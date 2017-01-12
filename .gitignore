@@ -1,0 +1,5 @@
+node_modules
+extension/background.js
+extension/content_script.js
+extension/overview/overview.js
+

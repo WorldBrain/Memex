@@ -1,0 +1,30 @@
+{
+    "name": "WebMemex",
+    "version": "0.1",
+    "background": {
+        "scripts": ["browser-polyfill.js", "background.js"]
+    },
+    "content_scripts": [{
+        "matches": ["<all_urls>"],
+        "js": ["browser-polyfill.js", "content_script.js"]
+    }],
+    "browser_action": {
+        "default_title": "Memory overview"
+    },
+    "commands": {
+        "_execute_browser_action": {
+            "suggested_key": {
+                "default": "Ctrl+M"
+            },
+            "description": "Open your memory overview"
+        }
+    },
+    "permissions": [
+        "<all_urls>",
+        "tabs"
+    ],
+    "chrome_url_overrides" : {
+        "newtab": "/overview/overview.html"
+    },
+    "manifest_version": 2
+}
