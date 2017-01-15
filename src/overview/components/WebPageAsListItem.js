@@ -20,7 +20,7 @@ const WebPageAsListItem = ({doc, extraBottomSpace, style}) => (
             </span>
 
             <time className="timestamp" dateTime={new Date(doc.timestamp)}>
-                {niceTime(doc.timestamp)}
+                {doc.timestamp ? niceTime(doc.timestamp) : null}
             </time>
         </div>
     </a>

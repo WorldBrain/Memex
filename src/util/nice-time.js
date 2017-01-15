@@ -11,7 +11,7 @@ function dayString(date) {
 
 function monthString(date) {
     const months = ['Jan', 'Feb', 'March', 'Apr', 'May', 'June', 'July', 'Aug', 'Sept', 'Nov', 'Dec']
-    return month[date.getMonth()]
+    return months[date.getMonth()]
 }
 
 // Get something nicely readable - at least to my personal taste.
