@@ -7,8 +7,10 @@ import { makeRangeTransform, makeNonlinearTransform } from '../../util/make-rang
 const timeGapToSpaceGap = makeNonlinearTransform({
     // A gap of <5 mins gets no extra space, a >24 hours gap gets the maximum space.
     domain: [60*5, 60*60*24],
-    // Minimum and maximum added space, in pixels
+    // Minimum and maximum added space, in pixels.
     range: [0, 100],
+    // Clamp excessive values to stay within the output range.
+    clampOutput: true,
     // Use a logarithm to squeeze the larger numbers.
     nonlinearity: Math.log,
 })
