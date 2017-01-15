@@ -34,10 +34,5 @@
     "redux-devtools-log-monitor": "^1.2.0",
     "vinyl-source-stream": "^1.1.0",
     "watchify": "^3.8.0"
-  },
-  "browserify": {
-    "transform": [
-      "babelify"
-    ]
   }
 }

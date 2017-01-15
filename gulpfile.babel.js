@@ -1,6 +1,7 @@
 import gulp from 'gulp'
 import browserify from 'browserify'
 import watchify from 'watchify'
+import babelify from 'babelify'
 import source from 'vinyl-source-stream'
 import envify from 'loose-envify/custom'
 
@@ -33,6 +34,7 @@ function createBundle({entries, output, destination},
         ? watchify(browserify({...watchify.args, ...browserifySettings, entries}))
             .on('update', bundle)
         : browserify({...browserifySettings, entries})
+    b.transform(babelify)
     b.transform(envify({
         NODE_ENV: production ? 'production' : 'development'
     }))
