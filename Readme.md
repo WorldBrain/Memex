@@ -8,8 +8,11 @@ A browser extension that lets you grow your personal web of knowledge.
  - :satellite: **Publish** your personal web on the world wide web
 
 Because a row of dozens of tabs or bookmarks needs better organisation.
+
 Because our minds organise by assocation, not by folders or filetypes.
+
 Because browsers were never intended to be just *viewers*.
+
 Let's make web browsers the *web weavers* they ought to be.
 
 
@@ -47,7 +50,12 @@ for the feature roadmap of the next few months.
 Got feedback, bug fixes, new features, tips? Give a shout. :loudspeaker:
 
 Pop in on #webmemex on [Freenode](http://webchat.freenode.net/), send a PR or
-open an issue [on GitHub](https://github.com/Treora/memextension).
+open an issue [on GitHub](https://github.com/Treora/memextension), or send
+me ([Gerben](https://github.com/Treora)) a message.
+
+Coding, design, communication, there is plenty to be done. Soon we should even
+have a tiny bit of funding available to reward contributions. :money_with_wings:
+
 
 ## Hacking
 
@@ -156,11 +164,11 @@ Tools to help during development. They are not used in production builds.
 Contains small generic things, stuff that is not project-specific. Things that
 could perhaps be packaged and published as an NPM module some day.
 
-#### `src/...`: other stuff
+#### `...`: other stuff
 
 The build process is a `Makefile`, that runs some `npm` commands specified in
 `package.json`, which in turn start the corresponding tasks in
-`gulpfile.babel.js` (transpiled by settings in `.babelrc`). All lurking there so
-you only have to type `make` to get things running.
+`gulpfile.babel.js` (transpiled by settings in `.babelrc`). All lurking there
+so you only have to type `make` to get things running.
 
-:zzz: So much for the code tour. Any questions? :point_up:
+So much for the code tour. :zzz:  Any questions? :point_up:
