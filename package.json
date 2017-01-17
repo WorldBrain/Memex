@@ -15,6 +15,7 @@
     "react": "^15.4.1",
     "react-dom": "^15.4.1",
     "react-redux": "^5.0.1",
+    "readability": "git://github.com/mozilla/readability.git#2b28d60",
     "redux": "^3.6.0",
     "redux-act": "^1.1.0",
     "redux-observable": "^0.12.2",
