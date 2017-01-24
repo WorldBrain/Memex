@@ -6,7 +6,8 @@
     },
     "content_scripts": [{
         "matches": ["<all_urls>"],
-        "js": ["browser-polyfill.js", "content_script.js"]
+        "js": ["browser-polyfill.js", "content_script.js"],
+        "run_at": "document_start"
     }],
     "browser_action": {
         "default_title": "Memory overview"
@@ -21,7 +22,8 @@
     },
     "permissions": [
         "<all_urls>",
-        "tabs"
+        "tabs",
+        "webNavigation"
     ],
     "chrome_url_overrides" : {
         "newtab": "/overview/overview.html"

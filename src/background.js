@@ -1,4 +1,4 @@
-import './activitylogger/background'
+import './activity-logger/background'
 
 // Open the overview when the extension's button is clicked
 browser.browserAction.onClicked.addListener(()=>{

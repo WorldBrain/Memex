@@ -1,8 +1,12 @@
 import PouchDB from 'pouchdb-browser'
 import PouchDBQuickSearch from 'pouchdb-quick-search'
-import docuri from 'docuri'
+import PouchDBFind from 'pouchdb-find'
+import PouchDBUpsert from 'pouchdb-upsert'
 
-PouchDB.plugin(PouchDBQuickSearch);
+PouchDB.plugin(PouchDBQuickSearch)
+PouchDB.plugin(PouchDBFind)
+PouchDB.plugin(PouchDBUpsert)
+
 const db = new PouchDB('webmemex')
 
 export default db
@@ -19,6 +23,3 @@ export function onDatabaseChange(callback) {
         since: 'now',
     }).on('change', callback)
 }
-
-// Creates an _id string given the variables, or vice versa parses such strings
-export const convertLogEntryId = docuri.route('logEntry/:timestamp(/:nonce)')

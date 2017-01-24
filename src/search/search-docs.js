@@ -2,55 +2,68 @@ import docuri from 'docuri'
 import orderBy from 'lodash/fp/orderBy'
 
 import db from '../pouchdb'
+import { visitKeyPrefix, pageKeyPrefix } from '../activity-logger'
+import { searchableTextFields, revisePageFields } from '../page-analysis'
 
 const defaultResultLimit = 30
 
 // The couch/pouch way to match keys with a given a prefix
 const keyRangeForPrefix = prefix => ({
-    startKey: prefix,
-    endKey: prefix + '\uffff'
+    startkey: `${prefix}`,
+    endkey: `${prefix}\uffff`
 })
 
-// Get the last N items from the log
-function getLog({
+// Post-process result list after any retrieval of pages from the database
+const mapResultToPages = result => result.rows.map(
+    // Let the page analysis module augment or revise the page attributes.
+    row => ({...row, doc: revisePageFields(row.doc)})
+)
+
+// Get the most recently visited pages from the log
+function getLastVisits({
     limit=defaultResultLimit
 }={}) {
-    return db.allDocs({
-        include_docs: true,
-        descending: true,
+    return db.find({
+        selector: {
+            // workaround for startkey/endkey
+            _id: { $gt: 'visit/', $lte: 'visit/\uffff'}
+        },
+        sort: [{_id: 'desc'}],
         limit,
-        ...keyRangeForPrefix('logEntry/'),
-    }).then((result) => {
-        return result.rows
-    }).catch(err => console.error(err))
+        ...keyRangeForPrefix(visitKeyPrefix), // Is this supported yet?
+    }).then(result => {
+        // Fetch the page for each visit.
+        const pageIds = result.docs.map(doc => doc.page._id)
+        return db.allDocs({
+            keys: pageIds,
+            include_docs: true,
+        })
+    }).then(mapResultToPages)
 }
 
 // Search the log for pages matching given query (keyword) string
-function searchLog({
+function searchPages({
     query,
     limit=defaultResultLimit,
 }) {
     return db.search({
         query,
-        fields: ['title', 'text'],
+        fields: searchableTextFields,
         include_docs: true,
         highlighting: true,
         limit,
-    }).then(
-        result => result.rows
-    ).catch(
-        err => console.error(err)
-    )
+        ...keyRangeForPrefix(pageKeyPrefix), // Is this supported yet?
+    }).then(mapResultToPages)
 }
 
 // Search by keyword query, returning all docs if no query is given
 export function filterByQuery({query}) {
     if (query === '') {
-        return getLog()
+        return getLastVisits()
     }
     else {
-        return searchLog({query}).then(
-            // Order the results by date, not matching score
+        return searchPages({query}).then(
+            // Order the results by date of visit, not matching score
             rows => orderBy('doc._id', 'desc')(rows)
         )
     }

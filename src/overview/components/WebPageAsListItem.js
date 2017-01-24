@@ -2,20 +2,25 @@ import React from 'react'
 
 import niceTime from '../../util/nice-time'
 
-
 const WebPageAsListItem = ({doc, extraBottomSpace, style}) => (
     <a
         className="WebPageAsListItem"
-        href={doc.visitedUrl}
-        title={doc.visitedUrl}
+        href={doc.url}
+        title={doc.url}
         style={{marginBottom: extraBottomSpace, ...style}}
     >
 
-        {doc.screenshot ? <img className="thumbnail" src={doc.screenshot} /> : null}
+        {doc.screenshot
+            ? <img className="thumbnail" src={doc.screenshot} />
+            : null
+        }
 
         <div className="caption">
             <span className="title" title={doc.title}>
-                {doc.favIcon ? <img className="favIcon" src={doc.favIcon} /> : null}
+                {doc.favIcon
+                    ? <img className="favIcon" src={doc.favIcon} />
+                    : null
+                }
                 {doc.title}
             </span>
 

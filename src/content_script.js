@@ -1,1 +1,2 @@
-import './activitylogger/content_script'
+import './activity-logger/content_script'
+import './page-analysis/content_script'

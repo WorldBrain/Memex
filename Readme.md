@@ -109,7 +109,8 @@ compilation):
   user interface.
 
 The parts communicate in two ways:
-- Messaging through `browser.sendMessage`.
+- Messaging through `browser.sendMessage`, usually done implicitly by using a
+  remote procedure call ([`util/webextensionRPC.js`](util/webextensionRPC.js)).
 - Through the in-browser PouchDB database, they get to see the same data, and
   can react to changes made by other parts.
 
@@ -117,7 +118,7 @@ Besides these parts,
 [`browser-polyfill.js`](https://github.com/mozilla/webextension-polyfill/)
 provides the promise-based `browser` API, that simply wraps Chromium/Chrome's
 callback-based `chrome` API, in order to make the same code run in different
-browsers.
+browsers (and to structure the callback mess).
 
 ### Source organisation
 
@@ -127,15 +128,23 @@ functionality. Some folders may end up being factored out into separate repos
 later on, or at some point perhaps even into separate but interacting browser
 extensions.
 
-#### [`src/activitylogger/`](src/activitylogger/): activity logger
+#### [`src/activity-logger/`](src/activity-logger/): activity logger
 
-Its code in [`content_script`](`src/activitylogger/content_script`) is run on
-every visited web page. Together with its background code, it extracts some
-metadata (title, logo, ...) from the page, and logs it in PouchDB.
+This logs every page visit in PouchDB. Soon it should also watch for user
+interactions, for example to remember which parts of a page you have read.
 
-It also extracts and stores the plain text of the page, mainly for the full-text
-search index. Soon it may trigger more features for document interpretation and
-archiving, though that will then be handled in a separate folder/module.
+Currently, for every visit, a new page object is created in the database, to
+represent the visited page itself. This object should soon be deduplicated when
+the same page is visited multiple times. After creating a new page object,
+the next module is triggered to start analysing the page.
+
+#### [`src/page-analysis`](src/page-analysis/): page analysis
+
+This extracts and stores information about the page in a given tab, such as:
+- The plain text of the page, mainly for the full-text
+search index.
+- Metadata, such as its author, publication date, etcetera.
+- A screenshot for visual recognition.
 
 #### [`src/overview/`](src/overview/): overview
 
