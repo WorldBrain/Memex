@@ -25,14 +25,10 @@ function extractPageText_sync({
         // Bummer.
         console.error('Readability (content extraction) crashed:', err)
     }
-    if (article) {
-        return article
-    }
-    else {
-        // Just return the full text then.
-        return {
-            bodyInnerText: doc.body.innerText,
-        }
+    return {
+        ...article,
+        // Also return full text, as article may be empty or wrong.
+        bodyInnerText: doc.body.innerText,
     }
 }
 
