@@ -1,5 +1,7 @@
-import storeVisit from './store-visit'
+import { whenPageDOMLoaded } from '../../util/tab-events'
 import performPageAnalysis from '../../page-analysis/background'
+import storeVisit from './store-visit'
+
 
 // Filter by URL to avoid logging extension pages, newtab, etcetera.
 const loggableUrlPattern = /^https?:\/\//
@@ -32,7 +34,10 @@ browser.webNavigation.onCommitted.addListener(details => {
     // Consider every navigation a new visit.
     logPageVisit({
         url: details.url
-    }).then(({visitId, pageId}) => {
+    }).then(
+        // Wait until its DOM has loaded.
+        value => whenPageDOMLoaded({tabId: details.tabId}).then(()=>value)
+    ).then(({visitId, pageId}) => {
         // Start page content analysis (text extraction, etcetera)
         performPageAnalysis({pageId, tabId: details.tabId})
     })
