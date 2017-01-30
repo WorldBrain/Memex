@@ -1,6 +1,6 @@
 import React from 'react'
 
-import WebPageAsListItem from './WebPageAsListItem'
+import VisitAsListItem from './VisitAsListItem'
 import { makeRangeTransform, makeNonlinearTransform } from '../../util/make-range-transform'
 
 // Map a time duration between log entries to a number of pixels between them.
@@ -15,18 +15,18 @@ const timeGapToSpaceGap = makeNonlinearTransform({
     nonlinearity: Math.log,
 })
 const rowSpacing = (row, nextRow) => nextRow
-    ? timeGapToSpaceGap((row.doc.timestamp - nextRow.doc.timestamp)/1000)
+    ? timeGapToSpaceGap((row.doc.visitStart - nextRow.doc.visitStart)/1000)
     : undefined
 
-const ResultList = ({searchResults}) => (
+const ResultList = ({searchResult}) => (
     <ul className="ResultList">
-        {searchResults.map((row, rowIndex) =>
+        {searchResult.rows.map((row, rowIndex) =>
             <li
-                key={row.id}
+                key={row.doc._id}
             >
-                <WebPageAsListItem
+                <VisitAsListItem
                     doc={row.doc}
-                    extraBottomSpace={rowSpacing(row, searchResults[rowIndex+1])}
+                    extraBottomSpace={rowSpacing(row, searchResult.rows[rowIndex+1])}
                 />
             </li>
         )}

@@ -1,14 +1,14 @@
 import { createAction } from 'redux-act'
 
 import { onDatabaseChange } from '../pouchdb'
-import { filterByQuery } from '../search/search-docs'
+import { filterVisitsByQuery } from '../search'
 import { ourState } from './selectors'
 
 
 // == Simple commands to change the state in reducers ==
 
 export const setQuery = createAction('overview/setQuery')
-export const setResults = createAction('overview/setResults')
+export const setSearchResult = createAction('overview/setSearchResult')
 
 
 // == Actions that trigger other actions ==
@@ -28,8 +28,8 @@ export function init() {
 export function refreshSearch() {
     return function (dispatch, getState) {
         const query = ourState(getState()).query
-        filterByQuery({query}).then(
-            searchResults => dispatch(setResults({searchResults}))
+        filterVisitsByQuery({query}).then(
+            searchResult => dispatch(setSearchResult({searchResult}))
         )
     }
 }

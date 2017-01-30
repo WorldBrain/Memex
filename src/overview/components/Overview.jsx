@@ -16,7 +16,7 @@ class Overview extends React.Component {
                 ref='inputQuery'
             >
             </input>
-            <ResultList searchResults={this.props.searchResults} />
+            <ResultList searchResult={this.props.searchResult} />
         </div>
     }
 
@@ -29,7 +29,7 @@ class Overview extends React.Component {
 
 const mapStateToProps = (state) => ({
     query: ourState(state).query,
-    searchResults: ourState(state).searchResults,
+    searchResult: ourState(state).searchResult,
 })
 
 const mapDispatchToProps = (dispatch) => ({
