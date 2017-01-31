@@ -1,13 +1,10 @@
 import React from 'react'
 
-import niceTime from '../../util/nice-time'
-
-const VisitAsListItem = ({doc, extraBottomSpace, style}) => (
+const VisitAsListItem = ({doc}) => (
     <a
         className="VisitAsListItem"
         href={doc.page.url}
         title={doc.page.url}
-        style={{marginBottom: extraBottomSpace, ...style}}
         // DEBUG Show document props on meta+click
         onClick={e=>{if (e.metaKey) {console.log(doc); e.preventDefault()}}}
     >
@@ -26,9 +23,6 @@ const VisitAsListItem = ({doc, extraBottomSpace, style}) => (
                 {doc.page.title}
             </span>
 
-            <time className="timestamp" dateTime={new Date(doc.visitStart)}>
-                {doc.visitStart ? niceTime(doc.visitStart) : null}
-            </time>
         </div>
     </a>
 )

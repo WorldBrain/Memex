@@ -1,3 +1,5 @@
+@charset "UTF-8";
+
 @import url(fonts/crimson/crimson.css);
 
 body {
@@ -25,6 +27,19 @@ body {
     margin: 40px auto;
     padding: 0;
     width: 242px;
+}
+
+.ResultList .timestamp {
+    display: inline-block;
+    text-align: center;
+    width: 100%;
+    font-family: 'Crimson', serif;
+}
+.ResultList .timestamp::before {
+    content: '— '
+}
+.ResultList .timestamp::after {
+    content: ' —'
 }
 
 .ResultList .VisitAsListItem {
@@ -81,11 +96,4 @@ body {
     padding-left: 4px;
     color: #333;
     font-size: large;
-}
-
-.VisitAsListItem .timestamp {
-    float: right;
-    margin: 4px 2px 2px 12px;
-    font-size: small;
-    color: grey;
 }
