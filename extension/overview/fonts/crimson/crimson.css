@@ -1,0 +1,29 @@
+/* from https://fontlibrary.org/en/font/crimson */
+
+@font-face {
+    font-family: 'Crimson';
+    src: url('CrimsonItalic.ttf') format('truetype');
+    font-weight: normal;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Crimson';
+    src: url('CrimsonRoman.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Crimson';
+    src: url('CrimsonSemibold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Crimson';
+    src: url('CrimsonSemiboldItalic.ttf') format('truetype');
+    font-weight: bold;
+    font-style: italic;
+}
