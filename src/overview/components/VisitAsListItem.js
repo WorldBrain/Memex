@@ -1,5 +1,7 @@
 import React from 'react'
 
+import {localVersionAvailable, LinkToLocalVersion } from '../../page-viewer'
+
 const VisitAsListItem = ({doc}) => (
     <a
         className="VisitAsListItem"
@@ -22,7 +24,10 @@ const VisitAsListItem = ({doc}) => (
                 }
                 {doc.page.title}
             </span>
-
+            {localVersionAvailable({page: doc.page})
+                ? <LinkToLocalVersion page={doc.page}>💾</LinkToLocalVersion>
+                : null
+            }
         </div>
     </a>
 )

@@ -55,6 +55,7 @@ body {
     border-radius: 5px;
     background-color: snow;
     box-shadow: 2px 3px 3px #888;
+    color: inherit;
 }
 
 .ResultList a.VisitAsListItem:focus {
@@ -96,4 +97,11 @@ body {
     padding-left: 4px;
     color: #333;
     font-size: large;
+}
+
+.VisitAsListItem .LinkToLocalVersion {
+    float: right;
+    padding: 4px 4px 4px 12px;
+    color: inherit;
+    text-decoration: none;
 }
