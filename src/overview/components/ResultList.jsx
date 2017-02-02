@@ -4,6 +4,13 @@ import { makeRangeTransform, makeNonlinearTransform } from '../../util/make-rang
 import niceTime from '../../util/nice-time'
 import VisitAsListItem from './VisitAsListItem'
 
+// import { getDomain } from 'tldjs' // https://github.com/oncletom/tld.js/issues/86
+import tldjs from 'tldjs'
+const getDomain = tldjs.getDomain.bind(tldjs)
+
+function shouldBeClustered(visit1, visit2) {
+    return getDomain(visit1.url) === getDomain(visit2.url)
+}
 
 // Map a time duration between log entries to a number of pixels between them.
 const timeGapToSpaceGap = makeNonlinearTransform({
@@ -33,6 +40,7 @@ const ResultList = ({searchResult}) => (
             const showTimestamp = (spaceGap > 40)
             // Height of timestamp.
             const timestampHeight = showTimestamp ? 16 : 0
+            let marginTop = spaceGap - timestampHeight
             const timestampComponent = showTimestamp
                 ? <time
                     className="timestamp"
@@ -46,11 +54,16 @@ const ResultList = ({searchResult}) => (
                 </time>
                 : null
 
+            // Cluster related visits closer together.
+            const nextRow = searchResult.rows[rowIndex+1]
+            const clustered = nextRow && shouldBeClustered(row.doc, nextRow.doc)
+
             return <li
                 key={row.doc._id}
                 style={{
-                    marginTop: spaceGap - timestampHeight,
+                    marginTop,
                 }}
+                className={clustered ? 'clustered' : undefined}
             >
                 {timestampComponent}
                 <VisitAsListItem

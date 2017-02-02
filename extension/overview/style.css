@@ -65,6 +65,18 @@ body {
     margin-left: -1px;
 }
 
+.ResultList .clustered {
+    margin-bottom: -90px;
+    transition: transform 100ms;
+}
+.ResultList .clustered .VisitAsListItem {
+    transition: transform 100ms;
+}
+.ResultList .clustered .VisitAsListItem:hover,
+.ResultList .clustered .VisitAsListItem:focus {
+    transform: translate(-5px, -75px) rotateZ(-5deg);
+}
+
 .VisitAsListItem .thumbnail {
     display: block;
     max-width: 240px;
@@ -75,7 +87,7 @@ body {
 
 .VisitAsListItem .caption {
     position: absolute;
-    bottom: 0;
+    top: 0;
     width: 100%;
     padding: 8px 0;
     background-color: rgba(255, 255, 255, 0.9);
