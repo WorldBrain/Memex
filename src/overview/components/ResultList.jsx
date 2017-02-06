@@ -24,39 +24,47 @@ const timeGapToSpaceGap = makeNonlinearTransform({
     nonlinearity: Math.log,
 })
 
-const ResultList = ({searchResult}) => (
-    <ul className="ResultList">
+const ResultList = ({searchResult}) => {
+    // The space and possibly a time stamp before each row
+    const rowGaps = searchResult.rows.map((row, rowIndex) => {
+        // Space between two rows depends on the time between them.
+        const prevRow = searchResult.rows[rowIndex-1]
+        const prevTimestamp = prevRow ? prevRow.doc.visitStart : new Date()
+        const timestamp = row.doc.visitStart
+        let spaceGap = 0
+        if (timestamp) {
+            spaceGap = timeGapToSpaceGap(prevTimestamp - timestamp)
+        }
+        // We add a timestamp if the gap is large (in pixels)
+        const showTimestamp = (spaceGap > 40)
+        // Height of timestamp.
+        const timestampHeight = showTimestamp ? 16 : 0
+        let marginTop = spaceGap - timestampHeight
+        const timestampComponent = showTimestamp
+            ? <time
+                className="timestamp"
+                dateTime={new Date(timestamp)}
+                style={{
+                    height: timestampHeight,
+                    fontSize: timestampHeight,
+                }}
+            >
+                {niceTime(timestamp)}
+            </time>
+            : null
+        return {marginTop, timestampComponent}
+    })
+
+    return <ul className="ResultList">
         {searchResult.rows.map((row, rowIndex) => {
+            let { marginTop, timestampComponent } = rowGaps[rowIndex]
 
-            // Space between two rows depends on the time between them.
-            const prevRow = searchResult.rows[rowIndex-1]
-            const prevTimestamp = prevRow ? prevRow.doc.visitStart : new Date()
-            const timestamp = row.doc.visitStart
-            let spaceGap = 0
-            if (timestamp) {
-                spaceGap = timeGapToSpaceGap(prevTimestamp - timestamp)
-            }
-            // We add a timestamp if the gap is large (in pixels)
-            const showTimestamp = (spaceGap > 40)
-            // Height of timestamp.
-            const timestampHeight = showTimestamp ? 16 : 0
-            let marginTop = spaceGap - timestampHeight
-            const timestampComponent = showTimestamp
-                ? <time
-                    className="timestamp"
-                    dateTime={new Date(timestamp)}
-                    style={{
-                        height: timestampHeight,
-                        fontSize: timestampHeight,
-                    }}
-                >
-                    {niceTime(timestamp)}
-                </time>
-                : null
-
-            // Cluster related visits closer together.
+            // Cluster successive & related visits closer together.
             const nextRow = searchResult.rows[rowIndex+1]
-            const clustered = nextRow && shouldBeClustered(row.doc, nextRow.doc)
+            // ...unless there is a gap between the rows.
+            const gapBelowThisRow = nextRow && rowGaps[rowIndex+1].marginTop
+            const clustered = nextRow && gapBelowThisRow===0
+                && shouldBeClustered(row.doc, nextRow.doc)
 
             return <li
                 key={row.doc._id}
@@ -72,6 +80,6 @@ const ResultList = ({searchResult}) => (
             </li>
         })}
     </ul>
-)
+}
 
 export default ResultList
