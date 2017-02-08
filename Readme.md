@@ -85,11 +85,11 @@ part of the code you change, you may currently have to reload the extension in
 your browser:
 
 - If your edits affected only the overview interface, just refresh/reopen it.
-- Likewise, if you changed the 'content_script', the new version will be loaded
-  into any page you visit afterwards.
 - However, if you changed the background script, you have will to reload the
   extension: find it back in the list of temporary add-ons/extensions and click
   Reload.
+- If you changed the 'content_script', it seems browser-dependent whether newly
+  opened pages will get the new version. Better reload the extension to be sure.
 
 
 ## Code Anatomy
