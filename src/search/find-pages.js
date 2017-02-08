@@ -29,6 +29,8 @@ export function searchPages({
 }) {
     return db.search({
         query,
+        filter: doc => (typeof doc._id === 'string'
+                        && doc._id.startsWith(pageKeyPrefix)),
         fields: searchableTextFields,
         include_docs: true,
         highlighting: true,
