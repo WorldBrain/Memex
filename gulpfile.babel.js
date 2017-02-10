@@ -37,7 +37,7 @@ function createBundle({entries, output, destination},
     b.transform(babelify)
     b.transform(envify({
         NODE_ENV: production ? 'production' : 'development'
-    }))
+    }), {global: true})
 
     function bundle() {
         let startTime = new Date().getTime()
