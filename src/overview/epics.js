@@ -1,4 +1,6 @@
-import 'rxjs'
+import 'rxjs/add/operator/debounceTime'
+import 'rxjs/add/operator/map'
+
 
 import * as actions from './actions'
 
