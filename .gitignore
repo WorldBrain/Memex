@@ -1,4 +1,5 @@
 node_modules
+dist
 extension/background.js
 extension/content_script.js
 extension/overview/overview.js

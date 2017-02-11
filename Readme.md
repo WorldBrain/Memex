@@ -68,9 +68,10 @@ play along! :tada:
 2. Get [Node/NPM](https://nodejs.org).
 3. Run `make`.
 4. Load it in Firefox or Chromium/Chrome:
-    * In Firefox ([≥45](https://blog.mozilla.org/addons/2015/12/23/loading-temporary-add-ons/)):
-      go to [`about:debugging`](about:debugging), choose 'Load Temporary
-      Add-on', pick `extension/manifest.json` from this repo.
+    * In Firefox (≥49): run `make fx-run` (or run [web-ext](https://developer.mozilla.org/en-US/Add-ons/WebExtensions/web-ext_command_reference#web-ext_run)
+      directly for more control).
+      Alternatively, go to [`about:debugging`](about:debugging), choose 'Load
+      Temporary Add-on', and pick `extension/manifest.json` from this repo.
     * In Chromium/Chrome: go to [Tools→Extensions](chrome://extensions/), enable
       'Developer mode', 'Load unpacked extension...', pick the `extension/`
       folder from this repo.
@@ -80,9 +81,11 @@ play along! :tada:
 ### Automatic recompilation
 
 If the steps above worked, running `make watch` will trigger a quick
-recompilation every time a source file has been modified. Depending on which
-part of the code you change, you may currently have to reload the extension in
-your browser:
+recompilation every time a source file has been modified.
+
+If you are testing in Firefox through `make fx-run`/`web-ext`, the extension
+should also reload automatically. Otherwise, depending on which part of the code
+you change, you may have to reload the extension in your browser:
 
 - If your edits affected only the overview interface, just refresh/reopen it.
 - However, if you changed the background script, you have will to reload the
