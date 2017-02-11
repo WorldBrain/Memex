@@ -12,6 +12,12 @@ const postprocessPagesResult = update('rows', rows => rows.map(
     update('doc', revisePageFields)
 ))
 
+const pageSearchIndexParams = {
+    filter: doc => (typeof doc._id === 'string'
+                    && doc._id.startsWith(pageKeyPrefix)),
+    fields: searchableTextFields,
+}
+
 // Get all pages for a given array of page ids
 export function getPages({pageIds}) {
     return db.allDocs({
@@ -28,16 +34,21 @@ export function searchPages({
     limit,
 }) {
     return db.search({
+        ...pageSearchIndexParams,
         query,
-        filter: doc => (typeof doc._id === 'string'
-                        && doc._id.startsWith(pageKeyPrefix)),
-        fields: searchableTextFields,
+        limit,
         include_docs: true,
         highlighting: true,
-        limit,
         stale: 'update_after',
-        ...keyRangeForPrefix(pageKeyPrefix), // Is this supported yet?
     }).then(
         postprocessPagesResult
     )
+}
+
+export function updatePageSearchIndex() {
+    // Add new documents to the search index.
+    return db.search({
+        ...pageSearchIndexParams,
+        build: true
+    })
 }

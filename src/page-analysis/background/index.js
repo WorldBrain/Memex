@@ -1,7 +1,9 @@
 import assocPath from 'lodash/fp/assocPath'
 
 import { remoteFunction } from '../../util/webextensionRPC'
+import whenAllSettled from '../../util/when-all-settled'
 import db from '../../pouchdb'
+import { updatePageSearchIndex } from '../../search/find-pages'
 
 import getFavIcon from './get-fav-icon'
 import makeScreenshot from './make-screenshot'
@@ -40,10 +42,16 @@ export default function performPageAnalysis({pageId, tabId}) {
         setDocField(db, pageId, 'extractedText')
     )
 
-    return Promise.all([
+    return whenAllSettled([
         storePageMetadata,
+        storePageText,
         storeFavIcon,
         storeScreenshot,
-        storePageText,
-    ])
+    ], {
+        onRejection: err => console.error(err)
+    }).then(
+        // Update search index
+        () => updatePageSearchIndex()
+    )
+
 }
