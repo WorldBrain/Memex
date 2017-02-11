@@ -1,6 +1,7 @@
 import assocPath from 'lodash/fp/assocPath'
 
 import { remoteFunction } from '../../util/webextensionRPC'
+import db from '../../pouchdb'
 
 import getFavIcon from './get-fav-icon'
 import makeScreenshot from './make-screenshot'

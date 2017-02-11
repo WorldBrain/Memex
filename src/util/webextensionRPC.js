@@ -18,7 +18,7 @@ export function remoteFunction(funcName, {tabId}={}) {
                 err => {
                     throw sendMessageError({
                         funcName,
-                        otherSide: "the background script",
+                        otherSide: "the tab's content script",
                     })
                 }
             )
@@ -28,7 +28,7 @@ export function remoteFunction(funcName, {tabId}={}) {
                 err => {
                     throw sendMessageError({
                         funcName,
-                        otherSide: "the tab's content script",
+                        otherSide: "the background script",
                     })
                 }
             )
