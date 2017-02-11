@@ -3,6 +3,7 @@ import eventToPromise from './event-to-promise'
 // Resolve if or when the page DOM is loaded (document.readyState==='interactive')
 // Rejects if it is closed before that.
 // XXX Needs host permission on the tab
+// TODO reject if loading of the current page is aborted. (#15)
 export function whenPageDOMLoaded({tabId}) {
     // This more obvious approach can get stuck in limbo, as there is no
     // tab.status==='interactive'; it is either 'loading' or 'complete'.
@@ -33,6 +34,7 @@ export function whenPageDOMLoaded({tabId}) {
 
 // Resolve if or when the page is completely loaded.
 // Rejects if it is closed before that.
+// TODO reject if loading of the current page is aborted. (#15)
 export function whenPageLoadComplete({tabId}) {
     return browser.tabs.get(tabId).then(tab => {
         if (tab.status === 'complete')
@@ -56,6 +58,7 @@ export function whenPageLoadComplete({tabId}) {
 
 // Resolve if or when the tab is active.
 // Rejects if it is closed before that.
+// TODO reject (optionally) if the tab's url changes (='whenPageActive'?) (#15)
 export function whenTabActive({tabId}) {
     return browser.tabs.query({active:true}).then(
         activeTabs => (activeTabs.map(t=>t.id).indexOf(tabId) > -1)
