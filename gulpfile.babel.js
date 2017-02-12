@@ -1,9 +1,13 @@
 import gulp from 'gulp'
+import uglify from 'gulp-uglify'
+import identity from 'gulp-identity'
+import source from 'vinyl-source-stream'
+import buffer from 'vinyl-buffer'
 import browserify from 'browserify'
 import watchify from 'watchify'
 import babelify from 'babelify'
-import source from 'vinyl-source-stream'
 import envify from 'loose-envify/custom'
+import uglifyify from 'uglifyify'
 
 const files = [
     {
@@ -38,12 +42,17 @@ function createBundle({entries, output, destination},
     b.transform(envify({
         NODE_ENV: production ? 'production' : 'development'
     }), {global: true})
+    if (production) {
+        b.transform(uglifyify, {global: true})
+    }
 
     function bundle() {
         let startTime = new Date().getTime()
         b.bundle()
             .on('error', error=>console.error(error.message))
             .pipe(source(output))
+            .pipe(buffer())
+            .pipe((production ? uglify : identity)())
             .pipe(gulp.dest(destination))
             .on('end', () => {
                 let time = (new Date().getTime() - startTime) / 1000
