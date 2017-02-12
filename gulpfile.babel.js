@@ -52,7 +52,7 @@ function createBundle({entries, output, destination},
             .on('error', error=>console.error(error.message))
             .pipe(source(output))
             .pipe(buffer())
-            .pipe((production ? uglify : identity)())
+            .pipe(production ? uglify({output: {ascii_only:true}}) : identity())
             .pipe(gulp.dest(destination))
             .on('end', () => {
                 let time = (new Date().getTime() - startTime) / 1000
