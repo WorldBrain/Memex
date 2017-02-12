@@ -7,7 +7,10 @@ PouchDB.plugin(PouchDBQuickSearch)
 PouchDB.plugin(PouchDBFind)
 PouchDB.plugin(PouchDBUpsert)
 
-const db = new PouchDB('webmemex')
+const db = new PouchDB({
+    name: 'webmemex',
+    auto_compaction: true,
+})
 
 export default db
 
