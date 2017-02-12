@@ -11,7 +11,7 @@
   "dependencies": {
     "docuri": "^4.2.1",
     "lodash": "^4.17.4",
-    "page-metadata-parser": "^0.5.2",
+    "page-metadata-parser": "git://github.com/Treora/page-metadata-parser.git#npm-testable",
     "pouchdb-browser": "^6.1.0",
     "pouchdb-find": "^0.10.4",
     "pouchdb-quick-search": "^1.2.0",
