@@ -25,6 +25,11 @@ const files = [
         output: 'overview.js',
         destination: './extension/overview',
     },
+    {
+        entries: ['./src/options/main.jsx'],
+        output: 'options.js',
+        destination: './extension/options'
+    }
 ]
 
 const browserifySettings = {
