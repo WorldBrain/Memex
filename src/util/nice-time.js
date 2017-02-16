@@ -10,7 +10,7 @@ function dayString(date) {
 }
 
 function monthString(date) {
-    const months = ['Jan', 'Feb', 'March', 'Apr', 'May', 'June', 'July', 'Aug', 'Sept', 'Nov', 'Dec']
+    const months = ['Jan', 'Feb', 'March', 'Apr', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec']
     return months[date.getMonth()]
 }
 
@@ -40,5 +40,5 @@ export default function niceTime(date, {now=undefined}={}) {
         return `${dayString(then)} ${hourString(then)}`
     if (then.getYear() === now.getYear())
         return `${then.getDate()} ${monthString(then)}`
-    return `${then.getDate()} ${monthString(then)} ${then.getYear()}`
+    return `${then.getDate()} ${monthString(then)} ${then.getFullYear()}`
 }
