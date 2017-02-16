@@ -1,11 +1,7 @@
 import { whenPageDOMLoaded } from '../../util/tab-events'
 import performPageAnalysis from '../../page-analysis/background'
 import storeVisit from './store-visit'
-
-
-// Filter by URL to avoid logging extension pages, newtab, etcetera.
-const loggableUrlPattern = /^https?:\/\//
-const shouldBeLogged = url => loggableUrlPattern.test(url)
+import { isWorthRemembering } from '..'
 
 // Create a visit/page pair in the database for the given URL.
 function logPageVisit({url}) {
@@ -28,7 +24,7 @@ browser.webNavigation.onCommitted.addListener(details => {
     if (details.frameId !== 0)
         return
 
-    if (!shouldBeLogged(details.url))
+    if (!isWorthRemembering({url: details.url}))
         return
 
     // Consider every navigation a new visit.

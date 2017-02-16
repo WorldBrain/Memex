@@ -1,22 +1,5 @@
 import db from '../../pouchdb'
-import randomString from '../../util/random-string'
-import { convertVisitDocId, convertPageDocId } from '..'
-
-function generateVisitDocId({timestamp}) {
-    return convertVisitDocId({
-        timestamp: timestamp.toISOString(),
-        // Add a random string to prevent accidental collisions.
-        nonce: randomString(),
-    })
-}
-
-function generatePageDocId({timestamp}) {
-    return convertPageDocId({
-        timestamp: timestamp.toISOString(),
-        // Add a random string to prevent accidental collisions.
-        nonce: randomString(),
-    })
-}
+import { generateVisitDocId, generatePageDocId } from '..'
 
 // Store the visit/page pair in PouchDB.
 // Returns the generated visitId and pageId.

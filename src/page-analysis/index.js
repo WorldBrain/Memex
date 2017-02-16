@@ -2,6 +2,7 @@
 
 // The properties of a page that should be indexed for full-text search.
 export const searchableTextFields = [
+    'title',
     'extractedMetadata.title',
     'extractedText.excerpt',
     'extractedText.textContent',
