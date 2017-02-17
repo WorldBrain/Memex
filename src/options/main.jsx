@@ -2,6 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import { Router, Route, IndexRedirect, hashHistory } from 'react-router';
 
+import Layout from './layout';
 import ImportContainer from './containers/import';
 import SettingsContainer from './containers/settings';
 
@@ -9,7 +10,7 @@ import SettingsContainer from './containers/settings';
 
 ReactDOM.render(
     <Router history={hashHistory}>
-        <Route path="/">
+        <Route path="/" component={Layout}>
             <IndexRedirect to="/settings" />
             <Route path="import" component={ImportContainer} />
             <Route path="settings" component={SettingsContainer} />
