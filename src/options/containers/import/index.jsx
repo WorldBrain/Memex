@@ -6,7 +6,6 @@ class ImportContainer extends React.Component {
         return (
             <div>
                 <p>Hey, I'm the imports page!</p>
-                <Link to="/settings">Settings</Link>
             </div>
         );
     }

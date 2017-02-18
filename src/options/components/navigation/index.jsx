@@ -21,6 +21,8 @@ const Navigation = ({ currentLocation }) => {
 
     return (
         <nav style={styles.root}>
+            <h1 style={styles.title}>Web Memex</h1>
+            
             <ul style={styles.nav}>
                 { buildRoutes() }
             </ul>
