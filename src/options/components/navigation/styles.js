@@ -2,7 +2,9 @@ const title = {
     fontSize: '1.2em',
     fontWeight: '100',
     margin: '20px 0 20px 20px',
-    color: '#666'
+    color: '#666',
+    paddingBottom: '10px',
+    borderBottom: '1px solid #ccc'
 };
 
 const nav = {

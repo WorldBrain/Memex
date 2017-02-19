@@ -1,5 +1,6 @@
 const route = {
-    marginLeft: '20px'
+    margin: '20px 20px 0',
+    flexGrow: '1'
 };
 
 export default {
