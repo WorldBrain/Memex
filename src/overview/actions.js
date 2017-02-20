@@ -28,9 +28,19 @@ export function init() {
 export function refreshSearch() {
     return function (dispatch, getState) {
         const query = ourState(getState()).query
-        filterVisitsByQuery({query}).then(
-            searchResult => dispatch(setSearchResult({searchResult}))
-        )
+        const oldResult = ourState(getState()).searchResult
+        filterVisitsByQuery({query}).then(searchResult => {
+            // First check if the query and result changed in the meantime.
+            if (ourState(getState()).query !== query
+                && ourState(getState()).searchResult !== oldResult) {
+                // The query already changed while we were searching, and the
+                // currently displayed result may already be more recent than
+                // ours. So we did all that effort for nothing.
+                return
+            }
+            // Set the result to have it displayed to the user.
+            dispatch(setSearchResult({searchResult}))
+        })
     }
 }
 
