@@ -11,7 +11,13 @@ ReactDOM.render(
     <Router history={hashHistory}>
         <Route path="/" component={Layout}>
             <IndexRedirect to="/settings" />
-            { Routes.map(route => <Route path={route.pathname} component={route.component} />) }
+            { Routes.map(route =>
+                <Route
+                    key={route.pathname}
+                    path={route.pathname}
+                    component={route.component}
+                />
+            )}
         </Route>
     </Router>,
     document.getElementById('app')
