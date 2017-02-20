@@ -3,8 +3,7 @@ import ReactDOM from 'react-dom'
 import { Router, Route, IndexRedirect, hashHistory } from 'react-router';
 
 import Layout from './layout';
-import ImportContainer from './containers/import';
-import SettingsContainer from './containers/settings';
+import Routes from './routes';
 
 // Render the UI to the screen
 
@@ -12,8 +11,7 @@ ReactDOM.render(
     <Router history={hashHistory}>
         <Route path="/" component={Layout}>
             <IndexRedirect to="/settings" />
-            <Route path="import" component={ImportContainer} />
-            <Route path="settings" component={SettingsContainer} />
+            { Routes.map(route => <Route path={route.pathname} component={route.component} />) }
         </Route>
     </Router>,
     document.getElementById('app')

@@ -1,10 +1,8 @@
 import React, { PropTypes } from 'react';
 import { Link } from 'react-router';
-
-import routes from './routes';
 import styles from './styles';
 
-const Navigation = ({ currentLocation }) => {
+const Navigation = ({ currentLocation, routes }) => {
     function buildRoutes() {
         return routes.map((route, idx) => {
             return (
@@ -31,7 +29,8 @@ const Navigation = ({ currentLocation }) => {
 }
 
 Navigation.propTypes = {
-    currentLocation: PropTypes.object.isRequired
+    currentLocation: PropTypes.object.isRequired,
+    routes: PropTypes.array.isRequired
 };
 
 export default Navigation;
