@@ -1,13 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router';
-
-import PageTitle from '../../components/page-title';
+import styles from './styles';
 
 class ImportContainer extends React.Component {
     render() {
         return (
             <div>
-                <PageTitle title="Import" />
+                <h1 style={styles.title}>Import</h1>
                 <p>Import specific components to come in here.</p>
             </div>
         );
