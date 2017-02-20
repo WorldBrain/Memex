@@ -3,4 +3,4 @@ dist
 extension/background.js
 extension/content_script.js
 extension/overview/overview.js
-
+extension/options/options.js
