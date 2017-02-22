@@ -1,8 +1,11 @@
 import fromPairs from 'lodash/fp/fromPairs'
 import update from 'lodash/fp/update'
+import reverse from 'lodash/fp/reverse'
+import unionBy from 'lodash/unionBy' // the fp version does not support >2 inputs (lodash issue #3025)
+import sortBy from 'lodash/fp/sortBy'
 
 import db from '../pouchdb'
-import { visitKeyPrefix } from '../activity-logger'
+import { convertVisitDocId, visitKeyPrefix, getTimestamp } from '../activity-logger'
 import { getPages } from './find-pages'
 
 
@@ -83,5 +86,65 @@ export function findVisitsToPages({pagesResult}) {
         normaliseFindResult
     ).then(visitsResult =>
         insertPagesIntoVisits({visitsResult, pagesResult})
+    )
+}
+
+// Expand the results, adding a bit of context around each visit.
+// Currently context means a few preceding and succeding visits.
+export function addVisitsContext({
+    visitsResult,
+    maxPrecedingVisits=2,
+    maxSuccedingVisits=2,
+    maxPrecedingTime = 1000*60*20,
+    maxSuccedingTime = 1000*60*20,
+}) {
+    // For each visit, get its context.
+    const promises = visitsResult.rows.map(row => {
+        const timestamp = getTimestamp(row.doc)
+        // Get preceding visits
+        return db.allDocs({
+            include_docs: true,
+            // Subtract 1ms to exclude itself (there is no include_start option).
+            startkey: convertVisitDocId({timestamp: timestamp-1}),
+            endkey: convertVisitDocId({timestamp: timestamp-maxPrecedingTime}),
+            descending: true,
+            limit: maxPrecedingVisits,
+        }).then(prequelResult => {
+            // Get succeeding visits
+            return db.allDocs({
+                include_docs: true,
+                // Add 1ms to exclude itself (there is no include_start option).
+                startkey: convertVisitDocId({timestamp: timestamp+1}),
+                endkey: convertVisitDocId({timestamp: timestamp+maxSuccedingTime}),
+                limit: maxSuccedingVisits,
+            }).then(sequelResult => {
+                // Combine them as if they were one result.
+                return {
+                    rows: prequelResult.rows.concat(reverse(sequelResult.rows))
+                }
+            })
+        }).then(contextResult =>
+            // Insert pages as usual.
+            insertPagesIntoVisits({visitsResult: contextResult})
+        ).then(
+            // Mark each row as being a 'contextual result'.
+            update('rows', rows =>
+                rows.map(row => ({...row, isContextualResult: true}))
+            )
+        )
+    })
+    // When the context of each visit has been retrieved, merge and return them.
+    return Promise.all(promises).then(contextResults =>
+        // Insert the contexts (prequels+sequels) into the original results
+        update('rows', rows => {
+            // Concat all results and all their contexts, but remove duplicates.
+            const allRows = unionBy(
+                rows,
+                ...contextResults.map(result => result.rows),
+                'doc._id' // Use the id as uniqueness criterion
+            )
+            // Sort them again by timestamp
+            return sortBy(row => -getTimestamp(row.doc))(allRows)
+        })(visitsResult)
     )
 }
