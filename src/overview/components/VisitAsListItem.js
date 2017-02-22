@@ -1,10 +1,11 @@
 import React from 'react'
+import classNames from 'classnames'
 
 import {localVersionAvailable, LinkToLocalVersion } from '../../page-viewer'
 
-const VisitAsListItem = ({doc}) => (
+const VisitAsListItem = ({doc, compact}) => (
     <a
-        className="VisitAsListItem"
+        className={classNames("VisitAsListItem", {compact})}
         href={doc.page.url}
         title={doc.page.url}
         // DEBUG Show document props on meta+click

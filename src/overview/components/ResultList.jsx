@@ -65,6 +65,7 @@ const ResultList = ({searchResult}) => {
             const gapBelowThisRow = nextRow && rowGaps[rowIndex+1].marginTop
             const clustered = nextRow && gapBelowThisRow===0
                 && shouldBeClustered(row.doc, nextRow.doc)
+                && row.isContextualResult === nextRow.isContextualResult
 
             return <li
                 key={row.doc._id}
@@ -75,6 +76,7 @@ const ResultList = ({searchResult}) => {
             >
                 {timestampComponent}
                 <VisitAsListItem
+                    compact={row.isContextualResult}
                     doc={row.doc}
                 />
             </li>

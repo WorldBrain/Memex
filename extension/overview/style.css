@@ -58,6 +58,16 @@ body {
     color: inherit;
 }
 
+.VisitAsListItem.compact {
+    opacity: 0.7;
+    transform: scale(0.8);
+    margin-bottom: -20px;
+}
+.VisitAsListItem.compact:hover,
+.VisitAsListItem.compact:focus {
+    opacity: 1;
+}
+
 .ResultList a.VisitAsListItem:focus {
     outline: none;
     border: 1px solid black;

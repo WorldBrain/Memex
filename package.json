@@ -14,6 +14,7 @@
     "fx-build": "npm run build-prod && web-ext -s extension -a dist/firefox build"
   },
   "dependencies": {
+    "classnames": "^2.2.5",
     "docuri": "^4.2.1",
     "lodash": "^4.17.4",
     "page-metadata-parser": "git://github.com/Treora/page-metadata-parser.git#npm-testable",
