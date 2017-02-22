@@ -22,6 +22,16 @@ const normaliseFindResult = result => ({
 
 // Nest the page docs into the visit docs, and return the latter.
 function insertPagesIntoVisits({visitsResult, pagesResult, presorted=false}) {
+    // If pages are not already passed to us, get them and call ourselves again.
+    if (pagesResult === undefined) {
+        // Get the page of each visit.
+        const pageIds = visitsResult.rows.map(row => row.doc.page._id)
+        return getPages({pageIds}).then(pagesResult =>
+            // Invoke ourselves with the found pages.
+            insertPagesIntoVisits({visitsResult, pagesResult, presorted: true})
+        )
+    }
+
     if (presorted) {
         // A small optimisation if the results already match one to one.
         return update('rows', rows => rows.map(
@@ -29,6 +39,7 @@ function insertPagesIntoVisits({visitsResult, pagesResult, presorted=false}) {
         ))(visitsResult)
     }
     else {
+        // Read each visit's doc.page._id and replace it with the specified page.
         const pagesById = resultsById(pagesResult)
         return update('rows', rows => rows.map(
             update('doc.page', page => pagesById[page._id].doc)
@@ -49,16 +60,8 @@ export function getLastVisits({
         limit,
     }).then(
         normaliseFindResult
-    ).then(visitsResult => {
-        // Get the page of each visit.
-        const pageIds = visitsResult.rows.map(row => row.doc.page._id)
-        return getPages({pageIds}).then(
-            // Pass on both results to the next step.
-            pagesResult => ({visitsResult, pagesResult})
-        )
-    }).then(({visitsResult, pagesResult}) =>
-        // Return each visit with te page nested at visit.page.
-        insertPagesIntoVisits({visitsResult, pagesResult, presorted: true})
+    ).then(
+        visitsResult => insertPagesIntoVisits({visitsResult})
     )
 }
 
