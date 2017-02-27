@@ -1,0 +1,42 @@
+.root {
+    width: 180px;
+}
+
+.title {
+    font-size: 1.2em;
+    font-weight: 100;
+    margin: 20px 0 20px 20px;
+    color: #666;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+.nav {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.navItem {
+    width: 100%;
+    margin-bottom: 10px;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+}
+
+.navLink {
+    display: block;
+    text-decoration: none;
+    color: #999;
+    font-size: 0.8em;
+    padding: 5px 0 5px 20px;
+    padding-left: 20px;
+
+    &.isActive {
+        color: #333;
+        padding-left: 15px;
+        border-left: 5px solid #333;
+    }
+}

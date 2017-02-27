@@ -1,0 +1,29 @@
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    font-size: 18px;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 200;
+}
+
+.root {
+    display: flex;
+    flex-direction: row;
+}
+
+.route {
+    margin: 20px 20px 0;
+    flex-grow: 1;
+}
+
+.routeTitle {
+    font-size: 1.2em;
+    font-weight: 100;
+    color: #666;
+    margin: 0 0 10px 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ccc;
+}

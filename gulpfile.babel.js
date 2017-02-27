@@ -8,6 +8,9 @@ import watchify from 'watchify'
 import babelify from 'babelify'
 import envify from 'loose-envify/custom'
 import uglifyify from 'uglifyify'
+import path from 'path'
+import modulesify from 'css-modulesify'
+import cssnext from 'postcss-cssnext'
 
 const files = [
     {
@@ -28,16 +31,17 @@ const files = [
     {
         entries: ['./src/options/main.jsx'],
         output: 'options.js',
-        destination: './extension/options'
+        destination: './extension/options',
+        cssOutput: 'style.css'
     }
 ]
 
 const browserifySettings = {
     debug: true,
-    extensions: ['.jsx'],
+    extensions: ['.jsx', '.css'],
 }
 
-function createBundle({entries, output, destination},
+function createBundle({entries, output, destination, cssOutput},
                       {watch=false, production=false}) {
     let b = watch
         ? watchify(browserify({...watchify.args, ...browserifySettings, entries}))
@@ -47,6 +51,16 @@ function createBundle({entries, output, destination},
     b.transform(envify({
         NODE_ENV: production ? 'production' : 'development'
     }), {global: true})
+
+    if(cssOutput) {
+        b.plugin(modulesify, {
+            output: path.join(destination, cssOutput),
+            postcssBefore: [
+                cssnext
+            ]
+        })
+    }
+
     if (production) {
         b.transform(uglifyify, {global: true})
     }

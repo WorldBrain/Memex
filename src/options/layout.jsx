@@ -1,14 +1,15 @@
 import React, { PropTypes } from 'react'
 import Navigation from './components/navigation'
 import Routes from './routes'
-import styles from './styles'
+
+import styles from './base.css'
 
 class Layout extends React.Component {
     render() {
         return (
-            <div style={styles.root}>
+            <div className={styles.root}>
                 <Navigation currentLocation={this.props.location} routes={Routes} />
-                <div style={styles.route}>
+                <div className={styles.route}>
                     { this.props.children }
                 </div>
             </div>
