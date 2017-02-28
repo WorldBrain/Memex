@@ -5,6 +5,8 @@ import { Provider } from 'react-redux'
 import configureStore from './store'
 import overview from '../overview'
 
+import './base.css'
+
 // Include development tools if we are not building for production
 let ReduxDevTools = undefined
 if (process.env.NODE_ENV !== 'production') {

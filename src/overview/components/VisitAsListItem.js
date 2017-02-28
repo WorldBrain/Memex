@@ -1,36 +1,45 @@
 import React from 'react'
 import classNames from 'classnames'
 
+import styles from './VisitAsListItem.css'
+
 import {localVersionAvailable, LinkToLocalVersion } from '../../page-viewer'
 
-const VisitAsListItem = ({doc, compact}) => (
-    <a
-        className={classNames("VisitAsListItem", {compact})}
-        href={doc.page.url}
-        title={doc.page.url}
-        // DEBUG Show document props on meta+click
-        onClick={e=>{if (e.metaKey) {console.log(doc); e.preventDefault()}}}
-    >
+const VisitAsListItem = ({doc, compact}) => {
+    const visitClasses = classNames({
+        [styles.root]: true,
+        [styles.compact]: compact
+    })
 
-        {doc.page.screenshot
-            ? <img className="thumbnail" src={doc.page.screenshot} />
-            : null
-        }
+    return (
+        <a
+            className={visitClasses}
+            href={doc.page.url}
+            title={doc.page.url}
+            // DEBUG Show document props on meta+click
+            onClick={e=>{if (e.metaKey) {console.log(doc); e.preventDefault()}}}
+        >
 
-        <div className="caption">
-            <span className="title" title={doc.page.title}>
-                {doc.page.favIcon
-                    ? <img className="favIcon" src={doc.page.favIcon} />
-                    : null
-                }
-                {doc.page.title}
-            </span>
-            {localVersionAvailable({page: doc.page})
-                ? <LinkToLocalVersion page={doc.page}>💾</LinkToLocalVersion>
+            {doc.page.screenshot
+                ? <img className={styles.thumbnail} src={doc.page.screenshot} />
                 : null
             }
-        </div>
-    </a>
-)
+
+            <div className={styles.caption}>
+                <span className={styles.title} title={doc.page.title}>
+                    {doc.page.favIcon
+                        ? <img className={styles.favicon} src={doc.page.favIcon} />
+                        : null
+                    }
+                    {doc.page.title}
+                </span>
+                {localVersionAvailable({page: doc.page})
+                    ? <LinkToLocalVersion className={styles.linkToLocalVersion} page={doc.page}>💾</LinkToLocalVersion>
+                    : null
+                }
+            </div>
+        </a>
+    )
+}
 
 export default VisitAsListItem

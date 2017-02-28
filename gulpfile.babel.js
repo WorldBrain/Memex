@@ -27,6 +27,7 @@ const files = [
         entries: ['./src/overview/main.jsx'],
         output: 'overview.js',
         destination: './extension/overview',
+        cssOutput: 'style.css'
     },
     {
         entries: ['./src/options/main.jsx'],
