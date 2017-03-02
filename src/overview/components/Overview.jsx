@@ -5,11 +5,13 @@ import * as actions from '../actions'
 import { ourState } from '../selectors'
 import ResultList from './ResultList'
 
+import styles from './Overview.css'
+
 class Overview extends React.Component {
     render() {
-        return <div className="Overview">
+        return <div>
             <input
-                className='query'
+                className={styles.query}
                 onChange={e=>this.props.onInputChanged(e.target.value)}
                 placeholder="Search your memory"
                 value={this.props.query}

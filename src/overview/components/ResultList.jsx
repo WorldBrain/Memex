@@ -4,6 +4,8 @@ import { makeRangeTransform, makeNonlinearTransform } from '../../util/make-rang
 import niceTime from '../../util/nice-time'
 import VisitAsListItem from './VisitAsListItem'
 
+import styles from './ResultList.css'
+
 // import { getDomain } from 'tldjs' // https://github.com/oncletom/tld.js/issues/86
 import tldjs from 'tldjs'
 const getDomain = tldjs.getDomain.bind(tldjs)
@@ -42,7 +44,7 @@ const ResultList = ({searchResult}) => {
         let marginTop = spaceGap - timestampHeight
         const timestampComponent = showTimestamp
             ? <time
-                className="timestamp"
+                className={styles.timestamp}
                 dateTime={new Date(timestamp)}
                 style={{
                     height: timestampHeight,
@@ -55,7 +57,7 @@ const ResultList = ({searchResult}) => {
         return {marginTop, timestampComponent}
     })
 
-    return <ul className="ResultList">
+    return <ul className={styles.root}>
         {searchResult.rows.map((row, rowIndex) => {
             let { marginTop, timestampComponent } = rowGaps[rowIndex]
 
@@ -72,7 +74,7 @@ const ResultList = ({searchResult}) => {
                 style={{
                     marginTop,
                 }}
-                className={clustered ? 'clustered' : undefined}
+                className={clustered ? styles.clustered : undefined}
             >
                 {timestampComponent}
                 <VisitAsListItem
