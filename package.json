@@ -33,6 +33,7 @@
     "redux-observable": "^0.12.2",
     "redux-thunk": "^2.1.0",
     "rxjs": "^5.0.3",
+    "string-similarity": "^1.1.0",
     "tldjs": "^1.7.0"
   },
   "devDependencies": {

@@ -32,3 +32,13 @@ export const keyRangeForPrefix = prefix => ({
     startkey: `${prefix}`,
     endkey: `${prefix}\uffff`
 })
+
+// Present db.find results in the same structure as other PouchDB results.
+export const normaliseFindResult = result => ({
+    rows: result.docs.map(doc => ({
+        doc,
+        id: doc._id,
+        key: doc._id,
+        value: {rev: doc._rev},
+    }))
+})
