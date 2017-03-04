@@ -113,7 +113,7 @@ compilation):
 
 The parts communicate in two ways:
 - Messaging through `browser.sendMessage`, usually done implicitly by using a
-  remote procedure call ([`util/webextensionRPC.js`](util/webextensionRPC.js)).
+  remote procedure call ([`util/webextensionRPC.js`](src/util/webextensionRPC.js)).
 - Through the in-browser PouchDB database, they get to see the same data, and
   can react to changes made by other parts.
 
