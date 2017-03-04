@@ -1,0 +1,30 @@
+.cell {
+    padding: 0 !important;
+}
+
+.input {
+    width: 100%;
+    padding: 15px 40px;
+    font-size: .9em;
+    border: none;
+    outline: none;
+}
+
+.newSite {
+    position: relative;
+}
+
+.saveButton {
+    position: absolute;
+    right: 30px;
+    top: 10px;
+    background: transparent;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    color: #999;
+
+    &:hover {
+        color: #333;
+    }
+}
