@@ -4,14 +4,10 @@ import reverse from 'lodash/fp/reverse'
 import unionBy from 'lodash/unionBy' // the fp version does not support >2 inputs (lodash issue #3025)
 import sortBy from 'lodash/fp/sortBy'
 
-import db, { normaliseFindResult }  from '../pouchdb'
+import db, { normaliseFindResult, resultRowsById }  from '../pouchdb'
 import { convertVisitDocId, visitKeyPrefix, getTimestamp } from '../activity-logger'
 import { getPages } from './find-pages'
 
-
-// Get query result indexed by doc id, as an {id: row} object.
-const resultsById = result =>
-    fromPairs(result.rows.map(row => [(row.id || row.doc._id), row]))
 
 // Nest the page docs into the visit docs, and return the latter.
 function insertPagesIntoVisits({visitsResult, pagesResult, presorted=false}) {
@@ -33,7 +29,7 @@ function insertPagesIntoVisits({visitsResult, pagesResult, presorted=false}) {
     }
     else {
         // Read each visit's doc.page._id and replace it with the specified page.
-        const pagesById = resultsById(pagesResult)
+        const pagesById = resultRowsById(pagesResult)
         return update('rows', rows => rows.map(
             update('doc.page', page => pagesById[page._id].doc)
         ))(visitsResult)

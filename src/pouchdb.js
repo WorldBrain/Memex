@@ -1,3 +1,5 @@
+import fromPairs from 'lodash/fp/fromPairs'
+
 import PouchDB from 'pouchdb-browser'
 import PouchDBQuickSearch from 'pouchdb-quick-search'
 import PouchDBFind from 'pouchdb-find'
@@ -42,3 +44,7 @@ export const normaliseFindResult = result => ({
         value: {rev: doc._rev},
     }))
 })
+
+// Get rows of a query result indexed by doc id, as an {id: row} object.
+export const resultRowsById = result =>
+    fromPairs(result.rows.map(row => [(row.id || row.doc._id), row]))
