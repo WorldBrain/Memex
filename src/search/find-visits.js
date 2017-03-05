@@ -59,10 +59,11 @@ export function getLastVisits({
 }
 
 
-// Find all visits to the given pages, return them with the pages nested.
+// Find all visits to the given pages, return them with the pages nested inside.
 // Resulting visits are sorted by time, descending.
+// XXX: If pages are redirected, only visits to the source page are found.
 export function findVisitsToPages({pagesResult}) {
-    const pageIds = pagesResult.rows.map(row => row.doc._id)
+    const pageIds = pagesResult.rows.map(row => row.id)
     return db.find({
         // Find the visits that contain the pages
         selector: {
@@ -131,7 +132,7 @@ export function addVisitsContext({
             const allRows = unionBy(
                 rows,
                 ...contextResults.map(result => result.rows),
-                'doc._id' // Use the id as uniqueness criterion
+                'id' // Use the visits' ids as the uniqueness criterion
             )
             // Sort them again by timestamp
             return sortBy(row => -getTimestamp(row.doc))(allRows)
