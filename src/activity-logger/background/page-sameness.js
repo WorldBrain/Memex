@@ -1,5 +1,5 @@
 import get from 'lodash/fp/get'
-import { compareTwoStrings } from 'string-similarity'
+import diffMatchPatch from 'diff-match-patch'
 
 export const Sameness = {
     EXACTLY: 5,    // Perfect match, containing exactly the same data.
@@ -11,7 +11,19 @@ export const Sameness = {
     UNKNOWN: NaN,  // Not enough information to make a comparison.
 }
 
-// Tell how similar two strings are.
+// Get a rough similarity metric between strings (a number between 0 and 1).
+function stringSimilarity(text1, text2) {
+    const dmp = new diffMatchPatch()
+    dmp.Diff_Timeout = 0.1
+    const diff = dmp.diff_main(text1, text2)
+    dmp.diff_cleanupSemantic(diff)
+    const distance = dmp.diff_levenshtein(diff)
+    const maxDistance = Math.max(text1.length, text2.length)
+    const similarity = 1-distance/maxDistance
+    return similarity
+}
+
+// Tell how similar two strings are in a qualitative way.
 function textSameness(text1, text2) {
     if (!text1 || !text2)
         return Sameness.UNKNOWN
@@ -23,7 +35,7 @@ function textSameness(text1, text2) {
     if (normaliseWhitespace(text1) === normaliseWhitespace(text2))
         return Sameness.OSTENSIBLY
 
-    const textSimilarity = compareTwoStrings(text1, text2)
+    const textSimilarity = stringSimilarity(text1, text2)
 
     if (textSimilarity > 0.9)
         return Sameness.MOSTLY
