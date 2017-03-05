@@ -9,7 +9,11 @@ export function filterVisitsByQuery({query}) {
         return getLastVisits({limit: defaultResultLimit})
     }
     else {
-        return searchPages({query, limit: defaultResultLimit}).then(
+        return searchPages({
+            query,
+            limit: defaultResultLimit,
+            followRedirects: true
+        }).then(
             pagesResult => findVisitsToPages({pagesResult})
         ).then(
             visitsResult => addVisitsContext({visitsResult})

@@ -15,7 +15,11 @@ function insertPagesIntoVisits({visitsResult, pagesResult, presorted=false}) {
     if (pagesResult === undefined) {
         // Get the page of each visit.
         const pageIds = visitsResult.rows.map(row => row.doc.page._id)
-        return getPages({pageIds}).then(pagesResult =>
+        return getPages({
+            pageIds,
+            // Assume that we always want to follow redirects.
+            followRedirects: true,
+        }).then(pagesResult =>
             // Invoke ourselves with the found pages.
             insertPagesIntoVisits({visitsResult, pagesResult, presorted: true})
         )
