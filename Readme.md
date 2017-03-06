@@ -77,6 +77,7 @@ play along! :tada:
       folder from this repo.
     * Others browsers: let know if you have tested it!
 
+*If NPM (during `make`) fails to install dependencies because a nasty firewall blocks the `git://` protocol, check [this solution](http://stackoverflow.com/questions/4891527/git-protocol-blocked-by-company-how-can-i-get-around-that/10729634#10729634)*
 
 ### Automatic recompilation
 
