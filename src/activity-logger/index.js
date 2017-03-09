@@ -4,13 +4,11 @@ import docuri from 'docuri'
 import randomString from '../util/random-string'
 
 export const visitKeyPrefix = 'visit/'
-export const pageKeyPrefix = 'page/'
 
 // Creates an _id string given the variables, or vice versa parses such strings
 // We simply use the creation time for the id, for easy chronological sorting.
 // We add a random string we call a 'nonce' to prevent accidental collisions.
 export const convertVisitDocId = docuri.route(`${visitKeyPrefix}:timestamp/:nonce`)
-export const convertPageDocId = docuri.route(`${pageKeyPrefix}:timestamp/:nonce`)
 
 const convertAnyTimestampedDocId = docuri.route(':type/:timestamp/:nonce')
 export const getTimestamp = doc =>
@@ -19,14 +17,6 @@ export const getTimestamp = doc =>
 export function generateVisitDocId({timestamp, nonce}={}) {
     const date = timestamp ? new Date(timestamp) : new Date()
     return convertVisitDocId({
-        timestamp: date.getTime(),
-        nonce: nonce || randomString(),
-    })
-}
-
-export function generatePageDocId({timestamp, nonce}={}) {
-    const date = timestamp ? new Date(timestamp) : new Date()
-    return convertPageDocId({
         timestamp: date.getTime(),
         nonce: nonce || randomString(),
     })
