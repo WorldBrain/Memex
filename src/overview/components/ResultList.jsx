@@ -57,33 +57,39 @@ const ResultList = ({searchResult}) => {
         return {marginTop, timestampComponent}
     })
 
-    return <ul className={styles.root}>
-        {searchResult.rows.map((row, rowIndex) => {
-            let { marginTop, timestampComponent } = rowGaps[rowIndex]
+    if(searchResult.rows.length) {
+        return <ul className={styles.root}>
+            {searchResult.rows.map((row, rowIndex) => {
+                let { marginTop, timestampComponent } = rowGaps[rowIndex]
 
-            // Cluster successive & related visits closer together.
-            const nextRow = searchResult.rows[rowIndex+1]
-            // ...unless there is a gap between the rows.
-            const gapBelowThisRow = nextRow && rowGaps[rowIndex+1].marginTop
-            const clustered = nextRow && gapBelowThisRow===0
-                && shouldBeClustered(row.doc, nextRow.doc)
-                && row.isContextualResult === nextRow.isContextualResult
+                // Cluster successive & related visits closer together.
+                const nextRow = searchResult.rows[rowIndex+1]
+                // ...unless there is a gap between the rows.
+                const gapBelowThisRow = nextRow && rowGaps[rowIndex+1].marginTop
+                const clustered = nextRow && gapBelowThisRow===0
+                    && shouldBeClustered(row.doc, nextRow.doc)
+                    && row.isContextualResult === nextRow.isContextualResult
 
-            return <li
-                key={row.doc._id}
-                style={{
-                    marginTop,
-                }}
-                className={clustered ? styles.clustered : undefined}
-            >
-                {timestampComponent}
-                <VisitAsListItem
-                    compact={row.isContextualResult}
-                    doc={row.doc}
-                />
-            </li>
-        })}
-    </ul>
+                return <li
+                    key={row.doc._id}
+                    style={{
+                        marginTop,
+                    }}
+                    className={clustered ? styles.clustered : undefined}
+                >
+                    {timestampComponent}
+                    <VisitAsListItem
+                        compact={row.isContextualResult}
+                        doc={row.doc}
+                    />
+                </li>
+            })}
+        </ul>
+    } else {
+        return <div className={styles.messageContainer} >
+            <span className={styles.message}>No Results Found</span>
+        </div>
+    }
 }
 
 export default ResultList

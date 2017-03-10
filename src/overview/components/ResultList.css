@@ -28,3 +28,17 @@
         transform: translate(-5px, -75px) rotateZ(-5deg);
     }
 }
+
+.message {
+    font-family: Cantarell, Arial, sans-serif;
+    font-size: 24px;
+    color: dimgray;
+    text-align: center;
+}
+
+.messageContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
