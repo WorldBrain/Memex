@@ -4,6 +4,7 @@ import { connect } from 'react-redux'
 import * as actions from '../actions'
 import { ourState } from '../selectors'
 import ResultList from './ResultList'
+import LoadingIndicator from './LoadingIndicator'
 
 import styles from './Overview.css'
 
@@ -18,7 +19,10 @@ class Overview extends React.Component {
                 ref='inputQuery'
             >
             </input>
-            <ResultList searchResult={this.props.searchResult} />
+            {this.props.waitingForResults
+                ? <LoadingIndicator />
+                : <ResultList searchResult={this.props.searchResult} />
+            }
         </div>
     }
 
@@ -32,6 +36,7 @@ class Overview extends React.Component {
 const mapStateToProps = (state) => ({
     query: ourState(state).query,
     searchResult: ourState(state).searchResult,
+    waitingForResults: ourState(state).waitingForResults,
 })
 
 const mapDispatchToProps = (dispatch) => ({
