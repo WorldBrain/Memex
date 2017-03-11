@@ -1,40 +1,44 @@
 import eventToPromise from './event-to-promise'
 
+const tabChangedEvents = [
+    {
+        event: browser.webNavigation.onCommitted,
+        filter: (details)=>(details.tabId == tabId && details.frameId == 0),
+        reason: {message: "Tab URL changed before event occurred."}
+    },
+    {
+        event: browser.webNavigation.onHistoryStateUpdated,
+        filter: (details)=>(details.tabId == tabId && details.frameId == 0),
+        reason: {message: "Tab URL changed before event occurred."}
+    },
+    {
+        event: browser.tabs.onRemoved,
+        filter: (closedTabId) => (closedTabId === tabId),
+        reason: {message: "Tab was closed before event occurred."},
+    }
+];
+
+
 // Resolve if or when the page DOM is loaded (document.readyState==='interactive')
 // Rejects if it is closed before that.
 // XXX Needs host permission on the tab
-// TODO reject if loading of the current page is aborted. (#15)
 export function whenPageDOMLoaded({tabId}) {
-    // This more obvious approach can get stuck in limbo, as there is no
-    // tab.status==='interactive'; it is either 'loading' or 'complete'.
-    // return browser.tabs.get(tabId).then(tab => {
-    //     if (tab.status === 'complete') // XXX Tests the wrong thing.
-    //         return // Resolve directly
-    //
-    //     return eventToPromise({
-    //         resolve: {
-    //             event: browser.webNavigation.onDOMContentLoaded,
-    //             filter: ({tabId: eventTabId}) => (eventTabId===tabId),
-    //         },
-    //         reject: {
-    //             event: browser.tabs.onRemoved,
-    //             filter: (closedTabId) => (closedTabId === tabId),
-    //             reason: {message: "Tab was closed before DOM was loaded."},
-    //         },
-    //     })
-    // })
-
-    // Workaround: we run a script at 'document_end' (= 'interactive')
-    return browser.tabs.executeScript(tabId, {
-        code: 'undefined', // Bogus code, anything works.
-        runAt: 'document_end',
-    })
+    
+    return new Promise((resolve, reject) => {
+        // using execute script here as a simple approach since there is no tab.status==='interactive'
+        browser.tabs.executeScript(tabId, {
+            code: 'undefined',
+            runAt: 'document_end',
+        }).then(() => resolve());
+        
+        eventToPromise({
+            reject: tabChangedEvents
+        }).catch(reject);
+    });
 }
-
 
 // Resolve if or when the page is completely loaded.
 // Rejects if it is closed before that.
-// TODO reject if loading of the current page is aborted. (#15)
 export function whenPageLoadComplete({tabId}) {
     return browser.tabs.get(tabId).then(tab => {
         if (tab.status === 'complete')
@@ -46,11 +50,7 @@ export function whenPageLoadComplete({tabId}) {
                 filter: (changedTabId, {status}) =>
                     (changedTabId === tabId && status === 'complete'),
             },
-            reject: {
-                event: browser.tabs.onRemoved,
-                filter: (closedTabId) => (closedTabId === tabId),
-                reason: {message: "Tab was closed before loading was complete."},
-            },
+            reject: tabChangedEvents
         })
     })
 }
@@ -58,7 +58,6 @@ export function whenPageLoadComplete({tabId}) {
 
 // Resolve if or when the tab is active.
 // Rejects if it is closed before that.
-// TODO reject (optionally) if the tab's url changes (='whenPageActive'?) (#15)
 export function whenTabActive({tabId}) {
     return browser.tabs.query({active:true}).then(
         activeTabs => (activeTabs.map(t=>t.id).indexOf(tabId) > -1)
@@ -71,11 +70,7 @@ export function whenTabActive({tabId}) {
                 event: browser.tabs.onActivated,
                 filter: ({tabId: activatedTabId}) => (activatedTabId === tabId),
             },
-            reject: {
-                event: browser.tabs.onRemoved,
-                filter: (closedTabId) => (closedTabId === tabId),
-                reason: {message: "Tab was closed before it became active."},
-            },
+            reject: tabChangedEvents
         })
     })
 }
