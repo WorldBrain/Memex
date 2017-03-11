@@ -9,6 +9,8 @@ import { ourState } from './selectors'
 
 export const setQuery = createAction('overview/setQuery')
 export const setSearchResult = createAction('overview/setSearchResult')
+export const showLoadIndicator = createAction('overview/showLoadIndicator')
+export const hideLoadIndicator = createAction('overview/hideLoadIndicator')
 
 
 // == Actions that trigger other actions ==
@@ -17,7 +19,7 @@ export const setSearchResult = createAction('overview/setSearchResult')
 export function init() {
     return function (dispatch, getState) {
         // Perform an initial search to populate the view (empty query = get all docs)
-        dispatch(refreshSearch())
+        dispatch(refreshSearch({showLoadingIndicator:true}))
 
         // Track database changes, to e.g. trigger search result refresh
         onDatabaseChange(change => dispatch(handlePouchChange({change})))
@@ -25,11 +27,19 @@ export function init() {
 }
 
 // Search for docs matching the current query, update the results
-export function refreshSearch() {
+export function refreshSearch({showLoadingIndicator=false}) {
     return function (dispatch, getState) {
         const query = ourState(getState()).query
         const oldResult = ourState(getState()).searchResult
+        // To show a search was called for and to load the LoadingIndicator
+        if (showLoadingIndicator) {
+            dispatch(showLoadIndicator())
+        }
         filterVisitsByQuery({query}).then(searchResult => {
+            // To show the search ended and to stop the LoadingIndicator
+            if (showLoadingIndicator) {
+                dispatch(hideLoadIndicator())
+            }
             // First check if the query and result changed in the meantime.
             if (ourState(getState()).query !== query
                 && ourState(getState()).searchResult !== oldResult) {
