@@ -16,10 +16,10 @@ export default function eventToPromise({
     reject: rejectOpts,
 }) {
     // We can get a single options object, or an array of them, or undefined.
-    if (typeof resolveOpts !== 'Array') {
+    if (!Array.isArray(resolveOpts)) {
         resolveOpts = (resolveOpts !== undefined) ? [resolveOpts] : []
     }
-    if (typeof rejectOpts !== 'Array') {
+    if (!Array.isArray(rejectOpts)) {
         rejectOpts = (rejectOpts !== undefined) ? [rejectOpts] : []
     }
 
