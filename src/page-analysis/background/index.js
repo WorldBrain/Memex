@@ -1,16 +1,18 @@
 import assocPath from 'lodash/fp/assocPath'
 
+import { whenPageDOMLoaded } from '../../util/tab-events'
 import { remoteFunction } from '../../util/webextensionRPC'
 import whenAllSettled from '../../util/when-all-settled'
 import db from '../../pouchdb'
 import { updatePageSearchIndex } from '../../search/find-pages'
 
+import { revisePageFields } from '..'
 import getFavIcon from './get-fav-icon'
 import makeScreenshot from './make-screenshot'
 
 
 // Extract interesting stuff from the current page and store it.
-export default function performPageAnalysis({pageId, tabId}) {
+function performPageAnalysis({pageId, tabId}) {
 
     // Run these functions in the content script in the tab.
     const extractPageText = remoteFunction('extractPageText', {tabId})
@@ -54,4 +56,13 @@ export default function performPageAnalysis({pageId, tabId}) {
         () => updatePageSearchIndex()
     )
 
+}
+
+export default async function analysePage({page, tabId}) {
+    // Wait until its DOM has loaded.
+    await whenPageDOMLoaded({tabId}) // TODO: catch e.g. tab close.
+    await performPageAnalysis({pageId: page._id, tabId})
+    // Get and return the page.
+    page = revisePageFields(await db.get(page._id))
+    return {page}
 }

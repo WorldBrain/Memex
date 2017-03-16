@@ -4,8 +4,9 @@
 
 import db from '../pouchdb'
 import { updatePageSearchIndex } from '../search/find-pages'
-import { isWorthRemembering, generatePageDocId, generateVisitDocId,
+import { isWorthRemembering, generateVisitDocId,
          visitKeyPrefix, convertVisitDocId } from '../activity-logger'
+import { generatePageDocId } from '../page-storage'
 
 
 // Get the historyItems (visited places/pages; not each visit to them)
