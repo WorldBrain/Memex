@@ -1,6 +1,6 @@
 import eventToPromise from './event-to-promise'
 
-const tabChangedEvents = [
+const tabChangedEvents = tabId => [
     {
         event: browser.webNavigation.onCommitted,
         filter: details => (details.tabId == tabId && details.frameId == 0),
@@ -34,7 +34,7 @@ export function whenPageDOMLoaded({tabId}) {
 
         // Reject when the page unloads.
         eventToPromise({
-            reject: tabChangedEvents,
+            reject: tabChangedEvents(tabId),
         }).catch(reject)
     })
 }
@@ -52,7 +52,7 @@ export function whenPageLoadComplete({tabId}) {
                 filter: (changedTabId, {status}) =>
                     (changedTabId === tabId && status === 'complete'),
             },
-            reject: tabChangedEvents
+            reject: tabChangedEvents(tabId)
         })
     })
 }
@@ -72,7 +72,7 @@ export function whenTabActive({tabId}) {
                 event: browser.tabs.onActivated,
                 filter: ({tabId: activatedTabId}) => (activatedTabId === tabId),
             },
-            reject: tabChangedEvents
+            reject: tabChangedEvents(tabId)
         })
     })
 }
