@@ -21,7 +21,7 @@ class Overview extends React.Component {
             </input>
             {this.props.waitingForResults
                 ? <LoadingIndicator />
-                : <ResultList searchResult={this.props.searchResult} />
+                : <ResultList searchResult={this.props.searchResult} searchQuery={this.props.query} />
             }
         </div>
     }

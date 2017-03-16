@@ -26,7 +26,17 @@ const timeGapToSpaceGap = makeNonlinearTransform({
     nonlinearity: Math.log,
 })
 
-const ResultList = ({searchResult}) => {
+const ResultList = ({searchResult, searchQuery}) => {
+    // If there are no results, show a message.
+    const noResultMessage = 'No result found'
+    if(searchResult.rows.length === 0 && searchQuery !== ''){
+        return (
+            <p className={styles.noResultMessage}>
+                {noResultMessage}
+            </p>
+        )
+    }
+
     // The space and possibly a time stamp before each row
     const rowGaps = searchResult.rows.map((row, rowIndex) => {
         // Space between two rows depends on the time between them.
