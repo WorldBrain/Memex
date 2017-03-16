@@ -37,7 +37,10 @@ export function refreshSearch({loadingIndicator=false}) {
             dispatch(showLoadingIndicator())
         }
 
-        filterVisitsByQuery({query}).then(searchResult => {
+        filterVisitsByQuery({
+            query,
+            includeContext: true,
+        }).then(searchResult => {
 
             if (loadingIndicator) {
                 // Hide our nice loading animation again.

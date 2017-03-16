@@ -1,22 +1,28 @@
 import { getLastVisits, findVisitsToPages, addVisitsContext } from './find-visits'
 import { searchPages } from './find-pages'
 
-const defaultResultLimit = 30
 
 // Search by keyword query, returning all docs if no query is given
-export function filterVisitsByQuery({query}) {
+export async function filterVisitsByQuery({
+    query,
+    limit=30,
+    includeContext=false,
+}) {
     if (query === '') {
-        return getLastVisits({limit: defaultResultLimit})
+        return await getLastVisits({limit})
     }
     else {
-        return searchPages({
+        const pagesResult = await searchPages({
             query,
-            limit: defaultResultLimit,
-            followRedirects: true
-        }).then(
-            pagesResult => findVisitsToPages({pagesResult})
-        ).then(
-            visitsResult => addVisitsContext({visitsResult})
-        )
+            limit,
+            followRedirects: true,
+        })
+
+        let visitsResult = await findVisitsToPages({pagesResult})
+
+        if (includeContext)
+            visitsResult = await addVisitsContext({visitsResult})
+
+        return visitsResult
     }
 }
