@@ -1,38 +1,58 @@
+import debounce from 'lodash/fp/debounce'
+import escapeHtml from 'lodash/fp/escape'
+
 import { filterVisitsByQuery } from './search'
 import niceTime from './util/nice-time'
 
-const visitToSuggestion = (result) => {
-            let doc = result.doc
-            let content = doc.url
-            let title = ''
-            let visitDate = niceTime(doc.visitStart)
-            let url = "<url>" + (content.slice(0,30)) + "</url>"
-            if(content.length > 30) {
-                url+= '...'
-            }
-            title = "<match>" + escape(doc.page.title) + "</match>"
-            title = title.replace(/%20|%2C|%3A|%3F|%B7|%23|%26/gi, matched => ' ')
-            let description = `${url} ${(visitDate)}  ${title}`
-            return ({
-                content,
-                description
+
+const shortUrl = (url, maxLength=50) => {
+    url = url.replace(/^https?:\/\//i, '')
+    if (url.length > maxLength)
+        url = url.slice(0, maxLength-3) + '...'
+    return url
+}
+
+const visitToSuggestion = doc => {
+    const visitDate = escapeHtml(niceTime(doc.visitStart))
+    const url = `<url>${escapeHtml(shortUrl(doc.url))}</url>`
+    const title = escapeHtml(doc.page.title)
+    const description = `${url} — ${title} (${visitDate})`
+    return ({
+        content: doc.url,
+        description: description.toString(),
+    })
+}
+
+let currentQuery
+let latestResolvedQuery
+const makeSuggestion = (query, suggest) => {
+    currentQuery = query
+    browser.omnibox.setDefaultSuggestion({description: 'Searching..'})
+    filterVisitsByQuery({query, limit: 5}).then(searchResult => {
+        // A subsequent search could have already started and finished while we
+        // were busy searching, so we ensure we do not overwrite its results.
+        if (query !== currentQuery && currentQuery !== latestResolvedQuery)
+            return
+        if (searchResult.rows.length === 0) {
+            browser.omnibox.setDefaultSuggestion({
+                description: 'No results found in your memory.'
+            })
+        } else {
+            browser.omnibox.setDefaultSuggestion({
+                description: 'Found these pages in your memory:'
             })
         }
+        const suggestions = searchResult.rows.map(
+            row => visitToSuggestion(row.doc)
+        )
 
-const makeSuggestion = (query, suggest) => {
-    browser.omnibox.setDefaultSuggestion({description: 'Searching'})
-    filterVisitsByQuery({query, limit: 5}).then(searchResult => {
-        if(searchResult.rows.length === 0) {
-            browser.omnibox.setDefaultSuggestion({description: 'No results found'})
-        } else {
-            browser.omnibox.setDefaultSuggestion({description: 'Found these pages in your memory'})
-        }
-        const suggestions = searchResult.rows.map(visitToSuggestion)
+        latestResolvedQuery = query
         suggest(suggestions)
     })
 }
 
 const acceptInput = (text, disposition) => {
+    // TODO if text is not a suggested URL, open the overview with this query.
     switch (disposition) {
     case 'currentTab':
         browser.tabs.update({url: text})
@@ -46,8 +66,5 @@ const acceptInput = (text, disposition) => {
     }
 }
 
-// This event is fired with the user change the input in the omnibox.
-browser.omnibox.onInputChanged.addListener(makeSuggestion)
-
-// This event is fired with the user accepts the input in the omnibox.
+browser.omnibox.onInputChanged.addListener(debounce(500)(makeSuggestion))
 browser.omnibox.onInputEntered.addListener(acceptInput)
