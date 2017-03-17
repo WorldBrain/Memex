@@ -2,8 +2,8 @@
 
 import maxBy from 'lodash/fp/maxBy'
 
-import db from '../pouchdb'
-import { getTimestamp } from '../activity-logger'
+import db from 'src/pouchdb'
+import { getTimestamp } from 'src/activity-logger'
 import determinePageSameness, { Sameness } from './sameness'
 
 function samenessLinkType({sameness}) {

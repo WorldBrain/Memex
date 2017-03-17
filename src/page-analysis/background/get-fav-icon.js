@@ -1,4 +1,4 @@
-import responseToDataURI from '../../util/response-to-data-uri'
+import responseToDataURI from 'src/util/response-to-data-uri'
 
 // Get a tab's fav-icon (website logo) as a data URI
 function getFavIcon({tabId}) {

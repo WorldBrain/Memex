@@ -1,5 +1,5 @@
-import { findPagesByUrl } from '../search/find-pages'
-import analysePage from '../page-analysis/background'
+import { findPagesByUrl } from 'src/search/find-pages'
+import analysePage from 'src/page-analysis/background'
 import tryDedupePage from './deduplication'
 import { generatePageDocId } from '.'
 

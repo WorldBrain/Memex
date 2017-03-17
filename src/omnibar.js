@@ -1,8 +1,8 @@
 import debounce from 'lodash/fp/debounce'
 import escapeHtml from 'lodash/fp/escape'
 
-import { filterVisitsByQuery } from './search'
-import niceTime from './util/nice-time'
+import { filterVisitsByQuery } from 'src/search'
+import niceTime from 'src/util/nice-time'
 
 
 const shortUrl = (url, maxLength=50) => {

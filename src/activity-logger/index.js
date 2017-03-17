@@ -1,7 +1,7 @@
 // Stuff that is to be accessible from other modules (folders)
 
 import docuri from 'docuri'
-import randomString from '../util/random-string'
+import randomString from 'src/util/random-string'
 
 export const visitKeyPrefix = 'visit/'
 

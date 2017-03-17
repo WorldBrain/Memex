@@ -1,5 +1,5 @@
-import './activity-logger/background'
-import './omnibar'
+import 'src/activity-logger/background'
+import 'src/omnibar'
 
 
 function openOverview() {

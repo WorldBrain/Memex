@@ -4,8 +4,8 @@ import reverse from 'lodash/fp/reverse'
 import unionBy from 'lodash/unionBy' // the fp version does not support >2 inputs (lodash issue #3025)
 import sortBy from 'lodash/fp/sortBy'
 
-import db, { normaliseFindResult, resultRowsById }  from '../pouchdb'
-import { convertVisitDocId, visitKeyPrefix, getTimestamp } from '../activity-logger'
+import db, { normaliseFindResult, resultRowsById }  from 'src/pouchdb'
+import { convertVisitDocId, visitKeyPrefix, getTimestamp } from 'src/activity-logger'
 import { getPages } from './find-pages'
 
 

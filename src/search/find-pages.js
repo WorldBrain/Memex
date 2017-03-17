@@ -1,9 +1,9 @@
 import get from 'lodash/fp/get'
 import update from 'lodash/fp/update'
 
-import db, { normaliseFindResult, resultRowsById } from '../pouchdb'
-import { pageKeyPrefix } from '../activity-logger'
-import { searchableTextFields, revisePageFields } from '../page-analysis'
+import db, { normaliseFindResult, resultRowsById } from 'src/pouchdb'
+import { pageKeyPrefix } from 'src/activity-logger'
+import { searchableTextFields, revisePageFields } from 'src/page-analysis'
 
 
 // Resolve redirects from (deduplicated) pages, replacing them in the results.
