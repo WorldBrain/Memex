@@ -31,7 +31,11 @@
 
 .noResultMessage {
     text-align: center;
-    font-size: 30px;
+    margin-top: 80px;
+    font-size: 20px;
+    font-family: sans-serif;
+    font-style: italic;
+    color: grey;
     animation-name: fadeIn;
     animation-duration: 0.5s;
     animation-iteration-count: 1;

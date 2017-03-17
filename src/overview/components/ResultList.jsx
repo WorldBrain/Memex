@@ -28,7 +28,7 @@ const timeGapToSpaceGap = makeNonlinearTransform({
 
 const ResultList = ({searchResult, searchQuery}) => {
     // If there are no results, show a message.
-    const noResultMessage = 'No result found'
+    const noResultMessage = 'no results'
     if(searchResult.rows.length === 0 && searchQuery !== ''){
         return (
             <p className={styles.noResultMessage}>
