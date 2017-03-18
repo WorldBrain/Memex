@@ -1,7 +1,7 @@
 import { createAction } from 'redux-act'
 
-import { onDatabaseChange } from '../pouchdb'
-import { filterVisitsByQuery } from '../search'
+import { onDatabaseChange } from 'src/pouchdb'
+import { filterVisitsByQuery } from 'src/search'
 import { ourState } from './selectors'
 
 

@@ -1,10 +1,10 @@
 import assocPath from 'lodash/fp/assocPath'
 
-import { whenPageDOMLoaded } from '../../util/tab-events'
-import { remoteFunction } from '../../util/webextensionRPC'
-import whenAllSettled from '../../util/when-all-settled'
-import db from '../../pouchdb'
-import { updatePageSearchIndex } from '../../search/find-pages'
+import { whenPageDOMLoaded } from 'src/util/tab-events'
+import { remoteFunction } from 'src/util/webextensionRPC'
+import whenAllSettled from 'src/util/when-all-settled'
+import db from 'src/pouchdb'
+import { updatePageSearchIndex } from 'src/search/find-pages'
 
 import { revisePageFields } from '..'
 import getFavIcon from './get-fav-icon'

@@ -1,5 +1,5 @@
 import { generateVisitDocId, isWorthRemembering } from '..'
-import { reidentifyOrStorePage } from '../../page-storage/store-page'
+import { reidentifyOrStorePage } from 'src/page-storage/store-page'
 
 
 // Store the visit in PouchDB.

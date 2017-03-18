@@ -1,5 +1,5 @@
-import delay from '../../util/delay'
-import { whenPageLoadComplete, whenTabActive } from '../../util/tab-events'
+import delay from 'src/util/delay'
+import { whenPageLoadComplete, whenTabActive } from 'src/util/tab-events'
 
 // Take a screenshot of the tabId, if it is active.
 // Returns a promise of the screenshot (a png image in a data URI).

@@ -1,5 +1,5 @@
 import docuri from 'docuri'
-import randomString from '../util/random-string'
+import randomString from 'src/util/random-string'
 
 export const pageKeyPrefix = 'page/'
 

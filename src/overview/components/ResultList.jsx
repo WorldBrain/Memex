@@ -1,7 +1,7 @@
 import React from 'react'
 
-import { makeRangeTransform, makeNonlinearTransform } from '../../util/make-range-transform'
-import niceTime from '../../util/nice-time'
+import { makeRangeTransform, makeNonlinearTransform } from 'src/util/make-range-transform'
+import niceTime from 'src/util/nice-time'
 import VisitAsListItem from './VisitAsListItem'
 
 import styles from './ResultList.css'

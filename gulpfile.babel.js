@@ -40,6 +40,7 @@ const files = [
 const browserifySettings = {
     debug: true,
     extensions: ['.jsx', '.css'],
+    paths: ['.'],
 }
 
 function createBundle({entries, output, destination, cssOutput},
