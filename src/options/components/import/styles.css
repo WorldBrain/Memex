@@ -1,0 +1,36 @@
+.importTable {
+    width: 100%;
+    border-radius: 6px;
+    background: #f1f1f1;
+    padding: 0 15px;
+    line-height: 36px;
+    margin-bottom: 10px;
+    border-collapse: collapse;
+    text-align: center;
+}
+
+.importTableHead {
+    font-size: 20px;
+    border-bottom: 1px solid #d2d2d2;
+}
+
+.importTableRow {
+    border-bottom: 1px solid #d2d2d2;
+
+    &:last-child {
+        border-bottom: none;
+    }
+}
+
+.actionTableRow {
+    font-weight: 400;
+}
+
+.importTableRowSepar {
+    border-bottom-width: 4px;
+}
+
+.actionButton {
+    float: right;
+    margin-left: 10px;
+}

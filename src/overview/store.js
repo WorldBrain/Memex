@@ -4,9 +4,11 @@ import { createEpicMiddleware, combineEpics } from 'redux-observable'
 import thunk from 'redux-thunk'
 
 import overview from 'src/overview'
+import options from 'src/options'
 
 const rootReducer = combineReducers({
     overview: overview.reducer,
+    options: options.reducer
 })
 
 const rootEpic = combineEpics(
