@@ -83,13 +83,14 @@ export function findVisitsToPages({pagesResult}) {
     {   
         //if startDate has been updated by user then it's updates else default value is used
         sDate = ourState(store.getState()).startDate.format('x');
-    }
+}
 
     if(ourState(store.getState()).endDate!='')
     {
         //if endDate has been updated by user then it's updates else default value is used
         eDate = ourState(store.getState()).endDate.format('x');
     }
+    
     return db.find({
         // Find the visits that contain the pages
         selector: {
