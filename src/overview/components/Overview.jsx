@@ -28,6 +28,7 @@ class Overview extends React.Component {
                 <div className={styles.dateRangeSelection}>
                     <DatePicker
                         className={styles.datePicker}
+                        dateFormat="DD-MM-YYYY"
                         placeholderText="after.."
                         isClearable={true}
                         selected={
@@ -43,6 +44,7 @@ class Overview extends React.Component {
                     />
                     <DatePicker
                         className={styles.datePicker}
+                        dateFormat="DD-MM-YYYY"
                         placeholderText="before.."
                         isClearable={true}
                         selected={
