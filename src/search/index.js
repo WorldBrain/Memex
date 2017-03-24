@@ -1,4 +1,4 @@
-import { getLastVisits, findVisitsToPages, addVisitsContext } from './find-visits'
+import { findVisits, addVisitsContext } from './find-visits'
 import { searchPages } from './find-pages'
 
 
@@ -11,7 +11,7 @@ export async function filterVisitsByQuery({
     includeContext=false,
 }) {
     if (query === '') {
-        return await getLastVisits({limit})
+        return await findVisits({startDate, endDate, limit})
     }
     else {
         const pagesResult = await searchPages({
@@ -20,10 +20,10 @@ export async function filterVisitsByQuery({
             followRedirects: true,
         })
 
-        let visitsResult = await findVisitsToPages({
+        let visitsResult = await findVisits({
             pagesResult,
             startDate,
-            endDate
+            endDate,
         })
 
         if (includeContext)
