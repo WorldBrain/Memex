@@ -2,6 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import moment from 'moment'
 import DatePicker from 'react-datepicker'
+import datePickerStyles from 'react-datepicker/dist/react-datepicker-cssmodules.css'
 
 import * as actions from '../actions'
 import { ourState } from '../selectors'

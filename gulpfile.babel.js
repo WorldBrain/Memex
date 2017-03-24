@@ -56,6 +56,7 @@ function createBundle({entries, output, destination, cssOutput},
 
     if(cssOutput) {
         b.plugin(cssModulesify, {
+            global: true,
             output: path.join(destination, cssOutput),
             postcssBefore: [
                 cssnext
