@@ -55,7 +55,7 @@ class Overview extends React.Component {
                         endDate={moment(this.props.endDate)}
                         maxDate={moment()}
                         onChange={date => this.props.onEndDateChange(
-                            date ? date.valueOf() : undefined,
+                            date ? date.endOf('day').valueOf() : undefined,
                         )}
                     />
                 </div>
