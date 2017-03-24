@@ -28,15 +28,31 @@ class Overview extends React.Component {
                 <div>
                     <DatePicker
                         placeholderText="after.."
-                        selected={moment(this.props.startDate)}
+                        isClearable={true}
+                        selected={
+                            this.props.startDate && moment(this.props.startDate)
+                        }
+                        selectsStart
+                        startDate={moment(this.props.startDate || 0)}
+                        endDate={moment(this.props.endDate)}
                         maxDate={moment()}
-                        onChange={date=>this.props.onStartDateChange(date.valueOf())}
+                        onChange={date => this.props.onStartDateChange(
+                            date ? date.valueOf() : undefined,
+                        )}
                     />
                     <DatePicker
                         placeholderText="before.."
-                        selected={moment(this.props.endDate)}
+                        isClearable={true}
+                        selected={
+                            this.props.endDate && moment(this.props.endDate)
+                        }
+                        selectsEnd
+                        startDate={moment(this.props.startDate || 0)}
+                        endDate={moment(this.props.endDate)}
                         maxDate={moment()}
-                        onChange={date=>this.props.onEndDateChange(date.valueOf())}
+                        onChange={date => this.props.onEndDateChange(
+                            date ? date.valueOf() : undefined,
+                        )}
                     />
                 </div>
                 <div>
