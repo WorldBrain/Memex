@@ -1,51 +1,56 @@
 import React from 'react'
 import { connect } from 'react-redux'
+import moment from 'moment'
+import DatePicker from 'react-datepicker'
 
 import * as actions from '../actions'
 import { ourState } from '../selectors'
 import ResultList from './ResultList'
 import LoadingIndicator from './LoadingIndicator'
-import DatePicker from 'react-datepicker'
-import moment from 'moment';
 import styles from './Overview.css'
+
 
 class Overview extends React.Component {
     render() {
-        return  <div>
+        return (
+            <div>
                 <div>
-                <input
-                  className={styles.query}
-                  onChange={e=>this.props.onInputChanged(e.target.value)}
-                  placeholder="Search your memory"
-                  value={this.props.query}
-                  ref='inputQuery'
-                 >
-                  </input>
+                    <input
+                        className={styles.query}
+                        onChange={e=>this.props.onInputChanged(e.target.value)}
+                        placeholder="Search your memory"
+                        value={this.props.query}
+                        ref='inputQuery'
+                    >
+                    </input>
                 </div>
-               <div>
-                  <DatePicker
-                    placeholderText="select startdate"
-                    selected={moment(this.props.startDate)}
-                    minDate={moment().subtract(365,"days")}
-                    maxDate={moment()}
-                    onChange={date=>this.props.onStartDateChange(date.valueOf())}
-                />
-                  <DatePicker
-                    placeholderText="select startdate"
-                    selected={moment(this.props.endDate)}
-                    minDate={moment().subtract(365,"days")}
-                    maxDate={moment()}
-                    onChange={date=>this.props.onEndDateChange(date.valueOf())}
-                  />
-                </div> 
                 <div>
-                {this.props.waitingForResults
-                ? <LoadingIndicator />
-                : <ResultList searchResult={this.props.searchResult} searchQuery={this.props.query} />
-            }
+                    <DatePicker
+                        placeholderText="after.."
+                        selected={moment(this.props.startDate)}
+                        maxDate={moment()}
+                        onChange={date=>this.props.onStartDateChange(date.valueOf())}
+                    />
+                    <DatePicker
+                        placeholderText="before.."
+                        selected={moment(this.props.endDate)}
+                        maxDate={moment()}
+                        onChange={date=>this.props.onEndDateChange(date.valueOf())}
+                    />
                 </div>
-            </div>         
-        
+                <div>
+                    {this.props.waitingForResults
+                        ? <LoadingIndicator />
+                        : (
+                            <ResultList
+                                searchResult={this.props.searchResult}
+                                searchQuery={this.props.query}
+                            />
+                        )
+                    }
+                </div>
+            </div>
+        )
     }
 
     componentDidMount() {
@@ -68,11 +73,10 @@ const mapDispatchToProps = (dispatch) => ({
         dispatch(actions.setQuery({query: input}))
     },
     onStartDateChange: date => {
-             dispatch(actions.handleStartChange({startDate: date}))
-      },
-
+        dispatch(actions.setStartDate({startDate: date}))
+    },
     onEndDateChange: date => {
-             dispatch(actions.handleEndChange({endDate: date}))
+        dispatch(actions.setEndDate({endDate: date}))
     },
 })
 

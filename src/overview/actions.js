@@ -11,8 +11,8 @@ export const setQuery = createAction('overview/setQuery')
 export const setSearchResult = createAction('overview/setSearchResult')
 export const showLoadingIndicator = createAction('overview/showLoadingIndicator')
 export const hideLoadingIndicator = createAction('overview/hideLoadingIndicator')
-export const handleStartChange = createAction('overview/handleStartChange')
-export const handleEndChange = createAction('overview/handleEndChange')
+export const setStartDate = createAction('overview/setStartDate')
+export const setEndDate = createAction('overview/setEndDate')
 
 
 // == Actions that trigger other actions ==

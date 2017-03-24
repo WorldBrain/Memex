@@ -14,6 +14,14 @@ function setQuery(state, {query}) {
     return {...state, query}
 }
 
+function setStartDate(state, {startDate}) {
+    return {...state, startDate}
+}
+
+function setEndDate(state, {endDate}) {
+    return {...state, endDate}
+}
+
 function setSearchResult(state, {searchResult}) {
     return {...state, searchResult}
 }
@@ -29,19 +37,11 @@ function hideLoadingIndicator(state) {
     return {...state, waitingForResults: state.waitingForResults-1}
 }
 
-function handleStartChange(state, {startDate}) {
-    return {...state, startDate}
-}
-
-function handleEndChange(state, {endDate}) { 
-    return {...state, endDate}
-}
-
 export default createReducer({
     [actions.setQuery]: setQuery,
+    [actions.setStartDate]: setStartDate,
+    [actions.setEndDate]: setEndDate,
     [actions.setSearchResult]: setSearchResult,
     [actions.showLoadingIndicator]: showLoadingIndicator,
     [actions.hideLoadingIndicator]: hideLoadingIndicator,
-    [actions.handleStartChange]:handleStartChange,
-    [actions.handleEndChange]:handleEndChange,
 }, defaultState)
