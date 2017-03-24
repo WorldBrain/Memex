@@ -25,17 +25,17 @@ class Overview extends React.Component {
                <div>
                   <DatePicker
                     placeholderText="select startdate"
-                    selected={this.props.startDate }
+                    selected={moment(this.props.startDate)}
                     minDate={moment().subtract(365,"days")}
                     maxDate={moment()}
-                    onChange={e=>this.props.onStartDateChange(e)}
+                    onChange={date=>this.props.onStartDateChange(date.valueOf())}
                 />
                   <DatePicker
                     placeholderText="select startdate"
-                    selected={this.props.endDate}
+                    selected={moment(this.props.endDate)}
                     minDate={moment().subtract(365,"days")}
                     maxDate={moment()}
-                    onChange={e=>this.props.onEndDateChange(e)}
+                    onChange={date=>this.props.onEndDateChange(date.valueOf())}
                   />
                 </div> 
                 <div>

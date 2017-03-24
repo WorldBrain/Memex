@@ -31,7 +31,7 @@ export function init() {
 // Search for docs matching the current query, update the results
 export function refreshSearch({loadingIndicator=false}) {
     return function (dispatch, getState) {
-        const query = ourState(getState()).query
+        const { query, startDate, endDate } = ourState(getState())
         const oldResult = ourState(getState()).searchResult
 
         if (loadingIndicator) {
@@ -41,6 +41,8 @@ export function refreshSearch({loadingIndicator=false}) {
 
         filterVisitsByQuery({
             query,
+            startDate,
+            endDate,
             includeContext: true,
         }).then(searchResult => {
 

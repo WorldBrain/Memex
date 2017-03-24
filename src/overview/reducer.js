@@ -6,8 +6,8 @@ const defaultState = {
     searchResult: {rows: []},
     query: '',
     waitingForResults: 0,
-    startDate: '', 
-    endDate: ''
+    startDate: undefined,
+    endDate: undefined,
 }
 
 function setQuery(state, {query}) {

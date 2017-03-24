@@ -5,6 +5,8 @@ import { searchPages } from './find-pages'
 // Search by keyword query, returning all docs if no query is given
 export async function filterVisitsByQuery({
     query,
+    startDate,
+    endDate,
     limit=30,
     includeContext=false,
 }) {
@@ -18,7 +20,11 @@ export async function filterVisitsByQuery({
             followRedirects: true,
         })
 
-        let visitsResult = await findVisitsToPages({pagesResult})
+        let visitsResult = await findVisitsToPages({
+            pagesResult,
+            startDate,
+            endDate
+        })
 
         if (includeContext)
             visitsResult = await addVisitsContext({visitsResult})

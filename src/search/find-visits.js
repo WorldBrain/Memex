@@ -3,8 +3,6 @@ import update from 'lodash/fp/update'
 import reverse from 'lodash/fp/reverse'
 import unionBy from 'lodash/unionBy' // the fp version does not support >2 inputs (lodash issue #3025)
 import sortBy from 'lodash/fp/sortBy'
-import {ourState} from '../overview/selectors'
-import store from '../overview/main'
 
 import db, { normaliseFindResult, resultRowsById }  from 'src/pouchdb'
 import { convertVisitDocId, visitKeyPrefix, getTimestamp } from 'src/activity-logger'
@@ -64,43 +62,26 @@ export function getLastVisits({
 // Find all visits to the given pages, return them with the pages nested inside.
 // Resulting visits are sorted by time, descending.
 // XXX: If pages are redirected, only visits to the source page are found.
-export function findVisitsToPages({pagesResult}) {
+export function findVisitsToPages({pagesResult, startDate, endDate}) {
     const pageIds = pagesResult.rows.map(row => row.id)
-   /**
-     * Here the whole data range values (StartDate and endDates) are accessed that are bieng updated 
-     * by Overview.jsx via date-picker . if they are not updated i.e user didn't seleceted any of them 
-     * then the startDate is intialized with default value of 100 days past and endDate is intialized 
-     * with present date.  if only one is selected other is initializedd with  it's default value.
-     * inside db,find we are  fetching only these data values that are between staertDate and endDate.
-     * Raj Pratim Bhattacharya gmail rajpratim1234@gmail.com
-     */
-    
-    var comp = new Date();
-    var sDate = comp.getTime() - 100*24*60*60*1000 //100 days old search
-    var eDate =  comp.getTime()
-  
-    if(ourState(store.getState()).startDate!='')
-    {   
-        //if startDate has been updated by user then it's updates else default value is used
-        sDate = ourState(store.getState()).startDate.format('x');
-}
-
-    if(ourState(store.getState()).endDate!='')
-    {
-        //if endDate has been updated by user then it's updates else default value is used
-        eDate = ourState(store.getState()).endDate.format('x');
-    }
-    
     return db.find({
         // Find the visits that contain the pages
         selector: {
             'page._id': {$in: pageIds},
-            // workaround for lack of startkey/endkey support
-        _id: { $gte: convertVisitDocId({timestamp: sDate}),
-                         $lte: convertVisitDocId({timestamp:eDate})} 
-   
-    },
-    
+            // Constrain by id (like with startkey/endkey), both to get only the
+            // visit docs, and (if needed) to filter the visits after/before a
+            // given timestamp (this compares timestamps lexically, which only
+            // works while they are of the same length, so we should fix this by
+            // 2286).
+            _id: {
+                $gte: startDate !== undefined
+                    ? convertVisitDocId({timestamp: startDate})
+                    : visitKeyPrefix,
+                $lte: endDate !== undefined
+                    ? convertVisitDocId({timestamp: endDate})
+                    : `${visitKeyPrefix}\uffff`,
+            },
+        },
         // Sort them by time, newest first
         sort: [{'_id': 'desc'}],
     }).then(
