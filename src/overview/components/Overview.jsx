@@ -25,8 +25,9 @@ class Overview extends React.Component {
                     >
                     </input>
                 </div>
-                <div>
+                <div className={styles.dateRangeSelection}>
                     <DatePicker
+                        className={styles.datePicker}
                         placeholderText="after.."
                         isClearable={true}
                         selected={
@@ -41,6 +42,7 @@ class Overview extends React.Component {
                         )}
                     />
                     <DatePicker
+                        className={styles.datePicker}
                         placeholderText="before.."
                         isClearable={true}
                         selected={
