@@ -30,7 +30,7 @@ export function init() {
 
 // Search for docs matching the current query, update the results
 export function refreshSearch({loadingIndicator=false}) {
-    return function (dispatch, getState) {
+    return async function (dispatch, getState) {
         const { query, startDate, endDate } = ourState(getState())
         const oldResult = ourState(getState()).searchResult
 
@@ -39,30 +39,29 @@ export function refreshSearch({loadingIndicator=false}) {
             dispatch(showLoadingIndicator())
         }
 
-        filterVisitsByQuery({
+        const searchResult = await filterVisitsByQuery({
             query,
             startDate,
             endDate,
             includeContext: true,
-        }).then(searchResult => {
-
-            if (loadingIndicator) {
-                // Hide our nice loading animation again.
-                dispatch(hideLoadingIndicator())
-            }
-
-            // First check if the query and result changed in the meantime.
-            if (ourState(getState()).query !== query
-                && ourState(getState()).searchResult !== oldResult) {
-                // The query already changed while we were searching, and the
-                // currently displayed result may already be more recent than
-                // ours. So we did all that effort for nothing.
-                return
-            }
-
-            // Set the result to have it displayed to the user.
-            dispatch(setSearchResult({searchResult}))
         })
+
+        if (loadingIndicator) {
+            // Hide our nice loading animation again.
+            dispatch(hideLoadingIndicator())
+        }
+
+        // First check if the query and result changed in the meantime.
+        if (ourState(getState()).query !== query
+            && ourState(getState()).searchResult !== oldResult) {
+            // The query already changed while we were searching, and the
+            // currently displayed result may already be more recent than
+            // ours. So we did all that effort for nothing.
+            return
+        }
+
+        // Set the result to have it displayed to the user.
+        dispatch(setSearchResult({searchResult}))
     }
 }
 

@@ -61,49 +61,48 @@ const pageSearchIndexParams = {
 }
 
 // Get all pages for a given array of page ids
-export function getPages({pageIds, ...otherOptions}) {
-    return db.allDocs({
+export async function getPages({pageIds, ...otherOptions}) {
+    let pagesResult = await db.allDocs({
         keys: pageIds,
         include_docs: true,
-    }).then(
-        pagesResult => postprocessPagesResult({...otherOptions, pagesResult})
-    )
+    })
+    pagesResult = await postprocessPagesResult({...otherOptions, pagesResult})
+    return pagesResult
 }
 
 // Search the log for pages matching given query (keyword) string
-export function searchPages({
+export async function searchPages({
     query,
     limit,
     ...otherOptions,
 }) {
-    return db.search({
+    let pagesResult = await db.search({
         ...pageSearchIndexParams,
         query,
         limit,
         include_docs: true,
         stale: 'update_after',
-    }).then(
-        pagesResult => postprocessPagesResult({...otherOptions, pagesResult})
-    )
+    })
+    pagesResult = await postprocessPagesResult({...otherOptions, pagesResult})
+    return pagesResult
 }
 
-export function updatePageSearchIndex() {
+export async function updatePageSearchIndex() {
     // Add new documents to the search index.
-    return db.search({
+    await db.search({
         ...pageSearchIndexParams,
         build: true
     })
 }
 
-export function findPagesByUrl({url, ...otherOptions}) {
-    return db.find({
+export async function findPagesByUrl({url, ...otherOptions}) {
+    const findResult = await db.find({
         selector: {
             _id: { $gte: pageKeyPrefix, $lte: `${pageKeyPrefix}\uffff`},
             url,
         }
-    }).then(
-        normaliseFindResult
-    ).then(
-        pagesResult => postprocessPagesResult({...otherOptions, pagesResult})
-    )
+    })
+    let pagesResult = normaliseFindResult(findResult)
+    pagesResult = await postprocessPagesResult({...otherOptions, pagesResult})
+    return pagesResult
 }

@@ -10,34 +10,30 @@ import { getPages } from './find-pages'
 
 
 // Nest the page docs into the visit docs, and return the latter.
-function insertPagesIntoVisits({visitsResult, pagesResult, presorted=false}) {
-    // If pages are not already passed to us, get them and call ourselves again.
+async function insertPagesIntoVisits({
+    visitsResult,
+    pagesResult,
+}) {
+    // If pages are not already passed to us, get them.
     if (pagesResult === undefined) {
         // Get the page of each visit.
         const pageIds = visitsResult.rows.map(row => row.doc.page._id)
-        return getPages({
+        pagesResult = await getPages({
             pageIds,
             // Assume that we always want to follow redirects.
             followRedirects: true,
-        }).then(pagesResult =>
-            // Invoke ourselves with the found pages.
-            insertPagesIntoVisits({visitsResult, pagesResult, presorted: true})
-        )
-    }
-
-    if (presorted) {
-        // A small optimisation if the results already match one to one.
+        })
+        // Because the results are lined up, we can use a small optimisation and
+        // return directly.
         return update('rows', rows => rows.map(
             (row, i) => update('doc.page', ()=>pagesResult.rows[i].doc)(row)
         ))(visitsResult)
     }
-    else {
-        // Read each visit's doc.page._id and replace it with the specified page.
-        const pagesById = resultRowsById(pagesResult)
-        return update('rows', rows => rows.map(
-            update('doc.page', page => pagesById[page._id].doc)
-        ))(visitsResult)
-    }
+    // Read each visit's doc.page._id and replace it with the specified page.
+    const pagesById = resultRowsById(pagesResult)
+    return update('rows', rows => rows.map(
+        update('doc.page', page => pagesById[page._id].doc)
+    ))(visitsResult)
 }
 
 
@@ -45,7 +41,7 @@ function insertPagesIntoVisits({visitsResult, pagesResult, presorted=false}) {
 // time (descending).
 // If pagesResult is given, only find visits to those pages.
 // XXX: If pages are redirected, only visits to the source page are found.
-export function findVisits({startDate, endDate, limit, pagesResult}) {
+export async function findVisits({startDate, endDate, limit, pagesResult}) {
     let selector = {
         // Constrain by id (like with startkey/endkey), both to get only the
         // visit docs, and (if needed) to filter the visits after/before a
@@ -70,77 +66,89 @@ export function findVisits({startDate, endDate, limit, pagesResult}) {
             'page._id': {$in: pageIds},
         }
     }
-    return db.find({
+
+    let findResult = await db.find({
         selector,
         // Sort them by time, newest first
         sort: [{'_id': 'desc'}],
         // limit, // XXX pouchdb-find seems to mess up when passing a limit...
-    }).then(
-        // ...so we apply the limit ourselves.
-        update('docs', docs => docs.slice(0, limit))
-    ).then(
-        normaliseFindResult
-    ).then(visitsResult =>
-        insertPagesIntoVisits({visitsResult, pagesResult})
-    )
+    })
+    // ...so we apply the limit ourselves.
+    findResult = update('docs', docs => docs.slice(0, limit))(findResult)
+
+    let visitsResult = normaliseFindResult(findResult)
+    visitsResult = insertPagesIntoVisits({visitsResult, pagesResult})
+    return visitsResult
 }
 
 // Expand the results, adding a bit of context around each visit.
 // Currently context means a few preceding and succeding visits.
-export function addVisitsContext({
+export async function addVisitsContext({
     visitsResult,
+    ...options,
+}) {
+    // For each visit, get its context.
+    const contextResultsP = visitsResult.rows.map(async row => {
+        let contextResult = await getContextForVisit({
+            visitDoc: row.doc,
+            ...options
+        })
+        // Mark each row as being a 'contextual result'.
+        contextResult = update('rows', rows =>
+            rows.map(row => ({...row, isContextualResult: true}))
+        )(contextResult)
+        return contextResult
+    })
+    const contextResults = await Promise.all(contextResultsP)
+
+    // Insert the contexts (prequels+sequels) into the original results
+    const visitsWithContextResult = update('rows', rows => {
+        // Concat all results and all their contexts, but remove duplicates.
+        const allRows = unionBy(
+            rows,
+            ...contextResults.map(result => result.rows),
+            'id' // Use the visits' ids as the uniqueness criterion
+        )
+        // Sort them again by timestamp
+        return sortBy(row => -getTimestamp(row.doc))(allRows)
+    })(visitsResult)
+
+    return visitsWithContextResult
+}
+
+async function getContextForVisit({
+    visitDoc,
     maxPrecedingVisits=2,
     maxSuccedingVisits=2,
     maxPrecedingTime = 1000*60*20,
     maxSuccedingTime = 1000*60*20,
 }) {
-    // For each visit, get its context.
-    const promises = visitsResult.rows.map(row => {
-        const timestamp = getTimestamp(row.doc)
-        // Get preceding visits
-        return db.allDocs({
-            include_docs: true,
-            // Subtract 1ms to exclude itself (there is no include_start option).
-            startkey: convertVisitDocId({timestamp: timestamp-1}),
-            endkey: convertVisitDocId({timestamp: timestamp-maxPrecedingTime}),
-            descending: true,
-            limit: maxPrecedingVisits,
-        }).then(prequelResult => {
-            // Get succeeding visits
-            return db.allDocs({
-                include_docs: true,
-                // Add 1ms to exclude itself (there is no include_start option).
-                startkey: convertVisitDocId({timestamp: timestamp+1}),
-                endkey: convertVisitDocId({timestamp: timestamp+maxSuccedingTime}),
-                limit: maxSuccedingVisits,
-            }).then(sequelResult => {
-                // Combine them as if they were one result.
-                return {
-                    rows: prequelResult.rows.concat(reverse(sequelResult.rows))
-                }
-            })
-        }).then(contextResult =>
-            // Insert pages as usual.
-            insertPagesIntoVisits({visitsResult: contextResult})
-        ).then(
-            // Mark each row as being a 'contextual result'.
-            update('rows', rows =>
-                rows.map(row => ({...row, isContextualResult: true}))
-            )
-        )
+    const timestamp = getTimestamp(visitDoc)
+    // Get preceding visits
+    const prequelResultP = db.allDocs({
+        include_docs: true,
+        // Subtract 1ms to exclude itself (there is no include_start option).
+        startkey: convertVisitDocId({timestamp: timestamp-1}),
+        endkey: convertVisitDocId({timestamp: timestamp-maxPrecedingTime}),
+        descending: true,
+        limit: maxPrecedingVisits,
     })
-    // When the context of each visit has been retrieved, merge and return them.
-    return Promise.all(promises).then(contextResults =>
-        // Insert the contexts (prequels+sequels) into the original results
-        update('rows', rows => {
-            // Concat all results and all their contexts, but remove duplicates.
-            const allRows = unionBy(
-                rows,
-                ...contextResults.map(result => result.rows),
-                'id' // Use the visits' ids as the uniqueness criterion
-            )
-            // Sort them again by timestamp
-            return sortBy(row => -getTimestamp(row.doc))(allRows)
-        })(visitsResult)
-    )
+    // Get succeeding visits
+    const sequelResultP = db.allDocs({
+        include_docs: true,
+        // Add 1ms to exclude itself (there is no include_start option).
+        startkey: convertVisitDocId({timestamp: timestamp+1}),
+        endkey: convertVisitDocId({timestamp: timestamp+maxSuccedingTime}),
+        limit: maxSuccedingVisits,
+    })
+    const prequelResult = await prequelResultP
+    const sequelResult = await sequelResultP
+
+    // Combine them as if they were one result.
+    let contextResult = {
+        rows: prequelResult.rows.concat(reverse(sequelResult.rows))
+    }
+    // Insert pages as usual.
+    contextResult = await insertPagesIntoVisits({visitsResult: contextResult})
+    return contextResult
 }
