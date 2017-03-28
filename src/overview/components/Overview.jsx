@@ -1,13 +1,11 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import moment from 'moment'
-import DatePicker from 'react-datepicker'
-import datePickerStyles from 'react-datepicker/dist/react-datepicker-cssmodules.css'
 
 import * as actions from '../actions'
 import { ourState } from '../selectors'
 import ResultList from './ResultList'
 import LoadingIndicator from './LoadingIndicator'
+import DateRangeSelection from './DateRangeSelection'
 import styles from './Overview.css'
 
 
@@ -25,40 +23,12 @@ class Overview extends React.Component {
                     >
                     </input>
                 </div>
-                <div className={styles.dateRangeSelection}>
-                    <DatePicker
-                        className={styles.datePicker}
-                        dateFormat="DD-MM-YYYY"
-                        placeholderText="after.."
-                        isClearable={true}
-                        selected={
-                            this.props.startDate && moment(this.props.startDate)
-                        }
-                        selectsStart
-                        startDate={moment(this.props.startDate || 0)}
-                        endDate={moment(this.props.endDate)}
-                        maxDate={moment()}
-                        onChange={date => this.props.onStartDateChange(
-                            date ? date.valueOf() : undefined,
-                        )}
-                    />
-                    <DatePicker
-                        className={styles.datePicker}
-                        dateFormat="DD-MM-YYYY"
-                        placeholderText="before.."
-                        isClearable={true}
-                        selected={
-                            this.props.endDate && moment(this.props.endDate)
-                        }
-                        selectsEnd
-                        startDate={moment(this.props.startDate || 0)}
-                        endDate={moment(this.props.endDate)}
-                        maxDate={moment()}
-                        onChange={date => this.props.onEndDateChange(
-                            date ? date.endOf('day').valueOf() : undefined,
-                        )}
-                    />
-                </div>
+                <DateRangeSelection
+                    startDate={this.props.startDate}
+                    endDate={this.props.endDate}
+                    onStartDateChange={this.props.onStartDateChange}
+                    onEndDateChange={this.props.onEndDateChange}
+                />
                 <div>
                     {this.props.waitingForResults
                         ? <LoadingIndicator />
