@@ -6,10 +6,20 @@ const defaultState = {
     searchResult: {rows: []},
     query: '',
     waitingForResults: 0,
+    startDate: undefined,
+    endDate: undefined,
 }
 
 function setQuery(state, {query}) {
     return {...state, query}
+}
+
+function setStartDate(state, {startDate}) {
+    return {...state, startDate}
+}
+
+function setEndDate(state, {endDate}) {
+    return {...state, endDate}
 }
 
 function setSearchResult(state, {searchResult}) {
@@ -29,6 +39,8 @@ function hideLoadingIndicator(state) {
 
 export default createReducer({
     [actions.setQuery]: setQuery,
+    [actions.setStartDate]: setStartDate,
+    [actions.setEndDate]: setEndDate,
     [actions.setSearchResult]: setSearchResult,
     [actions.showLoadingIndicator]: showLoadingIndicator,
     [actions.hideLoadingIndicator]: hideLoadingIndicator,

@@ -40,40 +40,45 @@ function insertPagesIntoVisits({visitsResult, pagesResult, presorted=false}) {
     }
 }
 
-// Get the most recent visits, each with the visited page already nested in it.
-export function getLastVisits({
-    limit
-}={}) {
-    return db.find({
-        selector: {
-            // workaround for lack of startkey/endkey support
-            _id: { $gte: visitKeyPrefix, $lte: `${visitKeyPrefix}\uffff`}
-        },
-        sort: [{_id: 'desc'}],
-        limit,
-    }).then(
-        normaliseFindResult
-    ).then(
-        visitsResult => insertPagesIntoVisits({visitsResult})
-    )
-}
 
-
-// Find all visits to the given pages, return them with the pages nested inside.
-// Resulting visits are sorted by time, descending.
+// Find visits in the given date range (and/or up to the given limit), sorted by
+// time (descending).
+// If pagesResult is given, only find visits to those pages.
 // XXX: If pages are redirected, only visits to the source page are found.
-export function findVisitsToPages({pagesResult}) {
-    const pageIds = pagesResult.rows.map(row => row.id)
-    return db.find({
-        // Find the visits that contain the pages
-        selector: {
-            'page._id': {$in: pageIds},
-            // workaround for lack of startkey/endkey support
-            _id: {$gte: visitKeyPrefix, $lte: `${visitKeyPrefix}\uffff`},
+export function findVisits({startDate, endDate, limit, pagesResult}) {
+    let selector = {
+        // Constrain by id (like with startkey/endkey), both to get only the
+        // visit docs, and (if needed) to filter the visits after/before a
+        // given timestamp (this compares timestamps lexically, which only
+        // works while they are of the same length, so we should fix this by
+        // 2286).
+        _id: {
+            $gte: startDate !== undefined
+                ? convertVisitDocId({timestamp: startDate})
+                : visitKeyPrefix,
+            $lte: endDate !== undefined
+                ? convertVisitDocId({timestamp: endDate})
+                : `${visitKeyPrefix}\uffff`,
         },
+    }
+
+    if (pagesResult) {
+        // Find only the visits that contain the given pages
+        const pageIds = pagesResult.rows.map(row => row.id)
+        selector = {
+            ...selector,
+            'page._id': {$in: pageIds},
+        }
+    }
+    return db.find({
+        selector,
         // Sort them by time, newest first
         sort: [{'_id': 'desc'}],
+        // limit, // XXX pouchdb-find seems to mess up when passing a limit...
     }).then(
+        // ...so we apply the limit ourselves.
+        update('docs', docs => docs.slice(0, limit))
+    ).then(
         normaliseFindResult
     ).then(visitsResult =>
         insertPagesIntoVisits({visitsResult, pagesResult})
