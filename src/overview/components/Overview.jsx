@@ -51,15 +51,9 @@ class Overview extends React.Component {
     }
 }
 
-const mapStateToProps = (state) => ({
-    query: ourState(state).query,
-    searchResult: ourState(state).searchResult,
-    waitingForResults: ourState(state).waitingForResults,
-    startDate: ourState(state).startDate,
-    endDate:  ourState(state).endDate
-})
+const mapStateToProps = state => ourState(state)
 
-const mapDispatchToProps = (dispatch) => ({
+const mapDispatchToProps = dispatch => ({
     onInputChanged: input => {
         dispatch(actions.setQuery({query: input}))
     },
