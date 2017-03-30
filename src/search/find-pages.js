@@ -81,7 +81,6 @@ export function searchPages({
         query,
         limit,
         include_docs: true,
-        highlighting: true,
         stale: 'update_after',
     }).then(
         pagesResult => postprocessPagesResult({...otherOptions, pagesResult})
