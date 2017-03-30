@@ -11,7 +11,7 @@ const sendMessageError = ({funcName, otherSide}) =>
     `Got no response from RPC when calling '${funcName}'. ` +
     `Did you enable RPC in ${otherSide}?`
 
-export function remoteFunction(funcName, {tabId}={}) {
+export function remoteFunction(funcName, {tabId} = {}) {
     const sendMessage = (tabId !== undefined)
         ? message => {
             return browser.tabs.sendMessage(tabId, message).catch(
@@ -28,7 +28,7 @@ export function remoteFunction(funcName, {tabId}={}) {
                 err => {
                     throw sendMessageError({
                         funcName,
-                        otherSide: "the background script",
+                        otherSide: 'the background script',
                     })
                 }
             )
@@ -41,22 +41,19 @@ export function remoteFunction(funcName, {tabId}={}) {
             args,
         }
         return sendMessage(message).then(response => {
-            if (response.error)
-                throw response.error
-            else
-                return response.returnValue
+            if (response.error) { throw response.error } else { return response.returnValue }
         })
     }
 
     // Give it a name, could be helpful in debugging
-    Object.defineProperty(f, 'name', { value: `${funcName}_RPC` });
+    Object.defineProperty(f, 'name', { value: `${funcName}_RPC` })
     return f
 }
 
 
 // === Executing side ===
 
-const noSuchFunctionError = "Received RPC for unknown function: "
+const noSuchFunctionError = 'Received RPC for unknown function: '
 
 const remotelyCallableFunctions = {}
 
@@ -84,7 +81,7 @@ function incomingRPCListener(message, sender) {
 }
 
 let enabled = false
-export function makeRemotelyCallable(functions, {insertExtraArg=false}={}) {
+export function makeRemotelyCallable(functions, {insertExtraArg = false} = {}) {
     // Every function is passed an extra argument with sender information,
     // so remove this from the call if this was not desired.
     if (!insertExtraArg) {

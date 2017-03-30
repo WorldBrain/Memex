@@ -5,10 +5,9 @@ import { filterVisitsByQuery } from 'src/search'
 import niceTime from 'src/util/nice-time'
 
 
-const shortUrl = (url, maxLength=50) => {
+const shortUrl = (url, maxLength = 50) => {
     url = url.replace(/^https?:\/\//i, '')
-    if (url.length > maxLength)
-        url = url.slice(0, maxLength-3) + '...'
+    if (url.length > maxLength) { url = url.slice(0, maxLength - 3) + '...' }
     return url
 }
 
@@ -50,8 +49,7 @@ async function makeSuggestion(query, suggest) {
 
     // A subsequent search could have already started and finished while we
     // were busy searching, so we ensure we do not overwrite its results.
-    if (currentQuery !== query && latestResolvedQuery !== queryForOldSuggestions)
-        return
+    if (currentQuery !== query && latestResolvedQuery !== queryForOldSuggestions) { return }
 
     if (visitDocs.length === 0) {
         browser.omnibox.setDefaultSuggestion({
@@ -71,15 +69,15 @@ async function makeSuggestion(query, suggest) {
 const acceptInput = (text, disposition) => {
     // TODO if text is not a suggested URL, open the overview with this query.
     switch (disposition) {
-    case 'currentTab':
-        browser.tabs.update({url: text})
-        break
-    case 'newForegroundTab':
-        browser.tabs.create({url: text})
-        break
-    case 'newBackgroundTab':
-        browser.tabs.create({url: text, active: false})
-        break
+        case 'currentTab':
+            browser.tabs.update({url: text})
+            break
+        case 'newForegroundTab':
+            browser.tabs.create({url: text})
+            break
+        case 'newBackgroundTab':
+            browser.tabs.create({url: text, active: false})
+            break
     }
 }
 

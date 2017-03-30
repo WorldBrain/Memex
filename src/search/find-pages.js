@@ -11,10 +11,10 @@ import { searchableTextFields, revisePageFields } from 'src/page-analysis'
 async function resolveRedirects(pagesResult) {
     // Get the targets of all docs' 'seeInstead' links.
     const targetPageIds = pagesResult.rows.map(get('doc.seeInstead._id'))
-        .filter(x=>x)
+        .filter(x => x)
 
     // If these pages contain no redirects, easy job for us.
-    if (targetPageIds.length===0) return pagesResult
+    if (targetPageIds.length === 0) return pagesResult
 
     // Fetch the targeted pages.
     // Note that multi-step redirections are resolved recursively here.
@@ -55,8 +55,8 @@ async function postprocessPagesResult({pagesResult, followRedirects}) {
 }
 
 const pageSearchIndexParams = {
-    filter: doc => (typeof doc._id === 'string'
-                    && doc._id.startsWith(pageKeyPrefix)),
+    filter: doc => (typeof doc._id === 'string' &&
+                    doc._id.startsWith(pageKeyPrefix)),
     fields: searchableTextFields,
 }
 
@@ -98,7 +98,7 @@ export async function updatePageSearchIndex() {
 export async function findPagesByUrl({url, ...otherOptions}) {
     const findResult = await db.find({
         selector: {
-            _id: { $gte: pageKeyPrefix, $lte: `${pageKeyPrefix}\uffff`},
+            _id: { $gte: pageKeyPrefix, $lte: `${pageKeyPrefix}\uffff` },
             url,
         }
     })

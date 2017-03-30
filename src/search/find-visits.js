@@ -4,7 +4,7 @@ import reverse from 'lodash/fp/reverse'
 import unionBy from 'lodash/unionBy' // the fp version does not support >2 inputs (lodash issue #3025)
 import sortBy from 'lodash/fp/sortBy'
 
-import db, { normaliseFindResult, resultRowsById }  from 'src/pouchdb'
+import db, { normaliseFindResult, resultRowsById } from 'src/pouchdb'
 import { convertVisitDocId, visitKeyPrefix, getTimestamp } from 'src/activity-logger'
 import { getPages } from './find-pages'
 
@@ -26,7 +26,7 @@ async function insertPagesIntoVisits({
         // Because the results are lined up, we can use a small optimisation and
         // return directly.
         return update('rows', rows => rows.map(
-            (row, i) => update('doc.page', ()=>pagesResult.rows[i].doc)(row)
+            (row, i) => update('doc.page', () => pagesResult.rows[i].doc)(row)
         ))(visitsResult)
     }
     // Read each visit's doc.page._id and replace it with the specified page.

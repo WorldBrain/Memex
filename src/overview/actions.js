@@ -21,7 +21,7 @@ export const setEndDate = createAction('overview/setEndDate')
 export function init() {
     return function (dispatch, getState) {
         // Perform an initial search to populate the view (empty query = get all docs)
-        dispatch(refreshSearch({loadingIndicator:true}))
+        dispatch(refreshSearch({loadingIndicator: true}))
 
         // Track database changes, to e.g. trigger search result refresh
         onDatabaseChange(change => dispatch(handlePouchChange({change})))

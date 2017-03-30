@@ -3,7 +3,7 @@ import classNames from 'classnames'
 
 import styles from './VisitAsListItem.css'
 
-import {localVersionAvailable, LinkToLocalVersion } from 'src/page-viewer'
+import {localVersionAvailable, LinkToLocalVersion} from 'src/page-viewer'
 
 const VisitAsListItem = ({doc, compact}) => {
     const visitClasses = classNames({
@@ -17,7 +17,7 @@ const VisitAsListItem = ({doc, compact}) => {
             href={doc.page.url}
             title={doc.page.url}
             // DEBUG Show document props on ctrl+meta+click
-            onClick={e=>{if (e.metaKey && e.ctrlKey) {console.log(doc); e.preventDefault()}}}
+            onClick={ e => { if (e.metaKey && e.ctrlKey) { console.log(doc); e.preventDefault() } }}
         >
 
             {doc.page.screenshot

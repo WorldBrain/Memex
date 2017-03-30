@@ -19,10 +19,10 @@ export default async function maybeLogPageVisit({
     tabId,
     url,
 }) {
-
     // First check if we want to log this page (hence the 'maybe' in the name).
-    if (!isWorthRemembering({url}))
+    if (!isWorthRemembering({url})) {
         return
+    }
 
     // The time to put in documents.
     const timestamp = new Date().getTime()

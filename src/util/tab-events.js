@@ -4,18 +4,18 @@ const tabChangedEvents = tabId => [
     {
         event: browser.webNavigation.onCommitted,
         filter: details => (details.tabId == tabId && details.frameId == 0),
-        reason: {message: "Tab URL changed before event occurred."}
+        reason: {message: 'Tab URL changed before event occurred.'}
     },
     {
         event: browser.webNavigation.onHistoryStateUpdated,
         filter: details => (details.tabId == tabId && details.frameId == 0),
-        reason: {message: "Tab URL changed before event occurred."}
+        reason: {message: 'Tab URL changed before event occurred.'}
     },
     {
         event: browser.tabs.onRemoved,
         filter: closedTabId => (closedTabId === tabId),
-        reason: {message: "Tab was closed before event occurred."},
-    },
+        reason: {message: 'Tab was closed before event occurred.'},
+    }
 ]
 
 
@@ -23,7 +23,6 @@ const tabChangedEvents = tabId => [
 // Rejects if it is closed before that.
 // XXX Needs host permission on the tab
 export function whenPageDOMLoaded({tabId}) {
-
     return new Promise((resolve, reject) => {
         // Using executeScript at document_end here as a workaround, as there is
         // no tab.status==='interactive'; it is either 'loading' or 'complete'.
@@ -40,7 +39,7 @@ export function whenPageDOMLoaded({tabId}) {
 }
 
 // Resolve if or when the page is completely loaded.
-// Rejects if it is closed before that.
+// Rejects if it is closed before that. 
 export async function whenPageLoadComplete({tabId}) {
     const tab = await browser.tabs.get(tabId)
 

@@ -8,17 +8,17 @@ import * as actions from './actions'
 const searchUpdateActions = [
     actions.setQuery.getType(),
     actions.setStartDate.getType(),
-    actions.setEndDate.getType(),
+    actions.setEndDate.getType()
 ]
 
 // When the query changed, refresh the search results
 export const refreshSearchResultsUponQueryChange = action$ => action$
     .filter(action => searchUpdateActions.includes(action.type))
     .debounceTime(500) // wait until typing stops for 500ms
-    .map(() => actions.refreshSearch({loadingIndicator:true}))
+    .map(() => actions.refreshSearch({loadingIndicator: true}))
 
 // When the database changed, refresh the search results
 export const refreshSearchResultsUponLogChange = action$ => action$
     .ofType(actions.handlePouchChange.getType())
     .debounceTime(1000)
-    .map(() => actions.refreshSearch({loadingIndicator:false}))
+    .map(() => actions.refreshSearch({loadingIndicator: false}))

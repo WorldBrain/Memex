@@ -40,7 +40,7 @@ async function analyseAndTryDedupePage({tabId, page, samePageCandidates}) {
 // (finalPagePromise) of the page doc resulting from these steps.
 export async function reidentifyOrStorePage({tabId, url}) {
     // Find pages we know that had the same URL.
-    const samePageCandidates = (await findPagesByUrl({url})).rows.map(row=>row.doc)
+    const samePageCandidates = (await findPagesByUrl({url})).rows.map(row => row.doc)
 
     // Check if we can already tell in advance that this is the same page.
     const reusablePage = await tryReidentifyPage({tabId, url, samePageCandidates})
@@ -48,8 +48,7 @@ export async function reidentifyOrStorePage({tabId, url}) {
     if (reusablePage) {
         // Equality is known (or assumed) in advance. Reuse the old page as is.
         return {page: reusablePage}
-    }
-    else {
+    } else {
         // Create a new page doc in the database.
         const page = await createPageStub({url})
 

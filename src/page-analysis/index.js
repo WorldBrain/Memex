@@ -6,7 +6,7 @@ export const searchableTextFields = [
     'extractedMetadata.title',
     'extractedText.excerpt',
     'extractedText.textContent',
-    'extractedText.bodyInnerText',
+    'extractedText.bodyInnerText'
 ]
 
 // Revise and augment a page doc using available fields from the extracted data.
@@ -14,7 +14,7 @@ export const searchableTextFields = [
 export const revisePageFields = doc => ({
     ...doc,
     // Choose something presentable as a title.
-    title: (doc.extractedMetadata && doc.extractedMetadata.title)
-        || doc.title
-        || doc.url,
+    title: (doc.extractedMetadata && doc.extractedMetadata.title) ||
+    doc.title ||
+    doc.url
 })

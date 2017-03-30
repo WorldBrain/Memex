@@ -36,12 +36,11 @@ export default function eventToPromise({
                 listener: function maybeResolve(...args) {
                     if (!opts.filter || opts.filter(...args)) {
                         removeListeners()
-                        if (opts.value)
+                        if (opts.value) {
                             return (typeof opts.value === 'function')
                                 ? resolve(opts.value(...args))
                                 : resolve(opts.value)
-                        else
-                            resolve()
+                        } else { resolve() }
                     }
                 }
             })
@@ -52,12 +51,11 @@ export default function eventToPromise({
                 listener: function maybeReject(...args) {
                     if (!opts.filter || opts.filter(...args)) {
                         removeListeners()
-                        if (opts.reason)
+                        if (opts.reason) {
                             return (typeof opts.reason === 'function')
                                 ? reject(opts.reason(...args))
                                 : reject(opts.reason)
-                        else
-                            reject()
+                        } else { reject() }
                     }
                 }
             })

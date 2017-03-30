@@ -57,7 +57,7 @@ export default async function tryDedupePage({
     page,
     samePageCandidates,
 }) {
-    if (samePageCandidates.length===0) {
+    if (samePageCandidates.length === 0) {
         return {page}
     }
 
@@ -69,8 +69,8 @@ export default async function tryDedupePage({
 
     // Choose the action to take.
     if (
-        sameness >= Sameness.MOSTLY
-        && !candidatePage.protected
+        sameness >= Sameness.MOSTLY &&
+        !candidatePage.protected
     ) {
         // Forget the old page's contents. Replace them with a link to the new
         // page.
@@ -79,8 +79,7 @@ export default async function tryDedupePage({
             newPage: page,
             sameness,
         })
-    }
-    else {
+    } else {
         // Do nothing, leave as duplicate. We do create a link for information
         // if they are similar enough.
         if (sameness >= Sameness.PARTLY) {

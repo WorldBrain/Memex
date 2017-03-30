@@ -14,7 +14,7 @@ body > main {
 
 const pageToHTML = ({
     extractedText: article,
-    extractedMetadata: { url }={},
+    extractedMetadata: { url } = {},
 }) => `<html>
     <head>
         <meta charset="utf-8" />

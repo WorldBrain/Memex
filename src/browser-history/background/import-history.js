@@ -88,8 +88,7 @@ function convertHistoryToPagesAndVisits({
                 const referringVisitDocId = referringVisitDoc._id
                 // Add a reference to the visit document.
                 visitDoc.referringVisit = {_id: referringVisitDocId}
-            }
-            else {
+            } else {
                 // Apparently the referring visit is not present in the history.
                 // We can just pretend that there was no referrer.
             }
@@ -106,7 +105,7 @@ function convertHistoryToPagesAndVisits({
 export default async function importHistory({
     startTime,
     endTime,
-}={}) {
+} = {}) {
     // Get the full history: both the historyItems and visitItems.
     console.time('import history')
     const historyItems = await getHistoryItems({startTime, endTime})
