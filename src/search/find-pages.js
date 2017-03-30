@@ -2,7 +2,7 @@ import get from 'lodash/fp/get'
 import update from 'lodash/fp/update'
 
 import db, { normaliseFindResult, resultRowsById } from 'src/pouchdb'
-import { pageKeyPrefix } from 'src/activity-logger'
+import { pageKeyPrefix } from 'src/page-storage'
 import { searchableTextFields, revisePageFields } from 'src/page-analysis'
 
 
