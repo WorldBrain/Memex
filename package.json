@@ -11,7 +11,9 @@
     "build": "gulp build",
     "watch": "gulp watch",
     "fx-run": "web-ext -s extension run",
-    "fx-build": "npm run build-prod && web-ext -s extension -a dist/firefox build"
+    "fx-build": "npm run build-prod && web-ext -s extension -a dist/firefox build",
+    "lint": "./node_modules/.bin/eslint .",
+    "fix": "./node_modules/.bin/eslint --fix ."
   },
   "dependencies": {
     "babel-runtime": "^6.23.0",
