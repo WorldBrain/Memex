@@ -8,7 +8,7 @@ import * as actions from './actions'
 const searchUpdateActions = [
     actions.setQuery.getType(),
     actions.setStartDate.getType(),
-    actions.setEndDate.getType()
+    actions.setEndDate.getType(),
 ]
 
 // When the query changed, refresh the search results

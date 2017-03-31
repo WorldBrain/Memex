@@ -11,7 +11,7 @@ function extractPageText_sync({
         host: loc.host,
         prePath: loc.protocol + '//' + loc.host,
         scheme: loc.protocol.substr(0, loc.protocol.indexOf(':')),
-        pathBase: loc.protocol + '//' + loc.host + loc.pathname.substr(0, loc.pathname.lastIndexOf('/') + 1)
+        pathBase: loc.protocol + '//' + loc.host + loc.pathname.substr(0, loc.pathname.lastIndexOf('/') + 1),
     }
     let article
     try {

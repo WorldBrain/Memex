@@ -15,8 +15,8 @@ const visitToSuggestion = doc => {
     const visitDate = escapeHtml(niceTime(doc.visitStart))
     const url = escapeHtml(shortUrl(doc.url))
     const title = escapeHtml(doc.page.title)
-    const description =
-        `<url>${url}</url> — ${title} <dim>(visited ${visitDate})</dim>`
+    const description
+        = `<url>${url}</url> — ${title} <dim>(visited ${visitDate})</dim>`
     return ({
         content: doc.url,
         description: description.toString(),
@@ -31,7 +31,7 @@ async function makeSuggestion(query, suggest) {
     // Show no suggestions if there is no query.
     if (query.trim() === '') {
         browser.omnibox.setDefaultSuggestion({
-            description: 'Type to search your memory.'
+            description: 'Type to search your memory.',
         })
         suggest([])
         latestResolvedQuery = query
@@ -39,7 +39,7 @@ async function makeSuggestion(query, suggest) {
     }
 
     browser.omnibox.setDefaultSuggestion({
-        description: 'Searching your memory..'
+        description: 'Searching your memory..',
     })
 
     const queryForOldSuggestions = latestResolvedQuery
@@ -53,11 +53,11 @@ async function makeSuggestion(query, suggest) {
 
     if (visitDocs.length === 0) {
         browser.omnibox.setDefaultSuggestion({
-            description: 'No results found in your memory.'
+            description: 'No results found in your memory.',
         })
     } else {
         browser.omnibox.setDefaultSuggestion({
-            description: 'Found these pages in your memory:'
+            description: 'Found these pages in your memory:',
         })
     }
     const suggestions = visitDocs.map(visitToSuggestion)

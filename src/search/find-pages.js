@@ -55,8 +55,8 @@ async function postprocessPagesResult({pagesResult, followRedirects}) {
 }
 
 const pageSearchIndexParams = {
-    filter: doc => (typeof doc._id === 'string' &&
-                    doc._id.startsWith(pageKeyPrefix)),
+    filter: doc => (typeof doc._id === 'string'
+                    && doc._id.startsWith(pageKeyPrefix)),
     fields: searchableTextFields,
 }
 
@@ -74,7 +74,7 @@ export async function getPages({pageIds, ...otherOptions}) {
 export async function searchPages({
     query,
     limit,
-    ...otherOptions,
+    ...otherOptions
 }) {
     let pagesResult = await db.search({
         ...pageSearchIndexParams,
@@ -91,7 +91,7 @@ export async function updatePageSearchIndex() {
     // Add new documents to the search index.
     await db.search({
         ...pageSearchIndexParams,
-        build: true
+        build: true,
     })
 }
 

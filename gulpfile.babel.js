@@ -27,14 +27,14 @@ const files = [
         entries: ['./src/overview/main.jsx'],
         output: 'overview.js',
         destination: './extension/overview',
-        cssOutput: 'style.css'
+        cssOutput: 'style.css',
     },
     {
         entries: ['./src/options/main.jsx'],
         output: 'options.js',
         destination: './extension/options',
-        cssOutput: 'style.css'
-    }
+        cssOutput: 'style.css',
+    },
 ]
 
 const browserifySettings = {
@@ -51,7 +51,7 @@ function createBundle({entries, output, destination, cssOutput},
         : browserify({...browserifySettings, entries})
     b.transform(babelify)
     b.transform(envify({
-        NODE_ENV: production ? 'production' : 'development'
+        NODE_ENV: production ? 'production' : 'development',
     }), {global: true})
 
     if (cssOutput) {
@@ -59,8 +59,8 @@ function createBundle({entries, output, destination, cssOutput},
             global: true,
             output: path.join(destination, cssOutput),
             postcssBefore: [
-                cssnext
-            ]
+                cssnext,
+            ],
         })
     }
 

@@ -97,7 +97,7 @@ function convertHistoryToPagesAndVisits({
     // Return the new docs.
     return {
         pageDocs,
-        visitDocs: Object.values(visitDocs) // we can forget the old ids now
+        visitDocs: Object.values(visitDocs), // we can forget the old ids now
     }
 }
 

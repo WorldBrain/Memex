@@ -5,7 +5,7 @@ import thunk from 'redux-thunk'
 import overview from 'src/overview'
 
 const rootReducer = combineReducers({
-    overview: overview.reducer
+    overview: overview.reducer,
 })
 
 const rootEpic = combineEpics(
@@ -17,7 +17,7 @@ export default function configureStore({ReduxDevTools = undefined} = {}) {
         applyMiddleware(
             createEpicMiddleware(rootEpic),
             thunk
-        )
+        ),
     ]
     if (ReduxDevTools) {
         enhancers.push(ReduxDevTools.instrument())

@@ -8,8 +8,8 @@ const RPC_ERR_UNKNOWN_FUNCTION = '__RPC_ERROR_UNKNOWN_FUNCTION__'
 // === Initiating side ===
 
 const sendMessageError = ({funcName, otherSide}) =>
-    `Got no response from RPC when calling '${funcName}'. ` +
-    `Did you enable RPC in ${otherSide}?`
+    `Got no response from RPC when calling '${funcName}'. `
+    + `Did you enable RPC in ${otherSide}?`
 
 export function remoteFunction(funcName, {tabId} = {}) {
     const sendMessage = (tabId !== undefined)
@@ -65,7 +65,7 @@ function incomingRPCListener(message, sender) {
         if (func === undefined) {
             console.error(noSuchFunctionError, funcName)
             return {
-                error: `No such function registered for RPC: ${funcName}`
+                error: `No such function registered for RPC: ${funcName}`,
             }
         }
         const extraArg = {
@@ -74,7 +74,7 @@ function incomingRPCListener(message, sender) {
         const value = func.call(null, extraArg, ...args)
         return Promise.resolve(value).then(
             value => ({
-                returnValue: value
+                returnValue: value,
             })
         )
     }

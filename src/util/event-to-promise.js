@@ -42,7 +42,7 @@ export default function eventToPromise({
                                 : resolve(opts.value)
                         } else { resolve() }
                     }
-                }
+                },
             })
         })
         rejectOpts.forEach(opts => {
@@ -57,7 +57,7 @@ export default function eventToPromise({
                                 : reject(opts.reason)
                         } else { reject() }
                     }
-                }
+                },
             })
         })
         listeners.forEach(listener => {

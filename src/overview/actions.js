@@ -45,7 +45,6 @@ export function refreshSearch({loadingIndicator=false}) {
             endDate,
             includeContext: true,
         })
-
         if (loadingIndicator) {
             // Hide our nice loading animation again.
             dispatch(hideLoadingIndicator())

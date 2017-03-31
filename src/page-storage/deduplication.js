@@ -69,8 +69,8 @@ export default async function tryDedupePage({
 
     // Choose the action to take.
     if (
-        sameness >= Sameness.MOSTLY &&
-        !candidatePage.protected
+        sameness >= Sameness.MOSTLY
+        && !candidatePage.protected
     ) {
         // Forget the old page's contents. Replace them with a link to the new
         // page.

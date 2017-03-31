@@ -4,18 +4,18 @@ const tabChangedEvents = tabId => [
     {
         event: browser.webNavigation.onCommitted,
         filter: details => (details.tabId == tabId && details.frameId == 0),
-        reason: {message: 'Tab URL changed before event occurred.'}
+        reason: {message: 'Tab URL changed before event occurred.'},
     },
     {
         event: browser.webNavigation.onHistoryStateUpdated,
         filter: details => (details.tabId == tabId && details.frameId == 0),
-        reason: {message: 'Tab URL changed before event occurred.'}
+        reason: {message: 'Tab URL changed before event occurred.'},
     },
     {
         event: browser.tabs.onRemoved,
         filter: closedTabId => (closedTabId === tabId),
         reason: {message: 'Tab was closed before event occurred.'},
-    }
+    },
 ]
 
 
@@ -39,7 +39,7 @@ export function whenPageDOMLoaded({tabId}) {
 }
 
 // Resolve if or when the page is completely loaded.
-// Rejects if it is closed before that. 
+// Rejects if it is closed before that.
 export async function whenPageLoadComplete({tabId}) {
     const tab = await browser.tabs.get(tabId)
 

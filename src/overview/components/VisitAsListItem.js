@@ -8,7 +8,7 @@ import {localVersionAvailable, LinkToLocalVersion} from 'src/page-viewer'
 const VisitAsListItem = ({doc, compact}) => {
     const visitClasses = classNames({
         [styles.root]: true,
-        [styles.compact]: compact
+        [styles.compact]: compact,
     })
 
     return (

@@ -48,18 +48,11 @@ async function performPageAnalysis({pageId, tabId}) {
         storePageMetadata,
         storePageText,
         storeFavIcon,
-        storeScreenshot
+        storeScreenshot,
     ], {
         onRejection: err => console.error(err)
-<<<<<<< HEAD
     })
     await updatePageSearchIndex()
-=======
-    }).then(
-        // Update search index
-        () => updatePageSearchIndex()
-    )
->>>>>>> Cleaning the linted code
 }
 
 export default async function analysePage({page, tabId}) {
