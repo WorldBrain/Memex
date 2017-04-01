@@ -10,32 +10,17 @@ import { generatePageDocId } from 'src/page-storage'
 
 
 // Get the historyItems (visited places/pages; not each visit to them)
-function getHistoryItems({
+async function getHistoryItems({
     startTime = 0,
     endTime,
 }={}) {
-    return browser.history.search({
+    const historyItems = await browser.history.search({
         text: '',
         maxResults: 9999999,
         startTime,
         endTime,
-    }).then(historyItems =>
-        historyItems.filter(({url}) => isWorthRemembering({url}))
-    )
-}
-
-// Get the visitItems for each historyItem.
-// Returns them as an array of: {historyItem, visitItems: [visitItem, ...]}.
-function getVisitItemsForHistoryItems(historyItems) {
-    // Get all visits to each of those items.
-    const promises = historyItems.map(historyItem =>
-        browser.history.getVisits({
-            url: historyItem.url,
-        }).then(
-            visitItems => ({historyItem, visitItems})
-        )
-    )
-    return Promise.all(promises)
+    })
+    return historyItems.filter(({url}) => isWorthRemembering({url}))
 }
 
 function transformToPageDoc({historyItem}) {
@@ -71,12 +56,17 @@ function transformToVisitDoc({visitItem, pageDoc}) {
     }
 }
 
-// Convert the array of {historyItem, visitItems} pairs to our model.
+// Convert data from the browser's history to our data model.
 // Returns two arrays: pageDocs and visitDocs.
-function convertHistoryToPagesAndVisits(fullHistory) {
+function convertHistoryToPagesAndVisits({
+    historyItems,
+    visitItemsPerHistoryItem,
+}) {
     const pageDocs = []
     const visitDocs = {}
-    fullHistory.forEach(({historyItem, visitItems}) => {
+    historyItems.forEach((historyItem, i) => {
+        // Read the visitItems corresponding to this historyItem
+        const visitItems = visitItemsPerHistoryItem[i]
         // Map each pair to a page...
         const pageDoc = transformToPageDoc({historyItem})
         pageDocs.push(pageDoc)
@@ -113,50 +103,51 @@ function convertHistoryToPagesAndVisits(fullHistory) {
 }
 
 // Pulls the full browser history into the database.
-export default function importHistory({
+export default async function importHistory({
     startTime,
     endTime,
 }={}) {
     // Get the full history: both the historyItems and visitItems.
     console.time('import history')
-    return getHistoryItems({startTime, endTime}).then(
-        getVisitItemsForHistoryItems
-    ).then(
-        // Convert everything to our data model
-        convertHistoryToPagesAndVisits
-    ).then(({pageDocs, visitDocs}) => {
-        // Mark and store the pages and visits.
-        let allDocs = pageDocs.concat(visitDocs)
-        // Mark each doc to remember it originated from this import action.
-        const importTimestamp = new Date().getTime()
-        allDocs = allDocs.map(doc => ({
-            ...doc,
-            importedFromBrowserHistory: importTimestamp,
-        }))
-        // Store them into the database. Already existing docs will simply be
-        // rejected, because their id (timestamp & history id) already exists.
-        return db.bulkDocs(allDocs)
-    }).then(() => {
-        console.timeEnd('import history')
-        console.time('rebuild search index')
-        return updatePageSearchIndex()
-    }).then(() => {
-        console.timeEnd('rebuild search index')
+    const historyItems = await getHistoryItems({startTime, endTime})
+    // Get all visits to each of those items.
+    const visitItemsPs = historyItems.map(async historyItem =>
+        await browser.history.getVisits({url: historyItem.url})
+    )
+    const visitItemsPerHistoryItem = await Promise.all(visitItemsPs)
+    // Convert everything to our data model
+    const {pageDocs, visitDocs} = convertHistoryToPagesAndVisits({
+        historyItems,
+        visitItemsPerHistoryItem,
     })
+    let allDocs = pageDocs.concat(visitDocs)
+    // Mark each doc to remember it originated from this import action.
+    const importTimestamp = new Date().getTime()
+    allDocs = allDocs.map(doc => ({
+        ...doc,
+        importedFromBrowserHistory: importTimestamp,
+    }))
+    // Store them into the database. Already existing docs will simply be
+    // rejected, because their id (timestamp & history id) already exists.
+    await db.bulkDocs(allDocs)
+    console.timeEnd('import history')
+    console.time('rebuild search index')
+    await updatePageSearchIndex()
+    console.timeEnd('rebuild search index')
 }
 
 // Get the timestamp of the oldest visit in our database
-export function getOldestVisitTimestamp() {
-    return db.allDocs({startkey: visitKeyPrefix, limit: 1}).then(result => {
-        return (result.rows.length > 0)
-            ? convertVisitDocId(result.rows[0].id).timestamp
-            : undefined
-    })
+export async function getOldestVisitTimestamp() {
+    const result = await db.allDocs({startkey: visitKeyPrefix, limit: 1})
+    return (result.rows.length > 0)
+        ? convertVisitDocId(result.rows[0].id).timestamp
+        : undefined
 }
 
 // Get the number of importable items in the history
-export function getHistoryStats() {
-    return getHistoryItems().then(historyItems => ({
+export async function getHistoryStats() {
+    const historyItems = await getHistoryItems()
+    return {
         quantity: historyItems.length
-    }))
+    }
 }

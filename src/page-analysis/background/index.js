@@ -12,7 +12,7 @@ import makeScreenshot from './make-screenshot'
 
 
 // Extract interesting stuff from the current page and store it.
-function performPageAnalysis({pageId, tabId}) {
+async function performPageAnalysis({pageId, tabId}) {
 
     // Run these functions in the content script in the tab.
     const extractPageText = remoteFunction('extractPageText', {tabId})
@@ -44,18 +44,16 @@ function performPageAnalysis({pageId, tabId}) {
         setDocField(db, pageId, 'extractedText')
     )
 
-    return whenAllSettled([
+    // When every task has either completed or failed, update the search index.
+    await whenAllSettled([
         storePageMetadata,
         storePageText,
         storeFavIcon,
         storeScreenshot,
     ], {
         onRejection: err => console.error(err)
-    }).then(
-        // Update search index
-        () => updatePageSearchIndex()
-    )
-
+    })
+    await updatePageSearchIndex()
 }
 
 export default async function analysePage({page, tabId}) {

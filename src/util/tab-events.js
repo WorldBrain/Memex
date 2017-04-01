@@ -41,38 +41,37 @@ export function whenPageDOMLoaded({tabId}) {
 
 // Resolve if or when the page is completely loaded.
 // Rejects if it is closed before that.
-export function whenPageLoadComplete({tabId}) {
-    return browser.tabs.get(tabId).then(tab => {
-        if (tab.status === 'complete')
-            return // Resolve directly
+export async function whenPageLoadComplete({tabId}) {
+    const tab = await browser.tabs.get(tabId)
 
-        return eventToPromise({
-            resolve: {
-                event: browser.tabs.onUpdated,
-                filter: (changedTabId, {status}) =>
-                    (changedTabId === tabId && status === 'complete'),
-            },
-            reject: tabChangedEvents(tabId)
-        })
+    if (tab.status === 'complete')
+        return // Resolve directly
+
+    return eventToPromise({
+        resolve: {
+            event: browser.tabs.onUpdated,
+            filter: (changedTabId, {status}) =>
+                (changedTabId === tabId && status === 'complete'),
+        },
+        reject: tabChangedEvents(tabId)
     })
 }
 
 
 // Resolve if or when the tab is active.
 // Rejects if it is closed before that.
-export function whenTabActive({tabId}) {
-    return browser.tabs.query({active:true}).then(
-        activeTabs => (activeTabs.map(t=>t.id).indexOf(tabId) > -1)
-    ).then(isActive => {
-        if (isActive)
-            return // Resolve directly
+export async function whenTabActive({tabId}) {
+    const activeTabs = await browser.tabs.query({active: true})
+    const isActive = (activeTabs.map(t=>t.id).indexOf(tabId) > -1)
 
-        return eventToPromise({
-            resolve: {
-                event: browser.tabs.onActivated,
-                filter: ({tabId: activatedTabId}) => (activatedTabId === tabId),
-            },
-            reject: tabChangedEvents(tabId)
-        })
+    if (isActive)
+        return // Resolve directly
+
+    return eventToPromise({
+        resolve: {
+            event: browser.tabs.onActivated,
+            filter: ({tabId: activatedTabId}) => (activatedTabId === tabId),
+        },
+        reject: tabChangedEvents(tabId)
     })
 }
