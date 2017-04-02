@@ -1,5 +1,5 @@
 import get from 'lodash/fp/get'
-import diffMatchPatch from 'diff-match-patch'
+import DiffMatchPatch from 'diff-match-patch'
 
 export const Sameness = {
     EXACTLY: 5,    // Perfect match, containing exactly the same data.
@@ -13,7 +13,7 @@ export const Sameness = {
 
 // Get a rough similarity metric between strings (a number between 0 and 1).
 function stringSimilarity(text1, text2) {
-    const dmp = new diffMatchPatch()
+    const dmp = new DiffMatchPatch()
     dmp.Diff_Timeout = 0.1
     const diff = dmp.diff_main(text1, text2)
     dmp.diff_cleanupSemantic(diff)
