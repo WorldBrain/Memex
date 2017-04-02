@@ -44,7 +44,6 @@
         "react/jsx-indent-props": ["error", 4],
         "no-multiple-empty-lines": ["error", { "max": 2, "maxEOF": 0 }],
         "no-unused-vars": "warn",
-        "no-console": "warn",
         "space-before-function-paren": "off",
         "operator-linebreak": ["error", "before"],
         "import/no-mutable-exports": "error",
