@@ -4,11 +4,12 @@
         "webextensions": true
     },
     "extends": [
-        "standard",
         "plugin:import/recommended",
         "plugin:import/react",
         "plugin:promise/recommended",
-        "plugin:react/recommended"
+        "plugin:react/recommended",
+        "standard",
+        "standard-react"
     ],
     "settings": {
         "import/resolver": {
@@ -39,12 +40,20 @@
     "rules":{
     	"comma-dangle": ["error", "always-multiline"],
         "indent": ["error", 4, { "SwitchCase": 1 }],
+        "react/jsx-indent": ["error", 4],
+        "react/jsx-indent-props": ["error", 4],
         "no-multiple-empty-lines": ["error", { "max": 2, "maxEOF": 0 }],
         "no-unused-vars": "warn",
         "no-console": "warn",
         "space-before-function-paren": "off",
         "eqeqeq": "warn",
         "operator-linebreak": ["error", "before"],
-        "import/no-mutable-exports": "error"
+        "import/no-mutable-exports": "error",
+        "import/unambiguous": "off",
+        "promise/avoid-new": "off",
+        "react/jsx-filename-extension": "error",
+        "react/prefer-stateless-function": "warn",
+        "react/sort-comp": "warn",
+        "react/jsx-max-props-per-line": [1, { "when": "always" }]
     }
 }
