@@ -1,4 +1,8 @@
 {
+    "env": {
+        "browser": true,
+        "webextensions": true
+    },
     "extends": [
         "standard",
         "plugin:react/recommended",
@@ -14,13 +18,6 @@
 	    "ecmaFeatures": {
 	        "jsx": true
 	    }
-  	},
-    "globals": {
-        "document": false,
-        "navigator": false,
-        "window": false,
-        "browser": true,
-        "db": true
   	},
     "rules":{
     	"comma-dangle": ["error", "always-multiline"],
