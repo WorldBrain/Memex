@@ -3,7 +3,7 @@ import classNames from 'classnames'
 import niceTime from '../../util/nice-time'
 import styles from './VisitAsListItem.css'
 
-import {localVersionAvailable, LinkToLocalVersion } from '../../page-viewer'
+import {localVersionAvailable, LinkToLocalVersion } from 'src/page-viewer'
 
 const VisitAsListItem = ({doc, compact}) => {
     const visitClasses = classNames({
