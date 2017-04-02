@@ -29,7 +29,7 @@ export default function niceTime(date, {now = undefined} = {}) {
     if (secondsAgo < 60 * 10) { return `${Math.round(secondsAgo / 60)} minutes ago` }
     if (secondsAgo < 60 * 60) { return `${Math.round(secondsAgo / 60 / 5) * 5} minutes ago` }
     if (secondsAgo < 60 * 60 * 24
-        && (now.getDay() == then.getDay() || secondsAgo < 60 * 60 * 6)) { return hourString(then) }
+        && (now.getDay() === then.getDay() || secondsAgo < 60 * 60 * 6)) { return hourString(then) }
     if (secondsAgo < 60 * 60 * 24) { return `Yesterday ${hourString(then)}` }
     if (secondsAgo < 60 * 60 * 24 * 3) { return `${dayString(then)} ${hourString(then)}` }
     if (then.getYear() === now.getYear()) { return `${then.getDate()} ${monthString(then)}` }

@@ -3,12 +3,12 @@ import eventToPromise from './event-to-promise'
 const tabChangedEvents = tabId => [
     {
         event: browser.webNavigation.onCommitted,
-        filter: details => (details.tabId == tabId && details.frameId == 0),
+        filter: details => (details.tabId === tabId && details.frameId === 0),
         reason: {message: 'Tab URL changed before event occurred.'},
     },
     {
         event: browser.webNavigation.onHistoryStateUpdated,
-        filter: details => (details.tabId == tabId && details.frameId == 0),
+        filter: details => (details.tabId === tabId && details.frameId === 0),
         reason: {message: 'Tab URL changed before event occurred.'},
     },
     {

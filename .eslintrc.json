@@ -46,7 +46,6 @@
         "no-unused-vars": "warn",
         "no-console": "warn",
         "space-before-function-paren": "off",
-        "eqeqeq": "warn",
         "operator-linebreak": ["error", "before"],
         "import/no-mutable-exports": "error",
         "import/unambiguous": "off",
