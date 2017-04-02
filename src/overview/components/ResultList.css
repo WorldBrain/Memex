@@ -2,7 +2,7 @@
     list-style: none;
     margin: 40px auto;
     padding: 0;
-    width: 242px;
+    width: 850px;
 }
 
 .timestamp {
@@ -20,14 +20,13 @@
     }
 }
 
-.clustered {
-    margin-bottom: -90px;
-    transition: transform 100ms;
 
-    &:hover, &:focus {
-        transform: translate(-5px, -75px) rotateZ(-5deg);
-    }
+.clustered {
+
+
+    
 }
+
 
 .noResultMessage {
     text-align: center;
