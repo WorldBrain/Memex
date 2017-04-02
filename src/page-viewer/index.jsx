@@ -39,7 +39,7 @@ export const localVersionAvailable = ({page}) => (
 export const LinkToLocalVersion = ({page, children, ...props}) => (
     <a
         href={`data:text/html;charset=UTF-8,${pageToHTML(page)}`}
-        title="Stored text version available"
+        title='Stored text version available'
         {...props}
     >
         {children}

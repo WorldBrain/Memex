@@ -16,12 +16,11 @@ class Overview extends React.Component {
                 <div>
                     <input
                         className={styles.query}
-                        onChange={e=>this.props.onInputChanged(e.target.value)}
-                        placeholder="Search your memory"
+                        onChange={e => this.props.onInputChanged(e.target.value)}
+                        placeholder='Search your memory'
                         value={this.props.query}
                         ref='inputQuery'
-                    >
-                    </input>
+                     />
                 </div>
                 <DateRangeSelection
                     startDate={this.props.startDate}

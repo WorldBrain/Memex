@@ -17,7 +17,7 @@ const VisitAsListItem = ({doc, compact}) => {
             href={doc.page.url}
             title={doc.page.url}
             // DEBUG Show document props on ctrl+meta+click
-            onClick={ e => { if (e.metaKey && e.ctrlKey) { console.log(doc); e.preventDefault() } }}
+            onClick={e => { if (e.metaKey && e.ctrlKey) { console.log(doc); e.preventDefault() } }}
         >
 
             {doc.page.screenshot
