@@ -29,7 +29,7 @@ export function init() {
 }
 
 // Search for docs matching the current query, update the results
-export function refreshSearch({loadingIndicator=false}) {
+export function refreshSearch({loadingIndicator = false}) {
     return async function (dispatch, getState) {
         const { query, startDate, endDate } = ourState(getState())
         const oldResult = ourState(getState()).searchResult

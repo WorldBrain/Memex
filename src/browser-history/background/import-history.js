@@ -13,7 +13,7 @@ import { generatePageDocId } from 'src/page-storage'
 async function getHistoryItems({
     startTime = 0,
     endTime,
-}={}) {
+} = {}) {
     const historyItems = await browser.history.search({
         text: '',
         maxResults: 9999999,
@@ -147,6 +147,6 @@ export async function getOldestVisitTimestamp() {
 export async function getHistoryStats() {
     const historyItems = await getHistoryItems()
     return {
-        quantity: historyItems.length
+        quantity: historyItems.length,
     }
 }

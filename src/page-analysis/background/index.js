@@ -50,7 +50,7 @@ async function performPageAnalysis({pageId, tabId}) {
         storeFavIcon,
         storeScreenshot,
     ], {
-        onRejection: err => console.error(err)
+        onRejection: err => console.error(err),
     })
     await updatePageSearchIndex()
 }

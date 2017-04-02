@@ -43,8 +43,7 @@ export function whenPageDOMLoaded({tabId}) {
 export async function whenPageLoadComplete({tabId}) {
     const tab = await browser.tabs.get(tabId)
 
-    if (tab.status === 'complete')
-        return // Resolve directly
+    if (tab.status === 'complete') { return } // Resolve directly
 
     return eventToPromise({
         resolve: {
@@ -52,7 +51,7 @@ export async function whenPageLoadComplete({tabId}) {
             filter: (changedTabId, {status}) =>
                 (changedTabId === tabId && status === 'complete'),
         },
-        reject: tabChangedEvents(tabId)
+        reject: tabChangedEvents(tabId),
     })
 }
 
@@ -61,16 +60,15 @@ export async function whenPageLoadComplete({tabId}) {
 // Rejects if it is closed before that.
 export async function whenTabActive({tabId}) {
     const activeTabs = await browser.tabs.query({active: true})
-    const isActive = (activeTabs.map(t=>t.id).indexOf(tabId) > -1)
+    const isActive = (activeTabs.map(t => t.id).indexOf(tabId) > -1)
 
-    if (isActive)
-        return // Resolve directly
+    if (isActive) { return } // Resolve directly
 
     return eventToPromise({
         resolve: {
             event: browser.tabs.onActivated,
             filter: ({tabId: activatedTabId}) => (activatedTabId === tabId),
         },
-        reject: tabChangedEvents(tabId)
+        reject: tabChangedEvents(tabId),
     })
 }

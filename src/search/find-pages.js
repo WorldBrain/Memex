@@ -100,7 +100,7 @@ export async function findPagesByUrl({url, ...otherOptions}) {
         selector: {
             _id: { $gte: pageKeyPrefix, $lte: `${pageKeyPrefix}\uffff` },
             url,
-        }
+        },
     })
     let pagesResult = normaliseFindResult(findResult)
     pagesResult = await postprocessPagesResult({...otherOptions, pagesResult})
