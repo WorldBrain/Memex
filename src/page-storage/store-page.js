@@ -1,3 +1,4 @@
+import db from 'src/pouchdb'
 import { findPagesByUrl } from 'src/search/find-pages'
 import analysePage from 'src/page-analysis/background'
 import tryDedupePage from './deduplication'

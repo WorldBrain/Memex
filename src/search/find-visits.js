@@ -1,4 +1,3 @@
-import fromPairs from 'lodash/fp/fromPairs'
 import update from 'lodash/fp/update'
 import reverse from 'lodash/fp/reverse'
 import unionBy from 'lodash/unionBy' // the fp version does not support >2 inputs (lodash issue #3025)
