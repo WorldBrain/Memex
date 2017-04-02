@@ -9,7 +9,7 @@
     display: inline-block;
     text-align: center;
     width: 100%;
-    font-family: 'Crimson', serif;
+    font-family: 'Arial', serif;
 
     &::before {
         content: '— ';
@@ -19,14 +19,6 @@
         content: ' —';
     }
 }
-
-
-.clustered {
-
-
-    
-}
-
 
 .noResultMessage {
     text-align: center;

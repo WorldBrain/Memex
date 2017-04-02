@@ -84,7 +84,6 @@ const ResultList = ({searchResult, searchQuery}) => {
                 style={{
                     marginTop,
                 }}
-                className={clustered ? styles.clustered : undefined}
             >
                 {timestampComponent}
                 <VisitAsListItem

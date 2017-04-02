@@ -16,7 +16,6 @@ const VisitAsListItem = ({doc, compact}) => {
             className={visitClasses}
             href={doc.page.url}
             title={doc.page.url}
-            // DEBUG Show document props on ctrl+meta+click
             onClick={e=>{if (e.metaKey && e.ctrlKey) {console.log(doc); e.preventDefault()}}}
         >
 
@@ -26,26 +25,30 @@ const VisitAsListItem = ({doc, compact}) => {
                     : <img className={styles.favicon} src='img/null-icon.png' />
                 }
             </span>
+
             <div className={styles.result_content}>
                 <div className={styles.title}><strong>{doc.page.title}</strong></div>
                 <div className={styles.url}>{doc.page.url}</div>
                 <div className={styles.time}>{niceTime(doc.visitStart)}</div>
             </div>
-            <div className={styles.linkToLocalVersion}>
+
+            <div className={styles.icons_container}>
                 {localVersionAvailable({page: doc.page})
                     ? <LinkToLocalVersion page={doc.page}>
-                    <img src='img/save-icon.png' alt='save-icon' />
-                    </LinkToLocalVersion>
+                        <img src='img/save-icon.png' alt='save-icon' />
+                        </LinkToLocalVersion>
                     : null
                 }
                 <img src='img/trash-icon.png' alt='trash-icon' />
             </div>
-            <div className={styles.screenshot}>
+
+            <div className={styles.screenshot_container}>
                 {doc.page.screenshot
-                ? <img className={styles.thumbnail} src={doc.page.screenshot} />
-                : <p className={styles.no_thumbnail}>No screenshot<br />available</p>
+                ? <img src={doc.page.screenshot} />
+                : <p className={styles.no_screenshot_available}>No screenshot<br />available</p>
                 }
             </div>
+
         </a>
     )
 }
