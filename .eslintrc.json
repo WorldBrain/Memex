@@ -5,11 +5,28 @@
     },
     "extends": [
         "standard",
-        "plugin:react/recommended",
-        "plugin:promise/recommended"
+        "plugin:import/recommended",
+        "plugin:import/react",
+        "plugin:promise/recommended",
+        "plugin:react/recommended"
     ],
+    "settings": {
+        "import/resolver": {
+            "node": {
+                "extensions": [
+                    ".js",
+                    ".jsx"
+                ],
+                "moduleDirectory": [
+                    "node_modules",
+                    "."
+                ]
+            }
+        }
+    },
     "plugins": [
         "standard",
+        "import",
         "promise",
         "react"
     ],
@@ -27,6 +44,7 @@
         "no-console": "warn",
         "space-before-function-paren": "off",
         "eqeqeq": "warn",
-        "operator-linebreak": ["error", "before"]
+        "operator-linebreak": ["error", "before"],
+        "import/no-mutable-exports": "error"
     }
 }
