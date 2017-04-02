@@ -2,7 +2,6 @@ import mapValues from 'lodash/fp/mapValues'
 
 // Our secret tokens to recognise our messages
 const RPC_CALL = '__RPC_CALL__'
-const RPC_ERR_UNKNOWN_FUNCTION = '__RPC_ERROR_UNKNOWN_FUNCTION__'
 
 
 // === Initiating side ===
@@ -60,7 +59,7 @@ const remotelyCallableFunctions = {}
 function incomingRPCListener(message, sender) {
     if (message && message[RPC_CALL] === RPC_CALL) {
         const funcName = message.funcName
-        const args = message.hasOwnProperty(args) ? message.args : []
+        const args = message.hasOwnProperty('args') ? message.args : []
         const func = remotelyCallableFunctions[funcName]
         if (func === undefined) {
             console.error(noSuchFunctionError, funcName)
@@ -71,7 +70,7 @@ function incomingRPCListener(message, sender) {
         const extraArg = {
             tab: sender.tab,
         }
-        const value = func.call(null, extraArg, ...args)
+        const value = func(extraArg, ...args)
         return Promise.resolve(value).then(
             value => ({
                 returnValue: value,
