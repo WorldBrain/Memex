@@ -1,24 +1,20 @@
-# WebMemex/memextension
+# WorldBrain's WebMemex
 
-A browser extension that lets you grow your personal web of knowledge.
+A browser extension that lets you create, search and share your personal web of knowledge.
 
- - :inbox_tray: **Store** pages and :mag: **find** them back *in their context*
- - :memo: **Create pages** to add notes and quotes
- - :link: **Create links** to organise your web by *your associations*
- - :satellite: **Publish** your personal web on the world wide web
-
-Because a row of dozens of tabs or bookmarks needs better organisation.
-
-Because our minds organise by assocation, not by folders or filetypes.
-
-Because browsers were never intended to be just *viewers*.
-
-Let's make web browsers the *web weavers* they ought to be.
+ - **Full-Text Search** pages and you visited and bookmarked (and later) also all the apps you use to organise your knowledge.
+ - **Manually and automatically create links** between your content to organise & search your web by *your associations*
+ - **Share** content recommendations, associations and qualifying metadata with your network and followers
 
 
 ## Project status
 
-Sorry to disappoint, but we do not have the promised solution yet. :unamused:
+Sorry to disappoint, but we do not have the promised solution complete yet. :unamused:
+
+In its current released version, the you can full-text search the browsing history & bookmarks.
+Here you can download it: [worldbrain.io/download](http://worldbrain.io/download)
+
+At the moment we are in the process of refactoring/porting the features of the [WorldBrain (Re)search-Engine](https://github.com/WorldBrain/Research-Engine/) into the *WebMemex*, a project started by [@treora|(https://github.com/Treora)
 
 This project is in full development. You are most welcome to contribute! See
 [Hacking](#hacking) below about how to build and run it from source and teach it
@@ -47,14 +43,12 @@ for the feature roadmap of the next few months.
 
 ## Contribute
 
-Got feedback, bug fixes, new features, tips? Give a shout. :loudspeaker:
+We are happy about any kind of feedback, bug fixes, new feature ideas and tips? 
+Give a shout. :loudspeaker:
 
-Pop in on #webmemex on [Freenode](http://webchat.freenode.net/), send a PR or
-open an issue [on GitHub](https://github.com/Treora/memextension), or send
-me ([Gerben](https://github.com/Treora)) a message.
-
-Coding, design, communication, there is plenty to be done. Soon we should even
-have a tiny bit of funding available to reward contributions. :money_with_wings:
+- [Drop by on Slack](join-worldbrain.herokuapp.com)
+- Write us an email: info@worldbrain.io
+- or leave a comment under issues you want to contribute to
 
 
 ## Hacking
