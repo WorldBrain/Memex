@@ -10,6 +10,12 @@ import styles from './Overview.css'
 
 
 class Overview extends React.Component {
+    componentDidMount() {
+        if (this.props.grabFocusOnMount) {
+            this.refs['inputQuery'].focus()
+        }
+    }
+
     render() {
         return (
             <div>
@@ -41,12 +47,6 @@ class Overview extends React.Component {
                 </div>
             </div>
         )
-    }
-
-    componentDidMount() {
-        if (this.props.grabFocusOnMount) {
-            this.refs['inputQuery'].focus()
-        }
     }
 }
 
