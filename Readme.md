@@ -1,24 +1,20 @@
-# WebMemex browser extension
+# WorldBrain's WebMemex
 
-A browser extension that lets you grow your personal web of knowledge.
+A browser extension that lets you create, search and share your personal web of knowledge.
 
- - :inbox_tray: **Store** pages and :mag: **find** them back *in their context*
- - :memo: **Create pages** to add notes and quotes
- - :link: **Create links** to organise your web by *your associations*
- - :satellite: **Publish** your personal web on the world wide web
-
-Because a row of dozens of tabs or bookmarks needs better organisation.
-
-Because our minds organise by assocation, not by folders or filetypes.
-
-Because browsers were never intended to be just *viewers*.
-
-Let's make web browsers the *web weavers* they ought to be.
+ - **Full-Text Search** pages and you visited and bookmarked (and later) also all the apps you use to organise your knowledge.
+ - **Manually and automatically create links** between your content to organise & search your web by *your associations*
+ - **Share** content recommendations, associations and qualifying metadata with your network and followers
 
 
 ## Project status
 
-Sorry to disappoint, but we do not have the promised solution yet. :unamused:
+Sorry to disappoint, but we do not have the promised solution complete yet. :unamused:
+
+In its current released version, the you can full-text search the browsing history & bookmarks.
+Here you can download it: [worldbrain.io/download](http://worldbrain.io/download)
+
+At the moment we are in the process of refactoring/porting the features of the [WorldBrain (Re)search-Engine](https://github.com/WorldBrain/Research-Engine/) into the *WebMemex*, a project started by [@treora|(https://github.com/Treora)
 
 This project is in full development. You are most welcome to contribute! See
 [Hacking](#hacking) below about how to build and run it from source and teach it
@@ -27,12 +23,13 @@ new tricks.
 
 ## Approach
 
-As it stands now, it is a WebExtension (thus should soon work on most modern
+As it stands now, it is a WebExtension (thus should work on most modern
 browsers), bundled by [browserify](http://browserify.org) with some
 [babel](https://babeljs.io) ES6–7→ES5 compilation, that logs and stores visited
 pages in [PouchDB](https://pouchdb.com), and provides a viewer for this data
 based on
-[React](https://facebook.github.io/react/)+[Redux](http://redux.js.org/).
+[React](https://facebook.github.io/react/)+[Redux](http://redux.js.org/). See
+[Code Anatomy](#code-anatomy) below for a full tour du code.
 
 The project strategy is to combine and integrate features from other projects,
 and to factor out developed functionality into separate modules wherever it
@@ -41,36 +38,29 @@ seems sensible. This extension could then be regarded as a bunch of different
 installation.
 
 See [our initial blog post](https://blog.webmemex.org/2017/01/05/roadmap/)
-for the current feature roadmap.
+for the feature roadmap of the next few months.
 
 
 ## Contribute
 
-Got feedback, bug fixes, new features, tips? Give a shout. :loudspeaker:
+We are happy about any kind of feedback, bug fixes, new feature ideas and tips? 
+Give a shout. :loudspeaker:
 
-Pop in on #webmemex on [Freenode](http://webchat.freenode.net/), send a PR or
-open an issue [on GitHub](https://github.com/Treora/memextension), or send
-me ([Gerben](https://github.com/Treora)) a message.
+- [Drop by on Slack](join-worldbrain.herokuapp.com)
+- Write us an email: info@worldbrain.io
+- or leave a comment under issues you want to contribute to
 
-Coding, design, communication, there is plenty to be done. A tiny but of funding
-is available to tip significant contributions. :money_with_wings:
-
-All code in this project is in the public domain, free from copyright
-restrictions. Please waive your copyrights on any contributions you make.
-See e.g. [unlicense.org](http://unlicense.org/) for more information.
 
 ## Hacking
 
 Like playing with ES6, WebExtension browser APIs, React, Redux, PouchDB? Come
 play along! :tada:
 
-See [`Codetour.md`](Codetour.md) for an explanation of the repository structure.
-
 ### Build and run it
 
 1. Clone this repo.
 2. Get [Node/NPM](https://nodejs.org).
-3. Run `make` to compile the source files.
+3. Run `make`.
 4. Load it in Firefox or Chromium/Chrome:
     * In Firefox (≥49): run `make fx-run` (or run [web-ext](https://developer.mozilla.org/en-US/Add-ons/WebExtensions/web-ext_command_reference#web-ext_run)
       directly for more control).
@@ -80,6 +70,8 @@ See [`Codetour.md`](Codetour.md) for an explanation of the repository structure.
       'Developer mode', 'Load unpacked extension...', pick the `extension/`
       folder from this repo.
     * Others browsers: let know if you have tested it!
+
+*If NPM (during `make`) fails to install dependencies because a nasty firewall blocks the `git://` protocol, check [this solution](http://stackoverflow.com/questions/4891527/git-protocol-blocked-by-company-how-can-i-get-around-that/10729634#10729634)*
 
 ### Automatic recompilation
 
@@ -96,3 +88,94 @@ you change, you may have to reload the extension in your browser:
   Reload.
 - If you changed the 'content_script', it seems browser-dependent whether newly
   opened pages will get the new version. Better reload the extension to be sure.
+
+
+## Code Anatomy
+
+### WebExtension parts
+
+To comply with the [anatomy of a WebExtension](https://developer.mozilla.org/en-US/Add-ons/WebExtensions/Anatomy_of_a_WebExtension),
+it consists of three main parts (found in [`extension/`](extension/) after
+compilation):
+
+- `background.js` always runs, in an 'empty invisible tab', listening for
+  messages and events.
+- `content_script.js` is loaded into every web page that is visited. It is
+  invisible from that web page's own scripts, and can talk to the background
+  script.
+- `overview/overview.html`, with the resources in that folder, provides the main
+  user interface.
+
+The parts communicate in two ways:
+- Messaging through `browser.sendMessage`, usually done implicitly by using a
+  remote procedure call ([`util/webextensionRPC.js`](src/util/webextensionRPC.js)).
+- Through the in-browser PouchDB database, they get to see the same data, and
+  can react to changes made by other parts.
+
+Besides these parts,
+[`browser-polyfill.js`](https://github.com/mozilla/webextension-polyfill/)
+provides the promise-based `browser` API, that simply wraps Chromium/Chrome's
+callback-based `chrome` API, in order to make the same code run in different
+browsers (and to structure the callback mess).
+
+### Source organisation
+
+To keep things modular, the source code in [`src/`](src/) is not split in
+exactly those the three parts of the extension, but is rather grouped by
+functionality. Some folders may end up being factored out into separate repos
+later on, or at some point perhaps even into separate but interacting browser
+extensions.
+
+#### [`src/activity-logger/`](src/activity-logger/): activity logger
+
+This logs every page visit in PouchDB. Soon it should also watch for user
+interactions, for example to remember which parts of a page you have read.
+
+Currently, for every visit, a new page object is created in the database, to
+represent the visited page itself. This object should soon be deduplicated when
+the same page is visited multiple times. After creating a new page object,
+the next module is triggered to start analysing the page.
+
+#### [`src/page-analysis`](src/page-analysis/): page analysis
+
+This extracts and stores information about the page in a given tab, such as:
+- The plain text of the page, mainly for the full-text
+search index.
+- Metadata, such as its author, publication date, etcetera.
+- A screenshot for visual recognition.
+
+#### [`src/overview/`](src/overview/): overview
+
+The `overview` is the user interface that opens in a tab of its own. It is built
+with [React](https://facebook.github.io/react/) and [Redux](http://redux.js.org/),
+which create a somewhat complex but nicely organised application structure.
+
+See [`src/overview/Readme.md`](src/overview/Readme.md) for more details.
+
+#### [`src/search`](src/search/): document search
+
+Functions for finding relevant knowledge in the user's memory. Currently
+provides a simple full-text keyword search through visited pages using
+[pouchdb-quick-search](https://github.com/nolanlawson/pouchdb-quick-search).
+This can be improved in many ways, because we are searching through a person's
+memory, not just some arbitrary document collection. For example, we can use
+created assocations and browsing paths to better understand what one is looking
+for.
+
+#### [`src/dev/`](src/dev/): development tools
+
+Tools to help during development. They are not used in production builds.
+
+#### [`src/util/`](src/util): utilities
+
+Contains small generic things, stuff that is not project-specific. Things that
+could perhaps be packaged and published as an NPM module some day.
+
+#### `...`: other stuff
+
+The build process is a `Makefile`, that runs some `npm` commands specified in
+`package.json`, which in turn start the corresponding tasks in
+`gulpfile.babel.js` (transpiled by settings in `.babelrc`). All lurking there
+so you only have to type `make` to get things running.
+
+So much for the code tour. :zzz:  Any questions? :point_up:
