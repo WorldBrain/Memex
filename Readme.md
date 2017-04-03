@@ -14,7 +14,7 @@ Sorry to disappoint, but we do not have the promised solution complete yet. :una
 In its current released version, the you can full-text search the browsing history & bookmarks.
 Here you can download it: [worldbrain.io/download](http://worldbrain.io/download)
 
-At the moment we are in the process of refactoring/porting the features of the [WorldBrain (Re)search-Engine](https://github.com/WorldBrain/Research-Engine/) into the *WebMemex*, a project started by [@treora](https://github.com/Treora)
+At the moment we are in the process of refactoring/porting the features of the [WorldBrain (Re)search-Engine](https://github.com/WorldBrain/Research-Engine/) into the *WebMemex*, a project started by [@treora|(https://github.com/Treora)
 
 This project is in full development. You are most welcome to contribute! See
 [Hacking](#hacking) below about how to build and run it from source and teach it
