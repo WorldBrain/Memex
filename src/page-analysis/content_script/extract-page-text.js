@@ -1,7 +1,7 @@
 import Readability from 'readability'
 
 // Extract the 'main text' from a web page (esp. news article, blog post, ...).
-function extractPageText_sync({
+function extractPageTextSync({
     // By default, use the globals window and document.
     loc = window.location,
     doc = document,
@@ -32,9 +32,9 @@ function extractPageText_sync({
 }
 
 // Wrap it in a promise.
-export default function extractPageText_async(...args) {
+export default function extractPageTextAsync(...args) {
     return new Promise(function (resolve, reject) {
-        const run = () => resolve(extractPageText_sync(...args))
+        const run = () => resolve(extractPageTextSync(...args))
         window.setTimeout(run, 0)
     })
 }
