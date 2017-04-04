@@ -34,17 +34,17 @@ class SettingsContainer extends React.Component {
         // TODO(AM): Validation
         const { actions } = this.props
 
-        actions.addNewBlacklistedSite({
+        actions.addSiteToBlacklist({
             expression: value,
             dateAdded: new Date()
         })
     }
 
     onDeleteClicked(itemIndex) {
-        // TODO(AM): Confirmation or undo
+        // TODO(AM): Undo? Confirmation?
         const { actions } = this.props
 
-        actions.deleteBlacklistedSite({
+        actions.removeSiteFromBlacklist({
             index: itemIndex
         })
     }

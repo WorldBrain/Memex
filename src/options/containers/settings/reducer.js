@@ -1,5 +1,5 @@
-import { persistentReducer } from 'redux-pouchdb'
 import { createReducer } from 'redux-act'
+import { addBlacklistedSiteToPouch } from './actions'
 
 import * as actions from './actions'
 
@@ -7,7 +7,14 @@ const defaultState = {
     blacklist: []
 }
 
-function addNewBlacklistedSite(state, payload) {
+function setBlacklist(state, blacklist) {
+    return {
+        ...state,
+        blacklist
+    }
+}
+
+function addSiteToBlacklist(state, payload) {
     const blacklist = [
         payload,
         ...state.blacklist
@@ -19,7 +26,7 @@ function addNewBlacklistedSite(state, payload) {
     }
 }
 
-function deleteBlacklistedSite(state, payload) {
+function removeSiteFromBlacklist(state, payload) {
     const blacklist = [
         ...state.blacklist.slice(0, payload.index),
         ...state.blacklist.slice(payload.index + 1, state.blacklist.length)
@@ -31,7 +38,8 @@ function deleteBlacklistedSite(state, payload) {
     }
 }
 
-export default persistentReducer(createReducer({
-    [actions.addNewBlacklistedSite]: addNewBlacklistedSite,
-    [actions.deleteBlacklistedSite]: deleteBlacklistedSite
-}, defaultState))
+export default createReducer({
+    [actions.setBlacklist]: setBlacklist,
+    [actions.addSiteToBlacklist]: addSiteToBlacklist,
+    [actions.removeSiteFromBlacklist]: removeSiteFromBlacklist
+}, defaultState)
