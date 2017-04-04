@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { PropTypes } from 'react'
 import { connect } from 'react-redux'
 
 import * as actions from '../actions'
@@ -49,6 +49,19 @@ class Overview extends React.Component {
         )
     }
 }
+
+Overview.propTypes = {
+    grabFocusOnMount: PropTypes.boolean,
+    query: PropTypes.string,
+    onInputChanged: PropTypes.function,
+    startDate: PropTypes.number,
+    endDate: PropTypes.number,
+    onStartDateChange: PropTypes.function,
+    onEndDateChange: PropTypes.function,
+    waitingForResults: PropTypes.boolean,
+    searchResult: PropTypes.object,
+}
+
 
 const mapStateToProps = state => ourState(state)
 

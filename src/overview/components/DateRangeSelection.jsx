@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { PropTypes } from 'react'
 import moment from 'moment'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker-cssmodules.css'
@@ -41,5 +41,13 @@ const DateRangeSelection = ({
         />
     </div>
 )
+
+DateRangeSelection.propTypes = {
+    startDate: PropTypes.number,
+    endDate: PropTypes.number,
+    onStartDateChange: PropTypes.function,
+    onEndDateChange: PropTypes.function,
+}
+
 
 export default DateRangeSelection

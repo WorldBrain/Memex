@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { PropTypes } from 'react'
 import classNames from 'classnames'
 
 import styles from './VisitAsListItem.css'
@@ -40,6 +40,11 @@ const VisitAsListItem = ({doc, compact}) => {
             </div>
         </a>
     )
+}
+
+VisitAsListItem.propTypes = {
+    doc: PropTypes.object.required,
+    compact: PropTypes.boolean,
 }
 
 export default VisitAsListItem

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { PropTypes } from 'react'
 
 import { makeNonlinearTransform } from 'src/util/make-range-transform'
 import niceTime from 'src/util/nice-time'
@@ -94,6 +94,11 @@ const ResultList = ({searchResult, searchQuery}) => {
             </li>
         })}
     </ul>
+}
+
+ResultList.propTypes = {
+    searchResult: PropTypes.object,
+    searchQuery: PropTypes.string,
 }
 
 export default ResultList

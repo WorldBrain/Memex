@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { PropTypes } from 'react'
 
 const readerViewStyle = `
 body {
@@ -45,3 +45,7 @@ export const LinkToLocalVersion = ({page, children, ...props}) => (
         {children}
     </a>
 )
+LinkToLocalVersion.propTypes = {
+    page: PropTypes.object.required,
+    children: PropTypes.node,
+}

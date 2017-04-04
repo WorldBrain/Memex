@@ -52,8 +52,6 @@
         "react/jsx-filename-extension": "error",
         "react/prefer-stateless-function": "warn",
         "react/sort-comp": "warn",
-        "react/jsx-max-props-per-line": [1, { "when": "multiline" }],
-        "react/no-unused-prop-types": "warn",
-        "react/prop-types": "off"
+        "react/jsx-max-props-per-line": [1, { "when": "multiline" }]
     }
 }
