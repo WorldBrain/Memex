@@ -1,4 +1,5 @@
 import { createAction } from 'redux-act'
 
-export const addNewBlacklistedSite = createAction('settings/addNewBlacklistedSite')
-export const deleteBlacklistedSite = createAction('settings/deleteBlacklistedSite')
+export const setBlacklist = createAction('settings/setBlacklist')
+export const addSiteToBlacklist = createAction('settings/addSiteToBlacklist')
+export const removeSiteFromBlacklist = createAction('settings/removeSiteFromBlacklist')

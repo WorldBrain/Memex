@@ -29,7 +29,8 @@
         "<all_urls>",
         "history",
         "tabs",
-        "webNavigation"
+        "webNavigation",
+        "storage"
     ],
     "chrome_url_overrides" : {
         "newtab": "/overview/overview.html"
