@@ -6,14 +6,6 @@ import VisitAsListItem from './VisitAsListItem'
 
 import styles from './ResultList.css'
 
-// import { getDomain } from 'tldjs' // https://github.com/oncletom/tld.js/issues/86
-import tldjs from 'tldjs'
-const getDomain = tldjs.getDomain.bind(tldjs)
-
-function shouldBeClustered(visit1, visit2) {
-    return getDomain(visit1.url) === getDomain(visit2.url)
-}
-
 // Map a time duration between log entries to a number of pixels between them.
 const timeGapToSpaceGap = makeNonlinearTransform({
     // A gap of <5 mins gets no extra space, a >24 hours gap gets the maximum space.
@@ -75,16 +67,12 @@ const ResultList = ({searchResult, searchQuery}) => {
             const nextRow = searchResult.rows[rowIndex + 1]
             // ...unless there is a gap between the rows.
             const gapBelowThisRow = nextRow && rowGaps[rowIndex + 1].marginTop
-            const clustered = nextRow && gapBelowThisRow === 0
-                && shouldBeClustered(row.doc, nextRow.doc)
-                && row.isContextualResult === nextRow.isContextualResult
 
             return <li
                 key={row.doc._id}
                 style={{
                     marginTop,
                 }}
-                className={clustered ? styles.clustered : undefined}
             >
                 {timestampComponent}
                 <VisitAsListItem
