@@ -4,11 +4,11 @@ import Routes from './routes'
 
 import styles from './base.css'
 
-const Layout = () => (
+const Layout = ({children, location}) => (
     <div className={styles.root}>
-        <Navigation currentLocation={this.props.location} routes={Routes} />
+        <Navigation currentLocation={location} routes={Routes} />
         <div className={styles.route}>
-            { this.props.children }
+            {children}
         </div>
     </div>
 )
