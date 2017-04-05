@@ -6,6 +6,7 @@ import VisitAsListItem from './VisitAsListItem'
 
 import styles from './ResultList.css'
 
+
 // Map a time duration between log entries to a number of pixels between them.
 const timeGapToSpaceGap = makeNonlinearTransform({
     // A gap of <5 mins gets no extra space, a >24 hours gap gets the maximum space.
