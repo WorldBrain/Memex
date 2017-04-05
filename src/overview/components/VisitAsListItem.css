@@ -19,13 +19,9 @@
         box-shadow: 3px 4px 3px #888;
         margin-left: -1px;
     }
-
-    &:hover .iconsContainer{
-        opacity: 0.7;
-    }
 }
 
-.compact {
+.root.compact {
     opacity: 0.7;
     transform: scale(0.8);
     margin-bottom: -20px;
@@ -35,51 +31,50 @@
     }
 }
 
-.logo {
+.pageIconContainer {
     flex: 1 1 100px;
     overflow: hidden;
     color: #333;
+
+    & img {
+        display: table;
+        height: 40%;
+        margin-top: 35%;
+        margin-left: 25%;
+    }
 }
 
-.resultContent {
+.descriptionContainer {
     flex: 1 1 740px;
     flex-direction: column;
     font-size: 1.2em;
     padding-top: 10px;
     overflow: hidden;
+
+    & .title {
+        white-space: nowrap;
+        margin: 0;
+        padding: 0;
+        font-size: 18px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    & .url {
+        font-size: 15px;
+        margin-top: 3px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    & .time {
+        font-size: 13px;
+        margin-top: 20px;
+    }
 }
 
-.resultContent .title {
-    white-space: nowrap;
-    margin: 0;
-    padding: 0;
-    font-size: 18px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.resultContent .url {
-    font-size: 15px;
-    margin-top: 3px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.resultContent .time {
-    font-size: 13px;
-    margin-top: 20px;
-}
-
-.favicon {
-    display: table;
-    height: 40%;
-    margin-top: 35%;
-    margin-left: 25%;
-
-}
-
-.iconsContainer {
+.buttonsContainer {
     display: flex;
     flex: 1 1 15px;
     margin-top: 5px;
@@ -88,12 +83,15 @@
     color: inherit;
     text-decoration: none;
     opacity: 0.2;
-}
+    @nest .root:hover & {
+        opacity: 0.7;
+    }
 
-.iconsContainer img {
-    height: 15px;
-    padding: 5px;
-    width: 15px;
+    & img {
+        height: 15px;
+        padding: 5px;
+        width: 15px;
+    }
 }
 
 .screenshotContainer {
@@ -103,20 +101,20 @@
     overflow: hidden;
     display: inline-block;
     border-left: 0.5px solid grey;
-}
 
-.screenshotContainer img {
-    display: block;
-    height: 100%;
-    width: 100%;
-    transform: scale(1.3);
-    margin-top: 15px;
-}
+    & img {
+        display: block;
+        height: 100%;
+        width: 100%;
+        transform: scale(1.3);
+        margin-top: 15px;
+    }
 
-.noScreenshotAvailable {
-    display: block;
-    height: 100%;
-    width: 100%;
-    transform: scale(1.3);
-    margin-top: 45px;
+    & .noScreenshotAvailable {
+        display: block;
+        height: 100%;
+        width: 100%;
+        transform: scale(1.3);
+        margin-top: 45px;
+    }
 }
