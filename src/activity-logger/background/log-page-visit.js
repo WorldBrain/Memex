@@ -36,4 +36,5 @@ export default async function maybeLogPageVisit({
     const visit = await storeVisit({page, url, timestamp})
 
     // TODO possibly deduplicate the visit if it was to the same page after all.
+    void (finalPagePromise, visit)
 }
