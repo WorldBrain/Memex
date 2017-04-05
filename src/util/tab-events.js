@@ -3,18 +3,18 @@ import eventToPromise from './event-to-promise'
 const tabChangedEvents = tabId => [
     {
         event: browser.webNavigation.onCommitted,
-        filter: details => (details.tabId == tabId && details.frameId == 0),
-        reason: {message: "Tab URL changed before event occurred."}
+        filter: details => (details.tabId === tabId && details.frameId === 0),
+        reason: {message: 'Tab URL changed before event occurred.'},
     },
     {
         event: browser.webNavigation.onHistoryStateUpdated,
-        filter: details => (details.tabId == tabId && details.frameId == 0),
-        reason: {message: "Tab URL changed before event occurred."}
+        filter: details => (details.tabId === tabId && details.frameId === 0),
+        reason: {message: 'Tab URL changed before event occurred.'},
     },
     {
         event: browser.tabs.onRemoved,
         filter: closedTabId => (closedTabId === tabId),
-        reason: {message: "Tab was closed before event occurred."},
+        reason: {message: 'Tab was closed before event occurred.'},
     },
 ]
 
@@ -23,14 +23,13 @@ const tabChangedEvents = tabId => [
 // Rejects if it is closed before that.
 // XXX Needs host permission on the tab
 export function whenPageDOMLoaded({tabId}) {
-
     return new Promise((resolve, reject) => {
         // Using executeScript at document_end here as a workaround, as there is
         // no tab.status==='interactive'; it is either 'loading' or 'complete'.
         browser.tabs.executeScript(tabId, {
             code: 'undefined',
             runAt: 'document_end',
-        }).then(() => resolve())
+        }).then(() => resolve()).catch(reject)
 
         // Reject when the page unloads.
         eventToPromise({
@@ -44,8 +43,7 @@ export function whenPageDOMLoaded({tabId}) {
 export async function whenPageLoadComplete({tabId}) {
     const tab = await browser.tabs.get(tabId)
 
-    if (tab.status === 'complete')
-        return // Resolve directly
+    if (tab.status === 'complete') { return } // Resolve directly
 
     return eventToPromise({
         resolve: {
@@ -53,7 +51,7 @@ export async function whenPageLoadComplete({tabId}) {
             filter: (changedTabId, {status}) =>
                 (changedTabId === tabId && status === 'complete'),
         },
-        reject: tabChangedEvents(tabId)
+        reject: tabChangedEvents(tabId),
     })
 }
 
@@ -62,16 +60,15 @@ export async function whenPageLoadComplete({tabId}) {
 // Rejects if it is closed before that.
 export async function whenTabActive({tabId}) {
     const activeTabs = await browser.tabs.query({active: true})
-    const isActive = (activeTabs.map(t=>t.id).indexOf(tabId) > -1)
+    const isActive = (activeTabs.map(t => t.id).indexOf(tabId) > -1)
 
-    if (isActive)
-        return // Resolve directly
+    if (isActive) { return } // Resolve directly
 
     return eventToPromise({
         resolve: {
             event: browser.tabs.onActivated,
             filter: ({tabId: activatedTabId}) => (activatedTabId === tabId),
         },
-        reject: tabChangedEvents(tabId)
+        reject: tabChangedEvents(tabId),
     })
 }

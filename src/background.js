@@ -14,7 +14,7 @@ browser.browserAction.onClicked.addListener(() => {
 })
 
 browser.commands.onCommand.addListener(command => {
-    if (command === "openOverview") {
+    if (command === 'openOverview') {
         openOverview()
     }
 })

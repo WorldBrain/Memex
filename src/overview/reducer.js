@@ -30,11 +30,11 @@ function showLoadingIndicator(state) {
     // We have to keep a counter, rather than a boolean, as it can currently
     // happen that multiple subsequent searches are running simultaneously. The
     // animation will thus hide again when all of them have completed.
-    return {...state, waitingForResults: state.waitingForResults+1}
+    return {...state, waitingForResults: state.waitingForResults + 1}
 }
 
 function hideLoadingIndicator(state) {
-    return {...state, waitingForResults: state.waitingForResults-1}
+    return {...state, waitingForResults: state.waitingForResults - 1}
 }
 
 export default createReducer({

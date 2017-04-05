@@ -32,7 +32,7 @@ export function onDatabaseChange(callback) {
 // The couch/pouch way to match keys with a given prefix (e.g. one type of docs).
 export const keyRangeForPrefix = prefix => ({
     startkey: `${prefix}`,
-    endkey: `${prefix}\uffff`
+    endkey: `${prefix}\uffff`,
 })
 
 // Present db.find results in the same structure as other PouchDB results.
@@ -42,7 +42,7 @@ export const normaliseFindResult = result => ({
         id: doc._id,
         key: doc._id,
         value: {rev: doc._rev},
-    }))
+    })),
 })
 
 // Get rows of a query result indexed by doc id, as an {id: row} object.

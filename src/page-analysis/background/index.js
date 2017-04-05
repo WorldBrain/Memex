@@ -13,7 +13,6 @@ import makeScreenshot from './make-screenshot'
 
 // Extract interesting stuff from the current page and store it.
 async function performPageAnalysis({pageId, tabId}) {
-
     // Run these functions in the content script in the tab.
     const extractPageText = remoteFunction('extractPageText', {tabId})
     const extractPageMetadata = remoteFunction('extractPageMetadata', {tabId})
@@ -51,7 +50,7 @@ async function performPageAnalysis({pageId, tabId}) {
         storeFavIcon,
         storeScreenshot,
     ], {
-        onRejection: err => console.error(err)
+        onRejection: err => console.error(err),
     })
     await updatePageSearchIndex()
 }

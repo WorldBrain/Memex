@@ -1,5 +1,6 @@
-import { generateVisitDocId, isWorthRemembering } from '..'
+import db from 'src/pouchdb'
 import { reidentifyOrStorePage } from 'src/page-storage/store-page'
+import { generateVisitDocId, isWorthRemembering } from '..'
 
 
 // Store the visit in PouchDB.
@@ -19,10 +20,10 @@ export default async function maybeLogPageVisit({
     tabId,
     url,
 }) {
-
     // First check if we want to log this page (hence the 'maybe' in the name).
-    if (!isWorthRemembering({url}))
+    if (!isWorthRemembering({url})) {
         return
+    }
 
     // The time to put in documents.
     const timestamp = new Date().getTime()
@@ -35,4 +36,5 @@ export default async function maybeLogPageVisit({
     const visit = await storeVisit({page, url, timestamp})
 
     // TODO possibly deduplicate the visit if it was to the same page after all.
+    void (finalPagePromise, visit)
 }

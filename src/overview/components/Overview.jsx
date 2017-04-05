@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { PropTypes } from 'react'
 import { connect } from 'react-redux'
 
 import * as actions from '../actions'
@@ -10,18 +10,23 @@ import styles from './Overview.css'
 
 
 class Overview extends React.Component {
+    componentDidMount() {
+        if (this.props.grabFocusOnMount) {
+            this.refs['inputQuery'].focus()
+        }
+    }
+
     render() {
         return (
             <div>
                 <div>
                     <input
                         className={styles.query}
-                        onChange={e=>this.props.onInputChanged(e.target.value)}
-                        placeholder="Search your memory"
+                        onChange={e => this.props.onInputChanged(e.target.value)}
+                        placeholder='Search your memory'
                         value={this.props.query}
                         ref='inputQuery'
-                    >
-                    </input>
+                     />
                 </div>
                 <DateRangeSelection
                     startDate={this.props.startDate}
@@ -43,13 +48,20 @@ class Overview extends React.Component {
             </div>
         )
     }
-
-    componentDidMount() {
-        if (this.props.grabFocusOnMount) {
-            this.refs['inputQuery'].focus()
-        }
-    }
 }
+
+Overview.propTypes = {
+    grabFocusOnMount: PropTypes.boolean,
+    query: PropTypes.string,
+    onInputChanged: PropTypes.function,
+    startDate: PropTypes.number,
+    endDate: PropTypes.number,
+    onStartDateChange: PropTypes.function,
+    onEndDateChange: PropTypes.function,
+    waitingForResults: PropTypes.boolean,
+    searchResult: PropTypes.object,
+}
+
 
 const mapStateToProps = state => ourState(state)
 

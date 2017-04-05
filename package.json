@@ -11,7 +11,9 @@
     "build": "gulp build",
     "watch": "gulp watch",
     "fx-run": "web-ext -s extension run",
-    "fx-build": "npm run build-prod && web-ext -s extension -a dist/firefox build"
+    "fx-build": "npm run build-prod && web-ext -s extension -a dist/firefox build",
+    "lint": "eslint --ext js,jsx .",
+    "lint-fix": "eslint --ext js,jsx --fix ."
   },
   "dependencies": {
     "babel-runtime": "^6.23.0",
@@ -48,6 +50,13 @@
     "babelify": "^7.3.0",
     "browserify": "^13.1.1",
     "css-modulesify": "^0.27.1",
+    "eslint": "^3.18.0",
+    "eslint-config-standard": "^7.1.0",
+    "eslint-config-standard-react": "^4.3.0",
+    "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-promise": "^3.5.0",
+    "eslint-plugin-react": "^6.10.3",
+    "eslint-plugin-standard": "^2.1.1",
     "gulp": "^3.9.1",
     "gulp-identity": "^0.1.0",
     "gulp-uglify": "^2.0.1",
