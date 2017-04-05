@@ -32,15 +32,15 @@ const VisitAsListItem = ({doc, compact}) => {
                 <div className={styles.time}>{niceTime(doc.visitStart)}</div>
             </div>
             <div className={styles.buttonsContainer}>
+                <img src='img/trash-icon.png' alt='🗑 remove' />
                 {localVersionAvailable({page: doc.page})
                     ? (
                         <LinkToLocalVersion page={doc.page}>
-                            <img src='img/save-icon.png' alt='save-icon' />
+                            <img src='img/save-icon.png' alt='💾 saved' />
                         </LinkToLocalVersion>
                     )
                     : null
                 }
-                <img src='img/trash-icon.png' alt='trash-icon' />
             </div>
             <div className={styles.screenshotContainer}>
                 {doc.page.screenshot
