@@ -29,7 +29,7 @@ export function whenPageDOMLoaded({tabId}) {
         browser.tabs.executeScript(tabId, {
             code: 'undefined',
             runAt: 'document_end',
-        }).then(() => resolve())
+        }).then(() => resolve()).catch(reject)
 
         // Reject when the page unloads.
         eventToPromise({
