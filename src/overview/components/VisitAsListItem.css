@@ -1,17 +1,27 @@
+* {
+    box-sizing: border-box;
+}
+
 .root {
     position: relative;
     display: flex;
-    height: 10vh;
+    height: 80px;
     box-sizing: content-box;
     justify-content: space-between;
     overflow: hidden;
-    min-height: 100px;
-    min-width: 500px;
     margin-top: 15px;
     border: 1px solid grey;
+    border-radius: 8px;
     background-color: snow;
     color: inherit;
     text-decoration: none;
+    box-shadow: 1px 2px 1px #aaa;
+
+    &:hover {
+        border: 1px solid black;
+        box-shadow: 3px 4px 3px #888;
+    }
+    transition: border 200ms, box-shadow 200ms;
 
     &:focus {
         outline: none;
@@ -23,7 +33,8 @@
 
 .root.compact {
     opacity: 0.7;
-    transform: scale(0.8);
+    transform: scale(0.75);
+    transform-origin: top;
     margin-bottom: -20px;
 
     &:hover, &:focus {
@@ -32,37 +43,37 @@
 }
 
 .pageIconContainer {
-    flex: 1 1 100px;
-    overflow: hidden;
-    color: #333;
+    display: flex;
+    justify-content: center;
+    padding: 10px;
 
     & img {
-        display: table;
-        height: 40%;
-        margin-top: 35%;
-        margin-left: 25%;
+        flex: 0 0 auto;
+        width: 48px;
+        height: auto;
+        align-self: center;
     }
 }
 
 .descriptionContainer {
-    flex: 1 1 740px;
+    flex: 1 1 auto;
+    padding: 10px 0;
+    display: flex;
     flex-direction: column;
-    font-size: 1.2em;
-    padding-top: 10px;
     overflow: hidden;
 
     & .title {
-        white-space: nowrap;
-        margin: 0;
-        padding: 0;
+        padding-bottom: 4px;
+        max-height: 24px;
         font-size: 18px;
+        white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
     }
 
     & .url {
         font-size: 15px;
-        margin-top: 3px;
+        flex-grow: 1;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -70,22 +81,19 @@
 
     & .time {
         font-size: 13px;
-        margin-top: 20px;
     }
 }
 
 .buttonsContainer {
+    flex: 0 0 auto;
     display: flex;
-    flex: 1 1 15px;
-    margin-top: 5px;
-    margin-right: 5px;
     flex-direction: column;
     color: inherit;
     text-decoration: none;
+    padding-top: 5px;
 
     & img {
-        height: 15px;
-        padding: 5px;
+        margin: 5px 8px;
         width: 15px;
 
         opacity: 0.1;
@@ -100,26 +108,25 @@
 }
 
 .screenshotContainer {
-    flex: 1 1 175px;
-    text-align: center;
-    color: #D3D3D3;
+    flex-shrink: 0;
+    width: 160px;
     overflow: hidden;
-    display: inline-block;
     border-left: 0.5px solid grey;
+    display: flex;
+    align-items: flex-start;
+    text-align: center;
 
     & img {
-        display: block;
-        height: 100%;
-        width: 100%;
-        transform: scale(1.3);
-        margin-top: 15px;
+        max-width: 100%;
+        max-height: 200%;
+        width: auto;
+        height: auto;
     }
 
     & .noScreenshotAvailable {
-        display: block;
-        height: 100%;
-        width: 100%;
-        transform: scale(1.3);
-        margin-top: 45px;
+        align-self: center;
+        color: #D3D3D3;
+        font-size: 14px;
+        padding: 5px;
     }
 }

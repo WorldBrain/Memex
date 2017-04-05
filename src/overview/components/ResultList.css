@@ -2,14 +2,13 @@
     list-style: none;
     margin: 40px auto;
     padding: 0;
-    width: 850px;
+    max-width: 600px;
 }
 
 .timestamp {
     display: inline-block;
     text-align: center;
     width: 100%;
-    font-family: 'Arial', serif;
 
     &::before {
         content: '— ';

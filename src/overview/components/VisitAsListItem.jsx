@@ -45,7 +45,11 @@ const VisitAsListItem = ({doc, compact}) => {
             <div className={styles.screenshotContainer}>
                 {doc.page.screenshot
                     ? <img src={doc.page.screenshot} />
-                    : <p className={styles.noScreenshotAvailable}>No screenshot available.</p>
+                    : (
+                        <span className={styles.noScreenshotAvailable}>
+                            No screenshot available.
+                        </span>
+                    )
                 }
             </div>
         </a>
