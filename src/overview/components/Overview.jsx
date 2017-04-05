@@ -51,14 +51,14 @@ class Overview extends React.Component {
 }
 
 Overview.propTypes = {
-    grabFocusOnMount: PropTypes.boolean,
+    grabFocusOnMount: PropTypes.bool,
     query: PropTypes.string,
-    onInputChanged: PropTypes.function,
+    onInputChanged: PropTypes.func,
     startDate: PropTypes.number,
     endDate: PropTypes.number,
-    onStartDateChange: PropTypes.function,
-    onEndDateChange: PropTypes.function,
-    waitingForResults: PropTypes.boolean,
+    onStartDateChange: PropTypes.func,
+    onEndDateChange: PropTypes.func,
+    waitingForResults: PropTypes.oneOfType([PropTypes.bool, PropTypes.number]),
     searchResult: PropTypes.object,
 }
 

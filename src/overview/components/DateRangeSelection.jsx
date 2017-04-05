@@ -45,8 +45,8 @@ const DateRangeSelection = ({
 DateRangeSelection.propTypes = {
     startDate: PropTypes.number,
     endDate: PropTypes.number,
-    onStartDateChange: PropTypes.function,
-    onEndDateChange: PropTypes.function,
+    onStartDateChange: PropTypes.func,
+    onEndDateChange: PropTypes.func,
 }
 
 

@@ -43,8 +43,8 @@ const VisitAsListItem = ({doc, compact}) => {
 }
 
 VisitAsListItem.propTypes = {
-    doc: PropTypes.object.required,
-    compact: PropTypes.boolean,
+    doc: PropTypes.object.isRequired,
+    compact: PropTypes.bool,
 }
 
 export default VisitAsListItem
