@@ -46,6 +46,7 @@
         "no-unused-vars": "warn",
         "space-before-function-paren": "off",
         "operator-linebreak": ["error", "before"],
+        "handle-callback-err": "off",
         "import/no-mutable-exports": "error",
         "import/unambiguous": "off",
         "promise/avoid-new": "off",
