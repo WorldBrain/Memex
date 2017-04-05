@@ -6,7 +6,7 @@ const RPC_CALL = '__RPC_CALL__'
 
 // === Initiating side ===
 
-const sendMessageError = ({funcName, otherSide}) =>
+const sendMessageErrorMessage = ({funcName, otherSide}) =>
     `Got no response from RPC when calling '${funcName}'. `
     + `Did you enable RPC in ${otherSide}?`
 
@@ -15,20 +15,20 @@ export function remoteFunction(funcName, {tabId} = {}) {
         ? message => {
             return browser.tabs.sendMessage(tabId, message).catch(
                 err => {
-                    throw sendMessageError({
+                    throw new Error(sendMessageErrorMessage({
                         funcName,
                         otherSide: "the tab's content script",
-                    })
+                    }))
                 }
             )
         }
         : message => {
             return browser.runtime.sendMessage(message).catch(
                 err => {
-                    throw sendMessageError({
+                    throw new Error(sendMessageErrorMessage({
                         funcName,
                         otherSide: 'the background script',
-                    })
+                    }))
                 }
             )
         }
@@ -40,7 +40,11 @@ export function remoteFunction(funcName, {tabId} = {}) {
             args,
         }
         return sendMessage(message).then(response => {
-            if (response.error) { throw response.error } else { return response.returnValue }
+            if (response.error) {
+                throw new Error(response.error)
+            } else {
+                return response.returnValue
+            }
         })
     }
 

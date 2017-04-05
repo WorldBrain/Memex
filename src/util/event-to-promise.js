@@ -37,9 +37,10 @@ export default function eventToPromise({
                     if (!opts.filter || opts.filter(...args)) {
                         removeListeners()
                         if (opts.value) {
-                            return (typeof opts.value === 'function')
-                                ? resolve(opts.value(...args))
-                                : resolve(opts.value)
+                            const value = (typeof opts.value === 'function')
+                                ? opts.value(...args)
+                                : opts.value
+                            resolve(value)
                         } else { resolve() }
                     }
                 },
@@ -51,11 +52,13 @@ export default function eventToPromise({
                 listener: function maybeReject(...args) {
                     if (!opts.filter || opts.filter(...args)) {
                         removeListeners()
-                        if (opts.reason) {
-                            return (typeof opts.reason === 'function')
-                                ? reject(opts.reason(...args))
-                                : reject(opts.reason)
-                        } else { reject() }
+                        const reason = (typeof opts.reason === 'function')
+                            ? opts.reason(...args)
+                            : opts.reason
+                        const error = (reason instanceof Error)
+                            ? reason
+                            : new Error(reason)
+                        reject(error)
                     }
                 },
             })
