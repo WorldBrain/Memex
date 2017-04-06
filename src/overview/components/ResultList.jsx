@@ -19,19 +19,9 @@ const timeGapToSpaceGap = makeNonlinearTransform({
     nonlinearity: Math.log,
 })
 
-const ResultList = ({searchResult, searchQuery}) => {
-    // If there are no results, show a message.
-    const noResultMessage = 'no results'
-    if (searchResult.rows.length === 0 && searchQuery !== '') {
-        return (
-            <p className={styles.noResultMessage}>
-                {noResultMessage}
-            </p>
-        )
-    }
-
+function computeRowGaps({searchResult}) {
     // The space and possibly a time stamp before each row
-    const rowGaps = searchResult.rows.map((row, rowIndex) => {
+    return searchResult.rows.map((row, rowIndex) => {
         // Space between two rows depends on the time between them.
         const prevRow = searchResult.rows[rowIndex - 1]
         const prevTimestamp = prevRow ? prevRow.doc.visitStart : new Date()
@@ -44,9 +34,9 @@ const ResultList = ({searchResult, searchQuery}) => {
         const showTimestamp = (spaceGap > 40)
         // Height of timestamp.
         const timestampHeight = showTimestamp ? 16 : 0
-        let marginTop = spaceGap - timestampHeight
-        const timestampComponent = showTimestamp
-            ? <time
+        const marginTop = spaceGap - timestampHeight
+        const timestampComponent = showTimestamp && (
+            <time
                 className={styles.timestamp}
                 dateTime={new Date(timestamp)}
                 style={{
@@ -56,33 +46,46 @@ const ResultList = ({searchResult, searchQuery}) => {
             >
                 {niceTime(timestamp)}
             </time>
-            : null
+        )
         return {marginTop, timestampComponent}
     })
+}
 
-    return <ul className={styles.root}>
-        {searchResult.rows.map((row, rowIndex) => {
-            let { marginTop, timestampComponent } = rowGaps[rowIndex]
+const ResultList = ({searchResult, searchQuery}) => {
+    // If there are no results, show a message.
+    const noResultMessage = 'no results'
+    if (searchResult.rows.length === 0 && searchQuery !== '') {
+        return (
+            <p className={styles.noResultMessage}>
+                {noResultMessage}
+            </p>
+        )
+    }
 
-            // Cluster successive & related visits closer together.
-            const nextRow = searchResult.rows[rowIndex + 1]
-            // ...unless there is a gap between the rows.
-            const gapBelowThisRow = nextRow && rowGaps[rowIndex + 1].marginTop
+    const rowGaps = computeRowGaps({searchResult})
 
-            return <li
-                key={row.doc._id}
-                style={{
-                    marginTop,
-                }}
-            >
-                {timestampComponent}
-                <VisitAsListItem
-                    compact={row.isContextualResult}
-                    doc={row.doc}
-                />
-            </li>
-        })}
-    </ul>
+    return (
+        <ul className={styles.root}>
+            {searchResult.rows.map((row, rowIndex) => {
+                const { marginTop, timestampComponent } = rowGaps[rowIndex]
+
+                return (
+                    <li
+                        key={row.doc._id}
+                        style={{
+                            marginTop,
+                        }}
+                    >
+                        {timestampComponent}
+                        <VisitAsListItem
+                            compact={row.isContextualResult}
+                            doc={row.doc}
+                        />
+                    </li>
+                )
+            })}
+        </ul>
+    )
 }
 
 ResultList.propTypes = {
