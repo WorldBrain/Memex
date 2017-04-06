@@ -121,7 +121,7 @@ export default async function importHistory({
     })
     let allDocs = pageDocs.concat(visitDocs)
     // Mark each doc to remember it originated from this import action.
-    const importTimestamp = new Date().getTime()
+    const importTimestamp = Date.now()
     allDocs = allDocs.map(doc => ({
         ...doc,
         importedFromBrowserHistory: importTimestamp,

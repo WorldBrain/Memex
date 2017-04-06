@@ -69,7 +69,7 @@ function createBundle({entries, output, destination, cssOutput},
     }
 
     function bundle() {
-        let startTime = new Date().getTime()
+        let startTime = Date.now()
         b.bundle()
             .on('error', error => console.error(error.message))
             .pipe(source(output))
@@ -77,7 +77,7 @@ function createBundle({entries, output, destination, cssOutput},
             .pipe(production ? uglify({output: {ascii_only: true}}) : identity())
             .pipe(gulp.dest(destination))
             .on('end', () => {
-                let time = (new Date().getTime() - startTime) / 1000
+                let time = (Date.now() - startTime) / 1000
                 console.log(`Bundled ${output} in ${time}s.`)
             })
     }

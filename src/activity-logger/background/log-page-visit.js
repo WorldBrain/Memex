@@ -26,7 +26,7 @@ export default async function maybeLogPageVisit({
     }
 
     // The time to put in documents.
-    const timestamp = new Date().getTime()
+    const timestamp = Date.now()
 
     // TODO first try to extend an existing visit instead of logging a new one.
 
