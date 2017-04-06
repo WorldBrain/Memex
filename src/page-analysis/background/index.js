@@ -34,8 +34,6 @@ async function performPageAnalysis({pageId, tabId}) {
     // Capture a screenshot.
     const storeScreenshot = makeScreenshot({tabId}).then(
         setDocField(db, pageId, 'screenshot')
-    ).catch(
-        err => console.error(err)
     )
 
     // Extract the main text
@@ -49,9 +47,7 @@ async function performPageAnalysis({pageId, tabId}) {
         storePageText,
         storeFavIcon,
         storeScreenshot,
-    ], {
-        onRejection: err => console.error(err),
-    })
+    ])
     await updatePageSearchIndex()
 }
 
