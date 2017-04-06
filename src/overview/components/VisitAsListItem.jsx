@@ -11,24 +11,36 @@ const VisitAsListItem = ({doc, compact}) => {
         [styles.root]: true,
         [styles.compact]: compact,
     })
-
+    const favIcon = (
+        <img
+            className={styles.favIcon}
+            src={doc.page.favIcon || 'img/null-icon.png'}
+        />
+    )
     return (
         <a
             className={visitClasses}
             href={doc.page.url}
-            title={doc.page.url}
             // DEBUG Show document props on ctrl+meta+click
             onClick={e => { if (e.metaKey && e.ctrlKey) { console.log(doc); e.preventDefault() } }}
         >
-            <span className={styles.pageIconContainer} title={doc.page.title}>
-                {doc.page.favIcon
-                    ? <img src={doc.page.favIcon} />
-                    : <img src='img/null-icon.png' />
+            <div className={styles.screenshotContainer}>
+                {doc.page.screenshot
+                    ? <img className={styles.screenshot} src={doc.page.screenshot} />
+                    : favIcon
                 }
-            </span>
+            </div>
             <div className={styles.descriptionContainer}>
-                <div className={styles.title}><strong>{doc.page.title}</strong></div>
-                <div className={styles.url}>{doc.page.url}</div>
+                <div
+                    className={styles.title}
+                    title={doc.page.title}
+                >
+                    {doc.page.favIcon && favIcon}
+                    {doc.page.title}
+                </div>
+                <div className={styles.url}>
+                    {doc.page.url}
+                </div>
                 <div className={styles.time}>{niceTime(doc.visitStart)}</div>
             </div>
             <div className={styles.buttonsContainer}>
@@ -40,16 +52,6 @@ const VisitAsListItem = ({doc, compact}) => {
                         </LinkToLocalVersion>
                     )
                     : null
-                }
-            </div>
-            <div className={styles.screenshotContainer}>
-                {doc.page.screenshot
-                    ? <img src={doc.page.screenshot} />
-                    : (
-                        <span className={styles.noScreenshotAvailable}>
-                            No screenshot available.
-                        </span>
-                    )
                 }
             </div>
         </a>
