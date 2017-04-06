@@ -1,17 +1,27 @@
+* {
+    box-sizing: border-box;
+}
+
 .root {
     position: relative;
-    display: block;
-    width: 240px;
-    height: 120px;
+    display: flex;
+    height: 100px;
     box-sizing: content-box;
+    justify-content: space-between;
     overflow: hidden;
-
     margin-top: 15px;
     border: 1px solid grey;
-    border-radius: 5px;
+    border-radius: 8px;
     background-color: snow;
-    box-shadow: 2px 3px 3px #888;
     color: inherit;
+    text-decoration: none;
+    box-shadow: 1px 2px 1px #aaa;
+
+    &:hover {
+        border: 1px solid black;
+        box-shadow: 3px 4px 3px #888;
+    }
+    transition: border 200ms, box-shadow 200ms;
 
     &:focus {
         outline: none;
@@ -21,9 +31,10 @@
     }
 }
 
-.compact {
+.root.compact {
     opacity: 0.7;
-    transform: scale(0.8);
+    transform: scale(0.75);
+    transform-origin: top;
     margin-bottom: -20px;
 
     &:hover, &:focus {
@@ -31,43 +42,81 @@
     }
 }
 
-.thumbnail {
-    display: block;
-    max-width: 240px;
-    width: auto;
-    height: auto;
-    opacity: 0.6;
-}
 
-.caption {
-    position: absolute;
-    top: 0;
-    width: 100%;
-    padding: 8px 0;
-    background-color: rgba(255, 255, 255, 0.9);
-    border-top: 1px solid lightgrey;
-}
-
-.title {
-    float: left;
-    max-width: 100%;
+.screenshotContainer {
+    flex-shrink: 0;
+    width: 200px;
     overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    padding-left: 4px;
-    color: #333;
-    font-size: large;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+
+    & .screenshot {
+        max-width: 100%;
+        width: auto;
+        height: auto;
+    }
+
+    & .favIcon {
+        align-self: center;
+        width: 48px;
+        height: 48px;
+    }
 }
 
-.favicon {
-    width: 16px;
-    height: 16px;
-    margin: 2px 4px 0px 2px;
+.descriptionContainer {
+    flex: 1 1 auto;
+    padding: 10px 0px 10px 10px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    & .title {
+        padding-bottom: 6px;
+        font-size: 18px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+
+        & .favIcon {
+            height: 16px;
+            margin-right: 4px;
+        }
+    }
+
+    & .url {
+        font-size: 15px;
+        flex-grow: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    & .time {
+        align-self: flex-end;
+        font-size: 13px;
+    }
 }
 
-.linkToLocalVersion {
-    float: right;
-    padding: 4px 4px 4px 12px;
+.buttonsContainer {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
     color: inherit;
     text-decoration: none;
+    padding-top: 5px;
+
+    & img {
+        margin: 5px 8px;
+        width: 15px;
+
+        opacity: 0.1;
+        @nest .root:hover & {
+            opacity: 0.4;
+            &:hover {
+                opacity: 1;
+            }
+        }
+        transition: opacity 200ms;
+    }
 }
