@@ -3,6 +3,6 @@ export default function whenAllSettled(promises, {
     onRejection = err => {},
 } = {}) {
     return Promise.all(
-        promises.map(p => p.catch(onRejection))
+        promises.map(p => Promise.resolve(p).catch(onRejection))
     )
 }
