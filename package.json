@@ -12,7 +12,7 @@
     "watch": "gulp watch",
     "fx-run": "web-ext -s extension run",
     "fx-build": "npm run build-prod && web-ext -s extension -a dist/firefox build",
-    "lint": "eslint --ext js,jsx .",
+    "lint": "eslint --ext js,jsx . && stylelint '**/*.css'",
     "lint-fix": "eslint --ext js,jsx --fix ."
   },
   "dependencies": {
@@ -65,6 +65,8 @@
     "redux-devtools": "^3.3.1",
     "redux-devtools-dock-monitor": "^1.1.1",
     "redux-devtools-log-monitor": "^1.2.0",
+    "stylelint": "^7.10.1",
+    "stylelint-config-standard": "^16.0.0",
     "uglifyify": "^3.0.4",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0",
