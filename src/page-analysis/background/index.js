@@ -11,10 +11,12 @@ import { revisePageFields } from '..'
 import getFavIcon from './get-fav-icon'
 import makeScreenshot from './make-screenshot'
 
+
 // Extract interesting stuff from the current page and store it.
 async function performPageAnalysis({pageId, tabId}) {
-    // Run this function in the content script in the tab.
+    // Run these functions in the content script in the tab.
     const extractPageContent = remoteFunction('extractPageContent', {tabId})
+    const freezeDry = remoteFunction('freezeDry', {tabId})
 
     // A shorthand for updating a single field in a doc.
     const setDocField = (db, docId, key) =>
@@ -49,11 +51,17 @@ async function performPageAnalysis({pageId, tabId}) {
         }
     )
 
+    // Freeze-dry and store the whole page
+    const storePageFreezeDried = freezeDry().then(
+        setDocField(db, pageId, 'html')
+    )
+
     // When every task has either completed or failed, update the search index.
     await whenAllSettled([
         storeFavIcon,
         storeScreenshot,
         storePageContent,
+        storePageFreezeDried,
     ])
     await updatePageSearchIndex()
 }
