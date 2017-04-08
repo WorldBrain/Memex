@@ -10,6 +10,7 @@
     "build-prod": "gulp build-prod",
     "build": "gulp build",
     "watch": "gulp watch",
+    "test": "npm run lint",
     "fx-run": "web-ext -s extension run",
     "fx-build": "npm run build-prod && web-ext -s extension -a dist/firefox build",
     "lint": "eslint --ext js,jsx .",
