@@ -2,6 +2,18 @@
     "extends": "stylelint-config-standard",
     "rules": {
         "indentation": 4,
-        "shorthand-property-no-redundant-values": null
+        "shorthand-property-no-redundant-values": null,
+        "font-family-name-quotes": "always-unless-keyword",
+        "function-url-quotes": "always",
+        "selector-attribute-quotes": "always",
+        "string-quotes": "single",
+        "at-rule-no-vendor-prefix": true,
+        "media-feature-name-no-vendor-prefix": true,
+        "property-no-vendor-prefix": true,
+        "selector-no-vendor-prefix": true,
+        "value-no-vendor-prefix": true,
+        "at-rule-no-unknown": true,
+        "declaration-no-important": true,
+        "function-url-scheme-whitelist": ['data']
     }
 }
