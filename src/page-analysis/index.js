@@ -4,6 +4,10 @@
 export const searchableTextFields = [
     'title',
     'extractedMetadata.title',
+    'extractedMetadata.Title',
+    'extractedMetadata.Author',
+    'extractedMetadata.Subject',
+    'extractedMetadata.Keywords',
     'extractedText.excerpt',
     'extractedText.textContent',
     'extractedText.bodyInnerText',

@@ -31,6 +31,9 @@
         "tabs",
         "webNavigation"
     ],
+    "web_accessible_resources": [
+      "pdf-worker/pdf.worker.min.js"
+    ],
     "chrome_url_overrides" : {
         "newtab": "/overview/overview.html"
     },

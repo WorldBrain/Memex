@@ -1,9 +1,7 @@
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 
-import extractPageText from './extract-page-text'
-import extractPageMetadata from './extract-page-metadata'
+import extractPageData from './extract-page-data'
 
 makeRemotelyCallable({
-    extractPageText,
-    extractPageMetadata,
+    extractPageData,
 })

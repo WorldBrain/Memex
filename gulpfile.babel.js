@@ -40,6 +40,11 @@ const sourceFiles = [
         destination: './extension/options',
         cssOutput: 'style.css',
     },
+    {
+        entries: ['./src/pdf.worker.min.js'],
+        output: 'pdf.worker.min.js',
+        destination: './extension/pdf-worker',
+    },
 ]
 
 const browserifySettings = {
