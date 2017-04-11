@@ -1,58 +1,50 @@
-// Returns a promise for an Object containing PDF Text and MetaData
-function getData(blob) {
-    return new Promise(function (resolve, reject) {
-        var fileReader = new FileReader()
-        fileReader.onload = async function (blob) {
-            require('pdfjs-dist')
-            require('fs')
+// Returns an Object containing PDF Text and MetaData
+async function getDatafromBlob(blob) {
+    require('pdfjs-dist')
 
-            // workerSrc needs to be specified, PDFJS library uses
-            // Document.currentScript which is disallowed by content scripts
-            PDFJS.workerSrc = browser.extension.getURL('pdf-worker/pdf.worker.min.js')
+    // workerSrc needs to be specified, PDFJS library uses
+    // Document.currentScript which is disallowed by content scripts
+    PDFJS.workerSrc = browser.extension.getURL('pdf-worker/pdf.worker.min.js')
 
-            // wait for document to load
-            let pdf = await PDFJS.getDocument(blob.target.result)
+    // wait for document to load
+    const pdf = await PDFJS.getDocument(blob.target.result)
 
-            var totalContent = []
-            var promises = []
-            collectContent()
-            function collectContent() {
-                for (var i = 1; i <= pdf.pdfInfo.numPages; i++) {
-                    promises.push(getPageContentForIndex(i, function(content) {
-                        totalContent.push(content)
-                    }))
-                }
-            }
-            function getPageContentForIndex(i, callback) {
-                return pdf.getPage(i).then(function(page) {
-                    return page.getTextContent().then(function(textContent) {
-                        var pageContent = textContent.items.map((item) => item.str).join(' ')
-                        callback(pageContent)
-                    })
-                })
-            }
+    // [1..N] array for N pages
+    const pages = [...Array(pdf.pdfInfo.numPages + 1).keys()].slice(1)
 
-            // wait for all promises of page contents
-            await Promise.all(promises)
-            totalContent = totalContent.join(' ')
-
-            // wait for metadata
-            let data = await pdf.getMetadata()
-
-            resolve(
-                {
-                    pageText: { bodyInnerText: totalContent },
-                    pageMetaData: JSON.parse(JSON.stringify(data.info, null, 2)),
-                })
-        }
-        fileReader.readAsArrayBuffer(blob)
+    // promises for page contents
+    const pageTextPromises = pages.map(async i => {
+        const page = await pdf.getPage(i)
+        // wait for object containing items array with text pieces
+        const pageItems = await page.getTextContent()
+        const pageText = pageItems.items.map(item => item.str).join(' ')
+        return pageText
     })
+
+    // wait for all promises to be fulfilled
+    const pageTexts = await Promise.all(pageTextPromises)
+    const totalContent = pageTexts.join('\n')
+
+    // wait for metadata
+    const data = await pdf.getMetadata()
+
+    return {
+        pageText: { bodyInnerText: totalContent },
+        pageMetaData: data.info,
+    }
 }
 
-// fetch file and return data
-export default async function extractPdfData(url) {
-    let response = await fetch(url)
-    let blob = await response.blob()
+// Return promise for PDF data
+export default async function extractPdfData({url, blob}) {
+    // fetch blob if not given
+    if (blob === undefined) {
+        const response = await fetch(url)
+        blob = await response.blob()
+    }
 
-    return getData(blob)
+    return new Promise(function (resolve, reject) {
+        const fileReader = new FileReader()
+        fileReader.onload = (blob) => resolve(getDatafromBlob(blob))
+        fileReader.readAsArrayBuffer(blob)
+    })
 }
