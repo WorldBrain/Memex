@@ -6,7 +6,7 @@
     margin: 20px auto;
 }
 
-.dot{
+.dot {
     position: absolute;
     display: inline-block;
     height: 10px;
@@ -38,9 +38,11 @@
     0% {
         bottom: 10%;
     }
+
     50% {
         bottom: 90%;
     }
+
     100% {
         bottom: 10%;
     }

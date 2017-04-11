@@ -21,6 +21,7 @@
         border: 1px solid black;
         box-shadow: 3px 4px 3px #888;
     }
+
     transition: border 200ms, box-shadow 200ms;
 
     &:focus {
@@ -37,11 +38,11 @@
     transform-origin: top;
     margin-bottom: -20px;
 
-    &:hover, &:focus {
+    &:hover,
+    &:focus {
         opacity: 1;
     }
 }
-
 
 .screenshotContainer {
     flex-shrink: 0;
@@ -66,7 +67,7 @@
 
 .descriptionContainer {
     flex: 1 1 auto;
-    padding: 10px 0px 10px 10px;
+    padding: 10px 0 10px 10px;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -109,14 +110,16 @@
     & img {
         margin: 5px 8px;
         width: 15px;
-
         opacity: 0.1;
+
         @nest .root:hover & {
             opacity: 0.4;
+
             &:hover {
                 opacity: 1;
             }
         }
+
         transition: opacity 200ms;
     }
 }
