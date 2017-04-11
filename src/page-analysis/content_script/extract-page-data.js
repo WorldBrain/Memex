@@ -1,6 +1,6 @@
 import { getMetadata, metadataRules } from 'page-metadata-parser'
 import extractPdfData from './extract-pdf-data'
-import getText from './gettext'
+import getText from './extract-page-data'
 
 // Extract the 'main text' from web pages (esp. news article, blog post, ...) and PDFs.
 async function extractPageDataSync({
@@ -11,7 +11,7 @@ async function extractPageDataSync({
 } = {}) {
     // Check URL for PDF
     if (url.endsWith('.pdf')) {
-        return extractPdfData(url)
+        return extractPdfData({url})
     }
 
     // Text content in web page
