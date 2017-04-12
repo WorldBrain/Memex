@@ -1,13 +1,13 @@
 // Returns an Object containing PDF Text and MetaData
-async function getDatafromBlob(blob) {
+async function extractContent(pdfData) {
     require('pdfjs-dist')
 
     // workerSrc needs to be specified, PDFJS library uses
     // Document.currentScript which is disallowed by content scripts
     PDFJS.workerSrc = browser.extension.getURL('/lib/pdf.worker.min.js')
 
-    // wait for document to load
-    const pdf = await PDFJS.getDocument(blob.target.result)
+    // Load PDF document into PDF.js
+    const pdf = await PDFJS.getDocument(pdfData)
 
     // [1..N] array for N pages
     const pages = [...Array(pdf.pdfInfo.numPages + 1).keys()].slice(1)
@@ -45,7 +45,16 @@ export default async function extractPdfContent({url, blob}) {
 
     return new Promise(function (resolve, reject) {
         const fileReader = new FileReader()
-        fileReader.onload = (blob) => resolve(getDatafromBlob(blob))
+        fileReader.onload = async event => {
+            const pdfData = event.target.result
+            try {
+                const pdfContent = await extractContent(pdfData)
+                resolve(pdfContent)
+            } catch (err) {
+                reject(err)
+            }
+        }
+        fileReader.onerror = event => reject(new Error(event.target.error))
         fileReader.readAsArrayBuffer(blob)
     })
 }
