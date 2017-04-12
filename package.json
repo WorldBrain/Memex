@@ -39,7 +39,8 @@
     "redux-observable": "^0.12.2",
     "redux-thunk": "^2.1.0",
     "rxjs": "^5.0.3",
-    "tldjs": "^1.7.0"
+    "tldjs": "^1.7.0",
+    "webextension-polyfill": "^0.1.0"
   },
   "devDependencies": {
     "autoprefixer": "^6.7.5",

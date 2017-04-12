@@ -1,5 +1,6 @@
 node_modules
 dist
+extension/browser-polyfill.js
 extension/background.js
 extension/content_script.js
 extension/overview/overview.js

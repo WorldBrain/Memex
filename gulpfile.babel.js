@@ -12,7 +12,12 @@ import path from 'path'
 import cssModulesify from 'css-modulesify'
 import cssnext from 'postcss-cssnext'
 
-const files = [
+
+const staticFiles = {
+    'node_modules/webextension-polyfill/dist/browser-polyfill.js': 'extension',
+}
+
+const sourceFiles = [
     {
         entries: ['./src/background.js'],
         output: 'background.js',
@@ -85,16 +90,24 @@ function createBundle({entries, output, destination, cssOutput},
     bundle()
 }
 
-gulp.task('build-prod', () => {
-    files.forEach(bundle => createBundle(bundle, {watch: false, production: true}))
+gulp.task('copyStaticFiles', () => {
+    for (let filename in staticFiles) {
+        console.log(`Copying '${filename}' to '${staticFiles[filename]}'..`)
+        gulp.src(filename)
+            .pipe(gulp.dest(staticFiles[filename]))
+    }
 })
 
-gulp.task('build', () => {
-    files.forEach(bundle => createBundle(bundle, {watch: false}))
+gulp.task('build-prod', ['copyStaticFiles'], () => {
+    sourceFiles.forEach(bundle => createBundle(bundle, {watch: false, production: true}))
 })
 
-gulp.task('watch', () => {
-    files.forEach(bundle => createBundle(bundle, {watch: true}))
+gulp.task('build', ['copyStaticFiles'], () => {
+    sourceFiles.forEach(bundle => createBundle(bundle, {watch: false}))
+})
+
+gulp.task('watch', ['copyStaticFiles'], () => {
+    sourceFiles.forEach(bundle => createBundle(bundle, {watch: true}))
 })
 
 gulp.task('default', ['watch'])
