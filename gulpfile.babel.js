@@ -43,7 +43,7 @@ const sourceFiles = [
     {
         entries: ['./src/pdf.worker.min.js'],
         output: 'pdf.worker.min.js',
-        destination: './extension/pdf-worker',
+        destination: './extension/lib',
     },
 ]
 

@@ -4,7 +4,7 @@ async function getDatafromBlob(blob) {
 
     // workerSrc needs to be specified, PDFJS library uses
     // Document.currentScript which is disallowed by content scripts
-    PDFJS.workerSrc = browser.extension.getURL('pdf-worker/pdf.worker.min.js')
+    PDFJS.workerSrc = browser.extension.getURL('/lib/pdf.worker.min.js')
 
     // wait for document to load
     const pdf = await PDFJS.getDocument(blob.target.result)
