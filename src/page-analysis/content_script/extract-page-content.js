@@ -2,7 +2,7 @@ import { getMetadata, metadataRules } from 'page-metadata-parser'
 import extractPdfContent from './extract-pdf-content'
 import extractPageText from './extract-page-text'
 
-// Extract the 'main text' from web pages (esp. news article, blog post, ...) and PDFs.
+// Extract the text content from web pages and PDFs.
 async function extractPageContentSync({
     // By default, use the globals window and document.
     loc = window.location,
@@ -15,13 +15,13 @@ async function extractPageContentSync({
     }
 
     // Text content in web page
-    const pageText = extractPageText(doc, loc)
+    const text = extractPageText(doc, loc)
     // MetaData of web page
-    const pageMetadata = getMetadata(doc, url, metadataRules)
+    const metadata = getMetadata(doc, url, metadataRules)
 
     return {
-        pageText: pageText,
-        pageMetaData: pageMetadata,
+        text,
+        metadata,
     }
 }
 

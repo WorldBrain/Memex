@@ -31,10 +31,9 @@ async function performPageAnalysis({pageId, tabId}) {
 
     // Extract the Main text and Metadata
     const storePageContent = extractPageContent().then(
-        (val) => {
-            console.log('Data : \n' + JSON.stringify(val, null, 2))
-            setDocField(db, pageId, 'extractedText')(val.pageText)
-            setDocField(db, pageId, 'extractedMetaData')(val.pageMetaData)
+        value => {
+            setDocField(db, pageId, 'extractedText')(value.text)
+            setDocField(db, pageId, 'extractedMetaData')(value.metadata)
         }
     )
 

@@ -23,14 +23,15 @@ async function getDatafromBlob(blob) {
 
     // wait for all promises to be fulfilled
     const pageTexts = await Promise.all(pageTextPromises)
-    const totalContent = pageTexts.join('\n')
+    const textContent = pageTexts.join('\n')
 
-    // wait for metadata
-    const data = await pdf.getMetadata()
+    const metadata = await pdf.getMetadata()
 
     return {
-        pageText: { bodyInnerText: totalContent },
-        pageMetaData: data.info,
+        text: {
+            textContent,
+        },
+        metadata: metadata.info,
     }
 }
 
