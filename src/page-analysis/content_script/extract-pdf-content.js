@@ -1,9 +1,8 @@
-// Returns an Object containing PDF Text and MetaData
+// Run PDF.js to extract text from each page and read document metadata.
 async function extractContent(pdfData) {
-    require('pdfjs-dist')
+    require('pdfjs-dist') /* global PDFJS */
 
-    // workerSrc needs to be specified, PDFJS library uses
-    // Document.currentScript which is disallowed by content scripts
+    // Point PDF.js to its worker code.
     PDFJS.workerSrc = browser.extension.getURL('/lib/pdf.worker.min.js')
 
     // Load PDF document into PDF.js
@@ -21,7 +20,6 @@ async function extractContent(pdfData) {
         return pageText
     })
 
-    // wait for all promises to be fulfilled
     const pageTexts = await Promise.all(pageTextPromises)
     const textContent = pageTexts.join('\n')
 
@@ -35,9 +33,9 @@ async function extractContent(pdfData) {
     }
 }
 
-// Return promise for PDF data
+// Given a PDF as blob or URL, return a promise of its text and metadata.
 export default async function extractPdfContent({url, blob}) {
-    // fetch blob if not given
+    // Fetch document if only a URL is given.
     if (blob === undefined) {
         const response = await fetch(url)
         blob = await response.blob()
