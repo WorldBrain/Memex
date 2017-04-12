@@ -8,19 +8,16 @@ async function extractContent(pdfData) {
     // Load PDF document into PDF.js
     const pdf = await PDFJS.getDocument(pdfData)
 
-    // [1..N] array for N pages
-    const pages = [...Array(pdf.pdfInfo.numPages + 1).keys()].slice(1)
-
-    // promises for page contents
-    const pageTextPromises = pages.map(async i => {
+    // Read text from pages one by one (in parallel may be too heavy).
+    const pageTexts = []
+    for (let i = 1; i <= pdf.pdfInfo.numPages; i++) {
         const page = await pdf.getPage(i)
         // wait for object containing items array with text pieces
         const pageItems = await page.getTextContent()
         const pageText = pageItems.items.map(item => item.str).join(' ')
-        return pageText
-    })
+        pageTexts.push(pageText)
+    }
 
-    const pageTexts = await Promise.all(pageTextPromises)
     const textContent = pageTexts.join('\n')
 
     const metadata = await pdf.getMetadata()
