@@ -1,6 +1,6 @@
 import Readability from 'readability'
 
-export default function getText(doc, loc) {
+export default function extractPageText(doc, loc) {
     const uri = {
         spec: loc.href,
         host: loc.host,

@@ -35,7 +35,7 @@ async function getDatafromBlob(blob) {
 }
 
 // Return promise for PDF data
-export default async function extractPdfData({url, blob}) {
+export default async function extractPdfContent({url, blob}) {
     // fetch blob if not given
     if (blob === undefined) {
         const response = await fetch(url)
