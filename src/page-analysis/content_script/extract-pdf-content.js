@@ -14,11 +14,11 @@ async function extractContent(pdfData) {
         const page = await pdf.getPage(i)
         // wait for object containing items array with text pieces
         const pageItems = await page.getTextContent()
-        const pageText = pageItems.items.map(item => item.str).join(' ')
+        const pageText = pageItems.items.map(item => item.str).join('\n\n')
         pageTexts.push(pageText)
     }
 
-    const textContent = pageTexts.join('\n')
+    const textContent = pageTexts.join('\n\n----------\n\n')
 
     const metadata = await pdf.getMetadata()
 
