@@ -55,6 +55,9 @@ me ([Gerben](https://github.com/Treora)) a message.
 Coding, design, communication, there is plenty to be done. A tiny but of funding
 is available to tip significant contributions. :money_with_wings:
 
+All code in this project is in the public domain, free from copyright
+restrictions. Please waive your copyrights on any contributions you make.
+See e.g. [unlicense.org](http://unlicense.org/) for more information.
 
 ## Hacking
 
