@@ -14,7 +14,7 @@ import cssnext from 'postcss-cssnext'
 
 
 const staticFiles = {
-    'node_modules/webextension-polyfill/dist/browser-polyfill.js': 'extension',
+    'node_modules/webextension-polyfill/dist/browser-polyfill.js': 'extension/lib',
 }
 
 const sourceFiles = [
