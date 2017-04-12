@@ -15,6 +15,7 @@ import cssnext from 'postcss-cssnext'
 
 const staticFiles = {
     'node_modules/webextension-polyfill/dist/browser-polyfill.js': 'extension/lib',
+    'node_modules/pdfjs-dist/build/pdf.worker.min.js': 'extension/lib',
 }
 
 const sourceFiles = [
@@ -39,11 +40,6 @@ const sourceFiles = [
         output: 'options.js',
         destination: './extension/options',
         cssOutput: 'style.css',
-    },
-    {
-        entries: ['./src/pdf.worker.min.js'],
-        output: 'pdf.worker.min.js',
-        destination: './extension/lib',
     },
 ]
 
