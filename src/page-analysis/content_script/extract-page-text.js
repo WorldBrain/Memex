@@ -1,6 +1,6 @@
 import Readability from 'readability'
 
-export default function extractPageText(doc, loc) {
+function extractPageText(doc, loc) {
     const uri = {
         spec: loc.href,
         host: loc.host,
@@ -25,4 +25,12 @@ export default function extractPageText(doc, loc) {
         // Also return full text, as article may be empty or wrong.
         bodyInnerText: doc.body.innerText,
     }
+}
+
+// Wrap it in a promise to defer execution.
+export default function extractPageTextAsync(...args) {
+    return new Promise(function (resolve, reject) {
+        const run = () => resolve(extractPageText(...args))
+        window.setTimeout(run, 0)
+    })
 }
