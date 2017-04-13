@@ -1,8 +1,9 @@
 // Run PDF.js to extract text from each page and read document metadata.
 async function extractContent(pdfData) {
+    // Import PDF.js only when needed, as it is large.
     require('pdfjs-dist') /* global PDFJS */
 
-    // Point PDF.js to its worker code.
+    // Point PDF.js to its worker code, a static file in the extension.
     PDFJS.workerSrc = browser.extension.getURL('/lib/pdf.worker.min.js')
 
     // Load PDF document into PDF.js
@@ -18,6 +19,7 @@ async function extractContent(pdfData) {
         pageTexts.push(pageText)
     }
 
+    // Join the texts of the pages with a small line, for human readability.
     const textContent = pageTexts.join('\n\n----------\n\n')
 
     const metadata = await pdf.getMetadata()
