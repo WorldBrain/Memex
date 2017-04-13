@@ -19,6 +19,7 @@ export const revisePageFields = doc => ({
     ...doc,
     // Choose something presentable as a title.
     title: (doc.extractedMetadata && doc.extractedMetadata.title)
-    || doc.title
-    || doc.url,
+        || (doc.extractedMetadata && doc.extractedMetadata.Title)
+        || doc.title
+        || doc.url,
 })
