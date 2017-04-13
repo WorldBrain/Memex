@@ -16,7 +16,7 @@ async function extractPageContentSync({
 
     // Text content in web page
     const text = extractPageText(doc, loc)
-    // MetaData of web page
+    // Metadata of web page
     const metadata = getMetadata(doc, url, metadataRules)
 
     return {

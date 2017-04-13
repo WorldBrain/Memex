@@ -29,11 +29,11 @@ async function performPageAnalysis({pageId, tabId}) {
         setDocField(db, pageId, 'screenshot')
     )
 
-    // Extract the Main text and Metadata
+    // Extract the text and metadata
     const storePageContent = extractPageContent().then(
         value => {
             setDocField(db, pageId, 'extractedText')(value.text)
-            setDocField(db, pageId, 'extractedMetaData')(value.metadata)
+            setDocField(db, pageId, 'extractedMetadata')(value.metadata)
         }
     )
 
