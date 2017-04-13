@@ -13,6 +13,7 @@ const attributesToInline = [
     {
         elements: 'img',
         attributes: 'src',
+        fixIntegrity: true,
     },
     {
         elements: 'img',
@@ -22,6 +23,7 @@ const attributesToInline = [
     {
         elements: 'link[rel*=icon]',
         attributes: 'href',
+        fixIntegrity: true,
     },
 ]
 

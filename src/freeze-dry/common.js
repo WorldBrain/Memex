@@ -18,6 +18,7 @@ export function inlineUrlsInAttributes({
     attributes,
     // Default case: the value is a single URL (e.g. for href, src, ...)
     attrToUrls = (value, attribute) => [value],
+    fixIntegrity = false,
     rootElement,
     docUrl,
 }) {
@@ -50,6 +51,10 @@ export function inlineUrlsInAttributes({
                 newValue = newValue.replace(urls[i], dataUris[i])
             }
             element.setAttribute(attribute, newValue)
+            if (fixIntegrity) {
+                // Don't bother recomputing the hash, just remove the check.
+                element.removeAttribute('integrity')
+            }
         })
         return Promise.all(promises)
     })
