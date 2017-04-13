@@ -13,9 +13,11 @@ export async function urlToDataUri(url) {
 // Find all URLs in the specified attribute(s) of the specified elements, fetch
 // their contents, and replace the URL with the content encoded as a data URI.
 // The elements argument can be a query selector string if rootElement is given.
-export function inlineAttributes({
+export function inlineUrlsInAttributes({
     elements,
     attributes,
+    // Default case: the value is a single URL (e.g. for href, src, ...)
+    attrToUrls = (value, attribute) => [value],
     rootElement,
     docUrl,
 }) {
@@ -23,13 +25,34 @@ export function inlineAttributes({
     if (typeof elements === 'string') {
         elements = rootElement.querySelectorAll(elements)
     }
+    // For each element...
     const promises = Array.from(elements).map(element => {
+        // ...for each listed attribute...
         const promises = attributes.map(async attribute => {
-            const url = new URL(element.getAttribute(attribute), docUrl)
-            const dataUri = await urlToDataUri(url)
-            element.setAttribute(attribute, dataUri)
+            // ...read the URL or URLs to be replaced.
+            const value = element.getAttribute(attribute)
+            if (!value) return
+
+            // Read the URL or URLs from the attribute value
+            const urls = attrToUrls(value, attribute)
+
+            // Fetch (hopefully from cache) the resource for each URL.
+            const dataUriPs = urls.map(async url => {
+                const absoluteUrl = new URL(url, docUrl)
+                const dataUri = await urlToDataUri(absoluteUrl)
+                return dataUri
+            })
+            const dataUris = await Promise.all(dataUriPs)
+
+            // Replace the URLs in the attribute value with the data URIs.
+            let newValue = value
+            for (let i = 0; i < urls.length; i++) {
+                newValue = newValue.replace(urls[i], dataUris[i])
+            }
+            element.setAttribute(attribute, newValue)
         })
         return Promise.all(promises)
     })
+    // Return a promise that resolves when finished.
     return Promise.all(promises)
 }
