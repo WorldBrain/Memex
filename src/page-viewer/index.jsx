@@ -6,7 +6,7 @@ export const localVersionAvailable = ({page}) => (
 
 export const LinkToLocalVersion = ({page, children, ...props}) => (
     <a
-        href={`data:text/html;charset=UTF-8,${page.html}`}
+        href={URL.createObjectURL(new Blob([page.html], {type: 'text/html;charset=UTF-8'}))}
         title='Stored text version available'
         {...props}
     >
