@@ -41,7 +41,7 @@ async function inlineLinkedStylesheets({rootElement, docUrl}) {
                 stylesheetText,
                 stylesheetUrl,
             })
-            dataUri = `data:text/css,${encodeURIComponent(stylesheetText)}`
+            dataUri = `data:text/css;charset=UTF-8,${encodeURIComponent(stylesheetText)}`
         } catch (err) {
             dataUri = 'about:blank'
         }
