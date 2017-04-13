@@ -39,6 +39,8 @@ async function inlineLinkedStylesheets({rootElement, docUrl}) {
         })
         const dataUri = `data:text/css,${encodeURIComponent(stylesheetText)}`
         linkEl.setAttribute('href', dataUri)
+        // Remove integrity check, if any, because hash will have changed.
+        linkEl.removeAttribute('integrity')
     })
     await whenAllSettled(jobs)
 }
