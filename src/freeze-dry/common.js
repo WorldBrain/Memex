@@ -1,4 +1,5 @@
 import responseToDataUri from 'src/util/response-to-data-uri'
+import whenAllSettled from 'src/util/when-all-settled'
 
 export async function urlToDataUri(url) {
     try {
@@ -13,7 +14,7 @@ export async function urlToDataUri(url) {
 // Find all URLs in the specified attribute(s) of the specified elements, fetch
 // their contents, and replace the URL with the content encoded as a data URI.
 // The elements argument can be a query selector string if rootElement is given.
-export function inlineUrlsInAttributes({
+export async function inlineUrlsInAttributes({
     elements,
     attributes,
     // Default case: the value is a single URL (e.g. for href, src, ...)
@@ -27,9 +28,9 @@ export function inlineUrlsInAttributes({
         elements = rootElement.querySelectorAll(elements)
     }
     // For each element...
-    const promises = Array.from(elements).map(element => {
+    const jobsForElements = Array.from(elements).map(async element => {
         // ...for each listed attribute...
-        const promises = attributes.map(async attribute => {
+        const jobsForAttributes = attributes.map(async attribute => {
             // ...read the URL or URLs to be replaced.
             const value = element.getAttribute(attribute)
             if (!value) return
@@ -56,8 +57,7 @@ export function inlineUrlsInAttributes({
                 element.removeAttribute('integrity')
             }
         })
-        return Promise.all(promises)
+        await whenAllSettled(jobsForAttributes)
     })
-    // Return a promise that resolves when finished.
-    return Promise.all(promises)
+    await whenAllSettled(jobsForElements)
 }

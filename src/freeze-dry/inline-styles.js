@@ -31,13 +31,20 @@ async function inlineLinkedStylesheets({rootElement, docUrl}) {
     const linkElements = Array.from(rootElement.querySelectorAll(querySelector))
     const jobs = linkElements.map(async linkEl => {
         const stylesheetUrl = new URL(linkEl.getAttribute('href'), docUrl)
-        const response = await fetch(stylesheetUrl, {cache: 'force-cache'})
-        let stylesheetText = await response.text()
-        stylesheetText = await inlineStylesheetContents({
-            stylesheetText,
-            stylesheetUrl,
-        })
-        const dataUri = `data:text/css,${encodeURIComponent(stylesheetText)}`
+        let dataUri
+        try {
+            // Fetch the stylesheet itself.
+            const response = await fetch(stylesheetUrl, {cache: 'force-cache'})
+            let stylesheetText = await response.text()
+            // Fetch and replace URLs inside the stylesheet.
+            stylesheetText = await inlineStylesheetContents({
+                stylesheetText,
+                stylesheetUrl,
+            })
+            dataUri = `data:text/css,${encodeURIComponent(stylesheetText)}`
+        } catch (err) {
+            dataUri = 'about:blank'
+        }
         linkEl.setAttribute('href', dataUri)
         // Remove integrity check, if any, because hash will have changed.
         linkEl.removeAttribute('integrity')
