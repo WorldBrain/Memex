@@ -76,7 +76,7 @@ export async function findVisits({startDate, endDate, limit, pagesResult}) {
     findResult = update('docs', docs => docs.slice(0, limit))(findResult)
 
     let visitsResult = normaliseFindResult(findResult)
-    visitsResult = insertPagesIntoVisits({visitsResult, pagesResult})
+    visitsResult = await insertPagesIntoVisits({visitsResult, pagesResult})
     return visitsResult
 }
 
