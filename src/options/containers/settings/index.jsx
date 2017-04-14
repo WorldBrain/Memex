@@ -1,6 +1,7 @@
 import React, { PropTypes } from 'react'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
+import debounce from 'lodash/debounce'
 
 import * as actions from './actions'
 import Blacklist from '../../components/blacklist'
@@ -16,10 +17,11 @@ class SettingsContainer extends React.Component {
             isAddingEnabled: false
         }
 
-        this.onAddClicked = this.onAddClicked.bind(this)
+        this.onAddClicked = debounce(this.onAddClicked.bind(this), 100)
         this.onCancelAdding = this.onCancelAdding.bind(this)
         this.onNewBlacklistItemAdded = this.onNewBlacklistItemAdded.bind(this)
         this.onDeleteClicked = this.onDeleteClicked.bind(this)
+        this.onInputChange = this.onInputChange.bind(this)
     }
 
     onAddClicked() {
@@ -30,12 +32,12 @@ class SettingsContainer extends React.Component {
         this.setState({ isAddingEnabled: false })
     }
 
-    onNewBlacklistItemAdded(value) {
+    onNewBlacklistItemAdded() {
         // TODO(AM): Validation
-        const { actions } = this.props
+        const { actions, siteInputValue } = this.props
 
         actions.addSiteToBlacklist({
-            expression: value,
+            expression: siteInputValue,
             dateAdded: new Date()
         })
     }
@@ -49,11 +51,16 @@ class SettingsContainer extends React.Component {
         })
     }
 
+    onInputChange(event = { target: {} }) {
+        const siteInputValue = event.target.value || ''
+        this.props.actions.setSiteInputValue({ siteInputValue })
+    }
+
     render() {
         return (
             <div>
                 <h1 className={routeTitle}>Settings</h1>
-                
+
                 <section className={styles.section}>
                     <h2 className={sectionTitle}>Ignored Sites</h2>
 
@@ -62,7 +69,9 @@ class SettingsContainer extends React.Component {
                                onNewBlacklistItemAdded={this.onNewBlacklistItemAdded}
                                onAddClicked={this.onAddClicked}
                                onCancelAdding={this.onCancelAdding}
-                               onDeleteClicked={this.onDeleteClicked} />
+                               onDeleteClicked={this.onDeleteClicked}
+                               onInputChange={this.onInputChange}
+                               siteInputValue={this.props.siteInputValue} />
                 </section>
             </div>
         )
@@ -70,12 +79,13 @@ class SettingsContainer extends React.Component {
 }
 
 SettingsContainer.propTypes = {
-    blacklist: PropTypes.array.isRequired
+    blacklist: PropTypes.array.isRequired,
+    siteInputValue: PropTypes.string.isRequired,
 }
 
-function mapStateToProps(state) {
+function mapStateToProps({ settings }) {
     return {
-        blacklist: state.settings.blacklist
+        ...settings,
     }
 }
 
