@@ -53,7 +53,9 @@ async function performPageAnalysis({pageId, tabId}) {
 
     // Freeze-dry and store the whole page
     const storePageFreezeDried = freezeDry().then(
-        setDocField(db, pageId, 'html')
+        htmlString => new Blob([htmlString], {type: 'text/html;charset=UTF-8'})
+    ).then(
+        setDocAttachment(db, pageId, 'frozen-page.html')
     )
 
     // When every task has either completed or failed, update the search index.

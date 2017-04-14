@@ -1,13 +1,13 @@
 import React, { PropTypes } from 'react'
 
 export const localVersionAvailable = ({page}) => (
-    !!page.html
+    !!(page._attachments && page._attachments['frozen-page.html'])
 )
 
 export const LinkToLocalVersion = ({page, children, ...props}) => (
     <a
-        href={URL.createObjectURL(new Blob([page.html], {type: 'text/html;charset=UTF-8'}))}
-        title='Stored text version available'
+        href={`/page-viewer/localpage.html?page=${page._id}`}
+        title='Stored version available'
         {...props}
     >
         {children}
