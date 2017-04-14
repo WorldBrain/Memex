@@ -2,20 +2,7 @@ import React, { PropTypes } from 'react'
 
 import styles from './style.css'
 
-const BlacklistNewSite = ({ isEnabled, value, onAdd, onCancelAdding, onInputChange }) => {
-
-    function handleKeyPress(e) {
-        if(e.which === 13) {
-            e.preventDefault()
-            onAdd()
-        }
-
-        if(e.which === 27) {
-            e.preventDefault()
-            onCancelAdding()
-        }
-    }
-
+const BlacklistNewSite = ({ isEnabled, value, onAdd, handleKeyPress, onInputChange }) => {
     return (
         <tr>
             { isEnabled && (
@@ -45,7 +32,7 @@ BlacklistNewSite.propTypes = {
     isEnabled: PropTypes.bool.isRequired,
     value: PropTypes.string.isRequired,
     onAdd: PropTypes.func.isRequired,
-    onCancelAdding: PropTypes.func.isRequired,
+    handleKeyPress: PropTypes.func.isRequired,
     onInputChange: PropTypes.func.isRequired,
 }
 
