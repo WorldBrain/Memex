@@ -40,6 +40,8 @@ class SettingsContainer extends React.Component {
             expression: siteInputValue,
             dateAdded: new Date()
         })
+
+        actions.resetSiteInputValue()
     }
 
     onDeleteClicked(itemIndex) {
