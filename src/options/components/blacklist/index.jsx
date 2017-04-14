@@ -6,7 +6,7 @@ import styles from './style.css'
 
 const Blacklist = ({
     blacklist, siteInputValue, isAddingEnabled, onNewBlacklistItemAdded,
-    onCancelAdding, onAddClicked, onDeleteClicked, onInputChange,
+    onAddClicked, onDeleteClicked, onInputChange, handleInputKeyPress,
 }) => {
     return (
         <div>
@@ -26,8 +26,8 @@ const Blacklist = ({
                     <tbody>
                         <BlacklistNewSite isEnabled={isAddingEnabled}
                                         onAdd={onNewBlacklistItemAdded}
-                                        onCancelAdding={onCancelAdding}
                                         value={siteInputValue}
+                                        handleKeyPress={handleInputKeyPress}
                                         onInputChange={onInputChange} />
 
                         { blacklist.map((item, idx) => (
@@ -48,8 +48,8 @@ Blacklist.propTypes = {
     siteInputValue: PropTypes.string.isRequired,
     isAddingEnabled: PropTypes.bool.isRequired,
     onInputChange: PropTypes.func.isRequired,
+    handleInputKeyPress: PropTypes.func.isRequired,
     onNewBlacklistItemAdded: PropTypes.func.isRequired,
-    onCancelAdding: PropTypes.func.isRequired,
     onAddClicked: PropTypes.func.isRequired,
     onDeleteClicked: PropTypes.func.isRequired
 }
