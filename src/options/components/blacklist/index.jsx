@@ -4,23 +4,16 @@ import BlacklistNewSite from '../blacklistNewSite'
 import BlacklistRow from '../blacklistRow'
 import styles from './style.css'
 
-const Blacklist = ({ blacklist, isAddingEnabled, onNewBlacklistItemAdded, onCancelAdding, onAddClicked, onDeleteClicked }) => {
-    const inputName = 'addNewBlacklistItem'
-    function handleAddClick() {
-        onAddClicked()
-
-        setTimeout(() => {
-            const el = document.querySelector(`input[data-name="${inputName}"]`)
-            el.focus()
-        }, 100)
-    }
-
+const Blacklist = ({
+    blacklist, siteInputValue, isAddingEnabled, onNewBlacklistItemAdded,
+    onCancelAdding, onAddClicked, onDeleteClicked, onInputChange,
+}) => {
     return (
         <div>
             <div className={styles.toolbar}>
-                <button onClick={handleAddClick} className={styles.addButton}>Add</button>
+                <button onClick={onAddClicked} className={styles.addButton}>Add</button>
             </div>
-            
+
             <div className={styles.tableContainer}>
                 <table className={styles.table}>
                     <thead>
@@ -32,9 +25,10 @@ const Blacklist = ({ blacklist, isAddingEnabled, onNewBlacklistItemAdded, onCanc
 
                     <tbody>
                         <BlacklistNewSite isEnabled={isAddingEnabled}
-                                        inputName={inputName}
                                         onAdd={onNewBlacklistItemAdded}
-                                        onCancelAdding={onCancelAdding} />
+                                        onCancelAdding={onCancelAdding}
+                                        value={siteInputValue}
+                                        onInputChange={onInputChange} />
 
                         { blacklist.map((item, idx) => (
                             <BlacklistRow blacklistItem={item}
@@ -46,12 +40,14 @@ const Blacklist = ({ blacklist, isAddingEnabled, onNewBlacklistItemAdded, onCanc
                 </table>
             </div>
         </div>
-    )
+    );
 }
 
 Blacklist.propTypes = {
     blacklist: PropTypes.array.isRequired,
+    siteInputValue: PropTypes.string.isRequired,
     isAddingEnabled: PropTypes.bool.isRequired,
+    onInputChange: PropTypes.func.isRequired,
     onNewBlacklistItemAdded: PropTypes.func.isRequired,
     onCancelAdding: PropTypes.func.isRequired,
     onAddClicked: PropTypes.func.isRequired,
