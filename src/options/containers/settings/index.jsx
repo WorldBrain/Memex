@@ -34,28 +34,28 @@ class SettingsContainer extends React.Component {
 
     onNewBlacklistItemAdded() {
         // TODO(AM): Validation
-        const { actions, siteInputValue } = this.props
+        const { boundActions, siteInputValue } = this.props
 
-        actions.addSiteToBlacklist({
+        boundActions.addSiteToBlacklist({
             expression: siteInputValue,
             dateAdded: new Date()
         })
 
-        actions.resetSiteInputValue()
+        boundActions.resetSiteInputValue()
     }
 
     onDeleteClicked(itemIndex) {
         // TODO(AM): Undo? Confirmation?
-        const { actions } = this.props
+        const { boundActions } = this.props
 
-        actions.removeSiteFromBlacklist({
+        boundActions.removeSiteFromBlacklist({
             index: itemIndex
         })
     }
 
     onInputChange(event = { target: {} }) {
         const siteInputValue = event.target.value || ''
-        this.props.actions.setSiteInputValue({ siteInputValue })
+        this.props.boundActions.setSiteInputValue({ siteInputValue })
     }
 
     render() {
@@ -83,6 +83,7 @@ class SettingsContainer extends React.Component {
 SettingsContainer.propTypes = {
     blacklist: PropTypes.array.isRequired,
     siteInputValue: PropTypes.string.isRequired,
+    boundActions: PropTypes.objectOf(PropTypes.func),
 }
 
 function mapStateToProps({ settings }) {
@@ -93,7 +94,7 @@ function mapStateToProps({ settings }) {
 
 function mapDispatchToProps(dispatch) {
     return {
-        actions: bindActionCreators(actions, dispatch)
+        boundActions: bindActionCreators(actions, dispatch)
     }
 }
 
