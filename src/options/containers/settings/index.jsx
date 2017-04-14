@@ -18,10 +18,10 @@ class SettingsContainer extends React.Component {
         }
 
         this.onAddClicked = debounce(this.onAddClicked.bind(this), 100)
-        this.onCancelAdding = this.onCancelAdding.bind(this)
         this.onNewBlacklistItemAdded = this.onNewBlacklistItemAdded.bind(this)
         this.onDeleteClicked = this.onDeleteClicked.bind(this)
         this.onInputChange = this.onInputChange.bind(this)
+        this.handleInputKeyPress = this.handleInputKeyPress.bind(this)
     }
 
     onAddClicked() {
@@ -30,6 +30,7 @@ class SettingsContainer extends React.Component {
 
     onCancelAdding() {
         this.setState({ isAddingEnabled: false })
+        this.props.boundActions.resetSiteInputValue()
     }
 
     onNewBlacklistItemAdded() {
@@ -58,6 +59,18 @@ class SettingsContainer extends React.Component {
         this.props.boundActions.setSiteInputValue({ siteInputValue })
     }
 
+    handleInputKeyPress(event = {}) {
+        if (event.key === 'Enter') {
+            event.preventDefault()
+            this.onNewBlacklistItemAdded()
+        }
+
+        if (event.key === 'Escape') {
+            event.preventDefault()
+            this.onCancelAdding()
+        }
+    }
+
     render() {
         return (
             <div>
@@ -70,9 +83,9 @@ class SettingsContainer extends React.Component {
                                isAddingEnabled={this.state.isAddingEnabled}
                                onNewBlacklistItemAdded={this.onNewBlacklistItemAdded}
                                onAddClicked={this.onAddClicked}
-                               onCancelAdding={this.onCancelAdding}
                                onDeleteClicked={this.onDeleteClicked}
                                onInputChange={this.onInputChange}
+                               handleInputKeyPress={this.handleInputKeyPress}
                                siteInputValue={this.props.siteInputValue} />
                 </section>
             </div>
