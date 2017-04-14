@@ -39,6 +39,7 @@ function removeSiteFromBlacklist(state, payload) {
 
 export default createReducer({
     [actions.setSiteInputValue]: (state, { siteInputValue }) => ({ ...state, siteInputValue }),
+    [actions.resetSiteInputValue]: (state) => ({ ...state, siteInputValue: '' }),
     [actions.setBlacklist]: setBlacklist,
     [actions.addSiteToBlacklist]: addSiteToBlacklist,
     [actions.removeSiteFromBlacklist]: removeSiteFromBlacklist
