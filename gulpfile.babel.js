@@ -42,6 +42,11 @@ const sourceFiles = [
         destination: './extension/options',
         cssOutput: 'style.css',
     },
+    {
+        entries: ['./src/page-viewer/localpage.js'],
+        output: 'localpage.js',
+        destination: './extension/page-viewer',
+    },
 ]
 
 const browserifySettings = {
