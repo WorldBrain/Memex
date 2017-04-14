@@ -1,10 +1,9 @@
 import { createReducer } from 'redux-act'
-import { addBlacklistedSiteToPouch } from './actions'
-
 import * as actions from './actions'
 
 const defaultState = {
-    blacklist: []
+    blacklist: [],
+    siteInputValue: '',
 }
 
 function setBlacklist(state, blacklist) {
@@ -39,6 +38,7 @@ function removeSiteFromBlacklist(state, payload) {
 }
 
 export default createReducer({
+    [actions.setSiteInputValue]: (state, { siteInputValue }) => ({ ...state, siteInputValue }),
     [actions.setBlacklist]: setBlacklist,
     [actions.addSiteToBlacklist]: addSiteToBlacklist,
     [actions.removeSiteFromBlacklist]: removeSiteFromBlacklist
