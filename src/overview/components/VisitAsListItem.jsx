@@ -3,6 +3,7 @@ import classNames from 'classnames'
 
 import {localVersionAvailable, LinkToLocalVersion} from 'src/page-viewer'
 import niceTime from 'src/util/nice-time'
+import ImgFromPouch from './ImgFromPouch'
 import styles from './VisitAsListItem.css'
 
 
@@ -11,12 +12,15 @@ const VisitAsListItem = ({doc, compact}) => {
         [styles.root]: true,
         [styles.compact]: compact,
     })
-    const favIcon = (
-        <img
-            className={styles.favIcon}
-            src={doc.page.favIcon || 'img/null-icon.png'}
-        />
-    )
+    const favIcon = doc.page._attachments && doc.page._attachments.favIcon
+        ? (
+            <ImgFromPouch
+                className={styles.favIcon}
+                doc={doc.page}
+                attachmentId='favIcon'
+            />
+        )
+        : <img className={styles.favIcon} src='img/null-icon.png' />
     return (
         <a
             className={visitClasses}
@@ -25,8 +29,14 @@ const VisitAsListItem = ({doc, compact}) => {
             onClick={e => { if (e.metaKey && e.ctrlKey) { console.log(doc); e.preventDefault() } }}
         >
             <div className={styles.screenshotContainer}>
-                {doc.page.screenshot
-                    ? <img className={styles.screenshot} src={doc.page.screenshot} />
+                {doc.page._attachments && doc.page._attachments.screenshot
+                    ? (
+                        <ImgFromPouch
+                            className={styles.screenshot}
+                            doc={doc.page}
+                            attachmentId='screenshot'
+                        />
+                    )
                     : favIcon
                 }
             </div>
