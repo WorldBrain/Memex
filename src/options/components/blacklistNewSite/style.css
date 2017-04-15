@@ -35,4 +35,9 @@
     &:hover {
         color: #333;
     }
+
+    &:disabled {
+        color: #ebebeb;
+        cursor: default;
+    }
 }
