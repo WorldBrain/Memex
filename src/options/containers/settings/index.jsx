@@ -61,6 +61,7 @@ class SettingsContainer extends React.Component {
     }
 
     render() {
+        const { boundActions } = this.props;
         return (
             <div>
                 <h1 className={routeTitle}>Settings</h1>
@@ -70,6 +71,7 @@ class SettingsContainer extends React.Component {
 
                     <Blacklist blacklist={this.props.blacklist}
                                onNewBlacklistItemAdded={this.onNewBlacklistItemAdded}
+                               onInputClear={() => boundActions.resetSiteInputValue()}
                                onAddClicked={this.onAddClicked}
                                onDeleteClicked={this.onDeleteClicked}
                                onInputChange={this.onInputChange}
