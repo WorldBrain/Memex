@@ -29,6 +29,9 @@ class SettingsContainer extends React.Component {
         const whitespaces = /\s+/g
         const expression = siteInputValue.replace(whitespaces, '')
 
+        // Ignore when user tries to submit nothing (no error state, so just do nothing)
+        if (expression.length === 0) return;
+
         boundActions.addSiteToBlacklist({
             expression,
             dateAdded: new Date()
