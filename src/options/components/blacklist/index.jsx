@@ -5,7 +5,7 @@ import BlacklistRow from '../blacklistRow'
 import styles from './style.css'
 
 const Blacklist = ({
-    blacklist, siteInputValue, onNewBlacklistItemAdded,
+    blacklist, siteInputValue, onNewBlacklistItemAdded, inputRef,
     onDeleteClicked, onInputChange, handleInputKeyPress,
 }) => (
     <div>
@@ -24,7 +24,8 @@ const Blacklist = ({
                     <BlacklistNewSite onAdd={onNewBlacklistItemAdded}
                                     value={siteInputValue}
                                     handleKeyPress={handleInputKeyPress}
-                                    onInputChange={onInputChange} />
+                                    onInputChange={onInputChange}
+                                    inputRef={inputRef} />
 
                     { blacklist.map((item, idx) => (
                         <BlacklistRow blacklistItem={item}
@@ -41,6 +42,7 @@ const Blacklist = ({
 Blacklist.propTypes = {
     blacklist: PropTypes.array.isRequired,
     siteInputValue: PropTypes.string.isRequired,
+    inputRef: PropTypes.func.isRequired,
     onInputChange: PropTypes.func.isRequired,
     handleInputKeyPress: PropTypes.func.isRequired,
     onNewBlacklistItemAdded: PropTypes.func.isRequired,
