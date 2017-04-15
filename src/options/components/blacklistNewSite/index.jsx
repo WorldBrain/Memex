@@ -16,11 +16,11 @@ const BlacklistNewSite = ({ value, onAdd, handleKeyPress, onInputChange, onInput
                         ref={inputRef} />
 
                 <div className={styles.inputButtons}>
-                    <button onClick={onInputClear} className={styles.button}>
+                    <button onClick={onInputClear} className={styles.button} disabled={value.length === 0}>
                         <span className="material-icons">backspace</span>
                     </button>
 
-                    <button onClick={onAdd} className={styles.button}>
+                    <button onClick={onAdd} className={styles.button} disabled={!/\S/g.test(value)}>
                         <span className="material-icons">save</span>
                     </button>
                 </div>
