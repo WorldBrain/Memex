@@ -23,11 +23,14 @@ class SettingsContainer extends React.Component {
     }
 
     onNewBlacklistItemAdded() {
-        // TODO(AM): Validation
         const { boundActions, siteInputValue } = this.props
 
+        // Ignore all whitespace by deleting it
+        const whitespaces = /\s+/g
+        const expression = siteInputValue.replace(whitespaces, '')
+
         boundActions.addSiteToBlacklist({
-            expression: siteInputValue,
+            expression,
             dateAdded: new Date()
         })
 
