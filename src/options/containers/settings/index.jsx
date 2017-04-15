@@ -18,6 +18,10 @@ class SettingsContainer extends React.Component {
         this.handleInputKeyPress = this.handleInputKeyPress.bind(this)
     }
 
+    componentDidMount() {
+        this.input.focus()
+    }
+
     onNewBlacklistItemAdded() {
         // TODO(AM): Validation
         const { boundActions, siteInputValue } = this.props
@@ -49,6 +53,11 @@ class SettingsContainer extends React.Component {
             event.preventDefault()
             this.onNewBlacklistItemAdded()
         }
+
+        if (event.key === 'Escape') {
+            event.preventDefault()
+            this.input.blur()
+        }
     }
 
     render() {
@@ -65,7 +74,8 @@ class SettingsContainer extends React.Component {
                                onDeleteClicked={this.onDeleteClicked}
                                onInputChange={this.onInputChange}
                                handleInputKeyPress={this.handleInputKeyPress}
-                               siteInputValue={this.props.siteInputValue} />
+                               siteInputValue={this.props.siteInputValue}
+                               inputRef={input => this.input = input} />
                 </section>
             </div>
         )
