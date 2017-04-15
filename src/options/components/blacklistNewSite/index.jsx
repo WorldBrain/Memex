@@ -5,7 +5,7 @@ import styles from './style.css'
 const BlacklistNewSite = ({ value, onAdd, handleKeyPress, onInputChange, inputRef }) => (
     <tr>
         <td colSpan={3} className={styles.cell}>
-            <div className={styles.newSite}>
+            <div className={styles.newSiteInputRow}>
 
                 <input value={value}
                         className={styles.input}
@@ -15,9 +15,11 @@ const BlacklistNewSite = ({ value, onAdd, handleKeyPress, onInputChange, inputRe
                         onKeyUp={handleKeyPress}
                         ref={inputRef} />
 
-                <button onClick={onAdd} className={styles.saveButton}>
-                    <span className="material-icons">save</span>
-                </button>
+                <div className={styles.inputButtons}>
+                    <button onClick={onAdd} className={styles.button}>
+                        <span className="material-icons">save</span>
+                    </button>
+                </div>
 
             </div>
         </td>
