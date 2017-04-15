@@ -1,4 +1,5 @@
 import assocPath from 'lodash/fp/assocPath'
+import { dataURLToBlob } from 'blob-util'
 
 import { whenPageDOMLoaded } from 'src/util/tab-events'
 import { remoteFunction } from 'src/util/webextensionRPC'
@@ -19,15 +20,26 @@ async function performPageAnalysis({pageId, tabId}) {
     const setDocField = (db, docId, key) =>
         value => db.upsert(docId, doc => assocPath(key, value)(doc))
 
+    // A shorthand for adding an attachment to a doc.
+    const setDocAttachment = (db, docId, attachmentId) => blob =>
+        db.upsert(docId, doc =>
+            assocPath(
+                ['_attachments', attachmentId],
+                {content_type: blob.type, data: blob}
+            )(doc)
+        )
+
     // Get and store the fav-icon
-    const storeFavIcon = getFavIcon({tabId}).then(
-        setDocField(db, pageId, 'favIcon')
-    )
+    const storeFavIcon = getFavIcon({tabId}).then(async dataUri => {
+        const blob = await dataURLToBlob(dataUri)
+        await setDocAttachment(db, pageId, 'favIcon')(blob)
+    })
 
     // Capture a screenshot.
-    const storeScreenshot = makeScreenshot({tabId}).then(
-        setDocField(db, pageId, 'screenshot')
-    )
+    const storeScreenshot = makeScreenshot({tabId}).then(async dataUri => {
+        const blob = await dataURLToBlob(dataUri)
+        await setDocAttachment(db, pageId, 'screenshot')(blob)
+    })
 
     // Extract the text and metadata
     const storePageContent = extractPageContent().then(
