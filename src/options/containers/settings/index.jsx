@@ -1,7 +1,6 @@
 import React, { PropTypes } from 'react'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
-import debounce from 'lodash/debounce'
 
 import * as actions from './actions'
 import Blacklist from '../../components/blacklist'
@@ -13,24 +12,10 @@ class SettingsContainer extends React.Component {
     constructor(props) {
         super(props)
 
-        this.state = {
-            isAddingEnabled: false
-        }
-
-        this.onAddClicked = debounce(this.onAddClicked.bind(this), 100)
         this.onNewBlacklistItemAdded = this.onNewBlacklistItemAdded.bind(this)
         this.onDeleteClicked = this.onDeleteClicked.bind(this)
         this.onInputChange = this.onInputChange.bind(this)
         this.handleInputKeyPress = this.handleInputKeyPress.bind(this)
-    }
-
-    onAddClicked() {
-        this.setState({ isAddingEnabled: true })
-    }
-
-    onCancelAdding() {
-        this.setState({ isAddingEnabled: false })
-        this.props.boundActions.resetSiteInputValue()
     }
 
     onNewBlacklistItemAdded() {
@@ -64,11 +49,6 @@ class SettingsContainer extends React.Component {
             event.preventDefault()
             this.onNewBlacklistItemAdded()
         }
-
-        if (event.key === 'Escape') {
-            event.preventDefault()
-            this.onCancelAdding()
-        }
     }
 
     render() {
@@ -80,7 +60,6 @@ class SettingsContainer extends React.Component {
                     <h2 className={sectionTitle}>Ignored Sites</h2>
 
                     <Blacklist blacklist={this.props.blacklist}
-                               isAddingEnabled={this.state.isAddingEnabled}
                                onNewBlacklistItemAdded={this.onNewBlacklistItemAdded}
                                onAddClicked={this.onAddClicked}
                                onDeleteClicked={this.onDeleteClicked}
