@@ -5,14 +5,12 @@ import BlacklistRow from '../blacklistRow'
 import styles from './style.css'
 
 const Blacklist = ({
-    blacklist, siteInputValue, isAddingEnabled, onNewBlacklistItemAdded,
-    onAddClicked, onDeleteClicked, onInputChange, handleInputKeyPress,
+    blacklist, siteInputValue, onNewBlacklistItemAdded,
+    onDeleteClicked, onInputChange, handleInputKeyPress,
 }) => (
     <div>
         <div className={styles.toolbar}>
-            <button onClick={onAddClicked} className={styles.addButton}>Add</button>
         </div>
-
         <div className={styles.tableContainer}>
             <table className={styles.table}>
                 <thead>
@@ -23,8 +21,7 @@ const Blacklist = ({
                 </thead>
 
                 <tbody>
-                    <BlacklistNewSite isEnabled={isAddingEnabled}
-                                    onAdd={onNewBlacklistItemAdded}
+                    <BlacklistNewSite onAdd={onNewBlacklistItemAdded}
                                     value={siteInputValue}
                                     handleKeyPress={handleInputKeyPress}
                                     onInputChange={onInputChange} />
@@ -44,11 +41,9 @@ const Blacklist = ({
 Blacklist.propTypes = {
     blacklist: PropTypes.array.isRequired,
     siteInputValue: PropTypes.string.isRequired,
-    isAddingEnabled: PropTypes.bool.isRequired,
     onInputChange: PropTypes.func.isRequired,
     handleInputKeyPress: PropTypes.func.isRequired,
     onNewBlacklistItemAdded: PropTypes.func.isRequired,
-    onAddClicked: PropTypes.func.isRequired,
     onDeleteClicked: PropTypes.func.isRequired,
 }
 
