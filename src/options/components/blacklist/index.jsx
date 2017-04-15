@@ -6,7 +6,7 @@ import styles from './style.css'
 
 const Blacklist = ({
     blacklist, siteInputValue, onNewBlacklistItemAdded, inputRef,
-    onDeleteClicked, onInputChange, handleInputKeyPress,
+    onDeleteClicked, onInputChange, onInputClear, handleInputKeyPress,
 }) => (
     <div>
         <div className={styles.toolbar}>
@@ -25,6 +25,7 @@ const Blacklist = ({
                                     value={siteInputValue}
                                     handleKeyPress={handleInputKeyPress}
                                     onInputChange={onInputChange}
+                                    onInputClear={onInputClear}
                                     inputRef={inputRef} />
 
                     { blacklist.map((item, idx) => (
@@ -44,6 +45,7 @@ Blacklist.propTypes = {
     siteInputValue: PropTypes.string.isRequired,
     inputRef: PropTypes.func.isRequired,
     onInputChange: PropTypes.func.isRequired,
+    onInputClear: PropTypes.func.isRequired,
     handleInputKeyPress: PropTypes.func.isRequired,
     onNewBlacklistItemAdded: PropTypes.func.isRequired,
     onDeleteClicked: PropTypes.func.isRequired,
