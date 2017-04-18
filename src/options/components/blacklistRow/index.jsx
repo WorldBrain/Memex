@@ -2,6 +2,7 @@ import React, { PropTypes } from 'react'
 import classNames from 'classnames'
 
 import styles from './style.css'
+import { blacklistButton } from '../../base.css'
 
 const iconClasses = classNames({
     'material-icons': true,
@@ -14,7 +15,9 @@ const BlacklistRow = ({ blacklistItem, itemId, onDeleteClicked }) => (
             <span>{blacklistItem.expression}</span>
 
             <span className={styles.blacklistActions}>
-                <a onClick={() => onDeleteClicked(itemId)}><i className={iconClasses}>delete</i></a>
+                <button className={blacklistButton} onClick={() => onDeleteClicked(itemId)}>
+                    <i className={iconClasses}>delete</i>
+                </button>
             </span>
         </td>
     </tr>
