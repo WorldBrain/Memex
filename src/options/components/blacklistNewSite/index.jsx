@@ -1,6 +1,7 @@
 import React, { PropTypes } from 'react'
 
 import styles from './style.css'
+import { blacklistButton } from '../../base.css'
 
 const BlacklistNewSite = ({ value, onAdd, handleKeyPress, onInputChange, onInputClear, inputRef }) => (
     <tr>
@@ -16,12 +17,12 @@ const BlacklistNewSite = ({ value, onAdd, handleKeyPress, onInputChange, onInput
                         ref={inputRef} />
 
                 <div className={styles.inputButtons}>
-                    <button onClick={onInputClear} className={styles.button} disabled={value.length === 0}>
-                        <span className="material-icons">backspace</span>
+                    <button onClick={onInputClear} className={blacklistButton} disabled={value.length === 0}>
+                        <i className="material-icons">backspace</i>
                     </button>
 
-                    <button onClick={onAdd} className={styles.button} disabled={!/\S/g.test(value)}>
-                        <span className="material-icons">save</span>
+                    <button onClick={onAdd} className={blacklistButton} disabled={!/\S/g.test(value)}>
+                        <i className="material-icons">save</i>
                     </button>
                 </div>
 
