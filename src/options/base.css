@@ -35,3 +35,20 @@ html, body {
     color: #666;
     margin: 0 0 10px 0;
 }
+
+.blacklistButton {
+    background: transparent;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    color: #999;
+
+    &:hover {
+        color: #333;
+    }
+
+    &:disabled {
+        color: #ebebeb;
+        cursor: default;
+    }
+}
