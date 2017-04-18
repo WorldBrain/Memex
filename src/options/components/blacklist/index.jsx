@@ -16,7 +16,6 @@ const Blacklist = ({
                 <thead>
                     <tr>
                         <th className={styles.domainCell}>Domain / Expression</th>
-                        <th>Added</th>
                     </tr>
                 </thead>
 
