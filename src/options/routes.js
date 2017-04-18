@@ -5,11 +5,11 @@ export default [
     {
         name: 'Import',
         pathname: '/import',
-        component: ImportContainer
+        component: ImportContainer,
     },
     {
         name: 'Settings',
         pathname: '/settings',
-        component: SettingsContainer
-    }
+        component: SettingsContainer,
+    },
 ]

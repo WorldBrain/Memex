@@ -9,8 +9,8 @@ import Routes from './routes'
 
 ReactDOM.render(
     <Router history={hashHistory}>
-        <Route path="/" component={Layout}>
-            <IndexRedirect to="/settings" />
+        <Route path='/' component={Layout}>
+            <IndexRedirect to='/settings' />
             { Routes.map(route =>
                 <Route
                     key={route.pathname}

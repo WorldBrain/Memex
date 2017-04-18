@@ -21,7 +21,7 @@ export const setEndDate = createAction('overview/setEndDate')
 export function init() {
     return function (dispatch, getState) {
         // Perform an initial search to populate the view (empty query = get all docs)
-        dispatch(refreshSearch({loadingIndicator:true}))
+        dispatch(refreshSearch({loadingIndicator: true}))
 
         // Track database changes, to e.g. trigger search result refresh
         onDatabaseChange(change => dispatch(handlePouchChange({change})))
@@ -29,7 +29,7 @@ export function init() {
 }
 
 // Search for docs matching the current query, update the results
-export function refreshSearch({loadingIndicator=false}) {
+export function refreshSearch({loadingIndicator = false}) {
     return async function (dispatch, getState) {
         const { query, startDate, endDate } = ourState(getState())
         const oldResult = ourState(getState()).searchResult
@@ -45,7 +45,6 @@ export function refreshSearch({loadingIndicator=false}) {
             endDate,
             includeContext: true,
         })
-
         if (loadingIndicator) {
             // Hide our nice loading animation again.
             dispatch(hideLoadingIndicator())

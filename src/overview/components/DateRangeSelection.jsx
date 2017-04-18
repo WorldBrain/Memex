@@ -1,7 +1,7 @@
-import React from 'react'
+import React, { PropTypes } from 'react'
 import moment from 'moment'
 import DatePicker from 'react-datepicker'
-import datePickerStyles from 'react-datepicker/dist/react-datepicker-cssmodules.css'
+import 'react-datepicker/dist/react-datepicker-cssmodules.css'
 
 import styles from './DateRangeSelection.css'
 
@@ -13,9 +13,9 @@ const DateRangeSelection = ({
     <div className={styles.dateRangeSelection}>
         <DatePicker
             className={styles.datePicker}
-            dateFormat="DD-MM-YYYY"
-            placeholderText="after.."
-            isClearable={true}
+            dateFormat='DD-MM-YYYY'
+            placeholderText='after..'
+            isClearable
             selected={startDate && moment(startDate)}
             selectsStart
             startDate={moment(startDate || 0)}
@@ -27,9 +27,9 @@ const DateRangeSelection = ({
         />
         <DatePicker
             className={styles.datePicker}
-            dateFormat="DD-MM-YYYY"
-            placeholderText="before.."
-            isClearable={true}
+            dateFormat='DD-MM-YYYY'
+            placeholderText='before..'
+            isClearable
             selected={endDate && moment(endDate)}
             selectsEnd
             startDate={moment(startDate || 0)}
@@ -41,5 +41,13 @@ const DateRangeSelection = ({
         />
     </div>
 )
+
+DateRangeSelection.propTypes = {
+    startDate: PropTypes.number,
+    endDate: PropTypes.number,
+    onStartDateChange: PropTypes.func,
+    onEndDateChange: PropTypes.func,
+}
+
 
 export default DateRangeSelection

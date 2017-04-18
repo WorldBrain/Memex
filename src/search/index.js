@@ -7,13 +7,12 @@ export async function filterVisitsByQuery({
     query,
     startDate,
     endDate,
-    limit=30,
-    includeContext=false,
+    limit = 30,
+    includeContext = false,
 }) {
     if (query === '') {
         return await findVisits({startDate, endDate, limit})
-    }
-    else {
+    } else {
         const pagesResult = await searchPages({
             query,
             limit,
@@ -26,8 +25,7 @@ export async function filterVisitsByQuery({
             endDate,
         })
 
-        if (includeContext)
-            visitsResult = await addVisitsContext({visitsResult})
+        if (includeContext) { visitsResult = await addVisitsContext({visitsResult}) }
 
         return visitsResult
     }
