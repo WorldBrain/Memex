@@ -13,7 +13,7 @@ import { generatePageDocId } from 'src/page-storage'
 async function getHistoryItems({
     startTime = 0,
     endTime,
-}={}) {
+} = {}) {
     const historyItems = await browser.history.search({
         text: '',
         maxResults: 9999999,
@@ -88,8 +88,7 @@ function convertHistoryToPagesAndVisits({
                 const referringVisitDocId = referringVisitDoc._id
                 // Add a reference to the visit document.
                 visitDoc.referringVisit = {_id: referringVisitDocId}
-            }
-            else {
+            } else {
                 // Apparently the referring visit is not present in the history.
                 // We can just pretend that there was no referrer.
             }
@@ -98,7 +97,7 @@ function convertHistoryToPagesAndVisits({
     // Return the new docs.
     return {
         pageDocs,
-        visitDocs: Object.values(visitDocs) // we can forget the old ids now
+        visitDocs: Object.values(visitDocs), // we can forget the old ids now
     }
 }
 
@@ -106,7 +105,7 @@ function convertHistoryToPagesAndVisits({
 export default async function importHistory({
     startTime,
     endTime,
-}={}) {
+} = {}) {
     // Get the full history: both the historyItems and visitItems.
     console.time('import history')
     const historyItems = await getHistoryItems({startTime, endTime})
@@ -122,7 +121,7 @@ export default async function importHistory({
     })
     let allDocs = pageDocs.concat(visitDocs)
     // Mark each doc to remember it originated from this import action.
-    const importTimestamp = new Date().getTime()
+    const importTimestamp = Date.now()
     allDocs = allDocs.map(doc => ({
         ...doc,
         importedFromBrowserHistory: importTimestamp,
@@ -148,6 +147,6 @@ export async function getOldestVisitTimestamp() {
 export async function getHistoryStats() {
     const historyItems = await getHistoryItems()
     return {
-        quantity: historyItems.length
+        quantity: historyItems.length,
     }
 }

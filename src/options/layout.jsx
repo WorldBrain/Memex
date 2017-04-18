@@ -4,22 +4,18 @@ import Routes from './routes'
 
 import styles from './base.css'
 
-class Layout extends React.Component {
-    render() {
-        return (
-            <div className={styles.root}>
-                <Navigation currentLocation={this.props.location} routes={Routes} />
-                <div className={styles.route}>
-                    { this.props.children }
-                </div>
-            </div>
-        )
-    }
-}
+const Layout = ({children, location}) => (
+    <div className={styles.root}>
+        <Navigation currentLocation={location} routes={Routes} />
+        <div className={styles.route}>
+            {children}
+        </div>
+    </div>
+)
 
 Layout.propTypes = {
     location: PropTypes.object.isRequired,
-    children: PropTypes.object.isRequired
+    children: PropTypes.object.isRequired,
 }
 
 export default Layout

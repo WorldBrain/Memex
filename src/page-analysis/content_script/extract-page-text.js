@@ -1,27 +1,26 @@
 import Readability from 'readability'
 
 // Extract the 'main text' from a web page (esp. news article, blog post, ...).
-function extractPageText_sync({
+function extractPageTextSync({
     // By default, use the globals window and document.
     loc = window.location,
     doc = document,
-}={}) {
+} = {}) {
     const uri = {
         spec: loc.href,
         host: loc.host,
-        prePath: loc.protocol + "//" + loc.host,
-        scheme: loc.protocol.substr(0, loc.protocol.indexOf(":")),
-        pathBase: loc.protocol + "//" + loc.host + loc.pathname.substr(0, loc.pathname.lastIndexOf("/") + 1)
+        prePath: loc.protocol + '//' + loc.host,
+        scheme: loc.protocol.substr(0, loc.protocol.indexOf(':')),
+        pathBase: loc.protocol + '//' + loc.host + loc.pathname.substr(0, loc.pathname.lastIndexOf('/') + 1),
     }
     let article
     try {
         article = new Readability(
             uri,
             // Readability mutates the DOM, so pass it a clone.
-            doc.cloneNode(true),
+            doc.cloneNode(true)
         ).parse()
-    }
-    catch (err) {
+    } catch (err) {
         // Bummer.
         console.error('Readability (content extraction) crashed:', err)
     }
@@ -33,9 +32,9 @@ function extractPageText_sync({
 }
 
 // Wrap it in a promise.
-export default function extractPageText_async(...args) {
+export default function extractPageTextAsync(...args) {
     return new Promise(function (resolve, reject) {
-        const run = () => resolve(extractPageText_sync(...args))
+        const run = () => resolve(extractPageTextSync(...args))
         window.setTimeout(run, 0)
     })
 }
