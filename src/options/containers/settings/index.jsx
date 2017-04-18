@@ -19,7 +19,11 @@ class SettingsContainer extends React.Component {
     }
 
     componentDidMount() {
-        this.input.focus()
+        this.focusInput();
+    }
+
+    focusInput() {
+        this.input.focus();
     }
 
     onNewBlacklistItemAdded() {
@@ -38,6 +42,9 @@ class SettingsContainer extends React.Component {
         })
 
         boundActions.resetSiteInputValue()
+
+        // Make sure input refocuses after new item added
+        this.focusInput();
     }
 
     onDeleteClicked(itemIndex) {
