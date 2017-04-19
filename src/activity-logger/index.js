@@ -67,7 +67,7 @@ export async function shouldRemember({url}) {
     const isProtocolValid = isWorthRemembering({ url })
     const isNotBlacklisted = !(await isURLBlacklisted(url))
 
-    return isProtocolValid && !isNotBlacklisted
+    return isProtocolValid && isNotBlacklisted
 }
 
 // Decide whether to remember or ignore a visited page.
