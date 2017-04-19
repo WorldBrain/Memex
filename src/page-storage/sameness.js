@@ -1,5 +1,5 @@
 import get from 'lodash/fp/get'
-import diffMatchPatch from 'diff-match-patch'
+import DiffMatchPatch from 'diff-match-patch'
 
 export const Sameness = {
     EXACTLY: 5,    // Perfect match, containing exactly the same data.
@@ -13,38 +13,32 @@ export const Sameness = {
 
 // Get a rough similarity metric between strings (a number between 0 and 1).
 function stringSimilarity(text1, text2) {
-    const dmp = new diffMatchPatch()
+    const dmp = new DiffMatchPatch()
     dmp.Diff_Timeout = 0.1
     const diff = dmp.diff_main(text1, text2)
     dmp.diff_cleanupSemantic(diff)
     const distance = dmp.diff_levenshtein(diff)
     const maxDistance = Math.max(text1.length, text2.length)
-    const similarity = 1-distance/maxDistance
+    const similarity = 1 - distance / maxDistance
     return similarity
 }
 
 // Tell how similar two strings are in a qualitative way.
 function textSameness(text1, text2) {
-    if (!text1 || !text2)
-        return Sameness.UNKNOWN
+    if (!text1 || !text2) { return Sameness.UNKNOWN }
 
-    if (text1 === text2)
-        return Sameness.EXACTLY
+    if (text1 === text2) { return Sameness.EXACTLY }
 
     const normaliseWhitespace = s => s.trim().replace(/s+/g, ' ')
-    if (normaliseWhitespace(text1) === normaliseWhitespace(text2))
-        return Sameness.OSTENSIBLY
+    if (normaliseWhitespace(text1) === normaliseWhitespace(text2)) { return Sameness.OSTENSIBLY }
 
     const textSimilarity = stringSimilarity(text1, text2)
 
-    if (textSimilarity > 0.9)
-        return Sameness.MOSTLY
+    if (textSimilarity > 0.9) { return Sameness.MOSTLY }
 
-    if (textSimilarity > 0.7)
-        return Sameness.PARTLY
+    if (textSimilarity > 0.7) { return Sameness.PARTLY }
 
-    if (textSimilarity > 0.5)
-        return Sameness.HARDLY
+    if (textSimilarity > 0.5) { return Sameness.HARDLY }
 
     return Sameness.UNRELATED
 }

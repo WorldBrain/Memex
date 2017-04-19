@@ -2,14 +2,14 @@
     list-style: none;
     margin: 40px auto;
     padding: 0;
-    width: 242px;
+    width: 850px;
 }
 
 .timestamp {
     display: inline-block;
     text-align: center;
     width: 100%;
-    font-family: 'Crimson', serif;
+    font-family: 'Arial', serif;
 
     &::before {
         content: '— ';
@@ -17,15 +17,6 @@
 
     &::after {
         content: ' —';
-    }
-}
-
-.clustered {
-    margin-bottom: -90px;
-    transition: transform 100ms;
-
-    &:hover, &:focus {
-        transform: translate(-5px, -75px) rotateZ(-5deg);
     }
 }
 

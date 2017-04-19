@@ -9,7 +9,7 @@ const Navigation = ({ currentLocation, routes }) => {
         return routes.map((route, idx) => {
             let navClasses = classNames({
                 [styles.navLink]: true,
-                [styles.isActive]: isActive(route)
+                [styles.isActive]: isActive(route),
             })
 
             return (
@@ -27,7 +27,7 @@ const Navigation = ({ currentLocation, routes }) => {
     return (
         <nav className={styles.root}>
             <h1 className={styles.title}>Web Memex</h1>
-            
+
             <ul className={styles.nav}>
                 { buildRoutes() }
             </ul>
@@ -37,7 +37,7 @@ const Navigation = ({ currentLocation, routes }) => {
 
 Navigation.propTypes = {
     currentLocation: PropTypes.object.isRequired,
-    routes: PropTypes.array.isRequired
+    routes: PropTypes.array.isRequired,
 }
 
 export default Navigation

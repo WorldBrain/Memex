@@ -2,11 +2,11 @@
     "name": "WebMemex",
     "version": "0.1",
     "background": {
-        "scripts": ["browser-polyfill.js", "background.js"]
+        "scripts": ["lib/browser-polyfill.js", "background.js"]
     },
     "content_scripts": [{
         "matches": ["<all_urls>"],
-        "js": ["browser-polyfill.js", "content_script.js"],
+        "js": ["lib/browser-polyfill.js", "content_script.js"],
         "run_at": "document_start"
     }],
     "browser_action": {

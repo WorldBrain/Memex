@@ -70,7 +70,7 @@ const ResultList = ({searchResult, searchQuery}) => {
     return <ul className={styles.root}>
         {searchResult.rows.map((row, rowIndex) => {
             let { marginTop, timestampComponent } = rowGaps[rowIndex]
-
+            
             // Cluster successive & related visits closer together.
             const nextRow = searchResult.rows[rowIndex+1]
             // ...unless there is a gap between the rows.
@@ -78,13 +78,12 @@ const ResultList = ({searchResult, searchQuery}) => {
             const clustered = nextRow && gapBelowThisRow===0
                 && shouldBeClustered(row.doc, nextRow.doc)
                 && row.isContextualResult === nextRow.isContextualResult
-
+            
             return <li
                 key={row.doc._id}
                 style={{
                     marginTop,
                 }}
-                className={clustered ? styles.clustered : undefined}
             >
                 {timestampComponent}
                 <VisitAsListItem

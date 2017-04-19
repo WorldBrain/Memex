@@ -1,0 +1,31 @@
+# https://editorconfig.org
+# Editor Config for WebMemex
+# Download an extension for editor config to allow your IDE
+# to follow the rules of the project
+
+# Used to indicate the file is in root of the project
+root = true
+
+# Styling applicable to all forms of files
+[*]
+indent_style = space
+indent_size = 4
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+end_of_line = lf
+charset = utf-8
+
+# Styling applicable to the file extension given
+[*.js, *.jsx]
+
+[*.json]
+indent_size = 2
+
+# Ignore all the styles due to uglify
+[*.min.js]
+indent_style = ignore
+insert_final_newline = ignore
+
+[Makefile]
+indent_style = tab

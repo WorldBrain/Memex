@@ -1,10 +1,9 @@
-import fromPairs from 'lodash/fp/fromPairs'
 import update from 'lodash/fp/update'
 import reverse from 'lodash/fp/reverse'
 import unionBy from 'lodash/unionBy' // the fp version does not support >2 inputs (lodash issue #3025)
 import sortBy from 'lodash/fp/sortBy'
 
-import db, { normaliseFindResult, resultRowsById }  from 'src/pouchdb'
+import db, { normaliseFindResult, resultRowsById } from 'src/pouchdb'
 import { convertVisitDocId, visitKeyPrefix, getTimestamp } from 'src/activity-logger'
 import { getPages } from './find-pages'
 
@@ -26,7 +25,7 @@ async function insertPagesIntoVisits({
         // Because the results are lined up, we can use a small optimisation and
         // return directly.
         return update('rows', rows => rows.map(
-            (row, i) => update('doc.page', ()=>pagesResult.rows[i].doc)(row)
+            (row, i) => update('doc.page', () => pagesResult.rows[i].doc)(row)
         ))(visitsResult)
     }
     // Read each visit's doc.page._id and replace it with the specified page.
@@ -77,7 +76,7 @@ export async function findVisits({startDate, endDate, limit, pagesResult}) {
     findResult = update('docs', docs => docs.slice(0, limit))(findResult)
 
     let visitsResult = normaliseFindResult(findResult)
-    visitsResult = insertPagesIntoVisits({visitsResult, pagesResult})
+    visitsResult = await insertPagesIntoVisits({visitsResult, pagesResult})
     return visitsResult
 }
 
@@ -85,13 +84,13 @@ export async function findVisits({startDate, endDate, limit, pagesResult}) {
 // Currently context means a few preceding and succeding visits.
 export async function addVisitsContext({
     visitsResult,
-    ...options,
+    ...options
 }) {
     // For each visit, get its context.
     const contextResultsP = visitsResult.rows.map(async row => {
         let contextResult = await getContextForVisit({
             visitDoc: row.doc,
-            ...options
+            ...options,
         })
         // Mark each row as being a 'contextual result'.
         contextResult = update('rows', rows =>
@@ -118,18 +117,18 @@ export async function addVisitsContext({
 
 async function getContextForVisit({
     visitDoc,
-    maxPrecedingVisits=2,
-    maxSuccedingVisits=2,
-    maxPrecedingTime = 1000*60*20,
-    maxSuccedingTime = 1000*60*20,
+    maxPrecedingVisits = 2,
+    maxSuccedingVisits = 2,
+    maxPrecedingTime = 1000 * 60 * 20,
+    maxSuccedingTime = 1000 * 60 * 20,
 }) {
     const timestamp = getTimestamp(visitDoc)
     // Get preceding visits
     const prequelResultP = db.allDocs({
         include_docs: true,
         // Subtract 1ms to exclude itself (there is no include_start option).
-        startkey: convertVisitDocId({timestamp: timestamp-1}),
-        endkey: convertVisitDocId({timestamp: timestamp-maxPrecedingTime}),
+        startkey: convertVisitDocId({timestamp: timestamp - 1}),
+        endkey: convertVisitDocId({timestamp: timestamp - maxPrecedingTime}),
         descending: true,
         limit: maxPrecedingVisits,
     })
@@ -137,8 +136,8 @@ async function getContextForVisit({
     const sequelResultP = db.allDocs({
         include_docs: true,
         // Add 1ms to exclude itself (there is no include_start option).
-        startkey: convertVisitDocId({timestamp: timestamp+1}),
-        endkey: convertVisitDocId({timestamp: timestamp+maxSuccedingTime}),
+        startkey: convertVisitDocId({timestamp: timestamp + 1}),
+        endkey: convertVisitDocId({timestamp: timestamp + maxSuccedingTime}),
         limit: maxSuccedingVisits,
     })
     const prequelResult = await prequelResultP
@@ -146,7 +145,7 @@ async function getContextForVisit({
 
     // Combine them as if they were one result.
     let contextResult = {
-        rows: prequelResult.rows.concat(reverse(sequelResult.rows))
+        rows: prequelResult.rows.concat(reverse(sequelResult.rows)),
     }
     // Insert pages as usual.
     contextResult = await insertPagesIntoVisits({visitsResult: contextResult})
