@@ -50,6 +50,18 @@ async function isURLBlacklisted(url = '') {
     return blacklistMatchesExist(blacklistArr)
 }
 
+/**
+ * Checks given URL against all "worth remembering" conditions.
+ * TODO: Merge this with `isWorthRemembering`. Now keep separate since `isWorthRemembering`
+ * is used in two places:
+ *  - history import (synchronous context)
+ *  - background page tracker (async context)
+ * Access to the blacklist is done async, but the way history is filtered uses a synchronous filter.
+ * Need to do an async filter to be able to use this correctly.
+ *
+ * @param {string} url The URL to check all conditions against.
+ * @returns {boolean} Denotes whether or not URL should be remembered.
+ */
 export async function shouldRemember({url}) {
     // "worth remembering" conditions
     const isProtocolValid = isWorthRemembering({ url })
