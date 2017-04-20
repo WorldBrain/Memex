@@ -39,7 +39,7 @@ async function getHistoryItems({
         startTime,
         endTime,
     })
-    return historyItems.filter(({url}) => isWorthRemembering({url}))
+    return await asyncFilter(historyItems, ({ url }) => isWorthRemembering(url))
 }
 
 function transformToPageDoc({historyItem}) {
