@@ -50,6 +50,12 @@ async function isURLBlacklisted(url = '') {
     return blacklistMatchesExist(blacklistArr)
 }
 
+function isURLProtocolValid(url = '') {
+    // Just remember http(s) pages, ignoring data uris, newtab, ...
+    const loggableUrlPattern = /^https?:\/\//
+    return loggableUrlPattern.test(url)
+}
+
 /**
  * Checks given URL against all "worth remembering" conditions.
  * TODO: Merge this with `isWorthRemembering`. Now keep separate since `isWorthRemembering`
@@ -62,17 +68,10 @@ async function isURLBlacklisted(url = '') {
  * @param {string} url The URL to check all conditions against.
  * @returns {boolean} Denotes whether or not URL should be remembered.
  */
-export async function shouldRemember({url}) {
+export async function isWorthRemembering(url = '') {
     // "worth remembering" conditions
-    const isProtocolValid = isWorthRemembering({ url })
+    const isProtocolValid = isURLProtocolValid(url)
     const isNotBlacklisted = !(await isURLBlacklisted(url))
 
     return isProtocolValid && isNotBlacklisted
-}
-
-// Decide whether to remember or ignore a visited page.
-export function isWorthRemembering({url}) {
-    // Just remember http(s) pages, ignoring data uris, newtab, ...
-    const loggableUrlPattern = /^https?:\/\//
-    return loggableUrlPattern.test(url)
 }
