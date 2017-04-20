@@ -4,7 +4,6 @@ import docuri from 'docuri'
 import randomString from 'src/util/random-string'
 
 export const visitKeyPrefix = 'visit/'
-export const blacklistStorageKey = 'blacklist'
 
 // Creates an _id string given the variables, or vice versa parses such strings
 // We simply use the creation time for the id, for easy chronological sorting.
@@ -24,30 +23,21 @@ export function generateVisitDocId({timestamp, nonce} = {}) {
 }
 
 /**
- * Given a URL, checks the URL against the user's stored blacklist expressions to see if any
+ * Given a URL and user's blacklist, checks the URL against the blacklist expressions to see if any
  * rule matches it.
  *
  * @param {string} url The URL to check against the blacklist.
+ * @param {Array<any>} blacklist Blacklist data to check URL against.
  * @return {boolean} Denotes whether or not the given URL matches any blacklist expressions.
  */
-async function isURLBlacklisted(url = '') {
+function isURLBlacklisted(url = '', blacklist = []) {
     // Main checking logic between a given blacklist expression and current URL
+    //   TODO: make this more "smart" (maybe check parts of the URL instead of match all, for e.g.)
     const doesExpressionMatchURL = (expression = '') => url.includes(expression)
 
     // Reduces blacklist to a bool by running main checking logic against each blacklist expression
     // (returns true if a single match is found in entire blacklist)
-    const blacklistMatchesExist = (blacklist = []) => blacklist.reduce(
-        (prev, curr) => doesExpressionMatchURL(curr.expression) || prev, false)
-
-    // Do the check against blacklist stored in local storage
-    const { blacklist } = await browser.storage.local.get(blacklistStorageKey)
-    if (!blacklist) {
-        return false // If blacklist isn't found in storage, then URL can't be considered blacklisted
-    }
-
-    // Sync parse of serialized blacklist data for programmatic use
-    const blacklistArr = JSON.parse(blacklist)
-    return blacklistMatchesExist(blacklistArr)
+    return blacklist.reduce((prev, curr) => doesExpressionMatchURL(curr.expression) || prev, false)
 }
 
 function isURLProtocolValid(url = '') {
@@ -58,20 +48,16 @@ function isURLProtocolValid(url = '') {
 
 /**
  * Checks given URL against all "worth remembering" conditions.
- * TODO: Merge this with `isWorthRemembering`. Now keep separate since `isWorthRemembering`
- * is used in two places:
- *  - history import (synchronous context)
- *  - background page tracker (async context)
- * Access to the blacklist is done async, but the way history is filtered uses a synchronous filter.
- * Need to do an async filter to be able to use this correctly.
  *
  * @param {string} url The URL to check all conditions against.
+ * @param {Array<any>} blacklist Blacklist data to pass in to avoid expensive processing of blacklist
+ *      local storage access every call
  * @returns {boolean} Denotes whether or not URL should be remembered.
  */
-export async function isWorthRemembering(url = '') {
+export function isWorthRemembering(url = '', blacklist = []) {
     // "worth remembering" conditions
     const isProtocolValid = isURLProtocolValid(url)
-    const isNotBlacklisted = !(await isURLBlacklisted(url))
+    const isNotBlacklisted = !isURLBlacklisted(url, blacklist)
 
     return isProtocolValid && isNotBlacklisted
 }

@@ -6,7 +6,6 @@ import db from 'src/pouchdb'
 import { isWorthRemembering, generateVisitDocId,
          visitKeyPrefix, convertVisitDocId } from 'src/activity-logger'
 import { generatePageDocId } from 'src/page-storage'
-import { asyncFilter } from 'src/util/async-wrappers'
 
 // Get the historyItems (visited places/pages; not each visit to them)
 async function getHistoryItems({
@@ -19,7 +18,11 @@ async function getHistoryItems({
         startTime,
         endTime,
     })
-    return await asyncFilter(historyItems, ({ url }) => isWorthRemembering(url))
+    // Fetch and parse blacklist data for page remembering decider predicate to use
+    const { blacklist } = await browser.storage.local.get('blacklist')
+    const blacklistArr = !blacklist ? [] : JSON.parse(blacklist)
+
+    return historyItems.filter(({ url }) => isWorthRemembering(url, blacklistArr))
 }
 
 function transformToPageDoc({historyItem}) {
