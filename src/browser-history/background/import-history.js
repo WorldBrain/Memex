@@ -8,7 +8,6 @@ import { isWorthRemembering, generateVisitDocId,
          visitKeyPrefix, convertVisitDocId } from 'src/activity-logger'
 import { generatePageDocId } from 'src/page-storage'
 
-
 // Get the historyItems (visited places/pages; not each visit to them)
 async function getHistoryItems({
     startTime = 0,
@@ -20,7 +19,11 @@ async function getHistoryItems({
         startTime,
         endTime,
     })
-    return historyItems.filter(({url}) => isWorthRemembering({url}))
+    // Fetch and parse blacklist data for page remembering decider predicate to use
+    const { blacklist } = await browser.storage.local.get('blacklist')
+    const blacklistArr = !blacklist ? [] : JSON.parse(blacklist)
+
+    return historyItems.filter(({ url }) => isWorthRemembering(url, blacklistArr))
 }
 
 function transformToPageDoc({historyItem}) {

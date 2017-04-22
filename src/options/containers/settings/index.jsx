@@ -1,12 +1,118 @@
-import React from 'react'
+import React, { PropTypes } from 'react'
+import { connect } from 'react-redux'
+import { bindActionCreators } from 'redux'
 
-import { routeTitle } from '../../base.css'
+import * as actions from './actions'
+import Blacklist from '../../components/blacklist'
 
-const SettingsContainer = () => (
-    <div>
-        <h1 className={routeTitle}>Settings</h1>
-        <p>Settings specific components to come in here.</p>
-    </div>
-)
+import { routeTitle, sectionTitle } from '../../base.css'
+import styles from './style.css'
 
-export default SettingsContainer
+class SettingsContainer extends React.Component {
+    constructor(props) {
+        super(props)
+
+        this.onNewBlacklistItemAdded = this.onNewBlacklistItemAdded.bind(this)
+        this.onDeleteClicked = this.onDeleteClicked.bind(this)
+        this.onInputChange = this.onInputChange.bind(this)
+        this.handleInputKeyPress = this.handleInputKeyPress.bind(this)
+    }
+
+    componentDidMount() {
+        this.focusInput();
+    }
+
+    focusInput() {
+        this.input.focus();
+    }
+
+    onNewBlacklistItemAdded() {
+        const { boundActions, siteInputValue } = this.props
+
+        // Ignore all whitespace by deleting it
+        const whitespaces = /\s+/g
+        const expression = siteInputValue.replace(whitespaces, '')
+
+        // Ignore when user tries to submit nothing (no error state, so just do nothing)
+        if (expression.length === 0) return;
+
+        boundActions.addSiteToBlacklist({
+            expression,
+            dateAdded: new Date()
+        })
+
+        boundActions.resetSiteInputValue()
+
+        // Make sure input refocuses after new item added
+        this.focusInput();
+    }
+
+    onDeleteClicked(itemIndex) {
+        // TODO(AM): Undo? Confirmation?
+        const { boundActions } = this.props
+
+        boundActions.removeSiteFromBlacklist({
+            index: itemIndex
+        })
+    }
+
+    onInputChange(event = { target: {} }) {
+        const siteInputValue = event.target.value || ''
+        this.props.boundActions.setSiteInputValue({ siteInputValue })
+    }
+
+    handleInputKeyPress(event = {}) {
+        if (event.key === 'Enter') {
+            event.preventDefault()
+            this.onNewBlacklistItemAdded()
+        }
+
+        if (event.key === 'Escape') {
+            event.preventDefault()
+            this.input.blur()
+        }
+    }
+
+    render() {
+        const { boundActions } = this.props;
+        return (
+            <div>
+                <h1 className={routeTitle}>Settings</h1>
+
+                <section className={styles.section}>
+                    <h2 className={sectionTitle}>Ignored Sites</h2>
+
+                    <Blacklist blacklist={this.props.blacklist}
+                               onNewBlacklistItemAdded={this.onNewBlacklistItemAdded}
+                               onInputClear={() => boundActions.resetSiteInputValue()}
+                               onAddClicked={this.onAddClicked}
+                               onDeleteClicked={this.onDeleteClicked}
+                               onInputChange={this.onInputChange}
+                               handleInputKeyPress={this.handleInputKeyPress}
+                               siteInputValue={this.props.siteInputValue}
+                               inputRef={input => this.input = input} />
+                </section>
+            </div>
+        )
+    }
+}
+
+SettingsContainer.propTypes = {
+    blacklist: PropTypes.array.isRequired,
+    siteInputValue: PropTypes.string.isRequired,
+    boundActions: PropTypes.objectOf(PropTypes.func),
+}
+
+function mapStateToProps({ settings }) {
+    return {
+        ...settings,
+    }
+}
+
+function mapDispatchToProps(dispatch) {
+    return {
+        boundActions: bindActionCreators(actions, dispatch)
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(SettingsContainer)
