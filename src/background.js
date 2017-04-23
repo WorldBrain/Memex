@@ -3,7 +3,7 @@ import 'src/omnibar'
 
 
 function openOverview() {
-    browser.tabs.create({
+    browser.tabs.update({
         url: '/overview/overview.html',
     })
 }
@@ -14,7 +14,7 @@ browser.browserAction.onClicked.addListener(() => {
 })
 
 browser.commands.onCommand.addListener(command => {
-    if (command === 'openOverview') {
+    if (command === '_execute_browser_action') {
         openOverview()
     }
 })
