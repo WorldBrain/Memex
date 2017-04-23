@@ -31,6 +31,7 @@
     "pouchdb-find": "^0.10.4",
     "pouchdb-quick-search": "^1.2.0",
     "pouchdb-upsert": "^2.0.2",
+    "query-string": "^4.3.4",
     "react": "^15.4.1",
     "react-datepicker": "^0.43.0",
     "react-dom": "^15.4.1",
