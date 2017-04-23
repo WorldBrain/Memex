@@ -1,5 +1,6 @@
 import debounce from 'lodash/fp/debounce'
 import escapeHtml from 'lodash/fp/escape'
+import tldjs from 'tldjs'
 
 import { filterVisitsByQuery } from 'src/search'
 import niceTime from 'src/util/nice-time'
@@ -67,10 +68,13 @@ async function makeSuggestion(query, suggest) {
 }
 
 const acceptInput = (text, disposition) => {
-    // TODO if text is not a suggested URL, open the overview with this query.
+    // Checks whether the text is a suggested url
+    const validUrl = tldjs.isValid(text)
+    const overviewPageWithQuery = '/overview/overview.html?searchQuery=' + text
+
     switch (disposition) {
         case 'currentTab':
-            browser.tabs.update({url: text})
+            browser.tabs.update({url: validUrl ? text : overviewPageWithQuery})
             break
         case 'newForegroundTab':
             browser.tabs.create({url: text})
