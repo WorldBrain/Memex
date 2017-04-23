@@ -13,11 +13,10 @@
         "default_title": "Memory overview"
     },
     "commands": {
-        "openOverview": {
+        "_execute_browser_action": {
             "suggested_key": {
                 "default": "Ctrl+Y"
-            },
-            "description": "Open your memory overview"
+            }
         }
     },
     "applications": {
