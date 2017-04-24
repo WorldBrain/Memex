@@ -1,0 +1,16 @@
+.blacklistButton {
+    background: transparent;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    color: #999;
+
+    &:hover {
+        color: #333;
+    }
+
+    &:disabled {
+        color: #ebebeb;
+        cursor: default;
+    }
+}

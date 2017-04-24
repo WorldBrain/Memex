@@ -1,9 +1,9 @@
 import { createStore, combineReducers } from 'redux'
 
-import settingsReducer from './containers/settings/reducer';
+import { reducer as blacklist } from './blacklist'
 
 const rootReducer = combineReducers({
-    settings: settingsReducer
+    blacklist,
 })
 
 export default function configureStore({ReduxDevTools=undefined}={}) {
