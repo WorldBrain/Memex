@@ -1,8 +1,8 @@
 import React, { PropTypes } from 'react'
 
-import BlacklistNewSite from '../blacklistNewSite'
-import BlacklistRow from '../blacklistRow'
-import styles from './style.css'
+import BlacklistNewSite from './BlacklistNewSite'
+import BlacklistRow from './BlacklistRow'
+import styles from './Blacklist.css'
 
 const Blacklist = ({
     blacklist, siteInputValue, onNewBlacklistItemAdded, inputRef,

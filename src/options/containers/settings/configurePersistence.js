@@ -1,9 +1,9 @@
-import * as actions from './actions'
+import { actions } from '../../blacklist'
 
 export default function configurePersistence(store) {
     // Subscribe to changes and update local storage
     store.subscribe(() => {
-        const { blacklist }  = store.getState().settings
+        const { blacklist } = store.getState().blacklist
         chrome.storage.local.set({'blacklist': JSON.stringify(blacklist)})
     })
 
