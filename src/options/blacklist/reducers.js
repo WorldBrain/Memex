@@ -9,19 +9,19 @@ const defaultState = {
 function setBlacklist(state, blacklist) {
     return {
         ...state,
-        blacklist
+        blacklist,
     }
 }
 
 function addSiteToBlacklist(state, payload) {
     const blacklist = [
         payload,
-        ...state.blacklist
+        ...state.blacklist,
     ]
 
     return {
         ...state,
-        blacklist
+        blacklist,
     }
 }
 
@@ -33,7 +33,7 @@ function removeSiteFromBlacklist(state, payload) {
 
     return {
         ...state,
-        blacklist
+        blacklist,
     }
 }
 
@@ -42,5 +42,5 @@ export default createReducer({
     [actions.resetSiteInputValue]: (state) => ({ ...state, siteInputValue: '' }),
     [actions.setBlacklist]: setBlacklist,
     [actions.addSiteToBlacklist]: addSiteToBlacklist,
-    [actions.removeSiteFromBlacklist]: removeSiteFromBlacklist
+    [actions.removeSiteFromBlacklist]: removeSiteFromBlacklist,
 }, defaultState)
