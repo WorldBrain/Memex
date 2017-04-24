@@ -11,8 +11,8 @@ const BlacklistNewSite = ({ value, onAdd, handleKeyPress, onInputChange, onInput
                 <input
                     value={value}
                     className={styles.input}
-                    type="text"
-                    placeholder="Enter any text or domain or path to ignore matching URLs"
+                    type='text'
+                    placeholder='Enter any text or domain or path to ignore matching URLs'
                     onChange={onInputChange}
                     onKeyUp={handleKeyPress}
                     ref={inputRef}
@@ -20,11 +20,11 @@ const BlacklistNewSite = ({ value, onAdd, handleKeyPress, onInputChange, onInput
 
                 <div className={styles.inputButtons}>
                     <button onClick={onInputClear} className={blacklistButton} disabled={value.length === 0}>
-                        <i className="material-icons">backspace</i>
+                        <i className='material-icons'>backspace</i>
                     </button>
 
                     <button onClick={onAdd} className={blacklistButton} disabled={!/\S/g.test(value)}>
-                        <i className="material-icons">save</i>
+                        <i className='material-icons'>save</i>
                     </button>
                 </div>
 
