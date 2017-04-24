@@ -81,7 +81,7 @@ class BlacklistContainer extends Component {
                 onInputChange={this.onInputChange}
                 handleInputKeyPress={this.handleInputKeyPress}
                 siteInputValue={this.props.siteInputValue}
-                inputRef={input => this.input = input} />
+                inputRef={input => this.input = input} />   // eslint-disable-line no-return-assign
         )
     }
 }

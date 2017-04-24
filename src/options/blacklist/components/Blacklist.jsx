@@ -9,8 +9,7 @@ const Blacklist = ({
     onDeleteClicked, onInputChange, onInputClear, handleInputKeyPress,
 }) => (
     <div>
-        <div className={styles.toolbar}>
-        </div>
+        <div className={styles.toolbar} />
         <div className={styles.tableContainer}>
             <table className={styles.table}>
                 <thead>
@@ -20,18 +19,22 @@ const Blacklist = ({
                 </thead>
 
                 <tbody>
-                    <BlacklistNewSite onAdd={onNewBlacklistItemAdded}
-                                    value={siteInputValue}
-                                    handleKeyPress={handleInputKeyPress}
-                                    onInputChange={onInputChange}
-                                    onInputClear={onInputClear}
-                                    inputRef={inputRef} />
+                    <BlacklistNewSite
+                        onAdd={onNewBlacklistItemAdded}
+                        value={siteInputValue}
+                        handleKeyPress={handleInputKeyPress}
+                        onInputChange={onInputChange}
+                        onInputClear={onInputClear}
+                        inputRef={inputRef}
+                    />
 
                     { blacklist.map((item, idx) => (
-                        <BlacklistRow blacklistItem={item}
-                                    key={idx}
-                                    itemId={idx}
-                                    onDeleteClicked={onDeleteClicked} />
+                        <BlacklistRow
+                            key={idx}
+                            blacklistItem={item}
+                            itemId={idx}
+                            onDeleteClicked={onDeleteClicked}
+                        />
                     ))}
                 </tbody>
             </table>
