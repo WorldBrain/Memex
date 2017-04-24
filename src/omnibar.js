@@ -70,17 +70,18 @@ async function makeSuggestion(query, suggest) {
 const acceptInput = (text, disposition) => {
     // Checks whether the text is a suggested url
     const validUrl = tldjs.isValid(text)
-    const overviewPageWithQuery = '/overview/overview.html?searchQuery=' + text
+    const overviewPageWithQuery = '/overview/overview.html?q=' + text
+    const goToUrl = validUrl ? text : overviewPageWithQuery
 
     switch (disposition) {
         case 'currentTab':
-            browser.tabs.update({url: validUrl ? text : overviewPageWithQuery})
+            browser.tabs.update({url: goToUrl})
             break
         case 'newForegroundTab':
-            browser.tabs.create({url: text})
+            browser.tabs.create({url: goToUrl})
             break
         case 'newBackgroundTab':
-            browser.tabs.create({url: text, active: false})
+            browser.tabs.create({url: goToUrl, active: false})
             break
     }
 }
