@@ -1,7 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import queryString from 'query-string'
 
 import * as actions from '../actions'
 import { ourState } from '../selectors'
@@ -11,13 +10,6 @@ import styles from './Overview.css'
 
 
 class Overview extends React.Component {
-    componentWillMount() {
-        const queryVariables = queryString.parse(location.search)
-        if (queryVariables && queryVariables.searchQuery) {
-            this.props.onInputChanged(queryVariables.searchQuery)
-        }
-    }
-
     componentDidMount() {
         if (this.props.grabFocusOnMount) {
             this.refs['inputQuery'].focus()
