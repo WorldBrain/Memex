@@ -6,7 +6,7 @@ import { blacklistButton } from './base.css'
 
 const iconClasses = classNames({
     'material-icons': true,
-    [styles.icon]: true
+    [styles.icon]: true,
 })
 
 const BlacklistRow = ({ blacklistItem, itemId, onDeleteClicked }) => (
@@ -26,7 +26,7 @@ const BlacklistRow = ({ blacklistItem, itemId, onDeleteClicked }) => (
 BlacklistRow.propTypes = {
     blacklistItem: PropTypes.object.isRequired,
     itemId: PropTypes.number.isRequired,
-    onDeleteClicked: PropTypes.func.isRequired
+    onDeleteClicked: PropTypes.func.isRequired,
 }
 
 export default BlacklistRow
