@@ -1,7 +1,7 @@
 import React, { PropTypes } from 'react'
 
-import styles from './style.css'
-import { blacklistButton } from '../../base.css'
+import styles from './BlacklistNewSite.css'
+import { blacklistButton } from './base.css'
 
 const BlacklistNewSite = ({ value, onAdd, handleKeyPress, onInputChange, onInputClear, inputRef }) => (
     <tr>
