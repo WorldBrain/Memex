@@ -15,7 +15,8 @@
     "commands": {
         "openOverview": {
             "suggested_key": {
-                "default": "Ctrl+Y"
+                "default": "Ctrl+Y",
+                "mac": "MacCtrl+Y"
             },
             "description": "Open your memory overview"
         }
