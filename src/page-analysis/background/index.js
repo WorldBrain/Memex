@@ -10,21 +10,14 @@ import { revisePageFields } from '..'
 import getFavIcon from './get-fav-icon'
 import makeScreenshot from './make-screenshot'
 
-
 // Extract interesting stuff from the current page and store it.
 async function performPageAnalysis({pageId, tabId}) {
-    // Run these functions in the content script in the tab.
-    const extractPageText = remoteFunction('extractPageText', {tabId})
-    const extractPageMetadata = remoteFunction('extractPageMetadata', {tabId})
+    // Run this function in the content script in the tab.
+    const extractPageContent = remoteFunction('extractPageContent', {tabId})
 
     // A shorthand for updating a single field in a doc.
     const setDocField = (db, docId, key) =>
         value => db.upsert(docId, doc => assocPath(key, value)(doc))
-
-    // Get page title, author (if any), etcetera.
-    const storePageMetadata = extractPageMetadata().then(
-        setDocField(db, pageId, 'extractedMetadata')
-    )
 
     // Get and store the fav-icon
     const storeFavIcon = getFavIcon({tabId}).then(
@@ -36,17 +29,19 @@ async function performPageAnalysis({pageId, tabId}) {
         setDocField(db, pageId, 'screenshot')
     )
 
-    // Extract the main text
-    const storePageText = extractPageText().then(
-        setDocField(db, pageId, 'extractedText')
+    // Extract the text and metadata
+    const storePageContent = extractPageContent().then(
+        value => {
+            setDocField(db, pageId, 'extractedText')(value.text)
+            setDocField(db, pageId, 'extractedMetadata')(value.metadata)
+        }
     )
 
     // When every task has either completed or failed, update the search index.
     await whenAllSettled([
-        storePageMetadata,
-        storePageText,
         storeFavIcon,
         storeScreenshot,
+        storePageContent,
     ])
     await updatePageSearchIndex()
 }
