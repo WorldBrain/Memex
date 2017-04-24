@@ -6,16 +6,16 @@ import { blacklistButton } from './base.css'
 
 const iconClasses = classNames({
     'material-icons': true,
-    [styles.icon]: true,
+    [styles.icon]: true
 })
 
-const BlacklistRow = ({ expression, onDeleteClicked }) => (
+const BlacklistRow = ({ blacklistItem, itemId, onDeleteClicked }) => (
     <tr>
         <td colSpan={3}>
-            <span>{expression}</span>
+            <span>{blacklistItem.expression}</span>
 
             <span className={styles.blacklistActions}>
-                <button className={blacklistButton} onClick={onDeleteClicked}>
+                <button className={blacklistButton} onClick={() => onDeleteClicked(itemId)}>
                     <i className={iconClasses}>delete</i>
                 </button>
             </span>
@@ -24,11 +24,9 @@ const BlacklistRow = ({ expression, onDeleteClicked }) => (
 )
 
 BlacklistRow.propTypes = {
-    // State
-    expression: PropTypes.string.isRequired,
-
-    // Event handlers
-    onDeleteClicked: PropTypes.func.isRequired,
+    blacklistItem: PropTypes.object.isRequired,
+    itemId: PropTypes.number.isRequired,
+    onDeleteClicked: PropTypes.func.isRequired
 }
 
 export default BlacklistRow
