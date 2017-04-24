@@ -1,8 +1,8 @@
 import React, { PropTypes } from 'react'
 import classNames from 'classnames'
 
-import styles from './style.css'
-import { blacklistButton } from '../../base.css'
+import styles from './BlacklistRow.css'
+import { blacklistButton } from './base.css'
 
 const iconClasses = classNames({
     'material-icons': true,
