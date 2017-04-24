@@ -1,51 +1,49 @@
 import mapValues from 'lodash/fp/mapValues'
 
+
 // Our secret tokens to recognise our messages
 const RPC_CALL = '__RPC_CALL__'
+const RPC_RESPONSE = '__RPC_RESPONSE__'
 
 
 // === Initiating side ===
 
-const sendMessageErrorMessage = ({funcName, otherSide}) =>
-    `Got no response from RPC when calling '${funcName}'. `
-    + `Did you enable RPC in ${otherSide}?`
-
 export function remoteFunction(funcName, {tabId} = {}) {
-    const sendMessage = (tabId !== undefined)
-        ? message => {
-            return browser.tabs.sendMessage(tabId, message).catch(
-                err => {
-                    throw new Error(sendMessageErrorMessage({
-                        funcName,
-                        otherSide: "the tab's content script",
-                    }))
-                }
-            )
-        }
-        : message => {
-            return browser.runtime.sendMessage(message).catch(
-                err => {
-                    throw new Error(sendMessageErrorMessage({
-                        funcName,
-                        otherSide: 'the background script',
-                    }))
-                }
-            )
-        }
+    const otherSide = (tabId !== undefined)
+        ? "the tab's content script"
+        : 'the background script'
 
-    const f = function (...args) {
+    const f = async function (...args) {
         const message = {
             [RPC_CALL]: RPC_CALL,
             funcName,
             args,
         }
-        return sendMessage(message).then(response => {
-            if (response.error) {
-                throw new Error(response.error)
-            } else {
-                return response.returnValue
-            }
-        })
+
+        // Try send the message and await the response.
+        let response
+        try {
+            response = (tabId !== undefined)
+                ? await browser.tabs.sendMessage(tabId, message)
+                : await browser.runtime.sendMessage(message)
+        } catch (err) {
+            throw new Error(
+                `Got no response when trying to call '${funcName}'. `
+                + `Did you enable RPC in ${otherSide}?`
+            )
+        }
+
+        // Check if it was *our* listener that responded.
+        if (!response || response[RPC_RESPONSE] !== RPC_RESPONSE) {
+            throw new Error(`RPC got a response from an interfering listener.`)
+        }
+
+        // Return the value or throw the error we received from the other side.
+        if (response.error) {
+            throw new Error(response.error)
+        } else {
+            return response.returnValue
+        }
     }
 
     // Give it a name, could be helpful in debugging
@@ -78,6 +76,7 @@ function incomingRPCListener(message, sender) {
         return Promise.resolve(value).then(
             value => ({
                 returnValue: value,
+                [RPC_RESPONSE]: RPC_RESPONSE,
             })
         )
     }
