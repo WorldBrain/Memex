@@ -15,7 +15,7 @@ async function extractContent(pdfData) {
         const page = await pdf.getPage(i)
         // wait for object containing items array with text pieces
         const pageItems = await page.getTextContent()
-        const pageText = pageItems.items.map(item => item.str).join('\n\n')
+        const pageText = pageItems.items.map(item => item.str).join(' ')
         pageTexts.push(pageText)
     }
 
