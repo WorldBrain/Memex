@@ -8,13 +8,15 @@ const BlacklistNewSite = ({ value, onAdd, handleKeyPress, onInputChange, onInput
         <td colSpan={3} className={styles.cell}>
             <div className={styles.newSiteInputRow}>
 
-                <input value={value}
-                        className={styles.input}
-                        type="text"
-                        placeholder="Enter any text or domain or path to ignore matching URLs"
-                        onChange={onInputChange}
-                        onKeyUp={handleKeyPress}
-                        ref={inputRef} />
+                <input
+                    value={value}
+                    className={styles.input}
+                    type="text"
+                    placeholder="Enter any text or domain or path to ignore matching URLs"
+                    onChange={onInputChange}
+                    onKeyUp={handleKeyPress}
+                    ref={inputRef}
+                />
 
                 <div className={styles.inputButtons}>
                     <button onClick={onInputClear} className={blacklistButton} disabled={value.length === 0}>
