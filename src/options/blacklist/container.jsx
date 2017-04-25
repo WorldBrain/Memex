@@ -2,9 +2,8 @@ import React, { PropTypes, Component } from 'react'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 
-import * as actions from './actions'
 import Blacklist from './components/Blacklist'
-import reducer from './reducers'
+import * as actions from './actions'
 
 class BlacklistContainer extends Component {
     constructor(props) {
@@ -96,5 +95,3 @@ const mapStateToProps = ({ blacklist }) => blacklist
 const mapDispatchToProps = dispatch => ({ boundActions: bindActionCreators(actions, dispatch) })
 
 export default connect(mapStateToProps, mapDispatchToProps)(BlacklistContainer)
-
-export { reducer, actions }
