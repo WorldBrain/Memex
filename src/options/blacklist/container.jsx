@@ -2,17 +2,15 @@ import React, { PropTypes, Component } from 'react'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 
-import BlacklistTable from './components/BlacklistTable'
-import BlacklistRow from './components/BlacklistRow'
-import BlacklistInputRow from './components/BlacklistInputRow'
+import Blacklist from './components/Blacklist'
 import * as actions from './actions'
-import { entireState as entireStateSelector } from './selectors'
 
 class BlacklistContainer extends Component {
     constructor(props) {
         super(props)
 
         this.onNewBlacklistItemAdded = this.onNewBlacklistItemAdded.bind(this)
+        this.onDeleteClicked = this.onDeleteClicked.bind(this)
         this.onInputChange = this.onInputChange.bind(this)
         this.handleInputKeyPress = this.handleInputKeyPress.bind(this)
     }
@@ -23,15 +21,6 @@ class BlacklistContainer extends Component {
 
     focusInput() {
         this.input.focus()
-    }
-
-    shouldDisableSaveBtn() {
-        // If there aren't any non-whitespace chars (only need to find first)
-        return !/\S/.test(this.props.siteInputValue)
-    }
-
-    shouldDisableClearBtn() {
-        return this.props.siteInputValue.length === 0
     }
 
     onNewBlacklistItemAdded() {
@@ -79,60 +68,30 @@ class BlacklistContainer extends Component {
         }
     }
 
-    renderBlacklistInputRow() {
-        const { boundActions, siteInputValue } = this.props
-
-        return (
-            <BlacklistInputRow
-                key='blacklist-input'
-                value={siteInputValue}
-                isClearBtnDisabled={this.shouldDisableClearBtn()}
-                isSaveBtnDisabled={this.shouldDisableSaveBtn()}
-                onAdd={this.onNewBlacklistItemAdded}
-                handleKeyPress={this.handleInputKeyPress}
-                onInputChange={this.onInputChange}
-                onInputClear={() => boundActions.resetSiteInputValue()}
-                inputRef={input => this.input = input}   // eslint-disable-line no-return-assign
-            />
-        )
-    }
-
-    renderBlacklistRows() {
-        const { blacklist } = this.props
-
-        return [
-            this.renderBlacklistInputRow(),
-            ...blacklist.map(({ expression }, idx) => (
-                <BlacklistRow
-                    key={idx}
-                    expression={expression}
-                    onDeleteClicked={() => this.onDeleteClicked(idx)}
-                />
-            )),
-        ]
-    }
-
     render() {
+        const { boundActions } = this.props
+
         return (
-            <BlacklistTable>
-                {this.renderBlacklistRows()}
-            </BlacklistTable>
+            <Blacklist blacklist={this.props.blacklist}
+                onNewBlacklistItemAdded={this.onNewBlacklistItemAdded}
+                onInputClear={() => boundActions.resetSiteInputValue()}
+                onAddClicked={this.onAddClicked}
+                onDeleteClicked={this.onDeleteClicked}
+                onInputChange={this.onInputChange}
+                handleInputKeyPress={this.handleInputKeyPress}
+                siteInputValue={this.props.siteInputValue}
+                inputRef={input => this.input = input} />   // eslint-disable-line no-return-assign
         )
     }
 }
 
 BlacklistContainer.propTypes = {
-    // State
+    blacklist: PropTypes.array.isRequired,
     siteInputValue: PropTypes.string.isRequired,
-    blacklist: PropTypes.arrayOf(PropTypes.shape({
-        expression: PropTypes.string.isRequired,
-    })).isRequired,
-
-    // Misc
     boundActions: PropTypes.objectOf(PropTypes.func),
 }
 
-const mapStateToProps = entireStateSelector
+const mapStateToProps = ({ blacklist }) => blacklist
 const mapDispatchToProps = dispatch => ({ boundActions: bindActionCreators(actions, dispatch) })
 
 export default connect(mapStateToProps, mapDispatchToProps)(BlacklistContainer)
