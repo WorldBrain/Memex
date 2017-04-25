@@ -6,13 +6,18 @@ import extractPageMetadata from 'src/page-analysis/content_script/extract-page-m
  * which the URL points to.
  *
  * @param {string} url The URL which points to the page to fetch text + meta-data for.
- * @return {any}
+ * @return {any} Object containing `text` and `metadata` objects containing given data
+ *  for the found page pointed at by the URL.
  */
 export default async function fetchPageData({
     url = '',
 } = {}) {
-    const document = fetchDOMFromUrl(url)
-    return document
+    const doc = await fetchDOMFromUrl(url)
+    const loc = getLocationFromURL(url)
+
+    const text = await extractPageText({ doc, loc })
+    const metadata = extractPageMetadata({ doc, url })
+    return { text, metadata }
 }
 
 /**
