@@ -4,7 +4,7 @@ import { Router, Route, IndexRedirect, hashHistory } from 'react-router'
 import { Provider } from 'react-redux'
 
 import configureStore from './store'
-import configurePersistence from './containers/settings/configurePersistence'
+import { configurePersistence } from './blacklist'
 
 import Layout from './layout'
 import Routes from './routes'
