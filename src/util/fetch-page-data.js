@@ -16,6 +16,23 @@ export default async function fetchPageData({
 }
 
 /**
+ * Given a URL string, converts it to a Location-interface compatible object.
+ *
+ * @param {string} url The URL to get Location-interface object for.
+ * @return {Location} A Location-interface compatible object.
+ */
+const getLocationFromURL = url => {
+    // This works through some weird stuff; more details here:
+    //  https://developer.mozilla.org/en-US/docs/Web/API/Location#Examples
+    // I think it's better to use the URL API later on, but right now MDN
+    //  says it's experimental; maybe discuss more later:
+    //  https://developer.mozilla.org/en/docs/Web/API/URL
+    const dummyEl = document.createElement('a')
+    dummyEl.href = url
+    return dummyEl
+}
+
+/**
  * Async function that given a URL will attempt to grab the current DOM which it points to.
  * Uses native XMLHttpRequest API, as newer Fetch API doesn't seem to support fetching of
  * the DOM; the Response object must be parsed.
