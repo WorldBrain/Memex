@@ -3,10 +3,7 @@ import React, { PropTypes } from 'react'
 import styles from './BlacklistInputRow.css'
 import { blacklistButton } from './base.css'
 
-const BlacklistInputRow = ({
-    value, isClearBtnDisabled, isSaveBtnDisabled, onAdd,
-    handleKeyPress, onInputChange, onInputClear, inputRef,
-}) => (
+const BlacklistInputRow = ({ value, onAdd, handleKeyPress, onInputChange, onInputClear, inputRef }) => (
     <tr>
         <td colSpan={3} className={styles.cell}>
             <div className={styles.newSiteInputRow}>
@@ -22,11 +19,11 @@ const BlacklistInputRow = ({
                 />
 
                 <div className={styles.inputButtons}>
-                    <button onClick={onInputClear} className={blacklistButton} disabled={isClearBtnDisabled}>
+                    <button onClick={onInputClear} className={blacklistButton} disabled={value.length === 0}>
                         <i className='material-icons'>backspace</i>
                     </button>
 
-                    <button onClick={onAdd} className={blacklistButton} disabled={isSaveBtnDisabled}>
+                    <button onClick={onAdd} className={blacklistButton} disabled={!/\S/g.test(value)}>
                         <i className='material-icons'>save</i>
                     </button>
                 </div>
@@ -39,8 +36,6 @@ const BlacklistInputRow = ({
 export const propTypes = BlacklistInputRow.propTypes = {
     // State
     value: PropTypes.string.isRequired,
-    isClearBtnDisabled: PropTypes.bool.isRequired,
-    isSaveBtnDisabled: PropTypes.bool.isRequired,
 
     // Event handlers
     onAdd: PropTypes.func.isRequired,

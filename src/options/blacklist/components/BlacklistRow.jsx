@@ -9,13 +9,13 @@ const iconClasses = classNames({
     [styles.icon]: true,
 })
 
-const BlacklistRow = ({ blacklistItem, itemId, onDeleteClicked }) => (
+const BlacklistRow = ({ expression, onDeleteClicked }) => (
     <tr>
         <td colSpan={3}>
-            <span>{blacklistItem.expression}</span>
+            <span>{expression}</span>
 
             <span className={styles.blacklistActions}>
-                <button className={blacklistButton} onClick={() => onDeleteClicked(itemId)}>
+                <button className={blacklistButton} onClick={onDeleteClicked}>
                     <i className={iconClasses}>delete</i>
                 </button>
             </span>
@@ -24,8 +24,10 @@ const BlacklistRow = ({ blacklistItem, itemId, onDeleteClicked }) => (
 )
 
 BlacklistRow.propTypes = {
-    blacklistItem: PropTypes.object.isRequired,
-    itemId: PropTypes.number.isRequired,
+    // State
+    expression: PropTypes.string.isRequired,
+
+    // Event handlers
     onDeleteClicked: PropTypes.func.isRequired,
 }
 
