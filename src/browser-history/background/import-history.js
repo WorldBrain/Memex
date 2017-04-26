@@ -3,7 +3,7 @@
 // converted to pageDocs and visitDocs (sorry for the confusingly similar name).
 
 import db from 'src/pouchdb'
-import { isWorthRemembering, generateVisitDocId,
+import { shouldBeRemembered, generateVisitDocId,
          visitKeyPrefix, convertVisitDocId } from 'src/activity-logger'
 import { generatePageDocId } from 'src/page-storage'
 
@@ -22,7 +22,7 @@ async function getHistoryItems({
     const { blacklist } = await browser.storage.local.get('blacklist')
     const blacklistArr = !blacklist ? [] : JSON.parse(blacklist)
 
-    return historyItems.filter(({ url }) => isWorthRemembering(url, blacklistArr))
+    return historyItems.filter(({ url }) => shouldBeRemembered(url, blacklistArr))
 }
 
 function transformToPageDoc({historyItem}) {
