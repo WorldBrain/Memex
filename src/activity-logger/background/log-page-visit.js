@@ -1,6 +1,6 @@
 import db from 'src/pouchdb'
 import { reidentifyOrStorePage } from 'src/page-storage/store-page'
-import { generateVisitDocId, shouldBeRemembered } from '..'
+import { generateVisitDocId, checkWithBlacklist } from '..'
 
 
 // Store the visit in PouchDB.
@@ -20,12 +20,9 @@ export default async function maybeLogPageVisit({
     tabId,
     url,
 }) {
-    // Fetch and parse blacklist data for page remembering decider predicate to use
-    const { blacklist } = await browser.storage.local.get('blacklist')
-    const blacklistArr = !blacklist ? [] : JSON.parse(blacklist)
-
     // First check if we want to log this page (hence the 'maybe' in the name).
-    if (!shouldBeRemembered(url, blacklistArr)) {
+    const shouldBeRemembered = await checkWithBlacklist()
+    if (!shouldBeRemembered({ url })) {
         return
     }
 
