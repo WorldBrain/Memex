@@ -1,5 +1,4 @@
-import extractPageText from 'src/page-analysis/content_script/extract-page-text'
-import extractPageMetadata from 'src/page-analysis/content_script/extract-page-metadata'
+import extractPageContent from 'src/page-analysis/content_script/extract-page-content'
 
 /**
  * Given a URL will attempt an async fetch of the text and metadata from the page
@@ -15,8 +14,7 @@ export default async function fetchPageData({
     const doc = await fetchDOMFromUrl(url)
     const loc = getLocationFromURL(url)
 
-    const text = await extractPageText({ doc, loc })
-    const metadata = extractPageMetadata({ doc, url })
+    const { text, metadata } = await extractPageContent({ doc, loc, url })
     return { text, metadata }
 }
 
