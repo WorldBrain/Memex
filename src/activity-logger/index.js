@@ -47,17 +47,32 @@ function isURLProtocolValid(url = '') {
 }
 
 /**
- * Checks given URL against all "worth remembering" conditions.
+ * Returns a shouldBeRemembered function with blacklist data bound for use.
+ * @returns {({ url: string }) => boolean} Ready-to-use shouldBeRemembered function which checks
+ *  URL against blacklist data.
+ */
+export async function checkWithBlacklist() {
+    // Fetch and parse blacklist data for page remembering decider predicate to use
+    const { blacklist } = await browser.storage.local.get('blacklist')
+    const blacklistArr = !blacklist ? [] : JSON.parse(blacklist)
+
+    // Return shouldBeRemembered with blacklist data bound
+    return shouldBeRemembered.bind({ blacklist: blacklistArr })
+}
+
+/**
+ * Checks given URL against all "worth remembering" conditions. For further conditions,
+ * bind needed data to `this`. So far can provide blacklist data at `this.blacklist` for
+ * blacklist checking.
  *
  * @param {string} url The URL to check all conditions against.
- * @param {Array<any>} blacklist Blacklist data to pass in to avoid expensive processing of blacklist
- *      local storage access every call
  * @returns {boolean} Denotes whether or not URL should be remembered.
  */
-export function shouldBeRemembered(url = '', blacklist = []) {
+export function shouldBeRemembered({ url = '' }) {
     // "worth remembering" conditions
     const isProtocolValid = isURLProtocolValid(url)
-    const isNotBlacklisted = !isURLBlacklisted(url, blacklist)
+    // If blacklist data available, perform check, else skip this condition (set true)
+    const isNotBlacklisted = !this.blacklist ? true : !isURLBlacklisted(url, this.blacklist)
 
     return isProtocolValid && isNotBlacklisted
 }
