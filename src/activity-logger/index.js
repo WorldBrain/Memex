@@ -48,32 +48,25 @@ function isURLProtocolValid(url = '') {
 }
 
 /**
- * Returns a shouldBeRemembered function with blacklist data bound for use.
- * @returns {({ url: string }) => boolean} Ready-to-use shouldBeRemembered function which checks
- *  URL against blacklist data.
+ * Fetches ready-to-use blacklist array from storage.
+ * @returns {Array<any>} Blacklist represented by nn array of objects containing `expression` keys
  */
-export async function checkWithBlacklist() {
-    // Fetch and parse blacklist data for page remembering decider predicate to use
+async function fetchBlacklistFromStorage() {
+    // Fetch and parse blacklist data for check calls to use
     const { blacklist } = await browser.storage.local.get(blacklistConsts.STORAGE_KEY)
-    const blacklistArr = !blacklist ? [] : JSON.parse(blacklist)
 
-    // Return shouldBeRemembered with blacklist data bound
-    return shouldBeRemembered.bind({ blacklist: blacklistArr })
+    return !blacklist ? [] : JSON.parse(blacklist)
 }
 
 /**
- * Checks given URL against all "worth remembering" conditions. For further conditions,
- * bind needed data to `this`. So far can provide blacklist data at `this.blacklist` for
- * blacklist checking.
- *
- * @param {string} url The URL to check all conditions against.
- * @returns {boolean} Denotes whether or not URL should be remembered.
+ * HOF which wraps a blacklist checking function up with stored blacklist data.
+ * @returns {({ url: string }) => boolean} Ready-to-use checking function against a URL
  */
-export function shouldBeRemembered({ url = '' }) {
-    // "worth remembering" conditions
-    const isProtocolValid = isURLProtocolValid(url)
-    // If blacklist data available, perform check, else skip this condition (set true)
-    const isNotBlacklisted = !this.blacklist ? true : !isURLBlacklisted(url, this.blacklist)
+export async function checkWithBlacklist() {
+    const blacklist = await fetchBlacklistFromStorage()
 
-    return isProtocolValid && isNotBlacklisted
+    /**
+     * @param {string} url The URL to check against the blacklist
+     */
+    return ({ url = '' } = {}) => isURLProtocolValid(url) && !isURLBlacklisted(url, blacklist)
 }
