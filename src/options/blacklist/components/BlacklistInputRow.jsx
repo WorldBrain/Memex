@@ -1,9 +1,9 @@
 import React, { PropTypes } from 'react'
 
-import styles from './BlacklistNewSite.css'
+import styles from './BlacklistInputRow.css'
 import { blacklistButton } from './base.css'
 
-const BlacklistNewSite = ({ value, onAdd, handleKeyPress, onInputChange, onInputClear, inputRef }) => (
+const BlacklistInputRow = ({ value, onAdd, handleKeyPress, onInputChange, onInputClear, inputRef }) => (
     <tr>
         <td colSpan={3} className={styles.cell}>
             <div className={styles.newSiteInputRow}>
@@ -33,13 +33,18 @@ const BlacklistNewSite = ({ value, onAdd, handleKeyPress, onInputChange, onInput
     </tr>
 )
 
-BlacklistNewSite.propTypes = {
+export const propTypes = BlacklistInputRow.propTypes = {
+    // State
     value: PropTypes.string.isRequired,
+
+    // Event handlers
     onAdd: PropTypes.func.isRequired,
-    onInputClear: PropTypes.func.isRequired,
     handleKeyPress: PropTypes.func.isRequired,
     onInputChange: PropTypes.func.isRequired,
+    onInputClear: PropTypes.func.isRequired,
+
+    // Misc
     inputRef: PropTypes.func.isRequired,
 }
 
-export default BlacklistNewSite
+export default BlacklistInputRow
