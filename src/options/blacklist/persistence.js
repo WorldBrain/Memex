@@ -1,10 +1,11 @@
 import { setBlacklist } from './actions'
+import { entireState } from './selectors'
 import { STORAGE_KEY } from './constants'
 
 export default function configurePersistence(store) {
     // Subscribe to changes and update local storage
     store.subscribe(() => {
-        const { blacklist } = store.getState().blacklist
+        const { blacklist } = entireState(store.getState())
         chrome.storage.local.set({ [STORAGE_KEY]: JSON.stringify(blacklist) })
     })
 
