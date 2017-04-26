@@ -2,7 +2,9 @@ import React, { PropTypes, Component } from 'react'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 
-import Blacklist from './components/Blacklist'
+import BlacklistTable from './components/BlacklistTable'
+import BlacklistRow from './components/BlacklistRow'
+import BlacklistInputRow from './components/BlacklistInputRow'
 import * as actions from './actions'
 import { entireState as entireStateSelector } from './selectors'
 
@@ -11,7 +13,6 @@ class BlacklistContainer extends Component {
         super(props)
 
         this.onNewBlacklistItemAdded = this.onNewBlacklistItemAdded.bind(this)
-        this.onDeleteClicked = this.onDeleteClicked.bind(this)
         this.onInputChange = this.onInputChange.bind(this)
         this.handleInputKeyPress = this.handleInputKeyPress.bind(this)
     }
@@ -69,26 +70,54 @@ class BlacklistContainer extends Component {
         }
     }
 
-    render() {
-        const { boundActions } = this.props
+    renderBlacklistInputRow() {
+        const { boundActions, siteInputValue } = this.props
 
         return (
-            <Blacklist blacklist={this.props.blacklist}
-                onNewBlacklistItemAdded={this.onNewBlacklistItemAdded}
-                onInputClear={() => boundActions.resetSiteInputValue()}
-                onAddClicked={this.onAddClicked}
-                onDeleteClicked={this.onDeleteClicked}
+            <BlacklistInputRow
+                key='blacklist-input'
+                onAdd={this.onNewBlacklistItemAdded}
+                value={siteInputValue}
+                handleKeyPress={this.handleInputKeyPress}
                 onInputChange={this.onInputChange}
-                handleInputKeyPress={this.handleInputKeyPress}
-                siteInputValue={this.props.siteInputValue}
-                inputRef={input => this.input = input} />   // eslint-disable-line no-return-assign
+                onInputClear={() => boundActions.resetSiteInputValue()}
+                inputRef={input => this.input = input}   // eslint-disable-line no-return-assign
+            />
+        )
+    }
+
+    renderBlacklistRows() {
+        const { blacklist } = this.props
+
+        return [
+            this.renderBlacklistInputRow(),
+            ...blacklist.map(({ expression }, idx) => (
+                <BlacklistRow
+                    key={idx}
+                    expression={expression}
+                    onDeleteClicked={() => this.onDeleteClicked(idx)}
+                />
+            )),
+        ]
+    }
+
+    render() {
+        return (
+            <BlacklistTable>
+                {this.renderBlacklistRows()}
+            </BlacklistTable>
         )
     }
 }
 
 BlacklistContainer.propTypes = {
-    blacklist: PropTypes.array.isRequired,
+    // State
     siteInputValue: PropTypes.string.isRequired,
+    blacklist: PropTypes.arrayOf(PropTypes.shape({
+        expression: PropTypes.string.isRequired,
+    })).isRequired,
+
+    // Misc
     boundActions: PropTypes.objectOf(PropTypes.func),
 }
 
