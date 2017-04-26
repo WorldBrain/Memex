@@ -15,6 +15,7 @@ import cssnext from 'postcss-cssnext'
 
 const staticFiles = {
     'node_modules/webextension-polyfill/dist/browser-polyfill.js': 'extension/lib',
+    'node_modules/pdfjs-dist/build/pdf.worker.min.js': 'extension/lib',
 }
 
 const sourceFiles = [

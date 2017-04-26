@@ -32,6 +32,9 @@
         "webNavigation",
         "storage"
     ],
+    "web_accessible_resources": [
+      "/lib/pdf.worker.min.js"
+    ],
     "chrome_url_overrides" : {
         "newtab": "/overview/overview.html"
     },
