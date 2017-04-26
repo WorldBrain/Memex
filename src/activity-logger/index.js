@@ -54,7 +54,7 @@ function isURLProtocolValid(url = '') {
  *      local storage access every call
  * @returns {boolean} Denotes whether or not URL should be remembered.
  */
-export function isWorthRemembering(url = '', blacklist = []) {
+export function shouldBeRemembered(url = '', blacklist = []) {
     // "worth remembering" conditions
     const isProtocolValid = isURLProtocolValid(url)
     const isNotBlacklisted = !isURLBlacklisted(url, blacklist)
