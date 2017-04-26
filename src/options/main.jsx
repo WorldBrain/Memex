@@ -4,7 +4,6 @@ import { Router, Route, IndexRedirect, hashHistory } from 'react-router'
 import { Provider } from 'react-redux'
 
 import configureStore from './store'
-import { configurePersistence } from './blacklist'
 
 import Layout from './layout'
 import Routes from './routes'
@@ -16,7 +15,6 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 const store = configureStore({ReduxDevTools})
-configurePersistence(store)
 
 ReactDOM.render(
     <Provider store={store}>
