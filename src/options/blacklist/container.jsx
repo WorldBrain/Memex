@@ -4,6 +4,7 @@ import { bindActionCreators } from 'redux'
 
 import Blacklist from './components/Blacklist'
 import * as actions from './actions'
+import { entireState as entireStateSelector } from './selectors'
 
 class BlacklistContainer extends Component {
     constructor(props) {
@@ -91,7 +92,7 @@ BlacklistContainer.propTypes = {
     boundActions: PropTypes.objectOf(PropTypes.func),
 }
 
-const mapStateToProps = ({ blacklist }) => blacklist
+const mapStateToProps = entireStateSelector
 const mapDispatchToProps = dispatch => ({ boundActions: bindActionCreators(actions, dispatch) })
 
 export default connect(mapStateToProps, mapDispatchToProps)(BlacklistContainer)
