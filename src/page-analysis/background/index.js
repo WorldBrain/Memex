@@ -44,7 +44,7 @@ async function performPageAnalysis({pageId, tabId = '', extractPageContent}) {
     await updatePageSearchIndex()
 }
 
-export default async function analysePage({page, tabId}) {
+export async function analysePageInTab({page, tabId}) {
     // Wait until its DOM has loaded.
     await whenPageDOMLoaded({tabId}) // TODO: catch e.g. tab close.
 

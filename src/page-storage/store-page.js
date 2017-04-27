@@ -1,6 +1,6 @@
 import db from 'src/pouchdb'
 import { findPagesByUrl } from 'src/search/find-pages'
-import analysePage from 'src/page-analysis/background'
+import { analysePageInTab } from 'src/page-analysis/background'
 import tryDedupePage from './deduplication'
 import { generatePageDocId } from '.'
 
@@ -26,7 +26,7 @@ async function createPageStub({url}) {
 
 async function analyseAndTryDedupePage({tabId, page, samePageCandidates}) {
     // Add info to the page doc by analysing the document in the tab.
-    const {page: analysedPage} = await analysePage({page, tabId})
+    const {page: analysedPage} = await analysePageInTab({page, tabId})
 
     // Knowing more about the page now, try find it again in our memory.
     const {finalPage} = await tryDedupePage({page: analysedPage, samePageCandidates})
