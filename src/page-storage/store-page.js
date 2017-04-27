@@ -1,13 +1,13 @@
 import db from 'src/pouchdb'
 import { findPagesByUrl } from 'src/search/find-pages'
-import analysePage from 'src/page-analysis/background'
+import { analysePageInTab, analysePageInBackground } from 'src/page-analysis/background'
 import tryDedupePage from './deduplication'
 import { generatePageDocId } from '.'
 
 
 // Try see if we can tell in advance that this page will be one we already know.
 // Returns the matching page doc, if any.
-async function tryReidentifyPage({tabId, url, samePageCandidates}) {
+async function tryReidentifyPage({tabId = '', url, samePageCandidates}) {
     // TODO check ETag or other proof of equality.
 
     // No match found. We will have to make a new page.
@@ -24,9 +24,15 @@ async function createPageStub({url}) {
     return page
 }
 
-async function analyseAndTryDedupePage({tabId, page, samePageCandidates}) {
+/**
+ * @param {PageDoc} page Page to be analysed
+ * @param {Array<PageDoc>} samePageCandidates Other page docs considered to be very similar.
+ * @param {(PageDoc) => PageDoc} analyser Fetch & analyse function to attempt to update page data.
+ * @returns {PageDoc} Page after analysis and deduping has been applied.
+ */
+async function analyseAndTryDedupePage({page, samePageCandidates, analyser}) {
     // Add info to the page doc by analysing the document in the tab.
-    const {page: analysedPage} = await analysePage({page, tabId})
+    const {page: analysedPage} = await analyser(page)
 
     // Knowing more about the page now, try find it again in our memory.
     const {finalPage} = await tryDedupePage({page: analysedPage, samePageCandidates})
@@ -35,11 +41,11 @@ async function analyseAndTryDedupePage({tabId, page, samePageCandidates}) {
     return {finalPage}
 }
 
-// Tries to reidentify the page in the tab, or creates a new page doc for it.
+// Tries to reidentify the page by URL (in background or in tab), or creates a new page doc for it.
 // Either way, it returns the page doc. If a new page was created, it starts
 // page analysis and then deduplication, and also returns a promise
 // (finalPagePromise) of the page doc resulting from these steps.
-export async function reidentifyOrStorePage({tabId, url}) {
+export async function reidentifyOrStorePage({tabId = '', url}) {
     // Find pages we know that had the same URL.
     const samePageCandidates = (await findPagesByUrl({url})).rows.map(row => row.doc)
 
@@ -55,9 +61,9 @@ export async function reidentifyOrStorePage({tabId, url}) {
 
         // Start analysis and (possibly) deduplication, but do not wait for it.
         const finalPagePromise = analyseAndTryDedupePage({
-            tabId,
             page,
             samePageCandidates,
+            analyser: page => !tabId ? analysePageInBackground({page, url}) : analysePageInTab({page, tabId}),
         })
 
         // Return the page stub, and a promise of the analysed & deduped page.
