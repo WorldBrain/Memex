@@ -11,10 +11,7 @@ import getFavIcon from './get-fav-icon'
 import makeScreenshot from './make-screenshot'
 
 // Extract interesting stuff from the current page and store it.
-async function performPageAnalysis({pageId, tabId = ''}) {
-    // Run this function in the content script in the tab.
-    const extractPageContent = remoteFunction('extractPageContent', {tabId})
-
+async function performPageAnalysis({pageId, tabId = '', extractPageContent}) {
     // A shorthand for updating a single field in a doc.
     const setDocField = (db, docId, key) =>
         value => db.upsert(docId, doc => assocPath(key, value)(doc))
@@ -49,7 +46,11 @@ async function performPageAnalysis({pageId, tabId = ''}) {
 export default async function analysePage({page, tabId}) {
     // Wait until its DOM has loaded.
     await whenPageDOMLoaded({tabId}) // TODO: catch e.g. tab close.
-    await performPageAnalysis({pageId: page._id, tabId})
+
+    // Run page data fetching in content script in the tab.
+    const extractPageContent = remoteFunction('extractPageContent', {tabId})
+
+    await performPageAnalysis({pageId: page._id, tabId, extractPageContent})
     // Get and return the page.
     page = revisePageFields(await db.get(page._id))
     return {page}
