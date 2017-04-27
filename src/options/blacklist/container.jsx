@@ -25,6 +25,15 @@ class BlacklistContainer extends Component {
         this.input.focus()
     }
 
+    shouldDisableSaveBtn() {
+        // If there aren't any non-whitespace chars (only need to find first)
+        return !/\S/.test(this.props.siteInputValue)
+    }
+
+    shouldDisableClearBtn() {
+        return this.props.siteInputValue.length === 0
+    }
+
     onNewBlacklistItemAdded() {
         const { boundActions, siteInputValue } = this.props
 
@@ -76,8 +85,10 @@ class BlacklistContainer extends Component {
         return (
             <BlacklistInputRow
                 key='blacklist-input'
-                onAdd={this.onNewBlacklistItemAdded}
                 value={siteInputValue}
+                isClearBtnDisabled={this.shouldDisableClearBtn()}
+                isSaveBtnDisabled={this.shouldDisableSaveBtn()}
+                onAdd={this.onNewBlacklistItemAdded}
                 handleKeyPress={this.handleInputKeyPress}
                 onInputChange={this.onInputChange}
                 onInputClear={() => boundActions.resetSiteInputValue()}
