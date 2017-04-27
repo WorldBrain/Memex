@@ -9,7 +9,7 @@ import { updatePageSearchIndex } from 'src/search/find-pages'
 import { revisePageFields } from '..'
 import getFavIcon from './get-fav-icon'
 import makeScreenshot from './make-screenshot'
-import fetchPageData from 'src/util/fetch-page-data'
+import fetchPageDataInBackground from './fetch-page-data'
 
 // Extract interesting stuff from the current page and store it.
 async function performPageAnalysis({pageId, tabId = '', extractPageContent}) {
@@ -75,7 +75,7 @@ export async function analysePageInTab({page, tabId}) {
  */
 export async function analysePageInBackground({ page, url }) {
     // Run page data fetching in background
-    const extractPageContent = () => fetchPageData({ url })
+    const extractPageContent = () => fetchPageDataInBackground({ url })
 
     await performPageAnalysis({ pageId: page._id, extractPageContent })
     // Get and return the page.
