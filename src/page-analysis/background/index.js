@@ -11,7 +11,7 @@ import getFavIcon from './get-fav-icon'
 import makeScreenshot from './make-screenshot'
 
 // Extract interesting stuff from the current page and store it.
-async function performPageAnalysis({pageId, tabId}) {
+async function performPageAnalysis({pageId, tabId = ''}) {
     // Run this function in the content script in the tab.
     const extractPageContent = remoteFunction('extractPageContent', {tabId})
 
@@ -19,13 +19,13 @@ async function performPageAnalysis({pageId, tabId}) {
     const setDocField = (db, docId, key) =>
         value => db.upsert(docId, doc => assocPath(key, value)(doc))
 
-    // Get and store the fav-icon
-    const storeFavIcon = getFavIcon({tabId}).then(
+    // Get and store the fav-icon (if tabId present)
+    const storeFavIcon = tabId && getFavIcon({tabId}).then(
         setDocField(db, pageId, 'favIcon')
     )
 
-    // Capture a screenshot.
-    const storeScreenshot = makeScreenshot({tabId}).then(
+    // Capture a screenshot (if tabId present).
+    const storeScreenshot = tabId && makeScreenshot({tabId}).then(
         setDocField(db, pageId, 'screenshot')
     )
 
