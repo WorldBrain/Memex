@@ -1,6 +1,6 @@
 import React, { PropTypes } from 'react'
 
-import styles from './Blacklist.css'
+import styles from './BlacklistTable.css'
 
 const BlacklistTable = ({ children }) => (
     <div>
