@@ -58,7 +58,7 @@ async function makeSuggestion(query, suggest) {
         })
     } else {
         browser.omnibox.setDefaultSuggestion({
-            description: 'Found these pages in your memory:',
+            description: 'Found these pages. Click here to show all results.',
         })
     }
     const suggestions = visitDocs.map(visitToSuggestion)
