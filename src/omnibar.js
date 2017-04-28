@@ -1,5 +1,6 @@
 import debounce from 'lodash/fp/debounce'
 import escapeHtml from 'lodash/fp/escape'
+import tldjs from 'tldjs'
 
 import { filterVisitsByQuery } from 'src/search'
 import niceTime from 'src/util/nice-time'
@@ -57,7 +58,7 @@ async function makeSuggestion(query, suggest) {
         })
     } else {
         browser.omnibox.setDefaultSuggestion({
-            description: 'Found these pages in your memory:',
+            description: 'Found these pages. Click here to show all results.',
         })
     }
     const suggestions = visitDocs.map(visitToSuggestion)
@@ -67,16 +68,20 @@ async function makeSuggestion(query, suggest) {
 }
 
 const acceptInput = (text, disposition) => {
-    // TODO if text is not a suggested URL, open the overview with this query.
+    // Checks whether the text is a suggested url
+    const validUrl = tldjs.isValid(text)
+    const overviewPageWithQuery = '/overview/overview.html?q=' + text
+    const goToUrl = validUrl ? text : overviewPageWithQuery
+
     switch (disposition) {
         case 'currentTab':
-            browser.tabs.update({url: text})
+            browser.tabs.update({url: goToUrl})
             break
         case 'newForegroundTab':
-            browser.tabs.create({url: text})
+            browser.tabs.create({url: goToUrl})
             break
         case 'newBackgroundTab':
-            browser.tabs.create({url: text, active: false})
+            browser.tabs.create({url: goToUrl, active: false})
             break
     }
 }
