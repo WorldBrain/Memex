@@ -128,6 +128,8 @@ export default async function importHistory({
     }))
     // Store them into the database. Already existing docs will simply be
     // rejected, because their id (timestamp & history id) already exists.
+    //console.log(allDocs);
+
     await db.bulkDocs(allDocs)
     console.timeEnd('import history')
     console.time('rebuild search index')
