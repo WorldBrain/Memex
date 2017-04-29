@@ -2,13 +2,10 @@
 // The browser's bookmarkItems and visitItems are quite straightforwardly
 // converted to pageDocs and visitDocs (sorry for the confusingly similar name).
 
-
 import db from 'src/pouchdb'
 import { updatePageSearchIndex } from 'src/search/find-pages'
-import { isWorthRemembering,
-		 generateVisitDocId,
-         visitKeyPrefix,
-         convertVisitDocId } from 'src/activity-logger'
+import { isWorthRemembering, generateVisitDocId,
+         visitKeyPrefix, convertVisitDocId } from 'src/activity-logger'
 import { generatePageDocId } from 'src/page-storage'
 
 
@@ -21,14 +18,13 @@ Get the Whole Browser Bookmark Tree.
 void
 
 @Return
-Array bookmarkItems  
+Array bookmarkItems
 */
 async function getBookmarkTree() {
+    const bookmarkTree = await browser.bookmarks.getTree()
+    const bookmarkItems = bookmarkTree[0].children[0].children.concat(bookmarkTree[0].children[1].children)
 
-    const bookmarkTree = await browser.bookmarks.getTree();
-    const bookmarkItems = bookmarkTree[0].children[0].children.concat(bookmarkTree[0].children[1].children);
-    
-    return bookmarkItems.filter(({url}) => isWorthRemembering({url}));
+    return bookmarkItems.filter(({url}) => isWorthRemembering({url}))
 }
 
 
@@ -41,27 +37,14 @@ Get Recent Browser Bookmark Items.
 Integer count = 5
 
 @Return
-Object Obj.quantity 
+Object Obj.quantity
 */
 export async function getRecentBookmarks(count = 5) {
     const recentBookmarkItems = await browser.bookmarks.getRecent(count)
     return {
-        quantity: bookmarkItems.length,
+        quantity: recentBookmarkItems.length,
     }
 }
-
-
-/*async function getBookmarkTreeItems([...bookmarkTreeId] = []) {
-    const bookmarkTreeItems = await browser.bookmarks.get(bookmarkTreeId);
-    let   
-
-    for(let i = 0; i < bookmarkTreeItems.length; i++){
-
-
-    }
-
-    return bookmarkItems.filter(({url}) => isWorthRemembering({url}))
-}*/
 
 
 /*
@@ -212,8 +195,8 @@ export default async function importBookamrks() {
     }))
     // Store them into the database. Already existing docs will simply be
     // rejected, because their id (timestamp & history id) already exists.
-    //console.log(allDocs);
-    
+    // console.log(allDocs);
+
     await db.bulkDocs(allDocs)
     console.timeEnd('import bookmark')
     console.time('rebuild search index')
@@ -259,16 +242,15 @@ export async function getBookmarksStats() {
     }
 }
 
-
+// Just a test function dont worry about it.
 export async function getBookmarkTreeItems([...bookmarkId] = []) {
-	console.log(bookmarkId, browser.bookmarks);
-    const bookmarkItems = await browser.bookmarks.get(bookmarkId);
-    const bookmarkTree = await browser.bookmarks.getTree();
-    const allBookmarks = bookmarkTree[0].children[0].children.concat(bookmarkTree[0].children[1].children);
+    console.log(bookmarkId, browser.bookmarks)
+    const bookmarkItems = await browser.bookmarks.get(bookmarkId)
+    const bookmarkTree = await browser.bookmarks.getTree()
+    const allBookmarks = bookmarkTree[0].children[0].children.concat(bookmarkTree[0].children[1].children)
     const allDb = await db.allDocs({
-    									include_docs: true,
-    									attachments: true
-  								    });
-
-    console.log(db,allDb,allBookmarks);
+        include_docs: true,
+        attachments: true,
+    })
+    console.log(db, allDb, allBookmarks, bookmarkItems)
 }
