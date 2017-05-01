@@ -8,7 +8,7 @@ import { updatePageSearchIndex } from 'src/search/find-pages'
 
 import { revisePageFields } from '..'
 import makeScreenshot from './make-screenshot'
-import fetchPageDataInBackground from '../fetch-page-data'
+import fetchPageDataInBackground from './fetch-page-data'
 
 // A shorthand for updating a single field in a doc.
 const setDocField = (db, docId, key) =>
