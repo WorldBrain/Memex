@@ -1,15 +1,20 @@
+import favicon from 'favicon'
+
 import responseToDataURI from 'src/util/response-to-data-uri'
 
-// Get a tab's fav-icon (website logo) as a data URI
-async function getFavIcon({tabId}) {
-    const tab = await browser.tabs.get(tabId)
+// Async wrapper around favicon package
+const fetchFaviconUrl = url =>
+    new Promise((resolve, reject) =>
+        favicon(url, (err, favIconUrl) => err ? reject(err) : resolve(favIconUrl)))
 
-    if (tab.favIconUrl === undefined) {
+// Get a tab's fav-icon (website logo) as a data URI
+async function getFavIcon(favIconUrl) {
+    if (favIconUrl === undefined) {
         return undefined
     }
 
     try {
-        const response = await fetch(tab.favIconUrl)
+        const response = await fetch(favIconUrl)
         const dataURI = await responseToDataURI(response)
         return dataURI
     } catch (err) {
@@ -17,4 +22,5 @@ async function getFavIcon({tabId}) {
     }
 }
 
-export default getFavIcon
+export const getFavIconFromTab = async ({ tabId }) => getFavIcon((await browser.tabs.get(tabId)).favIconUrl)
+export const getFavIconFromUrl = async ({ url }) => getFavIcon(await fetchFaviconUrl(url))

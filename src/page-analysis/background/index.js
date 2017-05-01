@@ -7,18 +7,18 @@ import db from 'src/pouchdb'
 import { updatePageSearchIndex } from 'src/search/find-pages'
 
 import { revisePageFields } from '..'
-import getFavIcon from './get-fav-icon'
+import { getFavIconFromTab, getFavIconFromUrl } from './get-fav-icon'
 import makeScreenshot from './make-screenshot'
 import fetchPageDataInBackground from './fetch-page-data'
 
 // Extract interesting stuff from the current page and store it.
-async function performPageAnalysis({pageId, tabId = '', extractPageContent}) {
+async function performPageAnalysis({pageId, tabId = '', extractPageContent, extractFavIcon}) {
     // A shorthand for updating a single field in a doc.
     const setDocField = (db, docId, key) =>
         value => db.upsert(docId, doc => assocPath(key, value)(doc))
 
     // Get and store the fav-icon (if tabId present)
-    const storeFavIcon = tabId && getFavIcon({tabId}).then(
+    const storeFavIcon = extractFavIcon().then(
         setDocField(db, pageId, 'favIcon')
     )
 
@@ -58,8 +58,10 @@ export async function analysePageInTab({page, tabId}) {
 
     // Run page data fetching in content script in the tab.
     const extractPageContent = remoteFunction('extractPageContent', {tabId})
+    // Run favicon fetching logic in content script in the tab.
+    const extractFavIcon = () => getFavIconFromTab({ tabId })
 
-    await performPageAnalysis({pageId: page._id, tabId, extractPageContent})
+    await performPageAnalysis({pageId: page._id, tabId, extractPageContent, extractFavIcon})
     // Get and return the page.
     page = revisePageFields(await db.get(page._id))
     return {page}
@@ -76,8 +78,9 @@ export async function analysePageInTab({page, tabId}) {
 export async function analysePageInBackground({ page, url }) {
     // Run page data fetching in background
     const extractPageContent = () => fetchPageDataInBackground({ url })
+    const extractFavIcon = () => getFavIconFromUrl({ url })
 
-    await performPageAnalysis({ pageId: page._id, extractPageContent })
+    await performPageAnalysis({ pageId: page._id, extractPageContent, extractFavIcon })
     // Get and return the page.
     const revisedPage = revisePageFields(await db.get(page._id))
     return { page: revisedPage }
