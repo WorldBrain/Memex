@@ -12,7 +12,6 @@ import updateDoc from 'src/util/pouchdb-update-doc'
 import { revisePageFields } from '..'
 import getFavIcon from './get-fav-icon'
 import makeScreenshot from './make-screenshot'
-import fetchPageDataInBackground from './fetch-page-data'
 
 
 // Extract interesting stuff from the current page and store it.
@@ -72,37 +71,11 @@ async function performPageAnalysis({pageId, tabId}) {
     ])
 }
 
-/**
- * Performs in-tab page analysis for a given page document, fetching and storing
- * further page data such as text and metadata.
- *
- * @param {page} page The page document to save analysis data to.
- * @param {tabId} string The ID of the tab to perform page data extraction in.
- * @returns {page} The updated page document containing any extra data found in analysis.
- */
-export async function analysePageInTab({page, tabId}) {
+export default async function analysePage({page, tabId}) {
     // Wait until its DOM has loaded.
     await whenPageDOMLoaded({tabId}) // TODO: catch e.g. tab close.
     await performPageAnalysis({pageId: page._id, tabId})
     // Get and return the page.
     page = revisePageFields(await db.get(page._id))
     return {page}
-}
-
-/**
- * Performs background page analysis for a given page document, fetching and storing
- * further page data such as text and metadata.
- *
- * @param {page} page The page document to save analysis data to.
- * @param {url} string The URL pointing to the data source for page data extraction.
- * @returns {page} The updated page document containing any extra data found in analysis.
- */
-export async function analysePageInBackground({ page, url }) {
-    // Run page data fetching in background
-    const extractPageContent = () => fetchPageDataInBackground({ url })
-
-    await performPageAnalysis({ pageId: page._id, extractPageContent })
-    // Get and return the page.
-    const revisedPage = revisePageFields(await db.get(page._id))
-    return { page: revisedPage }
 }
