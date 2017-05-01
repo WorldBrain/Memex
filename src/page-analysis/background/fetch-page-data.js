@@ -14,8 +14,8 @@ export default async function fetchPageData({
     const doc = await fetchDOMFromUrl(url)
     const loc = getLocationFromURL(url)
 
-    const { text, metadata } = await extractPageContent({ doc, loc, url })
-    return { text, metadata }
+    const { text, metadata, favIcon } = await extractPageContent({ doc, loc, url })
+    return { text, metadata, favIcon }
 }
 
 /**
