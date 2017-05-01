@@ -8,35 +8,26 @@ import { updatePageSearchIndex } from 'src/search/find-pages'
 
 import { revisePageFields } from '..'
 import makeScreenshot from './make-screenshot'
-import fetchPageDataInBackground from './fetch-page-data'
+import fetchPageDataInBackground from '../fetch-page-data'
 
-// Extract interesting stuff from the current page and store it.
-async function performPageAnalysis({pageId, tabId = '', extractPageContent}) {
-    // A shorthand for updating a single field in a doc.
-    const setDocField = (db, docId, key) =>
-        value => db.upsert(docId, doc => assocPath(key, value)(doc))
+// A shorthand for updating a single field in a doc.
+const setDocField = (db, docId, key) =>
+    value => db.upsert(docId, doc => assocPath(key, value)(doc))
 
-    // Capture a screenshot (if tabId present).
-    const storeScreenshot = tabId && makeScreenshot({tabId}).then(
-        setDocField(db, pageId, 'screenshot')
-    )
+// Capture a screenshot
+const storeScreenshot = (pageId, tabId) =>
+    makeScreenshot({tabId}).then(setDocField(db, pageId, 'screenshot'))
 
-    // Extract the text and metadata
-    const storePageContent = extractPageContent().then(
-        value => {
-            setDocField(db, pageId, 'extractedText')(value.text)
-            setDocField(db, pageId, 'extractedMetadata')(value.metadata)
-            setDocField(db, pageId, 'favIcon')(value.favIcon)
-        }
-    )
+// Extract the text, metadata and favicon
+const storePageContent = (pageId, contentExtractor) => contentExtractor().then(
+    value => {
+        setDocField(db, pageId, 'extractedText')(value.text)
+        setDocField(db, pageId, 'extractedMetadata')(value.metadata)
+        setDocField(db, pageId, 'favIcon')(value.favIcon)
+    }
+)
 
-    // When every task has either completed or failed, update the search index.
-    await whenAllSettled([
-        storeScreenshot,
-        storePageContent,
-    ])
-    await updatePageSearchIndex()
-}
+const getRevisedPage = async pageId => revisePageFields(await db.get(pageId))
 
 /**
  * Performs in-tab page analysis for a given page document, fetching and storing
@@ -46,17 +37,18 @@ async function performPageAnalysis({pageId, tabId = '', extractPageContent}) {
  * @param {tabId} string The ID of the tab to perform page data extraction in.
  * @returns {page} The updated page document containing any extra data found in analysis.
  */
-export async function analysePageInTab({page, tabId}) {
+export async function analysePageInTab({ page, tabId }) {
     // Wait until its DOM has loaded.
     await whenPageDOMLoaded({tabId}) // TODO: catch e.g. tab close.
 
     // Run page data fetching in content script in the tab.
-    const extractPageContent = remoteFunction('extractPageContent', {tabId})
+    await whenAllSettled([
+        storeScreenshot(page._id, tabId),
+        storePageContent(page._id, remoteFunction('extractPageContent', { tabId })),
+    ])
+    await updatePageSearchIndex()
 
-    await performPageAnalysis({pageId: page._id, tabId, extractPageContent})
-    // Get and return the page.
-    page = revisePageFields(await db.get(page._id))
-    return {page}
+    return { page: getRevisedPage(page._id) }
 }
 
 /**
@@ -69,10 +61,8 @@ export async function analysePageInTab({page, tabId}) {
  */
 export async function analysePageInBackground({ page, url }) {
     // Run page data fetching in background
-    const extractPageContent = () => fetchPageDataInBackground({ url })
+    await storePageContent(page._id, () => fetchPageDataInBackground({ url }))
+    await updatePageSearchIndex()
 
-    await performPageAnalysis({ pageId: page._id, extractPageContent })
-    // Get and return the page.
-    const revisedPage = revisePageFields(await db.get(page._id))
-    return { page: revisedPage }
+    return { page: getRevisedPage(page._id) }
 }
