@@ -7,20 +7,14 @@ import db from 'src/pouchdb'
 import { updatePageSearchIndex } from 'src/search/find-pages'
 
 import { revisePageFields } from '..'
-import { getFavIconFromTab, getFavIconFromUrl } from './get-fav-icon'
 import makeScreenshot from './make-screenshot'
 import fetchPageDataInBackground from './fetch-page-data'
 
 // Extract interesting stuff from the current page and store it.
-async function performPageAnalysis({pageId, tabId = '', extractPageContent, extractFavIcon}) {
+async function performPageAnalysis({pageId, tabId = '', extractPageContent}) {
     // A shorthand for updating a single field in a doc.
     const setDocField = (db, docId, key) =>
         value => db.upsert(docId, doc => assocPath(key, value)(doc))
-
-    // Get and store the fav-icon (if tabId present)
-    const storeFavIcon = extractFavIcon().then(
-        setDocField(db, pageId, 'favIcon')
-    )
 
     // Capture a screenshot (if tabId present).
     const storeScreenshot = tabId && makeScreenshot({tabId}).then(
@@ -32,12 +26,12 @@ async function performPageAnalysis({pageId, tabId = '', extractPageContent, extr
         value => {
             setDocField(db, pageId, 'extractedText')(value.text)
             setDocField(db, pageId, 'extractedMetadata')(value.metadata)
+            setDocField(db, pageId, 'favIcon')(value.favIcon)
         }
     )
 
     // When every task has either completed or failed, update the search index.
     await whenAllSettled([
-        storeFavIcon,
         storeScreenshot,
         storePageContent,
     ])
@@ -58,10 +52,8 @@ export async function analysePageInTab({page, tabId}) {
 
     // Run page data fetching in content script in the tab.
     const extractPageContent = remoteFunction('extractPageContent', {tabId})
-    // Run favicon fetching logic in content script in the tab.
-    const extractFavIcon = () => getFavIconFromTab({ tabId })
 
-    await performPageAnalysis({pageId: page._id, tabId, extractPageContent, extractFavIcon})
+    await performPageAnalysis({pageId: page._id, tabId, extractPageContent})
     // Get and return the page.
     page = revisePageFields(await db.get(page._id))
     return {page}
@@ -78,9 +70,8 @@ export async function analysePageInTab({page, tabId}) {
 export async function analysePageInBackground({ page, url }) {
     // Run page data fetching in background
     const extractPageContent = () => fetchPageDataInBackground({ url })
-    const extractFavIcon = () => getFavIconFromUrl({ url })
 
-    await performPageAnalysis({ pageId: page._id, extractPageContent, extractFavIcon })
+    await performPageAnalysis({ pageId: page._id, extractPageContent })
     // Get and return the page.
     const revisedPage = revisePageFields(await db.get(page._id))
     return { page: revisedPage }

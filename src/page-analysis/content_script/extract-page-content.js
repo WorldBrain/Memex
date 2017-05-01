@@ -1,6 +1,7 @@
 import { getMetadata, metadataRules } from 'page-metadata-parser'
 import extractPdfContent from './extract-pdf-content'
 import extractPageText from './extract-page-text'
+import extractFavIcon from '../background/get-fav-icon'
 
 // Extract the text content from web pages and PDFs.
 export default async function extractPageContent({
@@ -18,9 +19,12 @@ export default async function extractPageContent({
     const text = await extractPageText(doc, loc)
     // Metadata of web page
     const metadata = getMetadata(doc, url, metadataRules)
+    // Favicon of web page
+    const favIcon = await extractFavIcon(doc)
 
     return {
         text,
         metadata,
+        favIcon,
     }
 }

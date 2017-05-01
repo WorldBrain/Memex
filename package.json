@@ -21,7 +21,6 @@
     "classnames": "^2.2.5",
     "diff-match-patch": "^1.0.0",
     "docuri": "^4.2.1",
-    "favicon": "0.0.2",
     "history": "^4.6.1",
     "lodash": "^4.17.4",
     "moment": "^2.18.1",
