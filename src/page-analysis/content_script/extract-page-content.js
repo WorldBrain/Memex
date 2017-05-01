@@ -1,7 +1,7 @@
 import { getMetadata, metadataRules } from 'page-metadata-parser'
 import extractPdfContent from './extract-pdf-content'
 import extractPageText from './extract-page-text'
-import extractFavIcon from '../background/get-fav-icon'
+import extractFavIcon from './extract-fav-icon'
 
 // Extract the text content from web pages and PDFs.
 export default async function extractPageContent({

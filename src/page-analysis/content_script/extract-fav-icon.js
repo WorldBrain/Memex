@@ -27,5 +27,5 @@ async function getFavIcon(favIconUrl) {
  * @param {Document} doc DOM to attempt to extract favicon from.
  * @returns {string?} Favicon encoded as data URI.
  */
-const extractFavIcon = doc => getFavIcon(getFavIconURLFromDOM(doc))
+const extractFavIcon = (doc = document) => getFavIcon(getFavIconURLFromDOM(doc))
 export default extractFavIcon
