@@ -27,7 +27,7 @@ class Overview extends React.Component {
                 this.props.getMoreResults(this.props.searchResult.rows[this.props.searchResult.rows.length - 1].doc.visitStart, e.target.body.scrollTop)
             }
 
-            // console.log(e.target.body.clientHeight, e.target.body.scrollHeight, e.target.body.scrollTop, scrollPercentage);
+            // console.log(e.target.body.clientHeight, e.target.body.scrollHeight, e.target.body.scrollTop, scrollPercentage)
         })
     }
 
