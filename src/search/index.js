@@ -6,11 +6,12 @@ export async function filterVisitsByQuery({
     query,
     startDate,
     endDate,
-    limit = 30,
+    limit = 20,
     includeContext = false,
 }) {
     if (query === '') {
-        return await findVisits({startDate, endDate, limit})
+        const test = await findVisits({startDate, endDate, limit})
+        return test
     } else {
         const pagesResult = await searchPages({
             query,
