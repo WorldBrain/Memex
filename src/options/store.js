@@ -1,9 +1,11 @@
 import { createStore, combineReducers, compose } from 'redux'
 
 import * as blacklist from './blacklist'
+import * as imports from './imports'
 
 const rootReducer = combineReducers({
     blacklist: blacklist.reducer,
+    imports: imports.reducer,
 })
 
 export default function configureStore({ReduxDevTools = undefined} = {}) {
