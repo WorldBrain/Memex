@@ -2,7 +2,7 @@ import React, { PropTypes, Component } from 'react'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 
-import { entireState } from './selectors'
+import * as selectors from './selectors'
 import * as actions from './actions'
 import Import from './components/Import'
 import ImportButton from './components/ImportButton'
@@ -91,10 +91,9 @@ ImportContainer.propTypes = {
 }
 
 const mapStateToProps = state => ({
-    isLoading: entireState(state).loadingStatus === 'pending'
-        || entireState(state).indexRebuildingStatus === 'pending',
-    isPaused: entireState(state).loadingStatus === 'paused',
-    isCheckboxDisabled: entireState(state).loadingStatus !== 'stopped',
+    isLoading: selectors.isLoading(state),
+    isPaused: selectors.isPaused(state),
+    isCheckboxDisabled: selectors.isCheckboxDisabled(state),
     historyStats: { // demo statistics
         saved: 3000,
         sizeEngaged: 600,
