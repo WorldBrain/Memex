@@ -5,7 +5,7 @@ import localStyles from './Import.css'
 
 const Import = ({
     historyStats, bookmarksStats, onAllowImportHistoryClick, isCheckboxDisabled,
-    onAllowImportBookmarksClick, allowImport, downloadEsts, ActionButton,
+    onAllowImportBookmarksClick, allowImport, downloadEsts, ActionButton, StopButton,
 }) => (
     <div>
         <h1 className={styles.routeTitle}>Analyse History & Bookmarks</h1>
@@ -70,6 +70,7 @@ const Import = ({
 
         <div className={styles.fluidContainer}>
             {ActionButton}
+            {StopButton}
         </div>
 
         <div className={styles.fluidContainer}>
@@ -93,6 +94,7 @@ Import.propTypes = {
         bookmarks: PropTypes.bool.isRequired,
     }).isRequired,
     ActionButton: PropTypes.node.isRequired,
+    StopButton: PropTypes.node.isRequired,
     historyStats: PropTypes.shape({
         saved: PropTypes.number,
         sizeEngaged: PropTypes.number,

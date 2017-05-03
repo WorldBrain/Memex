@@ -14,6 +14,11 @@ const startImport = state => ({
 
 const resumeImport = startImport
 
+const stopImport = state => ({
+    ...state,
+    loadingStatus: 'stopped',
+})
+
 const pauseImport = state => ({
     ...state,
     loadingStatus: 'paused',
@@ -31,6 +36,7 @@ const stopIndexRebuild = (state, payload) => ({
 
 export default createReducer({
     [actions.startImport]: startImport,
+    [actions.stopImport]: stopImport,
     [actions.pauseImport]: pauseImport,
     [actions.resumeImport]: resumeImport,
     [actions.startIndexRebuild]: startIndexRebuild,

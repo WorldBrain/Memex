@@ -44,7 +44,19 @@ class ImportContainer extends Component {
         }
     }
 
-    renderImportButton() {
+    renderStopButton() {
+        const { isLoading, isPaused, boundActions: { stopImport } } = this.props
+
+        const isDisabled = !isLoading && !isPaused
+
+        return (
+            <ImportButton handleClick={stopImport} isDisabled={isDisabled}>
+                Cancel import
+            </ImportButton>
+        )
+    }
+
+    renderActionButton() {
         const { isLoading, isPaused, boundActions: { pauseImport, resumeImport, startImport } } = this.props
         const { allowImportBookmarks, allowImportHistory } = this.state
 
@@ -67,7 +79,8 @@ class ImportContainer extends Component {
 
         return (
             <Import
-                ActionButton={this.renderImportButton()}
+                ActionButton={this.renderActionButton()}
+                StopButton={this.renderStopButton()}
                 onAllowImportBookmarksClick={() => this.onAllowImportBookmarksClick()}
                 onAllowImportHistoryClick={() => this.onAllowImportHistoryClick()}
                 downloadEsts={this.getDownloadEsts()}
