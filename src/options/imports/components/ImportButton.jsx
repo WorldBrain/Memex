@@ -1,7 +1,7 @@
 import React, { PropTypes } from 'react'
 import classNames from 'classnames'
 import styles from '../../options.css'
-import localStyles from './ImportButton.css'
+import localStyles from './ImportButtonBar.css'
 
 const ImportButton = ({ children, handleClick, isDisabled }) => (
     <button
@@ -14,9 +14,14 @@ const ImportButton = ({ children, handleClick, isDisabled }) => (
 )
 
 ImportButton.propTypes = {
-    children: PropTypes.string.isRequired,
-    handleClick: PropTypes.func.isRequired,
+    // State
     isDisabled: PropTypes.bool,
+
+    // Event handlers
+    handleClick: PropTypes.func.isRequired,
+
+    // Misc
+    children: PropTypes.string.isRequired, // Button text
 }
 
 export default ImportButton

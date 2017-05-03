@@ -1,0 +1,41 @@
+.container {
+    display: flex;
+    flex-direction: row;
+    height: 100px;
+}
+
+.loadingContainer {
+    display: flex;
+    flex-direction: column;
+    width: 45%;
+}
+
+.actionContainer {
+    display: flex;
+    flex-direction: column;
+    width: 55%;
+}
+
+.actionBar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    height: 60px;
+    margin-left: 10%;
+}
+
+.actionButton {
+    width: 165px;
+    height: 45px;
+}
+
+.helpText {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    font-weight: 400;
+    text-align: right;
+    font-size: .8em;
+}
+

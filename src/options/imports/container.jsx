@@ -5,7 +5,9 @@ import { bindActionCreators } from 'redux'
 import * as selectors from './selectors'
 import * as actions from './actions'
 import Import from './components/Import'
+import ImportTable from './components/ImportTable'
 import ImportButton from './components/ImportButton'
+import ImportButtonBar from './components/ImportButtonBar'
 
 class ImportContainer extends Component {
     constructor(props) {
@@ -75,18 +77,23 @@ class ImportContainer extends Component {
     }
 
     render() {
+        const { isLoading } = this.props
         const { allowImportBookmarks: bookmarks, allowImportHistory: history } = this.state
 
         return (
-            <Import
-                ActionButton={this.renderActionButton()}
-                StopButton={this.renderStopButton()}
-                onAllowImportBookmarksClick={() => this.onAllowImportBookmarksClick()}
-                onAllowImportHistoryClick={() => this.onAllowImportHistoryClick()}
-                downloadEsts={this.getDownloadEsts()}
-                allowImport={{ bookmarks, history }}
-                {...this.props}
-            />
+            <Import>
+                <ImportTable
+                    onAllowImportBookmarksClick={() => this.onAllowImportBookmarksClick()}
+                    onAllowImportHistoryClick={() => this.onAllowImportHistoryClick()}
+                    downloadEsts={this.getDownloadEsts()}
+                    allowImport={{ bookmarks, history }}
+                    {...this.props}
+                />
+                <ImportButtonBar isLoading={isLoading}>
+                    {this.renderStopButton()}
+                    {this.renderActionButton()}
+                </ImportButtonBar>
+            </Import>
         )
     }
 }
