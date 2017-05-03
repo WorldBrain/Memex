@@ -5,6 +5,8 @@ import * as actions from './actions'
 const defaultState = {
     loadingStatus: 'stopped',
     indexRebuildingStatus: 'stopped',
+    downloadData: [],
+    downloadDataFilter: 'all',
 }
 
 const startImport = state => ({
@@ -34,6 +36,11 @@ const stopIndexRebuild = (state, payload) => ({
     indexRebuildingStatus: 'stopped',
 })
 
+const filterDownloadDetails = (state, payload) => ({
+    ...state,
+    downloadDataFilter: payload,
+})
+
 export default createReducer({
     [actions.startImport]: startImport,
     [actions.stopImport]: stopImport,
@@ -41,4 +48,5 @@ export default createReducer({
     [actions.resumeImport]: resumeImport,
     [actions.startIndexRebuild]: startIndexRebuild,
     [actions.stopIndexRebuild]: stopIndexRebuild,
+    [actions.filterDownloadDetails]: filterDownloadDetails,
 }, defaultState)

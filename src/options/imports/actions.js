@@ -1,5 +1,6 @@
 import { createAction } from 'redux-act'
 
+export const filterDownloadDetails = createAction('options/filterDownloadDetails')
 
 export const startImport = createAction('options/startImport')
 export const stopImport = createAction('options/stopImport')

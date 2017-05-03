@@ -47,7 +47,7 @@ html, body {
         background: #cdcdcd;
         color: #333;
     }
-    
+
     &[disabled] {
         background: #eee;
         color: #666;
@@ -63,6 +63,11 @@ html, body {
 .helpText_right {
     float: right;
     text-align: right;
+}
+
+.buttonNaked {
+    border: 0;
+    background: none;
 }
 
 .fluidContainer {

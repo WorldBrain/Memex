@@ -4,10 +4,13 @@ import { bindActionCreators } from 'redux'
 
 import * as selectors from './selectors'
 import * as actions from './actions'
+import * as constants from './constants'
 import Import from './components/Import'
 import ImportTable from './components/ImportTable'
 import ImportButton from './components/ImportButton'
 import ImportButtonBar from './components/ImportButtonBar'
+import DownloadDetails from './components/DownloadDetails'
+import DownloadDetailsRow from './components/DownloadDetailsRow'
 
 class ImportContainer extends Component {
     constructor(props) {
@@ -16,6 +19,7 @@ class ImportContainer extends Component {
         this.state = {
             allowImportHistory: true,
             allowImportBookmarks: false,
+            activeRow: -1,
         }
     }
 
@@ -31,6 +35,28 @@ class ImportContainer extends Component {
             ...state,
             allowImportBookmarks: !state.allowImportBookmarks,
         }))
+    }
+
+    onDetailsRowClick(rowId) {
+        this.setState(state => ({
+            ...state,
+            activeRow: rowId,
+        }))
+    }
+
+    getDetailFilterHandlers() {
+        const { boundActions } = this.props
+
+        const updateFilterState = filter => () => {
+            this.onDetailsRowClick(-1) // Simulate anti-click to reset state of active details row
+            boundActions.filterDownloadDetails(filter)
+        }
+
+        return {
+            all: updateFilterState(constants.FILTERS.ALL),
+            succ: updateFilterState(constants.FILTERS.SUCC),
+            fail: updateFilterState(constants.FILTERS.FAIL),
+        }
     }
 
     getDownloadEsts() {
@@ -76,8 +102,22 @@ class ImportContainer extends Component {
         return <ImportButton {...getProps(startImport)}>Start import</ImportButton>
     }
 
+    renderDownloadDetailsRows() {
+        const { activeRow } = this.state
+        const { downloadData } = this.props
+
+        return downloadData.map((data, i) => (
+            <DownloadDetailsRow
+                key={i}
+                isActive={i === activeRow}
+                handleClick={() => this.onDetailsRowClick(i)}
+                {...data}
+            />
+        ))
+    }
+
     render() {
-        const { isLoading } = this.props
+        const { isLoading, isStopped } = this.props
         const { allowImportBookmarks: bookmarks, allowImportHistory: history } = this.state
 
         return (
@@ -93,6 +133,11 @@ class ImportContainer extends Component {
                     {this.renderStopButton()}
                     {this.renderActionButton()}
                 </ImportButtonBar>
+                {!isStopped
+                    && <DownloadDetails filterHandlers={this.getDetailFilterHandlers()}>
+                        {this.renderDownloadDetailsRows()}
+                    </DownloadDetails>
+                }
             </Import>
         )
     }
@@ -101,7 +146,9 @@ class ImportContainer extends Component {
 ImportContainer.propTypes = {
     isLoading: PropTypes.bool.isRequired,
     isPaused: PropTypes.bool.isRequired,
+    isStopped: PropTypes.bool.isRequired,
     boundActions: PropTypes.object.isRequired,
+    downloadData: PropTypes.arrayOf(PropTypes.object).isRequired,
     historyStats: PropTypes.shape({
         timeEstim: PropTypes.number,
     }),
@@ -113,7 +160,9 @@ ImportContainer.propTypes = {
 const mapStateToProps = state => ({
     isLoading: selectors.isLoading(state),
     isPaused: selectors.isPaused(state),
+    isStopped: selectors.isStopped(state),
     isCheckboxDisabled: selectors.isCheckboxDisabled(state),
+    downloadData: selectors.downloadDetailsData(state),
     historyStats: { // demo statistics
         saved: 3000,
         sizeEngaged: 600,
