@@ -20,8 +20,12 @@ class ImportContainer extends Component {
         this.state = {
             allowImportHistory: false,
             allowImportBookmarks: false,
+            waitingOnCancelConfirm: false,
             activeRow: -1,
         }
+
+        this.flipCancelState = waitingOnCancelConfirm =>
+            this.setState(state => ({ ...state, waitingOnCancelConfirm }))
     }
 
     onAllowImportHistoryClick() {
@@ -42,7 +46,14 @@ class ImportContainer extends Component {
         this.setState(state => ({
             ...state,
             activeRow: rowId,
+            waitingOnCancelConfirm: false,
         }))
+    }
+
+    onButtonClick(e, handleClick) {
+        e.preventDefault()
+        this.flipCancelState(false)
+        handleClick()
     }
 
     getDetailFilterHandlers() {
@@ -54,37 +65,53 @@ class ImportContainer extends Component {
         }
 
         return {
-            all: updateFilterState(constants.FILTERS.ALL),
-            succ: updateFilterState(constants.FILTERS.SUCC),
-            fail: updateFilterState(constants.FILTERS.FAIL),
+            all: e => this.onButtonClick(e, updateFilterState(constants.FILTERS.ALL)),
+            succ: e => this.onButtonClick(e, updateFilterState(constants.FILTERS.SUCC)),
+            fail: e => this.onButtonClick(e, updateFilterState(constants.FILTERS.FAIL)),
         }
     }
 
-    renderStopButton() {
-        const { isStopped, boundActions: { stopImport } } = this.props
+    renderCancelButton() {
+        const { isStopped, boundActions } = this.props
+        const { waitingOnCancelConfirm } = this.state
+
+        const handleClick = e => {
+            e.preventDefault()
+
+            // Only cancel running import after second confirmation
+            if (!waitingOnCancelConfirm) {
+                this.flipCancelState(true)
+            } else {
+                this.flipCancelState(false)
+                boundActions.stopImport()
+            }
+        }
 
         return (
-            <ActionButton handleClick={stopImport} isHidden={isStopped}>
+            <ActionButton handleClick={handleClick} isHidden={isStopped}>
                 Cancel import
             </ActionButton>
         )
     }
 
     renderImportButton() {
-        const { isLoading, isPaused, boundActions: { pauseImport, resumeImport, startImport } } = this.props
+        const { isLoading, isPaused, boundActions } = this.props
         const { allowImportBookmarks, allowImportHistory } = this.state
 
         if (isLoading) {
-            return <ActionButton handleClick={pauseImport}>Pause</ActionButton>
+            const handleClick = e => this.onButtonClick(e, boundActions.pauseImport)
+            return <ActionButton handleClick={handleClick}>Pause</ActionButton>
         }
 
         if (isPaused) {
-            return <ActionButton handleClick={resumeImport}>Resume</ActionButton>
+            const handleClick = e => this.onButtonClick(e, boundActions.resumeImport)
+            return <ActionButton handleClick={handleClick}>Resume</ActionButton>
         }
 
         const isDisabled = !allowImportHistory && !allowImportBookmarks
+        const handleClick = e => this.onButtonClick(e, boundActions.startImport)
 
-        return <ActionButton handleClick={startImport} isDisabled={isDisabled}>Start import</ActionButton>
+        return <ActionButton handleClick={handleClick} isDisabled={isDisabled}>Start import</ActionButton>
     }
 
     renderDownloadDetailsRows() {
@@ -102,7 +129,7 @@ class ImportContainer extends Component {
     }
 
     render() {
-        const { allowImportBookmarks: bookmarks, allowImportHistory: history } = this.state
+        const { allowImportBookmarks: bookmarks, allowImportHistory: history, waitingOnCancelConfirm } = this.state
         const {
             isLoading, isStopped, bookmarksProgress, historyProgress,
             bookmarksStats, historyStats, downloadEsts,
@@ -121,8 +148,8 @@ class ImportContainer extends Component {
                     />
                     : <ProgressTable bookmarks={bookmarksProgress} history={historyProgress} />
                 }
-                <ButtonBar isLoading={isLoading} isStopped={isStopped}>
-                    {this.renderStopButton()}
+                <ButtonBar isLoading={isLoading} isStopped={isStopped} showCancelText={waitingOnCancelConfirm}>
+                    {this.renderCancelButton()}
                     {this.renderImportButton()}
                 </ButtonBar>
                 {!isStopped
