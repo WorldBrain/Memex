@@ -29,6 +29,10 @@
 .actionButton {
     width: 165px;
     height: 45px;
+
+    &.hidden {
+        visibility: hidden;
+    }
 }
 
 .helpText {

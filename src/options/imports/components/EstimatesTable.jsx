@@ -5,8 +5,7 @@ import localStyles from './Import.css'
 
 const EstimatesTable = ({
     onAllowImportHistoryClick, onAllowImportBookmarksClick,
-    historyStats, bookmarksStats, downloadEsts,
-    allowImport, isCheckboxDisabled,
+    historyStats, bookmarksStats, downloadEsts, allowImport,
 }) => (
     <table className={localStyles.importTable}>
         <colgroup>
@@ -56,7 +55,6 @@ const EstimatesTable = ({
                         name='history'
                         onChange={onAllowImportHistoryClick}
                         checked={allowImport.history}
-                        disabled={isCheckboxDisabled}
                     />
                 </td>
                 <td>
@@ -65,7 +63,6 @@ const EstimatesTable = ({
                         name='bookmarks'
                         onChange={onAllowImportBookmarksClick}
                         checked={allowImport.bookmarks}
-                        disabled={isCheckboxDisabled}
                     />
                 </td>
             </tr>
@@ -75,7 +72,6 @@ const EstimatesTable = ({
 
 EstimatesTable.propTypes = {
     // State
-    isCheckboxDisabled: PropTypes.bool.isRequired,
     downloadEsts: PropTypes.shape({
         bookmarks: PropTypes.string.isRequired,
         history: PropTypes.string.isRequired,

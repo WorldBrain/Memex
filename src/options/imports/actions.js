@@ -1,11 +1,15 @@
 import { createAction } from 'redux-act'
 
-export const filterDownloadDetails = createAction('options/filterDownloadDetails')
+export const filterDownloadDetails = createAction('imports/filterDownloadDetails')
+export const addDownloadDetails = createAction('imports/addDownloadDetails')
 
-export const startImport = createAction('options/startImport')
-export const stopImport = createAction('options/stopImport')
-export const pauseImport = createAction('options/pauseImport')
-export const resumeImport = createAction('options/resumeImport')
+export const setHistoryStats = createAction('imports/setHistoryStats')
+export const setBookmarksStats = createAction('imports/setBookmarksStats')
 
-export const startIndexRebuild = createAction('options/startIndexRebuild')
-export const stopIndexRebuild = createAction('options/stopIndexRebuild')
+export const startImport = createAction('imports/startImport')
+export const stopImport = createAction('imports/stopImport')
+export const pauseImport = createAction('imports/pauseImport')
+export const resumeImport = createAction('imports/resumeImport')
+
+export const startIndexRebuild = createAction('imports/startIndexRebuild')
+export const stopIndexRebuild = createAction('imports/stopIndexRebuild')

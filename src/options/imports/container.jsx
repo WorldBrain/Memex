@@ -60,26 +60,11 @@ class ImportContainer extends Component {
         }
     }
 
-    getDownloadEsts() {
-        const { bookmarksStats: { timeEstim: bookmarksTime }, historyStats: { timeEstim: historyTime } } = this.props
-
-        const getHours = time => Math.floor(time / 60)
-        const getMins = time => time - getHours(time) * 60
-        const getTimeEstStr = time => `${getHours(time)}:${getMins(time)} h`
-
-        return {
-            bookmarks: getTimeEstStr(bookmarksTime),
-            history: getTimeEstStr(historyTime),
-        }
-    }
-
     renderStopButton() {
-        const { isLoading, isPaused, boundActions: { stopImport } } = this.props
-
-        const isDisabled = !isLoading && !isPaused
+        const { isStopped, boundActions: { stopImport } } = this.props
 
         return (
-            <ActionButton handleClick={stopImport} isDisabled={isDisabled}>
+            <ActionButton handleClick={stopImport} isHidden={isStopped}>
                 Cancel import
             </ActionButton>
         )
@@ -118,8 +103,11 @@ class ImportContainer extends Component {
     }
 
     render() {
-        const { isLoading, isStopped, bookmarksProgress, historyProgress } = this.props
         const { allowImportBookmarks: bookmarks, allowImportHistory: history } = this.state
+        const {
+            isLoading, isStopped, bookmarksProgress, historyProgress,
+            bookmarksStats, historyStats, downloadEsts,
+        } = this.props
 
         return (
             <Import>
@@ -127,9 +115,10 @@ class ImportContainer extends Component {
                     ? <EstimatesTable
                         onAllowImportBookmarksClick={() => this.onAllowImportBookmarksClick()}
                         onAllowImportHistoryClick={() => this.onAllowImportHistoryClick()}
-                        downloadEsts={this.getDownloadEsts()}
                         allowImport={{ bookmarks, history }}
-                        {...this.props}
+                        downloadEsts={downloadEsts}
+                        historyStats={historyStats}
+                        bookmarksStats={bookmarksStats}
                     />
                     : <ProgressTable bookmarks={bookmarksProgress} history={historyProgress} />
                 }
@@ -148,31 +137,31 @@ class ImportContainer extends Component {
 }
 
 ImportContainer.propTypes = {
+    // State
     isLoading: PropTypes.bool.isRequired,
     isPaused: PropTypes.bool.isRequired,
     isStopped: PropTypes.bool.isRequired,
-    boundActions: PropTypes.object.isRequired,
     downloadData: PropTypes.arrayOf(PropTypes.object).isRequired,
     historyProgress: PropTypes.object.isRequired,
     bookmarksProgress: PropTypes.object.isRequired,
-    historyStats: PropTypes.shape({
-        timeEstim: PropTypes.number,
-    }),
-    bookmarksStats: PropTypes.shape({
-        timeEstim: PropTypes.number,
-    }),
+    historyStats: PropTypes.object.isRequired,
+    bookmarksStats: PropTypes.object.isRequired,
+    downloadEsts: PropTypes.object.isRequired,
+
+    // Misc
+    boundActions: PropTypes.object.isRequired,
 }
 
 const mapStateToProps = state => ({
     isLoading: selectors.isLoading(state),
     isPaused: selectors.isPaused(state),
     isStopped: selectors.isStopped(state),
-    isCheckboxDisabled: selectors.isCheckboxDisabled(state),
     downloadData: selectors.downloadDetailsData(state),
     historyProgress: selectors.historyProgress(state),
     bookmarksProgress: selectors.bookmarksProgress(state),
     historyStats: selectors.historyStats(state),
     bookmarksStats: selectors.bookmarksStats(state),
+    downloadEsts: selectors.downloadTimeEstimates(state),
 })
 
 const mapDispatchToProps = dispatch => ({ boundActions: bindActionCreators(actions, dispatch) })
