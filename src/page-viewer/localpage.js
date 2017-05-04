@@ -1,23 +1,21 @@
-import { blobToBinaryString } from 'blob-util'
+import { blobToArrayBuffer } from 'blob-util'
 
 import db from 'src/pouchdb'
 
 
 async function showPage(pageId) {
-    console.log(`Loading page '${pageId}' from database..`)
+    // Read the html file from the database.
     const blob = await db.getAttachment(pageId, 'frozen-page.html')
-    console.log('Got page blob.')
-
-    const htmlString = await blobToBinaryString(blob)
 
     // Replace the document contents.
     try {
-        document.open()
-        document.write(htmlString)
-        document.close()
+        // We assume utf-8 encoding. TODO: read encoding from document.
+        const html = new TextDecoder('utf-8').decode(await blobToArrayBuffer(blob))
+        // Strip the <html>...</html> tags because we set innerHTML.
+        const innerHTML = html.match(/[^]*?<html[^]*?>([^]*)<\/html[^]*?>/i)[1]
+        document.documentElement.innerHTML = innerHTML
     } catch (err) {
-        // Just in case document.write fails, e.g. due to browser quirks.
-        // Use a blob URL (downside: the url is very temporary).
+        // Alternatively, use a blob URL (downside: the url is very temporary).
         const blobUrl = URL.createObjectURL(blob)
         window.location = blobUrl
     }
