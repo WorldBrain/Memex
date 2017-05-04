@@ -3,7 +3,7 @@ import React, { PropTypes } from 'react'
 import { LoadingIndicator } from 'src/common-ui/components'
 import styles from './ImportButtonBar.css'
 
-const ImportButtonBar = ({ isLoading, children }) => (
+const ImportButtonBar = ({ isLoading, isStopped, children }) => (
     <div className={styles.container}>
         <div className={styles.loadingContainer}>
             {isLoading && <LoadingIndicator />}
@@ -12,16 +12,18 @@ const ImportButtonBar = ({ isLoading, children }) => (
             <div className={styles.actionBar}>
                 {children}
             </div>
-
-            <div className={styles.helpText}>
-                Downloading may slow down your browsing experience.<br /> You can pause and resume anytime
-            </div>
+            {isStopped
+                && <div className={styles.helpText}>
+                    Downloading may slow down your browsing experience.<br /> You can pause and resume anytime
+                </div>
+            }
         </div>
     </div>
 )
 
 ImportButtonBar.propTypes = {
     isLoading: PropTypes.bool.isRequired,
+    isStopped: PropTypes.bool.isRequired,
     children: PropTypes.arrayOf(PropTypes.node).isRequired,
 }
 

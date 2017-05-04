@@ -2,10 +2,19 @@ import { createReducer } from 'redux-act'
 
 import * as actions from './actions'
 
+const defaultProgress = {
+    progress: 0,
+    total: 0,
+    successful: 0,
+    failed: 0,
+}
+
 const defaultState = {
     loadingStatus: 'stopped',
     indexRebuildingStatus: 'stopped',
     downloadData: [],
+    historyProgress: defaultProgress,
+    bookmarksProgress: defaultProgress,
     downloadDataFilter: 'all',
 }
 

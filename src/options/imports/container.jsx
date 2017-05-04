@@ -7,6 +7,7 @@ import * as actions from './actions'
 import * as constants from './constants'
 import Import from './components/Import'
 import ImportTable from './components/ImportTable'
+import ProgressTable from './components/ProgressTable'
 import ImportButton from './components/ImportButton'
 import ImportButtonBar from './components/ImportButtonBar'
 import DownloadDetails from './components/DownloadDetails'
@@ -117,19 +118,22 @@ class ImportContainer extends Component {
     }
 
     render() {
-        const { isLoading, isStopped } = this.props
+        const { isLoading, isStopped, bookmarksProgress, historyProgress } = this.props
         const { allowImportBookmarks: bookmarks, allowImportHistory: history } = this.state
 
         return (
             <Import>
-                <ImportTable
-                    onAllowImportBookmarksClick={() => this.onAllowImportBookmarksClick()}
-                    onAllowImportHistoryClick={() => this.onAllowImportHistoryClick()}
-                    downloadEsts={this.getDownloadEsts()}
-                    allowImport={{ bookmarks, history }}
-                    {...this.props}
-                />
-                <ImportButtonBar isLoading={isLoading}>
+                {isStopped
+                    ? <ImportTable
+                        onAllowImportBookmarksClick={() => this.onAllowImportBookmarksClick()}
+                        onAllowImportHistoryClick={() => this.onAllowImportHistoryClick()}
+                        downloadEsts={this.getDownloadEsts()}
+                        allowImport={{ bookmarks, history }}
+                        {...this.props}
+                    />
+                    : <ProgressTable bookmarks={bookmarksProgress} history={historyProgress} />
+                }
+                <ImportButtonBar isLoading={isLoading} isStopped={isStopped}>
                     {this.renderStopButton()}
                     {this.renderActionButton()}
                 </ImportButtonBar>
@@ -149,6 +153,8 @@ ImportContainer.propTypes = {
     isStopped: PropTypes.bool.isRequired,
     boundActions: PropTypes.object.isRequired,
     downloadData: PropTypes.arrayOf(PropTypes.object).isRequired,
+    historyProgress: PropTypes.object.isRequired,
+    bookmarksProgress: PropTypes.object.isRequired,
     historyStats: PropTypes.shape({
         timeEstim: PropTypes.number,
     }),
@@ -163,6 +169,8 @@ const mapStateToProps = state => ({
     isStopped: selectors.isStopped(state),
     isCheckboxDisabled: selectors.isCheckboxDisabled(state),
     downloadData: selectors.downloadDetailsData(state),
+    historyProgress: selectors.historyProgress(state),
+    bookmarksProgress: selectors.bookmarksProgress(state),
     historyStats: { // demo statistics
         saved: 3000,
         sizeEngaged: 600,

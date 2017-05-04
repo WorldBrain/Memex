@@ -8,6 +8,8 @@ const loadingStatus = state => entireState(state).loadingStatus
 const indexRebuildingStatus = state => entireState(state).indexRebuildingStatus
 const downloadData = state => entireState(state).downloadData
 const downloadDataFilter = state => entireState(state).downloadDataFilter
+export const historyProgress = state => entireState(state).historyProgress
+export const bookmarksProgress = state => entireState(state).bookmarksProgress
 
 export const isLoading = createSelector(
     loadingStatus,

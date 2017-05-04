@@ -53,6 +53,10 @@
 }
 
 .importTableContainer {
+    display: flex;
+    flex-direction: column;
+    height: 750px;
+    justify-content: space-between;
     padding: 40px;
     background: #f8f8f8;
     border: 1px solid #666;
