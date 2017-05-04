@@ -6,10 +6,10 @@ import * as selectors from './selectors'
 import * as actions from './actions'
 import * as constants from './constants'
 import Import from './components/Import'
-import ImportTable from './components/ImportTable'
+import EstimatesTable from './components/EstimatesTable'
 import ProgressTable from './components/ProgressTable'
-import ImportButton from './components/ImportButton'
-import ImportButtonBar from './components/ImportButtonBar'
+import ActionButton from './components/ActionButton'
+import ButtonBar from './components/ButtonBar'
 import DownloadDetails from './components/DownloadDetails'
 import DownloadDetailsRow from './components/DownloadDetailsRow'
 
@@ -18,7 +18,7 @@ class ImportContainer extends Component {
         super(props)
 
         this.state = {
-            allowImportHistory: true,
+            allowImportHistory: false,
             allowImportBookmarks: false,
             activeRow: -1,
         }
@@ -79,13 +79,13 @@ class ImportContainer extends Component {
         const isDisabled = !isLoading && !isPaused
 
         return (
-            <ImportButton handleClick={stopImport} isDisabled={isDisabled}>
+            <ActionButton handleClick={stopImport} isDisabled={isDisabled}>
                 Cancel import
-            </ImportButton>
+            </ActionButton>
         )
     }
 
-    renderActionButton() {
+    renderImportButton() {
         const { isLoading, isPaused, boundActions: { pauseImport, resumeImport, startImport } } = this.props
         const { allowImportBookmarks, allowImportHistory } = this.state
 
@@ -93,14 +93,14 @@ class ImportContainer extends Component {
         const getProps = handleClick => ({ handleClick, isDisabled })
 
         if (isLoading) {
-            return <ImportButton {...getProps(pauseImport)}>Pause</ImportButton>
+            return <ActionButton {...getProps(pauseImport)}>Pause</ActionButton>
         }
 
         if (isPaused) {
-            return <ImportButton {...getProps(resumeImport)}>Resume</ImportButton>
+            return <ActionButton {...getProps(resumeImport)}>Resume</ActionButton>
         }
 
-        return <ImportButton {...getProps(startImport)}>Start import</ImportButton>
+        return <ActionButton {...getProps(startImport)}>Start import</ActionButton>
     }
 
     renderDownloadDetailsRows() {
@@ -124,7 +124,7 @@ class ImportContainer extends Component {
         return (
             <Import>
                 {isStopped
-                    ? <ImportTable
+                    ? <EstimatesTable
                         onAllowImportBookmarksClick={() => this.onAllowImportBookmarksClick()}
                         onAllowImportHistoryClick={() => this.onAllowImportHistoryClick()}
                         downloadEsts={this.getDownloadEsts()}
@@ -133,10 +133,10 @@ class ImportContainer extends Component {
                     />
                     : <ProgressTable bookmarks={bookmarksProgress} history={historyProgress} />
                 }
-                <ImportButtonBar isLoading={isLoading} isStopped={isStopped}>
+                <ButtonBar isLoading={isLoading} isStopped={isStopped}>
                     {this.renderStopButton()}
-                    {this.renderActionButton()}
-                </ImportButtonBar>
+                    {this.renderImportButton()}
+                </ButtonBar>
                 {!isStopped
                     && <DownloadDetails filterHandlers={this.getDetailFilterHandlers()}>
                         {this.renderDownloadDetailsRows()}

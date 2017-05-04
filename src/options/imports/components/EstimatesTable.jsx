@@ -3,7 +3,7 @@ import classNames from 'classnames'
 
 import localStyles from './Import.css'
 
-const ImportTable = ({
+const EstimatesTable = ({
     onAllowImportHistoryClick, onAllowImportBookmarksClick,
     historyStats, bookmarksStats, downloadEsts,
     allowImport, isCheckboxDisabled,
@@ -73,7 +73,7 @@ const ImportTable = ({
     </table>
 )
 
-ImportTable.propTypes = {
+EstimatesTable.propTypes = {
     // State
     isCheckboxDisabled: PropTypes.bool.isRequired,
     downloadEsts: PropTypes.shape({
@@ -106,4 +106,4 @@ ImportTable.propTypes = {
     }).isRequired,
 }
 
-export default ImportTable
+export default EstimatesTable

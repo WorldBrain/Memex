@@ -1,9 +1,10 @@
 import React, { PropTypes } from 'react'
 import classNames from 'classnames'
-import styles from '../../options.css'
-import localStyles from './ImportButtonBar.css'
 
-const ImportButton = ({ children, handleClick, isDisabled }) => (
+import styles from '../../options.css'
+import localStyles from './ButtonBar.css'
+
+const ActionButton = ({ children, handleClick, isDisabled }) => (
     <button
         className={classNames(localStyles.actionButton, styles.button)}
         onClick={handleClick}
@@ -13,7 +14,7 @@ const ImportButton = ({ children, handleClick, isDisabled }) => (
     </button>
 )
 
-ImportButton.propTypes = {
+ActionButton.propTypes = {
     // State
     isDisabled: PropTypes.bool,
 
@@ -24,5 +25,5 @@ ImportButton.propTypes = {
     children: PropTypes.string.isRequired, // Button text
 }
 
-export default ImportButton
+export default ActionButton
 

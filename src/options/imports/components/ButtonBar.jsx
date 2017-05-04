@@ -1,9 +1,9 @@
 import React, { PropTypes } from 'react'
 
 import { LoadingIndicator } from 'src/common-ui/components'
-import styles from './ImportButtonBar.css'
+import styles from './ButtonBar.css'
 
-const ImportButtonBar = ({ isLoading, isStopped, children }) => (
+const ButtonBar = ({ isLoading, isStopped, children }) => (
     <div className={styles.container}>
         <div className={styles.loadingContainer}>
             {isLoading && <LoadingIndicator />}
@@ -21,10 +21,10 @@ const ImportButtonBar = ({ isLoading, isStopped, children }) => (
     </div>
 )
 
-ImportButtonBar.propTypes = {
+ButtonBar.propTypes = {
     isLoading: PropTypes.bool.isRequired,
     isStopped: PropTypes.bool.isRequired,
     children: PropTypes.arrayOf(PropTypes.node).isRequired,
 }
 
-export default ImportButtonBar
+export default ButtonBar
