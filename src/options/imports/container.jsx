@@ -171,21 +171,8 @@ const mapStateToProps = state => ({
     downloadData: selectors.downloadDetailsData(state),
     historyProgress: selectors.historyProgress(state),
     bookmarksProgress: selectors.bookmarksProgress(state),
-    historyStats: { // demo statistics
-        saved: 3000,
-        sizeEngaged: 600,
-        notDownloaded: 1500,
-        sizeRequired: 300,
-        timeEstim: 80,
-    },
-    bookmarksStats: { // demo statistics
-        saved: 4000,
-        sizeEngaged: 350,
-        notDownloaded: 2000,
-        sizeRequired: 350,
-        timeEstim: 130,
-    },
-
+    historyStats: selectors.historyStats(state),
+    bookmarksStats: selectors.bookmarksStats(state),
 })
 
 const mapDispatchToProps = dispatch => ({ boundActions: bindActionCreators(actions, dispatch) })

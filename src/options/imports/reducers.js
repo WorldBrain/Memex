@@ -9,12 +9,22 @@ const defaultProgress = {
     failed: 0,
 }
 
+const defaultStats = {
+    saved: 0,
+    sizeEngaged: 0,
+    notDownloaded: 0,
+    sizeRequired: 0,
+    timeEstim: 0,
+}
+
 const defaultState = {
     loadingStatus: 'stopped',
     indexRebuildingStatus: 'stopped',
     downloadData: [],
     historyProgress: defaultProgress,
     bookmarksProgress: defaultProgress,
+    historyStats: defaultStats,
+    bookmarksStats: defaultStats,
     downloadDataFilter: 'all',
 }
 

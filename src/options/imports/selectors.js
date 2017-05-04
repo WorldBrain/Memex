@@ -10,6 +10,8 @@ const downloadData = state => entireState(state).downloadData
 const downloadDataFilter = state => entireState(state).downloadDataFilter
 export const historyProgress = state => entireState(state).historyProgress
 export const bookmarksProgress = state => entireState(state).bookmarksProgress
+export const historyStats = state => entireState(state).historyStats
+export const bookmarksStats = state => entireState(state).bookmarksStats
 
 export const isLoading = createSelector(
     loadingStatus,
