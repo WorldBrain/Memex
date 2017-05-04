@@ -11,6 +11,7 @@ const rootReducer = combineReducers({
 export default function configureStore({ReduxDevTools = undefined} = {}) {
     const enhancers = [
         blacklist.enhancer,
+        imports.enhancer,
     ]
 
     if (ReduxDevTools) {

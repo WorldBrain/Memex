@@ -20,33 +20,6 @@ const defaultState = {
     downloadDataFilter: 'all',
 }
 
-const startImport = state => ({
-    ...state,
-    loadingStatus: STATUS.RUNNING,
-})
-
-const resumeImport = startImport
-
-const stopImport = state => ({
-    ...state,
-    loadingStatus: STATUS.STOPPED,
-})
-
-const pauseImport = state => ({
-    ...state,
-    loadingStatus: STATUS.PAUSED,
-})
-
-const startIndexRebuild = state => ({
-    ...state,
-    indexRebuildingStatus: STATUS.RUNNING,
-})
-
-const stopIndexRebuild = state => ({
-    ...state,
-    indexRebuildingStatus: STATUS.STOPPED,
-})
-
 const addDownloadDetails = (state, payload) => ({
     ...state,
     downloadData: [
@@ -55,30 +28,26 @@ const addDownloadDetails = (state, payload) => ({
     ],
 })
 
-const filterDownloadDetails = (state, payload) => ({
-    ...state,
-    downloadDataFilter: payload,
-})
+// Sets whatever key to the specified val
+const genericReducer = (key, val) => state => ({ ...state, [key]: val })
+// Sets whatever key to payload
+const payloadReducer = key => (state, payload) => ({ ...state, [key]: payload })
 
-const setHistoryStats = (state, payload) => ({
-    ...state,
-    historyStats: payload,
-})
-
-const setBookmarksStats = (state, payload) => ({
-    ...state,
-    bookmarksStats: payload,
-})
+// Simple reducers constructed for state keys
+const setImportState = val => genericReducer('loadingStatus', val)
+const setIndexState = val => genericReducer('indexRebuildingStatus', val)
 
 export default createReducer({
-    [actions.startImport]: startImport,
-    [actions.stopImport]: stopImport,
-    [actions.pauseImport]: pauseImport,
-    [actions.resumeImport]: resumeImport,
-    [actions.startIndexRebuild]: startIndexRebuild,
-    [actions.stopIndexRebuild]: stopIndexRebuild,
+    [actions.startImport]: setImportState(STATUS.RUNNING),
+    [actions.stopImport]: setImportState(STATUS.STOPPED),
+    [actions.pauseImport]: setImportState(STATUS.PAUSED),
+    [actions.resumeImport]: setImportState(STATUS.RUNNING),
+    [actions.startIndexRebuild]: setIndexState(STATUS.RUNNING),
+    [actions.stopIndexRebuild]: setIndexState(STATUS.STOPPED),
     [actions.addDownloadDetails]: addDownloadDetails,
-    [actions.filterDownloadDetails]: filterDownloadDetails,
-    [actions.setHistoryStats]: setHistoryStats,
-    [actions.setBookmarksStats]: setBookmarksStats,
+    [actions.filterDownloadDetails]: payloadReducer('downloadDataFilter'),
+    [actions.initImportState]: payloadReducer('loadingStatus'),
+    [actions.initHistoryStats]: payloadReducer('historyStats'),
+    [actions.initBookmarksStats]: payloadReducer('bookmarksStats'),
+    [actions.initDownloadData]: payloadReducer('downloadData'),
 }, defaultState)

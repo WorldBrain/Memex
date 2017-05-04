@@ -74,18 +74,17 @@ class ImportContainer extends Component {
         const { isLoading, isPaused, boundActions: { pauseImport, resumeImport, startImport } } = this.props
         const { allowImportBookmarks, allowImportHistory } = this.state
 
-        const isDisabled = !allowImportHistory && !allowImportBookmarks
-        const getProps = handleClick => ({ handleClick, isDisabled })
-
         if (isLoading) {
-            return <ActionButton {...getProps(pauseImport)}>Pause</ActionButton>
+            return <ActionButton handleClick={pauseImport}>Pause</ActionButton>
         }
 
         if (isPaused) {
-            return <ActionButton {...getProps(resumeImport)}>Resume</ActionButton>
+            return <ActionButton handleClick={resumeImport}>Resume</ActionButton>
         }
 
-        return <ActionButton {...getProps(startImport)}>Start import</ActionButton>
+        const isDisabled = !allowImportHistory && !allowImportBookmarks
+
+        return <ActionButton handleClick={startImport} isDisabled={isDisabled}>Start import</ActionButton>
     }
 
     renderDownloadDetailsRows() {

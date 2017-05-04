@@ -4,9 +4,9 @@ import { FILTERS, STATUS, DOWNLOAD_TYPE as TYPE } from './constants'
 
 export const entireState = state => state.imports
 
-const loadingStatus = state => entireState(state).loadingStatus
+export const loadingStatus = state => entireState(state).loadingStatus
 const indexRebuildingStatus = state => entireState(state).indexRebuildingStatus
-const downloadData = state => entireState(state).downloadData
+export const downloadData = state => entireState(state).downloadData
 const downloadDataFilter = state => entireState(state).downloadDataFilter
 export const historyStats = state => entireState(state).historyStats
 export const bookmarksStats = state => entireState(state).bookmarksStats
