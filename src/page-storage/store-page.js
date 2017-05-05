@@ -38,7 +38,7 @@ async function analyseAndTryDedupePage({page, samePageCandidates, analyser}) {
     const {page: finalPage} = await tryDedupePage({page: analysedPage, samePageCandidates})
 
     // Return the resulting page (likely still the same as analysedPage)
-    return {finalPage}
+    return finalPage
 }
 
 // Tries to reidentify the page by URL (in background or in tab), or creates a new page doc for it.
@@ -59,14 +59,14 @@ export async function reidentifyOrStorePage({tabId = '', url}) {
         // Create a new page doc in the database.
         const page = await createPageStub({url})
 
-        // Start analysis and (possibly) deduplication, but do not wait for it.
-        const finalPagePromise = analyseAndTryDedupePage({
+        // Set up fetching function to run anaylsis + fetching logic on-demand
+        const fetchFinalPage = () => analyseAndTryDedupePage({
             page,
             samePageCandidates,
             analyser: page => !tabId ? analysePageInBackground({page, url}) : analysePageInTab({page, tabId}),
         })
 
-        // Return the page stub, and a promise of the analysed & deduped page.
-        return {page, finalPagePromise}
+        // Return the page stub, and a function to get the analysed & deduped page.
+        return {page, fetchFinalPage}
     }
 }

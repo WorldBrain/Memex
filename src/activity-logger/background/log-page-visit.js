@@ -31,10 +31,10 @@ export default async function maybeLogPageVisit({
     // TODO first try to extend an existing visit instead of logging a new one.
 
     // First create an identifier for the page being visited.
-    const {page, finalPagePromise} = await reidentifyOrStorePage({tabId, url})
+    const {page, fetchFinalPage} = await reidentifyOrStorePage({tabId, url})
     // Create a visit to this page.
     const visit = await storeVisit({page, url, timestamp})
 
     // TODO possibly deduplicate the visit if it was to the same page after all.
-    void (finalPagePromise, visit)
+    void (fetchFinalPage(), visit)
 }
