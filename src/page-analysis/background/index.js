@@ -48,7 +48,7 @@ export async function analysePageInTab({ page, tabId }) {
     ])
     await updatePageSearchIndex()
 
-    return { page: getRevisedPage(page._id) }
+    return { page: await getRevisedPage(page._id) }
 }
 
 /**
@@ -64,5 +64,5 @@ export async function analysePageInBackground({ page, url }) {
     await storePageContent(page._id, () => fetchPageDataInBackground({ url }))
     await updatePageSearchIndex()
 
-    return { page: getRevisedPage(page._id) }
+    return { page: await getRevisedPage(page._id) }
 }
