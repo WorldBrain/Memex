@@ -105,10 +105,10 @@ Please follow the given guideline to make it easier for the maintainer to review
 
 * It is recommended that the developers use a text editor that supports editor config files for consistent spacing and other code styling.
 
-* Before taking on an issue please give a rough outline of your approach below the issue tracker so that the maintainers can tell if the approach is correct or not. Also include a short description of changes made to the code in the description of each pull request made.
+* Before taking on an issue please outline your approach in the corresponding issue. This way we can pool all of our ideas and come up with the best solution together. 
 
-* Before sending a Pull Request, make sure the code conforms to the styling guide. You can check for errors in styling by running the command ```sudo npm run lint```. For trivial error fixes it is recommended that you use ```sudo npm run lint-fix```.
+* Before sending a pull request, make sure the code conforms to the styling guide. You can check for errors in styling by running the command ```sudo npm run lint```. For trivial error fixes it is recommended that you use ```sudo npm run lint-fix```.
 
-* Remove all errors and and fix the code styling before sending a pull request. It is also required that you update the README.md with details of changes to the interface, this includes new environment variables, exposed ports, useful file locations and container parameters.
+* Remove all errors and and fix the code styling before sending a pull request. Please also update the README.md with details of changes i.e. new environment variables, exposed ports, useful file locations and container parameters.
 
-* After sending a Pul Request please be patient, a maintainer will review it soon. Any derogatory language will not be tolerated. Please conform to the standard guidelines of [Contributor Covenant](http://contributor-covenant.org/).
+* We have a lot to do, so it might take a bit until a maintainer will review the code. We try our best to get it integrated ASAP. 
