@@ -84,7 +84,7 @@ See [`Codetour.md`](Codetour.md) for an explanation of the repository structure.
 ### Automatic recompilation
 
 If the steps above worked, running `make watch` will trigger a quick
-recompilation every time a source file has been modified.
+recompilation every time a source file has been modified. It will also trigger a lint watch which will catch all the styling errors in the code.
 
 If you are testing in Firefox through `make fx-run`/`web-ext`, the extension
 should also reload automatically. Otherwise, depending on which part of the code
@@ -96,3 +96,19 @@ you change, you may have to reload the extension in your browser:
   Reload.
 - If you changed the 'content_script', it seems browser-dependent whether newly
   opened pages will get the new version. Better reload the extension to be sure.
+
+### Guideline for Contribution
+
+Please follow the given guideline to make it easier for the maintainer to review and evaluate your work.
+
+**NOTE:**By sending a pull request you willingly waive all your copyrights on the code, so that it can be published in the public domain. For further information look into [Unlicense](http://unlicense.org/)
+
+* It is recommended that the developers use a text editor that supports editor config files for consistent spacing and other code styling.
+
+* Before taking on an issue please give a rough outline of your approach below the issue tracker so that the maintainers can tell if the approach is correct or not. Also include a short description of changes made to the code in the description of each pull request made.
+
+* Before sending a Pull Request, make sure the code conforms to the styling guide. You can check for errors in styling by running the command ```sudo npm run lint```. For trivial error fixes it is recommended that you use ```sudo npm run lint-fix```.
+
+* Remove all errors and and fix the code styling before sending a pull request. It is also required that you update the README.md with details of changes to the interface, this includes new environment variables, exposed ports, useful file locations and container parameters.
+
+* After sending a Pul Request please be patient, a maintainer will review it soon. Any derogatory language will not be tolerated. Please conform to the standard guidelines of [Contributor Covenant](http://contributor-covenant.org/).
