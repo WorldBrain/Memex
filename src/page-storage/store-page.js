@@ -35,7 +35,7 @@ async function analyseAndTryDedupePage({page, samePageCandidates, analyser}) {
     const {page: analysedPage} = await analyser(page)
 
     // Knowing more about the page now, try find it again in our memory.
-    const {finalPage} = await tryDedupePage({page: analysedPage, samePageCandidates})
+    const {page: finalPage} = await tryDedupePage({page: analysedPage, samePageCandidates})
 
     // Return the resulting page (likely still the same as analysedPage)
     return {finalPage}
