@@ -97,18 +97,18 @@ you change, you may have to reload the extension in your browser:
 - If you changed the 'content_script', it seems browser-dependent whether newly
   opened pages will get the new version. Better reload the extension to be sure.
 
-### Guideline for Contribution
+### Guidelines for Contribution
 
 Please follow the given guideline to make it easier for the maintainer to review and evaluate your work.
 
-**NOTE:**By sending a pull request you willingly waive all your copyrights on the code, so that it can be published in the public domain. For further information look into [Unlicense](http://unlicense.org/)
+**NOTE:** By sending a pull request you willingly waive all your copyrights on the code, so that it can be published in the public domain. For further information look into [Unlicense](http://unlicense.org/)
 
-* It is recommended that the developers use a text editor that supports editor config files for consistent spacing and other code styling.
+* It is recommended that the developers use a text editor that supports editor config files and linting using eslint for consistent spacing and other code styling.
 
-* Before taking on an issue please outline your approach in the corresponding issue. This way we can pool all of our ideas and come up with the best solution together. 
+* Before taking on an issue please outline your approach in the corresponding issue. This way we can pool all of our ideas and come up with the best solution together.
 
-* Before sending a pull request, make sure the code conforms to the styling guide. You can check for errors in styling by running the command ```sudo npm run lint```. For trivial error fixes it is recommended that you use ```sudo npm run lint-fix```.
+* Before sending a pull request, make sure the code conforms to the styling guide. You can check for errors in styling by running the command ```npm run lint```. For trivial error fixes it is recommended that you use ```npm run lint-fix```. For EACCES errors please refer to [fixing npm permissions](https://docs.npmjs.com/getting-started/fixing-npm-permissions)
 
 * Remove all errors and and fix the code styling before sending a pull request. Please also update the README.md with details of changes i.e. new environment variables, exposed ports, useful file locations and container parameters.
 
-* We have a lot to do, so it might take a bit until a maintainer will review the code. We try our best to get it integrated ASAP. 
+* We have a lot to do, so it might take a bit until a maintainer will review the code. We try our best to get it integrated ASAP.
