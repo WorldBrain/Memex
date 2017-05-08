@@ -8,7 +8,8 @@ import { updatePageSearchIndex } from 'src/search/find-pages'
 
 import { revisePageFields } from '..'
 import makeScreenshot from './make-screenshot'
-import fetchPageDataInBackground from './fetch-page-data'
+import fetchPageData from './fetch-page-data'
+export { fetchPageData }
 
 // A shorthand for updating a single field in a doc.
 const setDocField = (db, docId, key) =>
@@ -61,7 +62,7 @@ export async function analysePageInTab({ page, tabId }) {
  */
 export async function analysePageInBackground({ page, url }) {
     // Run page data fetching in background
-    await storePageContent(page._id, () => fetchPageDataInBackground({ url }))
+    await storePageContent(page._id, () => fetchPageData({ url }))
     await updatePageSearchIndex()
 
     return { page: await getRevisedPage(page._id) }

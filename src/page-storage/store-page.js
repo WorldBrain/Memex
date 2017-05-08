@@ -1,6 +1,7 @@
 import db from 'src/pouchdb'
 import { findPagesByUrl } from 'src/search/find-pages'
-import { analysePageInTab, analysePageInBackground } from 'src/page-analysis/background'
+import { analysePageInTab, analysePageInBackground, fetchPageData } from 'src/page-analysis/background'
+import { revisePageFields } from 'src/page-analysis'
 import tryDedupePage from './deduplication'
 import { generatePageDocId } from '.'
 
@@ -14,12 +15,8 @@ async function tryReidentifyPage({tabId = '', url, samePageCandidates}) {
     return undefined
 }
 
-async function createPageStub({url}) {
-    const pageId = generatePageDocId()
-    const page = {
-        _id: pageId,
-        url,
-    }
+const createPage = docFields => ({ _id: generatePageDocId(), ...docFields })
+const storePage = async page => {
     await db.put(page)
     return page
 }
@@ -56,8 +53,8 @@ export async function reidentifyOrStorePage({tabId = '', url}) {
         // Equality is known (or assumed) in advance. Reuse the old page as is.
         return {page: reusablePage}
     } else {
-        // Create a new page doc in the database.
-        const page = await createPageStub({url})
+        // Create a new page doc stub in the database.
+        const page = await storePage(createPage({url}))
 
         // Set up fetching function to run anaylsis + fetching logic on-demand
         const fetchFinalPage = () => analyseAndTryDedupePage({
@@ -69,4 +66,36 @@ export async function reidentifyOrStorePage({tabId = '', url}) {
         // Return the page stub, and a function to get the analysed & deduped page.
         return {page, fetchFinalPage}
     }
+}
+
+/**
+ * Given a URL, attempts to perform all logic needed to store a full page document.
+ * @param {string} url The URL to attempt to store a page document for.
+ * @returns {any} Page document that was created (or found, if reusable/deduped).
+ */
+export async function storePageFromUrl(url) {
+    // Find pages we know that had the same URL.
+    const samePageCandidates = (await findPagesByUrl({ url })).rows.map(row => row.doc)
+
+    // Check if we can already tell in advance that this is the same page.
+    const reusablePage = await tryReidentifyPage({ url, samePageCandidates })
+
+    // Equality is known (or assumed) in advance. Reuse the old page as is.
+    if (reusablePage) {
+        return reusablePage
+    }
+
+    // Do the data XHR fetch + analyse
+    const { text: extractedText, metadata: extractedMetadata, favIcon } = await fetchPageData({ url })
+
+    // Create and store DB page using data, before returning it
+    const page = createPage({ url, extractedText, extractedMetadata, favIcon })
+
+    // Store an augmented version of the doc, using data derived from extracted page data
+    const augPage = await storePage(revisePageFields(page))
+
+    // Knowing more about the page now, try find it again in our memory
+    const { page: finalPage } = await tryDedupePage({ page: augPage, samePageCandidates })
+
+    return finalPage
 }
