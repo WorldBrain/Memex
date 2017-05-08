@@ -8,8 +8,7 @@ import { updatePageSearchIndex } from 'src/search/find-pages'
 
 import { revisePageFields } from '..'
 import makeScreenshot from './make-screenshot'
-import fetchPageData from './fetch-page-data'
-export { fetchPageData }
+export { default as fetchPageData } from './fetch-page-data'
 
 // A shorthand for updating a single field in a doc.
 const setDocField = (db, docId, key) =>
@@ -47,22 +46,6 @@ export async function analysePageInTab({ page, tabId }) {
         storeScreenshot(page._id, tabId),
         storePageContent(page._id, remoteFunction('extractPageContent', { tabId })),
     ])
-    await updatePageSearchIndex()
-
-    return { page: await getRevisedPage(page._id) }
-}
-
-/**
- * Performs background page analysis for a given page document, fetching and storing
- * further page data such as text and metadata.
- *
- * @param {page} page The page document to save analysis data to.
- * @param {url} string The URL pointing to the data source for page data extraction.
- * @returns {page} The updated page document containing any extra data found in analysis.
- */
-export async function analysePageInBackground({ page, url }) {
-    // Run page data fetching in background
-    await storePageContent(page._id, () => fetchPageData({ url }))
     await updatePageSearchIndex()
 
     return { page: await getRevisedPage(page._id) }
