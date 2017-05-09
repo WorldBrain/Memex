@@ -101,7 +101,7 @@ gulp.task('copyStaticFiles', () => {
 })
 
 gulp.task('lint', () => {
-    return gulp.src(['**/*.js', '**/*.jsx'])
+    return gulp.src(['src/**/*.js', 'src/**/*.jsx'])
         .pipe(eslint())
         .pipe(eslint.format())
         .pipe(eslint.results(results => {
@@ -122,7 +122,7 @@ gulp.task('build-watch', ['copyStaticFiles'], () => {
 })
 
 gulp.task('lint-watch', () => {
-    gulp.watch(['**/*.js', '**/*.jsx'])
+    gulp.watch(['src/**/*.js', 'src/**/*.jsx'])
     .on('change', (file) => {
         return gulp.src(file.path)
         .pipe(eslint())
