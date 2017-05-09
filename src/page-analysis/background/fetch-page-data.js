@@ -11,8 +11,10 @@ import extractPageContent from 'src/page-analysis/content_script/extract-page-co
 export default async function fetchPageData({
     url = '',
 } = {}) {
-    const doc = await fetchDOMFromUrl(url)
     const loc = getLocationFromURL(url)
+    const doc = await fetchDOMFromUrl(url)
+    // If DOM couldn't be fetched, then we can't get text/metadata
+    if (!doc) { throw new Error(`Cannot get DOM from URL: ${url}`) }
 
     const { text, metadata, favIcon } = await extractPageContent({ doc, loc, url })
     return { text, metadata, favIcon }
@@ -39,7 +41,7 @@ const fetchDOMFromUrl = async url => new Promise((resolve, reject) => {
     const req = new XMLHttpRequest()
 
     req.onload = () => resolve(req.responseXML)
-    req.onerror = () => reject(req.statusText)
+    req.onerror = () => reject(new Error(`Failed XHR fetching for URL: ${url}`))
 
     req.open('GET', url)
 
