@@ -13,7 +13,7 @@
     "test": "npm run lint",
     "fx-run": "web-ext -s extension run --bc",
     "fx-build": "npm run build-prod && web-ext -s extension -a dist/firefox build",
-    "lint": "eslint --ext js,jsx . && stylelint '**/*.css'",
+    "lint": "gulp lint && stylelint '**/*.css'",
     "lint-fix": "eslint --ext js,jsx --fix ."
   },
   "dependencies": {
