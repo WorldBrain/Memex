@@ -4,34 +4,25 @@ import classNames from 'classnames'
 import { LoadingIndicator } from 'src/common-ui/components'
 import styles from './ButtonBar.css'
 
-const getTextClass = isStopped => classNames({
-    [styles.helpText]: true,
-    [styles.running]: !isStopped,
-})
-
-const ButtonBar = ({ isLoading, isStopped, showCancelText, children }) => (
+const ButtonBar = ({ isRunning, helpText, children }) => (
     <div className={styles.container}>
         <div className={styles.loadingContainer}>
-            {isLoading && <LoadingIndicator />}
+            {isRunning && <LoadingIndicator />}
         </div>
         <div className={styles.actionContainer}>
             <div className={styles.actionBar}>
                 {children}
             </div>
-            {showCancelText
-                ? <div className={styles.helpText}>Press cancel again to confirm</div>
-                : <div className={getTextClass(isStopped)}>
-                    Downloading may slow down your browsing experience.<br /> You can pause and resume anytime
-                </div>
-            }
+            <div className={styles.helpText}>
+                {helpText}
+            </div>
         </div>
     </div>
 )
 
 ButtonBar.propTypes = {
-    isLoading: PropTypes.bool.isRequired,
-    isStopped: PropTypes.bool.isRequired,
-    showCancelText: PropTypes.bool.isRequired,
+    isRunning: PropTypes.bool.isRequired,
+    helpText: PropTypes.string.isRequired,
     children: PropTypes.arrayOf(PropTypes.node).isRequired,
 }
 

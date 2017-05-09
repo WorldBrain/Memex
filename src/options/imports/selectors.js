@@ -1,35 +1,29 @@
 import { createSelector } from 'reselect'
 
-import { FILTERS, STATUS, DOWNLOAD_TYPE as TYPE } from './constants'
+import { FILTERS, STATUS, DOC_SIZE_EST, DOC_TIME_EST, DOWNLOAD_TYPE as TYPE } from './constants'
 
 export const entireState = state => state.imports
 
-export const loadingStatus = state => entireState(state).loadingStatus
+export const importStatus = state => entireState(state).importStatus
 const indexRebuildingStatus = state => entireState(state).indexRebuildingStatus
 export const downloadData = state => entireState(state).downloadData
 const downloadDataFilter = state => entireState(state).downloadDataFilter
-export const historyStats = state => entireState(state).historyStats
-export const bookmarksStats = state => entireState(state).bookmarksStats
-const historyTimeEst = state => historyStats(state).timeEstim
-const bookmarksTimeEst = state => bookmarksStats(state).timeEstim
+const fail = state => entireState(state).fail
+const success = state => entireState(state).success
+const totals = state => entireState(state).totals
 
-export const isLoading = createSelector(
-    loadingStatus,
-    indexRebuildingStatus,
-    (loadingStatus, indexRebuildingStatus) =>
-        loadingStatus === STATUS.RUNNING || indexRebuildingStatus === STATUS.RUNNING,
+const getImportStatusFlag = status => createSelector(
+    importStatus,
+    importStatus => importStatus === status,
 )
 
-export const isPaused = createSelector(
-    loadingStatus,
-    loadingStatus => loadingStatus === STATUS.PAUSED,
-)
 
-export const isStopped = createSelector(
-    isPaused,
-    isLoading,
-    (isPaused, isLoading) => !isPaused && !isLoading,
-)
+// Main import state selectors
+export const isInit = getImportStatusFlag(STATUS.INIT)
+export const isIdle = getImportStatusFlag(STATUS.IDLE)
+export const isRunning = getImportStatusFlag(STATUS.RUNNING)
+export const isPaused = getImportStatusFlag(STATUS.PAUSED)
+export const isStopped = getImportStatusFlag(STATUS.STOPPED)
 
 /**
  * Derives ready-to-use download details data (rendered into rows).
@@ -54,57 +48,44 @@ export const downloadDetailsData = createSelector(
     })),
 )
 
+const getProgress = (success, fail, total) => ({ total, success, fail, complete: success + fail })
+
 /**
- * Calculates the progress table data from the actual data.
+ * Derives progress state from completed + total state counts.
  */
-const calcProgress = ({ saved, notDownloaded }, data) => {
-    const progress = data.length
-    const successful = data.filter(({ status }) => status).length
-
-    return {
-        total: saved + notDownloaded,
-        failed: progress - successful,
-        progress,
-        successful,
-    }
-}
-
-const historyDownloadData = createSelector(
-    downloadData,
-    data => data.filter(({ type }) => type === TYPE.HISTORY),
-)
-
-const bookmarksDownloadData = createSelector(
-    downloadData,
-    data => data.filter(({ type }) => type === TYPE.BOOKMARK),
-)
-
-export const historyProgress = createSelector(
-    historyStats,
-    historyDownloadData,
-    calcProgress,
-)
-
-export const bookmarksProgress = createSelector(
-    bookmarksStats,
-    bookmarksDownloadData,
-    calcProgress,
+export const progress = createSelector(
+    fail, success, totals,
+    (fail, success, totals) => ({
+        [TYPE.HISTORY]: getProgress(success[TYPE.HISTORY], fail[TYPE.HISTORY], totals[TYPE.HISTORY]),
+        [TYPE.BOOKMARK]: getProgress(success[TYPE.BOOKMARK], fail[TYPE.BOOKMARK], totals[TYPE.BOOKMARK]),
+    }),
 )
 
 // Util formatting functions for download time estimates
-const getHours = time => Math.floor(time / 60)
-const getMins = time => time - getHours(time) * 60
+const getHours = time => Math.floor(time / 60).toFixed(0)
+const getMins = time => (time - getHours(time) * 60).toFixed(0)
 const getPaddedMins = time => getMins(time) < 10 ? `0${getMins(time)}` : getMins(time)
 const getTimeEstStr = time => `${getHours(time)}:${getPaddedMins(time)} h`
 
+const getEstimate = (success, fail, total) => {
+    const complete = success + fail
+    const remaining = total - complete
+    return {
+        complete,
+        remaining,
+        sizeCompleted: (complete * DOC_SIZE_EST).toFixed(2),
+        sizeRemaining: (remaining * DOC_SIZE_EST).toFixed(2),
+        timeRemaining: getTimeEstStr(remaining * DOC_TIME_EST),
+    }
+}
+
 /**
- * Selects timeEstims from bookmarks/history stats as human-readable strings
+ * Derives estimates state from completed + total state counts.
  */
-export const downloadTimeEstimates = createSelector(
-    historyTimeEst,
-    bookmarksTimeEst,
-    (history, bookmarks) => ({
-        history: getTimeEstStr(history),
-        bookmarks: getTimeEstStr(bookmarks),
+export const estimates = createSelector(
+    fail, success, totals,
+    (fail, success, totals) => ({
+        [TYPE.HISTORY]: getEstimate(success[TYPE.HISTORY], fail[TYPE.HISTORY], totals[TYPE.HISTORY]),
+        [TYPE.BOOKMARK]: getEstimate(success[TYPE.BOOKMARK], fail[TYPE.BOOKMARK], totals[TYPE.BOOKMARK]),
     }),
 )

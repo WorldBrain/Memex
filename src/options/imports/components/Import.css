@@ -62,3 +62,21 @@
     border: 1px solid #666;
     border-radius: 10px;
 }
+
+.mainContainer {
+    position: relative;
+}
+
+.initBlocker {
+    position: absolute;
+    top: 0;
+
+    display: flex;
+    align-items: center;
+
+    height: 750px;
+    width: 800px;
+    background: #fff;
+    opacity: 0.8;
+}
+

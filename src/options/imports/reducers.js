@@ -1,32 +1,50 @@
 import { createReducer } from 'redux-act'
 
 import * as actions from './actions'
-import { STATUS } from './constants'
+import { STATUS, DOWNLOAD_TYPE as TYPE } from './constants'
 
 const defaultStats = {
-    saved: 0,
-    sizeEngaged: 0,
-    notDownloaded: 0,
-    sizeRequired: 0,
-    timeEstim: 0,
+    [TYPE.HISTORY]: 0,
+    [TYPE.BOOKMARK]: 0,
 }
 
 const defaultState = {
     downloadData: [],
-    historyStats: defaultStats,
-    bookmarksStats: defaultStats,
-    loadingStatus: STATUS.STOPPED,
-    indexRebuildingStatus: STATUS.STOPPED,
+    fail: defaultStats,         // Fail counts for completed import items
+    success: defaultStats,      // Success counts for completed import items
+    totals: defaultStats,       // Static state to use to derive remaining counts from
+    importStatus: STATUS.IDLE,
+    indexRebuildingStatus: STATUS.IDLE,
     downloadDataFilter: 'all',
 }
 
-const addDownloadDetails = (state, payload) => ({
+/**
+ * A sub-reducer that either the success or fail count of a given import type, depending on success flag.
+ * @param {any} state The entire state of the parent reducer.
+ * @param {string} type The import type to update the count of (bookmarks/history)
+ * @param {isSuccess} boolean Denotes whether or not to update 'success' or 'fail' count.
+ */
+const updateCountReducer = (state, type, isSuccess) => {
+    const stateKey = isSuccess ? 'success' : 'fail'
+    return {
+        [stateKey]: { ...state[stateKey], [type]: state[stateKey][type] + 1 },
+    }
+}
+
+/**
+ * For a given type of import, add a new completed download's details.
+ * @param {string} type The import type to update the count of (bookmarks/history)
+ */
+const addDownloadDetails = type => (state, { url, status, err }) => ({
     ...state,
+    ...updateCountReducer(state, type, status),
     downloadData: [
         ...state.downloadData,
-        payload,
+        { url, status, err },     // Add new details row
     ],
 })
+
+const initCounts = (state, { totals, fail, success }) => ({ ...state, totals, fail, success })
 
 // Sets whatever key to the specified val
 const genericReducer = (key, val) => state => ({ ...state, [key]: val })
@@ -34,20 +52,22 @@ const genericReducer = (key, val) => state => ({ ...state, [key]: val })
 const payloadReducer = key => (state, payload) => ({ ...state, [key]: payload })
 
 // Simple reducers constructed for state keys
-const setImportState = val => genericReducer('loadingStatus', val)
+const setImportState = val => genericReducer('importStatus', val)
 const setIndexState = val => genericReducer('indexRebuildingStatus', val)
 
 export default createReducer({
+    [actions.initImport]: setImportState(STATUS.INIT),
     [actions.startImport]: setImportState(STATUS.RUNNING),
     [actions.stopImport]: setImportState(STATUS.STOPPED),
+    [actions.finishImport]: setImportState(STATUS.IDLE),
     [actions.pauseImport]: setImportState(STATUS.PAUSED),
     [actions.resumeImport]: setImportState(STATUS.RUNNING),
     [actions.startIndexRebuild]: setIndexState(STATUS.RUNNING),
     [actions.stopIndexRebuild]: setIndexState(STATUS.STOPPED),
-    [actions.addDownloadDetails]: addDownloadDetails,
+    [actions.finishBookmarkItem]: addDownloadDetails(TYPE.BOOKMARK),
+    [actions.finishHistoryItem]: addDownloadDetails(TYPE.HISTORY),
     [actions.filterDownloadDetails]: payloadReducer('downloadDataFilter'),
-    [actions.initImportState]: payloadReducer('loadingStatus'),
-    [actions.initHistoryStats]: payloadReducer('historyStats'),
-    [actions.initBookmarksStats]: payloadReducer('bookmarksStats'),
+    [actions.initImportState]: payloadReducer('importStatus'),
+    [actions.initCounts]: initCounts,
     [actions.initDownloadData]: payloadReducer('downloadData'),
 }, defaultState)

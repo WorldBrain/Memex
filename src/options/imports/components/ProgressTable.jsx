@@ -1,8 +1,10 @@
 import React, { PropTypes } from 'react'
 
+import { DOWNLOAD_TYPE as TYPE } from '../constants'
+
 import localStyles from './Import.css'
 
-const ProgressTable = ({ history, bookmarks }) => (
+const ProgressTable = ({ progress }) => (
     <table className={localStyles.importTable}>
         <colgroup>
             <col className={localStyles.importTableCol} />
@@ -19,34 +21,36 @@ const ProgressTable = ({ history, bookmarks }) => (
         <tbody>
             <tr className={localStyles.importTableRow}>
                 <td>Total Progress</td>
-                <td>{history.progress}/{history.total}</td>
-                <td>{bookmarks.progress}/{bookmarks.total}</td>
+                <td>{progress[TYPE.HISTORY].complete}/{progress[TYPE.HISTORY].total}</td>
+                <td>{progress[TYPE.BOOKMARK].complete}/{progress[TYPE.BOOKMARK].total}</td>
             </tr>
             <tr className={localStyles.importTableRow}>
                 <td>Successful</td>
-                <td>{history.successful}</td>
-                <td>{bookmarks.successful}</td>
+                <td>{progress[TYPE.HISTORY].success}</td>
+                <td>{progress[TYPE.BOOKMARK].success}</td>
             </tr>
             <tr className={localStyles.importTableRow}>
                 <td>Failed</td>
-                <td>{history.failed}</td>
-                <td>{bookmarks.failed}</td>
+                <td>{progress[TYPE.HISTORY].fail}</td>
+                <td>{progress[TYPE.BOOKMARK].fail}</td>
             </tr>
         </tbody>
     </table>
 )
 
-const propShape = PropTypes.shape({
-    progress: PropTypes.number.isRequired,
+const progressShape = PropTypes.shape({
     total: PropTypes.number.isRequired,
-    successful: PropTypes.number.isRequired,
-    failed: PropTypes.number.isRequired,
+    complete: PropTypes.number.isRequired,
+    success: PropTypes.number.isRequired,
+    fail: PropTypes.number.isRequired,
 })
 
 ProgressTable.propTypes = {
     // State
-    bookmarks: propShape.isRequired,
-    history: propShape.isRequired,
+    progress: PropTypes.shape({
+        [TYPE.HISTORY]: progressShape.isRequired,
+        [TYPE.BOOKMARK]: progressShape.isRequired,
+    }).isRequired,
 }
 
 export default ProgressTable

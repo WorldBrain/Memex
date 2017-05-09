@@ -5,9 +5,11 @@ export const FILTERS = {
 }
 
 export const STATUS = {
+    INIT: 'initing',
+    IDLE: 'idle',
+    RUNNING: 'running',
     PAUSED: 'paused',
     STOPPED: 'stopped',
-    RUNNING: 'running',
 }
 
 export const DOWNLOAD_TYPE = {
@@ -21,3 +23,9 @@ export const STORAGE_KEYS = {
     DOWNLOAD_DATA: 'import_progress',
     IMPORT_STATE: 'import_state',
 }
+
+/** Estimated size of a doc (MB) */
+export const DOC_SIZE_EST = 0.2
+/** Estimated time to download a doc (minutes) */
+export const DOC_TIME_EST = 0.2
+

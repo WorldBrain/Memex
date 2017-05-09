@@ -10,8 +10,6 @@ const hydrateImportsFromStorage = store => {
         store.dispatch(action(parsedData))
     })
 
-    hydrate(STORAGE_KEYS.HISTORY_STATS, actions.initHistoryStats)
-    hydrate(STORAGE_KEYS.BOOKMARK_STATS, actions.initBookmarksStats)
     hydrate(STORAGE_KEYS.DOWNLOAD_DATA, actions.initDownloadData)
     hydrate(STORAGE_KEYS.IMPORT_STATE, actions.initImportState)
 }
@@ -20,10 +18,8 @@ const syncImportsToStorage = store => store.subscribe(() => {
     const dump = (key, data) => chrome.storage.local.set({ [key]: JSON.stringify(data) })
 
     const state = store.getState()
-    dump(STORAGE_KEYS.HISTORY_STATS, selectors.historyStats(state))
-    dump(STORAGE_KEYS.BOOKMARK_STATS, selectors.bookmarksStats(state))
     dump(STORAGE_KEYS.DOWNLOAD_DATA, selectors.downloadData(state))
-    dump(STORAGE_KEYS.IMPORT_STATE, selectors.loadingStatus(state))
+    dump(STORAGE_KEYS.IMPORT_STATE, selectors.importStatus(state))
 })
 
 export default storeCreator => (reducer, initState, enhancer) => {

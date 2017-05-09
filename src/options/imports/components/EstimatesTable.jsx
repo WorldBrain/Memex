@@ -1,12 +1,11 @@
 import React, { PropTypes } from 'react'
 import classNames from 'classnames'
 
+import { DOWNLOAD_TYPE as TYPE } from '../constants'
+
 import localStyles from './Import.css'
 
-const EstimatesTable = ({
-    onAllowImportHistoryClick, onAllowImportBookmarksClick,
-    historyStats, bookmarksStats, downloadEsts, allowImport,
-}) => (
+const EstimatesTable = ({ onAllowImportHistoryClick, onAllowImportBookmarksClick, estimates, allowImport }) => (
     <table className={localStyles.importTable}>
         <colgroup>
             <col className={localStyles.importTableCol} />
@@ -23,29 +22,29 @@ const EstimatesTable = ({
         <tbody>
             <tr className={localStyles.importTableRow}>
                 <td>Pages already saved</td>
-                <td>{historyStats.saved}</td>
-                <td>{bookmarksStats.saved}</td>
+                <td>{estimates[TYPE.HISTORY].complete}</td>
+                <td>{estimates[TYPE.BOOKMARK].complete}</td>
             </tr>
             <tr className={classNames(localStyles.importTableRow, localStyles.importTableRowSepar)}>
                 <td className={localStyles.importTableCellSepar}>~ Size on Hard Drive</td>
-                <td className={localStyles.importTableCellSepar}>{historyStats.sizeEngaged} MB</td>
-                <td className={localStyles.importTableCellSepar}>{bookmarksStats.sizeEngaged} MB</td>
+                <td className={localStyles.importTableCellSepar}>{estimates[TYPE.HISTORY].sizeCompleted} MB</td>
+                <td className={localStyles.importTableCellSepar}>{estimates[TYPE.BOOKMARK].sizeCompleted} MB</td>
             </tr>
 
             <tr className={localStyles.importTableRow}>
                 <td>Not yet downloaded</td>
-                <td>{historyStats.notDownloaded}</td>
-                <td>{bookmarksStats.notDownloaded}</td>
+                <td>{estimates[TYPE.HISTORY].remaining}</td>
+                <td>{estimates[TYPE.BOOKMARK].remaining}</td>
             </tr>
             <tr className={localStyles.importTableRow}>
                 <td>~ Size on Hard Drive</td>
-                <td>{historyStats.sizeRequired} MB</td>
-                <td>{bookmarksStats.sizeRequired} MB</td>
+                <td>{estimates[TYPE.HISTORY].sizeRemaining} MB</td>
+                <td>{estimates[TYPE.BOOKMARK].sizeRemaining} MB</td>
             </tr>
             <tr className={localStyles.importTableRow}>
                 <td>~ Time to download</td>
-                <td>{downloadEsts.history}</td>
-                <td>{downloadEsts.bookmarks}</td>
+                <td>{estimates[TYPE.HISTORY].timeRemaining}</td>
+                <td>{estimates[TYPE.BOOKMARK].timeRemaining}</td>
             </tr>
             <tr className={classNames(localStyles.importTableRow, localStyles.actionTableRow)}>
                 <td>Import?</td>
@@ -70,12 +69,16 @@ const EstimatesTable = ({
     </table>
 )
 
+const estimatesShape = PropTypes.shape({
+    complete: PropTypes.number.isRequired,
+    remaining: PropTypes.number.isRequired,
+    sizeCompleted: PropTypes.string.isRequired,
+    sizeRemaining: PropTypes.string.isRequired,
+    timeRemaining: PropTypes.string.isRequired,
+})
+
 EstimatesTable.propTypes = {
     // State
-    downloadEsts: PropTypes.shape({
-        bookmarks: PropTypes.string.isRequired,
-        history: PropTypes.string.isRequired,
-    }).isRequired,
     allowImport: PropTypes.shape({
         history: PropTypes.bool.isRequired,
         bookmarks: PropTypes.bool.isRequired,
@@ -86,19 +89,9 @@ EstimatesTable.propTypes = {
     onAllowImportBookmarksClick: PropTypes.func.isRequired,
 
     // Data
-    historyStats: PropTypes.shape({
-        saved: PropTypes.number.isRequired,
-        sizeEngaged: PropTypes.number.isRequired,
-        notDownloaded: PropTypes.number.isRequired,
-        sizeRequired: PropTypes.number.isRequired,
-        timeEstim: PropTypes.number.isRequired,
-    }).isRequired,
-    bookmarksStats: PropTypes.shape({
-        saved: PropTypes.number.isRequired,
-        sizeEngaged: PropTypes.number.isRequired,
-        notDownloaded: PropTypes.number.isRequired,
-        sizeRequired: PropTypes.number.isRequired,
-        timeEstim: PropTypes.number.isRequired,
+    estimates: PropTypes.shape({
+        [TYPE.HISTORY]: estimatesShape.isRequired,
+        [TYPE.BOOKMARK]: estimatesShape.isRequired,
     }).isRequired,
 }
 

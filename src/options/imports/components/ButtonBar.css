@@ -44,9 +44,5 @@
     font-weight: 400;
     text-align: right;
     font-size: .8em;
-
-    &.running {
-        visibility: hidden;
-    }
 }
 
