@@ -1,4 +1,5 @@
-import { createStore, combineReducers, compose } from 'redux'
+import { createStore, combineReducers, compose, applyMiddleware } from 'redux'
+import thunk from 'redux-thunk'
 
 import * as blacklist from './blacklist'
 import * as imports from './imports'
@@ -12,6 +13,9 @@ export default function configureStore({ReduxDevTools = undefined} = {}) {
     const enhancers = [
         blacklist.enhancer,
         imports.enhancer,
+        applyMiddleware(
+            thunk,
+        ),
     ]
 
     if (ReduxDevTools) {
