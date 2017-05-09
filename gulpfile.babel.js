@@ -121,7 +121,7 @@ gulp.task('build-watch', ['copyStaticFiles'], () => {
     sourceFiles.forEach(bundle => createBundle(bundle, {watch: true}))
 })
 
-gulp.task('lint-watch', () => {
+gulp.task('lint-watch', ['lint'], () => {
     gulp.watch(['src/**/*.js', 'src/**/*.jsx'])
     .on('change', (file) => {
         return gulp.src(file.path)
@@ -130,5 +130,5 @@ gulp.task('lint-watch', () => {
     })
 })
 
-gulp.task('watch', ['lint', 'build-watch', 'lint-watch'])
+gulp.task('watch', ['build-watch', 'lint-watch'])
 gulp.task('default', ['watch'])
