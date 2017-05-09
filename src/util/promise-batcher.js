@@ -29,9 +29,9 @@ function initBatch({
     const subBatchObservable = () => {
         // Given an input, defers the async callback and handles any errors
         const inputDeferer = input => Rx.Observable.defer(() => asyncCallback(input))
-                .catch(err => {
-                    state.recordFailure(input, err.message)
-                    error(err)  // Note we're using the observer's onError callback here to not stop stream
+                .catch(error => {
+                    state.recordFailure(input, error.message)
+                    error({ input, error })  // Note we're using the observer's onError callback here to not stop stream
                     return Rx.Observable.empty() // Empty obs to ignore error and continue stream
                 })
 
