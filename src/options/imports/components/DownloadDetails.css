@@ -46,6 +46,9 @@
     & th, & td {
         text-align: left;
         padding: 5px;
+        height: 27px;
+        text-overflow: ellipsis;
+        overflow: hidden;
 
         &:first-child {
             padding-left: 15px;
@@ -73,6 +76,7 @@
     display: table;
     width: 100%;
     table-layout: fixed;
+    white-space: nowrap;
 }
 
 .detailsTableRow {
