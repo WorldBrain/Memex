@@ -3,9 +3,8 @@ import { createAction } from 'redux-act'
 import { onDatabaseChange } from 'src/pouchdb'
 import { filterVisitsByQuery } from 'src/search'
 import { deleteVisitAndPage } from 'src/page-storage/deletion'
-
 import { ourState } from './selectors'
-
+import extractTimeFiltersFromQuery from 'src/util/nlp-time-filter'
 
 // == Simple commands to change the state in reducers ==
 
@@ -43,8 +42,25 @@ export function deleteVisit({visitId}) {
 // Search for docs matching the current query, update the results
 export function refreshSearch({loadingIndicator = false}) {
     return async function (dispatch, getState) {
-        const { query, startDate, endDate } = ourState(getState())
-        const oldResult = ourState(getState()).searchResult
+        let {
+            query,
+            startDate: oldStartDate,
+            endDate: oldEndDate,
+            searchResult: oldResult,
+        } = ourState(getState())
+
+        const {
+            startDate: newStartDate,
+            endDate: newEndDate,
+            extractedQuery,
+        } = extractTimeFiltersFromQuery(query)
+
+        const startDate = newStartDate || oldStartDate
+        const endDate = newEndDate || oldEndDate
+        query = extractedQuery || query
+
+        if (oldStartDate !== newStartDate) dispatch(setStartDate({startDate}))
+        if (oldEndDate !== newEndDate) dispatch(setEndDate({endDate}))
 
         if (loadingIndicator) {
             // Show to the user that search is busy
