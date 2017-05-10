@@ -36,9 +36,6 @@
     "web_accessible_resources": [
       "/lib/pdf.worker.min.js"
     ],
-    "chrome_url_overrides" : {
-        "newtab": "/overview/overview.html"
-    },
     "omnibox": { "keyword" : "w" },
     "options_page": "./options/options.html",
     "options_ui": {
