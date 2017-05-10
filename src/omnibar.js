@@ -4,6 +4,7 @@ import tldjs from 'tldjs'
 
 import { filterVisitsByQuery } from 'src/search'
 import niceTime from 'src/util/nice-time'
+import extractTimeFiltersFromQuery from 'src/util/nlp-time-filter'
 
 
 const shortUrl = (url, maxLength = 50) => {
@@ -45,7 +46,18 @@ async function makeSuggestion(query, suggest) {
 
     const queryForOldSuggestions = latestResolvedQuery
 
-    const visitsResult = await filterVisitsByQuery({query, limit: 5})
+    const {
+        startDate,
+        endDate,
+        extractedQuery,
+    } = extractTimeFiltersFromQuery(query)
+
+    const visitsResult = await filterVisitsByQuery({
+        query: extractedQuery,
+        startDate,
+        endDate,
+        limit: 5,
+    })
     const visitDocs = visitsResult.rows.map(row => row.doc)
 
     // A subsequent search could have already started and finished while we
