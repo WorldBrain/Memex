@@ -2,6 +2,8 @@ import get from 'lodash/fp/get'
 import last from 'lodash/fp/last'
 
 import { searchableTextFields } from 'src/page-analysis'
+import extractTimeFiltersFromQuery from 'src/util/nlp-time-filter'
+
 
 import { findVisits, addVisitsContext } from './find-visits'
 
@@ -27,9 +29,7 @@ export async function filterVisitsByQuery({
         visitsResult.resultsExhausted = visitsResult.rows.length < limit
         return visitsResult
     } else {
-        // Process visits batch by batch, filtering for ones that match the
-        // query until we reach the requested limit or have exhausted all
-        // of them.
+        const { startDate, endDate, extractedQuery } = extractTimeFiltersFromQuery(query)
 
         let rows = []
         let resultsExhausted = false
@@ -54,7 +54,7 @@ export async function filterVisitsByQuery({
 
             // Filter for visits to pages that contain the query words.
             const hits = batchRows.filter(
-                row => pageMatchesQuery({page: row.doc.page, query})
+                row => pageMatchesQuery({page: row.doc.page, query: extractedQuery})
             )
 
             rows = rows.concat(hits)
