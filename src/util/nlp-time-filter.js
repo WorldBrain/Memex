@@ -10,8 +10,14 @@ export default function extractTimeFiltersFromQuery(query) {
 
     let startDate
     let endDate
-    if (matchedBefore && matchedBefore[1]) endDate = chrono.parseDate(matchedBefore[1]).getTime()
-    if (matchedAfter && matchedAfter[1]) startDate = chrono.parseDate(matchedAfter[1]).getTime()
+    if (matchedBefore && matchedBefore[1]) {
+        const parsedDate = chrono.parseDate(matchedBefore[1])
+        endDate = parsedDate && parsedDate.getTime()
+    }
+    if (matchedAfter && matchedAfter[1]) {
+        const parsedDate = chrono.parseDate(matchedAfter[1])
+        startDate = parsedDate && parsedDate.getTime()
+    }
 
     // Checks which comes first before/after and based on that decide where query should be sliced
     const firstIndexOfTimeFilter = Math.min(
