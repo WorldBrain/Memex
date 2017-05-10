@@ -37,9 +37,9 @@
       "/lib/pdf.worker.min.js"
     ],
     "omnibox": { "keyword" : "w" },
-    "options_page": "./options/options.html",
     "options_ui": {
-        "page": "./options/options.html"
+        "page": "./options/options.html",
+        "open_in_tab": true
     },
     "manifest_version": 2
 }
