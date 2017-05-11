@@ -83,7 +83,7 @@ function createBundle({entries, output, destination, cssOutput},
     function bundle() {
         let startTime = Date.now()
         b.bundle()
-            .on('error', error => console.error(error.message))
+            .on('error', console.error)
             .pipe(source(output))
             .pipe(buffer())
             .pipe(production ? uglify({output: {ascii_only: true}}) : identity())
