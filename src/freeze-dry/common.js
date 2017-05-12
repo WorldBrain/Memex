@@ -51,7 +51,11 @@ export async function inlineUrlsInAttributes({
             for (let i = 0; i < urls.length; i++) {
                 newValue = newValue.replace(urls[i], dataUris[i])
             }
-            element.setAttribute(attribute, newValue)
+            if (newValue !== value) {
+                element.setAttribute(attribute, newValue)
+                // Add the original attribute value (the original URL)
+                element.setAttribute(`data-original-${attribute}`, value)
+            }
             if (fixIntegrity) {
                 // Don't bother recomputing the hash, just remove the check.
                 element.removeAttribute('integrity')
