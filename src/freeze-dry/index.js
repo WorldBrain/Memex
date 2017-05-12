@@ -2,6 +2,7 @@ import whenAllSettled from 'src/util/when-all-settled'
 import inlineStyles from './inline-styles'
 import removeScripts from './remove-scripts'
 import inlineImages from './inline-images'
+import fixLinks from './fix-links'
 
 export default async function freezeDry (
     document = window.document,
@@ -19,6 +20,7 @@ export default async function freezeDry (
         removeScripts({rootElement}),
         inlineStyles({rootElement, docUrl}),
         inlineImages({rootElement, docUrl}),
+        fixLinks({rootElement, docUrl}),
     ]
     await whenAllSettled(jobs)
 
