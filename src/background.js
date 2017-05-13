@@ -1,6 +1,7 @@
 import tldjs from 'tldjs'
 
 import 'src/activity-logger/background'
+import 'src/browser-history/background'
 import 'src/omnibar'
 
 async function openOverview() {

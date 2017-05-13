@@ -20,3 +20,37 @@ export const resumeImport = createAction('imports/resumeImport')
 
 export const startIndexRebuild = createAction('imports/startIndexRebuild')
 export const stopIndexRebuild = createAction('imports/stopIndexRebuild')
+
+let port
+
+export const init = () => dispatch => {
+    port = browser.runtime.connect({ name: 'imports' })
+    port.onMessage.addListener(msg => {
+        const { type, ...payload } = msg
+        switch (type) {
+            case 'INIT': return dispatch(initCounts(payload))
+            case 'NEXT': return dispatch(finishHistoryItem(payload.url, payload.err))
+            case 'COMPLETE': return dispatch(stopImport())
+        }
+    })
+}
+
+export const start = () => dispatch => {
+    dispatch(startImport())
+    port.postMessage({ cmd: 'START' })
+}
+
+export const stop = () => dispatch => {
+    dispatch(stopImport())
+    port.postMessage({ cmd: 'STOP' })
+}
+
+export const pause = () => dispatch => {
+    dispatch(pauseImport())
+    port.postMessage({ cmd: 'PAUSE' })
+}
+
+export const resume = () => dispatch => {
+    dispatch(resumeImport())
+    port.postMessage({ cmd: 'RESUME' })
+}

@@ -24,6 +24,8 @@ class ImportContainer extends Component {
             activeRow: -1,
         }
 
+        props.boundActions.init()
+
         this.flipCancelState = waitingOnCancelConfirm =>
             this.setState(state => ({ ...state, waitingOnCancelConfirm }))
     }
@@ -93,7 +95,7 @@ class ImportContainer extends Component {
                 this.flipCancelState(true)
             } else {
                 this.flipCancelState(false)
-                boundActions.stopImport()
+                boundActions.stop()
             }
         }
 
@@ -109,12 +111,12 @@ class ImportContainer extends Component {
         const { allowImportBookmarks, allowImportHistory } = this.state
 
         if (isRunning) {
-            const handleClick = e => this.onButtonClick(e, boundActions.pauseImport)
+            const handleClick = e => this.onButtonClick(e, boundActions.pause)
             return <ActionButton handleClick={handleClick}>Pause</ActionButton>
         }
 
         if (isPaused) {
-            const handleClick = e => this.onButtonClick(e, boundActions.resumeImport)
+            const handleClick = e => this.onButtonClick(e, boundActions.resume)
             return <ActionButton handleClick={handleClick}>Resume</ActionButton>
         }
 
@@ -125,7 +127,7 @@ class ImportContainer extends Component {
 
         // Idle state case
         const isDisabled = !allowImportHistory && !allowImportBookmarks
-        const handleClick = e => this.onButtonClick(e, boundActions.startImport)
+        const handleClick = e => this.onButtonClick(e, boundActions.start)
         return <ActionButton handleClick={handleClick} isDisabled={isDisabled}>Start import</ActionButton>
     }
 
