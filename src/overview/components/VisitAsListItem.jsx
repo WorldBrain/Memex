@@ -12,7 +12,8 @@ const VisitAsListItem = ({doc, compact}) => {
         [styles.root]: true,
         [styles.compact]: compact,
     })
-    const favIcon = doc.page._attachments && doc.page._attachments.favIcon
+    const hasFavIcon = !!(doc.page._attachments && doc.page._attachments.favIcon)
+    const favIcon = hasFavIcon
         ? (
             <ImgFromPouch
                 className={styles.favIcon}
@@ -45,7 +46,7 @@ const VisitAsListItem = ({doc, compact}) => {
                     className={styles.title}
                     title={doc.page.title}
                 >
-                    {doc.page.favIcon && favIcon}
+                    {hasFavIcon && favIcon}
                     {doc.page.title}
                 </div>
                 <div className={styles.url}>
