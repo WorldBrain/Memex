@@ -14,7 +14,7 @@ export default async function fetchPageData({
     const loc = getLocationFromURL(url)
     const doc = await fetchDOMFromUrl(url)
     // If DOM couldn't be fetched, then we can't get text/metadata
-    if (!doc) { throw new Error(`Cannot get DOM from URL: ${url}`) }
+    if (!doc) { throw new Error('Cannot fetch DOM') }
 
     const { text, metadata, favIcon } = await extractPageContent({ doc, loc, url })
     return { text, metadata, favIcon }
@@ -40,8 +40,10 @@ const getLocationFromURL = url => new URL(url)
 const fetchDOMFromUrl = async url => new Promise((resolve, reject) => {
     const req = new XMLHttpRequest()
 
+    req.timeout = 5000
+    req.ontimeout = () => reject(new Error('Data fetch timeout'))
     req.onload = () => resolve(req.responseXML)
-    req.onerror = () => reject(new Error(`Failed XHR fetching for URL: ${url}`))
+    req.onerror = () => reject(new Error('Data fetch failed'))
 
     req.open('GET', url)
 
