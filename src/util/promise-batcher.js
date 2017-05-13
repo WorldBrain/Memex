@@ -42,10 +42,7 @@ function initBatch({
                 inputDeferer, // Defer async callbacks on input...
                 (input, output) => ({ input, output }),
                 concurrency)  // ...but run this many at any time
-            .do(({ input }) => {
-                console.log(`${state.getState().length} processed out of ${inputBatch.length}`)
-                state.recordSuccess(input)
-            })  // Update state as input gets processed
+            .do(({ input }) => state.recordSuccess(input)) // Update state as input gets processed
             .subscribe(next, noop, complete)
     }
 
@@ -87,6 +84,8 @@ function initBatch({
          * @returns {Array<any>} The Array of inputs that have already been processed.
          */
         getState: () => state.getState(),
+        getSuccessState: () => state.getState().filter(record => record.status),
+        getFailState: () => state.getState().filter(record => !record.status),
     }
 }
 
