@@ -1,42 +1,38 @@
-import initHistoryImport from './import-history'
+import importHistory, { importDocsSelector } from './import-history'
+import batcher from 'src/util/promise-batcher'
+import { fetchAndAnalysePage } from 'src/page-storage/store-page'
+import db from 'src/pouchdb'
 
-// Real hacky stuff, as I can't see a clean way to do this yet...
-let importer
-let importerPort
+const getImportDocs = async () => await db.find({ selector: importDocsSelector })
 
-initHistoryImport({
-    onNext: (url, page) => importerPort.postMessage({ type: 'NEXT', url }),
-    onError: (url, err) => importerPort.postMessage({ type: 'NEXT', url, err }),
-    onCompleted: () => importerPort.postMessage({ type: 'COMPLETE' }),
-}).then(res => { importer = res })
-
-/**
- * Given a command from UI, run the matching importer method.
- */
-const cmdHandler = ({ cmd }) => {
-    switch (cmd) {
-        case 'START':
-        case 'RESUME': return importer.start()
-        case 'STOP': return importer.stop()
-        case 'PAUSE': return importer.pause()
-        default: return console.error(`unknown command: ${cmd}`)
-    }
-}
+const genericCount = { history: 0, bookmark: 0 }
+const initCounts = { totals: genericCount, fail: genericCount, success: genericCount }
+const getImportCounts = docs => docs.reduce((acc, doc) => ({
+    totals: { ...acc.totals, [doc.type]: acc.totals[doc.type] + 1 },
+    fail: { ...acc.fail, [doc.type]: acc.fail[doc.type] + (doc.status === 'fail' ? 1 : 0) },
+    success: { ...acc.success, [doc.type]: acc.success[doc.type] + (doc.status === 'success' ? 1 : 0) },
+}), initCounts)
 
 /**
  * Handles importer events from the UI.
  */
 browser.runtime.onConnect.addListener(async port => {
     if (port.name !== 'imports') return
-    importerPort = port
 
     console.log('importer connected')
+    await importHistory({})
 
-    // Upon connect, send the current vals of the importer to client
-    const totals = importer.getInitTotals()
-    const fail = importer.getInitFailed()
-    const success = importer.getInitSuccess()
-    importerPort.postMessage({ type: 'INIT', fail, success, totals })
+    // Get import counts and send them down to UI
+    const { docs: importDocs } = await getImportDocs()
+    port.postMessage({ type: 'INIT', ...getImportCounts(importDocs) })
 
-    importerPort.onMessage.addListener(cmdHandler)
+    port.onMessage.addListener(({ cmd }) => {
+        switch (cmd) {
+            case 'START':
+            case 'RESUME':
+            case 'STOP':
+            case 'PAUSE':
+            default: return console.error(`unknown command: ${cmd}`)
+        }
+    })
 })

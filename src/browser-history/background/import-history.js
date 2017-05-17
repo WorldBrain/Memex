@@ -3,13 +3,24 @@
 // converted to pageDocs and visitDocs (sorry for the confusingly similar name).
 
 import db from 'src/pouchdb'
-import {
-    generateVisitDocId,
-    visitKeyPrefix,
-    checkWithBlacklist,
-    convertVisitDocId,
-} from 'src/activity-logger'
+import docuri from 'docuri'
+import randomString from 'src/util/random-string'
+import { checkWithBlacklist, generateVisitDocId,
+         visitKeyPrefix, convertVisitDocId } from 'src/activity-logger'
 import { generatePageDocId } from 'src/page-storage'
+
+export const importKeyPrefix = 'import/'
+export const importDocsSelector = { _id: { $gte: importKeyPrefix, $lte: `${importKeyPrefix}\uffff` } }
+
+export const convertImportDocId = docuri.route(`${importKeyPrefix}:timestamp/:nonce`)
+
+export function generateImportDocId({timestamp, nonce} = {}) {
+    const date = timestamp ? new Date(timestamp) : new Date()
+    return convertImportDocId({
+        timestamp: date.getTime(),
+        nonce: nonce || randomString(),
+    })
+}
 
 // Get the historyItems (visited places/pages; not each visit to them)
 async function getHistoryItems({
@@ -22,9 +33,18 @@ async function getHistoryItems({
         startTime,
         endTime,
     })
-    const shouldBeRemembered = await checkWithBlacklist()
+    const isWorthRemembering = await checkWithBlacklist()
+    return historyItems.filter(({url}) => isWorthRemembering({url}))
+}
 
-    return historyItems.filter(({ url }) => shouldBeRemembered({ url }))
+function transformToImportDoc({pageDoc}) {
+    return {
+        _id: generateImportDocId({timestamp: Date.now()}),
+        status: 'pending',
+        type: 'history',
+        url: pageDoc.url,
+        dataDocId: pageDoc._id,
+    }
 }
 
 function transformToPageDoc({historyItem}) {
@@ -107,8 +127,8 @@ function convertHistoryToPagesAndVisits({
 
 // Pulls the full browser history into the database.
 export default async function importHistory({
-    startTime,
-    endTime,
+    startTime = 0,
+    endTime = Date.now(),
 } = {}) {
     // Get the full history: both the historyItems and visitItems.
     console.time('import history')
@@ -123,6 +143,7 @@ export default async function importHistory({
         historyItems,
         visitItemsPerHistoryItem,
     })
+    const importDocs = pageDocs.map(pageDoc => transformToImportDoc({pageDoc}))
     let allDocs = pageDocs.concat(visitDocs)
     // Mark each doc to remember it originated from this import action.
     const importTimestamp = Date.now()
@@ -130,6 +151,7 @@ export default async function importHistory({
         ...doc,
         importedFromBrowserHistory: importTimestamp,
     }))
+    allDocs = allDocs.concat(importDocs)
     // Store them into the database. Already existing docs will simply be
     // rejected, because their id (timestamp & history id) already exists.
     await db.bulkDocs(allDocs)
