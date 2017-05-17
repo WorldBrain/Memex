@@ -29,7 +29,7 @@ export const init = () => dispatch => {
         const { type, ...payload } = msg
         switch (type) {
             case 'INIT': return dispatch(initCounts(payload))
-            case 'NEXT': return dispatch(finishHistoryItem(payload.url, payload.err))
+            case 'NEXT': return dispatch(finishHistoryItem(payload.url, payload.error))
             case 'COMPLETE': return dispatch(stopImport())
         }
     })

@@ -69,7 +69,7 @@ export async function reidentifyOrStorePage({ tabId, url }) {
  * @param {string} url The URL to attempt to store a page document for.
  * @returns {any} Page document that was created (or found, if reusable/deduped).
  */
-export async function storePageFromUrl(url) {
+export async function storePageFromUrl({ url }) {
     // Find pages we know that had the same URL.
     const samePageCandidates = (await findPagesByUrl({ url })).rows.map(row => row.doc)
 
