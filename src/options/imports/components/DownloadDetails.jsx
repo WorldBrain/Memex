@@ -25,16 +25,11 @@ const DownloadDetails = ({ children, filterHandlers }) => (
             </div>
         </div>
         <table className={localStyles.detailsTable}>
-            <colgroup>
-                <col className={localStyles.urlCol} />
-                <col className={localStyles.downloadedCol} />
-                <col className={localStyles.errorsCol} />
-            </colgroup>
             <thead className={localStyles.detailsTableHead}>
                 <tr>
-                    <th>URL</th>
-                    <th>Downloaded</th>
-                    <th>Errors</th>
+                    <th className={localStyles.urlCol}>URL</th>
+                    <th className={localStyles.downloadedCol}>Downloaded</th>
+                    <th className={localStyles.errorsCol}>Errors</th>
                 </tr>
             </thead>
             <tbody className={localStyles.detailsTableBody}>

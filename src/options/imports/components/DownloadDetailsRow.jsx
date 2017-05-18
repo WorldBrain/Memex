@@ -10,9 +10,9 @@ const getRowClasses = isActive => classNames({
 
 const DownloadDetailsRow = ({ url, downloaded, error, handleClick, isActive }) => (
     <tr className={getRowClasses(isActive)} onClick={handleClick}>
-        <td>{url}</td>
-        <td>{downloaded}</td>
-        <td>{error}</td>
+        <td className={localStyles.urlCol}>{url}</td>
+        <td className={localStyles.downloadedCol}>{downloaded}</td>
+        <td className={localStyles.errorsCol}>{error}</td>
     </tr>
 )
 
