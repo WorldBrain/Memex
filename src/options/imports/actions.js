@@ -19,39 +19,50 @@ export const readyImport = finishImport
 export const pauseImport = createAction('imports/pauseImport')
 export const resumeImport = createAction('imports/resumeImport')
 
+/**
+ * Responds to messages sent from background script over the runtime connection by dispatching
+ * appropriate redux actions. Non-handled messages are ignored.
+ */
+const getCmdMessageHandler = dispatch => ({ cmd, ...payload }) => {
+    switch (cmd) {
+        case 'INIT':
+            dispatch(initCounts(payload))
+            dispatch(readyImport())
+            break
+        case 'NEXT':
+            dispatch(finishHistoryItem(payload.url, payload.error))
+            break
+        case 'COMPLETE':
+            dispatch(stopImport())
+            break
+    }
+}
+
+// Hacky, but can't see a way around this... init thunk needs to be called before any other thunk...
 let port
 
+/**
+ * Handles initing the imports runtime connection with the background script's batch import logic.
+ */
 export const init = () => dispatch => {
     port = browser.runtime.connect({ name: 'imports' })
-    port.onMessage.addListener(msg => {
-        const { type, ...payload } = msg
-        switch (type) {
-            case 'INIT':
-                dispatch(initCounts(payload))
-                dispatch(readyImport())
-                break
-            case 'NEXT': return dispatch(finishHistoryItem(payload.url, payload.error))
-            case 'COMPLETE': return dispatch(stopImport())
-        }
-    })
+    const cmdMessageHandler = getCmdMessageHandler(dispatch)
+    port.onMessage.addListener(cmdMessageHandler)
 }
 
-export const start = () => dispatch => {
-    dispatch(startImport())
-    port.postMessage({ cmd: 'START' })
+/**
+ * Creates a thunk that dispatches a given redux action and sends message over runtime connection port
+ * to background script.
+ * @param action Redux action ready to dispatch.
+ * @param cmd The command to send over runtime connection's port.
+ */
+const makePortMessagingThunk = ({ action, cmd }) => () => dispatch => {
+    dispatch(action)
+    port.postMessage({ cmd })
 }
 
-export const stop = () => dispatch => {
-    dispatch(stopImport())
-    port.postMessage({ cmd: 'STOP' })
-}
-
-export const pause = () => dispatch => {
-    dispatch(pauseImport())
-    port.postMessage({ cmd: 'PAUSE' })
-}
-
-export const resume = () => dispatch => {
-    dispatch(resumeImport())
-    port.postMessage({ cmd: 'RESUME' })
-}
+// Batch controlling thunks
+export const start = makePortMessagingThunk({ action: startImport(), cmd: 'START' })
+export const stop = makePortMessagingThunk({ action: stopImport(), cmd: 'STOP' })
+export const pause = makePortMessagingThunk({ action: pauseImport(), cmd: 'PAUSE' })
+export const resume = makePortMessagingThunk({ action: resumeImport(), cmd: 'RESUME' })

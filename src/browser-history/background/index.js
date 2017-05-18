@@ -26,6 +26,29 @@ const setImportDocStatus = async (docId, status) => {
 }
 
 /**
+ * Creates observer functions to afford sending of messages over connection port
+ * to UI on certain batcher events.
+ *
+ * @param {Port} port The open connection port to send messages over.
+ */
+const getBatchObserver = port => ({
+    // Triggers on the successful finish of each batch input
+    next({ input: { url, importDocId } }) {
+        // Send success data to listener
+        port.postMessage({ cmd: 'NEXT', url })
+        setImportDocStatus(importDocId, 'success')
+    },
+    // Triggers on any error during the processing of each batch input
+    error({ input: { url, importDocId }, error }) {
+        // Send error data to listener
+        port.postMessage({ cmd: 'NEXT', url, error })
+        setImportDocStatus(importDocId, 'fail')
+    },
+    // Triggers after all inputs have been batch processed, regardless of success
+    complete: () => port.postMessage({ cmd: 'COMPLETE' }),
+})
+
+/**
  * Handles all needed preliminary logic before the user-controlled batch imports process
  * can begin. Currently handles generation of page and corresponding visit docs for all
  * browser history.
@@ -63,28 +86,14 @@ async function importsConnectionHandler(port) {
 
     // Get import counts and send them down to UI
     const { docs: importDocs } = await getImportDocs()
-    port.postMessage({ type: 'INIT', ...getImportCounts(importDocs) })
+    port.postMessage({ cmd: 'INIT', ...getImportCounts(importDocs) })
 
-    // Allows batcher to handle specific events
-    const observer = {
-        // Triggers on the successful finish of each batch input
-        next({ input: { url, importDocId } }) {
-            // Send success data to listener
-            port.postMessage({ type: 'NEXT', url })
-            setImportDocStatus(importDocId, 'success')
-        },
-        // Triggers on any error during the processing of each batch input
-        error({ input: { url, importDocId }, error }) {
-            // Send error data to listener
-            port.postMessage({ type: 'NEXT', url, error })
-            setImportDocStatus(importDocId, 'fail')
-        },
-        // Triggers after all inputs have been batch processed, regardless of success
-        complete: () => port.postMessage({ type: 'COMPLETE' }),
-    }
-
-    const inputBatch = getPendingInputs(importDocs)
-    const batch = initBatch({ inputBatch, asyncCallback: storePageFromUrl, observer })
+    const batch = initBatch({
+        inputBatch: getPendingInputs(importDocs),
+        asyncCallback: storePageFromUrl,
+        concurrency: 5,
+        observer: getBatchObserver(port),
+    })
 
     // Handle any incoming messages to control the batch
     const cmdMessageHandler = getCmdMessageHandler(batch)
