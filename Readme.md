@@ -46,7 +46,7 @@ for the feature roadmap of the next few months.
 We are happy about any kind of feedback, bug fixes, new feature ideas and tips? 
 Give a shout. :loudspeaker:
 
-- [Drop by on Slack](join-worldbrain.herokuapp.com)
+- [Drop by on Slack](http://join-worldbrain.herokuapp.com)
 - Write us an email: info@worldbrain.io
 - or leave a comment under issues you want to contribute to
 
