@@ -158,7 +158,7 @@ class ImportContainer extends Component {
 
         return (
             <Import isInit={isInit}>
-                {isIdle
+                {(isIdle || isInit)
                     ? <EstimatesTable {...estTableProps} />
                     : <ProgressTable progress={progress} />
                 }
@@ -166,7 +166,7 @@ class ImportContainer extends Component {
                     {this.renderCancelButton()}
                     {this.renderImportButton()}
                 </ButtonBar>
-                {!isIdle
+                {!(isIdle || isInit)
                     && <DownloadDetails filterHandlers={this.getDetailFilterHandlers()}>
                         {this.renderDownloadDetailsRows()}
                     </DownloadDetails>

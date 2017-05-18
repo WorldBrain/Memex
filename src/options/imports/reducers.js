@@ -13,8 +13,7 @@ const defaultState = {
     fail: defaultStats,         // Fail counts for completed import items
     success: defaultStats,      // Success counts for completed import items
     totals: defaultStats,       // Static state to use to derive remaining counts from
-    importStatus: STATUS.IDLE,
-    indexRebuildingStatus: STATUS.IDLE,
+    importStatus: STATUS.INIT,
     downloadDataFilter: 'all',
 }
 
@@ -62,8 +61,6 @@ export default createReducer({
     [actions.finishImport]: setImportState(STATUS.IDLE),
     [actions.pauseImport]: setImportState(STATUS.PAUSED),
     [actions.resumeImport]: setImportState(STATUS.RUNNING),
-    [actions.startIndexRebuild]: setIndexState(STATUS.RUNNING),
-    [actions.stopIndexRebuild]: setIndexState(STATUS.STOPPED),
     [actions.finishBookmarkItem]: addDownloadDetails(TYPE.BOOKMARK),
     [actions.finishHistoryItem]: addDownloadDetails(TYPE.HISTORY),
     [actions.filterDownloadDetails]: payloadReducer('downloadDataFilter'),

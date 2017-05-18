@@ -15,11 +15,9 @@ export const initImport = createAction('imports/initImport')
 export const startImport = createAction('imports/startImport')
 export const stopImport = createAction('imports/stopImport')
 export const finishImport = createAction('imports/finishImport')
+export const readyImport = finishImport
 export const pauseImport = createAction('imports/pauseImport')
 export const resumeImport = createAction('imports/resumeImport')
-
-export const startIndexRebuild = createAction('imports/startIndexRebuild')
-export const stopIndexRebuild = createAction('imports/stopIndexRebuild')
 
 let port
 
@@ -28,7 +26,10 @@ export const init = () => dispatch => {
     port.onMessage.addListener(msg => {
         const { type, ...payload } = msg
         switch (type) {
-            case 'INIT': return dispatch(initCounts(payload))
+            case 'INIT':
+                dispatch(initCounts(payload))
+                dispatch(readyImport())
+                break
             case 'NEXT': return dispatch(finishHistoryItem(payload.url, payload.error))
             case 'COMPLETE': return dispatch(stopImport())
         }

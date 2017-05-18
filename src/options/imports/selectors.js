@@ -5,7 +5,6 @@ import { FILTERS, STATUS, DOC_SIZE_EST, DOC_TIME_EST, DOWNLOAD_TYPE as TYPE } fr
 export const entireState = state => state.imports
 
 export const importStatus = state => entireState(state).importStatus
-const indexRebuildingStatus = state => entireState(state).indexRebuildingStatus
 export const downloadData = state => entireState(state).downloadData
 const downloadDataFilter = state => entireState(state).downloadDataFilter
 const fail = state => entireState(state).fail
