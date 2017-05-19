@@ -6,7 +6,6 @@ import { deleteVisitAndPage } from 'src/page-storage/deletion'
 import asyncActionCreator from 'src/util/redux-async-action-creator'
 
 import { ourState } from './selectors'
-import extractTimeFiltersFromQuery from 'src/util/nlp-time-filter'
 
 
 // == Simple commands to change the state in reducers ==
@@ -37,25 +36,7 @@ export function deleteVisit({visitId}) {
 }
 
 export const newSearch = asyncActionCreator(() => async (dispatch, getState) => {
-    let {
-        query,
-        startDate: oldStartDate,
-        endDate: oldEndDate,
-    } = ourState(getState())
-                                        
-    const {
-        startDate: newStartDate,
-        endDate: newEndDate,
-        extractedQuery,
-    } = extractTimeFiltersFromQuery(query)
-                                            
-    const startDate = newStartDate || oldStartDate
-    const endDate = newEndDate || oldEndDate
-    query = extractedQuery || query
-                                            
-    if (oldStartDate !== newStartDate) dispatch(setStartDate({startDate}))
-    if (oldEndDate !== newEndDate) dispatch(setEndDate({endDate}))
-
+    const { query, startDate, endDate } = ourState(getState())
     const searchResult = await filterVisitsByQuery({
         query,
         startDate,
