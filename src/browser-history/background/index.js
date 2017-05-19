@@ -4,6 +4,8 @@ import { storePageFromUrl } from 'src/page-storage/store-page'
 import db from 'src/pouchdb'
 
 export const lastImportTimeStorageKey = 'last_import_time'
+export const installTimeStorageKey = 'extension_install_time'
+
 const getImportDocs = async () => await db.find({ selector: importDocsSelector })
 
 const genericCount = { history: 0, bookmark: 0 }
