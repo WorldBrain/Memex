@@ -2,17 +2,27 @@ import { compose } from 'redux'
 
 import ReduxQuerySync from 'src/util/redux-query-sync'
 import { ourState } from './selectors'
-import { setQuery } from './actions'
+import { setQuery, setStartDate, setEndDate } from './actions'
 
 // Keep search query in sync with the query parameter in the window location.
 const locationSync = ReduxQuerySync.enhancer({
     replaceState: true, // We don't want back/forward to stop at every change.
     initialTruth: 'location', // Initialise store from current location.
     params: {
-        q: {
+        query: {
             selector: state => ourState(state).query,
             action: query => setQuery({query}),
             defaultValue: '',
+        },
+        startDate: {
+            selector: state => ourState(state).startDate,
+            action: startDate => setStartDate({startDate: Number(startDate) }),
+            defaultValue: undefined,
+        },
+        endDate: {
+            selector: state => ourState(state).endDate,
+            action: endDate => setEndDate({endDate: Number(endDate)}),
+            defaultValue: undefined,
         },
     },
 })
