@@ -5,7 +5,7 @@
 import db from 'src/pouchdb'
 import { checkWithBlacklist, generateVisitDocId,
          visitKeyPrefix, convertVisitDocId } from 'src/activity-logger'
-import { generatePageDocId } from 'src/page-storage'
+import { generatePageDocId, pageDocsSelector } from 'src/page-storage'
 import { generateImportDocId } from './'
 
 
@@ -153,10 +153,21 @@ export async function getOldestVisitTimestamp() {
         : undefined
 }
 
-// Get the number of importable items in the history
-export async function getHistoryStats() {
-    const historyItems = await getHistoryItems()
-    return {
-        quantity: historyItems.length,
-    }
+/**
+ * Gets count estimates for history imports.
+ * @return {any} Object containing `completed` and `remaining` numbers representing the number
+ *  of already saved and remaining history items to import, respectively.
+ */
+export async function getHistoryEstimates({
+    startTime = 0,
+    endTime = Date.now(),
+}) {
+    const historyItems = await getHistoryItems({ startTime, endTime })
+    const { docs: pageDocs } = await db.find({ selector: pageDocsSelector, fields: ['url'] })
+
+    // Make sure to get remaining count excluding URLs that already are saved in DB
+    const savedUrls = pageDocs.map(({ url }) => url)
+    const remainingUrls = historyItems.filter(({ url }) => !savedUrls.includes(url))
+
+    return { completed: savedUrls.length, remaining: remainingUrls.length }
 }

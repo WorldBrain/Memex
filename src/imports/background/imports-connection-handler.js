@@ -1,6 +1,6 @@
 import initBatch from 'src/util/promise-batcher'
 import { storePageFromUrl } from 'src/page-storage/store-page'
-import importHistory from './import-history'
+import importHistory, { getHistoryEstimates } from './import-history'
 import { lastImportTimeStorageKey, setImportDocStatus, getImportDocs } from './'
 
 
@@ -54,6 +54,31 @@ async function preliminaryImports() {
     browser.storage.local.set({ [lastImportTimeStorageKey]: Date.now() })
 }
 
+/**
+ * Handles calculating the estimate counts for history and bookmark imports.
+ * @returns {any} The state containing import estimates completed and remaining counts.
+ */
+async function getEstimateCounts() {
+    // Check if the importHistory stage was run previously to search history from that time
+    const startTime = (await browser.storage.local.get(lastImportTimeStorageKey))[lastImportTimeStorageKey]
+
+    const { completed: histCompleted, remaining: histRemaining } = await getHistoryEstimates({ startTime })
+    // TODO: switch this with async getBookmarkEstimates call when implemented
+    const bmCompleted = 10
+    const bmRemaining = 0
+
+    return {
+        completed: {
+            history: histCompleted,
+            bookmark: bmCompleted,
+        },
+        remaining: {
+            history: histRemaining,
+            bookmark: bmRemaining,
+        },
+    }
+}
+
 const getCmdMessageHandler = batch => ({ cmd }) => {
     switch (cmd) {
         case 'START':
@@ -74,11 +99,9 @@ export default async function importsConnectionHandler(port) {
 
     console.log('importer connected')
 
-    await preliminaryImports()
-
-    // Get import counts and send them down to UI
-    const { docs: importDocs } = await getImportDocs()
-    port.postMessage({ cmd: 'INIT', ...getImportCounts(importDocs) })
+    // Get import estimate counts and send them down to UI
+    const estimateCounts = await getEstimateCounts()
+    port.postMessage({ cmd: 'INIT', ...estimateCounts })
 
     const batch = initBatch({
         inputBatch: getPendingInputs(importDocs),

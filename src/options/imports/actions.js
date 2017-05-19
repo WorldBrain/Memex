@@ -6,7 +6,7 @@ const finishItem = (url, err) => ({ url, status: !err, err })
 export const finishBookmarkItem = createAction('imports/finishBookmarkItem', finishItem)
 export const finishHistoryItem = createAction('imports/finishHistoryItem', finishItem)
 
-export const initCounts = createAction('imports/initCounts')
+export const initEstimateCounts = createAction('imports/initEstimateCounts')
 
 export const initImportState = createAction('imports/initImportState')
 export const initDownloadData = createAction('imports/initDownloadData')
@@ -26,7 +26,7 @@ export const resumeImport = createAction('imports/resumeImport')
 const getCmdMessageHandler = dispatch => ({ cmd, ...payload }) => {
     switch (cmd) {
         case 'INIT':
-            dispatch(initCounts(payload))
+            dispatch(initEstimateCounts(payload))
             dispatch(readyImport())
             break
         case 'NEXT':

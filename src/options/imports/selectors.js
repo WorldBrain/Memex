@@ -10,6 +10,7 @@ const downloadDataFilter = state => entireState(state).downloadDataFilter
 const fail = state => entireState(state).fail
 const success = state => entireState(state).success
 const totals = state => entireState(state).totals
+const completed = state => entireState(state).completed
 
 const getImportStatusFlag = status => createSelector(
     importStatus,
@@ -66,25 +67,21 @@ const getMins = time => (time - getHours(time) * 60).toFixed(0)
 const getPaddedMins = time => getMins(time) < 10 ? `0${getMins(time)}` : getMins(time)
 const getTimeEstStr = time => `${getHours(time)}:${getPaddedMins(time)} h`
 
-const getEstimate = (success, fail, total) => {
-    const complete = success + fail
-    const remaining = total - complete
-    return {
-        complete,
-        remaining,
-        sizeCompleted: (complete * DOC_SIZE_EST).toFixed(2),
-        sizeRemaining: (remaining * DOC_SIZE_EST).toFixed(2),
-        timeRemaining: getTimeEstStr(remaining * DOC_TIME_EST),
-    }
-}
+const getEstimate = (complete, remaining) => ({
+    complete,
+    remaining,
+    sizeCompleted: (complete * DOC_SIZE_EST).toFixed(2),
+    sizeRemaining: (remaining * DOC_SIZE_EST).toFixed(2),
+    timeRemaining: getTimeEstStr(remaining * DOC_TIME_EST),
+})
 
 /**
  * Derives estimates state from completed + total state counts.
  */
 export const estimates = createSelector(
-    fail, success, totals,
-    (fail, success, totals) => ({
-        [TYPE.HISTORY]: getEstimate(success[TYPE.HISTORY], fail[TYPE.HISTORY], totals[TYPE.HISTORY]),
-        [TYPE.BOOKMARK]: getEstimate(success[TYPE.BOOKMARK], fail[TYPE.BOOKMARK], totals[TYPE.BOOKMARK]),
+    completed, totals,
+    (completed, totals) => ({
+        [TYPE.HISTORY]: getEstimate(completed[TYPE.HISTORY], totals[TYPE.HISTORY]),
+        [TYPE.BOOKMARK]: getEstimate(completed[TYPE.BOOKMARK], totals[TYPE.BOOKMARK]),
     }),
 )

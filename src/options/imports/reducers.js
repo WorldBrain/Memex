@@ -10,6 +10,7 @@ const defaultStats = {
 
 const defaultState = {
     downloadData: [],
+    completed: defaultStats,    // Count of docs already in DB (estimates view)
     fail: defaultStats,         // Fail counts for completed import items
     success: defaultStats,      // Success counts for completed import items
     totals: defaultStats,       // Static state to use to derive remaining counts from
@@ -43,7 +44,7 @@ const addDownloadDetails = type => (state, { url, status, err }) => ({
     ],
 })
 
-const initCounts = (state, { totals, fail, success }) => ({ ...state, totals, fail, success })
+const initEstimateCounts = (state, { remaining, completed }) => ({ ...state, totals: remaining, completed })
 
 // Sets whatever key to the specified val
 const genericReducer = (key, val) => state => ({ ...state, [key]: val })
@@ -65,6 +66,6 @@ export default createReducer({
     [actions.finishHistoryItem]: addDownloadDetails(TYPE.HISTORY),
     [actions.filterDownloadDetails]: payloadReducer('downloadDataFilter'),
     [actions.initImportState]: payloadReducer('importStatus'),
-    [actions.initCounts]: initCounts,
+    [actions.initEstimateCounts]: initEstimateCounts,
     [actions.initDownloadData]: payloadReducer('downloadData'),
 }, defaultState)
