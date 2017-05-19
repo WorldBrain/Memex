@@ -1,6 +1,7 @@
 import debounce from 'lodash/fp/debounce'
 import escapeHtml from 'lodash/fp/escape'
 import tldjs from 'tldjs'
+import queryString from 'query-string'
 
 import { filterVisitsByQuery } from 'src/search'
 import niceTime from 'src/util/nice-time'
@@ -82,7 +83,15 @@ async function makeSuggestion(query, suggest) {
 const acceptInput = (text, disposition) => {
     // Checks whether the text is a suggested url
     const validUrl = tldjs.isValid(text)
-    const overviewPageWithQuery = '/overview/overview.html?q=' + text
+    const {
+        startDate,
+        endDate,
+        extractedQuery,
+    } = extractTimeFiltersFromQuery(text)
+
+    const params = queryString.stringify({ query: extractedQuery, startDate, endDate })
+    const overviewPageWithQuery = `/overview/overview.html?${params}`
+
     const goToUrl = validUrl ? text : overviewPageWithQuery
 
     switch (disposition) {
