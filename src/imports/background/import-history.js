@@ -3,24 +3,11 @@
 // converted to pageDocs and visitDocs (sorry for the confusingly similar name).
 
 import db from 'src/pouchdb'
-import docuri from 'docuri'
-import randomString from 'src/util/random-string'
 import { checkWithBlacklist, generateVisitDocId,
          visitKeyPrefix, convertVisitDocId } from 'src/activity-logger'
 import { generatePageDocId } from 'src/page-storage'
+import { generateImportDocId } from './'
 
-export const importKeyPrefix = 'import/'
-export const importDocsSelector = { _id: { $gte: importKeyPrefix, $lte: `${importKeyPrefix}\uffff` } }
-
-export const convertImportDocId = docuri.route(`${importKeyPrefix}:timestamp/:nonce`)
-
-export function generateImportDocId({timestamp, nonce} = {}) {
-    const date = timestamp ? new Date(timestamp) : new Date()
-    return convertImportDocId({
-        timestamp: date.getTime(),
-        nonce: nonce || randomString(),
-    })
-}
 
 // Get the historyItems (visited places/pages; not each visit to them)
 async function getHistoryItems({

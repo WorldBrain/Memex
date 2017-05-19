@@ -1,12 +1,8 @@
-import importHistory, { importDocsSelector } from './import-history'
 import initBatch from 'src/util/promise-batcher'
 import { storePageFromUrl } from 'src/page-storage/store-page'
-import db from 'src/pouchdb'
+import importHistory from './import-history'
+import { lastImportTimeStorageKey, setImportDocStatus, getImportDocs } from './'
 
-export const lastImportTimeStorageKey = 'last_import_time'
-export const installTimeStorageKey = 'extension_install_time'
-
-const getImportDocs = async () => await db.find({ selector: importDocsSelector })
 
 const genericCount = { history: 0, bookmark: 0 }
 const initCounts = { totals: genericCount, fail: genericCount, success: genericCount }
@@ -20,12 +16,6 @@ const getImportCounts = docs => docs.reduce((acc, doc) => ({
 const getPendingInputs = importDocs => importDocs
     .filter(doc => doc.status === 'pending')
     .map(doc => ({ url: doc.url, importDocId: doc._id }))
-
-const setImportDocStatus = async (docId, status) => {
-    const doc = await db.get(docId)
-    doc.status = status
-    await db.put(doc)
-}
 
 /**
  * Creates observer functions to afford sending of messages over connection port
@@ -78,7 +68,7 @@ const getCmdMessageHandler = batch => ({ cmd }) => {
  * Main connection handler to handle background importing and fetch&analysis batching
  * logic via commands issued from the UI.
  */
-async function importsConnectionHandler(port) {
+export default async function importsConnectionHandler(port) {
     // Make sure to only handle connection logic for imports (allows other use of runtime.connect)
     if (port.name !== 'imports') return
 
@@ -101,6 +91,3 @@ async function importsConnectionHandler(port) {
     const cmdMessageHandler = getCmdMessageHandler(batch)
     port.onMessage.addListener(cmdMessageHandler)
 }
-
-// Allow content-script or UI to connect and communicate control of imports
-browser.runtime.onConnect.addListener(importsConnectionHandler)

@@ -2,7 +2,7 @@ import tldjs from 'tldjs'
 
 import 'src/activity-logger/background'
 import 'src/omnibar'
-import { installTimeStorageKey } from 'src/browser-history/background'
+import { installTimeStorageKey } from 'src/imports/background'
 
 async function openOverview() {
     const [ currentTab ] = await browser.tabs.query({ active: true })
