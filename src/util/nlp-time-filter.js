@@ -1,7 +1,7 @@
 import chrono from 'chrono-node'
 
-const BEFORE_REGEX = /before "(.*?)"/
-const AFTER_REGEX = /after "(.*?)"/
+const BEFORE_REGEX = /before:"(.*?)"/
+const AFTER_REGEX = /after:"(.*?)"/
 
 // Takes in query as a string and extracts startDate and endDate
 export default function extractTimeFiltersFromQuery(query) {
@@ -24,7 +24,9 @@ export default function extractTimeFiltersFromQuery(query) {
         matchedBefore ? matchedBefore.index : query.length,
         matchedAfter ? matchedAfter.index : query.length,
     )
-    const extractedQuery = query.substring(0, firstIndexOfTimeFilter)
+    const extractedQuery = query
+        .substring(0, firstIndexOfTimeFilter)
+        .trim()
 
     return {
         startDate,
