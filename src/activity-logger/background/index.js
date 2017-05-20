@@ -1,11 +1,8 @@
 import maybeLogPageVisit from './log-page-visit'
 
-// Listen for navigations to log them and analyse the pages.
-browser.webNavigation.onCommitted.addListener(({url, tabId, frameId}) => {
-    // Ignore pages loaded in frames, it is usually noise.
-    if (frameId !== 0) {
-        return
+// Listens for url changes of the page
+browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+    if (changeInfo.url && tab.url) {
+        maybeLogPageVisit({url: tab.url, tabId: tabId})
     }
-
-    maybeLogPageVisit({url, tabId})
 })
