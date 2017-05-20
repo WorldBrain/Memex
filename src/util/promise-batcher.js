@@ -6,18 +6,17 @@ import State from './promise-batcher-state'
 /**
  * Given a Set of input and an async function, will attempt to concurrently batch process them in the background.
  *
- * @param {Iterable<any>} inputBatch The total batch of input to operate on.
  * @param {(input: any) => Promise<any>} callback The callback to run each input on. Should be
  *          an async/promise-returning function.
  * @param {number} [concurrency=5] How many promises to be waiting at any time.
  * @returns {any} Object containing batch handling functions.
  */
 function initBatch({
-    inputBatch,
     asyncCallback,
     concurrency = 5,
     observer: { next = noop, error = noop, complete = noop } = {},
 }) {
+    let inputBatch
     const state = new State() // State to keep track of progress
     let sub // State to keep track of subscription (allow hiding of Rx away from caller)
 
@@ -48,6 +47,15 @@ function initBatch({
 
     // Interface to use this batch
     return {
+        /**
+         * Inits the input batch that this instance will operate on. This is not ideal, but
+         * due to the way the batcher will be used in imports, it needs to be able to happen
+         * after the batch is instantiated.
+         * @param {Iterable<any>} input The total batch of input to operate on.
+         */
+        init(input) {
+            inputBatch = input
+        },
         /**
          * Starts/resumes the batched processing on the input.
          * @returns {boolean} Denotes whether or not batch could be started/resumed.
