@@ -7,9 +7,9 @@ export const entireState = state => state.imports
 export const importStatus = state => entireState(state).importStatus
 export const downloadData = state => entireState(state).downloadData
 const downloadDataFilter = state => entireState(state).downloadDataFilter
-const fail = state => entireState(state).fail
-const success = state => entireState(state).success
-const totals = state => entireState(state).totals
+export const fail = state => entireState(state).fail
+export const success = state => entireState(state).success
+export const totals = state => entireState(state).totals
 const completed = state => entireState(state).completed
 
 const getImportStatusFlag = status => createSelector(

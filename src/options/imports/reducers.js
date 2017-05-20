@@ -67,5 +67,8 @@ export default createReducer({
     [actions.filterDownloadDetails]: payloadReducer('downloadDataFilter'),
     [actions.initImportState]: payloadReducer('importStatus'),
     [actions.initEstimateCounts]: initEstimateCounts,
+    [actions.initTotalsCounts]: payloadReducer('totals'),
+    [actions.initFailCounts]: payloadReducer('fail'),
+    [actions.initSuccessCounts]: payloadReducer('success'),
     [actions.initDownloadData]: payloadReducer('downloadData'),
 }, defaultState)

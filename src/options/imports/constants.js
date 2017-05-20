@@ -22,6 +22,9 @@ export const STORAGE_KEYS = {
     BOOKMARK_STATS: 'bookmark_stats',
     DOWNLOAD_DATA: 'import_progress',
     IMPORT_STATE: 'import_state',
+    TOTALS_STATE: 'import_totals_state',
+    SUCCESS_STATE: 'import_success_progress_state',
+    FAIL_STATE: 'import_fail_progress_state',
 }
 
 /** Estimated size of a doc (MB) */

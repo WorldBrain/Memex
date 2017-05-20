@@ -7,6 +7,7 @@ import importsConnectionHandler from './imports-connection-handler'
 
 // Constants
 export const lastImportTimeStorageKey = 'last_import_time'
+export const importProgressStorageKey = 'is_import_in_progress'
 export const installTimeStorageKey = 'extension_install_time'
 export const importKeyPrefix = 'import/'
 export const importDocsSelector = { _id: { $gte: importKeyPrefix, $lte: `${importKeyPrefix}\uffff` } }

@@ -7,6 +7,9 @@ export const finishBookmarkItem = createAction('imports/finishBookmarkItem', fin
 export const finishHistoryItem = createAction('imports/finishHistoryItem', finishItem)
 
 export const initEstimateCounts = createAction('imports/initEstimateCounts')
+export const initTotalsCounts = createAction('imports/initTotalsCounts')
+export const initFailCounts = createAction('imports/initFailCounts')
+export const initSuccessCounts = createAction('imports/initSuccessCounts')
 
 export const initImportState = createAction('imports/initImportState')
 export const initDownloadData = createAction('imports/initDownloadData')
@@ -28,6 +31,12 @@ const getCmdMessageHandler = dispatch => ({ cmd, ...payload }) => {
         case 'INIT':
             dispatch(initEstimateCounts(payload))
             dispatch(readyImport())
+            break
+        case 'START':
+            dispatch(startImport())
+            break
+        case 'PAUSE':
+            dispatch(pauseImport())
             break
         case 'NEXT':
             dispatch(finishHistoryItem(payload.url, payload.error))
@@ -62,7 +71,7 @@ const makePortMessagingThunk = ({ action, cmd }) => () => dispatch => {
 }
 
 // Batch controlling thunks
-export const start = makePortMessagingThunk({ action: startImport(), cmd: 'START' })
+export const start = makePortMessagingThunk({ action: initImport(), cmd: 'START' })
 export const stop = makePortMessagingThunk({ action: stopImport(), cmd: 'STOP' })
 export const pause = makePortMessagingThunk({ action: pauseImport(), cmd: 'PAUSE' })
 export const resume = makePortMessagingThunk({ action: resumeImport(), cmd: 'RESUME' })
