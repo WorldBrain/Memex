@@ -7,6 +7,7 @@ import browserify from 'browserify'
 import watchify from 'watchify'
 import babelify from 'babelify'
 import envify from 'loose-envify/custom'
+import eslint from 'gulp-eslint'
 import uglifyify from 'uglifyify'
 import path from 'path'
 import cssModulesify from 'css-modulesify'
@@ -99,16 +100,35 @@ gulp.task('copyStaticFiles', () => {
     }
 })
 
-gulp.task('build-prod', ['copyStaticFiles'], () => {
+gulp.task('lint', () => {
+    return gulp.src(['src/**/*.js', 'src/**/*.jsx'])
+        .pipe(eslint())
+        .pipe(eslint.format())
+        .pipe(eslint.results(results => {
+            console.log(`Total Errors: ${results.errorCount}`)
+        }))
+})
+
+gulp.task('build-prod', ['copyStaticFiles', 'lint'], () => {
     sourceFiles.forEach(bundle => createBundle(bundle, {watch: false, production: true}))
 })
 
-gulp.task('build', ['copyStaticFiles'], () => {
+gulp.task('build', ['copyStaticFiles', 'lint'], () => {
     sourceFiles.forEach(bundle => createBundle(bundle, {watch: false}))
 })
 
-gulp.task('watch', ['copyStaticFiles'], () => {
+gulp.task('build-watch', ['copyStaticFiles'], () => {
     sourceFiles.forEach(bundle => createBundle(bundle, {watch: true}))
 })
 
+gulp.task('lint-watch', ['lint'], () => {
+    gulp.watch(['src/**/*.js', 'src/**/*.jsx'])
+    .on('change', (file) => {
+        return gulp.src(file.path)
+        .pipe(eslint())
+        .pipe(eslint.format())
+    })
+})
+
+gulp.task('watch', ['build-watch', 'lint-watch'])
 gulp.task('default', ['watch'])
