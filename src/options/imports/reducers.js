@@ -44,6 +44,13 @@ const addDownloadDetails = type => (state, { url, status, err }) => ({
     ],
 })
 
+const finishImportsReducer = state => ({
+    ...state,
+    importStatus: STATUS.IDLE,
+    success: defaultStats,
+    fail: defaultStats,
+})
+
 const initEstimateCounts = (state, { remaining, completed }) => ({ ...state, totals: remaining, completed })
 
 // Sets whatever key to the specified val
@@ -59,7 +66,7 @@ export default createReducer({
     [actions.initImport]: setImportState(STATUS.INIT),
     [actions.startImport]: setImportState(STATUS.RUNNING),
     [actions.stopImport]: setImportState(STATUS.STOPPED),
-    [actions.finishImport]: setImportState(STATUS.IDLE),
+    [actions.finishImport]: finishImportsReducer,
     [actions.pauseImport]: setImportState(STATUS.PAUSED),
     [actions.resumeImport]: setImportState(STATUS.RUNNING),
     [actions.finishBookmarkItem]: addDownloadDetails(TYPE.BOOKMARK),

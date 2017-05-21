@@ -6,8 +6,20 @@ import db from 'src/pouchdb'
 import { checkWithBlacklist, generateVisitDocId,
          visitKeyPrefix, convertVisitDocId } from 'src/activity-logger'
 import { generatePageDocId, pageDocsSelector } from 'src/page-storage'
-import { generateImportDocId } from './'
+import { generateImportDocId, getImportDocs } from './'
 
+
+const getPendingImports = async fields => await getImportDocs({ status: 'pending', type: 'history' }, fields)
+
+/**
+ * Returns a function affording checking of a URL against the URLs of pending import docs.
+ */
+async function checkWithPendingImports() {
+    const { docs: pendingImportDocs } = await getPendingImports(['url'])
+    const pendingUrls = pendingImportDocs.map(({ url }) => url)
+
+    return ({ url }) => !pendingUrls.includes(url)
+}
 
 // Get the historyItems (visited places/pages; not each visit to them)
 async function getHistoryItems({
@@ -20,8 +32,11 @@ async function getHistoryItems({
         startTime,
         endTime,
     })
-    const isWorthRemembering = await checkWithBlacklist()
-    return historyItems.filter(({url}) => isWorthRemembering({url}))
+    const isNotBlacklisted = await checkWithBlacklist()
+    const isNotPending = await checkWithPendingImports()
+
+    const isWorthRemembering = ({url}) => isNotBlacklisted({url}) && isNotPending({url})
+    return historyItems.filter(isWorthRemembering)
 }
 
 function transformToImportDoc({pageDoc}) {
@@ -161,13 +176,15 @@ export async function getOldestVisitTimestamp() {
 export async function getHistoryEstimates({
     startTime = 0,
     endTime = Date.now(),
-}) {
+} = {}) {
+    // Grab needed data to make estimate counts
     const historyItems = await getHistoryItems({ startTime, endTime })
+    const { docs: pendingPageImportDocs } = await getPendingImports(['_id'])
     const { docs: pageDocs } = await db.find({ selector: pageDocsSelector, fields: ['url'] })
 
     // Make sure to get remaining count excluding URLs that already are saved in DB
-    const savedUrls = pageDocs.map(({ url }) => url)
-    const remainingUrls = historyItems.filter(({ url }) => !savedUrls.includes(url))
+    const savedFullPageCount = pageDocs.length - pendingPageImportDocs.length
+    const unsavedAndPageStubCount = historyItems.length + pendingPageImportDocs.length
 
-    return { completed: savedUrls.length, remaining: remainingUrls.length }
+    return { completed: savedFullPageCount, remaining: unsavedAndPageStubCount }
 }

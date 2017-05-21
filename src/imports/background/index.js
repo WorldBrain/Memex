@@ -21,7 +21,13 @@ export const generateImportDocId = ({
     nonce = randomString(),
 } = {}) => convertImportDocId({ timestamp, nonce })
 
-export const getImportDocs = async () => await db.find({ selector: importDocsSelector })
+export const getImportDocs = async (query = {}, fields = []) => await db.find({
+    selector: {
+        ...importDocsSelector,
+        ...query,
+    },
+    fields,
+})
 
 export const setImportDocStatus = async (docId, status) => {
     const doc = await db.get(docId)

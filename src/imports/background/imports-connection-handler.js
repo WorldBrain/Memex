@@ -4,29 +4,19 @@ import { updatePageSearchIndex } from 'src/search/find-pages'
 import importHistory, { getHistoryEstimates } from './import-history'
 import {
     lastImportTimeStorageKey, importProgressStorageKey,
-    setImportDocStatus, getImportDocs, removeImportDocs,
+    setImportDocStatus, getImportDocs,
 } from './'
 
 
-const genericCount = { history: 0, bookmark: 0 }
-const initCounts = { totals: genericCount, fail: genericCount, success: genericCount }
-
-const getImportCounts = docs => docs.reduce((acc, doc) => ({
-    totals: { ...acc.totals, [doc.type]: acc.totals[doc.type] + 1 },
-    fail: { ...acc.fail, [doc.type]: acc.fail[doc.type] + (doc.status === 'fail' ? 1 : 0) },
-    success: { ...acc.success, [doc.type]: acc.success[doc.type] + (doc.status === 'success' ? 1 : 0) },
-}), initCounts)
-
-const getPendingInputs = importDocs => importDocs
-    .filter(doc => doc.status === 'pending')
-    .map(doc => ({ url: doc.url, importDocId: doc._id }))
-
+// Local storage helpers to make the main functions a bit less messy
 const getLastImportTime = async () =>
     (await browser.storage.local.get(lastImportTimeStorageKey))[lastImportTimeStorageKey]
-
+const setLastImportTime = async () =>
+    (await browser.storage.local.set({ [lastImportTimeStorageKey]: Date.now() }))
 const getImportInProgressFlag = async () =>
     (await browser.storage.local.get(importProgressStorageKey))[importProgressStorageKey]
-
+const setImportInProgressFlag = async () =>
+    (await browser.storage.local.set({ [importProgressStorageKey]: true }))
 const clearImportInProgressFlag = async () =>
     await browser.storage.local.remove(importProgressStorageKey)
 
@@ -38,13 +28,13 @@ const clearImportInProgressFlag = async () =>
  */
 const getBatchObserver = port => ({
     // Triggers on the successful finish of each batch input
-    next({ input: { url, importDocId } }) {
+    next({ input: { _id: importDocId, url } }) {
         // Send success data to listener
         port.postMessage({ cmd: 'NEXT', url })
         setImportDocStatus(importDocId, 'success')
     },
     // Triggers on any error during the processing of each batch input
-    error({ input: { url, importDocId }, error }) {
+    error({ input: { _id: importDocId, url }, error }) {
         // Send error data to listener
         port.postMessage({ cmd: 'NEXT', url, error })
         setImportDocStatus(importDocId, 'fail')
@@ -86,13 +76,13 @@ async function getEstimateCounts() {
 }
 
 /**
- * Handles passing the input (pending import docs) to the batcher so that it can process.
- * @param {any} batch The promise batcher instance.
+ * Handles fetching the input/state for the batcher (pending import docs).
+ * @return Array<ImportDoc> The input derived from stored DB import docs with pending status.
  */
-async function initBatchWithImportDocs(batch) {
-    // Grab existing and newly created import docs and init the batcher with them
-    const { docs: importDocs } = await getImportDocs()
-    batch.init(getPendingInputs(importDocs))
+async function getBatchInput() {
+    const fields = ['_id', 'url']
+    const { docs } = await getImportDocs({ status: 'pending' }, fields)
+    return docs
 }
 
 /**
@@ -109,26 +99,15 @@ async function startImport(port, batch) {
         await importHistory({ startTime })
     }
 
+    // Tell UI to finish loading state and move into progress view
     port.postMessage({ cmd: 'START' })
 
-    // Set the new importHistory timestamp in local storage for next import
-    browser.storage.local.set({ [lastImportTimeStorageKey]: Date.now() })
+    setLastImportTime()
+    setImportInProgressFlag()
 
-    // Set the new import in progress flag to avoid expensive logic next time
-    browser.storage.local.set({ [importProgressStorageKey]: true })
-
-    await initBatchWithImportDocs(batch)
-
-    // Start the batcher
+    // Start the batcher with needed input
+    batch.init(await getBatchInput())
     batch.start()
-}
-
-/**
- * Handles getting import estimate counts and send them down to UI
- */
-async function initUIEstimates(port) {
-    const estimateCounts = await getEstimateCounts()
-    port.postMessage({ cmd: 'INIT', ...estimateCounts })
 }
 
 /**
@@ -137,7 +116,10 @@ async function initUIEstimates(port) {
  */
 async function finishImport(port) {
     clearImportInProgressFlag()
-    await initUIEstimates(port)
+
+    // Re-init the estimates view with updated estimates data
+    const estimateCounts = await getEstimateCounts()
+    port.postMessage({ cmd: 'INIT', ...estimateCounts })
 }
 
 /**
@@ -159,10 +141,12 @@ export default async function importsConnectionHandler(port) {
     // If import isn't started earlier, get estimates and set view state to init
     const importInProgress = await getImportInProgressFlag()
     if (!importInProgress) {
-        await initUIEstimates(port)
+        // Make sure estimates view init'd with count data
+        const estimateCounts = await getEstimateCounts()
+        port.postMessage({ cmd: 'INIT', ...estimateCounts })
     } else {
         // If import is in progress, we need to make sure it's input is ready to process again
-        await initBatchWithImportDocs(batch)
+        batch.init(await getBatchInput())
         // Make sure to start the view in paused state
         port.postMessage({ cmd: 'PAUSE' })
     }
