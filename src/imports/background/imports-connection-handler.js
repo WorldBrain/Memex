@@ -27,6 +27,9 @@ const getLastImportTime = async () =>
 const getImportInProgressFlag = async () =>
     (await browser.storage.local.get(importProgressStorageKey))[importProgressStorageKey]
 
+const clearImportInProgressFlag = async () =>
+    await browser.storage.local.remove(importProgressStorageKey)
+
 /**
  * Creates observer functions to afford sending of messages over connection port
  * to UI on certain batcher events.
@@ -53,9 +56,7 @@ const getBatchObserver = port => ({
 
         // Tell UI that it's finished
         port.postMessage({ cmd: 'COMPLETE' })
-
-        // Remove import in progress flag
-        browser.storage.local.remove(importProgressStorageKey)
+        clearImportInProgressFlag()
     },
 })
 
@@ -122,14 +123,21 @@ async function startImport(port, batch) {
     batch.start()
 }
 
-const getCmdMessageHandler = (port, batch) => async ({ cmd }) => {
-    switch (cmd) {
-        case 'START': return await startImport(port, batch)
-        case 'RESUME': return batch.start()
-        case 'PAUSE': return batch.pause()
-        case 'STOP': return batch.stop()
-        default: return console.error(`unknown command: ${cmd}`)
-    }
+/**
+ * Handles getting import estimate counts and send them down to UI
+ */
+async function initUIEstimates(port) {
+    const estimateCounts = await getEstimateCounts()
+    port.postMessage({ cmd: 'INIT', ...estimateCounts })
+}
+
+/**
+ * The cleanup logic that happens when user chooses to finish an import
+ * (either after completion or cancellation).
+ */
+async function finishImport(port) {
+    clearImportInProgressFlag()
+    await initUIEstimates(port)
 }
 
 /**
@@ -151,9 +159,7 @@ export default async function importsConnectionHandler(port) {
     // If import isn't started earlier, get estimates and set view state to init
     const importInProgress = await getImportInProgressFlag()
     if (!importInProgress) {
-        // Get import estimate counts and send them down to UI
-        const estimateCounts = await getEstimateCounts()
-        port.postMessage({ cmd: 'INIT', ...estimateCounts })
+        await initUIEstimates(port)
     } else {
         // If import is in progress, we need to make sure it's input is ready to process again
         await initBatchWithImportDocs(batch)
@@ -161,8 +167,15 @@ export default async function importsConnectionHandler(port) {
         port.postMessage({ cmd: 'PAUSE' })
     }
 
-
     // Handle any incoming messages to control the batch
-    const cmdMessageHandler = getCmdMessageHandler(port, batch)
-    port.onMessage.addListener(cmdMessageHandler)
+    port.onMessage.addListener(async ({ cmd }) => {
+        switch (cmd) {
+            case 'START': return await startImport(port, batch)
+            case 'RESUME': return batch.start()
+            case 'PAUSE': return batch.pause()
+            case 'STOP': return batch.stop()
+            case 'FINISH': return await finishImport(port)
+            default: return console.error(`unknown command: ${cmd}`)
+        }
+    })
 }

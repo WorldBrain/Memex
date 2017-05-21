@@ -75,3 +75,4 @@ export const start = makePortMessagingThunk({ action: initImport(), cmd: 'START'
 export const stop = makePortMessagingThunk({ action: stopImport(), cmd: 'STOP' })
 export const pause = makePortMessagingThunk({ action: pauseImport(), cmd: 'PAUSE' })
 export const resume = makePortMessagingThunk({ action: resumeImport(), cmd: 'RESUME' })
+export const finish = makePortMessagingThunk({ action: finishImport(), cmd: 'FINISH' })

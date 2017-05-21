@@ -121,7 +121,7 @@ class ImportContainer extends Component {
         }
 
         if (isStopped) {
-            const handleClick = e => this.onButtonClick(e, boundActions.finishImport)
+            const handleClick = e => this.onButtonClick(e, boundActions.finish)
             return <ActionButton handleClick={handleClick}>Return</ActionButton>
         }
 
