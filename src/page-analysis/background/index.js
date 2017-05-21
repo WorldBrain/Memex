@@ -1,4 +1,5 @@
 import assocPath from 'lodash/fp/assocPath'
+import merge from 'lodash/fp/merge'
 import { dataURLToBlob } from 'blob-util'
 
 import { whenPageDOMLoaded, whenPageLoadComplete, whenTabActive } from 'src/util/tab-events'
@@ -18,11 +19,6 @@ async function performPageAnalysis({pageId, tabId}) {
     // Run these functions in the content script in the tab.
     const extractPageContent = remoteFunction('extractPageContent', {tabId})
     const freezeDry = remoteFunction('freezeDry', {tabId})
-
-    // A shorthand for updating a single field in a doc.
-    const setDocField = (db, docId, key) => async value => {
-        await updateDoc(db, docId, doc => assocPath(key, value)(doc))
-    }
 
     // A shorthand for adding an attachment to a doc.
     const setDocAttachment = (db, docId, attachmentId) => async blob => {
@@ -49,12 +45,10 @@ async function performPageAnalysis({pageId, tabId}) {
     })
 
     // Extract the text and metadata
-    const storePageContent = extractPageContent().then(
-        value => {
-            setDocField(db, pageId, 'extractedText')(value.text)
-            setDocField(db, pageId, 'extractedMetadata')(value.metadata)
-        }
-    )
+    const storePageContent = extractPageContent().then(async object => {
+        // Add the info to the existing doc.
+        await updateDoc(db, pageId, doc => merge(object)(doc))
+    })
 
     // Freeze-dry and store the whole page
     async function storePageFreezeDried() {

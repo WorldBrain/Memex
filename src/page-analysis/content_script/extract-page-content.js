@@ -1,5 +1,8 @@
+import pick from 'lodash/fp/pick'
 import { getMetadata, metadataRules } from 'page-metadata-parser'
+
 import extractPdfContent from './extract-pdf-content'
+
 
 // Extract the text content from web pages and PDFs.
 export default async function extractPageContent({
@@ -13,14 +16,20 @@ export default async function extractPageContent({
     }
 
     // Text content in web page
-    const text = {
-        bodyInnerText: doc.body.innerText,
-    }
+    const fullText = doc.body.innerText
+
     // Metadata of web page
-    const metadata = getMetadata(doc, url, metadataRules)
+    const selectedMetadataRules = {
+        canonicalUrl: metadataRules.url,
+        title: metadataRules.title,
+        keywords: metadataRules.keywords,
+        description: metadataRules.description,
+    }
+    const metadata = getMetadata(doc, url, selectedMetadataRules)
 
     return {
-        text,
-        metadata,
+        fullText,
+        // Picking desired fields, as getMetadata adds some unrequested stuff.
+        ...pick(Object.keys(selectedMetadataRules))(metadata),
     }
 }

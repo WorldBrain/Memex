@@ -20,15 +20,15 @@ async function extractContent(pdfData) {
     }
 
     // Join the texts of the pages with a small line, for human readability.
-    const textContent = pageTexts.join('\n\n----------\n\n')
+    const fullText = pageTexts.join('\n\n----------\n\n')
 
     const metadata = await pdf.getMetadata()
 
     return {
-        text: {
-            textContent,
-        },
-        metadata: metadata.info,
+        fullText,
+        author: metadata.info.Author,
+        title: metadata.info.Title,
+        keywords: metadata.info.Keywords,
     }
 }
 
