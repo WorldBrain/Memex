@@ -1,7 +1,7 @@
 import initBatch from 'src/util/promise-batcher'
-import { storePageFromUrl } from 'src/page-storage/store-page'
 import { updatePageSearchIndex } from 'src/search/find-pages'
 import importHistory, { getHistoryEstimates } from './import-history'
+import processImportDoc from './import-doc-processor'
 import {
     lastImportTimeStorageKey, importProgressStorageKey,
     setImportDocStatus, getImportDocs,
@@ -80,7 +80,7 @@ async function getEstimateCounts() {
  * @return Array<ImportDoc> The input derived from stored DB import docs with pending status.
  */
 async function getBatchInput() {
-    const fields = ['_id', 'url']
+    const fields = ['_id', 'url', 'type', 'dataDocId']
     const { docs } = await getImportDocs({ status: 'pending' }, fields)
     return docs
 }
@@ -133,7 +133,7 @@ export default async function importsConnectionHandler(port) {
     console.log('importer connected')
 
     const batch = initBatch({
-        asyncCallback: storePageFromUrl,
+        asyncCallback: processImportDoc,
         concurrency: 5,
         observer: getBatchObserver(port),
     })
