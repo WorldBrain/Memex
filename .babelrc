@@ -1,4 +1,9 @@
 {
-  "plugins": ["transform-regenerator", "transform-runtime"],
+  "plugins": [
+      "transform-regenerator",
+      ["transform-runtime", {
+          "polyfill": false
+      }]
+  ],
   "presets": ["es2015", "stage-1", "react"]
 }

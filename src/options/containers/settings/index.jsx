@@ -1,12 +1,23 @@
-import React from 'react'
+import React, { PropTypes } from 'react'
 
-import { routeTitle } from '../../base.css'
+import Blacklist from '../../blacklist'
+import { routeTitle, sectionTitle } from '../../base.css'
+import styles from './style.css'
 
-const SettingsContainer = () => (
-    <div>
-        <h1 className={routeTitle}>Settings</h1>
-        <p>Settings specific components to come in here.</p>
-    </div>
-)
+class SettingsContainer extends React.Component {
+    render() {
+        return (
+            <div>
+                <h1 className={routeTitle}>Settings</h1>
+
+                <section className={styles.section}>
+                    <h2 className={sectionTitle}>Ignored Sites</h2>
+
+                    <Blacklist />
+                </section>
+            </div>
+        )
+    }
+}
 
 export default SettingsContainer

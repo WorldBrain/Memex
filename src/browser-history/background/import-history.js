@@ -4,10 +4,9 @@
 
 import db from 'src/pouchdb'
 import { updatePageSearchIndex } from 'src/search/find-pages'
-import { isWorthRemembering, generateVisitDocId,
+import { checkWithBlacklist, generateVisitDocId,
          visitKeyPrefix, convertVisitDocId } from 'src/activity-logger'
 import { generatePageDocId } from 'src/page-storage'
-
 
 // Get the historyItems (visited places/pages; not each visit to them)
 async function getHistoryItems({
@@ -20,7 +19,9 @@ async function getHistoryItems({
         startTime,
         endTime,
     })
-    return historyItems.filter(({url}) => isWorthRemembering({url}))
+    const shouldBeRemembered = await checkWithBlacklist()
+
+    return historyItems.filter(({ url }) => shouldBeRemembered({ url }))
 }
 
 function transformToPageDoc({historyItem}) {

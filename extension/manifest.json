@@ -15,7 +15,8 @@
     "commands": {
         "openOverview": {
             "suggested_key": {
-                "default": "Ctrl+Y"
+                "default": "Ctrl+Y",
+                "mac": "MacCtrl+Y"
             },
             "description": "Open your memory overview"
         }
@@ -29,15 +30,16 @@
         "<all_urls>",
         "history",
         "tabs",
-        "webNavigation"
+        "webNavigation",
+        "storage"
     ],
     "web_accessible_resources": [
       "/lib/pdf.worker.min.js"
     ],
-    "chrome_url_overrides" : {
-        "newtab": "/overview/overview.html"
-    },
     "omnibox": { "keyword" : "w" },
-    "options_page": "./options/options.html",
+    "options_ui": {
+        "page": "./options/options.html",
+        "open_in_tab": true
+    },
     "manifest_version": 2
 }
