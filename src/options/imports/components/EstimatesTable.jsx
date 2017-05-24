@@ -5,7 +5,7 @@ import { IMPORT_TYPE as TYPE } from '../constants'
 
 import localStyles from './Import.css'
 
-const EstimatesTable = ({ onAllowImportHistoryClick, onAllowImportBookmarksClick, estimates, allowImport }) => (
+const EstimatesTable = ({ onAllowHistoryClick, onAllowBookmarksClick, estimates, allowTypes }) => (
     <table className={localStyles.importTable}>
         <colgroup>
             <col className={localStyles.importTableCol} />
@@ -52,16 +52,16 @@ const EstimatesTable = ({ onAllowImportHistoryClick, onAllowImportBookmarksClick
                     <input
                         type='checkbox'
                         name='history'
-                        onChange={onAllowImportHistoryClick}
-                        checked={allowImport.history}
+                        onChange={onAllowHistoryClick}
+                        checked={allowTypes[TYPE.HISTORY]}
                     />
                 </td>
                 <td>
                     <input
                         type='checkbox'
                         name='bookmarks'
-                        onChange={onAllowImportBookmarksClick}
-                        checked={allowImport.bookmarks}
+                        onChange={onAllowBookmarksClick}
+                        checked={allowTypes[TYPE.BOOKMARK]}
                     />
                 </td>
             </tr>
@@ -79,14 +79,14 @@ const estimatesShape = PropTypes.shape({
 
 EstimatesTable.propTypes = {
     // State
-    allowImport: PropTypes.shape({
-        history: PropTypes.bool.isRequired,
-        bookmarks: PropTypes.bool.isRequired,
+    allowTypes: PropTypes.shape({
+        [TYPE.HISTORY]: PropTypes.bool.isRequired,
+        [TYPE.BOOKMARK]: PropTypes.bool.isRequired,
     }).isRequired,
 
     // Event handlers
-    onAllowImportHistoryClick: PropTypes.func.isRequired,
-    onAllowImportBookmarksClick: PropTypes.func.isRequired,
+    onAllowHistoryClick: PropTypes.func.isRequired,
+    onAllowBookmarksClick: PropTypes.func.isRequired,
 
     // Data
     estimates: PropTypes.shape({

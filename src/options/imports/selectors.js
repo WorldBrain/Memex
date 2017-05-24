@@ -18,6 +18,7 @@ export const fail = state => entireState(state).fail
 export const success = state => entireState(state).success
 export const totals = state => entireState(state).totals
 const completed = state => entireState(state).completed
+export const allowTypes = state => entireState(state).allowTypes
 
 const getImportStatusFlag = status => createSelector(
     importStatus,

@@ -16,6 +16,10 @@ const defaultState = {
     totals: defaultStats,       // Static state to use to derive remaining counts from
     importStatus: STATUS.INIT,
     downloadDataFilter: FILTERS.ALL,
+    allowTypes: {
+        [TYPE.HISTORY]: false,
+        [TYPE.BOOKMARK]: false,
+    },
 }
 
 /**
@@ -43,6 +47,14 @@ const addDownloadDetailsReducer = (state, { url, type, status = DL_STAT.FAIL, er
     ],
 })
 
+const toggleAllowTypeReducer = (state, type) => ({
+    ...state,
+    allowTypes: {
+        ...state.allowTypes,
+        [type]: !state.allowTypes[type],
+    },
+})
+
 const finishImportsReducer = state => ({
     ...state,
     importStatus: STATUS.IDLE,
@@ -68,6 +80,7 @@ export default createReducer({
     [actions.pauseImport]: setImportState(STATUS.PAUSED),
     [actions.resumeImport]: setImportState(STATUS.RUNNING),
     [actions.addImportItem]: addDownloadDetailsReducer,
+    [actions.toggleAllowType]: toggleAllowTypeReducer,
     [actions.filterDownloadDetails]: payloadReducer('downloadDataFilter'),
     [actions.initImportState]: payloadReducer('importStatus'),
     [actions.initEstimateCounts]: initEstimateCounts,

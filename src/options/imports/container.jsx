@@ -18,8 +18,6 @@ class ImportContainer extends Component {
         super(props)
 
         this.state = {
-            allowImportHistory: false,
-            allowImportBookmarks: false,
             waitingOnCancelConfirm: false,
             activeRow: -1,
         }
@@ -28,20 +26,6 @@ class ImportContainer extends Component {
 
         this.flipCancelState = waitingOnCancelConfirm =>
             this.setState(state => ({ ...state, waitingOnCancelConfirm }))
-    }
-
-    onAllowImportHistoryClick() {
-        this.setState(state => ({
-            ...state,
-            allowImportHistory: !state.allowImportHistory,
-        }))
-    }
-
-    onAllowImportBookmarksClick() {
-        this.setState(state => ({
-            ...state,
-            allowImportBookmarks: !state.allowImportBookmarks,
-        }))
     }
 
     onDetailsRowClick(rowId) {
@@ -107,8 +91,7 @@ class ImportContainer extends Component {
     }
 
     renderImportButton() {
-        const { isRunning, isStopped, isPaused, boundActions } = this.props
-        const { allowImportBookmarks, allowImportHistory } = this.state
+        const { isRunning, isStopped, isPaused, boundActions, allowTypes } = this.props
 
         if (isRunning) {
             const handleClick = e => this.onButtonClick(e, boundActions.pause)
@@ -126,7 +109,8 @@ class ImportContainer extends Component {
         }
 
         // Idle state case
-        const isDisabled = !allowImportHistory && !allowImportBookmarks
+        // Start btn disabled state set if all `allowTypes` set to false; enabled if any set to true
+        const isDisabled = !Object.values(allowTypes).reduce((prev, curr) => prev || curr)
         const handleClick = e => this.onButtonClick(e, boundActions.start)
         return <ActionButton handleClick={handleClick} isDisabled={isDisabled}>Start import</ActionButton>
     }
@@ -146,14 +130,13 @@ class ImportContainer extends Component {
     }
 
     render() {
-        const { allowImportBookmarks: bookmarks, allowImportHistory: history } = this.state
-        const { isRunning, isIdle, isInit, progress, estimates } = this.props
+        const { boundActions, allowTypes, isRunning, isIdle, isInit, progress, estimates } = this.props
 
         const estTableProps = {
             estimates,
-            allowImport: { bookmarks, history },
-            onAllowImportBookmarksClick: () => this.onAllowImportBookmarksClick(),
-            onAllowImportHistoryClick: () => this.onAllowImportHistoryClick(),
+            allowTypes,
+            onAllowBookmarksClick: () => boundActions.toggleAllowType(constants.IMPORT_TYPE.BOOKMARK),
+            onAllowHistoryClick: () => boundActions.toggleAllowType(constants.IMPORT_TYPE.HISTORY),
         }
 
         return (
@@ -200,6 +183,7 @@ const mapStateToProps = state => ({
     downloadData: selectors.downloadDetailsData(state),
     estimates: selectors.estimates(state),
     progress: selectors.progress(state),
+    allowTypes: selectors.allowTypes(state),
 })
 
 const mapDispatchToProps = dispatch => ({ boundActions: bindActionCreators(actions, dispatch) })

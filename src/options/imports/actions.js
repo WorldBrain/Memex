@@ -6,6 +6,8 @@ export const filterDownloadDetails = createAction('imports/filterDownloadDetails
 
 export const addImportItem = createAction('imports/addImportItem')
 
+export const toggleAllowType = createAction('imports/toggleAllowType')
+
 export const initEstimateCounts = createAction('imports/initEstimateCounts')
 export const initTotalsCounts = createAction('imports/initTotalsCounts')
 export const initFailCounts = createAction('imports/initFailCounts')
