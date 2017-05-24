@@ -6,6 +6,7 @@ import {
     lastImportTimeStorageKey, importProgressStorageKey,
     setImportDocStatus, getImportDocs,
 } from './'
+import { CMDS, IMPORT_DOC_STATUS, IMPORT_CONN_NAME } from 'src/options/imports/constants'
 
 
 // Local storage helpers to make the main functions a bit less messy
@@ -30,19 +31,23 @@ const clearImportInProgressFlag = async () =>
 const getBatchObserver = port => {
     const handleFinishedItem = docStatus => ({ input: { _id: importDocId, url, type }, output, error }) => {
         // Send item data + outcome status down to UI (and error if present)
-        port.postMessage({ cmd: 'NEXT', url, type, status: output, error })
+        port.postMessage({ cmd: CMDS.NEXT, url, type, status: output, error })
+
         setImportDocStatus(importDocId, docStatus)
     }
 
     return {
-        next: handleFinishedItem('success'), // Triggers on the successful finish of each batch input
-        error: handleFinishedItem('fail'), // Triggers on any error thrown during the processing of each input
-        async complete() { // Triggers when ALL batch inputs are finished
+        // Triggers on the successful finish of each batch input
+        next: handleFinishedItem(IMPORT_DOC_STATUS.SUCC),
+        // Triggers on any error thrown during the processing of each input
+        error: handleFinishedItem(IMPORT_DOC_STATUS.FAIL),
+        // Triggers when ALL batch inputs are finished
+        async complete() {
             // Final reindexing so that all the finished docs are searchable
             await updatePageSearchIndex()
 
             // Tell UI that it's finished
-            port.postMessage({ cmd: 'COMPLETE' })
+            port.postMessage({ cmd: CMDS.COMPLETE })
             clearImportInProgressFlag()
         },
     }
@@ -79,7 +84,7 @@ async function getEstimateCounts() {
  */
 async function getBatchInput() {
     const fields = ['_id', 'url', 'type', 'dataDocId']
-    const { docs } = await getImportDocs({ status: 'pending' }, fields)
+    const { docs } = await getImportDocs({ status: IMPORT_DOC_STATUS.PENDING }, fields)
     return docs
 }
 
@@ -98,7 +103,7 @@ async function startImport(port, batch) {
     }
 
     // Tell UI to finish loading state and move into progress view
-    port.postMessage({ cmd: 'START' })
+    port.postMessage({ cmd: CMDS.START })
 
     setLastImportTime()
     setImportInProgressFlag()
@@ -117,7 +122,7 @@ async function finishImport(port) {
 
     // Re-init the estimates view with updated estimates data
     const estimateCounts = await getEstimateCounts()
-    port.postMessage({ cmd: 'INIT', ...estimateCounts })
+    port.postMessage({ cmd: CMDS.INIT, ...estimateCounts })
 }
 
 /**
@@ -126,7 +131,7 @@ async function finishImport(port) {
  */
 export default async function importsConnectionHandler(port) {
     // Make sure to only handle connection logic for imports (allows other use of runtime.connect)
-    if (port.name !== 'imports') return
+    if (port.name !== IMPORT_CONN_NAME) return
 
     console.log('importer connected')
 
@@ -141,22 +146,22 @@ export default async function importsConnectionHandler(port) {
     if (!importInProgress) {
         // Make sure estimates view init'd with count data
         const estimateCounts = await getEstimateCounts()
-        port.postMessage({ cmd: 'INIT', ...estimateCounts })
+        port.postMessage({ cmd: CMDS.INIT, ...estimateCounts })
     } else {
         // If import is in progress, we need to make sure it's input is ready to process again
         batch.init(await getBatchInput())
         // Make sure to start the view in paused state
-        port.postMessage({ cmd: 'PAUSE' })
+        port.postMessage({ cmd: CMDS.PAUSE })
     }
 
     // Handle any incoming messages to control the batch
     port.onMessage.addListener(async ({ cmd }) => {
         switch (cmd) {
-            case 'START': return await startImport(port, batch)
-            case 'RESUME': return batch.start()
-            case 'PAUSE': return batch.pause()
-            case 'STOP': return batch.stop()
-            case 'FINISH': return await finishImport(port)
+            case CMDS.START: return await startImport(port, batch)
+            case CMDS.RESUME: return batch.start()
+            case CMDS.PAUSE: return batch.pause()
+            case CMDS.STOP: return batch.stop()
+            case CMDS.FINISH: return await finishImport(port)
             default: return console.error(`unknown command: ${cmd}`)
         }
     })

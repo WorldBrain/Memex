@@ -1,7 +1,7 @@
 import { createReducer } from 'redux-act'
 
 import * as actions from './actions'
-import { STATUS, DOWNLOAD_TYPE as TYPE, DOWNLOAD_STATUS as DL_STAT } from './constants'
+import { STATUS, FILTERS, IMPORT_TYPE as TYPE, DOWNLOAD_STATUS as DL_STAT } from './constants'
 
 const defaultStats = {
     [TYPE.HISTORY]: 0,
@@ -15,7 +15,7 @@ const defaultState = {
     success: defaultStats,      // Success counts for completed import items
     totals: defaultStats,       // Static state to use to derive remaining counts from
     importStatus: STATUS.INIT,
-    downloadDataFilter: 'all',
+    downloadDataFilter: FILTERS.ALL,
 }
 
 /**

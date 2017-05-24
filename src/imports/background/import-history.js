@@ -5,10 +5,12 @@
 import db from 'src/pouchdb'
 import { checkWithBlacklist, visitKeyPrefix, convertVisitDocId } from 'src/activity-logger'
 import { generatePageDocId, pageDocsSelector } from 'src/page-storage'
+import { IMPORT_TYPE, IMPORT_DOC_STATUS } from 'src/options/imports/constants'
 import { generateImportDocId, getImportDocs } from './'
 
 
-const getPendingImports = async fields => await getImportDocs({ status: 'pending', type: 'history' }, fields)
+const getPendingImports = async fields =>
+    await getImportDocs({ status: IMPORT_DOC_STATUS.PENDING, type: IMPORT_TYPE.HISTORY }, fields)
 
 /**
  * Returns a function affording checking of a URL against the URLs of pending import docs.
@@ -41,8 +43,8 @@ async function getHistoryItems({
 function transformToImportDoc({pageDoc}) {
     return {
         _id: generateImportDocId({timestamp: Date.now()}),
-        status: 'pending',
-        type: 'history',
+        status: IMPORT_DOC_STATUS.PENDING,
+        type: IMPORT_TYPE.HISTORY,
         url: pageDoc.url,
         dataDocId: pageDoc._id,
     }

@@ -5,7 +5,7 @@ import {
     STATUS,
     DOC_SIZE_EST,
     DOC_TIME_EST,
-    DOWNLOAD_TYPE as TYPE,
+    IMPORT_TYPE as TYPE,
     DOWNLOAD_STATUS as DL_STAT,
 } from './constants'
 

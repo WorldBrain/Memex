@@ -1,7 +1,7 @@
 import React, { PropTypes } from 'react'
 import classNames from 'classnames'
 
-import { DOWNLOAD_TYPE as TYPE } from '../constants'
+import { IMPORT_TYPE as TYPE } from '../constants'
 
 import localStyles from './Import.css'
 

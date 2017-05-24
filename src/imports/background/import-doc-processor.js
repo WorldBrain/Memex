@@ -4,6 +4,7 @@ import db from 'src/pouchdb'
 import { fetchPageData } from 'src/page-analysis/background'
 import { generateVisitDocId, visitDocsSelector } from 'src/activity-logger'
 import { pageDocsSelector } from 'src/page-storage'
+import { IMPORT_TYPE, DOWNLOAD_STATUS } from 'src/options/imports/constants'
 
 /**
  * Binds a given doc type query selector to an fetching function which checks if a given URL
@@ -123,7 +124,7 @@ async function processHistoryImport(importDoc) {
     // If URL deemed to exist in DB for these doc types, double-check missing visit docs and skip
     if (existingPages.length !== 0) {
         await processExistingDocVisits(existingPages)
-        return 'Skipped'
+        return DOWNLOAD_STATUS.SKIP
     }
 
     // First create visit docs for all VisitItems associated with this importDoc
@@ -133,7 +134,7 @@ async function processHistoryImport(importDoc) {
     await processNewPageDoc(importDoc)
 
     // If we finally got here without an error being thrown, return the success status message
-    return 'Success'
+    return DOWNLOAD_STATUS.SUCC
 }
 
 /**
@@ -144,7 +145,7 @@ async function processHistoryImport(importDoc) {
  */
 export default async function processImportDoc(importDoc = {}) {
     switch (importDoc.type) {
-        case 'history': return await processHistoryImport(importDoc)
+        case IMPORT_TYPE.HISTORY: return await processHistoryImport(importDoc)
         default: throw new Error('Unknown import type')
     }
 }

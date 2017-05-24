@@ -1,5 +1,7 @@
 import { createAction } from 'redux-act'
 
+import { CMDS, IMPORT_CONN_NAME } from './constants'
+
 export const filterDownloadDetails = createAction('imports/filterDownloadDetails')
 
 export const addImportItem = createAction('imports/addImportItem')
@@ -26,20 +28,20 @@ export const resumeImport = createAction('imports/resumeImport')
  */
 const getCmdMessageHandler = dispatch => ({ cmd, ...payload }) => {
     switch (cmd) {
-        case 'INIT':
+        case CMDS.INIT:
             dispatch(initEstimateCounts(payload))
             dispatch(readyImport())
             break
-        case 'START':
+        case CMDS.START:
             dispatch(startImport())
             break
-        case 'PAUSE':
+        case CMDS.PAUSE:
             dispatch(pauseImport())
             break
-        case 'NEXT':
+        case CMDS.NEXT:
             dispatch(addImportItem(payload))
             break
-        case 'COMPLETE':
+        case CMDS.COMPLETE:
             dispatch(stopImport())
             break
     }
@@ -52,7 +54,7 @@ let port
  * Handles initing the imports runtime connection with the background script's batch import logic.
  */
 export const init = () => dispatch => {
-    port = browser.runtime.connect({ name: 'imports' })
+    port = browser.runtime.connect({ name: IMPORT_CONN_NAME })
     const cmdMessageHandler = getCmdMessageHandler(dispatch)
     port.onMessage.addListener(cmdMessageHandler)
 }
@@ -69,8 +71,8 @@ const makePortMessagingThunk = ({ action, cmd }) => () => dispatch => {
 }
 
 // Batch controlling thunks
-export const start = makePortMessagingThunk({ action: initImport(), cmd: 'START' })
-export const stop = makePortMessagingThunk({ action: stopImport(), cmd: 'STOP' })
-export const pause = makePortMessagingThunk({ action: pauseImport(), cmd: 'PAUSE' })
-export const resume = makePortMessagingThunk({ action: resumeImport(), cmd: 'RESUME' })
-export const finish = makePortMessagingThunk({ action: finishImport(), cmd: 'FINISH' })
+export const start = makePortMessagingThunk({ action: initImport(), cmd: CMDS.START })
+export const stop = makePortMessagingThunk({ action: stopImport(), cmd: CMDS.STOP })
+export const pause = makePortMessagingThunk({ action: pauseImport(), cmd: CMDS.PAUSE })
+export const resume = makePortMessagingThunk({ action: resumeImport(), cmd: CMDS.RESUME })
+export const finish = makePortMessagingThunk({ action: finishImport(), cmd: CMDS.FINISH })
