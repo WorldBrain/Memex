@@ -1,6 +1,13 @@
 import { createSelector } from 'reselect'
 
-import { FILTERS, STATUS, DOC_SIZE_EST, DOC_TIME_EST, DOWNLOAD_TYPE as TYPE } from './constants'
+import {
+    FILTERS,
+    STATUS,
+    DOC_SIZE_EST,
+    DOC_TIME_EST,
+    DOWNLOAD_TYPE as TYPE,
+    DOWNLOAD_STATUS as DL_STAT,
+} from './constants'
 
 export const entireState = state => state.imports
 
@@ -34,19 +41,14 @@ export const downloadDetailsData = createSelector(
     downloadData,
     downloadDataFilter,
     (downloadData, filter) => downloadData.filter(({ status }) => {
-        if (filter === FILTERS.ALL) {
-            return true
+        switch (filter) {
+            case FILTERS.SUCC: return status !== DL_STAT.FAIL
+            case FILTERS.FAIL: return status === DL_STAT.FAIL
+            case FILTERS.ALL:
+            default: return true
         }
-        if (filter === FILTERS.FAIL) {
-            return !status
-        }
-        return status
-    }).map(({ url, status, err }) => ({
-        url,
-        downloaded: status ? 'Success' : 'Failed',
-        error: err,
-    })),
-)
+    }).map(({ url, status, error }) => ({ url, downloaded: status, error })
+))
 
 const getProgress = (success, fail, total) => ({ total, success, fail, complete: success + fail })
 

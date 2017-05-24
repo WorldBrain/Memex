@@ -1,7 +1,7 @@
 import { createReducer } from 'redux-act'
 
 import * as actions from './actions'
-import { STATUS, DOWNLOAD_TYPE as TYPE } from './constants'
+import { STATUS, DOWNLOAD_TYPE as TYPE, DOWNLOAD_STATUS as DL_STAT } from './constants'
 
 const defaultStats = {
     [TYPE.HISTORY]: 0,
@@ -32,15 +32,14 @@ const updateCountReducer = (state, type, isSuccess) => {
 }
 
 /**
- * For a given type of import, add a new completed download's details.
- * @param {string} type The import type to update the count of (bookmarks/history)
+ * Add given download details as a new row, as well as triggering an update of counts
  */
-const addDownloadDetails = type => (state, { url, status, err }) => ({
+const addDownloadDetailsReducer = (state, { url, type, status = DL_STAT.FAIL, error }) => ({
     ...state,
-    ...updateCountReducer(state, type, status),
+    ...updateCountReducer(state, type, status === DL_STAT.SUCC),
     downloadData: [
         ...state.downloadData,
-        { url, status, err },     // Add new details row
+        { url, type, status, error },     // Add new details row
     ],
 })
 
@@ -60,7 +59,6 @@ const payloadReducer = key => (state, payload) => ({ ...state, [key]: payload })
 
 // Simple reducers constructed for state keys
 const setImportState = val => genericReducer('importStatus', val)
-const setIndexState = val => genericReducer('indexRebuildingStatus', val)
 
 export default createReducer({
     [actions.initImport]: setImportState(STATUS.INIT),
@@ -69,8 +67,7 @@ export default createReducer({
     [actions.finishImport]: finishImportsReducer,
     [actions.pauseImport]: setImportState(STATUS.PAUSED),
     [actions.resumeImport]: setImportState(STATUS.RUNNING),
-    [actions.finishBookmarkItem]: addDownloadDetails(TYPE.BOOKMARK),
-    [actions.finishHistoryItem]: addDownloadDetails(TYPE.HISTORY),
+    [actions.addImportItem]: addDownloadDetailsReducer,
     [actions.filterDownloadDetails]: payloadReducer('downloadDataFilter'),
     [actions.initImportState]: payloadReducer('importStatus'),
     [actions.initEstimateCounts]: initEstimateCounts,

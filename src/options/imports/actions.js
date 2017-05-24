@@ -2,9 +2,7 @@ import { createAction } from 'redux-act'
 
 export const filterDownloadDetails = createAction('imports/filterDownloadDetails')
 
-const finishItem = (url, err) => ({ url, status: !err, err })
-export const finishBookmarkItem = createAction('imports/finishBookmarkItem', finishItem)
-export const finishHistoryItem = createAction('imports/finishHistoryItem', finishItem)
+export const addImportItem = createAction('imports/addImportItem')
 
 export const initEstimateCounts = createAction('imports/initEstimateCounts')
 export const initTotalsCounts = createAction('imports/initTotalsCounts')
@@ -39,7 +37,7 @@ const getCmdMessageHandler = dispatch => ({ cmd, ...payload }) => {
             dispatch(pauseImport())
             break
         case 'NEXT':
-            dispatch(finishHistoryItem(payload.url, payload.error))
+            dispatch(addImportItem(payload))
             break
         case 'COMPLETE':
             dispatch(stopImport())

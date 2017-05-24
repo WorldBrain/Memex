@@ -4,6 +4,13 @@ export const FILTERS = {
     SUCC: 'success',
 }
 
+// User-facing strings for download statuses
+export const DOWNLOAD_STATUS = {
+    SKIP: 'Skipped',
+    FAIL: 'Failed',
+    SUCC: 'Success',
+}
+
 export const STATUS = {
     INIT: 'initing',
     IDLE: 'idle',
