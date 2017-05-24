@@ -22,33 +22,31 @@ const clearImportInProgressFlag = async () =>
 
 /**
  * Creates observer functions to afford sending of messages over connection port
- * to UI on certain batcher events.
+ * to UI on certain batcher events. Note that next (success) and error handlers are pretty
+ * much the same; they either contain error or output/status keys, which UI handles if present.
  *
  * @param {Port} port The open connection port to send messages over.
  */
-const getBatchObserver = port => ({
-    // Triggers on the successful finish of each batch input
-    next({ input: { _id: importDocId, url } }) {
-        // Send success data to listener
-        port.postMessage({ cmd: 'NEXT', url })
-        setImportDocStatus(importDocId, 'success')
-    },
-    // Triggers on any error during the processing of each batch input
-    error({ input: { _id: importDocId, url }, error }) {
-        // Send error data to listener
-        port.postMessage({ cmd: 'NEXT', url, error })
-        setImportDocStatus(importDocId, 'fail')
-    },
-    // Triggers after all inputs have been batch processed, regardless of success
-    async complete() {
-        // Final reindexing so that all the finished docs are searchable
-        await updatePageSearchIndex()
+const getBatchObserver = port => {
+    const handleFinishedItem = docStatus => ({ input: { _id: importDocId, url, type }, output, error }) => {
+        // Send item data + outcome status down to UI (and error if present)
+        port.postMessage({ cmd: 'NEXT', url, type, status: output, error })
+        setImportDocStatus(importDocId, docStatus)
+    }
 
-        // Tell UI that it's finished
-        port.postMessage({ cmd: 'COMPLETE' })
-        clearImportInProgressFlag()
-    },
-})
+    return {
+        next: handleFinishedItem('success'), // Triggers on the successful finish of each batch input
+        error: handleFinishedItem('fail'), // Triggers on any error thrown during the processing of each input
+        async complete() { // Triggers when ALL batch inputs are finished
+            // Final reindexing so that all the finished docs are searchable
+            await updatePageSearchIndex()
+
+            // Tell UI that it's finished
+            port.postMessage({ cmd: 'COMPLETE' })
+            clearImportInProgressFlag()
+        },
+    }
+}
 
 /**
  * Handles calculating the estimate counts for history and bookmark imports.
