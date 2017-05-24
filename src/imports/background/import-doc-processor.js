@@ -1,7 +1,7 @@
 import flatten from 'lodash/flatten'
 
 import db from 'src/pouchdb'
-import { fetchPageData } from 'src/page-analysis/background'
+import { analysePageForImports as fetchAndAnalyse } from 'src/page-analysis/background'
 import { generateVisitDocId, visitDocsSelector } from 'src/activity-logger'
 import { pageDocsSelector } from 'src/page-storage'
 import { IMPORT_TYPE, DOWNLOAD_STATUS } from 'src/options/imports/constants'
@@ -88,27 +88,6 @@ async function processNewDocVisits({ url, dataDocId }) {
 }
 
 /**
- * Runs all the fetch and analysis logic for the page doc pointed to by
- * the import doc. Depending on the outcome of that logic, will update the
- * stub with all the new data.
- *
- * @param {IImportDoc} importDoc The import doc to be processed.
- */
-async function processNewPageDoc({ url, dataDocId: pageStubId }) {
-    // Attempt the data fetch
-    const { text, metadata, favIcon } = await fetchPageData({ url })
-
-    // Update the page stub with this data
-    const pageDoc = await db.get(pageStubId)
-    await db.put({
-        ...pageDoc,
-        extractedText: text,
-        extractedMetadata: metadata,
-        favIcon, // TODO: Move this to attachments thing (want to do at page-analysis level later)
-    })
-}
-
-/**
  * Handles processing of a history-type import doc. Checks for exisitng page docs that have the same
  * URL and visit docs associated with the URL. Depending on the existence of these docs, new visit or
  * page docs may be created or deemed unnecessary.
@@ -130,8 +109,8 @@ async function processHistoryImport(importDoc) {
     // First create visit docs for all VisitItems associated with this importDoc
     await processNewDocVisits(importDoc)
 
-    // Fill-out the page doc
-    await processNewPageDoc(importDoc)
+    // Perform fetch^analysis to fill-out the page doc
+    await fetchAndAnalyse({ page: await db.get(importDoc.dataDocId) })
 
     // If we finally got here without an error being thrown, return the success status message
     return DOWNLOAD_STATUS.SUCC
