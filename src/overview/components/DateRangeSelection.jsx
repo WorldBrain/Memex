@@ -15,6 +15,44 @@ class DateRangeSelection extends Component {
             startDateText: null,
             endDateText: null,
         }
+
+        this.handleKeydown = this.handleKeydown.bind(this)
+        this.submitDateChange = this.submitDateChange.bind(this)
+    }
+
+    componentDidMount() {
+        this.refs.startDateDatePicker.refs.input.refs.input.addEventListener('keydown', e => this.handleKeydown(e, 'startDate'))
+        this.refs.endDateDatePicker.refs.input.refs.input.addEventListener('keydown', e => this.handleKeydown(e, 'endDate'))
+    }
+
+    handleKeydown(event, type) {
+        if (event.key === 'Enter') {
+            event.stopImmediatePropagation()
+            this.submitDateChange(type)
+        }
+    }
+
+    submitDateChange(type) {
+        if (type === 'startDate') {
+            console.log('hrere')
+            const date = moment(this.state.startDateText, 'DD-MM-YYYY')
+            const nlpDate = chrono.parseDate(this.state.startDateText)
+
+            const dateToChange = date.isValid()
+                ? date.valueOf()
+                : nlpDate && nlpDate.getTime()
+
+            if (dateToChange !== this.props.startDate) this.props.onStartDateChange(dateToChange)
+        } else if (type === 'endDate') {
+            const date = moment(this.state.endDateText, 'DD-MM-YYYY')
+            const nlpDate = chrono.parseDate(this.state.endDateText)
+
+            const dateToChange = date.isValid()
+                ? date.valueOf()
+                : nlpDate && nlpDate.getTime()
+
+            if (dateToChange !== this.props.endDate) this.props.onEndDateChange(dateToChange)
+        }
     }
 
     render() {
@@ -26,6 +64,7 @@ class DateRangeSelection extends Component {
         return (
             <div className={styles.dateRangeSelection}>
                 <DatePicker
+                    ref='startDateDatePicker'
                     className={styles.datePicker}
                     dateFormat='DD-MM-YYYY'
                     placeholderText='after..'
@@ -49,18 +88,10 @@ class DateRangeSelection extends Component {
                     onChangeRaw={e => {
                         this.setState({ startDateText: e.target.value })
                     }}
-                    onBlur={() => {
-                        const date = moment(this.state.startDateText, 'DD-MM-YYYY')
-                        const nlpDate = chrono.parseDate(this.state.startDateText)
-
-                        const dateToChange = date.isValid()
-                            ? date.valueOf()
-                            : nlpDate && nlpDate.getTime()
-
-                        if (dateToChange !== startDate) onStartDateChange(dateToChange)
-                    }}
+                    onBlur={() => this.submitDateChange('startDate')}
                 />
                 <DatePicker
+                    ref='endDateDatePicker'
                     className={styles.datePicker}
                     dateFormat='DD-MM-YYYY'
                     placeholderText='before..'
@@ -84,16 +115,7 @@ class DateRangeSelection extends Component {
                     onChangeRaw={e => {
                         this.setState({ endDateText: e.target.value })
                     }}
-                    onBlur={() => {
-                        const date = moment(this.state.endDateText, 'DD-MM-YYYY')
-                        const nlpDate = chrono.parseDate(this.state.endDateText)
-
-                        const dateToChange = date.isValid()
-                            ? date.valueOf()
-                            : nlpDate && nlpDate.getTime()
-
-                        if (dateToChange !== endDate) onEndDateChange(dateToChange)
-                    }}
+                    onBlur={() => this.submitDateChange('endDate')}
                 />
             </div>
         )
