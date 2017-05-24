@@ -33,6 +33,7 @@ class DateRangeSelection extends Component {
                     isClearable
                     selected={startDate && moment(startDate)}
                     selectsStart
+                    disabledKeyboardNavigation
                     startDate={moment(startDate || 0)}
                     endDate={moment(endDate)}
                     maxDate={moment()}
@@ -70,6 +71,7 @@ class DateRangeSelection extends Component {
                     startDate={moment(startDate || 0)}
                     endDate={moment(endDate)}
                     maxDate={moment()}
+                    disabledKeyboardNavigation
                     onChange={date => {
                         // Syncs the change of end date to state
                         this.setState({
