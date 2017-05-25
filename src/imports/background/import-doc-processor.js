@@ -3,7 +3,8 @@ import flatten from 'lodash/flatten'
 import db from 'src/pouchdb'
 import { analysePageForImports as fetchAndAnalyse } from 'src/page-analysis/background'
 import { generateVisitDocId, visitDocsSelector } from 'src/activity-logger'
-import { pageDocsSelector } from 'src/page-storage'
+import { convertPageDocId, pageDocsSelector } from 'src/page-storage'
+import { bookmarkDocsSelector, generateBookmarkDocId } from './'
 import { IMPORT_TYPE, DOWNLOAD_STATUS } from 'src/options/imports/constants'
 
 /**
@@ -22,22 +23,41 @@ const getExistingDocsFetcher = docSelector => async ({ url, dataDocId }) => {
 }
 
 /**
+ * Converts a browser.history.VisitItem to our visit document model.
+ *
  * @param {history.VisitItem} visitItem The VisitItem fetched from browser API.
- * @param {any} assocDoc The associated DB doc containing `url` and `_id` to associate with newly created visit doc.
- * @returns {IVisitDoc} Newly created visit doc dervied from visitItem data for insertion into DB.
+ * @param {IPageDoc} assocPageDoc The page doc that contains the page data for this visit.
+ * @returns {IVisitDoc} Newly created visit doc dervied from visitItem data.
  */
-const transformToVisitDoc = (visitItem, { _id, url }) => ({
+const transformToVisitDoc = (visitItem, assocPageDoc) => ({
     _id: generateVisitDocId({
         timestamp: visitItem.visitTime,
         // We set the nonce manually, to prevent duplicating items if
         // importing multiple times (thus making importHistory idempotent).
-        nonce: `history-${visitItem.visitId}`,
+        nonce: visitItem.visitId,
     }),
     visitStart: visitItem.visitTime,
     browserId: visitItem.visitId,
     referringVisitItemId: visitItem.referringVisitId,
-    url,
-    page: { _id },
+    url: assocPageDoc.url,
+    page: { _id: assocPageDoc._id },
+})
+
+/**
+ * Converts a browser.bookmark.BookmarkTreeNode item to our bookmark document model.
+ *
+ * @param {bookmarks.BookmarkTreeNode} bookmarkItem The bookmark tree node item fetched from browser API.
+ * @param {IPageDoc} assocPageDoc The page doc that contains the page data for this bookmark.
+ * @returns {IBookmarkDoc} Newly created bookmark doc dervied from bookmarkItem data.
+ */
+const transformToBookmarkDoc = (bookmarkItem, assocPageDoc) => ({
+    _id: generateBookmarkDocId({
+        timestamp: bookmarkItem.dateAdded,
+        nonce: bookmarkItem.id,
+    }),
+    title: bookmarkItem.title,
+    url: bookmarkItem.url,
+    page: { _id: assocPageDoc._id },
 })
 
 /**
@@ -109,11 +129,50 @@ async function processHistoryImport(importDoc) {
     // First create visit docs for all VisitItems associated with this importDoc
     await processNewDocVisits(importDoc)
 
-    // Perform fetch^analysis to fill-out the page doc
+    // Perform fetch&analysis to fill-out the associated page doc
     await fetchAndAnalyse({ page: await db.get(importDoc.dataDocId) })
 
     // If we finally got here without an error being thrown, return the success status message
     return DOWNLOAD_STATUS.SUCC
+}
+
+/**
+ * Handles creating and storing a bookmark doc for a given page doc.
+ *
+ * @param {IPageDoc} assocPageDoc The page doc to associate with the new bookmark doc. Its `_id` should
+ * have been created with nonce set to the bookmark ID from browser bookmark API.
+ */
+async function processBookmarkData(assocPageDoc) {
+    // Grab the nonce from the page _id (in this case should be the bookmark item ID)
+    const { nonce: bookmarkId } = convertPageDocId(assocPageDoc._id)
+
+    try {
+        // Attempt to fetch BookmarkTreeNode from browser API
+        const [bookmarkItem] = await browser.bookmarks.get(bookmarkId)
+
+        // Transform is to a bookmark doc and store it
+        await db.put(transformToBookmarkDoc(bookmarkItem, assocPageDoc))
+    } catch (err) {
+        throw new Error('Cannot fetch bookmark data')
+    }
+}
+
+async function processBookmarkImport(importDoc) {
+    // Run simplified URL checking logic first
+    const fetchBookmarksWithSameURL = getExistingDocsFetcher(bookmarkDocsSelector)
+    const existingBookmarks = await fetchBookmarksWithSameURL(importDoc)
+
+    // If URL deemed to exist in DB for these doc types, double-check missing visit docs and skip
+    if (existingBookmarks.length !== 0) {
+        await processExistingDocVisits(existingBookmarks)
+        return DOWNLOAD_STATUS.SKIP
+    }
+
+    // Create the bookmark doc (TODO: think about if this actually needs to be await'd)
+    await processBookmarkData(await db.get(importDoc.dataDocId))
+
+    // Now that bookmark-specific logic is done, continue processing this as a normal history import
+    return await processHistoryImport(importDoc)
 }
 
 /**
@@ -125,6 +184,7 @@ async function processHistoryImport(importDoc) {
 export default async function processImportDoc(importDoc = {}) {
     switch (importDoc.type) {
         case IMPORT_TYPE.HISTORY: return await processHistoryImport(importDoc)
+        case IMPORT_TYPE.BOOKMARK: return await processBookmarkImport(importDoc)
         default: throw new Error('Unknown import type')
     }
 }

@@ -9,9 +9,18 @@ import importsConnectionHandler from './imports-connection-handler'
 export const lastImportTimeStorageKey = 'last_import_time'
 export const importProgressStorageKey = 'is_import_in_progress'
 export const installTimeStorageKey = 'extension_install_time'
+export const bookmarkKeyPrefix = 'bookmark/'
+export const bookmarkDocsSelector = { _id: { $gte: bookmarkKeyPrefix, $lte: `${bookmarkKeyPrefix}\uffff` } }
 export const importKeyPrefix = 'import/'
 export const importDocsSelector = { _id: { $gte: importKeyPrefix, $lte: `${importKeyPrefix}\uffff` } }
 
+// Bookmarks related utility functions (TODO: Find appropriate space for this to live)
+export const convertBookmarkDocId = docuri.route(`${bookmarkKeyPrefix}:timestamp/:nonce`)
+
+export const generateBookmarkDocId = ({
+    timestamp = Date.now(),
+    nonce = randomString(),
+} = {}) => convertBookmarkDocId({ timestamp, nonce })
 
 // Imports related utility functions
 export const convertImportDocId = docuri.route(`${importKeyPrefix}:timestamp/:nonce`)

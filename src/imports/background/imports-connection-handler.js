@@ -1,6 +1,6 @@
 import initBatch from 'src/util/promise-batcher'
 import { updatePageSearchIndex } from 'src/search/find-pages'
-import importHistory, { getHistoryEstimates } from './import-history'
+import importHistory, { getEstimateCounts } from './import-history'
 import processImportDoc from './import-doc-processor'
 import {
     lastImportTimeStorageKey, importProgressStorageKey,
@@ -54,31 +54,6 @@ const getBatchObserver = port => {
 }
 
 /**
- * Handles calculating the estimate counts for history and bookmark imports.
- * @returns {any} The state containing import estimates completed and remaining counts.
- */
-async function getEstimateCounts() {
-    // Check if the importHistory stage was run previously to search history from that time
-    const startTime = await getLastImportTime()
-
-    const { completed: histCompleted, remaining: histRemaining } = await getHistoryEstimates({ startTime })
-    // TODO: switch this with async getBookmarkEstimates call when implemented
-    const bmCompleted = 10
-    const bmRemaining = 0
-
-    return {
-        completed: {
-            history: histCompleted,
-            bookmark: bmCompleted,
-        },
-        remaining: {
-            history: histRemaining,
-            bookmark: bmRemaining,
-        },
-    }
-}
-
-/**
  * Handles fetching the input/state for the batcher (pending import docs).
  * @return Array<ImportDoc> The input derived from stored DB import docs with pending status.
  */
@@ -121,7 +96,7 @@ async function finishImport(port) {
     clearImportInProgressFlag()
 
     // Re-init the estimates view with updated estimates data
-    const estimateCounts = await getEstimateCounts()
+    const estimateCounts = await getEstimateCounts({ startTime: await getLastImportTime() })
     port.postMessage({ cmd: CMDS.INIT, ...estimateCounts })
 }
 
@@ -145,7 +120,7 @@ export default async function importsConnectionHandler(port) {
     const importInProgress = await getImportInProgressFlag()
     if (!importInProgress) {
         // Make sure estimates view init'd with count data
-        const estimateCounts = await getEstimateCounts()
+        const estimateCounts = await getEstimateCounts({ startTime: await getLastImportTime() })
         port.postMessage({ cmd: CMDS.INIT, ...estimateCounts })
     } else {
         // If import is in progress, we need to make sure it's input is ready to process again

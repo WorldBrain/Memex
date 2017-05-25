@@ -2,67 +2,84 @@
 // The browser's historyItems and visitItems are quite straightforwardly
 // converted to pageDocs and visitDocs (sorry for the confusingly similar name).
 
+import uniqBy from 'lodash/uniqBy'
+
 import db from 'src/pouchdb'
 import { checkWithBlacklist, visitKeyPrefix, convertVisitDocId } from 'src/activity-logger'
 import { generatePageDocId, pageDocsSelector } from 'src/page-storage'
 import { IMPORT_TYPE, IMPORT_DOC_STATUS } from 'src/options/imports/constants'
-import { generateImportDocId, getImportDocs } from './'
+import { generateImportDocId, getImportDocs, bookmarkDocsSelector } from './'
 
 
-const getPendingImports = async fields =>
-    await getImportDocs({ status: IMPORT_DOC_STATUS.PENDING, type: IMPORT_TYPE.HISTORY }, fields)
+const getPendingImports = async (fields, type) =>
+    await getImportDocs({ status: IMPORT_DOC_STATUS.PENDING, type }, fields)
 
 /**
  * Returns a function affording checking of a URL against the URLs of pending import docs.
  */
-async function checkWithPendingImports() {
-    const { docs: pendingImportDocs } = await getPendingImports(['url'])
+async function checkWithPendingImports(type) {
+    const { docs: pendingImportDocs } = await getPendingImports(['url'], type)
     const pendingUrls = pendingImportDocs.map(({ url }) => url)
 
     return ({ url }) => !pendingUrls.includes(url)
 }
 
 // Get the historyItems (visited places/pages; not each visit to them)
-async function getHistoryItems({
+const getHistoryItems = async ({
     startTime = 0,
     endTime,
-} = {}) {
-    const historyItems = await browser.history.search({
-        text: '',
-        maxResults: 9999999,
-        startTime,
-        endTime,
-    })
+} = {}) => filterItemsByUrl(await browser.history.search({
+    text: '',
+    maxResults: 9999999,
+    startTime,
+    endTime,
+}), IMPORT_TYPE.HISTORY)
+
+const getBookmarkItems = async () =>
+    filterItemsByUrl(await browser.bookmarks.getRecent(100000), IMPORT_TYPE.BOOKMARK)
+
+/**
+ * Handles performing blacklist and pending import filtering logic on any type
+ * of items containing a `url` field.
+ *
+ * @param {Iterable<any>} items Some Iterable of items of any shape, as long as they contain `url` field.
+ * @returns {Iterable<any>} Filtered version of the items arg.
+ */
+async function filterItemsByUrl(items, type) {
     const isNotBlacklisted = await checkWithBlacklist()
-    const isNotPending = await checkWithPendingImports()
+    const isNotPending = await checkWithPendingImports(type)
 
-    const isWorthRemembering = ({url}) => isNotBlacklisted({url}) && isNotPending({url})
-    return historyItems.filter(isWorthRemembering)
+    const isWorthRemembering = ({ url }) => isNotBlacklisted({ url }) && isNotPending({ url })
+    return items.filter(isWorthRemembering)
 }
 
-function transformToImportDoc({pageDoc}) {
-    return {
-        _id: generateImportDocId({timestamp: Date.now()}),
-        status: IMPORT_DOC_STATUS.PENDING,
-        type: IMPORT_TYPE.HISTORY,
-        url: pageDoc.url,
-        dataDocId: pageDoc._id,
-    }
-}
+/**
+ * Binds an import type to a function that transforms a page doc to an import doc.
+ * @param {string} type The IMPORT_TYPE to use.
+ */
+const transformToImportDoc = type => pageDoc => ({
+    _id: generateImportDocId({ timestamp: Date.now() }),
+    status: IMPORT_DOC_STATUS.PENDING,
+    url: pageDoc.url,
+    dataDocId: pageDoc._id,
+    type,
+})
 
-function transformToPageDoc({historyItem}) {
-    const pageDoc = {
-        _id: generatePageDocId({
-            timestamp: historyItem.lastVisitTime,
-            // We set the nonce manually, to prevent duplicating items if
-            // importing multiple times (thus making importHistory idempotent).
-            nonce: `history-${historyItem.id}`,
-        }),
-        url: historyItem.url,
-        title: historyItem.title,
-    }
-    return pageDoc
-}
+/**
+ * Transforms a browser item to a page doc. Currently supports browser HistoryItems
+ * and BookmarkTreeNodes.
+ */
+const transformToPageDoc = item => ({
+    _id: generatePageDocId({
+        // HistoryItems contain lastVisitTime while BookmarkTreeNodes contain dateAdded
+        timestamp: item.lastVisitTime || item.dateAdded,
+        // We set the nonce manually, to prevent duplicating items if
+        // importing multiple times (thus making importHistory idempotent).
+        nonce: item.id,
+    }),
+    url: item.url,
+    title: item.title,
+})
 
 // Pulls the full browser history into the database.
 export default async function importHistory({
@@ -72,15 +89,21 @@ export default async function importHistory({
     // Get the full history: both the historyItems and visitItems.
     console.time('import history')
     const historyItems = await getHistoryItems({startTime, endTime})
+    const bookmarkItems = await getBookmarkItems()
 
-    // Convert everything to our data model
+    // Grab all page stubs for items
     const importTimestamp = Date.now()
-    const pageDocs = historyItems.map(historyItem => ({
-        ...transformToPageDoc({historyItem}),
-        // Mark each doc to remember it originated from this import action.
-        importedFromBrowserHistory: importTimestamp,
-    }))
-    const importDocs = pageDocs.map(pageDoc => transformToImportDoc({pageDoc}))
+    const genPageStub = item => ({ ...transformToPageDoc(item), importTimestamp })
+    const historyPageStubs = historyItems.map(genPageStub)
+    const bookmarkPageStubs = bookmarkItems.map(genPageStub)
+
+    // Create import docs for all page stubs
+    const importDocs = historyPageStubs.map(transformToImportDoc(IMPORT_TYPE.HISTORY))
+        .concat(bookmarkPageStubs.map(transformToImportDoc(IMPORT_TYPE.BOOKMARK)))
+
+    // Put all page docs together and remove any docs with duplicate URLs
+    const pageDocs = uniqBy(historyPageStubs.concat(bookmarkPageStubs), 'url')
+
     const allDocs = pageDocs.concat(importDocs)
 
     // Store them into the database. Already existing docs will simply be
@@ -98,22 +121,34 @@ export async function getOldestVisitTimestamp() {
 }
 
 /**
- * Gets count estimates for history imports.
- * @return {any} Object containing `completed` and `remaining` numbers representing the number
- *  of already saved and remaining history items to import, respectively.
+ * Handles calculating the estimate counts for history and bookmark imports.
+ * @returns {any} The state containing import estimates completed and remaining counts.
  */
-export async function getHistoryEstimates({
+export async function getEstimateCounts({
     startTime = 0,
     endTime = Date.now(),
-} = {}) {
-    // Grab needed data to make estimate counts
+}) {
+    // Grab needed data from browser API
     const historyItems = await getHistoryItems({ startTime, endTime })
-    const { docs: pendingPageImportDocs } = await getPendingImports(['_id'])
-    const { docs: pageDocs } = await db.find({ selector: pageDocsSelector, fields: ['url'] })
+    const bookmarkItems = await getBookmarkItems()
 
-    // Make sure to get remaining count excluding URLs that already are saved in DB
-    const savedFullPageCount = pageDocs.length - pendingPageImportDocs.length
-    const unsavedAndPageStubCount = historyItems.length + pendingPageImportDocs.length
+    // Grab needed data from DB
+    const { docs: pageDocs } = await db.find({ selector: pageDocsSelector, fields: ['_id'] })
+    const { docs: bookmarkDocs } = await db.find({ selector: bookmarkDocsSelector, fields: ['_id'] })
+    const { docs: pendingImportDocs } = await getPendingImports(['type'])
 
-    return { completed: savedFullPageCount, remaining: unsavedAndPageStubCount }
+    // Less constants than two filter calls
+    const pendingCounts = { [IMPORT_TYPE.BOOKMARK]: 0, [IMPORT_TYPE.HISTORY]: 0 }
+    pendingImportDocs.forEach(doc => ++pendingCounts[doc.type])
+
+    return {
+        completed: {
+            [IMPORT_TYPE.HISTORY]: pageDocs.length - pendingCounts[IMPORT_TYPE.HISTORY],
+            [IMPORT_TYPE.BOOKMARK]: bookmarkDocs.length,
+        },
+        remaining: {
+            [IMPORT_TYPE.HISTORY]: historyItems.length + pendingCounts[IMPORT_TYPE.HISTORY],
+            [IMPORT_TYPE.BOOKMARK]: (bookmarkItems.length - bookmarkDocs.length) + pendingCounts[IMPORT_TYPE.BOOKMARK],
+        },
+    }
 }

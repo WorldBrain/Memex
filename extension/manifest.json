@@ -28,6 +28,7 @@
     },
     "permissions": [
         "<all_urls>",
+        "bookmarks",
         "history",
         "tabs",
         "webNavigation",
