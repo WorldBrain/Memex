@@ -34,7 +34,6 @@ class DateRangeSelection extends Component {
 
     submitDateChange(type) {
         if (type === 'startDate') {
-            console.log('hrere')
             const date = moment(this.state.startDateText, 'DD-MM-YYYY')
             const nlpDate = chrono.parseDate(this.state.startDateText)
 
