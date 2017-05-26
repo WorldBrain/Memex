@@ -10,11 +10,11 @@ export default function extractTimeFiltersFromQuery(query) {
 
     let startDate
     let endDate
-    if (matchedBefore && matchedBefore[1]) {
+    if (matchedBefore) {
         const parsedDate = chrono.parseDate(matchedBefore[1])
         endDate = parsedDate && parsedDate.getTime()
     }
-    if (matchedAfter && matchedAfter[1]) {
+    if (matchedAfter) {
         const parsedDate = chrono.parseDate(matchedAfter[1])
         startDate = parsedDate && parsedDate.getTime()
     }
