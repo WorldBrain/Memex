@@ -51,16 +51,17 @@ export const downloadDetailsData = createSelector(
     }).map(({ url, status, error }) => ({ url, downloaded: status, error })
 ))
 
-const getProgress = (success, fail, total) => ({ total, success, fail, complete: success + fail })
+const getProgress = (success, fail, total, allow) =>
+    ({ total: allow ? total : 0, success, fail, complete: success + fail })
 
 /**
  * Derives progress state from completed + total state counts.
  */
 export const progress = createSelector(
-    fail, success, totals,
-    (fail, success, totals) => ({
-        [TYPE.HISTORY]: getProgress(success[TYPE.HISTORY], fail[TYPE.HISTORY], totals[TYPE.HISTORY]),
-        [TYPE.BOOKMARK]: getProgress(success[TYPE.BOOKMARK], fail[TYPE.BOOKMARK], totals[TYPE.BOOKMARK]),
+    success, fail, totals, allowTypes,
+    (...args) => ({
+        [TYPE.HISTORY]: getProgress(...args.map(arg => arg[TYPE.HISTORY])),
+        [TYPE.BOOKMARK]: getProgress(...args.map(arg => arg[TYPE.BOOKMARK])),
     }),
 )
 
