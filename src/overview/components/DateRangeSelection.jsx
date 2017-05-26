@@ -34,7 +34,7 @@ class DateRangeSelection extends Component {
 
     submitDateChange(type) {
         if (type === 'startDate') {
-            const date = moment(this.state.startDateText, 'DD-MM-YYYY')
+            const date = moment(this.state.startDateText, 'DD-MM-YYYY', true)
             const nlpDate = chrono.parseDate(this.state.startDateText)
 
             const dateToChange = date.isValid()
@@ -43,7 +43,7 @@ class DateRangeSelection extends Component {
 
             if (dateToChange !== this.props.startDate) this.props.onStartDateChange(dateToChange)
         } else if (type === 'endDate') {
-            const date = moment(this.state.endDateText, 'DD-MM-YYYY')
+            const date = moment(this.state.endDateText, 'DD-MM-YYYY', true)
             const nlpDate = chrono.parseDate(this.state.endDateText)
 
             const dateToChange = date.isValid()
