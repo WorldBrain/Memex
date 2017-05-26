@@ -91,7 +91,7 @@ class ImportContainer extends Component {
     }
 
     renderImportButton() {
-        const { isRunning, isStopped, isPaused, boundActions, allowTypes } = this.props
+        const { isRunning, isStopped, isPaused, isStartBtnDisabled, boundActions, allowTypes } = this.props
 
         if (isRunning) {
             const handleClick = e => this.onButtonClick(e, boundActions.pause)
@@ -109,10 +109,8 @@ class ImportContainer extends Component {
         }
 
         // Idle state case
-        // Start btn disabled state set if all `allowTypes` set to false; enabled if any set to true
-        const isDisabled = !Object.values(allowTypes).reduce((prev, curr) => prev || curr)
         const handleClick = e => this.onButtonClick(e, boundActions.start)
-        return <ActionButton handleClick={handleClick} isDisabled={isDisabled}>Start import</ActionButton>
+        return <ActionButton handleClick={handleClick} isDisabled={isStartBtnDisabled}>Start import</ActionButton>
     }
 
     renderDownloadDetailsRows() {
@@ -166,9 +164,11 @@ ImportContainer.propTypes = {
     isStopped: PropTypes.bool.isRequired,
     isInit: PropTypes.bool.isRequired,
     isIdle: PropTypes.bool.isRequired,
+    isStartBtnDisabled: PropTypes.bool.isRequired,
     downloadData: PropTypes.arrayOf(PropTypes.object).isRequired,
     estimates: PropTypes.object.isRequired,
     progress: PropTypes.object.isRequired,
+    allowTypes: PropTypes.object.isRequired,
 
     // Misc
     boundActions: PropTypes.object.isRequired,
@@ -180,6 +180,7 @@ const mapStateToProps = state => ({
     isStopped: selectors.isStopped(state),
     isInit: selectors.isInit(state),
     isIdle: selectors.isIdle(state),
+    isStartBtnDisabled: selectors.isStartBtnDisabled(state),
     downloadData: selectors.downloadDetailsData(state),
     estimates: selectors.estimates(state),
     progress: selectors.progress(state),

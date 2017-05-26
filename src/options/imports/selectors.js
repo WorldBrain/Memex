@@ -88,3 +88,12 @@ export const estimates = createSelector(
         [TYPE.BOOKMARK]: getEstimate(completed[TYPE.BOOKMARK], totals[TYPE.BOOKMARK]),
     }),
 )
+
+
+export const isStartBtnDisabled = createSelector(
+    allowTypes,
+    (allowTypes) => {
+        const allCheckboxesDisabled = !Object.values(allowTypes).reduce((prev, curr) => prev || curr)
+        return allCheckboxesDisabled
+    }
+)
