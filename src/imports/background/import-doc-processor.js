@@ -2,7 +2,7 @@ import flatten from 'lodash/flatten'
 
 import db from 'src/pouchdb'
 import { analysePageForImports as fetchAndAnalyse } from 'src/page-analysis/background'
-import { generateVisitDocId, visitDocsSelector } from 'src/activity-logger'
+import { generateVisitDocId, visitDocsSelector, convertVisitDocId } from 'src/activity-logger'
 import { convertPageDocId, pageDocsSelector } from 'src/page-storage'
 import { bookmarkDocsSelector, generateBookmarkDocId } from './'
 import { IMPORT_TYPE, DOWNLOAD_STATUS } from 'src/options/imports/constants'
@@ -37,7 +37,6 @@ const transformToVisitDoc = (visitItem, assocPageDoc) => ({
         nonce: visitItem.visitId,
     }),
     visitStart: visitItem.visitTime,
-    browserId: visitItem.visitId,
     referringVisitItemId: visitItem.referringVisitId,
     url: assocPageDoc.url,
     page: { _id: assocPageDoc._id },
@@ -71,11 +70,12 @@ async function processExistingDocVisits(existingDocs) {
         const { url } = existingDoc
 
         // Fetch needed data
-        const { docs: visitDocs } = await db.find({ selector: { ...visitDocsSelector, url }, fields: ['browserId'] })
+        const { docs: visitDocs } = await db.find({ selector: { ...visitDocsSelector, url }, fields: ['_id'] })
         const visitItems = await browser.history.getVisits({ url })
 
         // Project out stored browser IDs from existing visit docs for easy comparison
-        const savedVisitIds = visitDocs.map(doc => doc.browserId)
+        // Note that the _id's nonce contains the browser ID
+        const savedVisitIds = visitDocs.map(doc => convertVisitDocId(doc._id).nonce)
 
         // Create visit docs for any VisitItem not present in DB
         const newVisitDocs = []
