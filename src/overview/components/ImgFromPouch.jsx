@@ -1,7 +1,8 @@
 import get from 'lodash/fp/get'
 import omit from 'lodash/fp/omit'
 import { blobToBase64String } from 'blob-util'
-import React, { PropTypes } from 'react'
+import React from 'react'
+import PropTypes from 'prop-types'
 
 import db from 'src/pouchdb'
 
