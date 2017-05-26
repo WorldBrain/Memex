@@ -32,6 +32,7 @@ export default class ImgFromPouch extends React.Component {
 
     componentWillMount() {
         // Fetch the attachment. Note we will not have it on our first mount.
+        this._isMounted = true
         this.updateFile(this.props)
     }
 
@@ -42,9 +43,15 @@ export default class ImgFromPouch extends React.Component {
         }
     }
 
+    componentWillUnmount() {
+        this._isMounted = false
+    }
+
     async updateFile({doc, attachmentId}) {
         const dataUri = await getAttachment({doc, attachmentId})
-        this.setState({dataUri})
+        if (this._isMounted) {
+            this.setState({dataUri})
+        }
     }
 
     render() {
