@@ -91,9 +91,15 @@ export const estimates = createSelector(
 
 
 export const isStartBtnDisabled = createSelector(
-    allowTypes,
-    (allowTypes) => {
-        const allCheckboxesDisabled = !Object.values(allowTypes).reduce((prev, curr) => prev || curr)
-        return allCheckboxesDisabled
-    }
+    allowTypes, estimates,
+    (allowTypes, estimates) => {
+        const allCheckboxesDisabled = () => !Object.values(allowTypes).reduce((prev, curr) => prev || curr)
+
+        // Map-reduce the remaining estimates to disable button when they're all 0
+        const noImportsRemaining = () => Object.values(TYPE)
+            .map(importType => estimates[importType].remaining === 0)
+            .reduce((prev, curr) => prev && curr)
+
+        return allCheckboxesDisabled() || noImportsRemaining()
+    },
 )
