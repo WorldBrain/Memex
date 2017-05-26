@@ -19,13 +19,9 @@ export default function extractTimeFiltersFromQuery(query) {
         startDate = parsedDate && parsedDate.getTime()
     }
 
-    // Checks which comes first before/after and based on that decide where query should be sliced
-    const firstIndexOfTimeFilter = Math.min(
-        matchedBefore ? matchedBefore.index : query.length,
-        matchedAfter ? matchedAfter.index : query.length,
-    )
     const extractedQuery = query
-        .substring(0, firstIndexOfTimeFilter)
+        .replace(BEFORE_REGEX, '')
+        .replace(AFTER_REGEX, '')
         .trim()
 
     return {
