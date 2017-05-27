@@ -4,15 +4,16 @@ import { LoadingIndicator } from 'src/common-ui/components'
 import styles from '../../options.css'
 import localStyles from './Import.css'
 
-const Import = ({ isInit, children }) => (
+const Import = ({ isLoading, loadingMsg, children }) => (
     <div>
         <h1 className={styles.routeTitle}>Analyse History & Bookmarks</h1>
         <div className={localStyles.mainContainer}>
             <div className={localStyles.importTableContainer}>
                 {children}
             </div>
-            {isInit
-                && <div className={localStyles.initBlocker}>
+            {isLoading
+                && <div className={localStyles.loadingBlocker}>
+                    <p className={localStyles.loadingMsg}>{loadingMsg}</p>
                     <LoadingIndicator />
                 </div>
             }
@@ -22,7 +23,8 @@ const Import = ({ isInit, children }) => (
 
 Import.propTypes = {
     children: PropTypes.arrayOf(PropTypes.node).isRequired,
-    isInit: PropTypes.bool.isRequired,
+    isLoading: PropTypes.bool.isRequired,
+    loadingMsg: PropTypes.string,
 }
 
 export default Import

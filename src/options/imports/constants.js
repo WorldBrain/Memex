@@ -14,7 +14,7 @@ export const DOWNLOAD_STATUS = {
 
 /** States for importer. */
 export const STATUS = {
-    INIT: 'initing',
+    LOADING: 'loading',
     IDLE: 'idle',
     RUNNING: 'running',
     PAUSED: 'paused',
@@ -47,7 +47,7 @@ export const CMDS = {
     PAUSE: `${IMPORT_CONN_NAME}/PAUSE`,
     RESUME: `${IMPORT_CONN_NAME}/RESUME`,
     FINISH: `${IMPORT_CONN_NAME}/FINISH`,
-    STOP: `${IMPORT_CONN_NAME}/STOP`,
+    CANCEL: `${IMPORT_CONN_NAME}/CANCEL`,
     NEXT: `${IMPORT_CONN_NAME}/NEXT`,
     COMPLETE: `${IMPORT_CONN_NAME}/COMPLETE`,
 }

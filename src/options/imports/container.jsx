@@ -128,7 +128,7 @@ class ImportContainer extends Component {
     }
 
     render() {
-        const { boundActions, allowTypes, isRunning, isIdle, isInit, progress, estimates } = this.props
+        const { boundActions, allowTypes, isRunning, isIdle, loadingMsg, isLoading, progress, estimates } = this.props
 
         const estTableProps = {
             estimates,
@@ -138,8 +138,8 @@ class ImportContainer extends Component {
         }
 
         return (
-            <Import isInit={isInit}>
-                {(isIdle || isInit)
+            <Import isLoading={isLoading} loadingMsg={loadingMsg}>
+                {(isIdle || isLoading)
                     ? <EstimatesTable {...estTableProps} />
                     : <ProgressTable progress={progress} />
                 }
@@ -147,7 +147,7 @@ class ImportContainer extends Component {
                     {this.renderCancelButton()}
                     {this.renderImportButton()}
                 </ButtonBar>
-                {!(isIdle || isInit)
+                {!(isIdle || isLoading)
                     && <DownloadDetails filterHandlers={this.getDetailFilterHandlers()}>
                         {this.renderDownloadDetailsRows()}
                     </DownloadDetails>
@@ -162,13 +162,14 @@ ImportContainer.propTypes = {
     isRunning: PropTypes.bool.isRequired,
     isPaused: PropTypes.bool.isRequired,
     isStopped: PropTypes.bool.isRequired,
-    isInit: PropTypes.bool.isRequired,
+    isLoading: PropTypes.bool.isRequired,
     isIdle: PropTypes.bool.isRequired,
     isStartBtnDisabled: PropTypes.bool.isRequired,
     downloadData: PropTypes.arrayOf(PropTypes.object).isRequired,
     estimates: PropTypes.object.isRequired,
     progress: PropTypes.object.isRequired,
     allowTypes: PropTypes.object.isRequired,
+    loadingMsg: PropTypes.string,
 
     // Misc
     boundActions: PropTypes.object.isRequired,
@@ -178,13 +179,14 @@ const mapStateToProps = state => ({
     isRunning: selectors.isRunning(state),
     isPaused: selectors.isPaused(state),
     isStopped: selectors.isStopped(state),
-    isInit: selectors.isInit(state),
+    isLoading: selectors.isLoading(state),
     isIdle: selectors.isIdle(state),
     isStartBtnDisabled: selectors.isStartBtnDisabled(state),
     downloadData: selectors.downloadDetailsData(state),
     estimates: selectors.estimates(state),
     progress: selectors.progress(state),
     allowTypes: selectors.allowTypes(state),
+    loadingMsg: selectors.loadingMsg(state),
 })
 
 const mapDispatchToProps = dispatch => ({ boundActions: bindActionCreators(actions, dispatch) })

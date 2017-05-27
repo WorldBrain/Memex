@@ -19,6 +19,7 @@ export const success = state => entireState(state).success
 export const totals = state => entireState(state).totals
 const completed = state => entireState(state).completed
 export const allowTypes = state => entireState(state).allowTypes
+export const loadingMsg = state => entireState(state).loadingMsg
 
 const getImportStatusFlag = status => createSelector(
     importStatus,
@@ -27,7 +28,7 @@ const getImportStatusFlag = status => createSelector(
 
 
 // Main import state selectors
-export const isInit = getImportStatusFlag(STATUS.INIT)
+export const isLoading = getImportStatusFlag(STATUS.LOADING)
 export const isIdle = getImportStatusFlag(STATUS.IDLE)
 export const isRunning = getImportStatusFlag(STATUS.RUNNING)
 export const isPaused = getImportStatusFlag(STATUS.PAUSED)

@@ -1,6 +1,7 @@
 import { createAction } from 'redux-act'
 
 import { CMDS, IMPORT_CONN_NAME } from './constants'
+import { allowTypes as allowTypesSelector } from './selectors'
 
 export const filterDownloadDetails = createAction('imports/filterDownloadDetails')
 
@@ -17,10 +18,12 @@ export const initImportState = createAction('imports/initImportState')
 export const initDownloadData = createAction('imports/initDownloadData')
 
 export const initImport = createAction('imports/initImport')
+export const prepareImport = createAction('imports/prepareImport')
 export const startImport = createAction('imports/startImport')
 export const stopImport = createAction('imports/stopImport')
 export const finishImport = createAction('imports/finishImport')
-export const readyImport = finishImport
+export const readyImport = createAction('imports/readyImport')
+export const cancelImport = createAction('imports/cancelImport')
 export const pauseImport = createAction('imports/pauseImport')
 export const resumeImport = createAction('imports/resumeImport')
 
@@ -73,8 +76,13 @@ const makePortMessagingThunk = ({ action, cmd }) => () => dispatch => {
 }
 
 // Batch controlling thunks
-export const start = makePortMessagingThunk({ action: initImport(), cmd: CMDS.START })
-export const stop = makePortMessagingThunk({ action: stopImport(), cmd: CMDS.STOP })
+export const stop = makePortMessagingThunk({ action: cancelImport(), cmd: CMDS.CANCEL })
 export const pause = makePortMessagingThunk({ action: pauseImport(), cmd: CMDS.PAUSE })
 export const resume = makePortMessagingThunk({ action: resumeImport(), cmd: CMDS.RESUME })
 export const finish = makePortMessagingThunk({ action: finishImport(), cmd: CMDS.FINISH })
+export const start = () => (dispatch, getState) => {
+    const allowImportTypes = allowTypesSelector(getState())
+
+    dispatch(prepareImport())
+    port.postMessage({ cmd: CMDS.START, ...allowImportTypes })
+}

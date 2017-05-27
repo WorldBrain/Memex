@@ -104,6 +104,17 @@ async function finishImport(port) {
     port.postMessage({ cmd: CMDS.INIT, ...estimateCounts })
 }
 
+async function cancelImport(port, batch) {
+    batch.stop()
+
+    // Make sure to reindex so that the progress up until cancelled point is usable
+    await updatePageSearchIndex()
+
+    // Resume UI at complete state
+    port.postMessage({ cmd: CMDS.COMPLETE })
+    clearImportInProgressFlag()
+}
+
 /**
  * Main connection handler to handle background importing and fetch&analysis batching
  * logic via commands issued from the UI.
@@ -139,7 +150,7 @@ export default async function importsConnectionHandler(port) {
             case CMDS.START: return await startImport(port, batch, payload)
             case CMDS.RESUME: return batch.start()
             case CMDS.PAUSE: return batch.pause()
-            case CMDS.STOP: return batch.stop()
+            case CMDS.CANCEL: return await cancelImport(port, batch)
             case CMDS.FINISH: return await finishImport(port)
             default: return console.error(`unknown command: ${cmd}`)
         }

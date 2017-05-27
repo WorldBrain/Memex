@@ -14,7 +14,8 @@ const defaultState = {
     fail: defaultStats,         // Fail counts for completed import items
     success: defaultStats,      // Success counts for completed import items
     totals: defaultStats,       // Static state to use to derive remaining counts from
-    importStatus: STATUS.INIT,
+    importStatus: STATUS.LOADING,
+    loadingMsg: '',
     downloadDataFilter: FILTERS.ALL,
     allowTypes: {
         [TYPE.HISTORY]: false,
@@ -58,8 +59,27 @@ const toggleAllowTypeReducer = (state, type) => ({
 const finishImportsReducer = state => ({
     ...state,
     importStatus: STATUS.IDLE,
+    downloadData: [],
     success: defaultStats,
     fail: defaultStats,
+})
+
+const prepareImportReducer = state => ({
+    ...state,
+    importStatus: STATUS.LOADING,
+    loadingMsg: 'Preparing import. Can take a few minutes for large histories...',
+})
+
+const initImportReducer = state => ({
+    ...state,
+    importStatus: STATUS.LOADING,
+    loadingMsg: '',
+})
+
+const cancelImportReducer = state => ({
+    ...state,
+    importStatus: STATUS.LOADING,
+    loadingMsg: 'Please wait as import progress gets recorded.',
 })
 
 const initEstimateCounts = (state, { remaining, completed }) => ({ ...state, totals: remaining, completed })
@@ -73,10 +93,13 @@ const payloadReducer = key => (state, payload) => ({ ...state, [key]: payload })
 const setImportState = val => genericReducer('importStatus', val)
 
 export default createReducer({
-    [actions.initImport]: setImportState(STATUS.INIT),
+    [actions.initImport]: initImportReducer,
+    [actions.prepareImport]: prepareImportReducer,
     [actions.startImport]: setImportState(STATUS.RUNNING),
     [actions.stopImport]: setImportState(STATUS.STOPPED),
     [actions.finishImport]: finishImportsReducer,
+    [actions.readyImport]: finishImportsReducer,
+    [actions.cancelImport]: cancelImportReducer,
     [actions.pauseImport]: setImportState(STATUS.PAUSED),
     [actions.resumeImport]: setImportState(STATUS.RUNNING),
     [actions.addImportItem]: addDownloadDetailsReducer,
