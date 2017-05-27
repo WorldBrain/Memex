@@ -57,8 +57,11 @@ async function filterItemsByUrl(items, type) {
  * Binds an import type to a function that transforms a page doc to an import doc.
  * @param {string} type The IMPORT_TYPE to use.
  */
-const transformToImportDoc = type => pageDoc => ({
-    _id: generateImportDocId({ timestamp: Date.now() }),
+const transformToImportDoc = (type, timestamp = Date.now()) => pageDoc => ({
+    _id: generateImportDocId({
+        timestamp,
+        nonce: pageDoc.url,
+    }),
     status: IMPORT_DOC_STATUS.PENDING,
     url: pageDoc.url,
     dataDocId: pageDoc._id,
@@ -109,8 +112,8 @@ export default async function prepareImports({
     const bookmarkPageStubs = allowTypes[IMPORT_TYPE.BOOKMARK] ? bookmarkItems.map(genPageStub) : []
 
     // Create import docs for all created page stubs
-    const importDocs = historyPageStubs.map(transformToImportDoc(IMPORT_TYPE.HISTORY))
-        .concat(bookmarkPageStubs.map(transformToImportDoc(IMPORT_TYPE.BOOKMARK)))
+    const importDocs = historyPageStubs.map(transformToImportDoc(IMPORT_TYPE.HISTORY, importTimestamp))
+        .concat(bookmarkPageStubs.map(transformToImportDoc(IMPORT_TYPE.BOOKMARK, importTimestamp)))
 
     // Put all page docs together and remove any docs with duplicate URLs
     const pageDocs = uniqBy(historyPageStubs.concat(bookmarkPageStubs), 'url')
