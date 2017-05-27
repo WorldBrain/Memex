@@ -1,6 +1,6 @@
 import initBatch from 'src/util/promise-batcher'
 import { updatePageSearchIndex } from 'src/search/find-pages'
-import importHistory, { getEstimateCounts } from './import-history'
+import prepareImports, { getEstimateCounts } from './imports-preparation'
 import processImportDoc from './import-doc-processor'
 import {
     lastImportTimeStorageKey, importProgressStorageKey,
@@ -65,16 +65,20 @@ async function getBatchInput() {
 
 /**
  * Essentially the logic which happens when the user presses the "Start Import" button.
+ *
+ * @param {Port} port The open connection port to send messages over.
  * @param {any} batch The init'd batcher to init with input and then start.
+ * @param {any} allowTypes Object with keys as valid import types pointing to bool values denoting whether
+ * or not to process that given type of imports.
  */
-async function startImport(port, batch) {
-    // Check if the importHistory stage was run previously to search history from that time
-    const startTime = await getLastImportTime()
+async function startImport(port, batch, allowTypes) {
+    // Check if the imports preparation stage was run previously to search history from that time
+    const historyOptions = { startTime: await getLastImportTime() }
 
     // Perform history-stubs, vists, and history import docs creation, if import not in progress
     const importInProgress = await getImportInProgressFlag()
     if (!importInProgress) {
-        await importHistory({ startTime })
+        await prepareImports({ historyOptions, allowTypes })
     }
 
     // Tell UI to finish loading state and move into progress view
@@ -130,9 +134,9 @@ export default async function importsConnectionHandler(port) {
     }
 
     // Handle any incoming messages to control the batch
-    port.onMessage.addListener(async ({ cmd }) => {
+    port.onMessage.addListener(async ({ cmd, ...payload }) => {
         switch (cmd) {
-            case CMDS.START: return await startImport(port, batch)
+            case CMDS.START: return await startImport(port, batch, payload)
             case CMDS.RESUME: return batch.start()
             case CMDS.PAUSE: return batch.pause()
             case CMDS.STOP: return batch.stop()

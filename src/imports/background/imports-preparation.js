@@ -27,7 +27,7 @@ async function checkWithPendingImports(type) {
 // Get the historyItems (visited places/pages; not each visit to them)
 const getHistoryItems = async ({
     startTime = 0,
-    endTime,
+    endTime = Date.now(),
 } = {}) => filterItemsByUrl(await browser.history.search({
     text: '',
     maxResults: 9999999,
@@ -81,23 +81,34 @@ const transformToPageDoc = item => ({
     title: item.title,
 })
 
-// Pulls the full browser history into the database.
-export default async function importHistory({
-    startTime = 0,
-    endTime = Date.now(),
-} = {}) {
-    // Get the full history: both the historyItems and visitItems.
+/**
+ * Prepares everything needed to start the imports batch process. Should create all needed
+ * page doc stubs (page docs that are yet to be filled with information from the website
+ * the are meant to represent) for browser history and bookmarks, and import docs (used as
+ * input and state to the import batcher). A page doc stub should have exactly one import
+ * doc created for it, as the import batcher essentially uses those import docs to fill-out
+ * the rest of the needed page doc data.
+ *
+ * @param {any} allowTypes Object containings bools for each valid type of import, denoting whether
+ * or not import and page docs should be created for that import type.
+ * @param {any} historyOpts Object containing `startTime` and `endTime` numbers representing ms to search
+ * and process browser history from and until, respectively.
+ */
+export default async function prepareImports({
+    allowTypes = {},
+    historyOptions = {},
+}) {
     console.time('import history')
-    const historyItems = await getHistoryItems({startTime, endTime})
+    const historyItems = await getHistoryItems(historyOptions)
     const bookmarkItems = await getBookmarkItems()
 
-    // Grab all page stubs for items
+    // Grab all page stubs for all item types (if they are allowed)
     const importTimestamp = Date.now()
     const genPageStub = item => ({ ...transformToPageDoc(item), importTimestamp })
-    const historyPageStubs = historyItems.map(genPageStub)
-    const bookmarkPageStubs = bookmarkItems.map(genPageStub)
+    const historyPageStubs = allowTypes[IMPORT_TYPE.HISTORY] ? historyItems.map(genPageStub) : []
+    const bookmarkPageStubs = allowTypes[IMPORT_TYPE.BOOKMARK] ? bookmarkItems.map(genPageStub) : []
 
-    // Create import docs for all page stubs
+    // Create import docs for all created page stubs
     const importDocs = historyPageStubs.map(transformToImportDoc(IMPORT_TYPE.HISTORY))
         .concat(bookmarkPageStubs.map(transformToImportDoc(IMPORT_TYPE.BOOKMARK)))
 
