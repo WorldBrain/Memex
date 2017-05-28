@@ -4,6 +4,7 @@ import update from 'lodash/fp/update'
 import db, { normaliseFindResult, resultRowsById } from 'src/pouchdb'
 import { pageKeyPrefix } from 'src/page-storage'
 import { searchableTextFields, revisePageFields } from 'src/page-analysis'
+import { getAllNodes } from 'src/util/tree-walker'
 
 
 // Resolve redirects from (deduplicated) pages, replacing them in the results.
@@ -105,4 +106,36 @@ export async function findPagesByUrl({url, ...otherOptions}) {
     let pagesResult = normaliseFindResult(findResult)
     pagesResult = await postprocessPagesResult({...otherOptions, pagesResult})
     return pagesResult
+}
+
+// Find all pages that are (indirectly) connected through 'seeInstead' links.
+export async function getEquivalentPages({pageId}) {
+    const page = await db.get(pageId)
+    // The pages connected by redirects form a tree we can walk through.
+    const pageRedirectionTreeWalker = {
+        getParent: getPageRedirectTarget,
+        getChildren: getRedirectersToPage,
+    }
+    const equivalentPages = await getAllNodes(pageRedirectionTreeWalker)(page)
+    // Shape the list of pages like a PouchDB result object.
+    const result = normaliseFindResult({docs: equivalentPages})
+    return result
+}
+
+async function getPageRedirectTarget(page) {
+    if (page.seeInstead && page.seeInstead._id) {
+        const parent = await db.get(page.seeInstead._id)
+        return parent
+    } else {
+        return undefined
+    }
+}
+
+async function getRedirectersToPage(page) {
+    const findResult = await db.find({
+        selector: {
+            'seeInstead._id': page._id,
+        },
+    })
+    return findResult.docs
 }
