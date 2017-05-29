@@ -20,17 +20,21 @@ async function performPageAnalysis({pageId, tabId}) {
     const freezeDry = remoteFunction('freezeDry', {tabId})
 
     // A shorthand for updating a single field in a doc.
-    const setDocField = (db, docId, key) =>
-        value => db.upsert(docId, doc => assocPath(key, value)(doc))
+    const setDocField = (db, docId, key) => async value => {
+        const doc = await db.get(docId)
+        const updatedDoc = assocPath(key, value)(doc)
+        await db.put(updatedDoc)
+    }
 
     // A shorthand for adding an attachment to a doc.
-    const setDocAttachment = (db, docId, attachmentId) => blob =>
-        db.upsert(docId, doc =>
-            assocPath(
-                ['_attachments', attachmentId],
-                {content_type: blob.type, data: blob}
-            )(doc)
-        )
+    const setDocAttachment = (db, docId, attachmentId) => async blob => {
+        const doc = await db.get(docId)
+        const updatedDoc = assocPath(
+            ['_attachments', attachmentId],
+            {content_type: blob.type, data: blob}
+        )(doc)
+        await db.put(updatedDoc)
+    }
 
     // Get and store the fav-icon
     const storeFavIcon = getFavIcon({tabId}).then(async dataUri => {
