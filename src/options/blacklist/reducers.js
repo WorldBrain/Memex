@@ -28,7 +28,7 @@ function addSiteToBlacklist(state, payload) {
 function removeSiteFromBlacklist(state, payload) {
     const blacklist = [
         ...state.blacklist.slice(0, payload.index),
-        ...state.blacklist.slice(payload.index + 1, state.blacklist.length)
+        ...state.blacklist.slice(payload.index + 1, state.blacklist.length),
     ]
 
     return {

@@ -9,10 +9,9 @@ import Layout from './layout'
 import Routes from './routes'
 
 // Include development tools if we are not building for production
-let ReduxDevTools = undefined
-if (process.env.NODE_ENV !== 'production') {
-    ReduxDevTools = require('src/dev/redux-devtools-component').default
-}
+const ReduxDevTools = process.env.NODE_ENV !== 'production'
+    ? require('src/dev/redux-devtools-component').default
+    : undefined
 
 const store = configureStore({ReduxDevTools})
 
