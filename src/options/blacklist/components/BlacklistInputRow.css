@@ -1,5 +1,5 @@
 .cell {
-    padding: 0 !important;
+    padding: 0 !important; /* stylelint-disable-line declaration-no-important */
 }
 
 .newSiteInputRow {
@@ -10,7 +10,7 @@
 .input {
     width: 90%;
     padding: 15px 40px;
-    font-size: .8em;
+    font-size: 0.8em;
     font-style: italic;
     border: none;
     outline: none;
