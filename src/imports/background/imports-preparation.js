@@ -15,13 +15,23 @@ const getPendingImports = async (fields, type) =>
     await getImportDocs({ status: IMPORT_DOC_STATUS.PENDING, type }, fields)
 
 /**
- * Returns a function affording checking of a URL against the URLs of pending import docs.
+ * @returns A function affording checking of a URL against the URLs of pending import docs.
  */
 async function checkWithPendingImports(type) {
     const { docs: pendingImportDocs } = await getPendingImports(['url'], type)
     const pendingUrls = pendingImportDocs.map(({ url }) => url)
 
     return ({ url }) => !pendingUrls.includes(url)
+}
+
+/**
+ * @returns A function affording checking of a URL against the URLs of existing page docs.
+ */
+async function checkWithExistingDocs() {
+    const { docs: existingPageDocs } = await db.find({ selector: { ...pageDocsSelector }, fields: ['url'] })
+    const existingUrls = existingPageDocs.map(({ url }) => url)
+
+    return ({ url }) => !existingUrls.includes(url)
 }
 
 // Get the historyItems (visited places/pages; not each visit to them)
@@ -48,8 +58,9 @@ const getBookmarkItems = async () =>
 async function filterItemsByUrl(items, type) {
     const isNotBlacklisted = await checkWithBlacklist()
     const isNotPending = await checkWithPendingImports(type)
+    const doesNotExist = await checkWithExistingDocs()
 
-    const isWorthRemembering = ({ url }) => isNotBlacklisted({ url }) && isNotPending({ url })
+    const isWorthRemembering = item => isNotBlacklisted(item) && isNotPending(item) && doesNotExist(item)
     return items.filter(isWorthRemembering)
 }
 
