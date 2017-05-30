@@ -33,25 +33,26 @@ class DateRangeSelection extends Component {
     }
 
     submitDateChange(type) {
-        if (type === 'startDate') {
-            const date = moment(this.state.startDateText, 'DD-MM-YYYY', true)
-            const nlpDate = chrono.parseDate(this.state.startDateText)
+        switch (type) {
+            case 'startDate': {
+                return this.onDateChange(this.state.startDateText, this.props.startDate, this.props.onStartDateChange)
+            }
 
-            const dateToChange = date.isValid()
-                ? date.valueOf()
-                : nlpDate && nlpDate.getTime()
-
-            if (dateToChange !== this.props.startDate) this.props.onStartDateChange(dateToChange)
-        } else if (type === 'endDate') {
-            const date = moment(this.state.endDateText, 'DD-MM-YYYY', true)
-            const nlpDate = chrono.parseDate(this.state.endDateText)
-
-            const dateToChange = date.isValid()
-                ? date.valueOf()
-                : nlpDate && nlpDate.getTime()
-
-            if (dateToChange !== this.props.endDate) this.props.onEndDateChange(dateToChange)
+            case 'endDate': {
+                return this.onDateChange(this.state.endDateText, this.props.endDate, this.props.onEndDateChange)
+            }
         }
+    }
+
+    onDateChange(dateText, currentDate, updateDate) {
+        const date = moment(dateText, 'DD-MM-YYYY', true)
+        const nlpDate = chrono.parseDate(dateText)
+
+        const dateToChange = date.isValid()
+            ? date.valueOf()
+            : nlpDate && nlpDate.getTime()
+
+        if (dateToChange !== currentDate) updateDate(dateToChange)
     }
 
     render() {
