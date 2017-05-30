@@ -1,7 +1,6 @@
 import { findVisits, addVisitsContext } from './find-visits'
 import { searchPages } from './find-pages'
 
-
 // Search by keyword query, returning all docs if no query is given
 export async function filterVisitsByQuery({
     query,

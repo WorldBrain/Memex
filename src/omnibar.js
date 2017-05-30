@@ -1,9 +1,11 @@
 import debounce from 'lodash/fp/debounce'
 import escapeHtml from 'lodash/fp/escape'
 import tldjs from 'tldjs'
+import queryString from 'query-string'
 
 import { filterVisitsByQuery } from 'src/search'
 import niceTime from 'src/util/nice-time'
+import extractTimeFiltersFromQuery from 'src/util/nlp-time-filter'
 
 
 const shortUrl = (url, maxLength = 50) => {
@@ -45,7 +47,18 @@ async function makeSuggestion(query, suggest) {
 
     const queryForOldSuggestions = latestResolvedQuery
 
-    const visitsResult = await filterVisitsByQuery({query, limit: 5})
+    const {
+        startDate,
+        endDate,
+        extractedQuery,
+    } = extractTimeFiltersFromQuery(query)
+
+    const visitsResult = await filterVisitsByQuery({
+        query: extractedQuery,
+        startDate,
+        endDate,
+        limit: 5,
+    })
     const visitDocs = visitsResult.rows.map(row => row.doc)
 
     // A subsequent search could have already started and finished while we
@@ -70,7 +83,15 @@ async function makeSuggestion(query, suggest) {
 const acceptInput = (text, disposition) => {
     // Checks whether the text is a suggested url
     const validUrl = tldjs.isValid(text)
-    const overviewPageWithQuery = '/overview/overview.html?q=' + text
+    const {
+        startDate,
+        endDate,
+        extractedQuery,
+    } = extractTimeFiltersFromQuery(text)
+
+    const params = queryString.stringify({ query: extractedQuery, startDate, endDate })
+    const overviewPageWithQuery = `/overview/overview.html?${params}`
+
     const goToUrl = validUrl ? text : overviewPageWithQuery
 
     switch (disposition) {
