@@ -5,6 +5,7 @@ import randomString from 'src/util/random-string'
 import { constants as blacklistConsts } from 'src/options/blacklist'
 
 export const visitKeyPrefix = 'visit/'
+export const blacklistStorageKey = 'blacklist'
 
 // Creates an _id string given the variables, or vice versa parses such strings
 // We simply use the creation time for the id, for easy chronological sorting.
@@ -53,7 +54,7 @@ function isURLProtocolValid(url = '') {
  */
 async function fetchBlacklistFromStorage() {
     // Fetch and parse blacklist data for check calls to use
-    const { blacklist } = await browser.storage.local.get(blacklistConsts.STORAGE_KEY)
+    const { blacklist } = await browser.storage.local.get(blacklistStorageKey)
 
     return !blacklist ? [] : JSON.parse(blacklist)
 }
