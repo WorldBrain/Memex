@@ -59,15 +59,19 @@ const VisitAsListItem = ({doc, compact, onTrashButtonClick}) => {
                 <div className={styles.time}>{niceTime(doc.visitStart)}</div>
             </div>
             <div className={styles.buttonsContainer}>
-                <a
+                <button
+                    className={styles.button}
                     onClick={e => { e.preventDefault(); onTrashButtonClick() }}
-                    title="Forget this item"
+                    title='Forget this item'
                 >
                     <img src='img/trash-icon.png' alt='🗑 forget' />
-                </a>
+                </button>
                 {localVersionAvailable({page: doc.page})
                     ? (
-                        <LinkToLocalVersion page={doc.page}>
+                        <LinkToLocalVersion
+                            className={styles.button}
+                            page={doc.page}
+                        >
                             <img src='img/save-icon.png' alt='💾 saved' />
                         </LinkToLocalVersion>
                     )
