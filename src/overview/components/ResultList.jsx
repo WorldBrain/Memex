@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react'
+import React from 'react'
+import PropTypes from 'prop-types'
 
 import { makeNonlinearTransform } from 'src/util/make-range-transform'
 import niceTime from 'src/util/nice-time'
