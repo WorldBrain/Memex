@@ -1,9 +1,10 @@
 import assocPath from 'lodash/fp/assocPath'
 import { dataURLToBlob } from 'blob-util'
 
-import { whenPageDOMLoaded } from 'src/util/tab-events'
+import { whenPageDOMLoaded, whenPageLoadComplete, whenTabActive } from 'src/util/tab-events'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import whenAllSettled from 'src/util/when-all-settled'
+import delay from 'src/util/delay'
 import db from 'src/pouchdb'
 import { updatePageSearchIndex } from 'src/search/find-pages'
 
@@ -11,10 +12,12 @@ import { revisePageFields } from '..'
 import getFavIcon from './get-fav-icon'
 import makeScreenshot from './make-screenshot'
 
+
 // Extract interesting stuff from the current page and store it.
 async function performPageAnalysis({pageId, tabId}) {
-    // Run this function in the content script in the tab.
+    // Run these functions in the content script in the tab.
     const extractPageContent = remoteFunction('extractPageContent', {tabId})
+    const freezeDry = remoteFunction('freezeDry', {tabId})
 
     // A shorthand for updating a single field in a doc.
     const setDocField = (db, docId, key) =>
@@ -49,11 +52,24 @@ async function performPageAnalysis({pageId, tabId}) {
         }
     )
 
+    // Freeze-dry and store the whole page
+    async function storePageFreezeDried() {
+        await whenPageLoadComplete({tabId})
+        // Wait a bit to first let scripts run. TODO Do this in a smarter way.
+        await delay(1000)
+        // Wait until the tab is activated (to match with screenshot).
+        await whenTabActive({tabId})
+        const htmlString = await freezeDry()
+        const blob = new Blob([htmlString], {type: 'text/html;charset=UTF-8'})
+        await setDocAttachment(db, pageId, 'frozen-page.html')(blob)
+    }
+
     // When every task has either completed or failed, update the search index.
     await whenAllSettled([
         storeFavIcon,
         storeScreenshot,
         storePageContent,
+        storePageFreezeDried(),
     ])
     await updatePageSearchIndex()
 }
