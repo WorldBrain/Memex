@@ -15,6 +15,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 // Set up the Redux store
 const store = configureStore({ReduxDevTools})
+
 store.dispatch(overview.actions.init())
 
 // Render the UI to the screen
