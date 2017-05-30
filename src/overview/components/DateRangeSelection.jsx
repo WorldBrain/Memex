@@ -22,8 +22,8 @@ class DateRangeSelection extends Component {
     }
 
     componentDidMount() {
-        this.refs.startDateDatePicker.refs.input.refs.input.addEventListener('keydown', e => this.handleKeydown(e, 'startDate'))
-        this.refs.endDateDatePicker.refs.input.refs.input.addEventListener('keydown', e => this.handleKeydown(e, 'endDate'))
+        this.startDateDatePicker.refs.input.refs.input.addEventListener('keydown', e => this.handleKeydown(e, 'startDate'))
+        this.endDateDatePicker.refs.input.refs.input.addEventListener('keydown', e => this.handleKeydown(e, 'endDate'))
     }
 
     handleKeydown(event, type) {
@@ -64,7 +64,7 @@ class DateRangeSelection extends Component {
         return (
             <div className={styles.dateRangeSelection}>
                 <DatePicker
-                    ref='startDateDatePicker'
+                    ref={dp => { this.startDateDatePicker = dp }}
                     className={styles.datePicker}
                     dateFormat='DD-MM-YYYY'
                     placeholderText='after..'
@@ -91,7 +91,7 @@ class DateRangeSelection extends Component {
                     onBlur={() => this.submitDateChange('startDate')}
                 />
                 <DatePicker
-                    ref='endDateDatePicker'
+                    ref={dp => { this.endDateDatePicker = dp }}
                     className={styles.datePicker}
                     dateFormat='DD-MM-YYYY'
                     placeholderText='before..'
