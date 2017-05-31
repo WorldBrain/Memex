@@ -1,5 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import Waypoint from 'react-waypoint'
 
 import { makeNonlinearTransform } from 'src/util/make-range-transform'
 import niceTime from 'src/util/nice-time'
@@ -52,7 +53,7 @@ function computeRowGaps({searchResult}) {
     })
 }
 
-const ResultList = ({searchResult, searchQuery}) => {
+const ResultList = ({searchResult, searchQuery, handlePagination}) => {
     // If there are no results, show a message.
     const noResultMessage = 'no results'
     if (searchResult.rows.length === 0 && searchQuery !== '') {
@@ -85,6 +86,7 @@ const ResultList = ({searchResult, searchQuery}) => {
                     </li>
                 )
             })}
+            <Waypoint onEnter={handlePagination} />
         </ul>
     )
 }
@@ -92,6 +94,7 @@ const ResultList = ({searchResult, searchQuery}) => {
 ResultList.propTypes = {
     searchResult: PropTypes.object,
     searchQuery: PropTypes.string,
+    handlePagination: PropTypes.func.isRequired,
 }
 
 export default ResultList
