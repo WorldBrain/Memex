@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
+import { bindActionCreators } from 'redux'
 import queryString from 'query-string'
 
 import * as actions from '../actions'
@@ -12,6 +13,12 @@ import styles from './Overview.css'
 
 
 class Overview extends React.Component {
+    constructor(props) {
+        super(props)
+
+        this.handlePagination = this.handlePagination.bind(this)
+    }
+
     componentWillMount() {
         const queryVariables = queryString.parse(location.search)
         if (queryVariables && queryVariables.searchQuery) {
@@ -23,21 +30,10 @@ class Overview extends React.Component {
         if (this.props.grabFocusOnMount) {
             this.refs['inputQuery'].focus()
         }
+    }
 
-        // Add an onscroll event listener to listen for scrolling events
-        window.addEventListener('scroll', (e) => {
-            // Calculate what percentage of the screen has ben scrolled
-            let scrollPercentage = (e.target.body.scrollTop / (e.target.body.scrollHeight - e.target.body.clientHeight)) * 100
-
-            // Check if that percentage is above 80% that is towards the end
-            // And if the system is not waiting for results so as to get more results.
-            if ((scrollPercentage >= 80) && (this.props.waitingForResults === 0)) {
-                // console.log("get more data", scrollPercentage, this.props.searchResult,this.props.searchResult.rows[this.props.searchResult.rows.length - 1].doc.visitStart);
-                this.props.getMoreResults(this.props.searchResult.rows[this.props.searchResult.rows.length - 1].doc.visitStart, e.target.body.scrollTop)
-            }
-
-            // console.log(e.target.body.clientHeight, e.target.body.scrollHeight, e.target.body.scrollTop, scrollPercentage);
-        })
+    handlePagination() {
+        this.props.boundActions.getMoreResults()
     }
 
     render() {
@@ -65,6 +61,7 @@ class Overview extends React.Component {
                             <ResultList
                                 searchResult={this.props.searchResult}
                                 searchQuery={this.props.query}
+                                handlePagination={this.handlePagination}
                             />
                         )
                     }
@@ -90,19 +87,21 @@ Overview.propTypes = {
 
 const mapStateToProps = state => ourState(state)
 
-const mapDispatchToProps = dispatch => ({
-    onInputChanged: input => {
-        dispatch(actions.setQuery({query: input}))
-    },
-    onStartDateChange: date => {
-        dispatch(actions.setStartDate({startDate: date}))
-    },
-    onEndDateChange: date => {
-        dispatch(actions.setEndDate({endDate: date}))
-    },
-    getMoreResults: (date, position) => {
-        dispatch(actions.getMoreResults({loadingIndicator: true, endDate: date, scrollPosition: position}))
-    },
-})
+const mapDispatchToProps = dispatch => {
+    const { setQuery, setStartDate, setEndDate, ...rest } = actions
+
+    return {
+        onInputChanged: input => {
+            dispatch(setQuery({query: input}))
+        },
+        onStartDateChange: date => {
+            dispatch(setStartDate({startDate: date}))
+        },
+        onEndDateChange: date => {
+            dispatch(setEndDate({endDate: date}))
+        },
+        boundActions: bindActionCreators(rest, dispatch),
+    }
+}
 
 export default connect(mapStateToProps, mapDispatchToProps)(Overview)
