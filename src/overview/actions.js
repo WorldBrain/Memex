@@ -16,6 +16,7 @@ export const setStartDate = createAction('overview/setStartDate')
 export const setEndDate = createAction('overview/setEndDate')
 export const hideVisit = createAction('overview/hideVisit')
 export const nextPage = createAction('overview/nextPage')
+export const resetPage = createAction('overview/resetPage')
 
 
 // == Actions that trigger other actions ==
@@ -41,8 +42,12 @@ export function deleteVisit({visitId}) {
 }
 
 // Search for docs matching the current query, update the results
-export function refreshSearch({loadingIndicator = false}) {
+export function refreshSearch({loadingIndicator = false, shouldResetPage = false}) {
     return async function (dispatch, getState) {
+        if (shouldResetPage) {
+            dispatch(resetPage())
+        }
+
         const state = getState()
         const { query, startDate, endDate, searchResult: oldResult } = ourState(state)
 

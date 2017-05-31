@@ -58,6 +58,11 @@ const nextPage = state => ({
     currentPage: state.currentPage + 1,
 })
 
+const resetPage = state => ({
+    ...state,
+    currentPage: defaultState.currentPage,
+})
+
 export default createReducer({
     [actions.setQuery]: setQuery,
     [actions.setStartDate]: setStartDate,
@@ -68,4 +73,5 @@ export default createReducer({
     [actions.hideLoadingIndicator]: hideLoadingIndicator,
     [actions.hideVisit]: hideVisit,
     [actions.nextPage]: nextPage,
+    [actions.resetPage]: resetPage,
 }, defaultState)
