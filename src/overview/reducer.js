@@ -8,6 +8,7 @@ import * as actions from './actions'
 const defaultState = {
     searchResult: {rows: []},
     query: '',
+    currentPage: 1,     // Current page in overview results list
     waitingForResults: 0,
     startDate: undefined,
     endDate: undefined,
@@ -52,6 +53,11 @@ function hideVisit(state, {visitId}) {
     )(state)
 }
 
+const nextPage = state => ({
+    ...state,
+    currentPage: state.currentPage + 1,
+})
+
 export default createReducer({
     [actions.setQuery]: setQuery,
     [actions.setStartDate]: setStartDate,
@@ -61,4 +67,5 @@ export default createReducer({
     [actions.showLoadingIndicator]: showLoadingIndicator,
     [actions.hideLoadingIndicator]: hideLoadingIndicator,
     [actions.hideVisit]: hideVisit,
+    [actions.nextPage]: nextPage,
 }, defaultState)

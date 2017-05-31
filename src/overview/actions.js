@@ -16,6 +16,7 @@ export const hideLoadingIndicator = createAction('overview/hideLoadingIndicator'
 export const setStartDate = createAction('overview/setStartDate')
 export const setEndDate = createAction('overview/setEndDate')
 export const hideVisit = createAction('overview/hideVisit')
+export const nextPage = createAction('overview/nextPage')
 
 
 // == Actions that trigger other actions ==
