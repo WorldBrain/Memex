@@ -3,8 +3,7 @@ import { createAction } from 'redux-act'
 import { onDatabaseChange } from 'src/pouchdb'
 import { filterVisitsByQuery } from 'src/search'
 import { deleteVisitAndPage } from 'src/page-storage/deletion'
-import { ourState } from './selectors'
-
+import { ourState, resultsLimit } from './selectors'
 
 // == Simple commands to change the state in reducers ==
 
@@ -44,8 +43,8 @@ export function deleteVisit({visitId}) {
 // Search for docs matching the current query, update the results
 export function refreshSearch({loadingIndicator = false}) {
     return async function (dispatch, getState) {
-        const { query, startDate, endDate } = ourState(getState())
-        const oldResult = ourState(getState()).searchResult
+        const state = getState()
+        const { query, startDate, endDate, searchResult: oldResult } = ourState(state)
 
         if (loadingIndicator) {
             // Show to the user that search is busy
@@ -58,6 +57,7 @@ export function refreshSearch({loadingIndicator = false}) {
                 query,
                 startDate,
                 endDate,
+                limit: resultsLimit(state),
                 includeContext: true,
             })
         } catch (err) {
@@ -85,37 +85,13 @@ export function refreshSearch({loadingIndicator = false}) {
     }
 }
 
-// Getting more results
-export function getMoreResults({loadingIndicator = false, endDate, scrollPosition}) {
-    return async function (dispatch, getState) {
-        const { query, startDate } = ourState(getState())
-
-        if (loadingIndicator) {
-            // Show to the user that search is busy
-            dispatch(showLoadingIndicator())
-        }
-
-        const searchResult = await filterVisitsByQuery({
-            query,
-            startDate,
-            endDate,
-            includeContext: true,
-        })
-        if (loadingIndicator) {
-            // Hide our nice loading animation again.
-            dispatch(hideLoadingIndicator())
-        }
-
-        // Append the result to have it displayed to the user.
-        dispatch(appendSearchResult({searchResult}))
-
-        if (scrollPosition) {
-            // Scroll back the position where the more results funtion was fire
-            // because after the new results are appended the whole view is re-rendered scrolling back to the begining
-            // So we need to scroll back to the point where the user left.
-            window.scrollTo(0, scrollPosition)
-        }
-    }
+/**
+ * Handles running actions related to pagination event to grab more results data.
+ * Should update page state before running refreshSearch thunk.
+ */
+export const getMoreResults = () => async dispatch => {
+    dispatch(nextPage())
+    dispatch(refreshSearch({}))
 }
 
 // Report a change in the database, to e.g. trigger a search refresh
