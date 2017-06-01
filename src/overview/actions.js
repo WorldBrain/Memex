@@ -51,15 +51,23 @@ export function refreshSearch({loadingIndicator = false}) {
             dispatch(showLoadingIndicator())
         }
 
-        const searchResult = await filterVisitsByQuery({
-            query,
-            startDate,
-            endDate,
-            includeContext: true,
-        })
-        if (loadingIndicator) {
-            // Hide our nice loading animation again.
-            dispatch(hideLoadingIndicator())
+        let searchResult
+        try {
+            searchResult = await filterVisitsByQuery({
+                query,
+                startDate,
+                endDate,
+                includeContext: true,
+            })
+        } catch (err) {
+            // TODO give feedback to user that results are not actually updated.
+            console.error(`Search for '${query}' erred: ${err}`)
+            return
+        } finally {
+            if (loadingIndicator) {
+                // Hide our nice loading animation again.
+                dispatch(hideLoadingIndicator())
+            }
         }
 
         // First check if the query and result changed in the meantime.
