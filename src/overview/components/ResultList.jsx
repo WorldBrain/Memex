@@ -5,6 +5,7 @@ import Waypoint from 'react-waypoint'
 import { makeNonlinearTransform } from 'src/util/make-range-transform'
 import niceTime from 'src/util/nice-time'
 import VisitAsListItem from './VisitAsListItem'
+import LoadingIndicator from './LoadingIndicator'
 
 import styles from './ResultList.css'
 
@@ -53,7 +54,7 @@ function computeRowGaps({searchResult}) {
     })
 }
 
-const ResultList = ({searchResult, searchQuery, handlePagination}) => {
+const ResultList = ({searchResult, searchQuery, handlePagination, isMoreLoading}) => {
     // If there are no results, show a message.
     const noResultMessage = 'no results'
     if (searchResult.rows.length === 0 && searchQuery !== '') {
@@ -86,7 +87,11 @@ const ResultList = ({searchResult, searchQuery, handlePagination}) => {
                     </li>
                 )
             })}
-            <Waypoint onEnter={handlePagination} />
+            {isMoreLoading
+                ? <LoadingIndicator />
+                : <Waypoint onEnter={handlePagination} />
+            }
+
         </ul>
     )
 }
@@ -95,6 +100,7 @@ ResultList.propTypes = {
     searchResult: PropTypes.object,
     searchQuery: PropTypes.string,
     handlePagination: PropTypes.func.isRequired,
+    isMoreLoading: PropTypes.bool.isRequired,
 }
 
 export default ResultList

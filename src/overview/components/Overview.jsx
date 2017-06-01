@@ -5,7 +5,7 @@ import { bindActionCreators } from 'redux'
 import queryString from 'query-string'
 
 import * as actions from '../actions'
-import { ourState } from '../selectors'
+import { ourState, isMoreLoading } from '../selectors'
 import ResultList from './ResultList'
 import LoadingIndicator from './LoadingIndicator'
 import DateRangeSelection from './DateRangeSelection'
@@ -62,6 +62,7 @@ class Overview extends React.Component {
                                 searchResult={this.props.searchResult}
                                 searchQuery={this.props.query}
                                 handlePagination={this.handlePagination}
+                                isMoreLoading={this.props.isoreLoading}
                             />
                         )
                     }
@@ -79,13 +80,14 @@ Overview.propTypes = {
     endDate: PropTypes.number,
     onStartDateChange: PropTypes.func,
     onEndDateChange: PropTypes.func,
-    getMoreResults: PropTypes.func,
+    boundActions: PropTypes.object.isRequired,
     waitingForResults: PropTypes.oneOfType([PropTypes.bool, PropTypes.number]),
+    isMoreLoading: PropTypes.bool.isRequired,
     searchResult: PropTypes.object,
 }
 
 
-const mapStateToProps = state => ourState(state)
+const mapStateToProps = state => ({ ...ourState(state), isMoreLoading: isMoreLoading(state) })
 
 const mapDispatchToProps = dispatch => {
     const { setQuery, setStartDate, setEndDate, ...rest } = actions
