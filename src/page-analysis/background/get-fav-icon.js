@@ -8,13 +8,9 @@ async function getFavIcon({tabId}) {
         return undefined
     }
 
-    try {
-        const response = await fetch(tab.favIconUrl)
-        const dataURI = await responseToDataURI(response)
-        return dataURI
-    } catch (err) {
-        return undefined // carry on without fav-icon
-    }
+    const response = await fetch(tab.favIconUrl)
+    const dataURI = await responseToDataURI(response)
+    return dataURI
 }
 
 export default getFavIcon

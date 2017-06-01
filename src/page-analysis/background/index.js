@@ -38,12 +38,14 @@ async function performPageAnalysis({pageId, tabId}) {
 
     // Get and store the fav-icon
     const storeFavIcon = getFavIcon({tabId}).then(async dataUri => {
+        if (dataUri === undefined) return
         const blob = await dataURLToBlob(dataUri)
         await setDocAttachment(db, pageId, 'favIcon')(blob)
     })
 
     // Capture a screenshot.
     const storeScreenshot = makeScreenshot({tabId}).then(async dataUri => {
+        if (dataUri === undefined) return
         const blob = await dataURLToBlob(dataUri)
         await setDocAttachment(db, pageId, 'screenshot')(blob)
     })
