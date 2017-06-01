@@ -14,6 +14,17 @@ async function showPage(pageId) {
         // Strip the <html>...</html> tags because we set innerHTML.
         const innerHTML = html.match(/[^]*?<html[^]*?>([^]*)<\/html[^]*?>/i)[1]
         document.documentElement.innerHTML = innerHTML
+
+        // Pragmatic workaround for Chromium, which appears to inject values for
+        // these two properties (with font-family: 75%, for some reason?)
+        if (document.head !== undefined) {
+            const styleEl = document.createElement('style')
+            styleEl.innerHTML = `body {
+                font-size: inherit;
+                font-family: inherit;
+            }`
+            document.head.insertAdjacentElement('afterbegin', styleEl)
+        }
     } catch (err) {
         // Alternatively, use a blob URL (downside: the url is very temporary).
         const blobUrl = URL.createObjectURL(blob)
