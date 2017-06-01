@@ -106,20 +106,28 @@
     color: inherit;
     text-decoration: none;
     padding-top: 5px;
+}
+
+.button {
+    display: inline;
+    border: none;
+    background-color: transparent;
+    padding: 0;
+    opacity: 0.1;
+
+    @nest .root:hover & {
+        opacity: 0.4;
+
+        &:hover {
+            opacity: 1;
+            cursor: pointer;
+        }
+    }
+
+    transition: opacity 200ms;
 
     & img {
         margin: 5px 8px;
         width: 15px;
-        opacity: 0.1;
-
-        @nest .root:hover & {
-            opacity: 0.4;
-
-            &:hover {
-                opacity: 1;
-            }
-        }
-
-        transition: opacity 200ms;
     }
 }

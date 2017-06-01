@@ -1,6 +1,9 @@
+import update from 'lodash/fp/update'
+import remove from 'lodash/fp/remove'
 import { createReducer } from 'redux-act'
 
 import * as actions from './actions'
+
 
 const defaultState = {
     searchResult: {rows: []},
@@ -37,6 +40,12 @@ function hideLoadingIndicator(state) {
     return {...state, waitingForResults: state.waitingForResults - 1}
 }
 
+function hideVisit(state, {visitId}) {
+    return update('searchResult.rows',
+        rows => remove(row => row.id === visitId)(rows)
+    )(state)
+}
+
 export default createReducer({
     [actions.setQuery]: setQuery,
     [actions.setStartDate]: setStartDate,
@@ -44,4 +53,5 @@ export default createReducer({
     [actions.setSearchResult]: setSearchResult,
     [actions.showLoadingIndicator]: showLoadingIndicator,
     [actions.hideLoadingIndicator]: hideLoadingIndicator,
+    [actions.hideVisit]: hideVisit,
 }, defaultState)

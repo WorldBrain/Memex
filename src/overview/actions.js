@@ -2,6 +2,8 @@ import { createAction } from 'redux-act'
 
 import { onDatabaseChange } from 'src/pouchdb'
 import { filterVisitsByQuery } from 'src/search'
+import { deleteVisitAndPage } from 'src/page-storage/deletion'
+
 import { ourState } from './selectors'
 
 
@@ -13,6 +15,7 @@ export const showLoadingIndicator = createAction('overview/showLoadingIndicator'
 export const hideLoadingIndicator = createAction('overview/hideLoadingIndicator')
 export const setStartDate = createAction('overview/setStartDate')
 export const setEndDate = createAction('overview/setEndDate')
+export const hideVisit = createAction('overview/hideVisit')
 
 
 // == Actions that trigger other actions ==
@@ -25,6 +28,15 @@ export function init() {
 
         // Track database changes, to e.g. trigger search result refresh
         onDatabaseChange(change => dispatch(handlePouchChange({change})))
+    }
+}
+
+export function deleteVisit({visitId}) {
+    return async function (dispatch, getState) {
+        // Hide the visit directly (optimistically).
+        dispatch(hideVisit({visitId}))
+        // Remove it from the database.
+        await deleteVisitAndPage({visitId})
     }
 }
 

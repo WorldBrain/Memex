@@ -19,22 +19,26 @@ function samenessLinkType({sameness}) {
     return types[sameness]
 }
 
-function forgetPageContents({page}) {
+async function forgetPageContents({page}) {
     // Remove analysed bulky stuff
-    return db.upsert(page._id, doc => ({
+    const doc = await db.get(page._id)
+    const updatedDoc = {
         ...doc,
         extractedText: undefined,
         extractedMetadata: undefined,
         screenshot: undefined,
         favIcon: undefined,
-    }))
+    }
+    await db.put(updatedDoc)
 }
 
 async function addLink({targetId, sourceId, linkType}) {
-    await db.upsert(sourceId, doc => ({
+    const doc = await db.get(sourceId)
+    const updatedDoc = {
         ...doc,
         [linkType]: {_id: targetId},
-    }))
+    }
+    await db.put(updatedDoc)
 }
 
 async function replaceWithRedirect({oldPage, newPage, sameness}) {

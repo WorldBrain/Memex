@@ -1,14 +1,17 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import { connect } from 'react-redux'
 import classNames from 'classnames'
 
-import {localVersionAvailable, LinkToLocalVersion} from 'src/page-viewer'
+import { localVersionAvailable, LinkToLocalVersion } from 'src/page-viewer'
 import niceTime from 'src/util/nice-time'
+
 import ImgFromPouch from './ImgFromPouch'
 import styles from './VisitAsListItem.css'
+import { deleteVisit } from '../actions'
 
 
-const VisitAsListItem = ({doc, compact}) => {
+const VisitAsListItem = ({doc, compact, onTrashButtonClick}) => {
     const visitClasses = classNames({
         [styles.root]: true,
         [styles.compact]: compact,
@@ -56,10 +59,19 @@ const VisitAsListItem = ({doc, compact}) => {
                 <div className={styles.time}>{niceTime(doc.visitStart)}</div>
             </div>
             <div className={styles.buttonsContainer}>
-                <img src='img/trash-icon.png' alt='🗑 remove' />
+                <button
+                    className={styles.button}
+                    onClick={e => { e.preventDefault(); onTrashButtonClick() }}
+                    title='Forget this item'
+                >
+                    <img src='img/trash-icon.png' alt='🗑 forget' />
+                </button>
                 {localVersionAvailable({page: doc.page})
                     ? (
-                        <LinkToLocalVersion page={doc.page}>
+                        <LinkToLocalVersion
+                            className={styles.button}
+                            page={doc.page}
+                        >
                             <img src='img/save-icon.png' alt='💾 saved' />
                         </LinkToLocalVersion>
                     )
@@ -73,6 +85,14 @@ const VisitAsListItem = ({doc, compact}) => {
 VisitAsListItem.propTypes = {
     doc: PropTypes.object.isRequired,
     compact: PropTypes.bool,
+    onTrashButtonClick: PropTypes.func,
 }
 
-export default VisitAsListItem
+
+const mapStateToProps = state => ({})
+
+const mapDispatchToProps = (dispatch, {doc}) => ({
+    onTrashButtonClick: () => dispatch(deleteVisit({visitId: doc._id})),
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(VisitAsListItem)
