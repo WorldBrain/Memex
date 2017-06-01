@@ -3,7 +3,6 @@
 // converted to pageDocs and visitDocs (sorry for the confusingly similar name).
 
 import db from 'src/pouchdb'
-import { updatePageSearchIndex } from 'src/search/find-pages'
 import { isWorthRemembering, generateVisitDocId,
          visitKeyPrefix, convertVisitDocId } from 'src/activity-logger'
 import { generatePageDocId } from 'src/page-storage'
@@ -130,9 +129,6 @@ export default async function importHistory({
     // rejected, because their id (timestamp & history id) already exists.
     await db.bulkDocs(allDocs)
     console.timeEnd('import history')
-    console.time('rebuild search index')
-    await updatePageSearchIndex()
-    console.timeEnd('rebuild search index')
 }
 
 // Get the timestamp of the oldest visit in our database

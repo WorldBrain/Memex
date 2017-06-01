@@ -3,7 +3,7 @@ import update from 'lodash/fp/update'
 
 import db, { normaliseFindResult, resultRowsById } from 'src/pouchdb'
 import { pageKeyPrefix } from 'src/page-storage'
-import { searchableTextFields, revisePageFields } from 'src/page-analysis'
+import { revisePageFields } from 'src/page-analysis'
 import { getAllNodes } from 'src/util/tree-walker'
 
 
@@ -55,12 +55,6 @@ async function postprocessPagesResult({pagesResult, followRedirects}) {
     return pagesResult
 }
 
-const pageSearchIndexParams = {
-    filter: doc => (typeof doc._id === 'string'
-                    && doc._id.startsWith(pageKeyPrefix)),
-    fields: searchableTextFields,
-}
-
 // Get all pages for a given array of page ids
 export async function getPages({pageIds, ...otherOptions}) {
     let pagesResult = await db.allDocs({
@@ -69,31 +63,6 @@ export async function getPages({pageIds, ...otherOptions}) {
     })
     pagesResult = await postprocessPagesResult({...otherOptions, pagesResult})
     return pagesResult
-}
-
-// Search the log for pages matching given query (keyword) string
-export async function searchPages({
-    query,
-    limit,
-    ...otherOptions
-}) {
-    let pagesResult = await db.search({
-        ...pageSearchIndexParams,
-        query,
-        limit,
-        include_docs: true,
-        stale: 'update_after',
-    })
-    pagesResult = await postprocessPagesResult({...otherOptions, pagesResult})
-    return pagesResult
-}
-
-export async function updatePageSearchIndex() {
-    // Add new documents to the search index.
-    await db.search({
-        ...pageSearchIndexParams,
-        build: true,
-    })
 }
 
 export async function findPagesByUrl({url, ...otherOptions}) {
