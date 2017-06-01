@@ -7,7 +7,6 @@ import whenAllSettled from 'src/util/when-all-settled'
 import delay from 'src/util/delay'
 import db from 'src/pouchdb'
 import updateDoc from 'src/util/pouchdb-update-doc'
-import { updatePageSearchIndex } from 'src/search/find-pages'
 
 import { revisePageFields } from '..'
 import getFavIcon from './get-fav-icon'
@@ -76,7 +75,6 @@ async function performPageAnalysis({pageId, tabId}) {
         storePageContent,
         storePageFreezeDried(),
     ])
-    await updatePageSearchIndex()
 }
 
 export default async function analysePage({page, tabId}) {

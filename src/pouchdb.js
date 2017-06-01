@@ -1,10 +1,8 @@
 import fromPairs from 'lodash/fp/fromPairs'
 import PouchDB from 'pouchdb-browser'
-import PouchDBQuickSearch from 'pouchdb-quick-search'
 import PouchDBFind from 'pouchdb-find'
 
 
-PouchDB.plugin(PouchDBQuickSearch)
 PouchDB.plugin(PouchDBFind)
 
 const db = new PouchDB({

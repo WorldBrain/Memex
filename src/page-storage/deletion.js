@@ -1,6 +1,6 @@
 import db from 'src/pouchdb'
 import { findVisits } from 'src/search/find-visits'
-import { getEquivalentPages, updatePageSearchIndex } from 'src/search/find-pages'
+import { getEquivalentPages } from 'src/search/find-pages'
 
 export async function deleteVisitAndPage({visitId}) {
     // Delete the visit object
@@ -30,6 +30,5 @@ async function deletePageIfOrphaned({pageId}) {
                 _deleted: true,
             })
         ))
-        await updatePageSearchIndex()
     }
 }
