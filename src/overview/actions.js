@@ -10,6 +10,8 @@ import { ourState, resultsLimit } from './selectors'
 export const setQuery = createAction('overview/setQuery')
 export const setSearchResult = createAction('overview/setSearchResult')
 export const appendSearchResult = createAction('overview/appendSearchResult')
+export const showMoreLoading = createAction('overview/showMoreLoading')
+export const hideMoreLoading = createAction('overview/hideMoreLoading')
 export const showLoadingIndicator = createAction('overview/showLoadingIndicator')
 export const hideLoadingIndicator = createAction('overview/hideLoadingIndicator')
 export const setStartDate = createAction('overview/setStartDate')
@@ -42,7 +44,7 @@ export function deleteVisit({visitId}) {
 }
 
 // Search for docs matching the current query, update the results
-export function refreshSearch({loadingIndicator = false, shouldResetPage = false}) {
+export function refreshSearch({loadingIndicator = false, shouldResetPage = false} = {}) {
     return async function (dispatch, getState) {
         if (shouldResetPage) {
             dispatch(resetPage())
@@ -95,8 +97,10 @@ export function refreshSearch({loadingIndicator = false, shouldResetPage = false
  * Should update page state before running refreshSearch thunk.
  */
 export const getMoreResults = () => async dispatch => {
+    dispatch(showMoreLoading())
     dispatch(nextPage())
-    dispatch(refreshSearch({}))
+    await dispatch(refreshSearch())
+    dispatch(hideMoreLoading())
 }
 
 // Report a change in the database, to e.g. trigger a search refresh

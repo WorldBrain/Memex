@@ -4,12 +4,12 @@ import { createReducer } from 'redux-act'
 
 import * as actions from './actions'
 
-
 const defaultState = {
     searchResult: {rows: []},
     query: '',
     currentPage: 1,     // Current page in overview results list
     waitingForResults: 0,
+    waitingForMoreResults: 0,
     startDate: undefined,
     endDate: undefined,
 }
@@ -63,6 +63,11 @@ const resetPage = state => ({
     currentPage: defaultState.currentPage,
 })
 
+const makeMoreLoadingReducer = inc => state => ({
+    ...state,
+    waitingForMoreResults: state.waitingForMoreResults + inc,
+})
+
 export default createReducer({
     [actions.setQuery]: setQuery,
     [actions.setStartDate]: setStartDate,
@@ -71,6 +76,8 @@ export default createReducer({
     [actions.appendSearchResult]: appendSearchResult,
     [actions.showLoadingIndicator]: showLoadingIndicator,
     [actions.hideLoadingIndicator]: hideLoadingIndicator,
+    [actions.showMoreLoading]: makeMoreLoadingReducer(1),
+    [actions.hideMoreLoading]: makeMoreLoadingReducer(-1),
     [actions.hideVisit]: hideVisit,
     [actions.nextPage]: nextPage,
     [actions.resetPage]: resetPage,
