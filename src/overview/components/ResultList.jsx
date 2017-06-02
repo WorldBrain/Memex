@@ -54,7 +54,20 @@ function computeRowGaps({searchResult}) {
     })
 }
 
-const ResultList = ({searchResult, searchQuery, handlePagination, isMoreLoading}) => {
+/**
+ * Handles rendering view for infinite scroll waypoint component. Simply switches between
+ * loading comp and waypoint comp to trigger infinite scroll event logic.
+ */
+const InfScrollWaypoint = ({isMoreLoading, handlePagination}) => isMoreLoading
+    ? <LoadingIndicator />
+    : <Waypoint onEnter={handlePagination} />
+
+InfScrollWaypoint.propTypes = {
+    isMoreLoading: PropTypes.bool.isRequired,
+    handlePagination: PropTypes.func.isRequired,
+}
+
+const ResultList = ({searchResult, searchQuery, ...waypointProps}) => {
     // If there are no results, show a message.
     const noResultMessage = 'no results'
     if (searchResult.rows.length === 0 && searchQuery !== '') {
@@ -87,11 +100,7 @@ const ResultList = ({searchResult, searchQuery, handlePagination, isMoreLoading}
                     </li>
                 )
             })}
-            {isMoreLoading
-                ? <LoadingIndicator />
-                : <Waypoint onEnter={handlePagination} />
-            }
-
+            <InfScrollWaypoint {...waypointProps} />
         </ul>
     )
 }
@@ -99,8 +108,6 @@ const ResultList = ({searchResult, searchQuery, handlePagination, isMoreLoading}
 ResultList.propTypes = {
     searchResult: PropTypes.object,
     searchQuery: PropTypes.string,
-    handlePagination: PropTypes.func.isRequired,
-    isMoreLoading: PropTypes.bool.isRequired,
 }
 
 export default ResultList
