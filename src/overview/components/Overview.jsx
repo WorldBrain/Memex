@@ -89,21 +89,17 @@ Overview.propTypes = {
 
 const mapStateToProps = state => ({ ...ourState(state), isMoreLoading: isMoreLoading(state) })
 
-const mapDispatchToProps = dispatch => {
-    const { setQuery, setStartDate, setEndDate, ...rest } = actions
-
-    return {
-        onInputChanged: input => {
-            dispatch(setQuery({query: input}))
-        },
-        onStartDateChange: date => {
-            dispatch(setStartDate({startDate: date}))
-        },
-        onEndDateChange: date => {
-            dispatch(setEndDate({endDate: date}))
-        },
-        boundActions: bindActionCreators(rest, dispatch),
-    }
-}
+const mapDispatchToProps = dispatch => ({
+    onInputChanged: input => {
+        dispatch(actions.setQuery({query: input}))
+    },
+    onStartDateChange: date => {
+        dispatch(actions.setStartDate({startDate: date}))
+    },
+    onEndDateChange: date => {
+        dispatch(actions.setEndDate({endDate: date}))
+    },
+    boundActions: bindActionCreators(actions, dispatch),
+})
 
 export default connect(mapStateToProps, mapDispatchToProps)(Overview)
