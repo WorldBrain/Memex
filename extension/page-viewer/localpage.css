@@ -1,0 +1,30 @@
+html,
+body {
+    margin: 0;
+    height: 100%;
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+}
+
+#bar {
+    width: 100%;
+    height: 24px;
+    z-index: 1;
+    background-color: #f8f8f8;
+    border-bottom: 1px solid #999;
+    overflow: visible;
+}
+
+#page {
+    width: 100%;
+    flex-grow: 1;
+}
+
+iframe[seamless] {
+    background-color: transparent;
+    border: 0px none transparent;
+    padding: 0px;
+    overflow: hidden;
+}
