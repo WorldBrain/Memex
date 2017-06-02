@@ -62,7 +62,7 @@ class Overview extends React.Component {
                                 searchResult={this.props.searchResult}
                                 searchQuery={this.props.query}
                                 handlePagination={this.handlePagination}
-                                isMoreLoading={this.props.isoreLoading}
+                                isMoreLoading={this.props.isMoreLoading}
                             />
                         )
                     }
