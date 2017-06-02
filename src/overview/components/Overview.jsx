@@ -13,36 +13,21 @@ import styles from './Overview.css'
 
 
 class Overview extends React.Component {
-    constructor(props) {
-        super(props)
-
-        this.handlePagination = this.handlePagination.bind(this)
-    }
-
-    componentWillMount() {
-        const queryVariables = queryString.parse(location.search)
-        if (queryVariables && queryVariables.searchQuery) {
-            this.props.onInputChanged(queryVariables.searchQuery)
-        }
-    }
-
     componentDidMount() {
         if (this.props.grabFocusOnMount) {
             this.refs['inputQuery'].focus()
         }
     }
 
-    handlePagination() {
-        this.props.boundActions.getMoreResults()
-    }
-
     render() {
+        const { boundActions } = this.props
+
         return (
             <div>
                 <div>
                     <input
                         className={styles.query}
-                        onChange={e => this.props.onInputChanged(e.target.value)}
+                        onChange={e => boundActions.setQuery(e.target.value)}
                         placeholder='Search your memory'
                         value={this.props.query}
                         ref='inputQuery'
@@ -51,8 +36,8 @@ class Overview extends React.Component {
                 <DateRangeSelection
                     startDate={this.props.startDate}
                     endDate={this.props.endDate}
-                    onStartDateChange={this.props.onStartDateChange}
-                    onEndDateChange={this.props.onEndDateChange}
+                    onStartDateChange={boundActions.setStartDate}
+                    onEndDateChange={boundActions.setEndDate}
                 />
                 <div>
                     {this.props.waitingForResults
@@ -61,7 +46,7 @@ class Overview extends React.Component {
                             <ResultList
                                 searchResult={this.props.searchResult}
                                 searchQuery={this.props.query}
-                                handlePagination={this.handlePagination}
+                                handlePagination={boundActions.getMoreResults}
                                 isMoreLoading={this.props.isMoreLoading}
                                 isFiltered={this.props.isFiltered}
                             />
@@ -76,11 +61,8 @@ class Overview extends React.Component {
 Overview.propTypes = {
     grabFocusOnMount: PropTypes.bool,
     query: PropTypes.string,
-    onInputChanged: PropTypes.func,
     startDate: PropTypes.number,
     endDate: PropTypes.number,
-    onStartDateChange: PropTypes.func,
-    onEndDateChange: PropTypes.func,
     boundActions: PropTypes.object.isRequired,
     waitingForResults: PropTypes.oneOfType([PropTypes.bool, PropTypes.number]),
     isMoreLoading: PropTypes.bool.isRequired,
@@ -95,17 +77,6 @@ const mapStateToProps = state => ({
     isFiltered: selectors.isFiltered(state),
 })
 
-const mapDispatchToProps = dispatch => ({
-    onInputChanged: input => {
-        dispatch(actions.setQuery({query: input}))
-    },
-    onStartDateChange: date => {
-        dispatch(actions.setStartDate({startDate: date}))
-    },
-    onEndDateChange: date => {
-        dispatch(actions.setEndDate({endDate: date}))
-    },
-    boundActions: bindActionCreators(actions, dispatch),
-})
+const mapDispatchToProps = dispatch => ({ boundActions: bindActionCreators(actions, dispatch) })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Overview)

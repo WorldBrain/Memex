@@ -7,15 +7,15 @@ import { ourState, resultsLimit } from './selectors'
 
 // == Simple commands to change the state in reducers ==
 
-export const setQuery = createAction('overview/setQuery')
+export const setQuery = createAction('overview/setQuery', input => ({ query: input }))
 export const setSearchResult = createAction('overview/setSearchResult')
 export const appendSearchResult = createAction('overview/appendSearchResult')
 export const showMoreLoading = createAction('overview/showMoreLoading')
 export const hideMoreLoading = createAction('overview/hideMoreLoading')
 export const showLoadingIndicator = createAction('overview/showLoadingIndicator')
 export const hideLoadingIndicator = createAction('overview/hideLoadingIndicator')
-export const setStartDate = createAction('overview/setStartDate')
-export const setEndDate = createAction('overview/setEndDate')
+export const setStartDate = createAction('overview/setStartDate', date => ({ startDate: date }))
+export const setEndDate = createAction('overview/setEndDate', date => ({ endDate: date }))
 export const hideVisit = createAction('overview/hideVisit')
 export const nextPage = createAction('overview/nextPage')
 export const resetPage = createAction('overview/resetPage')
