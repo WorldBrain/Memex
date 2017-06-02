@@ -67,7 +67,7 @@ InfScrollWaypoint.propTypes = {
     handlePagination: PropTypes.func.isRequired,
 }
 
-const ResultList = ({searchResult, searchQuery, ...waypointProps}) => {
+const ResultList = ({searchResult, searchQuery, isFiltered, ...waypointProps}) => {
     // If there are no results, show a message.
     const noResultMessage = 'no results'
     if (searchResult.rows.length === 0 && searchQuery !== '') {
@@ -100,7 +100,7 @@ const ResultList = ({searchResult, searchQuery, ...waypointProps}) => {
                     </li>
                 )
             })}
-            <InfScrollWaypoint {...waypointProps} />
+            {!isFiltered && <InfScrollWaypoint {...waypointProps} />}
         </ul>
     )
 }
@@ -108,6 +108,7 @@ const ResultList = ({searchResult, searchQuery, ...waypointProps}) => {
 ResultList.propTypes = {
     searchResult: PropTypes.object,
     searchQuery: PropTypes.string,
+    isFiltered: PropTypes.bool.isRequired,
 }
 
 export default ResultList
