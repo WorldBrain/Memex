@@ -1,11 +1,10 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import Waypoint from 'react-waypoint'
 
 import { makeNonlinearTransform } from 'src/util/make-range-transform'
 import niceTime from 'src/util/nice-time'
 import VisitAsListItem from './VisitAsListItem'
-import LoadingIndicator from './LoadingIndicator'
+import InfScrollWaypoint from './InfScrollWaypoint'
 
 import styles from './ResultList.css'
 
@@ -52,19 +51,6 @@ function computeRowGaps({searchResult}) {
         )
         return {marginTop, timestampComponent}
     })
-}
-
-/**
- * Handles rendering view for infinite scroll waypoint component. Simply switches between
- * loading comp and waypoint comp to trigger infinite scroll event logic.
- */
-const InfScrollWaypoint = ({isMoreLoading, handlePagination}) => isMoreLoading
-    ? <LoadingIndicator />
-    : <Waypoint onEnter={handlePagination} />
-
-InfScrollWaypoint.propTypes = {
-    isMoreLoading: PropTypes.bool.isRequired,
-    handlePagination: PropTypes.func.isRequired,
 }
 
 const ResultList = ({searchResult, searchQuery, ...waypointProps}) => {
