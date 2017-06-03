@@ -3,7 +3,8 @@ import { createAction } from 'redux-act'
 import { onDatabaseChange } from 'src/pouchdb'
 import { filterVisitsByQuery } from 'src/search'
 import { deleteVisitAndPage } from 'src/page-storage/deletion'
-import { ourState, resultsLimit } from './selectors'
+import * as selectors from './selectors'
+import { RESULTS_PAGE_SIZE } from './constants'
 
 // == Simple commands to change the state in reducers ==
 
@@ -51,7 +52,8 @@ export function refreshSearch({loadingIndicator = false, shouldResetPage = false
         }
 
         const state = getState()
-        const { query, startDate, endDate, searchResult: oldResult } = ourState(state)
+        const { query, startDate, endDate, searchResult: oldResult } = selectors.ourState(state)
+        const skip = selectors.resultsSkip(state)
 
         if (loadingIndicator) {
             // Show to the user that search is busy
@@ -64,7 +66,8 @@ export function refreshSearch({loadingIndicator = false, shouldResetPage = false
                 query,
                 startDate,
                 endDate,
-                limit: resultsLimit(state),
+                skip,
+                limit: RESULTS_PAGE_SIZE,
                 includeContext: false,
             })
         } catch (err) {
@@ -79,16 +82,21 @@ export function refreshSearch({loadingIndicator = false, shouldResetPage = false
         }
 
         // First check if the query and result changed in the meantime.
-        if (ourState(getState()).query !== query
-            && ourState(getState()).searchResult !== oldResult) {
+        const updatedState = getState()
+        if (selectors.ourState(updatedState).query !== query
+            && selectors.ourState(updatedState).searchResult !== oldResult) {
             // The query already changed while we were searching, and the
             // currently displayed result may already be more recent than
             // ours. So we did all that effort for nothing.
             return
         }
 
+        // If there is a skip, meaning we're on a page later than first page, we want to
+        // just append the new results for this page to the existing results state
+        const resultInsertAct = skip ? appendSearchResult : setSearchResult
+
         // Set the result to have it displayed to the user.
-        dispatch(setSearchResult({searchResult}))
+        dispatch(resultInsertAct({searchResult}))
     }
 }
 

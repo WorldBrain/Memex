@@ -7,7 +7,7 @@ const currentPage = state => ourState(state).currentPage
 const waitingForMoreResults = state => ourState(state).waitingForMoreResults
 const searchResult = state => ourState(state).searchResult
 
-export const resultsLimit = createSelector(currentPage, page => page * RESULTS_PAGE_SIZE)
+export const resultsSkip = createSelector(currentPage, page => page * RESULTS_PAGE_SIZE)
 export const isMoreLoading = createSelector(waitingForMoreResults, loading => loading > 0)
 export const areMoreResults = createSelector(searchResult, ({ rows: resultRows } = {}) => {
     // Base case when no results

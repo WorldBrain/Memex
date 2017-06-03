@@ -7,7 +7,7 @@ import * as actions from './actions'
 const defaultState = {
     searchResult: {rows: []},
     query: '',
-    currentPage: 1,     // Current page in overview results list
+    currentPage: 0,     // Current page in overview results list
     waitingForResults: 0,
     waitingForMoreResults: 0,
     startDate: undefined,
@@ -30,11 +30,6 @@ function setSearchResult(state, {searchResult}) {
     return {...state, searchResult}
 }
 
-function appendSearchResult(state, {searchResult}) {
-    let moreResults = {...searchResult}
-    moreResults.rows = state.searchResult.rows.concat(searchResult.rows)
-    return {...state, searchResult: moreResults}
-}
 
 function showLoadingIndicator(state) {
     // We have to keep a counter, rather than a boolean, as it can currently
@@ -66,6 +61,16 @@ const resetPage = state => ({
 const makeMoreLoadingReducer = inc => state => ({
     ...state,
     waitingForMoreResults: state.waitingForMoreResults + inc,
+})
+
+const appendSearchResult = (state, {searchResult: {rows: newRows}}) => ({
+    ...state,
+    searchResult: {
+        rows: [
+            ...state.searchResult.rows,
+            ...newRows,
+        ],
+    },
 })
 
 export default createReducer({
