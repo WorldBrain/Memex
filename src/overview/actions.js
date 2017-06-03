@@ -65,7 +65,7 @@ export function refreshSearch({loadingIndicator = false, shouldResetPage = false
                 startDate,
                 endDate,
                 limit: resultsLimit(state),
-                includeContext: true,
+                includeContext: false,
             })
         } catch (err) {
             // TODO give feedback to user that results are not actually updated.
