@@ -75,12 +75,14 @@ export async function getPages({pageIds, ...otherOptions}) {
 export async function searchPages({
     query,
     limit,
+    skip,
     ...otherOptions
 }) {
     let pagesResult = await db.search({
         ...pageSearchIndexParams,
         query,
         limit,
+        skip,
         include_docs: true,
         stale: 'update_after',
     })

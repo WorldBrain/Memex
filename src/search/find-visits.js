@@ -40,7 +40,7 @@ async function insertPagesIntoVisits({
 // time (descending).
 // If pagesResult is given, only find visits to those pages.
 // XXX: If pages are redirected, only visits to the source page are found.
-export async function findVisits({startDate, endDate, limit, pagesResult}) {
+export async function findVisits({startDate, endDate, skip, limit, pagesResult}) {
     let selector = {
         // Constrain by id (like with startkey/endkey), both to get only the
         // visit docs, and (if needed) to filter the visits after/before a
@@ -68,6 +68,7 @@ export async function findVisits({startDate, endDate, limit, pagesResult}) {
 
     let findResult = await db.find({
         selector,
+        skip,
         // Sort them by time, newest first
         sort: [{'_id': 'desc'}],
         // limit, // XXX pouchdb-find seems to mess up when passing a limit...
