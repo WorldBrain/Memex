@@ -2,10 +2,9 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
-import queryString from 'query-string'
 
 import * as actions from '../actions'
-import { ourState, isMoreLoading } from '../selectors'
+import * as selectors from '../selectors'
 import ResultList from './ResultList'
 import LoadingIndicator from './LoadingIndicator'
 import DateRangeSelection from './DateRangeSelection'
@@ -13,9 +12,23 @@ import styles from './Overview.css'
 
 
 class Overview extends React.Component {
+    constructor(props) {
+        super(props)
+
+        this.handlePagination = this.handlePagination.bind(this)
+    }
+
     componentDidMount() {
         if (this.props.grabFocusOnMount) {
             this.inputQueryRef.focus()
+        }
+    }
+
+    handlePagination() {
+        const { boundActions, areMoreResults } = this.props
+
+        if (areMoreResults) {
+            boundActions.getMoreResults()
         }
     }
 
@@ -46,7 +59,7 @@ class Overview extends React.Component {
                             <ResultList
                                 searchResult={this.props.searchResult}
                                 searchQuery={this.props.query}
-                                handlePagination={boundActions.getMoreResults}
+                                handlePagination={this.handlePagination}
                                 isMoreLoading={this.props.isMoreLoading}
                             />
                         )
@@ -65,11 +78,16 @@ Overview.propTypes = {
     boundActions: PropTypes.object.isRequired,
     waitingForResults: PropTypes.oneOfType([PropTypes.bool, PropTypes.number]),
     isMoreLoading: PropTypes.bool.isRequired,
+    areMoreResults: PropTypes.bool.isRequired,
     searchResult: PropTypes.object,
 }
 
 
-const mapStateToProps = state => ({ ...ourState(state), isMoreLoading: isMoreLoading(state) })
+const mapStateToProps = state => ({
+    ...selectors.ourState(state),
+    isMoreLoading: selectors.isMoreLoading(state),
+    areMoreResults: selectors.areMoreResults(state),
+})
 
 const mapDispatchToProps = dispatch => ({ boundActions: bindActionCreators(actions, dispatch) })
 
