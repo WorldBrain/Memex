@@ -3,6 +3,7 @@
 import maxBy from 'lodash/fp/maxBy'
 
 import db from 'src/pouchdb'
+import updateDoc from 'src/util/pouchdb-update-doc'
 import { getTimestamp } from 'src/activity-logger'
 import determinePageSameness, { Sameness } from './sameness'
 
@@ -21,24 +22,20 @@ function samenessLinkType({sameness}) {
 
 async function forgetPageContents({page}) {
     // Remove analysed bulky stuff
-    const doc = await db.get(page._id)
-    const updatedDoc = {
+    await updateDoc(db, page._id, doc => ({
         ...doc,
         extractedText: undefined,
         extractedMetadata: undefined,
         screenshot: undefined,
         favIcon: undefined,
-    }
-    await db.put(updatedDoc)
+    }))
 }
 
 async function addLink({targetId, sourceId, linkType}) {
-    const doc = await db.get(sourceId)
-    const updatedDoc = {
+    await updateDoc(db, sourceId, doc => ({
         ...doc,
         [linkType]: {_id: targetId},
-    }
-    await db.put(updatedDoc)
+    }))
 }
 
 async function replaceWithRedirect({oldPage, newPage, sameness}) {
