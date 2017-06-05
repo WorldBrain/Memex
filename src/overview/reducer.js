@@ -7,9 +7,9 @@ import * as actions from './actions'
 const defaultState = {
     searchResult: {rows: []},
     query: '',
-    currentPage: 0,     // Current page in overview results list
-    waitingForResults: 0,
-    waitingForMoreResults: 0,
+    currentPage: 0, // Current page in overview results list
+    waitingForResults: 0, // Main search loading state
+    waitingForMoreResults: 0, // Inf scroll loading state
     startDate: undefined,
     endDate: undefined,
 }
@@ -29,7 +29,6 @@ function setEndDate(state, {endDate}) {
 function setSearchResult(state, {searchResult}) {
     return {...state, searchResult}
 }
-
 
 function showLoadingIndicator(state) {
     // We have to keep a counter, rather than a boolean, as it can currently

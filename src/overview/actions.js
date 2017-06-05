@@ -82,9 +82,8 @@ export function refreshSearch({loadingIndicator = false, shouldResetPage = false
         }
 
         // First check if the query and result changed in the meantime.
-        const updatedState = getState()
-        if (selectors.ourState(updatedState).query !== query
-            && selectors.ourState(updatedState).searchResult !== oldResult) {
+        const { query: updatedQuery, searchResult: updatedResult } = selectors.ourState(getState())
+        if (updatedQuery !== query && updatedResult !== oldResult) {
             // The query already changed while we were searching, and the
             // currently displayed result may already be more recent than
             // ours. So we did all that effort for nothing.
