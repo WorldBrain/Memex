@@ -11,6 +11,7 @@ import { ourState } from './selectors'
 
 export const setQuery = createAction('overview/setQuery')
 export const setSearchResult = createAction('overview/setSearchResult')
+export const appendSearchResult = createAction('overview/appendSearchResult')
 export const showLoadingIndicator = createAction('overview/showLoadingIndicator')
 export const hideLoadingIndicator = createAction('overview/hideLoadingIndicator')
 export const setStartDate = createAction('overview/setStartDate')
@@ -81,6 +82,39 @@ export function refreshSearch({loadingIndicator = false}) {
 
         // Set the result to have it displayed to the user.
         dispatch(setSearchResult({searchResult}))
+    }
+}
+
+// Getting more results
+export function getMoreResults({loadingIndicator = false, endDate, scrollPosition}) {
+    return async function (dispatch, getState) {
+        const { query, startDate } = ourState(getState())
+
+        if (loadingIndicator) {
+            // Show to the user that search is busy
+            dispatch(showLoadingIndicator())
+        }
+
+        const searchResult = await filterVisitsByQuery({
+            query,
+            startDate,
+            endDate,
+            includeContext: true,
+        })
+        if (loadingIndicator) {
+            // Hide our nice loading animation again.
+            dispatch(hideLoadingIndicator())
+        }
+
+        // Append the result to have it displayed to the user.
+        dispatch(appendSearchResult({searchResult}))
+
+        if (scrollPosition) {
+            // Scroll back the position where the more results funtion was fire
+            // because after the new results are appended the whole view is re-rendered scrolling back to the begining
+            // So we need to scroll back to the point where the user left.
+            window.scrollTo(0, scrollPosition)
+        }
     }
 }
 

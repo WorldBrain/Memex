@@ -15,6 +15,21 @@ class Overview extends React.Component {
         if (this.props.grabFocusOnMount) {
             this.refs['inputQuery'].focus()
         }
+
+        // Add an onscroll event listener to listen for scrolling events
+        window.addEventListener('scroll', (e) => {
+            // Calculate what percentage of the screen has ben scrolled
+            let scrollPercentage = (e.target.body.scrollTop / (e.target.body.scrollHeight - e.target.body.clientHeight)) * 100
+
+            // Check if that percentage is above 80% that is towards the end
+            // And if the system is not waiting for results so as to get more results.
+            if ((scrollPercentage >= 80) && (this.props.waitingForResults === 0)) {
+                // console.log("get more data", scrollPercentage, this.props.searchResult,this.props.searchResult.rows[this.props.searchResult.rows.length - 1].doc.visitStart);
+                this.props.getMoreResults(this.props.searchResult.rows[this.props.searchResult.rows.length - 1].doc.visitStart, e.target.body.scrollTop)
+            }
+
+            // console.log(e.target.body.clientHeight, e.target.body.scrollHeight, e.target.body.scrollTop, scrollPercentage)
+        })
     }
 
     render() {
@@ -59,6 +74,7 @@ Overview.propTypes = {
     endDate: PropTypes.number,
     onStartDateChange: PropTypes.func,
     onEndDateChange: PropTypes.func,
+    getMoreResults: PropTypes.func,
     waitingForResults: PropTypes.oneOfType([PropTypes.bool, PropTypes.number]),
     searchResult: PropTypes.object,
 }
@@ -75,6 +91,9 @@ const mapDispatchToProps = dispatch => ({
     },
     onEndDateChange: date => {
         dispatch(actions.setEndDate({endDate: date}))
+    },
+    getMoreResults: (date, position) => {
+        dispatch(actions.getMoreResults({loadingIndicator: true, endDate: date, scrollPosition: position}))
     },
 })
 
