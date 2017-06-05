@@ -6,6 +6,7 @@ import { remoteFunction } from 'src/util/webextensionRPC'
 import whenAllSettled from 'src/util/when-all-settled'
 import delay from 'src/util/delay'
 import db from 'src/pouchdb'
+import updateDoc from 'src/util/pouchdb-update-doc'
 import { updatePageSearchIndex } from 'src/search/find-pages'
 
 import { revisePageFields } from '..'
@@ -21,19 +22,17 @@ async function performPageAnalysis({pageId, tabId}) {
 
     // A shorthand for updating a single field in a doc.
     const setDocField = (db, docId, key) => async value => {
-        const doc = await db.get(docId)
-        const updatedDoc = assocPath(key, value)(doc)
-        await db.put(updatedDoc)
+        await updateDoc(db, docId, doc => assocPath(key, value)(doc))
     }
 
     // A shorthand for adding an attachment to a doc.
     const setDocAttachment = (db, docId, attachmentId) => async blob => {
-        const doc = await db.get(docId)
-        const updatedDoc = assocPath(
-            ['_attachments', attachmentId],
-            {content_type: blob.type, data: blob}
-        )(doc)
-        await db.put(updatedDoc)
+        await updateDoc(db, docId,
+            doc => assocPath(
+                ['_attachments', attachmentId],
+                {content_type: blob.type, data: blob}
+            )(doc)
+        )
     }
 
     // Get and store the fav-icon
