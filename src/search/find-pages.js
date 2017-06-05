@@ -55,6 +55,11 @@ async function postprocessPagesResult({pagesResult, followRedirects}) {
     return pagesResult
 }
 
+export async function getPage({pageId, ...otherOptions}) {
+    const pagesResult = await getPages({pageIds: [pageId], ...otherOptions})
+    return pagesResult.rows[0].doc
+}
+
 // Get all pages for a given array of page ids
 export async function getPages({pageIds, ...otherOptions}) {
     let pagesResult = await db.allDocs({
