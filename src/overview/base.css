@@ -1,6 +1,5 @@
 @charset 'UTF-8';
 
 body {
-    background-image: url('img/background.jpg');
-    background-size: 100%;
+    background-color: #F4F4F4;
 }
