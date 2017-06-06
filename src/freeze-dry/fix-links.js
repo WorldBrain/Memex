@@ -3,7 +3,7 @@ export default async function fixLinks({rootElement, docUrl}) {
     if (head) {
         const base = head.ownerDocument.createElement('base')
         base.href = docUrl
-        head.appendChild(base)
+        head.insertAdjacentElement('afterbegin', base)
     } else {
         const links = Array.from(rootElement.querySelectorAll('*[href]'))
         links.forEach(link => {
