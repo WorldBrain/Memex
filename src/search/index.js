@@ -12,7 +12,7 @@ export async function filterVisitsByQuery({
     startDate,
     endDate,
     skipUntil,
-    limit = 5,
+    limit = 10,
     includeContext = false,
 }) {
     if (query === '') {

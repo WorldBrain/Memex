@@ -75,30 +75,37 @@ const ResultList = ({
 
     const rowGaps = computeRowGaps({searchResult})
 
+    const listItems = searchResult.rows.map((row, rowIndex) => {
+        const { marginTop, timestampComponent } = rowGaps[rowIndex]
+
+        return (
+            <li
+                key={row.doc._id}
+                style={{
+                    marginTop,
+                }}
+            >
+                {timestampComponent}
+                <VisitAsListItem
+                    compact={row.isContextualResult}
+                    doc={row.doc}
+                />
+            </li>
+        )
+    })
+
+    // Insert waypoint to trigger loading new items when scrolling down.
+    if (!waitingForResults) {
+        const waypoint = <Waypoint onEnter={onBottomReached} key='waypoint' />
+        // Put the waypoint a bit before the bottom, except if the list is short.
+        const waypointPosition = Math.max(Math.min(5, listItems.length), listItems.length - 5)
+        listItems.splice(waypointPosition, 0, waypoint)
+    }
+
     return (
         <ul className={styles.root}>
-            {searchResult.rows.map((row, rowIndex) => {
-                const { marginTop, timestampComponent } = rowGaps[rowIndex]
-
-                return (
-                    <li
-                        key={row.doc._id}
-                        style={{
-                            marginTop,
-                        }}
-                    >
-                        {timestampComponent}
-                        <VisitAsListItem
-                            compact={row.isContextualResult}
-                            doc={row.doc}
-                        />
-                    </li>
-                )
-            })}
-            {waitingForResults
-                ? <LoadingIndicator />
-                : <Waypoint onEnter={onBottomReached} />
-            }
+            {listItems}
+            {waitingForResults && <LoadingIndicator />}
         </ul>
     )
 }
