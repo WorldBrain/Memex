@@ -5,7 +5,6 @@ import { connect } from 'react-redux'
 import * as actions from '../actions'
 import { ourState } from '../selectors'
 import ResultList from './ResultList'
-import LoadingIndicator from './LoadingIndicator'
 import DateRangeSelection from './DateRangeSelection'
 import styles from './Overview.css'
 
@@ -36,16 +35,12 @@ class Overview extends React.Component {
                     onEndDateChange={this.props.onEndDateChange}
                 />
                 <div>
-                    {this.props.waitingForResults
-                        ? <LoadingIndicator />
-                        : (
-                            <ResultList
-                                searchResult={this.props.searchResult}
-                                searchQuery={this.props.query}
-                                onBottomReached={this.props.onBottomReached}
-                            />
-                        )
-                    }
+                    <ResultList
+                        searchResult={this.props.searchResult}
+                        searchQuery={this.props.query}
+                        onBottomReached={this.props.onBottomReached}
+                        waitingForResults={this.props.waitingForResults}
+                    />
                 </div>
             </div>
         )
@@ -61,12 +56,15 @@ Overview.propTypes = {
     onStartDateChange: PropTypes.func,
     onEndDateChange: PropTypes.func,
     onBottomReached: PropTypes.func,
-    waitingForResults: PropTypes.oneOfType([PropTypes.bool, PropTypes.number]),
+    waitingForResults: PropTypes.bool,
     searchResult: PropTypes.object,
 }
 
 
-const mapStateToProps = state => ourState(state)
+const mapStateToProps = state => ({
+    ...ourState(state),
+    waitingForResults: !!ourState(state).waitingForResults, // cast to boolean
+})
 
 const mapDispatchToProps = dispatch => ({
     onInputChanged: input => {

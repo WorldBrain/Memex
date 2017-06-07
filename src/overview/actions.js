@@ -43,14 +43,18 @@ export function deleteVisit({visitId}) {
 }
 
 // Search for docs matching the current query, update the results
-export function refreshSearch({loadingIndicator = false, skipUntil}) {
+export function refreshSearch({
+    loadingIndicator = false,
+    clearResults = false,
+    skipUntil,
+}) {
     return async function (dispatch, getState) {
         const { query, startDate, endDate } = ourState(getState())
         const oldResult = ourState(getState()).searchResult
 
         if (loadingIndicator) {
             // Show to the user that search is busy
-            dispatch(showLoadingIndicator())
+            dispatch(showLoadingIndicator({clearResults}))
         }
 
         let searchResult
@@ -97,7 +101,11 @@ export function loadMoreResults() {
         const lastResultId = searchResult.searchedUntil
             || (searchResult.rows.length && last(searchResult.rows).id)
             || undefined
-        dispatch(refreshSearch({skipUntil: lastResultId}))
+        dispatch(refreshSearch({
+            loadingIndicator: true,
+            clearResults: false,
+            skipUntil: lastResultId,
+        }))
     }
 }
 

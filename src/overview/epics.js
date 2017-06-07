@@ -15,10 +15,16 @@ const searchUpdateActions = [
 export const refreshSearchResultsUponQueryChange = action$ => action$
     .filter(action => searchUpdateActions.includes(action.type))
     .debounceTime(500) // wait until typing stops for 500ms
-    .map(() => actions.refreshSearch({loadingIndicator: true}))
+    .map(() => actions.refreshSearch({
+        clearResults: true,
+        loadingIndicator: true,
+    }))
 
 // When the database changed, refresh the search results
 export const refreshSearchResultsUponLogChange = action$ => action$
     .ofType(actions.handlePouchChange.getType())
     .debounceTime(1000)
-    .map(() => actions.refreshSearch({loadingIndicator: false}))
+    .map(() => actions.refreshSearch({
+        clearResults: false,
+        loadingIndicator: false,
+    }))

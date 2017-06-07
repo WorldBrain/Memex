@@ -4,8 +4,9 @@ import Waypoint from 'react-waypoint'
 
 import { makeNonlinearTransform } from 'src/util/make-range-transform'
 import niceTime from 'src/util/nice-time'
-import VisitAsListItem from './VisitAsListItem'
 
+import VisitAsListItem from './VisitAsListItem'
+import LoadingIndicator from './LoadingIndicator'
 import styles from './ResultList.css'
 
 
@@ -53,10 +54,18 @@ function computeRowGaps({searchResult}) {
     })
 }
 
-const ResultList = ({searchResult, searchQuery, onBottomReached}) => {
+const ResultList = ({
+    searchResult,
+    searchQuery,
+    waitingForResults,
+    onBottomReached,
+}) => {
     // If there are no results, show a message.
     const noResultMessage = 'no results'
-    if (searchResult.rows.length === 0 && searchQuery !== '') {
+    if (searchResult.rows.length === 0
+        && searchQuery !== ''
+        && !waitingForResults
+    ) {
         return (
             <p className={styles.noResultMessage}>
                 {noResultMessage}
@@ -86,7 +95,10 @@ const ResultList = ({searchResult, searchQuery, onBottomReached}) => {
                     </li>
                 )
             })}
-            <Waypoint onEnter={onBottomReached} />
+            {waitingForResults
+                ? <LoadingIndicator />
+                : <Waypoint onEnter={onBottomReached} />
+            }
         </ul>
     )
 }
@@ -94,6 +106,7 @@ const ResultList = ({searchResult, searchQuery, onBottomReached}) => {
 ResultList.propTypes = {
     searchResult: PropTypes.object,
     searchQuery: PropTypes.string,
+    waitingForResults: PropTypes.bool,
     onBottomReached: PropTypes.func,
 }
 
