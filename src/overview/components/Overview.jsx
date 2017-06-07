@@ -42,6 +42,7 @@ class Overview extends React.Component {
                             <ResultList
                                 searchResult={this.props.searchResult}
                                 searchQuery={this.props.query}
+                                onBottomReached={this.props.onBottomReached}
                             />
                         )
                     }
@@ -59,6 +60,7 @@ Overview.propTypes = {
     endDate: PropTypes.number,
     onStartDateChange: PropTypes.func,
     onEndDateChange: PropTypes.func,
+    onBottomReached: PropTypes.func,
     waitingForResults: PropTypes.oneOfType([PropTypes.bool, PropTypes.number]),
     searchResult: PropTypes.object,
 }
@@ -75,6 +77,9 @@ const mapDispatchToProps = dispatch => ({
     },
     onEndDateChange: date => {
         dispatch(actions.setEndDate({endDate: date}))
+    },
+    onBottomReached: () => {
+        dispatch(actions.loadMoreResults())
     },
 })
 

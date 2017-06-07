@@ -29,6 +29,13 @@ function setSearchResult(state, {searchResult}) {
     return {...state, searchResult}
 }
 
+function appendSearchResult(state, {searchResult}) {
+    const newResult = update('rows',
+        rows => state.searchResult.rows.concat(rows)
+    )(searchResult)
+    return {...state, searchResult: newResult}
+}
+
 function showLoadingIndicator(state) {
     // We have to keep a counter, rather than a boolean, as it can currently
     // happen that multiple subsequent searches are running simultaneously. The
@@ -51,6 +58,7 @@ export default createReducer({
     [actions.setStartDate]: setStartDate,
     [actions.setEndDate]: setEndDate,
     [actions.setSearchResult]: setSearchResult,
+    [actions.appendSearchResult]: appendSearchResult,
     [actions.showLoadingIndicator]: showLoadingIndicator,
     [actions.hideLoadingIndicator]: hideLoadingIndicator,
     [actions.hideVisit]: hideVisit,

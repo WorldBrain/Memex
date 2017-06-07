@@ -11,11 +11,12 @@ export async function filterVisitsByQuery({
     query,
     startDate,
     endDate,
-    limit = 30,
+    skipUntil,
+    limit = 5,
     includeContext = false,
 }) {
     if (query === '') {
-        return findVisits({startDate, endDate, limit})
+        return findVisits({startDate, endDate, limit, skipUntil})
     } else {
         // Process visits batch by batch, filtering for ones that match the
         // query until we reach the requested limit or have exhausted all
@@ -23,7 +24,6 @@ export async function filterVisitsByQuery({
 
         let rows = []
         let visitsExhausted = false
-        let skipUntil
         // Number of visits we process at a time (rather arbitrary)
         const batchSize = limit * 10
         do {
@@ -38,7 +38,7 @@ export async function filterVisitsByQuery({
             // Check if we reached the bottom.
             visitsExhausted = batchRows.length < batchSize
 
-            // Next batch, start from the last result.
+            // Next batch (or next invocation), start from the last result.
             skipUntil = (batchRows.length > 0)
                 ? last(batchRows).id
                 : skipUntil
@@ -58,6 +58,9 @@ export async function filterVisitsByQuery({
 
         let visitsResult = {
             rows,
+            // Remember the last docId, to continue from there when more results
+            // are requested.
+            searchedUntil: skipUntil,
         }
 
         if (includeContext) { visitsResult = await addVisitsContext({visitsResult}) }
