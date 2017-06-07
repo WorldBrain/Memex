@@ -1,4 +1,5 @@
 import get from 'lodash/fp/get'
+import last from 'lodash/fp/last'
 
 import { searchableTextFields } from 'src/page-analysis'
 
@@ -16,14 +17,48 @@ export async function filterVisitsByQuery({
     if (query === '') {
         return findVisits({startDate, endDate, limit})
     } else {
-        // Get all visits
-        let visitsResult = await findVisits({startDate, endDate})
-        // Filter for visits to pages that contain the query words.
-        visitsResult.rows = visitsResult.rows.filter(
-            row => pageMatchesQuery({page: row.doc.page, query})
-        )
-        // Apply the requested limit to the number of results.
-        visitsResult.rows = visitsResult.rows.slice(0, limit)
+        // Process visits batch by batch, filtering for ones that match the
+        // query until we reach the requested limit or have exhausted all
+        // of them.
+
+        let rows = []
+        let visitsExhausted = false
+        let skipUntil
+        // Number of visits we process at a time (rather arbitrary)
+        const batchSize = limit * 10
+        do {
+            let batch = await findVisits({
+                startDate,
+                endDate,
+                limit: batchSize,
+                skipUntil,
+            })
+            const batchRows = batch.rows
+
+            // Check if we reached the bottom.
+            visitsExhausted = batchRows.length < batchSize
+
+            // Next batch, start from the last result.
+            skipUntil = (batchRows.length > 0)
+                ? last(batchRows).id
+                : skipUntil
+
+            // Filter for visits to pages that contain the query words.
+            const hits = batchRows.filter(
+                row => pageMatchesQuery({page: row.doc.page, query})
+            )
+
+            rows = rows.concat(hits)
+
+            // If we did not have enough hits, get and filter another batch.
+        } while (rows.length < limit && !visitsExhausted)
+
+        // If too many, apply the requested limit to the number of results.
+        rows = rows.slice(0, limit)
+
+        let visitsResult = {
+            rows,
+        }
 
         if (includeContext) { visitsResult = await addVisitsContext({visitsResult}) }
 

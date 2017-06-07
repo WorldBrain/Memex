@@ -40,7 +40,7 @@ async function insertPagesIntoVisits({
 // time (descending).
 // If pagesResult is given, only find visits to those pages.
 // XXX: If pages are redirected, only visits to the source page are found.
-export async function findVisits({startDate, endDate, limit, pagesResult}) {
+export async function findVisits({startDate, endDate, limit, pagesResult, skipUntil}) {
     let selector = {
         // Constrain by id (like with startkey/endkey), both to get only the
         // visit docs, and (if needed) to filter the visits after/before a
@@ -54,6 +54,7 @@ export async function findVisits({startDate, endDate, limit, pagesResult}) {
             $lte: endDate !== undefined
                 ? convertVisitDocId({timestamp: endDate})
                 : `${visitKeyPrefix}\uffff`,
+            $lt: skipUntil,
         },
     }
 
