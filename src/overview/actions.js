@@ -1,3 +1,4 @@
+import last from 'lodash/fp/last'
 import { createAction } from 'redux-act'
 
 import { onDatabaseChange } from 'src/pouchdb'
@@ -11,6 +12,7 @@ import { ourState } from './selectors'
 
 export const setQuery = createAction('overview/setQuery')
 export const setSearchResult = createAction('overview/setSearchResult')
+export const appendSearchResult = createAction('overview/appendSearchResult')
 export const showLoadingIndicator = createAction('overview/showLoadingIndicator')
 export const hideLoadingIndicator = createAction('overview/hideLoadingIndicator')
 export const setStartDate = createAction('overview/setStartDate')
@@ -41,7 +43,7 @@ export function deleteVisit({visitId}) {
 }
 
 // Search for docs matching the current query, update the results
-export function refreshSearch({loadingIndicator = false}) {
+export function refreshSearch({loadingIndicator = false, skipUntil}) {
     return async function (dispatch, getState) {
         const { query, startDate, endDate } = ourState(getState())
         const oldResult = ourState(getState()).searchResult
@@ -57,6 +59,7 @@ export function refreshSearch({loadingIndicator = false}) {
                 query,
                 startDate,
                 endDate,
+                skipUntil,
                 includeContext: true,
             })
         } catch (err) {
@@ -80,7 +83,21 @@ export function refreshSearch({loadingIndicator = false}) {
         }
 
         // Set the result to have it displayed to the user.
-        dispatch(setSearchResult({searchResult}))
+        if (skipUntil) {
+            dispatch(appendSearchResult({searchResult}))
+        } else {
+            dispatch(setSearchResult({searchResult}))
+        }
+    }
+}
+
+export function loadMoreResults() {
+    return function (dispatch, getState) {
+        const { searchResult } = ourState(getState())
+        const lastResultId = searchResult.searchedUntil
+            || (searchResult.rows.length && last(searchResult.rows).id)
+            || undefined
+        dispatch(refreshSearch({skipUntil: lastResultId}))
     }
 }
 
