@@ -1,7 +1,6 @@
 import last from 'lodash/fp/last'
 import { createAction } from 'redux-act'
 
-import { onDatabaseChange } from 'src/pouchdb'
 import { filterVisitsByQuery } from 'src/search'
 import { deleteVisitAndPage } from 'src/page-storage/deletion'
 
@@ -27,9 +26,6 @@ export function init() {
     return function (dispatch, getState) {
         // Perform an initial search to populate the view (empty query = get all docs)
         dispatch(refreshSearch({loadingIndicator: true}))
-
-        // Track database changes, to e.g. trigger search result refresh
-        onDatabaseChange(change => dispatch(handlePouchChange({change})))
     }
 }
 
@@ -108,6 +104,3 @@ export function loadMoreResults() {
         }))
     }
 }
-
-// Report a change in the database, to e.g. trigger a search refresh
-export const handlePouchChange = createAction('overview/handlePouchChange')

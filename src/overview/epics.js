@@ -19,12 +19,3 @@ export const refreshSearchResultsUponQueryChange = action$ => action$
         clearResults: true,
         loadingIndicator: true,
     }))
-
-// When the database changed, refresh the search results
-export const refreshSearchResultsUponLogChange = action$ => action$
-    .ofType(actions.handlePouchChange.getType())
-    .debounceTime(1000)
-    .map(() => actions.refreshSearch({
-        clearResults: false,
-        loadingIndicator: false,
-    }))
