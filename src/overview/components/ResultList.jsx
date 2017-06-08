@@ -95,7 +95,7 @@ const ResultList = ({
     })
 
     // Insert waypoint to trigger loading new items when scrolling down.
-    if (!waitingForResults) {
+    if (!waitingForResults && !searchResult.resultsExhausted) {
         const waypoint = <Waypoint onEnter={onBottomReached} key='waypoint' />
         // Put the waypoint a bit before the bottom, except if the list is short.
         const waypointPosition = Math.max(Math.min(5, listItems.length), listItems.length - 5)
