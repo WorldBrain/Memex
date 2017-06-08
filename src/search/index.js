@@ -15,6 +15,12 @@ export async function filterVisitsByQuery({
     limit = 10,
     includeContext = false,
 }) {
+    if (limit <= 0) {
+        return {
+            rows: [],
+            resultsExhausted: true,
+        }
+    }
     if (query === '') {
         const visitsResult = await findVisits({startDate, endDate, limit, skipUntil})
         // Note whether we reached the bottom.
