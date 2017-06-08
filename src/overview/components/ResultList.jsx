@@ -24,10 +24,10 @@ const timeGapToSpaceGap = makeNonlinearTransform({
 
 function computeRowGaps({searchResult}) {
     // The space and possibly a time stamp before each row
-    return searchResult.rows.map((row, rowIndex) => {
+    return searchResult.map(({ latestResult: row }, rowIndex) => {
         // Space between two rows depends on the time between them.
-        const prevRow = searchResult.rows[rowIndex - 1]
-        const prevTimestamp = prevRow ? prevRow.doc.visitStart : new Date()
+        const prevRow = searchResult[rowIndex - 1]
+        const prevTimestamp = prevRow ? prevRow.latestResult.doc.visitStart : new Date()
         const timestamp = row.doc.visitStart
         let spaceGap = 0
         if (timestamp) {
@@ -62,7 +62,7 @@ const ResultList = ({
 }) => {
     // If there are no results, show a message.
     const noResultMessage = 'no results'
-    if (searchResult.rows.length === 0
+    if (searchResult.length === 0
         && searchQuery !== ''
         && !waitingForResults
     ) {
@@ -75,7 +75,7 @@ const ResultList = ({
 
     const rowGaps = computeRowGaps({searchResult})
 
-    const listItems = searchResult.rows.map((row, rowIndex) => {
+    const listItems = searchResult.map(({ latestResult: row }, rowIndex) => {
         const { marginTop, timestampComponent } = rowGaps[rowIndex]
 
         return (
@@ -111,7 +111,10 @@ const ResultList = ({
 }
 
 ResultList.propTypes = {
-    searchResult: PropTypes.object,
+    searchResult: PropTypes.arrayOf(PropTypes.shape({
+        latestResult: PropTypes.object.isRequired,
+        rest: PropTypes.arrayOf(PropTypes.object).isRequired,
+    })).isRequired,
     searchQuery: PropTypes.string,
     waitingForResults: PropTypes.bool,
     onBottomReached: PropTypes.func,
