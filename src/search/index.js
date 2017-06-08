@@ -57,7 +57,11 @@ export async function filterVisitsByQuery({
         } while (rows.length < limit && !resultsExhausted)
 
         // If too many, apply the requested limit to the number of results.
-        rows = rows.slice(0, limit)
+        if (rows.length > limit) {
+            rows = rows.slice(0, limit)
+            resultsExhausted = false
+            skipUntil = last(rows).id
+        }
 
         let visitsResult = {
             rows,
