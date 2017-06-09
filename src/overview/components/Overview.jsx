@@ -31,6 +31,12 @@ class Overview extends React.Component {
                         value={this.props.query}
                         ref='inputQuery'
                     />
+                    <div className={styles.links}>
+                        <img
+                            src='img/settings-icon.png'
+                            className={styles.icon}
+                        />
+                    </div>
                 </div>
                 <DateRangeSelection
                     startDate={this.props.startDate}
