@@ -11,34 +11,36 @@
     background-color: #FAFAFA;
     border-bottom: solid 1px #EBEBEB;
 
-    & .query {
-        display: block;
-        width: 100%;
-        margin-right: 8px;
-        margin-left: 8px;
-        max-width: 700px;
-        height: 37px;
-        border: none;
-        border-radius: 3.5px;
-        font-size: large;
-        box-shadow: 0px 2px 4px rgba(220, 220, 220, 0.7);
-        background-image: url('img/search-icon.png');
-        background-repeat: no-repeat;
-        background-size: 18px;
-        background-position: 27px;
-        padding-left: 60px;
-        color:  #484848;
 
-        &::placeholder {
-            color: #B8B8B8;
-        }
+.query {
+    display: block;
+    width: 100%;
+    margin: 0 8px;
+    max-width: 700px;
+    height: 37px;
+    border: none;
+    border-radius: 3.5px;
+    font-size: 16px;
+    box-shadow: 0px 2px 4px rgba(220, 220, 220, 0.7);
+    background-image: url('img/search-icon.png');
+    background-repeat: no-repeat;
+    background-size: 18px;
+    background-position: 27px;
+    padding-left: 60px;
+    outline: none;
+    color:  #484848;
 
-        &:focus {
-            outline: none;
-            border: none;
-            box-shadow: 0px 2px 6px rgba(200, 200, 200, 0.8);
-        }
+    &::placeholder {
+        color: #B8B8B8;
     }
+
+    &:focus {
+        outline: none;
+        border: none;
+        box-shadow: 0px 2px 6px rgba(200, 200, 200, 0.8);
+    }
+}
+
 }
 
 .main {
