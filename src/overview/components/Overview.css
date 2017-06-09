@@ -47,6 +47,15 @@
     }
 }
 
+.links {
+    display: flex;
+    justify-content: flex-end;
+    width: 131px;
+}
+
+.icon {
+    height: 25px;
+    width: 25px;
 }
 
 .main {
