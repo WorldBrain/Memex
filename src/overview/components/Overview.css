@@ -1,7 +1,7 @@
 .navbar {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
     height: 70px;
     position: fixed;
     top: 0;
@@ -9,8 +9,14 @@
     right: 0;
     z-index: 10;
     background-color: #FAFAFA;
-    border-bottom: solid 1px #EBEBEB;
+    padding: 0 60px;
+    box-shadow: 0px 2px 4px rgba(220, 220, 220, 0.7);
+}
 
+.logo {
+    width: 131px;
+    height: 33px;
+}
 
 .query {
     display: block;

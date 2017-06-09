@@ -20,13 +20,17 @@ class Overview extends React.Component {
         return (
             <div>
                 <div className={styles.navbar}>
+                    <img
+                        src='img/worldbrain-logo.png'
+                        className={styles.logo}
+                    />
                     <input
                         className={styles.query}
                         onChange={e => this.props.onInputChanged(e.target.value)}
                         placeholder='Search your memory'
                         value={this.props.query}
                         ref='inputQuery'
-                     />
+                    />
                 </div>
                 <DateRangeSelection
                     startDate={this.props.startDate}
