@@ -19,7 +19,7 @@ class Overview extends React.Component {
     render() {
         return (
             <div>
-                <div>
+                <div className={styles.navbar}>
                     <input
                         className={styles.query}
                         onChange={e => this.props.onInputChanged(e.target.value)}
@@ -35,6 +35,8 @@ class Overview extends React.Component {
                     onEndDateChange={this.props.onEndDateChange}
                 />
                 <div>
+
+                <div className={styles.main}>
                     <ResultList
                         searchResult={this.props.searchResult}
                         searchQuery={this.props.query}
