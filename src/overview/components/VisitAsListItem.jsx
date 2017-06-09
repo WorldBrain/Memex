@@ -42,7 +42,7 @@ const VisitAsListItem = ({doc, compact, onTrashButtonClick}) => {
                             attachmentId='screenshot'
                         />
                     )
-                    : favIcon
+                    : <img className={styles.screenshot} src='img/null-icon.png' />
                 }
             </div>
             <div className={styles.descriptionContainer}>
