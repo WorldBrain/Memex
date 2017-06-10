@@ -18,14 +18,14 @@ const VisitAsListItem = ({doc, compact, onTrashButtonClick}) => {
     })
     const hasFavIcon = !!(doc.page._attachments && doc.page._attachments.favIcon)
     const favIcon = hasFavIcon
-        ? (
+        && (
             <ImgFromPouch
                 className={styles.favIcon}
                 doc={doc.page}
                 attachmentId='favIcon'
             />
         )
-        : <img className={styles.favIcon} src='img/null-icon.png' />
+
     return (
         <a
             className={visitClasses}
