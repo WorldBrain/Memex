@@ -64,12 +64,6 @@
         width: auto;
         height: auto;
     }
-
-    & .favIcon {
-        align-self: center;
-        width: 48px;
-        height: 48px;
-    }
 }
 
 .descriptionContainer {
