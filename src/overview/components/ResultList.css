@@ -10,14 +10,7 @@
     text-align: center;
     width: 100%;
     margin-bottom: 5px;
-
-    &::before {
-        content: '— ';
-    }
-
-    &::after {
-        content: ' —';
-    }
+    color: #9B9BA2;
 }
 
 .noResultMessage {
