@@ -25,31 +25,18 @@ function setEndDate(state, {endDate}) {
     return {...state, endDate}
 }
 
-function setSearchResult(state, {searchResult}) {
-    return {...state, searchResult}
+function setSearchResult(state, {value: searchResult}) {
+    return {...state, searchResult, waitingForResults: false}
 }
 
-function appendSearchResult(state, {searchResult}) {
-    const newResult = update('rows',
-        rows => state.searchResult.rows.concat(rows)
-    )(searchResult)
-    return {...state, searchResult: newResult}
-}
-
-function showLoadingIndicator(state, {clearResults}) {
+function startSearch(state, {args: [{clearResults, loadingIndicator}]}) {
     const { searchResult } = clearResults ? defaultState : state
-    // We have to keep a counter, rather than a boolean, as it can currently
-    // happen that multiple subsequent searches are running simultaneously. The
-    // animation will thus hide again when all of them have completed.
+    const waitingForResults = loadingIndicator || state.waitingForResults
     return {
         ...state,
         searchResult,
-        waitingForResults: state.waitingForResults + 1,
+        waitingForResults,
     }
-}
-
-function hideLoadingIndicator(state) {
-    return {...state, waitingForResults: state.waitingForResults - 1}
 }
 
 function hideVisit(state, {visitId}) {
@@ -62,9 +49,7 @@ export default createReducer({
     [actions.setQuery]: setQuery,
     [actions.setStartDate]: setStartDate,
     [actions.setEndDate]: setEndDate,
-    [actions.setSearchResult]: setSearchResult,
-    [actions.appendSearchResult]: appendSearchResult,
-    [actions.showLoadingIndicator]: showLoadingIndicator,
-    [actions.hideLoadingIndicator]: hideLoadingIndicator,
+    [actions.newSearch.complete]: setSearchResult,
+    [actions.newSearch.pending]: startSearch,
     [actions.hideVisit]: hideVisit,
 }, defaultState)
