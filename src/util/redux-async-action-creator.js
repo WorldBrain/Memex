@@ -12,18 +12,44 @@ export default function asyncActionCreator({
     pending = createAction('pending'),
     complete = createAction('complete'),
     error = createAction('error'),
+    // exclusive: lets multiple invocations exclude each other.
+    // false (default): each action runs independently.
+    // true: ignore any calls when this action is already running.
+    // 'takeLast': run actions normally, but cancel/ignore any previous ones.
+    exclusive = false,
 }) {
+    let runningPromises = []
+
     const newActionCreator = (...args) => {
         return async dispatch => {
-            let value
+            if (runningPromises.length && exclusive === true) return
+            if (runningPromises.length && exclusive === 'takeLast') {
+                // Cancel all running promises. Or well, we just ignore their
+                // results as JS Promises cannot be cancelled.
+                runningPromises.forEach(promise => {
+                    runningPromises = []
+                })
+            }
+
+            // Run the actionCreator
             const action = actionCreator(...args)
             dispatch(pending({action, args}))
+
+            const promise = dispatch(action)
+
+            runningPromises.push(promise)
+
+            let finalAction
             try {
-                value = await dispatch(action)
+                const value = await promise
+                finalAction = complete({value, action, args})
             } catch (err) {
-                dispatch(error({error: err, action, args}))
+                finalAction = error({error: err, action, args})
             }
-            dispatch(complete({value, action, args}))
+            if (runningPromises.includes(promise)) {
+                dispatch(finalAction)
+                runningPromises = runningPromises.filter(v => (v !== promise))
+            } // (else it was supposed to be cancelled, so we ignore the outcome)
         }
     }
     newActionCreator.pending = pending
