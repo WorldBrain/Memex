@@ -50,4 +50,5 @@ const runSearch = () => async (dispatch, getState) => {
 
 export const newSearch = asyncActionCreator({
     actionCreator: runSearch,
+    exclusive: 'takeLast',
 })
