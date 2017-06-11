@@ -15,7 +15,7 @@ const searchUpdateActions = [
 export const refreshSearchResultsUponQueryChange = action$ => action$
     .filter(action => searchUpdateActions.includes(action.type))
     .debounceTime(500) // wait until typing stops for 500ms
-    .map(() => actions.refreshSearch({
+    .map(() => actions.newSearch({
         clearResults: true,
         loadingIndicator: true,
     }))

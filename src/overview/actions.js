@@ -1,8 +1,8 @@
-import last from 'lodash/fp/last'
 import { createAction } from 'redux-act'
 
 import { filterVisitsByQuery } from 'src/search'
 import { deleteVisitAndPage } from 'src/page-storage/deletion'
+import asyncActionCreator from 'src/util/redux-async-action-creator'
 
 import { ourState } from './selectors'
 
@@ -10,7 +10,6 @@ import { ourState } from './selectors'
 // == Simple commands to change the state in reducers ==
 
 export const setQuery = createAction('overview/setQuery')
-export const setSearchResult = createAction('overview/setSearchResult')
 export const appendSearchResult = createAction('overview/appendSearchResult')
 export const showLoadingIndicator = createAction('overview/showLoadingIndicator')
 export const hideLoadingIndicator = createAction('overview/hideLoadingIndicator')
@@ -25,7 +24,7 @@ export const hideVisit = createAction('overview/hideVisit')
 export function init() {
     return function (dispatch, getState) {
         // Perform an initial search to populate the view (empty query = get all docs)
-        dispatch(refreshSearch({loadingIndicator: true}))
+        dispatch(newSearch({loadingIndicator: true}))
     }
 }
 
@@ -38,69 +37,17 @@ export function deleteVisit({visitId}) {
     }
 }
 
-// Search for docs matching the current query, update the results
-export function refreshSearch({
-    loadingIndicator = false,
-    clearResults = false,
-    skipUntil,
-}) {
-    return async function (dispatch, getState) {
-        const { query, startDate, endDate } = ourState(getState())
-        const oldResult = ourState(getState()).searchResult
-
-        if (loadingIndicator) {
-            // Show to the user that search is busy
-            dispatch(showLoadingIndicator({clearResults}))
-        }
-
-        let searchResult
-        try {
-            searchResult = await filterVisitsByQuery({
-                query,
-                startDate,
-                endDate,
-                skipUntil,
-                includeContext: true,
-            })
-        } catch (err) {
-            // TODO give feedback to user that results are not actually updated.
-            console.error(`Search for '${query}' erred: ${err}`)
-            return
-        } finally {
-            if (loadingIndicator) {
-                // Hide our nice loading animation again.
-                dispatch(hideLoadingIndicator())
-            }
-        }
-
-        // First check if the query and result changed in the meantime.
-        if (ourState(getState()).query !== query
-            && ourState(getState()).searchResult !== oldResult) {
-            // The query already changed while we were searching, and the
-            // currently displayed result may already be more recent than
-            // ours. So we did all that effort for nothing.
-            return
-        }
-
-        // Set the result to have it displayed to the user.
-        if (skipUntil) {
-            dispatch(appendSearchResult({searchResult}))
-        } else {
-            dispatch(setSearchResult({searchResult}))
-        }
-    }
+const runSearch = () => async (dispatch, getState) => {
+    const { query, startDate, endDate } = ourState(getState())
+    const searchResult = await filterVisitsByQuery({
+        query,
+        startDate,
+        endDate,
+        includeContext: true,
+    })
+    return searchResult
 }
 
-export function loadMoreResults() {
-    return function (dispatch, getState) {
-        const { searchResult } = ourState(getState())
-        const lastResultId = searchResult.searchedUntil
-            || (searchResult.rows.length && last(searchResult.rows).id)
-            || undefined
-        dispatch(refreshSearch({
-            loadingIndicator: true,
-            clearResults: false,
-            skipUntil: lastResultId,
-        }))
-    }
-}
+export const newSearch = asyncActionCreator({
+    actionCreator: runSearch,
+})
