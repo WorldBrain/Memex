@@ -11,19 +11,28 @@ export async function filterVisitsByQuery({
     query,
     startDate,
     endDate,
-    limit = 30,
+    skipUntil,
+    limit = 10,
     includeContext = false,
 }) {
+    if (limit <= 0) {
+        return {
+            rows: [],
+            resultsExhausted: true,
+        }
+    }
     if (query === '') {
-        return findVisits({startDate, endDate, limit})
+        const visitsResult = await findVisits({startDate, endDate, limit, skipUntil})
+        // Note whether we reached the bottom.
+        visitsResult.resultsExhausted = visitsResult.rows.length < limit
+        return visitsResult
     } else {
         // Process visits batch by batch, filtering for ones that match the
         // query until we reach the requested limit or have exhausted all
         // of them.
 
         let rows = []
-        let visitsExhausted = false
-        let skipUntil
+        let resultsExhausted = false
         // Number of visits we process at a time (rather arbitrary)
         const batchSize = limit * 10
         do {
@@ -36,9 +45,9 @@ export async function filterVisitsByQuery({
             const batchRows = batch.rows
 
             // Check if we reached the bottom.
-            visitsExhausted = batchRows.length < batchSize
+            resultsExhausted = batchRows.length < batchSize
 
-            // Next batch, start from the last result.
+            // Next batch (or next invocation), start from the last result.
             skipUntil = (batchRows.length > 0)
                 ? last(batchRows).id
                 : skipUntil
@@ -51,13 +60,21 @@ export async function filterVisitsByQuery({
             rows = rows.concat(hits)
 
             // If we did not have enough hits, get and filter another batch.
-        } while (rows.length < limit && !visitsExhausted)
+        } while (rows.length < limit && !resultsExhausted)
 
         // If too many, apply the requested limit to the number of results.
-        rows = rows.slice(0, limit)
+        if (rows.length > limit) {
+            rows = rows.slice(0, limit)
+            resultsExhausted = false
+            skipUntil = last(rows).id
+        }
 
         let visitsResult = {
             rows,
+            // Remember the last docId, to continue from there when more results
+            // are requested.
+            searchedUntil: skipUntil,
+            resultsExhausted,
         }
 
         if (includeContext) { visitsResult = await addVisitsContext({visitsResult}) }

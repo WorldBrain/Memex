@@ -1,10 +1,12 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import Waypoint from 'react-waypoint'
 
 import { makeNonlinearTransform } from 'src/util/make-range-transform'
 import niceTime from 'src/util/nice-time'
-import VisitAsListItem from './VisitAsListItem'
 
+import VisitAsListItem from './VisitAsListItem'
+import LoadingIndicator from './LoadingIndicator'
 import styles from './ResultList.css'
 
 
@@ -52,10 +54,18 @@ function computeRowGaps({searchResult}) {
     })
 }
 
-const ResultList = ({searchResult, searchQuery}) => {
+const ResultList = ({
+    searchResult,
+    searchQuery,
+    waitingForResults,
+    onBottomReached,
+}) => {
     // If there are no results, show a message.
     const noResultMessage = 'no results'
-    if (searchResult.rows.length === 0 && searchQuery !== '') {
+    if (searchResult.rows.length === 0
+        && searchQuery !== ''
+        && !waitingForResults
+    ) {
         return (
             <p className={styles.noResultMessage}>
                 {noResultMessage}
@@ -65,26 +75,37 @@ const ResultList = ({searchResult, searchQuery}) => {
 
     const rowGaps = computeRowGaps({searchResult})
 
+    const listItems = searchResult.rows.map((row, rowIndex) => {
+        const { marginTop, timestampComponent } = rowGaps[rowIndex]
+
+        return (
+            <li
+                key={row.doc._id}
+                style={{
+                    marginTop,
+                }}
+            >
+                {timestampComponent}
+                <VisitAsListItem
+                    compact={row.isContextualResult}
+                    doc={row.doc}
+                />
+            </li>
+        )
+    })
+
+    // Insert waypoint to trigger loading new items when scrolling down.
+    if (!waitingForResults && !searchResult.resultsExhausted) {
+        const waypoint = <Waypoint onEnter={onBottomReached} key='waypoint' />
+        // Put the waypoint a bit before the bottom, except if the list is short.
+        const waypointPosition = Math.max(Math.min(5, listItems.length), listItems.length - 5)
+        listItems.splice(waypointPosition, 0, waypoint)
+    }
+
     return (
         <ul className={styles.root}>
-            {searchResult.rows.map((row, rowIndex) => {
-                const { marginTop, timestampComponent } = rowGaps[rowIndex]
-
-                return (
-                    <li
-                        key={row.doc._id}
-                        style={{
-                            marginTop,
-                        }}
-                    >
-                        {timestampComponent}
-                        <VisitAsListItem
-                            compact={row.isContextualResult}
-                            doc={row.doc}
-                        />
-                    </li>
-                )
-            })}
+            {listItems}
+            {waitingForResults && <LoadingIndicator />}
         </ul>
     )
 }
@@ -92,6 +113,8 @@ const ResultList = ({searchResult, searchQuery}) => {
 ResultList.propTypes = {
     searchResult: PropTypes.object,
     searchQuery: PropTypes.string,
+    waitingForResults: PropTypes.bool,
+    onBottomReached: PropTypes.func,
 }
 
 export default ResultList
