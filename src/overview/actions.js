@@ -1,3 +1,4 @@
+import last from 'lodash/fp/last'
 import { createAction } from 'redux-act'
 
 import { filterVisitsByQuery } from 'src/search'
@@ -10,9 +11,6 @@ import { ourState } from './selectors'
 // == Simple commands to change the state in reducers ==
 
 export const setQuery = createAction('overview/setQuery')
-export const appendSearchResult = createAction('overview/appendSearchResult')
-export const showLoadingIndicator = createAction('overview/showLoadingIndicator')
-export const hideLoadingIndicator = createAction('overview/hideLoadingIndicator')
 export const setStartDate = createAction('overview/setStartDate')
 export const setEndDate = createAction('overview/setEndDate')
 export const hideVisit = createAction('overview/hideVisit')
@@ -24,7 +22,7 @@ export const hideVisit = createAction('overview/hideVisit')
 export function init() {
     return function (dispatch, getState) {
         // Perform an initial search to populate the view (empty query = get all docs)
-        dispatch(newSearch({loadingIndicator: true}))
+        dispatch(newSearch())
     }
 }
 
@@ -37,7 +35,7 @@ export function deleteVisit({visitId}) {
     }
 }
 
-const runSearch = () => async (dispatch, getState) => {
+export const newSearch = asyncActionCreator(() => async (dispatch, getState) => {
     const { query, startDate, endDate } = ourState(getState())
     const searchResult = await filterVisitsByQuery({
         query,
@@ -46,9 +44,34 @@ const runSearch = () => async (dispatch, getState) => {
         includeContext: true,
     })
     return searchResult
+})
+
+export const expandSearch = asyncActionCreator(() => async (dispatch, getState) => {
+    const { query, startDate, endDate, searchResult } = ourState(getState())
+    // Look from which item the search should continue.
+    const skipUntil = searchResult.searchedUntil
+        || (searchResult.rows.length && last(searchResult.rows).id)
+        || undefined
+    // Get the items that are to be appended.
+    const newSearchResult = await filterVisitsByQuery({
+        query,
+        startDate,
+        endDate,
+        includeContext: true,
+        skipUntil,
+    })
+    return newSearchResult
+})
+
+export const updateSearch = () => (dispatch, getState) => {
+    // Cancel any running searches and start again.
+    newSearch.cancelAll()
+    expandSearch.cancelAll()
+    dispatch(newSearch())
 }
 
-export const newSearch = asyncActionCreator({
-    actionCreator: runSearch,
-    exclusive: 'takeLast',
-})
+export const loadMoreResults = () => (dispatch, getState) => {
+    // If a search is already running, don't do anything.
+    if (newSearch.isPending() || expandSearch.isPending()) return
+    dispatch(expandSearch())
+}

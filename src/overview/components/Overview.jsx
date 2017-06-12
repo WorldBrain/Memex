@@ -77,7 +77,7 @@ const mapDispatchToProps = dispatch => ({
         dispatch(actions.setEndDate({endDate: date}))
     },
     onBottomReached: () => {
-        // dispatch(actions.loadMoreResults())
+        dispatch(actions.loadMoreResults())
     },
 })
 
