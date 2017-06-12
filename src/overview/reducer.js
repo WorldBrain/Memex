@@ -1,3 +1,4 @@
+import uniqBy from 'lodash/fp/uniqBy'
 import update from 'lodash/fp/update'
 import remove from 'lodash/fp/remove'
 import { createReducer } from 'redux-act'
@@ -8,7 +9,7 @@ import * as actions from './actions'
 const defaultState = {
     searchResult: {rows: []},
     query: '',
-    waitingForResults: 0,
+    waitingForResults: false,
     startDate: undefined,
     endDate: undefined,
 }
@@ -25,31 +26,48 @@ function setEndDate(state, {endDate}) {
     return {...state, endDate}
 }
 
-function setSearchResult(state, {searchResult}) {
-    return {...state, searchResult}
-}
-
-function appendSearchResult(state, {searchResult}) {
-    const newResult = update('rows',
-        rows => state.searchResult.rows.concat(rows)
-    )(searchResult)
-    return {...state, searchResult: newResult}
-}
-
-function showLoadingIndicator(state, {clearResults}) {
-    const { searchResult } = clearResults ? defaultState : state
-    // We have to keep a counter, rather than a boolean, as it can currently
-    // happen that multiple subsequent searches are running simultaneously. The
-    // animation will thus hide again when all of them have completed.
+function startNewSearch(state) {
     return {
         ...state,
-        searchResult,
-        waitingForResults: state.waitingForResults + 1,
+        // Remove the currently displayed results
+        searchResult: defaultState.searchResult,
+        waitingForResults: true,
     }
 }
 
-function hideLoadingIndicator(state) {
-    return {...state, waitingForResults: state.waitingForResults - 1}
+function startExpandSearch(state) {
+    return {
+        ...state,
+        waitingForResults: true,
+    }
+}
+
+function finishNewSearch(state, {value, error, cancelled}) {
+    const searchResult = value || state.searchResult
+    return {
+        ...state,
+        searchResult,
+        waitingForResults: false,
+    }
+}
+
+function finishExpandSearch(state, {value: newResult, error, cancelled}) {
+    // We prepend old rows to the new result, not vice versa, to keep other info
+    // (esp. searchedUntil) from the new result.
+    const prependRows = moreRows => update('rows',
+        // uniqBy may currently be needed to dedupe when includeContext is used.
+        rows => uniqBy('id')(moreRows.concat(rows))
+    )
+
+    const searchResult = newResult
+        ? prependRows(state.searchResult.rows)(newResult)
+        : state.searchResult
+
+    return {
+        ...state,
+        searchResult,
+        waitingForResults: false,
+    }
 }
 
 function hideVisit(state, {visitId}) {
@@ -62,9 +80,9 @@ export default createReducer({
     [actions.setQuery]: setQuery,
     [actions.setStartDate]: setStartDate,
     [actions.setEndDate]: setEndDate,
-    [actions.setSearchResult]: setSearchResult,
-    [actions.appendSearchResult]: appendSearchResult,
-    [actions.showLoadingIndicator]: showLoadingIndicator,
-    [actions.hideLoadingIndicator]: hideLoadingIndicator,
+    [actions.newSearch.pending]: startNewSearch,
+    [actions.newSearch.finished]: finishNewSearch,
+    [actions.expandSearch.pending]: startExpandSearch,
+    [actions.expandSearch.finished]: finishExpandSearch,
     [actions.hideVisit]: hideVisit,
 }, defaultState)
