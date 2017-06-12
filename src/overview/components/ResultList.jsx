@@ -4,6 +4,7 @@ import PropTypes from 'prop-types'
 import { makeNonlinearTransform } from 'src/util/make-range-transform'
 import niceTime from 'src/util/nice-time'
 import VisitAsListItem from './VisitAsListItem'
+import InfScrollWaypoint from './InfScrollWaypoint'
 
 import styles from './ResultList.css'
 
@@ -52,7 +53,7 @@ function computeRowGaps({searchResult}) {
     })
 }
 
-const ResultList = ({searchResult, searchQuery}) => {
+const ResultList = ({searchResult, searchQuery, ...waypointProps}) => {
     // If there are no results, show a message.
     const noResultMessage = 'no results'
     if (searchResult.rows.length === 0 && searchQuery !== '') {
@@ -85,6 +86,7 @@ const ResultList = ({searchResult, searchQuery}) => {
                     </li>
                 )
             })}
+            <InfScrollWaypoint {...waypointProps} />
         </ul>
     )
 }

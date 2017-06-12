@@ -4,11 +4,12 @@ import { createReducer } from 'redux-act'
 
 import * as actions from './actions'
 
-
 const defaultState = {
     searchResult: {rows: []},
     query: '',
-    waitingForResults: 0,
+    currentPage: 0, // Current page in overview results list
+    waitingForResults: 0, // Main search loading state
+    waitingForMoreResults: 0, // Inf scroll loading state
     startDate: undefined,
     endDate: undefined,
 }
@@ -46,12 +47,42 @@ function hideVisit(state, {visitId}) {
     )(state)
 }
 
+const nextPage = state => ({
+    ...state,
+    currentPage: state.currentPage + 1,
+})
+
+const resetPage = state => ({
+    ...state,
+    currentPage: defaultState.currentPage,
+})
+
+const makeMoreLoadingReducer = inc => state => ({
+    ...state,
+    waitingForMoreResults: state.waitingForMoreResults + inc,
+})
+
+const appendSearchResult = (state, {searchResult: {rows: newRows}}) => ({
+    ...state,
+    searchResult: {
+        rows: [
+            ...state.searchResult.rows,
+            ...newRows,
+        ],
+    },
+})
+
 export default createReducer({
     [actions.setQuery]: setQuery,
     [actions.setStartDate]: setStartDate,
     [actions.setEndDate]: setEndDate,
     [actions.setSearchResult]: setSearchResult,
+    [actions.appendSearchResult]: appendSearchResult,
     [actions.showLoadingIndicator]: showLoadingIndicator,
     [actions.hideLoadingIndicator]: hideLoadingIndicator,
+    [actions.showMoreLoading]: makeMoreLoadingReducer(1),
+    [actions.hideMoreLoading]: makeMoreLoadingReducer(-1),
     [actions.hideVisit]: hideVisit,
+    [actions.nextPage]: nextPage,
+    [actions.resetPage]: resetPage,
 }, defaultState)

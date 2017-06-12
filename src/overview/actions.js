@@ -3,19 +3,23 @@ import { createAction } from 'redux-act'
 import { onDatabaseChange } from 'src/pouchdb'
 import { filterVisitsByQuery } from 'src/search'
 import { deleteVisitAndPage } from 'src/page-storage/deletion'
-
-import { ourState } from './selectors'
-
+import * as selectors from './selectors'
+import { RESULTS_PAGE_SIZE } from './constants'
 
 // == Simple commands to change the state in reducers ==
 
-export const setQuery = createAction('overview/setQuery')
+export const setQuery = createAction('overview/setQuery', input => ({ query: input }))
 export const setSearchResult = createAction('overview/setSearchResult')
+export const appendSearchResult = createAction('overview/appendSearchResult')
+export const showMoreLoading = createAction('overview/showMoreLoading')
+export const hideMoreLoading = createAction('overview/hideMoreLoading')
 export const showLoadingIndicator = createAction('overview/showLoadingIndicator')
 export const hideLoadingIndicator = createAction('overview/hideLoadingIndicator')
-export const setStartDate = createAction('overview/setStartDate')
-export const setEndDate = createAction('overview/setEndDate')
+export const setStartDate = createAction('overview/setStartDate', date => ({ startDate: date }))
+export const setEndDate = createAction('overview/setEndDate', date => ({ endDate: date }))
 export const hideVisit = createAction('overview/hideVisit')
+export const nextPage = createAction('overview/nextPage')
+export const resetPage = createAction('overview/resetPage')
 
 
 // == Actions that trigger other actions ==
@@ -41,10 +45,15 @@ export function deleteVisit({visitId}) {
 }
 
 // Search for docs matching the current query, update the results
-export function refreshSearch({loadingIndicator = false}) {
+export function refreshSearch({loadingIndicator = false, shouldResetPage = false} = {}) {
     return async function (dispatch, getState) {
-        const { query, startDate, endDate } = ourState(getState())
-        const oldResult = ourState(getState()).searchResult
+        if (shouldResetPage) {
+            dispatch(resetPage())
+        }
+
+        const state = getState()
+        const { query, startDate, endDate, searchResult: oldResult } = selectors.ourState(state)
+        const skip = selectors.resultsSkip(state)
 
         if (loadingIndicator) {
             // Show to the user that search is busy
@@ -57,7 +66,9 @@ export function refreshSearch({loadingIndicator = false}) {
                 query,
                 startDate,
                 endDate,
-                includeContext: true,
+                skip,
+                limit: RESULTS_PAGE_SIZE,
+                includeContext: false,
             })
         } catch (err) {
             // TODO give feedback to user that results are not actually updated.
@@ -71,17 +82,32 @@ export function refreshSearch({loadingIndicator = false}) {
         }
 
         // First check if the query and result changed in the meantime.
-        if (ourState(getState()).query !== query
-            && ourState(getState()).searchResult !== oldResult) {
+        const { query: updatedQuery, searchResult: updatedResult } = selectors.ourState(getState())
+        if (updatedQuery !== query && updatedResult !== oldResult) {
             // The query already changed while we were searching, and the
             // currently displayed result may already be more recent than
             // ours. So we did all that effort for nothing.
             return
         }
 
+        // If there is a skip, meaning we're on a page later than first page, we want to
+        // just append the new results for this page to the existing results state
+        const resultInsertAct = skip ? appendSearchResult : setSearchResult
+
         // Set the result to have it displayed to the user.
-        dispatch(setSearchResult({searchResult}))
+        dispatch(resultInsertAct({searchResult}))
     }
+}
+
+/**
+ * Handles running actions related to pagination event to grab more results data.
+ * Should update page state before running refreshSearch thunk.
+ */
+export const getMoreResults = () => async dispatch => {
+    dispatch(showMoreLoading())
+    dispatch(nextPage())
+    await dispatch(refreshSearch())
+    dispatch(hideMoreLoading())
 }
 
 // Report a change in the database, to e.g. trigger a search refresh
