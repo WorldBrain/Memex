@@ -1,3 +1,4 @@
+import uniqBy from 'lodash/fp/uniqBy'
 import update from 'lodash/fp/update'
 import remove from 'lodash/fp/remove'
 import { createReducer } from 'redux-act'
@@ -8,7 +9,7 @@ import * as actions from './actions'
 const defaultState = {
     searchResult: {rows: []},
     query: '',
-    waitingForResults: 0,
+    waitingForResults: false,
     startDate: undefined,
     endDate: undefined,
 }
@@ -25,17 +26,47 @@ function setEndDate(state, {endDate}) {
     return {...state, endDate}
 }
 
-function setSearchResult(state, {value: searchResult}) {
-    return {...state, searchResult, waitingForResults: false}
+function startNewSearch(state) {
+    return {
+        ...state,
+        // Remove the currently displayed results
+        searchResult: defaultState.searchResult,
+        waitingForResults: true,
+    }
 }
 
-function startSearch(state, {args: [{clearResults, loadingIndicator}]}) {
-    const { searchResult } = clearResults ? defaultState : state
-    const waitingForResults = loadingIndicator || state.waitingForResults
+function startExpandSearch(state) {
+    return {
+        ...state,
+        waitingForResults: true,
+    }
+}
+
+function finishNewSearch(state, {value, error, cancelled}) {
+    const searchResult = value || state.searchResult
     return {
         ...state,
         searchResult,
-        waitingForResults,
+        waitingForResults: false,
+    }
+}
+
+function finishExpandSearch(state, {value: newResult, error, cancelled}) {
+    // We prepend old rows to the new result, not vice versa, to keep other info
+    // (esp. searchedUntil) from the new result.
+    const prependRows = moreRows => update('rows',
+        // uniqBy may currently be needed to dedupe when includeContext is used.
+        rows => uniqBy('id')(moreRows.concat(rows))
+    )
+
+    const searchResult = newResult
+        ? prependRows(state.searchResult.rows)(newResult)
+        : state.searchResult
+
+    return {
+        ...state,
+        searchResult,
+        waitingForResults: false,
     }
 }
 
@@ -49,7 +80,9 @@ export default createReducer({
     [actions.setQuery]: setQuery,
     [actions.setStartDate]: setStartDate,
     [actions.setEndDate]: setEndDate,
-    [actions.newSearch.complete]: setSearchResult,
-    [actions.newSearch.pending]: startSearch,
+    [actions.newSearch.pending]: startNewSearch,
+    [actions.newSearch.finished]: finishNewSearch,
+    [actions.expandSearch.pending]: startExpandSearch,
+    [actions.expandSearch.finished]: finishExpandSearch,
     [actions.hideVisit]: hideVisit,
 }, defaultState)
