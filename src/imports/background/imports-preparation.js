@@ -80,10 +80,10 @@ const transformToImportDoc = (type, timestamp = Date.now()) => pageDoc => ({
 })
 
 /**
- * Transforms a browser item to a page doc. Currently supports browser HistoryItems
+ * Transforms a browser item to a page doc stub. Currently supports browser HistoryItems
  * and BookmarkTreeNodes.
  */
-const transformToPageDoc = item => ({
+const transformToPageDocStub = item => ({
     _id: generatePageDocId({
         // HistoryItems contain lastVisitTime while BookmarkTreeNodes contain dateAdded
         timestamp: item.lastVisitTime || item.dateAdded,
@@ -93,6 +93,7 @@ const transformToPageDoc = item => ({
     }),
     url: item.url,
     title: item.title,
+    isStub: true, // Flag denoting that this doc is yet to be filled-out with data from import process
 })
 
 /**
@@ -118,7 +119,7 @@ export default async function prepareImports({
 
     // Grab all page stubs for all item types (if they are allowed)
     const importTimestamp = Date.now()
-    const genPageStub = item => ({ ...transformToPageDoc(item), importTimestamp })
+    const genPageStub = item => ({ ...transformToPageDocStub(item), importTimestamp })
     const historyPageStubs = allowTypes[IMPORT_TYPE.HISTORY] ? historyItems.map(genPageStub) : []
     const bookmarkPageStubs = allowTypes[IMPORT_TYPE.BOOKMARK] ? bookmarkItems.map(genPageStub) : []
 
@@ -168,7 +169,7 @@ export async function getEstimateCounts({
 
     return {
         completed: {
-            [IMPORT_TYPE.HISTORY]: pageDocs.length - pendingCounts[IMPORT_TYPE.HISTORY],
+            [IMPORT_TYPE.HISTORY]: pageDocs.length,
             [IMPORT_TYPE.BOOKMARK]: bookmarkDocs.length,
         },
         remaining: {

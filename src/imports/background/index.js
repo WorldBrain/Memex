@@ -2,6 +2,7 @@ import docuri from 'docuri'
 
 import db from 'src/pouchdb'
 import randomString from 'src/util/random-string'
+import { pageDocsSelector } from 'src/page-storage'
 import importsConnectionHandler from './imports-connection-handler'
 
 
@@ -37,6 +38,11 @@ export const getImportDocs = async (query = {}, fields = []) => await db.find({
     },
     fields,
 })
+
+export const removeAllImportPageStubs = async () => {
+    const { docs } = await db.find({ selector: { ...pageDocsSelector, isStub: true } })
+    await Promise.all(docs.map(doc => db.remove(doc)))
+}
 
 export const setImportDocStatus = async (docId, status) => {
     const doc = await db.get(docId)

@@ -4,7 +4,7 @@ import prepareImports, { getEstimateCounts } from './imports-preparation'
 import processImportDoc from './import-doc-processor'
 import {
     lastImportTimeStorageKey, importProgressStorageKey,
-    setImportDocStatus, getImportDocs,
+    setImportDocStatus, getImportDocs, removeAllImportPageStubs,
 } from './'
 import { CMDS, IMPORT_DOC_STATUS, IMPORT_CONN_NAME } from 'src/options/imports/constants'
 
@@ -43,6 +43,9 @@ const getBatchObserver = port => {
         error: handleFinishedItem(IMPORT_DOC_STATUS.FAIL),
         // Triggers when ALL batch inputs are finished
         async complete() {
+            // Clean up any remaining page stubs
+            await removeAllImportPageStubs()
+
             // Final reindexing so that all the finished docs are searchable
             await updatePageSearchIndex()
 
@@ -106,6 +109,9 @@ async function finishImport(port) {
 
 async function cancelImport(port, batch) {
     batch.stop()
+
+    // Remove any remaining page stubs from DB for next run
+    await removeAllImportPageStubs()
 
     // Make sure to reindex so that the progress up until cancelled point is usable
     await updatePageSearchIndex()
