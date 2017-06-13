@@ -24,27 +24,30 @@ class Overview extends React.Component {
                         src='img/worldbrain-logo.png'
                         className={styles.logo}
                     />
-                    <input
-                        className={styles.query}
-                        onChange={e => this.props.onInputChanged(e.target.value)}
-                        placeholder='Search your memory'
-                        value={this.props.query}
-                        ref='inputQuery'
-                    />
-                    <div className={styles.links}>
-                        <img
-                            src='img/settings-icon.png'
-                            className={styles.icon}
+                    <div className={styles.searchField}>
+                        <input
+                            className={styles.query}
+                            onChange={e => this.props.onInputChanged(e.target.value)}
+                            placeholder='Search your memory'
+                            value={this.props.query}
+                            ref='inputQuery'
+                        />
+                        <DateRangeSelection
+                            startDate={this.props.startDate}
+                            endDate={this.props.endDate}
+                            onStartDateChange={this.props.onStartDateChange}
+                            onEndDateChange={this.props.onEndDateChange}
                         />
                     </div>
+                    <div className={styles.links}>
+                        <a href='/options/options.html'>
+                            <img
+                                src='img/settings-icon.png'
+                                className={styles.icon}
+                            />
+                        </a>
+                    </div>
                 </div>
-                <DateRangeSelection
-                    startDate={this.props.startDate}
-                    endDate={this.props.endDate}
-                    onStartDateChange={this.props.onStartDateChange}
-                    onEndDateChange={this.props.onEndDateChange}
-                />
-                <div>
 
                 <div className={styles.main}>
                     <ResultList
