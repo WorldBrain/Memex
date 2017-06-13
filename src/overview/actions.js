@@ -41,7 +41,7 @@ export const newSearch = asyncActionCreator(() => async (dispatch, getState) => 
         query,
         startDate,
         endDate,
-        includeContext: true,
+        includeContext: false,
     })
     return searchResult
 })
@@ -57,7 +57,7 @@ export const expandSearch = asyncActionCreator(() => async (dispatch, getState) 
         query,
         startDate,
         endDate,
-        includeContext: true,
+        includeContext: false,
         skipUntil,
     })
     return newSearchResult
