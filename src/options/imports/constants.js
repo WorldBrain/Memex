@@ -23,8 +23,8 @@ export const STATUS = {
 
 /** Different types of imports. */
 export const IMPORT_TYPE = {
-    BOOKMARK: 'bookmark',
-    HISTORY: 'history',
+    BOOKMARK: 'b',
+    HISTORY: 'h',
 }
 
 /** Keys used for local storage. */
@@ -52,14 +52,7 @@ export const CMDS = {
     COMPLETE: `${IMPORT_CONN_NAME}/COMPLETE`,
 }
 
-export const IMPORT_DOC_STATUS = {
-    PENDING: 'pending',
-    SUCC: 'success',
-    FAIL: 'fail',
-}
-
 /** Estimated size of a doc (MB) */
 export const DOC_SIZE_EST = 0.2
 /** Estimated time to download a doc (minutes) */
 export const DOC_TIME_EST = 0.2
-

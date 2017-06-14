@@ -9,17 +9,29 @@ import { IMPORT_TYPE, DOWNLOAD_STATUS } from 'src/options/imports/constants'
 
 /**
  * Binds a given doc type query selector to an fetching function which checks if a given URL
- * already exists in existing DB docs (excluding the stub doc associated with the given import doc)
- * and returns them.
+ * already exists in existing DB docs of the same type (excluding any stub docs) and returns them.
  *
  * @param {any} docSelector PouchDB find query selector for a specific type of docs.
- * @returns {(IImportDoc) => Array<any>} Doc fetching function for same URL docs.
+ * @returns {(IImportItem) => Array<any>} Doc fetching function for same URL docs.
  */
-const getExistingDocsFetcher = docSelector => async ({ url, dataDocId }) => {
-    const { docs } = await db.find({ selector: { ...docSelector, url }, fields: ['_id', 'url'] })
+const getExistingDocsFetcher = docSelector => async importItem => {
+    const selector = { ...docSelector, url: importItem.url, isStub: { $ne: true } }
+    const { docs } = await db.find({ selector, fields: ['_id', 'url'] })
+    return docs
+}
 
-    // Ignore the page stub related to this import doc
-    return docs.filter(doc => doc._id !== dataDocId)
+/**
+ * @param {IImportItem} importItem The import item to attempt to find the page stub for.
+ *   Assumes page stubs are unique via URL.
+ */
+const getAssociatedPageStub = async ({ url }) => {
+    const selector = { ...pageDocsSelector, url, isStub: true }
+    const { docs: [pageStub] } = await db.find({ selector })
+    // If the page stub cannot be found for this URL, something has gone wrong...
+    if (!pageStub) {
+        throw new Error('Database error')
+    }
+    return pageStub
 }
 
 /**
@@ -94,9 +106,9 @@ async function processExistingDocVisits(existingDocs) {
 }
 
 /**
- * Process all visit docs for a to-be-processed import doc.
+ * Process all visit docs for a to-be-processed import item.
  *
- * @param {IImportDoc} importDoc
+ * @param {IImportItem} importItemDoc
  */
 async function processNewDocVisits({ url, dataDocId }) {
     const visitItems = await browser.history.getVisits({ url })
@@ -108,17 +120,17 @@ async function processNewDocVisits({ url, dataDocId }) {
 }
 
 /**
- * Handles processing of a history-type import doc. Checks for exisitng page docs that have the same
+ * Handles processing of a history-type import item. Checks for exisitng page docs that have the same
  * URL and visit docs associated with the URL. Depending on the existence of these docs, new visit or
  * page docs may be created or deemed unnecessary.
  *
- * @param {IImportDoc} importDoc
+ * @param {IImportItem} importItemDoc
  * @returns {IImportStatus} Status string denoting the outcome of import processing.
  */
-async function processHistoryImport(importDoc) {
+async function processHistoryImport(importItem) {
     // Run simplified URL checking logic first
     const fetchPagesWithSameURL = getExistingDocsFetcher(pageDocsSelector)
-    const existingPages = await fetchPagesWithSameURL(importDoc)
+    const existingPages = await fetchPagesWithSameURL(importItem)
 
     // If URL deemed to exist in DB for these doc types, double-check missing visit docs and skip
     if (existingPages.length !== 0) {
@@ -126,11 +138,11 @@ async function processHistoryImport(importDoc) {
         return DOWNLOAD_STATUS.SKIP
     }
 
-    // First create visit docs for all VisitItems associated with this importDoc
-    await processNewDocVisits(importDoc)
+    // First create visit docs for all VisitItems associated with this imporItemt
+    await processNewDocVisits(importItem)
 
     // Perform fetch&analysis to fill-out the associated page doc
-    await fetchAndAnalyse({ page: await db.get(importDoc.dataDocId) })
+    await fetchAndAnalyse({ page: await getAssociatedPageStub(importItem) })
 
     // If we finally got here without an error being thrown, return the success status message
     return DOWNLOAD_STATUS.SUCC
@@ -157,10 +169,10 @@ async function processBookmarkData(assocPageDoc) {
     }
 }
 
-async function processBookmarkImport(importDoc) {
+async function processBookmarkImport(importItem) {
     // Run simplified URL checking logic first
     const fetchBookmarksWithSameURL = getExistingDocsFetcher(bookmarkDocsSelector)
-    const existingBookmarks = await fetchBookmarksWithSameURL(importDoc)
+    const existingBookmarks = await fetchBookmarksWithSameURL(importItem)
 
     // If URL deemed to exist in DB for these doc types, double-check missing visit docs and skip
     if (existingBookmarks.length !== 0) {
@@ -169,22 +181,22 @@ async function processBookmarkImport(importDoc) {
     }
 
     // Create the bookmark doc (TODO: think about if this actually needs to be await'd)
-    await processBookmarkData(await db.get(importDoc.dataDocId))
+    await processBookmarkData(await getAssociatedPageStub(importItem))
 
     // Now that bookmark-specific logic is done, continue processing this as a normal history import
-    return await processHistoryImport(importDoc)
+    return await processHistoryImport(importItem)
 }
 
 /**
- * Given an import doc, performs appropriate processing depending on the import type.
+ * Given an import state item, performs appropriate processing depending on the import type.
  *
- * @param {IImportDoc} importDoc The import doc to process.
+ * @param {IImportItem} importItem The import state item to process.
  * @returns {IImportStatus} Status string denoting the outcome of import processing.
  */
-export default async function processImportDoc(importDoc = {}) {
-    switch (importDoc.type) {
-        case IMPORT_TYPE.HISTORY: return await processHistoryImport(importDoc)
-        case IMPORT_TYPE.BOOKMARK: return await processBookmarkImport(importDoc)
+export default async function processImportItem(importItem = {}) {
+    switch (importItem.type) {
+        case IMPORT_TYPE.HISTORY: return await processHistoryImport(importItem)
+        case IMPORT_TYPE.BOOKMARK: return await processBookmarkImport(importItem)
         default: throw new Error('Unknown import type')
     }
 }
