@@ -40,12 +40,10 @@
 }
 
 .react-datepicker__navigation--previous {
-  /* border-right-color: transparent; */
   background-image: url(img/previous-arrow-icon.png);
 }
 
 .react-datepicker__navigation--next {
-  /* border-left-color: transparent; */
   background-image: url(img/next-arrow-icon.png);
 }
 
@@ -71,6 +69,7 @@
   background-color: #68F1C9;
 }
 
+.react-datepicker__day--selecting-range-start,
 .react-datepicker__day--selecting-range-start:not(.react-datepicker__day--in-range),
 .react-datepicker__day--range-start:not(.react-datepicker__day--in-selecting-range) {
   border-top-left-radius: 50%;
@@ -78,11 +77,24 @@
   background-color: #3EB995; 
 }
 
+.react-datepicker__day--selecting-range-end,
 .react-datepicker__day--selecting-range-end:not(.react-datepicker__day--in-range),
 .react-datepicker__day--range-end:not(.react-datepicker__day--in-selecting-range) {
   border-top-right-radius: 50%;
   border-bottom-right-radius: 50%;
   background-color: #3EB995; 
+}
+
+.react-datepicker__day--range-start:hover {
+  border-top-left-radius: 50%;
+  border-bottom-left-radius: 50%;
+  background-color: #42C19C;
+}
+
+.react-datepicker__day--range-end:hover {
+  border-top-right-radius: 50%;
+  border-bottom-right-radius: 50%;
+  background-color: #42C19C;
 }
 
 .react-datepicker__week > .react-datepicker__day--in-selecting-range:first-of-type,
