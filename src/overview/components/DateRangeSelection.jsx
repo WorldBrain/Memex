@@ -6,7 +6,7 @@ import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker-cssmodules.css'
 
 import styles from './DateRangeSelection.css'
-
+import './datepicker-overrides.css'
 
 class DateRangeSelection extends Component {
     constructor() {
