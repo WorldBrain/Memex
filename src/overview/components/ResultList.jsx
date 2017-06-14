@@ -6,7 +6,7 @@ import { makeNonlinearTransform } from 'src/util/make-range-transform'
 import niceTime from 'src/util/nice-time'
 
 import VisitAsListItem from './VisitAsListItem'
-import LoadingIndicator from './LoadingIndicator'
+import { LoadingIndicator } from 'src/common-ui/components'
 import styles from './ResultList.css'
 
 
