@@ -85,6 +85,10 @@ class DateRangeSelection extends Component {
                     }}
                     onBlur={() => this.submitDateChange('startDate')}
                 />
+                <img
+                    src="img/to-icon.png"
+                    className={styles.toIcon}
+                />
                 <DatePicker
                     ref={dp => { this.endDateDatePicker = dp }}
                     className={styles.datePicker}

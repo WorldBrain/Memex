@@ -1,5 +1,6 @@
 .dateRangeSelection {
     display: flex;
+    align-items: center;
     background-image: url('img/calendar-icon.png');
     background-repeat: no-repeat;
     background-size: 18px;
@@ -24,4 +25,9 @@
         outline: none;
         border: none;
     }
+}
+
+.toIcon {
+    width: 5px;
+    height: 8px;
 }
