@@ -3,9 +3,10 @@
 // converted to pageDocs and visitDocs (sorry for the confusingly similar name).
 
 import uniqBy from 'lodash/fp/uniqBy'
+import flatten from 'lodash/fp/flatten'
 
 import db from 'src/pouchdb'
-import { checkWithBlacklist, visitKeyPrefix, convertVisitDocId } from 'src/activity-logger'
+import { checkWithBlacklist, generateVisitDocId, visitKeyPrefix, convertVisitDocId } from 'src/activity-logger'
 import { generatePageDocId, pageDocsSelector } from 'src/page-storage'
 import { IMPORT_TYPE } from 'src/options/imports/constants'
 import { bookmarkDocsSelector, setImportItems } from './'
@@ -71,6 +72,45 @@ const transformToPageDocStub = item => ({
 })
 
 /**
+ * Converts a browser.history.VisitItem to our visit document model.
+ *
+ * @param {history.VisitItem} visitItem The VisitItem fetched from browser API.
+ * @param {IPageDoc} assocPageDoc The page doc that contains the page data for this visit.
+ * @returns {IVisitDoc} Newly created visit doc dervied from visitItem data.
+ */
+const transformToVisitDoc = assocPageDoc => visitItem => ({
+    _id: generateVisitDocId({
+        timestamp: visitItem.visitTime,
+        // We set the nonce manually, to prevent duplicating items if
+        // importing multiple times (thus making importHistory idempotent).
+        nonce: visitItem.visitId,
+    }),
+    visitStart: visitItem.visitTime,
+    referringVisitItemId: visitItem.referringVisitId,
+    url: assocPageDoc.url,
+    page: { _id: assocPageDoc._id },
+})
+
+/**
+ * @param {Array<IPageDoc>} pageDocs Page docs to get visit docs for.
+ * @returns {Array<IVisitDoc>} Array of visit docs gotten from URLs in pageDocs arg.
+ */
+async function getVisitsForPageDocs(pageDocs) {
+    // Collect VisitItems for all page docs
+    const visitItemsPerPageDoc = await Promise.all(pageDocs.map(async doc => ({
+        assocPageDoc: doc,
+        visitItems: await browser.history.getVisits({ url: doc.url }),
+    })))
+
+    // Map VisitItems to visit docs
+    const nestedVisitItems = visitItemsPerPageDoc.map(
+        ({ assocPageDoc, visitItems }) => visitItems.map(transformToVisitDoc(assocPageDoc)))
+
+    // Flatten everything out to return a single array of visit docs
+    return flatten(nestedVisitItems)
+}
+
+/**
  * Prepares everything needed to start the imports batch process. Should create all needed
  * page doc stubs (page docs that are yet to be filled with information from the website
  * the are meant to represent) for browser history and bookmarks, and import docs (used as
@@ -99,11 +139,14 @@ export default async function prepareImports(allowTypes = {}) {
     ))
 
     // Put all page docs together and remove any docs with duplicate URLs
-    const allDocs = uniqByUrl(historyPageStubs.concat(bookmarkPageStubs))
+    const pageDocs = uniqByUrl(historyPageStubs.concat(bookmarkPageStubs))
+
+    // Map all page docs to visit docs
+    const visitDocs = await getVisitsForPageDocs(pageDocs)
 
     // Store them into the database. Already existing docs will simply be
     // rejected, because their id (timestamp & history id) already exists.
-    await db.bulkDocs(allDocs)
+    await db.bulkDocs(pageDocs.concat(visitDocs))
     console.timeEnd('import history')
 }
 

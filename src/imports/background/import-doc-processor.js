@@ -1,8 +1,5 @@
-import flatten from 'lodash/flatten'
-
 import db from 'src/pouchdb'
 import { analysePageForImports as fetchAndAnalyse } from 'src/page-analysis/background'
-import { generateVisitDocId, visitDocsSelector, convertVisitDocId } from 'src/activity-logger'
 import { convertPageDocId, pageDocsSelector } from 'src/page-storage'
 import { bookmarkDocsSelector, generateBookmarkDocId } from './'
 import { IMPORT_TYPE, DOWNLOAD_STATUS } from 'src/options/imports/constants'
@@ -35,26 +32,6 @@ const getAssociatedPageStub = async ({ url }) => {
 }
 
 /**
- * Converts a browser.history.VisitItem to our visit document model.
- *
- * @param {history.VisitItem} visitItem The VisitItem fetched from browser API.
- * @param {IPageDoc} assocPageDoc The page doc that contains the page data for this visit.
- * @returns {IVisitDoc} Newly created visit doc dervied from visitItem data.
- */
-const transformToVisitDoc = (visitItem, assocPageDoc) => ({
-    _id: generateVisitDocId({
-        timestamp: visitItem.visitTime,
-        // We set the nonce manually, to prevent duplicating items if
-        // importing multiple times (thus making importHistory idempotent).
-        nonce: visitItem.visitId,
-    }),
-    visitStart: visitItem.visitTime,
-    referringVisitItemId: visitItem.referringVisitId,
-    url: assocPageDoc.url,
-    page: { _id: assocPageDoc._id },
-})
-
-/**
  * Converts a browser.bookmark.BookmarkTreeNode item to our bookmark document model.
  *
  * @param {bookmarks.BookmarkTreeNode} bookmarkItem The bookmark tree node item fetched from browser API.
@@ -72,57 +49,7 @@ const transformToBookmarkDoc = (bookmarkItem, assocPageDoc) => ({
 })
 
 /**
- * Checks vist docs for existing docs. If any deemed missing create them,
- * add existing doc references, and insert.
- *
- * @param {Array<any>} existingDocs The existing docs to check visits docs for.
- */
-async function processExistingDocVisits(existingDocs) {
-    const visitPs = existingDocs.map(async existingDoc => {
-        const { url } = existingDoc
-
-        // Fetch needed data
-        const { docs: visitDocs } = await db.find({ selector: { ...visitDocsSelector, url }, fields: ['_id'] })
-        const visitItems = await browser.history.getVisits({ url })
-
-        // Project out stored browser IDs from existing visit docs for easy comparison
-        // Note that the _id's nonce contains the browser ID
-        const savedVisitIds = visitDocs.map(doc => convertVisitDocId(doc._id).nonce)
-
-        // Create visit docs for any VisitItem not present in DB
-        const newVisitDocs = []
-        visitItems.forEach(visitItem => {
-            if (!savedVisitIds.includes(visitItem.visitId)) {
-                newVisitDocs.push(transformToVisitDoc(visitItem, existingDoc))
-            }
-        })
-        return newVisitDocs
-    })
-
-    const missingVisitDocs = flatten(await Promise.all(visitPs))
-    if (missingVisitDocs.length > 0) {
-        await db.bulkDocs(missingVisitDocs)
-    }
-}
-
-/**
- * Process all visit docs for a to-be-processed import item.
- *
- * @param {IImportItem} importItemDoc
- */
-async function processNewDocVisits({ url, dataDocId }) {
-    const visitItems = await browser.history.getVisits({ url })
-    const visitDocs = visitItems.map(visitItem => transformToVisitDoc(visitItem, { _id: dataDocId, url }))
-
-    if (visitDocs.length > 0) {
-        await db.bulkDocs(visitDocs)
-    }
-}
-
-/**
- * Handles processing of a history-type import item. Checks for exisitng page docs that have the same
- * URL and visit docs associated with the URL. Depending on the existence of these docs, new visit or
- * page docs may be created or deemed unnecessary.
+ * Handles processing of a history-type import item. Checks for exisitng page docs that have the same URL.
  *
  * @param {IImportItem} importItemDoc
  * @returns {IImportStatus} Status string denoting the outcome of import processing.
@@ -132,14 +59,10 @@ async function processHistoryImport(importItem) {
     const fetchPagesWithSameURL = getExistingDocsFetcher(pageDocsSelector)
     const existingPages = await fetchPagesWithSameURL(importItem)
 
-    // If URL deemed to exist in DB for these doc types, double-check missing visit docs and skip
+    // If URL deemed to exist in DB for these doc types, skip it
     if (existingPages.length !== 0) {
-        await processExistingDocVisits(existingPages)
         return DOWNLOAD_STATUS.SKIP
     }
-
-    // First create visit docs for all VisitItems associated with this imporItemt
-    await processNewDocVisits(importItem)
 
     // Perform fetch&analysis to fill-out the associated page doc
     await fetchAndAnalyse({ page: await getAssociatedPageStub(importItem) })
@@ -174,9 +97,8 @@ async function processBookmarkImport(importItem) {
     const fetchBookmarksWithSameURL = getExistingDocsFetcher(bookmarkDocsSelector)
     const existingBookmarks = await fetchBookmarksWithSameURL(importItem)
 
-    // If URL deemed to exist in DB for these doc types, double-check missing visit docs and skip
+    // If URL deemed to exist in DB for these doc types, skip it
     if (existingBookmarks.length !== 0) {
-        await processExistingDocVisits(existingBookmarks)
         return DOWNLOAD_STATUS.SKIP
     }
 
