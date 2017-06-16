@@ -19,6 +19,9 @@
     "js",
     "jsx"
   ],
+  "setupFiles": [
+    "./setupJest.js"
+  ],
   "unmockedModulePathPatterns": [
     "<rootDir>/node_modules/react",
     "<rootDir>/node_modules/react-dom",
