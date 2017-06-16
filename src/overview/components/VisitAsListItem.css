@@ -112,29 +112,34 @@
     flex-direction: column;
     color: inherit;
     text-decoration: none;
-    padding-top: 5px;
+    padding: 10px;
 }
 
 .button {
     display: inline;
     border: none;
     background-color: transparent;
-    padding: 0;
-    opacity: 0.7;
+    width: 26px;
+    height: 26px;
+    background-repeat: no-repeat;
+    background-size: contain;
+    margin-bottom: 10px;
+    cursor: pointer;
+    outline: none;
+}
 
-    @nest .root:hover & {
-        opacity: 0.7;
+.trash {
+    background-image: url(img/trash-icon.png);
+}
 
-        &:hover {
-            opacity: 1;
-            cursor: pointer;
-        }
-    }
+.trash:hover {
+    background-image: url(img/trash-icon-hovered.png);
+}
 
-    transition: opacity 200ms;
+.load {
+    background-image: url(img/load-icon.png);
+}
 
-    & img {
-        margin: 5px 5px;
-        width: 25px;
-    }
+.load:hover {
+    background-image: url(img/load-icon-hovered.png);
 }
