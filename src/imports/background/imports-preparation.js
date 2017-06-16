@@ -3,7 +3,6 @@
 // converted to pageDocs and visitDocs (sorry for the confusingly similar name).
 
 import uniqBy from 'lodash/fp/uniqBy'
-import flatten from 'lodash/fp/flatten'
 
 import db from 'src/pouchdb'
 import { checkWithBlacklist, generateVisitDocId, visitKeyPrefix, convertVisitDocId } from 'src/activity-logger'
@@ -97,18 +96,15 @@ const transformToVisitDoc = assocPageDoc => visitItem => ({
  * @returns {Array<IVisitDoc>} Array of visit docs gotten from URLs in pageDocs arg.
  */
 async function getVisitsForPageDocs(pageDocs) {
-    // Collect VisitItems for all page docs
-    const visitItemsPerPageDoc = await Promise.all(pageDocs.map(async doc => ({
-        assocPageDoc: doc,
-        visitItems: await browser.history.getVisits({ url: doc.url }),
-    })))
+    // For each page doc, map associated visit items to docs and store them
+    for (const pageDoc of pageDocs) {
+        const visitItems = await browser.history.getVisits({ url: pageDoc.url })
+        // Get on with it if no visits for current URL
+        if (!visitItems.length) continue
 
-    // Map VisitItems to visit docs
-    const nestedVisitItems = visitItemsPerPageDoc.map(
-        ({ assocPageDoc, visitItems }) => visitItems.map(transformToVisitDoc(assocPageDoc)))
-
-    // Flatten everything out to return a single array of visit docs
-    return flatten(nestedVisitItems)
+        const visitDocs = visitItems.map(transformToVisitDoc(pageDoc))
+        await db.bulkDocs(visitDocs)
+    }
 }
 
 /**
@@ -142,12 +138,12 @@ export default async function prepareImports(allowTypes = {}) {
     // Put all page docs together and remove any docs with duplicate URLs
     const pageDocs = uniqByUrl(historyPageStubs.concat(bookmarkPageStubs))
 
-    // Map all page docs to visit docs
-    const visitDocs = await getVisitsForPageDocs(pageDocs)
+    // Map all page docs to visit docs and store them
+    await getVisitsForPageDocs(pageDocs)
 
     // Store them into the database. Already existing docs will simply be
     // rejected, because their id (timestamp & history id) already exists.
-    await db.bulkDocs(pageDocs.concat(visitDocs))
+    await db.bulkDocs(pageDocs)
     console.timeEnd('import history')
 }
 
