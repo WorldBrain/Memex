@@ -2,10 +2,7 @@ import initBatch from 'src/util/promise-batcher'
 import { CMDS, IMPORT_CONN_NAME } from 'src/options/imports/constants'
 import prepareImports, { getEstimateCounts } from './imports-preparation'
 import processImportItem from './import-doc-processor'
-import {
-    importProgressStorageKey, removeAllImportPageStubs,
-    getImportItems, removeImportItem, clearImportItems,
-} from './'
+import { importProgressStorageKey, getImportItems, removeImportItem, clearImportItems } from './'
 
 
 // Local storage helpers to make the main functions a bit less messy
@@ -38,9 +35,6 @@ const getBatchObserver = port => {
         error: handleFinishedItem,
         // Triggers when ALL batch inputs are finished
         async complete() {
-            // Clean up any remaining page stubs
-            await removeAllImportPageStubs()
-
             // TODO: Final reindexing so that all the finished docs are searchable
 
             // Tell UI that it's finished
@@ -91,7 +85,6 @@ async function cancelImport(port, batch) {
     batch.stop()
 
     // Clean up any import-related stubs or state
-    await removeAllImportPageStubs()
     await clearImportItems()
 
     // TODO: Make sure to reindex so that the progress up until cancelled point is usable

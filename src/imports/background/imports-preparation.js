@@ -17,7 +17,8 @@ const uniqByUrl = uniqBy('url')
  * @returns A function affording checking of a URL against the URLs of existing page docs.
  */
 async function checkWithExistingDocs() {
-    const { docs: existingPageDocs } = await db.find({ selector: { ...pageDocsSelector }, fields: ['url'] })
+    const existingFullDocs = { ...pageDocsSelector, isStub: { $ne: true } }
+    const { docs: existingPageDocs } = await db.find({ selector: existingFullDocs, fields: ['url'] })
     const existingUrls = existingPageDocs.map(({ url }) => url)
 
     return ({ url }) => !existingUrls.includes(url)
@@ -168,8 +169,9 @@ export async function getEstimateCounts() {
     const filteredBookmarkItems = await getBookmarkItems()
 
     // Grab needed data from DB
-    const { docs: pageDocs } = await db.find({ selector: pageDocsSelector, fields: ['_id'] })
-    const { docs: bookmarkDocs } = await db.find({ selector: bookmarkDocsSelector, fields: ['_id'] })
+    const fields = ['_id']
+    const { docs: pageDocs } = await db.find({ selector: { ...pageDocsSelector, isStub: { $ne: true } }, fields })
+    const { docs: bookmarkDocs } = await db.find({ selector: bookmarkDocsSelector, fields })
 
     return {
         completed: {

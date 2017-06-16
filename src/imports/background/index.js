@@ -48,15 +48,5 @@ export const removeImportItem = async url => {
     }
 }
 
-/**
- * Removes all existing page docs in pouch that have `isStub` field set to `true`.
- * Currently this field is only used in the context of imports, however this fn may change
- * if the field is used elsewhere later, or it will remove unwanted page doc stubs.
- */
-export const removeAllImportPageStubs = async () => {
-    const { docs } = await db.find({ selector: { ...pageDocsSelector, isStub: true } })
-    await Promise.all(docs.map(doc => db.remove(doc)))
-}
-
 // Allow content-script or UI to connect and communicate control of imports
 browser.runtime.onConnect.addListener(importsConnectionHandler)
