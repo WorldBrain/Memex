@@ -34,13 +34,13 @@
         "react"
     ],
     "parserOptions": {
-    	"sourceType": "module",
-	    "ecmaFeatures": {
-	        "jsx": true
-	    }
-  	},
+        "sourceType": "module",
+        "ecmaFeatures": {
+            "jsx": true
+        }
+      },
     "rules":{
-    	"comma-dangle": ["error", "always-multiline"],
+        "comma-dangle": ["error", "always-multiline"],
         "indent": ["error", 4, { "SwitchCase": 1 }],
         "react/jsx-indent": ["error", 4],
         "react/jsx-indent-props": ["error", 4],
