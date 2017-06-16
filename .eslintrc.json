@@ -4,6 +4,7 @@
         "webextensions": true
     },
     "extends": [
+        "plugin:jest/recommended",
         "plugin:import/recommended",
         "plugin:import/react",
         "plugin:promise/recommended",
@@ -26,6 +27,7 @@
         }
     },
     "plugins": [
+        "jest",
         "standard",
         "import",
         "promise",
