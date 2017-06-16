@@ -60,20 +60,16 @@ const VisitAsListItem = ({doc, compact, onTrashButtonClick}) => {
             </div>
             <div className={styles.buttonsContainer}>
                 <button
-                    className={styles.button}
+                    className={`${styles.button} ${styles.trash}`}
                     onClick={e => { e.preventDefault(); onTrashButtonClick() }}
                     title='Forget this item'
-                >
-                    <img src='img/trash-icon.png' alt='🗑 forget' />
-                </button>
+                />
                 {localVersionAvailable({page: doc.page})
                     ? (
                         <LinkToLocalVersion
-                            className={styles.button}
+                            className={`${styles.button} ${styles.load}`}
                             page={doc.page}
-                        >
-                            <img src='img/save-icon.png' alt='💾 saved' />
-                        </LinkToLocalVersion>
+                        />
                     )
                     : null
                 }
