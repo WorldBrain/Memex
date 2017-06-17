@@ -5,48 +5,12 @@
 import uniqBy from 'lodash/fp/uniqBy'
 
 import db from 'src/pouchdb'
-import { checkWithBlacklist, generateVisitDocId, visitKeyPrefix, convertVisitDocId } from 'src/activity-logger'
-import { generatePageDocId, pageDocsSelector } from 'src/page-storage'
+import { generateVisitDocId, visitKeyPrefix, convertVisitDocId } from 'src/activity-logger'
+import { generatePageDocId } from 'src/page-storage'
 import { IMPORT_TYPE } from 'src/options/imports/constants'
-import { bookmarkDocsSelector, setImportItems, generateBookmarkDocId } from './'
+import { setImportItems, generateBookmarkDocId, getURLFilteredBookmarkItems, getURLFilteredHistoryItems } from './'
 
 const uniqByUrl = uniqBy('url')
-
-/**
- * @returns A function affording checking of a URL against the URLs of existing page docs.
- */
-async function checkWithExistingDocs() {
-    const existingFullDocs = { ...pageDocsSelector, isStub: { $ne: true } }
-    const { docs: existingPageDocs } = await db.find({ selector: existingFullDocs, fields: ['url'] })
-    const existingUrls = existingPageDocs.map(({ url }) => url)
-
-    return ({ url }) => !existingUrls.includes(url)
-}
-
-// Get the historyItems (visited places/pages; not each visit to them)
-const getHistoryItems = async () => filterItemsByUrl(await browser.history.search({
-    text: '',
-    maxResults: 9999999,
-    startTime: 0,
-}), IMPORT_TYPE.HISTORY)
-
-const getBookmarkItems = async () =>
-    filterItemsByUrl(await browser.bookmarks.getRecent(100000), IMPORT_TYPE.BOOKMARK)
-
-/**
- * Handles performing blacklist and pending import filtering logic on any type
- * of items containing a `url` field.
- *
- * @param {Iterable<any>} items Some Iterable of items of any shape, as long as they contain `url` field.
- * @returns {Iterable<any>} Filtered version of the items arg.
- */
-async function filterItemsByUrl(items, type) {
-    const isNotBlacklisted = await checkWithBlacklist()
-    const doesNotExist = await checkWithExistingDocs()
-
-    const isWorthRemembering = item => isNotBlacklisted(item) && doesNotExist(item)
-    return items.filter(isWorthRemembering)
-}
 
 /**
  * Binds an import type to a function that transforms a history/bookmark doc to an import item.
@@ -137,8 +101,8 @@ async function getVisitsForPageDocs(pageDocs) {
  */
 export default async function prepareImports(allowTypes = {}) {
     console.time('import history')
-    const historyItems = await getHistoryItems()
-    const bookmarkItems = await getBookmarkItems()
+    const historyItems = await getURLFilteredHistoryItems()
+    const bookmarkItems = await getURLFilteredBookmarkItems()
 
     // Grab all page stubs for all item types (if they are allowed)
     const importTimestamp = Date.now()
@@ -175,30 +139,4 @@ export async function getOldestVisitTimestamp() {
     return (result.rows.length > 0)
         ? convertVisitDocId(result.rows[0].id).timestamp
         : undefined
-}
-
-/**
- * Handles calculating the estimate counts for history and bookmark imports.
- * @returns {any} The state containing import estimates completed and remaining counts.
- */
-export async function getEstimateCounts() {
-    // Grab needed data from browser API (filtered by whats already in DB)
-    const filteredHistoryItems = await getHistoryItems()
-    const filteredBookmarkItems = await getBookmarkItems()
-
-    // Grab needed data from DB
-    const fields = ['_id']
-    const { docs: pageDocs } = await db.find({ selector: { ...pageDocsSelector, isStub: { $ne: true } }, fields })
-    const { docs: bookmarkDocs } = await db.find({ selector: bookmarkDocsSelector, fields })
-
-    return {
-        completed: {
-            [IMPORT_TYPE.HISTORY]: pageDocs.length,
-            [IMPORT_TYPE.BOOKMARK]: bookmarkDocs.length,
-        },
-        remaining: {
-            [IMPORT_TYPE.HISTORY]: filteredHistoryItems.length,
-            [IMPORT_TYPE.BOOKMARK]: filteredBookmarkItems.length,
-        },
-    }
 }

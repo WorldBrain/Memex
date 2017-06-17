@@ -3,6 +3,8 @@ import docuri from 'docuri'
 import db from 'src/pouchdb'
 import randomString from 'src/util/random-string'
 import { pageDocsSelector } from 'src/page-storage'
+import { checkWithBlacklist } from 'src/activity-logger'
+import { IMPORT_TYPE } from 'src/options/imports/constants'
 import importsConnectionHandler from './imports-connection-handler'
 
 
@@ -46,6 +48,51 @@ export const removeImportItem = async url => {
             ...importItems.slice(i + 1),
         ])
     }
+}
+
+/**
+ * @returns A function affording checking of a URL against the URLs of existing page docs.
+ */
+async function checkWithExistingDocs() {
+    const existingFullDocs = { ...pageDocsSelector, isStub: { $ne: true } }
+    const { docs: existingPageDocs } = await db.find({ selector: existingFullDocs, fields: ['url'] })
+    const existingUrls = existingPageDocs.map(({ url }) => url)
+
+    return ({ url }) => !existingUrls.includes(url)
+}
+
+/**
+ * Handles performing blacklist and pending import filtering logic on any type
+ * of items containing a `url` field.
+ *
+ * @param {Iterable<any>} items Some Iterable of items of any shape, as long as they contain `url` field.
+ * @returns {Iterable<any>} Filtered version of the items arg.
+ */
+async function filterItemsByUrl(items, type) {
+    const isNotBlacklisted = await checkWithBlacklist()
+    const doesNotExist = await checkWithExistingDocs()
+
+    const isWorthRemembering = item => isNotBlacklisted(item) && doesNotExist(item)
+    return items.filter(isWorthRemembering)
+}
+
+/**
+ * @param {number} [maxResults=9999999] The max amount of items to grab from browser.
+ * @param {number} [startTime=0] The time to start search from for browser history.
+ * @returns {Array<browser.history.HistoryItem>} All history items in browser filtered by URL.
+ */
+export async function getURLFilteredHistoryItems(maxResults = 9999999, startTime = 0) {
+    const historyItems = await browser.history.search({ text: '', maxResults, startTime })
+    return filterItemsByUrl(historyItems, IMPORT_TYPE.HISTORY)
+}
+
+/**
+ * @param {number} [maxResults=100000] The max amount of items to grab from browser.
+ * @returns {Array<browser.bookmarks.BookmarkTreeNode>} All bookmark items in browser filtered by URL.
+ */
+export async function getURLFilteredBookmarkItems(maxResults = 100000) {
+    const bookmarkItems = await browser.bookmarks.getRecent(maxResults)
+    return filterItemsByUrl(bookmarkItems, IMPORT_TYPE.BOOKMARK)
 }
 
 // Allow content-script or UI to connect and communicate control of imports
