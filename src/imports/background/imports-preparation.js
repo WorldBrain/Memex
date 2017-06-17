@@ -8,7 +8,7 @@ import db from 'src/pouchdb'
 import { checkWithBlacklist, generateVisitDocId, visitKeyPrefix, convertVisitDocId } from 'src/activity-logger'
 import { generatePageDocId, pageDocsSelector } from 'src/page-storage'
 import { IMPORT_TYPE } from 'src/options/imports/constants'
-import { bookmarkDocsSelector, setImportItems } from './'
+import { bookmarkDocsSelector, setImportItems, generateBookmarkDocId } from './'
 
 const uniqByUrl = uniqBy('url')
 
@@ -92,6 +92,23 @@ const transformToVisitDoc = assocPageDoc => visitItem => ({
 })
 
 /**
+ * Converts a browser.bookmark.BookmarkTreeNode item to our bookmark document model.
+ *
+ * @param {bookmarks.BookmarkTreeNode} bookmarkItem The bookmark tree node item fetched from browser API.
+ * @param {IPageDoc} assocPageDoc The page doc that contains the page data for this bookmark.
+ * @returns {IBookmarkDoc} Newly created bookmark doc dervied from bookmarkItem data.
+ */
+const transformToBookmarkDoc = assocPageDoc => bookmarkItem => ({
+    _id: generateBookmarkDocId({
+        timestamp: bookmarkItem.dateAdded,
+        nonce: bookmarkItem.id,
+    }),
+    title: bookmarkItem.title,
+    url: bookmarkItem.url,
+    page: { _id: assocPageDoc._id },
+})
+
+/**
  * @param {Array<IPageDoc>} pageDocs Page docs to get visit docs for.
  * @returns {Array<IVisitDoc>} Array of visit docs gotten from URLs in pageDocs arg.
  */
@@ -129,6 +146,9 @@ export default async function prepareImports(allowTypes = {}) {
     const historyPageStubs = allowTypes[IMPORT_TYPE.HISTORY] ? historyItems.map(genPageStub) : []
     const bookmarkPageStubs = allowTypes[IMPORT_TYPE.BOOKMARK] ? bookmarkItems.map(genPageStub) : []
 
+    // Map bookmark page stubs to bookmark items, if specified
+    const bookmarkDocs = bookmarkPageStubs.map((stub, i) => transformToBookmarkDoc(stub)(bookmarkItems[i]))
+
     // Create import items for all created page stubs
     await setImportItems(uniqByUrl(
         historyPageStubs.map(transformToImportItem(IMPORT_TYPE.HISTORY))
@@ -141,9 +161,11 @@ export default async function prepareImports(allowTypes = {}) {
     // Map all page docs to visit docs and store them
     await getVisitsForPageDocs(pageDocs)
 
+    const allDocs = pageDocs.concat(bookmarkDocs)
+
     // Store them into the database. Already existing docs will simply be
     // rejected, because their id (timestamp & history id) already exists.
-    await db.bulkDocs(pageDocs)
+    await db.bulkDocs(allDocs)
     console.timeEnd('import history')
 }
 

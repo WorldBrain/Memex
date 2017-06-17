@@ -1,7 +1,9 @@
+import db from 'src/pouchdb'
+import updateDoc from 'src/util/pouchdb-update-doc'
 import initBatch from 'src/util/promise-batcher'
 import { CMDS, IMPORT_CONN_NAME } from 'src/options/imports/constants'
 import prepareImports, { getEstimateCounts } from './imports-preparation'
-import processImportItem from './import-doc-processor'
+import processImportItem from './import-item-processor'
 import { importProgressStorageKey, getImportItems, removeImportItem, clearImportItems } from './'
 
 
@@ -21,18 +23,22 @@ const clearImportInProgressFlag = async () =>
  * @param {Port} port The open connection port to send messages over.
  */
 const getBatchObserver = port => {
-    const handleFinishedItem = ({ input: { url, type }, output, error }) => {
+    const handleFinishedItem = ({ input: { url, type }, output: { status } = {}, error }) => {
         // Send item data + outcome status down to UI (and error if present)
-        port.postMessage({ cmd: CMDS.NEXT, url, type, status: output, error })
+        port.postMessage({ cmd: CMDS.NEXT, url, type, status, error })
 
         removeImportItem(url)
     }
 
     return {
-        // Triggers on the successful finish of each batch input
-        next: handleFinishedItem,
         // Triggers on any error thrown during the processing of each input
         error: handleFinishedItem,
+
+        // Triggers on the successful finish of each batch input
+        next: ({ input, output: { pageDoc, status } }) => updateDoc(db, pageDoc._id, () => pageDoc)
+            .then(() => handleFinishedItem({ input, output: { status } }))
+            .catch(error => handleFinishedItem({ input, error: error.message })),
+
         // Triggers when ALL batch inputs are finished
         async complete() {
             // TODO: Final reindexing so that all the finished docs are searchable
@@ -106,7 +112,7 @@ export default async function importsConnectionHandler(port) {
 
     const batch = initBatch({
         asyncCallback: processImportItem,
-        concurrency: 5,
+        concurrency: 2,
         observer: getBatchObserver(port),
     })
 
