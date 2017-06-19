@@ -56,6 +56,12 @@ async function showPage(pageId) {
 
         // Focus on the page so it receives e.g. keyboard input
         iframe.contentWindow.focus()
+
+        // Set the location hash (= fragment identifier) to its stored value.
+        const hash = page.url.split('#')[1]
+        if (hash !== undefined) {
+            doc.location.hash = hash
+        }
     }
 }
 
