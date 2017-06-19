@@ -62,7 +62,7 @@ async function processHistoryImport(importItem) {
     }
 
     // Do the page data fetch
-    const { text, metadata, favIcon } = await fetchPageData(importItem)
+    const { text, metadata, favIconURI } = await fetchPageData(importItem)
 
     // Get the page stub
     const pageStub = await getAssociatedPageStub(importItem)
@@ -73,7 +73,7 @@ async function processHistoryImport(importItem) {
         isStub: false,
         extractedText: text,
         extractedMetadata: metadata,
-        _attachments: await formatFavIconAttachment(favIcon),
+        _attachments: await formatFavIconAttachment(favIconURI),
     })
 
     // If we finally got here without an error being thrown, return the success status message + pageDoc data

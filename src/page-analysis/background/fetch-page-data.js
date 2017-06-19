@@ -1,4 +1,5 @@
 import extractPageContent from 'src/page-analysis/content_script/extract-page-content'
+import extractFavIcon from 'src/page-analysis/content_script/extract-fav-icon'
 
 /**
  * Given a URL will attempt an async fetch of the text and metadata from the page
@@ -6,7 +7,8 @@ import extractPageContent from 'src/page-analysis/content_script/extract-page-co
  *
  * @param {string} url The URL which points to the page to fetch text + meta-data for.
  * @return {any} Object containing `text` and `metadata` objects containing given data
- *  for the found page pointed at by the URL.
+ *  for the found page pointed at by the URL, along with `favIconURL` containing the data
+ *  URI to the favicon found in the DOM. All of these are optional.
  */
 export default async function fetchPageData({
     url = '',
@@ -16,8 +18,12 @@ export default async function fetchPageData({
     // If DOM couldn't be fetched, then we can't get text/metadata
     if (!doc) { throw new Error('Cannot fetch DOM') }
 
-    const { text, metadata, favIcon } = await extractPageContent({ doc, loc, url })
-    return { text, metadata, favIcon }
+    const { text, metadata } = await extractPageContent({ doc, loc, url })
+
+    // Favicon of web page
+    const favIconURI = await extractFavIcon(doc)
+
+    return { text, metadata, favIconURI }
 }
 
 /**
