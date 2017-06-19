@@ -1,37 +1,10 @@
 import { dataURLToBlob } from 'blob-util'
 
 import db from 'src/pouchdb'
+import updateDoc from 'src/util/pouchdb-update-doc'
 import fetchPageData from 'src/page-analysis/background/fetch-page-data'
 import { revisePageFields } from 'src/page-analysis'
-import { pageDocsSelector } from 'src/page-storage'
 import { IMPORT_TYPE, DOWNLOAD_STATUS } from 'src/options/imports/constants'
-
-/**
- * Binds a given doc type query selector to an fetching function which checks if a given URL
- * already exists in existing DB docs of the same type (excluding any stub docs) and returns them.
- *
- * @param {any} docSelector PouchDB find query selector for a specific type of docs.
- * @returns {(IImportItem) => Array<any>} Doc fetching function for same URL docs.
- */
-const getExistingDocsFetcher = docSelector => async importItem => {
-    const selector = { ...docSelector, url: importItem.url, isStub: { $ne: true } }
-    const { docs } = await db.find({ selector, fields: ['_id', 'url'] })
-    return docs
-}
-
-/**
- * @param {IImportItem} importItem The import item to attempt to find the page stub for.
- *   Assumes page stubs are unique via URL.
- */
-const getAssociatedPageStub = async ({ url }) => {
-    const selector = { ...pageDocsSelector, url, isStub: true }
-    const { docs: [pageStub] } = await db.find({ selector })
-    // If the page stub cannot be found for this URL, something has gone wrong...
-    if (!pageStub) {
-        throw new Error('Database error')
-    }
-    return pageStub
-}
 
 /**
  * @param {string?} favIconURL The data URL string for the favicon.
@@ -52,32 +25,23 @@ const formatFavIconAttachment = async favIconURL => {
  *  + optional filled-out page doc as `pageDoc` field.
  */
 async function processHistoryImport(importItem) {
-    // Run simplified URL checking logic first
-    const fetchPagesWithSameURL = getExistingDocsFetcher(pageDocsSelector)
-    const existingPages = await fetchPagesWithSameURL(importItem)
-
-    // If URL deemed to exist in DB for these doc types, skip it
-    if (existingPages.length !== 0) {
-        return { status: DOWNLOAD_STATUS.SKIP }
-    }
-
     // Do the page data fetch
     const { text, metadata, favIconURI } = await fetchPageData(importItem)
 
-    // Get the page stub
-    const pageStub = await getAssociatedPageStub(importItem)
+    // Sort out all binary attachments
+    const _attachments = await formatFavIconAttachment(favIconURI)
 
-    // Construct filled-out page doc
-    const pageDoc = revisePageFields({
+    // Perform the update: page stub "filling-out" + db logic
+    await updateDoc(db, importItem.assocDocId, pageStub => revisePageFields({
         ...pageStub,
         isStub: false,
         extractedText: text,
         extractedMetadata: metadata,
-        _attachments: await formatFavIconAttachment(favIconURI),
-    })
+        _attachments,
+    }))
 
     // If we finally got here without an error being thrown, return the success status message + pageDoc data
-    return { status: DOWNLOAD_STATUS.SUCC, pageDoc }
+    return { status: DOWNLOAD_STATUS.SUCC }
 }
 
 /**

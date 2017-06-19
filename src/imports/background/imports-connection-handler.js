@@ -1,6 +1,4 @@
-import db from 'src/pouchdb'
-import updateDoc from 'src/util/pouchdb-update-doc'
-import initBatch from 'src/util/promise-batcher'
+import PromiseBatcher from 'src/util/promise-batcher'
 import { CMDS, IMPORT_CONN_NAME } from 'src/options/imports/constants'
 import prepareImports from './imports-preparation'
 import getEstimateCounts from './import-estimates'
@@ -34,12 +32,8 @@ const getBatchObserver = port => {
     return {
         // Triggers on any error thrown during the processing of each input
         error: handleFinishedItem,
-
         // Triggers on the successful finish of each batch input
-        next: ({ input, output: { pageDoc, status } }) => updateDoc(db, pageDoc._id, () => pageDoc)
-            .then(() => handleFinishedItem({ input, output: { status } }))
-            .catch(error => handleFinishedItem({ input, error: error.message })),
-
+        next: handleFinishedItem,
         // Triggers when ALL batch inputs are finished
         async complete() {
             // TODO: Final reindexing so that all the finished docs are searchable
@@ -66,13 +60,8 @@ async function startImport(port, batch, allowTypes) {
         await prepareImports(allowTypes)
     }
 
-    // Tell UI to finish loading state and move into progress view
-    port.postMessage({ cmd: CMDS.START })
-
+    port.postMessage({ cmd: CMDS.START }) // Tell UI to finish loading state and move into progress view
     setImportInProgressFlag()
-
-    // Start the batcher with needed input
-    batch.init(await getImportItems())
     batch.start()
 }
 
@@ -111,9 +100,10 @@ export default async function importsConnectionHandler(port) {
 
     console.log('importer connected')
 
-    const batch = initBatch({
-        asyncCallback: processImportItem,
-        concurrency: 2,
+    const batch = new PromiseBatcher({
+        inputBatchCallback: getImportItems,
+        processingCallback: processImportItem,
+        concurrency: 5,
         observer: getBatchObserver(port),
     })
 
@@ -124,8 +114,6 @@ export default async function importsConnectionHandler(port) {
         const estimateCounts = await getEstimateCounts()
         port.postMessage({ cmd: CMDS.INIT, ...estimateCounts })
     } else {
-        // If import is in progress, we need to make sure it's input is ready to process again
-        batch.init(await getImportItems())
         // Make sure to start the view in paused state
         port.postMessage({ cmd: CMDS.PAUSE })
     }
@@ -135,7 +123,7 @@ export default async function importsConnectionHandler(port) {
         switch (cmd) {
             case CMDS.START: return await startImport(port, batch, payload)
             case CMDS.RESUME: return batch.start()
-            case CMDS.PAUSE: return batch.pause()
+            case CMDS.PAUSE: return batch.stop()
             case CMDS.CANCEL: return await cancelImport(port, batch)
             case CMDS.FINISH: return await finishImport(port)
             default: return console.error(`unknown command: ${cmd}`)

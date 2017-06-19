@@ -15,8 +15,9 @@ const uniqByUrl = uniqBy('url')
 /**
  * Binds an import type to a function that transforms a history/bookmark doc to an import item.
  * @param {string} type The IMPORT_TYPE to use.
+ * @param {any} doc The associated stub doc in the DB to be "filling-out" in batched imports stage.
  */
-const transformToImportItem = type => doc => ({ url: doc.url, type })
+const transformToImportItem = type => doc => ({ url: doc.url, assocDocId: doc._id, type })
 
 /**
  * Transforms a browser item to a page doc stub. Currently supports browser HistoryItems
