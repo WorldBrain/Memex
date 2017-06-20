@@ -51,10 +51,10 @@ export default function determinePageSameness(page1, page2) {
     // TODO Replace this simple code with something more sophisticated.
 
     // Compare page titles
-    const titleSameness = textSameness(...pages.map(get('title')))
+    const titleSameness = textSameness(...pages.map(get('content.title')))
 
     // Compare page text contents
-    const textContents = pages.map(get('extractedText.bodyInnerText'))
+    const textContents = pages.map(get('content.fullText'))
     const textContentSameness = textSameness(...textContents)
 
     // Return the lowest (most pessimistic) score among them.
