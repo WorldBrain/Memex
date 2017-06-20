@@ -7,11 +7,14 @@ export const localVersionAvailable = ({page}) => (
 )
 
 export const LinkToLocalVersion = ({page, children, ...props}) => {
+    const uri = `/page-viewer/localpage.html?page=${page._id}`
+    const hash = (page.url && page.url.split('#')[1])
+    const href = (hash !== undefined) ? uri + '#' + hash : uri
     const size = get(['_attachments', 'frozen-page.html', 'length'])(page)
     const sizeInMB = Math.round(size / 1024**2 * 10) / 10
     return (
         <a
-            href={`/page-viewer/localpage.html?page=${page._id}`}
+            href={href}
             title={`Stored version available (${sizeInMB} MB)`}
             {...props}
         >
