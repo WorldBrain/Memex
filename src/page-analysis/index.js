@@ -7,6 +7,7 @@ export const searchableTextFields = [
     'content.author',
     'content.description',
     'content.keywords',
+    'url',
 ]
 
 // Revise and augment a page doc, used for two possible reasons:
