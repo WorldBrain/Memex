@@ -6,7 +6,11 @@
     </head>
     <body>
         <div id="bar"></div>
-        <iframe id="page" seamless></iframe>
+        <iframe
+            id="page"
+            seamless
+            sandbox="allow-same-origin allow-top-navigation"
+        ></iframe>
         <script src="/lib/browser-polyfill.js"></script>
         <script src="localpage.js"></script>
     </body>
