@@ -5,6 +5,7 @@ import { getPage } from 'src/search/find-pages'
 import { getTimestamp } from 'src/activity-logger'
 import shortUrl from 'src/util/short-url'
 import niceTime from 'src/util/nice-time'
+import syncLocationHashes from 'src/util/sync-location-hashes'
 
 
 function fixChromiumInjectedStylesheet(document) {
@@ -57,8 +58,8 @@ async function showPage(pageId) {
         // Focus on the page so it receives e.g. keyboard input
         iframe.contentWindow.focus()
 
-        // Pass through the location hash (= fragment identifier) if given.
-        doc.location.hash = window.location.hash
+        // Keep the iframe's location #hash in sync with that of the window.
+        syncLocationHashes([window, iframe.contentWindow], {initial: window})
     }
 }
 
