@@ -20,14 +20,12 @@ function samenessLinkType({sameness}) {
     return types[sameness]
 }
 
-async function forgetPageContents({page}) {
-    // Remove analysed bulky stuff
-    await updateDoc(db, page._id, doc => ({
+async function forgetPageContents({page, pageId = page._id}) {
+    // Remove stored content, screenshots, etcetera.
+    await updateDoc(db, pageId, doc => ({
         ...doc,
-        extractedText: undefined,
-        extractedMetadata: undefined,
-        screenshot: undefined,
-        favIcon: undefined,
+        content: undefined,
+        _attachments: {},
     }))
 }
 
