@@ -45,9 +45,9 @@ async function performPageAnalysis({pageId, tabId}) {
     })
 
     // Extract the text and metadata
-    const storePageContent = extractPageContent().then(async object => {
-        // Add the info to the existing doc.
-        await updateDoc(db, pageId, doc => merge(object)(doc))
+    const storePageContent = extractPageContent().then(async content => {
+        // Add the info to the doc's (possibly already existing) doc.content.
+        await updateDoc(db, pageId, doc => merge({content})(doc))
     })
 
     // Freeze-dry and store the whole page
