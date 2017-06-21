@@ -15,11 +15,11 @@ const shortUrl = (url, maxLength = 50) => {
 }
 
 const visitToSuggestion = doc => {
-    const visitDate = escapeHtml(niceTime(doc.visitStart))
+    const visitDate = decodeURIComponent('\uD83D\uDD52') + escapeHtml(niceTime(doc.visitStart))
     const url = escapeHtml(shortUrl(doc.url))
     const title = escapeHtml(doc.page.title)
     const description
-        = `<url>${url}</url> — ${title} <dim>(visited ${visitDate})</dim>`
+        = `<url>${url}</url> — <dim> (${visitDate}) </dim> - ${title}`
     return ({
         content: doc.url,
         description: description.toString(),
