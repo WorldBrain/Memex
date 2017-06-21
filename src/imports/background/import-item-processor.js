@@ -26,7 +26,7 @@ const formatFavIconAttachment = async favIconURL => {
  */
 async function processHistoryImport(importItem) {
     // Do the page data fetch
-    const { text, metadata, favIconURI } = await fetchPageData(importItem)
+    const { content, favIconURI } = await fetchPageData(importItem)
 
     // Sort out all binary attachments
     const _attachments = await formatFavIconAttachment(favIconURI)
@@ -34,10 +34,9 @@ async function processHistoryImport(importItem) {
     // Perform the update: page stub "filling-out" + db logic
     await updateDoc(db, importItem.assocDocId, pageStub => revisePageFields({
         ...pageStub,
-        isStub: false,
-        extractedText: text,
-        extractedMetadata: metadata,
+        content,
         _attachments,
+        isStub: false,
     }))
 
     // If we finally got here without an error being thrown, return the success status message + pageDoc data

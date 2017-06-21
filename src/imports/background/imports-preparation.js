@@ -33,6 +33,7 @@ const transformToPageDocStub = item => ({
     }),
     url: item.url,
     title: item.title,
+    content: { title: item.title },
     isStub: true, // Flag denoting that this doc is yet to be filled-out with data from import process
 })
 

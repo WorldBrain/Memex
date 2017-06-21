@@ -6,34 +6,23 @@ import extractFavIcon from 'src/page-analysis/content_script/extract-fav-icon'
  * which the URL points to.
  *
  * @param {string} url The URL which points to the page to fetch text + meta-data for.
- * @return {any} Object containing `text` and `metadata` objects containing given data
- *  for the found page pointed at by the URL, along with `favIconURL` containing the data
- *  URI to the favicon found in the DOM. All of these are optional.
+ * @return {any} Object containing `content` and `favIconURI` data fetched from the DOM pointed
+ *  at by the `url` arg.
  */
 export default async function fetchPageData({
     url = '',
 } = {}) {
-    const loc = getLocationFromURL(url)
     const doc = await fetchDOMFromUrl(url)
     // If DOM couldn't be fetched, then we can't get text/metadata
-    if (!doc) { throw new Error('Cannot fetch DOM') }
+    if (!doc) {
+        throw new Error('Cannot fetch DOM')
+    }
 
-    const { text, metadata } = await extractPageContent({ doc, loc, url })
-
-    // Favicon of web page
-    const favIconURI = await extractFavIcon(doc)
-
-    return { text, metadata, favIconURI }
+    return {
+        favIconURI: await extractFavIcon(doc),
+        content: await extractPageContent({ doc, url }),
+    }
 }
-
-/**
- * Given a URL string, converts it to a Location-interface compatible object.
- * Uses experimental URL API: https://developer.mozilla.org/en/docs/Web/API/URL
- *
- * @param {string} url The URL to get Location-interface object for.
- * @return {Location} A Location-interface compatible object.
- */
-const getLocationFromURL = url => new URL(url)
 
 /**
  * Async function that given a URL will attempt to grab the current DOM which it points to.
