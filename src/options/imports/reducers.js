@@ -56,9 +56,9 @@ const toggleAllowTypeReducer = (state, type) => ({
     },
 })
 
-const finishImportsReducer = state => ({
+const finishImportsReducer = ({ loading = false }) => state => ({
     ...state,
-    importStatus: STATUS.IDLE,
+    importStatus: loading ? STATUS.LOADING : STATUS.IDLE,
     downloadData: [],
     success: defaultStats,
     fail: defaultStats,
@@ -97,8 +97,8 @@ export default createReducer({
     [actions.prepareImport]: prepareImportReducer,
     [actions.startImport]: setImportState(STATUS.RUNNING),
     [actions.stopImport]: setImportState(STATUS.STOPPED),
-    [actions.finishImport]: finishImportsReducer,
-    [actions.readyImport]: finishImportsReducer,
+    [actions.finishImport]: finishImportsReducer({ loading: true }),
+    [actions.readyImport]: finishImportsReducer({ loading: false }),
     [actions.cancelImport]: cancelImportReducer,
     [actions.pauseImport]: setImportState(STATUS.PAUSED),
     [actions.resumeImport]: setImportState(STATUS.RUNNING),

@@ -11,7 +11,6 @@ const hydrateImportsFromStorage = store => {
     })
 
     hydrate(STORAGE_KEYS.DOWNLOAD_DATA, actions.initDownloadData)
-    hydrate(STORAGE_KEYS.IMPORT_STATE, actions.initImportState)
     hydrate(STORAGE_KEYS.TOTALS_STATE, actions.initTotalsCounts)
     hydrate(STORAGE_KEYS.SUCCESS_STATE, actions.initSuccessCounts)
     hydrate(STORAGE_KEYS.FAIL_STATE, actions.initFailCounts)
@@ -22,7 +21,6 @@ const syncImportsToStorage = store => store.subscribe(() => {
 
     const state = store.getState()
     dump(STORAGE_KEYS.DOWNLOAD_DATA, selectors.downloadData(state))
-    dump(STORAGE_KEYS.IMPORT_STATE, selectors.importStatus(state))
     dump(STORAGE_KEYS.TOTALS_STATE, selectors.totals(state))
     dump(STORAGE_KEYS.SUCCESS_STATE, selectors.success(state))
     dump(STORAGE_KEYS.FAIL_STATE, selectors.fail(state))
