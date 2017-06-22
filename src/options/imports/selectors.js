@@ -1,4 +1,5 @@
 import { createSelector } from 'reselect'
+import pickBy from 'lodash/fp/pickBy'
 
 import {
     FILTERS,
@@ -95,10 +96,11 @@ export const estimates = createSelector(
 export const isStartBtnDisabled = createSelector(
     allowTypes, estimates,
     (allowTypes, estimates) => {
+        const pickByAllowedTypes = pickBy((val, key) => val)
         const allCheckboxesDisabled = () => !Object.values(allowTypes).reduce((prev, curr) => prev || curr)
 
-        // Map-reduce the remaining estimates to disable button when they're all 0
-        const noImportsRemaining = () => Object.values(TYPE)
+        // Map-reduce the remaining (allowed) estimates to disable button when remaining is 0
+        const noImportsRemaining = () => Object.keys(pickByAllowedTypes(allowTypes))
             .map(importType => estimates[importType].remaining === 0)
             .reduce((prev, curr) => prev && curr)
 
