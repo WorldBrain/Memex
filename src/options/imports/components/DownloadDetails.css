@@ -43,7 +43,8 @@
     border: 1px solid #000;
     border-collapse: collapse;
 
-    & th, & td {
+    & th,
+    & td {
         text-align: left;
         padding: 5px;
         height: 27px;
@@ -69,10 +70,11 @@
 .detailsTableHead {
     border-bottom: 1px solid #000;
     background: #eee;
-    width: calc(100% - 1em)
+    width: calc(100% - 1em);
 }
 
-.detailsTableHead, .detailsTableBody tr {
+.detailsTableHead,
+.detailsTableBody tr {
     display: table;
     width: 100%;
     table-layout: fixed;

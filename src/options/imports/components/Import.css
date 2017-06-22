@@ -6,7 +6,8 @@
     border-collapse: collapse;
     text-align: center;
 
-    & th , & td {
+    & th,
+    & td {
         padding: 15px;
     }
 
@@ -70,12 +71,10 @@
 .loadingBlocker {
     position: absolute;
     top: 0;
-
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-
     height: 750px;
     width: 800px;
     background: #fff;

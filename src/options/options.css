@@ -2,13 +2,14 @@
     box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
     margin: 0;
 }
 
 .root {
     font-size: 18px;
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
     font-weight: 200;
     display: flex;
     flex-direction: row;
@@ -31,17 +32,15 @@ html, body {
 .button {
     background: #eee;
     color: #666;
-
-    font-size: .8em;
+    font-size: 0.8em;
     font-weight: 400;
-    padding: .6em 1.5em;
+    padding: 0.6em 1.5em;
     text-transform: uppercase;
     cursor: pointer;
-
     outline: 0;
     border: 1px solid #999;
     box-shadow: 0 0 1px 0 rgba(0, 0, 0, 0.1);
-    transition: background-color .1s ease-in, color .1s ease-in;
+    transition: background-color 0.1s ease-in, color 0.1s ease-in;
 
     &:hover {
         background: #cdcdcd;
@@ -57,7 +56,7 @@ html, body {
 }
 
 .helpText {
-    font-size: .8em;
+    font-size: 0.8em;
 }
 
 .helpText_right {
@@ -73,7 +72,7 @@ html, body {
 .fluidContainer {
     margin-bottom: 10px;
 
-    &:after {
+    &::after {
         content: '';
         display: table;
         clear: both;

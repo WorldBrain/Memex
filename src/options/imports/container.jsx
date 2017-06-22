@@ -91,7 +91,7 @@ class ImportContainer extends Component {
     }
 
     renderImportButton() {
-        const { isRunning, isStopped, isPaused, isStartBtnDisabled, boundActions, allowTypes } = this.props
+        const { isRunning, isStopped, isPaused, isStartBtnDisabled, boundActions } = this.props
 
         if (isRunning) {
             const handleClick = e => this.onButtonClick(e, boundActions.pause)

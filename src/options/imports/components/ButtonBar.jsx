@@ -1,5 +1,4 @@
 import React, { PropTypes } from 'react'
-import classNames from 'classnames'
 
 import { LoadingIndicator } from 'src/common-ui/components'
 import styles from './ButtonBar.css'
