@@ -6,13 +6,15 @@ import extractFavIcon from 'src/page-analysis/content_script/extract-fav-icon'
  * which the URL points to.
  *
  * @param {string} url The URL which points to the page to fetch text + meta-data for.
+ * @param {number} [timeout=5000] The amount of ms to wait before throwing a fetch timeout error.
  * @return {any} Object containing `content` and `favIconURI` data fetched from the DOM pointed
  *  at by the `url` arg.
  */
 export default async function fetchPageData({
     url = '',
+    timeout = 5000,
 } = {}) {
-    const doc = await fetchDOMFromUrl(url)
+    const doc = await fetchDOMFromUrl(url, timeout)
     // If DOM couldn't be fetched, then we can't get text/metadata
     if (!doc) {
         throw new Error('Cannot fetch DOM')
@@ -30,15 +32,25 @@ export default async function fetchPageData({
  * the DOM; the Response object must be parsed.
  *
  * @param {string} url The URL to fetch the DOM for.
+ * @param {number} timeout The amount of ms to wait before throwing a fetch timeout error.
  * @return {Document} The DOM which the URL points to.
  */
-const fetchDOMFromUrl = async url => new Promise((resolve, reject) => {
+const fetchDOMFromUrl = async (url, timeout) => new Promise((resolve, reject) => {
     const req = new XMLHttpRequest()
 
-    req.timeout = 5000
-    req.ontimeout = () => reject(new Error('Data fetch timeout'))
-    req.onload = () => resolve(req.responseXML)
+    req.timeout = timeout
+    // General non-HTTP errors
     req.onerror = () => reject(new Error('Data fetch failed'))
+    // Allow non-200 respons statuses to be considered failures; timeouts show up as 0
+    req.onreadystatechange = function() {
+        if (this.readyState === 4) {
+            switch (this.status) {
+                case 0: return reject(new Error('Data fetch timeout'))
+                case 200: return resolve(this.responseXML)
+                default: return reject(new Error('Data fetch failed'))
+            }
+        }
+    }
 
     req.open('GET', url)
 
