@@ -94,7 +94,7 @@ function castToArray(value) {
 
 // Identity function, except that if passed a function, its return value.
 // ('resolve' would be a better term than 'cast', but too confusing in this context)
-function castFuncToValue(functionOrValue, args=[]) {
+function castFuncToValue(functionOrValue, args = []) {
     const value = (typeof functionOrValue === 'function')
         ? functionOrValue(...args)
         : functionOrValue
