@@ -47,6 +47,7 @@
         "no-multiple-empty-lines": ["error", { "max": 2, "maxEOF": 0 }],
         "no-unused-vars": "warn",
         "space-before-function-paren": "off",
+        "space-infix-ops": "off",
         "operator-linebreak": ["error", "before"],
         "handle-callback-err": "off",
         "import/no-mutable-exports": "error",
