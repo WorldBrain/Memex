@@ -1,3 +1,6 @@
+.PHONY: all
+all: build-prod package
+
 .PHONY: build
 build: node_modules
 	npm run build
@@ -10,17 +13,10 @@ build-prod: node_modules
 watch:
 	npm run watch
 
+.PHONY: package
+package:
+	npm run package
+
 # Just check if node_modules is present at all, to ease first time install.
 node_modules:
 	npm install
-
-
-# Firefox-specific stuff
-
-.PHONY: fx-run
-fx-run:
-	npm run fx-run
-
-.PHONY: fx-build
-fx-build:
-	npm run fx-build
