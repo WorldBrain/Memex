@@ -21,3 +21,8 @@ export const results = createSelector(searchResult, ({ rows: results } = {}) =>
         safelyGet('doc.url')
     )(results)
     .map(resultsStateShape)) // Final map over the groupBy output to make nicer UI state
+
+export const searchMetaData = createSelector(searchResult, searchResult => ({
+    searchedUntil: searchResult.searchedUntil,
+    resultsExhausted: searchResult.resultsExhausted,
+}))

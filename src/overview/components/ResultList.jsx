@@ -59,6 +59,7 @@ const ResultList = ({
     searchQuery,
     waitingForResults,
     onBottomReached,
+    resultsExhausted,
 }) => {
     // If there are no results, show a message.
     const noResultMessage = 'no results'
@@ -95,7 +96,7 @@ const ResultList = ({
     })
 
     // Insert waypoint to trigger loading new items when scrolling down.
-    if (!waitingForResults && !searchResult.resultsExhausted) {
+    if (!waitingForResults && !resultsExhausted) {
         const waypoint = <Waypoint onEnter={onBottomReached} key='waypoint' />
         // Put the waypoint a bit before the bottom, except if the list is short.
         const waypointPosition = Math.max(Math.min(5, listItems.length), listItems.length - 5)
@@ -117,6 +118,7 @@ ResultList.propTypes = {
     })).isRequired,
     searchQuery: PropTypes.string,
     waitingForResults: PropTypes.bool,
+    resultsExhausted: PropTypes.bool.isRequired,
     onBottomReached: PropTypes.func,
 }
 
