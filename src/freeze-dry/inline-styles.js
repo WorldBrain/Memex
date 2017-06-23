@@ -31,23 +31,30 @@ async function inlineLinkedStylesheets({rootElement, docUrl}) {
     const linkElements = Array.from(rootElement.querySelectorAll(querySelector))
     const jobs = linkElements.map(async linkEl => {
         const stylesheetUrl = new URL(linkEl.getAttribute('href'), docUrl)
-        let dataUri
+        let stylesheetText
         try {
             // Fetch the stylesheet itself.
             const response = await fetch(stylesheetUrl, {cache: 'force-cache'})
-            let stylesheetText = await response.text()
+            stylesheetText = await response.text()
             // Fetch and replace URLs inside the stylesheet.
             stylesheetText = await inlineStylesheetContents({
                 stylesheetText,
                 stylesheetUrl,
             })
-            dataUri = `data:text/css;charset=UTF-8,${encodeURIComponent(stylesheetText)}`
         } catch (err) {
-            dataUri = 'about:blank'
+            stylesheetText = '/* Oops! Freeze-dry failed to save this stylesheet. */'
         }
-        linkEl.setAttribute('href', dataUri)
-        // Remove integrity check, if any, because hash will have changed.
-        linkEl.removeAttribute('integrity')
+        const styleEl = rootElement.ownerDocument.createElement('style')
+        styleEl.innerHTML = stylesheetText
+
+        // Type is practically always text/css, the default, but copy it anyway.
+        const type = linkEl.getAttribute('type')
+        if (type) {
+            styleEl.setAttribute('type', type)
+        }
+
+        // Replace the <link /> element with the inlined <style>...</style>.
+        linkEl.parentNode.replaceChild(styleEl, linkEl)
     })
     await whenAllSettled(jobs)
 }
