@@ -40,6 +40,7 @@ class Overview extends React.Component {
                         searchQuery={this.props.query}
                         onBottomReached={this.props.onBottomReached}
                         waitingForResults={this.props.waitingForResults}
+                        {...this.props.searchMetaData}
                     />
                 </div>
             </div>
@@ -57,6 +58,10 @@ Overview.propTypes = {
     onEndDateChange: PropTypes.func,
     onBottomReached: PropTypes.func,
     waitingForResults: PropTypes.bool,
+    searchMetaData: PropTypes.shape({
+        searchedUntil: PropTypes.string.isRequired,
+        resultsExhausted: PropTypes.bool.isRequired,
+    }).isRequired,
     searchResult: PropTypes.arrayOf(PropTypes.shape({
         latestResult: PropTypes.object.isRequired,
         rest: PropTypes.arrayOf(PropTypes.object).isRequired,
@@ -68,6 +73,7 @@ const mapStateToProps = state => ({
     ...selectors.ourState(state),
     waitingForResults: !!selectors.ourState(state).waitingForResults, // cast to boolean
     searchResult: selectors.results(state),
+    searchMetaData: selectors.searchMetaData(state),
 })
 
 const mapDispatchToProps = dispatch => ({
