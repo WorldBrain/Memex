@@ -1,3 +1,6 @@
+import fs from 'fs'
+import { exec as nodeExec} from 'child_process'
+import pify from 'pify'
 import gulp from 'gulp'
 import uglify from 'gulp-uglify'
 import identity from 'gulp-identity'
@@ -13,6 +16,10 @@ import path from 'path'
 import cssModulesify from 'css-modulesify'
 import cssnext from 'postcss-cssnext'
 
+const exec = pify(nodeExec)
+
+
+// === Tasks for building the source code; result is put into ./extension ===
 
 const staticFiles = {
     'node_modules/webextension-polyfill/dist/browser-polyfill.js': 'extension/lib',
@@ -136,4 +143,37 @@ gulp.task('lint-watch', ['lint'], () => {
 })
 
 gulp.task('watch', ['build-watch', 'lint-watch'])
-gulp.task('default', ['watch'])
+
+
+// === Tasks for packaging the extension; results go into ./dist/{browser} ===
+
+function getManifest() {
+    const manifest = JSON.parse(fs.readFileSync('./extension/manifest.json'))
+    return manifest
+}
+
+function getFilename() {
+    const { name, version } = getManifest()
+    const filename = `${name.toLowerCase()}-${version}`
+    return filename
+}
+
+gulp.task('package-firefox', async () => {
+    const filename = getFilename()
+    const buildXpiCommand = `web-ext -s ./extension -a ./dist/firefox build`
+    await exec(buildXpiCommand)
+    // web-ext will have named the file ${filename}.zip. Change .zip to .xpi.
+    await exec(`rename -f "s/\\.zip$/.xpi/" dist/firefox/${filename}.zip`)
+})
+
+gulp.task('package-chromium', async () => {
+    const filename = getFilename()
+    const buildCrxCommand = (
+        `crx pack ./extension`
+        + ` -o ./dist/chromium/${filename}.crx`
+        + ` -p .chrome-extension-key.pem`
+    )
+    await exec(buildCrxCommand)
+})
+
+gulp.task('package', ['package-firefox', 'package-chromium'])
