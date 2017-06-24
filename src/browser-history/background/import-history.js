@@ -3,8 +3,12 @@
 // converted to pageDocs and visitDocs (sorry for the confusingly similar name).
 
 import db from 'src/pouchdb'
-import { isWorthRemembering, generateVisitDocId,
-         visitKeyPrefix, convertVisitDocId } from 'src/activity-logger'
+import {
+    isWorthRemembering,
+    generateVisitDocId,
+    visitKeyPrefix,
+    convertVisitDocId,
+} from 'src/activity-logger'
 import { generatePageDocId } from 'src/page-storage'
 
 
