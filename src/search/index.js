@@ -88,7 +88,7 @@ function pageMatchesQuery({page, query}) {
     // Get page text fields.
     const texts = searchableTextFields.map(fieldName => get(fieldName)(page))
         .filter(text => text) // remove undefined fields
-        .map(text => text.toLowerCase())
+        .map(text => text.toString().toLowerCase())
 
     // Test if every word in the query is present in at least one text field.
     const queryWords = query.toLowerCase().trim().split(/s+/)
