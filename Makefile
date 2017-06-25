@@ -1,22 +1,33 @@
+# This Makefile just runs npm scripts defined in package.json, both so that
+# people can use `npm run ...` if they prefer, and because npm conveniently
+# expands $PATH for us to find and run tools we install (e.g. gulp).
+
+MIN_NODE_VERSION = 6
+
+NPM_ABSENT_MSG = "\n Please install Node/NPM (see https://nodejs.org) \n"
+NODE_VERSION_MSG = "\n Please install/activate Node version ≥ v${MIN_NODE_VERSION} \n"
+YARN_ABSENT_MSG = "\n Please install yarn (globally), e.g. run: npm install -g yarn \n"
+
 .PHONY: all
-all: build-prod package
+all: check_requirements
+	###
+	### Fetching and installing dependencies.
+	###
+	yarn install
 
-.PHONY: build
-build: node_modules
-	npm run build
-
-.PHONY: build-prod
-build-prod: node_modules
+    ###
+	### Transpiling, bundling & minifying the extension source code.
+	###
 	npm run build-prod
 
-.PHONY: watch
-watch:
-	npm run watch
-
-.PHONY: package
-package:
+	###
+	### Packaging it for the browsers.
+	###
 	npm run package
 
-# Just check if node_modules is present at all, to ease first time install.
-node_modules:
-	npm install
+.PHONY: check_requirements
+check_requirements:
+	### Checking availability of Node/NPM and yarn. ###
+	command -v npm >/dev/null || { echo ${NPM_ABSENT_MSG}; exit 1; }
+	test `node -p "process.versions.node.split('.')[0]"` -ge ${MIN_NODE_VERSION} || { echo ${NODE_VERSION_MSG}; exit 1; }
+	command -v yarn >/dev/null || { echo ${YARN_ABSENT_MSG}; exit 1; }

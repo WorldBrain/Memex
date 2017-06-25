@@ -1,5 +1,9 @@
 language: node_js
 node_js:
-    - "7"
+    - "6"
+script:
+    - npm run test # first run tests, to fail quickly.
+    - npm run build
+cache: yarn
 notifications:
     email: false

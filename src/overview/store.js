@@ -26,9 +26,9 @@ export default function configureStore({ReduxDevTools = undefined} = {}) {
     const enhancer = compose(...enhancers)
 
     const store = createStore(
-      rootReducer,
-      undefined, // initial state
-      enhancer
+        rootReducer,
+        undefined, // initial state
+        enhancer
     )
 
     return store
