@@ -52,12 +52,13 @@ Pop in on #webmemex on [Freenode](http://webchat.freenode.net/), send a PR or
 open an issue [on GitHub](https://github.com/Treora/memextension), or send
 me ([Gerben](https://github.com/Treora)) a message.
 
-Coding, design, communication, there is plenty to be done. A tiny but of funding
+Coding, design, communication, there is plenty to be done. A tiny bit of funding
 is available to tip significant contributions. :money_with_wings:
 
 All code in this project is in the public domain, free from copyright
 restrictions. Please waive your copyrights on any contributions you make.
-See e.g. [unlicense.org](http://unlicense.org/) for more information.
+See e.g. [unlicense.org](https://unlicense.org/) for more information.
+
 
 ## Hacking
 
@@ -69,24 +70,24 @@ See [`Codetour.md`](Codetour.md) for an explanation of the repository structure.
 ### Build and run it
 
 1. Clone this repo.
-2. Get [Node/NPM](https://nodejs.org).
-3. Run `make` to compile the source files.
+2. Get [Node/NPM](https://nodejs.org) and [yarn](https://yarnpkg.com)
+   (`npm install -g yarn`).
+3. Run `make` to install dependencies and compile the source files.
 4. Load it in Firefox or Chromium/Chrome:
-    * In Firefox (≥49): run `make fx-run` (or run [web-ext](https://developer.mozilla.org/en-US/Add-ons/WebExtensions/web-ext_command_reference#web-ext_run)
+    * In Firefox (≥49): run `npm run fx-run` (or run [web-ext](https://developer.mozilla.org/en-US/Add-ons/WebExtensions/web-ext_command_reference#web-ext_run)
       directly for more control).
       Alternatively, go to [`about:debugging`](about:debugging), choose 'Load
       Temporary Add-on', and pick `extension/manifest.json` from this repo.
     * In Chromium/Chrome: go to [Tools→Extensions](chrome://extensions/), enable
       'Developer mode', 'Load unpacked extension...', pick the `extension/`
       folder from this repo.
-    * Others browsers: let know if you have tested it!
 
 ### Automatic recompilation
 
-If the steps above worked, running `make watch` will trigger a quick
+If the steps above worked, running `npm run watch` will trigger a quick
 recompilation every time a source file has been modified.
 
-If you are testing in Firefox through `make fx-run`/`web-ext`, the extension
+If you are testing in Firefox through `npm run fx-run`/`web-ext`, the extension
 should also reload automatically. Otherwise, depending on which part of the code
 you change, you may have to reload the extension in your browser:
 
