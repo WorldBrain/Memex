@@ -2,9 +2,15 @@
 <html>
     <head>
         <meta charset="utf-8" />
+        <link rel="stylesheet" href="localpage.css" />
     </head>
     <body>
-        Page should load in a few milliseconds..
+        <div id="bar"></div>
+        <iframe
+            id="page"
+            seamless
+            sandbox="allow-same-origin allow-top-navigation"
+        ></iframe>
         <script src="/lib/browser-polyfill.js"></script>
         <script src="localpage.js"></script>
     </body>

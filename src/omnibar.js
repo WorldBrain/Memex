@@ -3,13 +3,8 @@ import escapeHtml from 'lodash/fp/escape'
 
 import { filterVisitsByQuery } from 'src/search'
 import niceTime from 'src/util/nice-time'
+import shortUrl from 'src/util/short-url'
 
-
-const shortUrl = (url, maxLength = 50) => {
-    url = url.replace(/^https?:\/\//i, '')
-    if (url.length > maxLength) { url = url.slice(0, maxLength - 3) + '...' }
-    return url
-}
 
 const visitToSuggestion = doc => {
     const visitDate = escapeHtml(niceTime(doc.visitStart))
