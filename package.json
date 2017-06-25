@@ -20,6 +20,7 @@
     "babel-runtime": "^6.23.0",
     "blob-util": "^1.2.1",
     "classnames": "^2.2.5",
+    "core-js": "^2.4.1",
     "diff-match-patch": "^1.0.0",
     "docuri": "^4.2.2",
     "history": "^4.6.3",
