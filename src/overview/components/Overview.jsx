@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 
 import * as actions from '../actions'
-import { ourState } from '../selectors'
+import * as selectors from '../selectors'
 import ResultList from './ResultList'
 import DateRangeSelection from './DateRangeSelection'
 import styles from './Overview.css'
@@ -40,6 +40,7 @@ class Overview extends React.Component {
                         searchQuery={this.props.query}
                         onBottomReached={this.props.onBottomReached}
                         waitingForResults={this.props.waitingForResults}
+                        {...this.props.searchMetaData}
                     />
                 </div>
             </div>
@@ -57,13 +58,22 @@ Overview.propTypes = {
     onEndDateChange: PropTypes.func,
     onBottomReached: PropTypes.func,
     waitingForResults: PropTypes.bool,
-    searchResult: PropTypes.object,
+    searchMetaData: PropTypes.shape({
+        searchedUntil: PropTypes.string,
+        resultsExhausted: PropTypes.bool,
+    }).isRequired,
+    searchResult: PropTypes.arrayOf(PropTypes.shape({
+        latestResult: PropTypes.object.isRequired,
+        rest: PropTypes.arrayOf(PropTypes.object).isRequired,
+    })).isRequired,
 }
 
 
 const mapStateToProps = state => ({
-    ...ourState(state),
-    waitingForResults: !!ourState(state).waitingForResults, // cast to boolean
+    ...selectors.ourState(state),
+    waitingForResults: !!selectors.ourState(state).waitingForResults, // cast to boolean
+    searchResult: selectors.results(state),
+    searchMetaData: selectors.searchMetaData(state),
 })
 
 const mapDispatchToProps = dispatch => ({
