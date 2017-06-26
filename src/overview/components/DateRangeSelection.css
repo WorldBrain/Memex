@@ -13,12 +13,12 @@
     width: 110px;
     height: 37px;
     font-size: 15px;
-    color:  #484848;
+    color: #484848;
     border: none;
     margin: 0 10px;
 
     &::placeholder {
-        color: #B8B8B8;
+        color: #b8b8b8;
     }
 
     &:focus {

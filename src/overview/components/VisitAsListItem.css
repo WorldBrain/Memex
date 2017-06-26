@@ -16,15 +16,15 @@
     justify-content: space-between;
     overflow: hidden;
     margin-top: var(--vertical-spacing);
-    border: 1px solid #E3E3E3;
+    border: 1px solid #e3e3e3;
     border-radius: 3px;
-    background-color: #FEFEFE;
+    background-color: #fefefe;
     color: inherit;
     text-decoration: none;
-    box-shadow: 0px 3px 10px 1px rgba(217, 219, 221, 0.6);
+    box-shadow: 0 3px 10px 1px rgba(217, 219, 221, 0.6);
 
     &:hover {
-        box-shadow: 0px 3px 15px 4px rgba(200, 200, 200, 0.5);
+        box-shadow: 0 3px 15px 4px rgba(200, 200, 200, 0.5);
         transform: scale(1.01);
     }
 
@@ -32,7 +32,7 @@
 
     &:focus {
         outline: none;
-        box-shadow: 0px 3px 10px 1px rgba(217, 219, 221, 0.6);
+        box-shadow: 0 3px 10px 1px rgba(217, 219, 221, 0.6);
     }
 }
 
@@ -57,7 +57,7 @@
     display: flex;
     align-items: flex-start;
     justify-content: center;
-    border-right: solid 1px #EBEBEB;
+    border-right: solid 1px #ebebeb;
 
     & .screenshot {
         max-width: 100%;
@@ -92,8 +92,8 @@
 
     & .url {
         font-size: 12px;
-        min-width: 0px;
-        color: #888888;
+        min-width: 0;
+        color: #888;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -102,7 +102,7 @@
 
     & .time {
         font-size: 11px;
-        color: #C1C1C1;
+        color: #c1c1c1;
     }
 }
 
@@ -129,17 +129,17 @@
 }
 
 .trash {
-    background-image: url(img/trash-icon.png);
+    background-image: url('img/trash-icon.png');
 }
 
 .trash:hover {
-    background-image: url(img/trash-icon-hovered.png);
+    background-image: url('img/trash-icon-hovered.png');
 }
 
 .load {
-    background-image: url(img/load-icon.png);
+    background-image: url('img/load-icon.png');
 }
 
 .load:hover {
-    background-image: url(img/load-icon-hovered.png);
+    background-image: url('img/load-icon-hovered.png');
 }
