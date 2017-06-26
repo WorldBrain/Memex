@@ -42,7 +42,7 @@ class DateRangeSelection extends Component {
                 ? date.valueOf()
                 : nlpDate && nlpDate.getTime()
 
-            if (dateToChange !== currentDate) updateDate(dateToChange || currentDate)
+            if (dateToChange && dateToChange !== currentDate) updateDate(dateToChange || currentDate)
         }
 
         return type === 'startDate'
