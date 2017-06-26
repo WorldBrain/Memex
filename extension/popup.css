@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css?family=Lato');
 
 @font-face {
   font-family: 'Lato';
@@ -19,21 +18,20 @@ body {
     margin: 0px;
     padding: 0px;
     text-align: left;
-    width:220px;
+    width:250px;
 }
 
 div {
     background-color:#fff;
-
 }
 
 form {
-  display: inline-block;
+  display: flex;
+  align-items: center;
   padding: 8px;
   font-size: 16px;
   background: rgb(204, 204, 204); /* Fallback for older browsers without RGBA-support */
   background: rgba(204, 204, 204, 0.5);
-
 }
 
 input {
@@ -41,7 +39,6 @@ input {
   font-size: 16px;
   color: #3b3b3b;
   text-transform: uppercase;
-
 }
 
 #search {
@@ -49,18 +46,16 @@ input {
   font-size: 16px;
 }
 
-
 i {
   font-size: 26px;
   padding: 8px;
-  vertical-align: middle;
+  display: flex;
+  align-items: center;
 }
 
 form i {
   color: #3EB995;
-  vertical-align: middle;
 }
-
 
 a {
     font-family: 'Lato', sans-serif;
@@ -69,7 +64,9 @@ a {
     text-decoration: none;
     font-size: 16px;
     padding: 8px;
-    display: block !important;
+    display: flex;
+    align-items: center;
+
 }
 
 a:hover {
