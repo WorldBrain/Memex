@@ -16,13 +16,15 @@
 body {
     font-family: "Lato", sans-serif;
     margin: 0px;
-    padding: 0px;
+    padding: 8px;
     text-align: left;
-    width:250px;
+    width:350px;
 }
 
 div {
     background-color:#fff;
+    margin: -8px;
+
 }
 
 form {
@@ -32,13 +34,15 @@ form {
   font-size: 16px;
   background: rgb(204, 204, 204); /* Fallback for older browsers without RGBA-support */
   background: rgba(204, 204, 204, 0.5);
+  margin: -8px;
+
 }
 
 input {
   font-family: "Lato", sans-serif;
   font-size: 16px;
   color: #3b3b3b;
-  text-transform: uppercase;
+  font-style: italic;
 }
 
 #search {
@@ -47,30 +51,36 @@ input {
 }
 
 i {
-  font-size: 26px;
+  font-size: 16px;
   padding: 8px;
   display: flex;
   align-items: center;
 }
 
 form i {
-  color: #3EB995;
+  color: #3b3b3b;
 }
 
 a {
     font-family: 'Lato', sans-serif;
-    color: #3EB995;
-    text-transform: uppercase;
+    color: #3b3b3b;
     text-decoration: none;
     font-size: 16px;
     padding: 8px;
     display: flex;
     align-items: center;
-
+    margin: -8px;
 }
 
 a:hover {
-    color:#3b3b3b;
+    color:#3EB995;
     background: rgb(204, 204, 204); /* Fallback for older browsers without RGBA-support */
     background: rgba(204, 204, 204, 0.5);
+}
+
+hr {
+    border: 0;
+    height: 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
 }
