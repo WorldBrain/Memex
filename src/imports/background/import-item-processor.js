@@ -25,27 +25,19 @@ const formatFavIconAttachment = async favIconURL => {
  *  + optional filled-out page doc as `pageDoc` field.
  */
 async function processHistoryImport(importItem) {
-    let updateModifier = {} // Will contain the updates to make
+    // Do the page data fetch
+    const { content, favIconURI } = await fetchPageData(importItem)
 
-    try {
-        // Do the page data fetch
-        const { content, favIconURI } = await fetchPageData(importItem)
-        updateModifier = { ...updateModifier, content }
+    // Sort out all binary attachments
+    const _attachments = await formatFavIconAttachment(favIconURI)
 
-        // Sort out all binary attachments
-        const _attachments = await formatFavIconAttachment(favIconURI)
-        updateModifier = { ...updateModifier, _attachments }
-    } catch (error) {
-        // Let the batcher handle the error, but still allow the page stub to be marked off
-        throw error
-    } finally {
-        // Perform the update: upadte page stub with available data and mark off stub flag
-        await updateDoc(db, importItem.assocDocId, pageStub => revisePageFields({
-            ...pageStub,
-            ...updateModifier,
-            isStub: false,
-        }))
-    }
+    // Perform the update: page stub "filling-out" + db logic
+    await updateDoc(db, importItem.assocDocId, pageStub => revisePageFields({
+        ...pageStub,
+        content,
+        _attachments,
+        isStub: false,
+    }))
 
     // If we finally got here without an error being thrown, return the success status message + pageDoc data
     return { status: DOWNLOAD_STATUS.SUCC }
