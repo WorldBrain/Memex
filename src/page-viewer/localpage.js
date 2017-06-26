@@ -43,7 +43,7 @@ async function showPage(pageId) {
 
     // Show the page in the iframe.
     const iframe = document.createElement('iframe')
-    iframe.setAttribute('sandbox', 'allow-same-origin allow-top-navigation')
+    iframe.setAttribute('sandbox', 'allow-same-origin allow-top-navigation allow-scripts')
     iframe.setAttribute('id', 'page')
     iframe.setAttribute('seamless', 'seamless')
     iframe.srcdoc = html
