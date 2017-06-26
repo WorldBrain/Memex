@@ -20,7 +20,14 @@ function fixChromiumInjectedStylesheet(document) {
 }
 
 async function showPage(pageId) {
-    const page = await getPage({pageId})
+    const page = await getPage({pageId, followRedirects: true})
+    if (page._id !== pageId) {
+        // Apparently getPage followed one or more redirects. Reload the viewer
+        // with the resolved page's id in the ?page query.
+        const location = new URL(window.location)
+        location.searchParams.set('page', page._id)
+        window.location = location
+    }
     const timestamp = getTimestamp(page)
 
     document.title = `💾 ${page.title}`
