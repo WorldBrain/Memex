@@ -6,7 +6,7 @@ import queryString from 'query-string'
 import { filterVisitsByQuery } from 'src/search'
 import niceTime from 'src/util/nice-time'
 import extractTimeFiltersFromQuery from 'src/util/nlp-time-filter'
-
+import moment from 'moment'
 
 const shortUrl = (url, maxLength = 50) => {
     url = url.replace(/^https?:\/\//i, '')
@@ -14,12 +14,21 @@ const shortUrl = (url, maxLength = 50) => {
     return url
 }
 
-const visitToSuggestion = doc => {
-    const visitDate = decodeURIComponent('\uD83D\uDD52') + escapeHtml(niceTime(doc.visitStart))
+const formatTime = visitDate => {
+    const m = moment(visitDate)
+    return m.format('HH:mm a')
+}
+
+const visitToSuggestion = timeFilterApplied => doc => {
+    var visitDate = escapeHtml(niceTime(doc.visitStart))
     const url = escapeHtml(shortUrl(doc.url))
     const title = escapeHtml(doc.page.title)
-    const description
-        = `<url>${url}</url> — <dim> (${visitDate}) </dim> - ${title}`
+    var description
+        = `<url>${url}</url> — ${title} <dim>(visited ${visitDate})</dim>`
+    if (timeFilterApplied) {
+        visitDate = `${decodeURIComponent('\uD83D\uDD52')} ${formatTime(doc.visitStart)}`
+        description = `<url>${url}</url> — <dim> (${visitDate}) </dim> - ${title}`
+    }
     return ({
         content: doc.url,
         description: description.toString(),
@@ -74,7 +83,7 @@ async function makeSuggestion(query, suggest) {
             description: 'Found these pages. Click here to show all results.',
         })
     }
-    const suggestions = visitDocs.map(visitToSuggestion)
+    const suggestions = visitDocs.map(visitToSuggestion(startDate || endDate))
 
     suggest(suggestions)
     latestResolvedQuery = query
