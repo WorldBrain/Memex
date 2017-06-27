@@ -1,6 +1,6 @@
 import { compose } from 'redux'
+import ReduxQuerySync from 'redux-query-sync'
 
-import ReduxQuerySync from 'src/util/redux-query-sync'
 import { ourState } from './selectors'
 import { setQuery } from './actions'
 
