@@ -1,3 +1,4 @@
+import get from 'lodash/fp/get'
 import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
@@ -12,6 +13,10 @@ import { deleteVisit } from '../actions'
 
 
 const VisitAsListItem = ({doc, compact, onTrashButtonClick}) => {
+    const pageSize = get(['_attachments', 'frozen-page.html', 'length'])(doc.page)
+    const sizeInMB = pageSize !== undefined
+        ? Math.round(pageSize / 1024**2 * 10) / 10
+        : 0
     const visitClasses = classNames({
         [styles.root]: true,
         [styles.compact]: compact,
@@ -27,9 +32,9 @@ const VisitAsListItem = ({doc, compact, onTrashButtonClick}) => {
         )
         : <img className={styles.favIcon} src='img/null-icon.png' />
     return (
-        <a
+        <LinkToLocalVersion
+            page={doc.page}
             className={visitClasses}
-            href={doc.page.url}
             // DEBUG Show document props on ctrl+meta+click
             onClick={e => { if (e.metaKey && e.ctrlKey) { console.log(doc); e.preventDefault() } }}
         >
@@ -48,13 +53,18 @@ const VisitAsListItem = ({doc, compact, onTrashButtonClick}) => {
             <div className={styles.descriptionContainer}>
                 <div
                     className={styles.title}
-                    title={doc.page.title}
                 >
                     {hasFavIcon && favIcon}
-                    {doc.page.title}
+                    <span title={doc.page.title}>
+                        {doc.page.title}
+                    </span>
                 </div>
                 <div className={styles.url}>
-                    {doc.page.url}
+                    <a
+                        href={doc.page.url}
+                    >
+                        {doc.page.url}
+                    </a>
                 </div>
                 <div className={styles.time}>{niceTime(doc.visitStart)}</div>
             </div>
@@ -62,23 +72,12 @@ const VisitAsListItem = ({doc, compact, onTrashButtonClick}) => {
                 <button
                     className={styles.button}
                     onClick={e => { e.preventDefault(); onTrashButtonClick() }}
-                    title='Forget this item'
+                    title={`Forget this item (${sizeInMB} MB)`}
                 >
                     <img src='img/trash-icon.png' alt='🗑 forget' />
                 </button>
-                {localVersionAvailable({page: doc.page})
-                    ? (
-                        <LinkToLocalVersion
-                            className={styles.button}
-                            page={doc.page}
-                        >
-                            <img src='img/save-icon.png' alt='💾 saved' />
-                        </LinkToLocalVersion>
-                    )
-                    : null
-                }
             </div>
-        </a>
+        </LinkToLocalVersion>
     )
 }
 

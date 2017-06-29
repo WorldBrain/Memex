@@ -4,7 +4,8 @@
     --compact-scale: 0.6;
 }
 
-* {
+.root,
+.root * {
     box-sizing: border-box;
 }
 
@@ -38,6 +39,13 @@
     }
 }
 
+/* List entries for which no stored version is available */
+/* TODO find neater solution than using a global class name (defined in src/page-viewer) */
+.root:not(:global(.available)) {
+    opacity: 0.5;
+}
+
+/* List entries shown as context around a search result */
 .root.compact {
     opacity: 0.7;
     transform: scale(0.6);
@@ -104,6 +112,15 @@
     & .time {
         align-self: flex-end;
         font-size: 13px;
+    }
+}
+
+.url a {
+    text-decoration: none;
+    color: inherit;
+
+    &:hover {
+        color: #00c;
     }
 }
 
