@@ -61,10 +61,14 @@ Overview.propTypes = {
 }
 
 
-const mapStateToProps = state => ({
-    ...ourState(state),
-    waitingForResults: !!ourState(state).waitingForResults, // cast to boolean
-})
+const mapStateToProps = state => {
+    state = ourState(state)
+    return {
+        ...state.currentQueryParams,
+        searchResult: state.searchResult,
+        waitingForResults: !!state.waitingForResults, // cast to boolean
+    }
+}
 
 const mapDispatchToProps = dispatch => ({
     onInputChanged: input => {

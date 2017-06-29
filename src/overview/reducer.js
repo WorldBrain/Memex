@@ -7,23 +7,29 @@ import * as actions from './actions'
 
 
 const defaultState = {
+    // The current search result list.
     searchResult: {rows: []},
-    query: '',
+    // The current input values.
+    currentQueryParams: {
+        query: '',
+        startDate: undefined,
+        endDate: undefined,
+    },
+    // The input values used in the most recent (possibly still pending) search action.
+    activeQueryParams: undefined,
     waitingForResults: false,
-    startDate: undefined,
-    endDate: undefined,
 }
 
 function setQuery(state, {query}) {
-    return {...state, query}
+    return {...state, currentQueryParams: {...state.currentQueryParams, query}}
 }
 
 function setStartDate(state, {startDate}) {
-    return {...state, startDate}
+    return {...state, currentQueryParams: {...state.currentQueryParams, startDate}}
 }
 
 function setEndDate(state, {endDate}) {
-    return {...state, endDate}
+    return {...state, currentQueryParams: {...state.currentQueryParams, endDate}}
 }
 
 function startNewSearch(state) {
@@ -32,6 +38,7 @@ function startNewSearch(state) {
         // Remove the currently displayed results
         searchResult: defaultState.searchResult,
         waitingForResults: true,
+        activeQueryParams: {...state.currentQueryParams},
     }
 }
 
@@ -39,6 +46,7 @@ function startExpandSearch(state) {
     return {
         ...state,
         waitingForResults: true,
+        activeQueryParams: {...state.currentQueryParams},
     }
 }
 
