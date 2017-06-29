@@ -12,7 +12,9 @@ export async function filterVisitsByQuery({
     startDate,
     endDate,
     skipUntil,
+    // Search until we have at least 10 hits (we may actually return more)...
     limit = 10,
+    // ... or until we spent 1 second and have at least one hit.
     maxWaitDuration = 1000,
     includeContext = false,
 }) {
@@ -67,13 +69,6 @@ export async function filterVisitsByQuery({
             // ...except if we did already find something and our user may be getting impatient.
             && !(rows.length >= 1 && Date.now() > reportingDeadline)
         )
-
-        // If too many, apply the requested limit to the number of results.
-        if (rows.length > limit) {
-            rows = rows.slice(0, limit)
-            resultsExhausted = false
-            skipUntil = last(rows).id
-        }
 
         let visitsResult = {
             rows,
