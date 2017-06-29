@@ -13,6 +13,7 @@ export async function filterVisitsByQuery({
     endDate,
     skipUntil,
     limit = 10,
+    maxWaitDuration = 1000,
     includeContext = false,
 }) {
     if (limit <= 0) {
@@ -35,6 +36,8 @@ export async function filterVisitsByQuery({
         let resultsExhausted = false
         // Number of visits we process at a time (rather arbitrary)
         const batchSize = limit * 10
+        // Time when we have to report back with what we got so far, in case we keep searching.
+        const reportingDeadline = Date.now() + maxWaitDuration
         do {
             let batch = await findVisits({
                 startDate,
@@ -58,9 +61,12 @@ export async function filterVisitsByQuery({
             )
 
             rows = rows.concat(hits)
-
-            // If we did not have enough hits, get and filter another batch.
-        } while (rows.length < limit && !resultsExhausted)
+        } while (
+            // If we did not have enough hits, get and filter another batch...
+            rows.length < limit && !resultsExhausted
+            // ...except if we did already find something and our user may be getting impatient.
+            && !(rows.length >= 1 && Date.now() > reportingDeadline)
+        )
 
         // If too many, apply the requested limit to the number of results.
         if (rows.length > limit) {
