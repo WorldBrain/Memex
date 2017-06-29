@@ -6,11 +6,12 @@ const tabChangedEvents = tabId => [
         filter: details => (details.tabId === tabId && details.frameId === 0),
         reason: {message: 'Tab URL changed before event occurred.'},
     },
-    {
-        event: browser.webNavigation.onHistoryStateUpdated,
-        filter: details => (details.tabId === tabId && details.frameId === 0),
-        reason: {message: 'Tab URL changed before event occurred.'},
-    },
+    // TODO Handle history state updates more carefully. Ignoring these events for now.
+    // {
+    //     event: browser.webNavigation.onHistoryStateUpdated,
+    //     filter: details => (details.tabId === tabId && details.frameId === 0),
+    //     reason: {message: 'Tab URL changed before event occurred.'},
+    // },
     {
         event: browser.tabs.onRemoved,
         filter: closedTabId => (closedTabId === tabId),
