@@ -2,12 +2,14 @@ function removeNode(node) {
     node.parentNode.removeChild(node)
 }
 
-export default async function removeScripts({rootElement}) {
-    // Remove all <script> elements.
+// Removes all <script> elements in rootElement.
+export function removeScriptElements({rootElement}) {
     const scripts = Array.from(rootElement.querySelectorAll('script'))
     scripts.forEach(removeNode)
+}
 
-    // Remove event handlers (onclick, onload, etcetera).
+// Removes event handlers (onclick, onload, etcetera) from rootElement and all elements it contains.
+export function removeEventHandlers({rootElement}) {
     const elements = Array.from(rootElement.querySelectorAll('*'))
     elements.forEach(element => {
         // A crude approach: any attribute starting with 'on' is removed.
@@ -17,4 +19,21 @@ export default async function removeScripts({rootElement}) {
                 element.removeAttribute(attribute.name)
             })
     })
+}
+
+// Disables all links with a 'javascript:' href.
+export function removeJavascriptHrefs({rootElement}) {
+    const elements = Array.from(rootElement.querySelectorAll('*[href^="javascript:"]'))
+    elements.forEach(element => {
+        // We should keep some href value there to not change the link's appearance, but it should
+        // not be resolvable. So just keep the 'javascript:' there, for lack of better idea.
+        element.setAttribute('href', 'javascript:')
+    })
+}
+
+// Tries to remove all kinds of scripts contained in the given rootElement.
+export default async function removeScripts({rootElement}) {
+    removeScriptElements({rootElement})
+    removeEventHandlers({rootElement})
+    removeJavascriptHrefs({rootElement})
 }
