@@ -70,9 +70,7 @@ export default function eventToPromise({
                         removeListeners()
                         const reason = castFuncToValue(opts.reason, args)
                         // Be neat and always reject with an instance of Error.
-                        const error = (reason instanceof Error)
-                            ? reason
-                            : new Error(reason)
+                        const error = castToError(reason)
                         reject(error)
                     }
                 },
@@ -84,6 +82,12 @@ export default function eventToPromise({
             listener.event.addListener(listener.listener)
         })
     })
+}
+
+function castToError(reason) {
+    if (reason instanceof Error) return reason
+    if (reason instanceof Object) return new Error(JSON.stringify(reason))
+    return new Error(reason)
 }
 
 function castToArray(value) {
