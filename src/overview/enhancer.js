@@ -10,7 +10,7 @@ const locationSync = ReduxQuerySync.enhancer({
     initialTruth: 'location', // Initialise store from current location.
     params: {
         q: {
-            selector: state => ourState(state).query,
+            selector: state => ourState(state).currentQueryParams.query,
             action: query => setQuery({query}),
             defaultValue: '',
         },
