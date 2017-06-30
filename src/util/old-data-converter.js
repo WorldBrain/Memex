@@ -154,30 +154,22 @@ const getMatchingPageDocs = async pageDataArr => {
 }
 
 /**
- * Converts the old extension's local storage object into one compatible with the new extension's
- * storage models, placing resulting conversions into either PouchDB or local storage, depending on the
- * data converted.
- *
- * @param {boolean} [setAsStubs=false] Denotes whether to set new pages as stubs to schedule for later import.
- * @param {number} [chunkSize=10] The amount of index items to process at any time.
+ * @param {IBlacklistOldExt} blacklist
  */
-export default async function convertOldData(setAsStubs = false, chunkSize = 10) {
-    // Grab initial needed local storage keys, providing defaults if not available
-    const {
-        [INDEX_KEY]: index,
-        [BLACKLIST_KEY]: blacklist,
-        [BOOKMARKS_KEY]: bookmarkUrls,
-    } = await browser.storage.local.get({
-        [INDEX_KEY]: [],
-        [BLACKLIST_KEY]: { PAGE: [], SITE: [], REGEX: [] },
-        [BOOKMARKS_KEY]: [],
-    })
+const handleBlacklistConversion = blacklist =>
+    browser.storage.local.set({ [BLACKLIST_KEY]: convertBlacklist(blacklist) })
 
-    // TODO: Check the shape of the blacklist in storage conforms to old shape
-    // Do blacklist conversion (relatively simple)
-    const newBlacklist = convertBlacklist(blacklist)
-    await browser.storage.local.set({ [BLACKLIST_KEY]: newBlacklist })
-
+/**
+ * Performs the conversion of old extension page data to new extension. For each page data
+ * in the old model, the following may be inserted into PouchDB:
+ *  - 0/1 page docs (0 if processed earlier in index)
+ *  - 0/1 bookmark docs (if present in `bookmarkUrls` param)
+ *  - 1+ visit docs (1 minimal from old page data + whatever in in the browser history)
+ *
+ * @param {Array<string>} index The old extension index, containing sorted keys of page data.
+ * @param {Array<string>} bookmarkUrls The old extension bookmark tracking list, containing URLs.
+ */
+async function handlePageDataConversion(index, bookmarkUrls, setAsStubs, chunkSize) {
     const convertOldData = convertPageData(setAsStubs, bookmarkUrls)
     const uniqByUrl = uniqBy('url')
 
@@ -206,5 +198,37 @@ export default async function convertOldData(setAsStubs = false, chunkSize = 10)
             console.error(error)
             continue    // Continue processing next chunk if this one failed
         }
+    }
+}
+
+/**
+ * Converts the old extension's local storage object into one compatible with the new extension's
+ * storage models, placing resulting conversions into either PouchDB or local storage, depending on the
+ * data converted.
+ *
+ * @param {boolean} [setAsStubs=false] Denotes whether to set new pages as stubs to schedule for later import.
+ * @param {number} [chunkSize=10] The amount of index items to process at any time.
+ */
+export default async function convertOldData(setAsStubs = false, chunkSize = 10) {
+    // Grab initial needed local storage keys, providing defaults if not available
+    const {
+        [INDEX_KEY]: index,
+        [BLACKLIST_KEY]: blacklist,
+        [BOOKMARKS_KEY]: bookmarkUrls,
+    } = await browser.storage.local.get({
+        [INDEX_KEY]: [],
+        [BLACKLIST_KEY]: { PAGE: [], SITE: [], REGEX: [] },
+        [BOOKMARKS_KEY]: [],
+    })
+
+    // Only attempt blacklist conversion if it matches shape of old extension blacklist
+    if (Object.prototype.toString.call(blacklist) === '[object Object]'
+        && 'PAGE' in blacklist && 'SITE' in blacklist && 'REGEX' in blacklist) {
+        await handleBlacklistConversion(blacklist)
+    }
+
+    // Only attempt page data conversion if index + bookmark URLs are some sort of arrays
+    if (index instanceof Array && bookmarkUrls instanceof Array) {
+        await handlePageDataConversion(index, bookmarkUrls, setAsStubs, chunkSize)
     }
 }
