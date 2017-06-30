@@ -36,7 +36,7 @@ export async function filterVisitsByQuery({
         let rows = []
         let resultsExhausted = false
         // Number of visits we process at a time (rather arbitrary)
-        const batchSize = limit * 10
+        const batchSize = 50
         // Time when we have to report back with what we got so far, in case we keep searching.
         const reportingDeadline = Date.now() + maxWaitDuration
         do {
