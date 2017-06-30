@@ -1,7 +1,6 @@
 import docuri from 'docuri'
 import uniqBy from 'lodash/fp/uniqBy'
 import chunk from 'lodash/fp/chunk'
-import map from 'lodash/fp/map'
 import flatten from 'lodash/fp/flatten'
 
 import db from 'src/pouchdb'
@@ -56,6 +55,8 @@ const transformToVisitDoc = assocPageDoc => visitItem => ({
 })
 
 // TODO: Merge with imports code
+const pageKeyPrefix = 'page/'
+const pageDocsSelector = { _id: { $gte: pageKeyPrefix, $lte: `${pageKeyPrefix}\uffff` } }
 const bookmarkKeyPrefix = 'bookmark/'
 const convertBookmarkDocId = docuri.route(`${bookmarkKeyPrefix}:timestamp/:nonce`)
 const generateBookmarkDocId = ({
@@ -117,11 +118,12 @@ function convertBlacklist(blacklist) {
  * @param {boolean} isStub Denotes whether to set new pages as stubs to schedule for later import.
  * @param {Array<String>} bookmarkUrls List of URLs denoting bookmark page data.
  * @param {IPageOldExt} pageData The old ext model's page data to convert.
+ * @param {IPageDoc?} [assocPageDoc] A page doc found to match the pageData param.
  * @return {Array<any>} List of converted docs ready to insert into PouchDB.
  */
-const convertPage = (isStub, bookmarkUrls) => async pageData => {
+const convertPageData = (isStub, bookmarkUrls) => async (pageData, assocPageDoc) => {
     // Do page conversion + visits generation
-    const pageDoc = transformToPageDoc(isStub)(pageData)
+    const pageDoc = assocPageDoc || transformToPageDoc(isStub)(pageData)
     const visitItems = await browser.history.getVisits({ url: pageData.url })
     const visitDocs = [
         ...visitItems.map(transformToVisitDoc(pageDoc)), // Visits from browser API
@@ -136,6 +138,19 @@ const convertPage = (isStub, bookmarkUrls) => async pageData => {
         ...visitDocs,
         ...bookmarkDocs,
     ]
+}
+
+/**
+ * @param {Array<IPageOldExt>} pageDataArr Array of page data to check against existing data for matches.
+ * @return {Array<IPageDoc>} Array of page docs that are deemed to match any of the input data.
+ */
+const getMatchingPageDocs = async pageDataArr => {
+    const pageDataUrls = pageDataArr.map(data => data.url)
+    const fields = ['_id', 'url']
+    const selector = { ...pageDocsSelector, url: { $in: pageDataUrls } }
+
+    const { docs } = await db.find({ selector, fields })
+    return docs
 }
 
 /**
@@ -163,15 +178,26 @@ export default async function convertOldData(setAsStubs = false, chunkSize = 10)
     const newBlacklist = convertBlacklist(blacklist)
     await browser.storage.local.set({ [BLACKLIST_KEY]: newBlacklist })
 
-    const mapPageConversion = map(convertPage(setAsStubs, bookmarkUrls))
-    const indexChunks = chunk(chunkSize)(index) // Split index into chunks to process at once
+    const convertOldData = convertPageData(setAsStubs, bookmarkUrls)
+    const uniqByUrl = uniqBy('url')
+
+    // Split index into chunks to process at once; reverse to process from latest first
+    const indexChunks = chunk(chunkSize)(index.reverse())
 
     for (const keyChunk of indexChunks) {
         try {
-            const oldPageData = await browser.storage.local.get(keyChunk)
+            // Grab old page data from storae, ignoring duplicate URLs
+            const oldPageData = uniqByUrl(Object.values(await browser.storage.local.get(keyChunk)))
+
+            // Get any matching pages docs to those data in current chunk
+            const matchingPages = await getMatchingPageDocs(oldPageData)
 
             // Map over local storage chunk, async processing each page data entry
-            const docs = await Promise.all(mapPageConversion(oldPageData))
+            const docs = await Promise.all(oldPageData.map(data => {
+                // Pass in any existing page doc that matches
+                const assocPageDoc = matchingPages.find(doc => doc.url === data.url)
+                return convertOldData(data, assocPageDoc)
+            }))
 
             // Bulk insert all docs for this chunk
             await db.bulkDocs(flatten(docs))
