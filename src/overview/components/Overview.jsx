@@ -22,7 +22,10 @@ class Overview extends React.Component {
                 <div>
                     <input
                         className={styles.query}
-                        onChange={e => this.props.onInputChanged(e.target.value)}
+                        onInput={e => { this.props.onInputChanged(e.target.value) }}
+                        onKeyDown={e => {
+                            if (e.key === 'Escape') { this.props.onInputChanged('') }
+                        }}
                         placeholder='Search your memory'
                         value={this.props.query}
                         ref={el => { this.inputQueryEl = el }}
