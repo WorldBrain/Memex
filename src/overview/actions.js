@@ -41,6 +41,8 @@ export const newSearch = asyncActionCreator(() => async (dispatch, getState) => 
     const searchResult = await filterVisitsByQuery({
         ...currentQueryParams,
         includeContext: true,
+        limit: 10,
+        softLimit: true,
     })
     return searchResult
 })
@@ -56,6 +58,8 @@ export const expandSearch = asyncActionCreator(() => async (dispatch, getState) 
         ...currentQueryParams,
         includeContext: true,
         skipUntil,
+        limit: 10,
+        softLimit: true,
     })
     return newSearchResult
 })
