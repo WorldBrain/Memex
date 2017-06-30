@@ -7,6 +7,10 @@
     background-position: 27px;
     padding-left: 60px;
     padding-right: 20px;
+
+    @media (max-width: 600px) {
+        display: none;
+    }
 }
 
 .datePicker {

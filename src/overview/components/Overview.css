@@ -1,5 +1,6 @@
 .navbar {
     display: flex;
+    flex: 1;
     align-items: center;
     justify-content: space-between;
     height: 70px;
@@ -11,11 +12,29 @@
     background-color: #fafafa;
     padding: 0 60px;
     box-shadow: 0 2px 4px rgba(220, 220, 220, 0.7);
+
+    @media (max-width: 1000px) {
+        justify-content: center;
+        padding: 0;
+    }
 }
 
 .logo {
+    background-image: url("img/worldbrain-logo.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
     width: 131px;
     height: 33px;
+
+    @media (max-width: 1200px) {
+        width: 24px;
+        background-image: url("img/worldbrain-logo-narrow.png");
+    }
+
+    @media (max-width: 1000px) {
+        display: none;
+    }
 }
 
 .searchField {
@@ -57,6 +76,14 @@
     display: flex;
     justify-content: flex-end;
     width: 131px;
+    
+    @media (max-width: 1200px) {
+        width: 24px;
+    }
+
+    @media (max-width: 1000px) {
+        display: none;
+    }
 }
 
 .icon {
