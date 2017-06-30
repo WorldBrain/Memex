@@ -98,7 +98,7 @@ function pageMatchesQuery({page, query}) {
         .map(text => text.toString().toLowerCase())
 
     // Test if every word in the query is present in at least one text field.
-    const queryWords = query.toLowerCase().trim().split(/s+/)
+    const queryWords = query.toLowerCase().trim().split(/\s+/)
     return queryWords.every(word =>
         texts.some(text => text.includes(word))
     )
