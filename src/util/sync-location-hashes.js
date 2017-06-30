@@ -7,16 +7,25 @@
 // Returns a function that disables synchronisation again.
 export default function syncLocationHashes(windows, {initial}) {
     const listeners = windows.map(win => function syncHashListener() {
-        disableAllListeners()
         syncHashToOthers(win)
-        enableAllListeners()
     })
 
     function syncHashToOthers(win) {
-        const hash = win.location.hash
+        // Read the window's hash, dropping the '#' if present.
+        let hash = win.location.hash
+        if (hash.startsWith('#')) {
+            hash = hash.substring(1)
+        }
+        // Likewise read each other window's hash, and update them where needed.
         windows.forEach(otherWindow => {
             if (otherWindow !== win) {
-                otherWindow.location.hash = hash
+                let otherHash = otherWindow.location.hash
+                if (otherHash.startsWith('#')) {
+                    otherHash = otherHash.substring(1)
+                }
+                if (otherHash !== hash) {
+                    otherWindow.location.hash = hash
+                }
             }
         })
     }
