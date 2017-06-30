@@ -37,7 +37,7 @@
     "chrome_url_overrides" : {
         "newtab": "/overview/overview.html"
     },
-    "omnibox": { "keyword" : "w" },
+    "omnibox": { "keyword" : "m" },
     "options_page": "./options/options.html",
     "manifest_version": 2
 }
