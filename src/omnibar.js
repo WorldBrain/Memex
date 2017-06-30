@@ -8,7 +8,8 @@ import niceTime from 'src/util/nice-time'
 // Read which browser we are running in.
 let browserName
 ;(async () => {
-    browserName = await browser.runtime.getBrowserInfo()
+    const browserInfo = await browser.runtime.getBrowserInfo()
+    browserName = browserInfo.name
 })()
 
 const visitToSuggestion = doc => {
