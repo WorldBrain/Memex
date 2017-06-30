@@ -30,6 +30,17 @@ export const BOOKMARKS_KEY = 'bookmarks'
  * @property {String} url The URL pointing to the page.
  */
 
+/**
+ * @param {IPageOldExt} pageData Page data from old extension to convert to visit doc.
+ * @param {string} assocPageDocId The `_id` of the associated page doc.
+ */
+const convertToMinimalVisit = assocPageDoc => ({ time, url }) => ({
+    _id: generateVisitDocId({ timestamp: time }),
+    visitStart: time,
+    url,
+    page: { _id: assocPageDoc._id },
+})
+
 // TODO: Merge with imports code
 const transformToVisitDoc = assocPageDoc => visitItem => ({
     _id: generateVisitDocId({
@@ -112,7 +123,10 @@ const convertPage = (isStub, bookmarkUrls) => async pageData => {
     // Do page conversion + visits generation
     const pageDoc = transformToPageDoc(isStub)(pageData)
     const visitItems = await browser.history.getVisits({ url: pageData.url })
-    const visitDocs = visitItems.map(transformToVisitDoc(pageDoc))
+    const visitDocs = [
+        ...visitItems.map(transformToVisitDoc(pageDoc)), // Visits from browser API
+        convertToMinimalVisit(pageDoc)(pageData), // Minimal visit straight from old ext data
+    ]
 
     // Create bookmark doc if URL shows up in bookmark URL list
     const bookmarkDocs = bookmarkUrls.includes(pageData.url) ? [transformToBookmarkDoc(pageDoc)(pageData)] : []
