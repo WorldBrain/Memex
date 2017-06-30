@@ -20,10 +20,7 @@ class Overview extends React.Component {
         return (
             <div>
                 <div className={styles.navbar}>
-                    <img
-                        src='img/worldbrain-logo.png'
-                        className={styles.logo}
-                    />
+                    <div className={styles.logo} />
                     <div className={styles.searchField}>
                         <input
                             className={styles.query}
