@@ -42,7 +42,10 @@ async function showPage(pageId) {
     const html = new TextDecoder('utf-8').decode(await blobToArrayBuffer(blob))
 
     // Show the page in the iframe.
-    const iframe = document.getElementById('page')
+    const iframe = document.createElement('iframe')
+    iframe.setAttribute('sandbox', 'allow-same-origin allow-top-navigation')
+    iframe.setAttribute('id', 'page')
+    iframe.setAttribute('seamless', 'seamless')
     iframe.srcdoc = html
     // XXX The DOMContentLoaded event would be better, but how to listen to that?
     iframe.onload = () => {
@@ -68,6 +71,7 @@ async function showPage(pageId) {
         // Keep the iframe's location #hash in sync with that of the window.
         syncLocationHashes([window, iframe.contentWindow], {initial: window})
     }
+    document.body.appendChild(iframe)
 }
 
 // Read pageId from location: ?page=pageId
