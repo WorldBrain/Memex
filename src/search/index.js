@@ -13,6 +13,7 @@ export async function filterVisitsByQuery({
     endDate,
     skipUntil,
     limit = 10,
+    softLimit = false,
     maxWaitDuration = 1000,
     includeContext = false,
 }) {
@@ -68,8 +69,8 @@ export async function filterVisitsByQuery({
             && !(rows.length >= 1 && Date.now() > reportingDeadline)
         )
 
-        // If too many, apply the requested limit to the number of results.
-        if (rows.length > limit) {
+        // If the limit is hard, cap the number of results.
+        if (!softLimit && rows.length > limit) {
             rows = rows.slice(0, limit)
             resultsExhausted = false
             skipUntil = last(rows).id
