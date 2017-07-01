@@ -18,6 +18,14 @@ export const KEYS = {
     BLACKLIST: 'blacklist',
 }
 
+const notifOptions = {
+    type: 'progress',
+    progress: 0,
+    iconUrl: '/overview/img/worldbrain-logo-narrow.png',
+    title: 'WorldBrain Update',
+    message: 'Converting existing extension data for update. Please wait',
+}
+
 /**
  * @typedef IBlacklistOldExt
  * @type {Object}
@@ -180,12 +188,14 @@ const handleBlacklistConversion = async blacklist => {
  *
  * @param {Array<string>} index The old extension index, containing sorted keys of page data.
  * @param {Array<string>} bookmarkUrls The old extension bookmark tracking list, containing URLs.
+ * @param {(number) => void} updateProgress Callback to update progress state elsewhere.
  * @param {ConversionOpts} opts
  */
-async function handlePageDataConversion(index, bookmarkUrls, { setAsStubs, concurrency }) {
+async function handlePageDataConversion(index, bookmarkUrls, updateProgress, { setAsStubs, concurrency }) {
     const convertOldData = convertPageData(setAsStubs, bookmarkUrls)
     const uniqByUrl = uniqBy('url')
     let hasErrorOccurred = false
+    let chunkCount = 0
 
     // Split index into chunks to process at once; reverse to process from latest first
     const indexChunks = chunk(concurrency)(index.reverse())
@@ -215,6 +225,8 @@ async function handlePageDataConversion(index, bookmarkUrls, { setAsStubs, concu
             console.error(`DEBUG: Error in converting of old extension data with keys: ${keyChunk}`)
             console.error(error)
             continue    // Continue processing next chunk if this one failed
+        } finally {
+            updateProgress(Math.round(++chunkCount / indexChunks.length * 100))
         }
     }
 
@@ -238,6 +250,9 @@ async function handlePageDataConversion(index, bookmarkUrls, { setAsStubs, concu
  * @param {ConversionOpts} opts
  */
 export default async function convertOldData(opts = { setAsStubs: false, concurrency: 10 }) {
+    const notifId = await browser.notifications.create(notifOptions)
+    const updateProgress = progress => browser.notifications.update(notifId, { progress })
+
     // Grab initial needed local storage keys, providing defaults if not available
     const {
         [KEYS.INDEX]: index,
@@ -257,6 +272,8 @@ export default async function convertOldData(opts = { setAsStubs: false, concurr
 
     // Only attempt page data conversion if index + bookmark URLs are some sort of arrays
     if (index instanceof Array && bookmarkUrls instanceof Array) {
-        await handlePageDataConversion(index, bookmarkUrls, opts)
+        await handlePageDataConversion(index, bookmarkUrls, updateProgress, opts)
     }
+
+    setTimeout(() => browser.notifications.clear(notifId), 3000)
 }
