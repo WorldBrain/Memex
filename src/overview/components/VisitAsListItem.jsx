@@ -2,6 +2,7 @@ import get from 'lodash/fp/get'
 import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
+import { Button, Popup } from 'semantic-ui-react'
 import classNames from 'classnames'
 
 import { LinkToLocalVersion } from 'src/page-viewer'
@@ -69,13 +70,25 @@ const VisitAsListItem = ({doc, compact, onTrashButtonClick}) => {
                 <div className={styles.time}>{niceTime(doc.visitStart)}</div>
             </div>
             <div className={styles.buttonsContainer}>
-                <button
-                    className={styles.button}
-                    onClick={e => { e.preventDefault(); onTrashButtonClick() }}
-                    title={`Forget this item (${sizeInMB} MB)`}
-                >
-                    <img src='img/trash-icon.png' alt='🗑 forget' />
-                </button>
+                <Popup
+                    trigger={
+                        <Button
+                            icon='trash'
+                            onClick={e => { e.preventDefault() }}
+                        />
+                    }
+                    content={
+                        <Button
+                            negative
+                            content={`Forget this item`}
+                            onClick={e => { onTrashButtonClick() }}
+                            title={`Stored page size: ${sizeInMB} MB`}
+                        />
+                    }
+                    on='focus'
+                    hoverable
+                    position='right center'
+                />
             </div>
         </LinkToLocalVersion>
     )
