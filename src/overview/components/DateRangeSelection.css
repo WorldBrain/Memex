@@ -1,25 +1,37 @@
 .dateRangeSelection {
     display: flex;
-    flex-flow: row wrap;
-    justify-content: center;
-    margin: auto;
-    width: 20em;
-}
+    align-items: center;
+    background-image: url('img/calendar-icon.png');
+    background-repeat: no-repeat;
+    background-size: 18px;
+    background-position: 27px;
+    padding-left: 60px;
+    padding-right: 20px;
 
-.dateRangeSelection > * {
-    flex: 1 50%;
+    @media (max-width: 600px) {
+        display: none;
+    }
 }
 
 .datePicker {
-    width: 100%;
-    min-width: 100px;
-    border: 1px solid lightgrey;
-    border-radius: 2px;
-    box-shadow: 1px 2px 2px #888;
-    padding: 4px;
+    width: 110px;
+    height: 37px;
+    font-size: 15px;
+    color: #484848;
+    border: none;
+    margin: 0 10px;
+
+    &::placeholder {
+        color: #b8b8b8;
+    }
 
     &:focus {
         outline: none;
-        border: 1px solid grey;
+        border: none;
     }
+}
+
+.toIcon {
+    width: 5px;
+    height: 8px;
 }

@@ -6,7 +6,7 @@ import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker-cssmodules.css'
 
 import styles from './DateRangeSelection.css'
-
+import './datepicker-overrides.css'
 
 class DateRangeSelection extends Component {
     constructor() {
@@ -42,7 +42,7 @@ class DateRangeSelection extends Component {
                 ? date.valueOf()
                 : nlpDate && nlpDate.getTime()
 
-            if (dateToChange !== currentDate) updateDate(dateToChange)
+            if (dateToChange !== currentDate) updateDate(dateToChange || undefined)
         }
 
         return type === 'startDate'
@@ -84,6 +84,10 @@ class DateRangeSelection extends Component {
                         this.setState({ startDateText: e.target.value })
                     }}
                     onBlur={() => this.submitDateChange('startDate')}
+                />
+                <img
+                    src='img/to-icon.png'
+                    className={styles.toIcon}
                 />
                 <DatePicker
                     ref={dp => { this.endDateDatePicker = dp }}

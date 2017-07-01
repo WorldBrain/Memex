@@ -19,22 +19,34 @@ class Overview extends React.Component {
     render() {
         return (
             <div>
-                <div>
-                    <input
-                        className={styles.query}
-                        onChange={e => this.props.onInputChanged(e.target.value)}
-                        placeholder='Search your memory'
-                        value={this.props.query}
-                        ref='inputQuery'
-                     />
+                <div className={styles.navbar}>
+                    <div className={styles.logo} />
+                    <div className={styles.searchField}>
+                        <input
+                            className={styles.query}
+                            onChange={e => this.props.onInputChanged(e.target.value)}
+                            placeholder='Search your memory'
+                            value={this.props.query}
+                            ref='inputQuery'
+                        />
+                        <DateRangeSelection
+                            startDate={this.props.startDate}
+                            endDate={this.props.endDate}
+                            onStartDateChange={this.props.onStartDateChange}
+                            onEndDateChange={this.props.onEndDateChange}
+                        />
+                    </div>
+                    <div className={styles.links}>
+                        <a href='/options/options.html'>
+                            <img
+                                src='img/settings-icon.png'
+                                className={styles.icon}
+                            />
+                        </a>
+                    </div>
                 </div>
-                <DateRangeSelection
-                    startDate={this.props.startDate}
-                    endDate={this.props.endDate}
-                    onStartDateChange={this.props.onStartDateChange}
-                    onEndDateChange={this.props.onEndDateChange}
-                />
-                <div>
+
+                <div className={styles.main}>
                     <ResultList
                         searchResult={this.props.searchResult}
                         searchQuery={this.props.query}

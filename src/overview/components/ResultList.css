@@ -2,7 +2,7 @@
     list-style: none;
     margin: 40px auto;
     padding: 0;
-    max-width: 600px;
+    max-width: 700px;
 }
 
 .timestamp {
@@ -10,14 +10,7 @@
     text-align: center;
     width: 100%;
     margin-bottom: 5px;
-
-    &::before {
-        content: '— ';
-    }
-
-    &::after {
-        content: ' —';
-    }
+    color: #9b9ba2;
 }
 
 .noResultMessage {

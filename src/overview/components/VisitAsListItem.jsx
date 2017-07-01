@@ -18,14 +18,14 @@ const VisitAsListItem = ({doc, compact, onTrashButtonClick}) => {
     })
     const hasFavIcon = !!(doc.page._attachments && doc.page._attachments.favIcon)
     const favIcon = hasFavIcon
-        ? (
+        && (
             <ImgFromPouch
                 className={styles.favIcon}
                 doc={doc.page}
                 attachmentId='favIcon'
             />
         )
-        : <img className={styles.favIcon} src='img/null-icon.png' />
+
     return (
         <a
             className={visitClasses}
@@ -42,7 +42,7 @@ const VisitAsListItem = ({doc, compact, onTrashButtonClick}) => {
                             attachmentId='screenshot'
                         />
                     )
-                    : favIcon
+                    : <img className={styles.screenshot} src='img/null-icon.png' />
                 }
             </div>
             <div className={styles.descriptionContainer}>
@@ -60,20 +60,16 @@ const VisitAsListItem = ({doc, compact, onTrashButtonClick}) => {
             </div>
             <div className={styles.buttonsContainer}>
                 <button
-                    className={styles.button}
+                    className={`${styles.button} ${styles.trash}`}
                     onClick={e => { e.preventDefault(); onTrashButtonClick() }}
                     title='Forget this item'
-                >
-                    <img src='img/trash-icon.png' alt='🗑 forget' />
-                </button>
+                />
                 {localVersionAvailable({page: doc.page})
                     ? (
                         <LinkToLocalVersion
-                            className={styles.button}
+                            className={`${styles.button} ${styles.load}`}
                             page={doc.page}
-                        >
-                            <img src='img/save-icon.png' alt='💾 saved' />
-                        </LinkToLocalVersion>
+                        />
                     )
                     : null
                 }
