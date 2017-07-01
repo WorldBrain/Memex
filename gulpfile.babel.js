@@ -24,6 +24,8 @@ const exec = pify(nodeExec)
 const staticFiles = {
     'node_modules/webextension-polyfill/dist/browser-polyfill.js': 'extension/lib',
     'node_modules/pdfjs-dist/build/pdf.worker.min.js': 'extension/lib',
+    'node_modules/semantic-ui-css/semantic.min.css': 'extension/lib/semantic-ui',
+    'node_modules/semantic-ui-css/themes/**/*': 'extension/lib/semantic-ui/themes',
 }
 
 const sourceFiles = [
