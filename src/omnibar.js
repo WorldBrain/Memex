@@ -14,25 +14,21 @@ const shortUrl = (url, maxLength = 50) => {
     return url
 }
 
-const formatTime = visitDate => {
-    const m = moment(visitDate)
-    return m.format('HH:mm a')
+const formatTime = (visitStart, showTime) => {
+    const m = moment(visitStart)
+    const visitDate = escapeHtml(niceTime(visitStart))
+    return showTime ? `🕒 ${m.format('HH:mm a')}` : `(visited ${visitDate})`
 }
 
 const visitToSuggestion = timeFilterApplied => doc => {
-    var visitDate = escapeHtml(niceTime(doc.visitStart))
     const url = escapeHtml(shortUrl(doc.url))
     const title = escapeHtml(doc.page.title)
-    var description
-        = `<url>${url}</url> — ${title} <dim>(visited ${visitDate})</dim>`
-    if (timeFilterApplied) {
-        visitDate = `${decodeURIComponent('\uD83D\uDD52')} ${formatTime(doc.visitStart)}`
-        description = `<url>${url}</url> — <dim> (${visitDate}) </dim> - ${title}`
-    }
-    return ({
+    const time = formatTime(doc.visitStart, timeFilterApplied)
+
+    return {
         content: doc.url,
-        description: description.toString(),
-    })
+        description: `<url>${url}</url> <dim>${time}</dim> - ${title}`,
+    }
 }
 
 let currentQuery
