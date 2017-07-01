@@ -35,11 +35,11 @@ class Overview extends React.Component {
                         value={this.props.query}
                         ref={el => { this.inputQueryEl = el }}
                     />
+                    <DateSelection
+                        date={this.props.endDate}
+                        onDateChange={this.props.onEndDateChange}
+                    />
                 </div>
-                <DateSelection
-                    date={this.props.endDate}
-                    onDateChange={this.props.onEndDateChange}
-                />
                 <div>
                     <ResultList
                         searchResult={this.props.searchResult}
