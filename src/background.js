@@ -3,6 +3,7 @@ import tldjs from 'tldjs'
 import 'src/activity-logger/background'
 import 'src/omnibar'
 import { installTimeStorageKey } from 'src/imports/background'
+import convertOldData from 'src/util/old-data-converter'
 
 async function openOverview() {
     const [ currentTab ] = await browser.tabs.query({ active: true })
@@ -31,9 +32,13 @@ browser.commands.onCommand.addListener(command => {
     }
 })
 
-// Store the timestamp of when the extension was installed in local storage
 browser.runtime.onInstalled.addListener(details => {
+    // Store the timestamp of when the extension was installed in local storage
     if (details.reason === 'install') {
         browser.storage.local.set({ [installTimeStorageKey]: Date.now() })
+    }
+    // Attempt convert of old extension data on extension update
+    if (details.reason === 'update') {
+        await convertOldData({ setAsStubs: true, concurrency: 15 })
     }
 })
