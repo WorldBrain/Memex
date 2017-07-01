@@ -2,15 +2,21 @@ import docuri from 'docuri'
 import uniqBy from 'lodash/fp/uniqBy'
 import chunk from 'lodash/fp/chunk'
 import flatten from 'lodash/fp/flatten'
+import omit from 'lodash/fp/omit'
 
 import db from 'src/pouchdb'
 import randomString from 'src/util/random-string'
 import { generatePageDocId } from 'src/page-storage'
 import { generateVisitDocId } from 'src/activity-logger'
-import { STORAGE_KEY as BLACKLIST_KEY } from 'src/options/blacklist/constants'
+import { STORAGE_KEY as NEW_BLACKLIST_KEY } from 'src/options/blacklist/constants'
 
-export const INDEX_KEY = 'index'
-export const BOOKMARKS_KEY = 'bookmarks'
+export const KEYS = {
+    INDEX: 'index',
+    BOOKMARKS: 'bookmarks',
+    HIST: 'history',
+    PREFS: 'preferences',
+    BLACKLIST: 'blacklist',
+}
 
 /**
  * @typedef IBlacklistOldExt
@@ -156,8 +162,14 @@ const getMatchingPageDocs = async pageDataArr => {
 /**
  * @param {IBlacklistOldExt} blacklist
  */
-const handleBlacklistConversion = blacklist =>
-    browser.storage.local.set({ [BLACKLIST_KEY]: convertBlacklist(blacklist) })
+const handleBlacklistConversion = async blacklist => {
+    const converted = convertBlacklist(blacklist)
+    await browser.storage.local.set({ [NEW_BLACKLIST_KEY]: converted })
+
+    if (NEW_BLACKLIST_KEY !== KEYS.BLACKLIST) { // Don't accidently remove what we just stored
+        await browser.storage.local.remove(KEYS.BLACKLIST)
+    }
+}
 
 /**
  * Performs the conversion of old extension page data to new extension. For each page data
@@ -168,13 +180,15 @@ const handleBlacklistConversion = blacklist =>
  *
  * @param {Array<string>} index The old extension index, containing sorted keys of page data.
  * @param {Array<string>} bookmarkUrls The old extension bookmark tracking list, containing URLs.
+ * @param {ConversionOpts} opts
  */
-async function handlePageDataConversion(index, bookmarkUrls, setAsStubs, chunkSize) {
+async function handlePageDataConversion(index, bookmarkUrls, { setAsStubs, concurrency }) {
     const convertOldData = convertPageData(setAsStubs, bookmarkUrls)
     const uniqByUrl = uniqBy('url')
+    let hasErrorOccurred = false
 
     // Split index into chunks to process at once; reverse to process from latest first
-    const indexChunks = chunk(chunkSize)(index.reverse())
+    const indexChunks = chunk(concurrency)(index.reverse())
 
     for (const keyChunk of indexChunks) {
         try {
@@ -193,32 +207,46 @@ async function handlePageDataConversion(index, bookmarkUrls, setAsStubs, chunkSi
 
             // Bulk insert all docs for this chunk
             await db.bulkDocs(flatten(docs))
+
+            // Clean up this chunk from local storage
+            await browser.storage.local.remove(keyChunk)
         } catch (error) {
-            console.error('DEBUG: Error encountered in storage conversion:')
+            hasErrorOccurred = true
+            console.error(`DEBUG: Error in converting of old extension data with keys: ${keyChunk}`)
             console.error(error)
             continue    // Continue processing next chunk if this one failed
         }
     }
+
+    if (!hasErrorOccurred) { // Clean other old ext data up if no problem happened
+        const pageRelatedKeys = omit('BLACKLIST')(KEYS)
+        browser.storage.local.remove(Object.values(pageRelatedKeys))
+    }
 }
+
+/**
+ * @typedef ConversionOpts
+ * @type {Object}
+ * @property {boolean} [setAsStubs=false] Denotes whether to set new pages as stubs to schedule for later import.
+ * @property {number} [concurrency=10] The amount of index items to process at any time.
+ */
 
 /**
  * Converts the old extension's local storage object into one compatible with the new extension's
  * storage models, placing resulting conversions into either PouchDB or local storage, depending on the
  * data converted.
- *
- * @param {boolean} [setAsStubs=false] Denotes whether to set new pages as stubs to schedule for later import.
- * @param {number} [chunkSize=10] The amount of index items to process at any time.
+ * @param {ConversionOpts} opts
  */
-export default async function convertOldData(setAsStubs = false, chunkSize = 10) {
+export default async function convertOldData(opts = { setAsStubs: false, concurrency: 10 }) {
     // Grab initial needed local storage keys, providing defaults if not available
     const {
-        [INDEX_KEY]: index,
-        [BLACKLIST_KEY]: blacklist,
-        [BOOKMARKS_KEY]: bookmarkUrls,
+        [KEYS.INDEX]: index,
+        [KEYS.BLACKLIST]: blacklist,
+        [KEYS.BOOKMARKS]: bookmarkUrls,
     } = await browser.storage.local.get({
-        [INDEX_KEY]: [],
-        [BLACKLIST_KEY]: { PAGE: [], SITE: [], REGEX: [] },
-        [BOOKMARKS_KEY]: [],
+        [KEYS.INDEX]: [],
+        [KEYS.BLACKLIST]: { PAGE: [], SITE: [], REGEX: [] },
+        [KEYS.BOOKMARKS]: [],
     })
 
     // Only attempt blacklist conversion if it matches shape of old extension blacklist
@@ -229,6 +257,6 @@ export default async function convertOldData(setAsStubs = false, chunkSize = 10)
 
     // Only attempt page data conversion if index + bookmark URLs are some sort of arrays
     if (index instanceof Array && bookmarkUrls instanceof Array) {
-        await handlePageDataConversion(index, bookmarkUrls, setAsStubs, chunkSize)
+        await handlePageDataConversion(index, bookmarkUrls, opts)
     }
 }
