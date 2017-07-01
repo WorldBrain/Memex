@@ -5,7 +5,7 @@ import { connect } from 'react-redux'
 import * as actions from '../actions'
 import { ourState } from '../selectors'
 import ResultList from './ResultList'
-import DateRangeSelection from './DateRangeSelection'
+import DateSelection from './DateSelection'
 import styles from './Overview.css'
 
 
@@ -31,11 +31,9 @@ class Overview extends React.Component {
                         ref={el => { this.inputQueryEl = el }}
                     />
                 </div>
-                <DateRangeSelection
-                    startDate={this.props.startDate}
-                    endDate={this.props.endDate}
-                    onStartDateChange={this.props.onStartDateChange}
-                    onEndDateChange={this.props.onEndDateChange}
+                <DateSelection
+                    date={this.props.endDate}
+                    onDateChange={this.props.onEndDateChange}
                 />
                 <div>
                     <ResultList
@@ -54,9 +52,7 @@ Overview.propTypes = {
     grabFocusOnMount: PropTypes.bool,
     query: PropTypes.string,
     onInputChanged: PropTypes.func,
-    startDate: PropTypes.number,
     endDate: PropTypes.number,
-    onStartDateChange: PropTypes.func,
     onEndDateChange: PropTypes.func,
     onBottomReached: PropTypes.func,
     waitingForResults: PropTypes.bool,
@@ -76,9 +72,6 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => ({
     onInputChanged: input => {
         dispatch(actions.setQuery({query: input}))
-    },
-    onStartDateChange: date => {
-        dispatch(actions.setStartDate({startDate: date}))
     },
     onEndDateChange: date => {
         dispatch(actions.setEndDate({endDate: date}))

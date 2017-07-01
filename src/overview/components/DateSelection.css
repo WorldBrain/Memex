@@ -1,13 +1,9 @@
-.dateRangeSelection {
+.dateSelection {
     display: flex;
     flex-flow: row wrap;
     justify-content: center;
     margin: auto;
-    width: 20em;
-}
-
-.dateRangeSelection > * {
-    flex: 1 50%;
+    width: 12em;
 }
 
 .datePicker {
@@ -17,9 +13,11 @@
     border-radius: 2px;
     box-shadow: 1px 2px 2px #888;
     padding: 4px;
+    padding-left: 8px;
 
     &:focus {
         outline: none;
         border: 1px solid grey;
     }
+
 }
