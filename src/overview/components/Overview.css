@@ -1,15 +1,4 @@
-.query {
-    display: block;
-    width: 20em;
-    margin: 1em auto;
-    padding: 0.4em 0.8em;
-    border: 1px solid lightgrey;
-    border-radius: 4px;
-    font-size: large;
-    box-shadow: 2px 3px 3px #888;
-
-    &:focus {
-        outline: none;
-        border: 1px solid grey;
-    }
+.queryInputContainer {
+    text-align: center;
+    margin: 1em;
 }

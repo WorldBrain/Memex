@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
+import { Input } from 'semantic-ui-react'
 
 import * as actions from '../actions'
 import { ourState } from '../selectors'
@@ -19,10 +20,14 @@ class Overview extends React.Component {
     render() {
         return (
             <div>
-                <div>
-                    <input
-                        className={styles.query}
-                        onInput={e => { this.props.onInputChanged(e.target.value) }}
+                <div
+                    className={styles.queryInputContainer}
+                >
+                    <Input
+                        size='large'
+                        icon='search'
+                        iconPosition='left'
+                        onChange={e => { this.props.onInputChanged(e.target.value) }}
                         onKeyDown={e => {
                             if (e.key === 'Escape') { this.props.onInputChanged('') }
                         }}
