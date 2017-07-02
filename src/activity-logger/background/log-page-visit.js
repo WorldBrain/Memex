@@ -1,5 +1,7 @@
 import db from 'src/pouchdb'
 import { reidentifyOrStorePage } from 'src/page-storage/store-page'
+import { makeRemotelyCallable } from 'src/util/webextensionRPC'
+
 import { generateVisitDocId, isWorthRemembering } from '..'
 
 
@@ -46,8 +48,27 @@ export async function maybeLogPageVisit({
         return
     }
 
+    // Check if logging is enabled by the user.
+    const { loggingEnabled } = await browser.storage.local.get('loggingEnabled')
+    if (!loggingEnabled) {
+        return
+    }
+
     await logPageVisit({
         tabId,
         url,
     })
 }
+
+// Log the visit/page in the currently active tab
+export async function logActivePageVisit() {
+    const tabs = await browser.tabs.query({active: true})
+    const tab = tabs[0]
+    await logPageVisit({
+        tabId: tab.id,
+        url: tab.url,
+    })
+}
+
+// Expose to be callable from browser button popup
+makeRemotelyCallable({logActivePageVisit})

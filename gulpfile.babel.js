@@ -56,6 +56,11 @@ const sourceFiles = [
         output: 'localpage.js',
         destination: './extension/page-viewer',
     },
+    {
+        entries: ['./src/popup/popup.js'],
+        output: 'popup.js',
+        destination: './extension/popup',
+    },
 ]
 
 const browserifySettings = {

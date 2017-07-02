@@ -8,11 +8,6 @@ function openOverview() {
     })
 }
 
-// Open the overview when the extension's button is clicked
-browser.browserAction.onClicked.addListener(() => {
-    openOverview()
-})
-
 browser.commands.onCommand.addListener(command => {
     if (command === 'openOverview') {
         openOverview()

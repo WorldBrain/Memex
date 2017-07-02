@@ -10,7 +10,8 @@
         "run_at": "document_start"
     }],
     "browser_action": {
-        "default_title": "Memory overview"
+        "default_title": "WebMemex",
+        "default_popup": "/popup/popup.html"
     },
     "commands": {
         "openOverview": {
@@ -28,6 +29,7 @@
     "permissions": [
         "<all_urls>",
         "history",
+        "storage",
         "tabs",
         "webNavigation"
     ],
