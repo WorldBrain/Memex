@@ -1,4 +1,10 @@
 .queryInputContainer {
-    text-align: center;
-    margin: 1em;
+    margin: 1em auto;
+    max-width: 600px;
+    display: flex;
+    flex-flow: row nowrap;
+}
+
+.queryInputComponent {
+    flex-grow: 1;
 }

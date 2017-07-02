@@ -24,7 +24,7 @@ class Overview extends React.Component {
                     className={styles.queryInputContainer}
                 >
                     <Input
-                        size='large'
+                        size='huge'
                         icon='search'
                         iconPosition='left'
                         onChange={e => { this.props.onInputChanged(e.target.value) }}
@@ -34,6 +34,7 @@ class Overview extends React.Component {
                         placeholder='Search your memory'
                         value={this.props.query}
                         ref={el => { this.inputQueryEl = el }}
+                        className={styles.queryInputComponent}
                     />
                     <DateSelection
                         date={this.props.endDate}
