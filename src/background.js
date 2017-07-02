@@ -5,6 +5,8 @@ import 'src/omnibar'
 import { installTimeStorageKey } from 'src/imports/background'
 import convertOldData from 'src/util/old-data-converter'
 
+export const dataConvertTimeKey = 'data-conversion-timestamp'
+
 async function openOverview() {
     const [ currentTab ] = await browser.tabs.query({ active: true })
     if (currentTab && currentTab.url) {
@@ -32,13 +34,17 @@ browser.commands.onCommand.addListener(command => {
     }
 })
 
-browser.runtime.onInstalled.addListener(details => {
+browser.runtime.onInstalled.addListener(async details => {
     // Store the timestamp of when the extension was installed in local storage
     if (details.reason === 'install') {
         browser.storage.local.set({ [installTimeStorageKey]: Date.now() })
     }
     // Attempt convert of old extension data on extension update
     if (details.reason === 'update') {
-        await convertOldData({ setAsStubs: true, concurrency: 15 })
+        const storage = await browser.storage.local.get(dataConvertTimeKey)
+        if (!storage[dataConvertTimeKey]) {
+            await convertOldData({ setAsStubs: true, concurrency: 15 })
+            await browser.storage.local.set({ [dataConvertTimeKey]: Date.now() })
+        }
     }
 })
