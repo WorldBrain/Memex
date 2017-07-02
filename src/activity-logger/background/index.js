@@ -1,4 +1,4 @@
-import maybeLogPageVisit from './log-page-visit'
+import { maybeLogPageVisit } from './log-page-visit'
 
 // Listen for navigations to log them and analyse the pages.
 browser.webNavigation.onCommitted.addListener(({url, tabId, frameId}) => {
