@@ -4,7 +4,6 @@ import tldjs from 'tldjs'
 import queryString from 'query-string'
 
 import { filterVisitsByQuery } from 'src/search'
-import niceTime from 'src/util/nice-time'
 import extractTimeFiltersFromQuery from 'src/util/nlp-time-filter'
 import moment from 'moment'
 
@@ -17,8 +16,10 @@ const shortUrl = (url, maxLength = 50) => {
 const formatTime = (visitStart, showTime) => {
     const m = moment(visitStart)
     const inLastSevenDays = moment().diff(m, 'days') <= 7
-    const visitDate = escapeHtml(niceTime(visitStart))
-    return showTime ? (inLastSevenDays ? `🕒 ${m.format('HH:mm a ddd')}` : `🕒 ${m.format('HH:mm a D/M/YYYY')})`) : (inLastSevenDays ? `🕒 ${m.format('ddd')}` : `(visited ${visitDate}))`)
+    if (showTime) {
+        return inLastSevenDays ? `🕒 ${m.format('HH:mm a ddd')}` : `🕒 ${m.format('HH:mm a D/M/YYYY')}`
+    }
+    return inLastSevenDays ? `${m.format('ddd')}` : `(visited ${m.format('D/M/YYYY')}))`
 }
 
 const visitToSuggestion = timeFilterApplied => doc => {
