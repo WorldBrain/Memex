@@ -16,15 +16,15 @@ const shortUrl = (url, maxLength = 50) => {
 
 const formatTime = (visitStart, showTime) => {
     const m = moment(visitStart)
+    const inLastSevenDays = moment().diff(m, 'days') <= 7
     const visitDate = escapeHtml(niceTime(visitStart))
-    return showTime ? `🕒 ${m.format('HH:mm a')}` : `(visited ${visitDate})`
+    return showTime ? (inLastSevenDays ? `🕒 ${m.format('HH:mm a ddd')}` : `🕒 ${m.format('HH:mm a D/M/YYYY')})`) : (inLastSevenDays ? `🕒 ${m.format('ddd')}` : `(visited ${visitDate}))`)
 }
 
 const visitToSuggestion = timeFilterApplied => doc => {
     const url = escapeHtml(shortUrl(doc.url))
     const title = escapeHtml(doc.page.title)
     const time = formatTime(doc.visitStart, timeFilterApplied)
-
     return {
         content: doc.url,
         description: `<url>${url}</url> <dim>${time}</dim> - ${title}`,
