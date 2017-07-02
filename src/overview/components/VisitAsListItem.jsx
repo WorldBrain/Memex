@@ -18,10 +18,12 @@ const VisitAsListItem = ({doc, compact, onTrashButtonClick}) => {
     const sizeInMB = pageSize !== undefined
         ? Math.round(pageSize / 1024**2 * 10) / 10
         : 0
+
     const visitClasses = classNames({
         [styles.root]: true,
         [styles.compact]: compact,
     })
+
     const hasFavIcon = !!(doc.page._attachments && doc.page._attachments.favIcon)
     const favIcon = hasFavIcon
         ? (
@@ -32,6 +34,30 @@ const VisitAsListItem = ({doc, compact, onTrashButtonClick}) => {
             />
         )
         : <img className={styles.favIcon} src='img/null-icon.png' />
+
+    const deleteButton = (
+        <Popup
+            trigger={
+                <Button
+                    icon='trash'
+                    onClick={e => { e.preventDefault() }}
+                    floated='right'
+                />
+            }
+            content={
+                <Button
+                    negative
+                    content={`Forget this item`}
+                    onClick={e => { onTrashButtonClick() }}
+                    title={`Stored page size: ${sizeInMB} MB`}
+                />
+            }
+            on='focus'
+            hoverable
+            position='right center'
+        />
+    )
+
     return (
         <LinkToLocalVersion
             page={doc.page}
@@ -70,25 +96,7 @@ const VisitAsListItem = ({doc, compact, onTrashButtonClick}) => {
                 <div className={styles.time}>{niceTime(doc.visitStart)}</div>
             </div>
             <div className={styles.buttonsContainer}>
-                <Popup
-                    trigger={
-                        <Button
-                            icon='trash'
-                            onClick={e => { e.preventDefault() }}
-                        />
-                    }
-                    content={
-                        <Button
-                            negative
-                            content={`Forget this item`}
-                            onClick={e => { onTrashButtonClick() }}
-                            title={`Stored page size: ${sizeInMB} MB`}
-                        />
-                    }
-                    on='focus'
-                    hoverable
-                    position='right center'
-                />
+                {deleteButton}
             </div>
         </LinkToLocalVersion>
     )

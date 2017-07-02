@@ -127,10 +127,6 @@
 }
 
 .buttonsContainer {
-    flex: 0 0 auto;
-    display: flex;
-    flex-direction: column;
-
     & button {
         opacity: 0.4;
         &:hover {
