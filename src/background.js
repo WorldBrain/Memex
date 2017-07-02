@@ -1,5 +1,4 @@
-import 'src/activity-logger/background'
-import 'src/omnibar'
+import { logActivePageVisit } from 'src/activity-logger/background/log-page-visit'
 
 
 function openOverview() {
@@ -8,8 +7,16 @@ function openOverview() {
     })
 }
 
+// Listen to keyboard shortcut commands declared in the manifest.
 browser.commands.onCommand.addListener(command => {
     if (command === 'openOverview') {
         openOverview()
     }
+    if (command === 'storeActivePage') {
+        logActivePageVisit()
+    }
 })
+
+// Run scripts that set their own event listeners.
+import 'src/activity-logger/background'
+import 'src/omnibar'

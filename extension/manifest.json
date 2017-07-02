@@ -19,6 +19,12 @@
                 "default": "Ctrl+Y"
             },
             "description": "Open your memory overview"
+        },
+        "storeActivePage": {
+            "suggested_key": {
+                "default": "Alt+B"
+            },
+            "description": "Store page"
         }
     },
     "applications": {
