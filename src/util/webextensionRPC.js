@@ -86,7 +86,7 @@ const noSuchFunctionError = 'Received RPC for unknown function: '
 
 const remotelyCallableFunctions = {}
 
-function incomingRPCListener(message, sender) {
+async function incomingRPCListener(message, sender) {
     if (message && message[RPC_CALL] === RPC_CALL) {
         const funcName = message.funcName
         const args = message.hasOwnProperty('args') ? message.args : []
@@ -100,13 +100,20 @@ function incomingRPCListener(message, sender) {
         const extraArg = {
             tab: sender.tab,
         }
-        const value = func(extraArg, ...args)
-        return Promise.resolve(value).then(
-            value => ({
-                returnValue: value,
-                [RPC_RESPONSE]: RPC_RESPONSE,
-            })
-        )
+
+        let returnValue, error
+        try {
+            // Run the function, and await its value if it returns a promise.
+            returnValue = await func(extraArg, ...args)
+        } catch (err) {
+            error = err
+        }
+
+        return {
+            returnValue,
+            error,
+            [RPC_RESPONSE]: RPC_RESPONSE,
+        }
     }
 }
 
