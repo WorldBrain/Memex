@@ -5,7 +5,7 @@ import { connect } from 'react-redux'
 import { Button, Popup } from 'semantic-ui-react'
 import classNames from 'classnames'
 
-import { LinkToLocalVersion } from 'src/page-viewer'
+import { hrefForLocalPage } from 'src/page-viewer'
 import niceTime from 'src/util/nice-time'
 
 import ImgFromPouch from './ImgFromPouch'
@@ -14,6 +14,8 @@ import { deleteVisit } from '../actions'
 
 
 const VisitAsListItem = ({doc, compact, onTrashButtonClick}) => {
+    const href = hrefForLocalPage({page: doc.page})
+
     const pageSize = get(['_attachments', 'frozen-page.html', 'length'])(doc.page)
     const sizeInMB = pageSize !== undefined
         ? Math.round(pageSize / 1024**2 * 10) / 10
@@ -22,6 +24,7 @@ const VisitAsListItem = ({doc, compact, onTrashButtonClick}) => {
     const visitClasses = classNames({
         [styles.root]: true,
         [styles.compact]: compact,
+        [styles.available]: !!href,
     })
 
     const hasFavIcon = !!(doc.page._attachments && doc.page._attachments.favIcon)
@@ -59,8 +62,9 @@ const VisitAsListItem = ({doc, compact, onTrashButtonClick}) => {
     )
 
     return (
-        <LinkToLocalVersion
-            page={doc.page}
+        <a
+            href={href}
+            title={href ? undefined : `Page not available. Perhaps storing failed?`}
             className={visitClasses}
             // DEBUG Show document props on ctrl+meta+click
             onClick={e => { if (e.metaKey && e.ctrlKey) { console.log(doc); e.preventDefault() } }}
@@ -98,7 +102,7 @@ const VisitAsListItem = ({doc, compact, onTrashButtonClick}) => {
             <div className={styles.buttonsContainer}>
                 {deleteButton}
             </div>
-        </LinkToLocalVersion>
+        </a>
     )
 }
 
