@@ -9,9 +9,14 @@ function openOverview() {
     })
 }
 
-// Functions to call for commands declared in the manifest.
+// Functions to call for commands declared in the manifest, via context menu or keyboard shortcut.
 const commandActions = {
     openOverview,
+}
+
+// Checkbox settings to be shown in the context menu.
+const settings = {
+    'loggingEnabled': {title: 'Log every visited page'},
 }
 
 const commands = manifest.commands
@@ -34,16 +39,39 @@ for (let commandId in commands) {
     const shortcutKey = get('suggested_key.default')(options)
     const shortcutInfo = shortcutKey ? ` (${shortcutKey})` : ''
     const title = options.description + shortcutInfo
-    updateOrCreateContextMenuItem(commandId, {
+    const itemId = `command_${commandId}`
+    updateOrCreateContextMenuItem(itemId, {
         title,
         contexts: ['browser_action'],
     })
 }
 
+// Show checkboxes in the context menu for each of the settings.
+async function updateSettingsInContextMenu() {
+    const settingValues = await browser.storage.local.get(...Object.keys(settings))
+    for (let settingId in settings) {
+        const itemId = `setting_${settingId}`
+        const options = {
+            ...settings[settingId],
+            type: 'checkbox',
+            checked: settingValues[settingId],
+            contexts: ['browser_action'],
+        }
+        await updateOrCreateContextMenuItem(itemId, options)
+    }
+}
+// Update the context menu values when storage was touched.
+browser.storage.onChanged.addListener(updateSettingsInContextMenu)
+updateSettingsInContextMenu()
+
 // Listen to context menu actions.
-browser.contextMenus.onClicked.addListener((info, tab) => {
-    const commandId = info.menuItemId
-    commandActions[commandId]()
+browser.contextMenus.onClicked.addListener(async (info, tab) => {
+    const [type, id] = info.menuItemId.split('_')
+    if (type === 'command') {
+        commandActions[id]()
+    } else if (type === 'setting') {
+        await browser.storage.local.set({[id]: info.checked})
+    }
 })
 
 // Listen to keyboard shortcut commands.
