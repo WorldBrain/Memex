@@ -28,7 +28,7 @@ const visitToSuggestion = timeFilterApplied => doc => {
     const time = formatTime(doc.visitStart, timeFilterApplied)
     return {
         content: doc.url,
-        description: `<url>${url}</url> <dim>${time}</dim> - ${title}`,
+        description: `<url>${url}</url> <dim>${title}</dim> - ${time}`,
     }
 }
 
