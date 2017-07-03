@@ -18,13 +18,13 @@
             "suggested_key": {
                 "default": "Ctrl+Y"
             },
-            "description": "Open your memory overview"
+            "description": "Open memory overview"
         },
-        "storeActivePage": {
+        "_execute_browser_action": {
             "suggested_key": {
-                "default": "Alt+B"
+                "default": "Alt+M"
             },
-            "description": "Store page"
+            "description": "Store this page"
         }
     },
     "applications": {
@@ -34,6 +34,7 @@
     },
     "permissions": [
         "<all_urls>",
+        "contextMenus",
         "history",
         "storage",
         "tabs",
