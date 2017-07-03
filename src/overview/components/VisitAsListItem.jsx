@@ -45,6 +45,7 @@ const VisitAsListItem = ({doc, compact, onTrashButtonClick}) => {
                     icon='trash'
                     onClick={e => { e.preventDefault() }}
                     floated='right'
+                    tabIndex='-1'
                 />
             }
             content={
@@ -68,6 +69,7 @@ const VisitAsListItem = ({doc, compact, onTrashButtonClick}) => {
             className={visitClasses}
             // DEBUG Show document props on ctrl+meta+click
             onClick={e => { if (e.metaKey && e.ctrlKey) { console.log(doc); e.preventDefault() } }}
+            onKeyPress={e => { if (e.key==='Delete') { onTrashButtonClick() } }}
         >
             <div className={styles.screenshotContainer}>
                 {doc.page._attachments && doc.page._attachments.screenshot
