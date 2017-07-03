@@ -3,7 +3,9 @@ import fromPairs from 'lodash/fp/fromPairs'
 import escapeHtml from 'lodash/fp/escape'
 
 import { filterVisitsByQuery } from 'src/search'
+import { hrefForLocalPage } from 'src/page-viewer'
 import niceTime from 'src/util/nice-time'
+
 
 // Read which browser we are running in.
 let browserName
@@ -33,7 +35,7 @@ const visitToSuggestion = doc => {
     })
 }
 
-let suggestionToPageId = {}
+let suggestionToUrl = {}
 let currentQuery
 let latestResolvedQuery
 async function makeSuggestion(query, suggest) {
@@ -73,21 +75,24 @@ async function makeSuggestion(query, suggest) {
     }
     const suggestions = visitDocs.map(visitToSuggestion)
 
+    // Call the callback function to display the suggestions to the user
     suggest(suggestions)
 
-    suggestionToPageId = fromPairs(suggestions.map(
-        (suggestion, i) => [suggestion.content, visitDocs[i].page._id]
+    // Remember which texts represent which pages, for when the user accepts a suggestion.
+    // (the URLs are so ugly and random-looking we rather not show them to the user)
+    suggestionToUrl = fromPairs(suggestions.map(
+        (suggestion, i) => [suggestion.content, hrefForLocalPage({page: visitDocs[i].page})]
     ))
+
     latestResolvedQuery = query
 }
 
 const acceptInput = (text, disposition) => {
     // The user has clicked a suggestion, or pressed enter.
     let url
-    if (text in suggestionToPageId) {
+    if (text in suggestionToUrl) {
         // Open the page chosen from the suggestions
-        const pageId = suggestionToPageId[text]
-        url = `/page-viewer/localpage.html?page=${encodeURIComponent(pageId)}`
+        url = suggestionToUrl[text]
     } else {
         // Treat input as search query, open the search
         url = `/overview/overview.html?q=${encodeURIComponent(text)}`
