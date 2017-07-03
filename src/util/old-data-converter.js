@@ -257,11 +257,11 @@ export default async function convertOldData(opts = { setAsStubs: false, concurr
     const {
         [KEYS.INDEX]: index,
         [KEYS.BLACKLIST]: blacklist,
-        [KEYS.BOOKMARKS]: bookmarkUrls,
+        [KEYS.BOOKMARKS]: bookmarks,
     } = await browser.storage.local.get({
         [KEYS.INDEX]: [],
         [KEYS.BLACKLIST]: { PAGE: [], SITE: [], REGEX: [] },
-        [KEYS.BOOKMARKS]: [],
+        [KEYS.BOOKMARKS]: '[]',
     })
 
     // Only attempt blacklist conversion if it matches shape of old extension blacklist
@@ -270,9 +270,17 @@ export default async function convertOldData(opts = { setAsStubs: false, concurr
         await handleBlacklistConversion(blacklist)
     }
 
-    // Only attempt page data conversion if index + bookmark URLs are some sort of arrays
-    if (index instanceof Array && bookmarkUrls instanceof Array) {
-        await handlePageDataConversion(index, bookmarkUrls, updateProgress, opts)
+    // Only attempt page data conversion if index + bookmark storage values are correct types
+    if (index instanceof Array && typeof bookmarks === 'string') {
+        let bookmarkUrls
+        try {
+            bookmarkUrls = JSON.parse(bookmarks).map(entry => entry.url)
+        } catch (error) {
+            // Bookmarks data cannot be parsed; means assumed shape is not there, possibly from user modification
+            bookmarkUrls = []
+        } finally {
+            await handlePageDataConversion(index, bookmarkUrls, updateProgress, opts)
+        }
     }
 
     setTimeout(() => browser.notifications.clear(notifId), 3000)
