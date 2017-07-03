@@ -259,7 +259,7 @@ export default async function convertOldData(opts = { setAsStubs: false, concurr
         [KEYS.BLACKLIST]: blacklist,
         [KEYS.BOOKMARKS]: bookmarks,
     } = await browser.storage.local.get({
-        [KEYS.INDEX]: [],
+        [KEYS.INDEX]: { index: [] },
         [KEYS.BLACKLIST]: { PAGE: [], SITE: [], REGEX: [] },
         [KEYS.BOOKMARKS]: '[]',
     })
@@ -271,7 +271,7 @@ export default async function convertOldData(opts = { setAsStubs: false, concurr
     }
 
     // Only attempt page data conversion if index + bookmark storage values are correct types
-    if (index instanceof Array && typeof bookmarks === 'string') {
+    if (index && index.index instanceof Array && typeof bookmarks === 'string') {
         let bookmarkUrls
         try {
             bookmarkUrls = JSON.parse(bookmarks).map(entry => entry.url)
@@ -279,7 +279,7 @@ export default async function convertOldData(opts = { setAsStubs: false, concurr
             // Bookmarks data cannot be parsed; means assumed shape is not there, possibly from user modification
             bookmarkUrls = []
         } finally {
-            await handlePageDataConversion(index, bookmarkUrls, updateProgress, opts)
+            await handlePageDataConversion(index.index, bookmarkUrls, updateProgress, opts)
         }
     }
 
