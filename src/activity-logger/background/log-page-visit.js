@@ -33,10 +33,11 @@ export async function logPageVisit({
     const visit = await storeVisit({page, url, timestamp})
 
     // Wait until all page analyis/deduping is done before returning.
-    await finalPagePromise
+    const {page: finalPage} = await finalPagePromise
 
     // TODO possibly deduplicate the visit if the page was deduped too.
-    void (visit)
+
+    return {visit, page: finalPage}
 }
 
 export async function maybeLogPageVisit({
@@ -54,7 +55,7 @@ export async function maybeLogPageVisit({
         return
     }
 
-    await logPageVisit({
+    return await logPageVisit({
         tabId,
         url,
     })
@@ -64,7 +65,7 @@ export async function maybeLogPageVisit({
 export async function logActivePageVisit() {
     const tabs = await browser.tabs.query({active: true})
     const tab = tabs[0]
-    await logPageVisit({
+    return await logPageVisit({
         tabId: tab.id,
         url: tab.url,
     })

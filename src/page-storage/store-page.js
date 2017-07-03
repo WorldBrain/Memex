@@ -29,10 +29,10 @@ async function analyseAndTryDedupePage({tabId, page, samePageCandidates}) {
     const {page: analysedPage} = await analysePage({page, tabId})
 
     // Knowing more about the page now, try find it again in our memory.
-    const {finalPage} = await tryDedupePage({page: analysedPage, samePageCandidates})
+    const {page: finalPage} = await tryDedupePage({page: analysedPage, samePageCandidates})
 
     // Return the resulting page (likely still the same as analysedPage)
-    return {finalPage}
+    return {page: finalPage}
 }
 
 // Tries to reidentify the page in the tab, or creates a new page doc for it.
