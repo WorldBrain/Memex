@@ -1,27 +1,13 @@
 import get from 'lodash/fp/get'
 import omit from 'lodash/fp/omit'
-import { blobToBase64String } from 'blob-util'
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import db from 'src/pouchdb'
+import { getAttachmentAsDataUri } from 'src/pouchdb'
 
 
 const readHash = ({doc, attachmentId}) =>
     doc && attachmentId && get(['_attachments', attachmentId, 'digest'])(doc)
-
-async function getAttachment({doc, attachmentId}) {
-    if (!doc
-        || !attachmentId
-        || readHash({doc, attachmentId}) === undefined
-    ) {
-        return undefined
-    }
-    const blob = await db.getAttachment(doc._id, attachmentId)
-    const base64 = await blobToBase64String(blob)
-    const dataUri = `data:${blob.type};base64,${base64}`
-    return dataUri
-}
 
 export default class ImgFromPouch extends React.Component {
     constructor(props) {
@@ -49,7 +35,7 @@ export default class ImgFromPouch extends React.Component {
     }
 
     async updateFile({doc, attachmentId}) {
-        const dataUri = await getAttachment({doc, attachmentId})
+        const dataUri = await getAttachmentAsDataUri({doc, attachmentId})
         if (this._isMounted) {
             this.setState({dataUri})
         }
