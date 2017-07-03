@@ -1,15 +1,35 @@
+import { getAttachmentAsDataUri } from 'src/pouchdb'
 import { remoteFunction } from 'src/util/webextensionRPC'
+import { hrefForLocalPage } from 'src/page-viewer'
+
 
 const logActivePageVisit = remoteFunction('logActivePageVisit')
 
-const storeButton = document.getElementById('store')
-storeButton.onclick = async () => {
-    await logActivePageVisit()
-    window.close()
-}
+const screenshotImg = document.getElementById('screenshotImg')
+const screenshotLink = document.getElementById('screenshotLink')
+const screenshotDimmer = document.getElementById('screenshotDimmer')
 
-const overviewButton = document.getElementById('overview')
-overviewButton.onclick = async() => {
+async function storeThisPage() {
+    screenshotDimmer.classList.add('active')
+    let page
+    try {
+        const { page: page_ } = await logActivePageVisit()
+        page = page_
+    } finally {
+        screenshotDimmer.classList.remove('active')
+    }
+    const imgData = await getAttachmentAsDataUri({doc: page, attachmentId: 'screenshot'})
+    screenshotImg.src = imgData
+    const href = hrefForLocalPage({page})
+    if (href) {
+        screenshotLink.setAttribute('href', href)
+    }
+}
+// Store this page directly.
+storeThisPage()
+
+const overviewButton = document.getElementById('overviewButton')
+overviewButton.onclick = async () => {
     await browser.tabs.create({
         url: '/overview/overview.html',
     })

@@ -1,11 +1,54 @@
 <meta charset="utf-8" />
 <title>📇 WebMemex popup menu</title>
+<link rel="stylesheet" href="/lib/semantic-ui/semantic.min.css" />
+<style>
+    .ui.image.scaleToFit {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .ui.image.scaleToFit img {
+        width: auto;
+        height: auto;
+        max-width: 100%;
+        max-height: 100%;
+    }
+</style>
 
-<button id="store">Remember</button>
-<button id="overview">Overview</button>
-
-<input type="checkbox" id="loggingEnabled" />
-<label for="loggingEnabled">Log every page</label>
+<div class="ui attached vertical fluid menu">
+    <div class="item">
+        <a
+            id="screenshotLink"
+            target="_new"
+            class="ui image scaleToFit"
+            style="height: 150px;"
+        >
+            <img id="screenshotImg" src="" />
+        </a>
+        <div id="screenshotDimmer" class="ui inverted dimmer">
+            <div class="content">
+                <div class="center">
+                    <h2 class="ui icon header">
+                        <i class="camera loading icon"></i>
+                        Storing page...
+                    </h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="item">
+        <div id="overviewButton" class="ui fluid primary button">
+            <i class="list layout icon"></i>
+            Open memory overview
+        </div>
+    </div>
+    <div class="item">
+        <div class="ui toggle checkbox">
+            <input type="checkbox" id="loggingEnabled" />
+            <label for="loggingEnabled">Log <em>every</em> visited webpage</label>
+        </div>
+    </div>
+</div>
 
 <script src="/lib/browser-polyfill.js"></script>
 <script src="popup.js"></script>
