@@ -1,3 +1,5 @@
+/* stylelint-disable declaration-no-important */
+
 .root > input {
     /* XXX We cannot just *append* 'width' to transition-property, so we force-set it to 'all' */
     transition-property: all !important;
@@ -13,8 +15,9 @@
     width: 7em;  /* Should roughly fit a date (e.g. 12-12-2121) */
 }
 
-/* Otherwise (when not expanded), add a fix to override semantic-ui's padding. */
-/* (note: this needs a high selector specificity, as semantic-ui also sets '!important') */
+/* Otherwise (when not expanded), add a fix to override semantic-ui's padding.
+ * (note: this needs a high selector specificity, as semantic-ui also sets '!important')
+ */
 :not(:global(.react-datepicker__tether-enabled)) > .root:not(.expanded) > input {
     padding-right: 0 !important;
 }
