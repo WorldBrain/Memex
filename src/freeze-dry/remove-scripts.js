@@ -1,6 +1,5 @@
-function removeNode(node) {
-    node.parentNode.removeChild(node)
-}
+import { removeNode } from './common.js'
+
 
 // Removes all <script> elements in rootElement.
 export function removeScriptElements({rootElement}) {
