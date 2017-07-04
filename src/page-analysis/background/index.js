@@ -2,10 +2,9 @@ import assocPath from 'lodash/fp/assocPath'
 import merge from 'lodash/fp/merge'
 import { dataURLToBlob } from 'blob-util'
 
-import { whenPageDOMLoaded, whenPageLoadComplete, whenTabActive } from 'src/util/tab-events'
+import { whenPageDOMLoaded } from 'src/util/tab-events'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import whenAllSettled from 'src/util/when-all-settled'
-import delay from 'src/util/delay'
 import db from 'src/pouchdb'
 import updateDoc from 'src/util/pouchdb-update-doc'
 
@@ -52,11 +51,6 @@ async function performPageAnalysis({pageId, tabId}) {
 
     // Freeze-dry and store the whole page
     async function storePageFreezeDried() {
-        await whenPageLoadComplete({tabId})
-        // Wait a bit to first let scripts run. TODO Do this in a smarter way.
-        await delay(1000)
-        // Wait until the tab is activated (to match with screenshot).
-        await whenTabActive({tabId})
         const htmlString = await freezeDry()
         const blob = new Blob([htmlString], {type: 'text/html;charset=UTF-8'})
         await setDocAttachment(db, pageId, 'frozen-page.html')(blob)
@@ -72,7 +66,7 @@ async function performPageAnalysis({pageId, tabId}) {
 }
 
 export default async function analysePage({page, tabId}) {
-    // Wait until its DOM has loaded.
+    // Wait until its DOM has loaded, in case we got invoked before that.
     await whenPageDOMLoaded({tabId}) // TODO: catch e.g. tab close.
     await performPageAnalysis({pageId: page._id, tabId})
     // Get and return the page.

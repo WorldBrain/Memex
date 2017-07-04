@@ -1,6 +1,8 @@
 import db from 'src/pouchdb'
 import { reidentifyOrStorePage } from 'src/page-storage/store-page'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
+import { whenPageLoadComplete, whenTabActive } from 'src/util/tab-events'
+import delay from 'src/util/delay'
 
 import { generateVisitDocId, isLoggable, shouldBeLogged } from '..'
 
@@ -54,6 +56,13 @@ export async function maybeLogPageVisit({
     if (!loggingEnabled) {
         return
     }
+
+    // Wait for it to be fully ready.
+    await whenPageLoadComplete({tabId})
+    // Wait a bit to first let scripts run. TODO Do this in a smarter way.
+    await delay(1000)
+    // Wait until the tab is activated (not technically needed)
+    await whenTabActive({tabId})
 
     return await logPageVisit({
         tabId,
