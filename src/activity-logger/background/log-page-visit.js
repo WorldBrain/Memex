@@ -2,7 +2,7 @@ import db from 'src/pouchdb'
 import { reidentifyOrStorePage } from 'src/page-storage/store-page'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 
-import { generateVisitDocId, isWorthRemembering } from '..'
+import { generateVisitDocId, shouldBeLogged } from '..'
 
 
 // Store the visit in PouchDB.
@@ -45,7 +45,7 @@ export async function maybeLogPageVisit({
     url,
 }) {
     // Check if we would want to log this page.
-    if (!isWorthRemembering({url})) {
+    if (!shouldBeLogged({url})) {
         return
     }
 

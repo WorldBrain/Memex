@@ -22,9 +22,15 @@ export function generateVisitDocId({timestamp, nonce} = {}) {
     })
 }
 
-// Decide whether to remember or ignore a visited page.
-export function isWorthRemembering({url}) {
-    // Just remember http(s) pages, ignoring data uris, newtab, ...
+// Tell whether a page can be stored.
+export function isLoggable({url}) {
+    // Only http(s) pages. Ignoring data uris, newtab, ...
     const loggableUrlPattern = /^https?:\/\//
     return loggableUrlPattern.test(url)
+}
+
+export function shouldBeLogged({url}) {
+    // Currently, we log everything that we think we can log.
+    // TODO Add ignore-/blacklist lookup here (issue #22, #94)
+    return isLoggable({url})
 }

@@ -4,7 +4,7 @@
 
 import db from 'src/pouchdb'
 import {
-    isWorthRemembering,
+    shouldBeLogged,
     generateVisitDocId,
     visitKeyPrefix,
     convertVisitDocId,
@@ -23,7 +23,7 @@ async function getHistoryItems({
         startTime,
         endTime,
     })
-    return historyItems.filter(({url}) => isWorthRemembering({url}))
+    return historyItems.filter(({url}) => shouldBeLogged({url}))
 }
 
 function transformToPageDoc({historyItem}) {
