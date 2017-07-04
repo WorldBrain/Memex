@@ -12,7 +12,7 @@ export async function urlToDataUri(url) {
         const dataUri = await responseToDataUri(response)
         return dataUri
     } catch (err) {
-        return 'about:blank'
+        return 'about:invalid'
     }
 }
 
