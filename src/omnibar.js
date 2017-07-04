@@ -4,9 +4,8 @@ import tldjs from 'tldjs'
 import queryString from 'query-string'
 
 import { filterVisitsByQuery } from 'src/search'
-import niceTime from 'src/util/nice-time'
 import extractTimeFiltersFromQuery from 'src/util/nlp-time-filter'
-
+import moment from 'moment'
 
 const shortUrl = (url, maxLength = 50) => {
     url = url.replace(/^https?:\/\//i, '')
@@ -14,16 +13,23 @@ const shortUrl = (url, maxLength = 50) => {
     return url
 }
 
-const visitToSuggestion = doc => {
-    const visitDate = escapeHtml(niceTime(doc.visitStart))
+const formatTime = (visitStart, showTime) => {
+    const m = moment(visitStart)
+    const inLastSevenDays = moment().diff(m, 'days') <= 7
+    if (showTime) {
+        return inLastSevenDays ? `🕒 ${m.format('HH:mm a ddd')}` : `🕒 ${m.format('HH:mm a D/M/YYYY')}`
+    }
+    return inLastSevenDays ? `${m.format('ddd')}` : `(visited ${m.format('D/M/YYYY')}))`
+}
+
+const visitToSuggestion = timeFilterApplied => doc => {
     const url = escapeHtml(shortUrl(doc.url))
     const title = escapeHtml(doc.page.title)
-    const description
-        = `<url>${url}</url> — ${title} <dim>(visited ${visitDate})</dim>`
-    return ({
+    const time = formatTime(doc.visitStart, timeFilterApplied)
+    return {
         content: doc.url,
-        description: description.toString(),
-    })
+        description: `<url>${url}</url> <dim>${title}</dim> - ${time}`,
+    }
 }
 
 let currentQuery
@@ -74,7 +80,7 @@ async function makeSuggestion(query, suggest) {
             description: 'Found these pages. Click here to show all results.',
         })
     }
-    const suggestions = visitDocs.map(visitToSuggestion)
+    const suggestions = visitDocs.map(visitToSuggestion(startDate || endDate))
 
     suggest(suggestions)
     latestResolvedQuery = query
