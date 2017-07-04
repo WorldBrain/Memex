@@ -44,6 +44,5 @@
       "/lib/pdf.worker.min.js"
     ],
     "omnibox": { "keyword" : "m" },
-    "options_page": "./options/options.html",
     "manifest_version": 2
 }

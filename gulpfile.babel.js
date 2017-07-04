@@ -46,12 +46,6 @@ const sourceFiles = [
         cssOutput: 'style.css',
     },
     {
-        entries: ['./src/options/main.jsx'],
-        output: 'options.js',
-        destination: './extension/options',
-        cssOutput: 'style.css',
-    },
-    {
         entries: ['./src/page-viewer/localpage.js'],
         output: 'localpage.js',
         destination: './extension/page-viewer',
