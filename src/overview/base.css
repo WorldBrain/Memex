@@ -3,7 +3,6 @@
 @import url('/lib/semantic-ui/semantic.min.css');
 
 body {
-    background-image: url('img/background.jpg');
-    background-size: 100%;
+    background-color: whitesmoke;
     overflow-y: scroll;
 }
