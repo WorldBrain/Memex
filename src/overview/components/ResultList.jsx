@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import Waypoint from 'react-waypoint'
 
 import { makeNonlinearTransform } from 'src/util/make-range-transform'
-import niceTime from 'src/util/nice-time'
+import { niceDate } from 'src/util/nice-time'
 
 import VisitAsListItem from './VisitAsListItem'
 import LoadingIndicator from './LoadingIndicator'
@@ -30,27 +30,28 @@ function computeRowGaps({searchResult}) {
         const prevTimestamp = prevRow ? prevRow.doc.visitStart : new Date()
         const timestamp = row.doc.visitStart
         let spaceGap = 0
-        if (timestamp) {
+        if (timestamp && prevTimestamp) {
             spaceGap = timeGapToSpaceGap(prevTimestamp - timestamp)
         }
-        // We add a timestamp if the gap is large (in pixels)
-        const showTimestamp = (spaceGap > 40)
-        // Height of timestamp.
-        const timestampHeight = showTimestamp ? 16 : 0
-        const marginTop = spaceGap - timestampHeight
-        const timestampComponent = showTimestamp && (
+
+        // On the day boundaries, we show the date.
+        const dateString = niceDate(timestamp)
+        const prevDateString = niceDate(prevTimestamp)
+        const showDate = (dateString !== prevDateString)
+        const timestampComponent = showDate && (
             <time
                 className={styles.timestamp}
                 dateTime={new Date(timestamp)}
                 style={{
-                    height: timestampHeight,
-                    fontSize: timestampHeight,
+                    height: 16,
+                    fontSize: 16,
                 }}
             >
-                {niceTime(timestamp)}
+                {dateString}
             </time>
         )
-        return {marginTop, timestampComponent}
+
+        return {marginTop: spaceGap, timestampComponent}
     })
 }
 

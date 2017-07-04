@@ -35,3 +35,16 @@ export default function niceTime(date, {now = undefined} = {}) {
     if (then.getYear() === now.getYear()) { return `${then.getDate()} ${monthString(then)}` }
     return `${then.getDate()} ${monthString(then)} ${then.getFullYear()}`
 }
+
+export function niceDate(date, {now = new Date()} = {}) {
+    const then = new Date(date)
+    if (then.getYear() !== now.getYear()) {
+        return `${then.getDate()} ${monthString(then)} ${then.getFullYear()}`
+    }
+    if (then.getMonth() === now.getMonth()) {
+        const daysAgo = now.getDate() - then.getDate()
+        if (daysAgo === 0) return `Today`
+        if (daysAgo === 1) return `Yesterday`
+    }
+    return `${dayString(then)} ${then.getDate()} ${monthString(then)}`
+}
