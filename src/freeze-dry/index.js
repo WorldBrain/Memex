@@ -1,6 +1,7 @@
 import whenAllSettled from 'src/util/when-all-settled'
 import inlineStyles from './inline-styles'
 import removeScripts from './remove-scripts'
+import removeNoscripts from './remove-noscripts'
 import inlineImages from './inline-images'
 import setContentSecurityPolicy from './set-content-security-policy'
 import fixLinks from './fix-links'
@@ -33,6 +34,7 @@ export default async function freezeDry (
                 "font-src data:", // Allow inlined fonts.
             ],
         }),
+        removeNoscripts({rootElement}), // Because our CSP might cause <noscript> content to show.
     ]
     await whenAllSettled(jobs)
 

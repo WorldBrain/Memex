@@ -1,6 +1,11 @@
 import responseToDataUri from 'src/util/response-to-data-uri'
 import whenAllSettled from 'src/util/when-all-settled'
 
+
+export function removeNode(node) {
+    node.parentNode.removeChild(node)
+}
+
 export async function urlToDataUri(url) {
     try {
         const response = await fetch(url, {cache: 'force-cache'})
