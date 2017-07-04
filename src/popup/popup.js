@@ -15,6 +15,10 @@ async function storeThisPage() {
     try {
         const { page: page_ } = await logActivePageVisit()
         page = page_
+    } catch (err) {
+        // TODO Make clear to the user that storing the page failed.
+        console.error(err)
+        return
     } finally {
         screenshotDimmer.classList.remove('active')
     }

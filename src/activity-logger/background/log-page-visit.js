@@ -2,7 +2,7 @@ import db from 'src/pouchdb'
 import { reidentifyOrStorePage } from 'src/page-storage/store-page'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 
-import { generateVisitDocId, shouldBeLogged } from '..'
+import { generateVisitDocId, isLoggable, shouldBeLogged } from '..'
 
 
 // Store the visit in PouchDB.
@@ -64,10 +64,15 @@ export async function maybeLogPageVisit({
 // Log the visit/page in the currently active tab
 export async function logActivePageVisit() {
     const tabs = await browser.tabs.query({active: true})
-    const tab = tabs[0]
+    const {url, id: tabId} = tabs[0]
+
+    if (!isLoggable({url})) {
+        throw new Error('This page cannot be stored.')
+    }
+
     return await logPageVisit({
-        tabId: tab.id,
-        url: tab.url,
+        tabId,
+        url,
     })
 }
 
