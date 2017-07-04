@@ -10,7 +10,9 @@
         "run_at": "document_start"
     }],
     "browser_action": {
-        "default_title": "Memory overview"
+        "default_title": "Memory overview",
+        "default_popup": "popup.html"
+
     },
     "commands": {
         "openOverview": {
