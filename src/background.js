@@ -31,6 +31,14 @@ browser.browserAction.onClicked.addListener(() => {
     openOverview()
 })
 
+
+browser.bookmarks.onCreated.addListener((id, bookmarkInfo) => {
+    //TO-DO Add method to handle indexing of bookmark
+    //bookmarkInfo.url gives the URL of the bookmark
+    //id is the unique id of the bookmark
+    //https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/bookmarks/onCreated
+})
+
 browser.commands.onCommand.addListener(command => {
     if (command === 'openOverview') {
         openOverview()
