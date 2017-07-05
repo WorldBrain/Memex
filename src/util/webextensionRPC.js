@@ -95,18 +95,22 @@ function incomingRPCListener(message, sender) {
             console.error(noSuchFunctionError, funcName)
             return {
                 error: `No such function registered for RPC: ${funcName}`,
+                [RPC_RESPONSE]: RPC_RESPONSE,
             }
         }
         const extraArg = {
             tab: sender.tab,
         }
-        const value = func(extraArg, ...args)
-        return Promise.resolve(value).then(
-            value => ({
-                returnValue: value,
-                [RPC_RESPONSE]: RPC_RESPONSE,
-            })
-        )
+
+        // Run the function, and await its value if it returns a promise.
+        const returnValue = func(extraArg, ...args)
+        return Promise.resolve(returnValue).then(returnValue => ({
+            returnValue,
+            [RPC_RESPONSE]: RPC_RESPONSE,
+        })).catch(error => ({
+            error,
+            [RPC_RESPONSE]: RPC_RESPONSE,
+        }))
     }
 }
 
