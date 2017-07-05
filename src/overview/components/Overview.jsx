@@ -12,11 +12,13 @@ import styles from './Overview.css'
 class Overview extends React.Component {
     componentDidMount() {
         if (this.props.grabFocusOnMount) {
-            this.refs['inputQuery'].focus()
+            this.inputQueryEl.focus()
         }
     }
 
     render() {
+        const { query, startDate, endDate } = this.props.currentQueryParams
+
         return (
             <div>
                 <div className={styles.navbar}>
@@ -26,12 +28,12 @@ class Overview extends React.Component {
                             className={styles.query}
                             onChange={e => this.props.onInputChanged(e.target.value)}
                             placeholder='Search your memory'
-                            value={this.props.query}
-                            ref='inputQuery'
+                            value={query}
+                            ref={ref => { this.inputQueryEl = ref }}
                         />
                         <DateRangeSelection
-                            startDate={this.props.startDate}
-                            endDate={this.props.endDate}
+                            startDate={startDate}
+                            endDate={endDate}
                             onStartDateChange={this.props.onStartDateChange}
                             onEndDateChange={this.props.onEndDateChange}
                         />
@@ -49,7 +51,7 @@ class Overview extends React.Component {
                 <div className={styles.main}>
                     <ResultList
                         searchResult={this.props.searchResult}
-                        searchQuery={this.props.query}
+                        searchQuery={query}
                         onBottomReached={this.props.onBottomReached}
                         waitingForResults={this.props.waitingForResults}
                         {...this.props.searchMetaData}
@@ -62,17 +64,19 @@ class Overview extends React.Component {
 
 Overview.propTypes = {
     grabFocusOnMount: PropTypes.bool,
-    query: PropTypes.string,
+    currentQueryParams: PropTypes.shape({
+        query: PropTypes.string,
+        startDate: PropTypes.number,
+        endDate: PropTypes.number,
+    }).isRequired,
     onInputChanged: PropTypes.func,
-    startDate: PropTypes.number,
-    endDate: PropTypes.number,
     onStartDateChange: PropTypes.func,
     onEndDateChange: PropTypes.func,
     onBottomReached: PropTypes.func,
     waitingForResults: PropTypes.bool,
     searchMetaData: PropTypes.shape({
-        searchedUntil: PropTypes.string.isRequired,
-        resultsExhausted: PropTypes.bool.isRequired,
+        searchedUntil: PropTypes.string,
+        resultsExhausted: PropTypes.bool,
     }).isRequired,
     searchResult: PropTypes.arrayOf(PropTypes.shape({
         latestResult: PropTypes.object.isRequired,
@@ -83,6 +87,7 @@ Overview.propTypes = {
 
 const mapStateToProps = state => ({
     ...selectors.ourState(state),
+    currentQueryParams: selectors.currentQueryParams(state),
     waitingForResults: !!selectors.ourState(state).waitingForResults, // cast to boolean
     searchResult: selectors.results(state),
     searchMetaData: selectors.searchMetaData(state),

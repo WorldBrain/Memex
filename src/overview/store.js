@@ -1,3 +1,4 @@
+import 'core-js/fn/object/values' // shim Object.values for Chromium<54
 import { createStore, applyMiddleware, compose, combineReducers } from 'redux'
 import { createEpicMiddleware, combineEpics } from 'redux-observable'
 import thunk from 'redux-thunk'
@@ -26,9 +27,9 @@ export default function configureStore({ReduxDevTools = undefined} = {}) {
     const enhancer = compose(...enhancers)
 
     const store = createStore(
-      rootReducer,
-      undefined, // initial state
-      enhancer
+        rootReducer,
+        undefined, // initial state
+        enhancer
     )
 
     return store

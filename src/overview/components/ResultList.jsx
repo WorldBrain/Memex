@@ -118,7 +118,7 @@ ResultList.propTypes = {
     })).isRequired,
     searchQuery: PropTypes.string,
     waitingForResults: PropTypes.bool,
-    resultsExhausted: PropTypes.bool.isRequired,
+    resultsExhausted: PropTypes.bool,
     onBottomReached: PropTypes.func,
 }
 

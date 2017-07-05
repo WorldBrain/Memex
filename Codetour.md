@@ -48,12 +48,18 @@ represent the visited page itself. This object should soon be deduplicated when
 the same page is visited multiple times. After creating a new page object,
 the next module is triggered to start analysing the page.
 
+### [`src/freeze-dry`](src/freeze-dry): snapshotting a webpage
+
+Provides the freezeDry function that creates a single static html file (returned
+as a string) with the rendered page. It takes the DOM, removes scripts, and
+inlines images and stylesheets. Should be moved into its own repo soon.
+
 ### [`src/page-analysis`](src/page-analysis/): (web)page analysis
 
 This extracts and stores information about the page in a given tab, such as:
-- The plain text of the page, mainly for the full-text
-search index.
-- Metadata, such as its author, publication date, etcetera.
+- A full html version of the rendered page, by 'freeze-drying' it.
+- The plain text of the page, mainly for the full-text search.
+- Metadata, such as its author, title, etcetera.
 - A screenshot for visual recognition.
 
 ### [`src/page-storage`](src/page-storage/): (web)page storage
@@ -88,8 +94,7 @@ Still to be developed and reorganised.
 ### [`src/search`](src/search/): document search
 
 Functions for finding relevant knowledge in the user's memory. Currently
-provides a simple full-text keyword search through visited pages using
-[pouchdb-quick-search](https://github.com/nolanlawson/pouchdb-quick-search).
+provides a simple word filter to search through text of visited pages.
 This can be improved in many ways, because we are searching through a person's
 memory, not just some arbitrary document collection. For example, we can use
 created assocations and browsing paths to better understand what one is looking

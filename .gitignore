@@ -1,5 +1,6 @@
 node_modules
 dist
+.chrome-extension-key.pem
 extension/lib
 extension/browser-polyfill.js
 extension/background.js
@@ -9,3 +10,4 @@ extension/overview/style.css
 extension/options/options.js
 extension/options/style.css
 extension/page-viewer/localpage.js
+jest_0/

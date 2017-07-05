@@ -1,0 +1,28 @@
+{
+  "globals": {
+    "browser": {}
+  },
+  "testMatch": [
+    "<rootDir>/src/**/*.test.(js|jsx)"
+  ],
+  "rootDir": ".",
+  "transform": {
+    "^.+\\.(js|jsx)$": "<rootDir>/node_modules/babel-jest"
+  },
+  "modulePaths": [
+    "<rootDir>"
+  ],
+  "moduleNameMapper": {
+    "\\.(css|less)$": "identity-obj-proxy"
+  },
+  "moduleFileExtensions": [
+    "js",
+    "jsx"
+  ],
+  "unmockedModulePathPatterns": [
+    "<rootDir>/node_modules/react",
+    "<rootDir>/node_modules/react-dom",
+    "<rootDir>/node_modules/react-addons-test-utils",
+    "<rootDir>/node_modules/fbjs"
+  ]
+}

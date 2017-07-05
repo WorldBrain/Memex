@@ -3,8 +3,12 @@
 // converted to pageDocs and visitDocs (sorry for the confusingly similar name).
 
 import db from 'src/pouchdb'
-import { checkWithBlacklist, generateVisitDocId,
-         visitKeyPrefix, convertVisitDocId } from 'src/activity-logger'
+import {
+    generateVisitDocId,
+    visitKeyPrefix,
+    checkWithBlacklist,
+    convertVisitDocId,
+} from 'src/activity-logger'
 import { generatePageDocId } from 'src/page-storage'
 
 // Get the historyItems (visited places/pages; not each visit to them)

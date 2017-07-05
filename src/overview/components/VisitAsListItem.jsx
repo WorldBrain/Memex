@@ -1,9 +1,10 @@
+import get from 'lodash/fp/get'
 import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import classNames from 'classnames'
 
-import { localVersionAvailable, LinkToLocalVersion } from 'src/page-viewer'
+import { LinkToLocalVersion } from 'src/page-viewer'
 import niceTime from 'src/util/nice-time'
 
 import ImgFromPouch from './ImgFromPouch'
@@ -12,6 +13,10 @@ import { deleteVisit } from '../actions'
 
 
 const VisitAsListItem = ({doc, compact, onTrashButtonClick}) => {
+    const pageSize = get(['_attachments', 'frozen-page.html', 'length'])(doc.page)
+    const sizeInMB = pageSize !== undefined
+        ? Math.round(pageSize / 1024**2 * 10) / 10
+        : 0
     const visitClasses = classNames({
         [styles.root]: true,
         [styles.compact]: compact,
@@ -27,9 +32,9 @@ const VisitAsListItem = ({doc, compact, onTrashButtonClick}) => {
         )
 
     return (
-        <a
+        <LinkToLocalVersion
+            page={doc.page}
             className={visitClasses}
-            href={doc.page.url}
             // DEBUG Show document props on ctrl+meta+click
             onClick={e => { if (e.metaKey && e.ctrlKey) { console.log(doc); e.preventDefault() } }}
         >
@@ -48,13 +53,18 @@ const VisitAsListItem = ({doc, compact, onTrashButtonClick}) => {
             <div className={styles.descriptionContainer}>
                 <div
                     className={styles.title}
-                    title={doc.page.title}
                 >
                     {hasFavIcon && favIcon}
-                    {doc.page.title}
+                    <span title={doc.page.title}>
+                        {doc.page.title}
+                    </span>
                 </div>
                 <div className={styles.url}>
-                    {doc.page.url}
+                    <a
+                        href={doc.page.url}
+                    >
+                        {doc.page.url}
+                    </a>
                 </div>
                 <div className={styles.time}>{niceTime(doc.visitStart)}</div>
             </div>
@@ -62,19 +72,10 @@ const VisitAsListItem = ({doc, compact, onTrashButtonClick}) => {
                 <button
                     className={`${styles.button} ${styles.trash}`}
                     onClick={e => { e.preventDefault(); onTrashButtonClick() }}
-                    title='Forget this item'
+                    title={`Forget this item (${sizeInMB} MB)`}
                 />
-                {localVersionAvailable({page: doc.page})
-                    ? (
-                        <LinkToLocalVersion
-                            className={`${styles.button} ${styles.load}`}
-                            page={doc.page}
-                        />
-                    )
-                    : null
-                }
             </div>
-        </a>
+        </LinkToLocalVersion>
     )
 }
 

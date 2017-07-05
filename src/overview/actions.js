@@ -1,4 +1,5 @@
 import last from 'lodash/fp/last'
+import isEqual from 'lodash/fp/isEqual'
 import { createAction } from 'redux-act'
 
 import { filterVisitsByQuery } from 'src/search'
@@ -36,34 +37,39 @@ export function deleteVisit({visitId}) {
 }
 
 export const newSearch = asyncActionCreator(() => async (dispatch, getState) => {
-    const { query, startDate, endDate } = ourState(getState())
+    const { currentQueryParams } = ourState(getState())
     const searchResult = await filterVisitsByQuery({
-        query,
-        startDate,
-        endDate,
-        includeContext: false,
+        ...currentQueryParams,
+        includeContext: true,
+        limit: 10,
+        softLimit: true,
     })
     return searchResult
 })
 
 export const expandSearch = asyncActionCreator(() => async (dispatch, getState) => {
-    const { query, startDate, endDate, searchResult } = ourState(getState())
+    const { currentQueryParams, searchResult } = ourState(getState())
     // Look from which item the search should continue.
     const skipUntil = searchResult.searchedUntil
         || (searchResult.rows.length && last(searchResult.rows).id)
         || undefined
     // Get the items that are to be appended.
     const newSearchResult = await filterVisitsByQuery({
-        query,
-        startDate,
-        endDate,
-        includeContext: false,
+        ...currentQueryParams,
+        includeContext: true,
         skipUntil,
+        limit: 10,
+        softLimit: true,
     })
     return newSearchResult
 })
 
 export const updateSearch = () => (dispatch, getState) => {
+    const state = ourState(getState())
+    if (isEqual(state.activeQueryParams, state.currentQueryParams)) {
+        // The query has not actually changed since our last search, so no need to update.
+        return
+    }
     // Cancel any running searches and start again.
     newSearch.cancelAll()
     expandSearch.cancelAll()

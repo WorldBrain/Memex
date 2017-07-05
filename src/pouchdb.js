@@ -5,13 +5,28 @@ import PouchDBFind from 'pouchdb-find'
 
 PouchDB.plugin(PouchDBFind)
 
-const db = new PouchDB({
+const pouchdbOptions = {
     name: 'webmemex',
     auto_compaction: true,
-})
+}
 
+let db_
+if (process.env.NODE_ENV !== 'test') {
+    db_ = PouchDB(pouchdbOptions)
+} else {
+    // Export a non-persistent version of PouchDB for running tests.
+    const PouchDB = require('pouchdb-node')
+    const PouchDBMemory = require('pouchdb-adapter-memory')
+    PouchDB.plugin(PouchDBMemory)
+
+    db_ = PouchDB({
+        ...pouchdbOptions,
+        name: 'testdb',
+        adapter: 'memory',
+    })
+}
+const db = db_
 export default db
-
 // Expose db for debugging
 if (process.env.NODE_ENV !== 'production') {
     window.db = db

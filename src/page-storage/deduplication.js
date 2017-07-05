@@ -1,5 +1,6 @@
 // See for explanation: https://github.com/WebMemex/webmemex-extension/issues/22#issuecomment-282329412
 
+import get from 'lodash/fp/get'
 import maxBy from 'lodash/fp/maxBy'
 
 import db from 'src/pouchdb'
@@ -20,14 +21,12 @@ function samenessLinkType({sameness}) {
     return types[sameness]
 }
 
-async function forgetPageContents({page}) {
-    // Remove analysed bulky stuff
-    await updateDoc(db, page._id, doc => ({
+async function forgetPageContents({page, pageId = page._id}) {
+    // Remove stored content, screenshots, etcetera.
+    await updateDoc(db, pageId, doc => ({
         ...doc,
-        extractedText: undefined,
-        extractedMetadata: undefined,
-        screenshot: undefined,
-        favIcon: undefined,
+        content: undefined,
+        _attachments: {},
     }))
 }
 
@@ -54,6 +53,17 @@ async function replaceWithRedirect({oldPage, newPage, sameness}) {
     })
 }
 
+// Tells whether the record quality of one page is better than that of the other.
+function hasHigherFidelity(page, comparisonPage) {
+    const hasFrozenPage = page =>
+        (get(['_attachments', 'frozen-page.html'])(page) !== undefined)
+    if (hasFrozenPage(page) && !hasFrozenPage(comparisonPage)) {
+        // page was successfully freeze-dried, while comparisonPage was not.
+        return true
+    }
+    return false
+}
+
 export default async function tryDedupePage({
     page,
     samePageCandidates,
@@ -72,6 +82,8 @@ export default async function tryDedupePage({
     if (
         sameness >= Sameness.MOSTLY
         && !candidatePage.protected
+        // Even if they seem to represent the same content, ensure we don't delete a better copy.
+        && !hasHigherFidelity(candidatePage, page)
     ) {
         // Forget the old page's contents. Replace them with a link to the new
         // page.

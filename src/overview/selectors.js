@@ -4,6 +4,7 @@ import safelyGet from 'src/util/safe-nested-access'
 import orderedGroupBy from 'src/util/ordered-group-by'
 
 export const ourState = state => state.overview
+export const currentQueryParams = createSelector(ourState, state => state.currentQueryParams)
 const searchResult = state => ourState(state).searchResult
 
 /**
@@ -17,10 +18,8 @@ const resultsStateShape = ([latestResult, ...rest]) => ({ latestResult, rest })
  * latest visit for display in the main view, and the later visits to display on-demand.
  */
 export const results = createSelector(searchResult, ({ rows: results } = {}) =>
-    orderedGroupBy(
-        safelyGet('doc.url')
-    )(results)
-    .map(resultsStateShape)) // Final map over the groupBy output to make nicer UI state
+    orderedGroupBy(safelyGet('doc.url'))(results)
+        .map(resultsStateShape)) // Final map over the groupBy output to make nicer UI state
 
 export const searchMetaData = createSelector(searchResult, searchResult => ({
     searchedUntil: searchResult.searchedUntil,

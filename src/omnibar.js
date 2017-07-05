@@ -2,33 +2,39 @@ import debounce from 'lodash/fp/debounce'
 import escapeHtml from 'lodash/fp/escape'
 import tldjs from 'tldjs'
 import queryString from 'query-string'
-
-import { filterVisitsByQuery } from 'src/search'
-import extractTimeFiltersFromQuery from 'src/util/nlp-time-filter'
 import moment from 'moment'
 
-const shortUrl = (url, maxLength = 50) => {
-    url = url.replace(/^https?:\/\//i, '')
-    if (url.length > maxLength) { url = url.slice(0, maxLength - 3) + '...' }
-    return url
-}
+import shortUrl from 'src/util/short-url'
+import { filterVisitsByQuery } from 'src/search'
+import extractTimeFiltersFromQuery from 'src/util/nlp-time-filter'
+
+
+// Read which browser we are running in.
+let browserName
+;(async () => {
+    const browserInfo = await browser.runtime.getBrowserInfo()
+    browserName = browserInfo.name
+})()
+
 
 const formatTime = (visitStart, showTime) => {
     const m = moment(visitStart)
     const inLastSevenDays = moment().diff(m, 'days') <= 7
+
     if (showTime) {
         return inLastSevenDays ? `🕒 ${m.format('HH:mm a ddd')}` : `🕒 ${m.format('HH:mm a D/M/YYYY')}`
     }
-    return inLastSevenDays ? `${m.format('ddd')}` : `(visited ${m.format('D/M/YYYY')}))`
+    return inLastSevenDays ? m.format('ddd') : m.format('D/M/YYYY')
 }
 
 const visitToSuggestion = timeFilterApplied => doc => {
     const url = escapeHtml(shortUrl(doc.url))
     const title = escapeHtml(doc.page.title)
     const time = formatTime(doc.visitStart, timeFilterApplied)
+
     return {
         content: doc.url,
-        description: `<url>${url}</url> <dim>${title}</dim> - ${time}`,
+        description: browserName === 'Firefox' ? `${url} ${title} - ${time}` : `<url>${url}</url> <dim>${title}</dim> - ${time}`,
     }
 }
 
@@ -48,7 +54,7 @@ async function makeSuggestion(query, suggest) {
     }
 
     browser.omnibox.setDefaultSuggestion({
-        description: 'Searching your memory..',
+        description: 'Searching your memory.. (press enter to search deeper)',
     })
 
     const queryForOldSuggestions = latestResolvedQuery
@@ -73,11 +79,11 @@ async function makeSuggestion(query, suggest) {
 
     if (visitDocs.length === 0) {
         browser.omnibox.setDefaultSuggestion({
-            description: 'No results found in your memory.',
+            description: 'No results found in your memory. (press enter to search deeper)',
         })
     } else {
         browser.omnibox.setDefaultSuggestion({
-            description: 'Found these pages. Click here to show all results.',
+            description: `Found these ${visitDocs.length} pages in your memory: (press enter to search deeper)`,
         })
     }
     const suggestions = visitDocs.map(visitToSuggestion(startDate || endDate))

@@ -4,6 +4,7 @@
         "webextensions": true
     },
     "extends": [
+        "plugin:jest/recommended",
         "plugin:import/recommended",
         "plugin:import/react",
         "plugin:promise/recommended",
@@ -26,27 +27,32 @@
         }
     },
     "plugins": [
+        "jest",
         "standard",
         "import",
         "promise",
         "react"
     ],
     "parserOptions": {
-    	"sourceType": "module",
-	    "ecmaFeatures": {
-	        "jsx": true
-	    }
-  	},
+        "sourceType": "module",
+        "ecmaFeatures": {
+            "jsx": true
+        }
+      },
     "rules":{
-    	"comma-dangle": ["error", "always-multiline"],
+        "comma-dangle": ["error", "always-multiline"],
+        "quotes": "off",
         "indent": ["error", 4, { "SwitchCase": 1 }],
         "react/jsx-indent": ["error", 4],
         "react/jsx-indent-props": ["error", 4],
         "no-multiple-empty-lines": ["error", { "max": 2, "maxEOF": 0 }],
         "no-unused-vars": "warn",
         "space-before-function-paren": "off",
+        "space-infix-ops": "off",
+        "no-multi-spaces": ["warn", {"ignoreEOLComments": true}],
         "operator-linebreak": ["error", "before"],
         "handle-callback-err": "off",
+        "no-return-await": "off",
         "import/no-mutable-exports": "error",
         "import/unambiguous": "off",
         "promise/avoid-new": "off",

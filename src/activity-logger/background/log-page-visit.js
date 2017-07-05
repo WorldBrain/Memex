@@ -16,7 +16,7 @@ async function storeVisit({timestamp, url, page}) {
     return {visit}
 }
 
-export default async function maybeLogPageVisit({
+export async function logPageVisit({
     tabId,
     url,
 }) {
@@ -33,9 +33,22 @@ export default async function maybeLogPageVisit({
 
     // First create an identifier for the page being visited.
     const {page, finalPagePromise} = await reidentifyOrStorePage({tabId, url})
-    // Create a visit to this page.
+    // Create a visit pointing to this page (analysing/storing it may still be in progress)
     const visit = await storeVisit({page, url, timestamp})
 
-    // TODO possibly deduplicate the visit if it was to the same page after all.
-    void (finalPagePromise, visit)
+    // Wait until all page analyis/deduping is done before returning.
+    await finalPagePromise
+
+    // TODO possibly deduplicate the visit if the page was deduped too.
+    void (visit)
+}
+
+export async function maybeLogPageVisit({
+    tabId,
+    url,
+}) {
+    await logPageVisit({
+        tabId,
+        url,
+    })
 }

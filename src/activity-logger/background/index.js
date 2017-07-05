@@ -1,4 +1,4 @@
-import maybeLogPageVisit from './log-page-visit'
+import { maybeLogPageVisit } from './log-page-visit'
 import debounce from 'lodash/debounce'
 
 // Debounced functions fro each tab are stored here

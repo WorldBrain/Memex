@@ -43,7 +43,7 @@ for the feature roadmap of the next few months.
 
 ## Contribute
 
-We are happy about any kind of feedback, bug fixes, new feature ideas and tips? 
+We are happy about any kind of feedback, bug fixes, new feature ideas and tips?
 Give a shout. :loudspeaker:
 
 - [Drop by on Slack](http://join-worldbrain.herokuapp.com)
@@ -59,26 +59,26 @@ play along! :tada:
 ### Build and run it
 
 1. Clone this repo.
-2. Get [Node/NPM](https://nodejs.org).
-3. Run `make`.
+2. Get [Node/NPM](https://nodejs.org) and [yarn](https://yarnpkg.com)
+   (`npm install -g yarn`).
+3. Run `make` to install dependencies and compile the source files.
 4. Load it in Firefox or Chromium/Chrome:
-    * In Firefox (≥49): run `make fx-run` (or run [web-ext](https://developer.mozilla.org/en-US/Add-ons/WebExtensions/web-ext_command_reference#web-ext_run)
+    * In Firefox (≥49): run `npm run fx-run` (or run [web-ext](https://developer.mozilla.org/en-US/Add-ons/WebExtensions/web-ext_command_reference#web-ext_run)
       directly for more control).
       Alternatively, go to [`about:debugging`](about:debugging), choose 'Load
       Temporary Add-on', and pick `extension/manifest.json` from this repo.
     * In Chromium/Chrome: go to [Tools→Extensions](chrome://extensions/), enable
       'Developer mode', 'Load unpacked extension...', pick the `extension/`
       folder from this repo.
-    * Others browsers: let know if you have tested it!
 
 *If NPM (during `make`) fails to install dependencies because a nasty firewall blocks the `git://` protocol, check [this solution](http://stackoverflow.com/questions/4891527/git-protocol-blocked-by-company-how-can-i-get-around-that/10729634#10729634)*
 
 ### Automatic recompilation
 
-If the steps above worked, running `make watch` will trigger a quick
+If the steps above worked, running `npm run watch` will trigger a quick
 recompilation every time a source file has been modified.
 
-If you are testing in Firefox through `make fx-run`/`web-ext`, the extension
+If you are testing in Firefox through `npm run fx-run`/`web-ext`, the extension
 should also reload automatically. Otherwise, depending on which part of the code
 you change, you may have to reload the extension in your browser:
 
