@@ -86,7 +86,7 @@ See [`src/overview/Readme.md`](src/overview/Readme.md) for more details.
 The page for modifying the settings is implemented as an individual React app.
 Currently it does not do much yet.
 
-### [`src/browser-history/`](src/browser-history/): import browser history
+### [`src/imports/`](src/imports/): background browser history + bookmarks imports logic
 
 Currently unused code for importing information from the browser's own history.
 Still to be developed and reorganised.

@@ -26,6 +26,8 @@ const staticFiles = {
     'node_modules/pdfjs-dist/build/pdf.worker.min.js': 'extension/lib',
 }
 
+const commonUIEntry = './src/common-ui/components/index.js'
+
 const sourceFiles = [
     {
         entries: ['./src/background.js'],
@@ -38,13 +40,13 @@ const sourceFiles = [
         destination: './extension',
     },
     {
-        entries: ['./src/overview/main.jsx'],
+        entries: ['./src/overview/main.jsx', commonUIEntry],
         output: 'overview.js',
         destination: './extension/overview',
         cssOutput: 'style.css',
     },
     {
-        entries: ['./src/options/main.jsx'],
+        entries: ['./src/options/main.jsx', commonUIEntry],
         output: 'options.js',
         destination: './extension/options',
         cssOutput: 'style.css',

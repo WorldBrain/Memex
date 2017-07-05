@@ -1,0 +1,48 @@
+.container {
+    display: flex;
+    flex-direction: row;
+    height: 100px;
+}
+
+.loadingContainer {
+    display: flex;
+    flex-direction: column;
+    width: 45%;
+}
+
+.actionContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    width: 55%;
+}
+
+.actionBar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    height: 60px;
+    margin-left: 10%;
+}
+
+.actionButton {
+    width: 165px;
+    height: 45px;
+
+    &.hidden {
+        visibility: hidden;
+    }
+}
+
+.helpText {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    height: 35px;
+    font-weight: 400;
+    text-align: right;
+    font-size: 0.8em;
+}
+

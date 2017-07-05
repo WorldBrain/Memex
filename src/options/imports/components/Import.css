@@ -1,0 +1,86 @@
+.importTable {
+    width: 100%;
+    padding: 0 15px;
+    line-height: 36px;
+    margin-bottom: 10px;
+    border-collapse: collapse;
+    text-align: center;
+
+    & th,
+    & td {
+        padding: 15px;
+    }
+
+    & td {
+        color: #666;
+    }
+
+    & td.importTableCellSepar {
+        padding-bottom: 60px;
+    }
+
+    & td:first-child {
+        text-align: left;
+    }
+}
+
+.importTableHead {
+    font-size: 20px;
+    border-bottom: 1px solid #d2d2d2;
+}
+
+.importTableRow {
+    border-bottom: 1px solid #d2d2d2;
+
+    &:last-child {
+        border-bottom: none;
+    }
+}
+
+.importTableHelp {
+    font-weight: 400;
+}
+
+.actionTableRow {
+    font-weight: 400;
+}
+
+.importTableRowSepar {
+    border-bottom-width: 4px;
+}
+
+.importTableCol {
+    width: calc(100% / 3);
+}
+
+.importTableContainer {
+    display: flex;
+    flex-direction: column;
+    height: 750px;
+    justify-content: space-between;
+    padding: 40px;
+    background: #f8f8f8;
+    border: 1px solid #666;
+    border-radius: 10px;
+}
+
+.mainContainer {
+    position: relative;
+}
+
+.loadingBlocker {
+    position: absolute;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 750px;
+    width: 800px;
+    background: #fff;
+    opacity: 0.8;
+}
+
+.loadingMsg {
+    font-weight: bold;
+}

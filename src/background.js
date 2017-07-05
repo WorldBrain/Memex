@@ -2,6 +2,7 @@ import tldjs from 'tldjs'
 
 import 'src/activity-logger/background'
 import 'src/omnibar'
+import { installTimeStorageKey } from 'src/imports/background'
 
 async function openOverview() {
     const [ currentTab ] = await browser.tabs.query({ active: true })
@@ -27,5 +28,12 @@ browser.browserAction.onClicked.addListener(() => {
 browser.commands.onCommand.addListener(command => {
     if (command === 'openOverview') {
         openOverview()
+    }
+})
+
+// Store the timestamp of when the extension was installed in local storage
+browser.runtime.onInstalled.addListener(details => {
+    if (details.reason === 'install') {
+        browser.storage.local.set({ [installTimeStorageKey]: Date.now() })
     }
 })

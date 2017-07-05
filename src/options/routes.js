@@ -1,4 +1,4 @@
-import ImportContainer from './containers/import'
+import ImportContainer from './imports'
 import SettingsContainer from './containers/settings'
 
 export default [
