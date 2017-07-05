@@ -18,7 +18,7 @@ body {
     margin: 0px;
     padding: 8px;
     text-align: left;
-    width:350px;
+    width:320px;
 }
 
 div {
@@ -29,7 +29,6 @@ div {
 
 form {
   display: flex;
-  align-items: center;
   padding: 8px;
   margin-bottom: 0px;
   background: rgb(204, 204, 204); /* Fallback for older browsers without RGBA-support */
@@ -44,12 +43,14 @@ input {
 }
 
 #search {
-  width: 75%;
+  align-items: right;
+  width: 90%;
   font-size: 16px;
 }
 
 i {
   padding: 8px;
+  margin-top: px;
   display: flex;
   align-items: center;
 }
@@ -83,8 +84,3 @@ hr {
     border-top: 1px solid rgba(0, 0, 0, 0.1);
     border-bottom: 1px solid rgba(255, 255, 255, 0.3);
 }
-
-/*#final-link {
-      margin: 8px;
-
-}*/
