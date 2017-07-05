@@ -1,4 +1,5 @@
-import React, { PropTypes, Component } from 'react'
+import React, { Component } from 'react'
+import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 
@@ -148,9 +149,9 @@ class ImportContainer extends Component {
                     {this.renderImportButton()}
                 </ButtonBar>
                 {!(isIdle || isLoading)
-                    && <DownloadDetails filterHandlers={this.getDetailFilterHandlers()}>
-                        {this.renderDownloadDetailsRows()}
-                    </DownloadDetails>
+                && <DownloadDetails filterHandlers={this.getDetailFilterHandlers()}>
+                    {this.renderDownloadDetailsRows()}
+                </DownloadDetails>
                 }
             </Import>
         )

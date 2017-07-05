@@ -118,7 +118,7 @@ export default async function prepareImports(allowTypes = {}) {
     // Create import items for all created page stubs
     await setImportItems(uniqByUrl(
         historyPageStubs.map(transformToImportItem(IMPORT_TYPE.HISTORY))
-        .concat(bookmarkPageStubs.map(transformToImportItem(IMPORT_TYPE.BOOKMARK)))
+            .concat(bookmarkPageStubs.map(transformToImportItem(IMPORT_TYPE.BOOKMARK)))
     ))
 
     // Put all page docs together and remove any docs with duplicate URLs

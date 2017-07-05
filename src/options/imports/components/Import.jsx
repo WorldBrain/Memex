@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react'
+import React from 'react'
+import PropTypes from 'prop-types'
 
 import { LoadingIndicator } from 'src/common-ui/components'
 import styles from '../../options.css'
@@ -12,10 +13,10 @@ const Import = ({ isLoading, loadingMsg, children }) => (
                 {children}
             </div>
             {isLoading
-                && <div className={localStyles.loadingBlocker}>
-                    <p className={localStyles.loadingMsg}>{loadingMsg}</p>
-                    <LoadingIndicator />
-                </div>
+            && <div className={localStyles.loadingBlocker}>
+                <p className={localStyles.loadingMsg}>{loadingMsg}</p>
+                <LoadingIndicator />
+            </div>
             }
         </div>
     </div>

@@ -51,7 +51,7 @@ export const downloadDetailsData = createSelector(
             default: return true
         }
     }).map(({ url, status, error }) => ({ url, downloaded: status, error })
-))
+    ))
 
 const getProgress = (success, fail, total, allow) =>
     ({ total: allow ? total : 0, success, fail, complete: success + fail })
