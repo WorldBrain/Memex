@@ -1,11 +1,12 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
+import { Input } from 'semantic-ui-react'
 
 import * as actions from '../actions'
 import { ourState } from '../selectors'
 import ResultList from './ResultList'
-import DateRangeSelection from './DateRangeSelection'
+import DateSelection from './DateSelection'
 import styles from './Overview.css'
 
 
@@ -19,24 +20,27 @@ class Overview extends React.Component {
     render() {
         return (
             <div>
-                <div>
-                    <input
-                        className={styles.query}
-                        onInput={e => { this.props.onInputChanged(e.target.value) }}
+                <div
+                    className={styles.queryInputContainer}
+                >
+                    <Input
+                        size='huge'
+                        icon='search'
+                        iconPosition='left'
+                        onChange={e => { this.props.onInputChanged(e.target.value) }}
                         onKeyDown={e => {
                             if (e.key === 'Escape') { this.props.onInputChanged('') }
                         }}
                         placeholder='Search your memory'
                         value={this.props.query}
                         ref={el => { this.inputQueryEl = el }}
+                        className={styles.queryInputComponent}
+                    />
+                    <DateSelection
+                        date={this.props.endDate}
+                        onDateChange={this.props.onEndDateChange}
                     />
                 </div>
-                <DateRangeSelection
-                    startDate={this.props.startDate}
-                    endDate={this.props.endDate}
-                    onStartDateChange={this.props.onStartDateChange}
-                    onEndDateChange={this.props.onEndDateChange}
-                />
                 <div>
                     <ResultList
                         searchResult={this.props.searchResult}
@@ -54,9 +58,7 @@ Overview.propTypes = {
     grabFocusOnMount: PropTypes.bool,
     query: PropTypes.string,
     onInputChanged: PropTypes.func,
-    startDate: PropTypes.number,
     endDate: PropTypes.number,
-    onStartDateChange: PropTypes.func,
     onEndDateChange: PropTypes.func,
     onBottomReached: PropTypes.func,
     waitingForResults: PropTypes.bool,
@@ -76,9 +78,6 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => ({
     onInputChanged: input => {
         dispatch(actions.setQuery({query: input}))
-    },
-    onStartDateChange: date => {
-        dispatch(actions.setStartDate({startDate: date}))
     },
     onEndDateChange: date => {
         dispatch(actions.setEndDate({endDate: date}))

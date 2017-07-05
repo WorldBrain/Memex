@@ -1,5 +1,7 @@
 @charset 'UTF-8';
 
+@import url('/lib/semantic-ui/semantic.min.css');
+
 body {
     background-image: url('img/background.jpg');
     background-size: 100%;
