@@ -1,36 +1,13 @@
-import classNames from 'classnames'
-import React from 'react'
-import PropTypes from 'prop-types'
+import get from 'lodash/fp/get'
 
-export const localVersionAvailable = ({page}) => (
-    !!(page._attachments && page._attachments['frozen-page.html'])
-)
-
-export const LinkToLocalVersion = ({page, children, ...props}) => {
-    const available = localVersionAvailable({page})
-    let href
-    if (available) {
-        const uri = `/page-viewer/localpage.html?page=${page._id}`
-        const hash = (page.url && page.url.split('#')[1])
-        href = (hash !== undefined) ? uri + '#' + hash : uri
+export function hrefForLocalPage({page}) {
+    // Check if it has a stored page attached at all.
+    if (!get(['_attachments', 'frozen-page.html'])(page)) {
+        return undefined
     }
-    const className = classNames(
-        {'available': available},
-        props.className
-    )
-    return (
-        <a
-            href={href}
-            title={available ? undefined : `Page not available. Perhaps storing failed?`}
-            {...props}
-            className={className}
-        >
-            {children}
-        </a>
-    )
-}
-LinkToLocalVersion.propTypes = {
-    page: PropTypes.object.isRequired,
-    className: PropTypes.string,
-    children: PropTypes.node,
+    const pageId = page._id
+    const uri = `/page-viewer/localpage.html?page=${encodeURIComponent(pageId)}`
+    const hash = (page.url && page.url.split('#')[1])
+    const href = (hash !== undefined) ? uri + '#' + hash : uri
+    return href
 }

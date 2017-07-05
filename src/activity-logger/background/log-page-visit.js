@@ -1,6 +1,10 @@
 import db from 'src/pouchdb'
 import { reidentifyOrStorePage } from 'src/page-storage/store-page'
-import { generateVisitDocId, isWorthRemembering } from '..'
+import { makeRemotelyCallable } from 'src/util/webextensionRPC'
+import { whenPageLoadComplete, whenTabActive } from 'src/util/tab-events'
+import delay from 'src/util/delay'
+
+import { generateVisitDocId, isLoggable, shouldBeLogged } from '..'
 
 
 // Store the visit in PouchDB.
@@ -31,10 +35,11 @@ export async function logPageVisit({
     const visit = await storeVisit({page, url, timestamp})
 
     // Wait until all page analyis/deduping is done before returning.
-    await finalPagePromise
+    const {page: finalPage} = await finalPagePromise
 
     // TODO possibly deduplicate the visit if the page was deduped too.
-    void (visit)
+
+    return {visit, page: finalPage}
 }
 
 export async function maybeLogPageVisit({
@@ -42,12 +47,43 @@ export async function maybeLogPageVisit({
     url,
 }) {
     // Check if we would want to log this page.
-    if (!isWorthRemembering({url})) {
+    if (!shouldBeLogged({url})) {
         return
     }
 
-    await logPageVisit({
+    // Check if logging is enabled by the user.
+    const { loggingEnabled } = await browser.storage.local.get('loggingEnabled')
+    if (!loggingEnabled) {
+        return
+    }
+
+    // Wait for it to be fully ready.
+    await whenPageLoadComplete({tabId})
+    // Wait a bit to first let scripts run. TODO Do this in a smarter way.
+    await delay(1000)
+    // Wait until the tab is activated (not technically needed)
+    await whenTabActive({tabId})
+
+    return await logPageVisit({
         tabId,
         url,
     })
 }
+
+// Log the visit/page in the currently active tab
+export async function logActivePageVisit() {
+    const tabs = await browser.tabs.query({active: true})
+    const {url, id: tabId} = tabs[0]
+
+    if (!isLoggable({url})) {
+        throw new Error('This page cannot be stored.')
+    }
+
+    return await logPageVisit({
+        tabId,
+        url,
+    })
+}
+
+// Expose to be callable from browser button popup
+makeRemotelyCallable({logActivePageVisit})

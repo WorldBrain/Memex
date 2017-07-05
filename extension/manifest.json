@@ -10,14 +10,21 @@
         "run_at": "document_start"
     }],
     "browser_action": {
-        "default_title": "Memory overview"
+        "default_title": "WebMemex",
+        "default_popup": "/popup/popup.html"
     },
     "commands": {
         "openOverview": {
             "suggested_key": {
                 "default": "Ctrl+Y"
             },
-            "description": "Open your memory overview"
+            "description": "Open memory overview"
+        },
+        "_execute_browser_action": {
+            "suggested_key": {
+                "default": "Alt+M"
+            },
+            "description": "Store this page"
         }
     },
     "applications": {
@@ -27,7 +34,9 @@
     },
     "permissions": [
         "<all_urls>",
+        "contextMenus",
         "history",
+        "storage",
         "tabs",
         "webNavigation"
     ],

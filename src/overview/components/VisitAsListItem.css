@@ -42,8 +42,7 @@
 }
 
 /* List entries for which no stored version is available */
-/* TODO find neater solution than using a global class name (defined in src/page-viewer) */
-.root:not(:global(.available)) {
+.root:not(.available) {
     opacity: 0.5;
 }
 
