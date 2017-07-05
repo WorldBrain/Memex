@@ -2,6 +2,7 @@
   "name": "webmemex-extension",
   "version": "0.1.0",
   "homepage": "https://webmemex.org",
+  "license": "Unlicense",
   "repository": {
     "type": "git",
     "url": "https://github.com/WebMemex/webmemex-extension.git"
