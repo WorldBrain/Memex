@@ -31,16 +31,14 @@ form {
   display: flex;
   align-items: center;
   padding: 8px;
-  font-size: 16px;
+  margin-bottom: 0px;
   background: rgb(204, 204, 204); /* Fallback for older browsers without RGBA-support */
   background: rgba(204, 204, 204, 0.5);
-  margin: -8px;
 
 }
 
 input {
   font-family: "Lato", sans-serif;
-  font-size: 16px;
   color: #3b3b3b;
   font-style: italic;
 }
@@ -51,7 +49,6 @@ input {
 }
 
 i {
-  font-size: 16px;
   padding: 8px;
   display: flex;
   align-items: center;
@@ -69,8 +66,8 @@ a {
     padding: 8px;
     display: flex;
     align-items: center;
-    margin: -8px;
-}
+/*    margin: -8px;
+*/}
 
 a:hover {
     color:#3EB995;
@@ -81,6 +78,13 @@ a:hover {
 hr {
     border: 0;
     height: 0;
+    margin: 0px;
+    padding: 0px;
     border-top: 1px solid rgba(0, 0, 0, 0.1);
     border-bottom: 1px solid rgba(255, 255, 255, 0.3);
 }
+
+/*#final-link {
+      margin: 8px;
+
+}*/
