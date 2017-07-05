@@ -2,10 +2,8 @@ import extractTimeFiltersFromQuery from 'src/util/nlp-time-filter.js'
 
 console.log('hello')
 
-console.log('hello')
+// document.getElementById('input')
 
-var search = document.getElementById('input')
+var search = document.getElementById('input').innerHTML
 
 extractTimeFiltersFromQuery(search)
-
-console.log(search)
