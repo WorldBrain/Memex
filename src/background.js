@@ -16,7 +16,7 @@ const commandActions = {
 
 // Checkbox settings to be shown in the context menu.
 const settings = {
-    'loggingEnabled': {title: 'Log every visited page'},
+    'loggingEnabled': {title: 'Store every visited page'},
 }
 
 const commands = manifest.commands
