@@ -15,7 +15,7 @@ all: check_requirements
 	###
 	yarn install
 
-    ###
+	###
 	### Transpiling, bundling & minifying the extension source code.
 	###
 	npm run build-prod
