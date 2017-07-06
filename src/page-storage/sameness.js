@@ -47,17 +47,25 @@ function textSameness(text1, text2) {
 export default function determinePageSameness(page1, page2) {
     const pages = [page1, page2]
 
+    // We start from the maximum score, and lower it when we discover differences.
+    let score = Sameness.EXACTLY
+
     // First a quick check for exact equality of the stored 'freeze-dried' pages.
     const hashes = pages.map(get(['_attachments', 'frozen-page.html', 'digest']))
     if (hashes.every(hash => (hash !== undefined && hash === hashes[0]))) {
         return Sameness.EXACTLY
     }
 
-    // Compare the title and body texts.
-    // TODO Replace this simple approach with something more sophisticated.
-    const titleSameness = textSameness(...pages.map(get('content.title')))
-    const textContents = pages.map(get('content.fullText'))
-    const textContentSameness = textSameness(...textContents)
-    // Return the lowest (most pessimistic) score among them.
-    return Math.min(titleSameness, textContentSameness)
+    // Compare extracted content, and return the lowest score among them.
+    const fieldsToCompare = {
+        'content.title': textSameness,
+        'content.fullText': textSameness,
+    }
+    for (let field in fieldsToCompare) {
+        const compare = fieldsToCompare[field]
+        const fieldSameness = compare(...pages.map(get(field)))
+        score = Math.min(score, fieldSameness)
+    }
+
+    return score
 }
