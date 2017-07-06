@@ -22,6 +22,11 @@ const completed = state => entireState(state).completed
 export const allowTypes = state => entireState(state).allowTypes
 export const loadingMsg = state => entireState(state).loadingMsg
 
+// Dev features only
+export const devState = createSelector(entireState, state => state.dev)
+export const devMode = createSelector(devState, devState => devState.isEnabled)
+export const isRestoring = createSelector(devState, devState => devState.isRestoring)
+
 const getImportStatusFlag = status => createSelector(
     importStatus,
     importStatus => importStatus === status,

@@ -8,6 +8,11 @@ const defaultStats = {
     [TYPE.BOOKMARK]: 0,
 }
 
+const defaultDevState = {
+    isEnabled: false,
+    isRestoring: false,
+}
+
 const defaultState = {
     downloadData: [],
     completed: defaultStats,    // Count of docs already in DB (estimates view)
@@ -17,6 +22,7 @@ const defaultState = {
     importStatus: STATUS.LOADING,
     loadingMsg: '',
     downloadDataFilter: FILTERS.ALL,
+    dev: defaultDevState,
     allowTypes: {
         [TYPE.HISTORY]: false,
         [TYPE.BOOKMARK]: false,
@@ -111,4 +117,9 @@ export default createReducer({
     [actions.initFailCounts]: payloadReducer('fail'),
     [actions.initSuccessCounts]: payloadReducer('success'),
     [actions.initDownloadData]: payloadReducer('downloadData'),
+
+    // Dev mode reducers
+    [actions.startRestore]: state => ({ ...state, dev: { ...state.dev, isRestoring: true } }),
+    [actions.finishRestore]: state => ({ ...state, dev: { ...state.dev, isRestoring: false } }),
+    [actions.toggleDevMode]: state => ({ ...state, dev: { ...state.dev, isEnabled: !state.dev.isEnabled } }),
 }, defaultState)
