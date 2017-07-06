@@ -52,8 +52,17 @@ export default function determinePageSameness(page1, page2) {
 
     // First a quick check for exact equality of the stored 'freeze-dried' pages.
     const hashes = pages.map(get(['_attachments', 'frozen-page.html', 'digest']))
-    if (hashes.every(hash => (hash !== undefined && hash === hashes[0]))) {
-        return Sameness.EXACTLY
+    if (hashes.every(hash => (hash === hashes[0]))) {
+        if (hashes[0] !== undefined) {
+            // If the stored pages are exactly the same, no need to compare their contents.
+            return Sameness.EXACTLY
+        } else {
+            // If neither page was freeze-dried, we ignore just this test and compare the content.
+        }
+    } else {
+        // The stored pages differ to some unknown extent. We go on to compare the content, but
+        // we lower the maximum possible score so we cannot return EXACTLY.
+        score = Sameness.OSTENSIBLY
     }
 
     // Compare extracted content, and return the lowest score among them.
