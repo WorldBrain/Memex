@@ -3,13 +3,17 @@ import PropTypes from 'prop-types'
 
 import TestDataUpload from './TestDataUpload'
 
+import styles from './DevOptions.css'
+
 const DevOptions = ({ devMode, toggleDevMode, ...uploadProps }) => (
-    <div>
-        <input type='checkbox' id='devModeCheckbox' onChange={toggleDevMode} checked={devMode} />
-        <label htmlFor='devModeCheckbox'>Enable dev mode</label>
+    <section className={styles.container}>
+        <div className={styles.devModeToggle}>
+            <input type='checkbox' id='devModeCheckbox' onChange={toggleDevMode} checked={devMode} />
+            <label htmlFor='devModeCheckbox'>Enable dev mode</label>
+        </div>
 
         {devMode && <TestDataUpload {...uploadProps} />}
-    </div>
+    </section>
 )
 
 DevOptions.propTypes = {

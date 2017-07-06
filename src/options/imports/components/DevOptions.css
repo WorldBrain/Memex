@@ -1,0 +1,23 @@
+.container {
+    margin: 15px;
+}
+
+.devModeToggle {
+    font-size: 0.85em;
+    display: flex;
+    justify-content: space-between;
+    width: 140px;
+}
+
+.uploadContainer {
+    display: flex;
+    flex-direction: row;
+}
+
+.uploadInput {
+    flex: 1;
+}
+
+.uploadLoading {
+    flex: 1;
+}
