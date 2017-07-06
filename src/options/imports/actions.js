@@ -30,8 +30,8 @@ export const resumeImport = createAction('imports/resumeImport')
 
 // Dev mode actions
 export const toggleDevMode = createAction('imports-dev/toggleDevMode')
-export const startRestore = createAction('imports-dev/startRestore')
-export const finishRestore = createAction('imports-dev/finishRestore')
+export const startTestDataUpload = createAction('imports-dev/startTestDataUpload')
+export const finishTestDataUpload = createAction('imports-dev/finishTestDataUpload')
 
 /**
  * @param {FileReader} fileReader FileReader instance to bind to text reading function.
@@ -43,6 +43,7 @@ const getFileTextViaReader = fileReader => file => new Promise((resolve, reject)
 })
 
 const deserializeDoc = docString => {
+    if (!docString) return undefined
     try {
         return JSON.parse(docString)
     } catch (error) {
@@ -54,12 +55,11 @@ const deserializeDoc = docString => {
  * Performs a restore of given docs files.
  * @param {Array<File>} files One or more NDJSON files that contain database docs.
  */
-export const restore = files => async (dispatch, getState) => {
-    dispatch(startRestore())
+export const uploadTestData = files => async (dispatch, getState) => {
+    dispatch(startTestDataUpload())
 
-    // TODO: Some better file validation here
     if (files.length < 1) {
-        return dispatch(finishRestore())
+        return dispatch(finishTestDataUpload())
     }
 
     const getFileText = getFileTextViaReader(new FileReader())
@@ -74,8 +74,10 @@ export const restore = files => async (dispatch, getState) => {
             .filter(onlyDefinedDocs)
 
         await db.bulkDocs(docs)
-        console.log(`inserted ${docs.length} docs`)
+        console.log(`${docs.length} test docs stored`)
     }
+
+    dispatch(finishTestDataUpload())
 }
 
 /**

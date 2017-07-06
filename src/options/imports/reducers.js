@@ -10,7 +10,7 @@ const defaultStats = {
 
 const defaultDevState = {
     isEnabled: false,
-    isRestoring: false,
+    isUploading: false,
 }
 
 const defaultState = {
@@ -119,7 +119,7 @@ export default createReducer({
     [actions.initDownloadData]: payloadReducer('downloadData'),
 
     // Dev mode reducers
-    [actions.startRestore]: state => ({ ...state, dev: { ...state.dev, isRestoring: true } }),
-    [actions.finishRestore]: state => ({ ...state, dev: { ...state.dev, isRestoring: false } }),
+    [actions.startTestDataUpload]: state => ({ ...state, dev: { ...state.dev, isUploading: true } }),
+    [actions.finishTestDataUpload]: state => ({ ...state, dev: { ...state.dev, isUploading: false } }),
     [actions.toggleDevMode]: state => ({ ...state, dev: { ...state.dev, isEnabled: !state.dev.isEnabled } }),
 }, defaultState)
