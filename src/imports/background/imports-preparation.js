@@ -44,7 +44,7 @@ const transformToPageDocStub = item => ({
  * @param {IPageDoc} assocPageDoc The page doc that contains the page data for this visit.
  * @returns {IVisitDoc} Newly created visit doc dervied from visitItem data.
  */
-const transformToVisitDoc = assocPageDoc => visitItem => ({
+export const transformToVisitDoc = assocPageDoc => visitItem => ({
     _id: generateVisitDocId({
         timestamp: visitItem.visitTime,
         // We set the nonce manually, to prevent duplicating items if

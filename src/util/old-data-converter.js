@@ -1,14 +1,15 @@
-import docuri from 'docuri'
 import uniqBy from 'lodash/fp/uniqBy'
 import chunk from 'lodash/fp/chunk'
 import flatten from 'lodash/fp/flatten'
 import omit from 'lodash/fp/omit'
 
 import db from 'src/pouchdb'
-import randomString from 'src/util/random-string'
-import { generatePageDocId } from 'src/page-storage'
-import { generateVisitDocId } from 'src/activity-logger'
 import { STORAGE_KEY as NEW_BLACKLIST_KEY } from 'src/options/blacklist/constants'
+import { generatePageDocId, pageDocsSelector } from 'src/page-storage'
+import { generateVisitDocId } from 'src/activity-logger'
+// TODO: unify these after refactored to be somewhere more appropriate
+import { transformToVisitDoc } from 'src/imports/background/imports-preparation'
+import { generateBookmarkDocId } from 'src/imports/background'
 
 export const KEYS = {
     INDEX: 'index',
@@ -47,36 +48,12 @@ const notifOptions = {
  * @param {IPageOldExt} pageData Page data from old extension to convert to visit doc.
  * @param {string} assocPageDocId The `_id` of the associated page doc.
  */
-const convertToMinimalVisit = assocPageDoc => ({ time, url }) => ({
+const transformToMinimalVisit = assocPageDoc => ({ time, url }) => ({
     _id: generateVisitDocId({ timestamp: time }),
     visitStart: time,
     url,
     page: { _id: assocPageDoc._id },
 })
-
-// TODO: Merge with imports code
-const transformToVisitDoc = assocPageDoc => visitItem => ({
-    _id: generateVisitDocId({
-        timestamp: visitItem.visitTime,
-        // We set the nonce manually, to prevent duplicating items if
-        // importing multiple times (thus making importHistory idempotent).
-        nonce: visitItem.visitId,
-    }),
-    visitStart: visitItem.visitTime,
-    referringVisitItemId: visitItem.referringVisitId,
-    url: assocPageDoc.url,
-    page: { _id: assocPageDoc._id },
-})
-
-// TODO: Merge with imports code
-const pageKeyPrefix = 'page/'
-const pageDocsSelector = { _id: { $gte: pageKeyPrefix, $lte: `${pageKeyPrefix}\uffff` } }
-const bookmarkKeyPrefix = 'bookmark/'
-const convertBookmarkDocId = docuri.route(`${bookmarkKeyPrefix}:timestamp/:nonce`)
-const generateBookmarkDocId = ({
-    timestamp = Date.now(),
-    nonce = randomString(),
-} = {}) => convertBookmarkDocId({ timestamp, nonce })
 
 /**
  * @param {IPageOldExt} oldPage
@@ -141,7 +118,7 @@ const convertPageData = (isStub, bookmarkUrls) => async (pageData, assocPageDoc)
     const visitItems = await browser.history.getVisits({ url: pageData.url })
     const visitDocs = [
         ...visitItems.map(transformToVisitDoc(pageDoc)), // Visits from browser API
-        convertToMinimalVisit(pageDoc)(pageData), // Minimal visit straight from old ext data
+        transformToMinimalVisit(pageDoc)(pageData), // Minimal visit straight from old ext data
     ]
 
     // Create bookmark doc if URL shows up in bookmark URL list
@@ -259,10 +236,10 @@ export default async function convertOldData(opts = { setAsStubs: false, concurr
         [KEYS.BLACKLIST]: blacklist,
         [KEYS.BOOKMARKS]: bookmarks,
     } = await browser.storage.local.get({
-        [KEYS.INDEX]: { index: [] },
-        [KEYS.BLACKLIST]: { PAGE: [], SITE: [], REGEX: [] },
-        [KEYS.BOOKMARKS]: '[]',
-    })
+            [KEYS.INDEX]: { index: [] },
+            [KEYS.BLACKLIST]: { PAGE: [], SITE: [], REGEX: [] },
+            [KEYS.BOOKMARKS]: '[]',
+        })
 
     // Only attempt blacklist conversion if it matches shape of old extension blacklist
     if (Object.prototype.toString.call(blacklist) === '[object Object]'

@@ -43,7 +43,7 @@ browser.runtime.onInstalled.addListener(async details => {
     if (details.reason === 'update') {
         const storage = await browser.storage.local.get(dataConvertTimeKey)
         if (!storage[dataConvertTimeKey]) {
-            await convertOldData({ setAsStubs: true, concurrency: 15 })
+            await convertOldData({ setAsStubs: false, concurrency: 15 })
             await browser.storage.local.set({ [dataConvertTimeKey]: Date.now() })
         }
     }
