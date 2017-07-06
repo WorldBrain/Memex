@@ -33,6 +33,7 @@
         "tabs",
         "webNavigation",
         "notifications",
+        "unlimitedStorage",
         "storage"
     ],
     "web_accessible_resources": [
