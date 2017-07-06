@@ -80,7 +80,7 @@ export default async function tryDedupePage({
 
     // Choose the action to take.
     if (
-        sameness >= Sameness.MOSTLY
+        sameness >= Sameness.EXACTLY
         && !candidatePage.protected
         // Even if they seem to represent the same content, ensure we don't delete a better copy.
         && !hasHigherFidelity(candidatePage, page)
