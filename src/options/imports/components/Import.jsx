@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
+import DevOptions from '../DevOptionsContainer'
 import { LoadingIndicator } from 'src/common-ui/components'
 import styles from '../../options.css'
 import localStyles from './Import.css'
@@ -19,6 +20,7 @@ const Import = ({ isLoading, loadingMsg, children }) => (
             </div>
             }
         </div>
+        <DevOptions />
     </div>
 )
 
