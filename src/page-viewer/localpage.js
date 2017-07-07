@@ -30,16 +30,37 @@ async function showPage(pageId) {
     }
     const timestamp = getTimestamp(page)
 
-    document.title = `📄 ${page.title}`
-    const bar = document.getElementById('bar')
-    const barContent = `<span>Snapshot of <a href="${page.url}">${shortUrl(page.url)}</a></span>`
-        + `<span><time datetime="${new Date(timestamp)}">⌚ ${niceTime(timestamp)}</time></span>`
-    bar.innerHTML = barContent
-
     // Read the html file from the database.
     const blob = await db.getAttachment(pageId, 'frozen-page.html')
     // We assume utf-8 encoding. TODO: read encoding from document.
     const html = new TextDecoder('utf-8').decode(await blobToArrayBuffer(blob))
+
+    // For 'downloading' the file if desired.
+    const blobUrl = URL.createObjectURL(blob)
+    const filename = `${page.title}`
+
+    // Add content to the header bar.
+    document.title = `📄 ${page.title}`
+    const bar = document.getElementById('bar')
+    const barContent = `
+        <span id="description">
+            <i class="camera icon"></i>
+            Snapshot of <a href="${page.url}" style="margin: 0 4px;">${shortUrl(page.url)}</a>
+            <i class="clock icon"></i>
+            <time datetime="${new Date(timestamp)}">
+                ${niceTime(timestamp)}
+            </time>
+        </span>
+        <a
+            href="${blobUrl}"
+            download="${filename}"
+            class="ui compact tiny icon button"
+        >
+            <i class="download icon"></i>
+            Save page as…
+        </a>
+    `
+    bar.innerHTML = barContent
 
     // Show the page in the iframe.
     const iframe = document.createElement('iframe')
