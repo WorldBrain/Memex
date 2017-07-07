@@ -11,6 +11,8 @@ import { generateVisitDocId } from 'src/activity-logger'
 import { transformToVisitDoc } from 'src/imports/background/imports-preparation'
 import { generateBookmarkDocId } from 'src/imports/background'
 
+export const dedupIdxName = 'conversion-dedupe-index'
+const dedupQueryFields = ['url', '_id']
 export const KEYS = {
     INDEX: 'index',
     BOOKMARKS: 'bookmarks',
@@ -112,7 +114,7 @@ function convertBlacklist(blacklist) {
  * @param {IPageDoc?} [assocPageDoc] A page doc found to match the pageData param.
  * @return {Array<any>} List of converted docs ready to insert into PouchDB.
  */
-const convertPageData = (isStub, bookmarkUrls) => async (pageData, assocPageDoc) => {
+const convertPageData = (isStub, bookmarkUrls) => assocPageDoc => async pageData => {
     // Do page conversion + visits generation
     const pageDoc = assocPageDoc || transformToPageDoc(isStub)(pageData)
     const visitItems = await browser.history.getVisits({ url: pageData.url })
@@ -132,16 +134,22 @@ const convertPageData = (isStub, bookmarkUrls) => async (pageData, assocPageDoc)
 }
 
 /**
- * @param {Array<IPageOldExt>} pageDataArr Array of page data to check against existing data for matches.
- * @return {Array<IPageDoc>} Array of page docs that are deemed to match any of the input data.
+ * @param {IPageOldExt} pageData Page data to check against existing data for matches.
+ * @return {IPageDoc|undefined} Page doc that are deemed to match any of the input data or undefined.
  */
-const getMatchingPageDocs = async pageDataArr => {
-    const pageDataUrls = pageDataArr.map(data => data.url)
-    const fields = ['_id', 'url']
-    const selector = { ...pageDocsSelector, url: { $in: pageDataUrls } }
+const getMatchingPageDocs = async ({ url }) => {
+    const selector = { ...pageDocsSelector, url }
+    const { docs } = await db.find({ selector, fields: dedupQueryFields })
+    return docs[0]
+}
 
-    const { docs } = await db.find({ selector, fields })
-    return docs
+const deleteDedupIndex = async () => {
+    const { indexes } = await db.getIndexes()
+    const dedupIndex = indexes.findIndex(({ name }) => name === dedupIdxName)
+
+    if (dedupIndex === -1) throw new Error('Conversion deduping index not found')
+
+    await db.deleteIndex(indexes[dedupIndex])
 }
 
 /**
@@ -169,7 +177,7 @@ const handleBlacklistConversion = async blacklist => {
  * @param {ConversionOpts} opts
  */
 async function handlePageDataConversion(index, bookmarkUrls, updateProgress, { setAsStubs, concurrency }) {
-    const convertOldData = convertPageData(setAsStubs, bookmarkUrls)
+    const convertOldPageData = convertPageData(setAsStubs, bookmarkUrls)
     const uniqByUrl = uniqBy('url')
     let hasErrorOccurred = false
     let chunkCount = 0
@@ -177,20 +185,17 @@ async function handlePageDataConversion(index, bookmarkUrls, updateProgress, { s
     // Split index into chunks to process at once; reverse to process from latest first
     const indexChunks = chunk(concurrency)(index.reverse())
 
+    // Create deduping index for deduping during conversion
+    await db.createIndex({ index: { name: dedupIdxName, fields: dedupQueryFields } })
+
     for (const keyChunk of indexChunks) {
         try {
             // Grab old page data from storae, ignoring duplicate URLs
             const oldPageData = uniqByUrl(Object.values(await browser.storage.local.get(keyChunk)))
 
-            // Get any matching pages docs to those data in current chunk
-            const matchingPages = await getMatchingPageDocs(oldPageData)
-
             // Map over local storage chunk, async processing each page data entry
-            const docs = await Promise.all(oldPageData.map(data => {
-                // Pass in any existing page doc that matches
-                const assocPageDoc = matchingPages.find(doc => doc.url === data.url)
-                return convertOldData(data, assocPageDoc)
-            }))
+            const matchingPageDoc = await getMatchingPageDocs(oldPageData) // Use existing page doc, if available
+            const docs = await Promise.all(oldPageData.map(convertOldPageData(matchingPageDoc)))
 
             // Bulk insert all docs for this chunk
             await db.bulkDocs(flatten(docs))
@@ -206,6 +211,8 @@ async function handlePageDataConversion(index, bookmarkUrls, updateProgress, { s
             updateProgress(Math.round(++chunkCount / indexChunks.length * 100))
         }
     }
+
+    deleteDedupIndex() // Clean up index, but don't wait
 
     if (!hasErrorOccurred) { // Clean other old ext data up if no problem happened
         const pageRelatedKeys = omit('BLACKLIST')(KEYS)
@@ -260,5 +267,6 @@ export default async function convertOldData(opts = { setAsStubs: false, concurr
         }
     }
 
+    updateProgress(100)
     setTimeout(() => browser.notifications.clear(notifId), 3000)
 }
