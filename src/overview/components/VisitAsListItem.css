@@ -42,21 +42,24 @@
 }
 
 /* List entries for which no stored version is available */
-.root:not(.available) {
+.root:not(.available) > * {
     opacity: 0.5;
 }
 
 /* List entries shown as context around a search result */
 .root.compact {
-    opacity: 0.7;
     transform: scale(0.6);
     transform-origin: top;
 
     /* Compensate margin for scale reduction. */
     margin-bottom: calc((var(--compact-scale) - 1) * var(--height));
 
+    & > * {
+        opacity: 0.7;
+    }
+
     &:hover,
-    &:focus {
+    &:focus > * {
         opacity: 1;
     }
 }

@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import Waypoint from 'react-waypoint'
+import classNames from 'classnames'
 
 import { makeNonlinearTransform } from 'src/util/make-range-transform'
 import { niceDate } from 'src/util/nice-time'
@@ -9,6 +10,9 @@ import VisitAsListItem from './VisitAsListItem'
 import LoadingIndicator from './LoadingIndicator'
 import styles from './ResultList.css'
 
+
+// Draw a line between gaps of at most 20 minutes.
+const maxBridgableTimeGap = 1000 * 60 * 20
 
 // Map a time duration between log entries to a number of pixels between them.
 const timeGapToSpaceGap = makeNonlinearTransform({
@@ -29,9 +33,17 @@ function computeRowGaps({searchResult}) {
         const prevRow = searchResult.rows[rowIndex - 1]
         const prevTimestamp = prevRow ? prevRow.doc.visitStart : new Date()
         const timestamp = row.doc.visitStart
+
         let spaceGap = 0
+        let showConnection = false
         if (timestamp && prevTimestamp) {
-            spaceGap = timeGapToSpaceGap(prevTimestamp - timestamp)
+            const timeGap = prevTimestamp - timestamp
+
+            spaceGap = timeGapToSpaceGap(timeGap)
+
+            if (prevRow && (timeGap < maxBridgableTimeGap)) {
+                showConnection = true
+            }
         }
 
         // On the day boundaries, we show the date.
@@ -51,7 +63,7 @@ function computeRowGaps({searchResult}) {
             </time>
         )
 
-        return {marginTop: spaceGap, timestampComponent}
+        return {marginTop: spaceGap, showConnection, timestampComponent}
     })
 }
 
@@ -77,7 +89,7 @@ const ResultList = ({
     const rowGaps = computeRowGaps({searchResult})
 
     const listItems = searchResult.rows.map((row, rowIndex) => {
-        const { marginTop, timestampComponent } = rowGaps[rowIndex]
+        const { marginTop, showConnection, timestampComponent } = rowGaps[rowIndex]
 
         return (
             <li
@@ -85,12 +97,17 @@ const ResultList = ({
                 style={{
                     marginTop,
                 }}
+                className={classNames({
+                    [styles.showConnection]: showConnection,
+                })}
             >
-                {timestampComponent}
-                <VisitAsListItem
-                    compact={row.isContextualResult}
-                    doc={row.doc}
-                />
+                <div>
+                    {timestampComponent}
+                    <VisitAsListItem
+                        compact={row.isContextualResult}
+                        doc={row.doc}
+                    />
+                </div>
             </li>
         )
     })
