@@ -37,8 +37,9 @@
 }
 
 /* List entries for which no stored version is available */
+
 /* TODO find neater solution than using a global class name (defined in src/page-viewer) */
-.root:not(:global(.available)) {
+.root:not(:global(.available)) { /* stylelint-disable  selector-pseudo-class-no-unknown */
     opacity: 0.5;
 }
 

@@ -20,7 +20,7 @@
 }
 
 .logo {
-    background-image: url("img/worldbrain-logo.png");
+    background-image: url('img/worldbrain-logo.png');
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
@@ -29,7 +29,7 @@
 
     @media (max-width: 1200px) {
         width: 24px;
-        background-image: url("img/worldbrain-logo-narrow.png");
+        background-image: url('img/worldbrain-logo-narrow.png');
     }
 
     @media (max-width: 1000px) {
@@ -76,7 +76,7 @@
     display: flex;
     justify-content: flex-end;
     width: 131px;
-    
+
     @media (max-width: 1200px) {
         width: 24px;
     }
