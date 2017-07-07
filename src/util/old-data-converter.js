@@ -13,6 +13,13 @@ import { generateBookmarkDocId } from 'src/imports/background'
 
 export const dedupIdxName = 'conversion-dedupe-index'
 const dedupQueryFields = ['url', '_id']
+
+/** Misc keys from old extension that are no longer used */
+const MISC_KEYS = [
+    'import_fail_progress_state', 'import_success_progress_state',
+    'import_totals_state', 'import_progress', 'shouldOpenTab',
+]
+
 export const KEYS = {
     INDEX: 'index',
     BOOKMARKS: 'bookmarks',
@@ -216,7 +223,7 @@ async function handlePageDataConversion(index, bookmarkUrls, updateProgress, { s
 
     if (!hasErrorOccurred) { // Clean other old ext data up if no problem happened
         const pageRelatedKeys = omit('BLACKLIST')(KEYS)
-        browser.storage.local.remove(Object.values(pageRelatedKeys))
+        browser.storage.local.remove([...Object.values(pageRelatedKeys), ...MISC_KEYS])
     }
 }
 
