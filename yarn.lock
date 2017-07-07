@@ -7234,9 +7234,9 @@ sax@>=0.6.0, sax@^1.2.1:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
 
-"semantic-ui-css@git+https://github.com/Treora/semantic-ui-css.git#217f486":
+"semantic-ui-css@git+https://github.com/Treora/semantic-ui-css.git#1d2237f":
   version "2.2.10"
-  resolved "git+https://github.com/Treora/semantic-ui-css.git#217f486"
+  resolved "git+https://github.com/Treora/semantic-ui-css.git#1d2237f"
   dependencies:
     jquery x.*
 
