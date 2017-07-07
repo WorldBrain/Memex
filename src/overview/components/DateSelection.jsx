@@ -32,9 +32,6 @@ const DateSelection = ({
         isClearable
         selected={date && moment(date)}
         openToDate={(date && moment(date)) || moment()}
-        selectsEnd
-        startDate={moment(0)}
-        endDate={moment(date)}
         maxDate={moment()}
         onChange={date => onDateChange(
             date ? date.endOf('day').valueOf() : undefined,
