@@ -1,40 +1,33 @@
  <html>
     <head>
         <link rel="stylesheet" href="./options/fonts/material-icons/material-icons.css">
-
         <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
-
         <link rel="stylesheet" type="text/css" href="popup.css">
-
-
     </head>
     <body>
         <div>
-
-              <form method="get" action="overview/overview.html?query=" target="_blank">
+            <form>
                 <i class="material-icons">search</i>
-                <input id="search" name="query" placeholder="Search your memory" target="_blank" />
-              </form>
+                <input id="search" name="query" placeholder="Search your memory" />
+            </form>
+            <hr/>
 
-              <hr/>
+            <a href="options/options.html#/settings" target="_blank">
+            <i class="material-icons">settings</i>
+            Settings</a>
 
-              <a href="options/options.html#/settings" target="_blank">
-                <i class="material-icons">settings</i>
-                Settings</a>
+            <a href="https://www.reddit.com/r/WorldBrain/" target="_blank">
+            <i class="material-icons">feedback</i>
+            Feedback</a>
 
-              <a href="https://www.reddit.com/r/WorldBrain/" target="_blank">
-              <i class="material-icons">feedback</i>
-              Feedback</a>
+            <hr/>
 
-              <hr/>
+            <a href="options/options.html#/import" target="_blank">
+            <i class="material-icons">file_download</i>
+            Import History &amp; Bookmarks</a>
+        </div>
 
-              <a href="options/options.html#/import" target="_blank">
-              <i class="material-icons">file_download</i>
-              Import History &amp; Bookmarks</a>
-
-
-       </div>
-    <script type="text/javascript" src="./popup.js"></script>
-
+        <script src="/lib/browser-polyfill.js"></script>
+        <script type="text/javascript" src="./popup.js"></script>
     </body>
 </html>
