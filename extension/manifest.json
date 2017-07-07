@@ -29,7 +29,7 @@
     },
     "applications": {
         "gecko": {
-            "id": "webmemex-extension@webmemex.org"
+            "id": "{37e031df-9c74-412e-b933-e847443ad005}"
         }
     },
     "permissions": [
