@@ -67,8 +67,8 @@ export function remoteFunction(funcName, {tabId} = {}) {
         }
 
         // Return the value or throw the error we received from the other side.
-        if (response.error) {
-            throw new Error(response.error)
+        if (response.errorMessage) {
+            throw new Error(response.errorMessage)
         } else {
             return response.returnValue
         }
@@ -108,7 +108,7 @@ function incomingRPCListener(message, sender) {
             returnValue,
             [RPC_RESPONSE]: RPC_RESPONSE,
         })).catch(error => ({
-            error,
+            errorMessage: error.message,
             [RPC_RESPONSE]: RPC_RESPONSE,
         }))
     }
