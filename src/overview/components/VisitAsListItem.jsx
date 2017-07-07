@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import classNames from 'classnames'
 
-import { LinkToLocalVersion } from 'src/page-viewer'
+import { localVersionAvailable, LinkToLocalVersion } from 'src/page-viewer'
 import niceTime from 'src/util/nice-time'
 
 import ImgFromPouch from './ImgFromPouch'
@@ -32,12 +32,7 @@ const VisitAsListItem = ({doc, compact, onTrashButtonClick}) => {
         )
 
     return (
-        <LinkToLocalVersion
-            page={doc.page}
-            className={visitClasses}
-            // DEBUG Show document props on ctrl+meta+click
-            onClick={e => { if (e.metaKey && e.ctrlKey) { console.log(doc); e.preventDefault() } }}
-        >
+        <a className={visitClasses} href={doc.page.url}>
             <div className={styles.screenshotContainer}>
                 {doc.page._attachments && doc.page._attachments.screenshot
                     ? (
@@ -51,20 +46,12 @@ const VisitAsListItem = ({doc, compact, onTrashButtonClick}) => {
                 }
             </div>
             <div className={styles.descriptionContainer}>
-                <div
-                    className={styles.title}
-                >
+                <div className={styles.title} title={doc.page.title}>
                     {hasFavIcon && favIcon}
-                    <span title={doc.page.title}>
-                        {doc.page.title}
-                    </span>
+                    {doc.page.title}
                 </div>
                 <div className={styles.url}>
-                    <a
-                        href={doc.page.url}
-                    >
-                        {doc.page.url}
-                    </a>
+                    {doc.page.url}
                 </div>
                 <div className={styles.time}>{niceTime(doc.visitStart)}</div>
             </div>
@@ -74,8 +61,17 @@ const VisitAsListItem = ({doc, compact, onTrashButtonClick}) => {
                     onClick={e => { e.preventDefault(); onTrashButtonClick() }}
                     title={`Forget this item (${sizeInMB} MB)`}
                 />
+                {localVersionAvailable({page: doc.page})
+                    ? (
+                        <LinkToLocalVersion
+                            className={`${styles.button} ${styles.load}`}
+                            page={doc.page}
+                        />
+                    )
+                    : null
+                }
             </div>
-        </LinkToLocalVersion>
+        </a>
     )
 }
 

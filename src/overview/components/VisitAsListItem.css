@@ -36,13 +36,6 @@
     }
 }
 
-/* List entries for which no stored version is available */
-
-/* TODO find neater solution than using a global class name (defined in src/page-viewer) */
-.root:not(:global(.available)) { /* stylelint-disable  selector-pseudo-class-no-unknown */
-    opacity: 0.5;
-}
-
 /* List entries shown as context around a search result */
 .root.compact {
     opacity: 0.7;
