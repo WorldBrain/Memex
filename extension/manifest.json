@@ -1,6 +1,6 @@
 {
     "name": "WebMemex",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "background": {
         "scripts": ["lib/browser-polyfill.js", "background.js"]
     },
