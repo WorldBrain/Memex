@@ -72,7 +72,7 @@ export async function maybeLogPageVisit({
 
 // Log the visit/page in the currently active tab
 export async function logActivePageVisit() {
-    const tabs = await browser.tabs.query({active: true})
+    const tabs = await browser.tabs.query({active: true, currentWindow: true})
     const {url, id: tabId} = tabs[0]
 
     if (!isLoggable({url})) {
