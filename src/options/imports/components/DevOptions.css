@@ -2,11 +2,22 @@
     margin: 15px;
 }
 
+.warning {
+    font-style: italic;
+    font-size: 0.85em;
+    margin: 15px 0 0;
+    color: #ff5722;
+}
+
 .devModeToggle {
     font-size: 0.85em;
     display: flex;
     justify-content: space-between;
     width: 140px;
+}
+
+.devFunctionality {
+    min-height: 300px;
 }
 
 .uploadContainer {
@@ -16,6 +27,10 @@
 
 .uploadInput {
     flex: 1;
+
+    > h3 {
+        margin: 20px 0 10px;
+    }
 }
 
 .uploadLoading {

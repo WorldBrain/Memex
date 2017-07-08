@@ -12,7 +12,14 @@ const DevOptions = ({ devMode, toggleDevMode, ...uploadProps }) => (
             <label htmlFor='devModeCheckbox'>Enable dev mode</label>
         </div>
 
-        {devMode && <TestDataUpload {...uploadProps} />}
+        {devMode
+        && <div className={styles.devFunctionality}>
+            <p className={styles.warning}>
+                Note that the options in here are for advanced use only, and could lead to unexpected behaviour.
+            </p>
+            <TestDataUpload {...uploadProps} />
+        </div>
+        }
     </section>
 )
 
