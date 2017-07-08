@@ -5,26 +5,28 @@
         <link rel="stylesheet" type="text/css" href="popup.css">
     </head>
     <body>
-        <div>
-            <form>
+        <div class="popup">
+            <form class="popup-search-container">
                 <i class="material-icons">search</i>
-                <input id="search" name="query" placeholder="Search your memory" />
+                <input id="search" class="popup-search" name="query" placeholder="Search your memory" />
             </form>
+
+            <a class="popup-item" href="options/options.html#/settings" target="_blank">
+                <i class="material-icons">settings</i>
+                Settings
+            </a>
+
+            <a class="popup-item" href="https://www.reddit.com/r/WorldBrain/" target="_blank">
+                <i class="material-icons">feedback</i>
+                Feedback
+            </a>
+
             <hr/>
 
-            <a href="options/options.html#/settings" target="_blank">
-            <i class="material-icons">settings</i>
-            Settings</a>
-
-            <a href="https://www.reddit.com/r/WorldBrain/" target="_blank">
-            <i class="material-icons">feedback</i>
-            Feedback</a>
-
-            <hr/>
-
-            <a href="options/options.html#/import" target="_blank">
-            <i class="material-icons">file_download</i>
-            Import History &amp; Bookmarks</a>
+            <a class="popup-item" href="options/options.html#/import" target="_blank">
+                <i class="material-icons">file_download</i>
+                Import History &amp; Bookmarks
+            </a>
         </div>
 
         <script src="/lib/browser-polyfill.js"></script>

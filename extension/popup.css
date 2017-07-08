@@ -1,51 +1,9 @@
 
-@font-face {
-  font-family: 'Lato';
-  font-style: normal;
-  font-weight: 300;
-  src: local('Lato Light'), local('fonts/Lato.woff2'), url(https://fonts.googleapis.com/css?family=Lato) format('woff2');
-}
-
-@font-face {
-  font-family: 'Lato';
-  font-style: normal;
-  font-weight: 700;
-  src: local('Lato Bold'), local('fonts/Lato.woff2'), url(https://fonts.googleapis.com/css?family=Lato) format('woff2');
-}
-
 body {
-    font-family: "Lato", sans-serif;
-    margin: 0px;
+    margin: 0;
     padding: 8px;
     text-align: left;
-    width:320px;
-}
-
-div {
-    background-color:#fff;
-    margin: -8px;
-
-}
-
-form {
-  display: flex;
-  padding: 8px;
-  margin-bottom: 0px;
-  background: rgb(204, 204, 204); /* Fallback for older browsers without RGBA-support */
-  background: rgba(204, 204, 204, 0.5);
-
-}
-
-input {
-  font-family: "Lato", sans-serif;
-  color: #3b3b3b;
-  font-style: italic;
-}
-
-#search {
-  align-items: right;
-  width: 90%;
-  font-size: 16px;
+    width:280px;
 }
 
 i {
@@ -55,32 +13,54 @@ i {
   align-items: center;
 }
 
-form i {
-  color: #3b3b3b;
-}
-
-a {
-    font-family: 'Lato', sans-serif;
-    color: #3b3b3b;
-    text-decoration: none;
-    font-size: 16px;
-    padding: 8px;
-    display: flex;
-    align-items: center;
-/*    margin: -8px;
-*/}
-
-a:hover {
-    color:#3EB995;
-    background: rgb(204, 204, 204); /* Fallback for older browsers without RGBA-support */
-    background: rgba(204, 204, 204, 0.5);
-}
-
 hr {
     border: 0;
     height: 0;
-    margin: 0px;
-    padding: 0px;
-    border-top: 1px solid rgba(0, 0, 0, 0.1);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    margin: 0;
+    padding: 0;
+    border-bottom: 1px solid rgb(229, 229, 229);
+}
+
+.popup {
+    background-color:#fff;
+    margin: -8px;
+    font-size: 1.2em;
+}
+
+.popup-search-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 12px;
+  margin-bottom: 0;
+  border-bottom: 1px solid rgb(202, 202, 202);
+  background: rgb(229, 229, 229);
+}
+
+.popup-search-container i {
+  color: #3b3b3b;
+  padding: 0;
+}
+
+.popup-search {
+    width: 90%;
+    height: 28px;
+    font-size: 1em;
+    padding: 5px;
+}
+
+.popup-search:placeholder-shown {
+    font-style: italic;
+}
+
+.popup-item {
+    color: #3b3b3b;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+
+.popup-item:hover {
+    color:#3EB995;
+    background: rgb(229, 229, 229);
 }
