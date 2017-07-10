@@ -40,7 +40,7 @@ export const newSearch = asyncActionCreator(() => async (dispatch, getState) => 
     const { currentQueryParams } = ourState(getState())
     const searchResult = await filterVisitsByQuery({
         ...currentQueryParams,
-        includeContext: true,
+        includeContext: false,
         limit: 10,
         softLimit: true,
     })
@@ -56,7 +56,7 @@ export const expandSearch = asyncActionCreator(() => async (dispatch, getState) 
     // Get the items that are to be appended.
     const newSearchResult = await filterVisitsByQuery({
         ...currentQueryParams,
-        includeContext: true,
+        includeContext: false,
         skipUntil,
         limit: 10,
         softLimit: true,
