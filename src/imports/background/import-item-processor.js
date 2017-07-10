@@ -6,6 +6,11 @@ import fetchPageData from 'src/page-analysis/background/fetch-page-data'
 import { revisePageFields } from 'src/page-analysis'
 import { IMPORT_TYPE, DOWNLOAD_STATUS } from 'src/options/imports/constants'
 
+const fetchPageDataOpts = {
+    includePageContent: true,
+    includeFavIcon: true,
+}
+
 /**
  * @param {string?} favIconURL The data URL string for the favicon.
  * @returns {any} The `_attachments` entry to place into a PouchDB doc.
@@ -26,7 +31,7 @@ const formatFavIconAttachment = async favIconURL => {
  */
 async function processHistoryImport(importItem) {
     // Do the page data fetch
-    const { content, favIconURI } = await fetchPageData(importItem)
+    const { content, favIconURI } = await fetchPageData({ url: importItem.url, opts: fetchPageDataOpts })
 
     // Sort out all binary attachments
     const _attachments = await formatFavIconAttachment(favIconURI)

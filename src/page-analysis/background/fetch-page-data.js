@@ -1,5 +1,19 @@
 import extractPageContent from 'src/page-analysis/content_script/extract-page-content'
 import extractFavIcon from 'src/page-analysis/content_script/extract-fav-icon'
+import freezeDry from 'src/freeze-dry'
+
+/**
+ * @typedef IFetchPageDataOpts
+ * @type {Object}
+ * @property {boolean} includeFreezeDry Denotes whether to attempt freeze-dry fetch.
+ * @property {boolean} includePageContent Denotes whether to attempt page text + metadata fetch.
+ * @property {boolean} includeFavIcon Denotes whether to attempt favicon fetch.
+ */
+export const defaultOpts = {
+    includeFreezeDry: false,
+    includePageContent: false,
+    includeFavIcon: false,
+}
 
 /**
  * Given a URL will attempt an async fetch of the text and metadata from the page
@@ -7,22 +21,25 @@ import extractFavIcon from 'src/page-analysis/content_script/extract-fav-icon'
  *
  * @param {string} url The URL which points to the page to fetch text + meta-data for.
  * @param {number} [timeout=5000] The amount of ms to wait before throwing a fetch timeout error.
+ * @param {IFetchPageDataOpts} opts
  * @return {any} Object containing `content` and `favIconURI` data fetched from the DOM pointed
  *  at by the `url` arg.
  */
 export default async function fetchPageData({
     url = '',
     timeout = 5000,
-} = {}) {
+    opts = defaultOpts,
+} = { opts: defaultOpts }) {
     const doc = await fetchDOMFromUrl(url, timeout)
-    // If DOM couldn't be fetched, then we can't get text/metadata
+    // If DOM couldn't be fetched, then we can't get anything
     if (!doc) {
         throw new Error('Cannot fetch DOM')
     }
 
     return {
-        favIconURI: await extractFavIcon(doc),
-        content: await extractPageContent({ doc, url }),
+        favIconURI: opts.includeFavIcon ? await extractFavIcon(doc) : undefined,
+        freezeDryHTML: opts.includeFreezeDry ? await freezeDry(doc, url) : undefined,
+        content: opts.includePageContent ? await extractPageContent({ doc, url }) : undefined,
     }
 }
 
