@@ -22,6 +22,9 @@ const exec = pify(nodeExec)
 // === Tasks for building the source code; result is put into ./extension ===
 
 const staticFiles = {
+    'src/manifest.json': 'extension',
+    'src/*.html': 'extension',
+    'src/local-page/local-page.css': 'extension/local-page',
     'node_modules/webextension-polyfill/dist/browser-polyfill.js': 'extension/lib',
     'node_modules/pdfjs-dist/build/pdf.worker.min.js': 'extension/lib',
 }
@@ -40,27 +43,27 @@ const sourceFiles = [
         destination: './extension',
     },
     {
-        entries: ['./src/overview/main.jsx', commonUIEntry],
+        entries: ['./src/overview/overview.jsx', commonUIEntry],
         output: 'overview.js',
         destination: './extension/overview',
-        cssOutput: 'style.css',
+        cssOutput: 'overview.css',
     },
     {
-        entries: ['./src/options/main.jsx', commonUIEntry],
+        entries: ['./src/options/options.jsx', commonUIEntry],
         output: 'options.js',
         destination: './extension/options',
-        cssOutput: 'style.css',
+        cssOutput: 'options.css',
     },
     {
-        entries: ['./src/page-viewer/localpage.js'],
-        output: 'localpage.js',
-        destination: './extension/page-viewer',
+        entries: ['./src/local-page/local-page.js'],
+        output: 'local-page.js',
+        destination: './extension/local-page',
     },
     {
-        entries: ['./src/popup/index.js'],
+        entries: ['./src/popup/popup.js'],
         output: 'popup.js',
         destination: './extension/popup',
-        cssOutput: 'style.css',
+        cssOutput: 'popup.css',
     },
 ]
 

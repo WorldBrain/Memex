@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import classNames from 'classnames'
 
-import { localVersionAvailable, LinkToLocalVersion } from 'src/page-viewer'
+import { localVersionAvailable, LinkToLocalVersion } from 'src/local-page'
 import niceTime from 'src/util/nice-time'
 
 import ImgFromPouch from './ImgFromPouch'
