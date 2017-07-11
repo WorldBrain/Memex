@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
+import { bindActionCreators } from 'redux'
 import { Input } from 'semantic-ui-react'
 
 import * as actions from '../actions'
@@ -75,16 +76,10 @@ const mapStateToProps = state => {
     }
 }
 
-const mapDispatchToProps = dispatch => ({
-    onInputChanged: input => {
-        dispatch(actions.setQuery({query: input}))
-    },
-    onEndDateChange: date => {
-        dispatch(actions.setEndDate({endDate: date}))
-    },
-    onBottomReached: () => {
-        dispatch(actions.loadMoreResults())
-    },
-})
+const mapDispatchToProps = dispatch => bindActionCreators({
+    onInputChanged: actions.setQuery,
+    onEndDateChange: actions.setEndDate,
+    onBottomReached: actions.loadMoreResults,
+}, dispatch)
 
 export default connect(mapStateToProps, mapDispatchToProps)(Overview)

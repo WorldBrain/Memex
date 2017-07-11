@@ -11,7 +11,7 @@ const locationSync = ReduxQuerySync.enhancer({
     params: {
         q: {
             selector: state => ourState(state).currentQueryParams.query,
-            action: query => setQuery({query}),
+            action: query => setQuery(query),
             defaultValue: '',
         },
     },
