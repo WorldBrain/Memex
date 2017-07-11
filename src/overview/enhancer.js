@@ -11,17 +11,17 @@ const locationSync = ReduxQuerySync.enhancer({
     params: {
         query: {
             selector: state => currentQueryParams(state).query,
-            action: query => setQuery({query}),
+            action: query => setQuery(query),
             defaultValue: '',
         },
         startDate: {
             selector: state => currentQueryParams(state).startDate,
-            action: startDate => setStartDate({startDate: Number(startDate)}),
+            action: startDate => setStartDate(Number(startDate)),
             defaultValue: undefined,
         },
         endDate: {
             selector: state => currentQueryParams(state).endDate,
-            action: endDate => setEndDate({endDate: Number(endDate)}),
+            action: endDate => setEndDate(Number(endDate)),
             defaultValue: undefined,
         },
     },

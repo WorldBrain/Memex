@@ -20,16 +20,16 @@ const defaultState = {
     waitingForResults: false,
 }
 
-function setQuery(state, {query}) {
+function setQuery(state, query) {
     return {...state, currentQueryParams: {...state.currentQueryParams, query}}
 }
 
-function setStartDate(state, {startDate}) {
-    return {...state, currentQueryParams: {...state.currentQueryParams, startDate}}
+function setStartDate(state, date) {
+    return {...state, currentQueryParams: {...state.currentQueryParams, startDate: date}}
 }
 
-function setEndDate(state, {endDate}) {
-    return {...state, currentQueryParams: {...state.currentQueryParams, endDate}}
+function setEndDate(state, date) {
+    return {...state, currentQueryParams: {...state.currentQueryParams, endDate: date}}
 }
 
 function startNewSearch(state) {

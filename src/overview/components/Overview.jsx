@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
+import { bindActionCreators } from 'redux'
 
 import * as actions from '../actions'
 import * as selectors from '../selectors'
@@ -96,19 +97,11 @@ const mapStateToProps = state => ({
     searchMetaData: selectors.searchMetaData(state),
 })
 
-const mapDispatchToProps = dispatch => ({
-    onInputChanged: input => {
-        dispatch(actions.setQuery({query: input}))
-    },
-    onStartDateChange: date => {
-        dispatch(actions.setStartDate({startDate: date}))
-    },
-    onEndDateChange: date => {
-        dispatch(actions.setEndDate({endDate: date}))
-    },
-    onBottomReached: () => {
-        dispatch(actions.loadMoreResults())
-    },
-})
+const mapDispatchToProps = dispatch => bindActionCreators({
+    onInputChanged: actions.setQuery,
+    onStartDateChange: actions.setStartDate,
+    onEndDateChange: actions.setEndDate,
+    onBottomReached: actions.loadMoreResults,
+}, dispatch)
 
 export default connect(mapStateToProps, mapDispatchToProps)(Overview)
