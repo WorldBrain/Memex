@@ -2,10 +2,10 @@
 
 A browser extension that lets you grow your personal web of knowledge.
 
- - :inbox_tray: **Store** pages and :mag: **find** them back *in their context*
- - :memo: **Create pages** to add notes and quotes
- - :link: **Create links** to organise your web by *your associations*
- - :satellite: **Publish** your personal web on the world wide web
+ - 📥 **Store** pages and 🔍 **find** them back *in their context*
+ - 📝 **Create pages** to add notes and quotes *(🚧 in development)*
+ - 🔗 **Create links** to organise your web by *your associations* *(🚧 in development)*
+ - 📡 **Publish** your personal web on the world wide web *(🚧 in development)*
 
 Because a row of dozens of tabs or bookmarks needs better organisation.
 
@@ -16,84 +16,70 @@ Because browsers were never intended to be just *viewers*.
 Let's make web browsers the *web weavers* they ought to be.
 
 
-## Project status
-
-Sorry to disappoint, but we do not have the promised solution yet. :unamused:
-
-This project is in full development. You are most welcome to contribute! See
-[Hacking](#hacking) below about how to build and run it from source and teach it
-new tricks.
-
-
 ## Approach
 
-As it stands now, it is a WebExtension (thus should soon work on most modern
-browsers), bundled by [browserify](http://browserify.org) with some
-[babel](https://babeljs.io) ES6–7→ES5 compilation, that logs and stores visited
-pages in [PouchDB](https://pouchdb.com), and provides a viewer for this data
-based on
-[React](https://facebook.github.io/react/)+[Redux](http://redux.js.org/).
+This extension attempts to turn the browser into an offline-first knowledge management tool. It can
+store web pages you visit on your computer by 'freeze-drying' them: removing scripts and thus most
+interactive behaviour, but inlining all images and stylesheets to let you save the page exactly the
+way you saw it.
 
-The project strategy is to combine and integrate features from other projects,
-and to factor out developed functionality into separate modules wherever it
-seems sensible. This extension could then be regarded as a bunch of different
-(but related) features a browser ought to have, bundled together for quick
-installation.
-
-See [our initial blog post](https://blog.webmemex.org/2017/01/05/roadmap/)
-for the current feature roadmap.
+The next step is to enable you to edit the pages, create new pages, and make links between them, to
+really grow your personal web. Then, by synchronising your web with a server (possibly your own
+server), you will be able to publish (parts of) it to share your knowledge with others.
 
 
 ## Contribute
 
-Got feedback, bug fixes, new features, tips? Give a shout. :loudspeaker:
+Got feedback, bug fixes, new features, tips? Want to help with coding, design, or communication?
+Give a shout. 📢
 
-Pop in on #webmemex on [Freenode](http://webchat.freenode.net/), send a PR or
-open an issue [on GitHub](https://github.com/Treora/memextension), or send
-me ([Gerben](https://github.com/Treora)) a message.
+Pop in on #webmemex on [Freenode], send a PR or open an issue on the [GitHub repo], or send me
+([Gerben/Treora][Treora]) a message.
 
-Coding, design, communication, there is plenty to be done. A tiny bit of funding
-is available to tip significant contributions. :money_with_wings:
+All code in this project is in the public domain, free from copyright restrictions. Please waive
+your copyrights on any contributions you make. See e.g. [unlicense.org] for more information.
 
-All code in this project is in the public domain, free from copyright
-restrictions. Please waive your copyrights on any contributions you make.
-See e.g. [unlicense.org](https://unlicense.org/) for more information.
+
+[Freenode]: http://webchat.freenode.net/
+[GitHub repo]: https://github.com/WebMemex/webmemex-extension
+[Treora]: https://github.com/Treora
+[unlicense.org]: https://unlicense.org/
 
 
 ## Hacking
 
-Like playing with ES6, WebExtension browser APIs, React, Redux, PouchDB? Come
-play along! :tada:
-
-See [`Codetour.md`](Codetour.md) for an explanation of the repository structure.
+See [`Codetour.md`](Codetour.md) for an explanation of the repository structure. In short, it is a
+[WebExtension] (runs on Firefox and Chrome/Chromium browsers), bundled by [browserify] with some
+[babel] ES6–7→ES5 compilation, that logs and stores pages in [PouchDB], and provides a viewer for
+this personal web based on [React]+[Redux].
 
 ### Build and run it
 
 1. Clone this repo.
-2. Get [Node/NPM](https://nodejs.org) and [yarn](https://yarnpkg.com)
-   (`npm install -g yarn`).
+2. Get [Node/NPM] and [yarn] (`npm install -g yarn`).
 3. Run `make` to install dependencies and compile the source files.
 4. Load it in Firefox or Chromium/Chrome:
-    * In Firefox (≥49): run `npm run fx-run` (or run [web-ext](https://developer.mozilla.org/en-US/Add-ons/WebExtensions/web-ext_command_reference#web-ext_run)
-      directly for more control).
-      Alternatively, go to [`about:debugging`](about:debugging), choose 'Load
-      Temporary Add-on', and pick `extension/manifest.json` from this repo.
-    * In Chromium/Chrome: go to [Tools→Extensions](chrome://extensions/), enable
-      'Developer mode', 'Load unpacked extension...', pick the `extension/`
-      folder from this repo.
+    * In Firefox (≥49): run `npm run fx-run` (or run [web-ext] directly for more control).
+      Alternatively, go to `about:debugging`, choose 'Load Temporary Add-on', and pick
+      `extension/manifest.json` from this repo.
+    * In Chromium/Chrome: go to Tools→Extensions (`chrome://extensions`), enable 'Developer mode',
+      click 'Load unpacked extension...', and pick the `extension/` folder from this repo.
 
 ### Automatic recompilation
 
-If the steps above worked, running `npm run watch` will trigger a quick
-recompilation every time a source file has been modified.
+If the steps above worked, running `npm run watch` will trigger a quick recompilation every time a
+source file has been modified.
 
-If you are testing in Firefox through `npm run fx-run`/`web-ext`, the extension
-should also reload automatically. Otherwise, depending on which part of the code
-you change, you may have to reload the extension in your browser:
+If you are testing in Firefox through `npm run fx-run`/`web-ext`, the extension should also reload
+automatically. Otherwise, manually press the reload button in the extension list.
 
-- If your edits affected only the overview interface, just refresh/reopen it.
-- However, if you changed the background script, you have will to reload the
-  extension: find it back in the list of temporary add-ons/extensions and click
-  Reload.
-- If you changed the 'content_script', it seems browser-dependent whether newly
-  opened pages will get the new version. Better reload the extension to be sure.
+
+[WebExtension]: https://developer.mozilla.org/en-US/Add-ons/WebExtensions
+[browserify]: http://browserify.org
+[babel]: https://babeljs.io
+[PouchDB]: https://pouchdb.com
+[React]: https://facebook.github.io/react/
+[Redux]: http://redux.js.org/
+[Node/NPM]: https://nodejs.org
+[yarn]: https://yarnpkg.com
+[web-ext]: https://developer.mozilla.org/en-US/Add-ons/WebExtensions/web-ext_command_reference#web-ext_run
