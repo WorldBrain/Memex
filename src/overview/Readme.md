@@ -2,9 +2,13 @@
 
 This code provides the user interface for overviewing one's memory, which is
 displayed in a tab of its own. It is a html+javascript app, built with
-[React](https://facebook.github.io/react/) and [Redux](http://redux.js.org/),
+[React] and [Redux],
 which create a somewhat complex-looking but nicely organised application
 structure.
+
+
+[React]: https://facebook.github.io/react/
+[Redux]: http://redux.js.org/
 
 
 ## Redactux?!
@@ -29,9 +33,7 @@ which update the state, which triggers component updates, and so on. Any change
 to the database will also trigger actions to update the output directly.
 
 Keeping the code clean, modular and understandable is an ongoing process. Some
-inspiration is drawn from Jack Hsu's nice
-[essays](https://jaysoo.ca/2016/02/28/organizing-redux-application/) about
-structuring Redux applications.
+inspiration is drawn from Jack Hsu's nice [essays] about structuring Redux applications.
 
 Some Redux middleware is used to deal with complexity and asynchronicity. In
 particular:
@@ -41,13 +43,18 @@ particular:
 - [`redux-thunk`](https://github.com/gaearon/redux-thunk) enables actions to
   execute a function that can dispatch other actions, possibly
   asynchronously.
-- [`redux-observable`](https://redux-observable.js.org) is used to enable
-  actions to listen and react to other actions (see [`epics.js`](epics.js))
+- [`redux-observable`](https://redux-observable.js.org) is used to trigger actions in response to
+  other actions, e.g. running the search again when the query changed. (see [`epics.js`](epics.js))
+
+
+[essays]: https://jaysoo.ca/2016/02/28/organizing-redux-application/
 
 
 ## Debugging
 
-To ease debugging, the app includes
-[`redux-devtools`](https://github.com/gaearon/redux-devtools) (unless it is
+To ease debugging, the app includes [redux-devtools] (unless it is
 built in production mode). Press `Ctrl+Shift+L` in the overview to open the
 devtools sidebar, to see the actions and state transitions as they happen.
+
+
+[redux-devtools]: https://github.com/gaearon/redux-devtools
