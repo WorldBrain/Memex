@@ -15,8 +15,6 @@ this extension consists of the following parts (found in
   script.
 - `overview/overview.html`, with the resources in that folder, provides the main
   user interface.
-- `options/options.html` (plus resources) is a technically separate application
-  that provides the settings page.
 
 The parts communicate in two ways:
 - Messaging through `browser.sendMessage`, usually done implicitly by using a
@@ -40,13 +38,9 @@ extensions.
 
 ### [`src/activity-logger/`](src/activity-logger/): activity logger
 
-This logs every page visit in PouchDB. Soon it should also watch for user
-interactions, for example to remember which parts of a page you have read.
-
-Currently, for every visit, a new page object is created in the database, to
-represent the visited page itself. This object should soon be deduplicated when
-the same page is visited multiple times. After creating a new page object,
-the next module is triggered to start analysing the page.
+For logging visits in the database. A visit object points to a page object, which represents the
+page itself. Project focus has shifted from logging every visit to manually storing pages, so this
+code may be refactored soon.
 
 ### [`src/freeze-dry`](src/freeze-dry): snapshotting a webpage
 
@@ -81,15 +75,9 @@ which create a somewhat complex but nicely organised application structure.
 
 See [`src/overview/Readme.md`](src/overview/Readme.md) for more details.
 
-### [`src/options/`](src/options/): settings panel
+### [`src/popup/`](src/popup/): browser button popup
 
-The page for modifying the settings is implemented as an individual React app.
-Currently it does not do much yet.
-
-### [`src/browser-history/`](src/browser-history/): import browser history
-
-Currently unused code for importing information from the browser's own history.
-Still to be developed and reorganised.
+The UI that shows up when pressing the extension's 'browser_action' button.
 
 ### [`src/search`](src/search/): document search
 
@@ -111,7 +99,7 @@ could perhaps be packaged and published as an NPM module some day.
 
 ### `...`: other stuff
 
-The build process is a `Makefile`, that runs some `npm` commands specified in
+The build process is a `Makefile`, that runs `yarn` and some `npm` commands specified in
 `package.json`, which in turn start the corresponding tasks in
 `gulpfile.babel.js` (transpiled by settings in `.babelrc`). All lurking there
 so you only have to type `make` to get things running.
