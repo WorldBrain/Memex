@@ -80,8 +80,11 @@
 
     & .favIcon {
         align-self: center;
-        width: 48px;
-        height: 48px;
+    }
+
+    & img.favIcon {
+        width: 36px;
+        height: 36px;
     }
 }
 

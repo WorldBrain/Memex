@@ -2,7 +2,7 @@ import get from 'lodash/fp/get'
 import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { Button, Popup } from 'semantic-ui-react'
+import { Button, Popup, Icon } from 'semantic-ui-react'
 import classNames from 'classnames'
 
 import { hrefForLocalPage } from 'src/page-viewer'
@@ -36,7 +36,7 @@ const VisitAsListItem = ({doc, compact, onTrashButtonClick}) => {
                 attachmentId='favIcon'
             />
         )
-        : <img className={styles.favIcon} src='img/null-icon.png' />
+        : <Icon size='big' name='file outline' className={styles.favIcon} />
 
     const deleteButton = (
         <Popup
