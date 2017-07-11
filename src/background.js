@@ -1,11 +1,20 @@
 import tldjs from 'tldjs'
+import { CronJob } from 'cron'
 
 import 'src/activity-logger/background'
 import 'src/omnibar'
 import { installTimeStorageKey } from 'src/imports/background'
 import convertOldData from 'src/util/old-data-converter'
+import cleanupFreezeDry from 'src/page-storage/cleanup'
 
 export const dataConvertTimeKey = 'data-conversion-timestamp'
+
+// Schedule freeze-dry cleanups every 30 mins
+export const freezeDryJob = new CronJob({
+    cronTime: '0 */30 * * * *',
+    onTick: cleanupFreezeDry,
+    start: true,
+})
 
 async function openOverview() {
     const [ currentTab ] = await browser.tabs.query({ active: true })
