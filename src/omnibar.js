@@ -3,7 +3,7 @@ import fromPairs from 'lodash/fp/fromPairs'
 import escapeHtml from 'lodash/fp/escape'
 
 import { filterVisitsByQuery } from 'src/search'
-import { hrefForLocalPage } from 'src/page-viewer'
+import { hrefForLocalPage } from 'src/local-page'
 import niceTime from 'src/util/nice-time'
 
 
@@ -95,7 +95,7 @@ const acceptInput = (text, disposition) => {
         url = suggestionToUrl[text]
     } else {
         // Treat input as search query, open the search
-        url = `/overview/overview.html?q=${encodeURIComponent(text)}`
+        url = `/overview.html?q=${encodeURIComponent(text)}`
     }
     // Open it in the place the browser requests us to.
     switch (disposition) {

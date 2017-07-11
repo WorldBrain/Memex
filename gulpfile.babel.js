@@ -22,6 +22,9 @@ const exec = pify(nodeExec)
 // === Tasks for building the source code; result is put into ./extension ===
 
 const staticFiles = {
+    'src/manifest.json': 'extension',
+    'src/*.html': 'extension',
+    'src/local-page/local-page.css': 'extension/local-page',
     'node_modules/webextension-polyfill/dist/browser-polyfill.js': 'extension/lib',
     'node_modules/pdfjs-dist/build/pdf.worker.min.js': 'extension/lib',
     'node_modules/semantic-ui-css/semantic.min.css': 'extension/lib/semantic-ui',
@@ -40,15 +43,15 @@ const sourceFiles = [
         destination: './extension',
     },
     {
-        entries: ['./src/overview/main.jsx'],
+        entries: ['./src/overview/overview.jsx'],
         output: 'overview.js',
         destination: './extension/overview',
-        cssOutput: 'style.css',
+        cssOutput: 'overview.css',
     },
     {
-        entries: ['./src/page-viewer/localpage.js'],
-        output: 'localpage.js',
-        destination: './extension/page-viewer',
+        entries: ['./src/local-page/local-page.js'],
+        output: 'local-page.js',
+        destination: './extension/local-page',
     },
     {
         entries: ['./src/popup/popup.js'],
