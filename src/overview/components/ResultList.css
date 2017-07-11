@@ -8,18 +8,20 @@
 /* Draw a line between list items. */
 .showConnection {
     position: relative;
-}
-.showConnection > ::before {
-    content: '';
-    background: #ddd;
-    display: block;
-    position: absolute;
-    left: 50%;
-    top: -60px;
-    width: 8px;
-    /* High enough to cover the gap, but short enough to not stick out. */
-    height: 60px;
-    z-index: -1;
+
+    & > ::before {
+        content: '';
+        background: #ddd;
+        display: block;
+        position: absolute;
+        left: 50%;
+        top: -60px;
+        width: 8px;
+
+        /* High enough to cover the gap, but short enough to not stick out. */
+        height: 60px;
+        z-index: -1;
+    }
 }
 
 .timestamp {
