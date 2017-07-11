@@ -66,12 +66,18 @@ hr {
 }
 
 .popup-item-button {
-  border: none;
-  background: none;
-  width: 100%;
-  padding: 0;
-  font-size: 1em;
-  cursor: pointer;
+    border: none;
+    background: none;
+    width: 100%;
+    padding: 0;
+    font-size: 1em;
+    cursor: pointer;
+}
+
+.popup-item-button:disabled {
+    color: #9c9c9c;
+    cursor: unset;
+    background: none;
 }
 
 .popup-item-button:focus {

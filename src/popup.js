@@ -13,7 +13,10 @@ const archiveBtn = document.getElementById('archive-button')
 /**
  * Attempts to get the ID of the page doc matching the current tab.
  * @return {string} The ID of the matching page doc
- * @throws Will throw an error if URL cannot be gotten from tab or matching page docs not found.
+ * @throws Will throw an error if:
+ *  - URL cannot be gotten from tab
+ *  - matching page doc/s not found
+ *  - matching page doc already has freeze-dry flag set
  */
 const getCurrentTabPageDocId = async () => {
     const [currentTab] = await browser.tabs.query({ active: true, currentWindow: true })
@@ -23,13 +26,20 @@ const getCurrentTabPageDocId = async () => {
     }
 
     const selector = { ...pageDocsSelector, url: currentTab.url }
-    const { docs } = await db.find({ selector, fields: ['_id'] })
+    const { docs } = await db.find({ selector, fields: ['_id', 'keepFreezeDry'] })
 
     if (!docs || !docs.length) {
         throw new Error('Cannot find page doc matching current tab for archiving')
     }
 
-    return last(docs)._id // Latest should be at the end
+    const latestPageDoc = last(docs) // Latest should be at the end
+
+    // If freeze-dry flag already set, no need to attempt to set it again
+    if (latestPageDoc.keepFreezeDry) {
+        throw new Error('Freeze-dry flag already set')
+    }
+
+    return latestPageDoc._id
 }
 
 const setFreezeDryFlag = doc => {
@@ -37,6 +47,33 @@ const setFreezeDryFlag = doc => {
     return doc
 }
 
+// On popup load, attempt to resolve current tab to a page doc, for archive button
+window.onload = async () => {
+    archiveBtn.disabled = true // Initial state is disabled as it needs an async computation to check
+    try {
+        const pageDocId = await getCurrentTabPageDocId()
+        archiveBtn.dataset.pageDocId = pageDocId // Set data att on button with page ID ready
+        archiveBtn.disabled = false
+    } catch (error) {
+        // Cannot get page doc ID associated with this page; leave button disabled
+    }
+}
+
+// Set flag on matching page doc on archive button press.
+// Flag says to save associated freeze-dry (others cleaned up over time)
+archiveBtn.addEventListener('click', async event => {
+    event.preventDefault()
+    try {
+        await updateDoc(db, archiveBtn.dataset.pageDocId, setFreezeDryFlag)
+    } catch (error) {
+        // Something bad happened; cannot update the freeze-dry flag
+        console.error(error)
+    } finally {
+        window.close()
+    }
+})
+
+// Converts an enter press on the input to convert the NLP queries and forward user to overview search
 input.addEventListener('keydown', event => {
     if (event.keyCode === 13) { // If 'Enter' pressed
         event.preventDefault() // So the form doesn't submit
@@ -46,20 +83,5 @@ input.addEventListener('keydown', event => {
 
         browser.tabs.create({ url: `${overviewURL}?${queryParams}` }) // New tab with query
         window.close() // Close the popup
-    }
-})
-
-// Runs to set flag on matching page doc. Flag says to save associated freeze-dry (others cleaned up over time)
-archiveBtn.addEventListener('click', async event => {
-    event.preventDefault()
-
-    try {
-        const pageId = await getCurrentTabPageDocId()
-        await updateDoc(db, pageId, setFreezeDryFlag)
-    } catch (error) {
-        // Something bad happened; cannot be archived
-        console.error(error)
-    } finally {
-        window.close()
     }
 })
