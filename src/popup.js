@@ -16,12 +16,3 @@ input.addEventListener('keydown', event => {
         window.close() // Close the popup
     }
 })
-import extractTimeFiltersFromQuery from 'src/util/nlp-time-filter.js'
-
-console.log('hello')
-
-// document.getElementById('input')
-
-var search = document.getElementById('input').innerHTML
-
-extractTimeFiltersFromQuery(search)

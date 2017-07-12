@@ -41,10 +41,7 @@
       },
     "rules":{
         "comma-dangle": ["error", "always-multiline"],
-<<<<<<< HEAD
         "quotes": "off",
-=======
->>>>>>> 16fdf5561a81dd253e18dead1cf4e67f991d5237
         "indent": ["error", 4, { "SwitchCase": 1 }],
         "react/jsx-indent": ["error", 4],
         "react/jsx-indent-props": ["error", 4],
