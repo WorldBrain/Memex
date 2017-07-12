@@ -6890,9 +6890,9 @@ redux-observable@^0.14.1:
   version "0.14.1"
   resolved "https://registry.yarnpkg.com/redux-observable/-/redux-observable-0.14.1.tgz#9f3d870c69388fdc427ded6770a3e326f3b69693"
 
-redux-query-sync@^0.1.3:
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/redux-query-sync/-/redux-query-sync-0.1.3.tgz#d06662ad7369de2a83e476cb5f50e719f2d029cd"
+redux-query-sync@^0.1.4:
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/redux-query-sync/-/redux-query-sync-0.1.4.tgz#a124884629f73e4cc76effd2c6d1393ec630aeda"
   dependencies:
     history "^4.6.3"
     postinstall-build "^3.0.1"
