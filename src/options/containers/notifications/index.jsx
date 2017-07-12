@@ -1,6 +1,6 @@
 import React from 'react'
 
-import Blacklist from '../../blacklist'
+import Notifications from '../../notifications'
 import { routeTitle, sectionTitle } from '../../base.css'
 import styles from './style.css'
 
@@ -11,7 +11,7 @@ const NotificationsContainer = () => (
         <section className={styles.section}>
             <h2 className={sectionTitle}>Click to mark as unread</h2>
 
-            <Blacklist />
+            <Notifications />
         </section>
     </div>
 )

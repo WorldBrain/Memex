@@ -1,0 +1,23 @@
+.blacklistActions {
+    float: right;
+    position: relative;
+    right: -20px;
+
+    & a {
+        color: #999;
+        text-decoration: none;
+
+        &:hover {
+            color: #333;
+        }
+    }
+}
+
+.date {
+    font-size: 0.75em;
+}
+
+.icon {
+    font-size: 1.5em;
+    cursor: pointer;
+}
