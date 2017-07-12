@@ -1,18 +1,21 @@
 import fs from 'fs'
+import path from 'path'
 import { exec as nodeExec} from 'child_process'
 import pify from 'pify'
 import gulp from 'gulp'
-import uglify from 'gulp-uglify'
+import addsrc from 'gulp-add-src'
+import clipEmptyFiles from 'gulp-clip-empty-files'
+import concatCss from 'gulp-concat-css'
 import identity from 'gulp-identity'
 import source from 'vinyl-source-stream'
 import buffer from 'vinyl-buffer'
+import uglify from 'gulp-uglify'
+import eslint from 'gulp-eslint'
 import browserify from 'browserify'
 import watchify from 'watchify'
 import babelify from 'babelify'
 import envify from 'loose-envify/custom'
-import eslint from 'gulp-eslint'
 import uglifyify from 'uglifyify'
-import path from 'path'
 import cssModulesify from 'css-modulesify'
 import cssnext from 'postcss-cssnext'
 
@@ -24,7 +27,6 @@ const exec = pify(nodeExec)
 const staticFiles = {
     'src/manifest.json': 'extension',
     'src/*.html': 'extension',
-    'src/local-page/local-page.css': 'extension/local-page',
     'node_modules/webextension-polyfill/dist/browser-polyfill.js': 'extension/lib',
     'node_modules/pdfjs-dist/build/pdf.worker.min.js': 'extension/lib',
     'node_modules/semantic-ui-css/semantic.min.css': 'extension/lib/semantic-ui',
@@ -32,32 +34,11 @@ const staticFiles = {
 }
 
 const sourceFiles = [
-    {
-        entries: ['./src/background.js'],
-        output: 'background.js',
-        destination: './extension',
-    },
-    {
-        entries: ['./src/content_script.js'],
-        output: 'content_script.js',
-        destination: './extension',
-    },
-    {
-        entries: ['./src/overview/overview.jsx'],
-        output: 'overview.js',
-        destination: './extension/overview',
-        cssOutput: 'overview.css',
-    },
-    {
-        entries: ['./src/local-page/local-page.js'],
-        output: 'local-page.js',
-        destination: './extension/local-page',
-    },
-    {
-        entries: ['./src/popup/popup.js'],
-        output: 'popup.js',
-        destination: './extension/popup',
-    },
+    'background.js',
+    'content_script.js',
+    'overview/overview.jsx',
+    'local-page/local-page.js',
+    'popup/popup.js',
 ]
 
 const browserifySettings = {
@@ -66,8 +47,17 @@ const browserifySettings = {
     paths: ['.'],
 }
 
-function createBundle({entries, output, destination, cssOutput},
-                      {watch = false, production = false}) {
+function createBundle({filePath, watch = false, production = false}) {
+    const { dir, name, ext } = path.parse(filePath)
+    const entries = [path.join('src', filePath)]
+    const destination = path.join('extension', dir)
+    const output = `${name}.js` // ignore original filename extension, to replace jsx with js.
+
+    // Hard-code the inclusion of any css file with the same name as the script.
+    // We append any css-modules imported from the script to this css file.
+    const cssInputPath = path.join('src', dir, `${name}.css`)
+    const cssOutput = `${name}.css`
+
     let b = watch
         ? watchify(browserify({...watchify.args, ...browserifySettings, entries}))
             .on('update', bundle)
@@ -77,15 +67,25 @@ function createBundle({entries, output, destination, cssOutput},
         NODE_ENV: production ? 'production' : 'development',
     }), {global: true})
 
-    if (cssOutput) {
-        b.plugin(cssModulesify, {
-            global: true,
-            output: path.join(destination, cssOutput),
-            postcssBefore: [
-                cssnext,
-            ],
-        })
-    }
+    b.plugin(cssModulesify, {
+        global: true, // for importing css modules from e.g. react-datepicker.
+        rootDir: path.join('src', dir),
+        // output: path.join(destination, cssOutput), // We read the stream instead (see below)
+        postcssBefore: [
+            cssnext,
+        ],
+    })
+    b.on('css stream', stream => {
+        // Append the css-modules output to the script's eponymous plain css file (if any).
+        // TODO resolve & copy @import and url()s
+        stream
+            .pipe(source('css-modules-output.css')) // pretend the streamed data had this filename.
+            .pipe(buffer()) // concatCss & clipEmptyFiles do not support streamed files.
+            .pipe(addsrc.prepend(cssInputPath))
+            .pipe(concatCss(cssOutput, {inlineImports: false}))
+            .pipe(clipEmptyFiles()) // Drop file if no output was produced (e.g. no background.css)
+            .pipe(gulp.dest(destination))
+    })
 
     if (production) {
         b.transform(uglifyify, {global: true})
@@ -126,15 +126,15 @@ gulp.task('lint', () => {
 })
 
 gulp.task('build-prod', ['copyStaticFiles', 'lint'], () => {
-    sourceFiles.forEach(bundle => createBundle(bundle, {watch: false, production: true}))
+    sourceFiles.forEach(filePath => createBundle({filePath, watch: false, production: true}))
 })
 
 gulp.task('build', ['copyStaticFiles', 'lint'], () => {
-    sourceFiles.forEach(bundle => createBundle(bundle, {watch: false}))
+    sourceFiles.forEach(filePath => createBundle({filePath, watch: false}))
 })
 
 gulp.task('build-watch', ['copyStaticFiles'], () => {
-    sourceFiles.forEach(bundle => createBundle(bundle, {watch: true}))
+    sourceFiles.forEach(filePath => createBundle({filePath, watch: true}))
 })
 
 gulp.task('lint-watch', ['lint'], () => {
