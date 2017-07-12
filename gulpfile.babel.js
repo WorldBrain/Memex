@@ -1,5 +1,5 @@
 import fs from 'fs'
-import { exec as nodeExec} from 'child_process'
+import { exec as nodeExec } from 'child_process'
 import pify from 'pify'
 import gulp from 'gulp'
 import uglify from 'gulp-uglify'
@@ -75,8 +75,7 @@ const browserifySettings = {
     paths: ['.'],
 }
 
-function createBundle({entries, output, destination, cssOutput},
-                      {watch = false, production = false}) {
+async function createBundle({entries, output, destination, cssOutput}, {watch = false, production = false}) {
     let b = watch
         ? watchify(browserify({...watchify.args, ...browserifySettings, entries}))
             .on('update', bundle)
@@ -100,7 +99,7 @@ function createBundle({entries, output, destination, cssOutput},
         b.transform(uglifyify, {global: true})
     }
 
-    function bundle() {
+    function bundle(callback) {
         let startTime = Date.now()
         b.bundle()
             .on('error', console.error)
@@ -111,10 +110,13 @@ function createBundle({entries, output, destination, cssOutput},
             .on('end', () => {
                 let time = (Date.now() - startTime) / 1000
                 console.log(`Bundled ${output} in ${time}s.`)
+                if (!watch) {
+                    callback()
+                }
             })
     }
 
-    bundle()
+    await pify(bundle)()
 }
 
 gulp.task('copyStaticFiles', () => {
@@ -134,26 +136,29 @@ gulp.task('lint', () => {
         }))
 })
 
-gulp.task('build-prod', ['copyStaticFiles', 'lint'], () => {
-    sourceFiles.forEach(bundle => createBundle(bundle, {watch: false, production: true}))
+gulp.task('build-prod', ['copyStaticFiles', 'lint'], async () => {
+    const ps = sourceFiles.map(bundle => createBundle(bundle, {watch: false, production: true}))
+    await Promise.all(ps)
 })
 
-gulp.task('build', ['copyStaticFiles', 'lint'], () => {
-    sourceFiles.forEach(bundle => createBundle(bundle, {watch: false}))
+gulp.task('build', ['copyStaticFiles', 'lint'], async () => {
+    const ps = sourceFiles.map(bundle => createBundle(bundle, {watch: false}))
+    await Promise.all(ps)
 })
 
-gulp.task('build-watch', ['copyStaticFiles'], () => {
-    sourceFiles.forEach(bundle => createBundle(bundle, {watch: true}))
+gulp.task('build-watch', ['copyStaticFiles'], async () => {
+    const ps = sourceFiles.map(bundle => createBundle(bundle, {watch: true}))
+    await Promise.all(ps)
 })
 
-gulp.task('lint-watch', ['lint'], () => {
+gulp.task('lint-watch', ['lint'], () =>
     gulp.watch(['src/**/*.js', 'src/**/*.jsx'])
-    .on('change', (file) => {
-        return gulp.src(file.path)
-        .pipe(eslint())
-        .pipe(eslint.format())
-    })
-})
+        .on('change', (file) =>
+            gulp.src(file.path)
+                .pipe(eslint())
+                .pipe(eslint.format())
+        )
+)
 
 gulp.task('watch', ['build-watch', 'lint-watch'])
 
