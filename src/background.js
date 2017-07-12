@@ -11,8 +11,8 @@ export const dataConvertTimeKey = 'data-conversion-timestamp'
 
 // Schedule freeze-dry cleanups every 30 mins
 export const freezeDryJob = new CronJob({
-    cronTime: '0 */30 * * * *',
-    onTick: cleanupFreezeDry,
+    cronTime: '* */30 * * * *',
+    onTick: cleanupFreezeDry(),
     start: true,
 })
 
