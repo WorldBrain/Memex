@@ -1,6 +1,6 @@
 import db from 'src/pouchdb'
 import { FREEZE_DRY_BOOKMARKS_KEY } from 'src/options/preferences/constants'
-import { pageDocsSelector } from './'
+import { pageDocsSelector } from 'src/page-storage'
 
 const freezeDryAttachmentId = 'frozen-page.html'
 
