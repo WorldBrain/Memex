@@ -1,7 +1,7 @@
 import whenAllSettled from 'src/util/when-all-settled'
 import { inlineUrlsInAttributes } from './common'
 
-function getUrlsFromSrcset(srcsetValue) {
+export function getUrlsFromSrcset(srcsetValue) {
     // srcset example: srcset="http://image 2x, http://other-image 1.5x"
     const URLs = srcsetValue.split(',').map(srcsetItem =>
         srcsetItem.trim().split(/\s+/)[0]
