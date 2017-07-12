@@ -47,7 +47,7 @@ const browserifySettings = {
     paths: ['.'],
 }
 
-function createBundle({filePath, watch = false, production = false}) {
+async function createBundle({filePath, watch = false, production = false}) {
     const { dir, name, ext } = path.parse(filePath)
     const entries = [path.join('src', filePath)]
     const destination = path.join('extension', dir)
@@ -91,7 +91,7 @@ function createBundle({filePath, watch = false, production = false}) {
         b.transform(uglifyify, {global: true})
     }
 
-    function bundle() {
+    function bundle(callback) {
         let startTime = Date.now()
         b.bundle()
             .on('error', error => console.error(error.message))
@@ -102,10 +102,13 @@ function createBundle({filePath, watch = false, production = false}) {
             .on('end', () => {
                 let time = (Date.now() - startTime) / 1000
                 console.log(`Bundled ${output} in ${time}s.`)
+                if (!watch) {
+                    callback()
+                }
             })
     }
 
-    bundle()
+    await pify(bundle)()
 }
 
 gulp.task('copyStaticFiles', () => {
@@ -125,16 +128,19 @@ gulp.task('lint', () => {
         }))
 })
 
-gulp.task('build-prod', ['copyStaticFiles', 'lint'], () => {
-    sourceFiles.forEach(filePath => createBundle({filePath, watch: false, production: true}))
+gulp.task('build-prod', ['copyStaticFiles', 'lint'], async () => {
+    const ps = sourceFiles.map(filePath => createBundle({filePath, watch: false, production: true}))
+    await Promise.all(ps)
 })
 
-gulp.task('build', ['copyStaticFiles', 'lint'], () => {
-    sourceFiles.forEach(filePath => createBundle({filePath, watch: false}))
+gulp.task('build', ['copyStaticFiles', 'lint'], async () => {
+    const ps = sourceFiles.map(filePath => createBundle({filePath, watch: false}))
+    await Promise.all(ps)
 })
 
-gulp.task('build-watch', ['copyStaticFiles'], () => {
-    sourceFiles.forEach(filePath => createBundle({filePath, watch: true}))
+gulp.task('build-watch', ['copyStaticFiles'], async () => {
+    const ps = sourceFiles.map(filePath => createBundle({filePath, watch: true}))
+    await Promise.all(ps)
 })
 
 gulp.task('lint-watch', ['lint'], () => {
