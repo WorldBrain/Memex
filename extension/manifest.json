@@ -30,6 +30,7 @@
     },
     "permissions": [
         "<all_urls>",
+        "idle",
         "bookmarks",
         "history",
         "tabs",
