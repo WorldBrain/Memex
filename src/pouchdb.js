@@ -10,22 +10,42 @@ const pouchdbOptions = {
     auto_compaction: true,
 }
 
+<<<<<<< HEAD
 let db_
 if (process.env.NODE_ENV !== 'test') {
     db_ = PouchDB(pouchdbOptions)
 } else {
     // Export a non-persistent version of PouchDB for running tests.
+=======
+function initDB() {
+    return PouchDB(pouchdbOptions)
+}
+
+function initTestDB() {
+>>>>>>> 16fdf5561a81dd253e18dead1cf4e67f991d5237
     const PouchDB = require('pouchdb-node')
     const PouchDBMemory = require('pouchdb-adapter-memory')
     PouchDB.plugin(PouchDBMemory)
 
+<<<<<<< HEAD
     db_ = PouchDB({
+=======
+    return PouchDB({
+>>>>>>> 16fdf5561a81dd253e18dead1cf4e67f991d5237
         ...pouchdbOptions,
         name: 'testdb',
         adapter: 'memory',
     })
 }
+<<<<<<< HEAD
 const db = db_
+=======
+
+const db = (process.env.NODE_ENV === 'test')
+    ? initTestDB()
+    : initDB()
+
+>>>>>>> 16fdf5561a81dd253e18dead1cf4e67f991d5237
 export default db
 // Expose db for debugging
 if (process.env.NODE_ENV !== 'production') {

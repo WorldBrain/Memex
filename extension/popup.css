@@ -63,4 +63,19 @@ hr {
 .popup-item:hover {
     color:#3EB995;
     background: rgb(229, 229, 229);
+  }
+
+@font-face {
+  font-family: 'Lato';
+  font-style: normal;
+  font-weight: 300;
+  src: local('Lato Light'), local('fonts/Lato.woff2'), url(https://fonts.googleapis.com/css?family=Lato) format('woff2');
 }
+
+@font-face {
+  font-family: 'Lato';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Lato Bold'), local('fonts/Lato.woff2'), url(https://fonts.googleapis.com/css?family=Lato) format('woff2');
+}
+
