@@ -4273,9 +4273,9 @@ jest-environment-node@^20.0.3:
     jest-mock "^20.0.3"
     jest-util "^20.0.3"
 
-jest-fetch-mock@^1.1.1:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/jest-fetch-mock/-/jest-fetch-mock-1.1.1.tgz#7548b6d0c0c77071e9f8652fcb4f8d537e988d1f"
+jest-fetch-mock@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/jest-fetch-mock/-/jest-fetch-mock-1.2.0.tgz#15ac5c2d32d2c888bd3d132b682a4deb17f3ab35"
   dependencies:
     whatwg-fetch "1.0.0"
 
