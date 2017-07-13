@@ -3060,6 +3060,14 @@ form-data@~2.1.1:
     combined-stream "^1.0.5"
     mime-types "^2.1.12"
 
+freeze-dry@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/freeze-dry/-/freeze-dry-0.1.0.tgz#a055b91f8e94ce1dce99f1a904f37fa9b3f94354"
+  dependencies:
+    postinstall-build "^3.0.1"
+    response-to-data-url "^0.1.0"
+    when-all-settled "^0.1.1"
+
 fs-exists-sync@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/fs-exists-sync/-/fs-exists-sync-0.1.0.tgz#982d6893af918e72d08dec9e8673ff2b5a8d6add"

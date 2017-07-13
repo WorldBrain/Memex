@@ -42,12 +42,6 @@ For logging visits in the database. A visit object points to a page object, whic
 page itself. Project focus has shifted from logging every visit to manually storing pages, so this
 code may be refactored soon.
 
-### [`src/freeze-dry`](src/freeze-dry): snapshotting a webpage
-
-Provides the freezeDry function that creates a single static html file (returned
-as a string) with the rendered page. It takes the DOM, removes scripts, and
-inlines images and stylesheets. Should be moved into its own repo soon.
-
 ### [`src/page-analysis`](src/page-analysis/): (web)page analysis
 
 This extracts and stores information about the page in a given tab, such as:
