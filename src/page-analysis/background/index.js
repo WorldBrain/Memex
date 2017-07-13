@@ -4,7 +4,7 @@ import { dataURLToBlob } from 'blob-util'
 
 import { whenPageDOMLoaded } from 'src/util/tab-events'
 import { remoteFunction } from 'src/util/webextensionRPC'
-import whenAllSettled from 'src/util/when-all-settled'
+import whenAllSettled from 'when-all-settled'
 import db from 'src/pouchdb'
 import updateDoc from 'src/util/pouchdb-update-doc'
 

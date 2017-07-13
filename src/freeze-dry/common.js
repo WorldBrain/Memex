@@ -1,5 +1,5 @@
 import responseToDataUri from 'src/util/response-to-data-uri'
-import whenAllSettled from 'src/util/when-all-settled'
+import whenAllSettled from 'when-all-settled'
 
 
 export function removeNode(node) {

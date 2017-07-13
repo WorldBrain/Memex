@@ -8325,6 +8325,12 @@ whatwg-url@^4.3.0:
     tr46 "~0.0.3"
     webidl-conversions "^3.0.0"
 
+when-all-settled@^0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/when-all-settled/-/when-all-settled-0.1.1.tgz#369bcfd142ed1f269174b8f0b6db1c87063c6113"
+  dependencies:
+    postinstall-build "^3.0.1"
+
 when@3.7.7:
   version "3.7.7"
   resolved "https://registry.yarnpkg.com/when/-/when-3.7.7.tgz#aba03fc3bb736d6c88b091d013d8a8e590d84718"
