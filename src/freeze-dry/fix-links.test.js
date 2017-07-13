@@ -2,49 +2,58 @@
 
 import fixLinks from 'src/freeze-dry/fix-links'
 
+
 describe('fixLinks', () => {
     const docUrl = 'https://example.com/page'
 
-    test('should call the function to prepend the base element', async () => {
-        const rootElement = window.document.implementation.createHTMLDocument()
-        rootElement.querySelector('head').insertAdjacentElement = jest.fn()
+    test('should insert the <base> element into <head>', async () => {
+        const doc = window.document.implementation.createHTMLDocument()
+        const rootElement = doc.documentElement
+        doc.querySelector('head').insertAdjacentElement = jest.fn()
         const docUrl = 'about:blank'
         await fixLinks({rootElement, docUrl})
         const base = document.createElement('base')
         base.href = docUrl
-        expect(rootElement.querySelector('head').insertAdjacentElement).toBeCalledWith('afterbegin', base) // for some reason the insertAdjacentElement doesn't work with jsdom. this test is a placeholder for when a better solution arises
+        // XXX insertAdjacentElement is not yet implemented in jsdom. This test is a placeholder
+        // until a better solution arises.
+        expect(rootElement.querySelector('head').insertAdjacentElement)
+            .toBeCalledWith('afterbegin', base)
     })
 
     test('should do nothing for absolute URLs', async () => {
         const rootElement = window.document.createElement('div')
         rootElement.innerHTML = '<a href="https://example.com/#home">Link</a>'
         await fixLinks({rootElement, docUrl})
-        expect(rootElement.querySelector('*[href]').getAttribute('href')).toBe('https://example.com/#home')
+        expect(rootElement.querySelector('*[href]').getAttribute('href'))
+            .toBe('https://example.com/#home')
     })
 
-    test('should correct relative URLs', async () => {
+    test('should make relative URLs absolute', async () => {
         const rootElement = window.document.createElement('div')
-        rootElement.innerHTML = '<a href="#home">Link</a>'
+        rootElement.innerHTML = '<a href="otherpage#home">Link</a>'
         await fixLinks({rootElement, docUrl})
-        expect(rootElement.querySelector('*[href]').getAttribute('href')).toBe('https://example.com/page#home')
+        expect(rootElement.querySelector('*[href]').getAttribute('href'))
+            .toBe('https://example.com/otherpage#home')
     })
 
     test('should not alter inline javascript in href attribute', async () => {
         const rootElement = window.document.createElement('div')
         rootElement.innerHTML = `<a href="javascript:alert('Hello');">Link</a>`
         await fixLinks({rootElement, docUrl})
-        expect(rootElement.querySelector('*[href]').getAttribute('href')).toBe(`javascript:alert('Hello');`)
+        expect(rootElement.querySelector('*[href]').getAttribute('href'))
+            .toBe(`javascript:alert('Hello');`)
     })
 
-    test('should not alter mailto scripts in href attribute', async () => {
+    test('should not alter mailto: URIs in href attribute', async () => {
         const rootElement = window.document.createElement('div')
         rootElement.innerHTML = `<a href="mailto:someone@example.com">Link</a>`
         await fixLinks({rootElement, docUrl})
-        expect(rootElement.querySelector('*[href]').getAttribute('href')).toBe(`mailto:someone@example.com`)
+        expect(rootElement.querySelector('*[href]').getAttribute('href'))
+            .toBe(`mailto:someone@example.com`)
     })
 
     test('should not alter data urls in href attribute', async () => {
-        const datauri = 'data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAABGdBTUEAALGP C/xhBQAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9YGARc5KB0XV+IA AAAddEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIFRoZSBHSU1Q72QlbgAAAF1J REFUGNO9zL0NglAAxPEfdLTs4BZM4DIO4C7OwQg2JoQ9LE1exdlYvBBeZ7jq ch9//q1uH4TLzw4d6+ErXMMcXuHWxId3KOETnnXXV6MJpcq2MLaI97CER3N0 vr4MkhoXe0rZigAAAABJRU5ErkJggg=='
+        const datauri = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVR4nGNiAAAABgADNjd8qAAAAABJRU5ErkJggg=='
         const rootElement = window.document.createElement('div')
         rootElement.innerHTML = `<a href="${datauri}">Link</a>`
         await fixLinks({rootElement, docUrl})

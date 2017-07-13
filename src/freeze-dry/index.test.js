@@ -9,6 +9,7 @@ import * as setContentSecurityPolicy from 'src/freeze-dry/set-content-security-p
 import * as fixLinks from 'src/freeze-dry/fix-links'
 import * as removeNoscripts from './remove-noscripts'
 
+
 beforeAll(() => {
     inlineStyles.default = jest.fn()
     removeScripts.default = jest.fn()
@@ -19,8 +20,7 @@ beforeAll(() => {
 })
 
 describe('freezeDry', () => {
-    test('should call the whenAllSettled with all the jobs', async () => {
-        expect.assertions(6)
+    test('should run all the jobs', async () => {
         await freezeDry()
         expect(inlineStyles.default).toHaveBeenCalled()
         expect(removeScripts.default).toHaveBeenCalled()
@@ -31,6 +31,7 @@ describe('freezeDry', () => {
     })
 
     test('should return the HTML document as a string', async () => {
+        // XXX We depend on the default empty document provided by jest.
         const html = await freezeDry()
         expect(html).toBe('<html><head></head><body></body></html>')
     })
