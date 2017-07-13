@@ -1,7 +1,7 @@
 /* eslint-env jest */
 
 import { inlineUrlsInAttributes, urlToDataUri, removeNode } from 'src/freeze-dry/common'
-import * as responseToDataUri from 'src/util/response-to-data-uri'
+import * as responseToDataUrl from 'response-to-data-url'
 import { dataURLToBlob } from 'blob-util'
 
 
@@ -26,7 +26,7 @@ describe('removeNode', () => {
 describe('urlToDataUri', () => {
     test('should return a dataUri given a URL', async () => {
         const someDataUri = 'data:text/html,<h1>bananas</h1>'
-        const spy = jest.spyOn(responseToDataUri, 'default').mockImplementation(async () => {
+        const spy = jest.spyOn(responseToDataUrl, 'default').mockImplementation(async () => {
             return someDataUri
         })
         const dataUri = await urlToDataUri('https://example.com/page')
@@ -35,7 +35,7 @@ describe('urlToDataUri', () => {
     })
 
     test('should return a "about:invalid" upon failure', async () => {
-        const spy = jest.spyOn(responseToDataUri, 'default').mockImplementation(async () => {
+        const spy = jest.spyOn(responseToDataUrl, 'default').mockImplementation(async () => {
             throw new Error('mock error')
         })
         const dataUri = await urlToDataUri('http://example.com')
