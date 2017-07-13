@@ -48,12 +48,6 @@ represent the visited page itself. This object should soon be deduplicated when
 the same page is visited multiple times. After creating a new page object,
 the next module is triggered to start analysing the page.
 
-### [`src/freeze-dry`](src/freeze-dry): snapshotting a webpage
-
-Provides the freezeDry function that creates a single static html file (returned
-as a string) with the rendered page. It takes the DOM, removes scripts, and
-inlines images and stylesheets. Should be moved into its own repo soon.
-
 ### [`src/page-analysis`](src/page-analysis/): (web)page analysis
 
 This extracts and stores information about the page in a given tab, such as:

@@ -1,6 +1,6 @@
 import extractPageContent from 'src/page-analysis/content_script/extract-page-content'
 import extractFavIcon from 'src/page-analysis/content_script/extract-fav-icon'
-import freezeDry from 'src/freeze-dry'
+import freezeDry from 'freeze-dry'
 
 /**
  * @typedef IFetchPageDataOpts

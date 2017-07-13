@@ -26,6 +26,7 @@
     "cron": "^1.2.1",
     "diff-match-patch": "^1.0.0",
     "docuri": "^4.2.2",
+    "freeze-dry": "^0.1.0",
     "history": "^4.6.3",
     "lodash": "^4.17.4",
     "moment": "^2.18.1",
