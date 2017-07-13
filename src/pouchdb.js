@@ -40,10 +40,10 @@ export const normaliseFindResult = result => ({
 export const resultRowsById = result =>
     fromPairs(result.rows.map(row => [row.id, row]))
 
-// Get an attachment from a doc as a data URI string.
+// Get an attachment from a doc as a data URL string.
 // Pass either a docId or a doc itself, and the attachmentId.
 // Returns undefined if non-existent.
-export async function getAttachmentAsDataUri({doc, docId=doc._id, attachmentId}) {
+export async function getAttachmentAsDataUrl({doc, docId=doc._id, attachmentId}) {
     if (!docId
         || !attachmentId
         // If we got passed the doc itself, we can check whether the attachment exists.
@@ -58,6 +58,6 @@ export async function getAttachmentAsDataUri({doc, docId=doc._id, attachmentId})
         return undefined
     }
     const base64 = await blobToBase64String(blob)
-    const dataUri = `data:${blob.type};base64,${base64}`
-    return dataUri
+    const dataUrl = `data:${blob.type};base64,${base64}`
+    return dataUrl
 }

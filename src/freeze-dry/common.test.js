@@ -1,11 +1,11 @@
 /* eslint-env jest */
 
-import { inlineUrlsInAttributes, urlToDataUri, removeNode } from 'src/freeze-dry/common'
+import { inlineUrlsInAttributes, urlToDataUrl, removeNode } from 'src/freeze-dry/common'
 import * as responseToDataUrl from 'response-to-data-url'
 import { dataURLToBlob } from 'blob-util'
 
 
-const imageDataUri = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVR4nGNiAAAABgADNjd8qAAAAABJRU5ErkJggg=='
+const imageDataUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVR4nGNiAAAABgADNjd8qAAAAABJRU5ErkJggg=='
 
 beforeEach(() => {
     fetch.resetMocks()
@@ -23,14 +23,14 @@ describe('removeNode', () => {
     })
 })
 
-describe('urlToDataUri', () => {
-    test('should return a dataUri given a URL', async () => {
-        const someDataUri = 'data:text/html,<h1>bananas</h1>'
+describe('urlToDataUrl', () => {
+    test('should return a dataUrl given a URL', async () => {
+        const someDataUrl = 'data:text/html,<h1>bananas</h1>'
         const spy = jest.spyOn(responseToDataUrl, 'default').mockImplementation(async () => {
-            return someDataUri
+            return someDataUrl
         })
-        const dataUri = await urlToDataUri('https://example.com/page')
-        expect(dataUri).toBe(someDataUri)
+        const dataUrl = await urlToDataUrl('https://example.com/page')
+        expect(dataUrl).toBe(someDataUrl)
         spy.mockRestore()
     })
 
@@ -38,15 +38,15 @@ describe('urlToDataUri', () => {
         const spy = jest.spyOn(responseToDataUrl, 'default').mockImplementation(async () => {
             throw new Error('mock error')
         })
-        const dataUri = await urlToDataUri('http://example.com')
-        expect(dataUri).toBe('about:invalid')
+        const dataUrl = await urlToDataUrl('http://example.com')
+        expect(dataUrl).toBe('about:invalid')
         spy.mockRestore()
     })
 
     test('should return a "about:invalid" when fetching fails', async () => {
         fetch.mockRejectOnce()
-        const dataUri = await urlToDataUri('http://example.com')
-        expect(dataUri).toBe('about:invalid')
+        const dataUrl = await urlToDataUrl('http://example.com')
+        expect(dataUrl).toBe('about:invalid')
     })
 })
 
@@ -56,10 +56,10 @@ describe('inlineUrlsInAttributes', () => {
     let imageBlob
 
     beforeAll(async () => {
-        imageBlob = await dataURLToBlob(imageDataUri)
+        imageBlob = await dataURLToBlob(imageDataUrl)
     })
 
-    test('should change the URL in <img> tag to a dataUri', async () => {
+    test('should change the URL in <img> tag to a dataUrl', async () => {
         fetch.mockResponseOnce(imageBlob)
         const doc = parser.parseFromString(
             '<html><body><img src="public/image/background.png" alt="background" /></body></html>',
@@ -68,10 +68,10 @@ describe('inlineUrlsInAttributes', () => {
         const rootElement = doc.documentElement
         await inlineUrlsInAttributes({elements: 'img', attributes: 'src', rootElement, docUrl})
         expect(rootElement.querySelector('img').getAttribute('data-original-src')).toBe('public/image/background.png')
-        expect(rootElement.querySelector('img').getAttribute('src')).toBe(imageDataUri)
+        expect(rootElement.querySelector('img').getAttribute('src')).toBe(imageDataUrl)
     })
 
-    test('should change the URL in the <link> tag to a dataUri', async () => {
+    test('should change the URL in the <link> tag to a dataUrl', async () => {
         fetch.mockResponseOnce(imageBlob)
         const doc = parser.parseFromString(
             '<html><head><link rel="icon" href="public/image/favicon.ico"></head></html>',
@@ -80,7 +80,7 @@ describe('inlineUrlsInAttributes', () => {
         const rootElement = doc.documentElement
         await inlineUrlsInAttributes({elements: 'link', attributes: 'href', rootElement, docUrl})
         expect(rootElement.querySelector('link').getAttribute('data-original-href')).toBe('public/image/favicon.ico')
-        expect(rootElement.querySelector('link').getAttribute('href')).toBe(imageDataUri)
+        expect(rootElement.querySelector('link').getAttribute('href')).toBe(imageDataUrl)
     })
 
     test('should remove the attribute integrity from the tag', async () => {

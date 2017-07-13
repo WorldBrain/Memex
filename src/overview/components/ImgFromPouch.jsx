@@ -3,7 +3,7 @@ import omit from 'lodash/fp/omit'
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import { getAttachmentAsDataUri } from 'src/pouchdb'
+import { getAttachmentAsDataUrl } from 'src/pouchdb'
 
 
 const readHash = ({doc, attachmentId}) =>
@@ -13,7 +13,7 @@ export default class ImgFromPouch extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
-            dataUri: undefined,
+            dataUrl: undefined,
         }
     }
 
@@ -35,9 +35,9 @@ export default class ImgFromPouch extends React.Component {
     }
 
     async updateFile({doc, attachmentId}) {
-        const dataUri = await getAttachmentAsDataUri({doc, attachmentId})
+        const dataUrl = await getAttachmentAsDataUrl({doc, attachmentId})
         if (this._isMounted) {
-            this.setState({dataUri})
+            this.setState({dataUrl})
         }
     }
 
@@ -46,7 +46,7 @@ export default class ImgFromPouch extends React.Component {
         return (
             <img
                 {...childProps}
-                src={this.state.dataUri}
+                src={this.state.dataUrl}
             />
         )
     }

@@ -6,8 +6,8 @@ export function hrefForLocalPage({page}) {
         return undefined
     }
     const pageId = page._id
-    const uri = `/page-viewer/localpage.html?page=${encodeURIComponent(pageId)}`
+    const url = `/page-viewer/localpage.html?page=${encodeURIComponent(pageId)}`
     const hash = (page.url && page.url.split('#')[1])
-    const href = (hash !== undefined) ? uri + '#' + hash : uri
+    const href = (hash !== undefined) ? url + '#' + hash : url
     return href
 }

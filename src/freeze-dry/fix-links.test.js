@@ -53,10 +53,10 @@ describe('fixLinks', () => {
     })
 
     test('should not alter data urls in href attribute', async () => {
-        const datauri = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVR4nGNiAAAABgADNjd8qAAAAABJRU5ErkJggg=='
+        const dataUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVR4nGNiAAAABgADNjd8qAAAAABJRU5ErkJggg=='
         const rootElement = window.document.createElement('div')
-        rootElement.innerHTML = `<a href="${datauri}">Link</a>`
+        rootElement.innerHTML = `<a href="${dataUrl}">Link</a>`
         await fixLinks({rootElement, docUrl})
-        expect(rootElement.querySelector('*[href]').getAttribute('href')).toBe(datauri)
+        expect(rootElement.querySelector('*[href]').getAttribute('href')).toBe(dataUrl)
     })
 })

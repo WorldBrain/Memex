@@ -1,4 +1,4 @@
-import { getAttachmentAsDataUri } from 'src/pouchdb'
+import { getAttachmentAsDataUrl } from 'src/pouchdb'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { hrefForLocalPage } from 'src/page-viewer'
 
@@ -22,7 +22,7 @@ async function storeThisPage() {
     } finally {
         screenshotDimmer.classList.remove('active')
     }
-    const imgData = await getAttachmentAsDataUri({doc: page, attachmentId: 'screenshot'})
+    const imgData = await getAttachmentAsDataUrl({doc: page, attachmentId: 'screenshot'})
     screenshotImg.src = imgData
     const href = hrefForLocalPage({page})
     if (href) {

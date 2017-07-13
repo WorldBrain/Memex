@@ -2,7 +2,7 @@ import delay from 'src/util/delay'
 import { whenTabActive } from 'src/util/tab-events'
 
 // Take a screenshot of the tabId, if it is active.
-// Returns a promise of the screenshot (a png image in a data URI).
+// Returns a promise of the screenshot (a png image in a data URL).
 // The promise rejects if the tab is not currently active!
 async function snapNow({tabId}) {
     const tab = await browser.tabs.get(tabId)
@@ -13,7 +13,7 @@ async function snapNow({tabId}) {
     return image
 }
 
-// Return the promise of an image (as data URI) of the visible area of the tab,
+// Return the promise of an image (as data URL) of the visible area of the tab,
 // but only as soon as it is active (due to a limitation of the browser API)
 export default async function makeScreenshotOfTabAsap({tabId}) {
     await whenTabActive({tabId})

@@ -1,9 +1,9 @@
 import whenAllSettled from 'when-all-settled'
-import { urlToDataUri } from './common'
+import { urlToDataUrl } from './common'
 
 
 // Finds all url(...) occurrances in a string of CSS, then fetches and inlines
-// them as data URIs.
+// them as data URLs.
 // Returns the processed (and possibly much larger) string of CSS.
 async function inlineStylesheetContents({stylesheetText, stylesheetUrl}) {
     const cssFindUrlsPattern = /url\s*\(\s*('|")?\s*([^"')]+?)\s*\1\s*\)/ig
@@ -18,14 +18,14 @@ async function inlineStylesheetContents({stylesheetText, stylesheetUrl}) {
             ? new URL(match[2], stylesheetUrl)
             : undefined
     })
-    const dataUris = await Promise.all(urls.map(urlToDataUri))
-    dataUris.forEach((dataUri, i) => {
-        stylesheetText = stylesheetText.replace(cssUrls[i], `url(${dataUri})`)
+    const dataUrls = await Promise.all(urls.map(urlToDataUrl))
+    dataUrls.forEach((dataUrl, i) => {
+        stylesheetText = stylesheetText.replace(cssUrls[i], `url(${dataUrl})`)
     })
     return stylesheetText
 }
 
-// In every <link rel="stylesheet"> tag, inline the stylesheet as a data URI,
+// In every <link rel="stylesheet"> tag, inline the stylesheet as a data URL,
 // and inline every URL within that stylesheet.
 async function inlineLinkedStylesheets({rootElement, docUrl}) {
     const querySelector = 'link[rel*="stylesheet"][href]'
