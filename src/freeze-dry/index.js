@@ -1,4 +1,4 @@
-import whenAllSettled from 'src/util/when-all-settled'
+import whenAllSettled from 'when-all-settled'
 import inlineStyles from './inline-styles'
 import removeScripts from './remove-scripts'
 import removeNoscripts from './remove-noscripts'
