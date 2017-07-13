@@ -43,8 +43,9 @@ function isURLBlacklisted(url = '', blacklist = []) {
     return blacklist.reduce((prev, curr) => doesExpressionMatchURL(curr.expression) || prev, false)
 }
 
-function isURLProtocolValid(url = '') {
-    // Just remember http(s) pages, ignoring data uris, newtab, ...
+// Tell whether a page can be stored.
+export function isLoggable(url) {
+    // Only http(s) pages. Ignoring data URLs, newtab, ...
     const loggableUrlPattern = /^https?:\/\//
     return loggableUrlPattern.test(url)
 }
@@ -70,5 +71,5 @@ export async function checkWithBlacklist() {
     /**
      * @param {string} url The URL to check against the blacklist
      */
-    return ({ url = '' } = {}) => isURLProtocolValid(url) && !isURLBlacklisted(url, blacklist)
+    return ({ url = '' } = {}) => isLoggable(url) && !isURLBlacklisted(url, blacklist)
 }

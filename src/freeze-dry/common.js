@@ -6,18 +6,18 @@ export function removeNode(node) {
     node.parentNode.removeChild(node)
 }
 
-export async function urlToDataUri(url) {
+export async function urlToDataUrl(url) {
     try {
         const response = await fetch(url, {cache: 'force-cache'})
-        const dataUri = await responseToDataUrl(response)
-        return dataUri
+        const dataUrl = await responseToDataUrl(response)
+        return dataUrl
     } catch (err) {
         return 'about:invalid'
     }
 }
 
 // Find all URLs in the specified attribute(s) of the specified elements, fetch
-// their contents, and replace the URL with the content encoded as a data URI.
+// their contents, and replace the URL with the content encoded as a data URL.
 // The elements argument can be a query selector string if rootElement is given.
 export async function inlineUrlsInAttributes({
     elements,
@@ -44,17 +44,17 @@ export async function inlineUrlsInAttributes({
             const urls = attrToUrls(value, attribute)
 
             // Fetch (hopefully from cache) the resource for each URL.
-            const dataUriPs = urls.map(async url => {
+            const dataUrlPs = urls.map(async url => {
                 const absoluteUrl = new URL(url, docUrl)
-                const dataUri = await urlToDataUri(absoluteUrl)
-                return dataUri
+                const dataUrl = await urlToDataUrl(absoluteUrl)
+                return dataUrl
             })
-            const dataUris = await Promise.all(dataUriPs)
+            const dataUrls = await Promise.all(dataUrlPs)
 
-            // Replace the URLs in the attribute value with the data URIs.
+            // Replace the URLs in the attribute value with the data URLs.
             let newValue = value
             for (let i = 0; i < urls.length; i++) {
-                newValue = newValue.replace(urls[i], dataUris[i])
+                newValue = newValue.replace(urls[i], dataUrls[i])
             }
             if (newValue !== value) {
                 element.setAttribute(attribute, newValue)

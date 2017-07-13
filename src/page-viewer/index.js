@@ -29,6 +29,7 @@ export const LinkToLocalVersion = ({page, children, ...props}) => {
         </a>
     )
 }
+
 LinkToLocalVersion.propTypes = {
     page: PropTypes.object.isRequired,
     className: PropTypes.string,

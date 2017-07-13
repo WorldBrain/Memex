@@ -6,7 +6,7 @@ export default function setContentSecurityPolicy({doc, policyDirectives}) {
         doc.documentElement.insertAdjacentElement('afterbegin', head)
     }
 
-    // Disallow any sources, except data URIs where we use them.
+    // Disallow any sources, except data URLs where we use them.
     const csp = policyDirectives.join('; ')
 
     const metaEl = doc.createElement('meta')
