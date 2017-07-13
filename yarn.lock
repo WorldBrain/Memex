@@ -7154,6 +7154,12 @@ resolve@^1.1.3, resolve@^1.1.4, resolve@^1.1.6, resolve@^1.1.7, resolve@^1.3.2, 
   dependencies:
     path-parse "^1.0.5"
 
+response-to-data-url@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/response-to-data-url/-/response-to-data-url-0.1.0.tgz#da1eb5724d114bd6568dda890acfbc3f905663ab"
+  dependencies:
+    postinstall-build "^3.0.1"
+
 restore-cursor@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/restore-cursor/-/restore-cursor-1.0.1.tgz#34661f46886327fed2991479152252df92daa541"

@@ -1,4 +1,4 @@
-import responseToDataURI from 'src/util/response-to-data-uri'
+import responseToDataUrl from 'response-to-data-url'
 
 // Get a tab's fav-icon (website logo) as a data URI
 async function getFavIcon({tabId}) {
@@ -9,7 +9,7 @@ async function getFavIcon({tabId}) {
     }
 
     const response = await fetch(tab.favIconUrl)
-    const dataURI = await responseToDataURI(response)
+    const dataURI = await responseToDataUrl(response)
     return dataURI
 }
 

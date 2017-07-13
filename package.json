@@ -47,6 +47,7 @@
     "redux-query-sync": "^0.1.4",
     "redux-thunk": "^2.2.0",
     "reselect": "^3.0.1",
+    "response-to-data-url": "^0.1.0",
     "rxjs": "^5.4.1",
     "tldjs": "^1.7.0",
     "webextension-polyfill": "^0.1.1",

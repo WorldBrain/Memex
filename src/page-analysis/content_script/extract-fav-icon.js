@@ -1,4 +1,4 @@
-import responseToDataURI from 'src/util/response-to-data-uri'
+import responseToDataUrl from 'response-to-data-url'
 
 /**
  * @param {Document} doc DOM to attempt to find favicon URL from.
@@ -11,21 +11,21 @@ function getFavIconURLFromDOM(doc) {
 
 /**
  * @param {string} favIconUrl URL pointing to a favicon.
- * @returns {string?} Favicon encoded as data URI.
+ * @returns {string?} Favicon encoded as data URL.
  */
 async function getFavIcon(favIconUrl) {
     if (!favIconUrl) return
 
     try {
         const response = await fetch(favIconUrl)
-        const dataURI = await responseToDataURI(response)
-        return dataURI
+        const dataUrl = await responseToDataUrl(response)
+        return dataUrl
     } catch (err) {} // carry on without fav-icon
 }
 
 /**
  * @param {Document} doc DOM to attempt to extract favicon from.
- * @returns {string?} Favicon encoded as data URI.
+ * @returns {string?} Favicon encoded as data URL.
  */
 const extractFavIcon = (doc = document) => getFavIcon(getFavIconURLFromDOM(doc))
 export default extractFavIcon
