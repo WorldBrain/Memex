@@ -57,7 +57,7 @@ const sourceFiles = [
         destination: './extension/page-viewer',
     },
     {
-        entries: ['./src/popup.js'],
+        entries: ['./src/popup/index.js'],
         output: 'popup.js',
         destination: './extension',
     },

@@ -1,11 +1,13 @@
 import tldjs from 'tldjs'
 
 import 'src/activity-logger/background'
+import 'src/scheduled-tasks/background'
 import 'src/omnibar'
 import { installTimeStorageKey } from 'src/imports/background'
 import convertOldData from 'src/util/old-data-converter'
 
 export const dataConvertTimeKey = 'data-conversion-timestamp'
+
 
 async function openOverview() {
     const [ currentTab ] = await browser.tabs.query({ active: true })
