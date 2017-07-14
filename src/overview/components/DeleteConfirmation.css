@@ -1,0 +1,71 @@
+.buttonBar {
+    display: flex;
+    justify-content: space-around;
+}
+
+.button {
+    border: none;
+    background: none;
+    transition: all 200ms;
+    cursor: pointer;
+
+    &:hover {
+        color: #3eb995;
+    }
+}
+
+.confirmButton {
+    font-size: 1.2em;
+    font-weight: 500;
+}
+
+.overlay {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    transition: opacity 500ms;
+    visibility: hidden;
+    opacity: 0;
+}
+
+.overlayShown {
+    visibility: visible;
+    opacity: 1;
+}
+
+.popup {
+    padding: 20px;
+    background: #fff;
+    border-radius: 5px;
+    width: 30%;
+    position: relative;
+    transition: all 5s ease-in-out;
+}
+
+.close {
+    position: absolute;
+    top: 5px;
+    right: 15px;
+    font-size: 2em;
+    font-weight: bold;
+    text-decoration: none;
+    color: #333;
+
+    &:hover {
+        color: #06d85f;
+    }
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    min-height: 100px;
+}
