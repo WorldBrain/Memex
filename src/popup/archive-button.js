@@ -1,14 +1,9 @@
-import qs from 'query-string'
-import last from 'lodash/fp/last'
-
 import db from 'src/pouchdb'
-import extractTimeFiltersFromQuery from 'src/util/nlp-time-filter.js'
+import last from 'lodash/fp/last'
 import { pageDocsSelector } from 'src/page-storage'
 import updateDoc from 'src/util/pouchdb-update-doc'
 
-const overviewURL = 'overview/overview.html'
-const input = document.getElementById('search')
-const archiveBtn = document.getElementById('archive-button')
+export const archiveBtn = document.getElementById('archive-button')
 
 /**
  * Attempts to get the ID of the page doc matching the current tab.
@@ -70,18 +65,5 @@ archiveBtn.addEventListener('click', async event => {
         console.error(error)
     } finally {
         window.close()
-    }
-})
-
-// Converts an enter press on the input to convert the NLP queries and forward user to overview search
-input.addEventListener('keydown', event => {
-    if (event.keyCode === 13) { // If 'Enter' pressed
-        event.preventDefault() // So the form doesn't submit
-
-        const { extractedQuery: query, startDate, endDate } = extractTimeFiltersFromQuery(input.value)
-        const queryParams = qs.stringify({ query, startDate, endDate })
-
-        browser.tabs.create({ url: `${overviewURL}?${queryParams}` }) // New tab with query
-        window.close() // Close the popup
     }
 })
