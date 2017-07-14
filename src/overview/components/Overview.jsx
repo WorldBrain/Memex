@@ -119,7 +119,7 @@ const mapDispatchToProps = dispatch => ({
         onBottomReached: actions.loadMoreResults,
         hideDeleteConfirm: actions.hideDeleteConfirm,
     }, dispatch),
-    deleteAssociatedDocs: visitId => () => dispatch(actions.deleteVisit(visitId)),
+    deleteAssociatedDocs: visitId => () => dispatch(actions.deleteVisit(visitId, true)),
     deleteVisit: visitId => () => dispatch(actions.deleteVisit(visitId)),
 })
 

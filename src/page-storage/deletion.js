@@ -2,15 +2,17 @@ import db from 'src/pouchdb'
 import { findVisits } from 'src/search/find-visits'
 import { getEquivalentPages } from 'src/search/find-pages'
 
-export async function deleteVisitAndPage({visitId}) {
+export async function deleteVisitAndPage({visitId, deleteAssoc = false}) {
     // Delete the visit object
     const visit = await db.get(visitId)
     const pageId = visit.page._id
     await db.remove(visit)
 
-    // If this was the only visit linking to the page, also remove the page.
-    // (a simple choice for now; this behaviour may be changed in the future)
-    await deletePageIfOrphaned({pageId})
+    if (deleteAssoc) {
+        // If this was the only visit linking to the page, also remove the page.
+        // (a simple choice for now; this behaviour may be changed in the future)
+        await deletePageIfOrphaned({pageId})
+    }
 }
 
 async function deletePageIfOrphaned({pageId}) {
