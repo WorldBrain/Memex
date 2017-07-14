@@ -25,3 +25,7 @@ export const searchMetaData = createSelector(searchResult, searchResult => ({
     searchedUntil: searchResult.searchedUntil,
     resultsExhausted: searchResult.resultsExhausted,
 }))
+
+export const deleteConfirmProps = createSelector(ourState, state => state.deleteConfirmProps)
+export const isDeleteConfShown = createSelector(deleteConfirmProps, state => state.isShown)
+export const deleteVisitId = createSelector(deleteConfirmProps, state => state.visitId)
