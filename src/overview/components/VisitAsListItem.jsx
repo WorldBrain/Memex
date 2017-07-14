@@ -9,7 +9,7 @@ import niceTime from 'src/util/nice-time'
 
 import ImgFromPouch from './ImgFromPouch'
 import styles from './VisitAsListItem.css'
-import { deleteVisit } from '../actions'
+import { showDeleteConfirm } from '../actions'
 
 
 const VisitAsListItem = ({doc, compact, onTrashButtonClick}) => {
@@ -85,7 +85,7 @@ VisitAsListItem.propTypes = {
 const mapStateToProps = state => ({})
 
 const mapDispatchToProps = (dispatch, {doc}) => ({
-    onTrashButtonClick: () => dispatch(deleteVisit({visitId: doc._id})),
+    onTrashButtonClick: () => dispatch(showDeleteConfirm(doc._id)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(VisitAsListItem)

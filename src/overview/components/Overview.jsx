@@ -7,6 +7,7 @@ import * as actions from '../actions'
 import * as selectors from '../selectors'
 import ResultList from './ResultList'
 import DateRangeSelection from './DateRangeSelection'
+import DeleteConfirmation from './DeleteConfirmation'
 import styles from './Overview.css'
 
 
@@ -60,6 +61,12 @@ class Overview extends React.Component {
                         waitingForResults={this.props.waitingForResults}
                         {...this.props.searchMetaData}
                     />
+                    <DeleteConfirmation
+                        isShown={this.props.isDeleteConfShown}
+                        close={this.props.hideDeleteConfirm}
+                        deleteAll={this.props.deleteAssociatedDocs(this.props.deleteVisitId)}
+                        deleteVisit={this.props.deleteVisit(this.props.deleteVisitId)}
+                    />
                 </div>
             </div>
         )
@@ -86,6 +93,11 @@ Overview.propTypes = {
         latestResult: PropTypes.object.isRequired,
         rest: PropTypes.arrayOf(PropTypes.object).isRequired,
     })).isRequired,
+    isDeleteConfShown: PropTypes.bool.isRequired,
+    deleteVisitId: PropTypes.string,
+    hideDeleteConfirm: PropTypes.func.isRequired,
+    deleteAssociatedDocs: PropTypes.func.isRequired,
+    deleteVisit: PropTypes.func.isRequired,
 }
 
 
@@ -95,13 +107,20 @@ const mapStateToProps = state => ({
     waitingForResults: !!selectors.ourState(state).waitingForResults, // cast to boolean
     searchResult: selectors.results(state),
     searchMetaData: selectors.searchMetaData(state),
+    isDeleteConfShown: selectors.isDeleteConfShown(state),
+    deleteVisitId: selectors.deleteVisitId(state),
 })
 
-const mapDispatchToProps = dispatch => bindActionCreators({
-    onInputChanged: actions.setQuery,
-    onStartDateChange: actions.setStartDate,
-    onEndDateChange: actions.setEndDate,
-    onBottomReached: actions.loadMoreResults,
-}, dispatch)
+const mapDispatchToProps = dispatch => ({
+    ...bindActionCreators({
+        onInputChanged: actions.setQuery,
+        onStartDateChange: actions.setStartDate,
+        onEndDateChange: actions.setEndDate,
+        onBottomReached: actions.loadMoreResults,
+        hideDeleteConfirm: actions.hideDeleteConfirm,
+    }, dispatch),
+    deleteAssociatedDocs: visitId => () => dispatch(actions.deleteVisit(visitId)),
+    deleteVisit: visitId => () => dispatch(actions.deleteVisit(visitId)),
+})
 
 export default connect(mapStateToProps, mapDispatchToProps)(Overview)

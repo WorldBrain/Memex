@@ -29,10 +29,10 @@ export function init() {
     }
 }
 
-export function deleteVisit({visitId}) {
+export function deleteVisit(visitId) {
     return async function (dispatch, getState) {
         // Hide the visit + confirm modal directly (optimistically).
-        dispatch(hideVisit({visitId}))
+        dispatch(hideVisit(visitId))
         dispatch(hideDeleteConfirm())
         // Remove it from the database.
         await deleteVisitAndPage({visitId})

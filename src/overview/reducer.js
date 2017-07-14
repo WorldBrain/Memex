@@ -77,7 +77,7 @@ function finishExpandSearch(state, {value: newResult, error, cancelled}) {
     }
 }
 
-function hideVisit(state, {visitId}) {
+function hideVisit(state, visitId) {
     return update('searchResult.rows',
         rows => remove(row => row.id === visitId)(rows)
     )(state)
