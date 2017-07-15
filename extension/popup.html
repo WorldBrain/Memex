@@ -1,38 +1,10 @@
  <html>
     <head>
         <link rel="stylesheet" href="./options/fonts/material-icons/material-icons.css">
-        <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
         <link rel="stylesheet" type="text/css" href="popup.css">
     </head>
     <body>
-        <div class="popup">
-            <form class="popup-search-container">
-                <i class="material-icons">search</i>
-                <input id="search" class="popup-search" name="query" placeholder="Search your memory" />
-            </form>
-
-            <a class="popup-item" href="options/options.html#/settings" target="_blank">
-                <i class="material-icons">settings</i>
-                Settings
-            </a>
-
-            <a class="popup-item" href="https://www.reddit.com/r/WorldBrain/" target="_blank">
-                <i class="material-icons">feedback</i>
-                Feedback
-            </a>
-
-            <hr/>
-
-            <a class="popup-item" href="options/options.html#/import" target="_blank">
-                <i class="material-icons">file_download</i>
-                Import History &amp; Bookmarks
-            </a>
-
-            <button id="archive-button" class="popup-item popup-item-button">
-                <i class="material-icons">archive</i>
-                Archive Current Page
-            </button>
-        </div>
+        <div id="popup"></div>
 
         <script src="/lib/browser-polyfill.js"></script>
         <script type="text/javascript" src="./popup.js"></script>

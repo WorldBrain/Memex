@@ -53,6 +53,10 @@ hr {
     font-style: italic;
 }
 
+.popup-link {
+    text-decoration: none;
+}
+
 .popup-item {
     color: #3b3b3b;
     text-decoration: none;
