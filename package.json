@@ -1,10 +1,11 @@
 {
-  "name": "webmemex-extension",
+  "name": "worldbrain-extension",
   "version": "0.1.0",
-  "homepage": "https://webmemex.org",
+  "homepage": "https://worldbrain.io",
+  "license": "Unlicense",
   "repository": {
     "type": "git",
-    "url": "https://github.com/WebMemex/webmemex-extension.git"
+    "url": "https://github.com/WorldBrain/WebMemex"
   },
   "scripts": {
     "build-prod": "gulp build-prod",
