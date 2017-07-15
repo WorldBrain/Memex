@@ -3,7 +3,7 @@ import * as selectors from './selectors'
 import { STORAGE_KEYS } from './constants'
 
 const hydrateImportsFromStorage = store => {
-    const hydrate = (key, action) => chrome.storage.local.get(key, data => {
+    const hydrate = (key, action) => browser.storage.local.get(key).then(data => {
         if (!data[key]) return
 
         const parsedData = JSON.parse(data[key])
@@ -17,7 +17,7 @@ const hydrateImportsFromStorage = store => {
 }
 
 const syncImportsToStorage = store => store.subscribe(() => {
-    const dump = (key, data) => chrome.storage.local.set({ [key]: JSON.stringify(data) })
+    const dump = (key, data) => browser.storage.local.set({ [key]: JSON.stringify(data) })
 
     const state = store.getState()
     dump(STORAGE_KEYS.DOWNLOAD_DATA, selectors.downloadData(state))

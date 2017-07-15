@@ -6,7 +6,7 @@ import { STORAGE_KEY } from './constants'
  * Handles hydrating of blacklist data from storage to redux state.
  * @param {any} store Redux store to hydrate.
  */
-const hydrateBlacklistFromStorage = store => chrome.storage.local.get(STORAGE_KEY, data => {
+const hydrateBlacklistFromStorage = store => browser.storage.local.get(STORAGE_KEY).then(data => {
     if (!data.blacklist) return
 
     const blacklist = JSON.parse(data.blacklist)
@@ -19,7 +19,7 @@ const hydrateBlacklistFromStorage = store => chrome.storage.local.get(STORAGE_KE
  */
 const syncBlacklistToStorage = store => store.subscribe(() => {
     const { blacklist } = entireState(store.getState())
-    chrome.storage.local.set({ [STORAGE_KEY]: JSON.stringify(blacklist) })
+    browser.storage.local.set({ [STORAGE_KEY]: JSON.stringify(blacklist) })
 })
 
 export default storeCreator => (reducer, initState, enhancer) => {
