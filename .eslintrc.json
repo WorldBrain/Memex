@@ -57,7 +57,7 @@
         "import/unambiguous": "off",
         "promise/avoid-new": "off",
         "promise/always-return": "off",
-        "react/jsx-filename-extension": "error",
+        "react/jsx-filename-extension": "off",
         "react/prefer-stateless-function": "warn",
         "react/sort-comp": "warn",
         "react/jsx-max-props-per-line": [1, { "when": "multiline" }]
