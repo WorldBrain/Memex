@@ -1,15 +1,14 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-const Button = ({ icon, onClick, children }) => (
-    <button className='popup-item popup-item-button' onClick={onClick}>
+const Button = ({ icon, children, ...btnProps }) => (
+    <button className='popup-item popup-item-button' {...btnProps}>
         <i className='material-icons'>{icon}</i>
         {children}
     </button>
 )
 
 Button.propTypes = {
-    onClick: PropTypes.func,
     icon: PropTypes.string.isRequired,
     children: PropTypes.string.isRequired,
 }

@@ -5,6 +5,7 @@ import extractTimeFiltersFromQuery from 'src/util/nlp-time-filter.js'
 import Popup from './components/Popup'
 import Button from './components/Button'
 import LinkButton from './components/LinkButton'
+import { getCurrentTabPageDocId, updateArchiveFlag } from './archive-button'
 
 export const overviewURL = 'overview/overview.html'
 export const optionsURL = 'options/options.html'
@@ -16,10 +17,34 @@ class PopupContainer extends Component {
 
         this.state = {
             searchValue: '',
+            archiveBtnDisabled: true,
+            currentTabPageDocId: '',
         }
 
+        this.onArchiveBtnClick = this.onArchiveBtnClick.bind(this)
         this.onSearchChange = this.onSearchChange.bind(this)
         this.onSearchEnter = this.onSearchEnter.bind(this)
+    }
+
+    async componentDidMount() {
+        try {
+            const currentTabPageDocId = await getCurrentTabPageDocId()
+            this.setState(state => ({ ...state, currentTabPageDocId, archiveBtnDisabled: false }))
+        } catch (error) {
+            // Can't get the ID at this time
+        }
+    }
+
+    async onArchiveBtnClick(event) {
+        event.preventDefault()
+
+        try {
+            await updateArchiveFlag(this.state.currentTabPageDocId)
+        } catch (error) {
+            // Can't do it for whatever reason
+        } finally {
+            window.close()
+        }
     }
 
     onSearchChange(event) {
@@ -40,7 +65,7 @@ class PopupContainer extends Component {
     }
 
     render() {
-        const { searchValue } = this.state
+        const { searchValue, archiveBtnDisabled } = this.state
 
         return (
             <Popup searchValue={searchValue} onSearchChange={this.onSearchChange} onSearchEnter={this.onSearchEnter}>
@@ -53,7 +78,7 @@ class PopupContainer extends Component {
                 <LinkButton href={`${optionsURL}#/import`} icon='file_download'>
                     Import History &amp; Bookmarks
                 </LinkButton>
-                <Button icon='archive'>
+                <Button icon='archive' onClick={this.onArchiveBtnClick} disabled={archiveBtnDisabled}>
                     Archive Current Page
                 </Button>
             </Popup>
