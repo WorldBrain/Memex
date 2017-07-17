@@ -2,12 +2,12 @@ import React, { Component } from 'react'
 import qs from 'query-string'
 
 import extractTimeFiltersFromQuery from 'src/util/nlp-time-filter.js'
+import { checkWithBlacklist, addToBlacklist } from 'src/activity-logger'
 import Popup from './components/Popup'
 import Button from './components/Button'
 import LinkButton from './components/LinkButton'
 import SplitButton from './components/SplitButton'
-import { getCurrentTabPageDocId, updateArchiveFlag } from './archive-button'
-import { getCurrentPageBlacklistedState } from './blacklist-button'
+import { getPageDocId, updateArchiveFlag } from './archive-button'
 
 export const overviewURL = '/overview/overview.html'
 export const optionsURL = '/options/options.html'
@@ -18,6 +18,7 @@ class PopupContainer extends Component {
         super(props)
 
         this.state = {
+            url: '',
             searchValue: '',
             currentTabPageDocId: '',
             blacklistBtnDisabled: true,
@@ -31,19 +32,36 @@ class PopupContainer extends Component {
     }
 
     async componentDidMount() {
-        try {
-            const currentTabPageDocId = await getCurrentTabPageDocId()
-            this.setState(state => ({ ...state, currentTabPageDocId, archiveBtnDisabled: false }))
-        } catch (error) {
-            // Can't get the ID at this time
-        }
+        const [currentTab] = await browser.tabs.query({ active: true, currentWindow: true })
 
+        // If we can't get the tab data, then can't init action button states
+        if (!currentTab || !currentTab.url) { return }
+
+        let initState = { url: currentTab.url }
         try {
-            const isCurrentPageBlacklisted = await getCurrentPageBlacklistedState()
-            this.setState(state => ({ ...state, blacklistBtnDisabled: isCurrentPageBlacklisted }))
+            const blacklistBtnState = await this.getInitBlacklistBtnState(currentTab.url)
+            initState = { ...initState, ...blacklistBtnState }
+
+            const archiveBtnState = await this.getInitArchiveBtnState(currentTab.url)
+            initState = { ...initState, ...archiveBtnState }
         } catch (error) {
-            // Can't check with the blacklist at this time
+            // Too bad; continue on with current render
+        } finally {
+            this.setState(state => ({ ...state, ...initState }))
         }
+    }
+
+    async getInitArchiveBtnState(url) {
+        const currentTabPageDocId = await getPageDocId(url)
+        return {
+            currentTabPageDocId,
+            archiveBtnDisabled: false,
+        }
+    }
+
+    async getInitBlacklistBtnState(url) {
+        const notBlacklisted = await checkWithBlacklist()
+        return { blacklistBtnDisabled: !notBlacklisted({ url }) }
     }
 
     onBlacklistBtnClick(domain = false) {
