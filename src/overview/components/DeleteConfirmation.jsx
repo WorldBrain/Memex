@@ -15,14 +15,14 @@ const DeleteConfirmation = ({ isShown, close, deleteAll, deleteVisit }) => (
         <div className={styles.popup}>
             <button className={classNames(styles.close, styles.button)} onClick={close}>×</button>
             <div className={styles.content}>
-                Are you sure you want to forget this visit?
+                What do you want to delete?
 
                 <div className={styles.buttonBar}>
                     <button className={confirmBtnStyles} onClick={deleteVisit}>
-                        Forget visit only
+                        Only this visit
                     </button>
                     <button className={confirmBtnStyles} onClick={deleteAll}>
-                        Forget all associated data
+                        Delete all associated data
                     </button>
                 </div>
             </div>
