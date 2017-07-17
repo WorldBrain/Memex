@@ -35,6 +35,11 @@ export const deleteVisit = (visitId, deleteAssoc = false) => async (dispatch, ge
     dispatch(hideDeleteConfirm())
     // Remove it from the database.
     await deleteVisitAndPage({visitId, deleteAssoc})
+
+    // Refresh search view after deleting all assoc docs
+    if (deleteAssoc) {
+        dispatch(newSearch())
+    }
 }
 
 export const newSearch = asyncActionCreator(() => async (dispatch, getState) => {
