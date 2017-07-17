@@ -47,7 +47,7 @@ class BlacklistContainer extends Component {
 
         boundActions.addSiteToBlacklist({
             expression,
-            dateAdded: new Date(),
+            dateAdded: Date.now(),
         })
 
         boundActions.resetSiteInputValue()

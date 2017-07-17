@@ -65,8 +65,12 @@ class PopupContainer extends Component {
     }
 
     onBlacklistBtnClick(domain = false) {
+        const url = domain ? new URL(this.state.url).hostname : this.state.url
+
         return event => {
             event.preventDefault()
+            addToBlacklist(url)
+            window.close()
         }
     }
 

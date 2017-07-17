@@ -54,11 +54,17 @@ export function isLoggable(url) {
  * Fetches ready-to-use blacklist array from storage.
  * @returns {Array<any>} Blacklist represented by nn array of objects containing `expression` keys
  */
-async function fetchBlacklistFromStorage() {
+async function fetchBlacklist() {
     // Fetch and parse blacklist data for check calls to use
     const { blacklist } = await browser.storage.local.get(blacklistStorageKey)
 
     return !blacklist ? [] : JSON.parse(blacklist)
+}
+
+async function storeBlacklist(blacklist = []) {
+    const serialized = JSON.stringify(blacklist)
+
+    await browser.storage.local.set({ [blacklistStorageKey]: serialized })
 }
 
 /**
@@ -66,10 +72,21 @@ async function fetchBlacklistFromStorage() {
  * @returns {({ url: string }) => boolean} Ready-to-use checking function against a URL
  */
 export async function checkWithBlacklist() {
-    const blacklist = await fetchBlacklistFromStorage()
+    const blacklist = await fetchBlacklist()
 
     /**
      * @param {string} url The URL to check against the blacklist
      */
     return ({ url = '' } = {}) => isLoggable(url) && !isURLBlacklisted(url, blacklist)
+}
+
+const createBlacklistEntry = url => ({
+    expression: url,
+    dateAdded: Date.now(),
+})
+
+export async function addToBlacklist(url) {
+    const blacklist = await fetchBlacklist()
+
+    await storeBlacklist([...blacklist, createBlacklistEntry(url)])
 }
