@@ -34,3 +34,13 @@
         background: none;
     }
 }
+
+.splitBtn {
+    display: flex;
+    width: 100%;
+    height: 40px;
+
+    & > .itemBtn {
+        justify-content: center;
+    }
+}

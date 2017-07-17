@@ -6,13 +6,13 @@ import styles from './Button.css'
 
 const Button = ({ icon, children, ...btnProps }) => (
     <button className={classNames(styles.item, styles.itemBtn)} {...btnProps}>
-        <i className='material-icons'>{icon}</i>
+        {icon && <i className='material-icons'>{icon}</i>}
         {children}
     </button>
 )
 
 Button.propTypes = {
-    icon: PropTypes.string.isRequired,
+    icon: PropTypes.string,
     children: PropTypes.string.isRequired,
 }
 

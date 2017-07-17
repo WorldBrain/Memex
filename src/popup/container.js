@@ -5,6 +5,7 @@ import extractTimeFiltersFromQuery from 'src/util/nlp-time-filter.js'
 import Popup from './components/Popup'
 import Button from './components/Button'
 import LinkButton from './components/LinkButton'
+import SplitButton from './components/SplitButton'
 import { getCurrentTabPageDocId, updateArchiveFlag } from './archive-button'
 import { getCurrentPageBlacklistedState } from './blacklist-button'
 
@@ -21,6 +22,7 @@ class PopupContainer extends Component {
             currentTabPageDocId: '',
             blacklistBtnDisabled: true,
             archiveBtnDisabled: true,
+            blacklistChoice: false,
         }
 
         this.onArchiveBtnClick = this.onArchiveBtnClick.bind(this)
@@ -43,6 +45,11 @@ class PopupContainer extends Component {
             // Can't check with the blacklist at this time
         }
     }
+
+    onBlacklistBtnClick(domain = false) {
+        return event => {
+            event.preventDefault()
+        }
     }
 
     async onArchiveBtnClick(event) {
@@ -74,6 +81,27 @@ class PopupContainer extends Component {
         }
     }
 
+    renderBlacklistButton() {
+        const { blacklistChoice, blacklistBtnDisabled } = this.state
+        const setBlacklistChoice = () => this.setState(state => ({ ...state, blacklistChoice: true }))
+
+        if (!blacklistChoice) { // Standard blacklist button
+            return (
+                <Button icon='block' onClick={setBlacklistChoice} disabled={blacklistBtnDisabled}>
+                    Blacklist Current Page
+                </Button>
+            )
+        }
+
+        // Domain vs URL choice button
+        return (
+            <SplitButton icon='block'>
+                <Button onClick={this.onBlacklistBtnClick(true)}>Domain</Button>
+                <Button onClick={this.onBlacklistBtnClick(false)}>URL</Button>
+            </SplitButton>
+        )
+    }
+
     render() {
         const { searchValue, archiveBtnDisabled } = this.state
 
@@ -92,6 +120,7 @@ class PopupContainer extends Component {
                 <Button icon='archive' onClick={this.onArchiveBtnClick} disabled={archiveBtnDisabled}>
                     Archive Current Page
                 </Button>
+                {this.renderBlacklistButton()}
             </Popup>
         )
     }
