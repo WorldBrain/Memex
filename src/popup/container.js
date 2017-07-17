@@ -6,6 +6,7 @@ import Popup from './components/Popup'
 import Button from './components/Button'
 import LinkButton from './components/LinkButton'
 import { getCurrentTabPageDocId, updateArchiveFlag } from './archive-button'
+import { getCurrentPageBlacklistedState } from './blacklist-button'
 
 export const overviewURL = '/overview/overview.html'
 export const optionsURL = '/options/options.html'
@@ -17,8 +18,9 @@ class PopupContainer extends Component {
 
         this.state = {
             searchValue: '',
-            archiveBtnDisabled: true,
             currentTabPageDocId: '',
+            blacklistBtnDisabled: true,
+            archiveBtnDisabled: true,
         }
 
         this.onArchiveBtnClick = this.onArchiveBtnClick.bind(this)
@@ -33,6 +35,14 @@ class PopupContainer extends Component {
         } catch (error) {
             // Can't get the ID at this time
         }
+
+        try {
+            const isCurrentPageBlacklisted = await getCurrentPageBlacklistedState()
+            this.setState(state => ({ ...state, blacklistBtnDisabled: isCurrentPageBlacklisted }))
+        } catch (error) {
+            // Can't check with the blacklist at this time
+        }
+    }
     }
 
     async onArchiveBtnClick(event) {
