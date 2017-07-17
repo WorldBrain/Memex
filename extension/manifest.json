@@ -11,7 +11,7 @@
     }],
     "browser_action": {
         "default_title": "Memory overview",
-        "default_popup": "popup.html"
+        "default_popup": "./popup/popup.html"
 
     },
     "commands": {

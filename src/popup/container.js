@@ -7,8 +7,8 @@ import Button from './components/Button'
 import LinkButton from './components/LinkButton'
 import { getCurrentTabPageDocId, updateArchiveFlag } from './archive-button'
 
-export const overviewURL = 'overview/overview.html'
-export const optionsURL = 'options/options.html'
+export const overviewURL = '/overview/overview.html'
+export const optionsURL = '/options/options.html'
 export const feedbackURL = 'https://www.reddit.com/r/WorldBrain'
 
 class PopupContainer extends Component {
@@ -75,6 +75,7 @@ class PopupContainer extends Component {
                 <LinkButton href={feedbackURL} icon='feedback'>
                     Feedback
                 </LinkButton>
+                <hr />
                 <LinkButton href={`${optionsURL}#/import`} icon='file_download'>
                     Import History &amp; Bookmarks
                 </LinkButton>

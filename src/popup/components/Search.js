@@ -1,11 +1,13 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
+import styles from './Popup.css'
+
 const Search = ({ onSearchEnter, onSearchChange, searchValue }) => (
-    <form className='popup-search-container'>
+    <form className={styles.searchContainer}>
         <i className='material-icons'>search</i>
         <input
-            className='popup-search'
+            className={styles.search}
             name='query'
             placeholder='Search your memory'
             onKeyDown={onSearchEnter}

@@ -59,7 +59,8 @@ const sourceFiles = [
     {
         entries: ['./src/popup/index.js'],
         output: 'popup.js',
-        destination: './extension',
+        destination: './extension/popup',
+        cssOutput: 'style.css',
     },
 ]
 

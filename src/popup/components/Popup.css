@@ -1,0 +1,49 @@
+body {
+    margin: 0;
+    padding: 8px;
+    width: 280px;
+}
+
+i {
+    padding: 8px;
+}
+
+hr {
+    border: 0;
+    height: 0;
+    margin: 0;
+    padding: 0;
+    border-bottom: 1px solid rgb(229, 229, 229);
+}
+
+.popup {
+    background-color: rgb(255, 255, 255);
+    margin: -8px;
+    font-size: 1.2em;
+}
+
+.searchContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 13px 12px;
+    margin-bottom: 0;
+    border-bottom: 1px solid rgb(202, 202, 202);
+    background: rgb(229, 229, 229);
+
+    & > i {
+        color: rgb(59, 59, 59);
+        padding: 0;
+    }
+}
+
+.search {
+    width: 90%;
+    height: 28px;
+    font-size: 1em;
+    padding: 5px;
+
+    &:placeholder-shown {
+        font-style: italic;
+    }
+}

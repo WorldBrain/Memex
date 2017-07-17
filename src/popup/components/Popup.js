@@ -3,8 +3,10 @@ import PropTypes from 'prop-types'
 
 import Search from './Search'
 
+import styles from './Popup.css'
+
 const Popup = ({ children, ...searchProps }) => (
-    <div className='popup'>
+    <div className={styles.popup}>
         <Search {...searchProps} />
         {children}
     </div>
