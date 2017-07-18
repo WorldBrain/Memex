@@ -1,6 +1,5 @@
 import db, { normaliseFindResult } from 'src/pouchdb'
 import { deleteDocs } from 'src/page-storage/deletion'
-import { addToBlacklist } from '..'
 
 /**
  * Handles confirmation and running of a quick blacklist request from the popup script.
@@ -13,8 +12,6 @@ export default function quickBlacklistConfirm(url) {
             .then(result => deleteDocs(result.rows))
             .catch(f => f) // Too bad
     }
-
-    addToBlacklist(url)
 }
 
 /**

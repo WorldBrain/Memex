@@ -3,7 +3,7 @@ import qs from 'query-string'
 
 import extractTimeFiltersFromQuery from 'src/util/nlp-time-filter.js'
 import { remoteFunction } from 'src/util/webextensionRPC'
-import { checkWithBlacklist } from 'src/blacklist'
+import { checkWithBlacklist, addToBlacklist } from 'src/blacklist'
 import { getPageDocId, updateArchiveFlag } from './archive-button'
 import Popup from './components/Popup'
 import Button from './components/Button'
@@ -65,6 +65,7 @@ class PopupContainer extends Component {
 
         return event => {
             event.preventDefault()
+            addToBlacklist(url)
             this.blacklistConfirm(url)
             window.close()
         }

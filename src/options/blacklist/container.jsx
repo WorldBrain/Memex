@@ -45,10 +45,7 @@ class BlacklistContainer extends Component {
         // Ignore when user tries to submit nothing (no error state, so just do nothing)
         if (expression.length === 0) return
 
-        boundActions.addSiteToBlacklist({
-            expression,
-            dateAdded: Date.now(),
-        })
+        boundActions.addToBlacklist(expression)
 
         boundActions.resetSiteInputValue()
 
