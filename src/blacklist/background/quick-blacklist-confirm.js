@@ -7,11 +7,11 @@ import { addToBlacklist } from '..'
  *
  * @param {string} url The URL being blacklisted.
  */
-export default async function quickBlacklistConfirm(url) {
-    const { rows } = await getURLMatchingDocs({ url })
-
-    if (window.confirm(`Do you want to delete ${rows.length} matching records to ${url}?`)) {
-        deleteDocs(rows)
+export default function quickBlacklistConfirm(url) {
+    if (window.confirm(`Do you want to delete all data matching site:\n${url}`)) {
+        getURLMatchingDocs({ url })
+            .then(result => deleteDocs(result.rows))
+            .catch(f => f) // Too bad
     }
 
     addToBlacklist(url)
