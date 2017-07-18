@@ -39,18 +39,12 @@ class PopupContainer extends Component {
         // If we can't get the tab data, then can't init action button states
         if (!currentTab || !currentTab.url) { return }
 
-        let initState = { url: currentTab.url }
-        try {
-            const blacklistBtnState = await this.getInitBlacklistBtnState(currentTab.url)
-            initState = { ...initState, ...blacklistBtnState }
+        const updateState = newState => this.setState(oldState => ({ ...oldState, ...newState }))
+        const noop = f => f // Don't do anything if error; state doesn't change
 
-            const archiveBtnState = await this.getInitArchiveBtnState(currentTab.url)
-            initState = { ...initState, ...archiveBtnState }
-        } catch (error) {
-            // Too bad; continue on with current render
-        } finally {
-            this.setState(state => ({ ...state, ...initState }))
-        }
+        updateState({ url: currentTab.url })
+        this.getInitBlacklistBtnState(currentTab.url).then(updateState).catch(noop)
+        this.getInitArchiveBtnState(currentTab.url).then(updateState).catch(noop)
     }
 
     async getInitArchiveBtnState(url) {
