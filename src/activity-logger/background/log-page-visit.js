@@ -1,6 +1,7 @@
 import db from 'src/pouchdb'
 import { reidentifyOrStorePage } from 'src/page-storage/store-page'
-import { generateVisitDocId, checkWithBlacklist } from '..'
+import { checkWithBlacklist } from 'src/blacklist'
+import { generateVisitDocId } from '..'
 
 
 // Store the visit in PouchDB.

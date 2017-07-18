@@ -3,7 +3,7 @@ import docuri from 'docuri'
 import db from 'src/pouchdb'
 import randomString from 'src/util/random-string'
 import { pageDocsSelector } from 'src/page-storage'
-import { checkWithBlacklist } from 'src/activity-logger'
+import { checkWithBlacklist } from 'src/blacklist'
 import { IMPORT_TYPE } from 'src/options/imports/constants'
 import importsConnectionHandler from './imports-connection-handler'
 
