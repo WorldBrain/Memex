@@ -2,7 +2,8 @@ import React, { Component } from 'react'
 import qs from 'query-string'
 
 import extractTimeFiltersFromQuery from 'src/util/nlp-time-filter.js'
-import { checkWithBlacklist, addToBlacklist } from 'src/blacklist'
+import { remoteFunction } from 'src/util/webextensionRPC'
+import { checkWithBlacklist } from 'src/blacklist'
 import { getPageDocId, updateArchiveFlag } from './archive-button'
 import Popup from './components/Popup'
 import Button from './components/Button'
@@ -26,6 +27,7 @@ class PopupContainer extends Component {
             blacklistChoice: false,
         }
 
+        this.blacklistConfirm = remoteFunction('quickBlacklistConfirm')
         this.onArchiveBtnClick = this.onArchiveBtnClick.bind(this)
         this.onSearchChange = this.onSearchChange.bind(this)
         this.onSearchEnter = this.onSearchEnter.bind(this)
@@ -69,7 +71,7 @@ class PopupContainer extends Component {
 
         return event => {
             event.preventDefault()
-            addToBlacklist(url)
+            this.blacklistConfirm(url)
             window.close()
         }
     }
