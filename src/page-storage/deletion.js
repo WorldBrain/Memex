@@ -9,16 +9,12 @@ export async function deleteVisitAndPage({visitId, deleteAssoc = false}) {
     const pageId = visit.page._id
     await db.remove(visit)
 
-    if (deleteAssoc) {
-        await deletePageAndAssociated({pageId})
-    } else {
-        // If this was the only visit linking to the page, also remove the page.
-        // (a simple choice for now; this behaviour may be changed in the future)
-        await deletePageIfOrphaned({pageId})
-    }
+    // Either delete all associated docs or just try to delete page/s if orphaned
+    const docs = deleteAssoc ? await getAssociatedDocs({pageId}) : await getOrphanedPageDocs({pageId})
+    await deleteDocs(docs)
 }
 
-const deleteDocs = docs => db.bulkDocs(docs.map(
+export const deleteDocs = docs => db.bulkDocs(docs.map(
     row => ({
         _id: row.id,
         _rev: row.value.rev,
@@ -27,12 +23,12 @@ const deleteDocs = docs => db.bulkDocs(docs.map(
 ))
 
 /**
- * Deletes a given page doc plus any visit and bookmark docs that are associated
- * to it.
+ * Get any associated visit, bookmark, and equivalent pages associated with a given page doc.
  *
- * @param {string} pageId The ID of the page doc to delete.
+ * @param {string} pageId The ID of the page doc to get.
+ * @return {Array<Document>} Documents found associated with pageId.
  */
-async function deletePageAndAssociated({pageId}) {
+async function getAssociatedDocs({pageId}) {
     const pagesResult = await getEquivalentPages({pageId})
     const visitsResult = await findVisits({pagesResult})
     const bookmarksResult = normaliseFindResult(await db.find({
@@ -42,16 +38,14 @@ async function deletePageAndAssociated({pageId}) {
         },
     }))
 
-    const totalDocs = [
+    return [
         ...pagesResult.rows,
         ...visitsResult.rows,
         ...bookmarksResult.rows,
     ]
-
-    await deleteDocs(totalDocs)
 }
 
-async function deletePageIfOrphaned({pageId}) {
+async function getOrphanedPageDocs({pageId}) {
     // Because of deduplication, different page objects may redirect to this
     // one, or this one may redirect to others. So we check for visits either
     // referring to this page object or to any equivalent ones.
@@ -60,7 +54,5 @@ async function deletePageIfOrphaned({pageId}) {
     // If there are no visits to any of them, delete all these page objects.
     // (otherwise, we leave them; it does not seem worth the effort to smartly
     // prune some orphans among them already)
-    if (visitsResult.rows.length === 0) {
-        await deleteDocs(pagesResult.rows)
-    }
+    return visitsResult.rows.length === 0 ? pagesResult.rows : []
 }
