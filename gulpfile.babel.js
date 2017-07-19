@@ -136,12 +136,12 @@ gulp.task('lint', () => {
         }))
 })
 
-gulp.task('build-prod', ['copyStaticFiles', 'lint'], async () => {
+gulp.task('build-prod', ['copyStaticFiles'], async () => {
     const ps = sourceFiles.map(bundle => createBundle(bundle, {watch: false, production: true}))
     await Promise.all(ps)
 })
 
-gulp.task('build', ['copyStaticFiles', 'lint'], async () => {
+gulp.task('build', ['copyStaticFiles'], async () => {
     const ps = sourceFiles.map(bundle => createBundle(bundle, {watch: false}))
     await Promise.all(ps)
 })
