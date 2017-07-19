@@ -8,9 +8,9 @@
     "url": "https://github.com/WorldBrain/WebMemex"
   },
   "scripts": {
-    "build-prod": "gulp build-prod",
-    "build": "gulp build",
-    "watch": "gulp watch",
+    "build-prod": "rm -rf ./extension && gulp build-prod",
+    "build": "rm -rf ./extension && gulp build",
+    "watch": "rm -rf ./extension && gulp watch",
     "package": "gulp package",
     "test": "npm run lint && jest --verbose --config=.jest-config.json",
     "fx-run": "web-ext -s extension run --bc",
