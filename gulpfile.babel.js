@@ -1,11 +1,13 @@
 import fs from 'fs'
 import { exec as nodeExec } from 'child_process'
 import pify from 'pify'
+import streamToPromise from 'stream-to-promise'
 import gulp from 'gulp'
 import uglify from 'gulp-uglify'
 import identity from 'gulp-identity'
 import source from 'vinyl-source-stream'
 import buffer from 'vinyl-buffer'
+import stylelint from 'gulp-stylelint'
 import browserify from 'browserify'
 import watchify from 'watchify'
 import babelify from 'babelify'
@@ -127,15 +129,6 @@ gulp.task('copyStaticFiles', () => {
     }
 })
 
-gulp.task('lint', () => {
-    return gulp.src(['src/**/*.js', 'src/**/*.jsx'])
-        .pipe(eslint())
-        .pipe(eslint.format())
-        .pipe(eslint.results(results => {
-            console.log(`Total Errors: ${results.errorCount}`)
-        }))
-})
-
 gulp.task('build-prod', ['copyStaticFiles'], async () => {
     const ps = sourceFiles.map(bundle => createBundle(bundle, {watch: false, production: true}))
     await Promise.all(ps)
@@ -151,14 +144,49 @@ gulp.task('build-watch', ['copyStaticFiles'], async () => {
     await Promise.all(ps)
 })
 
-gulp.task('lint-watch', ['lint'], () =>
+
+// === Tasks for linting the source code ===
+
+const stylelintOptions = {
+    failAfterError: false,
+    reporters: [
+        {formatter: 'string', console: true},
+    ],
+}
+
+gulp.task('lint', async () => {
+    const eslintStream = gulp.src(['src/**/*.js', 'src/**/*.jsx'])
+        .pipe(eslint())
+        .pipe(eslint.format())
+        .pipe(eslint.results(results => {
+            // For clarity, also give some output when there are no errors.
+            if (results.errorCount === 0) {
+                console.log(`No eslint errors.\n`)
+            }
+        }))
+    await streamToPromise(eslintStream)
+
+    const stylelintStream = gulp.src(['src/**/*.css'])
+        .pipe(stylelint(stylelintOptions))
+    await streamToPromise(stylelintStream)
+})
+
+gulp.task('lint-watch', ['lint'], callback => {
     gulp.watch(['src/**/*.js', 'src/**/*.jsx'])
-        .on('change', (file) =>
-            gulp.src(file.path)
+        .on('change', event => {
+            return gulp.src(event.path)
                 .pipe(eslint())
                 .pipe(eslint.format())
-        )
-)
+        })
+
+    gulp.watch(['src/**/*.css'])
+        .on('change', event => {
+            return gulp.src(event.path)
+                .pipe(stylelint(stylelintOptions))
+        })
+
+    // Don't call callback, to wait forever.
+})
 
 gulp.task('watch', ['build-watch', 'lint-watch'])
 
