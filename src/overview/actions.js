@@ -15,6 +15,8 @@ export const setQuery = createAction('overview/setQuery')
 export const setStartDate = createAction('overview/setStartDate')
 export const setEndDate = createAction('overview/setEndDate')
 export const hideVisit = createAction('overview/hideVisit')
+export const showDeleteConfirm = createAction('overview/showDeleteConfirm')
+export const hideDeleteConfirm = createAction('overview/hideDeleteConfirm')
 
 
 // == Actions that trigger other actions ==
@@ -27,12 +29,16 @@ export function init() {
     }
 }
 
-export function deleteVisit({visitId}) {
-    return async function (dispatch, getState) {
-        // Hide the visit directly (optimistically).
-        dispatch(hideVisit({visitId}))
-        // Remove it from the database.
-        await deleteVisitAndPage({visitId})
+export const deleteVisit = (visitId, deleteAssoc = false) => async (dispatch, getState) => {
+    // Hide the visit + confirm modal directly (optimistically).
+    dispatch(hideVisit(visitId))
+    dispatch(hideDeleteConfirm())
+    // Remove it from the database.
+    await deleteVisitAndPage({visitId, deleteAssoc})
+
+    // Refresh search view after deleting all assoc docs
+    if (deleteAssoc) {
+        dispatch(newSearch())
     }
 }
 

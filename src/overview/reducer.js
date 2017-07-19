@@ -18,6 +18,10 @@ const defaultState = {
     // The input values used in the most recent (possibly still pending) search action.
     activeQueryParams: undefined,
     waitingForResults: false,
+    deleteConfirmProps: {
+        isShown: false,
+        visitId: '',
+    },
 }
 
 function setQuery(state, query) {
@@ -73,16 +77,32 @@ function finishExpandSearch(state, {value: newResult, error, cancelled}) {
     }
 }
 
-function hideVisit(state, {visitId}) {
+function hideVisit(state, visitId) {
     return update('searchResult.rows',
         rows => remove(row => row.id === visitId)(rows)
     )(state)
 }
 
+const showDeleteConfirm = (state, visitId) => ({
+    ...state,
+    deleteConfirmProps: {
+        ...state.deleteConfirmProps,
+        isShown: true,
+        visitId,
+    },
+})
+
+const hideDeleteConfirm = state => ({
+    ...state,
+    deleteConfirmProps: { ...state.deleteConfirmProps, isShown: false },
+})
+
 export default createReducer({
     [actions.setQuery]: setQuery,
     [actions.setStartDate]: setStartDate,
     [actions.setEndDate]: setEndDate,
+    [actions.showDeleteConfirm]: showDeleteConfirm,
+    [actions.hideDeleteConfirm]: hideDeleteConfirm,
     [actions.newSearch.pending]: startNewSearch,
     [actions.newSearch.finished]: finishNewSearch,
     [actions.expandSearch.pending]: startExpandSearch,
