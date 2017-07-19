@@ -89,10 +89,6 @@ async function createBundle({filePath, watch = false, production = false}) {
             .pipe(gulp.dest(destination))
     })
 
-    if (production) {
-        b.transform(uglifyify, {global: true})
-    }
-
     function bundle(callback) {
         let startTime = Date.now()
         b.bundle()
