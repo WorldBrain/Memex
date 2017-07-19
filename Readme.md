@@ -63,13 +63,11 @@ play along! :tada:
    (`npm install -g yarn`).
 3. Run `make` to install dependencies and compile the source files.
 4. Load it in Firefox or Chromium/Chrome:
-    * In Firefox (≥49): run `npm run fx-run` (or run [web-ext](https://developer.mozilla.org/en-US/Add-ons/WebExtensions/web-ext_command_reference#web-ext_run)
-      directly for more control).
-      Alternatively, go to [`about:debugging`](about:debugging), choose 'Load
-      Temporary Add-on', and pick `extension/manifest.json` from this repo.
-    * In Chromium/Chrome: go to [Tools→Extensions](chrome://extensions/), enable
-      'Developer mode', 'Load unpacked extension...', pick the `extension/`
-      folder from this repo.
+    * In Firefox (≥49): run `npm run firefox` (or run [web-ext] directly for more control).
+      Alternatively, go to `about:debugging`, choose 'Load Temporary Add-on', and pick
+      `extension/manifest.json` from this repo.
+    * In Chromium/Chrome: go to Tools→Extensions (`chrome://extensions`), enable 'Developer mode',
+      click 'Load unpacked extension...', and pick the `extension/` folder from this repo.
 
 *If NPM (during `make`) fails to install dependencies because a nasty firewall blocks the `git://` protocol, check [this solution](http://stackoverflow.com/questions/4891527/git-protocol-blocked-by-company-how-can-i-get-around-that/10729634#10729634)*
 
@@ -78,9 +76,8 @@ play along! :tada:
 If the steps above worked, running `npm run watch` will trigger a quick
 recompilation every time a source file has been modified.
 
-If you are testing in Firefox through `npm run fx-run`/`web-ext`, the extension
-should also reload automatically. Otherwise, depending on which part of the code
-you change, you may have to reload the extension in your browser:
+If you are testing in Firefox through `npm run firefox`/`web-ext`, the extension should also reload
+automatically. Otherwise, manually press the reload button in the extension list.
 
 - If your edits affected only the overview interface, just refresh/reopen it.
 - However, if you changed the background script, you have will to reload the
