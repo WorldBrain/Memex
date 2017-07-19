@@ -7,6 +7,7 @@ import * as blacklistI from 'src/blacklist'
 import { getPageDocId, updateArchiveFlag } from './archive-button'
 import Popup from './components/Popup'
 import Button from './components/Button'
+import HistoryPauser from './components/HistoryPauser'
 import LinkButton from './components/LinkButton'
 import SplitButton from './components/SplitButton'
 import { BLACKLIST_BTN_STATE } from './constants'
@@ -31,6 +32,7 @@ class PopupContainer extends Component {
         this.state = {
             url: '',
             searchValue: '',
+            pauseValue: 20,
             currentTabPageDocId: '',
             blacklistBtn: BLACKLIST_BTN_STATE.DISABLED,
             archiveBtnDisabled: true,
@@ -39,7 +41,9 @@ class PopupContainer extends Component {
 
         this.onArchiveBtnClick = this.onArchiveBtnClick.bind(this)
         this.onSearchChange = this.onSearchChange.bind(this)
+        this.onPauseChange = this.onPauseChange.bind(this)
         this.onSearchEnter = this.onSearchEnter.bind(this)
+        this.onPauseConfirm = this.onPauseConfirm.bind(this)
     }
 
     async componentDidMount() {
@@ -86,6 +90,16 @@ class PopupContainer extends Component {
             this.blacklistConfirm(url)
             window.close()
         }
+    }
+
+    onPauseConfirm(event) {
+        event.preventDefault()
+        window.close()
+    }
+
+    onPauseChange(event) {
+        const pauseValue = event.target.value
+        this.setState(state => ({ ...state, pauseValue }))
     }
 
     async onArchiveBtnClick(event) {
@@ -142,11 +156,19 @@ class PopupContainer extends Component {
         )
     }
 
+    renderPauseChoices() {
+        return [5, 10, 20, 30, 60, 120, 180].map((val, i) => <option key={i} value={val}>{val}</option>)
+    }
+
     render() {
-        const { searchValue, archiveBtnDisabled } = this.state
+        const { searchValue, archiveBtnDisabled, pauseValue } = this.state
 
         return (
             <Popup searchValue={searchValue} onSearchChange={this.onSearchChange} onSearchEnter={this.onSearchEnter}>
+                <HistoryPauser onConfirm={this.onPauseConfirm} onChange={this.onPauseChange} value={pauseValue}>
+                    {this.renderPauseChoices()}
+                </HistoryPauser>
+                <hr />
                 <LinkButton href={`${optionsURL}#/settings`} icon='settings'>
                     Settings
                 </LinkButton>

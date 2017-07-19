@@ -43,6 +43,27 @@
     }
 }
 
+.itemDropdown {
+    &:hover,
+    &:focus {
+        background: none;
+        color: rgb(59, 59, 59);
+    }
+}
+
+.dropdown {
+    margin: 0 5px;
+}
+
+.clickableIcon {
+    cursor: pointer;
+
+    &:hover,
+    &:focus {
+        color: rgb(62, 185, 149);
+    }
+}
+
 .splitBtn {
     display: flex;
     width: 100%;
