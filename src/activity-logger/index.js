@@ -24,7 +24,7 @@ export function generateVisitDocId({timestamp, nonce} = {}) {
 
 // Tell whether a page can be stored.
 export function isLoggable({url}) {
-    // Only http(s) pages. Ignoring data uris, newtab, ...
+    // Only http(s) pages. Ignoring data URLs, newtab, ...
     const loggableUrlPattern = /^https?:\/\//
     return loggableUrlPattern.test(url)
 }

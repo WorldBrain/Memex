@@ -4,7 +4,7 @@ import { dataURLToBlob } from 'blob-util'
 
 import { whenPageDOMLoaded } from 'src/util/tab-events'
 import { remoteFunction } from 'src/util/webextensionRPC'
-import whenAllSettled from 'src/util/when-all-settled'
+import whenAllSettled from 'when-all-settled'
 import db from 'src/pouchdb'
 import updateDoc from 'src/util/pouchdb-update-doc'
 
@@ -30,16 +30,16 @@ async function performPageAnalysis({pageId, tabId}) {
     }
 
     // Get and store the fav-icon
-    const storeFavIcon = getFavIcon({tabId}).then(async dataUri => {
-        if (dataUri === undefined) return
-        const blob = await dataURLToBlob(dataUri)
+    const storeFavIcon = getFavIcon({tabId}).then(async dataUrl => {
+        if (dataUrl === undefined) return
+        const blob = await dataURLToBlob(dataUrl)
         await setDocAttachment(db, pageId, 'favIcon')(blob)
     })
 
     // Capture a screenshot.
-    const storeScreenshot = makeScreenshot({tabId}).then(async dataUri => {
-        if (dataUri === undefined) return
-        const blob = await dataURLToBlob(dataUri)
+    const storeScreenshot = makeScreenshot({tabId}).then(async dataUrl => {
+        if (dataUrl === undefined) return
+        const blob = await dataURLToBlob(dataUrl)
         await setDocAttachment(db, pageId, 'screenshot')(blob)
     })
 
