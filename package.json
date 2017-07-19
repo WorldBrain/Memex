@@ -12,7 +12,7 @@
     "build": "rm -rf ./extension && gulp build",
     "watch": "rm -rf ./extension && gulp watch",
     "package": "gulp package",
-    "test": "npm run lint && jest --verbose --config=.jest-config.json",
+    "test": "jest --verbose --config=.jest-config.json",
     "firefox": "web-ext -s extension run --bc",
     "lint": "gulp lint && stylelint '**/*.css'",
     "lint-fix": "eslint --ext js,jsx --fix ."
