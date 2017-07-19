@@ -1,6 +1,7 @@
 .buttonBar {
     display: flex;
     justify-content: space-around;
+    font-size: 0.8em;
 }
 
 .button {
@@ -67,5 +68,6 @@
     display: flex;
     flex-direction: column;
     justify-content: space-around;
+    font-size: 1.2em;
     min-height: 100px;
 }
