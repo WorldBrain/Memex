@@ -8,7 +8,7 @@ import { STORAGE_KEY } from 'src/options/blacklist/constants'
  * @param {Array<any>} blacklist Blacklist data to check URL against.
  * @return {boolean} Denotes whether or not the given URL matches any blacklist expressions.
  */
-function isURLBlacklisted(url = '', blacklist = []) {
+export function isURLBlacklisted(url = '', blacklist = []) {
     // Main checking logic between a given blacklist expression and current URL
     //   TODO: make this more "smart" (maybe check parts of the URL instead of match all, for e.g.)
     const doesExpressionMatchURL = (expression = '') => url.includes(expression)
@@ -41,7 +41,7 @@ export async function checkWithBlacklist() {
  * Fetches ready-to-use blacklist array from storage.
  * @returns {Array<any>} Blacklist represented by nn array of objects containing `expression` keys
  */
-async function fetchBlacklist() {
+export async function fetchBlacklist() {
     // Fetch and parse blacklist data for check calls to use
     const { blacklist } = await browser.storage.local.get(STORAGE_KEY)
 

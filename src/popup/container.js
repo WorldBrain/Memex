@@ -3,16 +3,26 @@ import qs from 'query-string'
 
 import extractTimeFiltersFromQuery from 'src/util/nlp-time-filter.js'
 import { remoteFunction } from 'src/util/webextensionRPC'
-import { checkWithBlacklist, addToBlacklist } from 'src/blacklist'
+import * as blacklistI from 'src/blacklist'
 import { getPageDocId, updateArchiveFlag } from './archive-button'
 import Popup from './components/Popup'
 import Button from './components/Button'
 import LinkButton from './components/LinkButton'
 import SplitButton from './components/SplitButton'
+import { BLACKLIST_BTN_STATE } from './constants'
+
+import { itemBtnBlacklisted } from './components/Button.css'
 
 export const overviewURL = '/overview/overview.html'
 export const optionsURL = '/options/options.html'
 export const feedbackURL = 'https://www.reddit.com/r/WorldBrain'
+
+// Transforms URL checking results to state types
+const getBlacklistButtonState = ({ loggable, blacklist }) => {
+    if (!blacklist) return BLACKLIST_BTN_STATE.BLACKLISTED
+    if (!loggable) return BLACKLIST_BTN_STATE.DISABLED
+    return BLACKLIST_BTN_STATE.UNLISTED
+}
 
 class PopupContainer extends Component {
     constructor(props) {
@@ -22,7 +32,7 @@ class PopupContainer extends Component {
             url: '',
             searchValue: '',
             currentTabPageDocId: '',
-            blacklistBtnDisabled: true,
+            blacklistBtn: BLACKLIST_BTN_STATE.DISABLED,
             archiveBtnDisabled: true,
             blacklistChoice: false,
         }
@@ -56,8 +66,14 @@ class PopupContainer extends Component {
     }
 
     async getInitBlacklistBtnState(url) {
-        const notBlacklisted = await checkWithBlacklist()
-        return { blacklistBtnDisabled: !notBlacklisted({ url }) }
+        const blacklist = await blacklistI.fetchBlacklist()
+
+        const result = {
+            loggable: blacklistI.isLoggable(url),
+            blacklist: !blacklistI.isURLBlacklisted(url, blacklist),
+        }
+
+        return { blacklistBtn: getBlacklistButtonState(result) }
     }
 
     onBlacklistBtnClick(domain = false) {
@@ -65,7 +81,7 @@ class PopupContainer extends Component {
 
         return event => {
             event.preventDefault()
-            addToBlacklist(url)
+            blacklistI.addToBlacklist(url)
             this.blacklistConfirm(url)
             window.close()
         }
@@ -101,12 +117,16 @@ class PopupContainer extends Component {
     }
 
     renderBlacklistButton() {
-        const { blacklistChoice, blacklistBtnDisabled } = this.state
+        const { blacklistChoice, blacklistBtn } = this.state
         const setBlacklistChoice = () => this.setState(state => ({ ...state, blacklistChoice: true }))
 
         if (!blacklistChoice) { // Standard blacklist button
-            return (
-                <Button icon='block' onClick={setBlacklistChoice} disabled={blacklistBtnDisabled}>
+            return blacklistBtn === BLACKLIST_BTN_STATE.BLACKLISTED ? (
+                <LinkButton href={`${optionsURL}#/settings`} icon='block' btnClass={itemBtnBlacklisted}>
+                    Current Page Blacklisted
+                </LinkButton>
+            ) : (
+                <Button icon='block' onClick={setBlacklistChoice} disabled={blacklistBtn === BLACKLIST_BTN_STATE.DISABLED}>
                     Blacklist Current Page
                 </Button>
             )
