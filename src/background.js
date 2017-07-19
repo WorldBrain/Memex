@@ -6,6 +6,11 @@ import 'src/blacklist/background'
 import 'src/omnibar'
 import { installTimeStorageKey } from 'src/imports/background'
 import convertOldData from 'src/util/old-data-converter'
+import fetchPageData from 'src/page-analysis/background/fetch-page-data'
+import findPagesByUrl from 'src/search/find-pages'
+import tryReidentifyPage from 'src/page-storage/store-page'
+import transformToBookmarkDoc from 'src/imports/background/import-preparation'
+import formatFavIconAttachment from 'src/imports/background'
 
 export const dataConvertTimeKey = 'data-conversion-timestamp'
 
@@ -37,6 +42,24 @@ browser.bookmarks.onCreated.addListener((id, bookmarkInfo) => {
     //bookmarkInfo.url gives the URL of the bookmark
     //id is the unique id of the bookmark
     //https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/bookmarks/onCreated
+    //Check if there already exists a page with this URL.
+    const samePageCandidates = (await findPagesByUrl({url})).rows.map(row => row.doc);
+    const reusablePage = await tryReidentifyPage({null, bookmarkInfo.url, samePageCandidates})
+    const pageData = fetchPageData(bookmarkInfo.url)
+    const favIconAttachment = formatFavIconAttachment(pageData.favIconURI)
+    const freezeDryBlob = new Blob([pageData.freezeDryHTML], {type: 'text/html;charset=UTF-8'})
+    const pageDoc = {
+        url: bookmarkInfo.url,
+        content: pageData.content,
+        _id: getPageId(pageData),
+        _attachments: {
+            'favIcon': favIconAttachment,
+            'frozen-page.html': freezeDryBlob
+        }
+    }
+    const bookmarkDoc = transformToBookmarkDoc(pageDoc, bookmarkInfo)
+    db.put(bookmarkDoc);
+    db.put(pageDoc);
 })
 
 browser.commands.onCommand.addListener(command => {
