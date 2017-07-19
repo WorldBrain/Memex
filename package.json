@@ -14,7 +14,7 @@
     "package": "gulp package",
     "test": "jest --verbose --config=.jest-config.json",
     "firefox": "web-ext -s extension run --bc",
-    "lint": "gulp lint && stylelint '**/*.css'",
+    "lint": "gulp lint",
     "lint-fix": "eslint --ext js,jsx --fix ."
   },
   "dependencies": {
@@ -81,6 +81,7 @@
     "gulp-eslint": "^4.0.0",
     "gulp-identity": "^0.1.0",
     "gulp-run": "^1.7.1",
+    "gulp-stylelint": "^4.0.0",
     "gulp-uglify": "^3.0.0",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^20.0.4",
@@ -96,6 +97,7 @@
     "redux-devtools": "^3.4.0",
     "redux-devtools-dock-monitor": "^1.1.2",
     "redux-devtools-log-monitor": "^1.3.0",
+    "stream-to-promise": "^2.2.0",
     "stylelint": "^7.11.1",
     "stylelint-config-standard": "^16.0.0",
     "uglifyify": "^4.0.1",
