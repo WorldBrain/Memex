@@ -97,10 +97,6 @@ async function createBundle({entries, output, destination, cssOutput}, {watch = 
         })
     }
 
-    if (production) {
-        b.transform(uglifyify, {global: true})
-    }
-
     function bundle(callback) {
         let startTime = Date.now()
         b.bundle()
