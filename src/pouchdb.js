@@ -15,10 +15,8 @@ const pouchdbOptions = {
 const db = PouchDB(pouchdbOptions)
 export default db
 
-// Expose db for debugging
-if (process.env.NODE_ENV !== 'production') {
-    window.db = db
-}
+// DEBUG Expose db for debugging or direct user access.
+window.db = db
 
 // The couch/pouch way to match keys with a given prefix (e.g. one type of docs).
 export const keyRangeForPrefix = prefix => ({
