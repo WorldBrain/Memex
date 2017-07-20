@@ -11,7 +11,7 @@
     }],
     "browser_action": {
         "default_title": "WebMemex",
-        "default_popup": "/popup/popup.html"
+        "default_popup": "/popup.html"
     },
     "commands": {
         "openOverview": {

@@ -59,7 +59,7 @@ this personal web based on [React]+[Redux].
 2. Get [Node/NPM] and [yarn] (`npm install -g yarn`).
 3. Run `make` to install dependencies and compile the source files.
 4. Load it in Firefox or Chromium/Chrome:
-    * In Firefox (≥49): run `npm run fx-run` (or run [web-ext] directly for more control).
+    * In Firefox (≥49): run `npm run firefox` (or run [web-ext] directly for more control).
       Alternatively, go to `about:debugging`, choose 'Load Temporary Add-on', and pick
       `extension/manifest.json` from this repo.
     * In Chromium/Chrome: go to Tools→Extensions (`chrome://extensions`), enable 'Developer mode',
@@ -70,7 +70,7 @@ this personal web based on [React]+[Redux].
 If the steps above worked, running `npm run watch` will trigger a quick recompilation every time a
 source file has been modified.
 
-If you are testing in Firefox through `npm run fx-run`/`web-ext`, the extension should also reload
+If you are testing in Firefox through `npm run firefox`/`web-ext`, the extension should also reload
 automatically. Otherwise, manually press the reload button in the extension list.
 
 

@@ -1,7 +1,5 @@
 node_modules
+extension
 dist
 .chrome-extension-key.pem
-extension/lib
-extension/**/*.js
-extension/**/*.css
 jest_0/

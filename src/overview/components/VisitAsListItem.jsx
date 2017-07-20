@@ -5,7 +5,7 @@ import { connect } from 'react-redux'
 import { Button, Popup, Icon } from 'semantic-ui-react'
 import classNames from 'classnames'
 
-import { hrefForLocalPage } from 'src/page-viewer'
+import { hrefForLocalPage } from 'src/local-page'
 import niceTime from 'src/util/nice-time'
 
 import ImgFromPouch from './ImgFromPouch'

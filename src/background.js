@@ -5,7 +5,7 @@ import manifest from '../extension/manifest.json'
 
 function openOverview() {
     browser.tabs.create({
-        url: '/overview/overview.html',
+        url: '/overview.html',
     })
 }
 

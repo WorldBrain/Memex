@@ -1,6 +1,6 @@
 import { getAttachmentAsDataUrl } from 'src/pouchdb'
 import { remoteFunction } from 'src/util/webextensionRPC'
-import { hrefForLocalPage } from 'src/page-viewer'
+import { hrefForLocalPage } from 'src/local-page'
 
 
 const logActivePageVisit = remoteFunction('logActivePageVisit')
@@ -35,7 +35,7 @@ storeThisPage()
 const overviewButton = document.getElementById('overviewButton')
 overviewButton.onclick = async () => {
     await browser.tabs.create({
-        url: '/overview/overview.html',
+        url: '/overview.html',
     })
     window.close()
 }
