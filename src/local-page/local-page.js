@@ -37,7 +37,7 @@ async function showPage(pageId) {
 
     // For 'downloading' the file if desired.
     const blobUrl = URL.createObjectURL(blob)
-    const filename = `${page.title}`
+    const filename = `${page.title}.html`
 
     // Add content to the header bar.
     document.title = `📄 ${page.title}`
