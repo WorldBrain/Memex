@@ -5,15 +5,21 @@ import classNames from 'classnames'
 import styles from './Button.css'
 
 const iconStyles = classNames('material-icons', styles.clickableIcon)
+const getIcon = isPaused => isPaused ? 'play_circle_outline' : 'pause_circle_outline'
 
-const HistoryPauser = ({ onConfirm, value, onChange, children, ...selectProps }) => (
+const HistoryPauser = ({ onConfirm, value, onChange, isPaused, children, ...selectProps }) => (
     <div className={classNames(styles.item, styles.itemDropdown)}>
-        <i className={iconStyles} onClick={onConfirm}>pause_circle_outline</i>
-        Pause recording for
-        <select className={styles.dropdown} value={value} onChange={onChange} {...selectProps}>
-            {children}
-        </select>
-        mins
+        <i className={iconStyles} onClick={onConfirm}>{getIcon(isPaused)}</i>
+        {isPaused
+            ? 'Recording paused'
+            : <div>
+                Pause recording for
+                <select className={styles.dropdown} value={value} onChange={onChange} {...selectProps}>
+                    {children}
+                </select>
+                mins
+            </div>
+        }
     </div>
 )
 
@@ -22,6 +28,7 @@ HistoryPauser.propTypes = {
     onConfirm: PropTypes.func.isRequired,
     onChange: PropTypes.func.isRequired,
     value: PropTypes.string.isRequired,
+    isPaused: PropTypes.bool.isRequired,
 }
 
 export default HistoryPauser

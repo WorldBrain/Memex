@@ -1,8 +1,9 @@
 import React, { Component } from 'react'
 import qs from 'query-string'
 
-import extractTimeFiltersFromQuery from 'src/util/nlp-time-filter.js'
+import extractTimeFiltersFromQuery from 'src/util/nlp-time-filter'
 import { remoteFunction } from 'src/util/webextensionRPC'
+import { PAUSE_STORAGE_KEY } from 'src/activity-logger'
 import * as blacklistI from 'src/blacklist'
 import { getPageDocId, updateArchiveFlag } from './archive-button'
 import Popup from './components/Popup'
@@ -35,6 +36,7 @@ class PopupContainer extends Component {
             pauseValue: 20,
             currentTabPageDocId: '',
             blacklistBtn: BLACKLIST_BTN_STATE.DISABLED,
+            isPaused: false,
             archiveBtnDisabled: true,
             blacklistChoice: false,
         }
@@ -58,8 +60,14 @@ class PopupContainer extends Component {
         const noop = f => f // Don't do anything if error; state doesn't change
 
         updateState({ url: currentTab.url })
+        this.getInitPauseState().then(updateState).catch(noop)
         this.getInitBlacklistBtnState(currentTab.url).then(updateState).catch(noop)
         this.getInitArchiveBtnState(currentTab.url).then(updateState).catch(noop)
+    }
+
+    async getInitPauseState() {
+        const isPaused = (await browser.storage.local.get(PAUSE_STORAGE_KEY))[PAUSE_STORAGE_KEY] || false
+        return { isPaused }
     }
 
     async getInitArchiveBtnState(url) {
@@ -94,7 +102,13 @@ class PopupContainer extends Component {
 
     onPauseConfirm(event) {
         event.preventDefault()
-        window.close()
+        const isPaused = !this.state.isPaused
+
+        // Do local state change
+        this.setState(state => ({ ...state, isPaused }))
+
+        // Do global state change
+        browser.storage.local.set({ [PAUSE_STORAGE_KEY]: isPaused })
     }
 
     onPauseChange(event) {
@@ -161,11 +175,16 @@ class PopupContainer extends Component {
     }
 
     render() {
-        const { searchValue, archiveBtnDisabled, pauseValue } = this.state
+        const { searchValue, archiveBtnDisabled, pauseValue, isPaused } = this.state
 
         return (
             <Popup searchValue={searchValue} onSearchChange={this.onSearchChange} onSearchEnter={this.onSearchEnter}>
-                <HistoryPauser onConfirm={this.onPauseConfirm} onChange={this.onPauseChange} value={pauseValue}>
+                <HistoryPauser
+                    onConfirm={this.onPauseConfirm}
+                    onChange={this.onPauseChange}
+                    value={pauseValue}
+                    isPaused={isPaused}
+                >
                     {this.renderPauseChoices()}
                 </HistoryPauser>
                 <hr />
