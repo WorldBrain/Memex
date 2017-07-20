@@ -7,7 +7,7 @@ export const visitKeyPrefix = 'visit/'
 
 export const visitDocsSelector = { _id: { $gte: visitKeyPrefix, $lte: `${visitKeyPrefix}\uffff` } }
 
-export const PAUSE_STORAGE_KEY = 'is-logging-paused';
+export const PAUSE_STORAGE_KEY = 'is-logging-paused'
 
 // Creates an _id string given the variables, or vice versa parses such strings
 // We simply use the creation time for the id, for easy chronological sorting.
