@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import PropTypes from 'prop-types'
 import qs from 'query-string'
 
 import extractTimeFiltersFromQuery from 'src/util/nlp-time-filter'
@@ -173,7 +174,9 @@ class PopupContainer extends Component {
     }
 
     renderPauseChoices() {
-        return [5, 10, 20, 30, 60, 120, 180].map((val, i) => <option key={i} value={val}>{val}</option>)
+        const pauseValueToOption = (val, i) => <option key={i} value={val}>{val}</option>
+
+        return this.props.pauseValues.map(pauseValueToOption)
     }
 
     render() {
@@ -208,5 +211,8 @@ class PopupContainer extends Component {
         )
     }
 }
+
+PopupContainer.propTypes = { pauseValues: PropTypes.arrayOf(PropTypes.number).isRequired }
+PopupContainer.defaultProps = { pauseValues: [5, 10, 20, 30, 60, 120, 180] }
 
 export default PopupContainer
