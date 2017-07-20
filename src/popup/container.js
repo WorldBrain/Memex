@@ -41,6 +41,8 @@ class PopupContainer extends Component {
             blacklistChoice: false,
         }
 
+        this.toggleLoggingPause = remoteFunction('toggleLoggingPause')
+
         this.onArchiveBtnClick = this.onArchiveBtnClick.bind(this)
         this.onSearchChange = this.onSearchChange.bind(this)
         this.onPauseChange = this.onPauseChange.bind(this)
@@ -102,13 +104,13 @@ class PopupContainer extends Component {
 
     onPauseConfirm(event) {
         event.preventDefault()
-        const isPaused = !this.state.isPaused
+        const { isPaused, pauseValue } = this.state
 
-        // Do local state change
-        this.setState(state => ({ ...state, isPaused }))
+        // Do local level state toggle
+        this.setState(state => ({ ...state, isPaused: !isPaused }))
 
-        // Do global state change
-        browser.storage.local.set({ [PAUSE_STORAGE_KEY]: isPaused })
+        // Tell background script to do on extension level
+        this.toggleLoggingPause(pauseValue)
     }
 
     onPauseChange(event) {

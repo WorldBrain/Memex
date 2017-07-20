@@ -1,5 +1,11 @@
+import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import { maybeLogPageVisit } from './log-page-visit'
+import initPauser from './pause-logging'
 import debounce from 'lodash/debounce'
+
+// Allow logging pause state toggle to be called from other scripts
+const toggleLoggingPause = initPauser()
+makeRemotelyCallable({ toggleLoggingPause })
 
 // Debounced functions fro each tab are stored here
 const tabs = {}
