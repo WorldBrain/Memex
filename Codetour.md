@@ -42,7 +42,7 @@ For logging visits in the database. A visit object points to a page object, whic
 page itself. Project focus has shifted from logging every visit to manually storing pages, so this
 code may be refactored soon.
 
-### [`src/page-analysis`](src/page-analysis/): (web)page analysis
+### [`src/page-analysis/`](src/page-analysis/): (web)page analysis
 
 This extracts and stores information about the page in a given tab, such as:
 - A full html version of the rendered page, by 'freeze-drying' it.
@@ -50,13 +50,13 @@ This extracts and stores information about the page in a given tab, such as:
 - Metadata, such as its author, title, etcetera.
 - A screenshot for visual recognition.
 
-### [`src/page-storage`](src/page-storage/): (web)page storage
+### [`src/page-storage/`](src/page-storage/): (web)page storage
 
 Everything around managing the pages stored in the database. Mainly created for
 grouping the code around comparison and deduplication of stored versions of
 web pages, which did not really fit well under another folder.
 
-### [`src/page-viewer`](src/page-viewer/): display stored pages
+### [`src/local-page/`](src/local-page/): display stored pages
 
 Code for displaying the locally stored web pages, making them accessible on
 their own URL.
@@ -73,7 +73,7 @@ See [`src/overview/Readme.md`](src/overview/Readme.md) for more details.
 
 The UI that shows up when pressing the extension's 'browser_action' button.
 
-### [`src/search`](src/search/): document search
+### [`src/search/`](src/search/): document search
 
 Functions for finding relevant knowledge in the user's memory. Currently
 provides a simple word filter to search through text of visited pages.
@@ -86,7 +86,7 @@ for.
 
 Tools to help during development. They are not used in production builds.
 
-### [`src/util/`](src/util): utilities
+### [`src/util/`](src/util/): utilities
 
 Contains small generic things, stuff that is not project-specific. Things that
 could perhaps be packaged and published as an NPM module some day.
