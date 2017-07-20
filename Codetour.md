@@ -48,7 +48,7 @@ represent the visited page itself. This object should soon be deduplicated when
 the same page is visited multiple times. After creating a new page object,
 the next module is triggered to start analysing the page.
 
-### [`src/page-analysis`](src/page-analysis/): (web)page analysis
+### [`src/page-analysis/`](src/page-analysis/): (web)page analysis
 
 This extracts and stores information about the page in a given tab, such as:
 - A full html version of the rendered page, by 'freeze-drying' it.
@@ -56,13 +56,13 @@ This extracts and stores information about the page in a given tab, such as:
 - Metadata, such as its author, title, etcetera.
 - A screenshot for visual recognition.
 
-### [`src/page-storage`](src/page-storage/): (web)page storage
+### [`src/page-storage/`](src/page-storage/): (web)page storage
 
 Everything around managing the pages stored in the database. Mainly created for
 grouping the code around comparison and deduplication of stored versions of
 web pages, which did not really fit well under another folder.
 
-### [`src/page-viewer`](src/page-viewer/): display stored pages
+### [`src/local-page/`](src/local-page/): display stored pages
 
 Code for displaying the locally stored web pages, making them accessible on
 their own URL.
@@ -85,7 +85,7 @@ Currently it does not do much yet.
 Currently unused code for importing information from the browser's own history.
 Still to be developed and reorganised.
 
-### [`src/search`](src/search/): document search
+### [`src/search/`](src/search/): document search
 
 Functions for finding relevant knowledge in the user's memory. Currently
 provides a simple word filter to search through text of visited pages.
@@ -98,7 +98,7 @@ for.
 
 Tools to help during development. They are not used in production builds.
 
-### [`src/util/`](src/util): utilities
+### [`src/util/`](src/util/): utilities
 
 Contains small generic things, stuff that is not project-specific. Things that
 could perhaps be packaged and published as an NPM module some day.
