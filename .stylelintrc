@@ -14,10 +14,11 @@
         "value-no-vendor-prefix": true,
         "at-rule-no-unknown": true,
         "declaration-no-important": true,
+        "declaration-empty-line-before": null,
+        "length-zero-no-unit": null,
         "selector-pseudo-class-no-unknown": [true, {
             "ignorePseudoClasses": ["global"]
         }],
-
         "function-url-scheme-whitelist": ['data']
     }
 }
