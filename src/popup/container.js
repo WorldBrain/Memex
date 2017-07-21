@@ -191,21 +191,20 @@ class PopupContainer extends Component {
                 >
                     {this.renderPauseChoices()}
                 </HistoryPauser>
+                {this.renderBlacklistButton()}
+                <Button icon='archive' onClick={this.onArchiveBtnClick} disabled={archiveBtnDisabled}>
+                    Archive Current Page
+                </Button>
                 <hr />
                 <LinkButton href={`${optionsURL}#/settings`} icon='settings'>
                     Settings
                 </LinkButton>
-                <LinkButton href={feedbackURL} icon='feedback'>
-                    Feedback
-                </LinkButton>
-                <hr />
                 <LinkButton href={`${optionsURL}#/import`} icon='file_download'>
                     Import History &amp; Bookmarks
                 </LinkButton>
-                <Button icon='archive' onClick={this.onArchiveBtnClick} disabled={archiveBtnDisabled}>
-                    Archive Current Page
-                </Button>
-                {this.renderBlacklistButton()}
+                <LinkButton href={feedbackURL} icon='feedback'>
+                    Feedback
+                </LinkButton>
             </Popup>
         )
     }

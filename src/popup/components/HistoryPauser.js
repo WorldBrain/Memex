@@ -4,12 +4,16 @@ import classNames from 'classnames'
 
 import styles from './Button.css'
 
-const iconStyles = classNames('material-icons', styles.clickableIcon)
+const getIconStyles = isPaused => classNames({
+    'material-icons': true,
+    [styles.clickableIcon]: true,
+    [styles.clickableIconNeg]: !isPaused,
+})
 const getIcon = isPaused => isPaused ? 'play_circle_outline' : 'pause_circle_outline'
 
 const HistoryPauser = ({ onConfirm, value, onChange, isPaused, children, ...selectProps }) => (
     <div className={classNames(styles.item, styles.itemDropdown)}>
-        <i className={iconStyles} onClick={onConfirm}>{getIcon(isPaused)}</i>
+        <i className={getIconStyles(isPaused)} onClick={onConfirm}>{getIcon(isPaused)}</i>
         {isPaused
             ? 'Recording paused'
             : <div>

@@ -59,10 +59,20 @@
 
 .clickableIcon {
     cursor: pointer;
+    color: rgb(62, 185, 149);
 
     &:hover,
     &:focus {
-        color: rgb(62, 185, 149);
+        color: rgb(5, 154, 111);
+    }
+}
+
+.clickableIconNeg {
+    color: rgb(255, 74, 85);
+
+    &:hover,
+    &:focus {
+        color: rgb(217, 24, 36);
     }
 }
 
