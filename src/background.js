@@ -10,7 +10,8 @@ import fetchPageData from 'src/page-analysis/background/fetch-page-data'
 import findPagesByUrl from 'src/search/find-pages'
 import tryReidentifyPage from 'src/page-storage/store-page'
 import transformToBookmarkDoc from 'src/imports/background/import-preparation'
-import formatFavIconAttachment from 'src/imports/background'
+import dataURLToBlob from 'src/blob-util'
+import generatePageDocId from 'src/page-storage' 
 
 export const dataConvertTimeKey = 'data-conversion-timestamp'
 
@@ -38,28 +39,42 @@ browser.browserAction.onClicked.addListener(() => {
 
 
 browser.bookmarks.onCreated.addListener((id, bookmarkInfo) => {
-    //TO-DO Add method to handle indexing of bookmark
-    //bookmarkInfo.url gives the URL of the bookmark
-    //id is the unique id of the bookmark
-    //https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/bookmarks/onCreated
-    //Check if there already exists a page with this URL.
-    const samePageCandidates = (await findPagesByUrl({url})).rows.map(row => row.doc);
-    const reusablePage = await tryReidentifyPage({null, bookmarkInfo.url, samePageCandidates})
-    const pageData = fetchPageData(bookmarkInfo.url)
-    const favIconAttachment = formatFavIconAttachment(pageData.favIconURI)
-    const freezeDryBlob = new Blob([pageData.freezeDryHTML], {type: 'text/html;charset=UTF-8'})
-    const pageDoc = {
-        url: bookmarkInfo.url,
-        content: pageData.content,
-        _id: getPageId(pageData),
-        _attachments: {
-            'favIcon': favIconAttachment,
-            'frozen-page.html': freezeDryBlob
+    const samePageCandidates = (await findPagesByUrl({url})).rows.map(row => row.doc)
+    if (samePageCandidates.length <= 0) {
+        const favIconBlob = await dataURLToBlob(pageData.favIconURI)
+        const freezeDryBlob = new Blob([pageData.freezeDryHTML], {type: 'text/html;charset=UTF-8'})
+        try {
+            const pageData = await fetchPageData(bookmarkInfo.url, {
+                                                    includeFreezeDry: true,
+                                                    includePageContent: true,
+                                                    includeFavIcon: true,
+                                                })
+            const pageDoc = {
+                url: bookmarkInfo.url,
+                title: bookmarkInfo.title,
+                content: pageData.content,
+                _id: generatePageDocId(bookmarkInfo.dateAdded, id),
+                _attachments: [{
+                        content_type: freezeDryBlob.type,
+                        data: freezeDryBlob
+                    }, {
+                        content_type: favIconBlob.type,
+                        data: favIconBlob
+                    }
+                ]
+            }
+        } catch (err) {
+            console.log("Error occurred while fetching page data: " + err.toString())
+        } finally {
+            const pageDoc = {
+                url: bookmarkInfo.url,
+                title: bookmarkInfo.title,
+                _id: generatePageDocId(bookmarkInfo.dateAdded, id),
+            }
         }
+        const bookmarkDoc = await transformToBookmarkDoc(pageDoc, bookmarkInfo)
+        db.bulkDocs([bookmarkDoc, pageDoc])
     }
-    const bookmarkDoc = transformToBookmarkDoc(pageDoc, bookmarkInfo)
-    db.put(bookmarkDoc);
-    db.put(pageDoc);
 })
 
 browser.commands.onCommand.addListener(command => {
