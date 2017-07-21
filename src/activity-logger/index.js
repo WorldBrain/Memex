@@ -9,6 +9,17 @@ export const visitDocsSelector = { _id: { $gte: visitKeyPrefix, $lte: `${visitKe
 
 export const PAUSE_STORAGE_KEY = 'is-logging-paused'
 
+export const getPauseState = async () => {
+    const state = (await browser.storage.local.get(PAUSE_STORAGE_KEY))[PAUSE_STORAGE_KEY]
+
+    switch (state) {
+        case 0:
+        case 1: return true
+        case 2:
+        default: return false
+    }
+}
+
 // Creates an _id string given the variables, or vice versa parses such strings
 // We simply use the creation time for the id, for easy chronological sorting.
 // We add a random string we call a 'nonce' to prevent accidental collisions.

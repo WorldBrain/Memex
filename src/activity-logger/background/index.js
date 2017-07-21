@@ -3,10 +3,7 @@ import debounce from 'lodash/debounce'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import { maybeLogPageVisit } from './log-page-visit'
 import initPauser from './pause-logging'
-import { PAUSE_STORAGE_KEY } from '..'
-
-const isPaused = async () =>
-    (await browser.storage.local.get(PAUSE_STORAGE_KEY))[PAUSE_STORAGE_KEY] || false
+import { getPauseState } from '..'
 
 // Allow logging pause state toggle to be called from other scripts
 const toggleLoggingPause = initPauser()
@@ -24,7 +21,7 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
         // Create debounced function and call it
         tabs[tabId] = debounce(async () => {
             // Bail-out if logging paused
-            if (await isPaused()) return
+            if (await getPauseState()) return
 
             return maybeLogPageVisit({url: tab.url, tabId: tabId})
         }, 10000)

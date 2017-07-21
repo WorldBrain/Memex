@@ -4,7 +4,7 @@ import qs from 'query-string'
 
 import extractTimeFiltersFromQuery from 'src/util/nlp-time-filter'
 import { remoteFunction } from 'src/util/webextensionRPC'
-import { PAUSE_STORAGE_KEY } from 'src/activity-logger'
+import { getPauseState } from 'src/activity-logger'
 import * as blacklistI from 'src/blacklist'
 import { getPageDocId, updateArchiveFlag } from './archive-button'
 import Popup from './components/Popup'
@@ -69,8 +69,7 @@ class PopupContainer extends Component {
     }
 
     async getInitPauseState() {
-        const isPaused = (await browser.storage.local.get(PAUSE_STORAGE_KEY))[PAUSE_STORAGE_KEY] || false
-        return { isPaused }
+        return { isPaused: await getPauseState() }
     }
 
     async getInitArchiveBtnState(url) {
@@ -107,11 +106,11 @@ class PopupContainer extends Component {
         event.preventDefault()
         const { isPaused, pauseValue } = this.state
 
-        // Do local level state toggle
-        this.setState(state => ({ ...state, isPaused: !isPaused }))
-
         // Tell background script to do on extension level
         this.toggleLoggingPause(pauseValue)
+
+        // Do local level state toggle and reset
+        this.setState(state => ({ ...state, isPaused: !isPaused, pauseValue: 20 }))
     }
 
     onPauseChange(event) {
@@ -174,7 +173,7 @@ class PopupContainer extends Component {
     }
 
     renderPauseChoices() {
-        const pauseValueToOption = (val, i) => <option key={i} value={val}>{val}</option>
+        const pauseValueToOption = (val, i) => <option key={i} value={val}>{val === Infinity ? '∞' : val}</option>
 
         return this.props.pauseValues.map(pauseValueToOption)
     }
@@ -213,6 +212,6 @@ class PopupContainer extends Component {
 }
 
 PopupContainer.propTypes = { pauseValues: PropTypes.arrayOf(PropTypes.number).isRequired }
-PopupContainer.defaultProps = { pauseValues: [5, 10, 20, 30, 60, 120, 180] }
+PopupContainer.defaultProps = { pauseValues: [5, 10, 20, 30, 60, 120, 180, Infinity] }
 
 export default PopupContainer
