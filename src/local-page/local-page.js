@@ -35,10 +35,6 @@ async function showPage(pageId) {
     // We assume utf-8 encoding. TODO: read encoding from document.
     const html = new TextDecoder('utf-8').decode(await blobToArrayBuffer(blob))
 
-    // For 'downloading' the file if desired.
-    const blobUrl = URL.createObjectURL(blob)
-    const filename = `${page.title}.html`
-
     // Add content to the header bar.
     document.title = `📄 ${page.title}`
     const bar = document.getElementById('bar')
@@ -51,16 +47,35 @@ async function showPage(pageId) {
                 ${niceTime(timestamp)}
             </time>
         </span>
-        <a
-            href="${blobUrl}"
-            download="${filename}"
+        <button
+            id="downloadButton"
             class="ui compact tiny icon button"
         >
             <i class="download icon"></i>
             Save page as…
-        </a>
+        </button>
     `
     bar.innerHTML = barContent
+
+    const downloadButton = document.getElementById('downloadButton')
+    downloadButton.onclick = async () => {
+        // Reread the html file from the database. XXX This might not be the version that is shown.
+        const blob = await db.getAttachment(pageId, 'frozen-page.html')
+        const url = URL.createObjectURL(blob)
+        // Use title as filename, after removing (back)slashes.
+        let filename = `${page.title.replace(/[\\/]/g, '-')}.html`
+        try {
+            await browser.downloads.download({url, filename, saveAs: true})
+        } catch (err) {
+            // Possibly due to punctuation in the filename (Chromium is picky).
+            if (err.message.includes('filename')) {
+                filename = filename.replace(/["?:~<>*|]/g, '-') // an emperically composed list.
+                await browser.downloads.download({url, filename, saveAs: true})
+            }
+        }
+        // Forget the blob again. Firefox needs a moment; we give it 10s to be on the safe side.
+        window.setTimeout(() => URL.revokeObjectURL(url), 1000*10)
+    }
 
     // Show the page in the iframe.
     const iframe = document.createElement('iframe')

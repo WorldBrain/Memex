@@ -35,6 +35,7 @@
     "permissions": [
         "<all_urls>",
         "contextMenus",
+        "downloads",
         "history",
         "storage",
         "tabs",
