@@ -10,30 +10,34 @@ class NotificationsContainer extends Component {
         this.state = {
             doc: {
                 _id: '',
-                name: '',
-                occupation: '',
-                age: null,
-
+                title: '',
+                body: '',
+                viewed: false,
             },
         }
     }
 
     componentDidMount() {
-        db.get('mittens1')
+        db.get('notif_1')
             .then(doc => this.setState(() => ({ doc })))
             .catch(err => console.log(err))
     }
 
     render() {
-        const {_id, name, occupation, age} = this.state.doc
+        const {title, body} = this.state.doc
         return (
             <div className='recipes'>
-                <h1>id {_id}</h1>
-                <p>
-                    <span>{name} nameç | </span>
-                    <span>{occupation} occupation | </span>
-                    <span>{age} age | </span>
-                </p>
+                <h1> Notifications</h1>
+
+                <section className={styles.section}>
+                    <h2>Click to mark as unread</h2>
+
+                    <h1>title {title}</h1>
+                    <p>
+                        <span>{title} title | </span>
+                        <span>{body} body | </span>
+                    </p>
+                </section>
             </div>
         )
     }
