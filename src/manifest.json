@@ -36,6 +36,8 @@
         "<all_urls>",
         "idle",
         "bookmarks",
+        "contextMenus",
+        "downloads",
         "history",
         "tabs",
         "webNavigation",

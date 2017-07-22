@@ -30,16 +30,52 @@ async function showPage(pageId) {
     }
     const timestamp = getTimestamp(page)
 
-    document.title = `📄 ${page.title}`
-    const bar = document.getElementById('bar')
-    const barContent = `<span>Snapshot of <a href="${page.url}">${shortUrl(page.url)}</a></span>`
-        + `<span><time datetime="${new Date(timestamp)}">⌚ ${niceTime(timestamp)}</time></span>`
-    bar.innerHTML = barContent
-
     // Read the html file from the database.
     const blob = await db.getAttachment(pageId, 'frozen-page.html')
     // We assume utf-8 encoding. TODO: read encoding from document.
     const html = new TextDecoder('utf-8').decode(await blobToArrayBuffer(blob))
+
+    // Add content to the header bar.
+    document.title = `📄 ${page.title}`
+    const bar = document.getElementById('bar')
+    const barContent = `
+        <span id="description">
+            <i class="camera icon"></i>
+            Snapshot of <a href="${page.url}" style="margin: 0 4px;">${shortUrl(page.url)}</a>
+            <i class="clock icon"></i>
+            <time datetime="${new Date(timestamp)}">
+                ${niceTime(timestamp)}
+            </time>
+        </span>
+        <button
+            id="downloadButton"
+            class="ui compact tiny icon button"
+        >
+            <i class="download icon"></i>
+            Save page as…
+        </button>
+    `
+    bar.innerHTML = barContent
+
+    const downloadButton = document.getElementById('downloadButton')
+    downloadButton.onclick = async () => {
+        // Reread the html file from the database. XXX This might not be the version that is shown.
+        const blob = await db.getAttachment(pageId, 'frozen-page.html')
+        const url = URL.createObjectURL(blob)
+        // Use title as filename, after removing (back)slashes.
+        let filename = `${page.title.replace(/[\\/]/g, '-')}.html`
+        try {
+            await browser.downloads.download({url, filename, saveAs: true})
+        } catch (err) {
+            // Possibly due to punctuation in the filename (Chromium is picky).
+            if (err.message.includes('filename')) {
+                filename = filename.replace(/["?:~<>*|]/g, '-') // an empirically composed list.
+                await browser.downloads.download({url, filename, saveAs: true})
+            }
+        }
+        // Forget the blob again. Firefox needs a moment; we give it 10s to be on the safe side.
+        window.setTimeout(() => URL.revokeObjectURL(url), 1000*10)
+    }
 
     // Show the page in the iframe.
     const iframe = document.createElement('iframe')
