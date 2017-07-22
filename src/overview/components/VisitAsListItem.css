@@ -122,13 +122,9 @@
     }
 }
 
-.url a {
-    text-decoration: none;
-    color: inherit;
-
-    &:hover {
-        color: #00c;
-    }
+/* Fainten the original URL, except when the link icon is hovered */
+.url a:not(:hover) + * {
+    opacity: 0.6;
 }
 
 .buttonsContainer {

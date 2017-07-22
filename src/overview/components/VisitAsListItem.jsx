@@ -95,9 +95,15 @@ const VisitAsListItem = ({doc, compact, onTrashButtonClick}) => {
                 <div className={styles.url}>
                     <a
                         href={doc.page.url}
+                        target='_blank'
+                        title='Visit original location'
                     >
-                        {doc.page.url}
+                        <Icon
+                            name='external'
+                            link
+                        />
                     </a>
+                    <span>{doc.page.url}</span>
                 </div>
                 <div className={styles.time}>{niceTime(doc.visitStart)}</div>
             </div>
