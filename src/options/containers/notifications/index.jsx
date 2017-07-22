@@ -1,19 +1,42 @@
-import React from 'react'
-
-import Notifications from '../../notifications'
-import { routeTitle, sectionTitle } from '../../base.css'
+import React, { Component } from 'react'
+import db from './index-pouch.js'
 import styles from './style.css'
 
-const NotificationsContainer = () => (
-    <div>
-        <h1 className={routeTitle}>Notifications</h1>
 
-        <section className={styles.section}>
-            <h2 className={sectionTitle}>Click to mark as unread</h2>
+class NotificationsContainer extends Component {
+    constructor(props) {
+        super(props)
 
-            <Notifications />
-        </section>
-    </div>
-)
+        this.state = {
+            doc: {
+                _id: '',
+                name: '',
+                occupation: '',
+                age: null,
+
+            },
+        }
+    }
+
+    componentDidMount() {
+        db.get('mittens1')
+            .then(doc => this.setState(() => ({ doc })))
+            .catch(err => console.log(err))
+    }
+
+    render() {
+        const {_id, name, occupation, age} = this.state.doc
+        return (
+            <div className='recipes'>
+                <h1>id {_id}</h1>
+                <p>
+                    <span>{name} nameç | </span>
+                    <span>{occupation} occupation | </span>
+                    <span>{age} age | </span>
+                </p>
+            </div>
+        )
+    }
+}
 
 export default NotificationsContainer
