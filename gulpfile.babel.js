@@ -1,3 +1,4 @@
+import 'core-js/fn/object/entries' // shim Object.entries
 import fs from 'fs'
 import path from 'path'
 import { exec as nodeExec } from 'child_process'
@@ -116,6 +117,17 @@ gulp.task('copyStaticFiles', () => {
     }
 })
 
+gulp.task('copyStaticFiles-watch', ['copyStaticFiles'], () => {
+    Object.entries(staticFiles).forEach(([filename, destination]) => {
+        gulp.watch(filename)
+            .on('change', event => {
+                console.log(`Copying '${filename}' to '${staticFiles[filename]}'..`)
+                return gulp.src(filename)
+                    .pipe(gulp.dest(staticFiles[filename]))
+            })
+    })
+})
+
 gulp.task('build-prod', ['copyStaticFiles'], async () => {
     const ps = sourceFiles.map(filePath => createBundle({filePath, watch: false, production: true}))
     await Promise.all(ps)
@@ -126,7 +138,7 @@ gulp.task('build', ['copyStaticFiles'], async () => {
     await Promise.all(ps)
 })
 
-gulp.task('build-watch', ['copyStaticFiles'], async () => {
+gulp.task('build-watch', ['copyStaticFiles-watch'], async () => {
     const ps = sourceFiles.map(filePath => createBundle({filePath, watch: true}))
     await Promise.all(ps)
 })
