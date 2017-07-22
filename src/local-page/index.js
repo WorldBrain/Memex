@@ -10,7 +10,7 @@ export const LinkToLocalVersion = ({page, children, ...props}) => {
     const available = localVersionAvailable({page})
     let href
     if (available) {
-        const uri = `/page-viewer/localpage.html?page=${page._id}`
+        const uri = `/local-page/local-page.html?page=${page._id}`
         const hash = (page.url && page.url.split('#')[1])
         href = (hash !== undefined) ? uri + '#' + hash : uri
     }

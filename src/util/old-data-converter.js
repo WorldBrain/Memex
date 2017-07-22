@@ -31,7 +31,7 @@ export const KEYS = {
 const notifOptions = {
     type: 'progress',
     progress: 0,
-    iconUrl: '/overview/img/worldbrain-logo-narrow.png',
+    iconUrl: '/img/worldbrain-logo-narrow.png',
     title: 'WorldBrain Update',
     message: 'Converting existing extension data for update. Please wait',
 }

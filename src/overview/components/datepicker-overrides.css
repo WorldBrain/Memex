@@ -41,11 +41,11 @@
 }
 
 :global .react-datepicker__navigation--previous {
-    background-image: url('img/previous-arrow-icon.png') !important;
+    background-image: url('/img/previous-arrow-icon.png') !important;
 }
 
 :global .react-datepicker__navigation--next {
-    background-image: url('img/next-arrow-icon.png') !important;
+    background-image: url('/img/next-arrow-icon.png') !important;
 }
 
 :global .react-datepicker__day {

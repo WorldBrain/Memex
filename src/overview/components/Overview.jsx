@@ -46,7 +46,7 @@ class Overview extends React.Component {
                     <div className={styles.links}>
                         <a href='/options/options.html'>
                             <img
-                                src='img/settings-icon.png'
+                                src='/img/settings-icon.png'
                                 className={styles.icon}
                             />
                         </a>

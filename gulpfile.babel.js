@@ -23,10 +23,12 @@ const exec = pify(nodeExec)
 
 const staticFiles = {
     'src/manifest.json': 'extension',
-    'src/*.html': 'extension',
+    'src/**/*.html': 'extension',
     'src/local-page/local-page.css': 'extension/local-page',
+    'img/*': 'extension/img',
     'node_modules/webextension-polyfill/dist/browser-polyfill.js': 'extension/lib',
     'node_modules/pdfjs-dist/build/pdf.worker.min.js': 'extension/lib',
+    'node_modules/material-design-icons/iconfont/*.{eot,ttf,woff,woff2,css}': 'extension/fonts/material-icons',
 }
 
 const commonUIEntry = './src/common-ui/components/index.js'

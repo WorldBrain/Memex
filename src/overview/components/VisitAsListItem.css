@@ -139,17 +139,17 @@
 }
 
 .trash {
-    background-image: url('img/trash-icon.png');
+    background-image: url('/img/trash-icon.png');
 }
 
 .trash:hover {
-    background-image: url('img/trash-icon-hovered.png');
+    background-image: url('/img/trash-icon-hovered.png');
 }
 
 .load {
-    background-image: url('img/load-icon.png');
+    background-image: url('/img/load-icon.png');
 }
 
 .load:hover {
-    background-image: url('img/load-icon-hovered.png');
+    background-image: url('/img/load-icon-hovered.png');
 }
