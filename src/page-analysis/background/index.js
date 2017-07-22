@@ -1,4 +1,3 @@
-import assocPath from 'lodash/fp/assocPath'
 import merge from 'lodash/fp/merge'
 import { dataURLToBlob } from 'blob-util'
 
@@ -6,7 +5,7 @@ import { whenPageDOMLoaded } from 'src/util/tab-events'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import whenAllSettled from 'when-all-settled'
 import db from 'src/pouchdb'
-import updateDoc from 'src/util/pouchdb-update-doc'
+import updateDoc, { setAttachment } from 'src/util/pouchdb-update-doc'
 
 import { revisePageFields } from '..'
 import getFavIcon from './get-fav-icon'
@@ -19,28 +18,18 @@ async function performPageAnalysis({pageId, tabId}) {
     const extractPageContent = remoteFunction('extractPageContent', {tabId})
     const freezeDry = remoteFunction('freezeDry', {tabId})
 
-    // A shorthand for adding an attachment to a doc.
-    const setDocAttachment = (db, docId, attachmentId) => async blob => {
-        await updateDoc(db, docId,
-            doc => assocPath(
-                ['_attachments', attachmentId],
-                {content_type: blob.type, data: blob}
-            )(doc)
-        )
-    }
-
     // Get and store the fav-icon
     const storeFavIcon = getFavIcon({tabId}).then(async dataUrl => {
         if (dataUrl === undefined) return
         const blob = await dataURLToBlob(dataUrl)
-        await setDocAttachment(db, pageId, 'favIcon')(blob)
+        await setAttachment(db, pageId, 'favIcon', blob)
     })
 
     // Capture a screenshot.
     const storeScreenshot = makeScreenshot({tabId}).then(async dataUrl => {
         if (dataUrl === undefined) return
         const blob = await dataURLToBlob(dataUrl)
-        await setDocAttachment(db, pageId, 'screenshot')(blob)
+        await setAttachment(db, pageId, 'screenshot', blob)
     })
 
     // Extract the text and metadata
@@ -53,7 +42,7 @@ async function performPageAnalysis({pageId, tabId}) {
     async function storePageFreezeDried() {
         const htmlString = await freezeDry()
         const blob = new Blob([htmlString], {type: 'text/html;charset=UTF-8'})
-        await setDocAttachment(db, pageId, 'frozen-page.html')(blob)
+        await setAttachment(db, pageId, 'frozen-page.html', blob)
     }
 
     // When every task has either completed or failed, update the search index.
