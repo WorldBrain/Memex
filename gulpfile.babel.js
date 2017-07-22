@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import { exec as nodeExec} from 'child_process'
+import { exec as nodeExec } from 'child_process'
 import pify from 'pify'
 import streamToPromise from 'stream-to-promise'
 import gulp from 'gulp'
@@ -17,7 +17,6 @@ import browserify from 'browserify'
 import watchify from 'watchify'
 import babelify from 'babelify'
 import envify from 'loose-envify/custom'
-import uglifyify from 'uglifyify'
 import cssModulesify from 'css-modulesify'
 import cssnext from 'postcss-cssnext'
 
@@ -50,7 +49,7 @@ const browserifySettings = {
 }
 
 async function createBundle({filePath, watch = false, production = false}) {
-    const { dir, name, ext } = path.parse(filePath)
+    const { dir, name } = path.parse(filePath)
     const entries = [path.join('src', filePath)]
     const destination = path.join('extension', dir)
     const output = `${name}.js` // ignore original filename extension, to replace jsx with js.
