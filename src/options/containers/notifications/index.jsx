@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import db from './index-pouch.js'
-import styles from './style.css'
-
+import { routeTitle, sectionTitle } from '../../base.css'
+import styles from './BlacklistTable.css'
 
 class NotificationsContainer extends Component {
     constructor(props) {
@@ -27,16 +27,19 @@ class NotificationsContainer extends Component {
         const {title, body} = this.state.doc
         return (
             <div className='recipes'>
-                <h1> Notifications</h1>
+                <h1 className={routeTitle}> Notifications</h1>
 
                 <section className={styles.section}>
-                    <h2>Click to mark as unread</h2>
-
-                    <h1>title {title}</h1>
-                    <p>
-                        <span>{title} title | </span>
-                        <span>{body} body | </span>
-                    </p>
+                    <h2 className={sectionTitle}>Click to mark as unread</h2>
+                    <div className={styles.tableContainer}>
+                        <table className={styles.table}>
+                            <thead>
+                                <tr>
+                                    <th className={styles.domainCell}> <span>{title}  | </span>{body}</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
                 </section>
             </div>
         )
