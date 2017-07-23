@@ -41,14 +41,14 @@ browser.browserAction.onClicked.addListener(() => {
 browser.bookmarks.onCreated.addListener((id, bookmarkInfo) => {
     const samePageCandidates = (await findPagesByUrl({url})).rows.map(row => row.doc)
     if (samePageCandidates.length <= 0) {
-        const favIconBlob = await dataURLToBlob(pageData.favIconURI)
-        const freezeDryBlob = new Blob([pageData.freezeDryHTML], {type: 'text/html;charset=UTF-8'})
         try {
             const pageData = await fetchPageData(bookmarkInfo.url, {
                                                     includeFreezeDry: true,
                                                     includePageContent: true,
                                                     includeFavIcon: true,
                                                 })
+            const favIconBlob = await dataURLToBlob(pageData.favIconURI)
+            const freezeDryBlob = new Blob([pageData.freezeDryHTML], {type: 'text/html;charset=UTF-8'})
             const pageDoc = {
                 url: bookmarkInfo.url,
                 title: bookmarkInfo.title,
@@ -65,15 +65,15 @@ browser.bookmarks.onCreated.addListener((id, bookmarkInfo) => {
             }
         } catch (err) {
             console.log("Error occurred while fetching page data: " + err.toString())
-        } finally {
             const pageDoc = {
                 url: bookmarkInfo.url,
                 title: bookmarkInfo.title,
                 _id: generatePageDocId(bookmarkInfo.dateAdded, id),
             }
+        } finally {
+            const bookmarkDoc = await transformToBookmarkDoc(pageDoc, bookmarkInfo)
+            db.bulkDocs([bookmarkDoc, pageDoc])
         }
-        const bookmarkDoc = await transformToBookmarkDoc(pageDoc, bookmarkInfo)
-        db.bulkDocs([bookmarkDoc, pageDoc])
     }
 })
 
