@@ -69,7 +69,7 @@ async function showPage(pageId) {
         } catch (err) {
             // Possibly due to punctuation in the filename (Chromium is picky).
             if (err.message.includes('filename')) {
-                filename = filename.replace(/["?:~<>*|]/g, '-') // an emperically composed list.
+                filename = filename.replace(/["?:~<>*|]/g, '-') // an empirically composed list.
                 await browser.downloads.download({url, filename, saveAs: true})
             }
         }
