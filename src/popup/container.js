@@ -48,6 +48,8 @@ class PopupContainer extends Component {
         // If we can't get the tab data, then can't init action button states
         if (!currentTab || !currentTab.url) { return }
 
+        this.blacklistConfirm = remoteFunction('quickBlacklistConfirm', { tabId: currentTab.id })
+
         const updateState = newState => this.setState(oldState => ({ ...oldState, ...newState }))
         const noop = f => f // Don't do anything if error; state doesn't change
 
