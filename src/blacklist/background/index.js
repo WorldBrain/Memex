@@ -1,4 +1,4 @@
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
-import quickBlacklistConfirm from './quick-blacklist-confirm'
+import cleanupBlacklist from './cleanup-blacklist'
 
-makeRemotelyCallable({ quickBlacklistConfirm })
+makeRemotelyCallable({ cleanupBlacklist })

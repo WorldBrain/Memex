@@ -2,17 +2,13 @@ import db, { normaliseFindResult } from 'src/pouchdb'
 import { deleteDocs } from 'src/page-storage/deletion'
 
 /**
- * Handles confirmation and running of a quick blacklist request from the popup script.
+ * Handles cleanup of a blacklisted URL.
  *
  * @param {string} url The URL being blacklisted.
  */
-export default function quickBlacklistConfirm(url) {
-    if (window.confirm(`Do you want to delete all data matching site:\n${url}`)) {
-        getURLMatchingDocs({ url })
-            .then(result => deleteDocs(result.rows))
-            .catch(f => f) // Too bad
-    }
-}
+const cleanupBlacklist = url => getURLMatchingDocs({ url })
+    .then(result => deleteDocs(result.rows))
+    .catch(f => f) // Too bad
 
 /**
  * Get all docs with matching URLs.
@@ -28,3 +24,5 @@ const getURLMatchingDocs = async ({ url, selector = {} }) => normaliseFindResult
         fields: ['_id', '_rev'],
     })
 )
+
+export default cleanupBlacklist

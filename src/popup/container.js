@@ -37,7 +37,6 @@ class PopupContainer extends Component {
             blacklistChoice: false,
         }
 
-        this.blacklistConfirm = remoteFunction('quickBlacklistConfirm')
         this.onArchiveBtnClick = this.onArchiveBtnClick.bind(this)
         this.onSearchChange = this.onSearchChange.bind(this)
         this.onSearchEnter = this.onSearchEnter.bind(this)
