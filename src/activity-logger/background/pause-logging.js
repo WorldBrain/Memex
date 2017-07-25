@@ -9,6 +9,9 @@ const getNotifOptions = (message, requireInteraction = false) => ({
     requireInteraction,
 })
 
+export const pauseIconPath = '/img/worldbrain-logo-narrow-paused.png'
+export const unpauseIconPath = '/img/worldbrain-logo-narrow-bw.png'
+
 const getState = async () => {
     const state = (await browser.storage.local.get(PAUSE_STORAGE_KEY))[PAUSE_STORAGE_KEY]
 
@@ -23,10 +26,19 @@ const getState = async () => {
 const setState = async state => {
     const transformState = val => {
         switch (val) {
-            case Infinity: return 0
-            case true: return 1
+            case Infinity: {
+                browser.browserAction.setIcon({ path: pauseIconPath })
+                return 0
+            }
+            case true: {
+                browser.browserAction.setIcon({ path: pauseIconPath })
+                return 1
+            }
             case false:
-            default: return 2
+            default: {
+                browser.browserAction.setIcon({ path: unpauseIconPath })
+                return 2
+            }
         }
     }
 

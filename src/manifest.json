@@ -10,9 +10,8 @@
         "run_at": "document_start"
     }],
     "browser_action": {
-        "default_title": "Memory overview",
+        "default_title": "WorldBrain WebMemex",
         "default_popup": "./popup/popup.html"
-
     },
     "commands": {
         "openOverview": {
@@ -27,6 +26,11 @@
         "gecko": {
             "id": "worldbrain-extension@worldbrain.io"
         }
+    },
+    "icons": {
+        "16": "./img/worldbrain-logo-narrow-bw.png",
+        "48": "./img/worldbrain-logo-narrow-bw.png",
+        "128": "./img/worldbrain-logo-narrow-bw.png"
     },
     "permissions": [
         "<all_urls>",
