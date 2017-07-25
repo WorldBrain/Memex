@@ -3,7 +3,7 @@ import { PAUSE_STORAGE_KEY } from '..'
 
 const getNotifOptions = (message, requireInteraction = false) => ({
     type: 'basic',
-    iconUrl: '/overview/img/worldbrain-logo-narrow.png',
+    iconUrl: '/img/worldbrain-logo-narrow.png',
     title: 'WorldBrain Activity Logger',
     message,
     requireInteraction,
