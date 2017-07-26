@@ -1,12 +1,15 @@
 import React, { Component } from 'react'
+import PropTypes from 'prop-types'
 import qs from 'query-string'
 
-import extractTimeFiltersFromQuery from 'src/util/nlp-time-filter.js'
+import extractTimeFiltersFromQuery from 'src/util/nlp-time-filter'
 import { remoteFunction } from 'src/util/webextensionRPC'
+import { getPauseState } from 'src/activity-logger'
 import * as blacklistI from 'src/blacklist'
 import { getPageDocId, updateArchiveFlag } from './archive-button'
 import Popup from './components/Popup'
 import Button from './components/Button'
+import HistoryPauser from './components/HistoryPauser'
 import LinkButton from './components/LinkButton'
 import SplitButton from './components/SplitButton'
 import { BLACKLIST_BTN_STATE } from './constants'
@@ -31,15 +34,21 @@ class PopupContainer extends Component {
         this.state = {
             url: '',
             searchValue: '',
+            pauseValue: 20,
             currentTabPageDocId: '',
             blacklistBtn: BLACKLIST_BTN_STATE.DISABLED,
+            isPaused: false,
             archiveBtnDisabled: true,
             blacklistChoice: false,
         }
 
+        this.toggleLoggingPause = remoteFunction('toggleLoggingPause')
+
         this.onArchiveBtnClick = this.onArchiveBtnClick.bind(this)
         this.onSearchChange = this.onSearchChange.bind(this)
+        this.onPauseChange = this.onPauseChange.bind(this)
         this.onSearchEnter = this.onSearchEnter.bind(this)
+        this.onPauseConfirm = this.onPauseConfirm.bind(this)
     }
 
     async componentDidMount() {
@@ -54,8 +63,13 @@ class PopupContainer extends Component {
         const noop = f => f // Don't do anything if error; state doesn't change
 
         updateState({ url: currentTab.url })
+        this.getInitPauseState().then(updateState).catch(noop)
         this.getInitBlacklistBtnState(currentTab.url).then(updateState).catch(noop)
         this.getInitArchiveBtnState(currentTab.url).then(updateState).catch(noop)
+    }
+
+    async getInitPauseState() {
+        return { isPaused: await getPauseState() }
     }
 
     async getInitArchiveBtnState(url) {
@@ -86,6 +100,22 @@ class PopupContainer extends Component {
             this.blacklistConfirm(url)
             window.close()
         }
+    }
+
+    onPauseConfirm(event) {
+        event.preventDefault()
+        const { isPaused, pauseValue } = this.state
+
+        // Tell background script to do on extension level
+        this.toggleLoggingPause(pauseValue)
+
+        // Do local level state toggle and reset
+        this.setState(state => ({ ...state, isPaused: !isPaused, pauseValue: 20 }))
+    }
+
+    onPauseChange(event) {
+        const pauseValue = event.target.value
+        this.setState(state => ({ ...state, pauseValue }))
     }
 
     async onArchiveBtnClick(event) {
@@ -142,28 +172,45 @@ class PopupContainer extends Component {
         )
     }
 
+    renderPauseChoices() {
+        const pauseValueToOption = (val, i) => <option key={i} value={val}>{val === Infinity ? '∞' : val}</option>
+
+        return this.props.pauseValues.map(pauseValueToOption)
+    }
+
     render() {
-        const { searchValue, archiveBtnDisabled } = this.state
+        const { searchValue, archiveBtnDisabled, pauseValue, isPaused } = this.state
 
         return (
             <Popup searchValue={searchValue} onSearchChange={this.onSearchChange} onSearchEnter={this.onSearchEnter}>
+                <HistoryPauser
+                    onConfirm={this.onPauseConfirm}
+                    onChange={this.onPauseChange}
+                    value={pauseValue}
+                    isPaused={isPaused}
+                >
+                    {this.renderPauseChoices()}
+                </HistoryPauser>
+                {this.renderBlacklistButton()}
+                <Button icon='archive' onClick={this.onArchiveBtnClick} disabled={archiveBtnDisabled}>
+                    Archive Current Page
+                </Button>
+                <hr />
                 <LinkButton href={`${optionsURL}#/settings`} icon='settings'>
                     Settings
+                </LinkButton>
+                <LinkButton href={`${optionsURL}#/import`} icon='file_download'>
+                    Import History &amp; Bookmarks
                 </LinkButton>
                 <LinkButton href={feedbackURL} icon='feedback'>
                     Feedback
                 </LinkButton>
-                <hr />
-                <LinkButton href={`${optionsURL}#/import`} icon='file_download'>
-                    Import History &amp; Bookmarks
-                </LinkButton>
-                <Button icon='archive' onClick={this.onArchiveBtnClick} disabled={archiveBtnDisabled}>
-                    Archive Current Page
-                </Button>
-                {this.renderBlacklistButton()}
             </Popup>
         )
     }
 }
+
+PopupContainer.propTypes = { pauseValues: PropTypes.arrayOf(PropTypes.number).isRequired }
+PopupContainer.defaultProps = { pauseValues: [5, 10, 20, 30, 60, 120, 180, Infinity] }
 
 export default PopupContainer

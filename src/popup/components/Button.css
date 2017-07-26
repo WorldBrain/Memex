@@ -11,6 +11,7 @@
     text-decoration: none;
     display: flex;
     align-items: center;
+    cursor: default;
 
     &:hover,
     &:focus {
@@ -40,6 +41,38 @@
 
     &:hover {
         color: rgb(193, 146, 146);
+    }
+}
+
+.itemDropdown {
+    &:hover,
+    &:focus {
+        background: none;
+        color: rgb(59, 59, 59);
+    }
+}
+
+.dropdown {
+    margin: 0 5px;
+    cursor: pointer;
+}
+
+.clickableIcon {
+    cursor: pointer;
+    color: rgb(62, 185, 149);
+
+    &:hover,
+    &:focus {
+        color: rgb(5, 154, 111);
+    }
+}
+
+.clickableIconNeg {
+    color: rgb(255, 74, 85);
+
+    &:hover,
+    &:focus {
+        color: rgb(217, 24, 36);
     }
 }
 
