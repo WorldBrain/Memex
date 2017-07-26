@@ -5,20 +5,14 @@ import updateDoc from 'src/util/pouchdb-update-doc'
 
 /**
  * Attempts to get the ID of the page doc matching the current tab.
+ * @param {string} url The URL to try to get page doc from
  * @return {string} The ID of the matching page doc
  * @throws Will throw an error if:
- *  - URL cannot be gotten from tab
  *  - matching page doc/s not found
  *  - matching page doc already has freeze-dry flag set
  */
-export async function getCurrentTabPageDocId() {
-    const [currentTab] = await browser.tabs.query({ active: true, currentWindow: true })
-
-    if (!currentTab || !currentTab.url) {
-        throw new Error('Cannot get current tab to archive pages for')
-    }
-
-    const selector = { ...pageDocsSelector, url: currentTab.url }
+export async function getPageDocId(url) {
+    const selector = { ...pageDocsSelector, url }
     const { docs } = await db.find({ selector, fields: ['_id', 'keepFreezeDry'] })
 
     if (!docs || !docs.length) {

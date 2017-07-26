@@ -2,6 +2,7 @@ import tldjs from 'tldjs'
 
 import 'src/activity-logger/background'
 import 'src/scheduled-tasks/background'
+import 'src/blacklist/background'
 import 'src/omnibar'
 import { installTimeStorageKey } from 'src/imports/background'
 import convertOldData from 'src/util/old-data-converter'
