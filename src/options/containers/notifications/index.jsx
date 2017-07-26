@@ -3,7 +3,6 @@ import db from './index-pouch.js'
 import { routeTitle, sectionTitle } from '../../base.css'
 import styles from './BlacklistTable.css'
 
-
 class NotificationsContainer extends Component {
     constructor(props) {
         super(props)
@@ -16,7 +15,9 @@ class NotificationsContainer extends Component {
             attachments: true,
             startkey: 'notif',
             endkey: 'notif\ufff0',
-        }).then(notifs => this.setState(() => ({notifs}))).catch(err => console.log(err))
+        })
+            .then(notifs => this.setState(() => ({ notifs })))
+            .catch(err => console.log(err))
     }
 
     render() {
@@ -28,13 +29,11 @@ class NotificationsContainer extends Component {
                 <section className={styles.section}>
                     <h2 className={sectionTitle}>Click to mark as unread</h2>
                     <div className={styles.tableContainer}>
-                        <table className={styles.table}>
-                            <th className={styles.domainCell}>
-                                {notifs.rows && notifs.rows.map(({ doc }) => (
-                                    <li key={doc} ><span>{doc.title}|</span> {doc.body}</li>
-                                ))}
-                            </th>
-                        </table>
+                        <ul>
+                            {notifs.rows && notifs.rows.map(({ doc }) => (
+                                <li key={doc}>{doc.title}<span>{doc.body}</span></li>
+                            ))}
+                        </ul>
                     </div>
                 </section>
             </div>
