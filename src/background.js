@@ -7,14 +7,64 @@ import 'src/omnibar'
 import { installTimeStorageKey } from 'src/imports/background'
 import convertOldData from 'src/util/old-data-converter'
 import fetchPageData from 'src/page-analysis/background/fetch-page-data'
-import findPagesByUrl from 'src/search/find-pages'
-import tryReidentifyPage from 'src/page-storage/store-page'
-import transformToBookmarkDoc from 'src/imports/background/import-preparation'
-import dataURLToBlob from 'src/blob-util'
-import generatePageDocId from 'src/page-storage' 
+import { findPagesByUrl } from 'src/search/find-pages'
+import { transformToBookmarkDoc } from 'src/imports/background/imports-preparation'
+import { dataURLToBlob } from 'blob-util'
+import { generatePageDocId } from 'src/page-storage'
+import db from 'src/pouchdb'
 
 export const dataConvertTimeKey = 'data-conversion-timestamp'
 
+
+export async function bookmarkStorageListener(id, bookmarkInfo) {
+    const urlToFind = bookmarkInfo.url
+    const samePageCandidates = (await findPagesByUrl({urlToFind})).rows.map(row => row.doc)
+    if (samePageCandidates.length > 0) {
+        let pageDoc = {}
+        for (var i = samePageCandidates.length - 1; i >= 0; i--) {
+            if (samePageCandidates[i].url === bookmarkInfo.url) {
+                pageDoc = samePageCandidates[i]
+                break
+            }
+        }
+        const bookmarkDoc = await transformToBookmarkDoc(pageDoc)(bookmarkInfo)
+        db.bulkDocs([bookmarkDoc, pageDoc])
+        return
+    }
+    let pageDoc = {
+        url: bookmarkInfo.url,
+        title: bookmarkInfo.title,
+        _id: generatePageDocId(bookmarkInfo.dateAdded, id),
+    }
+    try {
+        console.log("Trying to get page data")
+        const freezeDryFlag = window.localStorage.getItem('freeze-dry-bookmarks')
+        let fetchPageDataOptions = {
+            includePageContent: true,
+            includeFavIcon: true,
+        }
+        if (freezeDryFlag) {
+            fetchPageDataOptions.includeFreezeDry = true
+        }
+        const pageData = await fetchPageData(bookmarkInfo.url, fetchPageDataOptions)
+        const favIconBlob = await dataURLToBlob(pageData.favIconURI)
+        const freezeDryBlob = new Blob([pageData.freezeDryHTML], {type: 'text/html;charset=UTF-8'})
+        pageDoc.content = pageData.content
+        pageDoc._attachments = [{
+            content_type: freezeDryBlob.type,
+            data: freezeDryBlob,
+        }, {
+            content_type: favIconBlob.type,
+            data: favIconBlob,
+        }]
+    } catch (err) {
+        console.log("Error occurred while fetching page data: " + err.toString())
+    } finally {
+        const bookmarkDoc = await transformToBookmarkDoc(pageDoc, bookmarkInfo)
+        console.log(bookmarkDoc)
+        db.bulkDocs([bookmarkDoc, pageDoc])
+    }
+}
 
 async function openOverview() {
     const [ currentTab ] = await browser.tabs.query({ active: true })
@@ -38,44 +88,7 @@ browser.browserAction.onClicked.addListener(() => {
 })
 
 
-browser.bookmarks.onCreated.addListener((id, bookmarkInfo) => {
-    const samePageCandidates = (await findPagesByUrl({url})).rows.map(row => row.doc)
-    if (samePageCandidates.length <= 0) {
-        try {
-            const pageData = await fetchPageData(bookmarkInfo.url, {
-                                                    includeFreezeDry: true,
-                                                    includePageContent: true,
-                                                    includeFavIcon: true,
-                                                })
-            const favIconBlob = await dataURLToBlob(pageData.favIconURI)
-            const freezeDryBlob = new Blob([pageData.freezeDryHTML], {type: 'text/html;charset=UTF-8'})
-            const pageDoc = {
-                url: bookmarkInfo.url,
-                title: bookmarkInfo.title,
-                content: pageData.content,
-                _id: generatePageDocId(bookmarkInfo.dateAdded, id),
-                _attachments: [{
-                        content_type: freezeDryBlob.type,
-                        data: freezeDryBlob
-                    }, {
-                        content_type: favIconBlob.type,
-                        data: favIconBlob
-                    }
-                ]
-            }
-        } catch (err) {
-            console.log("Error occurred while fetching page data: " + err.toString())
-            const pageDoc = {
-                url: bookmarkInfo.url,
-                title: bookmarkInfo.title,
-                _id: generatePageDocId(bookmarkInfo.dateAdded, id),
-            }
-        } finally {
-            const bookmarkDoc = await transformToBookmarkDoc(pageDoc, bookmarkInfo)
-            db.bulkDocs([bookmarkDoc, pageDoc])
-        }
-    }
-})
+browser.bookmarks.onCreated.addListener(bookmarkStorageListener)
 
 browser.commands.onCommand.addListener(command => {
     if (command === 'openOverview') {
