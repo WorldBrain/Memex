@@ -5,7 +5,7 @@ const db = new PouchDB('sample')
 db.put({
     "_id": "notif_1",
     "title": "New feature",
-    "body": "This is a notifcation, let's hope it works.",
+    "body": "This is a notification, let's hope it works.",
     "viewed": false,
 })
 
