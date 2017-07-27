@@ -45,26 +45,23 @@ const setState = async state => {
     return browser.storage.local.set({ [PAUSE_STORAGE_KEY]: transformState(state) })
 }
 
-const unpause = () => {
-    browser.notifications.create(getNotifOptions('Activity logger now running in background again', true))
-    setState(false)
-}
-
 function handleInterrupt(timeoutId) {
     if (timeoutId != Infinity && !!timeoutId) {
         clearTimeout(timeoutId)
     }
-    unpause()
+    setState(false)
 }
 
 function handlePause(timeout) {
-    const message = `Activity logger now paused${timeout != Infinity ? ` for ${timeout} mins` : ''}`
-    browser.notifications.create(getNotifOptions(message))
-
     // We don't want to make a timeout for Infinity (it doesn't work), so needs to be handled differently
-    return timeout != Infinity
-        ? setTimeout(unpause, timeout * 60000)
-        : Infinity
+    if (timeout == Infinity) {
+        return timeout
+    }
+
+    return setTimeout(() => {
+        browser.notifications.create(getNotifOptions('Activity logger now running in background again', true))
+        setState(false)
+    }, timeout * 60000)
 }
 
 /**
