@@ -1,3 +1,25 @@
+.notifs ul {
+    padding: 20px;
+}
+
+.notifs ul li {
+    background: #333;
+    margin: 5px;
+    padding: 5px;
+    list-style: none;
+    color: #fff;
+    font-weight: 900;
+}
+
+.notifs .viewed ul li {
+    background: #666;
+    margin: 5px;
+    padding: 5px;
+    list-style: none;
+    color: #fff;
+    font-weight: 300;
+}
+
 .tableContainer {
     max-height: 550px;
     overflow-y: scroll;
@@ -5,7 +27,7 @@
 }
 
 span {
-    font-weight: 900;
+    font-weight: 300;
 }
 
 .table {
