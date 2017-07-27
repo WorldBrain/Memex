@@ -29,7 +29,7 @@ class NotificationsContainer extends Component {
                 <section className={styles.section}>
                     <h2 className={sectionTitle}>Click to mark as unread</h2>
                     <div className={styles.tableContainer}>
-                        <ul className='notifs'>
+                        <ul className={styles.notifs}>
                             {notifs.rows && notifs.rows.map(({ doc }) => (
                                 <li key={doc.title}>{doc.title}<span key={doc.body}> | {doc.body}</span></li>
                             ))}
