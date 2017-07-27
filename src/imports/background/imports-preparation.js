@@ -9,6 +9,7 @@ import { generateVisitDocId, visitKeyPrefix, convertVisitDocId } from 'src/activ
 import { generatePageDocId } from 'src/page-storage'
 import { IMPORT_TYPE } from 'src/options/imports/constants'
 import { setImportItems, generateBookmarkDocId, getURLFilteredBookmarkItems, getURLFilteredHistoryItems } from './'
+import * as index from 'src/search/search-index'
 
 const uniqByUrl = uniqBy('url')
 
@@ -128,6 +129,15 @@ export default async function prepareImports(allowTypes = {}) {
     await getVisitsForPageDocs(pageDocs)
 
     const allDocs = pageDocs.concat(bookmarkDocs)
+
+    // Queue them for index insertion
+    console.time('add-to-index time')
+    index.add(allDocs)
+        .then(() => {
+            console.timeEnd('add-to-index time')
+            console.log('done adding new docs to index')
+        })
+        .catch(console.error)
 
     // Store them into the database. Already existing docs will simply be
     // rejected, because their id (timestamp & history id) already exists.

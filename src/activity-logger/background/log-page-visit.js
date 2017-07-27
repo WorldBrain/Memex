@@ -2,6 +2,7 @@ import db from 'src/pouchdb'
 import { reidentifyOrStorePage } from 'src/page-storage/store-page'
 import { checkWithBlacklist } from 'src/blacklist'
 import { generateVisitDocId } from '..'
+import * as index from 'src/search/search-index'
 
 
 // Store the visit in PouchDB.
@@ -35,10 +36,19 @@ export async function logPageVisit({
     // First create an identifier for the page being visited.
     const {page, finalPagePromise} = await reidentifyOrStorePage({tabId, url})
     // Create a visit pointing to this page (analysing/storing it may still be in progress)
-    const visit = await storeVisit({page, url, timestamp})
+    const { visit } = await storeVisit({page, url, timestamp})
 
     // Wait until all page analyis/deduping is done before returning.
-    await finalPagePromise
+    const { finalPage } = await finalPagePromise
+
+    // Queue page and visit to add into search index
+    console.time('add-to-index time')
+    index.add([visit, finalPage || {}])
+        .then(() => {
+            console.timeEnd('add-to-index time')
+            console.log('added new visit and page to index!')
+        })
+        .catch(console.error)
 
     // TODO possibly deduplicate the visit if the page was deduped too.
     void (visit)
