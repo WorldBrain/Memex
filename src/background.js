@@ -20,13 +20,7 @@ export async function bookmarkStorageListener(id, bookmarkInfo) {
     const urlToFind = bookmarkInfo.url
     const samePageCandidates = (await findPagesByUrl({urlToFind})).rows.map(row => row.doc)
     if (samePageCandidates.length > 0) {
-        let pageDoc = {}
-        for (var i = samePageCandidates.length - 1; i >= 0; i--) {
-            if (samePageCandidates[i].url === bookmarkInfo.url) {
-                pageDoc = samePageCandidates[i]
-                break
-            }
-        }
+        let pageDoc = samePageCandidates[samePageCandidates.length - 1]
         const bookmarkDoc = await transformToBookmarkDoc(pageDoc)(bookmarkInfo)
         db.bulkDocs([bookmarkDoc, pageDoc])
         return
@@ -38,29 +32,33 @@ export async function bookmarkStorageListener(id, bookmarkInfo) {
     }
     try {
         console.log("Trying to get page data")
-        const freezeDryFlag = window.localStorage.getItem('freeze-dry-bookmarks')
+        let freezeDryFlag = false
+        browser.storage.local.get('freeze-dry-bookmarks').then(result => {
+            freezeDryFlag = result
+        }).catch(error => {})
         let fetchPageDataOptions = {
             includePageContent: true,
             includeFavIcon: true,
+            includeFreezeDry: freezeDryFlag,
         }
-        if (freezeDryFlag) {
-            fetchPageDataOptions.includeFreezeDry = true
-        }
-        const pageData = await fetchPageData(bookmarkInfo.url, fetchPageDataOptions)
+        const pageData = await fetchPageData({ url: bookmarkInfo.url, opts: fetchPageDataOptions })
         const favIconBlob = await dataURLToBlob(pageData.favIconURI)
         const freezeDryBlob = new Blob([pageData.freezeDryHTML], {type: 'text/html;charset=UTF-8'})
         pageDoc.content = pageData.content
-        pageDoc._attachments = [{
-            content_type: freezeDryBlob.type,
-            data: freezeDryBlob,
-        }, {
-            content_type: favIconBlob.type,
-            data: favIconBlob,
-        }]
+        pageDoc._attachments = {
+            'freeze-dry-blob': {
+                content_type: freezeDryBlob.type,
+                data: freezeDryBlob,
+            },
+            'fav-icon-blob': {
+                content_type: favIconBlob.type,
+                data: favIconBlob,
+            },
+        }
     } catch (err) {
         console.log("Error occurred while fetching page data: " + err.toString())
     } finally {
-        const bookmarkDoc = await transformToBookmarkDoc(pageDoc, bookmarkInfo)
+        const bookmarkDoc = await transformToBookmarkDoc(pageDoc)(bookmarkInfo)
         console.log(bookmarkDoc)
         db.bulkDocs([bookmarkDoc, pageDoc])
     }
