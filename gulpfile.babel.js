@@ -208,7 +208,7 @@ gulp.task('package-firefox', async () => {
     const buildXpiCommand = `web-ext -s ./extension -a ./dist/firefox build`
     await exec(buildXpiCommand)
     // web-ext will have named the file ${filename}.zip. Change .zip to .xpi.
-    await exec(`rename -f "s/\\.zip$/.xpi/" dist/firefox/${filename}.zip`)
+    await exec(`mv dist/firefox/${filename}.zip dist/firefox/${filename}.xpi`)
 })
 
 gulp.task('package-chromium', async () => {
@@ -218,6 +218,8 @@ gulp.task('package-chromium', async () => {
         + ` -o ./dist/chromium/${filename}.crx`
         + ` -p .chrome-extension-key.pem`
     )
+    // crx fails if the output directory is not there.
+    await exec(`mkdir -p dist/chromium`)
     await exec(buildCrxCommand)
 })
 
