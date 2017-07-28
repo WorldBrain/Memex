@@ -16,5 +16,4 @@ db.put({
     "viewed": false,
 })
 
-
 export default db

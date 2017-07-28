@@ -6,7 +6,11 @@ import styles from './Notifs.css'
 class NotificationsContainer extends Component {
     constructor(props) {
         super(props)
-        this.state = { notifs: {} }
+        this.state = { notifs: {}, selectedNotificationId: -1 }
+    }
+
+    selectNotification(doc) {
+        this.setState({selectedNotificationId: doc._id})
     }
 
     componentDidMount() {
@@ -31,7 +35,11 @@ class NotificationsContainer extends Component {
                     <div className={styles.tableContainer}>
                         <ul className={styles.notifs}>
                             {notifs.rows && notifs.rows.map(({ doc }) => (
-                                <li key={doc.title}>{doc.title}<span key={doc.body}> | {doc.body}</span></li>
+                                <li onClick={() => this.selectNotification(doc)} key={doc.title}>
+                                    {doc.title}
+                                    {this.state.selectedNotificationId === doc._id
+                                    && <li key={doc.body}>{doc.body}</li>}
+                                </li>
                             ))}
                         </ul>
                     </div>
