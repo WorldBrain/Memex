@@ -11,6 +11,25 @@ class NotificationsContainer extends Component {
 
     selectNotification(doc) {
         this.setState({selectedNotificationId: doc._id})
+        alert("viewed!!!")
+        db.get(doc._id).then(function(doc) {
+            return db.put({
+                _id: doc._id,
+                _rev: doc._rev,
+                title: doc.title,
+                body: doc.body,
+                viewed: true,
+            })
+        }).then(function(response) {
+        // handle response
+            console.log("viewed!!!")
+            console.log(doc._id)
+            console.log(doc.title)
+            console.log(doc.viewed)
+        // update badge
+        }).catch(function (err) {
+            console.log("err")
+        })
     }
 
     componentDidMount() {
