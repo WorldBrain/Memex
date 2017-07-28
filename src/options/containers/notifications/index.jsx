@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import db from './index-pouch.js'
 import { routeTitle, sectionTitle } from '../../base.css'
-import styles from './BlacklistTable.css'
+import styles from './Notifs.css'
 
 class NotificationsContainer extends Component {
     constructor(props) {

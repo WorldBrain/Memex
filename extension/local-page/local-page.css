@@ -1,0 +1,43 @@
+html,
+body {
+    margin: 0;
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+
+    display: flex;
+    flex-direction: column;
+}
+
+#bar {
+    width: 100%;
+    height: 24px;
+    font-size: 16px;
+    z-index: 1;
+    background-color: #f8f8f8;
+    border-bottom: 1px solid #999;
+    overflow: visible;
+    display: flex;
+    align-items: center;
+}
+
+#bar a {
+    text-decoration: none;
+    color: darkblue;
+}
+
+#bar span {
+    padding-left: 10px;
+}
+
+#page {
+    width: 100%;
+    flex-grow: 1;
+}
+
+iframe[seamless] {
+    background-color: transparent;
+    border: 0px none transparent;
+    padding: 0px;
+    overflow: hidden;
+}
