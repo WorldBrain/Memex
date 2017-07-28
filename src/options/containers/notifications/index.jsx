@@ -11,7 +11,6 @@ class NotificationsContainer extends Component {
 
     selectNotification(doc) {
         this.setState({selectedNotificationId: doc._id})
-        alert("viewed!!!")
         db.get(doc._id).then(function(doc) {
             return db.put({
                 _id: doc._id,
@@ -26,7 +25,13 @@ class NotificationsContainer extends Component {
             console.log(doc._id)
             console.log(doc.title)
             console.log(doc.viewed)
-        // update badge
+            var unreadItemCount = 5
+            var ba = chrome.browserAction
+            function setUnread(unreadItemCount) {
+                ba.setBadgeBackgroundColor({color: [255, 0, 0, 128]})
+                ba.setBadgeText({text: '' + unreadItemCount})
+            }
+            setUnread(4)
         }).catch(function (err) {
             console.log("err")
         })
