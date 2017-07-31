@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import db from './index-pouch.js'
 import { routeTitle, sectionTitle } from '../../base.css'
 import styles from './Notifs.css'
+// import setUnread from './setUnread'
 
 class NotificationsContainer extends Component {
     constructor(props) {
@@ -25,13 +26,15 @@ class NotificationsContainer extends Component {
             console.log(doc._id)
             console.log(doc.title)
             console.log(doc.viewed)
-            var unreadItemCount = 5
+            var unreadItemCount = 3
             var ba = chrome.browserAction
+
             function setUnread(unreadItemCount) {
-                ba.setBadgeBackgroundColor({color: [255, 0, 0, 128]})
+                ba.setBadgeBackgroundColor({color: [62, 185, 149, 128]})
                 ba.setBadgeText({text: '' + unreadItemCount})
             }
-            setUnread(4)
+
+            setUnread(unreadItemCount)
         }).catch(function (err) {
             console.log("err")
         })

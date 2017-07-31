@@ -10,7 +10,6 @@
         "run_at": "document_start"
     }],
     "browser_action": {
-        "default_icon": "images/icon32.png",
         "default_title": "Memory overview",
         "default_popup": "popup.html"
     },
