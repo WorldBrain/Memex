@@ -6,9 +6,63 @@ import 'src/blacklist/background'
 import 'src/omnibar'
 import { installTimeStorageKey } from 'src/imports/background'
 import convertOldData from 'src/util/old-data-converter'
+import fetchPageData from 'src/page-analysis/background/fetch-page-data'
+import { findPagesByUrl } from 'src/search/find-pages'
+import { transformToBookmarkDoc } from 'src/imports/background/imports-preparation'
+import { dataURLToBlob } from 'blob-util'
+import { generatePageDocId } from 'src/page-storage'
+import db from 'src/pouchdb'
 
 export const dataConvertTimeKey = 'data-conversion-timestamp'
 
+
+export async function bookmarkStorageListener(id, bookmarkInfo) {
+    const urlToFind = bookmarkInfo.url
+    const samePageCandidates = (await findPagesByUrl({urlToFind})).rows.map(row => row.doc)
+    if (samePageCandidates.length > 0) {
+        let pageDoc = samePageCandidates[samePageCandidates.length - 1]
+        const bookmarkDoc = await transformToBookmarkDoc(pageDoc)(bookmarkInfo)
+        db.bulkDocs([bookmarkDoc, pageDoc])
+        return
+    }
+    let pageDoc = {
+        url: bookmarkInfo.url,
+        title: bookmarkInfo.title,
+        _id: generatePageDocId(bookmarkInfo.dateAdded, id),
+    }
+    try {
+        console.log("Trying to get page data")
+        let freezeDryFlag = false
+        browser.storage.local.get('freeze-dry-bookmarks').then(result => {
+            freezeDryFlag = result
+        }).catch(error => {})
+        let fetchPageDataOptions = {
+            includePageContent: true,
+            includeFavIcon: true,
+            includeFreezeDry: freezeDryFlag,
+        }
+        const pageData = await fetchPageData({ url: bookmarkInfo.url, opts: fetchPageDataOptions })
+        const favIconBlob = await dataURLToBlob(pageData.favIconURI)
+        const freezeDryBlob = new Blob([pageData.freezeDryHTML], {type: 'text/html;charset=UTF-8'})
+        pageDoc.content = pageData.content
+        pageDoc._attachments = {
+            'freeze-dry-blob': {
+                content_type: freezeDryBlob.type,
+                data: freezeDryBlob,
+            },
+            'fav-icon-blob': {
+                content_type: favIconBlob.type,
+                data: favIconBlob,
+            },
+        }
+    } catch (err) {
+        console.log("Error occurred while fetching page data: " + err.toString())
+    } finally {
+        const bookmarkDoc = await transformToBookmarkDoc(pageDoc)(bookmarkInfo)
+        console.log(bookmarkDoc)
+        db.bulkDocs([bookmarkDoc, pageDoc])
+    }
+}
 
 async function openOverview() {
     const [ currentTab ] = await browser.tabs.query({ active: true })
@@ -30,6 +84,9 @@ async function openOverview() {
 browser.browserAction.onClicked.addListener(() => {
     openOverview()
 })
+
+
+browser.bookmarks.onCreated.addListener(bookmarkStorageListener)
 
 browser.commands.onCommand.addListener(command => {
     if (command === 'openOverview') {

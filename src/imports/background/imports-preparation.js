@@ -64,7 +64,7 @@ export const transformToVisitDoc = assocPageDoc => visitItem => ({
  * @param {IPageDoc} assocPageDoc The page doc that contains the page data for this bookmark.
  * @returns {IBookmarkDoc} Newly created bookmark doc dervied from bookmarkItem data.
  */
-const transformToBookmarkDoc = assocPageDoc => bookmarkItem => ({
+export const transformToBookmarkDoc = assocPageDoc => bookmarkItem => ({
     _id: generateBookmarkDocId({
         timestamp: bookmarkItem.dateAdded,
         nonce: bookmarkItem.id,
