@@ -1,5 +1,5 @@
-import db from "./index-pouch.js";
-import PouchDB from "pouchdb";
+import db from "./index-pouch.js"
+import PouchDB from "pouchdb"
 
 // export default function setUnread(itemToCount) {
 //     console.log(itemToCount);
@@ -7,7 +7,7 @@ import PouchDB from "pouchdb";
 // }
 
 export default function setUnread(itemToCount) {
-    console.log(itemToCount);
+    console.log(itemToCount)
     db
         .allDocs({
             include_docs: true,
@@ -34,7 +34,7 @@ export default function setUnread(itemToCount) {
             console.log("inside then", itemToCount)
         })
         .then(function(response) {
-            let ba = chrome.browserAction;
+            let ba = chrome.browserAction
             ba.setBadgeBackgroundColor({ color: [62, 185, 149, 128] })
             ba.setBadgeText({ text: "" + itemToCount })
         })

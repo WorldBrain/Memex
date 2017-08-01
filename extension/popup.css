@@ -64,3 +64,11 @@ hr {
     color:#3EB995;
     background: rgb(229, 229, 229);
 }
+
+
+.material-icons.mdl-badge[data-badge]::after {
+  font-size: .3em;
+  color: #3b3b3b;
+  width: 2em;
+  height: 2em;
+}

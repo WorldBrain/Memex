@@ -28,12 +28,10 @@ class NotificationsContainer extends Component {
             console.log(doc.viewed)
             var unreadItemCount = 3
             var ba = chrome.browserAction
-
             function setUnread(unreadItemCount) {
                 ba.setBadgeBackgroundColor({color: [62, 185, 149, 128]})
                 ba.setBadgeText({text: '' + unreadItemCount})
             }
-
             setUnread(unreadItemCount)
         }).catch(function (err) {
             console.log("err")
