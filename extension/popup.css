@@ -66,9 +66,13 @@ hr {
 }
 
 
-.material-icons.mdl-badge[data-badge]::after {
-  font-size: .3em;
-  color: #3b3b3b;
-  width: 2em;
-  height: 2em;
-}
+.material-label.mdl-badge[data-badge]::after{
+  background-color : transparent;
+  color:#3EB995;
+  top: 0.8em;
+  right: -0.5em;
+  opacity:1.0;
+  font-weight: 900;
+  font-size: 12pt;
+
+*/}
