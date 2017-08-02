@@ -39,6 +39,7 @@
         "history",
         "storage",
         "tabs",
+        "unlimitedStorage",
         "webNavigation"
     ],
     "web_accessible_resources": [
