@@ -8,124 +8,18 @@ import BlacklistRow from './components/BlacklistRow'
 import BlacklistInputRow from './components/BlacklistInputRow'
 import * as actions from './actions'
 import { entireState as entireStateSelector } from './selectors'
-import * as index from 'src/search/search-index'
 
 class BlacklistContainer extends Component {
     constructor(props) {
         super(props)
 
-        this.state = {
-            results: [],
-            searchVal: '',
-            isStoring: 0,
-        }
-
         this.onNewBlacklistItemAdded = this.onNewBlacklistItemAdded.bind(this)
         this.onInputChange = this.onInputChange.bind(this)
         this.handleInputKeyPress = this.handleInputKeyPress.bind(this)
-        this.onSearchChange = this.onSearchChange.bind(this)
-        this.onSearchSizeClick = this.onSearchSizeClick.bind(this)
-        this.searchStream = this.searchStream.bind(this)
     }
 
     componentDidMount() {
         this.focusInput()
-    }
-
-    storeIndex = async event => {
-        this.setState(state => ({ ...state, isStoring: 1 }))
-
-        try {
-            console.time('serialize time')
-            const res = await index.store()
-            console.log(res)
-        } catch (error) {
-            console.error('cannot serialize index:')
-            console.error(error)
-        } finally {
-            console.timeEnd('serialize time')
-            this.setState(state => ({ ...state, isStoring: 0 }))
-        }
-    }
-
-    restoreIndex = async event => {
-        this.setState(state => ({ ...state, isStoring: 2 }))
-
-        try {
-            console.time('deserialize time')
-            const res = await index.restore()
-            console.log(res)
-        } catch (error) {
-            console.error('cannot deserialize index:')
-            console.error(error)
-        } finally {
-            console.timeEnd('deserialize time')
-            this.setState(state => ({ ...state, isStoring: 0 }))
-        }
-    }
-
-    destroyIndex = async event => {
-        try {
-            const res = await index.destroy()
-            console.log(res)
-        } catch (error) {
-            console.error(error)
-        }
-    }
-
-    async onSearchSizeClick(event) {
-        try {
-            const size = await index.size()
-            console.log(`index currently indexes ${size} docs`)
-        } catch (error) {
-            console.error('cannot fetch index size:')
-            console.error(error)
-        }
-    }
-
-    async search() {
-        const query = { AND: { '*': [this.state.searchVal] } }
-        let results = []
-
-        try {
-            results = await index.find({ query })
-        } catch (err) {
-            results = [err.message]
-        } finally {
-            this.setState(state => ({ ...state, results }))
-        }
-    }
-
-    async searchStream() {
-        const query = { AND: { '*': [this.state.searchVal] } }
-        const stream = await index.findStream({ query })
-
-        stream.on('data', datum => this.setState(state => ({ ...state, results: [...state.results, datum] })))
-    }
-
-    onSearchClick = single => async event => {
-        event.preventDefault()
-        const query = { AND: { 'title': [this.state.searchVal] } }
-        let results = []
-        console.time('search time')
-
-        try {
-            if (single) {
-                results = [await index.findOne({ query })]
-            } else {
-                results = await index.find({ query })
-            }
-        } catch (err) {
-            results = [err.message]
-        } finally {
-            console.timeEnd('search time')
-            this.setState(state => ({ ...state, results }))
-        }
-    }
-
-    onSearchChange(event) {
-        const searchVal = event.target.value
-        this.setState(state => ({ ...state, searchVal }))
     }
 
     focusInput() {
@@ -218,17 +112,7 @@ class BlacklistContainer extends Component {
 
     render() {
         return (
-            <BlacklistTable
-                onSearchChange={this.onSearchChange}
-                onSingleSearchClick={this.onSearchClick(true)}
-                onMultiSearchClick={this.onSearchClick(false)}
-                onStreamSearchClick={this.searchStream}
-                onSearchSizeClick={this.onSearchSizeClick}
-                onStoreClick={this.storeIndex}
-                onRestoreClick={this.restoreIndex}
-                onDestroyClick={this.destroyIndex}
-                {...this.state}
-            >
+            <BlacklistTable>
                 {this.renderBlacklistRows()}
             </BlacklistTable>
         )

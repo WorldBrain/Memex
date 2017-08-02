@@ -111,7 +111,7 @@ export async function add(docs) {
     return new Promise((...args) => index.concurrentAdd(indexOpts, input, standardResponse(...args)))
 }
 
-export async function count (query) {
+export async function count(query) {
     const index = await indexP
 
     return new Promise((...args) => index.totalHits(query, standardResponse(...args)))
