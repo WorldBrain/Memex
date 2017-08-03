@@ -16,8 +16,10 @@ async function storeThisPage() {
         const { page: page_ } = await logActivePageVisit()
         page = page_
     } catch (err) {
-        // TODO Make clear to the user that storing the page failed.
-        console.error(err)
+        const errorMessageContent = document.getElementById('errorMessageContent')
+        const errorMessageDimmer = document.getElementById('errorMessageDimmer')
+        errorMessageContent.innerText = `Error: ${err && err.message}`
+        errorMessageDimmer.classList.add('active')
         return
     } finally {
         screenshotDimmer.classList.remove('active')
