@@ -4,6 +4,9 @@ import reduce from 'lodash/fp/reduce'
 import stream from 'stream'
 import JSONStream from 'JSONStream'
 
+import db, { normaliseFindResult } from 'src/pouchdb'
+import QueryBuilder from './query-builder'
+
 export const INDEX_STORAGE_KEY = 'search-index'
 // How many different keys in local storage are being used
 export let storageKeyCount = 0
@@ -185,4 +188,40 @@ export async function destroy() {
     return new Promise((resolve, reject) =>
         index.flush(err =>
             err ? reject(err) : resolve('index destroyed')))
+}
+
+// Gets all the "ok" docs in returned array
+const bulkResultsToArray = ({ results }) =>
+    results
+        .map(res => res.docs)
+        .map(list => list.filter(doc => doc.ok))
+        .filter(list => list.length)
+        .map(list => list[0].ok)
+
+export async function filterVisitsByQuery({
+    query,
+    startDate = 0,
+    endDate = Date.now(),
+    skipUntil,
+    limit = 10,
+}) {
+    const indexQuery = new QueryBuilder()
+        .searchTerm(query || '')
+        .startDate(startDate || 0)
+        .endDate(endDate || Date.now)
+        .skipUntil(skipUntil || undefined)
+        .limit(limit || 10)
+        .get()
+    console.log(indexQuery) // DEBUG
+
+    // Using index results, fetch matching pouch docs
+    const results = await find(query)
+    const docIds = results.map(res => ({ id: res.id }))
+    const bulkRes = await db.bulkGet({ docs: docIds })
+    const normalised = normaliseFindResult({ docs: bulkResultsToArray(bulkRes) })
+
+    return {
+        rows: normalised.rows,
+        resultExhausted: results.length < limit,
+    }
 }

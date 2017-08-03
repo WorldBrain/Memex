@@ -50,9 +50,13 @@ class SearchContainer extends Component {
             if (single) {
                 results = [await index.findOne(query)]
             } else {
-                results = await index.find(query)
+                results = await index.filterVisitsByQuery({
+                    query: this.state.searchVal,
+
+                })
             }
         } catch (err) {
+            console.error(err)
             results = [err.message]
         } finally {
             console.timeEnd('search time')
