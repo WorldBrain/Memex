@@ -4,7 +4,7 @@
 }
 
 .notifs li {
-    background: #333;
+    background: #666;
     margin: 5px;
     padding: 5px;
     list-style: none;
@@ -12,13 +12,26 @@
     font-weight: 900;
 }
 
-ul .notifs li .viewed{
+.boris li {
+    background-color: red;
+}
+
+.viewed{
     background: #666;
     margin: 5px;
     padding: 5px;
     list-style: none;
     color: #fff;
     font-weight: 300;
+}
+
+.not-viewed{
+    background: red;
+    margin: 5px;
+    padding: 5px;
+    list-style: none;
+    color: #fff;
+    font-weight: 900;
 }
 
 .tableContainer {
