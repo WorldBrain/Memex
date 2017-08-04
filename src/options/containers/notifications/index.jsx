@@ -71,7 +71,7 @@ class NotificationsContainer extends Component {
                                 && notifs.rows.map(({ doc }) =>
                                     <li
                                         className={
-                                            doc.viewed ? 'viewed' : 'not-viewed'
+                                            doc.viewed ? styles.viewed : styles.notviewed
                                         }
                                         onClick={() =>
                                             this.selectNotification(doc)}

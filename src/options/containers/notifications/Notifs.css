@@ -1,23 +1,5 @@
-.notifs ul {
-    padding: 20px;
-    background: #333;
-}
-
-.notifs li {
-    background: #666;
-    margin: 5px;
-    padding: 5px;
-    list-style: none;
-    color: #fff;
-    font-weight: 900;
-}
-
-.boris li {
-    background-color: red;
-}
-
 .viewed{
-    background: #666;
+    background: green;
     margin: 5px;
     padding: 5px;
     list-style: none;
@@ -25,8 +7,8 @@
     font-weight: 300;
 }
 
-.not-viewed{
-    background: red;
+.notviewed{
+    background: blue;
     margin: 5px;
     padding: 5px;
     list-style: none;
