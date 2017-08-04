@@ -67,12 +67,12 @@ hr {
 
 
 .material-label.mdl-badge[data-badge]::after{
-  background-color : transparent;
-  color:#3EB995;
-  top: 0.8em;
-  right: -0.5em;
+ background-color : #3EB995;
+  /* color:#3EB995;*/
+  top: 0.9em;
+  right: -0.7em;
   opacity:1.0;
   font-weight: 900;
-  font-size: 12pt;
+  font-size: 8pt;
 
 */}
