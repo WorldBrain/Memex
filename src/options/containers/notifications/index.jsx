@@ -28,7 +28,12 @@ class NotificationsContainer extends Component {
                     // Write the code which depends on the `res.val`, here
                     var ba = chrome.browserAction
                     ba.setBadgeBackgroundColor({ color: [62, 185, 149, 128] })
-                    ba.setBadgeText({ text: "" + res })
+                    if (res > 0) {
+                        ba.setBadgeText({ text: "" + res })
+                    } else {
+                        ba.setBadgeText({ text: "" })
+                    }
+
                     console.log("what are you baby?", res)
                 })
                     .catch(function(err) {
