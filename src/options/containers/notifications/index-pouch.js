@@ -43,4 +43,19 @@ db.put({
     "body": "blagh blah.",
     "viewed": false,
 })
+
+db.put({
+    "_id": "notif_7",
+    "title": "unnnread",
+    "body": "Dutch guys rule.",
+    "viewed": false,
+})
+
+db.put({
+    "_id": "notif_8",
+    "title": "unnnread",
+    "body": "blagh blah.",
+    "viewed": false,
+})
+
 export default db

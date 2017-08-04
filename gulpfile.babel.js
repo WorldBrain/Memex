@@ -61,6 +61,12 @@ const sourceFiles = [
         output: 'popup.js',
         destination: './extension',
     },
+
+    {   
+        entries: ['./src/dropdown_badge.js'],
+        output: 'dropdown_badge.js',
+        destination: './extension',
+    },
 ]
 
 const browserifySettings = {
