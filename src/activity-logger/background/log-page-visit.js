@@ -18,6 +18,43 @@ async function storeVisit({timestamp, url, page}) {
     return {visit}
 }
 
+/**
+ * Handles index update, either adding new page + visit, or just adding a visit to existing data.
+ *
+ * @param {any} reidentifyResult Object containing the existing page/page stub + promise resolving
+ *  to the new page (if deduping wasn't successful).
+ * @param {any} visit The new visit to add to index; should occur regardless of reidentify outcome.
+ */
+async function updateIndex({ finalPagePromise, page: existingPage }, visit) {
+    // If finalPagePromise exists, it is a new page
+    if (finalPagePromise) {
+        // Wait until all page analyis/deduping is done before returning.
+        const { finalPage } = await finalPagePromise
+
+        if (!finalPage) { return }
+
+        console.time('add-page-to-index time')
+        try {
+            // Queue page and visit to add into search index
+            await index.addPage({ pageDoc: finalPage, visitDocs: [visit] })
+            console.log('added new visit and page to index!')
+        } catch (error) {
+            console.error(error)
+        } finally {
+            console.timeEnd('add-page-to-index time')
+        }
+    } else { // It's an existing page
+        console.time('add-visit-to-index time')
+        try {
+            await index.addVisit(visit)
+        } catch (error) {
+            console.error(error)
+        } finally {
+            console.timeEnd('add-visit-to-index time')
+        }
+    }
+}
+
 export async function logPageVisit({
     tabId,
     url,
@@ -34,21 +71,12 @@ export async function logPageVisit({
     // TODO first try to extend an existing visit instead of logging a new one.
 
     // First create an identifier for the page being visited.
-    const {page, finalPagePromise} = await reidentifyOrStorePage({tabId, url})
+    const reidentifyResult = await reidentifyOrStorePage({tabId, url})
+
     // Create a visit pointing to this page (analysing/storing it may still be in progress)
-    const { visit } = await storeVisit({page, url, timestamp})
+    const { visit } = await storeVisit({page: reidentifyResult.page, url, timestamp})
 
-    // Wait until all page analyis/deduping is done before returning.
-    const { finalPage } = await finalPagePromise
-
-    // Queue page and visit to add into search index
-    console.time('add-to-index time')
-    index.addPage({ pageDoc: finalPage || {}, visitDocs: [visit] })
-        .then(() => {
-            console.timeEnd('add-to-index time')
-            console.log('added new visit and page to index!')
-        })
-        .catch(console.error)
+    await updateIndex(reidentifyResult, visit)
 
     // TODO possibly deduplicate the visit if the page was deduped too.
     void (visit)

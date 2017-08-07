@@ -12,6 +12,7 @@ import { findPagesByUrl } from 'src/search/find-pages'
 import { transformToBookmarkDoc } from 'src/imports/background/imports-preparation'
 import { generatePageDocId } from 'src/page-storage'
 import { FREEZE_DRY_BOOKMARKS_KEY } from 'src/options/preferences/constants'
+import * as index from 'src/search/search-index'
 import db from 'src/pouchdb'
 
 export const dataConvertTimeKey = 'data-conversion-timestamp'
@@ -48,6 +49,7 @@ export async function bookmarkStorageListener(id, bookmarkInfo) {
     if (samePageCandidates.length) {
         const pageDoc = samePageCandidates[samePageCandidates.length - 1]
         const bookmarkDoc = await transformToBookmarkDoc(pageDoc)(bookmarkInfo)
+        index.addBookmark(bookmarkDoc)
         return db.bulkDocs([bookmarkDoc, pageDoc])
     }
 
@@ -75,6 +77,7 @@ export async function bookmarkStorageListener(id, bookmarkInfo) {
         console.error("Error occurred while fetching page data: " + err.toString())
     } finally {
         const bookmarkDoc = await transformToBookmarkDoc(pageDoc)(bookmarkInfo)
+        index.addPage({ pageDoc, bookmarkDocs: [bookmarkDoc] })
         db.bulkDocs([bookmarkDoc, pageDoc])
     }
 }
