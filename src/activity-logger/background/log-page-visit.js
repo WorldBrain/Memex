@@ -43,7 +43,7 @@ export async function logPageVisit({
 
     // Queue page and visit to add into search index
     console.time('add-to-index time')
-    index.add([visit, finalPage || {}])
+    index.addPage({ pageDoc: finalPage || {}, visitDocs: [visit] })
         .then(() => {
             console.timeEnd('add-to-index time')
             console.log('added new visit and page to index!')

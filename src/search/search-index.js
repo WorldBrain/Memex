@@ -20,6 +20,17 @@ const indexOpts = {
     nGramLength: { gte: 1, lte: 5 },
     separator: /[|' .,\-|(\n)]+/,
     stopwords: require('stopword').en,
+    fieldOptions: {
+        visitTimestamps: {
+            fieldedSearch: true,
+        },
+        bookmarkTimestamps: {
+            fieldedSearch: true,
+        },
+        content: {
+            fieldedSearch: true,
+        },
+    }
 }
 
 class StorageReader extends stream.Readable {
@@ -92,24 +103,162 @@ const standardResponse = (resolve, reject) =>
     (err, data = true) => err ? reject(err) : resolve(data)
 
 /**
- * Transforms any of our page, bookmark, or visit docs to docs to build the search index around.
- * Only searchable data is brought over and joined into `content` key.
+ * Transforms a page doc to doc structured for use with the index.
+ * All searchable page data (content) is concatted to make a composite field.
+ * This represents the general structure for index docs.
  */
-const transformPouchDoc = ({ _id: id, content = {}, visitStart, timestamp, page = {} }) => ({
+const transformPageDoc = ({ _id: id, content = {}, bookmarkTimestamps = [], visitTimestamps = [] }) => ({
     id,
     content: combineContentStrings(content),
-    timestamp: visitStart || timestamp,
-    assocPageId: page._id,
+    bookmarkTimestamps,
+    visitTimestamps,
 })
+
+/**
+ * Simply maps out the ID of visit or bookmark docs. The ID contains
+ * timestamp, which is the only data we want at the moment.
+ */
+const transformTimeDoc = ({ _id: id }) => id
+
+/**
+ * Creates an object based on an array of page docs, indexing them via ID.
+ */
+const createPagesObject = reduce((result, pageDoc) => ({
+    ...result,
+    [pageDoc._id]: transformPageDoc(pageDoc),
+}), {})
 
 const indexP = new Promise((...args) => initSearchIndex(indexOpts, standardResponse(...args)))
 
-
 export const instance = () => indexP
 
-export async function add(docs) {
+export async function addPage({ pageDoc, visitDocs = [], bookmarkDocs = [] }) {
     const index = await indexP
-    const input = (docs instanceof Array ? docs : [docs]).map(transformPouchDoc)
+
+    const visitTimestamps = visitDocs.length ? visitDocs.map(transformTimeDoc) : []
+    const bookmarkTimestamps = bookmarkDocs.length ? bookmarkDocs.map(transformTimeDoc) : []
+    const input = [transformPageDoc({ ...pageDoc, visitTimestamps, bookmarkTimestamps })]
+
+    return new Promise((...args) => index.concurrentAdd(indexOpts, input, standardResponse(...args)))
+}
+
+export async function addPages({ pageDocs, visitDocs = [], bookmarkDocs = [] }) {
+    const index = await indexP
+
+    // Transform pages to objects with keys as `_id`s
+    const pages = createPagesObject(pageDocs)
+
+    // Update the pages object with bookmark/visit timestamps
+    const updatePageTimes = field => ({ _id, page }) => {
+        if (pages[page._id]) {
+            pages[page._id][field].push(_id)
+        }
+    }
+
+    visitDocs.forEach(updatePageTimes('visitTimestamps'))
+    bookmarkDocs.forEach(updatePageTimes('bookmarkTimestamps'))
+
+    // Extract document values out of ID-indexed object
+    const input = Object.values(pages)
+
+    return new Promise((...args) => index.concurrentAdd(indexOpts, input, standardResponse(...args)))
+}
+
+/**
+ * Returns a function that affords adding either a visit or bookmark to an index.
+ * The function should perform the following update, using the associated page doc ID:
+ *  - grab the existing index doc matching the page doc ID
+ *  - perform update to appropriate timestamp field
+ *  - delete the original doc form the index
+ *  - add the updated doc into the index
+ */
+const addTimestamp = field => async ({ _id, page })  => {
+    const index = await indexP
+
+    const existingDoc = await get(page._id) // Get existing doc
+    if (!existingDoc) {
+        throw new Error('Page associated with timestamp is not recorded in the index')
+    }
+
+    (existingDoc[field] || []).push(_id) // Perform in-memory update
+    await del(page._id) // Delete existing doc
+    return add(existingDoc) // Add new updated doc
+}
+
+export const addVisit = addTimestamp('visitTimestamps')
+export const addBookmark = addTimestamp('bookmarkTimestamps')
+
+/**
+ * Returns a function that affords removing either a visit or bookmark from the index.
+ * The function should perform the following update, using the associated page doc ID:
+ *  - grab the existing index doc matching the page doc ID
+ *  - perform update to appropriate timestamp field, removing the existing ID
+ *  - delete the original doc form the index
+ *  - add the updated doc into the index
+ */
+const removeTimestamp = field => async ({ _id, page }) => {
+    const index = await indexP
+
+    const existingDoc = await get(page._id) // Get existing doc
+    if (!existingDoc) {
+        throw new Error('Page associated with timestamp is not recorded in the index')
+    }
+
+    // Perform in-memory update by removing the timestamp
+    const indexToRemove = existingDoc[field].indexOf(_id)
+    if (indexToRemove === -1) {
+        throw new Error('Associated timestamp is not recorded in the index')
+    }
+    existingDoc[field] = [
+        ...existingDoc[field].slice(0, indexToRemove),
+        ...existingDoc[field].slice(indexToRemove + 1),
+    ]
+
+    await del(page._id) // Delete existing doc
+    return add(existingDoc) // Add new updated doc
+}
+
+export const removeVisit = removeTimestamp('visitTimestamps')
+export const removeBookmark = removeTimestamp('bookmarkTimestamps')
+
+/**
+ * @param {string|Array<string>} ids Single ID, or array of IDs, of docs to attempt to find in the index.
+ * @returns A single index doc that matches the supplied ID.
+ */
+export async function get(ids) {
+    const index = await indexP
+
+    // Typeguard on input; handle either array or single
+    const isSingle = typeof ids === 'string'
+    let found = []
+
+    return new Promise((resolve, reject) =>
+        index.get(isSingle ? [ids] : ids)
+            .on('data', datum => found.push(datum))
+            .on('error', reject)
+            .on('end', () => resolve(isSingle ? found[0] : found)))
+}
+
+/**
+ * @param {string|Array<string>} ids Single ID, or array of IDs, of docs to attempt to delete from the index.
+ * @returns Boolean denoting that the delete was successful (else error thrown).
+ */
+export async function del(ids) {
+    const index = await indexP
+
+    // Typeguard on input; make single ID into array if need be
+    const toDelete = typeof ids === 'string' ? [ids] : ids
+
+    return new Promise((...args) => index.del(toDelete, standardResponse(...args)))
+}
+
+/**
+ * @param doc The doc to queue up for adding into the index.
+ * @returns Boolean denoting that the add was successful (else error thrown).
+ */
+export async function add(doc) {
+    const index = await indexP
+    const input = [doc]
 
     return new Promise((...args) => index.concurrentAdd(indexOpts, input, standardResponse(...args)))
 }
