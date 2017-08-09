@@ -1,19 +1,14 @@
 /* eslint promise/param-names: 0 */
 import initSearchIndex from 'search-index'
 import reduce from 'lodash/fp/reduce'
-import stream from 'stream'
-import JSONStream from 'JSONStream'
+import partition from 'lodash/fp/partition'
 
 import db, { normaliseFindResult } from 'src/pouchdb'
 import QueryBuilder from './query-builder'
 
-export const INDEX_STORAGE_KEY = 'search-index'
-// How many different keys in local storage are being used
-export let storageKeyCount = 0
-export const SERIALIZE_BUFFER_SIZE = 10000000 // 5 MB
-
 const indexOpts = {
     batchSize: 500,
+    appendOnly: true,
     indexPath: 'test',
     preserveCase: false,
     compositeField: false,
@@ -30,71 +25,7 @@ const indexOpts = {
         content: {
             fieldedSearch: true,
         },
-    }
-}
-
-class StorageReader extends stream.Readable {
-    constructor(options) {
-        super(options)
-
-        // State used to iterate through storage keys
-        this.currentStorageKey = 0
-    }
-
-    _fetchFromStorage = async key =>
-        (await browser.storage.local.get(key))[key] || null
-
-    async _read() {
-        const storageKey = `${INDEX_STORAGE_KEY}-${this.currentStorageKey++}`
-        const data = await this._fetchFromStorage(storageKey)
-        this.push(data)
-    }
-}
-
-class StorageWriter extends stream.Writable {
-    constructor(options = { bufferSize: SERIALIZE_BUFFER_SIZE }) {
-        const { bufferSize, ...writableOpts } = options
-        super(writableOpts)
-
-        // Dumb buffer to keep data in before writing out to a new key when `bufferSize` is reached
-        this.dataBuffer = ''
-        this.bufferSize = bufferSize || SERIALIZE_BUFFER_SIZE
-    }
-
-    _isBufferFull = () => this.dataBuffer.length > this.bufferSize
-
-    // Writes out data buffer to the next storage key; resets buffer
-    async _writeOutBuffer() {
-        const storageKey = `${INDEX_STORAGE_KEY}-${storageKeyCount++}`
-        await browser.storage.local.set({ [storageKey]: this.dataBuffer })
-        this.dataBuffer = '' // Reset data buffer
-    }
-
-    async _write(chunk, _, next) {
-        let err
-        try {
-            if (this._isBufferFull()) {
-                await this._writeOutBuffer()
-            } else {
-                this.dataBuffer += chunk.toString()
-            }
-        } catch (error) {
-            err = error
-        } finally {
-            next(err)
-        }
-    }
-
-    async _final(next) {
-        let err
-        try {
-            await this._writeOutBuffer() // Write out remaining data in buffer
-        } catch (error) {
-            err = error
-        } finally {
-            next(err)
-        }
-    }
+    },
 }
 
 const combineContentStrings = reduce((result, val) => `${result}\n${val}`, '')
@@ -172,9 +103,7 @@ export async function addPages({ pageDocs, visitDocs = [], bookmarkDocs = [] }) 
  *  - delete the original doc form the index
  *  - add the updated doc into the index
  */
-const addTimestamp = field => async ({ _id, page })  => {
-    const index = await indexP
-
+const addTimestamp = field => async ({ _id, page }) => {
     const existingDoc = await get(page._id) // Get existing doc
     if (!existingDoc) {
         throw new Error('Page associated with timestamp is not recorded in the index')
@@ -197,8 +126,6 @@ export const addBookmark = addTimestamp('bookmarkTimestamps')
  *  - add the updated doc into the index
  */
 const removeTimestamp = field => async ({ _id, page }) => {
-    const index = await indexP
-
     const existingDoc = await get(page._id) // Get existing doc
     if (!existingDoc) {
         throw new Error('Page associated with timestamp is not recorded in the index')
@@ -301,36 +228,6 @@ export async function size() {
     return new Promise((...args) => index.countDocs(standardResponse(...args)))
 }
 
-export async function store() {
-    const index = await indexP
-
-    return new Promise((resolve, reject) => {
-        const storageStream = new StorageWriter()
-            .on('error', reject)
-            .on('finish', () => resolve('finished storing'))
-
-        index.dbReadStream({ gzip: true })
-            .pipe(JSONStream.stringify('', '\n', ''))
-            .pipe(storageStream)
-            .on('error', reject)
-    })
-}
-
-export async function restore() {
-    const index = await indexP
-
-    return new Promise((resolve, reject) => {
-        const indexWriteStream = index.dbWriteStream()
-            .on('error', reject)
-            .on('finish', () => resolve('finished restoring'))
-
-        new StorageReader()
-            .pipe(JSONStream.parse())
-            .pipe(indexWriteStream)
-            .on('error', reject)
-    })
-}
-
 export async function destroy() {
     const index = await indexP
 
@@ -339,38 +236,61 @@ export async function destroy() {
             err ? reject(err) : resolve('index destroyed')))
 }
 
-// Gets all the "ok" docs in returned array
-const bulkResultsToArray = ({ results }) =>
-    results
-        .map(res => res.docs)
-        .map(list => list.filter(doc => doc.ok))
-        .filter(list => list.length)
-        .map(list => list[0].ok)
+// TODO: clean all this up; should be moved to wherever is most relevant (src/pouchdb ?)
+
+// Gets all the "ok" docs from Pouch bulk result, returning them as an array
+const bulkResultsToArray = ({ results }) => results
+    .map(res => res.docs)
+    .map(list => list.filter(doc => doc.ok))
+    .filter(list => list.length)
+    .map(list => list[0].ok)
+
+const getTimestampFromId = id => id.split('/')[1]
+
+// Allows easy "flattening" of index results to just be left with the Pouch doc IDs
+const extractDocIdsFromIndexResult = indexResult => indexResult
+    .map(({ document: doc }) => [doc.id, ...doc.bookmarkTimestamps, ...doc.visitTimestamps]) // Grab IDs from doc
+    .reduce((prev, curr) => [...prev, ...curr], []) // Flatten everything
+    .map(id => ({ id })) // Map them into appropriate shape for pouch bulkGet query
 
 export async function filterVisitsByQuery({
     query,
-    startDate = 0,
-    endDate = Date.now(),
+    startDate,
+    endDate,
     skipUntil,
     limit = 10,
 }) {
     const indexQuery = new QueryBuilder()
-        .searchTerm(query || '')
-        .startDate(startDate || 0)
-        .endDate(endDate || Date.now)
+        .searchTerm(query || '*') // Search by wildcard by default
+        .startDate(startDate)
+        .endDate(endDate)
         .skipUntil(skipUntil || undefined)
         .limit(limit || 10)
         .get()
     console.log(indexQuery) // DEBUG
 
     // Using index results, fetch matching pouch docs
-    const results = await find(query)
-    const docIds = results.map(res => ({ id: res.id }))
+    const results = await find(indexQuery)
+
+    // Using the index result, grab doc IDs and then bulk get them from Pouch
+    const docIds = extractDocIdsFromIndexResult(results)
     const bulkRes = await db.bulkGet({ docs: docIds })
-    const normalised = normaliseFindResult({ docs: bulkResultsToArray(bulkRes) })
+    const docs = bulkResultsToArray(bulkRes)
+
+    // Parition into meta and page docs
+    let [pageDocs, metaDocs] = partition(({ _id }) => _id.startsWith('page/'))(docs)
+
+    // Put pageDocs into an easy-lookup dictionary
+    pageDocs = reduce((dict, pageDoc) => ({ ...dict, [pageDoc._id]: pageDoc }), {})(pageDocs)
+
+    // Insert page docs into the relevant meta docs
+    metaDocs = metaDocs.map(doc => {
+        doc.page = pageDocs[doc.page._id]
+        return doc
+    }).sort((a, b) => getTimestampFromId(a._id) < getTimestampFromId(b._id))
 
     return {
-        rows: normalised.rows,
+        ...normaliseFindResult({ docs: metaDocs }),
         resultExhausted: results.length < limit,
     }
 }

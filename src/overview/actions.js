@@ -2,7 +2,7 @@ import last from 'lodash/fp/last'
 import isEqual from 'lodash/fp/isEqual'
 import { createAction } from 'redux-act'
 
-import { filterVisitsByQuery } from 'src/search'
+import { filterVisitsByQuery } from 'src/search/search-index'
 import { deleteVisitAndPage } from 'src/page-storage/deletion'
 import asyncActionCreator from 'src/util/redux-async-action-creator'
 
@@ -46,9 +46,7 @@ export const newSearch = asyncActionCreator(() => async (dispatch, getState) => 
     const { currentQueryParams } = ourState(getState())
     const searchResult = await filterVisitsByQuery({
         ...currentQueryParams,
-        includeContext: false,
         limit: 10,
-        softLimit: true,
     })
     return searchResult
 })
@@ -62,10 +60,8 @@ export const expandSearch = asyncActionCreator(() => async (dispatch, getState) 
     // Get the items that are to be appended.
     const newSearchResult = await filterVisitsByQuery({
         ...currentQueryParams,
-        includeContext: false,
         skipUntil,
         limit: 10,
-        softLimit: true,
     })
     return newSearchResult
 })

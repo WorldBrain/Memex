@@ -31,6 +31,16 @@ const VisitAsListItem = ({doc, compact, onTrashButtonClick}) => {
             />
         )
 
+    const renderTitle = () => {
+        const fallback = doc.url
+        const { page } = doc
+
+        if (!page.title) {
+            return (page.content && page.content.title) ? page.content.title : fallback
+        }
+        return page.title
+    }
+
     return (
         <a className={visitClasses} href={doc.page.url}>
             <div className={styles.screenshotContainer}>
@@ -48,7 +58,7 @@ const VisitAsListItem = ({doc, compact, onTrashButtonClick}) => {
             <div className={styles.descriptionContainer}>
                 <div className={styles.title} title={doc.page.title}>
                     {hasFavIcon && favIcon}
-                    {doc.page.title}
+                    {renderTitle()}
                 </div>
                 <div className={styles.url}>
                     {doc.page.url}
