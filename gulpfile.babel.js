@@ -39,7 +39,7 @@ const sourceFiles = [
     'background.js',
     'content_script.js',
     'overview/overview.jsx',
-    'local-page/local-page.js',
+    'local-page/local-page.jsx',
     'popup/popup.js',
 ]
 
