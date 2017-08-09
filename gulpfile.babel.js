@@ -59,7 +59,7 @@ const sourceFiles = [
         cssOutput: 'options.css',
     },
     {
-        entries: ['./src/local-page/local-page.js'],
+        entries: ['./src/local-page/local-page.jsx'],
         output: 'local-page.js',
         destination: './extension/local-page',
     },
