@@ -2,7 +2,7 @@ import get from 'lodash/fp/get'
 import fromPairs from 'lodash/fp/fromPairs'
 import PouchDB from 'pouchdb-browser'
 import PouchDBFind from 'pouchdb-find'
-import { blobToBase64String } from 'blob-util'
+import { blobToDataURL } from 'blob-util'
 
 
 PouchDB.plugin(PouchDBFind)
@@ -55,7 +55,6 @@ export async function getAttachmentAsDataUrl({doc, docId=doc._id, attachmentId})
     } catch (err) {
         return undefined
     }
-    const base64 = await blobToBase64String(blob)
-    const dataUrl = `data:${blob.type};base64,${base64}`
+    const dataUrl = await blobToDataURL(blob)
     return dataUrl
 }
