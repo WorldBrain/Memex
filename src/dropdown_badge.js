@@ -6,7 +6,7 @@ setUnreadCount(0).then(function(res) {
         badge.removeAttribute("data-badge")
     } else {
         badge.setAttribute("data-badge", res)
-        console.log('does this run?')
+        console.log("res", res)
         console.log(badge.innerHTML)
     }
 })

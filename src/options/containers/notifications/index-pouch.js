@@ -1,6 +1,6 @@
 import PouchDB from 'pouchdb'
 
-const db = new PouchDB('sample')
+const db = new PouchDB('notes')
 
 db.put({
     "_id": "notif_1",
@@ -18,44 +18,10 @@ db.put({
 
 db.put({
     "_id": "notif_3",
-    "title": "Jess is fabulous",
-    "body": "And she is 2 legit 2 quit.",
+    "title": "NOTIF 3  ",
+    "body": "sdgd drg df hff.",
     "viewed": false,
 })
 
-db.put({
-    "_id": "notif_4",
-    "title": "Vanessa is a badass",
-    "body": "Canadians rule.",
-    "viewed": false,
-})
-
-db.put({
-    "_id": "notif_5",
-    "title": "Stefaaaaaan is the bomb",
-    "body": "Dutch guys rule.",
-    "viewed": false,
-})
-
-db.put({
-    "_id": "notif_6",
-    "title": "Something else",
-    "body": "blagh blah.",
-    "viewed": false,
-})
-
-db.put({
-    "_id": "notif_7",
-    "title": "unnnread",
-    "body": "Dutch guys rule.",
-    "viewed": false,
-})
-
-db.put({
-    "_id": "notif_8",
-    "title": "unnnread",
-    "body": "blagh blah.",
-    "viewed": false,
-})
 
 export default db

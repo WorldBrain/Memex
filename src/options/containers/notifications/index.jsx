@@ -3,6 +3,11 @@ import db from "./index-pouch.js"
 import { routeTitle, sectionTitle } from "../../base.css"
 import styles from "./Notifs.css"
 import setUnreadCount from "../../../util/setUnreadCount.js"
+import fetchNewNotifs from './polling/fetchNewNotifs'
+import updateWBBadge from './updateWBBadge'
+
+console.log('fetchNewNotifs')
+fetchNewNotifs()
 
 class NotificationsContainer extends Component {
     constructor(props) {
@@ -24,21 +29,9 @@ class NotificationsContainer extends Component {
                 })
             })
             .then(function(response) {
-                setUnreadCount(0).then(function(res) {
-                    // Write the code which depends on the `res.val`, here
-                    var ba = chrome.browserAction
-                    ba.setBadgeBackgroundColor({ color: [62, 185, 149, 128] })
-                    if (res > 0) {
-                        ba.setBadgeText({ text: "" + res })
-                    } else {
-                        ba.setBadgeText({ text: "" })
-                    }
-
-                    console.log("what are you baby?", res)
-                })
-                    .catch(function(err) {
-                        console.log("err")
-                    })
+                setUnreadCount(0)
+                updateWBBadge(0)
+                //     // rerender componen
             })
             .catch(function(err) {
                 console.log("err")
@@ -55,6 +48,11 @@ class NotificationsContainer extends Component {
             })
             .then(notifs => this.setState(() => ({ notifs })))
             .catch(err => console.log(err))
+    }
+
+    forceUpdateHandler() {
+        // alert("HOVER!!!")
+        NotificationsContainer.render()
     }
 
     render() {
@@ -79,7 +77,7 @@ class NotificationsContainer extends Component {
                                         {doc.title}
                                         {this.state.selectedNotificationId
                                             === doc._id
-                                            &&<li key={doc.body}>{doc.body}</li>}
+                                            &&<li key={doc.body} onMouseEnter={this.forceUpdateHandler}>{doc.body}</li>}
                                     </li>
                                 )}
                         </ul>
