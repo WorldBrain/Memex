@@ -5,28 +5,25 @@ import setUnreadCount from "../../../../util/setUnreadCount.js"
 
 
 export default function fetchNewNotifs() {
-    function getJSON() {
+    setInterval(function() {
         let url = "https://codepen.io/jobs.json"
         fetch(url).then(res => res.json()
         ).then(res => {
             console.log("What's crackin'?")
             console.log(res)
             console.log(res.jobs)
-            let fish = res.jobs[0]
-            return fish
-        }).then(fish => {
-            db.put({
-                "_id": "notif_" + fish.hashid,
-                "MongoId": fish.hashid,
-                "title": fish.title,
-                "body": fish.description,
+            let newNote = res.jobs[1]
+            return newNote
+        }).then(newNote => {
+            db.putIfNotExists({
+                "_id": "notif_" + newNote.hashid,
+                "MongoId": newNote.hashid,
+                "title": newNote.title,
+                "body": newNote.description,
                 "viewed": false,
             })
-        }).catch(function(err) {
-            console.log("err", err)
-        })
-    }
-    // setInterval(, 500)
-    getJSON()
-    setUnreadCount(0)
+        }).then(newNote => {
+            setUnreadCount(0)
+        }).catch(err => console.error("err", err))
+    }, 5000)
 }
