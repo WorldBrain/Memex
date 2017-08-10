@@ -2,7 +2,7 @@ import db from "../index-pouch.js"
 const PouchDB = require('pouchdb')
 PouchDB.plugin(require('pouchdb-upsert'))
 import setUnreadCount from "../../../../util/setUnreadCount.js"
-
+import updateWBBadge from '../updateWBBadge'
 
 export default function fetchNewNotifs() {
     setInterval(function() {
@@ -12,7 +12,7 @@ export default function fetchNewNotifs() {
             console.log("What's crackin'?")
             console.log(res)
             console.log(res.jobs)
-            let newNote = res.jobs[1]
+            let newNote = res.jobs[5]
             return newNote
         }).then(newNote => {
             db.putIfNotExists({
@@ -22,8 +22,10 @@ export default function fetchNewNotifs() {
                 "body": newNote.description,
                 "viewed": false,
             })
-        }).then(newNote => {
+        }).then(
             setUnreadCount(0)
-        }).catch(err => console.error("err", err))
+        ).then(
+            updateWBBadge(0)
+        ).catch(err => console.error("err", err))
     }, 5000)
 }
