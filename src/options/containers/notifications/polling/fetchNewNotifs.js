@@ -12,20 +12,22 @@ export default function fetchNewNotifs() {
             console.log("What's crackin'?")
             console.log(res)
             console.log(res.jobs)
-            let newNote = res.jobs[5]
-            return newNote
-        }).then(newNote => {
-            db.putIfNotExists({
-                "_id": "notif_" + newNote.hashid,
-                "MongoId": newNote.hashid,
-                "title": newNote.title,
-                "body": newNote.description,
-                "viewed": false,
+            let newNotes = res.jobs
+            return newNotes
+        }).then(newNotes => {
+            newNotes.forEach(function(element) {
+                db.putIfNotExists({
+                    "_id": "notif_" + element.hashid,
+                    "MongoId": element.hashid,
+                    "title": element.title,
+                    "body": element.description,
+                    "viewed": false,
+                })
             })
         }).then(
             setUnreadCount(0)
         ).then(
             updateWBBadge(0)
         ).catch(err => console.error("err", err))
-    }, 5000)
+    }, 1000 * 60 * 60)
 }

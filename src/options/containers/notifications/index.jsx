@@ -52,7 +52,7 @@ class NotificationsContainer extends Component {
 
     forceUpdateHandler() {
         // alert("HOVER!!!")
-        NotificationsContainer.render()
+        // NotificationsContainer.render()
     }
 
     render() {
