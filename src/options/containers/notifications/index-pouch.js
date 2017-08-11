@@ -1,6 +1,6 @@
 import PouchDB from 'pouchdb'
 
-const db = new PouchDB('notes')
+const db = new PouchDB('notifs')
 
 db.put({
     "_id": "notif_1",

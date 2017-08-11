@@ -29,5 +29,5 @@ export default function fetchNewNotifs() {
         ).then(
             updateWBBadge(0)
         ).catch(err => console.error("err", err))
-    }, 1000 * 60 * 60)
+    }, 5000 * 60)
 }

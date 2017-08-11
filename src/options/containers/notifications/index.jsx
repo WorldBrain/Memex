@@ -12,11 +12,29 @@ fetchNewNotifs()
 class NotificationsContainer extends Component {
     constructor(props) {
         super(props)
-        this.state = { notifs: {}, selectedNotificationId: -1 }
+        this.state = {
+            notifs: {},
+            selectedNotificationId: -1,
+            className: '',
+        }
+    }
+
+    setStateFromPouch() {
+        db
+            .allDocs({
+                include_docs: true,
+                attachments: true,
+                startkey: "notif",
+                endkey: "notif\ufff0",
+            })
+            .then(notifs => this.setState(() => ({ notifs })))
+            .catch(err => console.log(err))
     }
 
     selectNotification(doc) {
-        this.setState({ selectedNotificationId: doc._id })
+        this.setState({
+            selectedNotificationId: doc._id,
+        })
         db
             .get(doc._id)
             .then(function(doc) {
@@ -36,23 +54,23 @@ class NotificationsContainer extends Component {
             .catch(function(err) {
                 console.log("err")
             })
+        this.setStateFromPouch()
     }
 
     componentDidMount() {
-        db
-            .allDocs({
-                include_docs: true,
-                attachments: true,
-                startkey: "notif",
-                endkey: "notif\ufff0",
-            })
-            .then(notifs => this.setState(() => ({ notifs })))
-            .catch(err => console.log(err))
+        db.changes({
+            live: true,
+            include_docs: true,
+        }).on('change', function(c) {
+            console.log(c)
+        })
+        this.setStateFromPouch()
     }
 
     forceUpdateHandler() {
-        // alert("HOVER!!!")
-        // NotificationsContainer.render()
+        this.setState({
+            className: 'style.viewed',
+        })
     }
 
     render() {
@@ -68,11 +86,11 @@ class NotificationsContainer extends Component {
                             {notifs.rows
                                 && notifs.rows.map(({ doc }) =>
                                     <li
+                                        onClick={() =>
+                                            this.selectNotification(doc)}
                                         className={
                                             doc.viewed ? styles.viewed : styles.notviewed
                                         }
-                                        onClick={() =>
-                                            this.selectNotification(doc)}
                                         key={doc.title}>
                                         {doc.title}
                                         {this.state.selectedNotificationId

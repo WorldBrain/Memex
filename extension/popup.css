@@ -4,6 +4,20 @@ body {
     padding: 8px;
     text-align: left;
     width:280px;
+    height:480px;
+}
+
+.badge {
+  display: block-inline;
+  background-color: #efefef;
+  padding: 2px 10px;
+  margin-left: 10px;
+  border-radius: 10px;
+}
+
+#body {
+    max-height:0px !important;;
+    background-color: red;
 }
 
 i {
@@ -71,7 +85,12 @@ hr {
    color:#fff;
   top: 0.9em;
   right: -0.7em;
-/*  opacity:1.0;
-*/  font-weight: 900;
+  opacity:1.0;
+  font-weight: 900;
   font-size: 8pt;
 }
+
+span#notifs {
+  margin-left: -24px;
+/*  background-color: red;
+*/}
