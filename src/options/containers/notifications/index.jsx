@@ -62,7 +62,7 @@ class NotificationsContainer extends Component {
             live: true,
             include_docs: true,
         }).on('change', function(c) {
-            console.log(c)
+            console.log("change!", c)
         })
         this.setStateFromPouch()
     }

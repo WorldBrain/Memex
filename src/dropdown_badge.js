@@ -1,11 +1,12 @@
 import setUnreadCount from 'src/util/setUnreadCount.js'
 
 setUnreadCount(0).then(function(res) {
-    let badge = document.getElementById('notifs')
+    // let badge = document.getElementById('notifs')
     if (res === 0) {
-        badge.removeAttribute("data-badge")
+        // badge.removeAttribute("data-badge")
     } else {
-        badge.setAttribute("data-badge", res)
+        // badge.setAttribute("data-badge", res)
+        document.getElementById('notifs').innerHTML = res;
         console.log("res", res)
         console.log(badge.innerHTML)
     }

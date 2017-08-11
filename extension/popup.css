@@ -9,7 +9,7 @@ body {
 
 .badge {
   display: block-inline;
-  background-color: #efefef;
+  background-color : #3EB995;
   padding: 2px 10px;
   margin-left: 10px;
   border-radius: 10px;
@@ -90,7 +90,17 @@ hr {
   font-size: 8pt;
 }
 
-span#notifs {
+.material-label.mdl-badge[data-badge]::after{
+ background-color : #3EB995;
+   color:#fff;
+  top: 0.9em;
+  right: -0.7em;
+  opacity:1.0;
+  font-weight: 900;
+  font-size: 8pt;
+}
+
+/*span#notifs {
   margin-left: -24px;
 /*  background-color: red;
-*/}
+*/}*/
