@@ -1,3 +1,4 @@
+import 'core-js/fn/object/entries' // shim Object.entries
 import fs from 'fs'
 import { exec as nodeExec } from 'child_process'
 import pify from 'pify'
@@ -13,7 +14,6 @@ import watchify from 'watchify'
 import babelify from 'babelify'
 import envify from 'loose-envify/custom'
 import eslint from 'gulp-eslint'
-import uglifyify from 'uglifyify'
 import path from 'path'
 import cssModulesify from 'css-modulesify'
 import cssnext from 'postcss-cssnext'
@@ -59,7 +59,7 @@ const sourceFiles = [
         cssOutput: 'options.css',
     },
     {
-        entries: ['./src/local-page/local-page.js'],
+        entries: ['./src/local-page/local-page.jsx'],
         output: 'local-page.js',
         destination: './extension/local-page',
     },
@@ -125,6 +125,17 @@ gulp.task('copyStaticFiles', () => {
     }
 })
 
+gulp.task('copyStaticFiles-watch', ['copyStaticFiles'], () => {
+    Object.entries(staticFiles).forEach(([filename, destination]) => {
+        gulp.watch(filename)
+            .on('change', event => {
+                console.log(`Copying '${filename}' to '${staticFiles[filename]}'..`)
+                return gulp.src(filename)
+                    .pipe(gulp.dest(staticFiles[filename]))
+            })
+    })
+})
+
 gulp.task('build-prod', ['copyStaticFiles'], async () => {
     const ps = sourceFiles.map(bundle => createBundle(bundle, {watch: false, production: true}))
     await Promise.all(ps)
@@ -135,7 +146,7 @@ gulp.task('build', ['copyStaticFiles'], async () => {
     await Promise.all(ps)
 })
 
-gulp.task('build-watch', ['copyStaticFiles'], async () => {
+gulp.task('build-watch', ['copyStaticFiles-watch'], async () => {
     const ps = sourceFiles.map(bundle => createBundle(bundle, {watch: true}))
     await Promise.all(ps)
 })
@@ -205,7 +216,7 @@ gulp.task('package-firefox', async () => {
     const buildXpiCommand = `web-ext -s ./extension -a ./dist/firefox build`
     await exec(buildXpiCommand)
     // web-ext will have named the file ${filename}.zip. Change .zip to .xpi.
-    await exec(`rename -f "s/\\.zip$/.xpi/" dist/firefox/${filename}.zip`)
+    await exec(`mv dist/firefox/${filename}.zip dist/firefox/${filename}.xpi`)
 })
 
 gulp.task('package-chromium', async () => {
@@ -215,6 +226,8 @@ gulp.task('package-chromium', async () => {
         + ` -o ./dist/chromium/${filename}.crx`
         + ` -p .chrome-extension-key.pem`
     )
+    // crx fails if the output directory is not there.
+    await exec(`mkdir -p dist/chromium`)
     await exec(buildCrxCommand)
 })
 
