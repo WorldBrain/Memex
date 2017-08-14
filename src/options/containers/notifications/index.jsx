@@ -85,19 +85,19 @@ class NotificationsContainer extends Component {
                         <ul className={styles.notifs}>
                             {notifs.rows
                                 && notifs.rows.map(({ doc }) =>
-                                    <li
-                                        onClick={() =>
-                                            this.selectNotification(doc)}
-                                        className={
-                                            doc.viewed ? styles.viewed : styles.notviewed
-                                        }
-                                        key={doc.title}>
-                                        {doc.title}
-                                        {this.state.selectedNotificationId
-                                            === doc._id
-                                            &&<li key={doc.body} onMouseEnter={this.forceUpdateHandler}>{doc.body}</li>}
-                                    </li>
-                                )}
+                                <li
+                                    onClick={() =>
+                                        this.selectNotification(doc)}
+                                    className={
+                                        doc.viewed ? styles.viewed : styles.notviewed
+                                    }
+                                    key={doc.title}>
+                                    {doc.title}
+                                    {this.state.selectedNotificationId
+                                        === doc._id
+                                        &&<li key={doc.body} onMouseEnter={this.forceUpdateHandler}>{doc.body}</li>}
+                                 </li>
+                            )}
                         </ul>
                     </div>
                 </section>

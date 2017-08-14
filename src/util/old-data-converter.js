@@ -250,10 +250,10 @@ export default async function convertOldData(opts = { setAsStubs: false, concurr
         [KEYS.BLACKLIST]: blacklist,
         [KEYS.BOOKMARKS]: bookmarks,
     } = await browser.storage.local.get({
-        [KEYS.INDEX]: { index: [] },
-        [KEYS.BLACKLIST]: { PAGE: [], SITE: [], REGEX: [] },
-        [KEYS.BOOKMARKS]: '[]',
-    })
+            [KEYS.INDEX]: { index: [] },
+            [KEYS.BLACKLIST]: { PAGE: [], SITE: [], REGEX: [] },
+            [KEYS.BOOKMARKS]: '[]',
+        })
 
     // Only attempt blacklist conversion if it matches shape of old extension blacklist
     if (Object.prototype.toString.call(blacklist) === '[object Object]'
