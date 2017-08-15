@@ -3,6 +3,7 @@ const PouchDB = require('pouchdb')
 // PouchDB.plugin(require('pouchdb-upsert'))
 import setUnreadCount from "../../../../util/setUnreadCount.js"
 import updateWBBadge from '../updateWBBadge'
+import dropdownBadge from "../../../../dropdownBadge.js"
 
 export default function fetchNewNotifs() {
     setInterval(function() {

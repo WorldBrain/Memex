@@ -14,6 +14,10 @@ import LinkButton from './components/LinkButton'
 import SplitButton from './components/SplitButton'
 import { BLACKLIST_BTN_STATE } from './constants'
 
+import styles from './components/Popup.css'
+
+
+
 import { itemBtnBlacklisted } from './components/Button.css'
 
 export const overviewURL = '/overview/overview.html'
@@ -203,9 +207,8 @@ class PopupContainer extends Component {
                     Import History &amp; Bookmarks
                 </LinkButton>
                 <LinkButton href={`${optionsURL}#/notifications`} icon='notifications'>
-                    Notifications
+                    Notifications <span id='notifs' className={styles.badge}>4</span>
                 </LinkButton>
-
                 <LinkButton href={feedbackURL} icon='feedback'>
                     Feedback
                 </LinkButton>

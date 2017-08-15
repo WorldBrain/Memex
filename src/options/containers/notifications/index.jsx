@@ -5,6 +5,7 @@ import styles from "./Notifs.css"
 import setUnreadCount from "../../../util/setUnreadCount.js"
 import fetchNewNotifs from './polling/fetchNewNotifs'
 import updateWBBadge from './updateWBBadge'
+import dropdownBadge from './updateWBBadge'
 
 console.log('fetchNewNotifs')
 fetchNewNotifs()
@@ -48,8 +49,7 @@ class NotificationsContainer extends Component {
             })
             .then(function(response) {
                 setUnreadCount(0)
-                updateWBBadge(0)
-                //     // rerender componen
+                dropdownBadge(0)
             })
             .catch(function(err) {
                 console.log("err")
