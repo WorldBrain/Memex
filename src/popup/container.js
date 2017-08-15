@@ -9,6 +9,7 @@ import * as blacklistI from 'src/blacklist'
 import { getPageDocId, updateArchiveFlag } from './archive-button'
 import Popup from './components/Popup'
 import Button from './components/Button'
+import BlacklistConfirm from './components/BlacklistConfirm'
 import HistoryPauser from './components/HistoryPauser'
 import LinkButton from './components/LinkButton'
 import SplitButton from './components/SplitButton'
@@ -36,9 +37,11 @@ class PopupContainer extends Component {
             isPaused: false,
             archiveBtnDisabled: true,
             blacklistChoice: false,
+            blacklistConfirm: false,
         }
 
         this.toggleLoggingPause = remoteFunction('toggleLoggingPause')
+        this.cleanupBlacklist = remoteFunction('cleanupBlacklist')
 
         this.onArchiveBtnClick = this.onArchiveBtnClick.bind(this)
         this.onSearchChange = this.onSearchChange.bind(this)
@@ -52,8 +55,6 @@ class PopupContainer extends Component {
 
         // If we can't get the tab data, then can't init action button states
         if (!currentTab || !currentTab.url) { return }
-
-        this.blacklistConfirm = remoteFunction('quickBlacklistConfirm', { tabId: currentTab.id })
 
         const updateState = newState => this.setState(oldState => ({ ...oldState, ...newState }))
         const noop = f => f // Don't do anything if error; state doesn't change
@@ -93,8 +94,13 @@ class PopupContainer extends Component {
         return event => {
             event.preventDefault()
             blacklistI.addToBlacklist(url)
-            this.blacklistConfirm(url)
-            window.close()
+            this.setState(state => ({
+                ...state,
+                blacklistChoice: false,
+                blacklistConfirm: true,
+                blacklistBtn: constants.BLACKLIST_BTN_STATE.BLACKLISTED,
+                url,
+            }))
         }
     }
 
@@ -143,6 +149,14 @@ class PopupContainer extends Component {
         }
     }
 
+    // Hides full-popup confirm
+    resetBlacklistConfirmState = () => this.setState(state => ({ ...state, blacklistConfirm: false }))
+
+    handleDeleteBlacklistData = () => {
+        this.cleanupBlacklist(this.state.url)
+        this.resetBlacklistConfirmState()
+    }
+
     renderBlacklistButton() {
         const { blacklistChoice, blacklistBtn } = this.state
         const setBlacklistChoice = () => this.setState(state => ({ ...state, blacklistChoice: true }))
@@ -174,11 +188,20 @@ class PopupContainer extends Component {
         return this.props.pauseValues.map(pauseValueToOption)
     }
 
-    render() {
-        const { searchValue, archiveBtnDisabled, pauseValue, isPaused } = this.state
+    renderChildren() {
+        const { blacklistConfirm, archiveBtnDisabled, pauseValue, isPaused } = this.state
+
+        if (blacklistConfirm) {
+            return (
+                <BlacklistConfirm
+                    onConfirmClick={this.handleDeleteBlacklistData}
+                    onDenyClick={this.resetBlacklistConfirmState}
+                />
+            )
+        }
 
         return (
-            <Popup searchValue={searchValue} onSearchChange={this.onSearchChange} onSearchEnter={this.onSearchEnter}>
+            <div>
                 <HistoryPauser
                     onConfirm={this.onPauseConfirm}
                     onChange={this.onPauseChange}
@@ -201,6 +224,16 @@ class PopupContainer extends Component {
                 <LinkButton href={constants.FEEDBACK_URL} icon='feedback'>
                     Feedback
                 </LinkButton>
+            </div>
+        )
+    }
+
+    render() {
+        const { searchValue } = this.state
+
+        return (
+            <Popup searchValue={searchValue} onSearchChange={this.onSearchChange} onSearchEnter={this.onSearchEnter}>
+                {this.renderChildren()}
             </Popup>
         )
     }
