@@ -9,6 +9,12 @@ export const visitDocsSelector = { _id: { $gte: visitKeyPrefix, $lte: `${visitKe
 
 export const PAUSE_STORAGE_KEY = 'is-logging-paused'
 
+export function isLoggable({ url }) {
+    // Just remember http(s) pages, ignoring data uris, newtab, ...
+    const loggableUrlPattern = /^https?:\/\//
+    return loggableUrlPattern.test(url)
+}
+
 export const getPauseState = async () => {
     const state = (await browser.storage.local.get(PAUSE_STORAGE_KEY))[PAUSE_STORAGE_KEY]
 

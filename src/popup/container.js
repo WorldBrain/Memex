@@ -4,7 +4,7 @@ import qs from 'query-string'
 
 import extractTimeFiltersFromQuery from 'src/util/nlp-time-filter'
 import { remoteFunction } from 'src/util/webextensionRPC'
-import { getPauseState } from 'src/activity-logger'
+import { isLoggable, getPauseState } from 'src/activity-logger'
 import * as blacklistI from 'src/blacklist'
 import { getPageDocId, updateArchiveFlag } from './archive-button'
 import Popup from './components/Popup'
@@ -84,7 +84,7 @@ class PopupContainer extends Component {
         const blacklist = await blacklistI.fetchBlacklist()
 
         const result = {
-            loggable: blacklistI.isLoggable(url),
+            loggable: isLoggable({ url }),
             blacklist: !blacklistI.isURLBlacklisted(url, blacklist),
         }
 
