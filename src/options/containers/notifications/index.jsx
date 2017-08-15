@@ -5,9 +5,8 @@ import styles from "./Notifs.css"
 import setUnreadCount from "../../../util/setUnreadCount.js"
 import fetchNewNotifs from './polling/fetchNewNotifs'
 import updateWBBadge from './updateWBBadge'
-import dropdownBadge from './updateWBBadge'
+import dropdownBadge from '../../../dropdownBadge'
 
-console.log('fetchNewNotifs')
 fetchNewNotifs()
 
 class NotificationsContainer extends Component {
@@ -49,6 +48,7 @@ class NotificationsContainer extends Component {
             })
             .then(function(response) {
                 setUnreadCount(0)
+                updateWBBadge(0)
                 dropdownBadge(0)
             })
             .catch(function(err) {
@@ -65,12 +65,6 @@ class NotificationsContainer extends Component {
             console.log("change!", c)
         })
         this.setStateFromPouch()
-    }
-
-    forceUpdateHandler() {
-        this.setState({
-            className: 'style.viewed',
-        })
     }
 
     render() {
@@ -95,7 +89,7 @@ class NotificationsContainer extends Component {
                                     {doc.title}
                                     {this.state.selectedNotificationId
                                         === doc._id
-                                        &&<li key={doc.body} onMouseEnter={this.forceUpdateHandler}>{doc.body}</li>}
+                                        &&<li key={doc.body}>{doc.body}</li>}
                                  </li>
                             )}
                         </ul>

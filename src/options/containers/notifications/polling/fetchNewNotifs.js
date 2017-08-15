@@ -10,9 +10,6 @@ export default function fetchNewNotifs() {
         let url = "https://codepen.io/jobs.json"
         fetch(url).then(res => res.json()
         ).then(res => {
-            console.log("What's crackin'?")
-            console.log(res)
-            console.log(res.jobs)
             let newNotes = res.jobs
             return newNotes
         }).then(newNotes => {
@@ -29,6 +26,8 @@ export default function fetchNewNotifs() {
             setUnreadCount(0)
         ).then(
             updateWBBadge(0)
+        ).then(
+            dropdownBadge(0)
         ).catch(err => console.error("err", err))
-    }, 5000 * 60)
+    }, 1000 * 60 * 60)
 }

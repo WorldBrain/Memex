@@ -1,6 +1,7 @@
 import db from "../options/containers/notifications/index-pouch.js"
 import PouchDB from "pouchdb"
 
+
 export default function setUnreadCount(itemToCount) {
     console.log(itemToCount)
     return db

@@ -207,7 +207,7 @@ class PopupContainer extends Component {
                     Import History &amp; Bookmarks
                 </LinkButton>
                 <LinkButton href={`${optionsURL}#/notifications`} icon='notifications'>
-                    Notifications <span id='notifs' className={styles.badge}>4</span>
+                    Notifications <span id='notifs' className={styles.badge}>8</span>
                 </LinkButton>
                 <LinkButton href={feedbackURL} icon='feedback'>
                     Feedback
