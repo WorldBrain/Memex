@@ -1,0 +1,38 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    height: 200px;
+}
+
+.header {
+    font-size: 1.5em;
+}
+
+.content {
+    font-size: 1.1em;
+}
+
+.btnBar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    width: 100%;
+}
+
+.btn {
+    font-size: 1.5em;
+    border: none;
+    width: 60px;
+    cursor: pointer;
+
+    &:hover {
+        color: rgb(62, 185, 149);
+    }
+}
+
+.btnDanger {
+    color: rgb(255, 74, 85);
+}
