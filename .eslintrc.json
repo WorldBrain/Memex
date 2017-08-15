@@ -33,6 +33,7 @@
         "promise",
         "react"
     ],
+    "parser": "babel-eslint",
     "parserOptions": {
         "sourceType": "module",
         "ecmaFeatures": {
