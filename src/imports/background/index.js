@@ -4,6 +4,7 @@ import db from 'src/pouchdb'
 import randomString from 'src/util/random-string'
 import { pageDocsSelector } from 'src/page-storage'
 import { checkWithBlacklist } from 'src/blacklist'
+import { isLoggable } from 'src/activity-logger'
 import { IMPORT_TYPE } from 'src/options/imports/constants'
 import importsConnectionHandler from './imports-connection-handler'
 
@@ -72,7 +73,7 @@ async function filterItemsByUrl(items, type) {
     const isNotBlacklisted = await checkWithBlacklist()
     const doesNotExist = await checkWithExistingDocs()
 
-    const isWorthRemembering = item => isNotBlacklisted(item) && doesNotExist(item)
+    const isWorthRemembering = item => isLoggable(item) && isNotBlacklisted(item) && doesNotExist(item)
     return items.filter(isWorthRemembering)
 }
 

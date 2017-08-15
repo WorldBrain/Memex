@@ -18,12 +18,6 @@ export function isURLBlacklisted(url = '', blacklist = []) {
     return blacklist.reduce((prev, curr) => doesExpressionMatchURL(curr.expression) || prev, false)
 }
 
-export function isLoggable(url) {
-    // Just remember http(s) pages, ignoring data uris, newtab, ...
-    const loggableUrlPattern = /^https?:\/\//
-    return loggableUrlPattern.test(url)
-}
-
 /**
  * HOF which wraps a blacklist checking function up with stored blacklist data.
  * @returns {({ url: string }) => boolean} Ready-to-use checking function against a URL
@@ -34,7 +28,7 @@ export async function checkWithBlacklist() {
     /**
      * @param {string} url The URL to check against the blacklist
      */
-    return ({ url = '' } = {}) => isLoggable(url) && !isURLBlacklisted(url, blacklist)
+    return ({ url = '' } = {}) => !isURLBlacklisted(url, blacklist)
 }
 
 /**
