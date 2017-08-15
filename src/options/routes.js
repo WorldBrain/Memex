@@ -1,5 +1,6 @@
 import ImportContainer from './imports'
 import SettingsContainer from './containers/settings'
+import NotificationsContainer from './containers/notifications'
 
 export default [
     {
@@ -11,5 +12,10 @@ export default [
         name: 'Settings',
         pathname: '/settings',
         component: SettingsContainer,
+    },
+    {
+        name: 'Notifications',
+        pathname: '/notifications',
+        component: NotificationsContainer,
     },
 ]
