@@ -5,6 +5,7 @@ import partition from 'lodash/fp/partition'
 
 import db, { normaliseFindResult } from 'src/pouchdb'
 import QueryBuilder from './query-builder'
+import pipeline from './search-index-pipeline'
 
 const indexOpts = {
     batchSize: 500,
@@ -12,7 +13,7 @@ const indexOpts = {
     indexPath: 'test',
     preserveCase: false,
     compositeField: false,
-    nGramLength: { gte: 1, lte: 5 },
+    nGramLength: 1,
     separator: /[|' .,\-|(\n)]+/,
     stopwords: require('stopword').en,
     fieldOptions: {
@@ -28,22 +29,8 @@ const indexOpts = {
     },
 }
 
-const combineContentStrings = reduce((result, val) => `${result}\n${val}`, '')
-
 const standardResponse = (resolve, reject) =>
     (err, data = true) => err ? reject(err) : resolve(data)
-
-/**
- * Transforms a page doc to doc structured for use with the index.
- * All searchable page data (content) is concatted to make a composite field.
- * This represents the general structure for index docs.
- */
-const transformPageDoc = ({ _id: id, content = {}, bookmarkTimestamps = [], visitTimestamps = [] }) => ({
-    id,
-    content: combineContentStrings(content),
-    bookmarkTimestamps,
-    visitTimestamps,
-})
 
 /**
  * Simply maps out the ID of visit or bookmark docs. The ID contains
@@ -56,7 +43,7 @@ const transformTimeDoc = ({ _id: id }) => id
  */
 const createPagesObject = reduce((result, pageDoc) => ({
     ...result,
-    [pageDoc._id]: transformPageDoc(pageDoc),
+    [pageDoc._id]: { ...pipeline(pageDoc), visitTimestamps: [], bookmarkTimestamps: [] },
 }), {})
 
 const indexP = new Promise((...args) => initSearchIndex(indexOpts, standardResponse(...args)))
@@ -68,7 +55,8 @@ export async function addPage({ pageDoc, visitDocs = [], bookmarkDocs = [] }) {
 
     const visitTimestamps = visitDocs.length ? visitDocs.map(transformTimeDoc) : []
     const bookmarkTimestamps = bookmarkDocs.length ? bookmarkDocs.map(transformTimeDoc) : []
-    const input = [transformPageDoc({ ...pageDoc, visitTimestamps, bookmarkTimestamps })]
+
+    const input = [{ ...pipeline(pageDoc), visitTimestamps, bookmarkTimestamps }]
 
     return new Promise((...args) => index.concurrentAdd(indexOpts, input, standardResponse(...args)))
 }
@@ -271,6 +259,7 @@ export async function filterVisitsByQuery({
 
     // Using index results, fetch matching pouch docs
     const results = await find(indexQuery)
+    console.log(results)
 
     // Using the index result, grab doc IDs and then bulk get them from Pouch
     const docIds = extractDocIdsFromIndexResult(results)
