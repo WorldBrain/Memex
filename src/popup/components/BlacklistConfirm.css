@@ -26,12 +26,15 @@
 
 .btn {
     font-size: 1.5em;
-    border: none;
-    width: 60px;
+    border: 1px solid #e5e5e5;
+    padding: 10px 20px;
+    border-radius: 15px;
+    width: 80px;
     cursor: pointer;
 
     &:hover {
         color: rgb(62, 185, 149);
+        background: #f2f2f2;
     }
 }
 
