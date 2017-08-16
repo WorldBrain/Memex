@@ -9,10 +9,12 @@
 
 .header {
     font-size: 1.5em;
+    text-align: center;
 }
 
 .content {
     font-size: 1.1em;
+    text-align: center;
 }
 
 .btnBar {
