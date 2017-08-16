@@ -1,0 +1,43 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    height: 200px;
+}
+
+.header {
+    font-size: 1.5em;
+    text-align: center;
+}
+
+.content {
+    font-size: 1.1em;
+    text-align: center;
+}
+
+.btnBar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    width: 100%;
+}
+
+.btn {
+    font-size: 1.5em;
+    border: 1px solid #e5e5e5;
+    padding: 10px 20px;
+    border-radius: 15px;
+    width: 80px;
+    cursor: pointer;
+
+    &:hover {
+        color: rgb(62, 185, 149);
+        background: #f2f2f2;
+    }
+}
+
+.btnDanger {
+    color: rgb(255, 74, 85);
+}
