@@ -18,8 +18,10 @@ const transformPageDoc = ({ _id: id, content = {}, bookmarkTimestamps = [], visi
     visitTimestamps,
 })
 
-const removePunctuation = (text = '') =>
-    text.match(negateNonWordsPattern).join(' ')
+const removePunctuation = (text = '') => {
+    const results = text.match(negateNonWordsPattern)
+    return results ? results.join(' ') : text
+}
 
 const removeNumbers = (text = '') =>
     text.replace(numbersPattern, '')
