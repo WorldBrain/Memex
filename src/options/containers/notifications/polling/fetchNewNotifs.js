@@ -1,10 +1,9 @@
 import db from "../index-pouch.js"
-const PouchDB = require('pouchdb')
-// PouchDB.plugin(require('pouchdb-upsert'))
 import setUnreadCount from "../../../../util/setUnreadCount.js"
 import updateWBBadge from '../updateWBBadge'
 import dropdownBadge from "../../../../dropdownBadge.js"
-
+const PouchDB = require('pouchdb')
+// PouchDB.plugin(require('pouchdb-upsert'))
 export default function fetchNewNotifs() {
     setInterval(function() {
         let url = "https://codepen.io/jobs.json"

@@ -5,7 +5,7 @@ import styles from "./Notifs.css"
 import setUnreadCount from "../../../util/setUnreadCount.js"
 import fetchNewNotifs from './polling/fetchNewNotifs'
 import updateWBBadge from './updateWBBadge'
-import dropdownBadge from '../../../dropdownBadge'
+import dropdownBadge from '../../../util/dropdownBadge'
 
 fetchNewNotifs()
 
@@ -48,7 +48,11 @@ class NotificationsContainer extends Component {
             })
             .then(function(response) {
                 setUnreadCount(0)
+            })
+            .then(function(response) {
                 updateWBBadge(0)
+            })
+            .then(function(response) {
                 dropdownBadge(0)
             })
             .catch(function(err) {
@@ -62,7 +66,7 @@ class NotificationsContainer extends Component {
             live: true,
             include_docs: true,
         }).on('change', function(c) {
-            console.log("change!", c)
+            // console.log("change!", c)
         })
         this.setStateFromPouch()
     }
@@ -79,19 +83,19 @@ class NotificationsContainer extends Component {
                         <ul className={styles.notifs}>
                             {notifs.rows
                                 && notifs.rows.map(({ doc }) =>
-                                <li
-                                    onClick={() =>
-                                        this.selectNotification(doc)}
-                                    className={
-                                        doc.viewed ? styles.viewed : styles.notviewed
-                                    }
-                                    key={doc.title}>
-                                    {doc.title}
-                                    {this.state.selectedNotificationId
+                                    <li
+                                        onClick={() =>
+                                            this.selectNotification(doc)}
+                                        className={
+                                            doc.viewed ? styles.viewed : styles.notviewed
+                                        }
+                                        key={doc.title}>
+                                        {doc.title}
+                                        {this.state.selectedNotificationId
                                         === doc._id
                                         &&<li key={doc.body}>{doc.body}</li>}
-                                 </li>
-                            )}
+                                    </li>
+                                )}
                         </ul>
                     </div>
                 </section>

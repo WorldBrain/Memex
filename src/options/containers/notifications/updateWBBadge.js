@@ -9,7 +9,6 @@ export default function updateWBBadge() {
         } else {
             ba.setBadgeText({ text: "" })
         }
-
     })
         .catch(function(err) {
             console.log("err")
