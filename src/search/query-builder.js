@@ -32,7 +32,10 @@ class QueryBuilder {
         return this
     }
 
-    get = () => {
+    startDate = this._setDate('gte')
+    endDate = this._setDate('lte')
+
+    get() {
         const q = {
             query: [
                 { AND: { content: this.content, bookmarkTimestamps: this.bookmarkTimestamps } },
@@ -46,23 +49,24 @@ class QueryBuilder {
         return q
     }
 
-    skipUntil = skip => {
+    skipUntil(skip) {
         this.offset = skip
         return this
     }
 
-    limit = limit => {
+    limit(limit) {
         this.pageSize = limit
         return this
     }
 
-    searchTerm = term => {
-        if (term) this.content.push(term)
+    searchTerm(terms) {
+        if (terms) {
+            // Split into words and push to search query
+            terms.split(' ')
+                .forEach(term => this.content.push(term))
+        }
         return this
     }
-
-    startDate = this._setDate('gte')
-    endDate = this._setDate('lte')
 }
 
 export default QueryBuilder

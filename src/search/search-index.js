@@ -260,6 +260,11 @@ export async function filterVisitsByQuery({
     // Using index results, fetch matching pouch docs
     const results = await find(indexQuery)
 
+    // Short-circuit if no results
+    if (!results.length) {
+        return { rows: [], resultsExhausted: true }
+    }
+
     // Using the index result, grab doc IDs and then bulk get them from Pouch
     const docIds = extractDocIdsFromIndexResult(results)
     const bulkRes = await db.bulkGet({ docs: docIds })
