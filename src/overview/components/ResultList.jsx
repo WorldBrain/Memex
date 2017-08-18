@@ -57,19 +57,15 @@ function computeRowGaps({searchResult}) {
 const ResultList = ({
     searchResult,
     searchQuery,
-    waitingForResults,
+    isLoading,
     onBottomReached,
     resultsExhausted,
 }) => {
     // If there are no results, show a message.
-    const noResultMessage = 'no results'
-    if (searchResult.length === 0
-        && searchQuery !== ''
-        && !waitingForResults
-    ) {
+    if (searchResult.length === 0 && !isLoading) {
         return (
             <p className={styles.noResultMessage}>
-                {noResultMessage}
+                No results
             </p>
         )
     }
@@ -78,7 +74,6 @@ const ResultList = ({
 
     const listItems = searchResult.map(({ latestResult: row }, rowIndex) => {
         const { marginTop, timestampComponent } = rowGaps[rowIndex]
-
         return (
             <li
                 key={row.doc._id}
@@ -95,18 +90,16 @@ const ResultList = ({
         )
     })
 
-    // Insert waypoint to trigger loading new items when scrolling down.
-    if (!waitingForResults && !resultsExhausted) {
+    // Insert waypoint at the end of results to trigger loading new items when scrolling down
+    if (!isLoading && !resultsExhausted) {
         const waypoint = <Waypoint onEnter={onBottomReached} key='waypoint' />
-        // Put the waypoint a bit before the bottom, except if the list is short.
-        const waypointPosition = Math.max(Math.min(5, listItems.length), listItems.length - 5)
-        listItems.splice(waypointPosition, 0, waypoint)
+        listItems.push(waypoint)
     }
 
     return (
         <ul className={styles.root}>
             {listItems}
-            {waitingForResults && <LoadingIndicator />}
+            {isLoading && <LoadingIndicator />}
         </ul>
     )
 }
@@ -117,7 +110,7 @@ ResultList.propTypes = {
         rest: PropTypes.arrayOf(PropTypes.object).isRequired,
     })).isRequired,
     searchQuery: PropTypes.string,
-    waitingForResults: PropTypes.bool,
+    isLoading: PropTypes.bool,
     resultsExhausted: PropTypes.bool,
     onBottomReached: PropTypes.func,
 }

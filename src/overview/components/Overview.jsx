@@ -58,8 +58,8 @@ class Overview extends React.Component {
                         searchResult={this.props.searchResult}
                         searchQuery={query}
                         onBottomReached={this.props.onBottomReached}
-                        waitingForResults={this.props.waitingForResults}
-                        {...this.props.searchMetaData}
+                        isLoading={this.props.isLoading}
+                        resultsExhausted={this.props.resultsExhausted}
                     />
                     <DeleteConfirmation
                         isShown={this.props.isDeleteConfShown}
@@ -84,11 +84,8 @@ Overview.propTypes = {
     onStartDateChange: PropTypes.func,
     onEndDateChange: PropTypes.func,
     onBottomReached: PropTypes.func,
-    waitingForResults: PropTypes.bool,
-    searchMetaData: PropTypes.shape({
-        searchedUntil: PropTypes.string,
-        resultsExhausted: PropTypes.bool,
-    }).isRequired,
+    isLoading: PropTypes.bool,
+    resultsExhausted: PropTypes.bool,
     searchResult: PropTypes.arrayOf(PropTypes.shape({
         latestResult: PropTypes.object.isRequired,
         rest: PropTypes.arrayOf(PropTypes.object).isRequired,
@@ -103,10 +100,11 @@ Overview.propTypes = {
 
 const mapStateToProps = state => ({
     ...selectors.ourState(state),
+    isLoading: selectors.isLoading(state),
     currentQueryParams: selectors.currentQueryParams(state),
     waitingForResults: !!selectors.ourState(state).waitingForResults, // cast to boolean
     searchResult: selectors.results(state),
-    searchMetaData: selectors.searchMetaData(state),
+    resultsExhausted: selectors.resultsExhausted(state),
     isDeleteConfShown: selectors.isDeleteConfShown(state),
     deleteVisitId: selectors.deleteVisitId(state),
 })
@@ -116,7 +114,7 @@ const mapDispatchToProps = dispatch => ({
         onInputChanged: actions.setQuery,
         onStartDateChange: actions.setStartDate,
         onEndDateChange: actions.setEndDate,
-        onBottomReached: actions.loadMoreResults,
+        onBottomReached: actions.getMoreResults,
         hideDeleteConfirm: actions.hideDeleteConfirm,
     }, dispatch),
     deleteAssociatedDocs: visitId => () => dispatch(actions.deleteVisit(visitId, true)),

@@ -3,8 +3,9 @@ import { createSelector } from 'reselect'
 import safelyGet from 'src/util/safe-nested-access'
 import orderedGroupBy from 'src/util/ordered-group-by'
 
+import * as constants from './constants'
+
 export const ourState = state => state.overview
-export const currentQueryParams = createSelector(ourState, state => state.currentQueryParams)
 const searchResult = state => ourState(state).searchResult
 
 /**
@@ -21,11 +22,11 @@ export const results = createSelector(searchResult, ({ rows: results } = {}) =>
     orderedGroupBy(safelyGet('doc.url'))(results)
         .map(resultsStateShape)) // Final map over the groupBy output to make nicer UI state
 
-export const searchMetaData = createSelector(searchResult, searchResult => ({
-    searchedUntil: searchResult.searchedUntil,
-    resultsExhausted: searchResult.resultsExhausted,
-}))
-
+export const currentQueryParams = createSelector(ourState, state => state.currentQueryParams)
+export const isLoading = createSelector(ourState, state => state.isLoading)
+export const currentPage = createSelector(ourState, state => state.currentPage)
+export const resultsSkip = createSelector(currentPage, page => page * constants.PAGE_SIZE)
+export const resultsExhausted = createSelector(searchResult, searchResult => searchResult.resultsExhausted)
 export const deleteConfirmProps = createSelector(ourState, state => state.deleteConfirmProps)
 export const isDeleteConfShown = createSelector(deleteConfirmProps, state => state.isShown)
 export const deleteVisitId = createSelector(deleteConfirmProps, state => state.visitId)

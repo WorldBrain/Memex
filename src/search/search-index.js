@@ -245,21 +245,20 @@ export async function filterVisitsByQuery({
     query,
     startDate,
     endDate,
-    skipUntil,
+    skip,
     limit = 10,
 }) {
     const indexQuery = new QueryBuilder()
         .searchTerm(query || '*') // Search by wildcard by default
         .startDate(startDate)
         .endDate(endDate)
-        .skipUntil(skipUntil || undefined)
+        .skipUntil(skip || undefined)
         .limit(limit || 10)
         .get()
     console.log(indexQuery) // DEBUG
 
     // Using index results, fetch matching pouch docs
     const results = await find(indexQuery)
-    console.log(results)
 
     // Using the index result, grab doc IDs and then bulk get them from Pouch
     const docIds = extractDocIdsFromIndexResult(results)
@@ -280,6 +279,6 @@ export async function filterVisitsByQuery({
 
     return {
         ...normaliseFindResult({ docs: metaDocs }),
-        resultExhausted: results.length < limit,
+        resultsExhausted: results.length < limit,
     }
 }
