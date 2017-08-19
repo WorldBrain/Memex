@@ -16,6 +16,7 @@ import SplitButton from './components/SplitButton'
 import * as constants from './constants'
 
 import { itemBtnBlacklisted } from './components/Button.css'
+import { FREEZE_DRY_ARCHIVE_KEY } from '../options/preferences/constants'
 
 // Transforms URL checking results to state types
 const getBlacklistButtonState = ({ loggable, blacklist }) => {
@@ -38,6 +39,7 @@ class PopupContainer extends Component {
             archiveBtnDisabled: true,
             blacklistChoice: false,
             blacklistConfirm: false,
+            isArchiveEnabled: false,
         }
 
         this.toggleLoggingPause = remoteFunction('toggleLoggingPause')
@@ -48,6 +50,7 @@ class PopupContainer extends Component {
         this.onPauseChange = this.onPauseChange.bind(this)
         this.onSearchEnter = this.onSearchEnter.bind(this)
         this.onPauseConfirm = this.onPauseConfirm.bind(this)
+        this.getArchiveState = this.getArchiveState.bind(this)
     }
 
     async componentDidMount() {
@@ -63,6 +66,12 @@ class PopupContainer extends Component {
         this.getInitPauseState().then(updateState).catch(noop)
         this.getInitBlacklistBtnState(currentTab.url).then(updateState).catch(noop)
         this.getInitArchiveBtnState(currentTab.url).then(updateState).catch(noop)
+        this.getArchiveState().then(updateState).catch(noop)
+    }
+
+    async getArchiveState() {
+        const isArchiveEnabled = (await browser.storage.local.get(FREEZE_DRY_ARCHIVE_KEY))[FREEZE_DRY_ARCHIVE_KEY]
+        return { isArchiveEnabled: isArchiveEnabled }
     }
 
     async getInitPauseState() {
@@ -199,7 +208,6 @@ class PopupContainer extends Component {
                 />
             )
         }
-
         return (
             <div>
                 <HistoryPauser
@@ -211,9 +219,13 @@ class PopupContainer extends Component {
                     {this.renderPauseChoices()}
                 </HistoryPauser>
                 {this.renderBlacklistButton()}
-                <Button icon='archive' onClick={this.onArchiveBtnClick} disabled={archiveBtnDisabled}>
-                    Archive Current Page
-                </Button>
+                {
+                    this.state.isArchiveEnabled && (
+                        <Button icon='archive' onClick={this.onArchiveBtnClick} disabled={archiveBtnDisabled}>
+                            Archive Current Page
+                        </Button>
+                    )
+                }
                 <hr />
                 <LinkButton href={`${constants.OPTIONS_URL}#/settings`} icon='settings'>
                     Settings
