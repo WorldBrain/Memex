@@ -12,7 +12,7 @@ const Preferences = ({ toggleFreezeDryBookmarks, freezeDryBookmarks, toggleFreez
                     id='freezeDryBookmarksCheckbox'
                     onChange={toggleFreezeDryBookmarks}
                     checked={freezeDryBookmarks}
-                    disabled={freezeDryArchive}
+                    disabled={!freezeDryArchive}
                 />
                 <label htmlFor='freezeDryBookmarksCheckbox'>Store bookmarks for offline viewing</label>
             </li>
