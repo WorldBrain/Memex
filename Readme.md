@@ -61,8 +61,9 @@ play along! :tada:
 1. Clone this repo.
 2. Get [Node/NPM](https://nodejs.org) and [yarn](https://yarnpkg.com)
    (`npm install -g yarn`).
-3. Run `yarn` to install dependencies and compile the source files.
-4. Load it in Firefox or Chromium/Chrome:
+3. Run `yarn` to install dependencies.
+4. Compile the source files using `yarn watch` for incremental builds or `yarn build` for standard dev builds.
+5. Load it in Firefox or Chromium/Chrome:
     * In Firefox (≥49): run `yarn run firefox` (or run [web-ext] directly for more control).
       Alternatively, go to `about:debugging`, choose 'Load Temporary Add-on', and pick
       `extension/manifest.json` from this repo.
@@ -74,7 +75,7 @@ play along! :tada:
 If the steps above worked, running `yarn run watch` will trigger a quick
 recompilation every time a source file has been modified.
 
-If you are testing in Firefox through `yarn run firefox`/`web-ext`, the extension should also reload
+If you are testing in Firefox through `yarn run firefox`, the extension should also reload
 automatically. Otherwise, manually press the reload button in the extension list.
 
 - If your edits affected only the overview interface, just refresh/reopen it.
