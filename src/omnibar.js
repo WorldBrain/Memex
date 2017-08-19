@@ -14,6 +14,12 @@ let browserName
 ;(async () => {
     const browserInfo = await browser.runtime.getBrowserInfo()
     browserName = browserInfo.name
+    // XXX Firefox seems the only one currently implementing this function, but
+    // luckily that is enough for our current needs.
+    if (browser.runtime.getBrowserInfo !== undefined) {
+        const browserInfo = await browser.runtime.getBrowserInfo()
+        browserName = browserInfo.name
+    }
 })()
 
 
