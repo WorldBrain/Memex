@@ -1,9 +1,8 @@
 import stream from 'stream'
 import reduce from 'lodash/fp/reduce'
 
-const allWhitespacesPattern = /\s+/g
-const negateNonWordsPattern = /[^_\W]+/g // NOTE: This kills accented characters
-const numbersPattern = /[0-9]+/g
+import transformPageText from 'src/util/transform-page-text'
+
 const combineContentStrings = reduce((result, val) => `${result}\n${val}`, '')
 
 /**
@@ -18,23 +17,16 @@ const transformPageDoc = ({ _id: id, content = {}, bookmarkTimestamps = [], visi
     visitTimestamps,
 })
 
-const removePunctuation = (text = '') => {
-    const results = text.match(negateNonWordsPattern)
-    return results ? results.join(' ') : text
-}
-
-const removeNumbers = (text = '') =>
-    text.replace(numbersPattern, '')
-
-const cleanupWhitespaces = (text = '') =>
-    text.replace(allWhitespacesPattern, ' ').trim()
-
-// Transform stream version (currently not supported by concurrentAdd)
+// Transform stream version (currently not supported by concurrentAdd) TODO
 export class PipelineStream extends stream.Transform {
     _transform(doc, _, next) {
         const transformedDoc = transformPageDoc(doc)
+        const { text: transformedContent } = transformPageText({ text: transformedDoc.content })
 
-        next(null, transformedDoc)
+        next(null, {
+            ...transformedDoc,
+            content: transformedContent,
+        })
     }
 }
 
@@ -52,32 +44,16 @@ export default function pipeline({ _id: id, content }) {
         return { id }
     }
 
-    /* DEBUG */
-    console.time('pre-process content')
+    /* DEBUG */ console.time('pre-process content')
 
     // This is the main searchable page content. The bulk is from `document.body.innerText` in
     //  `content.fullText`. Contains other things like `content.title`, `content.description`.
     //  Here we are just concatting it all, essentially making a composite field for text search.
-    let searchableContent = combineContentStrings(content)
+    const searchableContent = combineContentStrings(content)
 
-    /* DEBUG */
-    const lengthBefore = searchableContent.length
-    console.log('length before: ', lengthBefore)
+    const { text: transformedContent } = transformPageText({ text: searchableContent })
 
-    // We don't care about non-single-space whitespace (other than ' ') -- this may not be needed --
-    searchableContent = cleanupWhitespaces(searchableContent)
+    /* DEBUG */ console.timeEnd('pre-process content')
 
-    // We don't care about searching on punctuation, so remove that
-    searchableContent = removePunctuation(searchableContent)
-
-    // We don't care about numbers
-    searchableContent = removeNumbers(searchableContent)
-
-    /* DEBUG */
-    const lengthAfter = searchableContent.length
-    console.log('length after: ', lengthAfter)
-    console.log('savings: ', lengthAfter/lengthBefore * 100)
-    console.timeEnd('pre-process content')
-
-    return { id, content: searchableContent }
+    return { id, content: transformedContent }
 }
