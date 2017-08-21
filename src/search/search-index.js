@@ -1,5 +1,6 @@
 /* eslint promise/param-names: 0 */
 import initSearchIndex from 'search-index'
+import stream from 'stream'
 import reduce from 'lodash/fp/reduce'
 import partition from 'lodash/fp/partition'
 
@@ -46,6 +47,33 @@ const createPagesObject = reduce((result, pageDoc) => ({
     [pageDoc._id]: { ...pipeline(pageDoc), visitTimestamps: [], bookmarkTimestamps: [] },
 }), {})
 
+
+/**
+ * Structures page + meta doc relationships for insert into the index. Essentially reverses
+ * the relationship from 1 metaDoc -> 1 pageDoc, to 1 pageDoc -> N metaDocs (via an array of IDs).
+ * @param {any} docs Object containing arrays of `pageDocs`, `visitDocs`, and `bookmarkDocs`
+ * @returns Array of page data ready for insert into index, holding all previously held relationship data.
+ */
+const structureDocsForIndex = ({ pageDocs, visitDocs, bookmarkDocs }) => {
+    // Transform pages to dict of `_id`s to docs, for constant-time lookup
+    const pages = createPagesObject(pageDocs)
+
+    // Affords updating the pages dict with bookmark/visit `_id`s/timestamps
+    const updatePageTimes = field => metaDoc => {
+        if (pages[metaDoc.page._id]) {
+            pages[metaDoc.page._id][field].push(metaDoc._id)
+        }
+    }
+
+    // Attach bookmarks/visits to assoc. page datas
+    visitDocs.forEach(updatePageTimes('visitTimestamps'))
+    bookmarkDocs.forEach(updatePageTimes('bookmarkTimestamps'))
+
+    // Return now-linked doc values out of ID-indexed dict
+    return Object.values(pages)
+}
+
+
 const indexP = new Promise((...args) => initSearchIndex(indexOpts, standardResponse(...args)))
 
 export const instance = () => indexP
@@ -61,26 +89,32 @@ export async function addPage({ pageDoc, visitDocs = [], bookmarkDocs = [] }) {
     return new Promise((...args) => index.concurrentAdd(indexOpts, input, standardResponse(...args)))
 }
 
+export async function addPagesConcurrent({ pageDocs, visitDocs = [], bookmarkDocs = [] }) {
+    const index = await indexP
+    const input = structureDocsForIndex({ pageDocs, visitDocs, bookmarkDocs })
+
+    return new Promise((...args) => index.concurrentAdd(indexOpts, input, standardResponse(...args)))
+}
+
 export async function addPages({ pageDocs, visitDocs = [], bookmarkDocs = [] }) {
     const index = await indexP
 
-    // Transform pages to objects with keys as `_id`s
-    const pages = createPagesObject(pageDocs)
+    return new Promise((resolve, reject) => {
+        const input = structureDocsForIndex({ pageDocs, visitDocs, bookmarkDocs })
 
-    // Update the pages object with bookmark/visit timestamps
-    const updatePageTimes = field => ({ _id, page }) => {
-        if (pages[page._id]) {
-            pages[page._id][field].push(_id)
-        }
-    }
+        // Set up add pipeline
+        const inputStream = new stream.Readable({ objectMode: true })
 
-    visitDocs.forEach(updatePageTimes('visitTimestamps'))
-    bookmarkDocs.forEach(updatePageTimes('bookmarkTimestamps'))
+        inputStream
+            .pipe(index.defaultPipeline())
+            .pipe(index.add())
+            .on('finish', () => resolve(input.length))
+            .on('error', reject)
 
-    // Extract document values out of ID-indexed object
-    const input = Object.values(pages)
-
-    return new Promise((...args) => index.concurrentAdd(indexOpts, input, standardResponse(...args)))
+        // Push input onto input stream
+        input.forEach(doc => inputStream.push(doc))
+        inputStream.push(null) // Signify end of input on Readable
+    })
 }
 
 /**

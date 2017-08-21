@@ -133,9 +133,9 @@ export default async function prepareImports(allowTypes = {}) {
     // Queue them for index insertion
     console.time('add-to-index time')
     index.addPages({ pageDocs, bookmarkDocs })
-        .then(() => {
+        .then((num) => {
             console.timeEnd('add-to-index time')
-            console.log('done adding page docs to index')
+            console.log('done adding page docs to index. Added: ', num)
         })
         .catch(console.error)
 
