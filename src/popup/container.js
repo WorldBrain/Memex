@@ -15,13 +15,17 @@ import SplitButton from './components/SplitButton'
 import { BLACKLIST_BTN_STATE } from './constants'
 
 import styles from './components/Popup.css'
-// import setUnreadCount from '../util/setUnreadCount'
+import setUnreadCount from '../util/setUnreadCount'
 
 import { itemBtnBlacklisted } from './components/Button.css'
 
 export const overviewURL = '/overview/overview.html'
 export const optionsURL = '/options/options.html'
 export const feedbackURL = 'https://www.reddit.com/r/WorldBrain'
+
+console.log("badge count!")
+let badge = setUnreadCount(0).then(console.log).then(console.log)
+console.log(badge)
 
 // Transforms URL checking results to state types
 const getBlacklistButtonState = ({ loggable, blacklist }) => {
@@ -43,7 +47,7 @@ class PopupContainer extends Component {
             isPaused: false,
             archiveBtnDisabled: true,
             blacklistChoice: false,
-            unreadCount: 4,
+            unreadCount: 6,
         }
 
         this.toggleLoggingPause = remoteFunction('toggleLoggingPause')
