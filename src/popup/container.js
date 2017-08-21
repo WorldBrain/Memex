@@ -15,7 +15,7 @@ import SplitButton from './components/SplitButton'
 import { BLACKLIST_BTN_STATE } from './constants'
 
 import styles from './components/Popup.css'
-import setUnreadCount from '../util/setUnreadCount'
+// import setUnreadCount from '../util/setUnreadCount'
 
 import { itemBtnBlacklisted } from './components/Button.css'
 
@@ -43,7 +43,7 @@ class PopupContainer extends Component {
             isPaused: false,
             archiveBtnDisabled: true,
             blacklistChoice: false,
-            // unreadNotifsBadge: setUnreadCount(0),
+            unreadCount: 4,
         }
 
         this.toggleLoggingPause = remoteFunction('toggleLoggingPause')
@@ -181,7 +181,7 @@ class PopupContainer extends Component {
 
         return this.props.pauseValues.map(pauseValueToOption)
     }
-    //     setUnreadNotifsBadge() {this.setState({unreadNotifsBadge : setUnreadCount(0)});// }
+    // setUnreadNotifsBadge() {this.setState({unreadNotifsBadge : setUnreadCount(0)});// }
     render() {
         const { searchValue, archiveBtnDisabled, pauseValue, isPaused } = this.state
 
@@ -207,7 +207,7 @@ class PopupContainer extends Component {
                     Import History &amp; Bookmarks
                 </LinkButton>
                 <LinkButton href={`${optionsURL}#/notifications`} icon='notifications'>
-                    Notifications
+                    Notifications <span className={styles.badge} />
                 </LinkButton>
                 <LinkButton href={feedbackURL} icon='feedback'>
                     Feedback
