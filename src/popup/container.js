@@ -23,8 +23,20 @@ export const overviewURL = '/overview/overview.html'
 export const optionsURL = '/options/options.html'
 export const feedbackURL = 'https://www.reddit.com/r/WorldBrain'
 
-console.log("badge count!")
-let badge = setUnreadCount(0).then(console.log).then(console.log)
+// console.log("badge count!")
+// let badge = setUnreadCount(0).then(console.log).then(console.log)
+
+async function updateDropDownBadge() {
+    try {
+        let res = await setUnreadCount(0)
+        await console.log("badge count! ", res)
+        return await res
+    } catch (err) {
+        console.err("err", err)
+    }
+}
+
+updateDropDownBadge()
 // console.log(badge)
 // Transforms URL checking results to state types
 const getBlacklistButtonState = ({ loggable, blacklist }) => {
@@ -46,7 +58,7 @@ class PopupContainer extends Component {
             isPaused: false,
             archiveBtnDisabled: true,
             blacklistChoice: false,
-            unreadCount: 6,
+            unreadCount: null,
         }
 
         this.toggleLoggingPause = remoteFunction('toggleLoggingPause')
@@ -73,6 +85,10 @@ class PopupContainer extends Component {
         this.getInitPauseState().then(updateState).catch(noop)
         this.getInitBlacklistBtnState(currentTab.url).then(updateState).catch(noop)
         this.getInitArchiveBtnState(currentTab.url).then(updateState).catch(noop)
+
+        let res = await setUnreadCount(0)
+        console.log("badgeupdate?")
+        this.setState(state => ({ ...state, unreadCount: res }))
     }
 
     async getInitPauseState() {
@@ -96,6 +112,13 @@ class PopupContainer extends Component {
         }
 
         return { blacklistBtn: getBlacklistButtonState(result) }
+    }
+
+    async updateDropDownBadge() {
+        let res = await setUnreadCount(0)
+        return {
+            unreadCount: res,
+        }
     }
 
     onBlacklistBtnClick(domain = false) {
