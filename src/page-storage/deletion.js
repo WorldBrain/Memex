@@ -1,6 +1,6 @@
 import db, { normaliseFindResult } from 'src/pouchdb'
 import { findVisits } from 'src/search/find-visits'
-import { bookmarkDocsSelector } from 'src/imports/background'
+import { bookmarkDocsSelector } from 'src/imports'
 import { getEquivalentPages } from 'src/search/find-pages'
 import * as index from 'src/search/search-index'
 

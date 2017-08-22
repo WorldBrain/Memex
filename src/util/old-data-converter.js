@@ -8,8 +8,7 @@ import { STORAGE_KEY as NEW_BLACKLIST_KEY } from 'src/options/blacklist/constant
 import { generatePageDocId, pageDocsSelector } from 'src/page-storage'
 import { generateVisitDocId } from 'src/activity-logger'
 // TODO: unify these after refactored to be somewhere more appropriate
-import { transformToVisitDoc } from 'src/imports/background/imports-preparation'
-import { generateBookmarkDocId } from 'src/imports/background'
+import { transformToVisitDoc, generateBookmarkDocId } from 'src/imports'
 
 export const dedupIdxName = 'conversion-dedupe-index'
 const dedupQueryFields = ['url', '_id']

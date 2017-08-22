@@ -1,10 +1,12 @@
 import { dataURLToBlob } from 'blob-util'
 
 import db from 'src/pouchdb'
-import updateDoc from 'src/util/pouchdb-update-doc'
+import { generatePageDocId } from 'src/page-storage'
 import fetchPageData from 'src/page-analysis/background/fetch-page-data'
 import { revisePageFields } from 'src/page-analysis'
 import { IMPORT_TYPE, DOWNLOAD_STATUS } from 'src/options/imports/constants'
+import * as index from 'src/search/search-index'
+import { transformToVisitDoc, transformToBookmarkDoc } from 'src/imports'
 
 const fetchPageDataOpts = {
     includePageContent: true,
@@ -23,6 +25,23 @@ const formatFavIconAttachment = async favIconURL => {
 }
 
 /**
+ * @param {PageDoc} pageDoc Page doc to get visits and create visit docs for.
+ * @returns {Array<IVisitDoc>} Array of visit docs gotten from URLs in `pageDoc`.
+ */
+async function createAssociatedVisitDocs(pageDoc) {
+    const visitItems = await browser.history.getVisits({ url: pageDoc.url })
+
+    return visitItems.map(transformToVisitDoc(pageDoc))
+}
+
+async function createAssociatedBookmarkDoc(pageDoc, importItem) {
+    // Web Ext. API should return array of BookmarkItems; grab first one
+    const [bookmarkItem] = await browser.bookmarks.get(importItem.browserId)
+
+    return transformToBookmarkDoc(pageDoc)(bookmarkItem)
+}
+
+/**
  * Handles processing of a history-type import item. Checks for exisitng page docs that have the same URL.
  *
  * @param {IImportItem} importItemDoc
@@ -36,13 +55,27 @@ async function processHistoryImport(importItem) {
     // Sort out all binary attachments
     const _attachments = await formatFavIconAttachment(favIconURI)
 
-    // Perform the update: page stub "filling-out" + db logic
-    await updateDoc(db, importItem.assocDocId, pageStub => revisePageFields({
-        ...pageStub,
+    // Construct the page doc ready for PouchDB from fetched + import item data
+    const pageDoc = revisePageFields({
+        _id: generatePageDocId({
+            timestamp: importItem.timestamp,
+            nonce: importItem.browserId,
+        }),
+        url: importItem.url,
         content,
         _attachments,
-        isStub: false,
-    }))
+    })
+
+    // Fetch and create meta-docs
+    const visitDocs = await createAssociatedVisitDocs(pageDoc)
+    const bookmarkDocs = importItem.type === IMPORT_TYPE.BOOKMARK
+        ? [await createAssociatedBookmarkDoc(pageDoc, importItem)]
+        : []
+
+    // Schedule indexing of searchable data, but don't wait for it
+    index.addPagesConcurrent({ pageDocs: [pageDoc], visitDocs, bookmarkDocs })
+    // Store the new data in Pouch
+    await db.bulkDocs([pageDoc, ...bookmarkDocs, ...visitDocs])
 
     // If we finally got here without an error being thrown, return the success status message + pageDoc data
     return { status: DOWNLOAD_STATUS.SUCC }
@@ -57,8 +90,6 @@ async function processHistoryImport(importItem) {
  */
 export default async function processImportItem(importItem = {}) {
     switch (importItem.type) {
-        // There's really no difference between history and bookmarks at this stage, hence
-        //  they use the same processing function to grab associated page data
         case IMPORT_TYPE.BOOKMARK:
         case IMPORT_TYPE.HISTORY: return await processHistoryImport(importItem)
         default: throw new Error('Unknown import type')
