@@ -25,8 +25,7 @@ export const feedbackURL = 'https://www.reddit.com/r/WorldBrain'
 
 console.log("badge count!")
 let badge = setUnreadCount(0).then(console.log).then(console.log)
-console.log(badge)
-
+// console.log(badge)
 // Transforms URL checking results to state types
 const getBlacklistButtonState = ({ loggable, blacklist }) => {
     if (!blacklist) return BLACKLIST_BTN_STATE.BLACKLISTED

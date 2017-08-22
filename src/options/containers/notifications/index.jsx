@@ -1,11 +1,10 @@
 import React, { Component } from "react"
-import db from "./index-pouch.js"
+import db from "../../../pouchdb"
 import { routeTitle, sectionTitle } from "../../base.css"
 import styles from "./Notifs.css"
-import setUnreadCount from "../../../util/setUnreadCount.js"
+import setUnreadCount from "../../../util/setUnreadCount"
 import fetchNewNotifs from './polling/fetchNewNotifs'
 import updateWBBadge from './updateWBBadge'
-import dropdownBadge from '../../../util/dropdownBadge'
 
 fetchNewNotifs()
 
@@ -51,9 +50,6 @@ class NotificationsContainer extends Component {
             })
             .then(function(response) {
                 updateWBBadge(0)
-            })
-            .then(function(response) {
-                dropdownBadge(0)
             })
             .catch(function(err) {
                 console.log("err")

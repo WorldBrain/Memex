@@ -1,5 +1,4 @@
-import db from "../options/containers/notifications/index-pouch.js"
-import PouchDB from "pouchdb"
+import db from "../pouchdb"
 
 
 export default function setUnreadCount(itemToCount) {
@@ -21,7 +20,6 @@ export default function setUnreadCount(itemToCount) {
                 if (element.doc.viewed === false) {
                     itemToCount = itemToCount + 1
                 }
-                return itemToCount
             })
             return itemToCount
         })
