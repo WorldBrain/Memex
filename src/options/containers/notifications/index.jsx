@@ -42,7 +42,7 @@ class NotificationsContainer extends Component {
                     _rev: doc._rev,
                     title: doc.title,
                     body: doc.body,
-                    viewed: true,
+                    viewed: false,
                 })
             })
             .then(function(response) {

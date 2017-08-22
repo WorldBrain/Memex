@@ -58,7 +58,7 @@ class PopupContainer extends Component {
             isPaused: false,
             archiveBtnDisabled: true,
             blacklistChoice: false,
-            unreadCount: null,
+            unreadCount: 6,
         }
 
         this.toggleLoggingPause = remoteFunction('toggleLoggingPause')
@@ -116,9 +116,8 @@ class PopupContainer extends Component {
 
     async updateDropDownBadge() {
         let res = await setUnreadCount(0)
-        return {
-            unreadCount: res,
-        }
+        console.log(res)
+        this.setState(state => ({ ...state, unreadCount: res }))
     }
 
     onBlacklistBtnClick(domain = false) {
@@ -233,7 +232,7 @@ class PopupContainer extends Component {
                     Import History &amp; Bookmarks
                 </LinkButton>
                 <LinkButton href={`${optionsURL}#/notifications`} icon='notifications'>
-                    Notifications <span className={styles.badge}>{this.state.unreadCount} </span>
+                    Brotifications <span className={styles.badge}>{this.state.unreadCount} </span>
                 </LinkButton>
                 <LinkButton href={feedbackURL} icon='feedback'>
                     Feedback
