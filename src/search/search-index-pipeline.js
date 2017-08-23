@@ -44,16 +44,12 @@ export default function pipeline({ _id: id, content }) {
         return { id }
     }
 
-    /* DEBUG */ console.time('pre-process content')
-
     // This is the main searchable page content. The bulk is from `document.body.innerText` in
     //  `content.fullText`. Contains other things like `content.title`, `content.description`.
     //  Here we are just concatting it all, essentially making a composite field for text search.
     const searchableContent = combineContentStrings(content)
 
     const { text: transformedContent } = transformPageText({ text: searchableContent })
-
-    /* DEBUG */ console.timeEnd('pre-process content')
 
     return { id, content: transformedContent }
 }
