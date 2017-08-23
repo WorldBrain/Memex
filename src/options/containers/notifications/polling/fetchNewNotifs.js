@@ -1,4 +1,4 @@
-import db from "../../../../pouchdb"
+import db from "../index-pouch"
 import setUnreadCount from "../../../../util/setUnreadCount"
 import updateWBBadge from '../updateWBBadge'
 // PouchDB.plugin(require('pouchdb-upsert'))

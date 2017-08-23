@@ -1,4 +1,4 @@
-import db from "../pouchdb"
+import db from "../options/containers/notifications/index-pouch"
 
 export default async function setUnreadCount(itemToCount) {
     try {

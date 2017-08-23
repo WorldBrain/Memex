@@ -23,22 +23,6 @@ export const overviewURL = '/overview/overview.html'
 export const optionsURL = '/options/options.html'
 export const feedbackURL = 'https://www.reddit.com/r/WorldBrain'
 
-// console.log("badge count!")
-// let badge = setUnreadCount(0).then(console.log).then(console.log)
-
-async function updateDropDownBadge() {
-    try {
-        let res = await setUnreadCount(0)
-        await console.log("badge count! ", res)
-        return await res
-    } catch (err) {
-        console.err("err", err)
-    }
-}
-
-updateDropDownBadge()
-// console.log(badge)
-// Transforms URL checking results to state types
 const getBlacklistButtonState = ({ loggable, blacklist }) => {
     if (!blacklist) return BLACKLIST_BTN_STATE.BLACKLISTED
     if (!loggable) return BLACKLIST_BTN_STATE.DISABLED
@@ -58,7 +42,6 @@ class PopupContainer extends Component {
             isPaused: false,
             archiveBtnDisabled: true,
             blacklistChoice: false,
-            unreadCount: 6,
         }
 
         this.toggleLoggingPause = remoteFunction('toggleLoggingPause')
@@ -87,8 +70,12 @@ class PopupContainer extends Component {
         this.getInitArchiveBtnState(currentTab.url).then(updateState).catch(noop)
 
         let res = await setUnreadCount(0)
-        console.log("badgeupdate?")
-        this.setState(state => ({ ...state, unreadCount: res }))
+        if (res === 0) {
+            this.setState({unread: false})
+        } else {
+            this.setState({unread: true})
+            this.setState(state => ({ ...state, unreadCount: res }))
+        }
     }
 
     async getInitPauseState() {
@@ -209,7 +196,6 @@ class PopupContainer extends Component {
     // setUnreadNotifsBadge() {this.setState({unreadNotifsBadge : setUnreadCount(0)});// }
     render() {
         const { searchValue, archiveBtnDisabled, pauseValue, isPaused } = this.state
-
         return (
             <Popup searchValue={searchValue} onSearchChange={this.onSearchChange} onSearchEnter={this.onSearchEnter}>
                 <HistoryPauser
@@ -232,7 +218,10 @@ class PopupContainer extends Component {
                     Import History &amp; Bookmarks
                 </LinkButton>
                 <LinkButton href={`${optionsURL}#/notifications`} icon='notifications'>
-                    Brotifications <span className={styles.badge}>{this.state.unreadCount} </span>
+                    Notifications <span
+                        className={
+                            this.state.unread ? styles.badge : styles.nobadge
+                        }>{this.state.unreadCount} </span>
                 </LinkButton>
                 <LinkButton href={feedbackURL} icon='feedback'>
                     Feedback

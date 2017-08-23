@@ -1,5 +1,5 @@
 import React, { Component } from "react"
-import db from "../../../pouchdb"
+import db from "./index-pouch"
 import { routeTitle, sectionTitle } from "../../base.css"
 import styles from "./Notifs.css"
 import setUnreadCount from "../../../util/setUnreadCount"
@@ -42,7 +42,7 @@ class NotificationsContainer extends Component {
                     _rev: doc._rev,
                     title: doc.title,
                     body: doc.body,
-                    viewed: false,
+                    viewed: true,
                 })
             })
             .then(function(response) {
