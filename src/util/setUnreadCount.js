@@ -1,4 +1,4 @@
-import db from "../options/containers/notifications/index-pouch"
+import db from "../pouchdb"
 
 export default async function setUnreadCount(itemToCount) {
     let items = itemToCount

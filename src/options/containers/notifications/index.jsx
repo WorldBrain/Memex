@@ -1,5 +1,5 @@
 import React, { Component } from "react"
-import db from "./index-pouch"
+import db from "../../../../src/pouchdb"
 import { routeTitle, sectionTitle } from "../../base.css"
 import styles from "./Notifs.css"
 import setUnreadCount from "../../../util/setUnreadCount"

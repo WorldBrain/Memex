@@ -1,4 +1,4 @@
-import db from "../index-pouch"
+import db from "../../../../../src/pouchdb"
 import setUnreadCount from "../../../../util/setUnreadCount"
 import updateWBBadge from '../updateWBBadge'
 
