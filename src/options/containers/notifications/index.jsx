@@ -30,31 +30,25 @@ class NotificationsContainer extends Component {
             .catch(err => console.log(err))
     }
 
-    selectNotification(doc) {
-        this.setState({
+    async selectNotification(doc) {
+        try {
+            this.setState({
             selectedNotificationId: doc._id,
-        })
-        db
-            .get(doc._id)
-            .then(function(doc) {
-                return db.put({
+            })
+            this.setStateFromPouch()
+            let notif = await db.get(doc._id)
+            db.put({
                     _id: doc._id,
                     _rev: doc._rev,
                     title: doc.title,
                     body: doc.body,
                     viewed: true,
-                })
             })
-            .then(function(response) {
-                setUnreadCount(0)
-            })
-            .then(function(response) {
-                updateWBBadge(0)
-            })
-            .catch(function(err) {
-                console.log("err")
-            })
-        this.setStateFromPouch()
+            await setUnreadCount(0)
+            await updateWBBadge(0)
+        } catch (err) {
+            console.err("err", err)
+        }
     }
 
     componentDidMount() {

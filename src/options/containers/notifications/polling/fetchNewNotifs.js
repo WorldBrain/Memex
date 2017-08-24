@@ -34,23 +34,21 @@ import updateWBBadge from '../updateWBBadge'
 
 export default async function fetchNewNotifs() {
         try {
-            let res = await fetch("https://codepen.io/jobs.json")
+            let res = await fetch("https://teamtreehouse.com/jessicaleach.json")
             let foo = await res.json()
-            await console.log("foo", foo)
-            let newNotes = await foo.jobs
+            let newNotes = await foo.badges
             await newNotes.forEach(function(element) {
                 db.put({
-                    "_id": "notif_" + element.hashid,
-                    "MongoId": element.hashid,
-                    "title": element.title,
-                    "body": element.description,
+                    "_id": "notif_" + element.id,
+                    "MongoId": element.id,
+                    "title": element.name,
+                    "body": element.earned_date,
                     "viewed": false,
                 })
             })
             await setUnreadCount(0)
             await updateWBBadge(0)
-            await console.log("does it work?")
-            
+            // await console.log("does it work?")
         }  
         catch(err) {
             console.log('Error: ', err.message);
