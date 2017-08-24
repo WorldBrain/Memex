@@ -12,6 +12,7 @@ const indexOpts = {
     batchSize: 500,
     appendOnly: true,
     indexPath: 'test',
+    logLevel: 'info',
     preserveCase: false,
     compositeField: false,
     nGramLength: 1,

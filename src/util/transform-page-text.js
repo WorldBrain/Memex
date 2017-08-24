@@ -1,7 +1,13 @@
+import urlRegex from 'url-regex'
+// Check https://mathiasbynens.be/demo/url-regex for results RE: this pattern
+
 const allWhitespacesPattern = /\s+/g
 const nonWordsPattern = /[_\W]+/g // NOTE: This kills accented characters; maybe make better
 const numbersPattern = /[0-9]+/g
+const urlPattern = urlRegex()
 
+const removeUrls = (text = '') =>
+    text.replace(urlPattern, ' ')
 
 const removePunctuation = (text = '') =>
     text.replace(nonWordsPattern, ' ')
@@ -30,6 +36,9 @@ export default function transform({ text = '' }) {
     let searchableText = text
 
     const lengthBefore = searchableText.length
+
+    // Remove URLs first before we start messing with things
+    searchableText = removeUrls(searchableText)
 
     // We don't care about searching on punctuation, so remove that
     searchableText = removePunctuation(searchableText)
