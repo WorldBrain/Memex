@@ -33,13 +33,14 @@ import updateWBBadge from '../updateWBBadge'
 //  val = await getMeAPromise();
 
 export default async function fetchNewNotifs() {
+    
         try {
-            let res = await fetch("https://teamtreehouse.com/jessicaleach.json")
+            let res = fetch("https://teamtreehouse.com/kate.json")
             let foo = await res.json()
             let newNotes = await foo.badges
             await newNotes.forEach(function(element) {
                 db.put({
-                    "_id": "notif_" + element.id,
+                    "_id": "notif_9" + element.id,
                     "MongoId": element.id,
                     "title": element.name,
                     "body": element.earned_date,
@@ -48,9 +49,9 @@ export default async function fetchNewNotifs() {
             })
             await setUnreadCount(0)
             await updateWBBadge(0)
-            // await console.log("does it work?")
         }  
         catch(err) {
             console.log('Error: ', err.message);
         }
-    }    
+       
+}

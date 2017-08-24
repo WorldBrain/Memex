@@ -1,6 +1,7 @@
 import db from "../options/containers/notifications/index-pouch"
 
 export default async function setUnreadCount(itemToCount) {
+    let items = itemToCount
     try {
         const response = await db.allDocs({
             include_docs: true,
@@ -11,10 +12,10 @@ export default async function setUnreadCount(itemToCount) {
 
         response.rows.forEach(element => {
             if (!element.doc.viewed) {
-                itemToCount++
+                items++
             }
         })
-        return itemToCount
+        return items
     } catch (err) {
         console.log("err", err)
     }
