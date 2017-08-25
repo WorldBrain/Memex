@@ -1,3 +1,5 @@
+// Pattern to match entire string to `domain.tld`-like format
+const DOMAIN_TLD_PATTERN = /^\w{2,}\.\w{2,3}$/
 
 class QueryBuilder {
     constructor() {
@@ -6,6 +8,7 @@ class QueryBuilder {
         this.visitTimestamps = []
         this.offset = null
         this.pageSize = null
+        this.url = []
     }
 
     /**
@@ -38,8 +41,8 @@ class QueryBuilder {
     get() {
         const q = {
             query: [
-                { AND: { content: this.content, bookmarkTimestamps: this.bookmarkTimestamps } },
-                { AND: { content: this.content, visitTimestamps: this.visitTimestamps } },
+                { AND: { content: this.content, bookmarkTimestamps: this.bookmarkTimestamps, url: this.url } },
+                { AND: { content: this.content, visitTimestamps: this.visitTimestamps, url: this.url } },
             ],
         }
 
@@ -59,11 +62,17 @@ class QueryBuilder {
         return this
     }
 
-    searchTerm(terms) {
-        if (terms) {
-            // Split into words and push to search query
-            terms.split(' ')
-                .forEach(term => this.content.push(term))
+    searchTerm(input) {
+        if (input) {
+            // Split into words and push to query
+            input.split(' ').forEach(term => {
+                if (DOMAIN_TLD_PATTERN.test(term)) {
+                    // Only can support single domain.tld search for now, so set to first index
+                    this.url[0] = term
+                } else {
+                    this.content.push(term)
+                }
+            })
         }
         return this
     }

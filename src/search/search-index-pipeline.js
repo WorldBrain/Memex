@@ -37,11 +37,11 @@ export class PipelineStream extends stream.Transform {
  * @param {any} doc A page doc containing `content` field containing various webpage data + `_id`.
  * @returns {any} Doc ready for indexing containing `id` and processed composite `content` string field
  */
-export default function pipeline({ _id: id, content }) {
+export default function pipeline({ _id: id, content, url }) {
     // Short circuit if no searchable content
     //  (not 100% sure what to do here yet; basically means doc is useless for search)
     if (!content || Object.keys(content).length === 0) {
-        return { id }
+        return { id, url }
     }
 
     // This is the main searchable page content. The bulk is from `document.body.innerText` in
@@ -51,5 +51,5 @@ export default function pipeline({ _id: id, content }) {
 
     const { text: transformedContent } = transformPageText({ text: searchableContent })
 
-    return { id, content: transformedContent }
+    return { id, content: transformedContent, url }
 }

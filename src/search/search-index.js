@@ -29,6 +29,11 @@ const indexOpts = {
         content: {
             fieldedSearch: true,
         },
+        url: {
+            weight: 10,
+            fieldedSearch: true,
+            separator: '/', // Not ideal, but will allow the domain name to be searchable
+        },
     },
 }
 
