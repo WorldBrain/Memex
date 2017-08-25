@@ -4,6 +4,7 @@ import stream from 'stream'
 import reduce from 'lodash/fp/reduce'
 import partition from 'lodash/fp/partition'
 
+import { convertMetaDocId } from 'src/activity-logger'
 import db, { normaliseFindResult } from 'src/pouchdb'
 import QueryBuilder from './query-builder'
 import pipeline from './search-index-pipeline'
@@ -268,7 +269,7 @@ const bulkResultsToArray = ({ results }) => results
     .filter(list => list.length)
     .map(list => list[0].ok)
 
-const getTimestampFromId = id => id.split('/')[1]
+const getTimestampFromId = id => convertMetaDocId(id).timestamp
 
 // Allows easy "flattening" of index results to just be left with the Pouch doc IDs
 const extractDocIdsFromIndexResult = indexResult => indexResult
@@ -315,7 +316,13 @@ export async function filterVisitsByQuery({
     metaDocs = metaDocs.map(doc => {
         doc.page = pageDocs[doc.page._id]
         return doc
-    }).sort((a, b) => getTimestampFromId(a._id) < getTimestampFromId(b._id))
+    })
+
+    // Perform sort if default query
+    if (!query) {
+        metaDocs = metaDocs
+            .sort((a, b) => getTimestampFromId(a._id) < getTimestampFromId(b._id))
+    }
 
     return {
         ...normaliseFindResult({ docs: metaDocs }),

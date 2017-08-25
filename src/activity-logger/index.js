@@ -31,9 +31,9 @@ export const getPauseState = async () => {
 // We add a random string we call a 'nonce' to prevent accidental collisions.
 export const convertVisitDocId = docuri.route(`${visitKeyPrefix}:timestamp/:nonce`)
 
-const convertAnyTimestampedDocId = docuri.route(':type/:timestamp/:nonce')
+export const convertMetaDocId = docuri.route(':type/:timestamp/:nonce')
 export const getTimestamp = doc =>
-    Number.parseInt(convertAnyTimestampedDocId(doc._id).timestamp)
+    Number.parseInt(convertMetaDocId(doc._id).timestamp)
 
 export function generateVisitDocId({timestamp, nonce} = {}) {
     const date = timestamp ? new Date(timestamp) : new Date()
