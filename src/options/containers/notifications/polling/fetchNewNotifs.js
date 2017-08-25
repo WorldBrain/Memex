@@ -1,6 +1,7 @@
-import db from "../../../../../src/pouchdb"
+import db from "../../../../pouchdb"
 import setUnreadCount from "../../../../util/setUnreadCount"
 import updateWBBadge from '../updateWBBadge'
+import desktopNotification from './desktopNotification'
 
 // PouchDB.plugin(require('pouchdb-upsert'))
 
@@ -35,20 +36,22 @@ import updateWBBadge from '../updateWBBadge'
 export default async function fetchNewNotifs() {
     
         try {
-            let res = fetch("https://teamtreehouse.com/kate.json")
-            let foo = await res.json()
-            let newNotes = await foo.badges
-            await newNotes.forEach(function(element) {
-                db.put({
-                    "_id": "notif_9" + element.id,
-                    "MongoId": element.id,
-                    "title": element.name,
-                    "body": element.earned_date,
-                    "viewed": false,
-                })
-            })
-            await setUnreadCount(0)
-            await updateWBBadge(0)
+            // let res = await fetch("https://teamtreehouse.com/kate.json")
+            // let foo = await res.json()
+            // let newNotes = await foo.badges
+            // await newNotes.forEach(function(element) {
+            //     db.put({
+            //         "_id": "notif_9" + element.id,
+            //         "MongoId": element.id,
+            //         "title": element.name,
+            //         "body": element.earned_date,
+            //         "viewed": false,
+            //     })
+            // })
+            // await setUnreadCount(0)
+            // await updateWBBadge(0)
+            await desktopNotification(0)
+            await console.log("does it work?")
         }  
         catch(err) {
             console.log('Error: ', err.message);
