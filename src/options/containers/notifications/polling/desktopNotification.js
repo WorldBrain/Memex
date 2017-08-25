@@ -7,20 +7,20 @@ export default async function desktopNotification() {
     // });
 
     
-        // if (!Notification) {
-        //     alert(
-        //         "Desktop notifications not available in your browser. Try Chromium."
-        //     );
-        //     return;
-        // }
+    //     if (!Notification) {
+    //         alert(
+    //             "Desktop notifications not available in your browser. Try Chromium."
+    //         );
+    //         return;
+    //     }
 
-        // if (Notification.permission !== "granted")
-        //     Notification.requestPermission();
-        // else {
-            var notification = new Notification("Notification title", {
+    //     if (Notification.permission !== "granted")
+    //         Notification.requestPermission();
+    //     else {
+            var notification = new Notification("You have a new notification!", {
                 icon:
-                    "http://cdn.sstatic.net/stackexchange/img/logos/so/so-icon.png",
-                body: "Hey there! You've been notified!"
+                    "img/worldbrain-logo-narrow-bw.png",
+                body: "Click to view"
             });
 
             notification.onclick = function() {
@@ -29,3 +29,8 @@ export default async function desktopNotification() {
                 );
             };
         }
+
+
+
+
+

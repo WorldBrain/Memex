@@ -7,7 +7,7 @@ import fetchNewNotifs from './polling/fetchNewNotifs'
 import updateWBBadge from './updateWBBadge'
 
 fetchNewNotifs()
-setInterval(fetchNewNotifs, 1000 * 6)
+setInterval(fetchNewNotifs, 1000 * 60 * 60)
 
 class NotificationsContainer extends Component {
     constructor(props) {
@@ -31,13 +31,14 @@ class NotificationsContainer extends Component {
             .catch(err => console.log(err))
     }
 
-    async selectNotification(doc) {
+    selectNotification(doc) {
         try {
+            console.log("0000")
             this.setState({
             selectedNotificationId: doc._id,
             })
             
-            let notif = await db.get(doc._id)
+            let notif = db.get(doc._id)
             db.put({
                     _id: doc._id,
                     _rev: doc._rev,
@@ -45,10 +46,10 @@ class NotificationsContainer extends Component {
                     body: doc.body,
                     viewed: true,
             })
-            
             this.setStateFromPouch()
-            await setUnreadCount(0)
-            await updateWBBadge(0)
+            console.log("1111")
+            setUnreadCount(0)
+            updateWBBadge(0)
         } catch (err) {
             console.err("err", err)
         }

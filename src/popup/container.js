@@ -69,7 +69,8 @@ class PopupContainer extends Component {
         this.getInitBlacklistBtnState(currentTab.url).then(updateState).catch(noop)
         this.getInitArchiveBtnState(currentTab.url).then(updateState).catch(noop)
 
-        let res = await setUnreadCount(0)
+        let res = await setUnreadCount()
+                console.log("popup res", res)
         if (res === 0) {
             this.setState({unread: false})
         } else {
@@ -99,12 +100,6 @@ class PopupContainer extends Component {
         }
 
         return { blacklistBtn: getBlacklistButtonState(result) }
-    }
-
-    async updateDropDownBadge() {
-        let res = await setUnreadCount(0)
-        console.log(res)
-        this.setState(state => ({ ...state, unreadCount: res }))
     }
 
     onBlacklistBtnClick(domain = false) {

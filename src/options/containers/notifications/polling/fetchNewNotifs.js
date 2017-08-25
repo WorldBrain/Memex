@@ -2,7 +2,9 @@ import db from "../../../../pouchdb"
 import setUnreadCount from "../../../../util/setUnreadCount"
 import updateWBBadge from '../updateWBBadge'
 import desktopNotification from './desktopNotification'
+import compareArrays from './compareArrays'
 
+// const PouchDB = require('pouchdb');
 // PouchDB.plugin(require('pouchdb-upsert'))
 
 // export default function fetchNewNotifs() {
@@ -36,21 +38,32 @@ import desktopNotification from './desktopNotification'
 export default async function fetchNewNotifs() {
     
         try {
-            // let res = await fetch("https://teamtreehouse.com/kate.json")
-            // let foo = await res.json()
-            // let newNotes = await foo.badges
-            // await newNotes.forEach(function(element) {
-            //     db.put({
-            //         "_id": "notif_9" + element.id,
-            //         "MongoId": element.id,
-            //         "title": element.name,
-            //         "body": element.earned_date,
-            //         "viewed": false,
-            //     })
-            // })
-            // await setUnreadCount(0)
-            // await updateWBBadge(0)
-            await desktopNotification(0)
+            let res = await fetch("https://safe-bastion-45672.herokuapp.com/kate.json")
+            let foo = await res.json()
+            let newNotes = await foo.badges
+
+            compareArrays(newNotes)
+
+            // if newNotes contains notif which is not in pouchdb notifs, then trigger desktopNotifs
+            // use filter
+
+            // what is unread count?
+
+            // run setunread count
+
+            // compare the 2, if higher, run desktopNotifs
+
+            newNotes.forEach(function(element) {
+                db.put({
+                    "_id": "notif_" + element.id,
+                    "MongoId": element.id,
+                    "title": element.name,
+                    "body": element.earned_date,
+                    "viewed": false,
+                })
+            })
+            await setUnreadCount()
+            await updateWBBadge()
             await console.log("does it work?")
         }  
         catch(err) {
