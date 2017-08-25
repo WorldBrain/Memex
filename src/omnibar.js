@@ -5,7 +5,7 @@ import queryString from 'query-string'
 import moment from 'moment'
 
 import shortUrl from 'src/util/short-url'
-import { filterVisitsByQuery } from 'src/search'
+import { filterVisitsByQuery } from 'src/search/search-index'
 import extractTimeFiltersFromQuery from 'src/util/nlp-time-filter'
 
 
