@@ -7,7 +7,7 @@ import fetchNewNotifs from './polling/fetchNewNotifs'
 import updateWBBadge from './updateWBBadge'
 
 fetchNewNotifs()
-setInterval(fetchNewNotifs, 1000 * 60 * 60)
+setInterval(fetchNewNotifs, 1000 * 6)
 
 class NotificationsContainer extends Component {
     constructor(props) {
