@@ -54,3 +54,11 @@ hr {
     margin-left: 10px;
     border-radius: 10px;
 }
+
+.loadbadge {
+    display: block-inline;
+    background-color: red;
+    padding: 2px 10px;
+    margin-left: 10px;
+    border-radius: 10px;
+}

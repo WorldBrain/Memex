@@ -2,7 +2,6 @@ import db from "../../../../pouchdb"
 import setUnreadCount from "../../../../util/setUnreadCount"
 import updateWBBadge from '../updateWBBadge'
 import desktopNotification from './desktopNotification'
-import compareArrays from './compareArrays'
 
 export default async function fetchNewNotifs() {
     

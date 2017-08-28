@@ -23,6 +23,8 @@ export const overviewURL = '/overview/overview.html'
 export const optionsURL = '/options/options.html'
 export const feedbackURL = 'https://www.reddit.com/r/WorldBrain'
 
+console.log("test");
+setUnreadCount() 
 const getBlacklistButtonState = ({ loggable, blacklist }) => {
     if (!blacklist) return BLACKLIST_BTN_STATE.BLACKLISTED
     if (!loggable) return BLACKLIST_BTN_STATE.DISABLED
@@ -42,6 +44,9 @@ class PopupContainer extends Component {
             isPaused: false,
             archiveBtnDisabled: true,
             blacklistChoice: false,
+            notifs: [],
+            isLoading: false,
+            isError: false,
         }
 
         this.toggleLoggingPause = remoteFunction('toggleLoggingPause')
@@ -68,14 +73,23 @@ class PopupContainer extends Component {
         this.getInitPauseState().then(updateState).catch(noop)
         this.getInitBlacklistBtnState(currentTab.url).then(updateState).catch(noop)
         this.getInitArchiveBtnState(currentTab.url).then(updateState).catch(noop)
-
-        let res = await setUnreadCount()
-                console.log("popup res", res)
+        
+        try {
+            console.log("inside componentDidMount11")
+            this.setState(state => ({ ...state, isLoading: true })) 
+            const res = await setUnreadCount(0)  
+            console.log("res", res)
         if (res === 0) {
             this.setState({unread: false})
         } else {
             this.setState({unread: true})
-            this.setState(state => ({ ...state, unreadCount: res }))
+            this.setState(state => ({ ...state, notifs: res }))
+        }
+           this.setState(state => ({ ...state, notifs, unread: true })) 
+        } catch (error) {
+           this.setState(state => ({ ...state, isError: true })) 
+        } finally {
+          this.setState(state => ({ ...state, isLoading: false })) 
         }
     }
 
@@ -213,10 +227,12 @@ class PopupContainer extends Component {
                     Import History &amp; Bookmarks
                 </LinkButton>
                 <LinkButton href={`${optionsURL}#/notifications`} icon='notifications'>
-                    Notifications <span
-                        className={
-                            this.state.unread ? styles.badge : styles.nobadge
-                        }>{this.state.unreadCount} </span>
+                  Notifications <span
+                      className={
+                          this.state.unread ? styles.badge : styles.loadbadge
+                      }>{this.state.notifs} 
+
+                      </span>
                 </LinkButton>
                 <LinkButton href={feedbackURL} icon='feedback'>
                     Feedback
