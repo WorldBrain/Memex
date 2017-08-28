@@ -274,7 +274,7 @@ const bulkResultsToArray = ({ results }) => results
     .filter(list => list.length)
     .map(list => list[0].ok)
 
-const getTimestampFromId = id => convertMetaDocId(id).timestamp
+const getTimestampFromId = id => +convertMetaDocId(id).timestamp
 
 // Allows easy "flattening" of index results to just be left with the Pouch doc IDs
 const extractDocIdsFromIndexResult = indexResult => indexResult
@@ -282,12 +282,19 @@ const extractDocIdsFromIndexResult = indexResult => indexResult
     .reduce((prev, curr) => [...prev, ...curr], []) // Flatten everything
     .map(id => ({ id })) // Map them into appropriate shape for pouch bulkGet query
 
+const getLatestVisit = (visitIds = []) => {
+    const sorted = visitIds.sort()
+    return sorted.length ? sorted[0] : ''
+}
+
+// TODO: Move this to own module and modularise the code
 export async function filterVisitsByQuery({
     query,
     startDate,
     endDate,
     skip,
     limit = 10,
+    pagesOnly = false,
 }) {
     const indexQuery = new QueryBuilder()
         .searchTerm(query || '*') // Search by wildcard by default
@@ -304,6 +311,25 @@ export async function filterVisitsByQuery({
     // Short-circuit if no results
     if (!results.length) {
         return { rows: [], resultsExhausted: true }
+    }
+
+    // Ignore meta docs if not wanted
+    if (pagesOnly) {
+        const resultDocs = results.map(result => ({
+            id: result.document.id,
+            latestVisit: getLatestVisit(result.document.visitTimestamps),
+        }))
+        const bulkRes = await db.bulkGet({ docs: resultDocs })
+        // TODO: Hacky as hell; improve this
+        const docs = bulkResultsToArray(bulkRes).map(doc => {
+            const matchingResult = resultDocs.find(result => result.id === doc._id)
+            return { ...doc, latestVisit: getTimestampFromId(matchingResult.latestVisit) }
+        })
+
+        return {
+            ...normaliseFindResult({ docs }),
+            resultsExhausted: results.length < limit,
+        }
     }
 
     // Using the index result, grab doc IDs and then bulk get them from Pouch

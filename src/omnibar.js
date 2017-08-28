@@ -31,10 +31,10 @@ const formatTime = (visitStart, showTime) => {
     return inLastSevenDays ? m.format('ddd') : m.format('D/M/YYYY')
 }
 
-const visitToSuggestion = timeFilterApplied => doc => {
+const pageToSuggestion = timeFilterApplied => doc => {
     const url = escapeHtml(shortUrl(doc.url))
-    const title = escapeHtml(doc.page.title)
-    const time = formatTime(doc.visitStart, timeFilterApplied)
+    const title = escapeHtml(doc.content.title)
+    const time = formatTime(doc.latestVisit, timeFilterApplied)
 
     return {
         content: doc.url,
@@ -69,28 +69,29 @@ async function makeSuggestion(query, suggest) {
         extractedQuery,
     } = extractTimeFiltersFromQuery(query)
 
-    const visitsResult = await filterVisitsByQuery({
+    const pagesResult = await filterVisitsByQuery({
         query: extractedQuery,
         startDate,
         endDate,
         limit: 5,
+        pagesOnly: true,
     })
-    const visitDocs = visitsResult.rows.map(row => row.doc)
+    const pageDocs = pagesResult.rows.map(row => row.doc)
 
     // A subsequent search could have already started and finished while we
     // were busy searching, so we ensure we do not overwrite its results.
     if (currentQuery !== query && latestResolvedQuery !== queryForOldSuggestions) { return }
 
-    if (visitDocs.length === 0) {
+    if (pageDocs.length === 0) {
         browser.omnibox.setDefaultSuggestion({
             description: 'No results found in your memory. (press enter to search deeper)',
         })
     } else {
         browser.omnibox.setDefaultSuggestion({
-            description: `Found these ${visitDocs.length} pages in your memory: (press enter to search deeper)`,
+            description: `Found these ${pageDocs.length} pages in your memory: (press enter to search deeper)`,
         })
     }
-    const suggestions = visitDocs.map(visitToSuggestion(startDate || endDate))
+    const suggestions = pageDocs.map(pageToSuggestion(startDate || endDate))
 
     suggest(suggestions)
     latestResolvedQuery = query
