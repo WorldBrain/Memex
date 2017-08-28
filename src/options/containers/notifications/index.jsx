@@ -35,14 +35,12 @@ class NotificationsContainer extends Component {
             .catch(err => console.log(err))
     }
 
-    selectNotification(doc) {
+    async selectNotification(doc) {
         try {
-            console.log("0000")
             this.setState({
             selectedNotificationId: doc._id,
             })
-            
-            let notif = db.get(doc._id)
+            let notif = await db.get(doc._id)
             db.put({
                     _id: doc._id,
                     _rev: doc._rev,
@@ -50,8 +48,8 @@ class NotificationsContainer extends Component {
                     body: doc.body,
                     viewed: true,
             })
+            console.log("one")
             this.setStateFromPouch()
-            console.log("1111")
             setUnreadCount(0)
             updateWBBadge(0)
         } catch (err) {
