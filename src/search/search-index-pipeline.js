@@ -17,6 +17,9 @@ const transformPageDoc = ({ _id: id, content = {}, bookmarkTimestamps = [], visi
     visitTimestamps,
 })
 
+// Currently just removes the protocol from URLs, to enable easy search-on-domain matching
+const transformUrl = url => url.replace(/(^\w+:|^)\/\//, '')
+
 // Transform stream version (currently not supported by concurrentAdd) TODO
 export class PipelineStream extends stream.Transform {
     _transform(doc, _, next) {
@@ -38,10 +41,13 @@ export class PipelineStream extends stream.Transform {
  * @returns {any} Doc ready for indexing containing `id` and processed composite `content` string field
  */
 export default function pipeline({ _id: id, content, url }) {
+    // First apply transformations to the URL
+    const transformedUrl = transformUrl(url)
+
     // Short circuit if no searchable content
     //  (not 100% sure what to do here yet; basically means doc is useless for search)
     if (!content || Object.keys(content).length === 0) {
-        return { id, url }
+        return { id, url: transformedUrl }
     }
 
     // This is the main searchable page content. The bulk is from `document.body.innerText` in
@@ -51,5 +57,5 @@ export default function pipeline({ _id: id, content, url }) {
 
     const { text: transformedContent } = transformPageText({ text: searchableContent })
 
-    return { id, content: transformedContent, url }
+    return { id, content: transformedContent, url: transformedUrl }
 }
