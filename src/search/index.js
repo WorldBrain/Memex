@@ -1,29 +1,171 @@
+import map from 'lodash/fp/map'
 import reduce from 'lodash/fp/reduce'
+import flatten from 'lodash/fp/flatten'
+import compose from 'lodash/fp/compose'
 import partition from 'lodash/fp/partition'
 
-import db, { normaliseFindResult } from 'src/pouchdb'
-import { convertMetaDocId } from 'src/activity-logger'
+import db from 'src/pouchdb'
+import { pageKeyPrefix } from 'src/page-storage'
+import { convertMetaDocId, visitKeyPrefix } from 'src/activity-logger'
 import QueryBuilder from './query-builder'
 import * as index from './search-index'
 
 // Gets all the "ok" docs from Pouch bulk result, returning them as an array
+// TODO: Try and make this nicer
 const bulkResultsToArray = ({ results }) => results
     .map(res => res.docs)
     .map(list => list.filter(doc => doc.ok))
     .filter(list => list.length)
     .map(list => list[0].ok)
 
+// Grabs the timestamp from a metadoc, formatting it to a Number
 const getTimestampFromId = id => +convertMetaDocId(id).timestamp
 
-// Allows easy "flattening" of index results to just be left with the Pouch doc IDs
-const extractDocIdsFromIndexResult = indexResult => indexResult
-    .map(({ document: doc }) => [doc.id, ...doc.bookmarkTimestamps, ...doc.visitTimestamps]) // Grab IDs from doc
-    .reduce((prev, curr) => [...prev, ...curr], []) // Flatten everything
-    .map(id => ({ id })) // Map them into appropriate shape for pouch bulkGet query
+/**
+ * Given an augmented page doc (returned from `mapResultsToPouchDocs`), returns the ID of the
+ * latest associated meta (either bookmark or visit doc).
+ *
+ * TODO: there may be cases of not-properly formatted data, which will result in null pointers;
+ *  need to handle this.
+ */
+const grabLatestAssocMetaId = ({ assoc }) => {
+    if (assoc.visit && assoc.bookmark) {
+        // If both visit and bookmark exist, return the latest of each
+        return assoc.visit > assoc.bookmark ? assoc.visit._id : assoc.bookmark._id
+    } else if (assoc.visit) {
+        return assoc.visit._id
+    }
+    return assoc.bookmark._id
+}
 
-const getLatestVisit = (visitIds = []) => {
-    const sorted = visitIds.sort()
-    return sorted.length ? sorted[0] : ''
+/**
+ * @param {Array<any>} augmentedPageDocs Array of augmented page docs (returned from `mapResultsToPouchDocs`)
+ *  to sort by their latest associated meta doc timestamps.
+ */
+const sortByMetas = (augmentedPageDocs = []) =>
+    augmentedPageDocs.sort((docA, docB) => {
+        const timeA = getTimestampFromId(grabLatestAssocMetaId(docA))
+        const timeB = getTimestampFromId(grabLatestAssocMetaId(docB))
+
+        return timeB - timeA
+    })
+
+/**
+ * Returns the latest bookmark or visit doc ID from index results.
+ * @param {Array<string>} metaIds Array of IDs to sort and extract latest from.
+ * @returns {any} Object containing `latest` meta ID and ordered `rest` array.
+ *  `latest` should be `undefined` if input array length is 0.
+ */
+function getLatestMeta(metaIds = []) {
+    const sorted = metaIds.sort((idA, idB) => getTimestampFromId(idB) - getTimestampFromId(idA))
+
+    if (!sorted.length) {
+        return { latest: undefined, rest: [] }
+    }
+
+    const [latest, ...rest] = sorted
+    return { latest, rest }
+}
+
+/**
+ * Creates a quick-lookup dictionary of page doc IDs to the associated meta doc IDs
+ * from our search-index results.
+ * @param {Array<any>} results Array of search-idnex results.
+ * @returns {any} Object with page ID keys and values containing either bookmark or visit or both docs.
+ */
+const createResultIdsDict = reduce((acc, result) => ({
+    ...acc,
+    [result.document.id]: {
+        pageId: result.document.id,
+        visitIds: getLatestMeta(result.document.visitTimestamps),
+        bookmarkIds: getLatestMeta(result.document.bookmarkTimestamps),
+        score: result.score,
+    },
+}), {})
+
+/**
+ * Formats result IDs dict to format needed for injestion into `PouchDB.bulkGet`.
+ */
+const formatBulkGetInput = compose(
+    flatten,
+    map(idBatch => [
+        { id: idBatch.pageId },
+        { id: idBatch.visitIds.latest },
+        { id: idBatch.bookmarkIds.latest },
+    ].filter(doc => doc.id != null)) // Filter out missing metas
+)
+
+/**
+ * Creates a quick-lookup dictionary of page doc IDs to the associated meta doc contents
+ * from an array of meta doc inputs.
+ * @param {Array<any>} metaDocs Array of meta docs to map page IDs to.
+ * @returns {any} Object with page ID keys and values containing either bookmark or visit or both docs.
+ */
+const createMetaDocsDict = reduce((acc, metaDoc) => {
+    const key = metaDoc._id.startsWith(visitKeyPrefix) ? 'visit' : 'bookmark'
+
+    // Merge with existing bookmark/visit if present
+    if (acc[metaDoc.page._id]) {
+        acc[metaDoc.page._id] = {
+            ...acc[metaDoc.page._id],
+            [key]: metaDoc,
+        }
+    } else {
+        acc[metaDoc.page._id] = {
+            [key]: metaDoc,
+        }
+    }
+
+    return acc
+}, {})
+
+/**
+ * Performs all the messy logic needed to resolve search-index results against our PouchDB model.
+ * Given n results, should produce n page docs with associated meta docs available under `assoc` key.
+ * For the sake of differentiation, call these "augmented page docs".
+ * The latest visit/bookmark doc should be available on the page doc (assuming they exist), while
+ * all later metas will only be as _ids to avoid large fetches in the cases of pages with large
+ * number of assoc. meta docs (they can be lazy fetched later on user actions).
+ *
+ * TODO: All this resolution is messy as hell; is there a better way?
+ * TODO: Somehow maintain relevancy sort with output (final iteration before return, relating
+ *  output back to results input?).
+ *
+ * @param {Array<any>} results Array of results gotten from our search-index query.
+ * @param {boolean} [sortByRelevance=false] Whether or not to maintain relevance to search sort order.
+ * @returns {Array<any>} Array of augmented page docs containing linked meta docs.
+ */
+async function mapResultsToPouchDocs(results, sortByRelevance = false) {
+    // Convert results to dictionary of page IDs to related meta IDs
+    const resultIdsDict = createResultIdsDict(results)
+
+    // Format IDs of docs needed to be immediately fetched from Pouch
+    const bulkGetInput = formatBulkGetInput(resultIdsDict)
+
+    // Perform bulk fetch for needed docs from pouch
+    const bulkRes = await db.bulkGet({ docs: bulkGetInput })
+    const docs = bulkResultsToArray(bulkRes)
+
+    // Parition into meta and page docs
+    const [pageDocs, metaDocs] = partition(doc => doc._id.startsWith(pageKeyPrefix))(docs)
+
+    // Insert meta docs into the relevant page docs,
+    //  including later meta doc IDs, within the `pageDoc.assoc` key
+    const metaDocsDict = createMetaDocsDict(metaDocs)
+    const augmentedPageDocs = pageDocs.map(doc => ({
+        ...doc,
+        assoc: {
+            ...metaDocsDict[doc._id],
+            laterVisits: resultIdsDict[doc._id].visitIds.rest,
+            laterBookmarks: resultIdsDict[doc._id].bookmarkIds.rest,
+        },
+    }))
+
+    // Ensure the original results order is maintained, if specified
+    return sortByRelevance
+        ? augmentedPageDocs.sort((pageA, pageB) =>
+            resultIdsDict[pageA._id].score - resultIdsDict[pageB._id].score)
+        : augmentedPageDocs
 }
 
 export default async function indexSearch({
@@ -48,53 +190,23 @@ export default async function indexSearch({
 
     // Short-circuit if no results
     if (!results.length) {
-        return { rows: [], resultsExhausted: true }
+        return { docs: [], resultsExhausted: true }
     }
 
-    // Ignore meta docs if not wanted
+    // TODO: have custom mapping step like in `mapResultsToPouchDocs`,
+    //  but ignoring all the fluff associated with resolving meta docs
     if (pagesOnly) {
-        const resultDocs = results.map(result => ({
-            id: result.document.id,
-            latestVisit: getLatestVisit(result.document.visitTimestamps),
-        }))
-        const bulkRes = await db.bulkGet({ docs: resultDocs })
-        // TODO: Hacky as hell; improve this
-        const docs = bulkResultsToArray(bulkRes).map(doc => {
-            const matchingResult = resultDocs.find(result => result.id === doc._id)
-            return { ...doc, latestVisit: getTimestampFromId(matchingResult.latestVisit) }
-        })
-
-        return {
-            ...normaliseFindResult({ docs }),
-            resultsExhausted: results.length < limit,
-        }
     }
 
-    // Using the index result, grab doc IDs and then bulk get them from Pouch
-    const docIds = extractDocIdsFromIndexResult(results)
-    const bulkRes = await db.bulkGet({ docs: docIds })
-    const docs = bulkResultsToArray(bulkRes)
+    let docs = await mapResultsToPouchDocs(results, query !== '')
 
-    // Parition into meta and page docs
-    let [pageDocs, metaDocs] = partition(({ _id }) => _id.startsWith('page/'))(docs)
-
-    // Put pageDocs into an easy-lookup dictionary
-    pageDocs = reduce((dict, pageDoc) => ({ ...dict, [pageDoc._id]: pageDoc }), {})(pageDocs)
-
-    // Insert page docs into the relevant meta docs
-    metaDocs = metaDocs.map(doc => {
-        doc.page = pageDocs[doc.page._id]
-        return doc
-    })
-
-    // Perform sort if default query
+    // Perform time-based sort if default query (based on greatest meta doc time)
     if (!query) {
-        metaDocs = metaDocs
-            .sort((a, b) => getTimestampFromId(a._id) < getTimestampFromId(b._id))
+        docs = sortByMetas(docs)
     }
 
     return {
-        ...normaliseFindResult({ docs: metaDocs }),
+        docs,
         resultsExhausted: results.length < limit,
     }
 }

@@ -7,7 +7,7 @@ import * as actions from './actions'
 
 const defaultState = {
     currentPage: 0, // Pagination state
-    searchResult: { rows: [], resultsExhausted: false }, // The current search result list
+    searchResult: { docs: [], resultsExhausted: false }, // The current search result list
     // The current search input values
     currentQueryParams: {
         query: '',
@@ -34,8 +34,8 @@ function setEndDate(state, date) {
 }
 
 function hideVisit(state, visitId) {
-    return update('searchResult.rows',
-        rows => remove(row => row.id === visitId)(rows)
+    return update('searchResult.docs',
+        docs => remove(doc => doc._id === visitId)(docs)
     )(state)
 }
 
@@ -56,7 +56,7 @@ const hideDeleteConfirm = state => ({
 // Updates search result state by either overwriting or appending
 const handleSearchResult = ({ overwrite }) => (state, newSearchResult) => {
     const searchResult = overwrite ? newSearchResult : {
-        rows: [...state.searchResult.rows, ...newSearchResult.rows],
+        docs: [...state.searchResult.docs, ...newSearchResult.docs],
         resultsExhausted: newSearchResult.resultsExhausted,
     }
 
