@@ -9,8 +9,6 @@ import updateWBBadge from './updateWBBadge'
 fetchNewNotifs()
 setInterval(fetchNewNotifs, 1000 * 60 * 60) 
 
-
-
 class NotificationsContainer extends Component {
     constructor(props) {
         super(props)
@@ -29,24 +27,22 @@ class NotificationsContainer extends Component {
                 startkey: 'notif',
                 endkey: 'notif\ufff0',
             })
-            .then(notifs => this.setState(() => ({ notifs })))
+            .then(notifs => this.setState(state => ({ ...state, notifs })))
             .catch(err => console.log(err))
     }
 
     async selectNotification(doc) {
         try {
+            console.log()
             this.setState({
             selectedNotificationId: doc._id,
+            className: 'viewed',
             })
             db.put({
-                _id: doc._id,
-                _rev: doc._rev,
-                title: doc.title,
-                body: doc.body,
+                ...doc,
                 viewed: true,
             })
             console.log('one')
-            this.setStateFromPouch()
             setUnreadCount()
             updateWBBadge()
         } catch (err) {
@@ -59,6 +55,7 @@ class NotificationsContainer extends Component {
             live: true,
             include_docs: true,
         }).on('change', function(c) {
+            // console.log('change!', c)
         })
         this.setStateFromPouch()
     }
