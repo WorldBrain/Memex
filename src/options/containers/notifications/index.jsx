@@ -1,16 +1,14 @@
-import React, { Component } from "react"
-import db from "../../../../src/pouchdb"
-import { routeTitle, sectionTitle } from "../../base.css"
-import styles from "./Notifs.css"
-import setUnreadCount from "../../../util/setUnreadCount"
+import React, { Component } from 'react'
+import db from '../../../../src/pouchdb'
+import { routeTitle, sectionTitle } from '../../base.css'
+import styles from './Notifs.css'
+import setUnreadCount from '../../../util/setUnreadCount'
 import fetchNewNotifs from './polling/fetchNewNotifs'
 import updateWBBadge from './updateWBBadge'
 
 fetchNewNotifs()
 setInterval(fetchNewNotifs, 1000 * 60 * 60) 
 
-console.log("test");
-var test = setUnreadCount(0).then(console.log)
 
 
 class NotificationsContainer extends Component {
@@ -28,8 +26,8 @@ class NotificationsContainer extends Component {
             .allDocs({
                 include_docs: true,
                 attachments: true,
-                startkey: "notif",
-                endkey: "notif\ufff0",
+                startkey: 'notif',
+                endkey: 'notif\ufff0',
             })
             .then(notifs => this.setState(() => ({ notifs })))
             .catch(err => console.log(err))
@@ -40,20 +38,19 @@ class NotificationsContainer extends Component {
             this.setState({
             selectedNotificationId: doc._id,
             })
-            let notif = await db.get(doc._id)
             db.put({
-                    _id: doc._id,
-                    _rev: doc._rev,
-                    title: doc.title,
-                    body: doc.body,
-                    viewed: true,
+                _id: doc._id,
+                _rev: doc._rev,
+                title: doc.title,
+                body: doc.body,
+                viewed: true,
             })
-            console.log("one")
+            console.log('one')
             this.setStateFromPouch()
-            setUnreadCount(0)
-            updateWBBadge(0)
+            setUnreadCount()
+            updateWBBadge()
         } catch (err) {
-            console.err("err", err)
+            console.err('err', err)
         }
     }
 
@@ -62,7 +59,6 @@ class NotificationsContainer extends Component {
             live: true,
             include_docs: true,
         }).on('change', function(c) {
-            // console.log("change!", c)
         })
         this.setStateFromPouch()
     }
@@ -85,7 +81,7 @@ class NotificationsContainer extends Component {
                                         className={
                                             doc.viewed ? styles.viewed : styles.notviewed
                                         }
-                                        key={doc.title}>
+                                        key={doc._id}>
                                         {doc.title}
                                         {this.state.selectedNotificationId
                                         === doc._id

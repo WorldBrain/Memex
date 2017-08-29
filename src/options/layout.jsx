@@ -5,7 +5,7 @@ import Routes from './routes'
 
 import styles from './base.css'
 
-const Layout = ({children, location}) => (
+const Layout = ({ children, location }) => (
     <div className={styles.root}>
         <Navigation currentLocation={location} routes={Routes} />
         <div className={styles.route}>

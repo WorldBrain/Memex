@@ -48,7 +48,7 @@ render() {
          ? <li>Loading... please wait</li>
          : this.state.notifs.map((notif, count) => <li key={count}>{notif.message}
           </li>
-       }
+       })
     </ul>
   )
 }
