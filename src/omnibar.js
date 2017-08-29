@@ -5,7 +5,7 @@ import queryString from 'query-string'
 import moment from 'moment'
 
 import shortUrl from 'src/util/short-url'
-import { filterVisitsByQuery } from 'src/search/search-index'
+import indexSearch from 'src/search'
 import extractTimeFiltersFromQuery from 'src/util/nlp-time-filter'
 
 
@@ -69,7 +69,7 @@ async function makeSuggestion(query, suggest) {
         extractedQuery,
     } = extractTimeFiltersFromQuery(query)
 
-    const pagesResult = await filterVisitsByQuery({
+    const pagesResult = await indexSearch({
         query: extractedQuery,
         startDate,
         endDate,

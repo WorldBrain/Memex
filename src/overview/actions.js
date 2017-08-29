@@ -1,6 +1,6 @@
 import { createAction } from 'redux-act'
 
-import { filterVisitsByQuery } from 'src/search/search-index'
+import indexSearch from 'src/search'
 import { deleteVisitAndPage } from 'src/page-storage/deletion'
 
 import * as constants from './constants'
@@ -46,7 +46,7 @@ export const search = ({ overwrite } = { overwrite: false }) => async (dispatch,
     const skip = selectors.resultsSkip(state)
 
     try {
-        const searchResult = await filterVisitsByQuery({
+        const searchResult = await indexSearch({
             ...currentQueryParams,
             limit: constants.PAGE_SIZE,
             skip,

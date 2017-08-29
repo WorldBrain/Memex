@@ -1,105 +1,100 @@
-import get from 'lodash/fp/get'
-import last from 'lodash/fp/last'
+import reduce from 'lodash/fp/reduce'
+import partition from 'lodash/fp/partition'
 
-import { searchableTextFields } from 'src/page-analysis'
+import db, { normaliseFindResult } from 'src/pouchdb'
+import { convertMetaDocId } from 'src/activity-logger'
+import QueryBuilder from './query-builder'
+import * as index from './search-index'
 
-import { findVisits, addVisitsContext } from './find-visits'
+// Gets all the "ok" docs from Pouch bulk result, returning them as an array
+const bulkResultsToArray = ({ results }) => results
+    .map(res => res.docs)
+    .map(list => list.filter(doc => doc.ok))
+    .filter(list => list.length)
+    .map(list => list[0].ok)
 
+const getTimestampFromId = id => +convertMetaDocId(id).timestamp
 
-// Search by keyword query, returning all docs if no query is given
-export async function filterVisitsByQuery({
+// Allows easy "flattening" of index results to just be left with the Pouch doc IDs
+const extractDocIdsFromIndexResult = indexResult => indexResult
+    .map(({ document: doc }) => [doc.id, ...doc.bookmarkTimestamps, ...doc.visitTimestamps]) // Grab IDs from doc
+    .reduce((prev, curr) => [...prev, ...curr], []) // Flatten everything
+    .map(id => ({ id })) // Map them into appropriate shape for pouch bulkGet query
+
+const getLatestVisit = (visitIds = []) => {
+    const sorted = visitIds.sort()
+    return sorted.length ? sorted[0] : ''
+}
+
+export default async function indexSearch({
     query,
     startDate,
     endDate,
-    skipUntil,
+    skip,
     limit = 10,
-    softLimit = false,
-    maxWaitDuration = 1000,
-    includeContext = false,
+    pagesOnly = false,
 }) {
-    if (limit <= 0) {
+    const indexQuery = new QueryBuilder()
+        .searchTerm(query || '*') // Search by wildcard by default
+        .startDate(startDate)
+        .endDate(endDate)
+        .skipUntil(skip || undefined)
+        .limit(limit || 10)
+        .get()
+    console.log(indexQuery) // DEBUG
+
+    // Using index results, fetch matching pouch docs
+    const results = await index.find(indexQuery)
+
+    // Short-circuit if no results
+    if (!results.length) {
+        return { rows: [], resultsExhausted: true }
+    }
+
+    // Ignore meta docs if not wanted
+    if (pagesOnly) {
+        const resultDocs = results.map(result => ({
+            id: result.document.id,
+            latestVisit: getLatestVisit(result.document.visitTimestamps),
+        }))
+        const bulkRes = await db.bulkGet({ docs: resultDocs })
+        // TODO: Hacky as hell; improve this
+        const docs = bulkResultsToArray(bulkRes).map(doc => {
+            const matchingResult = resultDocs.find(result => result.id === doc._id)
+            return { ...doc, latestVisit: getTimestampFromId(matchingResult.latestVisit) }
+        })
+
         return {
-            rows: [],
-            resultsExhausted: true,
+            ...normaliseFindResult({ docs }),
+            resultsExhausted: results.length < limit,
         }
     }
-    if (query === '') {
-        const visitsResult = await findVisits({startDate, endDate, limit, skipUntil})
-        // Note whether we reached the bottom.
-        visitsResult.resultsExhausted = visitsResult.rows.length < limit
-        return visitsResult
-    } else {
-        // Process visits batch by batch, filtering for ones that match the
-        // query until we reach the requested limit or have exhausted all
-        // of them.
 
-        let rows = []
-        let resultsExhausted = false
-        // Number of visits we process at a time (rather arbitrary)
-        const batchSize = 50
-        // Time when we have to report back with what we got so far, in case we keep searching.
-        const reportingDeadline = Date.now() + maxWaitDuration
-        do {
-            let batch = await findVisits({
-                startDate,
-                endDate,
-                limit: batchSize,
-                skipUntil,
-            })
-            const batchRows = batch.rows
+    // Using the index result, grab doc IDs and then bulk get them from Pouch
+    const docIds = extractDocIdsFromIndexResult(results)
+    const bulkRes = await db.bulkGet({ docs: docIds })
+    const docs = bulkResultsToArray(bulkRes)
 
-            // Check if we reached the bottom.
-            resultsExhausted = batchRows.length < batchSize
+    // Parition into meta and page docs
+    let [pageDocs, metaDocs] = partition(({ _id }) => _id.startsWith('page/'))(docs)
 
-            // Next batch (or next invocation), start from the last result.
-            skipUntil = (batchRows.length > 0)
-                ? last(batchRows).id
-                : skipUntil
+    // Put pageDocs into an easy-lookup dictionary
+    pageDocs = reduce((dict, pageDoc) => ({ ...dict, [pageDoc._id]: pageDoc }), {})(pageDocs)
 
-            // Filter for visits to pages that contain the query words.
-            const hits = batchRows.filter(
-                row => pageMatchesQuery({page: row.doc.page, query})
-            )
+    // Insert page docs into the relevant meta docs
+    metaDocs = metaDocs.map(doc => {
+        doc.page = pageDocs[doc.page._id]
+        return doc
+    })
 
-            rows = rows.concat(hits)
-        } while (
-            // If we did not have enough hits, get and filter another batch...
-            rows.length < limit && !resultsExhausted
-            // ...except if we did already find something and our user may be getting impatient.
-            && !(rows.length >= 1 && Date.now() > reportingDeadline)
-        )
-
-        // If the limit is hard, cap the number of results.
-        if (!softLimit && rows.length > limit) {
-            rows = rows.slice(0, limit)
-            resultsExhausted = false
-            skipUntil = last(rows).id
-        }
-
-        let visitsResult = {
-            rows,
-            // Remember the last docId, to continue from there when more results
-            // are requested.
-            searchedUntil: skipUntil,
-            resultsExhausted,
-        }
-
-        if (includeContext) { visitsResult = await addVisitsContext({visitsResult}) }
-
-        return visitsResult
+    // Perform sort if default query
+    if (!query) {
+        metaDocs = metaDocs
+            .sort((a, b) => getTimestampFromId(a._id) < getTimestampFromId(b._id))
     }
-}
 
-// We just use a simple literal word filter for now. No index, no ranking.
-function pageMatchesQuery({page, query}) {
-    // Get page text fields.
-    const texts = searchableTextFields.map(fieldName => get(fieldName)(page))
-        .filter(text => text) // remove undefined fields
-        .map(text => text.toString().toLowerCase())
-
-    // Test if every word in the query is present in at least one text field.
-    const queryWords = query.toLowerCase().trim().split(/\s+/)
-    return queryWords.every(word =>
-        texts.some(text => text.includes(word))
-    )
+    return {
+        ...normaliseFindResult({ docs: metaDocs }),
+        resultsExhausted: results.length < limit,
+    }
 }
