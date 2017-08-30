@@ -5,6 +5,8 @@ import styles from './Notifs.css'
 import setUnreadCount from '../../../util/setUnreadCount'
 import fetchNewNotifs from './polling/fetchNewNotifs'
 import updateWBBadge from './updateWBBadge'
+const CSSTransitionGroup = require('react-transition-group/CSSTransitionGroup')
+
 
 fetchNewNotifs()
 setInterval(fetchNewNotifs, 1000 * 60 * 60) 
@@ -55,7 +57,6 @@ class NotificationsContainer extends Component {
             live: true,
             include_docs: true,
         }).on('change', function(c) {
-            // console.log('change!', c)
         })
         this.setStateFromPouch()
     }
@@ -63,7 +64,7 @@ class NotificationsContainer extends Component {
     render() {
         const { notifs } = this.state
         return (
-            <div className='recipes'>
+            <div>
                 <h1 className={routeTitle}> Notifications</h1>
 
                 <section className={styles.section}>
@@ -82,7 +83,11 @@ class NotificationsContainer extends Component {
                                         {doc.title}
                                         {this.state.selectedNotificationId
                                         === doc._id
-                                        &&<li key={doc.body}>{doc.body}</li>}
+                                        &&<CSSTransitionGroup
+                                            transitionName={styles.toggle}
+                                            transitionEnterTimeout={500}
+                                            transitionLeaveTimeout={300}> <li key={doc._id}>{doc.body}</li>
+                                        </CSSTransitionGroup>}
                                     </li>
                                 )}
                         </ul>

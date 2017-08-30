@@ -19,11 +19,13 @@ import setUnreadCount from '../util/setUnreadCount'
 
 import { itemBtnBlacklisted } from './components/Button.css'
 
+// import loading from '../../img/loading.gif' // relative path to image 
+
+
 export const overviewURL = '/overview/overview.html'
 export const optionsURL = '/options/options.html'
 export const feedbackURL = 'https://www.reddit.com/r/WorldBrain'
 
-console.log("test");
 setUnreadCount() 
 const getBlacklistButtonState = ({ loggable, blacklist }) => {
     if (!blacklist) return BLACKLIST_BTN_STATE.BLACKLISTED
@@ -75,7 +77,7 @@ class PopupContainer extends Component {
         this.getInitArchiveBtnState(currentTab.url).then(updateState).catch(noop)
         
         try {
-            console.log("inside componentDidMount11")
+            console.log("inside componentDidMount12")
             this.setState(state => ({ ...state, isLoading: true })) 
             const res = await setUnreadCount(0)  
             console.log("res", res)
@@ -233,6 +235,10 @@ class PopupContainer extends Component {
                       }>{this.state.notifs} 
 
                       </span>
+                </LinkButton>
+                <LinkButton>
+                  HELLO!
+                      <img src='../../img/loading.gif'/>  
                 </LinkButton>
                 <LinkButton href={feedbackURL} icon='feedback'>
                     Feedback
