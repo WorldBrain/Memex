@@ -2,12 +2,16 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
+import Waypoint from 'react-waypoint'
 
 import * as actions from '../actions'
 import * as selectors from '../selectors'
+import * as constants from '../constants'
 import ResultList from './ResultList'
 import DateRangeSelection from './DateRangeSelection'
 import DeleteConfirmation from './DeleteConfirmation'
+import PageResultItem from './PageResultItem'
+import { LoadingIndicator } from 'src/common-ui/components'
 import styles from './Overview.css'
 
 
@@ -16,6 +20,36 @@ class Overview extends React.Component {
         if (this.props.grabFocusOnMount) {
             this.inputQueryEl.focus()
         }
+    }
+
+    renderResultItems() {
+        const { searchResults, onBottomReached, isLoading, needsWaypoint } = this.props
+
+        const resultItems = searchResults.map(doc => (
+            <li key={doc._id}>
+                <PageResultItem
+                    doc={doc}
+                    sizeInMB={doc.freezeDrySize}
+                    isBookmark={doc.displayType === constants.RESULT_TYPES.BOOKMARK}
+                />
+            </li>
+        ))
+
+        // Insert waypoint at the end of results to trigger loading new items when scrolling down
+        if (needsWaypoint) {
+            resultItems.push(<Waypoint onEnter={onBottomReached} key='waypoint' />)
+        }
+
+        // Add loading spinner to the list end, if loading (may change this)
+        if (isLoading) {
+            resultItems.push(<LoadingIndicator key='loading' />)
+        }
+
+        return resultItems
+    }
+
+    renderNoResultsMsg() {
+        return <p className={styles.noResultMessage}>No results</p>
     }
 
     render() {
@@ -54,13 +88,9 @@ class Overview extends React.Component {
                 </div>
 
                 <div className={styles.main}>
-                    <ResultList
-                        searchResult={this.props.searchResult}
-                        searchQuery={query}
-                        onBottomReached={this.props.onBottomReached}
-                        isLoading={this.props.isLoading}
-                        resultsExhausted={this.props.resultsExhausted}
-                    />
+                    {this.props.noResults
+                        ? this.renderNoResultsMsg()
+                        : <ResultList>{this.renderResultItems()}</ResultList>}
                     <DeleteConfirmation
                         isShown={this.props.isDeleteConfShown}
                         close={this.props.hideDeleteConfirm}
@@ -85,28 +115,24 @@ Overview.propTypes = {
     onEndDateChange: PropTypes.func,
     onBottomReached: PropTypes.func,
     isLoading: PropTypes.bool,
-    resultsExhausted: PropTypes.bool,
-    searchResult: PropTypes.arrayOf(PropTypes.shape({
-        latestResult: PropTypes.object.isRequired,
-        rest: PropTypes.arrayOf(PropTypes.object).isRequired,
-    })).isRequired,
+    noResults: PropTypes.bool.isRequired,
+    searchResults: PropTypes.arrayOf(PropTypes.object).isRequired,
     isDeleteConfShown: PropTypes.bool.isRequired,
     deleteVisitId: PropTypes.string,
     hideDeleteConfirm: PropTypes.func.isRequired,
     deleteAssociatedDocs: PropTypes.func.isRequired,
     deleteVisit: PropTypes.func.isRequired,
+    needsWaypoint: PropTypes.bool.isRequired,
 }
 
-
 const mapStateToProps = state => ({
-    ...selectors.ourState(state),
     isLoading: selectors.isLoading(state),
     currentQueryParams: selectors.currentQueryParams(state),
-    waitingForResults: !!selectors.ourState(state).waitingForResults, // cast to boolean
-    searchResult: selectors.results(state),
-    resultsExhausted: selectors.resultsExhausted(state),
+    noResults: selectors.noResults(state),
+    searchResults: selectors.results(state),
     isDeleteConfShown: selectors.isDeleteConfShown(state),
     deleteVisitId: selectors.deleteVisitId(state),
+    needsWaypoint: selectors.needsPagWaypoint(state),
 })
 
 const mapDispatchToProps = dispatch => ({

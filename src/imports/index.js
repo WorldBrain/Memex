@@ -44,6 +44,7 @@ export const transformToBookmarkDoc = assocPageDoc => bookmarkItem => ({
         timestamp: bookmarkItem.dateAdded,
         nonce: bookmarkItem.id,
     }),
+    dateAdded: bookmarkItem.dateAdded,
     title: bookmarkItem.title,
     url: bookmarkItem.url,
     page: { _id: assocPageDoc._id },

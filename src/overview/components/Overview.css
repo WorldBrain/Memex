@@ -94,3 +94,26 @@
 .main {
     margin-top: 100px;
 }
+
+.noResultMessage {
+    text-align: center;
+    margin-top: 80px;
+    font-size: 20px;
+    font-family: sans-serif;
+    font-style: italic;
+    color: grey;
+    animation-name: fadeIn;
+    animation-duration: 0.5s;
+    animation-iteration-count: 1;
+    animation-timing-function: ease-in;
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
