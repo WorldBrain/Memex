@@ -51,13 +51,18 @@ const sortByMetas = (augmentedPageDocs = []) =>
     })
 
 /**
- * Returns the latest bookmark or visit doc ID from index results.
+ * Returns the latest bookmark or visit doc from index results + IDs of the later metas.
  * @param {Array<string>} metaIds Array of IDs to sort and extract latest from.
+ * @param {any} timeFilters Time filters of the search query, if any.
  * @returns {any} Object containing `latest` meta ID and ordered `rest` array.
  *  `latest` should be `undefined` if input array length is 0.
  */
-function getLatestMeta(metaIds = []) {
-    const sorted = metaIds.sort((idA, idB) => getTimestampFromId(idB) - getTimestampFromId(idA))
+function getLatestMeta(metaIds = [], { startDate, endDate }) {
+    const now = Date.now()
+    // Filter out out-of-range metas then sort them by time
+    const sorted = metaIds
+        .filter(id => getTimestampFromId(id) >= (startDate || 0) && getTimestampFromId(id) <= (endDate || now))
+        .sort((idA, idB) => getTimestampFromId(idB) - getTimestampFromId(idA))
 
     if (!sorted.length) {
         return { latest: undefined, rest: [] }
@@ -73,12 +78,12 @@ function getLatestMeta(metaIds = []) {
  * @param {Array<any>} results Array of search-idnex results.
  * @returns {any} Object with page ID keys and values containing either bookmark or visit or both docs.
  */
-const createResultIdsDict = reduce((acc, result) => ({
+const createResultIdsDict = timeFilters => reduce((acc, result) => ({
     ...acc,
     [result.document.id]: {
         pageId: result.document.id,
-        visitIds: getLatestMeta(result.document.visitTimestamps),
-        bookmarkIds: getLatestMeta(result.document.bookmarkTimestamps),
+        visitIds: getLatestMeta(result.document.visitTimestamps, timeFilters),
+        bookmarkIds: getLatestMeta(result.document.bookmarkTimestamps, timeFilters),
         score: result.score,
     },
 }), {})
@@ -130,12 +135,13 @@ const createMetaDocsDict = reduce((acc, metaDoc) => {
  * TODO: All this resolution is messy as hell; is there a better way?
  *
  * @param {Array<any>} results Array of results gotten from our search-index query.
+ * @param {any} timeFilters Time filters of the search query, if any.
  * @param {boolean} [sortByRelevance=false] Whether or not to maintain relevance to search sort order.
  * @returns {Array<any>} Array of augmented page docs containing linked meta docs.
  */
-async function mapResultsToPouchDocs(results, sortByRelevance = false) {
+async function mapResultsToPouchDocs(results, timeFilters, sortByRelevance = false) {
     // Convert results to dictionary of page IDs to related meta IDs
-    const resultIdsDict = createResultIdsDict(results)
+    const resultIdsDict = createResultIdsDict(timeFilters)(results)
 
     // Format IDs of docs needed to be immediately fetched from Pouch
     const bulkGetInput = formatBulkGetInput(resultIdsDict)
@@ -190,7 +196,7 @@ export default async function indexSearch({
         return { docs: [], resultsExhausted: true }
     }
 
-    let docs = await mapResultsToPouchDocs(results, query !== '')
+    let docs = await mapResultsToPouchDocs(results, { startDate, endDate }, query !== '')
 
     // Perform time-based sort if default query (based on greatest meta doc time)
     if (!query) {
