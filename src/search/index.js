@@ -128,8 +128,6 @@ const createMetaDocsDict = reduce((acc, metaDoc) => {
  * number of assoc. meta docs (they can be lazy fetched later on user actions).
  *
  * TODO: All this resolution is messy as hell; is there a better way?
- * TODO: Somehow maintain relevancy sort with output (final iteration before return, relating
- *  output back to results input?).
  *
  * @param {Array<any>} results Array of results gotten from our search-index query.
  * @param {boolean} [sortByRelevance=false] Whether or not to maintain relevance to search sort order.
@@ -174,7 +172,6 @@ export default async function indexSearch({
     endDate,
     skip,
     limit = 10,
-    pagesOnly = false,
 }) {
     const indexQuery = new QueryBuilder()
         .searchTerm(query || '*') // Search by wildcard by default
@@ -191,11 +188,6 @@ export default async function indexSearch({
     // Short-circuit if no results
     if (!results.length) {
         return { docs: [], resultsExhausted: true }
-    }
-
-    // TODO: have custom mapping step like in `mapResultsToPouchDocs`,
-    //  but ignoring all the fluff associated with resolving meta docs
-    if (pagesOnly) {
     }
 
     let docs = await mapResultsToPouchDocs(results, query !== '')

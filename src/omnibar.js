@@ -20,9 +20,21 @@ let browserName
     }
 })()
 
+function getLatestTimestamp({ visit, bookmark }) {
+    if (visit && bookmark) {
+        return visit.visitStart > bookmark.dateAdded
+            ? visit.visitStart
+            : bookmark.dateAdded
+    } else if (visit) {
+        return visit.visitStart
+    } else if (bookmark) {
+        return bookmark.dateAdded
+    }
+    return 0
+}
 
-const formatTime = (visitStart, showTime) => {
-    const m = moment(visitStart)
+function formatTime(timestamp, showTime) {
+    const m = moment(timestamp)
     const inLastSevenDays = moment().diff(m, 'days') <= 7
 
     if (showTime) {
@@ -34,7 +46,7 @@ const formatTime = (visitStart, showTime) => {
 const pageToSuggestion = timeFilterApplied => doc => {
     const url = escapeHtml(shortUrl(doc.url))
     const title = escapeHtml(doc.content.title)
-    const time = formatTime(doc.latestVisit, timeFilterApplied)
+    const time = formatTime(getLatestTimestamp(doc.assoc), timeFilterApplied)
 
     return {
         content: doc.url,
@@ -69,29 +81,27 @@ async function makeSuggestion(query, suggest) {
         extractedQuery,
     } = extractTimeFiltersFromQuery(query)
 
-    const pagesResult = await indexSearch({
+    const searchResults = await indexSearch({
         query: extractedQuery,
         startDate,
         endDate,
         limit: 5,
-        pagesOnly: true,
     })
-    const pageDocs = pagesResult.rows.map(row => row.doc)
 
     // A subsequent search could have already started and finished while we
     // were busy searching, so we ensure we do not overwrite its results.
     if (currentQuery !== query && latestResolvedQuery !== queryForOldSuggestions) { return }
 
-    if (pageDocs.length === 0) {
+    if (searchResults.docs.length === 0) {
         browser.omnibox.setDefaultSuggestion({
             description: 'No results found in your memory. (press enter to search deeper)',
         })
     } else {
         browser.omnibox.setDefaultSuggestion({
-            description: `Found these ${pageDocs.length} pages in your memory: (press enter to search deeper)`,
+            description: `Found these ${searchResults.docs.length} pages in your memory: (press enter to search deeper)`,
         })
     }
-    const suggestions = pageDocs.map(pageToSuggestion(startDate || endDate))
+    const suggestions = searchResults.docs.map(pageToSuggestion(startDate || endDate))
 
     suggest(suggestions)
     latestResolvedQuery = query
