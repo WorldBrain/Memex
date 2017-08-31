@@ -1,7 +1,7 @@
 import { createAction } from 'redux-act'
 
 import indexSearch from 'src/search'
-import { deleteVisitAndPage } from 'src/page-storage/deletion'
+import { deleteMetaAndPage } from 'src/page-storage/deletion'
 
 import * as constants from './constants'
 import * as selectors from './selectors'
@@ -16,7 +16,7 @@ export const appendSearchResult = createAction('overview/appendSearchResult')
 export const setQuery = createAction('overview/setQuery')
 export const setStartDate = createAction('overview/setStartDate')
 export const setEndDate = createAction('overview/setEndDate')
-export const hideVisit = createAction('overview/hideVisit')
+export const hideResultItem = createAction('overview/hideResultItem')
 export const showDeleteConfirm = createAction('overview/showDeleteConfirm')
 export const hideDeleteConfirm = createAction('overview/hideDeleteConfirm')
 
@@ -69,12 +69,12 @@ export const getMoreResults = () => async dispatch => {
     dispatch(search())
 }
 
-export const deleteVisit = (visitId, deleteAssoc = false) => async (dispatch, getState) => {
-    // Hide the visit + confirm modal directly (optimistically).
-    dispatch(hideVisit(visitId))
+export const deleteMeta = (metaDoc, deleteAssoc = false) => async (dispatch, getState) => {
+    // Hide the result item + confirm modal directly (optimistically)
+    dispatch(hideResultItem(metaDoc))
     dispatch(hideDeleteConfirm())
     // Remove it from the database.
-    await deleteVisitAndPage({ visitId, deleteAssoc })
+    await deleteMetaAndPage({ metaDoc, deleteAssoc })
 
     // Refresh search view after deleting all assoc docs
     if (deleteAssoc) {

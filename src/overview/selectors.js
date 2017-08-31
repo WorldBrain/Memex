@@ -65,7 +65,7 @@ export const currentPage = createSelector(overview, state => state.currentPage)
 export const resultsSkip = createSelector(currentPage, page => page * constants.PAGE_SIZE)
 export const deleteConfirmProps = createSelector(overview, state => state.deleteConfirmProps)
 export const isDeleteConfShown = createSelector(deleteConfirmProps, state => state.isShown)
-export const deleteVisitId = createSelector(deleteConfirmProps, state => state.visitId)
+export const metaDocToDelete = createSelector(deleteConfirmProps, state => state.metaDoc)
 
 export const results = createSelector(
     resultDocs,

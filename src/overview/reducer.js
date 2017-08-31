@@ -17,7 +17,7 @@ const defaultState = {
     isLoading: false,
     deleteConfirmProps: {
         isShown: false,
-        visitId: '',
+        metaDoc: undefined,
     },
 }
 
@@ -33,18 +33,18 @@ function setEndDate(state, date) {
     return {...state, currentQueryParams: {...state.currentQueryParams, endDate: date}}
 }
 
-function hideVisit(state, visitId) {
+function hideResultItem(state, metaDoc) {
     return update('searchResult.docs',
-        docs => remove(doc => doc._id === visitId)(docs)
+        docs => remove(doc => doc._id === metaDoc.page._id)(docs)
     )(state)
 }
 
-const showDeleteConfirm = (state, visitId) => ({
+const showDeleteConfirm = (state, metaDoc) => ({
     ...state,
     deleteConfirmProps: {
         ...state.deleteConfirmProps,
         isShown: true,
-        visitId,
+        metaDoc,
     },
 })
 
@@ -74,5 +74,5 @@ export default createReducer({
     [actions.setEndDate]: setEndDate,
     [actions.showDeleteConfirm]: showDeleteConfirm,
     [actions.hideDeleteConfirm]: hideDeleteConfirm,
-    [actions.hideVisit]: hideVisit,
+    [actions.hideResultItem]: hideResultItem,
 }, defaultState)

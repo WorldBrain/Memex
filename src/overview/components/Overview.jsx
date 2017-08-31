@@ -94,8 +94,8 @@ class Overview extends React.Component {
                     <DeleteConfirmation
                         isShown={this.props.isDeleteConfShown}
                         close={this.props.hideDeleteConfirm}
-                        deleteAll={this.props.deleteAssociatedDocs(this.props.deleteVisitId)}
-                        deleteVisit={this.props.deleteVisit(this.props.deleteVisitId)}
+                        deleteAll={this.props.deleteAssociatedDocs(this.props.metaDocToDelete)}
+                        deleteMeta={this.props.deleteMeta(this.props.metaDocToDelete)}
                     />
                 </div>
             </div>
@@ -118,10 +118,10 @@ Overview.propTypes = {
     noResults: PropTypes.bool.isRequired,
     searchResults: PropTypes.arrayOf(PropTypes.object).isRequired,
     isDeleteConfShown: PropTypes.bool.isRequired,
-    deleteVisitId: PropTypes.string,
+    metaDocToDelete: PropTypes.object,
     hideDeleteConfirm: PropTypes.func.isRequired,
     deleteAssociatedDocs: PropTypes.func.isRequired,
-    deleteVisit: PropTypes.func.isRequired,
+    deleteMeta: PropTypes.func.isRequired,
     needsWaypoint: PropTypes.bool.isRequired,
 }
 
@@ -131,7 +131,7 @@ const mapStateToProps = state => ({
     noResults: selectors.noResults(state),
     searchResults: selectors.results(state),
     isDeleteConfShown: selectors.isDeleteConfShown(state),
-    deleteVisitId: selectors.deleteVisitId(state),
+    metaDocToDelete: selectors.metaDocToDelete(state),
     needsWaypoint: selectors.needsPagWaypoint(state),
 })
 
@@ -143,8 +143,8 @@ const mapDispatchToProps = dispatch => ({
         onBottomReached: actions.getMoreResults,
         hideDeleteConfirm: actions.hideDeleteConfirm,
     }, dispatch),
-    deleteAssociatedDocs: visitId => () => dispatch(actions.deleteVisit(visitId, true)),
-    deleteVisit: visitId => () => dispatch(actions.deleteVisit(visitId)),
+    deleteAssociatedDocs: metaDoc => () => dispatch(actions.deleteMeta(metaDoc, true)),
+    deleteMeta: metaDoc => () => dispatch(actions.deleteMeta(metaDoc)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Overview)

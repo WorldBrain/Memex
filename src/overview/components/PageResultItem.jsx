@@ -67,7 +67,7 @@ const PageResultItem = ({ doc, sizeInMB, onTrashButtonClick, compact = false, is
             <div className={styles.buttonsContainer}>
                 <button
                     className={`${styles.button} ${styles.trash}`}
-                    onClick={e => { e.preventDefault(); onTrashButtonClick() }}
+                    onClick={onTrashButtonClick}
                     title={`Forget this item (${sizeInMB} MB)`}
                 />
                 {localVersionAvailable({ page: doc })
@@ -94,9 +94,11 @@ PageResultItem.propTypes = {
 
 const mapStateToProps = state => ({})
 
-const mapDispatchToProps = (dispatch, {doc}) => ({
-    // TODO: Properly get either the visit or bookmark ID
-    onTrashButtonClick: () => dispatch(showDeleteConfirm(doc._id)),
+const mapDispatchToProps = (dispatch, { doc }) => ({
+    onTrashButtonClick: e => {
+        e.preventDefault()
+        dispatch(showDeleteConfirm(doc.assoc[doc.displayType]))
+    },
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(PageResultItem)
