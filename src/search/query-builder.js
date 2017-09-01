@@ -4,8 +4,8 @@ const DOMAIN_TLD_PATTERN = /^\w{2,}\.\w{2,3}$/
 class QueryBuilder {
     constructor() {
         this.content = []
-        this.bookmarkTimestamps = []
-        this.visitTimestamps = []
+        this.bookmarks = []
+        this.visits = []
         this.offset = null
         this.pageSize = null
         this.url = []
@@ -18,8 +18,8 @@ class QueryBuilder {
     _setDate = op => time => {
         // Don't add anything if the time isn't given
         if (!time) { return this }
-        const currentBookmarks = this.bookmarkTimestamps.length ? this.bookmarkTimestamps[0] : {}
-        const currentVisits = this.visitTimestamps.length ? this.visitTimestamps[0] : {}
+        const currentBookmarks = this.bookmarks.length ? this.bookmarks[0] : {}
+        const currentVisits = this.visits.length ? this.visits[0] : {}
         const updatedBookmarks = [{ ...currentBookmarks, [op]: `bookmark/${time}` }]
         const updatedVisits = [{ ...currentVisits, [op]: `visit/${time}` }]
 
@@ -30,8 +30,8 @@ class QueryBuilder {
         if (!updatedVisits[0].lte) updatedVisits[0].lte = `visit/${Date.now()}`
 
         // Set updated query fields
-        this.bookmarkTimestamps = updatedBookmarks
-        this.visitTimestamps = updatedVisits
+        this.bookmarks = updatedBookmarks
+        this.visits = updatedVisits
         return this
     }
 
@@ -41,8 +41,8 @@ class QueryBuilder {
     get() {
         const q = {
             query: [
-                { AND: { content: this.content, bookmarkTimestamps: this.bookmarkTimestamps, url: this.url } },
-                { AND: { content: this.content, visitTimestamps: this.visitTimestamps, url: this.url } },
+                { AND: { content: this.content, bookmarks: this.bookmarks, url: this.url } },
+                { AND: { content: this.content, visits: this.visits, url: this.url } },
             ],
         }
 

@@ -73,7 +73,7 @@ async function processHistoryImport(importItem) {
         : []
 
     // Schedule indexing of searchable data, but don't wait for it
-    await index.addPages({ pageDocs: [pageDoc], visitDocs, bookmarkDocs })
+    await index.addPage({ pageDoc, visitDocs, bookmarkDocs })
     // Store the new data in Pouch
     await db.bulkDocs([pageDoc, ...bookmarkDocs, ...visitDocs])
 

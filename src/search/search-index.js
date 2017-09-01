@@ -1,14 +1,13 @@
 /* eslint promise/param-names: 0 */
 import initSearchIndex from 'search-index'
 import stream from 'stream'
-import reduce from 'lodash/fp/reduce'
 
 import pipeline from './search-index-pipeline'
 
 const indexOpts = {
     batchSize: 500,
     appendOnly: true,
-    indexPath: 'test',
+    indexPath: 'worldbrain-index',
     logLevel: 'info',
     preserveCase: false,
     compositeField: false,
@@ -16,10 +15,10 @@ const indexOpts = {
     separator: /[|' .,\-|(\n)]+/,
     stopwords: require('stopword').en,
     fieldOptions: {
-        visitTimestamps: {
+        visits: {
             fieldedSearch: true,
         },
-        bookmarkTimestamps: {
+        bookmarks: {
             fieldedSearch: true,
         },
         content: {
@@ -28,7 +27,7 @@ const indexOpts = {
         url: {
             weight: 10,
             fieldedSearch: true,
-            separator: '/', // Not ideal, but will allow the domain name to be searchable
+            separator: '/',
         },
     },
 }
@@ -36,87 +35,67 @@ const indexOpts = {
 const standardResponse = (resolve, reject) =>
     (err, data = true) => err ? reject(err) : resolve(data)
 
-/**
- * Simply maps out the ID of visit or bookmark docs. The ID contains
- * timestamp, which is the only data we want at the moment.
- */
-const transformTimeDoc = ({ _id: id }) => id
+// Simply maps out the ID of visit or bookmark docs. The ID contains
+// timestamp, which is the only data we want at the moment.
+const transformTimeDoc = doc => doc._id
 
-/**
- * Creates an object based on an array of page docs, indexing them via ID.
- */
-const createPagesObject = reduce((result, pageDoc) => ({
-    ...result,
-    [pageDoc._id]: { ...pipeline(pageDoc), visitTimestamps: [], bookmarkTimestamps: [] },
-}), {})
+// Groups input docs into standard index doc structure
+const transformPageAndMetaDocs = ({ pageDoc, visitDocs = [], bookmarkDocs = [] }) => ({
+    ...pipeline(pageDoc),
+    visits: visitDocs.map(transformTimeDoc),
+    bookmarks: bookmarkDocs.map(transformTimeDoc),
+})
 
-
-/**
- * Structures page + meta doc relationships for insert into the index. Essentially reverses
- * the relationship from 1 metaDoc -> 1 pageDoc, to 1 pageDoc -> N metaDocs (via an array of IDs).
- * @param {any} docs Object containing arrays of `pageDocs`, `visitDocs`, and `bookmarkDocs`
- * @returns Array of page data ready for insert into index, holding all previously held relationship data.
- */
-const structureDocsForIndex = ({ pageDocs, visitDocs, bookmarkDocs }) => {
-    // Transform pages to dict of `_id`s to docs, for constant-time lookup
-    const pages = createPagesObject(pageDocs)
-
-    // Affords updating the pages dict with bookmark/visit `_id`s/timestamps
-    const updatePageTimes = field => metaDoc => {
-        if (pages[metaDoc.page._id]) {
-            pages[metaDoc.page._id][field].push(metaDoc._id)
-        }
-    }
-
-    // Attach bookmarks/visits to assoc. page datas
-    visitDocs.forEach(updatePageTimes('visitTimestamps'))
-    bookmarkDocs.forEach(updatePageTimes('bookmarkTimestamps'))
-
-    // Return now-linked doc values out of ID-indexed dict
-    return Object.values(pages)
-}
-
-
+// Wraps instance creation in a Promise for use in async interface methods
 const indexP = new Promise((...args) => initSearchIndex(indexOpts, standardResponse(...args)))
 
-export const instance = () => indexP
+/**
+ * @param doc The doc to queue up for adding into the index.
+ * @returns Boolean denoting that the add was successful (else error thrown).
+ */
+async function addConcurrent(doc) {
+    const index = await indexP
+    const input = [doc]
 
+    return new Promise((...args) => index.concurrentAdd(indexOpts, input, standardResponse(...args)))
+}
+
+/**
+ * Adds a new page doc + any associated visit/bookmark docs to the index. This method
+ * uses the concurrency-safe index add method.
+ * @param {any} Object containing a `pageDoc` (required) and optionally any associated `visitDocs` and `bookmarkDocs`.
+ * @returns {Promise} Promise resolving when indexing is complete, or rejecting for any index errors.
+ */
+export async function addPageConcurrent({ pageDoc, visitDocs = [], bookmarkDocs = [] }) {
+    const indexDoc = transformPageAndMetaDocs({ pageDoc, visitDocs, bookmarkDocs })
+
+    return await addConcurrent(indexDoc)
+}
+
+/**
+ * Adds a new page doc + any associated visit/bookmark docs to the index. This method
+ * is *NOT* concurrency safe.
+ * @param {any} Object containing a `pageDoc` (required) and optionally any associated `visitDocs` and `bookmarkDocs`.
+ * @returns {Promise} Promise resolving when indexing is complete, or rejecting for any index errors.
+ */
 export async function addPage({ pageDoc, visitDocs = [], bookmarkDocs = [] }) {
     const index = await indexP
 
-    const visitTimestamps = visitDocs.length ? visitDocs.map(transformTimeDoc) : []
-    const bookmarkTimestamps = bookmarkDocs.length ? bookmarkDocs.map(transformTimeDoc) : []
-
-    const input = [{ ...pipeline(pageDoc), visitTimestamps, bookmarkTimestamps }]
-
-    return new Promise((...args) => index.concurrentAdd(indexOpts, input, standardResponse(...args)))
-}
-
-export async function addPagesConcurrent({ pageDocs, visitDocs = [], bookmarkDocs = [] }) {
-    const index = await indexP
-    const input = structureDocsForIndex({ pageDocs, visitDocs, bookmarkDocs })
-
-    return new Promise((...args) => index.concurrentAdd(indexOpts, input, standardResponse(...args)))
-}
-
-export async function addPages({ pageDocs, visitDocs = [], bookmarkDocs = [] }) {
-    const index = await indexP
+    const indexDoc = transformPageAndMetaDocs({ pageDoc, visitDocs, bookmarkDocs })
+    console.log(indexDoc)
 
     return new Promise((resolve, reject) => {
-        const input = structureDocsForIndex({ pageDocs, visitDocs, bookmarkDocs })
-
         // Set up add pipeline
         const inputStream = new stream.Readable({ objectMode: true })
-
         inputStream
             .pipe(index.defaultPipeline())
             .pipe(index.add())
-            .on('finish', () => resolve(input.length))
+            .on('finish', resolve)
             .on('error', reject)
 
-        // Push input onto input stream
-        input.forEach(doc => inputStream.push(doc))
-        inputStream.push(null) // Signify end of input on Readable
+        // Push index doc onto stream + null to signify end-of-stream
+        inputStream.push(indexDoc)
+        inputStream.push(null)
     })
 }
 
@@ -136,11 +115,11 @@ const addTimestamp = field => async ({ _id, page }) => {
 
     (existingDoc[field] || []).push(_id) // Perform in-memory update
     await del(page._id) // Delete existing doc
-    return add(existingDoc) // Add new updated doc
+    return addConcurrent(existingDoc) // Add new updated doc
 }
 
-export const addVisit = addTimestamp('visitTimestamps')
-export const addBookmark = addTimestamp('bookmarkTimestamps')
+export const addVisit = addTimestamp('visits')
+export const addBookmark = addTimestamp('bookmarks')
 
 /**
  * Returns a function that affords removing either a visit or bookmark from the index.
@@ -167,11 +146,14 @@ const removeTimestamp = field => async ({ _id, page }) => {
     ]
 
     await del(page._id) // Delete existing doc
-    return add(existingDoc) // Add new updated doc
+    return addConcurrent(existingDoc) // Add new updated doc
 }
 
-export const removeVisit = removeTimestamp('visitTimestamps')
-export const removeBookmark = removeTimestamp('bookmarkTimestamps')
+export const removeVisit = removeTimestamp('visits')
+export const removeBookmark = removeTimestamp('bookmarks')
+
+
+// Below are mostly standard Promise wrappers around search-index stream-based methods
 
 /**
  * @param {string|Array<string>} ids Single ID, or array of IDs, of docs to attempt to find in the index.
@@ -204,16 +186,7 @@ export async function del(ids) {
     return new Promise((...args) => index.del(toDelete, standardResponse(...args)))
 }
 
-/**
- * @param doc The doc to queue up for adding into the index.
- * @returns Boolean denoting that the add was successful (else error thrown).
- */
-export async function add(doc) {
-    const index = await indexP
-    const input = [doc]
-
-    return new Promise((...args) => index.concurrentAdd(indexOpts, input, standardResponse(...args)))
-}
+export const instance = () => indexP
 
 export async function count(query) {
     const index = await indexP
@@ -221,16 +194,8 @@ export async function count(query) {
     return new Promise((...args) => index.totalHits(query, standardResponse(...args)))
 }
 
-export async function findOne(query) {
-    const index = await indexP
-
-    return new Promise((resolve, reject) =>
-        index.search(query)
-            .on('data', resolve)
-            .on('error', reject))
-}
-
-export async function find(query) {
+// Batches stream results to be all returned in Promise resolution.
+export async function search(query) {
     const index = await indexP
     let data = []
 
@@ -241,7 +206,8 @@ export async function find(query) {
             .on('end', () => resolve(data)))
 }
 
-export async function findStream(query) {
+// Resolves to the stream from search-index's `.search`.
+export async function searchStream(query) {
     const index = await indexP
 
     return index.search(query)

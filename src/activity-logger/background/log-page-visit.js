@@ -6,16 +6,16 @@ import * as index from 'src/search/search-index'
 
 
 // Store the visit in PouchDB.
-async function storeVisit({timestamp, url, page}) {
-    const visitId = generateVisitDocId({timestamp})
+async function storeVisit({ timestamp, url, page }) {
+    const visitId = generateVisitDocId({ timestamp })
     const visit = {
         _id: visitId,
         visitStart: timestamp,
         url,
-        page: {_id: page._id}, // store only a reference to the page
+        page: { _id: page._id }, // store only a reference to the page
     }
     await db.put(visit)
-    return {visit}
+    return { visit }
 }
 
 /**
@@ -28,29 +28,23 @@ async function storeVisit({timestamp, url, page}) {
 async function updateIndex({ finalPagePromise, page: existingPage }, visit) {
     // If finalPagePromise exists, it is a new page
     if (finalPagePromise) {
-        // Wait until all page analyis/deduping is done before returning.
+        // Wait until all page analyis/deduping is done
         const { finalPage } = await finalPagePromise
 
+        // If no page returned from analysis, we can't index
         if (!finalPage) { return }
 
-        console.time('add-page-to-index time')
+        // Queue page and visit to add into search index
         try {
-            // Queue page and visit to add into search index
-            await index.addPage({ pageDoc: finalPage, visitDocs: [visit] })
-            console.log('added new visit and page to index!')
+            await index.addPageConcurrent({ pageDoc: finalPage, visitDocs: [visit] })
         } catch (error) {
             console.error(error)
-        } finally {
-            console.timeEnd('add-page-to-index time')
         }
     } else { // It's an existing page
-        console.time('add-visit-to-index time')
         try {
             await index.addVisit(visit)
         } catch (error) {
             console.error(error)
-        } finally {
-            console.timeEnd('add-visit-to-index time')
         }
     }
 }
@@ -67,8 +61,6 @@ export async function logPageVisit({
 
     // The time to put in documents.
     const timestamp = Date.now()
-
-    // TODO first try to extend an existing visit instead of logging a new one.
 
     // First create an identifier for the page being visited.
     const reidentifyResult = await reidentifyOrStorePage({tabId, url})

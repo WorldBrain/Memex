@@ -77,7 +77,7 @@ export async function bookmarkStorageListener(id, bookmarkInfo) {
         console.error("Error occurred while fetching page data: " + err.toString())
     } finally {
         const bookmarkDoc = await transformToBookmarkDoc(pageDoc)(bookmarkInfo)
-        index.addPage({ pageDoc, bookmarkDocs: [bookmarkDoc] })
+        index.addPageConcurrent({ pageDoc, bookmarkDocs: [bookmarkDoc] })
         db.bulkDocs([bookmarkDoc, pageDoc])
     }
 }
