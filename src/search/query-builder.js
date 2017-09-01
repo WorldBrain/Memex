@@ -65,10 +65,12 @@ class QueryBuilder {
     searchTerm(input) {
         if (input) {
             // All indexed strings are lower-cased, so force the query terms to be
-            const terms = input.toLowerCase()
+            const terms = input
+                .toLowerCase()
+                .match(/\S+/g) || []
 
             // Split into words and push to query
-            terms.split(' ').forEach(term => {
+            terms.forEach(term => {
                 if (DOMAIN_TLD_PATTERN.test(term)) {
                     // Only can support single domain.tld search for now, so set to first index
                     this.url[0] = term

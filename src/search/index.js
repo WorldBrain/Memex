@@ -179,6 +179,9 @@ export default async function indexSearch({
     skip,
     limit = 10,
 }) {
+    query = query.trim() // Don't count whitespace searches
+
+    // Create SI query
     const indexQuery = new QueryBuilder()
         .searchTerm(query || '*') // Search by wildcard by default
         .startDate(startDate)
