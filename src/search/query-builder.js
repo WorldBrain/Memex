@@ -1,3 +1,5 @@
+import stopword from 'stopword'
+
 // Pattern to match entire string to `domain.tld`-like format
 const DOMAIN_TLD_PATTERN = /^\w{2,}\.\w{2,3}$/
 
@@ -65,9 +67,12 @@ class QueryBuilder {
     searchTerm(input) {
         if (input) {
             // All indexed strings are lower-cased, so force the query terms to be
-            const terms = input
+            let terms = input
                 .toLowerCase()
                 .match(/\S+/g) || []
+
+            // All EN stopwords are unindexed, so remove any from query terms
+            terms = stopword.removeStopwords(terms, stopword.en)
 
             // Split into words and push to query
             terms.forEach(term => {

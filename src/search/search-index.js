@@ -1,6 +1,7 @@
 /* eslint promise/param-names: 0 */
 import initSearchIndex from 'search-index'
 import stream from 'stream'
+import stopword from 'stopword'
 
 import pipeline from './search-index-pipeline'
 
@@ -13,7 +14,7 @@ const indexOpts = {
     compositeField: false,
     nGramLength: 1,
     separator: /[|' .,\-|(\n)]+/,
-    stopwords: require('stopword').en,
+    stopwords: stopword.en,
     fieldOptions: {
         visits: {
             fieldedSearch: true,
