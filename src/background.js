@@ -2,7 +2,6 @@ import tldjs from 'tldjs'
 import { dataURLToBlob } from 'blob-util'
 
 import 'src/activity-logger/background'
-import 'src/scheduled-tasks/background'
 import 'src/blacklist/background'
 import 'src/omnibar'
 import { installTimeStorageKey } from 'src/imports/background'
@@ -11,7 +10,6 @@ import fetchPageData from 'src/page-analysis/background/fetch-page-data'
 import { findPagesByUrl } from 'src/search/find-pages'
 import { transformToBookmarkDoc } from 'src/imports'
 import { generatePageDocId } from 'src/page-storage'
-import { FREEZE_DRY_BOOKMARKS_KEY } from 'src/options/preferences/constants'
 import * as index from 'src/search/search-index'
 import db from 'src/pouchdb'
 
@@ -27,18 +25,6 @@ export async function bookmarkStorageListener(id, bookmarkInfo) {
                 content_type: favIconBlob.type,
                 data: favIconBlob,
             },
-        }
-
-        if (pageData.freezeDryHTML) {
-            const freezeDryBlob = new Blob([pageData.freezeDryHTML], {type: 'text/html;charset=UTF-8'})
-
-            _attachments = {
-                ..._attachments,
-                'freeze-dry-blob': {
-                    content_type: freezeDryBlob.type,
-                    data: freezeDryBlob,
-                },
-            }
         }
 
         return _attachments
@@ -60,12 +46,9 @@ export async function bookmarkStorageListener(id, bookmarkInfo) {
     }
 
     try {
-        const { [FREEZE_DRY_BOOKMARKS_KEY]: includeFreezeDry = false } = await browser.storage.local.get(FREEZE_DRY_BOOKMARKS_KEY)
-
         const fetchPageDataOptions = {
             includePageContent: true,
             includeFavIcon: true,
-            includeFreezeDry,
         }
         const pageData = await fetchPageData({ url: bookmarkInfo.url, opts: fetchPageDataOptions })
         pageDoc = {

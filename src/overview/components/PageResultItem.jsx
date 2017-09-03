@@ -3,7 +3,6 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import classNames from 'classnames'
 
-import { localVersionAvailable, LinkToLocalVersion } from 'src/local-page'
 import niceTime from 'src/util/nice-time'
 
 import ImgFromPouch from './ImgFromPouch'
@@ -70,15 +69,6 @@ const PageResultItem = ({ doc, sizeInMB, onTrashButtonClick, compact = false, is
                     onClick={onTrashButtonClick}
                     title={`Forget this item (${sizeInMB} MB)`}
                 />
-                {localVersionAvailable({ page: doc })
-                    ? (
-                        <LinkToLocalVersion
-                            className={`${styles.button} ${styles.load}`}
-                            page={doc}
-                        />
-                    )
-                    : null
-                }
             </div>
         </a>
     )

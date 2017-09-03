@@ -11,13 +11,11 @@ import { revisePageFields } from '..'
 import getFavIcon from './get-fav-icon'
 import makeScreenshot from './make-screenshot'
 
-import { FREEZE_DRY_ARCHIVE_KEY } from '../../options/preferences/constants'
 
 // Extract interesting stuff from the current page and store it.
 async function performPageAnalysis({pageId, tabId}) {
     // Run these functions in the content script in the tab.
     const extractPageContent = remoteFunction('extractPageContent', {tabId})
-    const freezeDry = remoteFunction('freezeDry', {tabId})
 
     // Get and store the fav-icon
     const storeFavIcon = getFavIcon({tabId}).then(async dataUrl => {
@@ -39,21 +37,12 @@ async function performPageAnalysis({pageId, tabId}) {
         await updateDoc(db, pageId, doc => merge({content})(doc))
     })
 
-    // Freeze-dry and store the whole page
-    async function storePageFreezeDried() {
-        const htmlString = await freezeDry()
-        const blob = new Blob([htmlString], {type: 'text/html;charset=UTF-8'})
-        await setAttachment(db, pageId, 'frozen-page.html', blob)
-    }
-
-    const archiveChecked = (await browser.storage.local.get(FREEZE_DRY_ARCHIVE_KEY))[FREEZE_DRY_ARCHIVE_KEY]
 
     // When every task has either completed or failed, update the search index.
     await whenAllSettled([
         storeFavIcon,
         storeScreenshot,
         storePageContent,
-        archiveChecked ? storePageFreezeDried(): null,
     ])
 }
 

@@ -26,7 +26,6 @@ const exec = pify(nodeExec)
 const staticFiles = {
     'src/manifest.json': 'extension',
     'src/**/*.html': 'extension',
-    'src/local-page/local-page.css': 'extension/local-page',
     'img/*': 'extension/img',
     'node_modules/webextension-polyfill/dist/browser-polyfill.js': 'extension/lib',
     'node_modules/pdfjs-dist/build/pdf.worker.min.js': 'extension/lib',
@@ -57,11 +56,6 @@ const sourceFiles = [
         output: 'options.js',
         destination: './extension/options',
         cssOutput: 'options.css',
-    },
-    {
-        entries: ['./src/local-page/local-page.jsx'],
-        output: 'local-page.js',
-        destination: './extension/local-page',
     },
     {
         entries: ['./src/popup/popup.js'],
