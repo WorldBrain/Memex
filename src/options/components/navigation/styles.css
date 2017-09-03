@@ -1,5 +1,7 @@
 .root {
-    width: 180px;
+    width: 18%;
+    height: auto;
+    box-shadow: 1px 1px 5px #888;
 }
 
 .title {
@@ -11,10 +13,21 @@
     border-bottom: 1px solid #ccc;
 }
 
+.icon {
+    width: 135px;
+    height: 35px;
+    margin: 20px 20px;
+}
+
 .nav {
     margin: 0;
     padding: 0;
     list-style: none;
+}
+
+.navIcon {
+    float: left;
+    margin: 0 10px;
 }
 
 .navItem {
@@ -29,14 +42,15 @@
 .navLink {
     display: block;
     text-decoration: none;
-    color: #999;
-    font-size: 0.8em;
+    font-size: 0.9em;
     padding: 5px 0 5px 20px;
     padding-left: 20px;
+    color: black;
+    width: 100%;
 
     &.isActive {
-        color: #333;
-        padding-left: 15px;
-        border-left: 5px solid #333;
+        color: white;
+        background-color: #3db995;
     }
 }
+

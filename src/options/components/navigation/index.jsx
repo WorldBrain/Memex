@@ -13,8 +13,14 @@ const Navigation = ({ currentLocation, routes }) => {
                 [styles.isActive]: isActive(route),
             })
 
+            let navIcon = classNames({
+                [styles.navIcon]: true,
+                ['material-icons']: true,
+            })
+
             return (
-                <li className={styles.navItem} key={idx}>
+                <li className={navClasses} key={idx} >
+                    <i className={navIcon}>{route.icon}</i>
                     <Link className={navClasses} to={route.pathname}>{route.name}</Link>
                 </li>
             )
@@ -27,8 +33,10 @@ const Navigation = ({ currentLocation, routes }) => {
 
     return (
         <nav className={styles.root}>
-            <h1 className={styles.title}>Web Memex</h1>
-
+            <img
+                src='/img/worldbrain-logo.png'
+                className={styles.icon}
+            />
             <ul className={styles.nav}>
                 { buildRoutes() }
             </ul>
