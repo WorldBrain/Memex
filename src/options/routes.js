@@ -14,4 +14,28 @@ export default [
         component: SettingsContainer,
         icon: 'settings',
     },
+    {
+        name: 'Blacklist',
+        pathname: '/blacklist',
+        component: SettingsContainer,
+        icon: 'block',
+    },
+    {
+        name: 'Privacy',
+        pathname: '/privacy',
+        component: SettingsContainer,
+        icon: 'security',
+    },
+    {
+        name: 'Acknowledgements',
+        pathname: '/acknowledgements',
+        component: SettingsContainer,
+        icon: 'archive',
+    },
+    {
+        name: 'Help Me Please',
+        pathname: '/faq',
+        component: SettingsContainer,
+        icon: 'help',
+    },
 ]

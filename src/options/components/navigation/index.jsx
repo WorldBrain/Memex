@@ -33,10 +33,12 @@ const Navigation = ({ currentLocation, routes }) => {
 
     return (
         <nav className={styles.root}>
-            <img
-                src='/img/worldbrain-logo.png'
-                className={styles.icon}
-            />
+            <div className={styles.icon_div}>
+                <img
+                    src='/img/worldbrain-logo.png'
+                    className={styles.icon}
+                />
+            </div>
             <ul className={styles.nav}>
                 { buildRoutes() }
             </ul>

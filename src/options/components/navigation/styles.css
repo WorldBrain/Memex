@@ -1,8 +1,13 @@
 .root {
-    width: 18%;
+    width: 238px;
     height: auto;
-    box-shadow: 1px 1px 5px #888;
+    background-color: #f7f7f7;
+    box-shadow: 2px 1px 1px #e2e2e2;
+    font-family: 'Lato';
+    line-height: 2;
+    font-weight: 200;
 }
+
 
 .title {
     font-size: 1.2em;
@@ -14,9 +19,15 @@
 }
 
 .icon {
-    width: 135px;
-    height: 35px;
+    width: 60%;
+    height: auto;
     margin: 20px 20px;
+    margin-left: 30px;
+}
+
+.icon_div {
+    width: 100%;
+    height: auto;
 }
 
 .nav {
@@ -28,6 +39,8 @@
 .navIcon {
     float: left;
     margin: 0 10px;
+    font-size: 18px;
+    padding: 10px 0px;
 }
 
 .navItem {
@@ -45,12 +58,14 @@
     font-size: 0.9em;
     padding: 5px 0 5px 20px;
     padding-left: 20px;
-    color: black;
+    color: #494949;
     width: 100%;
+    letter-spacing: 1px;
 
     &.isActive {
         color: white;
-        background-color: #3db995;
+        background-color: #3eb995;
+        border-right: none;
     }
 }
 
