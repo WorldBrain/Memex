@@ -60,7 +60,7 @@ const PageResultItem = ({ doc, sizeInMB, onTrashButtonClick, compact = false, is
                     {doc.title}
                 </div>
                 <div className={styles.url}>
-                    {doc.url}
+                    {atob(doc.url)}
                 </div>
                 <div className={styles.time}>{renderTime({ doc })}</div>
             </div>
