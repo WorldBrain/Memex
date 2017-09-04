@@ -83,7 +83,6 @@ export async function addPage({ pageDoc, visitDocs = [], bookmarkDocs = [] }) {
     const index = await indexP
 
     const indexDoc = transformPageAndMetaDocs({ pageDoc, visitDocs, bookmarkDocs })
-    console.log(indexDoc)
 
     return new Promise((resolve, reject) => {
         // Set up add pipeline

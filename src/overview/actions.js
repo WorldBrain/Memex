@@ -1,10 +1,11 @@
 import { createAction } from 'redux-act'
 
-import indexSearch from 'src/search'
 import { deleteMetaAndPage } from 'src/page-storage/deletion'
-
 import * as constants from './constants'
 import * as selectors from './selectors'
+
+// Will contain the runtime port which will allow bi-directional communication to the background script
+let port
 
 // == Simple commands to change the state in reducers ==
 
@@ -20,8 +21,29 @@ export const hideResultItem = createAction('overview/hideResultItem')
 export const showDeleteConfirm = createAction('overview/showDeleteConfirm')
 export const hideDeleteConfirm = createAction('overview/hideDeleteConfirm')
 
-// Perform an initial search to populate the view (empty query = get all docs)
-export const init = () => dispatch => dispatch(search({ overwrite: true }))
+const getCmdMessageHandler = dispatch => ({ cmd, ...payload }) => {
+    switch (cmd) {
+        case constants.CMDS.RESULTS:
+            dispatch(updateSearchResult(payload))
+            break
+        case constants.CMDS.ERROR:
+            dispatch(handleErrors(payload))
+            break
+        default:
+            console.error(`Background script sent unknown command '${cmd}' with payload:\n${payload}`)
+    }
+}
+
+/**
+ * Init a connection to the index running in the background script, allowing
+ * redux actions to be dispatched whenever a command is received from the background script.
+ * Also perform an initial search to populate the view (empty query = get all docs)
+ */
+export const init = () => dispatch => {
+    port = browser.runtime.connect({ name: constants.SEARCH_CONN_NAME })
+    port.onMessage.addListener(getCmdMessageHandler(dispatch))
+    dispatch(search({ overwrite: true }))
+}
 
 /**
  * Perform a search using the current query params as defined in state. Pagination
@@ -31,8 +53,25 @@ export const init = () => dispatch => dispatch(search({ overwrite: true }))
 export const search = ({ overwrite } = { overwrite: false }) => async (dispatch, getState) => {
     dispatch(setLoading(true))
 
-    // If overwrite set, need to reset pagination state and set up action to overwrite current results
+    // Grab needed derived state for search
+    const state = getState()
+    const currentQueryParams = selectors.currentQueryParams(state)
+    const skip = selectors.resultsSkip(state)
+
+    const searchParams = {
+        ...currentQueryParams,
+        limit: constants.PAGE_SIZE,
+        skip,
+    }
+
+    // Tell background script to search
+    port.postMessage({ cmd: constants.CMDS.SEARCH, searchParams, overwrite })
+}
+
+const updateSearchResult = ({ searchResult, overwrite } = { overwrite: false, searchResult: [] }) => dispatch => {
+    console.log(searchResult)
     let searchAction
+
     if (overwrite) {
         dispatch(resetPage())
         searchAction = setSearchResult
@@ -40,25 +79,14 @@ export const search = ({ overwrite } = { overwrite: false }) => async (dispatch,
         searchAction = appendSearchResult
     }
 
-    // Grab needed derived state for search
-    const state = getState()
-    const currentQueryParams = selectors.currentQueryParams(state)
-    const skip = selectors.resultsSkip(state)
+    dispatch(searchAction(searchResult))
+    dispatch(setLoading(false))
+}
 
-    try {
-        const searchResult = await indexSearch({
-            ...currentQueryParams,
-            limit: constants.PAGE_SIZE,
-            skip,
-        })
-
-        dispatch(searchAction(searchResult))
-    } catch (error) {
-        // TODO give feedback to user that results are not actually updated.
-        console.error(`Search for '${currentQueryParams.query}' errored: ${error}`)
-    } finally {
-        dispatch(setLoading(false))
-    }
+// TODO stateful error handling
+const handleErrors = ({ query, error }) => dispatch => {
+    console.error(`Search for '${query}' errored: ${error}`)
+    dispatch(setLoading(false))
 }
 
 /**
