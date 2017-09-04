@@ -5,7 +5,7 @@ import localStyles from './styles.css'
 
 const PrivacyContainer = () => (
 	<div className={localStyles.privacy}>
-		<h1 className={styles.routeTitle}>Settings</h1>
+		<h1 className={styles.routeTitle}>Settings > Privacy</h1>
 
 		<span className={localStyles.title}>> Your privacy is paramount to us. Your data is safe and anonymous.</span>
 		

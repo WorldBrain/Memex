@@ -4,9 +4,10 @@
 }
 
 .title {
-    color: #3bba96;
+    color: #3eb995;
     font-weight: bold;
-    font-size: 18px;
+    font-size: 16px;
+    letter-spacing: 1px;
 }
 
 .content {
