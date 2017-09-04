@@ -51,12 +51,16 @@ export const init = () => dispatch => {
  * @param {boolean} [overwrite=false] Denotes whether to overwrite existing results or just append.
  */
 export const search = ({ overwrite } = { overwrite: false }) => async (dispatch, getState) => {
-    dispatch(setLoading(true))
-
     // Grab needed derived state for search
     const state = getState()
     const currentQueryParams = selectors.currentQueryParams(state)
+    const isLoading = selectors.isLoading(state)
     const skip = selectors.resultsSkip(state)
+
+    // If loading already, don't start another search
+    if (isLoading) return
+
+    dispatch(setLoading(true))
 
     const searchParams = {
         ...currentQueryParams,
