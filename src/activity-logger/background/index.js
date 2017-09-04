@@ -25,7 +25,7 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
             // Bail-out if logging paused
             if (await getPauseState()) return
 
-            return maybeLogPageVisit({url: tab.url, tabId: tabId})
+            return maybeLogPageVisit({url: btoa(tab.url), tabId: tabId})
         }, 10000)
         tabs[tabId]()
     }

@@ -44,7 +44,7 @@ function formatTime(timestamp, showTime) {
 }
 
 const pageToSuggestion = timeFilterApplied => doc => {
-    const url = escapeHtml(shortUrl(doc.url))
+    const url = escapeHtml(shortUrl(atob(doc.url)))
     const title = escapeHtml(doc.content.title)
     const time = formatTime(getLatestTimestamp(doc.assoc), timeFilterApplied)
 
