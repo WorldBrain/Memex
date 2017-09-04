@@ -22,6 +22,8 @@ class Overview extends React.Component {
         }
     }
 
+    handleInputChange = e => this.props.onInputChanged(e.target.value)
+
     renderResultItems() {
         const { searchResults, onBottomReached, isLoading, needsWaypoint } = this.props
 
@@ -62,10 +64,7 @@ class Overview extends React.Component {
                     <div className={styles.searchField}>
                         <input
                             className={styles.query}
-                            onInput={e => { this.props.onInputChanged(e.target.value) }}
-                            onKeyDown={e => {
-                                if (e.key === 'Escape') { this.props.onInputChanged('') }
-                            }}
+                            onChange={this.handleInputChange}
                             placeholder='Search your memory'
                             value={query}
                             ref={ref => { this.inputQueryEl = ref }}
