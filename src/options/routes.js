@@ -1,5 +1,6 @@
 import ImportContainer from './imports'
 import SettingsContainer from './containers/settings'
+import PrivacyContainer from './privacy/index'
 
 export default [
     {
@@ -23,7 +24,7 @@ export default [
     {
         name: 'Privacy',
         pathname: '/privacy',
-        component: SettingsContainer,
+        component: PrivacyContainer,
         icon: 'security',
     },
     {

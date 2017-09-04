@@ -19,6 +19,7 @@ body {
     margin: 20px 20px 0;
     flex-grow: 1;
     max-width: 800px;
+    margin-left: 50px;
 }
 
 .routeTitle {
