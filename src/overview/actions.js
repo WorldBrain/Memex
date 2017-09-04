@@ -51,16 +51,22 @@ export const init = () => dispatch => {
  * @param {boolean} [overwrite=false] Denotes whether to overwrite existing results or just append.
  */
 export const search = ({ overwrite } = { overwrite: false }) => async (dispatch, getState) => {
+    // If loading already, don't start another search
+    if (selectors.isLoading(getState())) {
+        return
+    }
+
+    dispatch(setLoading(true))
+
+    // Overwrite of results should always reset the current page before searching
+    if (overwrite) {
+        dispatch(resetPage())
+    }
+
     // Grab needed derived state for search
     const state = getState()
     const currentQueryParams = selectors.currentQueryParams(state)
-    const isLoading = selectors.isLoading(state)
     const skip = selectors.resultsSkip(state)
-
-    // If loading already, don't start another search
-    if (isLoading) return
-
-    dispatch(setLoading(true))
 
     const searchParams = {
         ...currentQueryParams,
@@ -73,15 +79,7 @@ export const search = ({ overwrite } = { overwrite: false }) => async (dispatch,
 }
 
 const updateSearchResult = ({ searchResult, overwrite } = { overwrite: false, searchResult: [] }) => dispatch => {
-    console.log(searchResult)
-    let searchAction
-
-    if (overwrite) {
-        dispatch(resetPage())
-        searchAction = setSearchResult
-    } else {
-        searchAction = appendSearchResult
-    }
+    const searchAction = overwrite ? setSearchResult : appendSearchResult
 
     dispatch(searchAction(searchResult))
     dispatch(setLoading(false))
