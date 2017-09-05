@@ -33,10 +33,10 @@
 }
 
 .li {
-    margin: 10px 0;
+    margin: 0px 0;
     display: inline-block;
     width: 50%;
-}   
+}  
 
 .img {
     vertical-align: middle;
@@ -48,7 +48,7 @@
 .p {
     display: inline-block;
     vertical-align: middle;
-    margin-left: 5px;
+    margin-left: 15px;
     font-size: 14px;
     color: black;
     letter-spacing: 1px;

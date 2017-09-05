@@ -1,7 +1,7 @@
 import ImportContainer from './imports'
 import SettingsContainer from './containers/settings'
 import PrivacyContainer from './privacy/index'
-import AcknowledgmentContainer from './acknowledgement/index'
+import AcknowledgmentContainer from './acknowledgement'
 
 export default [
     {
