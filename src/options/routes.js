@@ -1,6 +1,7 @@
 import ImportContainer from './imports'
 import SettingsContainer from './containers/settings'
 import PrivacyContainer from './privacy/index'
+import AcknowledgmentContainer from './acknowledgement/index'
 
 export default [
     {
@@ -8,12 +9,6 @@ export default [
         pathname: '/import',
         component: ImportContainer,
         icon: 'file_download',
-    },
-    {
-        name: 'Settings',
-        pathname: '/settings',
-        component: SettingsContainer,
-        icon: 'settings',
     },
     {
         name: 'Blacklist',
@@ -30,7 +25,7 @@ export default [
     {
         name: 'Acknowledgements',
         pathname: '/acknowledgements',
-        component: SettingsContainer,
+        component: AcknowledgmentContainer,
         icon: 'archive',
     },
     {
