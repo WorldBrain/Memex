@@ -27,7 +27,7 @@ export const defaultOpts = {
  */
 export default async function fetchPageData({
     url = '',
-    timeout = 5000,
+    timeout = 10000,
     opts = defaultOpts,
 } = { opts: defaultOpts }) {
     const doc = await fetchDOMFromUrl(url, timeout)
