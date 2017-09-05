@@ -30,8 +30,8 @@ export default [
     },
     {
         name: 'Help Me Please',
-        pathname: '/faq',
-        component: SettingsContainer,
+        pathname: 'https://www.reddit.com/r/WorldBrain',
+        component: 'faq',
         icon: 'help',
     },
 ]

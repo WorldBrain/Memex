@@ -21,7 +21,14 @@ const Navigation = ({ currentLocation, routes }) => {
             return (
                 <li className={navClasses} key={idx} >
                     <i className={navIcon}>{route.icon}</i>
-                    <Link className={navClasses} to={route.pathname}>{route.name}</Link>
+                    {
+                        route.component === 'faq' &&
+                        <a className={navClasses} href={route.pathname} target="_blank">{route.name}</a>
+                    }
+                    {
+                        route.component !== 'faq' &&
+                        <Link className={navClasses} to={route.pathname}>{route.name}</Link>
+                    }
                 </li>
             )
         })
