@@ -2989,6 +2989,12 @@ fastparse@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/fastparse/-/fastparse-1.1.1.tgz#d1e2643b38a94d7583b479060e6c4affc94071f8"
 
+fathom-web@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/fathom-web/-/fathom-web-2.1.0.tgz#1da6f2c1e31d5069463ddcac0fb55898893cde08"
+  dependencies:
+    wu "^2.1.0"
+
 "fathom-web@git://github.com/Treora/fathom.git#npm-testable":
   version "1.1.2"
   resolved "git://github.com/Treora/fathom.git#913009da10176f525274d0530d974a61cb6c93f2"
