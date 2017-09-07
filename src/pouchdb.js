@@ -38,6 +38,21 @@ export const normaliseFindResult = result => ({
 export const resultRowsById = result =>
     fromPairs(result.rows.map(row => [row.id, row]))
 
+/**
+ * PouchDB's `.bulkGet` allows us to grab many docs via array of ID at once.
+ * Sadly it has a bit of a weird response structure that is hard to use without
+ * formatting it first. We only care about the returned docs marked as "ok".
+ * More info: https://pouchdb.com/api.html#bulk_get
+ *
+ * @param {any} bulkGetResponse Standard reponse from PouchDB.bulkGet
+ * @returns {Array<any>} Array of "ok"d docs from response.
+ */
+export const bulkGetResultsToArray = ({ results }) => results
+    .map(res => res.docs)
+    .map(list => list.filter(doc => doc.ok))
+    .filter(list => list.length)
+    .map(list => list[0].ok)
+
 // Get an attachment from a doc as a data URL string.
 // Pass either a docId or a doc itself, and the attachmentId.
 // Returns undefined if non-existent.

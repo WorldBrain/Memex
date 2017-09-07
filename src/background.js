@@ -4,14 +4,16 @@ import { dataURLToBlob } from 'blob-util'
 import 'src/activity-logger/background'
 import 'src/scheduled-tasks/background'
 import 'src/blacklist/background'
+import 'src/search/background'
 import 'src/omnibar'
 import { installTimeStorageKey } from 'src/imports/background'
 import convertOldData from 'src/util/old-data-converter'
 import fetchPageData from 'src/page-analysis/background/fetch-page-data'
 import { findPagesByUrl } from 'src/search/find-pages'
-import { transformToBookmarkDoc } from 'src/imports/background/imports-preparation'
+import { transformToBookmarkDoc } from 'src/imports'
 import { generatePageDocId } from 'src/page-storage'
 import { FREEZE_DRY_BOOKMARKS_KEY } from 'src/options/preferences/constants'
+import * as index from 'src/search/search-index'
 import db from 'src/pouchdb'
 
 export const dataConvertTimeKey = 'data-conversion-timestamp'
@@ -48,6 +50,7 @@ export async function bookmarkStorageListener(id, bookmarkInfo) {
     if (samePageCandidates.length) {
         const pageDoc = samePageCandidates[samePageCandidates.length - 1]
         const bookmarkDoc = await transformToBookmarkDoc(pageDoc)(bookmarkInfo)
+        index.addBookmark(bookmarkDoc)
         return db.bulkDocs([bookmarkDoc, pageDoc])
     }
 
@@ -75,6 +78,7 @@ export async function bookmarkStorageListener(id, bookmarkInfo) {
         console.error("Error occurred while fetching page data: " + err.toString())
     } finally {
         const bookmarkDoc = await transformToBookmarkDoc(pageDoc)(bookmarkInfo)
+        index.addPageConcurrent({ pageDoc, bookmarkDocs: [bookmarkDoc] })
         db.bulkDocs([bookmarkDoc, pageDoc])
     }
 }

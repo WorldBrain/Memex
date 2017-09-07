@@ -15,4 +15,4 @@ const searchUpdateActions = [
 export const refreshSearchResultsUponQueryChange = action$ => action$
     .filter(action => searchUpdateActions.includes(action.type))
     .debounceTime(500) // wait until typing stops for 500ms
-    .map(() => actions.updateSearch())
+    .map(() => actions.search({ overwrite: true })) // Schedule new fresh (overwriting) search

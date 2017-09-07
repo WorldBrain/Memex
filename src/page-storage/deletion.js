@@ -1,16 +1,19 @@
 import db, { normaliseFindResult } from 'src/pouchdb'
 import { findVisits } from 'src/search/find-visits'
-import { bookmarkDocsSelector } from 'src/imports/background'
+import { bookmarkDocsSelector } from 'src/imports'
 import { getEquivalentPages } from 'src/search/find-pages'
+import * as index from 'src/search/search-index'
 
-export async function deleteVisitAndPage({visitId, deleteAssoc = false}) {
-    // Delete the visit object
-    const visit = await db.get(visitId)
-    const pageId = visit.page._id
-    await db.remove(visit)
+
+export async function deleteMetaAndPage({ metaDoc, deleteAssoc = false }) {
+    // Delete the meta doc
+    // const metaDoc = await db.get(metaDoc._id)
+    const pageId = metaDoc.page._id
+    await db.remove(metaDoc)
 
     // Either delete all associated docs or just try to delete page/s if orphaned
-    const docs = deleteAssoc ? await getAssociatedDocs({pageId}) : await getOrphanedPageDocs({pageId})
+    const docs = deleteAssoc ? await getAssociatedDocs({ pageId }) : await getOrphanedPageDocs({ pageId })
+    handleIndexDeletes(docs, metaDoc)
     await deleteDocs(docs)
 }
 
@@ -55,4 +58,30 @@ async function getOrphanedPageDocs({pageId}) {
     // (otherwise, we leave them; it does not seem worth the effort to smartly
     // prune some orphans among them already)
     return visitsResult.rows.length === 0 ? pagesResult.rows : []
+}
+
+/**
+ * Handles updating the index to remove pages and/or the visit timestamp.
+ *
+ * @param {any} [docsToDelete=[]] Array of docs that will be deleted from Pouch. Need to delete
+ *  the page docs in here from the index.
+ * @param {any} metaDoc The visit doc being deleted from Pouch. If this is not associated
+ *  with any of the pages in `docsToDelete`, the corresponding index doc will be updated.
+ */
+export async function handleIndexDeletes(docsToDelete = [], metaDoc) {
+    // Grab all page docs IDs (index indexes by page doc)
+    const indexDocIds = docsToDelete
+        .filter(doc => doc.id.startsWith('page/')) // Filter out visits/bookmarks
+        .map(doc => doc.id)
+
+    // If meta doc not already in pages to delete, delete it
+    if (metaDoc && !indexDocIds.includes(metaDoc.page._id)) {
+        if (metaDoc._id.startsWith('visit/')) {
+            await index.removeVisit(metaDoc)
+        } else {
+            await index.removeBookmark(metaDoc)
+        }
+    }
+
+    await index.del(indexDocIds)
 }

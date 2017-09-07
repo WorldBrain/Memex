@@ -1,5 +1,5 @@
 import db, { normaliseFindResult } from 'src/pouchdb'
-import { deleteDocs } from 'src/page-storage/deletion'
+import { deleteDocs, handleIndexDeletes } from 'src/page-storage/deletion'
 
 /**
  * Handles cleanup of a blacklisted URL.
@@ -7,7 +7,10 @@ import { deleteDocs } from 'src/page-storage/deletion'
  * @param {string} url The URL being blacklisted.
  */
 const cleanupBlacklist = url => getURLMatchingDocs({ url })
-    .then(result => deleteDocs(result.rows))
+    .then(result => {
+        handleIndexDeletes(result.rows)
+        deleteDocs(result.rows)
+    })
     .catch(f => f) // Too bad
 
 /**

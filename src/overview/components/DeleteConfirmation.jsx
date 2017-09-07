@@ -10,7 +10,7 @@ const getOverlayStyles = isShown => classNames({
     [styles.overlayShown]: isShown,
 })
 
-const DeleteConfirmation = ({ isShown, close, deleteAll, deleteVisit }) => (
+const DeleteConfirmation = ({ isShown, close, deleteAll, deleteMeta }) => (
     <div className={getOverlayStyles(isShown)}>
         <div className={styles.popup}>
             <button className={classNames(styles.close, styles.button)} onClick={close}>×</button>
@@ -18,8 +18,8 @@ const DeleteConfirmation = ({ isShown, close, deleteAll, deleteVisit }) => (
                 What do you want to delete?
 
                 <div className={styles.buttonBar}>
-                    <button className={confirmBtnStyles} onClick={deleteVisit}>
-                        Only this visit
+                    <button className={confirmBtnStyles} onClick={deleteMeta}>
+                        Only this visit/bookmark
                     </button>
                     <button className={confirmBtnStyles} onClick={deleteAll}>
                         Delete all associated data
@@ -34,7 +34,7 @@ DeleteConfirmation.propTypes = {
     isShown: PropTypes.bool.isRequired,
     close: PropTypes.func.isRequired,
     deleteAll: PropTypes.func.isRequired,
-    deleteVisit: PropTypes.func.isRequired,
+    deleteMeta: PropTypes.func.isRequired,
 }
 
 export default DeleteConfirmation
