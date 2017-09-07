@@ -18,6 +18,8 @@ import db from 'src/pouchdb'
 
 export const dataConvertTimeKey = 'data-conversion-timestamp'
 
+// Put page doc ID generator on window for user use with manual DB lookups
+window.generatePageDocId = generatePageDocId
 
 export async function bookmarkStorageListener(id, bookmarkInfo) {
     const getAttachments = async pageData => {
