@@ -57,7 +57,7 @@ export async function bookmarkStorageListener(id, bookmarkInfo) {
     let pageDoc = {
         url: bookmarkInfo.url,
         title: bookmarkInfo.title,
-        _id: generatePageDocId(bookmarkInfo.dateAdded, id),
+        _id: generatePageDocId({ url: bookmarkInfo.url }),
     }
 
     try {

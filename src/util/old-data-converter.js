@@ -67,8 +67,8 @@ const transformToMinimalVisit = assocPageDoc => ({ time, url }) => ({
  * @param {IPageOldExt} oldPage
  * @return {IPageDoc} The converted minimal page doc.
  */
-const transformToPageDoc = isStub => ({ text, time, title, url }) => ({
-    _id: generatePageDocId({ timestamp: time }),
+const transformToPageDoc = isStub => ({ text, title, url }) => ({
+    _id: generatePageDocId({ url }),
     title,
     url,
     isStub,

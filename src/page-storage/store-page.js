@@ -15,9 +15,8 @@ async function tryReidentifyPage({tabId, url, samePageCandidates}) {
 }
 
 async function createPageStub({url}) {
-    const pageId = generatePageDocId()
     const page = {
-        _id: pageId,
+        _id: generatePageDocId({ url }),
         url,
     }
     await db.put(page)
