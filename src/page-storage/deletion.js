@@ -1,7 +1,4 @@
-import db, { normaliseFindResult } from 'src/pouchdb'
-import { findVisits } from 'src/search/find-visits'
-import { bookmarkDocsSelector } from 'src/imports'
-import { getEquivalentPages } from 'src/search/find-pages'
+import db from 'src/pouchdb'
 import * as index from 'src/search/search-index'
 
 
@@ -46,18 +43,6 @@ async function getAssociatedDocs(pageId) {
         ...visitDocs,
         ...bookmarkDocs,
     ]
-
-}
-async function getOrphanedPageDocs({pageId}) {
-    // Because of deduplication, different page objects may redirect to this
-    // one, or this one may redirect to others. So we check for visits either
-    // referring to this page object or to any equivalent ones.
-    const pagesResult = await getEquivalentPages({pageId})
-    const visitsResult = await findVisits({pagesResult})
-    // If there are no visits to any of them, delete all these page objects.
-    // (otherwise, we leave them; it does not seem worth the effort to smartly
-    // prune some orphans among them already)
-    return visitsResult.rows.length === 0 ? pagesResult.rows : []
 }
 
 /**
