@@ -9,7 +9,6 @@ import 'src/omnibar'
 import { installTimeStorageKey } from 'src/imports/background'
 import convertOldData from 'src/util/old-data-converter'
 import fetchPageData from 'src/page-analysis/background/fetch-page-data'
-import { findPagesByUrl } from 'src/search/find-pages'
 import { FREEZE_DRY_BOOKMARKS_KEY } from 'src/options/preferences/constants'
 import * as index from 'src/search/search-index'
 import db from 'src/pouchdb'
@@ -24,41 +23,33 @@ window.generatePageDocId = generatePageDocId
 window.generateVisitDocId = generateVisitDocId
 window.generateBookmarkDocId = generateBookmarkDocId
 
-export async function bookmarkStorageListener(id, bookmarkInfo) {
-    const getAttachments = async pageData => {
-        const favIconBlob = await dataURLToBlob(pageData.favIconURI)
+// TODO: Move all this bookmarks logic away
+async function getAttachments(pageData) {
+    const favIconBlob = await dataURLToBlob(pageData.favIconURI)
 
-        let _attachments = {
-            'fav-icon-blob': {
-                content_type: favIconBlob.type,
-                data: favIconBlob,
+    let _attachments = {
+        'fav-icon-blob': {
+            content_type: favIconBlob.type,
+            data: favIconBlob,
+        },
+    }
+
+    if (pageData.freezeDryHTML) {
+        const freezeDryBlob = new Blob([pageData.freezeDryHTML], {type: 'text/html;charset=UTF-8'})
+
+        _attachments = {
+            ..._attachments,
+            'freeze-dry-blob': {
+                content_type: freezeDryBlob.type,
+                data: freezeDryBlob,
             },
         }
-
-        if (pageData.freezeDryHTML) {
-            const freezeDryBlob = new Blob([pageData.freezeDryHTML], {type: 'text/html;charset=UTF-8'})
-
-            _attachments = {
-                ..._attachments,
-                'freeze-dry-blob': {
-                    content_type: freezeDryBlob.type,
-                    data: freezeDryBlob,
-                },
-            }
-        }
-
-        return _attachments
     }
 
-    const samePageCandidates = (await findPagesByUrl({ url: bookmarkInfo.url })).rows.map(row => row.doc)
+    return _attachments
+}
 
-    if (samePageCandidates.length) {
-        const pageDoc = samePageCandidates[samePageCandidates.length - 1]
-        const bookmarkDoc = await transformToBookmarkDoc(pageDoc)(bookmarkInfo)
-        index.addBookmark(bookmarkDoc)
-        return db.bulkDocs([bookmarkDoc, pageDoc])
-    }
-
+async function createNewPageForBookmark(bookmarkInfo) {
     let pageDoc = {
         url: bookmarkInfo.url,
         title: bookmarkInfo.title,
@@ -82,7 +73,7 @@ export async function bookmarkStorageListener(id, bookmarkInfo) {
     } catch (err) {
         console.error("Error occurred while fetching page data: " + err.toString())
     } finally {
-        const bookmarkDoc = await transformToBookmarkDoc(pageDoc)(bookmarkInfo)
+        const bookmarkDoc = transformToBookmarkDoc(pageDoc)(bookmarkInfo)
         index.addPageConcurrent({ pageDoc, bookmarkDocs: [bookmarkDoc] })
         db.bulkDocs([bookmarkDoc, pageDoc])
     }
@@ -110,7 +101,22 @@ browser.browserAction.onClicked.addListener(() => {
 })
 
 
-browser.bookmarks.onCreated.addListener(bookmarkStorageListener)
+browser.bookmarks.onCreated.addListener(async (id, bookmarkInfo) => {
+    try {
+        // Attempt to resolve existing page doc to connect new bookmark to
+        const pageDoc = await db.get(generatePageDocId({ url: bookmarkInfo.url }))
+        const bookmarkDoc = transformToBookmarkDoc(pageDoc)(bookmarkInfo)
+        index.addBookmark(bookmarkDoc)
+        db.bulkDocs([bookmarkDoc, pageDoc])
+    } catch (error) {
+        // Create new page + bookmark if existing page not found
+        if (error.status === 404) {
+            createNewPageForBookmark(bookmarkInfo)
+        } else {
+            console.error(error) // Can't handle other errors; log to background script console
+        }
+    }
+})
 
 browser.commands.onCommand.addListener(command => {
     if (command === 'openOverview') {
