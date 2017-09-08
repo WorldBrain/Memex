@@ -7,9 +7,8 @@ import * as index from 'src/search/search-index'
 
 // Store the visit in PouchDB.
 async function storeVisit({ timestamp, url, page }) {
-    const visitId = generateVisitDocId({ timestamp })
     const visit = {
-        _id: visitId,
+        _id: generateVisitDocId({ url, timestamp }),
         visitStart: timestamp,
         url,
         page: { _id: page._id }, // store only a reference to the page

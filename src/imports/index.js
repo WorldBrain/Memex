@@ -31,11 +31,10 @@ export const generateBookmarkDocId = ({
  */
 export const transformToVisitDoc = assocPageDoc => visitItem => ({
     _id: generateVisitDocId({
+        url: assocPageDoc.url,
         timestamp: visitItem.visitTime,
-        // We set the nonce manually, to prevent duplicating items if
-        // importing multiple times (thus making importHistory idempotent).
-        nonce: visitItem.visitId,
     }),
+    browserId: visitItem.visitId,
     visitStart: visitItem.visitTime,
     referringVisitItemId: visitItem.referringVisitId,
     url: assocPageDoc.url,

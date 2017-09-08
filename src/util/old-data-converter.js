@@ -57,7 +57,7 @@ const notifOptions = {
  * @param {string} assocPageDocId The `_id` of the associated page doc.
  */
 const transformToMinimalVisit = assocPageDoc => ({ time, url }) => ({
-    _id: generateVisitDocId({ timestamp: time }),
+    _id: generateVisitDocId({ url, timestamp: time }),
     visitStart: time,
     url,
     page: { _id: assocPageDoc._id },
