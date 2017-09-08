@@ -84,7 +84,7 @@ const transformToPageDoc = isStub => ({ text, title, url }) => ({
  * @return {IBookmarkDoc} The converted minimal bookmark doc.
  */
 const transformToBookmarkDoc = assocPageDoc => ({ text, time, title, url }) => ({
-    _id: generateBookmarkDocId({ timestamp: time }),
+    _id: generateBookmarkDocId({ url, timestamp: time }),
     title,
     url,
     page: { _id: assocPageDoc._id },

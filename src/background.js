@@ -10,16 +10,19 @@ import { installTimeStorageKey } from 'src/imports/background'
 import convertOldData from 'src/util/old-data-converter'
 import fetchPageData from 'src/page-analysis/background/fetch-page-data'
 import { findPagesByUrl } from 'src/search/find-pages'
-import { transformToBookmarkDoc } from 'src/imports'
-import { generatePageDocId } from 'src/page-storage'
 import { FREEZE_DRY_BOOKMARKS_KEY } from 'src/options/preferences/constants'
 import * as index from 'src/search/search-index'
 import db from 'src/pouchdb'
+import { generatePageDocId } from 'src/page-storage'
+import { generateVisitDocId } from 'src/activity-logger'
+import { generateBookmarkDocId, transformToBookmarkDoc } from 'src/imports'
 
 export const dataConvertTimeKey = 'data-conversion-timestamp'
 
-// Put page doc ID generator on window for user use with manual DB lookups
+// Put doc ID generators on window for user use with manual DB lookups
 window.generatePageDocId = generatePageDocId
+window.generateVisitDocId = generateVisitDocId
+window.generateBookmarkDocId = generateBookmarkDocId
 
 export async function bookmarkStorageListener(id, bookmarkInfo) {
     const getAttachments = async pageData => {
