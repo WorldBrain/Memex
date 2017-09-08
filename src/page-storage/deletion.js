@@ -11,8 +11,7 @@ export async function deleteMetaAndPage({ metaDoc, deleteAssoc = false }) {
     const pageId = metaDoc.page._id
     await db.remove(metaDoc)
 
-    // Either delete all associated docs or just try to delete page/s if orphaned
-    const docs = deleteAssoc ? await getAssociatedDocs({ pageId }) : await getOrphanedPageDocs({ pageId })
+    const docs = await getAssociatedDocs(pageId)
     handleIndexDeletes(docs, metaDoc)
     await deleteDocs(docs)
 }
@@ -25,29 +24,30 @@ export const deleteDocs = docs => db.bulkDocs(docs.map(
     })
 ))
 
+async function getAllAssoc(pageId, metaType) {
+    const prefix = pageId.replace('page', metaType)
+    const { rows } = await db.allDocs({ startkey: prefix, endkey: `${prefix}\uffff` })
+    return rows
+}
+
 /**
  * Get any associated visit, bookmark, and equivalent pages associated with a given page doc.
  *
  * @param {string} pageId The ID of the page doc to get.
  * @return {Array<Document>} Documents found associated with pageId.
  */
-async function getAssociatedDocs({pageId}) {
-    const pagesResult = await getEquivalentPages({pageId})
-    const visitsResult = await findVisits({pagesResult})
-    const bookmarksResult = normaliseFindResult(await db.find({
-        selector: {
-            ...bookmarkDocsSelector,
-            'page._id': { $in: pagesResult.rows.map(row => row.id) },
-        },
-    }))
+async function getAssociatedDocs(pageId) {
+    const pageDoc = await db.get(pageId)
+    const visitDocs = await getAllAssoc(pageId, 'visit')
+    const bookmarkDocs = await getAllAssoc(pageId, 'bookmark')
 
     return [
-        ...pagesResult.rows,
-        ...visitsResult.rows,
-        ...bookmarksResult.rows,
+        pageDoc,
+        ...visitDocs,
+        ...bookmarkDocs,
     ]
-}
 
+}
 async function getOrphanedPageDocs({pageId}) {
     // Because of deduplication, different page objects may redirect to this
     // one, or this one may redirect to others. So we check for visits either
