@@ -97,7 +97,7 @@ const mapStateToProps = state => ({})
 const mapDispatchToProps = (dispatch, { doc }) => ({
     onTrashButtonClick: e => {
         e.preventDefault()
-        dispatch(showDeleteConfirm(doc.assoc[doc.displayType]))
+        dispatch(showDeleteConfirm(doc.url))
     },
 })
 

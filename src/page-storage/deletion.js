@@ -1,16 +1,22 @@
-import db from 'src/pouchdb'
+import db, { fetchDocTypesByUrl } from 'src/pouchdb'
 import * as index from 'src/search/search-index'
+import { pageKeyPrefix } from 'src/page-storage'
+import { visitKeyPrefix } from 'src/activity-logger'
+import { bookmarkKeyPrefix } from 'src/imports'
 
+export default async function deleteDocsByUrl(url) {
+    const fetchDocsByType = fetchDocTypesByUrl(url)
 
-export async function deleteMetaAndPage({ metaDoc, deleteAssoc = false }) {
-    // Delete the meta doc
-    // const metaDoc = await db.get(metaDoc._id)
-    const pageId = metaDoc.page._id
-    await db.remove(metaDoc)
+    const opts = { include_docs: false }
+    const { rows: pageRows } = await fetchDocsByType(pageKeyPrefix, opts)
+    const { rows: visitRows } = await fetchDocsByType(visitKeyPrefix, opts)
+    const { rows: bookmarkRows } = await fetchDocsByType(bookmarkKeyPrefix, opts)
 
-    const docs = await getAssociatedDocs(pageId)
-    handleIndexDeletes(docs, metaDoc)
-    await deleteDocs(docs)
+    const allRows = [...pageRows, ...visitRows, ...bookmarkRows]
+    await Promise.all([
+        deleteDocs(allRows),
+        handleIndexDeletes(allRows),
+    ])
 }
 
 export const deleteDocs = docs => db.bulkDocs(docs.map(
@@ -20,30 +26,6 @@ export const deleteDocs = docs => db.bulkDocs(docs.map(
         _deleted: true,
     })
 ))
-
-async function getAllAssoc(pageId, metaType) {
-    const prefix = pageId.replace('page', metaType)
-    const { rows } = await db.allDocs({ startkey: prefix, endkey: `${prefix}\uffff` })
-    return rows
-}
-
-/**
- * Get any associated visit, bookmark, and equivalent pages associated with a given page doc.
- *
- * @param {string} pageId The ID of the page doc to get.
- * @return {Array<Document>} Documents found associated with pageId.
- */
-async function getAssociatedDocs(pageId) {
-    const pageDoc = await db.get(pageId)
-    const visitDocs = await getAllAssoc(pageId, 'visit')
-    const bookmarkDocs = await getAllAssoc(pageId, 'bookmark')
-
-    return [
-        pageDoc,
-        ...visitDocs,
-        ...bookmarkDocs,
-    ]
-}
 
 /**
  * Handles updating the index to remove pages and/or the visit timestamp.

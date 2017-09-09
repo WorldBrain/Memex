@@ -93,8 +93,7 @@ class Overview extends React.Component {
                     <DeleteConfirmation
                         isShown={this.props.isDeleteConfShown}
                         close={this.props.hideDeleteConfirm}
-                        deleteAll={this.props.deleteAssociatedDocs(this.props.metaDocToDelete)}
-                        deleteMeta={this.props.deleteMeta(this.props.metaDocToDelete)}
+                        deleteDocs={this.props.deleteDocs}
                     />
                 </div>
             </div>
@@ -117,10 +116,8 @@ Overview.propTypes = {
     noResults: PropTypes.bool.isRequired,
     searchResults: PropTypes.arrayOf(PropTypes.object).isRequired,
     isDeleteConfShown: PropTypes.bool.isRequired,
-    metaDocToDelete: PropTypes.object,
     hideDeleteConfirm: PropTypes.func.isRequired,
-    deleteAssociatedDocs: PropTypes.func.isRequired,
-    deleteMeta: PropTypes.func.isRequired,
+    deleteDocs: PropTypes.func.isRequired,
     needsWaypoint: PropTypes.bool.isRequired,
 }
 
@@ -130,7 +127,6 @@ const mapStateToProps = state => ({
     noResults: selectors.noResults(state),
     searchResults: selectors.results(state),
     isDeleteConfShown: selectors.isDeleteConfShown(state),
-    metaDocToDelete: selectors.metaDocToDelete(state),
     needsWaypoint: selectors.needsPagWaypoint(state),
 })
 
@@ -141,9 +137,8 @@ const mapDispatchToProps = dispatch => ({
         onEndDateChange: actions.setEndDate,
         onBottomReached: actions.getMoreResults,
         hideDeleteConfirm: actions.hideDeleteConfirm,
+        deleteDocs: actions.deleteDocs,
     }, dispatch),
-    deleteAssociatedDocs: metaDoc => () => dispatch(actions.deleteMeta(metaDoc, true)),
-    deleteMeta: metaDoc => () => dispatch(actions.deleteMeta(metaDoc)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Overview)
