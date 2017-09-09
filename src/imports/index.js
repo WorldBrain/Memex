@@ -18,7 +18,7 @@ export const bookmarkKeyPrefix = 'bookmark/'
 export const bookmarkDocsSelector = { _id: { $gte: bookmarkKeyPrefix, $lte: `${bookmarkKeyPrefix}\uffff` } }
 export const convertBookmarkDocId = docuri.route(`${bookmarkKeyPrefix}:url/:timestamp`)
 export const generateBookmarkDocId = ({ url, timestamp = Date.now() }) =>
-    convertBookmarkDocId({ url: encodeUrl(url), timestamp })
+    convertBookmarkDocId({ url: encodeUrl(url, false), timestamp })
 
 /**
  * Converts a browser.history.VisitItem to our visit document model.

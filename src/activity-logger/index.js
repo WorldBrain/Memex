@@ -37,4 +37,4 @@ export const getTimestamp = doc =>
     Number.parseInt(convertMetaDocId(doc._id).timestamp)
 
 export const generateVisitDocId = ({ url, timestamp = Date.now() }) =>
-    convertVisitDocId({ url: encodeUrl(url), timestamp })
+    convertVisitDocId({ url: encodeUrl(url, false), timestamp })

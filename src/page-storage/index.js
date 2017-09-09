@@ -16,4 +16,4 @@ export const pageDocsSelector = { _id: { $gte: pageKeyPrefix, $lte: `${pageKeyPr
  * @throws {URIError} Thrown if the `url` is malformed.
  */
 export const generatePageDocId = ({ url }) =>
-    convertPageDocId({ url: encodeUrl(url) })
+    convertPageDocId({ url: encodeUrl(url, false) })

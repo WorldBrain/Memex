@@ -30,25 +30,30 @@ function normalize(url, customOpts) {
  * https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/Base64_encoding_and_decoding#The_.22Unicode_Problem.22
  *
  * @param {string} url
+ * @param {boolean} needsEscaping
  * @returns {string}
  */
-function encode(url) {
+function encode(url, needsEscaping) {
     const escaped = encodeURIComponent(url) // Grab percent-encoded unicode chars (`%`)
         .replace(/%([0-9A-F]{2})/g,  // Convert percentage-encodings into raw bytes
             (_, p1) => String.fromCharCode(`0x${p1}`))
 
     // Feed in escaped unicode stuff into base64 encoder
-    return encodeURIComponent(btoa(escaped))
+    const encoded = btoa(escaped)
+    return needsEscaping ? encodeURIComponent(encoded) : encoded
 }
 
 /**
  * Essentially goes backwards from the encode function.
  *
  * @param {string} encodedUrl URL that has been encoded via this module.
+ * @param {boolean} needsEscaping Essentially the inverse of the same named param on encode method.
  * @returns {string} Original normalized URL.
  */
-export function decode(encodedUrl) {
-    const percentageEncoded = decodeURIComponent(atob(encodedUrl))
+export function decode(encodedUrl, needsEscaping = true) {
+    encodedUrl = needsEscaping ? decodeURIComponent(encodedUrl) : encodedUrl
+
+    const percentageEncoded = atob(encodedUrl)
         .split('')
         .map(char => { // For each raw byte char, convert to percentage-encodings
             const unicodeChar = `00${char.charCodeAt(0).toString(16)}`.slice(-2)
@@ -70,12 +75,15 @@ export function decode(encodedUrl) {
  * make sense for the WorldBrain web extension, as Pouch doc IDs.
  *
  * @param {string} url URL string to normalize and encode.
+ * @param {boolean} needsEscaping Denotes whether or not encoded URL should be run through
+ *  final `encodeURIComponent` call. Generally should be done if encoding to perform a lookup,
+ *  as generated doc IDs will have been auto-escaped (via `docuri` package).
  * @param {any} [customNormalizationOpts={}] Custom options to pass to `normalize-url` package (will override).
  * @returns {string} Encoded URL ready for use in PouchID.
  */
-function normalizeAndEncode(url, customNormalizationOpts = {}) {
+function normalizeAndEncode(url, needsEscaping = true, customNormalizationOpts = {}) {
     const normalizedUrl = normalize(url, customNormalizationOpts)
-    return encode(normalizedUrl)
+    return encode(normalizedUrl, needsEscaping)
 }
 
 export default normalizeAndEncode
