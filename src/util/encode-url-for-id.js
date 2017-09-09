@@ -38,7 +38,7 @@ function encode(url) {
             (_, p1) => String.fromCharCode(`0x${p1}`))
 
     // Feed in escaped unicode stuff into base64 encoder
-    return btoa(escaped)
+    return encodeURIComponent(btoa(escaped))
 }
 
 /**
@@ -48,7 +48,7 @@ function encode(url) {
  * @returns {string} Original normalized URL.
  */
 export function decode(encodedUrl) {
-    const percentageEncoded = atob(encodedUrl)
+    const percentageEncoded = decodeURIComponent(atob(encodedUrl))
         .split('')
         .map(char => { // For each raw byte char, convert to percentage-encodings
             const unicodeChar = `00${char.charCodeAt(0).toString(16)}`.slice(-2)
