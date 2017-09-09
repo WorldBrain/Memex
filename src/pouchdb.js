@@ -4,6 +4,8 @@ import PouchDB from 'pouchdb-browser'
 import PouchDBFind from 'pouchdb-find'
 import { blobToBase64String } from 'blob-util'
 
+import encodeUrl from 'src/util/encode-url-for-id'
+
 
 PouchDB.plugin(PouchDBFind)
 
@@ -73,4 +75,22 @@ export async function getAttachmentAsDataUrl({doc, docId=doc._id, attachmentId})
     const base64 = await blobToBase64String(blob)
     const dataUrl = `data:${blob.type};base64,${base64}`
     return dataUrl
+}
+
+/**
+ * Given a URL, encode it and return a function that affords looking up all matching docs
+ * to that URL by specified type prefix. Valid type prefixes look like `page/`.
+ *
+ * @param {string} url URL to match against docs.
+ * @returns {(type: string, opts?: any) => Promise<Array<any>>} Async function that affords searching
+ *  on given URL via type. Any extra options to `PouchDB.allDocs` can be passed in as the second arg.
+ */
+export function fetchDocTypesByUrl(url) {
+    const encodedUrl = encodeUrl(url)
+
+    return (typePrefix, opts = { include_docs: true }) => db.allDocs({
+        startkey: `${typePrefix}${encodedUrl}`,
+        endkey: `${typePrefix}${encodedUrl}\ufff0`,
+        ...opts,
+    })
 }
