@@ -22,14 +22,14 @@ class QueryBuilder {
         if (!time) { return this }
         const currentBookmarks = this.bookmarks.length ? this.bookmarks[0] : {}
         const currentVisits = this.visits.length ? this.visits[0] : {}
-        const updatedBookmarks = [{ ...currentBookmarks, [op]: `bookmark/${time}` }]
-        const updatedVisits = [{ ...currentVisits, [op]: `visit/${time}` }]
+        const updatedBookmarks = [{ ...currentBookmarks, [op]: String(time) }]
+        const updatedVisits = [{ ...currentVisits, [op]: String(time) }]
 
         // search-index needs defaults if they're missing
-        if (!updatedBookmarks[0].gte) updatedBookmarks[0].gte = 'bookmark/'
-        if (!updatedBookmarks[0].lte) updatedBookmarks[0].lte = `bookmark/${Date.now()}`
-        if (!updatedVisits[0].gte) updatedVisits[0].gte = 'visit/'
-        if (!updatedVisits[0].lte) updatedVisits[0].lte = `visit/${Date.now()}`
+        if (!updatedBookmarks[0].gte) updatedBookmarks[0].gte = '0'
+        if (!updatedBookmarks[0].lte) updatedBookmarks[0].lte = Date.now().toString()
+        if (!updatedVisits[0].gte) updatedVisits[0].gte = '0'
+        if (!updatedVisits[0].lte) updatedVisits[0].lte = Date.now().toString()
 
         // Set updated query fields
         this.bookmarks = updatedBookmarks
