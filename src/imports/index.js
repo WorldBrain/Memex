@@ -17,8 +17,10 @@ export const clearImportInProgressFlag = async () =>
 export const bookmarkKeyPrefix = 'bookmark/'
 export const bookmarkDocsSelector = { _id: { $gte: bookmarkKeyPrefix, $lte: `${bookmarkKeyPrefix}\uffff` } }
 export const convertBookmarkDocId = docuri.route(`${bookmarkKeyPrefix}:url/:timestamp`)
+
+// NOTE: truncates any decimal part of the `timestamp` arg
 export const generateBookmarkDocId = ({ url, timestamp = Date.now() }) =>
-    convertBookmarkDocId({ url: encodeUrl(url, false), timestamp })
+    convertBookmarkDocId({ url: encodeUrl(url, false), timestamp: Math.floor(timestamp) })
 
 /**
  * Converts a browser.history.VisitItem to our visit document model.

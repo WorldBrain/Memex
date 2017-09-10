@@ -4,6 +4,7 @@ import stream from 'stream'
 import stopword from 'stopword'
 
 import pipeline from './search-index-pipeline'
+import { convertMetaDocId } from 'src/activity-logger'
 
 const indexOpts = {
     batchSize: 500,
@@ -36,15 +37,15 @@ const indexOpts = {
 const standardResponse = (resolve, reject) =>
     (err, data = true) => err ? reject(err) : resolve(data)
 
-// Simply maps out the ID of visit or bookmark docs. The ID contains
-// timestamp, which is the only data we want at the moment.
-const transformTimeDoc = doc => doc._id
+// Simply extracts the timestamp component out the ID of a visit or bookmark doc,
+//  which is the only data we want at the moment.
+const transformMetaDoc = doc => convertMetaDocId(doc._id).timestamp
 
 // Groups input docs into standard index doc structure
 const transformPageAndMetaDocs = ({ pageDoc, visitDocs = [], bookmarkDocs = [] }) => ({
     ...pipeline(pageDoc),
-    visits: visitDocs.map(transformTimeDoc),
-    bookmarks: bookmarkDocs.map(transformTimeDoc),
+    visits: visitDocs.map(transformMetaDoc),
+    bookmarks: bookmarkDocs.map(transformMetaDoc),
 })
 
 // Wraps instance creation in a Promise for use in async interface methods
@@ -103,18 +104,21 @@ export async function addPage({ pageDoc, visitDocs = [], bookmarkDocs = [] }) {
  * Returns a function that affords adding either a visit or bookmark to an index.
  * The function should perform the following update, using the associated page doc ID:
  *  - grab the existing index doc matching the page doc ID
- *  - perform update to appropriate timestamp field
+ *  - perform update to appropriate timestamp field, by APPENDING new timestamp to field
  *  - delete the original doc form the index
  *  - add the updated doc into the index
+ * NOTE: this appends the timestamp extracted from the given metaDoc, hence to maintain an
+ * order, this should generally only get called on new visits/bookmark events.
  */
-const addTimestamp = field => async ({ _id, page }) => {
-    const existingDoc = await get(page._id) // Get existing doc
+const addTimestamp = field => async metaDoc => {
+    const indexDocId = metaDoc.page._id // Index docs share ID with corresponding pouch page doc
+    const existingDoc = await get(indexDocId) // Get existing indexed doc
     if (!existingDoc) {
         throw new Error('Page associated with timestamp is not recorded in the index')
     }
 
-    (existingDoc[field] || []).push(_id) // Perform in-memory update
-    await del(page._id) // Delete existing doc
+    (existingDoc[field] || []).push(transformMetaDoc(metaDoc)) // Perform in-memory update
+    await del(indexDocId) // Delete existing doc
     return addConcurrent(existingDoc) // Add new updated doc
 }
 
@@ -129,14 +133,15 @@ export const addBookmark = addTimestamp('bookmarks')
  *  - delete the original doc form the index
  *  - add the updated doc into the index
  */
-const removeTimestamp = field => async ({ _id, page }) => {
-    const existingDoc = await get(page._id) // Get existing doc
+const removeTimestamp = field => async metaDoc => {
+    const indexDocId = metaDoc.page._id // Index docs share ID with corresponding pouch page doc
+    const existingDoc = await get(indexDocId) // Get existing doc
     if (!existingDoc) {
         throw new Error('Page associated with timestamp is not recorded in the index')
     }
 
     // Perform in-memory update by removing the timestamp
-    const indexToRemove = existingDoc[field].indexOf(_id)
+    const indexToRemove = existingDoc[field].indexOf(transformMetaDoc(metaDoc))
     if (indexToRemove === -1) {
         throw new Error('Associated timestamp is not recorded in the index')
     }
@@ -145,7 +150,7 @@ const removeTimestamp = field => async ({ _id, page }) => {
         ...existingDoc[field].slice(indexToRemove + 1),
     ]
 
-    await del(page._id) // Delete existing doc
+    await del(indexDocId) // Delete existing doc
     return addConcurrent(existingDoc) // Add new updated doc
 }
 

@@ -36,5 +36,6 @@ export const convertMetaDocId = docuri.route(':type/:url/:timestamp')
 export const getTimestamp = doc =>
     Number.parseInt(convertMetaDocId(doc._id).timestamp)
 
+// NOTE: truncates any decimal part of the `timestamp` arg
 export const generateVisitDocId = ({ url, timestamp = Date.now() }) =>
-    convertVisitDocId({ url: encodeUrl(url, false), timestamp })
+    convertVisitDocId({ url: encodeUrl(url, false), timestamp: Math.floor(timestamp) })
