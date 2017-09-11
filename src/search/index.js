@@ -45,6 +45,7 @@ export default async function indexSearch({
 
     return {
         docs,
-        resultsExhausted: results.length < limit,
+        // resultsExhausted: results.length < limit,
+        resultsExhausted: false, // Needs to be false for now; index results seem random relative to limit
     }
 }
