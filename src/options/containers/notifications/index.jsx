@@ -5,7 +5,6 @@ import styles from './Notifs.css'
 import setUnreadCount from '../../../util/setUnreadCount'
 import fetchNewNotifs from './polling/fetchNewNotifs'
 import updateWBBadge from './updateWBBadge'
-const CSSTransitionGroup = require('react-transition-group/CSSTransitionGroup')
 
 
 fetchNewNotifs()
@@ -35,7 +34,6 @@ class NotificationsContainer extends Component {
 
     async selectNotification(doc) {
         try {
-            console.log()
             this.setState({
             selectedNotificationId: doc._id,
             className: 'viewed',
@@ -44,11 +42,12 @@ class NotificationsContainer extends Component {
                 ...doc,
                 viewed: true,
             })
-            console.log('one')
+            this.setStateFromPouch()
+            console.log('selectedNotificationId2')
             setUnreadCount()
             updateWBBadge()
         } catch (err) {
-            console.err('err', err)
+            console.log('err', err)
         }
     }
 
@@ -83,12 +82,9 @@ class NotificationsContainer extends Component {
                                         {doc.title}
                                         {this.state.selectedNotificationId
                                         === doc._id
-                                        &&<CSSTransitionGroup
-                                            transitionName={styles.toggle}
-                                            transitionEnterTimeout={500}
-                                            transitionLeaveTimeout={300}> <li key={doc._id}>{doc.body}</li>
-                                        </CSSTransitionGroup>}
+                                        && <li className={styles.toggle} key={doc._id}>{doc.body}</li>}
                                     </li>
+
                                 )}
                         </ul>
                     </div>

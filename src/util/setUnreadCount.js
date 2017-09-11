@@ -3,7 +3,7 @@ import db from '../pouchdb'
 export default async function setUnreadCount(itemToCount) {
     try {
 
-        console.log('lets go 45')
+        console.log('lets go 63')
         let items = 0
 
         let response = await db.allDocs({

@@ -57,7 +57,6 @@ hr {
 
 .loadbadge {
     display: block-inline;
-    background-image: url('../../../img/loading.gif') no-repeat fixed center; 
     padding: 2px 10px;
     margin-left: 10px;
     border-radius: 10px;

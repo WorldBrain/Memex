@@ -19,9 +19,6 @@ import setUnreadCount from '../util/setUnreadCount'
 
 import { itemBtnBlacklisted } from './components/Button.css'
 
-// import loading from '../../img/loading.gif' // relative path to image 
-
-
 export const overviewURL = '/overview/overview.html'
 export const optionsURL = '/options/options.html'
 export const feedbackURL = 'https://www.reddit.com/r/WorldBrain'
@@ -235,10 +232,6 @@ class PopupContainer extends Component {
                       }>{this.state.notifs} 
 
                       </span>
-                </LinkButton>
-                <LinkButton>
-                  HELLO!
-                      <img src='../../img/loading.gif'/>  
                 </LinkButton>
                 <LinkButton href={feedbackURL} icon='feedback'>
                     Feedback
