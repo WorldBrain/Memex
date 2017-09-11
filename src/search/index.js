@@ -41,7 +41,7 @@ export default async function indexSearch({
     const shouldSortByTime = query === ''
 
     // Match the index results to data docs available in Pouch, consolidating meta docs
-    const docs = await mapResultsToPouchDocs(results, shouldSortByTime)
+    const docs = await mapResultsToPouchDocs(results, { startDate, endDate }, shouldSortByTime)
 
     return {
         docs,
