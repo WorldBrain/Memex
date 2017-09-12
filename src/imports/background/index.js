@@ -7,7 +7,6 @@ import importsConnectionHandler from './imports-connection-handler'
 
 
 // Constants
-export const importProgressStorageKey = 'is_import_in_progress'
 export const importStateStorageKey = 'import_items'
 export const installTimeStorageKey = 'extension_install_time'
 
