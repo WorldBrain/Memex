@@ -31,10 +31,18 @@ async function updateIndex(finalPagePromise, visit) {
     // If no page returned from analysis, we can't index
     if (!page) { return }
 
-    // Queue page and visit to add into search index
+    // Check if doc exists in index
+    const existingIndexedDoc = await index.get(page._id) // TODO: maybe just have this in the `addPage` index methods
+
+    // Index either the page + visit, or just the visit if page already exists
     try {
-        await index.addPageConcurrent({ pageDoc: page, visitDocs: [visit] })
+        if (existingIndexedDoc) {
+            await index.addVisit(visit)
+        } else {
+            await index.addPageConcurrent({ pageDoc: page, visitDocs: [visit] })
+        }
     } catch (error) {
+        // Indexing issue; log it for now
         console.error(error)
     }
 }
