@@ -8,7 +8,7 @@ const normalizationOpts = {
     stripWWW: true, // Remove any leading `www.`
     removeTrailingSlash: true,
     removeQueryParameters: [/^utm_\w+/i], // Remove each of these query params (default for now)
-    removeDirectoryIndex: [/^(default|index)\.\w{2,3}$/], // Remove things like tralining `/index.js` or `/default.php`
+    removeDirectoryIndex: [/^(default|index)\.\w{2,4}$/], // Remove things like tralining `/index.js` or `/default.php`
 }
 
 /**
