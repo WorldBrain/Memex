@@ -134,7 +134,7 @@ export async function addPage({ pageDoc, visitDocs = [], bookmarkDocs = [] }) {
  * Returns a function that affords adding either a visit or bookmark to an index.
  * The function should perform the following update, using the associated page doc ID:
  *  - grab the existing index doc matching the page doc ID
- *  - perform update to appropriate timestamp field, by APPENDING new timestamp to field
+ *  - perform update to appropriate timestamp field, by APPENDING new timestamp to field + `latest` (sort) field
  *  - delete the original doc form the index
  *  - add the updated doc into the index
  * NOTE: this appends the timestamp extracted from the given metaDoc, hence to maintain an
@@ -147,7 +147,15 @@ const addTimestamp = field => async metaDoc => {
         throw new Error('Page associated with timestamp is not recorded in the index')
     }
 
-    (existingDoc[field] || []).push(transformMetaDoc(metaDoc)) // Perform in-memory update
+    const newTimestamp = transformMetaDoc(metaDoc)
+
+    // Perform in-memory updates of timestamp array + "latest"/sort field
+    existingDoc.latest = newTimestamp
+    existingDoc[field] = [
+        ...(existingDoc[field] || []),
+        newTimestamp,
+    ]
+
     await del(indexDocId) // Delete existing doc
     return addConcurrent(existingDoc) // Add new updated doc
 }
