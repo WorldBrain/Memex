@@ -73,16 +73,17 @@ class QueryBuilder {
         return this
     }
 
-    searchTerm(input) {
-        if (input) {
-            // All indexed strings are lower-cased, so force the query terms to be
-            let terms = input
-                .toLowerCase()
-                .match(/\S+/g) || []
+    searchTerm(input = '') {
+        // All indexed strings are lower-cased, so force the query terms to be
+        let terms = input
+            .toLowerCase()
+            .match(/\S+/g) || []
 
-            // All EN stopwords are unindexed, so remove any from query terms
-            terms = stopword.removeStopwords(terms, stopword.en)
+        // All EN stopwords are unindexed, so remove any from query terms
+        terms = stopword.removeStopwords(terms, stopword.en)
 
+        // If there are valid search terms, parse them...
+        if (terms && terms.length) {
             // Split into words and push to query
             terms.forEach(term => {
                 if (DOMAIN_TLD_PATTERN.test(term)) {
@@ -92,7 +93,11 @@ class QueryBuilder {
                     this.content.push(term)
                 }
             })
+        } else {
+            // ... else default to wildcard search
+            this.content.push('*')
         }
+
         return this
     }
 }
