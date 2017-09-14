@@ -5,6 +5,7 @@ import stopword from 'stopword'
 
 import pipeline from './search-index-pipeline'
 import { convertMetaDocId } from 'src/activity-logger'
+import { RESULT_TYPES } from 'src/overview/constants'
 
 const indexOpts = {
     batchSize: 500,
@@ -17,23 +18,31 @@ const indexOpts = {
     separator: /[|' .,\-|(\n)]+/,
     stopwords: stopword.en,
     fieldOptions: {
-        visits: {
-            fieldedSearch: true,
-        },
-        bookmarks: {
-            fieldedSearch: true,
-        },
-        latest: {
-            sortable: true,
-        },
-        content: {
-            fieldedSearch: true,
-        },
+        // Page URL tokenized by forward slashes; normalized slightly to remove protocol and leading `www.`
+        // Currently used to afford `domain.tld` search in our queries
         url: {
             weight: 10,
             fieldedSearch: true,
             separator: '/',
         },
+        // Sorted arrays of UNIX epoch timestamps; latest at end.
+        // Currently used to afford time filtering; updates on relevant meta event
+        visits: { fieldedSearch: true },
+        bookmarks: { fieldedSearch: true },
+        // The bulk of page content; processed from `document.innerHTML`
+        content: { fieldedSearch: true },
+        // UNIX epoch timestamp; should always be the same as last element of `visits` or `bookmarks` array, depending on which is later.
+        // Currently used for sorting when there are no text search parameters defined; updates on meta events
+        latest: {
+            sortable: true,
+        },
+        // Denotes the type (currently 'visit' or 'bookmark') of the latest meta event performed on page
+        // Currently used to afford differientiation (mainly in UI); updates on meta events
+        type: {
+            searchable: false,
+            fieldedSearch: false,
+        },
+
     },
 }
 
@@ -48,7 +57,9 @@ const transformMetaDoc = doc => convertMetaDocId(doc._id).timestamp
  * NOTE: Assumes sorted arrays, last index containing latest.
  * @param {Array<string>} visits Sorted array of UNIX timestamp strings.
  * @param {Array<string>} bookmarks Sorted array of UNIX timestamp strings.
- * @returns {string} Latest UNIX timestamp of all params.
+ * @returns {any} Object containing:
+ *  - `latest`: latest UNIX timestamp of all params
+ *  - `type`: currently either `bookmark` or `visit` to allow distinguishing the type later.
  */
 const getLatestMeta = (visits, bookmarks) => {
     const numVisits = visits.length
@@ -56,12 +67,12 @@ const getLatestMeta = (visits, bookmarks) => {
 
     if (numVisits && numBookmarks) { // Both arrays have timestamps
         return visits[numVisits - 1] > bookmarks[numBookmarks - 1]
-            ? visits[numVisits - 1]
-            : bookmarks[numBookmarks - 1]
+            ? { latest: visits[numVisits - 1], type: RESULT_TYPES.VISIT }
+            : { latest: bookmarks[numBookmarks - 1], type: RESULT_TYPES.BOOKMARK }
     } else if (numBookmarks) { // Only bookmark array has timestamps
-        return bookmarks[numBookmarks - 1]
+        return { latest: bookmarks[numBookmarks - 1], type: RESULT_TYPES.BOOKMARK }
     } else { // Only visit array has timestamps
-        return visits[numVisits - 1]
+        return { latest: visits[numVisits - 1], type: RESULT_TYPES.VISIT }
     }
 }
 
@@ -72,7 +83,7 @@ const transformPageAndMetaDocs = ({ pageDoc, visitDocs = [], bookmarkDocs = [] }
 
     return {
         ...pipeline(pageDoc),
-        latest: getLatestMeta(visits, bookmarks),
+        ...getLatestMeta(visits, bookmarks),
         visits,
         bookmarks,
     }
@@ -148,6 +159,9 @@ const addTimestamp = field => async metaDoc => {
     }
 
     const newTimestamp = transformMetaDoc(metaDoc)
+
+    // This can be done better; now works becuase we have only 2 types
+    existingDoc.type = metaDoc._id.startsWith('visit/') ? RESULT_TYPES.VISIT : RESULT_TYPES.BOOKMARK
 
     // Perform in-memory updates of timestamp array + "latest"/sort field
     existingDoc.latest = newTimestamp

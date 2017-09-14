@@ -1,31 +1,6 @@
 import reduce from 'lodash/fp/reduce'
 
 import db, { bulkGetResultsToArray } from 'src/pouchdb'
-import { RESULT_TYPES } from 'src/overview/constants'
-
-/**
- * Given an augmented page doc determine its "type" for use to display in the views.
- * Either `visit` or `bookmark` will be chosen determined by whichever is latest (if available).
- * @param {any} augmentedPageDoc The augmented page doc from search results.
- * @returns {string} Display type string matching one of `constants.RESULT_TYPES`.
- *  Unknown type given in case of bad data (no assoc. meta timestamp)
- */
-function checkPageDocType({ bookmark, visit }) {
-    let type = RESULT_TYPES.UNKNOWN
-
-    // If both exist, find the time of the latest oneO
-    if (visit && bookmark) {
-        type = visit > bookmark
-            ? RESULT_TYPES.VISIT
-            : RESULT_TYPES.BOOKMARK
-    } else if (visit) {
-        type = RESULT_TYPES.VISIT
-    } else if (bookmark) {
-        type = RESULT_TYPES.BOOKMARK
-    }
-
-    return type
-}
 
 /**
  * Iterates through at most log N of the input timestamps (where N is timestamps.length).
@@ -56,7 +31,7 @@ const simpleTimestampBinSearch = (timestamps = [], endDate) => {
 }
 
 /**
-* NOTE: Assumes order for O(1) "lookup" of latest time,
+* NOTE: Assumes order for O(1) "lookup" of latest time, but O(log N) in case of endDate set
 * @param {Array<string>} timestamps ORDERED array of timestamp strings to get latest (last) one.
 * @returns {string} The latest timestamp
 */
@@ -83,6 +58,7 @@ const createResultIdsDict = timeFilters => reduce((acc, result) => ({
         visit: getLatestTime(result.document.visits, timeFilters),
         bookmark: getLatestTime(result.document.bookmarks, timeFilters),
         score: result.score,
+        displayType: result.document.type,
     },
 }), {})
 
@@ -114,7 +90,7 @@ export default async function mapResultsToPouchDocs(results, timeFilters) {
         ...doc,
         visit: +resultIdsDict[doc._id].visit,
         bookmark: +resultIdsDict[doc._id].bookmark,
-        displayType: checkPageDocType(resultIdsDict[doc._id]),
+        displayType: resultIdsDict[doc._id].displayType,
     }))
 
     // Ensure the original results order is maintained
