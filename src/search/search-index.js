@@ -23,6 +23,9 @@ const indexOpts = {
         bookmarks: {
             fieldedSearch: true,
         },
+        latest: {
+            sortable: true,
+        },
         content: {
             fieldedSearch: true,
         },
@@ -41,12 +44,39 @@ const standardResponse = (resolve, reject) =>
 //  which is the only data we want at the moment.
 const transformMetaDoc = doc => convertMetaDocId(doc._id).timestamp
 
+/**
+ * NOTE: Assumes sorted arrays, last index containing latest.
+ * @param {Array<string>} visits Sorted array of UNIX timestamp strings.
+ * @param {Array<string>} bookmarks Sorted array of UNIX timestamp strings.
+ * @returns {string} Latest UNIX timestamp of all params.
+ */
+const getLatestMeta = (visits, bookmarks) => {
+    const numVisits = visits.length
+    const numBookmarks = bookmarks.length
+
+    if (numVisits && numBookmarks) { // Both arrays have timestamps
+        return visits[numVisits - 1] > bookmarks[numBookmarks - 1]
+            ? visits[numVisits - 1]
+            : bookmarks[numBookmarks - 1]
+    } else if (numBookmarks) { // Only bookmark array has timestamps
+        return bookmarks[numBookmarks - 1]
+    } else { // Only visit array has timestamps
+        return visits[numVisits - 1]
+    }
+}
+
 // Groups input docs into standard index doc structure
-const transformPageAndMetaDocs = ({ pageDoc, visitDocs = [], bookmarkDocs = [] }) => ({
-    ...pipeline(pageDoc),
-    visits: visitDocs.map(transformMetaDoc),
-    bookmarks: bookmarkDocs.map(transformMetaDoc),
-})
+const transformPageAndMetaDocs = ({ pageDoc, visitDocs = [], bookmarkDocs = [] }) => {
+    const visits = visitDocs.map(transformMetaDoc)
+    const bookmarks = bookmarkDocs.map(transformMetaDoc)
+
+    return {
+        ...pipeline(pageDoc),
+        latest: getLatestMeta(visits, bookmarks),
+        visits,
+        bookmarks,
+    }
+}
 
 // Wraps instance creation in a Promise for use in async interface methods
 const indexP = new Promise((...args) => initSearchIndex(indexOpts, standardResponse(...args)))

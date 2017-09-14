@@ -37,15 +37,11 @@ export default async function indexSearch({
         return { docs: [], resultsExhausted: true }
     }
 
-    // If the query is empty, we default to time-based sort, else use search relevance
-    const shouldSortByTime = query === ''
-
     // Match the index results to data docs available in Pouch, consolidating meta docs
-    const docs = await mapResultsToPouchDocs(results, { startDate, endDate }, shouldSortByTime)
+    const docs = await mapResultsToPouchDocs(results, { startDate, endDate })
 
     return {
         docs,
-        // resultsExhausted: results.length < limit,
-        resultsExhausted: false, // Needs to be false for now; index results seem random relative to limit
+        resultsExhausted: results.length < limit,
     }
 }

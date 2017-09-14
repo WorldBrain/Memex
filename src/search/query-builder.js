@@ -50,6 +50,15 @@ class QueryBuilder {
 
         if (this.offset) q.offset = this.offset
         if (this.pageSize) q.pageSize = this.pageSize
+        // Wildcard search is special case when there is no search times; need to sort by time
+        if (this.content[0] === '*') {
+            // Remove duplicate empty query if nothing given; (special case - no inputs filled, so two blank queries)
+            if (!this.bookmarks.length && !this.visits.length) {
+                q.query.pop()
+            }
+            // Apply sort by latest meta time
+            q.sort = { field: 'latest', direction: 'desc' }
+        }
 
         return q
     }

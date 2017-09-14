@@ -86,12 +86,8 @@ const createResultIdsDict = timeFilters => reduce((acc, result) => ({
     },
 }), {})
 
-// Sort predicates based on time and search relevance
-const sortByTime = () => (docA, docB) =>
-    docB[docB.displayType] - docA[docA.displayType]
-
-const sortByRelevance = resultIdsDict => (docA, docB) =>
-    resultIdsDict[docA._id].score - resultIdsDict[docB._id].score
+const sortByScore = resultIdsDict => (docA, docB) =>
+    resultIdsDict[docB._id].score - resultIdsDict[docA._id].score
 
 /**
 * Performs all the messy logic needed to resolve search-index results against our PouchDB model.
@@ -100,10 +96,9 @@ const sortByRelevance = resultIdsDict => (docA, docB) =>
 * call these "augmented page docs", and are generally only used by the overview.
 *
 * @param {Array<any>} results Array of results gotten from our search-index query.
-* @param {boolean} [shouldSortByTime=false] Whether or not to order results by time.
 * @returns {Array<any>} Array of augmented page docs containing linked meta doc timestamps.
 */
-export default async function mapResultsToPouchDocs(results, timeFilters, shouldSortByTime = false) {
+export default async function mapResultsToPouchDocs(results, timeFilters) {
     // Convert results to dictionary of page IDs to related meta IDs
     const resultIdsDict = createResultIdsDict(timeFilters)(results)
 
@@ -122,9 +117,6 @@ export default async function mapResultsToPouchDocs(results, timeFilters, should
         displayType: checkPageDocType(resultIdsDict[doc._id]),
     }))
 
-    // Perform time-based sort if default query (based on greatest meta doc time)
-    const sortPredicate = shouldSortByTime ? sortByTime() : sortByRelevance(resultIdsDict)
-
-    // Ensure the original results order is maintained, if specified
-    return augmentedPageDocs.sort(sortPredicate)
+    // Ensure the original results order is maintained
+    return augmentedPageDocs.sort(sortByScore(resultIdsDict))
 }
