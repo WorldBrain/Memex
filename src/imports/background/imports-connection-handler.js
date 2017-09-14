@@ -5,20 +5,16 @@ import { CMDS, IMPORT_CONN_NAME, IMPORT_TYPE } from 'src/options/imports/constan
 import getEstimateCounts from './import-estimates'
 import processImportItem from './import-item-processor'
 import {
-    importProgressStorageKey, getImportItems, setImportItems,
+    getImportItems, setImportItems,
     getURLFilteredHistoryItems, getURLFilteredBookmarkItems,
     removeImportItem, clearImportItems,
 } from './'
+import {
+    getImportInProgressFlag, setImportInProgressFlag,
+    clearImportInProgressFlag,
+} from '../'
 
 const uniqByUrl = uniqBy('url')
-
-// Local storage helpers to make the main functions a bit less messy
-const getImportInProgressFlag = async () =>
-    (await browser.storage.local.get(importProgressStorageKey))[importProgressStorageKey]
-const setImportInProgressFlag = async () =>
-    (await browser.storage.local.set({ [importProgressStorageKey]: true }))
-const clearImportInProgressFlag = async () =>
-    await browser.storage.local.remove(importProgressStorageKey)
 
 // Binds an import type to a function that transforms a history/bookmark doc to an import item.
 const transformToImportItem = type => item => ({

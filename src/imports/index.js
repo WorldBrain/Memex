@@ -3,6 +3,16 @@ import docuri from 'docuri'
 import randomString from 'src/util/random-string'
 import { generateVisitDocId } from 'src/activity-logger'
 
+export const importProgressStorageKey = 'is_import_in_progress'
+
+// Local storage helpers to make the main functions a bit less messy
+export const getImportInProgressFlag = async () =>
+    (await browser.storage.local.get(importProgressStorageKey))[importProgressStorageKey]
+export const setImportInProgressFlag = async () =>
+    (await browser.storage.local.set({ [importProgressStorageKey]: true }))
+export const clearImportInProgressFlag = async () =>
+    await browser.storage.local.remove(importProgressStorageKey)
+
 // Bookmarks related utility functions (TODO: Find appropriate space for this to live)
 export const bookmarkKeyPrefix = 'bookmark/'
 export const bookmarkDocsSelector = { _id: { $gte: bookmarkKeyPrefix, $lte: `${bookmarkKeyPrefix}\uffff` } }
