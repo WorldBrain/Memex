@@ -49,6 +49,7 @@ async function createAssociatedBookmarkDoc(pageDoc, importItem) {
  *  + optional filled-out page doc as `pageDoc` field.
  */
 async function processHistoryImport(importItem) {
+    
     // Do the page data fetch
     const { content, favIconURI } = await fetchPageData({ url: importItem.url, opts: fetchPageDataOpts })
 
@@ -73,10 +74,12 @@ async function processHistoryImport(importItem) {
         : []
 
     // Schedule indexing of searchable data, but don't wait for it
+    console.time('index-time')
     await index.addPage({ pageDoc, visitDocs, bookmarkDocs })
+    console.timeEnd('index-time')
     // Store the new data in Pouch
     await db.bulkDocs([pageDoc, ...bookmarkDocs, ...visitDocs])
-
+    
     // If we finally got here without an error being thrown, return the success status message + pageDoc data
     return { status: DOWNLOAD_STATUS.SUCC }
 }
@@ -89,9 +92,11 @@ async function processHistoryImport(importItem) {
  *  + optional filled-out page doc as `pageDoc` field.
  */
 export default async function processImportItem(importItem = {}) {
+    console.time('total-import-time')
     switch (importItem.type) {
         case IMPORT_TYPE.BOOKMARK:
         case IMPORT_TYPE.HISTORY: return await processHistoryImport(importItem)
         default: throw new Error('Unknown import type')
     }
+    console.time('total-import-time')
 }

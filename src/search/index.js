@@ -42,7 +42,6 @@ export default async function indexSearch({
 
     // Match the index results to data docs available in Pouch, consolidating meta docs
     const docs = await mapResultsToPouchDocs(results, { startDate, endDate }, shouldSortByTime)
-
     return {
         docs,
         resultsExhausted: results.length < limit,

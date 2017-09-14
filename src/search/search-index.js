@@ -85,6 +85,7 @@ export async function addPage({ pageDoc, visitDocs = [], bookmarkDocs = [] }) {
     const indexDoc = transformPageAndMetaDocs({ pageDoc, visitDocs, bookmarkDocs })
 
     return new Promise((resolve, reject) => {
+        console.time('index-time-2')
         // Set up add pipeline
         const inputStream = new stream.Readable({ objectMode: true })
         inputStream
@@ -96,6 +97,7 @@ export async function addPage({ pageDoc, visitDocs = [], bookmarkDocs = [] }) {
         // Push index doc onto stream + null to signify end-of-stream
         inputStream.push(indexDoc)
         inputStream.push(null)
+        console.timeEnd('index-time-2')
     })
 }
 
