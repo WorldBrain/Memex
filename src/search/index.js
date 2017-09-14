@@ -16,6 +16,7 @@ export default async function indexSearch({
     endDate,
     skip,
     limit = 10,
+    getTotalCount = false,
 }) {
     query = query.trim() // Don't count whitespace searches
 
@@ -34,7 +35,11 @@ export default async function indexSearch({
 
     // Short-circuit if no results
     if (!results.length) {
-        return { docs: [], resultsExhausted: true }
+        return {
+            docs: [],
+            resultsExhausted: true,
+            totalCount: getTotalCount ? 0 : undefined,
+        }
     }
 
     // Match the index results to data docs available in Pouch, consolidating meta docs
@@ -42,6 +47,7 @@ export default async function indexSearch({
 
     return {
         docs,
-        resultsExhausted: results.length < limit,
+        resultsExhausted: false,
+        totalCount: getTotalCount ? await index.count(indexQuery) : undefined,
     }
 }
