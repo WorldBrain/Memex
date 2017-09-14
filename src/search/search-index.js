@@ -241,6 +241,28 @@ export async function search(query) {
             .on('end', () => resolve(data)))
 }
 
+export async function categorize(query) {
+    const index = await indexP
+    let data = []
+
+    return new Promise((resolve, reject) =>
+        index.categorize(query)
+            .on('data', datum => data.push(datum))
+            .on('error', reject)
+            .on('end', () => resolve(data)))
+}
+
+export async function buckets(query) {
+    const index = await indexP
+    let data = []
+
+    return new Promise((resolve, reject) =>
+        index.buckets(query)
+            .on('data', datum => data.push(datum))
+            .on('error', reject)
+            .on('end', () => resolve(data)))
+}
+
 // Resolves to the stream from search-index's `.search`.
 export async function searchStream(query) {
     const index = await indexP
