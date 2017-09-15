@@ -9,7 +9,7 @@ import { RESULT_TYPES } from 'src/overview/constants'
 
 const indexOpts = {
     batchSize: 500,
-    appendOnly: true,
+    appendOnly: false,
     indexPath: 'worldbrain-index',
     logLevel: 'info',
     preserveCase: false,
