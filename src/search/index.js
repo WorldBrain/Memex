@@ -22,11 +22,11 @@ export default async function indexSearch({
 
     // Create SI query
     const indexQuery = new QueryBuilder()
-        .searchTerm(query || '*') // Search by wildcard by default
+        .searchTerm(query)
         .startDate(startDate)
         .endDate(endDate)
-        .skipUntil(skip || undefined)
-        .limit(limit || 10)
+        .skipUntil(skip)
+        .limit(limit)
         .get()
 
     // Get index results, filtering out any unexpectedly structured results
