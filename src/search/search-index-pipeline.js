@@ -1,5 +1,3 @@
-import reduce from 'lodash/fp/reduce'
-
 import transformPageText from 'src/util/transform-page-text'
 
 // Meant to match domain + TLD + optional ccTLD of a URL without leading `protocol://www.`.
@@ -9,8 +7,6 @@ import transformPageText from 'src/util/transform-page-text'
 // TODO: This needs proper scrutinyy
 const DOMAIN_TLD_PATTERN = /(\w{2,}\.\w{2,3}(\.\w{2})?)(\/|$)(.*)/
 const PROTOCOL_WWW_PATTERN = /(^\w+:|^)\/\/(www\.)?/
-
-const combineContentStrings = reduce((result, val) => `${result}\n${val}`, '')
 
 /**
  * @param {string} url A raw URL string to attempt to extract parts from.
@@ -46,18 +42,14 @@ export default function pipeline({ _id: id, content, url }) {
     const { remainingUrl, domain } = transformUrl(url)
 
     // Short circuit if no searchable content
-    //  (not 100% sure what to do here yet; basically means doc is useless for search)
-    if (!content || Object.keys(content).length === 0) {
+    //  (not 100% sure what to do in this situation yet; basically means doc is useless for search,
+    //    so maybe throw error so index method can skip it?)
+    if (!content || !content.fullText || !content.fullText.length === 0) {
         return { id, url: remainingUrl, domain }
     }
 
-    // This is the main searchable page content. The bulk is from `document.body.innerHTML` in
-    //  `content.fullText`. Contains other things like `content.title`, `content.description`.
-    //  Here we are just concatting it all, essentially making a composite field for text search.
-    const searchableContent = combineContentStrings(content)
-
     // Run the searchable content through our text transformations, attempting to discard useless data.
-    const { text: transformedContent } = transformPageText({ text: searchableContent })
+    const { text: transformedContent } = transformPageText({ text: content.fullText })
 
-    return { id, content: transformedContent, url: remainingUrl, domain }
+    return { id, content: transformedContent, url: remainingUrl, domain, title: content.title }
 }

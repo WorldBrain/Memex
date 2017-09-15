@@ -27,6 +27,11 @@ const indexOpts = {
             fieldedSearch: true,
             separator: '/',
         },
+        // Page title text; occasionally empty
+        title: {
+            weight: 30,
+            fieldedSearch: true,
+        },
         // Page URL tokenized by forward slashes; normalized slightly to remove protocol and leading `www.`
         url: {
             weight: 20,
