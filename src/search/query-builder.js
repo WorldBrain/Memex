@@ -10,7 +10,7 @@ class QueryBuilder {
         this.visits = []
         this.offset = null
         this.pageSize = null
-        this.url = []
+        this.domain = []
     }
 
     /**
@@ -43,8 +43,8 @@ class QueryBuilder {
     get() {
         const q = {
             query: [
-                { AND: { content: this.content, bookmarks: this.bookmarks, url: this.url } },
-                { AND: { content: this.content, visits: this.visits, url: this.url } },
+                { AND: { content: this.content, bookmarks: this.bookmarks, domain: this.domain } },
+                { AND: { content: this.content, visits: this.visits, domain: this.domain } },
             ],
         }
 
@@ -88,7 +88,7 @@ class QueryBuilder {
             terms.forEach(term => {
                 if (DOMAIN_TLD_PATTERN.test(term)) {
                     // Only can support single domain.tld search for now, so set to first index
-                    this.url[0] = term
+                    this.domain[0] = term
                 } else {
                     this.content.push(term)
                 }
