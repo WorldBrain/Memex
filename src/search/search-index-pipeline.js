@@ -1,37 +1,34 @@
-import stream from 'stream'
-import reduce from 'lodash/fp/reduce'
-
 import transformPageText from 'src/util/transform-page-text'
 
-const combineContentStrings = reduce((result, val) => `${result}\n${val}`, '')
+// Meant to match domain + TLD + optional ccTLD of a URL without leading `protocol://www.`.
+//   It end-delimits the domain by either a forward-slash or end-of-input.
+//   From a `String.prototype.match` call, it should output 5 groups with group 2 containing
+//   `domain.tld.cctld` and group 5 containing the rest of the URL after domain.
+// TODO: This needs proper scrutinyy
+const DOMAIN_TLD_PATTERN = /(\w{2,}\.\w{2,3}(\.\w{2})?)(\/|$)(.*)/
+const PROTOCOL_WWW_PATTERN = /(^\w+:|^)\/\/(www\.)?/
 
 /**
- * Transforms a page doc to doc structured for use with the index.
- * All searchable page data (content) is concatted to make a composite field.
- * This represents the general structure for index docs.
-*/
-const transformPageDoc = ({ _id: id, content = {}, bookmarks = [], visits = [] }) => ({
-    id,
-    content: combineContentStrings(content),
-    bookmarks,
-    visits,
-})
+ * @param {string} url A raw URL string to attempt to extract parts from.
+ * @returns {any} Object containing `domain` and `remainingUrl` keys. Values should be the `domain.tld.cctld` part and
+ *  everything after, respectively. If regex matching failed on given URL, error will be logged and simply
+ *  the URL with protocol and opt. `www` parts removed will be returned for both values.
+ */
+const transformUrl = url => {
+    const normalized = url.replace(PROTOCOL_WWW_PATTERN, '')
+    const matchResult = normalized.match(DOMAIN_TLD_PATTERN)
 
-// Currently just removes the protocol (and opt. 'www.') from URLs, to enable easy search-on-domain matching
-const transformUrl = url => url.replace(/(^\w+:|^)\/\/(www\.)?/, '')
-
-// Transform stream version (currently not supported by concurrentAdd, hence is currently unused)
-export class PipelineStream extends stream.Transform {
-    _transform(doc, _, next) {
-        const transformedDoc = transformPageDoc(doc)
-        const { text: transformedContent } = transformPageText({ text: transformedDoc.content })
-
-        next(null, {
-            ...transformedDoc,
-            content: transformedContent,
-        })
+    if (matchResult == null) {
+        console.error(`cannot split URL: ${url}`)
+        return { remainingUrl: normalized, domain: normalized }
     }
+
+    const { 1: domain, 4: remainingUrl } = matchResult
+
+    // Fallback to normalized URL if match groups don't exist
+    return { remainingUrl: remainingUrl || normalized, domain: domain || normalized }
 }
+
 
 /**
  * Function version of "pipeline" logic. Applies transformation logic
@@ -42,21 +39,16 @@ export class PipelineStream extends stream.Transform {
  */
 export default function pipeline({ _id: id, content, url }) {
     // First apply transformations to the URL
-    const transformedUrl = transformUrl(url)
+    const { remainingUrl, domain } = transformUrl(url)
 
-    // Short circuit if no searchable content
-    //  (not 100% sure what to do here yet; basically means doc is useless for search)
-    if (!content || Object.keys(content).length === 0) {
-        return { id, url: transformedUrl }
+    // Throw error if no searchable content; we don't really want to index these (for now) so allow callers
+    //  to handle (probably by ignoring)
+    if (!content || !content.fullText || !content.fullText.length === 0) {
+        throw new Error('Page has no searchable content')
     }
 
-    // This is the main searchable page content. The bulk is from `document.body.innerHTML` in
-    //  `content.fullText`. Contains other things like `content.title`, `content.description`.
-    //  Here we are just concatting it all, essentially making a composite field for text search.
-    const searchableContent = combineContentStrings(content)
-
     // Run the searchable content through our text transformations, attempting to discard useless data.
-    const { text: transformedContent } = transformPageText({ text: searchableContent })
+    const { text: transformedContent } = transformPageText({ text: content.fullText })
 
-    return { id, content: transformedContent, url: transformedUrl }
+    return { id, content: transformedContent, url: remainingUrl, domain, title: content.title }
 }

@@ -1,6 +1,6 @@
 import { createAction } from 'redux-act'
 
-import { deleteMetaAndPage } from 'src/page-storage/deletion'
+import deleteDocsByUrl from 'src/page-storage/deletion'
 import * as constants from './constants'
 import * as selectors from './selectors'
 
@@ -99,15 +99,16 @@ export const getMoreResults = () => async dispatch => {
     dispatch(search())
 }
 
-export const deleteMeta = (metaDoc, deleteAssoc = false) => async (dispatch, getState) => {
+export const deleteDocs = () => async (dispatch, getState) => {
+    const url = selectors.urlToDelete(getState())
+
     // Hide the result item + confirm modal directly (optimistically)
-    dispatch(hideResultItem(metaDoc))
+    dispatch(hideResultItem(url))
     dispatch(hideDeleteConfirm())
-    // Remove it from the database.
-    await deleteMetaAndPage({ metaDoc, deleteAssoc })
+
+    // Remove all assoc. docs from the database + index
+    await deleteDocsByUrl(url)
 
     // Refresh search view after deleting all assoc docs
-    if (deleteAssoc) {
-        dispatch(search({ overwrite: true }))
-    }
+    dispatch(search({ overwrite: true }))
 }

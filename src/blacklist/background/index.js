@@ -1,4 +1,4 @@
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
-import cleanupBlacklist from './cleanup-blacklist'
+import deleteDocsByUrl from 'src/page-storage/deletion'
 
-makeRemotelyCallable({ cleanupBlacklist })
+makeRemotelyCallable({ cleanupBlacklist: deleteDocsByUrl })

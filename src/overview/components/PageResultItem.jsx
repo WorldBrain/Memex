@@ -12,16 +12,10 @@ import { showDeleteConfirm } from '../actions'
 import * as constants from '../constants'
 
 // Format either visit, bookmark, or nothing, depending on doc `displayType`.
-const renderTime = ({ doc }) => {
-    switch (doc.displayType) {
-        case constants.RESULT_TYPES.BOOKMARK:
-            return niceTime(doc.assoc.bookmark.dateAdded)
-        case constants.RESULT_TYPES.VISIT:
-            return niceTime(doc.assoc.visit.visitStart)
-        default:
-            return ''
-    }
-}
+const renderTime = ({ doc }) =>
+    doc.displayType !== constants.RESULT_TYPES.UNKNOWN
+        ? niceTime(doc[doc.displayType])
+        : ''
 
 const getMainClasses = ({ compact }) => classNames({
     [styles.root]: true,
@@ -97,7 +91,7 @@ const mapStateToProps = state => ({})
 const mapDispatchToProps = (dispatch, { doc }) => ({
     onTrashButtonClick: e => {
         e.preventDefault()
-        dispatch(showDeleteConfirm(doc.assoc[doc.displayType]))
+        dispatch(showDeleteConfirm(doc.url))
     },
 })
 

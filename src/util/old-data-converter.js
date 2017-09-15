@@ -57,7 +57,7 @@ const notifOptions = {
  * @param {string} assocPageDocId The `_id` of the associated page doc.
  */
 const transformToMinimalVisit = assocPageDoc => ({ time, url }) => ({
-    _id: generateVisitDocId({ timestamp: time }),
+    _id: generateVisitDocId({ url, timestamp: time }),
     visitStart: time,
     url,
     page: { _id: assocPageDoc._id },
@@ -67,8 +67,8 @@ const transformToMinimalVisit = assocPageDoc => ({ time, url }) => ({
  * @param {IPageOldExt} oldPage
  * @return {IPageDoc} The converted minimal page doc.
  */
-const transformToPageDoc = isStub => ({ text, time, title, url }) => ({
-    _id: generatePageDocId({ timestamp: time }),
+const transformToPageDoc = isStub => ({ text, title, url }) => ({
+    _id: generatePageDocId({ url }),
     title,
     url,
     isStub,
@@ -84,7 +84,7 @@ const transformToPageDoc = isStub => ({ text, time, title, url }) => ({
  * @return {IBookmarkDoc} The converted minimal bookmark doc.
  */
 const transformToBookmarkDoc = assocPageDoc => ({ text, time, title, url }) => ({
-    _id: generateBookmarkDocId({ timestamp: time }),
+    _id: generateBookmarkDocId({ url, timestamp: time }),
     title,
     url,
     page: { _id: assocPageDoc._id },

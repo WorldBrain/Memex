@@ -4,10 +4,12 @@ import stream from 'stream'
 import stopword from 'stopword'
 
 import pipeline from './search-index-pipeline'
+import { convertMetaDocId } from 'src/activity-logger'
+import { RESULT_TYPES } from 'src/overview/constants'
 
 const indexOpts = {
     batchSize: 500,
-    appendOnly: true,
+    appendOnly: false,
     indexPath: 'worldbrain-index',
     logLevel: 'info',
     preserveCase: false,
@@ -16,19 +18,42 @@ const indexOpts = {
     separator: /[|' .,\-|(\n)]+/,
     stopwords: stopword.en,
     fieldOptions: {
-        visits: {
-            fieldedSearch: true,
-        },
-        bookmarks: {
-            fieldedSearch: true,
-        },
-        content: {
-            fieldedSearch: true,
-        },
-        url: {
-            weight: 10,
+        // The `domain.tld(.cctld)` data from a page's URL
+        // Currently used to afford `domain.tld(.cctld)` search in our queries
+        // Should never need to tokenize, but put forward-slash separator incase preproecssing fails for whatever reason
+        // (then domain search can still happen)
+        domain: {
+            weight: 40,
             fieldedSearch: true,
             separator: '/',
+        },
+        // Page title text; occasionally empty
+        title: {
+            weight: 30,
+            fieldedSearch: true,
+        },
+        // Page URL tokenized by forward slashes; normalized slightly to remove protocol and leading `www.`
+        url: {
+            weight: 20,
+            fieldedSearch: true,
+            separator: '/',
+        },
+        // Sorted arrays of UNIX epoch timestamps; latest at end.
+        // Currently used to afford time filtering; updates on relevant meta event
+        visits: { fieldedSearch: true },
+        bookmarks: { fieldedSearch: true },
+        // The bulk of page content; processed from `document.innerHTML`
+        content: { fieldedSearch: true },
+        // UNIX epoch timestamp; should always be the same as last element of `visits` or `bookmarks` array, depending on which is later.
+        // Currently used for sorting when there are no text search parameters defined; updates on meta events
+        latest: {
+            sortable: true,
+        },
+        // Denotes the type (currently 'visit' or 'bookmark') of the latest meta event performed on page
+        // Currently used to afford differientiation (mainly in UI); updates on meta events
+        type: {
+            searchable: false,
+            fieldedSearch: false,
         },
     },
 }
@@ -36,16 +61,45 @@ const indexOpts = {
 const standardResponse = (resolve, reject) =>
     (err, data = true) => err ? reject(err) : resolve(data)
 
-// Simply maps out the ID of visit or bookmark docs. The ID contains
-// timestamp, which is the only data we want at the moment.
-const transformTimeDoc = doc => doc._id
+// Simply extracts the timestamp component out the ID of a visit or bookmark doc,
+//  which is the only data we want at the moment.
+const transformMetaDoc = doc => convertMetaDocId(doc._id).timestamp
+
+/**
+ * NOTE: Assumes sorted arrays, last index containing latest.
+ * @param {Array<string>} visits Sorted array of UNIX timestamp strings.
+ * @param {Array<string>} bookmarks Sorted array of UNIX timestamp strings.
+ * @returns {any} Object containing:
+ *  - `latest`: latest UNIX timestamp of all params
+ *  - `type`: currently either `bookmark` or `visit` to allow distinguishing the type later.
+ */
+const getLatestMeta = (visits, bookmarks) => {
+    const numVisits = visits.length
+    const numBookmarks = bookmarks.length
+
+    if (numVisits && numBookmarks) { // Both arrays have timestamps
+        return visits[numVisits - 1] > bookmarks[numBookmarks - 1]
+            ? { latest: visits[numVisits - 1], type: RESULT_TYPES.VISIT }
+            : { latest: bookmarks[numBookmarks - 1], type: RESULT_TYPES.BOOKMARK }
+    } else if (numBookmarks) { // Only bookmark array has timestamps
+        return { latest: bookmarks[numBookmarks - 1], type: RESULT_TYPES.BOOKMARK }
+    } else { // Only visit array has timestamps
+        return { latest: visits[numVisits - 1], type: RESULT_TYPES.VISIT }
+    }
+}
 
 // Groups input docs into standard index doc structure
-const transformPageAndMetaDocs = ({ pageDoc, visitDocs = [], bookmarkDocs = [] }) => ({
-    ...pipeline(pageDoc),
-    visits: visitDocs.map(transformTimeDoc),
-    bookmarks: bookmarkDocs.map(transformTimeDoc),
-})
+const transformPageAndMetaDocs = ({ pageDoc, visitDocs = [], bookmarkDocs = [] }) => {
+    const visits = visitDocs.map(transformMetaDoc)
+    const bookmarks = bookmarkDocs.map(transformMetaDoc)
+
+    return {
+        ...pipeline(pageDoc),
+        ...getLatestMeta(visits, bookmarks),
+        visits,
+        bookmarks,
+    }
+}
 
 // Wraps instance creation in a Promise for use in async interface methods
 const indexP = new Promise((...args) => initSearchIndex(indexOpts, standardResponse(...args)))
@@ -103,18 +157,32 @@ export async function addPage({ pageDoc, visitDocs = [], bookmarkDocs = [] }) {
  * Returns a function that affords adding either a visit or bookmark to an index.
  * The function should perform the following update, using the associated page doc ID:
  *  - grab the existing index doc matching the page doc ID
- *  - perform update to appropriate timestamp field
+ *  - perform update to appropriate timestamp field, by APPENDING new timestamp to field + `latest` (sort) field
  *  - delete the original doc form the index
  *  - add the updated doc into the index
+ * NOTE: this appends the timestamp extracted from the given metaDoc, hence to maintain an
+ * order, this should generally only get called on new visits/bookmark events.
  */
-const addTimestamp = field => async ({ _id, page }) => {
-    const existingDoc = await get(page._id) // Get existing doc
+const addTimestamp = field => async metaDoc => {
+    const indexDocId = metaDoc.page._id // Index docs share ID with corresponding pouch page doc
+    const existingDoc = await get(indexDocId) // Get existing indexed doc
     if (!existingDoc) {
         throw new Error('Page associated with timestamp is not recorded in the index')
     }
 
-    (existingDoc[field] || []).push(_id) // Perform in-memory update
-    await del(page._id) // Delete existing doc
+    const newTimestamp = transformMetaDoc(metaDoc)
+
+    // This can be done better; now works becuase we have only 2 types
+    existingDoc.type = metaDoc._id.startsWith('visit/') ? RESULT_TYPES.VISIT : RESULT_TYPES.BOOKMARK
+
+    // Perform in-memory updates of timestamp array + "latest"/sort field
+    existingDoc.latest = newTimestamp
+    existingDoc[field] = [
+        ...(existingDoc[field] || []),
+        newTimestamp,
+    ]
+
+    await del(indexDocId) // Delete existing doc
     return addConcurrent(existingDoc) // Add new updated doc
 }
 
@@ -129,14 +197,15 @@ export const addBookmark = addTimestamp('bookmarks')
  *  - delete the original doc form the index
  *  - add the updated doc into the index
  */
-const removeTimestamp = field => async ({ _id, page }) => {
-    const existingDoc = await get(page._id) // Get existing doc
+const removeTimestamp = field => async metaDoc => {
+    const indexDocId = metaDoc.page._id // Index docs share ID with corresponding pouch page doc
+    const existingDoc = await get(indexDocId) // Get existing doc
     if (!existingDoc) {
         throw new Error('Page associated with timestamp is not recorded in the index')
     }
 
     // Perform in-memory update by removing the timestamp
-    const indexToRemove = existingDoc[field].indexOf(_id)
+    const indexToRemove = existingDoc[field].indexOf(transformMetaDoc(metaDoc))
     if (indexToRemove === -1) {
         throw new Error('Associated timestamp is not recorded in the index')
     }
@@ -145,7 +214,7 @@ const removeTimestamp = field => async ({ _id, page }) => {
         ...existingDoc[field].slice(indexToRemove + 1),
     ]
 
-    await del(page._id) // Delete existing doc
+    await del(indexDocId) // Delete existing doc
     return addConcurrent(existingDoc) // Add new updated doc
 }
 
@@ -201,6 +270,28 @@ export async function search(query) {
 
     return new Promise((resolve, reject) =>
         index.search(query)
+            .on('data', datum => data.push(datum))
+            .on('error', reject)
+            .on('end', () => resolve(data)))
+}
+
+export async function categorize(query) {
+    const index = await indexP
+    let data = []
+
+    return new Promise((resolve, reject) =>
+        index.categorize(query)
+            .on('data', datum => data.push(datum))
+            .on('error', reject)
+            .on('end', () => resolve(data)))
+}
+
+export async function buckets(query) {
+    const index = await indexP
+    let data = []
+
+    return new Promise((resolve, reject) =>
+        index.buckets(query)
             .on('data', datum => data.push(datum))
             .on('error', reject)
             .on('end', () => resolve(data)))

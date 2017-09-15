@@ -20,19 +20,6 @@ let browserName
     }
 })()
 
-function getLatestTimestamp({ visit, bookmark }) {
-    if (visit && bookmark) {
-        return visit.visitStart > bookmark.dateAdded
-            ? visit.visitStart
-            : bookmark.dateAdded
-    } else if (visit) {
-        return visit.visitStart
-    } else if (bookmark) {
-        return bookmark.dateAdded
-    }
-    return 0
-}
-
 function formatTime(timestamp, showTime) {
     const m = moment(timestamp)
     const inLastSevenDays = moment().diff(m, 'days') <= 7
@@ -46,7 +33,7 @@ function formatTime(timestamp, showTime) {
 const pageToSuggestion = timeFilterApplied => doc => {
     const url = escapeHtml(shortUrl(doc.url))
     const title = escapeHtml(doc.content.title)
-    const time = formatTime(getLatestTimestamp(doc.assoc), timeFilterApplied)
+    const time = formatTime(doc[doc.displayType], timeFilterApplied)
 
     return {
         content: doc.url,
@@ -86,6 +73,7 @@ async function makeSuggestion(query, suggest) {
         startDate,
         endDate,
         limit: 5,
+        getTotalCount: true,
     })
 
     // A subsequent search could have already started and finished while we
@@ -98,7 +86,7 @@ async function makeSuggestion(query, suggest) {
         })
     } else {
         browser.omnibox.setDefaultSuggestion({
-            description: `Found these ${searchResults.docs.length} pages in your memory: (press enter to search deeper)`,
+            description: `Found these ${searchResults.totalCount} pages in your memory: (press enter to search deeper)`,
         })
     }
     const suggestions = searchResults.docs.map(pageToSuggestion(startDate || endDate))

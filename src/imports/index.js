@@ -1,7 +1,7 @@
 import docuri from 'docuri'
 
-import randomString from 'src/util/random-string'
 import { generateVisitDocId } from 'src/activity-logger'
+import encodeUrl from 'src/util/encode-url-for-id'
 
 export const importProgressStorageKey = 'is_import_in_progress'
 
@@ -16,11 +16,11 @@ export const clearImportInProgressFlag = async () =>
 // Bookmarks related utility functions (TODO: Find appropriate space for this to live)
 export const bookmarkKeyPrefix = 'bookmark/'
 export const bookmarkDocsSelector = { _id: { $gte: bookmarkKeyPrefix, $lte: `${bookmarkKeyPrefix}\uffff` } }
-export const convertBookmarkDocId = docuri.route(`${bookmarkKeyPrefix}:timestamp/:nonce`)
-export const generateBookmarkDocId = ({
-    timestamp = Date.now(),
-    nonce = randomString(),
-} = {}) => convertBookmarkDocId({ timestamp, nonce })
+export const convertBookmarkDocId = docuri.route(`${bookmarkKeyPrefix}:url/:timestamp`)
+
+// NOTE: truncates any decimal part of the `timestamp` arg
+export const generateBookmarkDocId = ({ url, timestamp = Date.now() }) =>
+    convertBookmarkDocId({ url: encodeUrl(url, false), timestamp: Math.floor(timestamp) })
 
 /**
  * Converts a browser.history.VisitItem to our visit document model.
@@ -31,11 +31,10 @@ export const generateBookmarkDocId = ({
  */
 export const transformToVisitDoc = assocPageDoc => visitItem => ({
     _id: generateVisitDocId({
+        url: assocPageDoc.url,
         timestamp: visitItem.visitTime,
-        // We set the nonce manually, to prevent duplicating items if
-        // importing multiple times (thus making importHistory idempotent).
-        nonce: visitItem.visitId,
     }),
+    browserId: visitItem.visitId,
     visitStart: visitItem.visitTime,
     referringVisitItemId: visitItem.referringVisitId,
     url: assocPageDoc.url,
@@ -51,8 +50,8 @@ export const transformToVisitDoc = assocPageDoc => visitItem => ({
  */
 export const transformToBookmarkDoc = assocPageDoc => bookmarkItem => ({
     _id: generateBookmarkDocId({
+        url: bookmarkItem.url,
         timestamp: bookmarkItem.dateAdded,
-        nonce: bookmarkItem.id,
     }),
     dateAdded: bookmarkItem.dateAdded,
     title: bookmarkItem.title,

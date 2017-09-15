@@ -16,16 +16,17 @@ export default async function indexSearch({
     endDate,
     skip,
     limit = 10,
+    getTotalCount = false,
 }) {
     query = query.trim() // Don't count whitespace searches
 
     // Create SI query
     const indexQuery = new QueryBuilder()
-        .searchTerm(query || '*') // Search by wildcard by default
+        .searchTerm(query)
         .startDate(startDate)
         .endDate(endDate)
-        .skipUntil(skip || undefined)
-        .limit(limit || 10)
+        .skipUntil(skip)
+        .limit(limit)
         .get()
 
     // Get index results, filtering out any unexpectedly structured results
@@ -34,17 +35,19 @@ export default async function indexSearch({
 
     // Short-circuit if no results
     if (!results.length) {
-        return { docs: [], resultsExhausted: true }
+        return {
+            docs: [],
+            resultsExhausted: true,
+            totalCount: getTotalCount ? 0 : undefined,
+        }
     }
 
-    // If the query is empty, we default to time-based sort, else use search relevance
-    const shouldSortByTime = query === ''
-
     // Match the index results to data docs available in Pouch, consolidating meta docs
-    const docs = await mapResultsToPouchDocs(results, { startDate, endDate }, shouldSortByTime)
+    const docs = await mapResultsToPouchDocs(results, { startDate, endDate })
 
     return {
         docs,
-        resultsExhausted: results.length < limit,
+        resultsExhausted: false,
+        totalCount: getTotalCount ? await index.count(indexQuery) : undefined,
     }
 }

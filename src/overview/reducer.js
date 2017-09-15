@@ -2,6 +2,7 @@ import update from 'lodash/fp/update'
 import remove from 'lodash/fp/remove'
 import { createReducer } from 'redux-act'
 
+import { generatePageDocId } from 'src/page-storage'
 import * as actions from './actions'
 
 
@@ -17,7 +18,7 @@ const defaultState = {
     isLoading: false,
     deleteConfirmProps: {
         isShown: false,
-        metaDoc: undefined,
+        url: undefined,
     },
 }
 
@@ -33,18 +34,18 @@ function setEndDate(state, date) {
     return {...state, currentQueryParams: {...state.currentQueryParams, endDate: date}}
 }
 
-function hideResultItem(state, metaDoc) {
+function hideResultItem(state, url) {
     return update('searchResult.docs',
-        docs => remove(doc => doc._id === metaDoc.page._id)(docs)
+        docs => remove(doc => doc._id === generatePageDocId({ url }))(docs)
     )(state)
 }
 
-const showDeleteConfirm = (state, metaDoc) => ({
+const showDeleteConfirm = (state, url) => ({
     ...state,
     deleteConfirmProps: {
         ...state.deleteConfirmProps,
         isShown: true,
-        metaDoc,
+        url,
     },
 })
 

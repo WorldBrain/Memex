@@ -57,10 +57,7 @@ async function processHistoryImport(importItem) {
 
     // Construct the page doc ready for PouchDB from fetched + import item data
     const pageDoc = revisePageFields({
-        _id: generatePageDocId({
-            timestamp: importItem.timestamp,
-            nonce: importItem.browserId,
-        }),
+        _id: generatePageDocId({ url: importItem.url }),
         url: importItem.url,
         content,
         _attachments,

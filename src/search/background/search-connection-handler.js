@@ -7,7 +7,8 @@ const search = ({ searchParams, overwrite }) => async port => {
 
         port.postMessage({ cmd: constants.CMDS.RESULTS, searchResult, overwrite })
     } catch (error) {
-        port.postMessage({ cmd: constants.CMDS.ERROR, error, query: searchParams.query })
+        console.error(error)
+        port.postMessage({ cmd: constants.CMDS.ERROR, error: error.message, query: searchParams.query })
     }
 }
 
