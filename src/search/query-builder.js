@@ -1,7 +1,7 @@
 import stopword from 'stopword'
 
-// Pattern to match entire string to `domain.tld`-like format
-const DOMAIN_TLD_PATTERN = /^\w{2,}\.\w{2,3}$/
+// Pattern to match entire string to `domain.tld`-like format + optional ccTLD
+const DOMAIN_TLD_PATTERN = /^\w{2,}\.\w{2,3}(\.\w{2})?$/
 
 class QueryBuilder {
     constructor() {
