@@ -35,7 +35,7 @@ export const currentQueryParams = createSelector(overview, state => state.curren
 export const isLoading = createSelector(overview, state => state.isLoading)
 export const noResults = createSelector(resultDocs, isLoading, (docs, isLoading) => docs.length === 0 && !isLoading)
 export const currentPage = createSelector(overview, state => state.currentPage)
-export const resultsSkip = createSelector(resultDocs, results => results.length)
+export const resultsSkip = createSelector(currentPage, page => page * constants.PAGE_SIZE)
 export const deleteConfirmProps = createSelector(overview, state => state.deleteConfirmProps)
 export const isDeleteConfShown = createSelector(deleteConfirmProps, state => state.isShown)
 export const urlToDelete = createSelector(deleteConfirmProps, state => state.url)
