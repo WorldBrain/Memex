@@ -18,10 +18,18 @@ const indexOpts = {
     separator: /[|' .,\-|(\n)]+/,
     stopwords: stopword.en,
     fieldOptions: {
+        // The `domain.tld(.cctld)` data from a page's URL
+        // Currently used to afford `domain.tld(.cctld)` search in our queries
+        // Should never need to tokenize, but put forward-slash separator incase preproecssing fails for whatever reason
+        // (then domain search can still happen)
+        domain: {
+            weight: 40,
+            fieldedSearch: true,
+            separator: '/',
+        },
         // Page URL tokenized by forward slashes; normalized slightly to remove protocol and leading `www.`
-        // Currently used to afford `domain.tld` search in our queries
         url: {
-            weight: 10,
+            weight: 20,
             fieldedSearch: true,
             separator: '/',
         },
@@ -42,7 +50,6 @@ const indexOpts = {
             searchable: false,
             fieldedSearch: false,
         },
-
     },
 }
 
