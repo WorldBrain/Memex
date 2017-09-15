@@ -41,11 +41,10 @@ export default function pipeline({ _id: id, content, url }) {
     // First apply transformations to the URL
     const { remainingUrl, domain } = transformUrl(url)
 
-    // Short circuit if no searchable content
-    //  (not 100% sure what to do in this situation yet; basically means doc is useless for search,
-    //    so maybe throw error so index method can skip it?)
+    // Throw error if no searchable content; we don't really want to index these (for now) so allow callers
+    //  to handle (probably by ignoring)
     if (!content || !content.fullText || !content.fullText.length === 0) {
-        return { id, url: remainingUrl, domain }
+        throw new Error('Page has no searchable content')
     }
 
     // Run the searchable content through our text transformations, attempting to discard useless data.
