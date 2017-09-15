@@ -1,4 +1,3 @@
-import stream from 'stream'
 import reduce from 'lodash/fp/reduce'
 
 import transformPageText from 'src/util/transform-page-text'
@@ -12,18 +11,6 @@ const DOMAIN_TLD_PATTERN = /(\w{2,}\.\w{2,3}(\.\w{2})?)(\/|$)(.*)/
 const PROTOCOL_WWW_PATTERN = /(^\w+:|^)\/\/(www\.)?/
 
 const combineContentStrings = reduce((result, val) => `${result}\n${val}`, '')
-
-/**
- * Transforms a page doc to doc structured for use with the index.
- * All searchable page data (content) is concatted to make a composite field.
- * This represents the general structure for index docs.
-*/
-const transformPageDoc = ({ _id: id, content = {}, bookmarks = [], visits = [] }) => ({
-    id,
-    content: combineContentStrings(content),
-    bookmarks,
-    visits,
-})
 
 /**
  * @param {string} url A raw URL string to attempt to extract parts from.
@@ -46,18 +33,6 @@ const transformUrl = url => {
     return { remainingUrl: remainingUrl || normalized, domain: domain || normalized }
 }
 
-// Transform stream version (currently not supported by concurrentAdd, hence is currently unused)
-export class PipelineStream extends stream.Transform {
-    _transform(doc, _, next) {
-        const transformedDoc = transformPageDoc(doc)
-        const { text: transformedContent } = transformPageText({ text: transformedDoc.content })
-
-        next(null, {
-            ...transformedDoc,
-            content: transformedContent,
-        })
-    }
-}
 
 /**
  * Function version of "pipeline" logic. Applies transformation logic
