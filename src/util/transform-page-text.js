@@ -91,13 +91,14 @@ export default function transform({ text = '' }) {
     // Example e-mail => email, O'Grady => OGrady
     searchableText = combinePunctuation(searchableText)
 
+    // Changes accented characters to regular letters 
+    searchableText = removeDiacritics(searchableText)
+
     searchableText = removePunctuation(searchableText)
     
     // Removes 'stopwords' such as they'll, don't, however ect..
     searchableText = removeUselessWords(searchableText)
     
-    // Changes accented characters to regular letters 
-    searchableText = removeDiacritics(searchableText)
 
     // Removes words <= 2 chars
     searchableText = removeSmallWords(searchableText)

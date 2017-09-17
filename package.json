@@ -57,6 +57,7 @@
     "rxjs": "^5.4.1",
     "search-index": "^0.13.0",
     "semantic-ui-react": "^0.71.4",
+    "stopword": "^0.1.8",
     "stream-browserify": "^2.0.1",
     "tldjs": "^1.7.0",
     "url-regex": "^4.1.1",
