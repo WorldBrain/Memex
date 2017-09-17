@@ -1,13 +1,15 @@
-import urlRegex from 'url-regex'
+import urlRegex from 'url-regex' // Check https://mathiasbynens.be/demo/url-regex for results RE: this pattern
 import nlp from 'compromise'
-import sw from 'stopword'
-// Check https://mathiasbynens.be/demo/url-regex for results RE: this pattern
+import sw from 'remove-stopwords'
+import rmDiacritics from './remove-diacritics'
+
 
 const allWhitespacesPattern = /\s+/g
 const nonWordsPattern = /[_\W]+/g // NOTE: This kills accented characters; maybe make better
 const singleDigitNumbersPattern = /\b\d\b/g
-const smallWordsPattern = /(\b(\w{1,3})\b(\s|$))/g
-const urlPattern = urlRegex()
+const smallWordsPattern = /(\b(\w{1,2})\b(\s|$))/g
+const apostropheDashPattern = /[\-\'\’]/g
+const urlPattern = urlRegex() 
 
 const removeUrls = (text = '') =>
     text.replace(urlPattern, ' ')
@@ -22,7 +24,7 @@ const removeSingleDigitNumbers = (text = '') =>
 const cleanupWhitespaces = (text = '') =>
     text.replace(allWhitespacesPattern, ' ').trim()
 
-// Removes any words with <= 3 chars
+// Removes any words with <= 2 chars
 const removeSmallWords = (text = '') =>
     text.replace(smallWordsPattern, '')
 
@@ -43,6 +45,14 @@ const removeUselessWords = (text = '') => {
     var newString = sw.removeStopwords(oldString)
     return (newString.join(' '))
 }
+
+const combinePunctuation = (text = '') =>
+    text.replace(apostropheDashPattern, '')
+
+const removeDiacritics = (text = '') => {
+    return (rmDiacritics(text))
+}
+    
 /**
  * Takes in some text content and strips it of unneeded data. Currently does
  * puncation (although includes accented characters), numbers, and whitespace.
@@ -53,50 +63,57 @@ const removeUselessWords = (text = '') => {
  *  `lengthBefore`, `lengthAfter` stats.
  */
 
+
 export default function transform({ text = '' }) {
     // Short circuit if no text
     if (!text || !text.replace(/\s/g, '')) {
         return text
     }
-    console.time("transform-text")
+    
+    console.time("transform-text-time")
     let searchableText = text
-    
-    
-    // We only care about 'usefull words'
-    const lengthBefore = searchableText.length
-    // console.time('compromise')
-    
+    var lengthBefore = searchableText.length
 
-    // searchableText = findUsefullWords(searchableText)
+  /*    // This is the block of code to run nlp compromise 
+    console.time('compromise')
     
+    searchableText = findUsefullWords(searchableText)
+    
+    console.timeEnd('compromise') */
 
-    // console.timeEnd('compromise')
-
-    // console.log(searchableText)
-    
-    // console.log('lengthbefore' + lengthBefore)
-    // console.log('lengthafter' + lengthAfter)
-    
 
     // Remove URLs first before we start messing with things
+    // console.log('beginning: \n',searchableText)
     searchableText = removeUrls(searchableText)
     
-    searchableText = removeSmallWords(searchableText)
-    
-    searchableText = removeDuplicateWords(searchableText)
-    
-    // We don't care about searching on punctuation, so remove that
+
+    // Removes ' and - from words effectively combining them
+    // Example e-mail => email, O'Grady => OGrady
+    searchableText = combinePunctuation(searchableText)
+
     searchableText = removePunctuation(searchableText)
-   
-    // We don't care single digit numbers
-    searchableText = removeSingleDigitNumbers(searchableText)
     
+    // Removes 'stopwords' such as they'll, don't, however ect..
+    searchableText = removeUselessWords(searchableText)
+    
+    // Changes accented characters to regular letters 
+    searchableText = removeDiacritics(searchableText)
+
+    // Removes words <= 2 chars
+    searchableText = removeSmallWords(searchableText)
+
+    searchableText = removeSingleDigitNumbers(searchableText)
+   
     // We don't care about non-single-space whitespace (' ' is cool)
     searchableText = cleanupWhitespaces(searchableText)
-
-    // searchableText = removeUselessWords(searchableText)
+   
+    searchableText = removeDuplicateWords(searchableText)
     
-    const lengthAfter = searchableText.length
-    console.timeEnd("transform-text")
+    var lengthAfter = searchableText.length
+    console.log('total chars removed: ', (lengthBefore - lengthAfter))
+    console.timeEnd("transform-text-time")
+    console.log('text after pipeline: \n' ,searchableText)
+
+    
     return { text: searchableText, lengthBefore, lengthAfter }
 }

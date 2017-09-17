@@ -92,11 +92,11 @@ async function processHistoryImport(importItem) {
  *  + optional filled-out page doc as `pageDoc` field.
  */
 export default async function processImportItem(importItem = {}) {
-    console.time('total-import-time')
+    console.time('import-time-total')
     switch (importItem.type) {
         case IMPORT_TYPE.BOOKMARK:
         case IMPORT_TYPE.HISTORY: return await processHistoryImport(importItem)
         default: throw new Error('Unknown import type')
     }
-    console.time('total-import-time')
+    console.timeEnd('import-time-total')
 }
