@@ -2,13 +2,16 @@ import urlRegex from 'url-regex' // Check https://mathiasbynens.be/demo/url-rege
 import nlp from 'compromise'
 import sw from 'remove-stopwords'
 import rmDiacritics from './remove-diacritics'
-
+import snowball from 'snowball'
 
 const allWhitespacesPattern = /\s+/g
 const nonWordsPattern = /[_\W]+/g // NOTE: This kills accented characters; maybe make better
 const singleDigitNumbersPattern = /\b\d\b/g
 const smallWordsPattern = /(\b(\w{1,2})\b(\s|$))/g
 const apostropheDashPattern = /[\-\'\’]/g
+const allWordsWithDigits = /((\b(\d{1,3}|\d{5,})\b)|([a-z]+\d\w*|\w*\d[a-z]+))\s*/gi  // /\w*\d\w*/g
+const plurals = /s\b/g
+
 const urlPattern = urlRegex() 
 
 const removeUrls = (text = '') =>
@@ -52,7 +55,25 @@ const combinePunctuation = (text = '') =>
 const removeDiacritics = (text = '') => {
     return (rmDiacritics(text))
 }
+
+const removeAllWordsWithDigits = (text = '') => 
+    text.replace(allWordsWithDigits, ' ')
+
+const removePlurals = (text = '') => 
+    text.replace(plurals, '')
     
+const stemWords = (text = '') => {
+    var textArray = text.split(' ')
+    var stemmer = new snowball('English')
+    
+    var stemmedText = textArray.map(function(word, index) {
+        stemmer.setCurrent(word)
+        stemmer.stem()
+        return stemmer.getCurrent()
+    })
+    return (stemmedText.join(' '))
+}
+
 /**
  * Takes in some text content and strips it of unneeded data. Currently does
  * puncation (although includes accented characters), numbers, and whitespace.
@@ -96,6 +117,7 @@ export default function transform({ text = '' }) {
 
     searchableText = removePunctuation(searchableText)
     
+    // searchableText = searchableText.toLowerCase()
     // Removes 'stopwords' such as they'll, don't, however ect..
     searchableText = removeUselessWords(searchableText)
     
@@ -103,17 +125,27 @@ export default function transform({ text = '' }) {
     // Removes words <= 2 chars
     searchableText = removeSmallWords(searchableText)
 
-    searchableText = removeSingleDigitNumbers(searchableText)
-   
+    // searchableText = removeSingleDigitNumbers(searchableText)
+
     // We don't care about non-single-space whitespace (' ' is cool)
     searchableText = cleanupWhitespaces(searchableText)
-   
+
+    // console.log('beforeRemoveAllWordsWithDigits \n', typeof(searchableText))
+    searchableText = removeAllWordsWithDigits(searchableText)
+
+    //c onsole.log('afterRemoveAllWordsWithDigits \n', searchableText)
+    // searchableText = removePlurals(searchableText)
+
     searchableText = removeDuplicateWords(searchableText)
+
+    searchableText = stemWords(searchableText)
     
     var lengthAfter = searchableText.length
-    console.log('total chars removed: ', (lengthBefore - lengthAfter))
+ /*    var numberOfWords = searchableText.split(' ').length
+    console.log(numberOfWords)
+    console.log('total chars removed: ', (lengthBefore - lengthAfter)) */
     console.timeEnd("transform-text-time")
-    console.log('text after pipeline: \n' ,searchableText)
+    // console.log('text after pipeline: \n' ,searchableText)
 
     
     return { text: searchableText, lengthBefore, lengthAfter }

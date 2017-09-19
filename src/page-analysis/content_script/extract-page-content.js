@@ -19,7 +19,6 @@ export default async function extractPageContent({
 
     // // Apply simple transformations to clean the page's HTML
     const { text: processedHtml } = transformPageHTML({ html: doc.body.innerHTML })
-    const { text: processedText } = transformPageText({ text: processedHtml })
 
     // Metadata of web page
     const selectedMetadataRules = {
@@ -31,7 +30,7 @@ export default async function extractPageContent({
     const metadata = getMetadata(doc, url, selectedMetadataRules)
 
     return {
-        fullText: processedText,
+        fullText: processedHtml,
         // Picking desired fields, as getMetadata adds some unrequested stuff.
         ...pick(Object.keys(selectedMetadataRules))(metadata),
     }

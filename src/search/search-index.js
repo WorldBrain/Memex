@@ -13,7 +13,7 @@ const indexOpts = {
     preserveCase: false,
     compositeField: false,
     nGramLength: 1,
-    separator: /[|' .,\-|(\n)]+/,
+    // separator: /[|' .,\-|(\n)]+/,
     stopwords: stopword.en,
     fieldOptions: {
         visits: {
