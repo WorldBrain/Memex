@@ -1,5 +1,5 @@
 import stopword from 'stopword'
-
+import transform from '../util/transform-page-text.js'
 // Pattern to match entire string to `domain.tld`-like format
 const DOMAIN_TLD_PATTERN = /^\w{2,}\.\w{2,3}$/
 
@@ -71,8 +71,12 @@ class QueryBuilder {
                 .toLowerCase()
                 .match(/\S+/g) || []
 
-            // All EN stopwords are unindexed, so remove any from query terms
-            terms = stopword.removeStopwords(terms, stopword.en)
+            // All terms must be pushed to the text-pipeline to take into account stemming, stopword removal ect...
+            terms = (transform({text: terms.join(' ')})).text.split(' ')
+
+            // terms = terms.text.split(' ')
+
+            console.log('terms after \n' + terms + '\n' + typeof(terms))
 
             // Split into words and push to query
             terms.forEach(term => {
