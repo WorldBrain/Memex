@@ -43,6 +43,13 @@ function formatTime(timestamp, showTime) {
     return inLastSevenDays ? m.format('ddd') : m.format('D/M/YYYY')
 }
 
+function setOmniboxMessage (text) {
+    browser.omnibox.setDefaultSuggestion({
+        description: text,
+    })
+    return
+}
+
 const pageToSuggestion = timeFilterApplied => doc => {
     const url = escapeHtml(shortUrl(doc.url))
     const title = escapeHtml(doc.content.title)
@@ -61,17 +68,13 @@ async function makeSuggestion(query, suggest) {
 
     // Show no suggestions if there is no query.
     if (query.trim() === '') {
-        browser.omnibox.setDefaultSuggestion({
-            description: 'Type to search your memory.',
-        })
+        setOmniboxMessage('Type to search your memory.')
         suggest([])
         latestResolvedQuery = query
         return
     }
 
-    browser.omnibox.setDefaultSuggestion({
-        description: 'Searching your memory.. (press enter to search deeper)',
-    })
+   setOmniboxMessage('Searching your memory.. (press enter to search deeper)')
 
     const queryForOldSuggestions = latestResolvedQuery
 
@@ -91,16 +94,17 @@ async function makeSuggestion(query, suggest) {
     // A subsequent search could have already started and finished while we
     // were busy searching, so we ensure we do not overwrite its results.
     if (currentQuery !== query && latestResolvedQuery !== queryForOldSuggestions) { return }
-
-    if (searchResults.docs.length === 0) {
-        browser.omnibox.setDefaultSuggestion({
-            description: 'No results found in your memory. (press enter to search deeper)',
-        })
-    } else {
-        browser.omnibox.setDefaultSuggestion({
-            description: `Found these ${searchResults.docs.length} pages in your memory: (press enter to search deeper)`,
-        })
+    
+   
+    if (searchResults.isBadTerm === true) {
+        setOmniboxMessage('Your search terms are very vague, please try and use more unique language')
     }
+    else if (searchResults.docs.length === 0) {
+        setOmniboxMessage('No results found in your memory. (press enter to search deeper')
+    } else {
+        setOmniboxMessage(`Found these ${searchResults.docs.length} pages in your memory: (press enter to search deeper)`)
+    }
+
     const suggestions = searchResults.docs.map(pageToSuggestion(startDate || endDate))
 
     suggest(suggestions)

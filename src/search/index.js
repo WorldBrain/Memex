@@ -28,13 +28,19 @@ export default async function indexSearch({
         .limit(limit || 10)
         .get()
 
+    // Don't continue if there is no content in indexQuery
+    if (indexQuery.query[0].AND.content.length === 0 || indexQuery.query[1].AND.content === 0) {
+        return { docs: [], resultsExhausted: false, isBadTerm: true,  }
+    }
+
     // Get index results, filtering out any unexpectedly structured results
     let results = await index.search(indexQuery)
     results = filterBadlyStructuredResults(results)
 
     // Short-circuit if no results
     if (!results.length) {
-        return { docs: [], resultsExhausted: true }
+        
+        return { docs: [], resultsExhausted: true, isBadTerm: false}
     }
 
     // If the query is empty, we default to time-based sort, else use search relevance
@@ -45,5 +51,6 @@ export default async function indexSearch({
     return {
         docs,
         resultsExhausted: results.length < limit,
+        isBadTerm: false
     }
 }

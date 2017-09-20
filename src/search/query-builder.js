@@ -11,6 +11,7 @@ class QueryBuilder {
         this.offset = null
         this.pageSize = null
         this.url = []
+        this.isBadTerm = false
     }
 
     /**
@@ -74,19 +75,18 @@ class QueryBuilder {
             // All terms must be pushed to the text-pipeline to take into account stemming, stopword removal ect...
             terms = (transform({text: terms.join(' ')})).text.split(' ')
 
-            // terms = terms.text.split(' ')
-
-            console.log('terms after \n' + terms + '\n' + typeof(terms))
-
             // Split into words and push to query
             terms.forEach(term => {
-                if (DOMAIN_TLD_PATTERN.test(term)) {
-                    // Only can support single domain.tld search for now, so set to first index
-                    this.url[0] = term
-                } else {
-                    this.content.push(term)
+                if (term != ''){
+                    if (DOMAIN_TLD_PATTERN.test(term)) {
+                        // Only can support single domain.tld search for now, so set to first index
+                        this.url[0] = term
+                    } else {
+                        this.content.push(term)
+                    }
                 }
             })
+        
         }
         return this
     }
