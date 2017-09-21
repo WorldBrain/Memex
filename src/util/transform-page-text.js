@@ -1,8 +1,8 @@
 import urlRegex from 'url-regex' // Check https://mathiasbynens.be/demo/url-regex for results RE: this pattern
-import nlp from 'compromise'
 import sw from 'remove-stopwords'
 import rmDiacritics from './remove-diacritics'
 import snowball from 'snowball'
+import isoConv from 'iso-language-converter'
 
 const allWhitespacesPattern = /\s+/g
 const nonWordsPattern = /[_\W]+/g // NOTE: This kills accented characters; maybe make better
@@ -20,10 +20,6 @@ const removeUrls = (text = '') =>
 const removePunctuation = (text = '') =>
     text.replace(nonWordsPattern, ' ')
 
-// Removes any single digit numbers that appear on their own
-const removeSingleDigitNumbers = (text = '') =>
-    text.replace(singleDigitNumbersPattern, ' ')
-
 const cleanupWhitespaces = (text = '') =>
     text.replace(allWhitespacesPattern, ' ').trim()
 
@@ -37,15 +33,9 @@ const removeDuplicateWords = (text = '') =>
         .filter((word, i, allWords) => i === allWords.indexOf(word))
         .join(' ')
 
-const findUsefullWords = (text = '') => {
-    var t = nlp(text)
-    var usefullwords = (t.nouns().out('text') + t.verbs().out('text'))
-    return (usefullwords)
-}
-
-const removeUselessWords = (text = '') => {
-    var oldString = text.split(' ')
-    var newString = sw.removeStopwords(oldString)
+const removeUselessWords = (text = '', lang) => {
+    var oldString = text.split(' ')   
+    var newString = sw.removeStopwords(oldString, sw.lang)
     return (newString.join(' '))
 }
 
@@ -59,20 +49,50 @@ const removeDiacritics = (text = '') => {
 const removeAllWordsWithDigits = (text = '') => 
     text.replace(allWordsWithDigits, ' ')
 
-const removePlurals = (text = '') => 
-    text.replace(plurals, '')
+const stemText = (text, lang) => {
+    var stemmer = new snowball(lang)
     
-const stemWords = (text = '') => {
-    var textArray = text.split(' ')
-    var stemmer = new snowball('English')
-    
-    var stemmedText = textArray.map(function(word, index) {
+    var stemmedText = textArray.map(function(word) {
         stemmer.setCurrent(word)
         stemmer.stem()
         return stemmer.getCurrent()
     })
     return (stemmedText.join(' '))
 }
+
+const stemAllLanguages = (text) => {
+    // These are the languages snowball supports.
+    allLanguages = ['english', 'danish', 'dutch', 'finnish', 'french', 'german', 'hungarian', 
+    'italian', 'norwegian', 'portuguese', 'russian', 'spansish', 'swedish', 'romanian', 'turkish' ]
+
+    wordsToKeep = text
+    //Iterate over each language and keep array if there are any changes.
+    allLanguages.map(function(lang) {
+       wordsToKeep.map(function(word) {
+        var maybeKeepWord = stemText([word], lang)
+        
+        if (maybeKeepWord != word) {
+            wordsToKeep[word].replace(maybeKeepWord)
+        }
+       }) 
+       
+       stemmedText = maybeKeepText != wordsToKeep ? maybeKeepText : wordsToKeep
+    })
+    return (wordsToKeep)
+} 
+
+const stemWords = (text = '', lang) => {
+    var wordsToKeep = text.split(' ')
+    if (lang === 'all') {
+        return (stemAllLanguages(text))
+    }
+    // snowball requires the language in readable text i.e. 'English' instead of 'en'
+    var newLang = isoConv(lang)
+
+    return (stemText(text, newLang))
+}
+
+
 
 /**
  * Takes in some text content and strips it of unneeded data. Currently does
@@ -85,29 +105,24 @@ const stemWords = (text = '') => {
  */
 
 
-export default function transform({ text = '' }) {
+export default function transform({ text = '', lang}) {
     // Short circuit if no text
     if (!text || !text.replace(/\s/g, '')) {
         return text
     }
-    
+
+    //Check if there is a language else default to english
+    lang = !lang ? 'en' : lang
+
+    console.log("transfor-text " + lang)
     console.time("transform-text-time")
     let searchableText = text
     var lengthBefore = searchableText.length
-
-  /*    // This is the block of code to run nlp compromise 
-    console.time('compromise')
-    
-    searchableText = findUsefullWords(searchableText)
-    
-    console.timeEnd('compromise') */
-
 
     // Remove URLs first before we start messing with things
     // console.log('beginning: \n',searchableText)
     searchableText = removeUrls(searchableText)
     
-
     // Removes ' and - from words effectively combining them
     // Example e-mail => email, O'Grady => OGrady
     searchableText = combinePunctuation(searchableText)
@@ -117,28 +132,24 @@ export default function transform({ text = '' }) {
 
     searchableText = removePunctuation(searchableText)
     
-    // searchableText = searchableText.toLowerCase()
     // Removes 'stopwords' such as they'll, don't, however ect..
-    searchableText = removeUselessWords(searchableText)
+    searchableText = removeUselessWords(searchableText, lang)
     
-
     // Removes words <= 2 chars
     searchableText = removeSmallWords(searchableText)
 
     // searchableText = removeSingleDigitNumbers(searchableText)
-
+    
     // We don't care about non-single-space whitespace (' ' is cool)
     searchableText = cleanupWhitespaces(searchableText)
 
-    // console.log('beforeRemoveAllWordsWithDigits \n', typeof(searchableText))
+    // Remove all numbers and all words containing numbers 
     searchableText = removeAllWordsWithDigits(searchableText)
 
-    //c onsole.log('afterRemoveAllWordsWithDigits \n', searchableText)
-    // searchableText = removePlurals(searchableText)
-
     searchableText = removeDuplicateWords(searchableText)
-
-    searchableText = stemWords(searchableText)
+    
+    // Stemming removes things like 'ly' from ends of words and reduces size overall
+    searchableText = stemWords('absolutely', lang)
     
     var lengthAfter = searchableText.length
  /*    var numberOfWords = searchableText.split(' ').length

@@ -35,11 +35,12 @@ export default async function fetchPageData({
     if (!doc) {
         throw new Error('Cannot fetch DOM')
     }
-
+    
     return {
         favIconURI: opts.includeFavIcon ? await extractFavIcon(doc) : undefined,
         freezeDryHTML: opts.includeFreezeDry ? await freezeDry(doc, url) : undefined,
         content: opts.includePageContent ? await extractPageContent({ doc, url }) : undefined,
+
     }
 }
 
