@@ -11,14 +11,18 @@ export default async function extractPageContent({
     // By default, use the globals window and document.
     url = window.location.href,
     doc = document,
+    isImport = false,
 } = {}) {
     // If it is a PDF, run code for pdf instead.
     if (url.endsWith('.pdf')) {
         return await extractPdfContent({url})
     }
+    
+    const lang = doc.documentElement.lang
 
     // // Apply simple transformations to clean the page's HTML
     const { text: processedHtml } = transformPageHTML({ html: doc.body.innerHTML })
+    const { text: processedText } = transformPageText({ text: processedHtml, lang: lang })
 
     // Metadata of web page
     const selectedMetadataRules = {
@@ -30,7 +34,7 @@ export default async function extractPageContent({
     const metadata = getMetadata(doc, url, selectedMetadataRules)
 
     return {
-        fullText: processedHtml,
+        fullText: processedText,
         // Picking desired fields, as getMetadata adds some unrequested stuff.
         ...pick(Object.keys(selectedMetadataRules))(metadata),
     }
