@@ -5,12 +5,9 @@ import snowball from 'snowball'
 import isoConv from 'iso-language-converter'
 
 const allWhitespacesPattern = /\s+/g
-const nonWordsPattern = /[_\W]+/g // NOTE: This kills accented characters; maybe make better
 const singleDigitNumbersPattern = /\b\d\b/g
-const smallWordsPattern = /(\b(\w{1,2})\b(\s|$))/g
 const apostropheDashPattern = /[\-\'\’]/g
-const allWordsWithDigits = /((\b(\d{1,3}|\d{5,})\b)|([a-z]+\d\w*|\w*\d[a-z]+))\s*/gi  // /\w*\d\w*/g
-const plurals = /s\b/g
+const allWordsWithDigits = /((\b(\d{6,})\b)|([a-z]+\d\w*|\w*\d[a-z]+))\s*/gi  // /\w*\d\w*/g
 
 const urlPattern = urlRegex() 
 
@@ -23,10 +20,6 @@ const removePunctuation = (text = '') =>
 const cleanupWhitespaces = (text = '') =>
     text.replace(allWhitespacesPattern, ' ').trim()
 
-// Removes any words with <= 2 chars
-const removeSmallWords = (text = '') =>
-    text.replace(smallWordsPattern, '')
-
 // Split strings on non-words, filtering out duplicates, before rejoining them with single space
 const removeDuplicateWords = (text = '') =>
     text.split(/\W+/)
@@ -35,7 +28,7 @@ const removeDuplicateWords = (text = '') =>
 
 const removeUselessWords = (text = '', lang) => {
     var oldString = text.split(' ')   
-    var newString = sw.removeStopwords(oldString, sw.lang)
+    var newString = sw.removeStopwords(oldString, lang)
     return (newString.join(' '))
 }
 
@@ -45,54 +38,9 @@ const combinePunctuation = (text = '') =>
 const removeDiacritics = (text = '') => {
     return (rmDiacritics(text))
 }
-
-const removeAllWordsWithDigits = (text = '') => 
+// This also removes any numbers greater than 5 chars
+const removeAllWordsWithDigits = (text = '') =>
     text.replace(allWordsWithDigits, ' ')
-
-const stemText = (text, lang) => {
-    var stemmer = new snowball(lang)
-    
-    var stemmedText = textArray.map(function(word) {
-        stemmer.setCurrent(word)
-        stemmer.stem()
-        return stemmer.getCurrent()
-    })
-    return (stemmedText.join(' '))
-}
-
-const stemAllLanguages = (text) => {
-    // These are the languages snowball supports.
-    allLanguages = ['english', 'danish', 'dutch', 'finnish', 'french', 'german', 'hungarian', 
-    'italian', 'norwegian', 'portuguese', 'russian', 'spansish', 'swedish', 'romanian', 'turkish' ]
-
-    wordsToKeep = text
-    //Iterate over each language and keep array if there are any changes.
-    allLanguages.map(function(lang) {
-       wordsToKeep.map(function(word) {
-        var maybeKeepWord = stemText([word], lang)
-        
-        if (maybeKeepWord != word) {
-            wordsToKeep[word].replace(maybeKeepWord)
-        }
-       }) 
-       
-       stemmedText = maybeKeepText != wordsToKeep ? maybeKeepText : wordsToKeep
-    })
-    return (wordsToKeep)
-} 
-
-const stemWords = (text = '', lang) => {
-    var wordsToKeep = text.split(' ')
-    if (lang === 'all') {
-        return (stemAllLanguages(text))
-    }
-    // snowball requires the language in readable text i.e. 'English' instead of 'en'
-    var newLang = isoConv(lang)
-
-    return (stemText(text, newLang))
-}
-
-
 
 /**
  * Takes in some text content and strips it of unneeded data. Currently does
@@ -106,6 +54,7 @@ const stemWords = (text = '', lang) => {
 
 
 export default function transform({ text = '', lang}) {
+    
     // Short circuit if no text
     if (!text || !text.replace(/\s/g, '')) {
         return text
@@ -114,10 +63,9 @@ export default function transform({ text = '', lang}) {
     //Check if there is a language else default to english
     lang = !lang ? 'en' : lang
 
-    console.log("transfor-text " + lang)
-    console.time("transform-text-time")
+    // console.log( text + "transform-text" + lang)
     let searchableText = text
-    var lengthBefore = searchableText.length
+    const lengthBefore = searchableText.length
 
     // Remove URLs first before we start messing with things
     // console.log('beginning: \n',searchableText)
@@ -131,12 +79,9 @@ export default function transform({ text = '', lang}) {
     searchableText = removeDiacritics(searchableText)
 
     searchableText = removePunctuation(searchableText)
-    
+
     // Removes 'stopwords' such as they'll, don't, however ect..
     searchableText = removeUselessWords(searchableText, lang)
-    
-    // Removes words <= 2 chars
-    searchableText = removeSmallWords(searchableText)
 
     // searchableText = removeSingleDigitNumbers(searchableText)
     
@@ -147,17 +92,8 @@ export default function transform({ text = '', lang}) {
     searchableText = removeAllWordsWithDigits(searchableText)
 
     searchableText = removeDuplicateWords(searchableText)
-    
-    // Stemming removes things like 'ly' from ends of words and reduces size overall
-    searchableText = stemWords('absolutely', lang)
-    
-    var lengthAfter = searchableText.length
- /*    var numberOfWords = searchableText.split(' ').length
-    console.log(numberOfWords)
-    console.log('total chars removed: ', (lengthBefore - lengthAfter)) */
-    console.timeEnd("transform-text-time")
-    // console.log('text after pipeline: \n' ,searchableText)
 
+    const lengthAfter = searchableText.length
     
     return { text: searchableText, lengthBefore, lengthAfter }
 }

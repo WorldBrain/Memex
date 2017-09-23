@@ -72,8 +72,8 @@ class QueryBuilder {
                 .toLowerCase()
                 .match(/\S+/g) || []
 
-            // All terms must be pushed to the text-pipeline to take into account stemming, stopword removal ect...
-            terms = (transform({text: terms.join(' ')})).text.split(' ')
+            // All terms must be pushed to the text-pipeline to take into account stopword removal ect...
+            terms = (transform({text: terms.join(' '), lang: 'all'})).text.split(' ')
 
             // Split into words and push to query
             terms.forEach(term => {

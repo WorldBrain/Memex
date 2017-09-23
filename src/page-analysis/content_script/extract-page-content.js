@@ -11,7 +11,6 @@ export default async function extractPageContent({
     // By default, use the globals window and document.
     url = window.location.href,
     doc = document,
-    isImport = false,
 } = {}) {
     // If it is a PDF, run code for pdf instead.
     if (url.endsWith('.pdf')) {
