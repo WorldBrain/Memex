@@ -114,7 +114,7 @@ class BlacklistContainer extends Component {
         return (
             <BlacklistTable>
                 {this.renderBlacklistRows()}
-            </BlacklistTable>
+            </BlacklistTable>            
         )
     }
 }

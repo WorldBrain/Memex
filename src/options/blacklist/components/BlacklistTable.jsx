@@ -10,7 +10,7 @@ const BlacklistTable = ({ children }) => (
             <table className={styles.table}>
                 <thead>
                     <tr>
-                        <th className={styles.domainCell}>Domain / Expression</th>
+                        <th className={styles.domainCell}>Ignore a new domain:</th>
                     </tr>
                 </thead>
 
