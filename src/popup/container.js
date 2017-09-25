@@ -227,7 +227,7 @@ class PopupContainer extends Component {
                 )
                 }
                 <hr />
-                <LinkButton href={`${constants.OPTIONS_URL}#/settings`} icon='settings'>
+                <LinkButton href={`${constants.OPTIONS_URL}#/blacklist`} icon='settings'>
                     Settings
                 </LinkButton>
                 <LinkButton href={`${constants.OPTIONS_URL}#/import`} icon='file_download'>
