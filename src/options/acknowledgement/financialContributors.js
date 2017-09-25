@@ -9,16 +9,7 @@ export default [
             	'fb':'https://www.facebook.com/',
             },
             {
-            	'twitter':'https://www.twitter.com/',
-            },
-            {
-            	'instagram':'https://www.instagram.com/',
-            },
-            {
-            	'linkedin':'https://www.linkedin.com/',
-            },
-            {
-            	'github':'https://www.github.com/',
+            	'twitter':'https://www.facebook.com/',
             },
         ],
 	},
