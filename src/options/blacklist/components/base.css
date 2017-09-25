@@ -3,7 +3,7 @@
     border: none;
     outline: none;
     cursor: pointer;
-    color: #999;
+    color: #666;
 
     &:hover {
         color: #333;
@@ -13,4 +13,12 @@
         color: #ebebeb;
         cursor: default;
     }
+}
+
+.ignoreDomainText, .blacklistText {
+    font-size: 14px;
+    font-weight: bold;
+    font-family: Lato;
+    color: #4c4a4b;
+    margin: 20px 0 10px 0;
 }

@@ -8,33 +8,29 @@ const BlacklistInputRow = ({
     value, isClearBtnDisabled, isSaveBtnDisabled, onAdd,
     handleKeyPress, onInputChange, onInputClear, inputRef,
 }) => (
-    <tr>
-        <td colSpan={3} className={styles.cell}>
-            <div className={styles.newSiteInputRow}>
+    <div className={styles.newSiteInputRow}>
 
-                <input
-                    value={value}
-                    className={styles.input}
-                    type='text'
-                    placeholder='Enter any text or domain or path to ignore matching URLs'
-                    onChange={onInputChange}
-                    onKeyUp={handleKeyPress}
-                    ref={inputRef}
-                />
+        <input
+            value={value}
+            className={styles.input}
+            type='text'
+            placeholder='Enter any text or domain or path to ignore matching URLs'
+            onChange={onInputChange}
+            onKeyUp={handleKeyPress}
+            ref={inputRef}
+        />
 
-                <div className={styles.inputButtons}>
-                    <button onClick={onInputClear} className={blacklistButton} disabled={isClearBtnDisabled}>
-                        <i className='material-icons'>backspace</i>
-                    </button>
+        <div className={styles.inputButtons}>
+            {/*<button onClick={onInputClear} className={blacklistButton} disabled={isClearBtnDisabled}>
+                            <i className='material-icons'>backspace</i>
+                        </button>*/}
 
-                    <button onClick={onAdd} className={blacklistButton} disabled={isSaveBtnDisabled}>
-                        <i className='material-icons'>save</i>
-                    </button>
-                </div>
-
-            </div>
-        </td>
-    </tr>
+            <button onClick={onAdd} className={styles.blacklistButton} disabled={isSaveBtnDisabled}>
+                {/*<i className='material-icons'>save</i>*/}
+                ADD TO BLACKLIST
+            </button>
+        </div>
+    </div>
 )
 
 export const propTypes = BlacklistInputRow.propTypes = {
