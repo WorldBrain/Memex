@@ -1,6 +1,13 @@
 .root {
-    width: 180px;
+    width: 238px;
+    height: auto;
+    background-color: #f7f7f7;
+    box-shadow: 2px 1px 1px #e2e2e2;
+    font-family: 'Lato';
+    line-height: 2;
+    font-weight: 200;
 }
+
 
 .title {
     font-size: 1.2em;
@@ -11,10 +18,29 @@
     border-bottom: 1px solid #ccc;
 }
 
+.icon {
+    width: 60%;
+    height: auto;
+    margin: 20px 20px;
+    margin-left: 30px;
+}
+
+.icon_div {
+    width: 100%;
+    height: auto;
+}
+
 .nav {
     margin: 0;
     padding: 0;
     list-style: none;
+}
+
+.navIcon {
+    float: left;
+    margin: 0 10px;
+    font-size: 18px;
+    padding: 11px 0 10px 0;
 }
 
 .navItem {
@@ -29,14 +55,16 @@
 .navLink {
     display: block;
     text-decoration: none;
-    color: #999;
-    font-size: 0.8em;
+    font-size: 0.9em;
     padding: 5px 0 5px 20px;
     padding-left: 20px;
+    color: #494949;
+    width: 100%;
+    letter-spacing: 1px;
 
     &.isActive {
-        color: #333;
-        padding-left: 15px;
-        border-left: 5px solid #333;
+        color: white;
+        background-color: #3eb995;
+        border-right: none;
     }
 }
