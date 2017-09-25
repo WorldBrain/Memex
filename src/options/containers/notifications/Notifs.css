@@ -16,23 +16,6 @@
     font-weight: 900;
 }
 
-/*.toggle {
-    transition: height 500ms 0ms, opacity 500ms 500ms;
-    background-color: red;
-}*/
-
-
-.toggle {
-    -webkit-transition: height 3.3s ease;
-}
-
-li:checked + .toggle {
-  height: 100px;
-}
-/*.toggle:hover {
-  background:red;
-}*/
-
 .tableContainer {
     max-height: 550px;
     overflow-y: scroll;

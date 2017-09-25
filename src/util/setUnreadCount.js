@@ -3,14 +3,14 @@ import db from '../pouchdb'
 export default async function setUnreadCount(itemToCount) {
     try {
 
-        console.log('lets go 63')
+        console.log('lets go 74')
         let items = 0
 
         let response = await db.allDocs({
             include_docs: true,
             attachments: true,
-            startkey: 'notif',
-            endkey: 'notif\ufff0',
+            startkey: 'notifs',
+            endkey: 'notifs\ufff0',
         })
         let notifs = response.rows
         

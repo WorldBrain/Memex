@@ -74,10 +74,8 @@ class PopupContainer extends Component {
         this.getInitArchiveBtnState(currentTab.url).then(updateState).catch(noop)
         
         try {
-            console.log("inside componentDidMount12")
             this.setState(state => ({ ...state, isLoading: true })) 
             const res = await setUnreadCount(0)  
-            console.log("res", res)
         if (res === 0) {
             this.setState({unread: false})
         } else {
@@ -201,7 +199,6 @@ class PopupContainer extends Component {
 
         return this.props.pauseValues.map(pauseValueToOption)
     }
-    // setUnreadNotifsBadge() {this.setState({unreadNotifsBadge : setUnreadCount(0)});// }
     render() {
         const { searchValue, archiveBtnDisabled, pauseValue, isPaused } = this.state
         return (
@@ -230,7 +227,6 @@ class PopupContainer extends Component {
                       className={
                           this.state.unread ? styles.badge : styles.loadbadge
                       }>{this.state.notifs} 
-
                       </span>
                 </LinkButton>
                 <LinkButton href={feedbackURL} icon='feedback'>

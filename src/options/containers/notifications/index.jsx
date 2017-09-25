@@ -8,7 +8,9 @@ import updateWBBadge from './updateWBBadge'
 
 
 fetchNewNotifs()
-setInterval(fetchNewNotifs, 1000 * 60 * 60) 
+setInterval(fetchNewNotifs, 1000 * 60)
+
+console.log("ok?1")
 
 class NotificationsContainer extends Component {
     constructor(props) {
@@ -25,8 +27,8 @@ class NotificationsContainer extends Component {
             .allDocs({
                 include_docs: true,
                 attachments: true,
-                startkey: 'notif',
-                endkey: 'notif\ufff0',
+                startkey: 'notifs',
+                endkey: 'notifs\ufff0',
             })
             .then(notifs => this.setState(state => ({ ...state, notifs })))
             .catch(err => console.log(err))
@@ -43,13 +45,13 @@ class NotificationsContainer extends Component {
                 viewed: true,
             })
             this.setStateFromPouch()
-            console.log('selectedNotificationId2')
             setUnreadCount()
             updateWBBadge()
         } catch (err) {
             console.log('err', err)
         }
     }
+
 
     componentDidMount() {
         db.changes({
@@ -62,6 +64,7 @@ class NotificationsContainer extends Component {
 
     render() {
         const { notifs } = this.state
+
         return (
             <div>
                 <h1 className={routeTitle}> Notifications</h1>
@@ -71,18 +74,18 @@ class NotificationsContainer extends Component {
                     <div className={styles.tableContainer}>
                         <ul className={styles.notifs}>
                             {notifs.rows
-                                && notifs.rows.map(({ doc }) =>
+                                && notifs.rows.reverse().map(({ doc }) =>
                                     <li
                                         onClick={() =>
                                             this.selectNotification(doc)}
                                         className={
                                             doc.viewed ? styles.viewed : styles.notviewed
                                         }
-                                        key={doc._id}>
+                                        key={doc.date}>
                                         {doc.title}
                                         {this.state.selectedNotificationId
                                         === doc._id
-                                        && <li className={styles.toggle} key={doc._id}>{doc.body}</li>}
+                                        && <li className={styles.toggle} key={doc.title}>{doc.body} | {doc.date}</li>}
                                     </li>
 
                                 )}

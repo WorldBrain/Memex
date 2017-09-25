@@ -4,18 +4,14 @@ import updateWBBadge from '../updateWBBadge'
 import desktopNotification from './desktopNotification'
 
 export default async function fetchNewNotifs() {
-    
+
         try {
             let unreadCountOne = await setUnreadCount(0)
             let res = await fetch('https://salty-fjord-43561.herokuapp.com/api/notifications')
             let newNotes = await res.json()
-            // let newNotes = await foo.badges
-                        console.log(newNotes)
-                        console.log(newNotes[0])
-                        console.log("_id", newNotes[0]._id)
             newNotes.forEach(function(element) {
                 db.put({
-                    '_id': 'notif_' + element._id,
+                    '_id': 'notifs_' + element._id,
                     'MongoId': element._id,
                     'title': element.title,
                     'body': element.body,
@@ -23,7 +19,6 @@ export default async function fetchNewNotifs() {
                     'viewed': false,
                 })
             })
-            console.log("dones?")
             await setUnreadCount()
             await updateWBBadge()
             let unreadCountTwo = await setUnreadCount(0)
@@ -33,6 +28,6 @@ export default async function fetchNewNotifs() {
         } catch(err) {
             console.log('Error: ', err.message);
         }
-        
-       
+
+
 }

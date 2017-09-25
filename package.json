@@ -12,7 +12,7 @@
     "build": "rm -rf ./extension && gulp build",
     "watch": "rm -rf ./extension && gulp watch",
     "package": "gulp package",
-    "test": "mocha",
+    "test": "jest",
     "firefox": "web-ext -s extension run --bc",
     "lint": "gulp lint",
     "lint-fix": "eslint --ext js,jsx --fix ."
