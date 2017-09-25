@@ -4,6 +4,8 @@ import PouchDB from 'pouchdb-browser'
 import PouchDBFind from 'pouchdb-find'
 import { blobToBase64String } from 'blob-util'
 
+import encodeUrl from 'src/util/encode-url-for-id'
+
 
 PouchDB.plugin(PouchDBFind)
 
@@ -38,6 +40,21 @@ export const normaliseFindResult = result => ({
 export const resultRowsById = result =>
     fromPairs(result.rows.map(row => [row.id, row]))
 
+/**
+ * PouchDB's `.bulkGet` allows us to grab many docs via array of ID at once.
+ * Sadly it has a bit of a weird response structure that is hard to use without
+ * formatting it first. We only care about the returned docs marked as "ok".
+ * More info: https://pouchdb.com/api.html#bulk_get
+ *
+ * @param {any} bulkGetResponse Standard reponse from PouchDB.bulkGet
+ * @returns {Array<any>} Array of "ok"d docs from response.
+ */
+export const bulkGetResultsToArray = ({ results }) => results
+    .map(res => res.docs)
+    .map(list => list.filter(doc => doc.ok))
+    .filter(list => list.length)
+    .map(list => list[0].ok)
+
 // Get an attachment from a doc as a data URL string.
 // Pass either a docId or a doc itself, and the attachmentId.
 // Returns undefined if non-existent.
@@ -58,4 +75,22 @@ export async function getAttachmentAsDataUrl({doc, docId=doc._id, attachmentId})
     const base64 = await blobToBase64String(blob)
     const dataUrl = `data:${blob.type};base64,${base64}`
     return dataUrl
+}
+
+/**
+ * Given a URL, encode it and return a function that affords looking up all matching docs
+ * to that URL by specified type prefix. Valid type prefixes look like `page/`.
+ *
+ * @param {string} url URL to match against docs.
+ * @returns {(type: string, opts?: any) => Promise<Array<any>>} Async function that affords searching
+ *  on given URL via type. Any extra options to `PouchDB.allDocs` can be passed in as the second arg.
+ */
+export function fetchDocTypesByUrl(url) {
+    const encodedUrl = encodeUrl(url)
+
+    return (typePrefix, opts = { include_docs: true }) => db.allDocs({
+        startkey: `${typePrefix}${encodedUrl}`,
+        endkey: `${typePrefix}${encodedUrl}\ufff0`,
+        ...opts,
+    })
 }

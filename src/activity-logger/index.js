@@ -1,7 +1,7 @@
 // Stuff that is to be accessible from other modules (folders)
 
 import docuri from 'docuri'
-import randomString from 'src/util/random-string'
+import encodeUrl from 'src/util/encode-url-for-id'
 
 export const visitKeyPrefix = 'visit/'
 
@@ -29,16 +29,13 @@ export const getPauseState = async () => {
 // Creates an _id string given the variables, or vice versa parses such strings
 // We simply use the creation time for the id, for easy chronological sorting.
 // We add a random string we call a 'nonce' to prevent accidental collisions.
-export const convertVisitDocId = docuri.route(`${visitKeyPrefix}:timestamp/:nonce`)
+export const convertVisitDocId = docuri.route(`${visitKeyPrefix}:url/:timestamp`)
 
-const convertAnyTimestampedDocId = docuri.route(':type/:timestamp/:nonce')
+export const convertMetaDocId = docuri.route(':type/:url/:timestamp')
+
 export const getTimestamp = doc =>
-    Number.parseInt(convertAnyTimestampedDocId(doc._id).timestamp)
+    Number.parseInt(convertMetaDocId(doc._id).timestamp)
 
-export function generateVisitDocId({timestamp, nonce} = {}) {
-    const date = timestamp ? new Date(timestamp) : new Date()
-    return convertVisitDocId({
-        timestamp: date.getTime(),
-        nonce: nonce || randomString(),
-    })
-}
+// NOTE: truncates any decimal part of the `timestamp` arg
+export const generateVisitDocId = ({ url, timestamp = Date.now() }) =>
+    convertVisitDocId({ url: encodeUrl(url, false), timestamp: Math.floor(timestamp) })

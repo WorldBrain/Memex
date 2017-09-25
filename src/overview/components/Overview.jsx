@@ -2,12 +2,16 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
+import Waypoint from 'react-waypoint'
 
 import * as actions from '../actions'
 import * as selectors from '../selectors'
+import * as constants from '../constants'
 import ResultList from './ResultList'
 import DateRangeSelection from './DateRangeSelection'
 import DeleteConfirmation from './DeleteConfirmation'
+import PageResultItem from './PageResultItem'
+import { LoadingIndicator } from 'src/common-ui/components'
 import styles from './Overview.css'
 
 
@@ -16,6 +20,38 @@ class Overview extends React.Component {
         if (this.props.grabFocusOnMount) {
             this.inputQueryEl.focus()
         }
+    }
+
+    handleInputChange = e => this.props.onInputChanged(e.target.value)
+
+    renderResultItems() {
+        const { searchResults, onBottomReached, isLoading, needsWaypoint } = this.props
+
+        const resultItems = searchResults.map(doc => (
+            <li key={doc._id}>
+                <PageResultItem
+                    doc={doc}
+                    sizeInMB={doc.freezeDrySize}
+                    isBookmark={doc.displayType === constants.RESULT_TYPES.BOOKMARK}
+                />
+            </li>
+        ))
+
+        // Insert waypoint at the end of results to trigger loading new items when scrolling down
+        if (needsWaypoint) {
+            resultItems.push(<Waypoint onEnter={onBottomReached} key='waypoint' />)
+        }
+
+        // Add loading spinner to the list end, if loading (may change this)
+        if (isLoading) {
+            resultItems.push(<LoadingIndicator key='loading' />)
+        }
+
+        return resultItems
+    }
+
+    renderNoResultsMsg() {
+        return <p className={styles.noResultMessage}>No results</p>
     }
 
     render() {
@@ -28,10 +64,7 @@ class Overview extends React.Component {
                     <div className={styles.searchField}>
                         <input
                             className={styles.query}
-                            onInput={e => { this.props.onInputChanged(e.target.value) }}
-                            onKeyDown={e => {
-                                if (e.key === 'Escape') { this.props.onInputChanged('') }
-                            }}
+                            onChange={this.handleInputChange}
                             placeholder='Search your memory'
                             value={query}
                             ref={ref => { this.inputQueryEl = ref }}
@@ -54,18 +87,13 @@ class Overview extends React.Component {
                 </div>
 
                 <div className={styles.main}>
-                    <ResultList
-                        searchResult={this.props.searchResult}
-                        searchQuery={query}
-                        onBottomReached={this.props.onBottomReached}
-                        waitingForResults={this.props.waitingForResults}
-                        {...this.props.searchMetaData}
-                    />
+                    {this.props.noResults
+                        ? this.renderNoResultsMsg()
+                        : <ResultList>{this.renderResultItems()}</ResultList>}
                     <DeleteConfirmation
                         isShown={this.props.isDeleteConfShown}
                         close={this.props.hideDeleteConfirm}
-                        deleteAll={this.props.deleteAssociatedDocs(this.props.deleteVisitId)}
-                        deleteVisit={this.props.deleteVisit(this.props.deleteVisitId)}
+                        deleteDocs={this.props.deleteDocs}
                     />
                 </div>
             </div>
@@ -84,31 +112,22 @@ Overview.propTypes = {
     onStartDateChange: PropTypes.func,
     onEndDateChange: PropTypes.func,
     onBottomReached: PropTypes.func,
-    waitingForResults: PropTypes.bool,
-    searchMetaData: PropTypes.shape({
-        searchedUntil: PropTypes.string,
-        resultsExhausted: PropTypes.bool,
-    }).isRequired,
-    searchResult: PropTypes.arrayOf(PropTypes.shape({
-        latestResult: PropTypes.object.isRequired,
-        rest: PropTypes.arrayOf(PropTypes.object).isRequired,
-    })).isRequired,
+    isLoading: PropTypes.bool,
+    noResults: PropTypes.bool.isRequired,
+    searchResults: PropTypes.arrayOf(PropTypes.object).isRequired,
     isDeleteConfShown: PropTypes.bool.isRequired,
-    deleteVisitId: PropTypes.string,
     hideDeleteConfirm: PropTypes.func.isRequired,
-    deleteAssociatedDocs: PropTypes.func.isRequired,
-    deleteVisit: PropTypes.func.isRequired,
+    deleteDocs: PropTypes.func.isRequired,
+    needsWaypoint: PropTypes.bool.isRequired,
 }
 
-
 const mapStateToProps = state => ({
-    ...selectors.ourState(state),
+    isLoading: selectors.isLoading(state),
     currentQueryParams: selectors.currentQueryParams(state),
-    waitingForResults: !!selectors.ourState(state).waitingForResults, // cast to boolean
-    searchResult: selectors.results(state),
-    searchMetaData: selectors.searchMetaData(state),
+    noResults: selectors.noResults(state),
+    searchResults: selectors.results(state),
     isDeleteConfShown: selectors.isDeleteConfShown(state),
-    deleteVisitId: selectors.deleteVisitId(state),
+    needsWaypoint: selectors.needsPagWaypoint(state),
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -116,11 +135,10 @@ const mapDispatchToProps = dispatch => ({
         onInputChanged: actions.setQuery,
         onStartDateChange: actions.setStartDate,
         onEndDateChange: actions.setEndDate,
-        onBottomReached: actions.loadMoreResults,
+        onBottomReached: actions.getMoreResults,
         hideDeleteConfirm: actions.hideDeleteConfirm,
+        deleteDocs: actions.deleteDocs,
     }, dispatch),
-    deleteAssociatedDocs: visitId => () => dispatch(actions.deleteVisit(visitId, true)),
-    deleteVisit: visitId => () => dispatch(actions.deleteVisit(visitId)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Overview)

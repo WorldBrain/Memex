@@ -1,17 +1,22 @@
-import db, { normaliseFindResult } from 'src/pouchdb'
-import { findVisits } from 'src/search/find-visits'
-import { bookmarkDocsSelector } from 'src/imports/background'
-import { getEquivalentPages } from 'src/search/find-pages'
+import db, { fetchDocTypesByUrl } from 'src/pouchdb'
+import * as index from 'src/search/search-index'
+import { pageKeyPrefix } from 'src/page-storage'
+import { visitKeyPrefix } from 'src/activity-logger'
+import { bookmarkKeyPrefix } from 'src/imports'
 
-export async function deleteVisitAndPage({visitId, deleteAssoc = false}) {
-    // Delete the visit object
-    const visit = await db.get(visitId)
-    const pageId = visit.page._id
-    await db.remove(visit)
+export default async function deleteDocsByUrl(url) {
+    const fetchDocsByType = fetchDocTypesByUrl(url)
 
-    // Either delete all associated docs or just try to delete page/s if orphaned
-    const docs = deleteAssoc ? await getAssociatedDocs({pageId}) : await getOrphanedPageDocs({pageId})
-    await deleteDocs(docs)
+    const opts = { include_docs: false }
+    const { rows: pageRows } = await fetchDocsByType(pageKeyPrefix, opts)
+    const { rows: visitRows } = await fetchDocsByType(visitKeyPrefix, opts)
+    const { rows: bookmarkRows } = await fetchDocsByType(bookmarkKeyPrefix, opts)
+
+    const allRows = [...pageRows, ...visitRows, ...bookmarkRows]
+    await Promise.all([
+        deleteDocs(allRows),
+        handleIndexDeletes(allRows),
+    ])
 }
 
 export const deleteDocs = docs => db.bulkDocs(docs.map(
@@ -23,36 +28,27 @@ export const deleteDocs = docs => db.bulkDocs(docs.map(
 ))
 
 /**
- * Get any associated visit, bookmark, and equivalent pages associated with a given page doc.
+ * Handles updating the index to remove pages and/or the visit timestamp.
  *
- * @param {string} pageId The ID of the page doc to get.
- * @return {Array<Document>} Documents found associated with pageId.
+ * @param {any} [docsToDelete=[]] Array of docs that will be deleted from Pouch. Need to delete
+ *  the page docs in here from the index.
+ * @param {any} metaDoc The visit doc being deleted from Pouch. If this is not associated
+ *  with any of the pages in `docsToDelete`, the corresponding index doc will be updated.
  */
-async function getAssociatedDocs({pageId}) {
-    const pagesResult = await getEquivalentPages({pageId})
-    const visitsResult = await findVisits({pagesResult})
-    const bookmarksResult = normaliseFindResult(await db.find({
-        selector: {
-            ...bookmarkDocsSelector,
-            'page._id': { $in: pagesResult.rows.map(row => row.id) },
-        },
-    }))
+export async function handleIndexDeletes(docsToDelete = [], metaDoc) {
+    // Grab all page docs IDs (index indexes by page doc)
+    const indexDocIds = docsToDelete
+        .filter(doc => doc.id.startsWith('page/')) // Filter out visits/bookmarks
+        .map(doc => doc.id)
 
-    return [
-        ...pagesResult.rows,
-        ...visitsResult.rows,
-        ...bookmarksResult.rows,
-    ]
-}
+    // If meta doc not already in pages to delete, delete it
+    if (metaDoc && !indexDocIds.includes(metaDoc.page._id)) {
+        if (metaDoc._id.startsWith('visit/')) {
+            await index.removeVisit(metaDoc)
+        } else {
+            await index.removeBookmark(metaDoc)
+        }
+    }
 
-async function getOrphanedPageDocs({pageId}) {
-    // Because of deduplication, different page objects may redirect to this
-    // one, or this one may redirect to others. So we check for visits either
-    // referring to this page object or to any equivalent ones.
-    const pagesResult = await getEquivalentPages({pageId})
-    const visitsResult = await findVisits({pagesResult})
-    // If there are no visits to any of them, delete all these page objects.
-    // (otherwise, we leave them; it does not seem worth the effort to smartly
-    // prune some orphans among them already)
-    return visitsResult.rows.length === 0 ? pagesResult.rows : []
+    await index.del(indexDocIds)
 }

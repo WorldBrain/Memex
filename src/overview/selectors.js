@@ -1,31 +1,56 @@
 import { createSelector } from 'reselect'
+import get from 'lodash/fp/get'
 
-import safelyGet from 'src/util/safe-nested-access'
-import orderedGroupBy from 'src/util/ordered-group-by'
-
-export const ourState = state => state.overview
-export const currentQueryParams = createSelector(ourState, state => state.currentQueryParams)
-const searchResult = state => ourState(state).searchResult
+import * as constants from './constants'
 
 /**
- * `latestResult` will contain the latest visit (to display in ResultsList);
- * `rest` contains the later visits as an array in original order of appearance (relevance + time)
+ * Given an augmented page doc, attempts to calculate its approx. freeze dry page size in MB.
+ * @param {any} pageDoc The augmented page doc from search results.
+ * @returns {string} Approx. size in MB of freeze-dry attachment. 0 if not found.
  */
-const resultsStateShape = ([latestResult, ...rest]) => ({ latestResult, rest })
+function calcFreezeDrySize(pageDoc) {
+    const pageSize = get(['_attachments', 'frozen-page.html', 'length'])(pageDoc)
+    const sizeInMB = pageSize !== undefined
+        ? Math.round(pageSize / 1024**2 * 10) / 10
+        : 0
+
+    return sizeInMB.toString()
+}
 
 /**
- * Given the search results, group them by URL and shape them so that the UI can easily pick out the
- * latest visit for display in the main view, and the later visits to display on-demand.
+ * Either set display title to be the top-level title field, else look in content. Fallback is the URL.
+ * @param {any} pageDoc The augmented page doc from search results.
+ * @returns {string} Title string to display from page title, or URL in case of bad data..
  */
-export const results = createSelector(searchResult, ({ rows: results } = {}) =>
-    orderedGroupBy(safelyGet('doc.url'))(results)
-        .map(resultsStateShape)) // Final map over the groupBy output to make nicer UI state
+function decideTitle(pageDoc) {
+    if (pageDoc.title) return pageDoc.title
 
-export const searchMetaData = createSelector(searchResult, searchResult => ({
-    searchedUntil: searchResult.searchedUntil,
-    resultsExhausted: searchResult.resultsExhausted,
-}))
+    return (pageDoc.content && pageDoc.content.title) ? pageDoc.content.title : pageDoc.url
+}
 
-export const deleteConfirmProps = createSelector(ourState, state => state.deleteConfirmProps)
+export const overview = state => state.overview
+const searchResult = createSelector(overview, state => state.searchResult)
+const resultDocs = createSelector(searchResult, results => results.docs)
+export const currentQueryParams = createSelector(overview, state => state.currentQueryParams)
+export const isLoading = createSelector(overview, state => state.isLoading)
+export const noResults = createSelector(resultDocs, isLoading, (docs, isLoading) => docs.length === 0 && !isLoading)
+export const currentPage = createSelector(overview, state => state.currentPage)
+export const resultsSkip = createSelector(currentPage, page => page * constants.PAGE_SIZE)
+export const deleteConfirmProps = createSelector(overview, state => state.deleteConfirmProps)
 export const isDeleteConfShown = createSelector(deleteConfirmProps, state => state.isShown)
-export const deleteVisitId = createSelector(deleteConfirmProps, state => state.visitId)
+export const urlToDelete = createSelector(deleteConfirmProps, state => state.url)
+
+export const results = createSelector(
+    resultDocs,
+    docs => docs.map(pageDoc => ({
+        ...pageDoc,
+        freezeDrySize: calcFreezeDrySize(pageDoc),
+        title: decideTitle(pageDoc),
+    })),
+)
+
+const resultsExhausted = createSelector(searchResult, results => results.resultsExhausted)
+export const needsPagWaypoint = createSelector(
+    resultsExhausted, isLoading,
+    (isExhausted, isLoading) => !isLoading && !isExhausted,
+)

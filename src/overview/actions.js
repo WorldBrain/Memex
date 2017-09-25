@@ -1,89 +1,114 @@
-import last from 'lodash/fp/last'
-import isEqual from 'lodash/fp/isEqual'
 import { createAction } from 'redux-act'
 
-import { filterVisitsByQuery } from 'src/search'
-import { deleteVisitAndPage } from 'src/page-storage/deletion'
-import asyncActionCreator from 'src/util/redux-async-action-creator'
+import deleteDocsByUrl from 'src/page-storage/deletion'
+import * as constants from './constants'
+import * as selectors from './selectors'
 
-import { ourState } from './selectors'
-
+// Will contain the runtime port which will allow bi-directional communication to the background script
+let port
 
 // == Simple commands to change the state in reducers ==
 
+export const setLoading = createAction('overview/setLoading')
+export const nextPage = createAction('overview/nextPage')
+export const resetPage = createAction('overview/resetPage')
+export const setSearchResult = createAction('overview/setSearchResult')
+export const appendSearchResult = createAction('overview/appendSearchResult')
 export const setQuery = createAction('overview/setQuery')
 export const setStartDate = createAction('overview/setStartDate')
 export const setEndDate = createAction('overview/setEndDate')
-export const hideVisit = createAction('overview/hideVisit')
+export const hideResultItem = createAction('overview/hideResultItem')
 export const showDeleteConfirm = createAction('overview/showDeleteConfirm')
 export const hideDeleteConfirm = createAction('overview/hideDeleteConfirm')
 
-
-// == Actions that trigger other actions ==
-
-// Initialisation
-export function init() {
-    return function (dispatch, getState) {
-        // Perform an initial search to populate the view (empty query = get all docs)
-        dispatch(newSearch())
+const getCmdMessageHandler = dispatch => ({ cmd, ...payload }) => {
+    switch (cmd) {
+        case constants.CMDS.RESULTS:
+            dispatch(updateSearchResult(payload))
+            break
+        case constants.CMDS.ERROR:
+            dispatch(handleErrors(payload))
+            break
+        default:
+            console.error(`Background script sent unknown command '${cmd}' with payload:\n${payload}`)
     }
 }
 
-export const deleteVisit = (visitId, deleteAssoc = false) => async (dispatch, getState) => {
-    // Hide the visit + confirm modal directly (optimistically).
-    dispatch(hideVisit(visitId))
-    dispatch(hideDeleteConfirm())
-    // Remove it from the database.
-    await deleteVisitAndPage({visitId, deleteAssoc})
-
-    // Refresh search view after deleting all assoc docs
-    if (deleteAssoc) {
-        dispatch(newSearch())
-    }
+/**
+ * Init a connection to the index running in the background script, allowing
+ * redux actions to be dispatched whenever a command is received from the background script.
+ * Also perform an initial search to populate the view (empty query = get all docs)
+ */
+export const init = () => dispatch => {
+    port = browser.runtime.connect({ name: constants.SEARCH_CONN_NAME })
+    port.onMessage.addListener(getCmdMessageHandler(dispatch))
+    dispatch(search({ overwrite: true }))
 }
 
-export const newSearch = asyncActionCreator(() => async (dispatch, getState) => {
-    const { currentQueryParams } = ourState(getState())
-    const searchResult = await filterVisitsByQuery({
-        ...currentQueryParams,
-        includeContext: false,
-        limit: 10,
-        softLimit: true,
-    })
-    return searchResult
-})
-
-export const expandSearch = asyncActionCreator(() => async (dispatch, getState) => {
-    const { currentQueryParams, searchResult } = ourState(getState())
-    // Look from which item the search should continue.
-    const skipUntil = searchResult.searchedUntil
-        || (searchResult.rows.length && last(searchResult.rows).id)
-        || undefined
-    // Get the items that are to be appended.
-    const newSearchResult = await filterVisitsByQuery({
-        ...currentQueryParams,
-        includeContext: false,
-        skipUntil,
-        limit: 10,
-        softLimit: true,
-    })
-    return newSearchResult
-})
-
-export const updateSearch = () => (dispatch, getState) => {
-    const state = ourState(getState())
-    if (isEqual(state.activeQueryParams, state.currentQueryParams)) {
-        // The query has not actually changed since our last search, so no need to update.
+/**
+ * Perform a search using the current query params as defined in state. Pagination
+ * state will also be used to perform relevant pagination logic.
+ * @param {boolean} [overwrite=false] Denotes whether to overwrite existing results or just append.
+ */
+export const search = ({ overwrite } = { overwrite: false }) => async (dispatch, getState) => {
+    // If loading already, don't start another search
+    if (selectors.isLoading(getState())) {
         return
     }
-    // Cancel any running searches and start again.
-    newSearch.cancelAll()
-    expandSearch.cancelAll()
-    dispatch(newSearch())
+
+    dispatch(setLoading(true))
+
+    // Overwrite of results should always reset the current page before searching
+    if (overwrite) {
+        dispatch(resetPage())
+    }
+
+    // Grab needed derived state for search
+    const state = getState()
+    const currentQueryParams = selectors.currentQueryParams(state)
+    const skip = selectors.resultsSkip(state)
+
+    const searchParams = {
+        ...currentQueryParams,
+        limit: constants.PAGE_SIZE,
+        skip,
+    }
+
+    // Tell background script to search
+    port.postMessage({ cmd: constants.CMDS.SEARCH, searchParams, overwrite })
 }
 
-export const loadMoreResults = () => (dispatch, getState) => {
-    // If a search is already running, don't do anything.
-    if (newSearch.isPending() || expandSearch.isPending()) return
-    dispatch(expandSearch())
+const updateSearchResult = ({ searchResult, overwrite } = { overwrite: false, searchResult: [] }) => dispatch => {
+    const searchAction = overwrite ? setSearchResult : appendSearchResult
+
+    dispatch(searchAction(searchResult))
+    dispatch(setLoading(false))
+}
+
+// TODO stateful error handling
+const handleErrors = ({ query, error }) => dispatch => {
+    console.error(`Search for '${query}' errored: ${error}`)
+    dispatch(setLoading(false))
+}
+
+/**
+ * Increments the page state before scheduling another search.
+ */
+export const getMoreResults = () => async dispatch => {
+    dispatch(nextPage())
+    dispatch(search())
+}
+
+export const deleteDocs = () => async (dispatch, getState) => {
+    const url = selectors.urlToDelete(getState())
+
+    // Hide the result item + confirm modal directly (optimistically)
+    dispatch(hideResultItem(url))
+    dispatch(hideDeleteConfirm())
+
+    // Remove all assoc. docs from the database + index
+    await deleteDocsByUrl(url)
+
+    // Refresh search view after deleting all assoc docs
+    dispatch(search({ overwrite: true }))
 }

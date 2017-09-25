@@ -1,7 +1,4 @@
-import docuri from 'docuri'
-
 import db from 'src/pouchdb'
-import randomString from 'src/util/random-string'
 import { pageDocsSelector } from 'src/page-storage'
 import { checkWithBlacklist } from 'src/blacklist'
 import { isLoggable } from 'src/activity-logger'
@@ -10,19 +7,9 @@ import importsConnectionHandler from './imports-connection-handler'
 
 
 // Constants
-export const importProgressStorageKey = 'is_import_in_progress'
 export const importStateStorageKey = 'import_items'
 export const installTimeStorageKey = 'extension_install_time'
-export const bookmarkKeyPrefix = 'bookmark/'
-export const bookmarkDocsSelector = { _id: { $gte: bookmarkKeyPrefix, $lte: `${bookmarkKeyPrefix}\uffff` } }
 
-// Bookmarks related utility functions (TODO: Find appropriate space for this to live)
-export const convertBookmarkDocId = docuri.route(`${bookmarkKeyPrefix}:timestamp/:nonce`)
-
-export const generateBookmarkDocId = ({
-    timestamp = Date.now(),
-    nonce = randomString(),
-} = {}) => convertBookmarkDocId({ timestamp, nonce })
 
 // Imports local storage state interface
 export const getImportItems = async () => {

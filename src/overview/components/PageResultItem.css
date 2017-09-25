@@ -51,6 +51,17 @@
     }
 }
 
+.bookmarkRibbon {
+    position: absolute;
+    top: 10px;
+    left: -15px;
+    width: 60px;
+    height: 10px;
+    transform: rotate(-45deg);
+    background: #ff503e;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
+}
+
 .screenshotContainer {
     flex-shrink: 0;
     width: 200px;

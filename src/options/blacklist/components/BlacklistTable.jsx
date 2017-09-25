@@ -22,8 +22,6 @@ const BlacklistTable = ({ children }) => (
     </div>
 )
 
-BlacklistTable.propTypes = {
-    children: PropTypes.arrayOf(PropTypes.node).isRequired,
-}
+BlacklistTable.propTypes = { children: PropTypes.arrayOf(PropTypes.node).isRequired }
 
 export default BlacklistTable

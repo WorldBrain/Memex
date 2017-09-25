@@ -1,18 +1,46 @@
+import uniqBy from 'lodash/fp/uniqBy'
+
 import PromiseBatcher from 'src/util/promise-batcher'
-import { CMDS, IMPORT_CONN_NAME } from 'src/options/imports/constants'
-import prepareImports from './imports-preparation'
+import { CMDS, IMPORT_CONN_NAME, IMPORT_TYPE } from 'src/options/imports/constants'
 import getEstimateCounts from './import-estimates'
 import processImportItem from './import-item-processor'
-import { importProgressStorageKey, getImportItems, removeImportItem, clearImportItems } from './'
+import {
+    getImportItems, setImportItems,
+    getURLFilteredHistoryItems, getURLFilteredBookmarkItems,
+    removeImportItem, clearImportItems,
+} from './'
+import {
+    getImportInProgressFlag, setImportInProgressFlag,
+    clearImportInProgressFlag,
+} from '../'
 
+const uniqByUrl = uniqBy('url')
 
-// Local storage helpers to make the main functions a bit less messy
-const getImportInProgressFlag = async () =>
-    (await browser.storage.local.get(importProgressStorageKey))[importProgressStorageKey]
-const setImportInProgressFlag = async () =>
-    (await browser.storage.local.set({ [importProgressStorageKey]: true }))
-const clearImportInProgressFlag = async () =>
-    await browser.storage.local.remove(importProgressStorageKey)
+// Binds an import type to a function that transforms a history/bookmark doc to an import item.
+const transformToImportItem = type => item => ({
+    browserId: item.id,
+    url: item.url,
+    // HistoryItems contain lastVisitTime while BookmarkTreeNodes contain dateAdded
+    timestamp: item.lastVisitTime || item.dateAdded,
+    type,
+})
+
+/**
+ * Handles building the list of import items in local storage. Note that these are only
+ * built in local storage as a way to persist them.
+ * @param {any} allowTypes Object containings bools for each valid type of import, denoting whether
+ *   or not import and page docs should be created for that import type.
+ */
+async function prepareImportItems(allowTypes = {}) {
+    const historyItems = allowTypes[IMPORT_TYPE.HISTORY] ? await getURLFilteredHistoryItems() : []
+    const bookmarkItems = allowTypes[IMPORT_TYPE.BOOKMARK] ? await getURLFilteredBookmarkItems() : []
+
+    // Create import items for all created page stubs
+    await setImportItems(uniqByUrl([
+        ...historyItems.map(transformToImportItem(IMPORT_TYPE.HISTORY)),
+        ...bookmarkItems.map(transformToImportItem(IMPORT_TYPE.BOOKMARK)),
+    ]))
+}
 
 /**
  * Creates observer functions to afford sending of messages over connection port
@@ -57,7 +85,7 @@ async function startImport(port, batch, allowTypes) {
     // Perform history-stubs, vists, and history import state creation, if import not in progress
     const importInProgress = await getImportInProgressFlag()
     if (!importInProgress) {
-        await prepareImports(allowTypes)
+        await prepareImportItems(allowTypes)
     }
 
     port.postMessage({ cmd: CMDS.START }) // Tell UI to finish loading state and move into progress view
@@ -103,7 +131,7 @@ export default async function importsConnectionHandler(port) {
     const batch = new PromiseBatcher({
         inputBatchCallback: getImportItems,
         processingCallback: processImportItem,
-        concurrency: 2,
+        concurrency: 1,
         observer: getBatchObserver(port),
     })
 

@@ -57,11 +57,11 @@ async function performPageAnalysis({pageId, tabId}) {
     ])
 }
 
-export default async function analysePage({page, tabId}) {
+export default async function analysePage({ pageId, tabId }) {
     // Wait until its DOM has loaded, in case we got invoked before that.
-    await whenPageDOMLoaded({tabId}) // TODO: catch e.g. tab close.
-    await performPageAnalysis({pageId: page._id, tabId})
+    await whenPageDOMLoaded({ tabId }) // TODO: catch e.g. tab close.
+    await performPageAnalysis({ pageId, tabId })
     // Get and return the page.
-    page = revisePageFields(await db.get(page._id))
-    return {page}
+    const page = revisePageFields(await db.get(pageId))
+    return { page }
 }
