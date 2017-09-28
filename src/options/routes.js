@@ -20,7 +20,7 @@ export default [
         name: 'Acknowledgements',
         pathname: '/acknowledgements',
         component: AcknowledgmentContainer,
-        icon: 'archive',
+        icon: 'perm_identity',
     },
     {
         name: 'Help Me Please',

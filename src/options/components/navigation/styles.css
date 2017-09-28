@@ -1,6 +1,8 @@
 .root {
-    width: 238px;
+    width: 300px;
     height: auto;
+    min-width: 238px;
+    min-height: 100vh;
     background-color: #f7f7f7;
     box-shadow: 2px 1px 1px #e2e2e2;
     font-family: 'Lato';
