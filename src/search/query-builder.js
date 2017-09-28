@@ -80,9 +80,14 @@ class QueryBuilder {
         let terms = input
             .toLowerCase()
             .match(/\S+/g) || []
-
+    
             // All terms must be pushed to the text-pipeline to take into account stopword removal ect...
-            terms = (transform({text: terms.join(' '), lang: 'all'})).text.split(' ')
+            terms = transform({text: terms.join(' '), lang: 'all'})
+
+        // Make sure terms is defined before trying to turn back into array.
+        if (terms) {
+            terms = terms.text.split(' ')
+        }
 
         // If there are valid search terms, parse them...
         if (terms && terms.length) {
