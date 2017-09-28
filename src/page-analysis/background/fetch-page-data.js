@@ -1,6 +1,5 @@
 import extractPageContent from 'src/page-analysis/content_script/extract-page-content'
 import extractFavIcon from 'src/page-analysis/content_script/extract-fav-icon'
-import freezeDry from 'freeze-dry'
 
 /**
  * @typedef IFetchPageDataOpts
@@ -10,7 +9,6 @@ import freezeDry from 'freeze-dry'
  * @property {boolean} includeFavIcon Denotes whether to attempt favicon fetch.
  */
 export const defaultOpts = {
-    includeFreezeDry: false,
     includePageContent: false,
     includeFavIcon: false,
 }
@@ -38,7 +36,6 @@ export default async function fetchPageData({
 
     return {
         favIconURI: opts.includeFavIcon ? await extractFavIcon(doc) : undefined,
-        freezeDryHTML: opts.includeFreezeDry ? await freezeDry(doc, url) : undefined,
         content: opts.includePageContent ? await extractPageContent({ doc, url }) : undefined,
     }
 }
