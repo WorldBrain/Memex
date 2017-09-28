@@ -6,7 +6,7 @@ html,
 body {
     margin: 0;
     font-size: 18px;
-    font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+    font-family: 'Lato', sans-serif;
     font-weight: 200;
 }
 
@@ -23,17 +23,17 @@ body {
 }
 
 .routeTitle {
-    font-size: 1.2em;
+    font-size: 1em;
     font-weight: 100;
-    color: #666;
-    margin: 0 0 10px 0;
+    color: #b7b7b7;
+    margin: 10px 0 10px 0;
     padding-bottom: 10px;
-    border-bottom: 1px solid #ccc;
 }
 
 .sectionTitle {
-    font-size: 1.125em;
-    font-weight: 200;
-    color: #666;
-    margin: 0 0 10px 0;
+    color: #3eb995;
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 20px;
+    margin-top: 10px;
 }

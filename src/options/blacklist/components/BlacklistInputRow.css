@@ -8,19 +8,39 @@
 }
 
 .input {
-    width: 90%;
-    padding: 15px 40px;
+    width: 82%;
+    padding: 10px 10px;
     font-size: 0.8em;
     font-style: italic;
     border: none;
     outline: none;
     background: #f8f8f8;
+    font-family: Lato;
 }
 
 .inputButtons {
-    width: 10%;
     display: flex;
     flex-direction: row;
     justify-content: center;
     background: #f8f8f8;
+}
+
+.blacklistButton {
+    background: transparent;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    color: white;
+    width: 100%;
+    background-color: #3eb994;
+    font-weight: bold;
+
+    &:hover {
+        color: #333;
+    }
+
+    &:disabled {
+        color: #ebebeb;
+        cursor: default;
+    }
 }

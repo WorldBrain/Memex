@@ -187,12 +187,12 @@ class PopupContainer extends Component {
                 </HistoryPauser>
                 {this.renderBlacklistButton()}
                 <hr />
-                <LinkButton href={`${constants.OPTIONS_URL}#/settings`} icon='settings'>
+                <LinkButton href={`${constants.OPTIONS_URL}#/blacklist`} icon='settings'>
                     Settings
                 </LinkButton>
-                <LinkButton href={`${constants.OPTIONS_URL}#/import`} icon='file_download'>
-                    Import History &amp; Bookmarks
-                </LinkButton>
+                {/*<LinkButton href={`${constants.OPTIONS_URL}#/import`} icon='file_download'>
+                                    Import History &amp; Bookmarks
+                                </LinkButton>*/}
                 <LinkButton href={constants.FEEDBACK_URL} icon='feedback'>
                     Feedback
                 </LinkButton>

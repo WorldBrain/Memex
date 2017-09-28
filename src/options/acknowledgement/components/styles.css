@@ -14,7 +14,7 @@
 
 .content {
     font-style: italic;
-    margin-top: 20px;
+    margin: 20px 0;
     font-size: 14px;
     color: black;
     width: 80%;
@@ -33,16 +33,16 @@
 }
 
 .li {
-    margin: 0px 0;
+    margin: 10px 0;
     display: inline-block;
     width: 50%;
 }  
 
 .img {
     vertical-align: middle;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    border-radius: 10%;
 }
 
 .p {
@@ -69,9 +69,27 @@
 }
 
 .contribute {
-    font-size: 12px;
-    margin-left: 10px;
-    color: #3eb995;
+    font-size: 16px;
+    color: black;
     font-weight: bold;
+    margin-top: 10px;
     letter-spacing: 1px;
+}
+
+.links {
+    text-decoration: none;
+    color: black;
+    margin-right: 5px;
+}
+
+.contributeContent {
+    font-size: 14px;
+    letter-spacing: 1px;
+    max-width: 80%;
+    background-color: #e7e7e7;
+    padding: 20px 20px;
+}
+
+.socialIcons {
+    width: 10px;
 }
