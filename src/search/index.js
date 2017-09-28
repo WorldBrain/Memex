@@ -29,6 +29,11 @@ export default async function indexSearch({
         .limit(limit)
         .get()
 
+    // Don't continue if there is no content in indexQuery
+    if (indexQuery.query[0].AND.content.length === 0 || indexQuery.query[1].AND.content === 0) {
+        return { docs: [], resultsExhausted: false, isBadTerm: true,  }
+    }
+
     // Get index results, filtering out any unexpectedly structured results
     let results = await index.search(indexQuery)
     results = filterBadlyStructuredResults(results)
@@ -39,6 +44,7 @@ export default async function indexSearch({
             docs: [],
             resultsExhausted: true,
             totalCount: getTotalCount ? 0 : undefined,
+            isBadTerm: false
         }
     }
 
@@ -49,5 +55,6 @@ export default async function indexSearch({
         docs,
         resultsExhausted: false,
         totalCount: getTotalCount ? await index.count(indexQuery) : undefined,
+        isBadTerm: false
     }
 }

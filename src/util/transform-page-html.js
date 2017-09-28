@@ -4,14 +4,15 @@ const WHITELIST_STRIP_LINEBREAKS = /[^A-Za-z\x80-\xFF 0-9 \u2018\u2019\u201C|\u2
 
 export default function transformHTML({ html = '' }) {
     const lengthBefore = html.length
-
+    console.time('html-pipeline')
+    // console.log('hello')
     let text = html.toString()
         .replace(/< *(br|p|div|section|aside|button|header|footer|li|article|blockquote|cite|code|h1|h2|h3|h4|h5|h6|legend|nav)((.*?)>)/g, '<$1$2|||||')
         .replace(/< *\/(td|a|option) *>/g, ' </$1>') // spacing some things out so text doesn't get smashed together
         .replace(/< *(a|td|option)/g, ' <$1') // spacing out links
         .replace(/< *(br|hr) +\/>/g, '|||||<$1\\>')
         .replace(/<\/ +?(p|div|section|aside|button|header|footer|li|article|blockquote|cite|code|h1|h2|h3|h4|h5|h6|legend|nav)>/g, '|||||</$1>')
-
+    // console.log({text}) 
     text = `<textractwrapper>${text}<textractwrapper>`
 
     // TODO: see if we can replace this lib
@@ -31,6 +32,6 @@ export default function transformHTML({ html = '' }) {
         .replace(/[ \t\v\u00A0]{2,}/g, ' ')
 
     const lengthAfter = text.length
-
+    console.timeEnd('html-pipeline')
     return  { text, lengthBefore, lengthAfter }
 }

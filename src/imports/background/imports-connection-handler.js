@@ -149,12 +149,19 @@ export default async function importsConnectionHandler(port) {
     // Handle any incoming messages to control the batch
     port.onMessage.addListener(async ({ cmd, ...payload }) => {
         switch (cmd) {
-            case CMDS.START: return await startImport(port, batch, payload)
+            case CMDS.START: {
+                console.time('total-import-time') 
+                return await startImport(port, batch, payload)
+            }
             case CMDS.RESUME: return batch.start()
             case CMDS.PAUSE: return batch.stop()
             case CMDS.CANCEL: return await cancelImport(port, batch)
-            case CMDS.FINISH: return await finishImport(port)
+            case CMDS.FINISH: {
+                console.timeEnd('total-import-time')
+                return await finishImport(port)
+            }
             default: return console.error(`unknown command: ${cmd}`)
         }
+        
     })
 }
