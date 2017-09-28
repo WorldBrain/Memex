@@ -58,11 +58,6 @@ This extracts and stores information about the page in a given tab, such as:
 
 ### [`src/page-storage/`](src/page-storage/): (web)page storage
 
-Everything around managing the pages stored in the database. Mainly created for
-grouping the code around comparison and deduplication of stored versions of
-web pages, which did not really fit well under another folder.
-
-### [`src/local-page/`](src/local-page/): display stored pages
 
 Code for displaying the locally stored web pages, making them accessible on
 their own URL.

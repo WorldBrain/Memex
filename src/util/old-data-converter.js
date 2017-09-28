@@ -23,7 +23,6 @@ export const KEYS = {
     INDEX: 'index',
     BOOKMARKS: 'bookmarks',
     HIST: 'history',
-    PREFS: 'preferences',
     BLACKLIST: 'blacklist',
 }
 

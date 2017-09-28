@@ -6,7 +6,6 @@ import extractTimeFiltersFromQuery from 'src/util/nlp-time-filter'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { isLoggable, getPauseState } from 'src/activity-logger'
 import * as blacklistI from 'src/blacklist'
-import { getPageDocId, updateArchiveFlag } from './archive-button'
 import Popup from './components/Popup'
 import Button from './components/Button'
 import BlacklistConfirm from './components/BlacklistConfirm'
@@ -16,7 +15,6 @@ import SplitButton from './components/SplitButton'
 import * as constants from './constants'
 
 import { itemBtnBlacklisted } from './components/Button.css'
-import { FREEZE_DRY_ARCHIVE_KEY } from '../options/preferences/constants'
 
 // Transforms URL checking results to state types
 const getBlacklistButtonState = ({ loggable, blacklist }) => {
@@ -36,21 +34,17 @@ class PopupContainer extends Component {
             currentTabPageDocId: '',
             blacklistBtn: constants.BLACKLIST_BTN_STATE.DISABLED,
             isPaused: false,
-            archiveBtnDisabled: true,
             blacklistChoice: false,
             blacklistConfirm: false,
-            isArchiveEnabled: false,
         }
 
         this.toggleLoggingPause = remoteFunction('toggleLoggingPause')
         this.cleanupBlacklist = remoteFunction('cleanupBlacklist')
 
-        this.onArchiveBtnClick = this.onArchiveBtnClick.bind(this)
         this.onSearchChange = this.onSearchChange.bind(this)
         this.onPauseChange = this.onPauseChange.bind(this)
         this.onSearchEnter = this.onSearchEnter.bind(this)
         this.onPauseConfirm = this.onPauseConfirm.bind(this)
-        this.getArchiveState = this.getArchiveState.bind(this)
     }
 
     async componentDidMount() {
@@ -65,25 +59,10 @@ class PopupContainer extends Component {
         updateState({ url: currentTab.url })
         this.getInitPauseState().then(updateState).catch(noop)
         this.getInitBlacklistBtnState(currentTab.url).then(updateState).catch(noop)
-        this.getInitArchiveBtnState(currentTab.url).then(updateState).catch(noop)
-        this.getArchiveState().then(updateState).catch(noop)
-    }
-
-    async getArchiveState() {
-        const isArchiveEnabled = (await browser.storage.local.get(FREEZE_DRY_ARCHIVE_KEY))[FREEZE_DRY_ARCHIVE_KEY]
-        return { isArchiveEnabled: isArchiveEnabled }
     }
 
     async getInitPauseState() {
         return { isPaused: await getPauseState() }
-    }
-
-    async getInitArchiveBtnState(url) {
-        const currentTabPageDocId = await getPageDocId(url)
-        return {
-            currentTabPageDocId,
-            archiveBtnDisabled: false,
-        }
     }
 
     async getInitBlacklistBtnState(url) {
@@ -127,18 +106,6 @@ class PopupContainer extends Component {
     onPauseChange(event) {
         const pauseValue = event.target.value
         this.setState(state => ({ ...state, pauseValue }))
-    }
-
-    async onArchiveBtnClick(event) {
-        event.preventDefault()
-
-        try {
-            await updateArchiveFlag(this.state.currentTabPageDocId)
-        } catch (error) {
-            // Can't do it for whatever reason
-        } finally {
-            window.close()
-        }
     }
 
     onSearchChange(event) {
@@ -198,7 +165,7 @@ class PopupContainer extends Component {
     }
 
     renderChildren() {
-        const { blacklistConfirm, archiveBtnDisabled, pauseValue, isPaused } = this.state
+        const { blacklistConfirm, pauseValue, isPaused } = this.state
 
         if (blacklistConfirm) {
             return (
@@ -219,13 +186,6 @@ class PopupContainer extends Component {
                     {this.renderPauseChoices()}
                 </HistoryPauser>
                 {this.renderBlacklistButton()}
-                {
-                    this.state.isArchiveEnabled && (
-                    <Button icon='archive' onClick={this.onArchiveBtnClick} disabled={archiveBtnDisabled}>
-                        Archive Current Page
-                    </Button>
-                )
-                }
                 <hr />
                 <LinkButton href={`${constants.OPTIONS_URL}#/settings`} icon='settings'>
                     Settings
