@@ -8,7 +8,7 @@ import BlacklistRow from './components/BlacklistRow'
 import BlacklistInputRow from './components/BlacklistInputRow'
 import * as actions from './actions'
 import { entireState as entireStateSelector } from './selectors'
-import styles from './components/base'
+import styles from './components/base.css'
 
 class BlacklistContainer extends Component {
     constructor(props) {
@@ -18,7 +18,7 @@ class BlacklistContainer extends Component {
         this.onInputChange = this.onInputChange.bind(this)
         this.handleInputKeyPress = this.handleInputKeyPress.bind(this)
         this.renderAddDomain = this.renderAddDomain.bind(this)
-        this.renderAddBlacklistSites = this.renderAddBlacklistSites.bind(this);
+        this.renderAddBlacklistSites = this.renderAddBlacklistSites.bind(this)
     }
 
     componentDidMount() {
@@ -100,7 +100,6 @@ class BlacklistContainer extends Component {
 
     renderBlacklistRows() {
         const { blacklist } = this.props
-
         return [
             ...blacklist.map(({ expression }, idx) => (
                 <BlacklistRow
@@ -117,7 +116,7 @@ class BlacklistContainer extends Component {
             <div className={styles.ignoreDomainText}>
                 Ignore a new domain:
             </div>
-        );
+        )
     }
 
     renderAddBlacklistSites() {
@@ -125,7 +124,7 @@ class BlacklistContainer extends Component {
             <div className={styles.blacklistText}>
                 You are currently not recording activity from the following websites:
             </div>
-        );
+        )
     }
 
     render() {
@@ -133,11 +132,13 @@ class BlacklistContainer extends Component {
             <div>
                 {this.renderAddDomain()}
                 {this.renderBlacklistInputRow()}
-                {this.renderAddBlacklistSites()}
+                { (this.props.blacklist.length) ? (
+                    this.renderAddBlacklistSites()) : null
+                }
                 <BlacklistTable>
                     {this.renderBlacklistRows()}
-                </BlacklistTable> 
-            </div>           
+                </BlacklistTable>
+            </div>
         )
     }
 }
