@@ -1,7 +1,7 @@
 .root {
     width: 300px;
     height: auto;
-    max-width: 300px;
+    min-width: 300px;
     min-height: 100vh;
     background-color: #f7f7f7;
     box-shadow: 2px 1px 1px #e2e2e2;
