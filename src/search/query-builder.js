@@ -52,6 +52,12 @@ class QueryBuilder {
 
         if (this.offset) q.offset = this.offset
         if (this.pageSize) q.pageSize = this.pageSize
+
+        // If the searchTerm results in an empty string don't continue
+        if (this.isBadTerm) {
+            return ({isBadTerm: true})
+        }
+
         // Wildcard search is special case when there is no search times; need to sort by time
         if (this.content[0] === '*') {
             // Remove duplicate empty query if nothing given; (special case - no inputs filled, so two blank queries)
@@ -100,6 +106,9 @@ class QueryBuilder {
                     } else {
                         this.content.push(term)
                     }
+                }
+                else {
+                    this.isBadTerm = true
                 }
             })
         

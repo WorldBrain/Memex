@@ -29,6 +29,16 @@ export default async function indexSearch({
         .limit(limit)
         .get()
 
+    // If there is only Bad Terms don't continue
+    if (indexQuery.isBadTerm) {
+        return {
+            docs: [],
+            resultsExhausted: true,
+            totalCount: getTotalCount ? 0 : undefined,
+            isBadTerm: true
+        }
+    }
+
     // Get index results, filtering out any unexpectedly structured results
     let results = await index.search(indexQuery)
     results = filterBadlyStructuredResults(results)
