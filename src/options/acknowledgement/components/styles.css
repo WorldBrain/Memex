@@ -36,6 +36,11 @@
     margin: 10px 0;
     display: inline-block;
     width: 50%;
+
+    @media (max-width: 1100px) {
+        display: block;
+        width: 100%;
+    }
 }  
 
 .img {
@@ -52,6 +57,15 @@
     font-size: 14px;
     color: black;
     letter-spacing: 1px;
+    word-break: break-all;
+
+    @media (max-width: 1100px) {
+        display: inline-block;
+    }
+
+     @media (max-width: 738px) {
+        margin-left: 0;
+    }
 }
 
 .position {
