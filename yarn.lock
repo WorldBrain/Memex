@@ -3189,6 +3189,14 @@ form-data@~2.1.1:
     combined-stream "^1.0.5"
     mime-types "^2.1.12"
 
+freeze-dry@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/freeze-dry/-/freeze-dry-0.1.0.tgz#a055b91f8e94ce1dce99f1a904f37fa9b3f94354"
+  dependencies:
+    postinstall-build "^3.0.1"
+    response-to-data-url "^0.1.0"
+    when-all-settled "^0.1.1"
+
 fs-exists-sync@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/fs-exists-sync/-/fs-exists-sync-0.1.0.tgz#982d6893af918e72d08dec9e8673ff2b5a8d6add"
@@ -4277,6 +4285,10 @@ isexe@^2.0.0:
 isnumeric@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/isnumeric/-/isnumeric-0.2.0.tgz#a2347ba360de19e33d0ffd590fddf7755cbf2e64"
+
+iso-language-converter@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/iso-language-converter/-/iso-language-converter-1.1.0.tgz#29533b7744f6894d4706e98bcea06218ad858082"
 
 isobject@^2.0.0, isobject@^2.1.0:
   version "2.1.0"
@@ -7315,6 +7327,10 @@ relaxed-json@1.0.1:
   dependencies:
     chalk "^1.0.0"
     commander "^2.6.0"
+
+remove-stopwords@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/remove-stopwords/-/remove-stopwords-1.0.3.tgz#f24b481f0576ab2834a1abde01ad8ff6175efe72"
 
 remove-trailing-separator@^1.0.1:
   version "1.0.2"
