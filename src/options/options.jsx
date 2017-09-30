@@ -19,7 +19,7 @@ ReactDOM.render(
     <Provider store={store}>
         <Router history={hashHistory}>
             <Route path='/' component={Layout}>
-                <IndexRedirect to='/settings' />
+                <IndexRedirect to='/blacklist' />
                 { Routes.map(route =>
                     <Route
                         key={route.pathname}
