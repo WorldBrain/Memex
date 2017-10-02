@@ -5,8 +5,8 @@ import localStyles from './styles.css'
 
 const AcknowledgementContainer = () => (
     <div className={localStyles.acknowledgement}>
-        <h1 className={styles.routeTitle}>Settings &gt Acknowledgement</h1>
-        <span className={localStyles.title}> &gt This project can only happen thanks to our talented collaborators.</span>
+        <h1 className={styles.routeTitle}>Settings &gt; Acknowledgement</h1>
+        <span className={localStyles.title}> &gt; This project can only happen thanks to our talented collaborators.</span>
         <div className={localStyles.content}>
         Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
         tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,

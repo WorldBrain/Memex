@@ -15,10 +15,11 @@
     }
 }
 
-.ignoreDomainText, .blacklistText {
+.ignoreDomainText,
+.blacklistText {
     font-size: 14px;
     font-weight: bold;
-    font-family: Lato;
+    font-family: 'Lato';
     color: #4c4a4b;
     margin: 20px 0 10px 0;
 }
