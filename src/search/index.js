@@ -35,7 +35,7 @@ export default async function indexSearch({
             docs: [],
             resultsExhausted: true,
             totalCount: getTotalCount ? 0 : undefined,
-            isBadTerm: true
+            isBadTerm: true,
         }
     }
 
@@ -49,7 +49,7 @@ export default async function indexSearch({
             docs: [],
             resultsExhausted: true,
             totalCount: getTotalCount ? 0 : undefined,
-            isBadTerm: false
+            isBadTerm: false,
         }
     }
 
@@ -60,6 +60,6 @@ export default async function indexSearch({
         docs,
         resultsExhausted: false,
         totalCount: getTotalCount ? await index.count(indexQuery) : undefined,
-        isBadTerm: false
+        isBadTerm: false,
     }
 }

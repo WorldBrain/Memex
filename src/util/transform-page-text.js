@@ -3,12 +3,12 @@ import sw from 'remove-stopwords'
 import rmDiacritics from './remove-diacritics'
 
 const allWhitespacesPattern = /\s+/g
-const singleDigitNumbersPattern = /\b\d\b/g
+// const singleDigitNumbersPattern = /\b\d\b/g
 const nonWordsPattern = /[_\W]+/g
-const apostropheDashPattern = /[\-\'\’]/g
+const apostropheDashPattern = /[-'’]/g
 const allWordsWithDigits = /((\b(\d{6,})\b)|([a-z]+\d\w*|\w*\d[a-z]+))\s*/gi  // /\w*\d\w*/g
 
-const urlPattern = urlRegex() 
+const urlPattern = urlRegex()
 
 const removeUrls = (text = '') =>
     text.replace(urlPattern, ' ')
@@ -26,17 +26,18 @@ const removeDuplicateWords = (text = '') =>
         .join(' ')
 
 const removeUselessWords = (text = '', lang) => {
-    var oldString = text.split(' ')   
-    var newString = sw.removeStopwords(oldString, lang)
-    return (newString.join(' '))
+    const oldString = text.split(' ')
+    const newString = sw.removeStopwords(oldString, lang)
+    return newString.join(' ')
 }
 
 const combinePunctuation = (text = '') =>
     text.replace(apostropheDashPattern, '')
 
 const removeDiacritics = (text = '') => {
-    return (rmDiacritics(text))
+    return rmDiacritics(text)
 }
+
 // This also removes any numbers greater than 5 chars
 const removeAllWordsWithDigits = (text = '') =>
     text.replace(allWordsWithDigits, ' ')
@@ -50,17 +51,11 @@ const removeAllWordsWithDigits = (text = '') =>
  * @returns {any} Object containing the transformed `content` + less important
  *  `lengthBefore`, `lengthAfter` stats.
  */
-
-
-export default function transform({ text = '', lang}) {
-    
+export default function transform({ text = '', lang = 'en' }) {
     // Short circuit if no text
     if (!text || !text.replace(/\s/g, '')) {
         return text
     }
-
-    //Check if there is a language else default to english
-    lang = !lang ? 'en' : lang
 
     // console.log( text + "transform-text" + lang)
     let searchableText = text
@@ -69,12 +64,12 @@ export default function transform({ text = '', lang}) {
     // Remove URLs first before we start messing with things
     // console.log('beginning: \n',searchableText)
     searchableText = removeUrls(searchableText)
-    
+
     // Removes ' and - from words effectively combining them
     // Example e-mail => email, O'Grady => OGrady
     searchableText = combinePunctuation(searchableText)
 
-    // Changes accented characters to regular letters 
+    // Changes accented characters to regular letters
     searchableText = removeDiacritics(searchableText)
 
     searchableText = removePunctuation(searchableText)
@@ -83,16 +78,16 @@ export default function transform({ text = '', lang}) {
     searchableText = removeUselessWords(searchableText, lang)
 
     // searchableText = removeSingleDigitNumbers(searchableText)
-    
+
     // We don't care about non-single-space whitespace (' ' is cool)
     searchableText = cleanupWhitespaces(searchableText)
 
-    // Remove all numbers and all words containing numbers 
+    // Remove all numbers and all words containing numbers
     searchableText = removeAllWordsWithDigits(searchableText)
 
     searchableText = removeDuplicateWords(searchableText)
 
     const lengthAfter = searchableText.length
-    
+
     return { text: searchableText, lengthBefore, lengthAfter }
 }

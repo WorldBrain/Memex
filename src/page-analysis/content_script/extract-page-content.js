@@ -16,12 +16,12 @@ export default async function extractPageContent({
     if (url.endsWith('.pdf')) {
         return await extractPdfContent({url})
     }
-    
+
     const lang = doc.documentElement.lang
 
     // // Apply simple transformations to clean the page's HTML
     const { text: processedHtml } = transformPageHTML({ html: doc.body.innerHTML })
-    const { text: processedText } = transformPageText({ text: processedHtml, lang: lang })
+    const { text: processedText } = transformPageText({ text: processedHtml, lang })
 
     // Metadata of web page
     const selectedMetadataRules = {

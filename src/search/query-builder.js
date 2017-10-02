@@ -1,5 +1,4 @@
-import stopword from 'stopword'
-import transform from '../util/transform-page-text.js'
+import transform from '../util/transform-page-text'
 
 // Pattern to match entire string to `domain.tld`-like format + optional ccTLD
 const DOMAIN_TLD_PATTERN = /^\w{2,}\.\w{2,3}(\.\w{2})?$/
@@ -86,9 +85,9 @@ class QueryBuilder {
         let terms = input
             .toLowerCase()
             .match(/\S+/g) || []
-    
-            // All terms must be pushed to the text-pipeline to take into account stopword removal ect...
-            terms = transform({text: terms.join(' '), lang: 'all'})
+
+        // All terms must be pushed to the text-pipeline to take into account stopword removal ect...
+        terms = transform({ text: terms.join(' '), lang: 'all' })
 
         // Make sure terms is defined before trying to turn back into array.
         if (terms) {
@@ -99,24 +98,22 @@ class QueryBuilder {
         if (terms && terms.length) {
             // Split into words and push to query
             terms.forEach(term => {
-                if (term != ''){
+                if (term !== '') {
                     if (DOMAIN_TLD_PATTERN.test(term)) {
                         // Only can support single domain.tld search for now, so set to first index
                         this.domain[0] = term
                     } else {
                         this.content.push(term)
                     }
-                }
-                else {
+                } else {
                     this.isBadTerm = true
                 }
             })
-        
         } else {
             // ... else default to wildcard search
             this.content.push('*')
         }
-        
+
         return this
     }
 }
