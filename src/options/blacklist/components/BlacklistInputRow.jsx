@@ -2,7 +2,6 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 import styles from './BlacklistInputRow.css'
-import { blacklistButton } from './base.css'
 
 const BlacklistInputRow = ({
     value, isClearBtnDisabled, isSaveBtnDisabled, onAdd,
@@ -21,12 +20,12 @@ const BlacklistInputRow = ({
         />
 
         <div className={styles.inputButtons}>
-            {/*<button onClick={onInputClear} className={blacklistButton} disabled={isClearBtnDisabled}>
+            {/* <button onClick={onInputClear} className={blacklistButton} disabled={isClearBtnDisabled}>
                             <i className='material-icons'>backspace</i>
-                        </button>*/}
+                        </button> */}
 
             <button onClick={onAdd} className={styles.blacklistButton} disabled={isSaveBtnDisabled}>
-                {/*<i className='material-icons'>save</i>*/}
+                {/* <i className='material-icons'>save</i> */}
                 ADD TO BLACKLIST
             </button>
         </div>
