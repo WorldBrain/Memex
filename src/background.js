@@ -6,7 +6,6 @@ import 'src/blacklist/background'
 import 'src/search/background'
 import 'src/omnibar'
 import { installTimeStorageKey } from 'src/imports/background'
-import convertOldData from 'src/util/old-data-converter'
 import fetchPageData from 'src/page-analysis/background/fetch-page-data'
 import { generatePageDocId } from 'src/page-storage'
 import * as index from 'src/search/search-index'
@@ -111,13 +110,5 @@ browser.runtime.onInstalled.addListener(async details => {
     // Store the timestamp of when the extension was installed in local storage
     if (details.reason === 'install') {
         browser.storage.local.set({ [installTimeStorageKey]: Date.now() })
-    }
-    // Attempt convert of old extension data on extension update
-    if (details.reason === 'update') {
-        const storage = await browser.storage.local.get(dataConvertTimeKey)
-        if (!storage[dataConvertTimeKey]) {
-            await convertOldData({ setAsStubs: false, concurrency: 15 })
-            await browser.storage.local.set({ [dataConvertTimeKey]: Date.now() })
-        }
     }
 })
