@@ -50,8 +50,20 @@ class Overview extends React.Component {
         return resultItems
     }
 
-    renderNoResultsMsg() {
-        return <p className={styles.noResultMessage}>No results</p>
+    renderCustomMsg = msg => <p className={styles.noResultMessage}>{msg}</p>
+
+    renderResults() {
+        if (this.props.isBadTerm) {
+            return this.renderCustomMsg(
+                'Your search terms are very vague, please try and use more unique language')
+        }
+
+        if (this.props.noResults) {
+            return this.renderCustomMsg('No results')
+        }
+
+        // No issues; render out results list view
+        return <ResultList>{this.renderResultItems()}</ResultList>
     }
 
     render() {
@@ -87,9 +99,7 @@ class Overview extends React.Component {
                 </div>
 
                 <div className={styles.main}>
-                    {this.props.noResults
-                        ? this.renderNoResultsMsg()
-                        : <ResultList>{this.renderResultItems()}</ResultList>}
+                    {this.renderResults()}
                     <DeleteConfirmation
                         isShown={this.props.isDeleteConfShown}
                         close={this.props.hideDeleteConfirm}
@@ -114,6 +124,7 @@ Overview.propTypes = {
     onBottomReached: PropTypes.func,
     isLoading: PropTypes.bool,
     noResults: PropTypes.bool.isRequired,
+    isBadTerm: PropTypes.bool.isRequired,
     searchResults: PropTypes.arrayOf(PropTypes.object).isRequired,
     isDeleteConfShown: PropTypes.bool.isRequired,
     hideDeleteConfirm: PropTypes.func.isRequired,
@@ -125,6 +136,7 @@ const mapStateToProps = state => ({
     isLoading: selectors.isLoading(state),
     currentQueryParams: selectors.currentQueryParams(state),
     noResults: selectors.noResults(state),
+    isBadTerm: selectors.isBadTerm(state),
     searchResults: selectors.results(state),
     isDeleteConfShown: selectors.isDeleteConfShown(state),
     needsWaypoint: selectors.needsPagWaypoint(state),

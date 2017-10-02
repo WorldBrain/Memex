@@ -49,6 +49,8 @@ export const results = createSelector(
     })),
 )
 
+export const isBadTerm = createSelector(searchResult, results => !!results.isBadTerm)
+
 const resultsExhausted = createSelector(searchResult, results => results.resultsExhausted)
 export const needsPagWaypoint = createSelector(
     resultsExhausted, isLoading,
