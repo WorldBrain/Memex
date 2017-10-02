@@ -41,7 +41,7 @@
         display: block;
         width: 100%;
     }
-}  
+}
 
 .img {
     vertical-align: middle;
@@ -63,7 +63,7 @@
         display: inline-block;
     }
 
-     @media (max-width: 738px) {
+    @media (max-width: 738px) {
         margin-left: 0;
     }
 }

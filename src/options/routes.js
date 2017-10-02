@@ -5,10 +5,10 @@ import AcknowledgmentContainer from './acknowledgement'
 
 export default [
     {
-         name: 'Import',
-         pathname: '/import',
-         component: ImportContainer,
-         icon: 'file_download',
+        name: 'Import',
+        pathname: '/import',
+        component: ImportContainer,
+        icon: 'file_download',
     },
     {
         name: 'Blacklist',
