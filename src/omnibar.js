@@ -1,6 +1,6 @@
 import debounce from 'lodash/fp/debounce'
 import escapeHtml from 'lodash/fp/escape'
-import tldjs from 'tldjs'
+import urlRegex from 'url-regex'
 import queryString from 'query-string'
 import moment from 'moment'
 
@@ -109,7 +109,7 @@ const formOverviewQuery = text => {
 
 const acceptInput = (text, disposition) => {
     // Either go to URL if input is valid URL, else form query for overview search using input terms
-    const url = tldjs.isValid(text) ? text : formOverviewQuery(text)
+    const url = urlRegex().test(text) ? text : formOverviewQuery(text)
 
     switch (disposition) {
         case 'currentTab':
