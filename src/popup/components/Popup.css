@@ -2,6 +2,8 @@ body {
     margin: 0;
     padding: 8px;
     width: 280px;
+    font-size: 12px;
+    font-family: 'Lato';
 }
 
 i {
@@ -44,5 +46,6 @@ hr {
 
     &:placeholder-shown {
         font-style: italic;
+        font-family: 'Lato';
     }
 }
