@@ -96,29 +96,30 @@ async function makeSuggestion(query, suggest) {
     latestResolvedQuery = query
 }
 
-const acceptInput = (text, disposition) => {
-    // Checks whether the text is a suggested url
-    const validUrl = tldjs.isValid(text)
-    const {
-        startDate,
-        endDate,
-        extractedQuery,
-    } = extractTimeFiltersFromQuery(text)
-
+/**
+ * @param {string} text The omnibar text input.
+ * @returns {string} Overview page URL with `text` formatted as query string params.
+ */
+const formOverviewQuery = text => {
+    const { startDate, endDate, extractedQuery } = extractTimeFiltersFromQuery(text)
     const params = queryString.stringify({ query: extractedQuery, startDate, endDate })
-    const overviewPageWithQuery = `/overview/overview.html?${params}`
 
-    const goToUrl = validUrl ? text : overviewPageWithQuery
+    return `/overview/overview.html?${params}`
+}
+
+const acceptInput = (text, disposition) => {
+    // Either go to URL if input is valid URL, else form query for overview search using input terms
+    const url = tldjs.isValid(text) ? text : formOverviewQuery(text)
 
     switch (disposition) {
         case 'currentTab':
-            browser.tabs.update({url: goToUrl})
+            browser.tabs.update({ url })
             break
         case 'newForegroundTab':
-            browser.tabs.create({url: goToUrl})
+            browser.tabs.create({ url })
             break
         case 'newBackgroundTab':
-            browser.tabs.create({url: goToUrl, active: false})
+            browser.tabs.create({ url, active: false })
             break
     }
 }
