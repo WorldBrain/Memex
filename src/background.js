@@ -1,4 +1,4 @@
-import tldjs from 'tldjs'
+import urlRegex from 'url-regex'
 import { dataURLToBlob } from 'blob-util'
 
 import 'src/activity-logger/background'
@@ -14,6 +14,7 @@ import { generateVisitDocId } from 'src/activity-logger'
 import { generateBookmarkDocId, transformToBookmarkDoc } from 'src/imports'
 
 export const dataConvertTimeKey = 'data-conversion-timestamp'
+export const OVERVIEW_URL = '/overview/overview.html'
 
 // Put doc ID generators on window for user use with manual DB lookups
 window.generatePageDocId = generatePageDocId
@@ -62,26 +63,15 @@ async function createNewPageForBookmark(bookmarkInfo) {
 }
 
 async function openOverview() {
-    const [ currentTab ] = await browser.tabs.query({ active: true })
-    if (currentTab && currentTab.url) {
-        const validUrl = tldjs.isValid(currentTab.url)
-        if (validUrl) {
-            return browser.tabs.create({
-                url: '/overview/overview.html',
-            })
-        }
+    const [currentTab] = await browser.tabs.query({ active: true })
+
+    // Either create new tab or update current tab with overview page, depending on URL validity
+    if (currentTab && currentTab.url && urlRegex().test(currentTab.url)) {
+        browser.tabs.create({ url: OVERVIEW_URL })
+    } else {
+        browser.tabs.update({ url: OVERVIEW_URL })
     }
-
-    browser.tabs.update({
-        url: '/overview/overview.html',
-    })
 }
-
-// Open the overview when the extension's button is clicked
-browser.browserAction.onClicked.addListener(() => {
-    openOverview()
-})
-
 
 browser.bookmarks.onCreated.addListener(async (id, bookmarkInfo) => {
     try {
