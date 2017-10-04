@@ -3,7 +3,7 @@
 // Given a node, return all nodes connected to it.
 export const getAllNodes = ({getParent, getChildren}) => async node => {
     // First find the root, then crawl down each branch.
-    let root = await getRoot({getParent})(node)
+    const root = await getRoot({getParent})(node)
     const crawled = []
     const toCrawl = [root]
     let next

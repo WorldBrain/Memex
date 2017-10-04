@@ -8,12 +8,12 @@ import styles from './styles.css'
 const Navigation = ({ currentLocation, routes }) => {
     function buildRoutes() {
         return routes.map((route, idx) => {
-            let navClasses = classNames({
+            const navClasses = classNames({
                 [styles.navLink]: true,
                 [styles.isActive]: isActive(route),
             })
 
-            let navIcon = classNames({
+            const navIcon = classNames({
                 [styles.navIcon]: true,
                 'material-icons': true,
             })

@@ -24,7 +24,7 @@ window.generateBookmarkDocId = generateBookmarkDocId
 async function getAttachments(pageData) {
     const favIconBlob = await dataURLToBlob(pageData.favIconURI)
 
-    let _attachments = {
+    const _attachments = {
         'fav-icon-blob': {
             content_type: favIconBlob.type,
             data: favIconBlob,

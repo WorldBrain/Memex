@@ -70,7 +70,7 @@ export default function determinePageSameness(page1, page2) {
         'content.title': textSameness,
         'content.fullText': textSameness,
     }
-    for (let field in fieldsToCompare) {
+    for (const field in fieldsToCompare) {
         const compare = fieldsToCompare[field]
         const fieldSameness = compare(...pages.map(get(field)))
         score = Math.min(score, fieldSameness)

@@ -233,7 +233,7 @@ export async function get(ids) {
 
     // Typeguard on input; handle either array or single
     const isSingle = typeof ids === 'string'
-    let found = []
+    const found = []
 
     return new Promise((resolve, reject) =>
         index.get(isSingle ? [ids] : ids)
@@ -266,7 +266,7 @@ export async function count(query) {
 // Batches stream results to be all returned in Promise resolution.
 export async function search(query) {
     const index = await indexP
-    let data = []
+    const data = []
 
     return new Promise((resolve, reject) =>
         index.search(query)
@@ -277,7 +277,7 @@ export async function search(query) {
 
 export async function categorize(query) {
     const index = await indexP
-    let data = []
+    const data = []
 
     return new Promise((resolve, reject) =>
         index.categorize(query)
@@ -288,7 +288,7 @@ export async function categorize(query) {
 
 export async function buckets(query) {
     const index = await indexP
-    let data = []
+    const data = []
 
     return new Promise((resolve, reject) =>
         index.buckets(query)

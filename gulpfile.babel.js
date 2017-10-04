@@ -72,7 +72,7 @@ const browserifySettings = {
 }
 
 async function createBundle({entries, output, destination, cssOutput}, {watch = false, production = false}) {
-    let b = watch
+    const b = watch
         ? watchify(browserify({...watchify.args, ...browserifySettings, entries}))
             .on('update', bundle)
         : browserify({...browserifySettings, entries})
@@ -92,7 +92,7 @@ async function createBundle({entries, output, destination, cssOutput}, {watch = 
     }
 
     function bundle(callback) {
-        let startTime = Date.now()
+        const startTime = Date.now()
         b.bundle()
             .on('error', console.error)
             .pipe(source(output))
@@ -100,7 +100,7 @@ async function createBundle({entries, output, destination, cssOutput}, {watch = 
             .pipe(production ? uglify({output: {ascii_only: true}}) : identity())
             .pipe(gulp.dest(destination))
             .on('end', () => {
-                let time = (Date.now() - startTime) / 1000
+                const time = (Date.now() - startTime) / 1000
                 console.log(`Bundled ${output} in ${time}s.`)
                 if (!watch) {
                     callback()
@@ -112,7 +112,7 @@ async function createBundle({entries, output, destination, cssOutput}, {watch = 
 }
 
 gulp.task('copyStaticFiles', () => {
-    for (let filename in staticFiles) {
+    for (const filename in staticFiles) {
         console.log(`Copying '${filename}' to '${staticFiles[filename]}'..`)
         gulp.src(filename)
             .pipe(gulp.dest(staticFiles[filename]))
