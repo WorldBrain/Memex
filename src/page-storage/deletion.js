@@ -2,7 +2,7 @@ import db, { fetchDocTypesByUrl } from 'src/pouchdb'
 import * as index from 'src/search/search-index'
 import { pageKeyPrefix } from 'src/page-storage'
 import { visitKeyPrefix } from 'src/activity-logger'
-import { bookmarkKeyPrefix } from 'src/imports'
+import { bookmarkKeyPrefix } from 'src/bookmarks'
 
 export default async function deleteDocsByUrl(url) {
     const fetchDocsByType = fetchDocTypesByUrl(url)
