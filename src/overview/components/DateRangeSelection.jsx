@@ -17,9 +17,9 @@ class DateRangeSelection extends Component {
     componentDidMount() {
         // Override event handlers within the `react-datepicker` input elements, allowing us to
         //  update state based on keydown
-        this.startDateDatePicker.refs.input.refs.input.addEventListener('keydown',
+        this.startDateDatePicker.input.addEventListener('keydown',
             this.handleKeydown({ isStartDate: true }))
-        this.endDateDatePicker.refs.input.refs.input.addEventListener('keydown',
+        this.endDateDatePicker.input.addEventListener('keydown',
             this.handleKeydown({ isStartDate: false }))
     }
 
