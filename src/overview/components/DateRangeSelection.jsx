@@ -9,52 +9,74 @@ import styles from './DateRangeSelection.css'
 import './datepicker-overrides.css'
 
 class DateRangeSelection extends Component {
-    constructor() {
-        super()
-
-        this.state = {
-            startDateText: null,
-            endDateText: null,
-        }
-
-        this.handleKeydown = this.handleKeydown.bind(this)
-        this.submitDateChange = this.submitDateChange.bind(this)
+    state = {
+        startDateText: null,
+        endDateText: null,
     }
 
     componentDidMount() {
-        this.startDateDatePicker.refs.input.refs.input.addEventListener('keydown', e => this.handleKeydown(e, 'startDate'))
-        this.endDateDatePicker.refs.input.refs.input.addEventListener('keydown', e => this.handleKeydown(e, 'endDate'))
+        // Override event handlers within the `react-datepicker` input elements, allowing us to
+        //  update state based on keydown
+        this.startDateDatePicker.refs.input.refs.input.addEventListener('keydown',
+            this.handleKeydown({ isStartDate: true }))
+        this.endDateDatePicker.refs.input.refs.input.addEventListener('keydown',
+            this.handleKeydown({ isStartDate: false }))
     }
 
-    handleKeydown(event, type) {
+    handleKeydown = ({ isStartDate }) => event => {
         if (event.key === 'Enter') {
             event.stopImmediatePropagation()
-            this.submitDateChange(type)
+            this.submitDateChange({ isStartDate })()
         }
     }
 
-    submitDateChange(type) {
-        const onDateChange = (dateText, currentDate, updateDate) => {
-            const date = moment(dateText, 'DD-MM-YYYY', true)
-            const nlpDate = chrono.parseDate(dateText)
+    submitDateChange = ({ isStartDate }) => () => {
+        const currentDate = isStartDate ? this.props.startDate : this.props.endDate
+        const updateDate = isStartDate ? this.props.onStartDateChange : this.props.onEndDateChange
+        const dateState = isStartDate ? this.state.startDateText : this.state.endDateText
 
-            const dateToChange = date.isValid()
-                ? date.valueOf()
-                : nlpDate && nlpDate.getTime()
+        const date = moment(dateState, 'DD-MM-YYYY', true)
+        const nlpDate = chrono.parseDate(dateState)
 
-            if (dateToChange && dateToChange !== currentDate) updateDate(dateToChange || currentDate)
+        let dateToChange
+
+        // If moment date is invalid, try the NLP parsing value
+        if (!date.isValid()) {
+            dateToChange = nlpDate && nlpDate.getTime()
+        } else {
+            // If end date, we want to search back from end of day
+            if (!isStartDate && date != null) {
+                date.endOf('day')
+            }
+
+            dateToChange = date.valueOf()
         }
 
-        return type === 'startDate'
-            ? onDateChange(this.state.startDateText, this.props.startDate, this.props.onStartDateChange)
-            : onDateChange(this.state.endDateText, this.props.endDate, this.props.onEndDateChange)
+        // Trigger state update only if there is a change
+        if (dateToChange && dateToChange !== currentDate) {
+            updateDate(dateToChange || currentDate)
+        }
+    }
+
+    handleDateChange = ({ isStartDate }) => date => {
+        const updateDate = isStartDate ? this.props.onStartDateChange : this.props.onEndDateChange
+        const stateKey = isStartDate ? 'startDateText' : 'endDateText'
+
+        this.setState(state => ({
+            ...state,
+            [stateKey]: date ? date.format('DD-MM-YYYY') : null,
+        }))
+
+        // If end date, we want to search back from end of day
+        if (!isStartDate && date != null) {
+            date.endOf('day')
+        }
+
+        updateDate(date ? date.valueOf() : undefined)
     }
 
     render() {
-        const {
-            startDate, endDate,
-            onStartDateChange, onEndDateChange,
-        } = this.props
+        const { startDate, endDate } = this.props
 
         return (
             <div className={styles.dateRangeSelection}>
@@ -70,20 +92,9 @@ class DateRangeSelection extends Component {
                     startDate={moment(startDate || 0)}
                     endDate={moment(endDate)}
                     maxDate={moment()}
-                    onChange={date => {
-                        // Syncs the change of date to state
-                        this.setState({
-                            startDateText: date ? date.format('DD-MM-YYYY') : null,
-                        })
-
-                        onStartDateChange(
-                            date ? date.valueOf() : undefined,
-                        )
-                    }}
-                    onChangeRaw={e => {
-                        this.setState({ startDateText: e.target.value })
-                    }}
-                    onBlur={() => this.submitDateChange('startDate')}
+                    onChange={this.handleDateChange({ isStartDate: true })}
+                    onChangeRaw={e => this.setState({ startDateText: e.target.value })}
+                    onBlur={this.submitDateChange({ isStartDate: true })}
                 />
                 <img
                     src='/img/to-icon.png'
@@ -101,20 +112,9 @@ class DateRangeSelection extends Component {
                     endDate={moment(endDate)}
                     maxDate={moment()}
                     disabledKeyboardNavigation
-                    onChange={date => {
-                        // Syncs the change of end date to state
-                        this.setState({
-                            endDateText: date ? date.format('DD-MM-YYYY') : null,
-                        })
-
-                        onEndDateChange(
-                            date ? date.valueOf() : undefined,
-                        )
-                    }}
-                    onChangeRaw={e => {
-                        this.setState({ endDateText: e.target.value })
-                    }}
-                    onBlur={() => this.submitDateChange('endDate')}
+                    onChange={this.handleDateChange({ isStartDate: false })}
+                    onChangeRaw={e => this.setState({ endDateText: e.target.value })}
+                    onBlur={this.submitDateChange({ isStartDate: false })}
                 />
             </div>
         )
