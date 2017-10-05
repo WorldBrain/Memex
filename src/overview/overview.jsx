@@ -2,8 +2,9 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import { Provider } from 'react-redux'
 
-import configureStore from './store'
 import overview from 'src/overview'
+import { ErrorBoundary, RuntimeError } from 'src/common-ui/components'
+import configureStore from './store'
 
 import './base.css'
 
@@ -18,13 +19,15 @@ const store = configureStore({ReduxDevTools})
 
 store.dispatch(overview.actions.init())
 
+const { Overview } = overview.components
+
 // Render the UI to the screen
 ReactDOM.render(
     <Provider store={store}>
-        <div>
-            <overview.components.Overview grabFocusOnMount />
+        <ErrorBoundary component={RuntimeError}>
+            <Overview grabFocusOnMount />
             {ReduxDevTools && <ReduxDevTools />}
-        </div>
+        </ErrorBoundary>
     </Provider>,
     document.getElementById('app')
 )
