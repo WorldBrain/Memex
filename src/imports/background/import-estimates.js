@@ -1,8 +1,8 @@
 import db from 'src/pouchdb'
 import { IMPORT_TYPE } from 'src/options/imports/constants'
 import { pageDocsSelector } from 'src/page-storage'
+import { bookmarkDocsSelector } from 'src/bookmarks'
 import { getURLFilteredBookmarkItems, getURLFilteredHistoryItems } from './'
-import { bookmarkDocsSelector } from '../'
 
 // As we're just getting counts, most queries will want to limit output fields to just `_id`
 const fields = ['_id']

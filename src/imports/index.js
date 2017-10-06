@@ -1,7 +1,5 @@
-import docuri from 'docuri'
-
 import { generateVisitDocId } from 'src/activity-logger'
-import encodeUrl from 'src/util/encode-url-for-id'
+import { generateBookmarkDocId } from 'src/bookmarks'
 
 export const importProgressStorageKey = 'is_import_in_progress'
 
@@ -12,15 +10,6 @@ export const setImportInProgressFlag = async () =>
     (await browser.storage.local.set({ [importProgressStorageKey]: true }))
 export const clearImportInProgressFlag = async () =>
     await browser.storage.local.remove(importProgressStorageKey)
-
-// Bookmarks related utility functions (TODO: Find appropriate space for this to live)
-export const bookmarkKeyPrefix = 'bookmark/'
-export const bookmarkDocsSelector = { _id: { $gte: bookmarkKeyPrefix, $lte: `${bookmarkKeyPrefix}\uffff` } }
-export const convertBookmarkDocId = docuri.route(`${bookmarkKeyPrefix}:url/:timestamp`)
-
-// NOTE: truncates any decimal part of the `timestamp` arg
-export const generateBookmarkDocId = ({ url, timestamp = Date.now() }) =>
-    convertBookmarkDocId({ url: encodeUrl(url, false), timestamp: Math.floor(timestamp) })
 
 /**
  * Converts a browser.history.VisitItem to our visit document model.
