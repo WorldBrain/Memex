@@ -3,7 +3,20 @@ import chrono from 'chrono-node'
 const BEFORE_REGEX = /before:"(.*?)"/
 const AFTER_REGEX = /after:"(.*?)"/
 
-// Takes in query as a string and extracts startDate and endDate
+/**
+ * @typedef QueryFilters
+ * @type {Object}
+ * @property {string} query The non-date-filter search terms.
+ * @property {number|undefined} startDate Number of ms representing the start of filter time.
+ * @property {number|undefined} endDate Number of ms representing the end of filter time.
+ */
+
+/**
+ * Takes in query as a string and extracts startDate, endDate, and query parts.
+ *
+ * @param {string} query The query string that user has entered.
+ * @returns {QueryFilters} The extracted query parameters.
+ */
 export default function extractTimeFiltersFromQuery(query) {
     const matchedBefore = query.match(BEFORE_REGEX)
     const matchedAfter = query.match(AFTER_REGEX)
@@ -27,6 +40,6 @@ export default function extractTimeFiltersFromQuery(query) {
     return {
         startDate,
         endDate,
-        extractedQuery,
+        query: extractedQuery,
     }
 }

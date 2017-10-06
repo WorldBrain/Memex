@@ -1,7 +1,7 @@
 import debounce from 'lodash/fp/debounce'
 import escapeHtml from 'lodash/fp/escape'
 import urlRegex from 'url-regex'
-import queryString from 'query-string'
+import qs from 'query-string'
 import moment from 'moment'
 
 import shortUrl from 'src/util/short-url'
@@ -64,16 +64,10 @@ async function makeSuggestion(query, suggest) {
 
     const queryForOldSuggestions = latestResolvedQuery
 
-    const {
-        startDate,
-        endDate,
-        extractedQuery,
-    } = extractTimeFiltersFromQuery(query)
+    const queryFilters = extractTimeFiltersFromQuery(query)
 
     const searchResults = await indexSearch({
-        query: extractedQuery,
-        startDate,
-        endDate,
+        ...queryFilters,
         limit: 5,
         getTotalCount: true,
     })
@@ -90,7 +84,8 @@ async function makeSuggestion(query, suggest) {
         setOmniboxMessage(`Found these ${searchResults.totalCount} pages in your memory: (press enter to search deeper)`)
     }
 
-    const suggestions = searchResults.docs.map(pageToSuggestion(startDate || endDate))
+    const suggestions = searchResults.docs.map(
+        pageToSuggestion(queryFilters.startDate || queryFilters.endDate))
 
     suggest(suggestions)
     latestResolvedQuery = query
@@ -101,10 +96,10 @@ async function makeSuggestion(query, suggest) {
  * @returns {string} Overview page URL with `text` formatted as query string params.
  */
 const formOverviewQuery = text => {
-    const { startDate, endDate, extractedQuery } = extractTimeFiltersFromQuery(text)
-    const params = queryString.stringify({ query: extractedQuery, startDate, endDate })
+    const queryFilters = extractTimeFiltersFromQuery(text)
+    const queryParams = qs.stringify(queryFilters)
 
-    return `/overview/overview.html?${params}`
+    return `/overview/overview.html?${queryParams}`
 }
 
 const acceptInput = (text, disposition) => {
