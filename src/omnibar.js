@@ -7,6 +7,7 @@ import moment from 'moment'
 import shortUrl from 'src/util/short-url'
 import indexSearch from 'src/search'
 import extractTimeFiltersFromQuery from 'src/util/nlp-time-filter'
+import { OVERVIEW_URL } from 'src/background'
 
 
 // Read which browser we are running in.
@@ -99,7 +100,7 @@ const formOverviewQuery = text => {
     const queryFilters = extractTimeFiltersFromQuery(text)
     const queryParams = qs.stringify(queryFilters)
 
-    return `/overview/overview.html?${queryParams}`
+    return `${OVERVIEW_URL}?${queryParams}`
 }
 
 const acceptInput = (text, disposition) => {
