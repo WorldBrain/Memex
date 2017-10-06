@@ -83,12 +83,12 @@ class DateRangeSelection extends Component {
                     ref={dp => { this.startDateDatePicker = dp }}
                     className={styles.datePicker}
                     dateFormat='DD-MM-YYYY'
-                    placeholderText='after..'
+                    placeholderText='after...'
                     isClearable
                     selected={startDate && moment(startDate)}
                     selectsStart
                     disabledKeyboardNavigation
-                    startDate={moment(startDate || 0)}
+                    startDate={moment(startDate)}
                     endDate={moment(endDate)}
                     maxDate={moment()}
                     onChange={this.handleDateChange({ isStartDate: true })}
@@ -103,11 +103,11 @@ class DateRangeSelection extends Component {
                     ref={dp => { this.endDateDatePicker = dp }}
                     className={styles.datePicker}
                     dateFormat='DD-MM-YYYY'
-                    placeholderText='before..'
+                    placeholderText='before...'
                     isClearable
                     selected={endDate && moment(endDate)}
                     selectsEnd
-                    startDate={moment(startDate || 0)}
+                    startDate={moment(startDate)}
                     endDate={moment(endDate)}
                     maxDate={moment()}
                     disabledKeyboardNavigation
