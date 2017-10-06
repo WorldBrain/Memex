@@ -20,6 +20,7 @@
     color: #484848;
     border: none;
     margin: 0 10px;
+    font-family: 'Lato';
 
     &::placeholder {
         color: #b8b8b8;
