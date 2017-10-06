@@ -1,12 +1,13 @@
 import debounce from 'lodash/fp/debounce'
 import escapeHtml from 'lodash/fp/escape'
-import tldjs from 'tldjs'
-import queryString from 'query-string'
+import urlRegex from 'url-regex'
+import qs from 'query-string'
 import moment from 'moment'
 
 import shortUrl from 'src/util/short-url'
 import indexSearch from 'src/search'
 import extractTimeFiltersFromQuery from 'src/util/nlp-time-filter'
+import { OVERVIEW_URL } from 'src/background'
 
 
 // Read which browser we are running in.
@@ -64,16 +65,10 @@ async function makeSuggestion(query, suggest) {
 
     const queryForOldSuggestions = latestResolvedQuery
 
-    const {
-        startDate,
-        endDate,
-        extractedQuery,
-    } = extractTimeFiltersFromQuery(query)
+    const queryFilters = extractTimeFiltersFromQuery(query)
 
     const searchResults = await indexSearch({
-        query: extractedQuery,
-        startDate,
-        endDate,
+        ...queryFilters,
         limit: 5,
         getTotalCount: true,
     })
@@ -90,35 +85,37 @@ async function makeSuggestion(query, suggest) {
         setOmniboxMessage(`Found these ${searchResults.totalCount} pages in your memory: (press enter to search deeper)`)
     }
 
-    const suggestions = searchResults.docs.map(pageToSuggestion(startDate || endDate))
+    const suggestions = searchResults.docs.map(
+        pageToSuggestion(queryFilters.startDate || queryFilters.endDate))
 
     suggest(suggestions)
     latestResolvedQuery = query
 }
 
+/**
+ * @param {string} text The omnibar text input.
+ * @returns {string} Overview page URL with `text` formatted as query string params.
+ */
+const formOverviewQuery = text => {
+    const queryFilters = extractTimeFiltersFromQuery(text)
+    const queryParams = qs.stringify(queryFilters)
+
+    return `${OVERVIEW_URL}?${queryParams}`
+}
+
 const acceptInput = (text, disposition) => {
-    // Checks whether the text is a suggested url
-    const validUrl = tldjs.isValid(text)
-    const {
-        startDate,
-        endDate,
-        extractedQuery,
-    } = extractTimeFiltersFromQuery(text)
-
-    const params = queryString.stringify({ query: extractedQuery, startDate, endDate })
-    const overviewPageWithQuery = `/overview/overview.html?${params}`
-
-    const goToUrl = validUrl ? text : overviewPageWithQuery
+    // Either go to URL if input is valid URL, else form query for overview search using input terms
+    const url = urlRegex().test(text) ? text : formOverviewQuery(text)
 
     switch (disposition) {
         case 'currentTab':
-            browser.tabs.update({url: goToUrl})
+            browser.tabs.update({ url })
             break
         case 'newForegroundTab':
-            browser.tabs.create({url: goToUrl})
+            browser.tabs.create({ url })
             break
         case 'newBackgroundTab':
-            browser.tabs.create({url: goToUrl, active: false})
+            browser.tabs.create({ url, active: false })
             break
     }
 }

@@ -117,8 +117,8 @@ class PopupContainer extends Component {
         if (event.key === 'Enter') {
             event.preventDefault()
 
-            const { extractedQuery, startDate, endDate } = extractTimeFiltersFromQuery(this.state.searchValue)
-            const queryParams = qs.stringify({ query: extractedQuery, startDate, endDate })
+            const queryFilters = extractTimeFiltersFromQuery(this.state.searchValue)
+            const queryParams = qs.stringify(queryFilters)
 
             browser.tabs.create({ url: `${constants.OVERVIEW_URL}?${queryParams}` }) // New tab with query
             window.close() // Close the popup
