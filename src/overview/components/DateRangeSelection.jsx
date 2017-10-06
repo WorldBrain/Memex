@@ -35,14 +35,13 @@ class DateRangeSelection extends Component {
         const updateDate = isStartDate ? this.props.onStartDateChange : this.props.onEndDateChange
         const dateState = isStartDate ? this.state.startDateText : this.state.endDateText
 
-        const date = moment(dateState, 'DD-MM-YYYY', true)
-        const nlpDate = chrono.parseDate(dateState)
-
         let dateToChange
+        const date = moment(dateState, 'DD-MM-YYYY', true)
 
         // If moment date is invalid, try the NLP parsing value
         if (!date.isValid()) {
-            dateToChange = nlpDate && nlpDate.getTime()
+            const nlpDate = chrono.parseDate(dateState)
+            dateToChange = nlpDate != null ? nlpDate.getTime() : null
         } else {
             // If end date, we want to search back from end of day
             if (!isStartDate && date != null) {
@@ -53,8 +52,8 @@ class DateRangeSelection extends Component {
         }
 
         // Trigger state update only if there is a change
-        if (dateToChange && dateToChange !== currentDate) {
-            updateDate(dateToChange || currentDate)
+        if (dateToChange != null && dateToChange !== currentDate) {
+            updateDate(dateToChange)
         }
     }
 
