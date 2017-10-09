@@ -9,12 +9,13 @@ const Overview = props => [
     <Header key='head' {...props} />,
     <div key='body' className={styles.main}>
         {props.children}
-        <DeleteConfirmation
-            isShown={props.isDeleteConfShown}
-            close={props.hideDeleteConfirm}
-            deleteDocs={props.deleteDocs}
-        />
     </div>,
+    <DeleteConfirmation
+        key='delete-modal'
+        isShown={props.isDeleteConfShown}
+        close={props.hideDeleteConfirm}
+        deleteDocs={props.deleteDocs}
+    />,
 ]
 
 Overview.propTypes = {
