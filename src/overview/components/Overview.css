@@ -61,6 +61,7 @@
     font-size: 15px;
     color: #484848;
     border: none;
+    font-family: 'Lato';
 
     &::placeholder {
         color: #b8b8b8;
