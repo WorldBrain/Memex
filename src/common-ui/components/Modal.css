@@ -1,0 +1,57 @@
+.button {
+    border: none;
+    background: none;
+    transition: all 200ms;
+    cursor: pointer;
+
+    &:hover {
+        color: #3eb995;
+    }
+}
+
+.overlay {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 99999;
+    background: rgba(0, 0, 0, 0.7);
+    cursor: pointer;
+}
+
+.popup {
+    padding: 20px;
+    background: #fff;
+    border-radius: 5px;
+    width: 30%;
+    position: relative;
+    transition: all 5s ease-in-out;
+    cursor: default;
+}
+
+.close {
+    position: absolute;
+    top: 5px;
+    right: 15px;
+    font-size: 2em;
+    font-weight: bold;
+    text-decoration: none;
+    color: #333;
+
+    &:hover {
+        color: #06d85f;
+    }
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    font-size: 1.2em;
+    min-height: 100px;
+}
