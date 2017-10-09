@@ -150,7 +150,7 @@ export default async function importsConnectionHandler(port) {
     port.onMessage.addListener(async ({ cmd, ...payload }) => {
         switch (cmd) {
             case CMDS.START: {
-                console.time('total-import-time') 
+                console.time('total-import-time')
                 return await startImport(port, batch, payload)
             }
             case CMDS.RESUME: return batch.start()
@@ -162,6 +162,5 @@ export default async function importsConnectionHandler(port) {
             }
             default: return console.error(`unknown command: ${cmd}`)
         }
-        
     })
 }
