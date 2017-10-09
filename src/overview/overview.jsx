@@ -19,7 +19,7 @@ const store = configureStore({ReduxDevTools})
 
 store.dispatch(overview.actions.init())
 
-const { Overview } = overview.components
+const Overview = overview.container
 
 // Render the UI to the screen
 ReactDOM.render(
