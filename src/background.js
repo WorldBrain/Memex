@@ -9,6 +9,7 @@ import { installTimeStorageKey } from 'src/imports/background'
 import { generatePageDocId } from 'src/page-storage'
 import { generateVisitDocId } from 'src/activity-logger'
 import { generateBookmarkDocId } from 'src/bookmarks'
+import { defaultEntries, addToBlacklist } from 'src/blacklist'
 
 export const dataConvertTimeKey = 'data-conversion-timestamp'
 export const OVERVIEW_URL = '/overview/overview.html'
@@ -36,8 +37,11 @@ browser.commands.onCommand.addListener(command => {
 })
 
 browser.runtime.onInstalled.addListener(async details => {
-    // Store the timestamp of when the extension was installed in local storage
     if (details.reason === 'install') {
+        // Store the timestamp of when the extension was installed in local storage
         browser.storage.local.set({ [installTimeStorageKey]: Date.now() })
+
+        // Set the default blacklist entries
+        addToBlacklist(defaultEntries)
     }
 })

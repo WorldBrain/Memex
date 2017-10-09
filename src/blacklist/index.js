@@ -1,6 +1,14 @@
 import { STORAGE_KEY } from 'src/options/blacklist/constants'
 
 /**
+ * Default blacklist entries.
+ */
+export const defaultEntries = [
+    'http://localhost',
+    'https://localhost',
+]
+
+/**
  * Given a URL and user's blacklist, checks the URL against the blacklist expressions to see if any
  * rule matches it.
  *
@@ -53,8 +61,14 @@ const createBlacklistEntry = url => ({
     dateAdded: Date.now(),
 })
 
+/**
+ * @param {string[]|string} url Array of or single URL string to add to blacklist.
+ */
 export async function addToBlacklist(url) {
     const blacklist = await fetchBlacklist()
+    const newBlacklist = url instanceof Array
+        ? url.map(createBlacklistEntry)
+        : createBlacklistEntry(url)
 
-    await storeBlacklist([...blacklist, createBlacklistEntry(url)])
+    return await storeBlacklist([...blacklist, ...newBlacklist])
 }
