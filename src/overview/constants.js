@@ -14,3 +14,5 @@ export const CMDS = {
     RESULTS: `${SEARCH_CONN_NAME}/RESULTS`,
     ERROR: `${SEARCH_CONN_NAME}/ERROR`,
 }
+
+export const DATE_PICKER_DATE_FORMAT = 'DD-MM-YYYY'
