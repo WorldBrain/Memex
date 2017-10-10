@@ -1,0 +1,20 @@
+{
+    "folders": [
+        {
+            "path": ".",
+            "folder_exclude_patterns": ["node_modules", "extension"]
+        }
+    ],
+    "settings": {
+        "js_prettier": {
+            "auto_format_on_save": true,
+            "auto_format_on_save_excludes": ["*/node_modules/*", "*/.git/*"],
+            "prettier_options": {
+                "tabWidth": 4,
+                "singleQuote": true,
+                "semi": false,
+                "trailingComma": "all"
+            }
+        }
+    }
+}
