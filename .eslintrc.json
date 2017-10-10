@@ -10,7 +10,8 @@
         "plugin:promise/recommended",
         "plugin:react/recommended",
         "standard",
-        "standard-react"
+        "standard-react",
+        "prettier"
     ],
     "settings": {
         "import/resolver": {
@@ -31,7 +32,8 @@
         "standard",
         "import",
         "promise",
-        "react"
+        "react",
+        "prettier"
     ],
     "parser": "babel-eslint",
     "parserOptions": {
