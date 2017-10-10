@@ -9,4 +9,7 @@ If reporting a bug:
 3. __Expected behavior (i.e. solution)__
 <!-- What should have happened? -->
 
-4. __Other comments__
+4. __Error stack (from extension crash page)__
+<!-- Did the issue lead you to the crash page? -->
+
+5. __Other comments__
