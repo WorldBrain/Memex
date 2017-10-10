@@ -6,12 +6,12 @@ import DeleteConfirmation from './DeleteConfirmation'
 import styles from './Overview.css'
 
 const Overview = props => [
-    <Header key='head' {...props} />,
-    <div key='body' className={styles.main}>
+    <Header key="head" {...props} />,
+    <div key="body" className={styles.main}>
         {props.children}
     </div>,
     <DeleteConfirmation
-        key='delete-modal'
+        key="delete-modal"
         isShown={props.isDeleteConfShown}
         close={props.hideDeleteConfirm}
         deleteDocs={props.deleteDocs}

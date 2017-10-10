@@ -1,24 +1,25 @@
 export default [
     {
-        image: 'https://worldbrain.io/wp-content/uploads/2017/02/oliver-sauter-3-500x500.jpg',
+        image:
+            'https://worldbrain.io/wp-content/uploads/2017/02/oliver-sauter-3-500x500.jpg',
         name: 'Oliver Sauter',
         position: 'CEO',
         web: 'https://worldbrain.io/team',
         links: [
             {
-                'fb': 'https://www.facebook.com/',
+                fb: 'https://www.facebook.com/',
             },
             {
-                'twitter': 'https://www.twitter.com/',
+                twitter: 'https://www.twitter.com/',
             },
             {
-                'instagram': 'https://www.instagram.com/',
+                instagram: 'https://www.instagram.com/',
             },
             {
-                'linkedin': 'https://www.linkedin.com/',
+                linkedin: 'https://www.linkedin.com/',
             },
             {
-                'github': 'https://www.github.com/',
+                github: 'https://www.github.com/',
             },
         ],
     },
@@ -29,7 +30,7 @@ export default [
         web: 'https://worldbrain.io/team',
         links: [
             {
-                'fb': 'https://www.facebook.com/',
+                fb: 'https://www.facebook.com/',
             },
         ],
     },
@@ -40,7 +41,7 @@ export default [
         web: 'https://worldbrain.io/team',
         links: [
             {
-                'fb': 'https://www.facebook.com/',
+                fb: 'https://www.facebook.com/',
             },
         ],
     },
@@ -51,7 +52,7 @@ export default [
         web: 'https://worldbrain.io/team',
         links: [
             {
-                'fb': 'https://www.facebook.com/',
+                fb: 'https://www.facebook.com/',
             },
         ],
     },

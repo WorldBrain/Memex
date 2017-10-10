@@ -13,13 +13,18 @@ export const pauseIconPath = '/img/worldbrain-logo-narrow-paused.png'
 export const unpauseIconPath = '/img/worldbrain-logo-narrow-bw.png'
 
 const getState = async () => {
-    const state = (await browser.storage.local.get(PAUSE_STORAGE_KEY))[PAUSE_STORAGE_KEY]
+    const state = (await browser.storage.local.get(PAUSE_STORAGE_KEY))[
+        PAUSE_STORAGE_KEY
+    ]
 
     switch (state) {
-        case 0: return Infinity
-        case 1: return true
+        case 0:
+            return Infinity
+        case 1:
+            return true
         case 2:
-        default: return false
+        default:
+            return false
     }
 }
 
@@ -42,7 +47,9 @@ const setState = async state => {
         }
     }
 
-    return browser.storage.local.set({ [PAUSE_STORAGE_KEY]: transformState(state) })
+    return browser.storage.local.set({
+        [PAUSE_STORAGE_KEY]: transformState(state),
+    })
 }
 
 function handleInterrupt(timeoutId) {
@@ -59,7 +66,12 @@ function handlePause(timeout) {
     }
 
     return setTimeout(() => {
-        browser.notifications.create(getNotifOptions('Activity logger now running in background again', true))
+        browser.notifications.create(
+            getNotifOptions(
+                'Activity logger now running in background again',
+                true,
+            ),
+        )
         setState(false)
     }, timeout * 60000)
 }
@@ -86,7 +98,8 @@ export default function initPauser() {
 
         if (isPaused) {
             handleInterrupt(timeoutId)
-        } else { // New pause timeout request
+        } else {
+            // New pause timeout request
             timeoutId = handlePause(timeoutMins)
         }
     }

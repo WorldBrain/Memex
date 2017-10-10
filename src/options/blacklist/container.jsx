@@ -85,7 +85,7 @@ class BlacklistContainer extends Component {
 
         return (
             <BlacklistInputRow
-                key='blacklist-input'
+                key="blacklist-input"
                 value={siteInputValue}
                 isClearBtnDisabled={this.shouldDisableClearBtn()}
                 isSaveBtnDisabled={this.shouldDisableSaveBtn()}
@@ -93,7 +93,7 @@ class BlacklistContainer extends Component {
                 handleKeyPress={this.handleInputKeyPress}
                 onInputChange={this.onInputChange}
                 onInputClear={() => boundActions.resetSiteInputValue()}
-                inputRef={input => this.input = input}   // eslint-disable-line no-return-assign
+                inputRef={input => (this.input = input)} // eslint-disable-line no-return-assign
             />
         )
     }
@@ -113,16 +113,15 @@ class BlacklistContainer extends Component {
 
     renderAddDomain() {
         return (
-            <div className={styles.ignoreDomainText}>
-                Ignore a new domain:
-            </div>
+            <div className={styles.ignoreDomainText}>Ignore a new domain:</div>
         )
     }
 
     renderAddBlacklistSites() {
         return (
             <div className={styles.blacklistText}>
-                You are currently not recording activity from the following websites:
+                You are currently not recording activity from the following
+                websites:
             </div>
         )
     }
@@ -132,12 +131,10 @@ class BlacklistContainer extends Component {
             <div>
                 {this.renderAddDomain()}
                 {this.renderBlacklistInputRow()}
-                { (this.props.blacklist.length) ? (
-                    this.renderAddBlacklistSites()) : null
-                }
-                <BlacklistTable>
-                    {this.renderBlacklistRows()}
-                </BlacklistTable>
+                {this.props.blacklist.length
+                    ? this.renderAddBlacklistSites()
+                    : null}
+                <BlacklistTable>{this.renderBlacklistRows()}</BlacklistTable>
             </div>
         )
     }
@@ -146,15 +143,19 @@ class BlacklistContainer extends Component {
 BlacklistContainer.propTypes = {
     // State
     siteInputValue: PropTypes.string.isRequired,
-    blacklist: PropTypes.arrayOf(PropTypes.shape({
-        expression: PropTypes.string.isRequired,
-    })).isRequired,
+    blacklist: PropTypes.arrayOf(
+        PropTypes.shape({
+            expression: PropTypes.string.isRequired,
+        }),
+    ).isRequired,
 
     // Misc
     boundActions: PropTypes.objectOf(PropTypes.func),
 }
 
 const mapStateToProps = entireStateSelector
-const mapDispatchToProps = dispatch => ({ boundActions: bindActionCreators(actions, dispatch) })
+const mapDispatchToProps = dispatch => ({
+    boundActions: bindActionCreators(actions, dispatch),
+})
 
 export default connect(mapStateToProps, mapDispatchToProps)(BlacklistContainer)

@@ -16,11 +16,12 @@
     "firefox": "web-ext -s extension run --bc",
     "lint": "gulp lint",
     "lint-fix": "eslint --ext js,jsx --fix .",
+    "format": "prettier --config prettier.config.js --write '**/*.{js,jsx,css}'",
     "precommit": "lint-staged"
   },
   "lint-staged": {
     "*.{js,jsx,css}": [
-      "prettier --write",
+      "prettier --config prettier.config.js --write",
       "git add"
     ]
   },

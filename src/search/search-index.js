@@ -58,8 +58,8 @@ const indexOpts = {
     },
 }
 
-const standardResponse = (resolve, reject) =>
-    (err, data = true) => err ? reject(err) : resolve(data)
+const standardResponse = (resolve, reject) => (err, data = true) =>
+    err ? reject(err) : resolve(data)
 
 // Simply extracts the timestamp component out the ID of a visit or bookmark doc,
 //  which is the only data we want at the moment.
@@ -77,19 +77,32 @@ const getLatestMeta = (visits, bookmarks) => {
     const numVisits = visits.length
     const numBookmarks = bookmarks.length
 
-    if (numVisits && numBookmarks) { // Both arrays have timestamps
+    if (numVisits && numBookmarks) {
+        // Both arrays have timestamps
         return visits[numVisits - 1] > bookmarks[numBookmarks - 1]
             ? { latest: visits[numVisits - 1], type: RESULT_TYPES.VISIT }
-            : { latest: bookmarks[numBookmarks - 1], type: RESULT_TYPES.BOOKMARK }
-    } else if (numBookmarks) { // Only bookmark array has timestamps
-        return { latest: bookmarks[numBookmarks - 1], type: RESULT_TYPES.BOOKMARK }
-    } else { // Only visit array has timestamps
+            : {
+                  latest: bookmarks[numBookmarks - 1],
+                  type: RESULT_TYPES.BOOKMARK,
+              }
+    } else if (numBookmarks) {
+        // Only bookmark array has timestamps
+        return {
+            latest: bookmarks[numBookmarks - 1],
+            type: RESULT_TYPES.BOOKMARK,
+        }
+    } else {
+        // Only visit array has timestamps
         return { latest: visits[numVisits - 1], type: RESULT_TYPES.VISIT }
     }
 }
 
 // Groups input docs into standard index doc structure
-const transformPageAndMetaDocs = ({ pageDoc, visitDocs = [], bookmarkDocs = [] }) => {
+const transformPageAndMetaDocs = ({
+    pageDoc,
+    visitDocs = [],
+    bookmarkDocs = [],
+}) => {
     const visits = visitDocs.map(transformMetaDoc)
     const bookmarks = bookmarkDocs.map(transformMetaDoc)
 
@@ -102,7 +115,9 @@ const transformPageAndMetaDocs = ({ pageDoc, visitDocs = [], bookmarkDocs = [] }
 }
 
 // Wraps instance creation in a Promise for use in async interface methods
-const indexP = new Promise((...args) => initSearchIndex(indexOpts, standardResponse(...args)))
+const indexP = new Promise((...args) =>
+    initSearchIndex(indexOpts, standardResponse(...args)),
+)
 
 /**
  * @param doc The doc to queue up for adding into the index.
@@ -112,7 +127,9 @@ async function addConcurrent(doc) {
     const index = await indexP
     const input = [doc]
 
-    return new Promise((...args) => index.concurrentAdd(indexOpts, input, standardResponse(...args)))
+    return new Promise((...args) =>
+        index.concurrentAdd(indexOpts, input, standardResponse(...args)),
+    )
 }
 
 /**
@@ -121,8 +138,16 @@ async function addConcurrent(doc) {
  * @param {any} Object containing a `pageDoc` (required) and optionally any associated `visitDocs` and `bookmarkDocs`.
  * @returns {Promise} Promise resolving when indexing is complete, or rejecting for any index errors.
  */
-export async function addPageConcurrent({ pageDoc, visitDocs = [], bookmarkDocs = [] }) {
-    const indexDoc = transformPageAndMetaDocs({ pageDoc, visitDocs, bookmarkDocs })
+export async function addPageConcurrent({
+    pageDoc,
+    visitDocs = [],
+    bookmarkDocs = [],
+}) {
+    const indexDoc = transformPageAndMetaDocs({
+        pageDoc,
+        visitDocs,
+        bookmarkDocs,
+    })
 
     return await addConcurrent(indexDoc)
 }
@@ -136,7 +161,11 @@ export async function addPageConcurrent({ pageDoc, visitDocs = [], bookmarkDocs 
 export async function addPage({ pageDoc, visitDocs = [], bookmarkDocs = [] }) {
     const index = await indexP
 
-    const indexDoc = transformPageAndMetaDocs({ pageDoc, visitDocs, bookmarkDocs })
+    const indexDoc = transformPageAndMetaDocs({
+        pageDoc,
+        visitDocs,
+        bookmarkDocs,
+    })
 
     return new Promise((resolve, reject) => {
         // Set up add pipeline
@@ -167,20 +196,21 @@ const addTimestamp = field => async metaDoc => {
     const indexDocId = metaDoc.page._id // Index docs share ID with corresponding pouch page doc
     const existingDoc = await get(indexDocId) // Get existing indexed doc
     if (!existingDoc) {
-        throw new Error('Page associated with timestamp is not recorded in the index')
+        throw new Error(
+            'Page associated with timestamp is not recorded in the index',
+        )
     }
 
     const newTimestamp = transformMetaDoc(metaDoc)
 
     // This can be done better; now works becuase we have only 2 types
-    existingDoc.type = metaDoc._id.startsWith('visit/') ? RESULT_TYPES.VISIT : RESULT_TYPES.BOOKMARK
+    existingDoc.type = metaDoc._id.startsWith('visit/')
+        ? RESULT_TYPES.VISIT
+        : RESULT_TYPES.BOOKMARK
 
     // Perform in-memory updates of timestamp array + "latest"/sort field
     existingDoc.latest = newTimestamp
-    existingDoc[field] = [
-        ...(existingDoc[field] || []),
-        newTimestamp,
-    ]
+    existingDoc[field] = [...(existingDoc[field] || []), newTimestamp]
 
     await del(indexDocId) // Delete existing doc
     return addConcurrent(existingDoc) // Add new updated doc
@@ -201,7 +231,9 @@ const removeTimestamp = field => async metaDoc => {
     const indexDocId = metaDoc.page._id // Index docs share ID with corresponding pouch page doc
     const existingDoc = await get(indexDocId) // Get existing doc
     if (!existingDoc) {
-        throw new Error('Page associated with timestamp is not recorded in the index')
+        throw new Error(
+            'Page associated with timestamp is not recorded in the index',
+        )
     }
 
     // Perform in-memory update by removing the timestamp
@@ -221,7 +253,6 @@ const removeTimestamp = field => async metaDoc => {
 export const removeVisit = removeTimestamp('visits')
 export const removeBookmark = removeTimestamp('bookmarks')
 
-
 // Below are mostly standard Promise wrappers around search-index stream-based methods
 
 /**
@@ -236,10 +267,12 @@ export async function get(ids) {
     const found = []
 
     return new Promise((resolve, reject) =>
-        index.get(isSingle ? [ids] : ids)
+        index
+            .get(isSingle ? [ids] : ids)
             .on('data', datum => found.push(datum))
             .on('error', reject)
-            .on('end', () => resolve(isSingle ? found[0] : found)))
+            .on('end', () => resolve(isSingle ? found[0] : found)),
+    )
 }
 
 /**
@@ -252,7 +285,9 @@ export async function del(ids) {
     // Typeguard on input; make single ID into array if need be
     const toDelete = typeof ids === 'string' ? [ids] : ids
 
-    return new Promise((...args) => index.del(toDelete, standardResponse(...args)))
+    return new Promise((...args) =>
+        index.del(toDelete, standardResponse(...args)),
+    )
 }
 
 export const instance = () => indexP
@@ -260,7 +295,9 @@ export const instance = () => indexP
 export async function count(query) {
     const index = await indexP
 
-    return new Promise((...args) => index.totalHits(query, standardResponse(...args)))
+    return new Promise((...args) =>
+        index.totalHits(query, standardResponse(...args)),
+    )
 }
 
 // Batches stream results to be all returned in Promise resolution.
@@ -269,10 +306,12 @@ export async function search(query) {
     const data = []
 
     return new Promise((resolve, reject) =>
-        index.search(query)
+        index
+            .search(query)
             .on('data', datum => data.push(datum))
             .on('error', reject)
-            .on('end', () => resolve(data)))
+            .on('end', () => resolve(data)),
+    )
 }
 
 export async function categorize(query) {
@@ -280,10 +319,12 @@ export async function categorize(query) {
     const data = []
 
     return new Promise((resolve, reject) =>
-        index.categorize(query)
+        index
+            .categorize(query)
             .on('data', datum => data.push(datum))
             .on('error', reject)
-            .on('end', () => resolve(data)))
+            .on('end', () => resolve(data)),
+    )
 }
 
 export async function buckets(query) {
@@ -291,10 +332,12 @@ export async function buckets(query) {
     const data = []
 
     return new Promise((resolve, reject) =>
-        index.buckets(query)
+        index
+            .buckets(query)
             .on('data', datum => data.push(datum))
             .on('error', reject)
-            .on('end', () => resolve(data)))
+            .on('end', () => resolve(data)),
+    )
 }
 
 // Resolves to the stream from search-index's `.search`.
@@ -314,6 +357,6 @@ export async function destroy() {
     const index = await indexP
 
     return new Promise((resolve, reject) =>
-        index.flush(err =>
-            err ? reject(err) : resolve('index destroyed')))
+        index.flush(err => (err ? reject(err) : resolve('index destroyed'))),
+    )
 }

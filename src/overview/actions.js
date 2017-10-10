@@ -30,7 +30,9 @@ const getCmdMessageHandler = dispatch => ({ cmd, ...payload }) => {
             dispatch(handleErrors(payload))
             break
         default:
-            console.error(`Background script sent unknown command '${cmd}' with payload:\n${payload}`)
+            console.error(
+                `Background script sent unknown command '${cmd}' with payload:\n${payload}`,
+            )
     }
 }
 
@@ -50,7 +52,10 @@ export const init = () => dispatch => {
  * state will also be used to perform relevant pagination logic.
  * @param {boolean} [overwrite=false] Denotes whether to overwrite existing results or just append.
  */
-export const search = ({ overwrite } = { overwrite: false }) => async (dispatch, getState) => {
+export const search = ({ overwrite } = { overwrite: false }) => async (
+    dispatch,
+    getState,
+) => {
     // If loading already, don't start another search
     if (selectors.isLoading(getState())) {
         return
@@ -78,7 +83,9 @@ export const search = ({ overwrite } = { overwrite: false }) => async (dispatch,
     port.postMessage({ cmd: constants.CMDS.SEARCH, searchParams, overwrite })
 }
 
-const updateSearchResult = ({ searchResult, overwrite } = { overwrite: false, searchResult: [] }) => dispatch => {
+const updateSearchResult = (
+    { searchResult, overwrite } = { overwrite: false, searchResult: [] },
+) => dispatch => {
     const searchAction = overwrite ? setSearchResult : appendSearchResult
 
     dispatch(searchAction(searchResult))

@@ -4,7 +4,9 @@ import db from 'src/pouchdb'
 import { CMDS, IMPORT_CONN_NAME } from './constants'
 import { allowTypes as allowTypesSelector } from './selectors'
 
-export const filterDownloadDetails = createAction('imports/filterDownloadDetails')
+export const filterDownloadDetails = createAction(
+    'imports/filterDownloadDetails',
+)
 
 export const addImportItem = createAction('imports/addImportItem')
 
@@ -30,17 +32,22 @@ export const resumeImport = createAction('imports/resumeImport')
 
 // Dev mode actions
 export const toggleDevMode = createAction('imports-dev/toggleDevMode')
-export const startTestDataUpload = createAction('imports-dev/startTestDataUpload')
-export const finishTestDataUpload = createAction('imports-dev/finishTestDataUpload')
+export const startTestDataUpload = createAction(
+    'imports-dev/startTestDataUpload',
+)
+export const finishTestDataUpload = createAction(
+    'imports-dev/finishTestDataUpload',
+)
 
 /**
  * @param {FileReader} fileReader FileReader instance to bind to text reading function.
  * @return {(File) => Promise<String>} Async function that reads a given file and returns its text.
  */
-const getFileTextViaReader = fileReader => file => new Promise((resolve, reject) => {
-    fileReader.onload = event => resolve(event.target.result)
-    fileReader.readAsText(file)
-})
+const getFileTextViaReader = fileReader => file =>
+    new Promise((resolve, reject) => {
+        fileReader.onload = event => resolve(event.target.result)
+        fileReader.readAsText(file)
+    })
 
 const deserializeDoc = docString => {
     if (!docString) return undefined
@@ -129,10 +136,22 @@ const makePortMessagingThunk = ({ action, cmd }) => () => dispatch => {
 }
 
 // Batch controlling thunks
-export const stop = makePortMessagingThunk({ action: cancelImport(), cmd: CMDS.CANCEL })
-export const pause = makePortMessagingThunk({ action: pauseImport(), cmd: CMDS.PAUSE })
-export const resume = makePortMessagingThunk({ action: resumeImport(), cmd: CMDS.RESUME })
-export const finish = makePortMessagingThunk({ action: finishImport(), cmd: CMDS.FINISH })
+export const stop = makePortMessagingThunk({
+    action: cancelImport(),
+    cmd: CMDS.CANCEL,
+})
+export const pause = makePortMessagingThunk({
+    action: pauseImport(),
+    cmd: CMDS.PAUSE,
+})
+export const resume = makePortMessagingThunk({
+    action: resumeImport(),
+    cmd: CMDS.RESUME,
+})
+export const finish = makePortMessagingThunk({
+    action: finishImport(),
+    cmd: CMDS.FINISH,
+})
 export const start = () => (dispatch, getState) => {
     const allowImportTypes = allowTypesSelector(getState())
 

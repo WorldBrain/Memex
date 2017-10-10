@@ -34,7 +34,9 @@ export default class PromiseBatcher {
         // State to keep track of subscription (allow hiding of Rx away from caller)
         this.sub = undefined
 
-        this.getDeferredInputObservable = this._getDeferredInputObservable.bind(this)
+        this.getDeferredInputObservable = this._getDeferredInputObservable.bind(
+            this,
+        )
     }
 
     /**
@@ -46,7 +48,7 @@ export default class PromiseBatcher {
      * @param output The output of the same processing function's invocation.
      */
     _getOutputShape(input, output) {
-        return ({ input, output })
+        return { input, output }
     }
 
     /**
@@ -55,13 +57,12 @@ export default class PromiseBatcher {
      * @return {Rx.Observable}
      */
     _getDeferredInputObservable(input) {
-        return Rx.Observable.defer(() => this.process(input))
-            .catch(err => {
-                // Note we're explicitly using the observer's onError callback here so RxJS stream does not stop
-                this.observer.error({ input, error: err.message })
-                // Return empty observable to ignore error and continue stream
-                return Rx.Observable.empty()
-            })
+        return Rx.Observable.defer(() => this.process(input)).catch(err => {
+            // Note we're explicitly using the observer's onError callback here so RxJS stream does not stop
+            this.observer.error({ input, error: err.message })
+            // Return empty observable to ignore error and continue stream
+            return Rx.Observable.empty()
+        })
     }
 
     /**
@@ -70,16 +71,19 @@ export default class PromiseBatcher {
     _subscribeToBatchObservable() {
         const inputBatchPromise = this.getInputBatch()
 
-        this.sub = Rx.Observable.from(inputBatchPromise)
+        this.sub = Rx.Observable
+            .from(inputBatchPromise)
             .mergeMap(Rx.Observable.from)
             .mergeMap(
                 this.getDeferredInputObservable, // Defer async callbacks on input...
                 this._getOutputShape,
-                this.concurrency)  // ...but run this many at any time
+                this.concurrency,
+            ) // ...but run this many at any time
             .subscribe(
                 this.observer.next,
                 noop, // Set error to noop as RxJS stops the stream on errors; we don't want to
-                this.observer.complete)
+                this.observer.complete,
+            )
     }
 
     /**
@@ -87,7 +91,9 @@ export default class PromiseBatcher {
      * @returns {boolean} Denotes whether or not batch could be started/resumed.
      */
     start() {
-        if (this.sub) { return false }
+        if (this.sub) {
+            return false
+        }
 
         this._subscribeToBatchObservable()
         return true
@@ -98,7 +104,9 @@ export default class PromiseBatcher {
      * @returns {boolean} Denotes whether or not batch could be terminated.
      */
     stop() {
-        if (!this.sub) { return false }
+        if (!this.sub) {
+            return false
+        }
 
         // Unsub to end observable processing and explicitly remove pointer to old sub
         this.sub.unsubscribe()

@@ -9,7 +9,7 @@ const TestDataUpload = ({ isUploading, uploadTestData }) => (
     <div className={styles.uploadContainer}>
         <div className={styles.uploadInput}>
             <h3>Restore database from test data</h3>
-            <input onChange={uploadTestData} type='file' accept='*' multiple />
+            <input onChange={uploadTestData} type="file" accept="*" multiple />
         </div>
         <div className={styles.uploadLoading}>
             {isUploading && <LoadingIndicator />}

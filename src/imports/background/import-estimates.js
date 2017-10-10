@@ -17,7 +17,10 @@ const nonStubPages = { ...pageDocsSelector, isStub: { $ne: true } }
 async function getAssocFullPageDocCount(bookmarkDocs) {
     let count = 0
     for (const doc of bookmarkDocs) {
-        const { docs: [assocPageDoc] } = await db.find({ selector: { ...nonStubPages, _id: doc.page._id }, fields })
+        const { docs: [assocPageDoc] } = await db.find({
+            selector: { ...nonStubPages, _id: doc.page._id },
+            fields,
+        })
         if (assocPageDoc) ++count
     }
     return count
@@ -34,12 +37,17 @@ export default async function getEstimateCounts() {
 
     // Grab needed data from DB
     const { docs: pageDocs } = await db.find({ selector: nonStubPages, fields })
-    const { docs: bookmarkDocs } = await db.find({ selector: bookmarkDocsSelector, fields: ['_id', 'page'] })
+    const { docs: bookmarkDocs } = await db.find({
+        selector: bookmarkDocsSelector,
+        fields: ['_id', 'page'],
+    })
 
     return {
         completed: {
             [IMPORT_TYPE.HISTORY]: pageDocs.length,
-            [IMPORT_TYPE.BOOKMARK]: await getAssocFullPageDocCount(bookmarkDocs),
+            [IMPORT_TYPE.BOOKMARK]: await getAssocFullPageDocCount(
+                bookmarkDocs,
+            ),
         },
         remaining: {
             [IMPORT_TYPE.HISTORY]: filteredHistoryItems.length,

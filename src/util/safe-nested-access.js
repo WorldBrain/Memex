@@ -17,6 +17,6 @@ const strPathToArr = path => path.split('.')
  * @return {any|null} Either the value found at pathArr on object, or null if it cannot be found.
  */
 const safelyGet = (path = '') => (object = {}) =>
-    strPathToArr(path).reduce((xs, x) => (xs && xs[x]) ? xs[x] : null, object)
+    strPathToArr(path).reduce((xs, x) => (xs && xs[x] ? xs[x] : null), object)
 
 export default safelyGet

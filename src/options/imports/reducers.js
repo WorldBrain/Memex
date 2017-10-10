@@ -1,7 +1,12 @@
 import { createReducer } from 'redux-act'
 
 import * as actions from './actions'
-import { STATUS, FILTERS, IMPORT_TYPE as TYPE, DOWNLOAD_STATUS as DL_STAT } from './constants'
+import {
+    STATUS,
+    FILTERS,
+    IMPORT_TYPE as TYPE,
+    DOWNLOAD_STATUS as DL_STAT,
+} from './constants'
 
 const defaultStats = {
     [TYPE.HISTORY]: 0,
@@ -15,10 +20,10 @@ const defaultDevState = {
 
 const defaultState = {
     downloadData: [],
-    completed: defaultStats,    // Count of docs already in DB (estimates view)
-    fail: defaultStats,         // Fail counts for completed import items
-    success: defaultStats,      // Success counts for completed import items
-    totals: defaultStats,       // Static state to use to derive remaining counts from
+    completed: defaultStats, // Count of docs already in DB (estimates view)
+    fail: defaultStats, // Fail counts for completed import items
+    success: defaultStats, // Success counts for completed import items
+    totals: defaultStats, // Static state to use to derive remaining counts from
     importStatus: STATUS.LOADING,
     loadingMsg: '',
     downloadDataFilter: FILTERS.ALL,
@@ -45,12 +50,15 @@ const updateCountReducer = (state, type, isSuccess) => {
 /**
  * Add given download details as a new row, as well as triggering an update of counts
  */
-const addDownloadDetailsReducer = (state, { url, type, status = DL_STAT.FAIL, error }) => ({
+const addDownloadDetailsReducer = (
+    state,
+    { url, type, status = DL_STAT.FAIL, error },
+) => ({
     ...state,
     ...updateCountReducer(state, type, status === DL_STAT.SUCC),
     downloadData: [
         ...state.downloadData,
-        { url, type, status, error },     // Add new details row
+        { url, type, status, error }, // Add new details row
     ],
 })
 
@@ -73,7 +81,8 @@ const finishImportsReducer = ({ loading = false }) => state => ({
 const prepareImportReducer = state => ({
     ...state,
     importStatus: STATUS.LOADING,
-    loadingMsg: 'Preparing import. Can take a few minutes for large histories...',
+    loadingMsg:
+        'Preparing import. Can take a few minutes for large histories...',
 })
 
 const initImportReducer = state => ({
@@ -88,7 +97,11 @@ const cancelImportReducer = state => ({
     loadingMsg: 'Please wait as import progress gets recorded.',
 })
 
-const initEstimateCounts = (state, { remaining, completed }) => ({ ...state, totals: remaining, completed })
+const initEstimateCounts = (state, { remaining, completed }) => ({
+    ...state,
+    totals: remaining,
+    completed,
+})
 
 // Sets whatever key to the specified val
 const genericReducer = (key, val) => state => ({ ...state, [key]: val })
@@ -98,28 +111,40 @@ const payloadReducer = key => (state, payload) => ({ ...state, [key]: payload })
 // Simple reducers constructed for state keys
 const setImportState = val => genericReducer('importStatus', val)
 
-export default createReducer({
-    [actions.initImport]: initImportReducer,
-    [actions.prepareImport]: prepareImportReducer,
-    [actions.startImport]: setImportState(STATUS.RUNNING),
-    [actions.stopImport]: setImportState(STATUS.STOPPED),
-    [actions.finishImport]: finishImportsReducer({ loading: true }),
-    [actions.readyImport]: finishImportsReducer({ loading: false }),
-    [actions.cancelImport]: cancelImportReducer,
-    [actions.pauseImport]: setImportState(STATUS.PAUSED),
-    [actions.resumeImport]: setImportState(STATUS.RUNNING),
-    [actions.addImportItem]: addDownloadDetailsReducer,
-    [actions.toggleAllowType]: toggleAllowTypeReducer,
-    [actions.filterDownloadDetails]: payloadReducer('downloadDataFilter'),
-    [actions.initImportState]: payloadReducer('importStatus'),
-    [actions.initEstimateCounts]: initEstimateCounts,
-    [actions.initTotalsCounts]: payloadReducer('totals'),
-    [actions.initFailCounts]: payloadReducer('fail'),
-    [actions.initSuccessCounts]: payloadReducer('success'),
-    [actions.initDownloadData]: payloadReducer('downloadData'),
+export default createReducer(
+    {
+        [actions.initImport]: initImportReducer,
+        [actions.prepareImport]: prepareImportReducer,
+        [actions.startImport]: setImportState(STATUS.RUNNING),
+        [actions.stopImport]: setImportState(STATUS.STOPPED),
+        [actions.finishImport]: finishImportsReducer({ loading: true }),
+        [actions.readyImport]: finishImportsReducer({ loading: false }),
+        [actions.cancelImport]: cancelImportReducer,
+        [actions.pauseImport]: setImportState(STATUS.PAUSED),
+        [actions.resumeImport]: setImportState(STATUS.RUNNING),
+        [actions.addImportItem]: addDownloadDetailsReducer,
+        [actions.toggleAllowType]: toggleAllowTypeReducer,
+        [actions.filterDownloadDetails]: payloadReducer('downloadDataFilter'),
+        [actions.initImportState]: payloadReducer('importStatus'),
+        [actions.initEstimateCounts]: initEstimateCounts,
+        [actions.initTotalsCounts]: payloadReducer('totals'),
+        [actions.initFailCounts]: payloadReducer('fail'),
+        [actions.initSuccessCounts]: payloadReducer('success'),
+        [actions.initDownloadData]: payloadReducer('downloadData'),
 
-    // Dev mode reducers
-    [actions.startTestDataUpload]: state => ({ ...state, dev: { ...state.dev, isUploading: true } }),
-    [actions.finishTestDataUpload]: state => ({ ...state, dev: { ...state.dev, isUploading: false } }),
-    [actions.toggleDevMode]: state => ({ ...state, dev: { ...state.dev, isEnabled: !state.dev.isEnabled } }),
-}, defaultState)
+        // Dev mode reducers
+        [actions.startTestDataUpload]: state => ({
+            ...state,
+            dev: { ...state.dev, isUploading: true },
+        }),
+        [actions.finishTestDataUpload]: state => ({
+            ...state,
+            dev: { ...state.dev, isUploading: false },
+        }),
+        [actions.toggleDevMode]: state => ({
+            ...state,
+            dev: { ...state.dev, isEnabled: !state.dev.isEnabled },
+        }),
+    },
+    defaultState,
+)

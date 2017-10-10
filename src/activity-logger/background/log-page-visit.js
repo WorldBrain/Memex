@@ -4,7 +4,6 @@ import { checkWithBlacklist } from 'src/blacklist'
 import { generateVisitDocId } from '..'
 import * as index from 'src/search/search-index'
 
-
 // Store the visit in PouchDB.
 async function storeVisit({ timestamp, url, page }) {
     const visit = {
@@ -29,7 +28,9 @@ async function updateIndex(finalPagePromise, visit) {
     const { page } = await finalPagePromise
 
     // If no page returned from analysis, we can't index
-    if (!page) { return }
+    if (!page) {
+        return
+    }
 
     // Check if doc exists in index
     const existingIndexedDoc = await index.get(page._id) // TODO: maybe just have this in the `addPage` index methods
@@ -47,10 +48,7 @@ async function updateIndex(finalPagePromise, visit) {
     }
 }
 
-export async function logPageVisit({
-    tabId,
-    url,
-}) {
+export async function logPageVisit({ tabId, url }) {
     // First check if we want to log this page (hence the 'maybe' in the name).
     const shouldBeRemembered = await checkWithBlacklist()
     if (!shouldBeRemembered({ url })) {
@@ -64,18 +62,19 @@ export async function logPageVisit({
     const storePageResult = await storePage({ tabId, url })
 
     // Create a visit pointing to this page (analysing/storing it may still be in progress)
-    const { visit } = await storeVisit({page: storePageResult.page, url, timestamp})
+    const { visit } = await storeVisit({
+        page: storePageResult.page,
+        url,
+        timestamp,
+    })
 
     await updateIndex(storePageResult.finalPagePromise, visit)
 
     // TODO possibly deduplicate the visit if the page was deduped too.
-    void (visit)
+    void visit
 }
 
-export async function maybeLogPageVisit({
-    tabId,
-    url,
-}) {
+export async function maybeLogPageVisit({ tabId, url }) {
     await logPageVisit({
         tabId,
         url,

@@ -24,11 +24,11 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
         // Create debounced function and call it
         tabs[tabId] = debounce(async () => {
             // Bail-out if logging paused or imports in progress
-            if (await getPauseState() || await getImportInProgressFlag()) {
+            if ((await getPauseState()) || (await getImportInProgressFlag())) {
                 return
             }
 
-            return maybeLogPageVisit({url: tab.url, tabId: tabId})
+            return maybeLogPageVisit({ url: tab.url, tabId: tabId })
         }, 10000)
         tabs[tabId]()
     }

@@ -10,15 +10,13 @@ const Import = ({ isLoading, loadingMsg, children }) => (
     <div>
         <h1 className={styles.routeTitle}>Analyse History & Bookmarks</h1>
         <div className={localStyles.mainContainer}>
-            <div className={localStyles.importTableContainer}>
-                {children}
-            </div>
-            {isLoading
-            && <div className={localStyles.loadingBlocker}>
-                <p className={localStyles.loadingMsg}>{loadingMsg}</p>
-                <LoadingIndicator />
-            </div>
-            }
+            <div className={localStyles.importTableContainer}>{children}</div>
+            {isLoading && (
+                <div className={localStyles.loadingBlocker}>
+                    <p className={localStyles.loadingMsg}>{loadingMsg}</p>
+                    <LoadingIndicator />
+                </div>
+            )}
         </div>
         <DevOptions />
     </div>

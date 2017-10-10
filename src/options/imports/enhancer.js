@@ -3,12 +3,13 @@ import * as selectors from './selectors'
 import { STORAGE_KEYS } from './constants'
 
 const hydrateImportsFromStorage = store => {
-    const hydrate = (key, action) => browser.storage.local.get(key).then(data => {
-        if (!data[key]) return
+    const hydrate = (key, action) =>
+        browser.storage.local.get(key).then(data => {
+            if (!data[key]) return
 
-        const parsedData = JSON.parse(data[key])
-        store.dispatch(action(parsedData))
-    })
+            const parsedData = JSON.parse(data[key])
+            store.dispatch(action(parsedData))
+        })
 
     hydrate(STORAGE_KEYS.DOWNLOAD_DATA, actions.initDownloadData)
     hydrate(STORAGE_KEYS.TOTALS_STATE, actions.initTotalsCounts)
@@ -16,15 +17,17 @@ const hydrateImportsFromStorage = store => {
     hydrate(STORAGE_KEYS.FAIL_STATE, actions.initFailCounts)
 }
 
-const syncImportsToStorage = store => store.subscribe(() => {
-    const dump = (key, data) => browser.storage.local.set({ [key]: JSON.stringify(data) })
+const syncImportsToStorage = store =>
+    store.subscribe(() => {
+        const dump = (key, data) =>
+            browser.storage.local.set({ [key]: JSON.stringify(data) })
 
-    const state = store.getState()
-    dump(STORAGE_KEYS.DOWNLOAD_DATA, selectors.downloadData(state))
-    dump(STORAGE_KEYS.TOTALS_STATE, selectors.totals(state))
-    dump(STORAGE_KEYS.SUCCESS_STATE, selectors.success(state))
-    dump(STORAGE_KEYS.FAIL_STATE, selectors.fail(state))
-})
+        const state = store.getState()
+        dump(STORAGE_KEYS.DOWNLOAD_DATA, selectors.downloadData(state))
+        dump(STORAGE_KEYS.TOTALS_STATE, selectors.totals(state))
+        dump(STORAGE_KEYS.SUCCESS_STATE, selectors.success(state))
+        dump(STORAGE_KEYS.FAIL_STATE, selectors.fail(state))
+    })
 
 export default storeCreator => (reducer, initState, enhancer) => {
     const store = storeCreator(reducer, initState, enhancer)

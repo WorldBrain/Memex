@@ -5,7 +5,6 @@
 
 import { createAction } from 'redux-act'
 
-
 export default function asyncActionCreator(
     // actionCreator is assumed to create a thunk that returns a promise.
     actionCreator,
@@ -27,7 +26,7 @@ export default function asyncActionCreator(
     let runningTransactions = []
 
     function isPending() {
-        return (runningTransactions.length > 0)
+        return runningTransactions.length > 0
     }
 
     function cancelAll() {
@@ -46,23 +45,26 @@ export default function asyncActionCreator(
 
             // Run the actionCreator
             const action = actionCreator(...args)
-            dispatch(pending({action, args}))
+            dispatch(pending({ action, args }))
 
             const removeFromTransactionList = () => {
                 runningTransactions = runningTransactions.filter(
-                    v => (v !== transaction)
+                    v => v !== transaction,
                 )
             }
 
             // Cancels this transaction. Put more accurately, we just ignore its
             // results, because a Javascript Promise cannot really be cancelled.
             const cancel = () => {
-                cancelled && dispatch(cancelled({action, args}))
-                finished && dispatch(finished({
-                    value: undefined,
-                    error: undefined,
-                    cancelled: true,
-                }))
+                cancelled && dispatch(cancelled({ action, args }))
+                finished &&
+                    dispatch(
+                        finished({
+                            value: undefined,
+                            error: undefined,
+                            cancelled: true,
+                        }),
+                    )
                 removeFromTransactionList()
             }
 
@@ -82,15 +84,18 @@ export default function asyncActionCreator(
             // If the transaction was not cancelled, dispatch some actions.
             if (runningTransactions.includes(transaction)) {
                 if (err) {
-                    error && dispatch(error({error: err}))
+                    error && dispatch(error({ error: err }))
                 } else {
-                    complete && dispatch(complete({value}))
+                    complete && dispatch(complete({ value }))
                 }
-                finished && dispatch(finished({
-                    value,
-                    error: err,
-                    cancelled: false,
-                }))
+                finished &&
+                    dispatch(
+                        finished({
+                            value,
+                            error: err,
+                            cancelled: false,
+                        }),
+                    )
                 removeFromTransactionList()
             }
         }

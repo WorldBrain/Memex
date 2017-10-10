@@ -39,7 +39,9 @@ async function createNewPageForBookmark(bookmarkInfo) {
             content: pageData.content,
         }
     } catch (err) {
-        console.error("Error occurred while fetching page data: " + err.toString())
+        console.error(
+            'Error occurred while fetching page data: ' + err.toString(),
+        )
     } finally {
         const bookmarkDoc = transformToBookmarkDoc(pageDoc)(bookmarkInfo)
         index.addPageConcurrent({ pageDoc, bookmarkDocs: [bookmarkDoc] })
@@ -51,7 +53,9 @@ async function createNewPageForBookmark(bookmarkInfo) {
 browser.bookmarks.onCreated.addListener(async (id, bookmarkInfo) => {
     try {
         // Attempt to resolve existing page doc to connect new bookmark to
-        const pageDoc = await db.get(generatePageDocId({ url: bookmarkInfo.url }))
+        const pageDoc = await db.get(
+            generatePageDocId({ url: bookmarkInfo.url }),
+        )
         const bookmarkDoc = transformToBookmarkDoc(pageDoc)(bookmarkInfo)
         index.addBookmark(bookmarkDoc)
         db.bulkDocs([bookmarkDoc, pageDoc])

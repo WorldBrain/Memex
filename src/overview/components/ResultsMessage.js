@@ -3,8 +3,9 @@ import PropTypes from 'prop-types'
 
 import styles from './Overview.css'
 
-const ResultsMessage = ({ children }) =>
+const ResultsMessage = ({ children }) => (
     <p className={styles.noResultMessage}>{children}</p>
+)
 
 ResultsMessage.propTypes = {
     children: PropTypes.string.isRequired,

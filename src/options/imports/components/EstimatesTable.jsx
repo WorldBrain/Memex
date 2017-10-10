@@ -6,7 +6,12 @@ import { IMPORT_TYPE as TYPE } from '../constants'
 
 import localStyles from './Import.css'
 
-const EstimatesTable = ({ onAllowHistoryClick, onAllowBookmarksClick, estimates, allowTypes }) => (
+const EstimatesTable = ({
+    onAllowHistoryClick,
+    onAllowBookmarksClick,
+    estimates,
+    allowTypes,
+}) => (
     <table className={localStyles.importTable}>
         <colgroup>
             <col className={localStyles.importTableCol} />
@@ -26,10 +31,21 @@ const EstimatesTable = ({ onAllowHistoryClick, onAllowBookmarksClick, estimates,
                 <td>{estimates[TYPE.HISTORY].complete}</td>
                 <td>{estimates[TYPE.BOOKMARK].complete}</td>
             </tr>
-            <tr className={classNames(localStyles.importTableRow, localStyles.importTableRowSepar)}>
-                <td className={localStyles.importTableCellSepar}>~ Size on Hard Drive</td>
-                <td className={localStyles.importTableCellSepar}>{estimates[TYPE.HISTORY].sizeCompleted} MB</td>
-                <td className={localStyles.importTableCellSepar}>{estimates[TYPE.BOOKMARK].sizeCompleted} MB</td>
+            <tr
+                className={classNames(
+                    localStyles.importTableRow,
+                    localStyles.importTableRowSepar,
+                )}
+            >
+                <td className={localStyles.importTableCellSepar}>
+                    ~ Size on Hard Drive
+                </td>
+                <td className={localStyles.importTableCellSepar}>
+                    {estimates[TYPE.HISTORY].sizeCompleted} MB
+                </td>
+                <td className={localStyles.importTableCellSepar}>
+                    {estimates[TYPE.BOOKMARK].sizeCompleted} MB
+                </td>
             </tr>
 
             <tr className={localStyles.importTableRow}>
@@ -47,20 +63,25 @@ const EstimatesTable = ({ onAllowHistoryClick, onAllowBookmarksClick, estimates,
                 <td>{estimates[TYPE.HISTORY].timeRemaining}</td>
                 <td>{estimates[TYPE.BOOKMARK].timeRemaining}</td>
             </tr>
-            <tr className={classNames(localStyles.importTableRow, localStyles.actionTableRow)}>
+            <tr
+                className={classNames(
+                    localStyles.importTableRow,
+                    localStyles.actionTableRow,
+                )}
+            >
                 <td>Import?</td>
                 <td>
                     <input
-                        type='checkbox'
-                        name='history'
+                        type="checkbox"
+                        name="history"
                         onChange={onAllowHistoryClick}
                         checked={allowTypes[TYPE.HISTORY]}
                     />
                 </td>
                 <td>
                     <input
-                        type='checkbox'
-                        name='bookmarks'
+                        type="checkbox"
+                        name="bookmarks"
                         onChange={onAllowBookmarksClick}
                         checked={allowTypes[TYPE.BOOKMARK]}
                     />

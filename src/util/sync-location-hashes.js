@@ -5,10 +5,13 @@
 // - windows: an Array of Windows.
 // - initial (optional): the window whose hash is used to sync them initially.
 // Returns a function that disables synchronisation again.
-export default function syncLocationHashes(windows, {initial}) {
-    const listeners = windows.map(win => function syncHashListener() {
-        syncHashToOthers(win)
-    })
+export default function syncLocationHashes(windows, { initial }) {
+    const listeners = windows.map(
+        win =>
+            function syncHashListener() {
+                syncHashToOthers(win)
+            },
+    )
 
     function syncHashToOthers(win) {
         // Read the window's hash, dropping the '#' if present.

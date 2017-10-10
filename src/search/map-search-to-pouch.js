@@ -14,7 +14,7 @@ const simpleTimestampBinSearch = (timestamps = [], endDate) => {
     let curr = -1
 
     while (min <= max) {
-        curr = (min + max) / 2 | 0
+        curr = ((min + max) / 2) | 0
 
         if (timestamps[curr] < endDate) {
             min = curr + 1
@@ -25,9 +25,7 @@ const simpleTimestampBinSearch = (timestamps = [], endDate) => {
         }
     }
 
-    return (curr === 0 || timestamps[curr] < endDate)
-        ? curr
-        : curr - 1
+    return curr === 0 || timestamps[curr] < endDate ? curr : curr - 1
 }
 
 /**
@@ -51,16 +49,20 @@ const getLatestTime = (timestamps = [], { startDate, endDate }) => {
 * @param {Array<any>} results Array of search-idnex results.
 * @returns {any} Object with page ID keys and values containing either bookmark or visit or both docs.
 */
-const createResultIdsDict = timeFilters => reduce((acc, result) => ({
-    ...acc,
-    [result.document.id]: {
-        pageId: result.document.id,
-        visit: getLatestTime(result.document.visits, timeFilters),
-        bookmark: getLatestTime(result.document.bookmarks, timeFilters),
-        score: result.score,
-        displayType: result.document.type,
-    },
-}), {})
+const createResultIdsDict = timeFilters =>
+    reduce(
+        (acc, result) => ({
+            ...acc,
+            [result.document.id]: {
+                pageId: result.document.id,
+                visit: getLatestTime(result.document.visits, timeFilters),
+                bookmark: getLatestTime(result.document.bookmarks, timeFilters),
+                score: result.score,
+                displayType: result.document.type,
+            },
+        }),
+        {},
+    )
 
 const sortByScore = resultIdsDict => (docA, docB) =>
     resultIdsDict[docB._id].score - resultIdsDict[docA._id].score

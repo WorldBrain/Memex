@@ -5,20 +5,22 @@ import { isLoggable } from 'src/activity-logger'
 import { IMPORT_TYPE } from 'src/options/imports/constants'
 import importsConnectionHandler from './imports-connection-handler'
 
-
 // Constants
 export const importStateStorageKey = 'import_items'
 export const installTimeStorageKey = 'extension_install_time'
 
-
 // Imports local storage state interface
 export const getImportItems = async () => {
-    const data = (await browser.storage.local.get(importStateStorageKey))[importStateStorageKey]
+    const data = (await browser.storage.local.get(importStateStorageKey))[
+        importStateStorageKey
+    ]
     return !data ? [] : JSON.parse(data)
 }
 
 export const setImportItems = items =>
-    browser.storage.local.set({ [importStateStorageKey]: JSON.stringify(items) })
+    browser.storage.local.set({
+        [importStateStorageKey]: JSON.stringify(items),
+    })
 
 export const clearImportItems = () =>
     browser.storage.local.remove(importStateStorageKey)
@@ -43,7 +45,10 @@ export const removeImportItem = async url => {
  */
 async function checkWithExistingDocs() {
     const existingFullDocs = { ...pageDocsSelector, isStub: { $ne: true } }
-    const { docs: existingPageDocs } = await db.find({ selector: existingFullDocs, fields: ['url'] })
+    const { docs: existingPageDocs } = await db.find({
+        selector: existingFullDocs,
+        fields: ['url'],
+    })
     const existingUrls = existingPageDocs.map(({ url }) => url)
 
     return ({ url }) => !existingUrls.includes(url)
@@ -60,7 +65,8 @@ async function filterItemsByUrl(items, type) {
     const isNotBlacklisted = await checkWithBlacklist()
     const doesNotExist = await checkWithExistingDocs()
 
-    const isWorthRemembering = item => isLoggable(item) && isNotBlacklisted(item) && doesNotExist(item)
+    const isWorthRemembering = item =>
+        isLoggable(item) && isNotBlacklisted(item) && doesNotExist(item)
     return items.filter(isWorthRemembering)
 }
 
@@ -69,8 +75,15 @@ async function filterItemsByUrl(items, type) {
  * @param {number} [startTime=0] The time to start search from for browser history.
  * @returns {Array<browser.history.HistoryItem>} All history items in browser filtered by URL.
  */
-export async function getURLFilteredHistoryItems(maxResults = 9999999, startTime = 0) {
-    const historyItems = await browser.history.search({ text: '', maxResults, startTime })
+export async function getURLFilteredHistoryItems(
+    maxResults = 9999999,
+    startTime = 0,
+) {
+    const historyItems = await browser.history.search({
+        text: '',
+        maxResults,
+        startTime,
+    })
     return filterItemsByUrl(historyItems, IMPORT_TYPE.HISTORY)
 }
 

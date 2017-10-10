@@ -5,7 +5,9 @@ export const pageKeyPrefix = 'page/'
 
 export const convertPageDocId = docuri.route(`${pageKeyPrefix}:url`)
 
-export const pageDocsSelector = { _id: { $gte: pageKeyPrefix, $lte: `${pageKeyPrefix}\uffff` } }
+export const pageDocsSelector = {
+    _id: { $gte: pageKeyPrefix, $lte: `${pageKeyPrefix}\uffff` },
+}
 
 /**
  * Generates a page doc ID for use in the WorldBrain data model. Our page doc IDs are based

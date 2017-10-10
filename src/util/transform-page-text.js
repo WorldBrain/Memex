@@ -6,22 +6,21 @@ const allWhitespacesPattern = /\s+/g
 // const singleDigitNumbersPattern = /\b\d\b/g
 const nonWordsPattern = /[_\W]+/g
 const apostropheDashPattern = /[-'’]/g
-const allWordsWithDigits = /((\b(\d{6,})\b)|([a-z]+\d\w*|\w*\d[a-z]+))\s*/gi  // /\w*\d\w*/g
+const allWordsWithDigits = /((\b(\d{6,})\b)|([a-z]+\d\w*|\w*\d[a-z]+))\s*/gi // /\w*\d\w*/g
 
 const urlPattern = urlRegex()
 
-const removeUrls = (text = '') =>
-    text.replace(urlPattern, ' ')
+const removeUrls = (text = '') => text.replace(urlPattern, ' ')
 
-const removePunctuation = (text = '') =>
-    text.replace(nonWordsPattern, ' ')
+const removePunctuation = (text = '') => text.replace(nonWordsPattern, ' ')
 
 const cleanupWhitespaces = (text = '') =>
     text.replace(allWhitespacesPattern, ' ').trim()
 
 // Split strings on non-words, filtering out duplicates, before rejoining them with single space
 const removeDuplicateWords = (text = '') =>
-    text.split(/\W+/)
+    text
+        .split(/\W+/)
         .filter((word, i, allWords) => i === allWords.indexOf(word))
         .join(' ')
 

@@ -10,22 +10,23 @@ export default async function deleteDocsByUrl(url) {
     const opts = { include_docs: false }
     const { rows: pageRows } = await fetchDocsByType(pageKeyPrefix, opts)
     const { rows: visitRows } = await fetchDocsByType(visitKeyPrefix, opts)
-    const { rows: bookmarkRows } = await fetchDocsByType(bookmarkKeyPrefix, opts)
+    const { rows: bookmarkRows } = await fetchDocsByType(
+        bookmarkKeyPrefix,
+        opts,
+    )
 
     const allRows = [...pageRows, ...visitRows, ...bookmarkRows]
-    await Promise.all([
-        deleteDocs(allRows),
-        handleIndexDeletes(allRows),
-    ])
+    await Promise.all([deleteDocs(allRows), handleIndexDeletes(allRows)])
 }
 
-export const deleteDocs = docs => db.bulkDocs(docs.map(
-    row => ({
-        _id: row.id,
-        _rev: row.value.rev,
-        _deleted: true,
-    })
-))
+export const deleteDocs = docs =>
+    db.bulkDocs(
+        docs.map(row => ({
+            _id: row.id,
+            _rev: row.value.rev,
+            _deleted: true,
+        })),
+    )
 
 /**
  * Handles updating the index to remove pages and/or the visit timestamp.

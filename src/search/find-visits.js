@@ -4,12 +4,8 @@ import db, { normaliseFindResult, resultRowsById } from 'src/pouchdb'
 import { convertVisitDocId, visitKeyPrefix } from 'src/activity-logger'
 import { getPages } from './find-pages'
 
-
 // Nest the page docs into the visit docs, and return the latter.
-async function insertPagesIntoVisits({
-    visitsResult,
-    pagesResult,
-}) {
+async function insertPagesIntoVisits({ visitsResult, pagesResult }) {
     // If pages are not already passed to us, get them.
     if (pagesResult === undefined) {
         // Get the page of each visit.
@@ -21,23 +17,30 @@ async function insertPagesIntoVisits({
         })
         // Because the results are lined up, we can use a small optimisation and
         // return directly.
-        return update('rows', rows => rows.map(
-            (row, i) => update('doc.page', () => pagesResult.rows[i].doc)(row)
-        ))(visitsResult)
+        return update('rows', rows =>
+            rows.map((row, i) =>
+                update('doc.page', () => pagesResult.rows[i].doc)(row),
+            ),
+        )(visitsResult)
     }
     // Read each visit's doc.page._id and replace it with the specified page.
     const pagesById = resultRowsById(pagesResult)
-    return update('rows', rows => rows.map(
-        update('doc.page', page => pagesById[page._id].doc)
-    ))(visitsResult)
+    return update('rows', rows =>
+        rows.map(update('doc.page', page => pagesById[page._id].doc)),
+    )(visitsResult)
 }
-
 
 // Find visits in the given date range (and/or up to the given limit), sorted by
 // time (descending).
 // If pagesResult is given, only find visits to those pages.
 // XXX: If pages are redirected, only visits to the source page are found.
-export async function findVisits({startDate, endDate, limit, pagesResult, skipUntil}) {
+export async function findVisits({
+    startDate,
+    endDate,
+    limit,
+    pagesResult,
+    skipUntil,
+}) {
     let selector = {
         // Constrain by id (like with startkey/endkey), both to get only the
         // visit docs, and (if needed) to filter the visits after/before a
@@ -45,12 +48,14 @@ export async function findVisits({startDate, endDate, limit, pagesResult, skipUn
         // works while they are of the same length, so we should fix this by
         // 2286).
         _id: {
-            $gte: startDate !== undefined
-                ? convertVisitDocId({timestamp: startDate})
-                : visitKeyPrefix,
-            $lte: endDate !== undefined
-                ? convertVisitDocId({timestamp: endDate})
-                : `${visitKeyPrefix}\uffff`,
+            $gte:
+                startDate !== undefined
+                    ? convertVisitDocId({ timestamp: startDate })
+                    : visitKeyPrefix,
+            $lte:
+                endDate !== undefined
+                    ? convertVisitDocId({ timestamp: endDate })
+                    : `${visitKeyPrefix}\uffff`,
             $lt: skipUntil,
         },
     }
@@ -60,20 +65,20 @@ export async function findVisits({startDate, endDate, limit, pagesResult, skipUn
         const pageIds = pagesResult.rows.map(row => row.id)
         selector = {
             ...selector,
-            'page._id': {$in: pageIds},
+            'page._id': { $in: pageIds },
         }
     }
 
     let findResult = await db.find({
         selector,
         // Sort them by time, newest first
-        sort: [{'_id': 'desc'}],
+        sort: [{ _id: 'desc' }],
         // limit, // XXX pouchdb-find seems to mess up when passing a limit...
     })
     // ...so we apply the limit ourselves.
     findResult = update('docs', docs => docs.slice(0, limit))(findResult)
 
     let visitsResult = normaliseFindResult(findResult)
-    visitsResult = await insertPagesIntoVisits({visitsResult, pagesResult})
+    visitsResult = await insertPagesIntoVisits({ visitsResult, pagesResult })
     return visitsResult
 }
