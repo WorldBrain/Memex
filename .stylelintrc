@@ -1,7 +1,7 @@
 {
     "extends": "stylelint-config-standard",
     "rules": {
-        "indentation": 4,
+        "indentation": null,
         "shorthand-property-no-redundant-values": null,
         "font-family-name-quotes": "always-unless-keyword",
         "function-url-quotes": "always",
@@ -16,6 +16,8 @@
         "declaration-no-important": true,
         "declaration-empty-line-before": null,
         "length-zero-no-unit": null,
-        "function-url-scheme-whitelist": ['data']
+        "function-url-scheme-whitelist": ['data'],
+        "selector-descendant-combinator-no-non-space": null,
+        "selector-combinator-space-before": null
     }
 }
