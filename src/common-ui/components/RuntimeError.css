@@ -1,5 +1,38 @@
 .main {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: center;
+    align-items: center;
+    height: fill-available;
+    font-size: 20px;
+    overflow: scroll;
+    background-color: #f4f4f4;
+}
+
+.reportBtn {
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.8em;
+    line-height: 1.5em;
+    background: linear-gradient(-180deg, #2dba4e 0%, #28a745 90%);
+    border-radius: 0.15em;
+    border: 1px solid #30b04d;
+    padding: 6px 12px;
+    color: #fff;
+}
+
+.error {
+    width: 75%;
+}
+
+.errorHeading {
+    font-size: 1.3em;
+}
+
+.errorMessage {
+    font-size: 0.9em;
+    padding: 25px;
+    overflow: scroll;
+    border: 1px solid #000;
+    color: #717171;
 }

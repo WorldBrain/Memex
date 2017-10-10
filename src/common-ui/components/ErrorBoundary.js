@@ -11,17 +11,18 @@ class ErrorBoundary extends Component {
     }
 
     state = {
-        hasError: false,
+        error: undefined,
     }
 
     componentDidCatch(error, info) {
-        this.setState(state => ({ ...state, hasError: true }))
+        this.setState(state => ({ ...state, error }))
     }
 
     render() {
         const { component: ErrorView, children } = this.props
+        const { error } = this.state
 
-        return this.state.hasError ? <ErrorView /> : children
+        return error ? <ErrorView stack={error.stack} message={error.message} /> : children
     }
 }
 
