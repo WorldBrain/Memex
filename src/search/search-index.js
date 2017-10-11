@@ -2,6 +2,10 @@
 import initSearchIndex from 'search-index'
 import stream from 'stream'
 import stopword from 'stopword'
+import leveljs from 'level-js'
+import uniq from 'lodash/uniq'
+import after from 'lodash/after'
+import flattenDeep from 'lodash/flattenDeep'
 
 import pipeline from './search-index-pipeline'
 import { convertMetaDocId } from 'src/activity-logger'
@@ -114,22 +118,30 @@ const transformPageAndMetaDocs = ({
     }
 }
 
+async function initRawIndex(cb) {
+    const db = leveljs('worldbrain-terms')
+    db.open(err => {
+        if (err) return cb(err)
+        return cb(null, db)
+    })
+}
+
 // Wraps instance creation in a Promise for use in async interface methods
-const indexP = new Promise((...args) =>
-    initSearchIndex(indexOpts, standardResponse(...args)),
-)
+// const indexP = new Promise((...args) => initSearchIndex(indexOpts, standardResponse(...args)))
+const indexP = new Promise((...args) => initRawIndex(standardResponse(...args)))
 
 /**
  * @param doc The doc to queue up for adding into the index.
  * @returns Boolean denoting that the add was successful (else error thrown).
  */
 async function addConcurrent(doc) {
-    const index = await indexP
     const input = [doc]
+    console.log('addConcurrent', doc)
 
-    return new Promise((...args) =>
-        index.concurrentAdd(indexOpts, input, standardResponse(...args)),
-    )
+    return new Promise((...args) => {
+        const done = after(input.length, standardResponse(...args))
+        input.forEach(page => addPageRaw(page, done))
+    })
 }
 
 /**
@@ -148,8 +160,11 @@ export async function addPageConcurrent({
         visitDocs,
         bookmarkDocs,
     })
+    console.log('adding page concurrent', indexDoc)
 
-    return await addConcurrent(indexDoc)
+    return await addPageRaw(indexDoc)
+
+    // return await addConcurrent(indexDoc)
 }
 
 /**
@@ -166,20 +181,68 @@ export async function addPage({ pageDoc, visitDocs = [], bookmarkDocs = [] }) {
         visitDocs,
         bookmarkDocs,
     })
+    console.log('adding page', indexDoc)
 
-    return new Promise((resolve, reject) => {
-        // Set up add pipeline
-        const inputStream = new stream.Readable({ objectMode: true })
-        inputStream
-            .pipe(index.defaultPipeline())
-            .pipe(index.add())
-            .on('finish', resolve)
-            .on('error', reject)
+    return new Promise((...args) =>
+        addPageRaw(indexDoc, standardResponse(...args)),
+    )
+    //
+    // return new Promise((resolve, reject) => {
+    //     // Set up add pipeline
+    //     const inputStream = new stream.Readable({ objectMode: true })
+    //     inputStream
+    //         .pipe(index.defaultPipeline())
+    //         .pipe(index.add())
+    //         .on('finish', resolve)
+    //         .on('error', reject)
+    //
+    //     // Push index doc onto stream + null to signify end-of-stream
+    //     inputStream.push(indexDoc)
+    //     inputStream.push(null)
+    // })
+}
 
-        // Push index doc onto stream + null to signify end-of-stream
-        inputStream.push(indexDoc)
-        inputStream.push(null)
-    })
+function getTerms(content) {
+    return uniq(content.split(' ').map(term => term.toLowerCase()))
+}
+
+async function addPageRaw(indexDoc) {
+    console.log('ADDING PAGE RAW')
+    const index = await indexP
+    const id = indexDoc.id
+    if (!indexDoc.content && !indexDoc.title) {
+        return new Promise.resolve()
+    }
+
+    // extract terms from the document and add the page ID
+    // to the array for each term
+    const terms = getTerms(indexDoc.content + ' ' + indexDoc.title)
+
+    const addterms = (resolve, reject) => {
+        try {
+            const done = after(terms.length + 1, resolve)
+            index.put(id, JSON.stringify(indexDoc), done)
+
+            terms.forEach(term => {
+                index.get(term, (err, value) => {
+                    let newvalue
+                    if (!value || err) {
+                        newvalue = [id]
+                    } else {
+                        const docids = JSON.parse(value)
+                        docids.push(id)
+                        newvalue = uniq(docids)
+                    }
+
+                    index.put(term, JSON.stringify(newvalue), done)
+                })
+            })
+        } catch (err) {
+            reject(err)
+        }
+    }
+
+    return new Promise(addterms)
 }
 
 /**
@@ -266,13 +329,14 @@ export async function get(ids) {
     const isSingle = typeof ids === 'string'
     const found = []
 
-    return new Promise((resolve, reject) =>
+    return new Promise((resolve, reject) => {
+        return resolve() // TODO: remove
         index
             .get(isSingle ? [ids] : ids)
             .on('data', datum => found.push(datum))
             .on('error', reject)
-            .on('end', () => resolve(isSingle ? found[0] : found)),
-    )
+            .on('end', () => resolve(isSingle ? found[0] : found))
+    })
 }
 
 /**
@@ -295,9 +359,9 @@ export const instance = () => indexP
 export async function count(query) {
     const index = await indexP
 
-    return new Promise((...args) =>
-        index.totalHits(query, standardResponse(...args)),
-    )
+    // return Promise.resolve(50)
+
+    // return new Promise((...args) => index.totalHits(query, standardResponse(...args)))
 }
 
 // Batches stream results to be all returned in Promise resolution.
@@ -305,47 +369,82 @@ export async function search(query) {
     const index = await indexP
     const data = []
 
-    return new Promise((resolve, reject) =>
-        index
-            .search(query)
-            .on('data', datum => data.push(datum))
-            .on('error', reject)
-            .on('end', () => resolve(data)),
-    )
+    console.log('QUERY', query)
+    const terms = query.query[0]['AND'].content
+
+    const dosearch = (resolve, reject) => {
+        const done = after(terms.length, () => {
+            // TODO: to start scoring, count occurrences insted of doing uniq
+            const results = uniq(flattenDeep(data))
+
+            console.log('RESULTS', results)
+
+            const fulldocs = []
+            const fulldocsdone = after(results.length, () => resolve(fulldocs))
+
+            results.forEach(page => {
+                index.get(page, (err, value) => {
+                    if (err) {
+                        console.log('could not find page', page)
+                        return reject(err)
+                    }
+
+                    const fulldoc = JSON.parse(value)
+                    fulldocs.push({
+                        id: fulldoc.id,
+                        document: fulldoc,
+                        score: 1.0,
+                    })
+                    fulldocsdone()
+                })
+            })
+        })
+
+        terms.forEach(term => {
+            index.get(term, (err, value) => {
+                if (err) return done()
+
+                const docs = JSON.parse(value)
+                data.push(docs)
+
+                done()
+            })
+        })
+    }
+
+    return new Promise(dosearch)
 }
 
-export async function categorize(query) {
-    const index = await indexP
-    const data = []
+// All commented out functions below are unused
 
-    return new Promise((resolve, reject) =>
-        index
-            .categorize(query)
-            .on('data', datum => data.push(datum))
-            .on('error', reject)
-            .on('end', () => resolve(data)),
-    )
-}
-
-export async function buckets(query) {
-    const index = await indexP
-    const data = []
-
-    return new Promise((resolve, reject) =>
-        index
-            .buckets(query)
-            .on('data', datum => data.push(datum))
-            .on('error', reject)
-            .on('end', () => resolve(data)),
-    )
-}
-
-// Resolves to the stream from search-index's `.search`.
-export async function searchStream(query) {
-    const index = await indexP
-
-    return index.search(query)
-}
+// export async function categorize(query) {
+//     const index = await indexP
+//     const data = []
+//
+//     return new Promise((resolve, reject) =>
+//         index.categorize(query)
+//             .on('data', datum => data.push(datum))
+//             .on('error', reject)
+//             .on('end', () => resolve(data)))
+// }
+//
+// export async function buckets(query) {
+//     const index = await indexP
+//     const data = []
+//
+//     return new Promise((resolve, reject) =>
+//         index.buckets(query)
+//             .on('data', datum => data.push(datum))
+//             .on('error', reject)
+//             .on('end', () => resolve(data)))
+// }
+//
+// // Resolves to the stream from search-index's `.search`.
+// export async function searchStream(query) {
+//     const index = await indexP
+//
+//     return index.search(query)
+// }
 
 export async function size() {
     const index = await indexP
