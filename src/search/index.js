@@ -40,6 +40,7 @@ export default async function indexSearch({
     }
 
     // Get index results, filtering out any unexpectedly structured results
+    console.log(indexQuery)
     let results = await index.search(indexQuery)
     results = filterBadlyStructuredResults(results)
 
@@ -53,8 +54,12 @@ export default async function indexSearch({
         }
     }
 
+    console.log('YAY non-zero number of results')
+
     // Match the index results to data docs available in Pouch, consolidating meta docs
     const docs = await mapResultsToPouchDocs(results, { startDate, endDate })
+
+    console.log('DOCS from results', docs)
 
     return {
         docs,
