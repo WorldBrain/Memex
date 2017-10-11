@@ -1,7 +1,7 @@
 import urlRegex from 'url-regex'
 
 import 'src/activity-logger/background'
-import 'src/blacklist/background'
+import 'src/page-storage/background'
 import 'src/search/background'
 import 'src/bookmarks/background'
 import 'src/omnibar'
@@ -10,6 +10,7 @@ import { generatePageDocId } from 'src/page-storage'
 import { generateVisitDocId } from 'src/activity-logger'
 import { generateBookmarkDocId } from 'src/bookmarks'
 import { defaultEntries, addToBlacklist } from 'src/blacklist'
+import index from 'src/search/search-index'
 
 export const dataConvertTimeKey = 'data-conversion-timestamp'
 export const OVERVIEW_URL = '/overview/overview.html'
@@ -18,6 +19,7 @@ export const OVERVIEW_URL = '/overview/overview.html'
 window.generatePageDocId = generatePageDocId
 window.generateVisitDocId = generateVisitDocId
 window.generateBookmarkDocId = generateBookmarkDocId
+window.index = index
 
 async function openOverview() {
     const [currentTab] = await browser.tabs.query({ active: true })

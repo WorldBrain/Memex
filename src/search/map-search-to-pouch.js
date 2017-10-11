@@ -80,8 +80,6 @@ export default async function mapResultsToPouchDocs(results, timeFilters) {
     // Convert results to dictionary of page IDs to related meta IDs
     const resultIdsDict = createResultIdsDict(timeFilters)(results)
 
-    console.log('ResultIDsDict', resultIdsDict)
-
     // Format IDs of docs needed to be immediately fetched from Pouch
     const bulkGetInput = results.map(result => ({ id: result.document.id }))
 

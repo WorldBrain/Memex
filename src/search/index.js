@@ -1,5 +1,5 @@
 import QueryBuilder from './query-builder'
-import * as index from './search-index'
+import { search, count } from './search-index/search'
 import mapResultsToPouchDocs from './map-search-to-pouch'
 
 /**
@@ -10,7 +10,7 @@ import mapResultsToPouchDocs from './map-search-to-pouch'
 const filterBadlyStructuredResults = results =>
     results.filter(result => result.document != null)
 
-export default async function indexSearch({
+async function indexSearch({
     query,
     startDate,
     endDate,
@@ -41,7 +41,7 @@ export default async function indexSearch({
 
     // Get index results, filtering out any unexpectedly structured results
     console.log(indexQuery)
-    let results = await index.search(indexQuery)
+    let results = await search(indexQuery)
     results = filterBadlyStructuredResults(results)
 
     // Short-circuit if no results
@@ -54,7 +54,7 @@ export default async function indexSearch({
         }
     }
 
-    console.log('YAY non-zero number of results')
+    console.log('YAY non-zero number of results', results)
 
     // Match the index results to data docs available in Pouch, consolidating meta docs
     const docs = await mapResultsToPouchDocs(results, { startDate, endDate })
@@ -64,7 +64,18 @@ export default async function indexSearch({
     return {
         docs,
         resultsExhausted: false,
-        totalCount: getTotalCount ? await index.count(indexQuery) : undefined,
+        totalCount: getTotalCount ? await count(indexQuery) : undefined,
         isBadTerm: false,
     }
 }
+
+// Export index interface
+export {
+    addPage,
+    addPageConcurrent,
+    addVisit,
+    addBookmark,
+} from './search-index/add'
+export { initSingleLookup } from './search-index/util'
+export { removeVisit, removeBookmark, default as del } from './search-index/del'
+export { indexSearch as search }

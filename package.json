@@ -26,6 +26,7 @@
     ]
   },
   "dependencies": {
+    "abstract-leveldown": "^2.7.2",
     "babel-runtime": "^6.23.0",
     "blob-util": "^1.2.1",
     "cheerio": "^1.0.0-rc.2",
@@ -38,6 +39,7 @@
     "freeze-dry": "^0.1.0",
     "history": "^4.6.3",
     "level-js": "^2.2.4",
+    "levelup": "^2.0.0",
     "lodash": "^4.17.4",
     "moment": "^2.18.1",
     "normalize-url": "^1.9.1",

@@ -1,7 +1,7 @@
 import { dataURLToBlob } from 'blob-util'
 
 import fetchPageData from 'src/page-analysis/background/fetch-page-data'
-import * as index from 'src/search/search-index'
+import * as index from 'src/search'
 import db from 'src/pouchdb'
 import { transformToBookmarkDoc } from 'src/imports'
 import { generatePageDocId } from 'src/page-storage'

@@ -1,5 +1,5 @@
 import db, { fetchDocTypesByUrl } from 'src/pouchdb'
-import * as index from 'src/search/search-index'
+import { del } from 'src/search'
 import { pageKeyPrefix } from 'src/page-storage'
 import { visitKeyPrefix } from 'src/activity-logger'
 import { bookmarkKeyPrefix } from 'src/bookmarks'
@@ -16,7 +16,7 @@ export default async function deleteDocsByUrl(url) {
     )
 
     const allRows = [...pageRows, ...visitRows, ...bookmarkRows]
-    await Promise.all([deleteDocs(allRows), handleIndexDeletes(allRows)])
+    await Promise.all([deleteDocs(allRows), handleIndexDeletes(pageRows)])
 }
 
 export const deleteDocs = docs =>
@@ -31,25 +31,10 @@ export const deleteDocs = docs =>
 /**
  * Handles updating the index to remove pages and/or the visit timestamp.
  *
- * @param {any} [docsToDelete=[]] Array of docs that will be deleted from Pouch. Need to delete
- *  the page docs in here from the index.
- * @param {any} metaDoc The visit doc being deleted from Pouch. If this is not associated
- *  with any of the pages in `docsToDelete`, the corresponding index doc will be updated.
+ * @param {any} docsToDelete Array of Pouch page rows that will be deleted from the index.
  */
-export async function handleIndexDeletes(docsToDelete = [], metaDoc) {
-    // Grab all page docs IDs (index indexes by page doc)
-    const indexDocIds = docsToDelete
-        .filter(doc => doc.id.startsWith('page/')) // Filter out visits/bookmarks
-        .map(doc => doc.id)
+async function handleIndexDeletes(rowsToDelete) {
+    const indexDocIds = rowsToDelete.map(row => row.id)
 
-    // If meta doc not already in pages to delete, delete it
-    if (metaDoc && !indexDocIds.includes(metaDoc.page._id)) {
-        if (metaDoc._id.startsWith('visit/')) {
-            await index.removeVisit(metaDoc)
-        } else {
-            await index.removeBookmark(metaDoc)
-        }
-    }
-
-    await index.del(indexDocIds)
+    await del(indexDocIds)
 }

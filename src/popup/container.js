@@ -39,7 +39,7 @@ class PopupContainer extends Component {
         }
 
         this.toggleLoggingPause = remoteFunction('toggleLoggingPause')
-        this.cleanupBlacklist = remoteFunction('cleanupBlacklist')
+        this.cleanupBlacklist = remoteFunction('deleteDocsByUrl')
 
         this.onSearchChange = this.onSearchChange.bind(this)
         this.onPauseChange = this.onPauseChange.bind(this)
