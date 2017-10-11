@@ -1,6 +1,5 @@
 import assocPath from 'lodash/fp/assocPath'
 
-
 // Set a limit to not hang forever if something is more fundamentally broken.
 const MAX_ATTEMPTS = 9999
 
@@ -27,10 +26,10 @@ export default updateDoc
 
 // A shorthand for adding/updating an attachment to an existing document.
 export async function setAttachment(db, docId, attachmentId, blob) {
-    await updateDoc(db, docId,
-        doc => assocPath(
-            ['_attachments', attachmentId],
-            {content_type: blob.type, data: blob}
-        )(doc)
+    await updateDoc(db, docId, doc =>
+        assocPath(['_attachments', attachmentId], {
+            content_type: blob.type,
+            data: blob,
+        })(doc),
     )
 }

@@ -15,7 +15,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // Set up the Redux store
-const store = configureStore({ReduxDevTools})
+const store = configureStore({ ReduxDevTools })
 
 store.dispatch(overview.actions.init())
 
@@ -29,5 +29,5 @@ ReactDOM.render(
             {ReduxDevTools && <ReduxDevTools />}
         </ErrorBoundary>
     </Provider>,
-    document.getElementById('app')
+    document.getElementById('app'),
 )

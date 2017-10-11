@@ -4,16 +4,21 @@ import PropTypes from 'prop-types'
 import styles from './BlacklistInputRow.css'
 
 const BlacklistInputRow = ({
-    value, isClearBtnDisabled, isSaveBtnDisabled, onAdd,
-    handleKeyPress, onInputChange, onInputClear, inputRef,
+    value,
+    isClearBtnDisabled,
+    isSaveBtnDisabled,
+    onAdd,
+    handleKeyPress,
+    onInputChange,
+    onInputClear,
+    inputRef,
 }) => (
     <div className={styles.newSiteInputRow}>
-
         <input
             value={value}
             className={styles.input}
-            type='text'
-            placeholder='Enter any text or domain or path to ignore matching URLs'
+            type="text"
+            placeholder="Enter any text or domain or path to ignore matching URLs"
             onChange={onInputChange}
             onKeyUp={handleKeyPress}
             ref={inputRef}
@@ -24,7 +29,11 @@ const BlacklistInputRow = ({
                             <i className='material-icons'>backspace</i>
                         </button> */}
 
-            <button onClick={onAdd} className={styles.blacklistButton} disabled={isSaveBtnDisabled}>
+            <button
+                onClick={onAdd}
+                className={styles.blacklistButton}
+                disabled={isSaveBtnDisabled}
+            >
                 {/* <i className='material-icons'>save</i> */}
                 ADD TO BLACKLIST
             </button>
@@ -32,7 +41,7 @@ const BlacklistInputRow = ({
     </div>
 )
 
-export const propTypes = BlacklistInputRow.propTypes = {
+export const propTypes = (BlacklistInputRow.propTypes = {
     // State
     value: PropTypes.string.isRequired,
     isClearBtnDisabled: PropTypes.bool.isRequired,
@@ -46,6 +55,6 @@ export const propTypes = BlacklistInputRow.propTypes = {
 
     // Misc
     inputRef: PropTypes.func.isRequired,
-}
+})
 
 export default BlacklistInputRow

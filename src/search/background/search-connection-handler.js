@@ -10,10 +10,18 @@ const connectSearch = port => async ({ searchParams, overwrite }) => {
     try {
         const searchResult = await indexSearch(searchParams)
 
-        port.postMessage({ cmd: constants.CMDS.RESULTS, searchResult, overwrite })
+        port.postMessage({
+            cmd: constants.CMDS.RESULTS,
+            searchResult,
+            overwrite,
+        })
     } catch (error) {
         console.error(error)
-        port.postMessage({ cmd: constants.CMDS.ERROR, error: error.message, query: searchParams.query })
+        port.postMessage({
+            cmd: constants.CMDS.ERROR,
+            error: error.message,
+            query: searchParams.query,
+        })
     }
 }
 
@@ -26,8 +34,10 @@ export default async function searchConnectionHandler(port) {
 
     port.onMessage.addListener(({ cmd, ...payload }) => {
         switch (cmd) {
-            case constants.CMDS.SEARCH: return search(payload)
-            default: return console.error(`unknown search command: ${cmd}`)
+            case constants.CMDS.SEARCH:
+                return search(payload)
+            default:
+                return console.error(`unknown search command: ${cmd}`)
         }
     })
 }

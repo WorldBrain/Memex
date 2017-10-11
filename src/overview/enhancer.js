@@ -27,8 +27,6 @@ const locationSync = ReduxQuerySync.enhancer({
     },
 })
 
-const enhancer = compose(
-    locationSync,
-)
+const enhancer = compose(locationSync)
 
 export default enhancer

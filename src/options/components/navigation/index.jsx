@@ -19,16 +19,22 @@ const Navigation = ({ currentLocation, routes }) => {
             })
 
             return (
-                <li className={navClasses} key={idx} >
+                <li className={navClasses} key={idx}>
                     <i className={navIcon}>{route.icon}</i>
-                    {
-                        route.component === 'faq'
-                        && <a className={navClasses} href={route.pathname} target='_blank'>{route.name}</a>
-                    }
-                    {
-                        route.component !== 'faq'
-                        && <Link className={navClasses} to={route.pathname}>{route.name}</Link>
-                    }
+                    {route.component === 'faq' && (
+                        <a
+                            className={navClasses}
+                            href={route.pathname}
+                            target="_blank"
+                        >
+                            {route.name}
+                        </a>
+                    )}
+                    {route.component !== 'faq' && (
+                        <Link className={navClasses} to={route.pathname}>
+                            {route.name}
+                        </Link>
+                    )}
                 </li>
             )
         })
@@ -41,14 +47,9 @@ const Navigation = ({ currentLocation, routes }) => {
     return (
         <nav className={styles.root}>
             <div className={styles.icon_div}>
-                <img
-                    src='/img/worldbrain-logo.png'
-                    className={styles.icon}
-                />
+                <img src="/img/worldbrain-logo.png" className={styles.icon} />
             </div>
-            <ul className={styles.nav}>
-                { buildRoutes() }
-            </ul>
+            <ul className={styles.nav}>{buildRoutes()}</ul>
         </nav>
     )
 }

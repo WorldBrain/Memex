@@ -9,33 +9,21 @@ class AcknowledgmentContainer extends Component {
     constructor(props) {
         super(props)
         this.fetchContributors = this.fetchContributors.bind(this)
-        this.fetchFinancialContributors = this.fetchFinancialContributors.bind(this)
+        this.fetchFinancialContributors = this.fetchFinancialContributors.bind(
+            this,
+        )
     }
 
     fetchContributors() {
-        return (
-            contributors.map((item, id) => {
-                return (
-                    <Contributor
-                        key={id}
-                        contributor={item}
-                    />
-                )
-            })
-        )
+        return contributors.map((item, id) => {
+            return <Contributor key={id} contributor={item} />
+        })
     }
 
     fetchFinancialContributors() {
-        return (
-            financialContributors.map((item, id) => {
-                return (
-                    <Contributor
-                        key={id}
-                        contributor={item}
-                    />
-                )
-            })
-        )
+        return financialContributors.map((item, id) => {
+            return <Contributor key={id} contributor={item} />
+        })
     }
 
     render() {
@@ -47,7 +35,9 @@ class AcknowledgmentContainer extends Component {
                         {this.fetchContributors()}
                     </div>
                 </div>
-                <div className={localStyles.col_title}>FINANCIAL COLLABORATORS</div>
+                <div className={localStyles.col_title}>
+                    FINANCIAL COLLABORATORS
+                </div>
                 <div className={localStyles.acknowledgement}>
                     <div className={localStyles.ul}>
                         {this.fetchFinancialContributors()}
@@ -57,6 +47,5 @@ class AcknowledgmentContainer extends Component {
         )
     }
 }
-
 
 export default AcknowledgmentContainer

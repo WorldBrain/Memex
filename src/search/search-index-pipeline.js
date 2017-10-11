@@ -26,9 +26,11 @@ const transformUrl = url => {
     const { 1: domain, 4: remainingUrl } = matchResult
 
     // Fallback to normalized URL if match groups don't exist
-    return { remainingUrl: remainingUrl || normalized, domain: domain || normalized }
+    return {
+        remainingUrl: remainingUrl || normalized,
+        domain: domain || normalized,
+    }
 }
-
 
 /**
  * Function version of "pipeline" logic. Applies transformation logic
@@ -48,7 +50,15 @@ export default function pipeline({ _id: id, content, url }) {
     }
 
     // Run the searchable content through our text transformations, attempting to discard useless data.
-    const { text: transformedContent } = transformPageText({ text: content.fullText })
+    const { text: transformedContent } = transformPageText({
+        text: content.fullText,
+    })
 
-    return { id, content: transformedContent, url: remainingUrl, domain, title: content.title }
+    return {
+        id,
+        content: transformedContent,
+        url: remainingUrl,
+        domain,
+        title: content.title,
+    }
 }

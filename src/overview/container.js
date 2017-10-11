@@ -31,7 +31,9 @@ class OverviewContainer extends Component {
         }
     }
 
-    setInputRef = element => { this.inputQueryEl = element }
+    setInputRef = element => {
+        this.inputQueryEl = element
+    }
 
     handleInputChange = event => {
         const input = event.target
@@ -40,26 +42,35 @@ class OverviewContainer extends Component {
     }
 
     renderResultItems() {
-        const { searchResults, onBottomReached, isLoading, needsWaypoint } = this.props
+        const {
+            searchResults,
+            onBottomReached,
+            isLoading,
+            needsWaypoint,
+        } = this.props
 
         const resultItems = searchResults.map(doc => (
             <li key={doc._id}>
                 <PageResultItem
                     doc={doc}
                     sizeInMB={doc.freezeDrySize}
-                    isBookmark={doc.displayType === constants.RESULT_TYPES.BOOKMARK}
+                    isBookmark={
+                        doc.displayType === constants.RESULT_TYPES.BOOKMARK
+                    }
                 />
             </li>
         ))
 
         // Insert waypoint at the end of results to trigger loading new items when scrolling down
         if (needsWaypoint) {
-            resultItems.push(<Waypoint onEnter={onBottomReached} key='waypoint' />)
+            resultItems.push(
+                <Waypoint onEnter={onBottomReached} key="waypoint" />,
+            )
         }
 
         // Add loading spinner to the list end, if loading (may change this)
         if (isLoading) {
-            resultItems.push(<LoadingIndicator key='loading' />)
+            resultItems.push(<LoadingIndicator key="loading" />)
         }
 
         return resultItems
@@ -69,7 +80,8 @@ class OverviewContainer extends Component {
         if (this.props.isBadTerm) {
             return (
                 <ResultsMessage>
-                    Your search terms are very vague, please try and use more unique language
+                    Your search terms are very vague, please try and use more
+                    unique language
                 </ResultsMessage>
             )
         }
@@ -84,7 +96,11 @@ class OverviewContainer extends Component {
 
     render() {
         return (
-            <Overview {...this.props} setInputRef={this.setInputRef} onInputChange={this.handleInputChange}>
+            <Overview
+                {...this.props}
+                setInputRef={this.setInputRef}
+                onInputChange={this.handleInputChange}
+            >
                 {this.renderResults()}
             </Overview>
         )
@@ -101,13 +117,17 @@ const mapStateToProps = state => ({
     needsWaypoint: selectors.needsPagWaypoint(state),
 })
 
-const mapDispatchToProps = dispatch => bindActionCreators({
-    onInputChange: actions.setQuery,
-    onStartDateChange: actions.setStartDate,
-    onEndDateChange: actions.setEndDate,
-    onBottomReached: actions.getMoreResults,
-    hideDeleteConfirm: actions.hideDeleteConfirm,
-    deleteDocs: actions.deleteDocs,
-}, dispatch)
+const mapDispatchToProps = dispatch =>
+    bindActionCreators(
+        {
+            onInputChange: actions.setQuery,
+            onStartDateChange: actions.setStartDate,
+            onEndDateChange: actions.setEndDate,
+            onBottomReached: actions.getMoreResults,
+            hideDeleteConfirm: actions.hideDeleteConfirm,
+            deleteDocs: actions.deleteDocs,
+        },
+        dispatch,
+    )
 
 export default connect(mapStateToProps, mapDispatchToProps)(OverviewContainer)

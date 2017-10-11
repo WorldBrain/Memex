@@ -9,7 +9,6 @@ import indexSearch from 'src/search'
 import extractTimeFiltersFromQuery from 'src/util/nlp-time-filter'
 import { OVERVIEW_URL } from 'src/background'
 
-
 // Read which browser we are running in.
 let browserName
 ;(async () => {
@@ -26,12 +25,14 @@ function formatTime(timestamp, showTime) {
     const inLastSevenDays = moment().diff(m, 'days') <= 7
 
     if (showTime) {
-        return inLastSevenDays ? `🕒 ${m.format('HH:mm a ddd')}` : `🕒 ${m.format('HH:mm a D/M/YYYY')}`
+        return inLastSevenDays
+            ? `🕒 ${m.format('HH:mm a ddd')}`
+            : `🕒 ${m.format('HH:mm a D/M/YYYY')}`
     }
     return inLastSevenDays ? m.format('ddd') : m.format('D/M/YYYY')
 }
 
-function setOmniboxMessage (text) {
+function setOmniboxMessage(text) {
     browser.omnibox.setDefaultSuggestion({
         description: text,
     })
@@ -44,7 +45,10 @@ const pageToSuggestion = timeFilterApplied => doc => {
 
     return {
         content: doc.url,
-        description: browserName === 'Firefox' ? `${url} ${title} - ${time}` : `<url>${url}</url> <dim>${title}</dim> - ${time}`,
+        description:
+            browserName === 'Firefox'
+                ? `${url} ${title} - ${time}`
+                : `<url>${url}</url> <dim>${title}</dim> - ${time}`,
     }
 }
 
@@ -75,18 +79,30 @@ async function makeSuggestion(query, suggest) {
 
     // A subsequent search could have already started and finished while we
     // were busy searching, so we ensure we do not overwrite its results.
-    if (currentQuery !== query && latestResolvedQuery !== queryForOldSuggestions) { return }
+    if (
+        currentQuery !== query &&
+        latestResolvedQuery !== queryForOldSuggestions
+    ) {
+        return
+    }
 
     if (searchResults.isBadTerm === true) {
-        setOmniboxMessage('Your search terms are very vague, please try and use more unique language')
+        setOmniboxMessage(
+            'Your search terms are very vague, please try and use more unique language',
+        )
     } else if (searchResults.docs.length === 0) {
-        setOmniboxMessage('No results found in your memory. (press enter to search deeper')
+        setOmniboxMessage(
+            'No results found in your memory. (press enter to search deeper',
+        )
     } else {
-        setOmniboxMessage(`Found these ${searchResults.totalCount} pages in your memory: (press enter to search deeper)`)
+        setOmniboxMessage(
+            `Found these ${searchResults.totalCount} pages in your memory: (press enter to search deeper)`,
+        )
     }
 
     const suggestions = searchResults.docs.map(
-        pageToSuggestion(queryFilters.startDate || queryFilters.endDate))
+        pageToSuggestion(queryFilters.startDate || queryFilters.endDate),
+    )
 
     suggest(suggestions)
     latestResolvedQuery = query

@@ -11,21 +11,33 @@ import './datepicker-overrides.css'
 
 class DateRangeSelection extends Component {
     state = {
-        startDateText: this.props.startDate ? moment(this.props.startDate).format(FORMAT) : '',
-        endDateText: this.props.endDate ? moment(this.props.endDate).format(FORMAT) : '',
+        startDateText: this.props.startDate
+            ? moment(this.props.startDate).format(FORMAT)
+            : '',
+        endDateText: this.props.endDate
+            ? moment(this.props.endDate).format(FORMAT)
+            : '',
     }
 
     componentDidMount() {
         // Override event handlers within the `react-datepicker` input elements, allowing us to
         //  update state based on keydown
-        this.startDatePicker.input.addEventListener('keydown',
-            this.handleKeydown({ isStartDate: true }))
-        this.endDatePicker.input.addEventListener('keydown',
-            this.handleKeydown({ isStartDate: false }))
+        this.startDatePicker.input.addEventListener(
+            'keydown',
+            this.handleKeydown({ isStartDate: true }),
+        )
+        this.endDatePicker.input.addEventListener(
+            'keydown',
+            this.handleKeydown({ isStartDate: false }),
+        )
 
         // Override clear button handlers
-        this.startDatePicker.onClearClick = this.handleClearClick({ isStartDate: true })
-        this.endDatePicker.onClearClick = this.handleClearClick({ isStartDate: false })
+        this.startDatePicker.onClearClick = this.handleClearClick({
+            isStartDate: true,
+        })
+        this.endDatePicker.onClearClick = this.handleClearClick({
+            isStartDate: false,
+        })
     }
 
     /**
@@ -58,7 +70,9 @@ class DateRangeSelection extends Component {
      */
     parsePlainTextDate({ isStartDate }) {
         const stateKey = isStartDate ? 'startDateText' : 'endDateText'
-        const dateState = isStartDate ? this.state.startDateText : this.state.endDateText
+        const dateState = isStartDate
+            ? this.state.startDateText
+            : this.state.endDateText
 
         const nlpDate = chrono.parseDate(dateState)
         if (nlpDate != null) {
@@ -82,9 +96,15 @@ class DateRangeSelection extends Component {
      * Runs against text input state, to attempt to parse a date string or natural language date.
      */
     handleInputChange = ({ isStartDate }) => () => {
-        const currentDate = isStartDate ? this.props.startDate : this.props.endDate
-        const updateDate = isStartDate ? this.props.onStartDateChange : this.props.onEndDateChange
-        const dateState = isStartDate ? this.state.startDateText : this.state.endDateText
+        const currentDate = isStartDate
+            ? this.props.startDate
+            : this.props.endDate
+        const updateDate = isStartDate
+            ? this.props.onStartDateChange
+            : this.props.onEndDateChange
+        const dateState = isStartDate
+            ? this.state.startDateText
+            : this.state.endDateText
 
         let dateToChange
         const date = moment(dateState, FORMAT, true)
@@ -121,7 +141,9 @@ class DateRangeSelection extends Component {
      * Runs against date selected in the date dropdown component.
      */
     handleDateChange = ({ isStartDate }) => date => {
-        const updateDate = isStartDate ? this.props.onStartDateChange : this.props.onEndDateChange
+        const updateDate = isStartDate
+            ? this.props.onStartDateChange
+            : this.props.onEndDateChange
         const stateKey = isStartDate ? 'startDateText' : 'endDateText'
 
         this.setState(state => ({
@@ -143,10 +165,12 @@ class DateRangeSelection extends Component {
         return (
             <div className={styles.dateRangeSelection}>
                 <DatePicker
-                    ref={dp => { this.startDatePicker = dp }}
+                    ref={dp => {
+                        this.startDatePicker = dp
+                    }}
                     className={styles.datePicker}
                     dateFormat={FORMAT}
-                    placeholderText='after...'
+                    placeholderText="after..."
                     isClearable
                     selected={startDate && moment(startDate)}
                     selectsStart
@@ -155,19 +179,20 @@ class DateRangeSelection extends Component {
                     endDate={moment(endDate)}
                     maxDate={moment()}
                     onChange={this.handleDateChange({ isStartDate: true })}
-                    onChangeRaw={this.handleRawInputChange({ isStartDate: true })}
+                    onChangeRaw={this.handleRawInputChange({
+                        isStartDate: true,
+                    })}
                     onBlur={this.handleInputChange({ isStartDate: true })}
                     value={this.state.startDateText}
                 />
-                <img
-                    src='/img/to-icon.png'
-                    className={styles.toIcon}
-                />
+                <img src="/img/to-icon.png" className={styles.toIcon} />
                 <DatePicker
-                    ref={dp => { this.endDatePicker = dp }}
+                    ref={dp => {
+                        this.endDatePicker = dp
+                    }}
                     className={styles.datePicker}
                     dateFormat={FORMAT}
-                    placeholderText='before...'
+                    placeholderText="before..."
                     isClearable
                     selected={endDate && moment(endDate)}
                     selectsEnd
@@ -176,7 +201,9 @@ class DateRangeSelection extends Component {
                     maxDate={moment()}
                     disabledKeyboardNavigation
                     onChange={this.handleDateChange({ isStartDate: false })}
-                    onChangeRaw={this.handleRawInputChange({ isStartDate: false })}
+                    onChangeRaw={this.handleRawInputChange({
+                        isStartDate: false,
+                    })}
                     onBlur={this.handleInputChange({ isStartDate: false })}
                     value={this.state.endDateText}
                 />
@@ -191,6 +218,5 @@ DateRangeSelection.propTypes = {
     onStartDateChange: PropTypes.func,
     onEndDateChange: PropTypes.func,
 }
-
 
 export default DateRangeSelection

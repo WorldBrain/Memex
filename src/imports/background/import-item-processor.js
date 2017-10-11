@@ -50,7 +50,10 @@ async function createAssociatedBookmarkDoc(pageDoc, importItem) {
  */
 async function processHistoryImport(importItem) {
     // Do the page data fetch
-    const { content, favIconURI } = await fetchPageData({ url: importItem.url, opts: fetchPageDataOpts })
+    const { content, favIconURI } = await fetchPageData({
+        url: importItem.url,
+        opts: fetchPageDataOpts,
+    })
 
     // Sort out all binary attachments
     const _attachments = await formatFavIconAttachment(favIconURI)
@@ -65,9 +68,10 @@ async function processHistoryImport(importItem) {
 
     // Fetch and create meta-docs
     const visitDocs = await createAssociatedVisitDocs(pageDoc)
-    const bookmarkDocs = importItem.type === IMPORT_TYPE.BOOKMARK
-        ? [await createAssociatedBookmarkDoc(pageDoc, importItem)]
-        : []
+    const bookmarkDocs =
+        importItem.type === IMPORT_TYPE.BOOKMARK
+            ? [await createAssociatedBookmarkDoc(pageDoc, importItem)]
+            : []
 
     // Schedule indexing of searchable data, but don't wait for it
     console.time('index-time')
@@ -90,7 +94,9 @@ async function processHistoryImport(importItem) {
 export default async function processImportItem(importItem = {}) {
     switch (importItem.type) {
         case IMPORT_TYPE.BOOKMARK:
-        case IMPORT_TYPE.HISTORY: return await processHistoryImport(importItem)
-        default: throw new Error('Unknown import type')
+        case IMPORT_TYPE.HISTORY:
+            return await processHistoryImport(importItem)
+        default:
+            throw new Error('Unknown import type')
     }
 }

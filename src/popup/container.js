@@ -48,17 +48,27 @@ class PopupContainer extends Component {
     }
 
     async componentDidMount() {
-        const [currentTab] = await browser.tabs.query({ active: true, currentWindow: true })
+        const [currentTab] = await browser.tabs.query({
+            active: true,
+            currentWindow: true,
+        })
 
         // If we can't get the tab data, then can't init action button states
-        if (!currentTab || !currentTab.url) { return }
+        if (!currentTab || !currentTab.url) {
+            return
+        }
 
-        const updateState = newState => this.setState(oldState => ({ ...oldState, ...newState }))
+        const updateState = newState =>
+            this.setState(oldState => ({ ...oldState, ...newState }))
         const noop = f => f // Don't do anything if error; state doesn't change
 
         updateState({ url: currentTab.url })
-        this.getInitPauseState().then(updateState).catch(noop)
-        this.getInitBlacklistBtnState(currentTab.url).then(updateState).catch(noop)
+        this.getInitPauseState()
+            .then(updateState)
+            .catch(noop)
+        this.getInitBlacklistBtnState(currentTab.url)
+            .then(updateState)
+            .catch(noop)
     }
 
     async getInitPauseState() {
@@ -100,7 +110,11 @@ class PopupContainer extends Component {
         this.toggleLoggingPause(pauseValue)
 
         // Do local level state toggle and reset
-        this.setState(state => ({ ...state, isPaused: !isPaused, pauseValue: 20 }))
+        this.setState(state => ({
+            ...state,
+            isPaused: !isPaused,
+            pauseValue: 20,
+        }))
     }
 
     onPauseChange(event) {
@@ -117,16 +131,21 @@ class PopupContainer extends Component {
         if (event.key === 'Enter') {
             event.preventDefault()
 
-            const queryFilters = extractTimeFiltersFromQuery(this.state.searchValue)
+            const queryFilters = extractTimeFiltersFromQuery(
+                this.state.searchValue,
+            )
             const queryParams = qs.stringify(queryFilters)
 
-            browser.tabs.create({ url: `${constants.OVERVIEW_URL}?${queryParams}` }) // New tab with query
+            browser.tabs.create({
+                url: `${constants.OVERVIEW_URL}?${queryParams}`,
+            }) // New tab with query
             window.close() // Close the popup
         }
     }
 
     // Hides full-popup confirm
-    resetBlacklistConfirmState = () => this.setState(state => ({ ...state, blacklistConfirm: false }))
+    resetBlacklistConfirmState = () =>
+        this.setState(state => ({ ...state, blacklistConfirm: false }))
 
     handleDeleteBlacklistData = () => {
         this.cleanupBlacklist(this.state.url)
@@ -135,15 +154,28 @@ class PopupContainer extends Component {
 
     renderBlacklistButton() {
         const { blacklistChoice, blacklistBtn } = this.state
-        const setBlacklistChoice = () => this.setState(state => ({ ...state, blacklistChoice: true }))
+        const setBlacklistChoice = () =>
+            this.setState(state => ({ ...state, blacklistChoice: true }))
 
-        if (!blacklistChoice) { // Standard blacklist button
-            return blacklistBtn === constants.BLACKLIST_BTN_STATE.BLACKLISTED ? (
-                <LinkButton href={`${constants.OPTIONS_URL}#/settings`} icon='block' btnClass={itemBtnBlacklisted}>
+        if (!blacklistChoice) {
+            // Standard blacklist button
+            return blacklistBtn ===
+                constants.BLACKLIST_BTN_STATE.BLACKLISTED ? (
+                <LinkButton
+                    href={`${constants.OPTIONS_URL}#/settings`}
+                    icon="block"
+                    btnClass={itemBtnBlacklisted}
+                >
                     Current Page Blacklisted
                 </LinkButton>
             ) : (
-                <Button icon='block' onClick={setBlacklistChoice} disabled={blacklistBtn === constants.BLACKLIST_BTN_STATE.DISABLED}>
+                <Button
+                    icon="block"
+                    onClick={setBlacklistChoice}
+                    disabled={
+                        blacklistBtn === constants.BLACKLIST_BTN_STATE.DISABLED
+                    }
+                >
                     Blacklist Current Page
                 </Button>
             )
@@ -151,7 +183,7 @@ class PopupContainer extends Component {
 
         // Domain vs URL choice button
         return (
-            <SplitButton icon='block'>
+            <SplitButton icon="block">
                 <Button onClick={this.onBlacklistBtnClick(true)}>Domain</Button>
                 <Button onClick={this.onBlacklistBtnClick(false)}>URL</Button>
             </SplitButton>
@@ -159,7 +191,11 @@ class PopupContainer extends Component {
     }
 
     renderPauseChoices() {
-        const pauseValueToOption = (val, i) => <option key={i} value={val}>{val === Infinity ? '∞' : val}</option>
+        const pauseValueToOption = (val, i) => (
+            <option key={i} value={val}>
+                {val === Infinity ? '∞' : val}
+            </option>
+        )
 
         return this.props.pauseValues.map(pauseValueToOption)
     }
@@ -187,13 +223,16 @@ class PopupContainer extends Component {
                 </HistoryPauser>
                 {this.renderBlacklistButton()}
                 <hr />
-                <LinkButton href={`${constants.OPTIONS_URL}#/blacklist`} icon='settings'>
+                <LinkButton
+                    href={`${constants.OPTIONS_URL}#/blacklist`}
+                    icon="settings"
+                >
                     Settings
                 </LinkButton>
                 {/* <LinkButton href={`${constants.OPTIONS_URL}#/import`} icon='file_download'>
                                     Import History &amp; Bookmarks
                                 </LinkButton> */}
-                <LinkButton href={constants.FEEDBACK_URL} icon='feedback'>
+                <LinkButton href={constants.FEEDBACK_URL} icon="feedback">
                     Feedback
                 </LinkButton>
             </div>
@@ -204,14 +243,22 @@ class PopupContainer extends Component {
         const { searchValue } = this.state
 
         return (
-            <Popup searchValue={searchValue} onSearchChange={this.onSearchChange} onSearchEnter={this.onSearchEnter}>
+            <Popup
+                searchValue={searchValue}
+                onSearchChange={this.onSearchChange}
+                onSearchEnter={this.onSearchEnter}
+            >
                 {this.renderChildren()}
             </Popup>
         )
     }
 }
 
-PopupContainer.propTypes = { pauseValues: PropTypes.arrayOf(PropTypes.number).isRequired }
-PopupContainer.defaultProps = { pauseValues: [5, 10, 20, 30, 60, 120, 180, Infinity] }
+PopupContainer.propTypes = {
+    pauseValues: PropTypes.arrayOf(PropTypes.number).isRequired,
+}
+PopupContainer.defaultProps = {
+    pauseValues: [5, 10, 20, 30, 60, 120, 180, Infinity],
+}
 
 export default PopupContainer

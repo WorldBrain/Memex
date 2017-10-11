@@ -20,7 +20,9 @@ class QueryBuilder {
      */
     _setDate = op => time => {
         // Don't add anything if the time isn't given
-        if (!time) { return this }
+        if (!time) {
+            return this
+        }
         const currentBookmarks = this.bookmarks.length ? this.bookmarks[0] : {}
         const currentVisits = this.visits.length ? this.visits[0] : {}
         const updatedBookmarks = [{ ...currentBookmarks, [op]: String(time) }]
@@ -28,7 +30,8 @@ class QueryBuilder {
 
         // search-index needs defaults if they're missing
         if (!updatedBookmarks[0].gte) updatedBookmarks[0].gte = '0'
-        if (!updatedBookmarks[0].lte) updatedBookmarks[0].lte = Date.now().toString()
+        if (!updatedBookmarks[0].lte)
+            updatedBookmarks[0].lte = Date.now().toString()
         if (!updatedVisits[0].gte) updatedVisits[0].gte = '0'
         if (!updatedVisits[0].lte) updatedVisits[0].lte = Date.now().toString()
 
@@ -44,8 +47,20 @@ class QueryBuilder {
     get() {
         const q = {
             query: [
-                { AND: { content: this.content, bookmarks: this.bookmarks, domain: this.domain } },
-                { AND: { content: this.content, visits: this.visits, domain: this.domain } },
+                {
+                    AND: {
+                        content: this.content,
+                        bookmarks: this.bookmarks,
+                        domain: this.domain,
+                    },
+                },
+                {
+                    AND: {
+                        content: this.content,
+                        visits: this.visits,
+                        domain: this.domain,
+                    },
+                },
             ],
         }
 
@@ -54,7 +69,7 @@ class QueryBuilder {
 
         // If the searchTerm results in an empty string don't continue
         if (this.isBadTerm) {
-            return ({isBadTerm: true})
+            return { isBadTerm: true }
         }
 
         // Wildcard search is special case when there is no search times; need to sort by time
@@ -82,9 +97,7 @@ class QueryBuilder {
 
     searchTerm(input = '') {
         // All indexed strings are lower-cased, so force the query terms to be
-        let terms = input
-            .toLowerCase()
-            .match(/\S+/g) || []
+        let terms = input.toLowerCase().match(/\S+/g) || []
 
         // All terms must be pushed to the text-pipeline to take into account stopword removal ect...
         terms = transform({ text: terms.join(' '), lang: 'all' })

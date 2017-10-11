@@ -6,7 +6,6 @@ import { blobToBase64String } from 'blob-util'
 
 import encodeUrl from 'src/util/encode-url-for-id'
 
-
 PouchDB.plugin(PouchDBFind)
 
 const pouchdbOptions = {
@@ -32,7 +31,7 @@ export const normaliseFindResult = result => ({
         doc,
         id: doc._id,
         key: doc._id,
-        value: {rev: doc._rev},
+        value: { rev: doc._rev },
     })),
 })
 
@@ -49,20 +48,26 @@ export const resultRowsById = result =>
  * @param {any} bulkGetResponse Standard reponse from PouchDB.bulkGet
  * @returns {Array<any>} Array of "ok"d docs from response.
  */
-export const bulkGetResultsToArray = ({ results }) => results
-    .map(res => res.docs)
-    .map(list => list.filter(doc => doc.ok))
-    .filter(list => list.length)
-    .map(list => list[0].ok)
+export const bulkGetResultsToArray = ({ results }) =>
+    results
+        .map(res => res.docs)
+        .map(list => list.filter(doc => doc.ok))
+        .filter(list => list.length)
+        .map(list => list[0].ok)
 
 // Get an attachment from a doc as a data URL string.
 // Pass either a docId or a doc itself, and the attachmentId.
 // Returns undefined if non-existent.
-export async function getAttachmentAsDataUrl({doc, docId=doc._id, attachmentId}) {
-    if (!docId
-        || !attachmentId
+export async function getAttachmentAsDataUrl({
+    doc,
+    docId = doc._id,
+    attachmentId,
+}) {
+    if (
+        !docId ||
+        !attachmentId ||
         // If we got passed the doc itself, we can check whether the attachment exists.
-        || (doc && !get(['_attachments', attachmentId, 'digest'])(doc))
+        (doc && !get(['_attachments', attachmentId, 'digest'])(doc))
     ) {
         return undefined
     }
@@ -88,9 +93,10 @@ export async function getAttachmentAsDataUrl({doc, docId=doc._id, attachmentId})
 export function fetchDocTypesByUrl(url) {
     const encodedUrl = encodeUrl(url)
 
-    return (typePrefix, opts = { include_docs: true }) => db.allDocs({
-        startkey: `${typePrefix}${encodedUrl}`,
-        endkey: `${typePrefix}${encodedUrl}\ufff0`,
-        ...opts,
-    })
+    return (typePrefix, opts = { include_docs: true }) =>
+        db.allDocs({
+            startkey: `${typePrefix}${encodedUrl}`,
+            endkey: `${typePrefix}${encodedUrl}\ufff0`,
+            ...opts,
+        })
 }

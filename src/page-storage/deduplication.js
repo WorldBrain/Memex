@@ -8,7 +8,7 @@ import updateDoc from 'src/util/pouchdb-update-doc'
 import { getTimestamp } from 'src/activity-logger'
 import determinePageSameness, { Sameness } from './sameness'
 
-function samenessLinkType({sameness}) {
+function samenessLinkType({ sameness }) {
     const types = {
         [Sameness.EXACTLY]: 'sameAs',
         [Sameness.OSTENSIBLY]: 'updatedBy',
@@ -21,7 +21,7 @@ function samenessLinkType({sameness}) {
     return types[sameness]
 }
 
-async function forgetPageContents({page, pageId = page._id}) {
+async function forgetPageContents({ page, pageId = page._id }) {
     // Remove stored content, screenshots, etcetera.
     await updateDoc(db, pageId, doc => ({
         ...doc,
@@ -30,15 +30,15 @@ async function forgetPageContents({page, pageId = page._id}) {
     }))
 }
 
-async function addLink({targetId, sourceId, linkType}) {
+async function addLink({ targetId, sourceId, linkType }) {
     await updateDoc(db, sourceId, doc => ({
         ...doc,
-        [linkType]: {_id: targetId},
+        [linkType]: { _id: targetId },
     }))
 }
 
-async function replaceWithRedirect({oldPage, newPage, sameness}) {
-    await forgetPageContents({page: oldPage})
+async function replaceWithRedirect({ oldPage, newPage, sameness }) {
+    await forgetPageContents({ page: oldPage })
     // Add a reference that indicates where to find usable content instead.
     await addLink({
         targetId: newPage._id,
@@ -49,14 +49,14 @@ async function replaceWithRedirect({oldPage, newPage, sameness}) {
     await addLink({
         targetId: newPage._id,
         sourceId: oldPage._id,
-        linkType: samenessLinkType({sameness}),
+        linkType: samenessLinkType({ sameness }),
     })
 }
 
 // Tells whether the record quality of one page is better than that of the other.
 function hasHigherFidelity(page, comparisonPage) {
     const hasFrozenPage = page =>
-        (get(['_attachments', 'frozen-page.html'])(page) !== undefined)
+        get(['_attachments', 'frozen-page.html'])(page) !== undefined
     if (hasFrozenPage(page) && !hasFrozenPage(comparisonPage)) {
         // page was successfully freeze-dried, while comparisonPage was not.
         return true
@@ -64,12 +64,9 @@ function hasHigherFidelity(page, comparisonPage) {
     return false
 }
 
-export default async function tryDedupePage({
-    page,
-    samePageCandidates,
-}) {
+export default async function tryDedupePage({ page, samePageCandidates }) {
     if (samePageCandidates.length === 0) {
-        return {page}
+        return { page }
     }
 
     // For simplicity, only try the most recent candidate.
@@ -80,10 +77,10 @@ export default async function tryDedupePage({
 
     // Choose the action to take.
     if (
-        sameness >= Sameness.EXACTLY
-        && !candidatePage.protected
+        sameness >= Sameness.EXACTLY &&
+        !candidatePage.protected &&
         // Even if they seem to represent the same content, ensure we don't delete a better copy.
-        && !hasHigherFidelity(candidatePage, page)
+        !hasHigherFidelity(candidatePage, page)
     ) {
         // Forget the old page's contents. Replace them with a link to the new
         // page.
@@ -99,10 +96,10 @@ export default async function tryDedupePage({
             await addLink({
                 sourceId: candidatePage._id,
                 targetId: page._id,
-                linkType: samenessLinkType({sameness}),
+                linkType: samenessLinkType({ sameness }),
             })
         }
     }
     // Same page is returned.
-    return {page}
+    return { page }
 }

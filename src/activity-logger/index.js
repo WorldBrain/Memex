@@ -5,7 +5,9 @@ import encodeUrl from 'src/util/encode-url-for-id'
 
 export const visitKeyPrefix = 'visit/'
 
-export const visitDocsSelector = { _id: { $gte: visitKeyPrefix, $lte: `${visitKeyPrefix}\uffff` } }
+export const visitDocsSelector = {
+    _id: { $gte: visitKeyPrefix, $lte: `${visitKeyPrefix}\uffff` },
+}
 
 export const PAUSE_STORAGE_KEY = 'is-logging-paused'
 
@@ -16,20 +18,26 @@ export function isLoggable({ url }) {
 }
 
 export const getPauseState = async () => {
-    const state = (await browser.storage.local.get(PAUSE_STORAGE_KEY))[PAUSE_STORAGE_KEY]
+    const state = (await browser.storage.local.get(PAUSE_STORAGE_KEY))[
+        PAUSE_STORAGE_KEY
+    ]
 
     switch (state) {
         case 0:
-        case 1: return true
+        case 1:
+            return true
         case 2:
-        default: return false
+        default:
+            return false
     }
 }
 
 // Creates an _id string given the variables, or vice versa parses such strings
 // We simply use the creation time for the id, for easy chronological sorting.
 // We add a random string we call a 'nonce' to prevent accidental collisions.
-export const convertVisitDocId = docuri.route(`${visitKeyPrefix}:url/:timestamp`)
+export const convertVisitDocId = docuri.route(
+    `${visitKeyPrefix}:url/:timestamp`,
+)
 
 export const convertMetaDocId = docuri.route(':type/:url/:timestamp')
 
@@ -38,4 +46,7 @@ export const getTimestamp = doc =>
 
 // NOTE: truncates any decimal part of the `timestamp` arg
 export const generateVisitDocId = ({ url, timestamp = Date.now() }) =>
-    convertVisitDocId({ url: encodeUrl(url, false), timestamp: Math.floor(timestamp) })
+    convertVisitDocId({
+        url: encodeUrl(url, false),
+        timestamp: Math.floor(timestamp),
+    })

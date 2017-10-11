@@ -3,3 +3,4 @@ extension
 dist
 .chrome-extension-key.pem
 jest_0/
+*.sublime-workspace

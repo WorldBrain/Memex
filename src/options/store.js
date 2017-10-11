@@ -9,13 +9,11 @@ const rootReducer = combineReducers({
     imports: imports.reducer,
 })
 
-export default function configureStore({ReduxDevTools = undefined} = {}) {
+export default function configureStore({ ReduxDevTools = undefined } = {}) {
     const enhancers = [
         blacklist.enhancer,
         imports.enhancer,
-        applyMiddleware(
-            thunk,
-        ),
+        applyMiddleware(thunk),
     ]
 
     if (ReduxDevTools) {
@@ -27,6 +25,6 @@ export default function configureStore({ReduxDevTools = undefined} = {}) {
     return createStore(
         rootReducer,
         undefined, // Initial State
-        enhancer
+        enhancer,
     )
 }

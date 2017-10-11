@@ -5,10 +5,8 @@ import styles from './Button.css'
 
 const SplitButton = ({ icon, children }) => (
     <div className={styles.item}>
-        {icon && <i className='material-icons'>{icon}</i>}
-        <div className={styles.splitBtn}>
-            {children}
-        </div>
+        {icon && <i className="material-icons">{icon}</i>}
+        <div className={styles.splitBtn}>{children}</div>
     </div>
 )
 

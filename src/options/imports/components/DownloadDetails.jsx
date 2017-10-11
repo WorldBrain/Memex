@@ -10,9 +10,7 @@ const filterClass = classNames(localStyles.filterOption, styles.buttonNaked)
 const DownloadDetails = ({ children, filterHandlers }) => (
     <div className={localStyles.detailsContainer}>
         <div className={localStyles.headerContainer}>
-            <h3 className={localStyles.header}>
-                Download Details
-            </h3>
+            <h3 className={localStyles.header}>Download Details</h3>
             <div className={localStyles.filters}>
                 <button className={filterClass} onClick={filterHandlers.all}>
                     All
@@ -33,9 +31,7 @@ const DownloadDetails = ({ children, filterHandlers }) => (
                     <th className={localStyles.errorsCol}>Errors</th>
                 </tr>
             </thead>
-            <tbody className={localStyles.detailsTableBody}>
-                {children}
-            </tbody>
+            <tbody className={localStyles.detailsTableBody}>{children}</tbody>
         </table>
     </div>
 )

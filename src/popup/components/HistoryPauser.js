@@ -4,26 +4,43 @@ import classNames from 'classnames'
 
 import styles from './Button.css'
 
-const getIconStyles = isPaused => classNames({
-    'material-icons': true,
-    [styles.clickableIcon]: true,
-    [styles.clickableIconNeg]: !isPaused,
-})
-const getIcon = isPaused => isPaused ? 'play_circle_outline' : 'pause_circle_outline'
+const getIconStyles = isPaused =>
+    classNames({
+        'material-icons': true,
+        [styles.clickableIcon]: true,
+        [styles.clickableIconNeg]: !isPaused,
+    })
+const getIcon = isPaused =>
+    isPaused ? 'play_circle_outline' : 'pause_circle_outline'
 
-const HistoryPauser = ({ onConfirm, value, onChange, isPaused, children, ...selectProps }) => (
+const HistoryPauser = ({
+    onConfirm,
+    value,
+    onChange,
+    isPaused,
+    children,
+    ...selectProps
+}) => (
     <div className={classNames(styles.item, styles.itemDropdown)}>
-        <i className={getIconStyles(isPaused)} onClick={onConfirm}>{getIcon(isPaused)}</i>
-        {isPaused
-            ? 'Recording paused'
-            : <div>
+        <i className={getIconStyles(isPaused)} onClick={onConfirm}>
+            {getIcon(isPaused)}
+        </i>
+        {isPaused ? (
+            'Recording paused'
+        ) : (
+            <div>
                 Pause recording for
-                <select className={styles.dropdown} value={value} onChange={onChange} {...selectProps}>
+                <select
+                    className={styles.dropdown}
+                    value={value}
+                    onChange={onChange}
+                    {...selectProps}
+                >
                     {children}
                 </select>
                 mins
             </div>
-        }
+        )}
     </div>
 )
 

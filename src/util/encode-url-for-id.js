@@ -18,7 +18,10 @@ const normalizationOpts = {
  * @returns {string}
  */
 function normalize(url, customOpts) {
-    const normalized = normalizeUrl(url, { ...normalizationOpts, ...customOpts })
+    const normalized = normalizeUrl(url, {
+        ...normalizationOpts,
+        ...customOpts,
+    })
 
     // Remove the protocol; we don't need it for IDs (only log http/s anyway)
     return normalized.replace(PROTOCOL_PATTERN, '')
@@ -35,8 +38,10 @@ function normalize(url, customOpts) {
  */
 function encode(url, needsEscaping) {
     const escaped = encodeURIComponent(url) // Grab percent-encoded unicode chars (`%`)
-        .replace(/%([0-9A-F]{2})/g,  // Convert percentage-encodings into raw bytes
-            (_, p1) => String.fromCharCode(`0x${p1}`))
+        .replace(
+            /%([0-9A-F]{2})/g, // Convert percentage-encodings into raw bytes
+            (_, p1) => String.fromCharCode(`0x${p1}`),
+        )
 
     // Feed in escaped unicode stuff into base64 encoder
     const encoded = btoa(escaped)
@@ -55,7 +60,8 @@ export function decode(encodedUrl, needsEscaping = true) {
 
     const percentageEncoded = atob(encodedUrl)
         .split('')
-        .map(char => { // For each raw byte char, convert to percentage-encodings
+        .map(char => {
+            // For each raw byte char, convert to percentage-encodings
             const unicodeChar = `00${char.charCodeAt(0).toString(16)}`.slice(-2)
             return `%${unicodeChar}`
         })
@@ -63,7 +69,6 @@ export function decode(encodedUrl, needsEscaping = true) {
 
     return decodeURIComponent(percentageEncoded)
 }
-
 
 /**
  * Given a URL string, should apply normalization transformations to standardize URLs
@@ -81,7 +86,11 @@ export function decode(encodedUrl, needsEscaping = true) {
  * @param {any} [customNormalizationOpts={}] Custom options to pass to `normalize-url` package (will override).
  * @returns {string} Encoded URL ready for use in PouchID.
  */
-function normalizeAndEncode(url, needsEscaping = true, customNormalizationOpts = {}) {
+function normalizeAndEncode(
+    url,
+    needsEscaping = true,
+    customNormalizationOpts = {},
+) {
     const normalizedUrl = normalize(url, customNormalizationOpts)
     return encode(normalizedUrl, needsEscaping)
 }

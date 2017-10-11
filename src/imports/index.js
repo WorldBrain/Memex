@@ -5,9 +5,11 @@ export const importProgressStorageKey = 'is_import_in_progress'
 
 // Local storage helpers to make the main functions a bit less messy
 export const getImportInProgressFlag = async () =>
-    (await browser.storage.local.get(importProgressStorageKey))[importProgressStorageKey]
+    (await browser.storage.local.get(importProgressStorageKey))[
+        importProgressStorageKey
+    ]
 export const setImportInProgressFlag = async () =>
-    (await browser.storage.local.set({ [importProgressStorageKey]: true }))
+    await browser.storage.local.set({ [importProgressStorageKey]: true })
 export const clearImportInProgressFlag = async () =>
     await browser.storage.local.remove(importProgressStorageKey)
 

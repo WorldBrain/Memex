@@ -16,45 +16,51 @@ const renderTime = ({ doc }) =>
         ? niceTime(doc[doc.displayType])
         : ''
 
-const getMainClasses = ({ compact }) => classNames({
-    [styles.root]: true,
-    [styles.compact]: compact,
-})
+const getMainClasses = ({ compact }) =>
+    classNames({
+        [styles.root]: true,
+        [styles.compact]: compact,
+    })
 
-const PageResultItem = ({ doc, sizeInMB, onTrashButtonClick, compact = false, isBookmark = false }) => {
+const PageResultItem = ({
+    doc,
+    sizeInMB,
+    onTrashButtonClick,
+    compact = false,
+    isBookmark = false,
+}) => {
     const hasFavIcon = !!(doc._attachments && doc._attachments.favIcon)
-    const favIcon = hasFavIcon
-        && (
-            <ImgFromPouch
-                className={styles.favIcon}
-                doc={doc}
-                attachmentId='favIcon'
-            />
-        )
+    const favIcon = hasFavIcon && (
+        <ImgFromPouch
+            className={styles.favIcon}
+            doc={doc}
+            attachmentId="favIcon"
+        />
+    )
 
     return (
         <a className={getMainClasses({ compact })} href={doc.url}>
             {isBookmark && <div className={styles.bookmarkRibbon} />}
             <div className={styles.screenshotContainer}>
-                {doc._attachments && doc._attachments.screenshot
-                    ? (
-                        <ImgFromPouch
-                            className={styles.screenshot}
-                            doc={doc}
-                            attachmentId='screenshot'
-                        />
-                    )
-                    : <img className={styles.screenshot} src='/img/null-icon.png' />
-                }
+                {doc._attachments && doc._attachments.screenshot ? (
+                    <ImgFromPouch
+                        className={styles.screenshot}
+                        doc={doc}
+                        attachmentId="screenshot"
+                    />
+                ) : (
+                    <img
+                        className={styles.screenshot}
+                        src="/img/null-icon.png"
+                    />
+                )}
             </div>
             <div className={styles.descriptionContainer}>
                 <div className={styles.title} title={doc.title}>
                     {hasFavIcon && favIcon}
                     {doc.title}
                 </div>
-                <div className={styles.url}>
-                    {doc.url}
-                </div>
+                <div className={styles.url}>{doc.url}</div>
                 <div className={styles.time}>{renderTime({ doc })}</div>
             </div>
             <div className={styles.buttonsContainer}>

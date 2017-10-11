@@ -3,14 +3,18 @@ import update from 'lodash/fp/update'
 import db from 'src/pouchdb'
 import { revisePageFields } from 'src/page-analysis'
 
-
 // Post-process result list after any retrieval of pages from the database.
 async function postprocessPagesResult({ pagesResult }) {
     // Let the page analysis module augment or revise the document attributes.
-    pagesResult = update('rows', rows => rows.map(
-        // We can skip those pages that will replaced by a redirect anyway.
-        update('doc', doc => doc.seeInstead ? doc : revisePageFields(doc))
-    ))(pagesResult)
+    pagesResult = update('rows', rows =>
+        rows.map(
+            // We can skip those pages that will replaced by a redirect anyway.
+            update(
+                'doc',
+                doc => (doc.seeInstead ? doc : revisePageFields(doc)),
+            ),
+        ),
+    )(pagesResult)
 
     return pagesResult
 }

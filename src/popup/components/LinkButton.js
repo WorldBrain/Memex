@@ -6,7 +6,7 @@ import Button from './Button'
 import styles from './Button.css'
 
 const LinkButton = ({ href, ...btnProps }) => (
-    <a className={styles.link} href={href} target='_blank' tabIndex='-1'>
+    <a className={styles.link} href={href} target="_blank" tabIndex="-1">
         <Button {...btnProps} />
     </a>
 )

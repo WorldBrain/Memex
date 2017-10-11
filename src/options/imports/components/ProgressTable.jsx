@@ -22,8 +22,12 @@ const ProgressTable = ({ progress }) => (
         <tbody>
             <tr className={localStyles.importTableRow}>
                 <td>Total Progress</td>
-                <td>{progress[TYPE.HISTORY].complete}/{progress[TYPE.HISTORY].total}</td>
-                <td>{progress[TYPE.BOOKMARK].complete}/{progress[TYPE.BOOKMARK].total}</td>
+                <td>
+                    {progress[TYPE.HISTORY].complete}/{progress[TYPE.HISTORY].total}
+                </td>
+                <td>
+                    {progress[TYPE.BOOKMARK].complete}/{progress[TYPE.BOOKMARK].total}
+                </td>
             </tr>
             <tr className={localStyles.importTableRow}>
                 <td>Successful</td>

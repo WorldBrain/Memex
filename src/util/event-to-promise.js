@@ -30,7 +30,7 @@ export default function eventToPromise({
     resolveOpts = castToArray(resolveOpts)
     rejectOpts = castToArray(rejectOpts)
 
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
         // A list of {event, listener} pairs, populated below.
         const listeners = []
 
@@ -99,8 +99,9 @@ function castToArray(value) {
 // Identity function, except that if passed a function, its return value.
 // ('resolve' would be a better term than 'cast', but too confusing in this context)
 function castFuncToValue(functionOrValue, args = []) {
-    const value = (typeof functionOrValue === 'function')
-        ? functionOrValue(...args)
-        : functionOrValue
+    const value =
+        typeof functionOrValue === 'function'
+            ? functionOrValue(...args)
+            : functionOrValue
     return value
 }

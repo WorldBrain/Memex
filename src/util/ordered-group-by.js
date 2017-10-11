@@ -19,7 +19,9 @@ const orderedGroupBy = (iteratee = identity) => (coll = []) => {
 
     coll.forEach(item => {
         const groupKey = iteratee(item)
-        if (!groupKey) { return } // If the groupby key is missing, skip it (left out of the result)
+        if (!groupKey) {
+            return
+        } // If the groupby key is missing, skip it (left out of the result)
 
         // Create new group if not already there
         if (!tmp[groupKey]) {

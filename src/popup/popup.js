@@ -8,4 +8,5 @@ render(
     <ErrorBoundary component={RuntimeError}>
         <Popup />
     </ErrorBoundary>,
-    document.getElementById('popup'))
+    document.getElementById('popup'),
+)

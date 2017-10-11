@@ -1,16 +1,24 @@
 import uniqBy from 'lodash/fp/uniqBy'
 
 import PromiseBatcher from 'src/util/promise-batcher'
-import { CMDS, IMPORT_CONN_NAME, IMPORT_TYPE } from 'src/options/imports/constants'
+import {
+    CMDS,
+    IMPORT_CONN_NAME,
+    IMPORT_TYPE,
+} from 'src/options/imports/constants'
 import getEstimateCounts from './import-estimates'
 import processImportItem from './import-item-processor'
 import {
-    getImportItems, setImportItems,
-    getURLFilteredHistoryItems, getURLFilteredBookmarkItems,
-    removeImportItem, clearImportItems,
+    getImportItems,
+    setImportItems,
+    getURLFilteredHistoryItems,
+    getURLFilteredBookmarkItems,
+    removeImportItem,
+    clearImportItems,
 } from './'
 import {
-    getImportInProgressFlag, setImportInProgressFlag,
+    getImportInProgressFlag,
+    setImportInProgressFlag,
     clearImportInProgressFlag,
 } from '../'
 
@@ -32,14 +40,20 @@ const transformToImportItem = type => item => ({
  *   or not import and page docs should be created for that import type.
  */
 async function prepareImportItems(allowTypes = {}) {
-    const historyItems = allowTypes[IMPORT_TYPE.HISTORY] ? await getURLFilteredHistoryItems() : []
-    const bookmarkItems = allowTypes[IMPORT_TYPE.BOOKMARK] ? await getURLFilteredBookmarkItems() : []
+    const historyItems = allowTypes[IMPORT_TYPE.HISTORY]
+        ? await getURLFilteredHistoryItems()
+        : []
+    const bookmarkItems = allowTypes[IMPORT_TYPE.BOOKMARK]
+        ? await getURLFilteredBookmarkItems()
+        : []
 
     // Create import items for all created page stubs
-    await setImportItems(uniqByUrl([
-        ...historyItems.map(transformToImportItem(IMPORT_TYPE.HISTORY)),
-        ...bookmarkItems.map(transformToImportItem(IMPORT_TYPE.BOOKMARK)),
-    ]))
+    await setImportItems(
+        uniqByUrl([
+            ...historyItems.map(transformToImportItem(IMPORT_TYPE.HISTORY)),
+            ...bookmarkItems.map(transformToImportItem(IMPORT_TYPE.BOOKMARK)),
+        ]),
+    )
 }
 
 /**
@@ -50,7 +64,11 @@ async function prepareImportItems(allowTypes = {}) {
  * @param {Port} port The open connection port to send messages over.
  */
 const getBatchObserver = port => {
-    const handleFinishedItem = ({ input: { url, type }, output: { status } = {}, error }) => {
+    const handleFinishedItem = ({
+        input: { url, type },
+        output: { status } = {},
+        error,
+    }) => {
         // Send item data + outcome status down to UI (and error if present)
         port.postMessage({ cmd: CMDS.NEXT, url, type, status, error })
 
@@ -153,14 +171,18 @@ export default async function importsConnectionHandler(port) {
                 console.time('total-import-time')
                 return await startImport(port, batch, payload)
             }
-            case CMDS.RESUME: return batch.start()
-            case CMDS.PAUSE: return batch.stop()
-            case CMDS.CANCEL: return await cancelImport(port, batch)
+            case CMDS.RESUME:
+                return batch.start()
+            case CMDS.PAUSE:
+                return batch.stop()
+            case CMDS.CANCEL:
+                return await cancelImport(port, batch)
             case CMDS.FINISH: {
                 console.timeEnd('total-import-time')
                 return await finishImport(port)
             }
-            default: return console.error(`unknown command: ${cmd}`)
+            default:
+                return console.error(`unknown command: ${cmd}`)
         }
     })
 }

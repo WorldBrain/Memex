@@ -18,14 +18,11 @@
 // const myRemoteFunc = remoteFunction('myFunc')
 // myRemoteFunc(21).then(result => { ... result is 42! ... })
 
-
 import mapValues from 'lodash/fp/mapValues'
-
 
 // Our secret tokens to recognise our messages
 const RPC_CALL = '__RPC_CALL__'
 const RPC_RESPONSE = '__RPC_RESPONSE__'
-
 
 // === Initiating side ===
 
@@ -36,12 +33,13 @@ const RPC_RESPONSE = '__RPC_RESPONSE__'
 //       tabId: The id of the tab whose content script is the remote side.
 //              Leave undefined to call the background script (from a tab).
 //   }
-export function remoteFunction(funcName, {tabId} = {}) {
-    const otherSide = (tabId !== undefined)
-        ? "the tab's content script"
-        : 'the background script'
+export function remoteFunction(funcName, { tabId } = {}) {
+    const otherSide =
+        tabId !== undefined
+            ? "the tab's content script"
+            : 'the background script'
 
-    const f = async function (...args) {
+    const f = async function(...args) {
         const message = {
             [RPC_CALL]: RPC_CALL,
             funcName,
@@ -51,13 +49,14 @@ export function remoteFunction(funcName, {tabId} = {}) {
         // Try send the message and await the response.
         let response
         try {
-            response = (tabId !== undefined)
-                ? await browser.tabs.sendMessage(tabId, message)
-                : await browser.runtime.sendMessage(message)
+            response =
+                tabId !== undefined
+                    ? await browser.tabs.sendMessage(tabId, message)
+                    : await browser.runtime.sendMessage(message)
         } catch (err) {
             throw new Error(
-                `Got no response when trying to call '${funcName}'. `
-                + `Did you enable RPC in ${otherSide}?`
+                `Got no response when trying to call '${funcName}'. ` +
+                    `Did you enable RPC in ${otherSide}?`,
             )
         }
 
@@ -78,7 +77,6 @@ export function remoteFunction(funcName, {tabId} = {}) {
     Object.defineProperty(f, 'name', { value: `${funcName}_RPC` })
     return f
 }
-
 
 // === Executing side ===
 
@@ -104,13 +102,15 @@ function incomingRPCListener(message, sender) {
 
         // Run the function, and await its value if it returns a promise.
         const returnValue = func(extraArg, ...args)
-        return Promise.resolve(returnValue).then(returnValue => ({
-            returnValue,
-            [RPC_RESPONSE]: RPC_RESPONSE,
-        })).catch(error => ({
-            errorMessage: error.message,
-            [RPC_RESPONSE]: RPC_RESPONSE,
-        }))
+        return Promise.resolve(returnValue)
+            .then(returnValue => ({
+                returnValue,
+                [RPC_RESPONSE]: RPC_RESPONSE,
+            }))
+            .catch(error => ({
+                errorMessage: error.message,
+                [RPC_RESPONSE]: RPC_RESPONSE,
+            }))
     }
 }
 
@@ -129,14 +129,17 @@ let enabled = false
 //           the details of the tab that sent the message.
 //   }
 
-export function makeRemotelyCallable(functions, {insertExtraArg = false} = {}) {
+export function makeRemotelyCallable(
+    functions,
+    { insertExtraArg = false } = {},
+) {
     // Every function is passed an extra argument with sender information,
     // so remove this from the call if this was not desired.
     if (!insertExtraArg) {
         // Replace each func with...
         const wrapFunctions = mapValues(func =>
             // ...a function that calls func, but hides the inserted argument.
-            (extraArg, ...args) => func(...args)
+            (extraArg, ...args) => func(...args),
         )
         functions = wrapFunctions(functions)
     }

@@ -8,14 +8,14 @@ const BlacklistTable = ({ children }) => (
         <div className={styles.toolbar} />
         <div className={styles.tableContainer}>
             <table className={styles.table}>
-                <tbody>
-                    {children}
-                </tbody>
+                <tbody>{children}</tbody>
             </table>
         </div>
     </div>
 )
 
-BlacklistTable.propTypes = { children: PropTypes.arrayOf(PropTypes.node).isRequired }
+BlacklistTable.propTypes = {
+    children: PropTypes.arrayOf(PropTypes.node).isRequired,
+}
 
 export default BlacklistTable

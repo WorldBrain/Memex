@@ -10,12 +10,8 @@ const ButtonBar = ({ isRunning, helpText, children }) => (
             {isRunning && <LoadingIndicator />}
         </div>
         <div className={styles.actionContainer}>
-            <div className={styles.actionBar}>
-                {children}
-            </div>
-            <div className={styles.helpText}>
-                {helpText}
-            </div>
+            <div className={styles.actionBar}>{children}</div>
+            <div className={styles.helpText}>{helpText}</div>
         </div>
     </div>
 )

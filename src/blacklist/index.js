@@ -3,10 +3,7 @@ import { STORAGE_KEY } from 'src/options/blacklist/constants'
 /**
  * Default blacklist entries.
  */
-export const defaultEntries = [
-    'http://localhost',
-    'https://localhost',
-]
+export const defaultEntries = ['http://localhost', 'https://localhost']
 
 /**
  * Given a URL and user's blacklist, checks the URL against the blacklist expressions to see if any
@@ -23,7 +20,10 @@ export function isURLBlacklisted(url = '', blacklist = []) {
 
     // Reduces blacklist to a bool by running main checking logic against each blacklist expression
     // (returns true if a single match is found in entire blacklist)
-    return blacklist.reduce((prev, curr) => doesExpressionMatchURL(curr.expression) || prev, false)
+    return blacklist.reduce(
+        (prev, curr) => doesExpressionMatchURL(curr.expression) || prev,
+        false,
+    )
 }
 
 /**
@@ -66,9 +66,10 @@ const createBlacklistEntry = url => ({
  */
 export async function addToBlacklist(url) {
     const blacklist = await fetchBlacklist()
-    const newBlacklist = url instanceof Array
-        ? url.map(createBlacklistEntry)
-        : createBlacklistEntry(url)
+    const newBlacklist =
+        url instanceof Array
+            ? url.map(createBlacklistEntry)
+            : createBlacklistEntry(url)
 
     return await storeBlacklist([...blacklist, ...newBlacklist])
 }

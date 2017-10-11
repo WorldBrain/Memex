@@ -9,17 +9,12 @@ const rootReducer = combineReducers({
     overview: overview.reducer,
 })
 
-const rootEpic = combineEpics(
-    ...Object.values(overview.epics)
-)
+const rootEpic = combineEpics(...Object.values(overview.epics))
 
-export default function configureStore({ReduxDevTools = undefined} = {}) {
+export default function configureStore({ ReduxDevTools = undefined } = {}) {
     const enhancers = [
         overview.enhancer,
-        applyMiddleware(
-            createEpicMiddleware(rootEpic),
-            thunk
-        ),
+        applyMiddleware(createEpicMiddleware(rootEpic), thunk),
     ]
     if (ReduxDevTools) {
         enhancers.push(ReduxDevTools.instrument())
@@ -29,7 +24,7 @@ export default function configureStore({ReduxDevTools = undefined} = {}) {
     const store = createStore(
         rootReducer,
         undefined, // initial state
-        enhancer
+        enhancer,
     )
 
     return store
