@@ -69,3 +69,16 @@
         border-right: none;
     }
 }
+
+.importSubItems {
+    margin-left: 60px;
+    margin-top: 10px;
+    color: #bababa;
+    font-size: 14px;
+    font-family: 'Lato';
+    font-weight: bold;
+}
+
+.active {
+    color: #3db995;
+}

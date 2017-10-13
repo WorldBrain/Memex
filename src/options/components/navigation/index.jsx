@@ -19,22 +19,32 @@ const Navigation = ({ currentLocation, routes }) => {
             })
 
             return (
-                <li className={navClasses} key={idx}>
-                    <i className={navIcon}>{route.icon}</i>
-                    {route.component === 'faq' && (
-                        <a
-                            className={navClasses}
-                            href={route.pathname}
-                            target="_blank"
-                        >
-                            {route.name}
-                        </a>
-                    )}
-                    {route.component !== 'faq' && (
-                        <Link className={navClasses} to={route.pathname}>
-                            {route.name}
-                        </Link>
-                    )}
+                <li>
+                    <li className={navClasses} key={idx}>
+                        <i className={navIcon}>{route.icon}</i>
+                        {route.component === 'faq' && (
+                            <a
+                                className={navClasses}
+                                href={route.pathname}
+                                target="_blank"
+                            >
+                                {route.name}
+                            </a>
+                        )}
+                        {route.component !== 'faq' && (
+                            <Link className={navClasses} to={route.pathname}>
+                                {route.name}
+                            </Link>
+                        )}
+                    </li>
+                    {route.name === 'Import' &&
+                        isActive(route) && (
+                            <div className={styles.importSubItems}>
+                                <div className={styles.active}>1. Analysis</div>
+                                <div>2. Download Progress</div>
+                                <div>3. Status Report</div>
+                            </div>
+                        )}
                 </li>
             )
         })
