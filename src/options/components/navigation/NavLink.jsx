@@ -5,7 +5,6 @@ import classNames from 'classnames'
 import styles from './styles.css'
 
 const NavLink = ({ route, currentLocation, state, idx }) => {
-    console.log(state)
     const navClasses = classNames({
         [styles.navLink]: true,
         [styles.isActive]: isActive(route),

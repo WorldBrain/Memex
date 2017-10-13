@@ -3,16 +3,11 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import * as selectors from '../../imports/selectors'
 import * as actions from '../../imports/actions'
-import styles from './styles.css'
 import { bindActionCreators } from 'redux'
 
 import Nav from './Nav'
 
 class Navigation extends Component {
-    constructor(props) {
-        super(props)
-    }
-
     render() {
         const { routes } = this.props
         const { isRunning, isIdle, isLoading } = this.props
