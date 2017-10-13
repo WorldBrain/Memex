@@ -4,7 +4,7 @@ import { Link } from 'react-router'
 import classNames from 'classnames'
 import styles from './styles.css'
 
-const NavLink = ({ route, currentLocation, state, idx }) => {
+const NavLink = ({ route, currentLocation, state }) => {
     const navClasses = classNames({
         [styles.navLink]: true,
         [styles.isActive]: isActive(route),
@@ -21,7 +21,7 @@ const NavLink = ({ route, currentLocation, state, idx }) => {
 
     return (
         <li>
-            <li className={navClasses} key={idx}>
+            <div className={navClasses}>
                 <i className={navIcon}>{route.icon}</i>
                 {route.component === 'faq' && (
                     <a
@@ -37,7 +37,7 @@ const NavLink = ({ route, currentLocation, state, idx }) => {
                         {route.name}
                     </Link>
                 )}
-            </li>
+            </div>
             {route.name === 'Import' &&
                 isActive(route) && (
                     <div className={styles.importSubItems}>
@@ -82,7 +82,6 @@ const NavLink = ({ route, currentLocation, state, idx }) => {
 NavLink.propTypes = {
     route: PropTypes.object.isRequired,
     currentLocation: PropTypes.object.isRequired,
-    idx: PropTypes.number.isRequired,
     state: PropTypes.object.isRequired,
 }
 

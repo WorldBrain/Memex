@@ -11,7 +11,7 @@ const Nav = ({ routes, currentLocation, state }) => {
             return (
                 <NavLink
                     route={route}
-                    idx={idx}
+                    key={idx}
                     currentLocation={currentLocation}
                     state={state}
                 />
