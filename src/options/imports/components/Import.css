@@ -84,3 +84,34 @@
 .loadingMsg {
     font-weight: bold;
 }
+
+.title {
+    color: #3eb995;
+    font-weight: bold;
+    font-size: 16px;
+    letter-spacing: 1px;
+}
+
+.stepNumber {
+    font-size: 16px;
+    color: #4d4b4c;
+    font-weight: bold;
+    letter-spacing: 1px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.stepText {
+    font-size: 14px;
+    color: #d5969e;
+    margin-bottom: 40px;
+}
+
+.icon {
+    width: auto;
+    height: 14px;
+}
+
+.stepSubText {
+    margin-left: 18px;
+}

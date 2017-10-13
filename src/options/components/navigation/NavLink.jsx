@@ -46,7 +46,8 @@ const NavLink = ({ route, currentLocation, state }) => {
                                 state.isIdle || state.isLoading
                                     ? styles.active
                                     : state.isRunning ||
-                                      !(state.isIdle || state.isLoading)
+                                      state.isStopped ||
+                                      state.isPaused
                                       ? styles.done
                                       : null
                             }
@@ -55,22 +56,14 @@ const NavLink = ({ route, currentLocation, state }) => {
                         </div>
                         <div
                             className={
-                                state.isRunning
+                                state.isRunning || state.isPaused
                                     ? styles.active
-                                    : !(state.isIdle || state.isLoading)
-                                      ? styles.done
-                                      : null
+                                    : state.isStopped ? styles.done : null
                             }
                         >
                             2. Download Progress
                         </div>
-                        <div
-                            className={
-                                !(state.isIdle || state.isLoading)
-                                    ? styles.active
-                                    : null
-                            }
-                        >
+                        <div className={state.isStopped ? styles.active : null}>
                             3. Status Report
                         </div>
                     </div>

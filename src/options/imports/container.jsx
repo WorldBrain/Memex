@@ -163,6 +163,8 @@ class ImportContainer extends Component {
             isIdle,
             loadingMsg,
             isLoading,
+            isStopped,
+            isPaused,
             progress,
             estimates,
         } = this.props
@@ -175,9 +177,16 @@ class ImportContainer extends Component {
             onAllowHistoryClick: () =>
                 boundActions.toggleAllowType(constants.IMPORT_TYPE.HISTORY),
         }
-
+        console.log(this.props)
         return (
-            <Import isLoading={isLoading} loadingMsg={loadingMsg}>
+            <Import
+                isLoading={isLoading}
+                loadingMsg={loadingMsg}
+                isIdle={isIdle}
+                isRunning={isRunning}
+                isStopped={isStopped}
+                isPaused={isPaused}
+            >
                 {isIdle || isLoading ? (
                     <EstimatesTable {...estTableProps} />
                 ) : (

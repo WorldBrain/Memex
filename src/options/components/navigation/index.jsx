@@ -10,11 +10,13 @@ import Nav from './Nav'
 class Navigation extends Component {
     render() {
         const { routes } = this.props
-        const { isRunning, isIdle, isLoading } = this.props
+        const { isRunning, isIdle, isLoading, isStopped, isPaused } = this.props
         const state = {
             isRunning: isRunning,
             isIdle: isIdle,
             isLoading: isLoading,
+            isStopped: isStopped,
+            isPaused: isPaused,
         }
 
         return (
@@ -33,6 +35,8 @@ Navigation.propTypes = {
     currentLocation: PropTypes.object.isRequired,
     routes: PropTypes.array.isRequired,
     isLoading: PropTypes.bool.isRequired,
+    isStopped: PropTypes.bool.isRequired,
+    isPaused: PropTypes.bool.isRequired,
 }
 
 const mapStateToProps = state => ({
