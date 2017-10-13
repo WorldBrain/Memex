@@ -7,7 +7,6 @@ const AcknowledgementContainer = () => (
     <div className={localStyles.acknowledgement}>
         <h1 className={styles.routeTitle}>Settings &gt; Acknowledgement</h1>
         <span className={localStyles.title}>
-            {' '}
             &gt; This project can only happen thanks to our talented
             collaborators.
         </span>
