@@ -82,3 +82,7 @@
 .active {
     color: #3db995;
 }
+
+.done {
+    text-decoration: line-through;
+}
