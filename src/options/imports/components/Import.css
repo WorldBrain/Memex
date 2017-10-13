@@ -20,20 +20,25 @@
     }
 
     & td:first-child {
-        text-align: left;
+        text-align: initial;
     }
 }
 
 .importTableHead {
-    font-size: 20px;
+    font-size: 14px;
+    color: #cacaca;
     border-bottom: 1px solid #d2d2d2;
 }
 
 .importTableRow {
-    border-bottom: 1px solid #d2d2d2;
+    font-size: 14px;
 
-    &:last-child {
-        border-bottom: none;
+    &:nth-child(even) {
+        background-color: #f6f6f6;
+    }
+
+    &:nth-child(odd) {
+        background-color: #fff;
     }
 }
 
@@ -50,7 +55,7 @@
 }
 
 .importTableCol {
-    width: calc(100% / 3);
+    width: calc(100% / 6);
 }
 
 .importTableContainer {
@@ -59,8 +64,7 @@
     height: auto;
     justify-content: space-between;
     padding: 40px;
-    background: #f8f8f8;
-    border: 1px solid #666;
+    background: #fff;
     border-radius: 10px;
 }
 
@@ -114,4 +118,8 @@
 
 .stepSubText {
     margin-left: 18px;
+}
+
+.checkboxText {
+    font-weight: bold;
 }

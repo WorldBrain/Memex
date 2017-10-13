@@ -31,7 +31,7 @@ body {
     background: #eee;
     color: #666;
     font-size: 0.8em;
-    font-weight: 400;
+    font-weight: bold;
     padding: 0.6em 1.5em;
     text-transform: uppercase;
     cursor: pointer;
@@ -41,8 +41,8 @@ body {
     transition: background-color 0.1s ease-in, color 0.1s ease-in;
 
     &:hover {
-        background: #cdcdcd;
-        color: #333;
+        background: #3db995;
+        color: white;
     }
 
     &[disabled] {

@@ -1,6 +1,5 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import classNames from 'classnames'
 
 import { IMPORT_TYPE as TYPE } from '../constants'
 
@@ -17,75 +16,85 @@ const EstimatesTable = ({
             <col className={localStyles.importTableCol} />
             <col className={localStyles.importTableCol} />
             <col className={localStyles.importTableCol} />
+            <col className={localStyles.importTableCol} />
+            <col className={localStyles.importTableCol} />
+            <col className={localStyles.importTableCol} />
         </colgroup>
         <thead className={localStyles.importTableHead}>
             <tr className={localStyles.importTableRow}>
                 <th />
-                <th>Browsing History</th>
-                <th>Bookmarks</th>
+                <th>Pages already saved</th>
+                <th>Size on Hard Drive</th>
+                <th>Not yet downloaded</th>
+                <th>Size on Hard Drive</th>
+                <th>Time to download</th>
             </tr>
         </thead>
         <tbody>
             <tr className={localStyles.importTableRow}>
-                <td>Pages already saved</td>
-                <td>{estimates[TYPE.HISTORY].complete}</td>
-                <td>{estimates[TYPE.BOOKMARK].complete}</td>
-            </tr>
-            <tr
-                className={classNames(
-                    localStyles.importTableRow,
-                    localStyles.importTableRowSepar,
-                )}
-            >
-                <td className={localStyles.importTableCellSepar}>
-                    ~ Size on Hard Drive
-                </td>
-                <td className={localStyles.importTableCellSepar}>
-                    {estimates[TYPE.HISTORY].sizeCompleted} MB
-                </td>
-                <td className={localStyles.importTableCellSepar}>
-                    {estimates[TYPE.BOOKMARK].sizeCompleted} MB
-                </td>
-            </tr>
-
-            <tr className={localStyles.importTableRow}>
-                <td>Not yet downloaded</td>
-                <td>{estimates[TYPE.HISTORY].remaining}</td>
-                <td>{estimates[TYPE.BOOKMARK].remaining}</td>
-            </tr>
-            <tr className={localStyles.importTableRow}>
-                <td>~ Size on Hard Drive</td>
-                <td>{estimates[TYPE.HISTORY].sizeRemaining} MB</td>
-                <td>{estimates[TYPE.BOOKMARK].sizeRemaining} MB</td>
-            </tr>
-            <tr className={localStyles.importTableRow}>
-                <td>~ Time to download</td>
-                <td>{estimates[TYPE.HISTORY].timeRemaining}</td>
-                <td>{estimates[TYPE.BOOKMARK].timeRemaining}</td>
-            </tr>
-            <tr
-                className={classNames(
-                    localStyles.importTableRow,
-                    localStyles.actionTableRow,
-                )}
-            >
-                <td>Import?</td>
                 <td>
                     <input
                         type="checkbox"
                         name="history"
+                        id="history"
                         onChange={onAllowHistoryClick}
                         checked={allowTypes[TYPE.HISTORY]}
                     />
+                    <label htmlFor="history">
+                        <span className={localStyles.checkboxText}>
+                            Browsing history
+                        </span>
+                        <br />(last 90 days)
+                    </label>
                 </td>
+                <td>{estimates[TYPE.HISTORY].complete}</td>
+                <td>{estimates[TYPE.HISTORY].sizeCompleted} MB</td>
+                <td>{estimates[TYPE.HISTORY].remaining}</td>
+                <td>{estimates[TYPE.HISTORY].sizeRemaining} MB</td>
+                <td>{estimates[TYPE.HISTORY].timeRemaining}</td>
+            </tr>
+            <tr className={localStyles.importTableRow}>
                 <td>
                     <input
                         type="checkbox"
                         name="bookmarks"
+                        id="bookmarks"
                         onChange={onAllowBookmarksClick}
                         checked={allowTypes[TYPE.BOOKMARK]}
-                    />
+                    />{' '}
+                    <label htmlFor="bookmarks">
+                        <span className={localStyles.checkboxText}>
+                            Bookmarks
+                        </span>
+                    </label>
                 </td>
+                <td>{estimates[TYPE.BOOKMARK].complete}</td>
+                <td>{estimates[TYPE.BOOKMARK].sizeCompleted} MB</td>
+                <td>{estimates[TYPE.BOOKMARK].remaining}</td>
+                <td>{estimates[TYPE.BOOKMARK].sizeRemaining} MB</td>
+                <td>{estimates[TYPE.BOOKMARK].timeRemaining}</td>
+            </tr>
+            <tr className={localStyles.importTableRow}>
+                <td>
+                    <input type="checkbox" name="evernote" />{' '}
+                    <label htmlFor="evernote">
+                        <span className={localStyles.checkboxText}>
+                            Evernote
+                        </span>
+                    </label>
+                </td>
+                <td colSpan="5">[COMING SOON]</td>
+            </tr>
+            <tr className={localStyles.importTableRow}>
+                <td>
+                    <input type="checkbox" name="evernote" />{' '}
+                    <label htmlFor="evernote">
+                        <span className={localStyles.checkboxText}>
+                            Evernote
+                        </span>
+                    </label>
+                </td>
+                <td colSpan="5">[COMING SOON]</td>
             </tr>
         </tbody>
     </table>

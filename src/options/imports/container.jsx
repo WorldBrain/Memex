@@ -192,10 +192,7 @@ class ImportContainer extends Component {
                 ) : (
                     <ProgressTable progress={progress} />
                 )}
-                <ButtonBar
-                    isRunning={isRunning}
-                    helpText={this.renderHelpText()}
-                >
+                <ButtonBar isRunning={isRunning}>
                     {this.renderCancelButton()}
                     {this.renderImportButton()}
                 </ButtonBar>
