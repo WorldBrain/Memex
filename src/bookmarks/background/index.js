@@ -17,11 +17,11 @@ async function getAttachments(pageData) {
     }
 }
 
-async function createNewPageForBookmark(bookmarkInfo) {
+async function createNewPageForBookmark(id, bookmarkInfo) {
     let pageDoc = {
+        _id: generatePageDocId({ url: bookmarkInfo.url }),
         url: bookmarkInfo.url,
         title: bookmarkInfo.title,
-        _id: generatePageDocId({ url: bookmarkInfo.url }),
     }
 
     try {
@@ -40,7 +40,8 @@ async function createNewPageForBookmark(bookmarkInfo) {
         }
     } catch (err) {
         console.error(
-            'Error occurred while fetching page data: ' + err.toString(),
+            'Error occurred while fetching page data: ',
+            err.toString(),
         )
     } finally {
         const bookmarkDoc = transformToBookmarkDoc(pageDoc)(bookmarkInfo)
@@ -50,21 +51,4 @@ async function createNewPageForBookmark(bookmarkInfo) {
 }
 
 // Store and index any new browser bookmark
-browser.bookmarks.onCreated.addListener(async (id, bookmarkInfo) => {
-    try {
-        // Attempt to resolve existing page doc to connect new bookmark to
-        const pageDoc = await db.get(
-            generatePageDocId({ url: bookmarkInfo.url }),
-        )
-        const bookmarkDoc = transformToBookmarkDoc(pageDoc)(bookmarkInfo)
-        index.addBookmark(bookmarkDoc)
-        db.bulkDocs([bookmarkDoc, pageDoc])
-    } catch (error) {
-        // Create new page + bookmark if existing page not found
-        if (error.status === 404) {
-            createNewPageForBookmark(bookmarkInfo)
-        } else {
-            console.error(error) // Can't handle other errors; log to background script console
-        }
-    }
-})
+browser.bookmarks.onCreated.addListener(createNewPageForBookmark)

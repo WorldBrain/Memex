@@ -70,12 +70,7 @@ async function indexSearch({
 }
 
 // Export index interface
-export {
-    addPage,
-    addPageConcurrent,
-    addVisit,
-    addBookmark,
-} from './search-index/add'
+export { addPage, addPageConcurrent } from './search-index/add'
 export { initSingleLookup } from './search-index/util'
-export { removeVisit, removeBookmark, default as del } from './search-index/del'
+export { default as del } from './search-index/del'
 export { indexSearch as search }

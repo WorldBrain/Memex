@@ -1,5 +1,3 @@
-import uniq from 'lodash/fp/uniq'
-
 import PromiseBatcher from 'src/util/promise-batcher'
 import { RESULT_TYPES } from 'src/overview/constants'
 import index, { DEFAULT_TERM_SEPARATOR } from './'
@@ -9,14 +7,14 @@ export const standardResponse = (resolve, reject) => (err, data = true) =>
 
 /**
  * Handles splitting up searchable content into indexable terms. Terms are all
- * lc'd + and uniq'd.
+ * lowercased.
  *
  * @param {string} content Searchable content text.
  * @param {string|RegExp} [separator=' '] Separator used to split content into terms.
  * @returns {string[]} Array of terms derived from `content`.
  */
 export const extractTerms = (content, separator = DEFAULT_TERM_SEPARATOR) =>
-    uniq(content.split(separator).map(term => term.toLowerCase()))
+    content.split(separator).map(term => term.toLowerCase())
 
 /**
  * Transforms an indexed document into a search result.
@@ -32,11 +30,17 @@ export const structureSearchResult = (document, score = 1) => ({
     score,
 })
 
-export const initSingleLookup = (defaultValue = null) => async key => {
-    try {
-        const result = await index.get(key)
+const defLookupOpts = {
+    defaultValue: null,
+    asBuffer: false,
+    concurrency: 5,
+}
 
-        return JSON.parse(result)
+export const initSingleLookup = (
+    { defaultValue = null, asBuffer = false } = defLookupOpts,
+) => async key => {
+    try {
+        return await index.get(key, { asBuffer })
     } catch (error) {
         if (error.notFound) {
             return defaultValue
@@ -53,13 +57,12 @@ export const initSingleLookup = (defaultValue = null) => async key => {
  *  of keys to lookup in index. Unique expected. Returns Promise resolving to single or array of
  *  documents matching given `keys` param.
  */
-export const initLookupByKeys = ({
-    concurrency = 5,
-    defaultValue = null,
-}) => keys =>
+export const initLookupByKeys = (
+    { concurrency = 5, defaultValue = null, asBuffer = false } = defLookupOpts,
+) => keys =>
     new Promise(async resolve => {
         const result = []
-        const singleLookup = initSingleLookup(defaultValue)
+        const singleLookup = initSingleLookup({ defaultValue, asBuffer })
 
         if (!Array.isArray(keys)) {
             return resolve(await singleLookup(keys))

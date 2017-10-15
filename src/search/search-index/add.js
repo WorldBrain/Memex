@@ -1,44 +1,6 @@
-import { RESULT_TYPES } from 'src/overview/constants'
-import PromiseBatcher from 'src/util/promise-batcher'
-import index, { DEFAULT_TERM_SEPARATOR } from './'
-import { transformPageAndMetaDocs, transformMetaDoc } from './transforms'
-import { initSingleLookup, extractTerms } from './util'
-import del from './del'
-
-/**
- * @param doc The doc to queue up for adding into the index.
- * @returns Boolean denoting that the add was successful (else error thrown).
- */
-export async function addConcurrent(doc) {
-    const input = [doc]
-    console.log('addConcurrent', doc)
-
-    for (const page of input) {
-        await addPageRaw(page)
-    }
-}
-
-/**
- * Adds a new page doc + any associated visit/bookmark docs to the index. This method
- * uses the concurrency-safe index add method.
- * // TODO: Reimplement
- * @param {any} Object containing a `pageDoc` (required) and optionally any associated `visitDocs` and `bookmarkDocs`.
- * @returns {Promise} Promise resolving when indexing is complete, or rejecting for any index errors.
- */
-export async function addPageConcurrent({
-    pageDoc,
-    visitDocs = [],
-    bookmarkDocs = [],
-}) {
-    const indexDoc = transformPageAndMetaDocs({
-        pageDoc,
-        visitDocs,
-        bookmarkDocs,
-    })
-    console.log('adding page concurrent', indexDoc)
-
-    return await addPageRaw(indexDoc)
-}
+import index, { DEFAULT_TERM_SEPARATOR } from '.'
+import { transformPageAndMetaDocs } from './transforms'
+import { initSingleLookup } from './util'
 
 /**
  * Adds a new page doc + any associated visit/bookmark docs to the index. This method
@@ -46,14 +8,13 @@ export async function addPageConcurrent({
  * @param {any} Object containing a `pageDoc` (required) and optionally any associated `visitDocs` and `bookmarkDocs`.
  * @returns {Promise} Promise resolving when indexing is complete, or rejecting for any index errors.
  */
-export const addPage = ({ pageDoc, visitDocs = [], bookmarkDocs = [] }) =>
-    addPageRaw(
-        transformPageAndMetaDocs({
-            pageDoc,
-            visitDocs,
-            bookmarkDocs,
-        }),
-    )
+export const addPage = docs =>
+    performIndexing(transformPageAndMetaDocs(DEFAULT_TERM_SEPARATOR)(docs))
+
+/**
+ * TODO: Implement queueing for concurrent-safeness
+ */
+export const addPageConcurrent = docs => addPage(docs)
 
 const createTermValue = indexDoc => ({
     [indexDoc.id]: {
@@ -61,91 +22,108 @@ const createTermValue = indexDoc => ({
     },
 })
 
-const initReduceTermValue = indexDoc => currTermValue => {
-    const newTermValue = createTermValue(indexDoc)
+const initReduceTermValue = indexDoc => currValue => {
+    const newValue = createTermValue(indexDoc)
 
     // If term not indexed, use new one...
-    if (currTermValue == null) {
-        return newTermValue
+    if (currValue == null) {
+        return newValue
     }
 
     // ... else update existing with new
     return {
-        ...currTermValue,
-        ...newTermValue,
+        ...currValue,
+        ...newValue,
     }
 }
 
-const addPageRaw = (indexDoc, termSeparator = DEFAULT_TERM_SEPARATOR) =>
-    new Promise(async (resolve, reject) => {
-        console.log('ADDING PAGE RAW')
-        console.log(indexDoc)
+const initReduceTimestampValue = indexDoc => currValue => {
+    const newValue = new Set(currValue)
 
-        if (!indexDoc.content) {
-            return Promise.resolve()
-        }
+    if (newValue.has(indexDoc.id)) {
+        throw Error('Already indexed')
+    }
 
-        const reduceTermValue = initReduceTermValue(indexDoc)
+    newValue.add(indexDoc.id)
+    return newValue
+}
 
+const indexTerms = async indexDoc => {
+    const indexBatch = index.batch()
+
+    const reduceTermValue = initReduceTermValue(indexDoc)
+    const singleLookup = initSingleLookup()
+
+    for (const term of indexDoc.terms) {
+        const termValue = reduceTermValue(await singleLookup(term))
+        indexBatch.put(term, termValue)
+    }
+
+    return new Promise(resolve => indexBatch.write(resolve))
+}
+
+const indexMetaTimestamps = async indexDoc => {
+    const indexBatch = index.batch()
+
+    const reduceTimestampValue = initReduceTimestampValue(indexDoc)
+    const timestamps = [...indexDoc.bookmarks, ...indexDoc.visits]
+    const singleLookup = initSingleLookup()
+
+    for (const timestamp of timestamps) {
         try {
-            await index.put(indexDoc.id, JSON.stringify(indexDoc))
-
-            const terms = extractTerms(indexDoc.content, termSeparator)
-
-            const batch = new PromiseBatcher({
-                inputBatchCallback: () => Promise.resolve(terms),
-                processingCallback: initSingleLookup(),
-                concurrency: 5,
-                observer: {
-                    next: ({ input, output }) =>
-                        index.put(
-                            input,
-                            JSON.stringify(reduceTermValue(output)),
-                        ),
-                    complete: resolve,
-                    error: console.error,
-                },
-            })
-
-            batch.start()
-        } catch (err) {
-            reject(err)
+            const timestampValue = reduceTimestampValue(
+                await singleLookup(timestamp),
+            )
+            indexBatch.put(timestamp, timestampValue)
+        } catch (error) {
+            // Already indexed; skip
         }
-    })
-
-/**
- * Returns a function that affords adding either a visit or bookmark to an index.
- * The function should perform the following update, using the associated page doc ID:
- *  - grab the existing index doc matching the page doc ID
- *  - perform update to appropriate timestamp field, by APPENDING new timestamp to field + `latest` (sort) field
- *  - delete the original doc form the index
- *  - add the updated doc into the index
- * NOTE: this appends the timestamp extracted from the given metaDoc, hence to maintain an
- * order, this should generally only get called on new visits/bookmark events.
- */
-const addTimestamp = field => async metaDoc => {
-    const indexDocId = metaDoc.page._id // Index docs share ID with corresponding pouch page doc
-    const existingDoc = await initSingleLookup()(indexDocId) // Get existing indexed doc
-    if (!existingDoc) {
-        throw new Error(
-            'Page associated with timestamp is not recorded in the index',
-        )
     }
 
-    const newTimestamp = transformMetaDoc(metaDoc)
-
-    // This can be done better; now works becuase we have only 2 types
-    existingDoc.type = metaDoc._id.startsWith('visit/')
-        ? RESULT_TYPES.VISIT
-        : RESULT_TYPES.BOOKMARK
-
-    // Perform in-memory updates of timestamp array + "latest"/sort field
-    existingDoc.latest = newTimestamp
-    existingDoc[field] = [...(existingDoc[field] || []), newTimestamp]
-
-    await del(indexDocId) // Delete existing doc
-    return addConcurrent(existingDoc) // Add new updated doc
+    return new Promise(resolve => indexBatch.write(resolve))
 }
 
-export const addVisit = addTimestamp('visits')
-export const addBookmark = addTimestamp('bookmarks')
+const indexPage = async indexDoc => {
+    const existingDoc = await initSingleLookup()(indexDoc.id)
+
+    if (!existingDoc) {
+        return index.put(indexDoc.id, indexDoc)
+    }
+
+    // Ensure the terms and meta timestamps get merged with existing
+    return index.put(indexDoc.id, {
+        ...indexDoc,
+        terms: new Set([...existingDoc.terms, ...indexDoc.terms]),
+        visits: new Set([...existingDoc.visits, ...indexDoc.visits]),
+        bookmarks: new Set([...existingDoc.bookmarks, ...indexDoc.bookmarks]),
+    })
+}
+
+// Runs all standard indexing on the index doc
+async function performIndexing(indexDoc) {
+    console.log('ADDING PAGE')
+    console.log(indexDoc)
+
+    if (!indexDoc.terms.size) {
+        return
+    }
+
+    try {
+        // Run indexing of page
+        console.time('indexing page')
+        await indexPage(indexDoc)
+        console.timeEnd('indexing page')
+
+        // Run indexing of terms
+        console.time('indexing terms')
+        await indexTerms(indexDoc)
+        console.timeEnd('indexing terms')
+
+        // Run indexing of meta timestamps
+        console.time('indexing meta times')
+        await indexMetaTimestamps(indexDoc)
+        console.timeEnd('indexing meta times')
+    } catch (err) {
+        console.error(err)
+    }
+}

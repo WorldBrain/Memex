@@ -32,16 +32,9 @@ async function updateIndex(finalPagePromise, visit) {
         return
     }
 
-    // Check if doc exists in index
-    const existingIndexedDoc = await index.initSingleLookup()(page._id) // TODO: maybe just have this in the `addPage` index methods
-
     // Index either the page + visit, or just the visit if page already exists
     try {
-        if (existingIndexedDoc) {
-            await index.addVisit(visit)
-        } else {
-            await index.addPage({ pageDoc: page, visitDocs: [visit] })
-        }
+        await index.addPage({ pageDoc: page, visitDocs: [visit] })
     } catch (error) {
         // Indexing issue; log it for now
         console.error(error)
