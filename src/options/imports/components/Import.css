@@ -123,3 +123,35 @@
 .checkboxText {
     font-weight: bold;
 }
+
+progress,
+progress[role] {
+    appearance: none;
+    background-size: auto;
+    height: 50px;
+    width: 100%;
+    border-radius: 20px;
+}
+
+progress[value]::-webkit-progress-bar {
+    background-color: #ededed;
+    border-radius: 20px;
+}
+
+progress[value]::-webkit-progress-value {
+    background-color: #4cc3a5;
+    border-radius: 20px;
+}
+
+.quoteBlock {
+    padding: 20px;
+    background-color: #f6f6f6;
+    text-align: center;
+    font-family: 'Lato';
+    color: #6d6d6d;
+    border-radius: 5px;
+}
+
+.quoteLine {
+    font-weight: bold;
+}

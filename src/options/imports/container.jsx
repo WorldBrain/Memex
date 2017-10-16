@@ -8,11 +8,12 @@ import * as actions from './actions'
 import * as constants from './constants'
 import Import from './components/Import'
 import EstimatesTable from './components/EstimatesTable'
-import ProgressTable from './components/ProgressTable'
+import ProgressBar from './components/ProgressBar'
 import ActionButton from './components/ActionButton'
 import ButtonBar from './components/ButtonBar'
 import DownloadDetails from './components/DownloadDetails'
 import DownloadDetailsRow from './components/DownloadDetailsRow'
+import QuoteDownloadProgress from './components/QuoteDownloadProgress'
 
 class ImportContainer extends Component {
     constructor(props) {
@@ -100,7 +101,7 @@ class ImportContainer extends Component {
                 isHidden={isIdle}
                 isDisabled={isStopped}
             >
-                Cancel import
+                Cancel
             </ActionButton>
         )
     }
@@ -189,13 +190,22 @@ class ImportContainer extends Component {
             >
                 {isIdle || isLoading ? (
                     <EstimatesTable {...estTableProps} />
-                ) : (
-                    <ProgressTable progress={progress} />
+                ) : null}
+                {(isRunning || isPaused) && (
+                    <div>
+                        <ProgressBar
+                            progress={progress}
+                            allowTypes={allowTypes}
+                        />
+                        <QuoteDownloadProgress />
+                    </div>
                 )}
-                <ButtonBar isRunning={isRunning}>
-                    {this.renderCancelButton()}
-                    {this.renderImportButton()}
-                </ButtonBar>
+                {(isRunning || isPaused || isIdle || isLoading) && (
+                    <ButtonBar isRunning={isRunning}>
+                        {this.renderCancelButton()}
+                        {this.renderImportButton()}
+                    </ButtonBar>
+                )}
                 {!(isIdle || isLoading) && (
                     <DownloadDetails
                         filterHandlers={this.getDetailFilterHandlers()}
