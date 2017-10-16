@@ -2,6 +2,8 @@ import index, { DEFAULT_TERM_SEPARATOR } from '.'
 import { transformPageAndMetaDocs } from './transforms'
 import { initSingleLookup } from './util'
 
+const singleLookup = initSingleLookup()
+
 /**
  * Adds a new page doc + any associated visit/bookmark docs to the index. This method
  * is *NOT* concurrency safe.
@@ -16,43 +18,35 @@ export const addPage = docs =>
  */
 export const addPageConcurrent = docs => addPage(docs)
 
-const createTermValue = indexDoc => ({
-    [indexDoc.id]: {
-        latest: indexDoc.latest,
-    },
-})
+const createTermValue = indexDoc =>
+    new Map([[indexDoc.id, new Map([['latest', indexDoc.latest]])]])
 
-const initReduceTermValue = indexDoc => currValue => {
-    const newValue = createTermValue(indexDoc)
+const createTimestampValue = indexDoc => new Map([[indexDoc.id]])
 
-    // If term not indexed, use new one...
-    if (currValue == null) {
-        return newValue
+const initReduceTermValue = indexDoc => value => {
+    if (value == null) {
+        return createTermValue(indexDoc)
     }
 
-    // ... else update existing with new
-    return {
-        ...currValue,
-        ...newValue,
-    }
+    return new Map([...value, ...createTermValue(indexDoc)])
 }
 
-const initReduceTimestampValue = indexDoc => currValue => {
-    const newValue = new Set(currValue)
+const initReduceTimestampValue = indexDoc => value => {
+    if (value == null) {
+        return createTimestampValue(indexDoc)
+    }
 
-    if (newValue.has(indexDoc.id)) {
+    if (value.has(indexDoc.id)) {
         throw Error('Already indexed')
     }
 
-    newValue.add(indexDoc.id)
-    return newValue
+    value.set(indexDoc.id)
+    return value
 }
 
 const indexTerms = async indexDoc => {
     const indexBatch = index.batch()
-
     const reduceTermValue = initReduceTermValue(indexDoc)
-    const singleLookup = initSingleLookup()
 
     for (const term of indexDoc.terms) {
         const termValue = reduceTermValue(await singleLookup(term))
@@ -64,10 +58,8 @@ const indexTerms = async indexDoc => {
 
 const indexMetaTimestamps = async indexDoc => {
     const indexBatch = index.batch()
-
     const reduceTimestampValue = initReduceTimestampValue(indexDoc)
     const timestamps = [...indexDoc.bookmarks, ...indexDoc.visits]
-    const singleLookup = initSingleLookup()
 
     for (const timestamp of timestamps) {
         try {
@@ -84,7 +76,7 @@ const indexMetaTimestamps = async indexDoc => {
 }
 
 const indexPage = async indexDoc => {
-    const existingDoc = await initSingleLookup()(indexDoc.id)
+    const existingDoc = await singleLookup(indexDoc.id)
 
     if (!existingDoc) {
         return index.put(indexDoc.id, indexDoc)

@@ -1,4 +1,4 @@
-import zipObject from 'lodash/fp/zipObject'
+import zip from 'lodash/fp/zip'
 
 import index from './'
 import { initSingleLookup, initLookupByKeys } from './util'
@@ -17,35 +17,30 @@ export default async function del(pageIds) {
     }
 }
 
-const initReduceTermValue = indexDoc => ({ [indexDoc.id]: id, ...termValue }) =>
-    termValue
-
-const initReduceTimestampValue = indexDoc => currValue => {
-    if (currValue == null) {
-        return currValue
+function reduceValue(value, id) {
+    if (value == null) {
+        return new Map()
     }
-    currValue.delete(indexDoc.id)
-    return currValue
+    value.delete(id)
+    return value
 }
 
-const deindexTerms = async indexDoc => {
+async function deindex(id, indexedKeys) {
     const indexBatch = index.batch()
 
-    const reduceTermValue = initReduceTermValue(indexDoc)
-    const terms = [...indexDoc.terms]
-    const termValues = await initLookupByKeys({ defaultValue: {} })(terms)
-    const termValuesDict = zipObject(terms, termValues)
+    const indexedValues = await initLookupByKeys()(indexedKeys)
+    const indexedMap = new Map(zip(indexedKeys, indexedValues))
 
     // Schedule updates of all associated term values
-    for (const term in termValuesDict) {
+    for (const [key, currValue] of indexedMap) {
         try {
-            const termValue = reduceTermValue(termValuesDict[term])
+            const newValue = reduceValue(currValue, id)
 
             // If reduces to empty obj delete KVP, else update
-            if (!Object.keys(termValue).length) {
-                indexBatch.del(term)
+            if (!newValue.size) {
+                indexBatch.del(key)
             } else {
-                indexBatch.put(term, termValue)
+                indexBatch.put(key, newValue)
             }
         } catch (error) {
             // skip current
@@ -56,37 +51,12 @@ const deindexTerms = async indexDoc => {
     return new Promise(resolve => indexBatch.write(resolve))
 }
 
-const deindexTimestamps = async indexDoc => {
-    const indexBatch = index.batch()
-
-    const reduceTimestampValue = initReduceTimestampValue(indexDoc)
-    const timestamps = [...indexDoc.bookmarks, ...indexDoc.visits]
-    const timestampValues = await initLookupByKeys()(timestamps)
-    const timestampValuesDict = zipObject(timestamps, timestampValues)
-
-    // Schedule updates of all associated timestamp values
-    for (const timestamp in timestampValuesDict) {
-        try {
-            const timestampValue = reduceTimestampValue(
-                timestampValuesDict[timestamp],
-            )
-
-            // If reduces to null delete KVP, else update
-            if (timestampValue == null || !timestampValue.size) {
-                indexBatch.del(timestamp)
-            } else {
-                indexBatch.put(timestamp, timestampValue)
-            }
-        } catch (error) {
-            // Skip current
-            console.error(error)
-        }
-    }
-
-    return new Promise(resolve => indexBatch.write(resolve))
-}
-
 const deinidexPage = indexDoc => index.del(indexDoc.id)
+
+const deindexTerms = indexDoc => deindex(indexDoc.id, [...indexDoc.terms])
+
+const deindexTimestamps = indexDoc =>
+    deindex(indexDoc.id, [...indexDoc.bookmarks, ...indexDoc.visits])
 
 async function performDeindexing(pageId) {
     const indexDoc = await initSingleLookup()(pageId)

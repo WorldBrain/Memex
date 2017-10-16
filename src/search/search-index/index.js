@@ -1,4 +1,3 @@
-// import stopword from 'stopword'
 import levelup from 'levelup'
 
 import LevelJS from './level-js-to-leveldown'

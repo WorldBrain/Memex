@@ -2,6 +2,13 @@ import PromiseBatcher from 'src/util/promise-batcher'
 import { RESULT_TYPES } from 'src/overview/constants'
 import index, { DEFAULT_TERM_SEPARATOR } from './'
 
+// Key generation functions
+export const keyGen = {
+    term: key => `term/${key}`,
+    visit: key => `visit/${key}`,
+    bookmark: key => `bookmark/${key}`,
+}
+
 export const standardResponse = (resolve, reject) => (err, data = true) =>
     err ? reject(err) : resolve(data)
 
@@ -14,7 +21,7 @@ export const standardResponse = (resolve, reject) => (err, data = true) =>
  * @returns {string[]} Array of terms derived from `content`.
  */
 export const extractTerms = (content, separator = DEFAULT_TERM_SEPARATOR) =>
-    content.split(separator).map(term => term.toLowerCase())
+    content.split(separator).map(term => keyGen.term(term.toLowerCase()))
 
 /**
  * Transforms an indexed document into a search result.

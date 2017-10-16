@@ -1,7 +1,4 @@
-import intersection from 'lodash/intersection'
-import pick from 'lodash/fp/pick'
-
-import { structureSearchResult, initLookupByKeys } from './util'
+import { structureSearchResult, initLookupByKeys, keyGen } from './util'
 
 const compareByScore = (a, b) => b.score - a.score
 
@@ -21,43 +18,57 @@ export async function search(
     { fullDocs = true } = { fullDocs: true },
 ) {
     const terms = query[0]['AND'].content
-    const lookupByKeys = initLookupByKeys({ defaultValue: {} })
+    const lookupByKeys = initLookupByKeys()
     const paginateResults = paginate(offset, pageSize)
 
     // For each term, do index lookup to grab the associated page IDs value
-    const termValues = await lookupByKeys(terms)
+    const termValues = await lookupByKeys(terms.map(keyGen.term))
+
+    const containsEmptyTerm = termValues.reduce(
+        (acc, curr) => acc || curr == null,
+        false,
+    )
 
     // Exit early if no results
-    if (!termValues.length) {
-        return termValues
+    if (!termValues.length || containsEmptyTerm) {
+        return []
     }
 
-    let mergedTermValues = Object.assign(...termValues)
+    const mergedTermValues = new Map(
+        termValues.reduce((acc, curr) => [...acc, ...curr], []),
+    )
 
-    // Perform set intersect on each term value key to AND results
+    // Perform intersect of Map on each term value key to AND results
     if (termValues.length > 1) {
-        const intersectedIds = intersection(...termValues.map(Object.keys))
-        mergedTermValues = pick(intersectedIds)(mergedTermValues)
+        const missingInSomeTermValues = pageId =>
+            termValues.some(termValue => !termValue.has(pageId))
+
+        // Perform set difference on pageIds between termValues
+        const differedIds = new Set(
+            [...mergedTermValues.keys()].filter(missingInSomeTermValues),
+        )
+
+        // Delete each of the differed pageIds from the merged Map of term values
+        differedIds.forEach(pageId => mergedTermValues.delete(pageId))
     }
 
     // Either just return the IDs
     if (!fullDocs) {
-        const results = Object.keys(mergedTermValues)
-            .map(id => {
-                const { latest } = mergedTermValues[id]
-                return structureSearchResult({ id }, latest)
-            })
-            .sort(compareByScore)
+        const results = []
 
-        return paginateResults(results)
+        for (const [id, value] of mergedTermValues) {
+            results.push(structureSearchResult({ id }, value.get('latest')))
+        }
+
+        return paginateResults(results.sort(compareByScore))
     }
 
     // ... or resolve result IDs to their indexed doc data
-    const resultDocs = await lookupByKeys(Object.keys(mergedTermValues))
+    const resultDocs = await lookupByKeys([...mergedTermValues.keys()])
 
     const results = resultDocs
         .map(doc => {
-            const { latest } = mergedTermValues[doc.id]
+            const latest = mergedTermValues.get(doc.id).get('latest')
             return structureSearchResult(doc, latest)
         })
         .sort(compareByScore)
