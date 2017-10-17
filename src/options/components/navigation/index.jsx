@@ -6,11 +6,16 @@ import * as actions from '../../imports/actions'
 import { bindActionCreators } from 'redux'
 
 import Nav from './Nav'
+import NavLink from './NavLink'
 
 class Navigation extends Component {
-    render() {
-        const { routes } = this.props
+    isActive(route) {
+        return this.props.currentLocation.pathname === route.pathname
+    }
+
+    renderNavLinks() {
         const { isRunning, isIdle, isLoading, isStopped, isPaused } = this.props
+
         const state = {
             isRunning: isRunning,
             isIdle: isIdle,
@@ -19,13 +24,17 @@ class Navigation extends Component {
             isPaused: isPaused,
         }
 
-        return (
-            <Nav
-                routes={routes}
-                currentLocation={this.props.currentLocation}
-                state={state}
-            />
-        )
+        return this.props.routes.map((route, idx) => {
+            return (
+                <NavLink route={route} key={idx} state={state}>
+                    {this.isActive(route)}
+                </NavLink>
+            )
+        })
+    }
+
+    render() {
+        return <Nav>{this.renderNavLinks()}</Nav>
     }
 }
 

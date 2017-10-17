@@ -4,10 +4,10 @@ import { Link } from 'react-router'
 import classNames from 'classnames'
 import styles from './styles.css'
 
-const NavLink = ({ route, currentLocation, state }) => {
+const NavLink = ({ route, state, children }) => {
     const navClasses = classNames({
         [styles.navLink]: true,
-        [styles.isActive]: isActive(route),
+        [styles.isActive]: children,
     })
 
     const navIcon = classNames({
@@ -15,9 +15,15 @@ const NavLink = ({ route, currentLocation, state }) => {
         'material-icons': true,
     })
 
-    function isActive(route) {
-        return currentLocation.pathname === route.pathname
-    }
+    const analysisCondition = classNames({
+        [styles.active]: state.isIdle || state.isLoading,
+        [styles.done]: state.isRunning || state.isStopped || state.isPaused,
+    })
+
+    const progressCondition = classNames({
+        [styles.active]: state.isRunning || state.isPaused,
+        [styles.done]: state.isStopped,
+    })
 
     return (
         <li>
@@ -39,28 +45,10 @@ const NavLink = ({ route, currentLocation, state }) => {
                 )}
             </div>
             {route.name === 'Import' &&
-                isActive(route) && (
+                children && (
                     <div className={styles.importSubItems}>
-                        <div
-                            className={
-                                state.isIdle || state.isLoading
-                                    ? styles.active
-                                    : state.isRunning ||
-                                      state.isStopped ||
-                                      state.isPaused
-                                      ? styles.done
-                                      : null
-                            }
-                        >
-                            1. Analysis
-                        </div>
-                        <div
-                            className={
-                                state.isRunning || state.isPaused
-                                    ? styles.active
-                                    : state.isStopped ? styles.done : null
-                            }
-                        >
+                        <div className={analysisCondition}>1. Analysis</div>
+                        <div className={progressCondition}>
                             2. Download Progress
                         </div>
                         <div className={state.isStopped ? styles.active : null}>
@@ -74,8 +62,8 @@ const NavLink = ({ route, currentLocation, state }) => {
 
 NavLink.propTypes = {
     route: PropTypes.object.isRequired,
-    currentLocation: PropTypes.object.isRequired,
     state: PropTypes.object.isRequired,
+    children: PropTypes.bool.isRequired,
 }
 
 export default NavLink
