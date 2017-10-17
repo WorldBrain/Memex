@@ -4,19 +4,23 @@ import PropTypes from 'prop-types'
 import { IMPORT_TYPE as TYPE } from '../constants'
 import localStyles from './Import.css'
 
-const ProgressBar = ({ progress, allowTypes }) => {
+const StatusReport = ({ progress, allowTypes }) => {
     let total = allowTypes.h ? progress[TYPE.HISTORY].total : 0
     total += allowTypes.b ? progress[TYPE.BOOKMARK].total : 0
-    let complete = allowTypes.h ? progress[TYPE.HISTORY].complete : 0
-    complete += allowTypes.b ? progress[TYPE.BOOKMARK].complete : 0
+    let succeed = allowTypes.h ? progress[TYPE.HISTORY].success : 0
+    succeed += allowTypes.b ? progress[TYPE.BOOKMARK].success : 0
+    let fail = allowTypes.h ? progress[TYPE.HISTORY].fail : 0
+    fail += allowTypes.b ? progress[TYPE.BOOKMARK].fail : 0
+
+    console.log(allowTypes)
     return (
         <div>
-            <progress
-                className={localStyles.process}
-                max={total}
-                value={complete}
-            />
-            <h3>{(complete / total).toFixed(2) * 100 + '%'}</h3>
+            <h1 className={localStyles.heading}>Importation Complete</h1>
+            <div className={localStyles.reportDetails}>
+                <p>{'Succeeded (' + succeed + ')'}</p>
+                <p>{'Failed (' + fail + ')'}</p>
+                <p>{'Total (' + total + ')'}</p>
+            </div>
         </div>
     )
 }
@@ -28,7 +32,7 @@ const progressShape = PropTypes.shape({
     fail: PropTypes.number.isRequired,
 })
 
-ProgressBar.propTypes = {
+StatusReport.propTypes = {
     progress: PropTypes.shape({
         [TYPE.HISTORY]: progressShape.isRequired,
         [TYPE.BOOKMARK]: progressShape.isRequired,
@@ -36,4 +40,4 @@ ProgressBar.propTypes = {
     allowTypes: PropTypes.object.isRequired,
 }
 
-export default ProgressBar
+export default StatusReport

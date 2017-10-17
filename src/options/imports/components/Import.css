@@ -155,3 +155,20 @@ progress[value]::-webkit-progress-value {
 .quoteLine {
     font-weight: bold;
 }
+
+.heading {
+    color: #c8c8c8;
+    border-bottom: 1px solid #c8c8c8;
+    font-size: 1em;
+    width: 250px;
+    line-height: 2;
+}
+
+.reportDetails {
+    font-size: 16px;
+    color: #4d4b4c;
+    font-weight: bold;
+    letter-spacing: 1px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}

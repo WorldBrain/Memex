@@ -14,6 +14,7 @@ import ButtonBar from './components/ButtonBar'
 import DownloadDetails from './components/DownloadDetails'
 import DownloadDetailsRow from './components/DownloadDetailsRow'
 import QuoteDownloadProgress from './components/QuoteDownloadProgress'
+import StatusReport from './components/StatusReport'
 
 class ImportContainer extends Component {
     constructor(props) {
@@ -127,7 +128,9 @@ class ImportContainer extends Component {
 
         if (isStopped) {
             const handleClick = e => this.onButtonClick(e, boundActions.finish)
-            return <ActionButton handleClick={handleClick}>Return</ActionButton>
+            return (
+                <ActionButton handleClick={handleClick}>Complete</ActionButton>
+            )
         }
 
         // Idle state case
@@ -200,19 +203,23 @@ class ImportContainer extends Component {
                         <QuoteDownloadProgress />
                     </div>
                 )}
-                {(isRunning || isPaused || isIdle || isLoading) && (
-                    <ButtonBar isRunning={isRunning}>
-                        {this.renderCancelButton()}
-                        {this.renderImportButton()}
-                    </ButtonBar>
+                {isStopped && (
+                    <div>
+                        <StatusReport
+                            progress={progress}
+                            allowTypes={allowTypes}
+                        />
+                        <DownloadDetails
+                            filterHandlers={this.getDetailFilterHandlers()}
+                        >
+                            {this.renderDownloadDetailsRows()}
+                        </DownloadDetails>
+                    </div>
                 )}
-                {!(isIdle || isLoading) && (
-                    <DownloadDetails
-                        filterHandlers={this.getDetailFilterHandlers()}
-                    >
-                        {this.renderDownloadDetailsRows()}
-                    </DownloadDetails>
-                )}
+                <ButtonBar isRunning={isRunning}>
+                    {!isStopped && this.renderCancelButton()}
+                    {this.renderImportButton()}
+                </ButtonBar>
             </Import>
         )
     }
