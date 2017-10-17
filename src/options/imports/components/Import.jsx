@@ -69,7 +69,7 @@ const Import = ({
                 </div>
             )}
         </div>
-        <DevOptions />
+        {(isIdle || isLoading) && <DevOptions />}
     </div>
 )
 

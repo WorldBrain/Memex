@@ -8,6 +8,7 @@ import * as actions from './actions'
 import * as constants from './constants'
 import Import from './components/Import'
 import EstimatesTable from './components/EstimatesTable'
+import ProgressTable from './components/ProgressTable'
 import ProgressBar from './components/ProgressBar'
 import ActionButton from './components/ActionButton'
 import ButtonBar from './components/ButtonBar'
@@ -70,11 +71,9 @@ class ImportContainer extends Component {
     }
 
     renderHelpText() {
-        const { isIdle, isStopped } = this.props
+        const { isStopped } = this.props
         const { waitingOnCancelConfirm } = this.state
 
-        if (isIdle)
-            return 'Downloading may slow down your experience.\nYou can pause and resume anytime'
         if (isStopped) return 'Import has finished.'
         if (waitingOnCancelConfirm) return 'Press cancel again to confirm'
         return ''
@@ -200,7 +199,7 @@ class ImportContainer extends Component {
                             progress={progress}
                             allowTypes={allowTypes}
                         />
-                        <QuoteDownloadProgress />
+                        <ProgressTable progress={progress} />
                     </div>
                 )}
                 {isStopped && (
@@ -216,10 +215,14 @@ class ImportContainer extends Component {
                         </DownloadDetails>
                     </div>
                 )}
-                <ButtonBar isRunning={isRunning}>
+                <ButtonBar
+                    isRunning={isRunning}
+                    helpText={this.renderHelpText()}
+                >
                     {!isStopped && this.renderCancelButton()}
                     {this.renderImportButton()}
                 </ButtonBar>
+                {(isRunning || isPaused) && <QuoteDownloadProgress />}
             </Import>
         )
     }

@@ -152,6 +152,7 @@ progress[value]::-webkit-progress-value {
     border-radius: 5px;
     letter-spacing: 1px;
     font-size: 0.7em;
+    margin-top: 40px;
 }
 
 .quoteLine {
@@ -177,6 +178,14 @@ progress[value]::-webkit-progress-value {
 
 .progressBar {
     font-size: 0.8em;
-    text-align: right;
     margin-bottom: 20px;
+    color: #3eb995;
+}
+
+.arrowUp {
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 5px solid #3eb995;
 }

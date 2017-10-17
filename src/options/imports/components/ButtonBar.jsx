@@ -4,19 +4,21 @@ import PropTypes from 'prop-types'
 import { LoadingIndicator } from 'src/common-ui/components'
 import styles from './ButtonBar.css'
 
-const ButtonBar = ({ isRunning, children }) => (
+const ButtonBar = ({ isRunning, helpText, children }) => (
     <div className={styles.container}>
         <div className={styles.loadingContainer}>
             {isRunning && <LoadingIndicator />}
         </div>
         <div className={styles.actionContainer}>
             <div className={styles.actionBar}>{children}</div>
+            <div className={styles.helpText}>{helpText}</div>
         </div>
     </div>
 )
 
 ButtonBar.propTypes = {
     isRunning: PropTypes.bool.isRequired,
+    helpText: PropTypes.string.isRequired,
     children: PropTypes.arrayOf(PropTypes.node).isRequired,
 }
 
