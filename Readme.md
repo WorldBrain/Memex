@@ -1,176 +1,115 @@
-# WorldBrain's WebMemex
+# <a id="worldbrain" href="#worldbrain">WorldBrain</a>
 
-A browser extension that lets you create, search and share your personal web of knowledge.
+Worldbrain is a browser extension that lets you create and search through your whole web of personal browser history.
 
- - **Full-Text Search** pages and you visited and bookmarked (and later) also all the apps you use to organise your knowledge.
- - **Manually and automatically create links** between your content to organise & search your web by *your associations*
- - **Share** content recommendations, associations and qualifying metadata with your network and followers
+ - **Full-Text-Search** all pages and bookmarks you have visited.
+ - **Full Data Privacy** everything stays on your own computer and will **never ever ever EVER** be shared or used without your consent. Here at worldbrain we are highly concerned about your privacy and security please see our [privacy policy](#privacy-policy) for more details.
+
+Lookout for these exiting new features in the future:
+ - **Rate** webpages you visit, add notes, comments and links to similar valuable resources
+ - **Weight** intelligent algorithms to assess the value of a webpage based on your interactions with it.
+ - **Integrate** with all your favorite services such as facebook, evernote and twitter.
+ - **Sync** with all of your browsers, smart-phones, tablets, smart-fridges, electric cars, space-ships ect...
+ - **Share** recommendations, comments, links & ratings with your network.
+ - **Discover** new content that has high value within your network
+ - **Diversify** the content you find by looking through great sources on the opposite side of your 'value' system. Break out of your 'filter bubble'
+
+### Table Of Content
+
+1. [Project Status](#project-status)
+1. [How it Works](#how-it-works.md)
+1. [Contact](#contact)
+1. [License + Privacy Policy](#license-+-privacy-policy)
+1. [See also](#see-also)
+
+**Seperate Docs**
+
+1. [Contributing](./docs/Contributing-Guide.md)
+    * [Getting Started](./docs/Contributing-Guide.md#getting-started)
+    * [Installation](./docs/Contributing-Guide.md#installation)
+    * [Running The Extension](./docs/Contributing-Guide.md#running-the-extension)
+1. [Code Overview](./docs/Contributing-Guide.md#code-overview)
+    * [A brief overview of Web Extensions](./docs/Contributing-Guide.md#a-brief-overview-of-web-e)
+    * [Application Structure](./docs/Contributing-Guide.md#application-structure)
+    * [Dependencies](./docs/Contributing-Guide.md#dependencies)
+1. [In Depth How it Works](./docs/How-It-Works.md)
+
+## Project Status
+We are currently on the cusp of releasing a brand new version of the extension. See [roadmap](https://trello.com/b/mdqEuBjb) for more details
+
+The old one can still be found here: worldbrain.io/download
+
+Want to help out? If you are:
+ - A Marketer, A Designer or Investor please Email oli@worldbrain.io
+ - If want to [donate click here](https://www.patreon.com/WorldBrain)! :moneybag:
+
+**If your a developer Please see [Contributing!](./docs/Contributing-Guide.md)**
+
+Have questions?
+- [Feedback](#contact), how can we make our extension better?
+- [General Questions or Concerns](#contact)
+- [Feature Requests](#feature-requests), <!-- vote for or add any new features you may want to see! --> What features would you like to see in our app? All ideas & requests are welcome!
+- [Bugs or Issues](https://github.com/WorldBrain/Research-Engine/issues/new), is something broken or not working as you feel it should?
+
+## How the Worldbrain Extension Works
+
+As you browse through websites WorldBrain will work automatically in the background see our [intro video](https://youtu.be/58Gys3ff4b8) for more information. When you are ready to search through your history follow the steps below.
+
+1. Go to the address bar of your browser
+2. Type `w` + `space_bar`
+3. Now simply type in your search query and the results will show below.
+
+![](https://github.com/swissums/worldbrain-doc-gifs/blob/master/how-it-works.gif)
+
+## Contact
+
+### Feedback
+**How can we make our extension better?**
+Please email: feedback@worldbrain.io
+or
+Join our slack channel: https://join-worldbrain.herokuapp.com/ and post a message
+
+### General Questions or Concerns?
+**Contemplating the meaning of life?**
+**Wondering why we are so wonderful or how we do what we do?**
+**Concerned that your Grandma may not understand how the extension works?**
+
+Please email: info@worldbrain.io
+or
+Join our slack channel: https://join-worldbrain.herokuapp.com/ and post a message
+
+### Feature Requests
+**Request <!-- Vote and Comment on -->  any new features you may want to see!**
+
+<!-- Please visit our [Feature Requests Page](**TODO**) -->
+Please either create a new [issue](https://github.com/WorldBrain/WebMemex/issues/new)
+or send us a message in the slack feature_request channel!
+You can join here https://join-worldbrain.herokuapp.com/
+
+### Bugs and Issues
+**Is the extension acting funny?**
+**Something not working properly or seems off?**
+
+Please create a new [issue](https://github.com/WorldBrain/WebMemex/issues/new)
+
+## License + Privacy Policy
+
+### MIT Licensed see [License](./License)
+
+### Privacy Policy
+
+We truly care about your privacy. So our privacy policy is as simple as we can make it.
+
+We will never retain or sell your data.
+It is actually impossible for us to do so as all of your data is kept on your local machine.
+:see_no_evil::hear_no_evil::speak_no_evil:
 
 
-## Project status
+## See also
 
-Sorry to disappoint, but we do not have the promised solution complete yet. :unamused:
+External resources
 
-In its current released version, the you can full-text search the browsing history & bookmarks.
-Here you can download it: [worldbrain.io/download](http://worldbrain.io/download)
+* [Donate to WorldBrain - www.patreon.com](https://www.patreon.com/WorldBrain)
+* [Join the WorldBrain community on Slack! - join-worldbrain.herokuapp.com](https://join-worldbrain.herokuapp.com/)
+* [Worldbrain is creating a structural solution to online (scientific) misinformation - www.worldbrain.io](https://worldbrain.io)
 
-At the moment we are in the process of refactoring/porting the features of the [WorldBrain (Re)search-Engine](https://github.com/WorldBrain/Research-Engine/) into the *WebMemex*, a project started by [@treora](https://github.com/Treora)
-
-This project is in full development. You are most welcome to contribute! See
-[Hacking](#hacking) below about how to build and run it from source and teach it
-new tricks.
-
-
-## Approach
-
-As it stands now, it is a WebExtension (thus should work on most modern
-browsers), bundled by [browserify](http://browserify.org) with some
-[babel](https://babeljs.io) ES6–7→ES5 compilation, that logs and stores visited
-pages in [PouchDB](https://pouchdb.com), and provides a viewer for this data
-based on
-[React](https://facebook.github.io/react/)+[Redux](http://redux.js.org/). See
-[Code Anatomy](#code-anatomy) below for a full tour du code.
-
-The project strategy is to combine and integrate features from other projects,
-and to factor out developed functionality into separate modules wherever it
-seems sensible. This extension could then be regarded as a bunch of different
-(but related) features a browser ought to have, bundled together for quick
-installation.
-
-See [our initial blog post](https://blog.webmemex.org/2017/01/05/roadmap/)
-for the feature roadmap of the next few months.
-
-
-## Contribute
-
-We are happy about any kind of feedback, bug fixes, new feature ideas and tips?
-Give a shout. :loudspeaker:
-
-- [Drop by on Slack](http://join-worldbrain.herokuapp.com)
-- Write us an email: info@worldbrain.io
-- or leave a comment under issues you want to contribute to
-
-
-## Hacking
-
-Like playing with ES6, WebExtension browser APIs, React, Redux, PouchDB? Come
-play along! :tada:
-
-### Build and run it
-
-1. Clone this repo.
-2. Get [Node/NPM](https://nodejs.org) and [yarn](https://yarnpkg.com)
-   (`npm install -g yarn`).
-3. Run `yarn` to install dependencies.
-4. Compile the source files using `yarn watch` for incremental builds or `yarn build` for standard dev builds.
-5. Load it in Firefox or Chromium/Chrome:
-    * In Firefox (≥49): run `yarn run firefox` (or run [web-ext] directly for more control).
-      Alternatively, go to `about:debugging`, choose 'Load Temporary Add-on', and pick
-      `extension/manifest.json` from this repo.
-    * In Chromium/Chrome: go to Tools→Extensions (`chrome://extensions`), enable 'Developer mode',
-      click 'Load unpacked extension...', and pick the `extension/` folder from this repo.
-
-### Automatic recompilation
-
-If the steps above worked, running `yarn run watch` will trigger a quick
-recompilation every time a source file has been modified.
-
-If you are testing in Firefox through `yarn run firefox`, the extension should also reload
-automatically. Otherwise, manually press the reload button in the extension list.
-
-- If your edits affected only the overview interface, just refresh/reopen it.
-- However, if you changed the background script, you have will to reload the
-  extension: find it back in the list of temporary add-ons/extensions and click
-  Reload.
-- If you changed the 'content_script', it seems browser-dependent whether newly
-  opened pages will get the new version. Better reload the extension to be sure.
-
-
-## Code Anatomy
-
-### WebExtension parts
-
-To comply with the [anatomy of a WebExtension](https://developer.mozilla.org/en-US/Add-ons/WebExtensions/Anatomy_of_a_WebExtension),
-it consists of three main parts (found in [`extension/`](extension/) after
-compilation):
-
-- `background.js` always runs, in an 'empty invisible tab', listening for
-  messages and events.
-- `content_script.js` is loaded into every web page that is visited. It is
-  invisible from that web page's own scripts, and can talk to the background
-  script.
-- `overview/overview.html`, with the resources in that folder, provides the main
-  user interface.
-
-The parts communicate in two ways:
-- Messaging through `browser.sendMessage`, usually done implicitly by using a
-  remote procedure call ([`util/webextensionRPC.js`](src/util/webextensionRPC.js)).
-- Through the in-browser PouchDB database, they get to see the same data, and
-  can react to changes made by other parts.
-
-Besides these parts,
-[`browser-polyfill.js`](https://github.com/mozilla/webextension-polyfill/)
-provides the promise-based `browser` API, that simply wraps Chromium/Chrome's
-callback-based `chrome` API, in order to make the same code run in different
-browsers (and to structure the callback mess).
-
-### Source organisation
-
-To keep things modular, the source code in [`src/`](src/) is not split in
-exactly those the three parts of the extension, but is rather grouped by
-functionality. Some folders may end up being factored out into separate repos
-later on, or at some point perhaps even into separate but interacting browser
-extensions.
-
-#### [`src/activity-logger/`](src/activity-logger/): activity logger
-
-This logs every page visit in PouchDB. Soon it should also watch for user
-interactions, for example to remember which parts of a page you have read.
-
-Currently, for every visit, a new page object is created in the database, to
-represent the visited page itself. This object should soon be deduplicated when
-the same page is visited multiple times. After creating a new page object,
-the next module is triggered to start analysing the page.
-
-#### [`src/page-analysis`](src/page-analysis/): page analysis
-
-This extracts and stores information about the page in a given tab, such as:
-- The plain text of the page, mainly for the full-text
-search index.
-- Metadata, such as its author, publication date, etcetera.
-- A screenshot for visual recognition.
-
-#### [`src/overview/`](src/overview/): overview
-
-The `overview` is the user interface that opens in a tab of its own. It is built
-with [React](https://facebook.github.io/react/) and [Redux](http://redux.js.org/),
-which create a somewhat complex but nicely organised application structure.
-
-See [`src/overview/Readme.md`](src/overview/Readme.md) for more details.
-
-#### [`src/search`](src/search/): document search
-
-Functions for finding relevant knowledge in the user's memory. Currently
-provides a simple full-text keyword search through visited pages using
-[pouchdb-quick-search](https://github.com/nolanlawson/pouchdb-quick-search).
-This can be improved in many ways, because we are searching through a person's
-memory, not just some arbitrary document collection. For example, we can use
-created assocations and browsing paths to better understand what one is looking
-for.
-
-#### [`src/dev/`](src/dev/): development tools
-
-Tools to help during development. They are not used in production builds.
-
-#### [`src/util/`](src/util): utilities
-
-Contains small generic things, stuff that is not project-specific. Things that
-could perhaps be packaged and published as an NPM module some day.
-
-#### `...`: other stuff
-
-The build process is based on `yarn`, that runs some `npm` commands specified in
-`package.json`, which in turn start the corresponding tasks in
-`gulpfile.babel.js` (transpiled by settings in `.babelrc`).
-
-So much for the code tour. :zzz:  Any questions? :point_up:
