@@ -12,7 +12,6 @@ const StatusReport = ({ progress, allowTypes }) => {
     let fail = allowTypes.h ? progress[TYPE.HISTORY].fail : 0
     fail += allowTypes.b ? progress[TYPE.BOOKMARK].fail : 0
 
-    console.log(allowTypes)
     return (
         <div>
             <h1 className={localStyles.heading}>Importation Complete</h1>

@@ -16,7 +16,12 @@ const ProgressBar = ({ progress, allowTypes }) => {
                 max={total}
                 value={complete}
             />
-            <h3>{(complete / total).toFixed(2) * 100 + '%'}</h3>
+            <h3
+                className={localStyles.progressBar}
+                style={{ width: (complete / total).toFixed(2) * 100 + '%' }}
+            >
+                {(complete / total).toFixed(2) * 100 + '%'}
+            </h3>
         </div>
     )
 }

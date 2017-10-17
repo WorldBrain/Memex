@@ -128,7 +128,7 @@ progress,
 progress[role] {
     appearance: none;
     background-size: auto;
-    height: 50px;
+    height: 30px;
     width: 100%;
     border-radius: 20px;
 }
@@ -150,6 +150,8 @@ progress[value]::-webkit-progress-value {
     font-family: 'Lato';
     color: #6d6d6d;
     border-radius: 5px;
+    letter-spacing: 1px;
+    font-size: 0.7em;
 }
 
 .quoteLine {
@@ -171,4 +173,10 @@ progress[value]::-webkit-progress-value {
     letter-spacing: 1px;
     margin-top: 10px;
     margin-bottom: 10px;
+}
+
+.progressBar {
+    font-size: 0.8em;
+    text-align: right;
+    margin-bottom: 20px;
 }
