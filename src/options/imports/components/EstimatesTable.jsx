@@ -76,7 +76,12 @@ const EstimatesTable = ({
             </tr>
             <tr className={localStyles.importTableRow}>
                 <td>
-                    <input type="checkbox" name="evernote" />{' '}
+                    <input
+                        type="checkbox"
+                        name="evernote"
+                        id="evernote"
+                        disabled
+                    />
                     <label htmlFor="evernote">
                         <span className={localStyles.checkboxText}>
                             Evernote
@@ -87,11 +92,14 @@ const EstimatesTable = ({
             </tr>
             <tr className={localStyles.importTableRow}>
                 <td>
-                    <input type="checkbox" name="evernote" />{' '}
-                    <label htmlFor="evernote">
-                        <span className={localStyles.checkboxText}>
-                            Evernote
-                        </span>
+                    <input
+                        type="checkbox"
+                        name="evernote"
+                        id="pocket"
+                        disabled
+                    />
+                    <label htmlFor="pocket">
+                        <span className={localStyles.checkboxText}>Pocket</span>
                     </label>
                 </td>
                 <td colSpan="5">[COMING SOON]</td>
