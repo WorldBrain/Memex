@@ -1,6 +1,7 @@
 import reduce from 'lodash/fp/reduce'
 
 import db, { bulkGetResultsToArray } from 'src/pouchdb'
+import { removeKeyType } from './search-index/util'
 
 /**
  * Iterates through at most log N of the input timestamps (where N is timestamps.length).
@@ -30,10 +31,12 @@ const simpleTimestampBinSearch = (timestamps = [], endDate) => {
 
 /**
 * NOTE: Assumes order for O(1) "lookup" of latest time, but O(log N) in case of endDate set
-* @param {Array<string>} timestamps ORDERED array of timestamp strings to get latest (last) one.
+* @param {Set<string>} timestamps Set of timestamp strings to get latest (last) one.
 * @returns {string} The latest timestamp
 */
-const getLatestTime = (timestamps = [], { startDate, endDate }) => {
+const getLatestTime = (timestamps, { startDate, endDate }) => {
+    timestamps = [...timestamps].map(removeKeyType).sort()
+
     // If endDate defined, need to return latest before endDate
     if (endDate) {
         return timestamps[simpleTimestampBinSearch(timestamps, endDate)]

@@ -1,5 +1,5 @@
 import QueryBuilder from './query-builder'
-import { search, count } from './search-index/search'
+import { search } from './search-index/search'
 import mapResultsToPouchDocs from './map-search-to-pouch'
 
 /**
@@ -7,14 +7,14 @@ import mapResultsToPouchDocs from './map-search-to-pouch'
  * In some special cases (if something is being removed, but t hasn't finished yet),
  * this could be `undefined`. May add more filters here if any other cases are encountered.
  */
-const filterBadlyStructuredResults = results =>
-    results.filter(result => result.document != null)
+// const filterBadlyStructuredResults = results =>
+//     results.filter(result => result.document != null)
 
 async function indexSearch({
     query,
     startDate,
     endDate,
-    skip,
+    skip = 0,
     limit = 10,
     getTotalCount = false,
 }) {
@@ -23,10 +23,10 @@ async function indexSearch({
     // Create SI query
     const indexQuery = new QueryBuilder()
         .searchTerm(query)
-        .startDate(startDate)
-        .endDate(endDate)
+        .filterTime({ startDate, endDate }, 'bookmark/')
+        .filterTime({ startDate, endDate }, 'visit/')
         .skipUntil(skip)
-        .limit(limit)
+        .limitUntil(limit)
         .get()
 
     // If there is only Bad Terms don't continue
@@ -38,33 +38,32 @@ async function indexSearch({
             isBadTerm: true,
         }
     }
+    console.log('DEBUG: query', indexQuery)
 
     // Get index results, filtering out any unexpectedly structured results
-    console.log(indexQuery)
-    let results = await search(indexQuery)
-    results = filterBadlyStructuredResults(results)
+    const { results, totalCount } = await search(indexQuery, {
+        count: getTotalCount,
+    })
 
     // Short-circuit if no results
     if (!results.length) {
         return {
             docs: [],
             resultsExhausted: true,
-            totalCount: getTotalCount ? 0 : undefined,
+            totalCount,
             isBadTerm: false,
         }
     }
 
-    console.log('YAY non-zero number of results', results)
-
     // Match the index results to data docs available in Pouch, consolidating meta docs
     const docs = await mapResultsToPouchDocs(results, { startDate, endDate })
 
-    console.log('DOCS from results', docs)
+    console.log('DEBUG: final UI results', docs)
 
     return {
         docs,
-        resultsExhausted: false,
-        totalCount: getTotalCount ? await count(indexQuery) : undefined,
+        resultsExhausted: docs.length < limit,
+        totalCount,
         isBadTerm: false,
     }
 }

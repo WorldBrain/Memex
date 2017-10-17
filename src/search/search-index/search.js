@@ -1,10 +1,135 @@
-import { structureSearchResult, initLookupByKeys, keyGen } from './util'
+import {
+    structureSearchResult,
+    initLookupByKeys,
+    keyGen,
+    rangeLookup,
+    removeKeyType,
+} from './util'
+
+const lookupByKeys = initLookupByKeys()
 
 const compareByScore = (a, b) => b.score - a.score
 
 // TODO: If only the page state changes, re-use results from last search
-const paginate = (skip, pageSize) => results =>
-    results.slice(skip, skip + pageSize)
+const paginate = ({ skip, limit }) => results =>
+    results.slice(skip, skip + limit)
+
+async function filterSearch({ timeFilter }) {
+    // Exit early for no values
+    if (!timeFilter.size) {
+        return null
+    }
+
+    const data = []
+
+    for (const timeRange of timeFilter.values()) {
+        data.push(await rangeLookup(timeRange))
+    }
+
+    // Perform union of results between all filter types (for now)
+    const unionedResults = new Map([
+        ...data.reduce((acc, curr) => [...acc, ...curr], []),
+    ])
+
+    //  Createa  Map of page ID keys to weights
+    return new Map(
+        [...unionedResults].reduce((acc, [timeKey, pageMap]) => {
+            const time = removeKeyType(timeKey)
+
+            // Update each page `latest` stamp for scoring with latest of all hits
+            for (const [pageId, props] of pageMap) {
+                if (!props.latest || props.latest < time) {
+                    pageMap.set(pageId, { ...props, latest: time })
+                }
+            }
+            return [...acc, ...pageMap]
+        }, []),
+    )
+}
+
+async function termSearch({ query }) {
+    // Exit early for wildcard
+    if (!query.size) {
+        return null
+    }
+
+    // For each term, do index lookup to grab the associated page IDs value
+    const termValuesMap = await lookupByKeys([...query].map(keyGen.term))
+
+    // If any terms are empty, they cancel all other results out
+    const containsEmptyTerm = [...termValuesMap.values()].reduce(
+        (acc, curr) => acc || curr == null || !curr.size,
+        false,
+    )
+
+    // Exit early if no results
+    if (!termValuesMap.size || containsEmptyTerm) {
+        return new Map()
+    }
+
+    // Create a Map of page ID keys to weights
+    const pageValuesMap = new Map(
+        [...termValuesMap.values()].reduce(
+            (acc, curr) => [...acc, ...curr],
+            [],
+        ),
+    )
+
+    // Perform intersect of Map on each term value key to AND results
+    if (termValuesMap.size > 1) {
+        const missingInSomeTermValues = terms => pageId =>
+            terms.some(termValue => !termValue.has(pageId))
+
+        // Perform set difference on pageIds between termValues
+        const differedIds = new Set(
+            [...pageValuesMap.keys()].filter(
+                missingInSomeTermValues([...termValuesMap.values()]),
+            ),
+        )
+
+        // Delete each of the differed pageIds from the merged Map of term values
+        differedIds.forEach(pageId => pageValuesMap.delete(pageId))
+    }
+
+    return pageValuesMap
+}
+
+function formatIdResults(pageResultsMap) {
+    const results = []
+
+    for (const [pageId, value] of pageResultsMap) {
+        results.push(structureSearchResult({ id: pageId }, value.latest))
+    }
+
+    return results.sort(compareByScore)
+}
+
+async function resolveIdResults(pageResultsMap) {
+    const pageValuesMap = await lookupByKeys([...pageResultsMap.keys()])
+
+    const results = []
+
+    for (const [pageId, props] of pageValuesMap) {
+        const { latest } = pageResultsMap.get(pageId)
+        results.push(structureSearchResult(props, latest))
+    }
+
+    return results.sort(compareByScore)
+}
+
+function intersectResultMaps(termPages, filterPages) {
+    // Should be null if filter search not needed to be run
+    if (filterPages == null) {
+        return termPages
+    }
+    if (termPages == null) {
+        return filterPages
+    }
+
+    const intersectsTermPages = ([filterPage]) => termPages.has(filterPage)
+
+    return new Map([...filterPages].filter(intersectsTermPages))
+}
 
 /**
  * Performs a search based on data supplied in the `query`.
@@ -14,70 +139,39 @@ const paginate = (skip, pageSize) => results =>
  * @returns {SearchResult[]}
  */
 export async function search(
-    { offset = 0, pageSize = 10, query },
-    { fullDocs = true } = { fullDocs: true },
+    query = { skip: 0, limit: 10 },
+    { fullDocs = true, count = false } = { fullDocs: true, count: false },
 ) {
-    const terms = query[0]['AND'].content
-    const lookupByKeys = initLookupByKeys()
-    const paginateResults = paginate(offset, pageSize)
+    const paginateResults = paginate(query)
+    let totalResultCount
+    console.time('total search')
 
-    // For each term, do index lookup to grab the associated page IDs value
-    const termValues = await lookupByKeys(terms.map(keyGen.term))
+    console.time('term search')
+    const termPageResultsMap = await termSearch(query)
+    console.timeEnd('term search')
 
-    const containsEmptyTerm = termValues.reduce(
-        (acc, curr) => acc || curr == null,
-        false,
+    console.time('filter search')
+    const filterPageResultsMap = await filterSearch(query)
+    console.timeEnd('filter search')
+
+    // If there was a time filter applied, intersect those results with term results, else use term results
+    const pageResultsMap = intersectResultMaps(
+        termPageResultsMap,
+        filterPageResultsMap,
     )
 
-    // Exit early if no results
-    if (!termValues.length || containsEmptyTerm) {
-        return []
+    if (count) {
+        totalResultCount = pageResultsMap.size
     }
 
-    const mergedTermValues = new Map(
-        termValues.reduce((acc, curr) => [...acc, ...curr], []),
-    )
+    // Either or resolve result IDs to their indexed doc data, or just return the IDs map
+    const results = fullDocs
+        ? await resolveIdResults(pageResultsMap)
+        : formatIdResults(pageResultsMap)
 
-    // Perform intersect of Map on each term value key to AND results
-    if (termValues.length > 1) {
-        const missingInSomeTermValues = pageId =>
-            termValues.some(termValue => !termValue.has(pageId))
-
-        // Perform set difference on pageIds between termValues
-        const differedIds = new Set(
-            [...mergedTermValues.keys()].filter(missingInSomeTermValues),
-        )
-
-        // Delete each of the differed pageIds from the merged Map of term values
-        differedIds.forEach(pageId => mergedTermValues.delete(pageId))
+    console.timeEnd('total search')
+    return {
+        results: paginateResults(results),
+        totalCount: totalResultCount,
     }
-
-    // Either just return the IDs
-    if (!fullDocs) {
-        const results = []
-
-        for (const [id, value] of mergedTermValues) {
-            results.push(structureSearchResult({ id }, value.get('latest')))
-        }
-
-        return paginateResults(results.sort(compareByScore))
-    }
-
-    // ... or resolve result IDs to their indexed doc data
-    const resultDocs = await lookupByKeys([...mergedTermValues.keys()])
-
-    const results = resultDocs
-        .map(doc => {
-            const latest = mergedTermValues.get(doc.id).get('latest')
-            return structureSearchResult(doc, latest)
-        })
-        .sort(compareByScore)
-
-    return paginateResults(results)
-}
-
-export async function count(query) {
-    // const index = await indexP
-    // return Promise.resolve(50)
-    // return new Promise((...args) => index.totalHits(query, standardResponse(...args)))
 }

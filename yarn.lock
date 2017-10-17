@@ -4956,6 +4956,14 @@ level-errors@~1.1.0:
   dependencies:
     errno "~0.1.1"
 
+level-iterator-stream@^2.0.0, level-iterator-stream@~2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/level-iterator-stream/-/level-iterator-stream-2.0.0.tgz#e0fe4273a0322177c81bb87684016bb5b90a98b4"
+  dependencies:
+    inherits "^2.0.1"
+    readable-stream "^2.0.5"
+    xtend "^4.0.0"
+
 level-iterator-stream@~1.3.0:
   version "1.3.1"
   resolved "https://registry.yarnpkg.com/level-iterator-stream/-/level-iterator-stream-1.3.1.tgz#e43b78b1a8143e6fa97a4f485eb8ea530352f2ed"
@@ -4963,14 +4971,6 @@ level-iterator-stream@~1.3.0:
     inherits "^2.0.1"
     level-errors "^1.0.3"
     readable-stream "^1.0.33"
-    xtend "^4.0.0"
-
-level-iterator-stream@~2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/level-iterator-stream/-/level-iterator-stream-2.0.0.tgz#e0fe4273a0322177c81bb87684016bb5b90a98b4"
-  dependencies:
-    inherits "^2.0.1"
-    readable-stream "^2.0.5"
     xtend "^4.0.0"
 
 level-js@^2.2.4:

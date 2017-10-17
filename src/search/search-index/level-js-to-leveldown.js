@@ -1,5 +1,6 @@
 import leveljs from 'level-js'
 import { AbstractLevelDOWN, AbstractChainedBatch } from 'abstract-leveldown'
+import IteratorStream from 'level-iterator-stream'
 
 class ChainedBatch extends AbstractChainedBatch {
     static INIT_STATE = []
@@ -47,7 +48,13 @@ class LevelJS extends AbstractLevelDOWN {
     _del = this.getStandardOverride('del')
     _get = this.getStandardOverride('get')
     _batch = this.getStandardOverride('batch')
+    _iterator = this.getStandardOverride('iterator')
     _chainedBatch = () => new ChainedBatch(this)
+
+    createReadStream = opts => {
+        opts = { keys: true, values: true, ...opts }
+        return new IteratorStream(this.iterator(opts), opts)
+    }
 }
 
 export default LevelJS

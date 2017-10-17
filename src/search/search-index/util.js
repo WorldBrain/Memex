@@ -9,8 +9,15 @@ export const keyGen = {
     bookmark: key => `bookmark/${key}`,
 }
 
+export const removeKeyType = key => key.replace(/^(term|visit|bookmark)\//, '')
+
 export const standardResponse = (resolve, reject) => (err, data = true) =>
     err ? reject(err) : resolve(data)
+
+export const idbBatchToPromise = batch =>
+    new Promise((resolve, reject) =>
+        batch.write(err => (err ? reject(err) : resolve())),
+    )
 
 /**
  * Handles splitting up searchable content into indexable terms. Terms are all
@@ -36,6 +43,15 @@ export const structureSearchResult = (document, score = 1) => ({
     document,
     score,
 })
+
+export const rangeLookup = iteratorOpts =>
+    new Promise(resolve => {
+        const data = new Map()
+        index.db
+            .createReadStream(iteratorOpts)
+            .on('data', ({ key, value }) => data.set(key, value))
+            .on('end', () => resolve(data))
+    })
 
 const defLookupOpts = {
     defaultValue: null,
@@ -68,11 +84,12 @@ export const initLookupByKeys = (
     { concurrency = 5, defaultValue = null, asBuffer = false } = defLookupOpts,
 ) => keys =>
     new Promise(async resolve => {
-        const result = []
+        const result = new Map()
         const singleLookup = initSingleLookup({ defaultValue, asBuffer })
 
         if (!Array.isArray(keys)) {
-            return resolve(await singleLookup(keys))
+            result.set(keys, await singleLookup(keys))
+            return resolve(result)
         }
 
         // Set up PromiseBatcher instance to handle concurrent lookups on same IDBOpenDBRequest
@@ -81,7 +98,7 @@ export const initLookupByKeys = (
             processingCallback: singleLookup,
             concurrency,
             observer: {
-                next: ({ output }) => result.push(output),
+                next: ({ input, output }) => result.set(input, output),
                 complete: () => resolve(result),
                 error: console.error,
             },

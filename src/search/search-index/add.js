@@ -1,6 +1,6 @@
 import index, { DEFAULT_TERM_SEPARATOR } from '.'
 import { transformPageAndMetaDocs } from './transforms'
-import { initSingleLookup } from './util'
+import { initSingleLookup, idbBatchToPromise } from './util'
 
 const singleLookup = initSingleLookup()
 
@@ -19,9 +19,9 @@ export const addPage = docs =>
 export const addPageConcurrent = docs => addPage(docs)
 
 const createTermValue = indexDoc =>
-    new Map([[indexDoc.id, new Map([['latest', indexDoc.latest]])]])
+    new Map([[indexDoc.id, { latest: indexDoc.latest }]])
 
-const createTimestampValue = indexDoc => new Map([[indexDoc.id]])
+const createTimestampValue = indexDoc => new Map([[indexDoc.id, {}]])
 
 const initReduceTermValue = indexDoc => value => {
     if (value == null) {
@@ -40,8 +40,7 @@ const initReduceTimestampValue = indexDoc => value => {
         throw Error('Already indexed')
     }
 
-    value.set(indexDoc.id)
-    return value
+    return new Map([...value, ...createTimestampValue(indexDoc)])
 }
 
 const indexTerms = async indexDoc => {
@@ -53,7 +52,7 @@ const indexTerms = async indexDoc => {
         indexBatch.put(term, termValue)
     }
 
-    return new Promise(resolve => indexBatch.write(resolve))
+    return idbBatchToPromise(indexBatch)
 }
 
 const indexMetaTimestamps = async indexDoc => {
@@ -72,7 +71,7 @@ const indexMetaTimestamps = async indexDoc => {
         }
     }
 
-    return new Promise(resolve => indexBatch.write(resolve))
+    return idbBatchToPromise(indexBatch)
 }
 
 const indexPage = async indexDoc => {
