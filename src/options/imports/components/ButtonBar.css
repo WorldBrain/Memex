@@ -43,6 +43,7 @@
     height: 35px;
     font-weight: 400;
     text-align: right;
+    color: #8d857f;
     font-size: 0.8em;
 }
 
@@ -67,7 +68,6 @@
     background: #3eb995;
     color: white;
     font-size: 0.8em;
-    font-weight: bold;
     padding: 0.6em 1.5em;
     text-transform: uppercase;
     cursor: pointer;
@@ -87,7 +87,6 @@
 }
 
 .newImport {
-    font-weight: bold;
     background-color: #3eb995;
     padding: 0.6em 1.5em;
     color: white;

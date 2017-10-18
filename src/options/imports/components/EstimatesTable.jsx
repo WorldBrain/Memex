@@ -23,7 +23,6 @@ const EstimatesTable = ({
             <tr className={localStyles.importTableRow}>
                 <th />
                 <th>Pages already saved</th>
-                <th>Size on Hard Drive</th>
                 <th>Not yet downloaded</th>
                 <th>Time to download</th>
             </tr>
@@ -42,11 +41,13 @@ const EstimatesTable = ({
                         <span className={localStyles.checkboxText}>
                             Browsing history
                         </span>
-                        <br />(last 90 days)
+                        <br />
+                        <span className={localStyles.checkboxSubText}>
+                            (last 90 days)
+                        </span>
                     </label>
                 </td>
                 <td>{estimates[TYPE.HISTORY].complete}</td>
-                <td>{estimates[TYPE.HISTORY].sizeCompleted} MB</td>
                 <td>{estimates[TYPE.HISTORY].remaining}</td>
                 <td>{estimates[TYPE.HISTORY].timeRemaining}</td>
             </tr>
@@ -66,7 +67,6 @@ const EstimatesTable = ({
                     </label>
                 </td>
                 <td>{estimates[TYPE.BOOKMARK].complete}</td>
-                <td>{estimates[TYPE.BOOKMARK].sizeCompleted} MB</td>
                 <td>{estimates[TYPE.BOOKMARK].remaining}</td>
                 <td>{estimates[TYPE.BOOKMARK].timeRemaining}</td>
             </tr>
@@ -84,7 +84,7 @@ const EstimatesTable = ({
                         </span>
                     </label>
                 </td>
-                <td colSpan="5">[COMING SOON]</td>
+                <td colSpan="3">[COMING SOON]</td>
             </tr>
             <tr className={localStyles.disabled}>
                 <td>
@@ -98,7 +98,7 @@ const EstimatesTable = ({
                         <span className={localStyles.checkboxText}>Pocket</span>
                     </label>
                 </td>
-                <td colSpan="5">[COMING SOON]</td>
+                <td colSpan="3">[COMING SOON]</td>
             </tr>
         </tbody>
     </table>

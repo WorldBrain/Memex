@@ -15,9 +15,6 @@ const Import = ({
     children,
 }) => (
     <div>
-        <span className={localStyles.title}>
-            &gt; Improve your browsing data for an improved experience.
-        </span>
         {(isIdle || isLoading) && (
             <div>
                 <div className={localStyles.stepNumber}>
@@ -42,10 +39,7 @@ const Import = ({
                         src="/img/caution.png"
                         className={localStyles.icon}
                     />{' '}
-                    Downloading may slow down your experience.<br />
-                    <span className={localStyles.stepSubText}>
-                        If you leave this page, your will paused.<br />
-                    </span>
+                    If you leave this page, your will paused.<br />
                     <span className={localStyles.stepSubText}>
                         You can always come back and resume the importation
                         anytime.

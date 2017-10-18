@@ -19,7 +19,7 @@ const StatusReport = ({
 
     return (
         <div>
-            <h1 className={localStyles.heading}>Import Finished</h1>
+            <h1 className={localStyles.heading}>Import Summary</h1>
             <div className={localStyles.reportDetails}>
                 <p>{'Succeeded (' + succeed + ')'}</p>
                 <p>{'Failed (' + fail + ')'}</p>

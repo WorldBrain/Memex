@@ -26,7 +26,7 @@ const defaultState = {
     totals: defaultStats, // Static state to use to derive remaining counts from
     importStatus: STATUS.LOADING,
     loadingMsg: '',
-    downloadDataFilter: FILTERS.SUCC,
+    downloadDataFilter: FILTERS.FAIL,
     dev: defaultDevState,
     allowTypes: {
         [TYPE.HISTORY]: false,

@@ -9,6 +9,7 @@ const ProgressBar = ({ progress, allowTypes }) => {
     total += allowTypes.b ? progress[TYPE.BOOKMARK].total : 0
     let complete = allowTypes.h ? progress[TYPE.HISTORY].complete : 0
     complete += allowTypes.b ? progress[TYPE.BOOKMARK].complete : 0
+
     return (
         <div>
             <div className={localStyles.layer1}>
@@ -28,7 +29,7 @@ const ProgressBar = ({ progress, allowTypes }) => {
                 className={localStyles.progressBar}
                 style={{ marginLeft: complete / total * 100 + '%' }}
             >
-                {(complete / total).toFixed(2) * 100 + '%'}
+                {Math.round(parseInt(complete / total * 100).toFixed(2)) + '%'}
             </h3>
         </div>
     )

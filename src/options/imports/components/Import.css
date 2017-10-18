@@ -34,6 +34,7 @@
 
 .importTableRow {
     font-size: 14px;
+    height: 100px;
 
     &:nth-child(even) {
         background-color: #f6f6f6;
@@ -57,7 +58,7 @@
 }
 
 .importTableCol {
-    width: calc(100% / 5);
+    width: calc(100% / 4);
 }
 
 .importTableContainer {
@@ -124,6 +125,10 @@
     font-weight: bold;
 }
 
+.checkboxSubText {
+    margin-left: 24px;
+}
+
 progress,
 progress[role] {
     background-size: auto;
@@ -165,13 +170,13 @@ progress[value]::-webkit-progress-value {
 .heading {
     color: #c8c8c8;
     border-bottom: 1px solid #c8c8c8;
-    font-size: 1em;
+    font-size: 14px;
     width: 250px;
     line-height: 2;
 }
 
 .reportDetails {
-    font-size: 12px;
+    font-size: 14px;
     color: #4d4b4c;
     font-weight: bold;
     letter-spacing: 1px;
@@ -195,8 +200,9 @@ progress[value]::-webkit-progress-value {
 }
 
 .disabled {
-    background-color: #f0f0f0;
+    background-color: #d0d0d0;
     font-size: 14px;
+    height: 100px;
 }
 
 .showDetails {
