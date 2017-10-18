@@ -11,18 +11,22 @@ const ProgressBar = ({ progress, allowTypes }) => {
     complete += allowTypes.b ? progress[TYPE.BOOKMARK].complete : 0
     return (
         <div>
-            <progress
-                className={localStyles.process}
-                max={total}
-                value={complete}
-            />
+            <div className={localStyles.layer1}>
+                <div className={localStyles.layer2}>
+                    <progress
+                        className={localStyles.process}
+                        max={total}
+                        value={complete}
+                    />
+                </div>
+            </div>
             <div
-                style={{ marginLeft: complete / total * 100 - 0.7 + '%' }}
+                style={{ marginLeft: complete / total * 100 + '%' }}
                 className={localStyles.arrowUp}
             />
             <h3
                 className={localStyles.progressBar}
-                style={{ marginLeft: complete / total * 100 - 0.7 + '%' }}
+                style={{ marginLeft: complete / total * 100 + '%' }}
             >
                 {(complete / total).toFixed(2) * 100 + '%'}
             </h3>
