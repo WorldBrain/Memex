@@ -183,6 +183,8 @@ class ImportContainer extends Component {
             isPaused,
             progress,
             estimates,
+            showDownloadDetails,
+            downloadDataFilter,
         } = this.props
 
         const estTableProps = {
@@ -193,6 +195,7 @@ class ImportContainer extends Component {
             onAllowHistoryClick: () =>
                 boundActions.toggleAllowType(constants.IMPORT_TYPE.HISTORY),
         }
+        console.log(this.props)
 
         return (
             <Import
@@ -220,9 +223,13 @@ class ImportContainer extends Component {
                         <StatusReport
                             progress={progress}
                             allowTypes={allowTypes}
+                            showDownloadDetails={showDownloadDetails}
+                            changeShowDetails={boundActions.showDownloadDetails}
                         />
                         <DownloadDetails
                             filterHandlers={this.getDetailFilterHandlers()}
+                            showDownloadDetails={showDownloadDetails}
+                            downloadDataFilter={downloadDataFilter}
                         >
                             {this.renderDownloadDetailsRows()}
                         </DownloadDetails>
@@ -260,6 +267,8 @@ ImportContainer.propTypes = {
     allowTypes: PropTypes.object.isRequired,
     loadingMsg: PropTypes.string,
     devMode: PropTypes.bool.isRequired,
+    showDownloadDetails: PropTypes.bool.isRequired,
+    downloadDataFilter: PropTypes.string.isRequired,
 
     // Misc
     boundActions: PropTypes.object.isRequired,
@@ -279,6 +288,8 @@ const mapStateToProps = state => ({
     allowTypes: selectors.allowTypes(state),
     loadingMsg: selectors.loadingMsg(state),
     devMode: selectors.devMode(state),
+    showDownloadDetails: selectors.showDownloadDetails(state),
+    downloadDataFilter: selectors.downloadDataFilter(state),
 })
 
 const mapDispatchToProps = dispatch => ({

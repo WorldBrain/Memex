@@ -24,7 +24,7 @@ const DownloadDetailsRow = ({
                 {url}
             </a>{' '}
         </td>
-        <td className={localStyles.errorsCol}>{error}</td>
+        {error && <td className={localStyles.errorsCol}>{error}</td>}
     </tr>
 )
 

@@ -64,7 +64,6 @@
     flex-direction: column;
     height: auto;
     justify-content: space-between;
-    padding: 40px 0;
     background: #fff;
     border-radius: 10px;
 }
@@ -196,4 +195,14 @@ progress[value]::-webkit-progress-value {
 .disabled {
     background-color: #f0f0f0;
     font-size: 14px;
+}
+
+.showDetails {
+    text-decoration: underline;
+    color: #3eb995;
+    font-size: 10px;
+
+    &:hover {
+        cursor: pointer;
+    }
 }

@@ -49,6 +49,7 @@
 .cancel {
     background-color: white;
     color: #db919c;
+    padding: 0.6em 1.5em;
     border: none;
 }
 
@@ -59,7 +60,7 @@
     border: 1px solid #3eb995;
     color: #3eb995;
     margin-left: 20px;
-    padding: 0.6em 2em;
+    padding: 0.6em 4em;
 }
 
 .startImport {
@@ -88,6 +89,7 @@
 .newImport {
     font-weight: bold;
     background-color: #3eb995;
+    padding: 0.6em 1.5em;
     color: white;
     border: none;
 }

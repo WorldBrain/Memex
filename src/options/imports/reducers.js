@@ -26,12 +26,13 @@ const defaultState = {
     totals: defaultStats, // Static state to use to derive remaining counts from
     importStatus: STATUS.LOADING,
     loadingMsg: '',
-    downloadDataFilter: FILTERS.ALL,
+    downloadDataFilter: FILTERS.SUCC,
     dev: defaultDevState,
     allowTypes: {
         [TYPE.HISTORY]: false,
         [TYPE.BOOKMARK]: false,
     },
+    showDownloadDetails: false,
 }
 
 /**
@@ -144,6 +145,11 @@ export default createReducer(
         [actions.toggleDevMode]: state => ({
             ...state,
             dev: { ...state.dev, isEnabled: !state.dev.isEnabled },
+        }),
+
+        [actions.showDownloadDetails]: state => ({
+            ...state,
+            showDownloadDetails: !state.showDownloadDetails,
         }),
     },
     defaultState,

@@ -8,15 +8,14 @@
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    height: 50px;
     align-items: baseline;
     margin-bottom: 5px;
+    margin-top: 10px;
 }
 
 .filters {
     display: flex;
     flex-direction: row;
-    width: 136px;
     justify-content: space-between;
 }
 
@@ -104,10 +103,6 @@
     width: 60%;
 }
 
-.downloadedCol {
-    width: 15%;
-}
-
 .errorsCol {
     width: 25%;
 }
@@ -115,6 +110,7 @@
 .link {
     text-decoration: none;
     color: #939192;
+    font-style: italic;
 }
 
 .header {
