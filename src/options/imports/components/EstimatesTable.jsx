@@ -18,7 +18,6 @@ const EstimatesTable = ({
             <col className={localStyles.importTableCol} />
             <col className={localStyles.importTableCol} />
             <col className={localStyles.importTableCol} />
-            <col className={localStyles.importTableCol} />
         </colgroup>
         <thead className={localStyles.importTableHead}>
             <tr className={localStyles.importTableRow}>
@@ -26,7 +25,6 @@ const EstimatesTable = ({
                 <th>Pages already saved</th>
                 <th>Size on Hard Drive</th>
                 <th>Not yet downloaded</th>
-                <th>Size on Hard Drive</th>
                 <th>Time to download</th>
             </tr>
         </thead>
@@ -50,7 +48,6 @@ const EstimatesTable = ({
                 <td>{estimates[TYPE.HISTORY].complete}</td>
                 <td>{estimates[TYPE.HISTORY].sizeCompleted} MB</td>
                 <td>{estimates[TYPE.HISTORY].remaining}</td>
-                <td>{estimates[TYPE.HISTORY].sizeRemaining} MB</td>
                 <td>{estimates[TYPE.HISTORY].timeRemaining}</td>
             </tr>
             <tr className={localStyles.importTableRow}>
@@ -71,10 +68,9 @@ const EstimatesTable = ({
                 <td>{estimates[TYPE.BOOKMARK].complete}</td>
                 <td>{estimates[TYPE.BOOKMARK].sizeCompleted} MB</td>
                 <td>{estimates[TYPE.BOOKMARK].remaining}</td>
-                <td>{estimates[TYPE.BOOKMARK].sizeRemaining} MB</td>
                 <td>{estimates[TYPE.BOOKMARK].timeRemaining}</td>
             </tr>
-            <tr className={localStyles.importTableRow}>
+            <tr className={localStyles.disabled}>
                 <td>
                     <input
                         type="checkbox"
@@ -90,7 +86,7 @@ const EstimatesTable = ({
                 </td>
                 <td colSpan="5">[COMING SOON]</td>
             </tr>
-            <tr className={localStyles.importTableRow}>
+            <tr className={localStyles.disabled}>
                 <td>
                     <input
                         type="checkbox"

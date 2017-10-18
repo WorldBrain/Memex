@@ -3,7 +3,6 @@ import PropTypes from 'prop-types'
 
 import DevOptions from '../DevOptionsContainer'
 import { LoadingIndicator } from 'src/common-ui/components'
-import styles from '../../options.css'
 import localStyles from './Import.css'
 
 const Import = ({
@@ -16,7 +15,6 @@ const Import = ({
     children,
 }) => (
     <div>
-        <h1 className={styles.routeTitle}>Settings &gt; Import</h1>
         <span className={localStyles.title}>
             &gt; Improve your browsing data for an improved experience.
         </span>
@@ -51,7 +49,7 @@ const Import = ({
                     <span className={localStyles.stepSubText}>
                         You can always come back and resume the importation
                         anytime.
-                    </span>>
+                    </span>
                 </div>
             </div>
         )}

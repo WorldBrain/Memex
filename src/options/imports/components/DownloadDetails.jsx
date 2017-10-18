@@ -27,7 +27,6 @@ const DownloadDetails = ({ children, filterHandlers }) => (
             <thead className={localStyles.detailsTableHead}>
                 <tr>
                     <th className={localStyles.urlCol}>URL</th>
-                    <th className={localStyles.downloadedCol}>Downloaded</th>
                     <th className={localStyles.errorsCol}>Errors</th>
                 </tr>
             </thead>

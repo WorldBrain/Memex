@@ -13,7 +13,8 @@
     font-size: 0.85em;
     display: flex;
     justify-content: space-between;
-    width: 140px;
+    margin-right: 20px;
+    color: #787677;
 }
 
 .devFunctionality {
@@ -35,4 +36,58 @@
 
 .uploadLoading {
     flex: 1;
+}
+
+input[type='checkbox'] {
+    position: absolute;
+    opacity: 0;
+
+    & + label {
+        position: relative;
+        cursor: pointer;
+        padding: 0;
+    }
+
+    & + label::before {
+        content: '';
+        margin-right: 10px;
+        display: inline-block;
+        vertical-align: text-top;
+        width: 15px;
+        height: 15px;
+        outline: 2px solid #3eb995;
+        box-shadow: 0 0 0 2pt #3eb995;
+        border-radius: 1px;
+    }
+
+    &:focus + label::before {
+        box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.12);
+    }
+
+    &:checked + label::before {
+        background: #3eb995;
+    }
+
+    &:checked + label::after {
+        content: '';
+        position: absolute;
+        left: 2px;
+        top: 7px;
+        background: white;
+        width: 2px;
+        height: 2px;
+        box-shadow: 2px 0 0 white, 4px 0 0 white, 4px -2px 0 white,
+            4px -4px 0 white, 4px -6px 0 white, 4px -8px 0 white;
+        transform: rotate(45deg);
+    }
+
+    &:disabled + label {
+        color: #3eb995;
+        cursor: auto;
+    }
+
+    &:disabled + label::before {
+        box-shadow: none;
+        background-color: #3eb995;
+    }
 }

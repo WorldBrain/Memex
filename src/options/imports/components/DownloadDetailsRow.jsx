@@ -18,8 +18,12 @@ const DownloadDetailsRow = ({
     isActive,
 }) => (
     <tr className={getRowClasses(isActive)} onClick={handleClick}>
-        <td className={localStyles.urlCol}>{url}</td>
-        <td className={localStyles.downloadedCol}>{downloaded}</td>
+        <td className={localStyles.urlCol}>
+            {' '}
+            <a className={localStyles.link} href={url} target="_blank">
+                {url}
+            </a>{' '}
+        </td>
         <td className={localStyles.errorsCol}>{error}</td>
     </tr>
 )

@@ -28,6 +28,7 @@
     font-size: 14px;
     color: #cacaca;
     border-bottom: 1px solid #d2d2d2;
+    line-height: 1.2;
 }
 
 .importTableRow {
@@ -55,7 +56,7 @@
 }
 
 .importTableCol {
-    width: calc(100% / 6);
+    width: calc(100% / 5);
 }
 
 .importTableContainer {
@@ -63,7 +64,7 @@
     flex-direction: column;
     height: auto;
     justify-content: space-between;
-    padding: 40px;
+    padding: 40px 0;
     background: #fff;
     border-radius: 10px;
 }
@@ -108,7 +109,6 @@
 .stepText {
     font-size: 14px;
     color: #d5969e;
-    margin-bottom: 40px;
 }
 
 .icon {
@@ -130,7 +130,7 @@ progress[role] {
     background-size: auto;
     height: 30px;
     width: 100%;
-    border-radius: 20px;
+    border-radius: 10px;
 }
 
 progress[value]::-webkit-progress-bar {
@@ -141,6 +141,8 @@ progress[value]::-webkit-progress-bar {
 progress[value]::-webkit-progress-value {
     background-color: #4cc3a5;
     border-radius: 20px;
+    padding-left: 40px;
+    display: inline-block;
 }
 
 .quoteBlock {
@@ -168,12 +170,13 @@ progress[value]::-webkit-progress-value {
 }
 
 .reportDetails {
-    font-size: 16px;
+    font-size: 12px;
     color: #4d4b4c;
     font-weight: bold;
     letter-spacing: 1px;
     margin-top: 10px;
     margin-bottom: 10px;
+    line-height: 0.7;
 }
 
 .progressBar {
@@ -188,4 +191,9 @@ progress[value]::-webkit-progress-value {
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
     border-bottom: 5px solid #3eb995;
+}
+
+.disabled {
+    background-color: #f0f0f0;
+    font-size: 14px;
 }

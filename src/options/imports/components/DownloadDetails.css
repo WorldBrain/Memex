@@ -111,3 +111,13 @@
 .errorsCol {
     width: 25%;
 }
+
+.link {
+    text-decoration: none;
+    color: #939192;
+}
+
+.header {
+    color: #c8c8c8;
+    font-size: 12px;
+}

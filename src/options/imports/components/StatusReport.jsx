@@ -14,7 +14,7 @@ const StatusReport = ({ progress, allowTypes }) => {
 
     return (
         <div>
-            <h1 className={localStyles.heading}>Importation Complete</h1>
+            <h1 className={localStyles.heading}>Import Finished</h1>
             <div className={localStyles.reportDetails}>
                 <p>{'Succeeded (' + succeed + ')'}</p>
                 <p>{'Failed (' + fail + ')'}</p>

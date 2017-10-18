@@ -14,8 +14,8 @@ import ActionButton from './components/ActionButton'
 import ButtonBar from './components/ButtonBar'
 import DownloadDetails from './components/DownloadDetails'
 import DownloadDetailsRow from './components/DownloadDetailsRow'
-import QuoteDownloadProgress from './components/QuoteDownloadProgress'
 import StatusReport from './components/StatusReport'
+import DevCheckBox from './components/DevCheckBox'
 
 class ImportContainer extends Component {
     constructor(props) {
@@ -71,10 +71,8 @@ class ImportContainer extends Component {
     }
 
     renderHelpText() {
-        const { isStopped } = this.props
         const { waitingOnCancelConfirm } = this.state
 
-        if (isStopped) return 'Import has finished.'
         if (waitingOnCancelConfirm) return 'Press cancel again to confirm'
         return ''
     }
@@ -100,6 +98,7 @@ class ImportContainer extends Component {
                 handleClick={handleClick}
                 isHidden={isIdle}
                 isDisabled={isStopped}
+                customClass={'cancel'}
             >
                 Cancel
             </ActionButton>
@@ -117,18 +116,31 @@ class ImportContainer extends Component {
 
         if (isRunning) {
             const handleClick = e => this.onButtonClick(e, boundActions.pause)
-            return <ActionButton handleClick={handleClick}>Pause</ActionButton>
+            return (
+                <ActionButton customClass={'pause'} handleClick={handleClick}>
+                    Pause
+                </ActionButton>
+            )
         }
 
         if (isPaused) {
             const handleClick = e => this.onButtonClick(e, boundActions.resume)
-            return <ActionButton handleClick={handleClick}>Resume</ActionButton>
+            return (
+                <ActionButton customClass={'resume'} handleClick={handleClick}>
+                    Resume
+                </ActionButton>
+            )
         }
 
         if (isStopped) {
             const handleClick = e => this.onButtonClick(e, boundActions.finish)
             return (
-                <ActionButton handleClick={handleClick}>Complete</ActionButton>
+                <ActionButton
+                    customClass={'newImport'}
+                    handleClick={handleClick}
+                >
+                    Start new import
+                </ActionButton>
             )
         }
 
@@ -138,6 +150,7 @@ class ImportContainer extends Component {
             <ActionButton
                 handleClick={handleClick}
                 isDisabled={isStartBtnDisabled}
+                customClass={'startImport'}
             >
                 Start import
             </ActionButton>
@@ -219,10 +232,15 @@ class ImportContainer extends Component {
                     isRunning={isRunning}
                     helpText={this.renderHelpText()}
                 >
+                    {(isIdle || isLoading) && (
+                        <DevCheckBox
+                            devMode={this.props.devMode}
+                            toggleDevMode={this.props.toggleDevMode}
+                        />
+                    )}
                     {!isStopped && this.renderCancelButton()}
                     {this.renderImportButton()}
                 </ButtonBar>
-                {(isRunning || isPaused) && <QuoteDownloadProgress />}
             </Import>
         )
     }
@@ -241,9 +259,11 @@ ImportContainer.propTypes = {
     progress: PropTypes.object.isRequired,
     allowTypes: PropTypes.object.isRequired,
     loadingMsg: PropTypes.string,
+    devMode: PropTypes.bool.isRequired,
 
     // Misc
     boundActions: PropTypes.object.isRequired,
+    toggleDevMode: PropTypes.func.isRequired,
 }
 
 const mapStateToProps = state => ({
@@ -258,10 +278,12 @@ const mapStateToProps = state => ({
     progress: selectors.progress(state),
     allowTypes: selectors.allowTypes(state),
     loadingMsg: selectors.loadingMsg(state),
+    devMode: selectors.devMode(state),
 })
 
 const mapDispatchToProps = dispatch => ({
     boundActions: bindActionCreators(actions, dispatch),
+    toggleDevMode: () => dispatch(actions.toggleDevMode()),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(ImportContainer)

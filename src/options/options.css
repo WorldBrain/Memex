@@ -28,26 +28,18 @@ body {
 }
 
 .button {
-    background: #eee;
-    color: #666;
     font-size: 0.8em;
-    font-weight: bold;
     padding: 0.6em 1.5em;
     text-transform: uppercase;
     cursor: pointer;
     outline: 0;
-    border: 1px solid #999;
-    box-shadow: 0 0 1px 0 rgba(0, 0, 0, 0.1);
-    transition: background-color 0.1s ease-in, color 0.1s ease-in;
+    transition: all 0.1s ease-in;
 
     &:hover {
-        background: #3db995;
-        color: white;
+        transform: scale(1.02);
     }
 
     &[disabled] {
-        background: #eee;
-        color: #666;
         opacity: 0.4;
         cursor: not-allowed;
     }
