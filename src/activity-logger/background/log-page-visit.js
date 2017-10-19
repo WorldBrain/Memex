@@ -34,7 +34,7 @@ async function updateIndex(finalPagePromise, visit) {
 
     // Index either the page + visit, or just the visit if page already exists
     try {
-        await index.addPage({ pageDoc: page, visitDocs: [visit] })
+        await index.addPageConcurrent({ pageDoc: page, visitDocs: [visit] })
     } catch (error) {
         // Indexing issue; log it for now
         console.error(error)

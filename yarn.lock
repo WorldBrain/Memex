@@ -7137,6 +7137,12 @@ querystring@0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/querystring/-/querystring-0.2.0.tgz#b209849203bb25df820da756e747005878521620"
 
+queue@^4.4.1:
+  version "4.4.1"
+  resolved "https://registry.yarnpkg.com/queue/-/queue-4.4.1.tgz#ed93888335700f12dee55955b5a594cb82a1783b"
+  dependencies:
+    inherits "~2.0.0"
+
 quick-format-unescaped@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/quick-format-unescaped/-/quick-format-unescaped-1.1.1.tgz#e77555ef3e66e105d4039e13ef79201284fee916"

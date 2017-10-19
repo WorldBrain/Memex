@@ -50,6 +50,7 @@
     "pouchdb-find": "^6.2.0",
     "prop-types": "^15.5.10",
     "query-string": "^4.3.4",
+    "queue": "^4.4.1",
     "react": "^16.0.0",
     "react-datepicker": "^0.55.0",
     "react-dom": "^16.0.0",

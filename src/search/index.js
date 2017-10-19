@@ -71,5 +71,5 @@ async function indexSearch({
 // Export index interface
 export { addPage, addPageConcurrent } from './search-index/add'
 export { initSingleLookup } from './search-index/util'
-export { default as del } from './search-index/del'
+export { delPages, delPagesConcurrent } from './search-index/del'
 export { indexSearch as search }

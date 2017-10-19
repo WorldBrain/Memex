@@ -1,13 +1,13 @@
-import zip from 'lodash/fp/zip'
-
-import index from './'
+import index, { indexQueue } from '.'
 import { initSingleLookup, initLookupByKeys } from './util'
 
 /**
+ * Deletes all indexed data associated with given pages or page IDs. This method is **not**
+ *  concurrency-safe.
  * @param {string|Array<string>} pageIds Single ID, or array of IDs, of docs to attempt to delete from the index.
- * @returns Boolean denoting that the delete was successful (else error thrown).
+ * @returns {Promise<void>}
  */
-export default async function del(pageIds) {
+export async function delPages(pageIds) {
     if (Array.isArray(pageIds)) {
         for (const pageId of pageIds) {
             await performDeindexing(pageId)
@@ -17,6 +17,14 @@ export default async function del(pageIds) {
     }
 }
 
+/**
+ * Concurrency-safe version of `delPages`
+ * @param {string|Array<string>} pageIds Single ID, or array of IDs, of docs to attempt to delete from the index.
+ * @returns {Promise<void>}
+ */
+export const delPagesConcurrent = pageIds =>
+    indexQueue.push(() => delPages(pageIds))
+
 function reduceValue(value, id) {
     if (value == null) {
         return new Map()
@@ -25,14 +33,20 @@ function reduceValue(value, id) {
     return value
 }
 
+/**
+ * For an array of `keys` will remove the index entry for `id` under each value.
+ *
+ * @param {string} id ID of the page to remove from each key.
+ * @param {string[]} indexedKeys Array of keys to update.
+ * @returns {Promise<void>} Reslves when all updates finished.
+ */
 async function deindex(id, indexedKeys) {
     const indexBatch = index.batch()
 
-    const indexedValues = await initLookupByKeys()(indexedKeys)
-    const indexedMap = new Map(zip(indexedKeys, indexedValues))
+    const indexedValuesMap = await initLookupByKeys()(indexedKeys)
 
     // Schedule updates of all associated term values
-    for (const [key, currValue] of indexedMap) {
+    for (const [key, currValue] of indexedValuesMap) {
         try {
             const newValue = reduceValue(currValue, id)
 
@@ -58,6 +72,10 @@ const deindexTerms = indexDoc => deindex(indexDoc.id, [...indexDoc.terms])
 const deindexTimestamps = indexDoc =>
     deindex(indexDoc.id, [...indexDoc.bookmarks, ...indexDoc.visits])
 
+/**
+ * @param {string} pageId ID of the page to deindex visits, bookmarks, and terms for.
+ * @returns {Promise<void>} Resolves when finished, rejects if any deletion error.
+ */
 async function performDeindexing(pageId) {
     const indexDoc = await initSingleLookup()(pageId)
 
@@ -66,14 +84,10 @@ async function performDeindexing(pageId) {
     }
 
     console.time('deindexing page')
-    await deinidexPage(indexDoc)
+    await Promise.all([
+        deinidexPage(indexDoc),
+        deindexTerms(indexDoc),
+        deindexTimestamps(indexDoc),
+    ])
     console.timeEnd('deindexing page')
-
-    console.time('deindexing terms')
-    await deindexTerms(indexDoc)
-    console.timeEnd('deindexing terms')
-
-    console.time('deindexing times')
-    await deindexTimestamps(indexDoc)
-    console.timeEnd('deindexing times')
 }

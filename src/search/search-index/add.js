@@ -1,28 +1,57 @@
-import index, { DEFAULT_TERM_SEPARATOR } from '.'
+import index, { DEFAULT_TERM_SEPARATOR, indexQueue } from '.'
 import { transformPageAndMetaDocs } from './transforms'
 import { initSingleLookup, idbBatchToPromise } from './util'
 
 const singleLookup = initSingleLookup()
 
 /**
- * Adds a new page doc + any associated visit/bookmark docs to the index. This method
- * is *NOT* concurrency safe.
- * @param {any} Object containing a `pageDoc` (required) and optionally any associated `visitDocs` and `bookmarkDocs`.
- * @returns {Promise} Promise resolving when indexing is complete, or rejecting for any index errors.
+ * @typedef IndexValue
+ * @type {Object}
+ * @property {string} [latest] Latest visit/bookmark timestamp time for easy scoring.
  */
-export const addPage = docs =>
-    performIndexing(transformPageAndMetaDocs(DEFAULT_TERM_SEPARATOR)(docs))
 
 /**
- * TODO: Implement queueing for concurrent-safeness
+ * @typedef IndexRequest
+ * @type {Object}
+ * @property {PageDoc} pageDoc
+ * @property {VisitDoc[]} [visitDocs]
+ * @property {BookmarkDoc[]} [bookmarkDocs]
  */
-export const addPageConcurrent = docs => addPage(docs)
 
+/**
+ * Adds a new page doc + any associated visit/bookmark docs to the index. This method
+ * is *NOT* concurrency safe.
+ * @param {IndexRequest} req A `pageDoc` (required) and optionally any associated `visitDocs` and `bookmarkDocs`.
+ * @returns {Promise<void>} Promise resolving when indexing is complete, or rejecting for any index errors.
+ */
+export const addPage = req =>
+    performIndexing(transformPageAndMetaDocs(DEFAULT_TERM_SEPARATOR)(req))
+
+/**
+ * Adds a new page doc + any associated visit/bookmark docs to the index. This method
+ * is concurrency safe as it uses a single queue instance to batch add requests.
+ * @param {IndexRequest} req A `pageDoc` (required) and optionally any associated `visitDocs` and `bookmarkDocs`.
+ * @returns {void}
+ */
+export const addPageConcurrent = req => indexQueue.push(() => addPage(req))
+
+/**
+ * @param {IndexLookupDoc} indexDoc
+ * @returns {Map<string, IndexValue>}
+ */
 const createTermValue = indexDoc =>
     new Map([[indexDoc.id, { latest: indexDoc.latest }]])
 
+/**
+ * @param {IndexLookupDoc} indexDoc
+ * @returns {Map<string, IndexValue>}
+ */
 const createTimestampValue = indexDoc => new Map([[indexDoc.id, {}]])
 
+/**
+ * @param {IndexLookupDoc} indexDoc
+ * @returns {(value?: IndexValue) => Map<string, IndexValue>}
+ */
 const initReduceTermValue = indexDoc => value => {
     if (value == null) {
         return createTermValue(indexDoc)
@@ -31,6 +60,10 @@ const initReduceTermValue = indexDoc => value => {
     return new Map([...value, ...createTermValue(indexDoc)])
 }
 
+/**
+ * @param {IndexLookupDoc} indexDoc
+ * @returns {(value?: IndexValue) => Map<string, IndexValue>}
+ */
 const initReduceTimestampValue = indexDoc => value => {
     if (value == null) {
         return createTimestampValue(indexDoc)
@@ -43,6 +76,10 @@ const initReduceTimestampValue = indexDoc => value => {
     return new Map([...value, ...createTimestampValue(indexDoc)])
 }
 
+/**
+ * @param {IndexLookupDoc} indexDoc
+ * @returns {Promise<void>}
+ */
 const indexTerms = async indexDoc => {
     const indexBatch = index.batch()
     const reduceTermValue = initReduceTermValue(indexDoc)
@@ -55,6 +92,10 @@ const indexTerms = async indexDoc => {
     return idbBatchToPromise(indexBatch)
 }
 
+/**
+ * @param {IndexLookupDoc} indexDoc
+ * @returns {Promise<void>}
+ */
 const indexMetaTimestamps = async indexDoc => {
     const indexBatch = index.batch()
     const reduceTimestampValue = initReduceTimestampValue(indexDoc)
@@ -74,6 +115,10 @@ const indexMetaTimestamps = async indexDoc => {
     return idbBatchToPromise(indexBatch)
 }
 
+/**
+ * @param {IndexLookupDoc} indexDoc
+ * @returns {Promise<void>}
+ */
 const indexPage = async indexDoc => {
     const existingDoc = await singleLookup(indexDoc.id)
 
@@ -90,7 +135,12 @@ const indexPage = async indexDoc => {
     })
 }
 
-// Runs all standard indexing on the index doc
+/**
+ * Runs all indexing logic on the page data concurrently for different types
+ * as they all live on separate indexes.
+ * @param {IndexLookupDoc} indexDoc
+ * @returns {Promise<void>}
+ */
 async function performIndexing(indexDoc) {
     console.log('ADDING PAGE')
     console.log(indexDoc)
@@ -102,18 +152,12 @@ async function performIndexing(indexDoc) {
     try {
         // Run indexing of page
         console.time('indexing page')
-        await indexPage(indexDoc)
+        await Promise.all([
+            indexPage(indexDoc),
+            indexTerms(indexDoc),
+            indexMetaTimestamps(indexDoc),
+        ])
         console.timeEnd('indexing page')
-
-        // Run indexing of terms
-        console.time('indexing terms')
-        await indexTerms(indexDoc)
-        console.timeEnd('indexing terms')
-
-        // Run indexing of meta timestamps
-        console.time('indexing meta times')
-        await indexMetaTimestamps(indexDoc)
-        console.timeEnd('indexing meta times')
     } catch (err) {
         console.error(err)
     }

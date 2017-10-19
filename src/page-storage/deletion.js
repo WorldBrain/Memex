@@ -1,5 +1,5 @@
 import db, { fetchDocTypesByUrl } from 'src/pouchdb'
-import { del } from 'src/search'
+import { delPagesConcurrent } from 'src/search'
 import { pageKeyPrefix } from 'src/page-storage'
 import { visitKeyPrefix } from 'src/activity-logger'
 import { bookmarkKeyPrefix } from 'src/bookmarks'
@@ -36,5 +36,5 @@ export const deleteDocs = docs =>
 async function handleIndexDeletes(rowsToDelete) {
     const indexDocIds = rowsToDelete.map(row => row.id)
 
-    await del(indexDocIds)
+    await delPagesConcurrent(indexDocIds)
 }
