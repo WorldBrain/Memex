@@ -1,5 +1,5 @@
+import transform from 'src/util/transform-page-text'
 import { DEFAULT_TERM_SEPARATOR } from './search-index'
-import transform from '../util/transform-page-text'
 
 // Pattern to match entire string to `domain.tld`-like format + optional ccTLD
 const DOMAIN_TLD_PATTERN = /^\w{2,}\.\w{2,3}(\.\w{2})?$/
@@ -9,19 +9,17 @@ class QueryBuilder {
     limit = 10
     query = new Set()
     timeFilter = new Map()
-    domain
+    domain = new Set()
     isBadTerm = false
 
-    get() {
-        return {
-            query: this.query,
-            limit: this.limit,
-            skip: this.skip,
-            domain: this.domain,
-            isBadTerm: this.isBadTerm,
-            timeFilter: this.timeFilter,
-        }
-    }
+    get = () => ({
+        query: this.query,
+        limit: this.limit,
+        skip: this.skip,
+        domain: this.domain,
+        isBadTerm: this.isBadTerm,
+        timeFilter: this.timeFilter,
+    });
 
     skipUntil(skip) {
         this.skip = skip
@@ -48,6 +46,15 @@ class QueryBuilder {
         // All indexed strings are lower-cased, so force the query terms to be
         let terms = input.toLowerCase().match(/\S+/g) || []
 
+        // Remove any domains detected in search terms, place them into domains Set
+        terms = terms.reduce((acc, term) => {
+            if (DOMAIN_TLD_PATTERN.test(term)) {
+                this.domain.add(term)
+                return acc
+            }
+            return [...acc, term]
+        }, [])
+
         // All terms must be pushed to the text-pipeline to take into account stopword removal ect...
         terms = transform({ text: terms.join(' '), lang: 'all' })
 
@@ -63,16 +70,13 @@ class QueryBuilder {
             terms.forEach(term => {
                 if (term !== '') {
                     goodTerm += 1
-                    if (DOMAIN_TLD_PATTERN.test(term)) {
-                        this.domain = term
-                    } else {
-                        this.query.add(term)
-                    }
+                    this.query.add(term)
+                } else {
+                    this.isBadTerm = true
                 }
             })
-            if (goodTerm === 0) {
-                this.isBadTerm = true
-            }
+
+            this.isBadTerm = goodTerm === 0
         }
 
         return this

@@ -1,11 +1,12 @@
-import index, { DEFAULT_TERM_SEPARATOR, indexQueue } from '.'
+import index, { indexQueue } from '.'
 import { transformPageAndMetaDocs } from './transforms'
-import { initSingleLookup, idbBatchToPromise } from './util'
+import { initSingleLookup, initLookupByKeys, idbBatchToPromise } from './util'
 
+const lookupByKeys = initLookupByKeys()
 const singleLookup = initSingleLookup()
 
 /**
- * @typedef IndexValue
+ * @typedef IndexTermValue
  * @type {Object}
  * @property {string} [latest] Latest visit/bookmark timestamp time for easy scoring.
  */
@@ -24,8 +25,7 @@ const singleLookup = initSingleLookup()
  * @param {IndexRequest} req A `pageDoc` (required) and optionally any associated `visitDocs` and `bookmarkDocs`.
  * @returns {Promise<void>} Promise resolving when indexing is complete, or rejecting for any index errors.
  */
-export const addPage = req =>
-    performIndexing(transformPageAndMetaDocs(DEFAULT_TERM_SEPARATOR)(req))
+export const addPage = req => performIndexing(transformPageAndMetaDocs(req))
 
 /**
  * Adds a new page doc + any associated visit/bookmark docs to the index. This method
@@ -36,79 +36,52 @@ export const addPage = req =>
 export const addPageConcurrent = req => indexQueue.push(() => addPage(req))
 
 /**
+ * @param {IndexTermValue} [currTermVal]
  * @param {IndexLookupDoc} indexDoc
- * @returns {Map<string, IndexValue>}
+ * @returns {IndexTermValue} Updated `currTermVal` with new entry for `indexDoc`.
  */
-const createTermValue = indexDoc =>
-    new Map([[indexDoc.id, { latest: indexDoc.latest }]])
+function reduceTermValue(currTermVal, indexDoc) {
+    const newTermVal = new Map([[indexDoc.id, { latest: indexDoc.latest }]])
 
-/**
- * @param {IndexLookupDoc} indexDoc
- * @returns {Map<string, IndexValue>}
- */
-const createTimestampValue = indexDoc => new Map([[indexDoc.id, {}]])
-
-/**
- * @param {IndexLookupDoc} indexDoc
- * @returns {(value?: IndexValue) => Map<string, IndexValue>}
- */
-const initReduceTermValue = indexDoc => value => {
-    if (value == null) {
-        return createTermValue(indexDoc)
-    }
-
-    return new Map([...value, ...createTermValue(indexDoc)])
-}
-
-/**
- * @param {IndexLookupDoc} indexDoc
- * @returns {(value?: IndexValue) => Map<string, IndexValue>}
- */
-const initReduceTimestampValue = indexDoc => value => {
-    if (value == null) {
-        return createTimestampValue(indexDoc)
-    }
-
-    if (value.has(indexDoc.id)) {
-        throw Error('Already indexed')
-    }
-
-    return new Map([...value, ...createTimestampValue(indexDoc)])
+    // Either reduce to a new term value or merge with the existing
+    return currTermVal == null
+        ? newTermVal
+        : new Map([...currTermVal, ...newTermVal])
 }
 
 /**
  * @param {IndexLookupDoc} indexDoc
  * @returns {Promise<void>}
  */
-const indexTerms = async indexDoc => {
+const initIndexTerms = termsField => async indexDoc => {
     const indexBatch = index.batch()
-    const reduceTermValue = initReduceTermValue(indexDoc)
+    const termValuesMap = await lookupByKeys([...indexDoc[termsField]])
 
-    for (const term of indexDoc.terms) {
-        const termValue = reduceTermValue(await singleLookup(term))
+    for (const [term, currTermVal] of termValuesMap) {
+        const termValue = reduceTermValue(currTermVal, indexDoc)
         indexBatch.put(term, termValue)
     }
 
     return idbBatchToPromise(indexBatch)
 }
 
+const indexTerms = initIndexTerms('terms')
+const indexUrlTerms = initIndexTerms('urlTerms')
+
 /**
  * @param {IndexLookupDoc} indexDoc
  * @returns {Promise<void>}
  */
-const indexMetaTimestamps = async indexDoc => {
+async function indexMetaTimestamps(indexDoc) {
     const indexBatch = index.batch()
-    const reduceTimestampValue = initReduceTimestampValue(indexDoc)
-    const timestamps = [...indexDoc.bookmarks, ...indexDoc.visits]
+    const timeValuesMap = await lookupByKeys([
+        ...indexDoc.bookmarks,
+        ...indexDoc.visits,
+    ])
 
-    for (const timestamp of timestamps) {
-        try {
-            const timestampValue = reduceTimestampValue(
-                await singleLookup(timestamp),
-            )
-            indexBatch.put(timestamp, timestampValue)
-        } catch (error) {
-            // Already indexed; skip
+    for (const [timestamp, existing] of timeValuesMap) {
+        if (existing !== indexDoc.id) {
+            indexBatch.put(timestamp, indexDoc.id)
         }
     }
 
@@ -119,7 +92,7 @@ const indexMetaTimestamps = async indexDoc => {
  * @param {IndexLookupDoc} indexDoc
  * @returns {Promise<void>}
  */
-const indexPage = async indexDoc => {
+async function indexPage(indexDoc) {
     const existingDoc = await singleLookup(indexDoc.id)
 
     if (!existingDoc) {
@@ -133,6 +106,16 @@ const indexPage = async indexDoc => {
         visits: new Set([...existingDoc.visits, ...indexDoc.visits]),
         bookmarks: new Set([...existingDoc.bookmarks, ...indexDoc.bookmarks]),
     })
+}
+
+/**
+ * @param {IndexLookupDoc} indexDoc
+ * @returns {Promise<void>}
+ */
+async function indexDomain(indexDoc) {
+    const existingValue = await singleLookup(indexDoc.domain)
+
+    return index.put(indexDoc.domain, reduceTermValue(existingValue, indexDoc))
 }
 
 /**
@@ -154,6 +137,8 @@ async function performIndexing(indexDoc) {
         console.time('indexing page')
         await Promise.all([
             indexPage(indexDoc),
+            indexDomain(indexDoc),
+            indexUrlTerms(indexDoc),
             indexTerms(indexDoc),
             indexMetaTimestamps(indexDoc),
         ])

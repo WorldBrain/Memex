@@ -1,3 +1,4 @@
+import { intersectMaps } from 'src/util/map-set-helpers'
 import {
     structureSearchResult,
     initLookupByKeys,
@@ -31,19 +32,41 @@ async function filterSearch({ timeFilter }) {
         ...data.reduce((acc, curr) => [...acc, ...curr], []),
     ])
 
-    //  Createa  Map of page ID keys to weights
+    //  Create a Map of page ID keys to their weights
     return new Map(
-        [...unionedResults].reduce((acc, [timeKey, pageMap]) => {
-            const time = removeKeyType(timeKey)
+        [...unionedResults].reduce(
+            (acc, [timeKey, pageId]) => [
+                ...acc,
+                [pageId, { latest: removeKeyType(timeKey) }],
+            ],
+            [],
+        ),
+    )
+}
 
-            // Update each page `latest` stamp for scoring with latest of all hits
-            for (const [pageId, props] of pageMap) {
-                if (!props.latest || props.latest < time) {
-                    pageMap.set(pageId, { ...props, latest: time })
-                }
-            }
-            return [...acc, ...pageMap]
-        }, []),
+async function domainSearch({ domain }) {
+    if (!domain.size) {
+        return null
+    }
+
+    const domainValuesMap = await lookupByKeys([...domain].map(keyGen.domain))
+
+    // If any domains are empty, they cancel all other results out
+    const containsEmptyTerm = [...domainValuesMap.values()].reduce(
+        (acc, curr) => acc || curr == null || !curr.size,
+        false,
+    )
+
+    if (containsEmptyTerm) {
+        return new Map()
+    }
+
+    // Create Map of page ID keys to weights
+    return new Map(
+        [...domainValuesMap.values()].reduce(
+            (acc, props) => [...acc, ...props],
+            [],
+        ),
     )
 }
 
@@ -117,18 +140,31 @@ async function resolveIdResults(pageResultsMap) {
     return results.sort(compareByScore)
 }
 
-function intersectResultMaps(termPages, filterPages) {
+/**
+ * @param {Map<string, IndexTermValue>} [termPages]
+ * @param {Map<string, IndexTermValue>} [filterPages]
+ * @param {Map<string, IndexTermValue>} [domainPages]
+ * @returns {Map<string, IndexTermValue>} Interescted results of all three
+ */
+function intersectResultMaps(termPages, filterPages, domainPages) {
+    const intersectDomain = intersectMaps(domainPages)
+
     // Should be null if filter search not needed to be run
     if (filterPages == null) {
-        return termPages
+        return domainPages == null ? termPages : intersectDomain(termPages)
     }
+
     if (termPages == null) {
-        return filterPages
+        return domainPages == null ? filterPages : intersectDomain(filterPages)
     }
 
-    const intersectsTermPages = ([filterPage]) => termPages.has(filterPage)
+    // Filter out only results in the domain, if domain search is on
+    if (domainPages != null) {
+        filterPages = intersectDomain(filterPages)
+        termPages = intersectDomain(termPages)
+    }
 
-    return new Map([...filterPages].filter(intersectsTermPages))
+    return intersectMaps(termPages)(filterPages)
 }
 
 /**
@@ -146,6 +182,10 @@ export async function search(
     let totalResultCount
     console.time('total search')
 
+    console.time('domain search')
+    const domainPageResultsMap = await domainSearch(query)
+    console.timeEnd('domain search')
+
     console.time('term search')
     const termPageResultsMap = await termSearch(query)
     console.timeEnd('term search')
@@ -158,6 +198,7 @@ export async function search(
     const pageResultsMap = intersectResultMaps(
         termPageResultsMap,
         filterPageResultsMap,
+        domainPageResultsMap,
     )
 
     if (count) {

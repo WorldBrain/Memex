@@ -4,6 +4,7 @@ import createQueue from 'queue'
 import LevelJS from './level-js-to-leveldown'
 
 export const DEFAULT_TERM_SEPARATOR = /[|' .,\-|(\n)]+/
+export const URL_SEPARATOR = /[/?#=+& .,\-|(\n)]+/
 
 const index = levelup(new LevelJS('worldbrain-terms'))
 
