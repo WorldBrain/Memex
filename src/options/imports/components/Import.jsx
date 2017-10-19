@@ -39,10 +39,9 @@ const Import = ({
                         src="/img/caution.png"
                         className={localStyles.icon}
                     />{' '}
-                    If you leave this page, your will paused.<br />
+                    If you leave this page, your import will paused.<br />
                     <span className={localStyles.stepSubText}>
-                        You can always come back and resume the importation
-                        anytime.
+                        You can always come back and resume where you left off.
                     </span>
                 </div>
             </div>

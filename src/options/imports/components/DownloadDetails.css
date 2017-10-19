@@ -107,7 +107,8 @@
     width: 25%;
 }
 
-.link {
+.link,
+.errorsCol {
     text-decoration: none;
     color: #939192;
 }

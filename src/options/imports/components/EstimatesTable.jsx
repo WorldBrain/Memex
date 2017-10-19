@@ -20,7 +20,7 @@ const EstimatesTable = ({
             <col className={localStyles.importTableCol} />
         </colgroup>
         <thead className={localStyles.importTableHead}>
-            <tr className={localStyles.importTableRow}>
+            <tr>
                 <th />
                 <th>Pages already saved</th>
                 <th>Not yet downloaded</th>
@@ -37,7 +37,7 @@ const EstimatesTable = ({
                         onChange={onAllowHistoryClick}
                         checked={allowTypes[TYPE.HISTORY]}
                     />
-                    <label htmlFor="history">
+                    <label className={localStyles.label} htmlFor="history">
                         <span className={localStyles.checkboxText}>
                             Browsing history
                         </span>
@@ -60,7 +60,7 @@ const EstimatesTable = ({
                         onChange={onAllowBookmarksClick}
                         checked={allowTypes[TYPE.BOOKMARK]}
                     />{' '}
-                    <label htmlFor="bookmarks">
+                    <label className={localStyles.label} htmlFor="bookmarks">
                         <span className={localStyles.checkboxText}>
                             Bookmarks
                         </span>
@@ -70,7 +70,11 @@ const EstimatesTable = ({
                 <td>{estimates[TYPE.BOOKMARK].remaining}</td>
                 <td>{estimates[TYPE.BOOKMARK].timeRemaining}</td>
             </tr>
-            <tr className={localStyles.disabled}>
+            <tr
+                className={
+                    localStyles.importTableRow + ' ' + localStyles.disabled
+                }
+            >
                 <td>
                     <input
                         type="checkbox"
@@ -78,15 +82,21 @@ const EstimatesTable = ({
                         id="evernote"
                         disabled
                     />
-                    <label htmlFor="evernote">
+                    <label className={localStyles.label} htmlFor="evernote">
                         <span className={localStyles.checkboxText}>
                             Evernote
                         </span>
                     </label>
                 </td>
-                <td colSpan="3">[COMING SOON]</td>
+                <td className={localStyles.disabledComingSoon} colSpan="3">
+                    [COMING SOON]
+                </td>
             </tr>
-            <tr className={localStyles.disabled}>
+            <tr
+                className={
+                    localStyles.importTableRow + ' ' + localStyles.disabled
+                }
+            >
                 <td>
                     <input
                         type="checkbox"
@@ -94,11 +104,13 @@ const EstimatesTable = ({
                         id="pocket"
                         disabled
                     />
-                    <label htmlFor="pocket">
+                    <label className={localStyles.label} htmlFor="pocket">
                         <span className={localStyles.checkboxText}>Pocket</span>
                     </label>
                 </td>
-                <td colSpan="3">[COMING SOON]</td>
+                <td className={localStyles.disabledComingSoon} colSpan="3">
+                    [COMING SOON]
+                </td>
             </tr>
         </tbody>
     </table>

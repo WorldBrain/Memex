@@ -56,7 +56,6 @@
 
 .pause,
 .resume {
-    font-weight: bold;
     background-color: white;
     border: 1px solid #3eb995;
     color: #3eb995;
@@ -91,4 +90,5 @@
     padding: 0.6em 1.5em;
     color: white;
     border: none;
+    margin-top: 20px;
 }
