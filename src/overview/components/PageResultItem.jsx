@@ -39,7 +39,7 @@ const PageResultItem = ({
     )
 
     return (
-        <a className={getMainClasses({ compact })} href={doc.url}>
+        <a className={getMainClasses({ compact })} href={doc.url} target='_blank'>
             {isBookmark && <div className={styles.bookmarkRibbon} />}
             <div className={styles.screenshotContainer}>
                 {doc._attachments && doc._attachments.screenshot ? (
