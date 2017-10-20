@@ -21,20 +21,17 @@ const Import = ({
                     Step 1/3: Analysing Browser History and Bookmarks{' '}
                 </div>
                 <div className={localStyles.stepText}>
+                    <p className={localStyles.stepImportText}>
+                        If you want, you can also make your existing browsing
+                        history and bookmarks available for full-text search.
+                        Even without doing that, you still can search everything
+                        you visit after installing the tool.
+                    </p>
                     <img
                         src="/img/caution.png"
                         className={localStyles.icon}
                     />{' '}
-                    This process may slow down your internet connection.<br />
-                    <span className={localStyles.stepSubText}>
-                        If you want, you can also make your existing browsing
-                        history and bookmarks available for full-text
-                    </span>
-                    <br />
-                    <span className={localStyles.stepSubText}>
-                        search. Even without doing that, you still can search
-                        everything you visit after installing the tool.
-                    </span>
+                    This process may slow down your internet connection.
                 </div>
             </div>
         )}

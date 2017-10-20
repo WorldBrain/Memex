@@ -122,6 +122,10 @@
     margin-left: 18px;
 }
 
+.stepImportText {
+    font-size: 15px;
+}
+
 .checkboxText {
     font-weight: bold;
 }
