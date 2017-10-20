@@ -7,16 +7,6 @@ import styles from './DevOptions.css'
 
 const DevOptions = ({ devMode, toggleDevMode, ...uploadProps }) => (
     <section className={styles.container}>
-        <div className={styles.devModeToggle}>
-            <input
-                type="checkbox"
-                id="devModeCheckbox"
-                onChange={toggleDevMode}
-                checked={devMode}
-            />
-            <label htmlFor="devModeCheckbox">Enable dev mode</label>
-        </div>
-
         {devMode && (
             <div className={styles.devFunctionality}>
                 <p className={styles.warning}>

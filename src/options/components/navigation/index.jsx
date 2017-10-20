@@ -1,62 +1,64 @@
-import React from 'react'
+import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import { Link } from 'react-router'
-import classNames from 'classnames'
+import { connect } from 'react-redux'
+import * as selectors from '../../imports/selectors'
+import * as actions from '../../imports/actions'
+import { bindActionCreators } from 'redux'
 
-import styles from './styles.css'
+import Nav from './Nav'
+import NavLink from './NavLink'
 
-const Navigation = ({ currentLocation, routes }) => {
-    function buildRoutes() {
-        return routes.map((route, idx) => {
-            const navClasses = classNames({
-                [styles.navLink]: true,
-                [styles.isActive]: isActive(route),
-            })
+class Navigation extends Component {
+    isActive(route) {
+        return this.props.currentLocation.pathname === route.pathname
+    }
 
-            const navIcon = classNames({
-                [styles.navIcon]: true,
-                'material-icons': true,
-            })
+    renderNavLinks() {
+        const { isRunning, isIdle, isLoading, isStopped, isPaused } = this.props
 
+        const state = {
+            isRunning: isRunning,
+            isIdle: isIdle,
+            isLoading: isLoading,
+            isStopped: isStopped,
+            isPaused: isPaused,
+        }
+
+        return this.props.routes.map((route, idx) => {
             return (
-                <li className={navClasses} key={idx}>
-                    <i className={navIcon}>{route.icon}</i>
-                    {route.component === 'faq' && (
-                        <a
-                            className={navClasses}
-                            href={route.pathname}
-                            target="_blank"
-                        >
-                            {route.name}
-                        </a>
-                    )}
-                    {route.component !== 'faq' && (
-                        <Link className={navClasses} to={route.pathname}>
-                            {route.name}
-                        </Link>
-                    )}
-                </li>
+                <NavLink route={route} key={idx} state={state}>
+                    {this.isActive(route)}
+                </NavLink>
             )
         })
     }
 
-    function isActive(route) {
-        return currentLocation.pathname === route.pathname
+    render() {
+        return <Nav>{this.renderNavLinks()}</Nav>
     }
-
-    return (
-        <nav className={styles.root}>
-            <div className={styles.icon_div}>
-                <img src="/img/worldbrain-logo.png" className={styles.icon} />
-            </div>
-            <ul className={styles.nav}>{buildRoutes()}</ul>
-        </nav>
-    )
 }
 
 Navigation.propTypes = {
+    isRunning: PropTypes.bool.isRequired,
+    isIdle: PropTypes.bool.isRequired,
     currentLocation: PropTypes.object.isRequired,
     routes: PropTypes.array.isRequired,
+    isLoading: PropTypes.bool.isRequired,
+    isStopped: PropTypes.bool.isRequired,
+    isPaused: PropTypes.bool.isRequired,
 }
 
-export default Navigation
+const mapStateToProps = state => ({
+    isRunning: selectors.isRunning(state),
+    isPaused: selectors.isPaused(state),
+    isStopped: selectors.isStopped(state),
+    isLoading: selectors.isLoading(state),
+    isIdle: selectors.isIdle(state),
+    isStartBtnDisabled: selectors.isStartBtnDisabled(state),
+})
+
+const mapDispatchToProps = dispatch => ({
+    boundActions: bindActionCreators(actions, dispatch),
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(Navigation)

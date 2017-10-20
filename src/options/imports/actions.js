@@ -39,6 +39,8 @@ export const finishTestDataUpload = createAction(
     'imports-dev/finishTestDataUpload',
 )
 
+export const showDownloadDetails = createAction('imports/showDownloadDetails')
+
 /**
  * @param {FileReader} fileReader FileReader instance to bind to text reading function.
  * @return {(File) => Promise<String>} Async function that reads a given file and returns its text.

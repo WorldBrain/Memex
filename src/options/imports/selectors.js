@@ -14,7 +14,7 @@ export const entireState = state => state.imports
 
 export const importStatus = state => entireState(state).importStatus
 export const downloadData = state => entireState(state).downloadData
-const downloadDataFilter = state => entireState(state).downloadDataFilter
+export const downloadDataFilter = state => entireState(state).downloadDataFilter
 export const fail = state => entireState(state).fail
 export const success = state => entireState(state).success
 export const totals = state => entireState(state).totals
@@ -22,6 +22,8 @@ const completed = state => entireState(state).completed
 export const allowTypes = state => entireState(state).allowTypes
 export const loadingMsg = state => entireState(state).loadingMsg
 
+export const showDownloadDetails = state =>
+    entireState(state).showDownloadDetails
 // Dev features only
 export const devState = createSelector(entireState, state => state.dev)
 export const devMode = createSelector(devState, devState => devState.isEnabled)

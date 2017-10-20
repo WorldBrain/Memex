@@ -13,7 +13,7 @@ const ProgressTable = ({ progress }) => (
             <col className={localStyles.importTableCol} />
         </colgroup>
         <thead className={localStyles.importTableHead}>
-            <tr className={localStyles.importTableRow}>
+            <tr>
                 <th />
                 <th>Browsing History</th>
                 <th>Bookmarks</th>

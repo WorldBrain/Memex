@@ -1,10 +1,11 @@
 .importTable {
     width: 100%;
     padding: 0 15px;
-    line-height: 36px;
+    line-height: 1.5;
     margin-bottom: 10px;
     border-collapse: collapse;
     text-align: center;
+    margin-top: 20px;
 
     & th,
     & td {
@@ -13,6 +14,7 @@
 
     & td {
         color: #666;
+        min-width: 160px;
     }
 
     & td.importTableCellSepar {
@@ -20,20 +22,27 @@
     }
 
     & td:first-child {
-        text-align: left;
+        text-align: initial;
     }
 }
 
 .importTableHead {
-    font-size: 20px;
+    font-size: 14px;
+    color: #cacaca;
     border-bottom: 1px solid #d2d2d2;
+    line-height: 1.2;
 }
 
 .importTableRow {
-    border-bottom: 1px solid #d2d2d2;
+    font-size: 14px;
+    height: 100px;
 
-    &:last-child {
-        border-bottom: none;
+    &:nth-child(even) {
+        background-color: #f6f6f6;
+    }
+
+    &:nth-child(odd) {
+        background-color: #fff;
     }
 }
 
@@ -50,7 +59,7 @@
 }
 
 .importTableCol {
-    width: calc(100% / 3);
+    width: calc(100% / 4);
 }
 
 .importTableContainer {
@@ -58,9 +67,7 @@
     flex-direction: column;
     height: auto;
     justify-content: space-between;
-    padding: 40px;
-    background: #f8f8f8;
-    border: 1px solid #666;
+    background: #fff;
     border-radius: 10px;
 }
 
@@ -83,4 +90,141 @@
 
 .loadingMsg {
     font-weight: bold;
+}
+
+.title {
+    color: #3eb995;
+    font-weight: bold;
+    font-size: 16px;
+    letter-spacing: 1px;
+}
+
+.stepNumber {
+    font-size: 16px;
+    color: #4d4b4c;
+    font-weight: bold;
+    letter-spacing: 1px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.stepText {
+    font-size: 14px;
+    color: #d5969e;
+}
+
+.icon {
+    width: auto;
+    height: 14px;
+}
+
+.stepSubText {
+    margin-left: 18px;
+}
+
+.stepImportText {
+    font-size: 15px;
+}
+
+.checkboxText {
+    font-weight: bold;
+}
+
+.checkboxSubText {
+    margin-left: 24px;
+}
+
+progress,
+progress[role] {
+    background-size: auto;
+    height: 30px;
+    width: 100%;
+    border-radius: 10px;
+    margin-top: 40px;
+    z-index: -1;
+}
+
+progress[value]::-webkit-progress-bar {
+    background-color: #ededed;
+    border-radius: 20px;
+    border: 5px solid transparent;
+}
+
+progress[value]::-webkit-progress-value {
+    background-color: #3eb995;
+    border-radius: 20px;
+    display: inline-block;
+}
+
+.quoteBlock {
+    padding: 20px;
+    background-color: #f6f6f6;
+    text-align: center;
+    font-family: 'Lato';
+    color: #6d6d6d;
+    border-radius: 5px;
+    letter-spacing: 1px;
+    font-size: 0.7em;
+    margin-top: 40px;
+}
+
+.quoteLine {
+    font-weight: bold;
+}
+
+.heading {
+    color: #c8c8c8;
+    border-bottom: 1px solid #c8c8c8;
+    font-size: 14px;
+    width: 250px;
+    line-height: 2;
+}
+
+.reportDetails {
+    font-size: 14px;
+    color: #4d4b4c;
+    font-weight: bold;
+    letter-spacing: 1px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    line-height: 0.7;
+}
+
+.progressBar {
+    font-size: 0.8em;
+    color: #3eb995;
+}
+
+.arrowUp {
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 5px solid #3eb995;
+}
+
+.disabled {
+    opacity: 0.4;
+}
+
+.disabledComingSoon {
+    color: #3eb995 !important;
+}
+
+.showDetails {
+    color: #3eb995;
+    font-size: 10px;
+
+    &:hover {
+        cursor: pointer;
+    }
+}
+
+.layer1 {
+    background-color: white;
+    z-index: -3;
+}
+
+.layer2 {
+    z-index: -2;
 }

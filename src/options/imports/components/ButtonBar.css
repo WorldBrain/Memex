@@ -2,6 +2,7 @@
     display: flex;
     flex-direction: row;
     height: 100px;
+    justify-content: flex-end;
 }
 
 .loadingContainer {
@@ -14,7 +15,6 @@
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    width: 55%;
 }
 
 .actionBar {
@@ -23,15 +23,15 @@
     justify-content: space-around;
     align-items: center;
     height: 60px;
-    margin-left: 10%;
 }
 
 .actionButton {
-    width: 165px;
     height: 45px;
+    background-color: #3eb995;
+    border-radius: 5px;
 
     &.hidden {
-        visibility: hidden;
+        display: none;
     }
 }
 
@@ -43,5 +43,52 @@
     height: 35px;
     font-weight: 400;
     text-align: right;
+    color: #8d857f;
     font-size: 0.8em;
+}
+
+.cancel {
+    background-color: white;
+    color: #db919c;
+    padding: 0.6em 1.5em;
+    border: none;
+}
+
+.pause,
+.resume {
+    background-color: white;
+    border: 1px solid #3eb995;
+    color: #3eb995;
+    margin-left: 20px;
+    padding: 0.6em 4em;
+}
+
+.startImport {
+    background: #3eb995;
+    color: white;
+    font-size: 0.8em;
+    padding: 0.6em 1.5em;
+    text-transform: uppercase;
+    cursor: pointer;
+    outline: 0;
+    border: none;
+    box-shadow: 0 0 1px 0 rgba(0, 0, 0, 0.1);
+    transition: all 0.1s ease-in;
+
+    &:hover {
+        transform: scale(1.02);
+    }
+
+    &[disabled] {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+}
+
+.newImport {
+    background-color: #3eb995;
+    padding: 0.6em 1.5em;
+    color: white;
+    border: none;
+    margin-top: 20px;
 }

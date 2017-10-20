@@ -1,21 +1,21 @@
 .detailsContainer {
     display: flex;
     flex-direction: column;
+    min-width: 320px;
 }
 
 .headerContainer {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    height: 50px;
     align-items: baseline;
     margin-bottom: 5px;
+    margin-top: 10px;
 }
 
 .filters {
     display: flex;
     flex-direction: row;
-    width: 136px;
     justify-content: space-between;
 }
 
@@ -40,7 +40,6 @@
     background: #fff;
     width: 100%;
     font-size: 0.75em;
-    border: 1px solid #000;
     border-collapse: collapse;
 
     & th,
@@ -63,13 +62,14 @@
 
 .detailsTableBody {
     display: block;
-    height: 210px;
+    height: auto;
+    max-height: 210px;
     overflow: auto;
 }
 
 .detailsTableHead {
-    border-bottom: 1px solid #000;
-    background: #eee;
+    color: #c8c8c8;
+    border-bottom: 1px solid #c8c8c8;
     width: calc(100% - 1em);
 }
 
@@ -89,16 +89,31 @@
     &.active {
         background: #b5d9ff;
     }
+
+    &:nth-child(odd) {
+        background-color: #fff;
+    }
+
+    &:nth-child(even) {
+        background-color: #f6f6f6;
+    }
 }
 
 .urlCol {
     width: 60%;
 }
 
-.downloadedCol {
-    width: 15%;
-}
-
 .errorsCol {
     width: 25%;
+}
+
+.link,
+.errorsCol {
+    text-decoration: none;
+    color: #939192;
+}
+
+.header {
+    color: #c8c8c8;
+    font-size: 12px;
 }

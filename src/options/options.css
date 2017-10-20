@@ -25,30 +25,20 @@ body {
     font-weight: 100;
     color: #b7b7b7;
     margin: 10px 0 10px 0;
-    padding-bottom: 10px;
 }
 
 .button {
-    background: #eee;
-    color: #666;
     font-size: 0.8em;
-    font-weight: 400;
-    padding: 0.6em 1.5em;
     text-transform: uppercase;
     cursor: pointer;
     outline: 0;
-    border: 1px solid #999;
-    box-shadow: 0 0 1px 0 rgba(0, 0, 0, 0.1);
-    transition: background-color 0.1s ease-in, color 0.1s ease-in;
+    transition: all 0.1s ease-in;
 
     &:hover {
-        background: #cdcdcd;
-        color: #333;
+        transform: scale(1.02);
     }
 
     &[disabled] {
-        background: #eee;
-        color: #666;
         opacity: 0.4;
         cursor: not-allowed;
     }

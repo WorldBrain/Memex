@@ -9,10 +9,13 @@ import * as constants from './constants'
 import Import from './components/Import'
 import EstimatesTable from './components/EstimatesTable'
 import ProgressTable from './components/ProgressTable'
+import ProgressBar from './components/ProgressBar'
 import ActionButton from './components/ActionButton'
 import ButtonBar from './components/ButtonBar'
 import DownloadDetails from './components/DownloadDetails'
 import DownloadDetailsRow from './components/DownloadDetailsRow'
+import StatusReport from './components/StatusReport'
+import DevCheckBox from './components/DevCheckBox'
 
 class ImportContainer extends Component {
     constructor(props) {
@@ -68,12 +71,8 @@ class ImportContainer extends Component {
     }
 
     renderHelpText() {
-        const { isIdle, isStopped } = this.props
         const { waitingOnCancelConfirm } = this.state
 
-        if (isIdle)
-            return 'Downloading may slow down your experience.\nYou can pause and resume anytime'
-        if (isStopped) return 'Import has finished.'
         if (waitingOnCancelConfirm) return 'Press cancel again to confirm'
         return ''
     }
@@ -99,8 +98,9 @@ class ImportContainer extends Component {
                 handleClick={handleClick}
                 isHidden={isIdle}
                 isDisabled={isStopped}
+                customClass={'cancel'}
             >
-                Cancel import
+                Cancel
             </ActionButton>
         )
     }
@@ -116,17 +116,32 @@ class ImportContainer extends Component {
 
         if (isRunning) {
             const handleClick = e => this.onButtonClick(e, boundActions.pause)
-            return <ActionButton handleClick={handleClick}>Pause</ActionButton>
+            return (
+                <ActionButton customClass={'pause'} handleClick={handleClick}>
+                    Pause
+                </ActionButton>
+            )
         }
 
         if (isPaused) {
             const handleClick = e => this.onButtonClick(e, boundActions.resume)
-            return <ActionButton handleClick={handleClick}>Resume</ActionButton>
+            return (
+                <ActionButton customClass={'resume'} handleClick={handleClick}>
+                    Resume
+                </ActionButton>
+            )
         }
 
         if (isStopped) {
             const handleClick = e => this.onButtonClick(e, boundActions.finish)
-            return <ActionButton handleClick={handleClick}>Return</ActionButton>
+            return (
+                <ActionButton
+                    customClass={'newImport'}
+                    handleClick={handleClick}
+                >
+                    Start new import
+                </ActionButton>
+            )
         }
 
         // Idle state case
@@ -135,6 +150,7 @@ class ImportContainer extends Component {
             <ActionButton
                 handleClick={handleClick}
                 isDisabled={isStartBtnDisabled}
+                customClass={'startImport'}
             >
                 Start import
             </ActionButton>
@@ -163,8 +179,12 @@ class ImportContainer extends Component {
             isIdle,
             loadingMsg,
             isLoading,
+            isStopped,
+            isPaused,
             progress,
             estimates,
+            showDownloadDetails,
+            downloadDataFilter,
         } = this.props
 
         const estTableProps = {
@@ -175,28 +195,59 @@ class ImportContainer extends Component {
             onAllowHistoryClick: () =>
                 boundActions.toggleAllowType(constants.IMPORT_TYPE.HISTORY),
         }
+        console.log(this.props)
 
         return (
-            <Import isLoading={isLoading} loadingMsg={loadingMsg}>
+            <Import
+                isLoading={isLoading}
+                loadingMsg={loadingMsg}
+                isIdle={isIdle}
+                isRunning={isRunning}
+                isStopped={isStopped}
+                isPaused={isPaused}
+            >
                 {isIdle || isLoading ? (
                     <EstimatesTable {...estTableProps} />
-                ) : (
-                    <ProgressTable progress={progress} />
+                ) : null}
+                {(isRunning || isPaused) && (
+                    <div>
+                        <ProgressBar
+                            progress={progress}
+                            allowTypes={allowTypes}
+                        />
+                        <ProgressTable progress={progress} />
+                    </div>
+                )}
+                {isStopped && (
+                    <div>
+                        <StatusReport
+                            progress={progress}
+                            allowTypes={allowTypes}
+                            showDownloadDetails={showDownloadDetails}
+                            changeShowDetails={boundActions.showDownloadDetails}
+                        />
+                        <DownloadDetails
+                            filterHandlers={this.getDetailFilterHandlers()}
+                            showDownloadDetails={showDownloadDetails}
+                            downloadDataFilter={downloadDataFilter}
+                        >
+                            {this.renderDownloadDetailsRows()}
+                        </DownloadDetails>
+                    </div>
                 )}
                 <ButtonBar
                     isRunning={isRunning}
                     helpText={this.renderHelpText()}
                 >
-                    {this.renderCancelButton()}
+                    {(isIdle || isLoading) && (
+                        <DevCheckBox
+                            devMode={this.props.devMode}
+                            toggleDevMode={this.props.toggleDevMode}
+                        />
+                    )}
+                    {!isStopped && this.renderCancelButton()}
                     {this.renderImportButton()}
                 </ButtonBar>
-                {!(isIdle || isLoading) && (
-                    <DownloadDetails
-                        filterHandlers={this.getDetailFilterHandlers()}
-                    >
-                        {this.renderDownloadDetailsRows()}
-                    </DownloadDetails>
-                )}
             </Import>
         )
     }
@@ -215,9 +266,13 @@ ImportContainer.propTypes = {
     progress: PropTypes.object.isRequired,
     allowTypes: PropTypes.object.isRequired,
     loadingMsg: PropTypes.string,
+    devMode: PropTypes.bool.isRequired,
+    showDownloadDetails: PropTypes.bool.isRequired,
+    downloadDataFilter: PropTypes.string.isRequired,
 
     // Misc
     boundActions: PropTypes.object.isRequired,
+    toggleDevMode: PropTypes.func.isRequired,
 }
 
 const mapStateToProps = state => ({
@@ -232,10 +287,14 @@ const mapStateToProps = state => ({
     progress: selectors.progress(state),
     allowTypes: selectors.allowTypes(state),
     loadingMsg: selectors.loadingMsg(state),
+    devMode: selectors.devMode(state),
+    showDownloadDetails: selectors.showDownloadDetails(state),
+    downloadDataFilter: selectors.downloadDataFilter(state),
 })
 
 const mapDispatchToProps = dispatch => ({
     boundActions: bindActionCreators(actions, dispatch),
+    toggleDevMode: () => dispatch(actions.toggleDevMode()),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(ImportContainer)

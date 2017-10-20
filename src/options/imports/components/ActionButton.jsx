@@ -12,9 +12,19 @@ const getBtnClass = isHidden =>
         [localStyles.hidden]: isHidden,
     })
 
-const ActionButton = ({ children, handleClick, isHidden, isDisabled }) => (
+const ActionButton = ({
+    children,
+    handleClick,
+    isHidden,
+    isDisabled,
+    customClass,
+}) => (
     <button
-        className={getBtnClass(isHidden)}
+        className={
+            getBtnClass(isHidden) +
+            ' _src_options_imports_components_ButtonBar__' +
+            customClass
+        }
         onClick={handleClick}
         disabled={isDisabled}
     >
@@ -26,6 +36,7 @@ ActionButton.propTypes = {
     // State
     isDisabled: PropTypes.bool,
     isHidden: PropTypes.bool,
+    customClass: PropTypes.string,
 
     // Event handlers
     handleClick: PropTypes.func.isRequired,
