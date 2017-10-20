@@ -1,4 +1,9 @@
-import { intersectMaps } from 'src/util/map-set-helpers'
+import {
+    containsEmptyVals,
+    intersectMaps,
+    intersectManyMaps,
+    unionNestedMaps,
+} from 'src/util/map-set-helpers'
 import {
     structureSearchResult,
     initLookupByKeys,
@@ -52,22 +57,12 @@ async function domainSearch({ domain }) {
     const domainValuesMap = await lookupByKeys([...domain].map(keyGen.domain))
 
     // If any domains are empty, they cancel all other results out
-    const containsEmptyTerm = [...domainValuesMap.values()].reduce(
-        (acc, curr) => acc || curr == null || !curr.size,
-        false,
-    )
-
-    if (containsEmptyTerm) {
+    if (containsEmptyVals(domainValuesMap.values())) {
         return new Map()
     }
 
-    // Create Map of page ID keys to weights
-    return new Map(
-        [...domainValuesMap.values()].reduce(
-            (acc, props) => [...acc, ...props],
-            [],
-        ),
-    )
+    // Union the nested 'pageId => weights' Maps for each domain
+    return unionNestedMaps(domainValuesMap)
 }
 
 async function termSearch({ query }) {
@@ -80,38 +75,16 @@ async function termSearch({ query }) {
     const termValuesMap = await lookupByKeys([...query].map(keyGen.term))
 
     // If any terms are empty, they cancel all other results out
-    const containsEmptyTerm = [...termValuesMap.values()].reduce(
-        (acc, curr) => acc || curr == null || !curr.size,
-        false,
-    )
-
-    // Exit early if no results
-    if (!termValuesMap.size || containsEmptyTerm) {
+    if (containsEmptyVals(termValuesMap.values())) {
         return new Map()
     }
 
-    // Create a Map of page ID keys to weights
-    const pageValuesMap = new Map(
-        [...termValuesMap.values()].reduce(
-            (acc, curr) => [...acc, ...curr],
-            [],
-        ),
-    )
+    // Union the nested 'pageId => weights' Maps for each term
+    let pageValuesMap = unionNestedMaps(termValuesMap)
 
     // Perform intersect of Map on each term value key to AND results
     if (termValuesMap.size > 1) {
-        const missingInSomeTermValues = terms => pageId =>
-            terms.some(termValue => !termValue.has(pageId))
-
-        // Perform set difference on pageIds between termValues
-        const differedIds = new Set(
-            [...pageValuesMap.keys()].filter(
-                missingInSomeTermValues([...termValuesMap.values()]),
-            ),
-        )
-
-        // Delete each of the differed pageIds from the merged Map of term values
-        differedIds.forEach(pageId => pageValuesMap.delete(pageId))
+        pageValuesMap = intersectManyMaps([...termValuesMap.values()])
     }
 
     return pageValuesMap
