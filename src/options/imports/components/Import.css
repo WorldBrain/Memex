@@ -124,6 +124,7 @@
 
 .stepImportText {
     font-size: 15px;
+    max-width: 700px;
 }
 
 .checkboxText {
