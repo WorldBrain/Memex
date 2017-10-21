@@ -7,12 +7,13 @@ export const keyGen = {
     domain: key => `domain/${key}`,
     url: key => `url/${key}`,
     term: key => `term/${key}`,
+    title: key => `title/${key}`,
     visit: key => `visit/${key}`,
     bookmark: key => `bookmark/${key}`,
 }
 
 export const removeKeyType = key =>
-    key.replace(/^(term|visit|url|domain|bookmark)\//, '')
+    key.replace(/^(term|title|visit|url|domain|bookmark)\//, '')
 
 export const standardResponse = (resolve, reject) => (err, data = true) =>
     err ? reject(err) : resolve(data)

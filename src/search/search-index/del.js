@@ -54,7 +54,7 @@ const initDeindexTerms = termsField => async indexDoc => {
 
     // Schedule updates of all associated term values
     for (const [term, currTermVal] of termValuesMap) {
-        const newTermVal = reduceValue(currTermVal, indexDoc.id)
+        const newTermVal = reduceValue(currTermVal, indexDoc)
 
         // If reduces to empty obj delete KVP, else update
         if (!newTermVal.size) {
@@ -69,6 +69,7 @@ const initDeindexTerms = termsField => async indexDoc => {
 
 const deindexTerms = initDeindexTerms('terms')
 const deindexUrlTerms = initDeindexTerms('urlTerms')
+const deindexTitleTerms = initDeindexTerms('titleTerms')
 
 /**
  * @param {IndexLookupDoc} indexDoc The lookup doc containing assoc. time keys.
@@ -109,7 +110,7 @@ async function deindexDomain(indexDoc) {
 async function performDeindexing(pageId) {
     const indexDoc = await singleLookup(pageId)
 
-    if (!indexDoc || !indexDoc.content) {
+    if (indexDoc == null) {
         throw new Error(`Page with ID "${pageId}" is not indexed`)
     }
 
@@ -118,6 +119,7 @@ async function performDeindexing(pageId) {
         deinidexPage(indexDoc),
         deindexDomain(indexDoc),
         deindexUrlTerms(indexDoc),
+        deindexTitleTerms(indexDoc),
         deindexTerms(indexDoc),
         deindexTimestamps(indexDoc),
     ])

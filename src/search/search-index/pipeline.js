@@ -88,12 +88,23 @@ export default function pipeline({
     const { text: transformedContent } = transformPageText({
         text: content.fullText,
     })
+    const { text: transformedTitle } = transformPageText({
+        text: content.title,
+    })
 
     // Extract all terms out of processed content
     const terms = new Set(
         extractContent(transformedContent, {
             separator: DEFAULT_TERM_SEPARATOR,
             key: 'term',
+        }),
+    )
+
+    // Extract all terms out of processed title
+    const titleTerms = new Set(
+        extractContent(transformedTitle, {
+            separator: DEFAULT_TERM_SEPARATOR,
+            key: 'title',
         }),
     )
 
@@ -115,7 +126,7 @@ export default function pipeline({
         terms,
         urlTerms,
         domain: keyGen.domain(domain),
-        title: content.title,
+        titleTerms,
         visits: new Set(visits.map(keyGen.visit)),
         bookmarks: new Set(bookmarks.map(keyGen.bookmark)),
     }

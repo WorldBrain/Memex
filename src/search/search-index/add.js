@@ -67,6 +67,7 @@ const initIndexTerms = termsField => async indexDoc => {
 
 const indexTerms = initIndexTerms('terms')
 const indexUrlTerms = initIndexTerms('urlTerms')
+const indexTitleTerms = initIndexTerms('titleTerms')
 
 /**
  * @param {IndexLookupDoc} indexDoc
@@ -139,6 +140,7 @@ async function performIndexing(indexDoc) {
             indexPage(indexDoc),
             indexDomain(indexDoc),
             indexUrlTerms(indexDoc),
+            indexTitleTerms(indexDoc),
             indexTerms(indexDoc),
             indexMetaTimestamps(indexDoc),
         ])
