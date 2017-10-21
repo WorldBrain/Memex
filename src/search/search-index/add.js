@@ -1,5 +1,5 @@
 import index, { indexQueue } from '.'
-import { transformPageAndMetaDocs } from './transforms'
+import pipeline from './pipeline'
 import { initSingleLookup, initLookupByKeys, idbBatchToPromise } from './util'
 
 const lookupByKeys = initLookupByKeys()
@@ -25,7 +25,7 @@ const singleLookup = initSingleLookup()
  * @param {IndexRequest} req A `pageDoc` (required) and optionally any associated `visitDocs` and `bookmarkDocs`.
  * @returns {Promise<void>} Promise resolving when indexing is complete, or rejecting for any index errors.
  */
-export const addPage = req => performIndexing(transformPageAndMetaDocs(req))
+export const addPage = req => performIndexing(pipeline(req))
 
 /**
  * Adds a new page doc + any associated visit/bookmark docs to the index. This method
