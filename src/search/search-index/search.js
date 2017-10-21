@@ -9,6 +9,7 @@ import {
     initLookupByKeys,
     keyGen,
     rangeLookup,
+    reverseRangeLookup,
     removeKeyType,
 } from './util'
 
@@ -20,7 +21,51 @@ const compareByScore = (a, b) => b.score - a.score
 const paginate = ({ skip, limit }) => results =>
     results.slice(skip, skip + limit)
 
-async function filterSearch({ timeFilter }) {
+const filterSearch = query => {
+    if (!query.query.size && !query.domain.size) {
+        return timeFilterBackSearch(query)
+    }
+    return timeFilterSearch(query)
+}
+
+/**
+ * Quicker version of time filter search that can be run when no terms defined.
+ * Simply searches backwards from the key specified in `timeFilter` until the
+ * latest `limit + skip` pages have been collected.
+ *
+ * @param {IndexQuery}
+ * @returns {Map<string, IndexTermValue>}
+ */
+async function timeFilterBackSearch({ timeFilter, limit, skip }) {
+    // Exit early for no values
+    if (!timeFilter.size) {
+        return null
+    }
+
+    const data = []
+
+    for (const timeRange of timeFilter.values()) {
+        data.push(
+            await reverseRangeLookup({
+                ...timeRange,
+                limit: skip + limit,
+            }),
+        )
+    }
+
+    return new Map([...data.reduce((acc, curr) => [...acc, ...curr], [])])
+}
+
+/**
+ * Linear version of time filter search. Searches entire space in given
+ * `timeFilter` range. Needs to be used with term search, so the intersection
+ * step can be done against all possible time filter values.
+ * TODO: make to be run incrementally to reduce average case search space.
+ *
+ * @param {IndexQuery}
+ * @returns {Map<string, IndexTermValue>}
+ */
+async function timeFilterSearch({ timeFilter }) {
     // Exit early for no values
     if (!timeFilter.size) {
         return null
