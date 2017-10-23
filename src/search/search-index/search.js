@@ -22,6 +22,11 @@ const paginate = ({ skip, limit }) => results =>
     results.slice(skip, skip + limit)
 
 const filterSearch = query => {
+    // Exit early for no values
+    if (!query.timeFilter.size) {
+        return null
+    }
+
     if (!query.query.size && !query.domain.size) {
         return timeFilterBackSearch(query)
     }
@@ -37,11 +42,6 @@ const filterSearch = query => {
  * @returns {Map<string, IndexTermValue>}
  */
 async function timeFilterBackSearch({ timeFilter, limit, skip }) {
-    // Exit early for no values
-    if (!timeFilter.size) {
-        return null
-    }
-
     const data = []
 
     for (const timeRange of timeFilter.values()) {
@@ -66,11 +66,6 @@ async function timeFilterBackSearch({ timeFilter, limit, skip }) {
  * @returns {Map<string, IndexTermValue>}
  */
 async function timeFilterSearch({ timeFilter }) {
-    // Exit early for no values
-    if (!timeFilter.size) {
-        return null
-    }
-
     const data = []
 
     for (const timeRange of timeFilter.values()) {
