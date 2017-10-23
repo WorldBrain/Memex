@@ -8,7 +8,14 @@ import Filters from './Filters'
 
 const Overview = props => [
     <Header key="head" {...props} />,
-    <div>{props.showFilter && <Filters />}</div>,
+    <div>
+        {props.showFilter && (
+            <Filters
+                showOnlyBookmarks={props.showOnlyBookmarks}
+                onShowOnlyBookmarksChange={props.onShowOnlyBookmarksChange}
+            />
+        )}
+    </div>,
     <div key="body" className={styles.main}>
         {props.children}
     </div>,
@@ -27,6 +34,8 @@ Overview.propTypes = {
     deleteDocs: PropTypes.func.isRequired,
     onShowFilterChange: PropTypes.func.isRequired,
     showFilter: PropTypes.bool.isRequired,
+    showOnlyBookmarks: PropTypes.bool.isRequired,
+    onShowOnlyBookmarksChange: PropTypes.func.isRequired,
 }
 
 export default Overview

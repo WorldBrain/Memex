@@ -26,6 +26,8 @@ class OverviewContainer extends Component {
         needsWaypoint: PropTypes.bool.isRequired,
         showFilter: PropTypes.bool.isRequired,
         onShowFilterChange: PropTypes.func.isRequired,
+        showOnlyBookmarks: PropTypes.bool.isRequired,
+        onShowOnlyBookmarksChange: PropTypes.func.isRequired,
     }
 
     componentDidMount() {
@@ -112,6 +114,8 @@ class OverviewContainer extends Component {
                 setInputRef={this.setInputRef}
                 onInputChange={this.handleInputChange}
                 onShowFilterChange={this.props.onShowFilterChange}
+                showOnlyBookmarks={this.props.showOnlyBookmarks}
+                onShowOnlyBookmarksChange={this.props.onShowOnlyBookmarksChange}
             >
                 {this.renderResults()}
             </Overview>
@@ -129,6 +133,7 @@ const mapStateToProps = state => ({
     isDeleteConfShown: selectors.isDeleteConfShown(state),
     needsWaypoint: selectors.needsPagWaypoint(state),
     showFilter: selectors.showFilter(state),
+    showOnlyBookmarks: selectors.showOnlyBookmarks(state),
 })
 
 const mapDispatchToProps = dispatch =>
@@ -141,6 +146,7 @@ const mapDispatchToProps = dispatch =>
             hideDeleteConfirm: actions.hideDeleteConfirm,
             deleteDocs: actions.deleteDocs,
             onShowFilterChange: actions.showFilter,
+            onShowOnlyBookmarksChange: actions.showOnlyBookmarks,
         },
         dispatch,
     )

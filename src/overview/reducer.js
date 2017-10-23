@@ -20,6 +20,7 @@ const defaultState = {
         url: undefined,
     },
     showFilter: false,
+    showOnlyBookmarks: false,
 }
 
 function setQuery(state, query) {
@@ -97,6 +98,10 @@ export default createReducer(
         [actions.showFilter]: state => ({
             ...state,
             showFilter: !state.showFilter,
+        }),
+        [actions.showOnlyBookmarks]: state => ({
+            ...state,
+            showOnlyBookmarks: !state.showOnlyBookmarks,
         }),
     },
     defaultState,

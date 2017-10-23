@@ -21,6 +21,7 @@ export const hideResultItem = createAction('overview/hideResultItem')
 export const showDeleteConfirm = createAction('overview/showDeleteConfirm')
 export const hideDeleteConfirm = createAction('overview/hideDeleteConfirm')
 export const showFilter = createAction('overview/showFilter')
+export const showOnlyBookmarks = createAction('overview/showOnlyBookmarks')
 
 const deleteDocsByUrl = remoteFunction('deleteDocsByUrl')
 
