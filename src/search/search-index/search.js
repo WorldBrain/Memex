@@ -5,6 +5,7 @@ import {
     unionNestedMaps,
 } from 'src/util/map-set-helpers'
 import {
+    boostScores,
     structureSearchResult,
     initLookupByKeys,
     keyGen,
@@ -23,7 +24,10 @@ const paginate = ({ skip, limit }) => results =>
 
 const filterSearch = query => {
     // Exit early for no values
-    if (!query.timeFilter.size) {
+    if (
+        query.timeFilter.get('blank') &&
+        (query.query.size || query.domain.size)
+    ) {
         return null
     }
 
@@ -127,8 +131,31 @@ async function termSearch({ query }) {
         pageValuesMap = intersectManyMaps([...termValuesMap.values()])
     }
 
-    return pageValuesMap
+    // Merge in boosted docs for other fields
+    return new Map([
+        ...pageValuesMap,
+        ...(await boostedUrlSearch({ query }, pageValuesMap)),
+        ...(await boostedTitleSearch({ query }, pageValuesMap)),
+    ])
 }
+
+const boostedTermSearch = (keyGenFn, boost) => async (
+    { query },
+    baseResults,
+) => {
+    // For each term, do index lookup to grab the associated page IDs value
+    const titleTermValuesMap = await lookupByKeys([...query].map(keyGenFn))
+
+    const pageScoresMap = boostScores(titleTermValuesMap, boost)
+
+    // Filter out page scores that don't appear in the base results
+    return new Map(
+        [...pageScoresMap].filter(([pageId]) => baseResults.has(pageId)),
+    )
+}
+
+const boostedTitleSearch = boostedTermSearch(keyGen.title, 0.2)
+const boostedUrlSearch = boostedTermSearch(keyGen.url, 0.1)
 
 function formatIdResults(pageResultsMap) {
     const results = []
@@ -160,6 +187,10 @@ async function resolveIdResults(pageResultsMap) {
  * @returns {Map<string, IndexTermValue>} Interescted results of all three
  */
 function intersectResultMaps(termPages, filterPages, domainPages) {
+    if (filterPages == null && termPages == null) {
+        return domainPages
+    }
+
     const intersectDomain = intersectMaps(domainPages)
 
     // Should be null if filter search not needed to be run
@@ -177,7 +208,7 @@ function intersectResultMaps(termPages, filterPages, domainPages) {
         termPages = intersectDomain(termPages)
     }
 
-    return intersectMaps(termPages)(filterPages)
+    return intersectMaps(filterPages)(termPages)
 }
 
 /**
@@ -207,7 +238,7 @@ export async function search(
     const filterPageResultsMap = await filterSearch(query)
     console.timeEnd('filter search')
 
-    // If there was a time filter applied, intersect those results with term results, else use term results
+    // Intersect different kinds of results
     const pageResultsMap = intersectResultMaps(
         termPageResultsMap,
         filterPageResultsMap,

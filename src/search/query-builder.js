@@ -33,7 +33,7 @@ class QueryBuilder {
 
     filterTime({ startDate, endDate }, keyType) {
         if (!startDate && !endDate) {
-            return this
+            this.timeFilter.set('blank', true)
         }
 
         const existing = this.timeFilter.get(keyType) || {}

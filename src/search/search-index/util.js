@@ -37,9 +37,42 @@ export const extractContent = (
 ) => content.split(separator).map(word => keyGen[key](word.toLowerCase()))
 
 /**
+ * @param {Map<string, Map<string, IndexTermValue>>} termValuesMap Map of terms to assoc. page values.
+ * @param {number} [boost=0.2] Boost to apply on base score.
+ * @returns {Map<string, IndexTermValue>} Map of page IDs to boosted scores.
+ */
+export const boostScores = (termValuesMap, boost = 0.2) =>
+    [...termValuesMap.values()].reduce((pageScoresMap, termValue) => {
+        // Skip empty values
+        if (termValue == null) {
+            return pageScoresMap
+        }
+
+        // For each assoc. page to the term...
+        for (const [pageId, score] of termValue) {
+            const currScore = +score.latest
+
+            if (!Number.isNaN(currScore)) {
+                let newScore
+
+                // ... boost score (extra boost, if found multiple times)
+                if (pageScoresMap.has(pageId)) {
+                    newScore = currScore + currScore * (boost + 0.1)
+                } else {
+                    newScore = currScore + currScore * boost
+                }
+
+                pageScoresMap.set(pageId, {
+                    latest: newScore.toFixed(),
+                })
+            }
+        }
+
+        return pageScoresMap
+    }, new Map())
+
+/**
  * Transforms an indexed document into a search result.
- * NOTE: score is always the same as there is yet term frequency
- *   to derive relevance from.
  *
  * @param {IndexedPageDoc} document
  * @returns {SearchResult}
@@ -165,16 +198,4 @@ export const getLatestMeta = (visits, bookmarks) => {
         // Only visit array has timestamps
         return { latest: visits[numVisits - 1], type: RESULT_TYPES.VISIT }
     }
-}
-
-// Below are mostly standard Promise wrappers around search-index stream-based methods
-// TODO: Reimplement these
-export async function size() {
-    return new Promise((...args) => index.countDocs(standardResponse(...args)))
-}
-
-export async function destroy() {
-    return new Promise((resolve, reject) =>
-        index.flush(err => (err ? reject(err) : resolve('index destroyed'))),
-    )
 }
