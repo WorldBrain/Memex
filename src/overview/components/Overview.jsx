@@ -4,9 +4,11 @@ import PropTypes from 'prop-types'
 import Header from './Header'
 import DeleteConfirmation from './DeleteConfirmation'
 import styles from './Overview.css'
+import Filters from './Filters'
 
 const Overview = props => [
     <Header key="head" {...props} />,
+    <div>{props.showFilter && <Filters />}</div>,
     <div key="body" className={styles.main}>
         {props.children}
     </div>,
@@ -23,6 +25,8 @@ Overview.propTypes = {
     isDeleteConfShown: PropTypes.bool.isRequired,
     hideDeleteConfirm: PropTypes.func.isRequired,
     deleteDocs: PropTypes.func.isRequired,
+    onShowFilterChange: PropTypes.func.isRequired,
+    showFilter: PropTypes.bool.isRequired,
 }
 
 export default Overview

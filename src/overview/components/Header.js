@@ -25,6 +25,13 @@ const Header = ({
                 onEndDateChange={props.onEndDateChange}
             />
         </div>
+        <div className={styles.linkFilter} onClick={props.onShowFilterChange}>
+            <img
+                src="/img/filter.png"
+                className={styles.iconFilter}
+                title="Click to view filters"
+            />
+        </div>
         <div className={styles.links}>
             <a href="/options/options.html">
                 <img src="/img/settings-icon.png" className={styles.icon} />
@@ -43,6 +50,7 @@ Header.propTypes = {
     onInputChange: PropTypes.func.isRequired,
     onStartDateChange: PropTypes.func.isRequired,
     onEndDateChange: PropTypes.func.isRequired,
+    onShowFilterChange: PropTypes.func.isRequired,
 }
 
 export default Header

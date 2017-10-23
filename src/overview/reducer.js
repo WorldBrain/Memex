@@ -19,6 +19,7 @@ const defaultState = {
         isShown: false,
         url: undefined,
     },
+    showFilter: false,
 }
 
 function setQuery(state, query) {
@@ -93,6 +94,10 @@ export default createReducer(
         [actions.showDeleteConfirm]: showDeleteConfirm,
         [actions.hideDeleteConfirm]: hideDeleteConfirm,
         [actions.hideResultItem]: hideResultItem,
+        [actions.showFilter]: state => ({
+            ...state,
+            showFilter: !state.showFilter,
+        }),
     },
     defaultState,
 )

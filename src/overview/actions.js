@@ -20,6 +20,7 @@ export const setEndDate = createAction('overview/setEndDate')
 export const hideResultItem = createAction('overview/hideResultItem')
 export const showDeleteConfirm = createAction('overview/showDeleteConfirm')
 export const hideDeleteConfirm = createAction('overview/hideDeleteConfirm')
+export const showFilter = createAction('overview/showFilter')
 
 const deleteDocsByUrl = remoteFunction('deleteDocsByUrl')
 

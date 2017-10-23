@@ -24,6 +24,8 @@ class OverviewContainer extends Component {
         isBadTerm: PropTypes.bool.isRequired,
         searchResults: PropTypes.arrayOf(PropTypes.object).isRequired,
         needsWaypoint: PropTypes.bool.isRequired,
+        showFilter: PropTypes.bool.isRequired,
+        onShowFilterChange: PropTypes.func.isRequired,
     }
 
     componentDidMount() {
@@ -109,6 +111,7 @@ class OverviewContainer extends Component {
                 {...this.props}
                 setInputRef={this.setInputRef}
                 onInputChange={this.handleInputChange}
+                onShowFilterChange={this.props.onShowFilterChange}
             >
                 {this.renderResults()}
             </Overview>
@@ -125,6 +128,7 @@ const mapStateToProps = state => ({
     searchResults: selectors.results(state),
     isDeleteConfShown: selectors.isDeleteConfShown(state),
     needsWaypoint: selectors.needsPagWaypoint(state),
+    showFilter: selectors.showFilter(state),
 })
 
 const mapDispatchToProps = dispatch =>
@@ -136,6 +140,7 @@ const mapDispatchToProps = dispatch =>
             onBottomReached: actions.getMoreResults,
             hideDeleteConfirm: actions.hideDeleteConfirm,
             deleteDocs: actions.deleteDocs,
+            onShowFilterChange: actions.showFilter,
         },
         dispatch,
     )

@@ -93,7 +93,7 @@
 }
 
 .main {
-    margin-top: 100px;
+    margin-top: 200px;
 }
 
 .noResultMessage {
@@ -116,5 +116,20 @@
 
     100% {
         opacity: 1;
+    }
+}
+
+.iconFilter {
+    height: 40px;
+    width: 40px;
+}
+
+.linkFilter {
+    display: flex;
+    justify-content: flex-start;
+    width: 131px;
+
+    @media (min-width: 1300px) {
+        margin-left: -50px;
     }
 }
