@@ -14,5 +14,7 @@ const indexQueue = createQueue({
     concurrency: 1,
 })
 
+indexQueue.on('timeout', next => next())
+
 export { indexQueue }
 export default index

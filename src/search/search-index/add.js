@@ -33,7 +33,14 @@ export const addPage = req => performIndexing(pipeline(req))
  * @param {IndexRequest} req A `pageDoc` (required) and optionally any associated `visitDocs` and `bookmarkDocs`.
  * @returns {void}
  */
-export const addPageConcurrent = req => indexQueue.push(() => addPage(req))
+export const addPageConcurrent = req =>
+    new Promise((resolve, reject) => {
+        indexQueue.push(() =>
+            addPage(req)
+                .then(resolve)
+                .catch(reject),
+        )
+    })
 
 /**
  * @param {IndexTermValue} [currTermVal]
@@ -126,6 +133,7 @@ async function indexDomain(indexDoc) {
  * @returns {Promise<void>}
  */
 async function performIndexing(indexDoc) {
+    indexDoc = await indexDoc
     console.log('ADDING PAGE')
     console.log(indexDoc)
 
