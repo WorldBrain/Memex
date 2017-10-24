@@ -53,7 +53,7 @@ export async function fetchBlacklist() {
 async function storeBlacklist(blacklist = []) {
     const serialized = JSON.stringify(blacklist)
 
-    await browser.storage.local.set({ [STORAGE_KEY]: serialized })
+    return browser.storage.local.set({ [STORAGE_KEY]: serialized })
 }
 
 const createBlacklistEntry = url => ({
@@ -69,7 +69,7 @@ export async function addToBlacklist(url) {
     const newBlacklist =
         url instanceof Array
             ? url.map(createBlacklistEntry)
-            : createBlacklistEntry(url)
+            : [createBlacklistEntry(url)]
 
-    return await storeBlacklist([...blacklist, ...newBlacklist])
+    return storeBlacklist([...blacklist, ...newBlacklist])
 }
