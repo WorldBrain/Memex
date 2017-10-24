@@ -15,9 +15,6 @@ export const keyGen = {
 export const removeKeyType = key =>
     key.replace(/^(term|title|visit|url|domain|bookmark)\//, '')
 
-export const standardResponse = (resolve, reject) => (err, data = true) =>
-    err ? reject(err) : resolve(data)
-
 export const idbBatchToPromise = batch =>
     new Promise((resolve, reject) =>
         batch.write(err => (err ? reject(err) : resolve())),
@@ -83,6 +80,14 @@ export const structureSearchResult = (document, score = 1) => ({
     score,
 })
 
+/**
+ * Runs a lookup over a range of DB keys, resolving to the collected docs.
+ * Range can be specified with `gte` and `lte` keys in `iteratorOpts`, along
+ * with a `limit` count.
+ *
+ * @param {any} iteratorOpts
+ * @returns {Promise<Map<string, any>>}
+ */
 export const rangeLookup = iteratorOpts =>
     new Promise(resolve => {
         const data = new Map()
@@ -92,6 +97,15 @@ export const rangeLookup = iteratorOpts =>
             .on('end', () => resolve(data))
     })
 
+/**
+ * Runs a lookup over a range of DB keys until a results limit is reached,
+ * rather than a limit of # docs searched through.
+ * Range for lookup can be specified with `gte` and `lte` keys in `iteratorOpts`, along
+ * with a `limit` count of docs to return.
+ *
+ * @param {any} iteratorOpts
+ * @returns {Promise<Map<string, any>>}
+ */
 export const reverseRangeLookup = ({ limit = Infinity, ...iteratorOpts }) =>
     new Promise(resolve => {
         const data = new Map()
@@ -137,8 +151,8 @@ export const initSingleLookup = (
  * Performs concurrent lookups on different keys.
  *
  * @param {number} [concurrent=5] Optional concurrency level to run lookups at.
- * @returns {(keys: string|string[]) => Promise<any|Array<any>>} Function taking single or array
- *  of keys to lookup in index. Unique expected. Returns Promise resolving to single or array of
+ * @returns {(keys: string|string[]) => Promise<any|Map<string, any>>} Function taking single or array
+ *  of keys to lookup in index. Unique expected. Returns Promise resolving to single or Map of
  *  documents matching given `keys` param.
  */
 export const initLookupByKeys = (

@@ -20,7 +20,7 @@ const compareByScore = (a, b) => b.score - a.score
 
 // TODO: If only the page state changes, re-use results from last search
 const paginate = ({ skip, limit }) => results =>
-    results.slice(skip, skip + limit)
+    results.sort(compareByScore).slice(skip, skip + limit)
 
 const filterSearch = query => {
     // Exit early for no values
@@ -93,6 +93,10 @@ async function timeFilterSearch({ timeFilter }) {
     )
 }
 
+/**
+ * @param {IndexQuery} query
+ * @returns {Map<string, IndexTermValue>}
+ */
 async function domainSearch({ domain }) {
     if (!domain.size) {
         return null
@@ -105,10 +109,14 @@ async function domainSearch({ domain }) {
         return new Map()
     }
 
-    // Union the nested 'pageId => weights' Maps for each domain
+    // Union the nested 'pageId => scores' Maps for each domain
     return unionNestedMaps(domainValuesMap)
 }
 
+/**
+ * @param {IndexQuery} query
+ * @returns {Map<string, IndexTermValue>}
+ */
 async function termSearch({ query }) {
     // Exit early for wildcard
     if (!query.size) {
@@ -139,6 +147,11 @@ async function termSearch({ query }) {
     ])
 }
 
+/**
+ * @param {(term: string) => string} keyMapFn
+ * @param {number} boost
+ * @returns {(IndexQuery, Map<string, IndexTermValue>) => Map<string, IndexTermValue>}
+ */
 const boostedTermSearch = (keyGenFn, boost) => async (
     { query },
     baseResults,
@@ -164,7 +177,7 @@ function formatIdResults(pageResultsMap) {
         results.push(structureSearchResult({ id: pageId }, value.latest))
     }
 
-    return results.sort(compareByScore)
+    return results
 }
 
 async function resolveIdResults(pageResultsMap) {
@@ -177,7 +190,7 @@ async function resolveIdResults(pageResultsMap) {
         results.push(structureSearchResult(props, latest))
     }
 
-    return results.sort(compareByScore)
+    return results
 }
 
 /**

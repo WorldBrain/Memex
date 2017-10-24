@@ -2,6 +2,12 @@ import leveljs from 'level-js'
 import { AbstractLevelDOWN, AbstractChainedBatch } from 'abstract-leveldown'
 import IteratorStream from 'level-iterator-stream'
 
+/**
+ * These classes allow us to use the levelup API for interacting with level-js
+ * (which we use as an direct interface to IndexedDB). They simply act as a proxy
+ * from levelup API to level-js methods.
+ */
+
 class ChainedBatch extends AbstractChainedBatch {
     static INIT_STATE = []
 

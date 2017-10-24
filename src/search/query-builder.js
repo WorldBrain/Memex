@@ -4,6 +4,17 @@ import { DEFAULT_TERM_SEPARATOR } from './search-index'
 // Pattern to match entire string to `domain.tld`-like format + optional ccTLD
 const DOMAIN_TLD_PATTERN = /^\w{2,}\.\w{2,3}(\.\w{2})?$/
 
+/**
+ * @typedef IndexQuery
+ * @type {Object}
+ * @property {Set<string>} query Query terms a user has searched for.
+ * @property {Set<string>} domain Domain patterns extracted from the terms a user has searched for.
+ * @property {Map<string, any>} timeFilter Map of different time filter ranges to apply to search.
+ * @property {number} [skip=0]
+ * @property {number} [limit=10]
+ * @property {boolean} [isBadTerm=false] Flag denoting whether or not searched query is not specific enough.
+ */
+
 class QueryBuilder {
     skip = 0
     limit = 10
@@ -12,6 +23,10 @@ class QueryBuilder {
     domain = new Set()
     isBadTerm = false
 
+    /**
+     * @returns {IndexQuery}
+     * @memberof QueryBuilder
+     */
     get = () => ({
         query: this.query,
         limit: this.limit,
