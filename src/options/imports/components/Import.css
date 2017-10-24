@@ -209,7 +209,7 @@ progress[value]::-webkit-progress-value {
 }
 
 .disabledComingSoon {
-    color: #3eb995 !important;
+    color: #3eb995 !important; /* stylelint-disable-line declaration-no-important */
 }
 
 .showDetails {
