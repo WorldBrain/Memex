@@ -83,7 +83,6 @@ export const uploadTestData = files => async (dispatch, getState) => {
             .filter(onlyDefinedDocs)
 
         await db.bulkDocs(docs)
-        console.log(`${docs.length} test docs stored`)
     }
 
     dispatch(finishTestDataUpload())

@@ -56,12 +56,10 @@ export default function transform({ text = '', lang = 'en' }) {
         return text
     }
 
-    // console.log( text + "transform-text" + lang)
     let searchableText = text
     const lengthBefore = searchableText.length
 
     // Remove URLs first before we start messing with things
-    // console.log('beginning: \n',searchableText)
     searchableText = removeUrls(searchableText)
 
     // Removes ' and - from words effectively combining them

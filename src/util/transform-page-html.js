@@ -5,7 +5,6 @@ const WHITELIST_STRIP_LINEBREAKS = /[^A-Za-z\x80-\xFF 0-9 \u2018\u2019\u201C|\u2
 export default function transformHTML({ html = '' }) {
     const lengthBefore = html.length
     console.time('html-pipeline')
-    // console.log('hello')
     let text = html
         .toString()
         .replace(
@@ -19,7 +18,6 @@ export default function transformHTML({ html = '' }) {
             /<\/ +?(p|div|section|aside|button|header|footer|li|article|blockquote|cite|code|h1|h2|h3|h4|h5|h6|legend|nav)>/g,
             '|||||</$1>',
         )
-    // console.log({text})
     text = `<textractwrapper>${text}<textractwrapper>`
 
     // TODO: see if we can replace this lib

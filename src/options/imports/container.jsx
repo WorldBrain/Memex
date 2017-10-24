@@ -195,7 +195,6 @@ class ImportContainer extends Component {
             onAllowHistoryClick: () =>
                 boundActions.toggleAllowType(constants.IMPORT_TYPE.HISTORY),
         }
-        console.log(this.props)
 
         return (
             <Import
