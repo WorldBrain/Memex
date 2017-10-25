@@ -1,5 +1,5 @@
 import QueryBuilder from './query-builder'
-import { search } from './search-index/search'
+import { searchConcurrent } from './search-index/search'
 import mapResultsToPouchDocs from './map-search-to-pouch'
 
 /**
@@ -42,7 +42,7 @@ async function indexSearch({
     console.log('DEBUG: query', indexQuery)
 
     // Get index results, filtering out any unexpectedly structured results
-    const { results, totalCount } = await search(indexQuery, {
+    const { results, totalCount } = await searchConcurrent(indexQuery, {
         count: getTotalCount,
         fullDocs,
     })

@@ -34,13 +34,13 @@ export const addPage = req => performIndexing(pipeline(req))
  * @returns {void}
  */
 export const addPageConcurrent = req =>
-    new Promise((resolve, reject) => {
+    new Promise((resolve, reject) =>
         indexQueue.push(() =>
             addPage(req)
                 .then(resolve)
                 .catch(reject),
-        )
-    })
+        ),
+    )
 
 /**
  * @param {IndexTermValue} [currTermVal]

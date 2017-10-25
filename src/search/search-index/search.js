@@ -13,6 +13,7 @@ import {
     reverseRangeLookup,
     removeKeyType,
 } from './util'
+import { indexQueue } from '.'
 
 const lookupByKeys = initLookupByKeys()
 
@@ -273,3 +274,12 @@ export async function search(
         totalCount: totalResultCount,
     }
 }
+
+export const searchConcurrent = (...req) =>
+    new Promise((resolve, reject) =>
+        indexQueue.push(() =>
+            search(...req)
+                .then(resolve)
+                .catch(reject),
+        ),
+    )
