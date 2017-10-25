@@ -88,6 +88,7 @@ export const progress = createSelector(
     (...args) => ({
         [TYPE.HISTORY]: getProgress(...args.map(arg => arg[TYPE.HISTORY])),
         [TYPE.BOOKMARK]: getProgress(...args.map(arg => arg[TYPE.BOOKMARK])),
+        [TYPE.OLD]: getProgress(...args.map(arg => arg[TYPE.OLD])),
     }),
 )
 

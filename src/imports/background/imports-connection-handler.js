@@ -13,6 +13,7 @@ import {
     setImportItems,
     getURLFilteredHistoryItems,
     getURLFilteredBookmarkItems,
+    getOldExtItems,
     removeImportItem,
     clearImportItems,
 } from './'
@@ -46,10 +47,14 @@ async function prepareImportItems(allowTypes = {}) {
     const bookmarkItems = allowTypes[IMPORT_TYPE.BOOKMARK]
         ? await getURLFilteredBookmarkItems()
         : []
+    const oldExtItems = allowTypes[IMPORT_TYPE.OLD]
+        ? await getOldExtItems(historyItems, bookmarkItems)
+        : []
 
     // Create import items for all created page stubs
     await setImportItems(
         uniqByUrl([
+            ...oldExtItems,
             ...historyItems.map(transformToImportItem(IMPORT_TYPE.HISTORY)),
             ...bookmarkItems.map(transformToImportItem(IMPORT_TYPE.BOOKMARK)),
         ]),
@@ -82,8 +87,6 @@ const getBatchObserver = port => {
         next: handleFinishedItem,
         // Triggers when ALL batch inputs are finished
         async complete() {
-            // TODO: Final reindexing so that all the finished docs are searchable
-
             // Tell UI that it's finished
             port.postMessage({ cmd: CMDS.COMPLETE })
             clearImportInProgressFlag()
