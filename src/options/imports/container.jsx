@@ -194,6 +194,8 @@ class ImportContainer extends Component {
                 boundActions.toggleAllowType(constants.IMPORT_TYPE.BOOKMARK),
             onAllowHistoryClick: () =>
                 boundActions.toggleAllowType(constants.IMPORT_TYPE.HISTORY),
+            onAllowOldExtClick: () =>
+                boundActions.toggleAllowType(constants.IMPORT_TYPE.OLD),
         }
 
         return (

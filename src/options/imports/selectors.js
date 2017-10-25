@@ -121,6 +121,7 @@ export const estimates = createSelector(
             completed[TYPE.BOOKMARK],
             totals[TYPE.BOOKMARK],
         ),
+        [TYPE.OLD]: getEstimate(completed[TYPE.OLD], totals[TYPE.OLD]),
     }),
 )
 
