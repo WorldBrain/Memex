@@ -2,11 +2,14 @@ import db from 'src/pouchdb'
 import { IMPORT_TYPE } from 'src/options/imports/constants'
 import { pageDocsSelector } from 'src/page-storage'
 import { bookmarkDocsSelector } from 'src/bookmarks'
-import { getURLFilteredBookmarkItems, getURLFilteredHistoryItems } from './'
+import {
+    getOldExtItems,
+    getURLFilteredBookmarkItems,
+    getURLFilteredHistoryItems,
+} from './'
 
 // As we're just getting counts, most queries will want to limit output fields to just `_id`
 const fields = ['_id']
-const nonStubPages = { ...pageDocsSelector, isStub: { $ne: true } }
 
 /**
  * Counts the associated _full_ page docs for each bookmark doc. Stubs are ignored. Does them
@@ -17,11 +20,10 @@ const nonStubPages = { ...pageDocsSelector, isStub: { $ne: true } }
 async function getAssocFullPageDocCount(bookmarkDocs) {
     let count = 0
     for (const doc of bookmarkDocs) {
-        const { docs: [assocPageDoc] } = await db.find({
-            selector: { ...nonStubPages, _id: doc.page._id },
-            fields,
-        })
-        if (assocPageDoc) ++count
+        try {
+            await db.get(doc.page._id)
+            ++count
+        } catch (err) {}
     }
     return count
 }
@@ -34,13 +36,19 @@ export default async function getEstimateCounts() {
     // Grab needed data from browser API (filtered by whats already in DB)
     const filteredHistoryItems = await getURLFilteredHistoryItems()
     const filteredBookmarkItems = await getURLFilteredBookmarkItems()
+    const oldExtItems = await getOldExtItems()
+    console.log(oldExtItems)
 
     // Grab needed data from DB
-    const { docs: pageDocs } = await db.find({ selector: nonStubPages, fields })
+    const { docs: pageDocs } = await db.find({
+        selector: pageDocsSelector,
+        fields,
+    })
     const { docs: bookmarkDocs } = await db.find({
         selector: bookmarkDocsSelector,
         fields: ['_id', 'page'],
     })
+    const oldExtUrls = new Set(oldExtItems.map(data => data.url))
 
     return {
         completed: {
@@ -48,10 +56,13 @@ export default async function getEstimateCounts() {
             [IMPORT_TYPE.BOOKMARK]: await getAssocFullPageDocCount(
                 bookmarkDocs,
             ),
+            [IMPORT_TYPE.OLD]: pageDocs.filter(page => oldExtUrls.has(page.url))
+                .length,
         },
         remaining: {
             [IMPORT_TYPE.HISTORY]: filteredHistoryItems.length,
             [IMPORT_TYPE.BOOKMARK]: filteredBookmarkItems.length,
+            [IMPORT_TYPE.OLD]: oldExtItems.length,
         },
     }
 }

@@ -57,3 +57,10 @@ export const CMDS = {
 export const DOC_SIZE_EST = 0.06
 /** Estimated time to download a doc (minutes) */
 export const DOC_TIME_EST = 0.01
+
+export const OLD_EXT_KEYS = {
+    INDEX: 'index',
+    BOOKMARKS: 'bookmarks',
+    HIST: 'history',
+    BLACKLIST: 'blacklist',
+}

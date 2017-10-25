@@ -2,7 +2,7 @@ import db from 'src/pouchdb'
 import { pageDocsSelector } from 'src/page-storage'
 import { checkWithBlacklist } from 'src/blacklist'
 import { isLoggable } from 'src/activity-logger'
-import { IMPORT_TYPE } from 'src/options/imports/constants'
+import { IMPORT_TYPE, OLD_EXT_KEYS } from 'src/options/imports/constants'
 import importsConnectionHandler from './imports-connection-handler'
 
 // Constants
@@ -44,9 +44,8 @@ export const removeImportItem = async url => {
  * @returns A function affording checking of a URL against the URLs of existing page docs.
  */
 async function checkWithExistingDocs() {
-    const existingFullDocs = { ...pageDocsSelector, isStub: { $ne: true } }
     const { docs: existingPageDocs } = await db.find({
-        selector: existingFullDocs,
+        selector: pageDocsSelector,
         fields: ['url'],
     })
     const existingUrls = existingPageDocs.map(({ url }) => url)
@@ -68,6 +67,36 @@ async function filterItemsByUrl(items, type) {
     const isWorthRemembering = item =>
         isLoggable(item) && isNotBlacklisted(item) && doesNotExist(item)
     return items.filter(isWorthRemembering)
+}
+
+export async function getOldExtItems() {
+    let importItems = []
+    let bookmarkUrls = new Set()
+    const {
+        [OLD_EXT_KEYS.INDEX]: index,
+        [OLD_EXT_KEYS.BOOKMARKS]: bookmarks,
+    } = await browser.storage.local.get({
+        [OLD_EXT_KEYS.INDEX]: { index: [] },
+        [OLD_EXT_KEYS.BOOKMARKS]: '[]',
+    })
+
+    if (typeof bookmarks === 'string') {
+        try {
+            bookmarkUrls = new Set(JSON.parse(bookmarks))
+        } catch (error) {}
+    }
+
+    // Only attempt page data conversion if index + bookmark storage values are correct types
+    if (index && index.index instanceof Array) {
+        importItems = index.index.map(data => ({
+            type: IMPORT_TYPE.OLD,
+            url: data.url,
+            timestamp: data.time,
+            hasBookmark: bookmarkUrls.has(data.url),
+        }))
+    }
+
+    return importItems
 }
 
 /**
