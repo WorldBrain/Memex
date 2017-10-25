@@ -11,6 +11,7 @@ import {
 const defaultStats = {
     [TYPE.HISTORY]: 0,
     [TYPE.BOOKMARK]: 0,
+    [TYPE.OLD]: 0,
 }
 
 const defaultDevState = {
@@ -31,6 +32,7 @@ const defaultState = {
     allowTypes: {
         [TYPE.HISTORY]: false,
         [TYPE.BOOKMARK]: false,
+        [TYPE.OLD]: false,
     },
     showDownloadDetails: false,
 }
@@ -100,8 +102,8 @@ const cancelImportReducer = state => ({
 
 const initEstimateCounts = (state, { remaining, completed }) => ({
     ...state,
-    totals: remaining,
-    completed,
+    totals: { ...state.totals, ...remaining },
+    completed: { ...state.completed, ...completed },
 })
 
 // Sets whatever key to the specified val

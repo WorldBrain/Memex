@@ -25,6 +25,7 @@ export const STATUS = {
 export const IMPORT_TYPE = {
     BOOKMARK: 'b',
     HISTORY: 'h',
+    OLD: 'o', // Old extension page
 }
 
 /** Keys used for local storage. */
