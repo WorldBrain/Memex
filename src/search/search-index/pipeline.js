@@ -93,6 +93,7 @@ export default function pipeline({
     })
 
     // Extract all terms out of processed content
+    let titleTerms, urlTerms
     const terms = new Set(
         extractContent(transformedContent, {
             separator: DEFAULT_TERM_SEPARATOR,
@@ -100,21 +101,25 @@ export default function pipeline({
         }),
     )
 
-    // Extract all terms out of processed title
-    const titleTerms = new Set(
-        extractContent(transformedTitle, {
-            separator: DEFAULT_TERM_SEPARATOR,
-            key: 'title',
-        }),
-    )
+    if (transformedTitle && transformedTitle.length) {
+        // Extract all terms out of processed title
+        titleTerms = new Set(
+            extractContent(transformedTitle, {
+                separator: DEFAULT_TERM_SEPARATOR,
+                key: 'title',
+            }),
+        )
+    }
 
-    // Extract all terms out of processed URL
-    const urlTerms = new Set(
-        extractContent(remainingUrl, {
-            separator: URL_SEPARATOR,
-            key: 'url',
-        }).filter(term => !term.endsWith('/')),
-    )
+    if (remainingUrl && remainingUrl.length) {
+        // Extract all terms out of processed URL
+        urlTerms = new Set(
+            extractContent(remainingUrl, {
+                separator: URL_SEPARATOR,
+                key: 'url',
+            }).filter(term => !term.endsWith('/')),
+        )
+    }
 
     // Create timestamps to be indexed as Sets
     const visits = visitDocs.map(transformMetaDoc)
@@ -124,9 +129,9 @@ export default function pipeline({
         id,
         ...getLatestMeta(visits, bookmarks),
         terms,
-        urlTerms,
+        urlTerms: urlTerms || new Set(),
         domain: keyGen.domain(domain),
-        titleTerms,
+        titleTerms: titleTerms || new Set(),
         visits: new Set(visits.map(keyGen.visit)),
         bookmarks: new Set(bookmarks.map(keyGen.bookmark)),
     })

@@ -62,7 +62,13 @@ function reduceTermValue(currTermVal, indexDoc) {
  */
 const initIndexTerms = termsField => async indexDoc => {
     const indexBatch = index.batch()
-    const termValuesMap = await lookupByKeys([...indexDoc[termsField]])
+    const terms = [...indexDoc[termsField]]
+
+    if (!terms.length) {
+        return Promise.resolve()
+    }
+
+    const termValuesMap = await lookupByKeys(terms)
 
     for (const [term, currTermVal] of termValuesMap) {
         const termValue = reduceTermValue(currTermVal, indexDoc)
@@ -134,8 +140,7 @@ async function indexDomain(indexDoc) {
  */
 async function performIndexing(indexDoc) {
     indexDoc = await indexDoc
-    console.log('ADDING PAGE')
-    console.log(indexDoc)
+    console.log('indexing', indexDoc)
 
     if (!indexDoc.terms.size) {
         return
