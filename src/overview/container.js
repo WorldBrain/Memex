@@ -19,6 +19,7 @@ class OverviewContainer extends Component {
         onInputChange: PropTypes.func.isRequired,
         onBottomReached: PropTypes.func.isRequired,
         isLoading: PropTypes.bool.isRequired,
+        isNewSearchLoading: PropTypes.bool.isRequired,
         noResults: PropTypes.bool.isRequired,
         isBadTerm: PropTypes.bool.isRequired,
         searchResults: PropTypes.arrayOf(PropTypes.object).isRequired,
@@ -90,6 +91,14 @@ class OverviewContainer extends Component {
             return <ResultsMessage>No results</ResultsMessage>
         }
 
+        if (this.props.isNewSearchLoading) {
+            return (
+                <ResultList>
+                    <LoadingIndicator />
+                </ResultList>
+            )
+        }
+
         // No issues; render out results list view
         return <ResultList>{this.renderResultItems()}</ResultList>
     }
@@ -109,6 +118,7 @@ class OverviewContainer extends Component {
 
 const mapStateToProps = state => ({
     isLoading: selectors.isLoading(state),
+    isNewSearchLoading: selectors.isNewSearchLoading(state),
     currentQueryParams: selectors.currentQueryParams(state),
     noResults: selectors.noResults(state),
     isBadTerm: selectors.isBadTerm(state),

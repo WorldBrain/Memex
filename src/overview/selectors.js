@@ -84,3 +84,9 @@ export const needsPagWaypoint = createSelector(
     isLoading,
     (isExhausted, isLoading) => !isLoading && !isExhausted,
 )
+
+export const isNewSearchLoading = createSelector(
+    isLoading,
+    currentPage,
+    (isLoading, currentPage) => isLoading && currentPage === 0,
+)
