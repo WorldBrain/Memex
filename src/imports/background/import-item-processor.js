@@ -8,6 +8,7 @@ import { IMPORT_TYPE, DOWNLOAD_STATUS } from 'src/options/imports/constants'
 import * as index from 'src/search'
 import {
     transformToMinimalVisitDoc,
+    transformToMinimalBookmarkDoc,
     transformToVisitDoc,
     transformToBookmarkDoc,
 } from 'src/imports'
@@ -104,9 +105,7 @@ async function processOldExtImport(importItem) {
     const bookmarkDocs = []
 
     if (importItem.hasBookmark) {
-        bookmarkDocs.push(
-            await createAssociatedBookmarkDoc(pageDoc, importItem),
-        )
+        bookmarkDocs.push(transformToMinimalBookmarkDoc(pageDoc)(importItem))
     } else {
         visitDocs.push(transformToMinimalVisitDoc(pageDoc)(importItem))
     }
