@@ -32,6 +32,13 @@ export const transformToVisitDoc = assocPageDoc => visitItem => ({
     page: { _id: assocPageDoc._id },
 })
 
+export const transformToMinimalVisitDoc = assocPageDoc => ({ time, url }) => ({
+    _id: generateVisitDocId({ url, timestamp: time }),
+    visitStart: time,
+    url,
+    page: { _id: assocPageDoc._id },
+})
+
 /**
  * Converts a browser.bookmark.BookmarkTreeNode item to our bookmark document model.
  *
