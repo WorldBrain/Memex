@@ -8,9 +8,6 @@ import {
     getURLFilteredHistoryItems,
 } from './'
 
-// As we're just getting counts, most queries will want to limit output fields to just `_id`
-const fields = ['_id']
-
 /**
  * Counts the associated _full_ page docs for each bookmark doc. Stubs are ignored. Does them
  * one-at-a-time instead of a map reduce, to avoid spamming DB with queries.
@@ -37,18 +34,19 @@ export default async function getEstimateCounts() {
     const filteredHistoryItems = await getURLFilteredHistoryItems()
     const filteredBookmarkItems = await getURLFilteredBookmarkItems()
     const oldExtItems = await getOldExtItems()
-    console.log(oldExtItems)
 
     // Grab needed data from DB
     const { docs: pageDocs } = await db.find({
         selector: pageDocsSelector,
-        fields,
+        fields: ['_id', 'url'],
     })
     const { docs: bookmarkDocs } = await db.find({
         selector: bookmarkDocsSelector,
         fields: ['_id', 'page'],
     })
     const oldExtUrls = new Set(oldExtItems.map(data => data.url))
+    const numCompletedOldExt = pageDocs.filter(page => oldExtUrls.has(page.url))
+        .length
 
     return {
         completed: {
@@ -56,13 +54,12 @@ export default async function getEstimateCounts() {
             [IMPORT_TYPE.BOOKMARK]: await getAssocFullPageDocCount(
                 bookmarkDocs,
             ),
-            [IMPORT_TYPE.OLD]: pageDocs.filter(page => oldExtUrls.has(page.url))
-                .length,
+            [IMPORT_TYPE.OLD]: numCompletedOldExt,
         },
         remaining: {
             [IMPORT_TYPE.HISTORY]: filteredHistoryItems.length,
             [IMPORT_TYPE.BOOKMARK]: filteredBookmarkItems.length,
-            [IMPORT_TYPE.OLD]: oldExtItems.length,
+            [IMPORT_TYPE.OLD]: oldExtUrls.size - numCompletedOldExt,
         },
     }
 }
