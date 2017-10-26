@@ -48,6 +48,7 @@ const filterSearch = query => {
  */
 async function timeFilterBackSearch({ timeFilter, limit, skip }) {
     const data = []
+    timeFilter.delete('blank')
 
     for (const timeRange of timeFilter.values()) {
         data.push(

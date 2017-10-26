@@ -140,7 +140,6 @@ async function indexDomain(indexDoc) {
  */
 async function performIndexing(indexDoc) {
     indexDoc = await indexDoc
-    console.log('indexing', indexDoc)
 
     if (!indexDoc.terms.size) {
         return
@@ -158,6 +157,7 @@ async function performIndexing(indexDoc) {
             indexMetaTimestamps(indexDoc),
         ])
         console.timeEnd('indexing page')
+        console.log('indexed', indexDoc)
     } catch (err) {
         console.error(err)
     }
