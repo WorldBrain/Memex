@@ -22,6 +22,13 @@ const getMainClasses = ({ compact }) =>
         [styles.compact]: compact,
     })
 
+const bookMarkClass = ({ isBookmark }) =>
+    classNames({
+        [styles.button]: true,
+        [styles.bookmark]: isBookmark,
+        [styles.notBookmark]: !isBookmark,
+    })
+
 const PageResultItem = ({
     doc,
     sizeInMB,
@@ -39,7 +46,11 @@ const PageResultItem = ({
     )
 
     return (
-        <a className={getMainClasses({ compact })} href={doc.url} target='_blank'>
+        <a
+            className={getMainClasses({ compact })}
+            href={doc.url}
+            target="_blank"
+        >
             {isBookmark && <div className={styles.bookmarkRibbon} />}
             <div className={styles.screenshotContainer}>
                 {doc._attachments && doc._attachments.screenshot ? (
@@ -64,6 +75,7 @@ const PageResultItem = ({
                 <div className={styles.time}>{renderTime({ doc })}</div>
             </div>
             <div className={styles.buttonsContainer}>
+                <button className={bookMarkClass({ isBookmark })} />
                 <button
                     className={`${styles.button} ${styles.trash}`}
                     onClick={onTrashButtonClick}

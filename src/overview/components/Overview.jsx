@@ -8,7 +8,7 @@ import Filters from './Filters'
 
 const Overview = props => [
     <Header key="head" {...props} />,
-    <div>
+    <div className={styles.filtersContainer}>
         {props.showFilter && (
             <Filters
                 showOnlyBookmarks={props.showOnlyBookmarks}
@@ -16,7 +16,11 @@ const Overview = props => [
             />
         )}
     </div>,
-    <div key="body" className={styles.main}>
+    <div
+        key="body"
+        className={styles.main}
+        style={{ marginTop: props.showFilter ? '200px' : '100px' }}
+    >
         {props.children}
     </div>,
     <DeleteConfirmation

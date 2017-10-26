@@ -1,17 +1,24 @@
 .filtersMain {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: space-between;
+    height: 100px;
     position: fixed;
     top: 70px;
     left: 0;
-    width: 100%;
-    height: 100px;
+    right: 0;
+    z-index: 10;
     background-color: #fafafa;
-    z-index: 2;
+    min-width: 1000px;
+    flex-flow: column;
 }
 
 .bookmarks {
-    margin-top: 20px;
-    width: 60%;
-    margin-left: 19.5%;
+    margin: 20px auto;
+    padding: 0;
+    max-width: 700px;
+    min-width: 700px;
 }
 
 input[type='checkbox'] {
@@ -68,4 +75,12 @@ input[type='checkbox'] {
         box-shadow: 0 0 0 2pt #3eb995;
         border-radius: 1px;
     }
+}
+
+.dummy {
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 131px;
+    height: 33px;
 }

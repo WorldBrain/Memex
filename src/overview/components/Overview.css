@@ -40,7 +40,7 @@
 .searchField {
     display: flex;
     justify-content: space-between;
-    margin: 0 8px;
+    /*margin: 0 8px;*/
     width: 100%;
     max-width: 700px;
     height: 37px;
@@ -93,7 +93,11 @@
 }
 
 .main {
-    margin-top: 200px;
+    margin-top: 100px;
+
+    @media (min-width: 1000px) {
+        margin-top: 200px;
+    }
 }
 
 .noResultMessage {
@@ -127,9 +131,25 @@
 .linkFilter {
     display: flex;
     justify-content: flex-start;
-    width: 131px;
 
-    @media (min-width: 1300px) {
-        margin-left: -50px;
+    @media (max-width: 1000px) {
+        display: none;
+    }
+}
+
+.container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 700px;
+    height: 37px;
+    background-color: #fafafa;
+    transition: all 200ms ease-out;
+    border-right: none;
+}
+
+.filtersContainer {
+    @media (max-width: 1000px) {
+        display: none;
     }
 }
