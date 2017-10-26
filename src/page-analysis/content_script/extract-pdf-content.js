@@ -1,3 +1,5 @@
+import transformPageText from 'src/util/transform-page-text'
+
 // Run PDF.js to extract text from each page and read document metadata.
 async function extractContent(pdfData) {
     // Import PDF.js only when needed, as it is large.
@@ -19,13 +21,15 @@ async function extractContent(pdfData) {
         pageTexts.push(pageText)
     }
 
-    // Join the texts of the pages with a small line, for human readability.
-    const fullText = pageTexts.join('\n\n----------\n\n')
+    // Run the joined texts through our pipeline
+    const { text: processedText } = transformPageText({
+        text: pageTexts.join(' '),
+    })
 
     const metadata = await pdf.getMetadata()
 
     return {
-        fullText,
+        fullText: processedText,
         author: metadata.info.Author,
         title: metadata.info.Title,
         keywords: metadata.info.Keywords,
