@@ -81,7 +81,7 @@ export default function pipeline({
     // Throw error if no searchable content; we don't really want to index these (for now) so allow callers
     //  to handle (probably by ignoring)
     if (!content || !content.fullText || !content.fullText.length === 0) {
-        return Promise.reject('Page has no searchable content')
+        return Promise.reject(new Error('Page has no searchable content'))
     }
 
     // Run the searchable content through our text transformations, attempting to discard useless data.
