@@ -17,6 +17,7 @@ const ProgressTable = ({ progress }) => (
                 <th />
                 <th>Browsing History</th>
                 <th>Bookmarks</th>
+                <th>Old Extension Data</th>
             </tr>
         </thead>
         <tbody>
@@ -28,16 +29,21 @@ const ProgressTable = ({ progress }) => (
                 <td>
                     {progress[TYPE.BOOKMARK].complete}/{progress[TYPE.BOOKMARK].total}
                 </td>
+                <td>
+                    {progress[TYPE.OLD].complete}/{progress[TYPE.OLD].total}
+                </td>
             </tr>
             <tr className={localStyles.importTableRow}>
                 <td>Successful</td>
                 <td>{progress[TYPE.HISTORY].success}</td>
                 <td>{progress[TYPE.BOOKMARK].success}</td>
+                <td>{progress[TYPE.OLD].success}</td>
             </tr>
             <tr className={localStyles.importTableRow}>
                 <td>Failed</td>
                 <td>{progress[TYPE.HISTORY].fail}</td>
                 <td>{progress[TYPE.BOOKMARK].fail}</td>
+                <td>{progress[TYPE.OLD].fail}</td>
             </tr>
         </tbody>
     </table>
