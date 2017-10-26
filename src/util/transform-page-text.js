@@ -5,9 +5,12 @@ import rmDiacritics from './remove-diacritics'
 const allWhitespacesPattern = /\s+/g
 // const singleDigitNumbersPattern = /\b\d\b/g
 const nonWordsPattern = /[_\W]+/g
-const apostropheDashPattern = /[-'’]/g
-const allWordsWithDigits = /((\b(\d{6,})\b)|([a-z]+\d\w*|\w*\d[a-z]+))\s*/gi // /\w*\d\w*/g
-
+const apostrophePattern = /['’]/g
+const allWordsWithDigits = /[a-z]+\d\w*|\w*\d[a-z]+/g // /\w*\d\w*/g
+const dashPattern = /[-]/g
+const giberishWords = /\S*([b-df-hj-np-tv-z]){5,}\S*/g
+const longWords = /\b\w{20,}\b/g
+const randomDigits = /\b(\d{1,3}|\d{5,})\b/g
 const urlPattern = urlRegex()
 
 const removeUrls = (text = '') => text.replace(urlPattern, ' ')
@@ -30,8 +33,9 @@ const removeUselessWords = (text = '', lang) => {
     return newString.join(' ')
 }
 
-const combinePunctuation = (text = '') =>
-    text.replace(apostropheDashPattern, '')
+const combinePunctuation = (text = '') => text.replace(apostrophePattern, '')
+
+const splitPunctuation = (text = '') => text.replace(dashPattern, ' ')
 
 const removeDiacritics = (text = '') => {
     return rmDiacritics(text)
@@ -40,6 +44,12 @@ const removeDiacritics = (text = '') => {
 // This also removes any numbers greater than 5 chars
 const removeAllWordsWithDigits = (text = '') =>
     text.replace(allWordsWithDigits, ' ')
+
+const removeRandomDigits = (text = '') => text.replace(randomDigits, ' ')
+
+const removeLongWords = (text = '') => text.replace(longWords, ' ')
+
+const removeGiberishWords = (text = '') => text.replace(giberishWords, ' ')
 
 /**
  * Takes in some text content and strips it of unneeded data. Currently does
@@ -56,15 +66,20 @@ export default function transform({ text = '', lang = 'en' }) {
         return text
     }
 
+    // console.log( text + "transform-text" + lang)
     let searchableText = text
     const lengthBefore = searchableText.length
 
     // Remove URLs first before we start messing with things
     searchableText = removeUrls(searchableText)
 
-    // Removes ' and - from words effectively combining them
-    // Example e-mail => email, O'Grady => OGrady
+    // Removes ' from words effectively combining them
+    // Example O'Grady => OGrady
     searchableText = combinePunctuation(searchableText)
+
+    // Splits words with - into two separate words
+    // Example "chevron-right", "chevron right"
+    searchableText = splitPunctuation(searchableText)
 
     // Changes accented characters to regular letters
     searchableText = removeDiacritics(searchableText)
@@ -74,13 +89,20 @@ export default function transform({ text = '', lang = 'en' }) {
     // Removes 'stopwords' such as they'll, don't, however ect..
     searchableText = removeUselessWords(searchableText, lang)
 
-    // searchableText = removeSingleDigitNumbers(searchableText)
-
     // We don't care about non-single-space whitespace (' ' is cool)
     searchableText = cleanupWhitespaces(searchableText)
 
-    // Remove all numbers and all words containing numbers
+    // Remove all words containing numbers ex. blah123
     searchableText = removeAllWordsWithDigits(searchableText)
+
+    // Removes all single digits and digits over 5+ characters
+    searchableText = removeRandomDigits(searchableText)
+
+    // Removes all words 20+ characters long
+    searchableText = removeLongWords(searchableText)
+
+    // Removes all words containing 4+ consonants such as "hellllo"
+    searchableText = removeGiberishWords(searchableText)
 
     searchableText = removeDuplicateWords(searchableText)
 

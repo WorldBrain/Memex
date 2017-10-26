@@ -5,19 +5,20 @@ const WHITELIST_STRIP_LINEBREAKS = /[^A-Za-z\x80-\xFF 0-9 \u2018\u2019\u201C|\u2
 export default function transformHTML({ html = '' }) {
     const lengthBefore = html.length
     console.time('html-pipeline')
+
     let text = html
         .toString()
         .replace(
-            /< *(br|p|div|section|aside|button|header|footer|li|article|blockquote|cite|code|h1|h2|h3|h4|h5|h6|legend|nav)((.*?)>)/g,
-            '<$1$2|||||',
-        )
+        /< *(br|p|div|section|aside|button|header|footer|li|article|blockquote|cite|code|h1|h2|h3|h4|h5|h6|legend|nav)((.*?)>)/g,
+        '<$1$2|||||',
+    )
         .replace(/< *\/(td|a|option) *>/g, ' </$1>') // spacing some things out so text doesn't get smashed together
         .replace(/< *(a|td|option)/g, ' <$1') // spacing out links
         .replace(/< *(br|hr) +\/>/g, '|||||<$1\\>')
         .replace(
-            /<\/ +?(p|div|section|aside|button|header|footer|li|article|blockquote|cite|code|h1|h2|h3|h4|h5|h6|legend|nav)>/g,
-            '|||||</$1>',
-        )
+        /<\/ +?(p|div|section|aside|button|header|footer|li|article|blockquote|cite|code|h1|h2|h3|h4|h5|h6|legend|nav)>/g,
+        '|||||</$1>',
+    )
     text = `<textractwrapper>${text}<textractwrapper>`
 
     // TODO: see if we can replace this lib
@@ -25,6 +26,18 @@ export default function transformHTML({ html = '' }) {
     $('script').remove()
     $('style').remove()
     $('noscript').remove()
+    $('svg').remove()
+    $('code').remove()
+    $('select').remove()
+
+    // This should remove all hidden items on pages
+    $.root()
+        .children()
+        .filter(function (i, el) {
+            var display = $(this).css('display')
+            var visibility = $(this).css('visbility')
+            if (display === 'none' || visibility === 'hidden') $(this).remove()
+        })
 
     text = $('textractwrapper')
         .text()
