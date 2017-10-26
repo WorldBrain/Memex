@@ -1,5 +1,6 @@
 import extractPageContent from 'src/page-analysis/content_script/extract-page-content'
 import extractFavIcon from 'src/page-analysis/content_script/extract-fav-icon'
+import extractPdfContent from 'src/page-analysis/content_script/extract-pdf-content'
 
 /**
  * @typedef IFetchPageDataOpts
@@ -26,7 +27,17 @@ export const defaultOpts = {
 export default async function fetchPageData(
     { url = '', timeout = 10000, opts = defaultOpts } = { opts: defaultOpts },
 ) {
+    // Check if pdf and run code for pdf instead
+    if (url.endsWith('.pdf')) {
+        return {
+            content: opts.includePageContent
+                ? await extractPdfContent({ url })
+                : undefined,
+        }
+    }
+
     const doc = await fetchDOMFromUrl(url, timeout)
+
     // If DOM couldn't be fetched, then we can't get anything
     if (!doc) {
         throw new Error('Cannot fetch DOM')
