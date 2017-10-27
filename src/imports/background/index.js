@@ -88,7 +88,10 @@ export async function getOldExtItems() {
 
     // Only attempt page data conversion if index + bookmark storage values are correct types
     if (index && index.index instanceof Array) {
-        importItems = index.index.map(data => ({
+        // Map all old ext data to import items, ignoring text
+        importItems = Object.values(
+            await browser.storage.local.get(index.index),
+        ).map(data => ({
             type: IMPORT_TYPE.OLD,
             url: data.url,
             timestamp: data.time,
