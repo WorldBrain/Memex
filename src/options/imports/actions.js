@@ -30,6 +30,8 @@ export const cancelImport = createAction('imports/cancelImport')
 export const pauseImport = createAction('imports/pauseImport')
 export const resumeImport = createAction('imports/resumeImport')
 
+export const setShowOldExt = createAction('imports/setShowOldExt')
+
 // Dev mode actions
 export const toggleDevMode = createAction('imports-dev/toggleDevMode')
 export const startTestDataUpload = createAction(

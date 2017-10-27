@@ -5,10 +5,13 @@ import { IMPORT_TYPE as TYPE } from '../constants'
 import localStyles from './Import.css'
 
 const ProgressBar = ({ progress, allowTypes }) => {
+    // TODO: Move to selector
     let total = allowTypes.h ? progress[TYPE.HISTORY].total : 0
     total += allowTypes.b ? progress[TYPE.BOOKMARK].total : 0
+    total += allowTypes.o ? progress[TYPE.OLD].total : 0
     let complete = allowTypes.h ? progress[TYPE.HISTORY].complete : 0
     complete += allowTypes.b ? progress[TYPE.BOOKMARK].complete : 0
+    complete += allowTypes.o ? progress[TYPE.OLD].complete : 0
 
     return (
         <div>
@@ -46,6 +49,7 @@ ProgressBar.propTypes = {
     progress: PropTypes.shape({
         [TYPE.HISTORY]: progressShape.isRequired,
         [TYPE.BOOKMARK]: progressShape.isRequired,
+        [TYPE.OLD]: progressShape.isRequired,
     }).isRequired,
     allowTypes: PropTypes.object.isRequired,
 }

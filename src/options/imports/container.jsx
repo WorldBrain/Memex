@@ -19,6 +19,20 @@ import StatusReport from './components/StatusReport'
 import DevCheckBox from './components/DevCheckBox'
 
 class ImportContainer extends Component {
+    static propTypes = {
+        // State
+        isRunning: PropTypes.bool.isRequired,
+        isPaused: PropTypes.bool.isRequired,
+        isStopped: PropTypes.bool.isRequired,
+        isLoading: PropTypes.bool.isRequired,
+        isIdle: PropTypes.bool.isRequired,
+        isStartBtnDisabled: PropTypes.bool.isRequired,
+        downloadData: PropTypes.arrayOf(PropTypes.object).isRequired,
+
+        // Misc
+        boundActions: PropTypes.object.isRequired,
+    }
+
     constructor(props) {
         super(props)
         props.boundActions.init()
@@ -210,20 +224,6 @@ class ImportContainer extends Component {
     }
 }
 
-ImportContainer.propTypes = {
-    // State
-    isRunning: PropTypes.bool.isRequired,
-    isPaused: PropTypes.bool.isRequired,
-    isStopped: PropTypes.bool.isRequired,
-    isLoading: PropTypes.bool.isRequired,
-    isIdle: PropTypes.bool.isRequired,
-    isStartBtnDisabled: PropTypes.bool.isRequired,
-    downloadData: PropTypes.arrayOf(PropTypes.object).isRequired,
-
-    // Misc
-    boundActions: PropTypes.object.isRequired,
-}
-
 const mapStateToProps = state => ({
     isRunning: selectors.isRunning(state),
     isPaused: selectors.isPaused(state),
@@ -231,6 +231,7 @@ const mapStateToProps = state => ({
     isLoading: selectors.isLoading(state),
     isIdle: selectors.isIdle(state),
     isStartBtnDisabled: selectors.isStartBtnDisabled(state),
+    showOldExt: selectors.showOldExt(state),
     downloadData: selectors.downloadDetailsData(state),
     estimates: selectors.estimates(state),
     progress: selectors.progress(state),

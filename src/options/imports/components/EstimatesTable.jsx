@@ -12,6 +12,7 @@ const EstimatesTable = ({
     onAllowOldExtClick,
     estimates,
     allowTypes,
+    showOldExt,
 }) => (
     <table className={localStyles.importTable}>
         <colgroup>
@@ -72,25 +73,27 @@ const EstimatesTable = ({
                 <td>{estimates[TYPE.BOOKMARK].remaining}</td>
                 <td>{estimates[TYPE.BOOKMARK].timeRemaining}</td>
             </tr>
-            <tr className={localStyles.importTableRow}>
-                <td>
-                    <input
-                        type="checkbox"
-                        name="history"
-                        id="old-ext"
-                        onChange={onAllowOldExtClick}
-                        checked={allowTypes[TYPE.OLD]}
-                    />
-                    <label className={localStyles.label} htmlFor="old-ext">
-                        <span className={localStyles.checkboxText}>
-                            Old extension pages
-                        </span>
-                    </label>
-                </td>
-                <td>{estimates[TYPE.OLD].complete}</td>
-                <td>{estimates[TYPE.OLD].remaining}</td>
-                <td>{estimates[TYPE.OLD].timeRemaining}</td>
-            </tr>
+            {showOldExt && (
+                <tr className={localStyles.importTableRow}>
+                    <td>
+                        <input
+                            type="checkbox"
+                            name="history"
+                            id="old-ext"
+                            onChange={onAllowOldExtClick}
+                            checked={allowTypes[TYPE.OLD]}
+                        />
+                        <label className={localStyles.label} htmlFor="old-ext">
+                            <span className={localStyles.checkboxText}>
+                                Old extension pages
+                            </span>
+                        </label>
+                    </td>
+                    <td>{estimates[TYPE.OLD].complete}</td>
+                    <td>{estimates[TYPE.OLD].remaining}</td>
+                    <td>{estimates[TYPE.OLD].timeRemaining}</td>
+                </tr>
+            )}
             <tr
                 className={cx(localStyles.importTableRow, localStyles.disabled)}
             >
@@ -143,6 +146,7 @@ const estimatesShape = PropTypes.shape({
 
 EstimatesTable.propTypes = {
     // State
+    showOldExt: PropTypes.bool.isRequired,
     allowTypes: PropTypes.shape({
         [TYPE.HISTORY]: PropTypes.bool.isRequired,
         [TYPE.BOOKMARK]: PropTypes.bool.isRequired,

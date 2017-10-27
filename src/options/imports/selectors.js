@@ -12,6 +12,7 @@ import {
 
 export const entireState = state => state.imports
 
+// TODO: make these memoized
 export const importStatus = state => entireState(state).importStatus
 export const downloadData = state => entireState(state).downloadData
 export const downloadDataFilter = state => entireState(state).downloadDataFilter
@@ -21,9 +22,11 @@ export const totals = state => entireState(state).totals
 const completed = state => entireState(state).completed
 export const allowTypes = state => entireState(state).allowTypes
 export const loadingMsg = state => entireState(state).loadingMsg
+export const showOldExt = createSelector(entireState, state => state.showOldExt)
 
 export const showDownloadDetails = state =>
     entireState(state).showDownloadDetails
+
 // Dev features only
 export const devState = createSelector(entireState, state => state.dev)
 export const devMode = createSelector(devState, devState => devState.isEnabled)

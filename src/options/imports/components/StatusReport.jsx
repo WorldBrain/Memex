@@ -10,12 +10,16 @@ const StatusReport = ({
     showDownloadDetails,
     changeShowDetails,
 }) => {
+    // TODO: Move to selectors; don't reference keys directly
     let total = allowTypes.h ? progress[TYPE.HISTORY].total : 0
     total += allowTypes.b ? progress[TYPE.BOOKMARK].total : 0
+    total += allowTypes.o ? progress[TYPE.OLD].total : 0
     let succeed = allowTypes.h ? progress[TYPE.HISTORY].success : 0
     succeed += allowTypes.b ? progress[TYPE.BOOKMARK].success : 0
+    succeed += allowTypes.o ? progress[TYPE.OLD].success : 0
     let fail = allowTypes.h ? progress[TYPE.HISTORY].fail : 0
     fail += allowTypes.b ? progress[TYPE.BOOKMARK].fail : 0
+    fail += allowTypes.o ? progress[TYPE.OLD].fail : 0
 
     return (
         <div>
@@ -48,6 +52,7 @@ StatusReport.propTypes = {
     progress: PropTypes.shape({
         [TYPE.HISTORY]: progressShape.isRequired,
         [TYPE.BOOKMARK]: progressShape.isRequired,
+        [TYPE.OLD]: progressShape.isRequired,
     }).isRequired,
     allowTypes: PropTypes.object.isRequired,
     showDownloadDetails: PropTypes.bool.isRequired,
