@@ -9,35 +9,38 @@ export default function transformHTML({ html = '' }) {
     let text = html
         .toString()
         .replace(
-        /< *(br|p|div|section|aside|button|header|footer|li|article|blockquote|cite|code|h1|h2|h3|h4|h5|h6|legend|nav)((.*?)>)/g,
-        '<$1$2|||||',
-    )
+            /< *(br|p|div|section|aside|button|header|footer|li|article|blockquote|cite|code|h1|h2|h3|h4|h5|h6|legend|nav)((.*?)>)/g,
+            '<$1$2|||||',
+        )
         .replace(/< *\/(td|a|option) *>/g, ' </$1>') // spacing some things out so text doesn't get smashed together
         .replace(/< *(a|td|option)/g, ' <$1') // spacing out links
         .replace(/< *(br|hr) +\/>/g, '|||||<$1\\>')
         .replace(
-        /<\/ +?(p|div|section|aside|button|header|footer|li|article|blockquote|cite|code|h1|h2|h3|h4|h5|h6|legend|nav)>/g,
-        '|||||</$1>',
-    )
+            /<\/ +?(p|div|section|aside|button|header|footer|li|article|blockquote|cite|code|h1|h2|h3|h4|h5|h6|legend|nav)>/g,
+            '|||||</$1>',
+        )
+
     text = `<textractwrapper>${text}<textractwrapper>`
 
     // TODO: see if we can replace this lib
     const $ = cheerio.load(text, { decodeEntities: false })
+
     $('script').remove()
-    $('style').remove()
     $('noscript').remove()
     $('svg').remove()
     $('code').remove()
     $('select').remove()
 
     // This should remove all hidden items on pages
-    $.root()
-        .children()
-        .filter(function (i, el) {
-            var display = $(this).css('display')
-            var visibility = $(this).css('visbility')
-            if (display === 'none' || visibility === 'hidden') $(this).remove()
-        })
+    $('*').each(function() {
+        let display = $(this).css('display')
+        let visibility = $(this).css('visibility')
+        if (display === 'none' || visibility === 'hidden') {
+            $(this).remove()
+        }
+    })
+    // Remove style only after removing hidden elements
+    $('style').remove()
 
     text = $('textractwrapper')
         .text()
@@ -53,5 +56,6 @@ export default function transformHTML({ html = '' }) {
 
     const lengthAfter = text.length
     console.timeEnd('html-pipeline')
+
     return { text, lengthBefore, lengthAfter }
 }
