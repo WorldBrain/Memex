@@ -20,6 +20,7 @@ const defaultDevState = {
 }
 
 const defaultState = {
+    showOldExt: false,
     downloadData: [],
     completed: defaultStats, // Count of docs already in DB (estimates view)
     fail: defaultStats, // Fail counts for completed import items
@@ -134,6 +135,7 @@ export default createReducer(
         [actions.initFailCounts]: payloadReducer('fail'),
         [actions.initSuccessCounts]: payloadReducer('success'),
         [actions.initDownloadData]: payloadReducer('downloadData'),
+        [actions.setShowOldExt]: payloadReducer('showOldExt'),
 
         // Dev mode reducers
         [actions.startTestDataUpload]: state => ({
