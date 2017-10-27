@@ -110,18 +110,21 @@ class QueryBuilder {
         // If there are valid search terms, parse them...
         if (terms && terms.length) {
             // Split into words and push to query
+            let goodTerm = 0
             terms.forEach(term => {
                 if (term !== '') {
+                    goodTerm += 1
                     if (DOMAIN_TLD_PATTERN.test(term)) {
                         // Only can support single domain.tld search for now, so set to first index
                         this.domain[0] = term
                     } else {
                         this.content.push(term)
                     }
-                } else {
-                    this.isBadTerm = true
                 }
             })
+            if (goodTerm === 0) {
+                this.isBadTerm = true
+            }
         } else {
             // ... else default to wildcard search
             this.content.push('*')
