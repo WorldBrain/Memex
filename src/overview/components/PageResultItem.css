@@ -166,9 +166,9 @@
 }
 
 .bookmark {
-    background-image: url('/img/bk.svg');
+    background-image: url('/img/starFull.png');
 }
 
 .notBookmark {
-    background-image: url('/img/star.svg');
+    background-image: url('/img/star.png');
 }

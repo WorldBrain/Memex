@@ -40,7 +40,6 @@
 .searchField {
     display: flex;
     justify-content: space-between;
-    /*margin: 0 8px;*/
     width: 100%;
     max-width: 700px;
     height: 37px;
@@ -48,6 +47,10 @@
     box-shadow: 0 2px 4px 1px rgba(220, 220, 220, 0.7);
     background-color: white;
     transition: all 200ms ease-out;
+
+    @media (max-width: 724px) {
+        margin: 0 8px;
+    }
 }
 
 .query {
@@ -95,8 +98,8 @@
 .main {
     margin-top: 100px;
 
-    @media (min-width: 1000px) {
-        margin-top: 200px;
+    @media (max-width: 1000px) {
+        margin-top: 100px !important;
     }
 }
 

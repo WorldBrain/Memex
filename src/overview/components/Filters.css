@@ -12,6 +12,8 @@
     background-color: #fafafa;
     min-width: 1000px;
     flex-flow: column;
+    box-shadow: 0 2px 4px rgba(220, 220, 220, 0.7);
+    border-top: 1px solid rgba(220, 220, 220, 0.7);
 }
 
 .bookmarks {
@@ -75,12 +77,4 @@ input[type='checkbox'] {
         box-shadow: 0 0 0 2pt #3eb995;
         border-radius: 1px;
     }
-}
-
-.dummy {
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    width: 131px;
-    height: 33px;
 }
