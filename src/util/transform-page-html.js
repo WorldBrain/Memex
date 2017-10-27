@@ -5,6 +5,7 @@ const WHITELIST_STRIP_LINEBREAKS = /[^A-Za-z\x80-\xFF 0-9 \u2018\u2019\u201C|\u2
 export default function transformHTML({ html = '' }) {
     const lengthBefore = html.length
     console.time('html-pipeline')
+
     let text = html
         .toString()
         .replace(
@@ -18,13 +19,28 @@ export default function transformHTML({ html = '' }) {
             /<\/ +?(p|div|section|aside|button|header|footer|li|article|blockquote|cite|code|h1|h2|h3|h4|h5|h6|legend|nav)>/g,
             '|||||</$1>',
         )
+
     text = `<textractwrapper>${text}<textractwrapper>`
 
     // TODO: see if we can replace this lib
     const $ = cheerio.load(text, { decodeEntities: false })
+
     $('script').remove()
-    $('style').remove()
     $('noscript').remove()
+    $('svg').remove()
+    $('code').remove()
+    $('select').remove()
+
+    // This should remove all hidden items on pages
+    $('*').each(function() {
+        let display = $(this).css('display')
+        let visibility = $(this).css('visibility')
+        if (display === 'none' || visibility === 'hidden') {
+            $(this).remove()
+        }
+    })
+    // Remove style only after removing hidden elements
+    $('style').remove()
 
     text = $('textractwrapper')
         .text()
@@ -40,5 +56,6 @@ export default function transformHTML({ html = '' }) {
 
     const lengthAfter = text.length
     console.timeEnd('html-pipeline')
+
     return { text, lengthBefore, lengthAfter }
 }
