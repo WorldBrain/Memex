@@ -10,25 +10,30 @@ import {
     DOWNLOAD_STATUS as DL_STAT,
 } from './constants'
 
-export const entireState = state => state.imports
+export const imports = state => state.imports
 
 // TODO: make these memoized
-export const importStatus = state => entireState(state).importStatus
-export const downloadData = state => entireState(state).downloadData
-export const downloadDataFilter = state => entireState(state).downloadDataFilter
-export const fail = state => entireState(state).fail
-export const success = state => entireState(state).success
-export const totals = state => entireState(state).totals
-const completed = state => entireState(state).completed
-export const allowTypes = state => entireState(state).allowTypes
-export const loadingMsg = state => entireState(state).loadingMsg
-export const showOldExt = createSelector(entireState, state => state.showOldExt)
+export const importStatus = createSelector(imports, state => state.importStatus)
+export const downloadData = createSelector(imports, state => state.downloadData)
+export const downloadDataFilter = createSelector(
+    imports,
+    state => state.downloadDataFilter,
+)
+export const fail = createSelector(imports, state => state.fail)
+export const success = createSelector(imports, state => state.success)
+export const totals = createSelector(imports, state => state.totals)
+const completed = createSelector(imports, state => state.completed)
+export const allowTypes = createSelector(imports, state => state.allowTypes)
+export const loadingMsg = createSelector(imports, state => state.loadingMsg)
+export const showOldExt = createSelector(imports, state => state.showOldExt)
 
-export const showDownloadDetails = state =>
-    entireState(state).showDownloadDetails
+export const showDownloadDetails = createSelector(
+    imports,
+    state => state.showDownloadDetails,
+)
 
 // Dev features only
-export const devState = createSelector(entireState, state => state.dev)
+export const devState = createSelector(imports, state => state.dev)
 export const devMode = createSelector(devState, devState => devState.isEnabled)
 export const isUploading = createSelector(
     devState,
