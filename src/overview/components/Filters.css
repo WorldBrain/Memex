@@ -9,11 +9,10 @@
     left: 0;
     right: 0;
     z-index: 10;
-    background-color: #fafafa;
+    background-color: white;
     min-width: 700px;
     flex-flow: column;
     box-shadow: 0 2px 4px rgba(220, 220, 220, 0.7);
-    border-top: 1px solid rgba(220, 220, 220, 0.7);
     padding-left: 6px;
 }
 
