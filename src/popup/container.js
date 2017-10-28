@@ -230,6 +230,12 @@ class PopupContainer extends Component {
                 >
                     Settings
                 </LinkButton>
+                <LinkButton
+                    href={`${constants.OPTIONS_URL}#/import`}
+                    icon="file_download"
+                >
+                    Import History &amp; Bookmarks
+                </LinkButton>
                 <LinkButton href={constants.FEEDBACK_URL} icon="feedback">
                     Feedback
                 </LinkButton>

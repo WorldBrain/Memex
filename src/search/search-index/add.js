@@ -31,7 +31,7 @@ export const addPage = req => performIndexing(pipeline(req))
  * Adds a new page doc + any associated visit/bookmark docs to the index. This method
  * is concurrency safe as it uses a single queue instance to batch add requests.
  * @param {IndexRequest} req A `pageDoc` (required) and optionally any associated `visitDocs` and `bookmarkDocs`.
- * @returns {void}
+ * @returns {Promise<void>} Promise resolving when indexing is complete, or rejecting for any index errors.
  */
 export const addPageConcurrent = req =>
     new Promise((resolve, reject) =>
@@ -43,7 +43,7 @@ export const addPageConcurrent = req =>
     )
 
 /**
- * @param {IndexTermValue} [currTermVal]
+ * @param {IndexTermValue} currTermVal
  * @param {IndexLookupDoc} indexDoc
  * @returns {IndexTermValue} Updated `currTermVal` with new entry for `indexDoc`.
  */

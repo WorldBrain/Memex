@@ -2,14 +2,6 @@ import QueryBuilder from './query-builder'
 import { searchConcurrent } from './search-index/search'
 import mapResultsToPouchDocs from './map-search-to-pouch'
 
-/**
- * Results should always contain a `document` key containing the indexed doc.
- * In some special cases (if something is being removed, but t hasn't finished yet),
- * this could be `undefined`. May add more filters here if any other cases are encountered.
- */
-// const filterBadlyStructuredResults = results =>
-//     results.filter(result => result.document != null)
-
 async function indexSearch({
     query,
     startDate,
