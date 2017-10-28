@@ -51,6 +51,13 @@ function setShowOnlyBookmarks(state) {
     }
 }
 
+function showOnlyBookmarksEnhancer(state) {
+    return {
+        ...state,
+        showOnlyBookmarks: state.showOnlyBookmarks,
+    }
+}
+
 function hideResultItem(state, url) {
     return update('searchResult.docs', docs =>
         remove(doc => doc._id === generatePageDocId({ url }))(docs),
@@ -103,6 +110,7 @@ export default createReducer(
         [actions.hideDeleteConfirm]: hideDeleteConfirm,
         [actions.hideResultItem]: hideResultItem,
         [actions.setShowOnlyBookmarks]: setShowOnlyBookmarks,
+        [actions.showOnlyBookmarksEnhancer]: showOnlyBookmarksEnhancer,
         [actions.showFilter]: state => ({
             ...state,
             showFilter: !state.showFilter,

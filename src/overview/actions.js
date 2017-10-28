@@ -24,6 +24,9 @@ export const showFilter = createAction('overview/showFilter')
 export const setShowOnlyBookmarks = createAction(
     'overview/setShowOnlyBookmarks',
 )
+export const showOnlyBookmarksEnhancer = createAction(
+    'overview/showOnlyBookmarksEnhancer',
+)
 
 const deleteDocsByUrl = remoteFunction('deleteDocsByUrl')
 
