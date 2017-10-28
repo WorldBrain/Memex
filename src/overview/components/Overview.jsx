@@ -21,7 +21,6 @@ const Overview = props => [
         className={styles.main}
         style={{ marginTop: props.showFilter ? '180px' : '100px' }}
     >
-        s
         {props.children}
     </div>,
     <DeleteConfirmation
