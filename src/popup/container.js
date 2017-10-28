@@ -39,7 +39,7 @@ class PopupContainer extends Component {
         }
 
         this.toggleLoggingPause = remoteFunction('toggleLoggingPause')
-        this.cleanupBlacklist = remoteFunction('cleanupBlacklist')
+        this.deleteDocs = remoteFunction('deleteDocsByUrl')
 
         this.onSearchChange = this.onSearchChange.bind(this)
         this.onPauseChange = this.onPauseChange.bind(this)
@@ -148,21 +148,22 @@ class PopupContainer extends Component {
         this.setState(state => ({ ...state, blacklistConfirm: false }))
 
     handleDeleteBlacklistData = () => {
-        this.cleanupBlacklist(this.state.url)
+        this.deleteDocs(this.state.url)
         this.resetBlacklistConfirmState()
     }
 
+    setBlacklistChoice = () =>
+        this.setState(state => ({ ...state, blacklistChoice: true }))
+
     renderBlacklistButton() {
         const { blacklistChoice, blacklistBtn } = this.state
-        const setBlacklistChoice = () =>
-            this.setState(state => ({ ...state, blacklistChoice: true }))
 
         if (!blacklistChoice) {
             // Standard blacklist button
             return blacklistBtn ===
                 constants.BLACKLIST_BTN_STATE.BLACKLISTED ? (
                 <LinkButton
-                    href={`${constants.OPTIONS_URL}#/settings`}
+                    href={`${constants.OPTIONS_URL}#/blacklist`}
                     icon="block"
                     btnClass={itemBtnBlacklisted}
                 >
@@ -171,7 +172,7 @@ class PopupContainer extends Component {
             ) : (
                 <Button
                     icon="block"
-                    onClick={setBlacklistChoice}
+                    onClick={this.setBlacklistChoice}
                     disabled={
                         blacklistBtn === constants.BLACKLIST_BTN_STATE.DISABLED
                     }
@@ -229,9 +230,12 @@ class PopupContainer extends Component {
                 >
                     Settings
                 </LinkButton>
-                {/* <LinkButton href={`${constants.OPTIONS_URL}#/import`} icon='file_download'>
-                                    Import History &amp; Bookmarks
-                                </LinkButton> */}
+                <LinkButton
+                    href={`${constants.OPTIONS_URL}#/import`}
+                    icon="file_download"
+                >
+                    Import History &amp; Bookmarks
+                </LinkButton>
                 <LinkButton href={constants.FEEDBACK_URL} icon="feedback">
                     Feedback
                 </LinkButton>

@@ -26,6 +26,7 @@
     ]
   },
   "dependencies": {
+    "abstract-leveldown": "^2.7.2",
     "babel-runtime": "^6.23.0",
     "blob-util": "^1.2.1",
     "cheerio": "^1.0.0-rc.2",
@@ -37,7 +38,9 @@
     "fathom-web": "^2.1.0",
     "freeze-dry": "^0.1.0",
     "history": "^4.6.3",
+    "level-iterator-stream": "^2.0.0",
     "level-js": "^2.2.4",
+    "levelup": "^2.0.0",
     "lodash": "^4.17.4",
     "moment": "^2.18.1",
     "normalize-url": "^1.9.1",
@@ -47,6 +50,7 @@
     "pouchdb-find": "^6.2.0",
     "prop-types": "^15.5.10",
     "query-string": "^4.3.4",
+    "queue": "^4.4.1",
     "react": "^16.0.0",
     "react-datepicker": "^0.55.0",
     "react-dom": "^16.0.0",

@@ -4,7 +4,6 @@ import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import { maybeLogPageVisit } from './log-page-visit'
 import initPauser from './pause-logging'
 import { isLoggable, getPauseState } from '..'
-import { getImportInProgressFlag } from 'src/imports'
 
 // Allow logging pause state toggle to be called from other scripts
 const toggleLoggingPause = initPauser()
@@ -24,7 +23,7 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
         // Create debounced function and call it
         tabs[tabId] = debounce(async () => {
             // Bail-out if logging paused or imports in progress
-            if ((await getPauseState()) || (await getImportInProgressFlag())) {
+            if (await getPauseState()) {
                 return
             }
 

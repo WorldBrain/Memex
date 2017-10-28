@@ -38,6 +38,12 @@ abstract-leveldown@2.4.1, abstract-leveldown@~2.4.0:
   dependencies:
     xtend "~4.0.0"
 
+abstract-leveldown@^2.7.2, abstract-leveldown@~2.7.0:
+  version "2.7.2"
+  resolved "https://registry.yarnpkg.com/abstract-leveldown/-/abstract-leveldown-2.7.2.tgz#87a44d7ebebc341d59665204834c8b7e0932cc93"
+  dependencies:
+    xtend "~4.0.0"
+
 abstract-leveldown@~0.12.0:
   version "0.12.4"
   resolved "https://registry.yarnpkg.com/abstract-leveldown/-/abstract-leveldown-0.12.4.tgz#29e18e632e60e4e221d5810247852a63d7b2e410"
@@ -2259,6 +2265,12 @@ deferred-leveldown@~1.2.1:
   resolved "https://registry.yarnpkg.com/deferred-leveldown/-/deferred-leveldown-1.2.1.tgz#5d25c3310f5fe909946f6240dc9f90dd109a71ef"
   dependencies:
     abstract-leveldown "~2.4.0"
+
+deferred-leveldown@~2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/deferred-leveldown/-/deferred-leveldown-2.0.2.tgz#6d3dcb066d940f01392cf310c8029a8605e7eef7"
+  dependencies:
+    abstract-leveldown "~2.7.0"
 
 defined@^1.0.0:
   version "1.0.0"
@@ -4938,6 +4950,20 @@ level-errors@^1.0.3, level-errors@~1.0.3:
   dependencies:
     errno "~0.1.1"
 
+level-errors@~1.1.0:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/level-errors/-/level-errors-1.1.1.tgz#52fdc2dbbaf395cf767db843929a38b7015678d2"
+  dependencies:
+    errno "~0.1.1"
+
+level-iterator-stream@^2.0.0, level-iterator-stream@~2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/level-iterator-stream/-/level-iterator-stream-2.0.0.tgz#e0fe4273a0322177c81bb87684016bb5b90a98b4"
+  dependencies:
+    inherits "^2.0.1"
+    readable-stream "^2.0.5"
+    xtend "^4.0.0"
+
 level-iterator-stream@~1.3.0:
   version "1.3.1"
   resolved "https://registry.yarnpkg.com/level-iterator-stream/-/level-iterator-stream-1.3.1.tgz#e43b78b1a8143e6fa97a4f485eb8ea530352f2ed"
@@ -5006,6 +5032,15 @@ levelup@^1.3.8:
     level-iterator-stream "~1.3.0"
     prr "~1.0.1"
     semver "~5.4.1"
+    xtend "~4.0.0"
+
+levelup@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/levelup/-/levelup-2.0.0.tgz#6a7e2af8e4d63fa17313e922c6c8a5b81cec1d08"
+  dependencies:
+    deferred-leveldown "~2.0.2"
+    level-errors "~1.1.0"
+    level-iterator-stream "~2.0.0"
     xtend "~4.0.0"
 
 leven@^2.1.0:
@@ -7101,6 +7136,12 @@ querystring-es3@~0.2.0:
 querystring@0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/querystring/-/querystring-0.2.0.tgz#b209849203bb25df820da756e747005878521620"
+
+queue@^4.4.1:
+  version "4.4.1"
+  resolved "https://registry.yarnpkg.com/queue/-/queue-4.4.1.tgz#ed93888335700f12dee55955b5a594cb82a1783b"
+  dependencies:
+    inherits "~2.0.0"
 
 quick-format-unescaped@^1.1.1:
   version "1.1.1"

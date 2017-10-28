@@ -1,5 +1,5 @@
-import * as constants from 'src/overview/constants'
-import indexSearch from 'src/search'
+import { CMDS, SEARCH_CONN_NAME } from 'src/overview/constants'
+import { search } from 'src/search'
 
 /**
  * Connects function affording search to a runtime messaging port.
@@ -8,17 +8,17 @@ import indexSearch from 'src/search'
  */
 const connectSearch = port => async ({ searchParams, overwrite }) => {
     try {
-        const searchResult = await indexSearch(searchParams)
+        const searchResult = await search(searchParams)
 
         port.postMessage({
-            cmd: constants.CMDS.RESULTS,
+            cmd: CMDS.RESULTS,
             searchResult,
             overwrite,
         })
     } catch (error) {
         console.error(error)
         port.postMessage({
-            cmd: constants.CMDS.ERROR,
+            cmd: CMDS.ERROR,
             error: error.message,
             query: searchParams.query,
         })
@@ -27,15 +27,15 @@ const connectSearch = port => async ({ searchParams, overwrite }) => {
 
 export default async function searchConnectionHandler(port) {
     // Make sure to only handle connection logic for search (allows other use of runtime.connect)
-    if (port.name !== constants.SEARCH_CONN_NAME) return
+    if (port.name !== SEARCH_CONN_NAME) return
 
-    const search = connectSearch(port)
+    const doSearch = connectSearch(port)
     console.log('overview search UI connected')
 
     port.onMessage.addListener(({ cmd, ...payload }) => {
         switch (cmd) {
-            case constants.CMDS.SEARCH:
-                return search(payload)
+            case CMDS.SEARCH:
+                return doSearch(payload)
             default:
                 return console.error(`unknown search command: ${cmd}`)
         }

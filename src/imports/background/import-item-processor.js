@@ -5,7 +5,7 @@ import { generatePageDocId } from 'src/page-storage'
 import fetchPageData from 'src/page-analysis/background/fetch-page-data'
 import { revisePageFields } from 'src/page-analysis'
 import { IMPORT_TYPE, DOWNLOAD_STATUS } from 'src/options/imports/constants'
-import * as index from 'src/search/search-index'
+import * as index from 'src/search'
 import { transformToVisitDoc, transformToBookmarkDoc } from 'src/imports'
 
 const fetchPageDataOpts = {
@@ -74,9 +74,7 @@ async function processHistoryImport(importItem) {
             : []
 
     // Schedule indexing of searchable data, but don't wait for it
-    console.time('index-time')
-    await index.addPage({ pageDoc, visitDocs, bookmarkDocs })
-    console.timeEnd('index-time')
+    await index.addPageConcurrent({ pageDoc, visitDocs, bookmarkDocs })
     // Store the new data in Pouch
     await db.bulkDocs([pageDoc, ...bookmarkDocs, ...visitDocs])
 

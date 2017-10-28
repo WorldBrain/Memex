@@ -1,6 +1,6 @@
 import { createAction } from 'redux-act'
 
-import deleteDocsByUrl from 'src/page-storage/deletion'
+import { remoteFunction } from 'src/util/webextensionRPC'
 import * as constants from './constants'
 import * as selectors from './selectors'
 
@@ -20,6 +20,8 @@ export const setEndDate = createAction('overview/setEndDate')
 export const hideResultItem = createAction('overview/hideResultItem')
 export const showDeleteConfirm = createAction('overview/showDeleteConfirm')
 export const hideDeleteConfirm = createAction('overview/hideDeleteConfirm')
+
+const deleteDocsByUrl = remoteFunction('deleteDocsByUrl')
 
 const getCmdMessageHandler = dispatch => ({ cmd, ...payload }) => {
     switch (cmd) {

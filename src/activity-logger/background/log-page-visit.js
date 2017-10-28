@@ -2,7 +2,7 @@ import db from 'src/pouchdb'
 import storePage from 'src/page-storage/store-page'
 import { checkWithBlacklist } from 'src/blacklist'
 import { generateVisitDocId } from '..'
-import * as index from 'src/search/search-index'
+import * as index from 'src/search'
 
 // Store the visit in PouchDB.
 async function storeVisit({ timestamp, url, page }) {
@@ -32,19 +32,13 @@ async function updateIndex(finalPagePromise, visit) {
         return
     }
 
-    // Check if doc exists in index
-    const existingIndexedDoc = await index.get(page._id) // TODO: maybe just have this in the `addPage` index methods
-
     // Index either the page + visit, or just the visit if page already exists
     try {
-        if (existingIndexedDoc) {
-            await index.addVisit(visit)
-        } else {
-            await index.addPageConcurrent({ pageDoc: page, visitDocs: [visit] })
-        }
+        await index.addPageConcurrent({ pageDoc: page, visitDocs: [visit] })
     } catch (error) {
         // Indexing issue; log it for now
         console.error(error)
+        throw error
     }
 }
 
