@@ -22,6 +22,7 @@ class QueryBuilder {
     timeFilter = new Map()
     domain = new Set()
     isBadTerm = false
+    showOnlyBookmarks = false
 
     /**
      * @returns {IndexQuery}
@@ -34,6 +35,7 @@ class QueryBuilder {
         domain: this.domain,
         isBadTerm: this.isBadTerm,
         timeFilter: this.timeFilter,
+        bookmarksFilter: this.showOnlyBookmarks,
     });
 
     skipUntil(skip) {
@@ -43,6 +45,11 @@ class QueryBuilder {
 
     limitUntil(limit) {
         this.limit = limit
+        return this
+    }
+
+    bookmarksFilter(showOnlyBookmarks) {
+        this.showOnlyBookmarks = showOnlyBookmarks
         return this
     }
 

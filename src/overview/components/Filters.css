@@ -2,22 +2,23 @@
     display: flex;
     flex: 1;
     align-items: center;
-    justify-content: space-between;
-    height: 100px;
+    justify-content: center;
+    height: 80px;
     position: fixed;
     top: 70px;
     left: 0;
     right: 0;
     z-index: 10;
     background-color: #fafafa;
-    min-width: 1000px;
+    min-width: 700px;
     flex-flow: column;
     box-shadow: 0 2px 4px rgba(220, 220, 220, 0.7);
     border-top: 1px solid rgba(220, 220, 220, 0.7);
+    padding-left: 6px;
 }
 
 .bookmarks {
-    margin: 20px auto;
+    margin: 10px auto;
     padding: 0;
     max-width: 700px;
     min-width: 700px;

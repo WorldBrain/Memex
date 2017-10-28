@@ -8,6 +8,7 @@ const searchUpdateActions = [
     actions.setQuery.getType(),
     actions.setStartDate.getType(),
     actions.setEndDate.getType(),
+    actions.setShowOnlyBookmarks.getType(),
 ]
 
 // When the query changed, refresh the search results

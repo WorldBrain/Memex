@@ -10,6 +10,7 @@ async function indexSearch({
     limit = 10,
     getTotalCount = false,
     fullDocs = true,
+    showOnlyBookmarks = false,
 }) {
     query = query.trim() // Don't count whitespace searches
 
@@ -20,6 +21,7 @@ async function indexSearch({
         .filterTime({ startDate, endDate }, 'visit/')
         .skipUntil(skip)
         .limitUntil(limit)
+        .bookmarksFilter(showOnlyBookmarks)
         .get()
 
     // If there is only Bad Terms don't continue

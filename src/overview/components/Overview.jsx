@@ -19,7 +19,7 @@ const Overview = props => [
     <div
         key="body"
         className={styles.main}
-        style={{ marginTop: props.showFilter ? '200px' : '100px' }}
+        style={{ marginTop: props.showFilter ? '180px' : '100px' }}
     >
         {props.children}
     </div>,

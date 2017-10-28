@@ -44,6 +44,13 @@ function setEndDate(state, date) {
     }
 }
 
+function setShowOnlyBookmarks(state) {
+    return {
+        ...state,
+        showOnlyBookmarks: !state.showOnlyBookmarks,
+    }
+}
+
 function hideResultItem(state, url) {
     return update('searchResult.docs', docs =>
         remove(doc => doc._id === generatePageDocId({ url }))(docs),
@@ -95,13 +102,10 @@ export default createReducer(
         [actions.showDeleteConfirm]: showDeleteConfirm,
         [actions.hideDeleteConfirm]: hideDeleteConfirm,
         [actions.hideResultItem]: hideResultItem,
+        [actions.setShowOnlyBookmarks]: setShowOnlyBookmarks,
         [actions.showFilter]: state => ({
             ...state,
             showFilter: !state.showFilter,
-        }),
-        [actions.showOnlyBookmarks]: state => ({
-            ...state,
-            showOnlyBookmarks: !state.showOnlyBookmarks,
         }),
     },
     defaultState,

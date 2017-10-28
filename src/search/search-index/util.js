@@ -136,7 +136,7 @@ export const reverseBookmarks = ({ limit = Infinity }) =>
             lte: 'bookmark/\uffff',
             reverse: true,
         })
-        console.log(stream)
+
         stream.on('end', () => resolve(data))
         stream.on('data', ({ key, value }) => {
             if (data.size >= limit) {

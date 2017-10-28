@@ -146,7 +146,7 @@ const mapDispatchToProps = dispatch =>
             hideDeleteConfirm: actions.hideDeleteConfirm,
             deleteDocs: actions.deleteDocs,
             onShowFilterChange: actions.showFilter,
-            onShowOnlyBookmarksChange: actions.showOnlyBookmarks,
+            onShowOnlyBookmarksChange: actions.setShowOnlyBookmarks,
         },
         dispatch,
     )

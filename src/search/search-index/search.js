@@ -298,9 +298,10 @@ export async function search(
     console.time('filter search')
     const filterPageResultsMap = await filterSearch(query)
     console.timeEnd('filter search')
-
     console.time('bookmark search')
-    const bookMarksResultMap = await bookmarkFilterBackSearch(query)
+    const bookMarksResultMap = query.bookmarksFilter
+        ? await bookmarkFilterBackSearch(query)
+        : null
     console.timeEnd('bookmark search')
 
     // Intersect different kinds of results
