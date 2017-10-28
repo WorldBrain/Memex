@@ -51,7 +51,6 @@ const PageResultItem = ({
             href={doc.url}
             target="_blank"
         >
-            {isBookmark && <div className={styles.bookmarkRibbon} />}
             <div className={styles.screenshotContainer}>
                 {doc._attachments && doc._attachments.screenshot ? (
                     <ImgFromPouch
