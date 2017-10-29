@@ -229,6 +229,7 @@ function intersectResultMaps(
     domainPages,
     bookmarkPages,
 ) {
+    console.log(termPages, filterPages, domainPages, bookmarkPages)
     if (filterPages == null && termPages == null && bookmarkPages == null) {
         return domainPages
     }
@@ -262,14 +263,17 @@ function intersectResultMaps(
         if (bookmarkPages == null) {
             filterPages = intersectDomain(filterPages)
             termPages = intersectDomain(termPages)
+            return intersectMaps(filterPages)(termPages)
         } else {
             filterPages = intersectDomain(filterPages)
             termPages = intersectDomain(termPages)
             bookmarkPages = intersectDomain(bookmarkPages)
+            return intersectManyMaps([filterPages, termPages, bookmarkPages])
         }
+    } else {
+        if (bookmarkPages == null) return intersectMaps(filterPages)(termPages)
+        else return intersectManyMaps([filterPages, termPages, bookmarkPages])
     }
-
-    return intersectMaps(filterPages)(termPages)(bookmarkPages)
 }
 
 /**
