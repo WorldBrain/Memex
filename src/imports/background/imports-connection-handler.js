@@ -48,15 +48,15 @@ async function prepareImportItems(allowTypes = {}) {
         ? await getURLFilteredBookmarkItems()
         : []
     const oldExtItems = allowTypes[IMPORT_TYPE.OLD]
-        ? await getOldExtItems(historyItems, bookmarkItems)
+        ? (await getOldExtItems()).importItems
         : []
 
     // Create import items for all created page stubs
     await setImportItems(
         uniqByUrl([
-            ...oldExtItems,
             ...historyItems.map(transformToImportItem(IMPORT_TYPE.HISTORY)),
             ...bookmarkItems.map(transformToImportItem(IMPORT_TYPE.BOOKMARK)),
+            ...oldExtItems,
         ]),
     )
 }

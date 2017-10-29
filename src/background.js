@@ -13,7 +13,6 @@ import { defaultEntries, addToBlacklist } from 'src/blacklist'
 import convertOldExtBlacklist from 'src/blacklist/background'
 import index from 'src/search/search-index'
 
-export const dataConvertTimeKey = 'data-conversion-timestamp'
 export const OVERVIEW_URL = '/overview/overview.html'
 
 // Put doc ID generators on window for user use with manual DB lookups
