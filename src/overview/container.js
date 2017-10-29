@@ -98,7 +98,7 @@ class OverviewContainer extends Component {
         if (this.props.isNewSearchLoading) {
             return (
                 <ResultList>
-                    <LoadingIndicator />
+                    [<LoadingIndicator />,]
                 </ResultList>
             )
         }

@@ -31,7 +31,8 @@ const locationSync = ReduxQuerySync.enhancer({
         },
         showOnlyBookmarks: {
             selector: state => showOnlyBookmarks(state),
-            action: state => showOnlyBookmarksEnhancer(),
+            action: showOnlyBookmarks =>
+                showOnlyBookmarksEnhancer(Boolean(showOnlyBookmarks)),
             defaultValue: false,
         },
     },

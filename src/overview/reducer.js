@@ -51,10 +51,10 @@ function setShowOnlyBookmarks(state) {
     }
 }
 
-function showOnlyBookmarksEnhancer(state) {
+function showOnlyBookmarksEnhancer(state, showOnlyBookmarks) {
     return {
         ...state,
-        showOnlyBookmarks: state.showOnlyBookmarks,
+        showOnlyBookmarks: showOnlyBookmarks,
     }
 }
 

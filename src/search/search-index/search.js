@@ -229,7 +229,6 @@ function intersectResultMaps(
     domainPages,
     bookmarkPages,
 ) {
-    console.log(termPages, filterPages, domainPages, bookmarkPages)
     if (filterPages == null && termPages == null && bookmarkPages == null) {
         return domainPages
     }
