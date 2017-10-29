@@ -25,6 +25,34 @@ export const setImportItems = items =>
 export const clearImportItems = () =>
     browser.storage.local.remove(importStateStorageKey)
 
+export async function clearOldExtData(oldExtKey) {
+    // Remove old ext page item
+    await browser.storage.local.remove(oldExtKey)
+
+    const {
+        [OLD_EXT_KEYS.INDEX]: index,
+        [OLD_EXT_KEYS.NUM_DONE]: numDone,
+    } = await browser.storage.local.get({
+        [OLD_EXT_KEYS.INDEX]: { index: [] },
+        [OLD_EXT_KEYS.NUM_DONE]: 0,
+    })
+    const currIndex = index.index
+    const iToRemove = currIndex.indexOf(oldExtKey)
+
+    // Remove old ext index entry and inc. finished count
+    if (iToRemove !== -1) {
+        await browser.storage.local.set({
+            [OLD_EXT_KEYS.INDEX]: {
+                index: [
+                    ...currIndex.slice(0, iToRemove),
+                    ...currIndex.slice(iToRemove + 1),
+                ],
+            },
+            [OLD_EXT_KEYS.NUM_DONE]: numDone + 1,
+        })
+    }
+}
+
 /**
  * @param url The URL to match against all items in import state. Item with matching URL will be removed.
  *  Assumes that input state is unique on URL to work properly.
@@ -75,9 +103,11 @@ export async function getOldExtItems() {
     const {
         [OLD_EXT_KEYS.INDEX]: index,
         [OLD_EXT_KEYS.BOOKMARKS]: bookmarks,
+        [OLD_EXT_KEYS.NUM_DONE]: numDone,
     } = await browser.storage.local.get({
         [OLD_EXT_KEYS.INDEX]: { index: [] },
         [OLD_EXT_KEYS.BOOKMARKS]: '[]',
+        [OLD_EXT_KEYS.NUM_DONE]: 0,
     })
 
     if (typeof bookmarks === 'string') {
@@ -99,7 +129,7 @@ export async function getOldExtItems() {
         }))
     }
 
-    return importItems
+    return { completedCount: numDone, importItems }
 }
 
 /**

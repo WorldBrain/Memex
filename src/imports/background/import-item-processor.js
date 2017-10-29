@@ -12,6 +12,7 @@ import {
     transformToVisitDoc,
     transformToBookmarkDoc,
 } from 'src/imports'
+import { clearOldExtData } from 'src/imports/background'
 
 const fetchPageDataOpts = {
     includePageContent: true,
@@ -111,6 +112,10 @@ async function processOldExtImport(importItem) {
     }
 
     await storeDocs({ pageDoc, visitDocs, bookmarkDocs })
+
+    // If all okay now, remove the old data (timestamp is old index key)
+    await clearOldExtData(importItem.timestamp.toString())
+
     return { status: DOWNLOAD_STATUS.SUCC }
 }
 

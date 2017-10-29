@@ -59,6 +59,7 @@ export const DOC_SIZE_EST = 0.06
 export const DOC_TIME_EST = 0.01
 
 export const OLD_EXT_KEYS = {
+    NUM_DONE: 'old-ext-converted-count',
     INDEX: 'index',
     BOOKMARKS: 'bookmarks',
     HIST: 'history',
