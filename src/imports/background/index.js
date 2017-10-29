@@ -82,7 +82,7 @@ export async function getOldExtItems() {
 
     if (typeof bookmarks === 'string') {
         try {
-            bookmarkUrls = new Set(JSON.parse(bookmarks))
+            bookmarkUrls = new Set(JSON.parse(bookmarks).map(bm => bm.url))
         } catch (error) {}
     }
 
