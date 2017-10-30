@@ -8,7 +8,7 @@ const BlacklistConfirm = props => (
     <div className={styles.container}>
         <h1 className={styles.header}>Blacklisting successful!</h1>
         <p className={styles.content}>
-            Do you want to delete all past visits as well?
+            Do you also want to delete all past visits of the blacklisted page?
         </p>
         <div className={styles.btnBar}>
             <button

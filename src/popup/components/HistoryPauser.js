@@ -26,10 +26,10 @@ const HistoryPauser = ({
             {getIcon(isPaused)}
         </i>
         {isPaused ? (
-            'Recording paused'
+            'Indexing paused'
         ) : (
             <div>
-                Pause recording for
+                Pause indexing for
                 <select
                     className={styles.dropdown}
                     value={value}
