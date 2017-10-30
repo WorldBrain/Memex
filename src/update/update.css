@@ -1,0 +1,56 @@
+body {
+    margin: 0;
+    background-color: #f4f4f4;
+}
+
+.main {
+    height: 100vh;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    width: 780px;
+    height: 360px;
+}
+
+.message-container {
+    height: 80%;
+}
+
+.message {
+    font-size: 1.5em;
+    line-height: 1.8em;
+    text-align: center;
+}
+
+.logo {
+    position: fixed;
+    bottom: 20px;
+    right: 25px;
+    width: 130px;
+    height: 35px;
+    background: url('/img/worldbrain-logo.png') no-repeat;
+    background-size: contain;
+    opacity: 0.8;
+}
+
+.btn-link {
+    border: 1px solid #000;
+    border-radius: 5px;
+    padding: 0.75em;
+    font-size: 1.5em;
+    text-decoration: none;
+    background: #fff;
+    color: #000;
+}
+
+.btn-link:hover {
+    background: #bfe2d7;
+}

@@ -10,7 +10,9 @@ import { generatePageDocId } from 'src/page-storage'
 import { generateVisitDocId } from 'src/activity-logger'
 import { generateBookmarkDocId } from 'src/bookmarks'
 import { defaultEntries, addToBlacklist } from 'src/blacklist'
-import convertOldExtBlacklist from 'src/blacklist/background'
+import convertOldExtBlacklist, {
+    CONVERT_TIME_KEY,
+} from 'src/blacklist/background'
 import index from 'src/search/search-index'
 
 export const OVERVIEW_URL = '/overview/overview.html'
@@ -38,7 +40,7 @@ browser.commands.onCommand.addListener(command => {
     }
 })
 
-browser.runtime.onInstalled.addListener(details => {
+browser.runtime.onInstalled.addListener(async details => {
     switch (details.reason) {
         case 'install':
             // Store the timestamp of when the extension was installed + default blacklist
@@ -46,7 +48,14 @@ browser.runtime.onInstalled.addListener(details => {
             addToBlacklist(defaultEntries)
             break
         case 'update':
-            convertOldExtBlacklist()
+            // If no prior conversion, convert old ext blacklist + show static notif page
+            const {
+                [CONVERT_TIME_KEY]: doneBefore,
+            } = await browser.storage.local.get(CONVERT_TIME_KEY)
+            if (!doneBefore) {
+                browser.tabs.create({ url: '/update/update.html' })
+                convertOldExtBlacklist()
+            }
             break
         default:
     }
