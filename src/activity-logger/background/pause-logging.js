@@ -9,7 +9,7 @@ const getNotifOptions = (message, requireInteraction = false) => ({
     requireInteraction,
 })
 
-export const pauseIconPath = '/img/worldbrain-logo-narrow-paused.png'
+export const pauseIconPath = '/img/worldbrain-logo-narrow-pause.png'
 export const unpauseIconPath = '/img/worldbrain-logo-narrow-bw.png'
 
 const getState = async () => {
