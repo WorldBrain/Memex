@@ -3,6 +3,8 @@ import uniqBy from 'lodash/fp/uniqBy'
 import { STORAGE_KEY } from 'src/options/blacklist/constants'
 
 export const CONVERT_TIME_KEY = 'data-conversion-timestamp'
+// Unused storage keys for old ext data
+export const OLD_EXT_MISC_KEYS = ['shouldOpenTab', 'history', 'preferences']
 
 /**
  * @typedef IBlacklistOldExt
@@ -56,5 +58,8 @@ export default async function convertOldBlacklist() {
             [STORAGE_KEY]: newBlacklist,
             [CONVERT_TIME_KEY]: Date.now(),
         })
+
+        // Remove misc. unused old ext data from local storage
+        await browser.storage.local.remove(OLD_EXT_MISC_KEYS)
     }
 }
