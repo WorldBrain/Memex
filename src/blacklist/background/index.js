@@ -38,16 +38,12 @@ function convertBlacklist(blacklist) {
 }
 
 export default async function convertOldBlacklist() {
-    const {
-        [STORAGE_KEY]: blacklist,
-        [CONVERT_TIME_KEY]: doneBefore,
-    } = await browser.storage.local.get({
+    const { [STORAGE_KEY]: blacklist } = await browser.storage.local.get({
         [STORAGE_KEY]: { PAGE: [], SITE: [], REGEX: [] },
     })
 
-    // Only attempt blacklist conversion if not done before and it matches shape of old extension blacklist
+    // Only attempt blacklist conversion if it matches shape of old extension blacklist
     if (
-        !doneBefore &&
         Object.prototype.toString.call(blacklist) === '[object Object]' &&
         'PAGE' in blacklist &&
         'SITE' in blacklist &&
