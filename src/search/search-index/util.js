@@ -128,29 +128,6 @@ export const reverseRangeLookup = ({ limit = Infinity, ...iteratorOpts }) =>
         })
     })
 
-export const reverseBookmarks = ({ limit = Infinity }) =>
-    new Promise(resolve => {
-        const data = new Map()
-        const stream = index.db.createReadStream({
-            gte: 'bookmark/',
-            lte: 'bookmark/\uffff',
-            reverse: true,
-        })
-
-        stream.on('end', () => resolve(data))
-        stream.on('data', ({ key, value }) => {
-            if (data.size >= limit) {
-                stream.destroy()
-                return resolve(data)
-            }
-
-            // Latest values will appear first, so only add if no matching key
-            if (!data.has(value)) {
-                data.set(value, { latest: removeKeyType(key) })
-            }
-        })
-    })
-
 const defLookupOpts = {
     defaultValue: null,
     asBuffer: false,

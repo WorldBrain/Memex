@@ -6,7 +6,7 @@ import {
     setQuery,
     setStartDate,
     setEndDate,
-    showOnlyBookmarksEnhancer,
+    toggleBookmarkFilter,
 } from './actions'
 
 // Keep search query in sync with the query parameter in the window location.
@@ -32,7 +32,7 @@ const locationSync = ReduxQuerySync.enhancer({
         showOnlyBookmarks: {
             selector: state => showOnlyBookmarks(state),
             action: showOnlyBookmarks =>
-                showOnlyBookmarksEnhancer(Boolean(showOnlyBookmarks)),
+                toggleBookmarkFilter(Boolean(showOnlyBookmarks)),
             defaultValue: false,
         },
     },

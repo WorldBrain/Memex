@@ -12,7 +12,6 @@ import {
     rangeLookup,
     reverseRangeLookup,
     removeKeyType,
-    reverseBookmarks,
 } from './util'
 import { indexQueue } from '.'
 
@@ -181,14 +180,25 @@ const boostedUrlSearch = boostedTermSearch(keyGen.url, 0.1)
  * @param {IndexQuery}
  * @returns {Map<string, IndexTermValue>}
  */
-async function bookmarkFilterBackSearch({ limit, skip }) {
+async function bookmarkFilterBackSearch({
+    timeFilter,
+    limit,
+    skip,
+    bookmarksFilter,
+}) {
+    if (bookmarksFilter === false) return null
     const data = []
 
-    data.push(
-        await reverseBookmarks({
-            limit: skip + limit,
-        }),
-    )
+    for (const timeRange of timeFilter.values()) {
+        if (timeRange.gte.split('/')[0] === 'bookmark') {
+            data.push(
+                await reverseRangeLookup({
+                    ...timeRange,
+                    limit: skip + limit,
+                }),
+            )
+        }
+    }
 
     return new Map([...data.reduce((acc, curr) => [...acc, ...curr], [])])
 }
@@ -302,9 +312,7 @@ export async function search(
     const filterPageResultsMap = await filterSearch(query)
     console.timeEnd('filter search')
     console.time('bookmark search')
-    const bookMarksResultMap = query.bookmarksFilter
-        ? await bookmarkFilterBackSearch(query)
-        : null
+    const bookMarksResultMap = await bookmarkFilterBackSearch(query)
     console.timeEnd('bookmark search')
 
     // Intersect different kinds of results

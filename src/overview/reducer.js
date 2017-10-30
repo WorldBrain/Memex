@@ -44,17 +44,13 @@ function setEndDate(state, date) {
     }
 }
 
-function setShowOnlyBookmarks(state) {
+function toggleBookmarkFilter(state, showOnlyBookmarks) {
     return {
         ...state,
-        showOnlyBookmarks: !state.showOnlyBookmarks,
-    }
-}
-
-function showOnlyBookmarksEnhancer(state, showOnlyBookmarks) {
-    return {
-        ...state,
-        showOnlyBookmarks: showOnlyBookmarks,
+        showOnlyBookmarks:
+            showOnlyBookmarks === true
+                ? showOnlyBookmarks
+                : !state.showOnlyBookmarks,
     }
 }
 
@@ -109,8 +105,7 @@ export default createReducer(
         [actions.showDeleteConfirm]: showDeleteConfirm,
         [actions.hideDeleteConfirm]: hideDeleteConfirm,
         [actions.hideResultItem]: hideResultItem,
-        [actions.setShowOnlyBookmarks]: setShowOnlyBookmarks,
-        [actions.showOnlyBookmarksEnhancer]: showOnlyBookmarksEnhancer,
+        [actions.toggleBookmarkFilter]: toggleBookmarkFilter,
         [actions.showFilter]: state => ({
             ...state,
             showFilter: !state.showFilter,

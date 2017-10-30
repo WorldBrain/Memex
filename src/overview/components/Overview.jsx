@@ -1,20 +1,24 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import classNames from 'classnames'
 
 import Header from './Header'
 import DeleteConfirmation from './DeleteConfirmation'
 import styles from './Overview.css'
 import Filters from './Filters'
 
+const showFilterClass = showFilter =>
+    classNames({
+        [styles.filtersContainer]: true,
+        [styles.hideFilter]: !showFilter,
+    })
 const Overview = props => [
     <Header key="head" {...props} />,
-    <div className={styles.filtersContainer} key="filters">
-        {props.showFilter && (
-            <Filters
-                showOnlyBookmarks={props.showOnlyBookmarks}
-                onShowOnlyBookmarksChange={props.onShowOnlyBookmarksChange}
-            />
-        )}
+    <div className={showFilterClass(props.showFilter)} key="filters">
+        <Filters
+            showOnlyBookmarks={props.showOnlyBookmarks}
+            onShowOnlyBookmarksChange={props.onShowOnlyBookmarksChange}
+        />
     </div>,
     <div
         key="body"

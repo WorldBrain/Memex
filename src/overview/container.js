@@ -113,9 +113,6 @@ class OverviewContainer extends Component {
                 {...this.props}
                 setInputRef={this.setInputRef}
                 onInputChange={this.handleInputChange}
-                onShowFilterChange={this.props.onShowFilterChange}
-                showOnlyBookmarks={this.props.showOnlyBookmarks}
-                onShowOnlyBookmarksChange={this.props.onShowOnlyBookmarksChange}
             >
                 {this.renderResults()}
             </Overview>
@@ -146,7 +143,7 @@ const mapDispatchToProps = dispatch =>
             hideDeleteConfirm: actions.hideDeleteConfirm,
             deleteDocs: actions.deleteDocs,
             onShowFilterChange: actions.showFilter,
-            onShowOnlyBookmarksChange: actions.setShowOnlyBookmarks,
+            onShowOnlyBookmarksChange: actions.toggleBookmarkFilter,
         },
         dispatch,
     )

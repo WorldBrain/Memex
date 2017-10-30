@@ -156,3 +156,7 @@
         display: none;
     }
 }
+
+.hideFilter {
+    display: none;
+}
