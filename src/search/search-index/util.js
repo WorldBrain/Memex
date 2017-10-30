@@ -31,7 +31,11 @@ export const idbBatchToPromise = batch =>
 export const extractContent = (
     content,
     { separator = DEFAULT_TERM_SEPARATOR, key = 'term' },
-) => content.split(separator).map(word => keyGen[key](word.toLowerCase()))
+) =>
+    content
+        .split(separator)
+        .map(word => keyGen[key](word.toLowerCase()))
+        .filter(term => !term.endsWith('/'))
 
 /**
  * @param {Map<string, Map<string, IndexTermValue>>} termValuesMap Map of terms to assoc. page values.

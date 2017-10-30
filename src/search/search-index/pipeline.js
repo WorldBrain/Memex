@@ -3,19 +3,11 @@ import normalizeUrl from 'normalize-url'
 import transformPageText from 'src/util/transform-page-text'
 import { convertMetaDocId } from 'src/activity-logger'
 import { getLatestMeta, extractContent, keyGen } from './util'
-import { DEFAULT_TERM_SEPARATOR, URL_SEPARATOR } from '.'
+import { DEFAULT_TERM_SEPARATOR } from '.'
 
 // Simply extracts the timestamp component out the ID of a visit or bookmark doc,
 //  which is the only data we want at the moment.
 export const transformMetaDoc = doc => convertMetaDocId(doc._id).timestamp
-
-// Meant to match domain + TLD + optional ccTLD of a URL without leading `protocol://www.`.
-//   It end-delimits the domain by either a forward-slash or end-of-input.
-//   From a `String.prototype.match` call, it should output 5 groups with group 2 containing
-//   `domain.tld.cctld` and group 5 containing the rest of the URL after domain.
-// TODO: This needs proper scrutinyy
-const DOMAIN_TLD_PATTERN = /(\w{2,}\.\w{2,3}(\.\w{2})?)(\/|$)(.*)/
-const PROTOCOL_WWW_PATTERN = /(^\w+:|^)\/\//
 
 const urlNormalizationOpts = {
     normalizeProtocol: true, // Prepend `http://` if URL is protocol-relative
@@ -33,21 +25,19 @@ const urlNormalizationOpts = {
  *  the URL with protocol and opt. `www` parts removed will be returned for both values.
  */
 function transformUrl(url) {
-    let normalized = normalizeUrl(url, urlNormalizationOpts)
-    normalized = url.replace(PROTOCOL_WWW_PATTERN, '')
-    const matchResult = normalized.match(DOMAIN_TLD_PATTERN)
+    let parsed
+    const normalized = normalizeUrl(url, urlNormalizationOpts)
 
-    if (matchResult == null) {
-        console.error(`cannot split URL: ${url}`)
-        return { remainingUrl: normalized, domain: normalized }
+    try {
+        parsed = new URL(normalized)
+    } catch (error) {
+        console.error(`cannot parse URL: ${url}`)
+        return { hostname: normalized, pathname: normalized }
     }
 
-    const { 1: domain, 4: remainingUrl } = matchResult
-
-    // Fallback to normalized URL if match groups don't exist
     return {
-        remainingUrl: remainingUrl || normalized,
-        domain: domain || normalized,
+        hostname: parsed ? parsed.hostname : normalized,
+        pathname: parsed ? parsed.pathname : normalized,
     }
 }
 
@@ -76,7 +66,7 @@ export default function pipeline({
     bookmarkDocs = [],
 }) {
     // First apply transformations to the URL
-    const { remainingUrl, domain } = transformUrl(url)
+    const { pathname, hostname } = transformUrl(url)
 
     // Throw error if no searchable content; we don't really want to index these (for now) so allow callers
     //  to handle (probably by ignoring)
@@ -90,6 +80,9 @@ export default function pipeline({
     })
     const { text: transformedTitle } = transformPageText({
         text: content.title,
+    })
+    const { text: transformedUrlTerms } = transformPageText({
+        text: pathname,
     })
 
     // Extract all terms out of processed content
@@ -111,13 +104,13 @@ export default function pipeline({
         )
     }
 
-    if (remainingUrl && remainingUrl.length) {
+    if (pathname && pathname.length) {
         // Extract all terms out of processed URL
         urlTerms = new Set(
-            extractContent(remainingUrl, {
-                separator: URL_SEPARATOR,
+            extractContent(transformedUrlTerms, {
+                separator: DEFAULT_TERM_SEPARATOR,
                 key: 'url',
-            }).filter(term => !term.endsWith('/')),
+            }),
         )
     }
 
@@ -130,7 +123,7 @@ export default function pipeline({
         ...getLatestMeta(visits, bookmarks),
         terms,
         urlTerms: urlTerms || new Set(),
-        domain: keyGen.domain(domain),
+        domain: keyGen.domain(hostname),
         titleTerms: titleTerms || new Set(),
         visits: new Set(visits.map(keyGen.visit)),
         bookmarks: new Set(bookmarks.map(keyGen.bookmark)),
