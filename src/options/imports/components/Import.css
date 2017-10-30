@@ -100,11 +100,11 @@
 }
 
 .stepNumber {
-    font-size: 16px;
-    color: #4d4b4c;
+    font-size: 18px;
+    color: #3eb995;
     font-weight: bold;
     letter-spacing: 1px;
-    margin-top: 10px;
+    margin-top: 20px;
     margin-bottom: 10px;
 }
 
@@ -187,7 +187,7 @@ progress[value]::-webkit-progress-value {
 .heading {
     color: #c8c8c8;
     border-bottom: 1px solid #c8c8c8;
-    font-size: 14px;
+    font-size: 16px;
     width: 250px;
     line-height: 2;
 }

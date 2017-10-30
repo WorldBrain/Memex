@@ -57,10 +57,12 @@ const Import = ({
                     Step 2/3: Download Progress{' '}
                 </div>
                 <div className={localStyles.stepText}>
-                    <Warning>
-                        If you leave this page, your import will paused.<br />
-                        You can always come back and resume where you left off.
-                    </Warning>
+                    <img
+                        src="/img/caution.png"
+                        className={localStyles.icon}
+                    />{' '}
+                    If you leave this page, your import will paused. You can
+                    always come back and resume where you left off.
                 </div>
             </div>
         )}

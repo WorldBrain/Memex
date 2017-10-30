@@ -1,6 +1,7 @@
 import ImportContainer from './imports'
 import SettingsContainer from './containers/settings'
 import PrivacyContainer from './privacy/index'
+import HelpContainer from './help/index'
 import AcknowledgmentContainer from './acknowledgement'
 
 export default [
@@ -30,8 +31,8 @@ export default [
     },
     {
         name: 'Help Me Please',
-        pathname: 'https://www.reddit.com/r/WorldBrain',
-        component: 'faq',
+        pathname: '/help',
+        component: HelpContainer,
         icon: 'help',
     },
 ]

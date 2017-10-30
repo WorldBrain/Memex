@@ -6,12 +6,11 @@ import styles from './style.css'
 
 const SettingsContainer = () => (
     <div>
-        <h1 className={routeTitle}>Settings &gt; Blacklist</h1>
-
         <section className={styles.section}>
-            <div className={sectionTitle}>
+            <div className={styles.title}>
                 {' '}
-                &gt; Ignore Specific domains from your memory when visiting them
+                Prevent specific URLs and domains from being indexed when
+                visiting them
             </div>
 
             <Blacklist />

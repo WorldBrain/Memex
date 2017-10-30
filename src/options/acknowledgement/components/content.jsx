@@ -5,32 +5,32 @@ import localStyles from './styles.css'
 
 const AcknowledgementContainer = () => (
     <div className={localStyles.acknowledgement}>
-        <h1 className={styles.routeTitle}>Settings &gt; Acknowledgement</h1>
         <span className={localStyles.title}>
-            &gt; This project can only happen thanks to our talented
-            collaborators.
+            WorldBrain can only happen thanks to our talented collaborators.
         </span>
         <div className={localStyles.content}>
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-            ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-            aliquip ex ea commodo consequat. Duis aute irure dolor in
-            reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-            pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-            culpa qui officia deserunt mollit anim id est laborum.
+            Many thanks goes out to our{' '}
+            <a href="https://worldbrain.io/team">
+                team of contributors, advisors and investors
+            </a>{' '}
+            who helped building our software.
+            <br />We also have immense grattitude for the decades long pioneer
+            work done by technologists and philosophers contributing the
+            foundational pieces of code and thought to make this project a
+            reality.
+            <br />
+            <br />This software is open-source, for anyone to reuse, recycle,
+            redistribute and add to.
         </div>
 
-        <span className={localStyles.contribute}>How to contribue?</span>
+        <span className={localStyles.contribute}>
+            You want to contribute to this project?
+        </span>
         <p className={localStyles.contributeContent}>
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-            ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-            aliquip ex ea commodo consequat. Duis aute irure dolor in
-            reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-            pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-            culpa qui officia deserunt mollit anim id est laborum.
+            You can do so either by supporting our development with{' '}
+            <a href="https://github.com/WorldBrain/WebMemex/">your mind</a> or{' '}
+            <a href="https://patreon.com/WorldBrain">your money</a>.
         </p>
-        <div className={localStyles.col_title}>COLLABORATORS</div>
     </div>
 )
 

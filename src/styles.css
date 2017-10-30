@@ -1,19 +1,18 @@
 .privacy {
     font-family: 'Lato';
-    margin-top: 20px;
 }
 
 .title {
     color: #3eb995;
     font-weight: bold;
-    font-size: 18px;
+    font-size: 20px;
     letter-spacing: 1px;
 }
 
 .content {
     font-style: normal;
     margin-top: 20px;
-    font-size: 16px;
+    font-size: 14px;
     color: #b7b7b7;
     letter-spacing: 1px;
     width: 60%;
