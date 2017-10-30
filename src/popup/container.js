@@ -167,7 +167,7 @@ class PopupContainer extends Component {
                     icon="block"
                     btnClass={itemBtnBlacklisted}
                 >
-                    Current Page Blacklisted
+                    This Page is Blacklisted. Undo>>
                 </LinkButton>
             ) : (
                 <Button
