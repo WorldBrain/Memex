@@ -6,10 +6,30 @@ import { whenPageLoadComplete, whenTabActive } from 'src/util/tab-events'
 // The promise rejects if the tab is not currently active!
 async function snapNow({ tabId }) {
     const tab = await browser.tabs.get(tabId)
-    const image = await browser.tabs.captureVisibleTab(tab.windowId, {
+    let image = await browser.tabs.captureVisibleTab(tab.windowId, {
         format: 'png',
     })
+    image = await resizeImage(image, 400, 400)
     return image
+}
+
+async function resizeImage(image, maxWidth, maxHeight) {
+    return new Promise((resolve, reject) => {
+        let img = new Image()
+        img.onload = () => {
+            let canvas = document.createElement('canvas')
+            let ctx = canvas.getContext('2d')
+            let ratio = Math.min(maxWidth / img.width, maxHeight / img.height)
+            canvas.width = img.width * ratio
+            canvas.height = img.height * ratio
+
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+
+            resolve(canvas.toDataURL())
+        }
+        img.onerror = reject
+        img.src = image
+    })
 }
 
 // Return the promise of an image (as data URL) of the visible area of the tab,
