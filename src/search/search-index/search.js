@@ -188,17 +188,8 @@ async function bookmarkFilterBackSearch({
 }) {
     if (bookmarksFilter === false) return null
     const data = []
-
-    for (const timeRange of timeFilter.values()) {
-        if (timeRange.gte.split('/')[0] === 'bookmark') {
-            data.push(
-                await reverseRangeLookup({
-                    ...timeRange,
-                    limit: skip + limit,
-                }),
-            )
-        }
-    }
+    const timeRange = timeFilter.get('bookmark/')
+    data.push(await reverseRangeLookup({ ...timeRange, limit: skip + limit }))
 
     return new Map([...data.reduce((acc, curr) => [...acc, ...curr], [])])
 }
