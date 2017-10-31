@@ -26,31 +26,18 @@ export const clearImportItems = () =>
     browser.storage.local.remove(importStateStorageKey)
 
 export async function clearOldExtData(oldExtKey) {
-    // Remove old ext page item
-    await browser.storage.local.remove(oldExtKey)
-
     const {
-        [OLD_EXT_KEYS.INDEX]: index,
         [OLD_EXT_KEYS.NUM_DONE]: numDone,
     } = await browser.storage.local.get({
-        [OLD_EXT_KEYS.INDEX]: { index: [] },
         [OLD_EXT_KEYS.NUM_DONE]: 0,
     })
-    const currIndex = index.index
-    const iToRemove = currIndex.indexOf(oldExtKey)
 
-    // Remove old ext index entry and inc. finished count
-    if (iToRemove !== -1) {
-        await browser.storage.local.set({
-            [OLD_EXT_KEYS.INDEX]: {
-                index: [
-                    ...currIndex.slice(0, iToRemove),
-                    ...currIndex.slice(iToRemove + 1),
-                ],
-            },
-            [OLD_EXT_KEYS.NUM_DONE]: numDone + 1,
-        })
-    }
+    // Inc. finished count
+    await browser.storage.local.set({
+        [OLD_EXT_KEYS.NUM_DONE]: numDone + 1,
+    })
+    // Remove old ext page item
+    await browser.storage.local.remove(oldExtKey)
 }
 
 /**
@@ -97,15 +84,20 @@ async function filterItemsByUrl(items, type) {
     return items.filter(isWorthRemembering)
 }
 
+// Transforms old ext data to an imports item
+const transformOldExtDataToImportItem = bookmarkUrls => data => ({
+    type: IMPORT_TYPE.OLD,
+    url: data.url,
+    timestamp: data.time,
+    hasBookmark: bookmarkUrls.has(data.url),
+})
+
 export async function getOldExtItems() {
-    let importItems = []
     let bookmarkUrls = new Set()
     const {
-        [OLD_EXT_KEYS.INDEX]: index,
         [OLD_EXT_KEYS.BOOKMARKS]: bookmarks,
         [OLD_EXT_KEYS.NUM_DONE]: numDone,
     } = await browser.storage.local.get({
-        [OLD_EXT_KEYS.INDEX]: { index: [] },
         [OLD_EXT_KEYS.BOOKMARKS]: '[]',
         [OLD_EXT_KEYS.NUM_DONE]: 0,
     })
@@ -116,17 +108,16 @@ export async function getOldExtItems() {
         } catch (error) {}
     }
 
-    // Only attempt page data conversion if index + bookmark storage values are correct types
-    if (index && index.index instanceof Array) {
-        // Map all old ext data to import items, ignoring text
-        importItems = Object.values(
-            await browser.storage.local.get(index.index),
-        ).map(data => ({
-            type: IMPORT_TYPE.OLD,
-            url: data.url,
-            timestamp: data.time,
-            hasBookmark: bookmarkUrls.has(data.url),
-        }))
+    const transform = transformOldExtDataToImportItem(bookmarkUrls)
+
+    const entireStorage = await browser.storage.local.get(null)
+    const importItems = []
+
+    // For everything in local storage, if the key represents page data, transform it
+    for (const key in entireStorage) {
+        if (Number.isInteger(+key)) {
+            importItems.push(transform(entireStorage[key]))
+        }
     }
 
     return { completedCount: numDone, importItems }
