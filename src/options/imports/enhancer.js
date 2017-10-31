@@ -11,6 +11,7 @@ const hydrateImportsFromStorage = store => {
             store.dispatch(action(parsedData))
         })
 
+    hydrate(STORAGE_KEYS.ALLOW_TYPES, actions.initAllowTypes)
     hydrate(STORAGE_KEYS.DOWNLOAD_DATA, actions.initDownloadData)
     hydrate(STORAGE_KEYS.TOTALS_STATE, actions.initTotalsCounts)
     hydrate(STORAGE_KEYS.SUCCESS_STATE, actions.initSuccessCounts)
@@ -23,6 +24,7 @@ const syncImportsToStorage = store =>
             browser.storage.local.set({ [key]: JSON.stringify(data) })
 
         const state = store.getState()
+        dump(STORAGE_KEYS.ALLOW_TYPES, selectors.allowTypes(state))
         dump(STORAGE_KEYS.DOWNLOAD_DATA, selectors.downloadData(state))
         dump(STORAGE_KEYS.TOTALS_STATE, selectors.totals(state))
         dump(STORAGE_KEYS.SUCCESS_STATE, selectors.success(state))

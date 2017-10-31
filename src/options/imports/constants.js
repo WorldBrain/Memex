@@ -32,6 +32,7 @@ export const IMPORT_TYPE = {
 export const STORAGE_KEYS = {
     HISTORY_STATS: 'history_stats',
     BOOKMARK_STATS: 'bookmark_stats',
+    ALLOW_TYPES: 'allow_types',
     DOWNLOAD_DATA: 'import_progress',
     IMPORT_STATE: 'import_state',
     TOTALS_STATE: 'import_totals_state',
@@ -56,7 +57,7 @@ export const CMDS = {
 /** Estimated size of a doc (MB) */
 export const DOC_SIZE_EST = 0.06
 /** Estimated time to download a doc (minutes) */
-export const DOC_TIME_EST = 0.01
+export const DOC_TIME_EST = 0.05
 
 export const OLD_EXT_KEYS = {
     NUM_DONE: 'old-ext-converted-count',
