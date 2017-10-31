@@ -12,7 +12,6 @@ const ProgressTable = ({ progress, showOldExt, allowTypes }) => (
             <col className={localStyles.importTableCol} />
             <col className={localStyles.importTableCol} />
             <col className={localStyles.importTableCol} />
-            {showOldExt && <col className={localStyles.importTableCol} />}
         </colgroup>
         <thead className={localStyles.importTableHead}>
             <tr>
