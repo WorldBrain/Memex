@@ -4,7 +4,6 @@ import pickBy from 'lodash/fp/pickBy'
 import {
     FILTERS,
     STATUS,
-    DOC_SIZE_EST,
     DOC_TIME_EST,
     IMPORT_TYPE as TYPE,
     DOWNLOAD_STATUS as DL_STAT,
@@ -145,8 +144,6 @@ const getTimeEstStr = time => `${getHours(time)}:${getPaddedMins(time)} h`
 const getEstimate = (complete, remaining) => ({
     complete,
     remaining,
-    sizeCompleted: (complete * DOC_SIZE_EST).toFixed(2),
-    sizeRemaining: (remaining * DOC_SIZE_EST).toFixed(2),
     timeRemaining: getTimeEstStr(remaining * DOC_TIME_EST),
 })
 

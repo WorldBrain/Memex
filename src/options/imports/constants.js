@@ -54,8 +54,6 @@ export const CMDS = {
     COMPLETE: `${IMPORT_CONN_NAME}/COMPLETE`,
 }
 
-/** Estimated size of a doc (MB) */
-export const DOC_SIZE_EST = 0.06
 /** Estimated time to download a doc (minutes) */
 export const DOC_TIME_EST = 0.05
 
