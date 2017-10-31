@@ -40,7 +40,7 @@ const HelpContainer = () => (
                 href="https://www.github.com/WorldBrain/WebMemex/issues/new"
             >
                 {' '}
-                on GitHub
+                GitHub
             </a>. Feature requests can be made either via email (<a
                 className={localStyles.link}
                 href="mailto:questions@worldbrain.io"
