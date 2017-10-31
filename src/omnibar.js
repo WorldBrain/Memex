@@ -91,12 +91,10 @@ async function makeSuggestion(query, suggest) {
             'Your search terms are very vague, please try and use more unique language',
         )
     } else if (searchResults.docs.length === 0) {
-        setOmniboxMessage(
-            'No results found in your memory. (press enter to search deeper',
-        )
+        setOmniboxMessage('No results found in your memory. ¯_(ツ)_/¯  ')
     } else {
         setOmniboxMessage(
-            `Found these ${searchResults.totalCount} pages in your memory: (press enter to search deeper)`,
+            `Found these ${searchResults.totalCount} pages in your memory: (press enter to see all results)`,
         )
     }
 
