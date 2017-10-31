@@ -5,9 +5,10 @@ import { IMPORT_TYPE as TYPE } from '../constants'
 
 import localStyles from './Import.css'
 
-const ProgressTable = ({ progress, showOldExt }) => (
+const ProgressTable = ({ progress, showOldExt, allowTypes }) => (
     <table className={localStyles.importTable}>
         <colgroup>
+            <col className={localStyles.importTableCol} />
             <col className={localStyles.importTableCol} />
             <col className={localStyles.importTableCol} />
             <col className={localStyles.importTableCol} />
@@ -16,38 +17,42 @@ const ProgressTable = ({ progress, showOldExt }) => (
         <thead className={localStyles.importTableHead}>
             <tr>
                 <th />
-                <th>Browsing History</th>
-                <th>Bookmarks</th>
-                {showOldExt && <th>Old Extension Data</th>}
+                <th>Total Progress</th>
+                <th>Successful</th>
+                <th>Failed</th>
             </tr>
         </thead>
         <tbody>
-            <tr className={localStyles.importTableRow}>
-                <td>Total Progress</td>
-                <td>
-                    {progress[TYPE.HISTORY].complete}/{progress[TYPE.HISTORY].total}
-                </td>
-                <td>
-                    {progress[TYPE.BOOKMARK].complete}/{progress[TYPE.BOOKMARK].total}
-                </td>
-                {showOldExt && (
+            {allowTypes.h && (
+                <tr className={localStyles.importTableRow}>
+                    <td>Browsing History</td>
+                    <td>
+                        {progress[TYPE.HISTORY].complete}/{progress[TYPE.HISTORY].total}
+                    </td>
+                    <td>{progress[TYPE.HISTORY].success}</td>
+                    <td>{progress[TYPE.HISTORY].fail}</td>
+                </tr>
+            )}
+            {allowTypes.b && (
+                <tr className={localStyles.importTableRow}>
+                    <td>Bookmarks</td>
+                    <td>
+                        {progress[TYPE.BOOKMARK].complete}/{progress[TYPE.BOOKMARK].total}
+                    </td>
+                    <td>{progress[TYPE.BOOKMARK].success}</td>
+                    <td>{progress[TYPE.BOOKMARK].fail}</td>
+                </tr>
+            )}
+            {showOldExt && (
+                <tr className={localStyles.importTableRow}>
+                    <td>Old Extension Data</td>
                     <td>
                         {progress[TYPE.OLD].complete}/{progress[TYPE.OLD].total}
                     </td>
-                )}
-            </tr>
-            <tr className={localStyles.importTableRow}>
-                <td>Successful</td>
-                <td>{progress[TYPE.HISTORY].success}</td>
-                <td>{progress[TYPE.BOOKMARK].success}</td>
-                {showOldExt && <td>{progress[TYPE.OLD].success}</td>}
-            </tr>
-            <tr className={localStyles.importTableRow}>
-                <td>Failed</td>
-                <td>{progress[TYPE.HISTORY].fail}</td>
-                <td>{progress[TYPE.BOOKMARK].fail}</td>
-                {showOldExt && <td>{progress[TYPE.OLD].fail}</td>}
-            </tr>
+                    <td>{progress[TYPE.OLD].success}</td>
+                    <td>{progress[TYPE.OLD].fail}</td>
+                </tr>
+            )}
         </tbody>
     </table>
 )
@@ -66,6 +71,7 @@ ProgressTable.propTypes = {
         [TYPE.HISTORY]: progressShape.isRequired,
         [TYPE.BOOKMARK]: progressShape.isRequired,
     }).isRequired,
+    allowTypes: PropTypes.object.isRequired,
 }
 
 export default ProgressTable
