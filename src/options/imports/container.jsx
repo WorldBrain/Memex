@@ -28,6 +28,8 @@ class ImportContainer extends Component {
         isIdle: PropTypes.bool.isRequired,
         isStartBtnDisabled: PropTypes.bool.isRequired,
         downloadData: PropTypes.arrayOf(PropTypes.object).isRequired,
+        progressPercent: PropTypes.number.isRequired,
+        showDownloadDetails: PropTypes.bool.isRequired,
 
         // Misc
         boundActions: PropTypes.object.isRequired,
@@ -71,38 +73,8 @@ class ImportContainer extends Component {
         }
     }
 
-    getDetailFilterHandlers() {
-        const { boundActions } = this.props
-
-        const updateFilterState = filter => () => {
-            this.handleDetailsRowClick(-1)() // Simulate anti-click to reset state of active details row
-            boundActions.filterDownloadDetails(filter)
-        }
-
-        return {
-            all: this.handleBtnClick(updateFilterState(constants.FILTERS.ALL)),
-            succ: this.handleBtnClick(
-                updateFilterState(constants.FILTERS.SUCC),
-            ),
-            fail: this.handleBtnClick(
-                updateFilterState(constants.FILTERS.FAIL),
-            ),
-        }
-    }
-
     handleEstTableCheck = type => () =>
         this.props.boundActions.toggleAllowType(type)
-
-    getEstTableProps = () => ({
-        ...this.props,
-        onAllowBookmarksClick: this.handleEstTableCheck(
-            constants.IMPORT_TYPE.BOOKMARK,
-        ),
-        onAllowHistoryClick: this.handleEstTableCheck(
-            constants.IMPORT_TYPE.HISTORY,
-        ),
-        onAllowOldExtClick: this.handleEstTableCheck(constants.IMPORT_TYPE.OLD),
-    })
 
     renderHelpText = () =>
         this.state.waitingOnCancelConfirm ? 'Press cancel again to confirm' : ''
@@ -176,43 +148,56 @@ class ImportContainer extends Component {
             />
         ))
 
+    renderEstimatesTable = () => (
+        <EstimatesTable
+            {...this.props}
+            onAllowBookmarksClick={this.handleEstTableCheck(
+                constants.IMPORT_TYPE.BOOKMARK,
+            )}
+            onAllowHistoryClick={this.handleEstTableCheck(
+                constants.IMPORT_TYPE.HISTORY,
+            )}
+            onAllowOldExtClick={this.handleEstTableCheck(
+                constants.IMPORT_TYPE.OLD,
+            )}
+        />
+    )
+
+    renderProgressTable = () => (
+        <Wrapper>
+            <ProgressBar progress={this.props.progressPercent} />
+            <ProgressTable {...this.props} />
+        </Wrapper>
+    )
+
+    renderStatusReport = () => (
+        <Wrapper>
+            <StatusReport
+                {...this.props}
+                changeShowDetails={this.props.boundActions.showDownloadDetails}
+            >
+                {this.props.showDownloadDetails
+                    ? 'Hide Details'
+                    : 'Show Details'}
+            </StatusReport>
+            {this.props.showDownloadDetails && (
+                <DownloadDetails>
+                    {this.renderDownloadDetailsRows()}
+                </DownloadDetails>
+            )}
+        </Wrapper>
+    )
+
     render() {
-        const {
-            boundActions,
-            isRunning,
-            isIdle,
-            isLoading,
-            isStopped,
-            isPaused,
-        } = this.props
+        const { isRunning, isIdle, isLoading, isStopped, isPaused } = this.props
 
         return (
             <Import {...this.props}>
-                {(isIdle || isLoading) && (
-                    <EstimatesTable {...this.getEstTableProps()} />
-                )}
-                {(isRunning || isPaused) && (
-                    <Wrapper>
-                        <ProgressBar {...this.props} />
-                        <ProgressTable {...this.props} />
-                    </Wrapper>
-                )}
-                {isStopped && (
-                    <Wrapper>
-                        <StatusReport
-                            {...this.props}
-                            changeShowDetails={boundActions.showDownloadDetails}
-                        />
-                        <DownloadDetails
-                            {...this.props}
-                            filterHandlers={this.getDetailFilterHandlers()}
-                        >
-                            {this.renderDownloadDetailsRows()}
-                        </DownloadDetails>
-                    </Wrapper>
-                )}
+                {(isIdle || isLoading) && this.renderEstimatesTable()}
+                {(isRunning || isPaused) && this.renderProgressTable()}
+                {isStopped && this.renderStatusReport()}
                 <ButtonBar
-                    isRunning={this.props.isRunning}
+                    isRunning={isRunning}
                     helpText={this.renderHelpText()}
                 >
                     {(isIdle || isLoading) && <DevCheckBox {...this.props} />}
@@ -235,11 +220,13 @@ const mapStateToProps = state => ({
     downloadData: selectors.downloadDetailsData(state),
     estimates: selectors.estimates(state),
     progress: selectors.progress(state),
+    progressPercent: selectors.progressPercent(state),
+    successCount: selectors.successCount(state),
+    failCount: selectors.failCount(state),
     allowTypes: selectors.allowTypes(state),
     loadingMsg: selectors.loadingMsg(state),
     devMode: selectors.devMode(state),
     showDownloadDetails: selectors.showDownloadDetails(state),
-    downloadDataFilter: selectors.downloadDataFilter(state),
 })
 
 const mapDispatchToProps = dispatch => ({

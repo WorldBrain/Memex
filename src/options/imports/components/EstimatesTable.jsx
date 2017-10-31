@@ -139,8 +139,6 @@ const EstimatesTable = ({
 const estimatesShape = PropTypes.shape({
     complete: PropTypes.number.isRequired,
     remaining: PropTypes.number.isRequired,
-    sizeCompleted: PropTypes.string.isRequired,
-    sizeRemaining: PropTypes.string.isRequired,
     timeRemaining: PropTypes.string.isRequired,
 })
 

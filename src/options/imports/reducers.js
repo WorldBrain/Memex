@@ -118,6 +118,7 @@ const setImportState = val => genericReducer('importStatus', val)
 export default createReducer(
     {
         [actions.initImport]: initImportReducer,
+        [actions.initAllowTypes]: payloadReducer('allowTypes'),
         [actions.prepareImport]: prepareImportReducer,
         [actions.startImport]: setImportState(STATUS.RUNNING),
         [actions.stopImport]: setImportState(STATUS.STOPPED),
