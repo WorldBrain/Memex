@@ -135,8 +135,9 @@ export const progressPercent = createSelector(
 )
 
 // Util formatting functions for download time estimates
-const getHours = time => Math.floor(time / 60).toFixed(0)
-const getMins = time => (time - getHours(time) * 60).toFixed(0)
+const getHours = time => Math.floor(time / 3600).toFixed(0)
+const getMins = time =>
+    Math.floor((time - getHours(time) * 3600) / 60).toFixed(0)
 const getPaddedMins = time =>
     getMins(time) < 10 ? `0${getMins(time)}` : getMins(time)
 const getTimeEstStr = time => `${getHours(time)}:${getPaddedMins(time)} h`

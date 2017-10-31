@@ -54,8 +54,8 @@ export const CMDS = {
     COMPLETE: `${IMPORT_CONN_NAME}/COMPLETE`,
 }
 
-/** Estimated time to download a doc (minutes) */
-export const DOC_TIME_EST = 0.05
+/** Estimated time to download a doc (seconds) */
+export const DOC_TIME_EST = 2.5
 
 export const OLD_EXT_KEYS = {
     NUM_DONE: 'old-ext-converted-count',
