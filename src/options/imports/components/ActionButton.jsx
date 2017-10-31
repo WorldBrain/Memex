@@ -5,26 +5,17 @@ import classNames from 'classnames'
 import styles from '../../options.css'
 import localStyles from './ButtonBar.css'
 
-const getBtnClass = isHidden =>
-    classNames({
-        [styles.button]: true,
-        [localStyles.actionButton]: true,
-        [localStyles.hidden]: isHidden,
-    })
+const getBtnClass = ({ isHidden, customClass }) =>
+    classNames(
+        styles.button,
+        localStyles.actionButton,
+        localStyles[customClass],
+        { [localStyles.hidden]: isHidden },
+    )
 
-const ActionButton = ({
-    children,
-    handleClick,
-    isHidden,
-    isDisabled,
-    customClass,
-}) => (
+const ActionButton = ({ children, handleClick, isDisabled, ...props }) => (
     <button
-        className={
-            getBtnClass(isHidden) +
-            ' _src_options_imports_components_ButtonBar__' +
-            customClass
-        }
+        className={getBtnClass(props)}
         onClick={handleClick}
         disabled={isDisabled}
     >

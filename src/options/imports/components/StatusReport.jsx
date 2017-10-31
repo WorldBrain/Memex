@@ -6,8 +6,8 @@ import localStyles from './Import.css'
 const StatusReport = ({
     successCount,
     failCount,
-    showDownloadDetails,
     changeShowDetails,
+    children,
 }) => (
     <div>
         <h1 className={localStyles.heading}>Import Summary</h1>
@@ -20,7 +20,7 @@ const StatusReport = ({
                     className={localStyles.showDetails}
                     onClick={changeShowDetails}
                 >
-                    {showDownloadDetails ? 'Hide Details' : 'Show Details'}
+                    {children}
                 </a>
             </p>
         </div>
@@ -30,8 +30,8 @@ const StatusReport = ({
 StatusReport.propTypes = {
     successCount: PropTypes.number.isRequired,
     failCount: PropTypes.number.isRequired,
-    showDownloadDetails: PropTypes.bool.isRequired,
     changeShowDetails: PropTypes.func.isRequired,
+    children: PropTypes.string.isRequired,
 }
 
 export default StatusReport
