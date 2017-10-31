@@ -100,6 +100,41 @@ export const progress = createSelector(
     }),
 )
 
+export const successCount = createSelector(
+    progress,
+    allowTypes,
+    (progress, allowTypes) =>
+        (allowTypes.h ? progress[TYPE.HISTORY].success : 0) +
+        (allowTypes.b ? progress[TYPE.BOOKMARK].success : 0) +
+        (allowTypes.o ? progress[TYPE.OLD].success : 0),
+)
+
+export const failCount = createSelector(
+    progress,
+    allowTypes,
+    (progress, allowTypes) =>
+        (allowTypes.h ? progress[TYPE.HISTORY].fail : 0) +
+        (allowTypes.b ? progress[TYPE.BOOKMARK].fail : 0) +
+        (allowTypes.o ? progress[TYPE.OLD].fail : 0),
+)
+
+export const progressPercent = createSelector(
+    progress,
+    allowTypes,
+    (progress, allowTypes) => {
+        const total =
+            (allowTypes.h ? progress[TYPE.HISTORY].total : 0) +
+            (allowTypes.b ? progress[TYPE.BOOKMARK].total : 0) +
+            (allowTypes.o ? progress[TYPE.OLD].total : 0)
+        const complete =
+            (allowTypes.h ? progress[TYPE.HISTORY].complete : 0) +
+            (allowTypes.b ? progress[TYPE.BOOKMARK].complete : 0) +
+            (allowTypes.o ? progress[TYPE.OLD].complete : 0)
+
+        return complete / total * 100
+    },
+)
+
 // Util formatting functions for download time estimates
 const getHours = time => Math.floor(time / 60).toFixed(0)
 const getMins = time => (time - getHours(time) * 60).toFixed(0)

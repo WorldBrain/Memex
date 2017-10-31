@@ -28,6 +28,7 @@ class ImportContainer extends Component {
         isIdle: PropTypes.bool.isRequired,
         isStartBtnDisabled: PropTypes.bool.isRequired,
         downloadData: PropTypes.arrayOf(PropTypes.object).isRequired,
+        progressPercent: PropTypes.number.isRequired,
 
         // Misc
         boundActions: PropTypes.object.isRequired,
@@ -184,6 +185,7 @@ class ImportContainer extends Component {
             isLoading,
             isStopped,
             isPaused,
+            progressPercent,
         } = this.props
 
         return (
@@ -193,7 +195,7 @@ class ImportContainer extends Component {
                 )}
                 {(isRunning || isPaused) && (
                     <Wrapper>
-                        <ProgressBar {...this.props} />
+                        <ProgressBar progress={progressPercent} />
                         <ProgressTable {...this.props} />
                     </Wrapper>
                 )}
@@ -235,6 +237,9 @@ const mapStateToProps = state => ({
     downloadData: selectors.downloadDetailsData(state),
     estimates: selectors.estimates(state),
     progress: selectors.progress(state),
+    progressPercent: selectors.progressPercent(state),
+    successCount: selectors.successCount(state),
+    failCount: selectors.failCount(state),
     allowTypes: selectors.allowTypes(state),
     loadingMsg: selectors.loadingMsg(state),
     devMode: selectors.devMode(state),
