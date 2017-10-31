@@ -1,5 +1,6 @@
 import delay from 'src/util/delay'
 import { whenPageLoadComplete, whenTabActive } from 'src/util/tab-events'
+import { dataURLToBlob } from 'blob-util'
 
 // Take a screenshot of the tabId, if it is active.
 // Returns a promise of the screenshot (a png image in a data URL).
@@ -9,26 +10,40 @@ async function snapNow({ tabId }) {
     let image = await browser.tabs.captureVisibleTab(tab.windowId, {
         format: 'png',
     })
-    image = await resizeImage(image, 400, 400)
+    const blob = await dataURLToBlob(image)
+    console.log('size before ' + blob.size / 1000 + 'kb')
+    image = await resizeImage(image, 0.78, 400)
+
     return image
 }
 
-async function resizeImage(image, maxWidth, maxHeight) {
+async function resizeImage(image, scale, maxHeight) {
     return new Promise((resolve, reject) => {
         let img = new Image()
+        let canvas = document.createElement('canvas')
+        let ctx = canvas.getContext('2d')
+
+        img.src = image
         img.onload = () => {
-            let canvas = document.createElement('canvas')
-            let ctx = canvas.getContext('2d')
-            let ratio = Math.min(maxWidth / img.width, maxHeight / img.height)
-            canvas.width = img.width * ratio
-            canvas.height = img.height * ratio
+            let newHeight = Math.floor(img.height * scale)
 
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+            if (newHeight <= maxHeight) {
+                resolve(canvas.toDataURL())
+            }
 
-            resolve(canvas.toDataURL())
+            let newWidth = Math.floor(img.width / img.height * newHeight)
+
+            if (newHeight >= maxHeight) {
+                canvas.width = newWidth
+                canvas.height = newHeight
+
+                ctx.drawImage(img, 0, 0, newWidth, newHeight)
+
+                img.src = canvas.toDataURL()
+                img.height = newHeight
+            }
         }
         img.onerror = reject
-        img.src = image
     })
 }
 
