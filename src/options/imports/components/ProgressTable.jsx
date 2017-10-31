@@ -5,7 +5,7 @@ import { IMPORT_TYPE as TYPE } from '../constants'
 
 import localStyles from './Import.css'
 
-const ProgressTable = ({ progress, showOldExt, allowTypes }) => (
+const ProgressTable = ({ progress, allowTypes }) => (
     <table className={localStyles.importTable}>
         <colgroup>
             <col className={localStyles.importTableCol} />
@@ -42,7 +42,7 @@ const ProgressTable = ({ progress, showOldExt, allowTypes }) => (
                     <td>{progress[TYPE.BOOKMARK].fail}</td>
                 </tr>
             )}
-            {showOldExt && (
+            {allowTypes.o && (
                 <tr className={localStyles.importTableRow}>
                     <td>Old Extension Data</td>
                     <td>
@@ -65,7 +65,6 @@ const progressShape = PropTypes.shape({
 
 ProgressTable.propTypes = {
     // State
-    showOldExt: PropTypes.bool.isRequired,
     progress: PropTypes.shape({
         [TYPE.HISTORY]: progressShape.isRequired,
         [TYPE.BOOKMARK]: progressShape.isRequired,
