@@ -22,19 +22,23 @@ const getMainClasses = ({ compact }) =>
         [styles.compact]: compact,
     })
 
-const bookMarkClass = ({ isBookmark }) =>
-    classNames({
+const getBookmarkClass = ({ doc, showOnlyBookmarks }) => {
+    const isBookmark =
+        showOnlyBookmarks || doc.displayType === constants.RESULT_TYPES.BOOKMARK
+
+    return classNames({
         [styles.button]: true,
         [styles.bookmark]: isBookmark,
         [styles.notBookmark]: !isBookmark,
     })
+}
 
 const PageResultItem = ({
     doc,
     sizeInMB,
     onTrashButtonClick,
     compact = false,
-    isBookmark = false,
+    showOnlyBookmarks,
 }) => {
     const hasFavIcon = !!(doc._attachments && doc._attachments.favIcon)
     const favIcon = hasFavIcon && (
@@ -74,7 +78,9 @@ const PageResultItem = ({
                 <div className={styles.time}>{renderTime({ doc })}</div>
             </div>
             <div className={styles.buttonsContainer}>
-                <button className={bookMarkClass({ isBookmark })} />
+                <button
+                    className={getBookmarkClass({ doc, showOnlyBookmarks })}
+                />
                 <button
                     className={`${styles.button} ${styles.trash}`}
                     onClick={onTrashButtonClick}
@@ -89,7 +95,7 @@ PageResultItem.propTypes = {
     doc: PropTypes.object.isRequired,
     sizeInMB: PropTypes.string.isRequired,
     compact: PropTypes.bool,
-    isBookmark: PropTypes.bool,
+    showOnlyBookmarks: PropTypes.bool,
     onTrashButtonClick: PropTypes.func,
 }
 

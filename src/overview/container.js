@@ -7,7 +7,6 @@ import Waypoint from 'react-waypoint'
 import { LoadingIndicator } from 'src/common-ui/components'
 import * as actions from './actions'
 import * as selectors from './selectors'
-import * as constants from './constants'
 import ResultList from './components/ResultList'
 import Overview from './components/Overview'
 import PageResultItem from './components/PageResultItem'
@@ -22,6 +21,7 @@ class OverviewContainer extends Component {
         isNewSearchLoading: PropTypes.bool.isRequired,
         noResults: PropTypes.bool.isRequired,
         isBadTerm: PropTypes.bool.isRequired,
+        showOnlyBookmarks: PropTypes.bool.isRequired,
         searchResults: PropTypes.arrayOf(PropTypes.object).isRequired,
         needsWaypoint: PropTypes.bool.isRequired,
     }
@@ -48,6 +48,7 @@ class OverviewContainer extends Component {
             onBottomReached,
             isLoading,
             needsWaypoint,
+            showOnlyBookmarks,
         } = this.props
 
         const resultItems = searchResults.map(doc => (
@@ -55,9 +56,7 @@ class OverviewContainer extends Component {
                 <PageResultItem
                     doc={doc}
                     sizeInMB={doc.freezeDrySize}
-                    isBookmark={
-                        doc.displayType === constants.RESULT_TYPES.BOOKMARK
-                    }
+                    showOnlyBookmarks={showOnlyBookmarks}
                 />
             </li>
         ))
