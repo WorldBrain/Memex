@@ -1,19 +1,23 @@
 //Remove unnecessary query params from the URL to avoid redundancy
-const FILTER_PARAM = {}
+const NORMALIZE_OPTS = {
+    'stripWWW': false,
+    'removeDirectoryIndex': false,
+    'removeTrailingSlash': false,
+    'stripFragment': true,
+    'normalizeProtocol': false
+}
+const GSEARCH_SUBSTR = 'www.google'
+const FB_SUBSTR = 'www.facebook'
 const normalizeUrl = require("normalize-url")
 export default function urlFilter(url) {
-    var match = url.match(/:\/\/(www[0-9]?\.)?(.[^/:]+)/i);
-    if (match != null && match.length > 2 && typeof match[2] === 'string' && match[2].length > 0) {
-        var params = FILTER_PARAM[match[2]]
-        const opts = {
-            removeQueryParameters: params,
-        }
+    const parts = url.split('.')
 
-        // TO-DO remove URL parts with # like www.abc.com/def#ghi
-
-        return normalizeUrl(url, opts)
+    if (parts[0] == 'www' && parts[1] == 'google') {
+        // Case 1: Google Search
+        return normalizeUrl(url.split('&')[0], NORMALIZE_OPTS)
+    } else if (parts[0] == 'www' && parts[1] == 'facebook') {
+        // Case 2: Facebook
+        return normalizeUrl(url.split('?')[0], NORMALIZE_OPTS)
     }
-    else {
-        return null;
-    }
+    return normalizeUrl(url, NORMALIZE_OPTS)
 }
