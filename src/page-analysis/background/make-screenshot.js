@@ -12,7 +12,7 @@ async function snapNow({ tabId }) {
     })
     const blob = await dataURLToBlob(image)
     console.log('size before ' + blob.size / 1000 + 'kb')
-    image = await resizeImage(image, 0.78, 400)
+    image = await resizeImage(image, 0.75, 200)
 
     return image
 }
