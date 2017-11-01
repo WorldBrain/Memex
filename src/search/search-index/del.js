@@ -1,7 +1,21 @@
 import index, { indexQueue } from '.'
-import { initSingleLookup, initLookupByKeys } from './util'
+import { initSingleLookup, initLookupByKeys, idbBatchToPromise } from './util'
 
 const singleLookup = initSingleLookup()
+
+/**
+ * @param {string|string[]} keys Single or array of keys to attempt to delete.
+ * @return {Promise<void>}
+ */
+export async function del(keys) {
+    if (!Array.isArray(keys)) {
+        return index.del(keys)
+    }
+
+    const indexBatch = index.batch()
+    keys.forEach(key => indexBatch.del(key))
+    return idbBatchToPromise(indexBatch)
+}
 
 /**
  * Deletes all indexed data associated with given pages or page IDs. This method is **not**
