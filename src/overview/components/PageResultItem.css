@@ -164,3 +164,11 @@
 .load:hover {
     background-image: url('/img/load-icon-hovered.png');
 }
+
+.bookmark {
+    background-image: url('/img/starFull.png');
+}
+
+.notBookmark {
+    background-image: url('/img/star.png');
+}

@@ -20,6 +20,10 @@ export const setEndDate = createAction('overview/setEndDate')
 export const hideResultItem = createAction('overview/hideResultItem')
 export const showDeleteConfirm = createAction('overview/showDeleteConfirm')
 export const hideDeleteConfirm = createAction('overview/hideDeleteConfirm')
+export const showFilter = createAction('overview/showFilter')
+export const toggleBookmarkFilter = createAction(
+    'overview/toggleBookmarkFilter',
+)
 
 const deleteDocsByUrl = remoteFunction('deleteDocsByUrl')
 
@@ -74,9 +78,11 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
     const state = getState()
     const currentQueryParams = selectors.currentQueryParams(state)
     const skip = selectors.resultsSkip(state)
+    const showOnlyBookmarks = selectors.showOnlyBookmarks(state)
 
     const searchParams = {
         ...currentQueryParams,
+        showOnlyBookmarks,
         limit: constants.PAGE_SIZE,
         skip,
     }

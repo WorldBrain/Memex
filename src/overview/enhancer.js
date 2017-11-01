@@ -1,8 +1,13 @@
 import { compose } from 'redux'
 import ReduxQuerySync from 'redux-query-sync'
 
-import { currentQueryParams } from './selectors'
-import { setQuery, setStartDate, setEndDate } from './actions'
+import { currentQueryParams, showOnlyBookmarks } from './selectors'
+import {
+    setQuery,
+    setStartDate,
+    setEndDate,
+    toggleBookmarkFilter,
+} from './actions'
 
 // Keep search query in sync with the query parameter in the window location.
 const locationSync = ReduxQuerySync.enhancer({
@@ -23,6 +28,12 @@ const locationSync = ReduxQuerySync.enhancer({
             selector: state => currentQueryParams(state).endDate,
             action: endDate => setEndDate(Number(endDate)),
             defaultValue: undefined,
+        },
+        showOnlyBookmarks: {
+            selector: state => showOnlyBookmarks(state),
+            action: showOnlyBookmarks =>
+                toggleBookmarkFilter(Boolean(showOnlyBookmarks)),
+            defaultValue: false,
         },
     },
 })

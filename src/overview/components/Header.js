@@ -10,20 +10,32 @@ const Header = ({
 }) => (
     <div className={styles.navbar}>
         <div className={styles.logo} />
-        <div className={styles.searchField}>
-            <input
-                className={styles.query}
-                onChange={props.onInputChange}
-                placeholder="Search your memory"
-                value={query}
-                ref={props.setInputRef}
-            />
-            <DateRangeSelection
-                startDate={startDate}
-                endDate={endDate}
-                onStartDateChange={props.onStartDateChange}
-                onEndDateChange={props.onEndDateChange}
-            />
+        <div className={styles.container}>
+            <div className={styles.searchField}>
+                <input
+                    className={styles.query}
+                    onChange={props.onInputChange}
+                    placeholder="Search your memory"
+                    value={query}
+                    ref={props.setInputRef}
+                />
+                <DateRangeSelection
+                    startDate={startDate}
+                    endDate={endDate}
+                    onStartDateChange={props.onStartDateChange}
+                    onEndDateChange={props.onEndDateChange}
+                />
+            </div>
+            <div
+                className={styles.linkFilter}
+                onClick={props.onShowFilterChange}
+            >
+                <img
+                    src="/img/filter.png"
+                    className={styles.iconFilter}
+                    title="Click to view filters"
+                />
+            </div>
         </div>
         <div className={styles.links}>
             <a href="/options/options.html">
@@ -43,6 +55,7 @@ Header.propTypes = {
     onInputChange: PropTypes.func.isRequired,
     onStartDateChange: PropTypes.func.isRequired,
     onEndDateChange: PropTypes.func.isRequired,
+    onShowFilterChange: PropTypes.func.isRequired,
 }
 
 export default Header

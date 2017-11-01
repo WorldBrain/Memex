@@ -19,6 +19,8 @@ const defaultState = {
         isShown: false,
         url: undefined,
     },
+    showFilter: false,
+    showOnlyBookmarks: false,
 }
 
 function setQuery(state, query) {
@@ -39,6 +41,16 @@ function setEndDate(state, date) {
     return {
         ...state,
         currentQueryParams: { ...state.currentQueryParams, endDate: date },
+    }
+}
+
+function toggleBookmarkFilter(state, showOnlyBookmarks) {
+    return {
+        ...state,
+        showOnlyBookmarks:
+            showOnlyBookmarks === true
+                ? showOnlyBookmarks
+                : !state.showOnlyBookmarks,
     }
 }
 
@@ -93,6 +105,11 @@ export default createReducer(
         [actions.showDeleteConfirm]: showDeleteConfirm,
         [actions.hideDeleteConfirm]: hideDeleteConfirm,
         [actions.hideResultItem]: hideResultItem,
+        [actions.toggleBookmarkFilter]: toggleBookmarkFilter,
+        [actions.showFilter]: state => ({
+            ...state,
+            showFilter: !state.showFilter,
+        }),
     },
     defaultState,
 )

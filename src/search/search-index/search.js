@@ -172,6 +172,28 @@ const boostedTermSearch = (keyGenFn, boost) => async (
 const boostedTitleSearch = boostedTermSearch(keyGen.title, 0.2)
 const boostedUrlSearch = boostedTermSearch(keyGen.url, 0.1)
 
+/**
+ * Quicker version of bookmark filter that can be run when no terms defined.
+ * Simply searches backwards from the key specified in `bookmarksFilter` until the
+ * latest `limit + skip` pages have been collected.
+ *
+ * @param {IndexQuery}
+ * @returns {Map<string, IndexTermValue>}
+ */
+async function bookmarkFilterBackSearch({
+    timeFilter,
+    limit,
+    skip,
+    bookmarksFilter,
+}) {
+    if (bookmarksFilter === false) return null
+    const data = []
+    const timeRange = timeFilter.get('bookmark/')
+    data.push(await reverseRangeLookup({ ...timeRange, limit: skip + limit }))
+
+    return new Map([...data.reduce((acc, curr) => [...acc, ...curr], [])])
+}
+
 function formatIdResults(pageResultsMap) {
     const results = []
 
@@ -199,10 +221,16 @@ async function resolveIdResults(pageResultsMap) {
  * @param {Map<string, IndexTermValue>} [termPages]
  * @param {Map<string, IndexTermValue>} [filterPages]
  * @param {Map<string, IndexTermValue>} [domainPages]
- * @returns {Map<string, IndexTermValue>} Interescted results of all three
+ * @param {Map<string, IndexTermValue>} [bookmarkPages]
+ * @returns {Map<string, IndexTermValue>} Interescted results of all four
  */
-function intersectResultMaps(termPages, filterPages, domainPages) {
-    if (filterPages == null && termPages == null) {
+function intersectResultMaps(
+    termPages,
+    filterPages,
+    domainPages,
+    bookmarkPages,
+) {
+    if (filterPages == null && termPages == null && bookmarkPages == null) {
         return domainPages
     }
 
@@ -210,20 +238,42 @@ function intersectResultMaps(termPages, filterPages, domainPages) {
 
     // Should be null if filter search not needed to be run
     if (filterPages == null) {
-        return domainPages == null ? termPages : intersectDomain(termPages)
+        if (bookmarkPages == null)
+            return domainPages == null ? termPages : intersectDomain(termPages)
+        else {
+            return domainPages == null
+                ? intersectMaps(termPages)(bookmarkPages)
+                : intersectMaps(bookmarkPages)(intersectDomain(termPages))
+        }
     }
 
     if (termPages == null) {
-        return domainPages == null ? filterPages : intersectDomain(filterPages)
+        if (bookmarkPages == null)
+            return domainPages == null
+                ? filterPages
+                : intersectDomain(filterPages)
+        else
+            return domainPages == null
+                ? intersectMaps(filterPages)(bookmarkPages)
+                : intersectMaps(bookmarkPages)(intersectDomain(filterPages))
     }
 
     // Filter out only results in the domain, if domain search is on
     if (domainPages != null) {
-        filterPages = intersectDomain(filterPages)
-        termPages = intersectDomain(termPages)
+        if (bookmarkPages == null) {
+            filterPages = intersectDomain(filterPages)
+            termPages = intersectDomain(termPages)
+            return intersectMaps(filterPages)(termPages)
+        } else {
+            filterPages = intersectDomain(filterPages)
+            termPages = intersectDomain(termPages)
+            bookmarkPages = intersectDomain(bookmarkPages)
+            return intersectManyMaps([filterPages, termPages, bookmarkPages])
+        }
+    } else {
+        if (bookmarkPages == null) return intersectMaps(filterPages)(termPages)
+        else return intersectManyMaps([filterPages, termPages, bookmarkPages])
     }
-
-    return intersectMaps(filterPages)(termPages)
 }
 
 /**
@@ -252,12 +302,16 @@ export async function search(
     console.time('filter search')
     const filterPageResultsMap = await filterSearch(query)
     console.timeEnd('filter search')
+    console.time('bookmark search')
+    const bookMarksResultMap = await bookmarkFilterBackSearch(query)
+    console.timeEnd('bookmark search')
 
     // Intersect different kinds of results
     const pageResultsMap = intersectResultMaps(
         termPageResultsMap,
         filterPageResultsMap,
         domainPageResultsMap,
+        bookMarksResultMap,
     )
 
     if (count) {

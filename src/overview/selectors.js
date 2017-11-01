@@ -90,3 +90,5 @@ export const isNewSearchLoading = createSelector(
     currentPage,
     (isLoading, currentPage) => isLoading && currentPage === 0,
 )
+export const showFilter = state => overview(state).showFilter
+export const showOnlyBookmarks = state => overview(state).showOnlyBookmarks

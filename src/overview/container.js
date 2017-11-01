@@ -24,6 +24,10 @@ class OverviewContainer extends Component {
         isBadTerm: PropTypes.bool.isRequired,
         searchResults: PropTypes.arrayOf(PropTypes.object).isRequired,
         needsWaypoint: PropTypes.bool.isRequired,
+        showFilter: PropTypes.bool.isRequired,
+        onShowFilterChange: PropTypes.func.isRequired,
+        showOnlyBookmarks: PropTypes.bool.isRequired,
+        onShowOnlyBookmarksChange: PropTypes.func.isRequired,
     }
 
     componentDidMount() {
@@ -94,7 +98,7 @@ class OverviewContainer extends Component {
         if (this.props.isNewSearchLoading) {
             return (
                 <ResultList>
-                    <LoadingIndicator />
+                    {[<LoadingIndicator key="loadingIndicator" />]}
                 </ResultList>
             )
         }
@@ -125,6 +129,8 @@ const mapStateToProps = state => ({
     searchResults: selectors.results(state),
     isDeleteConfShown: selectors.isDeleteConfShown(state),
     needsWaypoint: selectors.needsPagWaypoint(state),
+    showFilter: selectors.showFilter(state),
+    showOnlyBookmarks: selectors.showOnlyBookmarks(state),
 })
 
 const mapDispatchToProps = dispatch =>
@@ -136,6 +142,8 @@ const mapDispatchToProps = dispatch =>
             onBottomReached: actions.getMoreResults,
             hideDeleteConfirm: actions.hideDeleteConfirm,
             deleteDocs: actions.deleteDocs,
+            onShowFilterChange: actions.showFilter,
+            onShowOnlyBookmarksChange: actions.toggleBookmarkFilter,
         },
         dispatch,
     )

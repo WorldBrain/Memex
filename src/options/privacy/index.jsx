@@ -8,7 +8,6 @@ const PrivacyContainer = () => (
         <h1 className={styles.routeTitle}>Settings &gt; Privacy</h1>
 
         <span className={localStyles.title}>
-            {' '}
             &gt; Your privacy is paramount to us. Your data is safe and
             anonymous.
         </span>
