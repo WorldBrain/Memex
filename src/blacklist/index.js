@@ -3,7 +3,11 @@ import { STORAGE_KEY } from 'src/options/blacklist/constants'
 /**
  * Default blacklist entries.
  */
-export const defaultEntries = ['http://localhost', 'https://localhost']
+export const defaultEntries = [
+    'http://localhost',
+    'https://localhost',
+    'google.com/maps',
+]
 
 /**
  * Given a URL and user's blacklist, checks the URL against the blacklist expressions to see if any

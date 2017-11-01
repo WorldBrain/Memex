@@ -1,6 +1,7 @@
 import uniqBy from 'lodash/fp/uniqBy'
 
 import { STORAGE_KEY } from 'src/options/blacklist/constants'
+import { defaultEntries } from '../'
 
 export const CONVERT_TIME_KEY = 'data-conversion-timestamp'
 // Unused storage keys for old ext data
@@ -32,6 +33,7 @@ function convertBlacklist(blacklist) {
         ...blacklist.PAGE.map(mapToNewModel),
         ...blacklist.SITE.map(mapToNewModel),
         ...blacklist.REGEX.map(mapToNewModel),
+        ...defaultEntries.map(mapToNewModel),
     ])
 
     return JSON.stringify(blacklistArr) // Serialize it, as stored in new model
