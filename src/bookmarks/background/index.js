@@ -5,6 +5,7 @@ import * as index from 'src/search'
 import db from 'src/pouchdb'
 import { transformToBookmarkDoc } from 'src/imports'
 import { generatePageDocId } from 'src/page-storage'
+import removeBookmark from './deletion'
 
 async function getAttachments(pageData) {
     const favIconBlob = await dataURLToBlob(pageData.favIconURI)
@@ -52,3 +53,4 @@ async function createNewPageForBookmark(id, bookmarkInfo) {
 
 // Store and index any new browser bookmark
 browser.bookmarks.onCreated.addListener(createNewPageForBookmark)
+browser.bookmarks.onRemoved.addListener(removeBookmark)
