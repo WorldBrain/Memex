@@ -2,7 +2,7 @@ import db from 'src/pouchdb'
 import { pageDocsSelector } from 'src/page-storage'
 import { checkWithBlacklist } from 'src/blacklist'
 import { isLoggable } from 'src/activity-logger'
-import { IMPORT_TYPE } from 'src/options/imports/constants'
+import { IMPORT_TYPE, OLD_EXT_KEYS } from 'src/options/imports/constants'
 import importsConnectionHandler from './imports-connection-handler'
 
 // Constants
@@ -25,6 +25,21 @@ export const setImportItems = items =>
 export const clearImportItems = () =>
     browser.storage.local.remove(importStateStorageKey)
 
+export async function clearOldExtData(oldExtKey) {
+    const {
+        [OLD_EXT_KEYS.NUM_DONE]: numDone,
+    } = await browser.storage.local.get({
+        [OLD_EXT_KEYS.NUM_DONE]: 0,
+    })
+
+    // Inc. finished count
+    await browser.storage.local.set({
+        [OLD_EXT_KEYS.NUM_DONE]: numDone + 1,
+    })
+    // Remove old ext page item
+    await browser.storage.local.remove(oldExtKey)
+}
+
 /**
  * @param url The URL to match against all items in import state. Item with matching URL will be removed.
  *  Assumes that input state is unique on URL to work properly.
@@ -44,9 +59,8 @@ export const removeImportItem = async url => {
  * @returns A function affording checking of a URL against the URLs of existing page docs.
  */
 async function checkWithExistingDocs() {
-    const existingFullDocs = { ...pageDocsSelector, isStub: { $ne: true } }
     const { docs: existingPageDocs } = await db.find({
-        selector: existingFullDocs,
+        selector: pageDocsSelector,
         fields: ['url'],
     })
     const existingUrls = existingPageDocs.map(({ url }) => url)
@@ -68,6 +82,45 @@ async function filterItemsByUrl(items, type) {
     const isWorthRemembering = item =>
         isLoggable(item) && isNotBlacklisted(item) && doesNotExist(item)
     return items.filter(isWorthRemembering)
+}
+
+// Transforms old ext data to an imports item
+const transformOldExtDataToImportItem = bookmarkUrls => data => ({
+    type: IMPORT_TYPE.OLD,
+    url: data.url,
+    timestamp: data.time,
+    hasBookmark: bookmarkUrls.has(data.url),
+})
+
+export async function getOldExtItems() {
+    let bookmarkUrls = new Set()
+    const {
+        [OLD_EXT_KEYS.BOOKMARKS]: bookmarks,
+        [OLD_EXT_KEYS.NUM_DONE]: numDone,
+    } = await browser.storage.local.get({
+        [OLD_EXT_KEYS.BOOKMARKS]: '[]',
+        [OLD_EXT_KEYS.NUM_DONE]: 0,
+    })
+
+    if (typeof bookmarks === 'string') {
+        try {
+            bookmarkUrls = new Set(JSON.parse(bookmarks).map(bm => bm.url))
+        } catch (error) {}
+    }
+
+    const transform = transformOldExtDataToImportItem(bookmarkUrls)
+
+    const entireStorage = await browser.storage.local.get(null)
+    const importItems = []
+
+    // For everything in local storage, if the key represents page data, transform it
+    for (const key in entireStorage) {
+        if (Number.isInteger(+key)) {
+            importItems.push(transform(entireStorage[key]))
+        }
+    }
+
+    return { completedCount: numDone, importItems }
 }
 
 /**

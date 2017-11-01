@@ -11,6 +11,7 @@ import {
 const defaultStats = {
     [TYPE.HISTORY]: 0,
     [TYPE.BOOKMARK]: 0,
+    [TYPE.OLD]: 0,
 }
 
 const defaultDevState = {
@@ -19,6 +20,7 @@ const defaultDevState = {
 }
 
 const defaultState = {
+    showOldExt: false,
     downloadData: [],
     completed: defaultStats, // Count of docs already in DB (estimates view)
     fail: defaultStats, // Fail counts for completed import items
@@ -31,6 +33,7 @@ const defaultState = {
     allowTypes: {
         [TYPE.HISTORY]: false,
         [TYPE.BOOKMARK]: false,
+        [TYPE.OLD]: false,
     },
     showDownloadDetails: false,
 }
@@ -100,8 +103,8 @@ const cancelImportReducer = state => ({
 
 const initEstimateCounts = (state, { remaining, completed }) => ({
     ...state,
-    totals: remaining,
-    completed,
+    totals: { ...state.totals, ...remaining },
+    completed: { ...state.completed, ...completed },
 })
 
 // Sets whatever key to the specified val
@@ -115,6 +118,7 @@ const setImportState = val => genericReducer('importStatus', val)
 export default createReducer(
     {
         [actions.initImport]: initImportReducer,
+        [actions.initAllowTypes]: payloadReducer('allowTypes'),
         [actions.prepareImport]: prepareImportReducer,
         [actions.startImport]: setImportState(STATUS.RUNNING),
         [actions.stopImport]: setImportState(STATUS.STOPPED),
@@ -132,6 +136,7 @@ export default createReducer(
         [actions.initFailCounts]: payloadReducer('fail'),
         [actions.initSuccessCounts]: payloadReducer('success'),
         [actions.initDownloadData]: payloadReducer('downloadData'),
+        [actions.setShowOldExt]: payloadReducer('showOldExt'),
 
         // Dev mode reducers
         [actions.startTestDataUpload]: state => ({

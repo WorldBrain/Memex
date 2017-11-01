@@ -10,9 +10,11 @@ import { generatePageDocId } from 'src/page-storage'
 import { generateVisitDocId } from 'src/activity-logger'
 import { generateBookmarkDocId } from 'src/bookmarks'
 import { defaultEntries, addToBlacklist } from 'src/blacklist'
+import convertOldExtBlacklist, {
+    CONVERT_TIME_KEY,
+} from 'src/blacklist/background'
 import index from 'src/search/search-index'
 
-export const dataConvertTimeKey = 'data-conversion-timestamp'
 export const OVERVIEW_URL = '/overview/overview.html'
 
 // Put doc ID generators on window for user use with manual DB lookups
@@ -39,11 +41,22 @@ browser.commands.onCommand.addListener(command => {
 })
 
 browser.runtime.onInstalled.addListener(async details => {
-    if (details.reason === 'install') {
-        // Store the timestamp of when the extension was installed in local storage
-        browser.storage.local.set({ [installTimeStorageKey]: Date.now() })
-
-        // Set the default blacklist entries
-        addToBlacklist(defaultEntries)
+    switch (details.reason) {
+        case 'install':
+            // Store the timestamp of when the extension was installed + default blacklist
+            browser.storage.local.set({ [installTimeStorageKey]: Date.now() })
+            addToBlacklist(defaultEntries)
+            break
+        case 'update':
+            // If no prior conversion, convert old ext blacklist + show static notif page
+            const {
+                [CONVERT_TIME_KEY]: doneBefore,
+            } = await browser.storage.local.get(CONVERT_TIME_KEY)
+            if (!doneBefore) {
+                browser.tabs.create({ url: '/update/update.html' })
+                convertOldExtBlacklist()
+            }
+            break
+        default:
     }
 })

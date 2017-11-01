@@ -24,10 +24,6 @@ class OverviewContainer extends Component {
         isBadTerm: PropTypes.bool.isRequired,
         searchResults: PropTypes.arrayOf(PropTypes.object).isRequired,
         needsWaypoint: PropTypes.bool.isRequired,
-        showFilter: PropTypes.bool.isRequired,
-        onShowFilterChange: PropTypes.func.isRequired,
-        showOnlyBookmarks: PropTypes.bool.isRequired,
-        onShowOnlyBookmarksChange: PropTypes.func.isRequired,
     }
 
     componentDidMount() {

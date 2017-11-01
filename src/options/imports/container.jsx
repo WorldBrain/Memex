@@ -6,6 +6,7 @@ import { bindActionCreators } from 'redux'
 import * as selectors from './selectors'
 import * as actions from './actions'
 import * as constants from './constants'
+import { Wrapper } from 'src/common-ui/components'
 import Import from './components/Import'
 import EstimatesTable from './components/EstimatesTable'
 import ProgressTable from './components/ProgressTable'
@@ -18,126 +19,107 @@ import StatusReport from './components/StatusReport'
 import DevCheckBox from './components/DevCheckBox'
 
 class ImportContainer extends Component {
-    constructor(props) {
-        super(props)
+    static propTypes = {
+        // State
+        isRunning: PropTypes.bool.isRequired,
+        isPaused: PropTypes.bool.isRequired,
+        isStopped: PropTypes.bool.isRequired,
+        isLoading: PropTypes.bool.isRequired,
+        isIdle: PropTypes.bool.isRequired,
+        isStartBtnDisabled: PropTypes.bool.isRequired,
+        downloadData: PropTypes.arrayOf(PropTypes.object).isRequired,
+        progressPercent: PropTypes.number.isRequired,
+        showDownloadDetails: PropTypes.bool.isRequired,
 
-        this.state = {
-            waitingOnCancelConfirm: false,
-            activeRow: -1,
-        }
-
-        props.boundActions.init()
-
-        this.flipCancelState = waitingOnCancelConfirm =>
-            this.setState(state => ({ ...state, waitingOnCancelConfirm }))
+        // Misc
+        boundActions: PropTypes.object.isRequired,
     }
 
-    onDetailsRowClick(rowId) {
+    constructor(props) {
+        super(props)
+        props.boundActions.init()
+    }
+
+    state = {
+        waitingOnCancelConfirm: false,
+        activeRow: -1,
+    }
+
+    setCancelState = waitingOnCancelConfirm =>
+        this.setState(state => ({ ...state, waitingOnCancelConfirm }))
+
+    handleDetailsRowClick = rowId => () =>
         this.setState(state => ({
             ...state,
             activeRow: rowId,
             waitingOnCancelConfirm: false,
         }))
-    }
 
-    onButtonClick(e, handleClick) {
+    handleBtnClick = action => e => {
         e.preventDefault()
-        this.flipCancelState(false)
-        handleClick()
+        this.setCancelState(false)
+        action()
     }
 
-    getDetailFilterHandlers() {
-        const { boundActions } = this.props
+    handleCancelBtnClick = e => {
+        e.preventDefault()
 
-        const updateFilterState = filter => () => {
-            this.onDetailsRowClick(-1) // Simulate anti-click to reset state of active details row
-            boundActions.filterDownloadDetails(filter)
-        }
-
-        return {
-            all: e =>
-                this.onButtonClick(e, updateFilterState(constants.FILTERS.ALL)),
-            succ: e =>
-                this.onButtonClick(
-                    e,
-                    updateFilterState(constants.FILTERS.SUCC),
-                ),
-            fail: e =>
-                this.onButtonClick(
-                    e,
-                    updateFilterState(constants.FILTERS.FAIL),
-                ),
+        // Only cancel running import after second confirmation
+        if (!this.state.waitingOnCancelConfirm) {
+            this.setCancelState(true)
+        } else {
+            this.setCancelState(false)
+            this.props.boundActions.stop()
         }
     }
 
-    renderHelpText() {
-        const { waitingOnCancelConfirm } = this.state
+    handleEstTableCheck = type => () =>
+        this.props.boundActions.toggleAllowType(type)
 
-        if (waitingOnCancelConfirm) return 'Press cancel again to confirm'
-        return ''
-    }
+    renderHelpText = () =>
+        this.state.waitingOnCancelConfirm ? 'Press cancel again to confirm' : ''
 
-    renderCancelButton() {
-        const { isStopped, isIdle, boundActions } = this.props
-        const { waitingOnCancelConfirm } = this.state
-
-        const handleClick = e => {
-            e.preventDefault()
-
-            // Only cancel running import after second confirmation
-            if (!waitingOnCancelConfirm) {
-                this.flipCancelState(true)
-            } else {
-                this.flipCancelState(false)
-                boundActions.stop()
-            }
-        }
-
-        return (
-            <ActionButton
-                handleClick={handleClick}
-                isHidden={isIdle}
-                isDisabled={isStopped}
-                customClass={'cancel'}
-            >
-                Cancel
-            </ActionButton>
-        )
-    }
+    renderCancelButton = () => (
+        <ActionButton
+            handleClick={this.handleCancelBtnClick}
+            isHidden={this.props.isIdle}
+            isDisabled={this.props.isStopped}
+            customClass={'cancel'}
+        >
+            Cancel
+        </ActionButton>
+    )
 
     renderImportButton() {
-        const {
-            isRunning,
-            isStopped,
-            isPaused,
-            isStartBtnDisabled,
-            boundActions,
-        } = this.props
+        const { boundActions } = this.props
 
-        if (isRunning) {
-            const handleClick = e => this.onButtonClick(e, boundActions.pause)
+        if (this.props.isRunning) {
             return (
-                <ActionButton customClass={'pause'} handleClick={handleClick}>
+                <ActionButton
+                    customClass={'pause'}
+                    handleClick={this.handleBtnClick(boundActions.pause)}
+                >
                     Pause
                 </ActionButton>
             )
         }
 
-        if (isPaused) {
-            const handleClick = e => this.onButtonClick(e, boundActions.resume)
+        if (this.props.isPaused) {
             return (
-                <ActionButton customClass={'resume'} handleClick={handleClick}>
+                <ActionButton
+                    customClass={'resume'}
+                    handleClick={this.handleBtnClick(boundActions.resume)}
+                >
                     Resume
                 </ActionButton>
             )
         }
 
-        if (isStopped) {
-            const handleClick = e => this.onButtonClick(e, boundActions.finish)
+        if (this.props.isStopped) {
             return (
                 <ActionButton
                     customClass={'newImport'}
-                    handleClick={handleClick}
+                    handleClick={this.handleBtnClick(boundActions.finish)}
                 >
                     Start new import
                 </ActionButton>
@@ -145,11 +127,10 @@ class ImportContainer extends Component {
         }
 
         // Idle state case
-        const handleClick = e => this.onButtonClick(e, boundActions.start)
         return (
             <ActionButton
-                handleClick={handleClick}
-                isDisabled={isStartBtnDisabled}
+                handleClick={this.handleBtnClick(boundActions.start)}
+                isDisabled={this.props.isStartBtnDisabled}
                 customClass={'startImport'}
             >
                 Start import
@@ -157,121 +138,75 @@ class ImportContainer extends Component {
         )
     }
 
-    renderDownloadDetailsRows() {
-        const { activeRow } = this.state
-        const { downloadData } = this.props
-
-        return downloadData.map((data, i) => (
+    renderDownloadDetailsRows = () =>
+        this.props.downloadData.map((data, i) => (
             <DownloadDetailsRow
                 key={i}
-                isActive={i === activeRow}
-                handleClick={() => this.onDetailsRowClick(i)}
+                isActive={i === this.state.activeRow}
+                handleClick={this.handleDetailsRowClick(i)}
                 {...data}
             />
         ))
-    }
+
+    renderEstimatesTable = () => (
+        <EstimatesTable
+            {...this.props}
+            onAllowBookmarksClick={this.handleEstTableCheck(
+                constants.IMPORT_TYPE.BOOKMARK,
+            )}
+            onAllowHistoryClick={this.handleEstTableCheck(
+                constants.IMPORT_TYPE.HISTORY,
+            )}
+            onAllowOldExtClick={this.handleEstTableCheck(
+                constants.IMPORT_TYPE.OLD,
+            )}
+        />
+    )
+
+    renderProgressTable = () => (
+        <Wrapper>
+            <ProgressBar progress={this.props.progressPercent} />
+            <ProgressTable {...this.props} />
+        </Wrapper>
+    )
+
+    renderStatusReport = () => (
+        <Wrapper>
+            <StatusReport
+                {...this.props}
+                changeShowDetails={this.props.boundActions.showDownloadDetails}
+            >
+                {this.props.showDownloadDetails
+                    ? 'Hide Details'
+                    : 'Show Details'}
+            </StatusReport>
+            {this.props.showDownloadDetails && (
+                <DownloadDetails>
+                    {this.renderDownloadDetailsRows()}
+                </DownloadDetails>
+            )}
+        </Wrapper>
+    )
 
     render() {
-        const {
-            boundActions,
-            allowTypes,
-            isRunning,
-            isIdle,
-            loadingMsg,
-            isLoading,
-            isStopped,
-            isPaused,
-            progress,
-            estimates,
-            showDownloadDetails,
-            downloadDataFilter,
-        } = this.props
-
-        const estTableProps = {
-            estimates,
-            allowTypes,
-            onAllowBookmarksClick: () =>
-                boundActions.toggleAllowType(constants.IMPORT_TYPE.BOOKMARK),
-            onAllowHistoryClick: () =>
-                boundActions.toggleAllowType(constants.IMPORT_TYPE.HISTORY),
-        }
+        const { isRunning, isIdle, isLoading, isStopped, isPaused } = this.props
 
         return (
-            <Import
-                isLoading={isLoading}
-                loadingMsg={loadingMsg}
-                isIdle={isIdle}
-                isRunning={isRunning}
-                isStopped={isStopped}
-                isPaused={isPaused}
-            >
-                {isIdle || isLoading ? (
-                    <EstimatesTable {...estTableProps} />
-                ) : null}
-                {(isRunning || isPaused) && (
-                    <div>
-                        <ProgressBar
-                            progress={progress}
-                            allowTypes={allowTypes}
-                        />
-                        <ProgressTable progress={progress} />
-                    </div>
-                )}
-                {isStopped && (
-                    <div>
-                        <StatusReport
-                            progress={progress}
-                            allowTypes={allowTypes}
-                            showDownloadDetails={showDownloadDetails}
-                            changeShowDetails={boundActions.showDownloadDetails}
-                        />
-                        <DownloadDetails
-                            filterHandlers={this.getDetailFilterHandlers()}
-                            showDownloadDetails={showDownloadDetails}
-                            downloadDataFilter={downloadDataFilter}
-                        >
-                            {this.renderDownloadDetailsRows()}
-                        </DownloadDetails>
-                    </div>
-                )}
+            <Import {...this.props}>
+                {(isIdle || isLoading) && this.renderEstimatesTable()}
+                {(isRunning || isPaused) && this.renderProgressTable()}
+                {isStopped && this.renderStatusReport()}
                 <ButtonBar
                     isRunning={isRunning}
                     helpText={this.renderHelpText()}
                 >
-                    {(isIdle || isLoading) && (
-                        <DevCheckBox
-                            devMode={this.props.devMode}
-                            toggleDevMode={this.props.toggleDevMode}
-                        />
-                    )}
+                    {(isIdle || isLoading) && <DevCheckBox {...this.props} />}
                     {!isStopped && this.renderCancelButton()}
                     {this.renderImportButton()}
                 </ButtonBar>
             </Import>
         )
     }
-}
-
-ImportContainer.propTypes = {
-    // State
-    isRunning: PropTypes.bool.isRequired,
-    isPaused: PropTypes.bool.isRequired,
-    isStopped: PropTypes.bool.isRequired,
-    isLoading: PropTypes.bool.isRequired,
-    isIdle: PropTypes.bool.isRequired,
-    isStartBtnDisabled: PropTypes.bool.isRequired,
-    downloadData: PropTypes.arrayOf(PropTypes.object).isRequired,
-    estimates: PropTypes.object.isRequired,
-    progress: PropTypes.object.isRequired,
-    allowTypes: PropTypes.object.isRequired,
-    loadingMsg: PropTypes.string,
-    devMode: PropTypes.bool.isRequired,
-    showDownloadDetails: PropTypes.bool.isRequired,
-    downloadDataFilter: PropTypes.string.isRequired,
-
-    // Misc
-    boundActions: PropTypes.object.isRequired,
-    toggleDevMode: PropTypes.func.isRequired,
 }
 
 const mapStateToProps = state => ({
@@ -281,14 +216,17 @@ const mapStateToProps = state => ({
     isLoading: selectors.isLoading(state),
     isIdle: selectors.isIdle(state),
     isStartBtnDisabled: selectors.isStartBtnDisabled(state),
+    showOldExt: selectors.showOldExt(state),
     downloadData: selectors.downloadDetailsData(state),
     estimates: selectors.estimates(state),
     progress: selectors.progress(state),
+    progressPercent: selectors.progressPercent(state),
+    successCount: selectors.successCount(state),
+    failCount: selectors.failCount(state),
     allowTypes: selectors.allowTypes(state),
     loadingMsg: selectors.loadingMsg(state),
     devMode: selectors.devMode(state),
     showDownloadDetails: selectors.showDownloadDetails(state),
-    downloadDataFilter: selectors.downloadDataFilter(state),
 })
 
 const mapDispatchToProps = dispatch => ({

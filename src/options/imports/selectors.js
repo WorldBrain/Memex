@@ -4,28 +4,35 @@ import pickBy from 'lodash/fp/pickBy'
 import {
     FILTERS,
     STATUS,
-    DOC_SIZE_EST,
     DOC_TIME_EST,
     IMPORT_TYPE as TYPE,
     DOWNLOAD_STATUS as DL_STAT,
 } from './constants'
 
-export const entireState = state => state.imports
+export const imports = state => state.imports
 
-export const importStatus = state => entireState(state).importStatus
-export const downloadData = state => entireState(state).downloadData
-export const downloadDataFilter = state => entireState(state).downloadDataFilter
-export const fail = state => entireState(state).fail
-export const success = state => entireState(state).success
-export const totals = state => entireState(state).totals
-const completed = state => entireState(state).completed
-export const allowTypes = state => entireState(state).allowTypes
-export const loadingMsg = state => entireState(state).loadingMsg
+// TODO: make these memoized
+export const importStatus = createSelector(imports, state => state.importStatus)
+export const downloadData = createSelector(imports, state => state.downloadData)
+export const downloadDataFilter = createSelector(
+    imports,
+    state => state.downloadDataFilter,
+)
+export const fail = createSelector(imports, state => state.fail)
+export const success = createSelector(imports, state => state.success)
+export const totals = createSelector(imports, state => state.totals)
+const completed = createSelector(imports, state => state.completed)
+export const allowTypes = createSelector(imports, state => state.allowTypes)
+export const loadingMsg = createSelector(imports, state => state.loadingMsg)
+export const showOldExt = createSelector(imports, state => state.showOldExt)
 
-export const showDownloadDetails = state =>
-    entireState(state).showDownloadDetails
+export const showDownloadDetails = createSelector(
+    imports,
+    state => state.showDownloadDetails,
+)
+
 // Dev features only
-export const devState = createSelector(entireState, state => state.dev)
+export const devState = createSelector(imports, state => state.dev)
 export const devMode = createSelector(devState, devState => devState.isEnabled)
 export const isUploading = createSelector(
     devState,
@@ -88,12 +95,49 @@ export const progress = createSelector(
     (...args) => ({
         [TYPE.HISTORY]: getProgress(...args.map(arg => arg[TYPE.HISTORY])),
         [TYPE.BOOKMARK]: getProgress(...args.map(arg => arg[TYPE.BOOKMARK])),
+        [TYPE.OLD]: getProgress(...args.map(arg => arg[TYPE.OLD])),
     }),
 )
 
+export const successCount = createSelector(
+    progress,
+    allowTypes,
+    (progress, allowTypes) =>
+        (allowTypes.h ? progress[TYPE.HISTORY].success : 0) +
+        (allowTypes.b ? progress[TYPE.BOOKMARK].success : 0) +
+        (allowTypes.o ? progress[TYPE.OLD].success : 0),
+)
+
+export const failCount = createSelector(
+    progress,
+    allowTypes,
+    (progress, allowTypes) =>
+        (allowTypes.h ? progress[TYPE.HISTORY].fail : 0) +
+        (allowTypes.b ? progress[TYPE.BOOKMARK].fail : 0) +
+        (allowTypes.o ? progress[TYPE.OLD].fail : 0),
+)
+
+export const progressPercent = createSelector(
+    progress,
+    allowTypes,
+    (progress, allowTypes) => {
+        const total =
+            (allowTypes.h ? progress[TYPE.HISTORY].total : 0) +
+            (allowTypes.b ? progress[TYPE.BOOKMARK].total : 0) +
+            (allowTypes.o ? progress[TYPE.OLD].total : 0)
+        const complete =
+            (allowTypes.h ? progress[TYPE.HISTORY].complete : 0) +
+            (allowTypes.b ? progress[TYPE.BOOKMARK].complete : 0) +
+            (allowTypes.o ? progress[TYPE.OLD].complete : 0)
+
+        return complete / total * 100
+    },
+)
+
 // Util formatting functions for download time estimates
-const getHours = time => Math.floor(time / 60).toFixed(0)
-const getMins = time => (time - getHours(time) * 60).toFixed(0)
+const getHours = time => Math.floor(time / 3600).toFixed(0)
+const getMins = time =>
+    Math.floor((time - getHours(time) * 3600) / 60).toFixed(0)
 const getPaddedMins = time =>
     getMins(time) < 10 ? `0${getMins(time)}` : getMins(time)
 const getTimeEstStr = time => `${getHours(time)}:${getPaddedMins(time)} h`
@@ -101,8 +145,6 @@ const getTimeEstStr = time => `${getHours(time)}:${getPaddedMins(time)} h`
 const getEstimate = (complete, remaining) => ({
     complete,
     remaining,
-    sizeCompleted: (complete * DOC_SIZE_EST).toFixed(2),
-    sizeRemaining: (remaining * DOC_SIZE_EST).toFixed(2),
     timeRemaining: getTimeEstStr(remaining * DOC_TIME_EST),
 })
 
@@ -121,6 +163,7 @@ export const estimates = createSelector(
             completed[TYPE.BOOKMARK],
             totals[TYPE.BOOKMARK],
         ),
+        [TYPE.OLD]: getEstimate(completed[TYPE.OLD], totals[TYPE.OLD]),
     }),
 )
 

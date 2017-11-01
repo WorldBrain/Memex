@@ -99,7 +99,7 @@
     margin-top: 100px;
 
     @media (max-width: 1000px) {
-        margin-top: 100px !important;
+        margin-top: 100px !important; /* stylelint-disable-line declaration-no-important */
     }
 }
 

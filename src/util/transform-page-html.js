@@ -33,8 +33,8 @@ export default function transformHTML({ html = '' }) {
 
     // This should remove all hidden items on pages
     $('*').each(function() {
-        let display = $(this).css('display')
-        let visibility = $(this).css('visibility')
+        const display = $(this).css('display')
+        const visibility = $(this).css('visibility')
         if (display === 'none' || visibility === 'hidden') {
             $(this).remove()
         }

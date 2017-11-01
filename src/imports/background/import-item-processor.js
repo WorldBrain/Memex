@@ -6,7 +6,13 @@ import fetchPageData from 'src/page-analysis/background/fetch-page-data'
 import { revisePageFields } from 'src/page-analysis'
 import { IMPORT_TYPE, DOWNLOAD_STATUS } from 'src/options/imports/constants'
 import * as index from 'src/search'
-import { transformToVisitDoc, transformToBookmarkDoc } from 'src/imports'
+import {
+    transformToMinimalVisitDoc,
+    transformToMinimalBookmarkDoc,
+    transformToVisitDoc,
+    transformToBookmarkDoc,
+} from 'src/imports'
+import { clearOldExtData } from 'src/imports/background'
 
 const fetchPageDataOpts = {
     includePageContent: true,
@@ -41,6 +47,31 @@ async function createAssociatedBookmarkDoc(pageDoc, importItem) {
     return transformToBookmarkDoc(pageDoc)(bookmarkItem)
 }
 
+async function createPageDoc({ url }) {
+    // Do the page data fetch
+    const { content, favIconURI } = await fetchPageData({
+        url,
+        opts: fetchPageDataOpts,
+    })
+
+    // Sort out all binary attachments
+    const _attachments = await formatFavIconAttachment(favIconURI)
+
+    // Construct the page doc ready for PouchDB from fetched + import item data
+    return revisePageFields({
+        _id: generatePageDocId({ url }),
+        url,
+        content,
+        _attachments,
+    })
+}
+
+const storeDocs = ({ pageDoc, bookmarkDocs = [], visitDocs = [] }) =>
+    Promise.all([
+        index.addPageConcurrent({ pageDoc, visitDocs, bookmarkDocs }),
+        db.bulkDocs([pageDoc, ...bookmarkDocs, ...visitDocs]),
+    ])
+
 /**
  * Handles processing of a history-type import item. Checks for exisitng page docs that have the same URL.
  *
@@ -49,36 +80,42 @@ async function createAssociatedBookmarkDoc(pageDoc, importItem) {
  *  + optional filled-out page doc as `pageDoc` field.
  */
 async function processHistoryImport(importItem) {
-    // Do the page data fetch
-    const { content, favIconURI } = await fetchPageData({
-        url: importItem.url,
-        opts: fetchPageDataOpts,
-    })
-
-    // Sort out all binary attachments
-    const _attachments = await formatFavIconAttachment(favIconURI)
-
-    // Construct the page doc ready for PouchDB from fetched + import item data
-    const pageDoc = revisePageFields({
-        _id: generatePageDocId({ url: importItem.url }),
-        url: importItem.url,
-        content,
-        _attachments,
-    })
+    const pageDoc = await createPageDoc(importItem)
 
     // Fetch and create meta-docs
     const visitDocs = await createAssociatedVisitDocs(pageDoc)
-    const bookmarkDocs =
-        importItem.type === IMPORT_TYPE.BOOKMARK
-            ? [await createAssociatedBookmarkDoc(pageDoc, importItem)]
-            : []
+    const bookmarkDocs = []
 
-    // Schedule indexing of searchable data, but don't wait for it
-    await index.addPageConcurrent({ pageDoc, visitDocs, bookmarkDocs })
-    // Store the new data in Pouch
-    await db.bulkDocs([pageDoc, ...bookmarkDocs, ...visitDocs])
+    if (importItem.type === IMPORT_TYPE.BOOKMARK) {
+        bookmarkDocs.push(
+            await createAssociatedBookmarkDoc(pageDoc, importItem),
+        )
+    }
+
+    await storeDocs({ pageDoc, visitDocs, bookmarkDocs })
 
     // If we finally got here without an error being thrown, return the success status message + pageDoc data
+    return { status: DOWNLOAD_STATUS.SUCC }
+}
+
+async function processOldExtImport(importItem) {
+    const pageDoc = await createPageDoc(importItem)
+
+    // Fetch and create meta-docs
+    const visitDocs = await createAssociatedVisitDocs(pageDoc)
+    const bookmarkDocs = []
+
+    if (importItem.hasBookmark) {
+        bookmarkDocs.push(transformToMinimalBookmarkDoc(pageDoc)(importItem))
+    } else {
+        visitDocs.push(transformToMinimalVisitDoc(pageDoc)(importItem))
+    }
+
+    await storeDocs({ pageDoc, visitDocs, bookmarkDocs })
+
+    // If all okay now, remove the old data (timestamp is old index key)
+    await clearOldExtData(importItem.timestamp.toString())
+
     return { status: DOWNLOAD_STATUS.SUCC }
 }
 
@@ -94,6 +131,8 @@ export default async function processImportItem(importItem = {}) {
         case IMPORT_TYPE.BOOKMARK:
         case IMPORT_TYPE.HISTORY:
             return await processHistoryImport(importItem)
+        case IMPORT_TYPE.OLD:
+            return await processOldExtImport(importItem)
         default:
             throw new Error('Unknown import type')
     }
