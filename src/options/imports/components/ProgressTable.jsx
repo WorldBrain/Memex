@@ -5,6 +5,25 @@ import { IMPORT_TYPE as TYPE } from '../constants'
 
 import localStyles from './Import.css'
 
+const ProgressRow = ({ label, total, complete, success, fail }) => (
+    <tr className={localStyles.importTableRow}>
+        <td>{label}</td>
+        <td>
+            {complete}/{total}
+        </td>
+        <td>{success}</td>
+        <td>{fail}</td>
+    </tr>
+)
+
+ProgressRow.propTypes = {
+    label: PropTypes.string.isRequired,
+    total: PropTypes.number.isRequired,
+    complete: PropTypes.number.isRequired,
+    success: PropTypes.number.isRequired,
+    fail: PropTypes.number.isRequired,
+}
+
 const ProgressTable = ({ progress, allowTypes }) => (
     <table className={localStyles.importTable}>
         <colgroup>
@@ -22,35 +41,20 @@ const ProgressTable = ({ progress, allowTypes }) => (
             </tr>
         </thead>
         <tbody>
-            {allowTypes.h && (
-                <tr className={localStyles.importTableRow}>
-                    <td>Browsing History</td>
-                    <td>
-                        {progress[TYPE.HISTORY].complete}/{progress[TYPE.HISTORY].total}
-                    </td>
-                    <td>{progress[TYPE.HISTORY].success}</td>
-                    <td>{progress[TYPE.HISTORY].fail}</td>
-                </tr>
+            {allowTypes[TYPE.HISTORY] && (
+                <ProgressRow
+                    label="Browsing History"
+                    {...progress[TYPE.HISTORY]}
+                />
             )}
-            {allowTypes.b && (
-                <tr className={localStyles.importTableRow}>
-                    <td>Bookmarks</td>
-                    <td>
-                        {progress[TYPE.BOOKMARK].complete}/{progress[TYPE.BOOKMARK].total}
-                    </td>
-                    <td>{progress[TYPE.BOOKMARK].success}</td>
-                    <td>{progress[TYPE.BOOKMARK].fail}</td>
-                </tr>
+            {allowTypes[TYPE.BOOKMARK] && (
+                <ProgressRow label="Bookmarks" {...progress[TYPE.BOOKMARK]} />
             )}
-            {allowTypes.o && (
-                <tr className={localStyles.importTableRow}>
-                    <td>Old Extension Data</td>
-                    <td>
-                        {progress[TYPE.OLD].complete}/{progress[TYPE.OLD].total}
-                    </td>
-                    <td>{progress[TYPE.OLD].success}</td>
-                    <td>{progress[TYPE.OLD].fail}</td>
-                </tr>
+            {allowTypes[TYPE.OLD] && (
+                <ProgressRow
+                    label="Old Extension Data"
+                    {...progress[TYPE.OLD]}
+                />
             )}
         </tbody>
     </table>
