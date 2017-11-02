@@ -6,6 +6,13 @@ import AcknowledgmentContainer from './acknowledgement'
 
 export default [
     {
+        name: 'Go back to Search',
+        pathname: '/overview/overview.html',
+        component: 'faq',
+        icon: 'search',
+    },
+
+    {
         name: 'Import',
         pathname: '/import',
         component: ImportContainer,

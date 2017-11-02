@@ -237,7 +237,7 @@ class PopupContainer extends Component {
                     Import History &amp; Bookmarks
                 </LinkButton>
                 <LinkButton href={constants.FEEDBACK_URL} icon="feedback">
-                    Feedback
+                    I need Help!
                 </LinkButton>
             </div>
         )
