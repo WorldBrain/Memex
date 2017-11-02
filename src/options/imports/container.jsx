@@ -45,6 +45,10 @@ class ImportContainer extends Component {
         activeRow: -1,
     }
 
+    componentWillUnmount() {
+        this.props.boundActions.pause()
+    }
+
     setCancelState = waitingOnCancelConfirm =>
         this.setState(state => ({ ...state, waitingOnCancelConfirm }))
 
