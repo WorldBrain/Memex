@@ -21,7 +21,7 @@ const Import = ({
     isPaused,
     children,
 }) => (
-    <div>
+    <form>
         {(isIdle || isLoading) && (
             <div>
                 <div className={localStyles.stepNumber}>
@@ -79,7 +79,7 @@ const Import = ({
             )}
         </div>
         {(isIdle || isLoading) && <DevOptions />}
-    </div>
+    </form>
 )
 
 Warning.propTypes = {

@@ -136,6 +136,7 @@ class ImportContainer extends Component {
                 handleClick={this.handleBtnClick(boundActions.start)}
                 isDisabled={this.props.isStartBtnDisabled}
                 customClass={'startImport'}
+                type="submit"
             >
                 Start import
             </ActionButton>
