@@ -18,6 +18,11 @@ async function getFavIcon(favIconUrl) {
 
     try {
         const response = await fetch(favIconUrl)
+
+        if (response.status >= 400 && response.status < 600) {
+            throw new Error(`Bad response from server: ${response.status}`)
+        }
+
         const dataUrl = await responseToDataUrl(response)
         return dataUrl
     } catch (err) {} // carry on without fav-icon

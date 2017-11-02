@@ -9,6 +9,13 @@ async function getFavIcon({ tabId }) {
     }
 
     const response = await fetch(tab.favIconUrl)
+
+    if (response.status >= 400 && response.status < 600) {
+        return Promise.reject(
+            new Error(`Bad response from server: ${response.status}`),
+        )
+    }
+
     const dataUrl = await responseToDataUrl(response)
     return dataUrl
 }

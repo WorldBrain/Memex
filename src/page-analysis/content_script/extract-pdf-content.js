@@ -41,6 +41,13 @@ export default async function extractPdfContent({ url, blob }) {
     // Fetch document if only a URL is given.
     if (blob === undefined) {
         const response = await fetch(url)
+
+        if (response.status >= 400 && response.status < 600) {
+            return Promise.reject(
+                new Error(`Bad response from server: ${response.status}`),
+            )
+        }
+
         blob = await response.blob()
     }
 
