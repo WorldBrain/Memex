@@ -1,5 +1,5 @@
 import urlRegex from 'url-regex'
-
+import 'src/util/url-filter.js'
 import 'src/activity-logger/background'
 import 'src/blacklist/background'
 import 'src/search/background'
