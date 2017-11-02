@@ -1,23 +1,21 @@
-//Remove unnecessary query params from the URL to avoid redundancy
-const NORMALIZE_OPTS = {
-    'stripWWW': false,
-    'removeDirectoryIndex': false,
-    'removeTrailingSlash': false,
-    'stripFragment': true,
-    'normalizeProtocol': false
-}
-const GSEARCH_SUBSTR = 'www.google'
-const FB_SUBSTR = 'www.facebook'
-const normalizeUrl = require("normalize-url")
-export default function urlFilter(url) {
-    const parts = url.split('.')
+// Remove unnecessary query params from the URL to avoid redundancy
+import normalizeUrl from 'normalize-url'
 
-    if (parts[0] == 'www' && parts[1] == 'google') {
-        // Case 1: Google Search
-        return normalizeUrl(url.split('&')[0], NORMALIZE_OPTS)
-    } else if (parts[0] == 'www' && parts[1] == 'facebook') {
-        // Case 2: Facebook
-        return normalizeUrl(url.split('?')[0], NORMALIZE_OPTS)
+const NORMALIZE_OPTS = {
+    stripWWW: false,
+    removeDirectoryIndex: false,
+    removeTrailingSlash: false,
+    stripFragment: true,
+    normalizeProtocol: false,
+}
+
+const RULES = new Set(['q'])
+export default function urlFilter(url) {
+    const parsedUrl = new URL(url)
+    for (const param of parsedUrl.searchParams.keys()) {
+        if (!RULES.has(param)) {
+            parsedUrl.searchParams.delete(param)
+        }
     }
-    return normalizeUrl(url, NORMALIZE_OPTS)
+    return normalizeUrl(url.href, NORMALIZE_OPTS)
 }
