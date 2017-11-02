@@ -45,6 +45,8 @@ browser.commands.onCommand.addListener(command => {
 browser.runtime.onInstalled.addListener(async details => {
     switch (details.reason) {
         case 'install':
+            // Open onboarding page
+            browser.tabs.create({ url: '/onboarding/new_install.html' })
             // Store the timestamp of when the extension was installed + default blacklist
             browser.storage.local.set({ [installTimeStorageKey]: Date.now() })
             addToBlacklist(defaultEntries)
