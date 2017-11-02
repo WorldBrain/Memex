@@ -14,7 +14,7 @@ const defaultState = {
         startDate: undefined,
         endDate: undefined,
     },
-    isLoading: false,
+    isLoading: true,
     deleteConfirmProps: {
         isShown: false,
         url: undefined,

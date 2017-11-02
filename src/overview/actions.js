@@ -47,10 +47,14 @@ const getCmdMessageHandler = dispatch => ({ cmd, ...payload }) => {
  * redux actions to be dispatched whenever a command is received from the background script.
  * Also perform an initial search to populate the view (empty query = get all docs)
  */
-export const init = () => dispatch => {
+export const init = () => (dispatch, getState) => {
     port = browser.runtime.connect({ name: constants.SEARCH_CONN_NAME })
     port.onMessage.addListener(getCmdMessageHandler(dispatch))
-    dispatch(search({ overwrite: true }))
+
+    // Only do init search if empty query; if query set, the epic will trigger a search
+    if (selectors.isEmptyQuery(getState())) {
+        dispatch(search({ overwrite: true }))
+    }
 }
 
 /**
@@ -62,11 +66,6 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
     dispatch,
     getState,
 ) => {
-    // If loading already, don't start another search
-    if (selectors.isLoading(getState())) {
-        return
-    }
-
     dispatch(setLoading(true))
 
     // Overwrite of results should always reset the current page before searching

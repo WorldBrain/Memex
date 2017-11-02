@@ -38,6 +38,12 @@ export const currentQueryParams = createSelector(
     overview,
     state => state.currentQueryParams,
 )
+
+export const isEmptyQuery = createSelector(
+    currentQueryParams,
+    ({ query, startDate, endDate }) => !query.length && !startDate && !endDate,
+)
+
 export const isLoading = createSelector(overview, state => state.isLoading)
 export const noResults = createSelector(
     resultDocs,
