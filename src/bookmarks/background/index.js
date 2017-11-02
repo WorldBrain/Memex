@@ -5,7 +5,7 @@ import * as index from 'src/search'
 import db from 'src/pouchdb'
 import { transformToBookmarkDoc } from 'src/imports'
 import { generatePageDocId } from 'src/page-storage'
-import removeBookmark from './deletion'
+import removeBookmarkByUrl from './deletion'
 
 async function getAttachments(pageData) {
     const favIconBlob = await dataURLToBlob(pageData.favIconURI)
@@ -51,6 +51,11 @@ async function createNewPageForBookmark(id, bookmarkInfo) {
     }
 }
 
+const removeBookmarkHandler = (id, { node }) =>
+    node.url
+        ? removeBookmarkByUrl(node.url)
+        : console.warn('Cannot remove bookmark with no URL', node)
+
 // Store and index any new browser bookmark
 browser.bookmarks.onCreated.addListener(createNewPageForBookmark)
-browser.bookmarks.onRemoved.addListener(removeBookmark)
+browser.bookmarks.onRemoved.addListener(removeBookmarkHandler)

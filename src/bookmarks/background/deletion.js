@@ -4,13 +4,8 @@ import * as index from 'src/search'
 import deleteDocsByUrl, { deleteDocs } from 'src/page-storage/deletion'
 import { bookmarkKeyPrefix } from '..'
 
-async function removeBookmark(id, { node }) {
-    if (!node.url) {
-        console.warn('Cannot remove bookmark with no URL', node)
-        return
-    }
-
-    const pageId = generatePageDocId({ url: node.url })
+async function removeBookmarkByUrl(url) {
+    const pageId = generatePageDocId({ url })
     const reverseIndexDoc = await index.initSingleLookup()(pageId)
 
     if (reverseIndexDoc == null) {
@@ -23,7 +18,7 @@ async function removeBookmark(id, { node }) {
 
     // If no visits, we don't want an orphaned page, so remove everything for given URL
     if (!reverseIndexDoc.visits.size) {
-        return deleteDocsByUrl(node.url)
+        return deleteDocsByUrl(url)
     }
 
     // Deindex from bookmarks index
@@ -37,9 +32,9 @@ async function removeBookmark(id, { node }) {
     })
 
     // Remove corresponding bookmark docs from pouch
-    const fetchDocsByType = fetchDocTypesByUrl(node.url)
+    const fetchDocsByType = fetchDocTypesByUrl(url)
     const { rows: bookmarkRows } = await fetchDocsByType(bookmarkKeyPrefix)
     await deleteDocs(bookmarkRows)
 }
 
-export default removeBookmark
+export default removeBookmarkByUrl
