@@ -1,6 +1,5 @@
 import React from 'react'
 
-import styles from '../../options.css'
 import localStyles from './styles.css'
 
 const AcknowledgementContainer = () => (

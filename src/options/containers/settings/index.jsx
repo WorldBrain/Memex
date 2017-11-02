@@ -1,7 +1,7 @@
 import React from 'react'
 
 import Blacklist from '../../blacklist'
-import { routeTitle, sectionTitle } from '../../base.css'
+// import { routeTitle, sectionTitle } from '../../base.css'
 import styles from './style.css'
 
 const SettingsContainer = () => (
