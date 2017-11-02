@@ -110,16 +110,27 @@
 
 .stepText {
     font-size: 14px;
+    color: #4d4b4c;
+}
+
+.warning {
+    display: flex;
+    flex-direction: row;
     color: #d5969e;
+}
+
+.warningText {
+    left: 5px;
+    position: relative;
+}
+
+.warningCode {
+    font-size: 0.8em;
 }
 
 .icon {
     width: auto;
     height: 14px;
-}
-
-.stepSubText {
-    margin-left: 18px;
 }
 
 .stepImportText {

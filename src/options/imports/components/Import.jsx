@@ -5,6 +5,13 @@ import DevOptions from '../DevOptionsContainer'
 import { LoadingIndicator } from 'src/common-ui/components'
 import localStyles from './Import.css'
 
+const Warning = ({ children }) => (
+    <p className={localStyles.warning}>
+        <img src="/img/caution.png" className={localStyles.icon} />{' '}
+        <div className={localStyles.warningText}>{children}</div>
+    </p>
+)
+
 const Import = ({
     isLoading,
     loadingMsg,
@@ -27,11 +34,20 @@ const Import = ({
                         Even without doing that, you still can search everything
                         you visit after installing the tool.
                     </p>
-                    <img
-                        src="/img/caution.png"
-                        className={localStyles.icon}
-                    />{' '}
-                    This process may slow down your internet connection.
+                    <Warning>
+                        This process may slow down your internet connection.
+                    </Warning>
+                    <Warning>
+                        Disabling Chrome's background tab throttling may improve
+                        improve imports performance:
+                        <br />
+                        <code className={localStyles.warningCode}>
+                            chrome://flags/#expensive-background-timer-throttling
+                        </code>
+                        <br />
+                        Please use this option with care and reset to "Default"
+                        when not importing.
+                    </Warning>
                 </div>
             </div>
         )}
@@ -41,14 +57,10 @@ const Import = ({
                     Step 2/3: Download Progress{' '}
                 </div>
                 <div className={localStyles.stepText}>
-                    <img
-                        src="/img/caution.png"
-                        className={localStyles.icon}
-                    />{' '}
-                    If you leave this page, your import will paused.<br />
-                    <span className={localStyles.stepSubText}>
+                    <Warning>
+                        If you leave this page, your import will paused.<br />
                         You can always come back and resume where you left off.
-                    </span>
+                    </Warning>
                 </div>
             </div>
         )}
@@ -69,6 +81,10 @@ const Import = ({
         {(isIdle || isLoading) && <DevOptions />}
     </div>
 )
+
+Warning.propTypes = {
+    children: PropTypes.arrayOf(PropTypes.node).isRequired,
+}
 
 Import.propTypes = {
     children: PropTypes.arrayOf(PropTypes.node).isRequired,
