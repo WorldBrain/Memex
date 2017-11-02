@@ -27,7 +27,6 @@ async function performPageAnalysis({ pageId, tabId }) {
     const storeScreenshot = makeScreenshot({ tabId }).then(async dataUrl => {
         if (dataUrl === undefined) return
         const blob = await dataURLToBlob(dataUrl)
-        console.log('size after ' + blob.size / 1000 + 'kb')
         await setAttachment(db, pageId, 'screenshot', blob)
     })
 

@@ -1,6 +1,5 @@
 import delay from 'src/util/delay'
 import { whenPageLoadComplete, whenTabActive } from 'src/util/tab-events'
-import { dataURLToBlob } from 'blob-util'
 
 // Take a screenshot of the tabId, if it is active.
 // Returns a promise of the screenshot (a png image in a data URL).
@@ -8,10 +7,9 @@ import { dataURLToBlob } from 'blob-util'
 async function snapNow({ tabId }) {
     const tab = await browser.tabs.get(tabId)
     let image = await browser.tabs.captureVisibleTab(tab.windowId, {
-        format: 'png',
+        format: 'jpeg',
     })
-    const blob = await dataURLToBlob(image)
-    console.log('size before ' + blob.size / 1000 + 'kb')
+    // Reduces the size of image to save space
     image = await resizeImage(image, 0.75, 200)
 
     return image
