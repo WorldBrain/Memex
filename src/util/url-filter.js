@@ -17,5 +17,5 @@ export default function urlFilter(url) {
             parsedUrl.searchParams.delete(param)
         }
     }
-    return normalizeUrl(url.href, NORMALIZE_OPTS)
+    return normalizeUrl(parsedUrl.href, NORMALIZE_OPTS)
 }
