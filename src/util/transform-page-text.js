@@ -4,7 +4,7 @@ import rmDiacritics from './remove-diacritics'
 
 const allWhitespacesPattern = /\s+/g
 // const singleDigitNumbersPattern = /\b\d\b/g
-const nonWordsPattern = /[\u2000-\u206F\u2E00-\u2E7F\\!"#$%&()*+,.\/:;<=>?@\[\]^_`{|}~«»。（）ㅇ]/g
+const nonWordsPattern = /[\u2000-\u206F\u2E00-\u2E7F\\!"#$%&()*+,.\/:;<=>?@\[\]^_`{|}~«»。（）ㅇ©ºø°]/g
 const apostrophePattern = /['’]/g
 const allWordsWithDigits = /[a-z]+\d\w*|\w*\d[a-z]+/g // /\w*\d\w*/g
 const dashPattern = /[-]/g
