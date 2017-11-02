@@ -27,7 +27,8 @@ const defaultState = {
     success: defaultStats, // Success counts for completed import items
     totals: defaultStats, // Static state to use to derive remaining counts from
     importStatus: STATUS.LOADING,
-    loadingMsg: '',
+    loadingMsg:
+        'Please wait while we analyze & prepare your browsing history & bookmarks',
     downloadDataFilter: FILTERS.FAIL,
     dev: defaultDevState,
     allowTypes: {
@@ -89,12 +90,6 @@ const prepareImportReducer = state => ({
         'Preparing import. Can take a few minutes for large histories...',
 })
 
-const initImportReducer = state => ({
-    ...state,
-    importStatus: STATUS.LOADING,
-    loadingMsg: '',
-})
-
 const cancelImportReducer = state => ({
     ...state,
     importStatus: STATUS.LOADING,
@@ -117,7 +112,6 @@ const setImportState = val => genericReducer('importStatus', val)
 
 export default createReducer(
     {
-        [actions.initImport]: initImportReducer,
         [actions.initAllowTypes]: payloadReducer('allowTypes'),
         [actions.prepareImport]: prepareImportReducer,
         [actions.startImport]: setImportState(STATUS.RUNNING),

@@ -21,7 +21,6 @@ export const initSuccessCounts = createAction('imports/initSuccessCounts')
 export const initImportState = createAction('imports/initImportState')
 export const initDownloadData = createAction('imports/initDownloadData')
 
-export const initImport = createAction('imports/initImport')
 export const prepareImport = createAction('imports/prepareImport')
 export const startImport = createAction('imports/startImport')
 export const stopImport = createAction('imports/stopImport')
