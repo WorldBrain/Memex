@@ -19,6 +19,8 @@ const singleLookup = initSingleLookup()
  * @property {BookmarkDoc[]} [bookmarkDocs]
  */
 
+export const put = (key, val) => index.put(key, val)
+
 /**
  * Adds a new page doc + any associated visit/bookmark docs to the index. This method
  * is *NOT* concurrency safe.
