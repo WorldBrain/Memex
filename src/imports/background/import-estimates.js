@@ -1,7 +1,7 @@
 import db from 'src/pouchdb'
 import { IMPORT_TYPE } from 'src/options/imports/constants'
-import { pageDocsSelector } from 'src/page-storage'
-import { bookmarkDocsSelector } from 'src/bookmarks'
+import { pageKeyPrefix, convertPageDocId } from 'src/page-storage'
+import { bookmarkKeyPrefix, convertBookmarkDocId } from 'src/bookmarks'
 import {
     getOldExtItems,
     getURLFilteredBookmarkItems,
@@ -18,7 +18,8 @@ async function getAssocFullPageDocCount(bookmarkDocs) {
     let count = 0
     for (const doc of bookmarkDocs) {
         try {
-            await db.get(doc.page._id)
+            const { url } = convertBookmarkDocId(doc._id)
+            await db.get(convertPageDocId({ url }))
             ++count
         } catch (err) {}
     }
@@ -31,18 +32,18 @@ async function getAssocFullPageDocCount(bookmarkDocs) {
  */
 export default async function getEstimateCounts() {
     // Grab needed data from browser API (filtered by whats already in DB)
-    const filteredHistoryItems = await getURLFilteredHistoryItems()
-    const filteredBookmarkItems = await getURLFilteredBookmarkItems()
+    const historyItemsMap = await getURLFilteredHistoryItems()
+    const bookmarkItemsMap = await getURLFilteredBookmarkItems()
     const oldExtItems = await getOldExtItems()
 
     // Grab needed data from DB
-    const { docs: pageDocs } = await db.find({
-        selector: pageDocsSelector,
-        fields: ['_id', 'url'],
+    const { rows: pageDocs } = await db.allDocs({
+        startkey: pageKeyPrefix,
+        endkey: `${pageKeyPrefix}\uffff`,
     })
-    const { docs: bookmarkDocs } = await db.find({
-        selector: bookmarkDocsSelector,
-        fields: ['_id', 'page'],
+    const { rows: bookmarkDocs } = await db.allDocs({
+        startkey: bookmarkKeyPrefix,
+        endkey: `${bookmarkKeyPrefix}\uffff`,
     })
 
     return {
@@ -54,9 +55,9 @@ export default async function getEstimateCounts() {
             [IMPORT_TYPE.OLD]: oldExtItems.completedCount,
         },
         remaining: {
-            [IMPORT_TYPE.HISTORY]: filteredHistoryItems.length,
-            [IMPORT_TYPE.BOOKMARK]: filteredBookmarkItems.length,
-            [IMPORT_TYPE.OLD]: oldExtItems.importItems.length,
+            [IMPORT_TYPE.HISTORY]: historyItemsMap.size,
+            [IMPORT_TYPE.BOOKMARK]: bookmarkItemsMap.size,
+            [IMPORT_TYPE.OLD]: oldExtItems.importItemsMap.size,
         },
     }
 }

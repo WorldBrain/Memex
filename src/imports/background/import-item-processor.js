@@ -126,7 +126,7 @@ async function processOldExtImport(importItem) {
  * @returns {any} Status string denoting the outcome of import processing as `status`
  *  + optional filled-out page doc as `pageDoc` field.
  */
-export default async function processImportItem(importItem = {}) {
+export default async function processImportItem([url, importItem = {}]) {
     switch (importItem.type) {
         case IMPORT_TYPE.BOOKMARK:
         case IMPORT_TYPE.HISTORY:
