@@ -21,6 +21,7 @@ const defaultState = {
     },
     showFilter: false,
     showOnlyBookmarks: false,
+    toggleBookmarkUrl: null,
 }
 
 function setQuery(state, query) {
@@ -86,6 +87,11 @@ const handleSearchResult = ({ overwrite }) => (state, newSearchResult) => {
     return { ...state, searchResult }
 }
 
+const setBookmarkUrl = (state, url) => ({
+    ...state,
+    toggleBookmarkUrl: url,
+})
+
 export default createReducer(
     {
         [actions.appendSearchResult]: handleSearchResult({ overwrite: false }),
@@ -110,6 +116,7 @@ export default createReducer(
             ...state,
             showFilter: !state.showFilter,
         }),
+        [actions.setBookmarkUrl]: setBookmarkUrl,
     },
     defaultState,
 )

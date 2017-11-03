@@ -24,6 +24,8 @@ class OverviewContainer extends Component {
         searchResults: PropTypes.arrayOf(PropTypes.object).isRequired,
         needsWaypoint: PropTypes.bool.isRequired,
         handleTrashBtnClick: PropTypes.func.isRequired,
+        handleUnbookmarkClick: PropTypes.func.isRequired,
+        handleBookmarkClick: PropTypes.func.isRequired,
     }
 
     componentDidMount() {
@@ -47,6 +49,8 @@ class OverviewContainer extends Component {
             <li key={doc._id}>
                 <PageResultItem
                     onTrashBtnClick={this.props.handleTrashBtnClick(doc.url)}
+                    onUnbookmarkClick={this.props.handleUnbookmarkClick(doc.url)}
+                    onBookmarkClick={this.props.handleBookmarkClick(doc.url)}
                     {...doc}
                 />
             </li>
@@ -101,6 +105,7 @@ class OverviewContainer extends Component {
     }
 
     render() {
+        console.log(this.props)
         return (
             <Overview
                 {...this.props}
@@ -137,12 +142,24 @@ const mapDispatchToProps = dispatch => ({
             deleteDocs: actions.deleteDocs,
             onShowFilterChange: actions.showFilter,
             onShowOnlyBookmarksChange: actions.toggleBookmarkFilter,
+            unBookmark: actions.unBookmark,
+            bookmark: actions.bookmark,
         },
         dispatch,
     ),
     handleTrashBtnClick: url => event => {
         event.preventDefault()
         dispatch(actions.showDeleteConfirm(url))
+    },
+    handleUnbookmarkClick: url => event => {
+        event.preventDefault()
+        dispatch(actions.setBookmarkUrl(url))
+        dispatch(actions.unBookmark())
+    },
+    handleBookmarkClick: url => event => {
+        event.preventDefault()
+        dispatch(actions.setBookmarkUrl(url))
+        dispatch(actions.bookmark())
     },
 })
 

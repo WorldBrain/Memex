@@ -83,3 +83,8 @@ export const isEmptyQuery = createSelector(
     ({ query, startDate, endDate }, showOnlyBookmarks) =>
         !query.length && !startDate && !endDate && !showOnlyBookmarks,
 )
+
+export const bookmarkInfoToSend = createSelector(
+    overview,
+    state => state.toggleBookmarkUrl,
+)
