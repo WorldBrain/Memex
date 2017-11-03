@@ -16,7 +16,7 @@
     font-style: normal;
     margin-top: 20px;
     margin-bottom: 20px;
-    font-size: 16px;
+    font-size: 14px;
     color: #b7b7b7;
     letter-spacing: 1px;
     width: 80%;
@@ -86,8 +86,8 @@
 }
 
 .contribute {
-    font-size: 18px;
-    color: #b7b7b7;
+    font-size: 16px;
+    color: #666;
     font-weight: bold;
     margin-top: 10px;
     letter-spacing: 1px;
