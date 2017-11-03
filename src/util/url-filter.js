@@ -2,7 +2,7 @@
 import normalizeUrl from 'normalize-url'
 
 const NORMALIZE_OPTS = {
-    stripWWW: false,
+    stripWWW: true,
     removeDirectoryIndex: false,
     removeTrailingSlash: false,
     stripFragment: true,
@@ -11,11 +11,11 @@ const NORMALIZE_OPTS = {
 
 const RULES = new Set(['q'])
 export default function urlFilter(url) {
-    const parsedUrl = new URL(url)
+    const parsedUrl = new URL(normalizeUrl(url, NORMALIZE_OPTS))
     for (const param of parsedUrl.searchParams.keys()) {
         if (!RULES.has(param)) {
             parsedUrl.searchParams.delete(param)
         }
     }
-    return normalizeUrl(parsedUrl.href, NORMALIZE_OPTS)
+    return parsedUrl.href
 }
