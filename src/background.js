@@ -13,9 +13,11 @@ import { defaultEntries, addToBlacklist } from 'src/blacklist'
 import convertOldExtBlacklist, {
     CONVERT_TIME_KEY,
 } from 'src/blacklist/background'
+import { OLD_EXT_KEYS } from 'src/options/imports/constants'
 import index from 'src/search/search-index'
 
 export const OVERVIEW_URL = '/overview/overview.html'
+export const OLD_EXT_UPDATE_KEY = 'updated-from-old-ext'
 
 // Put doc ID generators on window for user use with manual DB lookups
 window.generatePageDocId = generatePageDocId
@@ -50,11 +52,27 @@ browser.runtime.onInstalled.addListener(async details => {
         case 'update':
             // If no prior conversion, convert old ext blacklist + show static notif page
             const {
-                [CONVERT_TIME_KEY]: doneBefore,
-            } = await browser.storage.local.get(CONVERT_TIME_KEY)
-            if (!doneBefore) {
-                browser.tabs.create({ url: '/update/update.html' })
+                [CONVERT_TIME_KEY]: blacklistConverted,
+                [OLD_EXT_UPDATE_KEY]: alreadyUpdated,
+                [OLD_EXT_KEYS.INDEX]: oldExtIndex,
+            } = await browser.storage.local.get([
+                CONVERT_TIME_KEY,
+                OLD_EXT_UPDATE_KEY,
+                OLD_EXT_KEYS.INDEX,
+            ])
+
+            if (!blacklistConverted) {
                 convertOldExtBlacklist()
+            }
+
+            // Over complicated check of old ext data + already upgraded flag to only show update page once
+            if (
+                !alreadyUpdated &&
+                oldExtIndex &&
+                oldExtIndex.index instanceof Array
+            ) {
+                browser.tabs.create({ url: '/update/update.html' })
+                browser.storage.local.set({ [OLD_EXT_UPDATE_KEY]: Date.now() })
             }
             break
         default:
