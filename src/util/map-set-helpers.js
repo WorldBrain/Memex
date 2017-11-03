@@ -44,3 +44,6 @@ export const containsEmptyVals = iterable =>
  */
 export const unionNestedMaps = map =>
     new Map([...map.values()].reduce((acc, value) => [...acc, ...value], []))
+
+export const differMaps = b => a =>
+    new Map([...a].filter(([key]) => !b.has(key)))
