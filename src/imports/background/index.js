@@ -160,10 +160,12 @@ export async function getOldExtItems() {
     // For everything in local storage, if the key represents page data, transform it
     for (const key in entireStorage) {
         if (Number.isInteger(+key)) {
-            importItemsMap.set(
-                encodeUrl(entireStorage[key].url),
-                transform(entireStorage[key]),
-            )
+            try {
+                const encodedUrl = encodeUrl(entireStorage[key].url)
+                importItemsMap.set(encodedUrl, transform(entireStorage[key]))
+            } catch (error) {
+                continue // Malformed URL
+            }
         }
     }
 

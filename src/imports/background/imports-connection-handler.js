@@ -36,7 +36,7 @@ async function prepareImportItems(allowTypes = {}) {
         ? await getURLFilteredBookmarkItems()
         : new Map()
     const oldExtItemsMap = allowTypes[IMPORT_TYPE.OLD]
-        ? (await getOldExtItems()).importItems
+        ? (await getOldExtItems()).importItemsMap
         : new Map()
 
     // Union all import item maps, allowing old ext items precedence over bookmarks which have
