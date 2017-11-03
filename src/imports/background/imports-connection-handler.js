@@ -1,4 +1,5 @@
 import PromiseBatcher from 'src/util/promise-batcher'
+import { decode } from 'src/util/encode-url-for-id'
 import {
     CMDS,
     IMPORT_CONN_NAME,
@@ -54,14 +55,20 @@ async function prepareImportItems(allowTypes = {}) {
  */
 const getBatchObserver = port => {
     const handleFinishedItem = ({
-        input: [url, { type }],
+        input: [encodedUrl, { type }],
         output: { status } = {},
         error,
     }) => {
         // Send item data + outcome status down to UI (and error if present)
-        port.postMessage({ cmd: CMDS.NEXT, url, type, status, error })
+        port.postMessage({
+            cmd: CMDS.NEXT,
+            url: decode(encodedUrl),
+            type,
+            status,
+            error,
+        })
 
-        removeImportItem(url)
+        removeImportItem(encodedUrl)
     }
 
     return {

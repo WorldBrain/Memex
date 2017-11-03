@@ -1,5 +1,6 @@
 import db from 'src/pouchdb'
-import { pageDocsSelector } from 'src/page-storage'
+import encodeUrl from 'src/util/encode-url-for-id'
+import { pageKeyPrefix, generatePageDocId } from 'src/page-storage'
 import { checkWithBlacklist } from 'src/blacklist'
 import { isLoggable } from 'src/activity-logger'
 import { IMPORT_TYPE, OLD_EXT_KEYS } from 'src/options/imports/constants'
@@ -71,13 +72,19 @@ const transformBrowserItemToImportItem = type => item => ({
  * @returns A function affording checking of a URL against the URLs of existing page docs.
  */
 async function checkWithExistingDocs() {
-    const { docs: existingPageDocs } = await db.find({
-        selector: pageDocsSelector,
-        fields: ['url'],
+    const { rows: existingPageDocs } = await db.allDocs({
+        startkey: pageKeyPrefix,
+        endkey: `${pageKeyPrefix}\uffff`,
     })
-    const existingUrls = new Set(existingPageDocs.map(({ url }) => url))
 
-    return ({ url }) => !existingUrls.has(url)
+    const existingIds = new Set(existingPageDocs.map(row => row.id))
+    return item => {
+        try {
+            return !existingIds.has(generatePageDocId(item))
+        } catch (err) {
+            return false // Malformed URI
+        }
+    }
 }
 
 /**
@@ -97,7 +104,10 @@ async function filterItemsByUrl(items, type) {
     return items
         .filter(isWorthRemembering)
         .map(transformBrowserItemToImportItem(type))
-        .reduce((acc, currItem) => acc.set(currItem.url, currItem), new Map())
+        .reduce(
+            (acc, currItem) => acc.set(encodeUrl(currItem.url), currItem),
+            new Map(),
+        )
 }
 
 /**
@@ -151,7 +161,7 @@ export async function getOldExtItems() {
     for (const key in entireStorage) {
         if (Number.isInteger(+key)) {
             importItemsMap.set(
-                entireStorage[key].url,
+                encodeUrl(entireStorage[key].url),
                 transform(entireStorage[key]),
             )
         }
