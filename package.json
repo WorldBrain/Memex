@@ -36,7 +36,6 @@
     "diff-match-patch": "^1.0.0",
     "docuri": "^4.2.2",
     "fathom-web": "^2.1.0",
-    "freeze-dry": "^0.1.0",
     "history": "^4.6.3",
     "level-iterator-stream": "^2.0.0",
     "level-js": "^2.2.4",
@@ -66,9 +65,6 @@
     "reselect": "^3.0.1",
     "response-to-data-url": "^0.1.0",
     "rxjs": "^5.4.1",
-    "search-index": "^0.13.0",
-    "stopword": "^0.1.6",
-    "stream-browserify": "^2.0.1",
     "url-regex": "^4.1.1",
     "webextension-polyfill": "^0.1.1",
     "when-all-settled": "^0.1.1"
