@@ -16,7 +16,7 @@
     font-style: normal;
     margin-top: 20px;
     margin-bottom: 20px;
-    font-size: 14px;
+    font-size: 15px;
     color: #b7b7b7;
     letter-spacing: 1px;
     width: 80%;
@@ -95,7 +95,8 @@
 
 .links {
     text-decoration: none;
-    color: black;
+    color: #928989;
+    font-weight: bold;
     margin-right: 5px;
 }
 

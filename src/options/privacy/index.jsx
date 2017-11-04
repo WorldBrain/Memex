@@ -16,7 +16,9 @@ const PrivacyContainer = () => (
             <br />You will be able to <strong>voluntarily</strong> share it in
             later stages with friends, followers and other applications. For
             more information on that you can watch our{' '}
-            <a href="https://worldbrain.io/vision">vision video</a>.
+            <a className={localStyles.link} href="https://worldbrain.io/vision">
+                vision video
+            </a>.
         </div>
     </div>
 )

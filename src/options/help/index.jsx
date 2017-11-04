@@ -8,7 +8,20 @@ const HelpContainer = () => (
 
         <div className={localStyles.content}>
             <p className={localStyles.title2}>How do I use this tool?</p>
-            Watch our 1 min tutorials or read step by step guides
+            Watch a{' '}
+            <a
+                className={localStyles.link}
+                href="https://worldbrain.io/tutorial"
+            >
+                1 min video intro{' '}
+            </a>{' '}
+            or read the more detailed{' '}
+            <a
+                className={localStyles.link}
+                href="options/options.html#/tutorial"
+            >
+                step by step guide
+            </a>.
         </div>
 
         <div className={localStyles.content}>
@@ -40,12 +53,40 @@ const HelpContainer = () => (
             >
                 {' '}
                 GitHub
-            </a>. Feature requests can be made either via email (<a
+            </a>. <br />
+            Feature requests can be made {' '}
+            <a
+                className={localStyles.link}
+                href="https://worldbrain.typeform.com/to/KIRrZ2"
+            >
+                with this form{' '}
+            </a>
+            or via email (<a
                 className={localStyles.link}
                 href="mailto:questions@worldbrain.io"
             >
                 questions@worldbrain.io
-            </a>) or on our Trello board.
+            </a>).
+        </div>
+
+        <div className={localStyles.content}>
+            <p className={localStyles.title2}>Whats your ROADMAP?</p>
+            Check out our{' '}
+            <a
+                className={localStyles.link}
+                href="mailto:questions@worldbrain.io"
+                href="https://trello.com/b/mdqEuBjb/worldbrain-roadmap"
+            >
+                public roadmap
+            </a>{' '}
+            or make {' '}
+            <a
+                className={localStyles.link}
+                href="https://worldbrain.typeform.com/to/KIRrZ2"
+            >
+                suggestions
+            </a>{' '}
+            for upcoming features.
         </div>
     </div>
 )

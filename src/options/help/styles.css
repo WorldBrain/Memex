@@ -14,10 +14,10 @@
     font-style: normal;
     margin-top: 20px;
     margin-bottom: 30px;
-    font-size: 14px;
+    font-size: 15px;
     color: #b7b7b7;
     letter-spacing: 1px;
-    width: 60%;
+    width: 80%;
     min-width: 450px;
 }
 
@@ -32,5 +32,6 @@
 
 .link {
     color: #928989;
-    font-weight: bolder;
+    text-decoration: none;
+    font-weight: 800;
 }

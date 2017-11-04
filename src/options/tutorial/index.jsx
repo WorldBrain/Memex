@@ -110,17 +110,9 @@ const TutorialContainer = () => (
                     Import your existing history and bookmarks
                 </h3>
                 <p className={LocalStyles.text}>
-                    By installing our extension, all pages you visit & bookmark
-                    are indexed.<br />
-                    But you can also{' '}
-                    <a
-                        className={LocalStyles.link}
-                        href="/options/options.html#/import"
-                    >
-                        make your previously existing history & bookmarks
-                        available
-                    </a>.<br />
-                    You can reach the import via the{' '}
+                    After installing WorldBrain, all pages you visit & bookmark
+                    are searchable.<br />
+                    To also search everything before that, click on the
                     <img
                         style={{
                             width: '20px',
@@ -128,7 +120,13 @@ const TutorialContainer = () => (
                             display: 'inline',
                         }}
                         src="/img/worldbrain-logo-narrow-bw-48.png"
-                    />-popup > "Import History & Bookmarks".
+                    />-icon in the menu and select "
+                    <a
+                        className={LocalStyles.link}
+                        href="/options/options.html#/import"
+                    >
+                        Import History & Bookmarks
+                    </a>".
                 </p>
                 <p className={LocalStyles.list}>
                     <img
