@@ -30,6 +30,7 @@ const staticFiles = {
     'img/*': 'extension/img',
     'node_modules/webextension-polyfill/dist/browser-polyfill.js':
         'extension/lib',
+    'node_modules/slick-carousel/slick/slick.min.js': 'extension/lib',
     'node_modules/pdfjs-dist/build/pdf.worker.min.js': 'extension/lib',
     'node_modules/material-design-icons/iconfont/*.{eot,ttf,woff,woff2,css}':
         'extension/fonts/material-icons',

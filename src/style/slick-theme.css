@@ -12,8 +12,6 @@
 
     src: url('./fonts/slick.eot');
     src: url('./fonts/slick.eot?#iefix') format('embedded-opentype'),
-        url('./fonts/slick.woff') format('woff'),
-        url('./fonts/slick.ttf') format('truetype'),
         url('./fonts/slick.svg#slick') format('svg');
 }
 /* Arrows */
@@ -161,4 +159,15 @@
 .slick-dots li.slick-active button:before {
     opacity: 0.75;
     color: black;
+}
+
+.slider {
+    font-size: 25px;
+    text-align: center;
+    width: 100%;
+}
+
+.h3 {
+    font-weight: 200;
+    font-size: 35px;
 }
