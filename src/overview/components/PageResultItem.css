@@ -169,6 +169,14 @@
     background-image: url('/img/starFull.png');
 }
 
+.bookmark:hover {
+    opacity: 0.5;
+}
+
 .notBookmark {
     background-image: url('/img/star.png');
+}
+
+.notBookmark:hover {
+    opacity: 0.5;
 }
