@@ -28,6 +28,8 @@ export const toggleBookmarkFilter = createAction(
 export const setBookmarkUrl = createAction('overview/setBookmarkUrl')
 
 const deleteDocsByUrl = remoteFunction('deleteDocsByUrl')
+const createBookmarkByExtension = remoteFunction('createBookmarkByExtension')
+const removeBookmarkByUrl = remoteFunction('removeBookmarkByUrl')
 
 const getCmdMessageHandler = dispatch => ({ cmd, ...payload }) => {
     switch (cmd) {
@@ -132,9 +134,19 @@ export const deleteDocs = () => async (dispatch, getState) => {
 export const unBookmark = () => async (dispatch, getState) => {
     const url = selectors.bookmarkInfoToSend(getState())
     console.log(url)
+
+    await removeBookmarkByUrl(url)
+
+    // Refresh search view after unbookmarking
+    dispatch(search({ overwrite: true }))
 }
 
 export const bookmark = () => async (dispatch, getState) => {
     const url = selectors.bookmarkInfoToSend(getState())
     console.log(url)
+
+    await createBookmarkByExtension(url)
+
+    // Refresh search view after bookmarking
+    dispatch(search({ overwrite: true }))
 }
