@@ -1,0 +1,37 @@
+.h3 {
+    color: #3eb995;
+    font-weight: bold;
+    font-size: 20px;
+    letter-spacing: 1px;
+    margin-left: 35px;
+}
+
+.text {
+    font-style: normal;
+    margin-top: 20px;
+    font-size: 18px;
+    color: #b7b7b7;
+    letter-spacing: 1px;
+    width: 90%;
+    min-width: 450px;
+    margin-left: 35px;
+}
+
+.list {
+    font-style: normal;
+    margin-top: 20px;
+    font-size: 16px;
+    color: #b7b7b7;
+    width: 90%;
+    min-width: 450px;
+    margin-left: 35px;
+}
+
+.list_element {
+    margin-bottom: 10px;
+}
+
+.link {
+    color: #928989;
+    font-weight: bolder;
+}

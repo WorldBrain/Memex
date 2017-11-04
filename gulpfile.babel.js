@@ -33,6 +33,8 @@ const staticFiles = {
     'node_modules/pdfjs-dist/build/pdf.worker.min.js': 'extension/lib',
     'node_modules/material-design-icons/iconfont/*.{eot,ttf,woff,woff2,css}':
         'extension/fonts/material-icons',
+    'node_modules/slick-carousel/slick/slick.css': 'extension/style/',
+    'src/style/*.css': 'extension/style/',
 }
 
 const commonUIEntry = './src/common-ui/components/index.js'

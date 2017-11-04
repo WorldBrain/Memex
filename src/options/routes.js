@@ -2,7 +2,8 @@ import ImportContainer from './imports'
 import SettingsContainer from './containers/settings'
 import PrivacyContainer from './privacy/index'
 import HelpContainer from './help/index'
-import Acknowledgments from './acknowledgement/components/content'
+import Acknowledgements from './acknowledgement/components/content'
+import TutorialContainer from './tutorial'
 
 export default [
     {
@@ -33,7 +34,7 @@ export default [
     {
         name: 'Acknowledgements',
         pathname: '/acknowledgements',
-        component: Acknowledgments,
+        component: Acknowledgements,
         icon: 'perm_identity',
     },
     {
@@ -41,5 +42,11 @@ export default [
         pathname: '/help',
         component: HelpContainer,
         icon: 'help',
+    },
+    {
+        name: 'Tutorial',
+        pathname: '/tutorial',
+        component: TutorialContainer,
+        icon: 'info',
     },
 ]
