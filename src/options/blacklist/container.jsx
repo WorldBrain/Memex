@@ -113,15 +113,17 @@ class BlacklistContainer extends Component {
 
     renderAddDomain() {
         return (
-            <div className={styles.ignoreDomainText}>Ignore a new domain:</div>
+            <div className={styles.ignoreDomainText}>
+                Ignore a new domain/url:
+            </div>
         )
     }
 
     renderAddBlacklistSites() {
         return (
             <div className={styles.blacklistText}>
-                You are currently not recording activity from the following
-                websites:
+                You are currently not indexing ANY visits on URLs that have the
+                following text in them:
             </div>
         )
     }

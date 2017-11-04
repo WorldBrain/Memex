@@ -1,3 +1,4 @@
+/** CURRENTLY UNUSED */
 import React, { Component } from 'react'
 import Contributor from './components/contributor'
 import Content from './components/content'
@@ -30,19 +31,7 @@ class AcknowledgmentContainer extends Component {
         return (
             <div>
                 <Content />
-                <div className={localStyles.acknowledgement}>
-                    <div className={localStyles.ul}>
-                        {this.fetchContributors()}
-                    </div>
-                </div>
-                <div className={localStyles.col_title}>
-                    FINANCIAL COLLABORATORS
-                </div>
-                <div className={localStyles.acknowledgement}>
-                    <div className={localStyles.ul}>
-                        {this.fetchFinancialContributors()}
-                    </div>
-                </div>
+                <div className={localStyles.acknowledgement} />
             </div>
         )
     }

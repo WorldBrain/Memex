@@ -8,9 +8,9 @@
 }
 
 .input {
-    width: 82%;
+    width: 100%;
     padding: 10px 10px;
-    font-size: 0.8em;
+    font-size: 14px;
     font-style: italic;
     border: none;
     outline: none;
@@ -28,12 +28,17 @@
 .blacklistButton {
     background: transparent;
     border: none;
+    font-family: 'Lato';
+    font-size: 12px;
     outline: none;
     cursor: pointer;
     color: white;
     width: 100%;
+    min-width: 150px;
     background-color: #3eb994;
     font-weight: bold;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
 
     &:hover {
         color: #333;

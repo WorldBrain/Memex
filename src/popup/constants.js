@@ -4,6 +4,6 @@ export const BLACKLIST_BTN_STATE = {
     UNLISTED: 2,
 }
 
-export const FEEDBACK_URL = 'https://www.reddit.com/r/WorldBrain'
+export const FEEDBACK_URL = '/options/options.html#/help'
 export const OVERVIEW_URL = '/overview/overview.html'
 export const OPTIONS_URL = '/options/options.html'

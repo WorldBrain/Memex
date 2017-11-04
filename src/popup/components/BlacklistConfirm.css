@@ -10,11 +10,14 @@
 .header {
     font-size: 1.5em;
     text-align: center;
+    color: #3eb995;
 }
 
 .content {
     font-size: 1.1em;
     text-align: center;
+    color: #3eb995;
+    margin-top: -10px;
 }
 
 .btnBar {
@@ -25,12 +28,16 @@
 }
 
 .btn {
-    font-size: 1.5em;
-    border: 1px solid #e5e5e5;
-    padding: 10px 20px;
-    border-radius: 15px;
-    width: 80px;
+    font-size: 14px;
+    border-radius: 5px;
+    width: 100px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    border: 1px solid #3eb995;
+    font-family: 'Lato';
     cursor: pointer;
+    background-color: white;
+    color: #3eb995;
 
     &:hover {
         color: rgb(62, 185, 149);
@@ -39,5 +46,6 @@
 }
 
 .btnDanger {
-    color: rgb(255, 74, 85);
+    color: white;
+    background-color: #3eb995;
 }

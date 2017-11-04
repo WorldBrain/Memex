@@ -17,9 +17,9 @@
 
 .ignoreDomainText,
 .blacklistText {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: bold;
     font-family: 'Lato';
-    color: #4c4a4b;
+    color: #666;
     margin: 20px 0 10px 0;
 }

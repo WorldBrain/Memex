@@ -28,8 +28,8 @@
         }
     },
     "icons": {
-        "16": "./img/worldbrain-logo-narrow-bw.png",
-        "48": "./img/worldbrain-logo-narrow-bw.png",
+        "16": "./img/worldbrain-logo-narrow-bw-16.png",
+        "48": "./img/worldbrain-logo-narrow-bw-48.png",
         "128": "./img/worldbrain-logo-narrow-bw.png"
     },
     "permissions": [

@@ -1,9 +1,17 @@
 import ImportContainer from './imports'
 import SettingsContainer from './containers/settings'
 import PrivacyContainer from './privacy/index'
-import AcknowledgmentContainer from './acknowledgement'
+import HelpContainer from './help/index'
+import Acknowledgments from './acknowledgement/components/content'
 
 export default [
+    {
+        name: 'Go back to Search',
+        pathname: '/overview/overview.html',
+        component: 'faq',
+        icon: 'search',
+    },
+
     {
         name: 'Import',
         pathname: '/import',
@@ -25,13 +33,13 @@ export default [
     {
         name: 'Acknowledgements',
         pathname: '/acknowledgements',
-        component: AcknowledgmentContainer,
+        component: Acknowledgments,
         icon: 'perm_identity',
     },
     {
         name: 'Help Me Please',
-        pathname: 'https://www.reddit.com/r/WorldBrain',
-        component: 'faq',
+        pathname: '/help',
+        component: HelpContainer,
         icon: 'help',
     },
 ]

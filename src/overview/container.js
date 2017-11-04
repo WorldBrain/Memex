@@ -87,7 +87,11 @@ class OverviewContainer extends Component {
         }
 
         if (this.props.noResults) {
-            return <ResultsMessage>No results</ResultsMessage>
+            return (
+                <ResultsMessage>
+                    No results found for this query. ¯\_(ツ)_/¯{' '}
+                </ResultsMessage>
+            )
         }
 
         if (this.props.isNewSearchLoading) {

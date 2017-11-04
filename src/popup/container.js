@@ -167,7 +167,7 @@ class PopupContainer extends Component {
                     icon="block"
                     btnClass={itemBtnBlacklisted}
                 >
-                    Current Page Blacklisted
+                    This Page is Blacklisted. Undo>>
                 </LinkButton>
             ) : (
                 <Button
@@ -237,7 +237,7 @@ class PopupContainer extends Component {
                     Import History &amp; Bookmarks
                 </LinkButton>
                 <LinkButton href={constants.FEEDBACK_URL} icon="feedback">
-                    Feedback
+                    I need Help!
                 </LinkButton>
             </div>
         )

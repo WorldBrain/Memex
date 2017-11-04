@@ -1,4 +1,4 @@
-.privacy {
+.help {
     font-family: 'Lato';
     margin-top: 20px;
 }
@@ -13,9 +13,24 @@
 .content {
     font-style: normal;
     margin-top: 20px;
+    margin-bottom: 30px;
     font-size: 14px;
     color: #b7b7b7;
     letter-spacing: 1px;
     width: 60%;
     min-width: 450px;
+}
+
+.title2 {
+    font-style: normal;
+    font-weight: bold;
+    font-size: 16px;
+    color: #666;
+    width: 60%;
+    min-width: 450px;
+}
+
+.link {
+    color: #928989;
+    font-weight: bolder;
 }

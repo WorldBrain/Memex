@@ -25,16 +25,11 @@ const BlacklistInputRow = ({
         />
 
         <div className={styles.inputButtons}>
-            {/* <button onClick={onInputClear} className={blacklistButton} disabled={isClearBtnDisabled}>
-                            <i className='material-icons'>backspace</i>
-                        </button> */}
-
             <button
                 onClick={onAdd}
                 className={styles.blacklistButton}
                 disabled={isSaveBtnDisabled}
             >
-                {/* <i className='material-icons'>save</i> */}
                 ADD TO BLACKLIST
             </button>
         </div>
