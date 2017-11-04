@@ -1,7 +1,6 @@
 import React from 'react'
 
 import Blacklist from '../../blacklist'
-// import { routeTitle, sectionTitle } from '../../base.css'
 import styles from './style.css'
 
 const SettingsContainer = () => (
@@ -15,11 +14,6 @@ const SettingsContainer = () => (
 
             <Blacklist />
         </section>
-        {/* <section className={styles.section}>
-                   <h2 className={sectionTitle}>Miscellaneous Preferences</h2>
-
-                   <Preferences />
-               </section> */}
     </div>
 )
 

@@ -1,3 +1,4 @@
+/** CURRENTLY UNUSED */
 import React, { Component } from 'react'
 import Contributor from './components/contributor'
 import Content from './components/content'
