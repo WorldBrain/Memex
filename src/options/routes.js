@@ -4,15 +4,22 @@ import PrivacyContainer from './privacy/index'
 import HelpContainer from './help/index'
 import Acknowledgements from './acknowledgement/components/content'
 import TutorialContainer from './tutorial'
+import newInstallContainer from './new_install'
 
 export default [
+    {
+        name: 'New install',
+        pathname: '/new_install',
+        component: newInstallContainer,
+        hideSidebar: true,
+        hideFromSidebar: true,
+    },
     {
         name: 'Go back to Search',
         pathname: '/overview/overview.html',
         component: 'faq',
         icon: 'search',
     },
-
     {
         name: 'Import',
         pathname: '/import',

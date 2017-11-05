@@ -25,7 +25,6 @@ const exec = pify(nodeExec)
 const staticFiles = {
     'src/manifest.json': 'extension',
     'src/update/*': 'extension/update',
-    'src/onboarding/*': 'extension/onboarding',
     'src/**/*.html': 'extension',
     'img/*': 'extension/img',
     'node_modules/webextension-polyfill/dist/browser-polyfill.js':

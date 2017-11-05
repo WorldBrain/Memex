@@ -90,7 +90,8 @@
 
     display: block;
 
-    width: 100%;
+    left: 0;
+    right: 0;
     padding: 0;
     margin: 0;
 
@@ -162,12 +163,12 @@
 }
 
 .slider {
-    font-size: 25px;
     text-align: center;
     width: 100%;
 }
 
 .h3 {
-    font-weight: 200;
     font-size: 35px;
+    font-weight: 100;
+    font-family: 'Libre Franklin', sans-serif;
 }
