@@ -34,7 +34,6 @@ class Layout extends Component {
 Layout.propTypes = {
     location: PropTypes.object.isRequired,
     children: PropTypes.object.isRequired,
-    routes: PropTypes.array.isRequired,
 }
 
 const mapStateToProps = state => ({})

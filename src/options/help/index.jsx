@@ -74,7 +74,6 @@ const HelpContainer = () => (
             Check out our{' '}
             <a
                 className={localStyles.link}
-                href="mailto:questions@worldbrain.io"
                 href="https://trello.com/b/mdqEuBjb/worldbrain-roadmap"
             >
                 public roadmap
