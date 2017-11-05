@@ -29,7 +29,7 @@ const timestampsBinSearch = (timestamps = [], endDate = Date.now()) => {
 }
 
 /**
- * @param {any} timeFilter
+ * @param {any} searchParams
  * @returns {(timestampsSet: Set<string>) => string} Function that returns latest timestamp in bookmarks/visits Set.
  */
 const initFindLatestTime = ({ endDate }) => timestampsSet => {
@@ -40,14 +40,16 @@ const initFindLatestTime = ({ endDate }) => timestampsSet => {
 
 /**
  * @param {IndexLookupDoc} resultDoc Contains `visits` and `bookmarks` Sets.
- * @param {any} timeFilter
+ * @param {any} searchParams
  * @returns {string} Latest visit or bookmark timestamp, depending on available data.
  */
-function getLatestTime({ visits, bookmarks }, timeFilter) {
-    const findLatest = initFindLatestTime(timeFilter)
+function getLatestTime({ visits, bookmarks }, searchParams) {
+    const findLatest = initFindLatestTime(searchParams)
 
-    // Only use bookmark times if no visits
-    return !visits.size ? findLatest(bookmarks) : findLatest(visits)
+    // Only use bookmark times if no visits, or bookmarks filter on
+    return !visits.size || searchParams.showOnlyBookmarks
+        ? findLatest(bookmarks)
+        : findLatest(visits)
 }
 
 /**
@@ -56,11 +58,11 @@ function getLatestTime({ visits, bookmarks }, timeFilter) {
 * @param {Array<any>} results Array of search index results.
 * @returns {Map<string, any>} Map with page ID keys and values containing needed search result data.
 */
-const createResultsMap = timeFilters =>
+const createResultsMap = searchParams =>
     reduce(
         (acc, result) =>
             acc.set(result.id, {
-                timestamp: getLatestTime(result.document, timeFilters),
+                timestamp: getLatestTime(result.document, searchParams),
                 score: result.score,
                 hasBookmark: result.document.bookmarks.size > 0,
             }),
@@ -77,11 +79,12 @@ const sortByScore = resultsMap => (docA, docB) =>
 * call these "augmented page docs", and are generally only used by the overview.
 *
 * @param {Array<any>} results Array of results gotten from our search-index query.
+* @param {any} searchParams Same params as main search entrypoint accepts.
 * @returns {Array<any>} Array of augmented page docs containing linked meta doc timestamps.
 */
-export default async function mapResultsToPouchDocs(results, timeFilters) {
+export default async function mapResultsToPouchDocs(results, searchParams) {
     // Convert results to dictionary of page IDs to related meta IDs
-    const resultsMap = createResultsMap(timeFilters)(results)
+    const resultsMap = createResultsMap(searchParams)(results)
 
     // Format IDs of docs needed to be immediately fetched from Pouch
     const bulkGetInput = results.map(result => ({ id: result.document.id }))
