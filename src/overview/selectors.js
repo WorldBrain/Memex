@@ -23,11 +23,6 @@ export const currentQueryParams = createSelector(
     state => state.currentQueryParams,
 )
 
-export const isEmptyQuery = createSelector(
-    currentQueryParams,
-    ({ query, startDate, endDate }) => !query.length && !startDate && !endDate,
-)
-
 export const isLoading = createSelector(overview, state => state.isLoading)
 export const noResults = createSelector(
     resultDocs,
@@ -81,3 +76,10 @@ export const isNewSearchLoading = createSelector(
 )
 export const showFilter = state => overview(state).showFilter
 export const showOnlyBookmarks = state => overview(state).showOnlyBookmarks
+
+export const isEmptyQuery = createSelector(
+    currentQueryParams,
+    showOnlyBookmarks,
+    ({ query, startDate, endDate }, showOnlyBookmarks) =>
+        !query.length && !startDate && !endDate && !showOnlyBookmarks,
+)
