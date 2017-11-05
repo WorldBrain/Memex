@@ -30,8 +30,19 @@ const AcknowledgementContainer = () => (
         </span>
         <p className={localStyles.contributeContent}>
             You can do so either by supporting our development with{' '}
-            <a href="https://github.com/WorldBrain/WebMemex/">your mind</a> or{' '}
-            <a href="https://patreon.com/WorldBrain">your money</a>.
+            <a
+                className={localStyles.links}
+                href="https://github.com/WorldBrain/WebMemex/"
+            >
+                your mind
+            </a>{' '}
+            or{' '}
+            <a
+                className={localStyles.links}
+                href="https://patreon.com/WorldBrain"
+            >
+                your money
+            </a>.
         </p>
     </div>
 )

@@ -10,6 +10,7 @@ const Help = () => (
             <p className={localStyles.title2}>How do I use this tool?</p>
             Watch a{' '}
             <a
+                target="_blank"
                 className={localStyles.link}
                 href="https://worldbrain.io/tutorial"
             >
@@ -18,7 +19,7 @@ const Help = () => (
             or read the more detailed{' '}
             <a
                 className={localStyles.link}
-                href="options/options.html#/tutorial"
+                href="/options/options.html#/tutorial"
             >
                 step by step guide
             </a>.
@@ -28,6 +29,7 @@ const Help = () => (
             <p className={localStyles.title2}>I have QUESTIONS. </p>
             You can visit our{' '}
             <a
+                target="_blank"
                 className={localStyles.link}
                 href="https://www.reddit.com/r/WorldBrain/"
             >
@@ -35,6 +37,7 @@ const Help = () => (
             </a>{' '}
             or you can write us an email:{' '}
             <a
+                target="_blank"
                 className={localStyles.link}
                 href="mailto:questions@worldbrain.io"
             >
@@ -48,6 +51,7 @@ const Help = () => (
             </p>
             Bugs you best report on{' '}
             <a
+                target="_blank"
                 className={localStyles.link}
                 href="https://www.github.com/WorldBrain/WebMemex/issues/new"
             >
@@ -56,12 +60,14 @@ const Help = () => (
             </a>. <br />
             Feature requests can be made {' '}
             <a
+                target="_blank"
                 className={localStyles.link}
                 href="https://worldbrain.typeform.com/to/KIRrZ2"
             >
                 with this form{' '}
             </a>
             or via email (<a
+                target="_blank"
                 className={localStyles.link}
                 href="mailto:questions@worldbrain.io"
             >
@@ -73,6 +79,7 @@ const Help = () => (
             <p className={localStyles.title2}>Whats your ROADMAP?</p>
             Check out our{' '}
             <a
+                target="_blank"
                 className={localStyles.link}
                 href="https://trello.com/b/mdqEuBjb/worldbrain-roadmap"
             >
@@ -80,6 +87,7 @@ const Help = () => (
             </a>{' '}
             or make {' '}
             <a
+                target="_blank"
                 className={localStyles.link}
                 href="https://worldbrain.typeform.com/to/KIRrZ2"
             >
