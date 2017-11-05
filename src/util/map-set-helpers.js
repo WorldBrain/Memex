@@ -1,3 +1,5 @@
+// TODO: either make these more consistent or find some util lib that does the same
+
 /**
  * @param {Map<any,any>[]} mapArr
  * @returns {Map<any,any>} Intersection Map of all input maps
@@ -44,3 +46,9 @@ export const containsEmptyVals = iterable =>
  */
 export const unionNestedMaps = map =>
     new Map([...map.values()].reduce((acc, value) => [...acc, ...value], []))
+
+/**
+ * Performs set difference on the provided Maps.
+ */
+export const differMaps = b => a =>
+    new Map([...a].filter(([key]) => !b.has(key)))

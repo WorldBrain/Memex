@@ -86,8 +86,7 @@ const finishImportsReducer = ({ loading = false }) => state => ({
 const prepareImportReducer = state => ({
     ...state,
     importStatus: STATUS.LOADING,
-    loadingMsg:
-        'Preparing import. Can take a few minutes for large histories...',
+    loadingMsg: 'Preparing import.',
 })
 
 const cancelImportReducer = state => ({

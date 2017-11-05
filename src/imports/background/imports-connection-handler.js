@@ -1,6 +1,5 @@
-import uniqBy from 'lodash/fp/uniqBy'
-
 import PromiseBatcher from 'src/util/promise-batcher'
+import { decode } from 'src/util/encode-url-for-id'
 import {
     CMDS,
     IMPORT_CONN_NAME,
@@ -23,41 +22,27 @@ import {
     clearImportInProgressFlag,
 } from '../'
 
-const uniqByUrl = uniqBy('url')
-
-// Binds an import type to a function that transforms a history/bookmark doc to an import item.
-const transformToImportItem = type => item => ({
-    browserId: item.id,
-    url: item.url,
-    // HistoryItems contain lastVisitTime while BookmarkTreeNodes contain dateAdded
-    timestamp: item.lastVisitTime || item.dateAdded,
-    type,
-})
-
 /**
- * Handles building the list of import items in local storage. Note that these are only
- * built in local storage as a way to persist them.
+ * Handles building the collection of import items in local storage.
+ *
  * @param {any} allowTypes Object containings bools for each valid type of import, denoting whether
  *   or not import and page docs should be created for that import type.
  */
 async function prepareImportItems(allowTypes = {}) {
-    const historyItems = allowTypes[IMPORT_TYPE.HISTORY]
+    const historyItemsMap = allowTypes[IMPORT_TYPE.HISTORY]
         ? await getURLFilteredHistoryItems()
-        : []
-    const bookmarkItems = allowTypes[IMPORT_TYPE.BOOKMARK]
+        : new Map()
+    const bookmarkItemsMap = allowTypes[IMPORT_TYPE.BOOKMARK]
         ? await getURLFilteredBookmarkItems()
-        : []
-    const oldExtItems = allowTypes[IMPORT_TYPE.OLD]
-        ? (await getOldExtItems()).importItems
-        : []
+        : new Map()
+    const oldExtItemsMap = allowTypes[IMPORT_TYPE.OLD]
+        ? (await getOldExtItems()).importItemsMap
+        : new Map()
 
-    // Create import items for all created page stubs
+    // Union all import item maps, allowing old ext items precedence over bookmarks which have
+    //  precedence over history
     await setImportItems(
-        uniqByUrl([
-            ...historyItems.map(transformToImportItem(IMPORT_TYPE.HISTORY)),
-            ...bookmarkItems.map(transformToImportItem(IMPORT_TYPE.BOOKMARK)),
-            ...oldExtItems,
-        ]),
+        new Map([...historyItemsMap, ...bookmarkItemsMap, ...oldExtItemsMap]),
     )
 }
 
@@ -70,14 +55,20 @@ async function prepareImportItems(allowTypes = {}) {
  */
 const getBatchObserver = port => {
     const handleFinishedItem = ({
-        input: { url, type },
+        input: [encodedUrl, { type }],
         output: { status } = {},
         error,
     }) => {
         // Send item data + outcome status down to UI (and error if present)
-        port.postMessage({ cmd: CMDS.NEXT, url, type, status, error })
+        port.postMessage({
+            cmd: CMDS.NEXT,
+            url: decode(encodedUrl),
+            type,
+            status,
+            error,
+        })
 
-        removeImportItem(url)
+        removeImportItem(encodedUrl)
     }
 
     return {
@@ -132,8 +123,6 @@ async function cancelImport(port, batch) {
     // Clean up any import-related stubs or state
     await clearImportItems()
 
-    // TODO: Make sure to reindex so that the progress up until cancelled point is usable
-
     // Resume UI at complete state
     port.postMessage({ cmd: CMDS.COMPLETE })
     clearImportInProgressFlag()
@@ -152,7 +141,7 @@ export default async function importsConnectionHandler(port) {
     const batch = new PromiseBatcher({
         inputBatchCallback: getImportItems,
         processingCallback: processImportItem,
-        concurrency: 1,
+        concurrency: 3,
         observer: getBatchObserver(port),
     })
 
