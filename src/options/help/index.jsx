@@ -2,7 +2,7 @@ import React from 'react'
 
 import localStyles from './styles.css'
 
-const HelpContainer = () => (
+const Help = () => (
     <div className={localStyles.help}>
         <span className={localStyles.title}> What can we help you with?</span>
 
@@ -90,4 +90,4 @@ const HelpContainer = () => (
     </div>
 )
 
-export default HelpContainer
+export default Help

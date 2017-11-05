@@ -1,16 +1,16 @@
 import ImportContainer from './imports'
 import SettingsContainer from './containers/settings'
-import PrivacyContainer from './privacy/index'
-import HelpContainer from './help/index'
+import Privacy from './privacy/index'
+import Help from './help/index'
 import Acknowledgements from './acknowledgement/components/content'
-import TutorialContainer from './tutorial'
-import newInstallContainer from './new_install'
+import Tutorial from './tutorial'
+import NewInstall from './new-install'
 
 export default [
     {
         name: 'New install',
         pathname: '/new_install',
-        component: newInstallContainer,
+        component: NewInstall,
         hideSidebar: true,
         hideFromSidebar: true,
     },
@@ -35,7 +35,7 @@ export default [
     {
         name: 'Privacy',
         pathname: '/privacy',
-        component: PrivacyContainer,
+        component: Privacy,
         icon: 'security',
     },
     {
@@ -47,13 +47,13 @@ export default [
     {
         name: 'Help Me Please',
         pathname: '/help',
-        component: HelpContainer,
+        component: Help,
         icon: 'help',
     },
     {
         name: 'Tutorial',
         pathname: '/tutorial',
-        component: TutorialContainer,
+        component: Tutorial,
         icon: 'info',
     },
 ]

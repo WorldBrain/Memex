@@ -2,7 +2,7 @@ import React from 'react'
 
 import localStyles from './styles.css'
 
-const PrivacyContainer = () => (
+const Privacy = () => (
     <div className={localStyles.privacy}>
         <span className={localStyles.title}>
             {' '}
@@ -23,4 +23,4 @@ const PrivacyContainer = () => (
     </div>
 )
 
-export default PrivacyContainer
+export default Privacy

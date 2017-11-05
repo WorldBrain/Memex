@@ -9,7 +9,7 @@ const settings = {
     arrows: true,
 }
 
-const TutorialContainer = () => (
+const Tutorial = () => (
     <div>
         <Slider {...settings}>
             <div>
@@ -149,4 +149,4 @@ const TutorialContainer = () => (
     </div>
 )
 
-export default TutorialContainer
+export default Tutorial

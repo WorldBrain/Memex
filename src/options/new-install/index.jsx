@@ -1,5 +1,6 @@
 import React from 'react'
 import Slider from 'react-slick'
+
 import localStyles from './styles.css'
 
 const settings = {
@@ -12,7 +13,7 @@ const settings = {
     centerPadding: true,
 }
 
-const newInstallContainer = () => (
+const NewInstall = () => (
     <div className={localStyles.content}>
         <h1 className={localStyles.heyyou}>Hey you, welcome to</h1>
         <img className={localStyles.logobig} src="/img/worldbrain-logo.png" />
@@ -68,4 +69,4 @@ const newInstallContainer = () => (
     </div>
 )
 
-export default newInstallContainer
+export default NewInstall
