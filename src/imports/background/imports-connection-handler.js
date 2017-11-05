@@ -23,8 +23,8 @@ import {
 } from '../'
 
 /**
- * Handles building the list of import items in local storage. Note that these are only
- * built in local storage as a way to persist them.
+ * Handles building the collection of import items in local storage.
+ *
  * @param {any} allowTypes Object containings bools for each valid type of import, denoting whether
  *   or not import and page docs should be created for that import type.
  */

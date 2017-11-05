@@ -122,11 +122,11 @@ async function processOldExtImport(importItem) {
 /**
  * Given an import state item, performs appropriate processing depending on the import type.
  *
- * @param {IImportItem} importItem The import state item to process.
- * @returns {any} Status string denoting the outcome of import processing as `status`
+ * @param {[string, IImportItem]} Key-value pair of encoded URL to import item value.
+ * @returns {string} Status string denoting the outcome of import processing as `status`
  *  + optional filled-out page doc as `pageDoc` field.
  */
-export default async function processImportItem([url, importItem = {}]) {
+export default async function processImportItem([encodedUrl, importItem = {}]) {
     switch (importItem.type) {
         case IMPORT_TYPE.BOOKMARK:
         case IMPORT_TYPE.HISTORY:

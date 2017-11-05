@@ -11,7 +11,8 @@ import {
 
 /**
  * Handles calculating the estimate counts for history and bookmark imports.
- * @returns {any} The state containing import estimates completed and remaining counts.
+ *
+ * @returns {Promise<any>} The state containing import estimates completed and remaining counts for each import type.
  */
 export default async function getEstimateCounts() {
     // Grab needed data from browser API (filtered by whats already in DB)
@@ -24,7 +25,7 @@ export default async function getEstimateCounts() {
     bookmarkItemsMap = differMaps(oldExtItems.importItemsMap)(bookmarkItemsMap)
     historyItemsMap = differMaps(bookmarkItemsMap)(historyItemsMap)
 
-    // Grab needed data from DB
+    // Grab existing data counts from DB
     const { rows: pageDocs } = await db.allDocs({
         startkey: pageKeyPrefix,
         endkey: `${pageKeyPrefix}\uffff`,

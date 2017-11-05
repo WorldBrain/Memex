@@ -19,6 +19,9 @@ export const getImportItems = async () => {
     return new Map(data)
 }
 
+/**
+ * @param {Map<string, IImportItem>} items Import items collection to become the new state.
+ */
 export const setImportItems = items =>
     browser.storage.local.set({
         [importStateStorageKey]: Array.from(items),
@@ -27,6 +30,20 @@ export const setImportItems = items =>
 export const clearImportItems = () =>
     browser.storage.local.remove(importStateStorageKey)
 
+/**
+ * @param {string} encodedUrl The URL to remove from imports items' collection state.
+ */
+export const removeImportItem = async encodedUrl => {
+    const importItemsMap = await getImportItems()
+    importItemsMap.delete(encodedUrl)
+    await setImportItems(importItemsMap)
+}
+
+/**
+ * Removes local storage entry representing single page data in the old ext.
+ *
+ * @param {string} oldExtKey Local storage key to remove.
+ */
 export async function clearOldExtData(oldExtKey) {
     const {
         [OLD_EXT_KEYS.NUM_DONE]: numDone,
@@ -40,15 +57,6 @@ export async function clearOldExtData(oldExtKey) {
     })
     // Remove old ext page item
     await browser.storage.local.remove(oldExtKey)
-}
-
-/**
- * @param url The URL to match against all items in import state. Item with matching URL will be removed.
- */
-export const removeImportItem = async url => {
-    const importItemsMap = await getImportItems()
-    importItemsMap.delete(url)
-    await setImportItems(importItemsMap)
 }
 
 // Binds old ext bookmark urls to a function that transforms old ext data to an import item
@@ -69,7 +77,8 @@ const transformBrowserItemToImportItem = type => item => ({
 })
 
 /**
- * @returns A function affording checking of a URL against the URLs of existing page docs.
+ * @returns {({ url: string }) => boolean} A function affording checking of a URL against the
+ *  URLs of existing page docs.
  */
 async function checkWithExistingDocs() {
     const { rows: existingPageDocs } = await db.allDocs({
@@ -91,8 +100,8 @@ async function checkWithExistingDocs() {
  * Handles performing blacklist and pending import filtering logic on any type
  * of items containing a `url` field.
  *
- * @param {Iterable<any>} items Some Iterable of items of any shape, as long as they contain `url` field.
- * @returns {Iterable<any>} Filtered version of the items arg.
+ * @param {Array<any>} items Some Iterable of items of any shape, as long as they contain `url` field.
+ * @returns {Array<any>} Filtered version of the items arg.
  */
 async function filterItemsByUrl(items, type) {
     const isNotBlacklisted = await checkWithBlacklist()
