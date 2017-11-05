@@ -41,7 +41,7 @@ function setOmniboxMessage(text) {
 const pageToSuggestion = timeFilterApplied => doc => {
     const url = escapeHtml(shortUrl(doc.url))
     const title = escapeHtml(doc.content.title)
-    const time = formatTime(doc[doc.displayType], timeFilterApplied)
+    const time = formatTime(+doc.displayTime, timeFilterApplied)
 
     return {
         content: doc.url,

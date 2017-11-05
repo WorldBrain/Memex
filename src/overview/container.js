@@ -21,9 +21,9 @@ class OverviewContainer extends Component {
         isNewSearchLoading: PropTypes.bool.isRequired,
         noResults: PropTypes.bool.isRequired,
         isBadTerm: PropTypes.bool.isRequired,
-        showOnlyBookmarks: PropTypes.bool.isRequired,
         searchResults: PropTypes.arrayOf(PropTypes.object).isRequired,
         needsWaypoint: PropTypes.bool.isRequired,
+        handleTrashBtnClick: PropTypes.func.isRequired,
     }
 
     componentDidMount() {
@@ -43,32 +43,27 @@ class OverviewContainer extends Component {
     }
 
     renderResultItems() {
-        const {
-            searchResults,
-            onBottomReached,
-            isLoading,
-            needsWaypoint,
-            showOnlyBookmarks,
-        } = this.props
-
-        const resultItems = searchResults.map(doc => (
+        const resultItems = this.props.searchResults.map(doc => (
             <li key={doc._id}>
                 <PageResultItem
-                    doc={doc}
-                    showOnlyBookmarks={showOnlyBookmarks}
+                    onTrashBtnClick={this.props.handleTrashBtnClick(doc.url)}
+                    {...doc}
                 />
             </li>
         ))
 
         // Insert waypoint at the end of results to trigger loading new items when scrolling down
-        if (needsWaypoint) {
+        if (this.props.needsWaypoint) {
             resultItems.push(
-                <Waypoint onEnter={onBottomReached} key="waypoint" />,
+                <Waypoint
+                    onEnter={this.props.onBottomReached}
+                    key="waypoint"
+                />,
             )
         }
 
-        // Add loading spinner to the list end, if loading (may change this)
-        if (isLoading) {
+        // Add loading spinner to the list end, if loading
+        if (this.props.isLoading) {
             resultItems.push(<LoadingIndicator key="loading" />)
         }
 
@@ -131,8 +126,8 @@ const mapStateToProps = state => ({
     showOnlyBookmarks: selectors.showOnlyBookmarks(state),
 })
 
-const mapDispatchToProps = dispatch =>
-    bindActionCreators(
+const mapDispatchToProps = dispatch => ({
+    ...bindActionCreators(
         {
             onInputChange: actions.setQuery,
             onStartDateChange: actions.setStartDate,
@@ -144,6 +139,11 @@ const mapDispatchToProps = dispatch =>
             onShowOnlyBookmarksChange: actions.toggleBookmarkFilter,
         },
         dispatch,
-    )
+    ),
+    handleTrashBtnClick: url => event => {
+        event.preventDefault()
+        dispatch(actions.showDeleteConfirm(url))
+    },
+})
 
 export default connect(mapStateToProps, mapDispatchToProps)(OverviewContainer)

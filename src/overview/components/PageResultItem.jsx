@@ -1,108 +1,62 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { connect } from 'react-redux'
 import classNames from 'classnames'
 
 import niceTime from 'src/util/nice-time'
-
 import ImgFromPouch from './ImgFromPouch'
 import styles from './PageResultItem.css'
-import { showDeleteConfirm } from '../actions'
-import * as constants from '../constants'
 
-// Format either visit, bookmark, or nothing, depending on doc `displayType`.
-const renderTime = ({ doc }) =>
-    doc.displayType !== constants.RESULT_TYPES.UNKNOWN
-        ? niceTime(doc[doc.displayType])
-        : ''
-
-const getMainClasses = ({ compact }) =>
-    classNames({
-        [styles.root]: true,
-        [styles.compact]: compact,
+const getBookmarkClass = ({ hasBookmark }) =>
+    classNames(styles.button, {
+        [styles.bookmark]: hasBookmark,
+        [styles.notBookmark]: !hasBookmark,
     })
 
-const getBookmarkClass = ({ doc, showOnlyBookmarks }) => {
-    const isBookmark =
-        showOnlyBookmarks || doc.displayType === constants.RESULT_TYPES.BOOKMARK
-
-    return classNames({
-        [styles.button]: true,
-        [styles.bookmark]: isBookmark,
-        [styles.notBookmark]: !isBookmark,
-    })
-}
-
-const PageResultItem = ({
-    doc,
-    onTrashButtonClick,
-    compact = false,
-    showOnlyBookmarks,
-}) => {
-    const hasFavIcon = !!(doc._attachments && doc._attachments.favIcon)
-    const favIcon = hasFavIcon && (
-        <ImgFromPouch
-            className={styles.favIcon}
-            doc={doc}
-            attachmentId="favIcon"
-        />
-    )
-
-    return (
-        <a
-            className={getMainClasses({ compact })}
-            href={doc.url}
-            target="_blank"
-        >
-            <div className={styles.screenshotContainer}>
-                {doc._attachments && doc._attachments.screenshot ? (
-                    <ImgFromPouch
-                        className={styles.screenshot}
-                        doc={doc}
-                        attachmentId="screenshot"
-                    />
-                ) : (
-                    <img
-                        className={styles.screenshot}
-                        src="/img/null-icon.png"
-                    />
-                )}
-            </div>
-            <div className={styles.descriptionContainer}>
-                <div className={styles.title} title={doc.title}>
-                    {hasFavIcon && favIcon}
-                    {doc.title}
-                </div>
-                <div className={styles.url}>{doc.url}</div>
-                <div className={styles.time}>{renderTime({ doc })}</div>
-            </div>
-            <div className={styles.buttonsContainer}>
-                <button
-                    className={getBookmarkClass({ doc, showOnlyBookmarks })}
+const PageResultItem = props => (
+    <a className={styles.root} href={props.url} target="_blank">
+        <div className={styles.screenshotContainer}>
+            {props._attachments && props._attachments.screenshot ? (
+                <ImgFromPouch
+                    className={styles.screenshot}
+                    doc={props}
+                    attachmentId="screenshot"
                 />
-                <button
-                    className={`${styles.button} ${styles.trash}`}
-                    onClick={onTrashButtonClick}
-                />
+            ) : (
+                <img className={styles.screenshot} src="/img/null-icon.png" />
+            )}
+        </div>
+        <div className={styles.descriptionContainer}>
+            <div className={styles.title} title={props.title}>
+                {props._attachments &&
+                    props._attachments.favIcon && (
+                        <ImgFromPouch
+                            className={styles.favIcon}
+                            doc={props}
+                            attachmentId="favIcon"
+                        />
+                    )}
+                {props.title}
             </div>
-        </a>
-    )
-}
+            <div className={styles.url}>{props.url}</div>
+            <div className={styles.time}>{niceTime(+props.displayTime)}</div>
+        </div>
+        <div className={styles.buttonsContainer}>
+            <button className={getBookmarkClass(props)} />
+            <button
+                className={classNames(styles.button, styles.trash)}
+                onClick={props.onTrashBtnClick}
+            />
+        </div>
+    </a>
+)
 
 PageResultItem.propTypes = {
-    doc: PropTypes.object.isRequired,
-    compact: PropTypes.bool,
-    showOnlyBookmarks: PropTypes.bool,
-    onTrashButtonClick: PropTypes.func,
+    _attachments: PropTypes.object.isRequired,
+    displayTime: PropTypes.string.isRequired,
+    url: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+    hasBookmark: PropTypes.bool.isRequired, // eslint-disable-line
+    onTrashBtnClick: PropTypes.func.isRequired,
 }
 
-const mapStateToProps = state => ({})
-
-const mapDispatchToProps = (dispatch, { doc }) => ({
-    onTrashButtonClick: e => {
-        e.preventDefault()
-        dispatch(showDeleteConfirm(doc.url))
-    },
-})
-
-export default connect(mapStateToProps, mapDispatchToProps)(PageResultItem)
+export default PageResultItem
