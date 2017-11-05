@@ -28,7 +28,6 @@ async function removeBookmarkByUrl(url) {
     await index.put(pageId, {
         ...reverseIndexDoc,
         bookmarks: new Set(),
-        type: 'visit',
     })
 
     // Remove corresponding bookmark docs from pouch

@@ -2,7 +2,7 @@ import normalizeUrl from 'normalize-url'
 
 import transformPageText from 'src/util/transform-page-text'
 import { convertMetaDocId } from 'src/activity-logger'
-import { getLatestMeta, extractContent, keyGen } from './util'
+import { extractContent, keyGen } from './util'
 import { DEFAULT_TERM_SEPARATOR } from '.'
 
 // Simply extracts the timestamp component out the ID of a visit or bookmark doc,
@@ -45,7 +45,6 @@ function transformUrl(url) {
  * @typedef IndexLookupDoc
  * @type {Object}
  * @property {string} latest Latest visit/bookmark timestamp time for easy scoring.
- * @property {string} type Enum of either 'bookmark' or 'visit'.
  * @property {string} domain Filter term extracted from page URL.
  * @property {Set} urlTerms Set of searchable terms extracted from page URL.
  * @property {Set} terms Set of searchable terms extracted from page content.
@@ -120,7 +119,6 @@ export default function pipeline({
 
     return Promise.resolve({
         id,
-        ...getLatestMeta(visits, bookmarks),
         terms,
         urlTerms: urlTerms || new Set(),
         domain: keyGen.domain(hostname),

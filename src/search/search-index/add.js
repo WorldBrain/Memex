@@ -1,6 +1,11 @@
 import index, { indexQueue } from '.'
 import pipeline from './pipeline'
-import { initSingleLookup, initLookupByKeys, idbBatchToPromise } from './util'
+import {
+    augmentIndexLookupDoc,
+    initSingleLookup,
+    initLookupByKeys,
+    idbBatchToPromise,
+} from './util'
 
 const lookupByKeys = initLookupByKeys()
 const singleLookup = initSingleLookup()
@@ -111,17 +116,24 @@ async function indexMetaTimestamps(indexDoc) {
 async function indexPage(indexDoc) {
     const existingDoc = await singleLookup(indexDoc.id)
 
-    if (!existingDoc) {
-        return index.put(indexDoc.id, indexDoc)
-    }
-
     // Ensure the terms and meta timestamps get merged with existing
-    return index.put(indexDoc.id, {
-        ...indexDoc,
-        terms: new Set([...existingDoc.terms, ...indexDoc.terms]),
-        visits: new Set([...existingDoc.visits, ...indexDoc.visits]),
-        bookmarks: new Set([...existingDoc.bookmarks, ...indexDoc.bookmarks]),
-    })
+    const newIndexDoc = !existingDoc
+        ? indexDoc
+        : {
+              ...indexDoc,
+              terms: new Set([...existingDoc.terms, ...indexDoc.terms]),
+              titleTerms: new Set([
+                  ...existingDoc.titleTerms,
+                  ...indexDoc.titleTerms,
+              ]),
+              visits: new Set([...existingDoc.visits, ...indexDoc.visits]),
+              bookmarks: new Set([
+                  ...existingDoc.bookmarks,
+                  ...indexDoc.bookmarks,
+              ]),
+          }
+
+    return index.put(indexDoc.id, augmentIndexLookupDoc(newIndexDoc))
 }
 
 /**
