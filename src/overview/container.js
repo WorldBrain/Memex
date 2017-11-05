@@ -55,7 +55,6 @@ class OverviewContainer extends Component {
             <li key={doc._id}>
                 <PageResultItem
                     doc={doc}
-                    sizeInMB={doc.freezeDrySize}
                     showOnlyBookmarks={showOnlyBookmarks}
                 />
             </li>

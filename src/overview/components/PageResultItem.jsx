@@ -35,7 +35,6 @@ const getBookmarkClass = ({ doc, showOnlyBookmarks }) => {
 
 const PageResultItem = ({
     doc,
-    sizeInMB,
     onTrashButtonClick,
     compact = false,
     showOnlyBookmarks,
@@ -84,7 +83,6 @@ const PageResultItem = ({
                 <button
                     className={`${styles.button} ${styles.trash}`}
                     onClick={onTrashButtonClick}
-                    title={`Forget this item (${sizeInMB} MB)`}
                 />
             </div>
         </a>
@@ -93,7 +91,6 @@ const PageResultItem = ({
 
 PageResultItem.propTypes = {
     doc: PropTypes.object.isRequired,
-    sizeInMB: PropTypes.string.isRequired,
     compact: PropTypes.bool,
     showOnlyBookmarks: PropTypes.bool,
     onTrashButtonClick: PropTypes.func,
