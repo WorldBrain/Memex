@@ -22,7 +22,7 @@ There are 2 ways to search your history. In the Omnibar or through the Overview.
 Have a website you don't want worldbrain to log? It's easy to choose either a whole domain or specific address.
 **Note by default worldbrain doesn't run in "incognito" or "private" windows**
 
-**For a site you are currently visitings**
+**For a site you are currently visiting**
 1. Click the worldbrain extension
 2. Click `Blacklist`
 3. Choose either the whole domain or the specific url
@@ -37,7 +37,7 @@ Have a website you don't want worldbrain to log? It's easy to choose either a wh
 ![](https://github.com/swissums/worldbrain-doc-gifs/raw/master/blacklist.gif)
 
 ### Import
-Want to import all your previous history items to making searching even better?
+Want to import all your previous history items to make searching even better?
 
 1. Click on the worldbrain extension
 2. Click `Settings`

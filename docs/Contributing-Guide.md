@@ -3,7 +3,7 @@
 **If you are a Developer head to [Getting Started](#getting-started)**
 
 **If you are a Designer, Marketer, or Investor**
-    Please Email Oliver Sauter: oli@worldbrain.io
+    Please Email Oliver Sauter: info@worldbrain.io
 
 **If you would like to donate a bit of money**
 Please support us on [Patreon](https://www.patreon.com/WorldBrain) :moneybag:
@@ -46,9 +46,9 @@ $ yarn
 $ yarn watch
 ```
 
-**For Windows Users! Please run: **TODO****
+**For Windows Users! Please run:**
 ```sh
-$ yarn watch **TODO**
+$ yarn watch
 ```
 
 ## Running The Extension
@@ -74,7 +74,7 @@ As of now it should work in most modern browsers except Safari (we mainly use Ch
 6. All Finished! :tada: For more info see: [creating multiple profiles](https://developer.mozilla.org/en-US/Firefox/Multiple_profiles)
 
 ### Running + Debugging
-*Chrome*
+*Chrome:*
 1. Open a `New Tab`
 3. Type [chrome://extensions](chrome://extensions) into the address bar
 5. At this point, it is recommended to bookmark `Extensions` for ease of use in development
@@ -86,7 +86,7 @@ As of now it should work in most modern browsers except Safari (we mainly use Ch
 
 **Note:** This is only for debugging the [background scripts](#code-overview). [Content-Script](#code-overview]) works within the reg dev tools of any given tab and the [Options](#srcoptions-the-settings-page), [Overview](#srcoverview-overview) and [Popup](#srcpopup-extension-popup) UI dev tools can be accesed by `right click Inspect` on the given element.
 
-*Firefox*
+*Firefox:*
 1. Enter [about:debugging](about:debugging) into the address bar
 2. Check the `Enable add-on debugging` box
 3. Click `Load Temporary Add-on`
@@ -238,7 +238,7 @@ This just wraps the content scripts of activity-logger and page analysis for use
 
 Allows a user to type `w` + `space_bar` to search through worldbrain without leaving the search bar.
 
-See (Mozilla Omnibox Docs)[https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/omnibox] for more details
+See [Mozilla Omnibox Docs](https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/omnibox) for more details
 
 #### **[src/pouchdb.js](../src/omnibar.js)**: Our Persistent Browser Database
 

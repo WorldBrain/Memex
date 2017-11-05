@@ -40,7 +40,7 @@ We are currently on the cusp of releasing a brand new version of the extension. 
 The old one can still be found here: worldbrain.io/download
 
 Want to help out? If you are:
- - A Marketer, A Designer or Investor please Email oli@worldbrain.io
+ - A Marketer, A Designer or Investor please Email info@worldbrain.io
  - If want to [donate click here](https://www.patreon.com/WorldBrain)! :moneybag:
 
 **If your a developer Please see [Contributing!](./docs/Contributing-Guide.md)**
@@ -53,7 +53,7 @@ Have questions?
 
 ## How the Worldbrain Extension Works
 
-As you browse through websites WorldBrain will work automatically in the background see our [intro video](https://youtu.be/58Gys3ff4b8) for more information. When you are ready to search through your history follow the steps below.
+As you browse through websites WorldBrain will work automatically in the background see our [intro video](https://youtu.be/rtYA8_taswk) for more information. When you are ready to search through your history follow the steps below.
 
 1. Go to the address bar of your browser
 2. Type `w` + `space_bar`
