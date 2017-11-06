@@ -24,8 +24,11 @@ export const showFilter = createAction('overview/showFilter')
 export const toggleBookmarkFilter = createAction(
     'overview/toggleBookmarkFilter',
 )
+export const changeHasBookmark = createAction('overview/changeHasBookmark')
 
 const deleteDocsByUrl = remoteFunction('deleteDocsByUrl')
+const createBookmarkByExtension = remoteFunction('createBookmarkByExtension')
+const removeBookmarkByUrl = remoteFunction('removeBookmarkByUrl')
 
 const getCmdMessageHandler = dispatch => ({ cmd, ...payload }) => {
     switch (cmd) {
@@ -125,4 +128,11 @@ export const deleteDocs = () => async (dispatch, getState) => {
 
     // Refresh search view after deleting all assoc docs
     dispatch(search({ overwrite: true }))
+}
+
+export const toggleBookmark = (url, index) => async (dispatch, getState) => {
+    const results = selectors.results(getState())
+    console.log(url, index)
+    if (results[index].hasBookmark) await removeBookmarkByUrl(url)
+    else await createBookmarkByExtension(url)
 }

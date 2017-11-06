@@ -166,9 +166,19 @@
 }
 
 .bookmark {
-    background-image: url('/img/starFull.png');
+    background-image: url('/img/star_full_grey.png');
+}
+
+.bookmark:hover {
+    opacity: 0.5;
+    background-image: url('/img/star_full_3EB995.png');
 }
 
 .notBookmark {
-    background-image: url('/img/star.png');
+    background-image: url('/img/star_empty_grey.png');
+}
+
+.notBookmark:hover {
+    opacity: 0.5;
+    background-image: url('/img/star_empty_3EB995.png');
 }

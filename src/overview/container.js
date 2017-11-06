@@ -24,6 +24,7 @@ class OverviewContainer extends Component {
         searchResults: PropTypes.arrayOf(PropTypes.object).isRequired,
         needsWaypoint: PropTypes.bool.isRequired,
         handleTrashBtnClick: PropTypes.func.isRequired,
+        handleToggleBookmarkClick: PropTypes.func.isRequired,
     }
 
     componentDidMount() {
@@ -43,10 +44,14 @@ class OverviewContainer extends Component {
     }
 
     renderResultItems() {
-        const resultItems = this.props.searchResults.map(doc => (
-            <li key={doc._id}>
+        const resultItems = this.props.searchResults.map((doc, index) => (
+            <li key={index}>
                 <PageResultItem
                     onTrashBtnClick={this.props.handleTrashBtnClick(doc.url)}
+                    onToggleBookmarkClick={this.props.handleToggleBookmarkClick(
+                        index,
+                        doc.url,
+                    )}
                     {...doc}
                 />
             </li>
@@ -143,6 +148,11 @@ const mapDispatchToProps = dispatch => ({
     handleTrashBtnClick: url => event => {
         event.preventDefault()
         dispatch(actions.showDeleteConfirm(url))
+    },
+    handleToggleBookmarkClick: (index, url) => event => {
+        event.preventDefault()
+        dispatch(actions.toggleBookmark(url, index))
+        dispatch(actions.changeHasBookmark(index))
     },
 })
 
