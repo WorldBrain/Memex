@@ -24,6 +24,7 @@ export const showFilter = createAction('overview/showFilter')
 export const toggleBookmarkFilter = createAction(
     'overview/toggleBookmarkFilter',
 )
+export const changeHasBookmark = createAction('overview/changeHasBookmark')
 
 export const setBookmarkUrl = createAction('overview/setBookmarkUrl')
 
@@ -133,20 +134,12 @@ export const deleteDocs = () => async (dispatch, getState) => {
 
 export const unBookmark = () => async (dispatch, getState) => {
     const url = selectors.bookmarkInfoToSend(getState())
-    console.log(url)
 
     await removeBookmarkByUrl(url)
-
-    // Refresh search view after unbookmarking
-    dispatch(search({ overwrite: true }))
 }
 
 export const bookmark = () => async (dispatch, getState) => {
     const url = selectors.bookmarkInfoToSend(getState())
-    console.log(url)
 
     await createBookmarkByExtension(url)
-
-    // Refresh search view after bookmarking
-    dispatch(search({ overwrite: true }))
 }

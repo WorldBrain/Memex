@@ -45,12 +45,18 @@ class OverviewContainer extends Component {
     }
 
     renderResultItems() {
-        const resultItems = this.props.searchResults.map(doc => (
+        const resultItems = this.props.searchResults.map((doc, index) => (
             <li key={doc._id}>
                 <PageResultItem
                     onTrashBtnClick={this.props.handleTrashBtnClick(doc.url)}
-                    onUnbookmarkClick={this.props.handleUnbookmarkClick(doc.url)}
-                    onBookmarkClick={this.props.handleBookmarkClick(doc.url)}
+                    onUnbookmarkClick={this.props.handleUnbookmarkClick(
+                        index,
+                        doc.url,
+                    )}
+                    onBookmarkClick={this.props.handleBookmarkClick(
+                        index,
+                        doc.url,
+                    )}
                     {...doc}
                 />
             </li>
@@ -151,15 +157,17 @@ const mapDispatchToProps = dispatch => ({
         event.preventDefault()
         dispatch(actions.showDeleteConfirm(url))
     },
-    handleUnbookmarkClick: url => event => {
+    handleUnbookmarkClick: (index, url) => event => {
         event.preventDefault()
         dispatch(actions.setBookmarkUrl(url))
         dispatch(actions.unBookmark())
+        dispatch(actions.changeHasBookmark(index))
     },
-    handleBookmarkClick: url => event => {
+    handleBookmarkClick: (index, url) => event => {
         event.preventDefault()
         dispatch(actions.setBookmarkUrl(url))
         dispatch(actions.bookmark())
+        dispatch(actions.changeHasBookmark(index))
     },
 })
 
