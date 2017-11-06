@@ -47,5 +47,7 @@
     &:disabled {
         color: #ebebeb;
         cursor: default;
+        background-color: #93c9b9;
+        pointer-events: none;
     }
 }
