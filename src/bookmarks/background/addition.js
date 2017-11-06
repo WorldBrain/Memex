@@ -53,7 +53,7 @@ export async function createNewPageForBookmark(id, bookmarkInfo) {
 export async function createBookmarkByExtension(url) {
     const pageId = generatePageDocId({ url })
     const pageDoc = await db.get(pageId)
-    const bookmarkIndex = `bookmark\\${Date.now()}`
+    const bookmarkIndex = `bookmark/${Date.now()}`
 
     await index.put(bookmarkIndex, pageId)
     const bookmarkDoc = transformToBookmarkDoc({ _id: pageId })({
