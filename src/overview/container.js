@@ -111,7 +111,6 @@ class OverviewContainer extends Component {
     }
 
     render() {
-        console.log(this.props)
         return (
             <Overview
                 {...this.props}
