@@ -6,10 +6,10 @@ import { LoadingIndicator } from 'src/common-ui/components'
 import localStyles from './Import.css'
 
 const Warning = ({ children }) => (
-    <p className={localStyles.warning}>
+    <div className={localStyles.warning}>
         <img src="/img/caution.png" className={localStyles.icon} />{' '}
-        <div className={localStyles.warningText}>{children}</div>
-    </p>
+        <p className={localStyles.warningText}>{children}</p>
+    </div>
 )
 
 const Import = ({
@@ -85,7 +85,10 @@ const Import = ({
 )
 
 Warning.propTypes = {
-    children: PropTypes.arrayOf(PropTypes.node).isRequired,
+    children: PropTypes.oneOfType([
+        PropTypes.arrayOf(PropTypes.node),
+        PropTypes.node,
+    ]).isRequired,
 }
 
 Import.propTypes = {

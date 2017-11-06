@@ -115,6 +115,7 @@
 
 .warning {
     display: flex;
+    margin: 1em 0;
     flex-direction: row;
     color: #d5969e;
 }
@@ -122,6 +123,7 @@
 .warningText {
     left: 5px;
     position: relative;
+    margin: 0;
 }
 
 .warningCode {
