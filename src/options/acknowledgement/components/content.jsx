@@ -19,7 +19,7 @@ const AcknowledgementContainer = () => (
             <br />This software is{' '}
             <a
                 className={localStyles.links}
-                href="https://github.com/WorldBrain/WebMemex/blob/master/Licence"
+                href="https://github.com/WorldBrain/WebMemex/blob/master/License"
             >
                 open-source
             </a>, for anyone to reuse, recycle, redistribute and add to.
