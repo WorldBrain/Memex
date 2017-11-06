@@ -21,6 +21,7 @@
     letter-spacing: 1px;
     width: 80%;
     min-width: 450px;
+    color: #999999;
 }
 
 .col_title {
@@ -72,7 +73,7 @@
 }
 
 .position {
-    color: #3eb995;
+    color: #999999;
 }
 
 .name {
@@ -94,9 +95,7 @@
 }
 
 .links {
-    text-decoration: none;
     color: #928989;
-    font-weight: bold;
     margin-right: 5px;
 }
 

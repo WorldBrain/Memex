@@ -15,7 +15,7 @@
     margin-top: 20px;
     margin-bottom: 30px;
     font-size: 15px;
-    color: #b7b7b7;
+    color: #999999;
     letter-spacing: 1px;
     width: 80%;
     min-width: 450px;
@@ -32,6 +32,4 @@
 
 .link {
     color: #928989;
-    text-decoration: none;
-    font-weight: 800;
 }

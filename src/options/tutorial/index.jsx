@@ -111,8 +111,8 @@ const Tutorial = () => (
                 </h3>
                 <p className={LocalStyles.text}>
                     After installing WorldBrain, all pages you visit & bookmark
-                    are searchable.<br /> Your bookmarks stay in sync with your
-                    browser. To also search everything before that, click on the
+                    are searchable.<br />To also search everything before that,
+                    click on the
                     <img
                         style={{
                             width: '20px',

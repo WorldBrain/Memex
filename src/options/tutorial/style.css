@@ -10,19 +10,19 @@
     font-style: normal;
     margin-top: 20px;
     font-size: 18px;
-    color: #b7b7b7;
+    color: #999999;
     letter-spacing: 1px;
     width: 90%;
     min-width: 450px;
     margin-left: 35px;
-    line-height: 30px;
+    line-height: 20px;
 }
 
 .list {
     font-style: normal;
     margin-top: 20px;
     font-size: 16px;
-    color: #b7b7b7;
+    color: #999999;
     width: 90%;
     min-width: 450px;
     margin-left: 35px;
@@ -34,6 +34,4 @@
 
 .link {
     color: #928989;
-    font-weight: bolder;
-    text-decoration: none;
 }
