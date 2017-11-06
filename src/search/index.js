@@ -52,7 +52,11 @@ async function indexSearch({
     }
 
     // Match the index results to data docs available in Pouch, consolidating meta docs
-    const docs = await mapResultsToPouchDocs(results, { startDate, endDate })
+    const docs = await mapResultsToPouchDocs(results, {
+        startDate,
+        endDate,
+        showOnlyBookmarks,
+    })
 
     console.log('DEBUG: final UI results', docs)
 

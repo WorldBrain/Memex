@@ -4,12 +4,11 @@ import db, { bulkGetResultsToArray } from 'src/pouchdb'
 import { removeKeyType } from './search-index/util'
 
 /**
- * Iterates through at most log N of the input timestamps (where N is timestamps.length).
  * @param {Array<string>} timestamps
  * @param {string} endDate
  * @returns {number} Index of the element most closely being less than or equal to the `endDate`.
  */
-const simpleTimestampBinSearch = (timestamps = [], endDate) => {
+const timestampsBinSearch = (timestamps = [], endDate = Date.now()) => {
     let min = 0
     let max = timestamps.length - 1
     let curr = -1
@@ -30,45 +29,48 @@ const simpleTimestampBinSearch = (timestamps = [], endDate) => {
 }
 
 /**
-* NOTE: Assumes order for O(1) "lookup" of latest time, but O(log N) in case of endDate set
-* @param {Set<string>} timestamps Set of timestamp strings to get latest (last) one.
-* @returns {string} The latest timestamp
-*/
-const getLatestTime = (timestamps, { startDate, endDate }) => {
-    timestamps = [...timestamps].map(removeKeyType).sort()
+ * @param {any} searchParams
+ * @returns {(timestampsSet: Set<string>) => string} Function that returns latest timestamp in bookmarks/visits Set.
+ */
+const initFindLatestTime = ({ endDate }) => timestampsSet => {
+    const timestamps = [...timestampsSet].map(removeKeyType).sort()
 
-    // If endDate defined, need to return latest before endDate
-    if (endDate) {
-        return timestamps[simpleTimestampBinSearch(timestamps, endDate)]
-    }
+    return timestamps[timestampsBinSearch(timestamps, endDate)]
+}
 
-    // If not, the latest will be at the end
-    return timestamps[timestamps.length - 1]
+/**
+ * @param {IndexLookupDoc} resultDoc Contains `visits` and `bookmarks` Sets.
+ * @param {any} searchParams
+ * @returns {string} Latest visit or bookmark timestamp, depending on available data.
+ */
+function getLatestTime({ visits, bookmarks }, searchParams) {
+    const findLatest = initFindLatestTime(searchParams)
+
+    // Only use bookmark times if no visits, or bookmarks filter on
+    return !visits.size || searchParams.showOnlyBookmarks
+        ? findLatest(bookmarks)
+        : findLatest(visits)
 }
 
 /**
 * Creates a quick-lookup dictionary of page doc IDs to the associated meta doc IDs
 * from our search-index results. The index result score is also kept for later sorting.
-* @param {Array<any>} results Array of search-idnex results.
-* @returns {any} Object with page ID keys and values containing either bookmark or visit or both docs.
+* @param {Array<any>} results Array of search index results.
+* @returns {Map<string, any>} Map with page ID keys and values containing needed search result data.
 */
-const createResultIdsDict = timeFilters =>
+const createResultsMap = searchParams =>
     reduce(
-        (acc, result) => ({
-            ...acc,
-            [result.document.id]: {
-                pageId: result.document.id,
-                visit: getLatestTime(result.document.visits, timeFilters),
-                bookmark: getLatestTime(result.document.bookmarks, timeFilters),
+        (acc, result) =>
+            acc.set(result.id, {
+                timestamp: getLatestTime(result.document, searchParams),
                 score: result.score,
-                displayType: result.document.type,
-            },
-        }),
-        {},
+                hasBookmark: result.document.bookmarks.size > 0,
+            }),
+        new Map(),
     )
 
-const sortByScore = resultIdsDict => (docA, docB) =>
-    resultIdsDict[docB._id].score - resultIdsDict[docA._id].score
+const sortByScore = resultsMap => (docA, docB) =>
+    resultsMap.get(docB._id).score - resultsMap.get(docA._id).score
 
 /**
 * Performs all the messy logic needed to resolve search-index results against our PouchDB model.
@@ -77,11 +79,12 @@ const sortByScore = resultIdsDict => (docA, docB) =>
 * call these "augmented page docs", and are generally only used by the overview.
 *
 * @param {Array<any>} results Array of results gotten from our search-index query.
+* @param {any} searchParams Same params as main search entrypoint accepts.
 * @returns {Array<any>} Array of augmented page docs containing linked meta doc timestamps.
 */
-export default async function mapResultsToPouchDocs(results, timeFilters) {
+export default async function mapResultsToPouchDocs(results, searchParams) {
     // Convert results to dictionary of page IDs to related meta IDs
-    const resultIdsDict = createResultIdsDict(timeFilters)(results)
+    const resultsMap = createResultsMap(searchParams)(results)
 
     // Format IDs of docs needed to be immediately fetched from Pouch
     const bulkGetInput = results.map(result => ({ id: result.document.id }))
@@ -90,14 +93,13 @@ export default async function mapResultsToPouchDocs(results, timeFilters) {
     const bulkRes = await db.bulkGet({ docs: bulkGetInput })
     const pageDocs = bulkGetResultsToArray(bulkRes)
 
-    // Augment the page docs with latest meta timestamp/s and type denoting the latest time for display
+    // Augment the page docs with meta display info derived from search results
     const augmentedPageDocs = pageDocs.map(doc => ({
         ...doc,
-        visit: +resultIdsDict[doc._id].visit,
-        bookmark: +resultIdsDict[doc._id].bookmark,
-        displayType: resultIdsDict[doc._id].displayType,
+        hasBookmark: resultsMap.get(doc._id).hasBookmark,
+        displayTime: resultsMap.get(doc._id).timestamp,
     }))
 
     // Ensure the original results order is maintained
-    return augmentedPageDocs.sort(sortByScore(resultIdsDict))
+    return augmentedPageDocs.sort(sortByScore(resultsMap))
 }

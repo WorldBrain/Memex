@@ -1,22 +1,6 @@
 import { createSelector } from 'reselect'
-import get from 'lodash/fp/get'
 
 import * as constants from './constants'
-
-/**
- * Given an augmented page doc, attempts to calculate its approx. freeze dry page size in MB.
- * @param {any} pageDoc The augmented page doc from search results.
- * @returns {string} Approx. size in MB of freeze-dry attachment. 0 if not found.
- */
-function calcFreezeDrySize(pageDoc) {
-    const pageSize = get(['_attachments', 'frozen-page.html', 'length'])(
-        pageDoc,
-    )
-    const sizeInMB =
-        pageSize !== undefined ? Math.round(pageSize / 1024 ** 2 * 10) / 10 : 0
-
-    return sizeInMB.toString()
-}
 
 /**
  * Either set display title to be the top-level title field, else look in content. Fallback is the URL.
@@ -37,11 +21,6 @@ const resultDocs = createSelector(searchResult, results => results.docs)
 export const currentQueryParams = createSelector(
     overview,
     state => state.currentQueryParams,
-)
-
-export const isEmptyQuery = createSelector(
-    currentQueryParams,
-    ({ query, startDate, endDate }) => !query.length && !startDate && !endDate,
 )
 
 export const isLoading = createSelector(overview, state => state.isLoading)
@@ -71,7 +50,6 @@ export const urlToDelete = createSelector(
 export const results = createSelector(resultDocs, docs =>
     docs.map(pageDoc => ({
         ...pageDoc,
-        freezeDrySize: calcFreezeDrySize(pageDoc),
         title: decideTitle(pageDoc),
     })),
 )
@@ -98,3 +76,10 @@ export const isNewSearchLoading = createSelector(
 )
 export const showFilter = state => overview(state).showFilter
 export const showOnlyBookmarks = state => overview(state).showOnlyBookmarks
+
+export const isEmptyQuery = createSelector(
+    currentQueryParams,
+    showOnlyBookmarks,
+    ({ query, startDate, endDate }, showOnlyBookmarks) =>
+        !query.length && !startDate && !endDate && !showOnlyBookmarks,
+)

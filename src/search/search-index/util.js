@@ -1,5 +1,4 @@
 import PromiseBatcher from 'src/util/promise-batcher'
-import { RESULT_TYPES } from 'src/overview/constants'
 import index, { DEFAULT_TERM_SEPARATOR } from './'
 
 // Key generation functions
@@ -186,34 +185,17 @@ export const initLookupByKeys = (
         batch.start()
     })
 
-/**
- * NOTE: Assumes sorted arrays, last index containing latest.
- * @param {Array<string>} visits Sorted array of UNIX timestamp strings.
- * @param {Array<string>} bookmarks Sorted array of UNIX timestamp strings.
- * @returns {any} Object containing:
- *  - `latest`: latest UNIX timestamp of all params
- *  - `type`: currently either `bookmark` or `visit` to allow distinguishing the type later.
- */
-export const getLatestMeta = (visits, bookmarks) => {
-    const numVisits = visits.length
-    const numBookmarks = bookmarks.length
+const getLatestVisitOrBookmark = ({ visits, bookmarks }) =>
+    !visits.size
+        ? [...bookmarks][bookmarks.size - 1]
+        : [...visits][visits.size - 1]
 
-    if (numVisits && numBookmarks) {
-        // Both arrays have timestamps
-        return visits[numVisits - 1] > bookmarks[numBookmarks - 1]
-            ? { latest: visits[numVisits - 1], type: RESULT_TYPES.VISIT }
-            : {
-                  latest: bookmarks[numBookmarks - 1],
-                  type: RESULT_TYPES.BOOKMARK,
-              }
-    } else if (numBookmarks) {
-        // Only bookmark array has timestamps
-        return {
-            latest: bookmarks[numBookmarks - 1],
-            type: RESULT_TYPES.BOOKMARK,
-        }
-    } else {
-        // Only visit array has timestamps
-        return { latest: visits[numVisits - 1], type: RESULT_TYPES.VISIT }
-    }
-}
+/**
+ * Augments a reverse index/lookup doc with `latest` timestamp field. Used for general-case search scoring.
+ * @param {IndexLookupDoc} doc
+ * @returns {any} `doc` with new `latest` field denoting the latest visit (or bookmark if no visits).
+ */
+export const augmentIndexLookupDoc = doc => ({
+    ...doc,
+    latest: removeKeyType(getLatestVisitOrBookmark(doc)),
+})
