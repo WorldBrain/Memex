@@ -17,19 +17,19 @@ async function snapNow({ tabId }) {
 
 async function resizeImage(image, scale, maxHeight) {
     return new Promise((resolve, reject) => {
-        let img = new Image()
-        let canvas = document.createElement('canvas')
-        let ctx = canvas.getContext('2d')
+        const img = new Image()
+        const canvas = document.createElement('canvas')
+        const ctx = canvas.getContext('2d')
 
         img.src = image
         img.onload = () => {
-            let newHeight = Math.floor(img.height * scale)
+            const newHeight = Math.floor(img.height * scale)
 
             if (newHeight <= maxHeight) {
                 resolve(canvas.toDataURL())
             }
 
-            let newWidth = Math.floor(img.width / img.height * newHeight)
+            const newWidth = Math.floor(img.width / img.height * newHeight)
 
             if (newHeight >= maxHeight) {
                 canvas.width = newWidth
