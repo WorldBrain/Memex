@@ -132,14 +132,9 @@ export const deleteDocs = () => async (dispatch, getState) => {
     dispatch(search({ overwrite: true }))
 }
 
-export const unBookmark = () => async (dispatch, getState) => {
-    const url = selectors.bookmarkInfoToSend(getState())
-
-    await removeBookmarkByUrl(url)
-}
-
-export const bookmark = () => async (dispatch, getState) => {
-    const url = selectors.bookmarkInfoToSend(getState())
-
-    await createBookmarkByExtension(url)
+export const toggleBookmark = (url, index) => async (dispatch, getState) => {
+    const results = selectors.results(getState())
+    console.log(url, index)
+    if (results[index].hasBookmark) await removeBookmarkByUrl(url)
+    else await createBookmarkByExtension(url)
 }
