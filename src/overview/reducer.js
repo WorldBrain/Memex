@@ -86,11 +86,6 @@ const handleSearchResult = ({ overwrite }) => (state, newSearchResult) => {
     return { ...state, searchResult }
 }
 
-const setBookmarkUrl = (state, url) => ({
-    ...state,
-    toggleBookmarkUrl: url,
-})
-
 const changeHasBookmark = (state, index) => {
     const currResult = state.searchResult.docs[index]
 
@@ -133,7 +128,6 @@ export default createReducer(
             ...state,
             showFilter: !state.showFilter,
         }),
-        [actions.setBookmarkUrl]: setBookmarkUrl,
         [actions.changeHasBookmark]: changeHasBookmark,
     },
     defaultState,
