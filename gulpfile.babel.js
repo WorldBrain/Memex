@@ -4,7 +4,7 @@ import { exec as nodeExec } from 'child_process'
 import pify from 'pify'
 import streamToPromise from 'stream-to-promise'
 import gulp from 'gulp'
-import uglify from 'gulp-uglify'
+import composeUglify from 'gulp-uglify/composer'
 import identity from 'gulp-identity'
 import source from 'vinyl-source-stream'
 import buffer from 'vinyl-buffer'
@@ -74,6 +74,9 @@ const browserifySettings = {
     paths: ['.'],
 }
 
+// Set up `gulp-uglify` to work with `uglify-es` (ES6 support)
+const uglify = composeUglify(require('uglify-es'), console)
+
 async function createBundle(
     { entries, output, destination, cssOutput },
     { watch = false, production = false },
@@ -108,7 +111,9 @@ async function createBundle(
             .pipe(buffer())
             .pipe(
                 production
-                    ? uglify({ output: { ascii_only: true } })
+                    ? uglify({
+                          output: { ascii_only: true },
+                      })
                     : identity(),
             )
             .pipe(gulp.dest(destination))
