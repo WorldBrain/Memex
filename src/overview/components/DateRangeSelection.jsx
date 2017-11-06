@@ -122,7 +122,11 @@ class DateRangeSelection extends Component {
         }
 
         // Trigger state update only if value was parsed and there is a change from current state
-        if (dateToChange != null && dateToChange !== currentDate) {
+        if (
+            dateToChange != null &&
+            dateToChange !== currentDate &&
+            date.format(FORMAT) !== dateState
+        ) {
             updateDate(dateToChange)
         }
     }
