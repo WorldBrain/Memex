@@ -1,7 +1,3 @@
-body {
-    margin: 0;
-}
-
 .main {
     height: 100vh;
     display: flex;
@@ -18,6 +14,7 @@ body {
     width: 780px;
     height: 360px;
     font-weight: lighter;
+    font-family: 'Libre Franklin', sans-serif;
 }
 
 .message-container {

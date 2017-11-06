@@ -16,11 +16,12 @@
     font-style: normal;
     margin-top: 20px;
     margin-bottom: 20px;
-    font-size: 14px;
+    font-size: 15px;
     color: #b7b7b7;
     letter-spacing: 1px;
     width: 80%;
     min-width: 450px;
+    color: #999999;
 }
 
 .col_title {
@@ -72,7 +73,7 @@
 }
 
 .position {
-    color: #3eb995;
+    color: #999999;
 }
 
 .name {
@@ -94,15 +95,13 @@
 }
 
 .links {
-    text-decoration: none;
-    color: black;
+    color: #928989;
     margin-right: 5px;
 }
 
 .contributeContent {
     font-size: 16px;
     letter-spacing: 1px;
-    max-width: 80%;
     background-color: #e7e7e7;
     padding: 20px 20px;
 }

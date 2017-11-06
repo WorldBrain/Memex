@@ -15,7 +15,7 @@ body {
     flex-direction: row;
 }
 
-.route {
+.sidebar .route {
     margin: 20px 20px 0;
     flex-grow: 1;
     max-width: 800px;

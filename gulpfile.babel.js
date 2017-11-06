@@ -25,14 +25,16 @@ const exec = pify(nodeExec)
 const staticFiles = {
     'src/manifest.json': 'extension',
     'src/update/*': 'extension/update',
-    'src/onboarding/*': 'extension/onboarding',
     'src/**/*.html': 'extension',
     'img/*': 'extension/img',
     'node_modules/webextension-polyfill/dist/browser-polyfill.js':
         'extension/lib',
+    'node_modules/slick-carousel/slick/slick.min.js': 'extension/lib',
     'node_modules/pdfjs-dist/build/pdf.worker.min.js': 'extension/lib',
     'node_modules/material-design-icons/iconfont/*.{eot,ttf,woff,woff2,css}':
         'extension/fonts/material-icons',
+    'node_modules/slick-carousel/slick/slick.css': 'extension/style/',
+    'src/style/*.css': 'extension/style/',
 }
 
 const commonUIEntry = './src/common-ui/components/index.js'

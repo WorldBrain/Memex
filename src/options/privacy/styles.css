@@ -13,9 +13,13 @@
 .content {
     font-style: normal;
     margin-top: 20px;
-    font-size: 14px;
-    color: #b7b7b7;
+    font-size: 15px;
+    color: #999999;
     letter-spacing: 1px;
     width: 60%;
     min-width: 450px;
+}
+
+.link {
+    color: #928989;
 }

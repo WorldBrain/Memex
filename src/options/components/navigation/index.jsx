@@ -24,13 +24,13 @@ class Navigation extends Component {
             isPaused: isPaused,
         }
 
-        return this.props.routes.map((route, idx) => {
-            return (
+        return this.props.routes
+            .filter(route => !route.hideFromSidebar)
+            .map((route, idx) => (
                 <NavLink route={route} key={idx} state={state}>
                     {this.isActive(route)}
                 </NavLink>
-            )
-        })
+            ))
     }
 
     render() {

@@ -1,33 +1,35 @@
-.help {
-    font-family: 'Lato';
-    margin-top: 20px;
-}
-
-.title {
+.h3 {
     color: #3eb995;
     font-weight: bold;
-    font-size: 18px;
+    font-size: 20px;
     letter-spacing: 1px;
+    margin-left: 35px;
 }
 
-.content {
+.text {
     font-style: normal;
     margin-top: 20px;
-    margin-bottom: 30px;
-    font-size: 15px;
+    font-size: 18px;
     color: #999999;
     letter-spacing: 1px;
-    width: 80%;
+    width: 90%;
     min-width: 450px;
+    margin-left: 35px;
+    line-height: 20px;
 }
 
-.title2 {
+.list {
     font-style: normal;
-    font-weight: bold;
+    margin-top: 20px;
     font-size: 16px;
-    color: #666;
-    width: 60%;
+    color: #999999;
+    width: 90%;
     min-width: 450px;
+    margin-left: 35px;
+}
+
+.list_element {
+    margin-bottom: 10px;
 }
 
 .link {

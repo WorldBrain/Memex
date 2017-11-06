@@ -2,19 +2,34 @@ import React from 'react'
 
 import localStyles from './styles.css'
 
-const HelpContainer = () => (
+const Help = () => (
     <div className={localStyles.help}>
         <span className={localStyles.title}> What can we help you with?</span>
 
         <div className={localStyles.content}>
             <p className={localStyles.title2}>How do I use this tool?</p>
-            Watch our 1 min tutorials or read step by step guides
+            Watch a{' '}
+            <a
+                target="_blank"
+                className={localStyles.link}
+                href="https://worldbrain.io/tutorial"
+            >
+                1 min video intro{' '}
+            </a>{' '}
+            or read the more detailed{' '}
+            <a
+                className={localStyles.link}
+                href="/options/options.html#/tutorial"
+            >
+                step by step guide
+            </a>.
         </div>
 
         <div className={localStyles.content}>
             <p className={localStyles.title2}>I have QUESTIONS. </p>
             You can visit our{' '}
             <a
+                target="_blank"
                 className={localStyles.link}
                 href="https://www.reddit.com/r/WorldBrain/"
             >
@@ -22,6 +37,7 @@ const HelpContainer = () => (
             </a>{' '}
             or you can write us an email:{' '}
             <a
+                target="_blank"
                 className={localStyles.link}
                 href="mailto:questions@worldbrain.io"
             >
@@ -35,19 +51,51 @@ const HelpContainer = () => (
             </p>
             Bugs you best report on{' '}
             <a
+                target="_blank"
                 className={localStyles.link}
                 href="https://www.github.com/WorldBrain/WebMemex/issues/new"
             >
                 {' '}
                 GitHub
-            </a>. Feature requests can be made either via email (<a
+            </a>. <br />
+            Feature requests can be made {' '}
+            <a
+                target="_blank"
+                className={localStyles.link}
+                href="https://worldbrain.typeform.com/to/KIRrZ2"
+            >
+                with this form{' '}
+            </a>
+            or via email (<a
+                target="_blank"
                 className={localStyles.link}
                 href="mailto:questions@worldbrain.io"
             >
                 questions@worldbrain.io
-            </a>) or on our Trello board.
+            </a>).
+        </div>
+
+        <div className={localStyles.content}>
+            <p className={localStyles.title2}>Whats your ROADMAP?</p>
+            Check out our{' '}
+            <a
+                target="_blank"
+                className={localStyles.link}
+                href="https://trello.com/b/mdqEuBjb/worldbrain-roadmap"
+            >
+                public roadmap
+            </a>{' '}
+            or make {' '}
+            <a
+                target="_blank"
+                className={localStyles.link}
+                href="https://worldbrain.typeform.com/to/KIRrZ2"
+            >
+                suggestions
+            </a>{' '}
+            for upcoming features.
         </div>
     </div>
 )
 
-export default HelpContainer
+export default Help
