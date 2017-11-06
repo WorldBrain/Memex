@@ -41,8 +41,9 @@ const PageResultItem = props => (
             <div className={styles.time}>{niceTime(+props.displayTime)}</div>
         </div>
         <div className={styles.buttonsContainer}>
-            <button className={getBookmarkClass(props)}
-                onClick={props.hasBookmark? props.onUnbookmarkClick: props.onBookmarkClick}
+            <button
+                className={getBookmarkClass(props)}
+                onClick={props.onToggleBookmarkClick}
             />
             <button
                 className={classNames(styles.button, styles.trash)}
@@ -59,8 +60,7 @@ PageResultItem.propTypes = {
     title: PropTypes.string.isRequired,
     hasBookmark: PropTypes.bool.isRequired, // eslint-disable-line
     onTrashBtnClick: PropTypes.func.isRequired,
-    onUnbookmarkClick: PropTypes.func.isRequired,
-    onBookmarkClick: PropTypes.func.isRequired,
+    onToggleBookmarkClick: PropTypes.func.isRequired,
 }
 
 export default PageResultItem

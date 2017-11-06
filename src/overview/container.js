@@ -24,8 +24,7 @@ class OverviewContainer extends Component {
         searchResults: PropTypes.arrayOf(PropTypes.object).isRequired,
         needsWaypoint: PropTypes.bool.isRequired,
         handleTrashBtnClick: PropTypes.func.isRequired,
-        handleUnbookmarkClick: PropTypes.func.isRequired,
-        handleBookmarkClick: PropTypes.func.isRequired,
+        handleToggleBookmarkClick: PropTypes.func.isRequired,
     }
 
     componentDidMount() {
@@ -49,11 +48,7 @@ class OverviewContainer extends Component {
             <li key={index}>
                 <PageResultItem
                     onTrashBtnClick={this.props.handleTrashBtnClick(doc.url)}
-                    onUnbookmarkClick={this.props.handleUnbookmarkClick(
-                        index,
-                        doc.url,
-                    )}
-                    onBookmarkClick={this.props.handleBookmarkClick(
+                    onToggleBookmarkClick={this.props.handleToggleBookmarkClick(
                         index,
                         doc.url,
                     )}
@@ -154,15 +149,8 @@ const mapDispatchToProps = dispatch => ({
         event.preventDefault()
         dispatch(actions.showDeleteConfirm(url))
     },
-    handleUnbookmarkClick: (index, url) => event => {
+    handleToggleBookmarkClick: (index, url) => event => {
         event.preventDefault()
-        dispatch(actions.setBookmarkUrl(url))
-        dispatch(actions.toggleBookmark(url, index))
-        dispatch(actions.changeHasBookmark(index))
-    },
-    handleBookmarkClick: (index, url) => event => {
-        event.preventDefault()
-        dispatch(actions.setBookmarkUrl(url))
         dispatch(actions.toggleBookmark(url, index))
         dispatch(actions.changeHasBookmark(index))
     },

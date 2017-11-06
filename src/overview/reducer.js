@@ -21,7 +21,6 @@ const defaultState = {
     },
     showFilter: false,
     showOnlyBookmarks: false,
-    toggleBookmarkUrl: null,
 }
 
 function setQuery(state, query) {

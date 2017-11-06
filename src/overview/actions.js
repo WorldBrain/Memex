@@ -26,8 +26,6 @@ export const toggleBookmarkFilter = createAction(
 )
 export const changeHasBookmark = createAction('overview/changeHasBookmark')
 
-export const setBookmarkUrl = createAction('overview/setBookmarkUrl')
-
 const deleteDocsByUrl = remoteFunction('deleteDocsByUrl')
 const createBookmarkByExtension = remoteFunction('createBookmarkByExtension')
 const removeBookmarkByUrl = remoteFunction('removeBookmarkByUrl')
