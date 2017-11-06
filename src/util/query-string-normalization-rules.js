@@ -2,8 +2,10 @@
  * Hostname keys to arrays of wanted query params values.
  * These will be used to remove all but specific query params from URLs with given
  * hostnames.
+ *
+ * May move this to external source at later stage.
  */
-export default {
+export const rules = {
     'twitter.com': ['q'],
     'google.com': ['q'],
     'google.com.vn': ['q'],
@@ -35,3 +37,5 @@ export default {
     'google.nl': ['q'],
     'facebook.com': ['q'],
 }
+
+export default new Map(Object.entries(rules))

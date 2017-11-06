@@ -1,5 +1,7 @@
 import normalizeUrl from 'normalize-url'
 
+import queryParamRules from './query-string-normalization-rules'
+
 export const PROTOCOL_PATTERN = /^\w+:\/\//
 
 const normalizationOpts = {
@@ -12,18 +14,48 @@ const normalizationOpts = {
 }
 
 /**
+ * Applies our custom query-param normalization rules for specific sites, removing all
+ * but specific params from the query string.
+ *
+ * @param {string} url
+ * @returns {string}
+ */
+function applyQueryParamsRules(url) {
+    const parsed = new URL(url)
+    const rules = queryParamRules.get(parsed.hostname)
+
+    // Base case; domain doesn't have any special normalization rules
+    if (!rules) {
+        return url
+    }
+
+    // Remove all query params that don't appear in special rules
+    const rulesSet = new Set(rules)
+    for (const param of parsed.searchParams.keys()) {
+        if (!rulesSet.has(param)) {
+            parsed.searchParams.delete(param)
+        }
+    }
+
+    return parsed.href
+}
+
+/**
  * NOTE: once normalized there is no way to recreate original input.
+ *
  * @param {string} url
  * @param {any} [customNormalizationOpts={}] Custom options to pass to `normalize-url` package (will override).
  * @returns {string}
  */
 function normalize(url, customOpts) {
-    const normalized = normalizeUrl(url, {
+    let normalized = normalizeUrl(url, {
         ...normalizationOpts,
         ...customOpts,
     })
 
-    // Remove the protocol; we don't need it for IDs (only log http/s anyway)
+    normalized = applyQueryParamsRules(normalized)
+
+    // Remove the protocol; we don't need/want it for IDs
     return normalized.replace(PROTOCOL_PATTERN, '')
 }
 
