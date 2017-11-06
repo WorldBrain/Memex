@@ -4,7 +4,6 @@ const WHITELIST_STRIP_LINEBREAKS = /[^A-Za-z\x80-\xFF 0-9 \u2018\u2019\u201C|\u2
 
 export default function transformHTML({ html = '' }) {
     const lengthBefore = html.length
-    console.time('html-pipeline')
 
     let text = html
         .toString()
@@ -55,7 +54,6 @@ export default function transformHTML({ html = '' }) {
         .replace(/[ \t\v\u00A0]{2,}/g, ' ')
 
     const lengthAfter = text.length
-    console.timeEnd('html-pipeline')
 
     return { text, lengthBefore, lengthAfter }
 }
