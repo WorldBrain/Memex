@@ -3,11 +3,7 @@ import { STORAGE_KEY } from 'src/options/blacklist/constants'
 /**
  * Default blacklist entries.
  */
-export const defaultEntries = [
-    'http://localhost',
-    'https://localhost',
-    'google.com/maps',
-]
+export const defaultEntries = ['https?://localhost', 'google.\\w+/maps']
 
 /**
  * Given a URL and user's blacklist, checks the URL against the blacklist expressions to see if any
@@ -19,8 +15,11 @@ export const defaultEntries = [
  */
 export function isURLBlacklisted(url = '', blacklist = []) {
     // Main checking logic between a given blacklist expression and current URL
-    //   TODO: make this more "smart" (maybe check parts of the URL instead of match all, for e.g.)
-    const doesExpressionMatchURL = (expression = '') => url.includes(expression)
+    const doesExpressionMatchURL = (expression = '') => {
+        // Make sure to interpret '.' as "period" rather than "any single character", as it is common in hostnames
+        expression = expression.replace('.', '\\.')
+        return new RegExp(expression, 'ig').test(url)
+    }
 
     // Reduces blacklist to a bool by running main checking logic against each blacklist expression
     // (returns true if a single match is found in entire blacklist)
