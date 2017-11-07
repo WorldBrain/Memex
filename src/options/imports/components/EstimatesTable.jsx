@@ -27,7 +27,7 @@ const EstimatesTable = ({
                 <th />
                 <th>Pages already saved</th>
                 <th>Not yet downloaded</th>
-                <th>Time to download</th>
+                <th>Max. time to download</th>
             </tr>
         </thead>
         <tbody>
