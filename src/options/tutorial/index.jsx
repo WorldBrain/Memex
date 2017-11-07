@@ -15,26 +15,50 @@ const Tutorial = () => (
             <div>
                 <h3 className={LocalStyles.h3}>How to Search</h3>
                 <p className={LocalStyles.text}>
-                    After visiting articles or{' '}
+                    The extension runs in the background and indexes the pages
+                    you visit since installing, but you can also{' '}
                     <a
                         className={LocalStyles.link}
                         href="/options/options.html#/import"
                     >
-                        importing your history/bookmarks
-                    </a>, there are 3 ways to search:
+                        import your history/bookmarks from before.
+                    </a>
+                    <br />
+                    <br />To find websites again, there are 3 ways to search
+                    with the words you remember:
                 </p>
                 <ol className={LocalStyles.list}>
                     <li className={LocalStyles.list_element}>
-                        Use the address bar of the browser. Type `w` followed by
-                        pressing 'space' or 'tab' to activate the search.
+                        <strong style={{ fontSize: '17px' }}>
+                            The address bar of the browser
+                        </strong>
+                        <br />
+                        Type `w` followed by pressing 'space' or 'tab'. Then
+                        type what you remember.
                     </li>
                     <li className={LocalStyles.list_element}>
-                        Use the search box in WorldBrain’s popup
+                        <strong style={{ fontSize: '17px' }}>
+                            The search box in the WorldBrain popup.
+                        </strong>
+                        <br />
+                        For that just click on the<img
+                            style={{
+                                width: '20px',
+                                verticalAlign: 'middle',
+                                display: 'inline',
+                            }}
+                            src="/img/worldbrain-logo-narrow-bw-48.png"
+                        />-icon in the menu bar, type in the words and confirm
+                        with 'Enter'.
                     </li>
                     <li className={LocalStyles.list_element}>
-                        In the Overview. You reach it by selecting the first
-                        result of the address bar’s drop down or via the popup
-                        search field.
+                        <strong style={{ fontSize: '17px' }}>
+                            In the search overview.
+                        </strong>
+                        <br />
+                        You reach it by selecting the first result of the
+                        address bar’s search or via the popup search field. You
+                        can also bookmark the link to it.
                     </li>
                 </ol>
 

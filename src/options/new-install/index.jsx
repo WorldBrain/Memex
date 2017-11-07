@@ -29,7 +29,7 @@ const NewInstall = () => (
                     <div>
                         <h3 className={localStyles.h3}>
                             "Finally, I can close my tabs and not lose them
-                            anymore!
+                            anymore!"
                         </h3>
                     </div>
                     <div>
@@ -45,27 +45,33 @@ const NewInstall = () => (
                 </Slider>
             </div>
         </div>
-        <a
-            className={localStyles.btnLink}
-            type="button"
-            href="https://worldbrain.io"
-        >
-            Start Browsing
-        </a>
-        <a
-            className={localStyles.btnLink}
-            type="button"
-            href="/options/options.html#/tutorial"
-        >
-            Open Tutorial
-        </a>
-        <a
-            className={localStyles.btnLink}
-            type="button"
-            href="/options/options.html#/import"
-        >
-            Import Existing History
-        </a>
+        <div className={localStyles.btnBar}>
+            <a
+                className={localStyles.btnLink}
+                type="button"
+                href="https://worldbrain.io/tutorial"
+            >
+                Watch 1-min Tutorial Video
+            </a>
+
+            <a
+                className={localStyles.btnLink}
+                type="button"
+                href="/options/options.html#/tutorial"
+            >
+                Read Step-By Step Tutorial
+            </a>
+        </div>
+        <p>
+            {' '}
+            <a
+                className={localStyles.link}
+                target="_blank"
+                href="https://worldbrain.io/"
+            >
+                Or just get started browsing the web
+            </a>
+        </p>
     </div>
 )
 

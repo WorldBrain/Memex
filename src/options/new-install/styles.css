@@ -23,12 +23,13 @@
 }
 
 .btnLink {
-    width: 230px;
+    width: 150px;
     text-align: center;
     border: 2px solid #3eb995;
     border-radius: 5px;
     padding: 15px 25px;
     margin-top: 30px;
+    margin: 20px;
     font-size: 17px;
     text-decoration: none;
     background: #fff;
@@ -39,4 +40,15 @@
 
 .btnLink:hover {
     background: #e7f4f0;
+}
+
+.btnBar {
+    align-items: center;
+    flex-direction: row;
+    margin: 20px;
+    margin-top: 50px;
+}
+
+.link {
+    color: #928989;
 }
