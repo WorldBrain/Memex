@@ -113,8 +113,8 @@ async function processOldExtImport(importItem) {
 
     await storeDocs({ pageDoc, visitDocs, bookmarkDocs })
 
-    // If all okay now, remove the old data (timestamp is old index key)
-    await clearOldExtData(importItem.timestamp.toString())
+    // If all okay now, remove the old data
+    await clearOldExtData(importItem)
 
     return { status: DOWNLOAD_STATUS.SUCC }
 }
