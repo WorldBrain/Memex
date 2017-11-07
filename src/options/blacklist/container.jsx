@@ -30,8 +30,12 @@ class BlacklistContainer extends Component {
     }
 
     shouldDisableSaveBtn() {
-        // If there aren't any non-whitespace chars (only need to find first)
-        return !/\S/.test(this.props.siteInputValue)
+        // If there are any whitespace symbols or digits at the beginning
+        try {
+            new RegExp(this.props.siteInputValue)
+        } catch (e) {
+            return true
+        }
     }
 
     shouldDisableClearBtn() {
@@ -127,11 +131,21 @@ class BlacklistContainer extends Component {
             </div>
         )
     }
+    renderInvalidRegexAlert() {
+        if (this.shouldDisableSaveBtn())
+            return (
+                <div className={styles.blacklistAlert}>
+                    This is an invalid RegExp! You can test your regex{' '}
+                    <a href="https://regexr.com/">here</a>
+                </div>
+            )
+    }
 
     render() {
         return (
             <div>
                 {this.renderAddDomain()}
+                {this.renderInvalidRegexAlert()}
                 {this.renderBlacklistInputRow()}
                 {this.props.blacklist.length
                     ? this.renderAddBlacklistSites()
