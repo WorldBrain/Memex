@@ -46,7 +46,11 @@ class ImportContainer extends Component {
     }
 
     componentWillUnmount() {
-        this.props.boundActions.pause()
+        if (this.props.isRunning) {
+            this.props.boundActions.pause()
+        } else if (!this.props.isPaused) {
+            this.props.boundActions.prepareImport()
+        }
     }
 
     setCancelState = waitingOnCancelConfirm =>
