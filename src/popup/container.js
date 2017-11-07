@@ -40,6 +40,9 @@ class PopupContainer extends Component {
 
         this.toggleLoggingPause = remoteFunction('toggleLoggingPause')
         this.deleteDocs = remoteFunction('deleteDocsByUrl')
+        this.createBookmarkByExtension = remoteFunction(
+            'createBookmarkByExtension',
+        )
 
         this.onSearchChange = this.onSearchChange.bind(this)
         this.onPauseChange = this.onPauseChange.bind(this)
@@ -201,6 +204,8 @@ class PopupContainer extends Component {
         return this.props.pauseValues.map(pauseValueToOption)
     }
 
+    handleAddBookmark = () => this.createBookmarkByExtension(this.state.url)
+
     renderChildren() {
         const { blacklistConfirm, pauseValue, isPaused } = this.state
 
@@ -214,6 +219,9 @@ class PopupContainer extends Component {
         }
         return (
             <div>
+                <Button onClick={this.handleAddBookmark} icon="bookmark">
+                    Bookmark This Page
+                </Button>
                 <HistoryPauser
                     onConfirm={this.onPauseConfirm}
                     onChange={this.onPauseChange}
