@@ -1,3 +1,5 @@
+import chunk from 'lodash/fp/chunk'
+
 import db from 'src/pouchdb'
 import encodeUrl from 'src/util/encode-url-for-id'
 import { pageKeyPrefix, generatePageDocId } from 'src/page-storage'
@@ -44,27 +46,36 @@ export const removeImportItem = async encodedUrl => {
  *
  * @param {string} oldExtKey Local storage key to remove.
  */
-export async function clearOldExtData(oldExtKey) {
+export async function clearOldExtData({ timestamp, index }) {
     const {
+        [OLD_EXT_KEYS.INDEX]: oldIndex,
         [OLD_EXT_KEYS.NUM_DONE]: numDone,
     } = await browser.storage.local.get({
+        [OLD_EXT_KEYS.INDEX]: { index: [] },
         [OLD_EXT_KEYS.NUM_DONE]: 0,
     })
 
     // Inc. finished count
     await browser.storage.local.set({
         [OLD_EXT_KEYS.NUM_DONE]: numDone + 1,
+        [OLD_EXT_KEYS.INDEX]: {
+            index: [
+                ...oldIndex.index.slice(0, index),
+                ...oldIndex.index.slice(index + 1),
+            ],
+        },
     })
     // Remove old ext page item
-    await browser.storage.local.remove(oldExtKey)
+    await browser.storage.local.remove(timestamp.toString())
 }
 
 // Binds old ext bookmark urls to a function that transforms old ext data to an import item
-const transformOldExtDataToImportItem = bookmarkUrls => data => ({
+const transformOldExtDataToImportItem = bookmarkUrls => (data, index) => ({
     type: IMPORT_TYPE.OLD,
     url: data.url,
     timestamp: data.time,
     hasBookmark: bookmarkUrls.has(data.url),
+    index,
 })
 
 // Binds an import type to a function that transforms a history/bookmark doc to an import item.
@@ -148,9 +159,11 @@ export async function getURLFilteredBookmarkItems(maxResults = 100000) {
 export async function getOldExtItems() {
     let bookmarkUrls = new Set()
     const {
+        [OLD_EXT_KEYS.INDEX]: index,
         [OLD_EXT_KEYS.BOOKMARKS]: bookmarks,
         [OLD_EXT_KEYS.NUM_DONE]: numDone,
     } = await browser.storage.local.get({
+        [OLD_EXT_KEYS.INDEX]: { index: [] },
         [OLD_EXT_KEYS.BOOKMARKS]: '[]',
         [OLD_EXT_KEYS.NUM_DONE]: 0,
     })
@@ -162,19 +175,26 @@ export async function getOldExtItems() {
     }
 
     const transform = transformOldExtDataToImportItem(bookmarkUrls)
-
-    const entireStorage = await browser.storage.local.get(null)
     const importItemsMap = new Map()
 
-    // For everything in local storage, if the key represents page data, transform it
-    for (const key in entireStorage) {
-        if (Number.isInteger(+key)) {
-            try {
-                const encodedUrl = encodeUrl(entireStorage[key].url)
-                importItemsMap.set(encodedUrl, transform(entireStorage[key]))
-            } catch (error) {
-                continue // Malformed URL
-            }
+    // Only attempt page data conversion if index + bookmark storage values are correct types
+    if (index && index.index instanceof Array) {
+        for (const keyChunk of chunk(200)(index.index)) {
+            const storageChunk = await browser.storage.local.get(keyChunk)
+
+            keyChunk.forEach((key, i) => {
+                if (storageChunk[key] == null) {
+                    return
+                }
+
+                try {
+                    const encodedUrl = encodeUrl(storageChunk[key].url)
+                    importItemsMap.set(
+                        encodedUrl,
+                        transform(storageChunk[key], i),
+                    )
+                } catch (error) {} // Malformed URL
+            })
         }
     }
 
