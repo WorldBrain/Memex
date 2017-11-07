@@ -15,14 +15,15 @@ const Tutorial = () => (
             <div>
                 <h3 className={LocalStyles.h3}>How to Search</h3>
                 <p className={LocalStyles.text}>
-                    The extension runs in the background an indexes the pages
-                    you visit from now on, but you can also{' '}
+                    The extension runs in the background and indexes the pages
+                    you visit since installing, but you can also{' '}
                     <a
                         className={LocalStyles.link}
                         href="/options/options.html#/import"
                     >
-                        import your history/bookmarks.
+                        import your history/bookmarks from before.
                     </a>
+                    <br />
                     <br />To find websites again, there are 3 ways to search
                     with the words you remember:
                 </p>
