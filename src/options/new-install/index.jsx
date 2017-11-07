@@ -64,7 +64,11 @@ const NewInstall = () => (
         </div>
         <p>
             {' '}
-            <a target="_blank" href="https://worldbrain.io/">
+            <a
+                className={localStyles.link}
+                target="_blank"
+                href="https://worldbrain.io/"
+            >
                 Or just get started browsing the web
             </a>
         </p>

@@ -21,7 +21,7 @@ const Tutorial = () => (
                         className={LocalStyles.link}
                         href="/options/options.html#/import"
                     >
-                        importing your history/bookmarks.
+                        import your history/bookmarks.
                     </a>
                     <br />To find websites again, there are 3 ways to search
                     with the words you remember:
