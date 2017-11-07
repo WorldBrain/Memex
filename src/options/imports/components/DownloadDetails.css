@@ -117,3 +117,15 @@
     color: #c8c8c8;
     font-size: 12px;
 }
+
+.showDetails {
+    color: #3eb995;
+    font-size: 12px;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+
+    &:hover {
+        cursor: pointer;
+    }
+}

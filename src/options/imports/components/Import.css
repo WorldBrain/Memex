@@ -225,15 +225,6 @@ progress[value]::-webkit-progress-value {
     color: #3eb995 !important; /* stylelint-disable-line declaration-no-important */
 }
 
-.showDetails {
-    color: #3eb995;
-    font-size: 10px;
-
-    &:hover {
-        cursor: pointer;
-    }
-}
-
 .layer1 {
     background-color: white;
     z-index: -3;

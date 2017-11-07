@@ -176,24 +176,18 @@ class ImportContainer extends Component {
         <Wrapper>
             <ProgressBar progress={this.props.progressPercent} />
             <ProgressTable {...this.props} />
+            <DownloadDetails
+                changeShowDetails={this.props.boundActions.showDownloadDetails}
+                showDownloadDetails={this.props.showDownloadDetails}
+            >
+                {this.renderDownloadDetailsRows()}
+            </DownloadDetails>
         </Wrapper>
     )
 
     renderStatusReport = () => (
         <Wrapper>
-            <StatusReport
-                {...this.props}
-                changeShowDetails={this.props.boundActions.showDownloadDetails}
-            >
-                {this.props.showDownloadDetails
-                    ? 'Hide Details'
-                    : 'Show Details'}
-            </StatusReport>
-            {this.props.showDownloadDetails && (
-                <DownloadDetails>
-                    {this.renderDownloadDetailsRows()}
-                </DownloadDetails>
-            )}
+            <StatusReport {...this.props} />
         </Wrapper>
     )
 
