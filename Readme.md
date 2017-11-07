@@ -1,18 +1,20 @@
-# <a id="worldbrain" href="#worldbrain">WorldBrain</a>
+# <a id="worldbrain" href="#worldbrain">WorldBrain's Memex</a>
 
-Worldbrain is a browser extension that lets you create and search through your whole web of personal browser history.
+A browser extension that lets you create, search and eventually share your personal web of knowledge
 
- - **Full-Text-Search** all pages and bookmarks you have visited.
- - **Full Data Privacy** everything stays on your own computer and will **never ever ever EVER** be shared or used without your consent. Here at worldbrain we are highly concerned about your privacy and security please see our [privacy policy](#privacy-policy) for more details.
+ - **Full-Text-Search** all websites you visited and bookmarked
+ - **Full Data Privacy** All data is stored and processed on your own computer and will **never ever ever EVER** be shared or used without your consent. Here at worldbrain we are highly concerned about your privacy and security please see our [privacy policy](#privacy-policy) for more details.
 
 Lookout for these exiting new features in the future:
- - **Rate** webpages you visit, add notes, comments and links to similar valuable resources
- - **Weight** intelligent algorithms to assess the value of a webpage based on your interactions with it.
+ - **Automatically Rate** how useful you perceive the websites you visit based on your interactions with it.
+ - **Add notes, comments and links** to similar valuable resources
  - **Integrate** with all your favorite services such as facebook, evernote and twitter.
  - **Sync** with all of your browsers, smart-phones, tablets, smart-fridges, electric cars, space-ships ect...
  - **Share** recommendations, comments, links & ratings with your network.
  - **Discover** new content that has high value within your network
  - **Diversify** the content you find by looking through great sources on the opposite side of your 'value' system. Break out of your 'filter bubble'
+
+More on that on our website: worldbrain.io
 
 ### Table Of Content
 
