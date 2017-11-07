@@ -132,7 +132,10 @@ export const deleteDocs = () => async (dispatch, getState) => {
 
 export const toggleBookmark = (url, index) => async (dispatch, getState) => {
     const results = selectors.results(getState())
-    console.log(url, index)
-    if (results[index].hasBookmark) await removeBookmarkByUrl(url)
-    else await createBookmarkByExtension(url)
+
+    if (results[index].hasBookmark) {
+        await removeBookmarkByUrl(url)
+    } else {
+        await createBookmarkByExtension(url)
+    }
 }

@@ -65,7 +65,6 @@ export default function transform({ text = '', lang = 'en' }) {
     if (!text || !text.replace(/\s/g, '')) {
         return text
     }
-    // console.log( text + "transform-text" + lang)
     let searchableText = text
     const lengthBefore = searchableText.length
 
