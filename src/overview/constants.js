@@ -16,3 +16,5 @@ export const CMDS = {
 }
 
 export const DATE_PICKER_DATE_FORMAT = 'DD-MM-YYYY'
+
+export const SEARCH_COUNT_KEY = 'number-of-searches'
