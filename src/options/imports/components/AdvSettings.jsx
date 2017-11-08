@@ -3,11 +3,11 @@ import PropTypes from 'prop-types'
 
 import TestDataUpload from './TestDataUpload'
 
-import styles from './DevOptions.css'
+import styles from './AdvSettings.css'
 
-const DevOptions = ({ devMode, toggleDevMode, ...uploadProps }) => (
+const AdvSettings = ({ advMode, toggleAdvMode, ...uploadProps }) => (
     <section className={styles.container}>
-        {devMode && (
+        {advMode && (
             <div className={styles.devFunctionality}>
                 <p className={styles.warning}>
                     Note that the options in here are for advanced use only, and
@@ -19,9 +19,9 @@ const DevOptions = ({ devMode, toggleDevMode, ...uploadProps }) => (
     </section>
 )
 
-DevOptions.propTypes = {
-    devMode: PropTypes.bool.isRequired,
-    toggleDevMode: PropTypes.func.isRequired,
+AdvSettings.propTypes = {
+    advMode: PropTypes.bool.isRequired,
+    toggleAdvMode: PropTypes.func.isRequired,
 }
 
-export default DevOptions
+export default AdvSettings

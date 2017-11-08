@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 
 import { LoadingIndicator } from 'src/common-ui/components'
 
-import styles from './DevOptions.css'
+import styles from './AdvSettings.css'
 
 const TestDataUpload = ({ isUploading, uploadTestData }) => (
     <div className={styles.uploadContainer}>

@@ -9,7 +9,7 @@
     color: #ff5722;
 }
 
-.devModeToggle {
+.advModeToggle {
     font-size: 0.85em;
     display: flex;
     justify-content: space-between;
@@ -17,7 +17,7 @@
     color: #787677;
 }
 
-.devFunctionality {
+.advFunctionality {
     min-height: 300px;
 }
 

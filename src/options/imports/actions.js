@@ -32,13 +32,13 @@ export const resumeImport = createAction('imports/resumeImport')
 
 export const setShowOldExt = createAction('imports/setShowOldExt')
 
-// Dev mode actions
-export const toggleDevMode = createAction('imports-dev/toggleDevMode')
+// Adv settings mode actions
+export const toggleAdvMode = createAction('imports-adv/toggleAdvMode')
 export const startTestDataUpload = createAction(
-    'imports-dev/startTestDataUpload',
+    'imports-adv/startTestDataUpload',
 )
 export const finishTestDataUpload = createAction(
-    'imports-dev/finishTestDataUpload',
+    'imports-adv/finishTestDataUpload',
 )
 
 export const showDownloadDetails = createAction('imports/showDownloadDetails')

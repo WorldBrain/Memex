@@ -14,7 +14,7 @@ const defaultStats = {
     [TYPE.OLD]: 0,
 }
 
-const defaultDevState = {
+const defaultAdvState = {
     isEnabled: false,
     isUploading: false,
 }
@@ -30,7 +30,7 @@ const defaultState = {
     loadingMsg:
         'Please wait while we analyze & prepare your browsing history & bookmarks',
     downloadDataFilter: FILTERS.FAIL,
-    dev: defaultDevState,
+    adv: defaultAdvState,
     allowTypes: {
         [TYPE.HISTORY]: false,
         [TYPE.BOOKMARK]: false,
@@ -131,18 +131,18 @@ export default createReducer(
         [actions.initDownloadData]: payloadReducer('downloadData'),
         [actions.setShowOldExt]: payloadReducer('showOldExt'),
 
-        // Dev mode reducers
+        // Adv settings mode reducers
         [actions.startTestDataUpload]: state => ({
             ...state,
-            dev: { ...state.dev, isUploading: true },
+            adv: { ...state.adv, isUploading: true },
         }),
         [actions.finishTestDataUpload]: state => ({
             ...state,
-            dev: { ...state.dev, isUploading: false },
+            adv: { ...state.adv, isUploading: false },
         }),
-        [actions.toggleDevMode]: state => ({
+        [actions.toggleAdvMode]: state => ({
             ...state,
-            dev: { ...state.dev, isEnabled: !state.dev.isEnabled },
+            adv: { ...state.adv, isEnabled: !state.adv.isEnabled },
         }),
 
         [actions.showDownloadDetails]: state => ({
