@@ -28,7 +28,7 @@ export default class PromiseBatcher {
     }) {
         this.getInputBatch = inputBatchCallback
         this.process = processingCallback
-        this.concurrency = concurrency
+        this._concurrency = concurrency
         this.observer = { next, error, complete }
 
         // State to keep track of subscription (allow hiding of Rx away from caller)
@@ -77,8 +77,8 @@ export default class PromiseBatcher {
             .mergeMap(
                 this.getDeferredInputObservable, // Defer async callbacks on input...
                 this._getOutputShape,
-                this.concurrency,
-            ) // ...but run this many at any time
+                this._concurrency, // ...but run this many at any time
+            )
             .subscribe(
                 this.observer.next,
                 noop, // Set error to noop as RxJS stops the stream on errors; we don't want to
@@ -115,8 +115,8 @@ export default class PromiseBatcher {
     }
 
     set concurrency(value) {
-        if (typeof value === 'number' && value < 1) {
-            this.concurrency = value
+        if (typeof value === 'number' && value > 0) {
+            this._concurrency = value
         }
     }
 }

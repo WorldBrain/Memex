@@ -6,6 +6,7 @@ import {
     FILTERS,
     IMPORT_TYPE as TYPE,
     DOWNLOAD_STATUS as DL_STAT,
+    DEF_CONCURRENCY,
 } from './constants'
 
 const defaultStats = {
@@ -25,7 +26,7 @@ const defaultState = {
     loadingMsg:
         'Please wait while we analyze & prepare your browsing history & bookmarks',
     downloadDataFilter: FILTERS.FAIL,
-    concurrency: 2,
+    concurrency: DEF_CONCURRENCY,
     isAdvEnabled: false,
     isFileUploading: false,
     allowTypes: {

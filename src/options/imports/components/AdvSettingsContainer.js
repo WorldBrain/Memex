@@ -13,7 +13,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
     toggleAdvMode: () => dispatch(actions.toggleAdvMode()),
     onConcurrencyChange: event =>
-        dispatch(actions.setConcurrency(+event.target.value)),
+        dispatch(actions.setConcurrencyLevel(+event.target.value)),
     uploadTestData: event =>
         dispatch(actions.uploadTestData(event.target.files || [])),
 })

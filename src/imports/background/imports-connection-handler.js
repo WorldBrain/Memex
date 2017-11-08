@@ -4,6 +4,7 @@ import {
     CMDS,
     IMPORT_CONN_NAME,
     IMPORT_TYPE,
+    DEF_CONCURRENCY,
 } from 'src/options/imports/constants'
 import getEstimateCounts from './import-estimates'
 import processImportItem from './import-item-processor'
@@ -141,7 +142,7 @@ export default async function importsConnectionHandler(port) {
     const batch = new PromiseBatcher({
         inputBatchCallback: getImportItems,
         processingCallback: processImportItem,
-        concurrency: 3,
+        concurrency: DEF_CONCURRENCY,
         observer: getBatchObserver(port),
     })
 
@@ -157,10 +158,9 @@ export default async function importsConnectionHandler(port) {
     }
 
     // Handle any incoming messages to control the batch
-    port.onMessage.addListener(async ({ cmd, ...payload }) => {
+    port.onMessage.addListener(async ({ cmd, payload }) => {
         switch (cmd) {
             case CMDS.START:
-                console.time('total-import-time')
                 return await startImport(port, batch, payload)
             case CMDS.RESUME:
                 return batch.start()
@@ -169,10 +169,9 @@ export default async function importsConnectionHandler(port) {
             case CMDS.CANCEL:
                 return await cancelImport(port, batch)
             case CMDS.FINISH:
-                console.timeEnd('total-import-time')
                 return await finishImport(port)
             case CMDS.SET_CONCURRENCY:
-                return (batch.concurrency = payload.concurrency)
+                return (batch.concurrency = payload)
             default:
                 return console.error(`unknown command: ${cmd}`)
         }

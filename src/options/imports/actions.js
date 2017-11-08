@@ -2,7 +2,7 @@ import { createAction } from 'redux-act'
 
 import db from 'src/pouchdb'
 import { CMDS, IMPORT_CONN_NAME, OLD_EXT_KEYS } from './constants'
-import { allowTypes as allowTypesSelector } from './selectors'
+import * as selectors from './selectors'
 
 export const filterDownloadDetails = createAction(
     'imports/filterDownloadDetails',
@@ -148,21 +148,31 @@ export const stop = makePortMessagingThunk({
     action: cancelImport(),
     cmd: CMDS.CANCEL,
 })
+
 export const pause = makePortMessagingThunk({
     action: pauseImport(),
     cmd: CMDS.PAUSE,
 })
+
 export const resume = makePortMessagingThunk({
     action: resumeImport(),
     cmd: CMDS.RESUME,
 })
+
 export const finish = makePortMessagingThunk({
     action: finishImport(),
     cmd: CMDS.FINISH,
 })
-export const start = () => (dispatch, getState) => {
-    const allowImportTypes = allowTypesSelector(getState())
 
+export const start = () => (dispatch, getState) => {
     dispatch(prepareImport())
-    port.postMessage({ cmd: CMDS.START, ...allowImportTypes })
+    port.postMessage({
+        cmd: CMDS.START,
+        payload: selectors.allowTypes(getState()),
+    })
+}
+
+export const setConcurrencyLevel = concurrency => dispatch => {
+    dispatch(setConcurrency(concurrency))
+    port.postMessage({ cmd: CMDS.SET_CONCURRENCY, payload: concurrency })
 }

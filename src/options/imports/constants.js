@@ -58,6 +58,8 @@ export const CMDS = {
 /** Estimated time to download a doc (seconds) */
 export const DOC_TIME_EST = 1.8
 
+export const DEF_CONCURRENCY = 2
+
 export const OLD_EXT_KEYS = {
     NUM_DONE: 'old-ext-converted-count',
     INDEX: 'index',
