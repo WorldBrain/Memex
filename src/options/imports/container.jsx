@@ -148,14 +148,16 @@ class ImportContainer extends Component {
     }
 
     renderDownloadDetailsRows = () =>
-        this.props.downloadData.map((data, i) => (
-            <DownloadDetailsRow
-                key={i}
-                isActive={i === this.state.activeRow}
-                handleClick={this.handleDetailsRowClick(i)}
-                {...data}
-            />
-        ))
+        this.props.downloadData
+            .reverse()
+            .map((data, i) => (
+                <DownloadDetailsRow
+                    key={i}
+                    isActive={i === this.state.activeRow}
+                    handleClick={this.handleDetailsRowClick(i)}
+                    {...data}
+                />
+            ))
 
     renderEstimatesTable = () => (
         <EstimatesTable
