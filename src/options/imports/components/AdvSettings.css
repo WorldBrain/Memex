@@ -21,21 +21,24 @@
     min-height: 300px;
 }
 
-.uploadContainer {
+.settingsList {
+    padding: 0;
+}
+
+.settingsListItem {
     display: flex;
     flex-direction: row;
-}
+    justify-content: space-between;
+    align-items: center;
+    margin: 2em 0;
 
-.uploadInput {
-    flex: 1;
-
-    > h3 {
-        margin: 20px 0 10px;
+    &:first-child {
+        margin-top: 1em;
     }
-}
 
-.uploadLoading {
-    flex: 1;
+    &:last-child {
+        margin-bottom: 1em;
+    }
 }
 
 input[type='checkbox'] {

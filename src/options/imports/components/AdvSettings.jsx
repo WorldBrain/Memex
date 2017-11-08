@@ -8,12 +8,16 @@ import styles from './AdvSettings.css'
 const AdvSettings = ({ advMode, toggleAdvMode, ...uploadProps }) => (
     <section className={styles.container}>
         {advMode && (
-            <div className={styles.devFunctionality}>
+            <div className={styles.advFunctionality}>
                 <p className={styles.warning}>
                     Note that the options in here are for advanced use only, and
                     could lead to unexpected behaviour.
                 </p>
-                <TestDataUpload {...uploadProps} />
+                <ul className={styles.settingsList}>
+                    <li className={styles.settingsListItem}>
+                        <TestDataUpload {...uploadProps} />
+                    </li>
+                </ul>
             </div>
         )}
     </section>
