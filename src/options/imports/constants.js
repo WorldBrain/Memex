@@ -52,6 +52,7 @@ export const CMDS = {
     CANCEL: `${IMPORT_CONN_NAME}/CANCEL`,
     NEXT: `${IMPORT_CONN_NAME}/NEXT`,
     COMPLETE: `${IMPORT_CONN_NAME}/COMPLETE`,
+    SET_CONCURRENCY: `${IMPORT_CONN_NAME}/SET_CONCURRENCY`,
 }
 
 /** Estimated time to download a doc (seconds) */

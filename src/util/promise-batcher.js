@@ -13,7 +13,7 @@ export default class PromiseBatcher {
      *  will be re-run every time `start` is called (both on resume and init start), hence this input will effectively
      *  act as state for the batcher. State management should be handled in the `observer` callbacks.
      * @param {(input: any) => Promise<any>} processingCallback The callback to run each input on.
-     * @param {number} [concurrency=5] How many input itemss to be processing at any time.
+     * @param {number} [concurrency=1] How many input itemss to be processing at any time.
      * @param {any} observer Affords logic to run on certain events relating to the processing of each input item:
      *  - successful finish: `next`
      *  - erroring out: `error`
@@ -23,7 +23,7 @@ export default class PromiseBatcher {
     constructor({
         inputBatchCallback,
         processingCallback,
-        concurrency = 5,
+        concurrency = 1,
         observer: { next = noop, error = noop, complete = noop } = {},
     }) {
         this.getInputBatch = inputBatchCallback
@@ -112,5 +112,11 @@ export default class PromiseBatcher {
         this.sub.unsubscribe()
         this.sub = undefined
         return true
+    }
+
+    set concurrency(value) {
+        if (typeof value === 'number' && value < 1) {
+            this.concurrency = value
+        }
     }
 }
