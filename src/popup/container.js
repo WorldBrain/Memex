@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import qs from 'query-string'
+import { initSingleLookup } from 'src/search/search-index/util'
+import { generatePageDocId } from 'src/page-storage'
 
 import extractTimeFiltersFromQuery from 'src/util/nlp-time-filter'
 import { remoteFunction } from 'src/util/webextensionRPC'
@@ -23,6 +25,13 @@ const getBlacklistButtonState = ({ loggable, blacklist }) => {
     return constants.BLACKLIST_BTN_STATE.UNLISTED
 }
 
+const getBookmarkButtonState = ({ loggable, bookmark, blacklist }) => {
+    if (!loggable || blacklist === constants.BLACKLIST_BTN_STATE.DISABLED)
+        return constants.BOOKMARK_BTN_STATE.DISABLED
+    if (bookmark) return constants.BOOKMARK_BTN_STATE.BOOKMARK
+    return constants.BOOKMARK_BTN_STATE.UNBOOKMARK
+}
+
 class PopupContainer extends Component {
     constructor(props) {
         super(props)
@@ -36,6 +45,7 @@ class PopupContainer extends Component {
             isPaused: false,
             blacklistChoice: false,
             blacklistConfirm: false,
+            bookmarkBtn: constants.BOOKMARK_BTN_STATE.DISABLED,
         }
 
         this.toggleLoggingPause = remoteFunction('toggleLoggingPause')
@@ -43,6 +53,7 @@ class PopupContainer extends Component {
         this.createBookmarkByExtension = remoteFunction(
             'createBookmarkByExtension',
         )
+        this.removeBookmarkByUrl = remoteFunction('removeBookmarkByUrl')
 
         this.onSearchChange = this.onSearchChange.bind(this)
         this.onPauseChange = this.onPauseChange.bind(this)
@@ -72,6 +83,9 @@ class PopupContainer extends Component {
         this.getInitBlacklistBtnState(currentTab.url)
             .then(updateState)
             .catch(noop)
+        this.getInitBookmarkBtnState(currentTab.url)
+            .then(updateState)
+            .catch(noop)
     }
 
     async getInitPauseState() {
@@ -87,6 +101,19 @@ class PopupContainer extends Component {
         }
 
         return { blacklistBtn: getBlacklistButtonState(result) }
+    }
+
+    async getInitBookmarkBtnState(url) {
+        const pageId = await generatePageDocId({ url })
+        const lookup = initSingleLookup()
+        const dbResult = await lookup(pageId)
+        const result = {
+            loggable: isLoggable({ url }),
+            bookmark: dbResult.bookmarks.size !== 0,
+            blacklist: this.state.blacklistBtn,
+        }
+
+        return { bookmarkBtn: getBookmarkButtonState(result) }
     }
 
     onBlacklistBtnClick(domain = false) {
@@ -204,7 +231,26 @@ class PopupContainer extends Component {
         return this.props.pauseValues.map(pauseValueToOption)
     }
 
-    handleAddBookmark = () => this.createBookmarkByExtension(this.state.url)
+    handleAddBookmark = () => {
+        if (
+            this.state.bookmarkBtn === constants.BOOKMARK_BTN_STATE.UNBOOKMARK
+        ) {
+            this.createBookmarkByExtension(this.state.url)
+        } else if (
+            this.state.bookmarkBtn === constants.BOOKMARK_BTN_STATE.BOOKMARK
+        ) {
+            this.removeBookmarkByUrl(this.state.url)
+        }
+        this.setState(state => ({
+            ...state,
+            boomarkBtn:
+                this.state.bookmarkBtn ===
+                constants.BOOKMARK_BTN_STATE.UNBOOKMARK
+                    ? constants.BOOKMARK_BTN_STATE.BOOKMARK
+                    : constants.BOOKMARK_BTN_STATE.UNBOOKMARK,
+        }))
+        window.close()
+    }
 
     renderChildren() {
         const { blacklistConfirm, pauseValue, isPaused } = this.state
@@ -219,8 +265,18 @@ class PopupContainer extends Component {
         }
         return (
             <div>
-                <Button onClick={this.handleAddBookmark} icon="bookmark">
-                    Bookmark This Page
+                <Button
+                    onClick={this.handleAddBookmark}
+                    icon="bookmark"
+                    disabled={
+                        this.state.bookmarkBtn ===
+                        constants.BOOKMARK_BTN_STATE.DISABLED
+                    }
+                >
+                    {this.state.bookmarkBtn ===
+                    constants.BOOKMARK_BTN_STATE.BOOKMARK
+                        ? 'Unbookmark This Page'
+                        : 'Bookmark This Page'}
                 </Button>
                 <HistoryPauser
                     onConfirm={this.onPauseConfirm}
