@@ -20,7 +20,7 @@ const ProgressBar = ({ progress }) => (
         />
         <h3
             className={localStyles.progressBar}
-            style={{ marginLeft: progress + '%' }}
+            style={{ width: progress + '%' }}
         >
             {Math.round(parseInt(progress).toFixed(2)) + '%'}
         </h3>

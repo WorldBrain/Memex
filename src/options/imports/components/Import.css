@@ -207,6 +207,7 @@ progress[value]::-webkit-progress-value {
 .progressBar {
     font-size: 0.8em;
     color: #3eb995;
+    text-align: right;
 }
 
 .arrowUp {
