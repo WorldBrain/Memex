@@ -5,9 +5,14 @@ import localStyles from './DownloadDetails.css'
 
 const ShowDownloadDetails = ({ changeShowDetails, showDownloadDetails }) => (
     <div className={localStyles.detailsContainer}>
-        <a className={localStyles.showDetails} onClick={changeShowDetails}>
-            {showDownloadDetails ? 'Hide Details' : 'Show Details'}
-        </a>
+        <div className={localStyles.showDetails}>
+            <a
+                className={localStyles.showDetailsLink}
+                onClick={changeShowDetails}
+            >
+                {showDownloadDetails ? 'Hide Details' : 'Show Details'}
+            </a>
+        </div>
     </div>
 )
 

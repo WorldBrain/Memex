@@ -119,11 +119,14 @@
 }
 
 .showDetails {
-    color: #3eb995;
-    font-size: 12px;
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
+}
+
+.showDetailsLink {
+    font-size: 12px;
+    color: #3eb995;
 
     &:hover {
         cursor: pointer;
