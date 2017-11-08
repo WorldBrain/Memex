@@ -136,7 +136,9 @@ class BlacklistContainer extends Component {
             return (
                 <div className={styles.blacklistAlert}>
                     This is an invalid RegExp! You can test your regex{' '}
-                    <a href="https://regexr.com/">here</a>
+                    <a target="_blank" href="https://regexr.com/">
+                        here
+                    </a>
                 </div>
             )
     }
