@@ -17,10 +17,6 @@
     },
     "commands": {
         "openOverview": {
-            "suggested_key": {
-                "default": "Ctrl+Y",
-                "mac": "Alt+I"
-            },
             "description": "Open Search Overview"
         }
     },
