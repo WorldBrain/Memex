@@ -1,37 +1,49 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import classNames from 'classnames'
 
 import localStyles from './DownloadDetails.css'
+import styles from '../../options.css'
 
-const DownloadDetails = ({
-    children,
-    changeShowDetails,
-    showDownloadDetails,
-}) => (
+const filterClass = classNames(localStyles.filterOption, styles.buttonNaked)
+
+const DownloadDetails = ({ children, filterHandlers, filter }) => (
     <div className={localStyles.detailsContainer}>
-        <a className={localStyles.showDetails} onClick={changeShowDetails}>
-            {showDownloadDetails ? 'Hide Details' : 'Show Details'}
-        </a>
-        {showDownloadDetails && (
-            <table className={localStyles.detailsTable}>
-                <thead className={localStyles.detailsTableHead}>
-                    <tr>
-                        <th className={localStyles.urlCol}>URL</th>
+        <div className={localStyles.filters}>
+            <button className={filterClass} onClick={filterHandlers.all}>
+                All
+            </button>
+            <button className={filterClass} onClick={filterHandlers.succ}>
+                Success
+            </button>
+            <button className={filterClass} onClick={filterHandlers.fail}>
+                Failed
+            </button>
+        </div>
+        <table className={localStyles.detailsTable}>
+            <thead className={localStyles.detailsTableHead}>
+                <tr>
+                    <th className={localStyles.urlCol}>URL</th>
+                    {filter !== 'success' && (
                         <th className={localStyles.errorsCol}>Errors</th>
-                    </tr>
-                </thead>
-                <tbody className={localStyles.detailsTableBody}>
-                    {children}
-                </tbody>
-            </table>
-        )}
+                    )}
+                </tr>
+            </thead>
+            <tbody className={localStyles.detailsTableBody}>{children}</tbody>
+        </table>
     </div>
 )
 
 DownloadDetails.propTypes = {
+    // Event handlers
+    filterHandlers: PropTypes.shape({
+        all: PropTypes.func.isRequired,
+        succ: PropTypes.func.isRequired,
+        fail: PropTypes.func.isRequired,
+    }).isRequired,
+    filter: PropTypes.string.isRequired,
+
     children: PropTypes.arrayOf(PropTypes.node).isRequired,
-    changeShowDetails: PropTypes.func.isRequired,
-    showDownloadDetails: PropTypes.bool.isRequired,
 }
 
 export default DownloadDetails

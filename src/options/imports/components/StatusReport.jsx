@@ -3,13 +3,26 @@ import PropTypes from 'prop-types'
 
 import localStyles from './Import.css'
 
-const StatusReport = ({ successCount, failCount }) => (
+const StatusReport = ({
+    successCount,
+    failCount,
+    changeShowDetails,
+    children,
+}) => (
     <div>
         <h1 className={localStyles.heading}>Import Summary</h1>
         <div className={localStyles.reportDetails}>
             <p>{`Succeeded (${successCount})`}</p>
             <p>{`Failed (${failCount})`}</p>
             <p>{`Total (${successCount + failCount})`}</p>
+            <p>
+                <a
+                    className={localStyles.showDetails}
+                    onClick={changeShowDetails}
+                >
+                    {children}
+                </a>
+            </p>
         </div>
     </div>
 )
@@ -17,6 +30,8 @@ const StatusReport = ({ successCount, failCount }) => (
 StatusReport.propTypes = {
     successCount: PropTypes.number.isRequired,
     failCount: PropTypes.number.isRequired,
+    changeShowDetails: PropTypes.func.isRequired,
+    children: PropTypes.string.isRequired,
 }
 
 export default StatusReport

@@ -233,3 +233,12 @@ progress[value]::-webkit-progress-value {
 .layer2 {
     z-index: -2;
 }
+
+.showDetails {
+    color: #3eb995;
+    font-size: 12px;
+
+    &:hover {
+        cursor: pointer;
+    }
+}

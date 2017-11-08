@@ -17,6 +17,7 @@ import DownloadDetails from './components/DownloadDetails'
 import DownloadDetailsRow from './components/DownloadDetailsRow'
 import StatusReport from './components/StatusReport'
 import AdvSettingCheckbox from './components/AdvSettingsCheckbox'
+import ShowDownloadDetails from './components/ShowDownloadDetails'
 
 class ImportContainer extends Component {
     static propTypes = {
@@ -30,6 +31,7 @@ class ImportContainer extends Component {
         downloadData: PropTypes.arrayOf(PropTypes.object).isRequired,
         progressPercent: PropTypes.number.isRequired,
         showDownloadDetails: PropTypes.bool.isRequired,
+        downloadDataFilter: PropTypes.string.isRequired,
 
         // Misc
         boundActions: PropTypes.object.isRequired,
@@ -38,6 +40,9 @@ class ImportContainer extends Component {
     constructor(props) {
         super(props)
         props.boundActions.init()
+
+        this.flipCancelState = waitingOnCancelConfirm =>
+            this.setState(state => ({ ...state, waitingOnCancelConfirm }))
     }
 
     state = {
@@ -174,22 +179,81 @@ class ImportContainer extends Component {
         />
     )
 
+    onButtonClick(e, handleClick) {
+        e.preventDefault()
+        this.flipCancelState(false)
+        handleClick()
+    }
+
+    onDetailsRowClick(rowId) {
+        this.setState(state => ({
+            ...state,
+            activeRow: rowId,
+            waitingOnCancelConfirm: false,
+        }))
+    }
+
+    getDetailFilterHandlers() {
+        const { boundActions } = this.props
+
+        const updateFilterState = filter => () => {
+            this.onDetailsRowClick(-1) // Simulate anti-click to reset state of active details row
+            boundActions.filterDownloadDetails(filter)
+        }
+
+        return {
+            all: e =>
+                this.onButtonClick(e, updateFilterState(constants.FILTERS.ALL)),
+            succ: e =>
+                this.onButtonClick(
+                    e,
+                    updateFilterState(constants.FILTERS.SUCC),
+                ),
+            fail: e =>
+                this.onButtonClick(
+                    e,
+                    updateFilterState(constants.FILTERS.FAIL),
+                ),
+        }
+    }
+
     renderProgressTable = () => (
         <Wrapper>
             <ProgressBar progress={this.props.progressPercent} />
             <ProgressTable {...this.props} />
-            <DownloadDetails
+            <ShowDownloadDetails
                 changeShowDetails={this.props.boundActions.showDownloadDetails}
                 showDownloadDetails={this.props.showDownloadDetails}
-            >
-                {this.renderDownloadDetailsRows()}
-            </DownloadDetails>
+            />
+            {this.props.showDownloadDetails && (
+                <DownloadDetails
+                    filterHandlers={this.getDetailFilterHandlers()}
+                    filter={this.props.downloadDataFilter}
+                >
+                    {this.renderDownloadDetailsRows()}
+                </DownloadDetails>
+            )}
         </Wrapper>
     )
 
     renderStatusReport = () => (
         <Wrapper>
-            <StatusReport {...this.props} />
+            <StatusReport
+                {...this.props}
+                changeShowDetails={this.props.boundActions.showDownloadDetails}
+            >
+                {this.props.showDownloadDetails
+                    ? 'Hide Details'
+                    : 'Show Details'}
+            </StatusReport>
+            {this.props.showDownloadDetails && (
+                <DownloadDetails
+                    filterHandlers={this.getDetailFilterHandlers()}
+                    filter={this.props.downloadDataFilter}
+                >
+                    {this.renderDownloadDetailsRows()}
+                </DownloadDetails>
+            )}
         </Wrapper>
     )
 
@@ -234,6 +298,7 @@ const mapStateToProps = state => ({
     loadingMsg: selectors.loadingMsg(state),
     advMode: selectors.advMode(state),
     showDownloadDetails: selectors.showDownloadDetails(state),
+    downloadDataFilter: selectors.downloadDataFilter(state),
 })
 
 const mapDispatchToProps = dispatch => ({
