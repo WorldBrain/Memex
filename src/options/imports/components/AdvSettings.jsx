@@ -2,12 +2,13 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 import TestDataUpload from './TestDataUpload'
+import Concurrency from './Concurrency'
 
 import styles from './AdvSettings.css'
 
-const AdvSettings = ({ advMode, toggleAdvMode, ...uploadProps }) => (
+const AdvSettings = props => (
     <section className={styles.container}>
-        {advMode && (
+        {props.advMode && (
             <div className={styles.advFunctionality}>
                 <p className={styles.warning}>
                     Note that the options in here are for advanced use only, and
@@ -15,7 +16,10 @@ const AdvSettings = ({ advMode, toggleAdvMode, ...uploadProps }) => (
                 </p>
                 <ul className={styles.settingsList}>
                     <li className={styles.settingsListItem}>
-                        <TestDataUpload {...uploadProps} />
+                        <TestDataUpload {...props} />
+                    </li>
+                    <li className={styles.settingsListItem}>
+                        <Concurrency {...props} />
                     </li>
                 </ul>
             </div>
@@ -25,7 +29,6 @@ const AdvSettings = ({ advMode, toggleAdvMode, ...uploadProps }) => (
 
 AdvSettings.propTypes = {
     advMode: PropTypes.bool.isRequired,
-    toggleAdvMode: PropTypes.func.isRequired,
 }
 
 export default AdvSettings

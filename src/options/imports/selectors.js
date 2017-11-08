@@ -32,9 +32,12 @@ export const showDownloadDetails = createSelector(
 )
 
 // Adv settings mode
-export const advState = createSelector(imports, state => state.adv)
-export const advMode = createSelector(advState, state => state.isEnabled)
-export const isUploading = createSelector(advState, state => state.isUploading)
+export const advMode = createSelector(imports, state => state.isAdvEnabled)
+export const isUploading = createSelector(
+    imports,
+    state => state.isFileUploading,
+)
+export const concurrency = createSelector(imports, state => state.concurrency)
 
 const getImportStatusFlag = status =>
     createSelector(importStatus, importStatus => importStatus === status)

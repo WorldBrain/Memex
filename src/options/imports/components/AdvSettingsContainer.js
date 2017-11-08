@@ -2,16 +2,20 @@ import { connect } from 'react-redux'
 
 import AdvSettings from './AdvSettings'
 import * as selectors from '../selectors'
-import { toggleAdvMode, uploadTestData } from '../actions'
+import * as actions from '../actions'
 
 const mapStateToProps = state => ({
     advMode: selectors.advMode(state),
+    concurrency: selectors.concurrency(state),
     isUploading: selectors.isUploading(state),
 })
 
 const mapDispatchToProps = dispatch => ({
-    toggleAdvMode: () => dispatch(toggleAdvMode()),
-    uploadTestData: event => dispatch(uploadTestData(event.target.files || [])),
+    toggleAdvMode: () => dispatch(actions.toggleAdvMode()),
+    onConcurrencyChange: event =>
+        dispatch(actions.setConcurrency(+event.target.value)),
+    uploadTestData: event =>
+        dispatch(actions.uploadTestData(event.target.files || [])),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(AdvSettings)

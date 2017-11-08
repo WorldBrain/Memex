@@ -14,11 +14,6 @@ const defaultStats = {
     [TYPE.OLD]: 0,
 }
 
-const defaultAdvState = {
-    isEnabled: false,
-    isUploading: false,
-}
-
 const defaultState = {
     showOldExt: false,
     downloadData: [],
@@ -30,7 +25,9 @@ const defaultState = {
     loadingMsg:
         'Please wait while we analyze & prepare your browsing history & bookmarks',
     downloadDataFilter: FILTERS.FAIL,
-    adv: defaultAdvState,
+    concurrency: 2,
+    isAdvEnabled: false,
+    isFileUploading: false,
     allowTypes: {
         [TYPE.HISTORY]: false,
         [TYPE.BOOKMARK]: false,
@@ -132,19 +129,18 @@ export default createReducer(
         [actions.setShowOldExt]: payloadReducer('showOldExt'),
 
         // Adv settings mode reducers
-        [actions.startTestDataUpload]: state => ({
+        [actions.setConcurrency]: (state, concurrency) => ({
             ...state,
-            adv: { ...state.adv, isUploading: true },
+            concurrency,
         }),
-        [actions.finishTestDataUpload]: state => ({
+        [actions.setFileUploading]: (state, isFileUploading) => ({
             ...state,
-            adv: { ...state.adv, isUploading: false },
+            isFileUploading,
         }),
         [actions.toggleAdvMode]: state => ({
             ...state,
-            adv: { ...state.adv, isEnabled: !state.adv.isEnabled },
+            isAdvEnabled: !state.isAdvEnabled,
         }),
-
         [actions.showDownloadDetails]: state => ({
             ...state,
             showDownloadDetails: !state.showDownloadDetails,

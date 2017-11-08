@@ -34,12 +34,8 @@ export const setShowOldExt = createAction('imports/setShowOldExt')
 
 // Adv settings mode actions
 export const toggleAdvMode = createAction('imports-adv/toggleAdvMode')
-export const startTestDataUpload = createAction(
-    'imports-adv/startTestDataUpload',
-)
-export const finishTestDataUpload = createAction(
-    'imports-adv/finishTestDataUpload',
-)
+export const setFileUploading = createAction('imports-adv/setFileUploading')
+export const setConcurrency = createAction('imports-adv/setConcurrency')
 
 export const showDownloadDetails = createAction('imports/showDownloadDetails')
 
@@ -67,10 +63,10 @@ const deserializeDoc = docString => {
  * @param {Array<File>} files One or more NDJSON files that contain database docs.
  */
 export const uploadTestData = files => async (dispatch, getState) => {
-    dispatch(startTestDataUpload())
+    dispatch(setFileUploading(true))
 
     if (files.length < 1) {
-        return dispatch(finishTestDataUpload())
+        return dispatch(setFileUploading(false))
     }
 
     const getFileText = getFileTextViaReader(new FileReader())
@@ -87,7 +83,7 @@ export const uploadTestData = files => async (dispatch, getState) => {
         await db.bulkDocs(docs)
     }
 
-    dispatch(finishTestDataUpload())
+    dispatch(setFileUploading(false))
 }
 
 /**
