@@ -41,13 +41,15 @@ export const addPage = req => performIndexing(pipeline(req))
  * @returns {Promise<void>} Promise resolving when indexing is complete, or rejecting for any index errors.
  */
 export const addPageConcurrent = req =>
-    new Promise((resolve, reject) =>
+    new Promise((resolve, reject) => {
+        const indexDoc = pipeline(req).catch(reject)
+
         indexQueue.push(() =>
-            addPage(req)
+            performIndexing(indexDoc)
                 .then(resolve)
                 .catch(reject),
-        ),
-    )
+        )
+    })
 
 /**
  * @param {IndexTermValue} currTermVal
