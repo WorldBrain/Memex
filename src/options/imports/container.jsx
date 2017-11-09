@@ -16,7 +16,7 @@ import ButtonBar from './components/ButtonBar'
 import DownloadDetails from './components/DownloadDetails'
 import DownloadDetailsRow from './components/DownloadDetailsRow'
 import StatusReport from './components/StatusReport'
-import DevCheckBox from './components/DevCheckBox'
+import AdvSettingCheckbox from './components/AdvSettingsCheckbox'
 
 class ImportContainer extends Component {
     static propTypes = {
@@ -209,7 +209,9 @@ class ImportContainer extends Component {
                     isRunning={isRunning}
                     helpText={this.renderHelpText()}
                 >
-                    {(isIdle || isLoading) && <DevCheckBox {...this.props} />}
+                    {(isIdle || isLoading) && (
+                        <AdvSettingCheckbox {...this.props} />
+                    )}
                     {!isStopped && this.renderCancelButton()}
                     {this.renderImportButton()}
                 </ButtonBar>
@@ -234,13 +236,13 @@ const mapStateToProps = state => ({
     failCount: selectors.failCount(state),
     allowTypes: selectors.allowTypes(state),
     loadingMsg: selectors.loadingMsg(state),
-    devMode: selectors.devMode(state),
+    advMode: selectors.advMode(state),
     showDownloadDetails: selectors.showDownloadDetails(state),
 })
 
 const mapDispatchToProps = dispatch => ({
     boundActions: bindActionCreators(actions, dispatch),
-    toggleDevMode: () => dispatch(actions.toggleDevMode()),
+    toggleAdvMode: () => dispatch(actions.toggleAdvMode()),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(ImportContainer)

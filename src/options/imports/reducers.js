@@ -6,17 +6,13 @@ import {
     FILTERS,
     IMPORT_TYPE as TYPE,
     DOWNLOAD_STATUS as DL_STAT,
+    DEF_CONCURRENCY,
 } from './constants'
 
 const defaultStats = {
     [TYPE.HISTORY]: 0,
     [TYPE.BOOKMARK]: 0,
     [TYPE.OLD]: 0,
-}
-
-const defaultDevState = {
-    isEnabled: false,
-    isUploading: false,
 }
 
 const defaultState = {
@@ -30,7 +26,9 @@ const defaultState = {
     loadingMsg:
         'Please wait while we analyze & prepare your browsing history & bookmarks',
     downloadDataFilter: FILTERS.FAIL,
-    dev: defaultDevState,
+    concurrency: DEF_CONCURRENCY,
+    isAdvEnabled: false,
+    isFileUploading: false,
     allowTypes: {
         [TYPE.HISTORY]: false,
         [TYPE.BOOKMARK]: false,
@@ -131,20 +129,19 @@ export default createReducer(
         [actions.initDownloadData]: payloadReducer('downloadData'),
         [actions.setShowOldExt]: payloadReducer('showOldExt'),
 
-        // Dev mode reducers
-        [actions.startTestDataUpload]: state => ({
+        // Adv settings mode reducers
+        [actions.setConcurrency]: (state, concurrency) => ({
             ...state,
-            dev: { ...state.dev, isUploading: true },
+            concurrency,
         }),
-        [actions.finishTestDataUpload]: state => ({
+        [actions.setFileUploading]: (state, isFileUploading) => ({
             ...state,
-            dev: { ...state.dev, isUploading: false },
+            isFileUploading,
         }),
-        [actions.toggleDevMode]: state => ({
+        [actions.toggleAdvMode]: state => ({
             ...state,
-            dev: { ...state.dev, isEnabled: !state.dev.isEnabled },
+            isAdvEnabled: !state.isAdvEnabled,
         }),
-
         [actions.showDownloadDetails]: state => ({
             ...state,
             showDownloadDetails: !state.showDownloadDetails,

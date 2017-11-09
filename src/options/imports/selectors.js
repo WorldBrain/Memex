@@ -31,13 +31,13 @@ export const showDownloadDetails = createSelector(
     state => state.showDownloadDetails,
 )
 
-// Dev features only
-export const devState = createSelector(imports, state => state.dev)
-export const devMode = createSelector(devState, devState => devState.isEnabled)
+// Adv settings mode
+export const advMode = createSelector(imports, state => state.isAdvEnabled)
 export const isUploading = createSelector(
-    devState,
-    devState => devState.isUploading,
+    imports,
+    state => state.isFileUploading,
 )
+export const concurrency = createSelector(imports, state => state.concurrency)
 
 const getImportStatusFlag = status =>
     createSelector(importStatus, importStatus => importStatus === status)

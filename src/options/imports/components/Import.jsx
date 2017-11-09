@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import DevOptions from '../DevOptionsContainer'
+import AdvSettings from './AdvSettingsContainer'
 import { LoadingIndicator } from 'src/common-ui/components'
 import localStyles from './Import.css'
 
@@ -80,7 +80,7 @@ const Import = ({
                 </div>
             )}
         </div>
-        {(isIdle || isLoading) && <DevOptions />}
+        {(isIdle || isLoading) && <AdvSettings />}
     </form>
 )
 

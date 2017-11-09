@@ -9,7 +9,7 @@
     color: #ff5722;
 }
 
-.devModeToggle {
+.advModeToggle {
     font-size: 0.85em;
     display: flex;
     justify-content: space-between;
@@ -17,25 +17,33 @@
     color: #787677;
 }
 
-.devFunctionality {
+.advFunctionality {
     min-height: 300px;
 }
 
-.uploadContainer {
+.concurrencyInput {
+    position: relative;
+    right: 200px;
+}
+
+.settingsList {
+    padding: 0;
+}
+
+.settingsListItem {
     display: flex;
     flex-direction: row;
-}
+    justify-content: space-between;
+    align-items: center;
+    margin: 2em 0;
 
-.uploadInput {
-    flex: 1;
-
-    > h3 {
-        margin: 20px 0 10px;
+    &:first-child {
+        margin-top: 1em;
     }
-}
 
-.uploadLoading {
-    flex: 1;
+    &:last-child {
+        margin-bottom: 1em;
+    }
 }
 
 input[type='checkbox'] {

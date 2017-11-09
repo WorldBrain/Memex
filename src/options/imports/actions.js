@@ -2,7 +2,7 @@ import { createAction } from 'redux-act'
 
 import db from 'src/pouchdb'
 import { CMDS, IMPORT_CONN_NAME, OLD_EXT_KEYS } from './constants'
-import { allowTypes as allowTypesSelector } from './selectors'
+import * as selectors from './selectors'
 
 export const filterDownloadDetails = createAction(
     'imports/filterDownloadDetails',
@@ -32,14 +32,10 @@ export const resumeImport = createAction('imports/resumeImport')
 
 export const setShowOldExt = createAction('imports/setShowOldExt')
 
-// Dev mode actions
-export const toggleDevMode = createAction('imports-dev/toggleDevMode')
-export const startTestDataUpload = createAction(
-    'imports-dev/startTestDataUpload',
-)
-export const finishTestDataUpload = createAction(
-    'imports-dev/finishTestDataUpload',
-)
+// Adv settings mode actions
+export const toggleAdvMode = createAction('imports-adv/toggleAdvMode')
+export const setFileUploading = createAction('imports-adv/setFileUploading')
+export const setConcurrency = createAction('imports-adv/setConcurrency')
 
 export const showDownloadDetails = createAction('imports/showDownloadDetails')
 
@@ -67,10 +63,10 @@ const deserializeDoc = docString => {
  * @param {Array<File>} files One or more NDJSON files that contain database docs.
  */
 export const uploadTestData = files => async (dispatch, getState) => {
-    dispatch(startTestDataUpload())
+    dispatch(setFileUploading(true))
 
     if (files.length < 1) {
-        return dispatch(finishTestDataUpload())
+        return dispatch(setFileUploading(false))
     }
 
     const getFileText = getFileTextViaReader(new FileReader())
@@ -87,7 +83,7 @@ export const uploadTestData = files => async (dispatch, getState) => {
         await db.bulkDocs(docs)
     }
 
-    dispatch(finishTestDataUpload())
+    dispatch(setFileUploading(false))
 }
 
 /**
@@ -152,21 +148,31 @@ export const stop = makePortMessagingThunk({
     action: cancelImport(),
     cmd: CMDS.CANCEL,
 })
+
 export const pause = makePortMessagingThunk({
     action: pauseImport(),
     cmd: CMDS.PAUSE,
 })
+
 export const resume = makePortMessagingThunk({
     action: resumeImport(),
     cmd: CMDS.RESUME,
 })
+
 export const finish = makePortMessagingThunk({
     action: finishImport(),
     cmd: CMDS.FINISH,
 })
-export const start = () => (dispatch, getState) => {
-    const allowImportTypes = allowTypesSelector(getState())
 
+export const start = () => (dispatch, getState) => {
     dispatch(prepareImport())
-    port.postMessage({ cmd: CMDS.START, ...allowImportTypes })
+    port.postMessage({
+        cmd: CMDS.START,
+        payload: selectors.allowTypes(getState()),
+    })
+}
+
+export const setConcurrencyLevel = concurrency => dispatch => {
+    dispatch(setConcurrency(concurrency))
+    port.postMessage({ cmd: CMDS.SET_CONCURRENCY, payload: concurrency })
 }
