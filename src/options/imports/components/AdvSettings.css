@@ -21,6 +21,11 @@
     min-height: 300px;
 }
 
+.concurrencyInput {
+    position: relative;
+    right: 200px;
+}
+
 .settingsList {
     padding: 0;
 }
