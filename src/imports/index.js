@@ -51,19 +51,22 @@ export const transformToBookmarkDoc = assocPageDoc => bookmarkItem => ({
 })
 
 // Below transformations only used for transforming old ext data
-export const transformToMinimalVisitDoc = assocPageDoc => ({ time, url }) => ({
-    _id: generateVisitDocId({ url, timestamp: time }),
-    visitStart: time,
+export const transformToMinimalVisitDoc = assocPageDoc => ({
+    timestamp,
+    url,
+}) => ({
+    _id: generateVisitDocId({ url, timestamp }),
+    visitStart: timestamp,
     url,
     page: { _id: assocPageDoc._id },
 })
 
 export const transformToMinimalBookmarkDoc = assocPageDoc => ({
-    time,
+    timestamp,
     url,
 }) => ({
-    _id: generateBookmarkDocId({ url, timestamp: time }),
-    dateAdded: time,
+    _id: generateBookmarkDocId({ url, timestamp }),
+    dateAdded: timestamp,
     url,
     page: { _id: assocPageDoc._id },
 })
