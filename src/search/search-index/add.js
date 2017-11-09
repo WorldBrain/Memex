@@ -133,7 +133,9 @@ async function indexPage(indexDoc) {
               ]),
           }
 
-    return index.put(indexDoc.id, augmentIndexLookupDoc(newIndexDoc))
+    const augIndexDoc = augmentIndexLookupDoc(newIndexDoc)
+    await index.put(indexDoc.id, augIndexDoc)
+    return augIndexDoc
 }
 
 /**
@@ -162,16 +164,16 @@ async function performIndexing(indexDoc) {
     try {
         // Run indexing of page
         console.time('indexing page')
+        const augIndexDoc = await indexPage(indexDoc)
         await Promise.all([
-            indexPage(indexDoc),
-            indexDomain(indexDoc),
-            indexUrlTerms(indexDoc),
-            indexTitleTerms(indexDoc),
-            indexTerms(indexDoc),
-            indexMetaTimestamps(indexDoc),
+            indexDomain(augIndexDoc),
+            indexUrlTerms(augIndexDoc),
+            indexTitleTerms(augIndexDoc),
+            indexTerms(augIndexDoc),
+            indexMetaTimestamps(augIndexDoc),
         ])
         console.timeEnd('indexing page')
-        console.log('indexed', indexDoc)
+        console.log('indexed', augIndexDoc)
     } catch (err) {
         console.error(err)
     }
