@@ -241,14 +241,6 @@ class PopupContainer extends Component {
         ) {
             this.removeBookmarkByUrl(this.state.url)
         }
-        this.setState(state => ({
-            ...state,
-            boomarkBtn:
-                this.state.bookmarkBtn ===
-                constants.BOOKMARK_BTN_STATE.UNBOOKMARK
-                    ? constants.BOOKMARK_BTN_STATE.BOOKMARK
-                    : constants.BOOKMARK_BTN_STATE.UNBOOKMARK,
-        }))
         window.close()
     }
 
