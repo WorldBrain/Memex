@@ -46,18 +46,19 @@ const filterSearch = query => {
  * @param {IndexQuery}
  * @returns {Map<string, IndexTermValue>}
  */
-async function timeFilterBackSearch({ timeFilter, limit, skip }) {
-    const data = []
-    timeFilter.delete('blank')
-
-    for (const timeRange of timeFilter.values()) {
-        data.push(
-            await reverseRangeLookup({
-                ...timeRange,
-                limit: skip + limit,
-            }),
-        )
-    }
+async function timeFilterBackSearch({
+    timeFilter,
+    limit,
+    skip,
+    bookmarksFilter,
+}) {
+    const timeRange = timeFilter.get(bookmarksFilter ? 'bookmark/' : 'visit/')
+    const data = [
+        await reverseRangeLookup({
+            ...timeRange,
+            limit: skip + limit,
+        }),
+    ]
 
     return new Map([...data.reduce((acc, curr) => [...acc, ...curr], [])])
 }
@@ -71,12 +72,9 @@ async function timeFilterBackSearch({ timeFilter, limit, skip }) {
  * @param {IndexQuery}
  * @returns {Map<string, IndexTermValue>}
  */
-async function timeFilterSearch({ timeFilter }) {
-    const data = []
-
-    for (const timeRange of timeFilter.values()) {
-        data.push(await rangeLookup(timeRange))
-    }
+async function timeFilterSearch({ timeFilter, bookmarksFilter }) {
+    const timeRange = timeFilter.get(bookmarksFilter ? 'bookmark/' : 'visit/')
+    const data = [await rangeLookup(timeRange)]
 
     // Perform union of results between all filter types (for now)
     const unionedResults = new Map([
@@ -95,11 +93,22 @@ async function timeFilterSearch({ timeFilter }) {
     )
 }
 
+async function filterResultsByBookmarks(pageResultsMap) {
+    const pageLookupDocs = await lookupByKeys([...pageResultsMap.keys()])
+
+    return new Map(
+        [...pageResultsMap].filter(
+            ([pageKey, lookupDoc]) =>
+                pageLookupDocs.get(pageKey).bookmarks.size,
+        ),
+    )
+}
+
 /**
  * @param {IndexQuery} query
  * @returns {Map<string, IndexTermValue>}
  */
-async function domainSearch({ domain }) {
+async function domainSearch({ domain, bookmarksFilter }) {
     if (!domain.size) {
         return null
     }
@@ -112,14 +121,18 @@ async function domainSearch({ domain }) {
     }
 
     // Union the nested 'pageId => scores' Maps for each domain
-    return unionNestedMaps(domainValuesMap)
+    const pageResultsMap = unionNestedMaps(domainValuesMap)
+
+    return bookmarksFilter
+        ? filterResultsByBookmarks(pageResultsMap)
+        : pageResultsMap
 }
 
 /**
  * @param {IndexQuery} query
  * @returns {Map<string, IndexTermValue>}
  */
-async function termSearch({ query }) {
+async function termSearch({ query, bookmarksFilter }) {
     // Exit early for wildcard
     if (!query.size) {
         return null
@@ -142,11 +155,15 @@ async function termSearch({ query }) {
     }
 
     // Merge in boosted docs for other fields
-    return new Map([
+    const pageResultsMap = new Map([
         ...pageValuesMap,
         ...(await boostedUrlSearch({ query }, pageValuesMap)),
         ...(await boostedTitleSearch({ query }, pageValuesMap)),
     ])
+
+    return bookmarksFilter
+        ? filterResultsByBookmarks(pageResultsMap)
+        : pageResultsMap
 }
 
 /**
@@ -171,28 +188,6 @@ const boostedTermSearch = (keyGenFn, boost) => async (
 
 const boostedTitleSearch = boostedTermSearch(keyGen.title, 0.2)
 const boostedUrlSearch = boostedTermSearch(keyGen.url, 0.1)
-
-/**
- * Quicker version of bookmark filter that can be run when no terms defined.
- * Simply searches backwards from the key specified in `bookmarksFilter` until the
- * latest `limit + skip` pages have been collected.
- *
- * @param {IndexQuery}
- * @returns {Map<string, IndexTermValue>}
- */
-async function bookmarkFilterBackSearch({
-    timeFilter,
-    limit,
-    skip,
-    bookmarksFilter,
-}) {
-    if (bookmarksFilter === false) return null
-    const data = []
-    const timeRange = timeFilter.get('bookmark/')
-    data.push(await reverseRangeLookup({ ...timeRange, limit: skip + limit }))
-
-    return new Map([...data.reduce((acc, curr) => [...acc, ...curr], [])])
-}
 
 function formatIdResults(pageResultsMap) {
     const results = []
@@ -221,16 +216,10 @@ async function resolveIdResults(pageResultsMap) {
  * @param {Map<string, IndexTermValue>} [termPages]
  * @param {Map<string, IndexTermValue>} [filterPages]
  * @param {Map<string, IndexTermValue>} [domainPages]
- * @param {Map<string, IndexTermValue>} [bookmarkPages]
  * @returns {Map<string, IndexTermValue>} Interescted results of all four
  */
-function intersectResultMaps(
-    termPages,
-    filterPages,
-    domainPages,
-    bookmarkPages,
-) {
-    if (filterPages == null && termPages == null && bookmarkPages == null) {
+function intersectResultMaps(termPages, filterPages, domainPages) {
+    if (filterPages == null && termPages == null) {
         return domainPages
     }
 
@@ -238,42 +227,21 @@ function intersectResultMaps(
 
     // Should be null if filter search not needed to be run
     if (filterPages == null) {
-        if (bookmarkPages == null)
-            return domainPages == null ? termPages : intersectDomain(termPages)
-        else {
-            return domainPages == null
-                ? intersectMaps(termPages)(bookmarkPages)
-                : intersectMaps(bookmarkPages)(intersectDomain(termPages))
-        }
+        return domainPages == null ? termPages : intersectDomain(termPages)
     }
 
     if (termPages == null) {
-        if (bookmarkPages == null)
-            return domainPages == null
-                ? filterPages
-                : intersectDomain(filterPages)
-        else
-            return domainPages == null
-                ? intersectMaps(filterPages)(bookmarkPages)
-                : intersectMaps(bookmarkPages)(intersectDomain(filterPages))
+        return domainPages == null ? filterPages : intersectDomain(filterPages)
     }
 
     // Filter out only results in the domain, if domain search is on
     if (domainPages != null) {
-        if (bookmarkPages == null) {
-            filterPages = intersectDomain(filterPages)
-            termPages = intersectDomain(termPages)
-            return intersectMaps(filterPages)(termPages)
-        } else {
-            filterPages = intersectDomain(filterPages)
-            termPages = intersectDomain(termPages)
-            bookmarkPages = intersectDomain(bookmarkPages)
-            return intersectManyMaps([filterPages, termPages, bookmarkPages])
-        }
-    } else {
-        if (bookmarkPages == null) return intersectMaps(filterPages)(termPages)
-        else return intersectManyMaps([filterPages, termPages, bookmarkPages])
+        filterPages = intersectDomain(filterPages)
+        termPages = intersectDomain(termPages)
+        return intersectMaps(filterPages)(termPages)
     }
+
+    return intersectMaps(filterPages)(termPages)
 }
 
 /**
@@ -302,16 +270,12 @@ export async function search(
     console.time('filter search')
     const filterPageResultsMap = await filterSearch(query)
     console.timeEnd('filter search')
-    console.time('bookmark search')
-    const bookMarksResultMap = await bookmarkFilterBackSearch(query)
-    console.timeEnd('bookmark search')
 
     // Intersect different kinds of results
     const pageResultsMap = intersectResultMaps(
         termPageResultsMap,
         filterPageResultsMap,
         domainPageResultsMap,
-        bookMarksResultMap,
     )
 
     if (count) {
