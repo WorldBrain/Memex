@@ -179,7 +179,11 @@ export async function getOldExtItems() {
 
     // Only attempt page data conversion if index + bookmark storage values are correct types
     if (index && index.index instanceof Array) {
-        for (const keyChunk of chunk(200)(index.index)) {
+        // NOTE: There is a bug in old ext that sometimes duplicates the index, hence why we're uniq'ing it here
+        //  e.g., one time I imported ~400 pages, but my index had 4 million entries!
+        const indexSet = new Set(index.index)
+
+        for (const keyChunk of chunk(200)([...indexSet])) {
             const storageChunk = await browser.storage.local.get(keyChunk)
 
             keyChunk.forEach((key, i) => {
