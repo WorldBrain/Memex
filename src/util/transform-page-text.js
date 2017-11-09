@@ -4,13 +4,13 @@ import rmDiacritics from './remove-diacritics'
 
 const allWhitespacesPattern = /\s+/g
 // const singleDigitNumbersPattern = /\b\d\b/g
-const nonWordsPattern = /[\u2000-\u206F\u2E00-\u2E7F\\!"#$%&()*+,./:;<=>?@[\]^_`{|}~«»。（）ㅇ©ºø°]/g
+const nonWordsPattern = /[\u2000-\u206F\u2E00-\u2E7F\\!"#$%&()*+,./:;<=>?@[\]^_`{|}~«»。（）ㅇ©ºø°]/gi
 const apostrophePattern = /['’]/g
-const allWordsWithDigits = /[a-z]+\d\w*|\w*\d[a-z]+/g // /\w*\d\w*/g
+const allWordsWithDigits = /[a-z]+\d\w*|\w*\d[a-z]+/gi // /\w*\d\w*/g
 const dashPattern = /[-]/g
-const giberishWords = /\S*([b-df-hj-np-tv-z]){5,}\S*/g
-const longWords = /\b\w{20,}\b/g
-const randomDigits = /\b(\d{1,3}|\d{5,})\b/g
+const giberishWords = /\S*([b-df-hj-np-tv-z]){5,}\S*/gi
+const longWords = /\b\w{20,}\b/gi
+const randomDigits = /\b(\d{1,3}|\d{5,})\b/gi
 const urlPattern = urlRegex()
 
 const removeUrls = (text = '') => text.replace(urlPattern, ' ')
