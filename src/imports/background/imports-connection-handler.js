@@ -2,7 +2,6 @@ import PromiseBatcher from 'src/util/promise-batcher'
 import {
     CMDS,
     IMPORT_CONN_NAME,
-    IMPORT_TYPE,
     DEF_CONCURRENCY,
 } from 'src/options/imports/constants'
 import getEstimateCounts from './import-estimates'
@@ -10,12 +9,10 @@ import processImportItem from './import-item-processor'
 import {
     getImportItems,
     setImportItems,
-    getURLFilteredHistoryItems,
-    getURLFilteredBookmarkItems,
-    getOldExtItems,
     removeImportItem,
     clearImportItems,
 } from './'
+import createImportItems from './import-item-creation'
 import {
     getImportInProgressFlag,
     setImportInProgressFlag,
@@ -29,20 +26,16 @@ import {
  *   or not import and page docs should be created for that import type.
  */
 async function prepareImportItems(allowTypes = {}) {
-    const historyItemsMap = allowTypes[IMPORT_TYPE.HISTORY]
-        ? await getURLFilteredHistoryItems()
-        : new Map()
-    const bookmarkItemsMap = allowTypes[IMPORT_TYPE.BOOKMARK]
-        ? await getURLFilteredBookmarkItems()
-        : new Map()
-    const oldExtItemsMap = allowTypes[IMPORT_TYPE.OLD]
-        ? (await getOldExtItems()).importItemsMap
-        : new Map()
+    const items = await createImportItems(allowTypes)
 
     // Union all import item maps, allowing old ext items precedence over bookmarks which have
     //  precedence over history
     await setImportItems(
-        new Map([...historyItemsMap, ...bookmarkItemsMap, ...oldExtItemsMap]),
+        new Map([
+            ...items.historyItemsMap,
+            ...items.bookmarkItemsMap,
+            ...items.oldExtItemsMap,
+        ]),
     )
 }
 

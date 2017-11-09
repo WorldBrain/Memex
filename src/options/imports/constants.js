@@ -67,3 +67,9 @@ export const OLD_EXT_KEYS = {
     HIST: 'history',
     BLACKLIST: 'blacklist',
 }
+
+export const DEF_ALLOW = {
+    [IMPORT_TYPE.HISTORY]: true,
+    [IMPORT_TYPE.BOOKMARK]: true,
+    [IMPORT_TYPE.OLD]: true,
+}
