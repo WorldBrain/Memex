@@ -34,9 +34,12 @@ export default async function getEstimateCounts() {
         [OLD_EXT_KEYS.NUM_DONE]: numOldExtDone,
     } = await browser.storage.local.get({ [OLD_EXT_KEYS.NUM_DONE]: 0 })
 
+    // Can sometimes return slightly different lengths for unknown reason
+    const completedHistory = pageDocs.length - bookmarkDocs.length
+
     return {
         completed: {
-            [IMPORT_TYPE.HISTORY]: pageDocs.length - bookmarkDocs.length,
+            [IMPORT_TYPE.HISTORY]: completedHistory < 0 ? 0 : completedHistory,
             [IMPORT_TYPE.BOOKMARK]: bookmarkDocs.length,
             [IMPORT_TYPE.OLD]: numOldExtDone,
         },
