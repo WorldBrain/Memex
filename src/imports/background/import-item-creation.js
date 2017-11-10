@@ -6,6 +6,7 @@ import { pageKeyPrefix, convertPageDocId } from 'src/page-storage'
 import { bookmarkKeyPrefix, convertBookmarkDocId } from 'src/bookmarks'
 import { checkWithBlacklist } from 'src/blacklist'
 import { isLoggable } from 'src/activity-logger'
+import { differMaps } from 'src/util/map-set-helpers'
 import {
     IMPORT_TYPE,
     OLD_EXT_KEYS,
@@ -25,7 +26,6 @@ const transformOldExtDataToImportItem = bookmarkUrls => (item, index) => ({
 const transformBrowserItemToImportItem = type => item => ({
     browserId: item.id,
     url: item.url,
-    encodedUrl: item.encodedUrl,
     // HistoryItems contain lastVisitTime while BookmarkTreeNodes contain dateAdded
     timestamp: item.lastVisitTime || item.dateAdded,
     type,
@@ -40,7 +40,7 @@ async function checkWithExistingBookmarks() {
     const existingIds = new Set(
         existingBmDocs.map(row => convertBookmarkDocId(row.id).url),
     )
-    return item => existingIds.has(item.encodedUrl)
+    return url => existingIds.has(url)
 }
 
 /**
@@ -56,27 +56,22 @@ async function checkWithExistingPages() {
     const existingIds = new Set(
         existingPageDocs.map(row => convertPageDocId(row.id).url),
     )
-    return item => existingIds.has(item.encodedUrl)
+    return url => existingIds.has(url)
 }
-
-/**
- * @param {Array<any>} items Items with `encodedUrl` prop
- * @returns {Map<string, any>} Map of `encodedUrl` to the remaining import item data.
- */
-const transformToImportItemMap = items =>
-    items.reduce(
-        (acc, { encodedUrl, ...currItem }) => acc.set(encodedUrl, currItem),
-        new Map(),
-    )
 
 async function initFilterItemsByUrl() {
     const isNotBlacklisted = await checkWithBlacklist()
 
     /**
+     * Performs all needed filtering on a collection of history, bookmark, or old ext items. As these
+     * can be quite large, attemps to do in a single iteration of the input collection.
+     *
      * @param {Array<any>} items Array of items with `url` to filter on.
-     * @return {Array<any>} Filtered version of `items` array, also augmented with `encodedUrl`.
+     * @param {(item: any) => any} transform Opt. transformformation fn turning current iterm into import item structure.
+     * @param {(url: string) => bool} alreadyExists Opt. checker function to check against existing data.
+     * @return {Map<string, any>} Filtered version of `items` array made into a Map of encoded URL strings to import items.
      */
-    return (items, alreadyExists) =>
+    return (items, transform = f => f, alreadyExists) =>
         items.reduce((accItems, currItem) => {
             if (!isLoggable(currItem) || !isNotBlacklisted(currItem)) {
                 return accItems
@@ -85,18 +80,17 @@ async function initFilterItemsByUrl() {
             try {
                 // Augment the item with encoded URL for DB check and item map
                 const encodedUrl = encodeUrl(currItem.url, false)
-                const augItem = { ...currItem, encodedUrl }
 
                 // Filter out items already existing in DB, if specified
-                if (alreadyExists == null || !alreadyExists(augItem)) {
-                    return [...accItems, augItem]
+                if (alreadyExists == null || !alreadyExists(encodedUrl)) {
+                    accItems.set(encodedUrl, transform(currItem))
                 }
                 return accItems
             } catch (error) {
                 // URI malformed; don't add to list
                 return accItems
             }
-        }, [])
+        }, new Map())
 }
 
 /**
@@ -140,7 +134,7 @@ export async function getOldExtItems() {
     // Only attempt page data conversion if index + bookmark storage values are correct types
     if (index && index.index instanceof Array) {
         // NOTE: There is a bug with old ext index sometimes repeating the index keys
-        //  (eg.I indexed 400 pages, index contained 43)
+        //  (eg.I indexed 400 pages, index contained 43 million)
         const indexSet = new Set(index.index)
 
         for (const keyChunk of chunk(200)([...indexSet])) {
@@ -167,35 +161,35 @@ export async function getOldExtItems() {
 export default async function createImportItems(allowTypes = DEF_ALLOW) {
     const filterItemsByUrl = await initFilterItemsByUrl()
 
-    const historyItems = allowTypes[IMPORT_TYPE.HISTORY]
-        ? filterItemsByUrl(
-              await getHistoryItems(),
-              await checkWithExistingPages(),
-          )
-        : []
+    // Get all history from browser, filter on existing DB pages
+    let historyItemsMap = filterItemsByUrl(
+        await getHistoryItems(),
+        transformBrowserItemToImportItem(IMPORT_TYPE.HISTORY),
+        await checkWithExistingPages(),
+    )
 
-    const bookmarkItems = allowTypes[IMPORT_TYPE.BOOKMARK]
-        ? filterItemsByUrl(
-              await getBookmarkItems(),
-              await checkWithExistingBookmarks(),
-          )
-        : []
+    // Get all bookmarks from browser, filter on existing DB bookmarks
+    const bookmarkItemsMap = filterItemsByUrl(
+        await getBookmarkItems(),
+        transformBrowserItemToImportItem(IMPORT_TYPE.BOOKMARK),
+        await checkWithExistingBookmarks(),
+    )
 
-    const oldExtItems = allowTypes[IMPORT_TYPE.OLD]
-        ? filterItemsByUrl(await getOldExtItems())
-        : []
+    // Get all old ext from local storage, don't filter on existing data
+    const oldExtItemsMap = filterItemsByUrl(await getOldExtItems())
+
+    // Perform set difference, removing bm items from history (these are a subset of hist)
+    historyItemsMap = differMaps(bookmarkItemsMap)(historyItemsMap)
 
     return {
-        historyItemsMap: transformToImportItemMap(
-            historyItems.map(
-                transformBrowserItemToImportItem(IMPORT_TYPE.HISTORY),
-            ),
-        ),
-        bookmarkItemsMap: transformToImportItemMap(
-            bookmarkItems.map(
-                transformBrowserItemToImportItem(IMPORT_TYPE.BOOKMARK),
-            ),
-        ),
-        oldExtItemsMap: transformToImportItemMap(oldExtItems),
+        historyItemsMap: allowTypes[IMPORT_TYPE.HISTORY]
+            ? historyItemsMap
+            : new Map(),
+        bookmarkItemsMap: allowTypes[IMPORT_TYPE.BOOKMARK]
+            ? bookmarkItemsMap
+            : new Map(),
+        oldExtItemsMap: allowTypes[IMPORT_TYPE.OLD]
+            ? oldExtItemsMap
+            : new Map(),
     }
 }
