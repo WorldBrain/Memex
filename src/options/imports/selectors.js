@@ -70,6 +70,7 @@ export const downloadDetailsData = createSelector(
                         return true
                 }
             })
+            .reverse()
             .map(({ url, status, error }) => ({
                 url,
                 downloaded: status,
