@@ -15,8 +15,9 @@ const Tutorial = () => (
             <div>
                 <h3 className={LocalStyles.h3}>How to Search</h3>
                 <p className={LocalStyles.text}>
-                    The extension runs in the background and indexes the pages
-                    you visit since installing, but you can also{' '}
+                    After installing, the extension runs in the background and
+                    indexes the pages you visit with a 10 seconds delay.
+                    <br />But you can also{' '}
                     <a
                         className={LocalStyles.link}
                         href="/options/options.html#/import"
@@ -83,9 +84,8 @@ const Tutorial = () => (
                         <strong style={{ fontSize: '17px' }}>
                             Only show Bookmarks:
                         </strong>
-                        <br />Via the filter button or by typing in
-                        "is_bookmark" into one of the search fields, you can
-                        filter results by bookmarks.
+                        <br />Via the filter button in the search results
+                        overview you can filter results by bookmarks.
                     </li>
                     <li className={LocalStyles.list_element}>
                         <strong style={{ fontSize: '17px' }}>

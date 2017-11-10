@@ -15,7 +15,6 @@ const settings = {
 
 const NewInstall = () => (
     <div className={localStyles.content}>
-        <h1 className={localStyles.heyyou}>Hey you, welcome to</h1>
         <img className={localStyles.logobig} src="/img/worldbrain-logo.png" />
         <div className={localStyles.messageContainer}>
             <div className={localStyles.message}>
@@ -50,6 +49,7 @@ const NewInstall = () => (
                 className={localStyles.btnLink}
                 type="button"
                 href="https://worldbrain.io/tutorial"
+                target="_blank"
             >
                 Watch 1-min Tutorial Video
             </a>
@@ -72,6 +72,7 @@ const NewInstall = () => (
                 Or just get started browsing the web
             </a>
         </p>
+        <img style={{ width: '60%' }} src="/img/how_to_search.png" />
     </div>
 )
 
