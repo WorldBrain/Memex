@@ -1,7 +1,7 @@
 {
     "name": "WorldBrain's Memex",
     "short_name":"WorldBrain",
-    "version": "0.1.0.1004",
+    "version": "0.1.0.1005",
     "description": "Find previously visited websites & PDFs in seconds. Full-text search your browsing history and bookmarks.",
     "background": {
         "scripts": ["lib/browser-polyfill.js", "background.js"]
