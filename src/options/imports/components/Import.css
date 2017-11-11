@@ -148,28 +148,6 @@
     margin-left: 24px;
 }
 
-progress,
-progress[role] {
-    background-size: auto;
-    height: 30px;
-    width: 100%;
-    border-radius: 10px;
-    margin-top: 40px;
-    z-index: -1;
-}
-
-progress[value]::-webkit-progress-bar {
-    background-color: #ededed;
-    border-radius: 20px;
-    border: 5px solid transparent;
-}
-
-progress[value]::-webkit-progress-value {
-    background-color: #3eb995;
-    border-radius: 20px;
-    display: inline-block;
-}
-
 .quoteBlock {
     padding: 20px;
     background-color: #f6f6f6;
@@ -204,9 +182,10 @@ progress[value]::-webkit-progress-value {
     line-height: 0.7;
 }
 
-.progressBar {
+.progressBarText {
     font-size: 0.8em;
     color: #3eb995;
+    text-align: right;
 }
 
 .arrowUp {
@@ -225,15 +204,6 @@ progress[value]::-webkit-progress-value {
     color: #3eb995 !important; /* stylelint-disable-line declaration-no-important */
 }
 
-.showDetails {
-    color: #3eb995;
-    font-size: 10px;
-
-    &:hover {
-        cursor: pointer;
-    }
-}
-
 .layer1 {
     background-color: white;
     z-index: -3;
@@ -241,4 +211,29 @@ progress[value]::-webkit-progress-value {
 
 .layer2 {
     z-index: -2;
+}
+
+.showDetails {
+    color: #3eb995;
+    font-size: 12px;
+
+    &:hover {
+        cursor: pointer;
+    }
+}
+
+.progressBar {
+    background-color: #ededed;
+    overflow: hidden;
+    width: 100%;
+    border-radius: 20px;
+    margin-top: 40px;
+    z-index: -1;
+    border: 5px solid transparent;
+}
+
+.progressColor {
+    background-color: #3eb995;
+    background-size: 40px 40px;
+    height: 25px;
 }

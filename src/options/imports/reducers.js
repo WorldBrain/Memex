@@ -25,7 +25,7 @@ const defaultState = {
     importStatus: STATUS.LOADING,
     loadingMsg:
         'Please wait while we analyze & prepare your browsing history & bookmarks',
-    downloadDataFilter: FILTERS.FAIL,
+    downloadDataFilter: FILTERS.ALL,
     concurrency: DEF_CONCURRENCY,
     isAdvEnabled: false,
     isFileUploading: false,

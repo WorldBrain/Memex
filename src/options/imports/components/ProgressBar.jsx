@@ -5,22 +5,19 @@ import localStyles from './Import.css'
 
 const ProgressBar = ({ progress }) => (
     <div>
-        <div className={localStyles.layer1}>
-            <div className={localStyles.layer2}>
-                <progress
-                    className={localStyles.process}
-                    max={100}
-                    value={progress}
-                />
-            </div>
+        <div className={localStyles.progressBar}>
+            <div
+                className={localStyles.progressColor}
+                style={{ width: progress + '%' }}
+            />
         </div>
         <div
             style={{ marginLeft: progress + '%' }}
             className={localStyles.arrowUp}
         />
         <h3
-            className={localStyles.progressBar}
-            style={{ marginLeft: progress + '%' }}
+            className={localStyles.progressBarText}
+            style={{ width: progress + '%' }}
         >
             {Math.round(parseInt(progress).toFixed(2)) + '%'}
         </h3>
