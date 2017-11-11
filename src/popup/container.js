@@ -46,6 +46,7 @@ class PopupContainer extends Component {
             blacklistChoice: false,
             blacklistConfirm: false,
             bookmarkBtn: constants.BOOKMARK_BTN_STATE.DISABLED,
+            domainDelete: false,
         }
 
         this.toggleLoggingPause = remoteFunction('toggleLoggingPause')
@@ -116,8 +117,10 @@ class PopupContainer extends Component {
         return { bookmarkBtn: getBookmarkButtonState(result) }
     }
 
-    onBlacklistBtnClick(domain = false) {
-        const url = domain ? new URL(this.state.url).hostname : this.state.url
+    onBlacklistBtnClick(domainDelete = false) {
+        const url = domainDelete
+            ? new URL(this.state.url).hostname
+            : this.state.url
 
         return event => {
             event.preventDefault()
@@ -128,6 +131,7 @@ class PopupContainer extends Component {
                 blacklistConfirm: true,
                 blacklistBtn: constants.BLACKLIST_BTN_STATE.BLACKLISTED,
                 url,
+                domainDelete,
             }))
         }
     }
@@ -178,7 +182,7 @@ class PopupContainer extends Component {
         this.setState(state => ({ ...state, blacklistConfirm: false }))
 
     handleDeleteBlacklistData = () => {
-        this.deleteDocs(this.state.url)
+        this.deleteDocs(this.state.url, this.state.domainDelete)
         this.resetBlacklistConfirmState()
     }
 

@@ -4,6 +4,9 @@ import PouchDB from 'pouchdb-browser'
 import PouchDBFind from 'pouchdb-find'
 import { blobToBase64String } from 'blob-util'
 
+import { pageKeyPrefix } from 'src/page-storage'
+import { visitKeyPrefix } from 'src/activity-logger'
+import { bookmarkKeyPrefix } from 'src/bookmarks'
 import encodeUrl from 'src/util/encode-url-for-id'
 
 PouchDB.plugin(PouchDBFind)
@@ -99,4 +102,39 @@ export function fetchDocTypesByUrl(url) {
             endkey: `${typePrefix}${encodedUrl}\ufff0`,
             ...opts,
         })
+}
+
+/**
+ * @param {string} pageId Page doc ID to look for associated visit + bookmark docs.
+ * @param {any} [opts] Custom `PouchDB.allDocs` options.
+ * @returns {any} Object containing `visitDocs` and `bookmarkDocs` arrays of meta docs associated to the input page ID.
+ */
+export async function fetchMetaDocsForPage(
+    pageId,
+    opts = { include_docs: false },
+) {
+    const encodedUrl = pageId.replace(/^page\//, '')
+
+    // Get all assoc. visit doc IDs
+    const { rows: visitRows } = await db.allDocs({
+        startkey: `${visitKeyPrefix}${encodedUrl}`,
+        endkey: `${visitKeyPrefix}${encodedUrl}\ufff0`,
+        ...opts,
+    })
+
+    // Get all assoc. bookmark doc IDs
+    const { rows: bookmarkRows } = await db.allDocs({
+        startkey: `${bookmarkKeyPrefix}${encodedUrl}`,
+        endkey: `${bookmarkKeyPrefix}${encodedUrl}\ufff0`,
+        ...opts,
+    })
+
+    // Grab page itself
+    const { rows: pageRows } = await db.allDocs({
+        startkey: `${pageKeyPrefix}${encodedUrl}`,
+        endkey: `${pageKeyPrefix}${encodedUrl}\ufff0`,
+        ...opts,
+    })
+
+    return { pageRows, visitRows, bookmarkRows }
 }
