@@ -1,10 +1,42 @@
-import db, { fetchDocTypesByUrl } from 'src/pouchdb'
-import { delPagesConcurrent } from 'src/search'
+import db, { fetchDocTypesByUrl, fetchMetaDocsForPage } from 'src/pouchdb'
+import { delPagesConcurrent, initSingleLookup, keyGen } from 'src/search'
 import { pageKeyPrefix } from 'src/page-storage'
 import { visitKeyPrefix } from 'src/activity-logger'
 import { bookmarkKeyPrefix } from 'src/bookmarks'
 
-export default async function deleteDocsByUrl(url) {
+export default (url, domainDelete = false) =>
+    domainDelete ? deleteDomain(url) : deleteSpecificSite(url)
+
+async function deleteDomain(url = '') {
+    // Filter-out the `www.`, if there
+    const normalizedDomain = url.startsWith('www.') ? url.slice(4) : url
+
+    // Grab domain index entry to get set of pages
+    const domainIndex = await initSingleLookup()(
+        keyGen.domain(normalizedDomain),
+    )
+    if (domainIndex == null) {
+        return
+    }
+
+    // Get all assoc. meta docs for deleting from Pouch
+    const allRows = []
+    for (const [pageId] of domainIndex) {
+        const metaRows = await fetchMetaDocsForPage(pageId)
+        allRows.push(
+            ...metaRows.pageRows,
+            ...metaRows.visitRows,
+            ...metaRows.bookmarkRows,
+        )
+    }
+
+    await Promise.all([
+        deleteDocs(allRows),
+        delPagesConcurrent([...domainIndex.keys()]),
+    ])
+}
+
+async function deleteSpecificSite(url = '') {
     const fetchDocsByType = fetchDocTypesByUrl(url)
 
     const opts = { include_docs: false }
@@ -19,6 +51,9 @@ export default async function deleteDocsByUrl(url) {
     await Promise.all([deleteDocs(allRows), handleIndexDeletes(pageRows)])
 }
 
+/**
+ * Performs the deletion on PouchDB, deleting all docs passed in.
+ */
 export const deleteDocs = docs =>
     db.bulkDocs(
         docs.map(row => ({
