@@ -263,7 +263,12 @@ class PopupContainer extends Component {
             <div>
                 <Button
                     onClick={this.handleAddBookmark}
-                    icon="bookmark"
+                    icon={
+                        this.state.bookmarkBtn ===
+                        constants.BOOKMARK_BTN_STATE.BOOKMARK
+                            ? 'star'
+                            : 'star_border'
+                    }
                     disabled={
                         this.state.bookmarkBtn ===
                         constants.BOOKMARK_BTN_STATE.DISABLED
@@ -271,8 +276,8 @@ class PopupContainer extends Component {
                 >
                     {this.state.bookmarkBtn ===
                     constants.BOOKMARK_BTN_STATE.BOOKMARK
-                        ? 'Unbookmark This Page'
-                        : 'Bookmark This Page'}
+                        ? 'Unbookmark this Page'
+                        : 'Bookmark this Page'}
                 </Button>
                 <HistoryPauser
                     onConfirm={this.onPauseConfirm}
