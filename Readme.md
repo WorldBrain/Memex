@@ -65,20 +65,13 @@ As you browse through websites WorldBrain will work automatically in the backgro
 
 ## Contact
 
-### Feedback
+Find us in [our Slack channel](https://join-worldbrain.herokuapp.com/) or contact us [via email](mailto:info@worldbrain.io).
+
+### Feedback, Questions or Concerns
 **How can we make our extension better?**
+
 Please email: feedback@worldbrain.io
-or
-Join our slack channel: https://join-worldbrain.herokuapp.com/ and post a message
-
-### General Questions or Concerns?
-**Contemplating the meaning of life?**
-**Wondering why we are so wonderful or how we do what we do?**
-**Concerned that your Grandma may not understand how the extension works?**
-
-Please email: info@worldbrain.io
-or
-Join our slack channel: https://join-worldbrain.herokuapp.com/ and post a message
+or drop by our [slack channel](https://join-worldbrain.herokuapp.com/) and post a message in #General
 
 ### Feature Requests
 **Request <!-- Vote and Comment on -->  any new features you may want to see!**
