@@ -6,7 +6,8 @@
  * May move this to external source at later stage.
  */
 export const rules = {
-    'twitter.com': ['q'],
+	'facebook.com': ['fbid']
+	'twitter.com': ['q'],
     'google.com': ['q'],
     'google.com.vn': ['q'],
     'google.com.au': ['q'],
