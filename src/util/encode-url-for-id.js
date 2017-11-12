@@ -22,21 +22,27 @@ const normalizationOpts = {
  */
 function applyQueryParamsRules(url) {
     const parsed = new URL(url)
-    const rules = queryParamRules.get(parsed.hostname)
+    const rulesObj = queryParamRules.get(parsed.hostname)
 
     // Base case; domain doesn't have any special normalization rules
-    if (!rules) {
+    if (!rulesObj) {
         return url
     }
 
     // Remove all query params that don't appear in special rules
-    const rulesSet = new Set(rules)
-    for (const param of parsed.searchParams.keys()) {
-        if (!rulesSet.has(param)) {
-            parsed.searchParams.delete(param)
+    const rulesSet = new Set(rulesObj.rules)
+    const rulesType = rulesObj.type
+    if (rulesType == 'keep') {
+        for (const param of parsed.searchParams.keys()) {
+            if (!rulesSet.has(param)) {
+                parsed.searchParams.delete(param)
+            }
         }
+        return parsed.href
     }
-
+    for (const param of rulesSet) {
+        parsed.searchParams.delete(param)
+    }
     return parsed.href
 }
 
@@ -71,9 +77,9 @@ function normalize(url, customOpts) {
 function encode(url, needsEscaping) {
     const escaped = encodeURIComponent(url) // Grab percent-encoded unicode chars (`%`)
         .replace(
-            /%([0-9A-F]{2})/g, // Convert percentage-encodings into raw bytes
-            (_, p1) => String.fromCharCode(`0x${p1}`),
-        )
+        /%([0-9A-F]{2})/g, // Convert percentage-encodings into raw bytes
+        (_, p1) => String.fromCharCode(`0x${p1}`),
+    )
 
     // Feed in escaped unicode stuff into base64 encoder
     const encoded = btoa(escaped)
