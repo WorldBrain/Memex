@@ -22,21 +22,23 @@ const normalizationOpts = {
  */
 function applyQueryParamsRules(url) {
     const parsed = new URL(url)
-    const rules = queryParamRules.get(parsed.hostname)
+    const rulesObj = queryParamRules.get(parsed.hostname)
 
     // Base case; domain doesn't have any special normalization rules
-    if (!rules) {
+    if (!rulesObj) {
         return url
     }
 
     // Remove all query params that don't appear in special rules
-    const rulesSet = new Set(rules)
+    const rulesSet = new Set(rulesObj.rules)
+    const rulesType = rulesObj.type
     for (const param of parsed.searchParams.keys()) {
-        if (!rulesSet.has(param)) {
+        const shouldDelete =
+            rulesType === 'keep' ? !rulesSet.has(param) : rulesSet.has(param)
+        if (shouldDelete) {
             parsed.searchParams.delete(param)
         }
     }
-
     return parsed.href
 }
 
