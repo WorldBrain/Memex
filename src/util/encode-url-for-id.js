@@ -32,11 +32,13 @@ function applyQueryParamsRules(url) {
     // Remove all query params that don't appear in special rules
     const rulesSet = new Set(rulesObj.rules)
     const rulesType = rulesObj.type
-	for (const param of parsed.searchParams.keys()) {
-		if ((rulesType === 'keep' && !rulesSet.has(param)) || (rulesType == 'remove' && rulesSet.has(param))) {
-			parsed.searchParams.delete(param)
-		}
-	}
+    for (const param of parsed.searchParams.keys()) {
+        const shouldDelete =
+            rulesType === 'keep' ? !rulesSet.has(param) : rulesSet.has(param)
+        if (shouldDelete) {
+            parsed.searchParams.delete(param)
+        }
+    }
     return parsed.href
 }
 
@@ -71,9 +73,9 @@ function normalize(url, customOpts) {
 function encode(url, needsEscaping) {
     const escaped = encodeURIComponent(url) // Grab percent-encoded unicode chars (`%`)
         .replace(
-        /%([0-9A-F]{2})/g, // Convert percentage-encodings into raw bytes
-        (_, p1) => String.fromCharCode(`0x${p1}`),
-    )
+            /%([0-9A-F]{2})/g, // Convert percentage-encodings into raw bytes
+            (_, p1) => String.fromCharCode(`0x${p1}`),
+        )
 
     // Feed in escaped unicode stuff into base64 encoder
     const encoded = btoa(escaped)
