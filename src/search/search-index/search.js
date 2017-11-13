@@ -52,13 +52,24 @@ async function timeFilterBackSearch({
     skip,
     bookmarksFilter,
 }) {
-    const timeRange = timeFilter.get(bookmarksFilter ? 'bookmark/' : 'visit/')
+    // Back search bookmarks in all cases
     const data = [
         await reverseRangeLookup({
-            ...timeRange,
+            ...timeFilter.get('bookmark/'),
             limit: skip + limit,
         }),
     ]
+
+    // Add result of visit back search if bookmarks flag not set
+    if (!bookmarksFilter) {
+        // Lookup for all time filters for non-bookmark search
+        data.push(
+            await reverseRangeLookup({
+                ...timeFilter.get('visits/'),
+                limit: skip + limit,
+            }),
+        )
+    }
 
     return new Map([...data.reduce((acc, curr) => [...acc, ...curr], [])])
 }
