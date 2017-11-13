@@ -11,6 +11,7 @@ import ResultList from './components/ResultList'
 import Overview from './components/Overview'
 import PageResultItem from './components/PageResultItem'
 import ResultsMessage from './components/ResultsMessage'
+import ShareButtons from './shareButtons'
 
 class OverviewContainer extends Component {
     static propTypes = {
@@ -57,7 +58,8 @@ class OverviewContainer extends Component {
             </li>
         ))
 
-        // Insert waypoint at the end of results to trigger loading new items when scrolling down
+        // Insert waypoint at the end of results to trigger loading new items when
+        // scrolling down
         if (this.props.needsWaypoint) {
             resultItems.push(
                 <Waypoint
@@ -107,13 +109,18 @@ class OverviewContainer extends Component {
 
     render() {
         return (
-            <Overview
-                {...this.props}
-                setInputRef={this.setInputRef}
-                onInputChange={this.handleInputChange}
-            >
-                {this.renderResults()}
-            </Overview>
+            <div>
+                <Overview
+                    {...this.props}
+                    setInputRef={this.setInputRef}
+                    onInputChange={this.handleInputChange}
+                >
+                    {this.renderResults()}
+                </Overview>
+                <div>
+                    <ShareButtons />
+                </div>
+            </div>
         )
     }
 }

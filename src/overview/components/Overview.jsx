@@ -25,7 +25,9 @@ const Overview = props => (
         </div>
         <div
             className={styles.main}
-            style={{ marginTop: props.showFilter ? '180px' : '100px' }}
+            style={{
+                marginTop: props.showFilter ? '180px' : '100px',
+            }}
         >
             {props.children}
         </div>
