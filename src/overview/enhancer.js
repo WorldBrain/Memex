@@ -1,13 +1,9 @@
 import { compose } from 'redux'
 import ReduxQuerySync from 'redux-query-sync'
 
-import { currentQueryParams, showOnlyBookmarks } from './selectors'
-import {
-    setQuery,
-    setStartDate,
-    setEndDate,
-    toggleBookmarkFilter,
-} from './actions'
+import * as selectors from './selectors'
+import * as actions from './actions'
+import * as constants from './constants'
 
 // Keep search query in sync with the query parameter in the window location.
 const locationSync = ReduxQuerySync.enhancer({
@@ -15,29 +11,60 @@ const locationSync = ReduxQuerySync.enhancer({
     initialTruth: 'location', // Initialise store from current location.
     params: {
         query: {
-            selector: state => currentQueryParams(state).query,
-            action: query => setQuery(query),
+            selector: selectors.query,
+            action: actions.setQuery,
             defaultValue: '',
         },
         startDate: {
-            selector: state => currentQueryParams(state).startDate,
-            action: startDate => setStartDate(Number(startDate)),
+            selector: selectors.startDate,
+            action: startDate => actions.setStartDate(Number(startDate)),
             defaultValue: undefined,
         },
         endDate: {
-            selector: state => currentQueryParams(state).endDate,
-            action: endDate => setEndDate(Number(endDate)),
+            selector: selectors.endDate,
+            action: endDate => actions.setEndDate(Number(endDate)),
             defaultValue: undefined,
         },
         showOnlyBookmarks: {
-            selector: state => showOnlyBookmarks(state),
+            selector: selectors.showOnlyBookmarks,
             action: showOnlyBookmarks =>
-                toggleBookmarkFilter(Boolean(showOnlyBookmarks)),
+                actions.toggleBookmarkFilter(Boolean(showOnlyBookmarks)),
             defaultValue: false,
         },
     },
 })
 
-const enhancer = compose(locationSync)
+const hydrateStateFromStorage = store => {
+    const hydrate = (key, action) =>
+        browser.storage.local.get(key).then(data => {
+            if (!data[key]) return
+            store.dispatch(action(data[key]))
+        })
+
+    // Keep each of these storage keys in sync
+    hydrate(constants.SEARCH_COUNT_KEY, actions.initSearchCount)
+}
+
+const syncStateToStorage = store =>
+    store.subscribe(() => {
+        const dump = (key, data) => browser.storage.local.set({ [key]: data })
+
+        const state = store.getState()
+        dump(constants.SEARCH_COUNT_KEY, selectors.searchCount(state))
+    })
+
+const storageSync = storeCreator => (reducer, initState, enhancer) => {
+    const store = storeCreator(reducer, initState, enhancer)
+
+    // Subscribe to changes and update local storage
+    syncStateToStorage(store)
+
+    // Rehydrate state from local storage
+    hydrateStateFromStorage(store)
+
+    return store
+}
+
+const enhancer = compose(locationSync, storageSync)
 
 export default enhancer

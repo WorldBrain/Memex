@@ -25,28 +25,20 @@ export const toggleBookmarkFilter = createAction(
     'overview/toggleBookmarkFilter',
 )
 export const changeHasBookmark = createAction('overview/changeHasBookmark')
+export const incSearchCount = createAction('overview/incSearchCount')
+export const initSearchCount = createAction('overview/initSearchCount')
 
 const deleteDocsByUrl = remoteFunction('deleteDocsByUrl')
 const createBookmarkByExtension = remoteFunction('createBookmarkByExtension')
 const removeBookmarkByUrl = remoteFunction('removeBookmarkByUrl')
 
-async function incSearchCount() {
-    const {
-        [constants.SEARCH_COUNT_KEY]: searchCount,
-    } = await browser.storage.local.get({
-        [constants.SEARCH_COUNT_KEY]: 0,
-    })
-
-    return browser.storage.local.set({
-        [constants.SEARCH_COUNT_KEY]: searchCount + 1,
-    })
-}
-
 const getCmdMessageHandler = dispatch => ({ cmd, ...payload }) => {
     switch (cmd) {
         case constants.CMDS.RESULTS:
             dispatch(updateSearchResult(payload))
-            incSearchCount()
+            if (payload.searchResult.docs.length) {
+                dispatch(incSearchCount())
+            }
             break
         case constants.CMDS.ERROR:
             dispatch(handleErrors(payload))

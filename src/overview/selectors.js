@@ -18,9 +18,22 @@ function decideTitle(pageDoc) {
 export const overview = state => state.overview
 const searchResult = createSelector(overview, state => state.searchResult)
 const resultDocs = createSelector(searchResult, results => results.docs)
+
+export const searchCount = createSelector(overview, state => state.searchCount)
+
 export const currentQueryParams = createSelector(
     overview,
     state => state.currentQueryParams,
+)
+
+export const query = createSelector(currentQueryParams, params => params.query)
+export const startDate = createSelector(
+    currentQueryParams,
+    params => params.startDate,
+)
+export const endDate = createSelector(
+    currentQueryParams,
+    params => params.endDate,
 )
 
 export const isLoading = createSelector(overview, state => state.isLoading)
