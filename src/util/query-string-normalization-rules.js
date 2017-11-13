@@ -129,6 +129,6 @@ export const rules = {
     'instagram.com': {
         rules: ['taken-by'],
         type: 'remove',
-    }
+    },
 }
 export default new Map(Object.entries(rules))
