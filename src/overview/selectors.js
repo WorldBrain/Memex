@@ -67,6 +67,12 @@ export const results = createSelector(resultDocs, docs =>
     })),
 )
 
+export const showInitSearchMsg = createSelector(
+    searchCount,
+    resultDocs,
+    (searchCount, results) => !results.length && !searchCount,
+)
+
 export const isBadTerm = createSelector(
     searchResult,
     results => !!results.isBadTerm,

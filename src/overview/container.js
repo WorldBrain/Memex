@@ -21,6 +21,7 @@ class OverviewContainer extends Component {
         isNewSearchLoading: PropTypes.bool.isRequired,
         noResults: PropTypes.bool.isRequired,
         isBadTerm: PropTypes.bool.isRequired,
+        showInitSearchMsg: PropTypes.bool.isRequired,
         searchResults: PropTypes.arrayOf(PropTypes.object).isRequired,
         needsWaypoint: PropTypes.bool.isRequired,
         handleTrashBtnClick: PropTypes.func.isRequired,
@@ -85,6 +86,15 @@ class OverviewContainer extends Component {
             )
         }
 
+        if (this.props.showInitSearchMsg) {
+            return (
+                <ResultsMessage>
+                    You have not made any history yet, either visit some pages
+                    and come back, or import your existing history
+                </ResultsMessage>
+            )
+        }
+
         if (this.props.noResults) {
             return (
                 <ResultsMessage>
@@ -129,6 +139,7 @@ const mapStateToProps = state => ({
     needsWaypoint: selectors.needsPagWaypoint(state),
     showFilter: selectors.showFilter(state),
     showOnlyBookmarks: selectors.showOnlyBookmarks(state),
+    showInitSearchMsg: selectors.showInitSearchMsg(state),
 })
 
 const mapDispatchToProps = dispatch => ({
