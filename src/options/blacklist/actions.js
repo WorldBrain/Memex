@@ -1,5 +1,6 @@
 import { createAction } from 'redux-act'
 
+export const toggleModal = createAction('settings/toggleBlacklistModal')
 export const setSiteInputValue = createAction('settings/setSiteInputValue')
 export const resetSiteInputValue = createAction('settings/resetSiteInputValue')
 export const setBlacklist = createAction('settings/setBlacklist')
@@ -8,5 +9,8 @@ export const removeSiteFromBlacklist = createAction(
     'settings/removeSiteFromBlacklist',
 )
 
-export const addToBlacklist = url => dispatch =>
-    dispatch(addSiteToBlacklist({ expression: url, dateAdded: Date.now() }))
+export const addToBlacklist = expression => dispatch => {
+    dispatch(addSiteToBlacklist({ expression, dateAdded: Date.now() }))
+    dispatch(resetSiteInputValue())
+    dispatch(toggleModal())
+}

@@ -3,9 +3,11 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 
+import { Wrapper } from 'src/common-ui/components'
 import BlacklistTable from './components/BlacklistTable'
 import BlacklistRow from './components/BlacklistRow'
 import BlacklistInputRow from './components/BlacklistInputRow'
+import BlacklistRemoveModal from './components/BlacklistRemoveModal'
 import * as actions from './actions'
 import * as selectors from './selectors'
 import styles from './components/base.css'
@@ -14,6 +16,7 @@ class BlacklistContainer extends Component {
     static propTypes = {
         // State
         siteInputValue: PropTypes.string.isRequired,
+        lastValue: PropTypes.string,
         blacklist: PropTypes.arrayOf(
             PropTypes.shape({
                 expression: PropTypes.string.isRequired,
@@ -22,8 +25,10 @@ class BlacklistContainer extends Component {
         isInputRegexInvalid: PropTypes.bool.isRequired,
         isSaveBtnDisabled: PropTypes.bool.isRequired,
         isClearBtnDisabled: PropTypes.bool.isRequired,
+        showRemoveModal: PropTypes.bool.isRequired,
 
         // Misc
+        toggleModalShow: PropTypes.func.isRequired,
         boundActions: PropTypes.objectOf(PropTypes.func),
     }
 
@@ -39,10 +44,9 @@ class BlacklistContainer extends Component {
         const expression = this.props.siteInputValue.replace(/\s+/g, '')
 
         // Ignore when user tries to submit nothing (no error state, so just do nothing)
-        if (expression.length === 0) return
+        if (!expression.length) return
 
         this.props.boundActions.addToBlacklist(expression)
-        this.props.boundActions.resetSiteInputValue()
 
         // Make sure input refocuses after new item added
         this.focusInput()
@@ -110,13 +114,21 @@ class BlacklistContainer extends Component {
 
     render() {
         return (
-            <div>
-                {this.renderAddDomain()}
-                {this.renderInvalidRegexAlert()}
-                {this.renderBlacklistInputRow()}
-                {this.renderAddBlacklistSites()}
-                <BlacklistTable>{this.renderBlacklistRows()}</BlacklistTable>
-            </div>
+            <Wrapper>
+                <div>
+                    {this.renderAddDomain()}
+                    {this.renderInvalidRegexAlert()}
+                    {this.renderBlacklistInputRow()}
+                    {this.renderAddBlacklistSites()}
+                    <BlacklistTable>
+                        {this.renderBlacklistRows()}
+                    </BlacklistTable>
+                </div>
+                <BlacklistRemoveModal
+                    isShown={this.props.showRemoveModal}
+                    onClose={this.props.toggleModalShow}
+                />
+            </Wrapper>
         )
     }
 }
@@ -127,10 +139,13 @@ const mapStateToProps = state => ({
     isInputRegexInvalid: selectors.isInputRegexInvalid(state),
     isSaveBtnDisabled: selectors.isSaveBtnDisabled(state),
     isClearBtnDisabled: selectors.isClearBtnDisabled(state),
+    showRemoveModal: selectors.showRemoveModal(state),
+    lastValue: selectors.lastValue(state),
 })
 
 const mapDispatchToProps = dispatch => ({
     boundActions: bindActionCreators(actions, dispatch),
+    toggleModalShow: () => dispatch(actions.toggleModal()),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(BlacklistContainer)
