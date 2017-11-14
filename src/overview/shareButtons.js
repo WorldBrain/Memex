@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import ReactDOM from 'react-dom'
+import styles from './components/Overview.css'
 
 class ShareButtons extends Component {
     constructor(props) {
@@ -9,17 +10,60 @@ class ShareButtons extends Component {
 
     render() {
         return (
-            <div>
-                <img
+            <div
+                className={styles.shareIcons}
+                style={{
+                    right: 0,
+                    top: 150,
+                }}
+            >
+                <p
                     style={{
-                        right: 45,
-                        top: 150,
+                        fontSize: 10,
+                        color: '#00b38f',
                     }}
-                    src="/img/face.png"
-                />
+                >
+                    {' '}
+                    Spread the love{' '}
+                </p>{' '}
+                <a href="#">
+                    {' '}
+                    <img width={25} height={25} src="/img/face.png" />{' '}
+                </a>{' '}
+                <a href="#">
+                    {' '}
+                    <img width={25} height={25} src="/img/twitt.png" />{' '}
+                </a>{' '}
+                <a href="#">
+                    {' '}
+                    <img width={25} height={25} src="/img/@.png" />{' '}
+                </a>{' '}
+                <a href="#">
+                    {' '}
+                    <img width={25} height={25} src="/img/ic.png" />{' '}
+                </a>{' '}
+                <div id={styles.fedIcon}>
+                    <a
+                        href="#"
+                        style={{
+                            textDecoration: 'none',
+                            color: '#ffffff',
+                            backgroundColor: '#00b38f',
+                            borderStyle: 'solid',
+                            borderColor: '#00b38f',
+                            borderLeftWidth: 10,
+                            borderRightWidth: 10,
+                            borderTopWidth: 10,
+                            borderBottomWidth: 10,
+                        }}
+                    >
+                        {' '}
+                        FEEDBACK{' '}
+                    </a>{' '}
+                </div>{' '}
             </div>
         )
     }
 }
-ReactDOM.render(<ShareButtons />, document.getElementById('dab'))
+
 export default ShareButtons

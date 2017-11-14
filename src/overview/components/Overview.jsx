@@ -18,6 +18,7 @@ const showFilterClass = ({ showFilter }) =>
 const Overview = props => (
     <Wrapper>
         <Header {...props} />
+        <ShareButtons />
 
         <div className={showFilterClass(props)}>
             <Filters
