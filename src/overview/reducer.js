@@ -6,6 +6,7 @@ import { generatePageDocId } from 'src/page-storage'
 import * as actions from './actions'
 
 const defaultState = {
+    searchCount: 0,
     currentPage: 0, // Pagination state
     searchResult: { docs: [], resultsExhausted: false }, // The current search result list
     // The current search input values
@@ -104,18 +105,16 @@ const changeHasBookmark = (state, index) => {
     return { ...state, searchResult }
 }
 
+const incSearchCount = state => ({
+    ...state,
+    searchCount: state.searchCount + 1,
+})
+const initSearchCount = (state, searchCount) => ({ ...state, searchCount })
+
 export default createReducer(
     {
         [actions.appendSearchResult]: handleSearchResult({ overwrite: false }),
         [actions.setSearchResult]: handleSearchResult({ overwrite: true }),
-        [actions.nextPage]: state => ({
-            ...state,
-            currentPage: state.currentPage + 1,
-        }),
-        [actions.resetPage]: state => ({
-            ...state,
-            currentPage: defaultState.currentPage,
-        }),
         [actions.setLoading]: (state, isLoading) => ({ ...state, isLoading }),
         [actions.setQuery]: setQuery,
         [actions.setStartDate]: setStartDate,
@@ -124,11 +123,21 @@ export default createReducer(
         [actions.hideDeleteConfirm]: hideDeleteConfirm,
         [actions.hideResultItem]: hideResultItem,
         [actions.toggleBookmarkFilter]: toggleBookmarkFilter,
+        [actions.incSearchCount]: incSearchCount,
+        [actions.initSearchCount]: initSearchCount,
+        [actions.changeHasBookmark]: changeHasBookmark,
         [actions.showFilter]: state => ({
             ...state,
             showFilter: !state.showFilter,
         }),
-        [actions.changeHasBookmark]: changeHasBookmark,
+        [actions.nextPage]: state => ({
+            ...state,
+            currentPage: state.currentPage + 1,
+        }),
+        [actions.resetPage]: state => ({
+            ...state,
+            currentPage: defaultState.currentPage,
+        }),
     },
     defaultState,
 )

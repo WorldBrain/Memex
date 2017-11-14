@@ -21,6 +21,7 @@ class OverviewContainer extends Component {
         isNewSearchLoading: PropTypes.bool.isRequired,
         noResults: PropTypes.bool.isRequired,
         isBadTerm: PropTypes.bool.isRequired,
+        showInitSearchMsg: PropTypes.bool.isRequired,
         searchResults: PropTypes.arrayOf(PropTypes.object).isRequired,
         needsWaypoint: PropTypes.bool.isRequired,
         handleTrashBtnClick: PropTypes.func.isRequired,
@@ -85,6 +86,32 @@ class OverviewContainer extends Component {
             )
         }
 
+        if (this.props.showInitSearchMsg) {
+            return (
+                <ResultsMessage>
+                    You have not made any history yet.
+                    <br />First, you need to visit some websites or{' '}
+                    <a
+                        style={{ color: '#928989' }}
+                        href="/options/options.html#/import"
+                    >
+                        import your existing history & bookmarks
+                    </a>.<br />
+                    <br />
+                    <strong>Tip: </strong>Read the{' '}
+                    <a
+                        style={{ color: '#928989' }}
+                        href="/options/options.html#/tutorial"
+                    >
+                        quick tutorial
+                    </a>.
+                    <br />
+                    <br />
+                    <img src="/img/ship.png" />
+                </ResultsMessage>
+            )
+        }
+
         if (this.props.noResults) {
             return (
                 <ResultsMessage>
@@ -129,6 +156,7 @@ const mapStateToProps = state => ({
     needsWaypoint: selectors.needsPagWaypoint(state),
     showFilter: selectors.showFilter(state),
     showOnlyBookmarks: selectors.showOnlyBookmarks(state),
+    showInitSearchMsg: selectors.showInitSearchMsg(state),
 })
 
 const mapDispatchToProps = dispatch => ({
