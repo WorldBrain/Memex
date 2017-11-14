@@ -7,141 +7,106 @@ import BlacklistTable from './components/BlacklistTable'
 import BlacklistRow from './components/BlacklistRow'
 import BlacklistInputRow from './components/BlacklistInputRow'
 import * as actions from './actions'
-import { entireState as entireStateSelector } from './selectors'
+import * as selectors from './selectors'
 import styles from './components/base.css'
 
 class BlacklistContainer extends Component {
-    constructor(props) {
-        super(props)
+    static propTypes = {
+        // State
+        siteInputValue: PropTypes.string.isRequired,
+        blacklist: PropTypes.arrayOf(
+            PropTypes.shape({
+                expression: PropTypes.string.isRequired,
+            }),
+        ).isRequired,
+        isInputRegexInvalid: PropTypes.bool.isRequired,
+        isSaveBtnDisabled: PropTypes.bool.isRequired,
+        isClearBtnDisabled: PropTypes.bool.isRequired,
 
-        this.onNewBlacklistItemAdded = this.onNewBlacklistItemAdded.bind(this)
-        this.onInputChange = this.onInputChange.bind(this)
-        this.handleInputKeyPress = this.handleInputKeyPress.bind(this)
-        this.renderAddDomain = this.renderAddDomain.bind(this)
-        this.renderAddBlacklistSites = this.renderAddBlacklistSites.bind(this)
+        // Misc
+        boundActions: PropTypes.objectOf(PropTypes.func),
     }
 
     componentDidMount() {
         this.focusInput()
     }
 
-    focusInput() {
-        this.input.focus()
-    }
+    focusInput = () => this.input.focus()
+    assignRef = input => (this.input = input)
 
-    shouldDisableSaveBtn() {
-        // If there are any whitespace symbols or digits at the beginning
-        try {
-            new RegExp(this.props.siteInputValue)
-        } catch (e) {
-            return true
-        }
-    }
-
-    shouldDisableClearBtn() {
-        return this.props.siteInputValue.length === 0
-    }
-
-    onNewBlacklistItemAdded() {
-        const { boundActions, siteInputValue } = this.props
-
+    onNewBlacklistItemAdded = () => {
         // Ignore all whitespace by deleting it
-        const whitespaces = /\s+/g
-        const expression = siteInputValue.replace(whitespaces, '')
+        const expression = this.props.siteInputValue.replace(/\s+/g, '')
 
         // Ignore when user tries to submit nothing (no error state, so just do nothing)
         if (expression.length === 0) return
 
-        boundActions.addToBlacklist(expression)
-
-        boundActions.resetSiteInputValue()
+        this.props.boundActions.addToBlacklist(expression)
+        this.props.boundActions.resetSiteInputValue()
 
         // Make sure input refocuses after new item added
         this.focusInput()
     }
 
-    onDeleteClicked(itemIndex) {
-        // TODO(AM): Undo? Confirmation?
-        const { boundActions } = this.props
+    // TODO(AM): Undo? Confirmation?
+    onDeleteClicked = itemIndex => () =>
+        this.props.boundActions.removeSiteFromBlacklist({ index: itemIndex })
 
-        boundActions.removeSiteFromBlacklist({ index: itemIndex })
-    }
-
-    onInputChange(event = { target: {} }) {
+    onInputChange = (event = { target: {} }) => {
         const siteInputValue = event.target.value || ''
         this.props.boundActions.setSiteInputValue({ siteInputValue })
     }
 
-    handleInputKeyPress(event = {}) {
-        if (event.key === 'Enter') {
-            event.preventDefault()
-            this.onNewBlacklistItemAdded()
-        }
-
-        if (event.key === 'Escape') {
-            event.preventDefault()
-            this.input.blur()
-        }
-    }
-
     renderBlacklistInputRow() {
-        const { boundActions, siteInputValue } = this.props
+        const { boundActions, siteInputValue, ...props } = this.props
 
         return (
             <BlacklistInputRow
                 key="blacklist-input"
                 value={siteInputValue}
-                isClearBtnDisabled={this.shouldDisableClearBtn()}
-                isSaveBtnDisabled={this.shouldDisableSaveBtn()}
                 onAdd={this.onNewBlacklistItemAdded}
-                handleKeyPress={this.handleInputKeyPress}
                 onInputChange={this.onInputChange}
-                onInputClear={() => boundActions.resetSiteInputValue()}
-                inputRef={input => (this.input = input)} // eslint-disable-line no-return-assign
+                onInputClear={boundActions.resetSiteInputValue}
+                inputRef={this.assignRef} // eslint-disable-line no-return-assign
+                {...props}
             />
         )
     }
 
-    renderBlacklistRows() {
-        const { blacklist } = this.props
-        return [
-            ...blacklist.map(({ expression }, idx) => (
-                <BlacklistRow
-                    key={idx}
-                    expression={expression}
-                    onDeleteClicked={() => this.onDeleteClicked(idx)}
-                />
-            )),
-        ]
-    }
+    renderBlacklistRows = () =>
+        this.props.blacklist.map(({ expression }, i) => (
+            <BlacklistRow
+                key={i}
+                expression={expression}
+                onDeleteClicked={this.onDeleteClicked(i)}
+            />
+        ))
 
-    renderAddDomain() {
-        return (
-            <div className={styles.ignoreDomainText}>
-                Ignore a new domain/url:
-            </div>
-        )
-    }
+    renderAddDomain = () => (
+        <div className={styles.ignoreDomainText}>Ignore a new domain/url:</div>
+    )
 
-    renderAddBlacklistSites() {
-        return (
+    renderAddBlacklistSites = () =>
+        this.props.blacklist.length ? (
             <div className={styles.blacklistText}>
                 You are currently not indexing ANY visits on URLs that have the
                 following text in them:
             </div>
+        ) : (
+            false
         )
-    }
-    renderInvalidRegexAlert() {
-        if (this.shouldDisableSaveBtn())
-            return (
-                <div className={styles.blacklistAlert}>
-                    This is an invalid RegExp! You can test your regex{' '}
-                    <a target="_blank" href="https://regexr.com/">
-                        here
-                    </a>
-                </div>
-            )
-    }
+
+    renderInvalidRegexAlert = () =>
+        this.props.isInputRegexInvalid ? (
+            <div className={styles.blacklistAlert}>
+                This is an invalid RegExp! You can test your regex{' '}
+                <a target="_blank" href="https://regexr.com/">
+                    here
+                </a>
+            </div>
+        ) : (
+            false
+        )
 
     render() {
         return (
@@ -149,29 +114,21 @@ class BlacklistContainer extends Component {
                 {this.renderAddDomain()}
                 {this.renderInvalidRegexAlert()}
                 {this.renderBlacklistInputRow()}
-                {this.props.blacklist.length
-                    ? this.renderAddBlacklistSites()
-                    : null}
+                {this.renderAddBlacklistSites()}
                 <BlacklistTable>{this.renderBlacklistRows()}</BlacklistTable>
             </div>
         )
     }
 }
 
-BlacklistContainer.propTypes = {
-    // State
-    siteInputValue: PropTypes.string.isRequired,
-    blacklist: PropTypes.arrayOf(
-        PropTypes.shape({
-            expression: PropTypes.string.isRequired,
-        }),
-    ).isRequired,
+const mapStateToProps = state => ({
+    siteInputValue: selectors.siteInputValue(state),
+    blacklist: selectors.blacklist(state),
+    isInputRegexInvalid: selectors.isInputRegexInvalid(state),
+    isSaveBtnDisabled: selectors.isSaveBtnDisabled(state),
+    isClearBtnDisabled: selectors.isClearBtnDisabled(state),
+})
 
-    // Misc
-    boundActions: PropTypes.objectOf(PropTypes.func),
-}
-
-const mapStateToProps = entireStateSelector
 const mapDispatchToProps = dispatch => ({
     boundActions: bindActionCreators(actions, dispatch),
 })
