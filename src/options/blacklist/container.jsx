@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { bindActionCreators } from 'redux'
 
 import { Wrapper } from 'src/common-ui/components'
 import BlacklistTable from './components/BlacklistTable'
@@ -15,7 +14,7 @@ import styles from './components/base.css'
 class BlacklistContainer extends Component {
     static propTypes = {
         // State
-        siteInputValue: PropTypes.string.isRequired,
+        inputVal: PropTypes.string.isRequired,
         lastValue: PropTypes.string,
         blacklist: PropTypes.arrayOf(PropTypes.string).isRequired,
         isInputRegexInvalid: PropTypes.bool.isRequired,
@@ -24,10 +23,13 @@ class BlacklistContainer extends Component {
         showRemoveModal: PropTypes.bool.isRequired,
         isRemoving: PropTypes.bool.isRequired,
 
-        // Misc
+        // Event handlers
         toggleModalShow: PropTypes.func.isRequired,
         removeMatchingDocs: PropTypes.func.isRequired,
-        boundActions: PropTypes.objectOf(PropTypes.func),
+        resetInputVal: PropTypes.func.isRequired,
+        addToBlacklist: PropTypes.func.isRequired,
+        removeFromBlacklist: PropTypes.func.isRequired,
+        setInputVal: PropTypes.func.isRequired,
     }
 
     componentDidMount() {
@@ -40,26 +42,25 @@ class BlacklistContainer extends Component {
     onNewBlacklistItemAdded = () => {
         // Make sure to interpret '.' as "period" rather than "any single character", as it is common in hostnames
         // also ignore all whitespace
-        const expression = this.props.siteInputValue
+        const expression = this.props.inputVal
             .replace(/\s+/g, '')
             .replace('.', '\\.')
 
         // Ignore when user tries to submit nothing (no error state, so just do nothing)
         if (!expression.length) return
 
-        this.props.boundActions.addToBlacklist(expression)
+        this.props.addToBlacklist(expression)
 
         // Make sure input refocuses after new item added
         this.focusInput()
     }
 
     // TODO(AM): Undo? Confirmation?
-    onDeleteClicked = itemIndex => () =>
-        this.props.boundActions.removeSiteFromBlacklist({ index: itemIndex })
+    onDeleteClicked = index => () => this.props.removeFromBlacklist(index)
 
     onInputChange = (event = { target: {} }) => {
-        const siteInputValue = event.target.value || ''
-        this.props.boundActions.setSiteInputValue({ siteInputValue })
+        const value = event.target.value || ''
+        this.props.setInputVal(value)
     }
 
     /**
@@ -69,15 +70,15 @@ class BlacklistContainer extends Component {
         this.props.removeMatchingDocs(this.props.lastValue)
 
     renderBlacklistInputRow() {
-        const { boundActions, siteInputValue, ...props } = this.props
+        const { resetInputVal, inputVal, ...props } = this.props
 
         return (
             <BlacklistInputRow
                 key="blacklist-input"
-                value={siteInputValue}
+                value={inputVal}
                 onAdd={this.onNewBlacklistItemAdded}
                 onInputChange={this.onInputChange}
-                onInputClear={boundActions.resetSiteInputValue}
+                onInputClear={resetInputVal}
                 inputRef={this.assignRef} // eslint-disable-line no-return-assign
                 {...props}
             />
@@ -143,7 +144,7 @@ class BlacklistContainer extends Component {
 }
 
 const mapStateToProps = state => ({
-    siteInputValue: selectors.siteInputValue(state),
+    inputVal: selectors.siteInputValue(state),
     blacklist: selectors.normalizedBlacklist(state),
     isInputRegexInvalid: selectors.isInputRegexInvalid(state),
     isSaveBtnDisabled: selectors.isSaveBtnDisabled(state),
@@ -154,10 +155,15 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-    boundActions: bindActionCreators(actions, dispatch),
     toggleModalShow: () => dispatch(actions.toggleModal()),
     removeMatchingDocs: expression =>
         dispatch(actions.removeMatchingDocs(expression)),
+    resetInputVal: () => dispatch(actions.resetSiteInputValue()),
+    addToBlacklist: expression => dispatch(actions.addToBlacklist(expression)),
+    setInputVal: siteInputValue =>
+        dispatch(actions.setSiteInputValue({ siteInputValue })),
+    removeFromBlacklist: index =>
+        dispatch(actions.removeFromBlacklist({ index })),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(BlacklistContainer)
