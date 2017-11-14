@@ -3,21 +3,30 @@ import PropTypes from 'prop-types'
 
 import { ConfirmModal, ConfirmModalBtn } from 'src/common-ui/components'
 
-const DeleteConfirmModal = ({ onCancel, onConfirm, ...modalProps }) => (
+const BlacklistRemoveModal = ({
+    onCancel,
+    onConfirm,
+    isRemoving,
+    ...modalProps
+}) => (
     <ConfirmModal
         {...modalProps}
         message="Do you want to delete all matching data for this entry?"
+        isLoading={isRemoving}
     >
-        <ConfirmModalBtn cancel onClick={onCancel}>
+        <ConfirmModalBtn disabled={isRemoving} cancel onClick={onCancel}>
             No
         </ConfirmModalBtn>
-        <ConfirmModalBtn onClick={onConfirm}>Yes</ConfirmModalBtn>
+        <ConfirmModalBtn disabled={isRemoving} onClick={onConfirm}>
+            Yes
+        </ConfirmModalBtn>
     </ConfirmModal>
 )
 
-DeleteConfirmModal.propTypes = {
+BlacklistRemoveModal.propTypes = {
     onConfirm: PropTypes.func.isRequired,
     onCancel: PropTypes.func.isRequired,
+    isRemoving: PropTypes.bool.isRequired,
 }
 
-export default DeleteConfirmModal
+export default BlacklistRemoveModal

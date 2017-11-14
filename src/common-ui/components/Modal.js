@@ -7,7 +7,7 @@ import styles from './Modal.css'
 
 class Modal extends Component {
     static propTypes = {
-        onClose: PropTypes.func.isRequired,
+        onClose: PropTypes.func,
         children: PropTypes.oneOfType([
             PropTypes.node,
             PropTypes.arrayOf(PropTypes.node),
@@ -30,17 +30,23 @@ class Modal extends Component {
 
     render() {
         return ReactDOM.createPortal(
-            <div className={styles.overlay} onClick={this.props.onClose}>
+            <div
+                className={styles.overlay}
+                disabled={this.props.onClose == null}
+                onClick={this.props.onClose}
+            >
                 <div
                     className={styles.popup}
                     onClick={event => event.stopPropagation()}
                 >
-                    <button
-                        className={cx(styles.close, styles.button)}
-                        onClick={this.props.onClose}
-                    >
-                        ×
-                    </button>
+                    {this.props.onClose && (
+                        <button
+                            className={cx(styles.close, styles.button)}
+                            onClick={this.props.onClose}
+                        >
+                            ×
+                        </button>
+                    )}
                     <div className={styles.content}>{this.props.children}</div>
                 </div>
             </div>,

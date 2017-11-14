@@ -6,6 +6,7 @@ const defaultState = {
     siteInputValue: '',
     showRemoveModal: false,
     lastValue: undefined,
+    isRemoving: false,
 }
 
 export default createReducer(
@@ -13,6 +14,10 @@ export default createReducer(
         [actions.toggleModal]: state => ({
             ...state,
             showRemoveModal: !state.showRemoveModal,
+        }),
+        [actions.setIsRemoving]: (state, isRemoving) => ({
+            ...state,
+            isRemoving,
         }),
         [actions.setBlacklist]: (state, blacklist) => ({ ...state, blacklist }),
         [actions.setSiteInputValue]: (state, { siteInputValue }) => ({

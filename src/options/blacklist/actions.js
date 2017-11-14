@@ -1,6 +1,7 @@
 import { createAction } from 'redux-act'
 
 export const toggleModal = createAction('settings/toggleBlacklistModal')
+export const setIsRemoving = createAction('settings/setIsRemoving')
 export const setSiteInputValue = createAction('settings/setSiteInputValue')
 export const resetSiteInputValue = createAction('settings/resetSiteInputValue')
 export const setBlacklist = createAction('settings/setBlacklist')

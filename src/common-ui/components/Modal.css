@@ -22,6 +22,11 @@
     z-index: 99999;
     background: rgba(0, 0, 0, 0.7);
     cursor: pointer;
+
+    &:disabled,
+    &[disabled] {
+        cursor: default;
+    }
 }
 
 .popup {

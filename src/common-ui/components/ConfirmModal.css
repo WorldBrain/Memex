@@ -1,3 +1,18 @@
+.textContainer {
+    display: flex;
+    align-items: center;
+
+    & > div {
+        display: none;
+    }
+}
+
+.textContainerLoading {
+    & > div {
+        display: block;
+    }
+}
+
 .btnBar {
     display: flex;
     justify-content: space-around;
@@ -11,8 +26,14 @@
     font-size: 12px;
     font-weight: 500;
 
-    &:hover {
+    &:hover:enabled {
         color: #3eb995;
+    }
+
+    &:disabled,
+    &[disabled] {
+        color: #9a9a9a;
+        cursor: default;
     }
 }
 

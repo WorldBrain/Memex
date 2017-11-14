@@ -26,6 +26,7 @@ class BlacklistContainer extends Component {
         isSaveBtnDisabled: PropTypes.bool.isRequired,
         isClearBtnDisabled: PropTypes.bool.isRequired,
         showRemoveModal: PropTypes.bool.isRequired,
+        isRemoving: PropTypes.bool.isRequired,
 
         // Misc
         toggleModalShow: PropTypes.func.isRequired,
@@ -125,8 +126,9 @@ class BlacklistContainer extends Component {
                     </BlacklistTable>
                 </div>
                 <BlacklistRemoveModal
+                    isRemoving={this.props.isRemoving}
                     isShown={this.props.showRemoveModal}
-                    onClose={this.props.toggleModalShow}
+                    onCancel={this.props.toggleModalShow}
                 />
             </Wrapper>
         )
@@ -139,6 +141,7 @@ const mapStateToProps = state => ({
     isInputRegexInvalid: selectors.isInputRegexInvalid(state),
     isSaveBtnDisabled: selectors.isSaveBtnDisabled(state),
     isClearBtnDisabled: selectors.isClearBtnDisabled(state),
+    isRemoving: selectors.isRemoving(state),
     showRemoveModal: selectors.showRemoveModal(state),
     lastValue: selectors.lastValue(state),
 })
