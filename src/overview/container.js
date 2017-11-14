@@ -89,8 +89,25 @@ class OverviewContainer extends Component {
         if (this.props.showInitSearchMsg) {
             return (
                 <ResultsMessage>
-                    You have not made any history yet, either visit some pages
-                    and come back, or import your existing history
+                    You have not made any history yet.
+                    <br />First, you need to visit some websites or{' '}
+                    <a
+                        style={{ color: '#928989' }}
+                        href="/options/options.html#/import"
+                    >
+                        import your existing history & bookmarks
+                    </a>.<br />
+                    <br />
+                    <strong>Tip: </strong>Read the{' '}
+                    <a
+                        style={{ color: '#928989' }}
+                        href="/options/options.html#/tutorial"
+                    >
+                        quick tutorial
+                    </a>.
+                    <br />
+                    <br />
+                    <img src="/img/ship.png" />
                 </ResultsMessage>
             )
         }
