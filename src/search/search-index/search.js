@@ -65,7 +65,7 @@ async function timeFilterBackSearch({
         // Lookup for all time filters for non-bookmark search
         data.push(
             await reverseRangeLookup({
-                ...timeFilter.get('visits/'),
+                ...timeFilter.get('visit/'),
                 limit: skip + limit,
             }),
         )
