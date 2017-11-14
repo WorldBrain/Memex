@@ -9,6 +9,11 @@ export const siteInputValue = createSelector(
 export const lastValue = createSelector(entireState, state => state.lastValue)
 export const isRemoving = createSelector(entireState, state => state.isRemoving)
 export const blacklist = createSelector(entireState, state => state.blacklist)
+
+export const normalizedBlacklist = createSelector(blacklist, blacklist =>
+    blacklist.map(entry => entry.expression.replace('\\.', '.')),
+)
+
 export const showRemoveModal = createSelector(
     entireState,
     state => state.showRemoveModal,

@@ -182,7 +182,10 @@ class PopupContainer extends Component {
         this.setState(state => ({ ...state, blacklistConfirm: false }))
 
     handleDeleteBlacklistData = () => {
-        this.deleteDocs(this.state.url, this.state.domainDelete)
+        this.deleteDocs(
+            this.state.url,
+            this.state.domainDelete ? 'domain' : 'url',
+        )
         this.resetBlacklistConfirmState()
     }
 

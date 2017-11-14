@@ -15,11 +15,8 @@ export const defaultEntries = ['https?://localhost', 'google.\\w+/maps']
  */
 export function isURLBlacklisted(url = '', blacklist = []) {
     // Main checking logic between a given blacklist expression and current URL
-    const doesExpressionMatchURL = (expression = '') => {
-        // Make sure to interpret '.' as "period" rather than "any single character", as it is common in hostnames
-        expression = expression.replace('.', '\\.')
-        return new RegExp(expression, 'ig').test(url)
-    }
+    const doesExpressionMatchURL = (expression = '') =>
+        new RegExp(expression, 'ig').test(url)
 
     // Reduces blacklist to a bool by running main checking logic against each blacklist expression
     // (returns true if a single match is found in entire blacklist)

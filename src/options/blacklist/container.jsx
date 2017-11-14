@@ -17,11 +17,7 @@ class BlacklistContainer extends Component {
         // State
         siteInputValue: PropTypes.string.isRequired,
         lastValue: PropTypes.string,
-        blacklist: PropTypes.arrayOf(
-            PropTypes.shape({
-                expression: PropTypes.string.isRequired,
-            }),
-        ).isRequired,
+        blacklist: PropTypes.arrayOf(PropTypes.string).isRequired,
         isInputRegexInvalid: PropTypes.bool.isRequired,
         isSaveBtnDisabled: PropTypes.bool.isRequired,
         isClearBtnDisabled: PropTypes.bool.isRequired,
@@ -30,6 +26,7 @@ class BlacklistContainer extends Component {
 
         // Misc
         toggleModalShow: PropTypes.func.isRequired,
+        removeMatchingDocs: PropTypes.func.isRequired,
         boundActions: PropTypes.objectOf(PropTypes.func),
     }
 
@@ -41,8 +38,11 @@ class BlacklistContainer extends Component {
     assignRef = input => (this.input = input)
 
     onNewBlacklistItemAdded = () => {
-        // Ignore all whitespace by deleting it
-        const expression = this.props.siteInputValue.replace(/\s+/g, '')
+        // Make sure to interpret '.' as "period" rather than "any single character", as it is common in hostnames
+        // also ignore all whitespace
+        const expression = this.props.siteInputValue
+            .replace(/\s+/g, '')
+            .replace('.', '\\.')
 
         // Ignore when user tries to submit nothing (no error state, so just do nothing)
         if (!expression.length) return
@@ -62,6 +62,12 @@ class BlacklistContainer extends Component {
         this.props.boundActions.setSiteInputValue({ siteInputValue })
     }
 
+    /**
+     * Handles removing all matching docs from the DBs for the recently added blacklist entry.
+     */
+    handleRemoveMatching = () =>
+        this.props.removeMatchingDocs(this.props.lastValue)
+
     renderBlacklistInputRow() {
         const { boundActions, siteInputValue, ...props } = this.props
 
@@ -79,7 +85,7 @@ class BlacklistContainer extends Component {
     }
 
     renderBlacklistRows = () =>
-        this.props.blacklist.map(({ expression }, i) => (
+        this.props.blacklist.map((expression, i) => (
             <BlacklistRow
                 key={i}
                 expression={expression}
@@ -129,6 +135,7 @@ class BlacklistContainer extends Component {
                     isRemoving={this.props.isRemoving}
                     isShown={this.props.showRemoveModal}
                     onCancel={this.props.toggleModalShow}
+                    onConfirm={this.handleRemoveMatching}
                 />
             </Wrapper>
         )
@@ -137,7 +144,7 @@ class BlacklistContainer extends Component {
 
 const mapStateToProps = state => ({
     siteInputValue: selectors.siteInputValue(state),
-    blacklist: selectors.blacklist(state),
+    blacklist: selectors.normalizedBlacklist(state),
     isInputRegexInvalid: selectors.isInputRegexInvalid(state),
     isSaveBtnDisabled: selectors.isSaveBtnDisabled(state),
     isClearBtnDisabled: selectors.isClearBtnDisabled(state),
@@ -149,6 +156,8 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
     boundActions: bindActionCreators(actions, dispatch),
     toggleModalShow: () => dispatch(actions.toggleModal()),
+    removeMatchingDocs: expression =>
+        dispatch(actions.removeMatchingDocs(expression)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(BlacklistContainer)
