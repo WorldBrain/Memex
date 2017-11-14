@@ -11,7 +11,7 @@ const Privacy = () => (
 
         <div className={localStyles.content}>
             All your data is stored locally on your computer.
-            <br />Noone will EVER have access to it by default.
+            <br />No one will EVER have access to it by default.
             <br />
             <br />You will be able to <strong>voluntarily</strong> share it in
             later stages with friends, followers and other applications. For

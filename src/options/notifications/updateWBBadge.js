@@ -1,4 +1,4 @@
-import setUnreadCount from '../../../util/setUnreadCount.js'
+import setUnreadCount from '../../util/setUnreadCount.js'
 
 export default async function updateWBBadge() {
     let ba = chrome.browserAction

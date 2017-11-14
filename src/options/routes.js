@@ -5,7 +5,7 @@ import Help from './help/index'
 import Acknowledgements from './acknowledgement/components/content'
 import Tutorial from './tutorial'
 import NewInstall from './new-install'
-import NotificationsContainer from './containers/notifications'
+import NotificationsContainer from './notifications'
 
 export default [
     {
@@ -34,6 +34,12 @@ export default [
         icon: 'block',
     },
     {
+        name: 'Notifications',
+        pathname: '/notifications',
+        component: NotificationsContainer,
+        icon: 'notifications',
+    },
+    {
         name: 'Privacy',
         pathname: '/privacy',
         component: Privacy,
@@ -56,10 +62,5 @@ export default [
         pathname: '/tutorial',
         component: Tutorial,
         icon: 'info',
-    },
-    {
-        name: 'Notifications',
-        pathname: '/notifications',
-        component: NotificationsContainer,
     },
 ]
