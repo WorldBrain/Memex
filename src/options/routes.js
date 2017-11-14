@@ -5,6 +5,7 @@ import Help from './help/index'
 import Acknowledgements from './acknowledgement/components/content'
 import Tutorial from './tutorial'
 import NewInstall from './new-install'
+import NotificationsContainer from './containers/notifications'
 
 export default [
     {
@@ -55,5 +56,10 @@ export default [
         pathname: '/tutorial',
         component: Tutorial,
         icon: 'info',
+    },
+    {
+        name: 'Notifications',
+        pathname: '/notifications',
+        component: NotificationsContainer,
     },
 ]

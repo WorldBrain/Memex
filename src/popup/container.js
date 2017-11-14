@@ -16,9 +16,20 @@ import LinkButton from './components/LinkButton'
 import SplitButton from './components/SplitButton'
 import * as constants from './constants'
 
+import styles from './components/Popup.css'
+import setUnreadCount from '../util/setUnreadCount'
+
 import { itemBtnBlacklisted } from './components/Button.css'
 
+<<<<<<< HEAD
 // Transforms URL checking results to state types
+=======
+export const overviewURL = '/overview/overview.html'
+export const optionsURL = '/options/options.html'
+export const feedbackURL = 'https://www.reddit.com/r/WorldBrain'
+
+setUnreadCount()
+>>>>>>> 9690e0470c54b046d4e48de3f2f33618ec28d94d
 const getBlacklistButtonState = ({ loggable, blacklist }) => {
     if (!blacklist) return constants.BLACKLIST_BTN_STATE.BLACKLISTED
     if (!loggable) return constants.BLACKLIST_BTN_STATE.DISABLED
@@ -47,6 +58,9 @@ class PopupContainer extends Component {
             blacklistConfirm: false,
             bookmarkBtn: constants.BOOKMARK_BTN_STATE.DISABLED,
             domainDelete: false,
+            notifs: [],
+            isLoading: false,
+            isError: false,
         }
 
         this.toggleLoggingPause = remoteFunction('toggleLoggingPause')
@@ -87,6 +101,23 @@ class PopupContainer extends Component {
         this.getInitBookmarkBtnState(currentTab.url)
             .then(updateState)
             .catch(noop)
+
+        // Something to do with notifications
+        try {
+            this.setState(state => ({ ...state, isLoading: true }))
+            const res = await setUnreadCount(0)
+            if (res === 0) {
+                this.setState({ unread: false })
+            } else {
+                this.setState({ unread: true })
+                this.setState(state => ({ ...state, notifs: res }))
+            }
+            this.setState(state => ({ ...state, notifs, unread: true }))
+        } catch (error) {
+            this.setState(state => ({ ...state, isError: true }))
+        } finally {
+            this.setState(state => ({ ...state, isLoading: false }))
+        }
     }
 
     async getInitPauseState() {
@@ -196,24 +227,24 @@ class PopupContainer extends Component {
             // Standard blacklist button
             return blacklistBtn ===
                 constants.BLACKLIST_BTN_STATE.BLACKLISTED ? (
-                <LinkButton
-                    href={`${constants.OPTIONS_URL}#/blacklist`}
-                    icon="block"
-                    btnClass={itemBtnBlacklisted}
-                >
-                    This Page is Blacklisted. Undo>>
+                    <LinkButton
+                        href={`${constants.OPTIONS_URL}#/blacklist`}
+                        icon="block"
+                        btnClass={itemBtnBlacklisted}
+                    >
+                        This Page is Blacklisted. Undo>>
                 </LinkButton>
-            ) : (
-                <Button
-                    icon="block"
-                    onClick={this.setBlacklistChoice}
-                    disabled={
-                        blacklistBtn === constants.BLACKLIST_BTN_STATE.DISABLED
-                    }
-                >
-                    Blacklist Current Page
+                ) : (
+                    <Button
+                        icon="block"
+                        onClick={this.setBlacklistChoice}
+                        disabled={
+                            blacklistBtn === constants.BLACKLIST_BTN_STATE.DISABLED
+                        }
+                    >
+                        Blacklist Current Page
                 </Button>
-            )
+                )
         }
 
         // Domain vs URL choice button
@@ -259,13 +290,16 @@ class PopupContainer extends Component {
                 />
             )
         }
+        // This line has to do with notifications
+        const { searchValue, pauseValue, isPaused } = this.state
+        // --
         return (
             <div>
                 <Button
                     onClick={this.handleAddBookmark}
                     icon={
                         this.state.bookmarkBtn ===
-                        constants.BOOKMARK_BTN_STATE.BOOKMARK
+                            constants.BOOKMARK_BTN_STATE.BOOKMARK
                             ? 'star'
                             : 'star_border'
                     }
@@ -275,7 +309,7 @@ class PopupContainer extends Component {
                     }
                 >
                     {this.state.bookmarkBtn ===
-                    constants.BOOKMARK_BTN_STATE.BOOKMARK
+                        constants.BOOKMARK_BTN_STATE.BOOKMARK
                         ? 'Unbookmark this Page'
                         : 'Bookmark this Page'}
                 </Button>
@@ -294,16 +328,24 @@ class PopupContainer extends Component {
                     icon="settings"
                 >
                     Settings
-                </LinkButton>
+                    </LinkButton>
                 <LinkButton
                     href={`${constants.OPTIONS_URL}#/import`}
                     icon="file_download"
                 >
                     Import History &amp; Bookmarks
-                </LinkButton>
+                    </LinkButton>
                 <LinkButton href={constants.FEEDBACK_URL} icon="feedback">
                     I need Help!
+                    </LinkButton>
+                <LinkButton href={`${optionsURL}#/notifications`} icon='notifications'>
+                    Notifications <span
+                        className={
+                            this.state.unread ? styles.badge : styles.loadbadge
+                        }>{this.state.notifs}
+                    </span>
                 </LinkButton>
+
             </div>
         )
     }
