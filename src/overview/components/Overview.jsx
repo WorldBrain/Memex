@@ -3,8 +3,8 @@ import PropTypes from 'prop-types'
 import classNames from 'classnames'
 
 import { Wrapper } from 'src/common-ui/components'
+import DeleteConfirmModal from './DeleteConfirmModal'
 import Header from './Header'
-import DeleteConfirmation from './DeleteConfirmation'
 import styles from './Overview.css'
 import Filters from './Filters'
 import ShareButtons from './ShareButtons'
@@ -34,9 +34,9 @@ const Overview = props => (
         >
             {props.children}
         </div>
-        <DeleteConfirmation
+        <DeleteConfirmModal
             isShown={props.isDeleteConfShown}
-            close={props.hideDeleteConfirm}
+            onClose={props.hideDeleteConfirm}
             deleteDocs={props.deleteDocs}
         />
     </Wrapper>
