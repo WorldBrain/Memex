@@ -7,7 +7,7 @@ import Header from './Header'
 import DeleteConfirmation from './DeleteConfirmation'
 import styles from './Overview.css'
 import Filters from './Filters'
-import ShareButtons from '../shareButtons'
+import ShareButtons from './shareButtons'
 
 const showFilterClass = ({ showFilter }) =>
     classNames({

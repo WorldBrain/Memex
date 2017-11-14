@@ -1,0 +1,36 @@
+.shareIcons {
+    float: right;
+    display: block;
+    margin-top: 35px;
+    width: 25px;
+    height: 500px;
+}
+
+/* Hide vertical share bar when screen is less than 600 pixels wide */
+
+@media screen and (max-width: 600px) {
+    .shareIcons {
+        display: none;
+    }
+}
+
+div #fedIcon {
+    margin-bottom: 0px;
+    margin-top: 5px;
+    transform: rotate(90deg);
+    background-color: #00b38f;
+}
+
+.FedLink {
+    text-decoration: none;
+    color: #ffffff;
+    background-color: #00b38f;
+    border-style: solid;
+    border-color: #00b38f;
+    border-width: 10 10 10 10;
+}
+
+.shareText {
+    font-size: 10px;
+    color: #00b38f;
+}
