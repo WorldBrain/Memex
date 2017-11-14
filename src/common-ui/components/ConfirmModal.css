@@ -1,7 +1,6 @@
 .btnBar {
     display: flex;
     justify-content: space-around;
-    font-size: 0.8em;
 }
 
 .btn {
@@ -9,7 +8,7 @@
     background: none;
     transition: all 200ms;
     cursor: pointer;
-    font-size: 1.2em;
+    font-size: 12px;
     font-weight: 500;
 
     &:hover {
