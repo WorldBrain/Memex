@@ -2,7 +2,7 @@
     position: fixed;
     display: flex;
     flex-direction: column;
-    margin-top: 35px;
+    margin-top: -10px;
     width: auto;
     height: 500px;
     margin-left: 97%;
@@ -28,20 +28,20 @@
     background-color: #3eb995;
     transform: rotate(90deg);
     margin-top: 48px;
-    margin-left: -44px;
+    margin-left: -47px;
     font-size: 20px;
     text-align: center;
-    padding: 0px 15px;
+    padding: 14px 20px 14px 20px;
 }
 
 .shareText {
     position: relative;
-    margin-left: -11px;
-    margin-bottom: 2px;
-    font-size: 9px;
+    margin-left: -15px;
+    margin-bottom: 5px;
+    font-size: 11px;
     color: #3eb995;
     text-align: right;
-    max-width: 35px;
+    max-width: 40px;
 }
 
 .shareImg {
