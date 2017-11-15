@@ -13,6 +13,8 @@ import {
     DEF_ALLOW,
 } from 'src/options/imports/constants'
 
+const chunkSize = 200
+
 // Binds old ext bookmark urls to a function that transforms old ext data to an import item
 const transformOldExtDataToImportItem = bookmarkUrls => (item, index) => ({
     type: IMPORT_TYPE.OLD,
@@ -37,10 +39,10 @@ async function checkWithExistingBookmarks() {
         endkey: `${bookmarkKeyPrefix}\uffff`,
     })
 
-    const existingIds = new Set(
+    const existingUrls = new Set(
         existingBmDocs.map(row => convertBookmarkDocId(row.id).url),
     )
-    return url => existingIds.has(url)
+    return url => existingUrls.has(url)
 }
 
 /**
@@ -53,14 +55,14 @@ async function checkWithExistingPages() {
         endkey: `${pageKeyPrefix}\uffff`,
     })
 
-    const existingIds = new Set(
+    const existingUrls = new Set(
         existingPageDocs.map(row => convertPageDocId(row.id).url),
     )
-    return url => existingIds.has(url)
+    return url => existingUrls.has(url)
 }
 
 async function initFilterItemsByUrl() {
-    const isNotBlacklisted = await checkWithBlacklist()
+    const isBlacklisted = await checkWithBlacklist()
 
     /**
      * Performs all needed filtering on a collection of history, bookmark, or old ext items. As these
@@ -71,26 +73,29 @@ async function initFilterItemsByUrl() {
      * @param {(url: string) => bool} alreadyExists Opt. checker function to check against existing data.
      * @return {Map<string, any>} Filtered version of `items` array made into a Map of encoded URL strings to import items.
      */
-    return (items, transform = f => f, alreadyExists) =>
-        items.reduce((accItems, currItem) => {
-            if (!isLoggable(currItem) || !isNotBlacklisted(currItem)) {
-                return accItems
+    return (items, transform = f => f, alreadyExists) => {
+        const importItems = new Map()
+
+        for (let i = 0; i < items.length; i++) {
+            if (!isLoggable(items[i]) || isBlacklisted(items[i])) {
+                continue
             }
 
             let encodedUrl
             try {
-                encodedUrl = encodeUrl(currItem.url, false) // Augment the item with encoded URL for DB check and item map
+                encodedUrl = encodeUrl(items[i].url, false) // Augment the item with encoded URL for DB check and item map
             } catch (error) {
-                return accItems // URI malformed; don't add to list
+                continue // URI malformed; don't add to map
             }
 
             // Filter out items already existing in DB, if specified
             if (alreadyExists == null || !alreadyExists(encodedUrl)) {
-                accItems.set(encodedUrl, transform(currItem))
+                importItems.set(encodedUrl, transform(items[i]))
             }
+        }
 
-            return accItems
-        }, new Map())
+        return importItems
+    }
 }
 
 /**
@@ -112,7 +117,7 @@ const getHistoryItems = (maxResults = 9999999, startTime = 0) =>
 const getBookmarkItems = (maxResults = 100000) =>
     browser.bookmarks.getRecent(maxResults)
 
-export async function getOldExtItems() {
+async function getOldExtItems() {
     let bookmarkUrls = new Set()
     const {
         [OLD_EXT_KEYS.INDEX]: index,
@@ -140,16 +145,19 @@ export async function getOldExtItems() {
         // Break up old index into chunks of size 200 to access sequentially from storage
         // Doing this to allow us to cap space complexity at a constant level +
         // give time a `N / # chunks` speedup
-        for (const keyChunk of chunk(200)([...indexSet])) {
-            const storageChunk = await browser.storage.local.get(keyChunk)
+        const chunks = chunk(chunkSize)([...indexSet])
+        for (let i = 0; i < chunks.length; i++) {
+            const storageChunk = await browser.storage.local.get(chunks[i])
 
-            keyChunk.forEach((key, i) => {
-                if (storageChunk[key] == null) {
-                    return
+            for (let j = 0; j < chunks[i].length; j++) {
+                if (storageChunk[chunks[i][j]] == null) {
+                    continue
                 }
 
-                importItems.push(transform(storageChunk[key], i))
-            })
+                importItems.push(
+                    transform(storageChunk[chunks[i][j]], i * chunkSize + j),
+                )
+            }
         }
     }
 
@@ -164,18 +172,28 @@ export async function getOldExtItems() {
 export default async function createImportItems(allowTypes = DEF_ALLOW) {
     const filterItemsByUrl = await initFilterItemsByUrl()
 
+    const [historyItems, checkExistingPages] = await Promise.all([
+        getHistoryItems(),
+        checkWithExistingPages(),
+    ])
+
     // Get all history from browser, filter on existing DB pages
     let historyItemsMap = filterItemsByUrl(
-        await getHistoryItems(),
+        historyItems,
         transformBrowserItemToImportItem(IMPORT_TYPE.HISTORY),
-        await checkWithExistingPages(),
+        checkExistingPages,
     )
+
+    const [bmItems, checkExistingBms] = await Promise.all([
+        getBookmarkItems(),
+        checkWithExistingBookmarks(),
+    ])
 
     // Get all bookmarks from browser, filter on existing DB bookmarks
     const bookmarkItemsMap = filterItemsByUrl(
-        await getBookmarkItems(),
+        bmItems,
         transformBrowserItemToImportItem(IMPORT_TYPE.BOOKMARK),
-        await checkWithExistingBookmarks(),
+        checkExistingBms,
     )
 
     // Get all old ext from local storage, don't filter on existing data

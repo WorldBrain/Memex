@@ -44,8 +44,8 @@ async function updateIndex(finalPagePromise, visit) {
 
 export async function logPageVisit({ tabId, url }) {
     // First check if we want to log this page (hence the 'maybe' in the name).
-    const shouldBeRemembered = await checkWithBlacklist()
-    if (!shouldBeRemembered({ url })) {
+    const isBlacklisted = await checkWithBlacklist()
+    if (isBlacklisted({ url })) {
         return
     }
 
