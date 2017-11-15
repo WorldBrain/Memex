@@ -1,31 +1,25 @@
-import React
-from 'react'
+import React from 'react'
 import styles from './ShareButtons.css'
-import {Link} from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 const ShareButtons = props => (
-
     <div className={styles.shareIcons}>
-        <p className={styles.shareText}>
-            Spread the love
-        </p>{' '}
+        <p className={styles.shareText}>Spread the love</p>{' '}
         <a href="#">
-            <img className={styles.shareImg} vspace={2} src="/img/face.png"/>
+            <img className={styles.shareImg} vspace={2} src="/img/face.png" />
         </a>{' '}
         <a Link to="/">
-            <img className={styles.shareImg} vspace={2} src="/img/twitt.png"/>
+            <img className={styles.shareImg} vspace={2} src="/img/twitt.png" />
         </a>{' '}
         <a Link to="#">
-            <img className={styles.shareImg} vspace={2} src="/img/@.png"/>
+            <img className={styles.shareImg} vspace={2} src="/img/ic.png" />
         </a>{' '}
         <a Link to="#">
-            <img className={styles.shareImg} vspace={2} src="/img/ic.png"/>
+            <img className={styles.shareImg} vspace={2} src="/img/@.png" />
         </a>{' '}
-        <div className={styles.fedIcon}>
-            <a Link to="#" className={styles.fedLink}>
-                Feedback{' '}
-            </a>{' '}
-        </div>{' '}
+        <a Link to="#" className={styles.fedLink}>
+            Feedback{' '}
+        </a>{' '}
     </div>
 )
 
