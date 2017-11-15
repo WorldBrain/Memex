@@ -1,3 +1,4 @@
+import moment from 'moment'
 import chunk from 'lodash/fp/chunk'
 
 import db from 'src/pouchdb'
@@ -14,6 +15,7 @@ import {
 } from 'src/options/imports/constants'
 
 const chunkSize = 200
+const lookbackWeeks = 12 // Browser history is limited to the last 3 months
 
 // Binds old ext bookmark urls to a function that transforms old ext data to an import item
 const transformOldExtDataToImportItem = bookmarkUrls => (item, index) => ({
@@ -99,16 +101,45 @@ async function initFilterItemsByUrl() {
 }
 
 /**
- * @param {number} [maxResults=9999999] The max amount of items to grab from browser.
- * @param {number} [startTime=0] The time to start search from for browser history.
+ * @param {moment} startTime The time to start search from for browser history.
  * @returns {Array<browser.history.HistoryItem>} All history items in browser filtered by URL.
  */
-const getHistoryItems = (maxResults = 9999999, startTime = 0) =>
+const getHistoryItems = startTime =>
     browser.history.search({
         text: '',
-        maxResults,
-        startTime,
+        maxResults: 999999,
+        startTime: startTime.valueOf(),
+        endTime: startTime.add(2, 'weeks').valueOf(),
     })
+
+/**
+ * Handles fetching and filtering the history URLs in time period batches.
+ * @param {Function} filterItemsByUrl
+ */
+async function filterHistoryItems(filterItemsByUrl) {
+    const checkExistingPages = await checkWithExistingPages()
+    const transformHist = transformBrowserItemToImportItem(IMPORT_TYPE.HISTORY)
+
+    // Get all history from browser (last 3 months), filter on existing DB pages
+    const startTime = moment().subtract(lookbackWeeks, 'weeks')
+    let historyItemsMap = new Map()
+
+    // Fetch and filter history in 2 week batches to limit space
+    for (let i = 0; i < lookbackWeeks / 2; i++, startTime.add(2, 'weeks')) {
+        const historyItemBatch = await getHistoryItems(moment(startTime))
+
+        historyItemsMap = new Map([
+            ...historyItemsMap,
+            ...filterItemsByUrl(
+                historyItemBatch,
+                transformHist,
+                checkExistingPages,
+            ),
+        ])
+    }
+
+    return historyItemsMap
+}
 
 /**
  * @param {number} [maxResults=100000] The max amount of items to grab from browser.
@@ -172,17 +203,7 @@ async function getOldExtItems() {
 export default async function createImportItems(allowTypes = DEF_ALLOW) {
     const filterItemsByUrl = await initFilterItemsByUrl()
 
-    const [historyItems, checkExistingPages] = await Promise.all([
-        getHistoryItems(),
-        checkWithExistingPages(),
-    ])
-
-    // Get all history from browser, filter on existing DB pages
-    let historyItemsMap = filterItemsByUrl(
-        historyItems,
-        transformBrowserItemToImportItem(IMPORT_TYPE.HISTORY),
-        checkExistingPages,
-    )
+    let historyItemsMap = await filterHistoryItems(filterItemsByUrl)
 
     const [bmItems, checkExistingBms] = await Promise.all([
         getBookmarkItems(),
