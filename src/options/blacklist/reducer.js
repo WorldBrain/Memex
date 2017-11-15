@@ -6,18 +6,23 @@ const defaultState = {
     siteInputValue: '',
     showRemoveModal: false,
     lastValue: undefined,
-    isRemoving: false,
+    isLoading: false,
+    matchedDocCount: 0,
 }
 
 export default createReducer(
     {
-        [actions.toggleModal]: state => ({
+        [actions.setMatchedCount]: (state, matchedDocCount) => ({
             ...state,
-            showRemoveModal: !state.showRemoveModal,
+            matchedDocCount,
         }),
-        [actions.setIsRemoving]: (state, isRemoving) => ({
+        [actions.setModalShow]: (state, showRemoveModal) => ({
             ...state,
-            isRemoving,
+            showRemoveModal,
+        }),
+        [actions.setIsLoading]: (state, isLoading) => ({
+            ...state,
+            isLoading,
         }),
         [actions.setBlacklist]: (state, blacklist) => ({ ...state, blacklist }),
         [actions.setSiteInputValue]: (state, { siteInputValue }) => ({

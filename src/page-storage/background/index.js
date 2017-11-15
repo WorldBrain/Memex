@@ -1,4 +1,4 @@
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
-import deleteDocsByUrl from 'src/page-storage/deletion'
+import deleteDocsByUrl, { calcMatchingDocs } from 'src/page-storage/deletion'
 
-makeRemotelyCallable({ deleteDocsByUrl })
+makeRemotelyCallable({ deleteDocsByUrl, calcMatchingDocs })

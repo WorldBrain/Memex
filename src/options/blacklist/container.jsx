@@ -21,10 +21,11 @@ class BlacklistContainer extends Component {
         isSaveBtnDisabled: PropTypes.bool.isRequired,
         isClearBtnDisabled: PropTypes.bool.isRequired,
         showRemoveModal: PropTypes.bool.isRequired,
-        isRemoving: PropTypes.bool.isRequired,
+        isLoading: PropTypes.bool.isRequired,
+        matchedDocCount: PropTypes.number.isRequired,
 
-        // Event handlers
-        toggleModalShow: PropTypes.func.isRequired,
+        // Actions
+        hideModal: PropTypes.func.isRequired,
         removeMatchingDocs: PropTypes.func.isRequired,
         resetInputVal: PropTypes.func.isRequired,
         addToBlacklist: PropTypes.func.isRequired,
@@ -133,9 +134,10 @@ class BlacklistContainer extends Component {
                     </BlacklistTable>
                 </div>
                 <BlacklistRemoveModal
-                    isRemoving={this.props.isRemoving}
+                    isLoading={this.props.isLoading}
+                    matchedCount={this.props.matchedDocCount}
                     isShown={this.props.showRemoveModal}
-                    onCancel={this.props.toggleModalShow}
+                    onCancel={this.props.hideModal}
                     onConfirm={this.handleRemoveMatching}
                 />
             </Wrapper>
@@ -149,13 +151,14 @@ const mapStateToProps = state => ({
     isInputRegexInvalid: selectors.isInputRegexInvalid(state),
     isSaveBtnDisabled: selectors.isSaveBtnDisabled(state),
     isClearBtnDisabled: selectors.isClearBtnDisabled(state),
-    isRemoving: selectors.isRemoving(state),
+    isLoading: selectors.isLoading(state),
+    matchedDocCount: selectors.matchedDocCount(state),
     showRemoveModal: selectors.showRemoveModal(state),
     lastValue: selectors.lastValue(state),
 })
 
 const mapDispatchToProps = dispatch => ({
-    toggleModalShow: () => dispatch(actions.toggleModal()),
+    hideModal: () => dispatch(actions.setModalShow(false)),
     removeMatchingDocs: expression =>
         dispatch(actions.removeMatchingDocs(expression)),
     resetInputVal: () => dispatch(actions.resetSiteInputValue()),
@@ -163,7 +166,7 @@ const mapDispatchToProps = dispatch => ({
     setInputVal: siteInputValue =>
         dispatch(actions.setSiteInputValue({ siteInputValue })),
     removeFromBlacklist: index =>
-        dispatch(actions.removeFromBlacklist({ index })),
+        dispatch(actions.removeSiteFromBlacklist({ index })),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(BlacklistContainer)

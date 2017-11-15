@@ -19,7 +19,25 @@ export default (input, type = 'url') => {
     }
 }
 
+/**
+ * Removes all matching data from Pouch and search index matching the given regex.
+ * Uses `calcMatchingDocs` to determine what to remove.
+ *
+ * @param {*} regex
+ * @returns {Promise<void>}
+ */
 async function deleteByRegex(regex) {
+    const { allRows, pageIds } = await calcMatchingDocs(regex)
+
+    return await Promise.all([deleteDocs(allRows), delPagesConcurrent(pageIds)])
+}
+
+/**
+ * @param {*} regex
+ * @returns {any} Object containing Arrays `allRows` and `pageIds`. `allRows` represents matching Pouch docs.
+ *  `pageIds` represents the IDs of just pages (no meta docs).
+ */
+export async function calcMatchingDocs(regex) {
     // Perform lookup on Pouch pages via matching regex against URL field
     const urlSelector = { url: { $regex: regex } }
 
@@ -43,7 +61,7 @@ async function deleteByRegex(regex) {
         pageIds.push(id)
     }
 
-    await Promise.all([deleteDocs(allRows), delPagesConcurrent(pageIds)])
+    return { pageIds, allRows }
 }
 
 async function deleteDomain(url = '') {

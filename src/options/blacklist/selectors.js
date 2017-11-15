@@ -7,7 +7,11 @@ export const siteInputValue = createSelector(
 )
 
 export const lastValue = createSelector(entireState, state => state.lastValue)
-export const isRemoving = createSelector(entireState, state => state.isRemoving)
+export const isLoading = createSelector(entireState, state => state.isLoading)
+export const matchedDocCount = createSelector(
+    entireState,
+    state => state.matchedDocCount,
+)
 export const blacklist = createSelector(entireState, state => state.blacklist)
 
 export const normalizedBlacklist = createSelector(blacklist, blacklist =>
