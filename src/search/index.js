@@ -9,7 +9,6 @@ async function indexSearch({
     skip = 0,
     limit = 10,
     getTotalCount = false,
-    fullDocs = true,
     showOnlyBookmarks = false,
 }) {
     query = query.trim() // Don't count whitespace searches
@@ -38,7 +37,6 @@ async function indexSearch({
     // Get index results, filtering out any unexpectedly structured results
     const { results, totalCount } = await searchConcurrent(indexQuery, {
         count: getTotalCount,
-        fullDocs,
     })
 
     // Short-circuit if no results
