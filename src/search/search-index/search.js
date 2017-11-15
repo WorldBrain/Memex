@@ -200,27 +200,22 @@ const boostedTermSearch = (keyGenFn, boost) => async (
 const boostedTitleSearch = boostedTermSearch(keyGen.title, 0.2)
 const boostedUrlSearch = boostedTermSearch(keyGen.url, 0.1)
 
-function formatIdResults(pageResultsMap) {
-    const results = []
+/**
+ * Takes in final search results (should be page size) and performs the reverse index lookup
+ * for each of them, augmenting their `document` property with the contents.
+ * @param {SearchResult[]} results
+ * @returns {SearchResult[]}
+ */
+async function fillOutResultDocs(results) {
+    // Do reverse index lookup
+    const pageIds = results.map(result => result.id)
+    const reverseDocsMap = await lookupByKeys(pageIds)
 
-    for (const [pageId, value] of pageResultsMap) {
-        results.push(structureSearchResult({ id: pageId }, value.latest))
-    }
-
-    return results
-}
-
-async function resolveIdResults(pageResultsMap) {
-    const pageValuesMap = await lookupByKeys([...pageResultsMap.keys()])
-
-    const results = []
-
-    for (const [pageId, props] of pageValuesMap) {
-        const { latest } = pageResultsMap.get(pageId)
-        results.push(structureSearchResult(props, latest))
-    }
-
-    return results
+    // Augment results with full reverse index docs
+    return results.map(result => ({
+        ...result,
+        document: reverseDocsMap.get(result.id),
+    }))
 }
 
 /**
@@ -259,12 +254,12 @@ function intersectResultMaps(termPages, filterPages, domainPages) {
  * Performs a search based on data supplied in the `query`.
  *
  * @param {IndexQuery} query
- * @param {boolean} [fullDocs=true] Specifies whether to return just the ID or all doc data.
+ * @param {boolean} [count=false] Specifies whether to return the `totalCount` of results for query.
  * @returns {SearchResult[]}
  */
 export async function search(
     query = { skip: 0, limit: 10 },
-    { fullDocs = true, count = false } = { fullDocs: true, count: false },
+    { count = false } = { count: false },
 ) {
     const paginateResults = paginate(query)
     let totalResultCount
@@ -293,14 +288,17 @@ export async function search(
         totalResultCount = pageResultsMap.size
     }
 
-    // Either or resolve result IDs to their indexed doc data, or just return the IDs map
-    const results = fullDocs
-        ? await resolveIdResults(pageResultsMap)
-        : formatIdResults(pageResultsMap)
+    // Structure all results as `SearchResult`s (minimal `document`)
+    let results = [...pageResultsMap].map(([id, { latest }]) =>
+        structureSearchResult({ id }, latest),
+    )
 
+    results = paginateResults(results)
+    results = await fillOutResultDocs(results)
     console.timeEnd('total search')
+
     return {
-        results: paginateResults(results),
+        results,
         totalCount: totalResultCount,
     }
 }
