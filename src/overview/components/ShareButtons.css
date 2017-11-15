@@ -1,10 +1,12 @@
 .shareIcons {
+    display: flex;
     float: right;
     display: block;
     margin-top: 35px;
     width: 25px;
     height: 500px;
 }
+
 
 /* Hide vertical share bar when screen is less than 980 pixels wide */
 
@@ -14,15 +16,15 @@
     }
 }
 
-div #fedIcon {
+.fedIcon {
+    overflow: hidden;
     margin-bottom: 0px;
-    margin-top: 8px;
-    margin-right: -4px;
+    margin-top: 11px;
     transform: rotate(90deg);
     background-color: #00b38f;
 }
 
-.FedLink {
+.fedLink {
     text-decoration: none;
     color: #fff;
     background-color: #00b38f;
@@ -37,4 +39,13 @@ div #fedIcon {
     margin-bottom: -1px;
     font-size: 9px;
     color: #00b38f;
+}
+
+.shareImg {
+    width: 25px;
+    height: 25px;
+}
+
+p {
+    margin-right: -10px;
 }
