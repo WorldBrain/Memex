@@ -1,0 +1,1 @@
+npm install react-transition-group@1.x --save

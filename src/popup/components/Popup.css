@@ -49,3 +49,18 @@ hr {
         font-family: 'Lato';
     }
 }
+
+.badge {
+    display: block-inline;
+    background-color: #3eb995;
+    padding: 2px 10px;
+    margin-left: 10px;
+    border-radius: 4px;
+}
+
+.loadbadge {
+    display: block-inline;
+    padding: 2px 10px;
+    margin-left: 10px;
+    border-radius: 10px;
+}

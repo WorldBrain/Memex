@@ -1,0 +1,57 @@
+.viewed {
+    background: #fffdfd;
+    margin-bottom: 5px;
+    line-height: 20px;
+    cursor: pointer;
+    list-style: none;
+    color: #d1caca;
+    font-weight: 300;
+    border-bottom-style: line;
+    border-bottom-width: 10px;
+    border-bottom-color: #000000;
+}
+
+.notviewed {
+    background: #3eb995;
+    margin: 1px;
+    padding: 5px;
+    list-style: none;
+    color: #000000;
+    font-weight: 900;
+}
+
+.tableContainer {
+    max-height: 550px;
+    width: 100%;
+    overflow-y: scroll;
+    box-shadow: 0 0px 0px 0px rgba(0, 0, 0, 0.2),
+        0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    background: #fff;
+}
+
+span {
+    font-weight: 300;
+    display: none;
+}
+body {
+    background: #f2f2f2;
+}
+
+.table {
+    border-bottom-style: line;
+    border-bottom-width: 10px;
+    border-bottom-color: #000000;
+    background: #fffdfd;
+    width: 100%;
+    font-size: 0.9em;
+}
+
+.domainCell {
+    width: 80%;
+}
+
+.toolbar {
+    float: right;
+    margin-bottom: 5px;
+    clear: both;
+}

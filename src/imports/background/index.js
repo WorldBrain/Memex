@@ -51,9 +51,9 @@ export async function clearOldExtData({ timestamp, index }) {
         [OLD_EXT_KEYS.INDEX]: oldIndex,
         [OLD_EXT_KEYS.NUM_DONE]: numDone,
     } = await browser.storage.local.get({
-        [OLD_EXT_KEYS.INDEX]: { index: [] },
-        [OLD_EXT_KEYS.NUM_DONE]: 0,
-    })
+            [OLD_EXT_KEYS.INDEX]: { index: [] },
+            [OLD_EXT_KEYS.NUM_DONE]: 0,
+        })
 
     // Inc. finished count
     await browser.storage.local.set({
@@ -125,9 +125,9 @@ async function filterItemsByUrl(items, type) {
         .filter(isWorthRemembering)
         .map(transformBrowserItemToImportItem(type))
         .reduce(
-            (acc, currItem) => acc.set(encodeUrl(currItem.url), currItem),
-            new Map(),
-        )
+        (acc, currItem) => acc.set(encodeUrl(currItem.url), currItem),
+        new Map(),
+    )
 }
 
 /**
@@ -163,15 +163,15 @@ export async function getOldExtItems() {
         [OLD_EXT_KEYS.BOOKMARKS]: bookmarks,
         [OLD_EXT_KEYS.NUM_DONE]: numDone,
     } = await browser.storage.local.get({
-        [OLD_EXT_KEYS.INDEX]: { index: [] },
-        [OLD_EXT_KEYS.BOOKMARKS]: '[]',
-        [OLD_EXT_KEYS.NUM_DONE]: 0,
-    })
+            [OLD_EXT_KEYS.INDEX]: { index: [] },
+            [OLD_EXT_KEYS.BOOKMARKS]: '[]',
+            [OLD_EXT_KEYS.NUM_DONE]: 0,
+        })
 
     if (typeof bookmarks === 'string') {
         try {
             bookmarkUrls = new Set(JSON.parse(bookmarks).map(bm => bm.url))
-        } catch (error) {}
+        } catch (error) { }
     }
 
     const transform = transformOldExtDataToImportItem(bookmarkUrls)
@@ -197,7 +197,7 @@ export async function getOldExtItems() {
                         encodedUrl,
                         transform(storageChunk[key], i),
                     )
-                } catch (error) {} // Malformed URL
+                } catch (error) { } // Malformed URL
             })
         }
     }

@@ -1,61 +1,93 @@
 {
-    "env": {
-        "browser": true,
-        "webextensions": true
-    },
-    "extends": [
-        "plugin:jest/recommended",
-        "plugin:import/recommended",
-        "plugin:import/react",
-        "plugin:promise/recommended",
-        "standard",
-        "standard-react",
-        "prettier",
-        "prettier/react",
-        "prettier/standard"
-    ],
-    "settings": {
-        "import/resolver": {
-            "node": {
-                "extensions": [".js", ".jsx"],
-                "moduleDirectory": ["node_modules", "."]
-            }
-        }
-    },
-    "plugins": ["prettier", "jest", "standard", "import", "promise", "react"],
-    "parser": "babel-eslint",
-    "parserOptions": {
-        "sourceType": "module",
-        "ecmaFeatures": {
-            "jsx": true
-        }
-    },
-    "rules": {
-        "comma-dangle": ["error", "always-multiline"],
-        "quotes": "off",
-        "no-var": "error",
-        "prefer-const": "error",
-        "indent": "off",
-        "react/jsx-indent": "off",
-        "react/jsx-indent-props": "off",
-        "jsx-quotes": "off",
-        "operator-linebreak": "off",
-        "no-multiple-empty-lines": ["error", { "max": 2, "maxEOF": 0 }],
-        "no-unused-vars": "warn",
-        "space-before-function-paren": "off",
-        "space-infix-ops": "off",
-        "no-multi-spaces": ["warn", { "ignoreEOLComments": true }],
-        "handle-callback-err": "off",
-        "no-return-await": "off",
-        "import/no-mutable-exports": "error",
-        "import/unambiguous": "off",
-        "promise/avoid-new": "off",
-        "promise/param-names": "off",
-        "promise/always-return": "off",
-        "prefer-promise-reject-errors": "off",
-        "react/jsx-filename-extension": "off",
-        "react/prefer-stateless-function": "warn",
-        "react/sort-comp": "warn",
-        "react/jsx-max-props-per-line": [1, { "when": "multiline" }]
+  "env": {
+    "browser": true,
+    "webextensions": true
+  },
+  "extends": [
+    "plugin:jest/recommended",
+    "plugin:import/recommended",
+    "plugin:import/react",
+    "plugin:promise/recommended",
+    "standard",
+    "standard-react",
+    "prettier",
+    "prettier/react",
+    "prettier/standard"
+  ],
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "extensions": [
+          ".js",
+          ".jsx"
+        ],
+        "moduleDirectory": [
+          "node_modules",
+          "."
+        ]
+      }
     }
+  },
+  "plugins": [
+    "prettier",
+    "jest",
+    "standard",
+    "import",
+    "promise",
+    "react"
+  ],
+  "parser": "babel-eslint",
+  "parserOptions": {
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "rules": {
+    "comma-dangle": [
+      "error",
+      "always-multiline"
+    ],
+    "quotes": "off",
+    "no-var": "error",
+    "prefer-const": "error",
+    "indent": "off",
+    "react/jsx-indent": "off",
+    "react/jsx-indent-props": "off",
+    "jsx-quotes": "off",
+    "operator-linebreak": "off",
+    "no-multiple-empty-lines": [
+      "error",
+      {
+        "max": 2,
+        "maxEOF": 0
+      }
+    ],
+    "no-unused-vars": "warn",
+    "space-before-function-paren": "off",
+    "space-infix-ops": "off",
+    "no-multi-spaces": [
+      "warn",
+      {
+        "ignoreEOLComments": true
+      }
+    ],
+    "handle-callback-err": "off",
+    "no-return-await": "off",
+    "import/no-mutable-exports": "error",
+    "import/unambiguous": "off",
+    "promise/avoid-new": "off",
+    "promise/param-names": "off",
+    "promise/always-return": "off",
+    "prefer-promise-reject-errors": "off",
+    "react/jsx-filename-extension": "off",
+    "react/prefer-stateless-function": "warn",
+    "react/sort-comp": "warn",
+    "react/jsx-max-props-per-line": [
+      1,
+      {
+        "when": "multiline"
+      }
+    ]
+  }
 }
