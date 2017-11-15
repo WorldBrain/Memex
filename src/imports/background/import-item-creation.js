@@ -77,19 +77,19 @@ async function initFilterItemsByUrl() {
                 return accItems
             }
 
+            let encodedUrl
             try {
-                // Augment the item with encoded URL for DB check and item map
-                const encodedUrl = encodeUrl(currItem.url, false)
-
-                // Filter out items already existing in DB, if specified
-                if (alreadyExists == null || !alreadyExists(encodedUrl)) {
-                    accItems.set(encodedUrl, transform(currItem))
-                }
-                return accItems
+                encodedUrl = encodeUrl(currItem.url, false) // Augment the item with encoded URL for DB check and item map
             } catch (error) {
-                // URI malformed; don't add to list
-                return accItems
+                return accItems // URI malformed; don't add to list
             }
+
+            // Filter out items already existing in DB, if specified
+            if (alreadyExists == null || !alreadyExists(encodedUrl)) {
+                accItems.set(encodedUrl, transform(currItem))
+            }
+
+            return accItems
         }, new Map())
 }
 
@@ -133,10 +133,13 @@ export async function getOldExtItems() {
 
     // Only attempt page data conversion if index + bookmark storage values are correct types
     if (index && index.index instanceof Array) {
-        // NOTE: There is a bug with old ext index sometimes repeating the index keys
+        // NOTE: There is a bug with old ext index sometimes repeating the index keys, hence uniqing here
         //  (eg.I indexed 400 pages, index contained 43 million)
         const indexSet = new Set(index.index)
 
+        // Break up old index into chunks of size 200 to access sequentially from storage
+        // Doing this to allow us to cap space complexity at a constant level +
+        // give time a `N / # chunks` speedup
         for (const keyChunk of chunk(200)([...indexSet])) {
             const storageChunk = await browser.storage.local.get(keyChunk)
 
