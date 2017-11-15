@@ -8,11 +8,7 @@ import { bookmarkKeyPrefix, convertBookmarkDocId } from 'src/bookmarks'
 import { checkWithBlacklist } from 'src/blacklist'
 import { isLoggable } from 'src/activity-logger'
 import { differMaps } from 'src/util/map-set-helpers'
-import {
-    IMPORT_TYPE,
-    OLD_EXT_KEYS,
-    DEF_ALLOW,
-} from 'src/options/imports/constants'
+import { IMPORT_TYPE, OLD_EXT_KEYS } from 'src/options/imports/constants'
 
 const chunkSize = 200
 const lookbackWeeks = 12 // Browser history is limited to the last 3 months
@@ -196,11 +192,10 @@ async function getOldExtItems() {
 }
 
 /**
- * @param {any} allowTypes
  * @returns {any} Object containing three Maps of encoded URL keys to import item values.
  *   Used to create the imports list and estimate counts.
  */
-export default async function createImportItems(allowTypes = DEF_ALLOW) {
+export default async function createImportItems() {
     const filterItemsByUrl = await initFilterItemsByUrl()
 
     let historyItemsMap = await filterHistoryItems(filterItemsByUrl)
@@ -224,14 +219,8 @@ export default async function createImportItems(allowTypes = DEF_ALLOW) {
     historyItemsMap = differMaps(bookmarkItemsMap)(historyItemsMap)
 
     return {
-        historyItemsMap: allowTypes[IMPORT_TYPE.HISTORY]
-            ? historyItemsMap
-            : new Map(),
-        bookmarkItemsMap: allowTypes[IMPORT_TYPE.BOOKMARK]
-            ? bookmarkItemsMap
-            : new Map(),
-        oldExtItemsMap: allowTypes[IMPORT_TYPE.OLD]
-            ? oldExtItemsMap
-            : new Map(),
+        historyItemsMap,
+        bookmarkItemsMap,
+        oldExtItemsMap,
     }
 }
