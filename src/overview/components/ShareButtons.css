@@ -1,0 +1,54 @@
+.shareIcons {
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    margin-top: -10px;
+    width: auto;
+    height: 500px;
+    margin-left: 97%;
+}
+
+@media only screen and (max-width: 980px) {
+    .shareIcons {
+        display: none;
+    }
+}
+
+.fedIcon {
+    overflow: hidden;
+    margin-bottom: 0px;
+    margin-top: 11px;
+    transform: rotate(90deg);
+    background-color: #3eb995;
+}
+
+.fedLink {
+    text-decoration: none;
+    color: #fff;
+    background-color: #3eb995;
+    transform: rotate(90deg);
+    margin-top: 48px;
+    margin-left: -47px;
+    font-size: 20px;
+    text-align: center;
+    padding: 14px 20px 14px 20px;
+}
+
+.shareText {
+    position: relative;
+    margin-left: -15px;
+    margin-bottom: 5px;
+    font-size: 11px;
+    color: #3eb995;
+    text-align: right;
+    max-width: 40px;
+}
+
+.shareImg {
+    width: 25px;
+    height: 25px;
+}
+
+p {
+    margin-right: -10px;
+}

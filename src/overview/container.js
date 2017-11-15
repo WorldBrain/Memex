@@ -58,7 +58,8 @@ class OverviewContainer extends Component {
             </li>
         ))
 
-        // Insert waypoint at the end of results to trigger loading new items when scrolling down
+        // Insert waypoint at the end of results to trigger loading new items when
+        // scrolling down
         if (this.props.needsWaypoint) {
             resultItems.push(
                 <Waypoint

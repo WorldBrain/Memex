@@ -7,6 +7,7 @@ import Header from './Header'
 import DeleteConfirmation from './DeleteConfirmation'
 import styles from './Overview.css'
 import Filters from './Filters'
+import ShareButtons from './ShareButtons'
 
 const showFilterClass = ({ showFilter }) =>
     classNames({
@@ -17,6 +18,8 @@ const showFilterClass = ({ showFilter }) =>
 const Overview = props => (
     <Wrapper>
         <Header {...props} />
+        <ShareButtons />
+
         <div className={showFilterClass(props)}>
             <Filters
                 showOnlyBookmarks={props.showOnlyBookmarks}
@@ -25,7 +28,9 @@ const Overview = props => (
         </div>
         <div
             className={styles.main}
-            style={{ marginTop: props.showFilter ? '180px' : '100px' }}
+            style={{
+                marginTop: props.showFilter ? '180px' : '100px',
+            }}
         >
             {props.children}
         </div>
