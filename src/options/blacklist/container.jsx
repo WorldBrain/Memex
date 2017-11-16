@@ -20,6 +20,7 @@ class BlacklistContainer extends Component {
         isInputRegexInvalid: PropTypes.bool.isRequired,
         isSaveBtnDisabled: PropTypes.bool.isRequired,
         isClearBtnDisabled: PropTypes.bool.isRequired,
+        isInputAlreadyStored: PropTypes.bool.isRequired,
         showRemoveModal: PropTypes.bool.isRequired,
         isLoading: PropTypes.bool.isRequired,
         matchedDocCount: PropTypes.number.isRequired,
@@ -95,10 +96,6 @@ class BlacklistContainer extends Component {
             />
         ))
 
-    renderAddDomain = () => (
-        <div className={styles.ignoreDomainText}>Ignore a new domain/url:</div>
-    )
-
     renderAddBlacklistSites = () =>
         this.props.blacklist.length ? (
             <div className={styles.blacklistText}>
@@ -109,24 +106,35 @@ class BlacklistContainer extends Component {
             false
         )
 
-    renderInvalidRegexAlert = () =>
-        this.props.isInputRegexInvalid ? (
-            <div className={styles.blacklistAlert}>
-                This is an invalid RegExp! You can test your regex{' '}
-                <a target="_blank" href="https://regexr.com/">
-                    here
-                </a>
-            </div>
-        ) : (
-            false
-        )
+    renderError() {
+        if (this.props.isInputRegexInvalid) {
+            return (
+                <div className={styles.blacklistAlert}>
+                    This is an invalid RegExp! You can test your regex{' '}
+                    <a target="_blank" href="https://regexr.com/">
+                        here
+                    </a>
+                </div>
+            )
+        }
+
+        if (this.props.isInputAlreadyStored) {
+            return (
+                <div className={styles.blacklistAlert}>
+                    "{this.props.inputVal}" is already blacklisted
+                </div>
+            )
+        }
+    }
 
     render() {
         return (
             <Wrapper>
                 <div>
-                    {this.renderAddDomain()}
-                    {this.renderInvalidRegexAlert()}
+                    <div className={styles.ignoreDomainText}>
+                        Ignore a new domain/url:
+                    </div>
+                    {this.renderError()}
                     {this.renderBlacklistInputRow()}
                     {this.renderAddBlacklistSites()}
                     <BlacklistTable>
@@ -149,6 +157,7 @@ const mapStateToProps = state => ({
     inputVal: selectors.siteInputValue(state),
     blacklist: selectors.normalizedBlacklist(state),
     isInputRegexInvalid: selectors.isInputRegexInvalid(state),
+    isInputAlreadyStored: selectors.isInputAlreadyStored(state),
     isSaveBtnDisabled: selectors.isSaveBtnDisabled(state),
     isClearBtnDisabled: selectors.isClearBtnDisabled(state),
     isLoading: selectors.isLoading(state),

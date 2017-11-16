@@ -14,8 +14,19 @@ export const matchedDocCount = createSelector(
 )
 export const blacklist = createSelector(entireState, state => state.blacklist)
 
-export const normalizedBlacklist = createSelector(blacklist, blacklist =>
-    blacklist.map(entry => entry.expression.replace('\\.', '.')),
+const blacklistEntries = createSelector(
+    blacklist,
+    blacklist => new Set(blacklist.map(entry => entry.expression)),
+)
+
+export const normalizedBlacklist = createSelector(blacklistEntries, blacklist =>
+    [...blacklist].map(exp => exp.replace('\\.', '.')),
+)
+
+export const isInputAlreadyStored = createSelector(
+    blacklistEntries,
+    siteInputValue,
+    (blacklist, input) => blacklist.has(input),
 )
 
 export const showRemoveModal = createSelector(
@@ -35,7 +46,8 @@ export const isInputRegexInvalid = createSelector(siteInputValue, value => {
 export const isSaveBtnDisabled = createSelector(
     siteInputValue,
     isInputRegexInvalid,
-    (value, invalid) => !value.length || invalid,
+    isInputAlreadyStored,
+    (value, invalid, duped) => !value.length || invalid || duped,
 )
 
 export const isClearBtnDisabled = createSelector(
