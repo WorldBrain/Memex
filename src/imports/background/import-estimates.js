@@ -5,8 +5,7 @@ import { IMPORT_TYPE, OLD_EXT_KEYS } from 'src/options/imports/constants'
 import { pageKeyPrefix } from 'src/page-storage'
 import { bookmarkKeyPrefix } from 'src/bookmarks'
 import createImportItems from './import-item-creation'
-
-export const estimatesStorageKey = 'import-estimate-counts'
+import { getStoredEsts, setStoredEsts } from '../'
 
 /**
  * Handles calculating the estimate counts for history and bookmark imports.
@@ -44,10 +43,7 @@ async function calcEstimateCounts(items, shouldSaveRes = true) {
     }
 
     if (shouldSaveRes) {
-        // Save current calculations for next time
-        browser.storage.local.set({
-            [estimatesStorageKey]: { ...result, calculatedAt: Date.now() },
-        })
+        setStoredEsts(result) // Save current calculations for next time
     }
 
     return result
@@ -55,11 +51,7 @@ async function calcEstimateCounts(items, shouldSaveRes = true) {
 
 export default async ({ forceRecalc = false }) => {
     // First check to see if we can use prev. calc'd values
-    const {
-        [estimatesStorageKey]: prevResult,
-    } = await browser.storage.local.get({
-        [estimatesStorageKey]: { calculatedAt: 0 },
-    })
+    const prevResult = await getStoredEsts()
 
     // If saved calcs are recent, just use them
     if (

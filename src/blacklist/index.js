@@ -1,3 +1,4 @@
+import { dirtyStoredEsts } from 'src/imports'
 import { STORAGE_KEY } from 'src/options/blacklist/constants'
 
 /**
@@ -53,6 +54,7 @@ export async function fetchBlacklist() {
 
 async function storeBlacklist(blacklist = []) {
     const serialized = JSON.stringify(blacklist)
+    await dirtyStoredEsts()
 
     return browser.storage.local.set({ [STORAGE_KEY]: serialized })
 }
@@ -67,10 +69,10 @@ const createBlacklistEntry = url => ({
  */
 export async function addToBlacklist(url) {
     const blacklist = await fetchBlacklist()
-    const newBlacklist =
+    const newEntries =
         url instanceof Array
             ? url.map(createBlacklistEntry)
             : [createBlacklistEntry(url)]
 
-    return storeBlacklist([...blacklist, ...newBlacklist])
+    return storeBlacklist([...blacklist, ...newEntries])
 }

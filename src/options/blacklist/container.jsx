@@ -168,14 +168,13 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
     hideModal: () => dispatch(actions.setModalShow(false)),
-    removeMatchingDocs: expression =>
-        dispatch(actions.removeMatchingDocs(expression)),
     resetInputVal: () => dispatch(actions.resetSiteInputValue()),
     addToBlacklist: expression => dispatch(actions.addToBlacklist(expression)),
+    removeFromBlacklist: index => dispatch(actions.removeFromBlacklist(index)),
+    removeMatchingDocs: expression =>
+        dispatch(actions.removeMatchingDocs(expression)),
     setInputVal: siteInputValue =>
         dispatch(actions.setSiteInputValue({ siteInputValue })),
-    removeFromBlacklist: index =>
-        dispatch(actions.removeSiteFromBlacklist({ index })),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(BlacklistContainer)

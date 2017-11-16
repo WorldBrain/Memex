@@ -1,5 +1,6 @@
 import { createAction } from 'redux-act'
 
+import { dirtyStoredEsts } from 'src/imports'
 import { remoteFunction } from 'src/util/webextensionRPC'
 
 const deleteDocs = remoteFunction('deleteDocsByUrl')
@@ -18,6 +19,7 @@ export const removeSiteFromBlacklist = createAction(
 
 export const addToBlacklist = expression => async dispatch => {
     dispatch(addSiteToBlacklist({ expression, dateAdded: Date.now() }))
+    dirtyStoredEsts() // Force import ests to recalc next visit
     dispatch(resetSiteInputValue())
     dispatch(setModalShow(true))
     dispatch(setIsLoading(true))
@@ -28,6 +30,11 @@ export const addToBlacklist = expression => async dispatch => {
     } finally {
         dispatch(setIsLoading(false))
     }
+}
+
+export const removeFromBlacklist = index => dispatch => {
+    dispatch(removeSiteFromBlacklist({ index }))
+    dirtyStoredEsts() // Force import ests to recalc next visit
 }
 
 export const removeMatchingDocs = expression => dispatch => {
