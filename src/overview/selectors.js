@@ -82,6 +82,18 @@ const resultsExhausted = createSelector(
     searchResult,
     results => results.resultsExhausted,
 )
+
+export const totalResultCount = createSelector(
+    searchResult,
+    results => results.totalCount,
+)
+
+export const shouldShowCount = createSelector(
+    currentQueryParams,
+    ({ query, startDate, endDate }) =>
+        query.length > 0 || startDate != null || endDate != null,
+)
+
 export const needsPagWaypoint = createSelector(
     resultsExhausted,
     isLoading,

@@ -8,7 +8,11 @@ import * as actions from './actions'
 const defaultState = {
     searchCount: 0,
     currentPage: 0, // Pagination state
-    searchResult: { docs: [], resultsExhausted: false }, // The current search result list
+    searchResult: {
+        docs: [], // The current search result list
+        resultsExhausted: false,
+        totalCount: 0,
+    },
     // The current search input values
     currentQueryParams: {
         query: '',
@@ -80,8 +84,8 @@ const handleSearchResult = ({ overwrite }) => (state, newSearchResult) => {
     const searchResult = overwrite
         ? newSearchResult
         : {
+              ...newSearchResult,
               docs: [...state.searchResult.docs, ...newSearchResult.docs],
-              resultsExhausted: newSearchResult.resultsExhausted,
           }
 
     return { ...state, searchResult }

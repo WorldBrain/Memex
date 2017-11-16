@@ -103,7 +103,7 @@
     }
 }
 
-.noResultMessage {
+.resultMessage {
     text-align: center;
     margin-top: 80px;
     font-size: 20px;
@@ -114,6 +114,20 @@
     animation-duration: 0.5s;
     animation-iteration-count: 1;
     animation-timing-function: ease-in;
+}
+
+.smallMessage {
+    position: relative;
+    left: -200px;
+    top: -15px;
+    margin: 0;
+    color: #4abf9d;
+    font-size: 15px;
+    font-style: normal;
+
+    & + ul {
+        margin-top: -30px;
+    }
 }
 
 @keyframes fadeIn {

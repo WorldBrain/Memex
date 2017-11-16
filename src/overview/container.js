@@ -4,7 +4,7 @@ import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import Waypoint from 'react-waypoint'
 
-import { LoadingIndicator } from 'src/common-ui/components'
+import { Wrapper, LoadingIndicator } from 'src/common-ui/components'
 import * as actions from './actions'
 import * as selectors from './selectors'
 import ResultList from './components/ResultList'
@@ -23,6 +23,8 @@ class OverviewContainer extends Component {
         isBadTerm: PropTypes.bool.isRequired,
         showInitSearchMsg: PropTypes.bool.isRequired,
         searchResults: PropTypes.arrayOf(PropTypes.object).isRequired,
+        totalResultCount: PropTypes.number.isRequired,
+        shouldShowCount: PropTypes.bool.isRequired,
         needsWaypoint: PropTypes.bool.isRequired,
         handleTrashBtnClick: PropTypes.func.isRequired,
         handleToggleBookmarkClick: PropTypes.func.isRequired,
@@ -124,13 +126,25 @@ class OverviewContainer extends Component {
         if (this.props.isNewSearchLoading) {
             return (
                 <ResultList>
-                    {[<LoadingIndicator key="loadingIndicator" />]}
+                    <LoadingIndicator />
                 </ResultList>
             )
         }
 
         // No issues; render out results list view
-        return <ResultList>{this.renderResultItems()}</ResultList>
+        return (
+            <Wrapper>
+                {this.props.shouldShowCount && (
+                    <ResultsMessage small>
+                        Found <strong>
+                            {this.props.totalResultCount}
+                        </strong>{' '}
+                        results in your digital memory
+                    </ResultsMessage>
+                )}
+                <ResultList>{this.renderResultItems()}</ResultList>
+            </Wrapper>
+        )
     }
 
     render() {
@@ -158,6 +172,8 @@ const mapStateToProps = state => ({
     showFilter: selectors.showFilter(state),
     showOnlyBookmarks: selectors.showOnlyBookmarks(state),
     showInitSearchMsg: selectors.showInitSearchMsg(state),
+    totalResultCount: selectors.totalResultCount(state),
+    shouldShowCount: selectors.shouldShowCount(state),
 })
 
 const mapDispatchToProps = dispatch => ({
