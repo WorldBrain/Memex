@@ -305,7 +305,7 @@ export async function search(
 
 export const searchConcurrent = (...req) =>
     new Promise((resolve, reject) =>
-        indexQueue.push(() =>
+        indexQueue.pushPriority(() =>
             search(...req)
                 .then(resolve)
                 .catch(reject),
