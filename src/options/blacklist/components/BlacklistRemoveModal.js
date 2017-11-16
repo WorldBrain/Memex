@@ -6,7 +6,7 @@ import { ConfirmModal, ConfirmModalBtn } from 'src/common-ui/components'
 const renderMsg = ({ isLoading, matchedCount }) =>
     isLoading
         ? 'Calculating matching data...'
-        : `Do you want to schedule ${matchedCount} matching data for background deletion?`
+        : `${matchedCount} pages found in your history. Do you want to delete them?`
 
 const BlacklistRemoveModal = ({ onCancel, onConfirm, ...modalProps }) => (
     <ConfirmModal {...modalProps} message={renderMsg(modalProps)}>

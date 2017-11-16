@@ -17,7 +17,7 @@ const BlacklistRow = ({ expression, onDeleteClicked }) => (
 
             <span className={styles.blacklistActions}>
                 <button className={blacklistButton} onClick={onDeleteClicked}>
-                    <i className={iconClasses}>undo</i>
+                    <i className={iconClasses}>remove_circle_outline</i>
                 </button>
             </span>
         </td>
