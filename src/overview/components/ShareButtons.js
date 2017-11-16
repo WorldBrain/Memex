@@ -1,6 +1,6 @@
 import React from 'react'
+
 import styles from './ShareButtons.css'
-import { Link } from 'react-router-dom'
 
 const ShareButtons = props => (
     <div className={styles.shareIcons}>
