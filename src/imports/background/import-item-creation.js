@@ -59,6 +59,19 @@ async function checkWithExistingPages() {
     return url => existingUrls.has(url)
 }
 
+// Simply hides away the the try...catch needed for the  `encodeUrl` call
+//  in the hopes of a little perf. boost on older versions of V8.
+const err = { value: null }
+function getEncodedUrl(...args) {
+    try {
+        const encodedUrl = encodeUrl(...args)
+        return encodedUrl
+    } catch (error) {
+        err.value = error
+        return err
+    }
+}
+
 async function initFilterItemsByUrl() {
     const isBlacklisted = await checkWithBlacklist()
 
@@ -71,7 +84,7 @@ async function initFilterItemsByUrl() {
      * @param {(url: string) => bool} alreadyExists Opt. checker function to check against existing data.
      * @return {Map<string, any>} Filtered version of `items` array made into a Map of encoded URL strings to import items.
      */
-    return (items, transform = f => f, alreadyExists) => {
+    return (items, transform = f => f, alreadyExists = url => false) => {
         const importItems = new Map()
 
         for (let i = 0; i < items.length; i++) {
@@ -79,17 +92,14 @@ async function initFilterItemsByUrl() {
                 continue
             }
 
-            let encodedUrl
-            try {
-                encodedUrl = encodeUrl(items[i].url, false) // Augment the item with encoded URL for DB check and item map
-            } catch (error) {
-                continue // URI malformed; don't add to map
+            // Augment the item with encoded URL for DB check and item map
+            const encodedUrl = getEncodedUrl(items[i].url, false)
+            if (encodedUrl === err || alreadyExists(encodedUrl)) {
+                continue
             }
 
-            // Filter out items already existing in DB, if specified
-            if (alreadyExists == null || !alreadyExists(encodedUrl)) {
-                importItems.set(encodedUrl, transform(items[i]))
-            }
+            // Add to map if you got here
+            importItems.set(encodedUrl, transform(items[i]))
         }
 
         return importItems
@@ -123,15 +133,13 @@ async function filterHistoryItems(filterItemsByUrl) {
     // Fetch and filter history in 2 week batches to limit space
     for (let i = 0; i < lookbackWeeks / 2; i++, startTime.add(2, 'weeks')) {
         const historyItemBatch = await getHistoryItems(moment(startTime))
+        const filteredItemsMap = filterItemsByUrl(
+            historyItemBatch,
+            transformHist,
+            checkExistingPages,
+        )
 
-        historyItemsMap = new Map([
-            ...historyItemsMap,
-            ...filterItemsByUrl(
-                historyItemBatch,
-                transformHist,
-                checkExistingPages,
-            ),
-        ])
+        historyItemsMap = new Map([...historyItemsMap, ...filteredItemsMap])
     }
 
     return historyItemsMap
