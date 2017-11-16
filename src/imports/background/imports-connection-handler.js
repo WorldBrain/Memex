@@ -2,20 +2,18 @@ import PromiseBatcher from 'src/util/promise-batcher'
 import {
     CMDS,
     IMPORT_CONN_NAME,
-    IMPORT_TYPE,
     DEF_CONCURRENCY,
+    IMPORT_TYPE,
 } from 'src/options/imports/constants'
 import getEstimateCounts from './import-estimates'
 import processImportItem from './import-item-processor'
 import {
     getImportItems,
     setImportItems,
-    getURLFilteredHistoryItems,
-    getURLFilteredBookmarkItems,
-    getOldExtItems,
     removeImportItem,
     clearImportItems,
 } from './'
+import createImportItems from './import-item-creation'
 import {
     getImportInProgressFlag,
     setImportInProgressFlag,
@@ -29,20 +27,16 @@ import {
  *   or not import and page docs should be created for that import type.
  */
 async function prepareImportItems(allowTypes = {}) {
-    const historyItemsMap = allowTypes[IMPORT_TYPE.HISTORY]
-        ? await getURLFilteredHistoryItems()
-        : new Map()
-    const bookmarkItemsMap = allowTypes[IMPORT_TYPE.BOOKMARK]
-        ? await getURLFilteredBookmarkItems()
-        : new Map()
-    const oldExtItemsMap = allowTypes[IMPORT_TYPE.OLD]
-        ? (await getOldExtItems()).importItemsMap
-        : new Map()
+    const items = await createImportItems()
 
     // Union all import item maps, allowing old ext items precedence over bookmarks which have
     //  precedence over history
     await setImportItems(
-        new Map([...historyItemsMap, ...bookmarkItemsMap, ...oldExtItemsMap]),
+        new Map([
+            ...(allowTypes[IMPORT_TYPE.HISTORY] ? items.historyItemsMap : []),
+            ...(allowTypes[IMPORT_TYPE.BOOKMARK] ? items.bookmarkItemsMap : []),
+            ...(allowTypes[IMPORT_TYPE.OLD] ? items.oldExtItemsMap : []),
+        ]),
     )
 }
 
@@ -113,7 +107,7 @@ async function finishImport(port) {
     clearImportInProgressFlag()
 
     // Re-init the estimates view with updated estimates data
-    const estimateCounts = await getEstimateCounts()
+    const estimateCounts = await getEstimateCounts({ forceRecalc: true })
     port.postMessage({ cmd: CMDS.INIT, ...estimateCounts })
 }
 
@@ -149,7 +143,7 @@ export default async function importsConnectionHandler(port) {
     const importInProgress = await getImportInProgressFlag()
     if (!importInProgress) {
         // Make sure estimates view init'd with count data
-        const estimateCounts = await getEstimateCounts()
+        const estimateCounts = await getEstimateCounts({ forceRecalc: false })
         port.postMessage({ cmd: CMDS.INIT, ...estimateCounts })
     } else {
         // Make sure to start the view in paused state

@@ -38,8 +38,9 @@ export async function checkWithBlacklist() {
 
     /**
      * @param {string} url The URL to check against the blacklist
+     * @returns {boolean} `true` if url in blacklist, else `false`
      */
-    return ({ url = '' } = {}) => !isURLBlacklisted(url, blacklist)
+    return ({ url = '' } = {}) => isURLBlacklisted(url, blacklist)
 }
 
 /**

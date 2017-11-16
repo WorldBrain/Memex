@@ -1,30 +1,19 @@
+import moment from 'moment'
+
 import db from 'src/pouchdb'
-import { differMaps } from 'src/util/map-set-helpers'
-import { IMPORT_TYPE } from 'src/options/imports/constants'
+import { IMPORT_TYPE, OLD_EXT_KEYS } from 'src/options/imports/constants'
 import { pageKeyPrefix } from 'src/page-storage'
 import { bookmarkKeyPrefix } from 'src/bookmarks'
-import {
-    getOldExtItems,
-    getURLFilteredBookmarkItems,
-    getURLFilteredHistoryItems,
-} from './'
+import createImportItems from './import-item-creation'
+
+export const estimatesStorageKey = 'import-estimate-counts'
 
 /**
  * Handles calculating the estimate counts for history and bookmark imports.
  *
  * @returns {Promise<any>} The state containing import estimates completed and remaining counts for each import type.
  */
-export default async function getEstimateCounts() {
-    // Grab needed data from browser API (filtered by whats already in DB)
-    let historyItemsMap = await getURLFilteredHistoryItems()
-    let bookmarkItemsMap = await getURLFilteredBookmarkItems()
-    const oldExtItems = await getOldExtItems()
-
-    // Perform set difference on import item Maps in same way they are merged
-    //  (old ext items take precedence over bookmarks, which take precendence over history)
-    bookmarkItemsMap = differMaps(oldExtItems.importItemsMap)(bookmarkItemsMap)
-    historyItemsMap = differMaps(bookmarkItemsMap)(historyItemsMap)
-
+async function calcEstimateCounts(items, shouldSaveRes = true) {
     // Grab existing data counts from DB
     const { rows: pageDocs } = await db.allDocs({
         startkey: pageKeyPrefix,
@@ -34,17 +23,57 @@ export default async function getEstimateCounts() {
         startkey: bookmarkKeyPrefix,
         endkey: `${bookmarkKeyPrefix}\uffff`,
     })
+    const {
+        [OLD_EXT_KEYS.NUM_DONE]: numOldExtDone,
+    } = await browser.storage.local.get({ [OLD_EXT_KEYS.NUM_DONE]: 0 })
 
-    return {
+    // Can sometimes return slightly different lengths for unknown reason
+    const completedHistory = pageDocs.length - bookmarkDocs.length
+
+    const result = {
         completed: {
-            [IMPORT_TYPE.HISTORY]: pageDocs.length - bookmarkDocs.length,
+            [IMPORT_TYPE.HISTORY]: completedHistory < 0 ? 0 : completedHistory,
             [IMPORT_TYPE.BOOKMARK]: bookmarkDocs.length,
-            [IMPORT_TYPE.OLD]: oldExtItems.completedCount,
+            [IMPORT_TYPE.OLD]: numOldExtDone,
         },
         remaining: {
-            [IMPORT_TYPE.HISTORY]: historyItemsMap.size,
-            [IMPORT_TYPE.BOOKMARK]: bookmarkItemsMap.size,
-            [IMPORT_TYPE.OLD]: oldExtItems.importItemsMap.size,
+            [IMPORT_TYPE.HISTORY]: items.historyItemsMap.size,
+            [IMPORT_TYPE.BOOKMARK]: items.bookmarkItemsMap.size,
+            [IMPORT_TYPE.OLD]: items.oldExtItemsMap.size,
         },
     }
+
+    if (shouldSaveRes) {
+        // Save current calculations for next time
+        browser.storage.local.set({
+            [estimatesStorageKey]: { ...result, calculatedAt: Date.now() },
+        })
+    }
+
+    return result
+}
+
+export default async ({ forceRecalc = false }) => {
+    // First check to see if we can use prev. calc'd values
+    const {
+        [estimatesStorageKey]: prevResult,
+    } = await browser.storage.local.get({
+        [estimatesStorageKey]: { calculatedAt: 0 },
+    })
+
+    // If saved calcs are recent, just use them
+    if (
+        !forceRecalc &&
+        prevResult.calculatedAt >
+            moment()
+                .subtract(1, 'day')
+                .valueOf()
+    ) {
+        return prevResult
+    }
+
+    // Else, grab needed data from browser API (filtered by whats already in DB)
+    const items = await createImportItems()
+    // Re-run calculations (auto-saved)
+    return await calcEstimateCounts(items)
 }
