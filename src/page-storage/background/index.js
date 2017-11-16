@@ -1,4 +1,5 @@
+import deleteDocsByUrl from 'src/page-storage/deletion'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
-import deleteDocsByUrl, { calcMatchingDocs } from 'src/page-storage/deletion'
+import { fetchPagesByUrlPattern } from 'src/pouchdb'
 
-makeRemotelyCallable({ deleteDocsByUrl, calcMatchingDocs })
+makeRemotelyCallable({ deleteDocsByUrl, fetchPagesByUrlPattern })

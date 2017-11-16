@@ -4,7 +4,7 @@ import { dirtyStoredEsts } from 'src/imports'
 import { remoteFunction } from 'src/util/webextensionRPC'
 
 const deleteDocs = remoteFunction('deleteDocsByUrl')
-const calcMatchingDocs = remoteFunction('calcMatchingDocs')
+const fetchMatchingPages = remoteFunction('fetchPagesByUrlPattern')
 
 export const setMatchedCount = createAction('settings/setMatchedCount')
 export const setModalShow = createAction('settings/setModalShow')
@@ -24,8 +24,8 @@ export const addToBlacklist = expression => async dispatch => {
     dispatch(setModalShow(true))
     dispatch(setIsLoading(true))
     try {
-        const { allRows } = await calcMatchingDocs(expression)
-        dispatch(setMatchedCount(allRows.length))
+        const rows = await fetchMatchingPages(expression)
+        dispatch(setMatchedCount(rows.length))
     } catch (error) {
     } finally {
         dispatch(setIsLoading(false))

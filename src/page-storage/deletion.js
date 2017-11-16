@@ -1,10 +1,10 @@
 import db, {
     fetchDocTypesByUrl,
     fetchMetaDocsForPage,
-    normaliseFindResult,
+    fetchPagesByUrlPattern,
 } from 'src/pouchdb'
 import { delPagesConcurrent, initSingleLookup, keyGen } from 'src/search'
-import { pageKeyPrefix, pageDocsSelector } from 'src/page-storage'
+import { pageKeyPrefix } from 'src/page-storage'
 import { visitKeyPrefix } from 'src/activity-logger'
 import { bookmarkKeyPrefix } from 'src/bookmarks'
 
@@ -21,32 +21,12 @@ export default (input, type = 'url') => {
 
 /**
  * Removes all matching data from Pouch and search index matching the given regex.
- * Uses `calcMatchingDocs` to determine what to remove.
  *
  * @param {*} regex
  * @returns {Promise<void>}
  */
 async function deleteByRegex(regex) {
-    const { allRows, pageIds } = await calcMatchingDocs(regex)
-
-    return await Promise.all([deleteDocs(allRows), delPagesConcurrent(pageIds)])
-}
-
-/**
- * @param {*} regex
- * @returns {any} Object containing Arrays `allRows` and `pageIds`. `allRows` represents matching Pouch docs.
- *  `pageIds` represents the IDs of just pages (no meta docs).
- */
-export async function calcMatchingDocs(regex) {
-    // Perform lookup on Pouch pages via matching regex against URL field
-    const urlSelector = { url: { $regex: regex } }
-
-    const { rows: pageRows } = normaliseFindResult(
-        await db.find({
-            selector: { ...pageDocsSelector, ...urlSelector },
-            fields: ['_id', '_rev'],
-        }),
-    )
+    const pageRows = await fetchPagesByUrlPattern(regex)
 
     // Find all assoc. meta pouch docs to remove
     const allRows = []
@@ -61,7 +41,7 @@ export async function calcMatchingDocs(regex) {
         pageIds.push(id)
     }
 
-    return { pageIds, allRows }
+    return await Promise.all([deleteDocs(allRows), delPagesConcurrent(pageIds)])
 }
 
 async function deleteDomain(url = '') {
