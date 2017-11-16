@@ -26,7 +26,7 @@ export const normalizedBlacklist = createSelector(blacklistEntries, blacklist =>
 export const isInputAlreadyStored = createSelector(
     blacklistEntries,
     siteInputValue,
-    (blacklist, input) => blacklist.has(input),
+    (blacklist, input) => blacklist.has(input.replace('.', '\\.')),
 )
 
 export const showRemoveModal = createSelector(
