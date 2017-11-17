@@ -4,6 +4,7 @@ import 'src/page-storage/background'
 import 'src/search/background'
 import 'src/bookmarks/background'
 import 'src/omnibar'
+import { dirtyStoredEsts } from 'src/imports'
 import { installTimeStorageKey } from 'src/imports/background'
 import { generatePageDocId } from 'src/page-storage'
 import { generateVisitDocId } from 'src/activity-logger'
@@ -54,6 +55,7 @@ browser.runtime.onInstalled.addListener(async details => {
             addToBlacklist(defaultEntries)
             break
         case 'update':
+            dirtyStoredEsts() // Make sure imports cache is dirtied to force recalc on update
             // If no prior conversion, convert old ext blacklist + show static notif page
             const {
                 [CONVERT_TIME_KEY]: blacklistConverted,
