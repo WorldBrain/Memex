@@ -5,7 +5,7 @@ import {
     DEF_CONCURRENCY,
     IMPORT_TYPE,
 } from 'src/options/imports/constants'
-import getEstimateCounts from './import-estimates'
+import calcItems from './import-estimates'
 import processImportItem from './import-item-processor'
 import {
     getImportItems,
@@ -13,7 +13,6 @@ import {
     removeImportItem,
     clearImportItems,
 } from './'
-import createImportItems from './import-item-creation'
 import {
     getImportInProgressFlag,
     setImportInProgressFlag,
@@ -27,15 +26,20 @@ import {
  *   or not import and page docs should be created for that import type.
  */
 async function prepareImportItems(allowTypes = {}) {
-    const items = await createImportItems()
+    const hoursToCache = 0.165 // Use cache if less than ~10mins old
+    const { remaining: items } = await calcItems(false, hoursToCache)
 
     // Union all import item maps, allowing old ext items precedence over bookmarks which have
     //  precedence over history
     await setImportItems(
         new Map([
-            ...(allowTypes[IMPORT_TYPE.HISTORY] ? items.historyItemsMap : []),
-            ...(allowTypes[IMPORT_TYPE.BOOKMARK] ? items.bookmarkItemsMap : []),
-            ...(allowTypes[IMPORT_TYPE.OLD] ? items.oldExtItemsMap : []),
+            ...(allowTypes[IMPORT_TYPE.HISTORY]
+                ? items[IMPORT_TYPE.HISTORY]
+                : []),
+            ...(allowTypes[IMPORT_TYPE.BOOKMARK]
+                ? items[IMPORT_TYPE.BOOKMARK]
+                : []),
+            ...(allowTypes[IMPORT_TYPE.OLD] ? items[IMPORT_TYPE.OLD] : []),
         ]),
     )
 }
@@ -107,8 +111,16 @@ async function finishImport(port) {
     clearImportInProgressFlag()
 
     // Re-init the estimates view with updated estimates data
-    const estimateCounts = await getEstimateCounts({ forceRecalc: true })
-    port.postMessage({ cmd: CMDS.INIT, ...estimateCounts })
+    const { remaining, completedCounts } = await calcItems(true)
+    port.postMessage({
+        cmd: CMDS.INIT,
+        completed: completedCounts,
+        remaining: {
+            [IMPORT_TYPE.OLD]: remaining[IMPORT_TYPE.OLD].length,
+            [IMPORT_TYPE.HISTORY]: remaining[IMPORT_TYPE.HISTORY].length,
+            [IMPORT_TYPE.BOOKMARK]: remaining[IMPORT_TYPE.BOOKMARK].length,
+        },
+    })
 }
 
 async function cancelImport(port, batch) {
@@ -143,8 +155,17 @@ export default async function importsConnectionHandler(port) {
     const importInProgress = await getImportInProgressFlag()
     if (!importInProgress) {
         // Make sure estimates view init'd with count data
-        const estimateCounts = await getEstimateCounts({ forceRecalc: false })
-        port.postMessage({ cmd: CMDS.INIT, ...estimateCounts })
+        const { remaining, completedCounts } = await calcItems()
+
+        port.postMessage({
+            cmd: CMDS.INIT,
+            completed: completedCounts,
+            remaining: {
+                [IMPORT_TYPE.OLD]: remaining[IMPORT_TYPE.OLD].length,
+                [IMPORT_TYPE.HISTORY]: remaining[IMPORT_TYPE.HISTORY].length,
+                [IMPORT_TYPE.BOOKMARK]: remaining[IMPORT_TYPE.BOOKMARK].length,
+            },
+        })
     } else {
         // Make sure to start the view in paused state
         port.postMessage({ cmd: CMDS.PAUSE })

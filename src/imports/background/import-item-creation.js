@@ -227,8 +227,8 @@ export default async function createImportItems() {
     historyItemsMap = differMaps(bookmarkItemsMap)(historyItemsMap)
 
     return {
-        historyItemsMap,
-        bookmarkItemsMap,
-        oldExtItemsMap,
+        [IMPORT_TYPE.HISTORY]: [...historyItemsMap],
+        [IMPORT_TYPE.BOOKMARK]: [...bookmarkItemsMap],
+        [IMPORT_TYPE.OLD]: [...oldExtItemsMap],
     }
 }
