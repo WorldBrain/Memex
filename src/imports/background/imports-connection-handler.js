@@ -1,3 +1,5 @@
+import size from 'lodash/fp/size'
+
 import PromiseBatcher from 'src/util/promise-batcher'
 import {
     CMDS,
@@ -7,42 +9,12 @@ import {
 } from 'src/options/imports/constants'
 import calcItems from './import-estimates'
 import processImportItem from './import-item-processor'
-import {
-    getImportItems,
-    setImportItems,
-    removeImportItem,
-    clearImportItems,
-} from './'
+import * as itemCache from '../import-item-cache'
 import {
     getImportInProgressFlag,
     setImportInProgressFlag,
     clearImportInProgressFlag,
 } from '../'
-
-/**
- * Handles building the collection of import items in local storage.
- *
- * @param {any} allowTypes Object containings bools for each valid type of import, denoting whether
- *   or not import and page docs should be created for that import type.
- */
-async function prepareImportItems(allowTypes = {}) {
-    const hoursToCache = 0.165 // Use cache if less than ~10mins old
-    const { remaining: items } = await calcItems(false, hoursToCache)
-
-    // Union all import item maps, allowing old ext items precedence over bookmarks which have
-    //  precedence over history
-    await setImportItems(
-        new Map([
-            ...(allowTypes[IMPORT_TYPE.HISTORY]
-                ? items[IMPORT_TYPE.HISTORY]
-                : []),
-            ...(allowTypes[IMPORT_TYPE.BOOKMARK]
-                ? items[IMPORT_TYPE.BOOKMARK]
-                : []),
-            ...(allowTypes[IMPORT_TYPE.OLD] ? items[IMPORT_TYPE.OLD] : []),
-        ]),
-    )
-}
 
 /**
  * Creates observer functions to afford sending of messages over connection port
@@ -53,20 +25,20 @@ async function prepareImportItems(allowTypes = {}) {
  */
 const getBatchObserver = port => {
     const handleFinishedItem = ({
-        input: [encodedUrl, { type, url }],
+        input: [encodedUrl, item],
         output: { status } = {},
         error,
     }) => {
         // Send item data + outcome status down to UI (and error if present)
         port.postMessage({
             cmd: CMDS.NEXT,
-            url: url,
-            type,
+            url: item.url,
+            type: item.type,
             status,
             error,
         })
 
-        removeImportItem(encodedUrl)
+        itemCache.removeItem(encodedUrl, item)
     }
 
     return {
@@ -95,7 +67,7 @@ async function startImport(port, batch, allowTypes) {
     // Perform history-stubs, vists, and history import state creation, if import not in progress
     const importInProgress = await getImportInProgressFlag()
     if (!importInProgress) {
-        await prepareImportItems(allowTypes)
+        await calcItems(false, 0.165) // Only recalc cache if > ~10mins old
     }
 
     port.postMessage({ cmd: CMDS.START }) // Tell UI to finish loading state and move into progress view
@@ -111,23 +83,21 @@ async function finishImport(port) {
     clearImportInProgressFlag()
 
     // Re-init the estimates view with updated estimates data
-    const { remaining, completedCounts } = await calcItems(true)
+    const { remaining, completedCounts } = await itemCache.get()
+
     port.postMessage({
         cmd: CMDS.INIT,
         completed: completedCounts,
         remaining: {
-            [IMPORT_TYPE.OLD]: remaining[IMPORT_TYPE.OLD].length,
-            [IMPORT_TYPE.HISTORY]: remaining[IMPORT_TYPE.HISTORY].length,
-            [IMPORT_TYPE.BOOKMARK]: remaining[IMPORT_TYPE.BOOKMARK].length,
+            [IMPORT_TYPE.OLD]: size(remaining[IMPORT_TYPE.OLD]),
+            [IMPORT_TYPE.HISTORY]: size(remaining[IMPORT_TYPE.HISTORY]),
+            [IMPORT_TYPE.BOOKMARK]: size(remaining[IMPORT_TYPE.BOOKMARK]),
         },
     })
 }
 
 async function cancelImport(port, batch) {
     batch.stop()
-
-    // Clean up any import-related stubs or state
-    await clearImportItems()
 
     // Resume UI at complete state
     port.postMessage({ cmd: CMDS.COMPLETE })
@@ -145,7 +115,7 @@ export default async function importsConnectionHandler(port) {
     console.log('importer connected')
 
     const batch = new PromiseBatcher({
-        inputBatchCallback: getImportItems,
+        inputBatchCallback: itemCache.getItemsList,
         processingCallback: processImportItem,
         concurrency: DEF_CONCURRENCY,
         observer: getBatchObserver(port),
@@ -161,9 +131,9 @@ export default async function importsConnectionHandler(port) {
             cmd: CMDS.INIT,
             completed: completedCounts,
             remaining: {
-                [IMPORT_TYPE.OLD]: remaining[IMPORT_TYPE.OLD].length,
-                [IMPORT_TYPE.HISTORY]: remaining[IMPORT_TYPE.HISTORY].length,
-                [IMPORT_TYPE.BOOKMARK]: remaining[IMPORT_TYPE.BOOKMARK].length,
+                [IMPORT_TYPE.OLD]: size(remaining[IMPORT_TYPE.OLD]),
+                [IMPORT_TYPE.HISTORY]: size(remaining[IMPORT_TYPE.HISTORY]),
+                [IMPORT_TYPE.BOOKMARK]: size(remaining[IMPORT_TYPE.BOOKMARK]),
             },
         })
     } else {

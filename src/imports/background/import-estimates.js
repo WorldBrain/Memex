@@ -5,7 +5,7 @@ import { IMPORT_TYPE, OLD_EXT_KEYS } from 'src/options/imports/constants'
 import { pageKeyPrefix } from 'src/page-storage'
 import { bookmarkKeyPrefix } from 'src/bookmarks'
 import createImportItems from './import-item-creation'
-import { getStoredEsts, setStoredEsts } from '../'
+import * as itemCache from '../import-item-cache'
 
 /**
  * Handles calculating the estimate counts for history and bookmark imports.
@@ -39,7 +39,7 @@ async function calcCompletedCounts() {
 export default async (forceRecalc = false, hoursToLive = 24) => {
     // First check to see if we can use prev. calc'd values
     let finalResult
-    const prevResult = await getStoredEsts()
+    const prevResult = await itemCache.get()
 
     // If saved calcs are recent, just use them
     if (
@@ -57,7 +57,7 @@ export default async (forceRecalc = false, hoursToLive = 24) => {
             remaining: await createImportItems(),
         }
 
-        setStoredEsts(finalResult) // Save current calculations for next time
+        itemCache.set(finalResult) // Save current calculations for next time
     }
 
     return finalResult

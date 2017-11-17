@@ -1,6 +1,6 @@
 import { createAction } from 'redux-act'
 
-import { dirtyStoredEsts } from 'src/imports'
+import { dirty as dirtyStoredEsts } from 'src/imports/import-item-cache'
 import { remoteFunction } from 'src/util/webextensionRPC'
 
 const deleteDocs = remoteFunction('deleteDocsByUrl')

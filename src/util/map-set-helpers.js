@@ -52,3 +52,13 @@ export const unionNestedMaps = map =>
  */
 export const differMaps = b => a =>
     new Map([...a].filter(([key]) => !b.has(key)))
+
+export const mapToObject = map => {
+    const entries = [...map]
+    const result = {}
+    for (let i = 0; i < map.size; i++) {
+        const [key, val] = entries[i]
+        result[key] = val
+    }
+    return result
+}

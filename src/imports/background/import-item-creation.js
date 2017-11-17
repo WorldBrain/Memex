@@ -7,7 +7,7 @@ import { pageKeyPrefix, convertPageDocId } from 'src/page-storage'
 import { bookmarkKeyPrefix, convertBookmarkDocId } from 'src/bookmarks'
 import { checkWithBlacklist } from 'src/blacklist'
 import { isLoggable } from 'src/activity-logger'
-import { differMaps } from 'src/util/map-set-helpers'
+import { differMaps, mapToObject } from 'src/util/map-set-helpers'
 import { IMPORT_TYPE, OLD_EXT_KEYS } from 'src/options/imports/constants'
 
 const chunkSize = 200
@@ -227,8 +227,8 @@ export default async function createImportItems() {
     historyItemsMap = differMaps(bookmarkItemsMap)(historyItemsMap)
 
     return {
-        [IMPORT_TYPE.HISTORY]: [...historyItemsMap],
-        [IMPORT_TYPE.BOOKMARK]: [...bookmarkItemsMap],
-        [IMPORT_TYPE.OLD]: [...oldExtItemsMap],
+        [IMPORT_TYPE.HISTORY]: mapToObject(historyItemsMap),
+        [IMPORT_TYPE.BOOKMARK]: mapToObject(bookmarkItemsMap),
+        [IMPORT_TYPE.OLD]: mapToObject(oldExtItemsMap),
     }
 }
