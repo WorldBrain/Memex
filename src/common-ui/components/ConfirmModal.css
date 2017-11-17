@@ -1,0 +1,47 @@
+.textContainer {
+    display: flex;
+    align-items: center;
+    text-align: center;
+
+    & > div {
+        display: none;
+    }
+}
+
+.textContainerLoading {
+    & > div {
+        display: block;
+    }
+}
+
+.btnBar {
+    display: flex;
+    justify-content: space-around;
+}
+
+.btn {
+    border: none;
+    background: none;
+    transition: all 200ms;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+
+    &:hover:enabled {
+        color: #3eb995;
+    }
+
+    &:disabled,
+    &[disabled] {
+        color: #9a9a9a;
+        cursor: default;
+    }
+}
+
+.confirmBtn {
+    color: #000;
+}
+
+.cancelBtn {
+    color: #f77;
+}

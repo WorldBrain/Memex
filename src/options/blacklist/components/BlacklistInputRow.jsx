@@ -8,32 +8,31 @@ const BlacklistInputRow = ({
     isClearBtnDisabled,
     isSaveBtnDisabled,
     onAdd,
-    handleKeyPress,
     onInputChange,
     onInputClear,
     inputRef,
 }) => (
-    <div className={styles.newSiteInputRow}>
+    <form className={styles.newSiteInputRow}>
         <input
             value={value}
             className={styles.input}
             type="text"
             placeholder="Enter any text or domain or path to ignore matching URLs"
             onChange={onInputChange}
-            onKeyUp={handleKeyPress}
             ref={inputRef}
         />
 
         <div className={styles.inputButtons}>
             <button
                 onClick={onAdd}
+                type="submit"
                 className={styles.blacklistButton}
                 disabled={isSaveBtnDisabled}
             >
                 ADD TO BLACKLIST
             </button>
         </div>
-    </div>
+    </form>
 )
 
 export const propTypes = (BlacklistInputRow.propTypes = {
@@ -44,7 +43,6 @@ export const propTypes = (BlacklistInputRow.propTypes = {
 
     // Event handlers
     onAdd: PropTypes.func.isRequired,
-    handleKeyPress: PropTypes.func.isRequired,
     onInputChange: PropTypes.func.isRequired,
     onInputClear: PropTypes.func.isRequired,
 

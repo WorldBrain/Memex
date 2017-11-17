@@ -4,7 +4,7 @@ import PouchDB from 'pouchdb-browser'
 import PouchDBFind from 'pouchdb-find'
 import { blobToBase64String } from 'blob-util'
 
-import { pageKeyPrefix } from 'src/page-storage'
+import { pageKeyPrefix, pageDocsSelector } from 'src/page-storage'
 import { visitKeyPrefix } from 'src/activity-logger'
 import { bookmarkKeyPrefix } from 'src/bookmarks'
 import encodeUrl from 'src/util/encode-url-for-id'
@@ -102,6 +102,25 @@ export function fetchDocTypesByUrl(url) {
             endkey: `${typePrefix}${encodedUrl}\ufff0`,
             ...opts,
         })
+}
+
+/**
+ * Perform lookup on Pouch pages via matching regex against URL field
+ *
+ * @param {string|RegExp} pattern
+ * @returns {PageDoc[]} Array of matching page docs.
+ */
+export async function fetchPagesByUrlPattern(pattern, fields = ['_id', 'rev']) {
+    const urlSelector = { url: { $regex: pattern } }
+
+    const { rows: pageRows } = normaliseFindResult(
+        await db.find({
+            selector: { ...pageDocsSelector, ...urlSelector },
+            fields,
+        }),
+    )
+
+    return pageRows
 }
 
 /**

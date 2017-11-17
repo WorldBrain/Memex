@@ -26,7 +26,11 @@ export async function del(keys) {
 export async function delPages(pageIds) {
     if (Array.isArray(pageIds)) {
         for (const pageId of pageIds) {
-            await performDeindexing(pageId)
+            try {
+                await performDeindexing(pageId)
+            } catch (error) {
+                // Ignore and continue deindexing rest
+            }
         }
     } else {
         await performDeindexing(pageIds)
@@ -39,7 +43,13 @@ export async function delPages(pageIds) {
  * @returns {Promise<void>}
  */
 export const delPagesConcurrent = pageIds =>
-    indexQueue.push(() => delPages(pageIds))
+    new Promise((resolve, reject) =>
+        indexQueue.push(() =>
+            delPages(pageIds)
+                .then(resolve)
+                .catch(reject),
+        ),
+    )
 
 /**
  * @param {IndexTermValue} [currTermValue]

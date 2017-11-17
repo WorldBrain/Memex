@@ -1,11 +1,48 @@
-import db, { fetchDocTypesByUrl, fetchMetaDocsForPage } from 'src/pouchdb'
+import db, {
+    fetchDocTypesByUrl,
+    fetchMetaDocsForPage,
+    fetchPagesByUrlPattern,
+} from 'src/pouchdb'
 import { delPagesConcurrent, initSingleLookup, keyGen } from 'src/search'
 import { pageKeyPrefix } from 'src/page-storage'
 import { visitKeyPrefix } from 'src/activity-logger'
 import { bookmarkKeyPrefix } from 'src/bookmarks'
 
-export default (url, domainDelete = false) =>
-    domainDelete ? deleteDomain(url) : deleteSpecificSite(url)
+export default (input, type = 'url') => {
+    switch (type) {
+        case 'domain':
+            return deleteDomain(input)
+        case 'regex':
+            return deleteByRegex(input)
+        default:
+            return deleteSpecificSite(input)
+    }
+}
+
+/**
+ * Removes all matching data from Pouch and search index matching the given regex.
+ *
+ * @param {*} regex
+ * @returns {Promise<void>}
+ */
+async function deleteByRegex(regex) {
+    const pageRows = await fetchPagesByUrlPattern(regex)
+
+    // Find all assoc. meta pouch docs to remove
+    const allRows = []
+    const pageIds = []
+    for (const { id } of pageRows) {
+        const metaRows = await fetchMetaDocsForPage(id)
+        allRows.push(
+            ...metaRows.pageRows,
+            ...metaRows.visitRows,
+            ...metaRows.bookmarkRows,
+        )
+        pageIds.push(id)
+    }
+
+    return await Promise.all([deleteDocs(allRows), delPagesConcurrent(pageIds)])
+}
 
 async function deleteDomain(url = '') {
     // Filter-out the `www.`, if there
