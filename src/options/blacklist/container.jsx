@@ -41,7 +41,8 @@ class BlacklistContainer extends Component {
     focusInput = () => this.input.focus()
     assignRef = input => (this.input = input)
 
-    onNewBlacklistItemAdded = () => {
+    onNewBlacklistItemAdded = event => {
+        event.preventDefault()
         // Make sure to interpret '.' as "period" rather than "any single character", as it is common in hostnames
         // also ignore all whitespace
         const expression = this.props.inputVal
@@ -52,9 +53,6 @@ class BlacklistContainer extends Component {
         if (!expression.length) return
 
         this.props.addToBlacklist(expression)
-
-        // Make sure input refocuses after new item added
-        this.focusInput()
     }
 
     // TODO(AM): Undo? Confirmation?
