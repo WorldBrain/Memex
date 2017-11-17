@@ -23,8 +23,7 @@ const defaultState = {
     success: defaultStats, // Success counts for completed import items
     totals: defaultStats, // Static state to use to derive remaining counts from
     importStatus: STATUS.LOADING,
-    loadingMsg:
-        'Please wait while we analyze & prepare your browsing history & bookmarks',
+    loadingMsg: 'Analyzing & preparing your browsing history & bookmarks',
     downloadDataFilter: FILTERS.ALL,
     concurrency: DEF_CONCURRENCY,
     isAdvEnabled: false,
@@ -84,13 +83,13 @@ const finishImportsReducer = ({ loading = false }) => state => ({
 const prepareImportReducer = state => ({
     ...state,
     importStatus: STATUS.LOADING,
-    loadingMsg: 'Preparing import.',
+    loadingMsg: 'Making last import preparations and we are good to go!',
 })
 
 const cancelImportReducer = state => ({
     ...state,
     importStatus: STATUS.LOADING,
-    loadingMsg: 'Please wait as import progress gets recorded.',
+    loadingMsg: 'Finishing off URLs that have already been started.',
 })
 
 const initEstimateCounts = (state, { remaining, completed }) => ({
