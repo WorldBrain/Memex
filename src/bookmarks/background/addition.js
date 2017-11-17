@@ -5,6 +5,7 @@ import * as index from 'src/search'
 import db from 'src/pouchdb'
 import { transformToBookmarkDoc } from 'src/imports'
 import { generatePageDocId } from 'src/page-storage'
+import { logPageVisitForBookmark } from 'src/activity-logger/background/log-page-visit'
 
 async function getAttachments(pageData) {
     const favIconBlob = await dataURLToBlob(pageData.favIconURI)
@@ -50,6 +51,7 @@ export async function createNewPageForBookmark(id, bookmarkInfo) {
     }
 }
 
+<<<<<<< eef4f6e255fdc0a22e80a5314c98ccee05f2a49c
 /**
  * TODO: Decided if we actually need these bookmark docs in Pouch; I don't think they're being used for anything.
  *
@@ -61,6 +63,7 @@ export async function createBookmarkByUrl(url) {
     const pageId = generatePageDocId({ url })
     const pageDoc = await db.get(pageId)
 
+
     const bookmarkDoc = transformToBookmarkDoc({ _id: pageId })({
         dateAdded: Date.now(),
         title: pageDoc.content.title,
@@ -71,4 +74,49 @@ export async function createBookmarkByUrl(url) {
         index.addBookmarkConcurrent(pageId),
         db.put(bookmarkDoc),
     ])
+=======
+export async function createBookmarkByExtension(url) {
+    const pageId = generatePageDocId({ url })
+    let pageDoc
+    try {
+        pageDoc = await db.get(pageId)
+    } catch (err) {
+        console.error(
+            'Error occurred while fetching page data: ',
+            err.toString(),
+        )
+    } finally {
+        const bookmarkDoc = transformToBookmarkDoc({ _id: pageId })({
+            dateAdded: Date.now(),
+            title: pageDoc.content.title,
+            url: pageDoc.url,
+        })
+        index.addPageConcurrent({ pageDoc, bookmarkDocs: [bookmarkDoc] })
+        db.put(bookmarkDoc)
+    }
+}
+
+export async function createBookmarkByTab(url, tabId) {
+    const pageId = generatePageDocId({ url })
+    let pageDoc
+
+    try {
+        pageDoc = await db.get(pageId)
+    } catch (err) {
+        try {
+            pageDoc = await logPageVisitForBookmark({ tabId, url })
+            console.log(pageDoc)
+        } catch (err) {
+            console.log('Here' + err)
+        }
+    } finally {
+        const bookmarkDoc = transformToBookmarkDoc({ _id: pageId })({
+            dateAdded: Date.now(),
+            title: pageDoc.content.title,
+            url: pageDoc.url,
+        })
+        index.addPageConcurrent({ pageDoc, bookmarkDocs: [bookmarkDoc] })
+        db.put(bookmarkDoc)
+    }
+>>>>>>> Made required changes
 }

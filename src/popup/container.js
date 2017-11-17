@@ -48,12 +48,14 @@ class PopupContainer extends Component {
             blacklistConfirm: false,
             bookmarkBtn: constants.BOOKMARK_BTN_STATE.DISABLED,
             domainDelete: false,
+            tabID: null,
         }
 
         this.toggleLoggingPause = remoteFunction('toggleLoggingPause')
         this.deleteDocs = remoteFunction('deleteDocsByUrl')
         this.createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
         this.removeBookmarkByUrl = remoteFunction('removeBookmarkByUrl')
+        this.createBookmarkByTab = remoteFunction('createBookmarkByTab')
 
         this.onSearchChange = this.onSearchChange.bind(this)
         this.onPauseChange = this.onPauseChange.bind(this)
@@ -76,7 +78,7 @@ class PopupContainer extends Component {
             this.setState(oldState => ({ ...oldState, ...newState }))
         const noop = f => f // Don't do anything if error; state doesn't change
 
-        updateState({ url: currentTab.url })
+        updateState({ url: currentTab.url, tabID: currentTab.id })
         this.getInitPauseState()
             .then(updateState)
             .catch(noop)
@@ -109,7 +111,7 @@ class PopupContainer extends Component {
         const dbResult = await lookup(pageId)
         const result = {
             loggable: isLoggable({ url }),
-            bookmark: dbResult.bookmarks.size !== 0,
+            bookmark: dbResult == null ? false : dbResult.bookmarks.size !== 0,
             blacklist: this.state.blacklistBtn,
         }
 
