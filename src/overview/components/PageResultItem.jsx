@@ -54,7 +54,7 @@ const PageResultItem = props => (
 )
 
 PageResultItem.propTypes = {
-    _attachments: PropTypes.object.isRequired,
+    _attachments: PropTypes.object,
     displayTime: PropTypes.string.isRequired,
     url: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,

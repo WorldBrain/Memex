@@ -89,6 +89,7 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
 
     const searchParams = {
         ...currentQueryParams,
+        getTotalCount: true,
         showOnlyBookmarks,
         limit: constants.PAGE_SIZE,
         skip,
