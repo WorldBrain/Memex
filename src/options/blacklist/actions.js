@@ -21,11 +21,14 @@ export const addToBlacklist = expression => async dispatch => {
     dispatch(addSiteToBlacklist({ expression, dateAdded: Date.now() }))
     dirtyStoredEsts() // Force import ests to recalc next visit
     dispatch(resetSiteInputValue())
-    dispatch(setModalShow(true))
     dispatch(setIsLoading(true))
     try {
         const rows = await fetchMatchingPages(expression)
-        dispatch(setMatchedCount(rows.length))
+
+        if (rows.length) {
+            dispatch(setModalShow(true))
+            dispatch(setMatchedCount(rows.length))
+        }
     } catch (error) {
     } finally {
         dispatch(setIsLoading(false))
