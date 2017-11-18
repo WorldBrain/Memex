@@ -148,6 +148,7 @@ EstimatesTable.propTypes = {
     allowTypes: PropTypes.shape({
         [TYPE.HISTORY]: PropTypes.bool.isRequired,
         [TYPE.BOOKMARK]: PropTypes.bool.isRequired,
+        [TYPE.OLD]: PropTypes.bool.isRequired,
     }).isRequired,
 
     // Event handlers
@@ -159,6 +160,7 @@ EstimatesTable.propTypes = {
     estimates: PropTypes.shape({
         [TYPE.HISTORY]: estimatesShape.isRequired,
         [TYPE.BOOKMARK]: estimatesShape.isRequired,
+        [TYPE.OLD]: estimatesShape.isRequired,
     }).isRequired,
 }
 

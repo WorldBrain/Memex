@@ -72,6 +72,7 @@ ProgressTable.propTypes = {
     progress: PropTypes.shape({
         [TYPE.HISTORY]: progressShape.isRequired,
         [TYPE.BOOKMARK]: progressShape.isRequired,
+        [TYPE.OLD]: progressShape.isRequired,
     }).isRequired,
     allowTypes: PropTypes.object.isRequired,
 }
