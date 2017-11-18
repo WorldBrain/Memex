@@ -1,11 +1,8 @@
-import size from 'lodash/fp/size'
-
 import PromiseBatcher from 'src/util/promise-batcher'
 import {
     CMDS,
     IMPORT_CONN_NAME,
     DEF_CONCURRENCY,
-    IMPORT_TYPE,
 } from 'src/options/imports/constants'
 import calcItems from './import-estimates'
 import processImportItem from './import-item-processor'
@@ -33,12 +30,12 @@ const getBatchObserver = port => {
         port.postMessage({
             cmd: CMDS.NEXT,
             url: item.url,
+            hasBookmark: item.hasBookmark,
             type: item.type,
+            key: encodedUrl,
             status,
             error,
         })
-
-        itemCache.removeItem(encodedUrl, item)
     }
 
     return {
@@ -82,18 +79,7 @@ async function startImport(port, batch, allowTypes) {
 async function finishImport(port) {
     clearImportInProgressFlag()
 
-    // Re-init the estimates view with updated estimates data
-    const { remaining, completedCounts } = await itemCache.get()
-
-    port.postMessage({
-        cmd: CMDS.INIT,
-        completed: completedCounts,
-        remaining: {
-            [IMPORT_TYPE.OLD]: size(remaining[IMPORT_TYPE.OLD]),
-            [IMPORT_TYPE.HISTORY]: size(remaining[IMPORT_TYPE.HISTORY]),
-            [IMPORT_TYPE.BOOKMARK]: size(remaining[IMPORT_TYPE.BOOKMARK]),
-        },
-    })
+    port.postMessage({ cmd: CMDS.INIT })
 }
 
 async function cancelImport(port, batch) {
@@ -124,18 +110,9 @@ export default async function importsConnectionHandler(port) {
     // If import isn't started earlier, get estimates and set view state to init
     const importInProgress = await getImportInProgressFlag()
     if (!importInProgress) {
-        // Make sure estimates view init'd with count data
-        const { remaining, completedCounts } = await calcItems()
-
-        port.postMessage({
-            cmd: CMDS.INIT,
-            completed: completedCounts,
-            remaining: {
-                [IMPORT_TYPE.OLD]: size(remaining[IMPORT_TYPE.OLD]),
-                [IMPORT_TYPE.HISTORY]: size(remaining[IMPORT_TYPE.HISTORY]),
-                [IMPORT_TYPE.BOOKMARK]: size(remaining[IMPORT_TYPE.BOOKMARK]),
-            },
-        })
+        // Make sure cache is updated for estimates view
+        await calcItems()
+        port.postMessage({ cmd: CMDS.INIT })
     } else {
         // Make sure to start the view in paused state
         port.postMessage({ cmd: CMDS.PAUSE })

@@ -21,7 +21,30 @@ export const downloadDataFilter = createSelector(
 export const fail = createSelector(imports, state => state.fail)
 export const success = createSelector(imports, state => state.success)
 export const totals = createSelector(imports, state => state.totals)
-const completed = createSelector(imports, state => state.completed)
+export const remaining = createSelector(imports, state => state.remaining)
+export const completedCounts = createSelector(
+    imports,
+    state => state.completedCounts,
+)
+
+const remainingCounts = createSelector(remaining, remaining => {
+    const res = {}
+    for (const key in remaining) {
+        res[key] = Object.keys(remaining[key]).length
+    }
+    return res
+})
+
+const reduceCountStatsToBool = stats =>
+    Object.values(stats).reduce((acc, curr) => acc && curr === 0, true)
+
+export const isCacheEmpty = createSelector(
+    remainingCounts,
+    completedCounts,
+    (remain, complete) =>
+        reduceCountStatsToBool(remain) && reduceCountStatsToBool(complete),
+)
+
 export const allowTypes = createSelector(imports, state => state.allowTypes)
 export const loadingMsg = createSelector(imports, state => state.loadingMsg)
 export const showOldExt = createSelector(imports, state => state.showOldExt)
@@ -153,18 +176,18 @@ const getEstimate = (complete, remaining) => ({
  * Derives estimates state from completed + total state counts.
  */
 export const estimates = createSelector(
-    completed,
-    totals,
-    (completed, totals) => ({
+    completedCounts,
+    remainingCounts,
+    (completed, remaining) => ({
+        [TYPE.OLD]: getEstimate(completed[TYPE.OLD], remaining[TYPE.OLD]),
         [TYPE.HISTORY]: getEstimate(
             completed[TYPE.HISTORY],
-            totals[TYPE.HISTORY],
+            remaining[TYPE.HISTORY],
         ),
         [TYPE.BOOKMARK]: getEstimate(
             completed[TYPE.BOOKMARK],
-            totals[TYPE.BOOKMARK],
+            remaining[TYPE.BOOKMARK],
         ),
-        [TYPE.OLD]: getEstimate(completed[TYPE.OLD], totals[TYPE.OLD]),
     }),
 )
 
