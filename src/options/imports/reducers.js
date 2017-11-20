@@ -40,23 +40,36 @@ const reduceCompletedCounts = (state, { type, hasBookmark, status }) => {
 
     const newState = { ...state }
 
+    // Inc the current type count
     newState[type]++
-    // Only for old ext imports
-    if (type === TYPE.OLD && hasBookmark) {
-        newState[TYPE.BOOKMARK]++
+
+    // Only for old ext imports (either additionally inc history or bookmark count)
+    if (type === TYPE.OLD) {
+        if (hasBookmark) {
+            newState[TYPE.BOOKMARK]++
+        } else {
+            newState[TYPE.HISTORY]++
+        }
     }
 
     return newState
 }
 
-const reduceRemainingLists = (state, { key, status }) => {
+const reduceRemainingLists = (state, { type, key, status }) => {
     if (status !== DL_STAT.SUCC) {
         return state
     }
 
-    const newState = {}
+    const newState = { ...state }
+    const typesToReduce = [TYPE.HISTORY, TYPE.BOOKMARK]
 
-    for (const type in state) {
+    // Also remove from old ext type list, if this item is old ext type
+    if (type === TYPE.OLD) {
+        typesToReduce.push(type)
+    }
+
+    // Remove the processed URL in each type list
+    for (const type of typesToReduce) {
         const { [key]: finishedItem, ...remainingItems } = state[type]
         newState[type] = remainingItems
     }
@@ -80,7 +93,7 @@ const addDownloadDetailsReducer = (
             hasBookmark,
             status,
         }),
-        remaining: reduceRemainingLists(state.remaining, { key, status }),
+        remaining: reduceRemainingLists(state.remaining, { type, key, status }),
         [countState]: {
             ...state[countState],
             [type]: state[countState][type] + 1,
