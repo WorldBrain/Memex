@@ -5,7 +5,7 @@ import * as index from 'src/search'
 import db from 'src/pouchdb'
 import { transformToBookmarkDoc } from 'src/imports'
 import { generatePageDocId } from 'src/page-storage'
-import { logPageVisitForBookmark } from 'src/activity-logger/background/log-page-visit'
+import storePage from 'src/page-storage/store-page'
 
 async function getAttachments(pageData) {
     const favIconBlob = await dataURLToBlob(pageData.favIconURI)
@@ -77,46 +77,25 @@ export async function createBookmarkByUrl(url) {
 =======
 export async function createBookmarkByExtension(url) {
     const pageId = generatePageDocId({ url })
-    let pageDoc
-    try {
-        pageDoc = await db.get(pageId)
-    } catch (err) {
-        console.error(
-            'Error occurred while fetching page data: ',
-            err.toString(),
-        )
-    } finally {
-        const bookmarkDoc = transformToBookmarkDoc({ _id: pageId })({
-            dateAdded: Date.now(),
-            title: pageDoc.content.title,
-            url: pageDoc.url,
-        })
-        index.addPageConcurrent({ pageDoc, bookmarkDocs: [bookmarkDoc] })
-        db.put(bookmarkDoc)
-    }
+    const pageDoc = await db.get(pageId)
+
+    const bookmarkDoc = transformToBookmarkDoc({ _id: pageId })({
+        dateAdded: Date.now(),
+        title: pageDoc.content.title,
+        url: pageDoc.url,
+    })
+    index.addPageConcurrent({ pageDoc, bookmarkDocs: [bookmarkDoc] })
+    db.put(bookmarkDoc)
 }
 
 export async function createBookmarkByTab(url, tabId) {
-    const pageId = generatePageDocId({ url })
-    let pageDoc
+    const storePageResult = await storePage({ tabId, url })
+    const { page } = await storePageResult.finalPagePromise
 
     try {
-        pageDoc = await db.get(pageId)
-    } catch (err) {
-        try {
-            pageDoc = await logPageVisitForBookmark({ tabId, url })
-            console.log(pageDoc)
-        } catch (err) {
-            console.log('Here' + err)
-        }
-    } finally {
-        const bookmarkDoc = transformToBookmarkDoc({ _id: pageId })({
-            dateAdded: Date.now(),
-            title: pageDoc.content.title,
-            url: pageDoc.url,
-        })
-        index.addPageConcurrent({ pageDoc, bookmarkDocs: [bookmarkDoc] })
-        db.put(bookmarkDoc)
+        createBookmarkByExtension(url)
+    } catch (error) {
+        console.log(error)
     }
 >>>>>>> Made required changes
 }

@@ -53,7 +53,6 @@ class PopupContainer extends Component {
 
         this.toggleLoggingPause = remoteFunction('toggleLoggingPause')
         this.deleteDocs = remoteFunction('deleteDocsByUrl')
-        this.createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
         this.removeBookmarkByUrl = remoteFunction('removeBookmarkByUrl')
         this.createBookmarkByTab = remoteFunction('createBookmarkByTab')
 
