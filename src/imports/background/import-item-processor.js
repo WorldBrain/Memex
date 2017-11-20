@@ -66,11 +66,20 @@ async function createPageDoc({ url }) {
     })
 }
 
-const storeDocs = ({ pageDoc, bookmarkDocs = [], visitDocs = [] }) =>
-    Promise.all([
+const storeDocs = ({ pageDoc, bookmarkDocs = [], visitDocs = [] }) => {
+    if (
+        !pageDoc.content ||
+        !pageDoc.content.fullText ||
+        !pageDoc.content.fullText.length
+    ) {
+        return Promise.reject(new Error('Page has no searchable content'))
+    }
+
+    return Promise.all([
         index.addPageConcurrent({ pageDoc, visitDocs, bookmarkDocs }),
         db.bulkDocs([pageDoc, ...bookmarkDocs, ...visitDocs]),
     ])
+}
 
 /**
  * Handles processing of a history-type import item. Checks for exisitng page docs that have the same URL.
