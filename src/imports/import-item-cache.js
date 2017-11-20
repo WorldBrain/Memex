@@ -10,8 +10,8 @@ export const get = async () => {
     })
 
     return {
-        calculatedAt,
         ...estimates,
+        calculatedAt,
     }
 }
 
