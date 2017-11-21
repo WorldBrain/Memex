@@ -175,6 +175,7 @@ export default createReducer(
         [actions.toggleAllowType]: toggleAllowTypeReducer,
         [actions.filterDownloadDetails]: payloadReducer('downloadDataFilter'),
         [actions.initImportState]: payloadReducer('importStatus'),
+        [actions.initTotalCounts]: payloadReducer('totals'),
         [actions.initFailCounts]: payloadReducer('fail'),
         [actions.initSuccessCounts]: payloadReducer('success'),
         [actions.initDownloadData]: payloadReducer('downloadData'),

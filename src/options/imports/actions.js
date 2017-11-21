@@ -14,6 +14,7 @@ export const addImportItem = createAction('imports/addImportItem')
 export const toggleAllowType = createAction('imports/toggleAllowType')
 
 export const initAllowTypes = createAction('imports/initAllowTypes')
+export const initTotalCounts = createAction('imports/initTotalCounts')
 export const initFailCounts = createAction('imports/initFailCounts')
 export const initSuccessCounts = createAction('imports/initSuccessCounts')
 export const initCache = createAction('imports/initImportsCache')
