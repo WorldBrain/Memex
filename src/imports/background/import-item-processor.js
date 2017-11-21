@@ -1,6 +1,7 @@
 import { dataURLToBlob } from 'blob-util'
 
 import db from 'src/pouchdb'
+import Queue from 'src/util/priority-queue'
 import { generatePageDocId } from 'src/page-storage'
 import fetchPageData from 'src/page-analysis/background/fetch-page-data'
 import { revisePageFields } from 'src/page-analysis'
@@ -18,6 +19,8 @@ const fetchPageDataOpts = {
     includePageContent: true,
     includeFavIcon: true,
 }
+
+const oldExtQueue = new Queue({ autostart: true, concurrency: 1 })
 
 /**
  * @param {string?} favIconURL The data URL string for the favicon.
@@ -123,7 +126,7 @@ async function processOldExtImport(importItem) {
     await storeDocs({ pageDoc, visitDocs, bookmarkDocs })
 
     // If all okay now, remove the old data
-    await clearOldExtData(importItem)
+    oldExtQueue.push(clearOldExtData(importItem))
 
     return { status: DOWNLOAD_STATUS.SUCC }
 }
