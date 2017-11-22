@@ -1,7 +1,9 @@
 import { createAction } from 'redux-act'
 
+import analytics from 'src/util/analytics'
 import { dirtyStoredEsts } from 'src/imports'
 import { remoteFunction } from 'src/util/webextensionRPC'
+import { normalizedBlacklist, matchedDocCount } from './selectors'
 
 const deleteDocs = remoteFunction('deleteDocsByUrl')
 const fetchMatchingPages = remoteFunction('fetchPagesByUrlPattern')
@@ -18,6 +20,12 @@ export const removeSiteFromBlacklist = createAction(
 )
 
 export const addToBlacklist = expression => async dispatch => {
+    analytics.trackEvent({
+        category: 'Blacklist',
+        action: 'Add blacklist entry',
+        name: expression,
+    })
+
     dispatch(addSiteToBlacklist({ expression, dateAdded: Date.now() }))
     dirtyStoredEsts() // Force import ests to recalc next visit
     dispatch(resetSiteInputValue())
@@ -35,12 +43,25 @@ export const addToBlacklist = expression => async dispatch => {
     }
 }
 
-export const removeFromBlacklist = index => dispatch => {
+export const removeFromBlacklist = index => (dispatch, getState) => {
+    analytics.trackEvent({
+        category: 'Blacklist',
+        action: 'Remove blacklist entry',
+        name: normalizedBlacklist(getState())[index],
+    })
+
     dispatch(removeSiteFromBlacklist({ index }))
     dirtyStoredEsts() // Force import ests to recalc next visit
 }
 
-export const removeMatchingDocs = expression => dispatch => {
+export const removeMatchingDocs = expression => (dispatch, getState) => {
+    analytics.trackEvent({
+        category: 'Blacklist',
+        action: 'Remove matching pages',
+        name: expression,
+        value: matchedDocCount(getState()),
+    })
+
     deleteDocs(expression, 'regex') // To be run in background; can take long
     dispatch(setModalShow(false))
 }
