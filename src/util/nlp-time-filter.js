@@ -43,23 +43,3 @@ export default function extractTimeFiltersFromQuery(query) {
         query: extractedQuery,
     }
 }
-
-/**
- * Utility function which runs on the output of `extractTimeFiltersFromQuery` and returns the values for
- * display. Now only used for analytics.
- *
- * @param {QueryFilters} The extracted query parameters.
- * @returns {string}
- */
-export function queryFiltersDisplay({ startDate, endDate, query }) {
-    let val = `"${query}"`
-
-    if (startDate) {
-        val += ` after: ${new Date(startDate).toISOString()}`
-    }
-    if (endDate) {
-        val += ` before: ${new Date(endDate).toISOString()}`
-    }
-
-    return val
-}

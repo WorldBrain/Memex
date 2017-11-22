@@ -5,9 +5,7 @@ import qs from 'query-string'
 import analytics from 'src/util/analytics'
 import { initSingleLookup } from 'src/search/search-index/util'
 import { generatePageDocId } from 'src/page-storage'
-import extractQueryFilters, {
-    queryFiltersDisplay,
-} from 'src/util/nlp-time-filter'
+import extractQueryFilters from 'src/util/nlp-time-filter'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { isLoggable, getPauseState } from 'src/activity-logger'
 import * as blacklistI from 'src/blacklist'
@@ -180,15 +178,12 @@ class PopupContainer extends Component {
     onSearchEnter(event) {
         if (event.key === 'Enter') {
             event.preventDefault()
-
-            const queryFilters = extractQueryFilters(this.state.searchValue)
-
             analytics.trackEvent({
                 category: 'Popup',
                 action: 'Popup search',
-                name: queryFiltersDisplay(queryFilters),
             })
 
+            const queryFilters = extractQueryFilters(this.state.searchValue)
             const queryParams = qs.stringify(queryFilters)
 
             browser.tabs.create({
