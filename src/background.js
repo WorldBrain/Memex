@@ -14,6 +14,7 @@ import convertOldExtBlacklist, {
 } from 'src/blacklist/background'
 import { OLD_EXT_KEYS } from 'src/options/imports/constants'
 import index from 'src/search/search-index'
+import analytics from 'src/util/analytics'
 
 export const OVERVIEW_URL = '/overview/overview.html'
 export const OLD_EXT_UPDATE_KEY = 'updated-from-old-ext'
@@ -49,6 +50,7 @@ browser.runtime.onInstalled.addListener(async details => {
         case 'install':
             // Ensure default blacklist entries are stored (before doing anything else)
             await addToBlacklist(defaultEntries)
+            analytics.trackEvent({ category: 'Global', action: 'Install' })
             // Open onboarding page
             browser.tabs.create({ url: '/options/options.html#/new_install' })
             // Store the timestamp of when the extension was installed + default blacklist

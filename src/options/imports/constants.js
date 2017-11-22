@@ -28,6 +28,12 @@ export const IMPORT_TYPE = {
     OLD: 'o', // Old extension page
 }
 
+export const IMPORT_TYPE_DISPLAY = {
+    [IMPORT_TYPE.BOOKMARK]: 'bookmarks',
+    [IMPORT_TYPE.HISTORY]: 'history',
+    [IMPORT_TYPE.OLD]: 'old ext',
+}
+
 /** Keys used for local storage. */
 export const STORAGE_KEYS = {
     HISTORY_STATS: 'history_stats',

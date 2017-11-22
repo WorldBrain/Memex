@@ -1,4 +1,5 @@
 import React from 'react'
+import cx from 'classnames'
 
 import localStyles from './styles.css'
 
@@ -16,7 +17,10 @@ const Privacy = () => (
             <br />You will be able to <strong>voluntarily</strong> share it in
             later stages with friends, followers and other applications. For
             more information on that you can watch our{' '}
-            <a className={localStyles.link} href="https://worldbrain.io/vision">
+            <a
+                className={cx(localStyles.link, 'piwik_link')}
+                href="https://worldbrain.io/vision"
+            >
                 vision video
             </a>.
         </div>

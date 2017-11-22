@@ -1,4 +1,6 @@
 import React from 'react'
+import cx from 'classnames'
+
 import localStyles from './styles.css'
 
 const AcknowledgementContainer = () => (
@@ -8,7 +10,10 @@ const AcknowledgementContainer = () => (
         </span>
         <div className={localStyles.content}>
             Many thanks goes out to our{' '}
-            <a className={localStyles.links} href="https://worldbrain.io/team">
+            <a
+                className={cx(localStyles.links, 'piwik_link')}
+                href="https://worldbrain.io/team"
+            >
                 team of contributors, advisors and investors
             </a>{' '}
             who helped building our software.
@@ -18,7 +23,7 @@ const AcknowledgementContainer = () => (
             <br />
             <br />This software is{' '}
             <a
-                className={localStyles.links}
+                className={cx(localStyles.links, 'piwik_link')}
                 href="https://github.com/WorldBrain/WebMemex/blob/master/License"
             >
                 open-source
@@ -31,14 +36,14 @@ const AcknowledgementContainer = () => (
         <p className={localStyles.contributeContent}>
             You can do so either by supporting our development with{' '}
             <a
-                className={localStyles.links}
+                className={cx(localStyles.links, 'piwik_link')}
                 href="https://github.com/WorldBrain/WebMemex/"
             >
                 your mind
             </a>{' '}
             or{' '}
             <a
-                className={localStyles.links}
+                className={cx(localStyles.links, 'piwik_link')}
                 href="https://patreon.com/WorldBrain"
             >
                 your money

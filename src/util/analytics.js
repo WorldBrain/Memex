@@ -8,6 +8,12 @@ import Piwik from 'piwik-react-router'
  * @property {number} [value] The optional event value (should be numeric).
  */
 
+/**
+ * @typedef {Object} LinkTrackInfo
+ * @property {string} url The full URL being linked to.
+ * @property {'link'|'download'} [linkType='link'] Signifies if link is to a page or download.
+ */
+
 class Analytics {
     instance
 
@@ -26,7 +32,7 @@ class Analytics {
      * @param {EventTrackInfo} eventArgs
      */
     trackEvent(eventArgs) {
-        const eventData = [
+        const data = [
             'trackEvent',
             eventArgs.category,
             eventArgs.action,
@@ -34,7 +40,18 @@ class Analytics {
             eventArgs.value,
         ]
 
-        return this.instance.push(eventData)
+        return this.instance.push(data)
+    }
+
+    /**
+     * Track user link clicks.
+     *
+     * @param {LinkTrackInfo} linkArgs
+     */
+    trackLink(linkArgs) {
+        const data = ['trackLink', linkArgs.url, linkArgs.linkType || 'link']
+
+        return this.instance.push(data)
     }
 
     // Default method wrappers

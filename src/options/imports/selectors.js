@@ -6,12 +6,12 @@ import {
     STATUS,
     DOC_TIME_EST,
     IMPORT_TYPE as TYPE,
+    IMPORT_TYPE_DISPLAY as TYPE_DISPLAY,
     DOWNLOAD_STATUS as DL_STAT,
 } from './constants'
 
 export const imports = state => state.imports
 
-// TODO: make these memoized
 export const importStatus = createSelector(imports, state => state.importStatus)
 export const downloadData = createSelector(imports, state => state.downloadData)
 export const downloadDataFilter = createSelector(
@@ -25,6 +25,21 @@ const completed = createSelector(imports, state => state.completed)
 export const allowTypes = createSelector(imports, state => state.allowTypes)
 export const loadingMsg = createSelector(imports, state => state.loadingMsg)
 export const showOldExt = createSelector(imports, state => state.showOldExt)
+
+/**
+ * Currently only used for analytics; derive the import type from `allowTypes` state
+ */
+export const allowTypesString = createSelector(allowTypes, state => {
+    const val = []
+
+    for (const type in state) {
+        if (state[type]) {
+            val.push(TYPE_DISPLAY[type])
+        }
+    }
+
+    return val.join('+')
+})
 
 export const showDownloadDetails = createSelector(
     imports,

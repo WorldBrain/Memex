@@ -1,10 +1,11 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import qs from 'query-string'
+
+import analytics from 'src/util/analytics'
 import { initSingleLookup } from 'src/search/search-index/util'
 import { generatePageDocId } from 'src/page-storage'
-
-import extractTimeFiltersFromQuery from 'src/util/nlp-time-filter'
+import extractQueryFilters from 'src/util/nlp-time-filter'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { isLoggable, getPauseState } from 'src/activity-logger'
 import * as blacklistI from 'src/blacklist'
@@ -124,6 +125,12 @@ class PopupContainer extends Component {
 
         return event => {
             event.preventDefault()
+
+            analytics.trackEvent({
+                category: 'Popup',
+                action: domainDelete ? 'Blacklist domain' : 'Blacklist site',
+            })
+
             blacklistI.addToBlacklist(url)
             this.setState(state => ({
                 ...state,
@@ -139,6 +146,12 @@ class PopupContainer extends Component {
     onPauseConfirm(event) {
         event.preventDefault()
         const { isPaused, pauseValue } = this.state
+
+        analytics.trackEvent({
+            category: 'Popup',
+            action: isPaused ? 'Resume indexing' : 'Pause indexing',
+            value: isPaused ? undefined : pauseValue,
+        })
 
         // Tell background script to do on extension level
         this.toggleLoggingPause(pauseValue)
@@ -164,10 +177,12 @@ class PopupContainer extends Component {
     onSearchEnter(event) {
         if (event.key === 'Enter') {
             event.preventDefault()
+            analytics.trackEvent({
+                category: 'Search',
+                action: 'Popup search',
+            })
 
-            const queryFilters = extractTimeFiltersFromQuery(
-                this.state.searchValue,
-            )
+            const queryFilters = extractQueryFilters(this.state.searchValue)
             const queryParams = qs.stringify(queryFilters)
 
             browser.tabs.create({
@@ -182,6 +197,11 @@ class PopupContainer extends Component {
         this.setState(state => ({ ...state, blacklistConfirm: false }))
 
     handleDeleteBlacklistData = () => {
+        analytics.trackEvent({
+            category: 'Popup',
+            action: 'Delete blacklisted pages',
+        })
+
         this.deleteDocs(
             this.state.url,
             this.state.domainDelete ? 'domain' : 'url',

@@ -7,8 +7,8 @@ const AFTER_REGEX = /after:"(.*?)"/
  * @typedef QueryFilters
  * @type {Object}
  * @property {string} query The non-date-filter search terms.
- * @property {number|undefined} startDate Number of ms representing the start of filter time.
- * @property {number|undefined} endDate Number of ms representing the end of filter time.
+ * @property {number} [startDate] Number of ms representing the start of filter time.
+ * @property {number} [endDate] Number of ms representing the end of filter time.
  */
 
 /**
@@ -42,4 +42,29 @@ export default function extractTimeFiltersFromQuery(query) {
         endDate,
         query: extractedQuery,
     }
+}
+
+/**
+ * Utility function which runs on the output of `extractTimeFiltersFromQuery` and returns the values for
+ * display. Now only used for analytics.
+ *
+ * @param {QueryFilters} The extracted query parameters.
+ * @returns {string}
+ */
+export function queryFiltersDisplay({ startDate, endDate, query }) {
+    let val = ''
+
+    if (query && query.length) {
+        val += 'T'
+    }
+
+    if (startDate) {
+        val += ' SD'
+    }
+
+    if (endDate) {
+        val += ' ED'
+    }
+
+    return val
 }
