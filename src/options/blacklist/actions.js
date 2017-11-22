@@ -57,7 +57,7 @@ export const removeFromBlacklist = index => (dispatch, getState) => {
 export const removeMatchingDocs = expression => (dispatch, getState) => {
     analytics.trackEvent({
         category: 'Blacklist',
-        action: 'Remove matching pages',
+        action: 'Delete matching pages',
         name: expression,
         value: matchedDocCount(getState()),
     })

@@ -205,7 +205,7 @@ class PopupContainer extends Component {
     handleDeleteBlacklistData = () => {
         analytics.trackEvent({
             category: 'Popup',
-            action: 'Remove blacklisted pages',
+            action: 'Delete blacklisted pages',
             name: this.state.url,
         })
 
