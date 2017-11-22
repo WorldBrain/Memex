@@ -1,12 +1,26 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
+import analytics from 'src/util/analytics'
 import Button from './Button'
 
 import styles from './Button.css'
 
+const trackLinkClick = name => () =>
+    analytics.trackEvent({
+        category: 'Popup',
+        action: 'Popup link click',
+        name,
+    })
+
 const LinkButton = ({ href, ...btnProps }) => (
-    <a className={styles.link} href={href} target="_blank" tabIndex="-1">
+    <a
+        className={styles.link}
+        onClick={trackLinkClick(href)}
+        href={href}
+        target="_blank"
+        tabIndex="-1"
+    >
         <Button {...btnProps} />
     </a>
 )
