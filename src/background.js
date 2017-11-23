@@ -47,11 +47,12 @@ browser.commands.onCommand.addListener(command => {
 browser.runtime.onInstalled.addListener(async details => {
     switch (details.reason) {
         case 'install':
+            // Ensure default blacklist entries are stored (before doing anything else)
+            await addToBlacklist(defaultEntries)
             // Open onboarding page
             browser.tabs.create({ url: '/options/options.html#/new_install' })
             // Store the timestamp of when the extension was installed + default blacklist
             browser.storage.local.set({ [installTimeStorageKey]: Date.now() })
-            addToBlacklist(defaultEntries)
             break
         case 'update':
             // If no prior conversion, convert old ext blacklist + show static notif page
