@@ -100,24 +100,32 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
     port.postMessage({ cmd: constants.CMDS.SEARCH, searchParams, overwrite })
 }
 
-const updateSearchResult = ({ searchResult, overwrite = false }) => (
-    dispatch,
-    getState,
-) => {
-    const state = getState()
-    const resultCount =
+function trackSearch(searchResult, overwrite, state) {
+    // Value should be set as # results (if non-default search)
+    const value =
         overwrite && !selectors.isEmptyQuery(state)
             ? searchResult.totalCount
             : undefined
 
-    analytics.trackEvent({
-        category: 'Overview',
-        action: overwrite ? 'New search' : 'Paginated search',
-        name: overwrite
-            ? selectors.queryParamsDisplay(state)
-            : selectors.currentPageDisplay(state),
-        value: resultCount,
-    })
+    let action
+    if (searchResult.totalCount > 0) {
+        action = overwrite ? 'Successful search' : 'Paginate search'
+    } else {
+        action = 'Unsuccessful search'
+    }
+
+    const name = overwrite
+        ? selectors.queryParamsDisplay(state)
+        : selectors.currentPageDisplay(state)
+
+    analytics.trackEvent({ category: 'Overview', action, name, value })
+}
+
+const updateSearchResult = ({ searchResult, overwrite = false }) => (
+    dispatch,
+    getState,
+) => {
+    trackSearch(searchResult, overwrite, getState())
 
     const searchAction = overwrite ? setSearchResult : appendSearchResult
 
