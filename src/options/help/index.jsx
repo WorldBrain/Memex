@@ -1,4 +1,5 @@
 import React from 'react'
+import cx from 'classnames'
 
 import localStyles from './styles.css'
 
@@ -11,7 +12,7 @@ const Help = () => (
             Watch a{' '}
             <a
                 target="_blank"
-                className={localStyles.link}
+                className={cx(localStyles.link, 'piwik_link')}
                 href="https://worldbrain.io/tutorial"
             >
                 1 min video intro{' '}
@@ -30,7 +31,7 @@ const Help = () => (
             You can visit our{' '}
             <a
                 target="_blank"
-                className={localStyles.link}
+                className={cx(localStyles.link, 'piwik_link')}
                 href="https://www.reddit.com/r/WorldBrain/"
             >
                 FAQ section
@@ -38,7 +39,7 @@ const Help = () => (
             or you can write us an email:{' '}
             <a
                 target="_blank"
-                className={localStyles.link}
+                className={cx(localStyles.link, 'piwik_link')}
                 href="mailto:questions@worldbrain.io"
             >
                 questions@worldbrain.io
@@ -52,7 +53,7 @@ const Help = () => (
             Bugs you best report on{' '}
             <a
                 target="_blank"
-                className={localStyles.link}
+                className={cx(localStyles.link, 'piwik_link')}
                 href="https://www.github.com/WorldBrain/WebMemex/issues/new"
             >
                 {' '}
@@ -61,14 +62,14 @@ const Help = () => (
             Feature requests can be made {' '}
             <a
                 target="_blank"
-                className={localStyles.link}
+                className={cx(localStyles.link, 'piwik_link')}
                 href="https://worldbrain.typeform.com/to/KIRrZ2"
             >
                 with this form{' '}
             </a>
             or via email (<a
                 target="_blank"
-                className={localStyles.link}
+                className={cx(localStyles.link, 'piwik_link')}
                 href="mailto:questions@worldbrain.io"
             >
                 questions@worldbrain.io
@@ -80,7 +81,7 @@ const Help = () => (
             Check out our{' '}
             <a
                 target="_blank"
-                className={localStyles.link}
+                className={cx(localStyles.link, 'piwik_link')}
                 href="https://trello.com/b/mdqEuBjb/worldbrain-roadmap"
             >
                 public roadmap
@@ -88,7 +89,7 @@ const Help = () => (
             or make {' '}
             <a
                 target="_blank"
-                className={localStyles.link}
+                className={cx(localStyles.link, 'piwik_link')}
                 href="https://worldbrain.typeform.com/to/KIRrZ2"
             >
                 suggestions
