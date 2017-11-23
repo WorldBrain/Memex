@@ -4,9 +4,12 @@ import urlRegex from 'url-regex'
 import qs from 'query-string'
 import moment from 'moment'
 
+import analytics from 'src/util/analytics'
 import shortUrl from 'src/util/short-url'
 import { search } from 'src/search'
-import extractTimeFiltersFromQuery from 'src/util/nlp-time-filter'
+import extractTimeFiltersFromQuery, {
+    queryFiltersDisplay,
+} from 'src/util/nlp-time-filter'
 import { OVERVIEW_URL } from 'src/background'
 
 // Read which browser we are running in.
@@ -75,6 +78,16 @@ async function makeSuggestion(query, suggest) {
         ...queryFilters,
         limit: 5,
         getTotalCount: true,
+    })
+
+    analytics.trackEvent({
+        category: 'Omnibar',
+        action:
+            searchResults.totalCount > 0
+                ? 'Successful search'
+                : 'Unsuccessful search',
+        name: queryFiltersDisplay(queryFilters),
+        value: searchResults.totalCount,
     })
 
     // A subsequent search could have already started and finished while we
