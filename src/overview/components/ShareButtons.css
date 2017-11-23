@@ -1,11 +1,17 @@
+.outer {
+    position: relative;
+    margin: 0 auto;
+    float: right;
+}
+
 .shareIcons {
     position: fixed;
     display: flex;
     flex-direction: column;
     margin-top: -10px;
-    width: auto;
+    margin-left: -30px;
+    width: 7%;
     height: 500px;
-    margin-left: 97%;
 }
 
 @media only screen and (max-width: 980px) {
@@ -24,23 +30,25 @@
 
 .fedLink {
     text-decoration: none;
+    position: absolute;
     color: #fff;
     background-color: #3eb995;
     transform: rotate(90deg);
-    margin-top: 48px;
-    margin-left: -45px;
+    margin-top: 115px;
+    margin-left: -16px;
     font-size: 20px;
     text-align: center;
     padding: 14px 20px 17px 20px;
+    transform-origin: 0 100%;
 }
 
 .shareText {
     position: relative;
-    margin-left: -10px;
+    margin-left: -15px;
     margin-bottom: 5px;
     font-size: 12px;
     color: #3eb995;
-    text-align: center;
+    text-align: right;
     max-width: 45px;
 }
 
