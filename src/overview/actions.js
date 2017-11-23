@@ -100,6 +100,7 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
     port.postMessage({ cmd: constants.CMDS.SEARCH, searchParams, overwrite })
 }
 
+// Analytics use
 function trackSearch(searchResult, overwrite, state) {
     // Value should be set as # results (if non-default search)
     const value =
@@ -112,6 +113,9 @@ function trackSearch(searchResult, overwrite, state) {
         action = overwrite ? 'Successful search' : 'Paginate search'
     } else {
         action = 'Unsuccessful search'
+    }
+    if (selectors.showOnlyBookmarks(state)) {
+        action += ' (BM only)'
     }
 
     const name = overwrite
