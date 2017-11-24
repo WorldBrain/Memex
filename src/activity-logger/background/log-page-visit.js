@@ -1,5 +1,6 @@
 import db from 'src/pouchdb'
 import storePage from 'src/page-storage/store-page'
+import { generatePageDocId } from 'src/page-storage'
 import { checkWithBlacklist } from 'src/blacklist'
 import { generateVisitDocId } from '..'
 import * as index from 'src/search'
@@ -23,26 +24,31 @@ async function storeVisit({ timestamp, url, page }) {
  *  to the new page.
  * @param {any} visit The new visit to add to index; should occur regardless of reidentify outcome.
  */
-async function updateIndex(finalPagePromise, visit) {
-    // Wait until all page analyis is done
-    const { page } = await finalPagePromise
+async function updateIndex(storePageResult, visit, pageId) {
+    if (storePageResult == null) {
+        await index.addMetaConcurrent('visit', Date.now(), pageId)
+    } else {
+        // Wait until all page analyis is done
+        const { page } = await storePageResult.finalPagePromise
 
-    // If no page returned from analysis, we can't index
-    if (!page) {
-        return
-    }
+        // If no page returned from analysis, we can't index
+        if (!page) {
+            return
+        }
 
-    // Index either the page + visit, or just the visit if page already exists
-    try {
-        await index.addPageConcurrent({ pageDoc: page, visitDocs: [visit] })
-    } catch (error) {
-        // Indexing issue; log it for now
-        console.error(error)
-        throw error
+        try {
+            await index.addPageConcurrent({ pageDoc: page, visitDocs: [visit] })
+        } catch (error) {
+            // Indexing issue; log it for now
+            console.error(error)
+            throw error
+        }
     }
 }
 
 export async function logPageVisit({ tabId, url }) {
+    const threshold = 20000
+
     // First check if we want to log this page (hence the 'maybe' in the name).
     const isBlacklisted = await checkWithBlacklist()
     if (isBlacklisted({ url })) {
@@ -52,17 +58,23 @@ export async function logPageVisit({ tabId, url }) {
     // The time to put in documents.
     const timestamp = Date.now()
 
-    // First create an identifier for the page being visited.
-    const storePageResult = await storePage({ tabId, url })
+    const pageId = generatePageDocId({ url })
+    const existingPage = index.initSingleLookup()(pageId)
+
+    let storePageResult
+    if (existingPage == null || timestamp - existingPage.latest < threshold) {
+        // First create an identifier for the page being visited.
+        storePageResult = await storePage({ tabId, url })
+    }
 
     // Create a visit pointing to this page (analysing/storing it may still be in progress)
     const { visit } = await storeVisit({
-        page: storePageResult.page,
+        page: { _id: pageId },
         url,
         timestamp,
     })
 
-    await updateIndex(storePageResult.finalPagePromise, visit)
+    await updateIndex(storePageResult, visit, pageId)
 
     // TODO possibly deduplicate the visit if the page was deduped too.
     void visit

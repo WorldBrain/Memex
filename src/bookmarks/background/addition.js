@@ -90,7 +90,7 @@ export async function createBookmarkByExtension(url) {
 
 export async function createBookmarkByTab(url, tabId) {
     const storePageResult = await storePage({ tabId, url })
-    const { page } = await storePageResult.finalPagePromise
+    await storePageResult.finalPagePromise
 
     try {
         createBookmarkByExtension(url)

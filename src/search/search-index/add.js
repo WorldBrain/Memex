@@ -225,3 +225,31 @@ async function performIndexing(indexDoc) {
         console.error(err)
     }
 }
+
+async function addMetaToReversePage(type, pageId, timestamp) {
+    const reverseIndexDoc = await singleLookup(pageId)
+    if (type === 'visit') {
+        reverseIndexDoc.visits.add('visit/' + timestamp)
+    } else {
+        reverseIndexDoc.bookmarks.add('bookmark/' + timestamp)
+    }
+    await index.put(pageId, reverseIndexDoc)
+}
+
+/**
+ * Adds a new meta index (bookmark or visit) entry.
+ * NOTE: Assumes the existence of indexed `pageId`.
+ *
+ * @param {'bookmark'|'visit'} type Type of meta event.
+ * @param {string} timestamp Timestamp of meta event.
+ * @param {string} pageId ID of page doc to associate with.
+ */
+export const addMetaConcurrent = (type, timestamp, pageId) =>
+    new Promise((resolve, reject) =>
+        indexQueue.push(() => {
+            addMetaToReversePage(type, pageId, timestamp)
+                .then(() => index.put(`${type}/${timestamp}`, pageId))
+                .then(resolve)
+                .catch(reject)
+        }),
+    )
