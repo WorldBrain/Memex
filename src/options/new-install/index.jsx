@@ -25,30 +25,19 @@ const NewInstall = () => (
         <img className={localStyles.logobig} src="/img/worldbrain-logo.png" />
         <div className={localStyles.messageContainer}>
             <div className={localStyles.message}>
-                <Slider {...settings} className={localStyles.slider}>
-                    <div>
-                        <h3 className={localStyles.h3}>
-                            No more re-googling of pages you have seen in the
-                            past.
-                        </h3>
-                    </div>
-                    <div>
-                        <h3 className={localStyles.h3}>
-                            "Finally, I can close my tabs and not lose them
-                            anymore!"
-                        </h3>
-                    </div>
-                    <div>
-                        <h3 className={localStyles.h3}>
-                            No need to bookmark pages. Just remember them.
-                        </h3>
-                    </div>
-                    <div>
-                        <h3 className={localStyles.h3}>
-                            "Why hasn't this existed before?"
-                        </h3>
-                    </div>
-                </Slider>
+                <p>
+                    With a 15s delay, Memex <strong>locally</strong> stores the
+                    content of the websites you visit.
+                </p>
+                <p>
+                    <strong>STEP 1: </strong>Visit some websites or{' '}
+                    <a className={localStyles.link} href="/#/import">
+                        import your history
+                    </a>.
+                    <br />
+                    <strong>STEP 2: </strong>Search by typing 'w' + 'space or
+                    tab' + 'your keywords' into the address bar of the browser.
+                </p>
             </div>
         </div>
         <div className={localStyles.btnBar}>
@@ -59,7 +48,7 @@ const NewInstall = () => (
                 href="https://worldbrain.io/tutorial"
                 target="_blank"
             >
-                Watch 1-min Tutorial Video
+                <strong>Watch</strong> 90s Tutorial Video
             </a>
 
             <a
@@ -68,7 +57,7 @@ const NewInstall = () => (
                 type="button"
                 href="/options/options.html#/tutorial"
             >
-                Read Step-By Step Tutorial
+                <strong>Read</strong> Step-By Step Tutorial
             </a>
         </div>
         <p>
