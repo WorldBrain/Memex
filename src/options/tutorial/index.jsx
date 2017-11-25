@@ -16,7 +16,7 @@ const Tutorial = () => (
                 <h3 className={LocalStyles.h3}>How to Search</h3>
                 <p className={LocalStyles.text}>
                     After installing, the extension runs in the background and
-                    indexes the pages you visit with a 10 seconds delay.
+                    indexes the pages you visit with a 15s delay.
                     <br />But you can also{' '}
                     <a
                         className={LocalStyles.link}
