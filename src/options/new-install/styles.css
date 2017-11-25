@@ -9,6 +9,7 @@
     align-items: center;
     font-weight: lighter;
     font-family: 'Libre Franklin', sans-serif;
+    justify-content: center;
 }
 
 .message {
