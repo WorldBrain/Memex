@@ -66,9 +66,8 @@ const NewInstall = () => (
                 className={localStyles.link}
                 onClick={trackWelcomeChoice('Go browsing')}
                 href="https://worldbrain.io/"
-                target="_blank"
             >
-                Or just get started browsing the web
+                Or close this window and start browsing the web
             </a>
         </p>
         <img style={{ width: '60%' }} src="/img/how_to_search.png" />
