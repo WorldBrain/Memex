@@ -8,6 +8,8 @@ import {
     idbBatchToPromise,
 } from './util'
 
+// Used to decide whether or not to do a range lookup for terms vs N single lookups
+const termsSizeLimit = 1000
 const lookupByKeys = initLookupByKeys()
 const singleLookup = initSingleLookup()
 
@@ -77,7 +79,9 @@ const initIndexTerms = (termsField, termKey) => async indexDoc => {
         return Promise.resolve()
     }
 
-    const termValuesMap = await termRangeLookup(termKey, termsSet)
+    const termValuesMap = await (termsSet.size > termsSizeLimit
+        ? termRangeLookup(termKey, termsSet)
+        : lookupByKeys([...termsSet]))
 
     for (const [term, currTermVal] of termValuesMap) {
         const termValue = reduceTermValue(currTermVal, indexDoc)
