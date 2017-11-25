@@ -4,6 +4,7 @@ import {
     augmentIndexLookupDoc,
     initSingleLookup,
     initLookupByKeys,
+    termRangeLookup,
     idbBatchToPromise,
 } from './util'
 
@@ -57,27 +58,26 @@ export const addPageConcurrent = req =>
  * @returns {IndexTermValue} Updated `currTermVal` with new entry for `indexDoc`.
  */
 function reduceTermValue(currTermVal, indexDoc) {
-    const newTermVal = new Map([[indexDoc.id, { latest: indexDoc.latest }]])
-
-    // Either reduce to a new term value or merge with the existing
-    return currTermVal == null
-        ? newTermVal
-        : new Map([...currTermVal, ...newTermVal])
+    if (currTermVal == null) {
+        return new Map([[indexDoc.id, { latest: indexDoc.latest }]])
+    }
+    currTermVal.set(indexDoc.id, { latest: indexDoc.latest })
+    return currTermVal
 }
 
 /**
  * @param {IndexLookupDoc} indexDoc
  * @returns {Promise<void>}
  */
-const initIndexTerms = termsField => async indexDoc => {
+const initIndexTerms = (termsField, termKey) => async indexDoc => {
     const indexBatch = index.batch()
-    const terms = [...indexDoc[termsField]]
+    const termsSet = indexDoc[termsField]
 
-    if (!terms.length) {
+    if (!termsSet.size) {
         return Promise.resolve()
     }
 
-    const termValuesMap = await lookupByKeys(terms)
+    const termValuesMap = await termRangeLookup(termKey, termsSet)
 
     for (const [term, currTermVal] of termValuesMap) {
         const termValue = reduceTermValue(currTermVal, indexDoc)
@@ -87,9 +87,9 @@ const initIndexTerms = termsField => async indexDoc => {
     return idbBatchToPromise(indexBatch)
 }
 
-const indexTerms = initIndexTerms('terms')
-const indexUrlTerms = initIndexTerms('urlTerms')
-const indexTitleTerms = initIndexTerms('titleTerms')
+const indexTerms = initIndexTerms('terms', 'term/')
+const indexUrlTerms = initIndexTerms('urlTerms', 'url/')
+const indexTitleTerms = initIndexTerms('titleTerms', 'title/')
 
 /**
  * @param {IndexLookupDoc} indexDoc

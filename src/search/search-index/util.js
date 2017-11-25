@@ -84,6 +84,32 @@ export const structureSearchResult = (document, score = 1) => ({
 })
 
 /**
+ * Performs a range lookup on a specific terms index, returning only those data
+ * that appear in the Set of terms supplied in `termsSet`.
+ *
+ * @param {string} termKey The specific term index prefix to lookup.
+ * @param {Set<string>} termsSet Set of term keys to include in the result.
+ * @returns {Map<string, string>} Map of term keys to term values found. Keys will be
+ *  indentical to `termsSet`, while values will be the found value if exist, else `null`.
+ */
+export const termRangeLookup = (termKey, termsSet) =>
+    new Promise(resolve => {
+        // Init Map as keys from `termsSet` to `null` values
+        const data = new Map([...termsSet].map(key => [key, null]))
+        index.db
+            .createReadStream({
+                gte: termKey,
+                lte: `${termKey}\uffff`,
+            })
+            .on('data', ({ key, value }) => {
+                if (termsSet.has(key)) {
+                    data.set(key, value)
+                }
+            })
+            .on('end', () => resolve(data))
+    })
+
+/**
  * Runs a lookup over a range of DB keys, resolving to the collected docs.
  * Range can be specified with `gte` and `lte` keys in `iteratorOpts`, along
  * with a `limit` count.
