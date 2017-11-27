@@ -129,7 +129,6 @@ class PopupContainer extends Component {
             analytics.trackEvent({
                 category: 'Popup',
                 action: domainDelete ? 'Blacklist domain' : 'Blacklist site',
-                name: url,
             })
 
             blacklistI.addToBlacklist(url)
@@ -201,7 +200,6 @@ class PopupContainer extends Component {
         analytics.trackEvent({
             category: 'Popup',
             action: 'Delete blacklisted pages',
-            name: this.state.url,
         })
 
         this.deleteDocs(

@@ -3,7 +3,7 @@ import { createAction } from 'redux-act'
 import analytics from 'src/util/analytics'
 import { dirtyStoredEsts } from 'src/imports'
 import { remoteFunction } from 'src/util/webextensionRPC'
-import { normalizedBlacklist, matchedDocCount } from './selectors'
+import { matchedDocCount } from './selectors'
 
 const deleteDocs = remoteFunction('deleteDocsByUrl')
 const fetchMatchingPages = remoteFunction('fetchPagesByUrlPattern')
@@ -23,7 +23,6 @@ export const addToBlacklist = expression => async dispatch => {
     analytics.trackEvent({
         category: 'Blacklist',
         action: 'Add blacklist entry',
-        name: expression,
     })
 
     dispatch(addSiteToBlacklist({ expression, dateAdded: Date.now() }))
@@ -43,11 +42,10 @@ export const addToBlacklist = expression => async dispatch => {
     }
 }
 
-export const removeFromBlacklist = index => (dispatch, getState) => {
+export const removeFromBlacklist = index => dispatch => {
     analytics.trackEvent({
         category: 'Blacklist',
         action: 'Remove blacklist entry',
-        name: normalizedBlacklist(getState())[index],
     })
 
     dispatch(removeSiteFromBlacklist({ index }))
@@ -58,7 +56,6 @@ export const removeMatchingDocs = expression => (dispatch, getState) => {
     analytics.trackEvent({
         category: 'Blacklist',
         action: 'Delete matching pages',
-        name: expression,
         value: matchedDocCount(getState()),
     })
 

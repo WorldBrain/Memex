@@ -80,7 +80,6 @@ class DateRangeSelection extends Component {
         analytics.trackEvent({
             category: isStartDate ? 'Overview start date' : 'Overview end date',
             action: nlpDate ? 'Successful NLP query' : 'Unsuccessful NLP query',
-            name: dateState,
         })
 
         if (nlpDate != null) {
@@ -156,7 +155,6 @@ class DateRangeSelection extends Component {
         analytics.trackEvent({
             category: isStartDate ? 'Overview start date' : 'Overview end date',
             action: date ? 'Date selection' : 'Date clear',
-            name: date ? date.toISOString() : undefined,
         })
 
         const updateDate = isStartDate
