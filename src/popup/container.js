@@ -179,7 +179,7 @@ class PopupContainer extends Component {
         if (event.key === 'Enter') {
             event.preventDefault()
             analytics.trackEvent({
-                category: 'Popup',
+                category: 'Search',
                 action: 'Popup search',
             })
 

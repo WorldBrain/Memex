@@ -122,7 +122,7 @@ function trackSearch(searchResult, overwrite, state) {
         ? selectors.queryParamsDisplay(state)
         : selectors.currentPageDisplay(state)
 
-    analytics.trackEvent({ category: 'Overview', action, name, value })
+    analytics.trackEvent({ category: 'Search', action, name, value })
 }
 
 const updateSearchResult = ({ searchResult, overwrite = false }) => (

@@ -81,11 +81,11 @@ async function makeSuggestion(query, suggest) {
     })
 
     analytics.trackEvent({
-        category: 'Omnibar',
+        category: 'Search',
         action:
             searchResults.totalCount > 0
-                ? 'Successful search'
-                : 'Unsuccessful search',
+                ? 'Successful omnibar search'
+                : 'Unsuccessful omnibar search',
         name: queryFiltersDisplay(queryFilters),
         value: searchResults.totalCount,
     })
