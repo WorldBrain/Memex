@@ -1,7 +1,14 @@
 import React from 'react'
 import Slider from 'react-slick'
 
+import analytics from 'src/util/analytics'
 import localStyles from './styles.css'
+
+const trackWelcomeChoice = action => () =>
+    analytics.trackEvent({
+        category: 'Welcome page selection',
+        action,
+    })
 
 const settings = {
     autoplay: true,
@@ -47,6 +54,7 @@ const NewInstall = () => (
         <div className={localStyles.btnBar}>
             <a
                 className={localStyles.btnLink}
+                onClick={trackWelcomeChoice('Tutorial video')}
                 type="button"
                 href="https://worldbrain.io/tutorial"
                 target="_blank"
@@ -56,6 +64,7 @@ const NewInstall = () => (
 
             <a
                 className={localStyles.btnLink}
+                onClick={trackWelcomeChoice('Tutorial page')}
                 type="button"
                 href="/options/options.html#/tutorial"
             >
@@ -66,8 +75,9 @@ const NewInstall = () => (
             {' '}
             <a
                 className={localStyles.link}
-                target="_blank"
+                onClick={trackWelcomeChoice('Go browsing')}
                 href="https://worldbrain.io/"
+                target="_blank"
             >
                 Or just get started browsing the web
             </a>
