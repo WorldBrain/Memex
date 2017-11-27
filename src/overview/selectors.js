@@ -39,13 +39,18 @@ export const endDate = createSelector(
 export const queryParamsDisplay = createSelector(
     currentQueryParams,
     ({ startDate, endDate, query }) => {
-        let val = `"${query}"`
+        let val = ''
+
+        if (query && query.length) {
+            val += 'T'
+        }
 
         if (startDate) {
-            val += ` after: ${new Date(startDate).toISOString()}`
+            val += ' SD'
         }
+
         if (endDate) {
-            val += ` before: ${new Date(endDate).toISOString()}`
+            val += ' ED'
         }
 
         return val
