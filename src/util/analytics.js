@@ -1,5 +1,7 @@
 import Piwik from 'piwik-react-router'
 
+import { SHOULD_TRACK_STORAGE_KEY as SHOULD_TRACK } from 'src/options/privacy/constants'
+
 /**
  * @typedef {Object} EventTrackInfo
  * @property {string} category The event category ('Search', 'Blacklist', etc.).
@@ -16,7 +18,6 @@ import Piwik from 'piwik-react-router'
 
 class Analytics {
     instance
-    _shouldTrack
 
     /**
      * @param {Object} args
@@ -27,12 +28,12 @@ class Analytics {
         this.instance = Piwik(args)
     }
 
-    set shouldTrack(value) {
-        this._shouldTrack = !!value
-    }
+    async shouldTrack() {
+        const storage = await browser.storage.local.get({
+            [SHOULD_TRACK]: true,
+        })
 
-    get shouldTrack() {
-        return this._shouldTrack
+        return storage[SHOULD_TRACK]
     }
 
     /**
@@ -40,8 +41,8 @@ class Analytics {
      *
      * @param {EventTrackInfo} eventArgs
      */
-    trackEvent(eventArgs) {
-        if (!this._shouldTrack) {
+    async trackEvent(eventArgs) {
+        if (!await this.shouldTrack()) {
             return
         }
 
@@ -61,8 +62,8 @@ class Analytics {
      *
      * @param {LinkTrackInfo} linkArgs
      */
-    trackLink(linkArgs) {
-        if (!this._shouldTrack) {
+    async trackLink(linkArgs) {
+        if (!await this.shouldTrack()) {
             return
         }
 
@@ -73,12 +74,8 @@ class Analytics {
 
     // Default method wrappers
     connectToHistory(history) {
-        // NOTE: This breaks page tracking as router is init'd before this state is properly set;
+        // NOTE: Page tracking will always happen for now as router is init'd before "should track" state can be fetched
         // TODO: Probably easiest way is to move to manual page tracking on a top-level `withRouter` component
-        if (!this._shouldTrack) {
-            return history
-        }
-
         return this.instance.connectToHistory(history)
     }
 }

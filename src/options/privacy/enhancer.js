@@ -1,4 +1,3 @@
-import analytics from 'src/util/analytics'
 import * as actions from './actions'
 import * as selectors from './selectors'
 import * as consts from './constants'
@@ -6,11 +5,6 @@ import * as consts from './constants'
 const sync = store =>
     store.subscribe(() => {
         const shouldTrackState = selectors.shouldTrack(store.getState())
-
-        // Update analytics instance shouldTrack property, if it's changed
-        if (analytics.shouldTrack !== shouldTrackState) {
-            analytics.shouldTrack = shouldTrackState
-        }
 
         // Update persisted shouldTrack value in Storage, if it's changed
         browser.storage.local
