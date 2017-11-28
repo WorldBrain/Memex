@@ -16,6 +16,7 @@ import Piwik from 'piwik-react-router'
 
 class Analytics {
     instance
+    _shouldTrack
 
     /**
      * @param {Object} args
@@ -26,12 +27,24 @@ class Analytics {
         this.instance = Piwik(args)
     }
 
+    set shouldTrack(value) {
+        this._shouldTrack = !!value
+    }
+
+    get shouldTrack() {
+        return this._shouldTrack
+    }
+
     /**
      * Track any user-invoked events.
      *
      * @param {EventTrackInfo} eventArgs
      */
     trackEvent(eventArgs) {
+        if (!this._shouldTrack) {
+            return
+        }
+
         const data = [
             'trackEvent',
             eventArgs.category,
@@ -49,6 +62,10 @@ class Analytics {
      * @param {LinkTrackInfo} linkArgs
      */
     trackLink(linkArgs) {
+        if (!this._shouldTrack) {
+            return
+        }
+
         const data = ['trackLink', linkArgs.url, linkArgs.linkType || 'link']
 
         return this.instance.push(data)
@@ -56,6 +73,12 @@ class Analytics {
 
     // Default method wrappers
     connectToHistory(history) {
+        // NOTE: This breaks page tracking as router is init'd before this state is properly set;
+        // TODO: Probably easiest way is to move to manual page tracking on a top-level `withRouter` component
+        if (!this._shouldTrack) {
+            return history
+        }
+
         return this.instance.connectToHistory(history)
     }
 }
