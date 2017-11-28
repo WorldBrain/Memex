@@ -1,8 +1,9 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
-import localStyles from './styles.css'
+import localStyles from './Privacy.css'
 
-const Privacy = () => (
+const Privacy = props => (
     <div className={localStyles.privacy}>
         <span className={localStyles.title}>
             {' '}
@@ -59,9 +60,12 @@ const Privacy = () => (
             <br />
             <br />Do you want to share anonymous usage statistics, so we can
             improve the Memex for you and others?
-            <select>
-                <option value="Yes">Yes</option>
-                <option value="No">No</option>
+            <select
+                value={props.shouldTrack ? 'y' : 'n'}
+                onChange={props.handleTrackChange}
+            >
+                <option value="y">Yes</option>
+                <option value="n">No</option>
             </select>
             <br />
             <br />
@@ -92,7 +96,7 @@ const Privacy = () => (
             <br />
             <br />
             <h3>Scope of Privacy Policy</h3>
-            This Privacy Policy applies to the informotion that we obtain
+            This Privacy Policy applies to the information that we obtain
             through your use of WorldBrain.io services via a device or when you
             otherwise interact with WorldBrain.io, Memex and WorldBrain UG.
             WorldBrain.io services include our:
@@ -103,5 +107,10 @@ const Privacy = () => (
         </div>
     </div>
 )
+
+Privacy.propTypes = {
+    shouldTrack: PropTypes.bool.isRequired,
+    handleTrackChange: PropTypes.func.isRequired,
+}
 
 export default Privacy
