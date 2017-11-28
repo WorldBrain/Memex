@@ -59,10 +59,10 @@ export async function logPageVisit({ tabId, url }) {
     const timestamp = Date.now()
 
     const pageId = generatePageDocId({ url })
-    const existingPage = index.initSingleLookup()(pageId)
+    const existingPage = await index.initSingleLookup()(pageId)
 
     let storePageResult
-    if (existingPage == null || timestamp - existingPage.latest < threshold) {
+    if (existingPage == null || timestamp - existingPage.latest > threshold) {
         // First create an identifier for the page being visited.
         storePageResult = await storePage({ tabId, url })
     }
