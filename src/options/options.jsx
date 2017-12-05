@@ -4,7 +4,7 @@ import { Router, Route, IndexRedirect, hashHistory } from 'react-router'
 import { Provider } from 'react-redux'
 
 import { ErrorBoundary, RuntimeError } from 'src/common-ui/components'
-import analytics from 'src/util/analytics'
+import withPageTracking from './withPageTracking'
 import configureStore from './store'
 import Layout from './layout'
 import Routes from './routes'
@@ -20,14 +20,14 @@ const store = configureStore({ ReduxDevTools })
 ReactDOM.render(
     <Provider store={store}>
         <ErrorBoundary component={RuntimeError}>
-            <Router history={analytics.connectToHistory(hashHistory)}>
+            <Router history={hashHistory}>
                 <Route path="/" component={Layout}>
                     <IndexRedirect to="/blacklist" />
                     {Routes.map(route => (
                         <Route
                             key={route.pathname}
                             path={route.pathname}
-                            component={route.component}
+                            component={withPageTracking(route.component)}
                         />
                     ))}
                 </Route>
