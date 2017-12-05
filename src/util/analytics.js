@@ -72,11 +72,17 @@ class Analytics {
         return this.instance.push(data)
     }
 
-    // Default method wrappers
-    connectToHistory(history) {
-        // NOTE: Page tracking will always happen for now as router is init'd before "should track" state can be fetched
-        // TODO: Probably easiest way is to move to manual page tracking on a top-level `withRouter` component
-        return this.instance.connectToHistory(history)
+    /**
+     * Track user page visits.
+     *
+     * @param {History.Location} loc Location object received from React Router.
+     */
+    async trackPage(loc) {
+        if (!await this.shouldTrack()) {
+            return
+        }
+
+        this.instance.track(loc)
     }
 }
 
