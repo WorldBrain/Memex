@@ -20,6 +20,35 @@ const fetchPageDataOpts = {
 }
 
 /**
+ * TransitionType strings that we care about in the context of the ext.
+ */
+const wantedTransitionTypes = new Set([
+    'link',
+    'generated',
+    'keyword',
+    'keyword_generated',
+])
+
+/**
+ * @param {IImportItem} importItem
+ * @throws {Error} Allows short-circuiting of the import process for current item if no VisitItems left after
+ *  filtering.
+ */
+async function checkVisitItemTransitionTypes({ url }) {
+    const visitItems = await browser.history.getVisits({ url })
+
+    // Only keep VisitItems with wanted TransitionType
+    const filteredVisitItems = visitItems.filter(item =>
+        wantedTransitionTypes.has(item.transition),
+    )
+
+    // Throw if no VisitItems left post-filtering (only if there was items to begin with)
+    if (visitItems.length > 0 && filteredVisitItems.length === 0) {
+        throw new Error('Redirection URL')
+    }
+}
+
+/**
  * @param {string?} favIconURL The data URL string for the favicon.
  * @returns {any} The `_attachments` entry to place into a PouchDB doc.
  */
@@ -80,6 +109,8 @@ const storeDocs = ({ pageDoc, bookmarkDocs = [], visitDocs = [] }) =>
  *  + optional filled-out page doc as `pageDoc` field.
  */
 async function processHistoryImport(importItem) {
+    await checkVisitItemTransitionTypes(importItem)
+
     const pageDoc = await createPageDoc(importItem)
 
     // Fetch and create meta-docs
