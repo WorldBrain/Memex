@@ -60,13 +60,19 @@ const formatFavIconAttachment = async favIconURL => {
 }
 
 /**
+ * Create visit docs from each of the WebExt history API's VisitItems. VisitItems with
+ * TransitionTypes not wanted in the context of the extension will be ignored. More info:
+ *  - https://developer.chrome.com/extensions/history#transition_types
+ *
  * @param {PageDoc} pageDoc Page doc to get visits and create visit docs for.
  * @returns {Array<IVisitDoc>} Array of visit docs gotten from URLs in `pageDoc`.
  */
 async function createAssociatedVisitDocs(pageDoc) {
     const visitItems = await browser.history.getVisits({ url: pageDoc.url })
 
-    return visitItems.map(transformToVisitDoc(pageDoc))
+    return visitItems
+        .filter(item => wantedTransitionTypes.has(item.transition))
+        .map(transformToVisitDoc(pageDoc))
 }
 
 async function createAssociatedBookmarkDoc(pageDoc, importItem) {
