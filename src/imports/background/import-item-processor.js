@@ -27,6 +27,9 @@ const wantedTransitionTypes = new Set([
     'generated',
     'keyword',
     'keyword_generated',
+    'typed',
+    'auto_bookmark',
+    'manual_subframe',
 ])
 
 /**
