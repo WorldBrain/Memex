@@ -5,7 +5,7 @@ import chrono from 'chrono-node'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker-cssmodules.css'
 
-import analytics from 'src/util/analytics'
+import analytics from 'src/analytics'
 import { DATE_PICKER_DATE_FORMAT as FORMAT } from '../constants'
 import styles from './DateRangeSelection.css'
 import './datepicker-overrides.css'

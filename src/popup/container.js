@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import qs from 'query-string'
 
-import analytics from 'src/util/analytics'
+import analytics from 'src/analytics'
 import { initSingleLookup } from 'src/search/search-index/util'
 import { generatePageDocId } from 'src/page-storage'
 import extractQueryFilters from 'src/util/nlp-time-filter'

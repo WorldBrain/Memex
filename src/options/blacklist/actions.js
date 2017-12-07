@@ -1,6 +1,6 @@
 import { createAction } from 'redux-act'
 
-import analytics from 'src/util/analytics'
+import analytics from 'src/analytics'
 import { dirtyStoredEsts } from 'src/imports'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { matchedDocCount } from './selectors'

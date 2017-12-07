@@ -14,7 +14,7 @@ import convertOldExtBlacklist, {
 } from 'src/blacklist/background'
 import { OLD_EXT_KEYS } from 'src/options/imports/constants'
 import index from 'src/search/search-index'
-import analytics from 'src/util/analytics'
+import analytics from 'src/analytics'
 
 export const OVERVIEW_URL = '/overview/overview.html'
 export const OLD_EXT_UPDATE_KEY = 'updated-from-old-ext'

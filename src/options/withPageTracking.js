@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import analytics from 'src/util/analytics'
+import analytics from 'src/analytics'
 
 /**
  * HOC that adds page tracking to whatever router-connected component.

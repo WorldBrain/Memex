@@ -1,7 +1,7 @@
 import React from 'react'
 import Slider from 'react-slick'
 
-import analytics from 'src/util/analytics'
+import analytics from 'src/analytics'
 import localStyles from './styles.css'
 
 const trackWelcomeChoice = action => () =>

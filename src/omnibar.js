@@ -4,7 +4,7 @@ import urlRegex from 'url-regex'
 import qs from 'query-string'
 import moment from 'moment'
 
-import analytics from 'src/util/analytics'
+import analytics from 'src/analytics'
 import shortUrl from 'src/util/short-url'
 import { search } from 'src/search'
 import extractTimeFiltersFromQuery, {

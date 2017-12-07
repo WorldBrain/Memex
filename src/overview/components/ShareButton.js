@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import analytics from 'src/util/analytics'
+import analytics from 'src/analytics'
 import styles from './ShareButtons.css'
 
 const trackLinkClick = name => () =>
