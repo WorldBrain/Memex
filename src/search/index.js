@@ -1,3 +1,4 @@
+import { STORAGE_KEYS as ANALYTIC_STORAGE_KEYS } from 'src/analytics/constants'
 import QueryBuilder from './query-builder'
 import { searchConcurrent } from './search-index/search'
 import mapResultsToPouchDocs from './map-search-to-pouch'
@@ -32,6 +33,9 @@ async function indexSearch({
             isBadTerm: true,
         }
     }
+
+    // Update the last search time in storage (used only for analytics purposes)
+    browser.storage.local.set({ [ANALYTIC_STORAGE_KEYS.SEARCH]: Date.now() })
     console.log('DEBUG: query', indexQuery)
 
     // Get index results, filtering out any unexpectedly structured results
