@@ -8,8 +8,8 @@ import {
     idbBatchToPromise,
 } from './util'
 
-// Used to decide whether or not to do a range lookup for terms vs N single lookups
-const termsSizeLimit = 1000
+// Used to decide whether or not to do a range lookup for terms (if # terms gt) or N single lookups
+const termsSizeLimit = 3000
 const lookupByKeys = initLookupByKeys()
 const singleLookup = initSingleLookup()
 
