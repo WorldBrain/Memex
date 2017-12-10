@@ -33,6 +33,13 @@ const wantedTransitionTypes = new Set([
 ])
 
 /**
+ * @param {history.VisitItem} item VisitItem object received from the WebExt History API.
+ * @returns {boolean}
+ */
+const filterVisitItemByTransType = item =>
+    wantedTransitionTypes.has(item.transition)
+
+/**
  * @param {IImportItem} importItem
  * @throws {Error} Allows short-circuiting of the import process for current item if no VisitItems left after
  *  filtering.
@@ -41,9 +48,7 @@ async function checkVisitItemTransitionTypes({ url }) {
     const visitItems = await browser.history.getVisits({ url })
 
     // Only keep VisitItems with wanted TransitionType
-    const filteredVisitItems = visitItems.filter(item =>
-        wantedTransitionTypes.has(item.transition),
-    )
+    const filteredVisitItems = visitItems.filter(filterVisitItemByTransType)
 
     // Throw if no VisitItems left post-filtering (only if there was items to begin with)
     if (visitItems.length > 0 && filteredVisitItems.length === 0) {
@@ -74,7 +79,7 @@ async function createAssociatedVisitDocs(pageDoc) {
     const visitItems = await browser.history.getVisits({ url: pageDoc.url })
 
     return visitItems
-        .filter(item => wantedTransitionTypes.has(item.transition))
+        .filter(filterVisitItemByTransType)
         .map(transformToVisitDoc(pageDoc))
 }
 
