@@ -20,6 +20,43 @@ const fetchPageDataOpts = {
 }
 
 /**
+ * TransitionType strings that we care about in the context of the ext.
+ */
+const wantedTransitionTypes = new Set([
+    'link',
+    'generated',
+    'keyword',
+    'keyword_generated',
+    'typed',
+    'auto_bookmark',
+    'manual_subframe',
+])
+
+/**
+ * @param {history.VisitItem} item VisitItem object received from the WebExt History API.
+ * @returns {boolean}
+ */
+const filterVisitItemByTransType = item =>
+    wantedTransitionTypes.has(item.transition)
+
+/**
+ * @param {IImportItem} importItem
+ * @throws {Error} Allows short-circuiting of the import process for current item if no VisitItems left after
+ *  filtering.
+ */
+async function checkVisitItemTransitionTypes({ url }) {
+    const visitItems = await browser.history.getVisits({ url })
+
+    // Only keep VisitItems with wanted TransitionType
+    const filteredVisitItems = visitItems.filter(filterVisitItemByTransType)
+
+    // Throw if no VisitItems left post-filtering (only if there was items to begin with)
+    if (visitItems.length > 0 && filteredVisitItems.length === 0) {
+        throw new Error('Redirection URL')
+    }
+}
+
+/**
  * @param {string?} favIconURL The data URL string for the favicon.
  * @returns {any} The `_attachments` entry to place into a PouchDB doc.
  */
@@ -31,13 +68,19 @@ const formatFavIconAttachment = async favIconURL => {
 }
 
 /**
+ * Create visit docs from each of the WebExt history API's VisitItems. VisitItems with
+ * TransitionTypes not wanted in the context of the extension will be ignored. More info:
+ *  - https://developer.chrome.com/extensions/history#transition_types
+ *
  * @param {PageDoc} pageDoc Page doc to get visits and create visit docs for.
  * @returns {Array<IVisitDoc>} Array of visit docs gotten from URLs in `pageDoc`.
  */
 async function createAssociatedVisitDocs(pageDoc) {
     const visitItems = await browser.history.getVisits({ url: pageDoc.url })
 
-    return visitItems.map(transformToVisitDoc(pageDoc))
+    return visitItems
+        .filter(filterVisitItemByTransType)
+        .map(transformToVisitDoc(pageDoc))
 }
 
 async function createAssociatedBookmarkDoc(pageDoc, importItem) {
@@ -80,6 +123,8 @@ const storeDocs = ({ pageDoc, bookmarkDocs = [], visitDocs = [] }) =>
  *  + optional filled-out page doc as `pageDoc` field.
  */
 async function processHistoryImport(importItem) {
+    await checkVisitItemTransitionTypes(importItem)
+
     const pageDoc = await createPageDoc(importItem)
 
     // Fetch and create meta-docs
