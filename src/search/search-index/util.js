@@ -89,24 +89,26 @@ export const structureSearchResult = (document, score = 1) => ({
  *
  * @param {string} termKey The specific term index prefix to lookup.
  * @param {Set<string>} termsSet Set of term keys to include in the result.
- * @returns {Map<string, string>} Map of term keys to term values found. Keys will be
- *  indentical to `termsSet`, while values will be the found value if exist, else `null`.
+ * @returns {Promise<Map<string, string>>} Map of term keys to term values found. Keys will be
+ *  indentical to `termsSet`, while values will be the found value (if exist in index), else `null`.
  */
 export const termRangeLookup = (termKey, termsSet) =>
     new Promise(resolve => {
         // Init Map as keys from `termsSet` to `null` values
-        const data = new Map([...termsSet].map(key => [key, null]))
+        const results = new Map([...termsSet].map(key => [key, null]))
+
         index.db
             .createReadStream({
                 gte: termKey,
                 lte: `${termKey}\uffff`,
             })
             .on('data', ({ key, value }) => {
+                // Only add current data to results if it appears in the set of terms we're looking for (else ignore)
                 if (termsSet.has(key)) {
-                    data.set(key, value)
+                    results.set(key, value)
                 }
             })
-            .on('end', () => resolve(data))
+            .on('end', () => resolve(results))
     })
 
 /**
