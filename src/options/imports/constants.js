@@ -38,6 +38,8 @@ export const STORAGE_KEYS = {
     TOTALS_STATE: 'import_totals_state',
     SUCCESS_STATE: 'import_success_progress_state',
     FAIL_STATE: 'import_fail_progress_state',
+    IMPORT_CACHE: 'import-estimate-counts',
+    IMPORT_CACHE_TIME: 'import-cache-time-calculated',
 }
 
 export const IMPORT_CONN_NAME = 'imports-bg-ui-runtime-connection'

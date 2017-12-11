@@ -1,6 +1,7 @@
 import { dataURLToBlob } from 'blob-util'
 
 import db from 'src/pouchdb'
+import Queue from 'src/util/priority-queue'
 import { generatePageDocId } from 'src/page-storage'
 import fetchPageData from 'src/page-analysis/background/fetch-page-data'
 import { revisePageFields } from 'src/page-analysis'
@@ -18,6 +19,8 @@ const fetchPageDataOpts = {
     includePageContent: true,
     includeFavIcon: true,
 }
+
+const oldExtQueue = new Queue({ autostart: true, concurrency: 1 })
 
 /**
  * TransitionType strings that we care about in the context of the ext.
@@ -109,11 +112,20 @@ async function createPageDoc({ url }) {
     })
 }
 
-const storeDocs = ({ pageDoc, bookmarkDocs = [], visitDocs = [] }) =>
-    Promise.all([
+const storeDocs = ({ pageDoc, bookmarkDocs = [], visitDocs = [] }) => {
+    if (
+        !pageDoc.content ||
+        !pageDoc.content.fullText ||
+        !pageDoc.content.fullText.length
+    ) {
+        return Promise.reject(new Error('Page has no searchable content'))
+    }
+
+    return Promise.all([
         index.addPageConcurrent({ pageDoc, visitDocs, bookmarkDocs }),
         db.bulkDocs([pageDoc, ...bookmarkDocs, ...visitDocs]),
     ])
+}
 
 /**
  * Handles processing of a history-type import item. Checks for exisitng page docs that have the same URL.
@@ -159,7 +171,7 @@ async function processOldExtImport(importItem) {
     await storeDocs({ pageDoc, visitDocs, bookmarkDocs })
 
     // If all okay now, remove the old data
-    await clearOldExtData(importItem)
+    oldExtQueue.push(clearOldExtData(importItem))
 
     return { status: DOWNLOAD_STATUS.SUCC }
 }

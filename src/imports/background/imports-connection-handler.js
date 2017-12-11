@@ -3,42 +3,15 @@ import {
     CMDS,
     IMPORT_CONN_NAME,
     DEF_CONCURRENCY,
-    IMPORT_TYPE,
 } from 'src/options/imports/constants'
-import getEstimateCounts from './import-estimates'
+import calcItems from './import-estimates'
 import processImportItem from './import-item-processor'
-import {
-    getImportItems,
-    setImportItems,
-    removeImportItem,
-    clearImportItems,
-} from './'
-import createImportItems from './import-item-creation'
+import * as itemCache from '../import-item-cache'
 import {
     getImportInProgressFlag,
     setImportInProgressFlag,
     clearImportInProgressFlag,
 } from '../'
-
-/**
- * Handles building the collection of import items in local storage.
- *
- * @param {any} allowTypes Object containings bools for each valid type of import, denoting whether
- *   or not import and page docs should be created for that import type.
- */
-async function prepareImportItems(allowTypes = {}) {
-    const items = await createImportItems()
-
-    // Union all import item maps, allowing old ext items precedence over bookmarks which have
-    //  precedence over history
-    await setImportItems(
-        new Map([
-            ...(allowTypes[IMPORT_TYPE.HISTORY] ? items.historyItemsMap : []),
-            ...(allowTypes[IMPORT_TYPE.BOOKMARK] ? items.bookmarkItemsMap : []),
-            ...(allowTypes[IMPORT_TYPE.OLD] ? items.oldExtItemsMap : []),
-        ]),
-    )
-}
 
 /**
  * Creates observer functions to afford sending of messages over connection port
@@ -49,20 +22,20 @@ async function prepareImportItems(allowTypes = {}) {
  */
 const getBatchObserver = port => {
     const handleFinishedItem = ({
-        input: [encodedUrl, { type, url }],
+        input: [encodedUrl, item],
         output: { status } = {},
         error,
     }) => {
         // Send item data + outcome status down to UI (and error if present)
         port.postMessage({
             cmd: CMDS.NEXT,
-            url: url,
-            type,
+            url: item.url,
+            hasBookmark: item.hasBookmark,
+            type: item.type,
+            key: encodedUrl,
             status,
             error,
         })
-
-        removeImportItem(encodedUrl)
     }
 
     return {
@@ -91,7 +64,7 @@ async function startImport(port, batch, allowTypes) {
     // Perform history-stubs, vists, and history import state creation, if import not in progress
     const importInProgress = await getImportInProgressFlag()
     if (!importInProgress) {
-        await prepareImportItems(allowTypes)
+        await calcItems(false, 0.165) // Only recalc cache if > ~10mins old
     }
 
     port.postMessage({ cmd: CMDS.START }) // Tell UI to finish loading state and move into progress view
@@ -106,16 +79,11 @@ async function startImport(port, batch, allowTypes) {
 async function finishImport(port) {
     clearImportInProgressFlag()
 
-    // Re-init the estimates view with updated estimates data
-    const estimateCounts = await getEstimateCounts({ forceRecalc: true })
-    port.postMessage({ cmd: CMDS.INIT, ...estimateCounts })
+    port.postMessage({ cmd: CMDS.INIT })
 }
 
 async function cancelImport(port, batch) {
     batch.stop()
-
-    // Clean up any import-related stubs or state
-    await clearImportItems()
 
     // Resume UI at complete state
     port.postMessage({ cmd: CMDS.COMPLETE })
@@ -133,7 +101,7 @@ export default async function importsConnectionHandler(port) {
     console.log('importer connected')
 
     const batch = new PromiseBatcher({
-        inputBatchCallback: getImportItems,
+        inputBatchCallback: itemCache.getItemsList,
         processingCallback: processImportItem,
         concurrency: DEF_CONCURRENCY,
         observer: getBatchObserver(port),
@@ -142,9 +110,9 @@ export default async function importsConnectionHandler(port) {
     // If import isn't started earlier, get estimates and set view state to init
     const importInProgress = await getImportInProgressFlag()
     if (!importInProgress) {
-        // Make sure estimates view init'd with count data
-        const estimateCounts = await getEstimateCounts({ forceRecalc: false })
-        port.postMessage({ cmd: CMDS.INIT, ...estimateCounts })
+        // Make sure cache is updated for estimates view
+        await calcItems()
+        port.postMessage({ cmd: CMDS.INIT })
     } else {
         // Make sure to start the view in paused state
         port.postMessage({ cmd: CMDS.PAUSE })

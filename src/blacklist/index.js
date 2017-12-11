@@ -1,4 +1,4 @@
-import { dirtyStoredEsts } from 'src/imports'
+import { dirty as dirtyStoredEsts } from 'src/imports/import-item-cache'
 import { STORAGE_KEY } from 'src/options/blacklist/constants'
 
 /**

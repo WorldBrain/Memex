@@ -9,45 +9,72 @@ import {
     DEF_CONCURRENCY,
 } from './constants'
 
-const defaultStats = {
-    [TYPE.HISTORY]: 0,
-    [TYPE.BOOKMARK]: 0,
-    [TYPE.OLD]: 0,
-}
+const defStatsState = val => ({
+    [TYPE.HISTORY]: val,
+    [TYPE.BOOKMARK]: val,
+    [TYPE.OLD]: val,
+})
 
 const defaultState = {
     showOldExt: false,
     downloadData: [],
-    completed: defaultStats, // Count of docs already in DB (estimates view)
-    fail: defaultStats, // Fail counts for completed import items
-    success: defaultStats, // Success counts for completed import items
-    totals: defaultStats, // Static state to use to derive remaining counts from
+    remaining: defStatsState({}), // Remaining item lists (estimates view + import item progress)
+    completedCounts: defStatsState(0), // Count of docs already in DB (estimates view)
+    fail: defStatsState(0), // Fail counts for completed import items
+    success: defStatsState(0), // Success counts for completed import items
+    totals: defStatsState(0), // Mostly-static counts from the start of an import to show
     importStatus: STATUS.LOADING,
-    loadingMsg:
-        'Please wait while we analyze & prepare your browsing history & bookmarks',
+    loadingMsg: 'Analyzing & preparing your browsing history & bookmarks',
     downloadDataFilter: FILTERS.ALL,
     concurrency: DEF_CONCURRENCY,
     isAdvEnabled: false,
     isFileUploading: false,
-    allowTypes: {
-        [TYPE.HISTORY]: false,
-        [TYPE.BOOKMARK]: false,
-        [TYPE.OLD]: false,
-    },
+    allowTypes: defStatsState(false),
     showDownloadDetails: false,
 }
 
-/**
- * A sub-reducer that either the success or fail count of a given import type, depending on success flag.
- * @param {any} state The entire state of the parent reducer.
- * @param {string} type The import type to update the count of (bookmarks/history)
- * @param {isSuccess} boolean Denotes whether or not to update 'success' or 'fail' count.
- */
-const updateCountReducer = (state, type, isSuccess) => {
-    const stateKey = isSuccess ? 'success' : 'fail'
-    return {
-        [stateKey]: { ...state[stateKey], [type]: state[stateKey][type] + 1 },
+const reduceCompletedCounts = (state, { type, hasBookmark, status }) => {
+    if (status !== DL_STAT.SUCC) {
+        return state
     }
+
+    const newState = { ...state }
+
+    // Inc the current type count
+    newState[type]++
+
+    // Only for old ext imports (either additionally inc history or bookmark count)
+    if (type === TYPE.OLD) {
+        if (hasBookmark) {
+            newState[TYPE.BOOKMARK]++
+        } else {
+            newState[TYPE.HISTORY]++
+        }
+    }
+
+    return newState
+}
+
+const reduceRemainingLists = (state, { type, key, status }) => {
+    if (status !== DL_STAT.SUCC) {
+        return state
+    }
+
+    const newState = { ...state }
+    const typesToReduce = [TYPE.HISTORY, TYPE.BOOKMARK]
+
+    // Also remove from old ext type list, if this item is old ext type
+    if (type === TYPE.OLD) {
+        typesToReduce.push(type)
+    }
+
+    // Remove the processed URL in each type list
+    for (const type of typesToReduce) {
+        const { [key]: finishedItem, ...remainingItems } = state[type]
+        newState[type] = remainingItems
+    }
+
+    return newState
 }
 
 /**
@@ -55,15 +82,28 @@ const updateCountReducer = (state, type, isSuccess) => {
  */
 const addDownloadDetailsReducer = (
     state,
-    { url, type, status = DL_STAT.FAIL, error },
-) => ({
-    ...state,
-    ...updateCountReducer(state, type, status === DL_STAT.SUCC),
-    downloadData: [
-        ...state.downloadData,
-        { url, type, status, error }, // Add new details row
-    ],
-})
+    { url, type, status = DL_STAT.FAIL, error, hasBookmark, key },
+) => {
+    const countState = status === DL_STAT.SUCC ? 'success' : 'fail'
+
+    return {
+        ...state,
+        completedCounts: reduceCompletedCounts(state.completedCounts, {
+            type,
+            hasBookmark,
+            status,
+        }),
+        remaining: reduceRemainingLists(state.remaining, { type, key, status }),
+        [countState]: {
+            ...state[countState],
+            [type]: state[countState][type] + 1,
+        },
+        downloadData: [
+            ...state.downloadData,
+            { url, type, status, error }, // Add new details row
+        ],
+    }
+}
 
 const toggleAllowTypeReducer = (state, type) => ({
     ...state,
@@ -76,27 +116,40 @@ const toggleAllowTypeReducer = (state, type) => ({
 const finishImportsReducer = ({ loading = false }) => state => ({
     ...state,
     importStatus: loading ? STATUS.LOADING : STATUS.IDLE,
-    downloadData: [],
-    success: defaultStats,
-    fail: defaultStats,
+    downloadData: defaultState.downloadData,
+    success: defaultState.success,
+    fail: defaultState.fail,
 })
 
 const prepareImportReducer = state => ({
     ...state,
     importStatus: STATUS.LOADING,
-    loadingMsg: 'Preparing import.',
+    loadingMsg: 'Making last import preparations and we are good to go!',
 })
 
 const cancelImportReducer = state => ({
     ...state,
     importStatus: STATUS.LOADING,
-    loadingMsg: 'Please wait as import progress gets recorded.',
+    loadingMsg: 'Finishing off URLs that have already been started.',
 })
 
-const initEstimateCounts = (state, { remaining, completed }) => ({
+const initCache = (state, cache) => ({
     ...state,
-    totals: { ...state.totals, ...remaining },
-    completed: { ...state.completed, ...completed },
+    ...cache,
+})
+
+const reduceTotalsCountsFromRemaining = remaining => {
+    const newTotalsState = {}
+    for (const key in remaining) {
+        newTotalsState[key] = Object.keys(remaining[key]).length
+    }
+    return newTotalsState
+}
+
+const startImport = state => ({
+    ...state,
+    importStatus: STATUS.RUNNING,
+    totals: reduceTotalsCountsFromRemaining(state.remaining),
 })
 
 // Sets whatever key to the specified val
@@ -111,7 +164,7 @@ export default createReducer(
     {
         [actions.initAllowTypes]: payloadReducer('allowTypes'),
         [actions.prepareImport]: prepareImportReducer,
-        [actions.startImport]: setImportState(STATUS.RUNNING),
+        [actions.startImport]: startImport,
         [actions.stopImport]: setImportState(STATUS.STOPPED),
         [actions.finishImport]: finishImportsReducer({ loading: true }),
         [actions.readyImport]: finishImportsReducer({ loading: false }),
@@ -122,11 +175,11 @@ export default createReducer(
         [actions.toggleAllowType]: toggleAllowTypeReducer,
         [actions.filterDownloadDetails]: payloadReducer('downloadDataFilter'),
         [actions.initImportState]: payloadReducer('importStatus'),
-        [actions.initEstimateCounts]: initEstimateCounts,
-        [actions.initTotalsCounts]: payloadReducer('totals'),
+        [actions.initTotalCounts]: payloadReducer('totals'),
         [actions.initFailCounts]: payloadReducer('fail'),
         [actions.initSuccessCounts]: payloadReducer('success'),
         [actions.initDownloadData]: payloadReducer('downloadData'),
+        [actions.initCache]: initCache,
         [actions.setShowOldExt]: payloadReducer('showOldExt'),
 
         // Adv settings mode reducers

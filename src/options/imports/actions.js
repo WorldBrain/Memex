@@ -1,6 +1,7 @@
 import { createAction } from 'redux-act'
 
 import db from 'src/pouchdb'
+import * as itemsCache from 'src/imports/import-item-cache'
 import { CMDS, IMPORT_CONN_NAME, OLD_EXT_KEYS } from './constants'
 import * as selectors from './selectors'
 
@@ -13,11 +14,10 @@ export const addImportItem = createAction('imports/addImportItem')
 export const toggleAllowType = createAction('imports/toggleAllowType')
 
 export const initAllowTypes = createAction('imports/initAllowTypes')
-export const initEstimateCounts = createAction('imports/initEstimateCounts')
-export const initTotalsCounts = createAction('imports/initTotalsCounts')
+export const initTotalCounts = createAction('imports/initTotalCounts')
 export const initFailCounts = createAction('imports/initFailCounts')
 export const initSuccessCounts = createAction('imports/initSuccessCounts')
-
+export const initCache = createAction('imports/initImportsCache')
 export const initImportState = createAction('imports/initImportState')
 export const initDownloadData = createAction('imports/initDownloadData')
 
@@ -58,6 +58,12 @@ const deserializeDoc = docString => {
     }
 }
 
+// Resync redux store state with external cache state
+const refreshImportsCache = () => dispatch =>
+    itemsCache
+        .get()
+        .then(({ calculatedAt, ...cache }) => dispatch(initCache(cache)))
+
 /**
  * Performs a restore of given docs files.
  * @param {Array<File>} files One or more NDJSON files that contain database docs.
@@ -93,7 +99,7 @@ export const uploadTestData = files => async (dispatch, getState) => {
 const getCmdMessageHandler = dispatch => ({ cmd, ...payload }) => {
     switch (cmd) {
         case CMDS.INIT:
-            dispatch(initEstimateCounts(payload))
+            dispatch(refreshImportsCache())
             dispatch(readyImport())
             break
         case CMDS.START:
