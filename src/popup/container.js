@@ -52,9 +52,7 @@ class PopupContainer extends Component {
 
         this.toggleLoggingPause = remoteFunction('toggleLoggingPause')
         this.deleteDocs = remoteFunction('deleteDocsByUrl')
-        this.createBookmarkByExtension = remoteFunction(
-            'createBookmarkByExtension',
-        )
+        this.createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
         this.removeBookmarkByUrl = remoteFunction('removeBookmarkByUrl')
 
         this.onSearchChange = this.onSearchChange.bind(this)
@@ -262,7 +260,7 @@ class PopupContainer extends Component {
         if (
             this.state.bookmarkBtn === constants.BOOKMARK_BTN_STATE.UNBOOKMARK
         ) {
-            this.createBookmarkByExtension(this.state.url)
+            this.createBookmarkByUrl(this.state.url)
         } else if (
             this.state.bookmarkBtn === constants.BOOKMARK_BTN_STATE.BOOKMARK
         ) {

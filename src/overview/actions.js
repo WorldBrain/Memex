@@ -30,7 +30,7 @@ export const incSearchCount = createAction('overview/incSearchCount')
 export const initSearchCount = createAction('overview/initSearchCount')
 
 const deleteDocsByUrl = remoteFunction('deleteDocsByUrl')
-const createBookmarkByExtension = remoteFunction('createBookmarkByExtension')
+const createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
 const removeBookmarkByUrl = remoteFunction('removeBookmarkByUrl')
 
 const getCmdMessageHandler = dispatch => ({ cmd, ...payload }) => {
@@ -187,7 +187,7 @@ export const toggleBookmark = (url, index) => async (dispatch, getState) => {
         if (hasBookmark) {
             await removeBookmarkByUrl(url)
         } else {
-            await createBookmarkByExtension(url)
+            await createBookmarkByUrl(url)
         }
     } catch (error) {
         dispatch(changeHasBookmark(index)) // Reset UI state in case of error

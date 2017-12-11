@@ -1,8 +1,8 @@
 import removeBookmarkByUrl from './deletion'
-import { createBookmarkByExtension, createNewPageForBookmark } from './addition'
+import { createBookmarkByUrl, createNewPageForBookmark } from './addition'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 
-makeRemotelyCallable({ createBookmarkByExtension })
+makeRemotelyCallable({ createBookmarkByUrl })
 makeRemotelyCallable({ removeBookmarkByUrl })
 
 const removeBookmarkHandler = (id, { node }) =>
