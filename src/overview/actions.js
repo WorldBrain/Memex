@@ -173,6 +173,7 @@ export const deleteDocs = () => async (dispatch, getState) => {
 export const toggleBookmark = (url, index) => async (dispatch, getState) => {
     const results = selectors.results(getState())
     const { hasBookmark } = results[index]
+    dispatch(changeHasBookmark(index)) // Reset UI state in case of error
 
     analytics.trackEvent({
         category: 'Overview',
@@ -181,9 +182,14 @@ export const toggleBookmark = (url, index) => async (dispatch, getState) => {
             : 'Create result bookmark',
     })
 
-    if (hasBookmark) {
-        await removeBookmarkByUrl(url)
-    } else {
-        await createBookmarkByExtension(url)
+    try {
+        // Either perform adding or removal of bookmark if
+        if (hasBookmark) {
+            await removeBookmarkByUrl(url)
+        } else {
+            await createBookmarkByExtension(url)
+        }
+    } catch (error) {
+        dispatch(changeHasBookmark(index)) // Reset UI state in case of error
     }
 }

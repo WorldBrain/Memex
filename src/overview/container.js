@@ -27,7 +27,7 @@ class OverviewContainer extends Component {
         shouldShowCount: PropTypes.bool.isRequired,
         needsWaypoint: PropTypes.bool.isRequired,
         handleTrashBtnClick: PropTypes.func.isRequired,
-        handleToggleBookmarkClick: PropTypes.func.isRequired,
+        handleToggleBm: PropTypes.func.isRequired,
     }
 
     componentDidMount() {
@@ -47,17 +47,13 @@ class OverviewContainer extends Component {
     }
 
     renderResultItems() {
-        const resultItems = this.props.searchResults.map((doc, index) => (
-            <li key={index}>
-                <PageResultItem
-                    onTrashBtnClick={this.props.handleTrashBtnClick(doc.url)}
-                    onToggleBookmarkClick={this.props.handleToggleBookmarkClick(
-                        index,
-                        doc.url,
-                    )}
-                    {...doc}
-                />
-            </li>
+        const resultItems = this.props.searchResults.map((doc, i) => (
+            <PageResultItem
+                key={i}
+                onTrashBtnClick={this.props.handleTrashBtnClick(doc.url)}
+                onToggleBookmarkClick={this.props.handleToggleBm(doc.url, i)}
+                {...doc}
+            />
         ))
 
         // Insert waypoint at the end of results to trigger loading new items when
@@ -194,10 +190,9 @@ const mapDispatchToProps = dispatch => ({
         event.preventDefault()
         dispatch(actions.showDeleteConfirm(url))
     },
-    handleToggleBookmarkClick: (index, url) => event => {
+    handleToggleBm: (url, index) => event => {
         event.preventDefault()
         dispatch(actions.toggleBookmark(url, index))
-        dispatch(actions.changeHasBookmark(index))
     },
 })
 
