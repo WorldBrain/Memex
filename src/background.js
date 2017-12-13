@@ -21,7 +21,10 @@ export const OVERVIEW_URL = '/overview/overview.html'
 export const OLD_EXT_UPDATE_KEY = 'updated-from-old-ext'
 export const ONBOARDING_URL = '/onboarding/new_install.html'
 export const UPDATE_URL = '/update/update.html'
-export const UNINSTALL_URL = 'http://worldbrain.io/uninstall'
+export const UNINSTALL_URL =
+    process.env.NODE_ENV === 'production'
+        ? 'http://worldbrain.io/uninstall'
+        : ''
 
 // Put doc ID generators on window for user use with manual DB lookups
 window.generatePageDocId = generatePageDocId
