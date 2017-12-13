@@ -13,44 +13,51 @@ const getBookmarkClass = ({ hasBookmark }) =>
     })
 
 const PageResultItem = props => (
-    <a className={styles.root} href={props.url} target="_blank">
-        <div className={styles.screenshotContainer}>
-            {props._attachments && props._attachments.screenshot ? (
-                <ImgFromPouch
-                    className={styles.screenshot}
-                    doc={props}
-                    attachmentId="screenshot"
-                />
-            ) : (
-                <img className={styles.screenshot} src="/img/null-icon.png" />
-            )}
-        </div>
-        <div className={styles.descriptionContainer}>
-            <div className={styles.title} title={props.title}>
-                {props._attachments &&
-                    props._attachments.favIcon && (
-                        <ImgFromPouch
-                            className={styles.favIcon}
-                            doc={props}
-                            attachmentId="favIcon"
-                        />
-                    )}
-                {props.title}
+    <li>
+        <a className={styles.root} href={props.url} target="_blank">
+            <div className={styles.screenshotContainer}>
+                {props._attachments && props._attachments.screenshot ? (
+                    <ImgFromPouch
+                        className={styles.screenshot}
+                        doc={props}
+                        attachmentId="screenshot"
+                    />
+                ) : (
+                    <img
+                        className={styles.screenshot}
+                        src="/img/null-icon.png"
+                    />
+                )}
             </div>
-            <div className={styles.url}>{props.url}</div>
-            <div className={styles.time}>{niceTime(+props.displayTime)}</div>
-        </div>
-        <div className={styles.buttonsContainer}>
-            <button
-                className={getBookmarkClass(props)}
-                onClick={props.onToggleBookmarkClick}
-            />
-            <button
-                className={classNames(styles.button, styles.trash)}
-                onClick={props.onTrashBtnClick}
-            />
-        </div>
-    </a>
+            <div className={styles.descriptionContainer}>
+                <div className={styles.title} title={props.title}>
+                    {props._attachments &&
+                        props._attachments.favIcon && (
+                            <ImgFromPouch
+                                className={styles.favIcon}
+                                doc={props}
+                                attachmentId="favIcon"
+                            />
+                        )}
+                    {props.title}
+                </div>
+                <div className={styles.url}>{props.url}</div>
+                <div className={styles.time}>
+                    {niceTime(+props.displayTime)}
+                </div>
+            </div>
+            <div className={styles.buttonsContainer}>
+                <button
+                    className={getBookmarkClass(props)}
+                    onClick={props.onToggleBookmarkClick}
+                />
+                <button
+                    className={classNames(styles.button, styles.trash)}
+                    onClick={props.onTrashBtnClick}
+                />
+            </div>
+        </a>
+    </li>
 )
 
 PageResultItem.propTypes = {

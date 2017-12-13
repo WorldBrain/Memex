@@ -8,12 +8,18 @@ import { pageKeyPrefix } from 'src/page-storage'
 import { visitKeyPrefix } from 'src/activity-logger'
 import { bookmarkKeyPrefix } from 'src/bookmarks'
 
+/**
+ * @param {any} input
+ * @param {'domain'|'regex'|'url'} type
+ * @returns {Promise<void>}
+ */
 export default (input, type = 'url') => {
     switch (type) {
         case 'domain':
             return deleteDomain(input)
         case 'regex':
             return deleteByRegex(input)
+        case 'url':
         default:
             return deleteSpecificSite(input)
     }

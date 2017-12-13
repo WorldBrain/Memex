@@ -15,7 +15,7 @@ import ResultsMessage from './components/ResultsMessage'
 class OverviewContainer extends Component {
     static propTypes = {
         grabFocusOnMount: PropTypes.bool.isRequired,
-        onInputChange: PropTypes.func.isRequired,
+        handleInputChange: PropTypes.func.isRequired,
         onBottomReached: PropTypes.func.isRequired,
         isLoading: PropTypes.bool.isRequired,
         isNewSearchLoading: PropTypes.bool.isRequired,
@@ -27,7 +27,7 @@ class OverviewContainer extends Component {
         shouldShowCount: PropTypes.bool.isRequired,
         needsWaypoint: PropTypes.bool.isRequired,
         handleTrashBtnClick: PropTypes.func.isRequired,
-        handleToggleBookmarkClick: PropTypes.func.isRequired,
+        handleToggleBm: PropTypes.func.isRequired,
     }
 
     componentDidMount() {
@@ -40,24 +40,14 @@ class OverviewContainer extends Component {
         this.inputQueryEl = element
     }
 
-    handleInputChange = event => {
-        const input = event.target
-
-        this.props.onInputChange(input.value)
-    }
-
     renderResultItems() {
-        const resultItems = this.props.searchResults.map((doc, index) => (
-            <li key={index}>
-                <PageResultItem
-                    onTrashBtnClick={this.props.handleTrashBtnClick(doc.url)}
-                    onToggleBookmarkClick={this.props.handleToggleBookmarkClick(
-                        index,
-                        doc.url,
-                    )}
-                    {...doc}
-                />
-            </li>
+        const resultItems = this.props.searchResults.map((doc, i) => (
+            <PageResultItem
+                key={i}
+                onTrashBtnClick={this.props.handleTrashBtnClick(doc.url)}
+                onToggleBookmarkClick={this.props.handleToggleBm(doc.url, i)}
+                {...doc}
+            />
         ))
 
         // Insert waypoint at the end of results to trigger loading new items when
@@ -152,7 +142,7 @@ class OverviewContainer extends Component {
             <Overview
                 {...this.props}
                 setInputRef={this.setInputRef}
-                onInputChange={this.handleInputChange}
+                onInputChange={this.props.handleInputChange}
             >
                 {this.renderResults()}
             </Overview>
@@ -179,7 +169,6 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
     ...bindActionCreators(
         {
-            onInputChange: actions.setQuery,
             onStartDateChange: actions.setStartDate,
             onEndDateChange: actions.setEndDate,
             onBottomReached: actions.getMoreResults,
@@ -190,14 +179,17 @@ const mapDispatchToProps = dispatch => ({
         },
         dispatch,
     ),
+    handleInputChange: event => {
+        const input = event.target
+        dispatch(actions.setQuery(input.value))
+    },
     handleTrashBtnClick: url => event => {
         event.preventDefault()
         dispatch(actions.showDeleteConfirm(url))
     },
-    handleToggleBookmarkClick: (index, url) => event => {
+    handleToggleBm: (url, index) => event => {
         event.preventDefault()
         dispatch(actions.toggleBookmark(url, index))
-        dispatch(actions.changeHasBookmark(index))
     },
 })
 

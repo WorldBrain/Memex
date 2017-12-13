@@ -1,3 +1,4 @@
+import { bookmarkKeyPrefix } from 'src/bookmarks'
 import index, { indexQueue } from '.'
 import pipeline from './pipeline'
 import {
@@ -53,6 +54,46 @@ export const addPageConcurrent = req =>
                 .catch(reject),
         )
     })
+
+/**
+ * @param {string} pageId ID/key of document to associate new bookmark entry with.
+ * @param {number|string} [timestamp=Date.now()]
+ * @throws {Error} Error thrown when `pageId` param does not correspond to existing document (or any other
+ *  standard indexing-related Error encountered during updates).
+ */
+export const addBookmarkConcurrent = (pageId, timestamp = Date.now()) =>
+    new Promise((resolve, reject) =>
+        indexQueue.push(() =>
+            addBookmark(pageId)
+                .then(resolve)
+                .catch(reject),
+        ),
+    )
+
+/**
+ * @param {string} pageId ID/key of document to associate new bookmark entry with.
+ * @param {number|string} [timestamp=Date.now()]
+ * @throws {Error} Error thrown when `pageId` param does not correspond to existing document (or any other
+ *  standard indexing-related Error encountered during updates).
+ */
+async function addBookmark(pageId, timestamp = Date.now()) {
+    const reverseIndexDoc = await singleLookup(pageId)
+
+    if (reverseIndexDoc == null) {
+        throw new Error(
+            `No document exists in reverse page index for the supplied page ID: ${pageId}`,
+        )
+    }
+
+    const bookmarkKey = `${bookmarkKeyPrefix}${timestamp}`
+
+    // Add new entry to bookmarks index
+    await index.put(bookmarkKey, pageId)
+
+    // Add bookmarks index key to reverse page doc and update index entry
+    reverseIndexDoc.bookmarks.add(bookmarkKey)
+    await index.put(pageId, reverseIndexDoc)
+}
 
 /**
  * @param {IndexTermValue} currTermVal

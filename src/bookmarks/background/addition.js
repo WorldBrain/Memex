@@ -50,7 +50,14 @@ export async function createNewPageForBookmark(id, bookmarkInfo) {
     }
 }
 
-export async function createBookmarkByExtension(url) {
+/**
+ * TODO: Decided if we actually need these bookmark docs in Pouch; I don't think they're being used for anything.
+ *
+ * @param {string} url URL to generate page ID from to associate bookmark with.
+ * @throws {Error} Error thrown if page for supplied URL not indexed.
+ * @returns {Promise<void>}
+ */
+export async function createBookmarkByUrl(url) {
     const pageId = generatePageDocId({ url })
     const pageDoc = await db.get(pageId)
 
@@ -59,6 +66,9 @@ export async function createBookmarkByExtension(url) {
         title: pageDoc.content.title,
         url: pageDoc.url,
     })
-    index.addPageConcurrent({ pageDoc, bookmarkDocs: [bookmarkDoc] })
-    db.put(bookmarkDoc)
+
+    return await Promise.all([
+        index.addBookmarkConcurrent(pageId),
+        db.put(bookmarkDoc),
+    ])
 }
