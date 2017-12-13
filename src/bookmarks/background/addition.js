@@ -5,7 +5,6 @@ import * as index from 'src/search'
 import db from 'src/pouchdb'
 import { transformToBookmarkDoc } from 'src/imports'
 import { generatePageDocId } from 'src/page-storage'
-import storePage from 'src/page-storage/store-page'
 
 async function getAttachments(pageData) {
     const favIconBlob = await dataURLToBlob(pageData.favIconURI)
@@ -51,7 +50,6 @@ export async function createNewPageForBookmark(id, bookmarkInfo) {
     }
 }
 
-<<<<<<< eef4f6e255fdc0a22e80a5314c98ccee05f2a49c
 /**
  * TODO: Decided if we actually need these bookmark docs in Pouch; I don't think they're being used for anything.
  *
@@ -63,7 +61,6 @@ export async function createBookmarkByUrl(url) {
     const pageId = generatePageDocId({ url })
     const pageDoc = await db.get(pageId)
 
-
     const bookmarkDoc = transformToBookmarkDoc({ _id: pageId })({
         dateAdded: Date.now(),
         title: pageDoc.content.title,
@@ -74,28 +71,4 @@ export async function createBookmarkByUrl(url) {
         index.addBookmarkConcurrent(pageId),
         db.put(bookmarkDoc),
     ])
-=======
-export async function createBookmarkByExtension(url) {
-    const pageId = generatePageDocId({ url })
-    const pageDoc = await db.get(pageId)
-
-    const bookmarkDoc = transformToBookmarkDoc({ _id: pageId })({
-        dateAdded: Date.now(),
-        title: pageDoc.content.title,
-        url: pageDoc.url,
-    })
-    index.addPageConcurrent({ pageDoc, bookmarkDocs: [bookmarkDoc] })
-    db.put(bookmarkDoc)
-}
-
-export async function createBookmarkByTab(url, tabId) {
-    const storePageResult = await storePage({ tabId, url })
-    await storePageResult.finalPagePromise
-
-    try {
-        createBookmarkByExtension(url)
-    } catch (error) {
-        console.log(error)
-    }
->>>>>>> Made required changes
 }

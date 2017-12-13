@@ -54,7 +54,7 @@ class PopupContainer extends Component {
         this.toggleLoggingPause = remoteFunction('toggleLoggingPause')
         this.deleteDocs = remoteFunction('deleteDocsByUrl')
         this.removeBookmarkByUrl = remoteFunction('removeBookmarkByUrl')
-        this.createBookmarkByTab = remoteFunction('createBookmarkByTab')
+        this.createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
 
         this.onSearchChange = this.onSearchChange.bind(this)
         this.onPauseChange = this.onPauseChange.bind(this)
@@ -283,6 +283,24 @@ class PopupContainer extends Component {
         }
         return (
             <div>
+                <Button
+                    onClick={this.handleAddBookmark}
+                    icon={
+                        this.state.bookmarkBtn ===
+                        constants.BOOKMARK_BTN_STATE.BOOKMARK
+                            ? 'star'
+                            : 'star_border'
+                    }
+                    disabled={
+                        this.state.bookmarkBtn ===
+                        constants.BOOKMARK_BTN_STATE.DISABLED
+                    }
+                >
+                    {this.state.bookmarkBtn ===
+                    constants.BOOKMARK_BTN_STATE.BOOKMARK
+                        ? 'Unbookmark this Page'
+                        : 'Bookmark this Page'}
+                </Button>
                 <HistoryPauser
                     onConfirm={this.onPauseConfirm}
                     onChange={this.onPauseChange}
