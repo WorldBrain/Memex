@@ -15,8 +15,9 @@ const NewInstall = () => (
         <div className={localStyles.messageContainer}>
             <div className={localStyles.message}>
                 <p>
-                    With a 15s delay, Memex <strong>locally</strong> stores the
-                    content of the websites you visit.
+                    With a 15s delay, Memex <strong>locally stores</strong> the
+                    content of the websites you visit, so you can search for
+                    every word in it.
                 </p>
                 <p>
                     <strong>STEP 1: </strong>Visit some websites or{' '}
@@ -24,7 +25,7 @@ const NewInstall = () => (
                         className={localStyles.link}
                         href="/options/options.html#/import"
                     >
-                        import your history
+                        import your existing browser history/bookmarks
                     </a>.
                     <br />
                     <strong>STEP 2: </strong>Search by typing 'w' + 'space or

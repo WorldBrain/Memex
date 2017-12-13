@@ -30,6 +30,8 @@ const wantedTransitionTypes = new Set([
     'typed',
     'auto_bookmark',
     'manual_subframe',
+    'reload',
+    'auto_toplevel',
 ])
 
 /**
@@ -52,7 +54,7 @@ async function checkVisitItemTransitionTypes({ url }) {
 
     // Throw if no VisitItems left post-filtering (only if there was items to begin with)
     if (visitItems.length > 0 && filteredVisitItems.length === 0) {
-        throw new Error('Redirection URL')
+        throw new Error('Unused TransitionType')
     }
 }
 

@@ -13,14 +13,16 @@
 }
 
 .message {
-    font-size: 1.5em;
-    line-height: 1.8em;
+    font-size: 1.2em;
+    line-height: 1.7em;
     text-align: center;
 }
 
 .logobig {
     margin-bottom: 50px;
-    margin-top: 20px;
+    margin-top: 55px;
+    width: 30%;
+    min-width: 500px;
 }
 
 .btnLink {

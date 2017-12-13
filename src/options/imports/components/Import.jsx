@@ -38,15 +38,8 @@ const Import = ({
                         This process may slow down your internet connection.
                     </Warning>
                     <Warning>
-                        Disabling Chrome's background tab throttling may improve
-                        improve imports performance:
-                        <br />
-                        <code className={localStyles.warningCode}>
-                            chrome://flags/#expensive-background-timer-throttling
-                        </code>
-                        <br />
-                        Please use this option with care and reset to "Default"
-                        when not importing.
+                        Since our importer cannot render pages, the content of
+                        urls coming from web-apps (i.e. Asana) is not searchable
                     </Warning>
                 </div>
             </div>
