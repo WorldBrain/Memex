@@ -1,5 +1,6 @@
 import { createAction } from 'redux-act'
 
+import analytics from 'src/analytics'
 import db from 'src/pouchdb'
 import { CMDS, IMPORT_CONN_NAME, OLD_EXT_KEYS } from './constants'
 import * as selectors from './selectors'
@@ -135,10 +136,16 @@ export const init = () => async dispatch => {
 /**
  * Creates a thunk that dispatches a given redux action and sends message over runtime connection port
  * to background script.
- * @param action Redux action ready to dispatch.
- * @param cmd The command to send over runtime connection's port.
+ * @param {any} action Redux action ready to dispatch.
+ * @param {string} cmd The command to send over runtime connection's port.
+ * @param {() => void} [cb] Opt. callback to run before any dispatch.
  */
-const makePortMessagingThunk = ({ action, cmd }) => () => dispatch => {
+const makePortMessagingThunk = ({
+    action,
+    cmd,
+    cb = f => f,
+}) => () => dispatch => {
+    cb()
     dispatch(action)
     port.postMessage({ cmd })
 }
@@ -147,28 +154,57 @@ const makePortMessagingThunk = ({ action, cmd }) => () => dispatch => {
 export const stop = makePortMessagingThunk({
     action: cancelImport(),
     cmd: CMDS.CANCEL,
+    cb: () =>
+        analytics.trackEvent({
+            category: 'Imports',
+            action: 'Cancel import',
+        }),
 })
 
 export const pause = makePortMessagingThunk({
     action: pauseImport(),
     cmd: CMDS.PAUSE,
+    cb: () =>
+        analytics.trackEvent({
+            category: 'Imports',
+            action: 'Pause import',
+        }),
 })
 
 export const resume = makePortMessagingThunk({
     action: resumeImport(),
     cmd: CMDS.RESUME,
+    cb: () =>
+        analytics.trackEvent({
+            category: 'Imports',
+            action: 'Resume import',
+        }),
 })
 
 export const finish = makePortMessagingThunk({
     action: finishImport(),
     cmd: CMDS.FINISH,
+    cb: () =>
+        analytics.trackEvent({
+            category: 'Imports',
+            action: 'Finish import',
+        }),
 })
 
 export const start = () => (dispatch, getState) => {
+    const state = getState()
+
+    analytics.trackEvent({
+        category: 'Imports',
+        action: 'Start import',
+        name: selectors.allowTypesString(state),
+        value: selectors.concurrency(state),
+    })
+
     dispatch(prepareImport())
     port.postMessage({
         cmd: CMDS.START,
-        payload: selectors.allowTypes(getState()),
+        payload: selectors.allowTypes(state),
     })
 }
 

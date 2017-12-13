@@ -36,6 +36,27 @@ export const endDate = createSelector(
     params => params.endDate,
 )
 
+export const queryParamsDisplay = createSelector(
+    currentQueryParams,
+    ({ startDate, endDate, query }) => {
+        let val = ''
+
+        if (query && query.length) {
+            val += 'T'
+        }
+
+        if (startDate) {
+            val += ' SD'
+        }
+
+        if (endDate) {
+            val += ' ED'
+        }
+
+        return val
+    },
+)
+
 export const isLoading = createSelector(overview, state => state.isLoading)
 export const noResults = createSelector(
     resultDocs,
@@ -43,6 +64,12 @@ export const noResults = createSelector(
     (docs, isLoading) => docs.length === 0 && !isLoading,
 )
 export const currentPage = createSelector(overview, state => state.currentPage)
+
+export const currentPageDisplay = createSelector(
+    currentPage,
+    page => `Page: ${page}`,
+)
+
 export const resultsSkip = createSelector(
     currentPage,
     page => page * constants.PAGE_SIZE,

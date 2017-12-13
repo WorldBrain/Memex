@@ -3,6 +3,7 @@ import 'src/activity-logger/background'
 import 'src/page-storage/background'
 import 'src/search/background'
 import 'src/bookmarks/background'
+import 'src/analytics/background'
 import 'src/omnibar'
 import { installTimeStorageKey } from 'src/imports/background'
 import { generatePageDocId } from 'src/page-storage'
@@ -14,12 +15,16 @@ import convertOldExtBlacklist, {
 } from 'src/blacklist/background'
 import { OLD_EXT_KEYS } from 'src/options/imports/constants'
 import index from 'src/search/search-index'
+import analytics from 'src/analytics'
 
 export const OVERVIEW_URL = '/overview/overview.html'
 export const OLD_EXT_UPDATE_KEY = 'updated-from-old-ext'
 export const ONBOARDING_URL = '/onboarding/new_install.html'
 export const UPDATE_URL = '/update/update.html'
-export const UNINSTALL_URL = 'http://worldbrain.io/uninstall'
+export const UNINSTALL_URL =
+    process.env.NODE_ENV === 'production'
+        ? 'http://worldbrain.io/uninstall'
+        : ''
 
 // Put doc ID generators on window for user use with manual DB lookups
 window.generatePageDocId = generatePageDocId
@@ -49,6 +54,7 @@ browser.runtime.onInstalled.addListener(async details => {
         case 'install':
             // Ensure default blacklist entries are stored (before doing anything else)
             await addToBlacklist(defaultEntries)
+            analytics.trackEvent({ category: 'Global', action: 'Install' })
             // Open onboarding page
             browser.tabs.create({ url: '/options/options.html#/new_install' })
             // Store the timestamp of when the extension was installed + default blacklist

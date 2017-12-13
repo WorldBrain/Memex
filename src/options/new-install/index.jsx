@@ -1,75 +1,65 @@
 import React from 'react'
-import Slider from 'react-slick'
 
+import analytics from 'src/analytics'
 import localStyles from './styles.css'
 
-const settings = {
-    autoplay: true,
-    vertical: true,
-    autoplaySpeed: 2500,
-    arrows: false,
-    // adaptiveHeight: false,
-    centerMode: false,
-    centerPadding: true,
-}
+const trackWelcomeChoice = action => () =>
+    analytics.trackEvent({
+        category: 'Welcome page selection',
+        action,
+    })
 
 const NewInstall = () => (
     <div className={localStyles.content}>
         <img className={localStyles.logobig} src="/img/worldbrain-logo.png" />
         <div className={localStyles.messageContainer}>
             <div className={localStyles.message}>
-                <Slider {...settings} className={localStyles.slider}>
-                    <div>
-                        <h3 className={localStyles.h3}>
-                            No more re-googling of pages you have seen in the
-                            past.
-                        </h3>
-                    </div>
-                    <div>
-                        <h3 className={localStyles.h3}>
-                            "Finally, I can close my tabs and not lose them
-                            anymore!"
-                        </h3>
-                    </div>
-                    <div>
-                        <h3 className={localStyles.h3}>
-                            No need to bookmark pages. Just remember them.
-                        </h3>
-                    </div>
-                    <div>
-                        <h3 className={localStyles.h3}>
-                            "Why hasn't this existed before?"
-                        </h3>
-                    </div>
-                </Slider>
+                <p>
+                    With a 15s delay, Memex <strong>locally</strong> stores the
+                    content of the websites you visit.
+                </p>
+                <p>
+                    <strong>STEP 1: </strong>Visit some websites or{' '}
+                    <a
+                        className={localStyles.link}
+                        href="/options/options.html#/import"
+                    >
+                        import your history
+                    </a>.
+                    <br />
+                    <strong>STEP 2: </strong>Search by typing 'w' + 'space or
+                    tab' + 'your keywords' into the address bar of the browser.
+                </p>
             </div>
         </div>
         <div className={localStyles.btnBar}>
             <a
                 className={localStyles.btnLink}
+                onClick={trackWelcomeChoice('Tutorial video')}
                 type="button"
                 href="https://worldbrain.io/tutorial"
                 target="_blank"
             >
-                Watch 1-min Tutorial Video
+                <strong>Watch</strong> 90s Tutorial Video
             </a>
 
             <a
                 className={localStyles.btnLink}
+                onClick={trackWelcomeChoice('Tutorial page')}
                 type="button"
                 href="/options/options.html#/tutorial"
             >
-                Read Step-By Step Tutorial
+                <strong>Read</strong> Step-By Step Tutorial
             </a>
         </div>
         <p>
             {' '}
             <a
                 className={localStyles.link}
-                target="_blank"
+                onClick={trackWelcomeChoice('Go browsing')}
                 href="https://worldbrain.io/"
             >
-                Or just get started browsing the web
+                Or close this window and start browsing the web
             </a>
         </p>
         <img style={{ width: '60%' }} src="/img/how_to_search.png" />

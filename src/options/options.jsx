@@ -4,6 +4,7 @@ import { Router, Route, IndexRedirect, hashHistory } from 'react-router'
 import { Provider } from 'react-redux'
 
 import { ErrorBoundary, RuntimeError } from 'src/common-ui/components'
+import withPageTracking from './withPageTracking'
 import configureStore from './store'
 import Layout from './layout'
 import Routes from './routes'
@@ -26,7 +27,7 @@ ReactDOM.render(
                         <Route
                             key={route.pathname}
                             path={route.pathname}
-                            component={route.component}
+                            component={withPageTracking(route.component)}
                         />
                     ))}
                 </Route>

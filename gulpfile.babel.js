@@ -92,6 +92,10 @@ async function createBundle(
     b.transform(
         envify({
             NODE_ENV: production ? 'production' : 'development',
+            PIWIK_HOST: production
+                ? 'https://analytics.worldbrain.io'
+                : 'localhost:1234',
+            PIWIK_SITE_ID: '1',
         }),
         { global: true },
     )

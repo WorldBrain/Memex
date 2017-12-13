@@ -5,6 +5,7 @@ import chrono from 'chrono-node'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker-cssmodules.css'
 
+import analytics from 'src/analytics'
 import { DATE_PICKER_DATE_FORMAT as FORMAT } from '../constants'
 import styles from './DateRangeSelection.css'
 import './datepicker-overrides.css'
@@ -75,6 +76,12 @@ class DateRangeSelection extends Component {
             : this.state.endDateText
 
         const nlpDate = chrono.parseDate(dateState)
+
+        analytics.trackEvent({
+            category: isStartDate ? 'Overview start date' : 'Overview end date',
+            action: nlpDate ? 'Successful NLP query' : 'Unsuccessful NLP query',
+        })
+
         if (nlpDate != null) {
             const dateToChange = nlpDate.getTime()
 
@@ -145,6 +152,11 @@ class DateRangeSelection extends Component {
      * Runs against date selected in the date dropdown component.
      */
     handleDateChange = ({ isStartDate }) => date => {
+        analytics.trackEvent({
+            category: isStartDate ? 'Overview start date' : 'Overview end date',
+            action: date ? 'Date selection' : 'Date clear',
+        })
+
         const updateDate = isStartDate
             ? this.props.onStartDateChange
             : this.props.onEndDateChange

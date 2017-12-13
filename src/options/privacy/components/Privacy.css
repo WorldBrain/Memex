@@ -1,0 +1,26 @@
+.privacy {
+    font-family: 'Lato';
+    margin-top: 20px;
+}
+
+.title {
+    color: #3eb995;
+    font-weight: bold;
+    font-size: 20px;
+    letter-spacing: 1px;
+}
+
+.content {
+    font-style: normal;
+    margin-top: 20px;
+    font-size: 15px;
+    color: #999;
+    letter-spacing: 1px;
+    width: 80%;
+    min-width: 450px;
+    font-weight: 50;
+}
+
+.link {
+    color: #928989;
+}

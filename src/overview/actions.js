@@ -1,5 +1,6 @@
 import { createAction } from 'redux-act'
 
+import analytics from 'src/analytics'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import * as constants from './constants'
 import * as selectors from './selectors'
@@ -99,9 +100,37 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
     port.postMessage({ cmd: constants.CMDS.SEARCH, searchParams, overwrite })
 }
 
-const updateSearchResult = (
-    { searchResult, overwrite } = { overwrite: false, searchResult: [] },
-) => dispatch => {
+// Analytics use
+function trackSearch(searchResult, overwrite, state) {
+    // Value should be set as # results (if non-default search)
+    const value =
+        overwrite && !selectors.isEmptyQuery(state)
+            ? searchResult.totalCount
+            : undefined
+
+    let action
+    if (searchResult.totalCount > 0) {
+        action = overwrite ? 'Successful search' : 'Paginate search'
+    } else {
+        action = 'Unsuccessful search'
+    }
+    if (selectors.showOnlyBookmarks(state)) {
+        action += ' (BM only)'
+    }
+
+    const name = overwrite
+        ? selectors.queryParamsDisplay(state)
+        : selectors.currentPageDisplay(state)
+
+    analytics.trackEvent({ category: 'Search', action, name, value })
+}
+
+const updateSearchResult = ({ searchResult, overwrite = false }) => (
+    dispatch,
+    getState,
+) => {
+    trackSearch(searchResult, overwrite, getState())
+
     const searchAction = overwrite ? setSearchResult : appendSearchResult
 
     dispatch(searchAction(searchResult))
@@ -125,6 +154,11 @@ export const getMoreResults = () => async dispatch => {
 export const deleteDocs = () => async (dispatch, getState) => {
     const url = selectors.urlToDelete(getState())
 
+    analytics.trackEvent({
+        category: 'Overview',
+        action: 'Delete result',
+    })
+
     // Hide the result item + confirm modal directly (optimistically)
     dispatch(hideResultItem(url))
     dispatch(hideDeleteConfirm())
@@ -138,8 +172,16 @@ export const deleteDocs = () => async (dispatch, getState) => {
 
 export const toggleBookmark = (url, index) => async (dispatch, getState) => {
     const results = selectors.results(getState())
+    const { hasBookmark } = results[index]
 
-    if (results[index].hasBookmark) {
+    analytics.trackEvent({
+        category: 'Overview',
+        action: hasBookmark
+            ? 'Remove result bookmark'
+            : 'Create result bookmark',
+    })
+
+    if (hasBookmark) {
         await removeBookmarkByUrl(url)
     } else {
         await createBookmarkByExtension(url)

@@ -1,8 +1,9 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
+
 import Navigation from './components/navigation'
 import routes from './routes'
-
+import Head from './containers/Head'
 import styles from './base.css'
 
 class Layout extends Component {
@@ -19,6 +20,7 @@ class Layout extends Component {
                     ? ''
                     : styles.sidebar}`}
             >
+                <Head />
                 {!hideSidebar && (
                     <Navigation currentLocation={location} routes={routes} />
                 )}

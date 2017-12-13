@@ -1,10 +1,11 @@
 import ImportContainer from './imports'
 import SettingsContainer from './containers/settings'
-import Privacy from './privacy/index'
+import Privacy from './privacy'
 import Help from './help/index'
 import Acknowledgements from './acknowledgement/components/content'
 import Tutorial from './tutorial'
 import NewInstall from './new-install'
+import Statistics from './statistics'
 
 export default [
     {
@@ -15,13 +16,19 @@ export default [
         hideFromSidebar: true,
     },
     {
+        name: 'Usage Statistics',
+        pathname: '/statistics',
+        component: Statistics,
+        hideFromSidebar: true,
+    },
+    {
         name: 'Go back to Search',
         pathname: '/overview/overview.html',
         component: 'faq',
         icon: 'search',
     },
     {
-        name: 'Import',
+        name: 'Import History & Bookmarks',
         pathname: '/import',
         component: ImportContainer,
         icon: 'file_download',
