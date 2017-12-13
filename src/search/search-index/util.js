@@ -200,8 +200,8 @@ export const initLookupByKeys = (
 
         // Set up PromiseBatcher instance to handle concurrent lookups on same IDBOpenDBRequest
         const batch = new PromiseBatcher({
-            inputBatchCallback: () => Promise.resolve(keys),
-            processingCallback: singleLookup,
+            nextInputBatchCb: () => Promise.resolve(keys),
+            processingCb: singleLookup,
             concurrency,
             observer: {
                 next: ({ input, output }) => result.set(input, output),
