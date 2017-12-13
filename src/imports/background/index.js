@@ -1,4 +1,4 @@
-import importsConnectionHandler from './imports-connection-handler'
+import importsConnectionHandler from './import-connection-handler'
 import { OLD_EXT_KEYS } from 'src/options/imports/constants'
 
 // Constants

@@ -9,10 +9,10 @@ import noop from 'lodash/fp/noop'
  */
 export default class PromiseBatcher {
     /**
-     * @param {() => Promise<Array<any>>} inputBatchCallback The async callback to run to fetch input. Note that this
-     *  will be re-run every time `start` is called (both on resume and init start), hence this input will effectively
-     *  act as state for the batcher. State management should be handled in the `observer` callbacks.
-     * @param {(input: any) => Promise<any>} processingCallback The callback to run each input on.
+     * @param {() => Promise<Array<any>> | Generator} nextInputBatchCb The async callback, or generator function, to run to fetch input.
+     *  Note that this will be re-run every time `start` is called (both on resume and init start).
+     *  Needed state management should be handled in the `observer` callbacks.
+     * @param {(input: any) => Promise<any>} processingCb The callback to run each input on.
      * @param {number} [concurrency=1] How many input itemss to be processing at any time.
      * @param {any} observer Affords logic to run on certain events relating to the processing of each input item:
      *  - successful finish: `next`
@@ -21,13 +21,13 @@ export default class PromiseBatcher {
      *  All set to no-ops, if nothing specified.
      */
     constructor({
-        inputBatchCallback,
-        processingCallback,
+        nextInputBatchCb,
+        processingCb,
         concurrency = 1,
         observer: { next = noop, error = noop, complete = noop } = {},
     }) {
-        this.getInputBatch = inputBatchCallback
-        this.process = processingCallback
+        this.getNextInputBatch = nextInputBatchCb
+        this.process = processingCb
         this._concurrency = concurrency
         this.observer = { next, error, complete }
 
@@ -69,7 +69,7 @@ export default class PromiseBatcher {
      * Subscribes to Observable built on the batch input.
      */
     _subscribeToBatchObservable() {
-        const inputBatchPromise = this.getInputBatch()
+        const inputBatchPromise = this.getNextInputBatch()
 
         this.sub = Rx.Observable
             .from(inputBatchPromise)

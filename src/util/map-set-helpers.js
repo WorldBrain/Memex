@@ -52,3 +52,16 @@ export const unionNestedMaps = map =>
  */
 export const differMaps = b => a =>
     new Map([...a].filter(([key]) => !b.has(key)))
+
+/**
+ * NOTE: This util fn will only work with Maps with keys of type string or number. More complex
+ * key types are not supported by JS standard objects.
+ *
+ * @param {Map<string|number, any>} map Map containing _only string or number keys_.
+ * @returns {any} Object representing same data as input `map`.
+ */
+export const mapToObject = map =>
+    [...map].reduce((acc, [key, val]) => {
+        acc[key] = val
+        return acc
+    }, {})
