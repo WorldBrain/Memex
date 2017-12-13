@@ -1,5 +1,4 @@
 import React from 'react'
-import Slider from 'react-slick'
 
 import analytics from 'src/analytics'
 import localStyles from './styles.css'
@@ -9,16 +8,6 @@ const trackWelcomeChoice = action => () =>
         category: 'Welcome page selection',
         action,
     })
-
-const settings = {
-    autoplay: true,
-    vertical: true,
-    autoplaySpeed: 2500,
-    arrows: false,
-    // adaptiveHeight: false,
-    centerMode: false,
-    centerPadding: true,
-}
 
 const NewInstall = () => (
     <div className={localStyles.content}>
@@ -31,7 +20,10 @@ const NewInstall = () => (
                 </p>
                 <p>
                     <strong>STEP 1: </strong>Visit some websites or{' '}
-                    <a className={localStyles.link} href="/#/import">
+                    <a
+                        className={localStyles.link}
+                        href="/options/options.html#/import"
+                    >
                         import your history
                     </a>.
                     <br />
