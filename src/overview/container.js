@@ -15,7 +15,7 @@ import ResultsMessage from './components/ResultsMessage'
 class OverviewContainer extends Component {
     static propTypes = {
         grabFocusOnMount: PropTypes.bool.isRequired,
-        onInputChange: PropTypes.func.isRequired,
+        handleInputChange: PropTypes.func.isRequired,
         onBottomReached: PropTypes.func.isRequired,
         isLoading: PropTypes.bool.isRequired,
         isNewSearchLoading: PropTypes.bool.isRequired,
@@ -38,12 +38,6 @@ class OverviewContainer extends Component {
 
     setInputRef = element => {
         this.inputQueryEl = element
-    }
-
-    handleInputChange = event => {
-        const input = event.target
-
-        this.props.onInputChange(input.value)
     }
 
     renderResultItems() {
@@ -148,7 +142,7 @@ class OverviewContainer extends Component {
             <Overview
                 {...this.props}
                 setInputRef={this.setInputRef}
-                onInputChange={this.handleInputChange}
+                onInputChange={this.props.handleInputChange}
             >
                 {this.renderResults()}
             </Overview>
@@ -175,7 +169,6 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
     ...bindActionCreators(
         {
-            onInputChange: actions.setQuery,
             onStartDateChange: actions.setStartDate,
             onEndDateChange: actions.setEndDate,
             onBottomReached: actions.getMoreResults,
@@ -186,6 +179,10 @@ const mapDispatchToProps = dispatch => ({
         },
         dispatch,
     ),
+    handleInputChange: event => {
+        const input = event.target
+        dispatch(actions.setQuery(input.value))
+    },
     handleTrashBtnClick: url => event => {
         event.preventDefault()
         dispatch(actions.showDeleteConfirm(url))
