@@ -51,12 +51,12 @@ export class ImportStateManager {
      * @yields {any} Object containing `chunkKey` and `chunk` pair, corresponding to the chunk storage key
      *  and value at that storage key, respectively.
      */
-    async *getItems() {
+    *getItems() {
         for (const key in this.storageKeyStack) {
             const chunkKey = ImportStateManager.generateChunkKey(key)
 
             // Each iteration should yield both the current chunk key and assoc. chunk values (import items)
-            yield { chunkKey, chunk: await this.getChunk(chunkKey) }
+            yield this.getChunk(chunkKey)
         }
     }
 
@@ -105,7 +105,7 @@ export class ImportStateManager {
 
     async getChunk(chunkKey) {
         const storage = await browser.storage.local.get(chunkKey)
-        return storage[chunkKey]
+        return { chunk: storage[chunkKey], chunkKey }
     }
 
     /**
