@@ -226,6 +226,15 @@ async function performIndexing(indexDoc) {
     }
 }
 
+/**
+ * Adds a meta (bookmark or visit) entry into specified reverse index doc.
+ * NOTE: Assumes the existence of indexed `pageId`.
+ *
+ * @param {'bookmark'|'visit'} type Type of meta event.
+ * @param {string} pageId ID of page doc to associate with.
+ * @param {string} timestamp Timestamp of meta event.
+
+ */
 async function addMetaToReversePage(type, pageId, timestamp) {
     const reverseIndexDoc = await singleLookup(pageId)
     if (type === 'visit') {

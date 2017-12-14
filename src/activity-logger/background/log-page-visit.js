@@ -6,7 +6,7 @@ import { generateVisitDocId } from '..'
 import * as index from 'src/search'
 
 // Store the visit in PouchDB.
-async function storeVisit({ timestamp, url, page }) {
+export async function storeVisit({ timestamp, url, page }) {
     const visit = {
         _id: generateVisitDocId({ url, timestamp }),
         visitStart: timestamp,
@@ -62,6 +62,7 @@ export async function logPageVisit({ tabId, url }) {
     const existingPage = await index.initSingleLookup()(pageId)
 
     let storePageResult
+    // If there exist the page and the time difference between last index and current timestamp less than {threshold} then we can store the page.
     if (existingPage == null || timestamp - existingPage.latest > threshold) {
         // First create an identifier for the page being visited.
         storePageResult = await storePage({ tabId, url })

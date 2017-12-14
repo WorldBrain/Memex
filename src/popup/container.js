@@ -261,7 +261,7 @@ class PopupContainer extends Component {
         if (
             this.state.bookmarkBtn === constants.BOOKMARK_BTN_STATE.UNBOOKMARK
         ) {
-            this.createBookmarkByUrl(this.state.url)
+            this.createBookmarkByUrl(this.state.url, this.state.tabID)
         } else if (
             this.state.bookmarkBtn === constants.BOOKMARK_BTN_STATE.BOOKMARK
         ) {
