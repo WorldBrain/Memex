@@ -17,7 +17,6 @@ const lookbackWeeks = 12 // Browser history is limited to the last 3 months
 const transformOldExtDataToImportItem = bookmarkUrls => (item, index) => ({
     type: IMPORT_TYPE.OLD,
     url: item.url,
-    timestamp: item.time,
     hasBookmark: bookmarkUrls.has(item.url),
     index,
 })
@@ -26,8 +25,6 @@ const transformOldExtDataToImportItem = bookmarkUrls => (item, index) => ({
 const transformBrowserItemToImportItem = type => item => ({
     browserId: item.id,
     url: item.url,
-    // HistoryItems contain lastVisitTime while BookmarkTreeNodes contain dateAdded
-    timestamp: item.lastVisitTime || item.dateAdded,
     type,
 })
 
