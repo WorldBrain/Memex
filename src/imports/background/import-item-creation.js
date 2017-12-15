@@ -7,7 +7,6 @@ import { pageKeyPrefix, convertPageDocId } from 'src/page-storage'
 import { bookmarkKeyPrefix, convertBookmarkDocId } from 'src/bookmarks'
 import { checkWithBlacklist } from 'src/blacklist'
 import { isLoggable } from 'src/activity-logger'
-import { differMaps } from 'src/util/map-set-helpers'
 import { IMPORT_TYPE, OLD_EXT_KEYS } from 'src/options/imports/constants'
 
 const chunkSize = 200
@@ -119,27 +118,23 @@ const getHistoryItems = startTime =>
  * Handles fetching and filtering the history URLs in time period batches.
  * @param {Function} filterItemsByUrl
  */
-async function filterHistoryItems(filterItemsByUrl) {
+async function* filterHistoryItems(filterItemsByUrl) {
     const checkExistingPages = await checkWithExistingPages()
     const transformHist = transformBrowserItemToImportItem(IMPORT_TYPE.HISTORY)
 
     // Get all history from browser (last 3 months), filter on existing DB pages
     const startTime = moment().subtract(lookbackWeeks, 'weeks')
-    let historyItemsMap = new Map()
 
     // Fetch and filter history in 2 week batches to limit space
     for (let i = 0; i < lookbackWeeks / 2; i++, startTime.add(2, 'weeks')) {
         const historyItemBatch = await getHistoryItems(moment(startTime))
-        const filteredItemsMap = filterItemsByUrl(
+
+        yield filterItemsByUrl(
             historyItemBatch,
             transformHist,
             checkExistingPages,
         )
-
-        historyItemsMap = new Map([...historyItemsMap, ...filteredItemsMap])
     }
-
-    return historyItemsMap
 }
 
 /**
@@ -200,10 +195,8 @@ async function getOldExtItems() {
  * @returns {any} Object containing three Maps of encoded URL keys to import item values.
  *   Used to create the imports list and estimate counts.
  */
-export default async function createImportItems() {
+export default async function* createImportItems() {
     const filterItemsByUrl = await initFilterItemsByUrl()
-
-    let historyItemsMap = await filterHistoryItems(filterItemsByUrl)
 
     const [bmItems, checkExistingBms] = await Promise.all([
         getBookmarkItems(),
@@ -211,21 +204,23 @@ export default async function createImportItems() {
     ])
 
     // Get all bookmarks from browser, filter on existing DB bookmarks
-    const bookmarkItemsMap = filterItemsByUrl(
-        bmItems,
-        transformBrowserItemToImportItem(IMPORT_TYPE.BOOKMARK),
-        checkExistingBms,
-    )
+    yield {
+        type: IMPORT_TYPE.BOOKMARK,
+        data: filterItemsByUrl(
+            bmItems,
+            transformBrowserItemToImportItem(IMPORT_TYPE.BOOKMARK),
+            checkExistingBms,
+        ),
+    }
+
+    // Yield history items in two week chunks
+    for await (const twoWeeksHistory of filterHistoryItems(filterItemsByUrl)) {
+        yield { type: IMPORT_TYPE.HISTORY, data: twoWeeksHistory }
+    }
 
     // Get all old ext from local storage, don't filter on existing data
-    const oldExtItemsMap = filterItemsByUrl(await getOldExtItems())
-
-    // Perform set difference, removing bm items from history (these are a subset of hist)
-    historyItemsMap = differMaps(bookmarkItemsMap)(historyItemsMap)
-
-    return {
-        historyItemsMap,
-        bookmarkItemsMap,
-        oldExtItemsMap,
+    yield {
+        type: IMPORT_TYPE.OLD,
+        data: filterItemsByUrl(await getOldExtItems()),
     }
 }

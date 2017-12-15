@@ -2,6 +2,7 @@ import moment from 'moment'
 
 import db from 'src/pouchdb'
 import { IMPORT_TYPE, OLD_EXT_KEYS } from 'src/options/imports/constants'
+import { differMaps } from 'src/util/map-set-helpers'
 import { pageKeyPrefix } from 'src/page-storage'
 import { bookmarkKeyPrefix } from 'src/bookmarks'
 import createImportItems from './import-item-creation'
@@ -36,9 +37,9 @@ async function calcEstimateCounts(items, shouldSaveRes = true) {
             [IMPORT_TYPE.OLD]: numOldExtDone,
         },
         remaining: {
-            [IMPORT_TYPE.HISTORY]: items.historyItemsMap.size,
-            [IMPORT_TYPE.BOOKMARK]: items.bookmarkItemsMap.size,
-            [IMPORT_TYPE.OLD]: items.oldExtItemsMap.size,
+            [IMPORT_TYPE.HISTORY]: items[IMPORT_TYPE.HISTORY].size,
+            [IMPORT_TYPE.BOOKMARK]: items[IMPORT_TYPE.BOOKMARK].size,
+            [IMPORT_TYPE.OLD]: items[IMPORT_TYPE.OLD].size,
         },
     }
 
@@ -64,8 +65,22 @@ export default async ({ forceRecalc = false }) => {
         return prevResult
     }
 
+    // TODO: Upgrade calc logic to use iterable items; this is just temp to collection iterator values
     // Else, grab needed data from browser API (filtered by whats already in DB)
-    const items = await createImportItems()
+    const items = {}
+
+    for await (const { data, type } of createImportItems()) {
+        if (items[type] != null) {
+            items[type] = new Map([...items[type], ...data])
+        } else {
+            items[type] = data
+        }
+    }
+
+    items[IMPORT_TYPE.HISTORY] = differMaps(items[IMPORT_TYPE.BOOKMARK])(
+        items[IMPORT_TYPE.HISTORY],
+    )
+
     // Re-run calculations (auto-saved)
     return await calcEstimateCounts(items)
 }
