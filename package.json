@@ -49,6 +49,7 @@
     "piwik-react-router": "^0.10.0",
     "pouchdb-browser": "^6.2.0",
     "pouchdb-find": "^6.2.0",
+    "promise-limit": "^2.5.0",
     "prop-types": "^15.5.10",
     "query-string": "^4.3.4",
     "queue": "^4.4.1",

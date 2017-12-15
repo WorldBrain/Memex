@@ -1,7 +1,13 @@
 {
-    "compilerOptions": {
-        "module": "es2015",
-        "allowSyntheticDefaultImports": true,
-        "baseUrl": "./"
-    }
+  "compilerOptions": {
+    "module": "es2015",
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": "./"
+  },
+  "exclude": [
+    "node_modules",
+    "img",
+    "extension",
+    "dist"
+  ]
 }
