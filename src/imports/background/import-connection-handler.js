@@ -4,6 +4,7 @@ import {
     DEF_CONCURRENCY,
     IMPORT_TYPE,
 } from 'src/options/imports/constants'
+import { differMaps } from 'src/util/map-set-helpers'
 import getEstimateCounts from './import-estimates'
 import processImportItem from './import-item-processor'
 import stateManager from './import-state'
@@ -22,17 +23,21 @@ import ProgressManager from './import-progress'
  *   or not import and page docs should be created for that import type.
  */
 async function prepareImportItems(allowTypes = {}) {
-    const items = await createImportItems()
+    let bookmarkItems
 
-    // Union all import item maps, allowing old ext items precedence over bookmarks which have
-    //  precedence over history
-    await stateManager.setItems(
-        new Map([
-            ...(allowTypes[IMPORT_TYPE.HISTORY] ? items.historyItemsMap : []),
-            ...(allowTypes[IMPORT_TYPE.BOOKMARK] ? items.bookmarkItemsMap : []),
-            ...(allowTypes[IMPORT_TYPE.OLD] ? items.oldExtItemsMap : []),
-        ]),
-    )
+    for await (let { data, type } of createImportItems()) {
+        if (type === IMPORT_TYPE.BOOKMARK) {
+            // Bookmarks should always yield before history
+            bookmarkItems = data
+        } else if (type === IMPORT_TYPE.HISTORY) {
+            // Don't include pages in history that exist as bookmarks as well
+            data = differMaps(bookmarkItems)(data)
+        }
+
+        if (allowTypes[type]) {
+            await stateManager.addItems(data)
+        }
+    }
 }
 
 /**
