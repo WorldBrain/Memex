@@ -169,18 +169,34 @@ async function processOldExtImport(importItem) {
 /**
  * Given an import state item, performs appropriate processing depending on the import type.
  *
- * @param {[string, IImportItem]} Key-value pair of encoded URL to import item value.
- * @returns {string} Status string denoting the outcome of import processing as `status`
- *  + optional filled-out page doc as `pageDoc` field.
+ * @param {IImportItem} importItem Import item state item to process.
+ * @param {any} token Token object to allow attaching of rejection callback, affording caller Promise cancellation.
+ * @returns {Promise<any>} Resolves to a status string denoting the outcome of import processing as `status`.
+ *  Rejects for any other error, including bad content check errors, and cancellation - caller should handle.
  */
-export default async function processImportItem([encodedUrl, importItem = {}]) {
-    switch (importItem.type) {
-        case IMPORT_TYPE.BOOKMARK:
-        case IMPORT_TYPE.HISTORY:
-            return await processHistoryImport(importItem)
-        case IMPORT_TYPE.OLD:
-            return await processOldExtImport(importItem)
-        default:
-            throw new Error('Unknown import type')
-    }
-}
+const processImportItem = (importItem = {}, token) =>
+    new Promise(async (resolve, reject) => {
+        // Bind the reject callback to token to allow outside cancellation of `this` Promise
+        token.cancel = reject
+
+        try {
+            let result
+            switch (importItem.type) {
+                case IMPORT_TYPE.BOOKMARK:
+                case IMPORT_TYPE.HISTORY:
+                    result = await processHistoryImport(importItem)
+                    break
+                case IMPORT_TYPE.OLD:
+                    result = await processOldExtImport(importItem)
+                    break
+                default:
+                    throw new Error('Unknown import type')
+            }
+
+            return resolve(result)
+        } catch (err) {
+            return reject(err)
+        }
+    })
+
+export default processImportItem

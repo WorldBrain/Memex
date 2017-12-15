@@ -5,35 +5,6 @@ import { OLD_EXT_KEYS } from 'src/options/imports/constants'
 export const importStateStorageKey = 'import_items'
 export const installTimeStorageKey = 'extension_install_time'
 
-// Imports local storage state interface
-export const getImportItems = async () => {
-    const { [importStateStorageKey]: data } = await browser.storage.local.get({
-        [importStateStorageKey]: [],
-    })
-
-    return new Map(data)
-}
-
-/**
- * @param {Map<string, IImportItem>} items Import items collection to become the new state.
- */
-export const setImportItems = items =>
-    browser.storage.local.set({
-        [importStateStorageKey]: Array.from(items),
-    })
-
-export const clearImportItems = () =>
-    browser.storage.local.remove(importStateStorageKey)
-
-/**
- * @param {string} encodedUrl The URL to remove from imports items' collection state.
- */
-export const removeImportItem = async encodedUrl => {
-    const importItemsMap = await getImportItems()
-    importItemsMap.delete(encodedUrl)
-    await setImportItems(importItemsMap)
-}
-
 /**
  * Removes local storage entry representing single page data in the old ext.
  *
