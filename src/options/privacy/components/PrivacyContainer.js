@@ -10,7 +10,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
     handleTrackChange: event =>
-        dispatch(actions.setTrackingFlag(event.target.value)),
+        dispatch(actions.toggleTrackingOptOut(event.target.value)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Privacy)
