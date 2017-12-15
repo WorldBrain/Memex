@@ -15,7 +15,7 @@ const Concurrency = ({ concurrency, onConcurrencyChange }) => (
             value={concurrency}
             type="number"
             min="1"
-            max="5"
+            max="10"
         />
     </Wrapper>
 )

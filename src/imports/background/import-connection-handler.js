@@ -6,14 +6,8 @@ import {
 } from 'src/options/imports/constants'
 import { differMaps } from 'src/util/map-set-helpers'
 import getEstimateCounts from './import-estimates'
-import processImportItem from './import-item-processor'
 import stateManager from './import-state'
 import createImportItems from './import-item-creation'
-import {
-    getImportInProgressFlag,
-    setImportInProgressFlag,
-    clearImportInProgressFlag,
-} from '../'
 import ProgressManager from './import-progress'
 
 class ImportConnectionHandler {
@@ -28,19 +22,25 @@ class ImportConnectionHandler {
     importer
 
     constructor(port) {
+        // Main `runtime.Port` that this class hides away to handle connection with the imports UI script
         this.port = port
 
-        this.importer = new ProgressManager(this.processChunk, DEF_CONCURRENCY)
+        // Initialize the `ProgressManager` to run the import processing logic on import items state
+        this.importer = new ProgressManager(DEF_CONCURRENCY, this.itemObserver)
 
-        // Handle any incoming messages to control theimporter
+        // Handle any incoming UI messages to control the importer
         port.onMessage.addListener(this.messageListener)
+
+        // Handle UI disconnection by stopping (pausing) progress
+        port.onDisconnect.addListener(() => this.importer.stop())
 
         this.attemptRehydrate()
     }
 
     async attemptRehydrate() {
         // If import isn't started earlier, get estimates and set view state to init
-        const importInProgress = await getImportInProgressFlag()
+        const importInProgress = await this.importer.getImportInProgressFlag()
+
         if (!importInProgress) {
             // Make sure estimates view init'd with count data
             const estimateCounts = await getEstimateCounts({
@@ -51,6 +51,16 @@ class ImportConnectionHandler {
             // Make sure to start the view in paused state
             this.port.postMessage({ cmd: CMDS.PAUSE })
         }
+    }
+
+    /**
+     * Object containing `next` and `complete` methods for the `ProgressManager` to
+     * pass messages back along the connection as it observes import items finishing
+     * (currently used to send item data for display in the UI).
+     */
+    itemObserver = {
+        next: msg => this.port.postMessage({ cmd: CMDS.NEXT, ...msg }),
+        complete: () => this.port.postMessage({ cmd: CMDS.COMPLETE }),
     }
 
     messageListener = ({ cmd, payload }) => {
@@ -69,40 +79,6 @@ class ImportConnectionHandler {
                 return (this.importer.concurrency = payload)
             default:
                 return console.error(`unknown command: ${cmd}`)
-        }
-    }
-
-    /**
-     * @param {any} chunkData The data of currently-being-processed chunk (contains `chunk` and `chunkKey`).
-     * @param {number} concurrency Externally-specified concurrency level to use to implement concurrency (TODO).
-     * @param {any} token Token object to allow attaching of rejection callback, affording caller Promise cancellation.
-     */
-    processChunk = async ({ chunk, chunkKey }, concurrency, token) => {
-        for (const [encodedUrl, importItem] of Object.entries(chunk)) {
-            let status, url, error
-            try {
-                const processingResult = await processImportItem(
-                    importItem,
-                    token,
-                )
-                status = processingResult.status
-            } catch (err) {
-                // Throw execution was cancelled, throw error up the stack
-                if (err.cancelled) {
-                    throw err
-                }
-                error = err.message
-            } finally {
-                // Send item data + outcome status down to UI (and error if present)
-                this.port.postMessage({
-                    cmd: CMDS.NEXT,
-                    url: url,
-                    type: importItem.type,
-                    status,
-                    error,
-                })
-                await stateManager.removeItem(chunkKey, encodedUrl)
-            }
         }
     }
 
@@ -136,13 +112,14 @@ class ImportConnectionHandler {
      */
     async startImport(allowTypes) {
         // Perform history-stubs, vists, and history import state creation, if import not in progress
-        const importInProgress = await getImportInProgressFlag()
+        const importInProgress = await this.importer.getImportInProgressFlag()
         if (!importInProgress) {
             await this.prepareImportItems(allowTypes)
         }
 
         this.port.postMessage({ cmd: CMDS.START }) // Tell UI to finish loading state and move into progress view
-        setImportInProgressFlag()
+
+        this.importer.setImportInProgressFlag(true)
         this.importer.start()
     }
 
@@ -151,7 +128,7 @@ class ImportConnectionHandler {
      * (either after completion or cancellation).
      */
     async finishImport() {
-        clearImportInProgressFlag()
+        this.importer.setImportInProgressFlag(false)
 
         // Re-init the estimates view with updated estimates data
         const estimateCounts = await getEstimateCounts({ forceRecalc: true })
@@ -160,13 +137,13 @@ class ImportConnectionHandler {
 
     async cancelImport() {
         this.importer.stop()
+        this.importer.setImportInProgressFlag(false)
 
         // Clean up any import-related stubs or state
         await stateManager.clearItems()
 
         // Resume UI at complete state
         this.port.postMessage({ cmd: CMDS.COMPLETE })
-        clearImportInProgressFlag()
     }
 }
 
