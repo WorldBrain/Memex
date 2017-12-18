@@ -17,7 +17,7 @@ import {
 import { OLD_EXT_KEYS } from 'src/options/imports/constants'
 import index from 'src/search/search-index'
 import analytics from 'src/analytics'
-
+import { importIndex, exportIndex } from 'src/options/imports/index_ops'
 export const OVERVIEW_URL = '/overview/overview.html'
 export const OLD_EXT_UPDATE_KEY = 'updated-from-old-ext'
 export const UPDATE_URL = '/update/update.html'
