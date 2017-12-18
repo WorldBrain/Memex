@@ -1,27 +1,6 @@
 import { generateVisitDocId } from 'src/activity-logger'
 import { generateBookmarkDocId } from 'src/bookmarks'
 
-export const estimatesStorageKey = 'import-estimate-counts'
-
-export const getStoredEsts = async () => {
-    const storage = await browser.storage.local.get({
-        [estimatesStorageKey]: { calculatedAt: 0 },
-    })
-    return storage[estimatesStorageKey]
-}
-
-export const setStoredEsts = estimates =>
-    browser.storage.local.set({
-        [estimatesStorageKey]: { ...estimates, calculatedAt: Date.now() },
-    })
-
-export const dirtyStoredEsts = () =>
-    getStoredEsts().then(storedEsts =>
-        browser.storage.local.set({
-            [estimatesStorageKey]: { ...storedEsts, calculatedAt: 0 },
-        }),
-    )
-
 /**
  * Converts a browser.history.VisitItem to our visit document model.
  *

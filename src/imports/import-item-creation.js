@@ -3,6 +3,7 @@ import chunk from 'lodash/fp/chunk'
 
 import db from 'src/pouchdb'
 import encodeUrl from 'src/util/encode-url-for-id'
+import stateManager from './background/import-state'
 import { pageKeyPrefix, convertPageDocId } from 'src/page-storage'
 import { bookmarkKeyPrefix, convertBookmarkDocId } from 'src/bookmarks'
 import { checkWithBlacklist } from 'src/blacklist'
@@ -55,6 +56,20 @@ async function checkWithExistingPages() {
     return url => existingUrls.has(url)
 }
 
+/**
+ * @returns {({ url: string }) => boolean} A function affording checking of a URL against the
+ *  URLs of previously error'd import items.
+ */
+async function checkWithErrordItems() {
+    const errordUrls = new Set()
+
+    for await (const { chunk } of stateManager.getErrItems()) {
+        Object.values(chunk).forEach(item => errordUrls.add(item.url))
+    }
+
+    return ({ url }) => errordUrls.has(url)
+}
+
 // Simply hides away the the try...catch needed for the  `encodeUrl` call
 //  in the hopes of a little perf. boost on older versions of V8.
 const err = { value: null }
@@ -70,6 +85,7 @@ function getEncodedUrl(...args) {
 
 async function initFilterItemsByUrl() {
     const isBlacklisted = await checkWithBlacklist()
+    const isErrord = await checkWithErrordItems()
 
     /**
      * Performs all needed filtering on a collection of history, bookmark, or old ext items. As these
@@ -84,7 +100,11 @@ async function initFilterItemsByUrl() {
         const importItems = new Map()
 
         for (let i = 0; i < items.length; i++) {
-            if (!isLoggable(items[i]) || isBlacklisted(items[i])) {
+            if (
+                !isLoggable(items[i]) ||
+                isBlacklisted(items[i]) ||
+                isErrord(items[i])
+            ) {
                 continue
             }
 
