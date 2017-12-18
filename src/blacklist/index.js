@@ -1,4 +1,4 @@
-import { dirtyStoredEsts } from 'src/imports'
+import importEstsManager from 'src/imports/import-estimates'
 import { STORAGE_KEY } from 'src/options/blacklist/constants'
 
 /**
@@ -54,7 +54,7 @@ export async function fetchBlacklist() {
 
 async function storeBlacklist(blacklist = []) {
     const serialized = JSON.stringify(blacklist)
-    await dirtyStoredEsts()
+    await importEstsManager.dirty()
 
     return browser.storage.local.set({ [STORAGE_KEY]: serialized })
 }

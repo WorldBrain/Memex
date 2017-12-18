@@ -2,10 +2,10 @@ import { mapToObject } from 'src/util/map-set-helpers'
 
 export class ImportStateManager {
     static STATE_STORAGE_KEY = 'import-state-manager'
+    static ERR_STATE_STORAGE_KEY = 'import-err-state-manager'
     static STORAGE_PREFIX = 'import-items-'
+    static ERR_STORAGE_PREFIX = 'err-import-items-'
     static DEF_CHUNK_SIZE = 100
-    static generateChunkKey = key =>
-        `${ImportStateManager.STORAGE_PREFIX}${key}`
 
     /**
      * @property {string[]} Stack of different storage keys used for storing import items state.
@@ -13,9 +13,19 @@ export class ImportStateManager {
     storageKeyStack
 
     /**
+     * @property {string[]} Stack of different storage keys used for storing error'd import items state.
+     */
+    errStorageKeyStack
+
+    /**
      * @property {number}
      */
     chunkSize
+
+    /**
+     * @property {number} Index of the current error chunk
+     */
+    currErrChunk = 0
 
     /**
      * @param {number} [chunkSize] Unsigned int to represent size of chunks to return from each `getItems` iteration.
@@ -31,34 +41,54 @@ export class ImportStateManager {
      * Attempt to rehydrate and init `storageKeyStack` state from local storage.
      */
     async rehydrateState() {
-        let initState
+        let initState, initErrState
         try {
             const {
+                [ImportStateManager.ERR_STATE_STORAGE_KEY]: savedErrState,
                 [ImportStateManager.STATE_STORAGE_KEY]: savedState,
             } = await browser.storage.local.get({
+                [ImportStateManager.ERR_STATE_STORAGE_KEY]: [],
                 [ImportStateManager.STATE_STORAGE_KEY]: [],
             })
             initState = savedState
+            initErrState = savedErrState
         } catch (error) {
             initState = []
+            initErrState = []
         } finally {
             this.storageKeyStack = initState
+            this.errStorageKeyStack = initErrState
+            this.currErrChunk = this.errStorageKeyStack.length - 1
         }
     }
 
     /**
      * @generator
+     * @param {boolean} [includeErrs=true] Flag to decide whether to include error'd items in the Iterator.
      * @yields {any} Object containing `chunkKey` and `chunk` pair, corresponding to the chunk storage key
      *  and value at that storage key, respectively.
      */
-    *getItems() {
-        for (const key in this.storageKeyStack) {
-            const chunkKey = ImportStateManager.generateChunkKey(key)
+    *getItems(includeErrs = false) {
+        for (const chunkKey of this.storageKeyStack) {
+            yield this.getChunk(chunkKey)
+        }
 
-            // Each iteration should yield both the current chunk key and assoc. chunk values (import items)
+        if (includeErrs) {
+            yield* this.getErrItems()
+        }
+    }
+
+    *getErrItems() {
+        for (const chunkKey of this.errStorageKeyStack) {
             yield this.getChunk(chunkKey)
         }
     }
+
+    getNextChunkKey = () =>
+        `${ImportStateManager.STORAGE_PREFIX}${this.storageKeyStack.length}`
+    getNextErrChunkKey = () =>
+        `${ImportStateManager.ERR_STORAGE_PREFIX}${this.errStorageKeyStack
+            .length}`
 
     /**
      * Splits up a Map into an Array of objects of specified size to use as state chunks.
@@ -83,9 +113,7 @@ export class ImportStateManager {
      * @param {any} chunk Chunk of total state to store.
      */
     async addChunk(chunk) {
-        const chunkKey = ImportStateManager.generateChunkKey(
-            this.storageKeyStack.length,
-        )
+        const chunkKey = this.getNextChunkKey()
 
         // Track new storage key in local key state
         this.storageKeyStack.push(chunkKey)
@@ -139,6 +167,47 @@ export class ImportStateManager {
         // Destructure existing state, removing the unwanted item, then update storage with remaining state
         const { [itemKey]: itemToRemove, ...remainingChunk } = chunk
         await browser.storage.local.set({ [chunkKey]: remainingChunk })
+
+        return itemToRemove
+    }
+
+    /**
+     * Moves a single import item from its stored chunk to an error chunk.
+     *
+     * @param {string} chunkKey Storage key of chunk in which item wanted to flag exists.
+     * @param {string} itemKey Key within chunk pointing item to flag.
+     */
+    async flagAsError(chunkKey, itemKey) {
+        const item = await this.removeItem(chunkKey, itemKey)
+
+        let errChunkKey
+        if (!this.errStorageKeyStack.length) {
+            errChunkKey = ImportStateManager.ERR_STORAGE_PREFIX + '0'
+            this.errStorageKeyStack.push(errChunkKey)
+        } else {
+            errChunkKey = this.errStorageKeyStack[
+                this.errStorageKeyStack.length - 1
+            ]
+        }
+
+        let { [errChunkKey]: existingChunk } = await browser.storage.local.get({
+            [errChunkKey]: {},
+        })
+
+        // If curr error chunk is full, move on to the next one
+        if (Object.keys(existingChunk).length >= this.chunkSize) {
+            existingChunk = {}
+            errChunkKey = this.getNextErrChunkKey()
+            this.errStorageKeyStack.push(errChunkKey)
+        }
+
+        // Add current item to error chunk
+        existingChunk[itemKey] = item
+
+        return await browser.storage.local.set({
+            [errChunkKey]: existingChunk,
+            [ImportStateManager.ERR_STATE_STORAGE_KEY]: this.errStorageKeyStack,
+        })
     }
 
     /**

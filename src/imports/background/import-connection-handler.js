@@ -2,12 +2,9 @@ import {
     CMDS,
     IMPORT_CONN_NAME,
     DEF_CONCURRENCY,
-    IMPORT_TYPE,
 } from 'src/options/imports/constants'
-import { differMaps } from 'src/util/map-set-helpers'
-import getEstimateCounts from './import-estimates'
+import estimateManager from '../import-estimates'
 import stateManager from './import-state'
-import createImportItems from './import-item-creation'
 import ProgressManager from './import-progress'
 
 class ImportConnectionHandler {
@@ -20,6 +17,12 @@ class ImportConnectionHandler {
      * @property {ImportProgressManager} Importer instance
      */
     importer
+
+    /**
+     * @property {any} Object containing boolean flags for each import item type key, representing whether
+     *  or not that type should be saved to state (user configurable via UI import-type checkboxes).
+     */
+    allowTypes
 
     constructor(port) {
         // Main `runtime.Port` that this class hides away to handle connection with the imports UI script
@@ -43,9 +46,7 @@ class ImportConnectionHandler {
 
         if (!importInProgress) {
             // Make sure estimates view init'd with count data
-            const estimateCounts = await getEstimateCounts({
-                forceRecalc: false,
-            })
+            const estimateCounts = await estimateManager.fetchCached({})
             this.port.postMessage({ cmd: CMDS.INIT, ...estimateCounts })
         } else {
             // Make sure to start the view in paused state
@@ -61,6 +62,15 @@ class ImportConnectionHandler {
     itemObserver = {
         next: msg => this.port.postMessage({ cmd: CMDS.NEXT, ...msg }),
         complete: () => this.port.postMessage({ cmd: CMDS.COMPLETE }),
+    }
+
+    /**
+     * Update state manager with new items as they are created for estimates counts (as long as type allowed).
+     */
+    handleItemCreation = async ({ data, type }) => {
+        if (this.allowTypes[type]) {
+            await stateManager.addItems(data)
+        }
     }
 
     messageListener = ({ cmd, payload }) => {
@@ -83,38 +93,19 @@ class ImportConnectionHandler {
     }
 
     /**
-     * Handles building the collection of import items in local storage.
-     *
-     * @param {any} allowTypes Object containings bools for each valid type of import, denoting whether
-     *   or not import and page docs should be created for that import type.
-     */
-    async prepareImportItems(allowTypes = {}) {
-        let bookmarkItems
-
-        for await (let { data, type } of createImportItems()) {
-            if (type === IMPORT_TYPE.BOOKMARK) {
-                // Bookmarks should always yield before history
-                bookmarkItems = data
-            } else if (type === IMPORT_TYPE.HISTORY) {
-                // Don't include pages in history that exist as bookmarks as well
-                data = differMaps(bookmarkItems)(data)
-            }
-
-            if (allowTypes[type]) {
-                await stateManager.addItems(data)
-            }
-        }
-    }
-
-    /**
      * @param {any} allowTypes Object with keys as valid import types pointing to bool values denoting whether
      * or not to process that given type of imports.
      */
     async startImport(allowTypes) {
+        this.allowTypes = allowTypes
+
         // Perform history-stubs, vists, and history import state creation, if import not in progress
         const importInProgress = await this.importer.getImportInProgressFlag()
         if (!importInProgress) {
-            await this.prepareImportItems(allowTypes)
+            await estimateManager.fetchCached({
+                forceRecalc: true,
+                onItemCreation: this.handleItemCreation,
+            })
         }
 
         this.port.postMessage({ cmd: CMDS.START }) // Tell UI to finish loading state and move into progress view
@@ -131,7 +122,9 @@ class ImportConnectionHandler {
         this.importer.setImportInProgressFlag(false)
 
         // Re-init the estimates view with updated estimates data
-        const estimateCounts = await getEstimateCounts({ forceRecalc: true })
+        const estimateCounts = await estimateManager.fetchCached({
+            forceRecalc: true,
+        })
         this.port.postMessage({ cmd: CMDS.INIT, ...estimateCounts })
     }
 
