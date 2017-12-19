@@ -3,12 +3,12 @@ import chunk from 'lodash/fp/chunk'
 
 import db from 'src/pouchdb'
 import encodeUrl from 'src/util/encode-url-for-id'
-import stateManager from './background/import-state'
 import { pageKeyPrefix, convertPageDocId } from 'src/page-storage'
 import { bookmarkKeyPrefix, convertBookmarkDocId } from 'src/bookmarks'
 import { checkWithBlacklist } from 'src/blacklist'
 import { isLoggable } from 'src/activity-logger'
 import { IMPORT_TYPE, OLD_EXT_KEYS } from 'src/options/imports/constants'
+import stateManager from './import-state'
 
 const chunkSize = 200
 const lookbackWeeks = 12 // Browser history is limited to the last 3 months

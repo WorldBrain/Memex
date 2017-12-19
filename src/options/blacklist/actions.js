@@ -1,12 +1,12 @@
 import { createAction } from 'redux-act'
 
 import analytics from 'src/analytics'
-import importEstsManager from 'src/imports/import-estimates'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { matchedDocCount } from './selectors'
 
 const deleteDocs = remoteFunction('deleteDocsByUrl')
 const fetchMatchingPages = remoteFunction('fetchPagesByUrlPattern')
+const dirtyEstsCache = remoteFunction('dirtyEstsCache')
 
 export const setMatchedCount = createAction('settings/setMatchedCount')
 export const setModalShow = createAction('settings/setModalShow')
@@ -26,7 +26,7 @@ export const addToBlacklist = expression => async dispatch => {
     })
 
     dispatch(addSiteToBlacklist({ expression, dateAdded: Date.now() }))
-    importEstsManager.dirty() // Force import ests to recalc next visit
+    dirtyEstsCache() // Force import ests to recalc next visit
     dispatch(resetSiteInputValue())
     dispatch(setIsLoading(true))
     try {
@@ -49,7 +49,7 @@ export const removeFromBlacklist = index => dispatch => {
     })
 
     dispatch(removeSiteFromBlacklist({ index }))
-    importEstsManager.dirty() // Force import ests to recalc next visit
+    dirtyEstsCache() // Force import ests to recalc next visit
 }
 
 export const removeMatchingDocs = expression => (dispatch, getState) => {
