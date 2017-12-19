@@ -1,5 +1,7 @@
-import importEstsManager from 'src/imports/import-estimates'
+import { remoteFunction } from 'src/util/webextensionRPC'
 import { STORAGE_KEY } from 'src/options/blacklist/constants'
+
+const dirtyEstsCache = remoteFunction('dirtyEstsCache')
 
 /**
  * Default blacklist entries.
@@ -54,7 +56,7 @@ export async function fetchBlacklist() {
 
 async function storeBlacklist(blacklist = []) {
     const serialized = JSON.stringify(blacklist)
-    await importEstsManager.dirty()
+    await dirtyEstsCache()
 
     return browser.storage.local.set({ [STORAGE_KEY]: serialized })
 }

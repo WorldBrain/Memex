@@ -1,13 +1,9 @@
-import {
-    CMDS,
-    IMPORT_CONN_NAME,
-    DEF_CONCURRENCY,
-} from 'src/options/imports/constants'
-import estimateManager from '../import-estimates'
+import { CMDS, DEF_CONCURRENCY } from 'src/options/imports/constants'
+import estimateManager from './import-estimates'
 import stateManager from './import-state'
 import ProgressManager from './import-progress'
 
-class ImportConnectionHandler {
+export default class ImportConnectionHandler {
     /**
      * @property {runtime.Port} Runtime connection port to afford message communication with UI script
      */
@@ -138,20 +134,4 @@ class ImportConnectionHandler {
         // Resume UI at complete state
         this.port.postMessage({ cmd: CMDS.COMPLETE })
     }
-}
-
-/**
- * Main connection handler to handle background importing and fetch&analysis batching
- * logic via commands issued from the UI.
- *
- * @param {runtime.Port} port Object passed from API event.
- * @returns {ImportConnectionHandler}
- */
-export default function importsConnectionHandler(port) {
-    // Make sure to only handle connection logic for imports (allows other use of runtime.connect)
-    if (port.name !== IMPORT_CONN_NAME) return
-
-    console.log('importer connected')
-
-    return new ImportConnectionHandler(port)
 }

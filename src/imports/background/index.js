@@ -1,9 +1,14 @@
-import importsConnectionHandler from './import-connection-handler'
-import { OLD_EXT_KEYS } from 'src/options/imports/constants'
+import { makeRemotelyCallable } from 'src/util/webextensionRPC'
+import ConnHandler from './import-connection-handler'
+import importEstManager from './import-estimates'
+import { OLD_EXT_KEYS, IMPORT_CONN_NAME } from 'src/options/imports/constants'
 
 // Constants
 export const importStateStorageKey = 'import_items'
 export const installTimeStorageKey = 'extension_install_time'
+
+// Allow UI scripts to dirty estimates cache
+makeRemotelyCallable({ dirtyEstsCache: () => importEstManager.dirty() })
 
 /**
  * Removes local storage entry representing single page data in the old ext.
@@ -34,4 +39,11 @@ export async function clearOldExtData({ timestamp, index }) {
 }
 
 // Allow content-script or UI to connect and communicate control of imports
-browser.runtime.onConnect.addListener(importsConnectionHandler)
+browser.runtime.onConnect.addListener(port => {
+    // Make sure to only handle connection logic for imports (allows other use of runtime.connect)
+    if (port.name !== IMPORT_CONN_NAME) return
+
+    console.log('importer connected')
+
+    return new ConnHandler(port)
+})
