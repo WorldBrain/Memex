@@ -152,7 +152,7 @@ class ImportProgressManager {
             processor.finished = true
 
             // Send item data + outcome status down to UI (and error if present)
-            if (!processor.cancelled) {
+            if (!this.stopped) {
                 this.observer.next(msg)
 
                 // Either flag as error or remove from state depending on processing error status
