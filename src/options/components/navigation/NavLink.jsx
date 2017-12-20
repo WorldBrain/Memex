@@ -6,7 +6,7 @@ import classNames from 'classnames'
 import { OutLink } from 'src/common-ui/containers'
 import styles from './styles.css'
 
-const NavLink = ({ route, state, children }) => {
+const NavLink = ({ route, state, children, messages }) => {
     const navClasses = classNames({
         [styles.navLink]: true,
         [styles.isActive]: children,
@@ -39,6 +39,15 @@ const NavLink = ({ route, state, children }) => {
                 {route.component !== 'faq' && (
                     <Link className={navClasses} to={route.pathname}>
                         {route.name}
+                        {route.name === 'Notifications' && (
+                            <span
+                                className={
+                                    messages ? styles.badge : styles.loadbadge
+                                }
+                            >
+                                {messages}
+                            </span>
+                        )}
                     </Link>
                 )}
             </div>
@@ -62,6 +71,7 @@ NavLink.propTypes = {
     route: PropTypes.object.isRequired,
     state: PropTypes.object.isRequired,
     children: PropTypes.bool.isRequired,
+    messages: PropTypes.bool.isRequired,
 }
 
 export default NavLink
