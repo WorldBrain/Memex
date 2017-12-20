@@ -19,6 +19,11 @@ class ImportProgressManager {
     _concurrency
 
     /**
+     * @property {boolean} Currently set preference for including previously error'd items in import.
+     */
+    processErrors = false
+
+    /**
      * @property {any} Object containing `next` and `complete` methods to run after each item and when
      *  all items complete, respecitively.
      */
@@ -83,7 +88,9 @@ class ImportProgressManager {
         this.stopped = false
 
         // Iterate through data chunks from the state manager
-        for await (const { chunk, chunkKey } of stateManager.getItems()) {
+        for await (const { chunk, chunkKey } of stateManager.getItems(
+            this.processErrors,
+        )) {
             try {
                 const importItemEntries = Object.entries(chunk)
                 const processEntry = this.processItem(chunkKey)
@@ -156,7 +163,7 @@ class ImportProgressManager {
                 this.observer.next(msg)
 
                 // Either flag as error or remove from state depending on processing error status
-                if (msg.error) {
+                if (msg.error && !this.processErrors) {
                     await stateManager.flagAsError(chunkKey, encodedUrl)
                 } else {
                     await stateManager.removeItem(chunkKey, encodedUrl)
