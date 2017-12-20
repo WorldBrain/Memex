@@ -54,9 +54,9 @@ hr {
 .badge {
     display: inline-block;
     background-color: #3eb995;
-    padding: 2px 10px;
-    margin-left: 10px;
-    border-radius: 4px;
+    padding: 2px 12px;
+    margin-left: 130px;
+    border-radius: 24px;
     color: white;
 }
 

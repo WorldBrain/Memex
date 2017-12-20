@@ -68,6 +68,6 @@ export default [
         name: 'Notifications',
         pathname: '/notifications',
         component: Notification,
-        icon: 'notifications',
+        icon: 'notifications_active',
     },
 ]
