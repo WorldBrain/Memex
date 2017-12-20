@@ -94,6 +94,7 @@
     border-radius: 24px;
     color: white;
     float: right;
+    margin-right: 10px;
 
     &.isNavActive {
         background-color: white;
