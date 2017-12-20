@@ -16,12 +16,12 @@
     justify-content: space-between;
     overflow: hidden;
     margin-top: var(--vertical-spacing);
-    border: 1px solid #e3e3e3;
+    border: 1px solid #3eb99517;
     border-radius: 3px;
     background-color: #fefefe;
     color: inherit;
     text-decoration: none;
-    box-shadow: 0 3px 10px 1px rgba(217, 219, 221, 0.6);
+    box-shadow: 0 4px 20px 1px #3eb99517;
 
     &:hover {
         box-shadow: 0 3px 15px 4px rgba(200, 200, 200, 0.5);
@@ -92,7 +92,7 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        color: #084999;
+        color: #173766;
         margin-bottom: 7px;
 
         & .favIcon {

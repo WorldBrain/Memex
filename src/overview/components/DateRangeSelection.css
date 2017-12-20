@@ -20,7 +20,9 @@
     color: #484848;
     border: none;
     margin: 0 10px;
-    font-family: 'Lato';
+    font-family: 'Open Sans';
+    font-weight: lighter;
+    font-style: italic;
 
     &::placeholder {
         color: #b8b8b8;

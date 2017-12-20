@@ -1,7 +1,7 @@
 .acknowledgement {
     width: 100%;
     height: 100%;
-    font-family: 'Lato';
+    font-family: 'Open Sans';
     margin-top: 20px;
 }
 
@@ -18,7 +18,7 @@
     margin-bottom: 20px;
     font-size: 15px;
     letter-spacing: 1px;
-    width: 80%;
+    width: 100%;
     min-width: 450px;
     color: #999;
 }

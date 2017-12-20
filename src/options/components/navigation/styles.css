@@ -5,7 +5,7 @@
     min-height: 100vh;
     background-color: #f7f7f7;
     box-shadow: 2px 1px 1px #e2e2e2;
-    font-family: 'Lato';
+    font-family: 'Open Sans';
     line-height: 2;
     font-weight: 200;
 }
@@ -75,7 +75,7 @@
     margin-top: 10px;
     color: #bababa;
     font-size: 14px;
-    font-family: 'Lato';
+    font-family: 'Open Sans';
     font-weight: bold;
 }
 

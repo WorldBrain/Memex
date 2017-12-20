@@ -83,7 +83,7 @@
     justify-content: center;
     align-items: center;
     height: 750px;
-    width: 800px;
+    width: 830px;
     background: #fff;
     opacity: 0.8;
 }
@@ -137,7 +137,7 @@
 
 .stepImportText {
     font-size: 15px;
-    max-width: 700px;
+    max-width: 800px;
 }
 
 .checkboxText {
@@ -152,7 +152,7 @@
     padding: 20px;
     background-color: #f6f6f6;
     text-align: center;
-    font-family: 'Lato';
+    font-family: 'Open Sans';
     color: #6d6d6d;
     border-radius: 5px;
     letter-spacing: 1px;

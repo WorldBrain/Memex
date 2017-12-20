@@ -28,7 +28,7 @@
     padding: 0;
     font-size: 1em;
     cursor: pointer;
-    font-family: 'Lato';
+    font-family: 'Open Sans';
 
     &:disabled {
         color: rgb(156, 156, 156);

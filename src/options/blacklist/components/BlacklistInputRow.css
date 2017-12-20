@@ -15,7 +15,7 @@
     border: none;
     outline: none;
     background: #f8f8f8;
-    font-family: 'Lato';
+    font-family: 'Open Sans';
 }
 
 .inputButtons {
@@ -28,7 +28,7 @@
 .blacklistButton {
     background: transparent;
     border: none;
-    font-family: 'Lato';
+    font-family: 'Open Sans';
     font-size: 12px;
     outline: none;
     cursor: pointer;
