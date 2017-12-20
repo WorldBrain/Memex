@@ -6,6 +6,7 @@ import Acknowledgements from './acknowledgement/components/content'
 import Tutorial from './tutorial'
 import NewInstall from './new-install'
 import Statistics from './statistics'
+import Notification from './notifications'
 
 export default [
     {
@@ -62,5 +63,11 @@ export default [
         pathname: '/tutorial',
         component: Tutorial,
         icon: 'info',
+    },
+    {
+        name: 'Notifications',
+        pathname: '/notifications',
+        component: Notification,
+        icon: 'notifications',
     },
 ]

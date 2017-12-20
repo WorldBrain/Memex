@@ -16,8 +16,10 @@ import HistoryPauser from './components/HistoryPauser'
 import LinkButton from './components/LinkButton'
 import SplitButton from './components/SplitButton'
 import * as constants from './constants'
+import setUnreadCount from '../util/setUnreadCount'
 
 import { itemBtnBlacklisted } from './components/Button.css'
+import styles from './components/Popup.css'
 
 // Transforms URL checking results to state types
 const getBlacklistButtonState = ({ loggable, blacklist }) => {
@@ -87,6 +89,14 @@ class PopupContainer extends Component {
         this.getInitBookmarkBtnState(currentTab.url)
             .then(updateState)
             .catch(noop)
+        this.getInitNotificationState()
+            .then(updateState)
+            .catch(noop)
+    }
+
+    async getInitNotificationState() {
+        const res = await setUnreadCount(0)
+        return res === 0 ? { unread: false } : { unread: true, notifs: res }
     }
 
     async getInitPauseState() {
@@ -325,6 +335,19 @@ class PopupContainer extends Component {
                 </LinkButton>
                 <LinkButton href={constants.FEEDBACK_URL} icon="feedback">
                     I need Help!
+                </LinkButton>
+                <LinkButton
+                    href={`${constants.OPTIONS_URL}#/notifications`}
+                    icon="notifications"
+                >
+                    Notifications{' '}
+                    <span
+                        className={
+                            this.state.unread ? styles.badge : styles.loadbadge
+                        }
+                    >
+                        {this.state.notifs}
+                    </span>
                 </LinkButton>
             </div>
         )
