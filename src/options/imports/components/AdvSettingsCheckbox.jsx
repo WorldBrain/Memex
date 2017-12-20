@@ -10,6 +10,7 @@ const AdvSettingsCheckbox = ({ advMode, toggleAdvMode }) => (
             id="advModeCheckbox"
             onChange={toggleAdvMode}
             checked={advMode}
+            className={styles.checkbox}
         />
         <label htmlFor="advModeCheckbox">Advanced Settings</label>
     </div>

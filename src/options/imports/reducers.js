@@ -16,6 +16,7 @@ const defaultStats = {
 }
 
 const defaultState = {
+    processErrors: false,
     showOldExt: false,
     downloadData: [],
     completed: defaultStats, // Count of docs already in DB (estimates view)
@@ -145,6 +146,10 @@ export default createReducer(
         [actions.showDownloadDetails]: state => ({
             ...state,
             showDownloadDetails: !state.showDownloadDetails,
+        }),
+        [actions.setProcessErrs]: (state, processErrors) => ({
+            ...state,
+            processErrors,
         }),
     },
     defaultState,

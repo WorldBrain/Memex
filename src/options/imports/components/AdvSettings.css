@@ -26,6 +26,11 @@
     right: 200px;
 }
 
+.prevFailedCheckbox {
+    position: relative;
+    right: 220px;
+}
+
 .settingsList {
     padding: 0;
 }
@@ -46,7 +51,7 @@
     }
 }
 
-input[type='checkbox'] {
+.checkbox {
     position: absolute;
     opacity: 0;
 

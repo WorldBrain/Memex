@@ -53,6 +53,10 @@ export const isUploading = createSelector(
     state => state.isFileUploading,
 )
 export const concurrency = createSelector(imports, state => state.concurrency)
+export const processErrors = createSelector(
+    imports,
+    state => state.processErrors,
+)
 
 const getImportStatusFlag = status =>
     createSelector(importStatus, importStatus => importStatus === status)

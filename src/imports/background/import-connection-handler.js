@@ -83,6 +83,8 @@ export default class ImportConnectionHandler {
                 return this.finishImport()
             case CMDS.SET_CONCURRENCY:
                 return (this.importer.concurrency = payload)
+            case CMDS.SET_PROCESS_ERRS:
+                return (this.importer.processErrors = payload)
             default:
                 return console.error(`unknown command: ${cmd}`)
         }

@@ -37,6 +37,7 @@ export const setShowOldExt = createAction('imports/setShowOldExt')
 export const toggleAdvMode = createAction('imports-adv/toggleAdvMode')
 export const setFileUploading = createAction('imports-adv/setFileUploading')
 export const setConcurrency = createAction('imports-adv/setConcurrency')
+export const setProcessErrs = createAction('imports-adv/setProcessErrs')
 
 export const showDownloadDetails = createAction('imports/showDownloadDetails')
 
@@ -211,4 +212,9 @@ export const start = () => (dispatch, getState) => {
 export const setConcurrencyLevel = concurrency => dispatch => {
     dispatch(setConcurrency(concurrency))
     port.postMessage({ cmd: CMDS.SET_CONCURRENCY, payload: concurrency })
+}
+
+export const setPrevFailed = value => dispatch => {
+    dispatch(setProcessErrs(value))
+    port.postMessage({ cmd: CMDS.SET_PROCESS_ERRS, payload: value })
 }
