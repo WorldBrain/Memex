@@ -3,6 +3,8 @@ import PropTypes from 'prop-types'
 import classNames from 'classnames'
 import localStyles from './UnreadMessages.css'
 
+const moment = require('moment')
+
 const iconClasses = classNames({
     'material-icons': true,
     [localStyles.icon]: true,
@@ -25,7 +27,9 @@ const messageRow = ({ doc, handleClick, isOpen }) => (
                 <div className={localStyles.toggle} key={doc.title}>
                     {doc.body}
                     <br />
-                    <div className={localStyles.dateNotif}>{doc.date}</div>
+                    <div className={localStyles.dateNotif}>
+                        {moment(doc.date, 'YYYY-MM-DD').format('MMM. DD, YYYY')}
+                    </div>
                 </div>
             )}
         </td>

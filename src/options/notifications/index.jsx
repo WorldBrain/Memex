@@ -166,6 +166,12 @@ class NotificationsContainer extends Component {
                     >
                         Show all
                     </div>
+                    <br />
+                    {!readMessages.length && (
+                        <div className={styles.noMessage}>
+                            There is no archive notification.
+                        </div>
+                    )}
                     {this.renderMesaagesTable(readMessages)}
                 </section>
             </div>

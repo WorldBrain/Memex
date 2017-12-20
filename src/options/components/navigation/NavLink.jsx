@@ -25,6 +25,12 @@ const NavLink = ({ route, state, children, messages }) => {
         [styles.done]: state.isStopped,
     })
 
+    const badgeCondition = classNames({
+        [styles.isNavActive]: children,
+        [styles.badge]: messages,
+        [styles.loadbadge]: !messages,
+    })
+
     return (
         <li>
             <div className={navClasses}>
@@ -42,13 +48,7 @@ const NavLink = ({ route, state, children, messages }) => {
                     <Link className={navClasses} to={route.pathname}>
                         {route.name}
                         {route.name === 'Notifications' && (
-                            <span
-                                className={
-                                    messages ? styles.badge : styles.loadbadge
-                                }
-                            >
-                                {messages}
-                            </span>
+                            <div className={badgeCondition}>{messages}</div>
                         )}
                     </Link>
                 )}

@@ -58,6 +58,7 @@ hr {
     margin-left: 130px;
     border-radius: 24px;
     color: white;
+    float: right;
 }
 
 .loadbadge {
@@ -66,4 +67,5 @@ hr {
     margin-left: 10px;
     border-radius: 10px;
     color: white;
+    float: right;
 }
