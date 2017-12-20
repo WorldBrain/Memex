@@ -401,13 +401,13 @@ class PopupContainer extends Component {
                     icon="notifications_active"
                 >
                     Notifications{' '}
-                    <span
+                    <div
                         className={
                             this.state.unread ? styles.badge : styles.loadbadge
                         }
                     >
                         {this.state.notifs}
-                    </span>
+                    </div>
                 </LinkButton>
                 <UpgradeButton />
                 <ButtonIcon
