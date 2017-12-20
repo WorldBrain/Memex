@@ -62,11 +62,10 @@
     background-color: transparent;
     padding-left: 60px;
     font-size: 15px;
-    color: #484848;
+    color: #3eb995;
     border: none;
     font-family: 'Open Sans';
     font-weight: lighter;
-    font-style: italic;
 
     &::placeholder {
         color: #b8b8b8;

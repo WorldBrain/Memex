@@ -17,12 +17,11 @@
     width: 110px;
     height: 37px;
     font-size: 15px;
-    color: #484848;
+    color: #3eb995;
     border: none;
     margin: 0 10px;
     font-family: 'Open Sans';
     font-weight: lighter;
-    font-style: italic;
 
     &::placeholder {
         color: #b8b8b8;
