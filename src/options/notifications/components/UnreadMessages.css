@@ -51,6 +51,7 @@
 .messageReadOrUnreadIcon {
     float: right;
     position: relative;
+    margin-top: -4px;
 }
 
 .dateNotif {
