@@ -42,7 +42,7 @@ const EstimatesTable = ({
                     />
                     <label className={localStyles.label} htmlFor="history">
                         <span className={localStyles.checkboxText}>
-                            Browsing history
+                            Browsing History
                         </span>
                         <br />
                         <span className={localStyles.checkboxSubText}>

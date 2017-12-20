@@ -12,6 +12,7 @@
     display: flex;
     align-items: center;
     cursor: default;
+    font-weight: 100;
 
     &:hover,
     &:focus {
@@ -29,6 +30,7 @@
     font-size: 1em;
     cursor: pointer;
     font-family: 'Open Sans';
+    font-weight: 100;
 
     &:disabled {
         color: rgb(156, 156, 156);

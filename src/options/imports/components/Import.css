@@ -23,6 +23,7 @@
 
     & td:first-child {
         text-align: initial;
+        font-weight: 500;
     }
 }
 
@@ -141,7 +142,7 @@
 }
 
 .checkboxText {
-    font-weight: bold;
+    font-weight: 500;
 }
 
 .checkboxSubText {
