@@ -62,3 +62,20 @@ hr {
         outline: none;
     }
 }
+
+.badge {
+    display: inline-block;
+    background-color: #3eb995;
+    padding: 2px 10px;
+    margin-left: 10px;
+    border-radius: 4px;
+    color: white;
+}
+
+.loadbadge {
+    display: inline-block;
+    padding: 2px 10px;
+    margin-left: 10px;
+    border-radius: 10px;
+    color: white;
+}
