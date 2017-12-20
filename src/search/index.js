@@ -76,6 +76,7 @@ export {
     addPageConcurrent,
     addBookmarkConcurrent,
     put,
+    addMetaConcurrent,
 } from './search-index/add'
 export { initSingleLookup, keyGen } from './search-index/util'
 export { delPages, delPagesConcurrent, del } from './search-index/del'

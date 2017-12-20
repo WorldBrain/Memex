@@ -48,12 +48,13 @@ class PopupContainer extends Component {
             blacklistConfirm: false,
             bookmarkBtn: constants.BOOKMARK_BTN_STATE.DISABLED,
             domainDelete: false,
+            tabID: null,
         }
 
         this.toggleLoggingPause = remoteFunction('toggleLoggingPause')
         this.deleteDocs = remoteFunction('deleteDocsByUrl')
-        this.createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
         this.removeBookmarkByUrl = remoteFunction('removeBookmarkByUrl')
+        this.createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
 
         this.onSearchChange = this.onSearchChange.bind(this)
         this.onPauseChange = this.onPauseChange.bind(this)
@@ -76,7 +77,7 @@ class PopupContainer extends Component {
             this.setState(oldState => ({ ...oldState, ...newState }))
         const noop = f => f // Don't do anything if error; state doesn't change
 
-        updateState({ url: currentTab.url })
+        updateState({ url: currentTab.url, tabID: currentTab.id })
         this.getInitPauseState()
             .then(updateState)
             .catch(noop)
@@ -109,7 +110,7 @@ class PopupContainer extends Component {
         const dbResult = await lookup(pageId)
         const result = {
             loggable: isLoggable({ url }),
-            bookmark: dbResult.bookmarks.size !== 0,
+            bookmark: dbResult == null ? false : dbResult.bookmarks.size !== 0,
             blacklist: this.state.blacklistBtn,
         }
 
@@ -260,7 +261,7 @@ class PopupContainer extends Component {
         if (
             this.state.bookmarkBtn === constants.BOOKMARK_BTN_STATE.UNBOOKMARK
         ) {
-            this.createBookmarkByUrl(this.state.url)
+            this.createBookmarkByUrl(this.state.url, this.state.tabID)
         } else if (
             this.state.bookmarkBtn === constants.BOOKMARK_BTN_STATE.BOOKMARK
         ) {
@@ -282,6 +283,24 @@ class PopupContainer extends Component {
         }
         return (
             <div>
+                <Button
+                    onClick={this.handleAddBookmark}
+                    icon={
+                        this.state.bookmarkBtn ===
+                        constants.BOOKMARK_BTN_STATE.BOOKMARK
+                            ? 'star'
+                            : 'star_border'
+                    }
+                    disabled={
+                        this.state.bookmarkBtn ===
+                        constants.BOOKMARK_BTN_STATE.DISABLED
+                    }
+                >
+                    {this.state.bookmarkBtn ===
+                    constants.BOOKMARK_BTN_STATE.BOOKMARK
+                        ? 'Unbookmark this Page'
+                        : 'Bookmark this Page'}
+                </Button>
                 <HistoryPauser
                     onConfirm={this.onPauseConfirm}
                     onChange={this.onPauseChange}
