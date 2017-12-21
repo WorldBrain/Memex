@@ -3,7 +3,7 @@ import chunk from 'lodash/fp/chunk'
 
 import encodeUrl from 'src/util/encode-url-for-id'
 import { grabExistingKeys } from 'src/search'
-import { checkWithBlacklist as initBlacklistCheck } from 'src/blacklist'
+import { blacklist } from 'src/blacklist/background'
 import { isLoggable } from 'src/activity-logger'
 import { IMPORT_TYPE, OLD_EXT_KEYS } from 'src/options/imports/constants'
 import stateManager from './import-state'
@@ -49,7 +49,7 @@ export default class ImportItemCreator {
     }
 
     async _initExistingChecks() {
-        this.isBlacklisted = await initBlacklistCheck()
+        this.isBlacklisted = await blacklist.checkWithBlacklist()
         this.isPrevErrord = await initErrordItemsCheck()
 
         // Grab existing data keys from DB

@@ -8,7 +8,6 @@ import { generatePageDocId } from 'src/page-storage'
 import extractQueryFilters from 'src/util/nlp-time-filter'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { isLoggable, getPauseState } from 'src/activity-logger'
-import * as blacklistI from 'src/blacklist'
 import Popup from './components/Popup'
 import Button from './components/Button'
 import BlacklistConfirm from './components/BlacklistConfirm'
@@ -20,16 +19,25 @@ import * as constants from './constants'
 import { itemBtnBlacklisted } from './components/Button.css'
 
 // Transforms URL checking results to state types
-const getBlacklistButtonState = ({ loggable, blacklist }) => {
-    if (!blacklist) return constants.BLACKLIST_BTN_STATE.BLACKLISTED
-    if (!loggable) return constants.BLACKLIST_BTN_STATE.DISABLED
-    return constants.BLACKLIST_BTN_STATE.UNLISTED
+const getBlacklistButtonState = ({ loggable, blacklisted }) => {
+    if (blacklisted) {
+        return constants.BLACKLIST_BTN_STATE.BLACKLISTED
+    }
+
+    return loggable
+        ? constants.BLACKLIST_BTN_STATE.UNLISTED
+        : constants.BLACKLIST_BTN_STATE.DISABLED
 }
 
 const getBookmarkButtonState = ({ loggable, bookmark, blacklist }) => {
-    if (!loggable || blacklist === constants.BLACKLIST_BTN_STATE.DISABLED)
+    if (!loggable || blacklist === constants.BLACKLIST_BTN_STATE.DISABLED) {
         return constants.BOOKMARK_BTN_STATE.DISABLED
-    if (bookmark) return constants.BOOKMARK_BTN_STATE.BOOKMARK
+    }
+
+    if (bookmark) {
+        return constants.BOOKMARK_BTN_STATE.BOOKMARK
+    }
+
     return constants.BOOKMARK_BTN_STATE.UNBOOKMARK
 }
 
@@ -37,20 +45,9 @@ class PopupContainer extends Component {
     constructor(props) {
         super(props)
 
-        this.state = {
-            url: '',
-            searchValue: '',
-            pauseValue: 20,
-            currentTabPageDocId: '',
-            blacklistBtn: constants.BLACKLIST_BTN_STATE.DISABLED,
-            isPaused: false,
-            blacklistChoice: false,
-            blacklistConfirm: false,
-            bookmarkBtn: constants.BOOKMARK_BTN_STATE.DISABLED,
-            domainDelete: false,
-            tabID: null,
-        }
-
+        this.fetchBlacklist = remoteFunction('fetchBlacklist')
+        this.addToBlacklist = remoteFunction('addToBlacklist')
+        this.isURLBlacklisted = remoteFunction('isURLBlacklisted')
         this.toggleLoggingPause = remoteFunction('toggleLoggingPause')
         this.deleteDocs = remoteFunction('deleteDocsByUrl')
         this.removeBookmarkByUrl = remoteFunction('removeBookmarkByUrl')
@@ -60,6 +57,20 @@ class PopupContainer extends Component {
         this.onPauseChange = this.onPauseChange.bind(this)
         this.onSearchEnter = this.onSearchEnter.bind(this)
         this.onPauseConfirm = this.onPauseConfirm.bind(this)
+    }
+
+    state = {
+        url: '',
+        searchValue: '',
+        pauseValue: 20,
+        currentTabPageDocId: '',
+        blacklistBtn: constants.BLACKLIST_BTN_STATE.DISABLED,
+        isPaused: false,
+        blacklistChoice: false,
+        blacklistConfirm: false,
+        bookmarkBtn: constants.BOOKMARK_BTN_STATE.DISABLED,
+        domainDelete: false,
+        tabID: null,
     }
 
     async componentDidMount() {
@@ -83,8 +94,7 @@ class PopupContainer extends Component {
             .catch(noop)
         this.getInitBlacklistBtnState(currentTab.url)
             .then(updateState)
-            .catch(noop)
-        this.getInitBookmarkBtnState(currentTab.url)
+            .then(() => this.getInitBookmarkBtnState(currentTab.url))
             .then(updateState)
             .catch(noop)
     }
@@ -94,14 +104,14 @@ class PopupContainer extends Component {
     }
 
     async getInitBlacklistBtnState(url) {
-        const blacklist = await blacklistI.fetchBlacklist()
+        const blacklist = await this.fetchBlacklist()
 
-        const result = {
-            loggable: isLoggable({ url }),
-            blacklist: !blacklistI.isURLBlacklisted(url, blacklist),
+        return {
+            blacklistBtn: getBlacklistButtonState({
+                loggable: isLoggable({ url }),
+                blacklisted: await this.isURLBlacklisted(url, blacklist),
+            }),
         }
-
-        return { blacklistBtn: getBlacklistButtonState(result) }
     }
 
     async getInitBookmarkBtnState(url) {
@@ -130,7 +140,7 @@ class PopupContainer extends Component {
                 action: domainDelete ? 'Blacklist domain' : 'Blacklist site',
             })
 
-            blacklistI.addToBlacklist(url)
+            this.addToBlacklist(url)
             this.setState(state => ({
                 ...state,
                 blacklistChoice: false,
