@@ -1,4 +1,5 @@
-import PromiseBatcher from 'src/util/promise-batcher'
+import promiseLimit from 'promise-limit'
+
 import index, { DEFAULT_TERM_SEPARATOR } from './'
 
 // Key generation functions
@@ -159,6 +160,43 @@ export const reverseRangeLookup = ({ limit = Infinity, ...iteratorOpts }) =>
         })
     })
 
+/**
+ * @param {boolean} [trimPrefix=true] Whether or not to trim the `page/` prefix from all returned keys.
+ * @returns {Promise<any>} Resolves to an object containing `histKeys` and `bmKeys` Sets of found history and
+ *  bookmark keys, respectively, for all pages indexed.
+ */
+export const grabExistingKeys = (trimPrefix = true) => {
+    const trim = key => key.replace('page/', '')
+
+    return new Promise(resolve => {
+        let histKeys = new Set()
+        let bmKeys = new Set()
+
+        index.db
+            .createReadStream({
+                gte: 'page/',
+                lte: 'page/\uffff',
+            })
+            .on('data', ({ key, value }) => {
+                if (value && value.bookmarks && value.bookmarks.size) {
+                    bmKeys.add(key)
+                }
+                histKeys.add(key)
+            })
+            .on('end', () => {
+                if (trimPrefix) {
+                    histKeys = new Set([...histKeys].map(trim))
+                    bmKeys = new Set([...bmKeys].map(trim))
+                }
+
+                resolve({
+                    histKeys,
+                    bmKeys,
+                })
+            })
+    })
+}
+
 const defLookupOpts = {
     defaultValue: null,
     asBuffer: false,
@@ -188,30 +226,21 @@ export const initSingleLookup = (
  */
 export const initLookupByKeys = (
     { concurrency = 5, defaultValue = null, asBuffer = false } = defLookupOpts,
-) => keys =>
-    new Promise(async resolve => {
-        const result = new Map()
-        const singleLookup = initSingleLookup({ defaultValue, asBuffer })
+) => async keys => {
+    const singleLookup = initSingleLookup({ defaultValue, asBuffer })
+    let entries
 
-        if (!Array.isArray(keys)) {
-            result.set(keys, await singleLookup(keys))
-            return resolve(result)
-        }
-
-        // Set up PromiseBatcher instance to handle concurrent lookups on same IDBOpenDBRequest
-        const batch = new PromiseBatcher({
-            nextInputBatchCb: () => Promise.resolve(keys),
-            processingCb: singleLookup,
-            concurrency,
-            observer: {
-                next: ({ input, output }) => result.set(input, output),
-                complete: () => resolve(result),
-                error: console.error,
-            },
-        })
-
-        batch.start()
-    })
+    if (!Array.isArray(keys)) {
+        entries = [[keys, await singleLookup(keys)]]
+    } else {
+        const runConcurrent = promiseLimit(concurrency)
+        entries = await runConcurrent.map(keys, async key => [
+            key,
+            await singleLookup(key),
+        ])
+    }
+    return new Map(entries)
+}
 
 const getLatestVisitOrBookmark = ({ visits, bookmarks }) =>
     !visits.size

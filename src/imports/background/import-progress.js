@@ -1,5 +1,6 @@
 import promiseLimit from 'promise-limit'
 
+import { IMPORT_TYPE as TYPE } from 'src/options/imports/constants'
 import { indexQueue } from 'src/search/search-index'
 import stateManager from './import-state'
 import ItemProcessor from './import-item-processor'
@@ -33,6 +34,16 @@ class ImportProgressManager {
      * @property {boolean} Flag denoting whether or not current state is stopped or not.
      */
     stopped = false
+
+    /**
+     * @property {any} Object containing boolean flags for each import item type key, representing whether
+     *  or not that type should be saved to state (user configurable via UI import-type checkboxes).
+     */
+    allowTypes = {
+        [TYPE.HISTORY]: true,
+        [TYPE.BOOKMARK]: true,
+        [TYPE.OLD]: true,
+    }
 
     constructor(initConcurrency, initObserver) {
         this.concurrency = initConcurrency
@@ -82,6 +93,14 @@ class ImportProgressManager {
     }
 
     /**
+     * @param {[key: string, value: ImportItem]} entry Any KVP entry from a chunk.
+     * @returns {boolean} Flag denoting whether or not chunk where `entry` came from is allowed by type.
+     */
+    checkChunkTypeAllowed([key, item]) {
+        return !!this.allowTypes[item.type]
+    }
+
+    /**
      * Start execution
      */
     async start() {
@@ -91,12 +110,22 @@ class ImportProgressManager {
         for await (const { chunk, chunkKey } of stateManager.getItems(
             this.processErrors,
         )) {
-            try {
-                const importItemEntries = Object.entries(chunk)
-                const processEntry = this.processItem(chunkKey)
+            const importItemEntries = Object.entries(chunk)
 
+            // Skip early if first entry type is not allowed (entire chunk's of same type items)
+            if (
+                !importItemEntries.length ||
+                !this.checkChunkTypeAllowed(importItemEntries[0])
+            ) {
+                continue
+            }
+
+            try {
                 // For each chunk, run through the import item entries at specified level of concurrency
-                await this.runConcurrent.map(importItemEntries, processEntry)
+                await this.runConcurrent.map(
+                    importItemEntries,
+                    this.processItem(chunkKey),
+                )
             } catch (err) {
                 // If execution cancelled break Iterator processing
                 if (err.cancelled) {
@@ -164,7 +193,7 @@ class ImportProgressManager {
 
                 // Either flag as error or remove from state depending on processing error status
                 if (msg.error && !this.processErrors) {
-                    await stateManager.flagAsError(chunkKey, encodedUrl)
+                    await stateManager.flagItemAsError(chunkKey, encodedUrl)
                 } else {
                     await stateManager.removeItem(chunkKey, encodedUrl)
                 }

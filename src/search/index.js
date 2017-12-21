@@ -78,6 +78,6 @@ export {
     put,
     addMetaConcurrent,
 } from './search-index/add'
-export { initSingleLookup, keyGen } from './search-index/util'
+export { initSingleLookup, keyGen, grabExistingKeys } from './search-index/util'
 export { delPages, delPagesConcurrent, del } from './search-index/del'
 export { indexSearch as search }

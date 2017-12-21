@@ -1,5 +1,4 @@
 import { CMDS, DEF_CONCURRENCY } from 'src/options/imports/constants'
-import estimateManager from './import-estimates'
 import stateManager from './import-state'
 import ProgressManager from './import-progress'
 
@@ -13,12 +12,6 @@ export default class ImportConnectionHandler {
      * @property {ImportProgressManager} Importer instance
      */
     importer
-
-    /**
-     * @property {any} Object containing boolean flags for each import item type key, representing whether
-     *  or not that type should be saved to state (user configurable via UI import-type checkboxes).
-     */
-    allowTypes
 
     constructor(port) {
         // Main `runtime.Port` that this class hides away to handle connection with the imports UI script
@@ -42,7 +35,7 @@ export default class ImportConnectionHandler {
 
         if (!importInProgress) {
             // Make sure estimates view init'd with count data
-            const estimateCounts = await estimateManager.fetchCached({})
+            const estimateCounts = await stateManager.fetchEsts()
             this.port.postMessage({ cmd: CMDS.INIT, ...estimateCounts })
         } else {
             // Make sure to start the view in paused state
@@ -57,16 +50,10 @@ export default class ImportConnectionHandler {
      */
     itemObserver = {
         next: msg => this.port.postMessage({ cmd: CMDS.NEXT, ...msg }),
-        complete: () => this.port.postMessage({ cmd: CMDS.COMPLETE }),
-    }
-
-    /**
-     * Update state manager with new items as they are created for estimates counts (as long as type allowed).
-     */
-    handleItemCreation = async ({ data, type }) => {
-        if (this.allowTypes[type]) {
-            await stateManager.addItems(data)
-        }
+        complete: () => {
+            stateManager.clearItems()
+            this.port.postMessage({ cmd: CMDS.COMPLETE })
+        },
     }
 
     messageListener = ({ cmd, payload }) => {
@@ -95,20 +82,16 @@ export default class ImportConnectionHandler {
      * or not to process that given type of imports.
      */
     async startImport(allowTypes) {
-        this.allowTypes = allowTypes
-
         // Perform history-stubs, vists, and history import state creation, if import not in progress
         const importInProgress = await this.importer.getImportInProgressFlag()
         if (!importInProgress) {
-            await estimateManager.fetchCached({
-                forceRecalc: true,
-                onItemCreation: this.handleItemCreation,
-            })
+            await stateManager.fetchEsts()
         }
 
         this.port.postMessage({ cmd: CMDS.START }) // Tell UI to finish loading state and move into progress view
 
         this.importer.setImportInProgressFlag(true)
+        this.importer.allowTypes = allowTypes
         this.importer.start()
     }
 
@@ -120,18 +103,13 @@ export default class ImportConnectionHandler {
         this.importer.setImportInProgressFlag(false)
 
         // Re-init the estimates view with updated estimates data
-        const estimateCounts = await estimateManager.fetchCached({
-            forceRecalc: true,
-        })
+        const estimateCounts = await stateManager.fetchEsts(false)
         this.port.postMessage({ cmd: CMDS.INIT, ...estimateCounts })
     }
 
     async cancelImport() {
         this.importer.stop()
         this.importer.setImportInProgressFlag(false)
-
-        // Clean up any import-related stubs or state
-        await stateManager.clearItems()
 
         // Resume UI at complete state
         this.port.postMessage({ cmd: CMDS.COMPLETE })
