@@ -20,12 +20,13 @@ const messageRow = ({ doc, handleClick, isOpen }) => (
             {doc.title}
             <div className={localStyles.messageReadOrUnreadIcon}>
                 <i className={iconClasses}>
-                    {isOpen ? 'keyboard_arrow_down' : 'keyboard_arrow_up'}
+                    {isOpen ? 'keyboard_arrow_up' : 'keyboard_arrow_down'}
                 </i>
             </div>
             {isOpen && (
                 <div className={localStyles.toggle} key={doc.title}>
                     {doc.body}
+                    <br />
                     <br />
                     <div className={localStyles.dateNotif}>
                         {moment(doc.date, 'YYYY-MM-DD').format('MMM. DD, YYYY')}
