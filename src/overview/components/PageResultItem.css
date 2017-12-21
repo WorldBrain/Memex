@@ -96,9 +96,10 @@
         margin-bottom: 7px;
 
         & .favIcon {
-            height: 18px;
+            height: 20px;
             margin-right: 5px;
             vertical-align: bottom;
+            padding-bottom: 1px;
         }
     }
 
