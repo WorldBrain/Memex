@@ -1,7 +1,7 @@
 import db from 'src/pouchdb'
 import storePage from 'src/page-storage/store-page'
 import { generatePageDocId } from 'src/page-storage'
-import { checkWithBlacklist } from 'src/blacklist'
+import { blacklist } from 'src/blacklist/background'
 import { generateVisitDocId } from '..'
 import * as index from 'src/search'
 
@@ -50,7 +50,7 @@ export async function logPageVisit({ tabId, url }) {
     const threshold = 20000
 
     // First check if we want to log this page (hence the 'maybe' in the name).
-    const isBlacklisted = await checkWithBlacklist()
+    const isBlacklisted = await blacklist.checkWithBlacklist()
     if (isBlacklisted({ url })) {
         return
     }

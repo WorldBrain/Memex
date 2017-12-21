@@ -9,9 +9,10 @@ import { installTimeStorageKey } from 'src/imports/background'
 import { generatePageDocId } from 'src/page-storage'
 import { generateVisitDocId } from 'src/activity-logger'
 import { generateBookmarkDocId } from 'src/bookmarks'
-import { defaultEntries, addToBlacklist } from 'src/blacklist'
-import convertOldExtBlacklist, {
-    CONVERT_TIME_KEY,
+import {
+    constants as blacklistConsts,
+    blacklist,
+    convertOldExtBlacklist,
 } from 'src/blacklist/background'
 import { OLD_EXT_KEYS } from 'src/options/imports/constants'
 import index from 'src/search/search-index'
@@ -53,7 +54,7 @@ browser.runtime.onInstalled.addListener(async details => {
     switch (details.reason) {
         case 'install':
             // Ensure default blacklist entries are stored (before doing anything else)
-            await addToBlacklist(defaultEntries)
+            await blacklist.addToBlacklist(blacklistConsts.DEF_ENTRIES)
             analytics.trackEvent({ category: 'Global', action: 'Install' })
             // Open onboarding page
             browser.tabs.create({ url: '/options/options.html#/new_install' })
@@ -63,11 +64,11 @@ browser.runtime.onInstalled.addListener(async details => {
         case 'update':
             // If no prior conversion, convert old ext blacklist + show static notif page
             const {
-                [CONVERT_TIME_KEY]: blacklistConverted,
+                [blacklistConsts.CONVERT_TIME_KEY]: blacklistConverted,
                 [OLD_EXT_UPDATE_KEY]: alreadyUpdated,
                 [OLD_EXT_KEYS.INDEX]: oldExtIndex,
             } = await browser.storage.local.get([
-                CONVERT_TIME_KEY,
+                blacklistConsts.CONVERT_TIME_KEY,
                 OLD_EXT_UPDATE_KEY,
                 OLD_EXT_KEYS.INDEX,
             ])
