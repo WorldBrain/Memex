@@ -20,7 +20,7 @@
     letter-spacing: 1px;
     width: 100%;
     min-width: 450px;
-    color: #999;
+    color: #777;
 }
 
 .col_title {
@@ -101,8 +101,8 @@
 .contributeContent {
     font-size: 16px;
     letter-spacing: 1px;
-    background-color: #e7e7e7;
     padding: 20px 20px;
+    box-shadow: 0 1px 5px 0px #3eb995;
 }
 
 .socialIcons {

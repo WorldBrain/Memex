@@ -4,7 +4,7 @@
     right: -20px;
 
     & a {
-        color: #999;
+        color: #666;
         text-decoration: none;
 
         &:hover {
@@ -20,4 +20,6 @@
 .icon {
     font-size: 1.5em;
     cursor: pointer;
+    color: #3eb995;
+    padding-right: 15px;
 }

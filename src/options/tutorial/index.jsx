@@ -16,15 +16,14 @@ const Tutorial = () => (
                 <h3 className={LocalStyles.h3}>How to Search</h3>
                 <p className={LocalStyles.text}>
                     After installing, the extension runs in the background and
-                    indexes the pages you visit with a 15s delay.
-                    <br />But you can also{' '}
+                    indexes the pages you visit with a 15s delay. But you can
+                    also{' '}
                     <a
                         className={LocalStyles.link}
                         href="/options/options.html#/import"
                     >
                         import your history/bookmarks from before.
                     </a>
-                    <br />
                     <br />To find websites again, there are 3 ways to search
                     with the words you remember:
                 </p>

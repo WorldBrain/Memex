@@ -9,8 +9,8 @@
 .text {
     font-style: normal;
     margin-top: 20px;
-    font-size: 18px;
-    color: #999;
+    font-size: 15px;
+    color: #777;
     letter-spacing: 1px;
     width: 90%;
     min-width: 450px;
@@ -21,11 +21,12 @@
 .list {
     font-style: normal;
     margin-top: 20px;
-    font-size: 16px;
+    font-size: 14px;
     color: #999;
     width: 90%;
     min-width: 450px;
     margin-left: 35px;
+    line-height: 25px;
 }
 
 .list_element {

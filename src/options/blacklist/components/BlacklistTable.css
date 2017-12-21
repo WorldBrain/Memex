@@ -6,18 +6,16 @@
 
 .table {
     border-collapse: collapse;
-    border: 1px solid #efefef;
     background: white;
     width: 100%;
     font-size: 14px;
     box-shadow: 0 3px 20px 2px rgba(0, 0, 0, 0.08);
-    background-color: #f4f4f4;
 
     & th,
     & td {
         border-collapse: collapse;
-        color: #666;
-        border: 1px solid #efefef;
+        color: #777;
+        border-bottom: 1px solid #3eb9954f;
         padding: 15px 20px;
     }
 
