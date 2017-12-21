@@ -104,13 +104,4 @@
 
 .loadbadge {
     display: inline-block;
-    padding: 2px 10px;
-    border-radius: 10px;
-    color: white;
-    float: right;
-
-    &.isNavActive {
-        background-color: white;
-        color: #3eb995;
-    }
 }

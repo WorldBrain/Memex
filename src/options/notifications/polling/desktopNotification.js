@@ -16,7 +16,7 @@ export default async function desktopNotification() {
         Notification.requestPermission()
     } else {
         const notification = new Notification('You have a new notification!', {
-            icon: 'img/worldbrain-logo-narrow-bw.png',
+            icon: '/img/worldbrain-logo-narrow-bw-16.ico',
             body: 'Click to view',
         })
 
