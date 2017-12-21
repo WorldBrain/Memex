@@ -1,6 +1,6 @@
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import ConnHandler from './import-connection-handler'
-import importEstManager from './import-estimates'
+import importStateManager from './import-state'
 import { OLD_EXT_KEYS, IMPORT_CONN_NAME } from 'src/options/imports/constants'
 
 // Constants
@@ -8,7 +8,7 @@ export const importStateStorageKey = 'import_items'
 export const installTimeStorageKey = 'extension_install_time'
 
 // Allow UI scripts to dirty estimates cache
-makeRemotelyCallable({ dirtyEstsCache: () => importEstManager.dirty() })
+makeRemotelyCallable({ dirtyEstsCache: () => importStateManager.dirtyEsts() })
 
 /**
  * Removes local storage entry representing single page data in the old ext.
