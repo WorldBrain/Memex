@@ -31,9 +31,7 @@ class NotificationsContainer extends Component {
                 live: true,
                 include_docs: true,
             })
-            .on('change', function(c) {
-                c.doc._rev = c.changes[0].rev
-            })
+            .on('change', function(c) {})
         this.setStateFromPouch()
     }
 
@@ -76,6 +74,8 @@ class NotificationsContainer extends Component {
             }),
         )
         this.setStateFromPouch()
+        setUnreadCount()
+        updateWBBadge()
     }
 
     setStateFromPouch() {
