@@ -19,7 +19,7 @@ class Navigation extends Component {
         }
     }
 
-    async componentDidMount() {
+    componentDidMount() {
         const updateState = newState =>
             this.setState(oldState => ({ ...oldState, ...newState }))
         const noop = f => f
@@ -56,7 +56,7 @@ class Navigation extends Component {
                     route={route}
                     key={idx}
                     state={state}
-                    messages={this.state.unread ? this.state.notifs : false}
+                    messages={this.state.unread ? this.state.notifs : 0}
                 >
                     {this.isActive(route)}
                 </NavLink>

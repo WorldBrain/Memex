@@ -20,6 +20,7 @@ class NotificationsContainer extends Component {
             selectedNotificationId: -1,
             showAll: false,
         }
+
         this.setShowAll = this.setShowAll.bind(this)
         this.setMarkAllRead = this.setMarkAllRead.bind(this)
     }
@@ -30,7 +31,9 @@ class NotificationsContainer extends Component {
                 live: true,
                 include_docs: true,
             })
-            .on('change', function(c) {})
+            .on('change', function(c) {
+                c.doc._rev = c.changes[0].rev
+            })
         this.setStateFromPouch()
     }
 
@@ -42,10 +45,13 @@ class NotificationsContainer extends Component {
                         ? ''
                         : doc._id,
             })
-            db.put({
-                ...doc,
-                viewed: true,
-            })
+
+            if (!doc.viewed) {
+                db.put({
+                    ...doc,
+                    viewed: true,
+                })
+            }
             setUnreadCount()
             updateWBBadge()
         } catch (err) {
