@@ -73,7 +73,7 @@ NavLink.propTypes = {
     route: PropTypes.object.isRequired,
     state: PropTypes.object.isRequired,
     children: PropTypes.bool.isRequired,
-    messages: PropTypes.bool.isRequired,
+    messages: PropTypes.number.isRequired,
 }
 
 export default NavLink
