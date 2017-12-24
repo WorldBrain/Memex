@@ -205,9 +205,8 @@ export class ImportStateManager {
      * Handles calculating the remaining estimate counts for history, bookmark, and old-ext imports.
      *
      * @param {ImportItemCreator} creator Ready item creator instance to afford creating import items from browser data.
-     * @param {boolean} persistItems Wether or not to keep the cached import items used to derive the remaining count.
      */
-    async _calcRemainingCounts(creator, persistItems) {
+    async _calcRemainingCounts(creator) {
         let bookmarkItems
 
         // Import items creation will yield parts of the total items
@@ -224,41 +223,36 @@ export class ImportStateManager {
             const numAdded = await this.addItems(data, type)
             this.remaining[type] += numAdded // Inc count state
         }
-
-        // Remove items cached during estimates calc, if not wanted
-        if (!persistItems) {
-            await this.clearItems()
-        }
     }
 
-    async _calcCounts(persistItems) {
+    /**
+     * Main count calculation method which will create import items, and set state counts and item chunks.
+     */
+    async _calcCounts() {
+        this.calculatedAt = Date.now()
+        this.counts = ImportStateManager.getInitEsts() // Reset counts first
+
+        await this.clearItems()
+
         // Create new ImportItemCreator to create import items from which we derive counts
         const creator = new ItemCreator()
         await creator.dataSourcesReady
 
         await this._calcCompletedCounts(creator)
-        await this._calcRemainingCounts(creator, persistItems)
+        await this._calcRemainingCounts(creator)
     }
 
     /**
      * Attempts to fetch the estimate counts from local state or does a complete state recalculation
      * if it deems current state to be out-of-date.
      *
-     * @param {boolean} [persistItems=true] Wether or not to keep the cached import items used to derive
-     *  the remaining count (only has effect when recalc is needed).
      * @return {EstimateCounts}
      */
-    async fetchEsts(persistItems = true) {
+    async fetchEsts() {
         // If saved calcs are old, or forced to, recalc
         if (this.shouldRecalcEsts) {
-            this.calculatedAt = Date.now()
-            this.counts = ImportStateManager.getInitEsts() // Reset counts first
-            if (persistItems) {
-                await this.clearItems()
-            }
-
             // Perform calcs to update state
-            await this._calcCounts(persistItems)
+            await this._calcCounts()
             await this._persistEsts()
         }
 

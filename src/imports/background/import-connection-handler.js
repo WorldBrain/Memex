@@ -103,7 +103,7 @@ export default class ImportConnectionHandler {
         this.importer.setImportInProgressFlag(false)
 
         // Re-init the estimates view with updated estimates data
-        const estimateCounts = await stateManager.fetchEsts(false)
+        const estimateCounts = await stateManager.fetchEsts()
         this.port.postMessage({ cmd: CMDS.INIT, ...estimateCounts })
     }
 
