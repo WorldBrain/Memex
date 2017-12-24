@@ -50,10 +50,7 @@ export default class ImportConnectionHandler {
      */
     itemObserver = {
         next: msg => this.port.postMessage({ cmd: CMDS.NEXT, ...msg }),
-        complete: () => {
-            stateManager.clearItems()
-            this.port.postMessage({ cmd: CMDS.COMPLETE })
-        },
+        complete: () => this.port.postMessage({ cmd: CMDS.COMPLETE }),
     }
 
     messageListener = ({ cmd, payload }) => {
