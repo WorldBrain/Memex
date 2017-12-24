@@ -1,3 +1,5 @@
+/* eslint-env jest */
+
 import shortUrl from './short-url'
 
 describe('shortUrl', () => {

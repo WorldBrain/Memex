@@ -1,3 +1,5 @@
+/* eslint-env jest */
+
 import delay from './delay'
 
 jest.useFakeTimers()

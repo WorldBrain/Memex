@@ -1,3 +1,5 @@
+/* eslint-env jest */
+
 import 'core-js/fn/object/entries' // shim Object.entries
 import pull from 'lodash/pull'
 
@@ -66,7 +68,9 @@ describe('eventToPromise', () => {
                 const resolveHandler = jest.fn()
                 eventToPromise({
                     resolve: resolveOpts,
-                }).then(resolveHandler)
+                })
+                    .then(resolveHandler)
+                    .catch()
 
                 await null
                 expect(resolveHandler).not.toBeCalled()
@@ -118,7 +122,9 @@ describe('eventToPromise', () => {
         const resolveHandler = jest.fn()
         eventToPromise({
             resolve: resolveOpts,
-        }).then(resolveHandler)
+        })
+            .then(resolveHandler)
+            .catch()
 
         await null
         expect(resolveHandler).not.toBeCalled()

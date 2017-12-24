@@ -1,3 +1,5 @@
+/* eslint-env jest */
+
 import { getAllNodes, getRoot } from './tree-walker'
 
 const testTrees = (() => {

@@ -1,3 +1,5 @@
+/* eslint-env jest */
+
 import syncLocationHashes from './sync-location-hashes'
 
 const createWindowMock = () => {

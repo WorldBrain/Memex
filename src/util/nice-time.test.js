@@ -1,3 +1,5 @@
+/* eslint-env jest */
+
 import niceTime from './nice-time'
 
 describe('niceTime', () => {

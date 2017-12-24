@@ -1,3 +1,5 @@
+/* eslint-env jest */
+
 import {
     makeRangeTransform,
     makeNonlinearTransform,

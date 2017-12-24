@@ -1,3 +1,5 @@
+/* eslint-env jest */
+
 import { remoteFunction } from './webextensionRPC'
 
 describe('remoteFunction', () => {
