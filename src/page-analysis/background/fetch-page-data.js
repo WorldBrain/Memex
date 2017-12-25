@@ -84,19 +84,23 @@ function fetchDOMFromUrl(url, timeout) {
          */
         run: () =>
             new Promise((resolve, reject) => {
+                // Set up timeout handling
                 req.timeout = timeout
+                req.ontimeout = () => reject(new Error('Data fetch timeout'))
+
                 // General non-HTTP errors
                 req.onerror = () => reject(new Error('Data fetch failed'))
-                // Allow non-200 respons statuses to be considered failures; timeouts show up as 0
+
+                // Allow non-200 response statuses to be considered failures;
+                //  non-HTTP issues also show up as 0. Add any exception cases in here.
                 req.onreadystatechange = function() {
                     if (this.readyState === 4) {
                         switch (this.status) {
-                            case 0:
-                                return reject(new Error('Data fetch timeout'))
                             case 200:
                                 return resolve(this.responseXML)
+                            case 0:
                             default:
-                                return reject(new Error('Data fetch failed'))
+                                return req.onerror()
                         }
                     }
                 }
