@@ -34,6 +34,7 @@ const EstimatesTable = ({
             <tr className={localStyles.importTableRow}>
                 <td>
                     <input
+                        className={localStyles.checkbox}
                         type="checkbox"
                         name="history"
                         id="history"
@@ -57,6 +58,7 @@ const EstimatesTable = ({
             <tr className={localStyles.importTableRow}>
                 <td>
                     <input
+                        className={localStyles.checkbox}
                         type="checkbox"
                         name="bookmarks"
                         id="bookmarks"
@@ -77,6 +79,7 @@ const EstimatesTable = ({
                 <tr className={localStyles.importTableRow}>
                     <td>
                         <input
+                            className={localStyles.checkbox}
                             type="checkbox"
                             name="history"
                             id="old-ext"
@@ -99,6 +102,7 @@ const EstimatesTable = ({
             >
                 <td>
                     <input
+                        className={localStyles.checkbox}
                         type="checkbox"
                         name="evernote"
                         id="evernote"
@@ -119,6 +123,7 @@ const EstimatesTable = ({
             >
                 <td>
                     <input
+                        className={localStyles.checkbox}
                         type="checkbox"
                         name="evernote"
                         id="pocket"
