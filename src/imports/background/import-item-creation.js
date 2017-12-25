@@ -63,12 +63,14 @@ export default class ImportItemCreator {
     * Performs all needed filtering on a collection of history, bookmark, or old ext items. As these
     * can be quite large, attemps to do in a single iteration of the input collection.
     *
-    * @param {Array<any>} items Array of items with `url` to filter on.
     * @param {(item: any) => any} transform Opt. transformformation fn turning current iterm into import item structure.
     * @param {(url: string) => bool} alreadyExists Opt. checker function to check against existing data.
-    * @return {Map<string, any>} Filtered version of `items` array made into a Map of encoded URL strings to import items.
+    * @return {(items: Array<any>) => Map<string, any>} Function that filters array of browser items into a Map of encoded URL strings to import items.
     */
-    _filterItemsByUrl(items, transform = f => f, alreadyExists = url => false) {
+    _filterItemsByUrl = (
+        transform = f => f,
+        alreadyExists = url => false,
+    ) => items => {
         const importItems = new Map()
 
         for (let i = 0; i < items.length; i++) {
@@ -107,15 +109,9 @@ export default class ImportItemCreator {
             endTime: startTime.add(2, 'weeks').valueOf(),
         })
 
-    /**
-     * @param {number} [maxResults=100000] The max amount of items to grab from browser.
-     * @returns {Array<browser.bookmarks.BookmarkTreeNode>} All bookmark items in browser filtered by URL.
-     */
-    _fetchBmItems = (maxResults = 100000) =>
-        browser.bookmarks.getRecent(maxResults)
-
     async _getOldExtItems() {
         let bookmarkUrls = new Set()
+        const filterByUrl = this._filterItemsByUrl()
         const {
             [OLD_EXT_KEYS.INDEX]: index,
             [OLD_EXT_KEYS.BOOKMARKS]: bookmarks,
@@ -161,24 +157,69 @@ export default class ImportItemCreator {
             }
         }
 
-        return this._filterItemsByUrl(importItems)
-    }
-
-    async _getBmItems() {
-        return this._filterItemsByUrl(
-            await this._fetchBmItems(),
-            transformBrowserToImportItem(IMPORT_TYPE.BOOKMARK),
-            url => this.bmKeys.has(url),
-        )
+        return filterByUrl(importItems)
     }
 
     /**
+     * Recursively traverses BFS-like from the specified node in the BookmarkTree,
+     * yielding the transformed bookmark ImportItems at each dir level.
+     *
+     * @generator
+     * @param {browser.BookmarkTreeNode} dirNode BM node representing a bookmark directory.
+     * @param {(items: browser.BookmarkTreeNode[]) => Map<string, ImportItem>} filter
+     * @yields {Map<string, ImportItem>} Bookmark items in current level.
+     */
+    async *_traverseBmTreeDir(dirNode, filter) {
+        // Folders don't contain `url`; recurse!
+        const children = await browser.bookmarks.getChildren(dirNode.id)
+
+        // Split into folders and bookmarks
+        const childGroups = children.reduce(
+            (prev, childNode) => {
+                const stateKey = !childNode.url ? 'dirs' : 'bms'
+
+                return {
+                    ...prev,
+                    [stateKey]: [...prev[stateKey], childNode],
+                }
+            },
+            { dirs: [], bms: [] },
+        )
+
+        // Filter and yield the current level of bookmarks
+        yield filter(childGroups.bms)
+
+        // Recursively process next levels (not expected to get deep)
+        for (const dir of childGroups.dirs) {
+            yield* await this._traverseBmTreeDir(dir, filter)
+        }
+    }
+
+    /**
+     * @generator
+     * @param {string} [rootId='0'] The ID of the BookmarkTreeNode to start searching from.
+     * @yields {Map<string, ImportItem>} All bookmark items in browser, indexed by encoded URL.
+     */
+    async *_traverseBmTree(rootId = '0') {
+        const filterByUrl = this._filterItemsByUrl(
+            transformBrowserToImportItem(IMPORT_TYPE.BOOKMARK),
+            url => this.bmKeys.has(url),
+        )
+
+        // Start off tree traversal from root
+        yield* await this._traverseBmTreeDir({ id: rootId }, filterByUrl)
+    }
+
+    /**
+     * @generator
      * Handles fetching and filtering the history URLs in time period batches,
      * yielding those batches.
      */
     async *_iterateHistItems() {
-        const transform = transformBrowserToImportItem(IMPORT_TYPE.HISTORY)
-        const exists = url => this.histKeys.has(url)
+        const filterByUrl = this._filterItemsByUrl(
+            transformBrowserToImportItem(IMPORT_TYPE.HISTORY),
+            url => this.histKeys.has(url),
+        )
         // Get all history from browser (last 3 months), filter on existing DB pages
         const startTime = moment().subtract(lookbackWeeks, 'weeks')
 
@@ -188,7 +229,7 @@ export default class ImportItemCreator {
                 moment(startTime),
             )
 
-            yield this._filterItemsByUrl(historyItemBatch, transform, exists)
+            yield filterByUrl(historyItemBatch)
         }
     }
 
@@ -201,9 +242,12 @@ export default class ImportItemCreator {
      */
     async *createImportItems() {
         // Get all bookmarks from browser, filter on existing DB bookmarks
-        yield {
-            type: IMPORT_TYPE.BOOKMARK,
-            data: await this._getBmItems(),
+        for await (const bms of this._traverseBmTree()) {
+            // Not all levels in the bookmark tree need to have bookmark items
+            if (!bms.size) {
+                continue
+            }
+            yield { type: IMPORT_TYPE.BOOKMARK, data: bms }
         }
 
         // Get all old ext from local storage, don't filter on existing data
