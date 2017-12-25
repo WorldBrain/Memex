@@ -4,7 +4,7 @@ import {
     IMPORT_TYPE as TYPE,
     OLD_EXT_KEYS,
 } from 'src/options/imports/constants'
-import { differMaps, mapToObject } from 'src/util/map-set-helpers'
+import { mapToObject } from 'src/util/map-set-helpers'
 import ItemCreator from './import-item-creation'
 
 /**
@@ -207,16 +207,18 @@ export class ImportStateManager {
      * @param {ImportItemCreator} creator Ready item creator instance to afford creating import items from browser data.
      */
     async _calcRemainingCounts(creator) {
-        let bookmarkItems
+        let bookmarkIds = new Set()
 
         // Import items creation will yield parts of the total items
         for await (let { data, type } of creator.createImportItems()) {
             if (type === TYPE.BOOKMARK) {
                 // Bookmarks should always yield before history
-                bookmarkItems = data
+                bookmarkIds = new Set([...bookmarkIds, ...data.keys()])
             } else if (type === TYPE.HISTORY) {
                 // Don't include pages in history that exist as bookmarks as well
-                data = differMaps(bookmarkItems)(data)
+                data = new Map(
+                    [...data].filter(([key]) => !bookmarkIds.has(key)),
+                )
             }
 
             // Cache current processed chunk for checking against future chunks (count state change happens in here)
