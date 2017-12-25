@@ -2,6 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 import styles from './AdvSettings.css'
+import importStyles from './Import.css'
 
 const AdvSettingsCheckbox = ({ advMode, toggleAdvMode }) => (
     <div className={styles.advModeToggle}>
@@ -10,7 +11,7 @@ const AdvSettingsCheckbox = ({ advMode, toggleAdvMode }) => (
             id="advModeCheckbox"
             onChange={toggleAdvMode}
             checked={advMode}
-            className={styles.checkbox}
+            className={importStyles.checkbox}
         />
         <label htmlFor="advModeCheckbox">Advanced Settings</label>
     </div>
