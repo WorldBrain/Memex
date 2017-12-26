@@ -3,6 +3,7 @@ import keys from 'lodash/fp/keys'
 import {
     IMPORT_TYPE as TYPE,
     OLD_EXT_KEYS,
+    STORAGE_KEYS,
 } from 'src/options/imports/constants'
 import { mapToObject } from 'src/util/map-set-helpers'
 import ItemCreator from './import-item-creation'
@@ -44,6 +45,17 @@ export class ImportStateManager {
             [TYPE.OLD]: 0,
         },
     })
+    static DEF_ALLOW_TYPES = {
+        [TYPE.HISTORY]: true,
+        [TYPE.BOOKMARK]: true,
+        [TYPE.OLD]: true,
+    }
+
+    /**
+     * @property {any} Object containing boolean flags for each import item type key, representing whether
+     *  or not that type should be saved to state (user configurable via UI import-type checkboxes).
+     */
+    allowTypes = ImportStateManager.DEF_ALLOW_TYPES
 
     /**
      * @property {ItemTypeCount}
@@ -120,9 +132,10 @@ export class ImportStateManager {
      * Attempt to rehydrate and init key stacks + est counts states from local storage.
      */
     async rehydrateState() {
-        let initState, initErrState, initEstsState, initCalcdAt
+        let initState, initErrState, initEstsState, initCalcdAt, initAllowTypes
         try {
             const {
+                [STORAGE_KEYS.ALLOW_TYPES]: allowTypes,
                 [ImportStateManager.ERR_STATE_STORAGE_KEY]: savedErrState,
                 [ImportStateManager.STATE_STORAGE_KEY]: savedState,
                 [ImportStateManager.ESTS_STORAGE_KEY]: {
@@ -130,20 +143,24 @@ export class ImportStateManager {
                     ...savedEsts
                 },
             } = await browser.storage.local.get({
+                [STORAGE_KEYS.ALLOW_TYPES]: ImportStateManager.DEF_ALLOW_TYPES,
                 [ImportStateManager.ERR_STATE_STORAGE_KEY]: [],
                 [ImportStateManager.STATE_STORAGE_KEY]: [],
                 [ImportStateManager.ESTS_STORAGE_KEY]: ImportStateManager.getInitEsts(),
             })
+            initAllowTypes = allowTypes
             initState = savedState
             initErrState = savedErrState
             initEstsState = savedEsts
             initCalcdAt = calculatedAt
         } catch (error) {
+            initAllowTypes = ImportStateManager.DEF_ALLOW_TYPES
             initState = []
             initErrState = []
             initEstsState = ImportStateManager.getInitEsts()
             initCalcdAt = 0
         } finally {
+            this.allowTypes = initAllowTypes
             this.storageKeyStack = initState
             this.errStorageKeyStack = initErrState
             this.currErrChunk = this.errStorageKeyStack.length - 1
