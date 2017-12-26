@@ -88,7 +88,7 @@ export default class ImportConnectionHandler {
         this.port.postMessage({ cmd: CMDS.START }) // Tell UI to finish loading state and move into progress view
 
         this.importer.setImportInProgressFlag(true)
-        this.importer.allowTypes = allowTypes
+        stateManager.allowTypes = allowTypes
         this.importer.start()
     }
 

@@ -1,6 +1,5 @@
 import promiseLimit from 'promise-limit'
 
-import { IMPORT_TYPE as TYPE } from 'src/options/imports/constants'
 import { indexQueue } from 'src/search/search-index'
 import stateManager from './import-state'
 import ItemProcessor from './import-item-processor'
@@ -34,16 +33,6 @@ class ImportProgressManager {
      * @property {boolean} Flag denoting whether or not current state is stopped or not.
      */
     stopped = false
-
-    /**
-     * @property {any} Object containing boolean flags for each import item type key, representing whether
-     *  or not that type should be saved to state (user configurable via UI import-type checkboxes).
-     */
-    allowTypes = {
-        [TYPE.HISTORY]: true,
-        [TYPE.BOOKMARK]: true,
-        [TYPE.OLD]: true,
-    }
 
     constructor(initConcurrency, initObserver) {
         this.concurrency = initConcurrency
@@ -97,7 +86,7 @@ class ImportProgressManager {
      * @returns {boolean} Flag denoting whether or not chunk where `entry` came from is allowed by type.
      */
     checkChunkTypeAllowed([key, item]) {
-        return !!this.allowTypes[item.type]
+        return !!stateManager.allowTypes[item.type]
     }
 
     /**
