@@ -7,6 +7,7 @@ import {
     initLookupByKeys,
     termRangeLookup,
     idbBatchToPromise,
+    fetchExistingPage,
 } from './util'
 
 // Used to decide whether or not to do a range lookup for terms (if # terms gt) or N single lookups
@@ -31,23 +32,6 @@ const singleLookup = initSingleLookup()
 export const put = (key, val) => index.put(key, val)
 
 /**
- * @param {string} pageId ID of existing reverse index page.
- * @returns {any} The corresponding reverse index page doc.
- * @throws {Error} If `pageId` param does not have a corresponding doc existing in DB.
- */
-async function fetchExistingPage(pageId) {
-    const reverseIndexDoc = await singleLookup(pageId)
-
-    if (reverseIndexDoc == null) {
-        throw new Error(
-            `No document exists in reverse page index for the supplied page ID: ${pageId}`,
-        )
-    }
-
-    return reverseIndexDoc
-}
-
-/**
  * @param {string} pageId ID of existing page to associate tags with.
  * @param {string[]} tags Array of tags to associate with page.
  * @returns {Promise<void>}
@@ -69,19 +53,17 @@ async function addTags(pageId, tags) {
     // Value entry to add to tags index Map value
     const indexEntry = [pageId, { latest: reverseIndexDoc.latest }]
 
-    // Add entries to tags index entries
-    await Promise.all([
+    // Add entries to tags index + update reverse index doc
+    return await Promise.all([
         ...keyedTags.map(async tagKey => {
             let value = await singleLookup(tagKey)
 
             if (value != null) {
-                console.log(tagKey, 'exists: ', value)
                 value.set(...indexEntry) // Update existing tag key
             } else {
-                console.log(tagKey, 'does not exist')
                 value = new Map([indexEntry]) // Make new Map value for non-existent tag key
             }
-            return index.put(tagKey, value)
+            return await index.put(tagKey, value)
         }),
         index.put(pageId, reverseIndexDoc), // Also update reverse index doc
     ])
