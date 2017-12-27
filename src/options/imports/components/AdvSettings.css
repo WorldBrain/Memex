@@ -14,7 +14,7 @@
     display: flex;
     justify-content: space-between;
     margin-right: 20px;
-    color: #787677;
+    color: #777;
 }
 
 .advFunctionality {
@@ -40,11 +40,9 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    margin: 2em 0;
-
-    &:first-child {
-        margin-top: 1em;
-    }
+    margin: 1em 0;
+    color: #777;
+    font-size: 16px;
 
     &:last-child {
         margin-bottom: 1em;

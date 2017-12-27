@@ -3,6 +3,7 @@
     flex-direction: row;
     height: 100px;
     justify-content: flex-end;
+    margin-bottom: -30px;
 }
 
 .loadingContainer {

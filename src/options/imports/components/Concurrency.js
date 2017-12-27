@@ -7,7 +7,7 @@ import styles from './AdvSettings.css'
 
 const Concurrency = ({ concurrency, onConcurrencyChange }) => (
     <Wrapper>
-        <label htmlFor="concurrency">Import item concurrency level</label>
+        <label htmlFor="concurrency"># of simultaneous downloads</label>
         <input
             className={styles.concurrencyInput}
             id="concurrency"

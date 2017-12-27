@@ -6,7 +6,7 @@ import ItemProcessor from './import-item-processor'
 
 class ImportProgressManager {
     static IMPORTS_PROGRESS_KEY = 'is-imports-in-progress'
-    static CONCURR_LIMIT = 10
+    static CONCURR_LIMIT = 15
 
     /**
      * @property {ItemProcessor[]} Currently scheduled processor instances, affording control over execution.
