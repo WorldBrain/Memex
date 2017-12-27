@@ -99,7 +99,7 @@ export class ImportStateManager {
         this.chunkSize = initChunkSize
 
         // Attempt rehydrate  of imports state from local storage
-        this.rehydrateState()
+        this._rehydrateState()
     }
 
     /**
@@ -124,14 +124,14 @@ export class ImportStateManager {
     /**
      * @returns {boolean} Denotes whether or not current est counts should be recalculated.
      */
-    get shouldRecalcEsts() {
+    get _shouldRecalcEsts() {
         return this.calculatedAt < Date.now() - ImportStateManager.DAY_IN_MS
     }
 
     /**
      * Attempt to rehydrate and init key stacks + est counts states from local storage.
      */
-    async rehydrateState() {
+    async _rehydrateState() {
         let initState, initErrState, initEstsState, initCalcdAt, initAllowTypes
         try {
             const {
@@ -180,11 +180,6 @@ export class ImportStateManager {
             },
             ...customState,
         })
-
-    async dirtyEsts() {
-        this.calculatedAt = 0
-        return await this._persistEsts()
-    }
 
     /**
      * @param {ImportItem} importItem
@@ -259,45 +254,6 @@ export class ImportStateManager {
 
         await this._calcCompletedCounts(creator)
         await this._calcRemainingCounts(creator)
-    }
-
-    /**
-     * Attempts to fetch the estimate counts from local state or does a complete state recalculation
-     * if it deems current state to be out-of-date.
-     *
-     * @return {EstimateCounts}
-     */
-    async fetchEsts() {
-        // If saved calcs are old, or forced to, recalc
-        if (this.shouldRecalcEsts) {
-            // Perform calcs to update state
-            await this._calcCounts()
-            await this._persistEsts()
-        }
-
-        return this.counts
-    }
-
-    /**
-     * @generator
-     * @param {boolean} [includeErrs=true] Flag to decide whether to include error'd items in the Iterator.
-     * @yields {any} Object containing `chunkKey` and `chunk` pair, corresponding to the chunk storage key
-     *  and value at that storage key, respectively.
-     */
-    *getItems(includeErrs = false) {
-        for (const chunkKey of this.storageKeyStack) {
-            yield this._getChunk(chunkKey)
-        }
-
-        if (includeErrs) {
-            yield* this.getErrItems()
-        }
-    }
-
-    *getErrItems() {
-        for (const chunkKey of this.errStorageKeyStack) {
-            yield this._getChunk(chunkKey)
-        }
     }
 
     /**
@@ -409,6 +365,54 @@ export class ImportStateManager {
     async setItems(itemsMap) {
         await this.clearItems()
         await this.addItems(itemsMap)
+    }
+
+    /**
+     * Forces the persisted estimates state to be "dirtied", meaning next `fetchEsts` attempt will
+     * require a complete recalc rather than using the persisted state/cache.
+     */
+    async dirtyEsts() {
+        this.calculatedAt = 0
+        return await this._persistEsts()
+    }
+
+    /**
+     * Attempts to fetch the estimate counts from local state or does a complete state recalculation
+     * if it deems current state to be out-of-date.
+     *
+     * @return {EstimateCounts}
+     */
+    async fetchEsts() {
+        // If saved calcs are old, or forced to, recalc
+        if (this._shouldRecalcEsts) {
+            // Perform calcs to update state
+            await this._calcCounts()
+            await this._persistEsts()
+        }
+
+        return this.counts
+    }
+
+    /**
+     * @generator
+     * @param {boolean} [includeErrs=true] Flag to decide whether to include error'd items in the Iterator.
+     * @yields {any} Object containing `chunkKey` and `chunk` pair, corresponding to the chunk storage key
+     *  and value at that storage key, respectively.
+     */
+    async *getItems(includeErrs = false) {
+        for (const chunkKey of this.storageKeyStack) {
+            yield await this._getChunk(chunkKey)
+        }
+
+        if (includeErrs) {
+            yield* this.getErrItems()
+        }
+    }
+
+    async *getErrItems() {
+        for (const chunkKey of this.errStorageKeyStack) {
+            yield await this._getChunk(chunkKey)
+        }
     }
 
     /**

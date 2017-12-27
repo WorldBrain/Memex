@@ -30,7 +30,7 @@ export default class ImportConnectionHandler {
     }
 
     async attemptRehydrate() {
-        // If import isn't started earlier, get estimates and set view state to init
+        // If import isn't already running, get estimates and set view state to init...
         const importInProgress = await this.importer.getImportInProgressFlag()
 
         if (!importInProgress) {
@@ -38,7 +38,7 @@ export default class ImportConnectionHandler {
             const estimateCounts = await stateManager.fetchEsts()
             this.port.postMessage({ cmd: CMDS.INIT, ...estimateCounts })
         } else {
-            // Make sure to start the view in paused state
+            // ... else make sure to start UI in paused state
             this.port.postMessage({ cmd: CMDS.PAUSE })
         }
     }
@@ -53,6 +53,9 @@ export default class ImportConnectionHandler {
         complete: () => this.port.postMessage({ cmd: CMDS.COMPLETE }),
     }
 
+    /**
+     * Main message listener that handles any messages sent from the UI script.
+     */
     messageListener = ({ cmd, payload }) => {
         switch (cmd) {
             case CMDS.START:
@@ -79,6 +82,8 @@ export default class ImportConnectionHandler {
      * or not to process that given type of imports.
      */
     async startImport(allowTypes) {
+        stateManager.allowTypes = allowTypes
+
         // Perform history-stubs, vists, and history import state creation, if import not in progress
         const importInProgress = await this.importer.getImportInProgressFlag()
         if (!importInProgress) {
@@ -88,7 +93,6 @@ export default class ImportConnectionHandler {
         this.port.postMessage({ cmd: CMDS.START }) // Tell UI to finish loading state and move into progress view
 
         this.importer.setImportInProgressFlag(true)
-        stateManager.allowTypes = allowTypes
         this.importer.start()
     }
 

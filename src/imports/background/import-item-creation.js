@@ -60,12 +60,11 @@ export default class ImportItemCreator {
 
     /**
     *
-    * Performs all needed filtering on a collection of history, bookmark, or old ext items. As these
-    * can be quite large, attemps to do in a single iteration of the input collection.
+    * Performs all needed filtering on a collection of history, bookmark, or old ext items.
     *
-    * @param {(item: any) => any} transform Opt. transformformation fn turning current iterm into import item structure.
-    * @param {(url: string) => bool} alreadyExists Opt. checker function to check against existing data.
-    * @return {(items: Array<any>) => Map<string, any>} Function that filters array of browser items into a Map of encoded URL strings to import items.
+    * @param {(item: any) => any} [transform=noop] Opt. transformformation fn turning current iterm into import item structure.
+    * @param {(url: string) => bool} [alreadyExists] Opt. checker function to check against existing data.
+    * @return {(items: any[]) => Map<string, any>} Function that filters array of browser items into a Map of encoded URL strings to import items.
     */
     _filterItemsByUrl = (
         transform = f => f,
@@ -74,6 +73,7 @@ export default class ImportItemCreator {
         const importItems = new Map()
 
         for (let i = 0; i < items.length; i++) {
+            // Exclude item if any of the standard checks fail
             if (
                 !isLoggable(items[i]) ||
                 this.isBlacklisted(items[i]) ||
@@ -82,7 +82,7 @@ export default class ImportItemCreator {
                 continue
             }
 
-            // Augment the item with encoded URL for DB check and item map
+            // Asssociate the item with the encoded URL in results Map
             try {
                 const encodedUrl = encodeUrl(items[i].url, true)
 

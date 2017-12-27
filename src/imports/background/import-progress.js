@@ -47,28 +47,12 @@ class ImportProgressManager {
         }
     }
 
-    async getImportInProgressFlag() {
-        const {
-            [ImportProgressManager.IMPORTS_PROGRESS_KEY]: flag,
-        } = await browser.storage.local.get({
-            [ImportProgressManager.IMPORTS_PROGRESS_KEY]: false,
-        })
-
-        return flag
-    }
-
-    async setImportInProgressFlag(value) {
-        return await browser.storage.local.set({
-            [ImportProgressManager.IMPORTS_PROGRESS_KEY]: value,
-        })
-    }
-
     /**
      * Get next available processor index.
      *
      * @returns {number} Index between 0 and `this._concurrency`.
      */
-    nextProcIndex() {
+    _nextProcIndex() {
         for (let i = 0; i < this._concurrency; i++) {
             const proc = this.processors[i]
 
@@ -85,8 +69,53 @@ class ImportProgressManager {
      * @param {[key: string, value: ImportItem]} entry Any KVP entry from a chunk.
      * @returns {boolean} Flag denoting whether or not chunk where `entry` came from is allowed by type.
      */
-    checkChunkTypeAllowed([key, item]) {
+    _checkChunkTypeAllowed([key, item]) {
         return !!stateManager.allowTypes[item.type]
+    }
+
+    /**
+     * @param {string} chunkKey The key of the chunk currently being processed.
+     * @returns {(chunkEntry) => Promise<void>} Async function affording processing of single entry in chunk.
+     */
+    _processItem = chunkKey => async ([encodedUrl, importItem]) => {
+        const processor = new ItemProcessor()
+
+        // Used to build the message to send to observer
+        const msg = {
+            type: importItem.type,
+            url: importItem.url,
+        }
+
+        try {
+            if (this.stopped) {
+                throw ItemProcessor.makeInterruptedErr()
+            }
+
+            // Save reference to processor for cancelling later
+            this.processors[this._nextProcIndex()] = processor
+            const res = await processor.process(importItem)
+            msg.status = res.status
+        } catch (err) {
+            // Throw execution was cancelled, throw error up the stack
+            if (err.cancelled) {
+                throw err
+            }
+            msg.error = err.message
+        } finally {
+            processor.finished = true
+
+            // Send item data + outcome status down to UI (and error if present)
+            if (!this.stopped) {
+                this.observer.next(msg)
+
+                // Either flag as error or remove from state depending on processing error status
+                if (msg.error && !this.processErrors) {
+                    await stateManager.flagItemAsError(chunkKey, encodedUrl)
+                } else {
+                    await stateManager.removeItem(chunkKey, encodedUrl)
+                }
+            }
+        }
     }
 
     /**
@@ -104,7 +133,7 @@ class ImportProgressManager {
             // Skip early if first entry type is not allowed (entire chunk's of same type items)
             if (
                 !importItemEntries.length ||
-                !this.checkChunkTypeAllowed(importItemEntries[0])
+                !this._checkChunkTypeAllowed(importItemEntries[0])
             ) {
                 continue
             }
@@ -113,7 +142,7 @@ class ImportProgressManager {
                 // For each chunk, run through the import item entries at specified level of concurrency
                 await this.runConcurrent.map(
                     importItemEntries,
-                    this.processItem(chunkKey),
+                    this._processItem(chunkKey),
                 )
             } catch (err) {
                 // If execution cancelled break Iterator processing
@@ -145,49 +174,20 @@ class ImportProgressManager {
         indexQueue.clear()
     }
 
-    /**
-     * @param {string} chunkKey The key of the chunk currently being processed.
-     * @returns {(chunkEntry) => Promise<void>} Async function affording processing of single entry in chunk.
-     */
-    processItem = chunkKey => async ([encodedUrl, importItem]) => {
-        const processor = new ItemProcessor()
+    async getImportInProgressFlag() {
+        const {
+            [ImportProgressManager.IMPORTS_PROGRESS_KEY]: flag,
+        } = await browser.storage.local.get({
+            [ImportProgressManager.IMPORTS_PROGRESS_KEY]: false,
+        })
 
-        // Used to build the message to send to observer
-        const msg = {
-            type: importItem.type,
-            url: importItem.url,
-        }
+        return flag
+    }
 
-        try {
-            if (this.stopped) {
-                throw ItemProcessor.makeInterruptedErr()
-            }
-
-            // Save reference to processor for cancelling later
-            this.processors[this.nextProcIndex()] = processor
-            const res = await processor.process(importItem)
-            msg.status = res.status
-        } catch (err) {
-            // Throw execution was cancelled, throw error up the stack
-            if (err.cancelled) {
-                throw err
-            }
-            msg.error = err.message
-        } finally {
-            processor.finished = true
-
-            // Send item data + outcome status down to UI (and error if present)
-            if (!this.stopped) {
-                this.observer.next(msg)
-
-                // Either flag as error or remove from state depending on processing error status
-                if (msg.error && !this.processErrors) {
-                    await stateManager.flagItemAsError(chunkKey, encodedUrl)
-                } else {
-                    await stateManager.removeItem(chunkKey, encodedUrl)
-                }
-            }
-        }
+    async setImportInProgressFlag(value) {
+        return await browser.storage.local.set({
+            [ImportProgressManager.IMPORTS_PROGRESS_KEY]: value,
+        })
     }
 }
 
