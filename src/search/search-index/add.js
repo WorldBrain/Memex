@@ -31,6 +31,75 @@ const singleLookup = initSingleLookup()
 export const put = (key, val) => index.put(key, val)
 
 /**
+ * @param {string} pageId ID of existing reverse index page.
+ * @returns {any} The corresponding reverse index page doc.
+ * @throws {Error} If `pageId` param does not have a corresponding doc existing in DB.
+ */
+async function fetchExistingPage(pageId) {
+    const reverseIndexDoc = await singleLookup(pageId)
+
+    if (reverseIndexDoc == null) {
+        throw new Error(
+            `No document exists in reverse page index for the supplied page ID: ${pageId}`,
+        )
+    }
+
+    return reverseIndexDoc
+}
+
+/**
+ * @param {string} pageId ID of existing page to associate tags with.
+ * @param {string[]} tags Array of tags to associate with page.
+ * @returns {Promise<void>}
+ */
+async function addTags(pageId, tags) {
+    const reverseIndexDoc = await fetchExistingPage(pageId)
+
+    // Prefix all tags with tag key
+    const keyedTags = tags.map(tag => `tag/${tag}`)
+
+    // Init tags Set if not present
+    if (reverseIndexDoc.tags == null) {
+        reverseIndexDoc.tags = new Set()
+    }
+
+    // Add all tag keys to reverse index doc
+    keyedTags.forEach(tagKey => reverseIndexDoc.tags.add(tagKey))
+
+    // Value entry to add to tags index Map value
+    const indexEntry = [pageId, { latest: reverseIndexDoc.latest }]
+
+    // Add entries to tags index entries
+    await Promise.all([
+        ...keyedTags.map(async tagKey => {
+            let value = await singleLookup(tagKey)
+
+            if (value != null) {
+                console.log(tagKey, 'exists: ', value)
+                value.set(...indexEntry) // Update existing tag key
+            } else {
+                console.log(tagKey, 'does not exist')
+                value = new Map([indexEntry]) // Make new Map value for non-existent tag key
+            }
+            return index.put(tagKey, value)
+        }),
+        index.put(pageId, reverseIndexDoc), // Also update reverse index doc
+    ])
+}
+
+/**
+ * Concurrency-safe (via index queue) wrapper around `addTags`.
+ */
+export const addTagsConcurrent = (...args) =>
+    new Promise((resolve, reject) =>
+        indexQueue.push(() =>
+            addTags(...args)
+                .then(resolve)
+                .catch(reject),
+        ),
+    )
+
+/**
  * Adds a new page doc + any associated visit/bookmark docs to the index. This method
  * is *NOT* concurrency safe.
  * @param {IndexRequest} req A `pageDoc` (required) and optionally any associated `visitDocs` and `bookmarkDocs`.
@@ -77,13 +146,7 @@ export const addBookmarkConcurrent = (pageId, timestamp = Date.now()) =>
  *  standard indexing-related Error encountered during updates).
  */
 async function addBookmark(pageId, timestamp = Date.now()) {
-    const reverseIndexDoc = await singleLookup(pageId)
-
-    if (reverseIndexDoc == null) {
-        throw new Error(
-            `No document exists in reverse page index for the supplied page ID: ${pageId}`,
-        )
-    }
+    const reverseIndexDoc = await fetchExistingPage(pageId)
 
     const bookmarkKey = `${bookmarkKeyPrefix}${timestamp}`
 
