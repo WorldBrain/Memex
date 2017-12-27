@@ -42,8 +42,7 @@ const getActivePeriodVars = period => {
 /**
  * @param {'month'|'week'|'day'} period
  * @returns {() => Promise<void>} Function affording checking of the last activity event ping for specified time `period`,
- *  sending off a new event if determined to be needed. Event's name will be set to 'active' or 'inactive' depending
- *  on what active state it derives from the last stored search time relative to wanted time period.
+ *  sending off a new event if determined to be needed.
  */
 const attemptActiveUserPing = period => {
     const { storageKey, action, numDays } = getActivePeriodVars(period)
@@ -60,12 +59,12 @@ const attemptActiveUserPing = period => {
 
         // If at least `numDays` since the last active user ping, track event
         if (now - lastPing >= DAY_IN_MS * numDays) {
-            // Event name will indicate whether user is active or not
-            // User considered active if they have a search in the last `numDays`
-            const name =
-                now - lastSearch >= DAY_IN_MS * numDays ? 'inactive' : 'active'
+            // Only send the event if last search done within current period (active user)
+            if (now - lastSearch < DAY_IN_MS * numDays) {
+                analytics.trackEvent({ category: 'Periodic', action })
+            }
 
-            analytics.trackEvent({ category: 'Periodic', action, name })
+            // Update last ping time to stop further attempts in current period, regardless if active event was sent
             browser.storage.local.set({ [storageKey]: now })
         }
     }
