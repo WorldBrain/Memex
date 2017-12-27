@@ -50,6 +50,7 @@ function transformUrl(url) {
  * @property {Set} terms Set of searchable terms extracted from page content.
  * @property {Set} visits Set of visit index doc IDs, extracted from visit docs.
  * @property {Set} bookmarks Set of bookmark index doc IDs, extracted from bookmark docs.
+ * @property {Set} tags Set of searchable tags - init'd empty.
  */
 
 /**
@@ -125,5 +126,6 @@ export default function pipeline({
         titleTerms: titleTerms || new Set(),
         visits: new Set(visits.map(keyGen.visit)),
         bookmarks: new Set(bookmarks.map(keyGen.bookmark)),
+        tags: new Set(),
     })
 }
