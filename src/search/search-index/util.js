@@ -21,6 +21,23 @@ export const idbBatchToPromise = batch =>
     )
 
 /**
+ * @param {string} pageId ID of existing reverse index page.
+ * @returns {any} The corresponding reverse index page doc.
+ * @throws {Error} If `pageId` param does not have a corresponding doc existing in DB.
+ */
+export async function fetchExistingPage(pageId) {
+    const reverseIndexDoc = await initSingleLookup()(pageId)
+
+    if (reverseIndexDoc == null) {
+        throw new Error(
+            `No document exists in reverse page index for the supplied page ID: ${pageId}`,
+        )
+    }
+
+    return reverseIndexDoc
+}
+
+/**
  * Handles splitting up searchable content into indexable terms. Terms are all
  * lowercased.
  *
