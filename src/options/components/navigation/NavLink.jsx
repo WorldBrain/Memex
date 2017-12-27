@@ -4,7 +4,7 @@ import { Link } from 'react-router'
 import classNames from 'classnames'
 import styles from './styles.css'
 
-const NavLink = ({ route, state, children, messages }) => {
+const NavLink = ({ route, state, children }) => {
     const navClasses = classNames({
         [styles.navLink]: true,
         [styles.isActive]: children,
@@ -27,8 +27,8 @@ const NavLink = ({ route, state, children, messages }) => {
 
     const badgeCondition = classNames({
         [styles.isNavActive]: children,
-        [styles.badge]: messages,
-        [styles.loadbadge]: !messages,
+        [styles.badge]: state.unreadMessagesCount,
+        [styles.loadbadge]: !state.unreadMessagesCount,
     })
 
     return (
@@ -48,7 +48,9 @@ const NavLink = ({ route, state, children, messages }) => {
                     <Link className={navClasses} to={route.pathname}>
                         {route.name}
                         {route.name === 'Notifications' && (
-                            <div className={badgeCondition}>{messages}</div>
+                            <div className={badgeCondition}>
+                                {state.unreadMessagesCount}
+                            </div>
                         )}
                     </Link>
                 )}
@@ -73,7 +75,6 @@ NavLink.propTypes = {
     route: PropTypes.object.isRequired,
     state: PropTypes.object.isRequired,
     children: PropTypes.bool.isRequired,
-    messages: PropTypes.number.isRequired,
 }
 
 export default NavLink

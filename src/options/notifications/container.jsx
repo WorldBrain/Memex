@@ -28,7 +28,6 @@ class NotificationsContainer extends Component {
             unreadMessagesCount: 0,
         }
         console.log(this.props.unreadMessagesCount)
-        console.log(this.props.handleReadNotification)
         this.setShowAll = this.setShowAll.bind(this)
         this.setMarkAllRead = this.setMarkAllRead.bind(this)
     }
@@ -41,6 +40,7 @@ class NotificationsContainer extends Component {
             })
             .on('change', function(c) {})
         this.setStateFromPouch()
+        this.props.handleReadNotification()
     }
 
     selectNotification = doc => () => {
@@ -60,6 +60,7 @@ class NotificationsContainer extends Component {
             }
             setUnreadCount()
             updateWBBadge()
+            this.props.handleReadNotification()
         } catch (err) {
             console.log('err', err)
         }
@@ -204,7 +205,7 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-    handleReadNotification: () => dispatch(actions.unreadMessagesCount()),
+    handleReadNotification: () => dispatch(actions.unreadMessagesUpdate()),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(
