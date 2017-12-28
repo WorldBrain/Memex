@@ -9,6 +9,7 @@ const DOMAIN_TLD_PATTERN = /^(\w+\.)?[\w-]{2,}\.\w{2,3}(\.\w{2})?$/
  * @type {Object}
  * @property {Set<string>} query Query terms a user has searched for.
  * @property {Set<string>} domain Domain patterns extracted from the terms a user has searched for.
+ * @property {Set<string>} tags Set of tags a user has chosen to filter.
  * @property {Map<string, any>} timeFilter Map of different time filter ranges to apply to search.
  * @property {number} [skip=0]
  * @property {number} [limit=10]
@@ -21,6 +22,7 @@ class QueryBuilder {
     query = new Set()
     timeFilter = new Map()
     domain = new Set()
+    tags = new Set()
     isBadTerm = false
     showOnlyBookmarks = false
 
@@ -33,6 +35,7 @@ class QueryBuilder {
         limit: this.limit,
         skip: this.skip,
         domain: this.domain,
+        tags: this.tags,
         isBadTerm: this.isBadTerm,
         timeFilter: this.timeFilter,
         bookmarksFilter: this.showOnlyBookmarks,
@@ -65,6 +68,11 @@ class QueryBuilder {
             lte: endDate ? `${keyType}${endDate}` : `${keyType}\uffff`,
         })
 
+        return this
+    }
+
+    filterTags(tags) {
+        tags.forEach(tag => this.tags.add(tag))
         return this
     }
 
