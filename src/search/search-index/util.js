@@ -5,6 +5,7 @@ import index, { DEFAULT_TERM_SEPARATOR } from './'
 // Key generation functions
 export const keyGen = {
     domain: key => `domain/${key}`,
+    tag: key => `tag/${key}`,
     url: key => `url/${key}`,
     term: key => `term/${key}`,
     title: key => `title/${key}`,
@@ -13,7 +14,7 @@ export const keyGen = {
 }
 
 export const removeKeyType = key =>
-    key.replace(/^(term|title|visit|url|domain|bookmark)\//, '')
+    key.replace(/^(term|title|visit|url|domain|tag|bookmark)\//, '')
 
 export const idbBatchToPromise = batch =>
     new Promise((resolve, reject) =>
