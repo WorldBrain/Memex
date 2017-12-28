@@ -167,7 +167,7 @@ class NotificationsContainer extends Component {
                     <br />
                     {!unreadMessages.length && (
                         <div className={styles.noMessage}>
-                            There is no new notification.
+                            You have no new notification
                         </div>
                     )}
                     {this.renderMesaagesTable(unreadMessages)}
@@ -185,7 +185,7 @@ class NotificationsContainer extends Component {
                     <br />
                     {!readMessages.length && (
                         <div className={styles.noMessage}>
-                            There is no archive notification.
+                            No past notifications.
                         </div>
                     )}
                     {this.renderMesaagesTable(readMessages)}

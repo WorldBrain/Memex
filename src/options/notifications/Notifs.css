@@ -51,18 +51,21 @@ body {
 .unreadMessage {
     float: left;
     width: 50%;
-    font-size: 14px;
+    font-size: 16px;
+    color: #777;
 }
 
 .markallread {
     float: right;
-    font-size: 14px;
+    font-size: 16px;
     cursor: pointer;
+    color: #777;
 }
 
 .noMessage {
     text-align: center;
-    font-size: 16px;
+    font-size: 15px;
+    padding-top: 15px;
 }
 
 .sectionReadMessages {
@@ -71,6 +74,6 @@ body {
 
 .notifbackground {
     margin-top: 20px;
-    width: 80%;
+    width: 100%;
     min-width: 300px;
 }
