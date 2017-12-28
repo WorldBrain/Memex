@@ -13,6 +13,7 @@ body {
 .root {
     display: flex;
     flex-direction: row;
+    background: white;
 }
 
 .sidebar .route {
