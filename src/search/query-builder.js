@@ -4,6 +4,9 @@ import { DEFAULT_TERM_SEPARATOR } from './search-index'
 // Pattern to match entire string to `domain.tld`-like format + optional subdomain prefix and ccTLD postfix
 const DOMAIN_TLD_PATTERN = /^(\w+\.)?[\w-]{2,}\.\w{2,3}(\.\w{2})?$/
 
+// Pattern to match hashtags - spaces can be represented via '+'
+const HASH_TAG_PATTERN = /^#\w[\w+]*$/
+
 /**
  * @typedef IndexQuery
  * @type {Object}
@@ -80,12 +83,20 @@ class QueryBuilder {
         // All indexed strings are lower-cased, so force the query terms to be
         let terms = input.toLowerCase().match(/\S+/g) || []
 
-        // Remove any domains detected in search terms, place them into domains Set
+        // Remove any domains/tags detected in search terms - place them into relevant Sets
         terms = terms.reduce((acc, term) => {
             if (DOMAIN_TLD_PATTERN.test(term)) {
                 this.domain.add(term)
                 return acc
             }
+
+            if (HASH_TAG_PATTERN.test(term)) {
+                // Slice off '#' prefix and replace any '+' with space char
+                term = term.slice(1).replace('+', ' ')
+                this.tags.add(term)
+                return acc
+            }
+
             return [...acc, term]
         }, [])
 
