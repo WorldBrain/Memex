@@ -70,6 +70,23 @@
     }
 }
 
+.subLink {
+    display: block;
+    text-decoration: none;
+    font-size: 13px;
+    padding: 5px 0 5px 15px;
+    padding-left: 15px;
+    color: #494949;
+    width: 100%;
+    letter-spacing: 1px;
+
+    &.isActive {
+        color: white;
+        background-color: #3eb995;
+        border-right: none;
+    }
+}
+
 .importSubItems {
     margin-left: 60px;
     margin-top: 10px;

@@ -23,6 +23,12 @@ const renderHeadContent = location => {
             return <title>Settings - Imports</title>
         case '/blacklist':
             return <title>Settings - Blacklist</title>
+        case '/about':
+            return <title>Settings - About</title>
+        case '/vision':
+            return <title>Settings - Vision</title>
+        case '/changelog':
+            return <title>Settings - Changelog</title>
         default:
             return <title>Settings</title>
     }

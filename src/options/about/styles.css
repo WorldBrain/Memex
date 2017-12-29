@@ -1,0 +1,53 @@
+.main {
+    font-family: 'Lato';
+    margin-top: 20px;
+}
+
+.content {
+    font-style: normal;
+    margin-top: 20px;
+    margin-bottom: 30px;
+    font-size: 15px;
+    color: #999;
+    letter-spacing: 1px;
+    width: 80%;
+    min-width: 450px;
+}
+
+.title {
+    color: #3eb995;
+    font-weight: bold;
+    font-size: 18px;
+    letter-spacing: 1px;
+}
+
+.h2 {
+    color: #3eb995;
+    font-weight: bold;
+    font-size: 20px;
+    letter-spacing: 1px;
+    margin-left: 35px;
+}
+
+.title2 {
+    font-style: normal;
+    font-weight: bold;
+    font-size: 16px;
+    color: #666;
+    width: 60%;
+    min-width: 450px;
+}
+
+.list {
+    font-style: normal;
+    margin-top: 20px;
+    font-size: 16px;
+    color: #999;
+    width: 90%;
+    min-width: 450px;
+    margin-left: 35px;
+}
+
+.list_element {
+    margin-bottom: 10px;
+}

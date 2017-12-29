@@ -56,6 +56,20 @@ const NavLink = ({ route, state, children }) => {
                         </div>
                     </div>
                 )}
+            {route.name === 'About' &&
+                children && (
+                    <div className={styles.importSubItems}>
+                        <Link to="/vision" className={styles.subLink}>
+                            1. Vision
+                        </Link>
+                        <Link to="/changelog" className={styles.subLink}>
+                            2. Changelog
+                        </Link>
+                        <Link to="/acknowledgements" className={styles.subLink}>
+                            3. Acknowledgement
+                        </Link>
+                    </div>
+                )}
         </li>
     )
 }
