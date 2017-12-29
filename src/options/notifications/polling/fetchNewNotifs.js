@@ -16,14 +16,16 @@ export default async function fetchNewNotifs() {
         const newNotes = await res.json()
         newNotes.forEach(function(element) {
             const dateTimestamp = new Date(element.date).getTime()
-            db.put({
-                _id: 'notifs_' + element._id,
-                MongoId: element._id,
-                title: element.title,
-                body: element.body,
-                date: element.date,
-                viewed: installTimestamp > dateTimestamp,
-            })
+            if (installTimestamp <= dateTimestamp) {
+                db.put({
+                    _id: 'notifs_' + element._id,
+                    MongoId: element._id,
+                    title: element.title,
+                    body: element.body,
+                    date: element.date,
+                    viewed: false,
+                })
+            }
         })
         await setUnreadCount()
         await updateWBBadge()

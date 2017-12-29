@@ -25,7 +25,10 @@ const messageRow = ({ doc, handleClick, isOpen }) => (
             </div>
             {isOpen && (
                 <div className={localStyles.toggle} key={doc.title}>
-                    <div dangerouslySetInnerHTML={{ __html: doc.body }} />
+                    <div
+                        className={localStyles.docBody}
+                        dangerouslySetInnerHTML={{ __html: doc.body }}
+                    />
                     <br />
                     <br />
                     <div className={localStyles.dateNotif}>

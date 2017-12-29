@@ -85,6 +85,7 @@ class NotificationsContainer extends Component {
         this.setStateFromPouch()
         setUnreadCount()
         updateWBBadge()
+        this.props.handleReadNotification()
     }
 
     setStateFromPouch() {
