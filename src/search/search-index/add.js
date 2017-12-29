@@ -8,6 +8,7 @@ import {
     termRangeLookup,
     idbBatchToPromise,
     fetchExistingPage,
+    keyGen,
 } from './util'
 
 // Used to decide whether or not to do a range lookup for terms (if # terms gt) or N single lookups
@@ -39,13 +40,13 @@ export const put = (key, val) => index.put(key, val)
 async function addTags(pageId, tags) {
     const reverseIndexDoc = await fetchExistingPage(pageId)
 
-    // Prefix all tags with tag key
-    const keyedTags = tags.map(tag => `tag/${tag}`)
-
     // Init tags Set if not present
     if (reverseIndexDoc.tags == null) {
         reverseIndexDoc.tags = new Set()
     }
+
+    // Convert all input tags into tags index keys
+    const keyedTags = tags.map(keyGen.tag)
 
     // Add all tag keys to reverse index doc
     keyedTags.forEach(tagKey => reverseIndexDoc.tags.add(tagKey))

@@ -4,6 +4,7 @@ import {
     initLookupByKeys,
     idbBatchToPromise,
     fetchExistingPage,
+    keyGen,
 } from './util'
 
 const singleLookup = initSingleLookup()
@@ -64,8 +65,8 @@ export const delPagesConcurrent = pageIds =>
 async function delTags(pageId, tags) {
     const reverseIndexDoc = await fetchExistingPage(pageId)
 
-    // Prefix all tags with tag key
-    const keyedTags = tags.map(tag => `tag/${tag}`)
+    // Convert all input tags into tags index keys
+    const keyedTags = tags.map(keyGen.tag)
 
     // Remove all tag keys to reverse index doc
     keyedTags.forEach(tagKey => reverseIndexDoc.tags.delete(tagKey))
@@ -79,8 +80,9 @@ async function delTags(pageId, tags) {
                 return Promise.resolve() // Skip current if non-existent
             }
 
+            value.delete(pageId) // Remove page from current indexed tag value
+
             // Remove tag index entry if no more assoc. page entries left in value, else just update
-            value.delete(pageId)
             return value.size
                 ? await index.put(tagKey, value)
                 : await index.del(tagKey)
