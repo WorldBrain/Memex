@@ -8,7 +8,7 @@ import { keyGen, removeKeyType } from './util'
  * @returns {Promise<Set<string>>} Resolves to a Set of matching tags, if any, of size 0 - `limit`.
  */
 const suggestTags = (query = '', limit = 10) =>
-    new Promise(resolve => {
+    new Promise((resolve, reject) => {
         const results = new Set()
 
         // Start searching from the tag matching the query
@@ -22,6 +22,7 @@ const suggestTags = (query = '', limit = 10) =>
                 limit,
             })
             .on('data', tagKey => results.add(removeKeyType(tagKey)))
+            .on('error', reject)
             .on('end', () => resolve(results))
     })
 
