@@ -47,7 +47,7 @@ const EstimatesTable = ({
                         </span>
                         <br />
                         <span className={localStyles.checkboxSubText}>
-                            (last 90 days)
+                            (from last 90 days)
                         </span>
                     </label>
                 </td>
@@ -68,6 +68,10 @@ const EstimatesTable = ({
                     <label className={localStyles.label} htmlFor="bookmarks">
                         <span className={localStyles.checkboxText}>
                             Bookmarks
+                        </span>
+                        <br />
+                        <span className={localStyles.checkboxSubText}>
+                            (from forever)
                         </span>
                     </label>
                 </td>

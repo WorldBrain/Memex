@@ -14,7 +14,7 @@
 
     & td {
         color: #666;
-        min-width: 160px;
+        min-width: 180px;
     }
 
     & td.importTableCellSepar {
@@ -147,6 +147,7 @@
 
 .checkboxSubText {
     margin-left: 24px;
+    font-size: 12px;
 }
 
 .checkbox {
