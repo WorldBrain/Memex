@@ -4,7 +4,12 @@ import { getMetadata, metadataRules } from 'page-metadata-parser'
 import transformPageHTML from 'src/util/transform-page-html'
 import extractPdfContent from './extract-pdf-content'
 
+<<<<<<< HEAD
 export const DEF_LANG = 'en'
+=======
+// Fathom rule to only get document's title (`page-metadata-parser` default rules prioritise OG tags)
+export const onlyDocTitle = ['title', node => node.element.text]
+>>>>>>> Update fathom rule used to extract page titles
 
 // Extract the text content from web pages and PDFs.
 export default async function extractPageContent(
@@ -27,9 +32,9 @@ export default async function extractPageContent(
     // Metadata of web page
     const selectedMetadataRules = {
         canonicalUrl: metadataRules.url,
-        title: metadataRules.title,
         keywords: metadataRules.keywords,
         description: metadataRules.description,
+        title: { rules: [onlyDocTitle] },
     }
     const metadata = getMetadata(doc, url, selectedMetadataRules)
 
