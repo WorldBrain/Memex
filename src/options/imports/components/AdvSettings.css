@@ -14,7 +14,7 @@
     display: flex;
     justify-content: space-between;
     margin-right: 20px;
-    color: #787677;
+    color: #777;
 }
 
 .advFunctionality {
@@ -26,6 +26,11 @@
     right: 200px;
 }
 
+.prevFailedCheckbox {
+    position: relative;
+    right: 220px;
+}
+
 .settingsList {
     padding: 0;
 }
@@ -35,69 +40,11 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    margin: 2em 0;
-
-    &:first-child {
-        margin-top: 1em;
-    }
+    margin: 1em 0;
+    color: #777;
+    font-size: 16px;
 
     &:last-child {
         margin-bottom: 1em;
-    }
-}
-
-input[type='checkbox'] {
-    position: absolute;
-    opacity: 0;
-
-    & + label {
-        position: relative;
-        cursor: pointer;
-        padding: 0;
-    }
-
-    & + label::before {
-        content: '';
-        margin-right: 10px;
-        margin-top: 3px;
-        display: inline-block;
-        vertical-align: text-top;
-        width: 12px;
-        height: 12px;
-        outline: 2px solid #3eb995;
-        box-shadow: 0 0 0 2pt #3eb995;
-        border-radius: 1px;
-    }
-
-    &:focus + label::before {
-        box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.12);
-    }
-
-    &:checked + label::before {
-        background: #3eb995;
-    }
-
-    &:checked + label::after {
-        content: '';
-        position: absolute;
-        left: 1px;
-        top: 8px;
-        background: white;
-        width: 2px;
-        height: 2px;
-        box-shadow: 2px 0 0 white, 4px 0 0 white, 4px -2px 0 white,
-            4px -4px 0 white, 4px -6px 0 white, 4px -8px 0 white;
-        transform: rotate(45deg);
-    }
-
-    &:disabled + label {
-        color: #3eb995;
-        cursor: auto;
-    }
-
-    &:disabled + label::before {
-        box-shadow: none;
-        box-shadow: 0 0 0 2pt #3eb995;
-        border-radius: 1px;
     }
 }

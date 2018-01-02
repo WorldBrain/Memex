@@ -8,6 +8,7 @@ const mapStateToProps = state => ({
     advMode: selectors.advMode(state),
     concurrency: selectors.concurrency(state),
     isUploading: selectors.isUploading(state),
+    prevFailedValue: selectors.processErrors(state),
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -16,6 +17,8 @@ const mapDispatchToProps = dispatch => ({
         dispatch(actions.setConcurrencyLevel(+event.target.value)),
     uploadTestData: event =>
         dispatch(actions.uploadTestData(event.target.files || [])),
+    onPrevFailedToggle: event =>
+        dispatch(actions.setPrevFailed(event.target.checked)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(AdvSettings)

@@ -1,39 +1,6 @@
 import { generateVisitDocId } from 'src/activity-logger'
 import { generateBookmarkDocId } from 'src/bookmarks'
 
-export const importProgressStorageKey = 'is_import_in_progress'
-export const estimatesStorageKey = 'import-estimate-counts'
-
-// Local storage helpers to make the main functions a bit less messy
-export const getImportInProgressFlag = async () => {
-    const storage = await browser.storage.local.get(importProgressStorageKey)
-    return storage[importProgressStorageKey]
-}
-
-export const setImportInProgressFlag = () =>
-    browser.storage.local.set({ [importProgressStorageKey]: true })
-export const clearImportInProgressFlag = () =>
-    browser.storage.local.remove(importProgressStorageKey)
-
-export const getStoredEsts = async () => {
-    const storage = await browser.storage.local.get({
-        [estimatesStorageKey]: { calculatedAt: 0 },
-    })
-    return storage[estimatesStorageKey]
-}
-
-export const setStoredEsts = estimates =>
-    browser.storage.local.set({
-        [estimatesStorageKey]: { ...estimates, calculatedAt: Date.now() },
-    })
-
-export const dirtyStoredEsts = () =>
-    getStoredEsts().then(storedEsts =>
-        browser.storage.local.set({
-            [estimatesStorageKey]: { ...storedEsts, calculatedAt: 0 },
-        }),
-    )
-
 /**
  * Converts a browser.history.VisitItem to our visit document model.
  *

@@ -1,10 +1,5 @@
-import { dirtyStoredEsts } from 'src/imports'
 import { STORAGE_KEY } from 'src/options/blacklist/constants'
-
-/**
- * Default blacklist entries.
- */
-export const defaultEntries = ['https?://localhost', 'google.\\w+/maps']
+import importStateManager from 'src/imports/background/import-state'
 
 /**
  * Given a URL and user's blacklist, checks the URL against the blacklist expressions to see if any
@@ -54,7 +49,7 @@ export async function fetchBlacklist() {
 
 async function storeBlacklist(blacklist = []) {
     const serialized = JSON.stringify(blacklist)
-    await dirtyStoredEsts()
+    await importStateManager.dirtyEsts()
 
     return browser.storage.local.set({ [STORAGE_KEY]: serialized })
 }

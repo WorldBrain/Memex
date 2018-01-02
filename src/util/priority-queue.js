@@ -18,4 +18,11 @@ export default class extends Queue {
 
         return res
     }
+
+    /**
+     * Removes all queued jobs.
+     */
+    clear() {
+        this.jobs = []
+    }
 }

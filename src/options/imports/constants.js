@@ -59,12 +59,13 @@ export const CMDS = {
     NEXT: `${IMPORT_CONN_NAME}/NEXT`,
     COMPLETE: `${IMPORT_CONN_NAME}/COMPLETE`,
     SET_CONCURRENCY: `${IMPORT_CONN_NAME}/SET_CONCURRENCY`,
+    SET_PROCESS_ERRS: `${IMPORT_CONN_NAME}/SET_PROCESS_ERRS`,
 }
 
 /** Estimated time to download a doc (seconds) */
-export const DOC_TIME_EST = 1.8
+export const DOC_TIME_EST = 3
 
-export const DEF_CONCURRENCY = 2
+export const DEF_CONCURRENCY = 15
 
 export const OLD_EXT_KEYS = {
     NUM_DONE: 'old-ext-converted-count',

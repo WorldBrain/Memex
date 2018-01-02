@@ -92,95 +92,167 @@ async function createAssociatedBookmarkDoc(pageDoc, importItem) {
     return transformToBookmarkDoc(pageDoc)(bookmarkItem)
 }
 
-async function createPageDoc({ url }) {
-    // Do the page data fetch
-    const { content, favIconURI } = await fetchPageData({
-        url,
-        opts: fetchPageDataOpts,
-    })
+export default class ImportItemProcessor {
+    /**
+     * @property {Function} Function to afford aborting current XHR. Set when import processor reaches XHR point.
+     */
+    abortXHR
 
-    // Sort out all binary attachments
-    const _attachments = await formatFavIconAttachment(favIconURI)
+    /**
+     * @property {boolean} Flag denoting whether or not execution has been cancelled.
+     */
+    cancelled = false
 
-    // Construct the page doc ready for PouchDB from fetched + import item data
-    return revisePageFields({
-        _id: generatePageDocId({ url }),
-        url,
-        content,
-        _attachments,
-    })
-}
+    /**
+     * @property {boolean} Flag denoting whether or not execution has finished successfully or not.
+     */
+    finished = false
 
-const storeDocs = ({ pageDoc, bookmarkDocs = [], visitDocs = [] }) =>
-    Promise.all([
-        index.addPageConcurrent({ pageDoc, visitDocs, bookmarkDocs }),
-        db.bulkDocs([pageDoc, ...bookmarkDocs, ...visitDocs]),
-    ])
-
-/**
- * Handles processing of a history-type import item. Checks for exisitng page docs that have the same URL.
- *
- * @param {IImportItem} importItemDoc
- * @returns {any} Status string denoting the outcome of import processing as `status`
- *  + optional filled-out page doc as `pageDoc` field.
- */
-async function processHistoryImport(importItem) {
-    await checkVisitItemTransitionTypes(importItem)
-
-    const pageDoc = await createPageDoc(importItem)
-
-    // Fetch and create meta-docs
-    const visitDocs = await createAssociatedVisitDocs(pageDoc)
-    const bookmarkDocs = []
-
-    if (importItem.type === IMPORT_TYPE.BOOKMARK) {
-        bookmarkDocs.push(
-            await createAssociatedBookmarkDoc(pageDoc, importItem),
-        )
+    static makeInterruptedErr() {
+        const err = new Error('Execution interrupted')
+        err.cancelled = true
+        return err
     }
 
-    await storeDocs({ pageDoc, visitDocs, bookmarkDocs })
-
-    // If we finally got here without an error being thrown, return the success status message + pageDoc data
-    return { status: DOWNLOAD_STATUS.SUCC }
-}
-
-async function processOldExtImport(importItem) {
-    const pageDoc = await createPageDoc(importItem)
-
-    // Fetch and create meta-docs
-    const visitDocs = await createAssociatedVisitDocs(pageDoc)
-    const bookmarkDocs = []
-
-    if (importItem.hasBookmark) {
-        bookmarkDocs.push(transformToMinimalBookmarkDoc(pageDoc)(importItem))
-    } else {
-        visitDocs.push(transformToMinimalVisitDoc(pageDoc)(importItem))
+    /**
+     * Hacky way of enabling cancellation. Checks state and throws an Error if detected change.
+     * Should be called by any main execution methods before any expensive async logic run.
+     *
+     * TODO: May move this to token-based later - need to come up with a clean way.
+     *
+     * @throws {Error} If `this.cancelled` is set.
+     */
+    _checkCancelled() {
+        if (this.cancelled) {
+            throw ImportItemProcessor.makeInterruptedErr()
+        }
     }
 
-    await storeDocs({ pageDoc, visitDocs, bookmarkDocs })
+    async _storeDocs({ pageDoc, bookmarkDocs = [], visitDocs = [] }) {
+        this._checkCancelled()
 
-    // If all okay now, remove the old data
-    await clearOldExtData(importItem)
+        return await Promise.all([
+            index.addPageConcurrent({ pageDoc, visitDocs, bookmarkDocs }),
+            db.bulkDocs([pageDoc, ...bookmarkDocs, ...visitDocs]),
+        ])
+    }
 
-    return { status: DOWNLOAD_STATUS.SUCC }
-}
+    /**
+     * Using the `url` of the current item, performs the XHR and formatting needed on the response
+     * to form a new page doc.
+     *
+     * @param {IImportItem} importItem
+     * @returns {PageDoc}
+     */
+    async _createPageDoc({ url }) {
+        // Do the page data fetch
+        const fetch = fetchPageData({
+            url,
+            opts: fetchPageDataOpts,
+        })
 
-/**
- * Given an import state item, performs appropriate processing depending on the import type.
- *
- * @param {[string, IImportItem]} Key-value pair of encoded URL to import item value.
- * @returns {string} Status string denoting the outcome of import processing as `status`
- *  + optional filled-out page doc as `pageDoc` field.
- */
-export default async function processImportItem([encodedUrl, importItem = {}]) {
-    switch (importItem.type) {
-        case IMPORT_TYPE.BOOKMARK:
-        case IMPORT_TYPE.HISTORY:
-            return await processHistoryImport(importItem)
-        case IMPORT_TYPE.OLD:
-            return await processOldExtImport(importItem)
-        default:
-            throw new Error('Unknown import type')
+        this.abortXHR = fetch.cancel
+
+        this._checkCancelled()
+        const { content, favIconURI } = await fetch.run()
+
+        // Sort out all binary attachments
+        const _attachments = await formatFavIconAttachment(favIconURI)
+
+        // Construct the page doc ready for PouchDB from fetched + import item data
+        return revisePageFields({
+            _id: generatePageDocId({ url }),
+            url,
+            content,
+            _attachments,
+        })
+    }
+
+    /**
+     * Handles processing of a history-type import item. Checks for exisitng page docs that have the same URL.
+     *
+     * @param {IImportItem} importItemDoc
+     * @returns {any} Status string denoting the outcome of import processing as `status`
+     *  + optional filled-out page doc as `pageDoc` field.
+     */
+    async _processHistory(importItem) {
+        await checkVisitItemTransitionTypes(importItem)
+
+        const pageDoc = await this._createPageDoc(importItem)
+
+        // Fetch and create meta-docs
+        const visitDocs = await createAssociatedVisitDocs(pageDoc)
+        const bookmarkDocs = []
+
+        if (importItem.type === IMPORT_TYPE.BOOKMARK) {
+            bookmarkDocs.push(
+                await createAssociatedBookmarkDoc(pageDoc, importItem),
+            )
+        }
+
+        await this._storeDocs({ pageDoc, visitDocs, bookmarkDocs })
+
+        this._checkCancelled()
+        // If we finally got here without an error being thrown, return the success status message + pageDoc data
+        return { status: DOWNLOAD_STATUS.SUCC }
+    }
+
+    async _processOldExt(importItem) {
+        const pageDoc = await this._createPageDoc(importItem)
+
+        // Fetch and create meta-docs
+        const visitDocs = await createAssociatedVisitDocs(pageDoc)
+        const bookmarkDocs = []
+
+        if (importItem.hasBookmark) {
+            bookmarkDocs.push(
+                transformToMinimalBookmarkDoc(pageDoc)(importItem),
+            )
+        } else {
+            visitDocs.push(transformToMinimalVisitDoc(pageDoc)(importItem))
+        }
+
+        await this._storeDocs({ pageDoc, visitDocs, bookmarkDocs })
+
+        // If all okay now, remove the old data
+        await clearOldExtData(importItem)
+
+        this._checkCancelled()
+
+        // If we finally got here without an error being thrown, return the success status message + pageDoc data
+        return { status: DOWNLOAD_STATUS.SUCC }
+    }
+
+    /**
+     * Given an import state item, performs appropriate processing depending on the import type.
+     * Main execution method.
+     *
+     * @param {IImportItem} importItem Import item state item to process.
+     * @returns {Promise<any>} Resolves to a status string denoting the outcome of import processing as `status`.
+     *  Rejects for any other error, including bad content check errors, and cancellation - caller should handle.
+     */
+    async process(importItem) {
+        this._checkCancelled()
+
+        switch (importItem.type) {
+            case IMPORT_TYPE.BOOKMARK:
+            case IMPORT_TYPE.HISTORY:
+                return await this._processHistory(importItem)
+            case IMPORT_TYPE.OLD:
+                return await this._processOldExt(importItem)
+            default:
+                throw new Error('Unknown import type')
+        }
+    }
+
+    /**
+     * Aborts execution. Note that once called, exeuction will only actually stop when the main
+     * methods reach a `this._checkCancelled()` call.
+     */
+    cancel() {
+        if (typeof this.abortXHR === 'function') {
+            this.abortXHR()
+        }
+        this.cancelled = true
     }
 }

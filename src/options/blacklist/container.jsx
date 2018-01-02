@@ -26,6 +26,7 @@ class BlacklistContainer extends Component {
         matchedDocCount: PropTypes.number.isRequired,
 
         // Actions
+        initBlacklist: PropTypes.func.isRequired,
         hideModal: PropTypes.func.isRequired,
         removeMatchingDocs: PropTypes.func.isRequired,
         resetInputVal: PropTypes.func.isRequired,
@@ -35,6 +36,7 @@ class BlacklistContainer extends Component {
     }
 
     componentDidMount() {
+        this.props.initBlacklist()
         this.focusInput()
     }
 
@@ -165,6 +167,7 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
+    initBlacklist: () => dispatch(actions.initBlacklist()),
     hideModal: () => dispatch(actions.setModalShow(false)),
     resetInputVal: () => dispatch(actions.resetSiteInputValue()),
     addToBlacklist: expression => dispatch(actions.addToBlacklist(expression)),

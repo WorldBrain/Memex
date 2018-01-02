@@ -1,38 +1,14 @@
-import importsConnectionHandler from './imports-connection-handler'
-import { OLD_EXT_KEYS } from 'src/options/imports/constants'
+import { makeRemotelyCallable } from 'src/util/webextensionRPC'
+import ConnHandler from './import-connection-handler'
+import importStateManager from './import-state'
+import { OLD_EXT_KEYS, IMPORT_CONN_NAME } from 'src/options/imports/constants'
 
 // Constants
 export const importStateStorageKey = 'import_items'
 export const installTimeStorageKey = 'extension_install_time'
 
-// Imports local storage state interface
-export const getImportItems = async () => {
-    const { [importStateStorageKey]: data } = await browser.storage.local.get({
-        [importStateStorageKey]: [],
-    })
-
-    return new Map(data)
-}
-
-/**
- * @param {Map<string, IImportItem>} items Import items collection to become the new state.
- */
-export const setImportItems = items =>
-    browser.storage.local.set({
-        [importStateStorageKey]: Array.from(items),
-    })
-
-export const clearImportItems = () =>
-    browser.storage.local.remove(importStateStorageKey)
-
-/**
- * @param {string} encodedUrl The URL to remove from imports items' collection state.
- */
-export const removeImportItem = async encodedUrl => {
-    const importItemsMap = await getImportItems()
-    importItemsMap.delete(encodedUrl)
-    await setImportItems(importItemsMap)
-}
+// Allow UI scripts to dirty estimates cache
+makeRemotelyCallable({ dirtyEstsCache: () => importStateManager.dirtyEsts() })
 
 /**
  * Removes local storage entry representing single page data in the old ext.
@@ -63,4 +39,11 @@ export async function clearOldExtData({ timestamp, index }) {
 }
 
 // Allow content-script or UI to connect and communicate control of imports
-browser.runtime.onConnect.addListener(importsConnectionHandler)
+browser.runtime.onConnect.addListener(port => {
+    // Make sure to only handle connection logic for imports (allows other use of runtime.connect)
+    if (port.name !== IMPORT_CONN_NAME) return
+
+    console.log('importer connected')
+
+    return new ConnHandler(port)
+})

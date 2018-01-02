@@ -1,14 +1,12 @@
 import moment from 'moment'
 import chunk from 'lodash/fp/chunk'
 
-import db from 'src/pouchdb'
 import encodeUrl from 'src/util/encode-url-for-id'
-import { pageKeyPrefix, convertPageDocId } from 'src/page-storage'
-import { bookmarkKeyPrefix, convertBookmarkDocId } from 'src/bookmarks'
-import { checkWithBlacklist } from 'src/blacklist'
+import { grabExistingKeys } from 'src/search'
+import { blacklist } from 'src/blacklist/background'
 import { isLoggable } from 'src/activity-logger'
-import { differMaps } from 'src/util/map-set-helpers'
 import { IMPORT_TYPE, OLD_EXT_KEYS } from 'src/options/imports/constants'
+import stateManager from './import-state'
 
 const chunkSize = 200
 const lookbackWeeks = 12 // Browser history is limited to the last 3 months
@@ -17,218 +15,250 @@ const lookbackWeeks = 12 // Browser history is limited to the last 3 months
 const transformOldExtDataToImportItem = bookmarkUrls => (item, index) => ({
     type: IMPORT_TYPE.OLD,
     url: item.url,
-    timestamp: item.time,
     hasBookmark: bookmarkUrls.has(item.url),
     index,
 })
 
 // Binds an import type to a function that transforms a history/bookmark doc to an import item.
-const transformBrowserItemToImportItem = type => item => ({
+const transformBrowserToImportItem = type => item => ({
     browserId: item.id,
     url: item.url,
-    // HistoryItems contain lastVisitTime while BookmarkTreeNodes contain dateAdded
-    timestamp: item.lastVisitTime || item.dateAdded,
     type,
 })
 
-async function checkWithExistingBookmarks() {
-    const { rows: existingBmDocs } = await db.allDocs({
-        startkey: bookmarkKeyPrefix,
-        endkey: `${bookmarkKeyPrefix}\uffff`,
-    })
-
-    const existingUrls = new Set(
-        existingBmDocs.map(row => convertBookmarkDocId(row.id).url),
-    )
-    return url => existingUrls.has(url)
-}
-
 /**
  * @returns {({ url: string }) => boolean} A function affording checking of a URL against the
- *  URLs of existing page docs.
+ *  URLs of previously error'd import items.
  */
-async function checkWithExistingPages() {
-    const { rows: existingPageDocs } = await db.allDocs({
-        startkey: pageKeyPrefix,
-        endkey: `${pageKeyPrefix}\uffff`,
-    })
+async function initErrordItemsCheck() {
+    const errordUrls = new Set()
 
-    const existingUrls = new Set(
-        existingPageDocs.map(row => convertPageDocId(row.id).url),
-    )
-    return url => existingUrls.has(url)
-}
-
-// Simply hides away the the try...catch needed for the  `encodeUrl` call
-//  in the hopes of a little perf. boost on older versions of V8.
-const err = { value: null }
-function getEncodedUrl(...args) {
-    try {
-        const encodedUrl = encodeUrl(...args)
-        return encodedUrl
-    } catch (error) {
-        err.value = error
-        return err
+    for await (const { chunk } of stateManager.getErrItems()) {
+        Object.values(chunk).forEach(item => errordUrls.add(item.url))
     }
-}
 
-async function initFilterItemsByUrl() {
-    const isBlacklisted = await checkWithBlacklist()
+    return ({ url }) => errordUrls.has(url)
+}
+export default class ImportItemCreator {
+    constructor(histKeysSet, bmKeysSet) {
+        this.dataSourcesReady = new Promise((resolve, reject) =>
+            this._initExistingChecks()
+                .then(resolve)
+                .catch(reject),
+        )
+    }
+
+    async _initExistingChecks() {
+        this.isBlacklisted = await blacklist.checkWithBlacklist()
+        this.isPrevErrord = await initErrordItemsCheck()
+
+        // Grab existing data keys from DB
+        const keySets = await grabExistingKeys()
+        this.histKeys = keySets.histKeys
+        this.bmKeys = keySets.bmKeys
+    }
 
     /**
-     * Performs all needed filtering on a collection of history, bookmark, or old ext items. As these
-     * can be quite large, attemps to do in a single iteration of the input collection.
-     *
-     * @param {Array<any>} items Array of items with `url` to filter on.
-     * @param {(item: any) => any} transform Opt. transformformation fn turning current iterm into import item structure.
-     * @param {(url: string) => bool} alreadyExists Opt. checker function to check against existing data.
-     * @return {Map<string, any>} Filtered version of `items` array made into a Map of encoded URL strings to import items.
-     */
-    return (items, transform = f => f, alreadyExists = url => false) => {
+    *
+    * Performs all needed filtering on a collection of history, bookmark, or old ext items.
+    *
+    * @param {(item: any) => any} [transform=noop] Opt. transformformation fn turning current iterm into import item structure.
+    * @param {(url: string) => bool} [alreadyExists] Opt. checker function to check against existing data.
+    * @return {(items: any[]) => Map<string, any>} Function that filters array of browser items into a Map of encoded URL strings to import items.
+    */
+    _filterItemsByUrl = (
+        transform = f => f,
+        alreadyExists = url => false,
+    ) => items => {
         const importItems = new Map()
 
         for (let i = 0; i < items.length; i++) {
-            if (!isLoggable(items[i]) || isBlacklisted(items[i])) {
+            // Exclude item if any of the standard checks fail
+            if (
+                !isLoggable(items[i]) ||
+                this.isBlacklisted(items[i]) ||
+                this.isPrevErrord(items[i])
+            ) {
                 continue
             }
 
-            // Augment the item with encoded URL for DB check and item map
-            const encodedUrl = getEncodedUrl(items[i].url, false)
-            if (encodedUrl === err || alreadyExists(encodedUrl)) {
+            // Asssociate the item with the encoded URL in results Map
+            try {
+                const encodedUrl = encodeUrl(items[i].url, true)
+
+                if (!alreadyExists(encodedUrl)) {
+                    importItems.set(encodedUrl, transform(items[i]))
+                }
+            } catch (err) {
                 continue
             }
-
-            // Add to map if you got here
-            importItems.set(encodedUrl, transform(items[i]))
         }
 
         return importItems
     }
-}
 
-/**
- * @param {moment} startTime The time to start search from for browser history.
- * @returns {Array<browser.history.HistoryItem>} All history items in browser filtered by URL.
- */
-const getHistoryItems = startTime =>
-    browser.history.search({
-        text: '',
-        maxResults: 999999,
-        startTime: startTime.valueOf(),
-        endTime: startTime.add(2, 'weeks').valueOf(),
-    })
+    /**
+     * @param {moment} startTime The time to start search from for browser history.
+     * @returns {Array<browser.history.HistoryItem>} All history items in browser filtered by URL.
+     */
+    _fetchHistItems = startTime =>
+        browser.history.search({
+            text: '',
+            maxResults: 999999,
+            startTime: startTime.valueOf(),
+            endTime: startTime.add(2, 'weeks').valueOf(),
+        })
 
-/**
- * Handles fetching and filtering the history URLs in time period batches.
- * @param {Function} filterItemsByUrl
- */
-async function filterHistoryItems(filterItemsByUrl) {
-    const checkExistingPages = await checkWithExistingPages()
-    const transformHist = transformBrowserItemToImportItem(IMPORT_TYPE.HISTORY)
+    async _getOldExtItems() {
+        let bookmarkUrls = new Set()
+        const filterByUrl = this._filterItemsByUrl()
+        const {
+            [OLD_EXT_KEYS.INDEX]: index,
+            [OLD_EXT_KEYS.BOOKMARKS]: bookmarks,
+        } = await browser.storage.local.get({
+            [OLD_EXT_KEYS.INDEX]: { index: [] },
+            [OLD_EXT_KEYS.BOOKMARKS]: '[]',
+        })
 
-    // Get all history from browser (last 3 months), filter on existing DB pages
-    const startTime = moment().subtract(lookbackWeeks, 'weeks')
-    let historyItemsMap = new Map()
+        if (typeof bookmarks === 'string') {
+            try {
+                bookmarkUrls = new Set(JSON.parse(bookmarks).map(bm => bm.url))
+            } catch (error) {}
+        }
 
-    // Fetch and filter history in 2 week batches to limit space
-    for (let i = 0; i < lookbackWeeks / 2; i++, startTime.add(2, 'weeks')) {
-        const historyItemBatch = await getHistoryItems(moment(startTime))
-        const filteredItemsMap = filterItemsByUrl(
-            historyItemBatch,
-            transformHist,
-            checkExistingPages,
+        const transform = transformOldExtDataToImportItem(bookmarkUrls)
+        const importItems = []
+
+        // Only attempt page data conversion if index + bookmark storage values are correct types
+        if (index && index.index instanceof Array) {
+            // NOTE: There is a bug with old ext index sometimes repeating the index keys, hence uniqing here
+            //  (eg.I indexed 400 pages, index contained 43 million)
+            const indexSet = new Set(index.index)
+
+            // Break up old index into chunks of size 200 to access sequentially from storage
+            // Doing this to allow us to cap space complexity at a constant level +
+            // give time a `N / # chunks` speedup
+            const chunks = chunk(chunkSize)([...indexSet])
+            for (let i = 0; i < chunks.length; i++) {
+                const storageChunk = await browser.storage.local.get(chunks[i])
+
+                for (let j = 0; j < chunks[i].length; j++) {
+                    if (storageChunk[chunks[i][j]] == null) {
+                        continue
+                    }
+
+                    importItems.push(
+                        transform(
+                            storageChunk[chunks[i][j]],
+                            i * chunkSize + j,
+                        ),
+                    )
+                }
+            }
+        }
+
+        return filterByUrl(importItems)
+    }
+
+    /**
+     * Recursively traverses BFS-like from the specified node in the BookmarkTree,
+     * yielding the transformed bookmark ImportItems at each dir level.
+     *
+     * @generator
+     * @param {browser.BookmarkTreeNode} dirNode BM node representing a bookmark directory.
+     * @param {(items: browser.BookmarkTreeNode[]) => Map<string, ImportItem>} filter
+     * @yields {Map<string, ImportItem>} Bookmark items in current level.
+     */
+    async *_traverseBmTreeDir(dirNode, filter) {
+        // Folders don't contain `url`; recurse!
+        const children = await browser.bookmarks.getChildren(dirNode.id)
+
+        // Split into folders and bookmarks
+        const childGroups = children.reduce(
+            (prev, childNode) => {
+                const stateKey = !childNode.url ? 'dirs' : 'bms'
+
+                return {
+                    ...prev,
+                    [stateKey]: [...prev[stateKey], childNode],
+                }
+            },
+            { dirs: [], bms: [] },
         )
 
-        historyItemsMap = new Map([...historyItemsMap, ...filteredItemsMap])
-    }
+        // Filter and yield the current level of bookmarks
+        yield filter(childGroups.bms)
 
-    return historyItemsMap
-}
-
-/**
- * @param {number} [maxResults=100000] The max amount of items to grab from browser.
- * @returns {Array<browser.bookmarks.BookmarkTreeNode>} All bookmark items in browser filtered by URL.
- */
-const getBookmarkItems = (maxResults = 100000) =>
-    browser.bookmarks.getRecent(maxResults)
-
-async function getOldExtItems() {
-    let bookmarkUrls = new Set()
-    const {
-        [OLD_EXT_KEYS.INDEX]: index,
-        [OLD_EXT_KEYS.BOOKMARKS]: bookmarks,
-    } = await browser.storage.local.get({
-        [OLD_EXT_KEYS.INDEX]: { index: [] },
-        [OLD_EXT_KEYS.BOOKMARKS]: '[]',
-    })
-
-    if (typeof bookmarks === 'string') {
-        try {
-            bookmarkUrls = new Set(JSON.parse(bookmarks).map(bm => bm.url))
-        } catch (error) {}
-    }
-
-    const transform = transformOldExtDataToImportItem(bookmarkUrls)
-    const importItems = []
-
-    // Only attempt page data conversion if index + bookmark storage values are correct types
-    if (index && index.index instanceof Array) {
-        // NOTE: There is a bug with old ext index sometimes repeating the index keys, hence uniqing here
-        //  (eg.I indexed 400 pages, index contained 43 million)
-        const indexSet = new Set(index.index)
-
-        // Break up old index into chunks of size 200 to access sequentially from storage
-        // Doing this to allow us to cap space complexity at a constant level +
-        // give time a `N / # chunks` speedup
-        const chunks = chunk(chunkSize)([...indexSet])
-        for (let i = 0; i < chunks.length; i++) {
-            const storageChunk = await browser.storage.local.get(chunks[i])
-
-            for (let j = 0; j < chunks[i].length; j++) {
-                if (storageChunk[chunks[i][j]] == null) {
-                    continue
-                }
-
-                importItems.push(
-                    transform(storageChunk[chunks[i][j]], i * chunkSize + j),
-                )
-            }
+        // Recursively process next levels (not expected to get deep)
+        for (const dir of childGroups.dirs) {
+            yield* await this._traverseBmTreeDir(dir, filter)
         }
     }
 
-    return importItems
-}
+    /**
+     * @generator
+     * @param {string} [rootId='0'] The ID of the BookmarkTreeNode to start searching from.
+     * @yields {Map<string, ImportItem>} All bookmark items in browser, indexed by encoded URL.
+     */
+    async *_traverseBmTree(rootId = '0') {
+        const filterByUrl = this._filterItemsByUrl(
+            transformBrowserToImportItem(IMPORT_TYPE.BOOKMARK),
+            url => this.bmKeys.has(url),
+        )
 
-/**
- * @returns {any} Object containing three Maps of encoded URL keys to import item values.
- *   Used to create the imports list and estimate counts.
- */
-export default async function createImportItems() {
-    const filterItemsByUrl = await initFilterItemsByUrl()
+        // Start off tree traversal from root
+        yield* await this._traverseBmTreeDir({ id: rootId }, filterByUrl)
+    }
 
-    let historyItemsMap = await filterHistoryItems(filterItemsByUrl)
+    /**
+     * @generator
+     * Handles fetching and filtering the history URLs in time period batches,
+     * yielding those batches.
+     */
+    async *_iterateHistItems() {
+        const filterByUrl = this._filterItemsByUrl(
+            transformBrowserToImportItem(IMPORT_TYPE.HISTORY),
+            url => this.histKeys.has(url),
+        )
+        // Get all history from browser (last 3 months), filter on existing DB pages
+        const startTime = moment().subtract(lookbackWeeks, 'weeks')
 
-    const [bmItems, checkExistingBms] = await Promise.all([
-        getBookmarkItems(),
-        checkWithExistingBookmarks(),
-    ])
+        // Fetch and filter history in 2 week batches to limit space
+        for (let i = 0; i < lookbackWeeks / 2; i++, startTime.add(2, 'weeks')) {
+            const historyItemBatch = await this._fetchHistItems(
+                moment(startTime),
+            )
 
-    // Get all bookmarks from browser, filter on existing DB bookmarks
-    const bookmarkItemsMap = filterItemsByUrl(
-        bmItems,
-        transformBrowserItemToImportItem(IMPORT_TYPE.BOOKMARK),
-        checkExistingBms,
-    )
+            yield filterByUrl(historyItemBatch)
+        }
+    }
 
-    // Get all old ext from local storage, don't filter on existing data
-    const oldExtItemsMap = filterItemsByUrl(await getOldExtItems())
+    /**
+     * Main interface method, allowing incremental creation of different import item types.
+     *
+     * @generator
+     * @yields {any} Object containing `type` and `data` keys, with string and
+     *  `Map<string, ImportItem>` types, respectively.
+     */
+    async *createImportItems() {
+        // Get all bookmarks from browser, filter on existing DB bookmarks
+        for await (const bms of this._traverseBmTree()) {
+            // Not all levels in the bookmark tree need to have bookmark items
+            if (!bms.size) {
+                continue
+            }
+            yield { type: IMPORT_TYPE.BOOKMARK, data: bms }
+        }
 
-    // Perform set difference, removing bm items from history (these are a subset of hist)
-    historyItemsMap = differMaps(bookmarkItemsMap)(historyItemsMap)
+        // Get all old ext from local storage, don't filter on existing data
+        yield {
+            type: IMPORT_TYPE.OLD,
+            data: await this._getOldExtItems(),
+        }
 
-    return {
-        historyItemsMap,
-        bookmarkItemsMap,
-        oldExtItemsMap,
+        // Yield history items in two week chunks
+        for await (const twoWeeksHistory of this._iterateHistItems()) {
+            yield { type: IMPORT_TYPE.HISTORY, data: twoWeeksHistory }
+        }
     }
 }
