@@ -8,8 +8,6 @@ import * as selectors from './selectors'
 // Will contain the runtime port which will allow bi-directional communication to the background script
 let port
 
-// == Simple commands to change the state in reducers ==
-
 export const setLoading = createAction('overview/setLoading')
 export const nextPage = createAction('overview/nextPage')
 export const resetPage = createAction('overview/resetPage')
@@ -69,6 +67,7 @@ export const init = () => (dispatch, getState) => {
 /**
  * Perform a search using the current query params as defined in state. Pagination
  * state will also be used to perform relevant pagination logic.
+ *
  * @param {boolean} [overwrite=false] Denotes whether to overwrite existing results or just append.
  */
 export const search = ({ overwrite } = { overwrite: false }) => async (
@@ -167,7 +166,7 @@ export const deleteDocs = () => async (dispatch, getState) => {
     await deleteDocsByUrl(url)
 
     // Refresh search view after deleting all assoc docs
-    dispatch(search({ overwrite: true }))
+    // dispatch(search({ overwrite: true }))
 }
 
 export const toggleBookmark = (url, index) => async (dispatch, getState) => {
