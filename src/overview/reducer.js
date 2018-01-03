@@ -23,6 +23,8 @@ const defaultState = {
     deleteConfirmProps: {
         isShown: false,
         url: undefined,
+        // Used to keep track of any particular result (use index)
+        deleting: undefined,
     },
     showFilter: false,
     showOnlyBookmarks: false,
@@ -65,18 +67,22 @@ function hideResultItem(state, url) {
     )(state)
 }
 
-const showDeleteConfirm = (state, url) => ({
+const showDeleteConfirm = (state, { url, index }) => ({
     ...state,
     deleteConfirmProps: {
         ...state.deleteConfirmProps,
         isShown: true,
         url,
+        deleting: index,
     },
 })
 
 const hideDeleteConfirm = state => ({
     ...state,
-    deleteConfirmProps: { ...state.deleteConfirmProps, isShown: false },
+    deleteConfirmProps: {
+        ...defaultState.deleteConfirmProps,
+        deleting: state.deleteConfirmProps.deleting,
+    },
 })
 
 // Updates search result state by either overwriting or appending
@@ -130,6 +136,13 @@ export default createReducer(
         [actions.incSearchCount]: incSearchCount,
         [actions.initSearchCount]: initSearchCount,
         [actions.changeHasBookmark]: changeHasBookmark,
+        [actions.setResultDeleting]: (state, index) => ({
+            ...state,
+            deleteConfirmProps: {
+                ...state.deleteConfirmProps,
+                deleting: index,
+            },
+        }),
         [actions.showFilter]: state => ({
             ...state,
             showFilter: !state.showFilter,

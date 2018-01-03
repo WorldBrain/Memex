@@ -44,7 +44,7 @@ class OverviewContainer extends Component {
         const resultItems = this.props.searchResults.map((doc, i) => (
             <PageResultItem
                 key={i}
-                onTrashBtnClick={this.props.handleTrashBtnClick(doc.url)}
+                onTrashBtnClick={this.props.handleTrashBtnClick(doc.url, i)}
                 onToggleBookmarkClick={this.props.handleToggleBm(doc.url, i)}
                 {...doc}
             />
@@ -69,6 +69,30 @@ class OverviewContainer extends Component {
         return resultItems
     }
 
+    renderInitMessage = () => (
+        <ResultsMessage>
+            You have not made any history yet.
+            <br />First, you need to visit some websites or{' '}
+            <a
+                style={{ color: '#928989' }}
+                href="/options/options.html#/import"
+            >
+                import your existing history & bookmarks
+            </a>.<br />
+            <br />
+            <strong>Tip: </strong>Read the{' '}
+            <a
+                style={{ color: '#928989' }}
+                href="/options/options.html#/tutorial"
+            >
+                quick tutorial
+            </a>.
+            <br />
+            <br />
+            <img src="/img/ship.png" />
+        </ResultsMessage>
+    )
+
     renderResults() {
         if (this.props.isBadTerm) {
             return (
@@ -80,29 +104,7 @@ class OverviewContainer extends Component {
         }
 
         if (this.props.showInitSearchMsg) {
-            return (
-                <ResultsMessage>
-                    You have not made any history yet.
-                    <br />First, you need to visit some websites or{' '}
-                    <a
-                        style={{ color: '#928989' }}
-                        href="/options/options.html#/import"
-                    >
-                        import your existing history & bookmarks
-                    </a>.<br />
-                    <br />
-                    <strong>Tip: </strong>Read the{' '}
-                    <a
-                        style={{ color: '#928989' }}
-                        href="/options/options.html#/tutorial"
-                    >
-                        quick tutorial
-                    </a>.
-                    <br />
-                    <br />
-                    <img src="/img/ship.png" />
-                </ResultsMessage>
-            )
+            return this.renderInitMessage()
         }
 
         if (this.props.noResults) {
@@ -183,9 +185,9 @@ const mapDispatchToProps = dispatch => ({
         const input = event.target
         dispatch(actions.setQuery(input.value))
     },
-    handleTrashBtnClick: url => event => {
+    handleTrashBtnClick: (url, index) => event => {
         event.preventDefault()
-        dispatch(actions.showDeleteConfirm(url))
+        dispatch(actions.showDeleteConfirm(url, index))
     },
     handleToggleBm: (url, index) => event => {
         event.preventDefault()

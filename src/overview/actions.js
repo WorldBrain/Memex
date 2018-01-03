@@ -17,7 +17,10 @@ export const setQuery = createAction('overview/setQuery')
 export const setStartDate = createAction('overview/setStartDate')
 export const setEndDate = createAction('overview/setEndDate')
 export const hideResultItem = createAction('overview/hideResultItem')
-export const showDeleteConfirm = createAction('overview/showDeleteConfirm')
+export const showDeleteConfirm = createAction(
+    'overview/showDeleteConfirm',
+    (url, index) => ({ url, index }),
+)
 export const hideDeleteConfirm = createAction('overview/hideDeleteConfirm')
 export const showFilter = createAction('overview/showFilter')
 export const toggleBookmarkFilter = createAction(
@@ -26,6 +29,7 @@ export const toggleBookmarkFilter = createAction(
 export const changeHasBookmark = createAction('overview/changeHasBookmark')
 export const incSearchCount = createAction('overview/incSearchCount')
 export const initSearchCount = createAction('overview/initSearchCount')
+export const setResultDeleting = createAction('overview/setResultDeleting')
 
 const deleteDocsByUrl = remoteFunction('deleteDocsByUrl')
 const createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
@@ -158,15 +162,18 @@ export const deleteDocs = () => async (dispatch, getState) => {
         action: 'Delete result',
     })
 
-    // Hide the result item + confirm modal directly (optimistically)
-    dispatch(hideResultItem(url))
-    dispatch(hideDeleteConfirm())
+    try {
+        dispatch(hideDeleteConfirm())
 
-    // Remove all assoc. docs from the database + index
-    await deleteDocsByUrl(url)
+        // Remove all assoc. docs from the database + index
+        await deleteDocsByUrl(url)
 
-    // Refresh search view after deleting all assoc docs
-    // dispatch(search({ overwrite: true }))
+        // Hide the result item + confirm modal directly (optimistically)
+        dispatch(hideResultItem(url))
+    } catch (error) {
+    } finally {
+        dispatch(setResultDeleting(undefined))
+    }
 }
 
 export const toggleBookmark = (url, index) => async (dispatch, getState) => {

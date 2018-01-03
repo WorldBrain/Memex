@@ -51,6 +51,17 @@
     }
 }
 
+.isDeleting {
+    position: relative;
+    opacity: 0.5;
+}
+
+.deletingSpinner {
+    position: absolute;
+    right: 50%;
+    z-index: 1;
+}
+
 .bookmarkRibbon {
     position: absolute;
     top: 10px;
