@@ -56,7 +56,7 @@ export default function fetchPageData(
                     ? await extractFavIcon(doc)
                     : undefined,
                 content: opts.includePageContent
-                    ? await extractPageContent({ doc, url })
+                    ? await extractPageContent(doc, url)
                     : undefined,
             }
         }

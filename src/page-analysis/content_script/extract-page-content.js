@@ -1,23 +1,23 @@
 import pick from 'lodash/fp/pick'
-import { getMetadata, metadataRules } from 'page-metadata-parser'
+import keys from 'lodash/fp/keys'
+import { getMetadata } from 'page-metadata-parser'
 
 import transformPageHTML from 'src/util/transform-page-html'
+import PAGE_METADATA_RULES from './page-metadata-rules'
 import extractPdfContent from './extract-pdf-content'
 
-<<<<<<< HEAD
 export const DEF_LANG = 'en'
-=======
-// Fathom rule to only get document's title (`page-metadata-parser` default rules prioritise OG tags)
-export const onlyDocTitle = ['title', node => node.element.text]
->>>>>>> Update fathom rule used to extract page titles
 
-// Extract the text content from web pages and PDFs.
+/**
+ * Extracts content from the DOM, both searchable terms and other metadata.
+ *
+ * @param {Document} [doc=document] A DOM tree's Document instance.
+ * @param {string} [url=location.href]
+ * @returns {any} Object containing `fullText` text and other extracted meta content from the input page.
+ */
 export default async function extractPageContent(
-    {
-        // By default, use the globals window and document.
-        url = window.location.href,
-        doc = document,
-    } = {},
+    doc = document,
+    url = location.href,
 ) {
     // If it is a PDF, run code for pdf instead.
     if (url.endsWith('.pdf')) {
@@ -29,19 +29,12 @@ export default async function extractPageContent(
         html: doc.body.innerHTML,
     })
 
-    // Metadata of web page
-    const selectedMetadataRules = {
-        canonicalUrl: metadataRules.url,
-        keywords: metadataRules.keywords,
-        description: metadataRules.description,
-        title: { rules: [onlyDocTitle] },
-    }
-    const metadata = getMetadata(doc, url, selectedMetadataRules)
+    const metadata = getMetadata(doc, url, PAGE_METADATA_RULES)
 
     return {
         fullText: processedHtml,
         lang: doc.documentElement.lang || DEF_LANG,
         // Picking desired fields, as getMetadata adds some unrequested stuff.
-        ...pick(Object.keys(selectedMetadataRules))(metadata),
+        ...pick(keys(PAGE_METADATA_RULES))(metadata),
     }
 }
