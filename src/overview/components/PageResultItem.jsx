@@ -52,10 +52,12 @@ const PageResultItem = props => (
             </div>
             <div className={styles.buttonsContainer}>
                 <button
+                    disabled={props.isDeleting}
                     className={getBookmarkClass(props)}
                     onClick={props.onToggleBookmarkClick}
                 />
                 <button
+                    disabled={props.isDeleting}
                     className={classNames(styles.button, styles.trash)}
                     onClick={props.onTrashBtnClick}
                 />
