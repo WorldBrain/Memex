@@ -23,7 +23,7 @@
     text-decoration: none;
     box-shadow: 0 4px 20px 1px #3eb99517;
 
-    &:hover {
+    &:hover:enabled {
         box-shadow: 0 3px 15px 4px rgba(200, 200, 200, 0.5);
         transform: scale(1.01);
     }
@@ -49,6 +49,17 @@
     &:focus {
         opacity: 1;
     }
+}
+
+.isDeleting {
+    position: relative;
+    opacity: 0.5;
+}
+
+.deletingSpinner {
+    position: absolute;
+    right: 50%;
+    z-index: 1;
 }
 
 .bookmarkRibbon {
@@ -152,34 +163,26 @@
 
 .trash {
     background-image: url('/img/trash-icon.png');
-}
 
-.trash:hover {
-    background-image: url('/img/trash-icon-hovered.png');
-}
-
-.load {
-    background-image: url('/img/load-icon.png');
-}
-
-.load:hover {
-    background-image: url('/img/load-icon-hovered.png');
+    &:hover:enabled {
+        background-image: url('/img/trash-icon-hovered.png');
+    }
 }
 
 .bookmark {
     background-image: url('/img/star_full_grey.png');
-}
 
-.bookmark:hover {
-    opacity: 0.5;
-    background-image: url('/img/star_full_3EB995.png');
+    &:hover:enabled {
+        opacity: 0.5;
+        background-image: url('/img/star_full_3EB995.png');
+    }
 }
 
 .notBookmark {
     background-image: url('/img/star_empty_grey.png');
-}
 
-.notBookmark:hover {
-    opacity: 0.5;
-    background-image: url('/img/star_empty_3EB995.png');
+    &:hover:enabled {
+        opacity: 0.5;
+        background-image: url('/img/star_empty_3EB995.png');
+    }
 }

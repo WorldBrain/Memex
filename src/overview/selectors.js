@@ -86,12 +86,21 @@ export const urlToDelete = createSelector(
     deleteConfirmProps,
     state => state.url,
 )
+export const deletingResultIndex = createSelector(
+    deleteConfirmProps,
+    state => state.deleting,
+)
 
-export const results = createSelector(resultDocs, docs =>
-    docs.map(pageDoc => ({
-        ...pageDoc,
-        title: decideTitle(pageDoc),
-    })),
+export const results = createSelector(
+    resultDocs,
+    isDeleteConfShown,
+    deletingResultIndex,
+    (docs, modalShown, deleting) =>
+        docs.map((pageDoc, i) => ({
+            ...pageDoc,
+            title: decideTitle(pageDoc),
+            isDeleting: !modalShown && i === deleting,
+        })),
 )
 
 export const showInitSearchMsg = createSelector(
