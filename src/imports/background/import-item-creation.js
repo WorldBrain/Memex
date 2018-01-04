@@ -197,10 +197,10 @@ export default class ImportItemCreator {
 
     /**
      * @generator
-     * @param {string} [rootId='0'] The ID of the BookmarkTreeNode to start searching from.
+     * @param {string} rootId The ID of the BookmarkTreeNode to start searching from.
      * @yields {Map<string, ImportItem>} All bookmark items in browser, indexed by encoded URL.
      */
-    async *_traverseBmTree(rootId = '0') {
+    async *_traverseBmTree(rootId) {
         const filterByUrl = this._filterItemsByUrl(
             transformBrowserToImportItem(IMPORT_TYPE.BOOKMARK),
             url => this.bmKeys.has(url),
@@ -241,8 +241,13 @@ export default class ImportItemCreator {
      *  `Map<string, ImportItem>` types, respectively.
      */
     async *createImportItems() {
+        // Chrome and FF seem to ID their bookmark data differently. Root works from '' in FF
+        //  but needs '0' in Chrome. `runtime.getBrowserInfo` is only available on FF web ext API
+        const rootId =
+            typeof browser.runtime.getBrowserInfo === 'undefined' ? '0' : ''
+
         // Get all bookmarks from browser, filter on existing DB bookmarks
-        for await (const bms of this._traverseBmTree()) {
+        for await (const bms of this._traverseBmTree(rootId)) {
             // Not all levels in the bookmark tree need to have bookmark items
             if (!bms.size) {
                 continue
