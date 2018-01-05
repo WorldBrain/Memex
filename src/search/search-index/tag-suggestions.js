@@ -26,4 +26,14 @@ const suggestTags = (query = '', limit = 10) =>
             .on('end', () => resolve(results))
     })
 
+/**
+ * @param {string} pageId The ID of the page to fetch associated tags for.
+ * @returns {Promise<Set<string>>} Resolves to a Set of tags associated with `pageId` - will be empty if none.
+ */
+export const fetchTagsForPage = pageId =>
+    index
+        .get(pageId, { asBuffer: false })
+        .then(({ tags = [] }) => new Set([...tags].map(removeKeyType)))
+        .catch(error => new Set())
+
 export default suggestTags
