@@ -26,6 +26,7 @@ ReactDOM.render(
                     {Routes.map(route => (
                         <Route
                             key={route.pathname}
+                            exact={route.exact}
                             path={route.pathname}
                             component={withPageTracking(route.component)}
                         />

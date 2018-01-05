@@ -7,11 +7,14 @@ import { bindActionCreators } from 'redux'
 
 import Nav from './Nav'
 import NavLink from './NavLink'
+import SubNavLink from './SubNavLink'
 
 class Navigation extends Component {
     isActive(route) {
         return this.props.currentLocation.pathname === route.pathname
     }
+    renderNavSubLinks = (routes = []) =>
+        routes.map((route, i) => <SubNavLink key={i} route={route} />)
 
     renderNavLinks() {
         const { isRunning, isIdle, isLoading, isStopped, isPaused } = this.props
@@ -27,8 +30,13 @@ class Navigation extends Component {
         return this.props.routes
             .filter(route => !route.hideFromSidebar)
             .map((route, idx) => (
-                <NavLink route={route} key={idx} state={state}>
-                    {this.isActive(route)}
+                <NavLink
+                    route={route}
+                    key={idx}
+                    state={state}
+                    isActive={this.isActive(route)}
+                >
+                    {this.renderNavSubLinks(route.subRoutes)}
                 </NavLink>
             ))
     }

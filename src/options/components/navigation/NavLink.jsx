@@ -4,10 +4,10 @@ import { Link } from 'react-router'
 import classNames from 'classnames'
 import styles from './styles.css'
 
-const NavLink = ({ route, state, children }) => {
+const NavLink = ({ route, state, isActive }) => {
     const navClasses = classNames({
         [styles.navLink]: true,
-        [styles.isActive]: children,
+        [styles.isActive]: isActive,
     })
 
     const navIcon = classNames({
@@ -45,7 +45,7 @@ const NavLink = ({ route, state, children }) => {
                 )}
             </div>
             {route.name === 'Import' &&
-                children && (
+                isActive && (
                     <div className={styles.importSubItems}>
                         <div className={analysisCondition}>1. Analysis</div>
                         <div className={progressCondition}>
@@ -56,20 +56,6 @@ const NavLink = ({ route, state, children }) => {
                         </div>
                     </div>
                 )}
-            {route.name === 'About' &&
-                children && (
-                    <div className={styles.importSubItems}>
-                        <Link to="/vision" className={styles.subLink}>
-                            1. Vision
-                        </Link>
-                        <Link to="/changelog" className={styles.subLink}>
-                            2. Changelog
-                        </Link>
-                        <Link to="/acknowledgements" className={styles.subLink}>
-                            3. Acknowledgement
-                        </Link>
-                    </div>
-                )}
         </li>
     )
 }
@@ -77,7 +63,7 @@ const NavLink = ({ route, state, children }) => {
 NavLink.propTypes = {
     route: PropTypes.object.isRequired,
     state: PropTypes.object.isRequired,
-    children: PropTypes.bool.isRequired,
+    isActive: PropTypes.bool.isRequired,
 }
 
 export default NavLink
