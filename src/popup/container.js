@@ -17,6 +17,8 @@ import SplitButton from './components/SplitButton'
 import * as constants from './constants'
 import Tags from './components/Tags'
 import TagOption from './components/TagOption'
+import { fetchTagsForPage } from 'src/search/search-index/tag-suggestions'
+import NoResult from './components/NoResult'
 
 import { itemBtnBlacklisted } from './components/Button.css'
 
@@ -110,10 +112,20 @@ class PopupContainer extends Component {
         this.getInitTagsState(currentTab.url)
             .then(updateState)
             .catch(noop)
+        this.getInitResultTags(currentTab.url)
+            .then(updateState)
+            .catch(noop)
     }
 
     async getInitTagsState(url) {
         return { tagButttonState: isLoggable({ url }) }
+    }
+
+    async getInitResultTags(url) {
+        const pageId = await generatePageDocId({ url })
+        const res = await fetchTagsForPage(pageId)
+        console.log(pageId, Array.from(res))
+        return { resultTags: Array.from(res) }
     }
 
     async getInitPauseState() {
@@ -344,6 +356,10 @@ class PopupContainer extends Component {
 
     renderTagsOptions() {
         const { resultTags, suggestedTags, tagSearchValue } = this.state
+
+        if (resultTags.length === 0) {
+            return <NoResult />
+        }
 
         return resultTags.map(
             (data, index) =>
