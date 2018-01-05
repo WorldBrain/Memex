@@ -3,7 +3,13 @@ import PropTypes from 'prop-types'
 import styles from './Popup.css'
 import localStyles from './TagOption.css'
 
-const Tags = ({ children, onTagSearchChange, setInputRef }) => (
+const Tags = ({
+    children,
+    onTagSearchChange,
+    setInputRef,
+    onTagSearchEnter,
+    value,
+}) => (
     <div>
         <form className={styles.searchContainer}>
             <input
@@ -11,7 +17,9 @@ const Tags = ({ children, onTagSearchChange, setInputRef }) => (
                 name="query"
                 placeholder="Search & Add Tag(s)"
                 onChange={onTagSearchChange}
+                onKeyDown={onTagSearchEnter}
                 ref={setInputRef}
+                value={value}
             />
             <i className="material-icons">search</i>
         </form>
@@ -23,6 +31,8 @@ Tags.propTypes = {
     children: PropTypes.arrayOf(PropTypes.element).isRequired,
     onTagSearchChange: PropTypes.func.isRequired,
     setInputRef: PropTypes.func.isRequired,
+    onTagSearchEnter: PropTypes.func.isRequired,
+    value: PropTypes.string.isRequired,
 }
 
 export default Tags

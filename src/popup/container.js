@@ -69,6 +69,7 @@ class PopupContainer extends Component {
         this.onTagSearchChange = this.onTagSearchChange.bind(this)
         this.addTagsToReverseDoc = this.addTagsToReverseDoc.bind(this)
         this.focusInput = this.focusInput.bind(this)
+        this.onTagSearchEnter = this.onTagSearchEnter.bind(this)
     }
 
     state = {
@@ -269,6 +270,34 @@ class PopupContainer extends Component {
         }
     }
 
+    async onTagSearchEnter(event) {
+        const { resultTags, deleteTags } = this.state
+        if (event.key === 'Enter') {
+            if (resultTags.length === 0) {
+                event.preventDefault()
+                let tagSearchValue = event.target.value
+
+                if (resultTags.indexOf(tagSearchValue) !== -1) {
+                    tagSearchValue = ''
+                }
+
+                if (deleteTags.indexOf(tagSearchValue) !== -1) {
+                    deleteTags.splice(deleteTags.indexOf(tagSearchValue), 1)
+                }
+
+                this.setState(state => ({
+                    ...state,
+                    tagSearchValue,
+                    newTag: tagSearchValue,
+                    deleteTags: deleteTags,
+                }))
+                this.addTagsToReverseDoc(event.target.value)
+            } else {
+                event.preventDefault()
+            }
+        }
+    }
+
     // Hides full-popup confirm
     resetBlacklistConfirmState = () =>
         this.setState(state => ({ ...state, blacklistConfirm: false }))
@@ -454,7 +483,7 @@ class PopupContainer extends Component {
                                 ? this.addToSuggestedTag(data)
                                 : this.removeFromSuggestedTag(data)
                         }
-                        newTag={false}
+                        newTag={0}
                         addTagsToReverseDoc={this.addTagsToReverseDoc}
                     />
                 ),
@@ -467,6 +496,7 @@ class PopupContainer extends Component {
             pauseValue,
             isPaused,
             tagSelected,
+            tagSearchValue,
         } = this.state
 
         if (blacklistConfirm) {
@@ -483,6 +513,8 @@ class PopupContainer extends Component {
                 <Tags
                     onTagSearchChange={this.onTagSearchChange}
                     setInputRef={this.setInputRef}
+                    onTagSearchEnter={this.onTagSearchEnter}
+                    value={tagSearchValue}
                 >
                     {this.renderTagsOptions()}
                     {this.renderNewTagOption()}
