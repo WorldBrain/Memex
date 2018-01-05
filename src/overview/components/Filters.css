@@ -79,3 +79,15 @@ input[type='checkbox'] {
         border-radius: 1px;
     }
 }
+
+.icon {
+    cursor: pointer;
+    color: #3eb995;
+    padding-right: 15px;
+}
+
+.clear {
+    cursor: pointer;
+    position: absolute;
+    right: 0;
+}
