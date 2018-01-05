@@ -26,7 +26,7 @@ export async function storeVisit({ timestamp, url, page }) {
  */
 async function updateIndex(storePageResult, visit, pageId) {
     if (storePageResult == null) {
-        await index.addMetaConcurrent('visit', Date.now(), pageId)
+        await index.addTimestampConcurrent('visit', Date.now(), pageId)
     } else {
         // Wait until all page analyis is done
         const { page } = await storePageResult.finalPagePromise
