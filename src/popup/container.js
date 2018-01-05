@@ -15,6 +15,8 @@ import HistoryPauser from './components/HistoryPauser'
 import LinkButton from './components/LinkButton'
 import SplitButton from './components/SplitButton'
 import * as constants from './constants'
+import Tags from './components/Tags'
+import TagOption from './components/TagOption'
 
 import { itemBtnBlacklisted } from './components/Button.css'
 
@@ -57,6 +59,9 @@ class PopupContainer extends Component {
         this.onPauseChange = this.onPauseChange.bind(this)
         this.onSearchEnter = this.onSearchEnter.bind(this)
         this.onPauseConfirm = this.onPauseConfirm.bind(this)
+
+        this.addToSuggestedTag = this.addToSuggestedTag.bind(this)
+        this.onTagSearchChange = this.onTagSearchChange.bind(this)
     }
 
     state = {
@@ -71,6 +76,11 @@ class PopupContainer extends Component {
         bookmarkBtn: constants.BOOKMARK_BTN_STATE.DISABLED,
         domainDelete: false,
         tabID: null,
+        tagSelected: false,
+        resultTags: ['A', 'B', 'C', 'D'],
+        suggestedTags: [],
+        tagSearchValue: '',
+        tagButttonState: false,
     }
 
     async componentDidMount() {
@@ -97,6 +107,13 @@ class PopupContainer extends Component {
             .then(() => this.getInitBookmarkBtnState(currentTab.url))
             .then(updateState)
             .catch(noop)
+        this.getInitTagsState(currentTab.url)
+            .then(updateState)
+            .catch(noop)
+    }
+
+    async getInitTagsState(url) {
+        return { tagButttonState: isLoggable({ url }) }
     }
 
     async getInitPauseState() {
@@ -280,8 +297,79 @@ class PopupContainer extends Component {
         window.close()
     }
 
+    setTagSelected = () =>
+        this.setState(state => ({ ...state, tagSelected: true }))
+
+    renderTagButton() {
+        return (
+            <Button
+                icon="label"
+                onClick={this.setTagSelected}
+                disabled={!this.state.tagButttonState}
+            >
+                Add Tag(s)
+            </Button>
+        )
+    }
+
+    onTagSearchChange(event) {
+        const { resultTags } = this.state
+        const tagSearchValue = event.target.value
+
+        resultTags.pop()
+        resultTags.push(tagSearchValue)
+
+        this.setState(state => ({
+            ...state,
+            tagSearchValue,
+            resultTags: resultTags,
+        }))
+    }
+
+    addToSuggestedTag = tag => () => {
+        const { suggestedTags } = this.state
+
+        suggestedTags.push(tag)
+
+        this.setState(state => ({ ...state, suggestedTags: suggestedTags }))
+    }
+
+    removeFromSuggestedTag = tag => () => {
+        const { suggestedTags } = this.state
+
+        suggestedTags.splice(suggestedTags.indexOf(tag), 1)
+
+        this.setState(state => ({ ...state, suggestedTags: suggestedTags }))
+    }
+
+    renderTagsOptions() {
+        const { resultTags, suggestedTags, tagSearchValue } = this.state
+
+        return resultTags.map(
+            (data, index) =>
+                data !== '' && (
+                    <TagOption
+                        data={data}
+                        key={index}
+                        active={suggestedTags.indexOf(data) !== -1}
+                        handleClick={
+                            suggestedTags.indexOf(data) === -1
+                                ? this.addToSuggestedTag(data)
+                                : this.removeFromSuggestedTag(data)
+                        }
+                        tagSearchValue={tagSearchValue}
+                    />
+                ),
+        )
+    }
+
     renderChildren() {
-        const { blacklistConfirm, pauseValue, isPaused } = this.state
+        const {
+            blacklistConfirm,
+            pauseValue,
+            isPaused,
+            tagSelected,
+        } = this.state
 
         if (blacklistConfirm) {
             return (
@@ -291,6 +379,15 @@ class PopupContainer extends Component {
                 />
             )
         }
+
+        if (tagSelected) {
+            return (
+                <Tags onTagSearchChange={this.onTagSearchChange}>
+                    {this.renderTagsOptions()}
+                </Tags>
+            )
+        }
+
         return (
             <div>
                 <Button
@@ -311,6 +408,7 @@ class PopupContainer extends Component {
                         ? 'Unbookmark this Page'
                         : 'Bookmark this Page'}
                 </Button>
+                {this.renderTagButton()}
                 <HistoryPauser
                     onConfirm={this.onPauseConfirm}
                     onChange={this.onPauseChange}
@@ -341,13 +439,14 @@ class PopupContainer extends Component {
     }
 
     render() {
-        const { searchValue } = this.state
+        const { searchValue, tagSelected } = this.state
 
         return (
             <Popup
                 searchValue={searchValue}
                 onSearchChange={this.onSearchChange}
                 onSearchEnter={this.onSearchEnter}
+                tagSelected={tagSelected}
             >
                 {this.renderChildren()}
             </Popup>

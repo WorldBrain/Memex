@@ -1,0 +1,24 @@
+.menuItem {
+    display: block;
+    padding: 8px 8px 8px 30px;
+    cursor: pointer;
+    border-bottom: 1px solid #eaecef;
+    word-wrap: break-word;
+}
+
+.menuItem i {
+    font-size: 12px;
+    float: right;
+}
+
+.tagContainer {
+    width: 100%;
+    max-height: 400px;
+    overflow-y: scroll;
+}
+
+.numberTags {
+    position: fixed;
+    bottom: 0;
+    margin-top: 40px;
+}

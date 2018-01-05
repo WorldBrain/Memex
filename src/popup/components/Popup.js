@@ -7,7 +7,7 @@ import styles from './Popup.css'
 
 const Popup = ({ children, ...searchProps }) => (
     <div className={styles.popup}>
-        <Search {...searchProps} />
+        {!searchProps.tagSelected && <Search {...searchProps} />}
         {children}
     </div>
 )
