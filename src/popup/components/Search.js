@@ -5,7 +5,6 @@ import styles from './Popup.css'
 
 const Search = ({ onSearchEnter, onSearchChange, searchValue }) => (
     <form className={styles.searchContainer}>
-        <i className="material-icons">search</i>
         <input
             className={styles.search}
             name="query"
@@ -14,6 +13,7 @@ const Search = ({ onSearchEnter, onSearchChange, searchValue }) => (
             onChange={onSearchChange}
             value={searchValue}
         />
+        <i className="material-icons">search</i>
     </form>
 )
 

@@ -32,10 +32,10 @@ hr {
     padding: 13px 12px;
     margin-bottom: 0;
     border-bottom: 1px solid rgb(202, 202, 202);
-    background: rgb(229, 229, 229);
+    background: white;
 
     & > i {
-        color: rgb(59, 59, 59);
+        color: #3eb995;
         padding: 0;
     }
 }
@@ -44,9 +44,14 @@ hr {
     width: 90%;
     font-size: 1em;
     padding: 5px;
+    border: none;
 
     &:placeholder-shown {
         font-style: italic;
         font-family: 'Open Sans';
+    }
+
+    &::placeholder {
+        color: #3eb995;
     }
 }
