@@ -377,8 +377,12 @@ class PopupContainer extends Component {
         window.close()
     }
 
-    setTagSelected = () =>
-        this.setState(state => ({ ...state, tagSelected: true }))
+    setTagSelected = () => {
+        this.setState(state => ({
+            ...state,
+            tagSelected: !this.state.tagSelected,
+        }))
+    }
 
     renderTagButton() {
         return (
@@ -497,6 +501,8 @@ class PopupContainer extends Component {
             isPaused,
             tagSelected,
             tagSearchValue,
+            resultTags,
+            deleteTags,
         } = this.state
 
         if (blacklistConfirm) {
@@ -515,6 +521,8 @@ class PopupContainer extends Component {
                     setInputRef={this.setInputRef}
                     onTagSearchEnter={this.onTagSearchEnter}
                     value={tagSearchValue}
+                    numberOfTags={resultTags.length - deleteTags.length}
+                    handleClick={this.setTagSelected}
                 >
                     {this.renderTagsOptions()}
                     {this.renderNewTagOption()}

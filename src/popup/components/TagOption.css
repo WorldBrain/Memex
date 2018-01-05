@@ -22,7 +22,25 @@
 }
 
 .numberTags {
-    position: fixed;
-    bottom: 0;
-    margin-top: 40px;
+    align-items: flex-start;
+    margin-top: 6px;
+}
+
+.summaryTagContainer {
+    width: 100%;
+    display: flex;
+    margin-top: 20px;
+    justify-content: space-around;
+}
+
+.tagDone {
+    align-items: flex-end;
+}
+
+.tagDoneButton {
+    background-color: #3eb995;
+    color: white;
+    padding: 8px 20px 8px 20px;
+    border: none;
+    border-radius: 5px;
 }
