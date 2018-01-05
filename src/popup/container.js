@@ -25,6 +25,7 @@ import NoResult from './components/NoResult'
 import { addTags } from 'src/search/search-index/add'
 
 import { itemBtnBlacklisted } from './components/Button.css'
+import { delTags } from 'src/search/search-index/del'
 
 // Transforms URL checking results to state types
 const getBlacklistButtonState = ({ loggable, blacklisted }) => {
@@ -360,18 +361,19 @@ class PopupContainer extends Component {
         }))
     }
 
+    removeFromSuggestedTag = tag => async () => {
+        const { resultTags, url } = this.state
+        const pageId = await generatePageDocId({ url })
+        await delTags(pageId, [tag])
+        resultTags.splice(resultTags.indexOf(tag), 1)
+
+        this.setState(state => ({ ...state, resultTags: resultTags }))
+    }
+
     addToSuggestedTag = tag => () => {
         const { suggestedTags } = this.state
 
         suggestedTags.push(tag)
-
-        this.setState(state => ({ ...state, suggestedTags: suggestedTags }))
-    }
-
-    removeFromSuggestedTag = tag => () => {
-        const { suggestedTags } = this.state
-
-        suggestedTags.splice(suggestedTags.indexOf(tag), 1)
 
         this.setState(state => ({ ...state, suggestedTags: suggestedTags }))
     }
@@ -411,7 +413,7 @@ class PopupContainer extends Component {
                         key={index}
                         active={1}
                         handleClick={
-                            suggestedTags.indexOf(data) === -1
+                            resultTags.indexOf(data) === -1
                                 ? this.addToSuggestedTag(data)
                                 : this.removeFromSuggestedTag(data)
                         }
