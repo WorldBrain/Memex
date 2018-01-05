@@ -17,8 +17,12 @@ import SplitButton from './components/SplitButton'
 import * as constants from './constants'
 import Tags from './components/Tags'
 import TagOption from './components/TagOption'
-import { fetchTagsForPage } from 'src/search/search-index/tag-suggestions'
+import {
+    fetchTagsForPage,
+    suggestTags,
+} from 'src/search/search-index/tag-suggestions'
 import NoResult from './components/NoResult'
+import { addTags } from 'src/search/search-index/add'
 
 import { itemBtnBlacklisted } from './components/Button.css'
 
@@ -64,6 +68,7 @@ class PopupContainer extends Component {
 
         this.addToSuggestedTag = this.addToSuggestedTag.bind(this)
         this.onTagSearchChange = this.onTagSearchChange.bind(this)
+        this.addTagsToReverseDoc = this.addTagsToReverseDoc.bind(this)
     }
 
     state = {
@@ -79,7 +84,7 @@ class PopupContainer extends Component {
         domainDelete: false,
         tabID: null,
         tagSelected: false,
-        resultTags: ['A', 'B', 'C', 'D'],
+        resultTags: [],
         suggestedTags: [],
         tagSearchValue: '',
         tagButttonState: false,
@@ -154,6 +159,13 @@ class PopupContainer extends Component {
         }
 
         return { bookmarkBtn: getBookmarkButtonState(result) }
+    }
+
+    async addTagsToReverseDoc(tag) {
+        const { url } = this.state
+        const pageId = await generatePageDocId({ url })
+        console.log(pageId, tag)
+        const res = await addTags(pageId, [tag])
     }
 
     onBlacklistBtnClick(domainDelete = false) {
@@ -374,6 +386,7 @@ class PopupContainer extends Component {
                                 : this.removeFromSuggestedTag(data)
                         }
                         tagSearchValue={tagSearchValue}
+                        addTagsToReverseDoc={this.addTagsToReverseDoc}
                     />
                 ),
         )
