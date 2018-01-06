@@ -18,10 +18,8 @@ import * as constants from './constants'
 import Tags from './components/Tags'
 import TagOption from './components/TagOption'
 import NoResult from './components/NoResult'
-import { addTags } from 'src/search/search-index/add'
 
 import { itemBtnBlacklisted } from './components/Button.css'
-import { delTags } from 'src/search/search-index/del'
 
 // Transforms URL checking results to state types
 const getBlacklistButtonState = ({ loggable, blacklisted }) => {
@@ -59,6 +57,8 @@ class PopupContainer extends Component {
         this.createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
         this.suggestTags = remoteFunction('suggestTags')
         this.fetchTagsForPage = remoteFunction('fetchTagsForPage')
+        this.addTags = remoteFunction('addTags')
+        this.delTags = remoteFunction('delTags')
 
         this.onSearchChange = this.onSearchChange.bind(this)
         this.onPauseChange = this.onPauseChange.bind(this)
@@ -175,7 +175,7 @@ class PopupContainer extends Component {
         const { url, resultTags } = this.state
         const pageId = await generatePageDocId({ url })
 
-        await addTags(pageId, [tag])
+        await this.addTags(pageId, [tag])
         if (resultTags.indexOf(tag) === -1) {
             resultTags.push(tag)
         }
@@ -419,7 +419,7 @@ class PopupContainer extends Component {
     removeFromSuggestedTag = tag => async () => {
         const { url, deleteTags } = this.state
         const pageId = await generatePageDocId({ url })
-        await delTags(pageId, [tag])
+        await this.delTags(pageId, [tag])
         deleteTags.push(tag)
         this.setState(state => ({
             ...state,
@@ -469,10 +469,30 @@ class PopupContainer extends Component {
     }
 
     renderTagsOptions() {
-        const { resultTags, newTag, deleteTags } = this.state
+        const { resultTags, newTag, deleteTags, suggestedTags } = this.state
 
         if (resultTags.length === 0 && newTag.length === 0) {
             return <NoResult />
+        }
+
+        if (newTag.length !== 0) {
+            return suggestedTags.map(
+                (data, index) =>
+                    data !== '' && (
+                        <TagOption
+                            data={data}
+                            key={index}
+                            active={resultTags.indexOf(data) !== -1}
+                            handleClick={
+                                resultTags.indexOf(data) === -1
+                                    ? this.addToSuggestedTag(data)
+                                    : this.removeFromSuggestedTag(data)
+                            }
+                            newTag={1}
+                            addTagsToReverseDoc={this.addTagsToReverseDoc}
+                        />
+                    ),
+            )
         }
 
         return resultTags.map(
@@ -500,7 +520,6 @@ class PopupContainer extends Component {
             pauseValue,
             isPaused,
             tagSelected,
-            tagSearchValue,
             resultTags,
             deleteTags,
         } = this.state
@@ -520,7 +539,6 @@ class PopupContainer extends Component {
                     onTagSearchChange={this.onTagSearchChange}
                     setInputRef={this.setInputRef}
                     onTagSearchEnter={this.onTagSearchEnter}
-                    value={tagSearchValue}
                     numberOfTags={resultTags.length - deleteTags.length}
                     handleClick={this.setTagSelected}
                 >
