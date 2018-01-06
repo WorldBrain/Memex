@@ -48,7 +48,7 @@ HistoryPauser.propTypes = {
     children: PropTypes.arrayOf(PropTypes.node).isRequired,
     onConfirm: PropTypes.func.isRequired,
     onChange: PropTypes.func.isRequired,
-    value: PropTypes.string.isRequired,
+    value: PropTypes.number.isRequired,
     isPaused: PropTypes.bool.isRequired,
 }
 

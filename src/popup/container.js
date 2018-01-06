@@ -140,7 +140,6 @@ class PopupContainer extends Component {
     async getInitResultTags(url) {
         const pageId = await generatePageDocId({ url })
         const res = await this.fetchTagsForPage(pageId)
-
         return { resultTags: Array.from(res) }
     }
 
