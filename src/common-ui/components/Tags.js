@@ -30,7 +30,7 @@ const Tags = ({
             <div className={localStyles.tagDone}>
                 <button
                     className={localStyles.tagDoneButton}
-                    onClick={() => handleClick()}
+                    onClick={() => handleClick('')}
                 >
                     Done
                 </button>

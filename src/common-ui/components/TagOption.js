@@ -11,7 +11,8 @@ const TagOption = ({
 }) => (
     <div
         className={localStyles.menuItem}
-        onClick={() => (newTag ? addTagsToReverseDoc(data) : handleClick(data))}
+        onClick={() =>
+            newTag === 1 ? addTagsToReverseDoc(data) : handleClick(data)}
     >
         {newTag === 1 ? 'add new: ' + data : data}
         {active && <i className="material-icons">done</i>}

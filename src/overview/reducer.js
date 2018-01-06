@@ -29,12 +29,44 @@ const defaultState = {
     showFilter: false,
     showOnlyBookmarks: false,
     pageIdForTag: '',
+    newTag: '',
+    resultTags: [],
+    deleteTags: [],
+    suggestedTags: [],
 }
 
 function setQuery(state, query) {
     return {
         ...state,
         currentQueryParams: { ...state.currentQueryParams, query },
+    }
+}
+
+function setNewTagValue(state, newTag) {
+    return {
+        ...state,
+        newTag: newTag,
+    }
+}
+
+function setResultTags(state, resultTags) {
+    return {
+        ...state,
+        resultTags: resultTags,
+    }
+}
+
+function setDeleteTags(state, deleteTags) {
+    return {
+        ...state,
+        deleteTags: deleteTags,
+    }
+}
+
+function setSuggestedTags(state, suggestedTags) {
+    return {
+        ...state,
+        suggestedTags: suggestedTags,
     }
 }
 
@@ -164,6 +196,9 @@ export default createReducer(
             currentPage: defaultState.currentPage,
         }),
         [actions.pageIdForTag]: setPageIdFortag,
+        [actions.newTag]: setNewTagValue,
+        [actions.resultTags]: setResultTags,
+        [actions.suggestedTags]: setSuggestedTags,
     },
     defaultState,
 )

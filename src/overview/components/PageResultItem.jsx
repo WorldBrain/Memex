@@ -63,7 +63,7 @@ const PageResultItem = props => (
                 />
                 <button
                     className={classNames(styles.button, styles.tag)}
-                    onClick={props.onTabBtnClick}
+                    onClick={props.onTagBtnClick(props._id)}
                 />
             </div>
         </a>
@@ -80,9 +80,10 @@ PageResultItem.propTypes = {
     isDeleting: PropTypes.bool.isRequired,
     onTrashBtnClick: PropTypes.func.isRequired,
     onToggleBookmarkClick: PropTypes.func.isRequired,
-    children: PropTypes.arrayOf(PropTypes.element).isRequired,
+    children: PropTypes.object.isRequired,
     showOrNot: PropTypes.bool.isRequired,
-    onTabBtnClick: PropTypes.func.isRequired,
+    onTagBtnClick: PropTypes.func.isRequired,
+    _id: PropTypes.string.isRequired,
 }
 
 export default PageResultItem

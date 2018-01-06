@@ -32,10 +32,17 @@ export const initSearchCount = createAction('overview/initSearchCount')
 export const setResultDeleting = createAction('overview/setResultDeleting')
 
 export const pageIdForTag = createAction('overview/pageIdForTag')
+export const newTag = createAction('overview/newTag')
+export const resultTags = createAction('overview/resultTags')
+export const deleteTags = createAction('overview/deleteTags')
+export const suggestedTags = createAction('overview/suggestedTags')
 
 const deleteDocsByUrl = remoteFunction('deleteDocsByUrl')
 const createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
 const removeBookmarkByUrl = remoteFunction('removeBookmarkByUrl')
+const fetchTagsForPage = remoteFunction('fetchTagsForPage')
+const addTags = remoteFunction('addTags')
+const delTags = remoteFunction('delTags')
 
 const getCmdMessageHandler = dispatch => ({ cmd, ...payload }) => {
     switch (cmd) {
@@ -199,5 +206,56 @@ export const toggleBookmark = (url, index) => async (dispatch, getState) => {
         }
     } catch (error) {
         dispatch(changeHasBookmark(index)) // Reset UI state in case of error
+    }
+}
+
+export const FetchInitResultTags = () => async (dispatch, getState) => {
+    const state = getState()
+    const pageId = selectors.pageIdForTag(state)
+    const tags = await fetchTagsForPage(pageId)
+    dispatch(resultTags(Array.from(tags)))
+}
+
+export const addTagsFromOverview = tag => async (dispatch, getState) => {
+    const state = getState()
+    const pageId = selectors.pageIdForTag(state)
+    const tags = selectors.resultTags(state)
+    if (tags.indexOf(tag) === -1) {
+        tags.push(tag)
+    }
+    await addTags(pageId, [tag])
+    dispatch(resultTags(tags))
+    dispatch(newTag(''))
+}
+
+export const delTagsFromOverview = tag => async (dispatch, getState) => {
+    const state = getState()
+    const pageId = selectors.pageIdForTag(state)
+    const tags = selectors.resultTags(state)
+    if (tags.indexOf(tag) !== -1) {
+        tag.splice(tags.indexOf(tag), 1)
+    }
+    await delTags(pageId, [tag])
+    dispatch(resultTags(tags))
+}
+
+export const produceNewTag = tag => async (dispatch, getState) => {
+    const state = getState()
+    const tags = selectors.resultTags(state)
+    if (tags.indexOf(tag) !== -1) {
+        tag = ''
+    }
+    dispatch(newTag(tag))
+}
+
+export const addTagsFromOverviewOnEnter = tag => async (dispatch, getState) => {
+    const state = getState()
+    const pageId = selectors.pageIdForTag(state)
+    const tags = selectors.resultTags(state)
+    if (tags.length === 0) {
+        tags.push(tag)
+        await addTags(pageId, [tag])
+        dispatch(resultTags(tags))
+        dispatch(newTag(''))
     }
 }
