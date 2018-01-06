@@ -31,6 +31,8 @@ export const incSearchCount = createAction('overview/incSearchCount')
 export const initSearchCount = createAction('overview/initSearchCount')
 export const setResultDeleting = createAction('overview/setResultDeleting')
 
+export const pageIdForTag = createAction('overview/pageIdForTag')
+
 const deleteDocsByUrl = remoteFunction('deleteDocsByUrl')
 const createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
 const removeBookmarkByUrl = remoteFunction('removeBookmarkByUrl')

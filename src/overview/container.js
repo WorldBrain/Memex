@@ -11,6 +11,8 @@ import ResultList from './components/ResultList'
 import Overview from './components/Overview'
 import PageResultItem from './components/PageResultItem'
 import ResultsMessage from './components/ResultsMessage'
+import Tags from 'src/common-ui/components/Tags'
+import TagOption from 'src/common-ui/components/TagOption'
 
 class OverviewContainer extends Component {
     static propTypes = {
@@ -28,6 +30,8 @@ class OverviewContainer extends Component {
         needsWaypoint: PropTypes.bool.isRequired,
         handleTrashBtnClick: PropTypes.func.isRequired,
         handleToggleBm: PropTypes.func.isRequired,
+        pageIdForTag: PropTypes.string.isRequired,
+        handleTagBtnClick: PropTypes.func.isRequired,
     }
 
     componentDidMount() {
@@ -41,13 +45,25 @@ class OverviewContainer extends Component {
     }
 
     renderResultItems() {
+        const { pageIdForTag } = this.props
+
         const resultItems = this.props.searchResults.map((doc, i) => (
             <PageResultItem
                 key={i}
                 onTrashBtnClick={this.props.handleTrashBtnClick(doc.url, i)}
                 onToggleBookmarkClick={this.props.handleToggleBm(doc.url, i)}
+                showOrNot={doc._id === pageIdForTag}
+                onTabBtnClick={this.props.handleTagBtnClick(doc._id)}
                 {...doc}
-            />
+            >
+                <Tags
+                    onTagSearchChange={this.onTagSearchChange}
+                    setInputRef={this.setInputRef}
+                    onTagSearchEnter={this.onTagSearchEnter}
+                    numberOfTags={0}
+                    handleClick={this.props.handleTagBtnClick('')}
+                />
+            </PageResultItem>
         ))
 
         // Insert waypoint at the end of results to trigger loading new items when
@@ -140,6 +156,7 @@ class OverviewContainer extends Component {
     }
 
     render() {
+        console.log(this.props.pageIdForTag)
         return (
             <Overview
                 {...this.props}
@@ -166,6 +183,7 @@ const mapStateToProps = state => ({
     showInitSearchMsg: selectors.showInitSearchMsg(state),
     totalResultCount: selectors.totalResultCount(state),
     shouldShowCount: selectors.shouldShowCount(state),
+    pageIdForTag: selectors.pageIdForTag(state),
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -192,6 +210,12 @@ const mapDispatchToProps = dispatch => ({
     handleToggleBm: (url, index) => event => {
         event.preventDefault()
         dispatch(actions.toggleBookmark(url, index))
+    },
+    handleTagBtnClick: pageId => event => {
+        if (event) {
+            event.preventDefault()
+        }
+        dispatch(actions.pageIdForTag(pageId))
     },
 })
 

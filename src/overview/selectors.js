@@ -150,3 +150,5 @@ export const isEmptyQuery = createSelector(
     ({ query, startDate, endDate }, showOnlyBookmarks) =>
         !query.length && !startDate && !endDate && !showOnlyBookmarks,
 )
+
+export const pageIdForTag = state => overview(state).pageIdForTag

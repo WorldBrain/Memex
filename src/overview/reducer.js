@@ -28,6 +28,7 @@ const defaultState = {
     },
     showFilter: false,
     showOnlyBookmarks: false,
+    pageIdForTag: '',
 }
 
 function setQuery(state, query) {
@@ -65,6 +66,13 @@ function hideResultItem(state, url) {
     return update('searchResult.docs', docs =>
         remove(doc => doc._id === generatePageDocId({ url }))(docs),
     )(state)
+}
+
+function setPageIdFortag(state, pageId) {
+    return {
+        ...state,
+        pageIdForTag: pageId,
+    }
 }
 
 const showDeleteConfirm = (state, { url, index }) => ({
@@ -155,6 +163,7 @@ export default createReducer(
             ...state,
             currentPage: defaultState.currentPage,
         }),
+        [actions.pageIdForTag]: setPageIdFortag,
     },
     defaultState,
 )
