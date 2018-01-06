@@ -8,7 +8,6 @@ const Tags = ({
     onTagSearchChange,
     setInputRef,
     onTagSearchEnter,
-    value,
     numberOfTags,
     handleClick,
 }) => (
@@ -21,7 +20,6 @@ const Tags = ({
                 onChange={onTagSearchChange}
                 onKeyDown={onTagSearchEnter}
                 ref={setInputRef}
-                value={value}
             />
             <i className="material-icons">search</i>
         </form>
@@ -47,7 +45,6 @@ Tags.propTypes = {
     onTagSearchChange: PropTypes.func.isRequired,
     setInputRef: PropTypes.func.isRequired,
     onTagSearchEnter: PropTypes.func.isRequired,
-    value: PropTypes.string.isRequired,
     numberOfTags: PropTypes.number.isRequired,
     handleClick: PropTypes.func.isRequired,
 }

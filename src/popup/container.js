@@ -18,10 +18,8 @@ import * as constants from './constants'
 import Tags from './components/Tags'
 import TagOption from './components/TagOption'
 import NoResult from './components/NoResult'
-import { addTags } from 'src/search/search-index/add'
 
 import { itemBtnBlacklisted } from './components/Button.css'
-import { delTags } from 'src/search/search-index/del'
 
 // Transforms URL checking results to state types
 const getBlacklistButtonState = ({ loggable, blacklisted }) => {
@@ -59,6 +57,8 @@ class PopupContainer extends Component {
         this.createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
         this.suggestTags = remoteFunction('suggestTags')
         this.fetchTagsForPage = remoteFunction('fetchTagsForPage')
+        this.addTags = remoteFunction('addTags')
+        this.delTags = remoteFunction('delTags')
 
         this.onSearchChange = this.onSearchChange.bind(this)
         this.onPauseChange = this.onPauseChange.bind(this)
@@ -140,6 +140,7 @@ class PopupContainer extends Component {
     async getInitResultTags(url) {
         const pageId = await generatePageDocId({ url })
         const res = await this.fetchTagsForPage(pageId)
+
         return { resultTags: Array.from(res) }
     }
 
@@ -175,7 +176,7 @@ class PopupContainer extends Component {
         const { url, resultTags } = this.state
         const pageId = await generatePageDocId({ url })
 
-        await addTags(pageId, [tag])
+        await this.addTags(pageId, [tag])
         if (resultTags.indexOf(tag) === -1) {
             resultTags.push(tag)
         }
@@ -419,7 +420,7 @@ class PopupContainer extends Component {
     removeFromSuggestedTag = tag => async () => {
         const { url, deleteTags } = this.state
         const pageId = await generatePageDocId({ url })
-        await delTags(pageId, [tag])
+        await this.delTags(pageId, [tag])
         deleteTags.push(tag)
         this.setState(state => ({
             ...state,
@@ -500,7 +501,6 @@ class PopupContainer extends Component {
             pauseValue,
             isPaused,
             tagSelected,
-            tagSearchValue,
             resultTags,
             deleteTags,
         } = this.state
@@ -520,7 +520,6 @@ class PopupContainer extends Component {
                     onTagSearchChange={this.onTagSearchChange}
                     setInputRef={this.setInputRef}
                     onTagSearchEnter={this.onTagSearchEnter}
-                    value={tagSearchValue}
                     numberOfTags={resultTags.length - deleteTags.length}
                     handleClick={this.setTagSelected}
                 >
