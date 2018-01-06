@@ -11,6 +11,9 @@ import ResultList from './components/ResultList'
 import Overview from './components/Overview'
 import PageResultItem from './components/PageResultItem'
 import ResultsMessage from './components/ResultsMessage'
+import Tags from 'src/common-ui/components/Tags'
+import TagOption from 'src/common-ui/components/TagOption'
+import NoResult from 'src/common-ui/components/NoResult'
 
 class OverviewContainer extends Component {
     static propTypes = {
@@ -28,6 +31,16 @@ class OverviewContainer extends Component {
         needsWaypoint: PropTypes.bool.isRequired,
         handleTrashBtnClick: PropTypes.func.isRequired,
         handleToggleBm: PropTypes.func.isRequired,
+        pageIdForTag: PropTypes.string.isRequired,
+        handleTagBtnClick: PropTypes.func.isRequired,
+        newTag: PropTypes.string.isRequired,
+        onTagSearchChange: PropTypes.func.isRequired,
+        resultTags: PropTypes.arrayOf(PropTypes.string).isRequired,
+        addTags: PropTypes.func.isRequired,
+        delTags: PropTypes.func.isRequired,
+        onTagSearchEnter: PropTypes.func.isRequired,
+        deleteTags: PropTypes.arrayOf(PropTypes.string).isRequired,
+        suggestedTags: PropTypes.arrayOf(PropTypes.string).isRequired,
     }
 
     componentDidMount() {
@@ -40,14 +53,76 @@ class OverviewContainer extends Component {
         this.inputQueryEl = element
     }
 
+    renderNewTagOption() {
+        const { newTag } = this.props
+        if (newTag.length !== 0) {
+            return (
+                <TagOption
+                    data={newTag}
+                    active={false}
+                    newTag={1}
+                    addTagsToReverseDoc={this.props.addTags}
+                />
+            )
+        }
+        return null
+    }
+
+    renderTagsOptions() {
+        const { resultTags, newTag, deleteTags, suggestedTags } = this.props
+
+        if (resultTags.length === 0 && newTag.length === 0) {
+            return <NoResult />
+        }
+
+        return resultTags.map(
+            (data, index) =>
+                data !== '' && (
+                    <TagOption
+                        data={data}
+                        key={index}
+                        active={deleteTags.indexOf(data) === -1}
+                        newTag={0}
+                        addTagsToReverseDoc={this.props.addTags}
+                        handleClick={
+                            deleteTags.indexOf(data) !== -1
+                                ? this.props.addTags
+                                : this.props.delTags
+                        }
+                    />
+                ),
+        )
+    }
+
     renderResultItems() {
+        const { pageIdForTag, resultTags, deleteTags } = this.props
+
         const resultItems = this.props.searchResults.map((doc, i) => (
             <PageResultItem
                 key={i}
                 onTrashBtnClick={this.props.handleTrashBtnClick(doc.url, i)}
                 onToggleBookmarkClick={this.props.handleToggleBm(doc.url, i)}
+                showOrNot={doc._id === pageIdForTag}
+                onTagBtnClick={this.props.handleTagBtnClick}
                 {...doc}
-            />
+            >
+                <div>
+                    {doc._id === pageIdForTag && (
+                        <Tags
+                            onTagSearchChange={this.props.onTagSearchChange}
+                            setInputRef={this.setInputRef}
+                            onTagSearchEnter={this.props.onTagSearchEnter}
+                            numberOfTags={resultTags.length - deleteTags.length}
+                            handleClick={this.props.handleTagBtnClick('')}
+                        >
+                            <div>
+                                {this.renderTagsOptions()}
+                                {this.renderNewTagOption()}
+                            </div>
+                        </Tags>
+                    )}
+                </div>
+            </PageResultItem>
         ))
 
         // Insert waypoint at the end of results to trigger loading new items when
@@ -140,6 +215,7 @@ class OverviewContainer extends Component {
     }
 
     render() {
+        console.log(this.props)
         return (
             <Overview
                 {...this.props}
@@ -166,6 +242,11 @@ const mapStateToProps = state => ({
     showInitSearchMsg: selectors.showInitSearchMsg(state),
     totalResultCount: selectors.totalResultCount(state),
     shouldShowCount: selectors.shouldShowCount(state),
+    pageIdForTag: selectors.pageIdForTag(state),
+    newTag: selectors.newTag(state),
+    resultTags: selectors.resultTags(state),
+    deleteTags: selectors.deleteTags(state),
+    suggestedTags: selectors.suggestedTags(state),
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -192,6 +273,30 @@ const mapDispatchToProps = dispatch => ({
     handleToggleBm: (url, index) => event => {
         event.preventDefault()
         dispatch(actions.toggleBookmark(url, index))
+    },
+    handleTagBtnClick: pageId => event => {
+        if (event) {
+            event.preventDefault()
+        }
+        dispatch(actions.pageIdForTag(pageId))
+        dispatch(actions.FetchInitResultTags())
+        dispatch(actions.deleteTags([]))
+    },
+    onTagSearchChange: event => {
+        const tagInput = event.target
+        dispatch(actions.produceNewTag(tagInput.value))
+    },
+    addTags: tag => {
+        dispatch(actions.addTagsFromOverview(tag))
+    },
+    delTags: tag => {
+        dispatch(actions.delTagsFromOverview(tag))
+    },
+    onTagSearchEnter: event => {
+        if (event.key === 'Enter') {
+            event.preventDefault()
+            dispatch(actions.addTagsFromOverviewOnEnter(event.target.value))
+        }
     },
 })
 

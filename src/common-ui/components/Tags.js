@@ -1,6 +1,5 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import styles from './Popup.css'
 import localStyles from './TagOption.css'
 
 const Tags = ({
@@ -11,10 +10,10 @@ const Tags = ({
     numberOfTags,
     handleClick,
 }) => (
-    <div>
-        <form className={styles.searchContainer}>
+    <div className={localStyles.tagDiv}>
+        <form className={localStyles.searchContainer}>
             <input
-                className={styles.search}
+                className={localStyles.search}
                 name="query"
                 placeholder="Search & Add Tag(s)"
                 onChange={onTagSearchChange}
@@ -32,7 +31,7 @@ const Tags = ({
             <div className={localStyles.tagDone}>
                 <button
                     className={localStyles.tagDoneButton}
-                    onClick={() => handleClick()}
+                    onClick={() => handleClick('')}
                 >
                     Done
                 </button>
@@ -42,7 +41,7 @@ const Tags = ({
 )
 
 Tags.propTypes = {
-    children: PropTypes.arrayOf(PropTypes.element).isRequired,
+    children: PropTypes.object.isRequired,
     onTagSearchChange: PropTypes.func.isRequired,
     setInputRef: PropTypes.func.isRequired,
     onTagSearchEnter: PropTypes.func.isRequired,

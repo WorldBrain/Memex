@@ -28,6 +28,11 @@ const defaultState = {
     },
     showFilter: false,
     showOnlyBookmarks: false,
+    pageIdForTag: '',
+    newTag: '',
+    resultTags: [],
+    suggestedTags: [],
+    deleteTags: [],
 }
 
 function setQuery(state, query) {
@@ -121,6 +126,8 @@ const incSearchCount = state => ({
 })
 const initSearchCount = (state, searchCount) => ({ ...state, searchCount })
 
+const payloadReducer = key => (state, payload) => ({ ...state, [key]: payload })
+
 export default createReducer(
     {
         [actions.appendSearchResult]: handleSearchResult({ overwrite: false }),
@@ -159,6 +166,11 @@ export default createReducer(
             ...state,
             currentPage: defaultState.currentPage,
         }),
+        [actions.pageIdForTag]: payloadReducer('pageIdForTag'),
+        [actions.newTag]: payloadReducer('newTag'),
+        [actions.resultTags]: payloadReducer('resultTags'),
+        [actions.suggestedTags]: payloadReducer('suggestedTags'),
+        [actions.deleteTags]: payloadReducer('deleteTags'),
     },
     defaultState,
 )

@@ -186,3 +186,12 @@
         background-image: url('/img/star_empty_3EB995.png');
     }
 }
+
+.tag {
+    background-image: url('/img/tag.png');
+
+    &:hover:enabled {
+        opacity: 0.5;
+        background-image: url('/img/tag.png');
+    }
+}
