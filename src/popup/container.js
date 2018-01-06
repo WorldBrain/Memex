@@ -469,10 +469,30 @@ class PopupContainer extends Component {
     }
 
     renderTagsOptions() {
-        const { resultTags, newTag, deleteTags } = this.state
+        const { resultTags, newTag, deleteTags, suggestedTags } = this.state
 
         if (resultTags.length === 0 && newTag.length === 0) {
             return <NoResult />
+        }
+
+        if (newTag.length !== 0) {
+            return suggestedTags.map(
+                (data, index) =>
+                    data !== '' && (
+                        <TagOption
+                            data={data}
+                            key={index}
+                            active={resultTags.indexOf(data) !== -1}
+                            handleClick={
+                                resultTags.indexOf(data) === -1
+                                    ? this.addToSuggestedTag(data)
+                                    : this.removeFromSuggestedTag(data)
+                            }
+                            newTag={1}
+                            addTagsToReverseDoc={this.addTagsToReverseDoc}
+                        />
+                    ),
+            )
         }
 
         return resultTags.map(
