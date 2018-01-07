@@ -19,6 +19,7 @@ const Tags = ({
                 onChange={onTagSearchChange}
                 onKeyDown={onTagSearchEnter}
                 ref={setInputRef}
+                autoComplete="off"
             />
             <i className="material-icons">search</i>
         </form>

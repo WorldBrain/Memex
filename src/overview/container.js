@@ -283,7 +283,6 @@ const mapDispatchToProps = dispatch => ({
         dispatch(actions.produceNewTag(tagInput.value))
     },
     addTags: tag => {
-        console.log('Here in add', tag)
         dispatch(actions.addTagsFromOverview(tag))
     },
     delTags: tag => {
