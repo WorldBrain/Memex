@@ -220,23 +220,28 @@ export const addTagsFromOverview = tag => async (dispatch, getState) => {
     const state = getState()
     const pageId = selectors.pageIdForTag(state)
     const tags = selectors.resultTags(state)
+    const deletedTags = selectors.deleteTags(state)
+    if (deletedTags.indexOf(tag) !== -1) {
+        deletedTags.splice(deletedTags.indexOf(tag), 1)
+    }
     if (tags.indexOf(tag) === -1) {
         tags.push(tag)
     }
     await addTags(pageId, [tag])
     dispatch(resultTags(tags))
+    dispatch(deleteTags(deletedTags))
     dispatch(newTag(''))
 }
 
 export const delTagsFromOverview = tag => async (dispatch, getState) => {
     const state = getState()
     const pageId = selectors.pageIdForTag(state)
-    const tags = selectors.resultTags(state)
-    if (tags.indexOf(tag) !== -1) {
-        tag.splice(tags.indexOf(tag), 1)
+    const deltags = selectors.deleteTags(state)
+    if (deltags.indexOf(tag) === -1) {
+        deltags.push(tag)
+        await delTags(pageId, [tag])
+        dispatch(deleteTags(deltags))
     }
-    await delTags(pageId, [tag])
-    dispatch(resultTags(tags))
 }
 
 export const produceNewTag = tag => async (dispatch, getState) => {

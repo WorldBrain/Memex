@@ -31,42 +31,14 @@ const defaultState = {
     pageIdForTag: '',
     newTag: '',
     resultTags: [],
-    deleteTags: [],
     suggestedTags: [],
+    deleteTags: [],
 }
 
 function setQuery(state, query) {
     return {
         ...state,
         currentQueryParams: { ...state.currentQueryParams, query },
-    }
-}
-
-function setNewTagValue(state, newTag) {
-    return {
-        ...state,
-        newTag: newTag,
-    }
-}
-
-function setResultTags(state, resultTags) {
-    return {
-        ...state,
-        resultTags: resultTags,
-    }
-}
-
-function setDeleteTags(state, deleteTags) {
-    return {
-        ...state,
-        deleteTags: deleteTags,
-    }
-}
-
-function setSuggestedTags(state, suggestedTags) {
-    return {
-        ...state,
-        suggestedTags: suggestedTags,
     }
 }
 
@@ -98,13 +70,6 @@ function hideResultItem(state, url) {
     return update('searchResult.docs', docs =>
         remove(doc => doc._id === generatePageDocId({ url }))(docs),
     )(state)
-}
-
-function setPageIdFortag(state, pageId) {
-    return {
-        ...state,
-        pageIdForTag: pageId,
-    }
 }
 
 const showDeleteConfirm = (state, { url, index }) => ({
@@ -161,6 +126,8 @@ const incSearchCount = state => ({
 })
 const initSearchCount = (state, searchCount) => ({ ...state, searchCount })
 
+const payloadReducer = key => (state, payload) => ({ ...state, [key]: payload })
+
 export default createReducer(
     {
         [actions.appendSearchResult]: handleSearchResult({ overwrite: false }),
@@ -195,10 +162,11 @@ export default createReducer(
             ...state,
             currentPage: defaultState.currentPage,
         }),
-        [actions.pageIdForTag]: setPageIdFortag,
-        [actions.newTag]: setNewTagValue,
-        [actions.resultTags]: setResultTags,
-        [actions.suggestedTags]: setSuggestedTags,
+        [actions.pageIdForTag]: payloadReducer('pageIdForTag'),
+        [actions.newTag]: payloadReducer('newTag'),
+        [actions.resultTags]: payloadReducer('resultTags'),
+        [actions.suggestedTags]: payloadReducer('suggestedTags'),
+        [actions.deleteTags]: payloadReducer('deleteTags'),
     },
     defaultState,
 )

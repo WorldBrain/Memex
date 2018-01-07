@@ -37,6 +37,7 @@ class OverviewContainer extends Component {
         onTagSearchChange: PropTypes.func.isRequired,
         resultTags: PropTypes.arrayOf(PropTypes.string).isRequired,
         addTags: PropTypes.func.isRequired,
+        delTags: PropTypes.func.isRequired,
         onTagSearchEnter: PropTypes.func.isRequired,
         deleteTags: PropTypes.arrayOf(PropTypes.string).isRequired,
         suggestedTags: PropTypes.arrayOf(PropTypes.string).isRequired,
@@ -80,16 +81,21 @@ class OverviewContainer extends Component {
                     <TagOption
                         data={data}
                         key={index}
-                        active={true}
+                        active={deleteTags.indexOf(data) === -1}
                         newTag={0}
                         addTagsToReverseDoc={this.props.addTags}
+                        handleClick={
+                            deleteTags.indexOf(data) !== -1
+                                ? this.props.addTags
+                                : this.props.delTags
+                        }
                     />
                 ),
         )
     }
 
     renderResultItems() {
-        const { pageIdForTag, resultTags } = this.props
+        const { pageIdForTag, resultTags, deleteTags } = this.props
 
         const resultItems = this.props.searchResults.map((doc, i) => (
             <PageResultItem
@@ -105,7 +111,7 @@ class OverviewContainer extends Component {
                         onTagSearchChange={this.props.onTagSearchChange}
                         setInputRef={this.setInputRef}
                         onTagSearchEnter={this.props.onTagSearchEnter}
-                        numberOfTags={resultTags.length}
+                        numberOfTags={resultTags.length - deleteTags.length}
                         handleClick={this.props.handleTagBtnClick('')}
                     >
                         {this.renderTagsOptions()}
@@ -205,7 +211,7 @@ class OverviewContainer extends Component {
     }
 
     render() {
-        console.log(this.props.resultTags)
+        console.log(this.props)
         return (
             <Overview
                 {...this.props}
@@ -270,12 +276,14 @@ const mapDispatchToProps = dispatch => ({
         }
         dispatch(actions.pageIdForTag(pageId))
         dispatch(actions.FetchInitResultTags())
+        dispatch(actions.deleteTags([]))
     },
     onTagSearchChange: event => {
         const tagInput = event.target
         dispatch(actions.produceNewTag(tagInput.value))
     },
     addTags: tag => {
+        console.log('Here in add', tag)
         dispatch(actions.addTagsFromOverview(tag))
     },
     delTags: tag => {
