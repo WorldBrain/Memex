@@ -114,8 +114,10 @@ class OverviewContainer extends Component {
                         numberOfTags={resultTags.length - deleteTags.length}
                         handleClick={this.props.handleTagBtnClick('')}
                     >
-                        {this.renderTagsOptions()}
-                        {this.renderNewTagOption()}
+                        <div>
+                            {this.renderTagsOptions()}
+                            {this.renderNewTagOption()}
+                        </div>
                     </Tags>
                 )}
             </PageResultItem>

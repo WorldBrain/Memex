@@ -209,6 +209,16 @@ export const toggleBookmark = (url, index) => async (dispatch, getState) => {
     }
 }
 
+function cloneArray(a) {
+    const b = []
+
+    for (let i = 0; i < a.length; i++) {
+        b.push(a[i])
+    }
+
+    return b
+}
+
 export const FetchInitResultTags = () => async (dispatch, getState) => {
     const state = getState()
     const pageId = selectors.pageIdForTag(state)
@@ -219,8 +229,8 @@ export const FetchInitResultTags = () => async (dispatch, getState) => {
 export const addTagsFromOverview = tag => async (dispatch, getState) => {
     const state = getState()
     const pageId = selectors.pageIdForTag(state)
-    const tags = selectors.resultTags(state)
-    const deletedTags = selectors.deleteTags(state)
+    const tags = cloneArray(selectors.resultTags(state))
+    const deletedTags = cloneArray(selectors.deleteTags(state))
     if (deletedTags.indexOf(tag) !== -1) {
         deletedTags.splice(deletedTags.indexOf(tag), 1)
     }
@@ -236,7 +246,8 @@ export const addTagsFromOverview = tag => async (dispatch, getState) => {
 export const delTagsFromOverview = tag => async (dispatch, getState) => {
     const state = getState()
     const pageId = selectors.pageIdForTag(state)
-    const deltags = selectors.deleteTags(state)
+    const deltags = cloneArray(selectors.deleteTags(state))
+
     if (deltags.indexOf(tag) === -1) {
         deltags.push(tag)
         await delTags(pageId, [tag])
@@ -256,7 +267,7 @@ export const produceNewTag = tag => async (dispatch, getState) => {
 export const addTagsFromOverviewOnEnter = tag => async (dispatch, getState) => {
     const state = getState()
     const pageId = selectors.pageIdForTag(state)
-    const tags = selectors.resultTags(state)
+    const tags = cloneArray(selectors.resultTags(state))
     if (tags.length === 0) {
         tags.push(tag)
         await addTags(pageId, [tag])
