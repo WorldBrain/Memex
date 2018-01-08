@@ -359,6 +359,7 @@ class PopupContainer extends Component {
             ...state,
             resultTags: resultTags,
             newTag: '',
+            suggestedTags: [],
         }))
     }
 
@@ -404,7 +405,6 @@ class PopupContainer extends Component {
 
     async onTagSearchChange(event) {
         const { resultTags } = this.state
-        let { suggestedTags } = this.state
         let tagSearchValue = event.target.value
         const index = findIndexValue(resultTags, tagSearchValue)
 
@@ -412,17 +412,14 @@ class PopupContainer extends Component {
             tagSearchValue = ''
         }
 
-        if (tagSearchValue === '') {
-            suggestedTags = []
-        } else {
-            this.changeSuggestedtags(tagSearchValue)
-        }
-
         this.setState(state => ({
             ...state,
             newTag: tagSearchValue,
-            suggestedTags: suggestedTags,
         }))
+
+        if (tagSearchValue !== '') {
+            this.changeSuggestedtags(event.target.value)
+        }
     }
 
     setTagSelected = () => {
@@ -463,6 +460,9 @@ class PopupContainer extends Component {
                         active={
                             isSuggested
                                 ? findIndexValue(resultTags, data) !== -1
+                                  ? resultTags[findIndexValue(resultTags, data)]
+                                        .isSelected === true
+                                  : findIndexValue(resultTags, data) !== -1
                                 : data['isSelected']
                         }
                         newTag={0}
@@ -470,6 +470,9 @@ class PopupContainer extends Component {
                         handleClick={
                             (isSuggested
                             ? findIndexValue(resultTags, data) !== -1
+                              ? resultTags[findIndexValue(resultTags, data)]
+                                    .isSelected === true
+                              : findIndexValue(resultTags, data) !== -1
                             : data['isSelected'])
                                 ? this.removeFromSuggestedTag(
                                       isSuggested ? data : data['value'],

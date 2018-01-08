@@ -74,7 +74,7 @@ class OverviewContainer extends Component {
 
     renderOptions(tags, isSuggested) {
         const { resultTags } = this.props
-        console.log(resultTags)
+
         return tags.map(
             (data, index) =>
                 data !== '' && (
@@ -84,6 +84,10 @@ class OverviewContainer extends Component {
                         active={
                             isSuggested
                                 ? this.findIndexValue(resultTags, data) !== -1
+                                  ? resultTags[
+                                        this.findIndexValue(resultTags, data)
+                                    ].isSelected === true
+                                  : this.findIndexValue(resultTags, data) !== -1
                                 : data['isSelected']
                         }
                         newTag={0}
@@ -91,6 +95,10 @@ class OverviewContainer extends Component {
                         handleClick={
                             (isSuggested
                             ? this.findIndexValue(resultTags, data) !== -1
+                              ? resultTags[
+                                    this.findIndexValue(resultTags, data)
+                                ].isSelected === true
+                              : this.findIndexValue(resultTags, data) !== -1
                             : data['isSelected'])
                                 ? this.props.delTags
                                 : this.props.addTags
@@ -245,7 +253,6 @@ class OverviewContainer extends Component {
     }
 
     render() {
-        console.log(this.props.suggestedTags)
         return (
             <Overview
                 {...this.props}

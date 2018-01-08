@@ -244,7 +244,6 @@ export const addTagsFromOverview = tag => async (dispatch, getState) => {
 }
 
 export const delTagsFromOverview = tag => async (dispatch, getState) => {
-    console.log('Here')
     const state = getState()
     const pageId = selectors.pageIdForTag(state)
     const tags = [...selectors.resultTags(state)]
@@ -253,7 +252,7 @@ export const delTagsFromOverview = tag => async (dispatch, getState) => {
     if (index !== -1) {
         tags[index].isSelected = false
         await delTags(pageId, [tag])
-        console.log(tags)
+
         dispatch(resultTags(tags))
     }
 }
