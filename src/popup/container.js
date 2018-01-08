@@ -123,24 +123,16 @@ class PopupContainer extends Component {
         this.getInitResultTags(currentTab.url)
             .then(updateState)
             .catch(noop)
-        this.getInitSuggestTags()
-            .then(updateState)
-            .catch(noop)
     }
 
     async getInitTagsState(url) {
         return { tagButttonState: isLoggable({ url }) }
     }
 
-    async getInitSuggestTags(url) {
-        const res = await this.suggestTags('s')
-        return { suggestedTags: Array.from(res) }
-    }
-
     async getInitResultTags(url) {
         const pageId = await generatePageDocId({ url })
         const res = await this.fetchTagsForPage(pageId)
-        return { resultTags: Array.from(res) }
+        return { resultTags: res }
     }
 
     async getInitPauseState() {
@@ -169,6 +161,14 @@ class PopupContainer extends Component {
         }
 
         return { bookmarkBtn: getBookmarkButtonState(result) }
+    }
+
+    async changeSuggestedtags(term) {
+        const res = await this.suggestTags(term)
+        this.setState(state => ({
+            ...state,
+            suggestedTags: res,
+        }))
     }
 
     async addTagsToReverseDoc(tag) {
@@ -271,9 +271,9 @@ class PopupContainer extends Component {
     }
 
     async onTagSearchEnter(event) {
-        const { resultTags, deleteTags } = this.state
+        const { resultTags, deleteTags, suggestedTags } = this.state
         if (event.key === 'Enter') {
-            if (resultTags.length === 0) {
+            if (suggestedTags.length === 0) {
                 event.preventDefault()
                 let tagSearchValue = event.target.value
 
@@ -414,6 +414,7 @@ class PopupContainer extends Component {
             newTag: tagSearchValue,
             deleteTags: deleteTags,
         }))
+        this.changeSuggestedtags(tagSearchValue)
     }
 
     removeFromSuggestedTag = tag => async () => {
@@ -470,7 +471,7 @@ class PopupContainer extends Component {
 
     renderTagsOptions() {
         const { resultTags, newTag, deleteTags, suggestedTags } = this.state
-
+        console.log(suggestedTags)
         if (resultTags.length === 0 && newTag.length === 0) {
             return <NoResult />
         }
@@ -488,7 +489,7 @@ class PopupContainer extends Component {
                                     ? this.addTagsToReverseDoc
                                     : this.removeFromSuggestedTag(data)
                             }
-                            newTag={1}
+                            newTag={0}
                             addTagsToReverseDoc={this.addTagsToReverseDoc}
                         />
                     ),
@@ -542,8 +543,10 @@ class PopupContainer extends Component {
                     numberOfTags={resultTags.length - deleteTags.length}
                     handleClick={this.setTagSelected}
                 >
-                    {this.renderTagsOptions()}
-                    {this.renderNewTagOption()}
+                    <div>
+                        {this.renderTagsOptions()}
+                        {this.renderNewTagOption()}
+                    </div>
                 </Tags>
             )
         }

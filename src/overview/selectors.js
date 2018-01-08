@@ -156,3 +156,11 @@ export const newTag = state => overview(state).newTag
 export const resultTags = state => overview(state).resultTags
 export const deleteTags = state => overview(state).deleteTags
 export const suggestedTags = state => overview(state).suggestedTags
+
+export const emptyTagOptions = createSelector(
+    newTag,
+    resultTags,
+    suggestedTags,
+    (newTag, resultTags, suggestedTags) =>
+        !newTag.length && !resultTags.length && !suggestedTags.length,
+)

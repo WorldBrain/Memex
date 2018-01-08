@@ -39,8 +39,8 @@ class OverviewContainer extends Component {
         addTags: PropTypes.func.isRequired,
         delTags: PropTypes.func.isRequired,
         onTagSearchEnter: PropTypes.func.isRequired,
-        deleteTags: PropTypes.arrayOf(PropTypes.string).isRequired,
         suggestedTags: PropTypes.arrayOf(PropTypes.string).isRequired,
+        emptyTagOptions: PropTypes.bool.isRequired,
     }
 
     componentDidMount() {
@@ -68,34 +68,54 @@ class OverviewContainer extends Component {
         return null
     }
 
-    renderTagsOptions() {
-        const { resultTags, newTag, deleteTags, suggestedTags } = this.props
-
-        if (resultTags.length === 0 && newTag.length === 0) {
-            return <NoResult />
-        }
-
-        return resultTags.map(
+    renderOptions(tags, isSuggested) {
+        return tags.map(
             (data, index) =>
                 data !== '' && (
                     <TagOption
-                        data={data}
+                        data={isSuggested ? data : data['value']}
                         key={index}
-                        active={deleteTags.indexOf(data) === -1}
+                        active={isSuggested ? false : data['isSelected']}
                         newTag={0}
                         addTagsToReverseDoc={this.props.addTags}
                         handleClick={
-                            deleteTags.indexOf(data) !== -1
-                                ? this.props.addTags
-                                : this.props.delTags
+                            isSuggested
+                                ? false
+                                : data['isSelected']
+                                  ? this.props.delTags
+                                  : this.props.addTags
                         }
                     />
                 ),
         )
     }
 
+    renderTagsOptions() {
+        const {
+            resultTags,
+            newTag,
+            suggestedTags,
+            emptyTagOptions,
+        } = this.props
+
+        if (emptyTagOptions) {
+            return <NoResult />
+        }
+
+        if (suggestedTags.length !== 0) {
+            return this.renderOptions(suggestedTags, true)
+        } else if (newTag.length !== 0) {
+            return null
+        }
+
+        return this.renderOptions(resultTags, false)
+    }
+
     renderResultItems() {
-        const { pageIdForTag, resultTags, deleteTags } = this.props
+        const { pageIdForTag, resultTags } = this.props
+        const selectedResultTags = resultTags.filter(
+            tag => tag.isSelected === true,
+        )
 
         const resultItems = this.props.searchResults.map((doc, i) => (
             <PageResultItem
@@ -112,7 +132,7 @@ class OverviewContainer extends Component {
                             onTagSearchChange={this.props.onTagSearchChange}
                             setInputRef={this.setInputRef}
                             onTagSearchEnter={this.props.onTagSearchEnter}
-                            numberOfTags={resultTags.length - deleteTags.length}
+                            numberOfTags={selectedResultTags.length}
                             handleClick={this.props.handleTagBtnClick('')}
                         >
                             <div>
@@ -215,7 +235,7 @@ class OverviewContainer extends Component {
     }
 
     render() {
-        console.log(this.props)
+        console.log(this.props.suggestedTags)
         return (
             <Overview
                 {...this.props}
@@ -247,6 +267,7 @@ const mapStateToProps = state => ({
     resultTags: selectors.resultTags(state),
     deleteTags: selectors.deleteTags(state),
     suggestedTags: selectors.suggestedTags(state),
+    emptyTagOptions: selectors.emptyTagOptions(state),
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -285,6 +306,7 @@ const mapDispatchToProps = dispatch => ({
     onTagSearchChange: event => {
         const tagInput = event.target
         dispatch(actions.produceNewTag(tagInput.value))
+        dispatch(actions.suggestTagFromOverview(event.target.value))
     },
     addTags: tag => {
         dispatch(actions.addTagsFromOverview(tag))

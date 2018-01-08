@@ -41,6 +41,7 @@ const deleteDocsByUrl = remoteFunction('deleteDocsByUrl')
 const createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
 const removeBookmarkByUrl = remoteFunction('removeBookmarkByUrl')
 const fetchTagsForPage = remoteFunction('fetchTagsForPage')
+const suggestTags = remoteFunction('suggestTags')
 const addTags = remoteFunction('addTags')
 const delTags = remoteFunction('delTags')
 
@@ -209,69 +210,79 @@ export const toggleBookmark = (url, index) => async (dispatch, getState) => {
     }
 }
 
-function cloneArray(a) {
-    const b = []
-
-    for (let i = 0; i < a.length; i++) {
-        b.push(a[i])
-    }
-
-    return b
+function findIndexValue(a, tag) {
+    return a.findIndex(i => i.value === tag)
 }
 
 export const FetchInitResultTags = () => async (dispatch, getState) => {
     const state = getState()
     const pageId = selectors.pageIdForTag(state)
-    const tags = await fetchTagsForPage(pageId)
-    dispatch(resultTags(Array.from(tags)))
+    const tagsFromBackend = await fetchTagsForPage(pageId)
+    const tags = []
+
+    for (let i = 0; i < tagsFromBackend.length; i++) {
+        tags.push({ isSelected: true, value: tagsFromBackend[i] })
+    }
+
+    dispatch(resultTags(tags))
 }
 
 export const addTagsFromOverview = tag => async (dispatch, getState) => {
     const state = getState()
     const pageId = selectors.pageIdForTag(state)
-    const tags = cloneArray(selectors.resultTags(state))
-    const deletedTags = cloneArray(selectors.deleteTags(state))
-    if (deletedTags.indexOf(tag) !== -1) {
-        deletedTags.splice(deletedTags.indexOf(tag), 1)
-    }
-    if (tags.indexOf(tag) === -1) {
-        tags.push(tag)
+    const tags = [...selectors.resultTags(state)]
+    const index = findIndexValue(tags, tag)
+    console.log(index)
+    if (index === -1) {
+        tags.push({ isSelected: true, value: tag })
+    } else if (tags[index].isSelected === false) {
+        tags[index].isSelected = true
     }
     await addTags(pageId, [tag])
     dispatch(resultTags(tags))
-    dispatch(deleteTags(deletedTags))
     dispatch(newTag(''))
 }
 
 export const delTagsFromOverview = tag => async (dispatch, getState) => {
     const state = getState()
     const pageId = selectors.pageIdForTag(state)
-    const deltags = cloneArray(selectors.deleteTags(state))
+    const tags = [...selectors.resultTags(state)]
+    const index = findIndexValue(tags, tag)
 
-    if (deltags.indexOf(tag) === -1) {
-        deltags.push(tag)
+    if (index !== -1) {
+        tags[index].isSelected = false
         await delTags(pageId, [tag])
-        dispatch(deleteTags(deltags))
+        dispatch(resultTags(tags))
     }
 }
 
 export const produceNewTag = tag => async (dispatch, getState) => {
     const state = getState()
     const tags = selectors.resultTags(state)
-    if (tags.indexOf(tag) !== -1) {
+    const index = findIndexValue(tags, tag)
+
+    if (index !== -1) {
         tag = ''
     }
+
     dispatch(newTag(tag))
 }
 
 export const addTagsFromOverviewOnEnter = tag => async (dispatch, getState) => {
     const state = getState()
     const pageId = selectors.pageIdForTag(state)
-    const tags = cloneArray(selectors.resultTags(state))
-    if (tags.length === 0) {
-        tags.push(tag)
+    const tags = [...selectors.resultTags(state)]
+    const suggestedTags = [...selectors.suggestedTags(state)]
+    if (suggestedTags.length === 0) {
+        tags.push({ isSelected: true, value: tag })
         await addTags(pageId, [tag])
         dispatch(resultTags(tags))
         dispatch(newTag(''))
+        dispatch(suggestedTags([]))
     }
+}
+
+export const suggestTagFromOverview = term => async (dispatch, getState) => {
+    const tags = await suggestTags(term)
+    dispatch(suggestedTags(tags))
 }
