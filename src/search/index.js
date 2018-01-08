@@ -79,6 +79,7 @@ export {
     addBookmarkConcurrent,
     put,
     addTimestampConcurrent,
+    updateTimestampMetaConcurrent,
 } from './search-index/add'
 export { initSingleLookup, keyGen, grabExistingKeys } from './search-index/util'
 export { delPages, delPagesConcurrent, del } from './search-index/del'

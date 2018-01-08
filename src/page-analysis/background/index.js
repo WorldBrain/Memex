@@ -1,7 +1,6 @@
 import merge from 'lodash/fp/merge'
 import { dataURLToBlob } from 'blob-util'
 
-import { whenPageDOMLoaded } from 'src/util/tab-events'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import whenAllSettled from 'when-all-settled'
 import db from 'src/pouchdb'
@@ -41,8 +40,6 @@ async function performPageAnalysis({ pageId, tabId }) {
 }
 
 export default async function analysePage({ pageId, tabId }) {
-    // Wait until its DOM has loaded, in case we got invoked before that.
-    await whenPageDOMLoaded({ tabId }) // TODO: catch e.g. tab close.
     await performPageAnalysis({ pageId, tabId })
     // Get and return the page.
     const page = revisePageFields(await db.get(pageId))

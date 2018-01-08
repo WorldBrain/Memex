@@ -2,8 +2,9 @@ import db from 'src/pouchdb'
 import storePage from 'src/page-storage/store-page'
 import { generatePageDocId } from 'src/page-storage'
 import { blacklist } from 'src/blacklist/background'
-import { generateVisitDocId } from '..'
+import { generateVisitDocId, visitKeyPrefix } from '..'
 import * as index from 'src/search'
+import tabTracker from './tab-time-tracker'
 
 // Store the visit in PouchDB.
 export async function storeVisit({ timestamp, url, page }) {
@@ -26,7 +27,11 @@ export async function storeVisit({ timestamp, url, page }) {
  */
 async function updateIndex(storePageResult, visit, pageId) {
     if (storePageResult == null) {
-        await index.addTimestampConcurrent('visit', Date.now(), pageId)
+        await index.addTimestampConcurrent(
+            visitKeyPrefix,
+            visit.visitStart,
+            pageId,
+        )
     } else {
         // Wait until all page analyis is done
         const { page } = await storePageResult.finalPagePromise
@@ -55,15 +60,14 @@ export async function logPageVisit({ tabId, url }) {
         return
     }
 
-    // The time to put in documents.
-    const timestamp = Date.now()
+    const { visitTime } = tabTracker.getTabState(tabId)
 
     const pageId = generatePageDocId({ url })
     const existingPage = await index.initSingleLookup()(pageId)
 
     let storePageResult
     // If there exist the page and the time difference between last index and current timestamp less than {threshold} then we can store the page.
-    if (existingPage == null || timestamp - existingPage.latest > threshold) {
+    if (existingPage == null || visitTime - existingPage.latest > threshold) {
         // First create an identifier for the page being visited.
         storePageResult = await storePage({ tabId, url })
     }
@@ -72,18 +76,11 @@ export async function logPageVisit({ tabId, url }) {
     const { visit } = await storeVisit({
         page: { _id: pageId },
         url,
-        timestamp,
+        timestamp: visitTime,
     })
 
     await updateIndex(storePageResult, visit, pageId)
 
     // TODO possibly deduplicate the visit if the page was deduped too.
     void visit
-}
-
-export async function maybeLogPageVisit({ tabId, url }) {
-    await logPageVisit({
-        tabId,
-        url,
-    })
 }

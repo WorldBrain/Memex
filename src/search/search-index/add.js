@@ -292,5 +292,3 @@ export const updateTimestampMetaConcurrent = (...args) =>
                 .catch(reject),
         ),
     )
-
-window.adder = updateTimestampMetaConcurrent

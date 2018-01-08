@@ -4,13 +4,22 @@
  * @property {number} activeTime Non-neg int representing accumulated active time in ms.
  * @property {boolean} isActive Flag that denotes activity.
  * @property {number} lastActivated Epoch timestamp representing last time being activated.
+ * @property {string} visitTime Epoch timestamp representing the time of the visit event associated with this tab.
+ * @property {number} [timeout] A timeout ID returned from a `setTimeout` call.
  */
 
-class TabTimeTracker {
+export class TabTimeTracker {
+    static DEF_LOG_DELAY = 10000
+
     /**
      * @property {Map<string, TabActiveState>}
      */
     _tabs = new Map()
+    _logDelay
+
+    constructor(logDelay = TabTimeTracker.DEF_LOG_DELAY) {
+        this._logDelay = logDelay
+    }
 
     get size() {
         return this._tabs.size
@@ -19,35 +28,74 @@ class TabTimeTracker {
     /**
      * @returns {TabActiveState}
      */
-    _createNewTab = () => ({
+    _createNewTab = ({ isActive = false, visitTime = `${Date.now()}` }) => ({
         activeTime: 0,
-        isActive: false,
         lastActivated: Date.now(),
+        isActive,
+        visitTime,
+        timeout: null,
     })
 
     /**
-     * @param {string} id The ID of the tab to start keeping track of.
+     * Reduces a tab's state to toggle between active and inactive. Time updates are performed based on active state change.
      */
-    trackTab = id => this._tabs.set(id, this._createNewTab())
+    _toggleActiveState = ({ isActive, activeTime, lastActivated, ...tab }) => ({
+        ...tab,
+        isActive: !isActive,
+        activeTime: isActive
+            ? activeTime + Date.now() - lastActivated
+            : activeTime,
+        lastActivated: isActive ? lastActivated : Date.now(),
+    })
+
+    /**
+     * @param {tabs.Tab} tab The browser tab to start keeping track of.
+     */
+    trackTab = ({ id, active }) =>
+        this._tabs.set(id, this._createNewTab({ isActive: active }))
+
+    /**
+     * @param {string} id The ID of the tab as assigned by web ext API.
+     * @returns {TabActiveState} The state for tab stored under given ID.
+     * @throws {Error} If input `id` does not correspond to any tab stored in state.
+     */
+    getTabState(id) {
+        const tab = this._tabs.get(id)
+        if (tab == null) {
+            throw new Error(`No tab stored under ID: ${id}`)
+        }
+
+        return tab
+    }
 
     /**
      * @param {string} id The ID of the tab to stop keeping track of.
-     * @returns {TabActiveState|undefined}
+     * @returns {TabActiveState}
      */
     removeTab(id) {
-        const toRemove = this._tabs.get(id)
-        this._tabs.delete(id)
+        const toRemove = this.getTabState(id)
 
-        // Update `activeTime` with final difference, only if still active when closed
-        if (toRemove.isActive) {
-            return {
-                ...toRemove,
-                activeTime:
-                    toRemove.activeTime + Date.now() - toRemove.lastActivated,
-            }
+        // Cancel any pending operations
+        if (toRemove.timeout != null) {
+            clearTimeout(toRemove.timeout)
         }
 
-        return toRemove
+        this._tabs.delete(id)
+
+        // If still active when closed, toggle active state to force time recalc
+        return this._toggleActiveState(toRemove)
+    }
+
+    /**
+     * Resets the state of a given tab, persisting active state.
+     *
+     * @param {string} id The ID of the tab to stop reset tracking of.
+     * @returns {TabActiveState} The state of the previously tracked tab assoc. with `id`.
+     */
+    resetTab(id, activeState) {
+        const oldTab = this.removeTab(id)
+        this.trackTab({ id, active: activeState })
+        return oldTab
     }
 
     /**
@@ -57,25 +105,35 @@ class TabTimeTracker {
      */
     activateTab(id) {
         for (const [tabId, tab] of this._tabs) {
-            // Only one tab can be active; if it is, reset it and count the time since activation
-            if (tab.isActive) {
-                this._tabs.set(tabId, {
-                    ...tab,
-                    isActive: false,
-                    activeTime: tab.activeTime + Date.now() - tab.lastActivated,
-                })
-            }
-
-            // Switch on the current tab's active state and record activation time
-            if (tabId === id) {
-                this._tabs.set(tabId, {
-                    ...tab,
-                    isActive: true,
-                    lastActivated: Date.now(),
-                })
+            // Toggle active state on currently active and the new candidate tab
+            if (tab.isActive || tabId === id) {
+                this._tabs.set(tabId, this._toggleActiveState(tab))
             }
         }
     }
+
+    /**
+     * @param {string} id The ID of the tab to set to associate the debounced log with.
+     * @param {() => void} cb The page log logic to delay.
+     */
+    scheduleTabLog(id, cb) {
+        const tab = this.getTabState(id)
+
+        // Check if we already have a delayed  function for this tab and cancel it
+        if (tab.timeout != null) {
+            clearTimeout(tab.timeout)
+        }
+
+        // Set up new delayed  page log, updating state
+        this._tabs.set(id, {
+            ...tab,
+            timeout: setTimeout(cb, this._logDelay),
+        })
+    }
 }
 
-export default TabTimeTracker
+// Set up tab time tracker state to work with tab events
+const tracker = new TabTimeTracker()
+window.tracker = tracker
+
+export default tracker
