@@ -241,6 +241,7 @@ export const addTagsFromOverview = tag => async (dispatch, getState) => {
     await addTags(pageId, [tag])
     dispatch(resultTags(tags))
     dispatch(newTag(''))
+    dispatch(suggestedTags([]))
 }
 
 export const delTagsFromOverview = tag => async (dispatch, getState) => {
