@@ -53,6 +53,10 @@ class OverviewContainer extends Component {
         this.inputQueryEl = element
     }
 
+    findIndexValue(a, tag) {
+        return a.findIndex(i => i.value === tag)
+    }
+
     renderNewTagOption() {
         const { newTag } = this.props
         if (newTag.length !== 0) {
@@ -69,21 +73,27 @@ class OverviewContainer extends Component {
     }
 
     renderOptions(tags, isSuggested) {
+        const { resultTags } = this.props
+        console.log(resultTags)
         return tags.map(
             (data, index) =>
                 data !== '' && (
                     <TagOption
                         data={isSuggested ? data : data['value']}
                         key={index}
-                        active={isSuggested ? false : data['isSelected']}
+                        active={
+                            isSuggested
+                                ? this.findIndexValue(resultTags, data) !== -1
+                                : data['isSelected']
+                        }
                         newTag={0}
                         addTagsToReverseDoc={this.props.addTags}
                         handleClick={
-                            isSuggested
-                                ? false
-                                : data['isSelected']
-                                  ? this.props.delTags
-                                  : this.props.addTags
+                            (isSuggested
+                            ? this.findIndexValue(resultTags, data) !== -1
+                            : data['isSelected'])
+                                ? this.props.delTags
+                                : this.props.addTags
                         }
                     />
                 ),
@@ -301,12 +311,16 @@ const mapDispatchToProps = dispatch => ({
         }
         dispatch(actions.pageIdForTag(pageId))
         dispatch(actions.FetchInitResultTags())
-        dispatch(actions.deleteTags([]))
+        dispatch(actions.suggestedTags([]))
     },
     onTagSearchChange: event => {
         const tagInput = event.target
         dispatch(actions.produceNewTag(tagInput.value))
-        dispatch(actions.suggestTagFromOverview(event.target.value))
+        if (tagInput.value === '') {
+            dispatch(actions.suggestedTags([]))
+        } else {
+            dispatch(actions.suggestTagFromOverview(event.target.value))
+        }
     },
     addTags: tag => {
         dispatch(actions.addTagsFromOverview(tag))

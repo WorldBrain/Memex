@@ -219,7 +219,6 @@ export const FetchInitResultTags = () => async (dispatch, getState) => {
     const pageId = selectors.pageIdForTag(state)
     const tagsFromBackend = await fetchTagsForPage(pageId)
     const tags = []
-
     for (let i = 0; i < tagsFromBackend.length; i++) {
         tags.push({ isSelected: true, value: tagsFromBackend[i] })
     }
@@ -232,18 +231,20 @@ export const addTagsFromOverview = tag => async (dispatch, getState) => {
     const pageId = selectors.pageIdForTag(state)
     const tags = [...selectors.resultTags(state)]
     const index = findIndexValue(tags, tag)
-    console.log(index)
+
     if (index === -1) {
         tags.push({ isSelected: true, value: tag })
     } else if (tags[index].isSelected === false) {
         tags[index].isSelected = true
     }
+
     await addTags(pageId, [tag])
     dispatch(resultTags(tags))
     dispatch(newTag(''))
 }
 
 export const delTagsFromOverview = tag => async (dispatch, getState) => {
+    console.log('Here')
     const state = getState()
     const pageId = selectors.pageIdForTag(state)
     const tags = [...selectors.resultTags(state)]
@@ -252,6 +253,7 @@ export const delTagsFromOverview = tag => async (dispatch, getState) => {
     if (index !== -1) {
         tags[index].isSelected = false
         await delTags(pageId, [tag])
+        console.log(tags)
         dispatch(resultTags(tags))
     }
 }
@@ -273,9 +275,11 @@ export const addTagsFromOverviewOnEnter = tag => async (dispatch, getState) => {
     const pageId = selectors.pageIdForTag(state)
     const tags = [...selectors.resultTags(state)]
     const suggestedTags = [...selectors.suggestedTags(state)]
+
     if (suggestedTags.length === 0) {
         tags.push({ isSelected: true, value: tag })
         await addTags(pageId, [tag])
+
         dispatch(resultTags(tags))
         dispatch(newTag(''))
         dispatch(suggestedTags([]))
