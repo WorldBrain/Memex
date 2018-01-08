@@ -35,12 +35,25 @@ class OverviewContainer extends Component {
         handleTagBtnClick: PropTypes.func.isRequired,
         newTag: PropTypes.string.isRequired,
         onTagSearchChange: PropTypes.func.isRequired,
-        resultTags: PropTypes.arrayOf(PropTypes.string).isRequired,
+        resultTags: PropTypes.arrayOf(PropTypes.object).isRequired,
         addTags: PropTypes.func.isRequired,
         delTags: PropTypes.func.isRequired,
         onTagSearchEnter: PropTypes.func.isRequired,
-        deleteTags: PropTypes.arrayOf(PropTypes.string).isRequired,
         suggestedTags: PropTypes.arrayOf(PropTypes.string).isRequired,
+        emptyTagOptions: PropTypes.bool.isRequired,
+    }
+
+    constructor() {
+        super()
+
+        this.handleOutsideClick = this.handleOutsideClick.bind(this)
+        this.handleKeyBoardUp = this.handleKeyBoardUp.bind(this)
+        this.setTagInputFocus = this.setTagInputFocus.bind(this)
+    }
+
+    componentWillMount() {
+        document.addEventListener('click', this.handleOutsideClick, false)
+        document.addEventListener('keyup', this.handleKeyBoardUp, false)
     }
 
     componentDidMount() {
@@ -49,8 +62,31 @@ class OverviewContainer extends Component {
         }
     }
 
+    componentWillUnmount() {
+        document.removeEventListener('click', this.handleOutsideClick, false)
+        document.removeEventListener('keyup', this.handleKeyBoardUp, false)
+    }
+
     setInputRef = element => {
         this.inputQueryEl = element
+    }
+
+    setTagDivRef = element => {
+        this.tagDiv = element
+    }
+
+    setTagInputRef = element => {
+        this.tagInput = element
+    }
+
+    setTagInputFocus(data) {
+        console.log(this.tagInput)
+        this.tagInput.focus()
+        this.props.addTags(data)
+    }
+
+    findIndexValue(a, tag) {
+        return a.findIndex(i => i.value === tag)
     }
 
     renderNewTagOption() {
@@ -62,40 +98,76 @@ class OverviewContainer extends Component {
                     active={false}
                     newTag={1}
                     addTagsToReverseDoc={this.props.addTags}
+                    setTagInputFocus={this.setTagInputFocus}
                 />
             )
         }
         return null
     }
 
-    renderTagsOptions() {
-        const { resultTags, newTag, deleteTags, suggestedTags } = this.props
+    renderOptions(tags, isSuggested) {
+        const { resultTags } = this.props
 
-        if (resultTags.length === 0 && newTag.length === 0) {
-            return <NoResult />
-        }
-
-        return resultTags.map(
+        return tags.map(
             (data, index) =>
                 data !== '' && (
                     <TagOption
-                        data={data}
+                        data={isSuggested ? data : data['value']}
                         key={index}
-                        active={deleteTags.indexOf(data) === -1}
+                        active={
+                            isSuggested
+                                ? this.findIndexValue(resultTags, data) !== -1
+                                  ? resultTags[
+                                        this.findIndexValue(resultTags, data)
+                                    ].isSelected === true
+                                  : this.findIndexValue(resultTags, data) !== -1
+                                : data['isSelected']
+                        }
                         newTag={0}
                         addTagsToReverseDoc={this.props.addTags}
                         handleClick={
-                            deleteTags.indexOf(data) !== -1
-                                ? this.props.addTags
-                                : this.props.delTags
+                            (isSuggested
+                            ? this.findIndexValue(resultTags, data) !== -1
+                              ? resultTags[
+                                    this.findIndexValue(resultTags, data)
+                                ].isSelected === true
+                              : this.findIndexValue(resultTags, data) !== -1
+                            : data['isSelected'])
+                                ? this.props.delTags
+                                : this.props.addTags
                         }
+                        setTagInputFocus={this.setTagInputFocus}
                     />
                 ),
         )
     }
 
+    renderTagsOptions() {
+        const {
+            resultTags,
+            newTag,
+            suggestedTags,
+            emptyTagOptions,
+        } = this.props
+
+        if (emptyTagOptions) {
+            return <NoResult />
+        }
+
+        if (suggestedTags.length !== 0) {
+            return this.renderOptions(suggestedTags, true)
+        } else if (newTag.length !== 0) {
+            return null
+        }
+
+        return this.renderOptions(resultTags, false)
+    }
+
     renderResultItems() {
-        const { pageIdForTag, resultTags, deleteTags } = this.props
+        const { pageIdForTag, resultTags } = this.props
+        const selectedResultTags = resultTags.filter(
+            tag => tag.isSelected === true,
+        )
 
         const resultItems = this.props.searchResults.map((doc, i) => (
             <PageResultItem
@@ -112,8 +184,10 @@ class OverviewContainer extends Component {
                             onTagSearchChange={this.props.onTagSearchChange}
                             setInputRef={this.setInputRef}
                             onTagSearchEnter={this.props.onTagSearchEnter}
-                            numberOfTags={resultTags.length - deleteTags.length}
+                            numberOfTags={selectedResultTags.length}
                             handleClick={this.props.handleTagBtnClick('')}
+                            setTagDivRef={this.setTagDivRef}
+                            setTagInputRef={this.setTagInputRef}
                         >
                             <div>
                                 {this.renderTagsOptions()}
@@ -214,8 +288,17 @@ class OverviewContainer extends Component {
         )
     }
 
+    handleOutsideClick(e) {
+        if (this.tagDiv && !this.tagDiv.contains(e.target)) {
+            this.props.handleTagBtnClick('')()
+        }
+    }
+
+    handleKeyBoardUp(e) {
+        // console.log("e1: ", e)
+    }
+
     render() {
-        console.log(this.props)
         return (
             <Overview
                 {...this.props}
@@ -247,6 +330,7 @@ const mapStateToProps = state => ({
     resultTags: selectors.resultTags(state),
     deleteTags: selectors.deleteTags(state),
     suggestedTags: selectors.suggestedTags(state),
+    emptyTagOptions: selectors.emptyTagOptions(state),
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -278,13 +362,19 @@ const mapDispatchToProps = dispatch => ({
         if (event) {
             event.preventDefault()
         }
+
         dispatch(actions.pageIdForTag(pageId))
         dispatch(actions.FetchInitResultTags())
-        dispatch(actions.deleteTags([]))
+        dispatch(actions.suggestedTags([]))
     },
     onTagSearchChange: event => {
         const tagInput = event.target
         dispatch(actions.produceNewTag(tagInput.value))
+        if (tagInput.value === '') {
+            dispatch(actions.suggestedTags([]))
+        } else {
+            dispatch(actions.suggestTagFromOverview(event.target.value))
+        }
     },
     addTags: tag => {
         dispatch(actions.addTagsFromOverview(tag))

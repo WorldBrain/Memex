@@ -8,11 +8,13 @@ const TagOption = ({
     handleClick,
     newTag,
     addTagsToReverseDoc,
+    setTagInputFocus,
 }) => (
     <div
         className={localStyles.menuItem}
-        onClick={() =>
-            newTag === 1 ? addTagsToReverseDoc(data) : handleClick(data)}
+        onClick={() => {
+            newTag === 1 ? setTagInputFocus(data) : handleClick(data)
+        }}
     >
         {newTag === 1 ? 'add new: ' + data : data}
         {active && <i className="material-icons">done</i>}
@@ -25,6 +27,7 @@ TagOption.propTypes = {
     handleClick: PropTypes.func.isRequired,
     newTag: PropTypes.number.isRequired,
     addTagsToReverseDoc: PropTypes.func.isRequired,
+    setTagInputFocus: PropTypes.func.isRequired,
 }
 
 export default TagOption
