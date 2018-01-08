@@ -106,20 +106,22 @@ class OverviewContainer extends Component {
                 onTagBtnClick={this.props.handleTagBtnClick}
                 {...doc}
             >
-                {doc._id === pageIdForTag && (
-                    <Tags
-                        onTagSearchChange={this.props.onTagSearchChange}
-                        setInputRef={this.setInputRef}
-                        onTagSearchEnter={this.props.onTagSearchEnter}
-                        numberOfTags={resultTags.length - deleteTags.length}
-                        handleClick={this.props.handleTagBtnClick('')}
-                    >
-                        <div>
-                            {this.renderTagsOptions()}
-                            {this.renderNewTagOption()}
-                        </div>
-                    </Tags>
-                )}
+                <div>
+                    {doc._id === pageIdForTag && (
+                        <Tags
+                            onTagSearchChange={this.props.onTagSearchChange}
+                            setInputRef={this.setInputRef}
+                            onTagSearchEnter={this.props.onTagSearchEnter}
+                            numberOfTags={resultTags.length - deleteTags.length}
+                            handleClick={this.props.handleTagBtnClick('')}
+                        >
+                            <div>
+                                {this.renderTagsOptions()}
+                                {this.renderNewTagOption()}
+                            </div>
+                        </Tags>
+                    )}
+                </div>
             </PageResultItem>
         ))
 

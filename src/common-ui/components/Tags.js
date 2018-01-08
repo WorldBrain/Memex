@@ -41,7 +41,7 @@ const Tags = ({
 )
 
 Tags.propTypes = {
-    children: PropTypes.arrayOf(PropTypes.element).isRequired,
+    children: PropTypes.object.isRequired,
     onTagSearchChange: PropTypes.func.isRequired,
     setInputRef: PropTypes.func.isRequired,
     onTagSearchEnter: PropTypes.func.isRequired,

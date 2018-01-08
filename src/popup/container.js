@@ -458,7 +458,7 @@ class PopupContainer extends Component {
                     newTag={1}
                     handleClick={
                         suggestedTags.indexOf(newTag) === -1
-                            ? this.addToSuggestedTag(newTag)
+                            ? this.addTagsToReverseDoc
                             : this.removeFromSuggestedTag(newTag)
                     }
                     addTagsToReverseDoc={this.addTagsToReverseDoc}
@@ -485,7 +485,7 @@ class PopupContainer extends Component {
                             active={resultTags.indexOf(data) !== -1}
                             handleClick={
                                 resultTags.indexOf(data) === -1
-                                    ? this.addToSuggestedTag(data)
+                                    ? this.addTagsToReverseDoc
                                     : this.removeFromSuggestedTag(data)
                             }
                             newTag={1}
