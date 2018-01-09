@@ -1,6 +1,8 @@
 // Local storage keys used for analytics-related logic
 export const STORAGE_KEYS = {
-    // Used for timestamp of last daily install ping (tracks rough # of installs)
+    // Used for timestamp of last install ping (tracks rough # of installs in period)
+    MONTHLY_INSTALL: 'last-monthly-install-ping-timestamp',
+    WEEKLY_INSTALL: 'last-weekly-install-ping-timestamp',
     DAILY_INSTALL: 'last-daily-install-ping-timestamp',
 
     // Used for timestamps of periodic activity pings (tracks # of in/active users for periods of time)

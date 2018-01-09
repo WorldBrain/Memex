@@ -14,27 +14,31 @@ const getDaysInMonth = (date = new Date()) =>
 
 /**
  * @param {'month'|'week'|'day'} period
+ * @returns {any} Object containing different constants that apply to specific period.
  */
 const getActivePeriodVars = period => {
     switch (period) {
         case 'month':
             return {
-                storageKey: STORAGE_KEYS.WEEKLY_ACTIVITY,
-                action: 'Monthly activity ping',
-                numDays: getDaysInMonth(),
+                installKey: STORAGE_KEYS.MONTHLY_INSTALL,
+                activityKey: STORAGE_KEYS.MONTHLY_ACTIVITY,
+                action: 'Monthly',
+                time: getDaysInMonth() * DAY_IN_MS,
             }
         case 'week':
             return {
-                storageKey: STORAGE_KEYS.WEEKLY_ACTIVITY,
-                action: 'Weekly activity ping',
-                numDays: 7,
+                installKey: STORAGE_KEYS.WEEKLY_INSTALL,
+                activityKey: STORAGE_KEYS.WEEKLY_ACTIVITY,
+                action: 'Weekly',
+                time: 7 * DAY_IN_MS,
             }
         case 'day':
         default:
             return {
-                storageKey: STORAGE_KEYS.DAILY_ACTIVITY,
-                action: 'Daily activity ping',
-                numDays: 1,
+                installKey: STORAGE_KEYS.DAILY_INSTALL,
+                activityKey: STORAGE_KEYS.DAILY_ACTIVITY,
+                action: 'Daily',
+                time: 1 * DAY_IN_MS,
             }
     }
 }
@@ -44,76 +48,59 @@ const getActivePeriodVars = period => {
  * @returns {() => Promise<void>} Function affording checking of the last activity event ping for specified time `period`,
  *  sending off a new event if determined to be needed.
  */
-const attemptActiveUserPing = period => {
-    const { storageKey, action, numDays } = getActivePeriodVars(period)
+function attemptPeriodicPing(period) {
+    const periodConsts = getActivePeriodVars(period)
 
     return async function() {
         const now = Date.now()
         const {
-            [storageKey]: lastPing,
+            [periodConsts.activityKey]: lastActivityPing,
+            [periodConsts.installKey]: lastInstallPing,
             [STORAGE_KEYS.SEARCH]: lastSearch,
         } = await browser.storage.local.get({
-            [storageKey]: 0,
+            [periodConsts.activityKey]: 0,
+            [periodConsts.installKey]: 0,
             [STORAGE_KEYS.SEARCH]: 0,
         })
 
-        // If at least `numDays` since the last active user ping, track event
-        if (now - lastPing >= DAY_IN_MS * numDays) {
+        // If at least the period time since the last active user ping, try to track event
+        if (now - lastActivityPing >= periodConsts.time) {
             // Only send the event if last search done within current period (active user)
-            if (now - lastSearch < DAY_IN_MS * numDays) {
-                analytics.trackEvent({ category: 'Periodic', action })
+            if (now - lastSearch < periodConsts.time) {
+                analytics.trackEvent({
+                    category: 'Periodic',
+                    action: `${period.action} activity ping`,
+                })
             }
 
             // Update last ping time to stop further attempts in current period, regardless if active event was sent
-            browser.storage.local.set({ [storageKey]: now })
+            await browser.storage.local.set({ [periodConsts.activityKey]: now })
+        }
+
+        // If at least the period time since the last install ping, track event
+        if (now - lastInstallPing >= periodConsts.time) {
+            analytics.trackEvent({
+                category: 'Periodic',
+                action: `${periodConsts.action} install ping`,
+            })
+
+            await browser.storage.local.set({ [periodConsts.installKey]: now })
         }
     }
 }
 
+const createPeriodicEventJob = period =>
+    new CronJob({
+        cronTime: SCHEDULES.EVERY_HOUR(),
+        start: true,
+        onTick: attemptPeriodicPing(period),
+    })
+
+// Schedule all periodic ping attempts at a random minute past the hour, every hour
 const jobs = [
-    new CronJob({
-        cronTime: SCHEDULES.EVERY_HOUR(),
-        start: true,
-        /**
-         * Sends a custom non-user-invoked event to signify an installed extension.
-         */
-        async onTick() {
-            const now = Date.now()
-            const {
-                [STORAGE_KEYS.DAILY_INSTALL]: lastPing,
-            } = await browser.storage.local.get({
-                [STORAGE_KEYS.DAILY_INSTALL]: 0,
-            })
-
-            // If at least a day since the last install ping, do it again and update timestamp
-            if (now - lastPing >= DAY_IN_MS) {
-                await analytics.trackEvent({
-                    category: 'Periodic',
-                    action: 'Install ping',
-                })
-
-                await browser.storage.local.set({
-                    [STORAGE_KEYS.DAILY_INSTALL]: now,
-                })
-            }
-        },
-    }),
-    // User activity jobs
-    new CronJob({
-        cronTime: SCHEDULES.EVERY_HOUR(),
-        start: true,
-        onTick: attemptActiveUserPing('week'),
-    }),
-    new CronJob({
-        cronTime: SCHEDULES.EVERY_HOUR(),
-        start: true,
-        onTick: attemptActiveUserPing('month'),
-    }),
-    new CronJob({
-        cronTime: SCHEDULES.EVERY_HOUR(),
-        start: true,
-        onTick: attemptActiveUserPing('day'),
-    }),
+    createPeriodicEventJob('month'),
+    createPeriodicEventJob('week'),
+    createPeriodicEventJob('day'),
 ]
 
 export default jobs
