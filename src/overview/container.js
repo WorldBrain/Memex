@@ -41,19 +41,24 @@ class OverviewContainer extends Component {
         onTagSearchEnter: PropTypes.func.isRequired,
         suggestedTags: PropTypes.arrayOf(PropTypes.string).isRequired,
         emptyTagOptions: PropTypes.bool.isRequired,
+        hoveredTagResult: PropTypes.string.isRequired,
+        changeHoveredTag: PropTypes.func.isRequired,
+        tagSearchValue: PropTypes.string.isRequired,
     }
 
     constructor() {
         super()
 
         this.handleOutsideClick = this.handleOutsideClick.bind(this)
-        this.handleKeyBoardUp = this.handleKeyBoardUp.bind(this)
+        this.handleKeyBoardDown = this.handleKeyBoardDown.bind(this)
         this.setTagInputFocus = this.setTagInputFocus.bind(this)
+        this.handleTagEnter = this.handleTagEnter.bind(this)
     }
 
     componentWillMount() {
         document.addEventListener('click', this.handleOutsideClick, false)
-        document.addEventListener('keyup', this.handleKeyBoardUp, false)
+        document.addEventListener('keydown', this.handleKeyBoardDown, false)
+        document.addEventListener('keypress', this.handleTagEnter, false)
     }
 
     componentDidMount() {
@@ -64,7 +69,8 @@ class OverviewContainer extends Component {
 
     componentWillUnmount() {
         document.removeEventListener('click', this.handleOutsideClick, false)
-        document.removeEventListener('keyup', this.handleKeyBoardUp, false)
+        document.removeEventListener('keydown', this.handleKeyBoardDown, false)
+        document.removeEventListener('keypress', this.handleTagEnter, false)
     }
 
     setInputRef = element => {
@@ -80,9 +86,8 @@ class OverviewContainer extends Component {
     }
 
     setTagInputFocus(data) {
-        console.log(this.tagInput)
-        this.tagInput.focus()
         this.props.addTags(data)
+        this.tagInput.focus()
     }
 
     findIndexValue(a, tag) {
@@ -90,7 +95,7 @@ class OverviewContainer extends Component {
     }
 
     renderNewTagOption() {
-        const { newTag } = this.props
+        const { newTag, hoveredTagResult } = this.props
         if (newTag.length !== 0) {
             return (
                 <TagOption
@@ -99,6 +104,7 @@ class OverviewContainer extends Component {
                     newTag={1}
                     addTagsToReverseDoc={this.props.addTags}
                     setTagInputFocus={this.setTagInputFocus}
+                    hovered={hoveredTagResult === newTag}
                 />
             )
         }
@@ -106,7 +112,7 @@ class OverviewContainer extends Component {
     }
 
     renderOptions(tags, isSuggested) {
-        const { resultTags } = this.props
+        const { resultTags, hoveredTagResult } = this.props
 
         return tags.map(
             (data, index) =>
@@ -124,7 +130,7 @@ class OverviewContainer extends Component {
                                 : data['isSelected']
                         }
                         newTag={0}
-                        addTagsToReverseDoc={this.props.addTags}
+                        addTagsToReverseDoc={this.setTagInputFocus}
                         handleClick={
                             (isSuggested
                             ? this.findIndexValue(resultTags, data) !== -1
@@ -134,9 +140,13 @@ class OverviewContainer extends Component {
                               : this.findIndexValue(resultTags, data) !== -1
                             : data['isSelected'])
                                 ? this.props.delTags
-                                : this.props.addTags
+                                : this.setTagInputFocus
                         }
                         setTagInputFocus={this.setTagInputFocus}
+                        hovered={
+                            hoveredTagResult ===
+                            (isSuggested ? data : data['value'])
+                        }
                     />
                 ),
         )
@@ -164,7 +174,7 @@ class OverviewContainer extends Component {
     }
 
     renderResultItems() {
-        const { pageIdForTag, resultTags } = this.props
+        const { pageIdForTag, resultTags, tagSearchValue } = this.props
         const selectedResultTags = resultTags.filter(
             tag => tag.isSelected === true,
         )
@@ -188,6 +198,7 @@ class OverviewContainer extends Component {
                             handleClick={this.props.handleTagBtnClick('')}
                             setTagDivRef={this.setTagDivRef}
                             setTagInputRef={this.setTagInputRef}
+                            tagSearchValue={tagSearchValue}
                         >
                             <div>
                                 {this.renderTagsOptions()}
@@ -294,8 +305,67 @@ class OverviewContainer extends Component {
         }
     }
 
-    handleKeyBoardUp(e) {
-        // console.log("e1: ", e)
+    handleKeyBoardDown(e) {
+        const {
+            resultTags,
+            newTag,
+            suggestedTags,
+            emptyTagOptions,
+            pageIdForTag,
+            hoveredTagResult,
+        } = this.props
+
+        if (pageIdForTag !== '') {
+            // e.preventDefault()
+            if (emptyTagOptions) {
+                this.props.changeHoveredTag(newTag)
+            }
+
+            if (suggestedTags.length !== 0) {
+                const index = suggestedTags.indexOf(hoveredTagResult)
+
+                if (e.keyCode === 40) {
+                    if (index !== suggestedTags.length - 1) {
+                        this.props.changeHoveredTag(suggestedTags[index + 1])
+                    }
+                } else if (e.keyCode === 38) {
+                    if (index !== 0) {
+                        this.props.changeHoveredTag(suggestedTags[index - 1])
+                    }
+                }
+            } else if (newTag.length !== 0) {
+                this.props.changeHoveredTag(newTag)
+            } else {
+                const index = this.findIndexValue(resultTags, hoveredTagResult)
+                if (e.keyCode === 40) {
+                    if (index !== resultTags.length - 1) {
+                        this.props.changeHoveredTag(resultTags[index + 1].value)
+                    }
+                } else if (e.keyCode === 38) {
+                    if (index !== 0) {
+                        this.props.changeHoveredTag(resultTags[index - 1].value)
+                    }
+                }
+            }
+        }
+    }
+
+    handleTagEnter(e) {
+        const { pageIdForTag, hoveredTagResult, resultTags } = this.props
+        if (e.keyCode === 13 && pageIdForTag !== '') {
+            e.preventDefault()
+            const index = this.findIndexValue(resultTags, hoveredTagResult)
+
+            if (index === -1) {
+                this.setTagInputFocus(hoveredTagResult)
+            } else {
+                if (resultTags[index].isSelected) {
+                    this.props.delTags(hoveredTagResult)
+                } else {
+                    this.setTagInputFocus(hoveredTagResult)
+                }
+            }
+        }
     }
 
     render() {
@@ -331,6 +401,8 @@ const mapStateToProps = state => ({
     deleteTags: selectors.deleteTags(state),
     suggestedTags: selectors.suggestedTags(state),
     emptyTagOptions: selectors.emptyTagOptions(state),
+    hoveredTagResult: selectors.hoveredTagResult(state),
+    tagSearchValue: selectors.tagSearchValue(state),
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -370,6 +442,8 @@ const mapDispatchToProps = dispatch => ({
     onTagSearchChange: event => {
         const tagInput = event.target
         dispatch(actions.produceNewTag(tagInput.value))
+        dispatch(actions.tagSearchValue(tagInput.value))
+
         if (tagInput.value === '') {
             dispatch(actions.suggestedTags([]))
         } else {
@@ -378,6 +452,7 @@ const mapDispatchToProps = dispatch => ({
     },
     addTags: tag => {
         dispatch(actions.addTagsFromOverview(tag))
+        dispatch(actions.tagSearchValue(''))
     },
     delTags: tag => {
         dispatch(actions.delTagsFromOverview(tag))
@@ -387,6 +462,9 @@ const mapDispatchToProps = dispatch => ({
             event.preventDefault()
             dispatch(actions.addTagsFromOverviewOnEnter(event.target.value))
         }
+    },
+    changeHoveredTag: tag => {
+        dispatch(actions.hoveredTagResult(tag))
     },
 })
 

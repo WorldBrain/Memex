@@ -10,6 +10,7 @@ const Tags = ({
     onTagSearchEnter,
     numberOfTags,
     handleClick,
+    tagSearch,
 }) => (
     <div>
         <form className={styles.searchContainer}>
@@ -18,9 +19,9 @@ const Tags = ({
                 name="query"
                 placeholder="Search & Add Tag(s)"
                 onChange={onTagSearchChange}
-                onKeyDown={onTagSearchEnter}
                 ref={setInputRef}
                 autoComplete="off"
+                value={tagSearch}
             />
             <i className="material-icons">search</i>
         </form>
@@ -48,6 +49,7 @@ Tags.propTypes = {
     onTagSearchEnter: PropTypes.func.isRequired,
     numberOfTags: PropTypes.number.isRequired,
     handleClick: PropTypes.func.isRequired,
+    tagSearch: PropTypes.string.isRequired,
 }
 
 export default Tags

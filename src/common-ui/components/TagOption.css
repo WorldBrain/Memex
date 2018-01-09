@@ -10,6 +10,10 @@
     }
 }
 
+.hoveredMenuItem {
+    background-color: #f7f7f7;
+}
+
 .menuItem i {
     font-size: 12px;
     float: right;
@@ -84,4 +88,8 @@
     z-index: 20;
     margin-left: 500px;
     background-color: #f2f2f2;
+}
+
+.bold {
+    font-weight: bold;
 }

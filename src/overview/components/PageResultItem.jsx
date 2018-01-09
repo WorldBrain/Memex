@@ -48,23 +48,23 @@ const PageResultItem = props => (
                 <div className={styles.url}>{props.url}</div>
                 <div className={styles.time}>
                     {niceTime(+props.displayTime)}
+                    <div className={styles.buttonsContainer}>
+                        <button
+                            className={classNames(styles.button, styles.tag)}
+                            onClick={props.onTagBtnClick(props._id)}
+                        />
+                        <button
+                            disabled={props.isDeleting}
+                            className={classNames(styles.button, styles.trash)}
+                            onClick={props.onTrashBtnClick}
+                        />
+                        <button
+                            disabled={props.isDeleting}
+                            className={getBookmarkClass(props)}
+                            onClick={props.onToggleBookmarkClick}
+                        />
+                    </div>
                 </div>
-            </div>
-            <div className={styles.buttonsContainer}>
-                <button
-                    disabled={props.isDeleting}
-                    className={getBookmarkClass(props)}
-                    onClick={props.onToggleBookmarkClick}
-                />
-                <button
-                    disabled={props.isDeleting}
-                    className={classNames(styles.button, styles.trash)}
-                    onClick={props.onTrashBtnClick}
-                />
-                <button
-                    className={classNames(styles.button, styles.tag)}
-                    onClick={props.onTagBtnClick(props._id)}
-                />
             </div>
         </a>
         {props.showOrNot && props.children}

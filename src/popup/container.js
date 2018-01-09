@@ -73,6 +73,9 @@ class PopupContainer extends Component {
         this.addTagsToReverseDoc = this.addTagsToReverseDoc.bind(this)
         this.focusInput = this.focusInput.bind(this)
         this.onTagSearchEnter = this.onTagSearchEnter.bind(this)
+
+        this.handleKeyBoardDown = this.handleKeyBoardDown.bind(this)
+        this.handleTagEnter = this.handleTagEnter.bind(this)
     }
 
     state = {
@@ -92,6 +95,13 @@ class PopupContainer extends Component {
         suggestedTags: [],
         tagButttonState: false,
         newTag: '',
+        tagSearch: '',
+        hoveredTagResult: '',
+    }
+
+    componentWillMount() {
+        document.addEventListener('keydown', this.handleKeyBoardDown, false)
+        document.addEventListener('keypress', this.handleTagEnter, false)
     }
 
     async componentDidMount() {
@@ -126,6 +136,74 @@ class PopupContainer extends Component {
             .catch(noop)
     }
 
+    componentWillUnmount() {
+        document.removeEventListener('keydown', this.handleKeyBoardDown, false)
+        document.removeEventListener('keypress', this.handleTagEnter, false)
+    }
+
+    async handleKeyBoardDown(e) {
+        const { resultTags, newTag, suggestedTags, url } = this.state
+
+        let { hoveredTagResult } = this.state
+
+        const pageId = await generatePageDocId({ url })
+
+        if (pageId !== '') {
+            // e.preventDefault()
+
+            if (suggestedTags.length !== 0) {
+                const index = suggestedTags.indexOf(hoveredTagResult)
+
+                if (e.keyCode === 40) {
+                    if (index !== suggestedTags.length - 1) {
+                        hoveredTagResult = suggestedTags[index + 1]
+                    }
+                } else if (e.keyCode === 38) {
+                    if (index !== 0) {
+                        hoveredTagResult = suggestedTags[index - 1]
+                    }
+                }
+            } else if (newTag.length !== 0) {
+                hoveredTagResult = newTag
+            } else {
+                const index = findIndexValue(resultTags, hoveredTagResult)
+                if (e.keyCode === 40) {
+                    if (index !== resultTags.length - 1) {
+                        hoveredTagResult = resultTags[index + 1].value
+                    }
+                } else if (e.keyCode === 38) {
+                    if (index !== 0) {
+                        hoveredTagResult = resultTags[index - 1].value
+                    }
+                }
+            }
+        }
+
+        this.setState(state => ({
+            ...state,
+            hoveredTagResult: hoveredTagResult,
+        }))
+    }
+
+    async handleTagEnter(e) {
+        const { hoveredTagResult, resultTags } = this.state
+
+        if (e.keyCode === 13) {
+            e.preventDefault()
+            const index = findIndexValue(resultTags, hoveredTagResult)
+
+            if (index === -1) {
+                this.addTagsToReverseDoc(hoveredTagResult)
+            } else {
+                if (resultTags[index].isSelected) {
+                    this.removeFromSuggestedTag(hoveredTagResult)()
+                } else {
+                    this.addTagsToReverseDoc(hoveredTagResult)
+                }
+            }
+        }
+    }
+
     async getInitTagsState(url) {
         return { tagButttonState: isLoggable({ url }) }
     }
@@ -133,11 +211,20 @@ class PopupContainer extends Component {
     async getInitResultTags(url) {
         const pageId = await generatePageDocId({ url })
         const res = await this.fetchTags(pageId)
+        let hoveredTagResult = ''
         res.sort()
         const tags = []
         for (let i = 0; i < res.length; i++) {
+            if (i === 0) {
+                hoveredTagResult = res[i]
+            }
             tags.push({ isSelected: true, value: res[i] })
         }
+
+        this.setState(state => ({
+            ...state,
+            hoveredTagResult: hoveredTagResult,
+        }))
 
         return { resultTags: tags }
     }
@@ -172,9 +259,16 @@ class PopupContainer extends Component {
 
     async changeSuggestedtags(term) {
         const res = await this.suggestTags(term)
+        let { hoveredTagResult } = this.state
+
+        if (res.length > 0) {
+            hoveredTagResult = res[0]
+        }
+
         this.setState(state => ({
             ...state,
             suggestedTags: res,
+            hoveredTagResult: hoveredTagResult,
         }))
     }
 
@@ -340,7 +434,7 @@ class PopupContainer extends Component {
     }
 
     async addTagsToReverseDoc(tag) {
-        const { url, resultTags, newTag } = this.state
+        const { url, resultTags } = this.state
         const pageId = await generatePageDocId({ url })
         const index = findIndexValue(resultTags, tag)
 
@@ -352,15 +446,14 @@ class PopupContainer extends Component {
             resultTags[index].isSelected = true
         }
 
-        if (newTag === tag) {
-            this.focusInput()
-        }
+        this.focusInput()
 
         this.setState(state => ({
             ...state,
             resultTags: resultTags,
             newTag: '',
             suggestedTags: [],
+            tagSearch: '',
         }))
     }
 
@@ -406,16 +499,13 @@ class PopupContainer extends Component {
 
     async onTagSearchChange(event) {
         const { resultTags } = this.state
-        let tagSearchValue = event.target.value
+        const tagSearchValue = event.target.value
         const index = findIndexValue(resultTags, tagSearchValue)
-
-        if (index !== -1) {
-            tagSearchValue = ''
-        }
 
         this.setState(state => ({
             ...state,
-            newTag: tagSearchValue,
+            newTag: index === -1 ? tagSearchValue : '',
+            tagSearch: tagSearchValue,
         }))
 
         if (tagSearchValue !== '') {
@@ -436,7 +526,7 @@ class PopupContainer extends Component {
     }
 
     renderNewTagOption() {
-        const { newTag, suggestedTags } = this.state
+        const { newTag, suggestedTags, hoveredTagResult } = this.state
         if (newTag.length !== 0) {
             return (
                 <TagOption
@@ -449,6 +539,7 @@ class PopupContainer extends Component {
                             : this.removeFromSuggestedTag(newTag)
                     }
                     addTagsToReverseDoc={this.addTagsToReverseDoc}
+                    hover={hoveredTagResult === newTag}
                 />
             )
         }
@@ -456,7 +547,8 @@ class PopupContainer extends Component {
     }
 
     renderOptions(tags, isSuggested) {
-        const { resultTags } = this.state
+        const { resultTags, hoveredTagResult } = this.state
+
         return tags.map(
             (data, index) =>
                 data !== '' && (
@@ -484,6 +576,10 @@ class PopupContainer extends Component {
                                       isSuggested ? data : data['value'],
                                   )
                                 : this.addTagsToReverseDoc
+                        }
+                        hover={
+                            hoveredTagResult ===
+                            (isSuggested ? data : data['value'])
                         }
                     />
                 ),
@@ -529,6 +625,7 @@ class PopupContainer extends Component {
             isPaused,
             tagSelected,
             resultTags,
+            tagSearch,
         } = this.state
         const selectedResultTags = resultTags.filter(
             tag => tag.isSelected === true,
@@ -551,6 +648,7 @@ class PopupContainer extends Component {
                     onTagSearchEnter={this.onTagSearchEnter}
                     numberOfTags={selectedResultTags.length}
                     handleClick={this.setTagSelected}
+                    tagSearch={tagSearch}
                 >
                     <div>
                         {this.renderTagsOptions()}
