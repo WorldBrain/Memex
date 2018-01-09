@@ -13,7 +13,13 @@ const TagOption = ({
         className={localStyles.menuItem}
         onClick={() => (newTag ? addTagsToReverseDoc(data) : handleClick(data))}
     >
-        {newTag === 1 ? 'add new: ' + data : data}
+        {newTag === 1 ? (
+            <div>
+                <span className={localStyles.bold}>add new: </span> {data}
+            </div>
+        ) : (
+            data
+        )}
         {active && <i className="material-icons">done</i>}
     </div>
 )

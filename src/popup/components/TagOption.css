@@ -44,3 +44,7 @@
     border: none;
     border-radius: 5px;
 }
+
+.bold {
+    font-weight: bold;
+}
