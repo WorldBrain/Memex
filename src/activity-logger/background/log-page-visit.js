@@ -1,7 +1,6 @@
 import db from 'src/pouchdb'
 import storePage from 'src/page-storage/store-page'
 import { generatePageDocId } from 'src/page-storage'
-import { blacklist } from 'src/blacklist/background'
 import { generateVisitDocId, visitKeyPrefix } from '..'
 import * as index from 'src/search'
 import tabTracker from './tab-time-tracker'
@@ -53,12 +52,6 @@ async function updateIndex(storePageResult, visit, pageId) {
 
 export async function logPageVisit({ tabId, url }) {
     const threshold = 20000
-
-    // First check if we want to log this page (hence the 'maybe' in the name).
-    const isBlacklisted = await blacklist.checkWithBlacklist()
-    if (isBlacklisted({ url })) {
-        return
-    }
 
     const { visitTime } = tabTracker.getTabState(tabId)
 

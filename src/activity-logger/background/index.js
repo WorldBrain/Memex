@@ -3,6 +3,7 @@ import noop from 'lodash/fp/noop'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import { whenPageDOMLoaded, whenTabActive } from 'src/util/tab-events'
 import { updateTimestampMetaConcurrent } from 'src/search'
+import { blacklist } from 'src/blacklist/background'
 import { logPageVisit } from './log-page-visit'
 import initPauser from './pause-logging'
 import tabTracker from './tab-time-tracker'
@@ -12,9 +13,25 @@ import { isLoggable, getPauseState, visitKeyPrefix } from '..'
 const toggleLoggingPause = initPauser()
 makeRemotelyCallable({ toggleLoggingPause })
 
-// Combines all "logibility" conditions for logging on given tab data
-const shouldLogTab = async tab =>
-    tab.url && isLoggable(tab) && !await getPauseState()
+/**
+ * Combines all "logibility" conditions for logging on given tab data to determine
+ * whether or not a tab should be logged.
+ *
+ * @param {tabs.Tab}
+ * @returns {Promise<boolean>}
+ */
+async function shouldLogTab(tab) {
+    // Short-circuit before async logic, if possible
+    if (!tab.url || !isLoggable(tab)) {
+        return false
+    }
+
+    // First check if we want to log this page (hence the 'maybe' in the name).
+    const isBlacklisted = await blacklist.checkWithBlacklist()
+    const isPaused = await getPauseState()
+
+    return !isPaused && !isBlacklisted(tab)
+}
 
 /**
  * Handles update of assoc. visit with derived tab state data, using the tab state.

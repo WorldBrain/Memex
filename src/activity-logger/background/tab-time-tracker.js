@@ -134,6 +134,5 @@ export class TabTimeTracker {
 
 // Set up tab time tracker state to work with tab events
 const tracker = new TabTimeTracker()
-window.tracker = tracker
 
 export default tracker
