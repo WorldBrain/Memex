@@ -133,6 +133,7 @@ class PopupContainer extends Component {
     async getInitResultTags(url) {
         const pageId = await generatePageDocId({ url })
         const res = await this.fetchTagsForPage(pageId)
+        res.sort()
         const tags = []
         for (let i = 0; i < res.length; i++) {
             tags.push({ isSelected: true, value: res[i] })
@@ -346,7 +347,7 @@ class PopupContainer extends Component {
         await this.addTags(pageId, [tag])
 
         if (index === -1) {
-            resultTags.push({ isSelected: true, value: tag })
+            resultTags.unshift({ isSelected: true, value: tag })
         } else if (!resultTags[index].isSelected) {
             resultTags[index].isSelected = true
         }
@@ -423,10 +424,15 @@ class PopupContainer extends Component {
     }
 
     setTagSelected = () => {
+        const { tagSelected } = this.state
+
         this.setState(state => ({
             ...state,
             tagSelected: !this.state.tagSelected,
         }))
+        if (tagSelected) {
+            window.close()
+        }
     }
 
     renderNewTagOption() {

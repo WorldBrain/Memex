@@ -35,12 +35,25 @@ class OverviewContainer extends Component {
         handleTagBtnClick: PropTypes.func.isRequired,
         newTag: PropTypes.string.isRequired,
         onTagSearchChange: PropTypes.func.isRequired,
-        resultTags: PropTypes.arrayOf(PropTypes.string).isRequired,
+        resultTags: PropTypes.arrayOf(PropTypes.object).isRequired,
         addTags: PropTypes.func.isRequired,
         delTags: PropTypes.func.isRequired,
         onTagSearchEnter: PropTypes.func.isRequired,
         suggestedTags: PropTypes.arrayOf(PropTypes.string).isRequired,
         emptyTagOptions: PropTypes.bool.isRequired,
+    }
+
+    constructor() {
+        super()
+
+        this.handleOutsideClick = this.handleOutsideClick.bind(this)
+        this.handleKeyBoardUp = this.handleKeyBoardUp.bind(this)
+        this.setTagInputFocus = this.setTagInputFocus.bind(this)
+    }
+
+    componentWillMount() {
+        document.addEventListener('click', this.handleOutsideClick, false)
+        document.addEventListener('keyup', this.handleKeyBoardUp, false)
     }
 
     componentDidMount() {
@@ -49,8 +62,27 @@ class OverviewContainer extends Component {
         }
     }
 
+    componentWillUnmount() {
+        document.removeEventListener('click', this.handleOutsideClick, false)
+        document.removeEventListener('keyup', this.handleKeyBoardUp, false)
+    }
+
     setInputRef = element => {
         this.inputQueryEl = element
+    }
+
+    setTagDivRef = element => {
+        this.tagDiv = element
+    }
+
+    setTagInputRef = element => {
+        this.tagInput = element
+    }
+
+    setTagInputFocus(data) {
+        console.log(this.tagInput)
+        this.tagInput.focus()
+        this.props.addTags(data)
     }
 
     findIndexValue(a, tag) {
@@ -66,6 +98,7 @@ class OverviewContainer extends Component {
                     active={false}
                     newTag={1}
                     addTagsToReverseDoc={this.props.addTags}
+                    setTagInputFocus={this.setTagInputFocus}
                 />
             )
         }
@@ -103,6 +136,7 @@ class OverviewContainer extends Component {
                                 ? this.props.delTags
                                 : this.props.addTags
                         }
+                        setTagInputFocus={this.setTagInputFocus}
                     />
                 ),
         )
@@ -152,6 +186,8 @@ class OverviewContainer extends Component {
                             onTagSearchEnter={this.props.onTagSearchEnter}
                             numberOfTags={selectedResultTags.length}
                             handleClick={this.props.handleTagBtnClick('')}
+                            setTagDivRef={this.setTagDivRef}
+                            setTagInputRef={this.setTagInputRef}
                         >
                             <div>
                                 {this.renderTagsOptions()}
@@ -252,6 +288,16 @@ class OverviewContainer extends Component {
         )
     }
 
+    handleOutsideClick(e) {
+        if (this.tagDiv && !this.tagDiv.contains(e.target)) {
+            this.props.handleTagBtnClick('')()
+        }
+    }
+
+    handleKeyBoardUp(e) {
+        // console.log("e1: ", e)
+    }
+
     render() {
         return (
             <Overview
@@ -316,6 +362,7 @@ const mapDispatchToProps = dispatch => ({
         if (event) {
             event.preventDefault()
         }
+
         dispatch(actions.pageIdForTag(pageId))
         dispatch(actions.FetchInitResultTags())
         dispatch(actions.suggestedTags([]))
