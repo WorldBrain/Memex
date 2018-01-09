@@ -1,4 +1,5 @@
 import { bookmarkKeyPrefix } from 'src/bookmarks'
+import { visitKeyPrefix } from 'src/activity-logger'
 import index, { indexQueue } from '.'
 import pipeline from './pipeline'
 import {
@@ -224,18 +225,17 @@ async function performIndexing(indexDoc) {
  * Adds a meta (bookmark or visit) entry into specified reverse index doc.
  * NOTE: Assumes the existence of indexed `pageId`.
  *
- * @param {'bookmark'|'visit'} type Type of meta event.
  * @param {string} pageId ID of page doc to associate with.
- * @param {string} timestamp Timestamp of meta event.
-
+ * @param {string} timestampKey Key of timestamp event to add.
  */
-async function addMetaToReversePage(type, pageId, timestamp) {
+async function addTimestamp(pageId, timestampKey) {
     const reverseIndexDoc = await singleLookup(pageId)
-    if (type === 'visit') {
-        reverseIndexDoc.visits.add('visit/' + timestamp)
-    } else {
-        reverseIndexDoc.bookmarks.add('bookmark/' + timestamp)
-    }
+    const metaSet = timestampKey.startsWith(visitKeyPrefix)
+        ? reverseIndexDoc.visits
+        : reverseIndexDoc.bookmarks
+
+    metaSet.add(timestampKey)
+
     await index.put(pageId, reverseIndexDoc)
 }
 
@@ -243,18 +243,15 @@ async function addMetaToReversePage(type, pageId, timestamp) {
  * Adds a new meta index (bookmark or visit) entry.
  * NOTE: Assumes the existence of indexed `pageId`.
  *
- * @param {'bookmark'|'visit'} type Type of meta event.
- * @param {string} timestamp Timestamp of meta event.
  * @param {string} pageId ID of page doc to associate with.
+ * @param {string} timestampKey Key of timestamp event to add.
  * @param {any} [meta={}] Object of any associated meta data to store with the indexed event value.
  */
-export const addTimestampConcurrent = (type, timestamp, pageId, meta = {}) =>
+export const addTimestampConcurrent = (pageId, timestampKey, meta = {}) =>
     new Promise((resolve, reject) =>
         indexQueue.push(() => {
-            addMetaToReversePage(type, pageId, timestamp)
-                .then(() =>
-                    index.put(`${type}/${timestamp}`, { pageId, ...meta }),
-                )
+            addTimestamp(pageId, timestampKey)
+                .then(() => index.put(timestampKey, { pageId, ...meta }))
                 .then(resolve)
                 .catch(reject)
         }),

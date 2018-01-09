@@ -27,9 +27,8 @@ export async function storeVisit({ timestamp, url, page }) {
 async function updateIndex(storePageResult, visit, pageId) {
     if (storePageResult == null) {
         await index.addTimestampConcurrent(
-            visitKeyPrefix,
-            visit.visitStart,
             pageId,
+            visitKeyPrefix + visit.visitStart,
         )
     } else {
         // Wait until all page analyis is done
