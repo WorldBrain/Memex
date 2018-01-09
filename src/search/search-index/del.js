@@ -1,11 +1,5 @@
 import index, { indexQueue } from '.'
-import {
-    initSingleLookup,
-    initLookupByKeys,
-    idbBatchToPromise,
-    fetchExistingPage,
-    keyGen,
-} from './util'
+import { initSingleLookup, initLookupByKeys, idbBatchToPromise } from './util'
 
 const singleLookup = initSingleLookup()
 
@@ -52,49 +46,6 @@ export const delPagesConcurrent = pageIds =>
     new Promise((resolve, reject) =>
         indexQueue.push(() =>
             delPages(pageIds)
-                .then(resolve)
-                .catch(reject),
-        ),
-    )
-
-/**
- * @param {string} pageId ID of existing page to remove association with tags from.
- * @param {string[]} tags Array of tags to remove association from page.
- * @returns {Promise<void>}
- */
-async function delTags(pageId, tags) {
-    const reverseIndexDoc = await fetchExistingPage(pageId)
-
-    // Convert all input tags into tags index keys
-    const keyedTags = tags.map(keyGen.tag)
-
-    // Remove all tag keys to reverse index doc
-    keyedTags.forEach(tagKey => reverseIndexDoc.tags.delete(tagKey))
-
-    // Remove entries to tags index + update reverse index doc
-    return await Promise.all([
-        ...keyedTags.map(async tagKey => {
-            const value = await singleLookup(tagKey)
-
-            if (value == null) {
-                return Promise.resolve() // Skip current if non-existent
-            }
-
-            value.delete(pageId) // Remove page from current indexed tag value
-
-            // Remove tag index entry if no more assoc. page entries left in value, else just update
-            return value.size
-                ? await index.put(tagKey, value)
-                : await index.del(tagKey)
-        }),
-        index.put(pageId, reverseIndexDoc), // Also update reverse index doc
-    ])
-}
-
-export const delTagsConcurrent = (...args) =>
-    new Promise((resolve, reject) =>
-        indexQueue.push(() =>
-            delTags(...args)
                 .then(resolve)
                 .catch(reject),
         ),

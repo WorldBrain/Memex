@@ -1,5 +1,5 @@
-import index from './'
-import { keyGen, removeKeyType } from './util'
+import index from '../'
+import { keyGen, removeKeyType } from '../util'
 
 /**
  * @param {string} [query=''] Plaintext query string to match against start of tag names.
@@ -30,7 +30,7 @@ const suggestTags = (query = '', limit = 10) =>
  * @param {string} pageId The ID of the page to fetch associated tags for.
  * @returns {Promise<string[]>} Resolves to an array of tags associated with `pageId` - will be empty if none.
  */
-export const fetchTagsForPage = pageId =>
+export const fetchTags = pageId =>
     index
         .get(pageId, { asBuffer: false })
         .then(({ tags = [] }) => [...tags].map(removeKeyType))
