@@ -1,6 +1,12 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import localStyles from './TagOption.css'
+import classNames from 'classnames'
+
+const getOptionClass = hovered =>
+    classNames(localStyles.menuItem, {
+        [localStyles.hoveredMenuItem]: hovered,
+    })
 
 const TagOption = ({
     data,
@@ -8,9 +14,10 @@ const TagOption = ({
     handleClick,
     newTag,
     addTagsToReverseDoc,
+    hover,
 }) => (
     <div
-        className={localStyles.menuItem}
+        className={getOptionClass(hover)}
         onClick={() => (newTag ? addTagsToReverseDoc(data) : handleClick(data))}
     >
         {newTag === 1 ? (
@@ -30,6 +37,7 @@ TagOption.propTypes = {
     handleClick: PropTypes.func.isRequired,
     newTag: PropTypes.number.isRequired,
     addTagsToReverseDoc: PropTypes.func.isRequired,
+    hover: PropTypes.bool.isRequired,
 }
 
 export default TagOption

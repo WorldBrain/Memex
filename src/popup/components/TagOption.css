@@ -48,3 +48,7 @@
 .bold {
     font-weight: bold;
 }
+
+.hoveredMenuItem {
+    background-color: #f7f7f7;
+}
