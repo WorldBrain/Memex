@@ -8,7 +8,6 @@ import {
     termRangeLookup,
     idbBatchToPromise,
     fetchExistingPage,
-    keyGen,
 } from './util'
 
 // Used to decide whether or not to do a range lookup for terms (if # terms gt) or N single lookups
@@ -31,56 +30,6 @@ const singleLookup = initSingleLookup()
  */
 
 export const put = (key, val) => index.put(key, val)
-
-/**
- * @param {string} pageId ID of existing page to associate tags with.
- * @param {string[]} tags Array of tags to associate with page.
- * @returns {Promise<void>}
- */
-async function addTags(pageId, tags) {
-    const reverseIndexDoc = await fetchExistingPage(pageId)
-
-    // Init tags Set if not present
-    if (reverseIndexDoc.tags == null) {
-        reverseIndexDoc.tags = new Set()
-    }
-
-    // Convert all input tags into tags index keys
-    const keyedTags = tags.map(keyGen.tag)
-
-    // Add all tag keys to reverse index doc
-    keyedTags.forEach(tagKey => reverseIndexDoc.tags.add(tagKey))
-
-    // Value entry to add to tags index Map value
-    const indexEntry = [pageId, { latest: reverseIndexDoc.latest }]
-
-    // Add entries to tags index + update reverse index doc
-    return await Promise.all([
-        ...keyedTags.map(async tagKey => {
-            let value = await singleLookup(tagKey)
-
-            if (value != null) {
-                value.set(...indexEntry) // Update existing tag key
-            } else {
-                value = new Map([indexEntry]) // Make new Map value for non-existent tag key
-            }
-            return await index.put(tagKey, value)
-        }),
-        index.put(pageId, reverseIndexDoc), // Also update reverse index doc
-    ])
-}
-
-/**
- * Concurrency-safe (via index queue) wrapper around `addTags`.
- */
-export const addTagsConcurrent = (...args) =>
-    new Promise((resolve, reject) =>
-        indexQueue.push(() =>
-            addTags(...args)
-                .then(resolve)
-                .catch(reject),
-        ),
-    )
 
 /**
  * Adds a new page doc + any associated visit/bookmark docs to the index. This method

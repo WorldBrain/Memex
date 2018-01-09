@@ -1,13 +1,18 @@
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import searchConnectionHandler from './search-connection-handler'
-import { addTagsConcurrent } from '../search-index/add'
-import { delTagsConcurrent } from '../search-index/del'
-import suggestTags, { fetchTagsForPage } from '../search-index/tag-suggestions'
+import {
+    setTags,
+    addTags,
+    delTags,
+    suggestTags,
+    fetchTags,
+} from '../search-index/tags'
 
 makeRemotelyCallable({
-    addTags: addTagsConcurrent,
-    delTags: delTagsConcurrent,
-    fetchTagsForPage,
+    addTags,
+    delTags,
+    setTags,
+    fetchTags,
     suggestTags,
 })
 
