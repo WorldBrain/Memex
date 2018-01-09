@@ -11,6 +11,7 @@ const Tags = ({
     handleClick,
     setTagDivRef,
     setTagInputRef,
+    tagSearchValue,
 }) => (
     <div className={localStyles.tagDiv} ref={setTagDivRef}>
         <form className={localStyles.searchContainer}>
@@ -21,6 +22,7 @@ const Tags = ({
                 onChange={onTagSearchChange}
                 ref={setTagInputRef}
                 autoComplete="off"
+                value={tagSearchValue}
             />
             <i className="material-icons">search</i>
         </form>
@@ -50,6 +52,7 @@ Tags.propTypes = {
     handleClick: PropTypes.func.isRequired,
     setTagDivRef: PropTypes.func.isRequired,
     setTagInputRef: PropTypes.func.isRequired,
+    tagSearchValue: PropTypes.string.isRequired,
 }
 
 export default Tags

@@ -92,6 +92,7 @@ class PopupContainer extends Component {
         suggestedTags: [],
         tagButttonState: false,
         newTag: '',
+        tagSearch: '',
     }
 
     async componentDidMount() {
@@ -340,7 +341,7 @@ class PopupContainer extends Component {
     }
 
     async addTagsToReverseDoc(tag) {
-        const { url, resultTags, newTag } = this.state
+        const { url, resultTags } = this.state
         const pageId = await generatePageDocId({ url })
         const index = findIndexValue(resultTags, tag)
 
@@ -352,15 +353,14 @@ class PopupContainer extends Component {
             resultTags[index].isSelected = true
         }
 
-        if (newTag === tag) {
-            this.focusInput()
-        }
+        this.focusInput()
 
         this.setState(state => ({
             ...state,
             resultTags: resultTags,
             newTag: '',
             suggestedTags: [],
+            tagSearch: '',
         }))
     }
 
@@ -406,16 +406,13 @@ class PopupContainer extends Component {
 
     async onTagSearchChange(event) {
         const { resultTags } = this.state
-        let tagSearchValue = event.target.value
+        const tagSearchValue = event.target.value
         const index = findIndexValue(resultTags, tagSearchValue)
-
-        if (index !== -1) {
-            tagSearchValue = ''
-        }
 
         this.setState(state => ({
             ...state,
-            newTag: tagSearchValue,
+            newTag: index === -1 ? tagSearchValue : '',
+            tagSearch: tagSearchValue,
         }))
 
         if (tagSearchValue !== '') {
@@ -529,6 +526,7 @@ class PopupContainer extends Component {
             isPaused,
             tagSelected,
             resultTags,
+            tagSearch,
         } = this.state
         const selectedResultTags = resultTags.filter(
             tag => tag.isSelected === true,
@@ -551,6 +549,7 @@ class PopupContainer extends Component {
                     onTagSearchEnter={this.onTagSearchEnter}
                     numberOfTags={selectedResultTags.length}
                     handleClick={this.setTagSelected}
+                    tagSearch={tagSearch}
                 >
                     <div>
                         {this.renderTagsOptions()}

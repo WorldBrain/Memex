@@ -43,20 +43,21 @@ class OverviewContainer extends Component {
         emptyTagOptions: PropTypes.bool.isRequired,
         hoveredTagResult: PropTypes.string.isRequired,
         changeHoveredTag: PropTypes.func.isRequired,
+        tagSearchValue: PropTypes.string.isRequired,
     }
 
     constructor() {
         super()
 
         this.handleOutsideClick = this.handleOutsideClick.bind(this)
-        this.handleKeyBoardUp = this.handleKeyBoardUp.bind(this)
+        this.handleKeyBoardDown = this.handleKeyBoardDown.bind(this)
         this.setTagInputFocus = this.setTagInputFocus.bind(this)
         this.handleTagEnter = this.handleTagEnter.bind(this)
     }
 
     componentWillMount() {
         document.addEventListener('click', this.handleOutsideClick, false)
-        document.addEventListener('keyup', this.handleKeyBoardUp, false)
+        document.addEventListener('keydown', this.handleKeyBoardDown, false)
         document.addEventListener('keypress', this.handleTagEnter, false)
     }
 
@@ -68,7 +69,7 @@ class OverviewContainer extends Component {
 
     componentWillUnmount() {
         document.removeEventListener('click', this.handleOutsideClick, false)
-        document.removeEventListener('keyup', this.handleKeyBoardUp, false)
+        document.removeEventListener('keydown', this.handleKeyBoardDown, false)
         document.removeEventListener('keypress', this.handleTagEnter, false)
     }
 
@@ -85,8 +86,8 @@ class OverviewContainer extends Component {
     }
 
     setTagInputFocus(data) {
-        this.tagInput.focus()
         this.props.addTags(data)
+        this.tagInput.focus()
     }
 
     findIndexValue(a, tag) {
@@ -129,7 +130,7 @@ class OverviewContainer extends Component {
                                 : data['isSelected']
                         }
                         newTag={0}
-                        addTagsToReverseDoc={this.props.addTags}
+                        addTagsToReverseDoc={this.setTagInputFocus}
                         handleClick={
                             (isSuggested
                             ? this.findIndexValue(resultTags, data) !== -1
@@ -139,7 +140,7 @@ class OverviewContainer extends Component {
                               : this.findIndexValue(resultTags, data) !== -1
                             : data['isSelected'])
                                 ? this.props.delTags
-                                : this.props.addTags
+                                : this.setTagInputFocus
                         }
                         setTagInputFocus={this.setTagInputFocus}
                         hovered={
@@ -173,7 +174,7 @@ class OverviewContainer extends Component {
     }
 
     renderResultItems() {
-        const { pageIdForTag, resultTags } = this.props
+        const { pageIdForTag, resultTags, tagSearchValue } = this.props
         const selectedResultTags = resultTags.filter(
             tag => tag.isSelected === true,
         )
@@ -197,6 +198,7 @@ class OverviewContainer extends Component {
                             handleClick={this.props.handleTagBtnClick('')}
                             setTagDivRef={this.setTagDivRef}
                             setTagInputRef={this.setTagInputRef}
+                            tagSearchValue={tagSearchValue}
                         >
                             <div>
                                 {this.renderTagsOptions()}
@@ -303,7 +305,7 @@ class OverviewContainer extends Component {
         }
     }
 
-    handleKeyBoardUp(e) {
+    handleKeyBoardDown(e) {
         const {
             resultTags,
             newTag,
@@ -314,6 +316,7 @@ class OverviewContainer extends Component {
         } = this.props
 
         if (pageIdForTag !== '') {
+            // e.preventDefault()
             if (emptyTagOptions) {
                 this.props.changeHoveredTag(newTag)
             }
@@ -321,7 +324,6 @@ class OverviewContainer extends Component {
             if (suggestedTags.length !== 0) {
                 const index = suggestedTags.indexOf(hoveredTagResult)
 
-                console.log(index, suggestedTags, hoveredTagResult)
                 if (e.keyCode === 40) {
                     if (index !== suggestedTags.length - 1) {
                         this.props.changeHoveredTag(suggestedTags[index + 1])
@@ -351,17 +353,16 @@ class OverviewContainer extends Component {
     handleTagEnter(e) {
         const { pageIdForTag, hoveredTagResult, resultTags } = this.props
         if (e.keyCode === 13 && pageIdForTag !== '') {
-            event.preventDefault()
+            e.preventDefault()
             const index = this.findIndexValue(resultTags, hoveredTagResult)
 
-            console.log(index)
             if (index === -1) {
-                this.props.addTags(hoveredTagResult)
+                this.setTagInputFocus(hoveredTagResult)
             } else {
                 if (resultTags[index].isSelected) {
                     this.props.delTags(hoveredTagResult)
                 } else {
-                    this.props.addTags(hoveredTagResult)
+                    this.setTagInputFocus(hoveredTagResult)
                 }
             }
         }
@@ -401,6 +402,7 @@ const mapStateToProps = state => ({
     suggestedTags: selectors.suggestedTags(state),
     emptyTagOptions: selectors.emptyTagOptions(state),
     hoveredTagResult: selectors.hoveredTagResult(state),
+    tagSearchValue: selectors.tagSearchValue(state),
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -440,6 +442,8 @@ const mapDispatchToProps = dispatch => ({
     onTagSearchChange: event => {
         const tagInput = event.target
         dispatch(actions.produceNewTag(tagInput.value))
+        dispatch(actions.tagSearchValue(tagInput.value))
+
         if (tagInput.value === '') {
             dispatch(actions.suggestedTags([]))
         } else {
@@ -448,6 +452,7 @@ const mapDispatchToProps = dispatch => ({
     },
     addTags: tag => {
         dispatch(actions.addTagsFromOverview(tag))
+        dispatch(actions.tagSearchValue(''))
     },
     delTags: tag => {
         dispatch(actions.delTagsFromOverview(tag))
