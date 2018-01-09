@@ -60,7 +60,7 @@ class PopupContainer extends Component {
         this.removeBookmarkByUrl = remoteFunction('removeBookmarkByUrl')
         this.createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
         this.suggestTags = remoteFunction('suggestTags')
-        this.fetchTagsForPage = remoteFunction('fetchTagsForPage')
+        this.fetchTags = remoteFunction('fetchTags')
         this.addTags = remoteFunction('addTags')
         this.delTags = remoteFunction('delTags')
 
@@ -132,7 +132,7 @@ class PopupContainer extends Component {
 
     async getInitResultTags(url) {
         const pageId = await generatePageDocId({ url })
-        const res = await this.fetchTagsForPage(pageId)
+        const res = await this.fetchTags(pageId)
         res.sort()
         const tags = []
         for (let i = 0; i < res.length; i++) {

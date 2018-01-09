@@ -40,7 +40,7 @@ export const suggestedTags = createAction('overview/suggestedTags')
 const deleteDocsByUrl = remoteFunction('deleteDocsByUrl')
 const createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
 const removeBookmarkByUrl = remoteFunction('removeBookmarkByUrl')
-const fetchTagsForPage = remoteFunction('fetchTagsForPage')
+const fetchTags = remoteFunction('fetchTags')
 const suggestTags = remoteFunction('suggestTags')
 const addTags = remoteFunction('addTags')
 const delTags = remoteFunction('delTags')
@@ -217,7 +217,7 @@ function findIndexValue(a, tag) {
 export const FetchInitResultTags = () => async (dispatch, getState) => {
     const state = getState()
     const pageId = selectors.pageIdForTag(state)
-    const tagsFromBackend = await fetchTagsForPage(pageId)
+    const tagsFromBackend = await fetchTags(pageId)
 
     tagsFromBackend.sort()
 
