@@ -36,6 +36,7 @@ export const newTag = createAction('overview/newTag')
 export const resultTags = createAction('overview/resultTags')
 export const deleteTags = createAction('overview/deleteTags')
 export const suggestedTags = createAction('overview/suggestedTags')
+export const hoveredTagResult = createAction('overview/hoveredTagResult')
 
 const deleteDocsByUrl = remoteFunction('deleteDocsByUrl')
 const createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
@@ -223,6 +224,9 @@ export const FetchInitResultTags = () => async (dispatch, getState) => {
 
     const tags = []
     for (let i = 0; i < tagsFromBackend.length; i++) {
+        if (i === 0) {
+            dispatch(hoveredTagResult(tagsFromBackend[i]))
+        }
         tags.push({ isSelected: true, value: tagsFromBackend[i] })
     }
 
@@ -291,5 +295,11 @@ export const addTagsFromOverviewOnEnter = tag => async (dispatch, getState) => {
 
 export const suggestTagFromOverview = term => async (dispatch, getState) => {
     const tags = await suggestTags(term)
+    tags.sort()
+    if (tags.length >= 1) {
+        dispatch(hoveredTagResult(tags[0]))
+    } else {
+        dispatch(hoveredTagResult(''))
+    }
     dispatch(suggestedTags(tags))
 }

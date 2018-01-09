@@ -156,6 +156,7 @@ export const newTag = state => overview(state).newTag
 export const resultTags = state => overview(state).resultTags
 export const deleteTags = state => overview(state).deleteTags
 export const suggestedTags = state => overview(state).suggestedTags
+export const hoveredTagResult = state => overview(state).hoveredTagResult
 
 export const emptyTagOptions = createSelector(
     newTag,

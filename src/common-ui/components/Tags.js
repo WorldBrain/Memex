@@ -19,7 +19,6 @@ const Tags = ({
                 name="query"
                 placeholder="Search & Add Tag(s)"
                 onChange={onTagSearchChange}
-                onKeyDown={onTagSearchEnter}
                 ref={setTagInputRef}
                 autoComplete="off"
             />
