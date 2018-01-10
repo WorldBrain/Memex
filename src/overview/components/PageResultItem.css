@@ -196,3 +196,8 @@
         background-image: url('/img/tag.png');
     }
 }
+
+.tagList {
+    margin-left: 15px;
+    max-width: 200px;
+}

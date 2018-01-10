@@ -1,0 +1,11 @@
+.tagname {
+    color: #3eb995;
+    padding: 1px 5px 1px 5px;
+    border-radius: 5px;
+}
+
+.notExpanded {
+    background-color: #3eb995;
+    color: white;
+    margin-left: 5px;
+}

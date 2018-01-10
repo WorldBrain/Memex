@@ -527,7 +527,7 @@ class PopupContainer extends Component {
 
     renderNewTagOption() {
         const { newTag, suggestedTags, hoveredTagResult } = this.state
-        if (newTag.length !== 0) {
+        if (newTag.length !== 0 && suggestedTags.indexOf(newTag) === -1) {
             return (
                 <TagOption
                     data={newTag}
