@@ -35,6 +35,7 @@ const defaultState = {
     deleteTags: [],
     hoveredTagResult: '',
     tagSearchValue: '',
+    tags: [],
 }
 
 function setQuery(state, query) {
@@ -171,6 +172,7 @@ export default createReducer(
         [actions.deleteTags]: payloadReducer('deleteTags'),
         [actions.hoveredTagResult]: payloadReducer('hoveredTagResult'),
         [actions.tagSearchValue]: payloadReducer('tagSearchValue'),
+        [actions.tags]: payloadReducer('tags'),
     },
     defaultState,
 )

@@ -38,6 +38,7 @@ export const deleteTags = createAction('overview/deleteTags')
 export const suggestedTags = createAction('overview/suggestedTags')
 export const hoveredTagResult = createAction('overview/hoveredTagResult')
 export const tagSearchValue = createAction('overview/tagSearchValue')
+export const tags = createAction('overview/tags')
 
 const deleteDocsByUrl = remoteFunction('deleteDocsByUrl')
 const createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
@@ -102,11 +103,13 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
     const currentQueryParams = selectors.currentQueryParams(state)
     const skip = selectors.resultsSkip(state)
     const showOnlyBookmarks = selectors.showOnlyBookmarks(state)
+    const tags = selectors.tags(state)
 
     const searchParams = {
         ...currentQueryParams,
         getTotalCount: true,
         showOnlyBookmarks,
+        tags,
         limit: constants.PAGE_SIZE,
         skip,
     }
@@ -303,4 +306,9 @@ export const suggestTagFromOverview = term => async (dispatch, getState) => {
         dispatch(hoveredTagResult(''))
     }
     dispatch(suggestedTags(tags))
+}
+
+export const searchByTags = tag => async (dispatch, getState) => {
+    dispatch(tags([tag, 'UI']))
+    dispatch(search({ overwrite: true }))
 }

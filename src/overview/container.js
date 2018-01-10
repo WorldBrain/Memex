@@ -45,6 +45,7 @@ class OverviewContainer extends Component {
         hoveredTagResult: PropTypes.string.isRequired,
         changeHoveredTag: PropTypes.func.isRequired,
         tagSearchValue: PropTypes.string.isRequired,
+        filterTag: PropTypes.func.isRequired,
     }
 
     constructor() {
@@ -212,6 +213,7 @@ class OverviewContainer extends Component {
                     tagnm={data.split('/')[1]}
                     key={index}
                     expandButton={0}
+                    handleClick={this.props.filterTag}
                 />
             ))
     }
@@ -433,6 +435,7 @@ const mapStateToProps = state => ({
     emptyTagOptions: selectors.emptyTagOptions(state),
     hoveredTagResult: selectors.hoveredTagResult(state),
     tagSearchValue: selectors.tagSearchValue(state),
+    tags: selectors.tags(state),
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -495,6 +498,10 @@ const mapDispatchToProps = dispatch => ({
     },
     changeHoveredTag: tag => {
         dispatch(actions.hoveredTagResult(tag))
+    },
+    filterTag: tag => event => {
+        event.preventDefault()
+        dispatch(actions.searchByTags(tag))
     },
 })
 

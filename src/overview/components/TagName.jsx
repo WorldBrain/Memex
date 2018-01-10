@@ -9,12 +9,15 @@ const getTagClass = tagnm =>
         [localStyles.notExpanded]: !(tagnm === '+1'),
     })
 
-const TagName = ({ tagnm }) => (
-    <span className={getTagClass(tagnm)}>{tagnm}</span>
+const TagName = ({ tagnm, handleClick }) => (
+    <span className={getTagClass(tagnm)} onClick={e => handleClick(tagnm)(e)}>
+        {tagnm}
+    </span>
 )
 
 TagName.propTypes = {
     tagnm: PropTypes.string.isRequired,
+    handleClick: PropTypes.func.isRequired,
 }
 
 export default TagName
