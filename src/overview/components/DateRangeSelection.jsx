@@ -82,16 +82,9 @@ class DateRangeSelection extends Component {
             action: nlpDate ? 'Successful NLP query' : 'Unsuccessful NLP query',
         })
 
+        // Get the time from the NLP query, if it could be parsed
         if (nlpDate != null) {
-            const dateToChange = nlpDate.getTime()
-
-            // Set input value state to be date format
-            this.setState(state => ({
-                ...state,
-                [stateKey]: moment(dateToChange).format(FORMAT),
-            }))
-
-            return dateToChange
+            return nlpDate.getTime()
         }
 
         // Reset input value state as NLP value invalid
