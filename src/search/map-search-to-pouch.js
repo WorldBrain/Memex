@@ -65,7 +65,7 @@ const createResultsMap = searchParams =>
                 timestamp: getLatestTime(result.document, searchParams),
                 score: result.score,
                 hasBookmark: result.document.bookmarks.size > 0,
-                tags: result.document.tags || new Set(),
+                tags: [...(result.document.tags || [])],
             }),
         new Map(),
     )
