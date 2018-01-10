@@ -80,6 +80,10 @@
     &::placeholder {
         color: #3eb995;
     }
+
+    &:focus {
+        outline-color: #3eb995;
+    }
 }
 
 .tagDiv {
