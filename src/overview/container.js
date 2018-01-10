@@ -220,7 +220,7 @@ class OverviewContainer extends Component {
 
     renderExpandTagButton(tags) {
         if (tags.length >= 3) {
-            return <TagName tagnm={'+1'} expandButton={1} />
+            return <TagName tagnm={'+' + (tags.length - 3)} expandButton={1} />
         }
         return null
     }
