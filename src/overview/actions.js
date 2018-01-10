@@ -39,6 +39,7 @@ export const suggestedTags = createAction('overview/suggestedTags')
 export const hoveredTagResult = createAction('overview/hoveredTagResult')
 export const tagSearchValue = createAction('overview/tagSearchValue')
 export const tags = createAction('overview/tags')
+export const tagExpandedPageId = createAction('overview/tagExpandedPageId')
 
 const deleteDocsByUrl = remoteFunction('deleteDocsByUrl')
 const createBookmarkByUrl = remoteFunction('createBookmarkByUrl')

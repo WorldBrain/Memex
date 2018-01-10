@@ -52,7 +52,11 @@ const PageResultItem = props => (
                     <div className={styles.buttonsContainer}>
                         <button
                             className={classNames(styles.button, styles.tag)}
-                            onClick={props.onTagBtnClick(props._id)}
+                            onClick={e =>
+                                props.onTagBtnClick(
+                                    props.OpenOrClose ? props._id : '',
+                                    e,
+                                )}
                         />
                         <button
                             disabled={props.isDeleting}
@@ -85,6 +89,7 @@ PageResultItem.propTypes = {
     tagItem: PropTypes.object.isRequired,
     onTagBtnClick: PropTypes.func.isRequired,
     _id: PropTypes.string.isRequired,
+    OpenOrClose: PropTypes.bool.isRequired,
 }
 
 export default PageResultItem

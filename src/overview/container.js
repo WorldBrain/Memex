@@ -46,6 +46,8 @@ class OverviewContainer extends Component {
         changeHoveredTag: PropTypes.func.isRequired,
         tagSearchValue: PropTypes.string.isRequired,
         filterTag: PropTypes.func.isRequired,
+        tagExpandedPageId: PropTypes.string.isRequired,
+        tagExpand: PropTypes.func.isRequired,
     }
 
     constructor() {
@@ -55,6 +57,9 @@ class OverviewContainer extends Component {
         this.handleKeyBoardDown = this.handleKeyBoardDown.bind(this)
         this.setTagInputFocus = this.setTagInputFocus.bind(this)
         this.handleTagEnter = this.handleTagEnter.bind(this)
+        this.handleTagBtnClickAndFocus = this.handleTagBtnClickAndFocus.bind(
+            this,
+        )
     }
 
     componentWillMount() {
@@ -190,7 +195,7 @@ class OverviewContainer extends Component {
                         setInputRef={this.setInputRef}
                         onTagSearchEnter={this.props.onTagSearchEnter}
                         numberOfTags={selectedResultTags.length}
-                        handleClick={this.props.handleTagBtnClick('')}
+                        handleClick={this.props.handleTagBtnClick}
                         setTagDivRef={this.setTagDivRef}
                         setTagInputRef={this.setTagInputRef}
                         tagSearchValue={tagSearchValue}
@@ -205,39 +210,74 @@ class OverviewContainer extends Component {
         )
     }
 
-    renderTagsNameInPageResultItem(tags) {
-        return tags
-            .slice(0, 3)
-            .map((data, index) => (
+    renderTagsNameInPageResultItem(tags, pageId) {
+        const { tagExpandedPageId } = this.props
+
+        if (tagExpandedPageId === pageId) {
+            return tags.map((data, index) => (
                 <TagName
                     tagnm={data.split('/')[1]}
                     key={index}
                     expandButton={0}
                     handleClick={this.props.filterTag}
+                    pageId={pageId}
                 />
             ))
+        } else {
+            return tags
+                .slice(0, 3)
+                .map((data, index) => (
+                    <TagName
+                        tagnm={data.split('/')[1]}
+                        key={index}
+                        expandButton={0}
+                        handleClick={this.props.filterTag}
+                        pageId={pageId}
+                    />
+                ))
+        }
     }
 
-    renderExpandTagButton(tags) {
-        if (tags.length >= 3) {
-            return <TagName tagnm={'+' + (tags.length - 3)} expandButton={1} />
+    renderExpandTagButton(tags, pageId) {
+        const { tagExpandedPageId } = this.props
+
+        if (tags.length >= 3 && tagExpandedPageId !== pageId) {
+            return (
+                <TagName
+                    tagnm={'+' + (tags.length - 3)}
+                    expandButton={1}
+                    handleClick={this.props.tagExpand}
+                    pageId={pageId}
+                />
+            )
         }
         return null
     }
 
+    handleTagBtnClickAndFocus(pageId, event) {
+        console.log(pageId, event)
+        this.props.handleTagBtnClick(pageId, event)
+        if (this.tagInput) {
+            this.tagInput.focus()
+        }
+    }
+
     renderResultItems() {
+        const { pageIdForTag } = this.props
+
         const resultItems = this.props.searchResults.map((doc, i) => (
             <PageResultItem
                 key={i}
                 onTrashBtnClick={this.props.handleTrashBtnClick(doc.url, i)}
                 onToggleBookmarkClick={this.props.handleToggleBm(doc.url, i)}
                 tagItem={this.renderTags(doc._id)}
-                onTagBtnClick={this.props.handleTagBtnClick}
+                onTagBtnClick={this.handleTagBtnClickAndFocus}
+                OpenOrClose={pageIdForTag === ''}
                 {...doc}
             >
                 <span>
-                    {this.renderTagsNameInPageResultItem(doc.tags)}
-                    {this.renderExpandTagButton(doc.tags)}
+                    {this.renderTagsNameInPageResultItem(doc.tags, doc._id)}
+                    {this.renderExpandTagButton(doc.tags, doc._id)}
                 </span>
             </PageResultItem>
         ))
@@ -333,7 +373,7 @@ class OverviewContainer extends Component {
 
     handleOutsideClick(e) {
         if (this.tagDiv && !this.tagDiv.contains(e.target)) {
-            this.props.handleTagBtnClick('')()
+            this.props.handleTagBtnClick('', e)
         }
     }
 
@@ -436,6 +476,7 @@ const mapStateToProps = state => ({
     hoveredTagResult: selectors.hoveredTagResult(state),
     tagSearchValue: selectors.tagSearchValue(state),
     tags: selectors.tags(state),
+    tagExpandedPageId: selectors.tagExpandedPageId(state),
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -463,7 +504,7 @@ const mapDispatchToProps = dispatch => ({
         event.preventDefault()
         dispatch(actions.toggleBookmark(url, index))
     },
-    handleTagBtnClick: pageId => event => {
+    handleTagBtnClick: (pageId, event) => {
         if (event) {
             event.preventDefault()
         }
@@ -502,6 +543,10 @@ const mapDispatchToProps = dispatch => ({
     filterTag: tag => event => {
         event.preventDefault()
         dispatch(actions.searchByTags(tag))
+    },
+    tagExpand: pageId => event => {
+        event.preventDefault()
+        dispatch(actions.tagExpandedPageId(pageId))
     },
 })
 

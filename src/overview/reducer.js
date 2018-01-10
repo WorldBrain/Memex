@@ -36,6 +36,7 @@ const defaultState = {
     hoveredTagResult: '',
     tagSearchValue: '',
     tags: [],
+    tagExpandedPageId: '',
 }
 
 function setQuery(state, query) {
@@ -173,6 +174,7 @@ export default createReducer(
         [actions.hoveredTagResult]: payloadReducer('hoveredTagResult'),
         [actions.tagSearchValue]: payloadReducer('tagSearchValue'),
         [actions.tags]: payloadReducer('tags'),
+        [actions.tagExpandedPageId]: payloadReducer('tagExpandedPageId'),
     },
     defaultState,
 )
