@@ -1,13 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import classNames from 'classnames'
 
 import localStyles from './Filters.css'
-
-const iconClasses = classNames({
-    'material-icons': true,
-    [localStyles.icon]: true,
-})
 
 const Filters = ({
     showOnlyBookmarks,
@@ -29,9 +23,14 @@ const Filters = ({
                 </span>
             </label>
         </div>
-        <div onClick={onShowFilterChange} className={localStyles.clear}>
-            <i className={iconClasses}>clear</i>
-        </div>
+        {showOnlyBookmarks && (
+            <div
+                onClick={onShowOnlyBookmarksChange}
+                className={localStyles.clear}
+            >
+                Clear Filters
+            </div>
+        )}
     </div>
 )
 
