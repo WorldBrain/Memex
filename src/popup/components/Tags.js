@@ -7,9 +7,7 @@ const Tags = ({
     children,
     onTagSearchChange,
     setInputRef,
-    onTagSearchEnter,
     numberOfTags,
-    handleClick,
     tagSearch,
 }) => (
     <div>
@@ -30,14 +28,6 @@ const Tags = ({
             <div className={localStyles.numberTags}>
                 {numberOfTags} tag selected
             </div>
-            <div className={localStyles.tagDone}>
-                <button
-                    className={localStyles.tagDoneButton}
-                    onClick={() => handleClick()}
-                >
-                    Done
-                </button>
-            </div>
         </div>
     </div>
 )
@@ -46,9 +36,7 @@ Tags.propTypes = {
     children: PropTypes.arrayOf(PropTypes.element).isRequired,
     onTagSearchChange: PropTypes.func.isRequired,
     setInputRef: PropTypes.func.isRequired,
-    onTagSearchEnter: PropTypes.func.isRequired,
     numberOfTags: PropTypes.number.isRequired,
-    handleClick: PropTypes.func.isRequired,
     tagSearch: PropTypes.string.isRequired,
 }
 

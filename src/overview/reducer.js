@@ -35,6 +35,8 @@ const defaultState = {
     deleteTags: [],
     hoveredTagResult: '',
     tagSearchValue: '',
+    tags: [],
+    indexDocFortag: -1,
 }
 
 function setQuery(state, query) {
@@ -122,6 +124,65 @@ const changeHasBookmark = (state, index) => {
     return { ...state, searchResult }
 }
 
+const changeTagsResult = (state, { index, tag, isDelete }) => {
+    const currResult = state.searchResult.docs[index]
+    const tags = currResult.tags
+
+    if (isDelete) {
+        tags.splice(tags.indexOf(tags), 1)
+    } else {
+        tags.push('tag/' + tag)
+    }
+
+    const searchResult = {
+        ...state.searchResult,
+        docs: [
+            ...state.searchResult.docs.slice(0, index),
+            {
+                ...currResult,
+                tags: tags,
+            },
+            ...state.searchResult.docs.slice(index + 1),
+        ],
+    }
+
+    return { ...state, searchResult }
+}
+
+function findIndexValue(a, tag) {
+    return a.findIndex(i => i.value === tag)
+}
+
+const addTag = (state, tag) => {
+    const tags = state.resultTags
+    const index = findIndexValue(tags, tag)
+
+    if (index === -1) {
+        tags.unshift({ isSelected: true, value: tag })
+    } else {
+        tags[index].isSelected = true
+    }
+
+    return {
+        ...state,
+        resultTags: tags,
+    }
+}
+
+const delTag = (state, tag) => {
+    const tags = state.resultTags
+    const index = findIndexValue(tags, tag)
+
+    if (index !== -1) {
+        tags[index].isSelected = false
+    }
+
+    return {
+        ...state,
+        resultTags: tags,
+    }
+}
+
 const incSearchCount = state => ({
     ...state,
     searchCount: state.searchCount + 1,
@@ -175,6 +236,12 @@ export default createReducer(
         [actions.deleteTags]: payloadReducer('deleteTags'),
         [actions.hoveredTagResult]: payloadReducer('hoveredTagResult'),
         [actions.tagSearchValue]: payloadReducer('tagSearchValue'),
+        [actions.tags]: payloadReducer('tags'),
+        [actions.tagExpandedPageId]: payloadReducer('tagExpandedPageId'),
+        [actions.changeTagsResult]: changeTagsResult,
+        [actions.indexDocFortag]: payloadReducer('indexDocFortag'),
+        [actions.addTag]: addTag,
+        [actions.delTag]: delTag,
     },
     defaultState,
 )

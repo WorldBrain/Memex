@@ -72,7 +72,6 @@ class PopupContainer extends Component {
         this.onTagSearchChange = this.onTagSearchChange.bind(this)
         this.addTagsToReverseDoc = this.addTagsToReverseDoc.bind(this)
         this.focusInput = this.focusInput.bind(this)
-        this.onTagSearchEnter = this.onTagSearchEnter.bind(this)
 
         this.handleKeyBoardDown = this.handleKeyBoardDown.bind(this)
         this.handleTagEnter = this.handleTagEnter.bind(this)
@@ -157,10 +156,15 @@ class PopupContainer extends Component {
                 if (e.keyCode === 40) {
                     if (index !== suggestedTags.length - 1) {
                         hoveredTagResult = suggestedTags[index + 1]
+                    } else if (index === suggestedTags.length - 1) {
+                        hoveredTagResult = newTag
                     }
                 } else if (e.keyCode === 38) {
-                    if (index !== 0) {
+                    if (index !== 0 && index >= 0) {
                         hoveredTagResult = suggestedTags[index - 1]
+                    } else if (index === -1) {
+                        hoveredTagResult =
+                            suggestedTags[suggestedTags.length - 1]
                     }
                 }
             } else if (newTag.length !== 0) {
@@ -259,10 +263,15 @@ class PopupContainer extends Component {
 
     async changeSuggestedtags(term) {
         const res = await this.suggestTags(term)
+        const { newTag } = this.state
         let { hoveredTagResult } = this.state
 
         if (res.length > 0) {
             hoveredTagResult = res[0]
+        } else {
+            if (newTag.length !== 0) {
+                hoveredTagResult = newTag
+            }
         }
 
         this.setState(state => ({
@@ -473,30 +482,6 @@ class PopupContainer extends Component {
         }))
     }
 
-    async onTagSearchEnter(event) {
-        const { resultTags, suggestedTags } = this.state
-        if (event.key === 'Enter') {
-            if (suggestedTags.length === 0) {
-                event.preventDefault()
-                let tagSearchValue = event.target.value
-                const index = findIndexValue(resultTags, tagSearchValue)
-
-                if (index !== -1) {
-                    tagSearchValue = ''
-                }
-
-                this.setState(state => ({
-                    ...state,
-                    newTag: tagSearchValue,
-                    suggestedTags: [],
-                }))
-                this.addTagsToReverseDoc(event.target.value)
-            } else {
-                event.preventDefault()
-            }
-        }
-    }
-
     async onTagSearchChange(event) {
         const { resultTags } = this.state
         const tagSearchValue = event.target.value
@@ -520,6 +505,7 @@ class PopupContainer extends Component {
             ...state,
             tagSelected: !this.state.tagSelected,
         }))
+
         if (tagSelected) {
             window.close()
         }
@@ -645,9 +631,7 @@ class PopupContainer extends Component {
                 <Tags
                     onTagSearchChange={this.onTagSearchChange}
                     setInputRef={this.setInputRef}
-                    onTagSearchEnter={this.onTagSearchEnter}
                     numberOfTags={selectedResultTags.length}
-                    handleClick={this.setTagSelected}
                     tagSearch={tagSearch}
                 >
                     <div>

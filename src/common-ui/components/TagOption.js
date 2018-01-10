@@ -13,9 +13,9 @@ const TagOption = ({
     active,
     handleClick,
     newTag,
-    addTagsToReverseDoc,
     setTagInputFocus,
     hovered,
+    children,
 }) => (
     <div
         className={getOptionClass(hovered)}
@@ -23,13 +23,7 @@ const TagOption = ({
             newTag === 1 ? setTagInputFocus(data) : handleClick(data)
         }}
     >
-        {newTag === 1 ? (
-            <div>
-                <span className={localStyles.bold}>add new: </span> {data}
-            </div>
-        ) : (
-            data
-        )}
+        {children}
         {active && <i className="material-icons">done</i>}
     </div>
 )
@@ -39,9 +33,9 @@ TagOption.propTypes = {
     active: PropTypes.bool.isRequired,
     handleClick: PropTypes.func.isRequired,
     newTag: PropTypes.number.isRequired,
-    addTagsToReverseDoc: PropTypes.func.isRequired,
     setTagInputFocus: PropTypes.func.isRequired,
     hovered: PropTypes.bool.isRequired,
+    children: PropTypes.object.isRequired,
 }
 
 export default TagOption

@@ -4,16 +4,20 @@ import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import Waypoint from 'react-waypoint'
 
-import { Wrapper, LoadingIndicator } from 'src/common-ui/components'
+import {
+    Wrapper,
+    LoadingIndicator,
+    Tags,
+    NoResult,
+    TagOption,
+    NewTagMsg,
+} from 'src/common-ui/components'
 import * as actions from './actions'
 import * as selectors from './selectors'
 import ResultList from './components/ResultList'
 import Overview from './components/Overview'
 import PageResultItem from './components/PageResultItem'
 import ResultsMessage from './components/ResultsMessage'
-import Tags from 'src/common-ui/components/Tags'
-import TagOption from 'src/common-ui/components/TagOption'
-import NoResult from 'src/common-ui/components/NoResult'
 import TagName from './components/TagName'
 
 class OverviewContainer extends Component {
@@ -39,12 +43,12 @@ class OverviewContainer extends Component {
         resultTags: PropTypes.arrayOf(PropTypes.object).isRequired,
         addTags: PropTypes.func.isRequired,
         delTags: PropTypes.func.isRequired,
-        onTagSearchEnter: PropTypes.func.isRequired,
         suggestedTags: PropTypes.arrayOf(PropTypes.string).isRequired,
         emptyTagOptions: PropTypes.bool.isRequired,
         hoveredTagResult: PropTypes.string.isRequired,
         changeHoveredTag: PropTypes.func.isRequired,
         tagSearchValue: PropTypes.string.isRequired,
+        filterTag: PropTypes.func.isRequired,
     }
 
     constructor() {
@@ -104,52 +108,56 @@ class OverviewContainer extends Component {
                     data={newTag}
                     active={false}
                     newTag={1}
-                    addTagsToReverseDoc={this.props.addTags}
                     setTagInputFocus={this.setTagInputFocus}
                     hovered={hoveredTagResult === newTag}
-                />
+                >
+                    <NewTagMsg data={newTag} />
+                </TagOption>
             )
         }
         return null
     }
 
+    returnTagStatus(isSuggested, tag) {
+        const { resultTags } = this.props
+        const index = this.findIndexValue(
+            resultTags,
+            isSuggested ? tag : tag['value'],
+        )
+
+        return isSuggested
+            ? index === -1 ? false : resultTags[index].isSelected
+            : resultTags[index].isSelected
+    }
+
+    renderTagValue(isSuggested, tag) {
+        return isSuggested ? tag : tag['value']
+    }
+
     renderOptions(tags, isSuggested) {
-        const { resultTags, hoveredTagResult } = this.props
+        const { hoveredTagResult } = this.props
 
         return tags.map(
             (data, index) =>
                 data !== '' && (
                     <TagOption
-                        data={isSuggested ? data : data['value']}
+                        data={this.renderTagValue(isSuggested, data)}
                         key={index}
-                        active={
-                            isSuggested
-                                ? this.findIndexValue(resultTags, data) !== -1
-                                  ? resultTags[
-                                        this.findIndexValue(resultTags, data)
-                                    ].isSelected === true
-                                  : this.findIndexValue(resultTags, data) !== -1
-                                : data['isSelected']
-                        }
+                        active={this.returnTagStatus(isSuggested, data)}
                         newTag={0}
-                        addTagsToReverseDoc={this.setTagInputFocus}
                         handleClick={
-                            (isSuggested
-                            ? this.findIndexValue(resultTags, data) !== -1
-                              ? resultTags[
-                                    this.findIndexValue(resultTags, data)
-                                ].isSelected === true
-                              : this.findIndexValue(resultTags, data) !== -1
-                            : data['isSelected'])
+                            this.returnTagStatus(isSuggested, data)
                                 ? this.props.delTags
                                 : this.setTagInputFocus
                         }
                         setTagInputFocus={this.setTagInputFocus}
                         hovered={
                             hoveredTagResult ===
-                            (isSuggested ? data : data['value'])
+                            this.renderTagValue(isSuggested, data)
                         }
-                    />
+                    >
+                        {this.renderTagValue(isSuggested, data)}
+                    </TagOption>
                 ),
         )
     }
@@ -187,9 +195,8 @@ class OverviewContainer extends Component {
                     <Tags
                         onTagSearchChange={this.props.onTagSearchChange}
                         setInputRef={this.setInputRef}
-                        onTagSearchEnter={this.props.onTagSearchEnter}
                         numberOfTags={selectedResultTags.length}
-                        handleClick={this.props.handleTagBtnClick('')}
+                        handleClick={this.props.handleTagBtnClick}
                         setTagDivRef={this.setTagDivRef}
                         setTagInputRef={this.setTagInputRef}
                         tagSearchValue={tagSearchValue}
@@ -204,21 +211,26 @@ class OverviewContainer extends Component {
         )
     }
 
-    renderTagsNameInPageResultItem(tags) {
+    renderTagsNameInPageResultItem(tags, pageId) {
         return tags
             .slice(0, 3)
             .map((data, index) => (
                 <TagName
                     tagnm={data.split('/')[1]}
                     key={index}
-                    expandButton={0}
+                    handleClick={this.props.filterTag(data.split('/')[1])}
                 />
             ))
     }
 
-    renderExpandTagButton(tags) {
-        if (tags.length >= 3) {
-            return <TagName tagnm={'+1'} expandButton={1} />
+    renderExpandTagButton(tags, pageId, i) {
+        if (tags.length > 3) {
+            return (
+                <TagName
+                    tagnm={'+' + (tags.length - 3)}
+                    handleClick={this.props.handleTagBtnClick(pageId, i)}
+                />
+            )
         }
         return null
     }
@@ -230,12 +242,12 @@ class OverviewContainer extends Component {
                 onTrashBtnClick={this.props.handleTrashBtnClick(doc.url, i)}
                 onToggleBookmarkClick={this.props.handleToggleBm(doc.url, i)}
                 tagItem={this.renderTags(doc._id)}
-                onTagBtnClick={this.props.handleTagBtnClick}
+                onTagBtnClick={this.props.handleTagBtnClick(doc._id, i)}
                 {...doc}
             >
                 <span>
-                    {this.renderTagsNameInPageResultItem(doc.tags)}
-                    {this.renderExpandTagButton(doc.tags)}
+                    {this.renderTagsNameInPageResultItem(doc.tags, doc._id)}
+                    {this.renderExpandTagButton(doc.tags, doc._id, i)}
                 </span>
             </PageResultItem>
         ))
@@ -331,7 +343,7 @@ class OverviewContainer extends Component {
 
     handleOutsideClick(e) {
         if (this.tagDiv && !this.tagDiv.contains(e.target)) {
-            this.props.handleTagBtnClick('')()
+            this.props.handleTagBtnClick('', -1)(e)
         }
     }
 
@@ -357,10 +369,19 @@ class OverviewContainer extends Component {
                 if (e.keyCode === 40) {
                     if (index !== suggestedTags.length - 1) {
                         this.props.changeHoveredTag(suggestedTags[index + 1])
+                    } else if (
+                        index === suggestedTags.length - 1 &&
+                        newTag !== ''
+                    ) {
+                        this.props.changeHoveredTag(newTag)
                     }
                 } else if (e.keyCode === 38) {
-                    if (index !== 0) {
+                    if (index !== 0 && index >= 0) {
                         this.props.changeHoveredTag(suggestedTags[index - 1])
+                    } else if (index === -1) {
+                        this.props.changeHoveredTag(
+                            suggestedTags[suggestedTags.length - 1],
+                        )
                     }
                 }
             } else if (newTag.length !== 0) {
@@ -433,6 +454,7 @@ const mapStateToProps = state => ({
     emptyTagOptions: selectors.emptyTagOptions(state),
     hoveredTagResult: selectors.hoveredTagResult(state),
     tagSearchValue: selectors.tagSearchValue(state),
+    tags: selectors.tags(state),
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -460,12 +482,10 @@ const mapDispatchToProps = dispatch => ({
         event.preventDefault()
         dispatch(actions.toggleBookmark(url, index))
     },
-    handleTagBtnClick: pageId => event => {
-        if (event) {
-            event.preventDefault()
-        }
-
+    handleTagBtnClick: (pageId, index) => event => {
+        event.preventDefault()
         dispatch(actions.pageIdForTag(pageId))
+        dispatch(actions.indexDocFortag(index))
         dispatch(actions.FetchInitResultTags())
         dispatch(actions.suggestedTags([]))
     },
@@ -487,14 +507,12 @@ const mapDispatchToProps = dispatch => ({
     delTags: tag => {
         dispatch(actions.delTagsFromOverview(tag))
     },
-    onTagSearchEnter: event => {
-        if (event.key === 'Enter') {
-            event.preventDefault()
-            dispatch(actions.addTagsFromOverviewOnEnter(event.target.value))
-        }
-    },
     changeHoveredTag: tag => {
         dispatch(actions.hoveredTagResult(tag))
+    },
+    filterTag: tag => event => {
+        event.preventDefault()
+        dispatch(actions.searchByTags(tag))
     },
 })
 

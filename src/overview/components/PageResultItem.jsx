@@ -52,7 +52,7 @@ const PageResultItem = props => (
                     <div className={styles.buttonsContainer}>
                         <button
                             className={classNames(styles.button, styles.tag)}
-                            onClick={props.onTagBtnClick(props._id)}
+                            onClick={props.onTagBtnClick}
                         />
                         <button
                             disabled={props.isDeleting}
@@ -81,10 +81,9 @@ PageResultItem.propTypes = {
     isDeleting: PropTypes.bool.isRequired,
     onTrashBtnClick: PropTypes.func.isRequired,
     onToggleBookmarkClick: PropTypes.func.isRequired,
-    children: PropTypes.arrayOf(PropTypes.string).isRequired,
+    children: PropTypes.object.isRequired,
     tagItem: PropTypes.object.isRequired,
     onTagBtnClick: PropTypes.func.isRequired,
-    _id: PropTypes.string.isRequired,
 }
 
 export default PageResultItem

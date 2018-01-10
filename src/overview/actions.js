@@ -39,6 +39,15 @@ export const deleteTags = createAction('overview/deleteTags')
 export const suggestedTags = createAction('overview/suggestedTags')
 export const hoveredTagResult = createAction('overview/hoveredTagResult')
 export const tagSearchValue = createAction('overview/tagSearchValue')
+export const tags = createAction('overview/tags')
+export const tagExpandedPageId = createAction('overview/tagExpandedPageId')
+export const changeTagsResult = createAction(
+    'overview/changeTagsResult',
+    (index, tag, isDelete) => ({ index, tag, isDelete }),
+)
+export const indexDocFortag = createAction('overview/indexDocFortag')
+export const addTag = createAction('overview/addTag')
+export const delTag = createAction('overview/delTag')
 
 const deleteDocsByUrl = remoteFunction('deleteDocsByUrl')
 const createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
@@ -103,11 +112,13 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
     const currentQueryParams = selectors.currentQueryParams(state)
     const skip = selectors.resultsSkip(state)
     const showOnlyBookmarks = selectors.showOnlyBookmarks(state)
+    const tags = selectors.tags(state)
 
     const searchParams = {
         ...currentQueryParams,
         getTotalCount: true,
         showOnlyBookmarks,
+        tags,
         limit: constants.PAGE_SIZE,
         skip,
     }
@@ -224,47 +235,34 @@ export const FetchInitResultTags = () => async (dispatch, getState) => {
 
     tagsFromBackend.sort()
 
-    const tags = []
-    for (let i = 0; i < tagsFromBackend.length; i++) {
-        if (i === 0) {
-            dispatch(hoveredTagResult(tagsFromBackend[i]))
-        }
-        tags.push({ isSelected: true, value: tagsFromBackend[i] })
+    if (tagsFromBackend.length > 0) {
+        dispatch(hoveredTagResult(tagsFromBackend[0]))
     }
-
-    dispatch(resultTags(tags))
+    dispatch(
+        resultTags(tagsFromBackend.map(value => ({ isSelected: true, value }))),
+    )
 }
 
 export const addTagsFromOverview = tag => async (dispatch, getState) => {
     const state = getState()
     const pageId = selectors.pageIdForTag(state)
-    const tags = [...selectors.resultTags(state)]
-    const index = findIndexValue(tags, tag)
-
-    if (index === -1) {
-        tags.unshift({ isSelected: true, value: tag })
-    } else if (tags[index].isSelected === false) {
-        tags[index].isSelected = true
-    }
+    const indexDocFortag = selectors.indexDocFortag(state)
 
     await addTags(pageId, [tag])
-    dispatch(resultTags(tags))
+    dispatch(addTag(tag))
     dispatch(newTag(''))
     dispatch(suggestedTags([]))
+    dispatch(changeTagsResult(indexDocFortag, tag, false))
 }
 
 export const delTagsFromOverview = tag => async (dispatch, getState) => {
     const state = getState()
     const pageId = selectors.pageIdForTag(state)
-    const tags = [...selectors.resultTags(state)]
-    const index = findIndexValue(tags, tag)
+    const indexDocFortag = selectors.indexDocFortag(state)
 
-    if (index !== -1) {
-        tags[index].isSelected = false
-        await delTags(pageId, [tag])
-
-        dispatch(resultTags(tags))
-    }
+    await delTags(pageId, [tag])
+    dispatch(delTag(tag))
+    dispatch(changeTagsResult(indexDocFortag, tag, true))
 }
 
 export const produceNewTag = tag => async (dispatch, getState) => {
@@ -282,14 +280,11 @@ export const produceNewTag = tag => async (dispatch, getState) => {
 export const addTagsFromOverviewOnEnter = tag => async (dispatch, getState) => {
     const state = getState()
     const pageId = selectors.pageIdForTag(state)
-    const tags = [...selectors.resultTags(state)]
     const suggestTags = [...selectors.suggestedTags(state)]
 
     if (suggestTags.length === 0) {
-        tags.unshift({ isSelected: true, value: tag })
         await addTags(pageId, [tag])
-
-        dispatch(resultTags(tags))
+        dispatch(addTag(tag))
         dispatch(newTag(''))
         dispatch(suggestedTags([]))
     }
@@ -297,11 +292,17 @@ export const addTagsFromOverviewOnEnter = tag => async (dispatch, getState) => {
 
 export const suggestTagFromOverview = term => async (dispatch, getState) => {
     const tags = await suggestTags(term)
+
     tags.sort()
     if (tags.length >= 1) {
         dispatch(hoveredTagResult(tags[0]))
     } else {
-        dispatch(hoveredTagResult(''))
+        dispatch(hoveredTagResult(term))
     }
     dispatch(suggestedTags(tags))
+}
+
+export const searchByTags = tag => async (dispatch, getState) => {
+    dispatch(tags([tag, 'UI']))
+    dispatch(search({ overwrite: true }))
 }

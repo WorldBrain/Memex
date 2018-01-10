@@ -33,7 +33,7 @@
 .summaryTagContainer {
     width: 100%;
     display: flex;
-    margin-top: 20px;
+    margin-top: 10px;
     justify-content: space-around;
     padding-bottom: 10px;
 }
@@ -80,12 +80,16 @@
     &::placeholder {
         color: #3eb995;
     }
+
+    &:focus {
+        outline-color: #3eb995;
+    }
 }
 
 .tagDiv {
     width: 300px;
     position: absolute;
-    z-index: 20;
+    z-index: 1;
     margin-left: 500px;
     background-color: #f2f2f2;
 }

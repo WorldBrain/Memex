@@ -6,15 +6,18 @@ import localStyles from './TagName.css'
 
 const getTagClass = tagnm =>
     classNames(localStyles.tagname, {
-        [localStyles.notExpanded]: !(tagnm === '+1'),
+        [localStyles.notExpanded]: !(tagnm[0] === '+'),
     })
 
-const TagName = ({ tagnm }) => (
-    <span className={getTagClass(tagnm)}>{tagnm}</span>
+const TagName = ({ tagnm, handleClick }) => (
+    <span className={getTagClass(tagnm)} onClick={handleClick}>
+        {tagnm}
+    </span>
 )
 
 TagName.propTypes = {
     tagnm: PropTypes.string.isRequired,
+    handleClick: PropTypes.func.isRequired,
 }
 
 export default TagName
