@@ -14,6 +14,7 @@ import ResultsMessage from './components/ResultsMessage'
 import Tags from 'src/common-ui/components/Tags'
 import TagOption from 'src/common-ui/components/TagOption'
 import NoResult from 'src/common-ui/components/NoResult'
+import TagName from './components/TagName'
 
 class OverviewContainer extends Component {
     static propTypes = {
@@ -95,8 +96,9 @@ class OverviewContainer extends Component {
     }
 
     renderNewTagOption() {
-        const { newTag, hoveredTagResult } = this.props
-        if (newTag.length !== 0) {
+        const { newTag, hoveredTagResult, suggestedTags } = this.props
+
+        if (newTag.length !== 0 && suggestedTags.indexOf(newTag) === -1) {
             return (
                 <TagOption
                     data={newTag}
@@ -173,40 +175,68 @@ class OverviewContainer extends Component {
         return this.renderOptions(resultTags, false)
     }
 
-    renderResultItems() {
+    renderTags(docId) {
         const { pageIdForTag, resultTags, tagSearchValue } = this.props
         const selectedResultTags = resultTags.filter(
             tag => tag.isSelected === true,
         )
 
+        return (
+            <div>
+                {docId === pageIdForTag && (
+                    <Tags
+                        onTagSearchChange={this.props.onTagSearchChange}
+                        setInputRef={this.setInputRef}
+                        onTagSearchEnter={this.props.onTagSearchEnter}
+                        numberOfTags={selectedResultTags.length}
+                        handleClick={this.props.handleTagBtnClick('')}
+                        setTagDivRef={this.setTagDivRef}
+                        setTagInputRef={this.setTagInputRef}
+                        tagSearchValue={tagSearchValue}
+                    >
+                        <div>
+                            {this.renderTagsOptions()}
+                            {this.renderNewTagOption()}
+                        </div>
+                    </Tags>
+                )}
+            </div>
+        )
+    }
+
+    renderTagsNameInPageResultItem(tags) {
+        return tags
+            .slice(0, 3)
+            .map((data, index) => (
+                <TagName
+                    tagnm={data.split('/')[1]}
+                    key={index}
+                    expandButton={0}
+                />
+            ))
+    }
+
+    renderExpandTagButton(tags) {
+        if (tags.length >= 3) {
+            return <TagName tagnm={'+1'} expandButton={1} />
+        }
+        return null
+    }
+
+    renderResultItems() {
         const resultItems = this.props.searchResults.map((doc, i) => (
             <PageResultItem
                 key={i}
                 onTrashBtnClick={this.props.handleTrashBtnClick(doc.url, i)}
                 onToggleBookmarkClick={this.props.handleToggleBm(doc.url, i)}
-                showOrNot={doc._id === pageIdForTag}
+                tagItem={this.renderTags(doc._id)}
                 onTagBtnClick={this.props.handleTagBtnClick}
                 {...doc}
             >
-                <div>
-                    {doc._id === pageIdForTag && (
-                        <Tags
-                            onTagSearchChange={this.props.onTagSearchChange}
-                            setInputRef={this.setInputRef}
-                            onTagSearchEnter={this.props.onTagSearchEnter}
-                            numberOfTags={selectedResultTags.length}
-                            handleClick={this.props.handleTagBtnClick('')}
-                            setTagDivRef={this.setTagDivRef}
-                            setTagInputRef={this.setTagInputRef}
-                            tagSearchValue={tagSearchValue}
-                        >
-                            <div>
-                                {this.renderTagsOptions()}
-                                {this.renderNewTagOption()}
-                            </div>
-                        </Tags>
-                    )}
-                </div>
+                <span>
+                    {this.renderTagsNameInPageResultItem(doc.tags)}
+                    {this.renderExpandTagButton(doc.tags)}
+                </span>
             </PageResultItem>
         ))
 

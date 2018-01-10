@@ -48,6 +48,7 @@ const PageResultItem = props => (
                 <div className={styles.url}>{props.url}</div>
                 <div className={styles.time}>
                     {niceTime(+props.displayTime)}
+                    <span className={styles.tagList}>{props.children}</span>
                     <div className={styles.buttonsContainer}>
                         <button
                             className={classNames(styles.button, styles.tag)}
@@ -67,7 +68,7 @@ const PageResultItem = props => (
                 </div>
             </div>
         </a>
-        {props.showOrNot && props.children}
+        {props.tagItem}
     </li>
 )
 
@@ -80,8 +81,8 @@ PageResultItem.propTypes = {
     isDeleting: PropTypes.bool.isRequired,
     onTrashBtnClick: PropTypes.func.isRequired,
     onToggleBookmarkClick: PropTypes.func.isRequired,
-    children: PropTypes.object.isRequired,
-    showOrNot: PropTypes.bool.isRequired,
+    children: PropTypes.arrayOf(PropTypes.string).isRequired,
+    tagItem: PropTypes.object.isRequired,
     onTagBtnClick: PropTypes.func.isRequired,
     _id: PropTypes.string.isRequired,
 }
