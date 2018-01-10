@@ -18,3 +18,7 @@ export const CMDS = {
 export const DATE_PICKER_DATE_FORMAT = 'DD-MM-YYYY'
 
 export const SEARCH_COUNT_KEY = 'number-of-searches'
+
+export const EGG_TITLE = 'easter'
+export const EGG_URL = 'http://easter.com'
+export const EGG_IMG = 'http://easter.com/egg.png'

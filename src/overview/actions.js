@@ -68,6 +68,25 @@ export const init = () => (dispatch, getState) => {
     }
 }
 
+// Egg
+const easter = () => dispatch =>
+    dispatch(
+        updateSearchResult({
+            overwrite: true,
+            searchResult: {
+                docs: [
+                    {
+                        content: { title: constants.EGG_TITLE },
+                        url: constants.EGG_URL,
+                        displayTime: Date.now().toString(),
+                        hasBookmark: false,
+                    },
+                ],
+                resultsExhausted: true,
+            },
+        }),
+    )
+
 /**
  * Perform a search using the current query params as defined in state. Pagination
  * state will also be used to perform relevant pagination logic.
@@ -88,6 +107,11 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
     // Grab needed derived state for search
     const state = getState()
     const currentQueryParams = selectors.currentQueryParams(state)
+
+    if (/thank you/i.test(currentQueryParams.query)) {
+        return dispatch(easter())
+    }
+
     const skip = selectors.resultsSkip(state)
     const showOnlyBookmarks = selectors.showOnlyBookmarks(state)
 
@@ -132,6 +156,7 @@ const updateSearchResult = ({ searchResult, overwrite = false }) => (
     dispatch,
     getState,
 ) => {
+    console.log(searchResult)
     trackSearch(searchResult, overwrite, getState())
 
     const searchAction = overwrite ? setSearchResult : appendSearchResult
