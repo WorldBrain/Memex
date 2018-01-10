@@ -1,3 +1,5 @@
+import ScrollState from './scroll-state'
+
 /**
  * @typedef TabActiveState
  * @type Object
@@ -5,6 +7,7 @@
  * @property {boolean} isActive Flag that denotes activity.
  * @property {number} lastActivated Epoch timestamp representing last time being activated.
  * @property {string} visitTime Epoch timestamp representing the time of the visit event associated with this tab.
+ * @property {ScrollState} scrollState Each tab will have their scroll state tracked.
  * @property {number} [timeout] A timeout ID returned from a `setTimeout` call.
  */
 
@@ -33,6 +36,7 @@ export class TabTimeTracker {
         lastActivated: Date.now(),
         isActive,
         visitTime,
+        scrollState: new ScrollState(),
         timeout: null,
     })
 
@@ -129,6 +133,15 @@ export class TabTimeTracker {
             ...tab,
             timeout: setTimeout(cb, this._logDelay),
         })
+    }
+
+    /**
+     * @param {string} id The ID of the tab to set to associate the debounced log with.
+     * @param {any} newState The new scroll state to set.
+     */
+    updateTabScrollState(id, newState) {
+        const tab = this.getTabState(id)
+        tab.scrollState.updateState(newState)
     }
 }
 

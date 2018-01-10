@@ -13,6 +13,16 @@ import { isLoggable, getPauseState, visitKeyPrefix } from '..'
 const toggleLoggingPause = initPauser()
 makeRemotelyCallable({ toggleLoggingPause })
 
+// Ensure tab scroll states are kept in-sync with scroll events from the content script
+browser.runtime.onMessage.addListener(
+    ({ funcName, ...scrollState }, { tab }) => {
+        if (funcName !== 'updateScrollState' || tab == null) {
+            return
+        }
+        tabTracker.updateTabScrollState(tab.id, scrollState)
+    },
+)
+
 /**
  * Combines all "logibility" conditions for logging on given tab data to determine
  * whether or not a tab should be logged.
@@ -38,13 +48,17 @@ async function shouldLogTab(tab) {
  *
  * @param {TabActiveState} tab The tab state to derive visit meta data from.
  */
-async function updateVisitForTab({ visitTime, activeTime }) {
+async function updateVisitForTab({ visitTime, activeTime, scrollState }) {
     const visitKey = visitKeyPrefix + visitTime
 
     try {
         await updateTimestampMetaConcurrent(visitKey, data => ({
             ...data,
             duration: activeTime,
+            scrollPx: scrollState.pixel,
+            scrollMaxPx: scrollState.maxPixel,
+            scrollPerc: scrollState.percent,
+            scrollMaxPerc: scrollState.maxPercent,
         }))
     } catch (error) {
         // If visit was never indexed for tab, cannot update it - move on
