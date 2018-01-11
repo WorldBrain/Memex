@@ -69,7 +69,7 @@ function attemptPeriodicPing(period) {
             if (now - lastSearch < periodConsts.time) {
                 analytics.trackEvent({
                     category: 'Periodic',
-                    action: `${period.action} activity ping`,
+                    action: `${periodConsts.action} activity ping`,
                 })
             }
 
