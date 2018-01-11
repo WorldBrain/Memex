@@ -11,7 +11,7 @@ import ScrollState from './scroll-state'
  * @property {number} [timeout] A timeout ID returned from a `setTimeout` call.
  */
 
-export class TabTimeTracker {
+export class TabManager {
     static DEF_LOG_DELAY = 10000
 
     /**
@@ -20,7 +20,7 @@ export class TabTimeTracker {
     _tabs = new Map()
     _logDelay
 
-    constructor(logDelay = TabTimeTracker.DEF_LOG_DELAY) {
+    constructor(logDelay = TabManager.DEF_LOG_DELAY) {
         this._logDelay = logDelay
     }
 
@@ -145,7 +145,7 @@ export class TabTimeTracker {
     }
 }
 
-// Set up tab time tracker state to work with tab events
-const tracker = new TabTimeTracker()
+// Set up singleton to use throughout bg script
+const manager = new TabManager()
 
-export default tracker
+export default manager

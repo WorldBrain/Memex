@@ -3,7 +3,7 @@ import storePage from 'src/page-storage/store-page'
 import { generatePageDocId } from 'src/page-storage'
 import { generateVisitDocId, visitKeyPrefix } from '..'
 import * as index from 'src/search'
-import tabTracker from './tab-time-tracker'
+import tabManager from './tab-manager'
 
 // Store the visit in PouchDB.
 export async function storeVisit({ timestamp, url, page }) {
@@ -52,7 +52,7 @@ async function updateIndex(storePageResult, visit, pageId) {
 export async function logPageVisit({ tabId, url }) {
     const threshold = 20000
 
-    const { visitTime } = tabTracker.getTabState(tabId)
+    const { visitTime } = tabManager.getTabState(tabId)
 
     const pageId = generatePageDocId({ url })
     const existingPage = await index.initSingleLookup()(pageId)

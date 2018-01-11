@@ -6,22 +6,12 @@ import { updateTimestampMetaConcurrent } from 'src/search'
 import { blacklist } from 'src/blacklist/background'
 import { logPageVisit } from './log-page-visit'
 import initPauser from './pause-logging'
-import tabTracker from './tab-time-tracker'
+import tabManager from './tab-manager'
 import { isLoggable, getPauseState, visitKeyPrefix } from '..'
 
 // Allow logging pause state toggle to be called from other scripts
 const toggleLoggingPause = initPauser()
 makeRemotelyCallable({ toggleLoggingPause })
-
-// Ensure tab scroll states are kept in-sync with scroll events from the content script
-browser.runtime.onMessage.addListener(
-    ({ funcName, ...scrollState }, { tab }) => {
-        if (funcName !== 'updateScrollState' || tab == null) {
-            return
-        }
-        tabTracker.updateTabScrollState(tab.id, scrollState)
-    },
-)
 
 /**
  * Combines all "logibility" conditions for logging on given tab data to determine
@@ -65,26 +55,41 @@ async function updateVisitForTab({ visitTime, activeTime, scrollState }) {
     }
 }
 
-browser.tabs.onCreated.addListener(tab => tabTracker.trackTab(tab))
-browser.tabs.onActivated.addListener(({ tabId }) =>
-    tabTracker.activateTab(tabId),
+// Ensure tab scroll states are kept in-sync with scroll events from the content script
+browser.runtime.onMessage.addListener(
+    ({ funcName, ...scrollState }, { tab }) => {
+        if (funcName !== 'updateScrollState' || tab == null) {
+            return
+        }
+        tabManager.updateTabScrollState(tab.id, scrollState)
+    },
 )
 
-// Remove tab from tab tracking state and update the visit with tab-derived metadata
-browser.tabs.onRemoved.addListener(tabId =>
-    updateVisitForTab(tabTracker.removeTab(tabId)),
+// Bind tab state updates to tab API events
+browser.tabs.onCreated.addListener(tab => tabManager.trackTab(tab))
+
+browser.tabs.onActivated.addListener(({ tabId }) =>
+    tabManager.activateTab(tabId),
 )
+
+browser.tabs.onRemoved.addListener(tabId => {
+    try {
+        // Remove tab from tab tracking state and update the visit with tab-derived metadata
+        const tab = tabManager.removeTab(tabId)
+        updateVisitForTab(tab)
+    } catch (error) {}
+})
 
 browser.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
     // `changeInfo` should only contain `url` prop if URL changed, which is what we care about
     if (changeInfo.url) {
         // Ensures the URL change counts as a new visit in tab state (tab ID doesn't change)
-        const oldTab = tabTracker.resetTab(tabId, tab.active)
+        const oldTab = tabManager.resetTab(tabId, tab.active)
         updateVisitForTab(oldTab) // Send off request for updating that prev. visit's tab state
 
         const shouldLog = await shouldLogTab(tab)
         if (shouldLog) {
-            tabTracker.scheduleTabLog(
+            tabManager.scheduleTabLog(
                 tabId,
                 () =>
                     // Wait until its DOM has loaded, and activated before attemping log
