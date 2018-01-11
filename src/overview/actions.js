@@ -74,15 +74,18 @@ const easter = () => dispatch =>
         updateSearchResult({
             overwrite: true,
             searchResult: {
+                resultsExhausted: true,
+                totalCount: 1,
                 docs: [
                     {
                         content: { title: constants.EGG_TITLE },
                         url: constants.EGG_URL,
+                        _attachments: { src: constants.EGG_IMG },
                         displayTime: Date.now().toString(),
                         hasBookmark: false,
+                        egg: true,
                     },
                 ],
-                resultsExhausted: true,
             },
         }),
     )
@@ -156,7 +159,6 @@ const updateSearchResult = ({ searchResult, overwrite = false }) => (
     dispatch,
     getState,
 ) => {
-    console.log(searchResult)
     trackSearch(searchResult, overwrite, getState())
 
     const searchAction = overwrite ? setSearchResult : appendSearchResult

@@ -29,7 +29,11 @@ const PageResultItem = props => (
                 ) : (
                     <img
                         className={styles.screenshot}
-                        src="/img/null-icon.png"
+                        src={
+                            props.egg
+                                ? props._attachments.src
+                                : '/img/null-icon.png'
+                        }
                     />
                 )}
             </div>
@@ -75,6 +79,7 @@ PageResultItem.propTypes = {
     isDeleting: PropTypes.bool.isRequired,
     onTrashBtnClick: PropTypes.func.isRequired,
     onToggleBookmarkClick: PropTypes.func.isRequired,
+    egg: PropTypes.bool,
 }
 
 export default PageResultItem
