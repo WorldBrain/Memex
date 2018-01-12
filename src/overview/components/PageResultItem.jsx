@@ -81,7 +81,7 @@ PageResultItem.propTypes = {
     isDeleting: PropTypes.bool.isRequired,
     onTrashBtnClick: PropTypes.func.isRequired,
     onToggleBookmarkClick: PropTypes.func.isRequired,
-    children: PropTypes.arrayOf(PropTypes.string).isRequired,
+    children: PropTypes.object.isRequired,
     tagItem: PropTypes.object.isRequired,
     onTagBtnClick: PropTypes.func.isRequired,
 }

@@ -125,9 +125,7 @@ const changeHasBookmark = (state, index) => {
 }
 
 const changeTagsResult = (state, { index, tag, isDelete }) => {
-    console.log('Here', index, tag, isDelete)
     const currResult = state.searchResult.docs[index]
-    console.log(currResult)
     const tags = currResult.tags
 
     if (isDelete) {
@@ -149,6 +147,40 @@ const changeTagsResult = (state, { index, tag, isDelete }) => {
     }
 
     return { ...state, searchResult }
+}
+
+function findIndexValue(a, tag) {
+    return a.findIndex(i => i.value === tag)
+}
+
+const addTag = (state, tag) => {
+    const tags = state.resultTags
+    const index = findIndexValue(tags, tag)
+
+    if (index === -1) {
+        tags.unshift({ isSelected: true, value: tag })
+    } else {
+        tags[index].isSelected = true
+    }
+
+    return {
+        ...state,
+        resultTags: tags,
+    }
+}
+
+const delTag = (state, tag) => {
+    const tags = state.resultTags
+    const index = findIndexValue(tags, tag)
+
+    if (index !== -1) {
+        tags[index].isSelected = false
+    }
+
+    return {
+        ...state,
+        resultTags: tags,
+    }
 }
 
 const incSearchCount = state => ({
@@ -204,6 +236,8 @@ export default createReducer(
         [actions.tagExpandedPageId]: payloadReducer('tagExpandedPageId'),
         [actions.changeTagsResult]: changeTagsResult,
         [actions.indexDocFortag]: payloadReducer('indexDocFortag'),
+        [actions.addTag]: addTag,
+        [actions.delTag]: delTag,
     },
     defaultState,
 )

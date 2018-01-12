@@ -10,6 +10,7 @@ import {
     Tags,
     NoResult,
     TagOption,
+    NewTagMsg,
 } from 'src/common-ui/components'
 import * as actions from './actions'
 import * as selectors from './selectors'
@@ -109,7 +110,9 @@ class OverviewContainer extends Component {
                     newTag={1}
                     setTagInputFocus={this.setTagInputFocus}
                     hovered={hoveredTagResult === newTag}
-                />
+                >
+                    <NewTagMsg data={newTag} />
+                </TagOption>
             )
         }
         return null
@@ -127,6 +130,10 @@ class OverviewContainer extends Component {
             : resultTags[index].isSelected
     }
 
+    renderTagValue(isSuggested, tag) {
+        return isSuggested ? tag : tag['value']
+    }
+
     renderOptions(tags, isSuggested) {
         const { hoveredTagResult } = this.props
 
@@ -134,7 +141,7 @@ class OverviewContainer extends Component {
             (data, index) =>
                 data !== '' && (
                     <TagOption
-                        data={isSuggested ? data : data['value']}
+                        data={this.renderTagValue(isSuggested, data)}
                         key={index}
                         active={this.returnTagStatus(isSuggested, data)}
                         newTag={0}
@@ -146,9 +153,11 @@ class OverviewContainer extends Component {
                         setTagInputFocus={this.setTagInputFocus}
                         hovered={
                             hoveredTagResult ===
-                            (isSuggested ? data : data['value'])
+                            this.renderTagValue(isSuggested, data)
                         }
-                    />
+                    >
+                        {this.renderTagValue(isSuggested, data)}
+                    </TagOption>
                 ),
         )
     }

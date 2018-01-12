@@ -45,6 +45,8 @@ export const changeTagsResult = createAction(
     (index, tag, isDelete) => ({ index, tag, isDelete }),
 )
 export const indexDocFortag = createAction('overview/indexDocFortag')
+export const addTag = createAction('overview/addTag')
+export const delTag = createAction('overview/delTag')
 
 const deleteDocsByUrl = remoteFunction('deleteDocsByUrl')
 const createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
@@ -232,51 +234,34 @@ export const FetchInitResultTags = () => async (dispatch, getState) => {
 
     tagsFromBackend.sort()
 
-    const tags = []
-    for (let i = 0; i < tagsFromBackend.length; i++) {
-        if (i === 0) {
-            dispatch(hoveredTagResult(tagsFromBackend[i]))
-        }
-        tags.push({ isSelected: true, value: tagsFromBackend[i] })
+    if (tagsFromBackend.length > 0) {
+        dispatch(hoveredTagResult(tagsFromBackend[0]))
     }
-
-    dispatch(resultTags(tags))
+    dispatch(
+        resultTags(tagsFromBackend.map(value => ({ isSelected: true, value }))),
+    )
 }
 
 export const addTagsFromOverview = tag => async (dispatch, getState) => {
     const state = getState()
     const pageId = selectors.pageIdForTag(state)
-    const tags = [...selectors.resultTags(state)]
     const indexDocFortag = selectors.indexDocFortag(state)
-    const index = findIndexValue(tags, tag)
-
-    if (index === -1) {
-        tags.unshift({ isSelected: true, value: tag })
-    } else if (tags[index].isSelected === false) {
-        tags[index].isSelected = true
-    }
-
-    dispatch(changeTagsResult(indexDocFortag, tag, false))
 
     await addTags(pageId, [tag])
-    dispatch(resultTags(tags))
+    dispatch(addTag(tag))
     dispatch(newTag(''))
     dispatch(suggestedTags([]))
+    dispatch(changeTagsResult(indexDocFortag, tag, false))
 }
 
 export const delTagsFromOverview = tag => async (dispatch, getState) => {
     const state = getState()
     const pageId = selectors.pageIdForTag(state)
-    const tags = [...selectors.resultTags(state)]
     const indexDocFortag = selectors.indexDocFortag(state)
-    const index = findIndexValue(tags, tag)
 
-    if (index !== -1) {
-        tags[index].isSelected = false
-        await delTags(pageId, [tag])
-        dispatch(changeTagsResult(indexDocFortag, tag, true))
-        dispatch(resultTags(tags))
-    }
+    await delTags(pageId, [tag])
+    dispatch(delTag(tag))
+    dispatch(changeTagsResult(indexDocFortag, tag, true))
 }
 
 export const produceNewTag = tag => async (dispatch, getState) => {
@@ -294,14 +279,11 @@ export const produceNewTag = tag => async (dispatch, getState) => {
 export const addTagsFromOverviewOnEnter = tag => async (dispatch, getState) => {
     const state = getState()
     const pageId = selectors.pageIdForTag(state)
-    const tags = [...selectors.resultTags(state)]
     const suggestTags = [...selectors.suggestedTags(state)]
 
     if (suggestTags.length === 0) {
-        tags.unshift({ isSelected: true, value: tag })
         await addTags(pageId, [tag])
-
-        dispatch(resultTags(tags))
+        dispatch(addTag(tag))
         dispatch(newTag(''))
         dispatch(suggestedTags([]))
     }
