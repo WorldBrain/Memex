@@ -20,6 +20,7 @@ const Tags = ({
                 ref={setTagInputRef}
                 autoComplete="off"
                 value={tagSearchValue}
+                autoFocus
             />
             <i className="material-icons">search</i>
         </form>
