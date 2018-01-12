@@ -8,21 +8,23 @@ const getOptionClass = hovered =>
         [localStyles.hoveredMenuItem]: hovered,
     })
 
-const NewTagMsg = ({ data, handleClick, hovered }) => (
+const OldTagMsg = ({ data, active, handleClick, hovered }) => (
     <div
         className={getOptionClass(hovered)}
         onClick={() => {
             handleClick(data)
         }}
     >
-        <span className={localStyles.bold}>add new: </span> {data}
+        {data}
+        {active && <i className="material-icons">done</i>}
     </div>
 )
 
-NewTagMsg.propTypes = {
+OldTagMsg.propTypes = {
     data: PropTypes.string.isRequired,
+    active: PropTypes.bool,
     handleClick: PropTypes.func.isRequired,
     hovered: PropTypes.bool.isRequired,
 }
 
-export default NewTagMsg
+export default OldTagMsg
