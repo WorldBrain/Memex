@@ -85,13 +85,17 @@ export default function pipeline({
     pageDoc: { _id: id, content, url },
     visitDocs = [],
     bookmarkDocs = [],
+    rejectNoContent = true,
 }) {
     // First apply transformations to the URL
     const { pathname, hostname } = transformUrl(url)
 
     // Throw error if no searchable content; we don't really want to index these (for now) so allow callers
     //  to handle (probably by ignoring)
-    if (!content || !content.fullText || !content.fullText.length) {
+    if (
+        rejectNoContent &&
+        (!content || !content.fullText || !content.fullText.length)
+    ) {
         return Promise.reject(new Error('Page has no searchable content'))
     }
 
