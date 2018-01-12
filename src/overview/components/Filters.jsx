@@ -23,6 +23,7 @@ const Filters = ({
                 </span>
             </label>
         </div>
+        {/* TODO: Toggle for Clear Filters button. Need to be modified according to new filters being added. */}
         {showOnlyBookmarks && (
             <div
                 onClick={onShowOnlyBookmarksChange}
