@@ -11,6 +11,7 @@ import {
     NoResult,
     TagOption,
     NewTagMsg,
+    OldTagMsg,
 } from 'src/common-ui/components'
 import * as actions from './actions'
 import * as selectors from './selectors'
@@ -104,14 +105,12 @@ class OverviewContainer extends Component {
 
         if (newTag.length !== 0 && suggestedTags.indexOf(newTag) === -1) {
             return (
-                <TagOption
-                    data={newTag}
-                    active={false}
-                    newTag={1}
-                    setTagInputFocus={this.setTagInputFocus}
-                    hovered={hoveredTagResult === newTag}
-                >
-                    <NewTagMsg data={newTag} />
+                <TagOption>
+                    <NewTagMsg
+                        data={newTag}
+                        handleClick={this.setTagInputFocus}
+                        hovered={hoveredTagResult === newTag}
+                    />
                 </TagOption>
             )
         }
@@ -140,23 +139,20 @@ class OverviewContainer extends Component {
         return tags.map(
             (data, index) =>
                 data !== '' && (
-                    <TagOption
-                        data={this.renderTagValue(isSuggested, data)}
-                        key={index}
-                        active={this.returnTagStatus(isSuggested, data)}
-                        newTag={0}
-                        handleClick={
-                            this.returnTagStatus(isSuggested, data)
-                                ? this.props.delTags
-                                : this.setTagInputFocus
-                        }
-                        setTagInputFocus={this.setTagInputFocus}
-                        hovered={
-                            hoveredTagResult ===
-                            this.renderTagValue(isSuggested, data)
-                        }
-                    >
-                        {this.renderTagValue(isSuggested, data)}
+                    <TagOption>
+                        <OldTagMsg
+                            data={this.renderTagValue(isSuggested, data)}
+                            active={this.returnTagStatus(isSuggested, data)}
+                            handleClick={
+                                this.returnTagStatus(isSuggested, data)
+                                    ? this.props.delTags
+                                    : this.setTagInputFocus
+                            }
+                            hovered={
+                                hoveredTagResult ===
+                                this.renderTagValue(isSuggested, data)
+                            }
+                        />
                     </TagOption>
                 ),
         )
