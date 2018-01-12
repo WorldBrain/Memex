@@ -1,10 +1,9 @@
 import { createAction } from 'redux-act'
 
 import analytics from 'src/analytics'
-import db from 'src/pouchdb'
 import { CMDS, IMPORT_CONN_NAME, OLD_EXT_KEYS } from './constants'
 import * as selectors from './selectors'
-
+import { importIndex } from 'src/options/imports/index_ops'
 export const filterDownloadDetails = createAction(
     'imports/filterDownloadDetails',
 )
@@ -51,14 +50,14 @@ const getFileTextViaReader = fileReader => file =>
         fileReader.readAsText(file)
     })
 
-const deserializeDoc = docString => {
-    if (!docString) return undefined
-    try {
-        return JSON.parse(docString)
-    } catch (error) {
-        console.error(`Cannot parse following input:\n${docString}`)
-    }
-}
+// const deserializeDoc = docString => {
+//    if (!docString) return undefined
+//    try {
+//        return JSON.parse(docString)
+//    } catch (error) {
+//        console.error(`Cannot parse following input:\n${docString}`)
+//    }
+// }
 
 /**
  * Performs a restore of given docs files.
@@ -72,17 +71,12 @@ export const uploadTestData = files => async (dispatch, getState) => {
     }
 
     const getFileText = getFileTextViaReader(new FileReader())
-    const onlyDefinedDocs = doc => doc
+    // const onlyDefinedDocs = doc => doc
 
     // Write contents of each file, one-at-a-time, to the DB
     for (const file of files) {
         const text = await getFileText(file)
-        const docs = text
-            .split('\n')
-            .map(deserializeDoc)
-            .filter(onlyDefinedDocs)
-
-        await db.bulkDocs(docs)
+        importIndex(JSON.parse(text))
     }
 
     dispatch(setFileUploading(false))
