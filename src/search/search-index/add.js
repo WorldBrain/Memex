@@ -34,28 +34,19 @@ export const put = (key, val) => index.put(key, val)
 
 /**
  * Adds a new page doc + any associated visit/bookmark docs to the index. This method
- * is *NOT* concurrency safe.
- * @param {IndexRequest} req A `pageDoc` (required) and optionally any associated `visitDocs` and `bookmarkDocs`.
- * @returns {Promise<void>} Promise resolving when indexing is complete, or rejecting for any index errors.
- */
-export const addPage = req => performIndexing(pipeline(req))
-
-/**
- * Adds a new page doc + any associated visit/bookmark docs to the index. This method
  * is concurrency safe as it uses a single queue instance to batch add requests.
  * @param {IndexRequest} req A `pageDoc` (required) and optionally any associated `visitDocs` and `bookmarkDocs`.
  * @returns {Promise<void>} Promise resolving when indexing is complete, or rejecting for any index errors.
  */
 export const addPageConcurrent = req =>
-    new Promise(async (resolve, reject) => {
-        const indexDoc = await pipeline(req).catch(reject)
-
+    new Promise((resolve, reject) =>
         indexQueue.push(() =>
-            performIndexing(indexDoc)
+            pipeline(req)
+                .then(performIndexing)
                 .then(resolve)
                 .catch(reject),
-        )
-    })
+        ),
+    )
 
 /**
  * @param {string} pageId ID/key of document to associate new bookmark entry with.
@@ -151,8 +142,8 @@ async function indexMetaTimestamps(indexDoc) {
 }
 
 /**
- * @param {IndexLookupDoc} indexDoc
- * @returns {Promise<void>}
+ * @param {IndexLookupDoc} indexDoc Input doc containing new data to add to current state.
+ * @param {IndexLookupDoc} Augmented version of input doc containing new state.
  */
 async function indexPage(indexDoc) {
     const existingDoc = await singleLookup(indexDoc.id)
@@ -197,29 +188,19 @@ async function indexDomain(indexDoc) {
  * @returns {Promise<void>}
  */
 async function performIndexing(indexDoc) {
-    indexDoc = await indexDoc
-
-    if (!indexDoc.terms.size) {
-        return
-    }
-
-    try {
-        // Run indexing of page
-        console.time('indexing page')
-        const augIndexDoc = await indexPage(indexDoc)
-        await Promise.all([
-            indexDomain(augIndexDoc),
-            indexUrlTerms(augIndexDoc),
-            indexTitleTerms(augIndexDoc),
-            indexTerms(augIndexDoc),
-            // Note we are only wanting to index new visits/bookmarks, so passing in the unagumented `indexDoc` here
-            indexMetaTimestamps(indexDoc),
-        ])
-        console.timeEnd('indexing page')
-        console.log('indexed', augIndexDoc)
-    } catch (err) {
-        console.error(err)
-    }
+    // Run indexing of page
+    console.time('indexing page')
+    const augIndexDoc = await indexPage(indexDoc)
+    await Promise.all([
+        indexDomain(augIndexDoc),
+        indexUrlTerms(augIndexDoc),
+        indexTitleTerms(augIndexDoc),
+        indexTerms(augIndexDoc),
+        // Note we are only wanting to index new visits/bookmarks, so passing in the unagumented `indexDoc` here
+        indexMetaTimestamps(indexDoc),
+    ])
+    console.timeEnd('indexing page')
+    console.log('indexed', augIndexDoc)
 }
 
 /**
