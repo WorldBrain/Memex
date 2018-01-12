@@ -135,6 +135,16 @@ export class TabManager {
         })
     }
 
+    clearScheduledLog(id) {
+        const tab = this.getTabState(id)
+
+        if (tab.timeout != null) {
+            clearTimeout(tab.timeout)
+        }
+
+        this._tabs.set(id, { ...tab, timeout: null })
+    }
+
     /**
      * @param {string} id The ID of the tab to set to associate the debounced log with.
      * @param {any} newState The new scroll state to set.

@@ -48,6 +48,10 @@ export function transformUrl(url) {
  * @returns {Set<string>} Set of "words-of-interest" - determined by pre-proc logic in `transformPageText` - extracted from `text`.
  */
 export function extractTerms(text, key) {
+    if (!text || !text.length) {
+        return new Set()
+    }
+
     const { text: transformedText } = transformPageText({ text })
 
     if (!transformedText || !transformedText.length) {
@@ -82,8 +86,8 @@ export function extractTerms(text, key) {
  * @returns {IndexLookupDoc} Doc structured for indexing.
  */
 export default function pipeline({
-    pageDoc: { _id: id, content, url },
-    visitDocs = [],
+    pageDoc: { _id: id, content = {}, url },
+    visits = [],
     bookmarkDocs = [],
     rejectNoContent = true,
 }) {
@@ -94,7 +98,7 @@ export default function pipeline({
     //  to handle (probably by ignoring)
     if (
         rejectNoContent &&
-        (!content || !content.fullText || !content.fullText.length)
+        (content == null || !content.fullText || !content.fullText.length)
     ) {
         return Promise.reject(new Error('Page has no searchable content'))
     }
@@ -105,7 +109,6 @@ export default function pipeline({
     const urlTerms = extractTerms(pathname, 'url')
 
     // Create timestamps to be indexed as Sets
-    const visits = visitDocs.map(transformMetaDoc)
     const bookmarks = bookmarkDocs.map(transformMetaDoc)
 
     return Promise.resolve({

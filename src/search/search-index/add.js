@@ -1,6 +1,6 @@
 import { bookmarkKeyPrefix } from 'src/bookmarks'
 import { visitKeyPrefix } from 'src/activity-logger'
-import index, { indexQueue } from '.'
+import index from '.'
 import pipeline from './pipeline'
 import {
     augmentIndexLookupDoc,
@@ -9,6 +9,7 @@ import {
     termRangeLookup,
     idbBatchToPromise,
     fetchExistingPage,
+    makeIndexFnConcSafe,
 } from './util'
 
 // Used to decide whether or not to do a range lookup for terms (if # terms gt) or N single lookups
@@ -38,30 +39,19 @@ export const put = (key, val) => index.put(key, val)
  * @param {IndexRequest} req A `pageDoc` (required) and optionally any associated `visitDocs` and `bookmarkDocs`.
  * @returns {Promise<void>} Promise resolving when indexing is complete, or rejecting for any index errors.
  */
-export const addPageConcurrent = req =>
-    new Promise((resolve, reject) =>
-        indexQueue.push(() =>
-            pipeline(req)
-                .then(performIndexing)
-                .then(resolve)
-                .catch(reject),
-        ),
-    )
+export const addPageConcurrent = makeIndexFnConcSafe(req =>
+    pipeline(req).then(performIndexing),
+)
 
 /**
- * @param {string} pageId ID/key of document to associate new bookmark entry with.
- * @param {number|string} [timestamp=Date.now()]
- * @throws {Error} Error thrown when `pageId` param does not correspond to existing document (or any other
- *  standard indexing-related Error encountered during updates).
+ * @param {IndexRequest} req Note that only the `pageDoc` will be used from the request params to update terms.
+ * @returns {Promise<void>} Promise resolving when indexing is complete, or rejecting for any index errors.
  */
-export const addBookmarkConcurrent = (pageId, timestamp = Date.now()) =>
-    new Promise((resolve, reject) =>
-        indexQueue.push(() =>
-            addBookmark(pageId)
-                .then(resolve)
-                .catch(reject),
-        ),
-    )
+export const addPageTermsConcurrent = makeIndexFnConcSafe(req =>
+    pipeline(req).then(addPageTerms),
+)
+
+export const addBookmarkConcurrent = makeIndexFnConcSafe(addBookmark)
 
 /**
  * @param {string} pageId ID/key of document to associate new bookmark entry with.
@@ -204,6 +194,35 @@ async function performIndexing(indexDoc) {
 }
 
 /**
+ * Updates an indexing indexed page doc with new terms.
+ *
+ * @param {IndexLookupDoc} indexDoc Contains at least `terms` and `id` props.
+ * @returns {Promise<void>}
+ * @throws {Error} If `indexDoc.id` has no indexed value.
+ */
+async function addPageTerms(indexDoc) {
+    const existingDoc = await singleLookup(indexDoc.id)
+
+    if (existingDoc == null) {
+        throw new Error(`Cannot add terms for unknown page "${indexDoc.id}"`)
+    }
+
+    // Update only the page terms
+    const augIndexDoc = {
+        ...existingDoc,
+        terms: new Set([...existingDoc.terms, ...indexDoc.terms]),
+    }
+    const timer = `indexing page content (${augIndexDoc.terms.size} terms)`
+
+    console.time(timer)
+    await Promise.all([
+        index.put(indexDoc.id, augIndexDoc),
+        indexTerms(augIndexDoc),
+    ])
+    console.timeEnd(timer)
+}
+
+/**
  * Adds a meta (bookmark or visit) entry into specified reverse index doc.
  * NOTE: Assumes the existence of indexed `pageId`.
  *
@@ -229,15 +248,12 @@ async function addTimestamp(pageId, timestampKey) {
  * @param {string} timestampKey Key of timestamp event to add.
  * @param {any} [meta={}] Object of any associated meta data to store with the indexed event value.
  */
-export const addTimestampConcurrent = (pageId, timestampKey, meta = {}) =>
-    new Promise((resolve, reject) =>
-        indexQueue.push(() => {
-            addTimestamp(pageId, timestampKey)
-                .then(() => index.put(timestampKey, { pageId, ...meta }))
-                .then(resolve)
-                .catch(reject)
-        }),
-    )
+export const addTimestampConcurrent = makeIndexFnConcSafe(
+    (pageId, timestampKey, meta = {}) =>
+        addTimestamp(pageId, timestampKey).then(() =>
+            index.put(timestampKey, { pageId, ...meta }),
+        ),
+)
 
 /**
  * @param {string} timestampId ID of an existing timestamp index value to update.
@@ -263,11 +279,6 @@ async function updateTimestampMeta(timestampId, updateCb) {
     return index.put(timestampId, newVal)
 }
 
-export const updateTimestampMetaConcurrent = (...args) =>
-    new Promise((resolve, reject) =>
-        indexQueue.push(() =>
-            updateTimestampMeta(...args)
-                .then(resolve)
-                .catch(reject),
-        ),
-    )
+export const updateTimestampMetaConcurrent = makeIndexFnConcSafe(
+    updateTimestampMeta,
+)

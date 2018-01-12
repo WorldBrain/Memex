@@ -1,10 +1,8 @@
-import noop from 'lodash/fp/noop'
-
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import { whenPageDOMLoaded, whenTabActive } from 'src/util/tab-events'
 import { updateTimestampMetaConcurrent } from 'src/search'
 import { blacklist } from 'src/blacklist/background'
-import { logPageVisit } from './log-page-visit'
+import { logPageVisit, logInitPageVisit } from './log-page-visit'
 import initPauser from './pause-logging'
 import tabManager from './tab-manager'
 import { isLoggable, getPauseState, visitKeyPrefix } from '..'
@@ -69,7 +67,7 @@ browser.runtime.onMessage.addListener(
 )
 
 // Bind tab state updates to tab API events
-browser.tabs.onCreated.addListener(tab => tabManager.trackTab(tab))
+browser.tabs.onCreated.addListener(tabManager.trackTab)
 
 browser.tabs.onActivated.addListener(({ tabId }) =>
     tabManager.activateTab(tabId),
@@ -83,8 +81,19 @@ browser.tabs.onRemoved.addListener(tabId => {
     } catch (error) {}
 })
 
+/**
+ * Run the initial metadata indexing on the `webNavigation.onCompleted` event.
+ * Note that indexing is only run on `frameId` === `0`, meaning the top level page
+ * (events may be fired for nested iframes).
+ */
+browser.webNavigation.onCompleted.addListener(({ tabId, frameId }) => {
+    if (frameId === 0) {
+        logInitPageVisit(tabId).catch(console.error)
+    }
+})
+
 browser.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
-    // `changeInfo` should only contain `url` prop if URL changed, which is what we care about
+    // `changeInfo` should only contain `url` prop if URL changed - what we care about for scheduling logging
     if (changeInfo.url) {
         // Ensures the URL change counts as a new visit in tab state (tab ID doesn't change)
         const oldTab = tabManager.resetTab(tabId, tab.active)
@@ -93,16 +102,15 @@ browser.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
             updateVisitForTab(oldTab)
         }
 
-        const shouldLog = await shouldLogTab(tab)
-        if (shouldLog) {
+        if (await shouldLogTab(tab)) {
             tabManager.scheduleTabLog(
                 tabId,
                 () =>
                     // Wait until its DOM has loaded, and activated before attemping log
                     whenPageDOMLoaded({ tabId })
                         .then(() => whenTabActive({ tabId }))
-                        .then(() => logPageVisit({ url: tab.url, tabId }))
-                        .catch(noop), // Ignore any tab state interuptions
+                        .then(() => logPageVisit(tabId, tab.url))
+                        .catch(console.error), // Ignore any tab state interuptions
             )
         }
     }

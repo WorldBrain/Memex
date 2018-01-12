@@ -3,9 +3,13 @@ import analysePage from 'src/page-analysis/background'
 import { generatePageDocId } from '.'
 
 /**
- * Given a tabId
- * @param {any} {tabId, url}
- * @returns
+ * @param {number} args.tabId
+ * @param {string} args.url
+ * @param {any} args.* Any further static property values to include in stored page.
+ * @param {boolean} [args.runAnalysis=true] Whether or not to run complex analysis via content script to extract
+ *  further content data.
+ * @returns {Promise<any>} Resolves to the initial created+stored `pageDoc` along with `finalPagePromise` which
+ *  will resolve with the further filled-out page doc when/if analysis is performed.
  */
 export default async function storePage({
     tabId,

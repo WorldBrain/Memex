@@ -74,6 +74,7 @@ async function indexSearch({
 // Export index interface
 export {
     addPageConcurrent,
+    addPageTermsConcurrent,
     addBookmarkConcurrent,
     put,
     addTimestampConcurrent,

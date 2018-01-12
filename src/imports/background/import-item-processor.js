@@ -132,7 +132,11 @@ export default class ImportItemProcessor {
         this._checkCancelled()
 
         return await Promise.all([
-            index.addPageConcurrent({ pageDoc, visitDocs, bookmarkDocs }),
+            index.addPageConcurrent({
+                pageDoc,
+                visits: visitDocs.map(doc => doc.visitStart),
+                bookmarkDocs,
+            }),
             db.bulkDocs([pageDoc, ...bookmarkDocs, ...visitDocs]),
         ])
     }
