@@ -22,8 +22,9 @@ import {
     OldTagMsg,
     NoResult,
 } from 'src/common-ui/components'
-
 import { itemBtnBlacklisted } from './components/Button.css'
+import UpgradeButton from './components/UpgradeButton'
+import ButtonIcon from './components/ButtonIcon'
 
 // Transforms URL checking results to state types
 const getBlacklistButtonState = ({ loggable, blacklisted }) => {
@@ -664,6 +665,7 @@ class PopupContainer extends Component {
                         : 'Bookmark this Page'}
                 </Button>
                 {this.renderTagButton()}
+                <hr />
                 <HistoryPauser
                     onConfirm={this.onPauseConfirm}
                     onChange={this.onPauseChange}
@@ -673,22 +675,13 @@ class PopupContainer extends Component {
                     {this.renderPauseChoices()}
                 </HistoryPauser>
                 {this.renderBlacklistButton()}
-                <hr />
-                <LinkButton
-                    href={`${constants.OPTIONS_URL}#/blacklist`}
+                <UpgradeButton />
+                <ButtonIcon
+                    href={constants.OPTIONS_URL}
                     icon="settings"
-                >
-                    Settings
-                </LinkButton>
-                <LinkButton
-                    href={`${constants.OPTIONS_URL}#/import`}
-                    icon="file_download"
-                >
-                    Import History &amp; Bookmarks
-                </LinkButton>
-                <LinkButton href={constants.FEEDBACK_URL} icon="feedback">
-                    I need Help!
-                </LinkButton>
+                    buttonType={1}
+                />
+                <ButtonIcon href={constants.FEEDBACK_URL} icon="help" />
             </div>
         )
     }

@@ -88,3 +88,33 @@
         justify-content: center;
     }
 }
+
+.button {
+    float: right;
+    width: 10%;
+    border: none;
+    background: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: 'Open Sans';
+    font-weight: 100;
+    margin-top: 13px;
+    outline: 0;
+    color: #909090;
+
+    &:hover {
+        color: rgb(62, 185, 149);
+    }
+
+    i {
+        font-size: 24px;
+    }
+}
+
+.settings {
+    margin-right: 10px;
+}
+
+.icon {
+    font-size: 26px;
+}
