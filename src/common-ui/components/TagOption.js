@@ -13,7 +13,6 @@ const TagOption = ({
     active,
     handleClick,
     newTag,
-    addTagsToReverseDoc,
     setTagInputFocus,
     hovered,
 }) => (
@@ -39,7 +38,6 @@ TagOption.propTypes = {
     active: PropTypes.bool.isRequired,
     handleClick: PropTypes.func.isRequired,
     newTag: PropTypes.number.isRequired,
-    addTagsToReverseDoc: PropTypes.func.isRequired,
     setTagInputFocus: PropTypes.func.isRequired,
     hovered: PropTypes.bool.isRequired,
 }

@@ -36,7 +36,7 @@ const defaultState = {
     hoveredTagResult: '',
     tagSearchValue: '',
     tags: [],
-    tagExpandedPageId: '',
+    indexDocFortag: -1,
 }
 
 function setQuery(state, query) {
@@ -124,6 +124,33 @@ const changeHasBookmark = (state, index) => {
     return { ...state, searchResult }
 }
 
+const changeTagsResult = (state, { index, tag, isDelete }) => {
+    console.log('Here', index, tag, isDelete)
+    const currResult = state.searchResult.docs[index]
+    console.log(currResult)
+    const tags = currResult.tags
+
+    if (isDelete) {
+        tags.splice(tags.indexOf(tags), 1)
+    } else {
+        tags.push('tag/' + tag)
+    }
+
+    const searchResult = {
+        ...state.searchResult,
+        docs: [
+            ...state.searchResult.docs.slice(0, index),
+            {
+                ...currResult,
+                tags: tags,
+            },
+            ...state.searchResult.docs.slice(index + 1),
+        ],
+    }
+
+    return { ...state, searchResult }
+}
+
 const incSearchCount = state => ({
     ...state,
     searchCount: state.searchCount + 1,
@@ -175,6 +202,8 @@ export default createReducer(
         [actions.tagSearchValue]: payloadReducer('tagSearchValue'),
         [actions.tags]: payloadReducer('tags'),
         [actions.tagExpandedPageId]: payloadReducer('tagExpandedPageId'),
+        [actions.changeTagsResult]: changeTagsResult,
+        [actions.indexDocFortag]: payloadReducer('indexDocFortag'),
     },
     defaultState,
 )

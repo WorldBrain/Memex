@@ -9,11 +9,8 @@ const getTagClass = tagnm =>
         [localStyles.notExpanded]: !(tagnm[0] === '+'),
     })
 
-const TagName = ({ tagnm, handleClick, pageId }) => (
-    <span
-        className={getTagClass(tagnm)}
-        onClick={e => handleClick(tagnm[0] === '+' ? pageId : tagnm)(e)}
-    >
+const TagName = ({ tagnm, handleClick }) => (
+    <span className={getTagClass(tagnm)} onClick={handleClick}>
         {tagnm}
     </span>
 )
@@ -21,7 +18,6 @@ const TagName = ({ tagnm, handleClick, pageId }) => (
 TagName.propTypes = {
     tagnm: PropTypes.string.isRequired,
     handleClick: PropTypes.func.isRequired,
-    pageId: PropTypes.string.isRequired,
 }
 
 export default TagName

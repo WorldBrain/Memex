@@ -152,7 +152,7 @@ export const suggestedTags = state => overview(state).suggestedTags
 export const hoveredTagResult = state => overview(state).hoveredTagResult
 export const tagSearchValue = state => overview(state).tagSearchValue
 export const tags = state => overview(state).tags
-export const tagExpandedPageId = state => overview(state).tagExpandedPageId
+export const indexDocFortag = state => overview(state).indexDocFortag
 
 export const isEmptyQuery = createSelector(
     currentQueryParams,

@@ -5,10 +5,7 @@ import localStyles from './TagOption.css'
 const Tags = ({
     children,
     onTagSearchChange,
-    setInputRef,
-    onTagSearchEnter,
     numberOfTags,
-    handleClick,
     setTagDivRef,
     setTagInputRef,
     tagSearchValue,
@@ -31,14 +28,6 @@ const Tags = ({
             <div className={localStyles.numberTags}>
                 {numberOfTags} tag selected
             </div>
-            <div className={localStyles.tagDone}>
-                <button
-                    className={localStyles.tagDoneButton}
-                    onClick={() => handleClick('')}
-                >
-                    Done
-                </button>
-            </div>
         </div>
     </div>
 )
@@ -46,10 +35,7 @@ const Tags = ({
 Tags.propTypes = {
     children: PropTypes.object.isRequired,
     onTagSearchChange: PropTypes.func.isRequired,
-    setInputRef: PropTypes.func.isRequired,
-    onTagSearchEnter: PropTypes.func.isRequired,
     numberOfTags: PropTypes.number.isRequired,
-    handleClick: PropTypes.func.isRequired,
     setTagDivRef: PropTypes.func.isRequired,
     setTagInputRef: PropTypes.func.isRequired,
     tagSearchValue: PropTypes.string.isRequired,

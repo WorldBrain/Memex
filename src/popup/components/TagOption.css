@@ -23,14 +23,14 @@
 
 .numberTags {
     align-items: flex-start;
-    margin-top: 6px;
 }
 
 .summaryTagContainer {
     width: 100%;
     display: flex;
-    margin-top: 20px;
+    margin-top: 10px;
     justify-content: space-around;
+    padding-bottom: 10px;
 }
 
 .tagDone {
