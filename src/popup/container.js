@@ -15,9 +15,13 @@ import HistoryPauser from './components/HistoryPauser'
 import LinkButton from './components/LinkButton'
 import SplitButton from './components/SplitButton'
 import * as constants from './constants'
-import Tags from './components/Tags'
-import TagOption from './components/TagOption'
-import NoResult from './components/NoResult'
+import {
+    Tags,
+    TagOption,
+    NewTagMsg,
+    OldTagMsg,
+    NoResult,
+} from 'src/common-ui/components'
 
 import { itemBtnBlacklisted } from './components/Button.css'
 
@@ -71,6 +75,7 @@ class PopupContainer extends Component {
 
         this.onTagSearchChange = this.onTagSearchChange.bind(this)
         this.addTagsToReverseDoc = this.addTagsToReverseDoc.bind(this)
+        this.removeFromSuggestedTag = this.removeFromSuggestedTag.bind(this)
         this.focusInput = this.focusInput.bind(this)
 
         this.handleKeyBoardDown = this.handleKeyBoardDown.bind(this)
@@ -466,7 +471,7 @@ class PopupContainer extends Component {
         }))
     }
 
-    removeFromSuggestedTag = tag => async () => {
+    async removeFromSuggestedTag(tag) {
         const { url, resultTags } = this.state
         const pageId = await generatePageDocId({ url })
         const index = findIndexValue(resultTags, tag)
@@ -515,59 +520,55 @@ class PopupContainer extends Component {
         const { newTag, suggestedTags, hoveredTagResult } = this.state
         if (newTag.length !== 0 && suggestedTags.indexOf(newTag) === -1) {
             return (
-                <TagOption
-                    data={newTag}
-                    active={false}
-                    newTag={1}
-                    handleClick={
-                        suggestedTags.indexOf(newTag) === -1
-                            ? this.addTagsToReverseDoc
-                            : this.removeFromSuggestedTag(newTag)
-                    }
-                    addTagsToReverseDoc={this.addTagsToReverseDoc}
-                    hover={hoveredTagResult === newTag}
-                />
+                <TagOption>
+                    <NewTagMsg
+                        data={newTag}
+                        handleClick={this.addTagsToReverseDoc}
+                        hovered={hoveredTagResult === newTag}
+                    />
+                </TagOption>
             )
         }
         return null
     }
 
+    returnTagStatus(isSuggested, tag) {
+        const { resultTags } = this.state
+        const index = findIndexValue(
+            resultTags,
+            isSuggested ? tag : tag['value'],
+        )
+
+        return isSuggested
+            ? index === -1 ? false : resultTags[index].isSelected
+            : resultTags[index].isSelected
+    }
+
+    renderTagValue(isSuggested, tag) {
+        return isSuggested ? tag : tag['value']
+    }
+
     renderOptions(tags, isSuggested) {
-        const { resultTags, hoveredTagResult } = this.state
+        const { hoveredTagResult } = this.state
 
         return tags.map(
             (data, index) =>
                 data !== '' && (
-                    <TagOption
-                        data={isSuggested ? data : data['value']}
-                        key={index}
-                        active={
-                            isSuggested
-                                ? findIndexValue(resultTags, data) !== -1
-                                  ? resultTags[findIndexValue(resultTags, data)]
-                                        .isSelected === true
-                                  : findIndexValue(resultTags, data) !== -1
-                                : data['isSelected']
-                        }
-                        newTag={0}
-                        addTagsToReverseDoc={this.addTagsToReverseDoc}
-                        handleClick={
-                            (isSuggested
-                            ? findIndexValue(resultTags, data) !== -1
-                              ? resultTags[findIndexValue(resultTags, data)]
-                                    .isSelected === true
-                              : findIndexValue(resultTags, data) !== -1
-                            : data['isSelected'])
-                                ? this.removeFromSuggestedTag(
-                                      isSuggested ? data : data['value'],
-                                  )
-                                : this.addTagsToReverseDoc
-                        }
-                        hover={
-                            hoveredTagResult ===
-                            (isSuggested ? data : data['value'])
-                        }
-                    />
+                    <TagOption>
+                        <OldTagMsg
+                            data={this.renderTagValue(isSuggested, data)}
+                            active={this.returnTagStatus(isSuggested, data)}
+                            handleClick={
+                                this.returnTagStatus(isSuggested, data)
+                                    ? this.removeFromSuggestedTag
+                                    : this.addTagsToReverseDoc
+                            }
+                            hovered={
+                                hoveredTagResult ===
+                                this.renderTagValue(isSuggested, data)
+                            }
+                        />
+                    </TagOption>
                 ),
         )
     }

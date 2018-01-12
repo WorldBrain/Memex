@@ -192,10 +192,9 @@ class OverviewContainer extends Component {
                         onTagSearchChange={this.props.onTagSearchChange}
                         setInputRef={this.setInputRef}
                         numberOfTags={selectedResultTags.length}
-                        handleClick={this.props.handleTagBtnClick}
                         setTagDivRef={this.setTagDivRef}
-                        setTagInputRef={this.setTagInputRef}
-                        tagSearchValue={tagSearchValue}
+                        tagSearch={tagSearchValue}
+                        fromOverview={true}
                     >
                         <div>
                             {this.renderTagsOptions()}
@@ -232,13 +231,18 @@ class OverviewContainer extends Component {
     }
 
     renderResultItems() {
+        const { pageIdForTag } = this.props
+
         const resultItems = this.props.searchResults.map((doc, i) => (
             <PageResultItem
                 key={i}
                 onTrashBtnClick={this.props.handleTrashBtnClick(doc.url, i)}
                 onToggleBookmarkClick={this.props.handleToggleBm(doc.url, i)}
                 tagItem={this.renderTags(doc._id)}
-                onTagBtnClick={this.props.handleTagBtnClick(doc._id, i)}
+                onTagBtnClick={this.props.handleTagBtnClick(
+                    pageIdForTag === '' ? doc._id : '',
+                    i,
+                )}
                 {...doc}
             >
                 <span>
