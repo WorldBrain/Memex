@@ -1,13 +1,11 @@
-import index from 'src/search/search-index'
-
 const db = index.db._db
 
 async function downloadChunk(data, counter) {
-    chrome.downloads.download({
+    browser.downloads.download({
         url: URL.createObjectURL(
             new Blob([JSON.stringify(data)], { type: 'text/plain' }),
         ),
-        filename: 'worldbrain_index_'.concat(counter, '.json'),
+        filename: 'worldbrain_index_${counter}.json',
         saveAs: false,
     })
 }
@@ -25,7 +23,7 @@ async function grabDBChunk(startAfter = '', limit = 1000) {
 }
 
 /**
- * @param {int} chunkSize Length of the chunk for piecewise export 
+ * @param {number} chunkSize Length of the chunk for piecewise export. Suggested value range: 500 - 1000 
  *
  */
 export async function exportIndex(chunkSize = 500) {
@@ -46,11 +44,11 @@ export async function exportIndex(chunkSize = 500) {
  * @param {JSON Array} JSON array of the index data to be inserted
  */
 export async function importIndex(data) {
-    data.forEach(datum => {
-        db.put(datum.key, datum.value, err => {
+    for (let datum of data) {
+        await db.put(datum.key, datum.value, err => {
             console.log(err)
         })
-    })
+    }
 }
 
 window.exportIndex = exportIndex
