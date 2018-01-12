@@ -26,8 +26,13 @@ const Tags = ({
     setInputRef,
     tagSearch,
     fromOverview,
+    keydown,
 }) => (
-    <div className={getTagsClass(fromOverview)}>
+    <div
+        className={getTagsClass(fromOverview)}
+        ref={setTagDivRef}
+        onKeyDown={keydown}
+    >
         <form className={getSearchContainerClass(fromOverview)}>
             <input
                 className={getSearchClass(fromOverview)}
@@ -58,7 +63,8 @@ Tags.propTypes = {
     setTagDivRef: PropTypes.func,
     setInputRef: PropTypes.func.isRequired,
     tagSearch: PropTypes.string.isRequired,
-    fromOverview: PropTypes.bool.isRequired,
+    fromOverview: PropTypes.number.isRequired,
+    keydown: PropTypes.func,
 }
 
 export default Tags

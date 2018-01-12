@@ -63,7 +63,6 @@ class OverviewContainer extends Component {
 
     componentWillMount() {
         document.addEventListener('click', this.handleOutsideClick, false)
-        document.addEventListener('keydown', this.handleKeyBoardDown, false)
         document.addEventListener('keypress', this.handleTagEnter, false)
     }
 
@@ -75,7 +74,6 @@ class OverviewContainer extends Component {
 
     componentWillUnmount() {
         document.removeEventListener('click', this.handleOutsideClick, false)
-        document.removeEventListener('keydown', this.handleKeyBoardDown, false)
         document.removeEventListener('keypress', this.handleTagEnter, false)
     }
 
@@ -194,7 +192,9 @@ class OverviewContainer extends Component {
                         numberOfTags={selectedResultTags.length}
                         setTagDivRef={this.setTagDivRef}
                         tagSearch={tagSearchValue}
-                        fromOverview={true}
+                        fromOverview={1}
+                        keydown={this.handleKeyBoardDown}
+                        keypress={this.handleTagEnter}
                     >
                         <div>
                             {this.renderTagsOptions()}
@@ -403,6 +403,7 @@ class OverviewContainer extends Component {
 
     handleTagEnter(e) {
         const { pageIdForTag, hoveredTagResult, resultTags } = this.props
+
         if (e.keyCode === 13 && pageIdForTag !== '') {
             e.preventDefault()
             const index = this.findIndexValue(resultTags, hoveredTagResult)
