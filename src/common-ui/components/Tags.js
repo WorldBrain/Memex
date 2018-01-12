@@ -1,25 +1,42 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import localStyles from './TagOption.css'
+import classNames from 'classnames'
+
+const getTagsClass = fromOverview =>
+    classNames(localStyles.tagDiv, {
+        [localStyles.tagDivFromOverview]: fromOverview,
+    })
+
+const getSearchContainerClass = fromOverview =>
+    classNames(localStyles.searchContainer, {
+        [localStyles.searchContainerOverview]: fromOverview,
+    })
+
+const getSearchClass = fromOverview =>
+    classNames(localStyles.search, {
+        [localStyles.searchOverview]: fromOverview,
+    })
 
 const Tags = ({
     children,
     onTagSearchChange,
     numberOfTags,
     setTagDivRef,
-    setTagInputRef,
-    tagSearchValue,
+    setInputRef,
+    tagSearch,
+    fromOverview,
 }) => (
-    <div className={localStyles.tagDiv} ref={setTagDivRef}>
-        <form className={localStyles.searchContainer}>
+    <div className={getTagsClass(fromOverview)}>
+        <form className={getSearchContainerClass(fromOverview)}>
             <input
-                className={localStyles.search}
+                className={getSearchClass(fromOverview)}
                 name="query"
                 placeholder="Search & Add Tag(s)"
                 onChange={onTagSearchChange}
-                ref={setTagInputRef}
+                ref={setInputRef}
                 autoComplete="off"
-                value={tagSearchValue}
+                value={tagSearch}
                 autoFocus
             />
             <i className="material-icons">search</i>
@@ -27,7 +44,8 @@ const Tags = ({
         <div className={localStyles.tagContainer}>{children}</div>
         <div className={localStyles.summaryTagContainer}>
             <div className={localStyles.numberTags}>
-                {numberOfTags} tag selected
+                <span className={localStyles.bold}>{numberOfTags}</span> tags
+                selected
             </div>
         </div>
     </div>
@@ -37,9 +55,10 @@ Tags.propTypes = {
     children: PropTypes.object.isRequired,
     onTagSearchChange: PropTypes.func.isRequired,
     numberOfTags: PropTypes.number.isRequired,
-    setTagDivRef: PropTypes.func.isRequired,
-    setTagInputRef: PropTypes.func.isRequired,
-    tagSearchValue: PropTypes.string.isRequired,
+    setTagDivRef: PropTypes.func,
+    setInputRef: PropTypes.func.isRequired,
+    tagSearch: PropTypes.string.isRequired,
+    fromOverview: PropTypes.bool.isRequired,
 }
 
 export default Tags
