@@ -52,7 +52,10 @@ const PageResultItem = props => (
                         {niceTime(+props.displayTime)}{' '}
                     </div>
                     <span className={styles.tagList}>{props.children}</span>
-                    <div className={styles.buttonsContainer}>
+                    <div
+                        className={styles.buttonsContainer}
+                        onClick={e => e.preventDefault()}
+                    >
                         <button
                             className={classNames(styles.button, styles.tag)}
                             onClick={props.onTagBtnClick}
