@@ -56,6 +56,7 @@ const PageResultItem = props => (
                         <button
                             className={classNames(styles.button, styles.tag)}
                             onClick={props.onTagBtnClick}
+                            ref={props.setTagButtonRef}
                         />
                         <button
                             disabled={props.isDeleting}
@@ -87,6 +88,7 @@ PageResultItem.propTypes = {
     children: PropTypes.object.isRequired,
     tagItem: PropTypes.object.isRequired,
     onTagBtnClick: PropTypes.func.isRequired,
+    setTagButtonRef: PropTypes.func.isRequired,
 }
 
 export default PageResultItem
