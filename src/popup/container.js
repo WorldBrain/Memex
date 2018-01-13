@@ -15,8 +15,16 @@ import HistoryPauser from './components/HistoryPauser'
 import LinkButton from './components/LinkButton'
 import SplitButton from './components/SplitButton'
 import * as constants from './constants'
-
+import {
+    Tags,
+    TagOption,
+    NewTagMsg,
+    OldTagMsg,
+    NoResult,
+} from 'src/common-ui/components'
 import { itemBtnBlacklisted } from './components/Button.css'
+import UpgradeButton from './components/UpgradeButton'
+import ButtonIcon from './components/ButtonIcon'
 
 // Transforms URL checking results to state types
 const getBlacklistButtonState = ({ loggable, blacklisted }) => {
@@ -41,6 +49,10 @@ const getBookmarkButtonState = ({ loggable, bookmark, blacklist }) => {
     return constants.BOOKMARK_BTN_STATE.UNBOOKMARK
 }
 
+function findIndexValue(a, tag) {
+    return a.findIndex(i => i.value === tag)
+}
+
 class PopupContainer extends Component {
     constructor(props) {
         super(props)
@@ -52,11 +64,23 @@ class PopupContainer extends Component {
         this.deleteDocs = remoteFunction('deleteDocsByUrl')
         this.removeBookmarkByUrl = remoteFunction('removeBookmarkByUrl')
         this.createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
+        this.suggestTags = remoteFunction('suggestTags')
+        this.fetchTags = remoteFunction('fetchTags')
+        this.addTags = remoteFunction('addTags')
+        this.delTags = remoteFunction('delTags')
 
         this.onSearchChange = this.onSearchChange.bind(this)
         this.onPauseChange = this.onPauseChange.bind(this)
         this.onSearchEnter = this.onSearchEnter.bind(this)
         this.onPauseConfirm = this.onPauseConfirm.bind(this)
+
+        this.onTagSearchChange = this.onTagSearchChange.bind(this)
+        this.addTagsToReverseDoc = this.addTagsToReverseDoc.bind(this)
+        this.removeFromSuggestedTag = this.removeFromSuggestedTag.bind(this)
+        this.focusInput = this.focusInput.bind(this)
+
+        this.handleKeyBoardDown = this.handleKeyBoardDown.bind(this)
+        this.handleTagEnter = this.handleTagEnter.bind(this)
     }
 
     state = {
@@ -71,6 +95,18 @@ class PopupContainer extends Component {
         bookmarkBtn: constants.BOOKMARK_BTN_STATE.DISABLED,
         domainDelete: false,
         tabID: null,
+        tagSelected: false,
+        resultTags: [],
+        suggestedTags: [],
+        tagButttonState: false,
+        newTag: '',
+        tagSearch: '',
+        hoveredTagResult: '',
+    }
+
+    componentWillMount() {
+        document.addEventListener('keydown', this.handleKeyBoardDown, false)
+        document.addEventListener('keypress', this.handleTagEnter, false)
     }
 
     async componentDidMount() {
@@ -97,6 +133,110 @@ class PopupContainer extends Component {
             .then(() => this.getInitBookmarkBtnState(currentTab.url))
             .then(updateState)
             .catch(noop)
+        this.getInitTagsState(currentTab.url)
+            .then(updateState)
+            .catch(noop)
+        this.getInitResultTags(currentTab.url)
+            .then(updateState)
+            .catch(noop)
+    }
+
+    componentWillUnmount() {
+        document.removeEventListener('keydown', this.handleKeyBoardDown, false)
+        document.removeEventListener('keypress', this.handleTagEnter, false)
+    }
+
+    async handleKeyBoardDown(e) {
+        const { resultTags, newTag, suggestedTags, url } = this.state
+
+        let { hoveredTagResult } = this.state
+
+        const pageId = await generatePageDocId({ url })
+
+        if (pageId !== '') {
+            // e.preventDefault()
+
+            if (suggestedTags.length !== 0) {
+                const index = suggestedTags.indexOf(hoveredTagResult)
+
+                if (e.keyCode === 40) {
+                    if (index !== suggestedTags.length - 1) {
+                        hoveredTagResult = suggestedTags[index + 1]
+                    } else if (index === suggestedTags.length - 1) {
+                        hoveredTagResult = newTag
+                    }
+                } else if (e.keyCode === 38) {
+                    if (index !== 0 && index >= 0) {
+                        hoveredTagResult = suggestedTags[index - 1]
+                    } else if (index === -1) {
+                        hoveredTagResult =
+                            suggestedTags[suggestedTags.length - 1]
+                    }
+                }
+            } else if (newTag.length !== 0) {
+                hoveredTagResult = newTag
+            } else {
+                const index = findIndexValue(resultTags, hoveredTagResult)
+                if (e.keyCode === 40) {
+                    if (index !== resultTags.length - 1) {
+                        hoveredTagResult = resultTags[index + 1].value
+                    }
+                } else if (e.keyCode === 38) {
+                    if (index !== 0) {
+                        hoveredTagResult = resultTags[index - 1].value
+                    }
+                }
+            }
+        }
+
+        this.setState(state => ({
+            ...state,
+            hoveredTagResult: hoveredTagResult,
+        }))
+    }
+
+    async handleTagEnter(e) {
+        const { hoveredTagResult, resultTags } = this.state
+
+        if (e.keyCode === 13) {
+            e.preventDefault()
+            const index = findIndexValue(resultTags, hoveredTagResult)
+
+            if (index === -1) {
+                this.addTagsToReverseDoc(hoveredTagResult)
+            } else {
+                if (resultTags[index].isSelected) {
+                    this.removeFromSuggestedTag(hoveredTagResult)()
+                } else {
+                    this.addTagsToReverseDoc(hoveredTagResult)
+                }
+            }
+        }
+    }
+
+    async getInitTagsState(url) {
+        return { tagButttonState: isLoggable({ url }) }
+    }
+
+    async getInitResultTags(url) {
+        const pageId = await generatePageDocId({ url })
+        const res = await this.fetchTags(pageId)
+        let hoveredTagResult = ''
+        res.sort()
+        const tags = []
+        for (let i = 0; i < res.length; i++) {
+            if (i === 0) {
+                hoveredTagResult = res[i]
+            }
+            tags.push({ isSelected: true, value: res[i] })
+        }
+
+        this.setState(state => ({
+            ...state,
+            hoveredTagResult: hoveredTagResult,
+        }))
+
+        return { resultTags: tags }
     }
 
     async getInitPauseState() {
@@ -125,6 +265,34 @@ class PopupContainer extends Component {
         }
 
         return { bookmarkBtn: getBookmarkButtonState(result) }
+    }
+
+    async changeSuggestedtags(term) {
+        const res = await this.suggestTags(term)
+        const { newTag } = this.state
+        let { hoveredTagResult } = this.state
+
+        if (res.length > 0) {
+            hoveredTagResult = res[0]
+        } else {
+            if (newTag.length !== 0) {
+                hoveredTagResult = newTag
+            }
+        }
+
+        this.setState(state => ({
+            ...state,
+            suggestedTags: res,
+            hoveredTagResult: hoveredTagResult,
+        }))
+    }
+
+    focusInput() {
+        this.inputQueryEl.focus()
+    }
+
+    setInputRef = element => {
+        this.inputQueryEl = element
     }
 
     onBlacklistBtnClick(domainDelete = false) {
@@ -280,8 +448,176 @@ class PopupContainer extends Component {
         window.close()
     }
 
+    async addTagsToReverseDoc(tag) {
+        const { url, resultTags } = this.state
+        const pageId = await generatePageDocId({ url })
+        const index = findIndexValue(resultTags, tag)
+
+        await this.addTags(pageId, [tag])
+
+        if (index === -1) {
+            resultTags.unshift({ isSelected: true, value: tag })
+        } else if (!resultTags[index].isSelected) {
+            resultTags[index].isSelected = true
+        }
+
+        this.focusInput()
+
+        this.setState(state => ({
+            ...state,
+            resultTags: resultTags,
+            newTag: '',
+            suggestedTags: [],
+            tagSearch: '',
+        }))
+    }
+
+    async removeFromSuggestedTag(tag) {
+        const { url, resultTags } = this.state
+        const pageId = await generatePageDocId({ url })
+        const index = findIndexValue(resultTags, tag)
+
+        if (index !== -1) {
+            resultTags[index].isSelected = false
+            await this.delTags(pageId, [tag])
+        }
+
+        this.setState(state => ({
+            ...state,
+            resultTags: resultTags,
+        }))
+    }
+
+    async onTagSearchChange(event) {
+        const { resultTags } = this.state
+        const tagSearchValue = event.target.value
+        const index = findIndexValue(resultTags, tagSearchValue)
+
+        this.setState(state => ({
+            ...state,
+            newTag: index === -1 ? tagSearchValue : '',
+            tagSearch: tagSearchValue,
+        }))
+
+        if (tagSearchValue !== '') {
+            this.changeSuggestedtags(event.target.value)
+        }
+    }
+
+    setTagSelected = () => {
+        const { tagSelected } = this.state
+
+        this.setState(state => ({
+            ...state,
+            tagSelected: !this.state.tagSelected,
+        }))
+
+        if (tagSelected) {
+            window.close()
+        }
+    }
+
+    renderNewTagOption() {
+        const { newTag, suggestedTags, hoveredTagResult } = this.state
+        if (newTag.length !== 0 && suggestedTags.indexOf(newTag) === -1) {
+            return (
+                <TagOption>
+                    <NewTagMsg
+                        data={newTag}
+                        handleClick={this.addTagsToReverseDoc}
+                        hovered={hoveredTagResult === newTag}
+                    />
+                </TagOption>
+            )
+        }
+        return null
+    }
+
+    returnTagStatus(isSuggested, tag) {
+        const { resultTags } = this.state
+        const index = findIndexValue(
+            resultTags,
+            isSuggested ? tag : tag['value'],
+        )
+
+        return isSuggested
+            ? index === -1 ? false : resultTags[index].isSelected
+            : resultTags[index].isSelected
+    }
+
+    renderTagValue(isSuggested, tag) {
+        return isSuggested ? tag : tag['value']
+    }
+
+    renderOptions(tags, isSuggested) {
+        const { hoveredTagResult } = this.state
+
+        return tags.map(
+            (data, index) =>
+                data !== '' && (
+                    <TagOption>
+                        <OldTagMsg
+                            data={this.renderTagValue(isSuggested, data)}
+                            active={this.returnTagStatus(isSuggested, data)}
+                            handleClick={
+                                this.returnTagStatus(isSuggested, data)
+                                    ? this.removeFromSuggestedTag
+                                    : this.addTagsToReverseDoc
+                            }
+                            hovered={
+                                hoveredTagResult ===
+                                this.renderTagValue(isSuggested, data)
+                            }
+                        />
+                    </TagOption>
+                ),
+        )
+    }
+
+    renderTagsOptions() {
+        const { resultTags, newTag, suggestedTags } = this.state
+
+        if (
+            resultTags.length === 0 &&
+            newTag.length === 0 &&
+            suggestedTags.length === 0
+        ) {
+            return <NoResult />
+        }
+
+        if (suggestedTags.length !== 0) {
+            return this.renderOptions(suggestedTags, true)
+        } else if (newTag.length !== 0) {
+            return null
+        }
+
+        return this.renderOptions(resultTags, false)
+    }
+
+    renderTagButton() {
+        return (
+            <Button
+                icon="label"
+                onClick={this.setTagSelected}
+                disabled={!this.state.tagButttonState}
+            >
+                Add Tag(s)
+            </Button>
+        )
+    }
+
     renderChildren() {
-        const { blacklistConfirm, pauseValue, isPaused } = this.state
+        const {
+            blacklistConfirm,
+            pauseValue,
+            isPaused,
+            tagSelected,
+            resultTags,
+            tagSearch,
+        } = this.state
+        const selectedResultTags = resultTags.filter(
+            tag => tag.isSelected === true,
+        )
 
         if (blacklistConfirm) {
             return (
@@ -291,6 +627,23 @@ class PopupContainer extends Component {
                 />
             )
         }
+
+        if (tagSelected) {
+            return (
+                <Tags
+                    onTagSearchChange={this.onTagSearchChange}
+                    setInputRef={this.setInputRef}
+                    numberOfTags={selectedResultTags.length}
+                    tagSearch={tagSearch}
+                >
+                    <div>
+                        {this.renderTagsOptions()}
+                        {this.renderNewTagOption()}
+                    </div>
+                </Tags>
+            )
+        }
+
         return (
             <div>
                 <Button
@@ -311,6 +664,8 @@ class PopupContainer extends Component {
                         ? 'Unbookmark this Page'
                         : 'Bookmark this Page'}
                 </Button>
+                {this.renderTagButton()}
+                <hr />
                 <HistoryPauser
                     onConfirm={this.onPauseConfirm}
                     onChange={this.onPauseChange}
@@ -320,34 +675,26 @@ class PopupContainer extends Component {
                     {this.renderPauseChoices()}
                 </HistoryPauser>
                 {this.renderBlacklistButton()}
-                <hr />
-                <LinkButton
-                    href={`${constants.OPTIONS_URL}#/blacklist`}
+                <UpgradeButton />
+                <ButtonIcon
+                    href={constants.OPTIONS_URL}
                     icon="settings"
-                >
-                    Settings
-                </LinkButton>
-                <LinkButton
-                    href={`${constants.OPTIONS_URL}#/import`}
-                    icon="file_download"
-                >
-                    Import History &amp; Bookmarks
-                </LinkButton>
-                <LinkButton href={constants.FEEDBACK_URL} icon="feedback">
-                    I need Help!
-                </LinkButton>
+                    buttonType={1}
+                />
+                <ButtonIcon href={constants.FEEDBACK_URL} icon="help" />
             </div>
         )
     }
 
     render() {
-        const { searchValue } = this.state
+        const { searchValue, tagSelected } = this.state
 
         return (
             <Popup
                 searchValue={searchValue}
                 onSearchChange={this.onSearchChange}
                 onSearchEnter={this.onSearchEnter}
+                tagSelected={tagSelected}
             >
                 {this.renderChildren()}
             </Popup>

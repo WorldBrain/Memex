@@ -7,13 +7,13 @@ import styles from './Popup.css'
 
 const Popup = ({ children, ...searchProps }) => (
     <div className={styles.popup}>
-        <Search {...searchProps} />
+        {!searchProps.tagSelected && <Search {...searchProps} />}
         {children}
     </div>
 )
 
 Popup.propTypes = {
-    children: PropTypes.arrayOf(PropTypes.element).isRequired,
+    children: PropTypes.object.isRequired,
 }
 
 export default Popup

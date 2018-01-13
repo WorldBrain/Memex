@@ -31,9 +31,30 @@ export const incSearchCount = createAction('overview/incSearchCount')
 export const initSearchCount = createAction('overview/initSearchCount')
 export const setResultDeleting = createAction('overview/setResultDeleting')
 
+export const pageIdForTag = createAction('overview/pageIdForTag')
+export const newTag = createAction('overview/newTag')
+export const resultTags = createAction('overview/resultTags')
+export const deleteTags = createAction('overview/deleteTags')
+export const suggestedTags = createAction('overview/suggestedTags')
+export const hoveredTagResult = createAction('overview/hoveredTagResult')
+export const tagSearchValue = createAction('overview/tagSearchValue')
+export const tags = createAction('overview/tags')
+export const tagExpandedPageId = createAction('overview/tagExpandedPageId')
+export const changeTagsResult = createAction(
+    'overview/changeTagsResult',
+    (index, tag, isDelete) => ({ index, tag, isDelete }),
+)
+export const indexDocFortag = createAction('overview/indexDocFortag')
+export const addTag = createAction('overview/addTag')
+export const delTag = createAction('overview/delTag')
+
 const deleteDocsByUrl = remoteFunction('deleteDocsByUrl')
 const createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
 const removeBookmarkByUrl = remoteFunction('removeBookmarkByUrl')
+const fetchTags = remoteFunction('fetchTags')
+const suggestTags = remoteFunction('suggestTags')
+const addTags = remoteFunction('addTags')
+const delTags = remoteFunction('delTags')
 
 const getCmdMessageHandler = dispatch => ({ cmd, ...payload }) => {
     switch (cmd) {
@@ -90,11 +111,13 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
     const currentQueryParams = selectors.currentQueryParams(state)
     const skip = selectors.resultsSkip(state)
     const showOnlyBookmarks = selectors.showOnlyBookmarks(state)
+    const tags = selectors.tags(state)
 
     const searchParams = {
         ...currentQueryParams,
         getTotalCount: true,
         showOnlyBookmarks,
+        tags,
         limit: constants.PAGE_SIZE,
         skip,
     }
@@ -198,4 +221,87 @@ export const toggleBookmark = (url, index) => async (dispatch, getState) => {
     } catch (error) {
         dispatch(changeHasBookmark(index)) // Reset UI state in case of error
     }
+}
+
+function findIndexValue(a, tag) {
+    return a.findIndex(i => i.value === tag)
+}
+
+export const FetchInitResultTags = () => async (dispatch, getState) => {
+    const state = getState()
+    const pageId = selectors.pageIdForTag(state)
+    const tagsFromBackend = await fetchTags(pageId)
+
+    tagsFromBackend.sort()
+
+    if (tagsFromBackend.length > 0) {
+        dispatch(hoveredTagResult(tagsFromBackend[0]))
+    }
+    dispatch(
+        resultTags(tagsFromBackend.map(value => ({ isSelected: true, value }))),
+    )
+}
+
+export const addTagsFromOverview = tag => async (dispatch, getState) => {
+    const state = getState()
+    const pageId = selectors.pageIdForTag(state)
+    const indexDocFortag = selectors.indexDocFortag(state)
+
+    await addTags(pageId, [tag])
+    dispatch(addTag(tag))
+    dispatch(newTag(''))
+    dispatch(suggestedTags([]))
+    dispatch(changeTagsResult(indexDocFortag, tag, false))
+}
+
+export const delTagsFromOverview = tag => async (dispatch, getState) => {
+    const state = getState()
+    const pageId = selectors.pageIdForTag(state)
+    const indexDocFortag = selectors.indexDocFortag(state)
+
+    await delTags(pageId, [tag])
+    dispatch(delTag(tag))
+    dispatch(changeTagsResult(indexDocFortag, tag, true))
+}
+
+export const produceNewTag = tag => async (dispatch, getState) => {
+    const state = getState()
+    const tags = selectors.resultTags(state)
+    const index = findIndexValue(tags, tag)
+
+    if (index !== -1) {
+        tag = ''
+    }
+
+    dispatch(newTag(tag))
+}
+
+export const addTagsFromOverviewOnEnter = tag => async (dispatch, getState) => {
+    const state = getState()
+    const pageId = selectors.pageIdForTag(state)
+    const suggestTags = [...selectors.suggestedTags(state)]
+
+    if (suggestTags.length === 0) {
+        await addTags(pageId, [tag])
+        dispatch(addTag(tag))
+        dispatch(newTag(''))
+        dispatch(suggestedTags([]))
+    }
+}
+
+export const suggestTagFromOverview = term => async (dispatch, getState) => {
+    const tags = await suggestTags(term)
+
+    tags.sort()
+    if (tags.length >= 1) {
+        dispatch(hoveredTagResult(tags[0]))
+    } else {
+        dispatch(hoveredTagResult(term))
+    }
+    dispatch(suggestedTags(tags))
+}
+
+export const searchByTags = tag => async (dispatch, getState) => {
+    dispatch(tags([tag, 'UI']))
+    dispatch(search({ overwrite: true }))
 }
