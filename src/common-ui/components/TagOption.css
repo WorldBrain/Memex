@@ -54,16 +54,16 @@
 }
 
 .searchContainerOverview {
-    background-color: #f2f2f2 !important;
+    background-color: #ffffff !important;
 }
 
 .searchOverview {
-    background-color: #f2f2f2 !important;
+    background-color: #ffffff !important;
 }
 
 .search {
     width: 90%;
-    font-size: 1em;
+    font-size: 14px;
     padding: 5px;
     border: none;
     background-color: white;
@@ -90,8 +90,9 @@
     position: absolute;
     width: 300px;
     z-index: 1;
-    background-color: #f2f2f2;
+    background-color: #ffffff;
     margin-left: 500px;
+    box-shadow: 0px 3px 7px 0px #3eb995;
 
     @media (max-width: 835px) {
         right: 10px;
