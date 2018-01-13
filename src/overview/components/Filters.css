@@ -83,6 +83,7 @@ input[type='checkbox'] {
 .clear {
     cursor: pointer;
     position: absolute;
-    bottom: 0;
+    left: 72.5%;
     color: #3eb995;
+    bottom: 12%;
 }

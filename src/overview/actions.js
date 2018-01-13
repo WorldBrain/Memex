@@ -28,6 +28,7 @@ export const showFilter = createAction('overview/showFilter')
 export const toggleBookmarkFilter = createAction(
     'overview/toggleBookmarkFilter',
 )
+export const resetFilters = createAction('overview/resetFilters')
 export const changeHasBookmark = createAction('overview/changeHasBookmark')
 export const incSearchCount = createAction('overview/incSearchCount')
 export const initSearchCount = createAction('overview/initSearchCount')

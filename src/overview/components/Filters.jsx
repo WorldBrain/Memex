@@ -6,7 +6,7 @@ import localStyles from './Filters.css'
 const Filters = ({
     showOnlyBookmarks,
     onShowOnlyBookmarksChange,
-    onShowFilterChange,
+    clearAllFilters,
 }) => (
     <div className={localStyles.filtersMain}>
         <div className={localStyles.bookmarks}>
@@ -25,12 +25,13 @@ const Filters = ({
         </div>
         {/* TODO: Toggle for Clear Filters button. Need to be modified according to new filters being added. */}
         {showOnlyBookmarks && (
-            <div
-                onClick={onShowOnlyBookmarksChange}
+            <button
+                type="button"
+                onClick={clearAllFilters}
                 className={localStyles.clear}
             >
                 Clear Filters
-            </div>
+            </button>
         )}
     </div>
 )
@@ -38,7 +39,7 @@ const Filters = ({
 Filters.propTypes = {
     showOnlyBookmarks: PropTypes.bool.isRequired,
     onShowOnlyBookmarksChange: PropTypes.func.isRequired,
-    onShowFilterChange: PropTypes.func.isRequired,
+    clearAllFilters: PropTypes.func.isRequired,
 }
 
 export default Filters

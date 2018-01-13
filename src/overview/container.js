@@ -257,6 +257,7 @@ const mapDispatchToProps = dispatch => ({
             onShowFilterChange: actions.showFilter,
             onShowOnlyBookmarksChange: actions.toggleBookmarkFilter,
             resetActiveTagIndex: actions.resetActiveTagIndex,
+            clearAllFilters: actions.resetFilters,
         },
         dispatch,
     ),
