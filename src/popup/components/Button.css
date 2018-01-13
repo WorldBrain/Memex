@@ -13,9 +13,9 @@
     align-items: center;
     cursor: default;
     font-weight: 100;
-    padding-left:10px;
-    padding-top: 10px
-    
+    padding-left: 10px;
+    padding-top: 10px;
+
     &:hover,
     &:focus {
         color: rgb(62, 185, 149);
@@ -102,7 +102,7 @@
     font-family: 'Open Sans';
     font-weight: 100;
     margin-top: 13px;
-    margin-right:5px;
+    margin-right: 5px;
     outline: 0;
     color: #909090;
 

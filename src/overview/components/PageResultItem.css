@@ -95,7 +95,8 @@
     flex-direction: column;
     justify-content: center;
     overflow: hidden;
-    padding-left: 24px;
+    padding-left: 12px;
+    padding-right: 12px;
 
     & .title {
         font-size: 16px;
@@ -125,8 +126,10 @@
     }
 
     & .time {
-        font-size: 11px;
-        color: #c1c1c1;
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+        align-items: center;
     }
 }
 
@@ -146,7 +149,11 @@
     float: right;
     color: inherit;
     text-decoration: none;
-    margin-right: 10px;
+}
+
+.displayTime {
+    font-size: 11px;
+    color: #c1c1c1;
 }
 
 .button {
@@ -159,46 +166,48 @@
     background-size: contain;
     cursor: pointer;
     outline: none;
-    margin: 0 3px 10px 3px;
+    margin: 0 3px 0 3px;
 }
 
 .trash {
-    background-image: url('/img/trash-icon.png');
+    background-image: url('/img/trash.svg');
+    opacity: 0.1;
 
     &:hover:enabled {
-        background-image: url('/img/trash-icon-hovered.png');
+        background-image: url('/img/trash_red.svg');
     }
 }
 
 .bookmark {
-    background-image: url('/img/star_full_grey.png');
+    background-image: url('/img/star_full_grey.svg');
 
     &:hover:enabled {
         opacity: 0.5;
-        background-image: url('/img/star_full_3EB995.png');
+        background-image: url('/img/star_full.svg');
     }
 }
 
 .notBookmark {
-    background-image: url('/img/star_empty_grey.png');
+    background-image: url('/img/star_empty_grey.svg');
 
     &:hover:enabled {
         opacity: 0.5;
-        background-image: url('/img/star_empty_3EB995.png');
+        background-image: url('/img/star_empty.svg');
     }
 }
 
 .tag {
-    background-image: url('/img/tag.png');
+    background-image: url('/img/tag.svg');
+    opacity: 0.1;
 
     &:hover:enabled {
         opacity: 0.5;
-        background-image: url('/img/tag.png');
+        background-image: url('/img/tag_3eb995.svg');
     }
 }
 
 .tagList {
+    display: flex;
+    flex-grow: 2;
     margin-left: 15px;
-    max-width: 200px;
-    line-height: 2em;
 }

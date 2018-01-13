@@ -47,12 +47,19 @@ const PageResultItem = props => (
                 </div>
                 <div className={styles.url}>{props.url}</div>
                 <div className={styles.time}>
-                    {niceTime(+props.displayTime)}
+                    <div className={styles.displayTime}>
+                        {' '}
+                        {niceTime(+props.displayTime)}{' '}
+                    </div>
                     <span className={styles.tagList}>{props.children}</span>
-                    <div className={styles.buttonsContainer}>
+                    <div
+                        className={styles.buttonsContainer}
+                        onClick={e => e.preventDefault()}
+                    >
                         <button
                             className={classNames(styles.button, styles.tag)}
                             onClick={props.onTagBtnClick}
+                            ref={props.setTagButtonRef}
                         />
                         <button
                             disabled={props.isDeleting}
@@ -84,6 +91,7 @@ PageResultItem.propTypes = {
     children: PropTypes.object.isRequired,
     tagItem: PropTypes.object.isRequired,
     onTagBtnClick: PropTypes.func.isRequired,
+    setTagButtonRef: PropTypes.func.isRequired,
 }
 
 export default PageResultItem

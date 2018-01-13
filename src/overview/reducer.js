@@ -126,10 +126,10 @@ const changeHasBookmark = (state, index) => {
 
 const changeTagsResult = (state, { index, tag, isDelete }) => {
     const currResult = state.searchResult.docs[index]
-    const tags = currResult.tags
+    const tags = [...currResult.tags]
 
     if (isDelete) {
-        tags.splice(tags.indexOf(tags), 1)
+        tags.splice(tags.indexOf('tag/' + tag), 1)
     } else {
         tags.push('tag/' + tag)
     }

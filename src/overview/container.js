@@ -89,6 +89,10 @@ class OverviewContainer extends Component {
         this.tagInput = element
     }
 
+    setTagButtonRef = element => {
+        this.tagButton = element
+    }
+
     setTagInputFocus(data) {
         this.props.addTags(data)
         this.tagInput.focus()
@@ -239,16 +243,15 @@ class OverviewContainer extends Component {
                 onTrashBtnClick={this.props.handleTrashBtnClick(doc.url, i)}
                 onToggleBookmarkClick={this.props.handleToggleBm(doc.url, i)}
                 tagItem={this.renderTags(doc._id)}
+                setTagButtonRef={this.setTagButtonRef}
                 onTagBtnClick={this.props.handleTagBtnClick(
                     pageIdForTag === '' ? doc._id : '',
                     i,
                 )}
                 {...doc}
             >
-                <span>
-                    {this.renderTagsNameInPageResultItem(doc.tags, doc._id)}
-                    {this.renderExpandTagButton(doc.tags, doc._id, i)}
-                </span>
+                {this.renderTagsNameInPageResultItem(doc.tags, doc._id)}
+                {this.renderExpandTagButton(doc.tags, doc._id, i)}
             </PageResultItem>
         ))
 
@@ -342,7 +345,11 @@ class OverviewContainer extends Component {
     }
 
     handleOutsideClick(e) {
-        if (this.tagDiv && !this.tagDiv.contains(e.target)) {
+        if (
+            this.tagDiv &&
+            !this.tagDiv.contains(e.target) &&
+            !this.tagButton.isEqualNode(e.target)
+        ) {
             this.props.handleTagBtnClick('', -1)(e)
         }
     }
