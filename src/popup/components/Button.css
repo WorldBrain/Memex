@@ -13,7 +13,7 @@
     align-items: center;
     cursor: default;
     font-weight: 100;
-    margin-left:10px;
+    padding-left:10px;
 
     &:hover,
     &:focus {
@@ -32,7 +32,7 @@
     cursor: pointer;
     font-family: 'Open Sans';
     font-weight: 100;
-    margin-left: 10px;
+    padding-left: 10px;
 
     &:disabled {
         color: rgb(156, 156, 156);
