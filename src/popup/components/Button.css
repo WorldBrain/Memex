@@ -13,6 +13,7 @@
     align-items: center;
     cursor: default;
     font-weight: 100;
+    margin-left:10px;
 
     &:hover,
     &:focus {
@@ -31,6 +32,7 @@
     cursor: pointer;
     font-family: 'Open Sans';
     font-weight: 100;
+    margin-left: 10px;
 
     &:disabled {
         color: rgb(156, 156, 156);
@@ -99,6 +101,7 @@
     font-family: 'Open Sans';
     font-weight: 100;
     margin-top: 13px;
+    margin-right:5px;
     outline: 0;
     color: #909090;
 
@@ -112,7 +115,7 @@
 }
 
 .settings {
-    margin-right: 10px;
+    margin-right: 26px;
 }
 
 .icon {
