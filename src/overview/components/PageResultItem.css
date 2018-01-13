@@ -153,13 +153,13 @@
     display: inline;
     border: none;
     background-color: transparent;
-    width: 18px;
-    height: 18px;
+    width: 23px;
+    height: 23px;
     background-repeat: no-repeat;
     background-size: contain;
     cursor: pointer;
     outline: none;
-    margin: 0 2px 10px 2px;
+    margin: 0 3px 10px 3px;
 }
 
 .trash {
