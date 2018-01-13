@@ -95,7 +95,8 @@
     flex-direction: column;
     justify-content: center;
     overflow: hidden;
-    padding-left: 24px;
+    padding-left: 12px;
+    padding-right: 12px;
 
     & .title {
         font-size: 16px;
@@ -125,8 +126,10 @@
     }
 
     & .time {
-        font-size: 11px;
-        color: #c1c1c1;
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+        align-items: center;
     }
 }
 
@@ -146,7 +149,11 @@
     float: right;
     color: inherit;
     text-decoration: none;
-    margin-right: 10px;
+}
+
+.displayTime {
+    font-size: 11px;
+    color: #c1c1c1;
 }
 
 .button {
@@ -159,7 +166,7 @@
     background-size: contain;
     cursor: pointer;
     outline: none;
-    margin: 0 3px 10px 3px;
+    margin: 0 3px 0 3px;
 }
 
 .trash {
@@ -198,7 +205,7 @@
 }
 
 .tagList {
+    display: flex;
+    flex-grow: 2;
     margin-left: 15px;
-    max-width: 200px;
-    line-height: 2em;
 }

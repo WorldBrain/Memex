@@ -245,10 +245,8 @@ class OverviewContainer extends Component {
                 )}
                 {...doc}
             >
-                <span>
-                    {this.renderTagsNameInPageResultItem(doc.tags, doc._id)}
-                    {this.renderExpandTagButton(doc.tags, doc._id, i)}
-                </span>
+                {this.renderTagsNameInPageResultItem(doc.tags, doc._id)}
+                {this.renderExpandTagButton(doc.tags, doc._id, i)}
             </PageResultItem>
         ))
 

@@ -47,7 +47,10 @@ const PageResultItem = props => (
                 </div>
                 <div className={styles.url}>{props.url}</div>
                 <div className={styles.time}>
-                    {niceTime(+props.displayTime)}
+                    <div className={styles.displayTime}>
+                        {' '}
+                        {niceTime(+props.displayTime)}{' '}
+                    </div>
                     <span className={styles.tagList}>{props.children}</span>
                     <div className={styles.buttonsContainer}>
                         <button
