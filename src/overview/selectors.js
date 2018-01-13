@@ -149,10 +149,20 @@ export const isNewSearchLoading = createSelector(
     currentPage,
     (isLoading, currentPage) => isLoading && currentPage === 0,
 )
+
 export const showFilter = state => overview(state).showFilter
 export const showOnlyBookmarks = state => overview(state).showOnlyBookmarks
 
 export const tags = createSelector(overview, state => state.tags)
+
+/**
+ * Selector to toggle clear filter button
+ * As new filters are added, corersponding changes need to made to this function
+ */
+export const isClearFilterButtonShown = createSelector(
+    showOnlyBookmarks,
+    showOnlyBookmarks => !!showOnlyBookmarks,
+)
 
 export const isEmptyQuery = createSelector(
     currentQueryParams,

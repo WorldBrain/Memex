@@ -244,6 +244,7 @@ const mapStateToProps = state => ({
     showInitSearchMsg: selectors.showInitSearchMsg(state),
     totalResultCount: selectors.totalResultCount(state),
     shouldShowCount: selectors.shouldShowCount(state),
+    isClearFilterButtonShown: selectors.isClearFilterButtonShown(state),
 })
 
 const mapDispatchToProps = dispatch => ({

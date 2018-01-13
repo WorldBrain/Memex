@@ -7,6 +7,7 @@ const Filters = ({
     showOnlyBookmarks,
     onShowOnlyBookmarksChange,
     clearAllFilters,
+    isClearFilterButtonShown,
 }) => (
     <div className={localStyles.filtersMain}>
         <div className={localStyles.bookmarks}>
@@ -23,8 +24,7 @@ const Filters = ({
                 </span>
             </label>
         </div>
-        {/* TODO: Toggle for Clear Filters button. Need to be modified according to new filters being added. */}
-        {showOnlyBookmarks && (
+        {isClearFilterButtonShown && (
             <button
                 type="button"
                 onClick={clearAllFilters}
@@ -40,6 +40,7 @@ Filters.propTypes = {
     showOnlyBookmarks: PropTypes.bool.isRequired,
     onShowOnlyBookmarksChange: PropTypes.func.isRequired,
     clearAllFilters: PropTypes.func.isRequired,
+    isClearFilterButtonShown: PropTypes.bool.isRequired,
 }
 
 export default Filters
