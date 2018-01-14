@@ -170,3 +170,15 @@
 .buttonIcons {
     background-size: cover;
 }
+
+.pauseIcon {
+    background-image: url('/img/pause.svg');
+    background-repeat: no-repeat;
+    background-size: 20px;
+}
+
+.playIcon {
+    background-image: url('/img/play.svg');
+    background-repeat: no-repeat;
+    background-size: 20px;
+}
