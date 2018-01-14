@@ -15,7 +15,7 @@ const Header = ({
                 <input
                     className={styles.query}
                     onChange={props.onInputChange}
-                    placeholder="Search your memory"
+                    placeholder="Search your memory; use # to filter by tag"
                     value={query}
                     ref={props.setInputRef}
                 />
