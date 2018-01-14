@@ -24,15 +24,24 @@ const Filters = ({
                 </span>
             </label>
         </div>
-        {isClearFilterButtonShown && (
-            <button
-                type="button"
-                onClick={clearAllFilters}
-                className={localStyles.clear}
-            >
-                Clear Filters
-            </button>
-        )}
+        <div
+            style={{
+                visibility: `${isClearFilterButtonShown
+                    ? 'visible'
+                    : 'hidden'}`,
+            }}
+            className={localStyles.clearDiv}
+        >
+            {isClearFilterButtonShown && (
+                <button
+                    type="button"
+                    onClick={clearAllFilters}
+                    className={localStyles.clear}
+                >
+                    Clear Filters
+                </button>
+            )}
+        </div>
     </div>
 )
 

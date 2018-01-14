@@ -11,13 +11,12 @@
     z-index: 2;
     background-color: white;
     min-width: 800px;
-    flex-flow: column;
+    flex-flow: row;
     box-shadow: 0 2px 4px rgba(220, 220, 220, 0.7);
     padding-left: 6px;
 }
 
 .bookmarks {
-    margin: 10px auto;
     padding: 0;
     max-width: 780px;
     min-width: 780px;
@@ -80,10 +79,15 @@ input[type='checkbox'] {
     }
 }
 
+.clearDiv {
+    position: absolute;
+    left: 75%;
+}
+
 .clear {
     cursor: pointer;
-    position: absolute;
-    left: 72.5%;
+    background: transparent;
+    border: 0;
     color: #3eb995;
-    bottom: 12%;
+    outline: none;
 }
