@@ -174,7 +174,7 @@ const mapDispatchToProps = dispatch => ({
             onStartDateChange: actions.setStartDate,
             onEndDateChange: actions.setEndDate,
             onBottomReached: actions.getMoreResults,
-            hideDeleteConfirm: actions.hideDeleteConfirm,
+            resetDeleteConfirm: actions.resetDeleteConfirm,
             deleteDocs: actions.deleteDocs,
             onShowFilterChange: actions.showFilter,
             onShowOnlyBookmarksChange: actions.toggleBookmarkFilter,

@@ -129,13 +129,17 @@ export default createReducer(
         [actions.setQuery]: setQuery,
         [actions.setStartDate]: setStartDate,
         [actions.setEndDate]: setEndDate,
-        [actions.showDeleteConfirm]: showDeleteConfirm,
-        [actions.hideDeleteConfirm]: hideDeleteConfirm,
         [actions.hideResultItem]: hideResultItem,
         [actions.toggleBookmarkFilter]: toggleBookmarkFilter,
         [actions.incSearchCount]: incSearchCount,
         [actions.initSearchCount]: initSearchCount,
         [actions.changeHasBookmark]: changeHasBookmark,
+        [actions.showDeleteConfirm]: showDeleteConfirm,
+        [actions.hideDeleteConfirm]: hideDeleteConfirm,
+        [actions.resetDeleteConfirm]: state => ({
+            ...state,
+            deleteConfirmProps: { ...defaultState.deleteConfirmProps },
+        }),
         [actions.setResultDeleting]: (state, index) => ({
             ...state,
             deleteConfirmProps: {

@@ -22,6 +22,7 @@ export const showDeleteConfirm = createAction(
     (url, index) => ({ url, index }),
 )
 export const hideDeleteConfirm = createAction('overview/hideDeleteConfirm')
+export const resetDeleteConfirm = createAction('overview/resetDeleteConfirm')
 export const showFilter = createAction('overview/showFilter')
 export const toggleBookmarkFilter = createAction(
     'overview/toggleBookmarkFilter',
