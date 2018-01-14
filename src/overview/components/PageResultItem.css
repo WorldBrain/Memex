@@ -182,7 +182,7 @@
 }
 
 .trash {
-    background-image: url('/img/trash.svg');
+    background-image: url('/img/trash_new.svg');
     opacity: 0.1;
 
     &:hover:enabled {
@@ -209,7 +209,7 @@
 }
 
 .tag {
-    background-image: url('/img/tag_3eb995.svg');
+    background-image: url('/img/tag.svg');
     opacity: 0.1;
 
     &:hover:enabled {

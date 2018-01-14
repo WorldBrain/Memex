@@ -22,7 +22,15 @@ import {
     OldTagMsg,
     NoResult,
 } from 'src/common-ui/components'
-import { itemBtnBlacklisted } from './components/Button.css'
+import {
+    itemBtnBlacklisted,
+    tag,
+    bmk,
+    notBmk,
+    blacklist,
+    settings,
+    help,
+} from './components/Button.css'
 import UpgradeButton from './components/UpgradeButton'
 import ButtonIcon from './components/ButtonIcon'
 
@@ -405,11 +413,11 @@ class PopupContainer extends Component {
                 </LinkButton>
             ) : (
                 <Button
-                    icon="block"
                     onClick={this.setBlacklistChoice}
                     disabled={
                         blacklistBtn === constants.BLACKLIST_BTN_STATE.DISABLED
                     }
+                    btnClass={blacklist}
                 >
                     Blacklist Current Page
                 </Button>
@@ -597,9 +605,9 @@ class PopupContainer extends Component {
     renderTagButton() {
         return (
             <Button
-                icon="label"
                 onClick={this.setTagSelected}
                 disabled={!this.state.tagButttonState}
+                btnClass={tag}
             >
                 Add Tag(s)
             </Button>
@@ -648,11 +656,11 @@ class PopupContainer extends Component {
             <div>
                 <Button
                     onClick={this.handleAddBookmark}
-                    icon={
+                    btnClass={
                         this.state.bookmarkBtn ===
                         constants.BOOKMARK_BTN_STATE.BOOKMARK
-                            ? 'star'
-                            : 'star_border'
+                            ? bmk
+                            : notBmk
                     }
                     disabled={
                         this.state.bookmarkBtn ===
@@ -680,8 +688,13 @@ class PopupContainer extends Component {
                     href={constants.OPTIONS_URL}
                     icon="settings"
                     buttonType={1}
+                    btnClass={settings}
                 />
-                <ButtonIcon href={constants.FEEDBACK_URL} icon="help" />
+                <ButtonIcon
+                    href={constants.FEEDBACK_URL}
+                    icon="help"
+                    btnClass={help}
+                />
             </div>
         )
     }

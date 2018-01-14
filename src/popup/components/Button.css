@@ -26,7 +26,6 @@
 
 .itemBtn {
     border: none;
-    background: none;
     width: 100%;
     padding: 0;
     font-size: 1em;
@@ -34,6 +33,7 @@
     font-family: 'Open Sans';
     font-weight: 100;
     padding-left: 10px;
+    background: none !important;
 
     &:disabled {
         color: rgb(156, 156, 156);
@@ -115,10 +115,58 @@
     }
 }
 
-.settings {
+.settingsIcon {
     margin-right: 18px;
 }
 
 .icon {
     font-size: 26px;
+}
+
+.customIcon {
+    width: 30px;
+    height: 30px;
+    margin-left: 10px;
+    margin-top: 10px;
+    outline: 0;
+}
+
+.bmk {
+    background: url('/img/star_full.svg');
+    background-repeat: no-repeat;
+    background-size: 20px;
+}
+
+.notBmk {
+    background-image: url('/img/star_empty.svg');
+    background-repeat: no-repeat;
+    background-size: 20px;
+}
+
+.tag {
+    background-image: url('/img/tag.svg');
+    background-repeat: no-repeat;
+    background-size: 20px;
+}
+
+.blacklist {
+    background-image: url('/img/blacklist_green.svg');
+    background-repeat: no-repeat;
+    background-size: 20px;
+}
+
+.settings {
+    background-image: url('/img/settings.svg');
+    background-repeat: no-repeat;
+    background-size: 20px;
+}
+
+.help {
+    background-image: url('/img/help.svg');
+    background-repeat: no-repeat;
+    background-size: 20px;
+}
+
+.buttonIcons {
+    background-size: cover;
 }
