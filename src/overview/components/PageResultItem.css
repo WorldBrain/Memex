@@ -34,6 +34,18 @@
         outline: none;
         box-shadow: 0 3px 10px 1px rgba(217, 219, 221, 0.6);
     }
+
+    &:hover .trash {
+        opacity: 0.3;
+    }
+
+    &:hover .tag {
+        opacity: 0.3;
+    }
+
+    &:hover .notBookmark {
+        opacity: 0.3;
+    }
 }
 
 /* List entries shown as context around a search result */
@@ -174,35 +186,34 @@
     opacity: 0.1;
 
     &:hover:enabled {
-        background-image: url('/img/trash_red.svg');
+        opacity: 0.5;
     }
 }
 
 .bookmark {
-    background-image: url('/img/star_full_grey.svg');
+    background-image: url('/img/star_full.svg');
+    opacity: 0.8;
 
     &:hover:enabled {
         opacity: 0.5;
-        background-image: url('/img/star_full.svg');
     }
 }
 
 .notBookmark {
-    background-image: url('/img/star_empty_grey.svg');
-
-    &:hover:enabled {
-        opacity: 0.5;
-        background-image: url('/img/star_empty.svg');
-    }
-}
-
-.tag {
-    background-image: url('/img/tag.svg');
+    background-image: url('/img/star_empty.svg');
     opacity: 0.1;
 
     &:hover:enabled {
         opacity: 0.5;
-        background-image: url('/img/tag_3eb995.svg');
+    }
+}
+
+.tag {
+    background-image: url('/img/tag_3eb995.svg');
+    opacity: 0.1;
+
+    &:hover:enabled {
+        opacity: 0.5;
     }
 }
 
