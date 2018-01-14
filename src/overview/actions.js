@@ -8,6 +8,8 @@ import * as selectors from './selectors'
 // Will contain the runtime port which will allow bi-directional communication to the background script
 let port
 
+// TODO: tmp hack; set up proper state for "tags filter"
+export const hackClearTagsState = createAction('overview/hack')
 export const setLoading = createAction('overview/setLoading')
 export const nextPage = createAction('overview/nextPage')
 export const resetPage = createAction('overview/resetPage')
@@ -161,6 +163,8 @@ const updateSearchResult = ({ searchResult, overwrite = false }) => (
     const searchAction = overwrite ? setSearchResult : appendSearchResult
 
     dispatch(searchAction(searchResult))
+    // TODO: Fix this; this is just a hack to force clear the "unclearable" tag state incase it's been set by clicking on a tag
+    dispatch(hackClearTagsState())
     dispatch(setLoading(false))
 }
 
@@ -303,6 +307,6 @@ export const suggestTagFromOverview = term => async (dispatch, getState) => {
 }
 
 export const searchByTags = tag => async (dispatch, getState) => {
-    dispatch(tags([tag, 'UI']))
+    dispatch(tags([tag]))
     dispatch(search({ overwrite: true }))
 }
