@@ -83,8 +83,6 @@ class PopupContainer extends Component {
         this.onPauseConfirm = this.onPauseConfirm.bind(this)
 
         this.onTagSearchChange = this.onTagSearchChange.bind(this)
-        this.addTagsToReverseDoc = this.addTagsToReverseDoc.bind(this)
-        this.removeFromSuggestedTag = this.removeFromSuggestedTag.bind(this)
         this.focusInput = this.focusInput.bind(this)
 
         this.handleKeyBoardDown = this.handleKeyBoardDown.bind(this)
@@ -211,12 +209,12 @@ class PopupContainer extends Component {
             const index = findIndexValue(resultTags, hoveredTagResult)
 
             if (index === -1) {
-                this.addTagsToReverseDoc(hoveredTagResult)
+                this.addTag(hoveredTagResult)()
             } else {
                 if (resultTags[index].isSelected) {
-                    this.removeFromSuggestedTag(hoveredTagResult)()
+                    this.removeTag(hoveredTagResult)()
                 } else {
-                    this.addTagsToReverseDoc(hoveredTagResult)
+                    this.addTag(hoveredTagResult)()
                 }
             }
         }
@@ -456,7 +454,7 @@ class PopupContainer extends Component {
         window.close()
     }
 
-    async addTagsToReverseDoc(tag) {
+    addTag = tag => async () => {
         const { url, resultTags } = this.state
         const pageId = await generatePageDocId({ url })
         const index = findIndexValue(resultTags, tag)
@@ -480,7 +478,7 @@ class PopupContainer extends Component {
         }))
     }
 
-    async removeFromSuggestedTag(tag) {
+    removeTag = tag => async () => {
         const { url, resultTags } = this.state
         const pageId = await generatePageDocId({ url })
         const index = findIndexValue(resultTags, tag)
@@ -490,10 +488,7 @@ class PopupContainer extends Component {
             await this.delTags(pageId, [tag])
         }
 
-        this.setState(state => ({
-            ...state,
-            resultTags: resultTags,
-        }))
+        this.setState(state => ({ ...state, resultTags }))
     }
 
     async onTagSearchChange(event) {
@@ -531,8 +526,8 @@ class PopupContainer extends Component {
             return (
                 <TagOption>
                     <NewTagMsg
-                        data={newTag}
-                        handleClick={this.addTagsToReverseDoc}
+                        value={newTag}
+                        onClick={this.addTag(newTag)}
                         hovered={hoveredTagResult === newTag}
                     />
                 </TagOption>
@@ -553,33 +548,28 @@ class PopupContainer extends Component {
             : resultTags[index].isSelected
     }
 
-    renderTagValue(isSuggested, tag) {
-        return isSuggested ? tag : tag['value']
-    }
+    renderTagValue = tag => (typeof tag === 'string' ? tag : tag.value)
 
     renderOptions(tags, isSuggested) {
         const { hoveredTagResult } = this.state
 
-        return tags.map(
-            (data, index) =>
-                data !== '' && (
-                    <TagOption>
-                        <OldTagMsg
-                            data={this.renderTagValue(isSuggested, data)}
-                            active={this.returnTagStatus(isSuggested, data)}
-                            handleClick={
-                                this.returnTagStatus(isSuggested, data)
-                                    ? this.removeFromSuggestedTag
-                                    : this.addTagsToReverseDoc
-                            }
-                            hovered={
-                                hoveredTagResult ===
-                                this.renderTagValue(isSuggested, data)
-                            }
-                        />
-                    </TagOption>
-                ),
-        )
+        return tags.map((tag, i) => {
+            const tagValue = this.renderTagValue(tag)
+            return (
+                <TagOption key={i}>
+                    <OldTagMsg
+                        value={tagValue}
+                        active={this.returnTagStatus(isSuggested, tag)}
+                        onClick={
+                            this.returnTagStatus(isSuggested, tag)
+                                ? this.removeTag(tagValue)
+                                : this.addTag(tagValue)
+                        }
+                        hovered={hoveredTagResult === tagValue}
+                    />
+                </TagOption>
+            )
+        })
     }
 
     renderTagsOptions() {

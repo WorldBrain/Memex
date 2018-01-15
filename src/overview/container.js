@@ -19,9 +19,11 @@ import ResultList from './components/ResultList'
 import Overview from './components/Overview'
 import PageResultItem from './components/PageResultItem'
 import ResultsMessage from './components/ResultsMessage'
-import TagName from './components/TagName'
+import TagPill from './components/TagPill'
 
 class OverviewContainer extends Component {
+    static SHOWN_TAGS_LIMIT = 3
+
     static propTypes = {
         grabFocusOnMount: PropTypes.bool.isRequired,
         handleInputChange: PropTypes.func.isRequired,
@@ -57,7 +59,6 @@ class OverviewContainer extends Component {
 
         this.handleOutsideClick = this.handleOutsideClick.bind(this)
         this.handleKeyBoardDown = this.handleKeyBoardDown.bind(this)
-        this.setTagInputFocus = this.setTagInputFocus.bind(this)
         this.handleTagEnter = this.handleTagEnter.bind(this)
     }
 
@@ -77,24 +78,16 @@ class OverviewContainer extends Component {
         document.removeEventListener('keypress', this.handleTagEnter, false)
     }
 
-    setInputRef = element => {
-        this.inputQueryEl = element
-    }
-
-    setTagDivRef = element => {
-        this.tagDiv = element
-    }
-
-    setTagInputRef = element => {
-        this.tagInput = element
-    }
+    setInputRef = el => (this.inputQueryEl = el)
+    setTagDivRef = el => (this.tagDiv = el)
+    setTagInputRef = el => (this.tagInput = el)
 
     setTagButtonRef = element => {
         this.tagButton = element
     }
 
-    setTagInputFocus(data) {
-        this.props.addTags(data)
+    addTag = tag => () => {
+        this.props.addTags(tag)
         this.tagInput.focus()
     }
 
@@ -109,8 +102,8 @@ class OverviewContainer extends Component {
             return (
                 <TagOption>
                     <NewTagMsg
-                        data={newTag}
-                        handleClick={this.setTagInputFocus}
+                        value={newTag}
+                        onClick={this.addTag(newTag)}
                         hovered={hoveredTagResult === newTag}
                     />
                 </TagOption>
@@ -131,33 +124,28 @@ class OverviewContainer extends Component {
             : resultTags[index].isSelected
     }
 
-    renderTagValue(isSuggested, tag) {
-        return isSuggested ? tag : tag['value']
-    }
+    renderTagValue = tag => (typeof tag === 'string' ? tag : tag.value)
 
     renderOptions(tags, isSuggested) {
         const { hoveredTagResult } = this.props
 
-        return tags.map(
-            (data, index) =>
-                data !== '' && (
-                    <TagOption>
-                        <OldTagMsg
-                            data={this.renderTagValue(isSuggested, data)}
-                            active={this.returnTagStatus(isSuggested, data)}
-                            handleClick={
-                                this.returnTagStatus(isSuggested, data)
-                                    ? this.props.delTags
-                                    : this.setTagInputFocus
-                            }
-                            hovered={
-                                hoveredTagResult ===
-                                this.renderTagValue(isSuggested, data)
-                            }
-                        />
-                    </TagOption>
-                ),
-        )
+        return tags.map((tag, i) => {
+            const tagValue = this.renderTagValue(tag)
+            return (
+                <TagOption key={i}>
+                    <OldTagMsg
+                        value={tagValue}
+                        active={this.returnTagStatus(isSuggested, tag)}
+                        onClick={
+                            this.returnTagStatus(isSuggested, tag)
+                                ? this.props.delTags(tagValue)
+                                : this.addTag(tagValue)
+                        }
+                        hovered={hoveredTagResult === tagValue}
+                    />
+                </TagOption>
+            )
+        })
     }
 
     renderTagsOptions() {
@@ -210,28 +198,31 @@ class OverviewContainer extends Component {
         )
     }
 
-    renderTagsNameInPageResultItem(tags, pageId) {
-        return tags
-            .slice(0, 3)
-            .map((data, index) => (
-                <TagName
-                    tagnm={data.split('/')[1]}
-                    key={index}
-                    handleClick={this.props.filterTag(data.split('/')[1])}
+    renderTagPills(tags) {
+        const pills = tags
+            .slice(0, OverviewContainer.SHOWN_TAGS_LIMIT)
+            .map(tagKey => tagKey.split('/')[1]) // Grab the part ofter `tag/` key prefix
+            .map((tag, i) => (
+                <TagPill
+                    key={i}
+                    value={tag}
+                    onClick={this.props.filterTag(tag)}
                 />
             ))
-    }
 
-    renderExpandTagButton(tags, pageId, i) {
-        if (tags.length > 3) {
-            return (
-                <TagName
-                    tagnm={'+' + (tags.length - 3)}
-                    handleClick={this.props.handleTagBtnClick(pageId, i)}
-                />
-            )
+        // Add on dummy pill with '+' sign if over limit
+        if (tags.length > OverviewContainer.SHOWN_TAGS_LIMIT) {
+            return [
+                ...pills,
+                <TagPill
+                    key="+"
+                    value={`+${tags.length -
+                        OverviewContainer.SHOWN_TAGS_LIMIT}`}
+                />,
+            ]
         }
-        return null
+
+        return pills
     }
 
     renderResultItems() {
@@ -248,11 +239,9 @@ class OverviewContainer extends Component {
                     pageIdForTag === '' ? doc._id : '',
                     i,
                 )}
+                tagPills={this.renderTagPills(doc.tags)}
                 {...doc}
-            >
-                {this.renderTagsNameInPageResultItem(doc.tags, doc._id)}
-                {this.renderExpandTagButton(doc.tags, doc._id, i)}
-            </PageResultItem>
+            />
         ))
 
         // Insert waypoint at the end of results to trigger loading new items when
@@ -416,12 +405,12 @@ class OverviewContainer extends Component {
             const index = this.findIndexValue(resultTags, hoveredTagResult)
 
             if (index === -1) {
-                this.setTagInputFocus(hoveredTagResult)
+                this.addTag(hoveredTagResult)()
             } else {
                 if (resultTags[index].isSelected) {
-                    this.props.delTags(hoveredTagResult)
+                    this.props.delTags(hoveredTagResult)()
                 } else {
-                    this.setTagInputFocus(hoveredTagResult)
+                    this.addTag(hoveredTagResult)()
                 }
             }
         }
@@ -494,7 +483,7 @@ const mapDispatchToProps = dispatch => ({
         event.preventDefault()
         dispatch(actions.pageIdForTag(pageId))
         dispatch(actions.indexDocFortag(index))
-        dispatch(actions.FetchInitResultTags())
+        dispatch(actions.fetchInitResultTags())
         dispatch(actions.suggestedTags([]))
     },
     onTagSearchChange: event => {
@@ -512,9 +501,7 @@ const mapDispatchToProps = dispatch => ({
         dispatch(actions.addTagsFromOverview(tag))
         dispatch(actions.tagSearchValue(''))
     },
-    delTags: tag => {
-        dispatch(actions.delTagsFromOverview(tag))
-    },
+    delTags: tag => () => dispatch(actions.delTagsFromOverview(tag)),
     changeHoveredTag: tag => {
         dispatch(actions.hoveredTagResult(tag))
     },

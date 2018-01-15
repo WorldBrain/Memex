@@ -232,7 +232,7 @@ function findIndexValue(a, tag) {
     return a.findIndex(i => i.value === tag)
 }
 
-export const FetchInitResultTags = () => async (dispatch, getState) => {
+export const fetchInitResultTags = () => async (dispatch, getState) => {
     const state = getState()
     const pageId = selectors.pageIdForTag(state)
     const tagsFromBackend = await fetchTags(pageId)

@@ -51,7 +51,7 @@ const PageResultItem = props => (
                         {' '}
                         {niceTime(+props.displayTime)}{' '}
                     </div>
-                    <span className={styles.tagList}>{props.children}</span>
+                    <span className={styles.tagList}>{props.tagPills}</span>
                     <div
                         className={styles.buttonsContainer}
                         onClick={e => e.preventDefault()}
@@ -88,7 +88,7 @@ PageResultItem.propTypes = {
     isDeleting: PropTypes.bool.isRequired,
     onTrashBtnClick: PropTypes.func.isRequired,
     onToggleBookmarkClick: PropTypes.func.isRequired,
-    children: PropTypes.object.isRequired,
+    tagPills: PropTypes.array.isRequired,
     tagItem: PropTypes.object.isRequired,
     onTagBtnClick: PropTypes.func.isRequired,
     setTagButtonRef: PropTypes.func.isRequired,
