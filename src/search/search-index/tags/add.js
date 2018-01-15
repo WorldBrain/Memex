@@ -1,3 +1,4 @@
+import { generatePageDocId } from 'src/page-storage'
 import index from '..'
 import { delPageFromTagValue } from './del'
 import { fetchExistingPage, keyGen, initSingleLookup } from '../util'
@@ -21,11 +22,16 @@ export const addPageToTagValue = pageEntry =>
     }
 
 /**
- * @param {string} pageId ID of existing page to associate tags with.
+ * @param {any} assoc Object containing either `url` or `pageId` strings - `url` will be converted
+ *  to an ID of a page to associate with.
  * @param {string[]} tags Array of tags to associate with page.
  * @returns {Promise<void>}
  */
-export async function setTags(pageId, tags) {
+export async function setTags({ pageId, url }, tags) {
+    if (url != null) {
+        pageId = await generatePageDocId({ url })
+    }
+
     const reverseIndexDoc = await fetchExistingPage(pageId)
     const keyedTags = new Set(tags.map(keyGen.tag))
 
@@ -45,11 +51,16 @@ export async function setTags(pageId, tags) {
 }
 
 /**
- * @param {string} pageId ID of existing page to associate tags with.
+ * @param {any} assoc Object containing either `url` or `pageId` strings - `url` will be converted
+ *  to an ID of a page to associate with.
  * @param {string[]} tags Array of tags to associate with page.
  * @returns {Promise<void>}
  */
-export async function addTags(pageId, tags) {
+export async function addTags({ pageId, url }, tags) {
+    if (url != null) {
+        pageId = await generatePageDocId({ url })
+    }
+
     const reverseIndexDoc = await fetchExistingPage(pageId)
 
     // Init tags Set if not present

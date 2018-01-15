@@ -1,0 +1,219 @@
+import React, { Component } from 'react'
+import PropTypes from 'prop-types'
+import debounce from 'lodash/fp/debounce'
+
+import { remoteFunction } from 'src/util/webextensionRPC'
+import { Tags, TagOption, NewTagMsg, OldTagMsg, NoResult } from '../components'
+
+class TagsContainer extends Component {
+    static propTypes = {
+        url: PropTypes.string.isRequired,
+    }
+
+    constructor(props) {
+        super(props)
+
+        this.suggestTags = remoteFunction('suggestTags')
+        this.fetchTags = remoteFunction('fetchTags')
+        this.addTags = remoteFunction('addTags')
+        this.delTags = remoteFunction('delTags')
+
+        this.fetchTagSuggestions = debounce(300)(this.fetchTagSuggestions)
+    }
+
+    state = {
+        searchVal: '',
+        isLoading: false,
+        displayTags: [], // Display state objects; will change all the time
+        tags: [], // Actual tags associated with the page; will only change when DB updates
+    }
+
+    componentDidMount() {
+        this.fetchInitTags()
+    }
+
+    isPageTag = value => this.state.tags.includes(value)
+
+    setInputRef = el => (this.inputEl = el)
+
+    async fetchInitTags() {
+        this.setState(state => ({ ...state, isLoading: true }))
+
+        let tags = []
+        try {
+            tags = await this.fetchTags({ url: this.props.url })
+        } catch (err) {
+        } finally {
+            this.setState(state => ({
+                ...state,
+                isLoading: false,
+                tags,
+                displayTags: tags,
+            }))
+        }
+    }
+
+    getDisplayTags = () =>
+        this.state.displayTags.map(value => ({
+            value,
+            active: this.isPageTag(value),
+        }))
+
+    getSearchVal = () => this.state.searchVal.trim().replace(/\s\s+/g, ' ')
+
+    canCreateTag() {
+        const searchVal = this.getSearchVal()
+
+        return (
+            !!searchVal.length &&
+            !this.state.tags.reduce(
+                (acc, tag) => acc || tag === searchVal,
+                false,
+            )
+        )
+    }
+
+    /**
+     * Used for 'Enter' presses or 'Add new tag' clicks.
+     */
+    addTag = async () => {
+        const newTag = this.getSearchVal()
+        let newTags = this.state.tags
+
+        try {
+            await this.addTags({ url: this.props.url }, [newTag])
+            newTags = [newTag, ...this.state.tags]
+        } catch (err) {
+        } finally {
+            this.inputEl.focus()
+            this.setState(state => ({
+                ...state,
+                searchVal: '',
+                tags: newTags,
+                displayTags: newTags,
+            }))
+        }
+    }
+
+    /**
+     * Used for clicks on displayed tags. Will either add or remove tags to the page
+     * depending on their current status as assoc. tags or not.
+     */
+    handleTagSelection = index => async event => {
+        const tag = this.state.displayTags[index]
+        const tagIndex = this.state.tags.findIndex(val => val === tag)
+
+        let tagsReducer = tags => tags
+        // Either add or remove it to the main `state.tags` array
+        try {
+            if (tagIndex === -1) {
+                await this.addTags({ url: this.props.url }, [tag])
+                tagsReducer = tags => [tag, ...tags]
+            } else {
+                await this.delTags({ url: this.props.url }, [tag])
+                tagsReducer = tags => [
+                    ...tags.slice(0, tagIndex),
+                    ...tags.slice(tagIndex + 1),
+                ]
+            }
+        } catch (err) {
+        } finally {
+            this.setState(state => ({
+                ...state,
+                tags: tagsReducer(state.tags),
+            }))
+        }
+    }
+
+    handleSearchEnterPress(event) {
+        event.preventDefault()
+
+        if (this.canCreateTag()) {
+            this.addTag()
+        }
+    }
+
+    handleSearchKeyDown = event => {
+        switch (event.key) {
+            case 'Enter':
+                return this.handleSearchEnterPress(event)
+        }
+    }
+
+    handleSearchChange = event => {
+        const searchVal = event.target.value
+
+        // If user backspaces to clear input, show the current assoc tags again
+        const displayTags = !searchVal.length
+            ? this.state.tags
+            : this.state.displayTags
+
+        this.setState(
+            state => ({ ...state, searchVal, displayTags }),
+            this.fetchTagSuggestions, // Debounced suggestion fetfh
+        )
+    }
+
+    fetchTagSuggestions = async () => {
+        if (!this.state.searchVal.length) {
+            return
+        }
+
+        let suggestions = this.state.tags
+
+        try {
+            suggestions = await this.suggestTags(this.state.searchVal)
+        } catch (err) {
+        } finally {
+            this.setState(state => ({
+                ...state,
+                displayTags: suggestions,
+            }))
+        }
+    }
+
+    renderTags() {
+        const tags = this.getDisplayTags()
+
+        const tagOptions = !tags.length
+            ? [<NoResult key="-" />]
+            : tags.map((tag, i) => (
+                  <TagOption key={i}>
+                      <OldTagMsg
+                          {...tag}
+                          onClick={this.handleTagSelection(i)}
+                      />
+                  </TagOption>
+              ))
+
+        if (this.canCreateTag()) {
+            tagOptions.push(
+                <TagOption key="+">
+                    <NewTagMsg
+                        value={this.state.searchVal}
+                        onClick={this.addTag}
+                    />
+                </TagOption>,
+            )
+        }
+
+        return tagOptions
+    }
+
+    render() {
+        return (
+            <Tags
+                onTagSearchChange={this.handleSearchChange}
+                onTagSearchKeyDown={this.handleSearchKeyDown}
+                setInputRef={this.setInputRef}
+                numberOfTags={this.state.tags.length}
+                tagSearchValue={this.state.searchVal}
+                {...this.props}
+            >
+                {this.renderTags()}
+            </Tags>
+        )
+    }
+}
+
+export default TagsContainer

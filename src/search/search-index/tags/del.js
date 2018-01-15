@@ -1,3 +1,4 @@
+import { generatePageDocId } from 'src/page-storage'
 import index from '..'
 import { fetchExistingPage, keyGen, initSingleLookup } from '../util'
 
@@ -24,11 +25,16 @@ export const delPageFromTagValue = pageId =>
     }
 
 /**
- * @param {string} pageId ID of existing page to remove association with tags from.
+ * @param {any} assoc Object containing either `url` or `pageId` strings - `url` will be converted
+ *  to an ID of a page to remove associate with.
  * @param {string[]} tags Array of tags to remove association from page.
  * @returns {Promise<void>}
  */
-export async function delTags(pageId, tags) {
+export async function delTags({ url, pageId }, tags) {
+    if (url != null) {
+        pageId = await generatePageDocId({ url })
+    }
+
     const reverseIndexDoc = await fetchExistingPage(pageId)
 
     // Convert all input tags into tags index keys

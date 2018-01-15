@@ -1,5 +1,6 @@
 import { createAction } from 'redux-act'
 
+import { generatePageDocId } from 'src/page-storage'
 import analytics from 'src/analytics'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import * as constants from './constants'
@@ -35,7 +36,6 @@ export const initSearchCount = createAction('overview/initSearchCount')
 export const setResultDeleting = createAction('overview/setResultDeleting')
 
 export const pageIdForTag = createAction('overview/pageIdForTag')
-export const newTag = createAction('overview/newTag')
 export const resultTags = createAction('overview/resultTags')
 export const deleteTags = createAction('overview/deleteTags')
 export const suggestedTags = createAction('overview/suggestedTags')
@@ -196,8 +196,10 @@ export const deleteDocs = () => async (dispatch, getState) => {
         // Remove all assoc. docs from the database + index
         await deleteDocsByUrl(url)
 
+        const pageId = await generatePageDocId({ url })
+
         // Hide the result item + confirm modal directly (optimistically)
-        dispatch(hideResultItem(url))
+        dispatch(hideResultItem(pageId))
     } catch (error) {
     } finally {
         dispatch(setResultDeleting(undefined))
@@ -228,14 +230,10 @@ export const toggleBookmark = (url, index) => async (dispatch, getState) => {
     }
 }
 
-function findIndexValue(a, tag) {
-    return a.findIndex(i => i.value === tag)
-}
-
 export const fetchInitResultTags = () => async (dispatch, getState) => {
     const state = getState()
     const pageId = selectors.pageIdForTag(state)
-    const tagsFromBackend = await fetchTags(pageId)
+    const tagsFromBackend = await fetchTags({ pageId })
 
     tagsFromBackend.sort()
 
@@ -252,9 +250,9 @@ export const addTagsFromOverview = tag => async (dispatch, getState) => {
     const pageId = selectors.pageIdForTag(state)
     const indexDocFortag = selectors.indexDocFortag(state)
 
-    await addTags(pageId, [tag])
+    await addTags({ pageId }, [tag])
     dispatch(addTag(tag))
-    dispatch(newTag(''))
+    dispatch(tagSearchValue(''))
     dispatch(suggestedTags([]))
     dispatch(changeTagsResult(indexDocFortag, tag, false))
 }
@@ -264,34 +262,9 @@ export const delTagsFromOverview = tag => async (dispatch, getState) => {
     const pageId = selectors.pageIdForTag(state)
     const indexDocFortag = selectors.indexDocFortag(state)
 
-    await delTags(pageId, [tag])
+    await delTags({ pageId }, [tag])
     dispatch(delTag(tag))
     dispatch(changeTagsResult(indexDocFortag, tag, true))
-}
-
-export const produceNewTag = tag => async (dispatch, getState) => {
-    const state = getState()
-    const tags = selectors.resultTags(state)
-    const index = findIndexValue(tags, tag)
-
-    if (index !== -1) {
-        tag = ''
-    }
-
-    dispatch(newTag(tag))
-}
-
-export const addTagsFromOverviewOnEnter = tag => async (dispatch, getState) => {
-    const state = getState()
-    const pageId = selectors.pageIdForTag(state)
-    const suggestTags = [...selectors.suggestedTags(state)]
-
-    if (suggestTags.length === 0) {
-        await addTags(pageId, [tag])
-        dispatch(addTag(tag))
-        dispatch(newTag(''))
-        dispatch(suggestedTags([]))
-    }
 }
 
 export const fetchTagSuggestions = () => async (dispatch, getState) => {

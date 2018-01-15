@@ -94,6 +94,7 @@ const initDeindexTerms = termsField => async indexDoc => {
 const deindexTerms = initDeindexTerms('terms')
 const deindexUrlTerms = initDeindexTerms('urlTerms')
 const deindexTitleTerms = initDeindexTerms('titleTerms')
+const deindexTags = initDeindexTerms('tags')
 
 /**
  * @param {IndexLookupDoc} indexDoc The lookup doc containing assoc. time keys.
@@ -146,6 +147,7 @@ async function performDeindexing(pageId) {
         deindexTitleTerms(indexDoc),
         deindexTerms(indexDoc),
         deindexTimestamps(indexDoc),
+        deindexTags(indexDoc),
     ])
     console.timeEnd('deindexing page')
 }

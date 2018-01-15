@@ -2,7 +2,6 @@ import update from 'lodash/fp/update'
 import remove from 'lodash/fp/remove'
 import { createReducer } from 'redux-act'
 
-import { generatePageDocId } from 'src/page-storage'
 import * as actions from './actions'
 
 const defaultState = {
@@ -29,7 +28,6 @@ const defaultState = {
     showFilter: false,
     showOnlyBookmarks: false,
     pageIdForTag: '',
-    newTag: '',
     resultTags: [],
     suggestedTags: [],
     deleteTags: [],
@@ -70,9 +68,9 @@ function toggleBookmarkFilter(state, showOnlyBookmarks) {
     }
 }
 
-function hideResultItem(state, url) {
+function hideResultItem(state, pageId) {
     return update('searchResult.docs', docs =>
-        remove(doc => doc._id === generatePageDocId({ url }))(docs),
+        remove(doc => doc._id === pageId)(docs),
     )(state)
 }
 
@@ -234,7 +232,6 @@ export default createReducer(
             currentPage: defaultState.currentPage,
         }),
         [actions.pageIdForTag]: payloadReducer('pageIdForTag'),
-        [actions.newTag]: payloadReducer('newTag'),
         [actions.resultTags]: payloadReducer('resultTags'),
         [actions.suggestedTags]: payloadReducer('suggestedTags'),
         [actions.deleteTags]: payloadReducer('deleteTags'),

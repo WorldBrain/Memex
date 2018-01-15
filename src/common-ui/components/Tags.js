@@ -3,45 +3,42 @@ import PropTypes from 'prop-types'
 import localStyles from './TagOption.css'
 import classNames from 'classnames'
 
-const getTagsClass = fromOverview =>
+const getTagsClass = overview =>
     classNames(localStyles.tagDiv, {
-        [localStyles.tagDivFromOverview]: fromOverview,
+        [localStyles.tagDivFromOverview]: overview,
     })
 
-const getSearchContainerClass = fromOverview =>
+const getSearchContainerClass = overview =>
     classNames(localStyles.searchContainer, {
-        [localStyles.searchContainerOverview]: fromOverview,
+        [localStyles.searchContainerOverview]: overview,
     })
 
-const getSearchClass = fromOverview =>
+const getSearchClass = overview =>
     classNames(localStyles.search, {
-        [localStyles.searchOverview]: fromOverview,
+        [localStyles.searchOverview]: overview,
     })
 
 const Tags = ({
     children,
     onTagSearchChange,
+    onTagSearchKeyDown,
     numberOfTags,
     setTagDivRef,
     setInputRef,
-    tagSearch,
-    fromOverview,
-    keydown,
+    tagSearchValue,
+    overview = false,
 }) => (
-    <div
-        className={getTagsClass(fromOverview)}
-        ref={setTagDivRef}
-        onKeyDown={keydown}
-    >
-        <form className={getSearchContainerClass(fromOverview)}>
+    <div className={getTagsClass(overview)} ref={setTagDivRef}>
+        <form className={getSearchContainerClass(overview)}>
             <input
-                className={getSearchClass(fromOverview)}
+                className={getSearchClass(overview)}
                 name="query"
                 placeholder="Search & Add Tag(s)"
                 onChange={onTagSearchChange}
+                onKeyDown={onTagSearchKeyDown}
                 ref={setInputRef}
                 autoComplete="off"
-                value={tagSearch}
+                value={tagSearchValue}
                 autoFocus
             />
             <i className="material-icons">search</i>
@@ -57,14 +54,14 @@ const Tags = ({
 )
 
 Tags.propTypes = {
-    children: PropTypes.object.isRequired,
+    children: PropTypes.array.isRequired,
     onTagSearchChange: PropTypes.func.isRequired,
+    onTagSearchKeyDown: PropTypes.func.isRequired,
     numberOfTags: PropTypes.number.isRequired,
     setTagDivRef: PropTypes.func,
     setInputRef: PropTypes.func.isRequired,
-    tagSearch: PropTypes.string.isRequired,
-    fromOverview: PropTypes.number.isRequired,
-    keydown: PropTypes.func,
+    tagSearchValue: PropTypes.string.isRequired,
+    overview: PropTypes.bool,
 }
 
 export default Tags

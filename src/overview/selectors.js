@@ -145,7 +145,6 @@ export const showFilter = state => overview(state).showFilter
 export const showOnlyBookmarks = state => overview(state).showOnlyBookmarks
 
 export const pageIdForTag = state => overview(state).pageIdForTag
-export const newTag = state => overview(state).newTag
 export const resultTags = state => overview(state).resultTags
 export const deleteTags = state => overview(state).deleteTags
 export const suggestedTags = state => overview(state).suggestedTags
@@ -167,9 +166,9 @@ export const isEmptyQuery = createSelector(
 )
 
 export const emptyTagOptions = createSelector(
-    newTag,
+    tagSearchValue,
     resultTags,
     suggestedTags,
-    (newTag, resultTags, suggestedTags) =>
-        !newTag.length && !resultTags.length && !suggestedTags.length,
+    (searchVal, resultTags, suggestedTags) =>
+        !searchVal.length && !resultTags.length && !suggestedTags.length,
 )

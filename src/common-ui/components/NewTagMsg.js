@@ -9,7 +9,7 @@ const getOptionClass = hovered =>
         [localStyles.hoveredMenuItem]: hovered,
     })
 
-const NewTagMsg = ({ onClick, hovered, value }) => (
+const NewTagMsg = ({ onClick, hovered = false, value }) => (
     <div className={getOptionClass(hovered)} onClick={onClick}>
         <span className={localStyles.bold}>add new: </span> {value}
     </div>
@@ -18,7 +18,7 @@ const NewTagMsg = ({ onClick, hovered, value }) => (
 NewTagMsg.propTypes = {
     value: PropTypes.string.isRequired,
     onClick: PropTypes.func.isRequired,
-    hovered: PropTypes.bool.isRequired,
+    hovered: PropTypes.bool,
 }
 
 export default NewTagMsg
