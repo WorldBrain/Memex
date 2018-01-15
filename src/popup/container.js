@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import qs from 'query-string'
+import debounce from 'lodash/fp/debounce'
 
 import analytics from 'src/analytics'
 import { initSingleLookup } from 'src/search/search-index/util'
@@ -82,7 +83,6 @@ class PopupContainer extends Component {
         this.onSearchEnter = this.onSearchEnter.bind(this)
         this.onPauseConfirm = this.onPauseConfirm.bind(this)
 
-        this.onTagSearchChange = this.onTagSearchChange.bind(this)
         this.focusInput = this.focusInput.bind(this)
 
         this.handleKeyBoardDown = this.handleKeyBoardDown.bind(this)
@@ -273,25 +273,32 @@ class PopupContainer extends Component {
         return { bookmarkBtn: getBookmarkButtonState(result) }
     }
 
-    async changeSuggestedtags(term) {
-        const res = await this.suggestTags(term)
-        const { newTag } = this.state
+    fetchTagSuggestions = debounce(300)(async () => {
+        const term = this.state.tagSearch
+
         let { hoveredTagResult } = this.state
+        let suggestedTags
 
-        if (res.length > 0) {
-            hoveredTagResult = res[0]
-        } else {
-            if (newTag.length !== 0) {
-                hoveredTagResult = newTag
+        try {
+            suggestedTags =
+                term.trim() === '' ? [] : await this.suggestTags(term)
+
+            if (suggestedTags.length) {
+                hoveredTagResult = suggestedTags[0]
+            } else {
+                if (this.state.newTag.length) {
+                    hoveredTagResult = this.state.newTag
+                }
             }
+        } catch (err) {
+        } finally {
+            this.setState(state => ({
+                ...state,
+                suggestedTags,
+                hoveredTagResult,
+            }))
         }
-
-        this.setState(state => ({
-            ...state,
-            suggestedTags: res,
-            hoveredTagResult: hoveredTagResult,
-        }))
-    }
+    })
 
     focusInput() {
         this.inputQueryEl.focus()
@@ -491,20 +498,19 @@ class PopupContainer extends Component {
         this.setState(state => ({ ...state, resultTags }))
     }
 
-    async onTagSearchChange(event) {
+    handleTagSearchChange = async event => {
         const { resultTags } = this.state
         const tagSearchValue = event.target.value
         const index = findIndexValue(resultTags, tagSearchValue)
 
-        this.setState(state => ({
-            ...state,
-            newTag: index === -1 ? tagSearchValue : '',
-            tagSearch: tagSearchValue,
-        }))
-
-        if (tagSearchValue !== '') {
-            this.changeSuggestedtags(event.target.value)
-        }
+        this.setState(
+            state => ({
+                ...state,
+                newTag: index === -1 ? tagSearchValue : '',
+                tagSearch: tagSearchValue,
+            }),
+            this.fetchTagSuggestions,
+        )
     }
 
     setTagSelected = () => {
@@ -629,7 +635,7 @@ class PopupContainer extends Component {
         if (tagSelected) {
             return (
                 <Tags
-                    onTagSearchChange={this.onTagSearchChange}
+                    onTagSearchChange={this.handleTagSearchChange}
                     setInputRef={this.setInputRef}
                     numberOfTags={selectedResultTags.length}
                     tagSearch={tagSearch}

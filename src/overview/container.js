@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import Waypoint from 'react-waypoint'
+import debounce from 'lodash/fp/debounce'
 
 import {
     Wrapper,
@@ -42,7 +43,7 @@ class OverviewContainer extends Component {
         pageIdForTag: PropTypes.string.isRequired,
         handleTagBtnClick: PropTypes.func.isRequired,
         newTag: PropTypes.string.isRequired,
-        onTagSearchChange: PropTypes.func.isRequired,
+        fetchTagSuggestions: PropTypes.func.isRequired,
         resultTags: PropTypes.arrayOf(PropTypes.object).isRequired,
         addTags: PropTypes.func.isRequired,
         delTags: PropTypes.func.isRequired,
@@ -52,6 +53,7 @@ class OverviewContainer extends Component {
         changeHoveredTag: PropTypes.func.isRequired,
         tagSearchValue: PropTypes.string.isRequired,
         filterTag: PropTypes.func.isRequired,
+        updateTagSearchVal: PropTypes.func.isRequired,
     }
 
     constructor() {
@@ -93,6 +95,12 @@ class OverviewContainer extends Component {
 
     findIndexValue(a, tag) {
         return a.findIndex(i => i.value === tag)
+    }
+
+    handleTagSearchChange = event => {
+        const input = event.target
+        this.props.updateTagSearchVal(input.value)
+        this.props.fetchTagSuggestions()
     }
 
     renderNewTagOption() {
@@ -179,7 +187,7 @@ class OverviewContainer extends Component {
             <div>
                 {docId === pageIdForTag && (
                     <Tags
-                        onTagSearchChange={this.props.onTagSearchChange}
+                        onTagSearchChange={this.handleTagSearchChange}
                         setInputRef={this.setInputRef}
                         numberOfTags={selectedResultTags.length}
                         setTagDivRef={this.setTagDivRef}
@@ -464,6 +472,7 @@ const mapDispatchToProps = dispatch => ({
             deleteDocs: actions.deleteDocs,
             onShowFilterChange: actions.showFilter,
             onShowOnlyBookmarksChange: actions.toggleBookmarkFilter,
+            updateTagSearchVal: actions.tagSearchValue,
         },
         dispatch,
     ),
@@ -486,17 +495,9 @@ const mapDispatchToProps = dispatch => ({
         dispatch(actions.fetchInitResultTags())
         dispatch(actions.suggestedTags([]))
     },
-    onTagSearchChange: event => {
-        const tagInput = event.target
-        dispatch(actions.produceNewTag(tagInput.value))
-        dispatch(actions.tagSearchValue(tagInput.value))
-
-        if (tagInput.value === '') {
-            dispatch(actions.suggestedTags([]))
-        } else {
-            dispatch(actions.suggestTagFromOverview(event.target.value))
-        }
-    },
+    fetchTagSuggestions: debounce(300)(() =>
+        dispatch(actions.fetchTagSuggestions()),
+    ),
     addTags: tag => {
         dispatch(actions.addTagsFromOverview(tag))
         dispatch(actions.tagSearchValue(''))

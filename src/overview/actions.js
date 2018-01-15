@@ -294,16 +294,28 @@ export const addTagsFromOverviewOnEnter = tag => async (dispatch, getState) => {
     }
 }
 
-export const suggestTagFromOverview = term => async (dispatch, getState) => {
-    const tags = await suggestTags(term)
+export const fetchTagSuggestions = () => async (dispatch, getState) => {
+    const term = selectors.tagSearchValue(getState())
 
-    tags.sort()
-    if (tags.length >= 1) {
-        dispatch(hoveredTagResult(tags[0]))
-    } else {
-        dispatch(hoveredTagResult(term))
+    // Skip for blank
+    if (term.trim() === '') {
+        return dispatch(suggestedTags([]))
     }
-    dispatch(suggestedTags(tags))
+
+    let suggestions = []
+    try {
+        suggestions = await suggestTags(term)
+
+        if (suggestions.length) {
+            dispatch(hoveredTagResult(suggestions[0]))
+        } else {
+            dispatch(hoveredTagResult(term))
+        }
+    } catch (err) {
+        // TODO: handle this
+    } finally {
+        dispatch(suggestedTags(suggestions))
+    }
 }
 
 export const searchByTags = tag => async (dispatch, getState) => {
