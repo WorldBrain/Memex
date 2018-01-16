@@ -4,7 +4,7 @@ import debounce from 'lodash/fp/debounce'
 import noop from 'lodash/fp/noop'
 
 import { remoteFunction } from 'src/util/webextensionRPC'
-import { Tags, NewTagRow, TagRow, NoResult } from '../components'
+import { Tags, NewTagRow, TagRow } from '../components'
 
 class TagsContainer extends Component {
     static propTypes = {
@@ -202,16 +202,9 @@ class TagsContainer extends Component {
     renderTags() {
         const tags = this.getDisplayTags()
 
-        const tagOptions =
-            !tags.length && !this.state.searchVal.length
-                ? [<NoResult key="-" />]
-                : tags.map((tag, i) => (
-                      <TagRow
-                          {...tag}
-                          key={i}
-                          onClick={this.handleTagSelection(i)}
-                      />
-                  ))
+        const tagOptions = tags.map((tag, i) => (
+            <TagRow {...tag} key={i} onClick={this.handleTagSelection(i)} />
+        ))
 
         if (this.canCreateTag()) {
             tagOptions.push(
