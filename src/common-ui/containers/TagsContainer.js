@@ -191,15 +191,16 @@ class TagsContainer extends Component {
     renderTags() {
         const tags = this.getDisplayTags()
 
-        const tagOptions = !tags.length
-            ? [<NoResult key="-" />]
-            : tags.map((tag, i) => (
-                  <TagRow
-                      {...tag}
-                      key={i}
-                      onClick={this.handleTagSelection(i)}
-                  />
-              ))
+        const tagOptions =
+            !tags.length && !this.state.searchVal.length
+                ? [<NoResult key="-" />]
+                : tags.map((tag, i) => (
+                      <TagRow
+                          {...tag}
+                          key={i}
+                          onClick={this.handleTagSelection(i)}
+                      />
+                  ))
 
         if (this.canCreateTag()) {
             tagOptions.push(
