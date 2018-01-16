@@ -1,21 +1,12 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import localStyles from './TagOption.css'
 import classNames from 'classnames'
+
+import localStyles from './Tags.css'
 
 const getTagsClass = overview =>
     classNames(localStyles.tagDiv, {
         [localStyles.tagDivFromOverview]: overview,
-    })
-
-const getSearchContainerClass = overview =>
-    classNames(localStyles.searchContainer, {
-        [localStyles.searchContainerOverview]: overview,
-    })
-
-const getSearchClass = overview =>
-    classNames(localStyles.search, {
-        [localStyles.searchOverview]: overview,
     })
 
 const Tags = ({
@@ -29,9 +20,9 @@ const Tags = ({
     overview = false,
 }) => (
     <div className={getTagsClass(overview)} ref={setTagDivRef}>
-        <form className={getSearchContainerClass(overview)}>
+        <form className={localStyles.searchContainer}>
             <input
-                className={getSearchClass(overview)}
+                className={localStyles.search}
                 name="query"
                 placeholder="Search & Add Tag(s)"
                 onChange={onTagSearchChange}

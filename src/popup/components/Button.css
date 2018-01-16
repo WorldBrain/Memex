@@ -33,7 +33,7 @@
     font-family: 'Open Sans';
     font-weight: 100;
     padding-left: 10px;
-    background: none !important;
+    background: none !important; /* stylelint-disable-line declaration-no-important */
 
     &:disabled {
         color: rgb(156, 156, 156);

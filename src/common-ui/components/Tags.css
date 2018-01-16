@@ -10,10 +10,6 @@
     }
 }
 
-.hoveredMenuItem {
-    background-color: #f7f7f7;
-}
-
 .menuItem i {
     font-size: 12px;
     float: right;
@@ -51,14 +47,6 @@
         color: #3eb995;
         padding: 0;
     }
-}
-
-.searchContainerOverview {
-    background-color: #fff !important;
-}
-
-.searchOverview {
-    background-color: #fff !important;
 }
 
 .search {
