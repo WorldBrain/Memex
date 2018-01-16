@@ -1,7 +1,7 @@
 const db = index.db._db
 
 async function downloadChunk(data, counter) {
-    browser.downloads.download({
+    return browser.downloads.download({
         url: URL.createObjectURL(
             new Blob([JSON.stringify(data)], { type: 'text/plain' }),
         ),
