@@ -173,6 +173,7 @@ async function indexPage(indexDoc) {
                   ...existingDoc.bookmarks,
                   ...indexDoc.bookmarks,
               ]),
+              tags: existingDoc.tags,
           }
 
     const augIndexDoc = augmentIndexLookupDoc(newIndexDoc)
