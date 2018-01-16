@@ -3,17 +3,9 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import Waypoint from 'react-waypoint'
-import debounce from 'lodash/fp/debounce'
 
-import {
-    Wrapper,
-    LoadingIndicator,
-    Tags,
-    NoResult,
-    TagOption,
-    NewTagMsg,
-    OldTagMsg,
-} from 'src/common-ui/components'
+import { Wrapper, LoadingIndicator } from 'src/common-ui/components'
+import { TagsContainer } from 'src/common-ui/containers'
 import * as actions from './actions'
 import * as selectors from './selectors'
 import ResultList from './components/ResultList'
@@ -34,38 +26,26 @@ class OverviewContainer extends Component {
         noResults: PropTypes.bool.isRequired,
         isBadTerm: PropTypes.bool.isRequired,
         showInitSearchMsg: PropTypes.bool.isRequired,
+        activeUrl: PropTypes.string.isRequired,
+        resetActiveUrl: PropTypes.func.isRequired,
         searchResults: PropTypes.arrayOf(PropTypes.object).isRequired,
         totalResultCount: PropTypes.number.isRequired,
         shouldShowCount: PropTypes.bool.isRequired,
         needsWaypoint: PropTypes.bool.isRequired,
         handleTrashBtnClick: PropTypes.func.isRequired,
         handleToggleBm: PropTypes.func.isRequired,
-        pageIdForTag: PropTypes.string.isRequired,
         handleTagBtnClick: PropTypes.func.isRequired,
-        fetchTagSuggestions: PropTypes.func.isRequired,
-        resultTags: PropTypes.arrayOf(PropTypes.object).isRequired,
-        addTags: PropTypes.func.isRequired,
-        delTags: PropTypes.func.isRequired,
-        suggestedTags: PropTypes.arrayOf(PropTypes.string).isRequired,
-        emptyTagOptions: PropTypes.bool.isRequired,
-        hoveredTagResult: PropTypes.string.isRequired,
-        changeHoveredTag: PropTypes.func.isRequired,
-        tagSearchValue: PropTypes.string.isRequired,
         filterTag: PropTypes.func.isRequired,
-        updateTagSearchVal: PropTypes.func.isRequired,
     }
 
     constructor(props) {
         super(props)
 
         this.handleOutsideClick = this.handleOutsideClick.bind(this)
-        // this.handleKeyBoardDown = this.handleKeyBoardDown.bind(this)
-        // this.handleTagEnter = this.handleTagEnter.bind(this)
     }
 
     componentWillMount() {
         document.addEventListener('click', this.handleOutsideClick, false)
-        // document.addEventListener('keypress', this.handleTagEnter, false)
     }
 
     componentDidMount() {
@@ -76,138 +56,16 @@ class OverviewContainer extends Component {
 
     componentWillUnmount() {
         document.removeEventListener('click', this.handleOutsideClick, false)
-        // document.removeEventListener('keypress', this.handleTagEnter, false)
     }
 
     setInputRef = el => (this.inputQueryEl = el)
     setTagDivRef = el => (this.tagDiv = el)
-    setTagInputRef = el => (this.tagInput = el)
     setTagButtonRef = el => (this.tagButton = el)
 
-    addTag = tag => () => {
-        this.props.addTags(tag)
-        this.tagInput.focus()
-    }
-
-    findIndexValue(a, tag) {
-        return a.findIndex(i => i.value === tag)
-    }
-
-    handleTagSearchChange = event => {
-        const input = event.target
-        this.props.updateTagSearchVal(input.value)
-        this.props.fetchTagSuggestions()
-    }
-
-    handleTagSearchKeyDown = event => {
-        if (event.key === 'Enter') {
-            event.preventDefault()
-
-            if (this.props.tagSearchValue.trim().length) {
-                this.addTag(this.props.tagSearchValue)()
-            }
-        }
-    }
-
-    renderNewTagOption() {
-        const { tagSearchValue, hoveredTagResult, suggestedTags } = this.props
-
-        if (
-            !!tagSearchValue.length &&
-            !suggestedTags.includes(tagSearchValue)
-        ) {
-            return (
-                <TagOption>
-                    <NewTagMsg
-                        value={tagSearchValue}
-                        onClick={this.addTag(tagSearchValue)}
-                        hovered={hoveredTagResult === tagSearchValue}
-                    />
-                </TagOption>
-            )
-        }
-        return null
-    }
-
-    returnTagStatus(isSuggested, tag) {
-        const { resultTags } = this.props
-        const index = this.findIndexValue(
-            resultTags,
-            isSuggested ? tag : tag['value'],
-        )
-
-        return isSuggested
-            ? index === -1 ? false : resultTags[index].isSelected
-            : resultTags[index].isSelected
-    }
-
-    renderTagValue = tag => (typeof tag === 'string' ? tag : tag.value)
-
-    renderOptions(tags, isSuggested) {
-        const { hoveredTagResult } = this.props
-
-        return tags.map((tag, i) => {
-            const tagValue = this.renderTagValue(tag)
-            return (
-                <TagOption key={i}>
-                    <OldTagMsg
-                        value={tagValue}
-                        active={this.returnTagStatus(isSuggested, tag)}
-                        hovered={hoveredTagResult === tagValue}
-                        onClick={
-                            this.returnTagStatus(isSuggested, tag)
-                                ? this.props.delTags(tagValue)
-                                : this.addTag(tagValue)
-                        }
-                    />
-                </TagOption>
-            )
-        })
-    }
-
-    renderTagsOptions() {
-        if (this.props.emptyTagOptions) {
-            return <NoResult />
-        }
-
-        if (this.props.suggestedTags.length !== 0) {
-            return this.renderOptions(this.props.suggestedTags, true)
-        } else if (this.props.tagSearchValue.length !== 0) {
-            return null
-        }
-
-        return this.renderOptions(this.props.resultTags, false)
-    }
-
-    renderTags(docId) {
-        const { pageIdForTag, resultTags, tagSearchValue } = this.props
-        const selectedResultTags = resultTags.filter(
-            tag => tag.isSelected === true,
-        )
-
-        return (
-            <div>
-                {docId === pageIdForTag && (
-                    <Tags
-                        onTagSearchChange={this.handleTagSearchChange}
-                        onTagSearchKeyDown={this.handleTagSearchKeyDown}
-                        setInputRef={this.setTagInputRef}
-                        numberOfTags={selectedResultTags.length}
-                        setTagDivRef={this.setTagDivRef}
-                        tagSearchValue={tagSearchValue}
-                        // keydown={this.handleKeyBoardDown}
-                        // keypress={this.handleTagEnter}
-                        overview
-                    >
-                        <div>
-                            {this.renderTagsOptions()}
-                            {this.renderNewTagOption()}
-                        </div>
-                    </Tags>
-                )}
-            </div>
-        )
-    }
+    renderTags = url =>
+        url === this.props.activeUrl ? (
+            <TagsContainer overview url={url} />
+        ) : null
 
     renderTagPills(tags) {
         const pills = tags
@@ -237,19 +95,14 @@ class OverviewContainer extends Component {
     }
 
     renderResultItems() {
-        const { pageIdForTag } = this.props
-
         const resultItems = this.props.searchResults.map((doc, i) => (
             <PageResultItem
                 key={i}
                 onTrashBtnClick={this.props.handleTrashBtnClick(doc.url, i)}
                 onToggleBookmarkClick={this.props.handleToggleBm(doc.url, i)}
-                tagItem={this.renderTags(doc._id)}
+                tagManager={this.renderTags(doc.url)}
                 setTagButtonRef={this.setTagButtonRef}
-                onTagBtnClick={this.props.handleTagBtnClick(
-                    pageIdForTag === '' ? doc._id : '',
-                    i,
-                )}
+                onTagBtnClick={this.props.handleTagBtnClick(doc.url)}
                 tagPills={this.renderTagPills(doc.tags)}
                 {...doc}
             />
@@ -350,79 +203,7 @@ class OverviewContainer extends Component {
             !this.tagDiv.contains(e.target) &&
             !this.tagButton.isEqualNode(e.target)
         ) {
-            this.props.handleTagBtnClick('', -1)(e)
-        }
-    }
-
-    handleKeyBoardDown(e) {
-        const {
-            resultTags,
-            tagSearchValue,
-            suggestedTags,
-            emptyTagOptions,
-            pageIdForTag,
-            hoveredTagResult,
-        } = this.props
-
-        if (pageIdForTag !== '') {
-            if (emptyTagOptions) {
-                this.props.changeHoveredTag(tagSearchValue)
-            }
-
-            if (suggestedTags.length !== 0) {
-                const index = suggestedTags.indexOf(hoveredTagResult)
-
-                if (e.keyCode === 40) {
-                    if (index !== suggestedTags.length - 1) {
-                        this.props.changeHoveredTag(suggestedTags[index + 1])
-                    } else if (
-                        index === suggestedTags.length - 1 &&
-                        tagSearchValue !== ''
-                    ) {
-                        this.props.changeHoveredTag(tagSearchValue)
-                    }
-                } else if (e.keyCode === 38) {
-                    if (index !== 0 && index >= 0) {
-                        this.props.changeHoveredTag(suggestedTags[index - 1])
-                    } else if (index === -1) {
-                        this.props.changeHoveredTag(
-                            suggestedTags[suggestedTags.length - 1],
-                        )
-                    }
-                }
-            } else if (tagSearchValue.length !== 0) {
-                this.props.changeHoveredTag(tagSearchValue)
-            } else {
-                const index = this.findIndexValue(resultTags, hoveredTagResult)
-                if (e.keyCode === 40) {
-                    if (index !== resultTags.length - 1) {
-                        this.props.changeHoveredTag(resultTags[index + 1].value)
-                    }
-                } else if (e.keyCode === 38) {
-                    if (index !== 0) {
-                        this.props.changeHoveredTag(resultTags[index - 1].value)
-                    }
-                }
-            }
-        }
-    }
-
-    handleTagEnter(e) {
-        const { pageIdForTag, hoveredTagResult, resultTags } = this.props
-
-        if (e.keyCode === 13 && pageIdForTag !== '') {
-            e.preventDefault()
-            const index = this.findIndexValue(resultTags, hoveredTagResult)
-
-            if (index === -1) {
-                this.addTag(hoveredTagResult)()
-            } else {
-                if (resultTags[index].isSelected) {
-                    this.props.delTags(hoveredTagResult)()
-                } else {
-                    this.addTag(hoveredTagResult)()
-                }
-            }
+            this.props.resetActiveUrl()
         }
     }
 
@@ -441,6 +222,7 @@ class OverviewContainer extends Component {
 
 const mapStateToProps = state => ({
     isLoading: selectors.isLoading(state),
+    activeUrl: selectors.activeUrl(state),
     isNewSearchLoading: selectors.isNewSearchLoading(state),
     currentQueryParams: selectors.currentQueryParams(state),
     noResults: selectors.noResults(state),
@@ -453,14 +235,6 @@ const mapStateToProps = state => ({
     showInitSearchMsg: selectors.showInitSearchMsg(state),
     totalResultCount: selectors.totalResultCount(state),
     shouldShowCount: selectors.shouldShowCount(state),
-    pageIdForTag: selectors.pageIdForTag(state),
-    resultTags: selectors.resultTags(state),
-    deleteTags: selectors.deleteTags(state),
-    suggestedTags: selectors.suggestedTags(state),
-    emptyTagOptions: selectors.emptyTagOptions(state),
-    hoveredTagResult: selectors.hoveredTagResult(state),
-    tagSearchValue: selectors.tagSearchValue(state),
-    tags: selectors.tags(state),
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -473,7 +247,7 @@ const mapDispatchToProps = dispatch => ({
             deleteDocs: actions.deleteDocs,
             onShowFilterChange: actions.showFilter,
             onShowOnlyBookmarksChange: actions.toggleBookmarkFilter,
-            updateTagSearchVal: actions.tagSearchValue,
+            resetActiveUrl: actions.resetActiveUrl,
         },
         dispatch,
     ),
@@ -489,20 +263,9 @@ const mapDispatchToProps = dispatch => ({
         event.preventDefault()
         dispatch(actions.toggleBookmark(url, index))
     },
-    handleTagBtnClick: (pageId, index) => event => {
+    handleTagBtnClick: url => event => {
         event.preventDefault()
-        dispatch(actions.pageIdForTag(pageId))
-        dispatch(actions.indexDocFortag(index))
-        dispatch(actions.fetchInitResultTags())
-        dispatch(actions.suggestedTags([]))
-    },
-    fetchTagSuggestions: debounce(300)(() =>
-        dispatch(actions.fetchTagSuggestions()),
-    ),
-    addTags: tag => dispatch(actions.addTagsFromOverview(tag)),
-    delTags: tag => () => dispatch(actions.delTagsFromOverview(tag)),
-    changeHoveredTag: tag => {
-        dispatch(actions.hoveredTagResult(tag))
+        dispatch(actions.showTags(url))
     },
     filterTag: tag => event => {
         event.preventDefault()

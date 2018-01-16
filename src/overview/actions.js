@@ -35,29 +35,13 @@ export const incSearchCount = createAction('overview/incSearchCount')
 export const initSearchCount = createAction('overview/initSearchCount')
 export const setResultDeleting = createAction('overview/setResultDeleting')
 
-export const pageIdForTag = createAction('overview/pageIdForTag')
-export const resultTags = createAction('overview/resultTags')
-export const deleteTags = createAction('overview/deleteTags')
-export const suggestedTags = createAction('overview/suggestedTags')
-export const hoveredTagResult = createAction('overview/hoveredTagResult')
-export const tagSearchValue = createAction('overview/tagSearchValue')
-export const tags = createAction('overview/tags')
-export const tagExpandedPageId = createAction('overview/tagExpandedPageId')
-export const changeTagsResult = createAction(
-    'overview/changeTagsResult',
-    (index, tag, isDelete) => ({ index, tag, isDelete }),
-)
-export const indexDocFortag = createAction('overview/indexDocFortag')
-export const addTag = createAction('overview/addTag')
-export const delTag = createAction('overview/delTag')
+export const resetActiveUrl = createAction('overview/resetActiveResultUrl')
+export const setActiveUrl = createAction('overview/setActiveResultUrl')
 
 const deleteDocsByUrl = remoteFunction('deleteDocsByUrl')
 const createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
 const removeBookmarkByUrl = remoteFunction('removeBookmarkByUrl')
-const fetchTags = remoteFunction('fetchTags')
-const suggestTags = remoteFunction('suggestTags')
-const addTags = remoteFunction('addTags')
-const delTags = remoteFunction('delTags')
+export const tags = createAction('overview/tags')
 
 const getCmdMessageHandler = dispatch => ({ cmd, ...payload }) => {
     switch (cmd) {
@@ -230,64 +214,13 @@ export const toggleBookmark = (url, index) => async (dispatch, getState) => {
     }
 }
 
-export const fetchInitResultTags = () => async (dispatch, getState) => {
-    const state = getState()
-    const pageId = selectors.pageIdForTag(state)
-    const tagsFromBackend = await fetchTags({ pageId })
+export const showTags = url => (dispatch, getState) => {
+    const activeUrl = selectors.activeUrl(getState())
 
-    tagsFromBackend.sort()
-
-    if (tagsFromBackend.length > 0) {
-        dispatch(hoveredTagResult(tagsFromBackend[0]))
-    }
-    dispatch(
-        resultTags(tagsFromBackend.map(value => ({ isSelected: true, value }))),
-    )
-}
-
-export const addTagsFromOverview = tag => async (dispatch, getState) => {
-    const state = getState()
-    const pageId = selectors.pageIdForTag(state)
-    const indexDocFortag = selectors.indexDocFortag(state)
-
-    await addTags({ pageId }, [tag])
-    dispatch(addTag(tag))
-    dispatch(tagSearchValue(''))
-    dispatch(suggestedTags([]))
-    dispatch(changeTagsResult(indexDocFortag, tag, false))
-}
-
-export const delTagsFromOverview = tag => async (dispatch, getState) => {
-    const state = getState()
-    const pageId = selectors.pageIdForTag(state)
-    const indexDocFortag = selectors.indexDocFortag(state)
-
-    await delTags({ pageId }, [tag])
-    dispatch(delTag(tag))
-    dispatch(changeTagsResult(indexDocFortag, tag, true))
-}
-
-export const fetchTagSuggestions = () => async (dispatch, getState) => {
-    const term = selectors.tagSearchValue(getState())
-
-    // Skip for blank
-    if (term.trim() === '') {
-        return dispatch(suggestedTags([]))
-    }
-
-    let suggestions = []
-    try {
-        suggestions = await suggestTags(term)
-
-        if (suggestions.length) {
-            dispatch(hoveredTagResult(suggestions[0]))
-        } else {
-            dispatch(hoveredTagResult(term))
-        }
-    } catch (err) {
-        // TODO: handle this
-    } finally {
-        dispatch(suggestedTags(suggestions))
+    if (activeUrl === url) {
+        dispatch(resetActiveUrl())
+    } else {
+        dispatch(setActiveUrl(url))
     }
 }
 

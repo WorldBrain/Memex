@@ -75,7 +75,7 @@ const PageResultItem = props => (
                 </div>
             </div>
         </a>
-        {props.tagItem}
+        {props.tagManager}
     </li>
 )
 
@@ -89,7 +89,7 @@ PageResultItem.propTypes = {
     onTrashBtnClick: PropTypes.func.isRequired,
     onToggleBookmarkClick: PropTypes.func.isRequired,
     tagPills: PropTypes.array.isRequired,
-    tagItem: PropTypes.object.isRequired,
+    tagManager: PropTypes.node,
     onTagBtnClick: PropTypes.func.isRequired,
     setTagButtonRef: PropTypes.func.isRequired,
 }

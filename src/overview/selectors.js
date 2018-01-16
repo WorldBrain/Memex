@@ -144,14 +144,8 @@ export const isNewSearchLoading = createSelector(
 export const showFilter = state => overview(state).showFilter
 export const showOnlyBookmarks = state => overview(state).showOnlyBookmarks
 
-export const pageIdForTag = state => overview(state).pageIdForTag
-export const resultTags = state => overview(state).resultTags
-export const deleteTags = state => overview(state).deleteTags
-export const suggestedTags = state => overview(state).suggestedTags
-export const hoveredTagResult = state => overview(state).hoveredTagResult
-export const tagSearchValue = state => overview(state).tagSearchValue
-export const tags = state => overview(state).tags
-export const indexDocFortag = state => overview(state).indexDocFortag
+export const activeUrl = createSelector(overview, state => state.activeUrl)
+export const tags = createSelector(overview, state => state.tags)
 
 export const isEmptyQuery = createSelector(
     currentQueryParams,
@@ -163,12 +157,4 @@ export const isEmptyQuery = createSelector(
         !endDate &&
         !showOnlyBookmarks &&
         !tags.length,
-)
-
-export const emptyTagOptions = createSelector(
-    tagSearchValue,
-    resultTags,
-    suggestedTags,
-    (searchVal, resultTags, suggestedTags) =>
-        !searchVal.length && !resultTags.length && !suggestedTags.length,
 )
