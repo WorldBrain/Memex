@@ -66,13 +66,23 @@ class TagsContainer extends Component {
         }
     }
 
+    /**
+     * Selector for derived display tags state
+     */
     getDisplayTags = () =>
         this.state.displayTags.map(value => ({
             value,
             active: this.isPageTag(value),
         }))
 
-    getSearchVal = () => this.state.searchVal.trim().replace(/\s\s+/g, ' ')
+    /**
+     * Selector for derived search value/new tag input state
+     */
+    getSearchVal = () =>
+        this.state.searchVal
+            .trim()
+            .replace(/\s\s+/g, ' ')
+            .toLowerCase()
 
     canCreateTag() {
         const searchVal = this.getSearchVal()
@@ -114,7 +124,7 @@ class TagsContainer extends Component {
      * depending on their current status as assoc. tags or not.
      */
     handleTagSelection = index => async event => {
-        const tag = this.state.displayTags[index]
+        const tag = this.getDisplayTags()[index].value
         const tagIndex = this.state.tags.findIndex(val => val === tag)
 
         let tagsReducer = tags => tags
@@ -171,14 +181,15 @@ class TagsContainer extends Component {
     }
 
     fetchTagSuggestions = async () => {
-        if (!this.state.searchVal.length) {
+        const searchVal = this.getSearchVal()
+        if (!searchVal.length) {
             return
         }
 
         let suggestions = this.state.tags
 
         try {
-            suggestions = await this.suggestTags(this.state.searchVal)
+            suggestions = await this.suggestTags(searchVal)
         } catch (err) {
         } finally {
             this.setState(state => ({
