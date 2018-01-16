@@ -35,8 +35,16 @@ export const incSearchCount = createAction('overview/incSearchCount')
 export const initSearchCount = createAction('overview/initSearchCount')
 export const setResultDeleting = createAction('overview/setResultDeleting')
 
-export const resetActiveUrl = createAction('overview/resetActiveResultUrl')
-export const setActiveUrl = createAction('overview/setActiveResultUrl')
+export const resetActiveTagIndex = createAction('overview/resetActiveTagIndex')
+export const setActiveTagIndex = createAction('overview/setActiveTagIndex')
+export const addTag = createAction('overview/localAddTag', (tag, index) => ({
+    tag,
+    index,
+}))
+export const delTag = createAction('overview/localDelTag', (tag, index) => ({
+    tag,
+    index,
+}))
 
 const deleteDocsByUrl = remoteFunction('deleteDocsByUrl')
 const createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
@@ -214,13 +222,13 @@ export const toggleBookmark = (url, index) => async (dispatch, getState) => {
     }
 }
 
-export const showTags = url => (dispatch, getState) => {
-    const activeUrl = selectors.activeUrl(getState())
+export const showTags = index => (dispatch, getState) => {
+    const activeTagIndex = selectors.activeTagIndex(getState())
 
-    if (activeUrl === url) {
-        dispatch(resetActiveUrl())
+    if (activeTagIndex === index) {
+        dispatch(resetActiveTagIndex())
     } else {
-        dispatch(setActiveUrl(url))
+        dispatch(setActiveTagIndex(index))
     }
 }
 

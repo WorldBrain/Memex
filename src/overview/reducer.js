@@ -27,7 +27,7 @@ const defaultState = {
     },
     showFilter: false,
     showOnlyBookmarks: false,
-    activeUrl: '',
+    activeTagIndex: -1,
     tags: [],
 }
 
@@ -66,6 +66,54 @@ function hideResultItem(state, pageId) {
     return update('searchResult.docs', docs =>
         remove(doc => doc._id === pageId)(docs),
     )(state)
+}
+
+const addTag = (state, { tag, index }) => {
+    const doc = state.searchResult.docs[index]
+    const docs = [
+        ...state.searchResult.docs.slice(0, index),
+        {
+            ...doc,
+            tags: [...doc.tags, tag],
+        },
+        ...state.searchResult.docs.slice(index + 1),
+    ]
+
+    return {
+        ...state,
+        searchResult: {
+            ...state.searchResult,
+            docs,
+        },
+    }
+}
+
+const delTag = (state, { tag, index }) => {
+    const doc = state.searchResult.docs[index]
+    const removalIndex = doc.tags.findIndex(val => val === tag)
+    if (removalIndex === -1) {
+        return state
+    }
+
+    const docs = [
+        ...state.searchResult.docs.slice(0, index),
+        {
+            ...doc,
+            tags: [
+                ...doc.tags.slice(0, removalIndex),
+                ...doc.tags.slice(removalIndex + 1),
+            ],
+        },
+        ...state.searchResult.docs.slice(index + 1),
+    ]
+
+    return {
+        ...state,
+        searchResult: {
+            ...state.searchResult,
+            docs,
+        },
+    }
 }
 
 const showDeleteConfirm = (state, { url, index }) => ({
@@ -166,12 +214,14 @@ export default createReducer(
             ...state,
             currentPage: defaultState.currentPage,
         }),
-        [actions.resetActiveUrl]: state => ({
+        [actions.resetActiveTagIndex]: state => ({
             ...state,
-            activeUrl: defaultState.activeUrl,
+            activeTagIndex: defaultState.activeTagIndex,
         }),
         [actions.tags]: payloadReducer('tags'),
-        [actions.setActiveUrl]: payloadReducer('activeUrl'),
+        [actions.setActiveTagIndex]: payloadReducer('activeTagIndex'),
+        [actions.addTag]: addTag,
+        [actions.delTag]: delTag,
     },
     defaultState,
 )

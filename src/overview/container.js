@@ -8,6 +8,7 @@ import { Wrapper, LoadingIndicator } from 'src/common-ui/components'
 import { TagsContainer } from 'src/common-ui/containers'
 import * as actions from './actions'
 import * as selectors from './selectors'
+import * as constants from './constants'
 import ResultList from './components/ResultList'
 import Overview from './components/Overview'
 import PageResultItem from './components/PageResultItem'
@@ -15,8 +16,6 @@ import ResultsMessage from './components/ResultsMessage'
 import TagPill from './components/TagPill'
 
 class OverviewContainer extends Component {
-    static SHOWN_TAGS_LIMIT = 3
-
     static propTypes = {
         grabFocusOnMount: PropTypes.bool.isRequired,
         handleInputChange: PropTypes.func.isRequired,
@@ -26,7 +25,6 @@ class OverviewContainer extends Component {
         noResults: PropTypes.bool.isRequired,
         isBadTerm: PropTypes.bool.isRequired,
         showInitSearchMsg: PropTypes.bool.isRequired,
-        activeUrl: PropTypes.string.isRequired,
         resetActiveUrl: PropTypes.func.isRequired,
         searchResults: PropTypes.arrayOf(PropTypes.object).isRequired,
         totalResultCount: PropTypes.number.isRequired,
@@ -36,6 +34,8 @@ class OverviewContainer extends Component {
         handleToggleBm: PropTypes.func.isRequired,
         handleTagBtnClick: PropTypes.func.isRequired,
         filterTag: PropTypes.func.isRequired,
+        addTag: PropTypes.func.isRequired,
+        delTag: PropTypes.func.isRequired,
     }
 
     constructor(props) {
@@ -62,31 +62,28 @@ class OverviewContainer extends Component {
     setTagDivRef = el => (this.tagDiv = el)
     setTagButtonRef = el => (this.tagButton = el)
 
-    renderTags = url =>
-        url === this.props.activeUrl ? (
-            <TagsContainer overview url={url} />
+    renderTags = ({ shouldDisplayTagPopup, url }, index) =>
+        shouldDisplayTagPopup ? (
+            <TagsContainer
+                overview
+                url={url}
+                onTagAdd={this.props.addTag(index)}
+                onTagDel={this.props.delTag(index)}
+            />
         ) : null
 
-    renderTagPills(tags) {
-        const pills = tags
-            .slice(0, OverviewContainer.SHOWN_TAGS_LIMIT)
-            .map(tagKey => tagKey.split('/')[1]) // Grab the part ofter `tag/` key prefix
-            .map((tag, i) => (
-                <TagPill
-                    key={i}
-                    value={tag}
-                    onClick={this.props.filterTag(tag)}
-                />
-            ))
+    renderTagPills({ tagPillsData, tags }) {
+        const pills = tagPillsData.map((tag, i) => (
+            <TagPill key={i} value={tag} onClick={this.props.filterTag(tag)} />
+        ))
 
         // Add on dummy pill with '+' sign if over limit
-        if (tags.length > OverviewContainer.SHOWN_TAGS_LIMIT) {
+        if (tags.length > constants.SHOWN_TAGS_LIMIT) {
             return [
                 ...pills,
                 <TagPill
                     key="+"
-                    value={`+${tags.length -
-                        OverviewContainer.SHOWN_TAGS_LIMIT}`}
+                    value={`+${tags.length - constants.SHOWN_TAGS_LIMIT}`}
                 />,
             ]
         }
@@ -98,12 +95,12 @@ class OverviewContainer extends Component {
         const resultItems = this.props.searchResults.map((doc, i) => (
             <PageResultItem
                 key={i}
-                onTrashBtnClick={this.props.handleTrashBtnClick(doc.url, i)}
-                onToggleBookmarkClick={this.props.handleToggleBm(doc.url, i)}
-                tagManager={this.renderTags(doc.url)}
+                onTrashBtnClick={this.props.handleTrashBtnClick(doc, i)}
+                onToggleBookmarkClick={this.props.handleToggleBm(doc, i)}
+                tagManager={this.renderTags(doc, i)}
                 setTagButtonRef={this.setTagButtonRef}
-                onTagBtnClick={this.props.handleTagBtnClick(doc.url)}
-                tagPills={this.renderTagPills(doc.tags)}
+                onTagBtnClick={this.props.handleTagBtnClick(i)}
+                tagPills={this.renderTagPills(doc)}
                 {...doc}
             />
         ))
@@ -222,7 +219,6 @@ class OverviewContainer extends Component {
 
 const mapStateToProps = state => ({
     isLoading: selectors.isLoading(state),
-    activeUrl: selectors.activeUrl(state),
     isNewSearchLoading: selectors.isNewSearchLoading(state),
     currentQueryParams: selectors.currentQueryParams(state),
     noResults: selectors.noResults(state),
@@ -247,7 +243,7 @@ const mapDispatchToProps = dispatch => ({
             deleteDocs: actions.deleteDocs,
             onShowFilterChange: actions.showFilter,
             onShowOnlyBookmarksChange: actions.toggleBookmarkFilter,
-            resetActiveUrl: actions.resetActiveUrl,
+            resetActiveUrl: actions.resetActiveTagIndex,
         },
         dispatch,
     ),
@@ -255,22 +251,24 @@ const mapDispatchToProps = dispatch => ({
         const input = event.target
         dispatch(actions.setQuery(input.value))
     },
-    handleTrashBtnClick: (url, index) => event => {
+    handleTrashBtnClick: ({ url }, index) => event => {
         event.preventDefault()
         dispatch(actions.showDeleteConfirm(url, index))
     },
-    handleToggleBm: (url, index) => event => {
+    handleToggleBm: ({ url }, index) => event => {
         event.preventDefault()
         dispatch(actions.toggleBookmark(url, index))
     },
-    handleTagBtnClick: url => event => {
+    handleTagBtnClick: index => event => {
         event.preventDefault()
-        dispatch(actions.showTags(url))
+        dispatch(actions.showTags(index))
     },
     filterTag: tag => event => {
         event.preventDefault()
         dispatch(actions.searchByTags(tag))
     },
+    addTag: resultIndex => tag => dispatch(actions.addTag(tag, resultIndex)),
+    delTag: resultIndex => tag => dispatch(actions.delTag(tag, resultIndex)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(OverviewContainer)

@@ -91,15 +91,23 @@ export const deletingResultIndex = createSelector(
     state => state.deleting,
 )
 
+export const activeTagIndex = createSelector(
+    overview,
+    state => state.activeTagIndex,
+)
+
 export const results = createSelector(
     resultDocs,
     isDeleteConfShown,
     deletingResultIndex,
-    (docs, modalShown, deleting) =>
+    activeTagIndex,
+    (docs, modalShown, deleting, tagIndex) =>
         docs.map((pageDoc, i) => ({
             ...pageDoc,
             title: decideTitle(pageDoc),
             isDeleting: !modalShown && i === deleting,
+            tagPillsData: pageDoc.tags.slice(0, constants.SHOWN_TAGS_LIMIT),
+            shouldDisplayTagPopup: i === tagIndex,
         })),
 )
 
@@ -144,7 +152,6 @@ export const isNewSearchLoading = createSelector(
 export const showFilter = state => overview(state).showFilter
 export const showOnlyBookmarks = state => overview(state).showOnlyBookmarks
 
-export const activeUrl = createSelector(overview, state => state.activeUrl)
 export const tags = createSelector(overview, state => state.tags)
 
 export const isEmptyQuery = createSelector(

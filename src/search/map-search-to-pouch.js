@@ -99,7 +99,7 @@ export default async function mapResultsToPouchDocs(results, searchParams) {
         ...doc,
         hasBookmark: resultsMap.get(doc._id).hasBookmark,
         displayTime: resultsMap.get(doc._id).timestamp,
-        tags: resultsMap.get(doc._id).tags,
+        tags: resultsMap.get(doc._id).tags.map(removeKeyType),
     }))
 
     // Ensure the original results order is maintained

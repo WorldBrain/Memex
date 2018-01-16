@@ -1,13 +1,26 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import debounce from 'lodash/fp/debounce'
+import noop from 'lodash/fp/noop'
 
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { Tags, TagOption, NewTagMsg, OldTagMsg, NoResult } from '../components'
 
 class TagsContainer extends Component {
     static propTypes = {
+        // The URL to use for dis/associating new tags with
         url: PropTypes.string.isRequired,
+
+        // Opt. cb to run when new tag added to DB
+        onTagAdd: PropTypes.func,
+
+        // Opt. cb to run when tag deleted from DB
+        onTagDel: PropTypes.func,
+    }
+
+    static defaultProps = {
+        onTagAdd: noop,
+        onTagDel: noop,
     }
 
     constructor(props) {
@@ -92,6 +105,7 @@ class TagsContainer extends Component {
                 tags: newTags,
                 displayTags: newTags,
             }))
+            this.props.onTagAdd(newTag)
         }
     }
 
@@ -108,9 +122,11 @@ class TagsContainer extends Component {
         try {
             if (tagIndex === -1) {
                 await this.addTags({ url: this.props.url }, [tag])
+                this.props.onTagAdd(tag)
                 tagsReducer = tags => [tag, ...tags]
             } else {
                 await this.delTags({ url: this.props.url }, [tag])
+                this.props.onTagDel(tag)
                 tagsReducer = tags => [
                     ...tags.slice(0, tagIndex),
                     ...tags.slice(tagIndex + 1),
