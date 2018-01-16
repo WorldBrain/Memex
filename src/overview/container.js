@@ -25,7 +25,7 @@ class OverviewContainer extends Component {
         noResults: PropTypes.bool.isRequired,
         isBadTerm: PropTypes.bool.isRequired,
         showInitSearchMsg: PropTypes.bool.isRequired,
-        resetActiveUrl: PropTypes.func.isRequired,
+        resetActiveTagIndex: PropTypes.func.isRequired,
         searchResults: PropTypes.arrayOf(PropTypes.object).isRequired,
         totalResultCount: PropTypes.number.isRequired,
         shouldShowCount: PropTypes.bool.isRequired,
@@ -38,17 +38,8 @@ class OverviewContainer extends Component {
         delTag: PropTypes.func.isRequired,
     }
 
-    constructor(props) {
-        super(props)
-
-        this.handleOutsideClick = this.handleOutsideClick.bind(this)
-    }
-
-    componentWillMount() {
-        document.addEventListener('click', this.handleOutsideClick, false)
-    }
-
     componentDidMount() {
+        document.addEventListener('click', this.handleOutsideClick, false)
         if (this.props.grabFocusOnMount) {
             this.inputQueryEl.focus()
         }
@@ -69,6 +60,7 @@ class OverviewContainer extends Component {
                 url={url}
                 onTagAdd={this.props.addTag(index)}
                 onTagDel={this.props.delTag(index)}
+                setTagDivRef={this.setTagDivRef}
             />
         ) : null
 
@@ -194,13 +186,13 @@ class OverviewContainer extends Component {
         )
     }
 
-    handleOutsideClick(e) {
+    handleOutsideClick = event => {
         if (
             this.tagDiv &&
-            !this.tagDiv.contains(e.target) &&
-            !this.tagButton.isEqualNode(e.target)
+            !this.tagDiv.contains(event.target) &&
+            !this.tagButton.isEqualNode(event.target)
         ) {
-            this.props.resetActiveUrl()
+            this.props.resetActiveTagIndex()
         }
     }
 
@@ -243,7 +235,7 @@ const mapDispatchToProps = dispatch => ({
             deleteDocs: actions.deleteDocs,
             onShowFilterChange: actions.showFilter,
             onShowOnlyBookmarksChange: actions.toggleBookmarkFilter,
-            resetActiveUrl: actions.resetActiveTagIndex,
+            resetActiveTagIndex: actions.resetActiveTagIndex,
         },
         dispatch,
     ),
