@@ -228,8 +228,17 @@ export const showTags = index => (dispatch, getState) => {
 }
 
 export const filterTag = tag => (dispatch, getState) => {
-    const query = selectors.query(getState())
-    const transformedTag = `#${tag.replace(' ', '+')} `
+    const state = getState()
+    const currentQueryParams = selectors.currentQueryParams(state)
+    const query = selectors.query(state)
 
-    dispatch(setQuery(`${transformedTag}${query}`))
+    const transformedTag = `#${tag.split(' ').join('+')} `
+
+    if (
+        currentQueryParams.query
+            .split(' ')
+            .indexOf(transformedTag.substr(0, transformedTag.length - 1)) === -1
+    ) {
+        dispatch(setQuery(`${transformedTag}${query}`))
+    }
 }
