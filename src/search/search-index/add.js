@@ -7,6 +7,7 @@ import {
     initLookupByKeys,
     termRangeLookup,
     idbBatchToPromise,
+    fetchExistingPage,
 } from './util'
 
 // Used to decide whether or not to do a range lookup for terms (if # terms gt) or N single lookups
@@ -77,13 +78,7 @@ export const addBookmarkConcurrent = (pageId, timestamp = Date.now()) =>
  *  standard indexing-related Error encountered during updates).
  */
 async function addBookmark(pageId, timestamp = Date.now()) {
-    const reverseIndexDoc = await singleLookup(pageId)
-
-    if (reverseIndexDoc == null) {
-        throw new Error(
-            `No document exists in reverse page index for the supplied page ID: ${pageId}`,
-        )
-    }
+    const reverseIndexDoc = await fetchExistingPage(pageId)
 
     const bookmarkKey = `${bookmarkKeyPrefix}${timestamp}`
 
@@ -178,6 +173,7 @@ async function indexPage(indexDoc) {
                   ...existingDoc.bookmarks,
                   ...indexDoc.bookmarks,
               ]),
+              tags: existingDoc.tags,
           }
 
     const augIndexDoc = augmentIndexLookupDoc(newIndexDoc)

@@ -34,6 +34,18 @@
         outline: none;
         box-shadow: 0 3px 10px 1px rgba(217, 219, 221, 0.6);
     }
+
+    &:hover .trash {
+        opacity: 0.3;
+    }
+
+    &:hover .tag {
+        opacity: 0.3;
+    }
+
+    &:hover .notBookmark {
+        opacity: 0.3;
+    }
 }
 
 /* List entries shown as context around a search result */
@@ -95,7 +107,8 @@
     flex-direction: column;
     justify-content: center;
     overflow: hidden;
-    padding-left: 24px;
+    padding-left: 12px;
+    padding-right: 12px;
 
     & .title {
         font-size: 16px;
@@ -105,6 +118,7 @@
         text-overflow: ellipsis;
         color: #173766;
         margin-bottom: 7px;
+        margin-top: 9px;
 
         & .favIcon {
             height: 20px;
@@ -125,8 +139,10 @@
     }
 
     & .time {
-        font-size: 11px;
-        color: #c1c1c1;
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+        align-items: center;
     }
 }
 
@@ -142,47 +158,74 @@
 .buttonsContainer {
     flex: 0 0 auto;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    float: right;
     color: inherit;
     text-decoration: none;
     padding: 10px;
+    margin: -10px;
+    margin-bottom: -4px;
+}
+
+.displayTime {
+    font-size: 11px;
+    color: #c1c1c1;
 }
 
 .button {
     display: inline;
     border: none;
     background-color: transparent;
-    width: 26px;
-    height: 26px;
+    width: 25px;
+    height: 25px;
     background-repeat: no-repeat;
     background-size: contain;
-    margin-bottom: 10px;
     cursor: pointer;
     outline: none;
+    margin: 0 3px 0 3px;
 }
 
 .trash {
-    background-image: url('/img/trash-icon.png');
+    background-image: url('/img/trash_new.svg');
+    opacity: 0.2;
+    width: 20px;
+    margin-top: 3px;
 
     &:hover:enabled {
-        background-image: url('/img/trash-icon-hovered.png');
+        opacity: 0.5;
     }
 }
 
 .bookmark {
-    background-image: url('/img/star_full_grey.png');
-
-    &:hover:enabled {
-        opacity: 0.5;
-        background-image: url('/img/star_full_3EB995.png');
-    }
+    background-image: url('/img/star_full.svg');
+    opacity: 0.8;
+    width: 25px;
 }
 
 .notBookmark {
-    background-image: url('/img/star_empty_grey.png');
+    background-image: url('/img/star_empty.svg');
+    opacity: 0.2;
+    width: 25px;
+
+    &:hover {
+        background-image: url('/img/star_full.svg');
+        opacity: 0.2;
+    }
+}
+
+.tag {
+    background-image: url('/img/tag.svg');
+    opacity: 0.2;
+    margin-top: 3px;
+    width: 20px;
 
     &:hover:enabled {
         opacity: 0.5;
-        background-image: url('/img/star_empty_3EB995.png');
     }
+}
+
+.tagList {
+    display: flex;
+    flex-grow: 2;
+    margin-left: 15px;
 }

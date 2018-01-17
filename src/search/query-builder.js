@@ -1,14 +1,12 @@
 import transform from 'src/util/transform-page-text'
 import { DEFAULT_TERM_SEPARATOR } from './search-index'
 
-// Pattern to match entire string to `domain.tld`-like format + optional subdomain prefix and ccTLD postfix
-const DOMAIN_TLD_PATTERN = /^(\w+\.)?[\w-]{2,}\.\w{2,3}(\.\w{2})?$/
-
 /**
  * @typedef IndexQuery
  * @type {Object}
  * @property {Set<string>} query Query terms a user has searched for.
  * @property {Set<string>} domain Domain patterns extracted from the terms a user has searched for.
+ * @property {Set<string>} tags Set of tags a user has chosen to filter.
  * @property {Map<string, any>} timeFilter Map of different time filter ranges to apply to search.
  * @property {number} [skip=0]
  * @property {number} [limit=10]
@@ -16,11 +14,18 @@ const DOMAIN_TLD_PATTERN = /^(\w+\.)?[\w-]{2,}\.\w{2,3}(\.\w{2})?$/
  */
 
 class QueryBuilder {
+    // Pattern to match entire string to `domain.tld`-like format + optional subdomain prefix and ccTLD postfix
+    static DOMAIN_TLD_PATTERN = /^(\w+\.)?[\w-]{2,}\.\w{2,3}(\.\w{2})?$/
+
+    // Pattern to match hashtags - spaces can be represented via '+'
+    static HASH_TAG_PATTERN = /^#\w[\w+]*$/
+
     skip = 0
     limit = 10
     query = new Set()
     timeFilter = new Map()
     domain = new Set()
+    tags = new Set()
     isBadTerm = false
     showOnlyBookmarks = false
 
@@ -33,6 +38,7 @@ class QueryBuilder {
         limit: this.limit,
         skip: this.skip,
         domain: this.domain,
+        tags: this.tags,
         isBadTerm: this.isBadTerm,
         timeFilter: this.timeFilter,
         bookmarksFilter: this.showOnlyBookmarks,
@@ -68,17 +74,31 @@ class QueryBuilder {
         return this
     }
 
+    filterTags(tags) {
+        tags.forEach(tag => this.tags.add(tag))
+        return this
+    }
+
     searchTerm(input = '') {
         // All indexed strings are lower-cased, so force the query terms to be
         let terms = input.toLowerCase().match(/\S+/g) || []
 
-        // Remove any domains detected in search terms, place them into domains Set
-        terms = terms.reduce((acc, term) => {
-            if (DOMAIN_TLD_PATTERN.test(term)) {
-                this.domain.add(term)
-                return acc
+        // Reduce the input down into array of terms. Contains side-effects to exclude any
+        //  domains/tags detected in input - place them into relevant Sets
+        terms = terms.reduce((terms, currTerm) => {
+            if (QueryBuilder.DOMAIN_TLD_PATTERN.test(currTerm)) {
+                this.domain.add(currTerm)
+                return terms
             }
-            return [...acc, term]
+
+            if (QueryBuilder.HASH_TAG_PATTERN.test(currTerm)) {
+                // Slice off '#' prefix and replace any '+' with space char
+                currTerm = currTerm.slice(1).replace('+', ' ')
+                this.tags.add(currTerm)
+                return terms
+            }
+
+            return [...terms, currTerm]
         }, [])
 
         // All terms must be pushed to the text-pipeline to take into account stopword removal ect...

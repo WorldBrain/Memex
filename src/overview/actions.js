@@ -1,5 +1,6 @@
 import { createAction } from 'redux-act'
 
+import { generatePageDocId } from 'src/page-storage'
 import analytics from 'src/analytics'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import * as constants from './constants'
@@ -31,6 +32,17 @@ export const changeHasBookmark = createAction('overview/changeHasBookmark')
 export const incSearchCount = createAction('overview/incSearchCount')
 export const initSearchCount = createAction('overview/initSearchCount')
 export const setResultDeleting = createAction('overview/setResultDeleting')
+
+export const resetActiveTagIndex = createAction('overview/resetActiveTagIndex')
+export const setActiveTagIndex = createAction('overview/setActiveTagIndex')
+export const addTag = createAction('overview/localAddTag', (tag, index) => ({
+    tag,
+    index,
+}))
+export const delTag = createAction('overview/localDelTag', (tag, index) => ({
+    tag,
+    index,
+}))
 
 const deleteDocsByUrl = remoteFunction('deleteDocsByUrl')
 const createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
@@ -91,11 +103,13 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
     const currentQueryParams = selectors.currentQueryParams(state)
     const skip = selectors.resultsSkip(state)
     const showOnlyBookmarks = selectors.showOnlyBookmarks(state)
+    const tags = selectors.tags(state)
 
     const searchParams = {
         ...currentQueryParams,
         getTotalCount: true,
         showOnlyBookmarks,
+        tags,
         limit: constants.PAGE_SIZE,
         skip,
     }
@@ -169,8 +183,10 @@ export const deleteDocs = () => async (dispatch, getState) => {
         // Remove all assoc. docs from the database + index
         await deleteDocsByUrl(url)
 
+        const pageId = await generatePageDocId({ url })
+
         // Hide the result item + confirm modal directly (optimistically)
-        dispatch(hideResultItem(url))
+        dispatch(hideResultItem(pageId))
     } catch (error) {
     } finally {
         dispatch(setResultDeleting(undefined))
@@ -199,4 +215,21 @@ export const toggleBookmark = (url, index) => async (dispatch, getState) => {
     } catch (error) {
         dispatch(changeHasBookmark(index)) // Reset UI state in case of error
     }
+}
+
+export const showTags = index => (dispatch, getState) => {
+    const activeTagIndex = selectors.activeTagIndex(getState())
+
+    if (activeTagIndex === index) {
+        dispatch(resetActiveTagIndex())
+    } else {
+        dispatch(setActiveTagIndex(index))
+    }
+}
+
+export const filterTag = tag => (dispatch, getState) => {
+    const query = selectors.query(getState())
+    const transformedTag = `#${tag.replace(' ', '+')} `
+
+    dispatch(setQuery(`${transformedTag}${query}`))
 }

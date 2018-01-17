@@ -5,15 +5,16 @@ import Search from './Search'
 
 import styles from './Popup.css'
 
-const Popup = ({ children, ...searchProps }) => (
+const Popup = ({ children, shouldRenderSearch = true, ...searchProps }) => (
     <div className={styles.popup}>
-        <Search {...searchProps} />
+        {shouldRenderSearch && <Search {...searchProps} />}
         {children}
     </div>
 )
 
 Popup.propTypes = {
-    children: PropTypes.arrayOf(PropTypes.element).isRequired,
+    children: PropTypes.object.isRequired,
+    shouldRenderSearch: PropTypes.bool,
 }
 
 export default Popup
