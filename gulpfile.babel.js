@@ -63,7 +63,7 @@ const sourceFiles = [
         cssOutput: 'options.css',
     },
     {
-        entries: ['./src/popup/popup.js'],
+        entries: ['./src/popup/popup.js', commonUIEntry],
         output: 'popup.js',
         destination: './extension/popup',
         cssOutput: 'popup.css',

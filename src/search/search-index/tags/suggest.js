@@ -1,3 +1,4 @@
+import { generatePageDocId } from 'src/page-storage'
 import index from '../'
 import { keyGen, removeKeyType } from '../util'
 
@@ -27,13 +28,19 @@ const suggestTags = (query = '', limit = 10) =>
     })
 
 /**
- * @param {string} pageId The ID of the page to fetch associated tags for.
+ * @param {any} assoc Object containing either `url` or `pageId` strings - `url` will be converted
+ *  to an ID of a page to fetch assoc. tags for.
  * @returns {Promise<string[]>} Resolves to an array of tags associated with `pageId` - will be empty if none.
  */
-export const fetchTags = pageId =>
-    index
+export async function fetchTags({ pageId, url }) {
+    if (url != null) {
+        pageId = await generatePageDocId({ url })
+    }
+
+    return index
         .get(pageId, { asBuffer: false })
         .then(({ tags = [] }) => [...tags].map(removeKeyType))
         .catch(error => [])
+}
 
 export default suggestTags

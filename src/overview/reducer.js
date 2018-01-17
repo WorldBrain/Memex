@@ -2,7 +2,6 @@ import update from 'lodash/fp/update'
 import remove from 'lodash/fp/remove'
 import { createReducer } from 'redux-act'
 
-import { generatePageDocId } from 'src/page-storage'
 import * as actions from './actions'
 
 const defaultState = {
@@ -28,6 +27,8 @@ const defaultState = {
     },
     showFilter: false,
     showOnlyBookmarks: false,
+    activeTagIndex: -1,
+    tags: [],
 }
 
 function setQuery(state, query) {
@@ -61,10 +62,58 @@ function toggleBookmarkFilter(state, showOnlyBookmarks) {
     }
 }
 
-function hideResultItem(state, url) {
+function hideResultItem(state, pageId) {
     return update('searchResult.docs', docs =>
-        remove(doc => doc._id === generatePageDocId({ url }))(docs),
+        remove(doc => doc._id === pageId)(docs),
     )(state)
+}
+
+const addTag = (state, { tag, index }) => {
+    const doc = state.searchResult.docs[index]
+    const docs = [
+        ...state.searchResult.docs.slice(0, index),
+        {
+            ...doc,
+            tags: [...doc.tags, tag],
+        },
+        ...state.searchResult.docs.slice(index + 1),
+    ]
+
+    return {
+        ...state,
+        searchResult: {
+            ...state.searchResult,
+            docs,
+        },
+    }
+}
+
+const delTag = (state, { tag, index }) => {
+    const doc = state.searchResult.docs[index]
+    const removalIndex = doc.tags.findIndex(val => val === tag)
+    if (removalIndex === -1) {
+        return state
+    }
+
+    const docs = [
+        ...state.searchResult.docs.slice(0, index),
+        {
+            ...doc,
+            tags: [
+                ...doc.tags.slice(0, removalIndex),
+                ...doc.tags.slice(removalIndex + 1),
+            ],
+        },
+        ...state.searchResult.docs.slice(index + 1),
+    ]
+
+    return {
+        ...state,
+        searchResult: {
+            ...state.searchResult,
+            docs,
+        },
+    }
 }
 
 const showDeleteConfirm = (state, { url, index }) => ({
@@ -121,6 +170,8 @@ const incSearchCount = state => ({
 })
 const initSearchCount = (state, searchCount) => ({ ...state, searchCount })
 
+const payloadReducer = key => (state, payload) => ({ ...state, [key]: payload })
+
 export default createReducer(
     {
         [actions.appendSearchResult]: handleSearchResult({ overwrite: false }),
@@ -159,6 +210,14 @@ export default createReducer(
             ...state,
             currentPage: defaultState.currentPage,
         }),
+        [actions.resetActiveTagIndex]: state => ({
+            ...state,
+            activeTagIndex: defaultState.activeTagIndex,
+        }),
+        [actions.tags]: payloadReducer('tags'),
+        [actions.setActiveTagIndex]: payloadReducer('activeTagIndex'),
+        [actions.addTag]: addTag,
+        [actions.delTag]: delTag,
     },
     defaultState,
 )

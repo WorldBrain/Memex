@@ -3,14 +3,18 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import Waypoint from 'react-waypoint'
+import reduce from 'lodash/fp/reduce'
 
 import { Wrapper, LoadingIndicator } from 'src/common-ui/components'
+import { TagsContainer } from 'src/common-ui/containers'
 import * as actions from './actions'
 import * as selectors from './selectors'
+import * as constants from './constants'
 import ResultList from './components/ResultList'
 import Overview from './components/Overview'
 import PageResultItem from './components/PageResultItem'
 import ResultsMessage from './components/ResultsMessage'
+import TagPill from './components/TagPill'
 
 class OverviewContainer extends Component {
     static propTypes = {
@@ -22,30 +26,85 @@ class OverviewContainer extends Component {
         noResults: PropTypes.bool.isRequired,
         isBadTerm: PropTypes.bool.isRequired,
         showInitSearchMsg: PropTypes.bool.isRequired,
+        resetActiveTagIndex: PropTypes.func.isRequired,
         searchResults: PropTypes.arrayOf(PropTypes.object).isRequired,
         totalResultCount: PropTypes.number.isRequired,
         shouldShowCount: PropTypes.bool.isRequired,
         needsWaypoint: PropTypes.bool.isRequired,
         handleTrashBtnClick: PropTypes.func.isRequired,
         handleToggleBm: PropTypes.func.isRequired,
+        handleTagBtnClick: PropTypes.func.isRequired,
+        handlePillClick: PropTypes.func.isRequired,
+        addTag: PropTypes.func.isRequired,
+        delTag: PropTypes.func.isRequired,
     }
 
     componentDidMount() {
+        document.addEventListener('click', this.handleOutsideClick, false)
         if (this.props.grabFocusOnMount) {
             this.inputQueryEl.focus()
         }
     }
 
-    setInputRef = element => {
-        this.inputQueryEl = element
+    componentWillUnmount() {
+        document.removeEventListener('click', this.handleOutsideClick, false)
+    }
+
+    furtherTagRefs = []
+    tagBtnRefs = []
+
+    setInputRef = el => (this.inputQueryEl = el)
+    setTagDivRef = el => (this.tagDiv = el)
+    setTagButtonRef = el => this.tagBtnRefs.push(el)
+    addFurtherTagRef = el => this.furtherTagRefs.push(el)
+
+    renderTags = ({ shouldDisplayTagPopup, url }, index) =>
+        shouldDisplayTagPopup ? (
+            <TagsContainer
+                overview
+                url={url}
+                onTagAdd={this.props.addTag(index)}
+                onTagDel={this.props.delTag(index)}
+                setTagDivRef={this.setTagDivRef}
+            />
+        ) : null
+
+    renderTagPills({ tagPillsData, tags }, resultIndex) {
+        const pills = tagPillsData.map((tag, i) => (
+            <TagPill
+                key={i}
+                value={tag}
+                onClick={this.props.handlePillClick(tag)}
+            />
+        ))
+
+        // Add on dummy pill with '+' sign if over limit
+        if (tags.length > constants.SHOWN_TAGS_LIMIT) {
+            return [
+                ...pills,
+                <TagPill
+                    key="+"
+                    setRef={this.addFurtherTagRef}
+                    value={`+${tags.length - constants.SHOWN_TAGS_LIMIT}`}
+                    onClick={this.props.handleTagBtnClick(resultIndex)}
+                    noBg
+                />,
+            ]
+        }
+
+        return pills
     }
 
     renderResultItems() {
         const resultItems = this.props.searchResults.map((doc, i) => (
             <PageResultItem
                 key={i}
-                onTrashBtnClick={this.props.handleTrashBtnClick(doc.url, i)}
-                onToggleBookmarkClick={this.props.handleToggleBm(doc.url, i)}
+                onTrashBtnClick={this.props.handleTrashBtnClick(doc, i)}
+                onToggleBookmarkClick={this.props.handleToggleBm(doc, i)}
+                tagManager={this.renderTags(doc, i)}
+                setTagButtonRef={this.setTagButtonRef}
+                onTagBtnClick={this.props.handleTagBtnClick(i)}
+                tagPills={this.renderTagPills(doc, i)}
                 {...doc}
             />
         ))
@@ -139,6 +198,25 @@ class OverviewContainer extends Component {
         )
     }
 
+    handleOutsideClick = event => {
+        // Reduces to `true` if any on input elements were clicked
+        const wereAnyClicked = reduce((res, el) => {
+            const isEqual = el != null ? el.isEqualNode(event.target) : false
+            return res || isEqual
+        }, false)
+
+        const clickedTagDiv =
+            this.tagDiv != null && this.tagDiv.contains(event.target)
+
+        if (
+            !clickedTagDiv &&
+            !wereAnyClicked(this.tagBtnRefs) &&
+            !wereAnyClicked(this.furtherTagRefs)
+        ) {
+            this.props.resetActiveTagIndex()
+        }
+    }
+
     render() {
         return (
             <Overview
@@ -178,6 +256,7 @@ const mapDispatchToProps = dispatch => ({
             deleteDocs: actions.deleteDocs,
             onShowFilterChange: actions.showFilter,
             onShowOnlyBookmarksChange: actions.toggleBookmarkFilter,
+            resetActiveTagIndex: actions.resetActiveTagIndex,
         },
         dispatch,
     ),
@@ -185,14 +264,24 @@ const mapDispatchToProps = dispatch => ({
         const input = event.target
         dispatch(actions.setQuery(input.value))
     },
-    handleTrashBtnClick: (url, index) => event => {
+    handleTrashBtnClick: ({ url }, index) => event => {
         event.preventDefault()
         dispatch(actions.showDeleteConfirm(url, index))
     },
-    handleToggleBm: (url, index) => event => {
+    handleToggleBm: ({ url }, index) => event => {
         event.preventDefault()
         dispatch(actions.toggleBookmark(url, index))
     },
+    handleTagBtnClick: index => event => {
+        event.preventDefault()
+        dispatch(actions.showTags(index))
+    },
+    handlePillClick: tag => event => {
+        event.preventDefault()
+        dispatch(actions.filterTag(tag))
+    },
+    addTag: resultIndex => tag => dispatch(actions.addTag(tag, resultIndex)),
+    delTag: resultIndex => tag => dispatch(actions.delTag(tag, resultIndex)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(OverviewContainer)
