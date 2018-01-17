@@ -191,10 +191,6 @@ export default createReducer(
             ...state,
             deleteConfirmProps: { ...defaultState.deleteConfirmProps },
         }),
-        [actions.hackClearTagsState]: state => ({
-            ...state,
-            tags: defaultState.tags,
-        }),
         [actions.setResultDeleting]: (state, index) => ({
             ...state,
             deleteConfirmProps: {

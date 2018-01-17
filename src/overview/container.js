@@ -33,7 +33,7 @@ class OverviewContainer extends Component {
         handleTrashBtnClick: PropTypes.func.isRequired,
         handleToggleBm: PropTypes.func.isRequired,
         handleTagBtnClick: PropTypes.func.isRequired,
-        filterTag: PropTypes.func.isRequired,
+        handlePillClick: PropTypes.func.isRequired,
         addTag: PropTypes.func.isRequired,
         delTag: PropTypes.func.isRequired,
     }
@@ -64,9 +64,13 @@ class OverviewContainer extends Component {
             />
         ) : null
 
-    renderTagPills({ tagPillsData, tags }) {
+    renderTagPills({ tagPillsData, tags }, resultIndex) {
         const pills = tagPillsData.map((tag, i) => (
-            <TagPill key={i} value={tag} onClick={this.props.filterTag(tag)} />
+            <TagPill
+                key={i}
+                value={tag}
+                onClick={this.props.handlePillClick(tag)}
+            />
         ))
 
         // Add on dummy pill with '+' sign if over limit
@@ -76,6 +80,7 @@ class OverviewContainer extends Component {
                 <TagPill
                     key="+"
                     value={`+${tags.length - constants.SHOWN_TAGS_LIMIT}`}
+                    noBg
                 />,
             ]
         }
@@ -92,7 +97,7 @@ class OverviewContainer extends Component {
                 tagManager={this.renderTags(doc, i)}
                 setTagButtonRef={this.setTagButtonRef}
                 onTagBtnClick={this.props.handleTagBtnClick(i)}
-                tagPills={this.renderTagPills(doc)}
+                tagPills={this.renderTagPills(doc, i)}
                 {...doc}
             />
         ))
@@ -255,9 +260,9 @@ const mapDispatchToProps = dispatch => ({
         event.preventDefault()
         dispatch(actions.showTags(index))
     },
-    filterTag: tag => event => {
+    handlePillClick: tag => event => {
         event.preventDefault()
-        dispatch(actions.searchByTags(tag))
+        dispatch(actions.filterTag(tag))
     },
     addTag: resultIndex => tag => dispatch(actions.addTag(tag, resultIndex)),
     delTag: resultIndex => tag => dispatch(actions.delTag(tag, resultIndex)),
