@@ -169,6 +169,11 @@ class TagsContainer extends Component {
     handleSearchChange = event => {
         const searchVal = event.target.value
 
+        // Block input of non-words, spaces and hypens
+        if (/[^\w\s-]/gi.test(searchVal)) {
+            return
+        }
+
         // If user backspaces to clear input, show the current assoc tags again
         const displayTags = !searchVal.length
             ? this.state.tags
