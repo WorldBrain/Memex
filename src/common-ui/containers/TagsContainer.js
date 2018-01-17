@@ -63,6 +63,7 @@ class TagsContainer extends Component {
                 isLoading: false,
                 tags,
                 displayTags: tags,
+                focused: tags.length > 0 ? 0 : -1,
             }))
         }
     }
@@ -91,7 +92,7 @@ class TagsContainer extends Component {
 
         return (
             !!searchVal.length &&
-            !this.state.tags.reduce(
+            !this.state.displayTags.reduce(
                 (acc, tag) => acc || tag === searchVal,
                 false,
             )
@@ -116,7 +117,7 @@ class TagsContainer extends Component {
                 searchVal: '',
                 tags: newTags,
                 displayTags: newTags,
-                focused: -1,
+                focused: 0,
             }))
             this.props.onTagAdd(newTag)
         }
@@ -158,8 +159,13 @@ class TagsContainer extends Component {
     handleSearchEnterPress(event) {
         event.preventDefault()
 
-        if (this.canCreateTag()) {
+        if (
+            this.canCreateTag() &&
+            this.state.focused === this.state.displayTags.length
+        ) {
             this.addTag()
+        } else {
+            this.handleTagsEnterPress(event)
         }
     }
 
@@ -200,6 +206,9 @@ class TagsContainer extends Component {
         switch (event.key) {
             case 'Enter':
                 return this.handleSearchEnterPress(event)
+            case 'ArrowUp':
+            case 'ArrowDown':
+                return this.handleTagsArrowPress(event)
         }
     }
 
@@ -247,7 +256,7 @@ class TagsContainer extends Component {
             this.setState(state => ({
                 ...state,
                 displayTags: suggestions,
-                focused: -1,
+                focused: 0,
             }))
         }
     }
