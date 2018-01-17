@@ -1,5 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import cx from 'classnames'
 
 import localStyles from './Tags.css'
 
@@ -9,12 +10,12 @@ const handleKeyDown = cb => event => {
     }
 }
 
-const TagRow = ({ value, active, onClick }) => (
+const TagRow = ({ value, active, onClick, focused = false }) => (
     <div
-        tabIndex={0}
-        className={localStyles.menuItem}
+        className={cx(localStyles.menuItem, {
+            [localStyles.menuItemFocused]: focused,
+        })}
         onClick={onClick}
-        onKeyDown={handleKeyDown(onClick)}
     >
         {value}
         {active && <i className="material-icons">done</i>}
@@ -26,6 +27,7 @@ TagRow.propTypes = {
         .isRequired,
     active: PropTypes.bool,
     onClick: PropTypes.func.isRequired,
+    focused: PropTypes.bool,
 }
 
 export default TagRow

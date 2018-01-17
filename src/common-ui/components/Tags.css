@@ -13,6 +13,10 @@
     }
 }
 
+.menuItemFocused {
+    background-color: #f7f7f7;
+}
+
 .menuItem i {
     font-size: 12px;
     float: right;
