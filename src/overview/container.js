@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import Waypoint from 'react-waypoint'
+import reduce from 'lodash/fp/reduce'
 
 import { Wrapper, LoadingIndicator } from 'src/common-ui/components'
 import { TagsContainer } from 'src/common-ui/containers'
@@ -49,9 +50,13 @@ class OverviewContainer extends Component {
         document.removeEventListener('click', this.handleOutsideClick, false)
     }
 
+    furtherTagRefs = []
+    tagBtnRefs = []
+
     setInputRef = el => (this.inputQueryEl = el)
     setTagDivRef = el => (this.tagDiv = el)
-    setTagButtonRef = el => (this.tagButton = el)
+    setTagButtonRef = el => this.tagBtnRefs.push(el)
+    addFurtherTagRef = el => this.furtherTagRefs.push(el)
 
     renderTags = ({ shouldDisplayTagPopup, url }, index) =>
         shouldDisplayTagPopup ? (
@@ -79,7 +84,9 @@ class OverviewContainer extends Component {
                 ...pills,
                 <TagPill
                     key="+"
+                    setRef={this.addFurtherTagRef}
                     value={`+${tags.length - constants.SHOWN_TAGS_LIMIT}`}
+                    onClick={this.props.handleTagBtnClick(resultIndex)}
                     noBg
                 />,
             ]
@@ -192,10 +199,19 @@ class OverviewContainer extends Component {
     }
 
     handleOutsideClick = event => {
+        // Reduces to `true` if any on input elements were clicked
+        const wereAnyClicked = reduce((res, el) => {
+            const isEqual = el != null ? el.isEqualNode(event.target) : false
+            return res || isEqual
+        }, false)
+
+        const clickedTagDiv =
+            this.tagDiv != null && this.tagDiv.contains(event.target)
+
         if (
-            this.tagDiv &&
-            !this.tagDiv.contains(event.target) &&
-            !this.tagButton.isEqualNode(event.target)
+            !clickedTagDiv &&
+            !wereAnyClicked(this.tagBtnRefs) &&
+            !wereAnyClicked(this.furtherTagRefs)
         ) {
             this.props.resetActiveTagIndex()
         }

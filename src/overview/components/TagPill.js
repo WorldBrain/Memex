@@ -9,8 +9,8 @@ const getTagClass = noBg =>
         [localStyles.notExpanded]: !noBg,
     })
 
-const TagPill = ({ value, noBg = false, onClick = f => f }) => (
-    <span className={getTagClass(noBg)} onClick={onClick}>
+const TagPill = ({ value, noBg = false, onClick = f => f, setRef }) => (
+    <span ref={setRef} className={getTagClass(noBg)} onClick={onClick}>
         {value}
     </span>
 )
@@ -19,6 +19,7 @@ TagPill.propTypes = {
     value: PropTypes.string.isRequired,
     onClick: PropTypes.func,
     noBg: PropTypes.bool,
+    setRef: PropTypes.func,
 }
 
 export default TagPill
