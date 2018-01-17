@@ -4,13 +4,13 @@ import classNames from 'classnames'
 
 import localStyles from './TagPill.css'
 
-const getTagClass = tagnm =>
+const getTagClass = noBg =>
     classNames(localStyles.tagname, {
-        [localStyles.notExpanded]: !(tagnm[0] === '+'),
+        [localStyles.notExpanded]: !noBg,
     })
 
-const TagPill = ({ value, onClick = f => f }) => (
-    <span className={getTagClass(value)} onClick={onClick}>
+const TagPill = ({ value, noBg = false, onClick = f => f }) => (
+    <span className={getTagClass(noBg)} onClick={onClick}>
         {value}
     </span>
 )
@@ -18,6 +18,7 @@ const TagPill = ({ value, onClick = f => f }) => (
 TagPill.propTypes = {
     value: PropTypes.string.isRequired,
     onClick: PropTypes.func,
+    noBg: PropTypes.bool,
 }
 
 export default TagPill
