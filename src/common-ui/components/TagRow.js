@@ -22,7 +22,8 @@ const TagRow = ({ value, active, onClick }) => (
 )
 
 TagRow.propTypes = {
-    value: PropTypes.string.isRequired,
+    value: PropTypes.oneOfType([PropTypes.string, PropTypes.element])
+        .isRequired,
     active: PropTypes.bool,
     onClick: PropTypes.func.isRequired,
 }
