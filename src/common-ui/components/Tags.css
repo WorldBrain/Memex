@@ -5,8 +5,11 @@
     border-bottom: 1px solid #eaecef;
     word-wrap: break-word;
 
-    &:hover {
+    &:hover,
+    &:focus,
+    &:active {
         background-color: #f7f7f7;
+        outline: none;
     }
 }
 

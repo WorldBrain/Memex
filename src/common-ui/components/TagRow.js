@@ -3,8 +3,19 @@ import PropTypes from 'prop-types'
 
 import localStyles from './Tags.css'
 
+const handleKeyDown = cb => event => {
+    if (event.key === 'Enter') {
+        cb(event)
+    }
+}
+
 const TagRow = ({ value, active, onClick }) => (
-    <div className={localStyles.menuItem} onClick={onClick}>
+    <div
+        tabIndex={0}
+        className={localStyles.menuItem}
+        onClick={onClick}
+        onKeyDown={handleKeyDown(onClick)}
+    >
         {value}
         {active && <i className="material-icons">done</i>}
     </div>
