@@ -229,7 +229,7 @@ export const showTags = index => (dispatch, getState) => {
 
 export const filterTag = tag => (dispatch, getState) => {
     const query = selectors.query(getState())
-    const transformedTag = `#${tag.replace(' ', '+')} `
+    const transformedTag = `#${tag.split(' ').join('+')} `
 
     const newQuery = query.includes(transformedTag)
         ? query.replace(transformedTag, '') // Either remove it, if already there

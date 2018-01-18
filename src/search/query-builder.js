@@ -93,7 +93,10 @@ class QueryBuilder {
 
             if (QueryBuilder.HASH_TAG_PATTERN.test(currTerm)) {
                 // Slice off '#' prefix and replace any '+' with space char
-                currTerm = currTerm.slice(1).replace('+', ' ')
+                currTerm = currTerm
+                    .slice(1)
+                    .split('+')
+                    .join(' ')
                 this.tags.add(currTerm)
                 return terms
             }
