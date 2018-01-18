@@ -228,17 +228,12 @@ export const showTags = index => (dispatch, getState) => {
 }
 
 export const filterTag = tag => (dispatch, getState) => {
-    const state = getState()
-    const currentQueryParams = selectors.currentQueryParams(state)
-    const query = selectors.query(state)
+    const query = selectors.query(getState())
+    const transformedTag = `#${tag.replace(' ', '+')} `
 
-    const transformedTag = `#${tag.split(' ').join('+')} `
+    const newQuery = query.includes(transformedTag)
+        ? query.replace(transformedTag, '') // Either remove it, if already there
+        : transformedTag + query // or prepend it, if not there
 
-    if (
-        currentQueryParams.query
-            .split(' ')
-            .indexOf(transformedTag.substr(0, transformedTag.length - 1)) === -1
-    ) {
-        dispatch(setQuery(`${transformedTag}${query}`))
-    }
+    dispatch(setQuery(newQuery))
 }
