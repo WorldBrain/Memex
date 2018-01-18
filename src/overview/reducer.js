@@ -62,6 +62,13 @@ function toggleBookmarkFilter(state, showOnlyBookmarks) {
     }
 }
 
+function resetFilters(state) {
+    return {
+        ...state,
+        showOnlyBookmarks: defaultState.showOnlyBookmarks,
+    }
+}
+
 function hideResultItem(state, pageId) {
     return update('searchResult.docs', docs =>
         remove(doc => doc._id === pageId)(docs),
@@ -182,6 +189,7 @@ export default createReducer(
         [actions.setEndDate]: setEndDate,
         [actions.hideResultItem]: hideResultItem,
         [actions.toggleBookmarkFilter]: toggleBookmarkFilter,
+        [actions.resetFilters]: resetFilters,
         [actions.incSearchCount]: incSearchCount,
         [actions.initSearchCount]: initSearchCount,
         [actions.changeHasBookmark]: changeHasBookmark,

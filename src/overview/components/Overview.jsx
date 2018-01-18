@@ -24,6 +24,8 @@ const Overview = props => (
             <Filters
                 showOnlyBookmarks={props.showOnlyBookmarks}
                 onShowOnlyBookmarksChange={props.onShowOnlyBookmarksChange}
+                clearAllFilters={props.clearAllFilters}
+                isClearFilterButtonShown={props.isClearFilterButtonShown}
             />
         </div>
         <div
@@ -50,6 +52,8 @@ Overview.propTypes = {
     showFilter: PropTypes.bool.isRequired,
     showOnlyBookmarks: PropTypes.bool.isRequired,
     onShowOnlyBookmarksChange: PropTypes.func.isRequired,
+    clearAllFilters: PropTypes.func.isRequired,
+    isClearFilterButtonShown: PropTypes.bool.isRequired,
 }
 
 export default Overview

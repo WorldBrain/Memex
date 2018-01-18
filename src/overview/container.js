@@ -244,6 +244,7 @@ const mapStateToProps = state => ({
     showInitSearchMsg: selectors.showInitSearchMsg(state),
     totalResultCount: selectors.totalResultCount(state),
     shouldShowCount: selectors.shouldShowCount(state),
+    isClearFilterButtonShown: selectors.isClearFilterButtonShown(state),
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -257,6 +258,7 @@ const mapDispatchToProps = dispatch => ({
             onShowFilterChange: actions.showFilter,
             onShowOnlyBookmarksChange: actions.toggleBookmarkFilter,
             resetActiveTagIndex: actions.resetActiveTagIndex,
+            clearAllFilters: actions.resetFilters,
         },
         dispatch,
     ),
