@@ -4,12 +4,6 @@ import cx from 'classnames'
 
 import localStyles from './Tags.css'
 
-const handleKeyDown = cb => event => {
-    if (event.key === 'Enter') {
-        cb(event)
-    }
-}
-
 const TagRow = ({ value, active, onClick, focused = false }) => (
     <div
         className={cx(localStyles.menuItem, {
