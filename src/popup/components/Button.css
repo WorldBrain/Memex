@@ -18,8 +18,12 @@
 
     &:hover,
     &:focus {
-        color: rgb(62, 185, 149);
-        background: rgb(229, 229, 229);
+        color: #3eb995;
+        background: rgb(
+            229,
+            229,
+            229
+        ) !important; /* stylelint-disable-line declaration-no-important */
         outline: 0;
     }
 }
@@ -105,10 +109,6 @@
     margin-right: 5px;
     outline: 0;
     color: #909090;
-
-    &:hover {
-        color: rgb(62, 185, 149);
-    }
 
     i {
         font-size: 24px;
