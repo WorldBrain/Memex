@@ -24,6 +24,8 @@ const Overview = props => (
             <Filters
                 showOnlyBookmarks={props.showOnlyBookmarks}
                 onShowOnlyBookmarksChange={props.onShowOnlyBookmarksChange}
+                clearAllFilters={props.clearAllFilters}
+                isClearFilterButtonShown={props.isClearFilterButtonShown}
             />
         </div>
         <div
@@ -36,7 +38,7 @@ const Overview = props => (
         </div>
         <DeleteConfirmModal
             isShown={props.isDeleteConfShown}
-            onClose={props.hideDeleteConfirm}
+            onClose={props.resetDeleteConfirm}
             deleteDocs={props.deleteDocs}
         />
     </Wrapper>
@@ -45,11 +47,13 @@ const Overview = props => (
 Overview.propTypes = {
     children: PropTypes.node.isRequired,
     isDeleteConfShown: PropTypes.bool.isRequired,
-    hideDeleteConfirm: PropTypes.func.isRequired,
+    resetDeleteConfirm: PropTypes.func.isRequired,
     deleteDocs: PropTypes.func.isRequired,
     showFilter: PropTypes.bool.isRequired,
     showOnlyBookmarks: PropTypes.bool.isRequired,
     onShowOnlyBookmarksChange: PropTypes.func.isRequired,
+    clearAllFilters: PropTypes.func.isRequired,
+    isClearFilterButtonShown: PropTypes.bool.isRequired,
 }
 
 export default Overview

@@ -5,6 +5,7 @@ import index, { DEFAULT_TERM_SEPARATOR } from './'
 // Key generation functions
 export const keyGen = {
     domain: key => `domain/${key}`,
+    tag: key => `tag/${key}`,
     url: key => `url/${key}`,
     term: key => `term/${key}`,
     title: key => `title/${key}`,
@@ -13,12 +14,29 @@ export const keyGen = {
 }
 
 export const removeKeyType = key =>
-    key.replace(/^(term|title|visit|url|domain|bookmark)\//, '')
+    key.replace(/^(term|title|visit|url|domain|tag|bookmark)\//, '')
 
 export const idbBatchToPromise = batch =>
     new Promise((resolve, reject) =>
         batch.write(err => (err ? reject(err) : resolve())),
     )
+
+/**
+ * @param {string} pageId ID of existing reverse index page.
+ * @returns {any} The corresponding reverse index page doc.
+ * @throws {Error} If `pageId` param does not have a corresponding doc existing in DB.
+ */
+export async function fetchExistingPage(pageId) {
+    const reverseIndexDoc = await initSingleLookup()(pageId)
+
+    if (reverseIndexDoc == null) {
+        throw new Error(
+            `No document exists in reverse page index for the supplied page ID: ${pageId}`,
+        )
+    }
+
+    return reverseIndexDoc
+}
 
 /**
  * Handles splitting up searchable content into indexable terms. Terms are all

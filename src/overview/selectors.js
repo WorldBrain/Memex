@@ -91,15 +91,23 @@ export const deletingResultIndex = createSelector(
     state => state.deleting,
 )
 
+export const activeTagIndex = createSelector(
+    overview,
+    state => state.activeTagIndex,
+)
+
 export const results = createSelector(
     resultDocs,
     isDeleteConfShown,
     deletingResultIndex,
-    (docs, modalShown, deleting) =>
+    activeTagIndex,
+    (docs, modalShown, deleting, tagIndex) =>
         docs.map((pageDoc, i) => ({
             ...pageDoc,
             title: decideTitle(pageDoc),
             isDeleting: !modalShown && i === deleting,
+            tagPillsData: pageDoc.tags.slice(0, constants.SHOWN_TAGS_LIMIT),
+            shouldDisplayTagPopup: i === tagIndex,
         })),
 )
 
@@ -141,12 +149,29 @@ export const isNewSearchLoading = createSelector(
     currentPage,
     (isLoading, currentPage) => isLoading && currentPage === 0,
 )
+
 export const showFilter = state => overview(state).showFilter
 export const showOnlyBookmarks = state => overview(state).showOnlyBookmarks
+
+export const tags = createSelector(overview, state => state.tags)
+
+/**
+ * Selector to toggle clear filter button
+ * As new filters are added, corersponding changes need to made to this function
+ */
+export const isClearFilterButtonShown = createSelector(
+    showOnlyBookmarks,
+    showOnlyBookmarks => !!showOnlyBookmarks,
+)
 
 export const isEmptyQuery = createSelector(
     currentQueryParams,
     showOnlyBookmarks,
-    ({ query, startDate, endDate }, showOnlyBookmarks) =>
-        !query.length && !startDate && !endDate && !showOnlyBookmarks,
+    tags,
+    ({ query, startDate, endDate }, showOnlyBookmarks, tags) =>
+        !query.length &&
+        !startDate &&
+        !endDate &&
+        !showOnlyBookmarks &&
+        !tags.length,
 )

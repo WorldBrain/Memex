@@ -4,10 +4,10 @@ import qs from 'query-string'
 
 import analytics from 'src/analytics'
 import { initSingleLookup } from 'src/search/search-index/util'
-import { generatePageDocId } from 'src/page-storage'
 import extractQueryFilters from 'src/util/nlp-time-filter'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { isLoggable, getPauseState } from 'src/activity-logger'
+import { TagsContainer as Tags } from 'src/common-ui/containers'
 import Popup from './components/Popup'
 import Button from './components/Button'
 import BlacklistConfirm from './components/BlacklistConfirm'
@@ -15,8 +15,10 @@ import HistoryPauser from './components/HistoryPauser'
 import LinkButton from './components/LinkButton'
 import SplitButton from './components/SplitButton'
 import * as constants from './constants'
-
-import { itemBtnBlacklisted } from './components/Button.css'
+import { generatePageDocId } from 'src/page-storage'
+import UpgradeButton from './components/UpgradeButton'
+import ButtonIcon from './components/ButtonIcon'
+import styles from './components/Button.css'
 
 // Transforms URL checking results to state types
 const getBlacklistButtonState = ({ loggable, blacklisted }) => {
@@ -42,6 +44,14 @@ const getBookmarkButtonState = ({ loggable, bookmark, blacklist }) => {
 }
 
 class PopupContainer extends Component {
+    static propTypes = {
+        pauseValues: PropTypes.arrayOf(PropTypes.number).isRequired,
+    }
+
+    static defaultProps = {
+        pauseValues: [5, 10, 20, 30, 60, 120, 180, Infinity],
+    }
+
     constructor(props) {
         super(props)
 
@@ -71,6 +81,8 @@ class PopupContainer extends Component {
         bookmarkBtn: constants.BOOKMARK_BTN_STATE.DISABLED,
         domainDelete: false,
         tabID: null,
+        tagMode: false,
+        isTagBtnDisabled: false,
     }
 
     async componentDidMount() {
@@ -97,11 +109,13 @@ class PopupContainer extends Component {
             .then(() => this.getInitBookmarkBtnState(currentTab.url))
             .then(updateState)
             .catch(noop)
+        this.getInitTagsState(currentTab.url)
+            .then(updateState)
+            .catch(noop)
     }
-
-    async getInitPauseState() {
-        return { isPaused: await getPauseState() }
-    }
+    getInitTagsState = url =>
+        Promise.resolve({ isTagBtnDisabled: !isLoggable({ url }) })
+    getInitPauseState = async () => ({ isPaused: await getPauseState() })
 
     async getInitBlacklistBtnState(url) {
         const blacklist = await this.fetchBlacklist()
@@ -231,17 +245,17 @@ class PopupContainer extends Component {
                 <LinkButton
                     href={`${constants.OPTIONS_URL}#/blacklist`}
                     icon="block"
-                    btnClass={itemBtnBlacklisted}
+                    btnClass={styles.itemBtnBlacklisted}
                 >
                     This Page is Blacklisted. Undo>>
                 </LinkButton>
             ) : (
                 <Button
-                    icon="block"
                     onClick={this.setBlacklistChoice}
                     disabled={
                         blacklistBtn === constants.BLACKLIST_BTN_STATE.DISABLED
                     }
+                    btnClass={styles.blacklist}
                 >
                     Blacklist Current Page
                 </Button>
@@ -279,10 +293,26 @@ class PopupContainer extends Component {
         }
         window.close()
     }
+    toggleTagPopup = () =>
+        this.setState(state => ({
+            ...state,
+            tagMode: !state.tagMode,
+        }))
+
+    renderTagButton() {
+        return (
+            <Button
+                onClick={this.toggleTagPopup}
+                disabled={this.state.isTagBtnDisabled}
+                btnClass={styles.tag}
+            >
+                Add Tag(s)
+            </Button>
+        )
+    }
 
     renderChildren() {
-        const { blacklistConfirm, pauseValue, isPaused } = this.state
-
+        const { blacklistConfirm, pauseValue, isPaused, tagMode } = this.state
         if (blacklistConfirm) {
             return (
                 <BlacklistConfirm
@@ -291,15 +321,20 @@ class PopupContainer extends Component {
                 />
             )
         }
+
+        if (tagMode) {
+            return <Tags url={this.state.url} />
+        }
+
         return (
             <div>
                 <Button
                     onClick={this.handleAddBookmark}
-                    icon={
+                    btnClass={
                         this.state.bookmarkBtn ===
                         constants.BOOKMARK_BTN_STATE.BOOKMARK
-                            ? 'star'
-                            : 'star_border'
+                            ? styles.bmk
+                            : styles.notBmk
                     }
                     disabled={
                         this.state.bookmarkBtn ===
@@ -311,6 +346,8 @@ class PopupContainer extends Component {
                         ? 'Unbookmark this Page'
                         : 'Bookmark this Page'}
                 </Button>
+                {this.renderTagButton()}
+                <hr />
                 <HistoryPauser
                     onConfirm={this.onPauseConfirm}
                     onChange={this.onPauseChange}
@@ -322,29 +359,33 @@ class PopupContainer extends Component {
                 {this.renderBlacklistButton()}
                 <hr />
                 <LinkButton
-                    href={`${constants.OPTIONS_URL}#/blacklist`}
+                    btnClass={styles.voteIcon}
+                    href="https://worldbrain.canny.io/feature-requests"
+                >
+                    Vote for Next Features
+                </LinkButton>
+                <UpgradeButton />
+                <ButtonIcon
+                    href={constants.OPTIONS_URL}
                     icon="settings"
-                >
-                    Settings
-                </LinkButton>
-                <LinkButton
-                    href={`${constants.OPTIONS_URL}#/import`}
-                    icon="file_download"
-                >
-                    Import History &amp; Bookmarks
-                </LinkButton>
-                <LinkButton href={constants.FEEDBACK_URL} icon="feedback">
-                    I need Help!
-                </LinkButton>
+                    buttonType={1}
+                    btnClass={styles.settings}
+                />
+                <ButtonIcon
+                    href={constants.FEEDBACK_URL}
+                    icon="help"
+                    btnClass={styles.help}
+                />
             </div>
         )
     }
 
     render() {
-        const { searchValue } = this.state
+        const { searchValue, tagMode } = this.state
 
         return (
             <Popup
+                shouldRenderSearch={!tagMode}
                 searchValue={searchValue}
                 onSearchChange={this.onSearchChange}
                 onSearchEnter={this.onSearchEnter}
@@ -353,13 +394,6 @@ class PopupContainer extends Component {
             </Popup>
         )
     }
-}
-
-PopupContainer.propTypes = {
-    pauseValues: PropTypes.arrayOf(PropTypes.number).isRequired,
-}
-PopupContainer.defaultProps = {
-    pauseValues: [5, 10, 20, 30, 60, 120, 180, Infinity],
 }
 
 export default PopupContainer

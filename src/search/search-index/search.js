@@ -27,12 +27,12 @@ const filterSearch = query => {
     // Exit early for no values
     if (
         query.timeFilter.get('blank') &&
-        (query.query.size || query.domain.size)
+        (query.query.size || query.domain.size || query.tags.size)
     ) {
         return null
     }
 
-    if (!query.query.size && !query.domain.size) {
+    if (!query.query.size && !query.domain.size && !query.tags.size) {
         return timeFilterBackSearch(query)
     }
     return timeFilterSearch(query)
@@ -113,6 +113,30 @@ async function filterResultsByBookmarks(pageResultsMap) {
                 pageLookupDocs.get(pageKey).bookmarks.size,
         ),
     )
+}
+
+/**
+ * @param {IndexQuery} query
+ * @returns {Map<string, IndexTermValue>}
+ */
+async function tagsSearch({ tags, bookmarksFilter }) {
+    if (!tags.size) {
+        return null
+    }
+
+    const tagsValuesMap = await lookupByKeys([...tags].map(keyGen.tag))
+
+    // If any tags are empty, they cancel all other results out
+    if (containsEmptyVals(tagsValuesMap.values())) {
+        return new Map()
+    }
+
+    // Union the nested `pageId => scores` Maps for each tag
+    const pageResultsMap = unionNestedMaps(tagsValuesMap)
+
+    return bookmarksFilter
+        ? filterResultsByBookmarks(pageResultsMap)
+        : pageResultsMap
 }
 
 /**
@@ -219,35 +243,65 @@ async function fillOutResultDocs(results) {
 }
 
 /**
+ * TODO: this won't scale to many different search params; find cleaner way to do conditional result intersection.
+ *
  * @param {Map<string, IndexTermValue>} [termPages]
- * @param {Map<string, IndexTermValue>} [filterPages]
+ * @param {Map<string, IndexTermValue>} [timeFilterPages]
  * @param {Map<string, IndexTermValue>} [domainPages]
+ * @param {Map<string, IndexTermValue>} [tagPages]
  * @returns {Map<string, IndexTermValue>} Interescted results of all four
  */
-function intersectResultMaps(termPages, filterPages, domainPages) {
-    if (filterPages == null && termPages == null) {
-        return domainPages
+function intersectResultMaps(
+    termPages,
+    timeFilterPages,
+    domainPages,
+    tagPages,
+) {
+    // Base cases where terms/time-filter not present
+    if (timeFilterPages == null && termPages == null) {
+        if (domainPages == null) {
+            return tagPages
+        }
+
+        if (tagPages == null) {
+            return domainPages
+        }
+
+        return intersectMaps(domainPages)(tagPages)
     }
 
-    const intersectDomain = intersectMaps(domainPages)
-
-    // Should be null if filter search not needed to be run
-    if (filterPages == null) {
-        return domainPages == null ? termPages : intersectDomain(termPages)
-    }
-
-    if (termPages == null) {
-        return domainPages == null ? filterPages : intersectDomain(filterPages)
-    }
-
-    // Filter out only results in the domain, if domain search is on
+    // Filter terms/time-filter by domain results, if present
     if (domainPages != null) {
-        filterPages = intersectDomain(filterPages)
-        termPages = intersectDomain(termPages)
-        return intersectMaps(filterPages)(termPages)
+        const intersectDomain = intersectMaps(domainPages)
+        termPages = termPages == null ? termPages : intersectDomain(termPages)
+        timeFilterPages =
+            timeFilterPages == null
+                ? timeFilterPages
+                : intersectDomain(timeFilterPages)
     }
 
-    return intersectMaps(filterPages)(termPages)
+    // Filter terms/time-filter by tag results, if present
+    if (tagPages != null) {
+        const intersectTags = intersectMaps(tagPages)
+        termPages = termPages == null ? termPages : intersectTags(termPages)
+        timeFilterPages =
+            timeFilterPages == null
+                ? timeFilterPages
+                : intersectTags(timeFilterPages)
+    }
+
+    // Should be null if time filter not used
+    if (timeFilterPages == null) {
+        return termPages
+    }
+
+    // Should be null if no terms queried
+    if (termPages == null) {
+        return timeFilterPages
+    }
+
+    // If both defined, return intersection
+    return intersectMaps(timeFilterPages)(termPages)
 }
 
 /**
@@ -264,6 +318,10 @@ export async function search(
     const paginateResults = paginate(query)
     let totalResultCount
     console.time('total search')
+
+    console.time('tags search')
+    const tagsPageResultsMap = await tagsSearch(query)
+    console.timeEnd('tags search')
 
     console.time('domain search')
     const domainPageResultsMap = await domainSearch(query)
@@ -282,6 +340,7 @@ export async function search(
         termPageResultsMap,
         filterPageResultsMap,
         domainPageResultsMap,
+        tagsPageResultsMap,
     )
 
     if (count) {

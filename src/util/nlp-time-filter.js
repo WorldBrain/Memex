@@ -1,7 +1,7 @@
 import chrono from 'chrono-node'
 
-const BEFORE_REGEX = /before:"(.*?)"/
-const AFTER_REGEX = /after:"(.*?)"/
+const BEFORE_REGEX = /before:[''"](.+)['"]/i
+const AFTER_REGEX = /after:['"](.+)['"]/i
 
 /**
  * @typedef QueryFilters

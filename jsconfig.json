@@ -1,13 +1,15 @@
 {
-  "compilerOptions": {
-    "module": "es2015",
-    "allowSyntheticDefaultImports": true,
-    "baseUrl": "./"
-  },
-  "exclude": [
-    "node_modules",
-    "img",
-    "extension",
-    "dist"
-  ]
+    "compilerOptions": {
+        "module": "commonjs",
+        "jsx": "preserve",
+        "allowSyntheticDefaultImports": true,
+        "target": "esnext",
+        "baseUrl": "./",
+        "checkJs": true,
+        "lib": ["esnext", "dom"]
+    },
+    "include": ["src/**/*"],
+    "typeAcquisition": {
+        "include": ["firefox-webext-browser"]
+    }
 }

@@ -51,22 +51,35 @@ const PageResultItem = props => (
                 </div>
                 <div className={styles.url}>{props.url}</div>
                 <div className={styles.time}>
-                    {niceTime(+props.displayTime)}
+                    <div className={styles.displayTime}>
+                        {' '}
+                        {niceTime(+props.displayTime)}{' '}
+                    </div>
+                    <span className={styles.tagList}>{props.tagPills}</span>
+                    <div
+                        className={styles.buttonsContainer}
+                        onClick={e => e.preventDefault()}
+                    >
+                        <button
+                            className={classNames(styles.button, styles.tag)}
+                            onClick={props.onTagBtnClick}
+                            ref={props.setTagButtonRef}
+                        />
+                        <button
+                            disabled={props.isDeleting}
+                            className={classNames(styles.button, styles.trash)}
+                            onClick={props.onTrashBtnClick}
+                        />
+                        <button
+                            disabled={props.isDeleting}
+                            className={getBookmarkClass(props)}
+                            onClick={props.onToggleBookmarkClick}
+                        />
+                    </div>
                 </div>
             </div>
-            <div className={styles.buttonsContainer}>
-                <button
-                    disabled={props.isDeleting}
-                    className={getBookmarkClass(props)}
-                    onClick={props.onToggleBookmarkClick}
-                />
-                <button
-                    disabled={props.isDeleting}
-                    className={classNames(styles.button, styles.trash)}
-                    onClick={props.onTrashBtnClick}
-                />
-            </div>
         </a>
+        {props.tagManager}
     </li>
 )
 
@@ -80,6 +93,10 @@ PageResultItem.propTypes = {
     onTrashBtnClick: PropTypes.func.isRequired,
     onToggleBookmarkClick: PropTypes.func.isRequired,
     egg: PropTypes.bool,
+    tagPills: PropTypes.array.isRequired,
+    tagManager: PropTypes.node,
+    onTagBtnClick: PropTypes.func.isRequired,
+    setTagButtonRef: PropTypes.func.isRequired,
 }
 
 export default PageResultItem
