@@ -212,7 +212,8 @@ async function performIndexing(indexDoc) {
             indexUrlTerms(augIndexDoc),
             indexTitleTerms(augIndexDoc),
             indexTerms(augIndexDoc),
-            indexMetaTimestamps(augIndexDoc),
+            // Note we are only wanting to index new visits/bookmarks, so passing in the unagumented `indexDoc` here
+            indexMetaTimestamps(indexDoc),
         ])
         console.timeEnd('indexing page')
         console.log('indexed', augIndexDoc)

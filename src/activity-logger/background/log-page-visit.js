@@ -25,27 +25,28 @@ export async function storeVisit({ timestamp, url, page }) {
  * @param {any} visit The new visit to add to index; should occur regardless of reidentify outcome.
  */
 async function updateIndex(storePageResult, visit, pageId) {
+    // If page wasn't stored again, just add new visit
     if (storePageResult == null) {
-        await index.addTimestampConcurrent(
+        return await index.addTimestampConcurrent(
             pageId,
             visitKeyPrefix + visit.visitStart,
         )
-    } else {
-        // Wait until all page analyis is done
-        const { page } = await storePageResult.finalPagePromise
+    }
 
-        // If no page returned from analysis, we can't index
-        if (!page) {
-            return
-        }
+    // Wait until all page analyis is done
+    const { page } = await storePageResult.finalPagePromise
 
-        try {
-            await index.addPageConcurrent({ pageDoc: page, visitDocs: [visit] })
-        } catch (error) {
-            // Indexing issue; log it for now
-            console.error(error)
-            throw error
-        }
+    // If no page returned from analysis, we can't index
+    if (!page) {
+        return
+    }
+
+    try {
+        await index.addPageConcurrent({ pageDoc: page, visitDocs: [visit] })
+    } catch (error) {
+        // Indexing issue; log it for now
+        console.error(error)
+        throw error
     }
 }
 
