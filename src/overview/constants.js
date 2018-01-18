@@ -19,6 +19,6 @@ export const DATE_PICKER_DATE_FORMAT = 'DD-MM-YYYY'
 
 export const SEARCH_COUNT_KEY = 'number-of-searches'
 
-export const EGG_TITLE = 'easter'
-export const EGG_URL = 'http://easter.com'
-export const EGG_IMG = 'http://easter.com/egg.png'
+export const EGG_TITLE = 'Cheers to the awesome crew which made Memex possible'
+export const EGG_URL = '/options/options.html#/acknowledgements'
+export const EGG_IMG = '/../../../../img/thanks.gif'
