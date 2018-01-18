@@ -13,7 +13,6 @@ const Tags = ({
     children,
     onTagSearchChange,
     onTagSearchKeyDown,
-    onTagsKeyDown,
     numberOfTags,
     setTagDivRef,
     setInputRef,
@@ -35,13 +34,7 @@ const Tags = ({
             />
             <i className="material-icons">search</i>
         </form>
-        <div
-            tabIndex={0}
-            className={localStyles.tagContainer}
-            onKeyDown={onTagsKeyDown}
-        >
-            {children}
-        </div>
+        <div className={localStyles.tagContainer}>{children}</div>
         <div className={localStyles.summaryTagContainer}>
             <div className={localStyles.numberTags}>
                 <span className={localStyles.bold}>{numberOfTags}</span> tags
@@ -55,7 +48,6 @@ Tags.propTypes = {
     children: PropTypes.array.isRequired,
     onTagSearchChange: PropTypes.func.isRequired,
     onTagSearchKeyDown: PropTypes.func.isRequired,
-    onTagsKeyDown: PropTypes.func.isRequired,
     numberOfTags: PropTypes.number.isRequired,
     setTagDivRef: PropTypes.func,
     setInputRef: PropTypes.func.isRequired,
