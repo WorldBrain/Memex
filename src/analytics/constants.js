@@ -14,7 +14,8 @@ export const STORAGE_KEYS = {
     SEARCH: 'last-search-timestamp',
 }
 
-export const DAY_IN_MS = 1000 * 60 * 60 * 24
+// Timezone to base milestones on
+export const TIMEZONE = 'Europe/Berlin'
 
 // Cron schedules for periodic analytics tasks
 export const SCHEDULES = {

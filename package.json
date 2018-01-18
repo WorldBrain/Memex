@@ -43,6 +43,7 @@
     "levelup": "^2.0.0",
     "lodash": "^4.17.4",
     "moment": "^2.18.1",
+    "moment-timezone": "^0.5.14",
     "normalize-url": "^1.9.1",
     "page-metadata-parser": "git+https://github.com/Treora/page-metadata-parser.git#npm-testable",
     "pdfjs-dist": "^1.8.492",
