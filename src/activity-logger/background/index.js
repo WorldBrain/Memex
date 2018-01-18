@@ -9,6 +9,9 @@ import initPauser from './pause-logging'
 import tabManager from './tab-manager'
 import { isLoggable, getPauseState, visitKeyPrefix } from '..'
 
+// `tabs.onUpdated` event fires on tab open - generally takes a few ms, which we can skip attemping visit update
+const fauxVisitThreshold = 100
+
 // Allow logging pause state toggle to be called from other scripts
 const toggleLoggingPause = initPauser()
 makeRemotelyCallable({ toggleLoggingPause })
@@ -85,7 +88,10 @@ browser.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
     if (changeInfo.url) {
         // Ensures the URL change counts as a new visit in tab state (tab ID doesn't change)
         const oldTab = tabManager.resetTab(tabId, tab.active)
-        updateVisitForTab(oldTab) // Send off request for updating that prev. visit's tab state
+        if (oldTab.activeTime > fauxVisitThreshold) {
+            // Send off request for updating that prev. visit's tab state, if active long enough
+            updateVisitForTab(oldTab)
+        }
 
         const shouldLog = await shouldLogTab(tab)
         if (shouldLog) {
