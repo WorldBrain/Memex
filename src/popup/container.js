@@ -357,6 +357,13 @@ class PopupContainer extends Component {
                     {this.renderPauseChoices()}
                 </HistoryPauser>
                 {this.renderBlacklistButton()}
+                <hr />
+                <LinkButton
+                    btnClass={styles.voteIcon}
+                    href="https://worldbrain.canny.io/feature-requests"
+                >
+                    Vote for Next Features
+                </LinkButton>
                 <UpgradeButton />
                 <ButtonIcon
                     href={constants.OPTIONS_URL}
