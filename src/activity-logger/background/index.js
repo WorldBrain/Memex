@@ -1,34 +1,109 @@
-import debounce from 'lodash/debounce'
+import noop from 'lodash/fp/noop'
 
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
-import { maybeLogPageVisit } from './log-page-visit'
+import { whenPageDOMLoaded, whenTabActive } from 'src/util/tab-events'
+import { updateTimestampMetaConcurrent } from 'src/search'
+import { blacklist } from 'src/blacklist/background'
+import { logPageVisit } from './log-page-visit'
 import initPauser from './pause-logging'
-import { isLoggable, getPauseState } from '..'
+import tabManager from './tab-manager'
+import { isLoggable, getPauseState, visitKeyPrefix } from '..'
+
+// `tabs.onUpdated` event fires on tab open - generally takes a few ms, which we can skip attemping visit update
+const fauxVisitThreshold = 100
 
 // Allow logging pause state toggle to be called from other scripts
 const toggleLoggingPause = initPauser()
 makeRemotelyCallable({ toggleLoggingPause })
 
-// Debounced functions fro each tab are stored here
-const tabs = {}
+/**
+ * Combines all "logibility" conditions for logging on given tab data to determine
+ * whether or not a tab should be logged.
+ *
+ * @param {tabs.Tab}
+ * @returns {Promise<boolean>}
+ */
+async function shouldLogTab(tab) {
+    // Short-circuit before async logic, if possible
+    if (!tab.url || !isLoggable(tab)) {
+        return false
+    }
 
-// Listens for url changes of the page
-browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-    if (changeInfo.url && tab.url && isLoggable(tab)) {
-        // Check if we already have a debounced function for this tab and cancel it
-        if (tabs[tabId]) {
-            tabs[tabId].cancel()
+    // First check if we want to log this page (hence the 'maybe' in the name).
+    const isBlacklisted = await blacklist.checkWithBlacklist()
+    const isPaused = await getPauseState()
+
+    return !isPaused && !isBlacklisted(tab)
+}
+
+/**
+ * Handles update of assoc. visit with derived tab state data, using the tab state.
+ *
+ * @param {TabActiveState} tab The tab state to derive visit meta data from.
+ */
+async function updateVisitForTab({ visitTime, activeTime, scrollState }) {
+    const visitKey = visitKeyPrefix + visitTime
+
+    try {
+        await updateTimestampMetaConcurrent(visitKey, data => ({
+            ...data,
+            duration: activeTime,
+            scrollPx: scrollState.pixel,
+            scrollMaxPx: scrollState.maxPixel,
+            scrollPerc: scrollState.percent,
+            scrollMaxPerc: scrollState.maxPercent,
+        }))
+    } catch (error) {
+        // If visit was never indexed for tab, cannot update it - move on
+    }
+}
+
+// Ensure tab scroll states are kept in-sync with scroll events from the content script
+browser.runtime.onMessage.addListener(
+    ({ funcName, ...scrollState }, { tab }) => {
+        if (funcName !== 'updateScrollState' || tab == null) {
+            return
+        }
+        tabManager.updateTabScrollState(tab.id, scrollState)
+    },
+)
+
+// Bind tab state updates to tab API events
+browser.tabs.onCreated.addListener(tab => tabManager.trackTab(tab))
+
+browser.tabs.onActivated.addListener(({ tabId }) =>
+    tabManager.activateTab(tabId),
+)
+
+browser.tabs.onRemoved.addListener(tabId => {
+    try {
+        // Remove tab from tab tracking state and update the visit with tab-derived metadata
+        const tab = tabManager.removeTab(tabId)
+        updateVisitForTab(tab)
+    } catch (error) {}
+})
+
+browser.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
+    // `changeInfo` should only contain `url` prop if URL changed, which is what we care about
+    if (changeInfo.url) {
+        // Ensures the URL change counts as a new visit in tab state (tab ID doesn't change)
+        const oldTab = tabManager.resetTab(tabId, tab.active)
+        if (oldTab.activeTime > fauxVisitThreshold) {
+            // Send off request for updating that prev. visit's tab state, if active long enough
+            updateVisitForTab(oldTab)
         }
 
-        // Create debounced function and call it
-        tabs[tabId] = debounce(async () => {
-            // Bail-out if logging paused or imports in progress
-            if (await getPauseState()) {
-                return
-            }
-
-            return maybeLogPageVisit({ url: tab.url, tabId: tabId })
-        }, 10000)
-        tabs[tabId]()
+        const shouldLog = await shouldLogTab(tab)
+        if (shouldLog) {
+            tabManager.scheduleTabLog(
+                tabId,
+                () =>
+                    // Wait until its DOM has loaded, and activated before attemping log
+                    whenPageDOMLoaded({ tabId })
+                        .then(() => whenTabActive({ tabId }))
+                        .then(() => logPageVisit({ url: tab.url, tabId }))
+                        .catch(noop), // Ignore any tab state interuptions
+            )
+        }
     }
 })

@@ -1,4 +1,5 @@
 import { bookmarkKeyPrefix } from 'src/bookmarks'
+import { visitKeyPrefix } from 'src/activity-logger'
 import index, { indexQueue } from '.'
 import pipeline from './pipeline'
 import {
@@ -83,7 +84,7 @@ async function addBookmark(pageId, timestamp = Date.now()) {
     const bookmarkKey = `${bookmarkKeyPrefix}${timestamp}`
 
     // Add new entry to bookmarks index
-    await index.put(bookmarkKey, pageId)
+    await index.put(bookmarkKey, { pageId })
 
     // Add bookmarks index key to reverse page doc and update index entry
     reverseIndexDoc.bookmarks.add(bookmarkKey)
@@ -142,10 +143,8 @@ async function indexMetaTimestamps(indexDoc) {
         ...indexDoc.visits,
     ])
 
-    for (const [timestamp, existing] of timeValuesMap) {
-        if (existing !== indexDoc.id) {
-            indexBatch.put(timestamp, indexDoc.id)
-        }
+    for (const [timestamp] of timeValuesMap) {
+        indexBatch.put(timestamp, { pageId: indexDoc.id })
     }
 
     return idbBatchToPromise(indexBatch)
@@ -213,7 +212,8 @@ async function performIndexing(indexDoc) {
             indexUrlTerms(augIndexDoc),
             indexTitleTerms(augIndexDoc),
             indexTerms(augIndexDoc),
-            indexMetaTimestamps(augIndexDoc),
+            // Note we are only wanting to index new visits/bookmarks, so passing in the unagumented `indexDoc` here
+            indexMetaTimestamps(indexDoc),
         ])
         console.timeEnd('indexing page')
         console.log('indexed', augIndexDoc)
@@ -226,18 +226,17 @@ async function performIndexing(indexDoc) {
  * Adds a meta (bookmark or visit) entry into specified reverse index doc.
  * NOTE: Assumes the existence of indexed `pageId`.
  *
- * @param {'bookmark'|'visit'} type Type of meta event.
  * @param {string} pageId ID of page doc to associate with.
- * @param {string} timestamp Timestamp of meta event.
-
+ * @param {string} timestampKey Key of timestamp event to add.
  */
-async function addMetaToReversePage(type, pageId, timestamp) {
+async function addTimestamp(pageId, timestampKey) {
     const reverseIndexDoc = await singleLookup(pageId)
-    if (type === 'visit') {
-        reverseIndexDoc.visits.add('visit/' + timestamp)
-    } else {
-        reverseIndexDoc.bookmarks.add('bookmark/' + timestamp)
-    }
+    const metaSet = timestampKey.startsWith(visitKeyPrefix)
+        ? reverseIndexDoc.visits
+        : reverseIndexDoc.bookmarks
+
+    metaSet.add(timestampKey)
+
     await index.put(pageId, reverseIndexDoc)
 }
 
@@ -245,16 +244,49 @@ async function addMetaToReversePage(type, pageId, timestamp) {
  * Adds a new meta index (bookmark or visit) entry.
  * NOTE: Assumes the existence of indexed `pageId`.
  *
- * @param {'bookmark'|'visit'} type Type of meta event.
- * @param {string} timestamp Timestamp of meta event.
  * @param {string} pageId ID of page doc to associate with.
+ * @param {string} timestampKey Key of timestamp event to add.
+ * @param {any} [meta={}] Object of any associated meta data to store with the indexed event value.
  */
-export const addMetaConcurrent = (type, timestamp, pageId) =>
+export const addTimestampConcurrent = (pageId, timestampKey, meta = {}) =>
     new Promise((resolve, reject) =>
         indexQueue.push(() => {
-            addMetaToReversePage(type, pageId, timestamp)
-                .then(() => index.put(`${type}/${timestamp}`, pageId))
+            addTimestamp(pageId, timestampKey)
+                .then(() => index.put(timestampKey, { pageId, ...meta }))
                 .then(resolve)
                 .catch(reject)
         }),
+    )
+
+/**
+ * @param {string} timestampId ID of an existing timestamp index value to update.
+ * @param {(oldVal: any) => any} updateCb Callback that is passed the existing value to reduce. Returned value gets set as new.
+ * @returns {Promise<void>}
+ */
+async function updateTimestampMeta(timestampId, updateCb) {
+    let existingVal = await singleLookup(timestampId)
+
+    if (existingVal == null) {
+        throw new Error(
+            `No existing value exists for supplied timestamp ID: ${timestampId}`,
+        )
+    }
+
+    // Handle older-string-baesd timestamp values
+    if (typeof existingVal === 'string') {
+        existingVal = { pageId: existingVal }
+    }
+
+    // Do not allow overwriting of the `pageId` property
+    const newVal = { ...updateCb(existingVal), pageId: existingVal.pageId }
+    return index.put(timestampId, newVal)
+}
+
+export const updateTimestampMetaConcurrent = (...args) =>
+    new Promise((resolve, reject) =>
+        indexQueue.push(() =>
+            updateTimestampMeta(...args)
+                .then(resolve)
+                .catch(reject),
+        ),
     )

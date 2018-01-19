@@ -131,19 +131,38 @@ export const termRangeLookup = (termKey, termsSet) =>
     })
 
 /**
+ * Newer visit and bookmarks have object values instead of single strings representing page IDs,
+ * to allow the storage and association of further data. This allows both shapes to be treated the same.
+ *
+ * @param {string|any} value Value stored under a visit key.
+ * @returns {any} Object containing `pageId` string and `meta` object containing any other data.
+ */
+export function normalizeTimestampVals(value) {
+    if (typeof value === 'string') {
+        return { pageId: value, meta: {} }
+    }
+    const { pageId, ...meta } = value
+
+    return { pageId, meta }
+}
+
+/**
  * Runs a lookup over a range of DB keys, resolving to the collected docs.
  * Range can be specified with `gte` and `lte` keys in `iteratorOpts`, along
  * with a `limit` count.
  *
  * @param {any} iteratorOpts
- * @returns {Promise<Map<string, any>>}
+ * @returns {Promise<Map<string, string>>}
  */
 export const rangeLookup = iteratorOpts =>
     new Promise(resolve => {
         const data = new Map()
         index.db
             .createReadStream(iteratorOpts)
-            .on('data', ({ key, value }) => data.set(key, value))
+            .on('data', ({ key, value }) => {
+                const { pageId } = normalizeTimestampVals(value)
+                data.set(key, pageId)
+            })
             .on('end', () => resolve(data))
     })
 
@@ -171,9 +190,9 @@ export const reverseRangeLookup = ({ limit = Infinity, ...iteratorOpts }) =>
                 return resolve(data)
             }
 
-            // Latest values will appear first, so only add if no matching key
-            if (!data.has(value)) {
-                data.set(value, { latest: removeKeyType(key) })
+            const { pageId, meta } = normalizeTimestampVals(value)
+            if (!data.has(pageId)) {
+                data.set(pageId, { latest: removeKeyType(key), ...meta })
             }
         })
     })
