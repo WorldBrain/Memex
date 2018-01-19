@@ -38,6 +38,13 @@ const Header = ({
             </div>
         </div>
         <div className={styles.links}>
+            <a
+                className={styles.upgrade}
+                href="https://worldbrain.io/pricing"
+                target="_new"
+            >
+                Upgrade Memex
+            </a>
             <a href="/options/options.html">
                 <img src="/img/settings-icon.png" className={styles.icon} />
             </a>

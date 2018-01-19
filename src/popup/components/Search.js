@@ -9,6 +9,7 @@ const Search = ({ onSearchEnter, onSearchChange, searchValue }) => (
             className={styles.search}
             name="query"
             placeholder="Search your memory"
+            autocomplete="off"
             onKeyDown={onSearchEnter}
             onChange={onSearchChange}
             value={searchValue}

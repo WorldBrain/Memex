@@ -118,7 +118,7 @@
         text-overflow: ellipsis;
         color: #173766;
         margin-bottom: 7px;
-        margin-top: 9px;
+        margin-top: 12px;
 
         & .favIcon {
             height: 20px;
@@ -170,6 +170,7 @@
 .displayTime {
     font-size: 11px;
     color: #c1c1c1;
+    padding-bottom: 7px;
 }
 
 .button {
@@ -228,4 +229,5 @@
     display: flex;
     flex-grow: 2;
     margin-left: 15px;
+    padding-bottom: 7px;
 }

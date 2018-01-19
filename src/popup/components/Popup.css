@@ -34,6 +34,7 @@ hr {
     margin-bottom: 0;
     border-bottom: 1px solid rgb(202, 202, 202);
     background: white;
+    margin-bottom: 6px;
 
     & > i {
         color: #3eb995;
@@ -46,10 +47,12 @@ hr {
     font-size: 1em;
     padding: 5px;
     border: none;
+    height: 20px;
 
     &:placeholder-shown {
         font-style: italic;
         font-family: 'Open Sans';
+        font-weight: 300;
     }
 
     &::placeholder {

@@ -80,7 +80,8 @@
 .links {
     display: flex;
     justify-content: flex-end;
-    width: 131px;
+    width: 180px;
+    margin-left: -50px;
 
     @media (max-width: 1200px) {
         width: 24px;
@@ -176,4 +177,19 @@
 
 .hideFilter {
     display: none;
+}
+
+.upgrade {
+    font-size: 15px;
+    text-decoration: none;
+    padding-top: 1px;
+    padding-right: 30px;
+    color: #3eb995;
+
+    &:hover {
+        color: #777;
+    }
+    @media (max-width: 1260px) {
+        display: none;
+    }
 }

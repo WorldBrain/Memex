@@ -8,7 +8,7 @@ const UpgradeButton = () => (
         href="https://worldbrain.io/pricing"
         target="_blank"
     >
-        Upgrade
+        Upgrade Memex
     </a>
 )
 
