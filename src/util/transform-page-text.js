@@ -20,12 +20,15 @@ const removePunctuation = (text = '') => text.replace(nonWordsPattern, ' ')
 const cleanupWhitespaces = (text = '') =>
     text.replace(allWhitespacesPattern, ' ').trim()
 
-// Split strings on non-words, filtering out duplicates, before rejoining them with single space
-const removeDuplicateWords = (text = '') =>
-    text
-        .split(' ')
-        .filter((word, i, allWords) => i === allWords.indexOf(word))
-        .join(' ')
+/**
+ * Split string into strings of words, then remove duplicates (using `Set` constructor).
+ *
+ * @param {string} [text=''] Input string
+ * @param {string|RegExp} [wordDelim=' '] Delimiter to split `input` into words.
+ * @returns {string} Version of `text` param without duplicate words.
+ */
+export const removeDupeWords = (text = '', wordDelim = ' ') =>
+    [...new Set(text.split(wordDelim))].join(wordDelim)
 
 const removeUselessWords = (text = '', lang) => {
     const oldString = text.split(' ')
@@ -102,7 +105,7 @@ export default function transform({ text = '', lang = 'en' }) {
     // Removes all words containing 4+ consonants such as "hellllo"
     searchableText = removeGiberishWords(searchableText)
 
-    searchableText = removeDuplicateWords(searchableText)
+    searchableText = removeDupeWords(searchableText)
 
     const lengthAfter = searchableText.length
 
