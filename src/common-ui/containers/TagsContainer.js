@@ -63,6 +63,7 @@ class TagsContainer extends Component {
                 isLoading: false,
                 tags,
                 displayTags: tags,
+                focused: tags.length > 0 ? 0 : -1,
             }))
         }
     }
@@ -91,7 +92,7 @@ class TagsContainer extends Component {
 
         return (
             !!searchVal.length &&
-            !this.state.tags.reduce(
+            !this.state.displayTags.reduce(
                 (acc, tag) => acc || tag === searchVal,
                 false,
             )
@@ -116,7 +117,7 @@ class TagsContainer extends Component {
                 searchVal: '',
                 tags: newTags,
                 displayTags: newTags,
-                focused: -1,
+                focused: 0,
             }))
             this.props.onTagAdd(newTag)
         }
@@ -158,19 +159,17 @@ class TagsContainer extends Component {
     handleSearchEnterPress(event) {
         event.preventDefault()
 
-        if (this.canCreateTag()) {
-            this.addTag()
-        }
-    }
-
-    handleTagsEnterPress(event) {
-        if (this.state.focused === this.state.displayTags.length) {
+        if (
+            this.canCreateTag() &&
+            this.state.focused === this.state.displayTags.length
+        ) {
             return this.addTag()
         }
+
         return this.handleTagSelection(this.state.focused)(event)
     }
 
-    handleTagsArrowPress(event) {
+    handleSearchArrowPress(event) {
         event.preventDefault()
 
         // One extra index if the "add new tag" thing is showing
@@ -200,16 +199,9 @@ class TagsContainer extends Component {
         switch (event.key) {
             case 'Enter':
                 return this.handleSearchEnterPress(event)
-        }
-    }
-
-    handleTagsKeyDown = event => {
-        switch (event.key) {
             case 'ArrowUp':
             case 'ArrowDown':
-                return this.handleTagsArrowPress(event)
-            case 'Enter':
-                return this.handleTagsEnterPress(event)
+                return this.handleSearchArrowPress(event)
         }
     }
 
@@ -247,7 +239,7 @@ class TagsContainer extends Component {
             this.setState(state => ({
                 ...state,
                 displayTags: suggestions,
-                focused: -1,
+                focused: 0,
             }))
         }
     }
@@ -280,7 +272,6 @@ class TagsContainer extends Component {
             <Tags
                 onTagSearchChange={this.handleSearchChange}
                 onTagSearchKeyDown={this.handleSearchKeyDown}
-                onTagsKeyDown={this.handleTagsKeyDown}
                 setInputRef={this.setInputRef}
                 numberOfTags={this.state.tags.length}
                 tagSearchValue={this.state.searchVal}

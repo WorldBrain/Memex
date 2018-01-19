@@ -26,6 +26,10 @@
     width: 100%;
     max-height: 400px;
     overflow-y: scroll;
+
+    &:focus {
+        outline: none;
+    }
 }
 
 .numberTags {
@@ -73,7 +77,7 @@
     }
 
     &:focus {
-        outline-color: #3eb995;
+        outline: none;
     }
 }
 
