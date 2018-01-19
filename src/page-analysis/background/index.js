@@ -30,10 +30,10 @@ async function performPageAnalysis({ pageId, tabId }) {
     })
 
     // Extract the text and metadata
-    const storePageContent = extractPageContent().then(async content => {
+    const storePageContent = extractPageContent().then(
         // Add the info to the doc's (possibly already existing) doc.content.
-        await updateDoc(db, pageId, doc => merge({ content })(doc))
-    })
+        content => updateDoc(db, pageId, doc => merge({ content })(doc)),
+    )
 
     // When every task has either completed or failed, update the search index.
     await whenAllSettled([storeFavIcon, storeScreenshot, storePageContent])

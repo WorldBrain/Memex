@@ -70,13 +70,14 @@ export default function pipeline({
 
     // Throw error if no searchable content; we don't really want to index these (for now) so allow callers
     //  to handle (probably by ignoring)
-    if (!content || !content.fullText || !content.fullText.length === 0) {
+    if (!content || !content.fullText || !content.fullText.length) {
         return Promise.reject(new Error('Page has no searchable content'))
     }
 
     // Run the searchable content through our text transformations, attempting to discard useless data.
     const { text: transformedContent } = transformPageText({
         text: content.fullText,
+        lang: content.lang,
     })
     const { text: transformedTitle } = transformPageText({
         text: content.title,
