@@ -15,6 +15,8 @@ import Overview from './components/Overview'
 import PageResultItem from './components/PageResultItem'
 import ResultsMessage from './components/ResultsMessage'
 import TagPill from './components/TagPill'
+import FilterContainer from './components/FilterContainer'
+import FilterPill from './components/FilterPill'
 
 class OverviewContainer extends Component {
     static propTypes = {
@@ -37,6 +39,16 @@ class OverviewContainer extends Component {
         handlePillClick: PropTypes.func.isRequired,
         addTag: PropTypes.func.isRequired,
         delTag: PropTypes.func.isRequired,
+        filterPopup: PropTypes.string.isRequired,
+        resetFilterPopup: PropTypes.func.isRequired,
+        addTagFilter: PropTypes.func.isRequired,
+        delTagFilter: PropTypes.func.isRequired,
+        addDomainFilter: PropTypes.func.isRequired,
+        delDomainFilter: PropTypes.func.isRequired,
+        filterTags: PropTypes.arrayOf(PropTypes.string).isRequired,
+        filterDomains: PropTypes.arrayOf(PropTypes.string).isRequired,
+        handleFilterPillClick: PropTypes.func.isRequired,
+        handleToggleFltClick: PropTypes.func.isRequired,
     }
 
     componentDidMount() {
@@ -69,6 +81,28 @@ class OverviewContainer extends Component {
             />
         ) : null
 
+    renderTagsFilter = shouldDisplayTagFilterPopup =>
+        shouldDisplayTagFilterPopup ? (
+            <FilterContainer
+                tag
+                setTagDivRef={this.setTagDivRef}
+                onTagAdd={this.props.addTagFilter}
+                onTagDel={this.props.delTagFilter}
+                tagInputs={this.props.filterTags}
+            />
+        ) : null
+
+    renderDomainsFilter = shouldDisplayDomainFilterPopup =>
+        shouldDisplayDomainFilterPopup ? (
+            <FilterContainer
+                domain
+                setTagDivRef={this.setTagDivRef}
+                onDomainAdd={this.props.addDomainFilter}
+                onDomainDel={this.props.delDomainFilter}
+                domainInputs={this.props.filterDomains}
+            />
+        ) : null
+
     renderTagPills({ tagPillsData, tags }, resultIndex) {
         const pills = tagPillsData.map((tag, i) => (
             <TagPill
@@ -93,6 +127,34 @@ class OverviewContainer extends Component {
         }
 
         return pills
+    }
+
+    renderFilterPills(data, option) {
+        const Filterpills = data
+            .slice(0, 2)
+            .map((tag, i) => (
+                <FilterPill
+                    key={i}
+                    value={tag}
+                    onClick={this.props.handleFilterPillClick(tag, option)}
+                />
+            ))
+
+        // Add on dummy pill with '+' sign if over limit
+        if (data.length > constants.SHOWN_FILTER_LIMIT) {
+            return [
+                ...Filterpills,
+                <FilterPill
+                    key="+"
+                    setRef={this.addFurtherTagRef}
+                    value={`+${data.length - constants.SHOWN_FILTER_LIMIT}`}
+                    onClick={this.props.handleToggleFltClick(option)}
+                    noBg
+                />,
+            ]
+        }
+
+        return Filterpills
     }
 
     renderResultItems() {
@@ -214,15 +276,28 @@ class OverviewContainer extends Component {
             !wereAnyClicked(this.furtherTagRefs)
         ) {
             this.props.resetActiveTagIndex()
+            this.props.resetFilterPopup()
         }
     }
 
     render() {
+        const { filterPopup, filterTags, filterDomains } = this.props
+
         return (
             <Overview
                 {...this.props}
                 setInputRef={this.setInputRef}
                 onInputChange={this.props.handleInputChange}
+                tagFilterManager={this.renderTagsFilter(filterPopup === 'tag')}
+                domainFilterManager={this.renderDomainsFilter(
+                    filterPopup === 'domain',
+                )}
+                setRef={this.addFurtherTagRef}
+                tagFilterPills={this.renderFilterPills(filterTags, 'tag')}
+                domainFilterPills={this.renderFilterPills(
+                    filterDomains,
+                    'domain',
+                )}
             >
                 {this.renderResults()}
             </Overview>
@@ -245,6 +320,9 @@ const mapStateToProps = state => ({
     totalResultCount: selectors.totalResultCount(state),
     shouldShowCount: selectors.shouldShowCount(state),
     isClearFilterButtonShown: selectors.isClearFilterButtonShown(state),
+    filterPopup: selectors.filterPopup(state),
+    filterTags: selectors.filterTags(state),
+    filterDomains: selectors.filterDomains(state),
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -259,6 +337,12 @@ const mapDispatchToProps = dispatch => ({
             onShowOnlyBookmarksChange: actions.toggleBookmarkFilter,
             resetActiveTagIndex: actions.resetActiveTagIndex,
             clearAllFilters: actions.resetFilters,
+            onFilterClick: actions.toggleFilterPopup,
+            resetFilterPopup: actions.resetFilterPopup,
+            addTagFilter: actions.addTagFilter,
+            delTagFilter: actions.delTagFilter,
+            addDomainFilter: actions.addDomainFilter,
+            delDomainFilter: actions.delDomainFilter,
         },
         dispatch,
     ),
@@ -284,6 +368,18 @@ const mapDispatchToProps = dispatch => ({
     },
     addTag: resultIndex => tag => dispatch(actions.addTag(tag, resultIndex)),
     delTag: resultIndex => tag => dispatch(actions.delTag(tag, resultIndex)),
+    handleFilterPillClick: (tag, option) => event => {
+        event.preventDefault()
+        if (option === 'tag') {
+            dispatch(actions.delTagFilter(tag))
+        } else {
+            dispatch(actions.delDomainFilter(tag))
+        }
+    },
+    handleToggleFltClick: option => event => {
+        event.preventDefault()
+        dispatch(actions.toggleFilterPopup(option))
+    },
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(OverviewContainer)

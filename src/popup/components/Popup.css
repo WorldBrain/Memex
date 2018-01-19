@@ -7,10 +7,6 @@ body {
     font-weight: 200;
 }
 
-i {
-    padding: 8px;
-}
-
 hr {
     border: 0;
     height: 0;
@@ -31,7 +27,6 @@ hr {
     align-items: center;
     justify-content: space-between;
     padding: 13px 12px;
-    margin-bottom: 0;
     border-bottom: 1px solid rgb(202, 202, 202);
     background: white;
     margin-bottom: 6px;
@@ -39,6 +34,10 @@ hr {
     & > i {
         color: #3eb995;
         padding: 0;
+    }
+
+    i {
+        padding: 8px;
     }
 }
 

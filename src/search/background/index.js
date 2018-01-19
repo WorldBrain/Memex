@@ -7,6 +7,7 @@ import {
     suggestTags,
     fetchTags,
 } from '../search-index/tags'
+import suggestDomains from '../search-index/suggestDomains'
 
 makeRemotelyCallable({
     addTags,
@@ -14,6 +15,7 @@ makeRemotelyCallable({
     setTags,
     fetchTags,
     suggestTags,
+    suggestDomains,
 })
 
 // Allow other scripts to connect to background index and send queries

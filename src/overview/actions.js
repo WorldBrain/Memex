@@ -45,6 +45,13 @@ export const delTag = createAction('overview/localDelTag', (tag, index) => ({
     index,
 }))
 
+export const toggleFilterPopup = createAction('overview/toggleFilterPopup')
+export const resetFilterPopup = createAction('overview/resetFilterPopup')
+export const addTagFilter = createAction('overview/addTagFilter')
+export const delTagFilter = createAction('overview/delTagFilter')
+export const addDomainFilter = createAction('overview/addDomainFilter')
+export const delDomainFilter = createAction('overview/delDomainFilter')
+
 const deleteDocsByUrl = remoteFunction('deleteDocsByUrl')
 const createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
 const removeBookmarkByUrl = remoteFunction('removeBookmarkByUrl')

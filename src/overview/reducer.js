@@ -29,6 +29,9 @@ const defaultState = {
     showOnlyBookmarks: false,
     activeTagIndex: -1,
     tags: [],
+    filterPopup: '',
+    filterTags: [],
+    filterDomains: [],
 }
 
 function setQuery(state, query) {
@@ -123,6 +126,54 @@ const delTag = (state, { tag, index }) => {
     }
 }
 
+const addTagFilter = (state, tag) => {
+    return {
+        ...state,
+        filterTags: [...state.filterTags, tag],
+    }
+}
+
+const delTagFilter = (state, tag) => {
+    const filterTags = state.filterTags
+    const removalIndex = filterTags.indexOf(tag)
+
+    if (removalIndex === -1) {
+        return state
+    }
+
+    return {
+        ...state,
+        filterTags: [
+            ...state.filterTags.slice(0, removalIndex),
+            ...state.filterTags.slice(removalIndex + 1),
+        ],
+    }
+}
+
+const addDomainFilter = (state, domain) => {
+    return {
+        ...state,
+        filterDomains: [...state.filterDomains, domain],
+    }
+}
+
+const delDomainFilter = (state, domain) => {
+    const filterDomains = state.filterDomains
+    const removalIndex = filterDomains.indexOf(domain)
+
+    if (removalIndex === -1) {
+        return state
+    }
+
+    return {
+        ...state,
+        filterDomains: [
+            ...state.filterDomains.slice(0, removalIndex),
+            ...state.filterDomains.slice(removalIndex + 1),
+        ],
+    }
+}
+
 const showDeleteConfirm = (state, { url, index }) => ({
     ...state,
     deleteConfirmProps: {
@@ -169,6 +220,24 @@ const changeHasBookmark = (state, index) => {
     }
 
     return { ...state, searchResult }
+}
+
+const setFilterPopup = (state, name) => {
+    let filterPopup = state.filterPopup
+
+    if (!filterPopup.length) {
+        filterPopup = name
+    } else if (filterPopup === name) {
+        filterPopup = ''
+    } else {
+        if (filterPopup === 'domain') {
+            filterPopup = 'tag'
+        } else {
+            filterPopup = 'domain'
+        }
+    }
+
+    return { ...state, filterPopup }
 }
 
 const incSearchCount = state => ({
@@ -226,6 +295,15 @@ export default createReducer(
         [actions.setActiveTagIndex]: payloadReducer('activeTagIndex'),
         [actions.addTag]: addTag,
         [actions.delTag]: delTag,
+        [actions.toggleFilterPopup]: setFilterPopup,
+        [actions.resetFilterPopup]: state => ({
+            ...state,
+            filterPopup: defaultState.filterPopup,
+        }),
+        [actions.addTagFilter]: addTagFilter,
+        [actions.delTagFilter]: delTagFilter,
+        [actions.addDomainFilter]: addDomainFilter,
+        [actions.delDomainFilter]: delDomainFilter,
     },
     defaultState,
 )

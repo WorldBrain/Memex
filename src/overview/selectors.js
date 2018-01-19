@@ -175,3 +175,7 @@ export const isEmptyQuery = createSelector(
         !showOnlyBookmarks &&
         !tags.length,
 )
+
+export const filterPopup = state => overview(state).filterPopup
+export const filterTags = state => overview(state).filterTags
+export const filterDomains = state => overview(state).filterDomains

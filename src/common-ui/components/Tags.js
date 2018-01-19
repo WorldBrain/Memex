@@ -4,9 +4,10 @@ import classNames from 'classnames'
 
 import localStyles from './Tags.css'
 
-const getTagsClass = overview =>
+const getTagsClass = (overview, tag, domain) =>
     classNames(localStyles.tagDiv, {
         [localStyles.tagDivFromOverview]: overview,
+        [localStyles.tagDivForFilter]: tag || domain,
     })
 
 const Tags = ({
@@ -18,8 +19,10 @@ const Tags = ({
     setInputRef,
     tagSearchValue,
     overview = false,
+    tag = false,
+    domain = false,
 }) => (
-    <div className={getTagsClass(overview)} ref={setTagDivRef}>
+    <div className={getTagsClass(overview, tag, domain)} ref={setTagDivRef}>
         <form className={localStyles.searchContainer}>
             <input
                 className={localStyles.search}
@@ -53,6 +56,8 @@ Tags.propTypes = {
     setInputRef: PropTypes.func.isRequired,
     tagSearchValue: PropTypes.string.isRequired,
     overview: PropTypes.bool,
+    tag: PropTypes.bool,
+    domain: PropTypes.bool,
 }
 
 export default Tags

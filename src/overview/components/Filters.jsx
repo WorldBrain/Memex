@@ -8,39 +8,79 @@ const Filters = ({
     onShowOnlyBookmarksChange,
     clearAllFilters,
     isClearFilterButtonShown,
+    tagFilterManager,
+    domainFilterManager,
+    onFilterClick,
+    setRef,
+    tagFilterPills,
+    domainFilterPills,
 }) => (
     <div className={localStyles.filtersMain}>
-        <div className={localStyles.bookmarks}>
-            <input
-                type="checkbox"
-                name="showOnlyBookmarks"
-                id="showOnlyBookmarks"
-                checked={showOnlyBookmarks}
-                onChange={onShowOnlyBookmarksChange}
-            />
-            <label htmlFor="showOnlyBookmarks">
-                <span className={localStyles.checkboxText}>
-                    Only Show Bookmarks
-                </span>
-            </label>
-        </div>
-        <div
-            style={{
-                visibility: `${isClearFilterButtonShown
-                    ? 'visible'
-                    : 'hidden'}`,
-            }}
-            className={localStyles.clearDiv}
-        >
-            {isClearFilterButtonShown && (
-                <button
-                    type="button"
-                    onClick={clearAllFilters}
-                    className={localStyles.clear}
+        <div className={localStyles.filters}>
+            <div
+                style={{
+                    visibility: `${isClearFilterButtonShown
+                        ? 'visible'
+                        : 'hidden'}`,
+                }}
+                className={localStyles.clearDiv}
+            >
+                {isClearFilterButtonShown && (
+                    <button
+                        type="button"
+                        onClick={clearAllFilters}
+                        className={localStyles.clear}
+                    >
+                        Clear Filters
+                    </button>
+                )}
+            </div>
+            <div className={localStyles.tags}>
+                <div
+                    className={localStyles.filterTagText}
+                    onClick={() => onFilterClick('tag')}
                 >
-                    Clear Filters
-                </button>
-            )}
+                    Tags
+                    <div className={localStyles.filterTagIcon} ref={setRef} />
+                </div>
+                <div className={localStyles.tagsFilter}>{tagFilterPills}</div>
+                <div className={localStyles.tagsPopup}>{tagFilterManager}</div>
+            </div>
+            <div className={localStyles.domains}>
+                <div
+                    className={localStyles.filterDomainText}
+                    onClick={() => onFilterClick('domain')}
+                >
+                    Domains
+                    <div
+                        className={localStyles.filterDomainIcon}
+                        ref={setRef}
+                    />
+                </div>
+                <div className={localStyles.tagsFilter}>
+                    {domainFilterPills}
+                </div>
+                <div className={localStyles.domainsPopup}>
+                    {domainFilterManager}
+                </div>
+            </div>
+            <div className={localStyles.misc}>
+                <div className={localStyles.filterMiscText}>Misc</div>
+                <div className={localStyles.bookmarks}>
+                    <input
+                        type="checkbox"
+                        name="showOnlyBookmarks"
+                        id="showOnlyBookmarks"
+                        checked={showOnlyBookmarks}
+                        onChange={onShowOnlyBookmarksChange}
+                    />
+                    <label htmlFor="showOnlyBookmarks">
+                        <span className={localStyles.checkboxText}>
+                            Only Show Bookmarks
+                        </span>
+                    </label>
+                </div>
+            </div>
         </div>
     </div>
 )
@@ -50,6 +90,12 @@ Filters.propTypes = {
     onShowOnlyBookmarksChange: PropTypes.func.isRequired,
     clearAllFilters: PropTypes.func.isRequired,
     isClearFilterButtonShown: PropTypes.bool.isRequired,
+    tagFilterManager: PropTypes.node,
+    domainFilterManager: PropTypes.node,
+    onFilterClick: PropTypes.func.isRequired,
+    setRef: PropTypes.func.isRequired,
+    tagFilterPills: PropTypes.node,
+    domainFilterPills: PropTypes.node,
 }
 
 export default Filters
