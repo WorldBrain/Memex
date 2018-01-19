@@ -14,7 +14,8 @@ i {
 hr {
     border: 0;
     height: 0;
-    margin: 0;
+    margin-top: 6px;
+    margin-bottom: 7px;
     padding: 0;
     border-bottom: 1px solid rgb(229, 229, 229);
 }

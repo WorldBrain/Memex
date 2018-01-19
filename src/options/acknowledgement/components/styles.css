@@ -33,12 +33,14 @@
 .ul {
     list-style-type: none;
     width: 80%;
+    color: #777;
 }
 
 .li {
     margin: 10px 0;
     display: inline-block;
     width: 50%;
+    color: #777;
 
     @media (max-width: 1100px) {
         display: block;

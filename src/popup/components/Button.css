@@ -1,3 +1,5 @@
+/* stylelint-disable declaration-no-important */
+
 .link {
     text-decoration: none;
 
@@ -14,16 +16,12 @@
     cursor: default;
     font-weight: 100;
     padding-left: 10px;
-    padding-top: 10px;
+    padding-top: 2px;
 
     &:hover,
     &:focus {
         color: #3eb995;
-        background: rgb(
-            229,
-            229,
-            229
-        ) !important; /* stylelint-disable-line declaration-no-important */
+        background: rgb(229, 229, 229) !important;
         outline: 0;
     }
 }
@@ -37,12 +35,19 @@
     font-family: 'Open Sans';
     font-weight: 100;
     padding-left: 10px;
-    background: none !important; /* stylelint-disable-line declaration-no-important */
+    background: none !important;
 
     &:disabled {
         color: rgb(156, 156, 156);
         cursor: unset;
         background: none;
+    }
+
+    &:hover,
+    &:focus {
+        color: rgb(62, 185, 149);
+        background: rgb(229, 229, 229);
+        outline: 0;
     }
 }
 
@@ -92,7 +97,7 @@
     height: 40px;
 
     & > .itemBtn {
-        justify-content: center;
+        justify-content: left;
     }
 }
 

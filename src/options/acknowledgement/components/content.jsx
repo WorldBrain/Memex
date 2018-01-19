@@ -54,6 +54,117 @@ const AcknowledgementContainer = () => (
                 your money
             </a>.
         </p>
+        <br />
+        <br />
+        <h3 className={localStyles.title}>
+            A list of people who made meaningful contributions
+        </h3>
+        <p>
+            Only because of these people, the WorldBrain/Memex project can
+            exist. We are deeply thankful for the hours of work & the passion
+            they contributed to this project.
+            <br />
+            <br />
+            <img src={'/../../../../img/thanks.gif'} />
+        </p>
+        <p>
+            <h4 className={localStyles.title}>Contributors</h4>
+            <ul className={localStyles.ul}>
+                <li>
+                    <b>Jon Poltak Samosir</b> | Australia/Vietnam
+                </li>
+                <li>
+                    <b>Gerben</b> | Netherlands/World
+                </li>
+                <li>
+                    <b>Mukesh Kharita</b> | India
+                </li>
+                <li>
+                    <b>Charlie Mathews</b> | South Africa/Canada
+                </li>
+                <li>
+                    <b>Jon Pienaar</b> | South Africa/Canada
+                </li>
+                <li>
+                    <b>Arpit Gogia</b> | India
+                </li>
+                <li>
+                    <b>Shivang Bharadwaj</b> | India
+                </li>
+                <li>
+                    <b>Yager Anderson</b> | Alaska
+                </li>
+                <li>
+                    <b>Jean-Baptiste Dupas</b> | France
+                </li>
+                <li>
+                    <b>Elio Qoshi</b> | Albania
+                </li>
+                <li>
+                    <b>Kimberly Lauren Bryant</b> | Canada
+                </li>
+                <li>
+                    <b>Nadine Collison</b> | Canada
+                </li>
+                <li>
+                    <b>Urban Cvek</b> | Slovenia
+                </li>
+                <li>
+                    <b>Aquib Master</b> | New Zealand
+                </li>
+                <li>
+                    <b>Richard Smith-Unna</b> | United Kingdom
+                </li>
+                <li>
+                    <b>Oliver Sauter</b> | Germany
+                </li>
+            </ul>
+            <h4 className={localStyles.title}>Advisors</h4>
+            <ul className={localStyles.ul}>
+                <li>
+                    <b>Samir Sekkat</b> | Germany/Marokko
+                </li>
+                <li>
+                    <b>Benjamin Young</b> | United States
+                </li>
+                <li>
+                    <b>David Passiak</b> | United States
+                </li>
+                <li>
+                    <b>Gerben</b> | Netherlands/World
+                </li>
+                <li>
+                    <b>Dan Lüdtke</b> | Germany
+                </li>
+                <li>
+                    <b>Isabell Mohr</b> | Germany
+                </li>
+                <li>
+                    <b>Christoph Pröschel</b> | Germany
+                </li>
+                <li>
+                    <b>Aurelia Moser</b> | United States
+                </li>
+                <li>
+                    <b>Abigail Cabunoc Mayes</b> | Canada
+                </li>
+                <li>
+                    <b>Jan Kennedy</b> | United Kingdom/Germany
+                </li>
+            </ul>
+            <h4 className={localStyles.title}>Funders</h4>
+            <ul className={localStyles.ul}>
+                <li>
+                    <b>Oliver Sauter</b> | 35.000 €
+                </li>
+                <li>
+                    <b>Margit Sauter</b> | 10.000 €
+                </li>
+                <li>
+                    <b>Digital Science</b> | 5.500 €
+                </li>
+            </ul>
+        </p>
     </div>
 )
 

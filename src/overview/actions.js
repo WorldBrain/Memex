@@ -98,6 +98,7 @@ const easter = () => dispatch =>
                         displayTime: Date.now().toString(),
                         hasBookmark: false,
                         egg: true,
+                        tags: [],
                     },
                 ],
             },
