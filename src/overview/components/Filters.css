@@ -213,7 +213,8 @@ input[type='checkbox'] {
         font-size: 15px;
         vertical-align: middle;
         margin-left: 5px;
-        margin-right: -5px;
+        margin-right: -3px;
+        margin-right: -2px;
     }
 }
 

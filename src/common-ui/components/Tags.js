@@ -27,7 +27,9 @@ const Tags = ({
             <input
                 className={localStyles.search}
                 name="query"
-                placeholder="Search & Add Tag(s)"
+                placeholder={
+                    'Search & Add ' + (domain ? 'Domains' : 'Tags') + '(s)'
+                }
                 onChange={onTagSearchChange}
                 onKeyDown={onTagSearchKeyDown}
                 ref={setInputRef}
@@ -40,8 +42,8 @@ const Tags = ({
         <div className={localStyles.tagContainer}>{children}</div>
         <div className={localStyles.summaryTagContainer}>
             <div className={localStyles.numberTags}>
-                <span className={localStyles.bold}>{numberOfTags}</span> tags
-                selected
+                <span className={localStyles.bold}>{numberOfTags}</span>{' '}
+                {domain ? 'domains' : 'tags'} selected
             </div>
         </div>
     </div>

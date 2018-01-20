@@ -117,6 +117,7 @@ class FilterContainer extends Component {
             }
         } catch (err) {
         } finally {
+            this.inputEl.focus()
             this.setState(state => ({
                 ...state,
                 focused: 0,

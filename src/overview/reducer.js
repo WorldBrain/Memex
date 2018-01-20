@@ -69,6 +69,8 @@ function resetFilters(state) {
     return {
         ...state,
         showOnlyBookmarks: defaultState.showOnlyBookmarks,
+        filterTags: defaultState.filterTags,
+        filterDomains: defaultState.filterDomains,
     }
 }
 

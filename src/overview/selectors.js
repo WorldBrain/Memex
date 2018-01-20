@@ -155,15 +155,6 @@ export const showOnlyBookmarks = state => overview(state).showOnlyBookmarks
 
 export const tags = createSelector(overview, state => state.tags)
 
-/**
- * Selector to toggle clear filter button
- * As new filters are added, corersponding changes need to made to this function
- */
-export const isClearFilterButtonShown = createSelector(
-    showOnlyBookmarks,
-    showOnlyBookmarks => !!showOnlyBookmarks,
-)
-
 export const isEmptyQuery = createSelector(
     currentQueryParams,
     showOnlyBookmarks,
@@ -179,3 +170,17 @@ export const isEmptyQuery = createSelector(
 export const filterPopup = state => overview(state).filterPopup
 export const filterTags = state => overview(state).filterTags
 export const filterDomains = state => overview(state).filterDomains
+
+/**
+ * Selector to toggle clear filter button
+ * As new filters are added, corersponding changes need to made to this function
+ */
+export const isClearFilterButtonShown = createSelector(
+    showOnlyBookmarks,
+    filterTags,
+    filterDomains,
+    (showOnlyBookmarks, filterTags, filterDomains) =>
+        !!showOnlyBookmarks ||
+        Boolean(filterTags.length) ||
+        Boolean(filterDomains.length),
+)
