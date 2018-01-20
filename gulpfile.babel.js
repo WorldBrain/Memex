@@ -4,6 +4,7 @@ import { exec as nodeExec } from 'child_process'
 import pify from 'pify'
 import streamToPromise from 'stream-to-promise'
 import gulp from 'gulp'
+import zip from 'gulp-zip'
 import composeUglify from 'gulp-uglify/composer'
 import identity from 'gulp-identity'
 import source from 'vinyl-source-stream'
@@ -245,4 +246,26 @@ gulp.task('package-chromium', async () => {
     await exec(buildCrxCommand)
 })
 
-gulp.task('package', ['package-firefox', 'package-chromium'])
+gulp.task('package-source-code', () =>
+    gulp
+        .src(
+            [
+                '**/*',
+                '!.git/**',
+                '!node_modules/**',
+                '!dist/**',
+                '!extension/**',
+            ],
+            {
+                dot: true,
+            },
+        )
+        .pipe(zip('source-code.zip'))
+        .pipe(gulp.dest('dist')),
+)
+
+gulp.task('package', [
+    'package-firefox',
+    'package-chromium',
+    'package-source-code',
+])
