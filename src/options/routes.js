@@ -53,8 +53,8 @@ export default [
     },
     {
         name: 'Help Me Please',
-        pathname: '/help',
-        component: Help,
+        pathname: 'https://worldbrain.useresponse.com/',
+        component: 'faq',
         icon: 'help',
     },
     {

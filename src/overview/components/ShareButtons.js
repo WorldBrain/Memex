@@ -25,7 +25,7 @@ const ShareButtons = () => (
             />
             <ShareButton
                 className={styles.fedLink}
-                href="https://worldbrain.io/share/feedback"
+                href="https://worldbrain.io/help"
             >
                 Feedback
             </ShareButton>

@@ -360,7 +360,7 @@ class PopupContainer extends Component {
                 <hr />
                 <LinkButton
                     btnClass={styles.voteIcon}
-                    href="https://worldbrain.canny.io/feature-requests"
+                    href="https://worldbrain.useresponse.com/topics/idea/status/all/category/all/sort/updated/page/1"
                 >
                     Vote for Next Features
                 </LinkButton>
@@ -372,7 +372,7 @@ class PopupContainer extends Component {
                     btnClass={styles.settings}
                 />
                 <ButtonIcon
-                    href={constants.FEEDBACK_URL}
+                    href="https://worldbrain.useresponse.com"
                     icon="help"
                     btnClass={styles.help}
                 />
