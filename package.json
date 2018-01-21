@@ -12,6 +12,7 @@
     "build": "rm -rf ./extension && gulp build",
     "watch": "rm -rf ./extension && gulp watch",
     "package": "gulp package",
+    "package-src": "gulp package-source-code",
     "test": "jest --verbose --config=.jest-config.json",
     "firefox": "web-ext -s extension run --bc",
     "lint": "gulp lint",

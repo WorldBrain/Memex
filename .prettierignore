@@ -1,0 +1,5 @@
+dist/
+extension/
+node_modules/
+.git/
+package.json
