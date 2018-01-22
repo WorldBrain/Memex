@@ -36,6 +36,8 @@
         "no-var": "error",
         "prefer-const": "error",
         "indent": "off",
+        "jest/no-disabled-tests": "off",
+        "camelcase": ["error", { "properties": "never" }],
         "react/jsx-indent": "off",
         "react/jsx-indent-props": "off",
         "jsx-quotes": "off",

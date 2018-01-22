@@ -1,7 +1,6 @@
 import ImportContainer from './imports'
 import SettingsContainer from './containers/settings'
 import Privacy from './privacy'
-import Help from './help/index'
 import Acknowledgements from './acknowledgement/components/content'
 import Tutorial from './tutorial'
 import NewInstall from './new-install'
