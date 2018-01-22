@@ -104,6 +104,7 @@
     "gulp-eslint": "^4.0.0",
     "gulp-identity": "^0.1.0",
     "gulp-run": "^1.7.1",
+    "gulp-sequence": "^1.0.0",
     "gulp-stylelint": "^4.0.0",
     "gulp-uglify": "^3.0.0",
     "gulp-zip": "^4.1.0",

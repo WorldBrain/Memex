@@ -11,6 +11,7 @@ import source from 'vinyl-source-stream'
 import buffer from 'vinyl-buffer'
 import stylelint from 'gulp-stylelint'
 import browserify from 'browserify'
+import gulpSeq from 'gulp-sequence'
 import watchify from 'watchify'
 import babelify from 'babelify'
 import envify from 'loose-envify/custom'
@@ -227,25 +228,6 @@ function getFilename() {
     return filename
 }
 
-gulp.task('package-firefox', async () => {
-    const filename = getFilename()
-    const buildXpiCommand = `web-ext -s ./extension -a ./dist/firefox build`
-    await exec(buildXpiCommand)
-    // web-ext will have named the file ${filename}.zip. Change .zip to .xpi.
-    await exec(`mv dist/firefox/${filename}.zip dist/firefox/${filename}.xpi`)
-})
-
-gulp.task('package-chromium', async () => {
-    const filename = getFilename()
-    const buildCrxCommand =
-        `crx pack ./extension` +
-        ` -o ./dist/chromium/${filename}.crx` +
-        ` -p .chrome-extension-key.pem`
-    // crx fails if the output directory is not there.
-    await exec(`mkdir -p dist/chromium`)
-    await exec(buildCrxCommand)
-})
-
 gulp.task('package-source-code', () =>
     gulp
         .src(
@@ -264,8 +246,53 @@ gulp.task('package-source-code', () =>
         .pipe(gulp.dest('dist')),
 )
 
-gulp.task('package', [
-    'package-firefox',
-    'package-chromium',
-    'package-source-code',
-])
+gulp.task('package-chromium', () =>
+    gulp
+        .src('extension/**/*')
+        .pipe(zip('chromium.zip'))
+        .pipe(gulp.dest('dist')),
+)
+
+gulp.task('package-firefox', async () => {
+    // TODO: Skip this step when analytics moved to use HTTP API
+    const rmContentPolicy = file =>
+        `sed -i '' '/content_security_policy/,/^/d' ${file}`
+    await exec(rmContentPolicy('extension/manifest.json'))
+    await exec(rmContentPolicy('src/manifest.json'))
+
+    return gulp
+        .src('extension/**/*')
+        .pipe(zip('firefox.zip'))
+        .pipe(gulp.dest('dist'))
+})
+
+gulp.task(
+    'package',
+    gulpSeq(
+        'build-prod',
+        'package-chromium',
+        'package-firefox',
+        'package-source-code',
+    ),
+)
+
+/* DEPRECATED */
+gulp.task('package-firefox-old', async () => {
+    const filename = getFilename()
+    const buildXpiCommand = `web-ext -s ./extension -a ./dist/firefox build`
+    await exec(buildXpiCommand)
+    // web-ext will have named the file ${filename}.zip. Change .zip to .xpi.
+    await exec(`mv dist/firefox/${filename}.zip dist/firefox/${filename}.xpi`)
+})
+
+/* DEPRECATED */
+gulp.task('package-chromium-old', async () => {
+    const filename = getFilename()
+    const buildCrxCommand =
+        `crx pack ./extension` +
+        ` -o ./dist/chromium/${filename}.crx` +
+        ` -p .chrome-extension-key.pem`
+    // crx fails if the output directory is not there.
+    await exec(`mkdir -p dist/chromium`)
+    await exec(buildCrxCommand)
+})
