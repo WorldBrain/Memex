@@ -37,7 +37,7 @@ export async function logInitPageVisit(tabId, secsSinceLastIndex = 20) {
             return await index.addTimestampConcurrent(pageId, visitId)
         }
 
-        const { page: pageDoc } = await storePage({
+        const pageDoc = await storePage({
             tabId,
             url: tab.url,
             content: { title: tab.title },
@@ -65,15 +65,13 @@ export async function logInitPageVisit(tabId, secsSinceLastIndex = 20) {
 export async function logPageVisit(tabId) {
     const { url } = await browser.tabs.get(tabId)
 
-    // Call `storePage` again, this time with analysis enabed to grab further page content
-    const { finalPagePromise } = await storePage({
+    // Call `storePage` again, this time with analysis enabed to grab and store further page content
+    const pageDoc = await storePage({
         tabId,
         url,
         runAnalysis: true,
     })
 
-    const { page } = await finalPagePromise
-
     // Index all the terms for the page
-    await index.addPageTermsConcurrent({ pageDoc: page })
+    await index.addPageTermsConcurrent({ pageDoc })
 }

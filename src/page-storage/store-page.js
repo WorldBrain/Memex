@@ -3,13 +3,16 @@ import analysePage from 'src/page-analysis/background'
 import { generatePageDocId } from '.'
 
 /**
+ * Creates a page stub in PouchDB (or re-uses existing doc) and attempts to fill it out with current page content
+ * sourced from browser tab via `page-analysis` module if specified.
+ *
  * @param {number} args.tabId
  * @param {string} args.url
  * @param {any} args.* Any further static property values to include in stored page.
  * @param {boolean} [args.runAnalysis=true] Whether or not to run complex analysis via content script to extract
  *  further content data.
- * @returns {Promise<any>} Resolves to the initial created+stored `pageDoc` along with `finalPagePromise` which
- *  will resolve with the further filled-out page doc when/if analysis is performed.
+ * @returns {Promise<IPageDoc>} Resolves to the page doc stored, either with basic or post-analysis data depending on
+ *  `runAnalysis` arg.
  */
 export default async function storePage({
     tabId,
@@ -20,6 +23,7 @@ export default async function storePage({
     const pageDocId = generatePageDocId({ url })
     let pageDoc
 
+    // Ensure at least a stub for this page exists in Pouch, else re-use existing
     try {
         pageDoc = await db.get(pageDocId)
     } catch (error) {
@@ -32,11 +36,10 @@ export default async function storePage({
         }
     }
 
-    // Start analysis, but do not wait for it.
-    const finalPagePromise = runAnalysis
-        ? analysePage({ tabId, pageId: pageDoc._id })
-        : Promise.resolve()
+    // Run analysis if needed
+    if (runAnalysis) {
+        pageDoc = await analysePage({ tabId, pageId: pageDoc._id })
+    }
 
-    // Return the page stub, and a promise of the analysed page.
-    return { page: pageDoc, finalPagePromise }
+    return pageDoc
 }

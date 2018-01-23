@@ -150,8 +150,10 @@ export class TabManager {
      * @param {any} newState The new scroll state to set.
      */
     updateTabScrollState(id, newState) {
-        const tab = this.getTabState(id)
-        tab.scrollState.updateState(newState)
+        try {
+            const tab = this.getTabState(id)
+            tab.scrollState.updateState(newState)
+        } catch (err) {}
     }
 }
 

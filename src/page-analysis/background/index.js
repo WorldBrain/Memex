@@ -42,11 +42,16 @@ async function performPageAnalysis({ pageId, tabId }) {
     await whenAllSettled([storeFavIcon, storeScreenshot, storePageContent])
 }
 
+/**
+ * Performs page content analysis and storage for an existing page doc in Pouch.
+ *
+ * @param {string} args.pageId ID of pouch doc to add analysed content to.
+ * @param {number} args.tabId ID of browser tab to use as data source.
+ * @returns {Promise<IPageDoc>} Resolves to the stored page doc in post-analysis state.
+ */
 export default async function analysePage({ pageId, tabId }) {
     // Wait until its DOM has loaded, in case we got invoked before that.
     await whenPageDOMLoaded({ tabId }) // TODO: catch e.g. tab close.
     await performPageAnalysis({ pageId, tabId })
-    // Get and return the page.
-    const page = revisePageFields(await db.get(pageId))
-    return { page }
+    return revisePageFields(await db.get(pageId))
 }
