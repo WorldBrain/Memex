@@ -10,17 +10,21 @@ const getTagClass = noBg =>
     })
 
 const FilterPill = ({ value, noBg = false, onClick = f => f, setRef }) => (
-    <span
-        ref={setRef}
-        className={getTagClass(noBg)}
-        onClick={noBg ? onClick : null}
-    >
-        {value}
-        {!noBg && (
-            <i className="material-icons" onClick={onClick}>
-                clear
-            </i>
-        )}
+    <span className={localStyles.pillContainer}>
+        <span
+            ref={setRef}
+            className={getTagClass(noBg)}
+            onClick={noBg ? onClick : null}
+        >
+            {value}
+        </span>
+        <span className={localStyles.closeIcon}>
+            {!noBg && (
+                <i className="material-icons" onClick={onClick}>
+                    clear
+                </i>
+            )}
+        </span>
     </span>
 )
 

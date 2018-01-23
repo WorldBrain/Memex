@@ -9,6 +9,10 @@ const searchUpdateActions = [
     actions.setStartDate.getType(),
     actions.setEndDate.getType(),
     actions.toggleBookmarkFilter.getType(),
+    actions.addTagFilter.getType(),
+    actions.delTagFilter.getType(),
+    actions.addDomainFilter.getType(),
+    actions.delDomainFilter.getType(),
     actions.resetFilters.getType(),
 ]
 

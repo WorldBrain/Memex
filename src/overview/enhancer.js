@@ -31,6 +31,16 @@ const locationSync = ReduxQuerySync.enhancer({
                 actions.toggleBookmarkFilter(Boolean(showOnlyBookmarks)),
             defaultValue: false,
         },
+        tags: {
+            selector: selectors.filterTagsStringify,
+            action: tags => actions.setTagFilters(tags),
+            defaultValue: '',
+        },
+        domains: {
+            selector: selectors.filterDomainsStringify,
+            action: domains => actions.setDomainFilters(domains),
+            defaultValue: '',
+        },
     },
 })
 

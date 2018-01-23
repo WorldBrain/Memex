@@ -1,6 +1,7 @@
 import update from 'lodash/fp/update'
 import remove from 'lodash/fp/remove'
 import { createReducer } from 'redux-act'
+import queryString from 'query-string'
 
 import * as actions from './actions'
 
@@ -28,7 +29,6 @@ const defaultState = {
     showFilter: false,
     showOnlyBookmarks: false,
     activeTagIndex: -1,
-    tags: [],
     filterPopup: '',
     filterTags: [],
     filterDomains: [],
@@ -176,6 +176,21 @@ const delDomainFilter = (state, domain) => {
     }
 }
 
+const setTagFilters = (state, tags) => {
+    return {
+        ...state,
+        filterTags: queryString.parse(tags, { arrayFormat: 'bracket' }).tags,
+    }
+}
+
+const setDomainFilters = (state, domains) => {
+    return {
+        ...state,
+        filterDomains: queryString.parse(domains, { arrayFormat: 'bracket' })
+            .domains,
+    }
+}
+
 const showDeleteConfirm = (state, { url, index }) => ({
     ...state,
     deleteConfirmProps: {
@@ -293,11 +308,10 @@ export default createReducer(
             ...state,
             activeTagIndex: defaultState.activeTagIndex,
         }),
-        [actions.tags]: payloadReducer('tags'),
         [actions.setActiveTagIndex]: payloadReducer('activeTagIndex'),
         [actions.addTag]: addTag,
         [actions.delTag]: delTag,
-        [actions.toggleFilterPopup]: setFilterPopup,
+        [actions.setFilterPopup]: setFilterPopup,
         [actions.resetFilterPopup]: state => ({
             ...state,
             filterPopup: defaultState.filterPopup,
@@ -306,6 +320,8 @@ export default createReducer(
         [actions.delTagFilter]: delTagFilter,
         [actions.addDomainFilter]: addDomainFilter,
         [actions.delDomainFilter]: delDomainFilter,
+        [actions.setTagFilters]: setTagFilters,
+        [actions.setDomainFilters]: setDomainFilters,
     },
     defaultState,
 )

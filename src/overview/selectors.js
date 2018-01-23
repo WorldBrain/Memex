@@ -1,4 +1,5 @@
 import { createSelector } from 'reselect'
+import queryString from 'query-string'
 
 import * as constants from './constants'
 
@@ -153,23 +154,23 @@ export const isNewSearchLoading = createSelector(
 export const showFilter = state => overview(state).showFilter
 export const showOnlyBookmarks = state => overview(state).showOnlyBookmarks
 
-export const tags = createSelector(overview, state => state.tags)
+export const filterPopup = state => overview(state).filterPopup
+export const filterTags = state => overview(state).filterTags
+export const filterDomains = state => overview(state).filterDomains
 
 export const isEmptyQuery = createSelector(
     currentQueryParams,
     showOnlyBookmarks,
-    tags,
+    filterTags,
+    filterDomains,
     ({ query, startDate, endDate }, showOnlyBookmarks, tags) =>
         !query.length &&
         !startDate &&
         !endDate &&
         !showOnlyBookmarks &&
-        !tags.length,
+        !filterTags.length &&
+        !filterDomains.length,
 )
-
-export const filterPopup = state => overview(state).filterPopup
-export const filterTags = state => overview(state).filterTags
-export const filterDomains = state => overview(state).filterDomains
 
 /**
  * Selector to toggle clear filter button
@@ -180,7 +181,30 @@ export const isClearFilterButtonShown = createSelector(
     filterTags,
     filterDomains,
     (showOnlyBookmarks, filterTags, filterDomains) =>
-        !!showOnlyBookmarks ||
+        showOnlyBookmarks ||
         Boolean(filterTags.length) ||
         Boolean(filterDomains.length),
+)
+
+export const filterTagsStringify = createSelector(filterTags, filterTags =>
+    queryString.stringify({ tags: filterTags }, { arrayFormat: 'bracket' }),
+)
+
+export const filterDomainsStringify = createSelector(
+    filterDomains,
+    filterDomains =>
+        queryString.stringify(
+            { domains: filterDomains },
+            { arrayFormat: 'bracket' },
+        ),
+)
+
+export const shouldDisplayDomainFilterPopup = createSelector(
+    filterPopup,
+    filterPopup => filterPopup === 'domain',
+)
+
+export const shouldDisplayTagFilterPopup = createSelector(
+    filterPopup,
+    filterPopup => filterPopup === 'tag',
 )

@@ -98,6 +98,7 @@
     padding: 0;
     max-width: 780px;
     min-width: 780px;
+    height: 17px;
     display: flex;
 }
 
@@ -105,6 +106,7 @@
     margin-right: 10px;
     width: 300px;
     max-width: 300px;
+    height: 17px;
 }
 
 .tagsFilterInput {
@@ -206,22 +208,48 @@ input[type='checkbox'] {
 .tagname {
     color: #3eb995;
     padding: 1px 5px 1px 5px;
-    border-radius: 5px;
+    cursor: pointer;
+}
+
+.notExpanded {
+    display: inline-block;
+    max-width: 60px;
+    color: white;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.closeIcon {
+    margin-right: 5px;
     cursor: pointer;
 
     & i {
         font-size: 15px;
         vertical-align: middle;
-        margin-left: 5px;
         margin-right: -3px;
-        margin-right: -2px;
+        margin-top: -12px;
     }
 }
 
-.notExpanded {
+.pillContainer {
+    display: inline-block;
     background-color: #3eb995;
     color: white;
     margin-left: 5px;
-    height: 18px;
-    max-width: 120px;
+    padding: 1px 0;
+    border-radius: 5px;
+}
+
+.bookmarks {
+    height: 19px;
+    padding-top: 2px;
+}
+
+.expandButton {
+    color: #3eb995;
+    padding: 1px 5px 1px 5px;
+    cursor: pointer;
+    position: absolute;
+    margin-top: 1px;
 }

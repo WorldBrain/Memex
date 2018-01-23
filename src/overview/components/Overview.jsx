@@ -29,7 +29,7 @@ const Overview = props => (
                 tagFilterManager={props.tagFilterManager}
                 domainFilterManager={props.domainFilterManager}
                 onFilterClick={props.onFilterClick}
-                setRef={props.setRef}
+                setTagDomainButtonRef={props.setTagDomainButtonRef}
                 tagFilterPills={props.tagFilterPills}
                 domainFilterPills={props.domainFilterPills}
             />
@@ -63,7 +63,7 @@ Overview.propTypes = {
     tagFilterManager: PropTypes.node,
     domainFilterManager: PropTypes.node,
     onFilterClick: PropTypes.func.isRequired,
-    setRef: PropTypes.func.isRequired,
+    setTagDomainButtonRef: PropTypes.func.isRequired,
     tagFilterPills: PropTypes.node,
     domainFilterPills: PropTypes.node,
 }

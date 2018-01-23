@@ -11,7 +11,7 @@ const Filters = ({
     tagFilterManager,
     domainFilterManager,
     onFilterClick,
-    setRef,
+    setTagDomainButtonRef,
     tagFilterPills,
     domainFilterPills,
 }) => (
@@ -41,7 +41,10 @@ const Filters = ({
                     onClick={() => onFilterClick('tag')}
                 >
                     Tags
-                    <div className={localStyles.filterTagIcon} ref={setRef} />
+                    <div
+                        className={localStyles.filterTagIcon}
+                        ref={setTagDomainButtonRef}
+                    />
                 </div>
                 <div className={localStyles.tagsFilter}>{tagFilterPills}</div>
                 <div className={localStyles.tagsPopup}>{tagFilterManager}</div>
@@ -54,7 +57,7 @@ const Filters = ({
                     Domains
                     <div
                         className={localStyles.filterDomainIcon}
-                        ref={setRef}
+                        ref={setTagDomainButtonRef}
                     />
                 </div>
                 <div className={localStyles.tagsFilter}>
@@ -93,7 +96,7 @@ Filters.propTypes = {
     tagFilterManager: PropTypes.node,
     domainFilterManager: PropTypes.node,
     onFilterClick: PropTypes.func.isRequired,
-    setRef: PropTypes.func.isRequired,
+    setTagDomainButtonRef: PropTypes.func.isRequired,
     tagFilterPills: PropTypes.node,
     domainFilterPills: PropTypes.node,
 }

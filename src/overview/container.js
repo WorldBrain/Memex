@@ -17,6 +17,7 @@ import ResultsMessage from './components/ResultsMessage'
 import TagPill from './components/TagPill'
 import FilterContainer from './components/FilterContainer'
 import FilterPill from './components/FilterPill'
+import ExpandButton from './components/ExpandButton'
 
 class OverviewContainer extends Component {
     static propTypes = {
@@ -39,7 +40,6 @@ class OverviewContainer extends Component {
         handlePillClick: PropTypes.func.isRequired,
         addTag: PropTypes.func.isRequired,
         delTag: PropTypes.func.isRequired,
-        filterPopup: PropTypes.string.isRequired,
         resetFilterPopup: PropTypes.func.isRequired,
         addTagFilter: PropTypes.func.isRequired,
         delTagFilter: PropTypes.func.isRequired,
@@ -48,7 +48,9 @@ class OverviewContainer extends Component {
         filterTags: PropTypes.arrayOf(PropTypes.string).isRequired,
         filterDomains: PropTypes.arrayOf(PropTypes.string).isRequired,
         handleFilterPillClick: PropTypes.func.isRequired,
-        handleToggleFltClick: PropTypes.func.isRequired,
+        setFilterPopup: PropTypes.func.isRequired,
+        shouldDisplayDomainFilterPopup: PropTypes.bool.isRequired,
+        shouldDisplayTagFilterPopup: PropTypes.bool.isRequired,
     }
 
     componentDidMount() {
@@ -131,7 +133,7 @@ class OverviewContainer extends Component {
 
     renderFilterPills(data, option) {
         const Filterpills = data
-            .slice(0, 2)
+            .slice(0, constants.SHOWN_FILTER_LIMIT)
             .map((tag, i) => (
                 <FilterPill
                     key={i}
@@ -144,11 +146,11 @@ class OverviewContainer extends Component {
         if (data.length > constants.SHOWN_FILTER_LIMIT) {
             return [
                 ...Filterpills,
-                <FilterPill
+                <ExpandButton
                     key="+"
                     setRef={this.addFurtherTagRef}
                     value={`+${data.length - constants.SHOWN_FILTER_LIMIT}`}
-                    onClick={this.props.handleToggleFltClick(option)}
+                    onClick={this.props.setFilterPopup(option)}
                     noBg
                 />,
             ]
@@ -281,18 +283,25 @@ class OverviewContainer extends Component {
     }
 
     render() {
-        const { filterPopup, filterTags, filterDomains } = this.props
+        const {
+            shouldDisplayDomainFilterPopup,
+            shouldDisplayTagFilterPopup,
+            filterTags,
+            filterDomains,
+        } = this.props
 
         return (
             <Overview
                 {...this.props}
                 setInputRef={this.setInputRef}
                 onInputChange={this.props.handleInputChange}
-                tagFilterManager={this.renderTagsFilter(filterPopup === 'tag')}
-                domainFilterManager={this.renderDomainsFilter(
-                    filterPopup === 'domain',
+                tagFilterManager={this.renderTagsFilter(
+                    shouldDisplayTagFilterPopup,
                 )}
-                setRef={this.addFurtherTagRef}
+                domainFilterManager={this.renderDomainsFilter(
+                    shouldDisplayDomainFilterPopup,
+                )}
+                setTagDomainButtonRef={this.addFurtherTagRef}
                 tagFilterPills={this.renderFilterPills(filterTags, 'tag')}
                 domainFilterPills={this.renderFilterPills(
                     filterDomains,
@@ -323,6 +332,10 @@ const mapStateToProps = state => ({
     filterPopup: selectors.filterPopup(state),
     filterTags: selectors.filterTags(state),
     filterDomains: selectors.filterDomains(state),
+    shouldDisplayDomainFilterPopup: selectors.shouldDisplayDomainFilterPopup(
+        state,
+    ),
+    shouldDisplayTagFilterPopup: selectors.shouldDisplayTagFilterPopup(state),
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -337,7 +350,7 @@ const mapDispatchToProps = dispatch => ({
             onShowOnlyBookmarksChange: actions.toggleBookmarkFilter,
             resetActiveTagIndex: actions.resetActiveTagIndex,
             clearAllFilters: actions.resetFilters,
-            onFilterClick: actions.toggleFilterPopup,
+            onFilterClick: actions.setFilterPopup,
             resetFilterPopup: actions.resetFilterPopup,
             addTagFilter: actions.addTagFilter,
             delTagFilter: actions.delTagFilter,
@@ -376,9 +389,9 @@ const mapDispatchToProps = dispatch => ({
             dispatch(actions.delDomainFilter(tag))
         }
     },
-    handleToggleFltClick: option => event => {
+    setFilterPopup: option => event => {
         event.preventDefault()
-        dispatch(actions.toggleFilterPopup(option))
+        dispatch(actions.setFilterPopup(option))
     },
 })
 

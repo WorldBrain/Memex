@@ -45,12 +45,14 @@ export const delTag = createAction('overview/localDelTag', (tag, index) => ({
     index,
 }))
 
-export const toggleFilterPopup = createAction('overview/toggleFilterPopup')
+export const setFilterPopup = createAction('overview/setFilterPopup')
 export const resetFilterPopup = createAction('overview/resetFilterPopup')
 export const addTagFilter = createAction('overview/addTagFilter')
 export const delTagFilter = createAction('overview/delTagFilter')
 export const addDomainFilter = createAction('overview/addDomainFilter')
 export const delDomainFilter = createAction('overview/delDomainFilter')
+export const setTagFilters = createAction('overview/setTagFilters')
+export const setDomainFilters = createAction('overview/setDomainFilters')
 
 const deleteDocsByUrl = remoteFunction('deleteDocsByUrl')
 const createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
@@ -137,17 +139,14 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
         return dispatch(easter())
     }
 
-    const skip = selectors.resultsSkip(state)
-    const showOnlyBookmarks = selectors.showOnlyBookmarks(state)
-    const tags = selectors.tags(state)
-
     const searchParams = {
         ...currentQueryParams,
         getTotalCount: true,
-        showOnlyBookmarks,
-        tags,
+        showOnlyBookmarks: selectors.showOnlyBookmarks(state),
+        tags: selectors.filterTags(state),
+        domains: selectors.filterDomains(state),
         limit: constants.PAGE_SIZE,
-        skip,
+        skip: selectors.resultsSkip(state),
     }
 
     // Tell background script to search
@@ -264,8 +263,9 @@ export const showTags = index => (dispatch, getState) => {
 }
 
 export const filterTag = tag => (dispatch, getState) => {
-    const query = selectors.query(getState())
-    const filterTags = selectors.filterTags(getState())
+    const state = getState()
+    const query = selectors.query(state)
+    const filterTags = selectors.filterTags(state)
 
     const transformedTag = `#${tag.split(' ').join('+')} `
 
