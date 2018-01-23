@@ -82,15 +82,35 @@ browser.tabs.onRemoved.addListener(tabId => {
 })
 
 /**
- * Run the initial metadata indexing on the `webNavigation.onCompleted` event.
+ * The `webNavigation.onCommitted` event gives us some useful data related to how the navigation event
+ * occured (client/server redirect, user typed in address bar, link click, etc.). Might as well keep the last
+ * navigation event for each tab in state for later decision making.
+ */
+browser.webNavigation.onCommitted.addListener(
+    ({ tabId, frameId, ...navData }) => {
+        if (frameId === 0) {
+            tabManager.updateNavState(tabId, {
+                type: navData.transitionType,
+                qualifiers: navData.transitionQualifiers,
+            })
+        }
+    },
+)
+
+/**
+ * Run the initial metadata indexing on the `webNavigation.onCompleted` and `onHistoryStateUpdated` events,
+ * for standarad navigation and client-side routing navs respectively.
  * Note that indexing is only run on `frameId` === `0`, meaning the top level page
  * (events may be fired for nested iframes).
  */
-browser.webNavigation.onCompleted.addListener(({ tabId, frameId }) => {
+function handleNavChange({ tabId, frameId }) {
     if (frameId === 0) {
         logInitPageVisit(tabId).catch(console.error)
     }
-})
+}
+
+browser.webNavigation.onCompleted.addListener(handleNavChange)
+browser.webNavigation.onHistoryStateUpdated.addListener(handleNavChange)
 
 browser.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
     // `changeInfo` should only contain `url` prop if URL changed - what we care about for scheduling logging

@@ -31,12 +31,17 @@ export class TabManager {
     /**
      * @returns {TabActiveState}
      */
-    _createNewTab = ({ isActive = false, visitTime = `${Date.now()}` }) => ({
+    _createNewTab = ({
+        isActive = false,
+        visitTime = `${Date.now()}`,
+        navState = {},
+    }) => ({
         activeTime: 0,
         lastActivated: Date.now(),
         isActive,
         visitTime,
         scrollState: new ScrollState(),
+        navState,
         timeout: null,
     })
 
@@ -98,7 +103,13 @@ export class TabManager {
      */
     resetTab(id, activeState) {
         const oldTab = this.removeTab(id)
-        this.trackTab({ id, active: activeState })
+        this._tabs.set(
+            id,
+            this._createNewTab({
+                isActive: activeState,
+                navState: oldTab.navState,
+            }),
+        )
         return oldTab
     }
 
@@ -146,13 +157,25 @@ export class TabManager {
     }
 
     /**
-     * @param {string} id The ID of the tab to set to associate the debounced log with.
+     * @param {string} id The ID of the tab to set to update scroll state for.
      * @param {any} newState The new scroll state to set.
      */
     updateTabScrollState(id, newState) {
         try {
             const tab = this.getTabState(id)
             tab.scrollState.updateState(newState)
+        } catch (err) {}
+    }
+
+    /**
+     * @param {string} id The ID of the tab to set to update navigation state for.
+     * @param {any} navState Object containing `webNavigation.TransitionQualifier`s under `qualifiers` prop
+     *  and ` webNavigation.TransitionType` under `type` prop.
+     */
+    updateNavState(id, navState) {
+        try {
+            const tab = this.getTabState(id)
+            this._tabs.set(id, { ...tab, navState })
         } catch (err) {}
     }
 }
