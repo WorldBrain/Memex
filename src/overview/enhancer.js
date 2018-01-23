@@ -12,7 +12,7 @@ const locationSync = ReduxQuerySync.enhancer({
     params: {
         query: {
             selector: selectors.query,
-            action: actions.setQuery,
+            action: query => actions.setQueryTagsDomains(query, true),
             defaultValue: '',
         },
         startDate: {

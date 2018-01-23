@@ -5,7 +5,6 @@ import 'rxjs/add/operator/filter'
 import * as actions from './actions'
 
 const searchUpdateActions = [
-    actions.setQuery.getType(),
     actions.setStartDate.getType(),
     actions.setEndDate.getType(),
     actions.toggleBookmarkFilter.getType(),
@@ -14,6 +13,8 @@ const searchUpdateActions = [
     actions.addDomainFilter.getType(),
     actions.delDomainFilter.getType(),
     actions.resetFilters.getType(),
+    actions.setTagFilters.getType(),
+    actions.setDomainFilters.getType(),
 ]
 
 // When the query changed, refresh the search results

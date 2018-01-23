@@ -149,6 +149,12 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
         skip: selectors.resultsSkip(state),
     }
 
+    // When we are loading the page and the in the query we can take many values so we are
+    // not inserting in the epic so the port should be there
+    if (!port) {
+        dispatch(init())
+    }
+
     // Tell background script to search
     port.postMessage({ cmd: constants.CMDS.SEARCH, searchParams, overwrite })
 }
@@ -266,7 +272,6 @@ export const filterTag = tag => (dispatch, getState) => {
     const state = getState()
     const query = selectors.query(state)
     const filterTags = selectors.filterTags(state)
-    const filterStatus = selectors.showFilter(state)
 
     const transformedTag = `#${tag.split(' ').join('+')} `
 
@@ -274,15 +279,59 @@ export const filterTag = tag => (dispatch, getState) => {
         ? query.replace(transformedTag, '') // Either remove it, if already there
         : transformedTag + query // or prepend it, if not there
 
-    dispatch(setQuery(newQuery))
+    dispatch(setQueryTagsDomains(newQuery))
+}
 
-    if (filterTags.indexOf(transformedTag.slice(1, -1)) === -1) {
-        dispatch(addTagFilter(transformedTag.slice(1, -1)))
-    } else {
-        dispatch(delTagFilter(transformedTag.slice(1, -1)))
-    }
+export const setQueryTagsDomains = (input, isEnter) => (dispatch, getState) => {
+    const state = getState()
+    const filterTags = selectors.filterTags(state)
+    const filterDomains = selectors.filterDomains(state)
+    let filterStatus = selectors.showFilter(state)
 
-    if (!filterStatus) {
-        dispatch(showFilter())
+    const terms = input.toLowerCase().match(/\S+/g) || []
+
+    terms.forEach(term => {
+        if (input[input.length - 1] === ' ' || isEnter) {
+            if (constants.HASH_TAG_PATTERN.test(term)) {
+                const tag = term
+                    .slice(1)
+                    .split('+')
+                    .join(' ')
+
+                input = input.replace(isEnter ? term : term + ' ', '')
+
+                if (filterTags.indexOf(tag) === -1) {
+                    dispatch(addTagFilter(tag))
+                } else {
+                    dispatch(delTagFilter(tag))
+                }
+
+                if (!filterStatus) {
+                    filterStatus = !filterStatus
+                    dispatch(showFilter())
+                }
+            }
+
+            if (constants.DOMAIN_TLD_PATTERN.test(term)) {
+                input = input.replace(isEnter ? term : term + ' ', '')
+
+                if (filterDomains.indexOf(term) === -1) {
+                    dispatch(addDomainFilter(term))
+                } else {
+                    dispatch(delDomainFilter(term))
+                }
+
+                if (!filterStatus) {
+                    filterStatus = !filterStatus
+                    dispatch(showFilter())
+                }
+            }
+        }
+    })
+
+    dispatch(setQuery(input))
+
+    if (!input.includes('#')) {
+        dispatch(search({ overwrite: true }))
     }
 }

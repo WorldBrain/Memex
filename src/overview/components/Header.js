@@ -18,6 +18,7 @@ const Header = ({
                     placeholder="Search your memory; use # to filter by tag"
                     value={query}
                     ref={props.setInputRef}
+                    onKeyDown={props.onQuerySearchKeyDown}
                 />
                 <DateRangeSelection
                     startDate={startDate}
@@ -63,6 +64,7 @@ Header.propTypes = {
     onStartDateChange: PropTypes.func.isRequired,
     onEndDateChange: PropTypes.func.isRequired,
     onShowFilterChange: PropTypes.func.isRequired,
+    onQuerySearchKeyDown: PropTypes.func.isRequired,
 }
 
 export default Header

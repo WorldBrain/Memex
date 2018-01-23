@@ -10,7 +10,12 @@ const getTagClass = noBg =>
     })
 
 const TagPill = ({ value, noBg = false, onClick = f => f, setRef }) => (
-    <span ref={setRef} className={getTagClass(noBg)} onClick={onClick}>
+    <span
+        ref={setRef}
+        className={getTagClass(noBg)}
+        onClick={onClick}
+        title={value}
+    >
         {value}
     </span>
 )

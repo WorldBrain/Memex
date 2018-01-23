@@ -4,26 +4,20 @@ import classNames from 'classnames'
 
 import localStyles from './Filters.css'
 
-const getTagClass = noBg =>
+const getTagClass = () =>
     classNames(localStyles.tagname, {
-        [localStyles.notExpanded]: !noBg,
+        [localStyles.notExpanded]: true,
     })
 
-const FilterPill = ({ value, noBg = false, onClick = f => f, setRef }) => (
+const FilterPill = ({ value, onClick = f => f }) => (
     <span className={localStyles.pillContainer}>
-        <span
-            ref={setRef}
-            className={getTagClass(noBg)}
-            onClick={noBg ? onClick : null}
-        >
+        <span className={getTagClass()} title={value}>
             {value}
         </span>
         <span className={localStyles.closeIcon}>
-            {!noBg && (
-                <i className="material-icons" onClick={onClick}>
-                    clear
-                </i>
-            )}
+            <i className="material-icons" onClick={onClick}>
+                clear
+            </i>
         </span>
     </span>
 )
@@ -31,8 +25,6 @@ const FilterPill = ({ value, noBg = false, onClick = f => f, setRef }) => (
 FilterPill.propTypes = {
     value: PropTypes.string.isRequired,
     onClick: PropTypes.func,
-    noBg: PropTypes.bool,
-    setRef: PropTypes.func,
 }
 
 export default FilterPill

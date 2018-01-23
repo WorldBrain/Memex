@@ -23,6 +23,7 @@ class OverviewContainer extends Component {
     static propTypes = {
         grabFocusOnMount: PropTypes.bool.isRequired,
         handleInputChange: PropTypes.func.isRequired,
+        handleInputClick: PropTypes.func.isRequired,
         onBottomReached: PropTypes.func.isRequired,
         isLoading: PropTypes.bool.isRequired,
         isNewSearchLoading: PropTypes.bool.isRequired,
@@ -72,6 +73,12 @@ class OverviewContainer extends Component {
     setTagButtonRef = el => this.tagBtnRefs.push(el)
     addFurtherTagRef = el => this.furtherTagRefs.push(el)
 
+    handleSearchEnter = event => {
+        if (event.key === 'Enter') {
+            this.props.handleInputClick(event)
+        }
+    }
+
     renderTags = ({ shouldDisplayTagPopup, url }, index) =>
         shouldDisplayTagPopup ? (
             <TagsContainer
@@ -83,27 +90,33 @@ class OverviewContainer extends Component {
             />
         ) : null
 
-    renderTagsFilter = shouldDisplayTagFilterPopup =>
-        shouldDisplayTagFilterPopup ? (
+    renderTagsFilter = () => {
+        const { shouldDisplayTagFilterPopup } = this.props
+
+        return shouldDisplayTagFilterPopup ? (
             <FilterContainer
                 tag
                 setTagDivRef={this.setTagDivRef}
-                onTagAdd={this.props.addTagFilter}
-                onTagDel={this.props.delTagFilter}
-                tagInputs={this.props.filterTags}
+                onFilterAdd={this.props.addTagFilter}
+                onFilterDel={this.props.delTagFilter}
+                initFilters={this.props.filterTags}
             />
         ) : null
+    }
 
-    renderDomainsFilter = shouldDisplayDomainFilterPopup =>
-        shouldDisplayDomainFilterPopup ? (
+    renderDomainsFilter = () => {
+        const { shouldDisplayDomainFilterPopup } = this.props
+
+        return shouldDisplayDomainFilterPopup ? (
             <FilterContainer
                 domain
                 setTagDivRef={this.setTagDivRef}
-                onDomainAdd={this.props.addDomainFilter}
-                onDomainDel={this.props.delDomainFilter}
-                domainInputs={this.props.filterDomains}
+                onFilterAdd={this.props.addDomainFilter}
+                onFilterDel={this.props.delDomainFilter}
+                initFilters={this.props.filterDomains}
             />
         ) : null
+    }
 
     renderTagPills({ tagPillsData, tags }, resultIndex) {
         const pills = tagPillsData.map((tag, i) => (
@@ -283,30 +296,22 @@ class OverviewContainer extends Component {
     }
 
     render() {
-        const {
-            shouldDisplayDomainFilterPopup,
-            shouldDisplayTagFilterPopup,
-            filterTags,
-            filterDomains,
-        } = this.props
+        const { filterTags, filterDomains } = this.props
 
         return (
             <Overview
                 {...this.props}
                 setInputRef={this.setInputRef}
                 onInputChange={this.props.handleInputChange}
-                tagFilterManager={this.renderTagsFilter(
-                    shouldDisplayTagFilterPopup,
-                )}
-                domainFilterManager={this.renderDomainsFilter(
-                    shouldDisplayDomainFilterPopup,
-                )}
+                tagFilterManager={this.renderTagsFilter()}
+                domainFilterManager={this.renderDomainsFilter()}
                 setTagDomainButtonRef={this.addFurtherTagRef}
                 tagFilterPills={this.renderFilterPills(filterTags, 'tag')}
                 domainFilterPills={this.renderFilterPills(
                     filterDomains,
                     'domain',
                 )}
+                onQuerySearchKeyDown={this.handleSearchEnter}
             >
                 {this.renderResults()}
             </Overview>
@@ -361,7 +366,11 @@ const mapDispatchToProps = dispatch => ({
     ),
     handleInputChange: event => {
         const input = event.target
-        dispatch(actions.setQuery(input.value))
+        dispatch(actions.setQueryTagsDomains(input.value, false))
+    },
+    handleInputClick: event => {
+        const input = event.target
+        dispatch(actions.setQueryTagsDomains(input.value, true))
     },
     handleTrashBtnClick: ({ url }, index) => event => {
         event.preventDefault()

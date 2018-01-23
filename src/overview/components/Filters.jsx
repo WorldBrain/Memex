@@ -3,32 +3,21 @@ import PropTypes from 'prop-types'
 
 import localStyles from './Filters.css'
 
-const Filters = ({
-    showOnlyBookmarks,
-    onShowOnlyBookmarksChange,
-    clearAllFilters,
-    isClearFilterButtonShown,
-    tagFilterManager,
-    domainFilterManager,
-    onFilterClick,
-    setTagDomainButtonRef,
-    tagFilterPills,
-    domainFilterPills,
-}) => (
+const Filters = props => (
     <div className={localStyles.filtersMain}>
         <div className={localStyles.filters}>
             <div
                 style={{
-                    visibility: `${isClearFilterButtonShown
+                    visibility: `${props.isClearFilterButtonShown
                         ? 'visible'
                         : 'hidden'}`,
                 }}
                 className={localStyles.clearDiv}
             >
-                {isClearFilterButtonShown && (
+                {props.isClearFilterButtonShown && (
                     <button
                         type="button"
-                        onClick={clearAllFilters}
+                        onClick={props.clearAllFilters}
                         className={localStyles.clear}
                     >
                         Clear Filters
@@ -38,33 +27,37 @@ const Filters = ({
             <div className={localStyles.tags}>
                 <div
                     className={localStyles.filterTagText}
-                    onClick={() => onFilterClick('tag')}
+                    onClick={() => props.onFilterClick('tag')}
                 >
                     Tags
                     <div
                         className={localStyles.filterTagIcon}
-                        ref={setTagDomainButtonRef}
+                        ref={props.setTagDomainButtonRef}
                     />
                 </div>
-                <div className={localStyles.tagsFilter}>{tagFilterPills}</div>
-                <div className={localStyles.tagsPopup}>{tagFilterManager}</div>
+                <div className={localStyles.tagsFilter}>
+                    {props.tagFilterPills}
+                </div>
+                <div className={localStyles.tagsPopup}>
+                    {props.tagFilterManager}
+                </div>
             </div>
             <div className={localStyles.domains}>
                 <div
                     className={localStyles.filterDomainText}
-                    onClick={() => onFilterClick('domain')}
+                    onClick={() => props.onFilterClick('domain')}
                 >
                     Domains
                     <div
                         className={localStyles.filterDomainIcon}
-                        ref={setTagDomainButtonRef}
+                        ref={props.setTagDomainButtonRef}
                     />
                 </div>
                 <div className={localStyles.tagsFilter}>
-                    {domainFilterPills}
+                    {props.domainFilterPills}
                 </div>
                 <div className={localStyles.domainsPopup}>
-                    {domainFilterManager}
+                    {props.domainFilterManager}
                 </div>
             </div>
             <div className={localStyles.misc}>
@@ -74,8 +67,8 @@ const Filters = ({
                         type="checkbox"
                         name="showOnlyBookmarks"
                         id="showOnlyBookmarks"
-                        checked={showOnlyBookmarks}
-                        onChange={onShowOnlyBookmarksChange}
+                        checked={props.showOnlyBookmarks}
+                        onChange={props.onShowOnlyBookmarksChange}
                     />
                     <label htmlFor="showOnlyBookmarks">
                         <span className={localStyles.checkboxText}>

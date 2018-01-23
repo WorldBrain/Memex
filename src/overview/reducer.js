@@ -62,6 +62,7 @@ function toggleBookmarkFilter(state, showOnlyBookmarks) {
             showOnlyBookmarks === true
                 ? showOnlyBookmarks
                 : !state.showOnlyBookmarks,
+        showFilter: true,
     }
 }
 
@@ -177,17 +178,26 @@ const delDomainFilter = (state, domain) => {
 }
 
 const setTagFilters = (state, tags) => {
+    if (typeof tags === 'string') {
+        tags = queryString.parse(tags, { arrayFormat: 'bracket' }).tags
+    }
+
     return {
         ...state,
-        filterTags: queryString.parse(tags, { arrayFormat: 'bracket' }).tags,
+        filterTags: tags,
+        showFilter: true,
     }
 }
 
 const setDomainFilters = (state, domains) => {
+    if (typeof domains === 'string') {
+        domains = queryString.parse(domains, { arrayFormat: 'bracket' }).domains
+    }
+
     return {
         ...state,
-        filterDomains: queryString.parse(domains, { arrayFormat: 'bracket' })
-            .domains,
+        filterDomains: domains,
+        showFilter: true,
     }
 }
 
@@ -242,6 +252,12 @@ const changeHasBookmark = (state, index) => {
 const setFilterPopup = (state, name) => {
     let filterPopup = state.filterPopup
 
+    /*
+        filterPopup{'tag'|'domain'|''} and name{'tag|domain'} is when click on any tag/domain
+        when length is zero,it means set on the same as click
+        if name is same as filterPopup, it means click on the same so just unset it
+        otherwise the different one. e.g. id tag is there then just set the domain and vice versa
+    */
     if (!filterPopup.length) {
         filterPopup = name
     } else if (filterPopup === name) {
