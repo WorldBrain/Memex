@@ -360,7 +360,7 @@ class PopupContainer extends Component {
                 <hr />
                 <LinkButton
                     btnClass={styles.voteIcon}
-                    href="https://worldbrain.useresponse.com/topics/idea/status/all/category/all/sort/updated/page/1"
+                    href="https://worldbrain.io/vote_feature"
                 >
                     Vote for Next Features
                 </LinkButton>
@@ -372,7 +372,7 @@ class PopupContainer extends Component {
                     btnClass={styles.settings}
                 />
                 <ButtonIcon
-                    href="https://worldbrain.useresponse.com"
+                    href="https://worldbrain.io/help"
                     icon="help"
                     btnClass={styles.help}
                 />

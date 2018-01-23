@@ -29,6 +29,22 @@ const ShareButtons = () => (
             >
                 Feedback
             </ShareButton>
+            <div className={styles.chatBox}>
+                <ShareButton
+                    className={styles.chat}
+                    href="https://worldbrain.io/how-can-we-help-you/"
+                    imgSrc="/img/chatwithus.png"
+                    style={{ height: 35, width: 35 }}
+                />
+                <p className={styles.chatText}>
+                    <a
+                        target="_new"
+                        href="https://worldbrain.io/how-can-we-help-you/"
+                    >
+                        Chat with us
+                    </a>
+                </p>{' '}
+            </div>
         </div>
     </div>
 )

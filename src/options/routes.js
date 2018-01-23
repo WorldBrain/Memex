@@ -52,7 +52,7 @@ export default [
     },
     {
         name: 'Help Me Please',
-        pathname: 'https://worldbrain.useresponse.com/',
+        pathname: 'https://worldbrain.io/help',
         component: 'faq',
         icon: 'help',
     },
