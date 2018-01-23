@@ -26,7 +26,7 @@ class TagsContainer extends Component {
     constructor(props) {
         super(props)
 
-        this.suggestTags = remoteFunction('suggestTags')
+        this.suggest = remoteFunction('suggest')
         this.fetchTags = remoteFunction('fetchTags')
         this.addTags = remoteFunction('addTags')
         this.delTags = remoteFunction('delTags')
@@ -233,7 +233,7 @@ class TagsContainer extends Component {
         let suggestions = this.state.tags
 
         try {
-            suggestions = await this.suggestTags(searchVal)
+            suggestions = await this.suggest(searchVal, 'tag')
         } catch (err) {
         } finally {
             this.setState(state => ({

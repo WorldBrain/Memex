@@ -163,7 +163,12 @@ export const isEmptyQuery = createSelector(
     showOnlyBookmarks,
     filterTags,
     filterDomains,
-    ({ query, startDate, endDate }, showOnlyBookmarks, tags) =>
+    (
+        { query, startDate, endDate },
+        showOnlyBookmarks,
+        filterTags,
+        filterDomains,
+    ) =>
         !query.length &&
         !startDate &&
         !endDate &&

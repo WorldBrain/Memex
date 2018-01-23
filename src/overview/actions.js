@@ -266,6 +266,7 @@ export const filterTag = tag => (dispatch, getState) => {
     const state = getState()
     const query = selectors.query(state)
     const filterTags = selectors.filterTags(state)
+    const filterStatus = selectors.showFilter(state)
 
     const transformedTag = `#${tag.split(' ').join('+')} `
 
@@ -275,9 +276,13 @@ export const filterTag = tag => (dispatch, getState) => {
 
     dispatch(setQuery(newQuery))
 
-    if (filterTags.indexOf(transformedTag) === -1) {
-        dispatch(addTagFilter(transformedTag))
+    if (filterTags.indexOf(transformedTag.slice(1, -1)) === -1) {
+        dispatch(addTagFilter(transformedTag.slice(1, -1)))
     } else {
-        dispatch(delTagFilter(transformedTag))
+        dispatch(delTagFilter(transformedTag.slice(1, -1)))
+    }
+
+    if (!filterStatus) {
+        dispatch(showFilter())
     }
 }

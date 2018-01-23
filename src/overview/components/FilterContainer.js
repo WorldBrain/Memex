@@ -38,8 +38,7 @@ class FilterContainer extends Component {
     constructor(props) {
         super(props)
 
-        this.suggestTags = remoteFunction('suggestTags')
-        this.suggestDomains = remoteFunction('suggestDomains')
+        this.suggest = remoteFunction('suggest')
 
         this.fetchTagSuggestions = debounce(300)(this.fetchTagSuggestions)
     }
@@ -195,9 +194,10 @@ class FilterContainer extends Component {
         let suggestions = this.state.displayTags
 
         try {
-            suggestions = this.props.tag
-                ? await this.suggestTags(searchVal)
-                : await this.suggestDomains(searchVal)
+            suggestions = await this.suggest(
+                searchVal,
+                this.props.tag ? 'tag' : 'domain',
+            )
         } catch (err) {
         } finally {
             this.setState(state => ({
