@@ -21,13 +21,13 @@ ReactDOM.render(
     <Provider store={store}>
         <ErrorBoundary component={RuntimeError}>
             <Router history={hashHistory}>
-                <Route path="/" component={Layout}>
+                <Route path="/" component={withPageTracking(Layout)}>
                     <IndexRedirect to="/blacklist" />
                     {Routes.map(route => (
                         <Route
                             key={route.pathname}
                             path={route.pathname}
-                            component={withPageTracking(route.component)}
+                            component={route.component}
                         />
                     ))}
                 </Route>

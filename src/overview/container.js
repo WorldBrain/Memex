@@ -5,6 +5,7 @@ import { bindActionCreators } from 'redux'
 import Waypoint from 'react-waypoint'
 import reduce from 'lodash/fp/reduce'
 
+import analytics from 'src/analytics'
 import { Wrapper, LoadingIndicator } from 'src/common-ui/components'
 import { TagsContainer } from 'src/common-ui/containers'
 import * as actions from './actions'
@@ -54,6 +55,8 @@ class OverviewContainer extends Component {
     }
 
     componentDidMount() {
+        analytics.trackPage({ title: document.title })
+
         document.addEventListener('click', this.handleOutsideClick, false)
         if (this.props.grabFocusOnMount) {
             this.inputQueryEl.focus()
