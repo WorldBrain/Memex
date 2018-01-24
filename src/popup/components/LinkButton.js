@@ -6,12 +6,8 @@ import Button from './Button'
 
 import styles from './Button.css'
 
-const trackLinkClick = name => () =>
-    analytics.trackEvent({
-        category: 'Popup',
-        action: 'Popup link click',
-        name,
-    })
+const trackLinkClick = url => () =>
+    analytics.trackLink({ linkType: 'link', url })
 
 const LinkButton = ({ href, ...btnProps }) => (
     <a
