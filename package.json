@@ -48,7 +48,6 @@
     "normalize-url": "^1.9.1",
     "page-metadata-parser": "git+https://github.com/Treora/page-metadata-parser.git#npm-testable",
     "pdfjs-dist": "^1.8.492",
-    "piwik-react-router": "^0.10.0",
     "pouchdb-browser": "^6.2.0",
     "pouchdb-find": "^6.2.0",
     "promise-limit": "^2.5.0",
