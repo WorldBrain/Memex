@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import qs from 'query-string'
 
-import analytics from 'src/analytics'
+import analytics, { updateLastActive } from 'src/analytics'
 import { initSingleLookup } from 'src/search/search-index/util'
 import extractQueryFilters from 'src/util/nlp-time-filter'
 import { remoteFunction } from 'src/util/webextensionRPC'
@@ -184,6 +184,7 @@ class PopupContainer extends Component {
 
         // Tell background script to do on extension level
         this.toggleLoggingPause(pauseValue)
+        updateLastActive() // Consider user active (analytics)
 
         // Do local level state toggle and reset
         this.setState(state => ({
@@ -297,8 +298,11 @@ class PopupContainer extends Component {
         ) {
             this.removeBookmarkByUrl(this.state.url)
         }
+
+        updateLastActive() // Consider user active (analytics)
         window.close()
     }
+
     toggleTagPopup = () =>
         this.setState(state => ({
             ...state,
