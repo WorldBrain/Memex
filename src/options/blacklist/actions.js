@@ -1,6 +1,6 @@
 import { createAction } from 'redux-act'
 
-import analytics from 'src/analytics'
+import analytics, { updateLastActive } from 'src/analytics'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import * as selectors from './selectors'
 import { STORAGE_KEY } from './constants'
@@ -59,6 +59,7 @@ export const addToBlacklist = expression => async (dispatch, getState) => {
         }
     } catch (error) {
     } finally {
+        updateLastActive() // Consider user active (analytics)
         dispatch(setIsLoading(false))
         dirtyEstsCache() // Force import ests to recalc next visit
     }
@@ -79,6 +80,7 @@ export const removeFromBlacklist = index => async (dispatch, getState) => {
         [STORAGE_KEY]: JSON.stringify(newBlacklist),
     })
 
+    updateLastActive() // Consider user active (analytics)
     dispatch(removeSiteFromBlacklist({ index }))
     dirtyEstsCache() // Force import ests to recalc next visit
 }

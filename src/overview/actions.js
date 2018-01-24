@@ -1,7 +1,7 @@
 import { createAction } from 'redux-act'
 
 import { generatePageDocId } from 'src/page-storage'
-import analytics from 'src/analytics'
+import analytics, { updateLastActive } from 'src/analytics'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import * as constants from './constants'
 import * as selectors from './selectors'
@@ -163,6 +163,7 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
 
     // Tell background script to search
     port.postMessage({ cmd: constants.CMDS.SEARCH, searchParams, overwrite })
+    updateLastActive() // Consider user active (analytics)
 }
 
 // Analytics use
@@ -237,6 +238,7 @@ export const deleteDocs = () => async (dispatch, getState) => {
     } catch (error) {
     } finally {
         dispatch(setResultDeleting(undefined))
+        updateLastActive() // Consider user active (analytics)
     }
 }
 
@@ -261,6 +263,8 @@ export const toggleBookmark = (url, index) => async (dispatch, getState) => {
         }
     } catch (error) {
         dispatch(changeHasBookmark(index)) // Reset UI state in case of error
+    } finally {
+        updateLastActive() // Consider user active (analytics)
     }
 }
 

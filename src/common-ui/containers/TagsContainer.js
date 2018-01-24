@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import debounce from 'lodash/fp/debounce'
 import noop from 'lodash/fp/noop'
 
+import { updateLastActive } from 'src/analytics'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { Tags, NewTagRow, TagRow } from '../components'
 
@@ -106,6 +107,7 @@ class TagsContainer extends Component {
                 focused: 0,
             }))
             this.props.onFilterAdd(newTag)
+            updateLastActive() // Consider user active (analytics)
         }
     }
 
@@ -143,6 +145,7 @@ class TagsContainer extends Component {
                 filters: tagsReducer(state.filters),
                 focused: index,
             }))
+            updateLastActive() // Consider user active (analytics)
         }
     }
 
