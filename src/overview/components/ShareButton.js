@@ -4,12 +4,8 @@ import PropTypes from 'prop-types'
 import analytics from 'src/analytics'
 import styles from './ShareButtons.css'
 
-const trackLinkClick = name => () =>
-    analytics.trackEvent({
-        category: 'Overview',
-        action: 'Share button click',
-        name,
-    })
+const trackLinkClick = url => () =>
+    analytics.trackLink({ linkType: 'link', url })
 
 const ShareButton = ({ className, href, imgSrc, children }) => (
     <a
