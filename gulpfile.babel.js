@@ -246,34 +246,16 @@ gulp.task('package-source-code', () =>
         .pipe(gulp.dest('dist')),
 )
 
-gulp.task('package-chromium', () =>
+gulp.task('package-extension', () =>
     gulp
         .src('extension/**/*')
-        .pipe(zip('chromium.zip'))
+        .pipe(zip('extension.zip'))
         .pipe(gulp.dest('dist')),
 )
 
-gulp.task('package-firefox', async () => {
-    // TODO: Skip this step when analytics moved to use HTTP API
-    const rmContentPolicy = file =>
-        `sed -i '' '/content_security_policy/,/^/d' ${file}`
-    await exec(rmContentPolicy('extension/manifest.json'))
-    await exec(rmContentPolicy('src/manifest.json'))
-
-    return gulp
-        .src('extension/**/*')
-        .pipe(zip('firefox.zip'))
-        .pipe(gulp.dest('dist'))
-})
-
 gulp.task(
     'package',
-    gulpSeq(
-        'build-prod',
-        'package-chromium',
-        'package-firefox',
-        'package-source-code',
-    ),
+    gulpSeq('build-prod', ['package-source-code', 'package-extension']),
 )
 
 /* DEPRECATED */
