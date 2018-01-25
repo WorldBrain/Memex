@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
+import { OutLink } from 'src/common-ui/containers'
 import DateRangeSelection from './DateRangeSelection'
 import styles from './Overview.css'
 
@@ -39,13 +40,12 @@ const Header = ({
             </div>
         </div>
         <div className={styles.links}>
-            <a
+            <OutLink
                 className={styles.upgrade}
                 href="https://worldbrain.io/pricing"
-                target="_new"
             >
                 Upgrade Memex
-            </a>
+            </OutLink>
             <a href="/options/options.html">
                 <img src="/img/settings-icon.png" className={styles.icon} />
             </a>

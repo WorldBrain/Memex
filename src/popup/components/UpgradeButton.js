@@ -1,15 +1,16 @@
 import React from 'react'
 import classNames from 'classnames'
+
+import { OutLink } from 'src/common-ui/containers'
 import styles from './UpgradeButton.css'
 
 const UpgradeButton = () => (
-    <a
+    <OutLink
         className={classNames(styles.upgradeButton)}
         href="https://worldbrain.io/pricing"
-        target="_blank"
     >
         Upgrade Memex
-    </a>
+    </OutLink>
 )
 
 export default UpgradeButton
