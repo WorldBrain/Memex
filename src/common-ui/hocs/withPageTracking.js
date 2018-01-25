@@ -23,7 +23,6 @@ const withPageTracking = Component =>
         _trackPage = () => analytics.trackPage({ title: document.title })
 
         componentDidMount() {
-            console.log('mounted')
             this.trackPage()
         }
 
