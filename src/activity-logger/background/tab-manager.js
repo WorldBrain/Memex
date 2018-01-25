@@ -82,7 +82,7 @@ export class TabManager {
      */
     scheduleTabLog(id, logCb) {
         const tab = this.getTabState(id)
-        tab.scheduledLog = logCb
+        tab.scheduleLog(logCb)
     }
 
     clearScheduledLog(id) {
@@ -116,5 +116,7 @@ export class TabManager {
 
 // Set up singleton to use throughout bg script
 const manager = new TabManager()
+
+window.man = manager
 
 export default manager

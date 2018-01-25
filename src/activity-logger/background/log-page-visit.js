@@ -33,7 +33,6 @@ export async function logInitPageVisit(tabId, secsSinceLastIndex = 20) {
                 moment(+visitTime).subtract(secsSinceLastIndex, 'seconds'),
             )
         ) {
-            tabManager.clearScheduledLog(tabId)
             return await index.addTimestampConcurrent(pageId, visitId)
         }
 

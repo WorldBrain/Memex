@@ -1,3 +1,5 @@
+import debounce from 'lodash/fp/debounce'
+
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import { whenPageDOMLoaded, whenTabActive } from 'src/util/tab-events'
 import { updateTimestampMetaConcurrent } from 'src/search'
@@ -109,8 +111,10 @@ function handleNavChange({ tabId, frameId }) {
     }
 }
 
-browser.webNavigation.onCompleted.addListener(handleNavChange)
-browser.webNavigation.onHistoryStateUpdated.addListener(handleNavChange)
+// Debounce initial metadata indexing as these two events can be emitted from the same webNavigation process
+const debouncedNavChange = debounce(1000)(handleNavChange)
+browser.webNavigation.onCompleted.addListener(debouncedNavChange)
+browser.webNavigation.onHistoryStateUpdated.addListener(debouncedNavChange)
 
 browser.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
     // `changeInfo` should only contain `url` prop if URL changed - what we care about for scheduling logging

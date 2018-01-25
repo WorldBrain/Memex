@@ -10,28 +10,33 @@ import { revisePageFields } from '..'
 import getFavIcon from './get-fav-icon'
 import makeScreenshot from './make-screenshot'
 
+const getAttachmentHandler = (pageId, attachment) =>
+    async function(dataUrl) {
+        if (dataUrl == null) {
+            return
+        }
+        const blob = await dataURLToBlob(dataUrl)
+        await setAttachment(db, pageId, attachment, blob)
+    }
+
 // Extract interesting stuff from the current page and store it.
 async function performPageAnalysis({ pageId, tabId }) {
     // Run these functions in the content script in the tab.
     const extractPageContent = remoteFunction('extractPageContent', { tabId })
 
     // Get and store the fav-icon
-    const storeFavIcon = getFavIcon({ tabId }).then(async dataUrl => {
-        if (dataUrl === undefined) return
-        const blob = await dataURLToBlob(dataUrl)
-        await setAttachment(db, pageId, 'favIcon', blob)
-    })
+    const storeFavIcon = getFavIcon({ tabId }).then(
+        getAttachmentHandler(pageId, 'favIcon'),
+    )
 
     // Capture a screenshot.
-    const storeScreenshot = makeScreenshot({ tabId }).then(async dataUrl => {
-        if (dataUrl === undefined) return
-        const blob = await dataURLToBlob(dataUrl)
-        await setAttachment(db, pageId, 'screenshot', blob)
-    })
+    const storeScreenshot = makeScreenshot({ tabId }).then(
+        getAttachmentHandler(pageId, 'screenshot'),
+    )
 
     // Extract the text and metadata
+    // Add the info to the doc's (possibly already existing) doc.content.
     const storePageContent = extractPageContent().then(content =>
-        // Add the info to the doc's (possibly already existing) doc.content.
         updateDoc(db, pageId, doc => ({
             ...doc,
             content: { ...doc.content, ...content },
