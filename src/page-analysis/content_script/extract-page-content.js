@@ -1,9 +1,10 @@
 import pick from 'lodash/fp/pick'
 import { getMetadata, metadataRules } from 'page-metadata-parser'
 
-import transformPageText from 'src/util/transform-page-text'
 import transformPageHTML from 'src/util/transform-page-html'
 import extractPdfContent from './extract-pdf-content'
+
+export const DEF_LANG = 'en'
 
 // Extract the text content from web pages and PDFs.
 export default async function extractPageContent(
@@ -18,15 +19,9 @@ export default async function extractPageContent(
         return await extractPdfContent({ url })
     }
 
-    const lang = doc.documentElement.lang
-
     // // Apply simple transformations to clean the page's HTML
     const { text: processedHtml } = transformPageHTML({
         html: doc.body.innerHTML,
-    })
-    const { text: processedText } = transformPageText({
-        text: processedHtml,
-        lang,
     })
 
     // Metadata of web page
@@ -39,7 +34,8 @@ export default async function extractPageContent(
     const metadata = getMetadata(doc, url, selectedMetadataRules)
 
     return {
-        fullText: processedText,
+        fullText: processedHtml,
+        lang: doc.documentElement.lang || DEF_LANG,
         // Picking desired fields, as getMetadata adds some unrequested stuff.
         ...pick(Object.keys(selectedMetadataRules))(metadata),
     }
