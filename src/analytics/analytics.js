@@ -25,7 +25,7 @@ class Analytics {
      */
     constructor({ url, siteId }) {
         this._siteId = siteId
-        this._host = url + Analytics.API_PATH
+        this._host = 'http://' + url + Analytics.API_PATH
     }
 
     get defaultParams() {

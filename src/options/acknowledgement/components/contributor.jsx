@@ -1,5 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
+
+import { OutLink } from 'src/common-ui/containers'
 import localStyles from './styles.css'
 
 class Contributor extends Component {
@@ -13,17 +15,16 @@ class Contributor extends Component {
         const links = contributor.links ? contributor.links : []
         return links.map((item, id) => {
             return (
-                <a
+                <OutLink
                     className={localStyles.links}
                     href={item[Object.keys(item)[0]]}
-                    target="_blank"
                     key={id}
                 >
                     <img
                         className={localStyles.socialIcons}
                         src={'/img/' + Object.keys(item)[0] + '.png'}
                     />
-                </a>
+                </OutLink>
             )
         })
     }
@@ -43,9 +44,9 @@ class Contributor extends Component {
                         {contributor.position}
                     </span>
                     <br />
-                    <a className={localStyles.web} href={contributor.web}>
+                    <OutLink className={localStyles.web} href={contributor.web}>
                         {contributor.web}
-                    </a>
+                    </OutLink>
                     <br />
                     {this.fetchContributorsLinks()}
                 </p>
