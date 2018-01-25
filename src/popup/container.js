@@ -82,7 +82,7 @@ class PopupContainer extends Component {
         domainDelete: false,
         tabID: null,
         tagMode: false,
-        isTagBtnDisabled: false,
+        isTagBtnDisabled: true,
     }
 
     async componentDidMount() {
@@ -106,15 +106,11 @@ class PopupContainer extends Component {
             .catch(noop)
         this.getInitBlacklistBtnState(currentTab.url)
             .then(updateState)
-            .then(() => this.getInitBookmarkBtnState(currentTab.url))
-            .then(updateState)
-            .catch(noop)
-        this.getInitTagsState(currentTab.url)
+            .then(() => this.getDBDepBtnsState(currentTab.url))
             .then(updateState)
             .catch(noop)
     }
-    getInitTagsState = url =>
-        Promise.resolve({ isTagBtnDisabled: !isLoggable({ url }) })
+
     getInitPauseState = async () => ({ isPaused: await getPauseState() })
 
     async getInitBlacklistBtnState(url) {
@@ -128,7 +124,14 @@ class PopupContainer extends Component {
         }
     }
 
-    async getInitBookmarkBtnState(url) {
+    /**
+     * Handles getting the init state of buttons depending on DB state (page existence), among other
+     * async sources.
+     *
+     * @param {string} url
+     * @return {Promise<any>} Resolves to object describing the changes to state.
+     */
+    async getDBDepBtnsState(url) {
         const pageId = await generatePageDocId({ url })
         const lookup = initSingleLookup()
         const dbResult = await lookup(pageId)
@@ -138,7 +141,10 @@ class PopupContainer extends Component {
             blacklist: this.state.blacklistBtn,
         }
 
-        return { bookmarkBtn: getBookmarkButtonState(result) }
+        return {
+            bookmarkBtn: getBookmarkButtonState(result),
+            isTagBtnDisabled: !result.loggable || dbResult == null,
+        }
     }
 
     onBlacklistBtnClick(domainDelete = false) {
