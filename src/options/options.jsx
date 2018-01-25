@@ -4,7 +4,7 @@ import { Router, Route, IndexRedirect, hashHistory } from 'react-router'
 import { Provider } from 'react-redux'
 
 import { ErrorBoundary, RuntimeError } from 'src/common-ui/components'
-import withPageTracking from './withPageTracking'
+import { withPageTracking } from 'src/common-ui/hocs'
 import configureStore from './store'
 import Layout from './layout'
 import Routes from './routes'
