@@ -1,3 +1,4 @@
+import PausableTimer from 'src/util/pausable-timer'
 import ScrollState from './scroll-state'
 
 /**
@@ -22,34 +23,29 @@ class Tab {
         this.activeTime = 0
         this.lastActivated = Date.now()
 
-        this._logCb = null
-        this._timeout = null
-        this._timeoutRemain = logDelay
+        this._timer = null
+        this._logDelay = logDelay
     }
 
     scheduleLog(logCb) {
         this.cancelPendingOps()
-        this._logCb = logCb
-
-        // Start timer if currently active
-        if (this.isActive) {
-            this._resumeLogTimer()
-        }
+        this._timer = new PausableTimer({
+            delay: this._logDelay,
+            cb: logCb,
+            // Start timer if currently active
+            start: this.isActive,
+        })
     }
 
     _pauseLogTimer() {
-        // If there is a pending timeout
-        if (this._timeout != null) {
-            clearTimeout(this._timeout)
-            this._timeout = null
-            this._timeoutRemain -= Date.now() - this.lastActivated
+        if (this._timer != null) {
+            this._timer.pause()
         }
     }
 
     _resumeLogTimer() {
-        // If log still has not occurred
-        if (this._logCb != null && this._timeoutRemain > 0) {
-            this._timeout = setTimeout(this._logCb, this._timeoutRemain)
+        if (this._timer != null) {
+            this._timer.resume()
         }
     }
 
@@ -66,9 +62,10 @@ class Tab {
     }
 
     cancelPendingOps() {
-        clearTimeout(this._timeout)
-        this._timeout = null
-        this._logCb = null
+        if (this._timer != null) {
+            this._timer.clear()
+            this._timer = null
+        }
     }
 }
 

@@ -1,5 +1,3 @@
-import debounce from 'lodash/fp/debounce'
-
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import { whenPageDOMLoaded, whenTabActive } from 'src/util/tab-events'
 import { updateTimestampMetaConcurrent } from 'src/search'
@@ -39,7 +37,7 @@ async function shouldLogTab(tab) {
 /**
  * Handles update of assoc. visit with derived tab state data, using the tab state.
  *
- * @param {TabActiveState} tab The tab state to derive visit meta data from.
+ * @param {Tab} tab The tab state to derive visit meta data from.
  */
 async function updateVisitForTab({ visitTime, activeTime, scrollState }) {
     const visitKey = visitKeyPrefix + visitTime
@@ -99,41 +97,29 @@ browser.webNavigation.onCommitted.addListener(
     },
 )
 
-/**
- * Run the initial metadata indexing on the `webNavigation.onCompleted` and `onHistoryStateUpdated` events,
- * for standarad navigation and client-side routing navs respectively.
- * Note that indexing is only run on `frameId` === `0`, meaning the top level page
- * (events may be fired for nested iframes).
- */
-function handleNavChange({ tabId, frameId }) {
-    if (frameId === 0) {
-        logInitPageVisit(tabId).catch(console.error)
-    }
-}
-
-// Debounce initial metadata indexing as these two events can be emitted from the same webNavigation process
-const debouncedNavChange = debounce(1000)(handleNavChange)
-browser.webNavigation.onCompleted.addListener(debouncedNavChange)
-browser.webNavigation.onHistoryStateUpdated.addListener(debouncedNavChange)
-
 browser.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
     // `changeInfo` should only contain `url` prop if URL changed - what we care about for scheduling logging
     if (changeInfo.url) {
-        // Ensures the URL change counts as a new visit in tab state (tab ID doesn't change)
-        const oldTab = tabManager.resetTab(tabId, tab.active)
-        if (oldTab.activeTime > fauxVisitThreshold) {
-            // Send off request for updating that prev. visit's tab state, if active long enough
-            updateVisitForTab(oldTab)
-        }
+        try {
+            // Ensures the URL change counts as a new visit in tab state (tab ID doesn't change)
+            const oldTab = tabManager.resetTab(tabId, tab.active)
+            if (oldTab.activeTime > fauxVisitThreshold) {
+                // Send off request for updating that prev. visit's tab state, if active long enough
+                updateVisitForTab(oldTab)
+            }
+        } catch (err) {}
 
         if (await shouldLogTab(tab)) {
+            whenPageDOMLoaded({ tabId })
+                .then(() => logInitPageVisit(tabId))
+                .catch(console.error)
+
             tabManager.scheduleTabLog(
                 tabId,
                 () =>
                     // Wait until its DOM has loaded, and activated before attemping log
-                    whenPageDOMLoaded({ tabId })
-                        .then(() => whenTabActive({ tabId }))
-                        .then(() => logPageVisit(tabId, tab.url))
+                    whenTabActive({ tabId })
+                        .then(() => logPageVisit(tabId))
                         .catch(console.error), // Ignore any tab state interuptions
             )
         }
