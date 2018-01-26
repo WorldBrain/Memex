@@ -35,7 +35,7 @@ class Analytics {
      */
     constructor({ url, siteId }) {
         this._siteId = siteId
-        this._host = 'http://' + url + Analytics.API_PATH
+        this._host = url + Analytics.API_PATH
 
         browser.idle.onStateChanged.addListener(this._handleIdleStateChange)
     }
@@ -88,6 +88,8 @@ class Analytics {
     _serializePoolReqs = () =>
         [...this._pool].map(params => `?${params.toString()}`)
 
+    _poolReq = params => this._pool.add(this._formReqParams(params))
+
     /**
      * Send a request to the Piwik HTTP Tracking API. Takes care of calculating all default
      * or easily derivable params, merging them with input `params`.
@@ -107,7 +109,8 @@ class Analytics {
      * @return {Promise<boolean>}
      */
     async _sendBulkReq() {
-        if (!this._pool.size) {
+        if (!this._pool.size || !await this.shouldTrack()) {
+            this._pool.clear() // Clear pool if user turned off tracking
             return
         }
 
@@ -138,20 +141,25 @@ class Analytics {
      * Track any user-invoked events.
      *
      * @param {EventTrackInfo} eventArgs
+     * @param {boolean} [force=false] Whether or not to send immediately or just add to request pool.
      */
-    async trackEvent(eventArgs) {
+    async trackEvent(eventArgs, force = false) {
         if (!await this.shouldTrack()) {
             return
         }
 
-        this._pool.add(
-            this._formReqParams({
-                e_c: eventArgs.category,
-                e_a: eventArgs.action,
-                e_n: eventArgs.name,
-                e_v: eventArgs.value,
-            }),
-        )
+        const params = {
+            e_c: eventArgs.category,
+            e_a: eventArgs.action,
+            e_n: eventArgs.name,
+            e_v: eventArgs.value,
+        }
+
+        if (force) {
+            await this._sendReq(params)
+        } else {
+            this._poolReq(params)
+        }
     }
 
     /**
@@ -165,7 +173,7 @@ class Analytics {
         }
 
         const params = linkType === 'link' ? { link: url } : { download: url }
-        return this._pool.add(this._formReqParams({ ...params, url }))
+        return this._poolReq({ ...params, url })
     }
 
     /**
@@ -178,9 +186,7 @@ class Analytics {
             return
         }
 
-        return this._pool.add(
-            this._formReqParams({ action_name: encodeURIComponent(title) }),
-        )
+        return this._poolReq({ action_name: encodeURIComponent(title) })
     }
 }
 

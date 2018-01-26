@@ -47,7 +47,7 @@ async function openOverview() {
 async function onInstall() {
     // Ensure default blacklist entries are stored (before doing anything else)
     await blacklist.addToBlacklist(blacklistConsts.DEF_ENTRIES)
-    analytics.trackEvent({ category: 'Global', action: 'Install' })
+    analytics.trackEvent({ category: 'Global', action: 'Install' }, true)
     // Open onboarding page
     browser.tabs.create({ url: '/options/options.html#/new_install' })
     // Store the timestamp of when the extension was installed + default blacklist
