@@ -104,21 +104,26 @@ class Analytics {
     /**
      * Send a bulk request to the Piwik HTTP Tracking API. Batches all pooled requests, then resets them.
      *
-     * @return {Promise<Response>}
+     * @return {Promise<boolean>}
      */
     async _sendBulkReq() {
         if (!this._pool.size) {
             return
         }
 
-        const res = await fetch(this._host, {
-            method: 'POST',
-            header: Analytics.JSON_HEADER,
-            body: JSON.stringify({ requests: this._serializePoolReqs() }),
-        })
+        try {
+            const res = await fetch(this._host, {
+                method: 'POST',
+                header: Analytics.JSON_HEADER,
+                body: JSON.stringify({ requests: this._serializePoolReqs() }),
+            })
 
-        this._pool.clear()
-        return res
+            if (res.ok) {
+                this._pool.clear()
+                return true
+            }
+        } catch (err) {}
+        return false
     }
 
     async shouldTrack() {
