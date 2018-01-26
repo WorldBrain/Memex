@@ -47,8 +47,8 @@ export const addPage = req => performIndexing(pipeline(req))
  * @returns {Promise<void>} Promise resolving when indexing is complete, or rejecting for any index errors.
  */
 export const addPageConcurrent = req =>
-    new Promise((resolve, reject) => {
-        const indexDoc = pipeline(req).catch(reject)
+    new Promise(async (resolve, reject) => {
+        const indexDoc = await pipeline(req).catch(reject)
 
         indexQueue.push(() =>
             performIndexing(indexDoc)
