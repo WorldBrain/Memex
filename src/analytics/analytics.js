@@ -17,6 +17,16 @@ import { SHOULD_TRACK_STORAGE_KEY as SHOULD_TRACK } from 'src/options/privacy/co
 
 class Analytics {
     static API_PATH = '/piwik.php'
+    static JSON_HEADERS = {
+        Accept: 'application/json, text/plain, */*',
+        'Content-Type': 'application/json',
+    }
+
+    /**
+     * @property {Set<URLSearchParam>} Pool of requests that have been tracked, which will be
+     *  periodically cleared and sent off in bulk.
+     */
+    _pool = new Set()
 
     /**
      * @param {Object} args
@@ -26,6 +36,8 @@ class Analytics {
     constructor({ url, siteId }) {
         this._siteId = siteId
         this._host = 'http://' + url + Analytics.API_PATH
+
+        browser.idle.onStateChanged.addListener(this._handleIdleStateChange)
     }
 
     get defaultParams() {
@@ -39,6 +51,20 @@ class Analytics {
             h: now.getHours(),
             m: now.getMinutes(),
             s: now.getSeconds(),
+        }
+    }
+
+    /**
+     * When system is idle (60s) or gets locked, try to clear the request pool and track all the
+     * recently recorded events.
+     */
+    _handleIdleStateChange = state => {
+        switch (state) {
+            case 'idle':
+            case 'locked':
+                return this._sendBulkReq()
+            case 'active':
+            default:
         }
     }
 
@@ -59,6 +85,9 @@ class Analytics {
         return searchParams
     }
 
+    _serializePoolReqs = () =>
+        [...this._pool].map(params => `?${params.toString()}`)
+
     /**
      * Send a request to the Piwik HTTP Tracking API. Takes care of calculating all default
      * or easily derivable params, merging them with input `params`.
@@ -71,6 +100,31 @@ class Analytics {
             method: 'POST',
             body: this._formReqParams(params),
         })
+
+    /**
+     * Send a bulk request to the Piwik HTTP Tracking API. Batches all pooled requests, then resets them.
+     *
+     * @return {Promise<boolean>}
+     */
+    async _sendBulkReq() {
+        if (!this._pool.size) {
+            return
+        }
+
+        try {
+            const res = await fetch(this._host, {
+                method: 'POST',
+                header: Analytics.JSON_HEADER,
+                body: JSON.stringify({ requests: this._serializePoolReqs() }),
+            })
+
+            if (res.ok) {
+                this._pool.clear()
+                return true
+            }
+        } catch (err) {}
+        return false
+    }
 
     async shouldTrack() {
         const storage = await browser.storage.local.get({
@@ -90,12 +144,14 @@ class Analytics {
             return
         }
 
-        return this._sendReq({
-            e_c: eventArgs.category,
-            e_a: eventArgs.action,
-            e_n: eventArgs.name,
-            e_v: eventArgs.value,
-        })
+        this._pool.add(
+            this._formReqParams({
+                e_c: eventArgs.category,
+                e_a: eventArgs.action,
+                e_n: eventArgs.name,
+                e_v: eventArgs.value,
+            }),
+        )
     }
 
     /**
@@ -109,7 +165,7 @@ class Analytics {
         }
 
         const params = linkType === 'link' ? { link: url } : { download: url }
-        return this._sendReq({ ...params, url })
+        return this._pool.add(this._formReqParams({ ...params, url }))
     }
 
     /**
@@ -122,7 +178,9 @@ class Analytics {
             return
         }
 
-        return this._sendReq({ action_name: encodeURIComponent(title) })
+        return this._pool.add(
+            this._formReqParams({ action_name: encodeURIComponent(title) }),
+        )
     }
 }
 
