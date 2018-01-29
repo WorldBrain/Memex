@@ -39,7 +39,11 @@ async function shouldLogTab(tab) {
  *
  * @param {Tab} tab The tab state to derive visit meta data from.
  */
-async function updateVisitForTab({ visitTime, activeTime, scrollState }) {
+async function updateVisitInteractionData({
+    visitTime,
+    activeTime,
+    scrollState,
+}) {
     const visitKey = visitKeyPrefix + visitTime
 
     try {
@@ -73,11 +77,12 @@ browser.tabs.onActivated.addListener(({ tabId }) =>
     tabManager.activateTab(tabId),
 )
 
+// Runs stage 3 of the visit indexing
 browser.tabs.onRemoved.addListener(tabId => {
     try {
         // Remove tab from tab tracking state and update the visit with tab-derived metadata
         const tab = tabManager.removeTab(tabId)
-        updateVisitForTab(tab)
+        updateVisitInteractionData(tab)
     } catch (error) {}
 })
 
@@ -88,6 +93,7 @@ browser.tabs.onRemoved.addListener(tabId => {
  */
 browser.webNavigation.onCommitted.addListener(
     ({ tabId, frameId, ...navData }) => {
+        // Frame ID is always `0` for the main webpage frame, which is what we care about
         if (frameId === 0) {
             tabManager.updateNavState(tabId, {
                 type: navData.transitionType,
@@ -105,15 +111,17 @@ browser.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
             const oldTab = tabManager.resetTab(tabId, tab.active)
             if (oldTab.activeTime > fauxVisitThreshold) {
                 // Send off request for updating that prev. visit's tab state, if active long enough
-                updateVisitForTab(oldTab)
+                updateVisitInteractionData(oldTab)
             }
         } catch (err) {}
 
         if (await shouldLogTab(tab)) {
+            // Run stage 1 of visit indexing
             whenPageDOMLoaded({ tabId })
                 .then(() => logInitPageVisit(tabId))
                 .catch(console.error)
 
+            // Schedule stage 2 of visit indexing (don't wait for stage 1)
             tabManager.scheduleTabLog(
                 tabId,
                 () =>
