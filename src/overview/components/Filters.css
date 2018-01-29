@@ -43,8 +43,8 @@
     background-image: url('/img/plus.svg');
     background-repeat: no-repeat;
     background-size: 18px;
-    background-position-x: 45px;
-    background-position-y: 20px;
+    background-position-x: 42px;
+    background-position-y: 18px;
     opacity: 0.3;
 }
 
@@ -56,8 +56,8 @@
     background-image: url('/img/plus.svg');
     background-repeat: no-repeat;
     background-size: 18px;
-    background-position-x: 81px;
-    background-position-y: 20px;
+    background-position-x: 78px;
+    background-position-y: 18px;
     opacity: 0.3;
 }
 
@@ -189,6 +189,7 @@ input[type='checkbox'] {
 .clearDiv {
     position: absolute;
     left: 75%;
+    top: 5%;
 }
 
 .clear {
@@ -213,7 +214,7 @@ input[type='checkbox'] {
 
 .notExpanded {
     display: inline-block;
-    max-width: 60px;
+    max-width: 75px;
     color: white;
     overflow: hidden;
     white-space: nowrap;
@@ -244,6 +245,7 @@ input[type='checkbox'] {
 .bookmarks {
     height: 19px;
     padding-top: 2px;
+    padding-left: 4px;
 }
 
 .expandButton {

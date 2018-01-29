@@ -287,6 +287,7 @@ export const setQueryTagsDomains = (input, isEnter) => (dispatch, getState) => {
     const filterTags = selectors.filterTags(state)
     const filterDomains = selectors.filterDomains(state)
     let filterStatus = selectors.showFilter(state)
+    const query = input
 
     const terms = input.toLowerCase().match(/\S+/g) || []
 
@@ -331,7 +332,7 @@ export const setQueryTagsDomains = (input, isEnter) => (dispatch, getState) => {
 
     dispatch(setQuery(input))
 
-    if (!input.includes('#')) {
+    if (!query.includes('#')) {
         dispatch(search({ overwrite: true }))
     }
 }

@@ -1,5 +1,4 @@
 import { createSelector } from 'reselect'
-import queryString from 'query-string'
 
 import * as constants from './constants'
 
@@ -192,16 +191,12 @@ export const isClearFilterButtonShown = createSelector(
 )
 
 export const filterTagsStringify = createSelector(filterTags, filterTags =>
-    queryString.stringify({ tags: filterTags }, { arrayFormat: 'bracket' }),
+    filterTags.join(','),
 )
 
 export const filterDomainsStringify = createSelector(
     filterDomains,
-    filterDomains =>
-        queryString.stringify(
-            { domains: filterDomains },
-            { arrayFormat: 'bracket' },
-        ),
+    filterDomains => filterDomains.join(','),
 )
 
 export const shouldDisplayDomainFilterPopup = createSelector(

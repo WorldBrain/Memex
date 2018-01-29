@@ -1,7 +1,6 @@
 import update from 'lodash/fp/update'
 import remove from 'lodash/fp/remove'
 import { createReducer } from 'redux-act'
-import queryString from 'query-string'
 
 import * as actions from './actions'
 
@@ -179,7 +178,7 @@ const delDomainFilter = (state, domain) => {
 
 const setTagFilters = (state, tags) => {
     if (typeof tags === 'string') {
-        tags = queryString.parse(tags, { arrayFormat: 'bracket' }).tags
+        tags = tags.split(',')
     }
 
     return {
@@ -191,7 +190,7 @@ const setTagFilters = (state, tags) => {
 
 const setDomainFilters = (state, domains) => {
     if (typeof domains === 'string') {
-        domains = queryString.parse(domains, { arrayFormat: 'bracket' }).domains
+        domains = domains.split(',')
     }
 
     return {

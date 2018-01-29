@@ -15,7 +15,6 @@ import Overview from './components/Overview'
 import PageResultItem from './components/PageResultItem'
 import ResultsMessage from './components/ResultsMessage'
 import TagPill from './components/TagPill'
-import FilterContainer from './components/FilterContainer'
 import FilterPill from './components/FilterPill'
 import ExpandButton from './components/ExpandButton'
 
@@ -84,8 +83,8 @@ class OverviewContainer extends Component {
             <TagsContainer
                 overview
                 url={url}
-                onTagAdd={this.props.addTag(index)}
-                onTagDel={this.props.delTag(index)}
+                onFilterAdd={this.props.addTag(index)}
+                onFilterDel={this.props.delTag(index)}
                 setTagDivRef={this.setTagDivRef}
             />
         ) : null
@@ -94,7 +93,7 @@ class OverviewContainer extends Component {
         const { shouldDisplayTagFilterPopup } = this.props
 
         return shouldDisplayTagFilterPopup ? (
-            <FilterContainer
+            <TagsContainer
                 tag
                 setTagDivRef={this.setTagDivRef}
                 onFilterAdd={this.props.addTagFilter}
@@ -108,7 +107,7 @@ class OverviewContainer extends Component {
         const { shouldDisplayDomainFilterPopup } = this.props
 
         return shouldDisplayDomainFilterPopup ? (
-            <FilterContainer
+            <TagsContainer
                 domain
                 setTagDivRef={this.setTagDivRef}
                 onFilterAdd={this.props.addDomainFilter}
