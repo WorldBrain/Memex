@@ -27,57 +27,32 @@ class TagsContainer extends Component {
     static defaultProps = {
         onFilterAdd: noop,
         onFilterDel: noop,
+        initFilters: [],
     }
 
     constructor(props) {
         super(props)
 
         this.suggest = remoteFunction('suggest')
-        this.fetchTags = remoteFunction('fetchTags')
         this.addTags = remoteFunction('addTags')
         this.delTags = remoteFunction('delTags')
 
         this.fetchTagSuggestions = debounce(300)(this.fetchTagSuggestions)
-    }
 
-    state = {
-        searchVal: '',
-        isLoading: false,
-        displayFilters: this.props.overview ? [] : this.props.initFilters, // Display state objects; will change all the time
-        initFilters: this.props.overview ? [] : this.props.initFilters, // Actual tags associated with the page; will only change when DB updates
-        focused:
-            !this.props.overview && this.props.initFilters.length > 0 ? 0 : -1,
-    }
-
-    componentDidMount() {
-        if (this.props.overview) {
-            this.fetchInitTags()
+        this.state = {
+            searchVal: '',
+            isLoading: false,
+            displayFilters: props.initFilters, // Display state objects; will change all the time
+            filters: props.initFilters, // Actual tags associated with the page; will only change when DB updates
+            focused: props.initFilters.length ? 0 : -1,
         }
     }
 
-    isPageTag = value => this.state.initFilters.includes(value)
+    isPageTag = value => this.state.filters.includes(value)
 
     setInputRef = el => (this.inputEl = el)
 
     isFromOverview = () => this.props.tag === undefined
-
-    async fetchInitTags() {
-        this.setState(state => ({ ...state, isLoading: true }))
-
-        let initFilters = []
-        try {
-            initFilters = await this.fetchTags({ url: this.props.url })
-        } catch (err) {
-        } finally {
-            this.setState(state => ({
-                ...state,
-                isLoading: false,
-                initFilters,
-                displayFilters: initFilters,
-                focused: initFilters.length > 0 ? 0 : -1,
-            }))
-        }
-    }
 
     /**
      * Selector for derived display tags state
@@ -115,18 +90,18 @@ class TagsContainer extends Component {
      */
     addTag = async () => {
         const newTag = this.getSearchVal()
-        let newTags = this.state.initFilters
+        let newTags = this.state.filters
 
         try {
             await this.addTags({ url: this.props.url }, [newTag])
-            newTags = [newTag, ...this.state.initFilters]
+            newTags = [newTag, ...this.state.filters]
         } catch (err) {
         } finally {
             this.inputEl.focus()
             this.setState(state => ({
                 ...state,
                 searchVal: '',
-                initFilters: newTags,
+                filters: newTags,
                 displayFilters: newTags,
                 focused: 0,
             }))
@@ -140,7 +115,7 @@ class TagsContainer extends Component {
      */
     handleTagSelection = index => async event => {
         const tag = this.getDisplayTags()[index].value
-        const tagIndex = this.state.initFilters.findIndex(val => val === tag)
+        const tagIndex = this.state.filters.findIndex(val => val === tag)
 
         let tagsReducer = tags => tags
         // Either add or remove it to the main `state.tags` array
@@ -165,7 +140,7 @@ class TagsContainer extends Component {
         } finally {
             this.setState(state => ({
                 ...state,
-                initFilters: tagsReducer(state.initFilters),
+                filters: tagsReducer(state.filters),
                 focused: index,
             }))
         }
@@ -240,7 +215,7 @@ class TagsContainer extends Component {
 
         // If user backspaces to clear input, show the current assoc tags again
         const displayFilters = !searchVal.length
-            ? this.state.initFilters
+            ? this.state.filters
             : this.state.displayFilters
 
         this.setState(
@@ -255,7 +230,7 @@ class TagsContainer extends Component {
             return
         }
 
-        let suggestions = this.state.initFilters
+        let suggestions = this.state.filters
 
         try {
             suggestions = await this.suggest(
@@ -301,7 +276,7 @@ class TagsContainer extends Component {
                 onTagSearchChange={this.handleSearchChange}
                 onTagSearchKeyDown={this.handleSearchKeyDown}
                 setInputRef={this.setInputRef}
-                numberOfTags={this.state.initFilters.length}
+                numberOfTags={this.state.filters.length}
                 tagSearchValue={this.state.searchVal}
                 {...this.props}
             >

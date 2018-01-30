@@ -78,14 +78,15 @@ class OverviewContainer extends Component {
         }
     }
 
-    renderTags = ({ shouldDisplayTagPopup, url }, index) =>
+    renderTags = ({ shouldDisplayTagPopup, url, tags }, index) =>
         shouldDisplayTagPopup ? (
             <TagsContainer
-                overview
                 url={url}
                 onFilterAdd={this.props.addTag(index)}
                 onFilterDel={this.props.delTag(index)}
                 setTagDivRef={this.setTagDivRef}
+                initFilters={tags}
+                overview
             />
         ) : null
 
