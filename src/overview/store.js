@@ -4,9 +4,11 @@ import { createEpicMiddleware, combineEpics } from 'redux-observable'
 import thunk from 'redux-thunk'
 
 import overview from 'src/overview'
+import { reducer as onboarding } from 'src/overview/onboarding'
 
 const rootReducer = combineReducers({
     overview: overview.reducer,
+    onboarding,
 })
 
 const rootEpic = combineEpics(...Object.values(overview.epics))
