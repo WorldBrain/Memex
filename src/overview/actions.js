@@ -49,8 +49,10 @@ export const setFilterPopup = createAction('overview/setFilterPopup')
 export const resetFilterPopup = createAction('overview/resetFilterPopup')
 export const addTagFilter = createAction('overview/addTagFilter')
 export const delTagFilter = createAction('overview/delTagFilter')
+export const toggleTagFilter = createAction('overview/toggleTagFilter')
 export const addDomainFilter = createAction('overview/addDomainFilter')
 export const delDomainFilter = createAction('overview/delDomainFilter')
+export const toggleDomainFilter = createAction('overview/toggleDomainFilter')
 export const setTagFilters = createAction('overview/setTagFilters')
 export const setDomainFilters = createAction('overview/setDomainFilters')
 
@@ -124,16 +126,20 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
     dispatch,
     getState,
 ) => {
+    // Grab needed derived state for search
+    const state = getState()
+    const currentQueryParams = selectors.currentQueryParams(state)
+
+    if (currentQueryParams.query.includes('#')) {
+        return
+    }
+
     dispatch(setLoading(true))
 
     // Overwrite of results should always reset the current page before searching
     if (overwrite) {
         dispatch(resetPage())
     }
-
-    // Grab needed derived state for search
-    const state = getState()
-    const currentQueryParams = selectors.currentQueryParams(state)
 
     if (/thank you/i.test(currentQueryParams.query)) {
         return dispatch(easter())
@@ -282,57 +288,34 @@ export const filterTag = tag => (dispatch, getState) => {
     dispatch(setQueryTagsDomains(newQuery))
 }
 
+const stripTagPattern = tag =>
+    tag
+        .slice(1)
+        .split('+')
+        .join(' ')
+
 export const setQueryTagsDomains = (input, isEnter) => (dispatch, getState) => {
-    const state = getState()
-    const filterTags = selectors.filterTags(state)
-    const filterDomains = selectors.filterDomains(state)
-    let filterStatus = selectors.showFilter(state)
-    const query = input
+    const removeFromInputVal = term =>
+        (input = input.replace(isEnter ? term : `${term} `, ''))
 
-    const terms = input.toLowerCase().match(/\S+/g) || []
+    if (input[input.length - 1] === ' ' || isEnter) {
+        // Split input into terms and try to extract any tag/domain patterns to add to filters
+        const terms = input.toLowerCase().match(/\S+/g) || []
 
-    terms.forEach(term => {
-        if (input[input.length - 1] === ' ' || isEnter) {
+        terms.forEach(term => {
+            // If '#tag' pattern in input, remove it and add to filter state
             if (constants.HASH_TAG_PATTERN.test(term)) {
-                const tag = term
-                    .slice(1)
-                    .split('+')
-                    .join(' ')
-
-                input = input.replace(isEnter ? term : term + ' ', '')
-
-                if (filterTags.indexOf(tag) === -1) {
-                    dispatch(addTagFilter(tag))
-                } else {
-                    dispatch(delTagFilter(tag))
-                }
-
-                if (!filterStatus) {
-                    filterStatus = !filterStatus
-                    dispatch(showFilter())
-                }
+                removeFromInputVal(term)
+                dispatch(toggleTagFilter(stripTagPattern(term)))
             }
 
+            // If 'domain.tld.cctld?' pattern in input, remove it and add to filter state
             if (constants.DOMAIN_TLD_PATTERN.test(term)) {
-                input = input.replace(isEnter ? term : term + ' ', '')
-
-                if (filterDomains.indexOf(term) === -1) {
-                    dispatch(addDomainFilter(term))
-                } else {
-                    dispatch(delDomainFilter(term))
-                }
-
-                if (!filterStatus) {
-                    filterStatus = !filterStatus
-                    dispatch(showFilter())
-                }
+                removeFromInputVal(term)
+                dispatch(toggleDomainFilter(term))
             }
-        }
-    })
+        })
+    }
 
     dispatch(setQuery(input))
-
-    if (!query.includes('#')) {
-        dispatch(search({ overwrite: true }))
-    }
 }

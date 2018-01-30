@@ -5,6 +5,7 @@ import 'rxjs/add/operator/filter'
 import * as actions from './actions'
 
 const searchUpdateActions = [
+    actions.setQuery.getType(),
     actions.setStartDate.getType(),
     actions.setEndDate.getType(),
     actions.toggleBookmarkFilter.getType(),

@@ -128,16 +128,14 @@ const delTag = (state, { tag, index }) => {
     }
 }
 
-const addTagFilter = (state, tag) => {
-    return {
-        ...state,
-        filterTags: [...state.filterTags, tag],
-    }
-}
+const addFilter = filterKey => (state, value) => ({
+    ...state,
+    [filterKey]: [...state[filterKey], value],
+    showFilter: true,
+})
 
-const delTagFilter = (state, tag) => {
-    const filterTags = state.filterTags
-    const removalIndex = filterTags.indexOf(tag)
+const delFilter = filterKey => (state, value) => {
+    const removalIndex = state[filterKey].indexOf(value)
 
     if (removalIndex === -1) {
         return state
@@ -145,34 +143,28 @@ const delTagFilter = (state, tag) => {
 
     return {
         ...state,
-        filterTags: [
-            ...state.filterTags.slice(0, removalIndex),
-            ...state.filterTags.slice(removalIndex + 1),
+        [filterKey]: [
+            ...state[filterKey].slice(0, removalIndex),
+            ...state[filterKey].slice(removalIndex + 1),
         ],
+        showFilter: true,
     }
 }
 
-const addDomainFilter = (state, domain) => {
-    return {
-        ...state,
-        filterDomains: [...state.filterDomains, domain],
-    }
-}
-
-const delDomainFilter = (state, domain) => {
-    const filterDomains = state.filterDomains
-    const removalIndex = filterDomains.indexOf(domain)
+const toggleFilter = filterKey => (state, value) => {
+    const removalIndex = state[filterKey].indexOf(value)
 
     if (removalIndex === -1) {
-        return state
+        return addFilter(filterKey)(state, value)
     }
 
     return {
         ...state,
-        filterDomains: [
-            ...state.filterDomains.slice(0, removalIndex),
-            ...state.filterDomains.slice(removalIndex + 1),
+        [filterKey]: [
+            ...state[filterKey].slice(0, removalIndex),
+            ...state[filterKey].slice(removalIndex + 1),
         ],
+        showFilter: true,
     }
 }
 
@@ -331,10 +323,12 @@ export default createReducer(
             ...state,
             filterPopup: defaultState.filterPopup,
         }),
-        [actions.addTagFilter]: addTagFilter,
-        [actions.delTagFilter]: delTagFilter,
-        [actions.addDomainFilter]: addDomainFilter,
-        [actions.delDomainFilter]: delDomainFilter,
+        [actions.addTagFilter]: addFilter('filterTags'),
+        [actions.delTagFilter]: delFilter('filterTags'),
+        [actions.toggleTagFilter]: toggleFilter('filterTags'),
+        [actions.addDomainFilter]: addFilter('filterDomains'),
+        [actions.delDomainFilter]: delFilter('filterDomains'),
+        [actions.toggleDomainFilter]: toggleFilter('filterDomains'),
         [actions.setTagFilters]: setTagFilters,
         [actions.setDomainFilters]: setDomainFilters,
     },
