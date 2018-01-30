@@ -281,7 +281,6 @@ export const showTags = index => (dispatch, getState) => {
 export const filterTag = tag => (dispatch, getState) => {
     const state = getState()
     const query = selectors.query(state)
-    const filterTags = selectors.filterTags(state)
 
     const transformedTag = `#${tag.split(' ').join('+')} `
 

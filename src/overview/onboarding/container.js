@@ -12,8 +12,15 @@ class OnboardingContainer extends PureComponent {
     static propTypes = {
         isVisible: PropTypes.bool.isRequired,
         setVisible: PropTypes.func.isRequired,
+        initConnection: PropTypes.func.isRequired,
     }
 
+    constructor(props) {
+        super(props)
+
+        // Init the connection to imports module in BG script
+        this._importsConnMan = this.props.initConnection()
+    }
     render() {
         if (!this.props.isVisible) {
             return null
@@ -34,6 +41,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
     setVisible: flag => () => dispatch(actions.setVisible(flag)),
+    initConnection: () => dispatch(actions.init()),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(OnboardingContainer)
