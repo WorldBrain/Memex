@@ -1,7 +1,7 @@
 import React from 'react'
 
 import analytics from 'src/analytics'
-import localStyles from './styles.css'
+import localStyles from './Onboarding.css'
 
 const trackWelcomeChoice = action => () =>
     analytics.trackEvent({
@@ -9,7 +9,7 @@ const trackWelcomeChoice = action => () =>
         action,
     })
 
-const NewInstall = () => (
+const Info = () => (
     <div className={localStyles.content}>
         <img className={localStyles.logobig} src="/img/worldbrain-logo.png" />
         <div className={localStyles.messageContainer}>
@@ -67,4 +67,4 @@ const NewInstall = () => (
     </div>
 )
 
-export default NewInstall
+export default Info

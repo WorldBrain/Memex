@@ -20,7 +20,6 @@ import analytics from 'src/analytics'
 
 export const OVERVIEW_URL = '/overview/overview.html'
 export const OLD_EXT_UPDATE_KEY = 'updated-from-old-ext'
-export const ONBOARDING_URL = '/onboarding/new_install.html'
 export const UPDATE_URL = '/update/update.html'
 export const UNINSTALL_URL =
     process.env.NODE_ENV === 'production'
@@ -49,7 +48,7 @@ async function onInstall() {
     await blacklist.addToBlacklist(blacklistConsts.DEF_ENTRIES)
     analytics.trackEvent({ category: 'Global', action: 'Install' }, true)
     // Open onboarding page
-    browser.tabs.create({ url: '/options/options.html#/new_install' })
+    browser.tabs.create({ url: OVERVIEW_URL })
     // Store the timestamp of when the extension was installed + default blacklist
     browser.storage.local.set({ [installTimeStorageKey]: Date.now() })
 }
