@@ -66,4 +66,10 @@
 
 .link {
     color: #928989;
+    cursor: pointer;
+    text-decoration: underline;
+
+    &:hover {
+        color: #76ccb2;
+    }
 }
