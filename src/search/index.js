@@ -8,6 +8,7 @@ async function indexSearch({
     startDate,
     endDate,
     tags = [],
+    domains = [],
     skip = 0,
     limit = 10,
     getTotalCount = false,
@@ -21,6 +22,7 @@ async function indexSearch({
         .filterTime({ startDate, endDate }, 'bookmark/')
         .filterTime({ startDate, endDate }, 'visit/')
         .filterTags(tags)
+        .filterDomains(domains)
         .skipUntil(skip)
         .limitUntil(limit)
         .bookmarksFilter(showOnlyBookmarks)

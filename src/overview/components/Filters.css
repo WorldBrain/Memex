@@ -11,15 +11,122 @@
     z-index: 2;
     background-color: white;
     min-width: 800px;
-    flex-flow: row;
+    flex-flow: column;
     box-shadow: 0 2px 4px rgba(220, 220, 220, 0.7);
     padding-left: 6px;
 }
 
-.bookmarks {
+.filters {
     padding: 0;
     max-width: 780px;
     min-width: 780px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.filterTagText {
+    font-size: 18px;
+    color: #3eb995;
+    margin-bottom: 10px;
+    cursor: pointer;
+
+    &:hover .filterTagIcon {
+        opacity: 1;
+    }
+}
+
+.filterTagIcon {
+    position: absolute;
+    top: 0;
+    width: 65px;
+    height: 45px;
+    background-image: url('/img/plus.svg');
+    background-repeat: no-repeat;
+    background-size: 18px;
+    background-position-x: 42px;
+    background-position-y: 18px;
+    opacity: 0.3;
+}
+
+.filterDomainIcon {
+    position: absolute;
+    top: 0;
+    width: 100px;
+    height: 45px;
+    background-image: url('/img/plus.svg');
+    background-repeat: no-repeat;
+    background-size: 18px;
+    background-position-x: 78px;
+    background-position-y: 18px;
+    opacity: 0.3;
+}
+
+.filterDomainText {
+    font-size: 18px;
+    color: #3eb995;
+    margin-bottom: 10px;
+    cursor: pointer;
+
+    &:hover .filterDomainIcon {
+        opacity: 1;
+    }
+}
+
+.filterMiscText {
+    font-size: 18px;
+    color: #3eb995;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+.tags,
+.misc {
+    display: flex;
+    flex-flow: column;
+}
+
+.domains {
+    display: flex;
+    flex-flow: column;
+
+    &:hover .filterDomainIcon {
+        opacity: 1;
+    }
+}
+
+.tagDomainFilter {
+    padding: 0;
+    max-width: 780px;
+    min-width: 780px;
+    height: 17px;
+    display: flex;
+}
+
+.tagsFilter {
+    margin-right: 10px;
+    width: 300px;
+    max-width: 300px;
+    height: 17px;
+}
+
+.tagsFilterInput {
+    flex: 1;
+    font-size: 15px;
+    color: #3eb995;
+    border: 2px solid #3eb995;
+    font-family: 'Open Sans';
+    font-weight: lighter;
+    margin-top: 10px;
+    width: 350px;
+
+    &::placeholder {
+        color: #3eb995;
+        padding-left: 10px;
+    }
+
+    &:focus {
+        outline: none;
+    }
 }
 
 input[type='checkbox'] {
@@ -82,6 +189,7 @@ input[type='checkbox'] {
 .clearDiv {
     position: absolute;
     left: 75%;
+    top: 5%;
 }
 
 .clear {
@@ -90,4 +198,60 @@ input[type='checkbox'] {
     border: 0;
     color: #3eb995;
     outline: none;
+}
+
+.tagsPopup,
+.domainsPopup {
+    position: absolute;
+    top: 50px;
+}
+
+.tagname {
+    color: #3eb995;
+    padding: 1px 5px 1px 5px;
+    cursor: pointer;
+}
+
+.notExpanded {
+    display: inline-block;
+    max-width: 75px;
+    color: white;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.closeIcon {
+    margin-right: 5px;
+    cursor: pointer;
+
+    & i {
+        font-size: 15px;
+        vertical-align: middle;
+        margin-right: -3px;
+        margin-top: -12px;
+    }
+}
+
+.pillContainer {
+    display: inline-block;
+    background-color: #3eb995;
+    color: white;
+    margin-left: 5px;
+    padding: 1px 0;
+    border-radius: 5px;
+}
+
+.bookmarks {
+    height: 19px;
+    padding-top: 2px;
+    padding-left: 4px;
+}
+
+.expandButton {
+    color: #3eb995;
+    padding: 1px 5px 1px 5px;
+    cursor: pointer;
+    position: absolute;
+    margin-top: 1px;
 }

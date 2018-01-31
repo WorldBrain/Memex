@@ -5,8 +5,8 @@ import { DEFAULT_TERM_SEPARATOR } from './search-index'
  * @typedef IndexQuery
  * @type {Object}
  * @property {Set<string>} query Query terms a user has searched for.
- * @property {Set<string>} domain Domain patterns extracted from the terms a user has searched for.
- * @property {Set<string>} tags Set of tags a user has chosen to filter.
+ * @property {Set<string>} domain Set of domains a user has chosen to filter, or extracted from query.
+ * @property {Set<string>} tags Set of tags a user has chosen to filter, or extracted from query.
  * @property {Map<string, any>} timeFilter Map of different time filter ranges to apply to search.
  * @property {number} [skip=0]
  * @property {number} [limit=10]
@@ -74,10 +74,13 @@ class QueryBuilder {
         return this
     }
 
-    filterTags(tags) {
-        tags.forEach(tag => this.tags.add(tag))
+    _filterGen = stateSet => data => {
+        data.forEach(datum => stateSet.add(datum))
         return this
     }
+
+    filterDomains = this._filterGen(this.domain)
+    filterTags = this._filterGen(this.tags)
 
     searchTerm(input = '') {
         // All indexed strings are lower-cased, so force the query terms to be

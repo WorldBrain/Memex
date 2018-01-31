@@ -153,7 +153,28 @@ export const isNewSearchLoading = createSelector(
 export const showFilter = state => overview(state).showFilter
 export const showOnlyBookmarks = state => overview(state).showOnlyBookmarks
 
-export const tags = createSelector(overview, state => state.tags)
+export const filterPopup = state => overview(state).filterPopup
+export const filterTags = state => overview(state).filterTags
+export const filterDomains = state => overview(state).filterDomains
+
+export const isEmptyQuery = createSelector(
+    currentQueryParams,
+    showOnlyBookmarks,
+    filterTags,
+    filterDomains,
+    (
+        { query, startDate, endDate },
+        showOnlyBookmarks,
+        filterTags,
+        filterDomains,
+    ) =>
+        !query.length &&
+        !startDate &&
+        !endDate &&
+        !showOnlyBookmarks &&
+        !filterTags.length &&
+        !filterDomains.length,
+)
 
 /**
  * Selector to toggle clear filter button
@@ -161,17 +182,29 @@ export const tags = createSelector(overview, state => state.tags)
  */
 export const isClearFilterButtonShown = createSelector(
     showOnlyBookmarks,
-    showOnlyBookmarks => !!showOnlyBookmarks,
+    filterTags,
+    filterDomains,
+    (showOnlyBookmarks, filterTags, filterDomains) =>
+        showOnlyBookmarks ||
+        Boolean(filterTags.length) ||
+        Boolean(filterDomains.length),
 )
 
-export const isEmptyQuery = createSelector(
-    currentQueryParams,
-    showOnlyBookmarks,
-    tags,
-    ({ query, startDate, endDate }, showOnlyBookmarks, tags) =>
-        !query.length &&
-        !startDate &&
-        !endDate &&
-        !showOnlyBookmarks &&
-        !tags.length,
+export const filterTagsStringify = createSelector(filterTags, filterTags =>
+    filterTags.join(','),
+)
+
+export const filterDomainsStringify = createSelector(
+    filterDomains,
+    filterDomains => filterDomains.join(','),
+)
+
+export const shouldDisplayDomainFilterPopup = createSelector(
+    filterPopup,
+    filterPopup => filterPopup === 'domain',
+)
+
+export const shouldDisplayTagFilterPopup = createSelector(
+    filterPopup,
+    filterPopup => filterPopup === 'tag',
 )

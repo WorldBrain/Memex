@@ -26,6 +26,12 @@ const Overview = props => (
                 onShowOnlyBookmarksChange={props.onShowOnlyBookmarksChange}
                 clearAllFilters={props.clearAllFilters}
                 isClearFilterButtonShown={props.isClearFilterButtonShown}
+                tagFilterManager={props.tagFilterManager}
+                domainFilterManager={props.domainFilterManager}
+                onFilterClick={props.onFilterClick}
+                setTagDomainButtonRef={props.setTagDomainButtonRef}
+                tagFilterPills={props.tagFilterPills}
+                domainFilterPills={props.domainFilterPills}
             />
         </div>
         <div
@@ -54,6 +60,12 @@ Overview.propTypes = {
     onShowOnlyBookmarksChange: PropTypes.func.isRequired,
     clearAllFilters: PropTypes.func.isRequired,
     isClearFilterButtonShown: PropTypes.bool.isRequired,
+    tagFilterManager: PropTypes.node,
+    domainFilterManager: PropTypes.node,
+    onFilterClick: PropTypes.func.isRequired,
+    setTagDomainButtonRef: PropTypes.func.isRequired,
+    tagFilterPills: PropTypes.node,
+    domainFilterPills: PropTypes.node,
 }
 
 export default Overview
