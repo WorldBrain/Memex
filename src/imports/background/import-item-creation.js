@@ -40,13 +40,23 @@ async function initErrordItemsCheck() {
     return ({ url }) => errordUrls.has(url)
 }
 export default class ImportItemCreator {
-    constructor(histKeysSet, bmKeysSet) {
+    /**
+     * @param {number} [histLimit=Infinity] Limit of history items to create.
+     * @param {number} [bmLimit=Infinity] Limit of bookmark items to create.
+     */
+    constructor({ histLimit = Infinity, bmLimit = Infinity }) {
+        this._histLimit = histLimit
+        this._bmLimit = bmLimit
+
         this.dataSourcesReady = new Promise((resolve, reject) =>
             this._initExistingChecks()
                 .then(resolve)
                 .catch(reject),
         )
     }
+
+    static _limitMap = (items, limit) =>
+        new Map([...items].slice(items.size - limit))
 
     async _initExistingChecks() {
         this.isBlacklisted = await blacklist.checkWithBlacklist()
@@ -98,15 +108,17 @@ export default class ImportItemCreator {
     }
 
     /**
-     * @param {moment} startTime The time to start search from for browser history.
-     * @returns {Array<browser.history.HistoryItem>} All history items in browser filtered by URL.
+     * @param {number} startTime The time to start search from for browser history.
+     * @param {number} [endTime=Date.now()] The time to end search from for browser history.
+     * @param {number} [limit=999999] The limit to number of items to return
+     * @returns {Array<browser.history.HistoryItem>} All history items in browser.
      */
-    _fetchHistItems = startTime =>
+    _fetchHistItems = ({ startTime, endTime = Date.now(), limit = 999999 }) =>
         browser.history.search({
             text: '',
-            maxResults: 999999,
-            startTime: startTime.valueOf(),
-            endTime: startTime.add(2, 'weeks').valueOf(),
+            maxResults: limit,
+            startTime,
+            endTime,
         })
 
     async _getOldExtItems() {
@@ -215,7 +227,7 @@ export default class ImportItemCreator {
      * Handles fetching and filtering the history URLs in time period batches,
      * yielding those batches.
      */
-    async *_iterateHistItems() {
+    async *_iterateHistItems(limit = 99999) {
         const filterByUrl = this._filterItemsByUrl(
             transformBrowserToImportItem(IMPORT_TYPE.HISTORY),
             url => this.histKeys.has(url),
@@ -223,13 +235,63 @@ export default class ImportItemCreator {
         // Get all history from browser (last 3 months), filter on existing DB pages
         const startTime = moment().subtract(lookbackWeeks, 'weeks')
 
-        // Fetch and filter history in 2 week batches to limit space
-        for (let i = 0; i < lookbackWeeks / 2; i++, startTime.add(2, 'weeks')) {
-            const historyItemBatch = await this._fetchHistItems(
-                moment(startTime),
-            )
+        // Fetch and filter history in week batches to limit space
+        for (let i = 0; i < lookbackWeeks; i++) {
+            const historyItemBatch = await this._fetchHistItems({
+                startTime: startTime.valueOf(),
+                endTime: startTime.add(1, 'weeks').valueOf(),
+            })
 
             yield filterByUrl(historyItemBatch)
+        }
+    }
+
+    async *_createBmItems() {
+        // Chrome and FF seem to ID their bookmark data differently. Root works from '' in FF
+        //  but needs '0' in Chrome. `runtime.getBrowserInfo` is only available on FF web ext API
+        const rootId =
+            typeof browser.runtime.getBrowserInfo === 'undefined' ? '0' : ''
+        let numItems = 0
+
+        // Get all bookmarks from browser, filter on existing DB bookmarks
+        for await (const bmsChunk of this._traverseBmTree(rootId)) {
+            // Not all levels in the bookmark tree need to have bookmark items
+            if (!bmsChunk.size) {
+                continue
+            }
+
+            // If limit surpassed, do final yield of limited items, else yield and continue to next chunk
+            numItems += bmsChunk.size
+            if (numItems >= this._bmLimit) {
+                return yield {
+                    type: IMPORT_TYPE.BOOKMARK,
+                    data: ImportItemCreator._limitMap(bmsChunk, this._bmLimit),
+                }
+            }
+
+            yield { type: IMPORT_TYPE.BOOKMARK, data: bmsChunk }
+        }
+    }
+
+    async *_createHistItems() {
+        let numHistItems = 0
+
+        // Yield history items in chunks
+        for await (const histItemChunk of this._iterateHistItems()) {
+            // If limit surpassed, do final yield of limited items, else yield and continue to next chunk
+            numHistItems += histItemChunk.size
+            if (numHistItems >= this._histLimit) {
+                yield {
+                    type: IMPORT_TYPE.HISTORY,
+                    data: ImportItemCreator._limitMap(
+                        histItemChunk,
+                        this._histLimit,
+                    ),
+                }
+                break
+            }
+
+            yield { type: IMPORT_TYPE.HISTORY, data: histItemChunk }
         }
     }
 
@@ -241,18 +303,8 @@ export default class ImportItemCreator {
      *  `Map<string, ImportItem>` types, respectively.
      */
     async *createImportItems() {
-        // Chrome and FF seem to ID their bookmark data differently. Root works from '' in FF
-        //  but needs '0' in Chrome. `runtime.getBrowserInfo` is only available on FF web ext API
-        const rootId =
-            typeof browser.runtime.getBrowserInfo === 'undefined' ? '0' : ''
-
-        // Get all bookmarks from browser, filter on existing DB bookmarks
-        for await (const bms of this._traverseBmTree(rootId)) {
-            // Not all levels in the bookmark tree need to have bookmark items
-            if (!bms.size) {
-                continue
-            }
-            yield { type: IMPORT_TYPE.BOOKMARK, data: bms }
+        if (this._bmLimit > 0) {
+            yield* this._createBmItems()
         }
 
         // Get all old ext from local storage, don't filter on existing data
@@ -261,9 +313,8 @@ export default class ImportItemCreator {
             data: await this._getOldExtItems(),
         }
 
-        // Yield history items in two week chunks
-        for await (const twoWeeksHistory of this._iterateHistItems()) {
-            yield { type: IMPORT_TYPE.HISTORY, data: twoWeeksHistory }
+        if (this._histLimit > 0) {
+            yield* this._createHistItems()
         }
     }
 }
