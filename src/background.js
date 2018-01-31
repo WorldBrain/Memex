@@ -48,7 +48,7 @@ async function onInstall() {
     await blacklist.addToBlacklist(blacklistConsts.DEF_ENTRIES)
     analytics.trackEvent({ category: 'Global', action: 'Install' }, true)
     // Open onboarding page
-    browser.tabs.create({ url: OVERVIEW_URL })
+    browser.tabs.create({ url: `${OVERVIEW_URL}?install=true` })
     // Store the timestamp of when the extension was installed + default blacklist
     browser.storage.local.set({ [installTimeStorageKey]: Date.now() })
 }

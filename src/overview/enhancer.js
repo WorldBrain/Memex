@@ -4,6 +4,12 @@ import ReduxQuerySync from 'redux-query-sync'
 import * as selectors from './selectors'
 import * as actions from './actions'
 import * as constants from './constants'
+import {
+    selectors as onboarding,
+    actions as onboardingActs,
+} from './onboarding'
+
+const parseBool = str => str === 'true'
 
 // Keep search query in sync with the query parameter in the window location.
 const locationSync = ReduxQuerySync.enhancer({
@@ -28,7 +34,7 @@ const locationSync = ReduxQuerySync.enhancer({
         showOnlyBookmarks: {
             selector: selectors.showOnlyBookmarks,
             action: showOnlyBookmarks =>
-                actions.toggleBookmarkFilter(Boolean(showOnlyBookmarks)),
+                actions.toggleBookmarkFilter(parseBool(showOnlyBookmarks)),
             defaultValue: false,
         },
         tags: {
@@ -40,6 +46,11 @@ const locationSync = ReduxQuerySync.enhancer({
             selector: selectors.filterDomainsStringify,
             action: domains => actions.setDomainFilters(domains),
             defaultValue: '',
+        },
+        install: {
+            selector: onboarding.isVisible,
+            action: value => onboardingActs.setVisible(parseBool(value)),
+            defaultValue: false,
         },
     },
 })
