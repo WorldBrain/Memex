@@ -20,12 +20,14 @@ const Header = ({
                     value={query}
                     ref={props.setInputRef}
                     onKeyDown={props.onQuerySearchKeyDown}
+                    disabled={props.isSearchDisabled}
                 />
                 <DateRangeSelection
                     startDate={startDate}
                     endDate={endDate}
                     onStartDateChange={props.onStartDateChange}
                     onEndDateChange={props.onEndDateChange}
+                    disabled={props.isSearchDisabled}
                 />
             </div>
             <div
@@ -65,6 +67,7 @@ Header.propTypes = {
     onEndDateChange: PropTypes.func.isRequired,
     onShowFilterChange: PropTypes.func.isRequired,
     onQuerySearchKeyDown: PropTypes.func.isRequired,
+    isSearchDisabled: PropTypes.bool,
 }
 
 export default Header

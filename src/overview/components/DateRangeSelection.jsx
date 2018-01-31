@@ -11,6 +11,14 @@ import styles from './DateRangeSelection.css'
 import './datepicker-overrides.css'
 
 class DateRangeSelection extends Component {
+    static propTypes = {
+        startDate: PropTypes.number,
+        endDate: PropTypes.number,
+        onStartDateChange: PropTypes.func,
+        onEndDateChange: PropTypes.func,
+        disabled: PropTypes.bool,
+    }
+
     state = {
         startDateText: this.props.startDate
             ? moment(this.props.startDate).format(FORMAT)
@@ -169,7 +177,7 @@ class DateRangeSelection extends Component {
     }
 
     render() {
-        const { startDate, endDate } = this.props
+        const { startDate, endDate, disabled } = this.props
 
         return (
             <div className={styles.dateRangeSelection}>
@@ -193,6 +201,7 @@ class DateRangeSelection extends Component {
                     })}
                     onBlur={this.handleInputChange({ isStartDate: true })}
                     value={this.state.startDateText}
+                    disabled={disabled}
                 />
                 <img src="/img/to-icon.png" className={styles.toIcon} />
                 <DatePicker
@@ -215,17 +224,11 @@ class DateRangeSelection extends Component {
                     })}
                     onBlur={this.handleInputChange({ isStartDate: false })}
                     value={this.state.endDateText}
+                    disabled={disabled}
                 />
             </div>
         )
     }
-}
-
-DateRangeSelection.propTypes = {
-    startDate: PropTypes.number,
-    endDate: PropTypes.number,
-    onStartDateChange: PropTypes.func,
-    onEndDateChange: PropTypes.func,
 }
 
 export default DateRangeSelection
