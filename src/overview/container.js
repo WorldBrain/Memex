@@ -316,6 +316,7 @@ class OverviewContainer extends Component {
                         'domain',
                     )}
                     onQuerySearchKeyDown={this.handleSearchEnter}
+                    isSearchDisabled={this.props.showOnboarding}
                 >
                     {this.renderResults()}
                 </Overview>
