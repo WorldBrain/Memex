@@ -1,5 +1,7 @@
 import { createAction } from 'redux-act'
-import { CMDS, IMPORT_CONN_NAME } from 'src/options/imports/constants'
+
+import { CMDS } from 'src/options/imports/constants'
+import { IMPORT_CONN_NAME } from './constants'
 
 export const setVisible = createAction('onboarding/setVisible')
 

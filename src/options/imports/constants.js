@@ -48,18 +48,20 @@ export const STORAGE_KEYS = {
 
 export const IMPORT_CONN_NAME = 'imports-bg-ui-runtime-connection'
 
+export const CMD_PRE = 'imports/'
+
 /** Commands used for BG <-> UI bi-directional communication */
 export const CMDS = {
-    INIT: `${IMPORT_CONN_NAME}/INIT`,
-    START: `${IMPORT_CONN_NAME}/START`,
-    PAUSE: `${IMPORT_CONN_NAME}/PAUSE`,
-    RESUME: `${IMPORT_CONN_NAME}/RESUME`,
-    FINISH: `${IMPORT_CONN_NAME}/FINISH`,
-    CANCEL: `${IMPORT_CONN_NAME}/CANCEL`,
-    NEXT: `${IMPORT_CONN_NAME}/NEXT`,
-    COMPLETE: `${IMPORT_CONN_NAME}/COMPLETE`,
-    SET_CONCURRENCY: `${IMPORT_CONN_NAME}/SET_CONCURRENCY`,
-    SET_PROCESS_ERRS: `${IMPORT_CONN_NAME}/SET_PROCESS_ERRS`,
+    INIT: `${CMD_PRE}INIT`,
+    START: `${CMD_PRE}START`,
+    PAUSE: `${CMD_PRE}PAUSE`,
+    RESUME: `${CMD_PRE}RESUME`,
+    FINISH: `${CMD_PRE}FINISH`,
+    CANCEL: `${CMD_PRE}CANCEL`,
+    NEXT: `${CMD_PRE}NEXT`,
+    COMPLETE: `${CMD_PRE}COMPLETE`,
+    SET_CONCURRENCY: `${CMD_PRE}SET_CONCURRENCY`,
+    SET_PROCESS_ERRS: `${CMD_PRE}SET_PROCESS_ERRS`,
 }
 
 /** Estimated time to download a doc (seconds) */

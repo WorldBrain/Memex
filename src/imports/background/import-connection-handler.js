@@ -13,9 +13,14 @@ export default class ImportConnectionHandler {
      */
     importer
 
-    constructor(port) {
+    _quickMode
+
+    constructor({ port, quick = false }) {
         // Main `runtime.Port` that this class hides away to handle connection with the imports UI script
         this.port = port
+
+        // Quick mode used to quickly import recent history for onboarding; some functionality differs
+        this._quickMode = quick
 
         // Initialize the `ProgressManager` to run the import processing logic on import items state
         this.importer = new ProgressManager(DEF_CONCURRENCY, this.itemObserver)
@@ -35,7 +40,7 @@ export default class ImportConnectionHandler {
 
         if (!importInProgress) {
             // Make sure estimates view init'd with count data
-            const estimateCounts = await stateManager.fetchEsts()
+            const estimateCounts = await stateManager.fetchEsts(this._quickMode)
             this.port.postMessage({ cmd: CMDS.INIT, ...estimateCounts })
         } else {
             // ... else make sure to start UI in paused state
