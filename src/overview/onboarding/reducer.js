@@ -3,7 +3,7 @@ import { createReducer } from 'redux-act'
 import * as actions from './actions'
 
 const defState = {
-    isVisible: true,
+    isVisible: false,
 }
 
 export default createReducer(
