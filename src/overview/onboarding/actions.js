@@ -4,6 +4,8 @@ import { IMPORT_TYPE as TYPE, CMDS } from 'src/options/imports/constants'
 import { IMPORT_CONN_NAME } from './constants'
 
 export const setVisible = createAction('onboarding/setVisible')
+export const incProgress = createAction('onboarding/incProgress')
+export const setImportsDone = createAction('onboarding/setImportsDone')
 
 export const init = () => dispatch =>
     new ImportsConnHandler(IMPORT_CONN_NAME, dispatch)
@@ -40,7 +42,9 @@ class ImportsConnHandler {
                     payload: ImportsConnHandler.ONBOARDING_ALLOW_TYPES,
                 })
             case CMDS.NEXT:
+                return this._dispatch(incProgress())
             case CMDS.COMPLETE:
+                return this._dispatch(setImportsDone(true))
             default:
                 console.log(cmd, payload)
         }
