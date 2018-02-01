@@ -1,8 +1,11 @@
 import { createAction } from 'redux-act'
 
+import { remoteFunction } from 'src/util/webextensionRPC'
 import { IMPORT_TYPE as TYPE, CMDS } from 'src/options/imports/constants'
 import { IMPORT_CONN_NAME } from './constants'
 import * as selectors from './selectors'
+
+const dirtyEstsCache = remoteFunction('dirtyEstsCache')
 
 export const setVisible = createAction('onboarding/setVisible')
 export const incProgress = createAction('onboarding/incProgress')
@@ -46,7 +49,12 @@ class ImportsConnHandler {
 
     cancel() {
         this._port.postMessage({ cmd: CMDS.CANCEL })
+        this.complete()
+    }
+
+    complete() {
         this._dispatch(setImportsDone(true))
+        dirtyEstsCache()
     }
 
     /**
@@ -55,13 +63,13 @@ class ImportsConnHandler {
     */
     handleCmds = ({ cmd, ...payload }) => {
         switch (cmd) {
-            case CMDS.INIT:
+            case CMDS.INIT: // Tell it to start immediately after BG connman sends INIT ready signal
                 return this.start()
             case CMDS.NEXT:
                 return this._dispatch(incProgress())
             case CMDS.COMPLETE:
-                return this._dispatch(setImportsDone(true))
-            case CMDS.PAUSE:
+                return this.complete()
+            case CMDS.PAUSE: // BG connman will pause on page refresh - this just auto-restarts on page load
                 return this._port.postMessage({ cmd: CMDS.RESUME })
             default:
                 console.log(cmd, payload)

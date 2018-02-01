@@ -55,7 +55,10 @@ export default class ImportConnectionHandler {
      */
     itemObserver = {
         next: msg => this.port.postMessage({ cmd: CMDS.NEXT, ...msg }),
-        complete: () => this.port.postMessage({ cmd: CMDS.COMPLETE }),
+        complete: () => {
+            this.port.postMessage({ cmd: CMDS.COMPLETE })
+            this.importer.setImportInProgressFlag(false)
+        },
     }
 
     /**
