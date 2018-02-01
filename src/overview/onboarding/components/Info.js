@@ -1,14 +1,9 @@
 import React, { PureComponent } from 'react'
-import PropTypes from 'prop-types'
 
 import analytics from 'src/analytics'
 import localStyles from './Onboarding.css'
 
 class Info extends PureComponent {
-    static propTypes = {
-        onClose: PropTypes.func.isRequired,
-    }
-
     trackWelcomeChoice = action => () =>
         analytics.trackEvent({
             category: 'Welcome page selection',

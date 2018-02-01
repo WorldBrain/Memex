@@ -11,6 +11,11 @@
     font-size: 0.9rem;
     color: #3eb995;
     font-weight: bold;
+    cursor: pointer;
+
+    &:hover {
+        text-decoration: underline;
+    }
 }
 
 .popup {
