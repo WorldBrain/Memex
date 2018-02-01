@@ -3,6 +3,7 @@ import 'rxjs/add/operator/map'
 import 'rxjs/add/operator/filter'
 
 import * as actions from './actions'
+import { actions as onboardingActs } from './onboarding'
 
 const searchUpdateActions = [
     actions.setQuery.getType(),
@@ -16,6 +17,7 @@ const searchUpdateActions = [
     actions.resetFilters.getType(),
     actions.setTagFilters.getType(),
     actions.setDomainFilters.getType(),
+    onboardingActs.setVisible.getType(),
 ]
 
 // When the query changed, refresh the search results

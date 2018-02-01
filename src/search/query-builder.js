@@ -20,6 +20,31 @@ class QueryBuilder {
     // Pattern to match hashtags - spaces can be represented via '+'
     static HASH_TAG_PATTERN = /^#\w[\w+]*$/
 
+    /**
+     * Slice off '#' prefix and replace any '+' with space char
+     *
+     * @param {string} tag
+     * @return {string}
+     */
+    static stripTagPattern = tag =>
+        tag
+            .slice(1)
+            .split('+')
+            .join(' ')
+
+    /**
+     * Splits up an input string into terms.
+     *
+     * @param {string} input
+     * @param {string|RegExp} [delim]
+     * @return {string[]}
+     */
+    static getTermsFromInput = (input, delim = DEFAULT_TERM_SEPARATOR) =>
+        input
+            .toLowerCase()
+            .trim()
+            .split(delim)
+
     skip = 0
     limit = 10
     query = new Set()
@@ -81,31 +106,6 @@ class QueryBuilder {
 
     filterDomains = this._filterGen(this.domain)
     filterTags = this._filterGen(this.tags)
-
-    /**
-     * Slice off '#' prefix and replace any '+' with space char
-     *
-     * @param {string} tag
-     * @return {string}
-     */
-    static stripTagPattern = tag =>
-        tag
-            .slice(1)
-            .split('+')
-            .join(' ')
-
-    /**
-     * Splits up an input string into terms.
-     *
-     * @param {string} input
-     * @param {string|RegExp} [delim]
-     * @return {string[]}
-     */
-    static getTermsFromInput = (input, delim = DEFAULT_TERM_SEPARATOR) =>
-        input
-            .toLowerCase()
-            .trim()
-            .split(delim)
 
     /**
      * Filter out terms those terms that match any tags/domain pattern from an array of terms.

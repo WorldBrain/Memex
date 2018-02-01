@@ -39,6 +39,7 @@ async function initErrordItemsCheck() {
 
     return ({ url }) => errordUrls.has(url)
 }
+
 export default class ImportItemCreator {
     /**
      * @param {number} [histLimit=Infinity] Limit of history items to create.
@@ -55,8 +56,7 @@ export default class ImportItemCreator {
         )
     }
 
-    static _limitMap = (items, limit) =>
-        new Map([...items].slice(items.size - limit))
+    static _limitMap = (items, limit) => new Map([...items].slice(0, limit))
 
     async _initExistingChecks() {
         this.isBlacklisted = await blacklist.checkWithBlacklist()
@@ -181,7 +181,7 @@ export default class ImportItemCreator {
      * @param {(items: browser.BookmarkTreeNode[]) => Map<string, ImportItem>} filter
      * @yields {Map<string, ImportItem>} Bookmark items in current level.
      */
-    async *_traverseBmTreeDir(dirNode, filter) {
+    async *_traverseBmTreeDir(dirNode, filter, itemCount = 0) {
         // Folders don't contain `url`; recurse!
         const children = await browser.bookmarks.getChildren(dirNode.id)
 
@@ -199,11 +199,18 @@ export default class ImportItemCreator {
         )
 
         // Filter and yield the current level of bookmarks
-        yield filter(childGroups.bms)
+        const itemsMap = filter(childGroups.bms)
+        const accCount = itemCount + itemsMap.size
+
+        if (accCount >= this._bmLimit) {
+            return yield ImportItemCreator._limitMap(itemsMap, this._bmLimit)
+        }
+
+        yield itemsMap
 
         // Recursively process next levels (not expected to get deep)
         for (const dir of childGroups.dirs) {
-            yield* await this._traverseBmTreeDir(dir, filter)
+            yield* await this._traverseBmTreeDir(dir, filter, accCount)
         }
     }
 
@@ -233,16 +240,31 @@ export default class ImportItemCreator {
             url => this.histKeys.has(url),
         )
         // Get all history from browser (last 3 months), filter on existing DB pages
-        const startTime = moment().subtract(lookbackWeeks, 'weeks')
+        const baseTime = moment().subtract(lookbackWeeks, 'weeks')
+        let itemCount = 0
 
         // Fetch and filter history in week batches to limit space
-        for (let i = 0; i < lookbackWeeks; i++) {
+        for (
+            let time = moment();
+            time.isAfter(baseTime);
+            time.subtract(1, 'week')
+        ) {
             const historyItemBatch = await this._fetchHistItems({
-                startTime: startTime.valueOf(),
-                endTime: startTime.add(1, 'weeks').valueOf(),
+                startTime: moment(time)
+                    .subtract(1, 'week')
+                    .valueOf(),
+                endTime: time.valueOf(),
             })
 
-            yield filterByUrl(historyItemBatch)
+            const itemsMap = filterByUrl(historyItemBatch)
+            itemCount += itemsMap.size
+
+            if (itemCount >= this._histLimit) {
+                yield ImportItemCreator._limitMap(itemsMap, this._histLimit)
+                break
+            }
+
+            yield itemsMap
         }
     }
 
@@ -251,7 +273,6 @@ export default class ImportItemCreator {
         //  but needs '0' in Chrome. `runtime.getBrowserInfo` is only available on FF web ext API
         const rootId =
             typeof browser.runtime.getBrowserInfo === 'undefined' ? '0' : ''
-        let numItems = 0
 
         // Get all bookmarks from browser, filter on existing DB bookmarks
         for await (const bmsChunk of this._traverseBmTree(rootId)) {
@@ -260,38 +281,7 @@ export default class ImportItemCreator {
                 continue
             }
 
-            // If limit surpassed, do final yield of limited items, else yield and continue to next chunk
-            numItems += bmsChunk.size
-            if (numItems >= this._bmLimit) {
-                return yield {
-                    type: IMPORT_TYPE.BOOKMARK,
-                    data: ImportItemCreator._limitMap(bmsChunk, this._bmLimit),
-                }
-            }
-
             yield { type: IMPORT_TYPE.BOOKMARK, data: bmsChunk }
-        }
-    }
-
-    async *_createHistItems() {
-        let numHistItems = 0
-
-        // Yield history items in chunks
-        for await (const histItemChunk of this._iterateHistItems()) {
-            // If limit surpassed, do final yield of limited items, else yield and continue to next chunk
-            numHistItems += histItemChunk.size
-            if (numHistItems >= this._histLimit) {
-                yield {
-                    type: IMPORT_TYPE.HISTORY,
-                    data: ImportItemCreator._limitMap(
-                        histItemChunk,
-                        this._histLimit,
-                    ),
-                }
-                break
-            }
-
-            yield { type: IMPORT_TYPE.HISTORY, data: histItemChunk }
         }
     }
 
@@ -314,7 +304,10 @@ export default class ImportItemCreator {
         }
 
         if (this._histLimit > 0) {
-            yield* this._createHistItems()
+            // Yield history items in chunks
+            for await (const histItemChunk of this._iterateHistItems()) {
+                yield { type: IMPORT_TYPE.HISTORY, data: histItemChunk }
+            }
         }
     }
 }
