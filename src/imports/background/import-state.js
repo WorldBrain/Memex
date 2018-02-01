@@ -5,6 +5,7 @@ import {
     OLD_EXT_KEYS,
     STORAGE_KEYS,
 } from 'src/options/imports/constants'
+import { NUM_IMPORT_ITEMS as ONBOARDING_LIM } from 'src/overview/onboarding/constants'
 import { mapToObject } from 'src/util/map-set-helpers'
 import ItemCreator from './import-item-creation'
 
@@ -25,7 +26,7 @@ import ItemCreator from './import-item-creation'
  */
 
 export class ImportStateManager {
-    static QUICK_MODE_ITEM_LIMITS = { histLimit: 30, bmLimit: 0 }
+    static QUICK_MODE_ITEM_LIMITS = { histLimit: ONBOARDING_LIM, bmLimit: 0 }
     static ESTS_STORAGE_KEY = 'import-estimate-counts'
     static DAY_IN_MS = 1000 * 60 * 60 * 24
     static STATE_STORAGE_KEY = 'import-items-state'

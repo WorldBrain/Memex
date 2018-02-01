@@ -21,6 +21,7 @@ class OnboardingContainer extends PureComponent {
         // Init the connection to imports module in BG script
         this._importsConnMan = this.props.initConnection()
     }
+
     render() {
         if (!this.props.isVisible) {
             return null
@@ -29,7 +30,7 @@ class OnboardingContainer extends PureComponent {
         return (
             <Overlay>
                 <Info onClose={this.props.setVisible(false)} />
-                <Importer />
+                <Importer {...this.props} />
             </Overlay>
         )
     }
@@ -37,6 +38,8 @@ class OnboardingContainer extends PureComponent {
 
 const mapStateToProps = state => ({
     isVisible: selectors.isVisible(state),
+    isImportsDone: selectors.isImportsDone(state),
+    progress: selectors.progressPercent(state),
 })
 
 const mapDispatchToProps = dispatch => ({

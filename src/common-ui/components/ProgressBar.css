@@ -1,0 +1,29 @@
+.progressBarText {
+    font-size: 0.8em;
+    color: #3eb995;
+    text-align: right;
+}
+
+.arrowUp {
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 5px solid #3eb995;
+}
+
+.progressBar {
+    background-color: #ededed;
+    overflow: hidden;
+    width: 100%;
+    border-radius: 20px;
+    margin-top: 40px;
+    z-index: -1;
+    border: 5px solid transparent;
+}
+
+.progressColor {
+    background-color: #3eb995;
+    background-size: 40px 40px;
+    height: 25px;
+}
