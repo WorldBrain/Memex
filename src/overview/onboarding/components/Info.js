@@ -9,11 +9,6 @@ class Info extends PureComponent {
         onClose: PropTypes.func.isRequired,
     }
 
-    handleClose = event => {
-        this.trackWelcomeChoice('Go browsing')()
-        this.props.onClose()
-    }
-
     trackWelcomeChoice = action => () =>
         analytics.trackEvent({
             category: 'Welcome page selection',
@@ -70,15 +65,6 @@ class Info extends PureComponent {
                         <strong>Read</strong> Step-By Step Tutorial
                     </a>
                 </div>
-                <p>
-                    {' '}
-                    <span
-                        className={localStyles.link}
-                        onClick={this.handleClose}
-                    >
-                        Or close this window and start browsing the web
-                    </span>
-                </p>
                 <img style={{ width: '60%' }} src="/img/how_to_search.png" />
             </div>
         )

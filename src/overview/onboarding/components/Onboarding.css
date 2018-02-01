@@ -1,3 +1,18 @@
+.container {
+    padding: 0 10em;
+    margin-bottom: 2em;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-align: center;
+}
+
+.importMsg {
+    font-size: 0.9rem;
+    color: #3eb995;
+    font-weight: bold;
+}
+
 .popup {
     padding: 20px;
     background: #fff;
@@ -25,14 +40,14 @@
 }
 
 .message {
-    font-size: 1.2em;
+    font-size: 1rem;
+    font-weight: 200;
     line-height: 1.7em;
     text-align: center;
 }
 
 .logobig {
-    margin-bottom: 50px;
-    margin-top: 55px;
+    margin: 1.5em 0;
     width: 30%;
     min-width: 500px;
 }
@@ -60,8 +75,7 @@
 .btnBar {
     align-items: center;
     flex-direction: row;
-    margin: 20px;
-    margin-top: 50px;
+    margin: 3em 0;
 }
 
 .link {
