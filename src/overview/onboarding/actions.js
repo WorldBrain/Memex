@@ -1,6 +1,6 @@
 import { createAction } from 'redux-act'
 
-import { CMDS } from 'src/options/imports/constants'
+import { IMPORT_TYPE as TYPE, CMDS } from 'src/options/imports/constants'
 import { IMPORT_CONN_NAME } from './constants'
 
 export const setVisible = createAction('onboarding/setVisible')
@@ -15,6 +15,12 @@ export const init = () => dispatch =>
  * @class ImportsConnHandler
  */
 class ImportsConnHandler {
+    static ONBOARDING_ALLOW_TYPES = {
+        [TYPE.HISTORY]: true,
+        [TYPE.BOOKMARK]: false,
+        [TYPE.OLD]: false,
+    }
+
     constructor(connName, dispatch) {
         this._port = browser.runtime.connect({ name: connName })
         this._dispatch = dispatch
@@ -29,6 +35,10 @@ class ImportsConnHandler {
     handleCmds = ({ cmd, ...payload }) => {
         switch (cmd) {
             case CMDS.INIT:
+                return this._port.postMessage({
+                    cmd: CMDS.START,
+                    payload: ImportsConnHandler.ONBOARDING_ALLOW_TYPES,
+                })
             case CMDS.NEXT:
             case CMDS.COMPLETE:
             default:
