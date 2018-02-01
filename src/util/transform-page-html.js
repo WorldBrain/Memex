@@ -3,8 +3,6 @@ import cheerio from 'cheerio'
 const WHITELIST_STRIP_LINEBREAKS = /[^A-Za-z\x80-\xFF 0-9 \u2018\u2019\u201C|\u201D\u2026 \u00C0-\u1FFF \u2C00-\uD7FF \.,\?""!@#\$%\^&\*\(\)-_=\+;:<>\/\\\|\}\{\[\]`~'-\w]*/g // eslint-disable-line
 
 export default function transformHTML({ html = '' }) {
-    const lengthBefore = html.length
-
     let text = html
         .toString()
         .replace(
@@ -53,7 +51,5 @@ export default function transformHTML({ html = '' }) {
         .replace(/ (?! )/g, '')
         .replace(/[ \t\v\u00A0]{2,}/g, ' ')
 
-    const lengthAfter = text.length
-
-    return { text, lengthBefore, lengthAfter }
+    return { text, lenBefore: html.length, lenAfter: text.length }
 }
