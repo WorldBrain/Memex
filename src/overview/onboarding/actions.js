@@ -5,6 +5,7 @@ import { IMPORT_CONN_NAME } from './constants'
 
 export const setVisible = createAction('onboarding/setVisible')
 export const incProgress = createAction('onboarding/incProgress')
+export const setProgress = createAction('onboarding/setProgress')
 export const setImportsDone = createAction('onboarding/setImportsDone')
 
 export const init = () => dispatch =>
@@ -45,6 +46,8 @@ class ImportsConnHandler {
                 return this._dispatch(incProgress())
             case CMDS.COMPLETE:
                 return this._dispatch(setImportsDone(true))
+            case CMDS.PAUSE:
+                return this._port.postMessage({ cmd: CMDS.RESUME })
             default:
                 console.log(cmd, payload)
         }

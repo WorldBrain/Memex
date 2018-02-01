@@ -7,6 +7,7 @@ import * as constants from './constants'
 import {
     selectors as onboarding,
     actions as onboardingActs,
+    constants as onboardingConsts,
 } from './onboarding'
 
 const parseBool = str => str === 'true'
@@ -64,6 +65,11 @@ const hydrateStateFromStorage = store => {
 
     // Keep each of these storage keys in sync
     hydrate(constants.SEARCH_COUNT_KEY, actions.initSearchCount)
+    hydrate(
+        onboardingConsts.STORAGE_KEYS.isImportsDone,
+        onboardingActs.setImportsDone,
+    )
+    hydrate(onboardingConsts.STORAGE_KEYS.progress, onboardingActs.setProgress)
 }
 
 const syncStateToStorage = store =>
@@ -72,6 +78,11 @@ const syncStateToStorage = store =>
 
         const state = store.getState()
         dump(constants.SEARCH_COUNT_KEY, selectors.searchCount(state))
+        dump(
+            onboardingConsts.STORAGE_KEYS.isImportsDone,
+            onboarding.isImportsDone(state),
+        )
+        dump(onboardingConsts.STORAGE_KEYS.progress, onboarding.progress(state))
     })
 
 const storageSync = storeCreator => (reducer, initState, enhancer) => {
