@@ -28,7 +28,7 @@ class OnboardingContainer extends PureComponent {
         this._importsConnMan = this.props.initConnection()
 
         // Chrome users don't need to see the switch; FF do
-        this._showTrackingSwitch =
+        this._showTrackingOptIn =
             typeof browser.runtime.getBrowserInfo !== 'undefined'
     }
 
@@ -50,6 +50,21 @@ class OnboardingContainer extends PureComponent {
         return <ImportMsg {...props} />
     }
 
+    renderOptIn() {
+        if (!this._showTrackingOptIn) {
+            return null
+        }
+
+        return (
+            <OptIn>
+                <Switch
+                    isChecked={this.props.shouldTrack}
+                    onChange={this.props.toggleShouldTrack}
+                />
+            </OptIn>
+        )
+    }
+
     render() {
         if (!this.props.isVisible) {
             return null
@@ -58,12 +73,7 @@ class OnboardingContainer extends PureComponent {
         return (
             <Overlay>
                 <Info />
-                <OptIn>
-                    <Switch
-                        isChecked={this.props.shouldTrack}
-                        onChange={this.props.toggleShouldTrack}
-                    />
-                </OptIn>
+                {this.renderOptIn()}
                 <Importer {...this.props}>{this.renderImportMsg()}</Importer>
             </Overlay>
         )
