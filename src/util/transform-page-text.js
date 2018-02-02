@@ -65,7 +65,7 @@ const removeGiberishWords = (text = '') => text.replace(giberishWords, ' ')
  */
 export default function transform({ text = '', lang = 'en' }) {
     // Short circuit if no text
-    if (!text || !text.replace(/\s/g, '')) {
+    if (!text.trim().length) {
         return { text, lenAfter: 0, lenBefore: 0 }
     }
 

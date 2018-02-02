@@ -12,7 +12,6 @@ import { keyGen, removeKeyType } from './util'
 const suggest = (query = '', type, limit = 10) =>
     new Promise((resolve, reject) => {
         const results = []
-        console.log(query, type)
         // Start searching from the domain or tag matching the query
         const startKey = keyGen[type](query)
 

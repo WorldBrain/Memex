@@ -1,4 +1,4 @@
-import transform from 'src/util/transform-page-text'
+import transformPageText from 'src/util/transform-page-text'
 import { DEFAULT_TERM_SEPARATOR } from './search-index'
 
 /**
@@ -82,60 +82,78 @@ class QueryBuilder {
     filterDomains = this._filterGen(this.domain)
     filterTags = this._filterGen(this.tags)
 
+    /**
+     * Slice off '#' prefix and replace any '+' with space char
+     *
+     * @param {string} tag
+     * @return {string}
+     */
+    static stripTagPattern = tag =>
+        tag
+            .slice(1)
+            .split('+')
+            .join(' ')
+
+    /**
+     * Splits up an input string into terms.
+     *
+     * @param {string} input
+     * @param {string|RegExp} [delim]
+     * @return {string[]}
+     */
+    static getTermsFromInput = (input, delim = DEFAULT_TERM_SEPARATOR) =>
+        input
+            .toLowerCase()
+            .trim()
+            .split(delim)
+
+    /**
+     * Filter out terms those terms that match any tags/domain pattern from an array of terms.
+     * Contains side-effects to update `domains` and `tags` Sets with anything found.
+     */
+    _extractTermsPatterns = (termsArr = []) =>
+        termsArr.filter(term => {
+            if (QueryBuilder.DOMAIN_TLD_PATTERN.test(term)) {
+                this.domain.add(term)
+                return false
+            }
+
+            if (QueryBuilder.HASH_TAG_PATTERN.test(term)) {
+                this.tags.add(QueryBuilder.stripTagPattern(term))
+                return false
+            }
+
+            return true
+        })
+
     searchTerm(input = '') {
         // Short-circuit if blank search
-        if (!input.length) {
-            this.query = input
+        if (!input.trim().length) {
             return this
         }
 
-        // All indexed strings are lower-cased, so force the query terms to be
-        let terms = input.toLowerCase().match(/\S+/g) || []
+        // STAGE 1: Filter out tags/domains
+        const terms = QueryBuilder.getTermsFromInput(input, /\s+/)
+        const filteredTerms = this._extractTermsPatterns(terms)
 
-        // Reduce the input down into array of terms. Contains side-effects to exclude any
-        //  domains/tags detected in input - place them into relevant Sets
-        terms = terms.reduce((terms, currTerm) => {
-            if (QueryBuilder.DOMAIN_TLD_PATTERN.test(currTerm)) {
-                this.domain.add(currTerm)
-                return terms
-            }
-
-            if (QueryBuilder.HASH_TAG_PATTERN.test(currTerm)) {
-                // Slice off '#' prefix and replace any '+' with space char
-                currTerm = currTerm
-                    .slice(1)
-                    .split('+')
-                    .join(' ')
-                this.tags.add(currTerm)
-                return terms
-            }
-
-            return [...terms, currTerm]
-        }, [])
-
-        // All terms must be pushed to the text-pipeline to take into account stopword removal ect...
-        terms = transform({ text: terms.join(' '), lang: 'all' })
-
-        // Make sure terms is defined before trying to turn back into array.
-        if (terms) {
-            terms = terms.text.split(DEFAULT_TERM_SEPARATOR)
+        // Short-circuit if all terms filtered out as tags/domains
+        if (!filteredTerms.length) {
+            return this
         }
 
-        // If there are valid search terms, parse them...
-        if (terms && terms.length) {
-            // Split into words and push to query
-            let goodTerm = 0
-            terms.forEach(term => {
-                if (term !== '') {
-                    goodTerm += 1
-                    this.query.add(term)
-                } else {
-                    this.isBadTerm = true
-                }
-            })
+        // STAGE 2: push through index text-processing logic
+        const { text } = transformPageText({ text: filteredTerms.join(' ') })
 
-            this.isBadTerm = goodTerm === 0
+        // Search is too vague if nothing left from text-processing
+        if (!text.trim().length) {
+            this.isBadTerm = true
+            return this
         }
+
+        // Add post-processed terms to `query` Set
+        QueryBuilder.getTermsFromInput(text).forEach(term =>
+            this.query.add(term),
+        )
 
         return this
     }
