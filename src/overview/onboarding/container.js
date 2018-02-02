@@ -2,13 +2,13 @@ import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 
+import { ToggleSwitch } from 'src/common-ui/components'
 import * as selectors from './selectors'
 import * as actions from './actions'
 import Importer from './components/Importer'
 import ImportMsg from './components/ImportMsg'
 import Overlay from './components/Overlay'
 import Info from './components/Info'
-import Switch from './components/Switch'
 import OptIn from './components/OptIn'
 
 class OnboardingContainer extends PureComponent {
@@ -57,7 +57,7 @@ class OnboardingContainer extends PureComponent {
 
         return (
             <OptIn>
-                <Switch
+                <ToggleSwitch
                     isChecked={this.props.shouldTrack}
                     onChange={this.props.toggleShouldTrack}
                 />
