@@ -8,10 +8,11 @@
 }
 
 .importMsg {
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     color: #3eb995;
     font-weight: bold;
     cursor: pointer;
+    margin-top: -15px;
 
     &:hover {
         text-decoration: underline;
@@ -52,8 +53,9 @@
 }
 
 .message {
-    font-size: 1rem;
+    font-size: 20px;
     font-weight: 200;
+    color: #777;
     line-height: 1.7em;
     text-align: center;
 }

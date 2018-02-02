@@ -13,30 +13,20 @@ class Info extends PureComponent {
     render() {
         return (
             <div className={localStyles.content}>
-                <img
-                    className={localStyles.logobig}
-                    src="/img/worldbrain-logo.png"
-                />
                 <div className={localStyles.messageContainer}>
                     <div className={localStyles.message}>
                         <p>
-                            With a 15s delay, Memex{' '}
-                            <strong>locally stores</strong> the content of the
-                            websites you visit, so you can search for every word
-                            in it.
+                            With a 15s delay, Memex  stores the content of the
+                            websites you visit.<br />Titles and URLs are always
+                            searchable.
                         </p>
                         <p>
-                            <strong>STEP 1: </strong>Visit some websites or{' '}
-                            <a
-                                className={localStyles.link}
-                                href="/options/options.html#/import"
-                            >
-                                import your existing browser history/bookmarks
-                            </a>.
-                            <br />
-                            <strong>STEP 2: </strong>Search by typing 'w' +
-                            'space or tab' + 'your keywords' into the address
-                            bar of the browser.
+                            <strong>Pro Tip: </strong>Search directly from the
+                            address bar by typing:
+                            <img
+                                className={localStyles.logobig}
+                                src="/img/shortcuts.png"
+                            />
                         </p>
                     </div>
                 </div>
@@ -60,7 +50,6 @@ class Info extends PureComponent {
                         <strong>Read</strong> Step-By Step Tutorial
                     </a>
                 </div>
-                <img style={{ width: '60%' }} src="/img/how_to_search.png" />
             </div>
         )
     }

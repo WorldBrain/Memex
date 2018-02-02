@@ -44,7 +44,7 @@ class OnboardingContainer extends PureComponent {
               }
             : {
                   children:
-                      'Please wait while Memex prepares... (click to skip)',
+                      'Importing the last 30 pages you visited, so you can play around immediately (click to skip)',
                   onClick: this.cancelImport,
               }
         return <ImportMsg {...props} />
@@ -72,9 +72,10 @@ class OnboardingContainer extends PureComponent {
 
         return (
             <Overlay>
-                <Info />
                 {this.renderOptIn()}
                 <Importer {...this.props}>{this.renderImportMsg()}</Importer>
+                <hr />
+                <Info />
             </Overlay>
         )
     }
