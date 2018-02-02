@@ -13,6 +13,7 @@ import OptIn from './components/OptIn'
 
 class OnboardingContainer extends PureComponent {
     static propTypes = {
+        showCancelBtn: PropTypes.bool.isRequired,
         isImportsDone: PropTypes.bool.isRequired,
         isVisible: PropTypes.bool.isRequired,
         shouldTrack: PropTypes.bool.isRequired,
@@ -34,20 +35,9 @@ class OnboardingContainer extends PureComponent {
 
     cancelImport = () => this._importsConnMan.cancel()
 
-    handleTrackingChange = event => console.log(event.target.value)
-
-    renderImportMsg() {
-        const props = this.props.isImportsDone
-            ? {
-                  children: 'Memex is ready! Click here to start.',
-                  onClick: this.props.setVisible(false),
-              }
-            : {
-                  children:
-                      'Please wait while Memex prepares... (click to skip)',
-                  onClick: this.cancelImport,
-              }
-        return <ImportMsg {...props} />
+    handleClose = event => {
+        this.cancelImport()
+        this.props.setVisible(false)()
     }
 
     renderOptIn() {
@@ -71,10 +61,20 @@ class OnboardingContainer extends PureComponent {
         }
 
         return (
-            <Overlay>
-                <Info />
+            <Overlay
+                onClose={this.handleClose}
+                showCloseBtn={this.props.showCancelBtn}
+            >
                 {this.renderOptIn()}
-                <Importer {...this.props}>{this.renderImportMsg()}</Importer>
+                <Importer {...this.props}>
+                    <ImportMsg
+                        isImportsDone={this.props.isImportsDone}
+                        onCancel={this.cancelImport}
+                        onFinish={this.props.setVisible(false)}
+                    />
+                </Importer>
+                <hr />
+                <Info />
             </Overlay>
         )
     }
@@ -83,6 +83,7 @@ class OnboardingContainer extends PureComponent {
 const mapStateToProps = state => ({
     isVisible: selectors.isVisible(state),
     isImportsDone: selectors.isImportsDone(state),
+    showCancelBtn: selectors.showCancelBtn(state),
     progress: selectors.progressPercent(state),
     shouldTrack: selectors.shouldTrack(state),
 })

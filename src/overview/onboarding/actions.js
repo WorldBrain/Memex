@@ -1,5 +1,6 @@
 import { createAction } from 'redux-act'
 
+import analytics from 'src/analytics'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { IMPORT_TYPE as TYPE, CMDS } from 'src/options/imports/constants'
 import { IMPORT_CONN_NAME } from './constants'
@@ -13,6 +14,7 @@ export const setVisible = createAction('onboarding/setVisible')
 export const incProgress = createAction('onboarding/incProgress')
 export const setProgress = createAction('onboarding/setProgress')
 export const setImportsDone = createAction('onboarding/setImportsDone')
+export const setImportsStarted = createAction('onboarding/setImportsStarted')
 
 export const init = () => (dispatch, getState) =>
     new ImportsConnHandler(IMPORT_CONN_NAME, dispatch, getState)
@@ -29,6 +31,8 @@ class ImportsConnHandler {
         [TYPE.BOOKMARK]: false,
         [TYPE.OLD]: false,
     }
+
+    _cancelled = false
 
     constructor(connName, dispatch, getState) {
         this._port = browser.runtime.connect({ name: connName })
@@ -47,14 +51,28 @@ class ImportsConnHandler {
                 payload: ImportsConnHandler.ONBOARDING_ALLOW_TYPES,
             })
         }
+
+        this._dispatch(setImportsStarted(true))
     }
 
     cancel() {
+        this._cancelled = true
+        analytics.trackEvent({
+            category: 'Onboarding',
+            action: 'Cancelled import',
+        })
+
         this._port.postMessage({ cmd: CMDS.CANCEL })
         this.complete()
     }
 
     complete() {
+        if (!this._cancelled) {
+            analytics.trackEvent({
+                category: 'Onboarding',
+                action: 'Finished import',
+            })
+        }
         this._dispatch(setImportsDone(true))
         dirtyEstsCache()
     }
@@ -74,7 +92,6 @@ class ImportsConnHandler {
             case CMDS.PAUSE: // BG connman will pause on page refresh - this just auto-restarts on page load
                 return this._port.postMessage({ cmd: CMDS.RESUME })
             default:
-                console.log(cmd, payload)
         }
     }
 }

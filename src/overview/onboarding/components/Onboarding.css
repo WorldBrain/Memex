@@ -7,14 +7,47 @@
     text-align: center;
 }
 
-.importMsg {
-    font-size: 0.9rem;
+.choiceBtnContainer {
+    font-size: 1.1rem;
     color: #3eb995;
-    font-weight: bold;
+    font-weight: lighter;
+    margin: 3em 0 1em;
+}
+
+.cancelText {
     cursor: pointer;
 
     &:hover {
         text-decoration: underline;
+        color: #185b47;
+    }
+}
+
+.choiceBtn {
+    margin: 0 0.3em;
+    padding: 0.3em 0.6em;
+    border-radius: 25px;
+    border: 1px solid #3eb995;
+    font-size: 1.1rem;
+    color: #3eb995;
+    cursor: pointer;
+    height: 35px;
+
+    &:hover,
+    &:active {
+        background-color: #3eb995;
+        color: #fff;
+    }
+}
+
+.startBtn {
+    background-color: #3eb995;
+    color: #fff;
+
+    &:hover,
+    &:active {
+        background-color: #fff;
+        color: #3eb995;
     }
 }
 
@@ -37,6 +70,22 @@
     overflow: auto;
 }
 
+.closeBtn {
+    position: absolute;
+    right: 10px;
+    top: 5px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 1.5rem;
+    color: #777;
+
+    &:hover,
+    &:focus {
+        color: #3eb995;
+    }
+}
+
 .heyyou {
     font-size: 50px;
     font-weight: lighter;
@@ -52,8 +101,9 @@
 }
 
 .message {
-    font-size: 1rem;
+    font-size: 20px;
     font-weight: 200;
+    color: #777;
     line-height: 1.7em;
     text-align: center;
 }
@@ -87,7 +137,7 @@
 .btnBar {
     align-items: center;
     flex-direction: row;
-    margin: 3em 0;
+    margin: 3em 0 6em;
 }
 
 .link {

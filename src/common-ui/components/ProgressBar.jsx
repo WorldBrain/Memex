@@ -1,34 +1,29 @@
 import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
+import cx from 'classnames'
 
 import localStyles from './ProgressBar.css'
 
 class ProgressBar extends PureComponent {
     static propTypes = {
         progress: PropTypes.number.isRequired,
+        className: PropTypes.string,
     }
 
     render() {
-        const { progress } = this.props
+        const { progress, className } = this.props
 
         return (
-            <div>
-                <div className={localStyles.progressBar}>
+            <div className={cx(localStyles.container, className)}>
+                <div className={localStyles.bar}>
                     <div
-                        className={localStyles.progressColor}
+                        className={localStyles.color}
                         style={{ width: `${progress}%` }}
                     />
                 </div>
-                <div
-                    className={localStyles.arrowUp}
-                    style={{ marginLeft: `${progress}%` }}
-                />
-                <h3
-                    className={localStyles.progressBarText}
-                    style={{ width: `${progress}%` }}
-                >
-                    {Math.floor(this.props.progress)}%
-                </h3>
+                <span className={localStyles.percent}>
+                    {Math.floor(progress)}%
+                </span>
             </div>
         )
     }
