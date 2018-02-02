@@ -203,7 +203,8 @@ input[type='checkbox'] {
 .tagsPopup,
 .domainsPopup {
     position: absolute;
-    top: 50px;
+    top: 76px;
+    border-top: 5px solid white;
 }
 
 .tagname {
@@ -245,7 +246,7 @@ input[type='checkbox'] {
 .bookmarks {
     height: 19px;
     padding-top: 2px;
-    padding-left: 4px;
+    padding-left: 7px;
 }
 
 .expandButton {
