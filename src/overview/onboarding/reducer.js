@@ -13,6 +13,10 @@ const defState = {
 
 export default createReducer(
     {
+        [actions.setShouldTrack]: (state, shouldTrack) => ({
+            ...state,
+            shouldTrack,
+        }),
         [actions.toggleShouldTrack]: state => ({
             ...state,
             shouldTrack: !state.shouldTrack,

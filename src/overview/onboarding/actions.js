@@ -7,6 +7,7 @@ import * as selectors from './selectors'
 
 const dirtyEstsCache = remoteFunction('dirtyEstsCache')
 
+export const setShouldTrack = createAction('onboarding/setShouldTrack')
 export const toggleShouldTrack = createAction('onboarding/toggleShouldTrack')
 export const setVisible = createAction('onboarding/setVisible')
 export const incProgress = createAction('onboarding/incProgress')
