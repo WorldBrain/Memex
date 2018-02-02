@@ -83,6 +83,12 @@ class QueryBuilder {
     filterTags = this._filterGen(this.tags)
 
     searchTerm(input = '') {
+        // Short-circuit if blank search
+        if (!input.length) {
+            this.query = input
+            return this
+        }
+
         // All indexed strings are lower-cased, so force the query terms to be
         let terms = input.toLowerCase().match(/\S+/g) || []
 
