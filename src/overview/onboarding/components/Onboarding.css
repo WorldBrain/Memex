@@ -18,6 +18,13 @@
     }
 }
 
+.optInContainer {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin: 0 10em;
+}
+
 .popup {
     padding: 20px;
     background: #fff;

@@ -13,3 +13,7 @@ export const progressPercent = createSelector(
     progress,
     progress => progress / constants.NUM_IMPORT_ITEMS * 100,
 )
+export const shouldTrack = createSelector(
+    onboarding,
+    state => state.shouldTrack,
+)

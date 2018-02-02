@@ -7,10 +7,20 @@ const defState = {
     isVisible: false,
     progress: 0,
     isImportsDone: false,
+    // Chrome version tracks analytics by default
+    shouldTrack: typeof browser.runtime.getBrowserInfo === 'undefined',
 }
 
 export default createReducer(
     {
+        [actions.setShouldTrack]: (state, shouldTrack) => ({
+            ...state,
+            shouldTrack,
+        }),
+        [actions.toggleShouldTrack]: state => ({
+            ...state,
+            shouldTrack: !state.shouldTrack,
+        }),
         [actions.setVisible]: (state, isVisible) => ({ ...state, isVisible }),
         [actions.setProgress]: (state, progress) => ({ ...state, progress }),
         [actions.incProgress]: (state, inc = 1) => ({
