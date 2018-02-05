@@ -20,7 +20,7 @@ class ImportMsg extends PureComponent {
                 onClick={this.props.onFinish}
                 type="button"
             >
-                Get started
+                Get Started
             </button>
             or
             <a
@@ -28,7 +28,7 @@ class ImportMsg extends PureComponent {
                 type="button"
                 href="/options/options.html#/import"
             >
-                Import rest of history
+                Import Rest of History
             </a>
         </span>
     )
@@ -36,8 +36,8 @@ class ImportMsg extends PureComponent {
     renderCancellableMsg = () => (
         <span className={localStyles.choiceBtnContainer}>
             <p className={localStyles.prepareMsg}>
-                Importing the last 30 pages you visited, so you can play around
-                immediately
+                Importing the last 30 pages you visited,<br />so you can play
+                around immediately
             </p>
             <p onClick={this.props.onCancel} className={localStyles.cancelText}>
                 - click to skip -
