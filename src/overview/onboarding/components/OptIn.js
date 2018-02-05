@@ -11,10 +11,14 @@ class OptIn extends PureComponent {
     render() {
         return (
             <div className={localStyles.optInContainer}>
-                <p className={localStyles.message}>
-                    Enable analytics tracking:
-                </p>
                 {this.props.children}
+                <p className={localStyles.OptIn}>
+                    Send 100% private & anonymous usage statistics
+                    <p className={localStyles.SubOptIn}>
+                        None of your history or searches, only interactions with
+                        software
+                    </p>
+                </p>
             </div>
         )
     }

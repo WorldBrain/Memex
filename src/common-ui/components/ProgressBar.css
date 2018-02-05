@@ -6,9 +6,10 @@
 
 .percent {
     width: 5%;
-    font-size: 10px;
+    font-size: 15px;
     color: #3eb995;
     text-align: center;
+    padding-left: 4px;
 }
 
 .bar {

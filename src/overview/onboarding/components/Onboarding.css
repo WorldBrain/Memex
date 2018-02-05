@@ -11,7 +11,20 @@
     font-size: 1.1rem;
     color: #3eb995;
     font-weight: lighter;
-    margin: 3em 0 1em;
+    display: block;
+    min-height: 150px;
+    margin-bottom: 15px;
+}
+
+.readyMsg {
+    font-size: 25px;
+    margin-bottom: 5px;
+    font-color: #777;
+}
+
+.prepareMsg {
+    padding-top: 25px;
+    font-size: 20px;
 }
 
 .cancelText {
@@ -24,14 +37,16 @@
 }
 
 .choiceBtn {
-    margin: 0 0.3em;
-    padding: 0.3em 0.6em;
+    padding: 6px 1.6em;
     border-radius: 25px;
+    font-weight: 300;
     border: 1px solid #3eb995;
     font-size: 1.1rem;
     color: #3eb995;
     cursor: pointer;
     height: 35px;
+    margin-left: 12px;
+    margin-right: 12px;
 
     &:hover,
     &:active {
@@ -55,7 +70,9 @@
     display: flex;
     justify-content: space-around;
     align-items: center;
-    margin: 0 10em;
+    margin: 0 7.5em;
+    margin-top: 15px;
+    margin-bottom: 15px;
 }
 
 .popup {
@@ -68,6 +85,7 @@
     cursor: default;
     max-height: 90%;
     overflow: auto;
+    max-width: 800px;
 }
 
 .closeBtn {
@@ -106,12 +124,33 @@
     color: #777;
     line-height: 1.7em;
     text-align: center;
+    margin-bottom: 15px;
+}
+
+.OptIn {
+    font-size: 20px;
+    font-weight: 200;
+    color: #777;
+    text-align: center;
+    text-align: left;
+}
+
+.SubOptIn {
+    font-size: 15px;
+    font-weight: 200;
+    color: #777;
+    line-height: 1em;
+    text-align: center;
+    margin-bottom: 15px;
+    margin-top: 6px;
+    text-align: left;
 }
 
 .logobig {
     margin: 1.5em 0;
     width: 30%;
     min-width: 500px;
+    margin-bottom: 35px;
 }
 
 .btnLink {
@@ -148,4 +187,14 @@
     &:hover {
         color: #76ccb2;
     }
+}
+
+.guidance {
+    margin-top: -30px;
+    margin-bottom: 15px;
+}
+
+p {
+    margin-right: -10px;
+    margin-bottom: -10px;
 }
