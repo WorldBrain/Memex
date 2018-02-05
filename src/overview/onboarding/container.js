@@ -65,7 +65,6 @@ class OnboardingContainer extends PureComponent {
                 onClose={this.handleClose}
                 showCloseBtn={this.props.showCancelBtn}
             >
-                {this.renderOptIn()}
                 <Importer {...this.props}>
                     <ImportMsg
                         isImportsDone={this.props.isImportsDone}
@@ -73,8 +72,8 @@ class OnboardingContainer extends PureComponent {
                         onFinish={this.props.setVisible(false)}
                     />
                 </Importer>
-                <hr />
                 <Info />
+                {this.renderOptIn()}
             </Overlay>
         )
     }

@@ -13,13 +13,14 @@ class ImportMsg extends PureComponent {
 
     renderFinishMsg = () => (
         <span className={localStyles.choiceBtnContainer}>
-            Memex is ready!
+            <p className={localStyles.readyMsg}>Memex is ready!</p>
+            <br />
             <button
                 className={cx(localStyles.choiceBtn, localStyles.startBtn)}
                 onClick={this.props.onFinish}
                 type="button"
             >
-                get started
+                Get started
             </button>
             or
             <a
@@ -27,14 +28,14 @@ class ImportMsg extends PureComponent {
                 type="button"
                 href="/options/options.html#/import"
             >
-                import rest of history
+                Import rest of history
             </a>
         </span>
     )
 
     renderCancellableMsg = () => (
         <span className={localStyles.choiceBtnContainer}>
-            <p>
+            <p className={localStyles.prepareMsg}>
                 Importing the last 30 pages you visited, so you can play around
                 immediately
             </p>
