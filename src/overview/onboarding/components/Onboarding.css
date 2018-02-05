@@ -109,7 +109,7 @@
 .btnBar {
     align-items: center;
     flex-direction: row;
-    margin: 3em 0;
+    margin: 3em 0 6em;
 }
 
 .link {

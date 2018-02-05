@@ -16,7 +16,7 @@ class Info extends PureComponent {
                 <div className={localStyles.messageContainer}>
                     <div className={localStyles.message}>
                         <p>
-                            With a 15s delay, Memex  stores the content of the
+                            With a 15s delay, Memex stores the content of the
                             websites you visit.<br />Titles and URLs are always
                             searchable.
                         </p>
@@ -30,6 +30,7 @@ class Info extends PureComponent {
                         </p>
                     </div>
                 </div>
+                <div className={localStyles.message}>More Guidance</div>
                 <div className={localStyles.btnBar}>
                     <a
                         className={localStyles.btnLink}
@@ -46,6 +47,7 @@ class Info extends PureComponent {
                         onClick={this.trackWelcomeChoice('Tutorial page')}
                         type="button"
                         href="/options/options.html#/tutorial"
+                        target="_blank"
                     >
                         <strong>Read</strong> Step-By Step Tutorial
                     </a>

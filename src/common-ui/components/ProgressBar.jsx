@@ -1,18 +1,20 @@
 import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
+import cx from 'classnames'
 
 import localStyles from './ProgressBar.css'
 
 class ProgressBar extends PureComponent {
     static propTypes = {
         progress: PropTypes.number.isRequired,
+        className: PropTypes.string,
     }
 
     render() {
-        const { progress } = this.props
+        const { progress, className } = this.props
 
         return (
-            <div className={localStyles.container}>
+            <div className={cx(localStyles.container, className)}>
                 <div className={localStyles.bar}>
                     <div
                         className={localStyles.color}

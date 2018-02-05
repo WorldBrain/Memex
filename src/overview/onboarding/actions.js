@@ -13,6 +13,7 @@ export const setVisible = createAction('onboarding/setVisible')
 export const incProgress = createAction('onboarding/incProgress')
 export const setProgress = createAction('onboarding/setProgress')
 export const setImportsDone = createAction('onboarding/setImportsDone')
+export const setImportsStarted = createAction('onboarding/setImportsStarted')
 
 export const init = () => (dispatch, getState) =>
     new ImportsConnHandler(IMPORT_CONN_NAME, dispatch, getState)
@@ -47,6 +48,8 @@ class ImportsConnHandler {
                 payload: ImportsConnHandler.ONBOARDING_ALLOW_TYPES,
             })
         }
+
+        this._dispatch(setImportsStarted(true))
     }
 
     cancel() {
@@ -74,7 +77,6 @@ class ImportsConnHandler {
             case CMDS.PAUSE: // BG connman will pause on page refresh - this just auto-restarts on page load
                 return this._port.postMessage({ cmd: CMDS.RESUME })
             default:
-                console.log(cmd, payload)
         }
     }
 }

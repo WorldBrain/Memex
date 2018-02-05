@@ -8,6 +8,15 @@ export const isImportsDone = createSelector(
     onboarding,
     state => state.isImportsDone,
 )
+export const isImportsStarted = createSelector(
+    onboarding,
+    state => state.isImportsStarted,
+)
+export const showCancelBtn = createSelector(
+    isImportsStarted,
+    isImportsDone,
+    (started, done) => started || done,
+)
 export const progress = createSelector(onboarding, state => state.progress)
 export const progressPercent = createSelector(
     progress,
