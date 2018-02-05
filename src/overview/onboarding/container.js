@@ -35,8 +35,6 @@ class OnboardingContainer extends PureComponent {
 
     cancelImport = () => this._importsConnMan.cancel()
 
-    handleTrackingChange = event => console.log(event.target.value)
-
     handleClose = event => {
         this.cancelImport()
         this.props.setVisible(false)()

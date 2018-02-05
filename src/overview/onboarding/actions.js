@@ -1,5 +1,6 @@
 import { createAction } from 'redux-act'
 
+import analytics from 'src/analytics'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { IMPORT_TYPE as TYPE, CMDS } from 'src/options/imports/constants'
 import { IMPORT_CONN_NAME } from './constants'
@@ -31,6 +32,8 @@ class ImportsConnHandler {
         [TYPE.OLD]: false,
     }
 
+    _cancelled = false
+
     constructor(connName, dispatch, getState) {
         this._port = browser.runtime.connect({ name: connName })
         this._dispatch = dispatch
@@ -53,11 +56,23 @@ class ImportsConnHandler {
     }
 
     cancel() {
+        this._cancelled = true
+        analytics.trackEvent({
+            category: 'Onboarding',
+            action: 'Cancelled import',
+        })
+
         this._port.postMessage({ cmd: CMDS.CANCEL })
         this.complete()
     }
 
     complete() {
+        if (!this._cancelled) {
+            analytics.trackEvent({
+                category: 'Onboarding',
+                action: 'Finished import',
+            })
+        }
         this._dispatch(setImportsDone(true))
         dirtyEstsCache()
     }
