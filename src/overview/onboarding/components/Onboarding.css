@@ -7,15 +7,47 @@
     text-align: center;
 }
 
-.importMsg {
+.choiceBtnContainer {
     font-size: 1.1rem;
     color: #3eb995;
     font-weight: lighter;
+    margin: 3em 0 1em;
+}
+
+.cancelText {
     cursor: pointer;
-    margin: 0 0 1em;
 
     &:hover {
         text-decoration: underline;
+        color: #185b47;
+    }
+}
+
+.choiceBtn {
+    margin: 0 0.3em;
+    padding: 0.3em 0.6em;
+    border-radius: 25px;
+    border: 1px solid #3eb995;
+    font-size: 1.1rem;
+    color: #3eb995;
+    cursor: pointer;
+    height: 35px;
+
+    &:hover,
+    &:active {
+        background-color: #3eb995;
+        color: #fff;
+    }
+}
+
+.startBtn {
+    background-color: #3eb995;
+    color: #fff;
+
+    &:hover,
+    &:active {
+        background-color: #fff;
+        color: #3eb995;
     }
 }
 
@@ -52,10 +84,6 @@
     &:focus {
         color: #3eb995;
     }
-}
-
-.progressBar {
-    margin: 3em 0;
 }
 
 .heyyou {

@@ -13,11 +13,8 @@ class Importer extends PureComponent {
     render() {
         return (
             <div className={localStyles.container}>
-                <ProgressBar
-                    className={localStyles.progressBar}
-                    progress={this.props.progress}
-                />
                 {this.props.children}
+                <ProgressBar progress={this.props.progress} />
             </div>
         )
     }

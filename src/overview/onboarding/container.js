@@ -42,20 +42,6 @@ class OnboardingContainer extends PureComponent {
         this.props.setVisible(false)()
     }
 
-    renderImportMsg() {
-        const props = this.props.isImportsDone
-            ? {
-                  children: 'Memex is ready! Click here to start.',
-                  onClick: this.props.setVisible(false),
-              }
-            : {
-                  children:
-                      'Importing the last 30 pages you visited, so you can play around immediately (click to skip)',
-                  onClick: this.cancelImport,
-              }
-        return <ImportMsg {...props} />
-    }
-
     renderOptIn() {
         if (!this._showTrackingOptIn) {
             return null
@@ -82,7 +68,13 @@ class OnboardingContainer extends PureComponent {
                 showCloseBtn={this.props.showCancelBtn}
             >
                 {this.renderOptIn()}
-                <Importer {...this.props}>{this.renderImportMsg()}</Importer>
+                <Importer {...this.props}>
+                    <ImportMsg
+                        isImportsDone={this.props.isImportsDone}
+                        onCancel={this.cancelImport}
+                        onFinish={this.props.setVisible(false)}
+                    />
+                </Importer>
                 <hr />
                 <Info />
             </Overlay>
