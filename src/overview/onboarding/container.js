@@ -13,6 +13,7 @@ import OptIn from './components/OptIn'
 
 class OnboardingContainer extends PureComponent {
     static propTypes = {
+        showCancelBtn: PropTypes.bool.isRequired,
         isImportsDone: PropTypes.bool.isRequired,
         isVisible: PropTypes.bool.isRequired,
         shouldTrack: PropTypes.bool.isRequired,
@@ -35,6 +36,11 @@ class OnboardingContainer extends PureComponent {
     cancelImport = () => this._importsConnMan.cancel()
 
     handleTrackingChange = event => console.log(event.target.value)
+
+    handleClose = event => {
+        this.cancelImport()
+        this.props.setVisible(false)()
+    }
 
     renderImportMsg() {
         const props = this.props.isImportsDone
@@ -71,7 +77,10 @@ class OnboardingContainer extends PureComponent {
         }
 
         return (
-            <Overlay>
+            <Overlay
+                onClose={this.handleClose}
+                showCloseBtn={this.props.showCancelBtn}
+            >
                 {this.renderOptIn()}
                 <Importer {...this.props}>{this.renderImportMsg()}</Importer>
                 <hr />
@@ -84,6 +93,7 @@ class OnboardingContainer extends PureComponent {
 const mapStateToProps = state => ({
     isVisible: selectors.isVisible(state),
     isImportsDone: selectors.isImportsDone(state),
+    showCancelBtn: selectors.showCancelBtn(state),
     progress: selectors.progressPercent(state),
     shouldTrack: selectors.shouldTrack(state),
 })

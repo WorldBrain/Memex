@@ -10,8 +10,9 @@
 .importMsg {
     font-size: 1.1rem;
     color: #3eb995;
-    font-weight: bold;
+    font-weight: lighter;
     cursor: pointer;
+    margin: 0 0 1em;
 
     &:hover {
         text-decoration: underline;
@@ -35,6 +36,26 @@
     cursor: default;
     max-height: 90%;
     overflow: auto;
+}
+
+.closeBtn {
+    position: absolute;
+    right: 10px;
+    top: 5px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 1.5rem;
+    color: #777;
+
+    &:hover,
+    &:focus {
+        color: #3eb995;
+    }
+}
+
+.progressBar {
+    margin: 3em 0;
 }
 
 .heyyou {
