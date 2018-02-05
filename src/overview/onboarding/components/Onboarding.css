@@ -12,7 +12,6 @@
     color: #3eb995;
     font-weight: bold;
     cursor: pointer;
-    margin-top: -15px;
 
     &:hover {
         text-decoration: underline;

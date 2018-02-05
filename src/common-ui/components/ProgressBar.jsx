@@ -12,23 +12,16 @@ class ProgressBar extends PureComponent {
         const { progress } = this.props
 
         return (
-            <div>
-                <div className={localStyles.progressBar}>
+            <div className={localStyles.container}>
+                <div className={localStyles.bar}>
                     <div
-                        className={localStyles.progressColor}
+                        className={localStyles.color}
                         style={{ width: `${progress}%` }}
                     />
                 </div>
-                <div
-                    className={localStyles.arrowUp}
-                    style={{ marginLeft: `${progress}%` }}
-                />
-                <h3
-                    className={localStyles.progressBarText}
-                    style={{ width: `${progress}%` }}
-                >
-                    {Math.floor(this.props.progress)}%
-                </h3>
+                <span className={localStyles.percent}>
+                    {Math.floor(progress)}%
+                </span>
             </div>
         )
     }
