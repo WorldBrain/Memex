@@ -72,7 +72,6 @@ class OnboardingContainer extends PureComponent {
                         onFinish={this.props.setVisible(false)}
                     />
                 </Importer>
-                <hr />
                 <Info />
                 {this.renderOptIn()}
             </Overlay>

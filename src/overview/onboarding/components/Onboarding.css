@@ -1,10 +1,12 @@
 .container {
-    padding: 0 10em;
+    padding: 0 8em;
+    padding-bottom: 2em;
     margin-bottom: 2em;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     text-align: center;
+    box-shadow: 0px 6px 7px -7px #777;
 }
 
 .choiceBtnContainer {
@@ -19,7 +21,6 @@
 .readyMsg {
     font-size: 25px;
     margin-bottom: 5px;
-    font-color: #777;
 }
 
 .prepareMsg {
