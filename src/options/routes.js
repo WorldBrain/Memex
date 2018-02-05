@@ -3,6 +3,9 @@ import SettingsContainer from './containers/settings'
 import Privacy from './privacy'
 import Acknowledgements from './acknowledgement/components/content'
 import Tutorial from './tutorial'
+import About from './about'
+import Vision from './vision'
+import Changelog from './changelog'
 import NewInstall from './new-install'
 import Statistics from './statistics'
 
@@ -45,12 +48,6 @@ export default [
         icon: 'security',
     },
     {
-        name: 'Acknowledgements',
-        pathname: '/acknowledgements',
-        component: Acknowledgements,
-        icon: 'perm_identity',
-    },
-    {
         name: 'Help Me Please',
         pathname: 'https://worldbrain.io/help',
         component: 'faq',
@@ -61,5 +58,35 @@ export default [
         pathname: '/tutorial',
         component: Tutorial,
         icon: 'info',
+    },
+    {
+        name: 'About',
+        pathname: '#',
+        component: About,
+        icon: 'info',
+        subRoutes: [
+            {
+                name: 'Vision',
+                pathname: '/vision',
+                component: Vision,
+                subLink: true,
+                hideFromSidebar: true,
+            },
+            {
+                name: 'Changelog',
+                pathname: '/changelog',
+                component: Changelog,
+                subLink: true,
+                hideFromSidebar: true,
+            },
+            {
+                name: 'Acknowledgements',
+                pathname: '/acknowledgements',
+                component: Acknowledgements,
+                // icon: 'perm_identity',
+                subLink: true,
+                hideFromSidebar: true,
+            },
+        ],
     },
 ]
