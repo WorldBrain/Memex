@@ -1,6 +1,20 @@
 import promiseLimit from 'promise-limit'
 
-import index, { DEFAULT_TERM_SEPARATOR } from './'
+import index, { indexQueue, DEFAULT_TERM_SEPARATOR } from './'
+
+/**
+ * @param {(args: any) => Promise<any>} fn Any async function to place on the index operations queue.
+ * @returns {(args: any) => Promise<any>} Bound version of `fn` that will finish once `fn` gets run
+ *  on the index queue and finishes.
+ */
+export const makeIndexFnConcSafe = fn => (...args) =>
+    new Promise((resolve, reject) =>
+        indexQueue.push(() =>
+            fn(...args)
+                .then(resolve)
+                .catch(reject),
+        ),
+    )
 
 // Key generation functions
 export const keyGen = {

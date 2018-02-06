@@ -176,24 +176,22 @@ async function termSearch({ query, bookmarksFilter }) {
     // For each term, do index lookup to grab the associated page IDs value
     const termValuesMap = await lookupByKeys([...query].map(keyGen.term))
 
-    // If any terms are empty, they cancel all other results out
-    if (containsEmptyVals(termValuesMap.values())) {
-        return new Map()
-    }
-
-    // Union the nested 'pageId => weights' Maps for each term
-    let pageValuesMap = unionNestedMaps(termValuesMap)
+    // If the terms are all indexed, union the nested 'pageId => weights' Maps for each term (clean up the structure),
+    //  however if any of the terms searched are not indexed, don't use terms results
+    let pageValuesMap = !containsEmptyVals(termValuesMap.values())
+        ? unionNestedMaps(termValuesMap)
+        : new Map()
 
     // Perform intersect of Map on each term value key to AND results
-    if (termValuesMap.size > 1) {
+    if (pageValuesMap.size > 1) {
         pageValuesMap = intersectManyMaps([...termValuesMap.values()])
     }
 
     // Merge in boosted docs for other fields
     const pageResultsMap = new Map([
         ...pageValuesMap,
-        ...(await boostedUrlSearch({ query }, pageValuesMap)),
-        ...(await boostedTitleSearch({ query }, pageValuesMap)),
+        ...(await boostedUrlSearch({ query })),
+        ...(await boostedTitleSearch({ query })),
     ])
 
     return bookmarksFilter
@@ -204,21 +202,13 @@ async function termSearch({ query, bookmarksFilter }) {
 /**
  * @param {(term: string) => string} keyMapFn
  * @param {number} boost
- * @returns {(IndexQuery, Map<string, IndexTermValue>) => Map<string, IndexTermValue>}
+ * @returns {(q: IndexQuery) => Map<string, IndexTermValue>}
  */
-const boostedTermSearch = (keyGenFn, boost) => async (
-    { query },
-    baseResults,
-) => {
+const boostedTermSearch = (keyGenFn, boost) => async ({ query }) => {
     // For each term, do index lookup to grab the associated page IDs value
     const titleTermValuesMap = await lookupByKeys([...query].map(keyGenFn))
 
-    const pageScoresMap = boostScores(titleTermValuesMap, boost)
-
-    // Filter out page scores that don't appear in the base results
-    return new Map(
-        [...pageScoresMap].filter(([pageId]) => baseResults.has(pageId)),
-    )
+    return boostScores(titleTermValuesMap, boost)
 }
 
 const boostedTitleSearch = boostedTermSearch(keyGen.title, 0.2)
