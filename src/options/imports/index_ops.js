@@ -11,6 +11,10 @@ const idb = index.db._db
  *
  */
 async function transformPage(datum) {
+    datum.value.terms = [...datum.value.terms]
+    datum.value.titleTerms = [...datum.value.titleTerms]
+    datum.value.urlTerms = [...datum.value.urlTerms]
+    datum.value.visits = [...datum.value.visits]
     let _pouchData
     try {
         const pageData = await db.get(datum.value.id)
@@ -18,7 +22,6 @@ async function transformPage(datum) {
             url: pageData.url,
             title: pageData.content.title,
         }
-        console.log(pageData)
     } catch (err) {
         _pouchData = {}
         console.error(err)
@@ -38,9 +41,7 @@ async function transformPage(datum) {
  */
 const transformData = datum => {
     if (datum.key.startsWith(pageKeyPrefix)) {
-        const temp = transformPage(datum)
-        console.log(temp)
-        return temp
+        return transformPage(datum)
     }
     return {
         key: datum.key,
@@ -116,9 +117,13 @@ export async function importIndex(data) {
                     title: datum.value._pouchData.title,
                 },
             })
+            datum.value.terms = new Set(datum.value.terms)
+            datum.value.titleTerms = new Set(datum.value.titleTerms)
+            datum.value.urlTerms = new Set(datum.value.urlTerms)
+            datum.value.visits = new Set(datum.value.visits)
         } else if (
-            !datum.key.beginsWith(visitKeyPrefix) &&
-            !datum.key.beginsWith(bookmarkKeyPrefix)
+            !datum.key.startsWith(visitKeyPrefix) &&
+            !datum.key.startsWith(bookmarkKeyPrefix)
         ) {
             try {
                 datum.value = new Map(datum.value)

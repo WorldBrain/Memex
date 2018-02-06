@@ -50,15 +50,6 @@ const getFileTextViaReader = fileReader => file =>
         fileReader.readAsText(file)
     })
 
-// const deserializeDoc = docString => {
-//    if (!docString) return undefined
-//    try {
-//        return JSON.parse(docString)
-//    } catch (error) {
-//        console.error(`Cannot parse following input:\n${docString}`)
-//    }
-// }
-
 /**
  * Performs a restore of given docs files.
  * @param {Array<File>} files One or more NDJSON files that contain database docs.
@@ -71,12 +62,11 @@ export const uploadTestData = files => async (dispatch, getState) => {
     }
 
     const getFileText = getFileTextViaReader(new FileReader())
-    // const onlyDefinedDocs = doc => doc
 
     // Write contents of each file, one-at-a-time, to the DB
     for (const file of files) {
         const text = await getFileText(file)
-        importIndex(JSON.parse(text))
+        await importIndex(JSON.parse(text))
     }
 
     dispatch(setFileUploading(false))
