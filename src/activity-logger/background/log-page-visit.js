@@ -16,6 +16,7 @@ const singleLookup = index.initSingleLookup()
  */
 export async function logInitPageVisit(tabId, secsSinceLastIndex = 20) {
     const tab = await browser.tabs.get(tabId)
+    console.log('indexing page title & url:', tab.url)
 
     const { visitTime } = tabManager.getTabState(tabId)
 

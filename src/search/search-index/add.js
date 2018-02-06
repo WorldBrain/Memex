@@ -212,7 +212,8 @@ async function addPageTerms(indexDoc) {
         ...existingDoc,
         terms: new Set([...existingDoc.terms, ...indexDoc.terms]),
     }
-    const timer = `indexing page content (${augIndexDoc.terms.size} terms)`
+    const timer = `indexing page content (${augIndexDoc.terms
+        .size} terms): ${indexDoc.id}`
 
     console.time(timer)
     await Promise.all([
