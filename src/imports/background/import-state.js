@@ -248,7 +248,7 @@ export class ImportStateManager {
      */
     async _calcCounts(quick) {
         // Reset current state first
-        this.calculatedAt = Date.now()
+        this.calculatedAt = quick ? 0 : Date.now()
         this.counts = ImportStateManager.getInitEsts()
         await this.clearItems()
 

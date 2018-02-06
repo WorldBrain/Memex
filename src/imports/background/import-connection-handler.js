@@ -95,7 +95,7 @@ export default class ImportConnectionHandler {
         // Perform history-stubs, vists, and history import state creation, if import not in progress
         const importInProgress = await this.importer.getImportInProgressFlag()
         if (!importInProgress) {
-            await stateManager.fetchEsts()
+            await stateManager.fetchEsts(this._quickMode)
         }
 
         this.port.postMessage({ cmd: CMDS.START }) // Tell UI to finish loading state and move into progress view
@@ -112,7 +112,7 @@ export default class ImportConnectionHandler {
         this.importer.setImportInProgressFlag(false)
 
         // Re-init the estimates view with updated estimates data
-        const estimateCounts = await stateManager.fetchEsts()
+        const estimateCounts = await stateManager.fetchEsts(this._quickMode)
         this.port.postMessage({ cmd: CMDS.INIT, ...estimateCounts })
     }
 

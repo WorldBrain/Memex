@@ -1,12 +1,9 @@
 import { createAction } from 'redux-act'
 
 import analytics from 'src/analytics'
-import { remoteFunction } from 'src/util/webextensionRPC'
 import { IMPORT_TYPE as TYPE, CMDS } from 'src/options/imports/constants'
 import { IMPORT_CONN_NAME } from './constants'
 import * as selectors from './selectors'
-
-const dirtyEstsCache = remoteFunction('dirtyEstsCache')
 
 export const setShouldTrack = createAction('onboarding/setShouldTrack')
 export const toggleShouldTrack = createAction('onboarding/toggleShouldTrack')
@@ -74,7 +71,6 @@ class ImportsConnHandler {
             })
         }
         this._dispatch(setImportsDone(true))
-        dirtyEstsCache()
     }
 
     /**
