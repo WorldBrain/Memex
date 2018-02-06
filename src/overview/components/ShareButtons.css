@@ -63,6 +63,7 @@ p {
 
 a {
     text-decoration: none;
+    color: #3eb995;
 }
 
 .chatBox {
@@ -78,4 +79,5 @@ a {
     color: #3eb995;
     text-align: center;
     max-width: 45px;
+    margin-top: 0px;
 }

@@ -1,5 +1,6 @@
 import { STORAGE_KEY } from 'src/options/blacklist/constants'
 import importStateManager from 'src/imports/background/import-state'
+import { updateLastActive } from 'src/analytics'
 
 /**
  * Given a URL and user's blacklist, checks the URL against the blacklist expressions to see if any
@@ -69,5 +70,6 @@ export async function addToBlacklist(url) {
             ? url.map(createBlacklistEntry)
             : [createBlacklistEntry(url)]
 
+    updateLastActive() // Consider user active (analytics)
     return storeBlacklist([...blacklist, ...newEntries])
 }

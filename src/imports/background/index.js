@@ -1,7 +1,11 @@
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import ConnHandler from './import-connection-handler'
 import importStateManager from './import-state'
-import { OLD_EXT_KEYS, IMPORT_CONN_NAME } from 'src/options/imports/constants'
+import {
+    OLD_EXT_KEYS,
+    IMPORT_CONN_NAME as MAIN_CONN,
+} from 'src/options/imports/constants'
+import { IMPORT_CONN_NAME as ONBOARDING_CONN } from 'src/overview/onboarding/constants'
 
 // Constants
 export const importStateStorageKey = 'import_items'
@@ -41,9 +45,11 @@ export async function clearOldExtData({ timestamp, index }) {
 // Allow content-script or UI to connect and communicate control of imports
 browser.runtime.onConnect.addListener(port => {
     // Make sure to only handle connection logic for imports (allows other use of runtime.connect)
-    if (port.name !== IMPORT_CONN_NAME) return
-
-    console.log('importer connected')
-
-    return new ConnHandler(port)
+    switch (port.name) {
+        case MAIN_CONN:
+            return new ConnHandler({ port })
+        case ONBOARDING_CONN:
+            return new ConnHandler({ port, quick: true })
+        default:
+    }
 })

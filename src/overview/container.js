@@ -5,6 +5,7 @@ import { bindActionCreators } from 'redux'
 import Waypoint from 'react-waypoint'
 import reduce from 'lodash/fp/reduce'
 
+import analytics from 'src/analytics'
 import { Wrapper, LoadingIndicator } from 'src/common-ui/components'
 import { TagsContainer } from 'src/common-ui/containers'
 import * as actions from './actions'
@@ -17,6 +18,7 @@ import ResultsMessage from './components/ResultsMessage'
 import TagPill from './components/TagPill'
 import FilterPill from './components/FilterPill'
 import ExpandButton from './components/ExpandButton'
+import Onboarding, { selectors as onboarding } from './onboarding'
 
 class OverviewContainer extends Component {
     static propTypes = {
@@ -51,9 +53,12 @@ class OverviewContainer extends Component {
         setFilterPopup: PropTypes.func.isRequired,
         shouldDisplayDomainFilterPopup: PropTypes.bool.isRequired,
         shouldDisplayTagFilterPopup: PropTypes.bool.isRequired,
+        showOnboarding: PropTypes.bool.isRequired,
     }
 
     componentDidMount() {
+        analytics.trackPage({ title: document.title })
+
         document.addEventListener('click', this.handleOutsideClick, false)
         if (this.props.grabFocusOnMount) {
             this.inputQueryEl.focus()
@@ -173,6 +178,10 @@ class OverviewContainer extends Component {
     }
 
     renderResultItems() {
+        if (this.props.isNewSearchLoading) {
+            return <LoadingIndicator />
+        }
+
         const resultItems = this.props.searchResults.map((doc, i) => (
             <PageResultItem
                 key={i}
@@ -251,14 +260,6 @@ class OverviewContainer extends Component {
             )
         }
 
-        if (this.props.isNewSearchLoading) {
-            return (
-                <ResultList>
-                    <LoadingIndicator />
-                </ResultList>
-            )
-        }
-
         // No issues; render out results list view
         return (
             <Wrapper>
@@ -270,7 +271,9 @@ class OverviewContainer extends Component {
                         results in your digital memory
                     </ResultsMessage>
                 )}
-                <ResultList>{this.renderResultItems()}</ResultList>
+                <ResultList scrollDisabled={this.props.showOnboarding}>
+                    {this.renderResultItems()}
+                </ResultList>
             </Wrapper>
         )
     }
@@ -299,22 +302,26 @@ class OverviewContainer extends Component {
         const { filterTags, filterDomains } = this.props
 
         return (
-            <Overview
-                {...this.props}
-                setInputRef={this.setInputRef}
-                onInputChange={this.props.handleInputChange}
-                tagFilterManager={this.renderTagsFilter()}
-                domainFilterManager={this.renderDomainsFilter()}
-                setTagDomainButtonRef={this.addFurtherTagRef}
-                tagFilterPills={this.renderFilterPills(filterTags, 'tag')}
-                domainFilterPills={this.renderFilterPills(
-                    filterDomains,
-                    'domain',
-                )}
-                onQuerySearchKeyDown={this.handleSearchEnter}
-            >
-                {this.renderResults()}
-            </Overview>
+            <Wrapper>
+                <Overview
+                    {...this.props}
+                    setInputRef={this.setInputRef}
+                    onInputChange={this.props.handleInputChange}
+                    tagFilterManager={this.renderTagsFilter()}
+                    domainFilterManager={this.renderDomainsFilter()}
+                    setTagDomainButtonRef={this.addFurtherTagRef}
+                    tagFilterPills={this.renderFilterPills(filterTags, 'tag')}
+                    domainFilterPills={this.renderFilterPills(
+                        filterDomains,
+                        'domain',
+                    )}
+                    onQuerySearchKeyDown={this.handleSearchEnter}
+                    isSearchDisabled={this.props.showOnboarding}
+                >
+                    {this.renderResults()}
+                </Overview>
+                <Onboarding />
+            </Wrapper>
         )
     }
 }
@@ -341,6 +348,7 @@ const mapStateToProps = state => ({
         state,
     ),
     shouldDisplayTagFilterPopup: selectors.shouldDisplayTagFilterPopup(state),
+    showOnboarding: onboarding.isVisible(state),
 })
 
 const mapDispatchToProps = dispatch => ({

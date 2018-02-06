@@ -4,6 +4,14 @@ import ReduxQuerySync from 'redux-query-sync'
 import * as selectors from './selectors'
 import * as actions from './actions'
 import * as constants from './constants'
+import {
+    selectors as onboarding,
+    actions as onboardingActs,
+    constants as onboardingConsts,
+} from './onboarding'
+import { SHOULD_TRACK_STORAGE_KEY } from 'src/options/privacy/constants'
+
+const parseBool = str => str === 'true'
 
 // Keep search query in sync with the query parameter in the window location.
 const locationSync = ReduxQuerySync.enhancer({
@@ -28,7 +36,7 @@ const locationSync = ReduxQuerySync.enhancer({
         showOnlyBookmarks: {
             selector: selectors.showOnlyBookmarks,
             action: showOnlyBookmarks =>
-                actions.toggleBookmarkFilter(Boolean(showOnlyBookmarks)),
+                actions.toggleBookmarkFilter(parseBool(showOnlyBookmarks)),
             defaultValue: false,
         },
         tags: {
@@ -40,6 +48,11 @@ const locationSync = ReduxQuerySync.enhancer({
             selector: selectors.filterDomainsStringify,
             action: domains => actions.setDomainFilters(domains),
             defaultValue: '',
+        },
+        install: {
+            selector: onboarding.isVisible,
+            action: value => onboardingActs.setVisible(parseBool(value)),
+            defaultValue: false,
         },
     },
 })
@@ -53,6 +66,12 @@ const hydrateStateFromStorage = store => {
 
     // Keep each of these storage keys in sync
     hydrate(constants.SEARCH_COUNT_KEY, actions.initSearchCount)
+    hydrate(
+        onboardingConsts.STORAGE_KEYS.isImportsDone,
+        onboardingActs.setImportsDone,
+    )
+    hydrate(onboardingConsts.STORAGE_KEYS.progress, onboardingActs.setProgress)
+    hydrate(SHOULD_TRACK_STORAGE_KEY, onboardingActs.setShouldTrack)
 }
 
 const syncStateToStorage = store =>
@@ -61,6 +80,12 @@ const syncStateToStorage = store =>
 
         const state = store.getState()
         dump(constants.SEARCH_COUNT_KEY, selectors.searchCount(state))
+        dump(
+            onboardingConsts.STORAGE_KEYS.isImportsDone,
+            onboarding.isImportsDone(state),
+        )
+        dump(onboardingConsts.STORAGE_KEYS.progress, onboarding.progress(state))
+        dump(SHOULD_TRACK_STORAGE_KEY, onboarding.shouldTrack(state))
     })
 
 const storageSync = storeCreator => (reducer, initState, enhancer) => {

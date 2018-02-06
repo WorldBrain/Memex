@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
+import { OutLink } from 'src/common-ui/containers'
 import localStyles from './Privacy.css'
 
 const Privacy = props => (
@@ -18,9 +19,12 @@ const Privacy = props => (
             <br />Later, you will be able to <strong>voluntarily</strong> share
             it with friends, followers and other applications. For more
             information on that you can watch our{' '}
-            <a className={localStyles.link} href="https://worldbrain.io/vision">
+            <OutLink
+                className={localStyles.link}
+                href="https://worldbrain.io/vision"
+            >
                 vision video
-            </a>.
+            </OutLink>.
             <br />
             <br />
             <h3>Anonymous Usage Statistics</h3>
@@ -40,17 +44,17 @@ const Privacy = props => (
             </a>{' '}
             is a complete list of all the data points Memex gathers currently.
             To cross-check this list you can examine our source code{' '}
-            <a
+            <OutLink
                 className={localStyles.link}
                 href="https://github.com/WorldBrain/Memex"
             >
                 on GitHub
-            </a>. To protect your privacy, we don't use Google Analytics.
+            </OutLink>. To protect your privacy, we don't use Google Analytics.
             Instead we use{' '}
-            <a className={localStyles.link} href="https://WorldBrain.io/">
+            <OutLink className={localStyles.link} href="https://WorldBrain.io/">
                 Piwik
-            </a>, an open-source alternative, and host the gathered data on our
-            servers.
+            </OutLink>, an open-source alternative, and host the gathered data
+            on our servers.
             <br />
             <br />
             <h3>Opting-out of Usage Statistics</h3>
