@@ -21,8 +21,10 @@ class TagsContainer extends Component {
         // Tag Filters that are previously present in the location
         initFilters: PropTypes.arrayOf(PropTypes.string),
 
+        // TODO: Remove these flags; can be simplified for use-cases
         tag: PropTypes.bool,
         overview: PropTypes.bool,
+        popup: PropTypes.bool, // Fetch to set to auto fetch the tags for given `url` prop
     }
 
     static defaultProps = {
@@ -37,6 +39,7 @@ class TagsContainer extends Component {
         this.suggest = remoteFunction('suggest')
         this.addTags = remoteFunction('addTags')
         this.delTags = remoteFunction('delTags')
+        this.fetchTags = remoteFunction('fetchTags')
 
         this.fetchTagSuggestions = debounce(300)(this.fetchTagSuggestions)
 
@@ -49,11 +52,35 @@ class TagsContainer extends Component {
         }
     }
 
+    componentDidMount() {
+        if (this.props.popup) {
+            this.fetchInitTags()
+        }
+    }
+
     isPageTag = value => this.state.filters.includes(value)
 
     setInputRef = el => (this.inputEl = el)
 
     isFromOverview = () => this.props.tag === undefined
+
+    async fetchInitTags() {
+        this.setState(state => ({ ...state, isLoading: true }))
+
+        let filters = []
+        try {
+            filters = await this.fetchTags({ url: this.props.url })
+        } catch (err) {
+        } finally {
+            this.setState(state => ({
+                ...state,
+                isLoading: false,
+                filters,
+                displayFilters: filters,
+                focused: filters.length > 0 ? 0 : -1,
+            }))
+        }
+    }
 
     /**
      * Selector for derived display tags state
@@ -123,13 +150,13 @@ class TagsContainer extends Component {
         // Either add or remove it to the main `state.tags` array
         try {
             if (tagIndex === -1) {
-                if (this.props.overview) {
+                if (this.props.overview || this.props.popup) {
                     await this.addTags({ url: this.props.url }, [tag])
                 }
                 this.props.onFilterAdd(tag)
                 tagsReducer = tags => [tag, ...tags]
             } else {
-                if (this.props.overview) {
+                if (this.props.overview || this.props.popup) {
                     await this.delTags({ url: this.props.url }, [tag])
                 }
                 this.props.onFilterDel(tag)
@@ -155,7 +182,7 @@ class TagsContainer extends Component {
         if (
             this.canCreateTag() &&
             this.state.focused === this.state.displayFilters.length &&
-            this.props.overview
+            (this.props.overview || this.props.popup)
         ) {
             return this.addTag()
         }
@@ -173,7 +200,7 @@ class TagsContainer extends Component {
         // One extra index if the "add new tag" thing is showing
         let offset = this.canCreateTag() ? 0 : 1
 
-        if (!this.props.overview) offset = 1
+        if (!(this.props.overview || this.props.popup)) offset = 1
 
         // Calculate the next focused index depending on current focus and direction
         let focusedReducer
@@ -257,7 +284,7 @@ class TagsContainer extends Component {
             <TagRow {...tag} key={i} onClick={this.handleTagSelection(i)} />
         ))
 
-        if (this.canCreateTag() && this.props.overview) {
+        if (this.canCreateTag() && (this.props.overview || this.props.popup)) {
             tagOptions.push(
                 <NewTagRow
                     key="+"

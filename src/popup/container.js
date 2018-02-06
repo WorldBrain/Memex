@@ -333,7 +333,7 @@ class PopupContainer extends Component {
         }
 
         if (tagMode) {
-            return <Tags url={this.state.url} />
+            return <Tags url={this.state.url} popup tag />
         }
 
         return (
