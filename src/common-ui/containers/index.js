@@ -1,2 +1,2 @@
-export { default as TagsContainer } from './TagsContainer'
+export { default as IndexDropdown } from './IndexDropdown'
 export { default as OutLink } from './OutLink'

@@ -7,7 +7,7 @@ import { initSingleLookup } from 'src/search/search-index/util'
 import extractQueryFilters from 'src/util/nlp-time-filter'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { isLoggable, getPauseState } from 'src/activity-logger'
-import { TagsContainer as Tags } from 'src/common-ui/containers'
+import { IndexDropdown } from 'src/common-ui/containers'
 import Popup from './components/Popup'
 import Button from './components/Button'
 import BlacklistConfirm from './components/BlacklistConfirm'
@@ -333,7 +333,7 @@ class PopupContainer extends Component {
         }
 
         if (tagMode) {
-            return <Tags url={this.state.url} popup tag />
+            return <IndexDropdown url={this.state.url} popup tag />
         }
 
         return (

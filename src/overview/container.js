@@ -7,7 +7,7 @@ import reduce from 'lodash/fp/reduce'
 
 import analytics from 'src/analytics'
 import { Wrapper, LoadingIndicator } from 'src/common-ui/components'
-import { TagsContainer } from 'src/common-ui/containers'
+import { IndexDropdown } from 'src/common-ui/containers'
 import * as actions from './actions'
 import * as selectors from './selectors'
 import * as constants from './constants'
@@ -83,45 +83,40 @@ class OverviewContainer extends Component {
         }
     }
 
-    renderTags = ({ shouldDisplayTagPopup, url, tags }, index) =>
+    renderTagsManager = ({ shouldDisplayTagPopup, url, tags }, index) =>
         shouldDisplayTagPopup ? (
-            <TagsContainer
+            <IndexDropdown
                 url={url}
                 onFilterAdd={this.props.addTag(index)}
                 onFilterDel={this.props.delTag(index)}
                 setTagDivRef={this.setTagDivRef}
                 initFilters={tags}
-                overview
+                source="tag"
+                hover
             />
         ) : null
 
-    renderTagsFilter = () => {
-        const { shouldDisplayTagFilterPopup } = this.props
-
-        return shouldDisplayTagFilterPopup ? (
-            <TagsContainer
-                tag
+    renderTagsFilter = () =>
+        this.props.shouldDisplayTagFilterPopup ? (
+            <IndexDropdown
                 setTagDivRef={this.setTagDivRef}
                 onFilterAdd={this.props.addTagFilter}
                 onFilterDel={this.props.delTagFilter}
                 initFilters={this.props.filterTags}
+                source="tag"
             />
         ) : null
-    }
 
-    renderDomainsFilter = () => {
-        const { shouldDisplayDomainFilterPopup } = this.props
-
-        return shouldDisplayDomainFilterPopup ? (
-            <TagsContainer
-                domain
+    renderDomainsFilter = () =>
+        this.props.shouldDisplayDomainFilterPopup ? (
+            <IndexDropdown
                 setTagDivRef={this.setTagDivRef}
                 onFilterAdd={this.props.addDomainFilter}
                 onFilterDel={this.props.delDomainFilter}
                 initFilters={this.props.filterDomains}
+                source="domain"
             />
         ) : null
-    }
 
     renderTagPills({ tagPillsData, tags }, resultIndex) {
         const pills = tagPillsData.map((tag, i) => (
@@ -187,7 +182,7 @@ class OverviewContainer extends Component {
                 key={i}
                 onTrashBtnClick={this.props.handleTrashBtnClick(doc, i)}
                 onToggleBookmarkClick={this.props.handleToggleBm(doc, i)}
-                tagManager={this.renderTags(doc, i)}
+                tagManager={this.renderTagsManager(doc, i)}
                 setTagButtonRef={this.setTagButtonRef}
                 onTagBtnClick={this.props.handleTagBtnClick(i)}
                 tagPills={this.renderTagPills(doc, i)}
