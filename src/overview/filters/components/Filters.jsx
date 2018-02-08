@@ -6,14 +6,7 @@ import localStyles from './Filters.css'
 const Filters = props => (
     <div className={localStyles.filtersMain}>
         <div className={localStyles.filters}>
-            <div
-                style={{
-                    visibility: `${props.isClearFilterButtonShown
-                        ? 'visible'
-                        : 'hidden'}`,
-                }}
-                className={localStyles.clearDiv}
-            >
+            <div className={localStyles.clearDiv}>
                 {props.isClearFilterButtonShown && (
                     <button
                         type="button"
@@ -27,12 +20,12 @@ const Filters = props => (
             <div className={localStyles.tags}>
                 <div
                     className={localStyles.filterTagText}
-                    onClick={() => props.onFilterClick('tag')}
+                    onClick={props.handleFilterClick('tag')}
                 >
                     Tags
                     <div
                         className={localStyles.filterTagIcon}
-                        ref={props.setTagDomainButtonRef}
+                        ref={props.setDropdownRef}
                     />
                 </div>
                 <div className={localStyles.tagsFilter}>
@@ -45,12 +38,12 @@ const Filters = props => (
             <div className={localStyles.domains}>
                 <div
                     className={localStyles.filterDomainText}
-                    onClick={() => props.onFilterClick('domain')}
+                    onClick={props.handleFilterClick('domain')}
                 >
                     Domains
                     <div
                         className={localStyles.filterDomainIcon}
-                        ref={props.setTagDomainButtonRef}
+                        ref={props.setDropdownRef}
                     />
                 </div>
                 <div className={localStyles.tagsFilter}>
@@ -88,8 +81,8 @@ Filters.propTypes = {
     isClearFilterButtonShown: PropTypes.bool.isRequired,
     tagFilterManager: PropTypes.node,
     domainFilterManager: PropTypes.node,
-    onFilterClick: PropTypes.func.isRequired,
-    setTagDomainButtonRef: PropTypes.func.isRequired,
+    handleFilterClick: PropTypes.func.isRequired,
+    setDropdownRef: PropTypes.func.isRequired,
     tagFilterPills: PropTypes.node,
     domainFilterPills: PropTypes.node,
 }

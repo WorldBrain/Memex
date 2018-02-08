@@ -15,7 +15,7 @@ class IndexDropdown extends PureComponent {
         tagSearchValue: PropTypes.string.isRequired,
         hover: PropTypes.bool,
         source: PropTypes.oneOf(['tag', 'domain']).isRequired,
-        url: PropTypes.bool,
+        url: PropTypes.string,
     }
 
     get mainClass() {
