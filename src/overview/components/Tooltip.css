@@ -1,0 +1,48 @@
+.mainTooltip {
+    position: fixed;
+    right: 8px;
+    padding: 5px;
+    margin-top: -13px;
+    max-width: 220px;
+    color: #3eb995;
+    max-height: 120px;
+    overflow: hidden;
+    z-index: 1;
+
+    &.isActive {
+        border: 1px solid #3eb995;
+        border-radius: 5px;
+        background-color: white;
+    }
+
+    @media (max-width: 1200px) {
+        display: none;
+    }
+}
+
+.tooltipButton {
+    display: flex;
+    cursor: pointer;
+    float: right;
+}
+
+.tooltipText {
+    margin-top: 18px;
+    padding: 5px 15px;
+}
+
+.tooltipText img {
+    max-width: 180px;
+}
+
+.tooltipTitle {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.refreshIcon {
+    background-image: url('/img/refresh-tooltip.svg');
+    width: 18px;
+    height: 18px;
+    margin-right: 4px;
+}

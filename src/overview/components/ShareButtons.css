@@ -8,7 +8,7 @@
     position: fixed;
     display: flex;
     flex-direction: column;
-    margin-top: -10px;
+    margin-top: 100px;
     margin-left: -30px;
     width: 7%;
     height: 500px;
@@ -34,7 +34,7 @@
     color: #fff;
     background-color: #3eb995;
     transform: rotate(90deg);
-    margin-top: 125px;
+    margin-top: 155px;
     margin-left: -13px;
     font-size: 15px;
     text-align: center;
@@ -67,7 +67,7 @@ a {
 }
 
 .chatBox {
-    margin-top: 150px;
+    margin-top: 165px;
     text-decoration: none;
 }
 

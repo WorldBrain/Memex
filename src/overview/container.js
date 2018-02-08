@@ -18,6 +18,7 @@ import ResultsMessage from './components/ResultsMessage'
 import TagPill from './components/TagPill'
 import Onboarding, { selectors as onboarding } from './onboarding'
 import Filters, { selectors as filters, actions as filterActs } from './filters'
+import tooltips from './components/tooltips'
 
 class OverviewContainer extends Component {
     static propTypes = {
@@ -266,6 +267,8 @@ const mapStateToProps = state => ({
     totalResultCount: selectors.totalResultCount(state),
     shouldShowCount: selectors.shouldShowCount(state),
     showOnboarding: onboarding.isVisible(state),
+    showTooltip: selectors.showTooltip(state),
+    tooltipIndex: selectors.tooltipIndex(state),
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -279,6 +282,8 @@ const mapDispatchToProps = dispatch => ({
             resetActiveTagIndex: actions.resetActiveTagIndex,
             onShowFilterChange: filterActs.showFilter,
             resetFilterPopup: filterActs.resetFilterPopup,
+            toggleShowTooltip: actions.showTooltip,
+            onClickRefreshTooltip: actions.tooltipIndex,
         },
         dispatch,
     ),

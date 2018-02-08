@@ -7,6 +7,7 @@ import DeleteConfirmModal from './DeleteConfirmModal'
 import Header from './Header'
 import styles from './Overview.css'
 import ShareButtons from './ShareButtons'
+import Tooltip from './Tooltip'
 
 const showFilterClass = ({ showFilters }) =>
     classNames({
@@ -17,6 +18,12 @@ const showFilterClass = ({ showFilters }) =>
 const Overview = props => (
     <Wrapper>
         <Header {...props} />
+        <Tooltip
+            showTooltip={props.showTooltip}
+            toggleShowTooltip={props.toggleShowTooltip}
+            tooltipIndex={props.tooltipIndex}
+            onClickRefreshTooltip={props.onClickRefreshTooltip}
+        />
         <ShareButtons />
 
         <div className={showFilterClass(props)}>{props.filters}</div>
@@ -43,6 +50,10 @@ Overview.propTypes = {
     deleteDocs: PropTypes.func.isRequired,
     showFilters: PropTypes.bool.isRequired,
     filters: PropTypes.node.isRequired,
+    showTooltip: PropTypes.bool.isRequired,
+    toggleShowTooltip: PropTypes.func.isRequired,
+    tooltipIndex: PropTypes.number.isRequired,
+    onClickRefreshTooltip: PropTypes.func.isRequired,
 }
 
 export default Overview
