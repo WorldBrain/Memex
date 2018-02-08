@@ -1,9 +1,10 @@
 import { createAction } from 'redux-act'
 
+import { remoteFunction } from 'src/util/webextensionRPC'
 import analytics from 'src/analytics'
 import { CMDS, IMPORT_CONN_NAME, OLD_EXT_KEYS } from './constants'
 import * as selectors from './selectors'
-import { importIndex, exportIndex } from 'src/options/imports/index_ops'
+
 export const filterDownloadDetails = createAction(
     'imports/filterDownloadDetails',
 )
@@ -40,6 +41,9 @@ export const setProcessErrs = createAction('imports-adv/setProcessErrs')
 
 export const showDownloadDetails = createAction('imports/showDownloadDetails')
 
+const restoreDB = remoteFunction('restoreDB')
+const dumpDB = remoteFunction('dumpDB')
+
 /**
  * @param {FileReader} fileReader FileReader instance to bind to text reading function.
  * @return {(File) => Promise<String>} Async function that reads a given file and returns its text.
@@ -54,7 +58,7 @@ const getFileTextViaReader = fileReader => file =>
  * Performs a restore of given docs files.
  * @param {Array<File>} files One or more NDJSON files that contain database docs.
  */
-export const restoreDB = files => async (dispatch, getState) => {
+export const reqRestoreDB = files => async (dispatch, getState) => {
     dispatch(setFileUploading(true))
 
     if (files.length < 1) {
@@ -66,13 +70,13 @@ export const restoreDB = files => async (dispatch, getState) => {
     // Write contents of each file, one-at-a-time, to the DB
     for (const file of files) {
         const text = await getFileText(file)
-        await importIndex(JSON.parse(text))
+        await restoreDB(JSON.parse(text))
     }
 
     dispatch(setFileUploading(false))
 }
 
-export const dumpDB = () => dispatch => exportIndex()
+export const reqDumpDB = () => dispatch => dumpDB()
 
 /**
  * Responds to messages sent from background script over the runtime connection by dispatching

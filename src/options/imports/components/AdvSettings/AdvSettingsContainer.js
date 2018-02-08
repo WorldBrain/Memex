@@ -17,8 +17,9 @@ const mapDispatchToProps = dispatch => ({
         dispatch(actions.setConcurrencyLevel(+event.target.value)),
     onPrevFailedToggle: event =>
         dispatch(actions.setPrevFailed(event.target.checked)),
-    dumpDB: event => dispatch(actions.dumpDB()),
-    restoreDB: event => dispatch(actions.restoreDB(event.target.files || [])),
+    dumpDB: event => dispatch(actions.reqDumpDB()),
+    restoreDB: event =>
+        dispatch(actions.reqRestoreDB(event.target.files || [])),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(AdvSettings)
