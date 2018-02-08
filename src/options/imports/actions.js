@@ -3,7 +3,7 @@ import { createAction } from 'redux-act'
 import analytics from 'src/analytics'
 import { CMDS, IMPORT_CONN_NAME, OLD_EXT_KEYS } from './constants'
 import * as selectors from './selectors'
-import { importIndex } from 'src/options/imports/index_ops'
+import { importIndex, exportIndex } from 'src/options/imports/index_ops'
 export const filterDownloadDetails = createAction(
     'imports/filterDownloadDetails',
 )
@@ -54,7 +54,7 @@ const getFileTextViaReader = fileReader => file =>
  * Performs a restore of given docs files.
  * @param {Array<File>} files One or more NDJSON files that contain database docs.
  */
-export const uploadTestData = files => async (dispatch, getState) => {
+export const restoreDB = files => async (dispatch, getState) => {
     dispatch(setFileUploading(true))
 
     if (files.length < 1) {
@@ -71,6 +71,8 @@ export const uploadTestData = files => async (dispatch, getState) => {
 
     dispatch(setFileUploading(false))
 }
+
+export const dumpDB = () => dispatch => exportIndex()
 
 /**
  * Responds to messages sent from background script over the runtime connection by dispatching
