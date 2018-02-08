@@ -40,9 +40,7 @@ const ShareButtons = () => (
                     <a
                         target="_new"
                         href="https://worldbrain.io/how-can-we-help-you/"
-                    >
-                        Chat with us
-                    </a>
+                    />
                 </p>{' '}
             </div>
         </div>

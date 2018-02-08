@@ -1,23 +1,23 @@
 const tooltips = [
     {
-        title: 'Test1',
+        title: 'Search Everywhere',
         description:
-            'Lorem ipsum dolor sit amet, consectetur adipisicing elit.',
+            "Use your browser's address bar to search from anywhere you are. <br/><br/>Just type:<br/><img src='/img/shortcuts.png'><img/>",
     },
     {
-        title: 'Test2',
+        title: 'Only exact matches possible',
         description:
-            'Lorem ipsum dolor sit amet, consectetur adipisicing elit.',
+            "Only exact word-matches yield results. Fuzzy matching or synonym-search are not a feature yet.<br/><a target='_new' href='https://worldbrain.helprace.com/i23-known-limitations-of-searching'>See full list</a> of current limitations.",
     },
     {
-        title: 'Test3',
+        title: 'Express time filters in natural language',
         description:
-            'Lorem ipsum dolor sit amet, consectetur adipisicing elit.',
+            'Try typing "<i>2 weeks ago<i/>" into the date picker field',
     },
     {
-        title: 'Test4',
+        title: 'New Use Case: ',
         description:
-            'Lorem ipsum dolor sit amet, consectetur adipisicing elit.',
+            '"That <i><b>medium.com</i></b> post I read <i><b>yesterday</i></b>."<br/><br/><span style="font-size:15px;margin-bottom:15px">Search with:</span><br/><code>medium.com after:"yesterday"<code/>',
     },
     {
         title: 'Test5',

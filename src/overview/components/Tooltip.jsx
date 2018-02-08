@@ -19,16 +19,16 @@ const Tooltip = ({
 }) => (
     <div className={mainTooltipContainer(showTooltip)}>
         <div className={localStyles.tooltipButton}>
+            <div onClick={toggleShowTooltip}>
+                {showTooltip ? 'Hide' : 'Show Tips'}
+            </div>
             {showTooltip && (
                 <div
                     className={localStyles.refreshIcon}
                     onClick={onClickRefreshTooltip}
-                    title="Click so new new tip"
+                    title="Next Tip"
                 />
             )}
-            <div onClick={toggleShowTooltip}>
-                {showTooltip ? 'Hide Tips' : 'Show Tooltips'}
-            </div>
         </div>
         {showTooltip && (
             <div className={localStyles.tooltipText}>
