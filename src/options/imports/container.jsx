@@ -15,7 +15,7 @@ import ButtonBar from './components/ButtonBar'
 import DownloadDetails from './components/DownloadDetails'
 import DownloadDetailsRow from './components/DownloadDetailsRow'
 import StatusReport from './components/StatusReport'
-import AdvSettingCheckbox from './components/AdvSettingsCheckbox'
+import AdvSettingCheckbox from './components/AdvSettings/AdvSettingsCheckbox'
 import ShowDownloadDetails from './components/ShowDownloadDetails'
 
 class ImportContainer extends Component {

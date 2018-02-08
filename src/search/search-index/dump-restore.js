@@ -1,4 +1,5 @@
 import index from '.'
+import { idbBatchToPromise } from './util'
 import db from 'src/pouchdb'
 import { pageKeyPrefix } from 'src/page-storage'
 import { visitKeyPrefix } from 'src/activity-logger'
@@ -58,7 +59,7 @@ function transformData({ key, value }) {
 }
 
 /**
- * @param {object} data Index dump to export to JSON
+ * @param {any[]} data Array of KVPs to process.
  * @param {number} counter Integer that maintains the count of exported files
  *
  */
@@ -74,11 +75,12 @@ async function downloadChunk(data, filename) {
     })
 }
 /**
- * @param {string} startAfter Index value to begin export from
- * @param {number} limit maximum number of docs to export into one file
+ * @param {string} [startAfter=''] Index key to start collecting data from.
+ * @param {number} [limit=5000] Max # of docs to collect (# of docs after initial key).
+ * @return {Promise<any[]>} Resolves to an array of key-value-pairs.
  *
  */
-async function grabDBChunk(startAfter = '', limit = 1000) {
+async function grabDBChunk(startAfter = '', limit = 5000) {
     const data = []
 
     return new Promise((resolve, reject) =>
@@ -90,7 +92,13 @@ async function grabDBChunk(startAfter = '', limit = 1000) {
     )
 }
 
-async function restorePage({ key, value }) {
+/**
+ * Attempts to create a new pouch page doc for given KVP + processing the data for IndexedDB insertion.
+ *
+ * @param {any} pageKVP
+ * @return {Promise<any>} Resolves to the object containing `key` and `value` props ready for DB insertion.
+ */
+async function processPageKVP({ key, value }) {
     await db.put({
         _id: key,
         url: value._pouchData.url,
@@ -99,59 +107,76 @@ async function restorePage({ key, value }) {
         },
     })
 
-    await index.put(key, {
-        ...value,
-        terms: new Set(value.terms || []),
-        titleTerms: new Set(value.titleTerms || []),
-        urlTerms: new Set(value.urlTerms || []),
-        visits: new Set(value.visits || []),
-        bookmarks: new Set(value.bookmarks || []),
-        tags: new Set(value.tags || []),
-    })
+    return {
+        key,
+        value: {
+            ...value,
+            terms: new Set(value.terms || []),
+            titleTerms: new Set(value.titleTerms || []),
+            urlTerms: new Set(value.urlTerms || []),
+            visits: new Set(value.visits || []),
+            bookmarks: new Set(value.bookmarks || []),
+            tags: new Set(value.tags || []),
+        },
+    }
 }
 
-function restoreDatum(datum) {
-    if (datum.key.startsWith(pageKeyPrefix)) {
-        return restorePage(datum)
+/**
+ * Processes a KVP pair object (`key` and `value` props) for restoring into IndexedDB.
+ * If a page is encountered, it will attempt to restore that pouch doc.
+ *
+ * @param {any} kvp
+ * @return {Promise<any>} Resolves to the object containing `key` and `value` props ready for DB insertion.
+ */
+function processKVPForRestore({ key, value }) {
+    if (key.startsWith(pageKeyPrefix)) {
+        return processPageKVP({ key, value })
     } else if (
         // Visits, bookmarks
-        datum.key.startsWith(visitKeyPrefix) ||
-        datum.key.startsWith(bookmarkKeyPrefix)
+        key.startsWith(visitKeyPrefix) ||
+        key.startsWith(bookmarkKeyPrefix)
     ) {
-        return index.put(datum.key, datum.value)
+        return Promise.resolve({ key, value })
     }
 
     // Everything else is a Map
-    return index.put(datum.key, new Map(datum.value))
+    return Promise.resolve({ key, value: new Map(value) })
 }
 
 /**
- * @param {any[]} Array of the index data key value pairs to be inserted.
+ * @param {any[]} kvps Array of the index data key value pairs to be inserted.
+ * @return {Promise<void>} Resolves when all KVPs restored. Error'd KVPs get skipped.
  */
-export async function restoreDB(data) {
-    for (const datum of data) {
+export async function restoreDB(kvps) {
+    const restoreBatch = index.batch()
+
+    for (const kvp of kvps) {
         try {
-            await restoreDatum(datum) // Try to restore current data
+            const { key, value } = await processKVPForRestore(kvp)
+            restoreBatch.put(key, value)
         } catch (err) {
             console.warn(err)
-            continue // Keep restoring the rest
+            continue // Skip current KVP, but keep restoring the rest
         }
     }
+
+    // Run all the DB ops at once for this batch of KVPs
+    return idbBatchToPromise(restoreBatch)
 }
 
 /**
- * @param {number} chunkSize Length of the chunk for piecewise export. Suggested value range: 500 - 1000
- *
+ * @param {number} [kvpPerFile=5000] Number of KVPs per dump file.
+ * @return {Promise<void>} Resolves when all the dump files are downloaded.
  */
-export async function dumpDB(chunkSize = 5000) {
+export async function dumpDB(kvpPerFile = 5000) {
     let startAfter, chunk
     let fileCount = 0
 
     do {
-        chunk = await grabDBChunk(startAfter, chunkSize)
+        chunk = await grabDBChunk(startAfter, kvpPerFile)
         await downloadChunk(chunk, `${DUMP_DIR}/index-${++fileCount}.json`)
 
         // Set `startAfter` to last key, so that next iteration will be new data
         startAfter = chunk[chunk.length - 1].key
-    } while (chunk.length === chunkSize) // If chunk `length` prop is < `chunkSize`, means we've run out of data
+    } while (chunk.length === kvpPerFile) // If chunk `length` prop is < `chunkSize`, means we've run out of data
 }

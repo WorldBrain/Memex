@@ -3,8 +3,6 @@ import PropTypes from 'prop-types'
 
 import { Wrapper } from 'src/common-ui/components'
 
-import styles from './AdvSettings.css'
-
 class Concurrency extends PureComponent {
     static propTypes = {
         concurrency: PropTypes.number.isRequired,
