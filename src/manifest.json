@@ -22,7 +22,15 @@
     },
     "commands": {
         "openOverview": {
-            "description": "Open Search Overview"
+            "description": "Open search overview"
+        },
+        "bookmarkPage": {
+            "description": "Bookmark current page"
+        },
+        "_execute_browser_action": {
+            "suggested_key": {
+                "default": "MacCtrl+Shift+T"
+            }
         }
     },
     "applications": {
