@@ -60,3 +60,14 @@ a {
     height: 18px;
     margin-left: 14px;
 }
+
+.buttontooltipempty {
+    border-radius: 30px;
+    border: 1px solid #3eb995;
+    font-weight: 100;
+    font-size: 15px;
+    color: #3eb995;
+    cursor: pointer;
+    height: 25px;
+    width: 200px;
+}

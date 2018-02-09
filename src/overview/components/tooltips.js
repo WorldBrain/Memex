@@ -20,9 +20,23 @@ const tooltips = [
             '"That <i><b>medium.com</i></b> post I read <i><b>yesterday</i></b>."<br/><br/><span style="font-size:15px;margin-bottom:15px">Search with:</span><br/><code>medium.com after:"yesterday"<code/>',
     },
     {
-        title: 'Test5',
+        title: 'Pages are indexed after 10 seconds',
+        description: 'Websites you visit are indexed with a 10 second delay.',
+    },
+    {
+        title: 'Block pages from being indexed',
         description:
-            'Lorem ipsum dolor sit amet, consectetur adipisicing elit.<img src="https://imagejournal.org/wp-content/uploads/bb-plugin/cache/23466317216_b99485ba14_o-panorama.jpg"> </img>',
+            'You can blacklist domains, urls and use regular expressions (a bit geeky) to block websites from being stored when you visit them. </br></br> <a target="_new" href="/options/options.html#/blacklist"><button class="_src_overview_components_Tooltip__buttontooltipempty">Go to Blacklist Settings</button></a> ',
+    },
+    {
+        title: 'Pause indexing for a certain amount of time',
+        description:
+            "Need to go on a little incognito web 'expedition' and don't want to leave traces?<br/>Pause your recording as long as you want via the <img style='height:18px; vertical-align:bottom' src='/img/worldbrain-logo-narrow-bw-16.png'/>-icon in the menu bar.",
+    },
+    {
+        title: 'Import Existing Bookmarks & History',
+        description:
+            'By default, Memex makes the pages available you visit after installation. But you can also <a target="_new" href="/options/options.html#/import">import all your bookmarks, and the browsing history</a> of the last 90 days.',
     },
 ]
 
