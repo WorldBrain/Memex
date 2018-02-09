@@ -6,7 +6,6 @@ import ShareButton from './ShareButton'
 const ShareButtons = () => (
     <div className={styles.outer}>
         <div className={styles.shareIcons}>
-            <p className={styles.shareText}>Spread the love</p>{' '}
             <ShareButton
                 href="https://worldbrain.io/share/facebook"
                 imgSrc="/img/face.png"

@@ -1,0 +1,42 @@
+.title {
+    color: #3eb995;
+    font-size: 30px;
+    font-weight: 800;
+    padding-top: 50px;
+    margin-bottom: 20px;
+    font-style: italic;
+}
+
+.subtitle {
+    color: #3eb995;
+    font-size: 18px;
+}
+
+.subsubtitle {
+    color: #3eb995;
+    font-size: 16px;
+    margin-top: 50px;
+    margin-bottom: 15px;
+}
+
+.button {
+    border-radius: 30px;
+    border: 1px solid #3eb995;
+    font-weight: 100;
+    font-size: 15px;
+    color: #3eb995;
+    cursor: pointer;
+    height: 25px;
+    width: 200px;
+    margin-top: 5px;
+    margin-left: 15px;
+
+    &:hover {
+        background: #3eb995;
+        color: white;
+    }
+}
+
+.btnBox {
+    display: block;
+}

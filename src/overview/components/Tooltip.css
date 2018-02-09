@@ -1,3 +1,7 @@
+a {
+    text-decoration: underline;
+}
+
 .mainTooltip {
     position: fixed;
     left: 8px;
@@ -7,15 +11,6 @@
     color: #3eb995;
     overflow: hidden;
     z-index: 1;
-
-    @media (max-width: 1200px) {
-        display: none;
-    }
-
-    @media (max-width: 800px) {
-        display: inline-block;
-        max-width: 210px;
-    }
 }
 
 a {
@@ -26,19 +21,21 @@ a {
     display: flex;
     cursor: pointer;
     float: left;
-    font-size: 13px;
+    font-size: 15px;
+    padding-left: 10px;
     font-weight: 100;
     color: #777;
     padding-bottom: 5px;
-    margin-left: 5px;
-    box-shadow: 0px 4px 6px -6px;
+    margin-left: 0px;
+    margin-top: -4px;
 }
 
 .tooltipText {
-    margin-top: 18px;
+    margin-top: 26px;
     padding: 5px;
     font-size: 14px;
     font-weight: 100;
+    box-shadow: inset 0px 4px 6px -6px #77777796;
 }
 
 .tooltipText img {
@@ -51,7 +48,7 @@ a {
     color: #777;
     font-size: 18px;
     margin-bottom: 5px;
-    margin-top: 30px;
+    margin-top: 11px;
 }
 
 .refreshIcon {
@@ -70,11 +67,41 @@ a {
     cursor: pointer;
     height: 25px;
     width: 200px;
+
+    &:hover {
+        background: #3eb995;
+        color: white;
+    }
 }
 
 .tooltipButtonIcon {
     background-image: url('/img/hide.svg');
     width: 18px;
     height: 18px;
-    margin-left: 14px;
+    margin-left: 0px;
+}
+
+/*
+
+Responsiveness Settings
+
+*/
+
+@media (max-width: 1350px) {
+    .mainTooltip {
+        display: inline-block;
+        max-width: 210px;
+    }
+    .tooltipTitle {
+        font-size: 16px;
+    }
+    .tooltipText {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .mainTooltip {
+        display: none;
+    }
 }

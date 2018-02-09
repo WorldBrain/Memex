@@ -34,12 +34,14 @@
     color: #fff;
     background-color: #3eb995;
     transform: rotate(90deg);
-    margin-top: 155px;
+    margin-top: 100px;
     margin-left: -13px;
     font-size: 15px;
     text-align: center;
     padding: 14px 20px 17px 20px;
     transform-origin: 0 100%;
+    font-weight: 100;
+    letter-spacing: 2;
 }
 
 .shareText {
