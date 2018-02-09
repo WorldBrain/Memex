@@ -30,3 +30,5 @@ export const DOMAIN_TLD_PATTERN = /^(\w+\.)?[\w-]{2,}\.\w{2,3}(\.\w{2})?$/
 
 /* Pattern to match hashtags - spaces can be represented via '+' */
 export const HASH_TAG_PATTERN = /^#\w[\w+]*$/
+
+export const SHOW_TOOL_TIP = 'showTooltip'

@@ -11,6 +11,11 @@ const mainTooltipContainer = showTooltip =>
         [localStyles.isActive]: showTooltip,
     })
 
+const tooltipButton = showTooltip =>
+    classNames({
+        [localStyles.tooltipButtonIcon]: showTooltip,
+    })
+
 const Tooltip = ({
     showTooltip,
     toggleShowTooltip,
@@ -19,8 +24,11 @@ const Tooltip = ({
 }) => (
     <div className={mainTooltipContainer(showTooltip)}>
         <div className={localStyles.tooltipButton}>
-            <div onClick={toggleShowTooltip}>
-                {showTooltip ? 'Hide' : 'Show Tips'}
+            <div
+                className={tooltipButton(showTooltip)}
+                onClick={toggleShowTooltip}
+            >
+                {!showTooltip && 'Show Tips'}
             </div>
             {showTooltip && (
                 <div

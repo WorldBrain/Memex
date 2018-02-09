@@ -29,6 +29,7 @@ const defaultState = {
     activeTagIndex: -1,
     showTooltip: false,
     tooltipIndex: 0,
+    toolTips: [],
 }
 
 function setQuery(state, query) {
@@ -152,6 +153,13 @@ const changeHasBookmark = (state, index) => {
     }
 
     return { ...state, searchResult }
+}
+
+const setShowTooltip = (state, { isShowTooltip }) => {
+    return {
+        ...state,
+        showTooltip: isShowTooltip || !state.showTooltip,
+    }
 }
 
 const incSearchCount = state => ({

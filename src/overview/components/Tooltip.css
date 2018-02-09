@@ -71,3 +71,10 @@ a {
     height: 25px;
     width: 200px;
 }
+
+.tooltipButtonIcon {
+    background-image: url('/img/hide.svg');
+    width: 18px;
+    height: 18px;
+    margin-left: 14px;
+}
