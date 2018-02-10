@@ -8,7 +8,7 @@ import FilterPill from './components/FilterPill'
 import ExpandButton from './components/ExpandButton'
 import * as actions from './actions'
 import * as selectors from './selectors'
-import * as constants from './constants'
+import { SHOWN_FILTER_LIMIT } from '../constants'
 
 class FiltersContainer extends PureComponent {
     static propTypes = {
@@ -55,7 +55,7 @@ class FiltersContainer extends PureComponent {
 
     renderFilterPills = source => data => {
         const filterPills = data
-            .slice(0, constants.SHOWN_FILTER_LIMIT)
+            .slice(0, SHOWN_FILTER_LIMIT)
             .map((value, i) => (
                 <FilterPill
                     key={i}
@@ -65,13 +65,13 @@ class FiltersContainer extends PureComponent {
             ))
 
         // Add on dummy pill with '+' sign if over limit
-        if (data.length > constants.SHOWN_FILTER_LIMIT) {
+        if (data.length > SHOWN_FILTER_LIMIT) {
             return [
                 ...filterPills,
                 <ExpandButton
                     key="+"
                     setRef={this.addFurtherTagRef}
-                    value={`+${data.length - constants.SHOWN_FILTER_LIMIT}`}
+                    value={`+${data.length - SHOWN_FILTER_LIMIT}`}
                     onClick={this.props.setFilterPopup(source)}
                     noBg
                 />,

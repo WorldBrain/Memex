@@ -3,7 +3,6 @@ import PropTypes from 'prop-types'
 import qs from 'query-string'
 
 import analytics, { updateLastActive } from 'src/analytics'
-import { initSingleLookup } from 'src/search/search-index/util'
 import extractQueryFilters from 'src/util/nlp-time-filter'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { isLoggable, getPauseState } from 'src/activity-logger'
@@ -29,9 +28,16 @@ class PopupContainer extends Component {
         pauseValues: [5, 10, 20, 30, 60, 120, 180, Infinity],
     }
 
+    // We only need these atts from the page we're requesting
+    static pageProjection = {
+        bookmarks: true,
+        tags: true,
+    }
+
     constructor(props) {
         super(props)
 
+        this.pageLookup = remoteFunction('pageLookup')
         this.fetchBlacklist = remoteFunction('fetchBlacklist')
         this.addToBlacklist = remoteFunction('addToBlacklist')
         this.isURLBlacklisted = remoteFunction('isURLBlacklisted')
@@ -100,10 +106,10 @@ class PopupContainer extends Component {
     }
 
     async getInitPageData() {
-        const pageId = generatePageDocId({ url: this.state.url })
-        const lookup = initSingleLookup()
+        const id = generatePageDocId({ url: this.state.url })
+        const page = await this.pageLookup(id, PopupContainer.pageProjection)
 
-        return { page: await lookup(pageId) }
+        return { page }
     }
 
     async getInitPauseState() {
@@ -144,7 +150,7 @@ class PopupContainer extends Component {
         }
 
         // Already a bookmark
-        if (this.state.page != null && this.state.page.bookmarks.size) {
+        if (this.state.page != null && this.state.page.bookmarks.length) {
             return constants.BOOKMARK_BTN_STATE.BOOKMARK
         }
 
@@ -158,8 +164,7 @@ class PopupContainer extends Component {
             return []
         }
 
-        // Ready all page tags for display
-        return [...this.state.page.tags].map(tag => tag.replace('tag/', ''))
+        return this.state.page.tags
     }
 
     onBlacklistBtnClick(domainDelete = false) {
