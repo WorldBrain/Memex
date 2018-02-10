@@ -2,6 +2,10 @@ a {
     text-decoration: underline;
 }
 
+b {
+    font-weight: 600;
+}
+
 .mainTooltip {
     position: fixed;
     left: 8px;

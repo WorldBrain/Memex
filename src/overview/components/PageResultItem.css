@@ -36,15 +36,15 @@
     }
 
     &:hover .trash {
-        opacity: 0.3;
+        opacity: 0.6;
     }
 
     &:hover .tag {
-        opacity: 0.3;
+        opacity: 0.6;
     }
 
     &:hover .notBookmark {
-        opacity: 0.3;
+        opacity: 0.6;
     }
 }
 
@@ -188,7 +188,7 @@
 
 .trash {
     background-image: url('/img/trash_new.svg');
-    opacity: 0.2;
+    opacity: 0.3;
     width: 20px;
     margin-top: 3px;
 
@@ -205,18 +205,18 @@
 
 .notBookmark {
     background-image: url('/img/star_empty.svg');
-    opacity: 0.2;
+    opacity: 0.3;
     width: 25px;
 
     &:hover {
         background-image: url('/img/star_full.svg');
-        opacity: 0.2;
+        opacity: 0.5;
     }
 }
 
 .tag {
     background-image: url('/img/tag.svg');
-    opacity: 0.2;
+    opacity: 0.3;
     margin-top: 3px;
     width: 20px;
 

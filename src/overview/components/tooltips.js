@@ -10,18 +10,29 @@ const tooltips = [
             "Only exact word-matches yield results. Fuzzy matching or synonym-search are not a feature yet.<br/><a target='_new' href='https://worldbrain.helprace.com/i23-known-limitations-of-searching'>See full list</a> of current limitations.",
     },
     {
-        title: 'Express time filters in natural language',
+        title: 'Express time filters in human language',
         description:
-            'Try typing "<i>2 weeks ago<i/>" into the date picker field',
+            'Try typing "<b><i>2 weeks ago</i></b>" into the date picker field',
     },
     {
         title: 'New Use Case: ',
         description:
-            '"That <i><b>medium.com</i></b> post I read <i><b>yesterday</i></b>."<br/><br/><span style="font-size:15px;margin-bottom:15px">Search with:</span><br/><code>medium.com after:"yesterday"<code/>',
+            '<span style="font-size:15px;margin-bottom:15px">To Find:</span><br/>"That <i><b>medium.com</i></b> post I read <i><b>yesterday</i></b>."<br/><br/><span style="font-size:15px;margin-bottom:15px">Search with:</span><br/><code>medium.com after:"yesterday"<code/>',
+    },
+    {
+        title: 'New Use Case: ',
+        description:
+            '<span style="font-size:15px;margin-bottom:15px">To Find:</span><br/>"<i><b>All</i></b> the influencers on <i><b>twitter.com</i></b> I saved to <i><b>#contactforlater</i></b>."<br/><br/><span style="font-size:15px;margin-bottom:15px">Search with:</span><br/><code>twitter.com #contactforlater<code/>',
+    },
+    {
+        title: 'New Use Case: ',
+        description:
+            '<span style="font-size:15px;margin-bottom:15px">To Find:</span><br/>"<i><b>All</i></b> the influencers on <i><b>twitter.com</i></b> I saved to <i><b>#contactforlater</i></b>."<br/><br/><span style="font-size:15px;margin-bottom:15px">Search with:</span><br/><code>twitter.com #contactforlater<code/>',
     },
     {
         title: 'Pages are indexed after 10 seconds',
-        description: 'Websites you visit are indexed with a 10 second delay.',
+        description:
+            'Websites you visit are indexed with a 10 second delay.</br>Titles and URLs are always searchable.',
     },
     {
         title: 'Block pages from being indexed',
