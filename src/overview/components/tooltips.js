@@ -12,27 +12,44 @@ const tooltips = [
     {
         title: 'Express time filters in human language',
         description:
-            'Try typing "<b><i>2 weeks ago</i></b>" into the date picker field',
+            'Try typing "<b><i>2 weeks ago</i></b>" into the date picker field.',
+    },
+
+    {
+        title: 'Sometimes a simple restart helps',
+        description:
+            'As the old question goes: "Have you tried to unplug the machine?", it also helps to restart Memex if you feel like things are not doing as they should.<br/>Just untick and tick the box next to Memex in the extensions menu.',
+    },
+    {
+        title: 'Tag Pages',
+        description:
+            "Quickly tag and group any page via the <img style='height:18px; vertical-align:bottom' src='/img/worldbrain-logo-narrow-bw-16.png'/>-icon in the menu bar or via the results list." /* or with the <a id='shortcuts' href='chrome://extensions/configureCommands'>shortcuts</a> you defined. */,
+    },
+
+    {
+        title: "Better than the browser's built-in search",
+        description:
+            'Even just for searching title & URLs, Memex will give better results than your browser.<br/> Try combining it with time, domain or bookmark filter to unleash its full potential.',
     },
     {
         title: 'New Use Case: ',
         description:
-            '<span style="font-size:15px;margin-bottom:15px">To Find:</span><br/>"That <i><b>medium.com</i></b> post I read <i><b>yesterday</i></b>."<br/><br/><span style="font-size:15px;margin-bottom:15px">Search with:</span><br/><code>medium.com after:"yesterday"<code/>',
+            '<span style="font-size:15px;margin-bottom:15px">To Find:</span><br/>"<i>That <i><b>medium.com</i></b> post I read <i><b>yesterday</i></b>.</i>"<br/><br/><span style="font-size:15px;margin-bottom:15px">Search with:</span><br/><code>medium.com after:"yesterday"<code/>',
     },
     {
         title: 'New Use Case: ',
         description:
-            '<span style="font-size:15px;margin-bottom:15px">To Find:</span><br/>"<i><b>All</i></b> the influencers on <i><b>twitter.com</i></b> I saved to <i><b>#contactforlater</i></b>."<br/><br/><span style="font-size:15px;margin-bottom:15px">Search with:</span><br/><code>twitter.com #contactforlater<code/>',
+            '<span style="font-size:15px;margin-bottom:15px">To Find:</span><br/>"<i>The <i><b>tab I closed</i></b> roughly <i><b>10 minutes ago</i></b> about <i><b>cats with hats</i></b>.</i>"<br/><br/><span style="font-size:15px;margin-bottom:15px">Search with:</span><br/><code>cats hats after:"10 minutes ago"<code/>',
     },
     {
         title: 'New Use Case: ',
         description:
-            '<span style="font-size:15px;margin-bottom:15px">To Find:</span><br/>"<i><b>All</i></b> the influencers on <i><b>twitter.com</i></b> I saved to <i><b>#contactforlater</i></b>."<br/><br/><span style="font-size:15px;margin-bottom:15px">Search with:</span><br/><code>twitter.com #contactforlater<code/>',
+            '<span style="font-size:15px;margin-bottom:15px">To Find:</span><br/>"<i><i><b>All</i></b> the influencers on <i><b>twitter.com</i></b> I saved to <i><b>#contactforlater</i></b>.</i>"<br/><br/><span style="font-size:15px;margin-bottom:15px">Search with:</span><br/><code>twitter.com #contactforlater<code/>',
     },
     {
         title: 'Pages are indexed after 10 seconds',
         description:
-            'Websites you visit are indexed with a 10 second delay.</br>Titles and URLs are always searchable.',
+            'Websites you visit are indexed with a 10 second delay.<br/>Titles and URLs are always searchable.',
     },
     {
         title: 'Block pages from being indexed',

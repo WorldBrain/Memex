@@ -60,6 +60,7 @@ a {
     width: 18px;
     height: 18px;
     margin-left: 14px;
+    opacity: 0.7;
 }
 
 .buttontooltipempty {
@@ -83,10 +84,10 @@ a {
     width: 18px;
     height: 18px;
     margin-left: 0px;
+    opacity: 0.7;
 }
 
 /*
-
 Responsiveness Settings
 
 */
@@ -96,9 +97,11 @@ Responsiveness Settings
         display: inline-block;
         max-width: 210px;
     }
+
     .tooltipTitle {
         font-size: 16px;
     }
+
     .tooltipText {
         font-size: 14px;
     }
