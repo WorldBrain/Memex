@@ -32,7 +32,7 @@
     text-decoration: none;
     position: absolute;
     color: #fff;
-    background-color: #3eb995;
+    background-color: #3eb99587;
     transform: rotate(90deg);
     margin-top: 100px;
     margin-left: -13px;
@@ -69,7 +69,7 @@ a {
 }
 
 .chatBox {
-    margin-top: 165px;
+    margin-top: 175px;
     text-decoration: none;
 }
 

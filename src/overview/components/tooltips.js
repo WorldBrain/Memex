@@ -14,7 +14,6 @@ const tooltips = [
         description:
             'Try typing "<b><i>2 weeks ago</i></b>" into the date picker field.',
     },
-
     {
         title: 'Sometimes a simple restart helps',
         description:
