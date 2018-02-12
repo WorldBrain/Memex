@@ -20,6 +20,7 @@
     "jsx"
   ],
   "setupFiles": [
+    "jest-webextension-mock",
     "./setupJest.js"
   ],
   "unmockedModulePathPatterns": [

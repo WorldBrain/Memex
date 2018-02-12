@@ -6,8 +6,6 @@ jest.useFakeTimers()
 
 describe('delay', () => {
     test('should set a timer with the given delay', () => {
-        'intentional test fuckup'.pleaseExplode()
-
         delay(1000)
         expect(setTimeout.mock.calls.length).toBe(1)
         expect(setTimeout.mock.calls[0][1]).toBe(1000)
