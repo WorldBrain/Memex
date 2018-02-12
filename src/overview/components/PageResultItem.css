@@ -197,6 +197,17 @@
     }
 }
 
+.share {
+    background-image: url('/img/share.svg');
+    opacity: 0.2;
+    width: 20px;
+    margin-top: 3px;
+
+    &:hover:enabled {
+        opacity: 0.5;
+    }
+}
+
 .bookmark {
     background-image: url('/img/star_full.svg');
     opacity: 0.8;

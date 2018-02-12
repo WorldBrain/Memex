@@ -97,18 +97,27 @@ export const activeTagIndex = createSelector(
     state => state.activeTagIndex,
 )
 
+export const activeShareIndex = createSelector(
+    overview,
+    state => state.activeShareIndex,
+)
+export const copy = createSelector(overview, state => state.copy)
 export const results = createSelector(
     resultDocs,
     isDeleteConfShown,
     deletingResultIndex,
     activeTagIndex,
-    (docs, modalShown, deleting, tagIndex) =>
+    activeShareIndex,
+    copy,
+    (docs, modalShown, deleting, tagIndex, shareIndex, copy) =>
         docs.map((pageDoc, i) => ({
             ...pageDoc,
             title: decideTitle(pageDoc),
             isDeleting: !modalShown && i === deleting,
             tagPillsData: pageDoc.tags.slice(0, constants.SHOWN_TAGS_LIMIT),
             shouldDisplayTagPopup: i === tagIndex,
+            shouldDisplaySharePopup: i === shareIndex,
+            copy: copy,
         })),
 )
 
