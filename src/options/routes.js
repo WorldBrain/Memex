@@ -3,17 +3,9 @@ import SettingsContainer from './containers/settings'
 import Privacy from './privacy'
 import Acknowledgements from './acknowledgement/components/content'
 import Tutorial from './tutorial'
-import NewInstall from './new-install'
 import Statistics from './statistics'
 
 export default [
-    {
-        name: 'New install',
-        pathname: '/new_install',
-        component: NewInstall,
-        hideSidebar: true,
-        hideFromSidebar: true,
-    },
     {
         name: 'Usage Statistics',
         pathname: '/statistics',

@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
+import { OutLink } from 'src/common-ui/containers'
 import DateRangeSelection from './DateRangeSelection'
 import styles from './Overview.css'
 
@@ -18,12 +19,15 @@ const Header = ({
                     placeholder="Search your memory; use # to filter by tag"
                     value={query}
                     ref={props.setInputRef}
+                    onKeyDown={props.onQuerySearchKeyDown}
+                    disabled={props.isSearchDisabled}
                 />
                 <DateRangeSelection
                     startDate={startDate}
                     endDate={endDate}
                     onStartDateChange={props.onStartDateChange}
                     onEndDateChange={props.onEndDateChange}
+                    disabled={props.isSearchDisabled}
                 />
             </div>
             <div
@@ -38,13 +42,12 @@ const Header = ({
             </div>
         </div>
         <div className={styles.links}>
-            <a
+            <OutLink
                 className={styles.upgrade}
                 href="https://worldbrain.io/pricing"
-                target="_new"
             >
                 Upgrade Memex
-            </a>
+            </OutLink>
             <a href="/options/options.html">
                 <img src="/img/settings-icon.png" className={styles.icon} />
             </a>
@@ -63,6 +66,8 @@ Header.propTypes = {
     onStartDateChange: PropTypes.func.isRequired,
     onEndDateChange: PropTypes.func.isRequired,
     onShowFilterChange: PropTypes.func.isRequired,
+    onQuerySearchKeyDown: PropTypes.func.isRequired,
+    isSearchDisabled: PropTypes.bool,
 }
 
 export default Header

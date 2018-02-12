@@ -26,7 +26,7 @@ const hydrate = async store => {
         const {
             [consts.SHOULD_TRACK_STORAGE_KEY]: shouldTrackPersisted,
         } = await browser.storage.local.get({
-            [consts.SHOULD_TRACK_STORAGE_KEY]: true,
+            [consts.SHOULD_TRACK_STORAGE_KEY]: false,
         })
 
         store.dispatch(actions.setTrackingFlag(shouldTrackPersisted))

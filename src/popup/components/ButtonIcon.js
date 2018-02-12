@@ -2,6 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
 
+import { OutLink } from 'src/common-ui/containers'
 import styles from './Button.css'
 
 const getButtonClass = buttonType =>
@@ -10,12 +11,7 @@ const getButtonClass = buttonType =>
     })
 
 const ButtonIcon = ({ icon, buttonType, btnClass, ...btnProps }) => (
-    <a
-        className={getButtonClass(buttonType)}
-        target="_blank"
-        tabIndex="-1"
-        {...btnProps}
-    >
+    <OutLink className={getButtonClass(buttonType)} tabIndex="-1" {...btnProps}>
         <div
             className={classNames(
                 styles.customIcon,
@@ -23,7 +19,7 @@ const ButtonIcon = ({ icon, buttonType, btnClass, ...btnProps }) => (
                 btnClass,
             )}
         />
-    </a>
+    </OutLink>
 )
 
 ButtonIcon.propTypes = {

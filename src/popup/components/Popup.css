@@ -7,10 +7,6 @@ body {
     font-weight: 200;
 }
 
-i {
-    padding: 8px;
-}
-
 hr {
     border: 0;
     height: 0;
@@ -38,6 +34,10 @@ hr {
     & > i {
         color: #3eb995;
         padding: 0;
+    }
+
+    i {
+        padding: 8px;
     }
 }
 

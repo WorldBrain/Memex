@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 
+import { OutLink } from 'src/common-ui/containers'
 import { Wrapper } from 'src/common-ui/components'
 import BlacklistTable from './components/BlacklistTable'
 import BlacklistRow from './components/BlacklistRow'
@@ -111,9 +112,7 @@ class BlacklistContainer extends Component {
             return (
                 <div className={styles.blacklistAlert}>
                     This is an invalid RegExp! You can test your regex{' '}
-                    <a target="_blank" href="https://regexr.com/">
-                        here
-                    </a>
+                    <OutLink href="https://regexr.com/">here</OutLink>
                 </div>
             )
         }

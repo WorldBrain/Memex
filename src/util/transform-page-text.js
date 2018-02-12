@@ -65,11 +65,11 @@ const removeGiberishWords = (text = '') => text.replace(giberishWords, ' ')
  */
 export default function transform({ text = '', lang = 'en' }) {
     // Short circuit if no text
-    if (!text || !text.replace(/\s/g, '')) {
-        return text
+    if (!text.trim().length) {
+        return { text, lenAfter: 0, lenBefore: 0 }
     }
+
     let searchableText = text
-    const lengthBefore = searchableText.length
 
     // Remove URLs first before we start messing with things
     searchableText = removeUrls(searchableText)
@@ -107,7 +107,9 @@ export default function transform({ text = '', lang = 'en' }) {
 
     searchableText = removeDupeWords(searchableText)
 
-    const lengthAfter = searchableText.length
-
-    return { text: searchableText, lengthBefore, lengthAfter }
+    return {
+        text: searchableText,
+        lenBefore: text.length,
+        lenAfter: searchableText.length,
+    }
 }

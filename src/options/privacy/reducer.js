@@ -3,7 +3,7 @@ import { createReducer } from 'redux-act'
 import * as actions from './actions'
 
 const defState = {
-    shouldTrack: true,
+    shouldTrack: false,
 }
 
 export default createReducer(

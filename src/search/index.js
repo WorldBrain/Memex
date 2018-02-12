@@ -1,4 +1,3 @@
-import { STORAGE_KEYS as ANALYTIC_STORAGE_KEYS } from 'src/analytics/constants'
 import QueryBuilder from './query-builder'
 import { searchConcurrent } from './search-index/search'
 import mapResultsToPouchDocs from './map-search-to-pouch'
@@ -8,6 +7,7 @@ async function indexSearch({
     startDate,
     endDate,
     tags = [],
+    domains = [],
     skip = 0,
     limit = 10,
     getTotalCount = false,
@@ -21,6 +21,7 @@ async function indexSearch({
         .filterTime({ startDate, endDate }, 'bookmark/')
         .filterTime({ startDate, endDate }, 'visit/')
         .filterTags(tags)
+        .filterDomains(domains)
         .skipUntil(skip)
         .limitUntil(limit)
         .bookmarksFilter(showOnlyBookmarks)
@@ -36,8 +37,6 @@ async function indexSearch({
         }
     }
 
-    // Update the last search time in storage (used only for analytics purposes)
-    browser.storage.local.set({ [ANALYTIC_STORAGE_KEYS.SEARCH]: Date.now() })
     console.log('DEBUG: query', indexQuery)
 
     // Get index results, filtering out any unexpectedly structured results
@@ -74,8 +73,8 @@ async function indexSearch({
 
 // Export index interface
 export {
-    addPage,
     addPageConcurrent,
+    addPageTermsConcurrent,
     addBookmarkConcurrent,
     put,
     addTimestampConcurrent,

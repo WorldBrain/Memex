@@ -56,7 +56,10 @@
         "promise/always-return": "off",
         "prefer-promise-reject-errors": "off",
         "react/jsx-filename-extension": "off",
-        "react/prefer-stateless-function": "warn",
+        "react/prefer-stateless-function": [
+            "warn",
+            { "ignorePureComponents": true }
+        ],
         "react/sort-comp": "warn",
         "react/jsx-max-props-per-line": [1, { "when": "multiline" }]
     }

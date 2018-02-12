@@ -1,5 +1,6 @@
 import React from 'react'
 
+import { OutLink } from 'src/common-ui/containers'
 import localStyles from './styles.css'
 
 const Privacy = () => (
@@ -19,13 +20,12 @@ const Privacy = () => (
                 >
                     write us an email
                 </a>, or post them to{' '}
-                <a
+                <OutLink
                     className={localStyles.link}
-                    target="_blank"
                     href="https://worldbrain.io/faq"
                 >
                     our FAQs
-                </a>.
+                </OutLink>.
             </p>
 
             <h3>General Metrics</h3>

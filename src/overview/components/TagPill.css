@@ -8,6 +8,9 @@
     background-color: #3eb995;
     color: white;
     margin-left: 5px;
-    height: 18px;
     max-width: 120px;
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }

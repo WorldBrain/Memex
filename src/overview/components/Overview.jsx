@@ -6,13 +6,12 @@ import { Wrapper } from 'src/common-ui/components'
 import DeleteConfirmModal from './DeleteConfirmModal'
 import Header from './Header'
 import styles from './Overview.css'
-import Filters from './Filters'
 import ShareButtons from './ShareButtons'
 
-const showFilterClass = ({ showFilter }) =>
+const showFilterClass = ({ showFilters }) =>
     classNames({
         [styles.filtersContainer]: true,
-        [styles.hideFilter]: !showFilter,
+        [styles.hideFilter]: !showFilters,
     })
 
 const Overview = props => (
@@ -20,18 +19,11 @@ const Overview = props => (
         <Header {...props} />
         <ShareButtons />
 
-        <div className={showFilterClass(props)}>
-            <Filters
-                showOnlyBookmarks={props.showOnlyBookmarks}
-                onShowOnlyBookmarksChange={props.onShowOnlyBookmarksChange}
-                clearAllFilters={props.clearAllFilters}
-                isClearFilterButtonShown={props.isClearFilterButtonShown}
-            />
-        </div>
+        <div className={showFilterClass(props)}>{props.filters}</div>
         <div
             className={styles.main}
             style={{
-                marginTop: props.showFilter ? '180px' : '100px',
+                marginTop: props.showFilters ? '180px' : '100px',
             }}
         >
             {props.children}
@@ -49,11 +41,8 @@ Overview.propTypes = {
     isDeleteConfShown: PropTypes.bool.isRequired,
     resetDeleteConfirm: PropTypes.func.isRequired,
     deleteDocs: PropTypes.func.isRequired,
-    showFilter: PropTypes.bool.isRequired,
-    showOnlyBookmarks: PropTypes.bool.isRequired,
-    onShowOnlyBookmarksChange: PropTypes.func.isRequired,
-    clearAllFilters: PropTypes.func.isRequired,
-    isClearFilterButtonShown: PropTypes.bool.isRequired,
+    showFilters: PropTypes.bool.isRequired,
+    filters: PropTypes.node.isRequired,
 }
 
 export default Overview

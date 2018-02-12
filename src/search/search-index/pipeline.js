@@ -20,11 +20,11 @@ const urlNormalizationOpts = {
 
 /**
  * @param {string} url A raw URL string to attempt to extract parts from.
- * @returns {any} Object containing `domain` and `remainingUrl` keys. Values should be the `domain.tld.cctld` part and
+ * @returns {any} Object containing `hostname` and `pathname` props. Values should be the `domain.tld.cctld` part and
  *  everything after, respectively. If regex matching failed on given URL, error will be logged and simply
  *  the URL with protocol and opt. `www` parts removed will be returned for both values.
  */
-function transformUrl(url) {
+export function transformUrl(url) {
     let parsed
     const normalized = normalizeUrl(url, urlNormalizationOpts)
 
@@ -39,6 +39,31 @@ function transformUrl(url) {
         hostname: parsed ? parsed.hostname : normalized,
         pathname: parsed ? parsed.pathname : normalized,
     }
+}
+
+/**
+ *
+ * @param {string} text
+ * @param {'term'|'title'|'url'} key The key under which the extracted terms are categorized.
+ * @returns {Set<string>} Set of "words-of-interest" - determined by pre-proc logic in `transformPageText` - extracted from `text`.
+ */
+export function extractTerms(text, key) {
+    if (!text || !text.length) {
+        return new Set()
+    }
+
+    const { text: transformedText } = transformPageText({ text })
+
+    if (!transformedText || !transformedText.length) {
+        return new Set()
+    }
+
+    return new Set(
+        extractContent(transformedText, {
+            separator: DEFAULT_TERM_SEPARATOR,
+            key,
+        }),
+    )
 }
 
 /**
@@ -61,70 +86,37 @@ function transformUrl(url) {
  * @returns {IndexLookupDoc} Doc structured for indexing.
  */
 export default function pipeline({
-    pageDoc: { _id: id, content, url },
-    visitDocs = [],
+    pageDoc: { _id: id, content = {}, url },
+    visits = [],
     bookmarkDocs = [],
+    rejectNoContent = true,
 }) {
     // First apply transformations to the URL
     const { pathname, hostname } = transformUrl(url)
 
     // Throw error if no searchable content; we don't really want to index these (for now) so allow callers
     //  to handle (probably by ignoring)
-    if (!content || !content.fullText || !content.fullText.length) {
+    if (
+        rejectNoContent &&
+        (content == null || !content.fullText || !content.fullText.length)
+    ) {
         return Promise.reject(new Error('Page has no searchable content'))
     }
 
-    // Run the searchable content through our text transformations, attempting to discard useless data.
-    const { text: transformedContent } = transformPageText({
-        text: content.fullText,
-        lang: content.lang,
-    })
-    const { text: transformedTitle } = transformPageText({
-        text: content.title,
-    })
-    const { text: transformedUrlTerms } = transformPageText({
-        text: pathname,
-    })
-
     // Extract all terms out of processed content
-    let titleTerms, urlTerms
-    const terms = new Set(
-        extractContent(transformedContent, {
-            separator: DEFAULT_TERM_SEPARATOR,
-            key: 'term',
-        }),
-    )
-
-    if (transformedTitle && transformedTitle.length) {
-        // Extract all terms out of processed title
-        titleTerms = new Set(
-            extractContent(transformedTitle, {
-                separator: DEFAULT_TERM_SEPARATOR,
-                key: 'title',
-            }),
-        )
-    }
-
-    if (pathname && pathname.length) {
-        // Extract all terms out of processed URL
-        urlTerms = new Set(
-            extractContent(transformedUrlTerms, {
-                separator: DEFAULT_TERM_SEPARATOR,
-                key: 'url',
-            }),
-        )
-    }
+    const terms = extractTerms(content.fullText, 'term')
+    const titleTerms = extractTerms(content.title, 'title')
+    const urlTerms = extractTerms(pathname, 'url')
 
     // Create timestamps to be indexed as Sets
-    const visits = visitDocs.map(transformMetaDoc)
     const bookmarks = bookmarkDocs.map(transformMetaDoc)
 
     return Promise.resolve({
         id,
         terms,
-        urlTerms: urlTerms || new Set(),
+        urlTerms,
+        titleTerms,
         domain: keyGen.domain(hostname),
-        titleTerms: titleTerms || new Set(),
         visits: new Set(visits.map(keyGen.visit)),
         bookmarks: new Set(bookmarks.map(keyGen.bookmark)),
         tags: new Set(),

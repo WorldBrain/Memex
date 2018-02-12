@@ -1,5 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import debounce from 'lodash/fp/debounce'
 
 import analytics from 'src/analytics'
 
@@ -13,9 +14,21 @@ const withPageTracking = Component =>
     class extends React.Component {
         static propTypes = { location: PropTypes.object.isRequired }
 
+        constructor(props) {
+            super(props)
+
+            this.trackPage = debounce(100)(this._trackPage)
+        }
+
+        _trackPage = () => analytics.trackPage({ title: document.title })
+
+        componentDidMount() {
+            this.trackPage()
+        }
+
         componentDidUpdate({ location: prevLoc }) {
             if (this.props.location !== prevLoc) {
-                analytics.trackPage(this.props.location)
+                this.trackPage()
             }
         }
 

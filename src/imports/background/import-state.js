@@ -5,6 +5,7 @@ import {
     OLD_EXT_KEYS,
     STORAGE_KEYS,
 } from 'src/options/imports/constants'
+import { NUM_IMPORT_ITEMS as ONBOARDING_LIM } from 'src/overview/onboarding/constants'
 import { mapToObject } from 'src/util/map-set-helpers'
 import ItemCreator from './import-item-creation'
 
@@ -25,6 +26,7 @@ import ItemCreator from './import-item-creation'
  */
 
 export class ImportStateManager {
+    static QUICK_MODE_ITEM_LIMITS = { histLimit: ONBOARDING_LIM, bmLimit: 0 }
     static ESTS_STORAGE_KEY = 'import-estimate-counts'
     static DAY_IN_MS = 1000 * 60 * 60 * 24
     static STATE_STORAGE_KEY = 'import-items-state'
@@ -241,15 +243,22 @@ export class ImportStateManager {
 
     /**
      * Main count calculation method which will create import items, and set state counts and item chunks.
+     *
+     * @param {boolean} quick Denotes whether or not to instantiate an ItemCreator instance with limited creation use.
      */
-    async _calcCounts() {
-        this.calculatedAt = Date.now()
-        this.counts = ImportStateManager.getInitEsts() // Reset counts first
-
+    async _calcCounts(quick) {
+        // Reset current state first
+        this.calculatedAt = quick ? 0 : Date.now()
+        this.counts = ImportStateManager.getInitEsts()
         await this.clearItems()
 
+        // Quick mode limits just to a small section of recent history
+        const itemLimits = quick
+            ? ImportStateManager.QUICK_MODE_ITEM_LIMITS
+            : {}
+
         // Create new ImportItemCreator to create import items from which we derive counts
-        const creator = new ItemCreator()
+        const creator = new ItemCreator(itemLimits)
         await creator.dataSourcesReady
 
         await this._calcCompletedCounts(creator)
@@ -380,13 +389,14 @@ export class ImportStateManager {
      * Attempts to fetch the estimate counts from local state or does a complete state recalculation
      * if it deems current state to be out-of-date.
      *
+     * @param {boolean} [quick=false] Determines if quick mode is set (only limited recent history).
      * @return {EstimateCounts}
      */
-    async fetchEsts() {
+    async fetchEsts(quick = false) {
         // If saved calcs are old, or forced to, recalc
         if (this._shouldRecalcEsts) {
             // Perform calcs to update state
-            await this._calcCounts()
+            await this._calcCounts(quick)
             await this._persistEsts()
         }
 

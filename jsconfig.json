@@ -5,7 +5,7 @@
         "allowSyntheticDefaultImports": true,
         "target": "esnext",
         "baseUrl": "./",
-        "checkJs": true,
+        "checkJs": false,
         "lib": ["esnext", "dom"]
     },
     "include": ["src/**/*"],

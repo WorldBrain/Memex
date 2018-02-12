@@ -78,3 +78,15 @@ export async function whenTabActive({ tabId }) {
         reject: tabChangedEvents(tabId),
     })
 }
+
+// Resolve if or when the tab title updates.
+// Rejects if it is closed before that.
+export const whenTabTitleUpdates = ({ tabId }) =>
+    eventToPromise({
+        resolve: {
+            event: browser.tabs.onUpdated,
+            filter: (updatedTabId, changeInfo) =>
+                updatedTabId === tabId && changeInfo.title != null,
+        },
+        reject: tabChangedEvents(tabId),
+    })
