@@ -9,6 +9,7 @@ import {
     actions as onboardingActs,
     constants as onboardingConsts,
 } from './onboarding'
+import { selectors as filters, actions as filterActs } from './filters'
 import { SHOULD_TRACK_STORAGE_KEY } from 'src/options/privacy/constants'
 
 const parseBool = str => str === 'true'
@@ -34,19 +35,19 @@ const locationSync = ReduxQuerySync.enhancer({
             defaultValue: undefined,
         },
         showOnlyBookmarks: {
-            selector: selectors.showOnlyBookmarks,
-            action: showOnlyBookmarks =>
-                actions.toggleBookmarkFilter(parseBool(showOnlyBookmarks)),
+            selector: filters.onlyBookmarks,
+            action: onlyBookmarks =>
+                filterActs.toggleBookmarkFilter(parseBool(onlyBookmarks)),
             defaultValue: false,
         },
         tags: {
-            selector: selectors.filterTagsStringify,
-            action: tags => actions.setTagFilters(tags),
+            selector: filters.tagsStringify,
+            action: tags => filterActs.setTagFilters(tags),
             defaultValue: '',
         },
         domains: {
-            selector: selectors.filterDomainsStringify,
-            action: domains => actions.setDomainFilters(domains),
+            selector: filters.domainsStringify,
+            action: domains => filterActs.setDomainFilters(domains),
             defaultValue: '',
         },
         install: {

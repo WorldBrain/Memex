@@ -3,6 +3,7 @@ import { createAction } from 'redux-act'
 import { generatePageDocId } from 'src/page-storage'
 import analytics, { updateLastActive } from 'src/analytics'
 import { remoteFunction } from 'src/util/webextensionRPC'
+import { actions as filterActs, selectors as filters } from './filters'
 import * as constants from './constants'
 import * as selectors from './selectors'
 
@@ -24,11 +25,6 @@ export const showDeleteConfirm = createAction(
 )
 export const hideDeleteConfirm = createAction('overview/hideDeleteConfirm')
 export const resetDeleteConfirm = createAction('overview/resetDeleteConfirm')
-export const showFilter = createAction('overview/showFilter')
-export const toggleBookmarkFilter = createAction(
-    'overview/toggleBookmarkFilter',
-)
-export const resetFilters = createAction('overview/resetFilters')
 export const changeHasBookmark = createAction('overview/changeHasBookmark')
 export const incSearchCount = createAction('overview/incSearchCount')
 export const initSearchCount = createAction('overview/initSearchCount')
@@ -44,17 +40,6 @@ export const delTag = createAction('overview/localDelTag', (tag, index) => ({
     tag,
     index,
 }))
-
-export const setFilterPopup = createAction('overview/setFilterPopup')
-export const resetFilterPopup = createAction('overview/resetFilterPopup')
-export const addTagFilter = createAction('overview/addTagFilter')
-export const delTagFilter = createAction('overview/delTagFilter')
-export const toggleTagFilter = createAction('overview/toggleTagFilter')
-export const addDomainFilter = createAction('overview/addDomainFilter')
-export const delDomainFilter = createAction('overview/delDomainFilter')
-export const toggleDomainFilter = createAction('overview/toggleDomainFilter')
-export const setTagFilters = createAction('overview/setTagFilters')
-export const setDomainFilters = createAction('overview/setDomainFilters')
 
 const deleteDocsByUrl = remoteFunction('deleteDocsByUrl')
 const createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
@@ -148,9 +133,9 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
     const searchParams = {
         ...currentQueryParams,
         getTotalCount: true,
-        showOnlyBookmarks: selectors.showOnlyBookmarks(state),
-        tags: selectors.filterTags(state),
-        domains: selectors.filterDomains(state),
+        showOnlyBookmarks: filters.onlyBookmarks(state),
+        tags: filters.tags(state),
+        domains: filters.domains(state),
         limit: constants.PAGE_SIZE,
         skip: selectors.resultsSkip(state),
     }
@@ -180,7 +165,7 @@ function trackSearch(searchResult, overwrite, state) {
     } else {
         action = 'Unsuccessful search'
     }
-    if (selectors.showOnlyBookmarks(state)) {
+    if (filters.onlyBookmarks(state)) {
         action += ' (BM only)'
     }
 
@@ -309,13 +294,13 @@ export const setQueryTagsDomains = (input, isEnter) => (dispatch, getState) => {
             // If '#tag' pattern in input, remove it and add to filter state
             if (constants.HASH_TAG_PATTERN.test(term)) {
                 removeFromInputVal(term)
-                dispatch(toggleTagFilter(stripTagPattern(term)))
+                dispatch(filterActs.toggleTagFilter(stripTagPattern(term)))
             }
 
             // If 'domain.tld.cctld?' pattern in input, remove it and add to filter state
             if (constants.DOMAIN_TLD_PATTERN.test(term)) {
                 removeFromInputVal(term)
-                dispatch(toggleDomainFilter(term))
+                dispatch(filterActs.toggleDomainFilter(term))
             }
         })
     }

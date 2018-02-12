@@ -25,12 +25,7 @@ const defaultState = {
         // Used to keep track of any particular result (use index)
         deleting: undefined,
     },
-    showFilter: false,
-    showOnlyBookmarks: false,
     activeTagIndex: -1,
-    filterPopup: '',
-    filterTags: [],
-    filterDomains: [],
 }
 
 function setQuery(state, query) {
@@ -51,26 +46,6 @@ function setEndDate(state, date) {
     return {
         ...state,
         currentQueryParams: { ...state.currentQueryParams, endDate: date },
-    }
-}
-
-function toggleBookmarkFilter(state, showOnlyBookmarks) {
-    return {
-        ...state,
-        showOnlyBookmarks:
-            showOnlyBookmarks === true
-                ? showOnlyBookmarks
-                : !state.showOnlyBookmarks,
-        showFilter: true,
-    }
-}
-
-function resetFilters(state) {
-    return {
-        ...state,
-        showOnlyBookmarks: defaultState.showOnlyBookmarks,
-        filterTags: defaultState.filterTags,
-        filterDomains: defaultState.filterDomains,
     }
 }
 
@@ -128,70 +103,6 @@ const delTag = (state, { tag, index }) => {
     }
 }
 
-const addFilter = filterKey => (state, value) => ({
-    ...state,
-    [filterKey]: [...state[filterKey], value],
-    showFilter: true,
-})
-
-const delFilter = filterKey => (state, value) => {
-    const removalIndex = state[filterKey].indexOf(value)
-
-    if (removalIndex === -1) {
-        return state
-    }
-
-    return {
-        ...state,
-        [filterKey]: [
-            ...state[filterKey].slice(0, removalIndex),
-            ...state[filterKey].slice(removalIndex + 1),
-        ],
-        showFilter: true,
-    }
-}
-
-const toggleFilter = filterKey => (state, value) => {
-    const removalIndex = state[filterKey].indexOf(value)
-
-    if (removalIndex === -1) {
-        return addFilter(filterKey)(state, value)
-    }
-
-    return {
-        ...state,
-        [filterKey]: [
-            ...state[filterKey].slice(0, removalIndex),
-            ...state[filterKey].slice(removalIndex + 1),
-        ],
-        showFilter: true,
-    }
-}
-
-const setTagFilters = (state, tags) => {
-    if (typeof tags === 'string') {
-        tags = tags.split(',')
-    }
-
-    return {
-        ...state,
-        filterTags: tags,
-        showFilter: true,
-    }
-}
-
-const setDomainFilters = (state, domains) => {
-    if (typeof domains === 'string') {
-        domains = domains.split(',')
-    }
-
-    return {
-        ...state,
-        filterDomains: domains,
-        showFilter: true,
-    }
-}
-
 const showDeleteConfirm = (state, { url, index }) => ({
     ...state,
     deleteConfirmProps: {
@@ -240,30 +151,6 @@ const changeHasBookmark = (state, index) => {
     return { ...state, searchResult }
 }
 
-const setFilterPopup = (state, name) => {
-    let filterPopup = state.filterPopup
-
-    /*
-        filterPopup{'tag'|'domain'|''} and name{'tag|domain'} is when click on any tag/domain
-        when length is zero,it means set on the same as click
-        if name is same as filterPopup, it means click on the same so just unset it
-        otherwise the different one. e.g. id tag is there then just set the domain and vice versa
-    */
-    if (!filterPopup.length) {
-        filterPopup = name
-    } else if (filterPopup === name) {
-        filterPopup = ''
-    } else {
-        if (filterPopup === 'domain') {
-            filterPopup = 'tag'
-        } else {
-            filterPopup = 'domain'
-        }
-    }
-
-    return { ...state, filterPopup }
-}
-
 const incSearchCount = state => ({
     ...state,
     searchCount: state.searchCount + 1,
@@ -281,8 +168,6 @@ export default createReducer(
         [actions.setStartDate]: setStartDate,
         [actions.setEndDate]: setEndDate,
         [actions.hideResultItem]: hideResultItem,
-        [actions.toggleBookmarkFilter]: toggleBookmarkFilter,
-        [actions.resetFilters]: resetFilters,
         [actions.incSearchCount]: incSearchCount,
         [actions.initSearchCount]: initSearchCount,
         [actions.changeHasBookmark]: changeHasBookmark,
@@ -299,10 +184,6 @@ export default createReducer(
                 deleting: index,
             },
         }),
-        [actions.showFilter]: state => ({
-            ...state,
-            showFilter: !state.showFilter,
-        }),
         [actions.nextPage]: state => ({
             ...state,
             currentPage: state.currentPage + 1,
@@ -318,19 +199,6 @@ export default createReducer(
         [actions.setActiveTagIndex]: payloadReducer('activeTagIndex'),
         [actions.addTag]: addTag,
         [actions.delTag]: delTag,
-        [actions.setFilterPopup]: setFilterPopup,
-        [actions.resetFilterPopup]: state => ({
-            ...state,
-            filterPopup: defaultState.filterPopup,
-        }),
-        [actions.addTagFilter]: addFilter('filterTags'),
-        [actions.delTagFilter]: delFilter('filterTags'),
-        [actions.toggleTagFilter]: toggleFilter('filterTags'),
-        [actions.addDomainFilter]: addFilter('filterDomains'),
-        [actions.delDomainFilter]: delFilter('filterDomains'),
-        [actions.toggleDomainFilter]: toggleFilter('filterDomains'),
-        [actions.setTagFilters]: setTagFilters,
-        [actions.setDomainFilters]: setDomainFilters,
     },
     defaultState,
 )

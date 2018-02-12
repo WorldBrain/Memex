@@ -28,11 +28,6 @@
     font-size: 18px;
     color: #3eb995;
     margin-bottom: 10px;
-    cursor: pointer;
-
-    &:hover .filterTagIcon {
-        opacity: 1;
-    }
 }
 
 .filterTagIcon {
@@ -46,6 +41,11 @@
     background-position-x: 42px;
     background-position-y: 18px;
     opacity: 0.3;
+    cursor: pointer;
+
+    &:hover {
+        opacity: 1;
+    }
 }
 
 .filterDomainIcon {
@@ -59,24 +59,23 @@
     background-position-x: 78px;
     background-position-y: 18px;
     opacity: 0.3;
+    cursor: pointer;
+
+    &:hover {
+        opacity: 1;
+    }
 }
 
 .filterDomainText {
     font-size: 18px;
     color: #3eb995;
     margin-bottom: 10px;
-    cursor: pointer;
-
-    &:hover .filterDomainIcon {
-        opacity: 1;
-    }
 }
 
 .filterMiscText {
     font-size: 18px;
     color: #3eb995;
     margin-bottom: 10px;
-    cursor: pointer;
 }
 
 .tags,

@@ -5,11 +5,15 @@ import noop from 'lodash/fp/noop'
 
 import { updateLastActive } from 'src/analytics'
 import { remoteFunction } from 'src/util/webextensionRPC'
-import { Tags, NewTagRow, TagRow } from '../components'
+import {
+    IndexDropdown,
+    IndexDropdownNewRow,
+    IndexDropdownRow,
+} from '../components'
 
-class TagsContainer extends Component {
+class IndexDropdownContainer extends Component {
     static propTypes = {
-        // The URL to use for dis/associating new tags with
+        // The URL to use for dis/associating new tags with; set this to keep in sync with index
         url: PropTypes.string,
 
         // Opt. cb to run when new tag added to state
@@ -21,10 +25,7 @@ class TagsContainer extends Component {
         // Tag Filters that are previously present in the location
         initFilters: PropTypes.arrayOf(PropTypes.string),
 
-        // TODO: Remove these flags; can be simplified for use-cases
-        tag: PropTypes.bool,
-        overview: PropTypes.bool,
-        popup: PropTypes.bool, // Fetch to set to auto fetch the tags for given `url` prop
+        source: PropTypes.oneOf(['tag', 'domain']).isRequired,
     }
 
     static defaultProps = {
@@ -39,7 +40,6 @@ class TagsContainer extends Component {
         this.suggest = remoteFunction('suggest')
         this.addTags = remoteFunction('addTags')
         this.delTags = remoteFunction('delTags')
-        this.fetchTags = remoteFunction('fetchTags')
 
         this.fetchTagSuggestions = debounce(300)(this.fetchTagSuggestions)
 
@@ -52,35 +52,23 @@ class TagsContainer extends Component {
         }
     }
 
-    componentDidMount() {
-        if (this.props.popup) {
-            this.fetchInitTags()
-        }
+    /**
+     * Domain inputs need to allow '.' while tags shouldn't.
+     */
+    get inputBlockPattern() {
+        return this.props.source === 'domain' ? /[^\w\s-.]/gi : /[^\w\s-]/gi
+    }
+
+    /**
+     * Decides whether or not to allow index update. Currently determined by `props.url` setting.
+     */
+    get allowIndexUpdate() {
+        return this.props.url != null
     }
 
     isPageTag = value => this.state.filters.includes(value)
 
     setInputRef = el => (this.inputEl = el)
-
-    isFromOverview = () => this.props.tag === undefined
-
-    async fetchInitTags() {
-        this.setState(state => ({ ...state, isLoading: true }))
-
-        let filters = []
-        try {
-            filters = await this.fetchTags({ url: this.props.url })
-        } catch (err) {
-        } finally {
-            this.setState(state => ({
-                ...state,
-                isLoading: false,
-                filters,
-                displayFilters: filters,
-                focused: filters.length > 0 ? 0 : -1,
-            }))
-        }
-    }
 
     /**
      * Selector for derived display tags state
@@ -102,6 +90,10 @@ class TagsContainer extends Component {
             .toLowerCase()
 
     canCreateTag() {
+        if (!this.allowIndexUpdate) {
+            return false
+        }
+
         const searchVal = this.getSearchVal()
 
         return (
@@ -121,7 +113,9 @@ class TagsContainer extends Component {
         let newTags = this.state.filters
 
         try {
-            await this.addTags({ url: this.props.url }, [newTag])
+            if (this.allowIndexUpdate) {
+                await this.addTags({ url: this.props.url }, [newTag])
+            }
             newTags = [newTag, ...this.state.filters]
         } catch (err) {
         } finally {
@@ -150,13 +144,13 @@ class TagsContainer extends Component {
         // Either add or remove it to the main `state.tags` array
         try {
             if (tagIndex === -1) {
-                if (this.props.overview || this.props.popup) {
+                if (this.allowIndexUpdate) {
                     await this.addTags({ url: this.props.url }, [tag])
                 }
                 this.props.onFilterAdd(tag)
                 tagsReducer = tags => [tag, ...tags]
             } else {
-                if (this.props.overview || this.props.popup) {
+                if (this.allowIndexUpdate) {
                     await this.delTags({ url: this.props.url }, [tag])
                 }
                 this.props.onFilterDel(tag)
@@ -181,13 +175,12 @@ class TagsContainer extends Component {
 
         if (
             this.canCreateTag() &&
-            this.state.focused === this.state.displayFilters.length &&
-            (this.props.overview || this.props.popup)
+            this.state.focused === this.state.displayFilters.length
         ) {
             return this.addTag()
         }
 
-        if (this.state.displayFilters.length !== 0) {
+        if (this.state.displayFilters.length) {
             return this.handleTagSelection(this.state.focused)(event)
         }
 
@@ -200,7 +193,7 @@ class TagsContainer extends Component {
         // One extra index if the "add new tag" thing is showing
         let offset = this.canCreateTag() ? 0 : 1
 
-        if (!(this.props.overview || this.props.popup)) offset = 1
+        if (!this.allowIndexUpdate) offset = 1
 
         // Calculate the next focused index depending on current focus and direction
         let focusedReducer
@@ -236,10 +229,7 @@ class TagsContainer extends Component {
         const searchVal = event.target.value
 
         // Block input of non-words, spaces and hypens for tags
-        if (
-            /[^\w\s-]/gi.test(searchVal) &&
-            (this.props.overview || this.props.tag)
-        ) {
+        if (this.inputBlockPattern.test(searchVal)) {
             return
         }
 
@@ -263,10 +253,7 @@ class TagsContainer extends Component {
         let suggestions = this.state.filters
 
         try {
-            suggestions = await this.suggest(
-                searchVal,
-                this.props.overview || this.props.tag ? 'tag' : 'domain',
-            )
+            suggestions = await this.suggest(searchVal, this.props.source)
         } catch (err) {
         } finally {
             this.setState(state => ({
@@ -281,12 +268,16 @@ class TagsContainer extends Component {
         const tags = this.getDisplayTags()
 
         const tagOptions = tags.map((tag, i) => (
-            <TagRow {...tag} key={i} onClick={this.handleTagSelection(i)} />
+            <IndexDropdownRow
+                {...tag}
+                key={i}
+                onClick={this.handleTagSelection(i)}
+            />
         ))
 
-        if (this.canCreateTag() && (this.props.overview || this.props.popup)) {
+        if (this.canCreateTag()) {
             tagOptions.push(
-                <NewTagRow
+                <IndexDropdownNewRow
                     key="+"
                     value={this.state.searchVal}
                     onClick={this.addTag}
@@ -302,7 +293,7 @@ class TagsContainer extends Component {
 
     render() {
         return (
-            <Tags
+            <IndexDropdown
                 onTagSearchChange={this.handleSearchChange}
                 onTagSearchKeyDown={this.handleSearchKeyDown}
                 setInputRef={this.setInputRef}
@@ -311,9 +302,9 @@ class TagsContainer extends Component {
                 {...this.props}
             >
                 {this.renderTags()}
-            </Tags>
+            </IndexDropdown>
         )
     }
 }
 
-export default TagsContainer
+export default IndexDropdownContainer

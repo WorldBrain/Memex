@@ -1,5 +1,6 @@
 import { createSelector } from 'reselect'
 
+import * as filterSelectors from './filters/selectors'
 import * as constants from './constants'
 
 /**
@@ -152,18 +153,11 @@ export const isNewSearchLoading = createSelector(
     (isLoading, currentPage) => isLoading && currentPage === 0,
 )
 
-export const showFilter = state => overview(state).showFilter
-export const showOnlyBookmarks = state => overview(state).showOnlyBookmarks
-
-export const filterPopup = state => overview(state).filterPopup
-export const filterTags = state => overview(state).filterTags
-export const filterDomains = state => overview(state).filterDomains
-
 export const isEmptyQuery = createSelector(
     currentQueryParams,
-    showOnlyBookmarks,
-    filterTags,
-    filterDomains,
+    filterSelectors.onlyBookmarks,
+    filterSelectors.tags,
+    filterSelectors.domains,
     (
         { query, startDate, endDate },
         showOnlyBookmarks,
@@ -176,37 +170,4 @@ export const isEmptyQuery = createSelector(
         !showOnlyBookmarks &&
         !filterTags.length &&
         !filterDomains.length,
-)
-
-/**
- * Selector to toggle clear filter button
- * As new filters are added, corersponding changes need to made to this function
- */
-export const isClearFilterButtonShown = createSelector(
-    showOnlyBookmarks,
-    filterTags,
-    filterDomains,
-    (showOnlyBookmarks, filterTags, filterDomains) =>
-        showOnlyBookmarks ||
-        Boolean(filterTags.length) ||
-        Boolean(filterDomains.length),
-)
-
-export const filterTagsStringify = createSelector(filterTags, filterTags =>
-    filterTags.join(','),
-)
-
-export const filterDomainsStringify = createSelector(
-    filterDomains,
-    filterDomains => filterDomains.join(','),
-)
-
-export const shouldDisplayDomainFilterPopup = createSelector(
-    filterPopup,
-    filterPopup => filterPopup === 'domain',
-)
-
-export const shouldDisplayTagFilterPopup = createSelector(
-    filterPopup,
-    filterPopup => filterPopup === 'tag',
 )

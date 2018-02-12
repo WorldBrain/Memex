@@ -3,11 +3,10 @@ import PropTypes from 'prop-types'
 import qs from 'query-string'
 
 import analytics, { updateLastActive } from 'src/analytics'
-import { initSingleLookup } from 'src/search/search-index/util'
 import extractQueryFilters from 'src/util/nlp-time-filter'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { isLoggable, getPauseState } from 'src/activity-logger'
-import { TagsContainer as Tags } from 'src/common-ui/containers'
+import { IndexDropdown } from 'src/common-ui/containers'
 import Popup from './components/Popup'
 import Button from './components/Button'
 import BlacklistConfirm from './components/BlacklistConfirm'
@@ -20,29 +19,6 @@ import UpgradeButton from './components/UpgradeButton'
 import ButtonIcon from './components/ButtonIcon'
 import styles from './components/Button.css'
 
-// Transforms URL checking results to state types
-const getBlacklistButtonState = ({ loggable, blacklisted }) => {
-    if (blacklisted) {
-        return constants.BLACKLIST_BTN_STATE.BLACKLISTED
-    }
-
-    return loggable
-        ? constants.BLACKLIST_BTN_STATE.UNLISTED
-        : constants.BLACKLIST_BTN_STATE.DISABLED
-}
-
-const getBookmarkButtonState = ({ loggable, bookmark, blacklist }) => {
-    if (!loggable || blacklist === constants.BLACKLIST_BTN_STATE.DISABLED) {
-        return constants.BOOKMARK_BTN_STATE.DISABLED
-    }
-
-    if (bookmark) {
-        return constants.BOOKMARK_BTN_STATE.BOOKMARK
-    }
-
-    return constants.BOOKMARK_BTN_STATE.UNBOOKMARK
-}
-
 class PopupContainer extends Component {
     static propTypes = {
         pauseValues: PropTypes.arrayOf(PropTypes.number).isRequired,
@@ -52,9 +28,16 @@ class PopupContainer extends Component {
         pauseValues: [5, 10, 20, 30, 60, 120, 180, Infinity],
     }
 
+    // We only need these atts from the page we're requesting
+    static pageProjection = {
+        bookmarks: true,
+        tags: true,
+    }
+
     constructor(props) {
         super(props)
 
+        this.pageLookup = remoteFunction('pageLookup')
         this.fetchBlacklist = remoteFunction('fetchBlacklist')
         this.addToBlacklist = remoteFunction('addToBlacklist')
         this.isURLBlacklisted = remoteFunction('isURLBlacklisted')
@@ -71,18 +54,23 @@ class PopupContainer extends Component {
 
     state = {
         url: '',
+        tabID: null,
         searchValue: '',
         pauseValue: 20,
-        currentTabPageDocId: '',
-        blacklistBtn: constants.BLACKLIST_BTN_STATE.DISABLED,
-        isPaused: false,
+
+        // Used to derive button disabled states among other states
+        isLoggable: false,
+        isBlacklisted: false,
+        page: null, // Contains the reverse index doc, if available
+
+        // View switching flags
         blacklistChoice: false,
         blacklistConfirm: false,
-        bookmarkBtn: constants.BOOKMARK_BTN_STATE.DISABLED,
-        domainDelete: false,
-        tabID: null,
         tagMode: false,
-        isTagBtnDisabled: true,
+
+        // Behaviour switching flags
+        domainDelete: false,
+        isPaused: false,
     }
 
     async componentDidMount() {
@@ -100,51 +88,83 @@ class PopupContainer extends Component {
             this.setState(oldState => ({ ...oldState, ...newState }))
         const noop = f => f // Don't do anything if error; state doesn't change
 
-        updateState({ url: currentTab.url, tabID: currentTab.id })
+        updateState({
+            url: currentTab.url,
+            tabID: currentTab.id,
+            isLoggable: isLoggable({ url: currentTab.url }),
+        })
+
+        this.getInitPageData()
+            .then(updateState)
+            .catch(noop)
         this.getInitPauseState()
             .then(updateState)
             .catch(noop)
-        this.getInitBlacklistBtnState(currentTab.url)
-            .then(updateState)
-            .then(() => this.getDBDepBtnsState(currentTab.url))
+        this.getInitBlacklistBtnState()
             .then(updateState)
             .catch(noop)
     }
 
-    getInitPauseState = async () => ({ isPaused: await getPauseState() })
+    async getInitPageData() {
+        const id = generatePageDocId({ url: this.state.url })
+        const page = await this.pageLookup(id, PopupContainer.pageProjection)
 
-    async getInitBlacklistBtnState(url) {
+        return { page }
+    }
+
+    async getInitPauseState() {
+        const isPaused = await getPauseState()
+
+        return { isPaused }
+    }
+
+    async getInitBlacklistBtnState() {
         const blacklist = await this.fetchBlacklist()
 
         return {
-            blacklistBtn: getBlacklistButtonState({
-                loggable: isLoggable({ url }),
-                blacklisted: await this.isURLBlacklisted(url, blacklist),
-            }),
+            isBlacklisted: await this.isURLBlacklisted(
+                this.state.url,
+                blacklist,
+            ),
         }
     }
 
-    /**
-     * Handles getting the init state of buttons depending on DB state (page existence), among other
-     * async sources.
-     *
-     * @param {string} url
-     * @return {Promise<any>} Resolves to object describing the changes to state.
-     */
-    async getDBDepBtnsState(url) {
-        const pageId = await generatePageDocId({ url })
-        const lookup = initSingleLookup()
-        const dbResult = await lookup(pageId)
-        const result = {
-            loggable: isLoggable({ url }),
-            bookmark: dbResult == null ? false : dbResult.bookmarks.size !== 0,
-            blacklist: this.state.blacklistBtn,
+    get blacklistBtnState() {
+        if (this.state.isBlacklisted) {
+            return constants.BLACKLIST_BTN_STATE.BLACKLISTED
         }
 
-        return {
-            bookmarkBtn: getBookmarkButtonState(result),
-            isTagBtnDisabled: !result.loggable || dbResult == null,
+        return this.state.isLoggable
+            ? constants.BLACKLIST_BTN_STATE.UNLISTED
+            : constants.BLACKLIST_BTN_STATE.DISABLED
+    }
+
+    get isTagBtnDisabled() {
+        return !this.state.isLoggable || this.state.page == null
+    }
+
+    get bookmarkBtnState() {
+        // Cannot bookmark
+        if (!this.state.isLoggable || this.state.isBlacklisted) {
+            return constants.BOOKMARK_BTN_STATE.DISABLED
         }
+
+        // Already a bookmark
+        if (this.state.page != null && this.state.page.bookmarks.length) {
+            return constants.BOOKMARK_BTN_STATE.BOOKMARK
+        }
+
+        // Not yet bookmarked
+        return constants.BOOKMARK_BTN_STATE.UNBOOKMARK
+    }
+
+    get pageTags() {
+        // No assoc. page indexed, or tagless page
+        if (this.state.page == null || this.state.page.tags == null) {
+            return []
+        }
+
+        return this.state.page.tags
     }
 
     onBlacklistBtnClick(domainDelete = false) {
@@ -165,7 +185,7 @@ class PopupContainer extends Component {
                 ...state,
                 blacklistChoice: false,
                 blacklistConfirm: true,
-                blacklistBtn: constants.BLACKLIST_BTN_STATE.BLACKLISTED,
+                isBlacklisted: true,
                 url,
                 domainDelete,
             }))
@@ -243,11 +263,9 @@ class PopupContainer extends Component {
         this.setState(state => ({ ...state, blacklistChoice: true }))
 
     renderBlacklistButton() {
-        const { blacklistChoice, blacklistBtn } = this.state
-
-        if (!blacklistChoice) {
+        if (!this.state.blacklistChoice) {
             // Standard blacklist button
-            return blacklistBtn ===
+            return this.blacklistBtnState ===
                 constants.BLACKLIST_BTN_STATE.BLACKLISTED ? (
                 <LinkButton
                     href={`${constants.OPTIONS_URL}#/blacklist`}
@@ -260,7 +278,8 @@ class PopupContainer extends Component {
                 <Button
                     onClick={this.setBlacklistChoice}
                     disabled={
-                        blacklistBtn === constants.BLACKLIST_BTN_STATE.DISABLED
+                        this.blacklistBtnState ===
+                        constants.BLACKLIST_BTN_STATE.DISABLED
                     }
                     btnClass={styles.blacklist}
                 >
@@ -289,12 +308,10 @@ class PopupContainer extends Component {
     }
 
     handleAddBookmark = () => {
-        if (
-            this.state.bookmarkBtn === constants.BOOKMARK_BTN_STATE.UNBOOKMARK
-        ) {
+        if (this.bookmarkBtnState === constants.BOOKMARK_BTN_STATE.UNBOOKMARK) {
             this.createBookmarkByUrl(this.state.url, this.state.tabID)
         } else if (
-            this.state.bookmarkBtn === constants.BOOKMARK_BTN_STATE.BOOKMARK
+            this.bookmarkBtnState === constants.BOOKMARK_BTN_STATE.BOOKMARK
         ) {
             this.removeBookmarkByUrl(this.state.url)
         }
@@ -313,7 +330,7 @@ class PopupContainer extends Component {
         return (
             <Button
                 onClick={this.toggleTagPopup}
-                disabled={this.state.isTagBtnDisabled}
+                disabled={this.isTagBtnDisabled}
                 btnClass={styles.tag}
             >
                 Add Tag(s)
@@ -333,7 +350,13 @@ class PopupContainer extends Component {
         }
 
         if (tagMode) {
-            return <Tags url={this.state.url} popup tag />
+            return (
+                <IndexDropdown
+                    url={this.state.url}
+                    initFilters={this.pageTags}
+                    source="tag"
+                />
+            )
         }
 
         return (
@@ -341,17 +364,17 @@ class PopupContainer extends Component {
                 <Button
                     onClick={this.handleAddBookmark}
                     btnClass={
-                        this.state.bookmarkBtn ===
+                        this.bookmarkBtnState ===
                         constants.BOOKMARK_BTN_STATE.BOOKMARK
                             ? styles.bmk
                             : styles.notBmk
                     }
                     disabled={
-                        this.state.bookmarkBtn ===
+                        this.bookmarkBtnState ===
                         constants.BOOKMARK_BTN_STATE.DISABLED
                     }
                 >
-                    {this.state.bookmarkBtn ===
+                    {this.bookmarkBtnState ===
                     constants.BOOKMARK_BTN_STATE.BOOKMARK
                         ? 'Unbookmark this Page'
                         : 'Bookmark this Page'}
