@@ -1,0 +1,257 @@
+.filtersMain {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    height: 80px;
+    position: fixed;
+    top: 70px;
+    left: 0;
+    right: 0;
+    z-index: 2;
+    background-color: white;
+    min-width: 800px;
+    flex-flow: column;
+    box-shadow: 0 2px 4px rgba(220, 220, 220, 0.7);
+    padding-left: 6px;
+}
+
+.filters {
+    padding: 0;
+    max-width: 780px;
+    min-width: 780px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.filterTagText {
+    font-size: 18px;
+    color: #3eb995;
+    margin-bottom: 10px;
+}
+
+.filterTagIcon {
+    position: absolute;
+    top: 0;
+    width: 65px;
+    height: 45px;
+    background-image: url('/img/plus.svg');
+    background-repeat: no-repeat;
+    background-size: 18px;
+    background-position-x: 42px;
+    background-position-y: 18px;
+    opacity: 0.3;
+    cursor: pointer;
+
+    &:hover {
+        opacity: 1;
+    }
+}
+
+.filterDomainIcon {
+    position: absolute;
+    top: 0;
+    width: 100px;
+    height: 45px;
+    background-image: url('/img/plus.svg');
+    background-repeat: no-repeat;
+    background-size: 18px;
+    background-position-x: 78px;
+    background-position-y: 18px;
+    opacity: 0.3;
+    cursor: pointer;
+
+    &:hover {
+        opacity: 1;
+    }
+}
+
+.filterDomainText {
+    font-size: 18px;
+    color: #3eb995;
+    margin-bottom: 10px;
+}
+
+.filterMiscText {
+    font-size: 18px;
+    color: #3eb995;
+    margin-bottom: 10px;
+}
+
+.tags,
+.misc {
+    display: flex;
+    flex-flow: column;
+}
+
+.domains {
+    display: flex;
+    flex-flow: column;
+
+    &:hover .filterDomainIcon {
+        opacity: 1;
+    }
+}
+
+.tagDomainFilter {
+    padding: 0;
+    max-width: 780px;
+    min-width: 780px;
+    height: 17px;
+    display: flex;
+}
+
+.tagsFilter {
+    margin-right: 10px;
+    width: 300px;
+    max-width: 300px;
+    height: 17px;
+}
+
+.tagsFilterInput {
+    flex: 1;
+    font-size: 15px;
+    color: #3eb995;
+    border: 2px solid #3eb995;
+    font-family: 'Open Sans';
+    font-weight: lighter;
+    margin-top: 10px;
+    width: 350px;
+
+    &::placeholder {
+        color: #3eb995;
+        padding-left: 10px;
+    }
+
+    &:focus {
+        outline: none;
+    }
+}
+
+input[type='checkbox'] {
+    position: absolute;
+    opacity: 0;
+
+    & + label {
+        position: relative;
+        cursor: pointer;
+        padding: 0;
+        color: #3eb995;
+    }
+
+    & + label::before {
+        content: '';
+        margin-right: 10px;
+        margin-top: 3px;
+        display: inline-block;
+        vertical-align: text-top;
+        width: 12px;
+        height: 12px;
+        outline: 2px solid #3eb995;
+        box-shadow: 0 0 0 2pt #3eb995;
+        border-radius: 1px;
+    }
+
+    &:focus + label::before {
+        box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.12);
+    }
+
+    &:checked + label::before {
+        background: #3eb995;
+    }
+
+    &:checked + label::after {
+        content: '';
+        position: absolute;
+        left: 1px;
+        top: 8px;
+        background: white;
+        width: 2px;
+        height: 2px;
+        box-shadow: 2px 0 0 white, 4px 0 0 white, 4px -2px 0 white,
+            4px -4px 0 white, 4px -6px 0 white, 4px -8px 0 white;
+        transform: rotate(45deg);
+    }
+
+    &:disabled + label {
+        color: #3eb995;
+        cursor: auto;
+    }
+
+    &:disabled + label::before {
+        box-shadow: none;
+        box-shadow: 0 0 0 2pt #3eb995;
+        border-radius: 1px;
+    }
+}
+
+.clearDiv {
+    position: absolute;
+    left: 75%;
+    top: 5%;
+}
+
+.clear {
+    cursor: pointer;
+    background: transparent;
+    border: 0;
+    color: #3eb995;
+    outline: none;
+}
+
+.tagsPopup,
+.domainsPopup {
+    position: absolute;
+    top: 76px;
+    border-top: 5px solid white;
+}
+
+.tagname {
+    color: #3eb995;
+    padding: 1px 5px 1px 5px;
+    cursor: pointer;
+}
+
+.notExpanded {
+    display: inline-block;
+    max-width: 75px;
+    color: white;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.closeIcon {
+    margin-right: 5px;
+    cursor: pointer;
+
+    & i {
+        font-size: 15px;
+        vertical-align: middle;
+        margin-right: -3px;
+        margin-top: -12px;
+    }
+}
+
+.pillContainer {
+    display: inline-block;
+    background-color: #3eb995;
+    color: white;
+    margin-left: 5px;
+    padding: 1px 0;
+    border-radius: 5px;
+}
+
+.bookmarks {
+    height: 19px;
+    padding-top: 2px;
+    padding-left: 7px;
+}
+
+.expandButton {
+    color: #3eb995;
+    padding: 1px 5px 1px 5px;
+    cursor: pointer;
+    position: absolute;
+    margin-top: 1px;
+}

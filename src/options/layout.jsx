@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
+import cx from 'classnames'
 
 import Navigation from './components/navigation'
 import routes from './routes'
@@ -10,21 +11,14 @@ class Layout extends Component {
     isActive = route => this.props.location.pathname === route.pathname
 
     render() {
-        const { children, location } = this.props
-        const currentRoute = routes.find(this.isActive)
-        const hideSidebar = currentRoute.hideSidebar
-
         return (
-            <div
-                className={`${styles.root} ${hideSidebar
-                    ? ''
-                    : styles.sidebar}`}
-            >
+            <div className={cx(styles.root, styles.sidebar)}>
                 <Head />
-                {!hideSidebar && (
-                    <Navigation currentLocation={location} routes={routes} />
-                )}
-                <div className={styles.route}>{children}</div>
+                <Navigation
+                    currentLocation={this.props.location}
+                    routes={routes}
+                />
+                <div className={styles.route}>{this.props.children}</div>
             </div>
         )
     }

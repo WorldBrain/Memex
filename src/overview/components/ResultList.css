@@ -12,3 +12,8 @@
     margin-bottom: 5px;
     color: #9b9ba2;
 }
+
+.noScroll {
+    overflow: hidden;
+    max-height: 80%;
+}

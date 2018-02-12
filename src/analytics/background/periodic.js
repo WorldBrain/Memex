@@ -51,11 +51,11 @@ const attemptPeriodicPing = (
     const {
         [activityKey]: lastActivityPing,
         [installKey]: lastInstallPing,
-        [STORAGE_KEYS.SEARCH]: lastSearch,
+        [STORAGE_KEYS.LAST_ACTIVE]: lastActive,
     } = await browser.storage.local.get({
         [activityKey]: 0,
         [installKey]: 0,
-        [STORAGE_KEYS.SEARCH]: 0,
+        [STORAGE_KEYS.LAST_ACTIVE]: 0,
     })
 
     // Milestone is either first day of month/week or just midnight for day
@@ -66,7 +66,7 @@ const attemptPeriodicPing = (
     // If last ping was before the last milestone, try to track event for this period
     if (moment(lastActivityPing).isBefore(lastMilestone)) {
         // Only send the event if last search done within current period (active user)
-        if (moment(lastSearch).isAfter(lastMilestone)) {
+        if (moment(lastActive).isAfter(lastMilestone)) {
             analytics.trackEvent({
                 category: 'Periodic',
                 action: `${action} activity ping`,

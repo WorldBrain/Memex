@@ -101,8 +101,7 @@ export async function createBookmarkByUrl(url, tabId = null) {
     } catch (err) {
         if (err.status === 404) {
             pageExist = 0
-            const storePageResult = await storePage({ tabId, url })
-            pageDoc = (await storePageResult.finalPagePromise).page
+            pageDoc = await storePage({ tabId, url })
         }
     }
 

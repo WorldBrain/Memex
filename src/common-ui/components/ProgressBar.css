@@ -1,0 +1,27 @@
+.container {
+    display: flex;
+    align-items: center;
+    margin: 1em 0;
+}
+
+.percent {
+    width: 5%;
+    font-size: 15px;
+    color: #3eb995;
+    text-align: center;
+    padding-left: 4px;
+}
+
+.bar {
+    width: 95%;
+    background-color: #ededed;
+    overflow: hidden;
+    border-radius: 20px;
+    border: 5px solid transparent;
+}
+
+.color {
+    background-color: #3eb995;
+    background-size: 40px 40px;
+    height: 25px;
+}

@@ -1,10 +1,8 @@
-import noop from 'lodash/fp/noop'
-
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import { whenPageDOMLoaded, whenTabActive } from 'src/util/tab-events'
 import { updateTimestampMetaConcurrent } from 'src/search'
 import { blacklist } from 'src/blacklist/background'
-import { logPageVisit } from './log-page-visit'
+import { logPageVisit, logInitPageVisit } from './log-page-visit'
 import initPauser from './pause-logging'
 import tabManager from './tab-manager'
 import { isLoggable, getPauseState, visitKeyPrefix } from '..'
@@ -39,9 +37,13 @@ async function shouldLogTab(tab) {
 /**
  * Handles update of assoc. visit with derived tab state data, using the tab state.
  *
- * @param {TabActiveState} tab The tab state to derive visit meta data from.
+ * @param {Tab} tab The tab state to derive visit meta data from.
  */
-async function updateVisitForTab({ visitTime, activeTime, scrollState }) {
+async function updateVisitInteractionData({
+    visitTime,
+    activeTime,
+    scrollState,
+}) {
     const visitKey = visitKeyPrefix + visitTime
 
     try {
@@ -69,40 +71,64 @@ browser.runtime.onMessage.addListener(
 )
 
 // Bind tab state updates to tab API events
-browser.tabs.onCreated.addListener(tab => tabManager.trackTab(tab))
+browser.tabs.onCreated.addListener(tabManager.trackTab)
 
 browser.tabs.onActivated.addListener(({ tabId }) =>
     tabManager.activateTab(tabId),
 )
 
+// Runs stage 3 of the visit indexing
 browser.tabs.onRemoved.addListener(tabId => {
     try {
         // Remove tab from tab tracking state and update the visit with tab-derived metadata
         const tab = tabManager.removeTab(tabId)
-        updateVisitForTab(tab)
+        updateVisitInteractionData(tab)
     } catch (error) {}
 })
 
-browser.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
-    // `changeInfo` should only contain `url` prop if URL changed, which is what we care about
-    if (changeInfo.url) {
-        // Ensures the URL change counts as a new visit in tab state (tab ID doesn't change)
-        const oldTab = tabManager.resetTab(tabId, tab.active)
-        if (oldTab.activeTime > fauxVisitThreshold) {
-            // Send off request for updating that prev. visit's tab state, if active long enough
-            updateVisitForTab(oldTab)
+/**
+ * The `webNavigation.onCommitted` event gives us some useful data related to how the navigation event
+ * occured (client/server redirect, user typed in address bar, link click, etc.). Might as well keep the last
+ * navigation event for each tab in state for later decision making.
+ */
+browser.webNavigation.onCommitted.addListener(
+    ({ tabId, frameId, ...navData }) => {
+        // Frame ID is always `0` for the main webpage frame, which is what we care about
+        if (frameId === 0) {
+            tabManager.updateNavState(tabId, {
+                type: navData.transitionType,
+                qualifiers: navData.transitionQualifiers,
+            })
         }
+    },
+)
 
-        const shouldLog = await shouldLogTab(tab)
-        if (shouldLog) {
+browser.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
+    // `changeInfo` should only contain `url` prop if URL changed - what we care about for scheduling logging
+    if (changeInfo.url) {
+        try {
+            // Ensures the URL change counts as a new visit in tab state (tab ID doesn't change)
+            const oldTab = tabManager.resetTab(tabId, tab.active)
+            if (oldTab.activeTime > fauxVisitThreshold) {
+                // Send off request for updating that prev. visit's tab state, if active long enough
+                updateVisitInteractionData(oldTab)
+            }
+        } catch (err) {}
+
+        if (await shouldLogTab(tab)) {
+            // Run stage 1 of visit indexing
+            whenPageDOMLoaded({ tabId })
+                .then(() => logInitPageVisit(tabId))
+                .catch(console.error)
+
+            // Schedule stage 2 of visit indexing (don't wait for stage 1)
             tabManager.scheduleTabLog(
                 tabId,
                 () =>
                     // Wait until its DOM has loaded, and activated before attemping log
-                    whenPageDOMLoaded({ tabId })
-                        .then(() => whenTabActive({ tabId }))
-                        .then(() => logPageVisit({ url: tab.url, tabId }))
-                        .catch(noop), // Ignore any tab state interuptions
+                    whenTabActive({ tabId })
+                        .then(() => logPageVisit(tabId))
+                        .catch(console.error), // Ignore any tab state interuptions
             )
         }
     }

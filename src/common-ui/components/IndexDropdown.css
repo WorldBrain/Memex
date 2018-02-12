@@ -20,6 +20,7 @@
 .menuItem i {
     font-size: 12px;
     float: right;
+    margin-top: 3px;
 }
 
 .tagContainer {
@@ -35,14 +36,16 @@
 .numberTags {
     align-items: flex-start;
     margin-top: 6px;
+    color: #777;
 }
 
 .summaryTagContainer {
     width: 100%;
     display: flex;
-    margin-top: 10px;
+    padding-top: 10px;
     justify-content: space-around;
     padding-bottom: 10px;
+    background: white;
 }
 
 .searchContainer {
@@ -96,4 +99,11 @@
     @media (max-width: 835px) {
         right: 10px;
     }
+}
+
+.tagDivForFilter {
+    width: 300px;
+    z-index: 1;
+    background-color: #fff;
+    box-shadow: 0px 4px 7px 0px #3eb995;
 }

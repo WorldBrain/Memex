@@ -5,8 +5,9 @@ import { bindActionCreators } from 'redux'
 import Waypoint from 'react-waypoint'
 import reduce from 'lodash/fp/reduce'
 
+import analytics from 'src/analytics'
 import { Wrapper, LoadingIndicator } from 'src/common-ui/components'
-import { TagsContainer } from 'src/common-ui/containers'
+import { IndexDropdown } from 'src/common-ui/containers'
 import * as actions from './actions'
 import * as selectors from './selectors'
 import * as constants from './constants'
@@ -15,11 +16,14 @@ import Overview from './components/Overview'
 import PageResultItem from './components/PageResultItem'
 import ResultsMessage from './components/ResultsMessage'
 import TagPill from './components/TagPill'
+import Onboarding, { selectors as onboarding } from './onboarding'
+import Filters, { selectors as filters, actions as filterActs } from './filters'
 
 class OverviewContainer extends Component {
     static propTypes = {
         grabFocusOnMount: PropTypes.bool.isRequired,
         handleInputChange: PropTypes.func.isRequired,
+        handleInputClick: PropTypes.func.isRequired,
         onBottomReached: PropTypes.func.isRequired,
         isLoading: PropTypes.bool.isRequired,
         isNewSearchLoading: PropTypes.bool.isRequired,
@@ -37,9 +41,13 @@ class OverviewContainer extends Component {
         handlePillClick: PropTypes.func.isRequired,
         addTag: PropTypes.func.isRequired,
         delTag: PropTypes.func.isRequired,
+        resetFilterPopup: PropTypes.func.isRequired,
+        showOnboarding: PropTypes.bool.isRequired,
     }
 
     componentDidMount() {
+        analytics.trackPage({ title: document.title })
+
         document.addEventListener('click', this.handleOutsideClick, false)
         if (this.props.grabFocusOnMount) {
             this.inputQueryEl.focus()
@@ -50,22 +58,30 @@ class OverviewContainer extends Component {
         document.removeEventListener('click', this.handleOutsideClick, false)
     }
 
-    furtherTagRefs = []
+    dropdownRefs = []
     tagBtnRefs = []
 
     setInputRef = el => (this.inputQueryEl = el)
     setTagDivRef = el => (this.tagDiv = el)
     setTagButtonRef = el => this.tagBtnRefs.push(el)
-    addFurtherTagRef = el => this.furtherTagRefs.push(el)
+    trackDropwdownRef = el => this.dropdownRefs.push(el)
 
-    renderTags = ({ shouldDisplayTagPopup, url }, index) =>
+    handleSearchEnter = event => {
+        if (event.key === 'Enter') {
+            this.props.handleInputClick(event)
+        }
+    }
+
+    renderTagsManager = ({ shouldDisplayTagPopup, url, tags }, index) =>
         shouldDisplayTagPopup ? (
-            <TagsContainer
-                overview
+            <IndexDropdown
                 url={url}
-                onTagAdd={this.props.addTag(index)}
-                onTagDel={this.props.delTag(index)}
+                onFilterAdd={this.props.addTag(index)}
+                onFilterDel={this.props.delTag(index)}
                 setTagDivRef={this.setTagDivRef}
+                initFilters={tags}
+                source="tag"
+                hover
             />
         ) : null
 
@@ -84,7 +100,7 @@ class OverviewContainer extends Component {
                 ...pills,
                 <TagPill
                     key="+"
-                    setRef={this.addFurtherTagRef}
+                    setRef={this.trackDropwdownRef}
                     value={`+${tags.length - constants.SHOWN_TAGS_LIMIT}`}
                     onClick={this.props.handleTagBtnClick(resultIndex)}
                     noBg
@@ -94,14 +110,17 @@ class OverviewContainer extends Component {
 
         return pills
     }
-
     renderResultItems() {
+        if (this.props.isNewSearchLoading) {
+            return <LoadingIndicator />
+        }
+
         const resultItems = this.props.searchResults.map((doc, i) => (
             <PageResultItem
                 key={i}
                 onTrashBtnClick={this.props.handleTrashBtnClick(doc, i)}
                 onToggleBookmarkClick={this.props.handleToggleBm(doc, i)}
-                tagManager={this.renderTags(doc, i)}
+                tagManager={this.renderTagsManager(doc, i)}
                 setTagButtonRef={this.setTagButtonRef}
                 onTagBtnClick={this.props.handleTagBtnClick(i)}
                 tagPills={this.renderTagPills(doc, i)}
@@ -174,14 +193,6 @@ class OverviewContainer extends Component {
             )
         }
 
-        if (this.props.isNewSearchLoading) {
-            return (
-                <ResultList>
-                    <LoadingIndicator />
-                </ResultList>
-            )
-        }
-
         // No issues; render out results list view
         return (
             <Wrapper>
@@ -193,7 +204,9 @@ class OverviewContainer extends Component {
                         results in your digital memory
                     </ResultsMessage>
                 )}
-                <ResultList>{this.renderResultItems()}</ResultList>
+                <ResultList scrollDisabled={this.props.showOnboarding}>
+                    {this.renderResultItems()}
+                </ResultList>
             </Wrapper>
         )
     }
@@ -211,21 +224,30 @@ class OverviewContainer extends Component {
         if (
             !clickedTagDiv &&
             !wereAnyClicked(this.tagBtnRefs) &&
-            !wereAnyClicked(this.furtherTagRefs)
+            !wereAnyClicked(this.dropdownRefs)
         ) {
             this.props.resetActiveTagIndex()
+            this.props.resetFilterPopup()
         }
     }
 
+    renderFilters = () => <Filters setDropdownRef={this.trackDropwdownRef} />
+
     render() {
         return (
-            <Overview
-                {...this.props}
-                setInputRef={this.setInputRef}
-                onInputChange={this.props.handleInputChange}
-            >
-                {this.renderResults()}
-            </Overview>
+            <Wrapper>
+                <Overview
+                    {...this.props}
+                    setInputRef={this.setInputRef}
+                    onInputChange={this.props.handleInputChange}
+                    filters={this.renderFilters()}
+                    onQuerySearchKeyDown={this.handleSearchEnter}
+                    isSearchDisabled={this.props.showOnboarding}
+                >
+                    {this.renderResults()}
+                </Overview>
+                <Onboarding />
+            </Wrapper>
         )
     }
 }
@@ -239,12 +261,11 @@ const mapStateToProps = state => ({
     searchResults: selectors.results(state),
     isDeleteConfShown: selectors.isDeleteConfShown(state),
     needsWaypoint: selectors.needsPagWaypoint(state),
-    showFilter: selectors.showFilter(state),
-    showOnlyBookmarks: selectors.showOnlyBookmarks(state),
+    showFilters: filters.showFilters(state),
     showInitSearchMsg: selectors.showInitSearchMsg(state),
     totalResultCount: selectors.totalResultCount(state),
     shouldShowCount: selectors.shouldShowCount(state),
-    isClearFilterButtonShown: selectors.isClearFilterButtonShown(state),
+    showOnboarding: onboarding.isVisible(state),
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -255,16 +276,19 @@ const mapDispatchToProps = dispatch => ({
             onBottomReached: actions.getMoreResults,
             resetDeleteConfirm: actions.resetDeleteConfirm,
             deleteDocs: actions.deleteDocs,
-            onShowFilterChange: actions.showFilter,
-            onShowOnlyBookmarksChange: actions.toggleBookmarkFilter,
             resetActiveTagIndex: actions.resetActiveTagIndex,
-            clearAllFilters: actions.resetFilters,
+            onShowFilterChange: filterActs.showFilter,
+            resetFilterPopup: filterActs.resetFilterPopup,
         },
         dispatch,
     ),
     handleInputChange: event => {
         const input = event.target
-        dispatch(actions.setQuery(input.value))
+        dispatch(actions.setQueryTagsDomains(input.value, false))
+    },
+    handleInputClick: event => {
+        const input = event.target
+        dispatch(actions.setQueryTagsDomains(input.value, true))
     },
     handleTrashBtnClick: ({ url }, index) => event => {
         event.preventDefault()

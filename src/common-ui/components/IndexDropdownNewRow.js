@@ -1,12 +1,12 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import TagRow from './TagRow'
+import IndexDropdownRow from './IndexDropdownRow'
 import Wrapper from './Wrapper'
-import localStyles from './Tags.css'
+import localStyles from './IndexDropdown.css'
 
-const NewTagRow = ({ value, ...props }) => (
-    <TagRow
+const IndexDropdownNewRow = ({ value, ...props }) => (
+    <IndexDropdownRow
         {...props}
         value={
             <Wrapper>
@@ -16,8 +16,8 @@ const NewTagRow = ({ value, ...props }) => (
     />
 )
 
-NewTagRow.propTypes = {
+IndexDropdownNewRow.propTypes = {
     value: PropTypes.string.isRequired,
 }
 
-export default NewTagRow
+export default IndexDropdownNewRow

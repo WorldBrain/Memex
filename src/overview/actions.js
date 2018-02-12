@@ -1,8 +1,9 @@
 import { createAction } from 'redux-act'
 
 import { generatePageDocId } from 'src/page-storage'
-import analytics from 'src/analytics'
+import analytics, { updateLastActive } from 'src/analytics'
 import { remoteFunction } from 'src/util/webextensionRPC'
+import { actions as filterActs, selectors as filters } from './filters'
 import * as constants from './constants'
 import * as selectors from './selectors'
 
@@ -24,11 +25,6 @@ export const showDeleteConfirm = createAction(
 )
 export const hideDeleteConfirm = createAction('overview/hideDeleteConfirm')
 export const resetDeleteConfirm = createAction('overview/resetDeleteConfirm')
-export const showFilter = createAction('overview/showFilter')
-export const toggleBookmarkFilter = createAction(
-    'overview/toggleBookmarkFilter',
-)
-export const resetFilters = createAction('overview/resetFilters')
 export const changeHasBookmark = createAction('overview/changeHasBookmark')
 export const incSearchCount = createAction('overview/incSearchCount')
 export const initSearchCount = createAction('overview/initSearchCount')
@@ -115,6 +111,14 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
     dispatch,
     getState,
 ) => {
+    // Grab needed derived state for search
+    const state = getState()
+    const currentQueryParams = selectors.currentQueryParams(state)
+
+    if (currentQueryParams.query.includes('#')) {
+        return
+    }
+
     dispatch(setLoading(true))
 
     // Overwrite of results should always reset the current page before searching
@@ -122,29 +126,29 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
         dispatch(resetPage())
     }
 
-    // Grab needed derived state for search
-    const state = getState()
-    const currentQueryParams = selectors.currentQueryParams(state)
-
     if (/thank you/i.test(currentQueryParams.query)) {
         return dispatch(easter())
     }
 
-    const skip = selectors.resultsSkip(state)
-    const showOnlyBookmarks = selectors.showOnlyBookmarks(state)
-    const tags = selectors.tags(state)
-
     const searchParams = {
         ...currentQueryParams,
         getTotalCount: true,
-        showOnlyBookmarks,
-        tags,
+        showOnlyBookmarks: filters.onlyBookmarks(state),
+        tags: filters.tags(state),
+        domains: filters.domains(state),
         limit: constants.PAGE_SIZE,
-        skip,
+        skip: selectors.resultsSkip(state),
+    }
+
+    // When we are loading the page and the in the query we can take many values so we are
+    // not inserting in the epic so the port should be there
+    if (!port) {
+        dispatch(init())
     }
 
     // Tell background script to search
     port.postMessage({ cmd: constants.CMDS.SEARCH, searchParams, overwrite })
+    updateLastActive() // Consider user active (analytics)
 }
 
 // Analytics use
@@ -161,7 +165,7 @@ function trackSearch(searchResult, overwrite, state) {
     } else {
         action = 'Unsuccessful search'
     }
-    if (selectors.showOnlyBookmarks(state)) {
+    if (filters.onlyBookmarks(state)) {
         action += ' (BM only)'
     }
 
@@ -219,6 +223,7 @@ export const deleteDocs = () => async (dispatch, getState) => {
     } catch (error) {
     } finally {
         dispatch(setResultDeleting(undefined))
+        updateLastActive() // Consider user active (analytics)
     }
 }
 
@@ -243,6 +248,8 @@ export const toggleBookmark = (url, index) => async (dispatch, getState) => {
         }
     } catch (error) {
         dispatch(changeHasBookmark(index)) // Reset UI state in case of error
+    } finally {
+        updateLastActive() // Consider user active (analytics)
     }
 }
 
@@ -257,12 +264,46 @@ export const showTags = index => (dispatch, getState) => {
 }
 
 export const filterTag = tag => (dispatch, getState) => {
-    const query = selectors.query(getState())
+    const state = getState()
+    const query = selectors.query(state)
+
     const transformedTag = `#${tag.split(' ').join('+')} `
 
-    const newQuery = query.includes(transformedTag)
+    const newQuery = query.includes(transformedTag.slice(0, -1))
         ? query.replace(transformedTag, '') // Either remove it, if already there
         : transformedTag + query // or prepend it, if not there
 
-    dispatch(setQuery(newQuery))
+    dispatch(setQueryTagsDomains(newQuery))
+}
+
+const stripTagPattern = tag =>
+    tag
+        .slice(1)
+        .split('+')
+        .join(' ')
+
+export const setQueryTagsDomains = (input, isEnter) => (dispatch, getState) => {
+    const removeFromInputVal = term =>
+        (input = input.replace(isEnter ? term : `${term} `, ''))
+
+    if (input[input.length - 1] === ' ' || isEnter) {
+        // Split input into terms and try to extract any tag/domain patterns to add to filters
+        const terms = input.toLowerCase().match(/\S+/g) || []
+
+        terms.forEach(term => {
+            // If '#tag' pattern in input, remove it and add to filter state
+            if (constants.HASH_TAG_PATTERN.test(term)) {
+                removeFromInputVal(term)
+                dispatch(filterActs.toggleTagFilter(stripTagPattern(term)))
+            }
+
+            // If 'domain.tld.cctld?' pattern in input, remove it and add to filter state
+            if (constants.DOMAIN_TLD_PATTERN.test(term)) {
+                removeFromInputVal(term)
+                dispatch(filterActs.toggleDomainFilter(term))
+            }
+        })
+    }
+
+    dispatch(setQuery(input))
 }

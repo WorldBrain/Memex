@@ -1,5 +1,6 @@
 import { createSelector } from 'reselect'
 
+import * as filterSelectors from './filters/selectors'
 import * as constants from './constants'
 
 /**
@@ -114,7 +115,9 @@ export const results = createSelector(
 export const showInitSearchMsg = createSelector(
     searchCount,
     resultDocs,
-    (searchCount, results) => !results.length && !searchCount,
+    isLoading,
+    (searchCount, results, isLoading) =>
+        !results.length && !searchCount && !isLoading,
 )
 
 export const isBadTerm = createSelector(
@@ -150,28 +153,21 @@ export const isNewSearchLoading = createSelector(
     (isLoading, currentPage) => isLoading && currentPage === 0,
 )
 
-export const showFilter = state => overview(state).showFilter
-export const showOnlyBookmarks = state => overview(state).showOnlyBookmarks
-
-export const tags = createSelector(overview, state => state.tags)
-
-/**
- * Selector to toggle clear filter button
- * As new filters are added, corersponding changes need to made to this function
- */
-export const isClearFilterButtonShown = createSelector(
-    showOnlyBookmarks,
-    showOnlyBookmarks => !!showOnlyBookmarks,
-)
-
 export const isEmptyQuery = createSelector(
     currentQueryParams,
-    showOnlyBookmarks,
-    tags,
-    ({ query, startDate, endDate }, showOnlyBookmarks, tags) =>
+    filterSelectors.onlyBookmarks,
+    filterSelectors.tags,
+    filterSelectors.domains,
+    (
+        { query, startDate, endDate },
+        showOnlyBookmarks,
+        filterTags,
+        filterDomains,
+    ) =>
         !query.length &&
         !startDate &&
         !endDate &&
         !showOnlyBookmarks &&
-        !tags.length,
+        !filterTags.length &&
+        !filterDomains.length,
 )

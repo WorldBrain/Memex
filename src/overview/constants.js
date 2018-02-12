@@ -23,3 +23,10 @@ export const EGG_TITLE = 'Cheers to the awesome crew that made Memex possible'
 export const EGG_URL = '/options/options.html#/acknowledgements'
 export const EGG_IMG = '/../../../../img/thanks.gif'
 export const SHOWN_TAGS_LIMIT = 3
+export const SHOWN_FILTER_LIMIT = 3
+
+/* Pattern to match entire string to `domain.tld`-like format + optional subdomain prefix and ccTLD postfix */
+export const DOMAIN_TLD_PATTERN = /^(\w+\.)?[\w-]{2,}\.\w{2,3}(\.\w{2})?$/
+
+/* Pattern to match hashtags - spaces can be represented via '+' */
+export const HASH_TAG_PATTERN = /^#\w[\w+]*$/

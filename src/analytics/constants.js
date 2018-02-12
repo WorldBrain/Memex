@@ -10,8 +10,8 @@ export const STORAGE_KEYS = {
     WEEKLY_ACTIVITY: 'last-weekly-activity-ping-timestamp',
     DAILY_ACTIVITY: 'last-daily-activity-ping-timestamp',
 
-    // Used for timestamp of last search (user needs 1 search in last week to be active)
-    SEARCH: 'last-search-timestamp',
+    // Used for timestamp of last "activity-indicating" action (user needs 1 in last week to be active)
+    LAST_ACTIVE: 'last-search-timestamp',
 }
 
 // Timezone to base milestones on

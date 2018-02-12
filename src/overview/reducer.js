@@ -25,10 +25,7 @@ const defaultState = {
         // Used to keep track of any particular result (use index)
         deleting: undefined,
     },
-    showFilter: false,
-    showOnlyBookmarks: false,
     activeTagIndex: -1,
-    tags: [],
 }
 
 function setQuery(state, query) {
@@ -49,23 +46,6 @@ function setEndDate(state, date) {
     return {
         ...state,
         currentQueryParams: { ...state.currentQueryParams, endDate: date },
-    }
-}
-
-function toggleBookmarkFilter(state, showOnlyBookmarks) {
-    return {
-        ...state,
-        showOnlyBookmarks:
-            showOnlyBookmarks === true
-                ? showOnlyBookmarks
-                : !state.showOnlyBookmarks,
-    }
-}
-
-function resetFilters(state) {
-    return {
-        ...state,
-        showOnlyBookmarks: defaultState.showOnlyBookmarks,
     }
 }
 
@@ -188,8 +168,6 @@ export default createReducer(
         [actions.setStartDate]: setStartDate,
         [actions.setEndDate]: setEndDate,
         [actions.hideResultItem]: hideResultItem,
-        [actions.toggleBookmarkFilter]: toggleBookmarkFilter,
-        [actions.resetFilters]: resetFilters,
         [actions.incSearchCount]: incSearchCount,
         [actions.initSearchCount]: initSearchCount,
         [actions.changeHasBookmark]: changeHasBookmark,
@@ -206,10 +184,6 @@ export default createReducer(
                 deleting: index,
             },
         }),
-        [actions.showFilter]: state => ({
-            ...state,
-            showFilter: !state.showFilter,
-        }),
         [actions.nextPage]: state => ({
             ...state,
             currentPage: state.currentPage + 1,
@@ -222,7 +196,6 @@ export default createReducer(
             ...state,
             activeTagIndex: defaultState.activeTagIndex,
         }),
-        [actions.tags]: payloadReducer('tags'),
         [actions.setActiveTagIndex]: payloadReducer('activeTagIndex'),
         [actions.addTag]: addTag,
         [actions.delTag]: delTag,

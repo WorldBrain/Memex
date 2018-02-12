@@ -2,6 +2,8 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { Link } from 'react-router'
 import classNames from 'classnames'
+
+import { OutLink } from 'src/common-ui/containers'
 import styles from './styles.css'
 
 const NavLink = ({ route, state, children }) => {
@@ -30,13 +32,9 @@ const NavLink = ({ route, state, children }) => {
             <div className={navClasses}>
                 <i className={navIcon}>{route.icon}</i>
                 {route.component === 'faq' && (
-                    <a
-                        className={navClasses}
-                        href={route.pathname}
-                        target="_blank"
-                    >
+                    <OutLink className={navClasses} href={route.pathname}>
                         {route.name}
-                    </a>
+                    </OutLink>
                 )}
                 {route.component !== 'faq' && (
                     <Link className={navClasses} to={route.pathname}>
