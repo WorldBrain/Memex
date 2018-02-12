@@ -1,0 +1,83 @@
+.shareIcons {
+    display: inline-block;
+    position: absolute;
+    width: 167px;
+    z-index: 2;
+    background-color: #fff;
+    padding: 5px;
+    box-shadow: 0px 3px 3px 0px #3eb995;
+}
+
+.outer {
+    position: absolute;
+    margin-left: 632px;
+    background-color: transparent;
+
+    @media (max-width: 835px) {
+        right: 177px;
+    }
+}
+
+.tip {
+    position: absolute;
+    top: -5px;
+    left: 107px;
+    display: block;
+    z-index: 1;
+    width: 10px;
+    height: 10px;
+    background: #fff;
+    transform: rotate(45deg);
+    box-shadow: -0.5px -0.5px 1px #3eb995;
+}
+
+.copy {
+    display: inline-block;
+    position: absolute;
+    width: 167px;
+    z-index: 1;
+    height: 34px;
+    font-size: 13px;
+    color: #3eb995;
+    background-color: #fff;
+    text-align: center;
+    padding: 5px;
+    padding-top: 8px;
+    padding-bottom: 7px;
+    box-shadow: 0px 3px 3px 0px #3eb995;
+}
+
+.shareImg {
+    margin-left: 8px;
+    width: 20px;
+    height: 20px;
+}
+
+.reddit {
+    margin-left: 4px;
+}
+
+.mail {
+    margin-left: 5px;
+}
+
+.bgimg {
+    margin-top: 2px;
+    margin-bottom: 2px;
+    margin-left: 8px;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+a {
+    text-decoration: none;
+    color: #3eb995;
+    margin: 0;
+}
+
+.hide {
+    position: absolute;
+    visibility: hidden;
+    opacity: 0;
+}

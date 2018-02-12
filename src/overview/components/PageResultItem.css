@@ -40,6 +40,10 @@
         opacity: 0.5;
     }
 
+    &:hover .share {
+        opacity: 0.6;
+    }
+
     &:hover .tag {
         opacity: 0.5;
     }
@@ -192,6 +196,17 @@
     opacity: 0.3;
     width: 20px;
     margin-top: 3px;
+}
+
+.share {
+    background-image: url('/img/share.svg');
+    opacity: 0.3;
+    width: 20px;
+    margin-top: 3px;
+
+    &:hover:enabled {
+        opacity: 0.5;
+    }
 }
 
 .bookmark {
