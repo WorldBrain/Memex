@@ -19,7 +19,6 @@ import ResultsMessage from './components/ResultsMessage'
 import TagPill from './components/TagPill'
 import Onboarding, { selectors as onboarding } from './onboarding'
 import Filters, { selectors as filters, actions as filterActs } from './filters'
-import tooltips from './components/tooltips'
 
 class OverviewContainer extends Component {
     static propTypes = {
@@ -173,36 +172,42 @@ class OverviewContainer extends Component {
         </ResultsMessage>
     )
 
+    renderBadTermNoResult = isBadTerm => (
+        <div>
+            <div className={localStyles.title}>No Results </div>
+            <div className={localStyles.subtitle}>
+                {isBadTerm
+                    ? ' Search terms are too common, or have been filtered out to increase performance.'
+                    : 'found for this query. ¯\\_(ツ)_/¯'}
+                <br />
+                <br />
+            </div>
+            <div className={localStyles.subsubtitle}>
+                We know there is still a lot of{' '}
+                <a target="_new" href="https://worldbrain.io/help">
+                    room to improve
+                </a>.
+            </div>
+            <div className={localStyles.btnBox}>
+                <a target="_new" href="https://worldbrain.helprace.com/">
+                    <button className={localStyles.button}>
+                        Report a Problem
+                    </button>
+                </a>
+                <a target="_new" href="https://eepurl.com/dkmJfr">
+                    <button className={localStyles.button}>
+                        Get Monthly Updates
+                    </button>
+                </a>
+            </div>
+        </div>
+    )
+
     renderResults() {
         if (this.props.isBadTerm) {
             return (
                 <ResultsMessage>
-                    <p className={localStyles.title}>No Results</p>
-                    <p className={localStyles.subtitle}>
-                        Search terms are too common, or have been filtered out
-                        to increase performance.
-                    </p>
-                    <p className={localStyles.subsubtitle}>
-                        We know there is still a lot of{' '}
-                        <a target="_new" href="https://worldbrain.io/help">
-                            room to improve
-                        </a>.
-                    </p>
-                    <div className={localStyles.btnBox}>
-                        <a
-                            target="_new"
-                            href="https://worldbrain.helprace.com/"
-                        >
-                            <button className={localStyles.button}>
-                                Report a Problem
-                            </button>
-                        </a>
-                        <a target="_new" href="https://eepurl.com/dkmJfr">
-                            <button className={localStyles.button}>
-                                Get Monthly Updates
-                            </button>
-                        </a>
-                    </div>
+                    {this.renderBadTermNoResult(true)}
                 </ResultsMessage>
             )
         }
@@ -214,35 +219,7 @@ class OverviewContainer extends Component {
         if (this.props.noResults) {
             return (
                 <ResultsMessage>
-                    <p className={localStyles.title}>No Results </p>
-                    <p className={localStyles.subtitle}>
-                        found for this query. ¯\_(ツ)_/¯<br />
-                        <br />
-                    </p>
-                    <p className={localStyles.subsubtitle}>
-                        We know there is still a lot of{' '}
-                        <a
-                            target="_new"
-                            href="https://worldbrain.helprace.com/i23-known-limitations-of-searching"
-                        >
-                            room to improve the search.
-                        </a>.
-                    </p>
-                    <div className={localStyles.btnBox}>
-                        <a
-                            target="_new"
-                            href="https://worldbrain.helprace.com/"
-                        >
-                            <button className={localStyles.button}>
-                                Report a Problem
-                            </button>
-                        </a>
-                        <a target="_new" href="https://eepurl.com/dkmJfr">
-                            <button className={localStyles.button}>
-                                Get Monthly Updates
-                            </button>
-                        </a>
-                    </div>
+                    {this.renderBadTermNoResult(false)}
                 </ResultsMessage>
             )
         }
@@ -335,8 +312,8 @@ const mapDispatchToProps = dispatch => ({
             resetActiveTagIndex: actions.resetActiveTagIndex,
             onShowFilterChange: filterActs.showFilter,
             resetFilterPopup: filterActs.resetFilterPopup,
-            toggleShowTooltip: actions.showTooltip,
-            onClickRefreshTooltip: actions.tooltipIndex,
+            toggleShowTooltip: actions.toggleTooltip,
+            onClickRefreshTooltip: actions.incTooltipIndex,
         },
         dispatch,
     ),

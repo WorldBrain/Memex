@@ -62,7 +62,7 @@ const hydrateStateFromStorage = store => {
     const hydrate = (key, action) =>
         browser.storage.local.get(key).then(data => {
             if (key === constants.SHOW_TOOL_TIP) {
-                store.dispatch(action({ isShowTooltip: data[key] }))
+                store.dispatch(action(data[key]))
             } else {
                 if (!data[key]) return
                 store.dispatch(action(data[key]))
@@ -77,7 +77,7 @@ const hydrateStateFromStorage = store => {
     )
     hydrate(onboardingConsts.STORAGE_KEYS.progress, onboardingActs.setProgress)
     hydrate(SHOULD_TRACK_STORAGE_KEY, onboardingActs.setShouldTrack)
-    hydrate(constants.SHOW_TOOL_TIP, actions.showTooltip)
+    hydrate(constants.SHOW_TOOL_TIP, actions.setShowTooltip)
 }
 
 const syncStateToStorage = store =>

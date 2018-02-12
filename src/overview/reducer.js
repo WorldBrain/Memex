@@ -29,7 +29,6 @@ const defaultState = {
     activeTagIndex: -1,
     showTooltip: false,
     tooltipIndex: 0,
-    toolTips: [],
 }
 
 function setQuery(state, query) {
@@ -155,29 +154,13 @@ const changeHasBookmark = (state, index) => {
     return { ...state, searchResult }
 }
 
-const setShowTooltip = (state, { isShowTooltip }) => {
+const setShowTooltip = (state, isShowTooltip) => {
     return {
         ...state,
-        showTooltip: isShowTooltip || !state.showTooltip,
-    }
-}
-
-const setTooltipIndex = state => {
-    let toolTips = state.toolTips
-    let index = Math.floor(Math.random() * tooltipsSize)
-
-    while (toolTips.indexOf(index) !== -1) {
-        index = Math.floor(Math.random() * tooltipsSize)
-    }
-
-    if (toolTips.length === tooltipsSize) {
-        toolTips = []
-    }
-
-    return {
-        ...state,
-        tooltipIndex: index,
-        toolTips: toolTips,
+        showTooltip:
+            isShowTooltip === undefined
+                ? isShowTooltip || !state.showTooltip
+                : isShowTooltip,
     }
 }
 
@@ -229,13 +212,17 @@ export default createReducer(
         [actions.setActiveTagIndex]: payloadReducer('activeTagIndex'),
         [actions.addTag]: addTag,
         [actions.delTag]: delTag,
-        [actions.showTooltip]: state => ({
+        [actions.setShowTooltip]: setShowTooltip,
+        [actions.toggleTooltip]: state => ({
             ...state,
             showTooltip: !state.showTooltip,
         }),
-        [actions.tooltipIndex]: state => ({
+        [actions.incTooltipIndex]: state => ({
             ...state,
-            tooltipIndex: Math.floor(Math.random() * tooltipsSize),
+            tooltipIndex:
+                state.tooltipIndex === tooltipsSize - 1
+                    ? 0
+                    : state.tooltipIndex + 1,
         }),
     },
     defaultState,

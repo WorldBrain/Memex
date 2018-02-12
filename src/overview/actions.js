@@ -41,8 +41,9 @@ export const delTag = createAction('overview/localDelTag', (tag, index) => ({
     index,
 }))
 
-export const showTooltip = createAction('overview/showTooltip')
-export const tooltipIndex = createAction('overview/tooltipIndex')
+export const setShowTooltip = createAction('overview/setShowTooltip')
+export const toggleTooltip = createAction('overview/toggleTooltip')
+export const incTooltipIndex = createAction('overview/incTooltipIndex')
 
 const deleteDocsByUrl = remoteFunction('deleteDocsByUrl')
 const createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
@@ -122,7 +123,7 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
 
     dispatch(setLoading(true))
 
-    dispatch(tooltipIndex())
+    dispatch(incTooltipIndex())
 
     // Overwrite of results should always reset the current page before searching
     if (overwrite) {

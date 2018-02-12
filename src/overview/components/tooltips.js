@@ -69,3 +69,5 @@ const tooltips = [
 
 export default tooltips
 export const tooltipsSize = tooltips.length
+
+export const tooltip = index => tooltips[index]
