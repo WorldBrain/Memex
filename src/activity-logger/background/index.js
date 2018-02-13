@@ -23,7 +23,7 @@ makeRemotelyCallable({ toggleLoggingPause })
  */
 async function shouldLogTab(tab) {
     // Short-circuit before async logic, if possible
-    if (!tab.url || !isLoggable(tab)) {
+    if (tab.incognito || !tab.url || !isLoggable(tab)) {
         return false
     }
 
