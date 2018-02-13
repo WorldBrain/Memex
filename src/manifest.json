@@ -15,6 +15,7 @@
             "run_at": "document_start"
         }
     ],
+    "incognito": "spanning",
     "browser_action": {
         "default_title": "WorldBrain's Memex",
         "default_popup": "./popup/popup.html"
