@@ -9,7 +9,7 @@ const apostrophePattern = /['’]/g
 const allWordsWithDigits = /[a-z]+\d\w*|\w*\d[a-z]+/gi // /\w*\d\w*/g
 const dashPattern = /[-]/g
 const giberishWords = /\S*([b-df-hj-np-tv-z]){5,}\S*/gi
-const longWords = /\b\w{20,}\b/gi
+const longWords = /\b\w{30,}\b/gi
 const randomDigits = /\b(\d{1,3}|\d{5,})\b/gi
 const urlPattern = urlRegex()
 
