@@ -3,15 +3,15 @@
 A browser extension that lets you create, search and eventually share your personal web of knowledge
 
  - **Full-Text-Search** all websites you visited and bookmarked
- - **Full Data Privacy** All data is stored and processed on your own computer and will **never ever ever EVER** be shared or used without your consent. Here at worldbrain we are highly concerned about your privacy and security please see our [privacy policy](#privacy-policy) for more details.
+ - **Full Data Privacy** All data is stored and processed on your own computer and will **never ever ever EVER** be shared or used without your consent. Here at WorldBrain, we are highly concerned about your privacy and security please see our [privacy policy](#privacy-policy) for more details.
 
-Lookout for these exiting new features in the future:
+Lookout for these exciting new features in the future:
  - **Automatically Rate** how useful you perceive the websites you visit based on your interactions with it.
  - **Add notes, comments and links** to similar valuable resources
- - **Integrate** with all your favorite services such as facebook, evernote and twitter.
- - **Sync** with all of your browsers, smart-phones, tablets, smart-fridges, electric cars, space-ships ect...
+ - **Integrate** with all your favorite services such as Facebook, Evernote and Twitter.
+ - **Sync** with all of your browsers, smart-phones, tablets, smart-fridges, electric cars, space-ships etc.
  - **Share** recommendations, comments, links & ratings with your network.
- - **Discover** new content that has high value within your network
+ - **Discover** new content that has high value in your network
  - **Diversify** the content you find by looking through great sources on the opposite side of your 'value' system. Break out of your 'filter bubble'
 
 More on that on our website: worldbrain.io
@@ -24,7 +24,7 @@ More on that on our website: worldbrain.io
 1. [License + Privacy Policy](#license-+-privacy-policy)
 1. [See also](#see-also)
 
-**Seperate Docs**
+**Separate Docs**
 
 1. [Contributing](./docs/Contributing-Guide.md)
     * [Getting Started](./docs/Contributing-Guide.md#getting-started)
@@ -43,7 +43,7 @@ The old one can still be found here: worldbrain.io/download
 
 Want to help out? If you are:
  - A Marketer, A Designer or Investor please Email info@worldbrain.io
- - If want to [donate click here](https://www.patreon.com/WorldBrain)! :moneybag:
+ - If you want to [donate click here](https://www.patreon.com/WorldBrain)! :moneybag:
 
 **If your a developer Please see [Contributing!](./docs/Contributing-Guide.md)**
 
@@ -53,7 +53,7 @@ Have questions?
 - [Feature Requests](#feature-requests), <!-- vote for or add any new features you may want to see! --> What features would you like to see in our app? All ideas & requests are welcome!
 - [Bugs or Issues](https://github.com/WorldBrain/Research-Engine/issues/new), is something broken or not working as you feel it should?
 
-## How the Worldbrain Extension Works
+## How the WorldBrain Extension Works
 
 As you browse through websites WorldBrain will work automatically in the background see our [intro video](https://youtu.be/rtYA8_taswk) for more information. When you are ready to search through your history follow the steps below.
 
@@ -107,4 +107,3 @@ External resources
 * [Donate to WorldBrain - www.patreon.com](https://www.patreon.com/WorldBrain)
 * [Join the WorldBrain community on Slack! - join-worldbrain.herokuapp.com](https://join-worldbrain.herokuapp.com/)
 * [Worldbrain is creating a structural solution to online (scientific) misinformation - www.worldbrain.io](https://worldbrain.io)
-
