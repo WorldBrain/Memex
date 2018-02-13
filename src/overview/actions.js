@@ -111,9 +111,7 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
     dispatch,
     getState,
 ) => {
-    // Grab needed derived state for search
-    const state = getState()
-    const currentQueryParams = selectors.currentQueryParams(state)
+    const currentQueryParams = selectors.currentQueryParams(getState())
 
     if (currentQueryParams.query.includes('#')) {
         return
@@ -130,6 +128,8 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
         return dispatch(easter())
     }
 
+    // Grab needed derived state for search
+    const state = getState()
     const searchParams = {
         ...currentQueryParams,
         getTotalCount: true,
@@ -197,7 +197,7 @@ const handleErrors = ({ query, error }) => dispatch => {
 /**
  * Increments the page state before scheduling another search.
  */
-export const getMoreResults = () => async dispatch => {
+export const getMoreResults = () => dispatch => {
     dispatch(nextPage())
     dispatch(search())
 }
