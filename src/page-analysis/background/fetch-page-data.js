@@ -30,10 +30,11 @@ export default function fetchPageData(
 
     // Check if pdf and run code for pdf instead
     if (url.endsWith('.pdf')) {
-        run = async () =>
-            opts.includePageContent
+        run = async () => ({
+            content: opts.includePageContent
                 ? await extractPdfContent({ url })
-                : undefined
+                : undefined,
+        })
         cancel = () => {}
     } else {
         const req = fetchDOMFromUrl(url, timeout)
@@ -60,9 +61,9 @@ export default function fetchPageData(
                     : undefined,
             }
         }
-
-        return { run, cancel }
     }
+
+    return { run, cancel }
 }
 
 /**
