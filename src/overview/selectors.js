@@ -173,4 +173,4 @@ export const isEmptyQuery = createSelector(
 )
 
 export const showTooltip = state => overview(state).showTooltip
-export const tooltipIndex = state => overview(state).tooltipIndex
+export const tooltip = state => overview(state).tooltip

@@ -5,9 +5,9 @@ import cx from 'classnames'
 import styles from './Overview.css'
 
 const ResultsMessage = ({ children, small = false }) => (
-    <p className={cx(styles.resultMessage, { [styles.smallMessage]: small })}>
+    <div className={cx(styles.resultMessage, { [styles.smallMessage]: small })}>
         {children}
-    </p>
+    </div>
 )
 
 ResultsMessage.propTypes = {

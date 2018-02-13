@@ -4,7 +4,6 @@ import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import Waypoint from 'react-waypoint'
 import reduce from 'lodash/fp/reduce'
-import localStyles from './components/NoResult.css'
 
 import analytics from 'src/analytics'
 import { Wrapper, LoadingIndicator } from 'src/common-ui/components'
@@ -19,6 +18,7 @@ import ResultsMessage from './components/ResultsMessage'
 import TagPill from './components/TagPill'
 import Onboarding, { selectors as onboarding } from './onboarding'
 import Filters, { selectors as filters, actions as filterActs } from './filters'
+import NoResultBadTerm from './components/NoResultBadTerm'
 
 class OverviewContainer extends Component {
     static propTypes = {
@@ -172,42 +172,14 @@ class OverviewContainer extends Component {
         </ResultsMessage>
     )
 
-    renderBadTermNoResult = isBadTerm => (
-        <div>
-            <div className={localStyles.title}>No Results </div>
-            <div className={localStyles.subtitle}>
-                {isBadTerm
-                    ? ' Search terms are too common, or have been filtered out to increase performance.'
-                    : 'found for this query. ¯\\_(ツ)_/¯'}
-                <br />
-                <br />
-            </div>
-            <div className={localStyles.subsubtitle}>
-                We know there is still a lot of{' '}
-                <a target="_new" href="https://worldbrain.io/help">
-                    room to improve
-                </a>.
-            </div>
-            <div className={localStyles.btnBox}>
-                <a target="_new" href="https://worldbrain.helprace.com/">
-                    <button className={localStyles.button}>
-                        Report a Problem
-                    </button>
-                </a>
-                <a target="_new" href="https://eepurl.com/dkmJfr">
-                    <button className={localStyles.button}>
-                        Get Monthly Updates
-                    </button>
-                </a>
-            </div>
-        </div>
-    )
-
     renderResults() {
         if (this.props.isBadTerm) {
             return (
                 <ResultsMessage>
-                    {this.renderBadTermNoResult(true)}
+                    <NoResultBadTerm>
+                        Search terms are too common, or have been filtered out
+                        to increase performance.
+                    </NoResultBadTerm>
                 </ResultsMessage>
             )
         }
@@ -219,7 +191,9 @@ class OverviewContainer extends Component {
         if (this.props.noResults) {
             return (
                 <ResultsMessage>
-                    {this.renderBadTermNoResult(false)}
+                    <NoResultBadTerm>
+                        'found for this query. ¯\\_(ツ)_/¯'
+                    </NoResultBadTerm>
                 </ResultsMessage>
             )
         }
@@ -298,7 +272,7 @@ const mapStateToProps = state => ({
     shouldShowCount: selectors.shouldShowCount(state),
     showOnboarding: onboarding.isVisible(state),
     showTooltip: selectors.showTooltip(state),
-    tooltipIndex: selectors.tooltipIndex(state),
+    tooltip: selectors.tooltip(state),
 })
 
 const mapDispatchToProps = dispatch => ({

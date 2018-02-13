@@ -3,7 +3,7 @@ import remove from 'lodash/fp/remove'
 import { createReducer } from 'redux-act'
 
 import * as actions from './actions'
-import { tooltipsSize } from './components/tooltips'
+import tooltips, { tooltipsSize } from './components/tooltips'
 
 const defaultState = {
     searchCount: 0,
@@ -29,6 +29,7 @@ const defaultState = {
     activeTagIndex: -1,
     showTooltip: false,
     tooltipIndex: 0,
+    tooltip: tooltips[0],
 }
 
 function setQuery(state, query) {
@@ -157,10 +158,8 @@ const changeHasBookmark = (state, index) => {
 const setShowTooltip = (state, isShowTooltip) => {
     return {
         ...state,
-        showTooltip:
-            isShowTooltip === undefined
-                ? isShowTooltip || !state.showTooltip
-                : isShowTooltip,
+        showTooltip: isShowTooltip,
+        tooltip: tooltips[0],
     }
 }
 
@@ -219,6 +218,10 @@ export default createReducer(
         }),
         [actions.incTooltipIndex]: state => ({
             ...state,
+            tooltip:
+                state.tooltipIndex === tooltipsSize - 1
+                    ? tooltips[0]
+                    : tooltips[state.tooltipIndex + 1],
             tooltipIndex:
                 state.tooltipIndex === tooltipsSize - 1
                     ? 0
