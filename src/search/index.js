@@ -44,6 +44,8 @@ async function indexSearch({
         count: getTotalCount,
     })
 
+    console.log('got results', results)
+
     // Short-circuit if no results
     if (!results.length) {
         return {

@@ -6,7 +6,26 @@ import LevelJS from './level-js-to-leveldown'
 export const DEFAULT_TERM_SEPARATOR = /[|' .,\-|(\n)]+/
 export const URL_SEPARATOR = /[/?#=+& _.,\-|(\n)]+/
 
-const index = levelup(new LevelJS('worldbrain-terms'))
+let realIndex = null
+const index = new Proxy(
+    {},
+    {
+        get: (target, key) => {
+            if (!realIndex) {
+                init()
+            }
+            if (key === 'db') {
+                return realIndex
+            }
+
+            let prop = realIndex[key]
+            if (typeof prop === 'function') {
+                prop = prop.bind(realIndex)
+            }
+            return prop
+        },
+    },
+)
 
 // Set up queue to handle scheduling index update requests
 const indexQueue = new Queue({
@@ -16,6 +35,11 @@ const indexQueue = new Queue({
 })
 
 indexQueue.on('timeout', next => next())
+
+export function init({ levelDown } = {}) {
+    levelDown = levelDown || new LevelJS('worldbrain-terms')
+    realIndex = levelup(levelDown)
+}
 
 export { indexQueue }
 export default index
