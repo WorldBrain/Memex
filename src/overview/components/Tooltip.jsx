@@ -19,7 +19,7 @@ const Tooltip = ({
     showTooltip,
     toggleShowTooltip,
     tooltip,
-    onClickRefreshTooltip,
+    fetchNextTooltip,
 }) => (
     <div className={mainTooltipContainer(showTooltip)}>
         <div className={localStyles.tooltipButton}>
@@ -32,7 +32,7 @@ const Tooltip = ({
             {showTooltip && (
                 <div
                     className={localStyles.refreshIcon}
-                    onClick={onClickRefreshTooltip}
+                    onClick={fetchNextTooltip}
                     title="Next Tip"
                 />
             )}
@@ -55,7 +55,7 @@ Tooltip.propTypes = {
     showTooltip: PropTypes.bool.isRequired,
     toggleShowTooltip: PropTypes.func.isRequired,
     tooltip: PropTypes.object,
-    onClickRefreshTooltip: PropTypes.func.isRequired,
+    fetchNextTooltip: PropTypes.func.isRequired,
 }
 
 export default Tooltip

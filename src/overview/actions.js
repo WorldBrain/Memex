@@ -43,9 +43,9 @@ export const delTag = createAction('overview/localDelTag', (tag, index) => ({
     index,
 }))
 
-export const setShowTooltip = createAction('overview/setShowTooltip')
-export const toggleTooltip = createAction('overview/toggleTooltip')
 export const setTooltip = createAction('overview/setTooltip')
+export const toggleShowTooltip = createAction('overview/toggleShowTooltip')
+export const setShowTooltip = createAction('overview/setShowTooltip')
 
 const deleteDocsByUrl = remoteFunction('deleteDocsByUrl')
 const createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
@@ -117,7 +117,10 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
     dispatch,
     getState,
 ) => {
-    const currentQueryParams = selectors.currentQueryParams(getState())
+    // Grab needed derived state for search
+    const firstState = getState()
+    const currentQueryParams = selectors.currentQueryParams(firstState)
+    const showTooltip = selectors.showTooltip(firstState)
 
     if (currentQueryParams.query.includes('#')) {
         return
@@ -125,7 +128,9 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
 
     dispatch(setLoading(true))
 
-    dispatch(fetchNextTooltip())
+    if (showTooltip) {
+        dispatch(fetchNextTooltip())
+    }
 
     // Overwrite of results should always reset the current page before searching
     if (overwrite) {

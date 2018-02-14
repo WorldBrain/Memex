@@ -32,3 +32,5 @@ export const DOMAIN_TLD_PATTERN = /^(\w+\.)?[\w-]{2,}\.\w{2,3}(\.\w{2})?$/
 export const HASH_TAG_PATTERN = /^#\w[\w+]*$/
 
 export const SHOW_TOOL_TIP = 'is-overview-tooltips-shown'
+
+export const TOOL_TIP = 'overview-tooltips'

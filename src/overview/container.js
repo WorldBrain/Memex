@@ -44,6 +44,8 @@ class OverviewContainer extends Component {
         delTag: PropTypes.func.isRequired,
         resetFilterPopup: PropTypes.func.isRequired,
         showOnboarding: PropTypes.bool.isRequired,
+        fetchNextTooltip: PropTypes.func.isRequired,
+        isFirstTooltip: PropTypes.bool.isRequired,
     }
 
     componentDidMount() {
@@ -52,6 +54,10 @@ class OverviewContainer extends Component {
         document.addEventListener('click', this.handleOutsideClick, false)
         if (this.props.grabFocusOnMount) {
             this.inputQueryEl.focus()
+        }
+
+        if (this.props.isFirstTooltip) {
+            this.props.fetchNextTooltip()
         }
     }
 
@@ -273,6 +279,7 @@ const mapStateToProps = state => ({
     showOnboarding: onboarding.isVisible(state),
     showTooltip: selectors.showTooltip(state),
     tooltip: selectors.tooltip(state),
+    isFirstTooltip: selectors.isFirstTooltip(state),
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -286,8 +293,7 @@ const mapDispatchToProps = dispatch => ({
             resetActiveTagIndex: actions.resetActiveTagIndex,
             onShowFilterChange: filterActs.showFilter,
             resetFilterPopup: filterActs.resetFilterPopup,
-            toggleShowTooltip: actions.toggleTooltip,
-            onClickRefreshTooltip: actions.fetchNextTooltip,
+            fetchNextTooltip: actions.fetchNextTooltip,
         },
         dispatch,
     ),
@@ -317,6 +323,7 @@ const mapDispatchToProps = dispatch => ({
     },
     addTag: resultIndex => tag => dispatch(actions.addTag(tag, resultIndex)),
     delTag: resultIndex => tag => dispatch(actions.delTag(tag, resultIndex)),
+    toggleShowTooltip: event => dispatch(actions.toggleShowTooltip()),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(OverviewContainer)

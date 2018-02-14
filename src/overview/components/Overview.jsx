@@ -22,7 +22,7 @@ const Overview = props => (
             showTooltip={props.showTooltip}
             toggleShowTooltip={props.toggleShowTooltip}
             tooltip={props.tooltip}
-            onClickRefreshTooltip={props.onClickRefreshTooltip}
+            fetchNextTooltip={props.fetchNextTooltip}
         />
         <ShareButtons />
 
@@ -53,7 +53,7 @@ Overview.propTypes = {
     showTooltip: PropTypes.bool.isRequired,
     toggleShowTooltip: PropTypes.func.isRequired,
     tooltip: PropTypes.object,
-    onClickRefreshTooltip: PropTypes.func.isRequired,
+    fetchNextTooltip: PropTypes.func.isRequired,
 }
 
 export default Overview
