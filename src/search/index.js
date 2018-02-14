@@ -1,6 +1,7 @@
 import QueryBuilder from './query-builder'
 import { searchConcurrent } from './search-index/search'
 import mapResultsToPouchDocs from './map-search-to-pouch'
+import NewSearchTriggered from '../analytics/internal/searches'
 
 async function indexSearch({
     query,
@@ -62,6 +63,8 @@ async function indexSearch({
     })
 
     console.log('DEBUG: final UI results', docs)
+
+    NewSearchTriggered()
 
     return {
         docs,
