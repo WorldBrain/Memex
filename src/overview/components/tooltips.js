@@ -70,4 +70,7 @@ const tooltips = [
 export default tooltips
 export const tooltipsSize = tooltips.length
 
-export const tooltip = index => tooltips[index]
+let index = 0
+export const fetchNextTooltip = () => {
+    return () => tooltips[index++ % tooltips.length]
+}

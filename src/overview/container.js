@@ -287,7 +287,7 @@ const mapDispatchToProps = dispatch => ({
             onShowFilterChange: filterActs.showFilter,
             resetFilterPopup: filterActs.resetFilterPopup,
             toggleShowTooltip: actions.toggleTooltip,
-            onClickRefreshTooltip: actions.incTooltipIndex,
+            onClickRefreshTooltip: actions.fetchNextTooltip,
         },
         dispatch,
     ),

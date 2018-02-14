@@ -61,12 +61,9 @@ const locationSync = ReduxQuerySync.enhancer({
 const hydrateStateFromStorage = store => {
     const hydrate = (key, action) =>
         browser.storage.local.get(key).then(data => {
-            if (key === constants.SHOW_TOOL_TIP) {
-                store.dispatch(action(data[key]))
-            } else {
-                if (!data[key]) return
-                store.dispatch(action(data[key]))
-            }
+            if (!data[key] == null) return
+
+            store.dispatch(action(data[key]))
         })
 
     // Keep each of these storage keys in sync

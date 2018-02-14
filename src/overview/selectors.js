@@ -172,5 +172,6 @@ export const isEmptyQuery = createSelector(
         !filterDomains.length,
 )
 
-export const showTooltip = state => overview(state).showTooltip
 export const tooltip = state => overview(state).tooltip
+
+export const showTooltip = createSelector(tooltip, tooltip => tooltip !== null)

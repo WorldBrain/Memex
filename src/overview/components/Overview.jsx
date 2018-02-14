@@ -52,7 +52,7 @@ Overview.propTypes = {
     filters: PropTypes.node.isRequired,
     showTooltip: PropTypes.bool.isRequired,
     toggleShowTooltip: PropTypes.func.isRequired,
-    tooltip: PropTypes.object.isRequired,
+    tooltip: PropTypes.object,
     onClickRefreshTooltip: PropTypes.func.isRequired,
 }
 
