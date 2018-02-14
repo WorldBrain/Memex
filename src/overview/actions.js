@@ -6,6 +6,8 @@ import { remoteFunction } from 'src/util/webextensionRPC'
 import { actions as filterActs, selectors as filters } from './filters'
 import * as constants from './constants'
 import * as selectors from './selectors'
+import { initTooltip } from './components/tooltips'
+const fetchTooltip = initTooltip()
 
 // Will contain the runtime port which will allow bi-directional communication to the background script
 let port
@@ -43,7 +45,7 @@ export const delTag = createAction('overview/localDelTag', (tag, index) => ({
 
 export const setShowTooltip = createAction('overview/setShowTooltip')
 export const toggleTooltip = createAction('overview/toggleTooltip')
-export const fetchNextTooltip = createAction('overview/fetchNextTooltip')
+export const setTooltip = createAction('overview/setTooltip')
 
 const deleteDocsByUrl = remoteFunction('deleteDocsByUrl')
 const createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
@@ -306,4 +308,9 @@ export const setQueryTagsDomains = (input, isEnter) => (dispatch, getState) => {
     }
 
     dispatch(setQuery(input))
+}
+
+export const fetchNextTooltip = () => dispatch => {
+    const tooltip = fetchTooltip()
+    dispatch(setTooltip(tooltip))
 }
