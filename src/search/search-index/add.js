@@ -158,6 +158,7 @@ async function indexPage(indexDoc) {
 
     const augIndexDoc = augmentIndexLookupDoc(newIndexDoc)
     await index.put(indexDoc.id, augIndexDoc)
+    console.log(await index.get(indexDoc.id))
     return augIndexDoc
 }
 

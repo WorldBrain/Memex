@@ -124,7 +124,7 @@
     "pouchdb-adapter-memory": "^6.2.0",
     "pouchdb-core": "^6.4.3",
     "pouchdb-mapreduce": "^6.4.3",
-    "pouchdb-node": "^6.2.0",
+    "pouchdb-memory": "^6.0.0",
     "pouchdb-replication": "^6.4.3",
     "prettier": "^1.7.4",
     "react-addons-test-utils": "^15.6.0",
