@@ -256,11 +256,15 @@ export default class ImportItemCreator {
                 endTime: time.valueOf(),
             })
 
+            const prevCount = itemCount
             const itemsMap = filterByUrl(historyItemBatch)
             itemCount += itemsMap.size
 
             if (itemCount >= this._histLimit) {
-                yield ImportItemCreator._limitMap(itemsMap, this._histLimit)
+                yield ImportItemCreator._limitMap(
+                    itemsMap,
+                    this._histLimit - prevCount,
+                )
                 break
             }
 
