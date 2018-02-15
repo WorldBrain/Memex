@@ -6,7 +6,6 @@ import ShareButton from './ShareButton'
 const ShareButtons = () => (
     <div className={styles.outer}>
         <div className={styles.shareIcons}>
-            <p className={styles.shareText}>Spread the love</p>{' '}
             <ShareButton
                 href="https://worldbrain.io/share/facebook"
                 imgSrc="/img/face.png"
@@ -27,7 +26,7 @@ const ShareButtons = () => (
                 className={styles.fedLink}
                 href="https://worldbrain.io/help"
             >
-                Feedback
+                FEEDBACK
             </ShareButton>
             <div className={styles.chatBox}>
                 <ShareButton
@@ -40,9 +39,7 @@ const ShareButtons = () => (
                     <a
                         target="_new"
                         href="https://worldbrain.io/how-can-we-help-you/"
-                    >
-                        Chat with us
-                    </a>
+                    />
                 </p>{' '}
             </div>
         </div>

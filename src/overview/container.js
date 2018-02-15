@@ -18,6 +18,7 @@ import ResultsMessage from './components/ResultsMessage'
 import TagPill from './components/TagPill'
 import Onboarding, { selectors as onboarding } from './onboarding'
 import Filters, { selectors as filters, actions as filterActs } from './filters'
+import NoResultBadTerm from './components/NoResultBadTerm'
 
 class OverviewContainer extends Component {
     static propTypes = {
@@ -43,6 +44,8 @@ class OverviewContainer extends Component {
         delTag: PropTypes.func.isRequired,
         resetFilterPopup: PropTypes.func.isRequired,
         showOnboarding: PropTypes.bool.isRequired,
+        fetchNextTooltip: PropTypes.func.isRequired,
+        isFirstTooltip: PropTypes.bool.isRequired,
     }
 
     componentDidMount() {
@@ -51,6 +54,10 @@ class OverviewContainer extends Component {
         document.addEventListener('click', this.handleOutsideClick, false)
         if (this.props.grabFocusOnMount) {
             this.inputQueryEl.focus()
+        }
+
+        if (this.props.isFirstTooltip) {
+            this.props.fetchNextTooltip()
         }
     }
 
@@ -175,8 +182,10 @@ class OverviewContainer extends Component {
         if (this.props.isBadTerm) {
             return (
                 <ResultsMessage>
-                    Your search terms are very vague, please try and use more
-                    unique language
+                    <NoResultBadTerm>
+                        Search terms are too common, or have been filtered out
+                        to increase performance.
+                    </NoResultBadTerm>
                 </ResultsMessage>
             )
         }
@@ -188,7 +197,9 @@ class OverviewContainer extends Component {
         if (this.props.noResults) {
             return (
                 <ResultsMessage>
-                    No results found for this query. ¯\_(ツ)_/¯{' '}
+                    <NoResultBadTerm>
+                        'found for this query. ¯\\_(ツ)_/¯'
+                    </NoResultBadTerm>
                 </ResultsMessage>
             )
         }
@@ -266,6 +277,9 @@ const mapStateToProps = state => ({
     totalResultCount: selectors.totalResultCount(state),
     shouldShowCount: selectors.shouldShowCount(state),
     showOnboarding: onboarding.isVisible(state),
+    showTooltip: selectors.showTooltip(state),
+    tooltip: selectors.tooltip(state),
+    isFirstTooltip: selectors.isFirstTooltip(state),
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -279,6 +293,7 @@ const mapDispatchToProps = dispatch => ({
             resetActiveTagIndex: actions.resetActiveTagIndex,
             onShowFilterChange: filterActs.showFilter,
             resetFilterPopup: filterActs.resetFilterPopup,
+            fetchNextTooltip: actions.fetchNextTooltip,
         },
         dispatch,
     ),
@@ -308,6 +323,7 @@ const mapDispatchToProps = dispatch => ({
     },
     addTag: resultIndex => tag => dispatch(actions.addTag(tag, resultIndex)),
     delTag: resultIndex => tag => dispatch(actions.delTag(tag, resultIndex)),
+    toggleShowTooltip: event => dispatch(actions.toggleShowTooltip()),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(OverviewContainer)

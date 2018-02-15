@@ -61,7 +61,8 @@ const locationSync = ReduxQuerySync.enhancer({
 const hydrateStateFromStorage = store => {
     const hydrate = (key, action) =>
         browser.storage.local.get(key).then(data => {
-            if (!data[key]) return
+            if (data[key] == null) return
+
             store.dispatch(action(data[key]))
         })
 
@@ -73,6 +74,8 @@ const hydrateStateFromStorage = store => {
     )
     hydrate(onboardingConsts.STORAGE_KEYS.progress, onboardingActs.setProgress)
     hydrate(SHOULD_TRACK_STORAGE_KEY, onboardingActs.setShouldTrack)
+    hydrate(constants.SHOW_TOOL_TIP, actions.setShowTooltip)
+    hydrate(constants.TOOL_TIP, actions.setTooltip)
 }
 
 const syncStateToStorage = store =>
@@ -80,6 +83,7 @@ const syncStateToStorage = store =>
         const dump = (key, data) => browser.storage.local.set({ [key]: data })
 
         const state = store.getState()
+
         dump(constants.SEARCH_COUNT_KEY, selectors.searchCount(state))
         dump(
             onboardingConsts.STORAGE_KEYS.isImportsDone,
@@ -87,6 +91,8 @@ const syncStateToStorage = store =>
         )
         dump(onboardingConsts.STORAGE_KEYS.progress, onboarding.progress(state))
         dump(SHOULD_TRACK_STORAGE_KEY, onboarding.shouldTrack(state))
+        dump(constants.SHOW_TOOL_TIP, selectors.showTooltip(state))
+        dump(constants.TOOL_TIP, selectors.tooltip(state))
     })
 
 const storageSync = storeCreator => (reducer, initState, enhancer) => {
