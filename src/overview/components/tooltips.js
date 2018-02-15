@@ -1,3 +1,12 @@
+/**
+ * @typedef {Object} Tooltip
+ * @property {string} title
+ * @property {string} description
+ */
+
+/**
+ * @type {Tooltip[]}
+ */
 const tooltips = [
     {
         title: 'Search Everywhere',
@@ -67,9 +76,9 @@ const tooltips = [
     },
 ]
 
-export default tooltips
-export const tooltipsSize = tooltips.length
-
+/**
+ * @return {() => Tooltip} Function that acts as a data source for returning new Tooltips.
+ */
 export function initTooltip() {
     let index = 0
     return () => tooltips[index++ % tooltips.length]

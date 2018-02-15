@@ -7,6 +7,7 @@ import { actions as filterActs, selectors as filters } from './filters'
 import * as constants from './constants'
 import * as selectors from './selectors'
 import { initTooltip } from './components/tooltips'
+
 const fetchTooltip = initTooltip()
 
 // Will contain the runtime port which will allow bi-directional communication to the background script
@@ -117,7 +118,6 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
     dispatch,
     getState,
 ) => {
-    // Grab needed derived state for search
     const firstState = getState()
     const currentQueryParams = selectors.currentQueryParams(firstState)
     const showTooltip = selectors.showTooltip(firstState)
