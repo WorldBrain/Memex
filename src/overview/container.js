@@ -48,16 +48,18 @@ class OverviewContainer extends Component {
         isFirstTooltip: PropTypes.bool.isRequired,
     }
 
+    componentWillMount() {
+        if (this.props.isFirstTooltip) {
+            this.props.fetchNextTooltip()
+        }
+    }
+
     componentDidMount() {
         analytics.trackPage({ title: document.title })
 
         document.addEventListener('click', this.handleOutsideClick, false)
         if (this.props.grabFocusOnMount) {
             this.inputQueryEl.focus()
-        }
-
-        if (this.props.isFirstTooltip) {
-            this.props.fetchNextTooltip()
         }
     }
 

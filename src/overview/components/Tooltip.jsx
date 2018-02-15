@@ -39,11 +39,13 @@ const Tooltip = ({
         </div>
         {showTooltip && (
             <div className={localStyles.tooltipText}>
-                <div className={localStyles.tooltipTitle}>{tooltip.title}</div>
+                <div className={localStyles.tooltipTitle}>
+                    {tooltip && tooltip.title}
+                </div>
                 <div
                     className={localStyles.tooltipDesc}
                     dangerouslySetInnerHTML={{
-                        __html: tooltip.description,
+                        __html: tooltip && tooltip.description,
                     }}
                 />
             </div>
