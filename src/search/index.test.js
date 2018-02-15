@@ -5,7 +5,7 @@ import * as search from './'
 import * as index from './search-index'
 
 describe('Search index', () => {
-    test('integration test', async () => {
+    test('TODO: integration test', async () => {
         index.init({ levelDown: memdown() })
         await search.addPageConcurrent({
             pageDoc: {
@@ -19,10 +19,8 @@ describe('Search index', () => {
             bookmarkDocs: [],
             visits: [Date.now().toString()],
         })
-        console.log(new Date(Date.now() - 1000 * 10).valueOf().toString())
         const results = await search.search({
             query: 'fox',
         })
-        console.log(results)
     })
 })
