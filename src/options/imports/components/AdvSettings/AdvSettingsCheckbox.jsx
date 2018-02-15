@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 import styles from './AdvSettings.css'
-import importStyles from './Import.css'
+import importStyles from '../Import.css'
 
 const AdvSettingsCheckbox = ({ advMode, toggleAdvMode }) => (
     <div className={styles.advModeToggle}>

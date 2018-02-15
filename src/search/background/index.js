@@ -3,6 +3,7 @@ import searchConnectionHandler from './search-connection-handler'
 import { setTags, addTags, delTags, fetchTags } from '../search-index/tags'
 import { initSingleLookup, removeKeyType } from '../search-index/util'
 import suggest from '../search-index/suggest'
+import { dumpDB, restoreDB } from '../search-index/dump-restore'
 
 const singleLookup = initSingleLookup()
 
@@ -12,6 +13,8 @@ makeRemotelyCallable({
     setTags,
     fetchTags,
     suggest,
+    dumpDB,
+    restoreDB,
     pageLookup: (id, projectOpts = {}) =>
         singleLookup(id).then(
             page =>

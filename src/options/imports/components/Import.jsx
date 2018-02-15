@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import AdvSettings from './AdvSettingsContainer'
+import AdvSettings from './AdvSettings'
 import { LoadingIndicator } from 'src/common-ui/components'
 import localStyles from './Import.css'
 

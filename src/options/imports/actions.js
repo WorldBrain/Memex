@@ -1,7 +1,7 @@
 import { createAction } from 'redux-act'
 
+import { remoteFunction } from 'src/util/webextensionRPC'
 import analytics from 'src/analytics'
-import db from 'src/pouchdb'
 import { CMDS, IMPORT_CONN_NAME, OLD_EXT_KEYS } from './constants'
 import * as selectors from './selectors'
 
@@ -41,6 +41,9 @@ export const setProcessErrs = createAction('imports-adv/setProcessErrs')
 
 export const showDownloadDetails = createAction('imports/showDownloadDetails')
 
+const restoreDB = remoteFunction('restoreDB')
+const dumpDB = remoteFunction('dumpDB')
+
 /**
  * @param {FileReader} fileReader FileReader instance to bind to text reading function.
  * @return {(File) => Promise<String>} Async function that reads a given file and returns its text.
@@ -51,20 +54,11 @@ const getFileTextViaReader = fileReader => file =>
         fileReader.readAsText(file)
     })
 
-const deserializeDoc = docString => {
-    if (!docString) return undefined
-    try {
-        return JSON.parse(docString)
-    } catch (error) {
-        console.error(`Cannot parse following input:\n${docString}`)
-    }
-}
-
 /**
  * Performs a restore of given docs files.
  * @param {Array<File>} files One or more NDJSON files that contain database docs.
  */
-export const uploadTestData = files => async (dispatch, getState) => {
+export const reqRestoreDB = files => async (dispatch, getState) => {
     dispatch(setFileUploading(true))
 
     if (files.length < 1) {
@@ -72,21 +66,17 @@ export const uploadTestData = files => async (dispatch, getState) => {
     }
 
     const getFileText = getFileTextViaReader(new FileReader())
-    const onlyDefinedDocs = doc => doc
 
     // Write contents of each file, one-at-a-time, to the DB
     for (const file of files) {
         const text = await getFileText(file)
-        const docs = text
-            .split('\n')
-            .map(deserializeDoc)
-            .filter(onlyDefinedDocs)
-
-        await db.bulkDocs(docs)
+        await restoreDB(JSON.parse(text))
     }
 
     dispatch(setFileUploading(false))
 }
+
+export const reqDumpDB = () => dispatch => dumpDB()
 
 /**
  * Responds to messages sent from background script over the runtime connection by dispatching

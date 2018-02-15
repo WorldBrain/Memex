@@ -21,24 +21,12 @@
     min-height: 300px;
 }
 
-.concurrencyInput {
-    position: relative;
-    right: 200px;
-}
-
-.prevFailedCheckbox {
-    position: relative;
-    right: 220px;
-}
-
 .settingsList {
     padding: 0;
 }
 
 .settingsListItem {
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
     align-items: center;
     margin: 1em 0;
     color: #777;
@@ -46,5 +34,14 @@
 
     &:last-child {
         margin-bottom: 1em;
+    }
+
+    & > input {
+        flex: 1;
+        max-width: 170px;
+    }
+
+    & > label {
+        flex: 3;
     }
 }
