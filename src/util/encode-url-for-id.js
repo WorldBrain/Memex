@@ -4,7 +4,7 @@ import queryParamRules from './query-string-normalization-rules'
 
 export const PROTOCOL_PATTERN = /^\w+:\/\//
 
-const normalizationOpts = {
+export const normalizationOpts = {
     normalizeProtocol: true, // Prepend `http://` if URL is protocol-relative
     stripFragment: true, // Remove trailing hash fragment
     stripWWW: true, // Remove any leading `www.`
