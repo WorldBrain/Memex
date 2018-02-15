@@ -15,13 +15,9 @@ class Info extends PureComponent {
             <div className={localStyles.content}>
                 <div className={localStyles.messageContainer}>
                     <div className={localStyles.message}>
-                        <p>
-                            From now on Memex stores the text of websites you
-                            visit (with a 15s delay).
-                        </p>
                         <p className={localStyles.tip}>
                             <strong>Tip: </strong>Search directly from the
-                            address bar by typing:
+                            browser's address bar by typing:
                             <img
                                 className={localStyles.logobig}
                                 src="/img/shortcuts.png"
