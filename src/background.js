@@ -26,6 +26,7 @@ export const UNINSTALL_URL =
         ? 'http://worldbrain.io/uninstall'
         : ''
 const VERSION_NUMBER = 'version_number'
+const CHECK_INTERVAL_SIZE = 2 * 60 * 60 * 1000 // 2 hours
 
 // Put doc ID generators on window for user use with manual DB lookups
 window.generatePageDocId = generatePageDocId
@@ -145,4 +146,4 @@ const checkForUpdate = async () => {
     }
 }
 
-setInterval(checkForUpdate, 1000)
+setInterval(checkForUpdate, CHECK_INTERVAL_SIZE)
