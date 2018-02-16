@@ -119,16 +119,13 @@ const updateNotif = () => {
     if (Notification.permission !== 'granted') {
         Notification.requestPermission()
     } else {
-        const notification = new Notification(
-            'Your extension has been updated!',
-            {
-                icon: '/img/worldbrain-logo-narrow-bw-16.ico',
-                body: 'Click to view',
-            },
-        )
+        const notification = new Notification('NEW FEATURE: Tagging', {
+            icon: '/img/worldbrain-logo-narrow.png',
+            body: 'More Information',
+        })
 
         notification.onclick = () => {
-            window.open('overview.html')
+            window.open('https://google.com')
         }
     }
 }
