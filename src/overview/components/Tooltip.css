@@ -1,4 +1,4 @@
-a {
+.mainTooltip a {
     text-decoration: underline;
 }
 
@@ -15,10 +15,6 @@ b {
     color: #3eb995;
     overflow: hidden;
     z-index: 1;
-}
-
-a {
-    text-decoration: underline;
 }
 
 .tooltipButton {

@@ -15,13 +15,13 @@ class ImportMsg extends PureComponent {
         <span className={localStyles.choiceBtnContainer}>
             <p className={localStyles.readyMsg}>Memex is ready!</p>
             <br />
-            <button
+            <a
                 className={cx(localStyles.choiceBtn, localStyles.startBtn)}
                 onClick={this.props.onFinish}
                 type="button"
             >
                 Get Started
-            </button>
+            </a>
             or
             <a
                 className={localStyles.choiceBtn}
@@ -39,9 +39,13 @@ class ImportMsg extends PureComponent {
                 Importing the last 30 pages you visited,<br />so you can play
                 around immediately
             </p>
-            <p onClick={this.props.onCancel} className={localStyles.cancelText}>
-                - click to skip -
-            </p>
+            <a
+                className={localStyles.cancelBtn}
+                onClick={this.props.onCancel}
+                type="button"
+            >
+                Skip This
+            </a>
         </span>
     )
 
