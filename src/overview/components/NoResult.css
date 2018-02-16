@@ -19,6 +19,10 @@
     margin-bottom: 15px;
 }
 
+.link {
+    text-decoration: underline !important;
+}
+
 .button {
     border-radius: 30px;
     border: 1px solid #3eb995;

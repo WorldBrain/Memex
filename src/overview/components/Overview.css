@@ -193,3 +193,37 @@
         display: none;
     }
 }
+
+.choiceBtn {
+    padding: 6px 1.6em;
+    border-radius: 25px;
+    font-weight: 300;
+    border: 1px solid #3eb995;
+    font-size: 1.1rem;
+    color: #3eb995;
+    cursor: pointer;
+    height: 35px;
+    margin-left: 12px;
+    margin-right: 12px;
+
+    &:hover,
+    &:active {
+        background-color: #3eb995;
+        color: #fff;
+    }
+}
+
+.subTitle {
+    font-size: 25px !important;
+    font-weight: 300 !important;
+    text-decoration: underline;
+}
+
+.title {
+    color: #3eb995;
+    font-size: 30px;
+    font-weight: 800;
+    padding-top: 50px;
+    margin-bottom: 20px;
+    font-style: italic;
+}

@@ -19,6 +19,7 @@ import TagPill from './components/TagPill'
 import Onboarding, { selectors as onboarding } from './onboarding'
 import Filters, { selectors as filters, actions as filterActs } from './filters'
 import NoResultBadTerm from './components/NoResultBadTerm'
+import localStyles from './components/overview.css'
 
 class OverviewContainer extends Component {
     static propTypes = {
@@ -158,25 +159,25 @@ class OverviewContainer extends Component {
 
     renderInitMessage = () => (
         <ResultsMessage>
-            You have not made any history yet.
-            <br />First, you need to visit some websites or{' '}
-            <a
-                style={{ color: '#928989' }}
-                href="/options/options.html#/import"
-            >
-                import your existing history & bookmarks
-            </a>.<br />
-            <br />
-            <strong>Tip: </strong>Read the{' '}
-            <a
-                style={{ color: '#928989' }}
-                href="/options/options.html#/tutorial"
-            >
-                quick tutorial
-            </a>.
-            <br />
-            <br />
-            <img src="/img/ship.png" />
+            <div className={localStyles.title}>
+                You didn't visit or{' '}
+                <a
+                    style={{ color: '#777' }}
+                    href="/options/options.html#/import"
+                >
+                    import
+                </a>
+                <br /> <p className={localStyles.subTitle}>any websites yet.</p>
+            </div>
+            <div>
+                <a
+                    className={localStyles.choiceBtn}
+                    type="button"
+                    href="/options/options.html#/import"
+                >
+                    Import Previous History
+                </a>
+            </div>
         </ResultsMessage>
     )
 
@@ -200,7 +201,7 @@ class OverviewContainer extends Component {
             return (
                 <ResultsMessage>
                     <NoResultBadTerm>
-                        'found for this query. ¯\\_(ツ)_/¯'
+                        found for this query. ¯\_(ツ)_/¯
                     </NoResultBadTerm>
                 </ResultsMessage>
             )
