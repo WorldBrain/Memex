@@ -25,6 +25,7 @@ export const UNINSTALL_URL =
     process.env.NODE_ENV === 'production'
         ? 'http://worldbrain.io/uninstall'
         : ''
+const VERSION_NUMBER = 'version_number'
 
 // Put doc ID generators on window for user use with manual DB lookups
 window.generatePageDocId = generatePageDocId
@@ -44,6 +45,10 @@ async function openOverview() {
 }
 
 async function onInstall() {
+    const manifestData = chrome.runtime.getManifest()
+    // Insert the version no. in the localStorage
+    browser.storage.local.set({ [VERSION_NUMBER]: manifestData.version })
+
     // Ensure default blacklist entries are stored (before doing anything else)
     await blacklist.addToBlacklist(blacklistConsts.DEF_ENTRIES)
     analytics.trackEvent({ category: 'Global', action: 'Install' }, true)
@@ -96,3 +101,48 @@ browser.runtime.onInstalled.addListener(details => {
 
 // Open uninstall survey on ext. uninstall
 browser.runtime.setUninstallURL(UNINSTALL_URL)
+
+const updateNotif = () => {
+    document.addEventListener('DOMContentLoaded', () => {
+        if (Notification.permission !== 'granted') {
+            Notification.requestPermission()
+        }
+    })
+    if (!Notification) {
+        alert(
+            'Desktop notifications not available in your browser. Try Chromium.',
+        )
+        return
+    }
+
+    if (Notification.permission !== 'granted') {
+        Notification.requestPermission()
+    } else {
+        const notification = new Notification(
+            'Your extension has been updated!',
+            {
+                icon: '/img/worldbrain-logo-narrow-bw-16.ico',
+                body: 'Click to view',
+            },
+        )
+
+        notification.onclick = () => {
+            window.open('overview.html')
+        }
+    }
+}
+
+const checkForUpdate = async () => {
+    const manifestData = chrome.runtime.getManifest()
+    const version = (await browser.storage.local.get(VERSION_NUMBER))[
+        VERSION_NUMBER
+    ]
+
+    if (version.localeCompare(manifestData.version) === -1) {
+        // browser.runtime.reload()
+        updateNotif()
+        browser.storage.local.set({ [VERSION_NUMBER]: manifestData.version })
+    }
+}
+
+setInterval(checkForUpdate, 1000)
