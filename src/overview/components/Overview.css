@@ -216,7 +216,9 @@
 .subTitle {
     font-size: 25px !important; /* stylelint-disable-line declaration-no-important */
     font-weight: 300 !important; /* stylelint-disable-line declaration-no-important */
-    text-decoration: underline;
+    text-decoration: none;
+    margin-bottom: 40px;
+    margin-top: 10px;
 }
 
 .title {
@@ -224,6 +226,6 @@
     font-size: 30px;
     font-weight: 800;
     padding-top: 50px;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     font-style: italic;
 }

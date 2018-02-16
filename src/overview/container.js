@@ -169,7 +169,7 @@ class OverviewContainer extends Component {
                     type="button"
                     href="/options/options.html#/import"
                 >
-                    Import Previous History
+                    Import History & Bookmarks
                 </a>
             </div>
         </ResultsMessage>
