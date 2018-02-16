@@ -43,14 +43,14 @@
 .close {
     position: absolute;
     top: 5px;
-    right: 15px;
+    right: 5px;
     font-size: 22px;
     font-weight: bold;
     text-decoration: none;
     color: #333;
 
     &:hover {
-        color: #06d85f;
+        color: #3eb995;
     }
 }
 
@@ -60,4 +60,5 @@
     justify-content: space-around;
     font-size: 13.5px;
     min-height: 100px;
+    align-content: center;
 }
