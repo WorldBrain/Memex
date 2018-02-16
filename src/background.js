@@ -17,6 +17,7 @@ import {
 import { OLD_EXT_KEYS } from 'src/options/imports/constants'
 import index from 'src/search/search-index'
 import analytics from 'src/analytics'
+import updateNotification from 'src/util/update-notification'
 
 export const OVERVIEW_URL = '/overview/overview.html'
 export const OLD_EXT_UPDATE_KEY = 'updated-from-old-ext'
@@ -103,42 +104,15 @@ browser.runtime.onInstalled.addListener(details => {
 // Open uninstall survey on ext. uninstall
 browser.runtime.setUninstallURL(UNINSTALL_URL)
 
-const updateNotif = () => {
-    document.addEventListener('DOMContentLoaded', () => {
-        if (Notification.permission !== 'granted') {
-            Notification.requestPermission()
-        }
-    })
-    if (!Notification) {
-        alert(
-            'Desktop notifications not available in your browser. Try Chromium.',
-        )
-        return
-    }
-
-    if (Notification.permission !== 'granted') {
-        Notification.requestPermission()
-    } else {
-        const notification = new Notification('NEW FEATURE: Tagging', {
-            icon: '/img/worldbrain-logo-narrow.png',
-            body: 'More Information',
-        })
-
-        notification.onclick = () => {
-            window.open('https://google.com')
-        }
-    }
-}
-
 const checkForUpdate = async () => {
     const manifestData = chrome.runtime.getManifest()
     const version = (await browser.storage.local.get(VERSION_NUMBER))[
         VERSION_NUMBER
     ]
 
+    // if the present version and installation version is different then make notification
     if (version.localeCompare(manifestData.version) === -1) {
-        // browser.runtime.reload()
-        updateNotif()
+        updateNotification()
         browser.storage.local.set({ [VERSION_NUMBER]: manifestData.version })
     }
 }
