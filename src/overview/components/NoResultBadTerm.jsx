@@ -16,7 +16,7 @@ const NoResultBadTerm = ({ children }) => (
             <a
                 className={localStyles.link}
                 target="_new"
-                href="https://worldbrain.io/help"
+                href="https://worldbrain.helprace.com/i23-known-limitations-of-searching"
             >
                 room to improve
             </a>.
