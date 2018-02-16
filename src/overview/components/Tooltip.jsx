@@ -20,6 +20,7 @@ const Tooltip = ({
     toggleShowTooltip,
     tooltip,
     fetchNextTooltip,
+    isTooltipRenderable,
 }) => (
     <div className={mainTooltipContainer(showTooltip)}>
         <div className={localStyles.tooltipButton}>
@@ -37,7 +38,7 @@ const Tooltip = ({
                 />
             )}
         </div>
-        {showTooltip && (
+        {isTooltipRenderable && (
             <div className={localStyles.tooltipText}>
                 <div className={localStyles.tooltipTitle}>{tooltip.title}</div>
                 <div
@@ -56,6 +57,7 @@ Tooltip.propTypes = {
     toggleShowTooltip: PropTypes.func.isRequired,
     tooltip: PropTypes.object,
     fetchNextTooltip: PropTypes.func.isRequired,
+    isTooltipRenderable: PropTypes.bool.isRequired,
 }
 
 export default Tooltip
