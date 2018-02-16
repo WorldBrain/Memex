@@ -20,7 +20,7 @@
 }
 
 .link {
-    text-decoration: underline !important;
+    text-decoration: underline !important; /* stylelint-disable-line declaration-no-important */
 }
 
 .button {

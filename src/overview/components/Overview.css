@@ -214,8 +214,8 @@
 }
 
 .subTitle {
-    font-size: 25px !important;
-    font-weight: 300 !important;
+    font-size: 25px !important; /* stylelint-disable-line declaration-no-important */
+    font-weight: 300 !important; /* stylelint-disable-line declaration-no-important */
     text-decoration: underline;
 }
 

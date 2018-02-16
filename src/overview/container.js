@@ -19,7 +19,7 @@ import TagPill from './components/TagPill'
 import Onboarding, { selectors as onboarding } from './onboarding'
 import Filters, { selectors as filters, actions as filterActs } from './filters'
 import NoResultBadTerm from './components/NoResultBadTerm'
-import localStyles from './components/overview.css'
+import localStyles from './components/Overview.css'
 
 class OverviewContainer extends Component {
     static propTypes = {
@@ -47,12 +47,6 @@ class OverviewContainer extends Component {
         showOnboarding: PropTypes.bool.isRequired,
         fetchNextTooltip: PropTypes.func.isRequired,
         isFirstTooltip: PropTypes.bool.isRequired,
-    }
-
-    componentWillMount() {
-        if (this.props.isFirstTooltip) {
-            this.props.fetchNextTooltip()
-        }
     }
 
     componentDidMount() {
@@ -283,6 +277,7 @@ const mapStateToProps = state => ({
     showTooltip: selectors.showTooltip(state),
     tooltip: selectors.tooltip(state),
     isFirstTooltip: selectors.isFirstTooltip(state),
+    isTooltipRenderable: selectors.isTooltipRenderable(state),
 })
 
 const mapDispatchToProps = dispatch => ({

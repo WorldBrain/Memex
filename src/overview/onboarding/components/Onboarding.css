@@ -10,7 +10,7 @@
 }
 
 a {
-    text-decoration: none !important;
+    text-decoration: none !important; /* stylelint-disable-line declaration-no-important */
 }
 
 .choiceBtnContainer {
