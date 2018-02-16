@@ -5,14 +5,14 @@ import cx from 'classnames'
 import styles from './ConfirmModal.css'
 
 const ConfirmModalBtn = ({ children, cancel = false, ...btnProps }) => (
-    <button
+    <a
         className={cx(styles.btn, styles.confirmBtn, {
             [styles.cancelBtn]: cancel,
         })}
         {...btnProps}
     >
         {children}
-    </button>
+    </a>
 )
 
 ConfirmModalBtn.propTypes = {
