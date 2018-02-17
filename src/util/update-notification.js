@@ -16,11 +16,11 @@ const updateNotification = () => {
     } else {
         const notification = new Notification('NEW FEATURE: Tagging', {
             icon: '/img/worldbrain-logo-narrow.png',
-            body: 'More Information',
+            body: 'Click for more Information',
         })
 
         notification.onclick = () => {
-            window.open('https://google.com')
+            window.open('https://worldbrain.helprace.com/i34-feature-tagging')
         }
     }
 }
