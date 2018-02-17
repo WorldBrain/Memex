@@ -6,6 +6,7 @@ import { remoteFunction } from 'src/util/webextensionRPC'
 import { actions as filterActs, selectors as filters } from './filters'
 import * as constants from './constants'
 import * as selectors from './selectors'
+import { fetchTooltip } from './components/tooltips'
 
 // Will contain the runtime port which will allow bi-directional communication to the background script
 let port
@@ -45,6 +46,10 @@ export const delTag = createAction('overview/localDelTag', (tag, index) => ({
     tag,
     index,
 }))
+
+export const setTooltip = createAction('overview/setTooltip')
+export const toggleShowTooltip = createAction('overview/toggleShowTooltip')
+export const setShowTooltip = createAction('overview/setShowTooltip')
 
 const deleteDocsByUrl = remoteFunction('deleteDocsByUrl')
 const createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
@@ -116,15 +121,19 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
     dispatch,
     getState,
 ) => {
-    // Grab needed derived state for search
-    const state = getState()
-    const currentQueryParams = selectors.currentQueryParams(state)
+    const firstState = getState()
+    const currentQueryParams = selectors.currentQueryParams(firstState)
+    const showTooltip = selectors.showTooltip(firstState)
 
     if (currentQueryParams.query.includes('#')) {
         return
     }
 
     dispatch(setLoading(true))
+
+    if (showTooltip) {
+        dispatch(fetchNextTooltip())
+    }
 
     // Overwrite of results should always reset the current page before searching
     if (overwrite) {
@@ -135,6 +144,8 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
         return dispatch(easter())
     }
 
+    // Grab needed derived state for search
+    const state = getState()
     const searchParams = {
         ...currentQueryParams,
         getTotalCount: true,
@@ -143,12 +154,6 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
         domains: filters.domains(state),
         limit: constants.PAGE_SIZE,
         skip: selectors.resultsSkip(state),
-    }
-
-    // When we are loading the page and the in the query we can take many values so we are
-    // not inserting in the epic so the port should be there
-    if (!port) {
-        dispatch(init())
     }
 
     // Tell background script to search
@@ -202,7 +207,7 @@ const handleErrors = ({ query, error }) => dispatch => {
 /**
  * Increments the page state before scheduling another search.
  */
-export const getMoreResults = () => async dispatch => {
+export const getMoreResults = () => dispatch => {
     dispatch(nextPage())
     dispatch(search())
 }
@@ -333,4 +338,9 @@ export const setQueryTagsDomains = (input, isEnter) => (dispatch, getState) => {
     }
 
     dispatch(setQuery(input))
+}
+
+export const fetchNextTooltip = () => async dispatch => {
+    const tooltip = await fetchTooltip()
+    dispatch(setTooltip(tooltip))
 }

@@ -2,6 +2,11 @@
     display: flex;
     align-items: center;
     text-align: center;
+    color: #3eb995;
+    font-size: 18px;
+    justify-content: space-around;
+    margin-top: 25px;
+    margin-bottom: 20px;
 
     & > div {
         display: none;
@@ -39,7 +44,22 @@
 }
 
 .confirmBtn {
-    color: #000;
+    padding: 6px 1.6em;
+    border-radius: 25px;
+    font-weight: 300;
+    border: 1px solid #3eb995;
+    font-size: 1rem;
+    color: #3eb995;
+    cursor: pointer;
+    height: 35px;
+    margin-left: 12px;
+    margin-right: 12px;
+
+    &:hover,
+    &:active {
+        background-color: #3eb995;
+        color: #fff;
+    }
 }
 
 .cancelBtn {

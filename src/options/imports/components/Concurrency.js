@@ -8,7 +8,7 @@ import styles from './AdvSettings.css'
 const Concurrency = ({ concurrency, onConcurrencyChange }) => (
     <Wrapper>
         <label htmlFor="concurrency">
-            # of simultaneous downloads (max. 25)
+            # of simultaneous downloads (max. 20)
         </label>
         <input
             className={styles.concurrencyInput}
@@ -17,7 +17,7 @@ const Concurrency = ({ concurrency, onConcurrencyChange }) => (
             value={concurrency}
             type="number"
             min="1"
-            max="25"
+            max="20"
         />
     </Wrapper>
 )

@@ -1,3 +1,6 @@
+import normalizeUrl from 'normalize-url'
+
+import { normalizationOpts } from 'src/util/encode-url-for-id'
 import extractPageContent from 'src/page-analysis/content_script/extract-page-content'
 import extractFavIcon from 'src/page-analysis/content_script/extract-fav-icon'
 import extractPdfContent from 'src/page-analysis/content_script/extract-pdf-content'
@@ -26,14 +29,20 @@ export const defaultOpts = {
 export default function fetchPageData(
     { url = '', timeout = 10000, opts = defaultOpts } = { opts: defaultOpts },
 ) {
+    const normalizedUrl = normalizeUrl(url, {
+        ...normalizationOpts,
+        removeQueryParameters: [/.*/i],
+    })
+
     let run, cancel
 
     // Check if pdf and run code for pdf instead
-    if (url.endsWith('.pdf')) {
-        run = async () =>
-            opts.includePageContent
+    if (normalizedUrl.endsWith('.pdf')) {
+        run = async () => ({
+            content: opts.includePageContent
                 ? await extractPdfContent({ url })
-                : undefined
+                : undefined,
+        })
         cancel = () => {}
     } else {
         const req = fetchDOMFromUrl(url, timeout)
@@ -60,9 +69,9 @@ export default function fetchPageData(
                     : undefined,
             }
         }
-
-        return { run, cancel }
     }
+
+    return { run, cancel }
 }
 
 /**

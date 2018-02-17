@@ -26,6 +26,8 @@ const defaultState = {
         deleting: undefined,
     },
     activeTagIndex: -1,
+    tooltip: null,
+    showTooltip: true,
 }
 
 function setQuery(state, query) {
@@ -212,6 +214,18 @@ export default createReducer(
         [actions.setActiveTagIndex]: payloadReducer('activeTagIndex'),
         [actions.addTag]: addTag,
         [actions.delTag]: delTag,
+        [actions.setTooltip]: (state, tooltip) => ({
+            ...state,
+            tooltip: tooltip,
+        }),
+        [actions.toggleShowTooltip]: state => ({
+            ...state,
+            showTooltip: !state.showTooltip,
+        }),
+        [actions.setShowTooltip]: (state, showTooltip) => ({
+            ...state,
+            showTooltip: showTooltip,
+        }),
     },
     defaultState,
 )

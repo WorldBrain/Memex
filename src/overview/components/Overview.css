@@ -109,8 +109,7 @@
     text-align: center;
     margin-top: 80px;
     font-size: 20px;
-    font-family: sans-serif;
-    font-style: italic;
+    font-family: 'Open Sans';
     color: grey;
     animation-name: fadeIn;
     animation-duration: 0.5s;
@@ -193,4 +192,40 @@
     @media (max-width: 1260px) {
         display: none;
     }
+}
+
+.choiceBtn {
+    padding: 6px 1.6em;
+    border-radius: 25px;
+    font-weight: 300;
+    border: 1px solid #3eb995;
+    font-size: 1.1rem;
+    color: #3eb995;
+    cursor: pointer;
+    height: 35px;
+    margin-left: 12px;
+    margin-right: 12px;
+
+    &:hover,
+    &:active {
+        background-color: #3eb995;
+        color: #fff;
+    }
+}
+
+.subTitle {
+    font-size: 25px !important; /* stylelint-disable-line declaration-no-important */
+    font-weight: 300 !important; /* stylelint-disable-line declaration-no-important */
+    text-decoration: none;
+    margin-bottom: 40px;
+    margin-top: 10px;
+}
+
+.title {
+    color: #3eb995;
+    font-size: 30px;
+    font-weight: 800;
+    padding-top: 50px;
+    margin-bottom: 15px;
+    font-style: italic;
 }
