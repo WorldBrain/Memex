@@ -6,9 +6,7 @@ import { remoteFunction } from 'src/util/webextensionRPC'
 import { actions as filterActs, selectors as filters } from './filters'
 import * as constants from './constants'
 import * as selectors from './selectors'
-import { initTooltip } from './components/tooltips'
-
-const fetchTooltip = initTooltip()
+import { fetchTooltip } from './components/tooltips'
 
 // Will contain the runtime port which will allow bi-directional communication to the background script
 let port
@@ -315,7 +313,7 @@ export const setQueryTagsDomains = (input, isEnter) => (dispatch, getState) => {
     dispatch(setQuery(input))
 }
 
-export const fetchNextTooltip = () => dispatch => {
-    const tooltip = fetchTooltip()
+export const fetchNextTooltip = () => async dispatch => {
+    const tooltip = await fetchTooltip()
     dispatch(setTooltip(tooltip))
 }

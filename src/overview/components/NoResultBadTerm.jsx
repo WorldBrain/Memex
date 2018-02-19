@@ -13,7 +13,11 @@ const NoResultBadTerm = ({ children }) => (
         </div>
         <div className={localStyles.subsubtitle}>
             We know there is still a lot of{' '}
-            <a target="_new" href="https://worldbrain.io/help">
+            <a
+                className={localStyles.link}
+                target="_new"
+                href="https://worldbrain.helprace.com/i23-known-limitations-of-searching"
+            >
                 room to improve
             </a>.
         </div>
