@@ -154,6 +154,12 @@
     background-size: 20px;
 }
 
+.comment {
+    background-image: url('/img/tag.svg');
+    background-repeat: no-repeat;
+    background-size: 20px;
+}
+
 .blacklist {
     background-image: url('/img/blacklist_green.svg');
     background-repeat: no-repeat;

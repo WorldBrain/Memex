@@ -18,6 +18,7 @@ import { generatePageDocId } from 'src/page-storage'
 import UpgradeButton from './components/UpgradeButton'
 import ButtonIcon from './components/ButtonIcon'
 import styles from './components/Button.css'
+import CommentDropdown from '../common-ui/components/CommentDropdown'
 
 class PopupContainer extends Component {
     static propTypes = {
@@ -67,6 +68,7 @@ class PopupContainer extends Component {
         blacklistChoice: false,
         blacklistConfirm: false,
         tagMode: false,
+        commentMode: false,
 
         // Behaviour switching flags
         domainDelete: false,
@@ -140,6 +142,9 @@ class PopupContainer extends Component {
     }
 
     get isTagBtnDisabled() {
+        return !this.state.isLoggable || this.state.page == null
+    }
+    get isCommentBtnDisabled() {
         return !this.state.isLoggable || this.state.page == null
     }
 
@@ -326,6 +331,12 @@ class PopupContainer extends Component {
             tagMode: !state.tagMode,
         }))
 
+    toggleCommentPopup = () =>
+        this.setState(state => ({
+            ...state,
+            commentMode: !state.commentMode,
+        }))
+
     renderTagButton() {
         return (
             <Button
@@ -337,9 +348,27 @@ class PopupContainer extends Component {
             </Button>
         )
     }
+    renderCommentButton() {
+        return (
+            <Button
+                onClick={this.toggleCommentPopup}
+                disabled={this.isCommentBtnDisabled}
+                btnClass={styles.comment}
+            >
+                Add Comment
+            </Button>
+        )
+    }
 
     renderChildren() {
-        const { blacklistConfirm, pauseValue, isPaused, tagMode } = this.state
+        const {
+            blacklistConfirm,
+            pauseValue,
+            isPaused,
+            tagMode,
+            commentMode,
+        } = this.state
+
         if (blacklistConfirm) {
             return (
                 <BlacklistConfirm
@@ -358,7 +387,15 @@ class PopupContainer extends Component {
                 />
             )
         }
-
+        if (commentMode) {
+            return (
+                <CommentDropdown
+                    url={this.state.url}
+                    initComments={this.pageComments}
+                    source="comments"
+                />
+            )
+        }
         return (
             <div>
                 <Button
@@ -380,6 +417,7 @@ class PopupContainer extends Component {
                         : 'Bookmark this Page'}
                 </Button>
                 {this.renderTagButton()}
+                {this.renderCommentButton()}
                 <hr />
                 <HistoryPauser
                     onConfirm={this.onPauseConfirm}
@@ -414,11 +452,11 @@ class PopupContainer extends Component {
     }
 
     render() {
-        const { searchValue, tagMode } = this.state
+        const { searchValue, tagMode, commentMode } = this.state
 
         return (
             <Popup
-                shouldRenderSearch={!tagMode}
+                shouldRenderSearch={!tagMode && !commentMode}
                 searchValue={searchValue}
                 onSearchChange={this.onSearchChange}
                 onSearchEnter={this.onSearchEnter}
