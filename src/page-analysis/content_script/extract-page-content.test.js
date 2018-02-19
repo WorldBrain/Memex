@@ -1,7 +1,5 @@
 /* eslint-env jest */
 
-import * as fs from 'fs'
-import * as path from 'path'
 import * as JSDOM from 'jsdom'
 import extractPageContent from './extract-page-content'
 
@@ -31,9 +29,7 @@ describe('Extract page content', () => {
     })
 
     test('extract content from an HTML page', async () => {
-        const html = fs.readFileSync(
-            path.resolve('test-content/html/medium-index.html'),
-        )
+        // eslint-disable-next-line new-cap
         const document = new JSDOM.jsdom(`
         <!DOCTYPE html>
         <html>
