@@ -6,6 +6,13 @@ import LevelJS from './level-js-to-leveldown'
 export const DEFAULT_TERM_SEPARATOR = /[|' .,\-|(\n)]+/
 export const URL_SEPARATOR = /[/?#=+& _.,\-|(\n)]+/
 
+// People use the functions exposed directly by
+// the default object (like index.search()) to interact with the index.
+// For unit testing however, we need to repeatedly set up and
+// destroy indices, so we need some way of allowing that.
+// This is why we use a single Proxy object that other code can hold a reference
+// to while the underlying object may change. See:
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy
 let realIndex = null
 const index = new Proxy(
     {},

@@ -15,7 +15,6 @@ describe('Extract page content', () => {
     // })
 
     test('TO FINISH: extract content from PDF', async () => {
-        //     jest.setTimeout(50 * 1000)
         //     const pdfUrl =
         //         'http://cdn.linkdetox.com/wp-content/uploads/noindex/111-things-to-know-about-links.pdf'
         //     const pdfPath = path.resolve(
@@ -52,6 +51,5 @@ describe('Extract page content', () => {
             keywords: ['key words for all'],
             description: 'some kind of description',
         })
-        // fs.writeFileSync('/tmp/content.txt', )
     })
 })
