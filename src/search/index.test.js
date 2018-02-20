@@ -5,7 +5,7 @@ import * as search from './'
 import * as index from './search-index'
 
 describe('Search index', () => {
-    test('TODO: integration test', async () => {
+    test('Integration test', async () => {
         index.init({ levelDown: memdown() })
         const visit1 = Date.now().toString()
         await search.addPageConcurrent({
