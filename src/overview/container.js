@@ -45,8 +45,8 @@ class OverviewContainer extends Component {
         delTag: PropTypes.func.isRequired,
         resetFilterPopup: PropTypes.func.isRequired,
         showOnboarding: PropTypes.bool.isRequired,
-        fetchNextTooltip: PropTypes.func.isRequired,
-        isFirstTooltip: PropTypes.bool.isRequired,
+        // fetchNextTooltip: PropTypes.func.isRequired,
+        // isFirstTooltip: PropTypes.bool.isRequired,
     }
 
     componentDidMount() {

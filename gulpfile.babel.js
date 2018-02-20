@@ -173,28 +173,41 @@ gulp.task('build-watch', ['copyStaticFiles-watch'], async () => {
 // === Tasks for linting the source code ===
 
 const stylelintOptions = {
-    failAfterError: false,
     reporters: [{ formatter: 'string', console: true }],
 }
 
 gulp.task('lint', async () => {
-    const eslintStream = gulp
+    const failLintError = process.argv.slice(-1)[0] !== 'watch'
+
+    let eslintStream = gulp
         .src(['src/**/*.js', 'src/**/*.jsx'])
         .pipe(eslint())
         .pipe(eslint.format())
-        .pipe(
-            eslint.results(results => {
-                // For clarity, also give some output when there are no errors.
-                if (results.errorCount === 0) {
-                    console.log(`No eslint errors.\n`)
-                }
-            }),
-        )
+    if (failLintError) {
+        eslintStream = eslintStream.pipe(eslint.failAfterError())
+    }
+    eslintStream = eslintStream.pipe(
+        eslint.results(results => {
+            // For clarity, also give some output when there are no errors.
+            if (results.errorCount === 0) {
+                console.log(`No eslint errors.\n`)
+            }
+        }),
+    )
     await streamToPromise(eslintStream)
 
     const stylelintStream = gulp
         .src(['src/**/*.css'])
-        .pipe(stylelint(stylelintOptions))
+        .pipe(
+            stylelint({
+                ...stylelintOptions,
+                failAfterError: failLintError,
+            }),
+        )
+        .on('error', e => {
+            console.error(e)
+            process.exit(1)
+        })
     await streamToPromise(stylelintStream)
 })
 

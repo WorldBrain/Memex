@@ -1,9 +1,8 @@
 import get from 'lodash/fp/get'
 import fromPairs from 'lodash/fp/fromPairs'
-import PouchDB from 'pouchdb-browser'
+import PouchDB from 'pouchdb-browser' // maps to pouchdb-memory in Jest, see .jest-config.json
 import PouchDBFind from 'pouchdb-find'
 import { blobToBase64String } from 'blob-util'
-
 import { pageKeyPrefix, pageDocsSelector } from 'src/page-storage'
 import { visitKeyPrefix } from 'src/activity-logger'
 import { bookmarkKeyPrefix } from 'src/bookmarks'
