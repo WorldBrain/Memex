@@ -172,13 +172,13 @@ gulp.task('build-watch', ['copyStaticFiles-watch'], async () => {
 
 // === Tasks for linting the source code ===
 
-let failLintError = true
 const stylelintOptions = {
-    failAfterError: true,
     reporters: [{ formatter: 'string', console: true }],
 }
 
 gulp.task('lint', async () => {
+    const failLintError = process.argv.slice(-1)[0] !== 'watch'
+
     let eslintStream = gulp
         .src(['src/**/*.js', 'src/**/*.jsx'])
         .pipe(eslint())
@@ -212,8 +212,6 @@ gulp.task('lint', async () => {
 })
 
 gulp.task('lint-watch', ['lint'], callback => {
-    failLintError = false
-
     gulp.watch(['src/**/*.js', 'src/**/*.jsx']).on('change', event => {
         return gulp
             .src(event.path)
