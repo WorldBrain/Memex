@@ -9,12 +9,16 @@
     box-shadow: 0px 6px 7px -7px #777;
 }
 
+a {
+    text-decoration: none !important; /* stylelint-disable-line declaration-no-important */
+}
+
 .choiceBtnContainer {
     font-size: 1.1rem;
     color: #3eb995;
     font-weight: lighter;
     display: block;
-    min-height: 150px;
+    min-height: 160px;
     margin-bottom: 15px;
 }
 
@@ -26,14 +30,23 @@
 .prepareMsg {
     padding-top: 25px;
     font-size: 20px;
+    margin-bottom: 25px;
 }
 
-.cancelText {
+.cancelBtn {
+    padding: 6px 1.6em;
+    border-radius: 25px;
+    font-weight: 300;
+    border: 1px solid #3eb995;
+    font-size: 1.1rem;
+    color: #3eb995;
     cursor: pointer;
+    height: 35px;
 
-    &:hover {
-        text-decoration: underline;
-        color: #185b47;
+    &:hover,
+    &:active {
+        background-color: #3eb995;
+        color: #fff;
     }
 }
 
@@ -117,6 +130,7 @@
     font-weight: lighter;
     font-family: 'Libre Franklin', sans-serif;
     justify-content: center;
+    margin-bottom: 15px;
 }
 
 .message {

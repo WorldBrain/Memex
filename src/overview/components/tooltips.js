@@ -77,9 +77,18 @@ const tooltips = [
 ]
 
 /**
- * @return {() => Tooltip} Function that acts as a data source for returning new Tooltips.
+ * @return {Tooltip} Object that is the new Tooltips.
  */
-export function initTooltip() {
+export async function fetchTooltip() {
     let index = 0
-    return () => tooltips[index++ % tooltips.length]
+    const indexTooltip = (await browser.storage.local.get('tooltip_index'))
+        .tooltip_index
+
+    if (indexTooltip !== undefined) {
+        index = indexTooltip
+    }
+
+    await browser.storage.local.set({ tooltip_index: index + 1 })
+
+    return tooltips[index++ % tooltips.length]
 }

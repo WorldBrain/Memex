@@ -181,3 +181,9 @@ export const isFirstTooltip = createSelector(
     showTooltip,
     (tooltip, showTooltip) => tooltip === null && showTooltip,
 )
+
+export const isTooltipRenderable = createSelector(
+    tooltip,
+    showTooltip,
+    (tooltip, showTooltip) => tooltip !== null && showTooltip,
+)

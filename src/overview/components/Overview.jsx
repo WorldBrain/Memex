@@ -18,12 +18,15 @@ const showFilterClass = ({ showFilters }) =>
 const Overview = props => (
     <Wrapper>
         <Header {...props} />
+
         <Tooltip
             showTooltip={props.showTooltip}
             toggleShowTooltip={props.toggleShowTooltip}
             tooltip={props.tooltip}
             fetchNextTooltip={props.fetchNextTooltip}
+            isTooltipRenderable={props.isTooltipRenderable}
         />
+
         <ShareButtons />
 
         <div className={showFilterClass(props)}>{props.filters}</div>
@@ -54,6 +57,7 @@ Overview.propTypes = {
     toggleShowTooltip: PropTypes.func.isRequired,
     tooltip: PropTypes.object,
     fetchNextTooltip: PropTypes.func.isRequired,
+    isTooltipRenderable: PropTypes.bool.isRequired,
 }
 
 export default Overview
