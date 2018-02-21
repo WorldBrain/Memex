@@ -114,7 +114,13 @@ async function createBundle(
         const startTime = Date.now()
         b
             .bundle()
-            .on('error', console.error)
+            .on('error', err => {
+                console.error(err.stack)
+                // Fail entire gulp build if browserify emits error, but not in dev/watch mode
+                if (!watch) {
+                    process.exit(1)
+                }
+            })
             .pipe(source(output))
             .pipe(buffer())
             .pipe(
