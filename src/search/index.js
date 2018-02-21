@@ -1,88 +1,115 @@
-import QueryBuilder from './query-builder'
-import { searchConcurrent } from './search-index/search'
-import mapResultsToPouchDocs from './map-search-to-pouch'
+import * as oldBackend from './search-index-old/api'
+import * as newBackend from './search-index-new'
 
-async function indexSearch({
-    query,
-    startDate,
-    endDate,
-    tags = [],
-    domains = [],
-    skip = 0,
-    limit = 10,
-    getTotalCount = false,
-    showOnlyBookmarks = false,
-    mapResultsFunc = mapResultsToPouchDocs,
-}) {
-    query = query.trim() // Don't count whitespace searches
-
-    // Create SI query
-    const indexQuery = new QueryBuilder()
-        .searchTerm(query)
-        .filterTime({ startDate, endDate }, 'bookmark/')
-        .filterTime({ startDate, endDate }, 'visit/')
-        .filterTags(tags)
-        .filterDomains(domains)
-        .skipUntil(skip)
-        .limitUntil(limit)
-        .bookmarksFilter(showOnlyBookmarks)
-        .get()
-
-    // If there is only Bad Terms don't continue
-    if (indexQuery.isBadTerm) {
-        return {
-            docs: [],
-            resultsExhausted: true,
-            totalCount: getTotalCount ? 0 : undefined,
-            isBadTerm: true,
+export const getBackend = (() => {
+    let backend = null
+    const get = async function() {
+        if (!backend) {
+            get._reset({ useOld: await oldBackend.hasData() })
         }
+        return backend
     }
+    get._reset = ({ useOld }) => {
+        backend = useOld ? oldBackend : newBackend
+    }
+    return get
+})()
 
-    console.log('DEBUG: query', indexQuery)
+//
+// Adding stuff
+//
 
-    // Get index results, filtering out any unexpectedly structured results
-    const { results, totalCount } = await searchConcurrent(indexQuery, {
-        count: getTotalCount,
-    })
+export async function addPage(...args) {
+    return await (await getBackend()).addPage(...args)
+}
 
-    // console.log('got results', results)
+export async function addPageTerms(...args) {
+    return await (await getBackend()).addPageTerms(...args)
+}
 
-    // Short-circuit if no results
-    if (!results.length) {
-        return {
-            docs: [],
-            resultsExhausted: true,
-            totalCount,
-            isBadTerm: false,
+export async function updateTimestampMeta(...args) {
+    return await (await getBackend()).updateTimestampMeta(...args)
+}
+
+//
+// Deleting stuff
+//
+export async function delPages(...args) {
+    return await (await getBackend()).delPages(...args)
+}
+
+//
+// Tags
+//
+export async function setTags(...args) {
+    return await (await getBackend()).setTags(...args)
+}
+
+export async function addTags(...args) {
+    return await (await getBackend()).addTags(...args)
+}
+
+export async function delTags(...args) {
+    return await (await getBackend()).delTags(...args)
+}
+
+export async function fetchTags(...args) {
+    return await (await getBackend()).fetchTags(...args)
+}
+
+//
+// Bookmarks
+//
+export async function addBookmark(...args) {
+    return await (await getBackend()).addBookmark(...args)
+}
+
+export async function createBookmarkByUrl(...args) {
+    return await (await getBackend()).createBookmarkByUrl(...args)
+}
+
+export async function createNewPageForBookmark(...args) {
+    return await (await getBackend()).createNewPageForBookmark(...args)
+}
+
+export async function removeBookmarkByUrl(...args) {
+    return await (await getBackend()).removeBookmarkByUrl(...args)
+}
+
+//
+// Utilities
+//
+export function initSingleLookup() {
+    let singleLookup
+    return async function(...args) {
+        if (!singleLookup) {
+            singleLookup = (await getBackend()).initSingleLookup()
         }
-    }
-
-    // Match the index results to data docs available in Pouch, consolidating meta docs
-    const docs = await mapResultsFunc(results, {
-        startDate,
-        endDate,
-        showOnlyBookmarks,
-    })
-
-    console.log('DEBUG: final UI results', docs)
-
-    return {
-        docs,
-        resultsExhausted: docs.length < limit,
-        totalCount,
-        isBadTerm: false,
+        return await singleLookup(...args)
     }
 }
 
+export async function grabExistingKeys(...args) {
+    return await (await getBackend()).grabExistingKeys(...args)
+}
+
+//
+// Searching & suggesting
+//
+
+export async function search(...args) {
+    return await (await getBackend()).search(...args)
+}
+
+export async function suggest(...args) {
+    return await (await getBackend()).suggest(...args)
+}
+
+export const indexQueue = {
+    clear: async () => {
+        ;(await getBackend()).indexQueue.clear()
+    },
+}
+
 // Export index interface
-export {
-    addPageConcurrent,
-    addPageTermsConcurrent,
-    addBookmarkConcurrent,
-    put,
-    addTimestampConcurrent,
-    updateTimestampMetaConcurrent,
-} from './search-index/add'
-export { initSingleLookup, keyGen, grabExistingKeys } from './search-index/util'
-export { delPages, delPagesConcurrent, del } from './search-index/del'
-export { indexSearch as search }
+export { keyGen, removeKeyType } from './util'

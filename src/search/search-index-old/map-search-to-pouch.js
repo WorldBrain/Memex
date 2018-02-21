@@ -1,7 +1,7 @@
 import reduce from 'lodash/fp/reduce'
 
-import db, { bulkGetResultsToArray } from '../pouchdb'
-import { removeKeyType } from './search-index/util'
+import db, { bulkGetResultsToArray } from '../../pouchdb'
+import { removeKeyType } from './util'
 
 /**
  * @param {Array<string>} timestamps

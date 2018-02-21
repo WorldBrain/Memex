@@ -1,8 +1,8 @@
 import { fetchDocTypesByUrl } from 'src/pouchdb'
 import { generatePageDocId } from 'src/page-storage'
-import * as index from 'src/search'
+import { index, initSingleLookup } from '../'
 import deleteDocsByUrl, { deleteDocs } from 'src/page-storage/deletion'
-import { bookmarkKeyPrefix } from '..'
+import { bookmarkKeyPrefix } from '../../bookmarks'
 
 /**
  * TODO: Decided if we actually need these bookmark docs in Pouch; I don't think they're being used for anything.
@@ -14,7 +14,7 @@ import { bookmarkKeyPrefix } from '..'
  */
 async function removeBookmarkByUrl(url) {
     const pageId = generatePageDocId({ url })
-    const reverseIndexDoc = await index.initSingleLookup()(pageId)
+    const reverseIndexDoc = await initSingleLookup()(pageId)
 
     if (reverseIndexDoc == null) {
         throw new Error(

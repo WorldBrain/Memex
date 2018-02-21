@@ -1,8 +1,17 @@
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import searchConnectionHandler from './search-connection-handler'
-import { setTags, addTags, delTags, fetchTags } from '../search-index/tags'
-import { initSingleLookup, removeKeyType } from '../search-index/util'
-import suggest from '../search-index/suggest'
+import {
+    setTags,
+    addTags,
+    delTags,
+    fetchTags,
+    initSingleLookup,
+    removeKeyType,
+    suggest,
+    removeBookmarkByUrl,
+    createBookmarkByUrl,
+    createNewPageForBookmark,
+} from '../'
 
 const singleLookup = initSingleLookup()
 
@@ -19,6 +28,8 @@ makeRemotelyCallable({
                     ? transformPageForSending(page, projectOpts)
                     : page,
         ),
+    createBookmarkByUrl,
+    removeBookmarkByUrl,
 })
 
 const destructPageAtt = (att = []) => [...att]
@@ -43,3 +54,12 @@ const transformPageForSending = (page, projectOpts) => ({
 
 // Allow other scripts to connect to background index and send queries
 browser.runtime.onConnect.addListener(searchConnectionHandler)
+
+const removeBookmarkHandler = (id, { node }) =>
+    node.url
+        ? removeBookmarkByUrl(node.url)
+        : console.warn('Cannot remove bookmark with no URL', node)
+
+// Store and index any new browser bookmark
+browser.bookmarks.onCreated.addListener(createNewPageForBookmark)
+browser.bookmarks.onRemoved.addListener(removeBookmarkHandler)

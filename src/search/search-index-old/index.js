@@ -3,9 +3,6 @@ import levelup from 'levelup'
 import Queue from 'src/util/priority-queue'
 import LevelJS from './level-js-to-leveldown'
 
-export const DEFAULT_TERM_SEPARATOR = /[|' .,\-|(\n)]+/
-export const URL_SEPARATOR = /[/?#=+& _.,\-|(\n)]+/
-
 // People use the functions exposed directly by
 // the default object (like index.search()) to interact with the index.
 // For unit testing however, we need to repeatedly set up and
@@ -48,5 +45,5 @@ export function init({ levelDown } = {}) {
     realIndex = levelup(levelDown)
 }
 
-export { indexQueue }
 export default index
+export { indexQueue }

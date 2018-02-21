@@ -2,13 +2,14 @@
 
 import memdown from 'memdown'
 import * as search from './'
-import * as index from './search-index'
+import * as oldIndex from './search-index-old'
 
 describe('Search index', () => {
     test('Integration test', async () => {
-        index.init({ levelDown: memdown() })
+        search.getBackend._reset({ useOld: true })
+        oldIndex.init({ levelDown: memdown() })
         const visit1 = Date.now().toString()
-        await search.addPageConcurrent({
+        await search.addPage({
             pageDoc: {
                 _id: 'test-id-1',
                 url: 'https://www.test.com/test',
@@ -49,7 +50,7 @@ describe('Search index', () => {
         ]) // TODO: Why is score not deterministic?
 
         const visit2 = Date.now().toString()
-        await search.addPageConcurrent({
+        await search.addPage({
             pageDoc: {
                 _id: 'test-id-2',
                 url: 'https://www.test.com/test2',

@@ -1,6 +1,7 @@
 import promiseLimit from 'promise-limit'
 
-import index, { indexQueue, DEFAULT_TERM_SEPARATOR } from './'
+import { keyGen, removeKeyType, DEFAULT_TERM_SEPARATOR } from '../util'
+import index, { indexQueue } from './'
 
 /**
  * @param {(args: any) => Promise<any>} fn Any async function to place on the index operations queue.
@@ -15,20 +16,6 @@ export const makeIndexFnConcSafe = fn => (...args) =>
                 .catch(reject),
         ),
     )
-
-// Key generation functions
-export const keyGen = {
-    domain: key => `domain/${key}`,
-    tag: key => `tag/${key}`,
-    url: key => `url/${key}`,
-    term: key => `term/${key}`,
-    title: key => `title/${key}`,
-    visit: key => `visit/${key}`,
-    bookmark: key => `bookmark/${key}`,
-}
-
-export const removeKeyType = key =>
-    key.replace(/^(term|title|visit|url|domain|tag|bookmark)\//, '')
 
 export const idbBatchToPromise = batch =>
     new Promise((resolve, reject) =>
