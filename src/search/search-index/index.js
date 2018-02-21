@@ -48,5 +48,9 @@ export function init({ levelDown } = {}) {
     realIndex = levelup(levelDown)
 }
 
+export * from './add'
+export * from './del'
+export * from './tags'
+export * from './util'
 export { indexQueue }
 export default index
