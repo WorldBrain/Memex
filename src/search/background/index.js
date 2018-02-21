@@ -7,8 +7,11 @@ import {
     fetchTags,
     initSingleLookup,
     removeKeyType,
+    suggest,
+    removeBookmarkByUrl,
+    createBookmarkByUrl,
+    createNewPageForBookmark,
 } from '../'
-import suggest from '../search-index/suggest'
 
 const singleLookup = initSingleLookup()
 
@@ -25,6 +28,8 @@ makeRemotelyCallable({
                     ? transformPageForSending(page, projectOpts)
                     : page,
         ),
+    createBookmarkByUrl,
+    removeBookmarkByUrl,
 })
 
 const destructPageAtt = (att = []) => [...att]
@@ -49,3 +54,12 @@ const transformPageForSending = (page, projectOpts) => ({
 
 // Allow other scripts to connect to background index and send queries
 browser.runtime.onConnect.addListener(searchConnectionHandler)
+
+const removeBookmarkHandler = (id, { node }) =>
+    node.url
+        ? removeBookmarkByUrl(node.url)
+        : console.warn('Cannot remove bookmark with no URL', node)
+
+// Store and index any new browser bookmark
+browser.bookmarks.onCreated.addListener(createNewPageForBookmark)
+browser.bookmarks.onRemoved.addListener(removeBookmarkHandler)

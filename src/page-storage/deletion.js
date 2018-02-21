@@ -6,7 +6,7 @@ import db, {
 import { delPagesConcurrent, initSingleLookup, keyGen } from 'src/search'
 import { pageKeyPrefix } from 'src/page-storage'
 import { visitKeyPrefix } from 'src/activity-logger'
-import { bookmarkKeyPrefix } from 'src/bookmarks'
+import { bookmarkKeyPrefix } from 'src/search/bookmarks'
 
 /**
  * @param {any} input

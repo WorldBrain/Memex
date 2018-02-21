@@ -1,11 +1,14 @@
 import { dataURLToBlob } from 'blob-util'
 
 import fetchPageData from 'src/page-analysis/background/fetch-page-data'
-import * as index from 'src/search'
+import { addPageConcurrent, addPageTermsConcurrent } from '../add'
 import db from 'src/pouchdb'
 import { transformToBookmarkDoc } from 'src/imports'
 import { generatePageDocId } from 'src/page-storage'
 import storePage from 'src/page-storage/store-page'
+import { bookmarkKeyPrefix } from '../../bookmarks'
+import { fetchExistingPage, makeIndexFnConcSafe } from '../util'
+import index from '../'
 
 async function getAttachments(pageData) {
     const favIconBlob = await dataURLToBlob(pageData.favIconURI)
@@ -48,7 +51,7 @@ export async function createNewPageForBookmark(id, bookmarkInfo) {
         )
     } finally {
         const bookmarkDoc = transformToBookmarkDoc(pageDoc)(bookmarkInfo)
-        index.addPageConcurrent({ pageDoc, bookmarkDocs: [bookmarkDoc] })
+        addPageConcurrent({ pageDoc, bookmarkDocs: [bookmarkDoc] })
         db.bulkDocs([bookmarkDoc, pageDoc])
     }
 }
@@ -66,12 +69,12 @@ export async function createNewPageForBookmark(id, bookmarkInfo) {
 async function addBookmarkDoc(pageExist, pageId, pageDoc, bookmarkDoc) {
     if (pageExist) {
         return await Promise.all([
-            index.addBookmarkConcurrent(pageId),
+            addBookmarkConcurrent(pageId),
             db.put(bookmarkDoc),
         ])
     } else {
         return await Promise.all([
-            await index.addPageConcurrent({
+            await addPageConcurrent({
                 pageDoc: pageDoc,
                 bookmarkDocs: [bookmarkDoc],
             }),
@@ -113,3 +116,24 @@ export async function createBookmarkByUrl(url, tabId = null) {
 
     await addBookmarkDoc(pageExist, pageId, pageDoc, bookmarkDoc)
 }
+
+/**
+ * @param {string} pageId ID/key of document to associate new bookmark entry with.
+ * @param {number|string} [timestamp=Date.now()]
+ * @throws {Error} Error thrown when `pageId` param does not correspond to existing document (or any other
+ *  standard indexing-related Error encountered during updates).
+ */
+async function addBookmark(pageId, timestamp = Date.now()) {
+    const reverseIndexDoc = await fetchExistingPage(pageId)
+
+    const bookmarkKey = `${bookmarkKeyPrefix}${timestamp}`
+
+    // Add new entry to bookmarks index
+    await index.put(bookmarkKey, { pageId })
+
+    // Add bookmarks index key to reverse page doc and update index entry
+    reverseIndexDoc.bookmarks.add(bookmarkKey)
+    await index.put(pageId, reverseIndexDoc)
+}
+
+export const addBookmarkConcurrent = makeIndexFnConcSafe(addBookmark)
