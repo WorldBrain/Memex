@@ -6,7 +6,7 @@ import analytics, { updateLastActive } from 'src/analytics'
 import extractQueryFilters from 'src/util/nlp-time-filter'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { isLoggable, getPauseState } from 'src/activity-logger'
-import { IndexDropdown } from 'src/common-ui/containers'
+import { IndexDropdown, CommentDropdown } from 'src/common-ui/containers'
 import Popup from './components/Popup'
 import Button from './components/Button'
 import BlacklistConfirm from './components/BlacklistConfirm'
@@ -18,7 +18,6 @@ import { generatePageDocId } from 'src/page-storage'
 import UpgradeButton from './components/UpgradeButton'
 import ButtonIcon from './components/ButtonIcon'
 import styles from './components/Button.css'
-import CommentDropdown from '../common-ui/components/CommentDropdown'
 
 class PopupContainer extends Component {
     static propTypes = {
@@ -46,6 +45,7 @@ class PopupContainer extends Component {
         this.deleteDocs = remoteFunction('deleteDocsByUrl')
         this.removeBookmarkByUrl = remoteFunction('removeBookmarkByUrl')
         this.createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
+        this.createCommentsByUrl = remoteFunction('createCommentsByUrl') // mine
 
         this.onSearchChange = this.onSearchChange.bind(this)
         this.onPauseChange = this.onPauseChange.bind(this)
@@ -68,7 +68,7 @@ class PopupContainer extends Component {
         blacklistChoice: false,
         blacklistConfirm: false,
         tagMode: false,
-        commentMode: false,
+        commentMode: false, // mine
 
         // Behaviour switching flags
         domainDelete: false,
@@ -170,6 +170,16 @@ class PopupContainer extends Component {
         }
 
         return this.state.page.tags
+    }
+
+    // mine
+    get pageComment() {
+        // No assoc. page indexed, or commentless page
+        if (this.state.page == null || this.state.page.comments == null) {
+            return []
+        }
+
+        return this.state.page.comments
     }
 
     onBlacklistBtnClick(domainDelete = false) {
@@ -368,7 +378,7 @@ class PopupContainer extends Component {
             tagMode,
             commentMode,
         } = this.state
-
+        console.log(this.state)
         if (blacklistConfirm) {
             return (
                 <BlacklistConfirm
@@ -388,13 +398,7 @@ class PopupContainer extends Component {
             )
         }
         if (commentMode) {
-            return (
-                <CommentDropdown
-                    url={this.state.url}
-                    initComments={this.pageComments}
-                    source="comments"
-                />
-            )
+            return <CommentDropdown />
         }
         return (
             <div>
