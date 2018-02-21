@@ -1,6 +1,86 @@
 import QueryBuilder from './query-builder'
 import { searchConcurrent } from './search-index/search'
 import mapResultsToPouchDocs from './map-search-to-pouch'
+import * as oldIndex from './search-index'
+
+//
+// Adding stuff
+//
+
+export async function addPageConcurrent(...args) {
+    return await oldIndex.addPageConcurrent(...args)
+}
+
+export async function addPageTermsConcurrent(...args) {
+    return await oldIndex.addPageTermsConcurrent(...args)
+}
+
+export async function addBookmarkConcurrent(...args) {
+    return await oldIndex.addBookmarkConcurrent(...args)
+}
+
+export async function put(...args) {
+    return await oldIndex.put(...args)
+}
+
+export async function updateTimestampMetaConcurrent(...args) {
+    return await oldIndex.updateTimestampMetaConcurrent(...args)
+}
+
+//
+// Deleting stuff
+//
+export async function delPages(...args) {
+    return await oldIndex.delPages(...args)
+}
+
+export async function delPagesConcurrent(...args) {
+    return await oldIndex.delPagesConcurrent(...args)
+}
+
+export async function del(...args) {
+    return await oldIndex.del(...args)
+}
+
+//
+// Tagging
+//
+export async function setTags(...args) {
+    return await oldIndex.setTags(...args)
+}
+
+export async function addTags(...args) {
+    return await oldIndex.addTags(...args)
+}
+
+export async function delTags(...args) {
+    return await oldIndex.delTags(...args)
+}
+
+export async function fetchTags(...args) {
+    return await oldIndex.fetchTags(...args)
+}
+
+//
+// Utilities
+//
+export function initSingleLookup(...args) {
+    return oldIndex.initSingleLookup(...args)
+}
+
+export const keyGen = oldIndex.keyGen // Is an object with functions
+
+export function grabExistingKeys(...args) {
+    return oldIndex.grabExistingKeys(...args)
+}
+
+export function removeKeyType(...args) {
+    return oldIndex.removeKeyType(...args)
+}
+
+//
+// Searching
+//
 
 async function indexSearch({
     query,
@@ -75,14 +155,5 @@ async function indexSearch({
 }
 
 // Export index interface
-export {
-    addPageConcurrent,
-    addPageTermsConcurrent,
-    addBookmarkConcurrent,
-    put,
-    addTimestampConcurrent,
-    updateTimestampMetaConcurrent,
-} from './search-index/add'
-export { initSingleLookup, keyGen, grabExistingKeys } from './search-index/util'
-export { delPages, delPagesConcurrent, del } from './search-index/del'
+export { default as index, indexQueue } from './search-index'
 export { indexSearch as search }

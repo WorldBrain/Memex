@@ -1,6 +1,6 @@
 import promiseLimit from 'promise-limit'
 
-import { indexQueue } from 'src/search/search-index'
+import { indexQueue } from 'src/search'
 import stateManager from './import-state'
 import ItemProcessor from './import-item-processor'
 

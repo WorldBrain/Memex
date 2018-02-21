@@ -15,7 +15,7 @@ import {
     convertOldExtBlacklist,
 } from 'src/blacklist/background'
 import { OLD_EXT_KEYS } from 'src/options/imports/constants'
-import index from 'src/search/search-index'
+import { index } from 'src/search'
 import analytics from 'src/analytics'
 import updateNotification from 'src/util/update-notification'
 
