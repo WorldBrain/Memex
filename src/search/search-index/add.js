@@ -1,4 +1,4 @@
-import { bookmarkKeyPrefix } from 'src/bookmarks'
+import { bookmarkKeyPrefix } from '../bookmarks'
 import { visitKeyPrefix } from 'src/activity-logger'
 import index from '.'
 import pipeline from './pipeline'
@@ -50,27 +50,6 @@ export const addPageConcurrent = makeIndexFnConcSafe(req =>
 export const addPageTermsConcurrent = makeIndexFnConcSafe(req =>
     pipeline(req).then(addPageTerms),
 )
-
-export const addBookmarkConcurrent = makeIndexFnConcSafe(addBookmark)
-
-/**
- * @param {string} pageId ID/key of document to associate new bookmark entry with.
- * @param {number|string} [timestamp=Date.now()]
- * @throws {Error} Error thrown when `pageId` param does not correspond to existing document (or any other
- *  standard indexing-related Error encountered during updates).
- */
-async function addBookmark(pageId, timestamp = Date.now()) {
-    const reverseIndexDoc = await fetchExistingPage(pageId)
-
-    const bookmarkKey = `${bookmarkKeyPrefix}${timestamp}`
-
-    // Add new entry to bookmarks index
-    await index.put(bookmarkKey, { pageId })
-
-    // Add bookmarks index key to reverse page doc and update index entry
-    reverseIndexDoc.bookmarks.add(bookmarkKey)
-    await index.put(pageId, reverseIndexDoc)
-}
 
 /**
  * @param {IndexTermValue} currTermVal

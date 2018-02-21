@@ -51,6 +51,8 @@ export function init({ levelDown } = {}) {
 export * from './add'
 export * from './del'
 export * from './tags'
+export * from './bookmarks'
+export { default as suggest } from './suggest'
 export * from './util'
 export { indexQueue }
 export default index

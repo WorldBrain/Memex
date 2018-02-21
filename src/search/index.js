@@ -15,10 +15,6 @@ export async function addPageTermsConcurrent(...args) {
     return await oldIndex.addPageTermsConcurrent(...args)
 }
 
-export async function addBookmarkConcurrent(...args) {
-    return await oldIndex.addBookmarkConcurrent(...args)
-}
-
 export async function put(...args) {
     return await oldIndex.put(...args)
 }
@@ -43,7 +39,7 @@ export async function del(...args) {
 }
 
 //
-// Tagging
+// Tags
 //
 export async function setTags(...args) {
     return await oldIndex.setTags(...args)
@@ -59,6 +55,25 @@ export async function delTags(...args) {
 
 export async function fetchTags(...args) {
     return await oldIndex.fetchTags(...args)
+}
+
+//
+// Bookmarks
+//
+export async function addBookmarkConcurrent(...args) {
+    return await oldIndex.addBookmarkConcurrent(...args)
+}
+
+export async function createBookmarkByUrl(...args) {
+    return await oldIndex.createBookmarkByUrl(...args)
+}
+
+export async function createNewPageForBookmark(...args) {
+    return await oldIndex.createNewPageForBookmark(...args)
+}
+
+export async function removeBookmarkByUrl(...args) {
+    return await oldIndex.removeBookmarkByUrl(...args)
 }
 
 //
@@ -79,10 +94,10 @@ export function removeKeyType(...args) {
 }
 
 //
-// Searching
+// Searching & suggesting
 //
 
-async function indexSearch({
+export async function search({
     query,
     startDate,
     endDate,
@@ -154,6 +169,9 @@ async function indexSearch({
     }
 }
 
+export function suggest(...args) {
+    return oldIndex.suggest(...args)
+}
+
 // Export index interface
 export { default as index, indexQueue } from './search-index'
-export { indexSearch as search }

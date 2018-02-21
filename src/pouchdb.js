@@ -5,7 +5,7 @@ import PouchDBFind from 'pouchdb-find'
 import { blobToBase64String } from 'blob-util'
 import { pageKeyPrefix, pageDocsSelector } from 'src/page-storage'
 import { visitKeyPrefix } from 'src/activity-logger'
-import { bookmarkKeyPrefix } from 'src/bookmarks'
+import { bookmarkKeyPrefix } from 'src/search/bookmarks'
 import encodeUrl from 'src/util/encode-url-for-id'
 
 PouchDB.plugin(PouchDBFind)

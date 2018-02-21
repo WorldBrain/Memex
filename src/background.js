@@ -2,13 +2,12 @@ import urlRegex from 'url-regex'
 import 'src/activity-logger/background'
 import 'src/page-storage/background'
 import 'src/search/background'
-import 'src/bookmarks/background'
 import 'src/analytics/background'
 import 'src/omnibar'
 import { installTimeStorageKey } from 'src/imports/background'
 import { generatePageDocId } from 'src/page-storage'
 import { generateVisitDocId } from 'src/activity-logger'
-import { generateBookmarkDocId } from 'src/bookmarks'
+import { generateBookmarkDocId } from 'src/search/bookmarks'
 import {
     constants as blacklistConsts,
     blacklist,
