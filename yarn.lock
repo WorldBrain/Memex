@@ -1951,6 +1951,12 @@ compress-commons@^1.2.0:
     normalize-path "^2.0.0"
     readable-stream "^2.0.0"
 
+compromise@^11.4.0:
+  version "11.4.0"
+  resolved "https://registry.yarnpkg.com/compromise/-/compromise-11.4.0.tgz#15693739e96908cb9b3e57d0e8b255de951b77c4"
+  dependencies:
+    efrt-unpack "2.0.3"
+
 concat-map@0.0.1:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/concat-map/-/concat-map-0.0.1.tgz#d8a96bd77fd68df7793a73036a3ba0d5405d477b"
@@ -2589,6 +2595,10 @@ ecdsa-sig-formatter@1.0.9:
   dependencies:
     base64url "^2.0.0"
     safe-buffer "^5.0.1"
+
+efrt-unpack@2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/efrt-unpack/-/efrt-unpack-2.0.3.tgz#6ada57793e3dda16d182f6a371fbe3d135af9dc2"
 
 electron-to-chromium@^1.2.7, electron-to-chromium@^1.3.14:
   version "1.3.14"
