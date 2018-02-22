@@ -35,7 +35,7 @@ export async function logInitPageVisit(tabId, secsSinceLastIndex = 20) {
             )
         ) {
             tabManager.clearScheduledLog(tabId)
-            return await index.addTimestampConcurrent(pageId, visitId)
+            return await index.addTimestamp(pageId, visitId)
         }
 
         const pageDoc = await storePage({
@@ -45,7 +45,7 @@ export async function logInitPageVisit(tabId, secsSinceLastIndex = 20) {
             runAnalysis: false,
         })
 
-        await index.addPageConcurrent({
+        await index.addPage({
             pageDoc,
             visits: [visitTime],
             rejectNoContent: false, // No page content available yet; don't reject during pre-processing pipeline
@@ -74,5 +74,5 @@ export async function logPageVisit(tabId) {
     })
 
     // Index all the terms for the page
-    await index.addPageTermsConcurrent({ pageDoc })
+    await index.addPageTerms({ pageDoc })
 }

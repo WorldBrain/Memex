@@ -8,7 +8,7 @@ describe('Search index', () => {
     test('Integration test', async () => {
         index.init({ levelDown: memdown() })
         const visit1 = Date.now().toString()
-        await search.addPageConcurrent({
+        await search.addPage({
             pageDoc: {
                 _id: 'test-id-1',
                 url: 'https://www.test.com/test',
@@ -49,7 +49,7 @@ describe('Search index', () => {
         ]) // TODO: Why is score not deterministic?
 
         const visit2 = Date.now().toString()
-        await search.addPageConcurrent({
+        await search.addPage({
             pageDoc: {
                 _id: 'test-id-2',
                 url: 'https://www.test.com/test2',

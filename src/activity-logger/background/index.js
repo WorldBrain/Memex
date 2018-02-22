@@ -1,6 +1,6 @@
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import { whenPageDOMLoaded, whenTabActive } from 'src/util/tab-events'
-import { updateTimestampMetaConcurrent } from 'src/search'
+import { updateTimestampMeta } from 'src/search'
 import { blacklist } from 'src/blacklist/background'
 import { logPageVisit, logInitPageVisit } from './log-page-visit'
 import initPauser from './pause-logging'
@@ -47,7 +47,7 @@ async function updateVisitInteractionData({
     const visitKey = visitKeyPrefix + visitTime
 
     try {
-        await updateTimestampMetaConcurrent(visitKey, data => ({
+        await updateTimestampMeta(visitKey, data => ({
             ...data,
             duration: activeTime,
             scrollPx: scrollState.pixel,
