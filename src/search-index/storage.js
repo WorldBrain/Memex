@@ -56,7 +56,7 @@ export default class Storage extends Dexie {
      */
     _initSchema() {
         this.version(1).stores({
-            pages: 'url, *terms',
+            pages: 'url, *terms, *titleTerms, *urlTerms',
             visits: '[time+url], url',
             bookmarks: 'url, time',
         })
@@ -184,7 +184,7 @@ export default class Storage extends Dexie {
      * @return {Promise<[number, string][]>} Ordered array of result KVPs of latest visit timestamps to page URLs.
      */
     search({
-        query = '',
+        queryTerms = [],
         startTime = 0,
         endTime = Date.now(),
         skip = 0,
@@ -215,8 +215,15 @@ export default class Storage extends Dexie {
 
                 // Fetch all pages with terms matching query
                 let matchingPageUrls = await this.pages
-                    .where('terms')
-                    .equals(query)
+                    .where('titleTerms')
+                    .anyOf(queryTerms)
+                    .distinct()
+                    .or('urlTerms')
+                    .anyOf(queryTerms)
+                    .distinct()
+                    .or('terms')
+                    .anyOf(queryTerms)
+                    .distinct()
                     .filter(page => latestVisitByUrl.has(page.url))
                     .primaryKeys()
 

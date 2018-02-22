@@ -114,16 +114,6 @@ export async function search({
 }) {
     query = query.trim() // Don't count whitespace searches
 
-    const res = await newIndex.search({
-        query,
-        startTime: startDate,
-        endTime: endDate,
-        bookmarks: showOnlyBookmarks,
-        skip,
-        limit,
-    })
-    console.log('new index res:', res)
-
     // Create SI query
     const indexQuery = new QueryBuilder()
         .searchTerm(query)
@@ -135,6 +125,16 @@ export async function search({
         .limitUntil(limit)
         .bookmarksFilter(showOnlyBookmarks)
         .get()
+
+    const res = await newIndex.search({
+        queryTerms: [...indexQuery.query],
+        startTime: startDate,
+        endTime: endDate,
+        bookmarks: showOnlyBookmarks,
+        skip,
+        limit,
+    })
+    console.log('new index res:', res)
 
     // If there is only Bad Terms don't continue
     if (indexQuery.isBadTerm) {
