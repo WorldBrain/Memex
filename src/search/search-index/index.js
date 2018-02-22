@@ -48,11 +48,26 @@ export function init({ levelDown } = {}) {
     realIndex = levelup(levelDown)
 }
 
-export * from './add'
-export * from './del'
-export * from './tags'
-export * from './bookmarks'
+export {
+    addPageConcurrent as addPage,
+    addPageTermsConcurrent as addPageTerms,
+    updateTimestampMetaConcurrent as updateTimestampMeta,
+} from './add'
+export { delPagesConcurrent as delPages } from './del'
+export { setTags, addTags, delTags, fetchTags } from './tags'
+export {
+    addBookmarkConcurrent as addBookmark,
+    createBookmarkByUrl,
+    createNewPageForBookmark,
+    removeBookmarkByUrl,
+} from './bookmarks'
 export { default as suggest } from './suggest'
-export * from './util'
+export { searchConcurrent as search } from './search'
+export {
+    initSingleLookup,
+    keyGen,
+    grabExistingKeys,
+    removeKeyType,
+} from './util'
 export { indexQueue }
 export default index

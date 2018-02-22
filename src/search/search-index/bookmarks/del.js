@@ -1,6 +1,6 @@
 import { fetchDocTypesByUrl } from 'src/pouchdb'
 import { generatePageDocId } from 'src/page-storage'
-import { index, initSingleLookup } from 'src/search/search-index'
+import { index, initSingleLookup } from '../'
 import deleteDocsByUrl, { deleteDocs } from 'src/page-storage/deletion'
 import { bookmarkKeyPrefix } from '../../bookmarks'
 
