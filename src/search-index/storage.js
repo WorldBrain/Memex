@@ -184,7 +184,7 @@ export default class Storage extends Dexie {
         // Grab all the Pages needed for results
         const pages = await this.pages
             .where('url')
-            .anyOf(results.map(([_, url]) => url))
+            .anyOf(results.map(([url]) => url))
             .toArray()
 
         const displayPages = new Map()
@@ -202,27 +202,92 @@ export default class Storage extends Dexie {
         }
 
         // Return display page data in order of input results
-        return results.map(([_, url]) => displayPages.get(url))
+        return results.map(([url]) => displayPages.get(url))
     }
 
     /**
-     * @param {string} [args.query=''] Terms search query.
+     * @param {any[]} resultEntries Map entries (2-el KVP arrays) of URL keys to latest times
+     * @param {number} [args.skip=0]
+     * @param {number} [args.limit=10]
+     * @return {any[]} Sorted and trimmed version of `resultEntries` input.
+     */
+    _paginate(resultEntries, { skip = 0, limit = 10 }) {
+        return resultEntries
+            .sort(([, a], [, b]) => b - a)
+            .slice(skip, skip + limit)
+    }
+
+    /**
+     * Goes through visits index by most recent and groups by URL, mapping URLs to latest
+     * visit times.
+     *
+     * TODO: Better pagination; probably no need to go back every time when just changing pages.
+     *   Maybe look into memoization or caching.
+     *
      * @param {number} [args.startTime=0] Lower-bound for visit time.
      * @param {number} [args.endTime=Date.now()] Upper-bound for visit time.
      * @param {number} [args.skip=0]
      * @param {number} [args.limit=10]
+     * @return {Map<string, number>} Map of URL keys to latest visit time numbers. Should be size <= skip + limit.
+     */
+    async _getLatestVisitsByUrl(
+        { startTime = 0, endTime = Date.now(), skip = 0, limit = 10 },
+        shallowLookback = false,
+    ) {
+        const latestVisitsByUrl = new Map()
+
+        let visitColl = this.visits
+            .where('[time+url]')
+            .between([startTime, Storage.MIN_STR], [endTime, Storage.MAX_STR])
+            .reverse() // Go through visits by most recent
+
+        // Blank search can be a bit faster as we don't need to intersected Pages to meet result limit
+        if (shallowLookback) {
+            visitColl = visitColl.until(
+                () => latestVisitsByUrl.size > skip + limit,
+            )
+        }
+
+        await visitColl.eachPrimaryKey(([time, url]) => {
+            // Only ever record the first (latest) visit for each URL
+            if (!latestVisitsByUrl.get(url)) {
+                latestVisitsByUrl.set(url, time)
+            }
+        })
+
+        return latestVisitsByUrl
+    }
+
+    /**
+     * Runs for blank terms searches.
+     */
+    _blankSearch({
+        domains = [], // TODO: support these
+        bookmarks = false,
+        ...params
+    }) {
+        return this.transaction(
+            'r',
+            this.pages,
+            this.visits,
+            this.bookmarks,
+            async () => {
+                const latestVisitsByUrl = await this._getLatestVisitsByUrl(
+                    params,
+                    true,
+                )
+
+                return this._paginate([...latestVisitsByUrl], params)
+            },
+        )
+    }
+
+    /**
+     * @param {string} [args.query=''] Terms search query.
      * @param {boolean} [args.bookmarks=false] Whether or not to filter by bookmarked pages only.
      * @return {Promise<[number, string][]>} Ordered array of result KVPs of latest visit timestamps to page URLs.
      */
-    _search({
-        queryTerms = [],
-        startTime = 0,
-        endTime = Date.now(),
-        domains = [],
-        skip = 0,
-        limit = 10,
-        bookmarks = false,
-    }) {
+    _search({ queryTerms = [], domains = [], bookmarks = false, ...params }) {
         return this.transaction(
             'r',
             this.pages,
@@ -232,22 +297,11 @@ export default class Storage extends Dexie {
                 const domainsSet = new Set(domains)
 
                 // Fetch all latest visits in time range, grouped by URL
-                const latestVisitByUrl = new Map()
-                await this.visits
-                    .where('[time+url]')
-                    .between(
-                        [startTime, Storage.MIN_STR],
-                        [endTime, Storage.MAX_STR],
-                    )
-                    .reverse() // Go through visits by most recent
-                    .eachPrimaryKey(([time, url]) => {
-                        // Only ever record the first (latest) visit for each URL
-                        if (!latestVisitByUrl.get(url)) {
-                            latestVisitByUrl.set(url, time)
-                        }
-                    })
+                const latestVisitsByUrl = await this._getLatestVisitsByUrl(
+                    params,
+                )
 
-                // Fetch all pages with terms matching query
+                // Fetch all pages with terms matching query (TODO: make it AND the queryTerms set)
                 let matchingPageUrls = await this.pages
                     .where('titleTerms')
                     .anyOf(queryTerms)
@@ -267,7 +321,7 @@ export default class Storage extends Dexie {
                             return false
                         }
 
-                        return latestVisitByUrl.has(page.url)
+                        return latestVisitsByUrl.has(page.url)
                     })
                     .primaryKeys()
 
@@ -280,10 +334,13 @@ export default class Storage extends Dexie {
                 }
 
                 // Paginate
-                return matchingPageUrls
-                    .map(url => [latestVisitByUrl.get(url), url])
-                    .sort(([a], [b]) => b - a)
-                    .slice(skip, skip + limit)
+                return this._paginate(
+                    matchingPageUrls.map(url => [
+                        url,
+                        latestVisitsByUrl.get(url),
+                    ]),
+                    params,
+                )
             },
         )
     }
@@ -292,7 +349,9 @@ export default class Storage extends Dexie {
         console.log('QUERY:', params)
 
         console.time('search')
-        let results = await this._search(params)
+        let results = !params.queryTerms.length
+            ? await this._blankSearch(params)
+            : await this._search(params)
         console.timeEnd('search')
 
         console.time('search result mapping')
