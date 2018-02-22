@@ -49,7 +49,7 @@ export async function fetchExistingPage(pageId) {
  */
 export const extractContent = (
     content,
-    { separator = DEFAULT_TERM_SEPARATOR, key = 'term' },
+    { separator = DEFAULT_TERM_SEPARATOR, key = '_' },
 ) =>
     content
         .split(separator)

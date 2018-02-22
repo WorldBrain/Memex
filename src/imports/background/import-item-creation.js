@@ -1,7 +1,7 @@
 import moment from 'moment'
 import chunk from 'lodash/fp/chunk'
 
-import encodeUrl from 'src/util/encode-url-for-id'
+import normalizeUrl from 'src/util/encode-url-for-id'
 import { grabExistingKeys } from 'src/search'
 import { blacklist } from 'src/blacklist/background'
 import { isLoggable } from 'src/activity-logger'
@@ -94,10 +94,10 @@ export default class ImportItemCreator {
 
             // Asssociate the item with the encoded URL in results Map
             try {
-                const encodedUrl = encodeUrl(items[i].url, true)
+                const normalizedUrl = normalizeUrl(items[i].url)
 
-                if (!alreadyExists(encodedUrl)) {
-                    importItems.set(encodedUrl, transform(items[i]))
+                if (!alreadyExists(normalizedUrl)) {
+                    importItems.set(normalizedUrl, transform(items[i]))
                 }
             } catch (err) {
                 continue
