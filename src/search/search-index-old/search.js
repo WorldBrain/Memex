@@ -8,11 +8,10 @@ import {
     boostScores,
     structureSearchResult,
     initLookupByKeys,
-    keyGen,
     rangeLookup,
     reverseRangeLookup,
-    removeKeyType,
 } from './util'
+import { keyGen, removeKeyType } from '../util'
 import { indexQueue } from '.'
 
 const lookupByKeys = initLookupByKeys()

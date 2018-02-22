@@ -1,83 +1,94 @@
 import QueryBuilder from './query-builder'
 import mapResultsToPouchDocs from './map-search-to-pouch'
-import * as oldIndex from './search-index-old'
+import * as oldBackend from './search-index-old'
+import * as newBackend from './search-index-new'
+
+const getBackend = (() => {
+    let backend = null
+    return async function() {
+        if (!backend) {
+            backend = (await oldBackend.hasData()) ? oldBackend : newBackend
+        }
+        return backend
+    }
+})()
 
 //
 // Adding stuff
 //
 
 export async function addPage(...args) {
-    return await oldIndex.addPage(...args)
+    return await (await getBackend()).addPage(...args)
 }
 
 export async function addPageTerms(...args) {
-    return await oldIndex.addPageTerms(...args)
+    return await (await getBackend()).addPageTerms(...args)
 }
 
 export async function updateTimestampMeta(...args) {
-    return await oldIndex.updateTimestampMeta(...args)
+    return await (await getBackend()).updateTimestampMeta(...args)
 }
 
 //
 // Deleting stuff
 //
 export async function delPages(...args) {
-    return await oldIndex.delPages(...args)
+    return await (await getBackend()).delPages(...args)
 }
 
 //
 // Tags
 //
 export async function setTags(...args) {
-    return await oldIndex.setTags(...args)
+    return await (await getBackend()).setTags(...args)
 }
 
 export async function addTags(...args) {
-    return await oldIndex.addTags(...args)
+    return await (await getBackend()).addTags(...args)
 }
 
 export async function delTags(...args) {
-    return await oldIndex.delTags(...args)
+    return await (await getBackend()).delTags(...args)
 }
 
 export async function fetchTags(...args) {
-    return await oldIndex.fetchTags(...args)
+    return await (await getBackend()).fetchTags(...args)
 }
 
 //
 // Bookmarks
 //
 export async function addBookmark(...args) {
-    return await oldIndex.addBookmark(...args)
+    return await (await getBackend()).addBookmark(...args)
 }
 
 export async function createBookmarkByUrl(...args) {
-    return await oldIndex.createBookmarkByUrl(...args)
+    return await (await getBackend()).createBookmarkByUrl(...args)
 }
 
 export async function createNewPageForBookmark(...args) {
-    return await oldIndex.createNewPageForBookmark(...args)
+    return await (await getBackend()).createNewPageForBookmark(...args)
 }
 
 export async function removeBookmarkByUrl(...args) {
-    return await oldIndex.removeBookmarkByUrl(...args)
+    return await (await getBackend()).removeBookmarkByUrl(...args)
 }
 
 //
 // Utilities
 //
-export function initSingleLookup(...args) {
-    return oldIndex.initSingleLookup(...args)
+export function initSingleLookup() {
+    let singleLookup
+    return async function(...args) {
+        if (!singleLookup) {
+            singleLookup = (await getBackend()).initSingleLookup()
+        }
+        return await singleLookup(...args)
+    }
 }
 
-export const keyGen = oldIndex.keyGen // Is an object with functions
-
-export function grabExistingKeys(...args) {
-    return oldIndex.grabExistingKeys(...args)
-}
-
-export function removeKeyType(...args) {
-    return oldIndex.removeKeyType(...args)
+export async function grabExistingKeys(...args) {
+    return await (await getBackend()).grabExistingKeys(...args)
 }
 
 //
@@ -123,7 +134,10 @@ export async function search({
     console.log('DEBUG: query', indexQuery)
 
     // Get index results, filtering out any unexpectedly structured results
-    const { results, totalCount } = await oldIndex.search(indexQuery, {
+    const {
+        results,
+        totalCount,
+    } = await (await getBackend()).search(indexQuery, {
         count: getTotalCount,
     })
 
@@ -156,9 +170,15 @@ export async function search({
     }
 }
 
-export function suggest(...args) {
-    return oldIndex.suggest(...args)
+export async function suggest(...args) {
+    return await (await getBackend()).suggest(...args)
+}
+
+export const indexQueue = {
+    clear: async () => {
+        ;(await getBackend()).indexQueue.clear()
+    },
 }
 
 // Export index interface
-export { default as index, indexQueue } from './search-index'
+export { keyGen, removeKeyType } from './util'

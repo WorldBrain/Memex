@@ -1,7 +1,8 @@
 import { generatePageDocId } from 'src/page-storage'
 import index from '..'
 import { delPageFromTagValue } from './del'
-import { fetchExistingPage, keyGen, initSingleLookup } from '../util'
+import { fetchExistingPage, initSingleLookup } from '../util'
+import { keyGen } from '../../util'
 
 const singleLookup = initSingleLookup()
 

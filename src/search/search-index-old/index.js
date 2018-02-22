@@ -48,6 +48,24 @@ export function init({ levelDown } = {}) {
     realIndex = levelup(levelDown)
 }
 
+export function hasData() {
+    return new Promise((resolve, reject) => {
+        let empty = true
+        index.db
+            .createReadStream({
+                keys: true,
+                values: false,
+                limit: 1,
+            })
+            .on('data', function(data) {
+                empty = false
+            })
+            .on('end', function() {
+                resolve(!empty)
+            })
+    })
+}
+
 export {
     addPageConcurrent as addPage,
     addPageTermsConcurrent as addPageTerms,
@@ -63,11 +81,6 @@ export {
 } from './bookmarks'
 export { default as suggest } from './suggest'
 export { searchConcurrent as search } from './search'
-export {
-    initSingleLookup,
-    keyGen,
-    grabExistingKeys,
-    removeKeyType,
-} from './util'
+export { initSingleLookup, grabExistingKeys } from './util'
 export { indexQueue }
 export default index
