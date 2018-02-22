@@ -1,7 +1,7 @@
 import promiseLimit from 'promise-limit'
 
-import { keyGen, removeKeyType } from '../util'
-import index, { indexQueue, DEFAULT_TERM_SEPARATOR } from './'
+import { keyGen, removeKeyType, DEFAULT_TERM_SEPARATOR } from '../util'
+import index, { indexQueue } from './'
 
 /**
  * @param {(args: any) => Promise<any>} fn Any async function to place on the index operations queue.

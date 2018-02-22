@@ -1,3 +1,6 @@
+export const DEFAULT_TERM_SEPARATOR = /[|' .,\-|(\n)]+/
+export const URL_SEPARATOR = /[/?#=+& _.,\-|(\n)]+/
+
 export const removeKeyType = key =>
     key.replace(/^(term|title|visit|url|domain|tag|bookmark)\//, '')
 
