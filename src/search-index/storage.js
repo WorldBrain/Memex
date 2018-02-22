@@ -11,6 +11,12 @@ import { Page, Visit, Bookmark } from './models'
  * @property {number} scrollMaxPerc
  */
 
+/**
+ * @typedef {Array} PageEntry
+ * @property {any} 0 Page data object - needs `url` string and `terms` array.
+ * @property {number[]} 1 Opt. times to create Visits for. Uses calling time if none defined.
+ */
+
 export default class Storage extends Dexie {
     static DEF_PARAMS = {
         indexedDB: null,
@@ -75,17 +81,34 @@ export default class Storage extends Dexie {
     }
 
     /**
-     * Adds a page + associated visit (pages never exist without either an assoc. visit or bookmark in current model).
+     * Adds/updates a page + associated visit (pages never exist without either an assoc.
+     *  visit or bookmark in current model).
      *
-     * @param {[any, number][]} pageEntries Array of two-element entry-like arrays.
-     *  El 0 being page data, el 1 being an associated visit time (defaults to current time if undefined).
+     * @param {PageEntry} pageEntry
+     * @return {Promise<void>}
+     */
+    async addPage([pageData, times]) {
+        const page = new Page(pageData)
+
+        // Load any current assoc. data for this page
+        await page.loadRels(this)
+
+        // Create Visits for each specified time, or a single Visit for "now"
+        const visitTimes = times == null || !times.length ? [Date.now()] : times
+        visitTimes.forEach(time => page.addVisit(time))
+
+        // Persist current state
+        await page.save(this)
+        console.log('added:', page)
+    }
+
+    /**
+     * @param {PageEntry[]} pageEntries
      * @return {Promise<void>}
      */
     async addPages(pageEntries) {
-        for (const [pageData, time = Date.now()] of pageEntries) {
-            const page = new Page(pageData)
-            page.addVisit(time)
-            await page.save(this)
+        for (const pageEntry of pageEntries) {
+            await this.addPage(pageEntry)
         }
     }
 
