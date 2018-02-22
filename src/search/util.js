@@ -13,4 +13,5 @@ export const keyGen = {
     title: key => `title/${key}`,
     visit: key => `visit/${key}`,
     bookmark: key => `bookmark/${key}`,
+    _: key => key,
 }
