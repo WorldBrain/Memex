@@ -1,8 +1,7 @@
-import normalizeUrl from 'normalize-url'
-
+import normalizeUrl from 'src/util/encode-url-for-id'
 import transformPageText from 'src/util/transform-page-text'
 import { convertMetaDocId } from 'src/activity-logger'
-import { keyGen, DEFAULT_TERM_SEPARATOR, extractContent } from '../util'
+import { DEFAULT_TERM_SEPARATOR, extractContent } from '../util'
 
 // Simply extracts the timestamp component out the ID of a visit or bookmark doc,
 //  which is the only data we want at the moment.
@@ -15,6 +14,8 @@ const urlNormalizationOpts = {
     removeTrailingSlash: true,
     removeQueryParameters: [/.+/], // Remove all query params from terms indexing
     removeDirectoryIndex: [/^(default|index)\.\w{2,4}$/], // Remove things like tralining `/index.js` or `/default.php`
+    skipProtocolTrim: true,
+    skipQueryRules: true,
 }
 
 /**
@@ -30,7 +31,7 @@ export function transformUrl(url) {
     try {
         parsed = new URL(normalized)
     } catch (error) {
-        console.error(`cannot parse URL: ${url}`)
+        console.error(`cannot parse URL: ${normalized}`)
         return { hostname: normalized, pathname: normalized }
     }
 
@@ -46,7 +47,7 @@ export function transformUrl(url) {
  * @param {'term'|'title'|'url'} key The key under which the extracted terms are categorized.
  * @returns {Set<string>} Set of "words-of-interest" - determined by pre-proc logic in `transformPageText` - extracted from `text`.
  */
-export function extractTerms(text, key) {
+export function extractTerms(text) {
     if (!text || !text.length) {
         return new Set()
     }
@@ -57,12 +58,13 @@ export function extractTerms(text, key) {
         return new Set()
     }
 
-    return new Set(
-        extractContent(transformedText, {
-            separator: DEFAULT_TERM_SEPARATOR,
-            key,
-        }),
-    )
+    return [
+        ...new Set(
+            extractContent(transformedText, {
+                separator: DEFAULT_TERM_SEPARATOR,
+            }),
+        ),
+    ]
 }
 
 /**
@@ -85,7 +87,7 @@ export function extractTerms(text, key) {
  * @returns {IndexLookupDoc} Doc structured for indexing.
  */
 export default function pipeline({
-    pageDoc: { _id: id, content = {}, url },
+    pageDoc: { content = {}, url },
     visits = [],
     bookmarkDocs = [],
     rejectNoContent = true,
@@ -103,21 +105,25 @@ export default function pipeline({
     }
 
     // Extract all terms out of processed content
-    const terms = extractTerms(content.fullText, 'term')
-    const titleTerms = extractTerms(content.title, 'title')
-    const urlTerms = extractTerms(pathname, 'url')
+    const terms = extractTerms(content.fullText)
+    const titleTerms = extractTerms(content.title)
+    const urlTerms = extractTerms(pathname)
 
     // Create timestamps to be indexed as Sets
-    const bookmarks = bookmarkDocs.map(transformMetaDoc)
+    // const bookmarks = bookmarkDocs.map(transformMetaDoc)
 
-    return Promise.resolve({
-        id,
-        terms,
-        urlTerms,
-        titleTerms,
-        domain: keyGen.domain(hostname),
-        visits: new Set(visits.map(keyGen.visit)),
-        bookmarks: new Set(bookmarks.map(keyGen.bookmark)),
-        tags: new Set(),
-    })
+    return Promise.resolve([
+        {
+            url: normalizeUrl(url),
+            fullUrl: url,
+            fullTitle: content.title,
+            text: content.fullText,
+            terms,
+            urlTerms,
+            titleTerms,
+            domain: hostname,
+            tags: [],
+        },
+        visits,
+    ])
 }
