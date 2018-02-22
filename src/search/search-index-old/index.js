@@ -3,9 +3,6 @@ import levelup from 'levelup'
 import Queue from 'src/util/priority-queue'
 import LevelJS from './level-js-to-leveldown'
 
-export const DEFAULT_TERM_SEPARATOR = /[|' .,\-|(\n)]+/
-export const URL_SEPARATOR = /[/?#=+& _.,\-|(\n)]+/
-
 // People use the functions exposed directly by
 // the default object (like index.search()) to interact with the index.
 // For unit testing however, we need to repeatedly set up and
@@ -48,39 +45,5 @@ export function init({ levelDown } = {}) {
     realIndex = levelup(levelDown)
 }
 
-export function hasData() {
-    return new Promise((resolve, reject) => {
-        let empty = true
-        index.db
-            .createReadStream({
-                keys: true,
-                values: false,
-                limit: 1,
-            })
-            .on('data', function(data) {
-                empty = false
-            })
-            .on('end', function() {
-                resolve(!empty)
-            })
-    })
-}
-
-export {
-    addPageConcurrent as addPage,
-    addPageTermsConcurrent as addPageTerms,
-    updateTimestampMetaConcurrent as updateTimestampMeta,
-} from './add'
-export { delPagesConcurrent as delPages } from './del'
-export { setTags, addTags, delTags, fetchTags } from './tags'
-export {
-    addBookmarkConcurrent as addBookmark,
-    createBookmarkByUrl,
-    createNewPageForBookmark,
-    removeBookmarkByUrl,
-} from './bookmarks'
-export { default as suggest } from './suggest'
-export { searchConcurrent as search } from './search'
-export { initSingleLookup, grabExistingKeys } from './util'
-export { indexQueue }
 export default index
+export { indexQueue }

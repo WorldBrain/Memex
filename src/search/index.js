@@ -1,16 +1,20 @@
 import QueryBuilder from './query-builder'
 import mapResultsToPouchDocs from './map-search-to-pouch'
-import * as oldBackend from './search-index-old'
+import * as oldBackend from './search-index-old/api'
 import * as newBackend from './search-index-new'
 
-const getBackend = (() => {
+export const getBackend = (() => {
     let backend = null
-    return async function() {
+    const get = async function() {
         if (!backend) {
-            backend = (await oldBackend.hasData()) ? oldBackend : newBackend
+            backend = get._reset({ useOld: await oldBackend.hasData() })
         }
         return backend
     }
+    get._reset = ({ useOld }) => {
+        backend = useOld ? oldBackend : newBackend
+    }
+    return get
 })()
 
 //

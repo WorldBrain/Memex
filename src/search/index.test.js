@@ -2,11 +2,12 @@
 
 import memdown from 'memdown'
 import * as search from './'
-import * as index from './search-index'
+import * as oldIndex from './search-index-old'
 
 describe('Search index', () => {
     test('Integration test', async () => {
-        index.init({ levelDown: memdown() })
+        search.getBackend._reset({ useOld: true })
+        oldIndex.init({ levelDown: memdown() })
         const visit1 = Date.now().toString()
         await search.addPage({
             pageDoc: {
