@@ -2449,6 +2449,10 @@ detective@^4.0.0, detective@^4.3.1:
     acorn "^4.0.3"
     defined "^1.0.0"
 
+dexie@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/dexie/-/dexie-2.0.1.tgz#a6dc4e607461c4da5f934621917a2a8939a18e97"
+
 diff-match-patch@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/diff-match-patch/-/diff-match-patch-1.0.0.tgz#1cc3c83a490d67f95d91e39f6ad1f2e086b63048"
