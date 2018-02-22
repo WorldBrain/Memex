@@ -126,6 +126,16 @@ export async function search({
         .bookmarksFilter(showOnlyBookmarks)
         .get()
 
+    // If there is only Bad Terms don't continue
+    if (indexQuery.isBadTerm) {
+        return {
+            docs: [],
+            resultsExhausted: true,
+            totalCount: getTotalCount ? 0 : undefined,
+            isBadTerm: true,
+        }
+    }
+
     const res = await newIndex.search({
         queryTerms: [...indexQuery.query],
         startTime: startDate,
@@ -135,16 +145,13 @@ export async function search({
         skip,
         limit,
     })
-    console.log('new index res:', res)
+    console.log('RESULTS:', res)
 
-    // If there is only Bad Terms don't continue
-    if (indexQuery.isBadTerm) {
-        return {
-            docs: [],
-            resultsExhausted: true,
-            totalCount: getTotalCount ? 0 : undefined,
-            isBadTerm: true,
-        }
+    return {
+        docs: res,
+        resultsExhausted: res.length < limit,
+        totalCount: res.length, // TODO: implement count
+        isBadTerm: false,
     }
 
     console.log('DEBUG: query', indexQuery)
