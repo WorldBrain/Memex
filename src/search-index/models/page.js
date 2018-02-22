@@ -2,23 +2,48 @@ import AbstractModel from './abstract-model'
 import Visit from './visit'
 import Bookmark from './bookmark'
 
+// Keep these properties as Symbols to avoid storing them to DB
+const visitsProp = Symbol('assocVisits')
+const bookmarkProp = Symbol('assocBookmark')
+
 export default class Page extends AbstractModel {
     /**
+     * @param {Object} args
      * @param {string} args.url
      * @param {string} args.text
-     * @param {lunr.Token[]} args.terms
+     * @param {string[]} args.terms
      * @param {Visit} [args.visits=[]] Opt. Visits to assoc. with.
      * @param {Bookmark} [args.bookmark] Opt. Bookmark to assoc. with.
      */
-    constructor({ url, text, terms, bookmark, visits = [] }) {
+    constructor({
+        url,
+        text,
+        fullUrl,
+        terms,
+        urlTerms,
+        titleTerms,
+        domain,
+        bookmark,
+        visits = [],
+    }) {
         super()
         this.url = url
+        this.fullUrl = fullUrl
         this.text = text
         this.terms = terms
+        this.urlTerms = urlTerms
+        this.titleTerms = titleTerms
+        this.domain = domain
 
         Object.defineProperties(this, {
-            visits: { value: visits, enumerable: false, writeable: true },
-            bookmark: { value: bookmark, enumerable: false, writeable: true },
+            [visitsProp]: {
+                value: visits,
+                ...AbstractModel.DEF_NON_ENUM_PROP,
+            },
+            [bookmarkProp]: {
+                value: bookmark,
+                ...AbstractModel.DEF_NON_ENUM_PROP,
+            },
         })
     }
 
@@ -26,20 +51,20 @@ export default class Page extends AbstractModel {
      * @param {number} [time=Date.now()]
      */
     addVisit(time = Date.now()) {
-        this.visits.push(new Visit({ url: this.url, time }))
+        this[visitsProp].push(new Visit({ url: this.url, time }))
     }
 
     setBookmark(time = Date.now()) {
-        this.bookmark = new Bookmark({ url: this.url, time })
+        this[bookmarkProp] = new Bookmark({ url: this.url, time })
     }
 
     delBookmark() {
-        this.bookmark = undefined
+        this[bookmarkProp] = undefined
     }
 
     async loadRels(db) {
-        this.visits = await db.visits.where({ url: this.url }).toArray()
-        this.bookmark = await db.bookmarks.where({ url: this.url }).first()
+        this[visitsProp] = await db.visits.where({ url: this.url }).toArray()
+        this[bookmarkProp] = await db.bookmarks.where({ url: this.url }).first()
     }
 
     save(db) {
@@ -53,12 +78,12 @@ export default class Page extends AbstractModel {
 
                 // Insert or update all associated visits
                 const visitIds = await Promise.all(
-                    this.visits.map(visit => visit.save(db)),
+                    this[visitsProp].map(visit => visit.save(db)),
                 )
 
                 // Either try to update or delete the assoc. bookmark
-                if (this.bookmark != null) {
-                    this.bookmark.save(db)
+                if (this[bookmarkProp] != null) {
+                    this[bookmarkProp].save(db)
                 } else {
                     await db.bookmarks.where({ url: this.url }).delete()
                 }
