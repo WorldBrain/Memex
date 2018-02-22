@@ -11,6 +11,7 @@ const searchUpdateActions = [
     actions.setStartDate.getType(),
     actions.setEndDate.getType(),
     filterActs.toggleBookmarkFilter.getType(),
+    filterActs.toggleLaterlistFilter.getType(),
     filterActs.addTagFilter.getType(),
     filterActs.delTagFilter.getType(),
     filterActs.addDomainFilter.getType(),

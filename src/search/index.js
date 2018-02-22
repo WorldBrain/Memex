@@ -12,6 +12,7 @@ async function indexSearch({
     limit = 10,
     getTotalCount = false,
     showOnlyBookmarks = false,
+    showOnlyLaterlist = false,
     mapResultsFunc = mapResultsToPouchDocs,
 }) {
     query = query.trim() // Don't count whitespace searches
@@ -20,12 +21,14 @@ async function indexSearch({
     const indexQuery = new QueryBuilder()
         .searchTerm(query)
         .filterTime({ startDate, endDate }, 'bookmark/')
+        .filterTime({ startDate, endDate }, 'laterlist/')
         .filterTime({ startDate, endDate }, 'visit/')
         .filterTags(tags)
         .filterDomains(domains)
         .skipUntil(skip)
         .limitUntil(limit)
         .bookmarksFilter(showOnlyBookmarks)
+        .laterlistFilter(showOnlyLaterlist)
         .get()
 
     // If there is only Bad Terms don't continue
@@ -62,6 +65,7 @@ async function indexSearch({
         startDate,
         endDate,
         showOnlyBookmarks,
+        showOnlyLaterlist,
     })
 
     console.log('DEBUG: final UI results', docs)
@@ -79,6 +83,7 @@ export {
     addPageConcurrent,
     addPageTermsConcurrent,
     addBookmarkConcurrent,
+    addLaterlistConcurrent,
     put,
     addTimestampConcurrent,
     updateTimestampMetaConcurrent,

@@ -100,6 +100,7 @@ class FiltersContainer extends PureComponent {
 
 const mapStateToProps = state => ({
     showOnlyBookmarks: selectors.onlyBookmarks(state),
+    showOnlyLaterlist: selectors.onlyLaterlist(state),
     isClearFilterButtonShown: selectors.showClearFiltersBtn(state),
     filterTags: selectors.tags(state),
     filterDomains: selectors.domains(state),
@@ -109,6 +110,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
     onShowOnlyBookmarksChange: () => dispatch(actions.toggleBookmarkFilter()),
+    onShowOnlyLaterlistChange: () => dispatch(actions.toggleLaterlistFilter()),
     clearAllFilters: () => dispatch(actions.resetFilters()),
     handleFilterClick: source => () => dispatch(actions.setFilterPopup(source)),
     addTagFilter: tag => dispatch(actions.addTagFilter(tag)),

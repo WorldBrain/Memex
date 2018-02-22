@@ -131,7 +131,6 @@ class OverviewContainer extends Component {
                 {...doc}
             />
         ))
-
         // Insert waypoint at the end of results to trigger loading new items when
         // scrolling down
         if (this.props.needsWaypoint) {
@@ -206,9 +205,7 @@ class OverviewContainer extends Component {
             <Wrapper>
                 {this.props.shouldShowCount && (
                     <ResultsMessage small>
-                        Found <strong>
-                            {this.props.totalResultCount}
-                        </strong>{' '}
+                        Found <strong>{this.props.totalResultCount}</strong>{' '}
                         results in your digital memory
                     </ResultsMessage>
                 )}

@@ -53,11 +53,11 @@ function getLatestTime({ visits, bookmarks }, searchParams) {
 }
 
 /**
-* Creates a quick-lookup dictionary of page doc IDs to the associated meta doc IDs
-* from our search-index results. The index result score is also kept for later sorting.
-* @param {Array<any>} results Array of search index results.
-* @returns {Map<string, any>} Map with page ID keys and values containing needed search result data.
-*/
+ * Creates a quick-lookup dictionary of page doc IDs to the associated meta doc IDs
+ * from our search-index results. The index result score is also kept for later sorting.
+ * @param {Array<any>} results Array of search index results.
+ * @returns {Map<string, any>} Map with page ID keys and values containing needed search result data.
+ */
 const createResultsMap = searchParams =>
     reduce(
         (acc, result) =>
@@ -65,6 +65,7 @@ const createResultsMap = searchParams =>
                 timestamp: getLatestTime(result.document, searchParams),
                 score: result.score,
                 hasBookmark: result.document.bookmarks.size > 0,
+                hasLaterlist: result.document.laterlist.size > 0,
                 tags: [...(result.document.tags || [])],
             }),
         new Map(),
@@ -74,15 +75,15 @@ const sortByScore = resultsMap => (docA, docB) =>
     resultsMap.get(docB._id).score - resultsMap.get(docA._id).score
 
 /**
-* Performs all the messy logic needed to resolve search-index results against our PouchDB model.
-* Given n results, should produce n page docs with the latest associated meta docs timestamps
-* available under either `bookmark` or `visit` key, or both. For the sake of differentiation,
-* call these "augmented page docs", and are generally only used by the overview.
-*
-* @param {Array<any>} results Array of results gotten from our search-index query.
-* @param {any} searchParams Same params as main search entrypoint accepts.
-* @returns {Array<any>} Array of augmented page docs containing linked meta doc timestamps.
-*/
+ * Performs all the messy logic needed to resolve search-index results against our PouchDB model.
+ * Given n results, should produce n page docs with the latest associated meta docs timestamps
+ * available under either `bookmark` or `visit` key, or both. For the sake of differentiation,
+ * call these "augmented page docs", and are generally only used by the overview.
+ *
+ * @param {Array<any>} results Array of results gotten from our search-index query.
+ * @param {any} searchParams Same params as main search entrypoint accepts.
+ * @returns {Array<any>} Array of augmented page docs containing linked meta doc timestamps.
+ */
 export default async function mapResultsToPouchDocs(results, searchParams) {
     // Convert results to dictionary of page IDs to related meta IDs
     const resultsMap = createResultsMap(searchParams)(results)
@@ -93,11 +94,11 @@ export default async function mapResultsToPouchDocs(results, searchParams) {
     // Perform bulk fetch for needed docs from pouch
     const bulkRes = await db.bulkGet({ docs: bulkGetInput })
     const pageDocs = bulkGetResultsToArray(bulkRes)
-
     // Augment the page docs with meta display info derived from search results
     const augmentedPageDocs = pageDocs.map(doc => ({
         ...doc,
         hasBookmark: resultsMap.get(doc._id).hasBookmark,
+        hasLaterlist: resultsMap.get(doc._id).hasLaterlist,
         displayTime: resultsMap.get(doc._id).timestamp,
         tags: resultsMap.get(doc._id).tags.map(removeKeyType),
     }))

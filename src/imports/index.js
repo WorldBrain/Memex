@@ -1,6 +1,6 @@
 import { generateVisitDocId } from 'src/activity-logger'
 import { generateBookmarkDocId } from 'src/bookmarks'
-
+import { generateLaterlistDocId } from 'src/laterlist'
 /**
  * Converts a browser.history.VisitItem to our visit document model.
  *
@@ -49,11 +49,32 @@ export const transformToMinimalVisitDoc = assocPageDoc => ({
     page: { _id: assocPageDoc._id },
 })
 
+export const transformToLaterlistDoc = assocPageDoc => laterlistItem => ({
+    _id: generateLaterlistDocId({
+        url: laterlistItem.url,
+        timestamp: laterlistItem.dateAdded,
+    }),
+    dateAdded: laterlistItem.dateAdded,
+    title: laterlistItem.title,
+    url: laterlistItem.url,
+    page: { _id: assocPageDoc._id },
+})
+
 export const transformToMinimalBookmarkDoc = assocPageDoc => ({
     timestamp,
     url,
 }) => ({
     _id: generateBookmarkDocId({ url, timestamp }),
+    dateAdded: timestamp,
+    url,
+    page: { _id: assocPageDoc._id },
+})
+
+export const transformToMinimalLaterlistDoc = assocPageDoc => ({
+    timestamp,
+    url,
+}) => ({
+    _id: generateLaterlistDocId({ url, timestamp }),
     dateAdded: timestamp,
     url,
     page: { _id: assocPageDoc._id },

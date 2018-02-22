@@ -11,7 +11,10 @@ export const onlyBookmarks = createSelector(
     filters,
     state => state.onlyBookmarks,
 )
-
+export const onlyLaterlist = createSelector(
+    filters,
+    state => state.onlyLaterlist,
+)
 export const tagsStringify = createSelector(tags, tags => tags.join(','))
 
 export const domainsStringify = createSelector(domains, domains =>
@@ -31,8 +34,9 @@ export const showTagsFilter = createSelector(popup, popup => popup === 'tag')
  */
 export const showClearFiltersBtn = createSelector(
     onlyBookmarks,
+    onlyLaterlist,
     tags,
     domains,
-    (onlyBookmarks, tags, domains) =>
-        onlyBookmarks || !!tags.length || !!domains.length,
+    (onlyBookmarks, onlyLaterlist, tags, domains) =>
+        onlyBookmarks || onlyLaterlist || !!tags.length || !!domains.length,
 )

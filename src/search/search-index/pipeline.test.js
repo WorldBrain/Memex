@@ -46,6 +46,7 @@ describe('Search index pipeline', () => {
             domain: 'domain/test.com',
             visits: new Set(['visit/12345']),
             bookmarks: new Set(),
+            laterlist: new Set(),
             tags: new Set(),
         })
     })

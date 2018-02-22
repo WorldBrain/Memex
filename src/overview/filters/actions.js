@@ -18,3 +18,6 @@ export const showFilter = createAction('search-filters/showFilter')
 export const toggleBookmarkFilter = createAction(
     'search-filters/toggleBookmarkFilter',
 )
+export const toggleLaterlistFilter = createAction(
+    'search-filters/toggleLaterlistFilter',
+)

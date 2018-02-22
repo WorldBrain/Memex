@@ -7,6 +7,7 @@ import { delPagesConcurrent, initSingleLookup, keyGen } from 'src/search'
 import { pageKeyPrefix } from 'src/page-storage'
 import { visitKeyPrefix } from 'src/activity-logger'
 import { bookmarkKeyPrefix } from 'src/bookmarks'
+import { laterlistKeyPrefix } from 'src/laterlist'
 
 /**
  * @param {any} input
@@ -43,6 +44,7 @@ async function deleteByRegex(regex) {
             ...metaRows.pageRows,
             ...metaRows.visitRows,
             ...metaRows.bookmarkRows,
+            ...metaRows.laterlistRows,
         )
         pageIds.push(id)
     }
@@ -70,6 +72,7 @@ async function deleteDomain(url = '') {
             ...metaRows.pageRows,
             ...metaRows.visitRows,
             ...metaRows.bookmarkRows,
+            ...metaRows.laterlistRows,
         )
     }
 
@@ -89,8 +92,16 @@ async function deleteSpecificSite(url = '') {
         bookmarkKeyPrefix,
         opts,
     )
-
-    const allRows = [...pageRows, ...visitRows, ...bookmarkRows]
+    const { rows: laterlistRows } = await fetchDocsByType(
+        laterlistKeyPrefix,
+        opts,
+    )
+    const allRows = [
+        ...pageRows,
+        ...visitRows,
+        ...bookmarkRows,
+        ...laterlistRows,
+    ]
     await Promise.all([deleteDocs(allRows), handleIndexDeletes(pageRows)])
 }
 

@@ -27,6 +27,7 @@ export const showDeleteConfirm = createAction(
 export const hideDeleteConfirm = createAction('overview/hideDeleteConfirm')
 export const resetDeleteConfirm = createAction('overview/resetDeleteConfirm')
 export const changeHasBookmark = createAction('overview/changeHasBookmark')
+export const changeHasLaterlist = createAction('overview/changeHasLaterlist')
 export const incSearchCount = createAction('overview/incSearchCount')
 export const initSearchCount = createAction('overview/initSearchCount')
 export const setResultDeleting = createAction('overview/setResultDeleting')
@@ -98,6 +99,7 @@ const easter = () => dispatch =>
                         _attachments: { src: constants.EGG_IMG },
                         displayTime: Date.now().toString(),
                         hasBookmark: false,
+                        hasLaterlist: false,
                         egg: true,
                         tags: [],
                     },
@@ -145,6 +147,7 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
         ...currentQueryParams,
         getTotalCount: true,
         showOnlyBookmarks: filters.onlyBookmarks(state),
+        showOnlyLaterlist: filters.onlyLaterlist(state),
         tags: filters.tags(state),
         domains: filters.domains(state),
         limit: constants.PAGE_SIZE,
@@ -172,6 +175,10 @@ function trackSearch(searchResult, overwrite, state) {
     }
     if (filters.onlyBookmarks(state)) {
         action += ' (BM only)'
+    }
+
+    if (filters.onlyLaterlist(state)) {
+        action += ' (LL only)'
     }
 
     const name = overwrite
