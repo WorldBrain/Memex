@@ -1,3 +1,4 @@
 import Storage from './storage'
 
-export default Storage
+const instance = new Storage()
+export default instance

@@ -11,6 +11,7 @@ import {
     fetchExistingPage,
     makeIndexFnConcSafe,
 } from './util'
+import newIndex from 'src/search-index'
 
 // Used to decide whether or not to do a range lookup for terms (if # terms gt) or N single lookups
 const termsSizeLimit = 3000
@@ -39,9 +40,8 @@ export const put = (key, val) => index.put(key, val)
  * @param {IndexRequest} req A `pageDoc` (required) and optionally any associated `visitDocs` and `bookmarkDocs`.
  * @returns {Promise<void>} Promise resolving when indexing is complete, or rejecting for any index errors.
  */
-export const addPageConcurrent = makeIndexFnConcSafe(req =>
-    pipeline(req).then(performIndexing),
-)
+export const addPageConcurrent = req =>
+    pipeline(req).then(out => newIndex.addPage(out))
 
 /**
  * @param {IndexRequest} req Note that only the `pageDoc` will be used from the request params to update terms.
