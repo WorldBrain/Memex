@@ -1,5 +1,4 @@
 import QueryBuilder from './query-builder'
-import { searchConcurrent } from './search-index/search'
 import mapResultsToPouchDocs from './map-search-to-pouch'
 import * as oldIndex from './search-index'
 
@@ -8,22 +7,22 @@ import * as oldIndex from './search-index'
 //
 
 export async function addPage(...args) {
-    return await oldIndex.addPageConcurrent(...args)
+    return await oldIndex.addPage(...args)
 }
 
 export async function addPageTerms(...args) {
-    return await oldIndex.addPageTermsConcurrent(...args)
+    return await oldIndex.addPageTerms(...args)
 }
 
 export async function updateTimestampMeta(...args) {
-    return await oldIndex.updateTimestampMetaConcurrent(...args)
+    return await oldIndex.updateTimestampMeta(...args)
 }
 
 //
 // Deleting stuff
 //
 export async function delPages(...args) {
-    return await oldIndex.delPagesConcurrent(...args)
+    return await oldIndex.delPages(...args)
 }
 
 //
@@ -49,7 +48,7 @@ export async function fetchTags(...args) {
 // Bookmarks
 //
 export async function addBookmark(...args) {
-    return await oldIndex.addBookmarkConcurrent(...args)
+    return await oldIndex.addBookmark(...args)
 }
 
 export async function createBookmarkByUrl(...args) {
@@ -124,7 +123,7 @@ export async function search({
     console.log('DEBUG: query', indexQuery)
 
     // Get index results, filtering out any unexpectedly structured results
-    const { results, totalCount } = await searchConcurrent(indexQuery, {
+    const { results, totalCount } = await oldIndex.search(indexQuery, {
         count: getTotalCount,
     })
 
