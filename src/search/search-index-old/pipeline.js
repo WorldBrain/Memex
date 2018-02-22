@@ -117,6 +117,7 @@ export default function pipeline({
         {
             url: normalizeUrl(url),
             fullUrl: url,
+            fullTitle: content.title,
             text: content.fullText,
             terms,
             urlTerms,

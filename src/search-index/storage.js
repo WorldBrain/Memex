@@ -175,6 +175,37 @@ export default class Storage extends Dexie {
     }
 
     /**
+     * Used as a helper to shape the search results for the current UI's expected result shape.
+     *
+     * @param {any[]} results Results array returned from `_search` method.
+     * @return {any[]} Array corresponding to input `results` with all needed display data attached.
+     */
+    async _getResultsForDisplay(results) {
+        // Grab all the Pages needed for results
+        const pages = await this.pages
+            .where('url')
+            .anyOf(results.map(([_, url]) => url))
+            .toArray()
+
+        const displayPages = new Map()
+        for (const page of pages) {
+            await page.loadRels(this)
+
+            // Only keep around the data needed for display
+            displayPages.set(page.url, {
+                url: page.fullUrl,
+                title: page.fullTitle,
+                hasBookmark: page.hasBookmark,
+                displayTime: page.latestVisitTime,
+                tags: [], // TODO: tags data model
+            })
+        }
+
+        // Return display page data in order of input results
+        return results.map(([_, url]) => displayPages.get(url))
+    }
+
+    /**
      * @param {string} [args.query=''] Terms search query.
      * @param {number} [args.startTime=0] Lower-bound for visit time.
      * @param {number} [args.endTime=Date.now()] Upper-bound for visit time.
@@ -183,7 +214,7 @@ export default class Storage extends Dexie {
      * @param {boolean} [args.bookmarks=false] Whether or not to filter by bookmarked pages only.
      * @return {Promise<[number, string][]>} Ordered array of result KVPs of latest visit timestamps to page URLs.
      */
-    search({
+    _search({
         queryTerms = [],
         startTime = 0,
         endTime = Date.now(),
@@ -251,9 +282,23 @@ export default class Storage extends Dexie {
                 // Paginate
                 return matchingPageUrls
                     .map(url => [latestVisitByUrl.get(url), url])
-                    .sort(([a], [b]) => a - b)
+                    .sort(([a], [b]) => b - a)
                     .slice(skip, skip + limit)
             },
         )
+    }
+
+    async search(params) {
+        console.log('QUERY:', params)
+
+        console.time('search')
+        let results = await this._search(params)
+        console.timeEnd('search')
+
+        console.time('search result mapping')
+        results = await this._getResultsForDisplay(results)
+        console.timeEnd('search result mapping')
+
+        return results
     }
 }

@@ -19,6 +19,7 @@ export default class Page extends AbstractModel {
         url,
         text,
         fullUrl,
+        fullTitle,
         terms,
         urlTerms,
         titleTerms,
@@ -29,6 +30,7 @@ export default class Page extends AbstractModel {
         super()
         this.url = url
         this.fullUrl = fullUrl
+        this.fullTitle = fullTitle
         this.text = text
         this.terms = terms
         this.urlTerms = urlTerms
@@ -45,6 +47,14 @@ export default class Page extends AbstractModel {
                 ...AbstractModel.DEF_NON_ENUM_PROP,
             },
         })
+    }
+
+    get hasBookmark() {
+        return this[bookmarkProp] != null
+    }
+
+    get latestVisitTime() {
+        return this[visitsProp].sort((a, b) => b.time - a.time)[0].time
     }
 
     /**
@@ -64,7 +74,7 @@ export default class Page extends AbstractModel {
 
     async loadRels(db) {
         this[visitsProp] = await db.visits.where({ url: this.url }).toArray()
-        this[bookmarkProp] = await db.bookmarks.where({ url: this.url }).first()
+        this[bookmarkProp] = await db.bookmarks.get(this.url)
     }
 
     save(db) {
