@@ -3,7 +3,7 @@ import db, {
     fetchMetaDocsForPage,
     fetchPagesByUrlPattern,
 } from 'src/pouchdb'
-import { delPagesConcurrent, initSingleLookup, keyGen } from 'src/search'
+import { delPages, initSingleLookup, keyGen } from 'src/search'
 import { pageKeyPrefix } from 'src/page-storage'
 import { visitKeyPrefix } from 'src/activity-logger'
 import { bookmarkKeyPrefix } from 'src/search/bookmarks'
@@ -47,7 +47,7 @@ async function deleteByRegex(regex) {
         pageIds.push(id)
     }
 
-    return await Promise.all([deleteDocs(allRows), delPagesConcurrent(pageIds)])
+    return await Promise.all([deleteDocs(allRows), delPages(pageIds)])
 }
 
 async function deleteDomain(url = '') {
@@ -73,10 +73,7 @@ async function deleteDomain(url = '') {
         )
     }
 
-    await Promise.all([
-        deleteDocs(allRows),
-        delPagesConcurrent([...domainIndex.keys()]),
-    ])
+    await Promise.all([deleteDocs(allRows), delPages([...domainIndex.keys()])])
 }
 
 async function deleteSpecificSite(url = '') {
@@ -114,5 +111,5 @@ export const deleteDocs = docs =>
 async function handleIndexDeletes(rowsToDelete) {
     const indexDocIds = rowsToDelete.map(row => row.id)
 
-    await delPagesConcurrent(indexDocIds)
+    await delPages(indexDocIds)
 }

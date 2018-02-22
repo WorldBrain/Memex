@@ -7,19 +7,15 @@ import * as oldIndex from './search-index'
 // Adding stuff
 //
 
-export async function addPageConcurrent(...args) {
+export async function addPage(...args) {
     return await oldIndex.addPageConcurrent(...args)
 }
 
-export async function addPageTermsConcurrent(...args) {
+export async function addPageTerms(...args) {
     return await oldIndex.addPageTermsConcurrent(...args)
 }
 
-export async function put(...args) {
-    return await oldIndex.put(...args)
-}
-
-export async function updateTimestampMetaConcurrent(...args) {
+export async function updateTimestampMeta(...args) {
     return await oldIndex.updateTimestampMetaConcurrent(...args)
 }
 
@@ -27,15 +23,7 @@ export async function updateTimestampMetaConcurrent(...args) {
 // Deleting stuff
 //
 export async function delPages(...args) {
-    return await oldIndex.delPages(...args)
-}
-
-export async function delPagesConcurrent(...args) {
     return await oldIndex.delPagesConcurrent(...args)
-}
-
-export async function del(...args) {
-    return await oldIndex.del(...args)
 }
 
 //
@@ -60,7 +48,7 @@ export async function fetchTags(...args) {
 //
 // Bookmarks
 //
-export async function addBookmarkConcurrent(...args) {
+export async function addBookmark(...args) {
     return await oldIndex.addBookmarkConcurrent(...args)
 }
 
