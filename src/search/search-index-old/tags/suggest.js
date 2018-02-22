@@ -1,6 +1,6 @@
 import { generatePageDocId } from 'src/page-storage'
 import index from '../'
-import { keyGen, removeKeyType } from '../util'
+import { keyGen, removeKeyType } from '../../util'
 
 /**
  * @param {string} [query=''] Plaintext query string to match against start of tag names.
