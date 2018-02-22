@@ -1,6 +1,6 @@
 import QueryBuilder from './query-builder'
 import mapResultsToPouchDocs from './map-search-to-pouch'
-import * as oldIndex from './search-index'
+import * as oldIndex from './search-index-old'
 
 //
 // Adding stuff
