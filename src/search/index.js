@@ -130,6 +130,7 @@ export async function search({
         queryTerms: [...indexQuery.query],
         startTime: startDate,
         endTime: endDate,
+        domains: [...indexQuery.domain],
         bookmarks: showOnlyBookmarks,
         skip,
         limit,

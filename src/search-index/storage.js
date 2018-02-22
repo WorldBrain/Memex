@@ -187,6 +187,7 @@ export default class Storage extends Dexie {
         queryTerms = [],
         startTime = 0,
         endTime = Date.now(),
+        domains = [],
         skip = 0,
         limit = 10,
         bookmarks = false,
@@ -197,6 +198,8 @@ export default class Storage extends Dexie {
             this.visits,
             this.bookmarks,
             async () => {
+                const domainsSet = new Set(domains)
+
                 // Fetch all latest visits in time range, grouped by URL
                 const latestVisitByUrl = new Map()
                 await this.visits
@@ -224,7 +227,17 @@ export default class Storage extends Dexie {
                     .or('terms')
                     .anyOf(queryTerms)
                     .distinct()
-                    .filter(page => latestVisitByUrl.has(page.url))
+                    // Filter matching pages down by domains, if specified + visit results
+                    .filter(page => {
+                        if (
+                            domainsSet.size > 0 &&
+                            !domainsSet.has(page.domain)
+                        ) {
+                            return false
+                        }
+
+                        return latestVisitByUrl.has(page.url)
+                    })
                     .primaryKeys()
 
                 // Further filter down by bookmarks, if specified
