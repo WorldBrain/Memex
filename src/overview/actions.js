@@ -158,6 +158,12 @@ function trackSearch(searchResult, overwrite, state) {
     if (filters.onlyBookmarks(state)) {
         action += ' (BM only)'
     }
+    if (filters.tags(state).length) {
+        action += ' (Tag only)'
+    }
+    if (filters.domains(state).length) {
+        action += ' (Domain only)'
+    }
 
     const name = overwrite
         ? selectors.queryParamsDisplay(state)
@@ -273,6 +279,10 @@ export const setQueryTagsDomains = (input, isEnter = true) => (
             if (constants.HASH_TAG_PATTERN.test(term)) {
                 removeFromInputVal(term)
                 dispatch(filterActs.toggleTagFilter(stripTagPattern(term)))
+                analytics.trackEvent({
+                    category: 'Tag',
+                    action: 'Filter by Tag',
+                })
             }
 
             // If 'domain.tld.cctld?' pattern in input, remove it and add to filter state
@@ -286,6 +296,11 @@ export const setQueryTagsDomains = (input, isEnter = true) => (
 
                 term = term.replace(constants.TERM_CLEAN_PATTERN, '')
                 dispatch(act(term))
+
+                analytics.trackEvent({
+                    category: 'Domain',
+                    action: 'Filter by Domain',
+                })
             }
         })
     }

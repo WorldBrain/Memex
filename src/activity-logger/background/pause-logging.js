@@ -1,6 +1,7 @@
 /* eslint eqeqeq: 0 */
 import createNotif from 'src/util/notifications'
 import { PAUSE_STORAGE_KEY } from '..'
+import analytics from 'src/analytics'
 
 export const pauseIconPath = '/img/worldbrain-logo-narrow-pause.png'
 export const unpauseIconPath = '/img/worldbrain-logo-narrow-bw.png'
@@ -57,6 +58,12 @@ function handlePause(timeout) {
     if (timeout == Infinity) {
         return timeout
     }
+
+    console.log('Here am I')
+    analytics.trackEvent({
+        category: 'Popup',
+        action: 'Resume indexing',
+    })
 
     return setTimeout(() => {
         createNotif({

@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import debounce from 'lodash/fp/debounce'
 import noop from 'lodash/fp/noop'
 
+import internalAnalytics from 'src/analytics/internal'
 import { updateLastActive } from 'src/analytics'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import {
@@ -66,6 +67,24 @@ class IndexDropdownContainer extends Component {
         return this.props.url != null
     }
 
+    /**
+     *
+     */
+    async storeTrackEvent(isAdded) {
+        const { source, hover } = this.props
+
+        internalAnalytics.storeEvent({
+            category: this.allowIndexUpdate
+                ? hover ? source : 'Popup ' + source
+                : source,
+            action: this.allowIndexUpdate
+                ? hover
+                  ? isAdded ? 'Add ' + source : 'Delete ' + source
+                  : isAdded ? 'Popup Add ' + source : 'Popup Delete ' + source
+                : 'Filter by ' + source,
+        })
+    }
+
     isPageTag = value => this.state.filters.includes(value)
 
     setInputRef = el => (this.inputEl = el)
@@ -117,6 +136,7 @@ class IndexDropdownContainer extends Component {
                 await this.addTagRPC(this.props.url, newTag)
             }
             newTags = [newTag, ...this.state.filters]
+            this.storeTrackEvent(true)
         } catch (err) {
         } finally {
             this.inputEl.focus()
@@ -149,6 +169,7 @@ class IndexDropdownContainer extends Component {
                 }
                 this.props.onFilterAdd(tag)
                 tagsReducer = tags => [tag, ...tags]
+                this.storeTrackEvent(true)
             } else {
                 if (this.allowIndexUpdate) {
                     await this.delTagRPC(this.props.url, tag)
@@ -158,6 +179,7 @@ class IndexDropdownContainer extends Component {
                     ...tags.slice(0, tagIndex),
                     ...tags.slice(tagIndex + 1),
                 ]
+                this.storeTrackEvent(false)
             }
         } catch (err) {
         } finally {
