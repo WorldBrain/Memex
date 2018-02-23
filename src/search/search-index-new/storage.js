@@ -261,25 +261,14 @@ export default class Storage extends Dexie {
     /**
      * Runs for blank terms searches.
      */
-    _blankSearch({
+    async _blankSearch({
         domains = [], // TODO: support these
         bookmarks = false,
         ...params
     }) {
-        return this.transaction(
-            'r',
-            this.pages,
-            this.visits,
-            this.bookmarks,
-            async () => {
-                const latestVisitsByUrl = await this._getLatestVisitsByUrl(
-                    params,
-                    true,
-                )
+        const latestVisitsByUrl = await this._getLatestVisitsByUrl(params, true)
 
-                return this._paginate([...latestVisitsByUrl], params)
-            },
-        )
+        return this._paginate([...latestVisitsByUrl], params)
     }
 
     /**
@@ -287,77 +276,75 @@ export default class Storage extends Dexie {
      * @param {boolean} [args.bookmarks=false] Whether or not to filter by bookmarked pages only.
      * @return {Promise<[number, string][]>} Ordered array of result KVPs of latest visit timestamps to page URLs.
      */
-    _search({ queryTerms = [], domains = [], bookmarks = false, ...params }) {
+    async _search({
+        queryTerms = [],
+        domains = [],
+        bookmarks = false,
+        ...params
+    }) {
+        const domainsSet = new Set(domains)
+
+        // Fetch all latest visits in time range, grouped by URL
+        const latestVisitsByUrl = await this._getLatestVisitsByUrl(params)
+
+        // Fetch all pages with terms matching query (TODO: make it AND the queryTerms set)
+        let matchingPageUrls = await this.pages
+            .where('titleTerms')
+            .anyOf(queryTerms)
+            .distinct()
+            .or('urlTerms')
+            .anyOf(queryTerms)
+            .distinct()
+            .or('terms')
+            .anyOf(queryTerms)
+            .distinct()
+            // Filter matching pages down by domains, if specified + visit results
+            .filter(page => {
+                if (domainsSet.size > 0 && !domainsSet.has(page.domain)) {
+                    return false
+                }
+
+                return latestVisitsByUrl.has(page.url)
+            })
+            .primaryKeys()
+
+        // Further filter down by bookmarks, if specified
+        if (bookmarks) {
+            matchingPageUrls = await this.bookmarks
+                .where('url')
+                .anyOf(matchingPageUrls)
+                .primaryKeys()
+        }
+
+        // Paginate
+        return this._paginate(
+            matchingPageUrls.map(url => [url, latestVisitsByUrl.get(url)]),
+            params,
+        )
+    }
+
+    search(params) {
         return this.transaction(
             'r',
             this.pages,
             this.visits,
             this.bookmarks,
             async () => {
-                const domainsSet = new Set(domains)
+                console.log('QUERY:', params)
 
-                // Fetch all latest visits in time range, grouped by URL
-                const latestVisitsByUrl = await this._getLatestVisitsByUrl(
-                    params,
-                )
+                console.time('search')
+                let results = !params.queryTerms.length
+                    ? await this._blankSearch(params)
+                    : await this._search(params)
+                console.timeEnd('search')
 
-                // Fetch all pages with terms matching query (TODO: make it AND the queryTerms set)
-                let matchingPageUrls = await this.pages
-                    .where('titleTerms')
-                    .anyOf(queryTerms)
-                    .distinct()
-                    .or('urlTerms')
-                    .anyOf(queryTerms)
-                    .distinct()
-                    .or('terms')
-                    .anyOf(queryTerms)
-                    .distinct()
-                    // Filter matching pages down by domains, if specified + visit results
-                    .filter(page => {
-                        if (
-                            domainsSet.size > 0 &&
-                            !domainsSet.has(page.domain)
-                        ) {
-                            return false
-                        }
+                console.log(results)
+                console.time('search result mapping')
+                results = await this._getResultsForDisplay(results)
+                console.timeEnd('search result mapping')
 
-                        return latestVisitsByUrl.has(page.url)
-                    })
-                    .primaryKeys()
-
-                // Further filter down by bookmarks, if specified
-                if (bookmarks) {
-                    matchingPageUrls = await this.bookmarks
-                        .where('url')
-                        .anyOf(matchingPageUrls)
-                        .primaryKeys()
-                }
-
-                // Paginate
-                return this._paginate(
-                    matchingPageUrls.map(url => [
-                        url,
-                        latestVisitsByUrl.get(url),
-                    ]),
-                    params,
-                )
+                return results
             },
         )
-    }
-
-    async search(params) {
-        console.log('QUERY:', params)
-
-        console.time('search')
-        let results = !params.queryTerms.length
-            ? await this._blankSearch(params)
-            : await this._search(params)
-        console.timeEnd('search')
-
-        console.time('search result mapping')
-        results = await this._getResultsForDisplay(results)
-        console.timeEnd('search result mapping')
-
-        return results
     }
 }
