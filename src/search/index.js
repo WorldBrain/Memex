@@ -7,7 +7,7 @@ export const getBackend = (() => {
     let backend = null
     const get = async function() {
         if (!backend) {
-            backend = get._reset({ useOld: await oldBackend.hasData() })
+            get._reset({ useOld: await oldBackend.hasData() })
         }
         return backend
     }
