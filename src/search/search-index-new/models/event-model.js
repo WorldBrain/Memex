@@ -13,6 +13,6 @@ export default class EventModel extends AbstractModel {
         super()
 
         this.url = url
-        this.time = time
+        this.time = typeof time === 'number' ? time : +time
     }
 }
