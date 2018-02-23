@@ -1,3 +1,4 @@
+import db from '..'
 import EventModel from './event-model'
 
 export default class Visit extends EventModel {
@@ -26,7 +27,7 @@ export default class Visit extends EventModel {
      */
     scrollMaxPerc
 
-    save(db) {
+    save() {
         return db.visits.put(this)
     }
 }

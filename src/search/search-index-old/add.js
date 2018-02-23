@@ -239,7 +239,7 @@ export const addTimestampConcurrent = makeIndexFnConcSafe(
  * @param {(oldVal: any) => any} updateCb Callback that is passed the existing value to reduce. Returned value gets set as new.
  * @returns {Promise<void>}
  */
-async function updateTimestampMeta(timestampId, updateCb) {
+async function updateTimestampMeta(timestampId, time, update) {
     let existingVal = await singleLookup(timestampId)
 
     if (existingVal == null) {
@@ -254,7 +254,7 @@ async function updateTimestampMeta(timestampId, updateCb) {
     }
 
     // Do not allow overwriting of the `pageId` property
-    const newVal = { ...updateCb(existingVal), pageId: existingVal.pageId }
+    const newVal = { ...existingVal, ...update, pageId: existingVal.pageId }
     return index.put(timestampId, newVal)
 }
 

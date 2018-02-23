@@ -42,7 +42,8 @@ class PopupContainer extends Component {
         this.addToBlacklist = remoteFunction('addToBlacklist')
         this.isURLBlacklisted = remoteFunction('isURLBlacklisted')
         this.toggleLoggingPause = remoteFunction('toggleLoggingPause')
-        this.deleteDocs = remoteFunction('deleteDocsByUrl')
+        this.deletePages = remoteFunction('delPages')
+        this.deletePagesByDomain = remoteFunction('delPagesByDomain')
         this.removeBookmarkByUrl = remoteFunction('removeBookmarkByUrl')
         this.createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
 
@@ -252,10 +253,11 @@ class PopupContainer extends Component {
             action: 'Delete blacklisted pages',
         })
 
-        this.deleteDocs(
-            this.state.url,
-            this.state.domainDelete ? 'domain' : 'url',
-        )
+        if (this.state.domainDelete) {
+            this.deletePagesByDomain(this.state.url)
+        } else {
+            this.deletePages([this.state.url])
+        }
         this.resetBlacklistConfirmState()
     }
 

@@ -1,6 +1,11 @@
 import index from './index'
 import mapResultsToPouchDocs from './map-search-to-pouch'
 import QueryBuilder from '../query-builder'
+import { generatePageDocId } from 'src/page-storage'
+import { addTimestampConcurrent } from './add'
+import { searchConcurrent } from './search'
+import { delPagesConcurrent } from './del'
+import { initSingleLookup, keyGen } from './util'
 
 export function hasData() {
     return new Promise((resolve, reject) => {
@@ -59,7 +64,7 @@ export async function search({
     console.log('DEBUG: query', indexQuery)
 
     // Get index results, filtering out any unexpectedly structured results
-    const { results, totalCount } = await index.searchConcurrent(indexQuery, {
+    const { results, totalCount } = await searchConcurrent(indexQuery, {
         count: getTotalCount,
     })
 
@@ -92,12 +97,29 @@ export async function search({
     }
 }
 
+export const getPage = url => index.db.get(generatePageDocId({ url }))
+
+export const addVisit = (url, time = Date.now()) =>
+    addTimestampConcurrent(generatePageDocId({ url }), `visit/${time}`)
+
+export const delPages = urls =>
+    delPagesConcurrent(urls.map(url => generatePageDocId({ url })))
+
+export async function delPagesByDomain(url) {
+    // Grab domain index entry to get set of pages
+    const domainIndex = await initSingleLookup({ defaultValue: [] })(
+        keyGen.domain(url),
+    )
+
+    const pageIds = [...domainIndex].map(([pageId]) => pageId)
+    return await delPagesConcurrent(pageIds)
+}
+
 export {
     addPageConcurrent as addPage,
     addPageTermsConcurrent as addPageTerms,
     updateTimestampMetaConcurrent as updateTimestampMeta,
 } from './add'
-export { delPagesConcurrent as delPages } from './del'
 export { setTags, addTags, delTags, fetchTags } from './tags'
 export {
     addBookmarkConcurrent as addBookmark,
@@ -106,5 +128,6 @@ export {
     removeBookmarkByUrl,
 } from './bookmarks'
 export { default as suggest } from './suggest'
-export { initSingleLookup, grabExistingKeys } from './util'
+export { grabExistingKeys } from './util'
 export { indexQueue } from './'
+export { initSingleLookup }

@@ -1,7 +1,9 @@
+import normalizeUrl from 'src/util/encode-url-for-id'
 import Storage from './storage'
 import pipeline from './pipeline'
 import QueryBuilder from '../query-builder'
 
+// Create main singleton to interact with DB in the ext
 const db = new Storage()
 export default db
 
@@ -9,18 +11,50 @@ export default db
 // Adding stuff
 //
 
-export async function addPage(...args) {
-    return pipeline(...args).then(entry => db.addPage(entry))
+export async function addPage(pipelineReq) {
+    return pipeline(pipelineReq).then(entry => db.addPage(entry))
 }
 
-export async function addPageTerms(...args) {}
+export async function addPageTerms(pipelineReq) {
+    return pipeline(pipelineReq).then(
+        ([{ url, terms, text }]) =>
+            console.log(`adding ${terms.length} terms to page: ${url}`) ||
+            db.pages.update(url, { terms, text }),
+    )
+}
 
-export async function updateTimestampMeta(...args) {}
+export async function updateTimestampMeta(...args) {
+    return db.updateVisitInteractionData(...args)
+}
+
+export const addVisit = (url, time = Date.now()) => db.addVisit({ url, time })
 
 //
 // Deleting stuff
 //
-export async function delPages(...args) {}
+export async function delPages(urls) {
+    const normalized = urls.map(normalizeUrl)
+    const pages = await db.pages
+        .where('url')
+        .anyOf(normalized)
+        .toArray()
+
+    for (const page of pages) {
+        await page.delete()
+    }
+}
+
+export async function delPagesByDomain(url) {
+    const normalized = normalizeUrl(url)
+    const pages = await db.pages
+        .where('url')
+        .startsWith(normalized)
+        .toArray()
+
+    for (const page of pages) {
+        await page.delete()
+    }
+}
 
 //
 // Tags
@@ -50,6 +84,8 @@ export async function removeBookmarkByUrl(...args) {}
 export function initSingleLookup() {
     return async function(...args) {}
 }
+
+export const getPage = url => db.pages.get(normalizeUrl(url))
 
 /**
  * Hardcoded replacement for now.

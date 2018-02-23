@@ -49,7 +49,7 @@ export function transformUrl(url) {
  */
 export function extractTerms(text) {
     if (!text || !text.length) {
-        return new Set()
+        return []
     }
 
     const { text: transformedText } = transformPageText({ text })
@@ -89,7 +89,7 @@ export function extractTerms(text) {
 export default function pipeline({
     pageDoc: { content = {}, url },
     visits = [],
-    bookmarkDocs = [],
+    bookmark = undefined,
     rejectNoContent = true,
 }) {
     // First apply transformations to the URL
@@ -109,9 +109,6 @@ export default function pipeline({
     const titleTerms = extractTerms(content.title)
     const urlTerms = extractTerms(pathname)
 
-    // Create timestamps to be indexed as Sets
-    // const bookmarks = bookmarkDocs.map(transformMetaDoc)
-
     return Promise.resolve([
         {
             url: normalizeUrl(url),
@@ -125,5 +122,6 @@ export default function pipeline({
             tags: [],
         },
         visits,
+        bookmark,
     ])
 }

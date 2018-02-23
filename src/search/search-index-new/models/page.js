@@ -1,3 +1,4 @@
+import db from '..'
 import AbstractModel from './abstract-model'
 import Visit from './visit'
 import Bookmark from './bookmark'
@@ -5,6 +6,7 @@ import Bookmark from './bookmark'
 // Keep these properties as Symbols to avoid storing them to DB
 const visitsProp = Symbol('assocVisits')
 const bookmarkProp = Symbol('assocBookmark')
+const latestProp = Symbol('latestEvent')
 
 export default class Page extends AbstractModel {
     /**
@@ -46,15 +48,16 @@ export default class Page extends AbstractModel {
                 value: bookmark,
                 ...AbstractModel.DEF_NON_ENUM_PROP,
             },
+            [latestProp]: AbstractModel.DEF_NON_ENUM_PROP,
         })
+    }
+
+    get latest() {
+        return this[latestProp]
     }
 
     get hasBookmark() {
         return this[bookmarkProp] != null
-    }
-
-    get latestVisitTime() {
-        return this[visitsProp].sort((a, b) => b.time - a.time)[0].time
     }
 
     /**
@@ -72,12 +75,40 @@ export default class Page extends AbstractModel {
         this[bookmarkProp] = undefined
     }
 
-    async loadRels(db) {
-        this[visitsProp] = await db.visits.where({ url: this.url }).toArray()
-        this[bookmarkProp] = await db.bookmarks.get(this.url)
+    async loadRels() {
+        // Grab DB data
+        const visits = await db.visits.where({ url: this.url }).toArray()
+        const bookmark = await db.bookmarks.get(this.url)
+
+        this[visitsProp] = visits
+        this[bookmarkProp] = bookmark
+
+        // Derive latest time of either bookmark or visits
+        let latest = bookmark != null ? bookmark.time : 0
+
+        if (latest < (visits[visits.length - 1] || { time: 0 }).time) {
+            latest = visits[visits.length - 1].time
+        }
+
+        this[latestProp] = latest
     }
 
-    save(db) {
+    delete() {
+        return db.transaction(
+            'rw',
+            db.pages,
+            db.visits,
+            db.bookmarks,
+            async () => {
+                console.log('deleting', this)
+                await db.visits.where({ url: this.url }).delete()
+                await db.bookmarks.where({ url: this.url }).delete()
+                await db.pages.where({ url: this.url }).delete()
+            },
+        )
+    }
+
+    save() {
         return db.transaction(
             'rw',
             db.pages,
@@ -88,12 +119,12 @@ export default class Page extends AbstractModel {
 
                 // Insert or update all associated visits
                 const visitIds = await Promise.all(
-                    this[visitsProp].map(visit => visit.save(db)),
+                    this[visitsProp].map(visit => visit.save()),
                 )
 
                 // Either try to update or delete the assoc. bookmark
                 if (this[bookmarkProp] != null) {
-                    this[bookmarkProp].save(db)
+                    this[bookmarkProp].save()
                 } else {
                     await db.bookmarks.where({ url: this.url }).delete()
                 }
