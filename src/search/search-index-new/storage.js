@@ -168,8 +168,8 @@ export default class Storage extends Dexie {
     updateVisitInteractionData(url, time, data) {
         return this.transaction('rw', this.visits, () =>
             this.visits
-                .where('[url+time]')
-                .equals([url, time])
+                .where('[time+url]')
+                .equals([time, url])
                 .modify(data),
         )
     }

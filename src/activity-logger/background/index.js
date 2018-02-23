@@ -1,3 +1,4 @@
+import normalizeUrl from 'src/util/encode-url-for-id'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import { whenPageDOMLoaded, whenTabActive } from 'src/util/tab-events'
 import { updateTimestampMeta } from 'src/search'
@@ -5,7 +6,7 @@ import { blacklist } from 'src/blacklist/background'
 import { logPageVisit, logInitPageVisit } from './log-page-visit'
 import initPauser from './pause-logging'
 import tabManager from './tab-manager'
-import { isLoggable, getPauseState, visitKeyPrefix } from '..'
+import { isLoggable, getPauseState } from '..'
 
 // `tabs.onUpdated` event fires on tab open - generally takes a few ms, which we can skip attemping visit update
 const fauxVisitThreshold = 100
@@ -39,26 +40,19 @@ async function shouldLogTab(tab) {
  *
  * @param {Tab} tab The tab state to derive visit meta data from.
  */
-async function updateVisitInteractionData({
+const updateVisitInteractionData = ({
+    url,
     visitTime,
     activeTime,
     scrollState,
-}) {
-    const visitKey = visitKeyPrefix + visitTime
-
-    try {
-        await updateTimestampMeta(visitKey, data => ({
-            ...data,
-            duration: activeTime,
-            scrollPx: scrollState.pixel,
-            scrollMaxPx: scrollState.maxPixel,
-            scrollPerc: scrollState.percent,
-            scrollMaxPerc: scrollState.maxPercent,
-        }))
-    } catch (error) {
-        // If visit was never indexed for tab, cannot update it - move on
-    }
-}
+}) =>
+    updateTimestampMeta(normalizeUrl(url), +visitTime, {
+        duration: activeTime,
+        scrollPx: scrollState.pixel,
+        scrollMaxPx: scrollState.maxPixel,
+        scrollPerc: scrollState.percent,
+        scrollMaxPerc: scrollState.maxPercent,
+    })
 
 // Ensure tab scroll states are kept in-sync with scroll events from the content script
 browser.runtime.onMessage.addListener(
@@ -108,7 +102,11 @@ browser.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
     if (changeInfo.url) {
         try {
             // Ensures the URL change counts as a new visit in tab state (tab ID doesn't change)
-            const oldTab = tabManager.resetTab(tabId, tab.active)
+            const oldTab = tabManager.resetTab(
+                tabId,
+                tab.active,
+                changeInfo.url,
+            )
             if (oldTab.activeTime > fauxVisitThreshold) {
                 // Send off request for updating that prev. visit's tab state, if active long enough
                 updateVisitInteractionData(oldTab)
