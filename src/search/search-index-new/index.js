@@ -13,7 +13,13 @@ export async function addPage(...args) {
     return pipeline(...args).then(entry => db.addPage(entry))
 }
 
-export async function addPageTerms(...args) {}
+export async function addPageTerms(...args) {
+    return pipeline(...args).then(
+        ([{ url, terms }]) =>
+            console.log(`adding ${terms.length} terms to page: ${url}`) ||
+            db.pages.update(url, { terms }),
+    )
+}
 
 export async function updateTimestampMeta(...args) {}
 
