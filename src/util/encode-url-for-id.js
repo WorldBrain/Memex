@@ -49,7 +49,7 @@ function applyQueryParamsRules(url) {
  * @param {any} [customNormalizationOpts={}] Custom options to pass to `normalize-url` package (will override).
  * @returns {string}
  */
-export function normalize(url, customOpts = {}) {
+export default function normalize(url, customOpts = {}) {
     let normalized = normalizeUrl(url, {
         ...normalizationOpts,
         ...customOpts,
@@ -124,7 +124,7 @@ export function decode(encodedUrl, needsEscaping = true) {
  * @param {any} [customNormalizationOpts={}] Custom options to pass to `normalize-url` package (will override).
  * @returns {string} Encoded URL ready for use in PouchID.
  */
-export default function normalizeAndEncode(
+export function normalizeAndEncode(
     url,
     needsEscaping = true,
     customNormalizationOpts = {},
