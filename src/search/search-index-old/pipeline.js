@@ -2,8 +2,7 @@ import normalizeUrl from 'normalize-url'
 
 import transformPageText from 'src/util/transform-page-text'
 import { convertMetaDocId } from 'src/activity-logger'
-import { extractContent } from './util'
-import { keyGen, DEFAULT_TERM_SEPARATOR } from '../util'
+import { keyGen, DEFAULT_TERM_SEPARATOR, extractContent } from '../util'
 
 // Simply extracts the timestamp component out the ID of a visit or bookmark doc,
 //  which is the only data we want at the moment.
