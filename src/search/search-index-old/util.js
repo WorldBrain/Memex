@@ -1,6 +1,6 @@
 import promiseLimit from 'promise-limit'
 
-import { keyGen, removeKeyType, DEFAULT_TERM_SEPARATOR } from '../util'
+import { removeKeyType } from '../util'
 import index, { indexQueue } from './'
 
 /**
@@ -38,23 +38,6 @@ export async function fetchExistingPage(pageId) {
 
     return reverseIndexDoc
 }
-
-/**
- * Handles splitting up searchable content into indexable terms. Terms are all
- * lowercased.
- *
- * @param {string} content Searchable content text.
- * @param {string|RegExp} [separator=' '] Separator used to split content into terms.
- * @returns {string[]} Array of terms derived from `content`.
- */
-export const extractContent = (
-    content,
-    { separator = DEFAULT_TERM_SEPARATOR, key = '_' },
-) =>
-    content
-        .split(separator)
-        .map(word => keyGen[key](word.toLowerCase()))
-        .filter(term => !term.endsWith('/'))
 
 /**
  * @param {Map<string, Map<string, IndexTermValue>>} termValuesMap Map of terms to assoc. page values.
