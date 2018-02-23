@@ -49,7 +49,7 @@ export function transformUrl(url) {
  */
 export function extractTerms(text) {
     if (!text || !text.length) {
-        return new Set()
+        return []
     }
 
     const { text: transformedText } = transformPageText({ text })
