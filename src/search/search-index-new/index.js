@@ -1,4 +1,6 @@
 import Storage from './storage'
+import pipeline from './pipeline'
+import QueryBuilder from '../query-builder'
 
 const db = new Storage()
 export default db
@@ -7,7 +9,9 @@ export default db
 // Adding stuff
 //
 
-export async function addPage(...args) {}
+export async function addPage(...args) {
+    return pipeline(...args).then(entry => db.addPage(entry))
+}
 
 export async function addPageTerms(...args) {}
 
@@ -63,10 +67,22 @@ export async function grabExistingKeys(...args) {
 // Searching & suggesting
 //
 
-export async function search(
-    query = { skip: 0, limit: 10 },
-    { count = false } = { count: false },
-) {}
+export async function search({ query, showOnlyBookmarks, ...params }) {
+    const qb = new QueryBuilder().searchTerm(query).get()
+
+    const docs = await db.search({
+        queryTerms: [...qb.query],
+        bookmarks: showOnlyBookmarks,
+        ...params,
+    })
+
+    return {
+        docs,
+        resultsExhausted: docs.length < params.limit,
+        totalCount: docs.length,
+        isBadTerm: qb.isBadTerm,
+    }
+}
 
 export async function suggest(...args) {}
 
