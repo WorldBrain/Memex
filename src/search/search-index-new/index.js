@@ -9,19 +9,21 @@ export default db
 // Adding stuff
 //
 
-export async function addPage(...args) {
-    return pipeline(...args).then(entry => db.addPage(entry))
+export async function addPage(pipelineReq) {
+    return pipeline(pipelineReq).then(entry => db.addPage(entry))
 }
 
-export async function addPageTerms(...args) {
-    return pipeline(...args).then(
+export async function addPageTerms(pipelineReq) {
+    return pipeline(pipelineReq).then(
         ([{ url, terms }]) =>
             console.log(`adding ${terms.length} terms to page: ${url}`) ||
             db.pages.update(url, { terms }),
     )
 }
 
-export async function updateTimestampMeta(...args) {}
+export async function updateTimestampMeta(...args) {
+    return db.updateVisitInteractionData(...args)
+}
 
 //
 // Deleting stuff

@@ -22,9 +22,10 @@ class Tab {
      * @param {number} [logDelay] The # of ms a user must be active on this tab before calling scheduled log.
      */
     constructor(
-        { isActive = false, visitTime = `${Date.now()}`, navState = {} },
+        { url, isActive = false, visitTime = `${Date.now()}`, navState = {} },
         logDelay = Tab.DEF_LOG_DELAY,
     ) {
+        this.url = url
         this.isActive = isActive
         this.visitTime = visitTime
         this.navState = navState
