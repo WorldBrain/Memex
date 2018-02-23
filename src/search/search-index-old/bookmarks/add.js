@@ -1,7 +1,7 @@
 import { dataURLToBlob } from 'blob-util'
 
 import fetchPageData from 'src/page-analysis/background/fetch-page-data'
-import { addPageConcurrent, addPageTermsConcurrent } from '../add'
+import { addPageConcurrent } from '../add'
 import db from 'src/pouchdb'
 import { transformToBookmarkDoc } from 'src/imports'
 import { generatePageDocId } from 'src/page-storage'
