@@ -26,8 +26,6 @@ export const UNINSTALL_URL =
     process.env.NODE_ENV === 'production'
         ? 'http://worldbrain.io/uninstall'
         : ''
-const VERSION_NUMBER = 'version_number'
-const CHECK_INTERVAL_SIZE = 2 * 60 * 60 * 1000 // 2 hours
 
 // Put doc ID generators on window for user use with manual DB lookups
 window.generatePageDocId = generatePageDocId
@@ -47,10 +45,6 @@ async function openOverview() {
 }
 
 async function onInstall() {
-    const manifestData = chrome.runtime.getManifest()
-    // Insert the version no. in the localStorage
-    browser.storage.local.set({ [VERSION_NUMBER]: manifestData.version })
-
     // Ensure default blacklist entries are stored (before doing anything else)
     await blacklist.addToBlacklist(blacklistConsts.DEF_ENTRIES)
     analytics.trackEvent({ category: 'Global', action: 'Install' }, true)
@@ -61,6 +55,9 @@ async function onInstall() {
 }
 
 async function onUpdate() {
+    // Notification with updates when we update
+    updateNotification()
+
     // If no prior conversion, convert old ext blacklist + show static notif page
     const {
         [blacklistConsts.CONVERT_TIME_KEY]: blacklistConverted,
@@ -103,18 +100,3 @@ browser.runtime.onInstalled.addListener(details => {
 
 // Open uninstall survey on ext. uninstall
 browser.runtime.setUninstallURL(UNINSTALL_URL)
-
-const checkForUpdate = async () => {
-    const manifestData = chrome.runtime.getManifest()
-    const version = (await browser.storage.local.get(VERSION_NUMBER))[
-        VERSION_NUMBER
-    ]
-
-    // if the present version and installation version is different then make notification
-    if (version.localeCompare(manifestData.version) === -1) {
-        updateNotification()
-        browser.storage.local.set({ [VERSION_NUMBER]: manifestData.version })
-    }
-}
-
-setInterval(checkForUpdate, CHECK_INTERVAL_SIZE)
