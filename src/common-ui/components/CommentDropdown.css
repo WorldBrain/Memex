@@ -1,3 +1,5 @@
+/* stylelint-disable declaration-no-important */
+
 .container {
     display: flex;
     justify-content: center;
@@ -5,12 +7,14 @@
     flex-direction: column;
     margin: 8px;
 }
+
 .buttongroup {
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
     margin-top: 8px;
 }
+
 .textarea {
     font-size: 16px;
     font-family: 'Open Sans';
@@ -18,6 +22,7 @@
     font-style: italic;
     resize: none;
 }
+
 .cancel {
     background-color: white;
     border: none;
