@@ -1,0 +1,13 @@
+.url {
+    font-size: 12px;
+    color: #888;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 8px;
+}
+
+.displayTime {
+    font-size: 12px;
+    color: #c1c1c1;
+    padding-bottom: 7px;
+}
