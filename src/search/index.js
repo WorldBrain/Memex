@@ -12,6 +12,7 @@ async function indexSearch({
     limit = 10,
     getTotalCount = false,
     showOnlyBookmarks = false,
+    mapResultsFunc = mapResultsToPouchDocs,
 }) {
     query = query.trim() // Don't count whitespace searches
 
@@ -44,6 +45,8 @@ async function indexSearch({
         count: getTotalCount,
     })
 
+    // console.log('got results', results)
+
     // Short-circuit if no results
     if (!results.length) {
         return {
@@ -55,7 +58,7 @@ async function indexSearch({
     }
 
     // Match the index results to data docs available in Pouch, consolidating meta docs
-    const docs = await mapResultsToPouchDocs(results, {
+    const docs = await mapResultsFunc(results, {
         startDate,
         endDate,
         showOnlyBookmarks,

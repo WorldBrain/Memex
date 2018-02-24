@@ -1,6 +1,6 @@
 import reduce from 'lodash/fp/reduce'
 
-import db, { bulkGetResultsToArray } from 'src/pouchdb'
+import db, { bulkGetResultsToArray } from '../pouchdb'
 import { removeKeyType } from './search-index/util'
 
 /**

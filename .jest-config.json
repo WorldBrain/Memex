@@ -13,13 +13,15 @@
     "<rootDir>"
   ],
   "moduleNameMapper": {
-    "\\.(css|less)$": "identity-obj-proxy"
+    "\\.(css|less)$": "identity-obj-proxy",
+    "^pouchdb-browser$": "pouchdb-memory"
   },
   "moduleFileExtensions": [
     "js",
     "jsx"
   ],
   "setupFiles": [
+    "jest-webextension-mock",
     "./setupJest.js"
   ],
   "unmockedModulePathPatterns": [
