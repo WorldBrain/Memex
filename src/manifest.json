@@ -25,7 +25,11 @@
             "description": "Open Search Overview"
         }
     },
-
+    "applications": {
+        "gecko": {
+            "id": "info@worldbrain.io"
+        }
+    },
     "icons": {
         "16": "./img/worldbrain-logo-narrow-bw-16.png",
         "48": "./img/worldbrain-logo-narrow-bw-48.png",
