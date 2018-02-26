@@ -23,10 +23,9 @@ export default class AbstractModel {
     /**
      * Persist the current Modol instance to the `db`.
      *
-     * @param {Dexie} db Dexie DB instance to use to save this model instance.
      * @return {Promise<any>}
      */
-    save(db) {
+    save() {
         throw new Error(`Method 'save' not implemented by subclass`)
     }
 }

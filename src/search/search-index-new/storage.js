@@ -89,16 +89,15 @@ export default class Storage extends Dexie {
      */
     async addPage([pageData, times]) {
         const page = new Page(pageData)
-
         // Load any current assoc. data for this page
-        await page.loadRels(this)
+        await page.loadRels()
 
         // Create Visits for each specified time, or a single Visit for "now"
         const visitTimes = times == null || !times.length ? [Date.now()] : times
         visitTimes.forEach(time => page.addVisit(time))
 
         // Persist current state
-        await page.save(this)
+        await page.save()
         console.log('added:', page)
     }
 
@@ -110,6 +109,28 @@ export default class Storage extends Dexie {
         for (const pageEntry of pageEntries) {
             await this.addPage(pageEntry)
         }
+    }
+
+    async addVisit({ url, time = Date.now(), pageData }) {
+        const matchingPage = await this.pages.where({ url }).first()
+
+        // Base case; page exists, so just add visit and update
+        if (matchingPage != null) {
+            await matchingPage.loadRels()
+            matchingPage.addVisit(time)
+            return matchingPage.save()
+        }
+
+        // Edge case: Page doesn't exist, try to create new one from supplied data
+        if (pageData == null) {
+            throw new Error(
+                'Visited URL has no matching page stored, and no page data was supplied',
+            )
+        }
+
+        const page = new Page(pageData)
+        page.addVisit(time)
+        await page.save()
     }
 
     /**
@@ -126,9 +147,9 @@ export default class Storage extends Dexie {
 
         // Base case; page exists, so just add bookmark and update
         if (matchingPage != null) {
-            await matchingPage.loadRels(this)
+            await matchingPage.loadRels()
             matchingPage.setBookmark(time)
-            return matchingPage.save(this)
+            return matchingPage.save()
         }
 
         // Edge case: Page doesn't exist, try to create new one from supplied data
@@ -151,9 +172,9 @@ export default class Storage extends Dexie {
         const matchingPage = await this.pages.where({ url }).first()
 
         if (matchingPage != null) {
-            await matchingPage.loadRels(this)
+            await matchingPage.loadRels()
             matchingPage.delBookmark()
-            await matchingPage.save(this)
+            await matchingPage.save()
         }
     }
 
@@ -189,7 +210,7 @@ export default class Storage extends Dexie {
 
         const displayPages = new Map()
         for (const page of pages) {
-            await page.loadRels(this)
+            await page.loadRels()
 
             // Only keep around the data needed for display
             displayPages.set(page.url, {
