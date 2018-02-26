@@ -5,8 +5,8 @@ import { remoteFunction } from 'src/util/webextensionRPC'
 import * as selectors from './selectors'
 import { STORAGE_KEY } from './constants'
 
-const deleteDocs = remoteFunction('deleteDocsByUrl')
-const fetchMatchingPages = remoteFunction('fetchPagesByUrlPattern')
+const deletePagesByPattern = remoteFunction('delPagesByPattern')
+const getMatchingPageCount = remoteFunction('getMatchingPageCount')
 const dirtyEstsCache = remoteFunction('dirtyEstsCache')
 
 export const setMatchedCount = createAction('settings/setMatchedCount')
@@ -51,11 +51,11 @@ export const addToBlacklist = expression => async (dispatch, getState) => {
         await browser.storage.local.set({
             [STORAGE_KEY]: JSON.stringify([newEntry, ...oldBlacklist]),
         })
-        const rows = await fetchMatchingPages(expression)
+        const count = await getMatchingPageCount(expression)
 
-        if (rows.length) {
+        if (count > 0) {
             dispatch(setModalShow(true))
-            dispatch(setMatchedCount(rows.length))
+            dispatch(setMatchedCount(count))
         }
     } catch (error) {
     } finally {
@@ -92,6 +92,6 @@ export const removeMatchingDocs = expression => (dispatch, getState) => {
         value: selectors.matchedDocCount(getState()),
     })
 
-    deleteDocs(expression, 'regex') // To be run in background; can take long
+    deletePagesByPattern(expression) // To be run in background; can take long
     dispatch(setModalShow(false))
 }
