@@ -31,6 +31,10 @@ export async function updateTimestampMeta(...args) {
     return await (await getBackend()).updateTimestampMeta(...args)
 }
 
+export async function addVisit(...args) {
+    return await (await getBackend()).addVisit(...args)
+}
+
 //
 // Deleting stuff
 //
@@ -79,11 +83,11 @@ export async function removeBookmarkByUrl(...args) {
 //
 // Utilities
 //
-export function initSingleLookup() {
+export function initSingleLookup(...outterArgs) {
     let singleLookup
     return async function(...args) {
         if (!singleLookup) {
-            singleLookup = (await getBackend()).initSingleLookup()
+            singleLookup = (await getBackend()).initSingleLookup(...outterArgs)
         }
         return await singleLookup(...args)
     }
@@ -109,6 +113,10 @@ export const indexQueue = {
     clear: async () => {
         ;(await getBackend()).indexQueue.clear()
     },
+}
+
+export async function getPage(url) {
+    return await (await getBackend()).getPage(url)
 }
 
 // Export index interface

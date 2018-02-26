@@ -1,12 +1,8 @@
 import moment from 'moment'
 
-import storePage from 'src/page-storage/store-page'
-import { generatePageDocId } from 'src/page-storage'
+import analysePage from 'src/page-analysis/background'
 import * as index from 'src/search'
-import { visitKeyPrefix } from '..'
 import tabManager from './tab-manager'
-
-const singleLookup = index.initSingleLookup()
 
 /**
  * Performs initial page indexing on small amount of available content (title, URL) + visit.
@@ -20,35 +16,33 @@ export async function logInitPageVisit(tabId, secsSinceLastIndex = 20) {
 
     const { visitTime } = tabManager.getTabState(tabId)
 
-    const pageId = generatePageDocId({ url: tab.url })
-    const visitId = `${visitKeyPrefix}${visitTime}`
-
     try {
-        const existingPage = await singleLookup(pageId)
+        const existingPage = await index.getPage(tab.url)
 
-        // Store just new visit if existing page has been indexed recently (`secsSinceLastIndex`)
-        //  also clear scheduled content indexing
-        if (
-            existingPage != null &&
-            moment(+existingPage.latest).isAfter(
-                moment(+visitTime).subtract(secsSinceLastIndex, 'seconds'),
-            )
-        ) {
-            tabManager.clearScheduledLog(tabId)
-            return await index.addTimestamp(pageId, visitId)
+        if (existingPage != null) {
+            await existingPage.loadRels()
+
+            // Store just new visit if existing page has been indexed recently (`secsSinceLastIndex`)
+            //  also clear scheduled content indexing
+            if (
+                moment(existingPage.latest).isAfter(
+                    moment(+visitTime).subtract(secsSinceLastIndex, 'seconds'),
+                )
+            ) {
+                tabManager.clearScheduledLog(tabId)
+                return await index.addVisit(tab.url, +visitTime)
+            }
         }
 
-        const pageDoc = await storePage({
+        // TODO: handle screenshot, favicon
+        const { content: { fullText, ...content } } = await analysePage({
             tabId,
-            url: tab.url,
-            content: { title: tab.title },
-            runAnalysis: false,
         })
 
         await index.addPage({
-            pageDoc,
+            pageDoc: { url: tab.url, content },
             visits: [visitTime],
-            rejectNoContent: false, // No page content available yet; don't reject during pre-processing pipeline
+            rejectNoContent: false,
         })
     } catch (err) {
         // If any problems in this stage, clear the later-scheduled content indexing stage
@@ -66,13 +60,15 @@ export async function logInitPageVisit(tabId, secsSinceLastIndex = 20) {
 export async function logPageVisit(tabId) {
     const { url } = await browser.tabs.get(tabId)
 
-    // Call `storePage` again, this time with analysis enabed to grab and store further page content
-    const pageDoc = await storePage({
+    // Call `analysePage` again, this time just to get full terms
+    const { content } = await analysePage({
         tabId,
-        url,
-        runAnalysis: true,
+        allowScreenshot: false,
+        allowFavIcon: false,
     })
 
     // Index all the terms for the page
-    await index.addPageTerms({ pageDoc })
+    await index.addPageTerms({
+        pageDoc: { url, content },
+    })
 }

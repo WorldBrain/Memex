@@ -1,6 +1,9 @@
 import index from './index'
 import mapResultsToPouchDocs from './map-search-to-pouch'
 import QueryBuilder from '../query-builder'
+import { generatePageDocId } from 'src/page-storage'
+import { addTimestampConcurrent } from './add'
+import { searchConcurrent } from './search'
 
 export function hasData() {
     return new Promise((resolve, reject) => {
@@ -59,7 +62,7 @@ export async function search({
     console.log('DEBUG: query', indexQuery)
 
     // Get index results, filtering out any unexpectedly structured results
-    const { results, totalCount } = await index.searchConcurrent(indexQuery, {
+    const { results, totalCount } = await searchConcurrent(indexQuery, {
         count: getTotalCount,
     })
 
@@ -91,6 +94,11 @@ export async function search({
         isBadTerm: false,
     }
 }
+
+export const getPage = url => index.db.get(generatePageDocId({ url }))
+
+export const addVisit = (url, time = Date.now()) =>
+    addTimestampConcurrent(generatePageDocId({ url }), `visit/${time}`)
 
 export {
     addPageConcurrent as addPage,

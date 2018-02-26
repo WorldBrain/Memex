@@ -1,7 +1,9 @@
+import normalizeUrl from 'src/util/encode-url-for-id'
 import Storage from './storage'
 import pipeline from './pipeline'
 import QueryBuilder from '../query-builder'
 
+// Create main singleton to interact with DB in the ext
 const db = new Storage()
 export default db
 
@@ -15,15 +17,17 @@ export async function addPage(pipelineReq) {
 
 export async function addPageTerms(pipelineReq) {
     return pipeline(pipelineReq).then(
-        ([{ url, terms }]) =>
+        ([{ url, terms, text }]) =>
             console.log(`adding ${terms.length} terms to page: ${url}`) ||
-            db.pages.update(url, { terms }),
+            db.pages.update(url, { terms, text }),
     )
 }
 
 export async function updateTimestampMeta(...args) {
     return db.updateVisitInteractionData(...args)
 }
+
+export const addVisit = (url, time = Date.now()) => db.addVisit({ url, time })
 
 //
 // Deleting stuff
@@ -58,6 +62,8 @@ export async function removeBookmarkByUrl(...args) {}
 export function initSingleLookup() {
     return async function(...args) {}
 }
+
+export const getPage = url => db.pages.get(normalizeUrl(url))
 
 /**
  * Hardcoded replacement for now.
