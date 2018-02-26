@@ -1,3 +1,10 @@
+const createTab = id => {
+    browser.notifications.clear(id)
+    browser.tabs.create({
+        url: 'https://worldbrain.helprace.com/i34-feature-tagging',
+    })
+}
+
 const updateNotification = () => {
     browser.notifications.create({
         type: 'basic',
@@ -8,8 +15,11 @@ const updateNotification = () => {
     })
 
     browser.notifications.onButtonClicked.addListener((id, index) => {
-        browser.notifications.clear(id)
-        window.open('https://worldbrain.helprace.com/i34-feature-tagging')
+        createTab(id)
+    })
+
+    browser.notifications.onClicked.addListener(id => {
+        createTab(id)
     })
 }
 
