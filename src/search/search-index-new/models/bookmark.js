@@ -1,7 +1,8 @@
+import db from '..'
 import EventModel from './event-model'
 
 export default class Bookmark extends EventModel {
-    save(db) {
+    save() {
         return db.bookmarks.put(this)
     }
 }
