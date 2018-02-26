@@ -18,7 +18,12 @@ import makeScreenshot from './make-screenshot'
  * @param {number} args.tabId ID of browser tab to use as data source.
  * @returns {Promise<PageAnalysisResult>}
  */
-export default async function analysePage({ tabId }) {
+export default async function analysePage({
+    tabId,
+    allowContent = true,
+    allowScreenshot = true,
+    allowFavIcon = true,
+}) {
     // Wait until its DOM has loaded, in case we got invoked before that.
     await whenPageDOMLoaded({ tabId })
 
@@ -27,13 +32,13 @@ export default async function analysePage({ tabId }) {
 
     // Fetch the data
     const dataFetchingPromises = [
-        getFavIcon({ tabId }),
-        makeScreenshot({ tabId }),
-        extractPageContent(),
+        allowContent ? extractPageContent() : Promise.resolve(),
+        allowScreenshot ? makeScreenshot({ tabId }) : Promise.resolve(),
+        allowFavIcon ? getFavIcon({ tabId }) : Promise.resolve(),
     ]
 
     // When every task has either completed or failed, return what we got
-    const [favIcon, screenshot, content] = await whenAllSettled(
+    const [content, screenshot, favIcon] = await whenAllSettled(
         dataFetchingPromises,
     )
     return { favIcon, screenshot, content }
