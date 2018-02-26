@@ -56,6 +56,16 @@ export async function delPagesByDomain(url) {
     }
 }
 
+// WARNING: Inefficient; goes through entire table
+export async function delPagesByPattern(pattern) {
+    const re = new RegExp(pattern, 'i')
+    const pages = await db.pages.filter(page => re.test(page.url)).toArray()
+
+    for (const page of pages) {
+        await page.delete()
+    }
+}
+
 //
 // Tags
 //
@@ -118,6 +128,12 @@ export async function search({ query, showOnlyBookmarks, ...params }) {
         totalCount: docs.length,
         isBadTerm: qb.isBadTerm,
     }
+}
+
+// WARNING: Inefficient; goes through entire table
+export async function getMatchingPageCount(pattern) {
+    const re = new RegExp(pattern, 'i')
+    return await db.pages.filter(page => re.test(page.url)).count()
 }
 
 export async function suggest(...args) {}

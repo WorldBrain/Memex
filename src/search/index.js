@@ -46,6 +46,10 @@ export async function delPagesByDomain(...args) {
     return await (await getBackend()).delPagesByDomain(...args)
 }
 
+export async function delPagesByPattern(...args) {
+    return await (await getBackend()).delPagesByPattern(...args)
+}
+
 //
 // Tags
 //
@@ -111,6 +115,10 @@ export async function search(...args) {
 
 export async function suggest(...args) {
     return await (await getBackend()).suggest(...args)
+}
+
+export async function getMatchingPageCount(...args) {
+    return await (await getBackend()).getMatchingPageCount(...args)
 }
 
 export const indexQueue = {

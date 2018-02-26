@@ -1,3 +1,4 @@
+import { fetchPagesByUrlPattern } from 'src/pouchdb'
 import index from './index'
 import mapResultsToPouchDocs from './map-search-to-pouch'
 import QueryBuilder from '../query-builder'
@@ -113,6 +114,17 @@ export async function delPagesByDomain(url) {
 
     const pageIds = [...domainIndex].map(([pageId]) => pageId)
     return await delPagesConcurrent(pageIds)
+}
+
+export async function delPagesByPattern(regex) {
+    const pageRows = await fetchPagesByUrlPattern(regex)
+    const pageIds = pageRows.map(({ id }) => id)
+    return await delPagesConcurrent(pageIds)
+}
+
+export async function getMatchingPageCount(regex) {
+    const pageRows = await fetchPagesByUrlPattern(regex)
+    return pageRows.length
 }
 
 export {
