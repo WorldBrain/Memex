@@ -51,9 +51,9 @@ function setEndDate(state, date) {
     }
 }
 
-function hideResultItem(state, pageId) {
+function hideResultItem(state, url) {
     return update('searchResult.docs', docs =>
-        remove(doc => doc._id === pageId)(docs),
+        remove(doc => doc.url === url)(docs),
     )(state)
 }
 

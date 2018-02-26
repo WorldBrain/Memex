@@ -42,6 +42,10 @@ export async function delPages(...args) {
     return await (await getBackend()).delPages(...args)
 }
 
+export async function delPagesByDomain(...args) {
+    return await (await getBackend()).delPagesByDomain(...args)
+}
+
 //
 // Tags
 //
