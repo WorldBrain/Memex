@@ -46,23 +46,19 @@ export async function delPagesByDomain(...args) {
     return await (await getBackend()).delPagesByDomain(...args)
 }
 
+export async function delPagesByPattern(...args) {
+    return await (await getBackend()).delPagesByPattern(...args)
+}
+
 //
 // Tags
 //
-export async function setTags(...args) {
-    return await (await getBackend()).setTags(...args)
+export async function addTag(...args) {
+    return await (await getBackend()).addTag(...args)
 }
 
-export async function addTags(...args) {
-    return await (await getBackend()).addTags(...args)
-}
-
-export async function delTags(...args) {
-    return await (await getBackend()).delTags(...args)
-}
-
-export async function fetchTags(...args) {
-    return await (await getBackend()).fetchTags(...args)
+export async function delTag(...args) {
+    return await (await getBackend()).delTag(...args)
 }
 
 //
@@ -72,16 +68,12 @@ export async function addBookmark(...args) {
     return await (await getBackend()).addBookmark(...args)
 }
 
-export async function createBookmarkByUrl(...args) {
-    return await (await getBackend()).createBookmarkByUrl(...args)
+export async function delBookmark(...args) {
+    return await (await getBackend()).delBookmark(...args)
 }
 
-export async function createNewPageForBookmark(...args) {
-    return await (await getBackend()).createNewPageForBookmark(...args)
-}
-
-export async function removeBookmarkByUrl(...args) {
-    return await (await getBackend()).removeBookmarkByUrl(...args)
+export async function handleBookmarkCreation(...args) {
+    return await (await getBackend()).handleBookmarkCreation(...args)
 }
 
 //
@@ -111,6 +103,10 @@ export async function search(...args) {
 
 export async function suggest(...args) {
     return await (await getBackend()).suggest(...args)
+}
+
+export async function getMatchingPageCount(...args) {
+    return await (await getBackend()).getMatchingPageCount(...args)
 }
 
 export const indexQueue = {

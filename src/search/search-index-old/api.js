@@ -1,3 +1,4 @@
+import { fetchPagesByUrlPattern } from 'src/pouchdb'
 import index from './index'
 import mapResultsToPouchDocs from './map-search-to-pouch'
 import QueryBuilder from '../query-builder'
@@ -115,17 +116,27 @@ export async function delPagesByDomain(url) {
     return await delPagesConcurrent(pageIds)
 }
 
+export async function delPagesByPattern(regex) {
+    const pageRows = await fetchPagesByUrlPattern(regex)
+    const pageIds = pageRows.map(({ id }) => id)
+    return await delPagesConcurrent(pageIds)
+}
+
+export async function getMatchingPageCount(regex) {
+    const pageRows = await fetchPagesByUrlPattern(regex)
+    return pageRows.length
+}
+
 export {
     addPageConcurrent as addPage,
     addPageTermsConcurrent as addPageTerms,
     updateTimestampMetaConcurrent as updateTimestampMeta,
 } from './add'
-export { setTags, addTags, delTags, fetchTags } from './tags'
+export { addTag, delTag } from './tags'
 export {
     addBookmarkConcurrent as addBookmark,
-    createBookmarkByUrl,
-    createNewPageForBookmark,
-    removeBookmarkByUrl,
+    removeBookmarkByUrl as delBookmark,
+    handleBookmarkCreation,
 } from './bookmarks'
 export { default as suggest } from './suggest'
 export { grabExistingKeys } from './util'

@@ -1,6 +1,6 @@
 import Dexie from 'dexie'
 
-import { Page, Visit, Bookmark } from './models'
+import { Page, Visit, Bookmark, Tag } from './models'
 
 /**
  * @typedef {Object} VisitInteraction
@@ -17,7 +17,6 @@ import { Page, Visit, Bookmark } from './models'
  * @property {number[]} 1 Opt. times to create Visits for. Uses calling time if none defined.
  * @property {number} 2 Opt. time to create a Bookmark for.
  */
-
 export default class Storage extends Dexie {
     static DEF_PARAMS = {
         indexedDB: null,
@@ -57,9 +56,10 @@ export default class Storage extends Dexie {
      */
     _initSchema() {
         this.version(1).stores({
-            pages: 'url, *terms, *titleTerms, *urlTerms',
+            pages: 'url, *terms, *titleTerms, *urlTerms, domain',
             visits: '[time+url], url',
-            bookmarks: 'url, time',
+            bookmarks: 'url',
+            tags: '[name+url], name, url',
         })
 
         // ... add versions/migration logic here
@@ -68,6 +68,7 @@ export default class Storage extends Dexie {
         this.pages.mapToClass(Page)
         this.visits.mapToClass(Visit)
         this.bookmarks.mapToClass(Bookmark)
+        this.tags.mapToClass(Tag)
     }
 
     /**
@@ -144,51 +145,6 @@ export default class Storage extends Dexie {
     }
 
     /**
-     * Handles adding a new bookmark for a given URL/page. If `pageData` is supplied and there is
-     * no pre-existing page for `url`, a new unvisited page is created along with the bookmark.
-     *
-     * @param {string} args.url
-     * @param {number} [args.time=Date.now()]
-     * @param {any} [pageData] Supply if
-     * @return {Promise<void>}
-     */
-    async addBookmark({ url, time = Date.now(), pageData }) {
-        const matchingPage = await this.pages.where({ url }).first()
-
-        // Base case; page exists, so just add bookmark and update
-        if (matchingPage != null) {
-            await matchingPage.loadRels()
-            matchingPage.setBookmark(time)
-            return matchingPage.save()
-        }
-
-        // Edge case: Page doesn't exist, try to create new one from supplied data
-        if (pageData == null) {
-            throw new Error(
-                'Bookmarked URL has no matching page stored, and no page data was supplied',
-            )
-        }
-
-        const page = new Page(pageData)
-        page.setBookmark(time)
-        await page.save()
-    }
-
-    /**
-     * @param {string} args.url
-     * @return {Promise<void>}
-     */
-    async delBookmark({ url }) {
-        const matchingPage = await this.pages.where({ url }).first()
-
-        if (matchingPage != null) {
-            await matchingPage.loadRels()
-            matchingPage.delBookmark()
-            await matchingPage.save()
-        }
-    }
-
-    /**
      * Updates an existing specified visit with interactions data.
      *
      * @param {string} url The URL of the visit to get.
@@ -212,11 +168,24 @@ export default class Storage extends Dexie {
      * @return {any[]} Array corresponding to input `results` with all needed display data attached.
      */
     async _getResultsForDisplay(results) {
+        const resultUrls = results.map(([url]) => url)
         // Grab all the Pages needed for results
         const pages = await this.pages
             .where('url')
-            .anyOf(results.map(([url]) => url))
+            .anyOf(resultUrls)
             .toArray()
+
+        // Grab assoc. tags for all pages + create a Map of URLs => tags name array for easy lookup
+        const tags = await this.tags
+            .where('url')
+            .anyOf(resultUrls)
+            .toArray()
+
+        const pageTagsMap = new Map()
+        for (const { name, url } of tags) {
+            const tags = pageTagsMap.get(url) || []
+            pageTagsMap.set(url, [...tags, name])
+        }
 
         const displayPages = new Map()
         for (const page of pages) {
@@ -228,7 +197,9 @@ export default class Storage extends Dexie {
                 title: page.fullTitle,
                 hasBookmark: page.hasBookmark,
                 displayTime: page.latest,
-                tags: [], // TODO: tags data model
+                tags: pageTagsMap.get(page.url) || [],
+                screenshot: page.screenshotURI,
+                favIcon: page.favIconURI,
             })
         }
 
@@ -311,6 +282,7 @@ export default class Storage extends Dexie {
         queryTerms = [],
         domains = [],
         bookmarks = false,
+        tags = [],
         ...params
     }) {
         const domainsSet = new Set(domains)
@@ -347,6 +319,22 @@ export default class Storage extends Dexie {
                 .primaryKeys()
         }
 
+        // Further filter down by tags, if specified
+        if (tags.length) {
+            const matchingTags = await this.tags
+                .where('name')
+                .anyOf(tags)
+                .primaryKeys()
+
+            const matchingTagUrls = new Set(
+                matchingTags.map(([name, url]) => url),
+            )
+
+            matchingPageUrls = matchingPageUrls.filter(url =>
+                matchingTagUrls.has(url),
+            )
+        }
+
         // Paginate
         return this._paginate(
             matchingPageUrls.map(url => [url, latestVisitsByUrl.get(url)]),
@@ -360,6 +348,7 @@ export default class Storage extends Dexie {
             this.pages,
             this.visits,
             this.bookmarks,
+            this.tags,
             async () => {
                 console.log('QUERY:', params)
 

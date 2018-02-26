@@ -1,7 +1,10 @@
 import normalizeUrl from 'src/util/encode-url-for-id'
 import Storage from './storage'
+import { Page } from './models'
 import pipeline from './pipeline'
 import QueryBuilder from '../query-builder'
+import fetchPageData from 'src/page-analysis/background/fetch-page-data'
+import analysePage from 'src/page-analysis/background'
 
 // Create main singleton to interact with DB in the ext
 const db = new Storage()
@@ -56,27 +59,110 @@ export async function delPagesByDomain(url) {
     }
 }
 
+// WARNING: Inefficient; goes through entire table
+export async function delPagesByPattern(pattern) {
+    const re = new RegExp(pattern, 'i')
+    const pages = await db.pages.filter(page => re.test(page.url)).toArray()
+
+    for (const page of pages) {
+        await page.delete()
+    }
+}
+
 //
 // Tags
 //
-export async function setTags(...args) {}
+const modifyTag = shouldAdd =>
+    async function(url, tag) {
+        const normalized = normalizeUrl(url)
+        const page = await db.pages.get(normalized)
 
-export async function addTags(...args) {}
+        if (page == null) {
+            throw new Error('Page does not exist for provided URL:', normalized)
+        }
 
-export async function delTags(...args) {}
+        await page.loadRels()
 
-export async function fetchTags(...args) {}
+        if (shouldAdd) {
+            page.addTag(tag)
+        } else {
+            page.delTag(tag)
+        }
+
+        await page.save()
+    }
+export const delTag = modifyTag(false)
+export const addTag = modifyTag(true)
 
 //
 // Bookmarks
 //
-export async function addBookmark(...args) {}
+export async function addBookmark({ url, timestamp = Date.now(), tabId }) {
+    const normalized = normalizeUrl(url)
+    let page = await db.pages.get(normalized)
 
-export async function createBookmarkByUrl(...args) {}
+    // No existing page for BM; need to make new via content-script if `tabId` provided
+    if (page == null) {
+        if (tabId == null) {
+            throw new Error(
+                'Page does not exist for URL and no tabID provided to extract content:',
+                normalized,
+            )
+        }
 
-export async function createNewPageForBookmark(...args) {}
+        // TODO: handle screenshot, favicon
+        const { content } = await analysePage({ tabId })
+        const [pageDoc] = await pipeline({ pageDoc: { content, url } })
+        page = new Page(pageDoc)
+    }
 
-export async function removeBookmarkByUrl(...args) {}
+    await page.loadRels()
+    page.setBookmark()
+    await page.save()
+}
+
+export async function delBookmark({ url }) {
+    const normalized = normalizeUrl(url)
+    const page = await db.pages.get(normalized)
+
+    if (page != null) {
+        await page.loadRels()
+        page.delBookmark()
+
+        // Delete if Page left orphaned, else just save current state
+        if (page.shouldDelete) {
+            await page.delete()
+        } else {
+            await page.save()
+        }
+    }
+}
+
+/**
+ * Handles the browser `bookmarks.onCreated` event:
+ * https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/bookmarks/onCreated
+ */
+export async function handleBookmarkCreation(browserId, { url }) {
+    const normalized = normalizeUrl(url)
+    let page = await db.pages.get(normalized)
+
+    // No existing page for BM; need to make new from a remote DOM fetch
+    if (page == null) {
+        const fetch = fetchPageData({
+            url,
+            opts: { includePageContent: true, includeFavIcon: true },
+        })
+
+        const pageData = await fetch.run()
+        const [pageDoc] = await pipeline({ pageDoc: { url, ...pageData } })
+
+        page = new Page(pageDoc)
+    }
+
+    await page.loadRels()
+    page.setBookmark()
+    await page.save()
+}
 
 //
 // Utilities
@@ -120,6 +206,29 @@ export async function search({ query, showOnlyBookmarks, ...params }) {
     }
 }
 
-export async function suggest(...args) {}
+// WARNING: Inefficient; goes through entire table
+export async function getMatchingPageCount(pattern) {
+    const re = new RegExp(pattern, 'i')
+    return await db.pages.filter(page => re.test(page.url)).count()
+}
+
+export async function suggest(query = '', type, limit = 10) {
+    // Start building the WhereClause from appropriate table
+    const whereClause = (() => {
+        switch (type) {
+            case 'domain':
+                return db.pages.where('domain')
+            case 'tag':
+            default:
+                return db.tags.where('name')
+        }
+    })()
+
+    // Perform suggestion matching
+    return await whereClause
+        .startsWith(query)
+        .limit(limit)
+        .uniqueKeys()
+}
 
 export const indexQueue = { clear() {} }

@@ -34,13 +34,13 @@ export async function logInitPageVisit(tabId, secsSinceLastIndex = 20) {
             }
         }
 
-        // TODO: handle screenshot, favicon
-        const { content: { fullText, ...content } } = await analysePage({
-            tabId,
-        })
+        const analysisRes = await analysePage({ tabId })
+
+        // Don't index full-text just yet
+        delete analysisRes.content.fullText
 
         await index.addPage({
-            pageDoc: { url: tab.url, content },
+            pageDoc: { url: tab.url, ...analysisRes },
             visits: [visitTime],
             rejectNoContent: false,
         })
