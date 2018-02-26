@@ -1,8 +1,6 @@
-import { fetchDocTypesByUrl } from 'src/pouchdb'
 import { generatePageDocId } from 'src/page-storage'
 import { index, initSingleLookup } from '../'
-import deleteDocsByUrl, { deleteDocs } from 'src/page-storage/deletion'
-import { bookmarkKeyPrefix } from '../../bookmarks'
+import { delPages } from '../del'
 
 /**
  * TODO: Decided if we actually need these bookmark docs in Pouch; I don't think they're being used for anything.
@@ -24,7 +22,7 @@ async function removeBookmarkByUrl(url) {
 
     // If no visits, we don't want an orphaned page, so remove everything for given URL
     if (!reverseIndexDoc.visits.size) {
-        await deleteDocsByUrl(url)
+        await delPages(pageId)
     } else {
         // Standard case where only bookmarks removed from index
 
@@ -35,11 +33,6 @@ async function removeBookmarkByUrl(url) {
         reverseIndexDoc.bookmarks.clear()
         await index.put(pageId, reverseIndexDoc)
     }
-
-    // Remove corresponding bookmark docs from pouch
-    const fetchDocsByType = fetchDocTypesByUrl(url)
-    const { rows: bookmarkRows } = await fetchDocsByType(bookmarkKeyPrefix)
-    await deleteDocs(bookmarkRows)
 }
 
 export default removeBookmarkByUrl

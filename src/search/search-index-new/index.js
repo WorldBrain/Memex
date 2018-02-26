@@ -32,7 +32,29 @@ export const addVisit = (url, time = Date.now()) => db.addVisit({ url, time })
 //
 // Deleting stuff
 //
-export async function delPages(...args) {}
+export async function delPages(urls) {
+    const normalized = urls.map(normalizeUrl)
+    const pages = await db.pages
+        .where('url')
+        .anyOf(normalized)
+        .toArray()
+
+    for (const page of pages) {
+        await page.delete()
+    }
+}
+
+export async function delPagesByDomain(url) {
+    const normalized = normalizeUrl(url)
+    const pages = await db.pages
+        .where('url')
+        .startsWith(normalized)
+        .toArray()
+
+    for (const page of pages) {
+        await page.delete()
+    }
+}
 
 //
 // Tags

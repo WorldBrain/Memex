@@ -1,6 +1,5 @@
 import { createAction } from 'redux-act'
 
-import { generatePageDocId } from 'src/page-storage'
 import analytics, { updateLastActive } from 'src/analytics'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { actions as filterActs, selectors as filters } from './filters'
@@ -46,7 +45,7 @@ export const setTooltip = createAction('overview/setTooltip')
 export const toggleShowTooltip = createAction('overview/toggleShowTooltip')
 export const setShowTooltip = createAction('overview/setShowTooltip')
 
-const deleteDocsByUrl = remoteFunction('deleteDocsByUrl')
+const deletePages = remoteFunction('delPages')
 const createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
 const removeBookmarkByUrl = remoteFunction('removeBookmarkByUrl')
 
@@ -219,12 +218,10 @@ export const deleteDocs = () => async (dispatch, getState) => {
         dispatch(hideDeleteConfirm())
 
         // Remove all assoc. docs from the database + index
-        await deleteDocsByUrl(url)
-
-        const pageId = await generatePageDocId({ url })
+        await deletePages([url])
 
         // Hide the result item + confirm modal directly (optimistically)
-        dispatch(hideResultItem(pageId))
+        dispatch(hideResultItem(url))
     } catch (error) {
     } finally {
         dispatch(setResultDeleting(undefined))

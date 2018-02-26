@@ -11,6 +11,8 @@ import {
     removeBookmarkByUrl,
     createBookmarkByUrl,
     createNewPageForBookmark,
+    delPages,
+    delPagesByDomain,
 } from '../'
 
 const singleLookup = initSingleLookup()
@@ -30,6 +32,8 @@ makeRemotelyCallable({
         ),
     createBookmarkByUrl,
     removeBookmarkByUrl,
+    delPages,
+    delPagesByDomain,
 })
 
 const destructPageAtt = (att = []) => [...att]

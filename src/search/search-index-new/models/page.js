@@ -93,6 +93,21 @@ export default class Page extends AbstractModel {
         this[latestProp] = latest
     }
 
+    delete() {
+        return db.transaction(
+            'rw',
+            db.pages,
+            db.visits,
+            db.bookmarks,
+            async () => {
+                console.log('deleting', this)
+                await db.visits.where({ url: this.url }).delete()
+                await db.bookmarks.where({ url: this.url }).delete()
+                await db.pages.where({ url: this.url }).delete()
+            },
+        )
+    }
+
     save() {
         return db.transaction(
             'rw',

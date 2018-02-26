@@ -1,6 +1,5 @@
 import urlRegex from 'url-regex'
 import 'src/activity-logger/background'
-import 'src/page-storage/background'
 import 'src/search/background'
 import 'src/analytics/background'
 import 'src/omnibar'
