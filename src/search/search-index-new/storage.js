@@ -15,6 +15,7 @@ import { Page, Visit, Bookmark } from './models'
  * @typedef {Array} PageEntry
  * @property {any} 0 Page data object - needs `url` string and `terms` array.
  * @property {number[]} 1 Opt. times to create Visits for. Uses calling time if none defined.
+ * @property {number} 2 Opt. time to create a Bookmark for.
  */
 
 export default class Storage extends Dexie {
@@ -87,14 +88,23 @@ export default class Storage extends Dexie {
      * @param {PageEntry} pageEntry
      * @return {Promise<void>}
      */
-    async addPage([pageData, times]) {
+    async addPage([pageData, visitTimes, bookmarkTime]) {
         const page = new Page(pageData)
         // Load any current assoc. data for this page
         await page.loadRels()
 
-        // Create Visits for each specified time, or a single Visit for "now"
-        const visitTimes = times == null || !times.length ? [Date.now()] : times
+        // If no meta event times supplied, create a new Visit for now
+        const shouldCreateVisit =
+            (visitTimes == null || !visitTimes.length) && bookmarkTime == null
+
+        // Create Visits for each specified time, or a single Visit for "now" if no assoc event
+        visitTimes = shouldCreateVisit ? [Date.now()] : visitTimes
         visitTimes.forEach(time => page.addVisit(time))
+
+        // Create bookmark, if given
+        if (bookmarkTime != null) {
+            page.setBookmark(bookmarkTime)
+        }
 
         // Persist current state
         await page.save()
@@ -217,7 +227,7 @@ export default class Storage extends Dexie {
                 url: page.fullUrl,
                 title: page.fullTitle,
                 hasBookmark: page.hasBookmark,
-                displayTime: page.latestVisitTime,
+                displayTime: page.latest,
                 tags: [], // TODO: tags data model
             })
         }

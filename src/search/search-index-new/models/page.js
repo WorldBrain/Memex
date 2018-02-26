@@ -60,10 +60,6 @@ export default class Page extends AbstractModel {
         return this[bookmarkProp] != null
     }
 
-    get latestVisitTime() {
-        return this[visitsProp].sort((a, b) => b.time - a.time)[0].time
-    }
-
     /**
      * @param {number} [time=Date.now()]
      */
