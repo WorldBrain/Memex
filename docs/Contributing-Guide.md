@@ -13,9 +13,9 @@ Please support us on [Patreon](https://www.patreon.com/WorldBrain) :moneybag:
 We have broken up tasks into three levels, **easy**, **medium** and **hard** tasks. You can choose based on your skill level or how much time you would like to put into contributing. **After finding a Task you would like to help out with please see [Installation Instructions](#installation)**.
 
 
-#### [Priorities :exclamation:](https://github.com/WorldBrain/WebMemex/issues?q=is%3Aissue+is%3Aopen+label%3A%22Prio+1%22)
-#### [Bugs :space_invader:](https://github.com/WorldBrain/WebMemex/issues?utf8=%E2%9C%93&q=is%3Aissue%20is%3Aopen%20label%3Abug)
-#### [Enhancements :muscle::point_up:](https://github.com/WorldBrain/WebMemex/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement)
+#### [Priorities :exclamation:](https://github.com/WorldBrain/Memex/issues?q=is%3Aissue+is%3Aopen+label%3A%22Prio+1%22)
+#### [Bugs :space_invader:](https://github.com/WorldBrain/Memex/issues?utf8=%E2%9C%93&q=is%3Aissue%20is%3Aopen%20label%3Abug)
+#### [Enhancements :muscle::point_up:](https://github.com/WorldBrain/Memex/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement)
 
 
 
@@ -27,7 +27,7 @@ We have broken up tasks into three levels, **easy**, **medium** and **hard** tas
 **Clone this repo:**
 
 ```sh
-$ git clone https://github.com/WorldBrain/WebMemex
+$ git clone https://github.com/WorldBrain/Memex
 ```
 
 **Install yarn:**
@@ -46,14 +46,9 @@ $ yarn
 $ yarn watch
 ```
 
-**For Windows Users! Please run:**
-```sh
-$ yarn watch
-```
-
 ## Running The Extension
 
-As of now it should work in most modern browsers except Safari (we mainly use Chrome for testing so if any inconsistencies are found in Firefox, Opera or any other browser please create an [issue](https://github.com/WorldBrain/WebMemex/issues/new) and submit a fix)
+As of now it should work in most modern browsers except Safari (we mainly use Chrome for testing so if any inconsistencies are found in Firefox, Opera or any other browser please create an [issue](https://github.com/WorldBrain/Memex/issues/new) and submit a fix)
 
 **Note: It is highly recommended to [create a new browser profile](#creating-a-new-browser-profile) for dev purposes especially if you currently use the extension and would like to develop without interfering with its daily use**
 
@@ -93,6 +88,61 @@ As of now it should work in most modern browsers except Safari (we mainly use Ch
 4. Now navigate to the folder where you cloned the repo and there should be a new folder named extension (this was created by [`yarn watch`]) go into this folder select the `manifest.json` file and then click `open`
 5. Everything should be all loaded! 😃
 6. To view the developer tools simply click `Debug` under the Worldbrain Extension in [about:debugging](about:debugging)
+
+
+## Creating your own branches to work on
+
+We recommend [creating a forked repo on your GitHub account](https://help.github.com/articles/fork-a-repo/),
+which you can create branches to push your commits to, and easily keep up-to-date with our
+upstream changes.
+
+**Clone your forked repo:**
+
+```sh
+$ git clone https://github.com/${GH_USERNAME}/Memex
+```
+
+**Add & fetch our repo as a remote named `upstream`:**
+
+```sh
+$ git remote add -f upstream https://github.com/WorldBrain/Memex
+```
+
+**Create and move to a new local branch based on our current `master` branch:**
+
+```sh
+$ git checkout -b ${BRANCH_NAME} upstream/master
+```
+
+_...have a play around..._
+
+**Publish and push your local branch to your forked repo:**
+
+```sh
+$ git push -u origin ${BRANCH_NAME}
+```
+
+From there, you can make Pull Requests from your pushed branches to any of our Memex repo's branches
+via your forked repository on GitHub.
+
+You can keep your forked repo's branches in-sync with our upstream changes. We recommend doing this before
+making or requesting any reviews on PRs.
+
+**Replay all your commits on top of our current `master` branch:**
+
+```sh
+$ git pull --rebase upstream master
+```
+
+**Overwrite your personal forked repo's branch with your synced local branch state:**
+
+```sh
+$ git push --force
+```
+
+Keep in-the-loop and chat with us on the Memex repo's [Issues](https://github.com/WorldBrain/Memex/issues) and
+[PRs](https://github.com/WorldBrain/Memex/pulls) pages so we can work together on different parts of the
+code.
 
 
 **Now you are ready to hack! 😃**
