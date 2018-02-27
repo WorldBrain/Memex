@@ -61,6 +61,15 @@ export default class Page extends AbstractModel {
     }
 
     /**
+     * Pages should be deleted if no events associated with them any more.
+     *
+     * @return {boolean}
+     */
+    get shouldDelete() {
+        return !this.hasBookmark && !this[visitsProp].length
+    }
+
+    /**
      * @param {number} [time=Date.now()]
      */
     addVisit(time = Date.now()) {

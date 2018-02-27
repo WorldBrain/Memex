@@ -4,6 +4,7 @@ import { Page } from './models'
 import pipeline from './pipeline'
 import QueryBuilder from '../query-builder'
 import fetchPageData from 'src/page-analysis/background/fetch-page-data'
+import analysePage from 'src/page-analysis/background'
 
 // Create main singleton to interact with DB in the ext
 const db = new Storage()
@@ -83,11 +84,44 @@ export async function fetchTags(...args) {}
 // Bookmarks
 //
 export async function addBookmark({ url, timestamp = Date.now(), tabId }) {
-    console.log('add bookmark called', url, timestamp, tabId)
+    const normalized = normalizeUrl(url)
+    let page = await db.pages.get(normalized)
+
+    // No existing page for BM; need to make new via content-script if `tabId` provided
+    if (page == null) {
+        if (tabId == null) {
+            throw new Error(
+                'Page does not exist for URL and no tabID provided to extract content:',
+                normalized,
+            )
+        }
+
+        // TODO: handle screenshot, favicon
+        const { content } = await analysePage({ tabId })
+        const [pageDoc] = await pipeline({ pageDoc: { content, url } })
+        page = new Page(pageDoc)
+    }
+
+    await page.loadRels()
+    page.setBookmark()
+    await page.save()
 }
 
 export async function delBookmark({ url }) {
-    console.log('del bookmark called', url)
+    const normalized = normalizeUrl(url)
+    const page = await db.pages.get(normalized)
+
+    if (page != null) {
+        await page.loadRels()
+        page.delBookmark()
+
+        // Delete if Page left orphaned, else just save current state
+        if (page.shouldDelete) {
+            await page.delete()
+        } else {
+            await page.save()
+        }
+    }
 }
 
 /**
@@ -98,7 +132,7 @@ export async function handleBookmarkCreation(browserId, { url }) {
     const normalized = normalizeUrl(url)
     let page = await db.pages.get(normalized)
 
-    // No existing page for BM; need to make new
+    // No existing page for BM; need to make new from a remote DOM fetch
     if (page == null) {
         const fetch = fetchPageData({
             url,
