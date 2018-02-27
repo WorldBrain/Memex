@@ -200,17 +200,22 @@ export async function getMatchingPageCount(pattern) {
 }
 
 export async function suggest(query = '', type, limit = 10) {
-    switch (type) {
-        case 'tag':
-            return db.tags
-                .where('name')
-                .startsWith(query)
-                .limit(limit)
-                .keys()
-        case 'domain':
-        default:
-            return []
-    }
+    // Start building the WhereClause from appropriate table
+    const whereClause = (() => {
+        switch (type) {
+            case 'domain':
+                return db.pages.where('domain')
+            case 'tag':
+            default:
+                return db.tags.where('name')
+        }
+    })()
+
+    // Perform suggestion matching
+    return await whereClause
+        .startsWith(query)
+        .limit(limit)
+        .uniqueKeys()
 }
 
 export const indexQueue = { clear() {} }
