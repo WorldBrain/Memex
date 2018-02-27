@@ -84,7 +84,7 @@ export function extractTerms(text) {
  * on a given doc.
  *
  * @param {IndexRequest} req Page doc + assoc. meta event docs.
- * @returns {IndexLookupDoc} Doc structured for indexing.
+ * @returns {PageEntry}
  */
 export default function pipeline({
     pageDoc: { content = {}, url },

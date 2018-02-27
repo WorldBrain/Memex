@@ -1,7 +1,9 @@
 import normalizeUrl from 'src/util/encode-url-for-id'
 import Storage from './storage'
+import { Page } from './models'
 import pipeline from './pipeline'
 import QueryBuilder from '../query-builder'
+import fetchPageData from 'src/page-analysis/background/fetch-page-data'
 
 // Create main singleton to interact with DB in the ext
 const db = new Storage()
@@ -80,13 +82,40 @@ export async function fetchTags(...args) {}
 //
 // Bookmarks
 //
-export async function addBookmark(...args) {}
+export async function addBookmark({ url, timestamp = Date.now(), tabId }) {
+    console.log('add bookmark called', url, timestamp, tabId)
+}
 
-export async function createBookmarkByUrl(...args) {}
+export async function delBookmark({ url }) {
+    console.log('del bookmark called', url)
+}
 
-export async function createNewPageForBookmark(...args) {}
+/**
+ * Handles the browser `bookmarks.onCreated` event:
+ * https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/bookmarks/onCreated
+ */
+export async function handleBookmarkCreation(browserId, { url }) {
+    const normalized = normalizeUrl(url)
+    let page = await db.pages.get(normalized)
 
-export async function removeBookmarkByUrl(...args) {}
+    // No existing page for BM; need to make new
+    if (page == null) {
+        const fetch = fetchPageData({
+            url,
+            opts: { includePageContent: true, includeFavIcon: true },
+        })
+
+        // TODO: handle favicon
+        const { content } = await fetch.run()
+        const [pageDoc] = await pipeline({ pageDoc: { content, url } })
+
+        page = new Page(pageDoc)
+    }
+
+    await page.loadRels()
+    page.setBookmark()
+    await page.save()
+}
 
 //
 // Utilities

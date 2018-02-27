@@ -44,8 +44,8 @@ class PopupContainer extends Component {
         this.toggleLoggingPause = remoteFunction('toggleLoggingPause')
         this.deletePages = remoteFunction('delPages')
         this.deletePagesByDomain = remoteFunction('delPagesByDomain')
-        this.removeBookmarkByUrl = remoteFunction('removeBookmarkByUrl')
-        this.createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
+        this.removeBookmarkByUrl = remoteFunction('delBookmark')
+        this.createBookmarkByUrl = remoteFunction('addBookmark')
 
         this.onSearchChange = this.onSearchChange.bind(this)
         this.onPauseChange = this.onPauseChange.bind(this)
@@ -311,11 +311,14 @@ class PopupContainer extends Component {
 
     handleAddBookmark = () => {
         if (this.bookmarkBtnState === constants.BOOKMARK_BTN_STATE.UNBOOKMARK) {
-            this.createBookmarkByUrl(this.state.url, this.state.tabID)
+            this.createBookmarkByUrl({
+                url: this.state.url,
+                tabId: this.state.tabID,
+            })
         } else if (
             this.bookmarkBtnState === constants.BOOKMARK_BTN_STATE.BOOKMARK
         ) {
-            this.removeBookmarkByUrl(this.state.url)
+            this.removeBookmarkByUrl({ url: this.state.url })
         }
 
         updateLastActive() // Consider user active (analytics)
