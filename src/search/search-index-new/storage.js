@@ -1,6 +1,6 @@
 import Dexie from 'dexie'
 
-import { Page, Visit, Bookmark } from './models'
+import { Page, Visit, Bookmark, Tag } from './models'
 
 /**
  * @typedef {Object} VisitInteraction
@@ -59,6 +59,7 @@ export default class Storage extends Dexie {
             pages: 'url, *terms, *titleTerms, *urlTerms',
             visits: '[time+url], url',
             bookmarks: 'url, time',
+            tags: '[name+url], name',
         })
 
         // ... add versions/migration logic here
@@ -67,6 +68,7 @@ export default class Storage extends Dexie {
         this.pages.mapToClass(Page)
         this.visits.mapToClass(Visit)
         this.bookmarks.mapToClass(Bookmark)
+        this.tags.mapToClass(Tag)
     }
 
     /**
@@ -265,6 +267,7 @@ export default class Storage extends Dexie {
         queryTerms = [],
         domains = [],
         bookmarks = false,
+        tags = [],
         ...params
     }) {
         const domainsSet = new Set(domains)
@@ -301,6 +304,22 @@ export default class Storage extends Dexie {
                 .primaryKeys()
         }
 
+        // Further filter down by tags, if specified
+        if (tags.length) {
+            const matchingTags = await this.tags
+                .where('name')
+                .anyOf(tags)
+                .primaryKeys()
+
+            const matchingTagUrls = new Set(
+                matchingTags.map(([name, url]) => url),
+            )
+
+            matchingPageUrls = matchingPageUrls.filter(url =>
+                matchingTagUrls.has(url),
+            )
+        }
+
         // Paginate
         return this._paginate(
             matchingPageUrls.map(url => [url, latestVisitsByUrl.get(url)]),
@@ -314,6 +333,7 @@ export default class Storage extends Dexie {
             this.pages,
             this.visits,
             this.bookmarks,
+            this.tags,
             async () => {
                 console.log('QUERY:', params)
 
