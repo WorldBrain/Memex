@@ -132,7 +132,7 @@ export {
     addPageTermsConcurrent as addPageTerms,
     updateTimestampMetaConcurrent as updateTimestampMeta,
 } from './add'
-export { setTags, addTags, delTags, fetchTags } from './tags'
+export { addTag, delTag } from './tags'
 export {
     addBookmarkConcurrent as addBookmark,
     removeBookmarkByUrl as delBookmark,

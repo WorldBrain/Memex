@@ -53,20 +53,12 @@ export async function delPagesByPattern(...args) {
 //
 // Tags
 //
-export async function setTags(...args) {
-    return await (await getBackend()).setTags(...args)
+export async function addTag(...args) {
+    return await (await getBackend()).addTag(...args)
 }
 
-export async function addTags(...args) {
-    return await (await getBackend()).addTags(...args)
-}
-
-export async function delTags(...args) {
-    return await (await getBackend()).delTags(...args)
-}
-
-export async function fetchTags(...args) {
-    return await (await getBackend()).fetchTags(...args)
+export async function delTag(...args) {
+    return await (await getBackend()).delTag(...args)
 }
 
 //

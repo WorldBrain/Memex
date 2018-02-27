@@ -38,8 +38,8 @@ class IndexDropdownContainer extends Component {
         super(props)
 
         this.suggest = remoteFunction('suggest')
-        this.addTags = remoteFunction('addTags')
-        this.delTags = remoteFunction('delTags')
+        this.addTagRPC = remoteFunction('addTag')
+        this.delTagRPC = remoteFunction('delTag')
 
         this.fetchTagSuggestions = debounce(300)(this.fetchTagSuggestions)
 
@@ -114,7 +114,7 @@ class IndexDropdownContainer extends Component {
 
         try {
             if (this.allowIndexUpdate) {
-                await this.addTags({ url: this.props.url }, [newTag])
+                await this.addTagRPC(this.props.url, newTag)
             }
             newTags = [newTag, ...this.state.filters]
         } catch (err) {
@@ -145,13 +145,13 @@ class IndexDropdownContainer extends Component {
         try {
             if (tagIndex === -1) {
                 if (this.allowIndexUpdate) {
-                    await this.addTags({ url: this.props.url }, [tag])
+                    await this.addTagRPC(this.props.url, tag)
                 }
                 this.props.onFilterAdd(tag)
                 tagsReducer = tags => [tag, ...tags]
             } else {
                 if (this.allowIndexUpdate) {
-                    await this.delTags({ url: this.props.url }, [tag])
+                    await this.delTagRPC(this.props.url, tag)
                 }
                 this.props.onFilterDel(tag)
                 tagsReducer = tags => [
