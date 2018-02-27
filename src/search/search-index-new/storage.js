@@ -59,7 +59,7 @@ export default class Storage extends Dexie {
             pages: 'url, *terms, *titleTerms, *urlTerms',
             visits: '[time+url], url',
             bookmarks: 'url, time',
-            tags: '[name+url], name',
+            tags: '[name+url], name, url',
         })
 
         // ... add versions/migration logic here
@@ -168,11 +168,24 @@ export default class Storage extends Dexie {
      * @return {any[]} Array corresponding to input `results` with all needed display data attached.
      */
     async _getResultsForDisplay(results) {
+        const resultUrls = results.map(([url]) => url)
         // Grab all the Pages needed for results
         const pages = await this.pages
             .where('url')
-            .anyOf(results.map(([url]) => url))
+            .anyOf(resultUrls)
             .toArray()
+
+        // Grab assoc. tags for all pages + create a Map of URLs => tags name array for easy lookup
+        const tags = await this.tags
+            .where('url')
+            .anyOf(resultUrls)
+            .toArray()
+
+        const pageTagsMap = new Map()
+        for (const { name, url } of tags) {
+            const tags = pageTagsMap.get(url) || []
+            pageTagsMap.set(url, [...tags, name])
+        }
 
         const displayPages = new Map()
         for (const page of pages) {
@@ -184,7 +197,7 @@ export default class Storage extends Dexie {
                 title: page.fullTitle,
                 hasBookmark: page.hasBookmark,
                 displayTime: page.latest,
-                tags: [], // TODO: tags data model
+                tags: pageTagsMap.get(page.url) || [],
             })
         }
 
