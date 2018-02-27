@@ -378,7 +378,6 @@ class PopupContainer extends Component {
             tagMode,
             commentMode,
         } = this.state
-        console.log(this.state)
         if (blacklistConfirm) {
             return (
                 <BlacklistConfirm

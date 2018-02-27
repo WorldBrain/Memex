@@ -155,7 +155,7 @@
 }
 
 .comment {
-    background-image: url('/img/tag.svg');
+    background-image: url('/img/comment.svg');
     background-repeat: no-repeat;
     background-size: 20px;
 }

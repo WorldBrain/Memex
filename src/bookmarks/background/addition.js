@@ -9,7 +9,7 @@ import storePage from 'src/page-storage/store-page'
 
 async function getAttachments(pageData) {
     const favIconBlob = await dataURLToBlob(pageData.favIconURI)
-
+    console.log('hi')
     return {
         'fav-icon-blob': {
             content_type: favIconBlob.type,
