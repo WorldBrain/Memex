@@ -76,16 +76,12 @@ export async function addBookmark(...args) {
     return await (await getBackend()).addBookmark(...args)
 }
 
-export async function createBookmarkByUrl(...args) {
-    return await (await getBackend()).createBookmarkByUrl(...args)
+export async function delBookmark(...args) {
+    return await (await getBackend()).delBookmark(...args)
 }
 
-export async function createNewPageForBookmark(...args) {
-    return await (await getBackend()).createNewPageForBookmark(...args)
-}
-
-export async function removeBookmarkByUrl(...args) {
-    return await (await getBackend()).removeBookmarkByUrl(...args)
+export async function handleBookmarkCreation(...args) {
+    return await (await getBackend()).handleBookmarkCreation(...args)
 }
 
 //

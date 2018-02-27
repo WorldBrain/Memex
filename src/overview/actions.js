@@ -46,8 +46,8 @@ export const toggleShowTooltip = createAction('overview/toggleShowTooltip')
 export const setShowTooltip = createAction('overview/setShowTooltip')
 
 const deletePages = remoteFunction('delPages')
-const createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
-const removeBookmarkByUrl = remoteFunction('removeBookmarkByUrl')
+const createBookmarkByUrl = remoteFunction('addBookmark')
+const removeBookmarkByUrl = remoteFunction('delBookmark')
 
 const getCmdMessageHandler = dispatch => ({ cmd, ...payload }) => {
     switch (cmd) {
@@ -244,9 +244,9 @@ export const toggleBookmark = (url, index) => async (dispatch, getState) => {
     try {
         // Either perform adding or removal of bookmark if
         if (hasBookmark) {
-            await removeBookmarkByUrl(url)
+            await removeBookmarkByUrl({ url })
         } else {
-            await createBookmarkByUrl(url)
+            await createBookmarkByUrl({ url })
         }
     } catch (error) {
         dispatch(changeHasBookmark(index)) // Reset UI state in case of error

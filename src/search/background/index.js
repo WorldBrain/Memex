@@ -8,9 +8,9 @@ import {
     initSingleLookup,
     removeKeyType,
     suggest,
-    removeBookmarkByUrl,
-    createBookmarkByUrl,
-    createNewPageForBookmark,
+    delBookmark,
+    addBookmark,
+    handleBookmarkCreation,
     delPages,
     delPagesByDomain,
     delPagesByPattern,
@@ -32,8 +32,8 @@ makeRemotelyCallable({
                     ? transformPageForSending(page, projectOpts)
                     : page,
         ),
-    createBookmarkByUrl,
-    removeBookmarkByUrl,
+    addBookmark,
+    delBookmark,
     delPages,
     delPagesByDomain,
     delPagesByPattern,
@@ -63,11 +63,11 @@ const transformPageForSending = (page, projectOpts) => ({
 // Allow other scripts to connect to background index and send queries
 browser.runtime.onConnect.addListener(searchConnectionHandler)
 
-const removeBookmarkHandler = (id, { node }) =>
+const handleBookmarkRemoval = (id, { node }) =>
     node.url
-        ? removeBookmarkByUrl(node.url)
+        ? delBookmark(node.url)
         : console.warn('Cannot remove bookmark with no URL', node)
 
 // Store and index any new browser bookmark
-browser.bookmarks.onCreated.addListener(createNewPageForBookmark)
-browser.bookmarks.onRemoved.addListener(removeBookmarkHandler)
+browser.bookmarks.onCreated.addListener(handleBookmarkCreation)
+browser.bookmarks.onRemoved.addListener(handleBookmarkRemoval)

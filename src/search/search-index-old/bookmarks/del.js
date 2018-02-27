@@ -10,7 +10,7 @@ import { delPages } from '../del'
  *  standard indexing-related Error encountered during updates).
  * @returns {Promise<void>}
  */
-async function removeBookmarkByUrl(url) {
+async function removeBookmarkByUrl({ url }) {
     const pageId = generatePageDocId({ url })
     const reverseIndexDoc = await initSingleLookup()(pageId)
 

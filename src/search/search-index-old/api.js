@@ -135,9 +135,8 @@ export {
 export { setTags, addTags, delTags, fetchTags } from './tags'
 export {
     addBookmarkConcurrent as addBookmark,
-    createBookmarkByUrl,
-    createNewPageForBookmark,
-    removeBookmarkByUrl,
+    removeBookmarkByUrl as delBookmark,
+    handleBookmarkCreation,
 } from './bookmarks'
 export { default as suggest } from './suggest'
 export { grabExistingKeys } from './util'
