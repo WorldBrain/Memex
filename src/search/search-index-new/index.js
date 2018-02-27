@@ -199,6 +199,18 @@ export async function getMatchingPageCount(pattern) {
     return await db.pages.filter(page => re.test(page.url)).count()
 }
 
-export async function suggest(...args) {}
+export async function suggest(query = '', type, limit = 10) {
+    switch (type) {
+        case 'tag':
+            return db.tags
+                .where('name')
+                .startsWith(query)
+                .limit(limit)
+                .keys()
+        case 'domain':
+        default:
+            return []
+    }
+}
 
 export const indexQueue = { clear() {} }
