@@ -1,10 +1,8 @@
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import searchConnectionHandler from './search-connection-handler'
 import {
-    setTags,
-    addTags,
-    delTags,
-    fetchTags,
+    addTag,
+    delTag,
     initSingleLookup,
     removeKeyType,
     suggest,
@@ -20,10 +18,8 @@ import {
 const singleLookup = initSingleLookup()
 
 makeRemotelyCallable({
-    addTags,
-    delTags,
-    setTags,
-    fetchTags,
+    addTag,
+    delTag,
     suggest,
     pageLookup: (id, projectOpts = {}) =>
         singleLookup(id).then(

@@ -57,10 +57,8 @@ export async function setTags({ pageId, url }, tags) {
  * @param {string[]} tags Array of tags to associate with page.
  * @returns {Promise<void>}
  */
-export async function addTags({ pageId, url }, tags) {
-    if (url != null) {
-        pageId = await generatePageDocId({ url })
-    }
+export async function addTag(url, tag) {
+    const pageId = await generatePageDocId({ url })
 
     const reverseIndexDoc = await fetchExistingPage(pageId)
 
@@ -69,16 +67,15 @@ export async function addTags({ pageId, url }, tags) {
         reverseIndexDoc.tags = new Set()
     }
 
-    // Convert all input tags into tags index keys
-    const keyedTags = tags.map(keyGen.tag)
+    const keyedTag = keyGen.tag(tag)
 
     // Add all tag keys to reverse index doc
-    keyedTags.forEach(tagKey => reverseIndexDoc.tags.add(tagKey))
+    reverseIndexDoc.tags.add(keyedTag)
 
     // Add entries to tags index + update reverse index doc
     await Promise.all([
-        ...keyedTags.map(
-            addPageToTagValue([pageId, { latest: reverseIndexDoc.latest }]),
+        addPageToTagValue([pageId, { latest: reverseIndexDoc.latest }])(
+            keyedTag,
         ),
         index.put(pageId, reverseIndexDoc), // Also update reverse index doc
     ])

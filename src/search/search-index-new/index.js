@@ -72,13 +72,27 @@ export async function delPagesByPattern(pattern) {
 //
 // Tags
 //
-export async function setTags(...args) {}
+const modifyTag = shouldAdd =>
+    async function(url, tag) {
+        const normalized = normalizeUrl(url)
+        const page = await db.pages.get(normalized)
 
-export async function addTags(...args) {}
+        if (page == null) {
+            throw new Error('Page does not exist for provided URL:', normalized)
+        }
 
-export async function delTags(...args) {}
+        await page.loadRels()
 
-export async function fetchTags(...args) {}
+        if (shouldAdd) {
+            page.addTag(tag)
+        } else {
+            page.delTag(tag)
+        }
+
+        await page.save()
+    }
+export const delTag = modifyTag(false)
+export const addTag = modifyTag(true)
 
 //
 // Bookmarks

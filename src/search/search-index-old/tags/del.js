@@ -31,22 +31,20 @@ export const delPageFromTagValue = pageId =>
  * @param {string[]} tags Array of tags to remove association from page.
  * @returns {Promise<void>}
  */
-export async function delTags({ url, pageId }, tags) {
-    if (url != null) {
-        pageId = await generatePageDocId({ url })
-    }
+export async function delTag(url, tag) {
+    const pageId = await generatePageDocId({ url })
 
     const reverseIndexDoc = await fetchExistingPage(pageId)
 
     // Convert all input tags into tags index keys
-    const keyedTags = tags.map(keyGen.tag)
+    const keyedTag = keyGen.tag(tag)
 
     // Remove all tag keys to reverse index doc
-    keyedTags.forEach(tagKey => reverseIndexDoc.tags.delete(tagKey))
+    reverseIndexDoc.tags.delete(keyedTag)
 
     // Remove entries to tags index + update reverse index doc
     await Promise.all([
-        ...keyedTags.map(delPageFromTagValue(pageId)),
+        delPageFromTagValue(pageId)(keyedTag),
         index.put(pageId, reverseIndexDoc), // Also update reverse index doc
     ])
 }
