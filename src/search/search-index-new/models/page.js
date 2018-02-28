@@ -88,6 +88,10 @@ export default class Page extends AbstractModel {
         return this[bookmarkProp] != null
     }
 
+    get tags() {
+        return this[tagsProp].map(tag => tag.name)
+    }
+
     /**
      * Pages should be deleted if no events associated with them any more.
      *
