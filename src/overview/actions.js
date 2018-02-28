@@ -94,10 +94,9 @@ const easter = () => dispatch =>
                     {
                         content: { title: constants.EGG_TITLE },
                         url: constants.EGG_URL,
-                        _attachments: { src: constants.EGG_IMG },
+                        screenshot: constants.EGG_IMG,
                         displayTime: Date.now().toString(),
                         hasBookmark: false,
-                        egg: true,
                         tags: [],
                     },
                 ],
