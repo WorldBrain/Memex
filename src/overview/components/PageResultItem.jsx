@@ -4,8 +4,9 @@ import classNames from 'classnames'
 
 import { LoadingIndicator } from 'src/common-ui/components'
 import niceTime from 'src/util/nice-time'
-import ImgFromPouch from './ImgFromPouch'
 import styles from './PageResultItem.css'
+
+const nullImg = '/img/null-icon.png'
 
 const getBookmarkClass = ({ hasBookmark }) =>
     classNames(styles.button, {
@@ -20,40 +21,23 @@ const PageResultItem = props => (
         )}
         <a className={styles.root} href={props.url} target="_blank">
             <div className={styles.screenshotContainer}>
-                {props._attachments && props._attachments.screenshot ? (
-                    <ImgFromPouch
-                        className={styles.screenshot}
-                        doc={props}
-                        attachmentId="screenshot"
-                    />
-                ) : (
-                    <img
-                        className={styles.screenshot}
-                        src={
-                            props.egg
-                                ? props._attachments.src
-                                : '/img/null-icon.png'
-                        }
-                    />
-                )}
+                <img
+                    className={styles.screenshot}
+                    src={props.screenshot == null ? nullImg : props.screenshot}
+                />
             </div>
             <div className={styles.descriptionContainer}>
                 <div className={styles.title} title={props.title}>
-                    {props._attachments &&
-                        props._attachments.favIcon && (
-                            <ImgFromPouch
-                                className={styles.favIcon}
-                                doc={props}
-                                attachmentId="favIcon"
-                            />
-                        )}
+                    {props.favIcon && (
+                        <img className={styles.favIcon} src={props.favIcon} />
+                    )}
                     {props.title}
                 </div>
                 <div className={styles.url}>{props.url}</div>
                 <div className={styles.time}>
                     <div className={styles.displayTime}>
                         {' '}
-                        {niceTime(+props.displayTime)}{' '}
+                        {niceTime(props.displayTime)}{' '}
                     </div>
                     <span className={styles.tagList}>{props.tagPills}</span>
                     <div
@@ -84,15 +68,15 @@ const PageResultItem = props => (
 )
 
 PageResultItem.propTypes = {
-    _attachments: PropTypes.object,
-    displayTime: PropTypes.string.isRequired,
+    favIcon: PropTypes.string,
+    screenshot: PropTypes.string,
+    displayTime: PropTypes.number.isRequired,
     url: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
     hasBookmark: PropTypes.bool.isRequired, // eslint-disable-line
     isDeleting: PropTypes.bool.isRequired,
     onTrashBtnClick: PropTypes.func.isRequired,
     onToggleBookmarkClick: PropTypes.func.isRequired,
-    egg: PropTypes.bool,
     tagPills: PropTypes.array.isRequired,
     tagManager: PropTypes.node,
     onTagBtnClick: PropTypes.func.isRequired,
