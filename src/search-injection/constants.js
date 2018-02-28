@@ -15,3 +15,6 @@ export const SEARCH_ENGINES = {
         container: 'ires',
     },
 }
+
+// Gets the overview url of the extension
+export const OVERVIEW_URL = chrome.runtime.getURL('/overview/overview.html')

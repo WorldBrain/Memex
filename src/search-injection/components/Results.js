@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import { MEMEX_CONTAINER_ID } from '../constants'
+import { MEMEX_CONTAINER_ID, OVERVIEW_URL } from '../constants'
 import ResultItem from './ResultItem'
 
 const styles = {
@@ -15,12 +15,27 @@ class Results extends React.Component {
         results: PropTypes.arrayOf(PropTypes.object).isRequired,
     }
 
+    constructor(props) {
+        super(props)
+        this.showMoreHandler = this.showMoreHandler.bind(this)
+    }
+
     renderResultItems() {
-        console.log(this.props.results)
         const resultItems = this.props.results.map((result, i) => (
             <ResultItem key={i} {...result} />
         ))
         return resultItems
+    }
+
+    showMoreHandler() {
+        // Create a new tab with the query overview URL
+        const query = new URL(location.href).searchParams.get('q')
+        const url = `${OVERVIEW_URL}?query=${query}`
+        const message = {
+            action: 'openOverviewURL',
+            url,
+        }
+        browser.runtime.sendMessage(message)
     }
 
     render() {
@@ -28,6 +43,9 @@ class Results extends React.Component {
             <div id={MEMEX_CONTAINER_ID} style={styles.memexResults}>
                 <p>Similar results from your Memex</p>
                 <div>{this.renderResultItems()}</div>
+                <a href="#" onClick={this.showMoreHandler}>
+                    Show more results
+                </a>
             </div>
         )
     }

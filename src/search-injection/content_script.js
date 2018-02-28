@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 
+import { remoteFunction } from 'src/util/webextensionRPC'
 import Results from './components/Results'
 import * as constants from './constants'
 
@@ -19,6 +20,10 @@ const handleRender = (id, results) => {
         const target = document.createElement('div')
         target.setAttribute('id', 'memexResults')
         container.insertBefore(target, container.firstChild)
+
+        // const overviewURL = chrome.runtime.getURL("/overview/overview.html")
+        // const url = `${overviewURL}?query=${query}`
+        // const openChromeURL = remoteFunction("openChromeURL").bind(null, url)
 
         // Render our React component on the target element
         ReactDOM.render(<Results results={results} />, target)
