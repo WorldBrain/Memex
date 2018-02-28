@@ -9,6 +9,8 @@ const visitsProp = Symbol('assocVisits')
 const tagsProp = Symbol('assocTags')
 const bookmarkProp = Symbol('assocBookmark')
 const latestProp = Symbol('latestEvent')
+const screenshot = Symbol('screenshotURI')
+const favIcon = Symbol('favIconURI')
 
 export default class Page extends AbstractModel {
     /**
@@ -30,6 +32,8 @@ export default class Page extends AbstractModel {
         domain,
         bookmark,
         visits = [],
+        screenshotURI,
+        favIconURI,
     }) {
         super()
         this.url = url
@@ -40,6 +44,8 @@ export default class Page extends AbstractModel {
         this.urlTerms = urlTerms
         this.titleTerms = titleTerms
         this.domain = domain
+        this.screenshot = undefined
+        this.favIcon = undefined
 
         Object.defineProperties(this, {
             [visitsProp]: {
@@ -54,8 +60,24 @@ export default class Page extends AbstractModel {
                 value: [],
                 ...AbstractModel.DEF_NON_ENUM_PROP,
             },
+            [favIcon]: {
+                value: favIconURI,
+                ...AbstractModel.DEF_NON_ENUM_PROP,
+            },
+            [screenshot]: {
+                value: screenshotURI,
+                ...AbstractModel.DEF_NON_ENUM_PROP,
+            },
             [latestProp]: AbstractModel.DEF_NON_ENUM_PROP,
         })
+    }
+
+    get favIconURI() {
+        return this[favIcon]
+    }
+
+    get screenshotURI() {
+        return this[screenshot]
     }
 
     get latest() {
@@ -109,7 +131,47 @@ export default class Page extends AbstractModel {
         this[bookmarkProp] = undefined
     }
 
+    /**
+     * Attempt to load the blobs if they are currently undefined and there is a valid data URI
+     * on the corresponding hidden field.
+     * Any errors encountered in trying to resolve the URI to a Blob will result in it being unset.
+     * Fields accessed by Symbols are the hidden data URI fields.
+     * TODO: Find a better way to manage Blobs and Data URIs on models?
+     */
+    async loadBlobs() {
+        // Unset the fields if they're invalid
+        const handleInvalid = (urlProp, blobProp) => err => {
+            this[urlProp] = undefined
+            this[blobProp] = undefined
+        }
+
+        // Got data URI but no Blob
+        if (!this.screenshot && this[screenshot]) {
+            await AbstractModel.dataURLToBlob(this[screenshot])
+                .then(blob => (this.screenshot = blob))
+                .catch(handleInvalid(screenshot, 'screenshot'))
+        } else if (this.screenshot && !this[screenshot]) {
+            // Got Blob, but no data URI
+            await AbstractModel.blobToDataURL(this.screenshot)
+                .then(url => (this[screenshot] = url))
+                .catch(handleInvalid(screenshot, 'screenshot'))
+        }
+
+        // Same thing for favicon
+        if (!this.favIcon && this[favIcon]) {
+            await AbstractModel.dataURLToBlob(this[favIcon])
+                .then(blob => (this.favIcon = blob))
+                .catch(handleInvalid(favIcon, 'favIcon'))
+        } else if (this.favIcon && !this[favIcon]) {
+            await AbstractModel.blobToDataURL(this.favIcon)
+                .then(url => (this[favIcon] = url))
+                .catch(handleInvalid(favIcon, 'favIcon'))
+        }
+    }
+
     async loadRels() {
+        await this.loadBlobs()
+
         // Grab DB data
         const visits = await db.visits.where({ url: this.url }).toArray()
         const tags = await db.tags.where({ url: this.url }).toArray()
@@ -154,6 +216,7 @@ export default class Page extends AbstractModel {
             db.bookmarks,
             db.tags,
             async () => {
+                await this.loadBlobs()
                 await db.pages.put(this)
 
                 // Insert or update all associated visits

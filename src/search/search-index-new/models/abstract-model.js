@@ -1,4 +1,6 @@
 /* eslint-disable eqeqeq */
+import Dexie from 'dexie'
+import { blobToDataURL, dataURLToBlob } from 'blob-util'
 
 /**
  * Basic Model blueprint. Each Model representing a Dexie index table should extend this.
@@ -13,6 +15,9 @@ export default class AbstractModel {
         enumerable: false,
         writable: true,
     }
+
+    static blobToDataURL = blob => Dexie.waitFor(blobToDataURL(blob))
+    static dataURLToBlob = url => Dexie.waitFor(dataURLToBlob(url))
 
     constructor() {
         if (this.constructor == AbstractModel) {
