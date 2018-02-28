@@ -48,7 +48,9 @@ async function checkVisitItemTransitionTypes({ url }) {
 }
 
 const getVisitTimes = ({ url }) =>
-    browser.history.getVisits({ url }).then(visits => visits.visitTime)
+    browser.history
+        .getVisits({ url })
+        .then(visits => visits.map(visit => Math.trunc(visit.visitTime)))
 
 async function getBookmarkTime({ browserId }) {
     // Web Ext. API should return array of BookmarkItems; grab first one
