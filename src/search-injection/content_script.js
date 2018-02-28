@@ -21,10 +21,6 @@ const handleRender = (id, results) => {
         target.setAttribute('id', 'memexResults')
         container.insertBefore(target, container.firstChild)
 
-        // const overviewURL = chrome.runtime.getURL("/overview/overview.html")
-        // const url = `${overviewURL}?query=${query}`
-        // const openChromeURL = remoteFunction("openChromeURL").bind(null, url)
-
         // Render our React component on the target element
         ReactDOM.render(<Results results={results} />, target)
     }

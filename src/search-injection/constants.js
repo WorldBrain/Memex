@@ -18,3 +18,6 @@ export const SEARCH_ENGINES = {
 
 // Gets the overview url of the extension
 export const OVERVIEW_URL = chrome.runtime.getURL('/overview/overview.html')
+
+// Local storage for hideResults state
+export const LOCALSTORAGE_ID = 'HIDE_MEMEX_RESULTS'
