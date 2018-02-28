@@ -4,9 +4,6 @@ import 'src/search/background'
 import 'src/analytics/background'
 import 'src/omnibar'
 import { installTimeStorageKey } from 'src/imports/background'
-import { generatePageDocId } from 'src/page-storage'
-import { generateVisitDocId } from 'src/activity-logger'
-import { generateBookmarkDocId } from 'src/search/bookmarks'
 import {
     constants as blacklistConsts,
     blacklist,
@@ -16,6 +13,11 @@ import { OLD_EXT_KEYS } from 'src/options/imports/constants'
 import { index } from 'src/search'
 import analytics from 'src/analytics'
 import updateNotification from 'src/util/update-notification'
+import db from 'src/search/search-index-new'
+import * as models from 'src/search/search-index-new/models'
+
+window.index = db
+window.indexModels = models
 
 export const OVERVIEW_URL = '/overview/overview.html'
 export const OLD_EXT_UPDATE_KEY = 'updated-from-old-ext'
@@ -25,11 +27,7 @@ export const UNINSTALL_URL =
         ? 'http://worldbrain.io/uninstall'
         : ''
 
-// Put doc ID generators on window for user use with manual DB lookups
-window.generatePageDocId = generatePageDocId
-window.generateVisitDocId = generateVisitDocId
-window.generateBookmarkDocId = generateBookmarkDocId
-window.index = index
+window.oldIndex = index
 
 async function openOverview() {
     const [currentTab] = await browser.tabs.query({ active: true })
