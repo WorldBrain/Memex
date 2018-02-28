@@ -38,8 +38,8 @@ export default async function analysePage({
     ]
 
     // When every task has either completed or failed, return what we got
-    const [content, screenshot, favIcon] = await whenAllSettled(
+    const [content, screenshotURI, favIconURI] = await whenAllSettled(
         dataFetchingPromises,
     )
-    return { favIcon, screenshot, content }
+    return { favIconURI, screenshotURI, content }
 }

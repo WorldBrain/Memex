@@ -153,9 +153,8 @@ export async function handleBookmarkCreation(browserId, { url }) {
             opts: { includePageContent: true, includeFavIcon: true },
         })
 
-        // TODO: handle favicon
-        const { content } = await fetch.run()
-        const [pageDoc] = await pipeline({ pageDoc: { content, url } })
+        const pageData = await fetch.run()
+        const [pageDoc] = await pipeline({ pageDoc: { url, ...pageData } })
 
         page = new Page(pageDoc)
     }

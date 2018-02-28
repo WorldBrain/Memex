@@ -198,6 +198,8 @@ export default class Storage extends Dexie {
                 hasBookmark: page.hasBookmark,
                 displayTime: page.latest,
                 tags: pageTagsMap.get(page.url) || [],
+                screenshot: page.screenshotURI,
+                favIcon: page.favIconURI,
             })
         }
 

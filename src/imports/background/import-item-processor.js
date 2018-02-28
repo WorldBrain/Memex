@@ -1,5 +1,3 @@
-import { dataURLToBlob } from 'blob-util'
-
 import fetchPageData from 'src/page-analysis/background/fetch-page-data'
 import { IMPORT_TYPE, DOWNLOAD_STATUS } from 'src/options/imports/constants'
 import * as index from 'src/search'
@@ -48,17 +46,6 @@ async function checkVisitItemTransitionTypes({ url }) {
         throw new Error('Unused TransitionType')
     }
 }
-
-/**
- * @param {string?} favIconURL The data URL string for the favicon.
- * @returns {any} The `_attachments` entry to place into a PouchDB doc.
- */
-// const formatFavIconAttachment = async favIconURL => {
-//     if (!favIconURL) return undefined
-
-//     const blob = await dataURLToBlob(favIconURL)
-//     return { favIcon: { content_type: blob.type, data: blob } }
-// }
 
 const getVisitTimes = ({ url }) =>
     browser.history.getVisits({ url }).then(visits => visits.visitTime)
@@ -133,10 +120,9 @@ export default class ImportItemProcessor {
         this.abortXHR = fetch.cancel
 
         this._checkCancelled()
-        // TODO: handle favicon
-        const { content } = await fetch.run()
+        const pageContent = await fetch.run()
 
-        return { url, content }
+        return { url, ...pageContent }
     }
 
     /**
