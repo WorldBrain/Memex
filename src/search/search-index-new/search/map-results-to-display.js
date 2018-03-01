@@ -1,10 +1,22 @@
 import db from '..'
 
 /**
+ * @typedef {Object} SearchDisplayResult
+ * @property {string} url
+ * @property {string} title
+ * @property {boolean} hasBookmark
+ * @property {number} displayTime
+ * @property {string[]} tags
+ * @property {string} [screenshot]
+ * @property {string} [favIcon]
+ */
+
+/**
  * Used as a helper to shape the search results for the current UI's expected result shape.
  *
- * @param {any[]} results Results array returned from `_search` method.
- * @return {any[]} Array corresponding to input `results` with all needed display data attached.
+ * @param {SearchResult[]} results
+ * @return {Promise<SearchDisplayResult[]>} Array corresponding to input `results` with
+ *  all needed display data attached.
  */
 export async function mapResultsToDisplay(results) {
     const resultUrls = results.map(([url]) => url)
