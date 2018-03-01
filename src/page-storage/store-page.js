@@ -6,7 +6,7 @@ import analysePage from 'src/page-analysis/background'
 import { revisePageFields } from 'src/page-analysis'
 import { generatePageDocId } from '.'
 
-async function handleAttachment(pageId, attachment, dataUrl) {
+export async function handleAttachment(pageId, attachment, dataUrl) {
     if (dataUrl == null) {
         return
     }
