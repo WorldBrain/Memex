@@ -11,3 +11,12 @@
     color: #c1c1c1;
     padding-bottom: 7px;
 }
+.memexResults {
+    margin-bottom: 30;
+}
+.toggle {
+    cursor: pointer;
+    font-size: 13;
+    color: #4abf9d;
+    float: right;
+}

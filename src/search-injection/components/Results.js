@@ -4,17 +4,7 @@ import PropTypes from 'prop-types'
 import ResultItem from './ResultItem'
 import { MEMEX_CONTAINER_ID, OVERVIEW_URL, LOCALSTORAGE_ID } from '../constants'
 
-const styles = {
-    memexResults: {
-        marginBottom: 30,
-    },
-    toggle: {
-        cursor: 'pointer',
-        fontSize: 13,
-        color: '#4abf9d',
-        float: 'right',
-    },
-}
+import styles from './ResultItem.css'
 
 class Results extends React.Component {
     static propTypes = {
@@ -77,11 +67,11 @@ class Results extends React.Component {
         // Number of search results
         const len = this.props.results.length
         return (
-            <div id={MEMEX_CONTAINER_ID} style={styles.memexResults}>
+            <div id={MEMEX_CONTAINER_ID} className={styles.memexResults}>
                 <p>
                     You got {len} results in your Memex memory.
                     <span
-                        style={styles.toggle}
+                        className={styles.toggle}
                         onClick={this.toggleHideResults}
                     >
                         {this.state.hideResults ? 'show' : 'close'}

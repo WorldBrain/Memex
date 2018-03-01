@@ -1,18 +1,19 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 
-import { remoteFunction } from 'src/util/webextensionRPC'
 import Results from './components/Results'
 import * as constants from './constants'
-
+import { appendCss } from './utils'
 import { SEARCH_CONN_NAME, CMDS } from '../overview/constants'
 
 const handleRender = (id, results) => {
     // The actual function to render the results on screen.
     const renderComponent = () => {
+        // Append content_script.css to the document
+        const cssFile = chrome.runtime.getURL('/content_script.css')
+        appendCss(cssFile)
+
         // Gets the container using the passed id
-        // Container is where all the search engine's results
-        // are displayed
         const container = document.getElementById(id)
 
         // Create a new div and append it as the first child
