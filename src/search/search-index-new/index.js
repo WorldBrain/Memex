@@ -105,7 +105,7 @@ export async function addVisit(url, time = Date.now()) {
 
     return db.transaction('rw', db.tables, async () => {
         const matchingPage = await db.pages.get(normalized)
-        if (matchingPage != null) {
+        if (matchingPage == null) {
             throw new Error(
                 `Cannot add visit for non-existent page: ${normalized}`,
             )
