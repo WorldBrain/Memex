@@ -15,7 +15,7 @@ import db, { Storage } from '..'
  * @return {Map<string, number>} Map of URL keys to latest visit time numbers. Should be size <= skip + limit.
  */
 export async function getLatestVisitsByUrl(
-    { startTime = 0, endTime = Date.now(), skip = 0, limit = 10 },
+    { startDate = 0, endDate = Date.now(), skip = 0, limit = 10 },
     filteredURLs,
     shallowLookback = false,
 ) {
@@ -27,7 +27,7 @@ export async function getLatestVisitsByUrl(
 
     let visitColl = db.visits
         .where('[time+url]')
-        .between([startTime, Storage.MIN_STR], [endTime, Storage.MAX_STR])
+        .between([startDate, Storage.MIN_STR], [endDate, Storage.MAX_STR])
         .reverse() // Go through visits by most recent
 
     // Blank search can be a bit faster as we don't need to intersected Pages to meet result limit

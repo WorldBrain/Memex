@@ -23,9 +23,7 @@ export default async function search(params) {
     console.log('QUERY:', params)
 
     console.time('search')
-    let results = !params.queryTerms.length
-        ? await blankSearch(params)
-        : await standardSearch(params)
+    let results = await matchingPagesSearch(params)
     console.timeEnd('search')
 
     console.log(results)
@@ -40,7 +38,7 @@ export default async function search(params) {
  * @param {SearchParams} params
  * @return {Promise<Set<string> | null>}
  */
-async function tagSearch({ tags = [] }) {
+async function tagSearch({ tags }) {
     if (!tags || !tags.length) {
         return null
     }
@@ -100,66 +98,97 @@ async function deriveFilteredURLs(params) {
 const paginate = (resultEntries, { skip = 0, limit = 10 }) =>
     resultEntries.sort(([, a], [, b]) => b - a).slice(skip, skip + limit)
 
+const termQuery = (term, index) =>
+    db.pages
+        .where(index)
+        .equals(term)
+        .primaryKeys()
+
 /**
- * Runs for blank terms searches.
- * @
+ * @param {SearchParams} params
+ * @param {Set<string>} filteredURLs
+ * @return {Promise<Map<string, number>>}
  */
-async function blankSearch(params) {
-    const urlScopeSet = await deriveFilteredURLs(params)
-    console.log(urlScopeSet)
+async function termSearch({ queryTerms }, filteredURLs) {
+    if (!queryTerms || !queryTerms.length) {
+        // If blank search, all will have score multipliers of 1
+        return new Map([...filteredURLs].map(url => [url, 1]))
+    }
 
-    const latestVisitsByUrl = await getLatestVisitsByUrl(
-        params,
-        urlScopeSet,
-        true,
+    const results = await Promise.all(
+        queryTerms.map(async term => ({
+            content: await termQuery(term, 'terms'),
+            title: await termQuery(term, 'titleTerms'),
+            url: await termQuery(term, 'urlTerms'),
+        })),
     )
-    console.log('latest:', latestVisitsByUrl)
 
-    return paginate([...latestVisitsByUrl], params)
+    // Creates a Map of URLs to score multipliers, based on if they were found in title, URL, or content terms,
+    //  These are intersected between results for separate words
+    return results
+        .map(({ content, title, url }) => {
+            const urlScoreMap = new Map()
+            const add = multiplier => url => {
+                const existing = urlScoreMap.get(url)
+                if (
+                    filteredURLs.has(url) &&
+                    (!existing || existing < multiplier)
+                ) {
+                    urlScoreMap.set(url, multiplier)
+                }
+            }
+
+            content.forEach(add(1))
+            url.forEach(add(1.1))
+            title.forEach(add(1.2))
+            return urlScoreMap
+        })
+        .reduce((a, b) => new Map([...a].filter(([url]) => b.has(url))))
 }
 
 /**
  * @param {SearchParams} params
  * @return {Promise<SearchResult[]>} Ordered array of result KVPs of latest visit timestamps to page URLs.
  */
-async function standardSearch({
+async function matchingPagesSearch({
     queryTerms = [],
     bookmarks = false,
     ...params
 }) {
-    const filteredURLs = await deriveFilteredURLs(params)
-    console.log('scope:', filteredURLs)
+    const filteredUrls = await deriveFilteredURLs(params)
 
     // Fetch all latest visits in time range, grouped by URL
-    const latestVisitsByUrl = await getLatestVisitsByUrl(params, filteredURLs)
-    console.log('latest:', latestVisitsByUrl)
+    const filteredUrlTimes = await getLatestVisitsByUrl(
+        params,
+        filteredUrls,
+        !queryTerms.length,
+    )
 
-    // Fetch all pages with terms matching query (TODO: make it AND the queryTerms set)
-    let matchingPageUrls = await db.pages
-        .where('titleTerms')
-        .anyOf(queryTerms)
-        .distinct()
-        .or('urlTerms')
-        .anyOf(queryTerms)
-        .distinct()
-        .or('terms')
-        .anyOf(queryTerms)
-        .distinct()
-        // Filter matching pages down by domains, if specified + visit results
-        .filter(page => latestVisitsByUrl.has(page.url))
-        .primaryKeys()
+    let urlScoreMap = await termSearch(
+        { queryTerms },
+        new Set(filteredUrlTimes.keys()),
+    )
 
     // Further filter down by bookmarks, if specified
     if (bookmarks) {
-        matchingPageUrls = await db.bookmarks
-            .where('url')
-            .anyOf(matchingPageUrls)
-            .primaryKeys()
+        const matchingBookmarks = new Set(
+            await db.bookmarks
+                .where('url')
+                .anyOf(urlScoreMap.keys())
+                .primaryKeys(),
+        )
+
+        urlScoreMap = new Map(
+            [...urlScoreMap].filter(([url]) => matchingBookmarks.has(url)),
+        )
     }
 
+    // Apply scoring by relating the score maps (URL -> multipliers) back to latest time maps (URL -> timestamp)
+    const scoredResults = [...urlScoreMap].map(([url, multiplier]) => [
+        url,
+        filteredUrlTimes.get(url) * multiplier,
+    ])
+
     // Paginate
-    return paginate(
-        matchingPageUrls.map(url => [url, latestVisitsByUrl.get(url)]),
-        params,
-    )
+    return paginate(scoredResults, params)
 }
