@@ -3,15 +3,6 @@ import Dexie from 'dexie'
 import { Page, Visit, Bookmark, Tag } from './models'
 
 /**
- * @typedef {Object} VisitInteraction
- * @property {number} duration Time user was active during visit (ms).
- * @property {number} scrollPx Y-axis pixel scrolled to at point in time.
- * @property {number} scrollPerc
- * @property {number} scrollMaxPx Furthest y-axis pixel scrolled to during visit.
- * @property {number} scrollMaxPerc
- */
-
-/**
  * @typedef {Array} PageEntry
  * @property {any} 0 Page data object - needs `url` string and `terms` array.
  * @property {number[]} 1 Opt. times to create Visits for. Uses calling time if none defined.
@@ -40,6 +31,11 @@ export default class Storage extends Dexie {
      * @type {Dexie.Table} Represents page visit timestamp and activity data.
      */
     bookmarks
+
+    /**
+     * @type {Dexie.Table} Represents tags associated with Pages.
+     */
+    tags
 
     constructor({ indexedDB, IDBKeyRange, dbName } = Storage.DEF_PARAMS) {
         super(dbName, {
@@ -80,85 +76,6 @@ export default class Storage extends Dexie {
         for (const table of this.tables) {
             await table.clear()
         }
-    }
-
-    /**
-     * Adds/updates a page + associated visit (pages never exist without either an assoc.
-     *  visit or bookmark in current model).
-     *
-     * @param {PageEntry} pageEntry
-     * @return {Promise<void>}
-     */
-    async addPage([pageData, visitTimes, bookmarkTime]) {
-        const page = new Page(pageData)
-        // Load any current assoc. data for this page
-        await page.loadRels()
-
-        // If no meta event times supplied, create a new Visit for now
-        const shouldCreateVisit =
-            (visitTimes == null || !visitTimes.length) && bookmarkTime == null
-
-        // Create Visits for each specified time, or a single Visit for "now" if no assoc event
-        visitTimes = shouldCreateVisit ? [Date.now()] : visitTimes
-        visitTimes.forEach(time => page.addVisit(time))
-
-        // Create bookmark, if given
-        if (bookmarkTime != null) {
-            page.setBookmark(bookmarkTime)
-        }
-
-        // Persist current state
-        await page.save()
-        console.log('added:', page)
-    }
-
-    /**
-     * @param {PageEntry[]} pageEntries
-     * @return {Promise<void>}
-     */
-    async addPages(pageEntries) {
-        for (const pageEntry of pageEntries) {
-            await this.addPage(pageEntry)
-        }
-    }
-
-    async addVisit({ url, time = Date.now(), pageData }) {
-        const matchingPage = await this.pages.where({ url }).first()
-
-        // Base case; page exists, so just add visit and update
-        if (matchingPage != null) {
-            await matchingPage.loadRels()
-            matchingPage.addVisit(time)
-            return matchingPage.save()
-        }
-
-        // Edge case: Page doesn't exist, try to create new one from supplied data
-        if (pageData == null) {
-            throw new Error(
-                'Visited URL has no matching page stored, and no page data was supplied',
-            )
-        }
-
-        const page = new Page(pageData)
-        page.addVisit(time)
-        await page.save()
-    }
-
-    /**
-     * Updates an existing specified visit with interactions data.
-     *
-     * @param {string} url The URL of the visit to get.
-     * @param {string|number} time
-     * @param {VisitInteraction} data
-     * @return {Promise<void>}
-     */
-    updateVisitInteractionData(url, time, data) {
-        return this.transaction('rw', this.visits, () =>
-            this.visits
-                .where('[time+url]')
-                .equals([time, url])
-                .modify(data),
-        )
     }
 
     /**
@@ -343,28 +260,21 @@ export default class Storage extends Dexie {
     }
 
     search(params) {
-        return this.transaction(
-            'r',
-            this.pages,
-            this.visits,
-            this.bookmarks,
-            this.tags,
-            async () => {
-                console.log('QUERY:', params)
+        return this.transaction('r', this.tables, async () => {
+            console.log('QUERY:', params)
 
-                console.time('search')
-                let results = !params.queryTerms.length
-                    ? await this._blankSearch(params)
-                    : await this._search(params)
-                console.timeEnd('search')
+            console.time('search')
+            let results = !params.queryTerms.length
+                ? await this._blankSearch(params)
+                : await this._search(params)
+            console.timeEnd('search')
 
-                console.log(results)
-                console.time('search result mapping')
-                results = await this._getResultsForDisplay(results)
-                console.timeEnd('search result mapping')
+            console.log(results)
+            console.time('search result mapping')
+            results = await this._getResultsForDisplay(results)
+            console.timeEnd('search result mapping')
 
-                return results
-            },
-        )
+            return results
+        })
     }
 }

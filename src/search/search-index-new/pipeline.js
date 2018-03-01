@@ -88,8 +88,6 @@ export function extractTerms(text) {
  */
 export default function pipeline({
     pageDoc: { content = {}, url, ...data },
-    visits = [],
-    bookmark = undefined,
     rejectNoContent = true,
 }) {
     // First apply transformations to the URL
@@ -109,20 +107,16 @@ export default function pipeline({
     const titleTerms = extractTerms(content.title)
     const urlTerms = extractTerms(pathname)
 
-    return Promise.resolve([
-        {
-            url: normalizeUrl(url),
-            fullUrl: url,
-            fullTitle: content.title,
-            text: content.fullText,
-            terms,
-            urlTerms,
-            titleTerms,
-            domain: hostname,
-            tags: [],
-            ...data,
-        },
-        visits,
-        bookmark,
-    ])
+    return Promise.resolve({
+        url: normalizeUrl(url),
+        fullUrl: url,
+        fullTitle: content.title,
+        text: content.fullText,
+        terms,
+        urlTerms,
+        titleTerms,
+        domain: hostname,
+        tags: [],
+        ...data,
+    })
 }

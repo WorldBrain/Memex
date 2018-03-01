@@ -6,6 +6,22 @@ import QueryBuilder from '../query-builder'
 import fetchPageData from 'src/page-analysis/background/fetch-page-data'
 import analysePage from 'src/page-analysis/background'
 
+/**
+ * @typedef {Object} VisitInteraction
+ * @property {number} duration Time user was active during visit (ms).
+ * @property {number} scrollPx Y-axis pixel scrolled to at point in time.
+ * @property {number} scrollPerc
+ * @property {number} scrollMaxPx Furthest y-axis pixel scrolled to during visit.
+ * @property {number} scrollMaxPerc
+ */
+
+/**
+ * @typedef {Object} PageAddRequest
+ * @property {any} pageData TODO: type
+ * @property {number[]} [visits=[]] Opt. visit times to assoc. with Page.
+ * @property {number} [bookmark] Opt. bookmark time to assoc. with Page.
+ */
+
 // Create main singleton to interact with DB in the ext
 const db = new Storage()
 export default db
@@ -14,128 +30,201 @@ export default db
 // Adding stuff
 //
 
-export async function addPage(pipelineReq) {
-    return pipeline(pipelineReq).then(entry => db.addPage(entry))
+/**
+ * Adds/updates a page + associated visit (pages never exist without either an assoc.
+ *  visit or bookmark in current model).
+ *
+ * @param {PageAddReq} req
+ * @return {Promise<void>}
+ */
+export async function addPage({ visits = [], bookmark, ...pipelineReq }) {
+    const pageData = await pipeline(pipelineReq)
+
+    return db
+        .transaction('rw', db.tables, async () => {
+            const page = new Page(pageData)
+            // Load any current assoc. data for this page
+            await page.loadRels()
+
+            // If no meta event times supplied, create a new Visit for now
+            const shouldCreateVisit = !visits.length && bookmark == null
+
+            // Create Visits for each specified time, or a single Visit for "now" if no assoc event
+            visits = shouldCreateVisit ? [Date.now()] : visits
+            visits.forEach(time => page.addVisit(time))
+
+            // Create bookmark, if given
+            if (bookmark != null) {
+                page.setBookmark(bookmark)
+            }
+
+            // Persist current state
+            await page.save()
+            console.log('added:', page)
+        })
+        .catch(console.error)
 }
 
-export async function addPageTerms(pipelineReq) {
-    return pipeline(pipelineReq).then(
-        ([{ url, terms, text }]) =>
-            console.log(`adding ${terms.length} terms to page: ${url}`) ||
-            db.pages.update(url, { terms, text }),
+/**
+ * @param {PageAddReq} req
+ * @return {Promise<void>}
+ */
+export async function addPageTerms(req) {
+    const { url, terms, text } = await pipeline(req)
+
+    return db.transaction('rw', db.pages, async () => {
+        await db.pages.update(url, { terms, text })
+
+        console.log(`added ${terms.length} terms to page: ${url}`)
+    })
+}
+
+/**
+ * Updates an existing specified visit with interactions data.
+ *
+ * @param {string} url The URL of the visit to get.
+ * @param {string|number} time
+ * @param {VisitInteraction} data
+ * @return {Promise<void>}
+ */
+export async function updateTimestampMeta(url, time, data) {
+    const normalized = normalizeUrl(url)
+
+    return db.transaction('rw', db.visits, () =>
+        db.visits
+            .where('[time+url]')
+            .equals([time, normalized])
+            .modify(data),
     )
 }
 
-export async function updateTimestampMeta(...args) {
-    return db.updateVisitInteractionData(...args)
-}
+export async function addVisit(url, time = Date.now()) {
+    const normalized = normalizeUrl(url)
 
-export const addVisit = (url, time = Date.now()) => db.addVisit({ url, time })
+    return db.transaction('rw', db.tables, async () => {
+        const matchingPage = await db.pages.get(normalized)
+        if (matchingPage != null) {
+            throw new Error(
+                `Cannot add visit for non-existent page: ${normalized}`,
+            )
+        }
+
+        await matchingPage.loadRels()
+        matchingPage.addVisit(time)
+        return await matchingPage.save()
+    })
+}
 
 //
 // Deleting stuff
-//
-export async function delPages(urls) {
+export function delPages(urls) {
     const normalized = urls.map(normalizeUrl)
-    const pages = await db.pages
-        .where('url')
-        .anyOf(normalized)
-        .toArray()
 
-    for (const page of pages) {
-        await page.delete()
-    }
+    return deletePages(pageTable => pageTable.where('url').anyOf(normalized))
 }
 
-export async function delPagesByDomain(url) {
+export function delPagesByDomain(url) {
     const normalized = normalizeUrl(url)
-    const pages = await db.pages
-        .where('url')
-        .startsWith(normalized)
-        .toArray()
 
-    for (const page of pages) {
-        await page.delete()
-    }
+    return deletePages(table => table.where('url').startsWith(normalized))
 }
 
 // WARNING: Inefficient; goes through entire table
-export async function delPagesByPattern(pattern) {
+export function delPagesByPattern(pattern) {
     const re = new RegExp(pattern, 'i')
-    const pages = await db.pages.filter(page => re.test(page.url)).toArray()
 
-    for (const page of pages) {
-        await page.delete()
-    }
+    return deletePages(table => table.filter(page => re.test(page.url)))
 }
+
+const deletePages = applyQuery =>
+    db.transaction('rw', db.tables, async () => {
+        const pages = await applyQuery(db.pages).toArray()
+
+        for (const page of pages) {
+            await page.delete()
+        }
+    })
 
 //
 // Tags
 //
 const modifyTag = shouldAdd =>
-    async function(url, tag) {
+    function(url, tag) {
         const normalized = normalizeUrl(url)
-        const page = await db.pages.get(normalized)
 
-        if (page == null) {
-            throw new Error('Page does not exist for provided URL:', normalized)
-        }
+        return db.transaction('rw', db.tables, async () => {
+            const page = await db.pages.get(normalized)
 
-        await page.loadRels()
+            if (page == null) {
+                throw new Error(
+                    'Page does not exist for provided URL:',
+                    normalized,
+                )
+            }
 
-        if (shouldAdd) {
-            page.addTag(tag)
-        } else {
-            page.delTag(tag)
-        }
+            await page.loadRels()
 
-        await page.save()
+            if (shouldAdd) {
+                page.addTag(tag)
+            } else {
+                page.delTag(tag)
+            }
+
+            return await page.save()
+        })
     }
+
 export const delTag = modifyTag(false)
 export const addTag = modifyTag(true)
 
 //
 // Bookmarks
 //
-export async function addBookmark({ url, timestamp = Date.now(), tabId }) {
+export function addBookmark({ url, timestamp = Date.now(), tabId }) {
     const normalized = normalizeUrl(url)
-    let page = await db.pages.get(normalized)
 
-    // No existing page for BM; need to make new via content-script if `tabId` provided
-    if (page == null) {
-        if (tabId == null) {
-            throw new Error(
-                'Page does not exist for URL and no tabID provided to extract content:',
-                normalized,
-            )
+    return db.transaction('rw', db.tables, async () => {
+        let page = await db.pages.get(normalized)
+
+        // No existing page for BM; need to make new via content-script if `tabId` provided
+        if (page == null) {
+            if (tabId == null) {
+                throw new Error(
+                    'Page does not exist for URL and no tabID provided to extract content:',
+                    normalized,
+                )
+            }
+
+            // TODO: handle screenshot, favicon
+            const { content } = await analysePage({ tabId })
+            const [pageDoc] = await pipeline({ pageDoc: { content, url } })
+            page = new Page(pageDoc)
         }
 
-        // TODO: handle screenshot, favicon
-        const { content } = await analysePage({ tabId })
-        const [pageDoc] = await pipeline({ pageDoc: { content, url } })
-        page = new Page(pageDoc)
-    }
-
-    await page.loadRels()
-    page.setBookmark()
-    await page.save()
+        await page.loadRels()
+        page.setBookmark()
+        await page.save()
+    })
 }
 
-export async function delBookmark({ url }) {
+export function delBookmark({ url }) {
     const normalized = normalizeUrl(url)
-    const page = await db.pages.get(normalized)
 
-    if (page != null) {
-        await page.loadRels()
-        page.delBookmark()
+    return db.transaction('rw', db.tables, async () => {
+        const page = await db.pages.get(normalized)
 
-        // Delete if Page left orphaned, else just save current state
-        if (page.shouldDelete) {
-            await page.delete()
-        } else {
-            await page.save()
+        if (page != null) {
+            await page.loadRels()
+            page.delBookmark()
+
+            // Delete if Page left orphaned, else just save current state
+            if (page.shouldDelete) {
+                await page.delete()
+            } else {
+                await page.save()
+            }
         }
-    }
+    })
 }
 
 /**
@@ -144,24 +233,27 @@ export async function delBookmark({ url }) {
  */
 export async function handleBookmarkCreation(browserId, { url }) {
     const normalized = normalizeUrl(url)
-    let page = await db.pages.get(normalized)
 
-    // No existing page for BM; need to make new from a remote DOM fetch
-    if (page == null) {
-        const fetch = fetchPageData({
-            url,
-            opts: { includePageContent: true, includeFavIcon: true },
-        })
+    return db.transaction('rw', db.tables, async () => {
+        let page = await db.pages.get(normalized)
 
-        const pageData = await fetch.run()
-        const [pageDoc] = await pipeline({ pageDoc: { url, ...pageData } })
+        // No existing page for BM; need to make new from a remote DOM fetch
+        if (page == null) {
+            const fetch = fetchPageData({
+                url,
+                opts: { includePageContent: true, includeFavIcon: true },
+            })
 
-        page = new Page(pageDoc)
-    }
+            const pageData = await fetch.run()
+            const [pageDoc] = await pipeline({ pageDoc: { url, ...pageData } })
 
-    await page.loadRels()
-    page.setBookmark()
-    await page.save()
+            page = new Page(pageDoc)
+        }
+
+        await page.loadRels()
+        page.setBookmark()
+        await page.save()
+    })
 }
 
 //
