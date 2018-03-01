@@ -2,9 +2,10 @@ import normalizeUrl from 'src/util/encode-url-for-id'
 import Storage from './storage'
 import { Page } from './models'
 import pipeline from './pipeline'
-import QueryBuilder from '../query-builder'
 import fetchPageData from 'src/page-analysis/background/fetch-page-data'
+import QueryBuilder from 'src/search/query-builder'
 import analysePage from 'src/page-analysis/background'
+import fullSearch from './search'
 
 /**
  * @typedef {Object} VisitInteraction
@@ -24,6 +25,7 @@ import analysePage from 'src/page-analysis/background'
 
 // Create main singleton to interact with DB in the ext
 const db = new Storage()
+export { Storage }
 export default db
 
 //
@@ -282,13 +284,16 @@ export async function grabExistingKeys(...args) {
 //
 
 export async function search({ query, showOnlyBookmarks, ...params }) {
+    // Extract query terms via QueryBuilder (may change)
     const qb = new QueryBuilder().searchTerm(query).get()
 
-    const docs = await db.search({
-        queryTerms: [...qb.query],
-        bookmarks: showOnlyBookmarks,
-        ...params,
-    })
+    const docs = await db.transaction('r', db.tables, () =>
+        fullSearch({
+            queryTerms: [...qb.query],
+            bookmarks: showOnlyBookmarks,
+            ...params,
+        }),
+    )
 
     return {
         docs,
