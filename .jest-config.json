@@ -3,11 +3,12 @@
     "browser": {}
   },
   "testMatch": [
-    "<rootDir>/src/**/*.test.(js|jsx)"
+    "<rootDir>/src/**/*.test.(js|jsx|ts|tsx)"
   ],
   "rootDir": ".",
   "transform": {
-    "^.+\\.(js|jsx)$": "<rootDir>/node_modules/babel-jest"
+    "^.+\\.(js|jsx)$": "<rootDir>/node_modules/babel-jest",
+    "^.+\\.(ts|tsx)$": "<rootDir>/node_modules/ts-jest"
   },
   "modulePaths": [
     "<rootDir>"
@@ -18,7 +19,9 @@
   },
   "moduleFileExtensions": [
     "js",
-    "jsx"
+    "jsx",
+    "ts",
+    "tsx"
   ],
   "setupFiles": [
     "jest-webextension-mock",
