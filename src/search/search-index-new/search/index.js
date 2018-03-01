@@ -19,6 +19,17 @@ export default async function search(params) {
     return results
 }
 
+async function tagSearch({ tags = [] }) {
+    const urls = new Set()
+
+    await db.tags
+        .where('name')
+        .anyOf(tags)
+        .eachPrimaryKey(([name, url]) => urls.add(url))
+
+    return urls
+}
+
 /**
  * @param {any[]} resultEntries Map entries (2-el KVP arrays) of URL keys to latest times
  * @param {number} [args.skip=0]
@@ -36,7 +47,12 @@ async function blankSearch({
     bookmarks = false,
     ...params
 }) {
-    const latestVisitsByUrl = await getLatestVisitsByUrl(params, true)
+    const urlScopeSet = await tagSearch(params)
+    const latestVisitsByUrl = await getLatestVisitsByUrl(
+        params,
+        urlScopeSet,
+        true,
+    )
 
     return paginate([...latestVisitsByUrl], params)
 }
@@ -50,13 +66,13 @@ async function standardSearch({
     queryTerms = [],
     domains = [],
     bookmarks = false,
-    tags = [],
     ...params
 }) {
     const domainsSet = new Set(domains)
+    const urlScopeSet = await tagSearch(params)
 
     // Fetch all latest visits in time range, grouped by URL
-    const latestVisitsByUrl = await getLatestVisitsByUrl(params)
+    const latestVisitsByUrl = await getLatestVisitsByUrl(params, urlScopeSet)
 
     // Fetch all pages with terms matching query (TODO: make it AND the queryTerms set)
     let matchingPageUrls = await db.pages
@@ -85,20 +101,6 @@ async function standardSearch({
             .where('url')
             .anyOf(matchingPageUrls)
             .primaryKeys()
-    }
-
-    // Further filter down by tags, if specified
-    if (tags.length) {
-        const matchingTags = await db.tags
-            .where('name')
-            .anyOf(tags)
-            .primaryKeys()
-
-        const matchingTagUrls = new Set(matchingTags.map(([name, url]) => url))
-
-        matchingPageUrls = matchingPageUrls.filter(url =>
-            matchingTagUrls.has(url),
-        )
     }
 
     // Paginate
