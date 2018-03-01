@@ -79,18 +79,13 @@ export async function handleBookmarkCreation(...args) {
 //
 // Utilities
 //
-export function initSingleLookup(...outterArgs) {
-    let singleLookup
-    return async function(...args) {
-        if (!singleLookup) {
-            singleLookup = (await getBackend()).initSingleLookup(...outterArgs)
-        }
-        return await singleLookup(...args)
-    }
-}
 
 export async function grabExistingKeys(...args) {
     return await (await getBackend()).grabExistingKeys(...args)
+}
+
+export async function getPage(url) {
+    return await (await getBackend()).getPage(url)
 }
 
 //
@@ -114,10 +109,3 @@ export const indexQueue = {
         ;(await getBackend()).indexQueue.clear()
     },
 }
-
-export async function getPage(url) {
-    return await (await getBackend()).getPage(url)
-}
-
-// Export index interface
-export { keyGen, removeKeyType } from './util'

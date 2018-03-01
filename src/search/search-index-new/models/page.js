@@ -102,6 +102,26 @@ export default class Page extends AbstractModel {
     }
 
     /**
+     * @param {number} [upperBound]
+     * @return {number} Latest event timestamp below `upperBound`.
+    */
+    getLatest(upperBound = Date.now()) {
+        let max = 0
+        for (const visit of this[visitsProp]) {
+            if (visit.time > max && visit.time <= upperBound) {
+                max = visit.time
+            }
+        }
+
+        const bm = this[bookmarkProp]
+        if (bm != null && bm.time > max && bm.time <= upperBound) {
+            max = this[bookmarkProp].time
+        }
+
+        return max
+    }
+
+    /**
      * @param {number} [time=Date.now()]
      */
     addVisit(time = Date.now()) {
@@ -142,117 +162,104 @@ export default class Page extends AbstractModel {
      * Fields accessed by Symbols are the hidden data URI fields.
      * TODO: Find a better way to manage Blobs and Data URIs on models?
      */
-    async loadBlobs() {
+    loadBlobs() {
         // Unset the fields if they're invalid
-        const handleInvalid = (urlProp, blobProp) => err => {
+        const handleInvalid = (urlProp, blobProp) => {
             this[urlProp] = undefined
             this[blobProp] = undefined
         }
 
-        // Got data URI but no Blob
-        if (!this.screenshot && this[screenshot]) {
-            await AbstractModel.dataURLToBlob(this[screenshot])
-                .then(blob => (this.screenshot = blob))
-                .catch(handleInvalid(screenshot, 'screenshot'))
-        } else if (this.screenshot && !this[screenshot]) {
-            // Got Blob, but no data URI
-            await AbstractModel.blobToDataURL(this.screenshot)
-                .then(url => (this[screenshot] = url))
-                .catch(handleInvalid(screenshot, 'screenshot'))
+        try {
+            // Got data URI but no Blob
+            if (!this.screenshot && this[screenshot]) {
+                this.screenshot = AbstractModel.dataURLToBlob(this[screenshot])
+            } else if (this.screenshot && !this[screenshot]) {
+                // Got Blob, but no data URI
+                this[screenshot] = AbstractModel.blobToDataURL(this.screenshot)
+            }
+        } catch (err) {
+            handleInvalid(screenshot, 'screenshot')
         }
 
-        // Same thing for favicon
-        if (!this.favIcon && this[favIcon]) {
-            await AbstractModel.dataURLToBlob(this[favIcon])
-                .then(blob => (this.favIcon = blob))
-                .catch(handleInvalid(favIcon, 'favIcon'))
-        } else if (this.favIcon && !this[favIcon]) {
-            await AbstractModel.blobToDataURL(this.favIcon)
-                .then(url => (this[favIcon] = url))
-                .catch(handleInvalid(favIcon, 'favIcon'))
+        try {
+            // Same thing for favicon
+            if (!this.favIcon && this[favIcon]) {
+                this.favIcon = AbstractModel.dataURLToBlob(this[favIcon])
+            } else if (this.favIcon && !this[favIcon]) {
+                this[favIcon] = AbstractModel.blobToDataURL(this.favIcon)
+            }
+        } catch (err) {
+            handleInvalid(favIcon, 'favIcon')
         }
     }
 
-    async loadRels() {
-        await this.loadBlobs()
+    loadRels() {
+        return db.transaction('r', db.tables, async () => {
+            this.loadBlobs()
 
-        // Grab DB data
-        const visits = await db.visits.where({ url: this.url }).toArray()
-        const tags = await db.tags.where({ url: this.url }).toArray()
-        const bookmark = await db.bookmarks.get(this.url)
+            // Grab DB data
+            const visits = await db.visits.where({ url: this.url }).toArray()
+            const tags = await db.tags.where({ url: this.url }).toArray()
+            const bookmark = await db.bookmarks.get(this.url)
 
-        this[visitsProp] = visits
-        this[tagsProp] = tags
-        this[bookmarkProp] = bookmark
+            this[visitsProp] = visits
+            this[tagsProp] = tags
+            this[bookmarkProp] = bookmark
 
-        // Derive latest time of either bookmark or visits
-        let latest = bookmark != null ? bookmark.time : 0
+            // Derive latest time of either bookmark or visits
+            let latest = bookmark != null ? bookmark.time : 0
 
-        if (latest < (visits[visits.length - 1] || { time: 0 }).time) {
-            latest = visits[visits.length - 1].time
-        }
+            if (latest < (visits[visits.length - 1] || { time: 0 }).time) {
+                latest = visits[visits.length - 1].time
+            }
 
-        this[latestProp] = latest
+            this[latestProp] = latest
+        })
     }
 
     delete() {
-        return db.transaction(
-            'rw',
-            db.pages,
-            db.visits,
-            db.bookmarks,
-            db.tags,
-            async () => {
-                console.log('deleting', this)
-                await db.visits.where({ url: this.url }).delete()
-                await db.bookmarks.where({ url: this.url }).delete()
-                await db.tags.where({ url: this.url }).delete()
-                await db.pages.where({ url: this.url }).delete()
-            },
+        console.log('deleting', this)
+        return db.transaction('rw', db.tables, () =>
+            Promise.all([
+                db.visits.where({ url: this.url }).delete(),
+                db.bookmarks.where({ url: this.url }).delete(),
+                db.tags.where({ url: this.url }).delete(),
+                db.pages.where({ url: this.url }).delete(),
+            ]),
         )
     }
 
     save() {
-        return db.transaction(
-            'rw',
-            db.pages,
-            db.visits,
-            db.bookmarks,
-            db.tags,
-            async () => {
-                await this.loadBlobs()
-                await db.pages.put(this)
+        return db.transaction('rw', db.tables, async () => {
+            this.loadBlobs()
+            await db.pages.put(this)
 
-                // Insert or update all associated visits
-                const visitIds = await Promise.all(
-                    this[visitsProp].map(visit => visit.save()),
-                )
-                // Insert or update all associated tags
-                const tagIds = await Promise.all(
-                    this[tagsProp].map(tag => tag.save()),
-                )
+            // Insert or update all associated visits + tags
+            const [visitIds, tagIds] = await Promise.all([
+                Promise.all(this[visitsProp].map(visit => visit.save())),
+                Promise.all(this[tagsProp].map(tag => tag.save())),
+            ])
 
-                // Either try to update or delete the assoc. bookmark
-                if (this[bookmarkProp] != null) {
-                    this[bookmarkProp].save()
-                } else {
-                    await db.bookmarks.where({ url: this.url }).delete()
-                }
+            // Either try to update or delete the assoc. bookmark
+            if (this[bookmarkProp] != null) {
+                this[bookmarkProp].save()
+            } else {
+                await db.bookmarks.where({ url: this.url }).delete()
+            }
 
-                // Remove any visits no longer associated with this page
-                const visitTimes = new Set(visitIds.map(([time]) => time))
-                await db.visits
+            // Remove any visits no longer associated with this page
+            const visitTimes = new Set(visitIds.map(([time]) => time))
+            const tagNames = new Set(tagIds.map(([name]) => name))
+            await Promise.all([
+                db.visits
                     .where({ url: this.url })
                     .filter(visit => !visitTimes.has(visit.time))
-                    .delete()
-
-                // Remove any tags no longer associated with this page
-                const tagsSet = new Set(tagIds.map(([name]) => name))
-                await db.tags
+                    .delete(),
+                db.tags
                     .where({ url: this.url })
-                    .filter(tag => !tagsSet.has(tag.name))
-                    .delete()
-            },
-        )
+                    .filter(tag => !tagNames.has(tag.name))
+                    .delete(),
+            ])
+        })
     }
 }
