@@ -1,28 +1,26 @@
-const updateNotification = () => {
-    document.addEventListener('DOMContentLoaded', () => {
-        if (Notification.permission !== 'granted') {
-            Notification.requestPermission()
-        }
+const createTab = id => {
+    browser.notifications.clear(id)
+    browser.tabs.create({
+        url: 'https://worldbrain.helprace.com/i34-feature-tagging',
     })
-    if (!Notification) {
-        alert(
-            'Desktop notifications not available in your browser. Try Chromium.',
-        )
-        return
-    }
+}
 
-    if (Notification.permission !== 'granted') {
-        Notification.requestPermission()
-    } else {
-        const notification = new Notification('NEW FEATURE: Tagging', {
-            icon: '/img/worldbrain-logo-narrow.png',
-            body: 'Click for more Information',
-        })
+const updateNotification = () => {
+    browser.notifications.create({
+        type: 'basic',
+        title: 'NEW FEATURE: Tagging',
+        iconUrl: '/img/worldbrain-logo-narrow.png',
+        message: 'Click for more Information',
+        buttons: [{ title: 'Click for more Information' }],
+    })
 
-        notification.onclick = () => {
-            window.open('https://worldbrain.helprace.com/i34-feature-tagging')
-        }
-    }
+    browser.notifications.onButtonClicked.addListener((id, index) => {
+        createTab(id)
+    })
+
+    browser.notifications.onClicked.addListener(id => {
+        createTab(id)
+    })
 }
 
 export default updateNotification
