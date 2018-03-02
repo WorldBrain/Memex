@@ -19,6 +19,7 @@ import eslint from 'gulp-eslint'
 import path from 'path'
 import cssModulesify from 'css-modulesify'
 import cssnext from 'postcss-cssnext'
+import * as chromeStore from 'chrome-store-api'
 
 const exec = pify(nodeExec)
 
@@ -276,6 +277,28 @@ gulp.task(
     'package',
     gulpSeq('build-prod', ['package-source-code', 'package-extension']),
 )
+
+// Tasks for publishing the extension
+
+gulp.task('publish-extension:chrome', ['package-extension'], async () => {
+    const extensionID = 'abkfbakhjpmblaafnpgjppbmioombali'
+    const tokenManager = new chromeStore.TokenManager(
+        'worldbrain-1057',
+        process.env.WEBSTORE_CLIENT_ID,
+        process.env.WEBSTORE_CLIENT_SECRET,
+    )
+    const api = new chromeStore.Webstore(tokenManager)
+    const zip = await new Promise((resolve, reject) => {
+        fs.readFile(
+            'dist/extension.zip',
+            (err, data) => (err ? reject(err) : resolve(data)),
+        )
+    })
+    await api.update(extensionID, zip)
+    await api.publish(extensionID)
+})
+
+gulp.task('publish-extension', ['publish-extension:chrome'])
 
 /* DEPRECATED */
 gulp.task('package-firefox-old', async () => {
