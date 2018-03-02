@@ -287,7 +287,17 @@ export async function search({ query, showOnlyBookmarks, ...params }) {
     // Extract query terms via QueryBuilder (may change)
     const qb = new QueryBuilder().searchTerm(query).get()
 
-    const docs = await db.transaction('r', db.tables, () =>
+    // Short-circuit search if bad term
+    if (qb.isBadTerm) {
+        return {
+            docs: [],
+            resultsExhausted: true,
+            totalCount: 0,
+            isBadTerm: true,
+        }
+    }
+
+    const { docs, totalCount } = await db.transaction('r', db.tables, () =>
         fullSearch({
             queryTerms: [...qb.query],
             bookmarks: showOnlyBookmarks,
@@ -298,8 +308,8 @@ export async function search({ query, showOnlyBookmarks, ...params }) {
     return {
         docs,
         resultsExhausted: docs.length < params.limit,
-        totalCount: docs.length,
         isBadTerm: qb.isBadTerm,
+        totalCount,
     }
 }
 
