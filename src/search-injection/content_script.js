@@ -8,22 +8,27 @@ import { SEARCH_CONN_NAME, CMDS } from '../overview/constants'
 
 const handleRender = (id, results) => {
     // The actual function to render the results on screen.
-    const renderComponent = () => {
-        // Append content_script.css to the document
-        const cssFile = chrome.runtime.getURL('/content_script.css')
-        appendCss(cssFile)
 
+    const renderComponent = () => {
         // Gets the container using the passed id
         const container = document.getElementById(id)
 
-        // Create a new div and append it as the first child
-        // of the container
         const target = document.createElement('div')
         target.setAttribute('id', 'memexResults')
         container.insertBefore(target, container.firstChild)
 
         // Render our React component on the target element
-        ReactDOM.render(<Results results={results} />, target)
+        ReactDOM.render(
+            <Results
+                results={results.slice(0, constants.LIMIT)}
+                len={results.length}
+            />,
+            target,
+        )
+
+        // Append content_script.css to the document
+        const cssFile = browser.extension.getURL('/content_script.css')
+        appendCss(cssFile)
     }
 
     // Check if the document has loaded,
@@ -61,7 +66,6 @@ const search = query => {
     port.onMessage.addListener(cmdHandler)
 
     const searchParams = {
-        limit: constants.LIMIT,
         query,
     }
 

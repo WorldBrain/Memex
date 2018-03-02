@@ -6,18 +6,14 @@ import styles from './ResultItem.css'
 
 const ResultItem = props => {
     return (
-        <div>
-            <a className="root" href={props.url} target="_blank">
+        <div className={styles.result}>
+            <a className={styles.title} href={props.url} target="_blank">
                 {props.content.title}
             </a>
-            <div className="descriptionContainer">
-                <div className={styles.url}>{props.url}</div>
-                <div className="time">
-                    <div className={styles.displayTime}>
-                        {' '}
-                        {niceTime(+props.displayTime)}{' '}
-                    </div>
-                </div>
+            <p className={styles.url}>{props.url}</p>
+            <div className={styles.displayTime}>
+                {' '}
+                {niceTime(+props.displayTime)}{' '}
             </div>
         </div>
     )

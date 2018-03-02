@@ -48,7 +48,11 @@
         "unlimitedStorage",
         "storage"
     ],
-    "web_accessible_resources": ["/lib/pdf.worker.min.js"],
+    "web_accessible_resources": [
+        "/lib/pdf.worker.min.js",
+        "/img/*",
+        "/content_script.css"
+    ],
     "omnibox": { "keyword": "w" },
     "options_ui": {
         "page": "./options/options.html",

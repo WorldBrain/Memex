@@ -1,22 +1,33 @@
-.url {
-    font-size: 12px;
-    color: #888;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-bottom: 8px;
+:root {
+    --memex-green: #4abf9d;
+}
+
+.result {
+    background: #fbf9fa;
+    padding: 12px;
 }
 
 .displayTime {
-    font-size: 12px;
-    color: #c1c1c1;
-    padding-bottom: 7px;
+    font-size: 1em;
+    color: #bfbdbe;
 }
-.memexResults {
-    margin-bottom: 30;
-}
-.toggle {
+
+.url {
+    color: var(--memex-green);
+    font-size: 1em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: pre;
+    margin: 4px 0px;
+    width: 75%;
     cursor: pointer;
-    font-size: 13;
-    color: #4abf9d;
-    float: right;
+}
+
+.title {
+    /* Since google loads css after page load which
+overides the color of links, so there is a need
+for !important */
+    color: #444 !important;
+    font-size: 1.3em;
+    text-decoration: none;
 }

@@ -2,27 +2,30 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 import ResultItem from './ResultItem'
-import { MEMEX_CONTAINER_ID, OVERVIEW_URL, LOCALSTORAGE_ID } from '../constants'
+import * as constants from '../constants'
+import { getLocalStorage, setLocalStorage } from '../utils'
 
-import styles from './ResultItem.css'
+import styles from './Results.css'
 
 class Results extends React.Component {
     static propTypes = {
         results: PropTypes.arrayOf(PropTypes.object).isRequired,
+        len: PropTypes.number.isRequired,
     }
 
     constructor(props) {
         super(props)
-        this.state = {
-            hideResults: false,
-        }
-        this.showMoreHandler = this.showMoreHandler.bind(this)
+
+        this.seeMoreResults = this.seeMoreResults.bind(this)
         this.toggleHideResults = this.toggleHideResults.bind(this)
     }
 
-    componentDidMount() {
-        const stored = localStorage.getItem(LOCALSTORAGE_ID)
-        const hideResults = stored === 'true'
+    state = {
+        hideResults: false,
+    }
+
+    async componentDidMount() {
+        const hideResults = await getLocalStorage(constants.HIDE_RESULTS_KEY)
         this.setState({
             hideResults,
         })
@@ -32,20 +35,13 @@ class Results extends React.Component {
         const resultItems = this.props.results.map((result, i) => (
             <ResultItem key={i} {...result} />
         ))
-        return (
-            <div className="memex-results">
-                <div>{resultItems}</div>
-                <a href="#" onClick={this.showMoreHandler}>
-                    Show more results
-                </a>
-            </div>
-        )
+        return resultItems
     }
 
-    showMoreHandler() {
+    seeMoreResults() {
         // Create a new tab with the query overview URL
         const query = new URL(location.href).searchParams.get('q')
-        const url = `${OVERVIEW_URL}?query=${query}`
+        const url = `${constants.OVERVIEW_URL}?query=${query}`
         const message = {
             action: 'openOverviewURL',
             url,
@@ -53,32 +49,41 @@ class Results extends React.Component {
         browser.runtime.sendMessage(message)
     }
 
-    toggleHideResults() {
-        // Toggles the hideResults state
-        // Also updates the localstorage
-        const newState = !this.state.hideResults
-        localStorage.setItem(LOCALSTORAGE_ID, newState)
+    async toggleHideResults() {
+        const toggled = !this.state.hideResults
+        await setLocalStorage(constants.HIDE_RESULTS_KEY, toggled)
         this.setState({
-            hideResults: newState,
+            hideResults: toggled,
         })
     }
 
     render() {
-        // Number of search results
-        const len = this.props.results.length
         return (
-            <div id={MEMEX_CONTAINER_ID} className={styles.memexResults}>
-                <p>
-                    You got {len} results in your Memex memory.
-                    <span
-                        className={styles.toggle}
+            <div className={styles.MEMEX_CONTAINER}>
+                <div className={styles.resultsText}>
+                    You have <span>{this.props.len}</span> results in your
+                    digital memory.
+                    <button
+                        className={styles.settingsButton}
                         onClick={this.toggleHideResults}
+                    />
+                </div>
+                <div className={styles.logoContainer}>
+                    <a
+                        className={styles.seeAllResults}
+                        onClick={this.seeMoreResults}
                     >
-                        {this.state.hideResults ? 'show' : 'close'}
-                    </span>
-                </p>
-                {// Render only if hideResults is false
-                this.state.hideResults ? '' : this.renderResultItems()}
+                        See all results
+                    </a>
+                    <img
+                        src={constants.MEMEX_LOGO_URL}
+                        className={styles.logo}
+                    />
+                </div>
+                <div className={styles.resultsBox}>
+                    {// Render only if hideResults is false
+                    this.state.hideResults ? '' : this.renderResultItems()}
+                </div>
             </div>
         )
     }

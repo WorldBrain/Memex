@@ -2,7 +2,6 @@ import urlRegex from 'url-regex'
 import 'src/activity-logger/background'
 import 'src/page-storage/background'
 import 'src/search/background'
-import 'src/search-injection/background'
 import 'src/bookmarks/background'
 import 'src/analytics/background'
 import 'src/omnibar'
@@ -45,6 +44,8 @@ async function openOverview() {
     }
 }
 
+const openOverviewURL = url => chrome.tabs.create({ url })
+
 async function onInstall() {
     // Ensure default blacklist entries are stored (before doing anything else)
     await blacklist.addToBlacklist(blacklistConsts.DEF_ENTRIES)
@@ -85,6 +86,15 @@ browser.commands.onCommand.addListener(command => {
     switch (command) {
         case 'openOverview':
             return openOverview()
+        default:
+    }
+})
+
+// Open overview URL on receving message from content script
+browser.runtime.onMessage.addListener(({ action, url }) => {
+    switch (action) {
+        case 'openOverviewURL':
+            return openOverviewURL(url)
         default:
     }
 })

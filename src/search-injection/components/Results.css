@@ -1,0 +1,51 @@
+:root {
+    --memex-green: #4abf9d;
+}
+
+.MEMEX_CONTAINER {
+    /* Base size of the children elements */
+    font-size: 75%;
+    margin-bottom: 30px;
+}
+
+.resultsText {
+    margin-bottom: 3px;
+    font-size: 1.3em;
+    font-weight: 100;
+}
+
+.resultLength {
+    font-weight: 500;
+}
+
+.logoContainer {
+    margin-bottom: 10px;
+}
+
+.seeAllResults {
+    color: var(--memex-green);
+    text-decoration: none;
+    font-size: 1em;
+    display: inline-block;
+    margin-top: 12px;
+}
+
+.logo {
+    width: 20%;
+    height: 8%;
+    float: right;
+}
+
+.settingsButton {
+    float: right;
+    width: 3%;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    height: 20px;
+    outline: 0;
+    color: #909090;
+    background-image: url('/img/settings.svg');
+    background-repeat: no-repeat;
+    background-size: 20px;
+}
