@@ -32,7 +32,7 @@ export default async function search(params) {
     console.timeEnd('SEARCH: main search')
 
     console.time('SEARCH: result mapping')
-    const docs = await mapResultsToDisplay(results.ids)
+    const docs = await mapResultsToDisplay(results.ids, params)
     console.timeEnd('SEARCH: result mapping')
 
     return { docs, totalCount: results.totalCount }
