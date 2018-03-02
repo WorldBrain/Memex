@@ -1,30 +1,7 @@
 import db, { addPage, addTag } from './index'
+import { ExportedPage } from '../import-export'
 
-export type ImportTag = string
-export type ImportBookmark = number
-
-export interface ImportVisit {
-  duration: number
-  scrollPx: number
-  scrollPerc: number
-  scrollMaxPx: number
-  scrollMaxPerc: number
-}
-
-export interface ImportPageContent {
-  title: string
-  fullText: string
-}
-
-export interface ImportPage {
-  url: string
-  content: ImportPageContent
-  visits: ImportVisit
-  tags: ImportTag[]
-  bookmark?: ImportBookmark
-}
-
-export async function importPage(page: ImportPage) {
+export async function importPage(page: ExportedPage) {
   await addPage({
     pageDoc: {
       content: page.content,
