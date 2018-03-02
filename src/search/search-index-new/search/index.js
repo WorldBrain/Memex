@@ -16,22 +16,23 @@ import { mapResultsToDisplay } from './map-results-to-display'
  */
 
 /**
+ * Should be run from inside a Dexie transaction.
+ *
  * @param {SearchParams} params
- * @return {Promise<SearchDisplayResult[]>}
  */
 export default async function search(params) {
     console.log('QUERY:', params)
 
     console.time('search')
-    let results = await matchingPagesSearch(params)
+    const results = await matchingPagesSearch(params)
     console.timeEnd('search')
 
     console.log(results)
     console.time('search result mapping')
-    results = await mapResultsToDisplay(results)
+    const docs = await mapResultsToDisplay(results.ids)
     console.timeEnd('search result mapping')
 
-    return results
+    return { docs, totalCount: results.totalCount }
 }
 
 /**
@@ -148,7 +149,6 @@ async function termSearch({ queryTerms }, filteredURLs) {
 
 /**
  * @param {SearchParams} params
- * @return {Promise<SearchResult[]>} Ordered array of result KVPs of latest visit timestamps to page URLs.
  */
 async function matchingPagesSearch({
     queryTerms = [],
@@ -190,5 +190,8 @@ async function matchingPagesSearch({
     ])
 
     // Paginate
-    return paginate(scoredResults, params)
+    return {
+        ids: paginate(scoredResults, params),
+        totalCount: urlScoreMap.size,
+    }
 }
