@@ -54,7 +54,7 @@ export default class Storage extends Dexie {
         this.version(1).stores({
             pages: 'url, *terms, *titleTerms, *urlTerms, domain',
             visits: '[time+url], url',
-            bookmarks: 'url',
+            bookmarks: 'url, time',
             tags: '[name+url], name, url',
         })
 

@@ -1,4 +1,4 @@
-import { groupLatestVisitsByUrl, mapUrlsToVisits } from './visits'
+import { groupLatestEventsByUrl, mapUrlsToLatestEvents } from './events'
 import { mapResultsToDisplay } from './map-results-to-display'
 import { findFilteredUrls, filterByBookmarks } from './filters'
 import { textSearch } from './text-search'
@@ -48,13 +48,14 @@ async function matchingPagesSearch({ queryTerms = [], ...params }) {
 
     // Blank search; simply do lookback from `endDate` on visits and score URLs by latest
     if (!queryTerms.length) {
-        urlScoresMap = await groupLatestVisitsByUrl(params, filteredUrls, true)
+        urlScoresMap = await groupLatestEventsByUrl(params, filteredUrls)
     } else {
-        // Do terms lookup first then visit lookup for each result
-        const urlScoreMap = await textSearch({ queryTerms }, filteredUrls)
-        const latestVisits = await mapUrlsToVisits(params, urlScoreMap.keys())
+        // Do terms lookup first then latest event lookup (within time bounds) for each result
+        const urlScoreMultiMap = await textSearch({ queryTerms }, filteredUrls)
+        const urls = new Set(urlScoreMultiMap.keys())
+        const latestEvents = await mapUrlsToLatestEvents(params, urls)
 
-        urlScoresMap = applyScores(urlScoreMap, latestVisits)
+        urlScoresMap = applyScores(urlScoreMultiMap, latestEvents)
     }
 
     urlScoresMap = await filterByBookmarks(params, urlScoresMap)
