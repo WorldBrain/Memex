@@ -74,11 +74,13 @@
     "reselect": "^3.0.1",
     "response-to-data-url": "^0.1.0",
     "rxjs": "^5.5.5",
+    "through2": "^2.0.3",
     "url-regex": "^4.1.1",
     "webextension-polyfill": "^0.1.1",
     "when-all-settled": "^0.1.1"
   },
   "devDependencies": {
+    "@types/jest": "^22.1.4",
     "autoprefixer": "^7.1.1",
     "babel-eslint": "^7.2.3",
     "babel-jest": "^20.0.3",
@@ -89,6 +91,7 @@
     "browserify": "^14.4.0",
     "crx": "^3.2.1",
     "css-modulesify": "git+https://github.com/Treora/css-modulesify#95447d1",
+    "encoding-down": "^4.0.0",
     "eslint": "^4.1.0",
     "eslint-config-prettier": "^2.6.0",
     "eslint-config-standard": "^10.2.1",

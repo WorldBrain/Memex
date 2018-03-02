@@ -42,6 +42,7 @@ indexQueue.on('timeout', next => next())
 
 export function init({ levelDown } = {}) {
     levelDown = levelDown || new LevelJS('worldbrain-terms')
+    console.log(levelDown)
     realIndex = levelup(levelDown)
 }
 
