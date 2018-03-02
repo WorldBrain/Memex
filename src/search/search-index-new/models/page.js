@@ -102,6 +102,26 @@ export default class Page extends AbstractModel {
     }
 
     /**
+     * @param {number} [upperBound]
+     * @return {number} Latest event timestamp below `upperBound`.
+    */
+    getLatest(upperBound = Date.now()) {
+        let max = 0
+        for (const visit of this[visitsProp]) {
+            if (visit.time > max && visit.time <= upperBound) {
+                max = visit.time
+            }
+        }
+
+        const bm = this[bookmarkProp]
+        if (bm != null && bm.time > max && bm.time <= upperBound) {
+            max = this[bookmarkProp].time
+        }
+
+        return max
+    }
+
+    /**
      * @param {number} [time=Date.now()]
      */
     addVisit(time = Date.now()) {
