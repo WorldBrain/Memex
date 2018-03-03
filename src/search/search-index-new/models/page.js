@@ -162,40 +162,40 @@ export default class Page extends AbstractModel {
      * Fields accessed by Symbols are the hidden data URI fields.
      * TODO: Find a better way to manage Blobs and Data URIs on models?
      */
-    async loadBlobs() {
+    loadBlobs() {
         // Unset the fields if they're invalid
-        const handleInvalid = (urlProp, blobProp) => err => {
+        const handleInvalid = (urlProp, blobProp) => {
             this[urlProp] = undefined
             this[blobProp] = undefined
         }
 
-        // Got data URI but no Blob
-        if (!this.screenshot && this[screenshot]) {
-            await AbstractModel.dataURLToBlob(this[screenshot])
-                .then(blob => (this.screenshot = blob))
-                .catch(handleInvalid(screenshot, 'screenshot'))
-        } else if (this.screenshot && !this[screenshot]) {
-            // Got Blob, but no data URI
-            await AbstractModel.blobToDataURL(this.screenshot)
-                .then(url => (this[screenshot] = url))
-                .catch(handleInvalid(screenshot, 'screenshot'))
+        try {
+            // Got data URI but no Blob
+            if (!this.screenshot && this[screenshot]) {
+                this.screenshot = AbstractModel.dataURLToBlob(this[screenshot])
+            } else if (this.screenshot && !this[screenshot]) {
+                // Got Blob, but no data URI
+                this[screenshot] = AbstractModel.blobToDataURL(this.screenshot)
+            }
+        } catch (err) {
+            handleInvalid(screenshot, 'screenshot')
         }
 
-        // Same thing for favicon
-        if (!this.favIcon && this[favIcon]) {
-            await AbstractModel.dataURLToBlob(this[favIcon])
-                .then(blob => (this.favIcon = blob))
-                .catch(handleInvalid(favIcon, 'favIcon'))
-        } else if (this.favIcon && !this[favIcon]) {
-            await AbstractModel.blobToDataURL(this.favIcon)
-                .then(url => (this[favIcon] = url))
-                .catch(handleInvalid(favIcon, 'favIcon'))
+        try {
+            // Same thing for favicon
+            if (!this.favIcon && this[favIcon]) {
+                this.favIcon = AbstractModel.dataURLToBlob(this[favIcon])
+            } else if (this.favIcon && !this[favIcon]) {
+                this[favIcon] = AbstractModel.blobToDataURL(this.favIcon)
+            }
+        } catch (err) {
+            handleInvalid(favIcon, 'favIcon')
         }
     }
 
     loadRels() {
         return db.transaction('r', db.tables, async () => {
-            await this.loadBlobs()
+            this.loadBlobs()
 
             // Grab DB data
             const visits = await db.visits.where({ url: this.url }).toArray()
@@ -229,7 +229,7 @@ export default class Page extends AbstractModel {
 
     save() {
         return db.transaction('rw', db.tables, async () => {
-            await this.loadBlobs()
+            this.loadBlobs()
             await db.pages.put(this)
 
             // Insert or update all associated visits

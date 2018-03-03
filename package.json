@@ -29,7 +29,7 @@
   "dependencies": {
     "abstract-leveldown": "^2.7.2",
     "babel-runtime": "^6.23.0",
-    "blob-util": "^1.3.0",
+    "blob-util": "^1.2.1",
     "cheerio": "^1.0.0-rc.2",
     "chrono-node": "^1.3.1",
     "classnames": "^2.2.5",

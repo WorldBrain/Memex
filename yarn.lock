@@ -1301,12 +1301,12 @@ bl@^1.0.0:
   dependencies:
     readable-stream "^2.0.5"
 
-blob-util@^1.3.0:
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/blob-util/-/blob-util-1.3.0.tgz#dbb4e8caffd50b5720d347e1169b6369ba34fe95"
+blob-util@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/blob-util/-/blob-util-1.2.1.tgz#cda95814d2359802611a6110fe0bc88aa2dcaa2f"
   dependencies:
     blob "0.0.4"
-    native-or-lie "1.0.2"
+    native-or-lie "1.0.0"
 
 blob@0.0.4:
   version "0.0.4"
@@ -5860,9 +5860,9 @@ nan@^2.3.0, nan@^2.3.3:
   version "2.8.0"
   resolved "https://registry.yarnpkg.com/nan/-/nan-2.8.0.tgz#ed715f3fe9de02b57a5e6252d90a96675e1f085a"
 
-native-or-lie@1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/native-or-lie/-/native-or-lie-1.0.2.tgz#c870ee0ba0bf0ff11350595d216cfea68a6d8086"
+native-or-lie@1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/native-or-lie/-/native-or-lie-1.0.0.tgz#14f8783f4b26257780be75142fa145375c50d980"
   dependencies:
     lie "*"
 
