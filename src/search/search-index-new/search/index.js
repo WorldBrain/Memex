@@ -1,6 +1,6 @@
 import { groupLatestEventsByUrl, mapUrlsToLatestEvents } from './events'
 import { mapResultsToDisplay } from './map-results-to-display'
-import { findFilteredUrls, filterByBookmarks } from './filters'
+import { findFilteredUrls } from './filters'
 import { textSearch } from './text-search'
 import { paginate, applyScores } from './util'
 
@@ -57,8 +57,6 @@ async function matchingPagesSearch({ queryTerms = [], ...params }) {
 
         urlScoresMap = applyScores(urlScoreMultiMap, latestEvents)
     }
-
-    urlScoresMap = await filterByBookmarks(params, urlScoresMap)
 
     return {
         ids: paginate(urlScoresMap, params),
