@@ -7,7 +7,10 @@ import db, { Storage } from '..'
  * @param {Iterable<string>} urls
  * @return {Map<string, number>} Map of URL keys to latest visit timestamps.
  */
-export async function mapUrlsToLatestEvents({ endDate, startDate }, urls) {
+export async function mapUrlsToLatestEvents(
+    { endDate, startDate, bookmarks },
+    urls,
+) {
     const latestEvents = new Map()
 
     const attemptAdd = ({ time, url }) => {
@@ -23,10 +26,12 @@ export async function mapUrlsToLatestEvents({ endDate, startDate }, urls) {
         latestEvents.set(url, time)
     }
 
-    await db.visits
-        .where('url')
-        .anyOf(urls)
-        .eachPrimaryKey(([time, url]) => attemptAdd({ time, url }))
+    if (!bookmarks) {
+        await db.visits
+            .where('url')
+            .anyOf(urls)
+            .eachPrimaryKey(([time, url]) => attemptAdd({ time, url }))
+    }
 
     await db.bookmarks
         .where('url')
@@ -46,28 +51,30 @@ export async function mapUrlsToLatestEvents({ endDate, startDate }, urls) {
  * @return {Map<string, number> | null} Map of URL keys to latest visit time numbers. Should be size <= skip + limit.
  */
 export async function groupLatestEventsByUrl(
-    { startDate = 0, endDate = Date.now(), skip = 0, limit = 10 },
+    { startDate = 0, endDate = Date.now(), skip = 0, limit = 10, bookmarks },
     filteredUrls,
 ) {
     // Lookback from endDate to get needed amount of visits
     const latestVisits = new Map()
-    await db.visits
-        .where('[time+url]')
-        .between([startDate, Storage.MIN_STR], [endDate, Storage.MAX_STR])
-        // Go through visits by most recent
-        .reverse()
-        // Stop iterating once we have enough
-        .until(() => latestVisits.size >= skip + limit)
-        // For each visit PK, reduce down into Map of URL keys to latest visit time
-        .eachPrimaryKey(([time, url]) => {
-            // Only ever record the latest visit for each URL (first due to IndexedDB keys ordering)
-            if (
-                !latestVisits.has(url) &&
-                (filteredUrls == null || filteredUrls.has(url))
-            ) {
-                latestVisits.set(url, time)
-            }
-        })
+    if (!bookmarks) {
+        await db.visits
+            .where('[time+url]')
+            .between([startDate, Storage.MIN_STR], [endDate, Storage.MAX_STR])
+            // Go through visits by most recent
+            .reverse()
+            // Stop iterating once we have enough
+            .until(() => latestVisits.size >= skip + limit)
+            // For each visit PK, reduce down into Map of URL keys to latest visit time
+            .eachPrimaryKey(([time, url]) => {
+                // Only ever record the latest visit for each URL (first due to IndexedDB keys ordering)
+                if (
+                    !latestVisits.has(url) &&
+                    (filteredUrls == null || filteredUrls.has(url))
+                ) {
+                    latestVisits.set(url, time)
+                }
+            })
+    }
 
     // Similar lookback on bookmarks
     const latestBookmarks = new Map()

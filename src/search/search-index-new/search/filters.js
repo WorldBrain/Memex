@@ -65,28 +65,3 @@ export async function findFilteredUrls(params) {
     // Or just return the non-null one, or null
     return domainsUrls == null ? tagsUrls : domainsUrls
 }
-
-/**
- * Time: O(#urlScoreMap * log n)
- * Space: O(#matchedBms OR #urlScoreMap)
- *
- * @param {SearchParams} params
- * @param {Map<string, number>} matchedUrlsMap The results so far to filter down.
- * @return {Promise<Map<string, number>>} Filtered version of `urlScoreMap`, if `params.bookmarks` was set.
- */
-export async function filterByBookmarks({ bookmarks }, matchedUrlsMap) {
-    if (!bookmarks) {
-        return matchedUrlsMap
-    }
-
-    const matchingBookmarks = new Set(
-        await db.bookmarks
-            .where('url')
-            .anyOf(matchedUrlsMap.keys())
-            .primaryKeys(),
-    )
-
-    return new Map(
-        [...matchedUrlsMap].filter(([url]) => matchingBookmarks.has(url)),
-    )
-}
