@@ -10,8 +10,9 @@ import {
     initLookupByKeys,
     rangeLookup,
     reverseRangeLookup,
+    keyGen,
+    removeKeyType,
 } from './util'
-import { keyGen, removeKeyType } from '../util'
 import { indexQueue } from '.'
 
 const lookupByKeys = initLookupByKeys()
