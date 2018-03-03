@@ -118,6 +118,3 @@ export const indexQueue = {
 export async function getPage(url) {
     return await (await getBackend()).getPage(url)
 }
-
-// Export index interface
-export { keyGen, removeKeyType } from './util'
