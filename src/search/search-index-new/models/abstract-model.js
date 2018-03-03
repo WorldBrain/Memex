@@ -1,6 +1,4 @@
 /* eslint-disable eqeqeq */
-import Dexie from 'dexie'
-import { blobToDataURL, dataURLToBlob } from 'blob-util'
 
 /**
  * Basic Model blueprint. Each Model representing a Dexie index table should extend this.
@@ -16,8 +14,33 @@ export default class AbstractModel {
         writable: true,
     }
 
-    static blobToDataURL = blob => Dexie.waitFor(blobToDataURL(blob))
-    static dataURLToBlob = url => Dexie.waitFor(dataURLToBlob(url))
+    /**
+     * @param {Blob} blob
+     * @return {string} Data URI representation of input `blob`.
+     */
+    static blobToDataURL = blob => URL.createObjectURL(blob)
+
+    /**
+     * See: https://stackoverflow.com/a/12300351
+     *
+     * @param {string} url Data URI.
+     * @return {Blob} Blob representation of input `url`.
+     */
+    static dataURLToBlob = url => {
+        const byteString = atob(url.split(',')[1])
+        const mimeType = url
+            .split(',')[0]
+            .split(':')[1]
+            .split(';')[0]
+        const buffer = new ArrayBuffer(byteString.length)
+        const bufferView = new Uint8Array(buffer)
+
+        for (let i = 0; i < byteString.length; i++) {
+            bufferView[i] = byteString.charCodeAt(i)
+        }
+
+        return new Blob([buffer], { type: mimeType })
+    }
 
     constructor() {
         if (this.constructor == AbstractModel) {
