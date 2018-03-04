@@ -5,9 +5,7 @@ const deletePages = applyQuery =>
     db.transaction('rw', db.tables, async () => {
         const pages = await applyQuery(db.pages).toArray()
 
-        for (const page of pages) {
-            await page.delete()
-        }
+        await Promise.all(pages.map(page => page.delete()))
     })
 
 export function delPages(urls) {

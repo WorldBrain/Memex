@@ -218,13 +218,15 @@ export default class Page extends AbstractModel {
     }
 
     delete() {
-        return db.transaction('rw', db.tables, async () => {
-            console.log('deleting', this)
-            await db.visits.where({ url: this.url }).delete()
-            await db.bookmarks.where({ url: this.url }).delete()
-            await db.tags.where({ url: this.url }).delete()
-            await db.pages.where({ url: this.url }).delete()
-        })
+        console.log('deleting', this)
+        return db.transaction('rw', db.tables, () =>
+            Promise.all([
+                db.visits.where({ url: this.url }).delete(),
+                db.bookmarks.where({ url: this.url }).delete(),
+                db.tags.where({ url: this.url }).delete(),
+                db.pages.where({ url: this.url }).delete(),
+            ]),
+        )
     }
 
     save() {
@@ -232,14 +234,11 @@ export default class Page extends AbstractModel {
             this.loadBlobs()
             await db.pages.put(this)
 
-            // Insert or update all associated visits
-            const visitIds = await Promise.all(
-                this[visitsProp].map(visit => visit.save()),
-            )
-            // Insert or update all associated tags
-            const tagIds = await Promise.all(
-                this[tagsProp].map(tag => tag.save()),
-            )
+            // Insert or update all associated visits + tags
+            const [visitIds, tagIds] = await Promise.all([
+                Promise.all(this[visitsProp].map(visit => visit.save())),
+                Promise.all(this[tagsProp].map(tag => tag.save())),
+            ])
 
             // Either try to update or delete the assoc. bookmark
             if (this[bookmarkProp] != null) {
@@ -250,17 +249,17 @@ export default class Page extends AbstractModel {
 
             // Remove any visits no longer associated with this page
             const visitTimes = new Set(visitIds.map(([time]) => time))
-            await db.visits
-                .where({ url: this.url })
-                .filter(visit => !visitTimes.has(visit.time))
-                .delete()
-
-            // Remove any tags no longer associated with this page
-            const tagsSet = new Set(tagIds.map(([name]) => name))
-            await db.tags
-                .where({ url: this.url })
-                .filter(tag => !tagsSet.has(tag.name))
-                .delete()
+            const tagNames = new Set(tagIds.map(([name]) => name))
+            await Promise.all([
+                db.visits
+                    .where({ url: this.url })
+                    .filter(visit => !visitTimes.has(visit.time))
+                    .delete(),
+                db.tags
+                    .where({ url: this.url })
+                    .filter(tag => !tagNames.has(tag.name))
+                    .delete(),
+            ])
         })
     }
 }
