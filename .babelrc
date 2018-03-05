@@ -1,9 +1,19 @@
 {
-  "plugins": [
-      "transform-regenerator",
-      ["transform-runtime", {
-          "polyfill": false
-      }]
-  ],
-  "presets": ["es2015", "stage-1", "react"]
+    "presets": [
+        [
+            "env",
+            {
+                "targets": {
+                    "browsers": [
+                        "last 10 Firefox versions",
+                        "last 10 Chrome versions"
+                    ]
+                },
+                "include": ["es6.promise", "transform-es2015-spread"],
+                "useBuiltIns": true
+            }
+        ],
+        "stage-1",
+        "react"
+    ]
 }
