@@ -1,11 +1,6 @@
 import normalizeUrl from 'src/util/encode-url-for-id'
 import transformPageText from 'src/util/transform-page-text'
-import { convertMetaDocId } from 'src/activity-logger'
 import { DEFAULT_TERM_SEPARATOR, extractContent } from '../util'
-
-// Simply extracts the timestamp component out the ID of a visit or bookmark doc,
-//  which is the only data we want at the moment.
-export const transformMetaDoc = doc => convertMetaDocId(doc._id).timestamp
 
 const urlNormalizationOpts = {
     normalizeProtocol: true, // Prepend `http://` if URL is protocol-relative
@@ -44,7 +39,6 @@ export function transformUrl(url) {
 /**
  *
  * @param {string} text
- * @param {'term'|'title'|'url'} key The key under which the extracted terms are categorized.
  * @returns {Set<string>} Set of "words-of-interest" - determined by pre-proc logic in `transformPageText` - extracted from `text`.
  */
 export function extractTerms(text) {
@@ -68,23 +62,12 @@ export function extractTerms(text) {
 }
 
 /**
- * @typedef IndexLookupDoc
- * @type {Object}
- * @property {string} latest Latest visit/bookmark timestamp time for easy scoring.
- * @property {string} domain Filter term extracted from page URL.
- * @property {Set} urlTerms Set of searchable terms extracted from page URL.
- * @property {Set} terms Set of searchable terms extracted from page content.
- * @property {Set} visits Set of visit index doc IDs, extracted from visit docs.
- * @property {Set} bookmarks Set of bookmark index doc IDs, extracted from bookmark docs.
- * @property {Set} tags Set of searchable tags - init'd empty.
- */
-
-/**
- * Function version of "pipeline" logic. Applies transformation logic
- * on a given doc.
+ * Given some page data, applies some transformations to the text and
+ * returns page data ready for creation of new Page model instance.
  *
- * @param {IndexRequest} req Page doc + assoc. meta event docs.
- * @returns {PageEntry}
+ * @param {any} args.pageDoc Contains props like content (full text, blobs), url.
+ * @param {boolean} [args.rejectNoContent=true] Whether or not to reject if input page data text is empty.
+ * @returns {Promise<any>} Resolves to an object containing all data needed for Page model.
  */
 export default function pipeline({
     pageDoc: { content = {}, url, ...data },

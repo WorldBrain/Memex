@@ -28,18 +28,17 @@ import pipeline from './pipeline'
  */
 export async function addPage({ visits = [], bookmark, ...pipelineReq }) {
     const pageData = await pipeline(pipelineReq)
+    const timerLabel = `TIMER - add page: "${pageData.url}"`
 
-    return db
-        .transaction('rw', db.tables, async () => {
+    console.time(timerLabel)
+    try {
+        await db.transaction('rw', db.tables, async () => {
             const page = new Page(pageData)
             // Load any current assoc. data for this page
             await page.loadRels()
 
-            // If no meta event times supplied, create a new Visit for now
-            const shouldCreateVisit = !visits.length && bookmark == null
-
             // Create Visits for each specified time, or a single Visit for "now" if no assoc event
-            visits = shouldCreateVisit ? [Date.now()] : visits
+            visits = !visits.length && bookmark == null ? [Date.now()] : visits
             visits.forEach(time => page.addVisit(time))
 
             // Create bookmark, if given
@@ -49,9 +48,12 @@ export async function addPage({ visits = [], bookmark, ...pipelineReq }) {
 
             // Persist current state
             await page.save()
-            console.log('added:', page)
         })
-        .catch(console.error)
+    } catch (error) {
+        console.error(error)
+    } finally {
+        console.timeEnd(timerLabel)
+    }
 }
 
 /**
@@ -60,12 +62,18 @@ export async function addPage({ visits = [], bookmark, ...pipelineReq }) {
  */
 export async function addPageTerms(req) {
     const { url, terms, text } = await pipeline(req)
+    const timerLabel = `TIMER - add #${terms.length} terms to page: "${url}"`
 
-    return db.transaction('rw', db.pages, async () => {
-        await db.pages.update(url, { terms, text })
-
-        console.log(`added ${terms.length} terms to page: ${url}`)
-    })
+    console.time(timerLabel)
+    try {
+        await db.transaction('rw', db.pages, () =>
+            db.pages.update(url, { terms, text }),
+        )
+    } catch (error) {
+        console.error(error)
+    } finally {
+        console.timeEnd(timerLabel)
+    }
 }
 
 /**

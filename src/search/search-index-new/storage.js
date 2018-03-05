@@ -2,12 +2,6 @@ import Dexie from 'dexie'
 
 import { Page, Visit, Bookmark, Tag } from './models'
 
-/**
- * @typedef {Array} PageEntry
- * @property {any} 0 Page data object - needs `url` string and `terms` array.
- * @property {number[]} 1 Opt. times to create Visits for. Uses calling time if none defined.
- * @property {number} 2 Opt. time to create a Bookmark for.
- */
 export default class Storage extends Dexie {
     static DEF_PARAMS = {
         indexedDB: null,
@@ -68,7 +62,7 @@ export default class Storage extends Dexie {
     }
 
     /**
-     * Performs async clearing of each table in succession (may just `Promise.all` this).
+     * Performs async clearing of each table in succession; don't use unless you want to lose __all your data__
      *
      * @return {Promise<void>}
      */
