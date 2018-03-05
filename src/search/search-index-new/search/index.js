@@ -48,13 +48,13 @@ export async function search({ query, showOnlyBookmarks, ...restParams }) {
         'r',
         db.tables,
         async () => {
-            console.time('SEARCH: main search')
+            console.time('TIMER - main search')
             const results = await fullSearch(params)
-            console.timeEnd('SEARCH: main search')
+            console.timeEnd('TIMER - main search')
 
-            console.time('SEARCH: result mapping')
+            console.time('TIMER - result mapping')
             const docs = await mapResultsToDisplay(results.ids, params)
-            console.timeEnd('SEARCH: result mapping')
+            console.timeEnd('TIMER - result mapping')
 
             return { docs, totalCount: results.totalCount }
         },

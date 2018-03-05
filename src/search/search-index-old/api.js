@@ -6,8 +6,7 @@ import { generatePageDocId } from 'src/page-storage'
 import { addTimestampConcurrent } from './add'
 import { searchConcurrent } from './search'
 import { delPagesConcurrent } from './del'
-import { initSingleLookup, keyGen } from './util'
-import { removeKeyType } from '../util'
+import { initSingleLookup, keyGen, removeKeyType } from './util'
 
 export function hasData() {
     return new Promise((resolve, reject) => {
@@ -100,14 +99,17 @@ export async function search({
 }
 
 export async function getPage(url) {
-    const page = await index.db.get(generatePageDocId({ url }))
+    const pageId = generatePageDocId({ url })
+    const page = await initSingleLookup()(pageId)
 
-    return {
-        loadRels: () => Promise.resolve(),
-        latest: page.latest,
-        hasBookmark: page.bookmarks.size > 0,
-        tags: [...page.tags].map(removeKeyType),
-    }
+    return page != null
+        ? {
+              loadRels: () => Promise.resolve(),
+              latest: page.latest,
+              hasBookmark: page.bookmarks.size > 0,
+              tags: page.tags ? [...page.tags].map(removeKeyType) : [],
+          }
+        : page
 }
 
 export const addVisit = (url, time = Date.now()) =>
