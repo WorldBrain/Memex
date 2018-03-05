@@ -59,24 +59,31 @@ export function delBookmark({ url }) {
 export async function handleBookmarkCreation(browserId, { url }) {
     const normalized = normalizeUrl(url)
 
-    return db.transaction('rw', db.tables, async () => {
-        let page = await db.pages.get(normalized)
+    let page = await db.pages.get(normalized)
 
-        // No existing page for BM; need to make new from a remote DOM fetch
-        if (page == null) {
-            const fetch = fetchPageData({
-                url,
-                opts: { includePageContent: true, includeFavIcon: true },
-            })
+    // No existing page for BM; need to try and make new from a remote DOM fetch
+    if (page == null) {
+        const fetch = fetchPageData({
+            url,
+            opts: { includePageContent: true, includeFavIcon: true },
+        })
 
-            const pageData = await fetch.run()
-            const [pageDoc] = await pipeline({ pageDoc: { url, ...pageData } })
+        const pageData = await fetch.run()
+        page = new Page(await pipeline({ pageDoc: { url, ...pageData } }))
+    }
 
-            page = new Page(pageDoc)
-        }
+    const timerLabel = `TIMER - add bookmark for page: "${page.url}"`
+    console.time(timerLabel)
 
-        await page.loadRels()
-        page.setBookmark()
-        await page.save()
-    })
+    try {
+        await db.transaction('rw', db.tables, async () => {
+            await page.loadRels()
+            page.setBookmark()
+            await page.save()
+        })
+    } catch (err) {
+        console.error(err)
+    } finally {
+        console.timeEnd(timerLabel)
+    }
 }
