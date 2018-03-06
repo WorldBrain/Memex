@@ -1,5 +1,5 @@
 import docuri from 'docuri'
-import encodeUrl from 'src/util/encode-url-for-id'
+import { normalizeAndEncode } from 'src/util/encode-url-for-id'
 
 export const pageKeyPrefix = 'page/'
 
@@ -18,4 +18,4 @@ export const pageDocsSelector = {
  * @throws {URIError} Thrown if the `url` is malformed.
  */
 export const generatePageDocId = ({ url }) =>
-    convertPageDocId({ url: encodeUrl(url, false) })
+    convertPageDocId({ url: normalizeAndEncode(url, false) })

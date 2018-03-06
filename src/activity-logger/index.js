@@ -1,7 +1,7 @@
 // Stuff that is to be accessible from other modules (folders)
 
 import docuri from 'docuri'
-import encodeUrl from 'src/util/encode-url-for-id'
+import { normalizeAndEncode } from 'src/util/encode-url-for-id'
 
 export const visitKeyPrefix = 'visit/'
 
@@ -55,6 +55,6 @@ export const getTimestamp = doc =>
 // NOTE: truncates any decimal part of the `timestamp` arg
 export const generateVisitDocId = ({ url, timestamp = Date.now() }) =>
     convertVisitDocId({
-        url: encodeUrl(url, false),
+        url: normalizeAndEncode(url, false),
         timestamp: Math.floor(timestamp),
     })

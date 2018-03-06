@@ -1,4 +1,3 @@
-import normalizeUrl from 'src/util/encode-url-for-id'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import { whenPageDOMLoaded, whenTabActive } from 'src/util/tab-events'
 import { updateTimestampMeta } from 'src/search'
@@ -46,7 +45,7 @@ const updateVisitInteractionData = ({
     activeTime,
     scrollState,
 }) =>
-    updateTimestampMeta(normalizeUrl(url), +visitTime, {
+    updateTimestampMeta(url, +visitTime, {
         duration: activeTime,
         scrollPx: scrollState.pixel,
         scrollMaxPx: scrollState.maxPixel,
