@@ -1,5 +1,6 @@
 import { generatePageDocId } from 'src/page-storage'
-import { index, initSingleLookup } from '../'
+import index from '../'
+import { initSingleLookup } from '../util'
 import { delPages } from '../del'
 
 /**
