@@ -11,7 +11,6 @@ describe('Search index', () => {
         const visit1 = Date.now().toString()
         await search.addPage({
             pageDoc: {
-                _id: 'test-id-1',
                 url: 'https://www.test.com/test',
                 content: {
                     fullText: 'the wild fox jumped over the hairy red hen',
@@ -25,34 +24,29 @@ describe('Search index', () => {
             query: 'fox',
             mapResultsFunc: async results => results,
         })
-        expect(results1).toEqual([
+        expect(results1[0].document).toEqual(
             expect.objectContaining({
-                id: 'test-id-1',
-                document: {
-                    id: 'test-id-1',
-                    terms: new Set([
-                        'term/wild',
-                        'term/fox',
-                        'term/jumped',
-                        'term/hairy',
-                        'term/red',
-                        'term/hen',
-                    ]),
-                    urlTerms: new Set(['url/test']),
-                    titleTerms: new Set(['title/test', 'title/page']),
-                    domain: 'domain/test.com',
-                    visits: new Set([`visit/${visit1}`]),
-                    bookmarks: new Set([]),
-                    tags: new Set([]),
-                    latest: visit1,
-                },
+                terms: new Set([
+                    'term/wild',
+                    'term/fox',
+                    'term/jumped',
+                    'term/hairy',
+                    'term/red',
+                    'term/hen',
+                ]),
+                urlTerms: new Set(['url/test']),
+                titleTerms: new Set(['title/test', 'title/page']),
+                domain: 'domain/test.com',
+                visits: new Set([`visit/${visit1}`]),
+                bookmarks: new Set([]),
+                tags: new Set([]),
+                latest: visit1,
             }),
-        ]) // TODO: Why is score not deterministic?
+        ) // TODO: Why is score not deterministic?
 
         const visit2 = Date.now().toString()
         await search.addPage({
             pageDoc: {
-                _id: 'test-id-2',
                 url: 'https://www.test.com/test2',
                 content: {
                     fullText: 'the fox was wild',
@@ -66,55 +60,47 @@ describe('Search index', () => {
             query: 'fox wild',
             mapResultsFunc: async results => results,
         })
-        expect(results2).toEqual([
+        expect(results2[0].document).toEqual(
             expect.objectContaining({
-                id: 'test-id-2',
-                document: {
-                    id: 'test-id-2',
-                    terms: new Set(['term/fox', 'term/wild']),
-                    urlTerms: new Set([]),
-                    titleTerms: new Set(['title/test', 'title/page']),
-                    domain: 'domain/test.com',
-                    visits: new Set([`visit/${visit2}`]),
-                    bookmarks: new Set([]),
-                    tags: new Set([]),
-                    latest: visit2,
-                },
+                terms: new Set(['term/fox', 'term/wild']),
+                urlTerms: new Set([]),
+                titleTerms: new Set(['title/test', 'title/page']),
+                domain: 'domain/test.com',
+                visits: new Set([`visit/${visit2}`]),
+                bookmarks: new Set([]),
+                tags: new Set([]),
+                latest: visit2,
             }),
+        )
+        expect(results2[1].document).toEqual(
             expect.objectContaining({
-                id: 'test-id-1',
-                document: expect.objectContaining({
-                    terms: new Set([
-                        'term/wild',
-                        'term/fox',
-                        'term/jumped',
-                        'term/hairy',
-                        'term/red',
-                        'term/hen',
-                    ]),
-                }),
+                terms: new Set([
+                    'term/wild',
+                    'term/fox',
+                    'term/jumped',
+                    'term/hairy',
+                    'term/red',
+                    'term/hen',
+                ]),
             }),
-        ])
+        )
 
-        await search.delPages(['test-id-2'])
+        await search.delPages(['https://www.test.com/test2'])
         const { docs: results3 } = await search.search({
             query: 'fox wild',
             mapResultsFunc: async results => results,
         })
-        expect(results3).toEqual([
+        expect(results3[0].document).toEqual(
             expect.objectContaining({
-                id: 'test-id-1',
-                document: expect.objectContaining({
-                    terms: new Set([
-                        'term/wild',
-                        'term/fox',
-                        'term/jumped',
-                        'term/hairy',
-                        'term/red',
-                        'term/hen',
-                    ]),
-                }),
+                terms: new Set([
+                    'term/wild',
+                    'term/fox',
+                    'term/jumped',
+                    'term/hairy',
+                    'term/red',
+                    'term/hen',
+                ]),
             }),
-        ])
+        )
     })
 })
