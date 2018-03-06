@@ -23,9 +23,18 @@ import { paginate, applyScores } from './util'
  * @property {number} 1 Timestamp of latest event.
  */
 
-export async function search({ query, showOnlyBookmarks, ...restParams }) {
+export async function search({
+    query,
+    showOnlyBookmarks,
+    mapResultsFunc = mapResultsToDisplay,
+    domains = [],
+    ...restParams
+}) {
     // Extract query terms via QueryBuilder (may change)
-    const qb = new QueryBuilder().searchTerm(query).get()
+    const qb = new QueryBuilder()
+        .searchTerm(query)
+        .filterDomains(domains)
+        .get()
 
     // Short-circuit search if bad term
     if (qb.isBadTerm) {
@@ -39,9 +48,10 @@ export async function search({ query, showOnlyBookmarks, ...restParams }) {
 
     // Reshape needed params; prob consolidate interface later when remove old index code
     const params = {
-        queryTerms: [...qb.query],
-        bookmarks: showOnlyBookmarks,
         ...restParams,
+        bookmarks: showOnlyBookmarks,
+        queryTerms: [...qb.query],
+        domains: [...qb.domain],
     }
 
     const { docs, totalCount } = await db.transaction(
@@ -53,7 +63,7 @@ export async function search({ query, showOnlyBookmarks, ...restParams }) {
             console.timeEnd('TIMER - main search')
 
             console.time('TIMER - result mapping')
-            const docs = await mapResultsToDisplay(results.ids, params)
+            const docs = await mapResultsFunc(results.ids, params)
             console.timeEnd('TIMER - result mapping')
 
             return { docs, totalCount: results.totalCount }

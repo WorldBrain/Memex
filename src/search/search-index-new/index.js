@@ -1,9 +1,33 @@
 import Storage from './storage'
 
 // Create main singleton to interact with DB in the ext
-const db = new Storage()
+let realIndex = null
+const index = new Proxy(
+    {},
+    {
+        get: (target, key) => {
+            if (!realIndex) {
+                init()
+            }
+            if (key === 'db') {
+                return realIndex
+            }
+
+            let prop = realIndex[key]
+            if (typeof prop === 'function') {
+                prop = prop.bind(realIndex)
+            }
+            return prop
+        },
+    },
+)
+
+export function init(idbOpts = {}) {
+    realIndex = new Storage(idbOpts)
+}
+
 export { Storage }
-export default db
+export default index
 
 //
 // Adding stuff

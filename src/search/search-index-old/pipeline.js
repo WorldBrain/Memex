@@ -100,7 +100,7 @@ export function extractTerms(text, key) {
 export default async function pipeline({
     pageDoc: { content = {}, url, favIconURI, screenshotURI },
     visits = [],
-    bookmarkDocs = [],
+    bookmark,
     rejectNoContent = true,
     updatePouchTextOnly = false,
 }) {
@@ -150,8 +150,9 @@ export default async function pipeline({
     const titleTerms = extractTerms(content.title, 'title')
     const urlTerms = extractTerms(pathname, 'url')
 
-    // Create timestamps to be indexed as Sets
-    const bookmarks = bookmarkDocs.map(transformMetaDoc)
+    // Fit into old-index multi-bookmarks model
+    const bookmarks =
+        bookmark == null ? new Set() : new Set([keyGen.bookmark(bookmark)])
 
     return {
         id,
@@ -160,7 +161,7 @@ export default async function pipeline({
         titleTerms,
         domain: keyGen.domain(hostname),
         visits: new Set(visits.map(keyGen.visit)),
-        bookmarks: new Set(bookmarks.map(keyGen.bookmark)),
         tags: new Set(),
+        bookmarks,
     }
 }

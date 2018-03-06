@@ -27,7 +27,7 @@ export function hasData() {
 }
 
 export async function search({
-    query,
+    query = '',
     startDate,
     endDate,
     tags = [],
@@ -105,7 +105,7 @@ export async function getPage(url) {
     return page != null
         ? {
               loadRels: () => Promise.resolve(),
-              latest: page.latest,
+              latest: +page.latest,
               hasBookmark: page.bookmarks.size > 0,
               tags: page.tags ? [...page.tags].map(removeKeyType) : [],
           }

@@ -14,7 +14,7 @@ export const keyGen = {
     _: key => key,
 }
 
-export const removeKeyType = key =>
+export const removeKeyType = (key = '') =>
     key.replace(/^(term|title|visit|url|domain|tag|bookmark)\//, '')
 
 /**
@@ -83,7 +83,7 @@ export function boostScores(pageScoresMap, boost = 0) {
 export const structureSearchResult = (document, score = 1) => ({
     id: document.id,
     document,
-    score,
+    score: +score,
 })
 
 /**
@@ -104,6 +104,8 @@ export const termRangeLookup = (termKey, termsSet) =>
             .createReadStream({
                 gte: termKey,
                 lte: `${termKey}\uffff`,
+                keyAsBuffer: false,
+                valueAsBuffer: false,
             })
             .on('data', ({ key, value }) => {
                 // Only add current data to results if it appears in the set of terms we're looking for (else ignore)
@@ -142,7 +144,11 @@ export const rangeLookup = iteratorOpts =>
     new Promise(resolve => {
         const data = new Map()
         index.db
-            .createReadStream(iteratorOpts)
+            .createReadStream({
+                ...iteratorOpts,
+                keyAsBuffer: false,
+                valueAsBuffer: false,
+            })
             .on('data', ({ key, value }) => {
                 const { pageId } = normalizeTimestampVals(value)
                 data.set(key, pageId)
@@ -165,6 +171,8 @@ export const reverseRangeLookup = ({ limit = Infinity, ...iteratorOpts }) =>
         const stream = index.db.createReadStream({
             ...iteratorOpts,
             reverse: true,
+            keyAsBuffer: false,
+            valueAsBuffer: false,
         })
 
         stream.on('end', () => resolve(data))
@@ -187,8 +195,6 @@ export const reverseRangeLookup = ({ limit = Infinity, ...iteratorOpts }) =>
  *  bookmark keys, respectively, for all pages indexed.
  */
 export const grabExistingKeys = (trimPrefix = true) => {
-    const trim = key => key.replace('page/', '')
-
     return new Promise(resolve => {
         let histKeys = new Set()
         let bmKeys = new Set()
@@ -197,6 +203,8 @@ export const grabExistingKeys = (trimPrefix = true) => {
             .createReadStream({
                 gte: 'page/',
                 lte: 'page/\uffff',
+                keyAsBuffer: false,
+                valueAsBuffer: false,
             })
             .on('data', ({ key, value }) => {
                 if (value && value.bookmarks && value.bookmarks.size) {
@@ -206,8 +214,8 @@ export const grabExistingKeys = (trimPrefix = true) => {
             })
             .on('end', () => {
                 if (trimPrefix) {
-                    histKeys = new Set([...histKeys].map(trim))
-                    bmKeys = new Set([...bmKeys].map(trim))
+                    histKeys = new Set([...histKeys].map(removeKeyType))
+                    bmKeys = new Set([...bmKeys].map(removeKeyType))
                 }
 
                 resolve({

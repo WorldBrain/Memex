@@ -1,120 +1,535 @@
 /* eslint-env jest */
 
 import memdown from 'memdown'
-import * as search from './'
+import indexedDB from 'fake-indexeddb'
+import IDBKeyRange from 'fake-indexeddb/lib/FDBKeyRange'
+
+import * as index from './'
 import * as oldIndex from './search-index-old'
+import * as newIndex from './search-index-new'
 
-describe('Search index', () => {
-    test('Integration test', async () => {
-        search.getBackend._reset({ useOld: true })
-        oldIndex.init({ levelDown: memdown() })
-        const visit1 = Date.now().toString()
-        await search.addPage({
-            pageDoc: {
-                _id: 'test-id-1',
-                url: 'https://www.test.com/test',
-                content: {
-                    fullText: 'the wild fox jumped over the hairy red hen',
-                    title: 'test page',
-                },
-            },
-            bookmarkDocs: [],
-            visits: [visit1],
-        })
-        const { docs: results1 } = await search.search({
-            query: 'fox',
-            mapResultsFunc: async results => results,
-        })
-        expect(results1).toEqual([
-            expect.objectContaining({
-                id: 'test-id-1',
-                document: {
-                    id: 'test-id-1',
-                    terms: new Set([
-                        'term/wild',
-                        'term/fox',
-                        'term/jumped',
-                        'term/hairy',
-                        'term/red',
-                        'term/hen',
-                    ]),
-                    urlTerms: new Set(['url/test']),
-                    titleTerms: new Set(['title/test', 'title/page']),
-                    domain: 'domain/test.com',
-                    visits: new Set([`visit/${visit1}`]),
-                    bookmarks: new Set([]),
-                    tags: new Set([]),
-                    latest: visit1,
-                },
-            }),
-        ]) // TODO: Why is score not deterministic?
+// Test data (TODO: better way to manage this?)
+const VISIT_3 = Date.now()
+const VISIT_2 = VISIT_3 - 1000 * 60
+const VISIT_1 = VISIT_2 - 1000 * 60
+const BOOKMARK_1 = VISIT_3 - 1000 * 60 * 86400 // Bookmark from a day ago
+const TEST_PAGE_1 = {
+    url: 'https://www.lorem.com/test2',
+    content: {
+        fullText: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+        title: 'test page 3',
+    },
+}
+const TEST_PAGE_2 = {
+    url: 'https://www.lorem.com/test1',
+    content: {
+        fullText: 'Lorem Ipsum is simply dummy text of the printing industry',
+        title: 'test page 2',
+    },
+}
+const TEST_PAGE_3 = {
+    url: 'https://www.test.com/test',
+    content: {
+        fullText: 'the wild fox jumped over the hairy red hen',
+        title: 'test page',
+    },
+}
+const TEST_PAGE_4 = { ...TEST_PAGE_3, url: 'https://test.com/tmp' }
 
-        const visit2 = Date.now().toString()
-        await search.addPage({
-            pageDoc: {
-                _id: 'test-id-2',
-                url: 'https://www.test.com/test2',
-                content: {
-                    fullText: 'the fox was wild',
-                    title: 'test page 2',
-                },
-            },
-            bookmarkDocs: [],
-            visits: [visit2],
-        })
-        const { docs: results2 } = await search.search({
-            query: 'fox wild',
-            mapResultsFunc: async results => results,
-        })
-        expect(results2).toEqual([
-            expect.objectContaining({
-                id: 'test-id-2',
-                document: {
-                    id: 'test-id-2',
-                    terms: new Set(['term/fox', 'term/wild']),
-                    urlTerms: new Set([]),
-                    titleTerms: new Set(['title/test', 'title/page']),
-                    domain: 'domain/test.com',
-                    visits: new Set([`visit/${visit2}`]),
-                    bookmarks: new Set([]),
-                    tags: new Set([]),
-                    latest: visit2,
-                },
-            }),
-            expect.objectContaining({
-                id: 'test-id-1',
-                document: expect.objectContaining({
-                    terms: new Set([
-                        'term/wild',
-                        'term/fox',
-                        'term/jumped',
-                        'term/hairy',
-                        'term/red',
-                        'term/hen',
-                    ]),
-                }),
-            }),
-        ])
-
-        await search.delPages(['test-id-2'])
-        const { docs: results3 } = await search.search({
-            query: 'fox wild',
-            mapResultsFunc: async results => results,
-        })
-        expect(results3).toEqual([
-            expect.objectContaining({
-                id: 'test-id-1',
-                document: expect.objectContaining({
-                    terms: new Set([
-                        'term/wild',
-                        'term/fox',
-                        'term/jumped',
-                        'term/hairy',
-                        'term/red',
-                        'term/hen',
-                    ]),
-                }),
-            }),
-        ])
+async function insertTestData() {
+    // Insert some test data for all tests to use
+    await index.addPage({ pageDoc: TEST_PAGE_3, visits: [VISIT_3] })
+    await index.addPage({
+        pageDoc: TEST_PAGE_2,
+        visits: [VISIT_2],
+        bookmark: BOOKMARK_1,
     })
-})
+    await index.addPage({ pageDoc: TEST_PAGE_1, visits: [VISIT_1] })
+
+    // Add some test tags
+    await index.addTag(TEST_PAGE_3.url, 'good')
+    await index.addTag(TEST_PAGE_3.url, 'quality')
+    await index.addTag(TEST_PAGE_2.url, 'quality')
+}
+
+async function resetTestData(dbName = 'test') {
+    // Don't have any destroy methods available;
+    //   => update pointer to memdown and manually delete fake-indexeddb's DB
+    indexedDB.deleteDatabase(dbName)
+    oldIndex.init({ levelDown: memdown() })
+    newIndex.init({ indexedDB, IDBKeyRange, dbName })
+
+    await insertTestData()
+}
+
+// Runs the same tests for either the new or old index
+const runSuite = useOld => () => {
+    // Old model uses page IDs (derived from URL), new model simply uses URL
+    const PAGE_ID_1 = useOld ? 'page/bG9yZW0uY29tL3Rlc3Qy' : 'lorem.com/test2'
+    const PAGE_ID_2 = useOld ? 'page/bG9yZW0uY29tL3Rlc3Qx' : 'lorem.com/test1'
+    const PAGE_ID_3 = useOld ? 'page/dGVzdC5jb20vdGVzdA%3D%3D' : 'test.com/test'
+    const PAGE_ID_4 = useOld ? 'page/dGVzdC5jb20vdG1w' : 'test.com/tmp'
+
+    // Some things may be broken in old one, but no plans on fixing
+    const testOnlyNew = useOld ? test.skip : test
+
+    // Bind common search params
+    const search = params => {
+        // Map the old result objects to KVP [ID, score] array style of new results
+        const mapResultsFunc = useOld
+            ? async results => results.map(res => [res.id, res.score])
+            : async results => results
+
+        return index.search({ mapResultsFunc, ...params })
+    }
+
+    // Set what index to use for tests + initialize data
+    beforeAll(async () => {
+        index.getBackend._reset({ useOld })
+        await resetTestData()
+    })
+
+    describe('read ops', () => {
+        test('fetch page by URL', async () => {
+            const runChecks = async page => {
+                await page.loadRels()
+
+                expect(page).toBeDefined()
+                expect(page).not.toBeNull()
+                expect(page.hasBookmark).toBe(false)
+                expect(page.tags).toEqual(['good', 'quality'])
+
+                expect(page.latest).toEqual(VISIT_3)
+            }
+
+            runChecks(await index.getPage(TEST_PAGE_3.url))
+            runChecks(await index.getPage('test.com/test')) // Should get normalized the same
+
+            const page = await index.getPage(TEST_PAGE_2.url)
+            await page.loadRels()
+
+            expect(page).toBeDefined()
+            expect(page).not.toBeNull()
+            expect(page.hasBookmark).toBe(true)
+            expect(page.latest).toEqual(VISIT_2)
+        })
+
+        test('single term search', async () => {
+            const { docs } = await search({ query: 'fox' })
+
+            expect(docs.length).toBe(1)
+            const [id, score] = docs[0]
+            expect(id).toEqual(PAGE_ID_3)
+            expect(score).toEqual(VISIT_3)
+        })
+
+        test('multi-term search', async () => {
+            const { docs } = await search({
+                query: 'fox wild',
+            })
+
+            expect(docs.length).toBe(1)
+            const [id, score] = docs[0]
+            expect(id).toEqual(PAGE_ID_3)
+            expect(score).toEqual(VISIT_3)
+        })
+
+        test('time-filtered blank search', async () => {
+            // Upper-bound
+            const { docs: docsA } = await search({ endDate: BOOKMARK_1 })
+
+            // All other data should be more recent
+            expect(docsA.length).toBe(1)
+            expect(docsA[0]).toEqual([PAGE_ID_2, BOOKMARK_1])
+
+            // Lower-bound
+            const { docs: docsB } = await search({ startDate: VISIT_3 })
+
+            // All other data should be older
+            expect(docsB.length).toBe(1)
+            expect(docsB[0]).toEqual([PAGE_ID_3, VISIT_3])
+
+            // Both bounds
+            const { docs: docsC } = await search({
+                startDate: VISIT_1,
+                endDate: VISIT_2,
+            })
+
+            // Should be in order of visit
+            expect(docsC.length).toBe(2)
+            expect(docsC[0]).toEqual([PAGE_ID_2, VISIT_2])
+            expect(docsC[1]).toEqual([PAGE_ID_1, VISIT_1])
+        })
+
+        test('time-filtered + terms search', async () => {
+            const runChecks = docs => {
+                expect(docs.length).toBe(2)
+                expect(docs[0]).toEqual([PAGE_ID_2, VISIT_2])
+                expect(docs[1]).toEqual([PAGE_ID_1, VISIT_1])
+            }
+
+            const { docs: docsA } = await search({
+                endDate: VISIT_2,
+                query: 'consectetur adipiscing',
+            })
+
+            expect(docsA.length).toBe(1)
+            expect(docsA[0]).toEqual([PAGE_ID_1, VISIT_1])
+
+            const { docs: docsB } = await search({
+                startDate: VISIT_1,
+                query: 'lorem ipsum',
+            })
+            runChecks(docsB)
+
+            const { docs: docsC } = await search({
+                startDate: VISIT_1,
+                endDate: VISIT_2,
+                query: 'lorem ipsum',
+            })
+            runChecks(docsC)
+        })
+
+        test('time-filtered + terms + tags search', async () => {
+            const { docs } = await search({
+                startDate: VISIT_1,
+                endDate: VISIT_2,
+                query: 'lorem ipsum',
+                tags: ['quality'],
+            })
+
+            expect(docs.length).toBe(1)
+            expect(docs[0]).toEqual([PAGE_ID_2, VISIT_2])
+        })
+
+        // Score is wrong on old version; it will still have score == visit2
+        testOnlyNew(
+            'time-filtered + terms + tags + bookmarks search',
+            async () => {
+                const { docs } = await search({
+                    startDate: BOOKMARK_1,
+                    endDate: VISIT_2,
+                    query: 'lorem ipsum',
+                    tags: ['quality'],
+                    showOnlyBookmarks: true,
+                })
+
+                expect(docs.length).toBe(1)
+                expect(docs[0]).toEqual([PAGE_ID_2, BOOKMARK_1])
+            },
+        )
+
+        test('time-filtered + terms + domains search', async () => {
+            const { docs } = await search({
+                startDate: VISIT_1,
+                endDate: VISIT_2,
+                query: 'lorem ipsum',
+                domains: ['lorem.com'],
+            })
+
+            expect(docs.length).toBe(2)
+            expect(docs[0]).toEqual([PAGE_ID_2, VISIT_2])
+            expect(docs[1]).toEqual([PAGE_ID_1, VISIT_1])
+        })
+
+        test('time-filtered + terms + domains + tags search', async () => {
+            const { docs } = await search({
+                startDate: VISIT_1,
+                endDate: VISIT_2,
+                query: 'lorem ipsum',
+                domains: ['lorem.com'],
+                tags: ['quality'],
+            })
+
+            expect(docs.length).toBe(1)
+            expect(docs[0]).toEqual([PAGE_ID_2, VISIT_2])
+        })
+
+        test('paginated search', async () => {
+            // Blank search but skipping the first 2 most-recent and only returning the 3rd
+            const { docs: docsA } = await search({ skip: 2, limit: 2 })
+
+            expect(docsA.length).toBe(1)
+            expect(docsA[0]).toEqual([PAGE_ID_1, VISIT_1])
+
+            // Skip passed the end
+            const { docs: docsB } = await search({ skip: 10 })
+            expect(docsB.length).toBe(0)
+        })
+
+        const testDomains = (singleDomain, multiDomain) => async () => {
+            const { docs: loremDocs } = await search(singleDomain)
+
+            expect(loremDocs.length).toBe(2)
+            expect(loremDocs[0]).toEqual([PAGE_ID_2, VISIT_2])
+            expect(loremDocs[1]).toEqual([PAGE_ID_1, VISIT_1])
+
+            // Multi-domain
+            const { docs: testDocs } = await search(multiDomain)
+
+            expect(testDocs.length).toBe(3)
+            expect(testDocs[0]).toEqual([PAGE_ID_3, VISIT_3])
+            expect(testDocs[1]).toEqual([PAGE_ID_2, VISIT_2])
+            expect(testDocs[2]).toEqual([PAGE_ID_1, VISIT_1])
+        }
+
+        test(
+            'domains search (query)',
+            testDomains(
+                { query: 'lorem.com' },
+                { query: 'lorem.com test.com' },
+            ),
+        )
+
+        test(
+            'domains search (filter)',
+            testDomains(
+                { domains: ['lorem.com'] },
+                { domains: ['lorem.com', 'test.com'] },
+            ),
+        )
+
+        test('domains suggest', async () => {
+            const expected1 = ['lorem.com']
+            expect(await index.suggest('l', 'domain')).toEqual(expected1)
+            expect(await index.suggest('lo', 'domain')).toEqual(expected1)
+            expect(await index.suggest('lol', 'domain')).not.toEqual(expected1)
+
+            const expected2 = ['test.com']
+            expect(await index.suggest('t', 'domain')).toEqual(expected2)
+            expect(await index.suggest('te', 'domain')).toEqual(expected2)
+            expect(await index.suggest('tet', 'domain')).not.toEqual(expected2)
+        })
+
+        test('tags suggest', async () => {
+            const expected1 = ['quality']
+            expect(await index.suggest('q', 'tag')).toEqual(expected1)
+            expect(await index.suggest('qu', 'tag')).toEqual(expected1)
+            expect(await index.suggest('quq', 'tag')).not.toEqual(expected1)
+
+            const expected2 = ['good']
+            expect(await index.suggest('g', 'tag')).toEqual(expected2)
+            expect(await index.suggest('go', 'tag')).toEqual(expected2)
+            expect(await index.suggest('gog', 'tag')).not.toEqual(expected2)
+        })
+
+        test('blank search', async () => {
+            const { docs } = await search()
+
+            // All docs, latest first
+            expect(docs.length).toBe(3)
+            expect(docs[0]).toEqual([PAGE_ID_3, VISIT_3])
+            expect(docs[1]).toEqual([PAGE_ID_2, VISIT_2])
+            expect(docs[2]).toEqual([PAGE_ID_1, VISIT_1])
+        })
+
+        test('tags search', async () => {
+            const runChecks = docs => {
+                expect(docs.length).toBe(2)
+                expect(docs[0]).toEqual([PAGE_ID_3, VISIT_3])
+                expect(docs[1]).toEqual([PAGE_ID_2, VISIT_2])
+            }
+
+            // Single tag
+            const { docs: qualityDocs } = await search({ tags: ['quality'] })
+            runChecks(qualityDocs)
+
+            // Multi tag
+            const { docs: multiDocs } = await search({
+                tags: ['quality', 'good'],
+            })
+            runChecks(multiDocs) // Same checks should pass as both contain these tags
+        })
+
+        test('bookmarks search', async () => {
+            const { docs } = await search({ showOnlyBookmarks: true })
+
+            // We only have a single bookmark
+            expect(docs.length).toBe(1)
+            expect(docs[0]).toEqual([PAGE_ID_2, BOOKMARK_1])
+        })
+    })
+
+    describe('read-write ops', () => {
+        // These tests will change the index data, so reset each time to avoid side-effects from other tests
+        beforeEach(resetTestData)
+
+        test('page adding affects search', async () => {
+            const tmpVisit = Date.now()
+            // Insert a tmp page
+            await index.addPage({
+                pageDoc: TEST_PAGE_4,
+                visits: [tmpVisit],
+            })
+
+            // Blank search to get all test data + new latest doc
+            const { docs } = await search()
+
+            // First result should be the new page
+            expect(docs[0]).toEqual([PAGE_ID_4, tmpVisit])
+            expect(docs.length).toBe(4)
+
+            // Expects from prev test should no longer pass
+            expect(docs.length).not.toBe(3)
+            expect(docs[0]).not.toEqual([PAGE_ID_3, VISIT_3])
+            expect(docs[1]).not.toEqual([PAGE_ID_2, VISIT_2])
+            expect(docs[2]).not.toEqual([PAGE_ID_1, VISIT_1])
+        })
+
+        test('visit adding affects search', async () => {
+            const { docs: before } = await search()
+
+            expect(before.length).toBe(3)
+            expect(before[0]).toEqual([PAGE_ID_3, VISIT_3])
+
+            const newVisit = Date.now()
+            await index.addVisit(TEST_PAGE_2.url, newVisit)
+
+            const { docs: after } = await search()
+
+            expect(after.length).toBe(3)
+            // First doc should now be page2, as we added new visit for now
+            expect(after[0]).toEqual([PAGE_ID_2, newVisit])
+        })
+
+        test('page deletion affects search', async () => {
+            const { docs: before } = await search()
+
+            // Page 2 should be the second most recent
+            expect(before.length).toBe(3)
+            expect(before).toEqual(
+                expect.arrayContaining([[PAGE_ID_2, VISIT_2]]),
+            )
+
+            // so delete it
+            await index.delPages([TEST_PAGE_2.url])
+
+            const { docs: after } = await search()
+
+            // Page 2 should now be excluded from blank search results
+            expect(after.length).toBe(2)
+            expect(after).not.toEqual(
+                expect.arrayContaining([[PAGE_ID_2, VISIT_2]]),
+            )
+        })
+
+        test('tag adding affects search', async () => {
+            const { docs: before } = await search({ tags: ['quality'] })
+            expect(before.length).toBe(2)
+            expect(before).not.toEqual(
+                expect.arrayContaining([[PAGE_ID_1, VISIT_1]]),
+            )
+
+            // This page doesn't have any tags; 'quality' tag has 2 other pages
+            await index.addTag(TEST_PAGE_1.url, 'quality')
+
+            const { docs: after } = await search({ tags: ['quality'] })
+            expect(after.length).toBe(3)
+            expect(after).toEqual(
+                expect.arrayContaining([[PAGE_ID_1, VISIT_1]]),
+            )
+        })
+
+        test('tag deleting affects search', async () => {
+            const { docs: before } = await search({ tags: ['quality'] })
+            expect(before.length).toBe(2)
+            expect(before).toEqual(
+                expect.arrayContaining([[PAGE_ID_2, VISIT_2]]),
+            )
+
+            await index.delTag(TEST_PAGE_2.url, 'quality')
+
+            const { docs: after } = await search({ tags: ['quality'] })
+            expect(after.length).toBe(1)
+            expect(after).not.toEqual(
+                expect.arrayContaining([[PAGE_ID_2, VISIT_2]]),
+            )
+        })
+
+        test('bookmark adding affects search', async () => {
+            const tmpBm = Date.now()
+            const { docs: before } = await search({ showOnlyBookmarks: true })
+
+            // Base test data expectation
+            expect(before.length).toBe(1)
+            expect(before).toEqual(
+                expect.arrayContaining([[PAGE_ID_2, BOOKMARK_1]]),
+            ) // Base test data expectation
+
+            // Add bm to 3rd test page
+            await index.addBookmark({ url: TEST_PAGE_1.url, timestamp: tmpBm })
+            const { docs } = await search({ showOnlyBookmarks: true })
+
+            expect(docs.length).toBe(2)
+            // Latest result should be from the recent bookmark event
+            expect(docs[0]).toEqual([PAGE_ID_1, tmpBm])
+            // Second-latest result should be our orig test bookmark data (latest before)
+            expect(docs[1]).toEqual([PAGE_ID_2, BOOKMARK_1])
+        })
+
+        test('bookmark deleting affects search', async () => {
+            const { docs: before } = await search({ showOnlyBookmarks: true })
+
+            // We only have a single bookmark
+            expect(before.length).toBe(1)
+            expect(before[0]).toEqual([PAGE_ID_2, BOOKMARK_1])
+
+            // Add bm to 3rd test page
+            await index.delBookmark({ url: TEST_PAGE_2.url })
+
+            const { docs: after } = await search({ showOnlyBookmarks: true })
+            expect(after.length).toBe(0) // Bye
+        })
+
+        test('page terms adding affects search', async () => {
+            const query = 'rerun tests changed files'
+            const { docs: before } = await search({ query })
+            expect(before.length).toBe(0)
+
+            await index.addPageTerms({
+                pageDoc: {
+                    ...TEST_PAGE_3,
+                    content: {
+                        ...TEST_PAGE_3.content,
+                        fullText:
+                            'Watch files for changes and rerun tests related to changed files',
+                    },
+                },
+            })
+
+            const { docs: after } = await search({ query })
+            expect(after.length).toBe(1)
+        })
+
+        test('delete pages by domain', async () => {
+            const { docs: existingDocs } = await search({
+                domains: ['test.com'],
+            })
+            expect(existingDocs.length).toBe(1)
+
+            await index.delPagesByDomain('test.com')
+
+            const { docs: deletedDocs } = await search({
+                domains: ['test.com'],
+            })
+            expect(deletedDocs.length).toBe(0)
+        })
+
+        test('delete pages by pattern', async () => {
+            const { docs: existingDocs } = await search({
+                domains: ['lorem.com'],
+            })
+            expect(existingDocs.length).toBe(2)
+
+            await index.delPagesByPattern(/lorem/i)
+
+            const { docs: deletedDocs } = await search({
+                domains: ['lorem.com'],
+            })
+            expect(deletedDocs.length).toBe(0)
+        })
+    })
+}
+
+describe('Old search index integration', runSuite(true))
+describe('New search index integration', runSuite(false))

@@ -1,3 +1,4 @@
+import 'babel-polyfill'
 import fs from 'fs'
 import gulp from 'gulp'
 import zip from 'gulp-zip'

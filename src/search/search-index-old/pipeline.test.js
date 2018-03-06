@@ -20,7 +20,6 @@ describe('Search index pipeline', () => {
     test('process a document', async () => {
         const result = await pipeline({
             pageDoc: {
-                _id: 'test-id-1',
                 url: 'https://www.test.com/test',
                 content: {
                     fullText: 'the wild fox jumped over the hairy red hen',
@@ -31,23 +30,24 @@ describe('Search index pipeline', () => {
             visits: ['12345'],
             rejectNoContent: true,
         })
-        expect(result).toEqual({
-            id: 'test-id-1',
-            terms: new Set([
-                'term/wild',
-                'term/fox',
-                'term/jumped',
-                'term/hairy',
-                'term/red',
-                'term/hen',
-            ]),
-            urlTerms: new Set(['url/test']),
-            titleTerms: new Set(['title/test', 'title/page']),
-            domain: 'domain/test.com',
-            visits: new Set(['visit/12345']),
-            bookmarks: new Set(),
-            tags: new Set(),
-        })
+        expect(result).toEqual(
+            expect.objectContaining({
+                terms: new Set([
+                    'term/wild',
+                    'term/fox',
+                    'term/jumped',
+                    'term/hairy',
+                    'term/red',
+                    'term/hen',
+                ]),
+                urlTerms: new Set(['url/test']),
+                titleTerms: new Set(['title/test', 'title/page']),
+                domain: 'domain/test.com',
+                visits: new Set(['visit/12345']),
+                bookmarks: new Set(),
+                tags: new Set(),
+            }),
+        )
     })
 
     test('extract terms from a document', () => {

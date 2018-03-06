@@ -59,7 +59,12 @@ export async function groupLatestEventsByUrl(
     if (!bookmarks) {
         await db.visits
             .where('[time+url]')
-            .between([startDate, Storage.MIN_STR], [endDate, Storage.MAX_STR])
+            .between(
+                [startDate, Storage.MIN_STR],
+                [endDate, Storage.MAX_STR],
+                true,
+                true,
+            )
             // Go through visits by most recent
             .reverse()
             // Stop iterating once we have enough
@@ -80,7 +85,7 @@ export async function groupLatestEventsByUrl(
     const latestBookmarks = new Map()
     await db.bookmarks
         .where('time')
-        .between(startDate, endDate)
+        .between(startDate, endDate, true, true)
         .reverse()
         .until(() => latestBookmarks.size >= skip + limit)
         .each(({ time, url }) => {
