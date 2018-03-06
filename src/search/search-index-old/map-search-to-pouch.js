@@ -1,6 +1,9 @@
 import reduce from 'lodash/fp/reduce'
 
-import db, { bulkGetResultsToArray } from '../../pouchdb'
+import db, {
+    bulkGetResultsToArray,
+    getAttachmentAsDataUrl,
+} from '../../pouchdb'
 import { removeKeyType } from './util'
 
 /**
@@ -62,7 +65,7 @@ const createResultsMap = searchParams =>
     reduce(
         (acc, result) =>
             acc.set(result.id, {
-                timestamp: getLatestTime(result.document, searchParams),
+                timestamp: +getLatestTime(result.document, searchParams),
                 score: result.score,
                 hasBookmark: result.document.bookmarks.size > 0,
                 tags: [...(result.document.tags || [])],
@@ -72,6 +75,23 @@ const createResultsMap = searchParams =>
 
 const sortByScore = resultsMap => (docA, docB) =>
     resultsMap.get(docB._id).score - resultsMap.get(docA._id).score
+
+async function processAttachments(doc) {
+    const res = {}
+    if (doc._attachments.favIcon) {
+        res.favIcon = await getAttachmentAsDataUrl({
+            doc,
+            attachmentId: 'favIcon',
+        })
+    }
+    if (doc._attachments.screenshot) {
+        res.screenshot = await getAttachmentAsDataUrl({
+            doc,
+            attachmentId: 'screenshot',
+        })
+    }
+    return res
+}
 
 /**
 * Performs all the messy logic needed to resolve search-index results against our PouchDB model.
@@ -95,12 +115,15 @@ export default async function mapResultsToPouchDocs(results, searchParams) {
     const pageDocs = bulkGetResultsToArray(bulkRes)
 
     // Augment the page docs with meta display info derived from search results
-    const augmentedPageDocs = pageDocs.map(doc => ({
-        ...doc,
-        hasBookmark: resultsMap.get(doc._id).hasBookmark,
-        displayTime: resultsMap.get(doc._id).timestamp,
-        tags: resultsMap.get(doc._id).tags.map(removeKeyType),
-    }))
+    const augmentedPageDocs = await Promise.all(
+        pageDocs.map(async ({ _attachments, ...doc }) => ({
+            ...doc,
+            ...(await processAttachments({ _attachments, ...doc })),
+            hasBookmark: resultsMap.get(doc._id).hasBookmark,
+            displayTime: resultsMap.get(doc._id).timestamp,
+            tags: resultsMap.get(doc._id).tags.map(removeKeyType),
+        })),
+    )
 
     // Ensure the original results order is maintained
     return augmentedPageDocs.sort(sortByScore(resultsMap))
