@@ -106,7 +106,10 @@ browser.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
                 tab.active,
                 changeInfo.url,
             )
-            if (oldTab.activeTime > fauxVisitThreshold) {
+            if (
+                oldTab.url !== changeInfo.url &&
+                oldTab.activeTime > fauxVisitThreshold
+            ) {
                 // Send off request for updating that prev. visit's tab state, if active long enough
                 updateVisitInteractionData(oldTab)
             }

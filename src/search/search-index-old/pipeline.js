@@ -1,9 +1,21 @@
 import normalizeUrl from 'normalize-url'
+import { dataURLToBlob } from 'blob-util'
 
+import db from 'src/pouchdb'
+import updateDoc, { setAttachment } from 'src/util/pouchdb-update-doc'
+import { generatePageDocId } from 'src/page-storage'
 import transformPageText from 'src/util/transform-page-text'
 import { convertMetaDocId } from 'src/activity-logger'
 import { DEFAULT_TERM_SEPARATOR, extractContent } from '../util'
 import { keyGen } from './util'
+
+async function handleAttachment(pageId, attachment, dataUrl) {
+    if (dataUrl == null) {
+        return
+    }
+    const blob = await dataURLToBlob(dataUrl)
+    await setAttachment(db, pageId, attachment, blob)
+}
 
 // Simply extracts the timestamp component out the ID of a visit or bookmark doc,
 //  which is the only data we want at the moment.
@@ -85,14 +97,16 @@ export function extractTerms(text, key) {
  * @param {IndexRequest} req Page doc + assoc. meta event docs.
  * @returns {IndexLookupDoc} Doc structured for indexing.
  */
-export default function pipeline({
-    pageDoc: { _id: id, content = {}, url },
+export default async function pipeline({
+    pageDoc: { content = {}, url, favIconURI, screenshotURI },
     visits = [],
     bookmarkDocs = [],
     rejectNoContent = true,
+    updatePouchTextOnly = false,
 }) {
     // First apply transformations to the URL
     const { pathname, hostname } = transformUrl(url)
+    const id = generatePageDocId({ url })
 
     // Throw error if no searchable content; we don't really want to index these (for now) so allow callers
     //  to handle (probably by ignoring)
@@ -100,7 +114,35 @@ export default function pipeline({
         rejectNoContent &&
         (content == null || !content.fullText || !content.fullText.length)
     ) {
-        return Promise.reject(new Error('Page has no searchable content'))
+        throw new Error('Page has no searchable content')
+    }
+
+    // Ensure a pouch page doc exists for current page
+    let newPage = false
+    try {
+        await db.get(id)
+    } catch (err) {
+        if (err.status === 404) {
+            newPage = true
+            await db.put({ _id: id, url, title: content.title, content })
+        } else {
+            throw err
+        }
+    }
+
+    if (favIconURI) {
+        await handleAttachment(id, 'favIcon', favIconURI)
+    }
+    if (screenshotURI) {
+        await handleAttachment(id, 'screenshot', screenshotURI)
+    }
+
+    // Update existing with new data if doesn't yet exist
+    if (!newPage) {
+        await updateDoc(db, id, doc => ({
+            ...doc,
+            content: { ...doc.content, ...content },
+        }))
     }
 
     // Extract all terms out of processed content
@@ -111,7 +153,7 @@ export default function pipeline({
     // Create timestamps to be indexed as Sets
     const bookmarks = bookmarkDocs.map(transformMetaDoc)
 
-    return Promise.resolve({
+    return {
         id,
         terms,
         urlTerms,
@@ -120,5 +162,5 @@ export default function pipeline({
         visits: new Set(visits.map(keyGen.visit)),
         bookmarks: new Set(bookmarks.map(keyGen.bookmark)),
         tags: new Set(),
-    })
+    }
 }

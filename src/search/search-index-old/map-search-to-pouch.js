@@ -78,6 +78,11 @@ const sortByScore = resultsMap => (docA, docB) =>
 
 async function processAttachments(doc) {
     const res = {}
+
+    if (!doc._attachments) {
+        return res
+    }
+
     if (doc._attachments.favIcon) {
         res.favIcon = await getAttachmentAsDataUrl({
             doc,
