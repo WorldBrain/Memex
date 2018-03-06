@@ -1,5 +1,6 @@
-export type ImportTag = string
-export type ImportBookmark = number
+export type ExportedTag = string
+export type ExportedBookmark = number
+export type ExportedDataURL = string
 
 export interface ExportedPageVisit {
   timestamp: number
@@ -22,7 +23,8 @@ export interface ExportedPage {
   url: string
   content: ExportedPageContent
   visits: ExportedPageVisit[]
-  tags: ImportTag[]
-  bookmark?: ImportBookmark
-  screenshot?: string // data URL
+  tags: ExportedTag[]
+  bookmark?: ExportedBookmark
+  screenshot?: ExportedDataURL
+  favIcon?: ExportedDataURL
 }
