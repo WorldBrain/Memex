@@ -77,6 +77,19 @@ describe('Old search index integration', () => {
         await index.addTag('https://www.lorem.com/test1', 'quality')
     })
 
+    test('fetch page by URL', async () => {
+        const runChecks = page => {
+            expect(page).toBeDefined()
+            expect(page).not.toBeNull()
+            expect(page.hasBookmark).toBe(false)
+            expect(page.latest).toEqual(visit1.toString())
+            expect(page.tags).toEqual(['good', 'quality'])
+        }
+
+        runChecks(await index.getPage('https://www.test.com/test'))
+        runChecks(await index.getPage('test.com/test')) // Should get normalized the same
+    })
+
     test('single term search', async () => {
         const { docs } = await search({ query: 'fox' })
 
@@ -125,15 +138,6 @@ describe('Old search index integration', () => {
         expect(docsC[1].document).toEqual(expect.objectContaining(expected3))
     })
 
-    test('bookmarks search', async () => {
-        const { docs } = await search({ showOnlyBookmarks: true })
-
-        // We only have a single bookmark
-        expect(docs.length).toBe(1)
-        expect(docs[0].document).toEqual(expect.objectContaining(expected2))
-        expect(docs[0].score).toEqual(bookmark1.toString())
-    })
-
     test('paginated search', async () => {
         // Blank search but skipping the first 2 most-recent and only returning the 3rd
         const { docs: docsA } = await search({ skip: 2, limit: 2 })
@@ -168,7 +172,17 @@ describe('Old search index integration', () => {
         expect(testDocs[2].document).toEqual(expect.objectContaining(expected3))
     })
 
-    test('tags search', async () => {
+    async function testBlankSearch() {
+        const { docs } = await search()
+
+        // All docs, latest first
+        expect(docs.length).toBe(3)
+        expect(docs[0].document).toEqual(expect.objectContaining(expected1))
+        expect(docs[1].document).toEqual(expect.objectContaining(expected2))
+        expect(docs[2].document).toEqual(expect.objectContaining(expected3))
+    }
+
+    async function testTagsSearch() {
         const runChecks = docs => {
             expect(docs.length).toBe(2)
             expect(docs[0].document).toEqual(expect.objectContaining(expected1))
@@ -180,13 +194,29 @@ describe('Old search index integration', () => {
         runChecks(qualityDocs)
 
         // Multi tag
-        const { docs: multiDocs } = await search({ tags: ['quality', 'good'] })
+        const { docs: multiDocs } = await search({
+            tags: ['quality', 'good'],
+        })
         runChecks(multiDocs) // Same checks should pass as both contain these tags
-    })
+    }
+
+    async function testBookmarkSearch() {
+        const { docs } = await search({ showOnlyBookmarks: true })
+
+        // We only have a single bookmark
+        expect(docs.length).toBe(1)
+        expect(docs[0].document).toEqual(expect.objectContaining(expected2))
+        expect(docs[0].score).toEqual(bookmark1.toString())
+    }
+
+    test('blank search', testBlankSearch)
+    test('tags search', testTagsSearch)
+    test('bookmarks search', testBookmarkSearch)
 
     // Meant to be run in seq -> verify search, change data, search again
     // Not sure if this is the best way to do?
     describe('mutation tests', () => {
+        const tmpBm = Date.now()
         const tmpVisit = Date.now()
         const tmpPage = {
             ...input1.pageDoc,
@@ -196,19 +226,7 @@ describe('Old search index integration', () => {
             id: generatePageDocId({ url: tmpPage.url }),
         }
 
-        async function testBlankSearch() {
-            const { docs } = await search()
-
-            // All docs, latest first
-            expect(docs.length).toBe(3)
-            expect(docs[0].document).toEqual(expect.objectContaining(expected1))
-            expect(docs[1].document).toEqual(expect.objectContaining(expected2))
-            expect(docs[2].document).toEqual(expect.objectContaining(expected3))
-        }
-
-        test('blank search', testBlankSearch)
-
-        test('insertion affects search', async () => {
+        test('page adding affects search', async () => {
             // Insert a tmp page
             await index.addPage({
                 pageDoc: tmpPage,
@@ -223,6 +241,7 @@ describe('Old search index integration', () => {
                 expect.objectContaining(tmpExpected),
             )
             expect(docs.length).toBe(4)
+            expect(docs[0].score).toEqual(tmpVisit.toString())
 
             // Expects from prev test should no longer pass
             expect(docs.length).not.toBe(3)
@@ -237,10 +256,106 @@ describe('Old search index integration', () => {
             )
         })
 
-        test('deletion affects search', async () => {
+        test('visit adding affects search', async () => {
+            const visit = Date.now()
+            await index.addVisit(tmpPage.url, visit)
+
+            // Blank search to get all test data + new latest doc
+            const { docs } = await search()
+
+            // These should be the same
+            expect(docs[0].document).toEqual(
+                expect.objectContaining(tmpExpected),
+            )
+            expect(docs.length).toBe(4)
+
+            // However the score should have changed
+            expect(docs[0].score).not.toEqual(tmpVisit.toString())
+            expect(docs[0].score).toEqual(visit.toString())
+        })
+
+        test('page deletion affects search', async () => {
             // Delete tmp page added from prev test then make sure same blank search test passes again
             await index.delPages([tmpPage.url])
             await testBlankSearch()
         })
+
+        test('tag adding affects search', async () => {
+            // This page doesn't have any tags; 'quality' tag has 2 other pages
+            await index.addTag('https://www.lorem.com/test2', 'quality')
+
+            const { docs } = await search({ tags: ['quality'] })
+            expect(docs.length).not.toBe(2) // Base test data expectation
+            expect(docs.length).toBe(3)
+            expect(docs[2].document).toEqual(expect.objectContaining(expected3))
+        })
+
+        test('tag deleting affects search', async () => {
+            await index.delTag('https://www.lorem.com/test2', 'quality')
+            await testTagsSearch() // Should once again pass as we are now at original data state
+        })
+
+        test('bookmark adding affects search', async () => {
+            // Add bm to 3rd test page
+            await index.addBookmark({
+                url: 'https://www.lorem.com/test2',
+                timestamp: tmpBm,
+            })
+
+            const { docs } = await search({ showOnlyBookmarks: true })
+
+            expect(docs.length).not.toBe(1) // Base test data expectation
+            expect(docs.length).toBe(2)
+
+            // Latest result should be from the recent bookmark event
+            expect(docs[0].document).toEqual(expect.objectContaining(expected3))
+            expect(docs[0].score).toEqual(tmpBm.toString())
+        })
+
+        test('bookmark deleting affects search', async () => {
+            // Add bm to 3rd test page
+            await index.delBookmark({ url: 'https://www.lorem.com/test2' })
+            await testBookmarkSearch() // Base data bookmark test should now pass again
+        })
+
+        test('page terms adding affects search', async () => {
+            const query = 'rerun tests changed files'
+            const { docs: before } = await search({ query })
+            expect(before.length).toBe(0)
+
+            await index.addPageTerms({
+                pageDoc: {
+                    ...input1.pageDoc,
+                    content: {
+                        ...input1.pageDoc.content,
+                        fullText:
+                            'Watch files for changes and rerun tests related to changed files',
+                    },
+                },
+            })
+
+            const { docs: after } = await search({ query })
+            expect(after.length).toBe(1)
+        })
+    })
+
+    test('delete pages by domain', async () => {
+        const { docs: existingDocs } = await search({ domains: ['test.com'] })
+        expect(existingDocs.length).toBe(1)
+
+        await index.delPagesByDomain('test.com')
+
+        const { docs: deletedDocs } = await search({ domains: ['test.com'] })
+        expect(deletedDocs.length).toBe(0)
+    })
+
+    test('delete pages by pattern', async () => {
+        const { docs: existingDocs } = await search({ domains: ['lorem.com'] })
+        expect(existingDocs.length).toBe(2)
+
+        await index.delPagesByPattern(/lorem/i)
+
+        const { docs: deletedDocs } = await search({ domains: ['lorem.com'] })
+        expect(deletedDocs.length).toBe(0)
     })
 })
