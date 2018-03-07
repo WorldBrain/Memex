@@ -6,3 +6,4 @@ jest_0/
 *.sublime-workspace
 *.swp
 yarn-error.log
+coverage/
