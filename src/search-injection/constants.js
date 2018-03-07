@@ -23,3 +23,4 @@ export const OVERVIEW_URL = chrome.extension.getURL('/overview/overview.html')
 
 // Storage keys
 export const HIDE_RESULTS_KEY = 'HIDE_MEMEX_RESULTS'
+export const SEARCH_INJECTION_KEY = 'SEARCH_INJECTION'

@@ -25,9 +25,9 @@
 
 .title {
     /* Since google loads css after page load which
-overides the color of links, so there is a need
+overides the color of links, there is a need
 for !important */
-    color: #444 !important;
+    color: #444 !important; /* stylelint-disable-line declaration-no-important */
     font-size: 1.3em;
     text-decoration: none;
 }

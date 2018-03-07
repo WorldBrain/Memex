@@ -4,6 +4,7 @@ import Privacy from './privacy'
 import Acknowledgements from './acknowledgement/components/content'
 import Tutorial from './tutorial'
 import Statistics from './statistics'
+import SearchInjection from './search-injection'
 
 export default [
     {
@@ -35,6 +36,12 @@ export default [
         pathname: '/privacy',
         component: Privacy,
         icon: 'security',
+    },
+    {
+        name: 'Show Memex alongside Google',
+        pathname: '/search-injection',
+        component: SearchInjection,
+        icon: 'search',
     },
     {
         name: 'Acknowledgements',

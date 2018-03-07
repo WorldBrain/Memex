@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom'
 
 import Results from './components/Results'
 import * as constants from './constants'
-import { appendCss } from './utils'
+import { appendCss, getLocalStorage } from './utils'
 import { SEARCH_CONN_NAME, CMDS } from '../overview/constants'
 
 const handleRender = (id, results) => {
@@ -72,15 +72,21 @@ const search = query => {
     port.postMessage({ cmd: CMDS.SEARCH, searchParams })
 }
 
-// Get the window's current URL
-// Do a regex match of URL against Search Engine's query URLs
-// (Google for now)
-// And extract the query
-const href = window.location.href
+const init = async () => {
+    // The users setting for this feature is stored in this variable
+    // If this is false, there is no need to render the results
+    const searchInjection = await getLocalStorage(
+        constants.SEARCH_INJECTION_KEY,
+    )
 
-const gRegex = constants.SEARCH_ENGINES.google.regex
-if (href.match(gRegex) != null) {
-    const url = new URL(href)
-    const query = url.searchParams.get('q')
-    search(query)
+    // TODO: Generalize this matching process
+    const href = window.location.href
+    const gRegex = constants.SEARCH_ENGINES.google.regex
+    if (href.match(gRegex) != null && searchInjection) {
+        const url = new URL(href)
+        const query = url.searchParams.get('q')
+        search(query)
+    }
 }
+
+init()

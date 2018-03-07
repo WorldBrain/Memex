@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 
 import Dropdown from './Dropdown'
 import ResultItem from './ResultItem'
+import RemovedText from './RemovedText'
 import * as constants from '../constants'
 import { getLocalStorage, setLocalStorage } from '../utils'
 
@@ -19,11 +20,15 @@ class Results extends React.Component {
         this.seeMoreResults = this.seeMoreResults.bind(this)
         this.toggleHideResults = this.toggleHideResults.bind(this)
         this.toggleDropDown = this.toggleDropDown.bind(this)
+        this.removeResults = this.removeResults.bind(this)
+        this.undoRemove = this.undoRemove.bind(this)
     }
 
     state = {
         hideResults: false,
         dropdown: false,
+        removed: false,
+        timerRunning: false,
     }
 
     async componentDidMount() {
@@ -68,7 +73,38 @@ class Results extends React.Component {
         }))
     }
 
+    async removeResults() {
+        // Sets a timer to set the searchInjetion key to false
+        // And sets removed state to true
+        // Triggering the fade out UI to come
+        this.timer = setTimeout(async () => {
+            await setLocalStorage(constants.SEARCH_INJECTION_KEY, false)
+            this.setState({
+                timerRunning: false,
+            })
+        }, 8000)
+        this.setState({
+            removed: true,
+            timerRunning: true,
+            dropdown: false,
+        })
+    }
+
+    undoRemove() {
+        clearInterval(this.timer)
+        this.setState({
+            removed: false,
+            timerRunning: false,
+        })
+    }
+
     render() {
+        // If the timer is running, show the RemovedText component
+        if (this.state.timerRunning)
+            return <RemovedText undo={this.undoRemove} />
+
+        if (this.state.removed) return null
+
         return (
             <div className={styles.MEMEX_CONTAINER}>
                 <div className={styles.resultsText}>
@@ -82,6 +118,7 @@ class Results extends React.Component {
                         <Dropdown
                             isMinimized={this.state.hideResults}
                             minimize={this.toggleHideResults}
+                            remove={this.removeResults}
                         />
                     ) : (
                         ''
