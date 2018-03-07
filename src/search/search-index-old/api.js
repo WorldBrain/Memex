@@ -105,7 +105,7 @@ export async function getPage(url) {
     return page != null
         ? {
               loadRels: () => Promise.resolve(),
-              latest: page.latest,
+              latest: +page.latest,
               hasBookmark: page.bookmarks.size > 0,
               tags: page.tags ? [...page.tags].map(removeKeyType) : [],
           }

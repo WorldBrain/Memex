@@ -97,7 +97,7 @@ export const boostScores = (termValuesMap, boost = 0.2) =>
 export const structureSearchResult = (document, score = 1) => ({
     id: document.id,
     document,
-    score,
+    score: +score,
 })
 
 /**
