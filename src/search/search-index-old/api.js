@@ -27,7 +27,7 @@ export function hasData() {
 }
 
 export async function search({
-    query,
+    query = '',
     startDate,
     endDate,
     tags = [],
