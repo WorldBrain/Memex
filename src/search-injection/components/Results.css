@@ -20,6 +20,7 @@
 
 .logoContainer {
     margin-bottom: 10px;
+    position: relative;
 }
 
 .seeAllResults {

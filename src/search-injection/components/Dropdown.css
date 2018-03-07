@@ -1,0 +1,24 @@
+/* Dropdown */
+.dropdown {
+    padding: 10px;
+    background: white;
+    display: block;
+    position: absolute;
+    right: 15px;
+    list-style-type: none;
+    top: 20px;
+    z-index: 100;
+    box-shadow: -5px 9px 15px -5px #00000059;
+}
+
+.dropdownElement {
+    cursor: pointer;
+    font-size: 15px;
+    color: #222;
+    padding: 5px;
+}
+
+.dropdownElement:hover {
+    background: #00000024;
+    color: #333;
+}

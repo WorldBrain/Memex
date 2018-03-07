@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
+import Dropdown from './Dropdown'
 import ResultItem from './ResultItem'
 import * as constants from '../constants'
 import { getLocalStorage, setLocalStorage } from '../utils'
@@ -15,13 +16,14 @@ class Results extends React.Component {
 
     constructor(props) {
         super(props)
-
         this.seeMoreResults = this.seeMoreResults.bind(this)
         this.toggleHideResults = this.toggleHideResults.bind(this)
+        this.toggleDropDown = this.toggleDropDown.bind(this)
     }
 
     state = {
         hideResults: false,
+        dropdown: false,
     }
 
     async componentDidMount() {
@@ -50,11 +52,20 @@ class Results extends React.Component {
     }
 
     async toggleHideResults() {
+        // Toggles hideResults (minimize) state
+        // And also, sets dropdown to false
         const toggled = !this.state.hideResults
         await setLocalStorage(constants.HIDE_RESULTS_KEY, toggled)
         this.setState({
             hideResults: toggled,
+            dropdown: false,
         })
+    }
+
+    toggleDropDown() {
+        this.setState(state => ({
+            dropdown: !state.dropdown,
+        }))
     }
 
     render() {
@@ -65,8 +76,16 @@ class Results extends React.Component {
                     digital memory.
                     <button
                         className={styles.settingsButton}
-                        onClick={this.toggleHideResults}
+                        onClick={this.toggleDropDown}
                     />
+                    {this.state.dropdown ? (
+                        <Dropdown
+                            isMinimized={this.state.hideResults}
+                            minimize={this.toggleHideResults}
+                        />
+                    ) : (
+                        ''
+                    )}
                 </div>
                 <div className={styles.logoContainer}>
                     <a
