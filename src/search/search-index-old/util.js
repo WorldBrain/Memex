@@ -14,7 +14,7 @@ export const keyGen = {
     _: key => key,
 }
 
-export const removeKeyType = key =>
+export const removeKeyType = (key = '') =>
     key.replace(/^(term|title|visit|url|domain|tag|bookmark)\//, '')
 
 /**
@@ -179,6 +179,8 @@ export const reverseRangeLookup = ({ limit = Infinity, ...iteratorOpts }) =>
         const stream = index.db.createReadStream({
             ...iteratorOpts,
             reverse: true,
+            keyAsBuffer: false,
+            valueAsBuffer: false,
         })
 
         stream.on('end', () => resolve(data))
@@ -201,8 +203,6 @@ export const reverseRangeLookup = ({ limit = Infinity, ...iteratorOpts }) =>
  *  bookmark keys, respectively, for all pages indexed.
  */
 export const grabExistingKeys = (trimPrefix = true) => {
-    const trim = key => key.replace('page/', '')
-
     return new Promise(resolve => {
         let histKeys = new Set()
         let bmKeys = new Set()
@@ -220,8 +220,8 @@ export const grabExistingKeys = (trimPrefix = true) => {
             })
             .on('end', () => {
                 if (trimPrefix) {
-                    histKeys = new Set([...histKeys].map(trim))
-                    bmKeys = new Set([...bmKeys].map(trim))
+                    histKeys = new Set([...histKeys].map(removeKeyType))
+                    bmKeys = new Set([...bmKeys].map(removeKeyType))
                 }
 
                 resolve({
