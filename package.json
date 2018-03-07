@@ -100,6 +100,7 @@
     "eslint-plugin-promise": "^3.5.0",
     "eslint-plugin-react": "^7.1.0",
     "eslint-plugin-standard": "^3.0.1",
+    "fake-indexeddb": "^2.0.4",
     "gulp": "^3.9.1",
     "gulp-eslint": "^4.0.0",
     "gulp-identity": "^0.1.0",
