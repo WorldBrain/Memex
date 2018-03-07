@@ -23,7 +23,12 @@ import { paginate, applyScores } from './util'
  * @property {number} 1 Timestamp of latest event.
  */
 
-export async function search({ query, showOnlyBookmarks, ...restParams }) {
+export async function search({
+    query,
+    showOnlyBookmarks,
+    mapResultsFunc = mapResultsToDisplay,
+    ...restParams
+}) {
     // Extract query terms via QueryBuilder (may change)
     const qb = new QueryBuilder().searchTerm(query).get()
 
@@ -53,7 +58,7 @@ export async function search({ query, showOnlyBookmarks, ...restParams }) {
             console.timeEnd('TIMER - main search')
 
             console.time('TIMER - result mapping')
-            const docs = await mapResultsToDisplay(results.ids, params)
+            const docs = await mapResultsFunc(results.ids, params)
             console.timeEnd('TIMER - result mapping')
 
             return { docs, totalCount: results.totalCount }
