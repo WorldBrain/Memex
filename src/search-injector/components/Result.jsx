@@ -2,71 +2,20 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 import niceTime from 'src/util/nice-time'
-import ImgFromPouch from '../../overview/components/ImgFromPouch'
 
-// import styles from './Result.css'
-
-const styles = {
-    resultItems: {
-        padding: '1%',
-        margin: 'auto 0px',
-        boxShadow: '0 4px 20px 1px lightgray',
-        marginTop: '3px',
-        marginBottom: '3px',
-        display: 'flex',
-    },
-    displayTime: {
-        fontsize: '4px',
-        color: 'grey',
-        paddingBottom: '1px',
-        paddingTop: '1%',
-    },
-    externalUrl: {
-        textDecoration: 'none',
-    },
-    screenshotContainer: {},
-    title: {
-        paddingBottom: '1%',
-        color: '#000',
-    },
-    screenshot: {
-        maxWidth: '100%',
-        width: 'auto',
-        height: 'auto',
-    },
-}
+import styles from './Result.css'
 
 const Result = props => (
-    <li>
-        <a style={styles.externalUrl} href={props.url} target="_blank">
-            <div style={styles.resultItems}>
-                <div style={styles.screenshotContainer}>
-                    {props._attachments && props._attachments.screenshot ? (
-                        <ImgFromPouch
-                            style={styles.screenshot}
-                            doc={props}
-                            attachmentId="screenshot"
-                        />
-                    ) : (
-                        <img
-                            style={styles.screenshot}
-                            src={
-                                props.egg
-                                    ? props._attachments.src
-                                    : chrome.extension.getURL(
-                                          '/img/null-icon.png',
-                                      )
-                            }
-                        />
-                    )}
-                </div>
+    <li className={styles.wrapper}>
+        <a className={styles.anchorTag} href={props.url} target="_blank">
+            <div className={styles.resultItems}>
                 <div>
-                    <h3 style={styles.title}>
+                    <h3 className={styles.title}>
                         {' '}
                         {props.title || props.content.title}
                     </h3>
-                    <span>{props.url}</span>
-                    <div style={styles.displayTime}>
+                    <span className={styles.externalUrl}>{props.url}</span>
+                    <div className={styles.displayTime}>
                         {' '}
                         {niceTime(+props.displayTime)}{' '}
                     </div>
@@ -77,11 +26,9 @@ const Result = props => (
 )
 
 Result.propTypes = {
-    _attachments: PropTypes.object,
     displayTime: PropTypes.string.isRequired,
     url: PropTypes.string.isRequired,
     title: PropTypes.string,
-    egg: PropTypes.bool,
     content: PropTypes.object.isRequired,
 }
 

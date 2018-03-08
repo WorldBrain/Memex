@@ -57,7 +57,8 @@
     ],
     "web_accessible_resources": [
         "/lib/pdf.worker.min.js",
-        "/img/*"
+        "/img/*",
+        "/injector.css"
     ],
     "omnibox": {
         "keyword": "w"

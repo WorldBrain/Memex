@@ -1,10 +1,11 @@
 import React, { Component } from 'react'
-
-import { remoteFunction } from 'src/util/webextensionRPC'
-import { Wrapper } from 'src/common-ui/components'
-
-const fetchSearchInjection = remoteFunction('fetchSearchInjection')
-const toggleSearchInjection = remoteFunction('toggleSearchInjection')
+import { INJECTION_POSITION_KEY } from 'src/search-injector/constants'
+import {
+    toggleSearchInjection,
+    storeValue,
+    fetchSearchInjection,
+    fetchData,
+} from 'src/search-injector/utilities'
 
 class SearchInjectionContainer extends Component {
     static propTypes = {}
@@ -13,14 +14,22 @@ class SearchInjectionContainer extends Component {
         super(props)
         this.state = {
             searchInjection: true,
+            data: '',
         }
         this.handleToggle = this.handleToggle.bind(this)
+        this.handleInjectionPositionChange = this.handleInjectionPositionChange.bind(
+            this,
+        )
     }
 
     async componentWillMount() {
         const searchInjection = await fetchSearchInjection()
+        const data = await fetchData(INJECTION_POSITION_KEY)
+        console.log(data)
+
         this.setState({
             searchInjection,
+            data,
         })
     }
 
@@ -32,9 +41,19 @@ class SearchInjectionContainer extends Component {
         })
     }
 
+    async handleInjectionPositionChange(event) {
+        const { value } = event.target
+        await storeValue(INJECTION_POSITION_KEY, value)
+        const data = await fetchData(INJECTION_POSITION_KEY)
+        this.setState({
+            data,
+        })
+        console.log(data)
+    }
+
     render() {
         return (
-            <Wrapper>
+            <div>
                 <label className="switch">
                     <input
                         type="checkbox"
@@ -43,13 +62,18 @@ class SearchInjectionContainer extends Component {
                     />
                     Toggle Search Injection
                     <hr />
+                    {/* <select onChange={this.handleInjectionPositionChange}>
+                        <option value={ALONGSIDE_SEARCH_RESULT}>{ALONGSIDE_SEARCH_RESULT}</option>
+                        <option value={OVER_SEARCH_RESULT}>{OVER_SEARCH_RESULT}</option>
+                    </select> */}
+                    <hr />
                     <div>
                         This is a new feature of Memex that lets you search the
                         Memex memory and shows results side by side google(for
                         now) results.
                     </div>
                 </label>
-            </Wrapper>
+            </div>
         )
     }
 }

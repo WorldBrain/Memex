@@ -1,0 +1,122 @@
+.searchResultContainer {
+    animation: 1s ease-out 0s 1 slideInFromLeft;
+    position: relative;
+    text-decoration: none;
+    width: 40vw;
+    padding: 2%;
+    margin: 0% 10%;
+    transition: display 2s;
+    min-width: 10vh;
+}
+
+@keyframes slideInFromLeft {
+    0% {
+        transform: translateX(100%);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
+
+.results {
+    display: block;
+    transition: display 2s;
+    transition-timing-function: ease-in-out;
+}
+
+.resultsCollapsed {
+    display: none;
+}
+
+.heading {
+    font-weight: 800;
+}
+
+.showMore {
+    cursor: pointer;
+    color: #4abf9d;
+    float: left;
+    font-size: 0.9em;
+    margin-top: 4%;
+}
+
+.styleSide {
+    max-width: 30vw;
+    display: block;
+    min-height: 10vh;
+}
+
+.logo {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.logoContainer {
+    width: 26%;
+    float: right;
+    padding-top: 3%;
+}
+
+.options {
+    float: right;
+    font-size: 1.5em;
+    padding-bottom: 2%;
+}
+
+/* The container <div> - needed to position the dropdown content */
+.dropdown {
+    position: relative;
+    float: right;
+}
+
+/* Dropdown Content (Hidden by Default) */
+.dropdownContent {
+    display: none;
+    position: absolute;
+    background-color: #f1f1f1;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+    margin-right: 20%;
+    right: -10px;
+}
+
+/* Links inside the dropdown */
+.dropdownContent a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+/* Change color of dropdown links on hover */
+.dropdownContent a:hover {
+    background-color: #ddd;
+    text-decoration: none;
+}
+
+/* Show the dropdown menu on hover */
+.dropdown:hover .dropdownContent {
+    display: block;
+}
+
+.dropbtn {
+    background-color: #fff;
+    color: #000;
+    padding: 16px 0px 16px 16px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    width: 10%;
+}
+
+.settingsIcon {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.settingsIconContainer {
+    width: 26%;
+    float: right;
+}

@@ -3,9 +3,12 @@ import ReactDOM from 'react-dom'
 import App from './components/App'
 import * as constants from './constants'
 import { doSearch } from './actions'
-import { remoteFunction } from 'src/util/webextensionRPC'
-
-const fetchSearchInjection = remoteFunction('fetchSearchInjection')
+import {
+    toggleSearchInjection,
+    storeValue,
+    fetchSearchInjection,
+    fetchData,
+} from './utilities/'
 
 // Render Memex search results to the Google Search Page
 const getCmdMessageHandler = ({ cmd, ...payload }) => {
@@ -26,8 +29,12 @@ const getCmdMessageHandler = ({ cmd, ...payload }) => {
 // Match URLs
 async function matchUrl({ url = location.href }) {
     if (url.match(constants.GOOGLE_SEARCH_INJECTOR.url)) {
-        const queryParam = extractQueryParam(url)
-        handleSearch(queryParam)
+        const query = extractQueryParam(url)
+        const queryParams = {
+            limit: 4,
+            query,
+        }
+        handleSearch(queryParams)
     }
 }
 
@@ -41,13 +48,82 @@ const handleRender = results => {
     renderSearchResults(document, results)
 }
 
-// Render SEarch results
-async function renderSearchResults(doc = document, value) {
-    const viewport = doc.getElementById('before-appbar')
+async function handleHideResults() {
+    const memexSearchResults = document.getElementById('memexSearchResults')
+    ReactDOM.unmountComponentAtNode(memexSearchResults)
+    return await toggleSearchInjection()
+}
+
+async function handleInjectionPosition(position) {
+    await storeValue(constants.INJECTION_POSITION_KEY, position)
+    injectSearchResultWrapper()
+}
+
+// Handling Maximize Minimize of the results
+async function handleMaximizeMinimize(resultState) {
+    await storeValue(constants.SHOW_RESULT_STATE, resultState)
+    // injectSearchResultWrapper()
+}
+
+const renderCss = container => {
+    const link = document.createElement('LINK')
+    link.href = browser.extension.getURL('injector.css')
+    link.rel = 'stylesheet'
+    link.type = 'text/css'
+    container.prepend(link)
+}
+
+// Render Search results
+async function renderSearchResults(doc = document, value = []) {
+    let inject
+    let resultLimit
+    const { injectionPosition } = await fetchData(
+        constants.INJECTION_POSITION_KEY,
+    )
+    const { showResultState } = await fetchData(constants.SHOW_RESULT_STATE)
+
+    switch (injectionPosition) {
+        case constants.OVER_SEARCH_RESULT:
+            inject = constants.GOOGLE_SEARCH_INJECTOR.overContainer
+            resultLimit = 4
+            break
+        case constants.ALONGSIDE_SEARCH_RESULT:
+            inject = constants.GOOGLE_SEARCH_INJECTOR.alongsideContainer
+            resultLimit = 6
+            break
+        default:
+            inject = constants.GOOGLE_SEARCH_INJECTOR.alongsideContainer
+            resultLimit = 6
+    }
+
+    const viewport = doc.getElementById(inject)
+    const memexSearchResults = doc.getElementById('memexSearchResults')
+
+    if (memexSearchResults) {
+        memexSearchResults.parentNode.removeChild(memexSearchResults)
+    }
+
     const app = doc.createElement('div')
-    app.id = 'searchResults'
-    if (viewport) viewport.append(app)
-    ReactDOM.render(<App {...value} openOverview={openOverviewPage} />, app)
+    app.id = 'memexSearchResults'
+    // Append App container div
+    if (viewport) viewport.prepend(app)
+
+    // Append css
+    renderCss(viewport)
+
+    ReactDOM.render(
+        <App
+            {...value}
+            openOverview={openOverviewPage}
+            handleInjectionPosition={handleInjectionPosition}
+            injectionPosition={injectionPosition}
+            handleHideResults={handleHideResults}
+            resultLimit={resultLimit}
+            showResultState={showResultState}
+            handleMaximizeMinimize={handleMaximizeMinimize}
+        />,
+        app,
+    )
 }
 
 // Check if the feature is enabled
