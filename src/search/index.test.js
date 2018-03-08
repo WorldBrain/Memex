@@ -263,6 +263,30 @@ const runSuite = useOld => () => {
         expect(testDocs[2]).toEqual([expected3, visit3])
     })
 
+    test('domains suggest', async () => {
+        const expected1 = ['lorem.com']
+        expect(await index.suggest('l', 'domain')).toEqual(expected1)
+        expect(await index.suggest('lo', 'domain')).toEqual(expected1)
+        expect(await index.suggest('lol', 'domain')).not.toEqual(expected1)
+
+        const expected2 = ['test.com']
+        expect(await index.suggest('t', 'domain')).toEqual(expected2)
+        expect(await index.suggest('te', 'domain')).toEqual(expected2)
+        expect(await index.suggest('tet', 'domain')).not.toEqual(expected2)
+    })
+
+    test('tags suggest', async () => {
+        const expected1 = ['quality']
+        expect(await index.suggest('q', 'tag')).toEqual(expected1)
+        expect(await index.suggest('qu', 'tag')).toEqual(expected1)
+        expect(await index.suggest('quq', 'tag')).not.toEqual(expected1)
+
+        const expected2 = ['good']
+        expect(await index.suggest('g', 'tag')).toEqual(expected2)
+        expect(await index.suggest('go', 'tag')).toEqual(expected2)
+        expect(await index.suggest('gog', 'tag')).not.toEqual(expected2)
+    })
+
     async function testBlankSearch() {
         const { docs } = await search()
 
