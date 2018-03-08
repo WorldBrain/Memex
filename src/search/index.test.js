@@ -51,9 +51,12 @@ const runSuite = useOld => () => {
     const expected2 = createId(page2.url)
     const expected3 = createId(page3.url)
 
+    // Some things may be broken in old one, but no plans on fixing
+    const testOnlyNew = useOld ? test.skip : test
+
     // Bind common search params
     const search = params => {
-        // Map the old result objects to KVP array style of new results
+        // Map the old result objects to KVP [ID, score] array style of new results
         const mapResultsFunc = useOld
             ? async results => results.map(res => [res.id, res.score])
             : async results => results
@@ -129,16 +132,14 @@ const runSuite = useOld => () => {
 
         // All other data should be more recent
         expect(docsA.length).toBe(1)
-        expect(docsA[0][0]).toEqual(expected2)
-        expect(docsA[0][1]).toEqual(bookmark1)
+        expect(docsA[0]).toEqual([expected2, bookmark1])
 
         // Lower-bound
         const { docs: docsB } = await search({ startDate: visit1 })
 
         // All other data should be older
         expect(docsB.length).toBe(1)
-        expect(docsB[0][0]).toEqual(expected1)
-        expect(docsB[0][1]).toEqual(visit1)
+        expect(docsB[0]).toEqual([expected1, visit1])
 
         // Both bounds
         const { docs: docsC } = await search({
@@ -148,8 +149,89 @@ const runSuite = useOld => () => {
 
         // Should be in order of visit
         expect(docsC.length).toBe(2)
-        expect(docsC[0][0]).toEqual(expected2)
-        expect(docsC[1][0]).toEqual(expected3)
+        expect(docsC[0]).toEqual([expected2, visit2])
+        expect(docsC[1]).toEqual([expected3, visit3])
+    })
+
+    test('time-filtered + terms search', async () => {
+        const runChecks = docs => {
+            expect(docs.length).toBe(2)
+            expect(docs[0]).toEqual([expected2, visit2])
+            expect(docs[1]).toEqual([expected3, visit3])
+        }
+
+        const { docs: docsA } = await search({
+            endDate: visit2,
+            query: 'consectetur adipiscing',
+        })
+
+        expect(docsA.length).toBe(1)
+        expect(docsA[0]).toEqual([expected3, visit3])
+
+        const { docs: docsB } = await search({
+            startDate: visit3,
+            query: 'lorem ipsum',
+        })
+        runChecks(docsB)
+
+        const { docs: docsC } = await search({
+            startDate: visit3,
+            endDate: visit2,
+            query: 'lorem ipsum',
+        })
+        runChecks(docsC)
+    })
+
+    test('time-filtered + terms + tags search', async () => {
+        const { docs } = await search({
+            startDate: visit3,
+            endDate: visit2,
+            query: 'lorem ipsum',
+            tags: ['quality'],
+        })
+
+        expect(docs.length).toBe(1)
+        expect(docs[0]).toEqual([expected2, visit2])
+    })
+
+    // Score is wrong on old version; it will still have score == visit2
+    testOnlyNew('time-filtered + terms + tags + bookmarks search', async () => {
+        const { docs } = await search({
+            startDate: bookmark1,
+            endDate: visit2,
+            query: 'lorem ipsum',
+            tags: ['quality'],
+            showOnlyBookmarks: true,
+        })
+
+        expect(docs.length).toBe(1)
+        expect(docs[0]).toEqual([expected2, bookmark1])
+    })
+
+    test('time-filtered + terms + domains search', async () => {
+        const { docs } = await search({
+            startDate: visit3,
+            endDate: visit2,
+            query: 'lorem ipsum',
+            domains: ['lorem.com'],
+        })
+
+        expect(docs.length).toBe(2)
+        expect(docs[0]).toEqual([expected2, visit2])
+        expect(docs[1]).toEqual([expected3, visit3])
+    })
+
+    test('time-filtered + terms + domains + tags search', async () => {
+        const { docs } = await search({
+            startDate: visit3,
+            endDate: visit2,
+            query: 'lorem ipsum',
+            domains: ['lorem.com'],
+            tags: ['quality'],
+        })
+
+        expect(docs.length).toBe(1)
+        expect(docs[0]).toEqual([expected2, visit2])
     })
 
     test('paginated search', async () => {
@@ -157,8 +239,7 @@ const runSuite = useOld => () => {
         const { docs: docsA } = await search({ skip: 2, limit: 2 })
 
         expect(docsA.length).toBe(1)
-        expect(docsA[0][0]).toEqual(expected3)
-        expect(docsA[0][1]).toEqual(visit3)
+        expect(docsA[0]).toEqual([expected3, visit3])
 
         // Skip passed the end
         const { docs: docsB } = await search({ skip: 10 })
@@ -169,17 +250,17 @@ const runSuite = useOld => () => {
         const { docs: loremDocs } = await search({ domains: ['lorem.com'] })
 
         expect(loremDocs.length).toBe(2)
-        expect(loremDocs[0][0]).toEqual(expected2)
-        expect(loremDocs[1][0]).toEqual(expected3)
+        expect(loremDocs[0]).toEqual([expected2, visit2])
+        expect(loremDocs[1]).toEqual([expected3, visit3])
 
         // Multi-domain
         const { docs: testDocs } = await search({
             domains: ['lorem.com', 'test.com'],
         })
         expect(testDocs.length).toBe(3)
-        expect(testDocs[0][0]).toEqual(expected1)
-        expect(testDocs[1][0]).toEqual(expected2)
-        expect(testDocs[2][0]).toEqual(expected3)
+        expect(testDocs[0]).toEqual([expected1, visit1])
+        expect(testDocs[1]).toEqual([expected2, visit2])
+        expect(testDocs[2]).toEqual([expected3, visit3])
     })
 
     async function testBlankSearch() {
@@ -187,16 +268,16 @@ const runSuite = useOld => () => {
 
         // All docs, latest first
         expect(docs.length).toBe(3)
-        expect(docs[0][0]).toEqual(expected1)
-        expect(docs[1][0]).toEqual(expected2)
-        expect(docs[2][0]).toEqual(expected3)
+        expect(docs[0]).toEqual([expected1, visit1])
+        expect(docs[1]).toEqual([expected2, visit2])
+        expect(docs[2]).toEqual([expected3, visit3])
     }
 
     async function testTagsSearch() {
         const runChecks = docs => {
             expect(docs.length).toBe(2)
-            expect(docs[0][0]).toEqual(expected1)
-            expect(docs[1][0]).toEqual(expected2)
+            expect(docs[0]).toEqual([expected1, visit1])
+            expect(docs[1]).toEqual([expected2, visit2])
         }
 
         // Single tag
@@ -215,8 +296,7 @@ const runSuite = useOld => () => {
 
         // We only have a single bookmark
         expect(docs.length).toBe(1)
-        expect(docs[0][0]).toEqual(expected2)
-        expect(docs[0][1]).toEqual(bookmark1)
+        expect(docs[0]).toEqual([expected2, bookmark1])
     }
 
     test('blank search', testBlankSearch)
@@ -246,15 +326,14 @@ const runSuite = useOld => () => {
             const { docs } = await search()
 
             // First result should be the new page
-            expect(docs[0][0]).toEqual(tmpExpected)
+            expect(docs[0]).toEqual([tmpExpected, tmpVisit])
             expect(docs.length).toBe(4)
-            expect(docs[0][1]).toEqual(tmpVisit)
 
             // Expects from prev test should no longer pass
             expect(docs.length).not.toBe(3)
-            expect(docs[0][0]).not.toEqual(expected1)
-            expect(docs[1][0]).not.toEqual(expected2)
-            expect(docs[2][0]).not.toEqual(expected3)
+            expect(docs[0]).not.toEqual([expected1, visit1])
+            expect(docs[1]).not.toEqual([expected2, visit2])
+            expect(docs[2]).not.toEqual([expected3, visit3])
         })
 
         test('visit adding affects search', async () => {
@@ -304,12 +383,10 @@ const runSuite = useOld => () => {
             expect(docs.length).toBe(2)
 
             // Latest result should be from the recent bookmark event
-            expect(docs[0][0]).toEqual(expected3)
-            expect(docs[0][1]).toEqual(tmpBm)
+            expect(docs[0]).toEqual([expected3, tmpBm])
 
             // Second-latest result should be our orig test bookmark data
-            expect(docs[1][0]).toEqual(expected2)
-            expect(docs[1][1]).toEqual(bookmark1)
+            expect(docs[1]).toEqual([expected2, bookmark1])
         })
 
         test('bookmark deleting affects search', async () => {
