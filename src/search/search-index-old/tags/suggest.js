@@ -21,6 +21,7 @@ const suggestTags = (query = '', limit = 10) =>
                 lte: `${startKey}\uffff`,
                 values: false,
                 limit,
+                keyAsBuffer: false,
             })
             .on('data', tagKey => results.push(removeKeyType(tagKey)))
             .on('error', reject)

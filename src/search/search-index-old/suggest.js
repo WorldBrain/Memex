@@ -21,6 +21,7 @@ const suggest = (query = '', type, limit = 10) =>
                 lte: `${startKey}\uffff`,
                 values: false,
                 limit,
+                keyAsBuffer: false,
             })
             .on('data', key => results.push(removeKeyType(key)))
             .on('error', reject)

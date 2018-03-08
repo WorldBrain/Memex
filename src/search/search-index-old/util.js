@@ -118,6 +118,8 @@ export const termRangeLookup = (termKey, termsSet) =>
             .createReadStream({
                 gte: termKey,
                 lte: `${termKey}\uffff`,
+                keyAsBuffer: false,
+                valueAsBuffer: false,
             })
             .on('data', ({ key, value }) => {
                 // Only add current data to results if it appears in the set of terms we're looking for (else ignore)
@@ -156,7 +158,11 @@ export const rangeLookup = iteratorOpts =>
     new Promise(resolve => {
         const data = new Map()
         index.db
-            .createReadStream(iteratorOpts)
+            .createReadStream({
+                ...iteratorOpts,
+                keyAsBuffer: false,
+                valueAsBuffer: false,
+            })
             .on('data', ({ key, value }) => {
                 const { pageId } = normalizeTimestampVals(value)
                 data.set(key, pageId)
@@ -211,6 +217,8 @@ export const grabExistingKeys = (trimPrefix = true) => {
             .createReadStream({
                 gte: 'page/',
                 lte: 'page/\uffff',
+                keyAsBuffer: false,
+                valueAsBuffer: false,
             })
             .on('data', ({ key, value }) => {
                 if (value && value.bookmarks && value.bookmarks.size) {
