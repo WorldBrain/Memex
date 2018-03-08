@@ -74,9 +74,9 @@ const runSuite = useOld => () => {
         await index.addPage({ pageDoc: page3, visits: [visit3] })
 
         // Add some test tags
-        await index.addTag('https://www.test.com/test', 'good')
-        await index.addTag('https://www.test.com/test', 'quality')
-        await index.addTag('https://www.lorem.com/test1', 'quality')
+        await index.addTag(page1.url, 'good')
+        await index.addTag(page1.url, 'quality')
+        await index.addTag(page2.url, 'quality')
     })
 
     test('fetch page by URL', async () => {
@@ -91,8 +91,16 @@ const runSuite = useOld => () => {
             expect(page.latest).toEqual(visit1)
         }
 
-        runChecks(await index.getPage('https://www.test.com/test'))
+        runChecks(await index.getPage(page1.url))
         runChecks(await index.getPage('test.com/test')) // Should get normalized the same
+
+        const page = await index.getPage(page2.url)
+        await page.loadRels()
+
+        expect(page).toBeDefined()
+        expect(page).not.toBeNull()
+        expect(page.hasBookmark).toBe(true)
+        expect(page.latest).toEqual(visit2)
     })
 
     test('single term search', async () => {
@@ -273,7 +281,7 @@ const runSuite = useOld => () => {
 
         test('tag adding affects search', async () => {
             // This page doesn't have any tags; 'quality' tag has 2 other pages
-            await index.addTag('https://www.lorem.com/test2', 'quality')
+            await index.addTag(page3.url, 'quality')
 
             const { docs } = await search({ tags: ['quality'] })
             expect(docs.length).not.toBe(2) // Base test data expectation
@@ -282,16 +290,13 @@ const runSuite = useOld => () => {
         })
 
         test('tag deleting affects search', async () => {
-            await index.delTag('https://www.lorem.com/test2', 'quality')
+            await index.delTag(page3.url, 'quality')
             await testTagsSearch() // Should once again pass as we are now at original data state
         })
 
         test('bookmark adding affects search', async () => {
             // Add bm to 3rd test page
-            await index.addBookmark({
-                url: 'https://www.lorem.com/test2',
-                timestamp: tmpBm,
-            })
+            await index.addBookmark({ url: page3.url, timestamp: tmpBm })
 
             const { docs } = await search({ showOnlyBookmarks: true })
 
@@ -301,11 +306,15 @@ const runSuite = useOld => () => {
             // Latest result should be from the recent bookmark event
             expect(docs[0][0]).toEqual(expected3)
             expect(docs[0][1]).toEqual(tmpBm)
+
+            // Second-latest result should be our orig test bookmark data
+            expect(docs[1][0]).toEqual(expected2)
+            expect(docs[1][1]).toEqual(bookmark1)
         })
 
         test('bookmark deleting affects search', async () => {
             // Add bm to 3rd test page
-            await index.delBookmark({ url: 'https://www.lorem.com/test2' })
+            await index.delBookmark({ url: page3.url })
             await testBookmarkSearch() // Base data bookmark test should now pass again
         })
 
