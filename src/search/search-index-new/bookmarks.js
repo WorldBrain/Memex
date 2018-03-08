@@ -5,29 +5,29 @@ import fetchPageData from 'src/page-analysis/background/fetch-page-data'
 import pipeline from './pipeline'
 import { Page } from './models'
 
-export function addBookmark({ url, timestamp = Date.now(), tabId }) {
+export async function addBookmark({ url, timestamp = Date.now(), tabId }) {
     const normalized = normalizeUrl(url)
 
-    return db.transaction('rw', db.tables, async () => {
-        let page = await db.pages.get(normalized)
+    let page = await db.pages.get(normalized)
 
-        // No existing page for BM; need to make new via content-script if `tabId` provided
-        if (page == null) {
-            if (tabId == null) {
-                throw new Error(
-                    'Page does not exist for URL and no tabID provided to extract content:',
-                    normalized,
-                )
-            }
-
-            // TODO: handle screenshot, favicon
-            const { content } = await analysePage({ tabId })
-            const [pageDoc] = await pipeline({ pageDoc: { content, url } })
-            page = new Page(pageDoc)
+    // No existing page for BM; need to make new via content-script if `tabId` provided
+    if (page == null) {
+        if (tabId == null) {
+            throw new Error(
+                'Page does not exist for URL and no tabID provided to extract content:',
+                normalized,
+            )
         }
 
+        // TODO: handle screenshot, favicon
+        const { content } = await analysePage({ tabId })
+        const [pageDoc] = await pipeline({ pageDoc: { content, url } })
+        page = new Page(pageDoc)
+    }
+
+    return db.transaction('rw', db.tables, async () => {
         await page.loadRels()
-        page.setBookmark()
+        page.setBookmark(timestamp)
         await page.save()
     })
 }
