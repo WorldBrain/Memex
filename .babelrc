@@ -9,7 +9,11 @@
                         "last 10 Chrome versions"
                     ]
                 },
-                "include": ["es6.promise", "transform-es2015-spread"],
+                "include": [
+                    "es6.promise",
+                    "transform-es2015-spread",
+                    "es7.object.entries"
+                ],
                 "useBuiltIns": true
             }
         ],
