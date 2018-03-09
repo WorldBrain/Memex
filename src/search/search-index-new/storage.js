@@ -32,7 +32,7 @@ export default class Storage extends Dexie {
     tags
 
     constructor({ indexedDB, IDBKeyRange, dbName } = Storage.DEF_PARAMS) {
-        super(dbName, {
+        super(dbName || Storage.DEF_PARAMS.dbName, {
             indexedDB: indexedDB || window.indexedDB,
             IDBKeyRange: IDBKeyRange || window.IDBKeyRange,
         })
