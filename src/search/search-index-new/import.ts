@@ -9,6 +9,8 @@ export async function importPage(page: ExportedPage) {
     },
     visits: page.visits,
     bookmark: page.bookmark,
+    // screenshotURI: page.screenshot,
+    // favIconURI: page.favIcon,
   })
   for (const tag of page.tags) {
     await addTag(page.url, tag)

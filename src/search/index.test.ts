@@ -1,13 +1,11 @@
 /* eslint-env jest */
 
 import memdown from 'memdown'
-import indexedDB from 'fake-indexeddb'
-import IDBKeyRange from 'fake-indexeddb/lib/FDBKeyRange'
+import * as indexedDB from 'fake-indexeddb'
+import * as IDBKeyRange from 'fake-indexeddb/lib/FDBKeyRange'
 
 import * as index from './'
 import * as oldIndex from './search-index-old'
-import { exportPages as exportOldPages } from './search-index-old/export'
-import { importPage as importNewPage } from './search-index-new/import'
 import * as newIndex from './search-index-new'
 import * as DATA from './index.test.data'
 
