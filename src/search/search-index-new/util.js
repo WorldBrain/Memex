@@ -1,7 +1,16 @@
 import db from '.'
 import normalizeUrl from 'src/util/encode-url-for-id'
 
-export const getPage = url => db.pages.get(normalizeUrl(url))
+export async function getPage(url) {
+    const page = await db.pages.get(normalizeUrl(url))
+
+    if (page != null) {
+        // Force-load any related records from other tables
+        await page.loadRels()
+    }
+
+    return page
+}
 
 /**
  * Hardcoded replacement for now.

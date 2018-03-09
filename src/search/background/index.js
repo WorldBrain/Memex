@@ -32,8 +32,6 @@ async function transformPageForSending(page) {
         return null
     }
 
-    await page.loadRels()
-
     return {
         hasBookmark: page.hasBookmark,
         tags: page.tags,
