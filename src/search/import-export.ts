@@ -15,7 +15,7 @@ export interface ExportedPageContent {
   lang: string,
   title: string
   fullText: string,
-  keywords: string,
+  keywords: string[],
   description: string
 }
 
