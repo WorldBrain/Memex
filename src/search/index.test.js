@@ -495,6 +495,26 @@ const runSuite = useOld => () => {
             expect(after.length).toBe(1)
         })
 
+        test('page re-add appends new terms', async () => {
+            const { docs: before } = await search({ query: 'fox' })
+            expect(before.length).toBe(1)
+
+            // Re-add page 3, but with new data (in-ext use case is page re-visit)
+            await index.addPage({
+                pageDoc: {
+                    ...TEST_PAGE_3,
+                    content: {
+                        ...TEST_PAGE_3.content,
+                        fullText: 'a group of pigs were shocked',
+                    },
+                },
+            })
+
+            // Should still match old text not in new page data
+            const { docs: after } = await search({ query: 'fox' })
+            expect(after.length).toBe(1)
+        })
+
         test('delete pages by domain', async () => {
             const { docs: existingDocs } = await search({
                 domains: ['test.com'],
