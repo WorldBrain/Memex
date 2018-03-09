@@ -246,22 +246,34 @@ const runSuite = useOld => () => {
         expect(docsB.length).toBe(0)
     })
 
-    test('domains search', async () => {
-        const { docs: loremDocs } = await search({ domains: ['lorem.com'] })
+    const testDomains = (singleDomain, multiDomain) => async () => {
+        const { docs: loremDocs } = await search(singleDomain)
 
         expect(loremDocs.length).toBe(2)
         expect(loremDocs[0]).toEqual([expected2, visit2])
         expect(loremDocs[1]).toEqual([expected3, visit3])
 
         // Multi-domain
-        const { docs: testDocs } = await search({
-            domains: ['lorem.com', 'test.com'],
-        })
+        const { docs: testDocs } = await search(multiDomain)
+
         expect(testDocs.length).toBe(3)
         expect(testDocs[0]).toEqual([expected1, visit1])
         expect(testDocs[1]).toEqual([expected2, visit2])
         expect(testDocs[2]).toEqual([expected3, visit3])
-    })
+    }
+
+    test(
+        'domains search (query)',
+        testDomains({ query: 'lorem.com' }, { query: 'lorem.com test.com' }),
+    )
+
+    test(
+        'domains search (filter)',
+        testDomains(
+            { domains: ['lorem.com'] },
+            { domains: ['lorem.com', 'test.com'] },
+        ),
+    )
 
     test('domains suggest', async () => {
         const expected1 = ['lorem.com']
