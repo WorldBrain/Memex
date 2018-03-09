@@ -27,10 +27,14 @@ export async function search({
     query,
     showOnlyBookmarks,
     mapResultsFunc = mapResultsToDisplay,
+    domains = [],
     ...restParams
 }) {
     // Extract query terms via QueryBuilder (may change)
-    const qb = new QueryBuilder().searchTerm(query).get()
+    const qb = new QueryBuilder()
+        .searchTerm(query)
+        .filterDomains(domains)
+        .get()
 
     // Short-circuit search if bad term
     if (qb.isBadTerm) {
@@ -44,9 +48,10 @@ export async function search({
 
     // Reshape needed params; prob consolidate interface later when remove old index code
     const params = {
-        queryTerms: [...qb.query],
-        bookmarks: showOnlyBookmarks,
         ...restParams,
+        bookmarks: showOnlyBookmarks,
+        queryTerms: [...qb.query],
+        domains: [...qb.domain],
     }
 
     const { docs, totalCount } = await db.transaction(
