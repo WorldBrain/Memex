@@ -63,12 +63,12 @@ function getLatestTime({ visits, bookmarks }, searchParams) {
 */
 const createResultsMap = searchParams =>
     reduce(
-        (acc, result) =>
-            acc.set(result.id, {
-                timestamp: +getLatestTime(result.document, searchParams),
-                score: result.score,
-                hasBookmark: result.document.bookmarks.size > 0,
-                tags: [...(result.document.tags || [])],
+        (acc, [id, score, doc]) =>
+            acc.set(id, {
+                timestamp: +getLatestTime(doc, searchParams),
+                score,
+                hasBookmark: doc.bookmarks.size > 0,
+                tags: [...(doc.tags || [])],
             }),
         new Map(),
     )
@@ -113,7 +113,7 @@ export default async function mapResultsToPouchDocs(results, searchParams) {
     const resultsMap = createResultsMap(searchParams)(results)
 
     // Format IDs of docs needed to be immediately fetched from Pouch
-    const bulkGetInput = results.map(result => ({ id: result.document.id }))
+    const bulkGetInput = results.map(([id]) => ({ id }))
 
     // Perform bulk fetch for needed docs from pouch
     const bulkRes = await db.bulkGet({ docs: bulkGetInput })

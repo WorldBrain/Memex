@@ -75,18 +75,6 @@ export function boostScores(pageScoresMap, boost = 0) {
 }
 
 /**
- * Transforms an indexed document into a search result.
- *
- * @param {IndexedPageDoc} document
- * @returns {SearchResult}
- */
-export const structureSearchResult = (document, score = 1) => ({
-    id: document.id,
-    document,
-    score: +score,
-})
-
-/**
  * Performs a range lookup on a specific terms index, returning only those data
  * that appear in the Set of terms supplied in `termsSet`.
  *

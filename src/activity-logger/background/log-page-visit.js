@@ -20,8 +20,6 @@ export async function logInitPageVisit(tabId, secsSinceLastIndex = 20) {
         const existingPage = await index.getPage(tab.url)
 
         if (existingPage != null) {
-            await existingPage.loadRels()
-
             // Store just new visit if existing page has been indexed recently (`secsSinceLastIndex`)
             //  also clear scheduled content indexing
             if (
