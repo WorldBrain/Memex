@@ -92,8 +92,6 @@ const runSuite = useOld => () => {
     describe('read ops', () => {
         test('fetch page by URL', async () => {
             const runChecks = async page => {
-                await page.loadRels()
-
                 expect(page).toBeDefined()
                 expect(page).not.toBeNull()
                 expect(page.hasBookmark).toBe(false)
@@ -106,7 +104,6 @@ const runSuite = useOld => () => {
             runChecks(await index.getPage('test.com/test')) // Should get normalized the same
 
             const page = await index.getPage(TEST_PAGE_2.url)
-            await page.loadRels()
 
             expect(page).toBeDefined()
             expect(page).not.toBeNull()
