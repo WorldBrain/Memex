@@ -25,20 +25,23 @@ export function exportPages() {
         })
         const getBookmark = () => parseInt(indexDoc.bookmarks.values().next().value.substr('bookmark/'.length))
         const screenshot = await getAttachmentAsDataUrl({ doc: pouchDoc, attachmentId: 'screenshot' })
-        //   const page: ExportedPage = {
-        //     url: pouchDoc.url,
-        //     content: {
-        //       lang: pouchDoc.content.lang,
-        //       title: pouchDoc.content.title,
-        //       fullText: pouchDoc.content.fullText,
-        //       keywords: pouchDoc.content.keywords,
-        //       description: pouchDoc.content.description
-        //     },
-        //     visits: Array.from(indexDoc.visits).map(getVisit),
-        //     tags: Array.from(indexDoc.tags).map((tag: string) => tag.substr('tag/'.length)),
-        //     bookmark: indexDoc.bookmarks.size ? getBookmark() : null
-        //   }
-        //   this.push(page)
+        const favIcon = await getAttachmentAsDataUrl({ doc: pouchDoc, attachmentId: 'favicon' })
+        const page: ExportedPage = {
+          url: pouchDoc.url,
+          content: {
+            lang: pouchDoc.content.lang,
+            title: pouchDoc.content.title,
+            fullText: pouchDoc.content.fullText,
+            keywords: pouchDoc.content.keywords,
+            description: pouchDoc.content.description
+          },
+          visits: Array.from(indexDoc.visits).map(getVisit),
+          tags: Array.from(indexDoc.tags).map((tag: string) => tag.substr('tag/'.length)),
+          bookmark: indexDoc.bookmarks.size ? getBookmark() : null,
+          screenshot,
+          favIcon,
+        }
+        this.push(page)
 
         cb()
       })
