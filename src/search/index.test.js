@@ -62,6 +62,13 @@ async function resetTestData(dbName = 'test') {
     await insertTestData()
 }
 
+// Bind projecting-out just ID and score from results to search
+const search = params =>
+    index.search({
+        mapResultsFunc: res => res.map(([id, score]) => [id, score]),
+        ...params,
+    })
+
 // Runs the same tests for either the new or old index
 const runSuite = useOld => () => {
     // Old model uses page IDs (derived from URL), new model simply uses URL
@@ -72,16 +79,6 @@ const runSuite = useOld => () => {
 
     // Some things may be broken in old one, but no plans on fixing
     const testOnlyNew = useOld ? test.skip : test
-
-    // Bind common search params
-    const search = params => {
-        // Map the old result objects to KVP [ID, score] array style of new results
-        const mapResultsFunc = useOld
-            ? async results => results.map(res => [res.id, res.score])
-            : async results => results
-
-        return index.search({ mapResultsFunc, ...params })
-    }
 
     // Set what index to use for tests + initialize data
     beforeAll(async () => {

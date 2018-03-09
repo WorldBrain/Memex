@@ -6,7 +6,6 @@ import {
 } from 'src/util/map-set-helpers'
 import {
     boostScores,
-    structureSearchResult,
     initLookupByKeys,
     rangeLookup,
     reverseRangeLookup,
@@ -17,7 +16,7 @@ import { indexQueue } from '.'
 
 const lookupByKeys = initLookupByKeys()
 
-const compareByScore = (a, b) => b.score - a.score
+const compareByScore = ([, scoreA], [, scoreB]) => scoreB - scoreA
 
 // TODO: If only the page state changes, re-use results from last search
 const paginate = ({ skip, limit }) => results =>
@@ -222,14 +221,11 @@ const boostedUrlSearch = boostedTermSearch(keyGen.url, 0.1)
  */
 async function fillOutResultDocs(results) {
     // Do reverse index lookup
-    const pageIds = results.map(result => result.id)
+    const pageIds = results.map(([id]) => id)
     const reverseDocsMap = await lookupByKeys(pageIds)
 
     // Augment results with full reverse index docs
-    return results.map(result => ({
-        ...result,
-        document: reverseDocsMap.get(result.id),
-    }))
+    return results.map(([id, score]) => [id, score, reverseDocsMap.get(id)])
 }
 
 /**
@@ -338,9 +334,7 @@ export async function search(
     }
 
     // Structure all results as `SearchResult`s (minimal `document`)
-    let results = [...pageResultsMap].map(([id, { latest }]) =>
-        structureSearchResult({ id }, latest),
-    )
+    let results = [...pageResultsMap].map(([id, { latest }]) => [id, +latest])
 
     results = paginateResults(results)
     results = await fillOutResultDocs(results)
