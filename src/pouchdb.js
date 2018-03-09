@@ -3,7 +3,7 @@ import fromPairs from 'lodash/fp/fromPairs'
 import PouchDB from 'pouchdb-browser' // maps to pouchdb-memory in Jest, see .jest-config.json
 import PouchDBFind from 'pouchdb-find'
 import PouchDBErase from 'pouchdb-erase'
-import { blobToBase64String } from 'blob-util'
+import { blobToBase64String, arrayBufferToBlob } from 'blob-util'
 import { pageKeyPrefix, pageDocsSelector } from 'src/page-storage'
 import { visitKeyPrefix } from 'src/activity-logger'
 import { bookmarkKeyPrefix } from 'src/search/bookmarks'
@@ -75,12 +75,17 @@ export async function getAttachmentAsDataUrl({
     ) {
         return undefined
     }
-    let blob
+    let blobOrBuffer
     try {
-        blob = await db.getAttachment(docId, attachmentId)
+        blobOrBuffer = await db.getAttachment(docId, attachmentId)
     } catch (err) {
         return undefined
     }
+    const contentType = get(['_attachments', attachmentId, 'content_type'])(doc)
+    const isBrowser = typeof window !== 'undefined' && !window.process
+    const blob = isBrowser
+        ? blobOrBuffer
+        : await arrayBufferToBlob(blobOrBuffer, contentType)
     const base64 = await blobToBase64String(blob)
     const dataUrl = `data:${blob.type};base64,${base64}`
     return dataUrl
