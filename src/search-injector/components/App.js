@@ -125,8 +125,6 @@ class App extends Component {
     // This Handles Hiding
     handleHide = () => {
         // A timeout set for displaying things
-        console.log('Hide')
-
         const timer = setTimeout(() => {
             this.unrenderAll()
         }, 10000)
@@ -160,8 +158,6 @@ class App extends Component {
     renderCSS = () => this.props.injectionPosition !== OVER_SEARCH_RESULT
 
     render() {
-        console.log(this.state.settingsIcon)
-
         return (
             <div
                 className={

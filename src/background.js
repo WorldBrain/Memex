@@ -138,3 +138,12 @@ const checkForUpdate = async () => {
 }
 
 setInterval(checkForUpdate, CHECK_INTERVAL_SIZE)
+
+browser.runtime.onMessage.addListener(value => {
+    switch (value.action) {
+        case 'openOverviewPagewithParams':
+            return openOverview(value.queryParams)
+        default:
+            break
+    }
+})
