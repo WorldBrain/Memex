@@ -1,5 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import classNames from 'classnames'
 
 import Dropdown from './Dropdown'
 import ResultItem from './ResultItem'
@@ -13,6 +14,7 @@ class Results extends React.Component {
     static propTypes = {
         results: PropTypes.arrayOf(PropTypes.object).isRequired,
         len: PropTypes.number.isRequired,
+        rerender: PropTypes.func.isRequired,
     }
 
     constructor(props) {
@@ -22,6 +24,7 @@ class Results extends React.Component {
         this.toggleDropDown = this.toggleDropDown.bind(this)
         this.removeResults = this.removeResults.bind(this)
         this.undoRemove = this.undoRemove.bind(this)
+        this.changePosition = this.changePosition.bind(this)
     }
 
     state = {
@@ -29,13 +32,29 @@ class Results extends React.Component {
         dropdown: false,
         removed: false,
         timerRunning: false,
+        position: null,
     }
 
     async componentDidMount() {
-        const hideResults = await getLocalStorage(constants.HIDE_RESULTS_KEY)
+        const hideResults = await getLocalStorage(
+            constants.HIDE_RESULTS_KEY,
+            false,
+        )
+        const position = await getLocalStorage(constants.POSITION_KEY, 'above')
         this.setState({
             hideResults,
+            position,
         })
+    }
+
+    positionStyles = {
+        // Custom styling depending on the position
+        above: {
+            width: '600px',
+        },
+        side: {
+            width: '454px',
+        },
     }
 
     renderResultItems() {
@@ -98,6 +117,13 @@ class Results extends React.Component {
         })
     }
 
+    async changePosition() {
+        const currPos = this.state.position
+        const newPos = currPos === 'above' ? 'side' : 'above'
+        await setLocalStorage(constants.POSITION_KEY, newPos)
+        this.props.rerender()
+    }
+
     render() {
         // If the timer is running, show the RemovedText component
         if (this.state.timerRunning)
@@ -105,8 +131,12 @@ class Results extends React.Component {
 
         if (this.state.removed) return null
 
+        const { position } = this.state
+        console.log(position)
         return (
-            <div className={styles.MEMEX_CONTAINER}>
+            <div
+                className={classNames(styles.MEMEX_CONTAINER, styles[position])}
+            >
                 <div className={styles.resultsText}>
                     You have <span>{this.props.len}</span> results in your
                     digital memory.
@@ -119,6 +149,7 @@ class Results extends React.Component {
                             isMinimized={this.state.hideResults}
                             minimize={this.toggleHideResults}
                             remove={this.removeResults}
+                            rerender={this.changePosition}
                         />
                     ) : (
                         ''

@@ -3,15 +3,16 @@ export const appendCss = filename => {
     link.type = 'text/css'
     link.rel = 'stylesheet'
     link.href = filename
-    document.body.appendChild(link)
+    document.body.prepend(link)
 }
 
 // Generalized functions to get and store
 // variables in browser.storage
 
-export const getLocalStorage = async KEY => {
+export const getLocalStorage = async (KEY, defVal = '') => {
+    // defVal: Default value of the key to set, when value has not been set
     const value = (await browser.storage.local.get({
-        [KEY]: false,
+        [KEY]: defVal,
     }))[KEY]
 
     return value

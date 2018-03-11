@@ -6,30 +6,41 @@ import * as constants from './constants'
 import { appendCss, getLocalStorage } from './utils'
 import { SEARCH_CONN_NAME, CMDS } from '../overview/constants'
 
-const handleRender = (id, results) => {
+const handleRender = results => {
     // The actual function to render the results on screen.
 
-    const renderComponent = () => {
+    const renderComponent = async () => {
+        const position = await getLocalStorage(constants.POSITION_KEY, 'above')
+        const containerID = constants.SEARCH_ENGINES.google.container[position]
         // Gets the container using the passed id
-        const container = document.getElementById(id)
+        const container = document.getElementById(containerID)
+
+        // If re-rendering remove the already present component
+        const component = document.getElementById('memexResults')
+        if (component) component.parentNode.removeChild(component)
 
         const target = document.createElement('div')
         target.setAttribute('id', 'memexResults')
         container.insertBefore(target, container.firstChild)
 
+        // Number of results to limit
+        const limit = constants.LIMIT[position]
+
         // Render our React component on the target element
+        // Passing this same function so that it can change position
         ReactDOM.render(
             <Results
-                results={results.slice(0, constants.LIMIT)}
+                results={results.slice(0, limit)}
                 len={results.length}
+                rerender={renderComponent}
             />,
             target,
         )
-
-        // Append content_script.css to the document
-        const cssFile = browser.extension.getURL('/content_script.css')
-        appendCss(cssFile)
     }
+
+    // Append content_script.css to the document
+    const cssFile = browser.extension.getURL('/content_script.css')
+    appendCss(cssFile)
 
     // Check if the document has loaded,
     // if it has, execute the rendering function immediately
@@ -48,9 +59,8 @@ const cmdHandler = ({ cmd, ...payload }) => {
             console.log(payload)
             // Render only if there is atleast one result
             if (payload.searchResult.docs.length) {
-                const containerID = constants.SEARCH_ENGINES.google.container
                 // Pass the container id and the search docs
-                handleRender(containerID, payload.searchResult.docs)
+                handleRender(payload.searchResult.docs)
             }
             break
         case CMDS.ERROR:
@@ -82,7 +92,7 @@ const init = async () => {
     // TODO: Generalize this matching process
     const href = window.location.href
     const gRegex = constants.SEARCH_ENGINES.google.regex
-    if (href.match(gRegex) != null && searchInjection) {
+    if (searchInjection && href.match(gRegex) != null) {
         const url = new URL(href)
         const query = url.searchParams.get('q')
         search(query)

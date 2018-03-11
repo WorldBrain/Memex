@@ -8,6 +8,14 @@
     margin-bottom: 30px;
 }
 
+.above {
+    width: 600px;
+}
+
+.side {
+    width: 454px;
+}
+
 .resultsText {
     margin-bottom: 3px;
     font-size: 1.3em;
@@ -29,6 +37,7 @@
     font-size: 1em;
     display: inline-block;
     margin-top: 12px;
+    cursor: pointer;
 }
 
 .logo {

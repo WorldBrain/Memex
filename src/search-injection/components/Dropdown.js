@@ -13,7 +13,7 @@ const Dropdown = props => {
                 <li className={styles.dropdownElement} onClick={props.remove}>
                     Remove Results Forever
                 </li>
-                <li className={styles.dropdownElement}>
+                <li className={styles.dropdownElement} onClick={props.rerender}>
                     Change position of Memex
                 </li>
             </ul>
@@ -25,6 +25,7 @@ Dropdown.propTypes = {
     isMinimized: PropTypes.bool.isRequired,
     minimize: PropTypes.func.isRequired,
     remove: PropTypes.func.isRequired,
+    rerender: PropTypes.func.isRequired,
 }
 
 export default Dropdown
