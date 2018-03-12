@@ -156,6 +156,16 @@ export default class Page extends AbstractModel {
     }
 
     /**
+     * Merges some terms with the current terms state.
+     *
+     * @param {('terms'|'urlTerms'|'titleTerms')} termProp The name of which terms state to update.
+     * @param {string[]} [terms=[]] Array of terms to merge with current state.
+     */
+    _mergeTerms(termProp, terms = []) {
+        this[termProp] = [...new Set([...this[termProp], ...terms])]
+    }
+
+    /**
      * Attempt to load the blobs if they are currently undefined and there is a valid data URI
      * on the corresponding hidden field.
      * Any errors encountered in trying to resolve the URI to a Blob will result in it being unset.
@@ -232,6 +242,25 @@ export default class Page extends AbstractModel {
     save() {
         return db.transaction('rw', db.tables, async () => {
             this.loadBlobs()
+
+            // Merge any new data with any existing
+            const existing = await db.pages.get(this.url)
+            if (existing) {
+                this._mergeTerms('terms', existing.terms)
+                this._mergeTerms('urlTerms', existing.urlTerms)
+                this._mergeTerms('titleTerms', existing.titleTerms)
+
+                // Use existing Blobs if none defined
+                if (!this.favIcon && existing.favIcon) {
+                    this.favIcon = existing.favIcon
+                }
+
+                if (!this.screenshot && existing.screenshot) {
+                    this.screenshot = existing.screenshot
+                }
+            }
+
+            // Persist current page state
             await db.pages.put(this)
 
             // Insert or update all associated visits + tags
