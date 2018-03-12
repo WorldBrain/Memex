@@ -44,8 +44,8 @@ export default class Page extends AbstractModel {
         this.urlTerms = urlTerms
         this.titleTerms = titleTerms
         this.domain = domain
-        this.screenshot = undefined
-        this.favIcon = undefined
+        this.screenshotURI = screenshotURI
+        this.favIconURI = favIconURI
 
         Object.defineProperties(this, {
             [visitsProp]: {
@@ -60,14 +60,8 @@ export default class Page extends AbstractModel {
                 value: [],
                 ...AbstractModel.DEF_NON_ENUM_PROP,
             },
-            [favIcon]: {
-                value: favIconURI,
-                ...AbstractModel.DEF_NON_ENUM_PROP,
-            },
-            [screenshot]: {
-                value: screenshotURI,
-                ...AbstractModel.DEF_NON_ENUM_PROP,
-            },
+            [favIcon]: AbstractModel.DEF_NON_ENUM_PROP,
+            [screenshot]: AbstractModel.DEF_NON_ENUM_PROP,
             [latestProp]: AbstractModel.DEF_NON_ENUM_PROP,
         })
     }
@@ -99,6 +93,20 @@ export default class Page extends AbstractModel {
      */
     get shouldDelete() {
         return !this.hasBookmark && !this[visitsProp].length
+    }
+
+    set screenshotURI(input) {
+        if (input) {
+            this.screenshot = AbstractModel.dataURLToBlob(input)
+            this[screenshot] = AbstractModel.blobToDataURL(this.screenshot)
+        }
+    }
+
+    set favIconURI(url) {
+        if (url) {
+            this.favIcon = AbstractModel.dataURLToBlob(url)
+            this[favIcon] = AbstractModel.blobToDataURL(this.favIcon)
+        }
     }
 
     /**
@@ -156,6 +164,16 @@ export default class Page extends AbstractModel {
     }
 
     /**
+     * Merges some terms with the current terms state.
+     *
+     * @param {('terms'|'urlTerms'|'titleTerms')} termProp The name of which terms state to update.
+     * @param {string[]} [terms=[]] Array of terms to merge with current state.
+     */
+    _mergeTerms(termProp, terms = []) {
+        this[termProp] = [...new Set([...this[termProp], ...terms])]
+    }
+
+    /**
      * Attempt to load the blobs if they are currently undefined and there is a valid data URI
      * on the corresponding hidden field.
      * Any errors encountered in trying to resolve the URI to a Blob will result in it being unset.
@@ -170,11 +188,8 @@ export default class Page extends AbstractModel {
         }
 
         try {
-            // Got data URI but no Blob
-            if (!this.screenshot && this[screenshot]) {
-                this.screenshot = AbstractModel.dataURLToBlob(this[screenshot])
-            } else if (this.screenshot && !this[screenshot]) {
-                // Got Blob, but no data URI
+            // Got Blob, but no data URL
+            if (this.screenshot && !this[screenshot]) {
                 this[screenshot] = AbstractModel.blobToDataURL(this.screenshot)
             }
         } catch (err) {
@@ -183,9 +198,7 @@ export default class Page extends AbstractModel {
 
         try {
             // Same thing for favicon
-            if (!this.favIcon && this[favIcon]) {
-                this.favIcon = AbstractModel.dataURLToBlob(this[favIcon])
-            } else if (this.favIcon && !this[favIcon]) {
+            if (this.favIcon && !this[favIcon]) {
                 this[favIcon] = AbstractModel.blobToDataURL(this.favIcon)
             }
         } catch (err) {
@@ -232,6 +245,25 @@ export default class Page extends AbstractModel {
     save() {
         return db.transaction('rw', db.tables, async () => {
             this.loadBlobs()
+
+            // Merge any new data with any existing
+            const existing = await db.pages.get(this.url)
+            if (existing) {
+                this._mergeTerms('terms', existing.terms)
+                this._mergeTerms('urlTerms', existing.urlTerms)
+                this._mergeTerms('titleTerms', existing.titleTerms)
+
+                // Use existing Blobs if none defined
+                if (!this.favIcon && existing.favIcon) {
+                    this.favIcon = existing.favIcon
+                }
+
+                if (!this.screenshot && existing.screenshot) {
+                    this.screenshot = existing.screenshot
+                }
+            }
+
+            // Persist current page state
             await db.pages.put(this)
 
             // Insert or update all associated visits + tags

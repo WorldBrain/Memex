@@ -57,18 +57,21 @@ export async function addPage({ visits = [], bookmark, ...pipelineReq }) {
 }
 
 /**
- * @param {PageAddReq} req
+ * @param {PageAddReq} pipelineReq
  * @return {Promise<void>}
  */
-export async function addPageTerms(req) {
-    const { url, terms, text } = await pipeline(req)
-    const timerLabel = `TIMER - add #${terms.length} terms to page: "${url}"`
+export async function addPageTerms(pipelineReq) {
+    const pageData = await pipeline(pipelineReq)
+    const timerLabel = `TIMER - add #${pageData.terms
+        .length} terms to page: "${pageData.url}"`
 
     console.time(timerLabel)
     try {
-        await db.transaction('rw', db.pages, () =>
-            db.pages.update(url, { terms, text }),
-        )
+        await db.transaction('rw', db.tables, async () => {
+            const page = new Page(pageData)
+            await page.loadRels()
+            await page.save()
+        })
     } catch (error) {
         console.error(error)
     } finally {
