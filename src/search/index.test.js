@@ -8,7 +8,6 @@ import * as index from './'
 import * as oldIndex from './search-index-old'
 import * as newIndex from './search-index-new'
 
-// Test data (TODO: better way to manage this?)
 const VISIT_3 = Date.now()
 const VISIT_2 = VISIT_3 - 1000 * 60
 const VISIT_1 = VISIT_2 - 1000 * 60
@@ -251,15 +250,15 @@ const runSuite = useOld => () => {
             expect(docsB.length).toBe(0)
         })
 
-        const testDomains = (singleDomain, multiDomain) => async () => {
-            const { docs: loremDocs } = await search(singleDomain)
+        const testDomains = (singleQuery, multiQuery) => async () => {
+            const { docs: loremDocs } = await search(singleQuery)
 
             expect(loremDocs.length).toBe(2)
             expect(loremDocs[0]).toEqual([PAGE_ID_2, VISIT_2])
             expect(loremDocs[1]).toEqual([PAGE_ID_1, VISIT_1])
 
             // Multi-domain
-            const { docs: testDocs } = await search(multiDomain)
+            const { docs: testDocs } = await search(multiQuery)
 
             expect(testDocs.length).toBe(3)
             expect(testDocs[0]).toEqual([PAGE_ID_3, VISIT_3])
@@ -281,6 +280,31 @@ const runSuite = useOld => () => {
                 { domains: ['lorem.com'] },
                 { domains: ['lorem.com', 'test.com'] },
             ),
+        )
+
+        const testTags = (singleQuery, multiQuery) => async () => {
+            const runChecks = docs => {
+                expect(docs.length).toBe(2)
+                expect(docs[0]).toEqual([PAGE_ID_3, VISIT_3])
+                expect(docs[1]).toEqual([PAGE_ID_2, VISIT_2])
+            }
+
+            // Single tag
+            const { docs: qualityDocs } = await search(singleQuery)
+            runChecks(qualityDocs)
+
+            // Multi tag
+            const { docs: multiDocs } = await search(multiQuery)
+            runChecks(multiDocs) // Same checks should pass as both contain these tags
+        }
+
+        test(
+            'tags search (query)',
+            testTags({ query: '#quality' }, { query: '#quality #good' }),
+        )
+        test(
+            'tags search (filter)',
+            testTags({ tags: ['quality'] }, { tags: ['quality', 'good'] }),
         )
 
         test('domains suggest', async () => {
@@ -315,24 +339,6 @@ const runSuite = useOld => () => {
             expect(docs[0]).toEqual([PAGE_ID_3, VISIT_3])
             expect(docs[1]).toEqual([PAGE_ID_2, VISIT_2])
             expect(docs[2]).toEqual([PAGE_ID_1, VISIT_1])
-        })
-
-        test('tags search', async () => {
-            const runChecks = docs => {
-                expect(docs.length).toBe(2)
-                expect(docs[0]).toEqual([PAGE_ID_3, VISIT_3])
-                expect(docs[1]).toEqual([PAGE_ID_2, VISIT_2])
-            }
-
-            // Single tag
-            const { docs: qualityDocs } = await search({ tags: ['quality'] })
-            runChecks(qualityDocs)
-
-            // Multi tag
-            const { docs: multiDocs } = await search({
-                tags: ['quality', 'good'],
-            })
-            runChecks(multiDocs) // Same checks should pass as both contain these tags
         })
 
         test('bookmarks search', async () => {

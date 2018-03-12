@@ -28,12 +28,14 @@ export async function search({
     showOnlyBookmarks,
     mapResultsFunc = mapResultsToDisplay,
     domains = [],
+    tags = [],
     ...restParams
 }) {
     // Extract query terms via QueryBuilder (may change)
     const qb = new QueryBuilder()
         .searchTerm(query)
         .filterDomains(domains)
+        .filterTags(tags)
         .get()
 
     // Short-circuit search if bad term
@@ -52,6 +54,7 @@ export async function search({
         bookmarks: showOnlyBookmarks,
         queryTerms: [...qb.query],
         domains: [...qb.domain],
+        tags: [...qb.tags],
     }
 
     const { docs, totalCount } = await db.transaction(
