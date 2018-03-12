@@ -14,6 +14,8 @@ import * as testData from './import-export.test.data'
 
 const TEST_VISIT_1 = Date.now()
 const TEST_BOOKMARK_1 = (Date.now() + 5000)
+const TEST_SCREENSHOT = 'data:image/png;base64,notreallyascreenshot'
+const TEST_FAVICON = 'data:image/png;base64,notreallyanicon'
 
 async function insertTestPageIntoOldIndex() {
   await db.put(testData.PAGE_DOC_1)
@@ -25,8 +27,8 @@ async function insertTestPageIntoOldIndex() {
   await search.addTag(testData.PAGE_DOC_1.url, 'virus')
   await search.addTag(testData.PAGE_DOC_1.url, 'fix')
   await search.addBookmark({ url: testData.PAGE_DOC_1.url, timestamp: TEST_BOOKMARK_1, tabId: 25 })
-  await addPouchPageAttachment(testData.PAGE_DOC_1._id, 'screenshot', 'data:image/png;base64,notreallyascreenshot')
-  await addPouchPageAttachment(testData.PAGE_DOC_1._id, 'favicon', 'data:image/png;base64,notreallyanicon')
+  await addPouchPageAttachment(testData.PAGE_DOC_1._id, 'screenshot', TEST_SCREENSHOT)
+  await addPouchPageAttachment(testData.PAGE_DOC_1._id, 'favicon', TEST_FAVICON)
 }
 
 describe('Old search index', () => {
@@ -36,16 +38,16 @@ describe('Old search index', () => {
     await db.erase()
     await insertTestPageIntoOldIndex()
 
-    const stream = exportOldPages()
+    const exportChunk = exportOldPages({ chunkSize: 10 }).next
     const exported = []
-    await new Promise((resolve, reject) => {
-      stream
-        .on('data', (obj) => {
-          exported.push(obj)
-        })
-        .on('error', reject)
-        .on('end', resolve)
-    })
+    while (true) {
+      const chunk = await exportChunk()
+      if (!chunk) {
+        break
+      }
+      exported.push(...chunk)
+    }
+
     expect(exported).toEqual([<ExportedPage>{
       url: "https://www.2-spyware.com/remove-skype-virus.html",
       content: {
@@ -58,8 +60,8 @@ describe('Old search index', () => {
       visits: [{ timestamp: TEST_VISIT_1 }],
       tags: ['virus', 'fix'],
       bookmark: TEST_BOOKMARK_1,
-      screenshot: 'data:image/png;base64,notreallyascreenshot',
-      favIcon: 'data:image/png;base64,notreallyanicok=',
+      screenshot: TEST_SCREENSHOT,
+      favIcon: TEST_FAVICON,
     }])
   })
 })
@@ -87,8 +89,8 @@ describe('New search index', () => {
       visits: [{ timestamp: visit1 }],
       tags: [tag1, tag2],
       bookmark: bookmark1,
-      screenshot: 'data:image/png;base64,notreallyascreenshot',
-      favIcon: 'data:image/png;base64,notreallyanicok=',
+      screenshot: TEST_SCREENSHOT,
+      favIcon: TEST_FAVICON,
     })
     const { docs: results } = await search.search({
       query: 'interesting',
@@ -98,8 +100,8 @@ describe('New search index', () => {
       expect.objectContaining({
         url: 'https://www.test.com?q=test',
         title: 'very interesting futile title',
-        screenshot: 'data:image/png;base64,notreallyascreenshot',
-        favIcon: 'data:image/png;base64,notreallyanicok=',
+        screenshot: TEST_SCREENSHOT,
+        favIcon: TEST_FAVICON,
       })
     ])
   })
@@ -128,8 +130,9 @@ describe('Migration', () => {
       expect.objectContaining({
         url: 'https://www.2-spyware.com/remove-skype-virus.html',
         title: 'Remove Skype virus (Removal Guide) - Jan 2018 update',
-        screenshot: 'data:image/png;base64,notreallyascreenshot',
-        favIcon: 'data:image/png;base64,notreallyanicok=',
+        screenshot: TEST_SCREENSHOT,
+        favIcon: TEST_FAVICON,
       })
+    ])
   })
 })
