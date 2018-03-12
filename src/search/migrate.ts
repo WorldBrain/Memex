@@ -3,6 +3,8 @@ import { importPage as importNewPage } from './search-index-new/import'
 import { ExportedPage } from './import-export';
 
 export default function migrate() {
+  const exportChunk = exportOldPages({ chunkSize: 10 }).next
+
   return new Promise((resolve, reject) => {
     exportOldPages()
       .on('data', (page: ExportedPage) => {
