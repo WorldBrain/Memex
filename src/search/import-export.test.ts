@@ -31,7 +31,7 @@ async function insertTestPageIntoOldIndex() {
   await addPouchPageAttachment(testData.PAGE_DOC_1._id, 'favicon', TEST_FAVICON)
 }
 
-describe('Old search index', () => {
+describe.skip('Old search index', () => {
   test('Exporting data', async () => {
     search.getBackend._reset({ useOld: true })
     oldIndex.init({ levelDown: memdown() })
@@ -66,7 +66,7 @@ describe('Old search index', () => {
   })
 })
 
-describe('New search index', () => {
+describe.skip('New search index', () => {
   test('Importing data', async () => {
     search.getBackend._reset({ useOld: false })
     newIndex.init({
@@ -107,7 +107,7 @@ describe('New search index', () => {
   })
 })
 
-describe('Migration', () => {
+describe.skip('Migration', () => {
   test('simple migration', async () => {
     search.getBackend._reset({ useOld: true })
     oldIndex.init({ levelDown: memdown() })
