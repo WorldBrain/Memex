@@ -44,8 +44,8 @@ export default class Page extends AbstractModel {
         this.urlTerms = urlTerms
         this.titleTerms = titleTerms
         this.domain = domain
-        this.screenshot = undefined
-        this.favIcon = undefined
+        this.screenshotURI = screenshotURI
+        this.favIconURI = favIconURI
 
         Object.defineProperties(this, {
             [visitsProp]: {
@@ -60,14 +60,8 @@ export default class Page extends AbstractModel {
                 value: [],
                 ...AbstractModel.DEF_NON_ENUM_PROP,
             },
-            [favIcon]: {
-                value: favIconURI,
-                ...AbstractModel.DEF_NON_ENUM_PROP,
-            },
-            [screenshot]: {
-                value: screenshotURI,
-                ...AbstractModel.DEF_NON_ENUM_PROP,
-            },
+            [favIcon]: AbstractModel.DEF_NON_ENUM_PROP,
+            [screenshot]: AbstractModel.DEF_NON_ENUM_PROP,
             [latestProp]: AbstractModel.DEF_NON_ENUM_PROP,
         })
     }
@@ -99,6 +93,20 @@ export default class Page extends AbstractModel {
      */
     get shouldDelete() {
         return !this.hasBookmark && !this[visitsProp].length
+    }
+
+    set screenshotURI(input) {
+        if (input) {
+            this.screenshot = AbstractModel.dataURLToBlob(input)
+            this[screenshot] = AbstractModel.blobToDataURL(this.screenshot)
+        }
+    }
+
+    set favIconURI(url) {
+        if (url) {
+            this.favIcon = AbstractModel.dataURLToBlob(url)
+            this[favIcon] = AbstractModel.blobToDataURL(this.favIcon)
+        }
     }
 
     /**
@@ -180,11 +188,8 @@ export default class Page extends AbstractModel {
         }
 
         try {
-            // Got data URI but no Blob
-            if (!this.screenshot && this[screenshot]) {
-                this.screenshot = AbstractModel.dataURLToBlob(this[screenshot])
-            } else if (this.screenshot && !this[screenshot]) {
-                // Got Blob, but no data URI
+            // Got Blob, but no data URL
+            if (this.screenshot && !this[screenshot]) {
                 this[screenshot] = AbstractModel.blobToDataURL(this.screenshot)
             }
         } catch (err) {
@@ -193,9 +198,7 @@ export default class Page extends AbstractModel {
 
         try {
             // Same thing for favicon
-            if (!this.favIcon && this[favIcon]) {
-                this.favIcon = AbstractModel.dataURLToBlob(this[favIcon])
-            } else if (this.favIcon && !this[favIcon]) {
+            if (this.favIcon && !this[favIcon]) {
                 this[favIcon] = AbstractModel.blobToDataURL(this.favIcon)
             }
         } catch (err) {
