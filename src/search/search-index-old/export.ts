@@ -15,7 +15,7 @@ export function exportPages({ chunkSize = 10 } = {}) {
     const data = []
 
     return new Promise((resolve, reject) => {
-      index
+      (<any>index)
         .createKeyStream({
           gt: lastKey,
           lt: 'page/\uffff',
