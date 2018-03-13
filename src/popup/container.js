@@ -14,7 +14,6 @@ import HistoryPauser from './components/HistoryPauser'
 import LinkButton from './components/LinkButton'
 import SplitButton from './components/SplitButton'
 import * as constants from './constants'
-import { generatePageDocId } from 'src/page-storage'
 import UpgradeButton from './components/UpgradeButton'
 import ButtonIcon from './components/ButtonIcon'
 import styles from './components/Button.css'
@@ -28,12 +27,6 @@ class PopupContainer extends Component {
         pauseValues: [5, 10, 20, 30, 60, 120, 180, Infinity],
     }
 
-    // We only need these atts from the page we're requesting
-    static pageProjection = {
-        bookmarks: true,
-        tags: true,
-    }
-
     constructor(props) {
         super(props)
 
@@ -42,14 +35,10 @@ class PopupContainer extends Component {
         this.addToBlacklist = remoteFunction('addToBlacklist')
         this.isURLBlacklisted = remoteFunction('isURLBlacklisted')
         this.toggleLoggingPause = remoteFunction('toggleLoggingPause')
-        this.deleteDocs = remoteFunction('deleteDocsByUrl')
-        this.removeBookmarkByUrl = remoteFunction('removeBookmarkByUrl')
-        this.createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
-
-        this.onSearchChange = this.onSearchChange.bind(this)
-        this.onPauseChange = this.onPauseChange.bind(this)
-        this.onSearchEnter = this.onSearchEnter.bind(this)
-        this.onPauseConfirm = this.onPauseConfirm.bind(this)
+        this.deletePages = remoteFunction('delPages')
+        this.deletePagesByDomain = remoteFunction('delPagesByDomain')
+        this.removeBookmarkByUrl = remoteFunction('delBookmark')
+        this.createBookmarkByUrl = remoteFunction('addBookmark')
     }
 
     state = {
@@ -106,10 +95,7 @@ class PopupContainer extends Component {
     }
 
     async getInitPageData() {
-        const id = generatePageDocId({ url: this.state.url })
-        const page = await this.pageLookup(id, PopupContainer.pageProjection)
-
-        return { page }
+        return { page: await this.pageLookup(this.state.url) }
     }
 
     async getInitPauseState() {
@@ -150,7 +136,7 @@ class PopupContainer extends Component {
         }
 
         // Already a bookmark
-        if (this.state.page != null && this.state.page.bookmarks.length) {
+        if (this.state.page != null && this.state.page.hasBookmark) {
             return constants.BOOKMARK_BTN_STATE.BOOKMARK
         }
 
@@ -192,7 +178,7 @@ class PopupContainer extends Component {
         }
     }
 
-    onPauseConfirm(event) {
+    onPauseConfirm = event => {
         event.preventDefault()
         const { isPaused, pauseValue } = this.state
 
@@ -214,17 +200,17 @@ class PopupContainer extends Component {
         }))
     }
 
-    onPauseChange(event) {
+    onPauseChange = event => {
         const pauseValue = event.target.value
         this.setState(state => ({ ...state, pauseValue }))
     }
 
-    onSearchChange(event) {
+    onSearchChange = event => {
         const searchValue = event.target.value
         this.setState(state => ({ ...state, searchValue }))
     }
 
-    onSearchEnter(event) {
+    onSearchEnter = event => {
         if (event.key === 'Enter') {
             event.preventDefault()
             analytics.trackEvent({
@@ -252,10 +238,11 @@ class PopupContainer extends Component {
             action: 'Delete blacklisted pages',
         })
 
-        this.deleteDocs(
-            this.state.url,
-            this.state.domainDelete ? 'domain' : 'url',
-        )
+        if (this.state.domainDelete) {
+            this.deletePagesByDomain(this.state.url)
+        } else {
+            this.deletePages([this.state.url])
+        }
         this.resetBlacklistConfirmState()
     }
 
@@ -309,11 +296,14 @@ class PopupContainer extends Component {
 
     handleAddBookmark = () => {
         if (this.bookmarkBtnState === constants.BOOKMARK_BTN_STATE.UNBOOKMARK) {
-            this.createBookmarkByUrl(this.state.url, this.state.tabID)
+            this.createBookmarkByUrl({
+                url: this.state.url,
+                tabId: this.state.tabID,
+            })
         } else if (
             this.bookmarkBtnState === constants.BOOKMARK_BTN_STATE.BOOKMARK
         ) {
-            this.removeBookmarkByUrl(this.state.url)
+            this.removeBookmarkByUrl({ url: this.state.url })
         }
 
         updateLastActive() // Consider user active (analytics)

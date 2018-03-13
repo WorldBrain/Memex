@@ -1,17 +1,6 @@
-import { dataURLToBlob } from 'blob-util'
-
-import db from 'src/pouchdb'
-import { generatePageDocId } from 'src/page-storage'
 import fetchPageData from 'src/page-analysis/background/fetch-page-data'
-import { revisePageFields } from 'src/page-analysis'
 import { IMPORT_TYPE, DOWNLOAD_STATUS } from 'src/options/imports/constants'
 import * as index from 'src/search'
-import {
-    transformToMinimalVisitDoc,
-    transformToMinimalBookmarkDoc,
-    transformToVisitDoc,
-    transformToBookmarkDoc,
-} from 'src/imports'
 import { clearOldExtData } from 'src/imports/background'
 
 const fetchPageDataOpts = {
@@ -58,38 +47,20 @@ async function checkVisitItemTransitionTypes({ url }) {
     }
 }
 
-/**
- * @param {string?} favIconURL The data URL string for the favicon.
- * @returns {any} The `_attachments` entry to place into a PouchDB doc.
- */
-const formatFavIconAttachment = async favIconURL => {
-    if (!favIconURL) return undefined
+const getVisitTimes = ({ url }) =>
+    browser.history
+        .getVisits({ url })
+        .then(visits => visits.map(visit => Math.trunc(visit.visitTime)))
 
-    const blob = await dataURLToBlob(favIconURL)
-    return { favIcon: { content_type: blob.type, data: blob } }
-}
-
-/**
- * Create visit docs from each of the WebExt history API's VisitItems. VisitItems with
- * TransitionTypes not wanted in the context of the extension will be ignored. More info:
- *  - https://developer.chrome.com/extensions/history#transition_types
- *
- * @param {PageDoc} pageDoc Page doc to get visits and create visit docs for.
- * @returns {Array<IVisitDoc>} Array of visit docs gotten from URLs in `pageDoc`.
- */
-async function createAssociatedVisitDocs(pageDoc) {
-    const visitItems = await browser.history.getVisits({ url: pageDoc.url })
-
-    return visitItems
-        .filter(filterVisitItemByTransType)
-        .map(transformToVisitDoc(pageDoc))
-}
-
-async function createAssociatedBookmarkDoc(pageDoc, importItem) {
+async function getBookmarkTime({ browserId }) {
     // Web Ext. API should return array of BookmarkItems; grab first one
-    const [bookmarkItem] = await browser.bookmarks.get(importItem.browserId)
+    const [bookmarkItem] = await browser.bookmarks.get(browserId)
 
-    return transformToBookmarkDoc(pageDoc)(bookmarkItem)
+    if (bookmarkItem) {
+        return bookmarkItem.dateAdded || undefined
+    }
+
+    return undefined
 }
 
 export default class ImportItemProcessor {
@@ -128,17 +99,10 @@ export default class ImportItemProcessor {
         }
     }
 
-    async _storeDocs({ pageDoc, bookmarkDocs = [], visitDocs = [] }) {
+    async _storeDocs({ pageDoc, bookmark, visits = [] }) {
         this._checkCancelled()
 
-        return await Promise.all([
-            index.addPageConcurrent({
-                pageDoc,
-                visits: visitDocs.map(doc => doc.visitStart),
-                bookmarkDocs,
-            }),
-            db.bulkDocs([pageDoc, ...bookmarkDocs, ...visitDocs]),
-        ])
+        return await index.addPage({ pageDoc, visits, bookmark })
     }
 
     /**
@@ -158,18 +122,9 @@ export default class ImportItemProcessor {
         this.abortXHR = fetch.cancel
 
         this._checkCancelled()
-        const { content, favIconURI } = await fetch.run()
+        const pageContent = await fetch.run()
 
-        // Sort out all binary attachments
-        const _attachments = await formatFavIconAttachment(favIconURI)
-
-        // Construct the page doc ready for PouchDB from fetched + import item data
-        return revisePageFields({
-            _id: generatePageDocId({ url }),
-            url,
-            content,
-            _attachments,
-        })
+        return { url, ...pageContent }
     }
 
     /**
@@ -183,18 +138,14 @@ export default class ImportItemProcessor {
         await checkVisitItemTransitionTypes(importItem)
 
         const pageDoc = await this._createPageDoc(importItem)
+        const visits = await getVisitTimes(importItem)
 
-        // Fetch and create meta-docs
-        const visitDocs = await createAssociatedVisitDocs(pageDoc)
-        const bookmarkDocs = []
-
+        let bookmark
         if (importItem.type === IMPORT_TYPE.BOOKMARK) {
-            bookmarkDocs.push(
-                await createAssociatedBookmarkDoc(pageDoc, importItem),
-            )
+            bookmark = await getBookmarkTime(importItem)
         }
 
-        await this._storeDocs({ pageDoc, visitDocs, bookmarkDocs })
+        await this._storeDocs({ pageDoc, visits, bookmark })
 
         this._checkCancelled()
         // If we finally got here without an error being thrown, return the success status message + pageDoc data
@@ -205,18 +156,10 @@ export default class ImportItemProcessor {
         const pageDoc = await this._createPageDoc(importItem)
 
         // Fetch and create meta-docs
-        const visitDocs = await createAssociatedVisitDocs(pageDoc)
-        const bookmarkDocs = []
+        const visits = await getVisitTimes(importItem)
+        const bookmark = importItem.hasBookmark ? Date.now() : undefined
 
-        if (importItem.hasBookmark) {
-            bookmarkDocs.push(
-                transformToMinimalBookmarkDoc(pageDoc)(importItem),
-            )
-        } else {
-            visitDocs.push(transformToMinimalVisitDoc(pageDoc)(importItem))
-        }
-
-        await this._storeDocs({ pageDoc, visitDocs, bookmarkDocs })
+        await this._storeDocs({ pageDoc, visits, bookmark })
 
         // If all okay now, remove the old data
         await clearOldExtData(importItem)

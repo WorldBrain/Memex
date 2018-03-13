@@ -1,5 +1,5 @@
 import { generateVisitDocId } from 'src/activity-logger'
-import { generateBookmarkDocId } from 'src/bookmarks'
+import { generateBookmarkDocId } from 'src/search/bookmarks'
 
 /**
  * Converts a browser.history.VisitItem to our visit document model.

@@ -1,6 +1,18 @@
+import { dataURLToBlob } from 'blob-util'
+
 import db from 'src/pouchdb'
+import updateDoc, { setAttachment } from 'src/util/pouchdb-update-doc'
 import analysePage from 'src/page-analysis/background'
+import { revisePageFields } from 'src/page-analysis'
 import { generatePageDocId } from '.'
+
+export async function handleAttachment(pageId, attachment, dataUrl) {
+    if (dataUrl == null) {
+        return
+    }
+    const blob = await dataURLToBlob(dataUrl)
+    await setAttachment(db, pageId, attachment, blob)
+}
 
 /**
  * Creates a page stub in PouchDB (or re-uses existing doc) and attempts to fill it out with current page content
@@ -36,10 +48,25 @@ export default async function storePage({
         }
     }
 
-    // Run analysis if needed
+    // Run analysis, if needed, + all doc updates
     if (runAnalysis) {
-        pageDoc = await analysePage({ tabId, pageId: pageDoc._id })
+        const result = await analysePage({ tabId })
+
+        if (result.screenshot) {
+            await handleAttachment(pageDocId, 'screenshot', result.screenshot)
+        }
+
+        if (result.favIcon) {
+            await handleAttachment(pageDocId, 'favIcon', result.favIcon)
+        }
+
+        await updateDoc(db, pageDocId, doc => ({
+            ...doc,
+            content: { ...doc.content, ...result.content },
+        }))
     }
+
+    pageDoc = revisePageFields(await db.get(pageDocId))
 
     return pageDoc
 }

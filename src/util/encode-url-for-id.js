@@ -49,16 +49,20 @@ function applyQueryParamsRules(url) {
  * @param {any} [customNormalizationOpts={}] Custom options to pass to `normalize-url` package (will override).
  * @returns {string}
  */
-function normalize(url, customOpts) {
+export default function normalize(url, customOpts = {}) {
     let normalized = normalizeUrl(url, {
         ...normalizationOpts,
         ...customOpts,
     })
 
-    normalized = applyQueryParamsRules(normalized)
+    if (!customOpts.skipQueryRules) {
+        normalized = applyQueryParamsRules(normalized)
+    }
 
     // Remove the protocol; we don't need/want it for IDs
-    return normalized.replace(PROTOCOL_PATTERN, '')
+    return !customOpts.skipProtocolTrim
+        ? normalized.replace(PROTOCOL_PATTERN, '')
+        : normalized
 }
 
 /**
@@ -120,7 +124,7 @@ export function decode(encodedUrl, needsEscaping = true) {
  * @param {any} [customNormalizationOpts={}] Custom options to pass to `normalize-url` package (will override).
  * @returns {string} Encoded URL ready for use in PouchID.
  */
-function normalizeAndEncode(
+export function normalizeAndEncode(
     url,
     needsEscaping = true,
     customNormalizationOpts = {},
@@ -128,5 +132,3 @@ function normalizeAndEncode(
     const normalizedUrl = normalize(url, customNormalizationOpts)
     return encode(normalizedUrl, needsEscaping)
 }
-
-export default normalizeAndEncode
