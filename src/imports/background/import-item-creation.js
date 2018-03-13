@@ -234,7 +234,7 @@ export default class ImportItemCreator {
      * Handles fetching and filtering the history URLs in time period batches,
      * yielding those batches.
      */
-    async *_iterateHistItems(limit = 99999) {
+    async *_createHistItems(limit = 99999) {
         const filterByUrl = this._filterItemsByUrl(
             transformBrowserToImportItem(IMPORT_TYPE.HISTORY),
             url => this.histKeys.has(url),
@@ -258,17 +258,24 @@ export default class ImportItemCreator {
 
             const prevCount = itemCount
             const itemsMap = filterByUrl(historyItemBatch)
+
+            // If no items in given period of history, go to next period
+            if (!itemsMap.size) {
+                continue
+            }
+
             itemCount += itemsMap.size
 
             if (itemCount >= this._histLimit) {
-                yield ImportItemCreator._limitMap(
+                const data = ImportItemCreator._limitMap(
                     itemsMap,
                     this._histLimit - prevCount,
                 )
+                yield { data, type: IMPORT_TYPE.HISTORY }
                 break
             }
 
-            yield itemsMap
+            yield { data: itemsMap, type: IMPORT_TYPE.HISTORY }
         }
     }
 
@@ -308,10 +315,7 @@ export default class ImportItemCreator {
         }
 
         if (this._histLimit > 0) {
-            // Yield history items in chunks
-            for await (const histItemChunk of this._iterateHistItems()) {
-                yield { type: IMPORT_TYPE.HISTORY, data: histItemChunk }
-            }
+            yield* this._createHistItems()
         }
     }
 }
