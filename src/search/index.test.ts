@@ -325,8 +325,16 @@ const runSuite = useOld => () => {
     })
 
     describe('read-write ops', () => {
-        // These tests will change the index data, so reset each time to avoid side-effects from other tests
-        beforeEach(resetTestData)
+        let origTimeout
+
+        beforeEach(async () => {
+            // These tests will change the index data, so reset each time to avoid side-effects from other tests
+            await resetTestData()
+            origTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL
+            jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000
+        })
+
+        afterEach(() => (jasmine.DEFAULT_TIMEOUT_INTERVAL = origTimeout))
 
         test('page adding affects search', async () => {
             const tmpVisit = Date.now()
