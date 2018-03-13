@@ -73,16 +73,16 @@ class IndexDropdownContainer extends Component {
     async storeTrackEvent(isAdded) {
         const { source, hover } = this.props
 
-        internalAnalytics.storeEvent({
-            category: this.allowIndexUpdate
-                ? hover ? source : 'Popup ' + source
-                : source,
-            action: this.allowIndexUpdate
-                ? hover
-                  ? isAdded ? 'Add ' + source : 'Delete ' + source
-                  : isAdded ? 'Popup Add ' + source : 'Popup Delete ' + source
-                : 'Filter by ' + source,
-        })
+        // Only for add and remove from the popup or overview, we have already covered filter in overview
+        if (this.allowIndexUpdate) {
+            internalAnalytics.storeEvent({
+                type: hover
+                    ? isAdded ? 'add_' + source : 'delete_' + source
+                    : isAdded
+                      ? 'popup_add_' + source
+                      : 'popup_delete_' + source,
+            })
+        }
     }
 
     isPageTag = value => this.state.filters.includes(value)

@@ -1,9 +1,6 @@
-import {
-    saveToDBEventLog,
-    saveToDBEventLink,
-    saveToDBEventPage,
-} from './eventLog'
 import { searches } from './analysis'
+
+import db from './db'
 
 class Analytics {
     /**
@@ -18,9 +15,8 @@ class Analytics {
         }
         searches()
 
-        if (params.category) await saveToDBEventLog(event)
-        if (params.url) await saveToDBEventLink(event)
-        if (params.action_name) await saveToDBEventPage(event)
+        await db.eventLog.add(event)
+        console.log(await db.eventLog.toArray())
     }
 
     /**
@@ -30,29 +26,10 @@ class Analytics {
      */
     async storeEvent(eventArgs) {
         const params = {
-            category: eventArgs.category,
-            action: eventArgs.action,
+            type: eventArgs.type,
+            data: eventArgs.data || {},
         }
         await this._saveToDB(params)
-    }
-
-    /**
-     * Track user link clicks.
-     *
-     * @param {LinkTrackInfo} linkArgs
-     */
-    async storeLink({ linkType, url }) {
-        const params = linkType === 'link' ? { link: url } : { download: url }
-        return this._saveToDB({ ...params, url })
-    }
-
-    /**
-     * Track user page visits.
-     *
-     * @param {string} args.title The title of the page to track
-     */
-    async storePage({ title }) {
-        return this._saveToDB({ action_name: encodeURIComponent(title) })
     }
 }
 

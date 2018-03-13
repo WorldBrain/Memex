@@ -1,6 +1,7 @@
 import { createAction } from 'redux-act'
 
 import analytics from 'src/analytics'
+import internalAnalytics from 'src/analytics/internal'
 import { IMPORT_TYPE as TYPE, CMDS } from 'src/options/imports/constants'
 import { IMPORT_CONN_NAME } from './constants'
 import * as selectors from './selectors'
@@ -80,6 +81,10 @@ class ImportsConnHandler {
             action: 'Cancelled import',
         })
 
+        internalAnalytics.storeEvent({
+            type: 'onboarding_cancel_import',
+        })
+
         this._port.postMessage({ cmd: CMDS.CANCEL })
         this.complete()
     }
@@ -89,6 +94,10 @@ class ImportsConnHandler {
             analytics.trackEvent({
                 category: 'Onboarding',
                 action: 'Finished import',
+            })
+
+            internalAnalytics.storeEvent({
+                type: 'onboarding_finish_import',
             })
         }
         this._dispatch(setImportsDone(true))

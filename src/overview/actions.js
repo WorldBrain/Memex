@@ -1,6 +1,7 @@
 import { createAction } from 'redux-act'
 
 import analytics, { updateLastActive } from 'src/analytics'
+import internalAnalytics from 'src/analytics/internal'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { actions as filterActs, selectors as filters } from './filters'
 import * as constants from './constants'
@@ -172,11 +173,38 @@ function trackSearch(searchResult, overwrite, state) {
     analytics.trackEvent({ category: 'Search', action, name, value })
 }
 
+// Internal analytics store
+function storeSearch(searchResult, overwrite, state) {
+    let type
+    let isOther
+
+    if (searchResult.totalCount > 0) {
+        type = overwrite ? 'successful_search' : 'paginate_search'
+    } else {
+        type = 'unsuccessful_search'
+    }
+
+    if (filters.onlyBookmarks(state)) {
+        type += '_with_bm'
+        isOther = 1
+    }
+
+    if (filters.tags(state).length) {
+        type += isOther ? '_tag' : '_with_tag'
+    }
+    if (filters.domains(state).length) {
+        type += isOther ? '_domain' : '_with_domain'
+    }
+
+    internalAnalytics.storeEvent({ type: type })
+}
+
 const updateSearchResult = ({ searchResult, overwrite = false }) => (
     dispatch,
     getState,
 ) => {
     trackSearch(searchResult, overwrite, getState())
+    storeSearch(searchResult, overwrite, getState())
 
     const searchAction = overwrite ? setSearchResult : appendSearchResult
 
@@ -206,6 +234,10 @@ export const deleteDocs = () => async (dispatch, getState) => {
         action: 'Delete result',
     })
 
+    internalAnalytics.storeEvent({
+        type: 'delete_result',
+    })
+
     try {
         dispatch(hideDeleteConfirm())
 
@@ -231,6 +263,10 @@ export const toggleBookmark = (url, index) => async (dispatch, getState) => {
         action: hasBookmark
             ? 'Remove result bookmark'
             : 'Create result bookmark',
+    })
+
+    internalAnalytics.storeEvent({
+        type: hasBookmark ? 'remove_result_bookmark' : 'create_result_bookmark',
     })
 
     try {

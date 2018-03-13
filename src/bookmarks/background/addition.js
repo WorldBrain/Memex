@@ -1,6 +1,7 @@
 import { dataURLToBlob } from 'blob-util'
 
 import analytics from 'src/analytics'
+import internalAnalytics from 'src/analytics/internal'
 import fetchPageData from 'src/page-analysis/background/fetch-page-data'
 import * as index from 'src/search'
 import db from 'src/pouchdb'
@@ -55,6 +56,10 @@ export async function createNewPageForBookmark(id, bookmarkInfo) {
         analytics.trackEvent({
             category: 'Popup',
             action: 'Create browser bookmark',
+        })
+
+        internalAnalytics.storeEvent({
+            type: 'create_browser_bookmark',
         })
     }
 }
@@ -122,5 +127,9 @@ export async function createBookmarkByUrl(url, tabId = null) {
     analytics.trackEvent({
         category: 'Popup',
         action: 'Create popup bookmark',
+    })
+
+    internalAnalytics.storeEvent({
+        type: 'create_popup_bookmark',
     })
 }

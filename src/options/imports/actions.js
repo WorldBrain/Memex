@@ -158,41 +158,61 @@ export const setConcurrencyLevel = makePortMessagingThunk({
 export const stop = makePortMessagingThunk({
     actionCreator: cancelImport,
     cmd: CMDS.CANCEL,
-    cb: () =>
+    cb: () => {
         analytics.trackEvent({
             category: 'Imports',
             action: 'Cancel import',
-        }),
+        })
+
+        internalAnalytics.storeEvent({
+            type: 'imports_cancel_import',
+        })
+    },
 })
 
 export const pause = makePortMessagingThunk({
     actionCreator: pauseImport,
     cmd: CMDS.PAUSE,
-    cb: () =>
+    cb: () => {
         analytics.trackEvent({
             category: 'Imports',
             action: 'Pause import',
-        }),
+        })
+
+        internalAnalytics.storeEvent({
+            type: 'imports_pause_import',
+        })
+    },
 })
 
 export const resume = makePortMessagingThunk({
     actionCreator: resumeImport,
     cmd: CMDS.RESUME,
-    cb: () =>
+    cb: () => {
         analytics.trackEvent({
             category: 'Imports',
             action: 'Resume import',
-        }),
+        })
+
+        internalAnalytics.storeEvent({
+            type: 'imports_resume_import',
+        })
+    },
 })
 
 export const finish = makePortMessagingThunk({
     actionCreator: finishImport,
     cmd: CMDS.FINISH,
-    cb: () =>
+    cb: () => {
         analytics.trackEvent({
             category: 'Imports',
             action: 'Finish import',
-        }),
+        })
+
+        internalAnalytics.storeEvent({
+            type: 'imports_finish_import',
+        })
+    },
 })
 
 export const start = () => (dispatch, getState) => {
@@ -203,6 +223,10 @@ export const start = () => (dispatch, getState) => {
         action: 'Start import',
         name: selectors.allowTypesString(state),
         value: selectors.concurrency(state),
+    })
+
+    internalAnalytics.storeEvent({
+        type: 'imports_start_import',
     })
 
     dispatch(prepareImport())
