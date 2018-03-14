@@ -27,37 +27,37 @@ export function exportPages({ chunkSize = 10 } = {}) {
 
           const pouchDoc = await db.get(key)
 
-          index.get(key, { asBuffer: false }, async (err, indexDoc) => {
-            if (err) {
-              // TODO: Design error handling
-              return cb(err)
-            }
+            (<any>index).get(key, { asBuffer: false }, async (err, indexDoc) => {
+              if (err) {
+                // TODO: Design error handling
+                return cb(err)
+              }
 
-            const getVisit = (visit: string) => ({
-              timestamp: parseInt(visit.substr('visit/'.length))
+              const getVisit = (visit: string) => ({
+                timestamp: parseInt(visit.substr('visit/'.length))
+              })
+              const getBookmark = () => parseInt(indexDoc.bookmarks.values().next().value.substr('bookmark/'.length))
+              const screenshot = await getAttachmentAsDataUrl({ doc: pouchDoc, attachmentId: 'screenshot' })
+              const favIcon = await getAttachmentAsDataUrl({ doc: pouchDoc, attachmentId: 'favicon' })
+              const page: ExportedPage = {
+                url: pouchDoc.url,
+                content: {
+                  lang: pouchDoc.content.lang,
+                  title: pouchDoc.content.title,
+                  fullText: pouchDoc.content.fullText,
+                  keywords: pouchDoc.content.keywords,
+                  description: pouchDoc.content.description
+                },
+                visits: Array.from(indexDoc.visits).map(getVisit),
+                tags: Array.from(indexDoc.tags).map((tag: string) => tag.substr('tag/'.length)),
+                bookmark: indexDoc.bookmarks.size ? getBookmark() : null,
+                screenshot,
+                favIcon,
+              }
+              this.push(page)
+
+              cb()
             })
-            const getBookmark = () => parseInt(indexDoc.bookmarks.values().next().value.substr('bookmark/'.length))
-            const screenshot = await getAttachmentAsDataUrl({ doc: pouchDoc, attachmentId: 'screenshot' })
-            const favIcon = await getAttachmentAsDataUrl({ doc: pouchDoc, attachmentId: 'favicon' })
-            const page: ExportedPage = {
-              url: pouchDoc.url,
-              content: {
-                lang: pouchDoc.content.lang,
-                title: pouchDoc.content.title,
-                fullText: pouchDoc.content.fullText,
-                keywords: pouchDoc.content.keywords,
-                description: pouchDoc.content.description
-              },
-              visits: Array.from(indexDoc.visits).map(getVisit),
-              tags: Array.from(indexDoc.tags).map((tag: string) => tag.substr('tag/'.length)),
-              bookmark: indexDoc.bookmarks.size ? getBookmark() : null,
-              screenshot,
-              favIcon,
-            }
-            this.push(page)
-
-            cb()
-          })
         }))
         .on('data', (obj) => {
           data.push(obj)
