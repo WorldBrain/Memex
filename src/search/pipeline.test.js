@@ -1,54 +1,35 @@
 /* eslint-env jest */
 
-import pipeline, { extractTerms } from './pipeline'
+import newPipeline from './search-index-new/pipeline'
+import oldPipeline, { extractTerms } from './search-index-old/pipeline'
+import * as DATA from './pipeline.test.data'
 
-const attachPrefix = s => 'term/' + s
+const runSuite = useOld => () => {
+    // New index pipeline has removed unused visit, bookmark inputs and removed all IDB key prefixing ('term/')
+    const pipeline = useOld ? oldPipeline : newPipeline
+    const attachPrefix = useOld ? s => 'term/' + s : s => s
 
-const TEST_TERMS = ['people', 'forget', 'optimize', 'important', 'code']
+    function testExtractTerms({ input, output = DATA.EXPECTED_TERMS }) {
+        const result = extractTerms(input, useOld ? 'term' : undefined)
 
-const TEST_EXTRACT_OUTPUT = new Set(TEST_TERMS.map(attachPrefix))
+        expect(result).toEqual(new Set(output.map(attachPrefix)))
+    }
 
-function testExtractTerms({ input, output }) {
-    const result = extractTerms(input, 'term')
-    expect(result).toEqual(
-        output
-            ? new Set(output.map(attachPrefix))
-            : new Set(TEST_EXTRACT_OUTPUT),
-    )
-}
-
-describe('Search index pipeline', () => {
     test('process a document', async () => {
         const result = await pipeline({
-            pageDoc: {
-                url: 'https://www.test.com/test',
-                content: {
-                    fullText: 'the wild fox jumped over the hairy red hen',
-                    title: 'test page',
-                },
-            },
+            pageDoc: DATA.PAGE_1,
             bookmarkDocs: [],
             visits: ['12345'],
             rejectNoContent: true,
         })
-        expect(result).toEqual(
-            expect.objectContaining({
-                terms: new Set([
-                    'term/wild',
-                    'term/fox',
-                    'term/jumped',
-                    'term/hairy',
-                    'term/red',
-                    'term/hen',
-                ]),
-                urlTerms: new Set(['url/test']),
-                titleTerms: new Set(['title/test', 'title/page']),
-                domain: 'domain/test.com',
-                visits: new Set(['visit/12345']),
-                bookmarks: new Set(),
-                tags: new Set(),
-            }),
-        )
+
+        // Pipeline outputs differently in both implementations too as pages now contain additional data
+        //  that was prev. in Pouch (Pouch docs never went through pipeline - weird design).
+        const expected = useOld
+            ? DATA.EXPECTED_OUTPUT_OLD
+            : DATA.EXPECTED_OUTPUT_NEW
+
+        expect(result).toEqual(expect.objectContaining(expected))
     })
 
     test('extract terms from a document', () => {
@@ -87,7 +68,7 @@ describe('Search index pipeline', () => {
         testExtractTerms({
             input:
                 'very often the-people (like Punkdude123) forget to optimize important code',
-            output: [...TEST_TERMS, 'punkdude123'],
+            output: [...DATA.EXPECTED_TERMS, 'punkdude123'],
         })
     })
 
@@ -134,7 +115,7 @@ describe('Search index pipeline', () => {
         testExtractTerms({
             input:
                 'very often the people from Vrchlabí forget to optimize important code',
-            output: [...TEST_TERMS, 'vrchlabi'],
+            output: [...DATA.EXPECTED_TERMS, 'vrchlabi'],
         })
     })
 
@@ -144,4 +125,7 @@ describe('Search index pipeline', () => {
                 'very often the people forget to people optimize important code',
         })
     })
-})
+}
+
+describe('Old search index pipeline', runSuite(true))
+describe('New search index pipeline', runSuite(false))
