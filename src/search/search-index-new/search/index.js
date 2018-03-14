@@ -112,20 +112,30 @@ export async function suggest(query = '', type, limit = 10) {
  * @param {SearchParams} params
  */
 async function fullSearch({ queryTerms = [], ...params }) {
+    console.time('TIMER - findFilteredUrls()')
     const filteredUrls = await findFilteredUrls(params)
+    console.timeEnd('TIMER - findFilteredUrls()')
 
     let urlScoresMap
 
     // Blank search; simply do lookback from `endDate` on visits and score URLs by latest
     if (!queryTerms.length) {
+        console.time('TIMER - groupLatestEventsByUrl()')
         urlScoresMap = await groupLatestEventsByUrl(params, filteredUrls)
+        console.timeEnd('TIMER - groupLatestEventsByUrl()')
     } else {
         // Do terms lookup first then latest event lookup (within time bounds) for each result
+        console.time('TIMER - textSearch()')
         const urlScoreMultiMap = await textSearch({ queryTerms }, filteredUrls)
+        console.timeEnd('TIMER - textSearch()')
         const urls = new Set(urlScoreMultiMap.keys())
+        console.time('TIMER - mapUrlsToLatestEvents()')
         const latestEvents = await mapUrlsToLatestEvents(params, urls)
+        console.timeEnd('TIMER - mapUrlsToLatestEvents()')
 
+        console.time('TIMER - applyScores()')
         urlScoresMap = applyScores(urlScoreMultiMap, latestEvents)
+        console.timeEnd('TIMER - applyScores()')
     }
 
     return {
