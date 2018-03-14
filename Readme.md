@@ -65,21 +65,21 @@ As you browse through websites WorldBrain will work automatically in the backgro
 
 ## Contact
 
-Find us in [our Slack channel](https://join-worldbrain.herokuapp.com/) or contact us [via email](mailto:info@worldbrain.io).
+Find us in [our Team chat](https://chat.worldbrain.io/) or contact us [via email](mailto:info@worldbrain.io).
 
 ### Feedback, Questions or Concerns
 **How can we make our extension better?**
 
 Please email: feedback@worldbrain.io
-or drop by our [slack channel](https://join-worldbrain.herokuapp.com/) and post a message in #General
+or drop by our [team chat](https://chat.worldbrain.io/) and post a message in #TownSquare
 
 ### Feature Requests
 **Request <!-- Vote and Comment on -->  any new features you may want to see!**
 
 <!-- Please visit our [Feature Requests Page](**TODO**) -->
 Please either create a new [issue](https://github.com/WorldBrain/WebMemex/issues/new)
-or send us a message in the slack feature_request channel!
-You can join here https://join-worldbrain.herokuapp.com/
+or send us a message in the team chat's feature_request channel!
+You can join here https://chat.worldbrain.io/
 
 ### Bugs and Issues
 **Is the extension acting funny?**
@@ -105,5 +105,5 @@ It is actually impossible for us to do so as all of your data is kept on your lo
 External resources
 
 * [Donate to WorldBrain - www.patreon.com](https://www.patreon.com/WorldBrain)
-* [Join the WorldBrain community on Slack! - join-worldbrain.herokuapp.com](https://join-worldbrain.herokuapp.com/)
+* [Join the WorldBrain community! - chat.worldbrain.io](https://chat.worldbrain.io/)
 * [Worldbrain is creating a structural solution to online (scientific) misinformation - www.worldbrain.io](https://worldbrain.io)
