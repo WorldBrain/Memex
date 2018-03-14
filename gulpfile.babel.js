@@ -90,7 +90,8 @@ function createBundle(
               browserify({ ...watchify.args, ...browserifySettings, entries }),
           ).on('update', bundle)
         : browserify({ ...browserifySettings, entries })
-    b.transform(babelify)
+    b.plugin(tsify)
+    b.transform(babelify, { extensions: ['.js', '.jsx', '.ts', '.tsx'] })
     b.transform(
         envify({
             NODE_ENV: production ? 'production' : 'development',
@@ -104,7 +105,6 @@ function createBundle(
         }),
         { global: true },
     )
-    b.plugin(tsify)
 
     if (cssOutput) {
         b.plugin(cssModulesify, {
@@ -120,6 +120,7 @@ function createBundle(
             b
                 .bundle()
                 .on('error', err => {
+                    console.error('ERROR creating bundle', err)
                     console.error(err.stack)
                     // Fail entire gulp build if browserify emits error, but not in dev/watch mode
                     if (!watch) {
