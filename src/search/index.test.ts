@@ -36,7 +36,7 @@ async function resetTestData(dbName = 'test') {
 }
 
 // Bind projecting-out just ID and score from results to search
-const search = params =>
+const search = (params = {}) =>
     index.search({
         mapResultsFunc: res => res.map(([id, score]) => [id, score]),
         ...params,

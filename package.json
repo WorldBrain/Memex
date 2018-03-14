@@ -29,7 +29,7 @@
     ]
   },
   "dependencies": {
-    "abstract-leveldown": "^2.7.2",
+    "abstract-leveldown": "^4.0.3",
     "babel-polyfill": "^6.26.0",
     "blob-util": "^1.2.1",
     "cheerio": "^1.0.0-rc.2",
@@ -153,5 +153,8 @@
     "vinyl-source-stream": "^1.1.0",
     "watchify": "^3.9.0",
     "web-ext": "^1.10.0"
+  },
+  "resolutions": {
+    "abstract-leveldown": "4.0.3"
   }
 }

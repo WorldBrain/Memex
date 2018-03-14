@@ -2,7 +2,7 @@ import db, { addPage, addTag } from './index'
 import { ExportedPage } from '../import-export'
 
 export async function importPage(page: ExportedPage) {
-  await addPage({
+  await (<any>addPage)({
     pageDoc: {
       content: page.content,
       url: page.url,
