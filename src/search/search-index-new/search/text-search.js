@@ -14,13 +14,19 @@ const termQuery = (term, index) =>
         .primaryKeys()
 
 /**
+ * For a given term, run all index lookups at the same time. Return when done.
+ *
  * @param {string} term
  */
-const lookupTerm = async term => ({
-    content: await termQuery(term, 'terms'),
-    title: await termQuery(term, 'titleTerms'),
-    url: await termQuery(term, 'urlTerms'),
-})
+async function lookupTerm(term) {
+    const [content, title, url] = await Promise.all([
+        termQuery(term, 'terms'),
+        termQuery(term, 'titleTerms'),
+        termQuery(term, 'urlTerms'),
+    ])
+
+    return { content, title, url }
+}
 
 const scoreTermResults = filteredUrls =>
     function({ content, title, url }) {
