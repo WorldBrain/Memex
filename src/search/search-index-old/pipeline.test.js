@@ -2,17 +2,18 @@
 
 import pipeline, { extractTerms } from './pipeline'
 
-const TEST_EXTRACT_OUTPUT = new Set([
-    'term/people',
-    'term/forget',
-    'term/optimize',
-    'term/important',
-    'term/code',
-])
+const attachPrefix = s => 'term/' + s
+
+const TEST_TERMS = ['people', 'forget', 'optimize', 'important', 'code']
+
+const TEST_EXTRACT_OUTPUT = new Set(TEST_TERMS.map(attachPrefix))
+
 function testExtractTerms({ input, output }) {
     const result = extractTerms(input, 'term')
     expect(result).toEqual(
-        output ? new Set(output.map(s => 'term/' + s)) : TEST_EXTRACT_OUTPUT,
+        output
+            ? new Set(output.map(attachPrefix))
+            : new Set(TEST_EXTRACT_OUTPUT),
     )
 }
 
@@ -82,10 +83,11 @@ describe('Search index pipeline', () => {
         })
     })
 
-    test('extract terms from a document removing words with numbers', () => {
+    test('extract terms from a document _including_ words with numbers', () => {
         testExtractTerms({
             input:
                 'very often the-people (like Punkdude123) forget to optimize important code',
+            output: [...TEST_TERMS, 'punkdude123'],
         })
     })
 
@@ -128,10 +130,11 @@ describe('Search index pipeline', () => {
         })
     })
 
-    test('FIX for Slavic languages: extract terms from a document removing words with too many consonants', () => {
+    test('extract terms from a document _including_ words with many consonants', () => {
         testExtractTerms({
             input:
                 'very often the people from Vrchlabí forget to optimize important code',
+            output: [...TEST_TERMS, 'vrchlabi'],
         })
     })
 
