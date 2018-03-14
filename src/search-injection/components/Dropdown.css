@@ -4,9 +4,9 @@
     background: white;
     display: block;
     position: absolute;
-    right: 15px;
+    top: 32px;
+    right: 10px;
     list-style-type: none;
-    top: 20px;
     z-index: 100;
     box-shadow: -5px 9px 15px -5px #00000059;
 }

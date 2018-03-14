@@ -4,58 +4,87 @@
 
 .MEMEX_CONTAINER {
     /* Base size of the children elements */
-    font-size: 75%;
     margin-bottom: 30px;
-}
-
-.above {
-    width: 600px;
-}
-
-.side {
-    width: 454px;
+    position: relative;
 }
 
 .resultsText {
+    display: inline-block;
     margin-bottom: 3px;
     font-size: 1.3em;
     font-weight: 100;
 }
 
 .resultLength {
-    font-weight: 500;
-}
-
-.logoContainer {
-    margin-bottom: 10px;
-    position: relative;
-}
-
-.seeAllResults {
+    font-weight: 800;
     color: var(--memex-green);
+}
+
+.linksContainer {
+    display: inline-block;
+    font-size: 1.1em;
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+
+.links {
+    color: #666;
     text-decoration: none;
     font-size: 1em;
     display: inline-block;
-    margin-top: 12px;
+    margin-right: 10px;
     cursor: pointer;
+
+    &:hover {
+        color: #888;
+        text-decoration: none !important; /* stylelint-disable-line declaration-no-important */
+    }
 }
 
 .logo {
-    width: 20%;
-    height: 8%;
-    float: right;
+    width: 75px;
+    height: 20px;
+    margin-left: 10px;
+    vertical-align: bottom;
 }
 
 .settingsButton {
-    float: right;
-    width: 3%;
+    position: absolute;
+    top: 15px;
+    width: 5%;
     border: none;
     padding: 0;
     cursor: pointer;
     height: 20px;
     outline: 0;
     color: #909090;
-    background-image: url('/img/settings.svg');
+    background-image: url('/img/settings-icon.png');
     background-repeat: no-repeat;
     background-size: 20px;
+}
+
+.above {
+    width: 600px;
+    font-size: 75%;
+
+    & .resultsText {
+        width: 69%;
+    }
+
+    & .settingsButton {
+        right: -10px;
+    }
+}
+
+.side {
+    width: 454px;
+    font-size: 85%;
+
+    & .resultsText {
+        width: 100%;
+    }
+
+    & .settingsButton {
+        right: -5px;
+    }
 }

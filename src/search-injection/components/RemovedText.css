@@ -4,8 +4,6 @@
     border-radius: 3px;
     border: 1px solid #4abf9dad;
     margin-bottom: 20px;
-    animation-name: fadeOut;
-    animation-duration: 8s;
 }
 
 .removedP {
@@ -22,19 +20,8 @@
     text-decoration: none;
     color: #757475;
     cursor: pointer;
-}
-
-.removedA:hover {
-    color: #4abf9dad;
-    text-decoration: none;
-}
-
-@keyframes fadeOut {
-    0% {
-        opacity: 1;
-    }
-
-    100% {
-        opacity: 0;
+    &:hover {
+        color: #4abf9dad;
+        text-decoration: none !important; /* stylelint-disable-line declaration-no-important */
     }
 }

@@ -8,7 +8,7 @@ export const LIMIT = {
 
 // URL for Memex LOGO
 export const MEMEX_LOGO_URL = browser.extension.getURL(
-    'img/worldbrain-logo.png',
+    'img/worldbrain-logo-wo-beta.png',
 )
 
 // regex - Regular Expression for the search url

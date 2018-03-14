@@ -31,7 +31,6 @@ class Results extends React.Component {
         hideResults: false,
         dropdown: false,
         removed: false,
-        timerRunning: false,
         position: null,
     }
 
@@ -45,16 +44,6 @@ class Results extends React.Component {
             hideResults,
             position,
         })
-    }
-
-    positionStyles = {
-        // Custom styling depending on the position
-        above: {
-            width: '600px',
-        },
-        side: {
-            width: '454px',
-        },
     }
 
     renderResultItems() {
@@ -93,27 +82,20 @@ class Results extends React.Component {
     }
 
     async removeResults() {
-        // Sets a timer to set the searchInjetion key to false
+        // Sets the search injection key to false
         // And sets removed state to true
-        // Triggering the fade out UI to come
-        this.timer = setTimeout(async () => {
-            await setLocalStorage(constants.SEARCH_INJECTION_KEY, false)
-            this.setState({
-                timerRunning: false,
-            })
-        }, 8000)
+        // Triggering the Removed text UI to pop up
+        await setLocalStorage(constants.SEARCH_INJECTION_KEY, false)
         this.setState({
             removed: true,
-            timerRunning: true,
             dropdown: false,
         })
     }
 
-    undoRemove() {
-        clearInterval(this.timer)
+    async undoRemove() {
+        await setLocalStorage(constants.SEARCH_INJECTION_KEY, true)
         this.setState({
             removed: false,
-            timerRunning: false,
         })
     }
 
@@ -125,21 +107,40 @@ class Results extends React.Component {
     }
 
     render() {
-        // If the timer is running, show the RemovedText component
-        if (this.state.timerRunning)
-            return <RemovedText undo={this.undoRemove} />
-
-        if (this.state.removed) return null
+        // If the state is set to removed, show the RemovedText component
+        if (this.state.removed) return <RemovedText undo={this.undoRemove} />
 
         const { position } = this.state
-        console.log(position)
         return (
             <div
                 className={classNames(styles.MEMEX_CONTAINER, styles[position])}
             >
-                <div className={styles.resultsText}>
-                    You have <span>{this.props.len}</span> results in your
-                    digital memory.
+                <div className={styles.header}>
+                    <p className={styles.resultsText}>
+                        You have{' '}
+                        <span className={styles.resultLength}>
+                            {this.props.len} results
+                        </span>{' '}
+                        in your
+                        <img
+                            src={constants.MEMEX_LOGO_URL}
+                            className={styles.logo}
+                        />
+                    </p>
+                    <div className={styles.linksContainer}>
+                        <a
+                            className={styles.links}
+                            onClick={this.seeMoreResults}
+                        >
+                            See all results
+                        </a>
+                        <a
+                            className={styles.links}
+                            onClick={this.toggleHideResults}
+                        >
+                            {this.state.hideResults ? 'Maximize' : 'Minimize'}
+                        </a>
+                    </div>
                     <button
                         className={styles.settingsButton}
                         onClick={this.toggleDropDown}
@@ -154,18 +155,6 @@ class Results extends React.Component {
                     ) : (
                         ''
                     )}
-                </div>
-                <div className={styles.logoContainer}>
-                    <a
-                        className={styles.seeAllResults}
-                        onClick={this.seeMoreResults}
-                    >
-                        See all results
-                    </a>
-                    <img
-                        src={constants.MEMEX_LOGO_URL}
-                        className={styles.logo}
-                    />
                 </div>
                 <div className={styles.resultsBox}>
                     {// Render only if hideResults is false

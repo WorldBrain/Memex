@@ -42,14 +42,10 @@ const handleRender = results => {
     const cssFile = browser.extension.getURL('/content_script.css')
     appendCss(cssFile)
 
-    // Check if the document has loaded,
+    // Check if the document has completed loading,
     // if it has, execute the rendering function immediately
     // else attach it to the DOMContentLoaded event listener
-    if (
-        document.readyState === 'interactive' ||
-        document.readyState === 'complete'
-    )
-        renderComponent()
+    if (document.readyState === 'complete') renderComponent()
     else document.addEventListener('DOMContentLoaded', renderComponent, true)
 }
 

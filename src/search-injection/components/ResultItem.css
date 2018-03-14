@@ -30,4 +30,5 @@ for !important */
     color: #444 !important; /* stylelint-disable-line declaration-no-important */
     font-size: 1.3em;
     text-decoration: none;
+    width: 80%;
 }
