@@ -309,7 +309,7 @@ gulp.task('publish-extension:chrome', ['package-extension'], async () => {
         )
     })
     await api.update(extensionID, zip)
-    await api.publish(extensionID)
+    await api.publish(extensionID, process.env.WEBSTORE_PUBLISH_TARGET)
 })
 
 gulp.task('publish-extension:firefox', ['package-extension'], () => {
