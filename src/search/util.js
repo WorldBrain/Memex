@@ -1,6 +1,6 @@
 import { keyGen } from './search-index-old/util'
 
-export const DEFAULT_TERM_SEPARATOR = /[|' .,\-|(\n)]+/
+export const DEFAULT_TERM_SEPARATOR = /[|\u{A0}' .,\-|(\n)]+/u
 export const URL_SEPARATOR = /[/?#=+& _.,\-|(\n)]+/
 
 /**
