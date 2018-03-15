@@ -87,7 +87,7 @@ function createBundle(
               browserify({ ...watchify.args, ...browserifySettings, entries }),
           ).on('update', bundle)
         : browserify({ ...browserifySettings, entries })
-    b.plugin(tsify, { target: 'es5' })
+    b.plugin(tsify)
     b.transform(babelify, { extensions: ['.js', '.jsx', '.ts', '.tsx'] })
     b.transform(
         envify({
