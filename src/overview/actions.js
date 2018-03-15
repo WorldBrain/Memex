@@ -175,8 +175,9 @@ function trackSearch(searchResult, overwrite, state) {
 
 // Internal analytics store
 function storeSearch(searchResult, overwrite, state) {
+    const query = selectors.query(state)
+
     let type
-    let isOther
 
     if (searchResult.totalCount > 0) {
         type = overwrite ? 'successful_search' : 'paginate_search'
@@ -184,19 +185,22 @@ function storeSearch(searchResult, overwrite, state) {
         type = 'unsuccessful_search'
     }
 
+    internalAnalytics.storeEvent({ type: type })
+
+    if (query.length > 0) {
+        internalAnalytics.storeEvent({ type: 'nlp_search' })
+    }
+
     if (filters.onlyBookmarks(state)) {
-        type += '_with_bm'
-        isOther = 1
+        internalAnalytics.storeEvent({ type: 'bookmark_filter' })
     }
 
     if (filters.tags(state).length) {
-        type += isOther ? '_tag' : '_with_tag'
+        internalAnalytics.storeEvent({ type: 'tag_filter' })
     }
     if (filters.domains(state).length) {
-        type += isOther ? '_domain' : '_with_domain'
+        internalAnalytics.storeEvent({ type: 'domain_filter' })
     }
-
-    internalAnalytics.storeEvent({ type: type })
 }
 
 const updateSearchResult = ({ searchResult, overwrite = false }) => (

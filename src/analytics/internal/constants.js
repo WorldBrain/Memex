@@ -2,42 +2,146 @@ export const API_HOST =
     'https://a8495szyaa.execute-api.eu-central-1.amazonaws.com/' +
     (process.env.NODE_ENV === 'production' ? 'production' : 'staging')
 
+// This is used to change the event type into integer to optimize the space
 export const MapEventTypeToInt = {
-    successful_search: 1,
-    paginate_search: 2,
-    unsuccessful_search: 3,
-    datepicker_by_dropdown_start_date: 4,
-    datepicker_clear_start_date: 5,
-    datepicker_by_dropdown_end_date: 6,
-    datepicker_clear_end_date: 7,
-    successful_search_with_tag: 8,
-    successful_search_with_domain: 9,
-    unsuccessful_search_with_bm: 10,
-    successful_search_with_bm: 11,
-    add_tag: 12,
-    delete_tag: 13,
-    delete_result: 14,
-    create_result_bookmark: 15,
-    remove_result_bookmark: 16,
-    create_browser_bookmark: 17,
-    remove_browser_bookmark: 18,
-    create_popup_bookmark: 19,
-    remove_popup_bookmark: 20,
-    add_popup_tag: 21,
-    delete_popup_tag: 22,
-    blacklist_site: 23,
-    blacklist_domain: 24,
-    remove_blacklist_entry: 25,
-    'change_tracking_pref_opt-out': 26,
-    'change_tracking_pref_opt-in': 27,
-    start_import: 28,
-    pause_import: 29,
-    resume_import: 30,
-    cancel_import: 31,
-    finish_import: 32,
-    search_popup: 33,
-    successful_omnibar_search: 34,
-    unsuccessful_omnibar_search: 35,
-    datepicker_by_nlp_start_date: 36,
-    datepicker_by_nlp_end_date: 37,
+    successful_search: {
+        id: 1,
+        notifType: 'successful_search',
+    },
+    paginate_search: {
+        id: 2,
+        notifType: 'successful_search',
+    },
+    unsuccessful_search: {
+        id: 3,
+        notifType: 'unsuccessful_search',
+    },
+    datepicker_by_dropdown_start_date: {
+        id: 4,
+        notifType: 'datepicker',
+    },
+    datepicker_clear_start_date: {
+        id: 5,
+        notifType: 'datepicker',
+    },
+    datepicker_by_dropdown_end_date: {
+        id: 6,
+        notifType: 'datepicker',
+    },
+    datepicker_clear_end_date: {
+        id: 7,
+        notifType: 'datepicker',
+    },
+    bookmark_filter: {
+        id: 8,
+        notifType: 'bookmark_filter',
+    },
+    tag_filter: {
+        id: 9,
+        notifType: 'tag_filter',
+    },
+    domain_filter: {
+        id: 10,
+        notifType: 'domain_filter',
+    },
+    add_tag: {
+        id: 12,
+        notifType: 'tagging',
+    },
+    delete_tag: {
+        id: 13,
+        notifType: 'tagging',
+    },
+    delete_result: {
+        id: 14,
+    },
+    create_result_bookmark: {
+        id: 15,
+        notifType: 'bookmark',
+    },
+    remove_result_bookmark: {
+        id: 16,
+        notifType: 'bookmark',
+    },
+    create_browser_bookmark: {
+        id: 17,
+        notifType: 'bookmark',
+    },
+    remove_browser_bookmark: {
+        id: 18,
+        notifType: 'bookmark',
+    },
+    create_popup_bookmark: {
+        id: 19,
+        notifType: 'bookmark',
+    },
+    remove_popup_bookmark: {
+        id: 20,
+        notifType: 'bookmark',
+    },
+    add_popup_tag: {
+        id: 21,
+        notifType: 'tagging',
+    },
+    delete_popup_tag: {
+        id: 22,
+        notifType: 'tagging',
+    },
+    blacklist_site: {
+        id: 23,
+        notifType: 'blacklist',
+    },
+    blacklist_domain: {
+        id: 24,
+        notifType: 'blacklist',
+    },
+    remove_blacklist_entry: {
+        id: 25,
+        notifType: 'blacklist',
+    },
+    'change_tracking_pref_opt-out': {
+        id: 26,
+    },
+    'change_tracking_pref_opt-in': {
+        id: 27,
+    },
+    start_import: {
+        id: 28,
+    },
+    pause_import: {
+        id: 29,
+    },
+    resume_import: {
+        id: 30,
+    },
+    cancel_import: {
+        id: 31,
+    },
+    finish_import: {
+        id: 32,
+    },
+    search_popup: {
+        id: 33,
+        notifType: 'address_bar_search',
+    },
+    successful_omnibar_search: {
+        id: 34,
+        notifType: 'address_bar_search',
+    },
+    unsuccessful_omnibar_search: {
+        id: 35,
+        notifType: 'address_bar_search',
+    },
+    datepicker_by_nlp_start_date: {
+        id: 36,
+        notifType: 'datepicker_nlp',
+    },
+    datepicker_by_nlp_end_date: {
+        id: 37,
+        notifType: 'datepicker_nlp',
+    },
+    nlp_search: {
+        id: 38,
+        notifType: 'nlp_search',
+    },
 }

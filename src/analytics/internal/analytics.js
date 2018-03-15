@@ -10,14 +10,7 @@ class Analytics {
      * @return {Promise<boolean>}
      */
     _saveToDB = async params => {
-        const event = {
-            ...params,
-            timestamp: Date.now(),
-        }
-
-        EventProcessor(event)
-
-        await db.eventLog.add(event)
+        await db.eventLog.add(params)
         console.log(await db.eventLog.toArray())
     }
 
@@ -27,10 +20,21 @@ class Analytics {
      * @param {EventTrackInfo} eventArgs
      */
     async storeEvent(eventArgs) {
+        const timestamp = Date.now()
+
         const params = {
-            type: MapEventTypeToInt[eventArgs.type],
+            type: MapEventTypeToInt[eventArgs.type].id,
             data: eventArgs.data || {},
+            timestamp,
         }
+
+        if (MapEventTypeToInt[eventArgs.type].notifType) {
+            EventProcessor({
+                type: MapEventTypeToInt[eventArgs.type].notifType,
+                timestamp,
+            })
+        }
+
         await this._saveToDB(params)
     }
 }
