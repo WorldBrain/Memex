@@ -14,6 +14,7 @@ export default function pipeline({
     pageDoc: { content = {}, url, ...data },
     rejectNoContent = true,
 }) {
+    const textTimerLabel = `TIMER - text proc: ${url}`
     // First apply transformations to the URL
     const { pathname, hostname } = transformUrl(url)
 
@@ -27,7 +28,9 @@ export default function pipeline({
     }
 
     // Extract all terms out of processed content
+    console.time(textTimerLabel)
     const terms = [...extractTerms(content.fullText)]
+    console.timeEnd(textTimerLabel)
     const titleTerms = [...extractTerms(content.title)]
     const urlTerms = [...extractTerms(pathname)]
 
