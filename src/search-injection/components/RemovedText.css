@@ -20,6 +20,7 @@
     text-decoration: none;
     color: #757475;
     cursor: pointer;
+
     &:hover {
         color: #4abf9dad;
         text-decoration: none !important; /* stylelint-disable-line declaration-no-important */

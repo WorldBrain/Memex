@@ -4,7 +4,7 @@ import Privacy from './privacy'
 import Acknowledgements from './acknowledgement/components/content'
 import Tutorial from './tutorial'
 import Statistics from './statistics'
-import SearchInjection from './search-injection'
+import Settings from './settings'
 
 export default [
     {
@@ -18,6 +18,12 @@ export default [
         pathname: '/overview/overview.html',
         component: 'faq',
         icon: 'search',
+    },
+    {
+        name: 'Settings',
+        pathname: '/settings',
+        component: Settings,
+        icon: 'settings',
     },
     {
         name: 'Import History & Bookmarks',
@@ -36,12 +42,6 @@ export default [
         pathname: '/privacy',
         component: Privacy,
         icon: 'security',
-    },
-    {
-        name: 'Show Memex alongside Google',
-        pathname: '/search-injection',
-        component: SearchInjection,
-        icon: 'search',
     },
     {
         name: 'Acknowledgements',

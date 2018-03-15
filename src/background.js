@@ -20,6 +20,7 @@ import analytics from 'src/analytics'
 import updateNotification from 'src/util/update-notification'
 
 export const OVERVIEW_URL = '/overview/overview.html'
+export const OPTIONS_URL = '/options/options.html#'
 export const OLD_EXT_UPDATE_KEY = 'updated-from-old-ext'
 export const UPDATE_URL = '/update/update.html'
 export const UNINSTALL_URL =
@@ -45,6 +46,11 @@ async function openOverview() {
 }
 
 const openOverviewURL = url => chrome.tabs.create({ url })
+
+const openOptionsURL = section =>
+    chrome.tabs.create({
+        url: OPTIONS_URL + section,
+    })
 
 async function onInstall() {
     // Ensure default blacklist entries are stored (before doing anything else)
@@ -90,11 +96,13 @@ browser.commands.onCommand.addListener(command => {
     }
 })
 
-// Open overview URL on receving message from content script
+// Open an extension URL on receving message from content script
 browser.runtime.onMessage.addListener(({ action, url }) => {
     switch (action) {
         case 'openOverviewURL':
             return openOverviewURL(url)
+        case 'openOptionsURL':
+            return openOptionsURL(url)
         default:
     }
 })

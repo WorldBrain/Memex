@@ -3,12 +3,20 @@ import PropTypes from 'prop-types'
 
 import styles from './Dropdown.css'
 
+const openSettings = () => {
+    const message = {
+        action: 'openOptionsURL',
+        url: 'settings',
+    }
+    browser.runtime.sendMessage(message)
+}
+
 const Dropdown = props => {
     return (
         <div className={styles.dropdownContainer}>
             <ul className={styles.dropdown}>
-                <li className={styles.dropdownElement} onClick={props.minimize}>
-                    {props.isMinimized ? 'Maximize' : 'Minimize'}
+                <li className={styles.dropdownElement} onClick={openSettings}>
+                    Settings
                 </li>
                 <li className={styles.dropdownElement} onClick={props.remove}>
                     Remove Results Forever
@@ -22,8 +30,6 @@ const Dropdown = props => {
 }
 
 Dropdown.propTypes = {
-    isMinimized: PropTypes.bool.isRequired,
-    minimize: PropTypes.func.isRequired,
     remove: PropTypes.func.isRequired,
     rerender: PropTypes.func.isRequired,
 }

@@ -147,8 +147,6 @@ class Results extends React.Component {
                     />
                     {this.state.dropdown ? (
                         <Dropdown
-                            isMinimized={this.state.hideResults}
-                            minimize={this.toggleHideResults}
                             remove={this.removeResults}
                             rerender={this.changePosition}
                         />
