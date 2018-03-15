@@ -295,7 +295,7 @@ gulp.task(
 // Tasks for publishing the extension
 
 gulp.task('publish-extension:chrome', ['package-extension'], async () => {
-    const extensionID = 'abkfbakhjpmblaafnpgjppbmioombali'
+    const extensionID = process.env.WEBSTORE_EXTENSION_ID
     const tokenManager = new chromeStore.TokenManager(
         'worldbrain-1057',
         process.env.WEBSTORE_CLIENT_ID,
