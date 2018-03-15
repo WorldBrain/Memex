@@ -1,7 +1,8 @@
 import db from './db'
 import { STORAGE_KEY } from 'src/options/blacklist/constants'
 
-export async function searches() {
+export async function EventProcessor({ type, timestamp }) {
+    console.log(type, timestamp)
     // // Search Analysis
     // const totalSearches = await db.eventLog
     //     .where('category')

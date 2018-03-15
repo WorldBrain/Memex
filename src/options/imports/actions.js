@@ -165,7 +165,7 @@ export const stop = makePortMessagingThunk({
         })
 
         internalAnalytics.storeEvent({
-            type: 'imports_cancel_import',
+            type: 'cancel_import',
         })
     },
 })
@@ -180,7 +180,7 @@ export const pause = makePortMessagingThunk({
         })
 
         internalAnalytics.storeEvent({
-            type: 'imports_pause_import',
+            type: 'pause_import',
         })
     },
 })
@@ -195,7 +195,7 @@ export const resume = makePortMessagingThunk({
         })
 
         internalAnalytics.storeEvent({
-            type: 'imports_resume_import',
+            type: 'resume_import',
         })
     },
 })
@@ -210,7 +210,7 @@ export const finish = makePortMessagingThunk({
         })
 
         internalAnalytics.storeEvent({
-            type: 'imports_finish_import',
+            type: 'finish_import',
         })
     },
 })
@@ -226,7 +226,7 @@ export const start = () => (dispatch, getState) => {
     })
 
     internalAnalytics.storeEvent({
-        type: 'imports_start_import',
+        type: 'start_import',
     })
 
     dispatch(prepareImport())

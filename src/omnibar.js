@@ -5,6 +5,7 @@ import qs from 'query-string'
 import moment from 'moment'
 
 import analytics from 'src/analytics'
+import internalAnalytics from 'src/analytics/internal'
 import shortUrl from 'src/util/short-url'
 import searchIndex from 'src/search'
 import extractTimeFiltersFromQuery, {
@@ -87,6 +88,13 @@ async function makeSuggestion(query, suggest) {
                 : 'Unsuccessful omnibar search',
         name: queryFiltersDisplay(queryFilters),
         value: searchResults.totalCount,
+    })
+
+    internalAnalytics.storeEvent({
+        type:
+            searchResults.totalCount > 0
+                ? 'successful_omnibar_search'
+                : 'unsuccessful_omnibar_search',
     })
 
     // A subsequent search could have already started and finished while we

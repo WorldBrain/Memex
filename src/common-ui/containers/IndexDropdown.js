@@ -79,8 +79,8 @@ class IndexDropdownContainer extends Component {
                 type: hover
                     ? isAdded ? 'add_' + source : 'delete_' + source
                     : isAdded
-                      ? 'popup_add_' + source
-                      : 'popup_delete_' + source,
+                      ? 'add_popup_' + source
+                      : 'delete_popup_' + source,
             })
         }
     }

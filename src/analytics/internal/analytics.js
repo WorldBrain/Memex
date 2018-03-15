@@ -1,4 +1,5 @@
-import { searches } from './analysis'
+import { EventProcessor } from './analysis'
+import { MapEventTypeToInt } from './constants'
 
 import db from './db'
 
@@ -13,7 +14,8 @@ class Analytics {
             ...params,
             timestamp: Date.now(),
         }
-        searches()
+
+        EventProcessor(event)
 
         await db.eventLog.add(event)
         console.log(await db.eventLog.toArray())
@@ -26,7 +28,7 @@ class Analytics {
      */
     async storeEvent(eventArgs) {
         const params = {
-            type: eventArgs.type,
+            type: MapEventTypeToInt[eventArgs.type],
             data: eventArgs.data || {},
         }
         await this._saveToDB(params)
