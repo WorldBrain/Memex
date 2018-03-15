@@ -8165,6 +8165,21 @@ sign-addon@0.2.1:
     stream-to-promise "2.2.0"
     when "3.7.7"
 
+sign-addon@^0.3.0:
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/sign-addon/-/sign-addon-0.3.0.tgz#b5585d8ffc978058c0a0d8c28047ecb6c8e5dab6"
+  dependencies:
+    babel-polyfill "6.16.0"
+    deepcopy "0.6.3"
+    es6-error "4.0.0"
+    es6-promisify "5.0.0"
+    jsonwebtoken "7.1.9"
+    mz "2.5.0"
+    request "2.79.0"
+    source-map-support "0.4.6"
+    stream-to-promise "2.2.0"
+    when "3.7.7"
+
 signal-exit@^3.0.0, signal-exit@^3.0.2:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/signal-exit/-/signal-exit-3.0.2.tgz#b5fdc08f1287ea1178628e415e25132b73646c6d"

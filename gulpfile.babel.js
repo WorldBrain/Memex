@@ -20,6 +20,7 @@ import path from 'path'
 import cssModulesify from 'css-modulesify'
 import cssnext from 'postcss-cssnext'
 import * as chromeStore from 'chrome-store-api'
+const signAddon = require('sign-addon').default;
 
 const exec = pify(nodeExec)
 
@@ -88,8 +89,8 @@ async function createBundle(
 ) {
     const b = watch
         ? watchify(
-              browserify({ ...watchify.args, ...browserifySettings, entries }),
-          ).on('update', bundle)
+            browserify({ ...watchify.args, ...browserifySettings, entries }),
+        ).on('update', bundle)
         : browserify({ ...browserifySettings, entries })
     b.transform(babelify)
     b.transform(
@@ -125,12 +126,12 @@ async function createBundle(
             .pipe(source(output))
             .pipe(buffer())
             .pipe(
-                production
-                    ? uglify({
-                          output: { ascii_only: true },
-                      })
-                    : identity(),
-            )
+            production
+                ? uglify({
+                    output: { ascii_only: true },
+                })
+                : identity(),
+        )
             .pipe(gulp.dest(destination))
             .on('end', () => {
                 const time = (Date.now() - startTime) / 1000
@@ -144,7 +145,15 @@ async function createBundle(
     await pify(bundle)()
 }
 
-gulp.task('copyStaticFiles', () => {
+gulp.task('propagateVersionNumber', () => {
+    // Copies version number from package.json to manifest.json and maybe other places in the future
+    const version = getVersion()
+    const manifest = JSON.parse(fs.readFileSync('./src/manifest.json'))
+    manifest.version = version
+    fs.writeFileSync('./src/manifest.json', JSON.stringify(manifest, null, 4))
+})
+
+gulp.task('copyStaticFiles', ['propagateVersionNumber'], () => {
     for (const filename in staticFiles) {
         console.log(`Copying '${filename}' to '${staticFiles[filename]}'..`)
         gulp.src(filename).pipe(gulp.dest(staticFiles[filename]))
@@ -206,11 +215,11 @@ gulp.task('lint', async () => {
     const stylelintStream = gulp
         .src(['src/**/*.css'])
         .pipe(
-            stylelint({
-                ...stylelintOptions,
-                failAfterError: failLintError,
-            }),
-        )
+        stylelint({
+            ...stylelintOptions,
+            failAfterError: failLintError,
+        }),
+    )
         .on('error', e => {
             console.error(e)
             process.exit(1)
@@ -248,20 +257,25 @@ function getFilename() {
     return filename
 }
 
+function getVersion() {
+    const pkgInfo = JSON.parse(fs.readFileSync('./package.json'))
+    return pkgInfo.version
+}
+
 gulp.task('package-source-code', () =>
     gulp
         .src(
-            [
-                '**/*',
-                '!.git/**',
-                '!node_modules/**',
-                '!dist/**',
-                '!extension/**',
-            ],
-            {
-                dot: true,
-            },
-        )
+        [
+            '**/*',
+            '!.git/**',
+            '!node_modules/**',
+            '!dist/**',
+            '!extension/**',
+        ],
+        {
+            dot: true,
+        },
+    )
         .pipe(zip('source-code.zip'))
         .pipe(gulp.dest('dist')),
 )
@@ -296,6 +310,30 @@ gulp.task('publish-extension:chrome', ['package-extension'], async () => {
     })
     await api.update(extensionID, zip)
     await api.publish(extensionID)
+})
+
+gulp.task('publish-extension:firefox', ['package-extension'], () => {
+    return signAddon({
+        xpiPath: 'dist/extension.zip',
+        version: JSON.parse(fs.readFileSync('package.json')).version,
+        apiKey: process.env.AMO_API_KEY,
+        apiSecret: process.env.AMO_API_SECRET,
+        channel: 'listed',
+        downloadDir: 'downloaded_amo',
+    }).then(function (result) {
+        if (result.success) {
+            console.log("The following signed files were downloaded:");
+            console.log(result.downloadedFiles);
+            console.log("Your extension ID is:");
+            console.log(result.id);
+        } else {
+            console.error("Your add-on could not be signed!");
+            console.error("Check the console for details.");
+        }
+        console.log(result.success ? "SUCCESS" : "FAIL");
+    }).catch(function (error) {
+        console.error("Signing error:", error);
+    })
 })
 
 gulp.task('publish-extension', ['publish-extension:chrome'])
