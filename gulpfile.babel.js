@@ -297,7 +297,7 @@ gulp.task(
 gulp.task('publish-extension:chrome', ['package-extension'], async () => {
     const extensionID = process.env.WEBSTORE_EXTENSION_ID
     const tokenManager = new chromeStore.TokenManager(
-        'worldbrain-1057',
+        process.env.WEBSTORE_TOKEN_CODE,
         process.env.WEBSTORE_CLIENT_ID,
         process.env.WEBSTORE_CLIENT_SECRET,
     )
