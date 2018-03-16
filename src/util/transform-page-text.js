@@ -2,13 +2,13 @@ import urlRegex from 'url-regex' // Check https://mathiasbynens.be/demo/url-rege
 import sw from 'remove-stopwords'
 import rmDiacritics from './remove-diacritics'
 
+import { DEFAULT_TERM_SEPARATOR } from 'src/search/util'
+
+const termSeparator = new RegExp(DEFAULT_TERM_SEPARATOR.source, 'gu')
 const allWhitespacesPattern = /\s+/g
-// const singleDigitNumbersPattern = /\b\d\b/g
-const nonWordsPattern = /[\u2000-\u206F\u2E00-\u2E7F\\!"#$%&()*+,./:;<=>?@[\]^_`{|}~«»。（）ㅇ©ºø°]/gi
+const nonWordsPattern = /[\u2000-\u206F\u2E00-\u2E7F\\!"#$%&()*+,./:;<=>?[\]^_`{|}~«»。（）ㅇ©ºø°]/gi
 const apostrophePattern = /['’]/g
-const allWordsWithDigits = /[a-z]+\d\w*|\w*\d[a-z]+/gi // /\w*\d\w*/g
-const dashPattern = /[-]/g
-const giberishWords = /\S*([b-df-hj-np-tv-z]){5,}\S*/gi
+const dashPattern = /(\S+)-(\S+)/g
 const longWords = /\b\w{30,}\b/gi
 const randomDigits = /\b(\d{1,3}|\d{5,})\b/gi
 const urlPattern = urlRegex()
@@ -27,32 +27,42 @@ const cleanupWhitespaces = (text = '') =>
  * @param {string|RegExp} [wordDelim=' '] Delimiter to split `input` into words.
  * @returns {string} Version of `text` param without duplicate words.
  */
-export const removeDupeWords = (text = '', wordDelim = ' ') =>
-    [...new Set(text.split(wordDelim))].join(wordDelim)
+export const removeDupeWords = (text = '') =>
+    [...new Set(text.split(termSeparator))].join(' ')
 
 const removeUselessWords = (text = '', lang) => {
-    const oldString = text.split(' ')
+    const oldString = text.split(termSeparator)
     const newString = sw.removeStopwords(oldString, lang)
     return newString.join(' ')
 }
 
 const combinePunctuation = (text = '') => text.replace(apostrophePattern, '')
 
-const splitPunctuation = (text = '') => text.replace(dashPattern, ' ')
+// Extract individual words from any words-connected-by-dashes
+const splitDashes = (text = '') => {
+    const matches = text.match(dashPattern)
+
+    if (matches == null) {
+        return text
+    }
+
+    return (
+        text +
+        ' ' +
+        matches
+            .map(match => match.split('-')) // Split up dash-words
+            .reduce((a, b) => [...a, ...b]) // Flatten split word
+            .join(' ')
+    )
+}
 
 const removeDiacritics = (text = '') => {
     return rmDiacritics(text)
 }
 
-// This also removes any numbers greater than 5 chars
-const removeAllWordsWithDigits = (text = '') =>
-    text.replace(allWordsWithDigits, ' ')
-
 const removeRandomDigits = (text = '') => text.replace(randomDigits, ' ')
 
 const removeLongWords = (text = '') => text.replace(longWords, ' ')
-
-const removeGiberishWords = (text = '') => text.replace(giberishWords, ' ')
 
 /**
  * Takes in some text content and strips it of unneeded data. Currently does
@@ -69,7 +79,7 @@ export default function transform({ text = '', lang = 'en' }) {
         return { text, lenAfter: 0, lenBefore: 0 }
     }
 
-    let searchableText = text
+    let searchableText = text.toLocaleLowerCase(lang)
 
     // Remove URLs first before we start messing with things
     searchableText = removeUrls(searchableText)
@@ -78,14 +88,19 @@ export default function transform({ text = '', lang = 'en' }) {
     // Example O'Grady => OGrady
     searchableText = combinePunctuation(searchableText)
 
-    // Splits words with - into two separate words
-    // Example "chevron-right", "chevron right"
-    searchableText = splitPunctuation(searchableText)
+    // Splits words with - into separate words
+    // Example "chevron-right": "chevron right chevron-right"
+    searchableText = splitDashes(searchableText)
 
     // Changes accented characters to regular letters
     searchableText = removeDiacritics(searchableText)
 
     searchableText = removePunctuation(searchableText)
+
+    searchableText = removeDupeWords(searchableText)
+
+    // Removes all single digits and digits over 5+ characters
+    searchableText = removeRandomDigits(searchableText)
 
     // Removes 'stopwords' such as they'll, don't, however ect..
     searchableText = removeUselessWords(searchableText, lang)
@@ -93,19 +108,8 @@ export default function transform({ text = '', lang = 'en' }) {
     // We don't care about non-single-space whitespace (' ' is cool)
     searchableText = cleanupWhitespaces(searchableText)
 
-    // Remove all words containing numbers ex. blah123
-    searchableText = removeAllWordsWithDigits(searchableText)
-
-    // Removes all single digits and digits over 5+ characters
-    searchableText = removeRandomDigits(searchableText)
-
     // Removes all words 20+ characters long
     searchableText = removeLongWords(searchableText)
-
-    // Removes all words containing 4+ consonants such as "hellllo"
-    searchableText = removeGiberishWords(searchableText)
-
-    searchableText = removeDupeWords(searchableText)
 
     return {
         text: searchableText,
