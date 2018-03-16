@@ -7,9 +7,7 @@ import { installTimeStorageKey } from 'src/imports/background'
 import {
     constants as blacklistConsts,
     blacklist,
-    convertOldExtBlacklist,
 } from 'src/blacklist/background'
-import { OLD_EXT_KEYS } from 'src/options/imports/constants'
 import { index } from 'src/search'
 import analytics from 'src/analytics'
 import updateNotification from 'src/util/update-notification'
@@ -65,27 +63,6 @@ async function onInstall() {
 async function onUpdate() {
     // Notification with updates when we update
     updateNotification()
-
-    // If no prior conversion, convert old ext blacklist + show static notif page
-    const {
-        [blacklistConsts.CONVERT_TIME_KEY]: blacklistConverted,
-        [OLD_EXT_UPDATE_KEY]: alreadyUpdated,
-        [OLD_EXT_KEYS.INDEX]: oldExtIndex,
-    } = await browser.storage.local.get([
-        blacklistConsts.CONVERT_TIME_KEY,
-        OLD_EXT_UPDATE_KEY,
-        OLD_EXT_KEYS.INDEX,
-    ])
-
-    if (!blacklistConverted) {
-        convertOldExtBlacklist()
-    }
-
-    // Over complicated check of old ext data + already upgraded flag to only show update page once
-    if (!alreadyUpdated && oldExtIndex && oldExtIndex.index instanceof Array) {
-        browser.tabs.create({ url: UPDATE_URL })
-        browser.storage.local.set({ [OLD_EXT_UPDATE_KEY]: Date.now() })
-    }
 }
 
 browser.commands.onCommand.addListener(command => {

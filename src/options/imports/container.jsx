@@ -170,9 +170,6 @@ class ImportContainer extends Component {
             onAllowHistoryClick={this.handleEstTableCheck(
                 constants.IMPORT_TYPE.HISTORY,
             )}
-            onAllowOldExtClick={this.handleEstTableCheck(
-                constants.IMPORT_TYPE.OLD,
-            )}
         />
     )
 
@@ -284,7 +281,6 @@ const mapStateToProps = state => ({
     isLoading: selectors.isLoading(state),
     isIdle: selectors.isIdle(state),
     isStartBtnDisabled: selectors.isStartBtnDisabled(state),
-    showOldExt: selectors.showOldExt(state),
     downloadData: selectors.downloadDetailsData(state),
     estimates: selectors.estimates(state),
     progress: selectors.progress(state),

@@ -12,12 +12,10 @@ import {
 const defaultStats = {
     [TYPE.HISTORY]: 0,
     [TYPE.BOOKMARK]: 0,
-    [TYPE.OLD]: 0,
 }
 
 const defaultState = {
     processErrors: false,
-    showOldExt: false,
     downloadData: [],
     completed: defaultStats, // Count of docs already in DB (estimates view)
     fail: defaultStats, // Fail counts for completed import items
@@ -33,7 +31,6 @@ const defaultState = {
     allowTypes: {
         [TYPE.HISTORY]: false,
         [TYPE.BOOKMARK]: false,
-        [TYPE.OLD]: false,
     },
     showDownloadDetails: false,
 }
@@ -128,7 +125,6 @@ export default createReducer(
         [actions.initFailCounts]: payloadReducer('fail'),
         [actions.initSuccessCounts]: payloadReducer('success'),
         [actions.initDownloadData]: payloadReducer('downloadData'),
-        [actions.setShowOldExt]: payloadReducer('showOldExt'),
 
         // Adv settings mode reducers
         [actions.setConcurrency]: (state, concurrency) => ({
