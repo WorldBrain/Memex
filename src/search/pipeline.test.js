@@ -64,6 +64,13 @@ const runSuite = useOld => () => {
         })
     })
 
+    test('extract terms from a document normalizing weird spaces', () => {
+        testExtractTerms({
+            input:
+                'very often\u{2007}the people\u{202F}forget to optimize important\u{A0}code',
+        })
+    })
+
     test('extract terms from a document _including_ words with numbers', () => {
         testExtractTerms({
             input:
