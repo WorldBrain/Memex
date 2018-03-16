@@ -9,10 +9,8 @@ import localStyles from './Import.css'
 const EstimatesTable = ({
     onAllowHistoryClick,
     onAllowBookmarksClick,
-    onAllowOldExtClick,
     estimates,
     allowTypes,
-    showOldExt,
 }) => (
     <table className={localStyles.importTable}>
         <colgroup>
@@ -79,28 +77,6 @@ const EstimatesTable = ({
                 <td>{estimates[TYPE.BOOKMARK].remaining}</td>
                 <td>{estimates[TYPE.BOOKMARK].timeRemaining}</td>
             </tr>
-            {showOldExt && (
-                <tr className={localStyles.importTableRow}>
-                    <td>
-                        <input
-                            className={localStyles.checkbox}
-                            type="checkbox"
-                            name="history"
-                            id="old-ext"
-                            onChange={onAllowOldExtClick}
-                            checked={allowTypes[TYPE.OLD]}
-                        />
-                        <label className={localStyles.label} htmlFor="old-ext">
-                            <span className={localStyles.checkboxText}>
-                                Old extension pages
-                            </span>
-                        </label>
-                    </td>
-                    <td>{estimates[TYPE.OLD].complete}</td>
-                    <td>{estimates[TYPE.OLD].remaining}</td>
-                    <td>{estimates[TYPE.OLD].timeRemaining}</td>
-                </tr>
-            )}
             <tr
                 className={cx(localStyles.importTableRow, localStyles.disabled)}
             >
@@ -153,7 +129,6 @@ const estimatesShape = PropTypes.shape({
 
 EstimatesTable.propTypes = {
     // State
-    showOldExt: PropTypes.bool.isRequired,
     allowTypes: PropTypes.shape({
         [TYPE.HISTORY]: PropTypes.bool.isRequired,
         [TYPE.BOOKMARK]: PropTypes.bool.isRequired,
@@ -162,7 +137,6 @@ EstimatesTable.propTypes = {
     // Event handlers
     onAllowHistoryClick: PropTypes.func.isRequired,
     onAllowBookmarksClick: PropTypes.func.isRequired,
-    onAllowOldExtClick: PropTypes.func.isRequired,
 
     // Data
     estimates: PropTypes.shape({

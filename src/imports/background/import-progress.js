@@ -9,28 +9,28 @@ class ImportProgressManager {
     static CONCURR_LIMIT = 20
 
     /**
-     * @property {ItemProcessor[]} Currently scheduled processor instances, affording control over execution.
+     * @type {ItemProcessor[]} Currently scheduled processor instances, affording control over execution.
      */
     processors = []
 
     /**
-     * @property {number} Currently set level of concurrency.
+     * @type {number} Currently set level of concurrency.
      */
     _concurrency
 
     /**
-     * @property {boolean} Currently set preference for including previously error'd items in import.
+     * @type {boolean} Currently set preference for including previously error'd items in import.
      */
     processErrors = false
 
     /**
-     * @property {any} Object containing `next` and `complete` methods to run after each item and when
+     * @type {any} Object containing `next` and `complete` methods to run after each item and when
      *  all items complete, respecitively.
      */
     observer
 
     /**
-     * @property {boolean} Flag denoting whether or not current state is stopped or not.
+     * @type {boolean} Flag denoting whether or not current state is stopped or not.
      */
     stopped = false
 
@@ -104,14 +104,25 @@ class ImportProgressManager {
         } finally {
             processor.finished = true
 
-            this.observer.next(msg)
+            // Send item data + outcome status down to UI (and error if present)
+            if (!this.stopped) {
+                this.observer.next(msg)
 
-            // Either flag as error or remove from state depending on processing error status
-            if (msg.error && !this.processErrors) {
-                await stateManager.flagItemAsError(chunkKey, encodedUrl)
-            } else {
-                await stateManager.removeItem(chunkKey, encodedUrl)
+                // Either flag as error or remove from state depending on processing error status
+                if (msg.error && !this.processErrors) {
+                    await stateManager.flagItemAsError(chunkKey, encodedUrl)
+                } else {
+                    await stateManager.removeItem(chunkKey, encodedUrl)
+                }
             }
+        }
+    }
+
+    async init(allowTypes, quickMode) {
+        stateManager.allowTypes = allowTypes
+
+        if (!await this.getImportInProgressFlag()) {
+            await stateManager.fetchEsts(quickMode)
         }
     }
 
@@ -119,10 +130,11 @@ class ImportProgressManager {
      * Start execution
      */
     async start() {
+        this.setImportInProgressFlag(true)
         this.stopped = false
 
         // Iterate through data chunks from the state manager
-        for await (const { chunk, chunkKey } of stateManager.getItems(
+        for await (const { chunk, chunkKey } of stateManager.fetchItems(
             this.processErrors,
         )) {
             const importItemEntries = Object.entries(chunk)
@@ -172,13 +184,11 @@ class ImportProgressManager {
     }
 
     async getImportInProgressFlag() {
-        const {
-            [ImportProgressManager.IMPORTS_PROGRESS_KEY]: flag,
-        } = await browser.storage.local.get({
+        const storage = await browser.storage.local.get({
             [ImportProgressManager.IMPORTS_PROGRESS_KEY]: false,
         })
 
-        return flag
+        return storage[ImportProgressManager.IMPORTS_PROGRESS_KEY]
     }
 
     async setImportInProgressFlag(value) {
@@ -186,6 +196,8 @@ class ImportProgressManager {
             [ImportProgressManager.IMPORTS_PROGRESS_KEY]: value,
         })
     }
+
+    fetchEsts = quickMode => stateManager.fetchEsts(quickMode)
 }
 
 export default ImportProgressManager

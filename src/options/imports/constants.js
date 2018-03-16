@@ -25,13 +25,11 @@ export const STATUS = {
 export const IMPORT_TYPE = {
     BOOKMARK: 'b',
     HISTORY: 'h',
-    OLD: 'o', // Old extension page
 }
 
 export const IMPORT_TYPE_DISPLAY = {
     [IMPORT_TYPE.BOOKMARK]: 'bookmarks',
     [IMPORT_TYPE.HISTORY]: 'history',
-    [IMPORT_TYPE.OLD]: 'old ext',
 }
 
 /** Keys used for local storage. */
@@ -69,16 +67,7 @@ export const DOC_TIME_EST = 3
 
 export const DEF_CONCURRENCY = 10
 
-export const OLD_EXT_KEYS = {
-    NUM_DONE: 'old-ext-converted-count',
-    INDEX: 'index',
-    BOOKMARKS: 'bookmarks',
-    HIST: 'history',
-    BLACKLIST: 'blacklist',
-}
-
 export const DEF_ALLOW = {
     [IMPORT_TYPE.HISTORY]: true,
     [IMPORT_TYPE.BOOKMARK]: true,
-    [IMPORT_TYPE.OLD]: true,
 }

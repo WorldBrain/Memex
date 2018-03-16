@@ -1,7 +1,6 @@
 import fetchPageData from 'src/page-analysis/background/fetch-page-data'
 import { IMPORT_TYPE, DOWNLOAD_STATUS } from 'src/options/imports/constants'
 import * as index from 'src/search'
-import { clearOldExtData } from 'src/imports/background'
 
 const fetchPageDataOpts = {
     includePageContent: true,
@@ -65,17 +64,17 @@ async function getBookmarkTime({ browserId }) {
 
 export default class ImportItemProcessor {
     /**
-     * @property {Function} Function to afford aborting current XHR. Set when import processor reaches XHR point.
+     * @type {Function} Function to afford aborting current XHR. Set when import processor reaches XHR point.
      */
     abortXHR
 
     /**
-     * @property {boolean} Flag denoting whether or not execution has been cancelled.
+     * @type {boolean} Flag denoting whether or not execution has been cancelled.
      */
     cancelled = false
 
     /**
-     * @property {boolean} Flag denoting whether or not execution has finished successfully or not.
+     * @type {boolean} Flag denoting whether or not execution has finished successfully or not.
      */
     finished = false
 
@@ -152,24 +151,6 @@ export default class ImportItemProcessor {
         return { status: DOWNLOAD_STATUS.SUCC }
     }
 
-    async _processOldExt(importItem) {
-        const pageDoc = await this._createPageDoc(importItem)
-
-        // Fetch and create meta-docs
-        const visits = await getVisitTimes(importItem)
-        const bookmark = importItem.hasBookmark ? Date.now() : undefined
-
-        await this._storeDocs({ pageDoc, visits, bookmark })
-
-        // If all okay now, remove the old data
-        await clearOldExtData(importItem)
-
-        this._checkCancelled()
-
-        // If we finally got here without an error being thrown, return the success status message + pageDoc data
-        return { status: DOWNLOAD_STATUS.SUCC }
-    }
-
     /**
      * Given an import state item, performs appropriate processing depending on the import type.
      * Main execution method.
@@ -185,8 +166,6 @@ export default class ImportItemProcessor {
             case IMPORT_TYPE.BOOKMARK:
             case IMPORT_TYPE.HISTORY:
                 return await this._processHistory(importItem)
-            case IMPORT_TYPE.OLD:
-                return await this._processOldExt(importItem)
             default:
                 throw new Error('Unknown import type')
         }

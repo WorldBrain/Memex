@@ -24,7 +24,6 @@ export const totals = createSelector(imports, state => state.totals)
 const completed = createSelector(imports, state => state.completed)
 export const allowTypes = createSelector(imports, state => state.allowTypes)
 export const loadingMsg = createSelector(imports, state => state.loadingMsg)
-export const showOldExt = createSelector(imports, state => state.showOldExt)
 
 /**
  * Currently only used for analytics; derive the import type from `allowTypes` state

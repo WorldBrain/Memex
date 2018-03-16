@@ -26,7 +26,6 @@ class ImportsConnHandler {
     static ONBOARDING_ALLOW_TYPES = {
         [TYPE.HISTORY]: true,
         [TYPE.BOOKMARK]: false,
-        [TYPE.OLD]: false,
     }
 
     _cancelled = false

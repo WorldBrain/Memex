@@ -8,5 +8,4 @@ makeRemotelyCallable({
     addToBlacklist: blacklist.addToBlacklist,
 })
 
-export { default as convertOldExtBlacklist, CONVERT_TIME_KEY } from './convert'
 export { blacklist, constants }

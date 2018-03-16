@@ -1,18 +1,20 @@
 import { CMDS, DEF_CONCURRENCY } from 'src/options/imports/constants'
-import stateManager from './import-state'
 import ProgressManager from './import-progress'
 
 export default class ImportConnectionHandler {
     /**
-     * @property {runtime.Port} Runtime connection port to afford message communication with UI script
+     * @type {runtime.Port} Runtime connection port to afford message communication with UI script
      */
     port
 
     /**
-     * @property {ImportProgressManager} Importer instance
+     * @type {ImportProgressManager} Importer instance
      */
     importer
 
+    /**
+     * @type {boolean} Used to flag special quick imports on first install.
+     */
     _quickMode
 
     constructor({ port, quick = false }) {
@@ -40,7 +42,9 @@ export default class ImportConnectionHandler {
 
         if (!importInProgress) {
             // Make sure estimates view init'd with count data
-            const estimateCounts = await stateManager.fetchEsts(this._quickMode)
+            const estimateCounts = await this.importer.fetchEsts(
+                this._quickMode,
+            )
             this.port.postMessage({ cmd: CMDS.INIT, ...estimateCounts })
         } else {
             // ... else make sure to start UI in paused state
@@ -90,17 +94,9 @@ export default class ImportConnectionHandler {
      * or not to process that given type of imports.
      */
     async startImport(allowTypes) {
-        stateManager.allowTypes = allowTypes
-
-        // Perform history-stubs, vists, and history import state creation, if import not in progress
-        const importInProgress = await this.importer.getImportInProgressFlag()
-        if (!importInProgress) {
-            await stateManager.fetchEsts(this._quickMode)
-        }
-
+        await this.importer.init(allowTypes, this._quickMode)
         this.port.postMessage({ cmd: CMDS.START }) // Tell UI to finish loading state and move into progress view
 
-        this.importer.setImportInProgressFlag(true)
         this.importer.start()
     }
 
@@ -112,7 +108,7 @@ export default class ImportConnectionHandler {
         this.importer.setImportInProgressFlag(false)
 
         // Re-init the estimates view with updated estimates data
-        const estimateCounts = await stateManager.fetchEsts(this._quickMode)
+        const estimateCounts = await this.importer.fetchEsts(this._quickMode)
         this.port.postMessage({ cmd: CMDS.INIT, ...estimateCounts })
     }
 
