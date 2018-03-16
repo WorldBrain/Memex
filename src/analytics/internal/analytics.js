@@ -11,7 +11,7 @@ class Analytics {
      */
     _saveToDB = async params => {
         await db.eventLog.add(params)
-        console.log(await db.eventLog.toArray())
+        // console.log(await db.eventLog.toArray())
     }
 
     /**
