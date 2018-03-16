@@ -1,4 +1,4 @@
-import { EventProcessor } from './analysis'
+import { eventProcessor } from './analysis'
 import { MapEventTypeToInt } from './constants'
 
 import db from './db'
@@ -29,7 +29,7 @@ class Analytics {
         }
 
         if (MapEventTypeToInt[eventArgs.type].notifType) {
-            EventProcessor({
+            eventProcessor({
                 type: MapEventTypeToInt[eventArgs.type].notifType,
                 timestamp,
             })

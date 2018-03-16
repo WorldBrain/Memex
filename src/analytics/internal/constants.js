@@ -144,4 +144,10 @@ export const MapEventTypeToInt = {
         id: 38,
         notifType: 'nlp_search',
     },
+    onboarding_cancel_import: {
+        id: 39,
+    },
+    onboarding_finish_import: {
+        id: 40,
+    },
 }
