@@ -1,53 +1,35 @@
 /* eslint-env jest */
 
-import pipeline, { extractTerms } from './pipeline'
+import newPipeline from './search-index-new/pipeline'
+import oldPipeline, { extractTerms } from './search-index-old/pipeline'
+import * as DATA from './pipeline.test.data'
 
-const TEST_EXTRACT_OUTPUT = new Set([
-    'term/people',
-    'term/forget',
-    'term/optimize',
-    'term/important',
-    'term/code',
-])
-function testExtractTerms({ input, output }) {
-    const result = extractTerms(input, 'term')
-    expect(result).toEqual(
-        output ? new Set(output.map(s => 'term/' + s)) : TEST_EXTRACT_OUTPUT,
-    )
-}
+const runSuite = useOld => () => {
+    // New index pipeline has removed unused visit, bookmark inputs and removed all IDB key prefixing ('term/')
+    const pipeline = useOld ? oldPipeline : newPipeline
+    const attachPrefix = useOld ? s => 'term/' + s : s => s
 
-describe('Search index pipeline', () => {
+    function testExtractTerms({ input, output = DATA.EXPECTED_TERMS }) {
+        const result = extractTerms(input, useOld ? 'term' : undefined)
+
+        expect(result).toEqual(new Set(output.map(attachPrefix)))
+    }
+
     test('process a document', async () => {
         const result = await pipeline({
-            pageDoc: {
-                url: 'https://www.test.com/test',
-                content: {
-                    fullText: 'the wild fox jumped over the hairy red hen',
-                    title: 'test page',
-                },
-            },
+            pageDoc: DATA.PAGE_1,
             bookmarkDocs: [],
             visits: ['12345'],
             rejectNoContent: true,
         })
-        expect(result).toEqual(
-            expect.objectContaining({
-                terms: new Set([
-                    'term/wild',
-                    'term/fox',
-                    'term/jumped',
-                    'term/hairy',
-                    'term/red',
-                    'term/hen',
-                ]),
-                urlTerms: new Set(['url/test']),
-                titleTerms: new Set(['title/test', 'title/page']),
-                domain: 'domain/test.com',
-                visits: new Set(['visit/12345']),
-                bookmarks: new Set(),
-                tags: new Set(),
-            }),
-        )
+
+        // Pipeline outputs differently in both implementations too as pages now contain additional data
+        //  that was prev. in Pouch (Pouch docs never went through pipeline - weird design).
+        const expected = useOld
+            ? DATA.EXPECTED_OUTPUT_OLD
+            : DATA.EXPECTED_OUTPUT_NEW
+
+        expect(result).toEqual(expect.objectContaining(expected))
     })
 
     test('extract terms from a document', () => {
@@ -82,10 +64,18 @@ describe('Search index pipeline', () => {
         })
     })
 
-    test('extract terms from a document removing words with numbers', () => {
+    test('extract terms from a document normalizing weird spaces', () => {
+        testExtractTerms({
+            input:
+                'very often\u{2007}the people\u{202F}forget to optimize important\u{A0}code',
+        })
+    })
+
+    test('extract terms from a document _including_ words with numbers', () => {
         testExtractTerms({
             input:
                 'very often the-people (like Punkdude123) forget to optimize important code',
+            output: [...DATA.EXPECTED_TERMS, 'punkdude123'],
         })
     })
 
@@ -128,10 +118,11 @@ describe('Search index pipeline', () => {
         })
     })
 
-    test('FIX for Slavic languages: extract terms from a document removing words with too many consonants', () => {
+    test('extract terms from a document _including_ words with many consonants', () => {
         testExtractTerms({
             input:
                 'very often the people from Vrchlabí forget to optimize important code',
+            output: [...DATA.EXPECTED_TERMS, 'vrchlabi'],
         })
     })
 
@@ -141,4 +132,7 @@ describe('Search index pipeline', () => {
                 'very often the people forget to people optimize important code',
         })
     })
-})
+}
+
+describe('Old search index pipeline', runSuite(true))
+describe('New search index pipeline', runSuite(false))

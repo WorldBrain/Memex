@@ -1,65 +1,6 @@
 import normalizeUrl from 'src/util/encode-url-for-id'
-import transformPageText from 'src/util/transform-page-text'
-import { DEFAULT_TERM_SEPARATOR, extractContent } from '../util'
 
-const urlNormalizationOpts = {
-    normalizeProtocol: true, // Prepend `http://` if URL is protocol-relative
-    stripFragment: true, // Remove trailing hash fragment
-    stripWWW: true, // Remove any leading `www.`
-    removeTrailingSlash: true,
-    removeQueryParameters: [/.+/], // Remove all query params from terms indexing
-    removeDirectoryIndex: [/^(default|index)\.\w{2,4}$/], // Remove things like tralining `/index.js` or `/default.php`
-    skipProtocolTrim: true,
-    skipQueryRules: true,
-}
-
-/**
- * @param {string} url A raw URL string to attempt to extract parts from.
- * @returns {any} Object containing `hostname` and `pathname` props. Values should be the `domain.tld.cctld` part and
- *  everything after, respectively. If regex matching failed on given URL, error will be logged and simply
- *  the URL with protocol and opt. `www` parts removed will be returned for both values.
- */
-export function transformUrl(url) {
-    let parsed
-    const normalized = normalizeUrl(url, urlNormalizationOpts)
-
-    try {
-        parsed = new URL(normalized)
-    } catch (error) {
-        console.error(`cannot parse URL: ${normalized}`)
-        return { hostname: normalized, pathname: normalized }
-    }
-
-    return {
-        hostname: parsed ? parsed.hostname : normalized,
-        pathname: parsed ? parsed.pathname : normalized,
-    }
-}
-
-/**
- *
- * @param {string} text
- * @returns {Set<string>} Set of "words-of-interest" - determined by pre-proc logic in `transformPageText` - extracted from `text`.
- */
-export function extractTerms(text) {
-    if (!text || !text.length) {
-        return []
-    }
-
-    const { text: transformedText } = transformPageText({ text })
-
-    if (!transformedText || !transformedText.length) {
-        return new Set()
-    }
-
-    return [
-        ...new Set(
-            extractContent(transformedText, {
-                separator: DEFAULT_TERM_SEPARATOR,
-            }),
-        ),
-    ]
-}
+import { extractTerms, transformUrl } from '../search-index-old/pipeline'
 
 /**
  * Given some page data, applies some transformations to the text and
@@ -73,6 +14,7 @@ export default function pipeline({
     pageDoc: { content = {}, url, ...data },
     rejectNoContent = true,
 }) {
+    const textTimerLabel = `TIMER - text proc: ${url}`
     // First apply transformations to the URL
     const { pathname, hostname } = transformUrl(url)
 
@@ -86,9 +28,11 @@ export default function pipeline({
     }
 
     // Extract all terms out of processed content
-    const terms = extractTerms(content.fullText)
-    const titleTerms = extractTerms(content.title)
-    const urlTerms = extractTerms(pathname)
+    console.time(textTimerLabel)
+    const terms = [...extractTerms(content.fullText)]
+    console.timeEnd(textTimerLabel)
+    const titleTerms = [...extractTerms(content.title)]
+    const urlTerms = [...extractTerms(pathname)]
 
     return Promise.resolve({
         url: normalizeUrl(url),

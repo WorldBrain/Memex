@@ -1,6 +1,6 @@
 import { keyGen } from './search-index-old/util'
 
-export const DEFAULT_TERM_SEPARATOR = /[|' .,\-|(\n)]+/
+export const DEFAULT_TERM_SEPARATOR = /[|\u{A0}' .,\-|(\n)]+/u
 export const URL_SEPARATOR = /[/?#=+& _.,\-|(\n)]+/
 
 /**
@@ -18,4 +18,4 @@ export const extractContent = (
     content
         .split(separator)
         .map(word => keyGen[key](word.toLowerCase()))
-        .filter(term => !term.endsWith('/'))
+        .filter(term => !term.endsWith('/') && term.length)
