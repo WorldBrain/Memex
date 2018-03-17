@@ -19,8 +19,7 @@
     text-overflow: ellipsis;
     white-space: pre;
     margin: 4px 0px;
-    width: 75%;
-    cursor: pointer;
+    width: 90%;
 }
 
 .title {
@@ -30,5 +29,9 @@ for !important */
     color: #444 !important; /* stylelint-disable-line declaration-no-important */
     font-size: 1.3em;
     text-decoration: none;
-    width: 80%;
+    width: 90%;
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }

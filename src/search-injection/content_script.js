@@ -45,7 +45,11 @@ const handleRender = results => {
     // Check if the document has completed loading,
     // if it has, execute the rendering function immediately
     // else attach it to the DOMContentLoaded event listener
-    if (document.readyState === 'complete') renderComponent()
+    if (
+        document.readyState === 'complete' ||
+        document.readyState === 'interactive'
+    )
+        renderComponent()
     else document.addEventListener('DOMContentLoaded', renderComponent, true)
 }
 
@@ -83,6 +87,7 @@ const init = async () => {
     // If this is false, there is no need to render the results
     const searchInjection = await getLocalStorage(
         constants.SEARCH_INJECTION_KEY,
+        true,
     )
 
     // TODO: Generalize this matching process

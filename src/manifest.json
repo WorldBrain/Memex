@@ -55,7 +55,7 @@
     ],
     "omnibox": { "keyword": "w" },
     "options_ui": {
-        "page": "./options/options.html",
+        "page": "./options/options.html#/settings",
         "open_in_tab": true
     },
     "manifest_version": 2

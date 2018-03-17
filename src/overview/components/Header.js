@@ -48,7 +48,7 @@ const Header = ({
             >
                 Upgrade Memex
             </OutLink>
-            <a href="/options/options.html">
+            <a href="/options/options.html#/settings">
                 <img src="/img/settings-icon.png" className={styles.icon} />
             </a>
         </div>

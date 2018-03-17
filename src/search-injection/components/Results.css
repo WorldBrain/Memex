@@ -6,6 +6,7 @@
     /* Base size of the children elements */
     margin-bottom: 30px;
     position: relative;
+    animation: fadeIn 0.4s ease-in;
 }
 
 .resultsText {
@@ -24,7 +25,7 @@
     display: inline-block;
     font-size: 1.1em;
     margin-bottom: 10px;
-    margin-top: 10px;
+    margin-top: 6px;
 }
 
 .links {
@@ -45,7 +46,7 @@
     width: 75px;
     height: 20px;
     margin-left: 10px;
-    vertical-align: bottom;
+    vertical-align: middle;
 }
 
 .settingsButton {
@@ -65,10 +66,12 @@
 
 .above {
     width: 600px;
-    font-size: 75%;
+    font-size: 90%;
+    margin-left: 15px;
+    margin-top: -20px;
 
     & .resultsText {
-        width: 69%;
+        width: 71%;
     }
 
     & .settingsButton {
@@ -78,7 +81,8 @@
 
 .side {
     width: 454px;
-    font-size: 85%;
+    font-size: 89%;
+    margin-top: -8px;
 
     & .resultsText {
         width: 100%;
@@ -86,5 +90,15 @@
 
     & .settingsButton {
         right: -5px;
+    }
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
     }
 }

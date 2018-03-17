@@ -28,7 +28,7 @@ class Results extends React.Component {
     }
 
     state = {
-        hideResults: false,
+        hideResults: true,
         dropdown: false,
         removed: false,
         position: null,
