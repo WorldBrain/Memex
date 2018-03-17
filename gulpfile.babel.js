@@ -101,6 +101,7 @@ async function createBundle(
                 ? 'https://analytics.worldbrain.io'
                 : 'http://localhost:1234',
             PIWIK_SITE_ID: '1',
+            SENTRY_DSN: 'ADD_YOUR_DNS_HERE',
         }),
         { global: true },
     )

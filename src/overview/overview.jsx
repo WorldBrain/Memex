@@ -16,9 +16,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // Set up the sentry runtime error config
-Raven.config(
-    'https://1f8eda9c41c445999a23e01e87eb5754@sentry.io/305560',
-).install()
+Raven.config(process.env.SENTRY_DSN).install()
 
 // Set up the Redux store
 const store = configureStore({ ReduxDevTools })
