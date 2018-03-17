@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { Provider } from 'react-redux'
+import Raven from 'raven-js'
 
 import overview from 'src/overview'
 import { ErrorBoundary, RuntimeError } from 'src/common-ui/components'
@@ -13,6 +14,11 @@ let ReduxDevTools
 if (process.env.NODE_ENV !== 'production') {
     ReduxDevTools = require('src/dev/redux-devtools-component').default
 }
+
+// Set up the sentry runtime error config
+Raven.config(
+    'https://1f8eda9c41c445999a23e01e87eb5754@sentry.io/305560',
+).install()
 
 // Set up the Redux store
 const store = configureStore({ ReduxDevTools })
