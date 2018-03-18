@@ -4,22 +4,23 @@
 
 .result {
     background: #fbf9fa;
-    padding: 12px;
+    padding: 15px;
+    padding-left: 16px;
 }
 
 .displayTime {
-    font-size: 1em;
+    font-size: 0.9em;
     color: #bfbdbe;
 }
 
 .url {
     color: var(--memex-green);
-    font-size: 1em;
+    font-size: 0.8em;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: pre;
-    margin: 4px 0px;
-    width: 90%;
+    margin: -2px 0 5px 0;
+    width: 97%;
 }
 
 .title {
@@ -27,11 +28,12 @@
 overides the color of links, there is a need
 for !important */
     color: #444 !important; /* stylelint-disable-line declaration-no-important */
-    font-size: 1.3em;
+    font-size: 1.125em;
     text-decoration: none;
-    width: 90%;
+    width: 97%;
     display: inline-block;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    margin-bottom: 1px;
 }

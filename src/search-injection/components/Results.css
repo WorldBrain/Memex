@@ -2,18 +2,31 @@
     --memex-green: #4abf9d;
 }
 
+.above {
+    & .settingsButton {
+        right: -10px;
+    }
+
+    & .resultsText {
+        padding-left: 16px;
+    }
+}
+
+.side {
+    width: 454px;
+
+    & .settingsButton {
+        right: -5px;
+        top: 14px;
+    }
+}
+
 .MEMEX_CONTAINER {
     /* Base size of the children elements */
     margin-bottom: 30px;
     position: relative;
-    animation: fadeIn 0.4s ease-in;
-}
-
-.resultsText {
-    display: inline-block;
-    margin-bottom: 3px;
-    font-size: 1.3em;
-    font-weight: 100;
+    animation: fadeIn 0.5s ease-in;
+    margin-top: -20px;
 }
 
 .resultLength {
@@ -23,15 +36,16 @@
 
 .linksContainer {
     display: inline-block;
-    font-size: 1.1em;
+    font-size: 1em;
     margin-bottom: 10px;
     margin-top: 6px;
+    margin-left: -30px;
 }
 
 .links {
     color: #666;
     text-decoration: none;
-    font-size: 1em;
+    font-size: 0.9em;
     display: inline-block;
     margin-right: 10px;
     cursor: pointer;
@@ -64,33 +78,12 @@
     background-size: 20px;
 }
 
-.above {
-    width: 600px;
-    font-size: 90%;
-    margin-left: 15px;
-    margin-top: -20px;
-
-    & .resultsText {
-        width: 71%;
-    }
-
-    & .settingsButton {
-        right: -10px;
-    }
-}
-
-.side {
-    width: 454px;
-    font-size: 89%;
-    margin-top: -8px;
-
-    & .resultsText {
-        width: 100%;
-    }
-
-    & .settingsButton {
-        right: -5px;
-    }
+.resultsText {
+    display: inline-block;
+    margin-bottom: 3px;
+    font-size: 1.1em;
+    font-weight: 100;
+    width: 71%;
 }
 
 @keyframes fadeIn {

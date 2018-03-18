@@ -111,6 +111,9 @@ class Results extends React.Component {
         if (this.state.removed) return <RemovedText undo={this.undoRemove} />
 
         const { position } = this.state
+        if (!position) {
+            return null
+        }
         return (
             <div
                 className={classNames(styles.MEMEX_CONTAINER, styles[position])}
