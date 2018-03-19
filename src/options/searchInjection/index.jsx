@@ -7,6 +7,8 @@ import {
     fetchData,
 } from 'src/search-injector/utilities'
 
+import styles from './index.css'
+
 class SearchInjectionContainer extends Component {
     static propTypes = {}
 
@@ -52,19 +54,21 @@ class SearchInjectionContainer extends Component {
     render() {
         return (
             <div>
-                <label className="switch">
-                    <input
-                        type="checkbox"
-                        onChange={this.handleToggle}
-                        checked={this.state.searchInjection}
-                    />
-                    Toggle Search Injection
-                    <hr />
+                <h2>Settings</h2>
+                <h3>Toggle Search Injection</h3>
+                <label>
+                    <label className={styles.switch}>
+                        <input
+                            type="checkbox"
+                            onChange={this.handleToggle}
+                            checked={this.state.searchInjection}
+                        />
+                        <span className={styles.slider} />
+                    </label>
                     {/* <select onChange={this.handleInjectionPositionChange}>
                         <option value={ALONGSIDE_SEARCH_RESULT}>{ALONGSIDE_SEARCH_RESULT}</option>
                         <option value={OVER_SEARCH_RESULT}>{OVER_SEARCH_RESULT}</option>
                     </select> */}
-                    <hr />
                     <div>
                         This is a new feature of Memex that lets you search the
                         Memex memory and shows results side by side google(for
