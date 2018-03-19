@@ -33,7 +33,6 @@ export async function fetchData(key) {
  * @param {string} value state of the property mentioned
  */
 export async function storeValue(key, value) {
-    console.log(key, value)
     return browser.storage.local.set({
         [key]: value,
     })

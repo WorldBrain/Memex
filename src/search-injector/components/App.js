@@ -77,7 +77,9 @@ class App extends Component {
         if (!resultsExhausted) {
             return (
                 <div
-                    className={styles.showMore}
+                    className={
+                        this.renderCSS() ? styles.showMoreSide : styles.showMore
+                    }
                     onClick={this.props.openOverview}
                 >
                     Show All Results.
@@ -168,22 +170,24 @@ class App extends Component {
             >
                 {!this.state.remove ? (
                     <div>
-                        {this.renderDropDown()}
                         <div>
-                            <h3 className={styles.heading}>
-                                You have{' '}
-                                {this.props.searchResult
-                                    ? this.props.searchResult.totalCount
-                                    : ''}{' '}
-                                Results in Memex memory.
-                            </h3>
-                            {this.renderShowMoreResults()}
-                            <div className={styles.logoContainer}>
-                                <img
-                                    alt="memex Logo"
-                                    className={styles.logo}
-                                    src={this.state.memexLogo}
-                                />
+                            <div className={styles.headingWrapper}>
+                                {this.renderDropDown()}
+                                <h3 className={styles.heading}>
+                                    You have{' '}
+                                    {this.props.searchResult
+                                        ? this.props.searchResult.totalCount
+                                        : ''}{' '}
+                                    Results in
+                                </h3>
+                                <div className={styles.logoContainer}>
+                                    <img
+                                        alt="memex Logo"
+                                        className={styles.logo}
+                                        src={this.state.memexLogo}
+                                    />
+                                </div>
+                                {this.renderShowMoreResults()}
                             </div>
                             <div
                                 className={[

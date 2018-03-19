@@ -25,7 +25,6 @@ class SearchInjectionContainer extends Component {
     async componentWillMount() {
         const searchInjection = await fetchSearchInjection()
         const data = await fetchData(INJECTION_POSITION_KEY)
-        console.log(data)
 
         this.setState({
             searchInjection,
@@ -48,7 +47,6 @@ class SearchInjectionContainer extends Component {
         this.setState({
             data,
         })
-        console.log(data)
     }
 
     render() {

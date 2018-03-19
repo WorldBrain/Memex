@@ -1,28 +1,13 @@
 .searchResultContainer {
-    animation: 1s ease-out 0s 1 slideInFromLeft;
     position: relative;
-    text-decoration: none;
-    width: 40vw;
+    width: 48vw;
     padding: 2%;
-    margin: 0% 10%;
-    transition: display 2s;
+    margin: 0% 12%;
     min-width: 10vh;
-}
-
-@keyframes slideInFromLeft {
-    0% {
-        transform: translateX(100%);
-    }
-
-    100% {
-        transform: translateX(0);
-    }
 }
 
 .results {
     display: block;
-    transition: display 2s;
-    transition-timing-function: ease-in-out;
 }
 
 .resultsCollapsed {
@@ -31,20 +16,28 @@
 
 .heading {
     font-weight: 800;
+    font-size: 1.1em;
+    font-style: italic;
+    display: inline-block;
+    margin: 4% 0%;
 }
 
 .showMore {
     cursor: pointer;
-    color: #4abf9d;
-    float: left;
     font-size: 0.9em;
-    margin-top: 4%;
+    display: inline-block;
+    margin: 2% 33%;
+}
+
+.showMoreSide {
+    cursor: pointer;
+    font-size: 0.9em;
 }
 
 .styleSide {
-    max-width: 30vw;
+    max-width: 28vw;
     display: block;
-    min-height: 10vh;
+    min-height: 15vh;
 }
 
 .logo {
@@ -53,9 +46,9 @@
 }
 
 .logoContainer {
-    width: 26%;
-    float: right;
-    padding-top: 3%;
+    width: 16%;
+    display: inline-block;
+    margin: 0% 2%;
 }
 
 .options {
@@ -117,6 +110,11 @@
 }
 
 .settingsIconContainer {
-    width: 26%;
+    width: 34%;
     float: right;
+    margin: 28% -26%;
+}
+
+.headingWrapper {
+    white-space: nowrap;
 }

@@ -5,16 +5,20 @@
     text-overflow: ellipsis;
     display: block;
     background: #fbf8fa;
-    font-family: 'Libre Franklin', sans-serif;
-    padding: 5% 2%;
-    text-decoration: none;
+    font-family: 'Arial', sans-serif;
+    padding: 3% 2%;
 }
 
 .resultItems:hover {
     background-color: #e0d8de;
+    text-decoration: none;
 }
 
 a:hover {
+    text-decoration: none;
+}
+
+a {
     text-decoration: none;
 }
 
@@ -32,11 +36,12 @@ a:hover {
     overflow: hidden;
     text-overflow: ellipsis;
     display: block;
+    font-size: 14px;
 }
 
 .title {
     padding-bottom: 1%;
-    font-size: 1.5em;
+    font-size: 18px;
     color: #000;
     white-space: nowrap;
     overflow: hidden;
