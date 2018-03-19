@@ -51,6 +51,7 @@ const sourceFiles = [
         entries: ['./src/content_script.js'],
         output: 'content_script.js',
         destination: './extension',
+        cssOutput: './injector.css',
     },
     {
         entries: ['./src/overview/overview.jsx', commonUIEntry],

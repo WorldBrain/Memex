@@ -1,0 +1,51 @@
+.resultItems {
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    background: #fbf8fa;
+    font-family: 'Arial', sans-serif;
+    padding: 3% 2%;
+}
+
+.resultItems:hover {
+    background-color: #e0d8de;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: none;
+}
+
+a {
+    text-decoration: none;
+}
+
+.displayTime {
+    font-size: 0.8em;
+    color: grey;
+    padding-bottom: 1px;
+    padding-top: 1%;
+}
+
+.externalUrl {
+    text-decoration: underline;
+    color: #3eb995;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    font-size: 14px;
+}
+
+.title {
+    padding-bottom: 1%;
+    font-size: 18px;
+    color: #000;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    font-weight: 100;
+}

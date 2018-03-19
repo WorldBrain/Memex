@@ -4,6 +4,7 @@ import Privacy from './privacy'
 import Acknowledgements from './acknowledgement/components/content'
 import Tutorial from './tutorial'
 import Statistics from './statistics'
+import SearchInjection from './searchInjection/'
 
 export default [
     {
@@ -53,5 +54,11 @@ export default [
         pathname: '/tutorial',
         component: Tutorial,
         icon: 'info',
+    },
+    {
+        name: 'Toggle Search Injection',
+        pathname: '/searchInjection',
+        component: SearchInjection,
+        icon: '', // TODO: get an icon
     },
 ]
