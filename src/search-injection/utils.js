@@ -1,23 +1,58 @@
-export const appendCss = filename => {
+import { SEARCH_ENGINES } from './constants'
+
+export const injectCSS = file => {
+    // filename: (string) url of the CSS file
+    // injects the css into the webpage
+
     const link = document.createElement('link')
     link.type = 'text/css'
     link.rel = 'stylesheet'
-    link.href = filename
+    link.href = file
     const d = document.body || document.head || document.documentElement
     d.prepend(link)
 }
 
-// Generalized functions to get and store
-// variables in browser.storage.local
+export const matchURL = url => {
+    // url: (string) location.href 
+    // match url against search engines regexs 
+    // returns: the search engine it matches to or false
 
-export const getLocalStorage = async (KEY, defVal = '') => {
-    // defVal: Default value of the key to set, when key has not been set
+    for (let key in SEARCH_ENGINES) { // eslint-disable-line prefer-const
+        const regex = SEARCH_ENGINES[key].regex
+        if (url.match(regex) !== null)
+            return key
+    }
+    return false
+}
+
+export const fetchQuery = url => {
+    // url: (string) location.href 
+    // creates a new URL object
+    // and fetches the query param from the url
+    // returns: query
+
+    const urlObj = new URL(url)
+    const query = urlObj.searchParams.get('q')
+    return query
+}
+
+export const getLocalStorage = async (KEY, defVal) => {
+    // KEY: (string) 
+    // defVal: (any) default value of the key to set, if undefined
+    // gets the value, or if undefined stores it
+    // returns: fetched value
+
     const value = (await browser.storage.local.get(KEY))[KEY]
-    if (value === undefined) return await setLocalStorage(KEY, defVal)
+    if (value === undefined && defVal) return await setLocalStorage(KEY, defVal)
     return value
 }
 
 export const setLocalStorage = async (KEY, value) => {
+    // KEY: (string)
+    // value: (any)
+    // adds the key, value pair to the storage.local
+    // returns: value
+
     await browser.storage.local.set({
         [KEY]: value,
     })

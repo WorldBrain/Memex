@@ -56,7 +56,9 @@ class Results extends React.Component {
     seeMoreResults() {
         // Create a new tab with the query overview URL
         const query = new URL(location.href).searchParams.get('q')
-        const url = `${constants.OVERVIEW_URL}?query=${query}`
+        const overviewURL = chrome.extension.getURL('/overview/overview.html')
+
+        const url = `${overviewURL}?query=${query}`
         const message = {
             action: 'openOverviewURL',
             url,
@@ -114,6 +116,8 @@ class Results extends React.Component {
         if (!position) {
             return null
         }
+        const logoURL = browser.extension.getURL('img/worldbrain-logo-wo-beta.png')
+
         return (
             <div
                 className={classNames(styles.MEMEX_CONTAINER, styles[position])}
@@ -126,7 +130,7 @@ class Results extends React.Component {
                         </span>{' '}
                         in your
                         <img
-                            src={constants.MEMEX_LOGO_URL}
+                            src={logoURL}
                             className={styles.logo}
                         />
                     </p>

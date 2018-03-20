@@ -3,14 +3,14 @@ import ReactDOM from 'react-dom'
 
 import Results from './components/Results'
 import * as constants from './constants'
-import { appendCss, getLocalStorage } from './utils'
+import * as utils from './utils'
 import { SEARCH_CONN_NAME, CMDS } from '../overview/constants'
 
 const handleRender = results => {
     // The actual function to render the results on screen.
 
     const renderComponent = async () => {
-        const position = await getLocalStorage(constants.POSITION_KEY, 'above')
+        const position = await utils.getLocalStorage(constants.POSITION_KEY, 'above')
         const containerID = constants.SEARCH_ENGINES.google.container[position]
         // Gets the container using the passed id
         const container = document.getElementById(containerID)
@@ -40,7 +40,7 @@ const handleRender = results => {
 
     // Append content_script.css to the document
     const cssFile = browser.extension.getURL('/content_script.css')
-    appendCss(cssFile)
+    utils.injectCSS(cssFile)
 
     // Check if the document has completed loading,
     // if it has, execute the rendering function immediately
@@ -85,17 +85,19 @@ const search = query => {
 const init = async () => {
     // The users setting for this feature is stored in this variable
     // If this is false, there is no need to render the results
-    const searchInjection = await getLocalStorage(
+    const searchInjection = await utils.getLocalStorage(
         constants.SEARCH_INJECTION_KEY,
         true,
     )
+    
+    if (!searchInjection)
+        return;
 
-    // TODO: Generalize this matching process
-    const href = window.location.href
-    const gRegex = constants.SEARCH_ENGINES.google.regex
-    if (searchInjection && href.match(gRegex) != null) {
-        const url = new URL(href)
-        const query = url.searchParams.get('q')
+
+    const url = window.location.href
+    const matched = utils.matchURL(url)
+    if (matched){
+        const query = utils.fetchQuery(url)
         search(query)
     }
 }
