@@ -1,17 +1,5 @@
 import { SEARCH_ENGINES } from './constants'
 
-export const injectCSS = file => {
-    // filename: (string) url of the CSS file
-    // injects the css into the webpage
-
-    const link = document.createElement('link')
-    link.type = 'text/css'
-    link.rel = 'stylesheet'
-    link.href = file
-    const d = document.body || document.head || document.documentElement
-    d.prepend(link)
-}
-
 export const matchURL = url => {
     // url: (string) location.href 
     // match url against search engines regexs 
