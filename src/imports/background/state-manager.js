@@ -46,10 +46,10 @@ export class ImportStateManager {
     /**
      * @param {ImportCache} [cacheBackend] Affords state persistence.
      */
-    constructor(
-        cacheBackend = new ImportCache(),
-        itemCreator = new ItemCreator(),
-    ) {
+    constructor({
+        cacheBackend = new ImportCache({}),
+        itemCreator = new ItemCreator({}),
+    }) {
         this._cache = cacheBackend
         this._itemCreator = itemCreator
 
@@ -219,6 +219,6 @@ export class ImportStateManager {
     }
 }
 
-const instance = new ImportStateManager()
+const instance = new ImportStateManager({})
 
 export default instance

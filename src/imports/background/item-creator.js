@@ -17,27 +17,42 @@ const deriveImportItem = type => item => ({
  * @property {string} type
  * @property {Map<string, ImportItem>} data Map of URL keys to import items.
  */
+
 /**
  * @typedef {Object} BrowserItem
  * @property {string} id
  * @property {string} url
  */
 
+/**
+ * @typedef {Object} ItemLimits
+ * @property {number} histLimit
+ * @property {number} bmLimit
+ */
+
+/**
+ * @typedef {Object} ItemCreatorParams
+ * @property {ItemLimits} limits
+ * @property {DataSources} dataSources
+ * @property {() => Promise<any>} existingKeySource Resolves to `histKeys` and `bmKeys` `Set<string>`s containing
+ *  all existing history and bookmark keys to compare incoming URLs against.
+ */
+
 export default class ImportItemCreator {
     static DEF_LIMITS = { histLimit: Infinity, bmLimit: Infinity }
 
     /**
-     * @param {Object} [limits]
-     * @param {number} limits.histLimit Limit of history items to create.
-     * @param {number} limits.bmLimit Limit of bookmark items to create.
-     * @param {DataSources} [sources]
+     * @param {ItemCreatorParams} args
      */
-    constructor(
+    constructor({
         limits = ImportItemCreator.DEF_LIMITS,
-        sources = new DataSources(),
-    ) {
+        dataSources = new DataSources({}),
+        existingKeySource = grabExistingKeys,
+    }) {
         this.limits = limits
-        this._dataSources = sources
+        this._dataSources = dataSources
+        this._existingKeys = existingKeySource
+
         this.initData()
     }
 
@@ -68,7 +83,7 @@ export default class ImportItemCreator {
                 this._isBlacklisted = await checkWithBlacklist()
 
                 // Grab existing data keys from DB
-                const keySets = await grabExistingKeys()
+                const keySets = await this._existingKeys()
                 this._histKeys = keySets.histKeys
                 this._bmKeys = keySets.bmKeys
                 resolve()

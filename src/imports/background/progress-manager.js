@@ -1,8 +1,8 @@
 import promiseLimit from 'promise-limit'
 
 import { indexQueue } from 'src/search'
-import stateManager from './import-state'
-import ItemProcessor from './import-item-processor'
+import stateManager from './state-manager'
+import ItemProcessor from './item-processor'
 
 class ImportProgressManager {
     static IMPORTS_PROGRESS_KEY = 'is-imports-in-progress'
@@ -34,9 +34,9 @@ class ImportProgressManager {
      */
     stopped = false
 
-    constructor(initConcurrency, initObserver) {
-        this.concurrency = initConcurrency
-        this.observer = initObserver
+    constructor({ concurrency, observer }) {
+        this.concurrency = concurrency
+        this.observer = observer
     }
 
     set concurrency(value) {

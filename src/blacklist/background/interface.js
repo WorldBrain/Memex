@@ -1,5 +1,5 @@
 import { STORAGE_KEY } from 'src/options/blacklist/constants'
-import importStateManager from 'src/imports/background/import-state'
+import importStateManager from 'src/imports/background/state-manager'
 import { updateLastActive } from 'src/analytics'
 
 /**

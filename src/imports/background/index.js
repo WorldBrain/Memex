@@ -1,6 +1,6 @@
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
-import ConnHandler from './import-connection-handler'
-import importStateManager from './import-state'
+import ConnHandler from './connection-handler'
+import importStateManager from './state-manager'
 import { IMPORT_CONN_NAME as MAIN_CONN } from 'src/options/imports/constants'
 import { IMPORT_CONN_NAME as ONBOARDING_CONN } from 'src/overview/onboarding/constants'
 
