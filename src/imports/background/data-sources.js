@@ -17,6 +17,11 @@ export default class ImportDataSources {
         id: typeof browser.runtime.getBrowserInfo === 'undefined' ? '0' : '',
     }
 
+    constructor({ history = browser.history, bookmarks = browser.bookmarks }) {
+        this._history = history
+        this._bookmarks = bookmarks
+    }
+
     _createHistParams = time => ({
         ...ImportDataSources.DEF_HIST_PARAMS,
         endTime: time,
@@ -41,7 +46,7 @@ export default class ImportDataSources {
             time.isAfter(baseTime);
             time.subtract(1, 'week')
         ) {
-            yield browser.history.search(this._createHistParams(time.valueOf()))
+            yield this._history.search(this._createHistParams(time.valueOf()))
         }
     }
 
@@ -54,7 +59,7 @@ export default class ImportDataSources {
      */
     async *bookmarks(dirNode = ImportDataSources.ROOT_BM) {
         // Folders don't contain `url`; recurse!
-        const children = await browser.bookmarks.getChildren(dirNode.id)
+        const children = await this._bookmarks.getChildren(dirNode.id)
 
         // Split into folders and bookmarks
         const childGroups = children.reduce(
