@@ -6,7 +6,7 @@ describe('URL', () => {
     const URLS = {
         simple: "https://www.google.com/search?q=test",
         complex: "https://www.google.co.in/search?q=test+with+space&rlz=1C5CHFA_enIN722IN722&oq=test&aqs=chrome..69i57j69i60l4j69i65.13361j0j1&sourceid=chrome&ie=UTF-8",
-        nomatch: "https://www.google.com/ie=UTF-8&&sourceid=chrome"
+        nomatch: "https://www.google.com/ie=UTF-8&&sourceid=chrome",
     }
 
     test("should match url", () => {
@@ -39,7 +39,7 @@ describe('Browser Storage Local', () => {
         const keys = {
             notstored: "key_returns_undefined",
             stored: "key_returns_true",
-            twoargs: "key_returns_arg2"
+            twoargs: "key_returns_arg2",
         }
         const defaultValue = 10;
 

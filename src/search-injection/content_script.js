@@ -11,7 +11,6 @@ const cmdHandler = ({ cmd, ...payload }) => {
 
     switch (cmd) {
         case CMDS.RESULTS:
-            console.log(payload)
             // Render only if there is atleast one result
             if (payload.searchResult.docs.length) {
                 handleRender(payload.searchResult)

@@ -5,7 +5,7 @@ DOM manipulation helper functions
 import React from 'react'
 import ReactDOM from 'react-dom'
 
-import Results from './components/Results'
+import Container from './components/container'
 import * as utils from './utils'
 import * as constants from './constants'
 
@@ -50,7 +50,7 @@ export const handleRender = ({docs, totalCount}) => {
         // Render the React component on the target element
         // Passing this same function so that it can change position
         ReactDOM.render(
-            <Results
+            <Container
                 results={docs.slice(0, limit)}
                 len={totalCount}
                 rerender={renderComponent}

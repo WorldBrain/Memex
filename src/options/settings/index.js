@@ -1,12 +1,3 @@
-import React from 'react'
+import SearchInjectionContainer from './components/SearchInjectionContainer'
 
-import { Wrapper } from 'src/common-ui/components'
-import SearchInjection from './components/SearchInjection'
-
-const Settings = () => (
-    <Wrapper>
-        <SearchInjection />
-    </Wrapper>
-)
-
-export default Settings
+export default SearchInjectionContainer

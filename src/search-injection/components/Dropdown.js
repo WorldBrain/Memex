@@ -1,12 +1,13 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
+import { OPEN_OPTIONS } from '../constants'
 import styles from './Dropdown.css'
 
 const openSettings = () => {
     const message = {
-        action: 'openOptionsURL',
-        url: 'settings',
+        action: OPEN_OPTIONS,
+        query: 'settings',
     }
     browser.runtime.sendMessage(message)
 }
