@@ -1,5 +1,6 @@
 import React from 'react'
 
+import analytics from 'src/analytics'
 import SearchInjection from './SearchInjection'
 import { getLocalStorage, setLocalStorage } from 'src/search-injection/utils'
 import { SEARCH_INJECTION_KEY } from 'src/search-injection/constants'
@@ -24,6 +25,15 @@ class SearchInjectionContainer extends React.Component {
     async toggleInjection() {
         const toggled = !this.state.isInjectionEnabled
         await setLocalStorage(SEARCH_INJECTION_KEY, toggled)
+
+        if (!toggled) {
+            analytics.trackEvent({
+                category: 'Search integration',
+                action: 'Disabled',
+                name: 'Options script',
+            })
+        }
+
         this.setState({
             isInjectionEnabled: toggled,
         })

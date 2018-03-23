@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
+import { remoteFunction } from 'src/util/webextensionRPC'
 import Results from './Results'
 import ResultItem from './ResultItem'
 import RemovedText from './RemovedText'
@@ -23,6 +24,9 @@ class Container extends React.Component {
         this.removeResults = this.removeResults.bind(this)
         this.undoRemove = this.undoRemove.bind(this)
         this.changePosition = this.changePosition.bind(this)
+
+        this.updateLastActive = remoteFunction('updateLastActive')
+        this.trackEvent = remoteFunction('trackEvent')
     }
 
     state = {
@@ -44,14 +48,21 @@ class Container extends React.Component {
         })
     }
 
+    handleResultLinkClick = () => this.updateLastActive()
+
     renderResultItems() {
         const resultItems = this.props.results.map((result, i) => (
-            <ResultItem key={i} {...result} />
+            <ResultItem
+                key={i}
+                onLinkClick={this.handleResultLinkClick}
+                {...result}
+            />
         ))
         return resultItems
     }
 
     seeMoreResults() {
+        this.updateLastActive()
         // Create a new tab with the query overview URL
         const query = new URL(location.href).searchParams.get('q')
 
@@ -85,6 +96,13 @@ class Container extends React.Component {
         // And sets removed state to true
         // Triggering the Removed text UI to pop up
         await setLocalStorage(constants.SEARCH_INJECTION_KEY, false)
+
+        this.trackEvent({
+            category: 'Search integration',
+            action: 'Disabled',
+            name: 'Content script',
+        })
+
         this.setState({
             removed: true,
             dropdown: false,
@@ -115,7 +133,7 @@ class Container extends React.Component {
         }
 
         return (
-            <Results 
+            <Results
                 position={position}
                 totalCount={this.props.len}
                 seeMoreResults={this.seeMoreResults}
@@ -125,10 +143,9 @@ class Container extends React.Component {
                 dropdown={this.state.dropdown}
                 removeResults={this.removeResults}
                 changePosition={this.changePosition}
-                renderResultItems={this.renderResultItems} 
+                renderResultItems={this.renderResultItems}
             />
         )
-
     }
 }
 
