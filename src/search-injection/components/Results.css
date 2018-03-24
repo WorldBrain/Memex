@@ -76,6 +76,7 @@
     background-image: url('/img/settings-icon.png');
     background-repeat: no-repeat;
     background-size: 20px;
+    background-color: #fff;
 }
 
 .resultsText {
