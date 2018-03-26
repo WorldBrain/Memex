@@ -6,7 +6,7 @@ import ItemCreator from './item-creator'
 import { ImportItem } from './types'
 
 import * as urlLists from './url-list.test.data'
-import initData, { TestData } from './state-manager.test.data'
+import initData, { TestData, diff } from './state-manager.test.data'
 
 type ForEachChunkCb = (
     values: [string, ImportItem][],
@@ -19,12 +19,6 @@ jest.mock('src/activity-logger')
 jest.mock('src/search')
 jest.mock('./cache')
 jest.mock('./data-sources')
-
-// Gets set diff `a - b`
-const diff = (a = [], b = []) => {
-    const checkSet = new Set(b)
-    return a.filter(val => !checkSet.has(val))
-}
 
 const runSuite = (DATA: TestData) => async () => {
     let state

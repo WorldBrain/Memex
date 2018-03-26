@@ -1,7 +1,10 @@
 import { CMDS, DEF_CONCURRENCY } from 'src/options/imports/constants'
 import ProgressManager from './progress-manager'
+import stateManager from './state-manager'
 
 export default class ImportConnectionHandler {
+    static IMPORTS_PROGRESS_KEY = 'is-imports-in-progress'
+
     /**
      * @type {runtime.Port} Runtime connection port to afford message communication with UI script
      */
@@ -28,6 +31,7 @@ export default class ImportConnectionHandler {
         this.importer = new ProgressManager({
             concurrency: DEF_CONCURRENCY,
             observer: this.itemObserver,
+            stateManager,
         })
 
         // Handle any incoming UI messages to control the importer
@@ -41,13 +45,11 @@ export default class ImportConnectionHandler {
 
     async attemptRehydrate() {
         // If import isn't already running, get estimates and set view state to init...
-        const importInProgress = await this.importer.getImportInProgressFlag()
+        const importInProgress = await this.getImportInProgressFlag()
 
         if (!importInProgress) {
             // Make sure estimates view init'd with count data
-            const estimateCounts = await this.importer.fetchEsts(
-                this._quickMode,
-            )
+            const estimateCounts = await stateManager.fetchEsts(this._quickMode)
             this.port.postMessage({ cmd: CMDS.INIT, ...estimateCounts })
         } else {
             // ... else make sure to start UI in paused state
@@ -64,7 +66,7 @@ export default class ImportConnectionHandler {
         next: msg => this.port.postMessage({ cmd: CMDS.NEXT, ...msg }),
         complete: () => {
             this.port.postMessage({ cmd: CMDS.COMPLETE })
-            this.importer.setImportInProgressFlag(false)
+            this.setImportInProgressFlag(false)
         },
     }
 
@@ -97,9 +99,15 @@ export default class ImportConnectionHandler {
      * or not to process that given type of imports.
      */
     async startImport(allowTypes) {
-        await this.importer.init(allowTypes, this._quickMode)
+        stateManager.allowTypes = allowTypes
+
+        if (!await this.getImportInProgressFlag()) {
+            await stateManager.fetchEsts(this._quickMode)
+        }
+
         this.port.postMessage({ cmd: CMDS.START }) // Tell UI to finish loading state and move into progress view
 
+        this.setImportInProgressFlag(true)
         this.importer.start()
     }
 
@@ -108,18 +116,32 @@ export default class ImportConnectionHandler {
      * (either after completion or cancellation).
      */
     async finishImport() {
-        this.importer.setImportInProgressFlag(false)
+        this.setImportInProgressFlag(false)
 
         // Re-init the estimates view with updated estimates data
-        const estimateCounts = await this.importer.fetchEsts(this._quickMode)
+        const estimateCounts = await stateManager.fetchEsts(this._quickMode)
         this.port.postMessage({ cmd: CMDS.INIT, ...estimateCounts })
     }
 
     async cancelImport() {
         this.importer.stop()
-        this.importer.setImportInProgressFlag(false)
+        this.setImportInProgressFlag(false)
 
         // Resume UI at complete state
         this.port.postMessage({ cmd: CMDS.COMPLETE })
+    }
+
+    async getImportInProgressFlag() {
+        const storage = await browser.storage.local.get({
+            [ImportConnectionHandler.IMPORTS_PROGRESS_KEY]: false,
+        })
+
+        return storage[ImportConnectionHandler.IMPORTS_PROGRESS_KEY]
+    }
+
+    async setImportInProgressFlag(value) {
+        return await browser.storage.local.set({
+            [ImportConnectionHandler.IMPORTS_PROGRESS_KEY]: value,
+        })
     }
 }
