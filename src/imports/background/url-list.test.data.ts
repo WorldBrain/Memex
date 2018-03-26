@@ -1405,3 +1405,13 @@ export const large = [
     'https://yandex.com/',
     'https://protonmail.com/',
 ]
+
+const append = postfix => text => text + postfix
+
+export const xlarge = [
+    ...large,
+    ...large.map(append('/test-0')),
+    ...large.map(append('/test-1')),
+    ...large.map(append('/test-2')),
+    ...large.map(append('/test-3')),
+]

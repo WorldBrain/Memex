@@ -1,6 +1,9 @@
-import { BrowserItem } from './types'
+import { BrowserItem, ImportItemType } from './types'
+
+type AllowTypes = { [key: string]: boolean }
 
 export interface TestData {
+    allowTypes: AllowTypes
     bmUrls: string[]
     histUrls: string[]
     bookmarks: BrowserItem[]
@@ -8,7 +11,11 @@ export interface TestData {
     fakeCacheCounts: any
 }
 
-export default function(histUrls: string[], bmUrls: string[]): TestData {
+export default function(
+    histUrls: string[],
+    bmUrls: string[],
+    allowTypes?: AllowTypes,
+): TestData {
     let idIt = 0
     const createBrowserItem = type => url =>
         ({ id: idIt++, url, type } as BrowserItem)
@@ -19,10 +26,17 @@ export default function(histUrls: string[], bmUrls: string[]): TestData {
     }
 
     return {
+        allowTypes,
         bmUrls,
         histUrls,
         bookmarks: bmUrls.map(createBrowserItem('b')),
         history: histUrls.map(createBrowserItem('h')),
         fakeCacheCounts,
     }
+}
+
+// Gets set diff `a - b`
+export const diff = (a = [], b = []) => {
+    const checkSet = new Set(b)
+    return a.filter(val => !checkSet.has(val))
 }

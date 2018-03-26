@@ -1,12 +1,13 @@
 import promiseLimit from 'promise-limit'
+import noop from 'lodash/fp/noop'
 
 import { indexQueue } from 'src/search'
-import stateManager from './state-manager'
 import ItemProcessor from './item-processor'
 
 class ImportProgressManager {
-    static IMPORTS_PROGRESS_KEY = 'is-imports-in-progress'
     static CONCURR_LIMIT = 20
+    static DEF_CONCURR = 1
+    static DEF_OBSERVER = { next: noop, complete: noop }
 
     /**
      * @type {ItemProcessor[]} Currently scheduled processor instances, affording control over execution.
@@ -27,16 +28,23 @@ class ImportProgressManager {
      * @type {any} Object containing `next` and `complete` methods to run after each item and when
      *  all items complete, respecitively.
      */
-    observer
+    _observer
 
     /**
      * @type {boolean} Flag denoting whether or not current state is stopped or not.
      */
-    stopped = false
+    stopped = true
 
-    constructor({ concurrency, observer }) {
+    constructor({
+        concurrency = ImportProgressManager.DEF_CONCURR,
+        observer = ImportProgressManager.DEF_OBSERVER,
+        stateManager,
+        Processor = ItemProcessor,
+    }) {
         this.concurrency = concurrency
-        this.observer = observer
+        this._observer = observer
+        this._stateManager = stateManager
+        this._Processor = Processor
     }
 
     set concurrency(value) {
@@ -70,7 +78,7 @@ class ImportProgressManager {
      * @returns {boolean} Flag denoting whether or not chunk where `entry` came from is allowed by type.
      */
     _checkChunkTypeAllowed([key, item]) {
-        return !!stateManager.allowTypes[item.type]
+        return !!this._stateManager.allowTypes[item.type]
     }
 
     /**
@@ -78,7 +86,7 @@ class ImportProgressManager {
      * @returns {(chunkEntry) => Promise<void>} Async function affording processing of single entry in chunk.
      */
     _processItem = chunkKey => async ([encodedUrl, importItem]) => {
-        const processor = new ItemProcessor()
+        const processor = new this._Processor()
 
         // Used to build the message to send to observer
         const msg = {
@@ -88,7 +96,7 @@ class ImportProgressManager {
 
         try {
             if (this.stopped) {
-                throw ItemProcessor.makeInterruptedErr()
+                throw this._Processor.makeInterruptedErr()
             }
 
             // Save reference to processor for cancelling later
@@ -106,23 +114,18 @@ class ImportProgressManager {
 
             // Send item data + outcome status down to UI (and error if present)
             if (!this.stopped) {
-                this.observer.next(msg)
+                this._observer.next(msg)
 
                 // Either flag as error or remove from state depending on processing error status
                 if (msg.error && !this.processErrors) {
-                    await stateManager.flagItemAsError(chunkKey, encodedUrl)
+                    await this._stateManager.flagItemAsError(
+                        chunkKey,
+                        encodedUrl,
+                    )
                 } else {
-                    await stateManager.removeItem(chunkKey, encodedUrl)
+                    await this._stateManager.removeItem(chunkKey, encodedUrl)
                 }
             }
-        }
-    }
-
-    async init(allowTypes, quickMode) {
-        stateManager.allowTypes = allowTypes
-
-        if (!await this.getImportInProgressFlag()) {
-            await stateManager.fetchEsts(quickMode)
         }
     }
 
@@ -130,11 +133,10 @@ class ImportProgressManager {
      * Start execution
      */
     async start() {
-        this.setImportInProgressFlag(true)
         this.stopped = false
 
         // Iterate through data chunks from the state manager
-        for await (const { chunk, chunkKey } of stateManager.fetchItems(
+        for await (const { chunk, chunkKey } of this._stateManager.fetchItems(
             this.processErrors,
         )) {
             const importItemEntries = Object.entries(chunk)
@@ -164,7 +166,7 @@ class ImportProgressManager {
 
         if (!this.stopped) {
             // Notify observer that we're done!
-            this.observer.complete()
+            this._observer.complete()
         }
     }
 
@@ -182,22 +184,6 @@ class ImportProgressManager {
         // Ensure index queue is cleared so queued up item's indexing doesn't happen
         indexQueue.clear()
     }
-
-    async getImportInProgressFlag() {
-        const storage = await browser.storage.local.get({
-            [ImportProgressManager.IMPORTS_PROGRESS_KEY]: false,
-        })
-
-        return storage[ImportProgressManager.IMPORTS_PROGRESS_KEY]
-    }
-
-    async setImportInProgressFlag(value) {
-        return await browser.storage.local.set({
-            [ImportProgressManager.IMPORTS_PROGRESS_KEY]: value,
-        })
-    }
-
-    fetchEsts = quickMode => stateManager.fetchEsts(quickMode)
 }
 
 export default ImportProgressManager

@@ -7,17 +7,22 @@ export default class Cache {
         completed: { b: 0, h: 0 },
         remaining: { b: 0, h: 0 },
     }
+    static DEF_CHUNK_SIZE = 20
 
     chunks = []
     errChunks = []
 
     calculatedAt = 0
 
-    constructor({ initEsts = Cache.INIT_ESTS }) {
+    constructor({
+        initEsts = Cache.INIT_ESTS,
+        chunkSize = Cache.DEF_CHUNK_SIZE,
+    }) {
         this.counts = {
             completed: { ...initEsts.completed },
             remaining: { ...initEsts.remaining },
         }
+        this._chunkSize = chunkSize
     }
 
     get expired() {
@@ -69,7 +74,7 @@ export default class Cache {
         let chunkKey = !this.errChunks.length ? 0 : this.errChunks.length - 1
         let existing = this.errChunks[chunkKey] || {}
 
-        if (Object.keys(existing) >= 10) {
+        if (Object.keys(existing) >= this._chunkSize) {
             existing = {}
             ++chunkKey
         }
