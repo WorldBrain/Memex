@@ -2,25 +2,6 @@
     --memex-green: #4abf9d;
 }
 
-.above {
-    & .settingsButton {
-        right: -10px;
-    }
-
-    & .resultsText {
-        padding-left: 16px;
-    }
-}
-
-.side {
-    width: 454px;
-
-    & .settingsButton {
-        right: -5px;
-        top: 14px;
-    }
-}
-
 .MEMEX_CONTAINER {
     /* Base size of the children elements */
     margin-bottom: 30px;
@@ -85,6 +66,25 @@
     font-size: 1.1em;
     font-weight: 100;
     width: 71%;
+}
+
+.above {
+    & .settingsButton {
+        right: -10px;
+    }
+
+    & .resultsText {
+        padding-left: 16px;
+    }
+}
+
+.side {
+    width: 454px;
+
+    & .settingsButton {
+        right: -5px;
+        top: 14px;
+    }
 }
 
 @keyframes fadeIn {

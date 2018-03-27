@@ -16,7 +16,10 @@ class SearchInjectionContainer extends React.Component {
     }
 
     async componentDidMount() {
-        const isInjectionEnabled = await getLocalStorage(SEARCH_INJECTION_KEY, true)
+        const isInjectionEnabled = await getLocalStorage(
+            SEARCH_INJECTION_KEY,
+            true,
+        )
         this.setState({
             isInjectionEnabled,
         })

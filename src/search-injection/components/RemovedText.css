@@ -8,18 +8,21 @@
 
 .removedP {
     display: inline-block;
-    width: 85%;
-    font-size: 12px;
+    width: 75%;
+    font-size: 15px;
+    text-align: left;
+    margin-left: 42px;
 }
 
 .removedA {
     display: inline-block;
     font-size: 18px;
     padding: 10px;
-    vertical-align: bottom;
+    vertical-align: middle;
     text-decoration: none;
     color: #757475;
     cursor: pointer;
+    margin-right: 25px;
 
     &:hover {
         color: #4abf9dad;

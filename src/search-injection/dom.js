@@ -21,18 +21,21 @@ export const injectCSS = file => {
     d.prepend(link)
 }
 
-export const handleRender = ({docs, totalCount}) => {
-    // docs: (array of objects) returned by the search 
+export const handleRender = ({ docs, totalCount }) => {
+    // docs: (array of objects) returned by the search
     // totalCount: (int) number of results found
-    // Injects CSS into the search page. 
+    // Injects CSS into the search page.
     // Calls renderComponent to render the react component
 
     const renderComponent = async () => {
         // Accesses docs, totalCount from parent through closure
-        // Gets position from settings 
+        // Gets position from settings
         // Renders React Component on the respective container
 
-        const position = await utils.getLocalStorage(constants.POSITION_KEY, 'above')
+        const position = await utils.getLocalStorage(
+            constants.POSITION_KEY,
+            'above',
+        )
         const containerID = constants.SEARCH_ENGINES.google.container[position]
         const container = document.getElementById(containerID)
 

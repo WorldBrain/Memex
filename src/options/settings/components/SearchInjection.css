@@ -6,3 +6,11 @@
     margin-top: 20px;
     margin-bottom: 10px;
 }
+
+p {
+    font-size: 16px;
+}
+
+a {
+    color: #928989;
+}

@@ -47,14 +47,12 @@ const init = async () => {
         constants.SEARCH_INJECTION_KEY,
         true,
     )
-    
-    if (!searchInjection)
-        return;
 
+    if (!searchInjection) return
 
     const url = window.location.href
     const matched = utils.matchURL(url)
-    if (matched){
+    if (matched) {
         const query = utils.fetchQuery(url)
         search(query)
     }

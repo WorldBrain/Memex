@@ -4,10 +4,7 @@ import PropTypes from 'prop-types'
 import Checkbox from './Checkbox'
 import styles from './SearchInjection.css'
 
-const SearchInjection = ({
-    isInjectionEnabled,
-    toggleInjection,
-}) => {
+const SearchInjection = ({ isInjectionEnabled, toggleInjection }) => {
     return (
         <div>
             <p className={styles.settingsHeader}>
@@ -21,6 +18,15 @@ const SearchInjection = ({
             >
                 Google
             </Checkbox>
+            <p>
+                Want others?{' '}
+                <a
+                    target="_new"
+                    href="https://github.com/WorldBrain/Memex/blob/master/docs/Contributing-Guide.md"
+                >
+                    Help integrating them
+                </a>.
+            </p>
         </div>
     )
 }

@@ -19,11 +19,11 @@ const Dropdown = props => {
                 <li className={styles.dropdownElement} onClick={openSettings}>
                     Settings
                 </li>
-                <li className={styles.dropdownElement} onClick={props.remove}>
-                    Remove Results Forever
-                </li>
                 <li className={styles.dropdownElement} onClick={props.rerender}>
                     Change position of Memex
+                </li>
+                <li className={styles.dropdownElement} onClick={props.remove}>
+                    Remove Results Forever
                 </li>
             </ul>
         </div>

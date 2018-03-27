@@ -5,11 +5,14 @@ import classNames from 'classnames'
 import Dropdown from './Dropdown'
 import styles from './Results.css'
 
-const Results = (props) => {
+const Results = props => {
     const logoURL = browser.extension.getURL('img/worldbrain-logo-wo-beta.png')
     return (
         <div
-            className={classNames(styles.MEMEX_CONTAINER, styles[props.position])}
+            className={classNames(
+                styles.MEMEX_CONTAINER,
+                styles[props.position],
+            )}
         >
             <div className={styles.header}>
                 <p className={styles.resultsText}>
@@ -18,16 +21,10 @@ const Results = (props) => {
                         {props.totalCount} results
                     </span>{' '}
                     in your
-                    <img
-                        src={logoURL}
-                        className={styles.logo}
-                    />
+                    <img src={logoURL} className={styles.logo} />
                 </p>
                 <div className={styles.linksContainer}>
-                    <a
-                        className={styles.links}
-                        onClick={props.seeMoreResults}
-                    >
+                    <a className={styles.links} onClick={props.seeMoreResults}>
                         See all results
                     </a>
                     <a
