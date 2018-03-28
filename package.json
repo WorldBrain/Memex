@@ -87,7 +87,7 @@
     "babel-preset-stage-1": "^6.24.1",
     "babelify": "^7.3.0",
     "browserify": "^14.4.0",
-    "chrome-store-api": "^1.0.5",
+    "chrome-webstore-upload": "^0.2.2",
     "crx": "^3.2.1",
     "css-modulesify": "git+https://github.com/Treora/css-modulesify#95447d1",
     "eslint": "^4.1.0",

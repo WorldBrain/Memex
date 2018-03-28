@@ -19,8 +19,8 @@ import eslint from 'gulp-eslint'
 import path from 'path'
 import cssModulesify from 'css-modulesify'
 import cssnext from 'postcss-cssnext'
-import * as chromeStore from 'chrome-store-api'
-const signAddon = require('sign-addon').default;
+import * as ChromeStore from 'chrome-webstore-upload'
+const signAddon = require('sign-addon').default
 
 const exec = pify(nodeExec)
 
@@ -89,8 +89,8 @@ async function createBundle(
 ) {
     const b = watch
         ? watchify(
-            browserify({ ...watchify.args, ...browserifySettings, entries }),
-        ).on('update', bundle)
+              browserify({ ...watchify.args, ...browserifySettings, entries }),
+          ).on('update', bundle)
         : browserify({ ...browserifySettings, entries })
     b.transform(babelify)
     b.transform(
@@ -126,12 +126,12 @@ async function createBundle(
             .pipe(source(output))
             .pipe(buffer())
             .pipe(
-            production
-                ? uglify({
-                    output: { ascii_only: true },
-                })
-                : identity(),
-        )
+                production
+                    ? uglify({
+                          output: { ascii_only: true },
+                      })
+                    : identity(),
+            )
             .pipe(gulp.dest(destination))
             .on('end', () => {
                 const time = (Date.now() - startTime) / 1000
@@ -215,11 +215,11 @@ gulp.task('lint', async () => {
     const stylelintStream = gulp
         .src(['src/**/*.css'])
         .pipe(
-        stylelint({
-            ...stylelintOptions,
-            failAfterError: failLintError,
-        }),
-    )
+            stylelint({
+                ...stylelintOptions,
+                failAfterError: failLintError,
+            }),
+        )
         .on('error', e => {
             console.error(e)
             process.exit(1)
@@ -265,17 +265,17 @@ function getVersion() {
 gulp.task('package-source-code', () =>
     gulp
         .src(
-        [
-            '**/*',
-            '!.git/**',
-            '!node_modules/**',
-            '!dist/**',
-            '!extension/**',
-        ],
-        {
-            dot: true,
-        },
-    )
+            [
+                '**/*',
+                '!.git/**',
+                '!node_modules/**',
+                '!dist/**',
+                '!extension/**',
+            ],
+            {
+                dot: true,
+            },
+        )
         .pipe(zip('source-code.zip'))
         .pipe(gulp.dest('dist')),
 )
@@ -294,49 +294,53 @@ gulp.task(
 
 // Tasks for publishing the extension
 
-gulp.task('publish-extension:chrome', ['package-extension'], async () => {
+gulp.task('publish-extension:chrome', ['package'], async () => {
     const extensionID = process.env.WEBSTORE_EXTENSION_ID
-    const tokenManager = new chromeStore.TokenManager(
-        process.env.WEBSTORE_TOKEN_CODE,
-        process.env.WEBSTORE_CLIENT_ID,
-        process.env.WEBSTORE_CLIENT_SECRET,
-    )
-    const api = new chromeStore.Webstore(tokenManager)
-    const zip = await new Promise((resolve, reject) => {
-        fs.readFile(
-            'dist/extension.zip',
-            (err, data) => (err ? reject(err) : resolve(data)),
-        )
+    const webStore = ChromeStore({
+        extensionId: extensionID,
+        clientId: process.env.WEBSTORE_CLIENT_ID,
+        clientSecret: process.env.WEBSTORE_CLIENT_SECRET,
+        refreshToken: process.env.WEBSTORE_REFRESH_TOKEN,
     })
-    await api.update(extensionID, zip)
-    await api.publish(extensionID, process.env.WEBSTORE_PUBLISH_TARGET)
+    const token = await webStore.fetchToken()
+    await webStore.uploadExisting(
+        fs.createReadStream('dist/extension.zip'),
+        token,
+    )
+    await webStore.publish('default', token)
 })
 
-gulp.task('publish-extension:firefox', ['package-extension'], () => {
+gulp.task('publish-extension:firefox', ['package'], () => {
     return signAddon({
+        id: 'info@worldbrain.io',
         xpiPath: 'dist/extension.zip',
         version: JSON.parse(fs.readFileSync('package.json')).version,
         apiKey: process.env.AMO_API_KEY,
         apiSecret: process.env.AMO_API_SECRET,
         channel: 'listed',
         downloadDir: 'downloaded_amo',
-    }).then(function (result) {
-        if (result.success) {
-            console.log("The following signed files were downloaded:");
-            console.log(result.downloadedFiles);
-            console.log("Your extension ID is:");
-            console.log(result.id);
-        } else {
-            console.error("Your add-on could not be signed!");
-            console.error("Check the console for details.");
-        }
-        console.log(result.success ? "SUCCESS" : "FAIL");
-    }).catch(function (error) {
-        console.error("Signing error:", error);
     })
+        .then(function(result) {
+            if (result.success) {
+                console.log('The following signed files were downloaded:')
+                console.log(result.downloadedFiles)
+                console.log('Your extension ID is:')
+                console.log(result.id)
+            } else {
+                console.error('Your add-on could not be signed!')
+                console.error('Check the console for details.')
+            }
+            console.log(result.success ? 'SUCCESS' : 'FAIL')
+        })
+        .catch(function(error) {
+            console.error('Signing error:', error)
+        })
 })
 
-gulp.task('publish-extension', ['publish-extension:chrome'])
+gulp.task('publish-extension', [
+    'publish-extension:chrome',
+    'publish-extension:firefox',
+])
 
 /* DEPRECATED */
 gulp.task('package-firefox-old', async () => {
