@@ -1,10 +1,10 @@
-import urlRegex from 'url-regex'
 import 'src/activity-logger/background'
 import 'src/page-storage/background'
 import 'src/search/background'
 import 'src/bookmarks/background'
 import 'src/analytics/background'
 import 'src/omnibar'
+import 'src/commands'
 import { installTimeStorageKey } from 'src/imports/background'
 import { generatePageDocId } from 'src/page-storage'
 import { generateVisitDocId } from 'src/activity-logger'
@@ -32,17 +32,6 @@ window.generatePageDocId = generatePageDocId
 window.generateVisitDocId = generateVisitDocId
 window.generateBookmarkDocId = generateBookmarkDocId
 window.index = index
-
-async function openOverview() {
-    const [currentTab] = await browser.tabs.query({ active: true })
-
-    // Either create new tab or update current tab with overview page, depending on URL validity
-    if (currentTab && currentTab.url && urlRegex().test(currentTab.url)) {
-        browser.tabs.create({ url: OVERVIEW_URL })
-    } else {
-        browser.tabs.update({ url: OVERVIEW_URL })
-    }
-}
 
 async function onInstall() {
     // Ensure default blacklist entries are stored (before doing anything else)
@@ -79,14 +68,6 @@ async function onUpdate() {
         browser.storage.local.set({ [OLD_EXT_UPDATE_KEY]: Date.now() })
     }
 }
-
-browser.commands.onCommand.addListener(command => {
-    switch (command) {
-        case 'openOverview':
-            return openOverview()
-        default:
-    }
-})
 
 browser.runtime.onInstalled.addListener(details => {
     switch (details.reason) {
