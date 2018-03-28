@@ -44,6 +44,7 @@
     },
     "permissions": [
         "<all_urls>",
+        "alarms",
         "idle",
         "bookmarks",
         "contextMenus",

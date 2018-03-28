@@ -17,8 +17,7 @@ export const STORAGE_KEYS = {
 // Timezone to base milestones on
 export const TIMEZONE = 'Europe/Berlin'
 
-// Cron schedules for periodic analytics tasks
+// Ext Alarm schedules for periodic analytics tasks
 export const SCHEDULES = {
-    // Generates a cron schedule to run some time past the hour, every hour
-    EVERY_HOUR: () => `0 ${Math.floor(Math.random() * 60)} * * * *`,
+    EVERY_HOUR: 60, // minutes
 }
