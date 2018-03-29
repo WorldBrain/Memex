@@ -1,0 +1,90 @@
+.outer {
+    display: inline-block;
+    width: 150px;
+    z-index: 1;
+    background-color: #fff;
+    box-shadow: 0px 3px 3px 0px #3eb995;
+
+    @media (max-width: 835px) {
+        right: 10px;
+    }
+}
+
+.shareIcons {
+    display: inline-block;
+    position: absolute;
+    width: 175px;
+    z-index: 1;
+    background-color: #fff;
+    box-shadow: 0px 4px 3px 0px #3eb995;
+}
+
+.divcont {
+    display: inline-block;
+    margin-left: 625px;
+    background-color: #fff;
+}
+
+.divcont::before {
+    content: ' ';
+    position: relative;
+    left: 110px;
+    border-style: solid;
+    border-width: 0 10px 10px;
+    border-color: #fff transparent;
+    display: block;
+    width: 0;
+    z-index: 2;
+}
+
+.divcont::after {
+    content: ' ';
+    position: absolute;
+    left: 110px;
+    border-style: solid;
+    border-width: 0 10px 10px;
+    border-color: #fff transparent;
+    display: block;
+    width: 0;
+    z-index: 2;
+}
+
+.copy {
+    display: inline-block;
+    position: absolute;
+    width: 175px;
+    z-index: 1;
+    height: 25px;
+    font-size: 14px;
+    background-color: #fff;
+    text-align: center;
+    padding: 1px;
+    box-shadow: 0px 4px 3px 0px #3eb995;
+}
+
+.shareImg {
+    margin: 5px;
+    width: 25px;
+    height: 25px;
+}
+
+.bgimg {
+    display: inline-block;
+    position: relative;
+    background-image: url('/img/url.svg');
+    width: 25px;
+    height: 25px;
+    margin: 5px;
+    padding: 0;
+}
+
+a {
+    text-decoration: none;
+    color: #3eb995;
+}
+
+.hide {
+    position: absolute;
+    visibility: hidden;
+    opacity: 0;
+}

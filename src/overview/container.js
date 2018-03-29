@@ -8,6 +8,7 @@ import reduce from 'lodash/fp/reduce'
 import analytics from 'src/analytics'
 import { Wrapper, LoadingIndicator } from 'src/common-ui/components'
 import { IndexDropdown } from 'src/common-ui/containers'
+import SharePopUp from './components/SharePopUp'
 import * as actions from './actions'
 import * as selectors from './selectors'
 import * as constants from './constants'
@@ -33,11 +34,15 @@ class OverviewContainer extends Component {
         isBadTerm: PropTypes.bool.isRequired,
         showInitSearchMsg: PropTypes.bool.isRequired,
         resetActiveTagIndex: PropTypes.func.isRequired,
+        resetActiveShareIndex: PropTypes.func.isRequired,
+        resetCopy: PropTypes.func.isRequired,
         searchResults: PropTypes.arrayOf(PropTypes.object).isRequired,
         totalResultCount: PropTypes.number.isRequired,
         shouldShowCount: PropTypes.bool.isRequired,
         needsWaypoint: PropTypes.bool.isRequired,
         handleTrashBtnClick: PropTypes.func.isRequired,
+        handleShareBtnClick: PropTypes.func.isRequired,
+        handleSharePopUpClick: PropTypes.func.isRequired,
         handleToggleBm: PropTypes.func.isRequired,
         handleTagBtnClick: PropTypes.func.isRequired,
         handlePillClick: PropTypes.func.isRequired,
@@ -64,9 +69,11 @@ class OverviewContainer extends Component {
 
     dropdownRefs = []
     tagBtnRefs = []
-
+    shareBtnRefs = []
     setInputRef = el => (this.inputQueryEl = el)
     setTagDivRef = el => (this.tagDiv = el)
+    setShareDivRef = el => (this.shareDiv = el)
+    setShareButtonRef = el => this.shareBtnRefs.push(el)
     setTagButtonRef = el => this.tagBtnRefs.push(el)
     trackDropwdownRef = el => this.dropdownRefs.push(el)
 
@@ -88,6 +95,17 @@ class OverviewContainer extends Component {
                 hover
             />
         ) : null
+
+    renderShare = ({ shouldDisplaySharePopup, url, copy }, index) => {
+        return shouldDisplaySharePopup ? (
+            <SharePopUp
+                copied={copy}
+                setShareDivRef={this.setShareDivRef}
+                url={url}
+                onSharePopUpClick={this.props.handleSharePopUpClick(url)}
+            />
+        ) : null
+    }
 
     renderTagPills({ tagPillsData, tags }, resultIndex) {
         const pills = tagPillsData.map((tag, i) => (
@@ -124,9 +142,12 @@ class OverviewContainer extends Component {
                 key={i}
                 onTrashBtnClick={this.props.handleTrashBtnClick(doc, i)}
                 onToggleBookmarkClick={this.props.handleToggleBm(doc, i)}
+                shareManager={this.renderShare(doc, i)}
                 tagManager={this.renderTagsManager(doc, i)}
+                setShareButtonRef={this.setShareButtonRef}
                 setTagButtonRef={this.setTagButtonRef}
                 onTagBtnClick={this.props.handleTagBtnClick(i)}
+                onShareBtnClick={this.props.handleShareBtnClick(i)}
                 tagPills={this.renderTagPills(doc, i)}
                 {...doc}
             />
@@ -206,9 +227,7 @@ class OverviewContainer extends Component {
             <Wrapper>
                 {this.props.shouldShowCount && (
                     <ResultsMessage small>
-                        Found <strong>
-                            {this.props.totalResultCount}
-                        </strong>{' '}
+                        Found <strong>{this.props.totalResultCount}</strong>{' '}
                         results in your digital memory
                     </ResultsMessage>
                 )}
@@ -225,9 +244,10 @@ class OverviewContainer extends Component {
             const isEqual = el != null ? el.isEqualNode(event.target) : false
             return res || isEqual
         }, false)
-
         const clickedTagDiv =
             this.tagDiv != null && this.tagDiv.contains(event.target)
+        const clickedShareDiv =
+            this.shareDiv != null && this.shareDiv.contains(event.target)
 
         if (
             !clickedTagDiv &&
@@ -236,6 +256,15 @@ class OverviewContainer extends Component {
         ) {
             this.props.resetActiveTagIndex()
             this.props.resetFilterPopup()
+        }
+        if (wereAnyClicked(this.tagBtnRefs)) {
+            this.props.resetCopy()
+        }
+        if (!clickedShareDiv && wereAnyClicked(this.shareBtnRefs)) {
+            this.props.resetCopy()
+        }
+        if (!clickedShareDiv && !wereAnyClicked(this.shareBtnRefs)) {
+            this.props.resetActiveShareIndex()
         }
     }
 
@@ -287,8 +316,11 @@ const mapDispatchToProps = dispatch => ({
             onEndDateChange: actions.setEndDate,
             onBottomReached: actions.getMoreResults,
             resetDeleteConfirm: actions.resetDeleteConfirm,
+            resetSharePopup: actions.resetSharePopup,
             deleteDocs: actions.deleteDocs,
             resetActiveTagIndex: actions.resetActiveTagIndex,
+            resetActiveShareIndex: actions.resetActiveShareIndex,
+            resetCopy: actions.resetCopy,
             onShowFilterChange: filterActs.showFilter,
             resetFilterPopup: filterActs.resetFilterPopup,
             fetchNextTooltip: actions.fetchNextTooltip,
@@ -302,6 +334,23 @@ const mapDispatchToProps = dispatch => ({
     handleInputClick: event => {
         const input = event.target
         dispatch(actions.setQueryTagsDomains(input.value, true))
+    },
+    handleShareBtnClick: index => event => {
+        event.preventDefault()
+        dispatch(actions.openShare(index))
+    },
+    handleSharePopUpClick: url => event => {
+        event.preventDefault()
+        const dummy = document.createElement('input')
+        document.body.appendChild(dummy)
+        dummy.value = url
+        dummy.select()
+        document.execCommand('copy')
+        document.body.removeChild(dummy)
+        dispatch(actions.changeCopy())
+        setTimeout(function() {
+            dispatch(actions.resetActiveShareIndex())
+        }, 500)
     },
     handleTrashBtnClick: ({ url }, index) => event => {
         event.preventDefault()
