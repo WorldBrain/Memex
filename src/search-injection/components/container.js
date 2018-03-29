@@ -124,10 +124,12 @@ class Container extends React.Component {
     }
 
     render() {
-        // If the state.removed is true, show the RemovedText component
-        if (this.state.removed) return <RemovedText undo={this.undoRemove} />
-
         const { position } = this.state
+
+        // If the state.removed is true, show the RemovedText component
+        if (this.state.removed)
+            return <RemovedText undo={this.undoRemove} position={position} />
+
         if (!position) {
             return null
         }

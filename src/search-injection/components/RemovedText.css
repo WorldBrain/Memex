@@ -6,12 +6,22 @@
     margin-bottom: 20px;
 }
 
+.removed-side {
+    display: flex;
+}
+
 .removedP {
     display: inline-block;
     width: 75%;
     font-size: 15px;
     text-align: left;
     margin-left: 42px;
+}
+
+.removedP-side {
+    font-size: 12px;
+    margin-left: 25px;
+    margin-right: 25px;
 }
 
 .removedA {
@@ -22,10 +32,14 @@
     text-decoration: none;
     color: #757475;
     cursor: pointer;
-    margin-right: 25px;
+    margin-right: 15px;
 
     &:hover {
         color: #4abf9dad;
         text-decoration: none !important; /* stylelint-disable-line declaration-no-important */
     }
+}
+
+.removedA-side {
+    font-size: 15px;
 }
