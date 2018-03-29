@@ -19,7 +19,7 @@ import eslint from 'gulp-eslint'
 import path from 'path'
 import cssModulesify from 'css-modulesify'
 import cssnext from 'postcss-cssnext'
-import * as ChromeStore from 'chrome-webstore-upload'
+import ChromeStore from 'chrome-webstore-upload'
 const signAddon = require('sign-addon').default
 
 const exec = pify(nodeExec)
