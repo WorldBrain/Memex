@@ -4,6 +4,7 @@ import Privacy from './privacy'
 import Acknowledgements from './acknowledgement/components/content'
 import Tutorial from './tutorial'
 import Statistics from './statistics'
+import Settings from './settings'
 
 export default [
     {
@@ -17,6 +18,12 @@ export default [
         pathname: '/overview/overview.html',
         component: 'faq',
         icon: 'search',
+    },
+    {
+        name: 'Settings',
+        pathname: '/settings',
+        component: Settings,
+        icon: 'settings',
     },
     {
         name: 'Import History & Bookmarks',

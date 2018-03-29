@@ -12,4 +12,4 @@ export const BOOKMARK_BTN_STATE = {
 
 export const FEEDBACK_URL = '/options/options.html#/help'
 export const OVERVIEW_URL = '/overview/overview.html'
-export const OPTIONS_URL = '/options/options.html'
+export const OPTIONS_URL = '/options/options.html#/settings'

@@ -18,15 +18,16 @@ import { OLD_EXT_KEYS } from 'src/options/imports/constants'
 import index from 'src/search/search-index'
 import analytics from 'src/analytics'
 import updateNotification from 'src/util/update-notification'
+import { OPEN_OVERVIEW, OPEN_OPTIONS } from 'src/search-injection/constants'
 
 export const OVERVIEW_URL = '/overview/overview.html'
+export const OPTIONS_URL = '/options/options.html'
 export const OLD_EXT_UPDATE_KEY = 'updated-from-old-ext'
 export const UPDATE_URL = '/update/update.html'
 export const UNINSTALL_URL =
     process.env.NODE_ENV === 'production'
         ? 'http://worldbrain.io/uninstall'
         : ''
-
 // Put doc ID generators on window for user use with manual DB lookups
 window.generatePageDocId = generatePageDocId
 window.generateVisitDocId = generateVisitDocId
@@ -43,6 +44,16 @@ async function openOverview() {
         browser.tabs.update({ url: OVERVIEW_URL })
     }
 }
+
+const openOverviewURL = query => 
+    browser.tabs.create({
+        url: `${OVERVIEW_URL}?query=${query}`,
+    })
+
+const openOptionsURL = query =>
+    browser.tabs.create({
+        url: `${OPTIONS_URL}#${query}`,
+    })
 
 async function onInstall() {
     // Ensure default blacklist entries are stored (before doing anything else)
@@ -84,6 +95,17 @@ browser.commands.onCommand.addListener(command => {
     switch (command) {
         case 'openOverview':
             return openOverview()
+        default:
+    }
+})
+
+// Open an extension URL on receving message from content script
+browser.runtime.onMessage.addListener(({ action, query }) => {
+    switch (action) {
+        case OPEN_OVERVIEW:
+            return openOverviewURL(query)
+        case OPEN_OPTIONS:
+            return openOptionsURL(query)
         default:
     }
 })

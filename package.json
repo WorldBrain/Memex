@@ -134,6 +134,7 @@
     "redux-devtools": "^3.4.0",
     "redux-devtools-dock-monitor": "^1.1.2",
     "redux-devtools-log-monitor": "^1.3.0",
+    "sinon": "^4.4.8",
     "sign-addon": "^0.3.0",
     "stream-to-promise": "^2.2.0",
     "stylelint": "^7.11.1",
