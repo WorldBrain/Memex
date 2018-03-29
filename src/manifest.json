@@ -1,17 +1,24 @@
 {
     "name": "WorldBrain's Memex",
     "short_name": "Memex",
-    "version": "0.1.0.1030",
+    "version": "0.1.0",
     "offline_enabled": true,
-    "description":
-        "Find previously visited websites & PDFs in seconds. Full-text search your browsing history and bookmarks.",
+    "description": "Find previously visited websites & PDFs in seconds. Full-text search your browsing history and bookmarks.",
     "background": {
-        "scripts": ["lib/browser-polyfill.js", "background.js"]
+        "scripts": [
+            "lib/browser-polyfill.js",
+            "background.js"
+        ]
     },
     "content_scripts": [
         {
-            "matches": ["<all_urls>"],
-            "js": ["lib/browser-polyfill.js", "content_script.js"],
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "lib/browser-polyfill.js",
+                "content_script.js"
+            ],
             "run_at": "document_start"
         }
     ],
@@ -53,7 +60,9 @@
         "/img/*",
         "/content_script.css"
     ],
-    "omnibox": { "keyword": "w" },
+    "omnibox": {
+        "keyword": "w"
+    },
     "options_ui": {
         "page": "./options/options.html#/settings",
         "open_in_tab": true
