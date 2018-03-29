@@ -44,19 +44,25 @@ export function remoteFunction(funcName, { tabId } = {}) {
             [RPC_CALL]: RPC_CALL,
             funcName,
             args,
+            isFirefox: typeof browser.runtime.getBrowserInfo !== 'undefined',
         }
 
         // Try send the message and await the response.
         let response
         try {
             response =
-                tabId !== undefined
+                tabId != null
                     ? await browser.tabs.sendMessage(tabId, message)
                     : await browser.runtime.sendMessage(message)
         } catch (err) {
+            const origErrMsg = err.message
+                ? `\nError message: ${err.message}`
+                : ''
+
             throw new Error(
                 `Got no response when trying to call '${funcName}'. ` +
-                    `Did you enable RPC in ${otherSide}?`,
+                    `Did you enable RPC in ${otherSide}?` +
+                    origErrMsg,
             )
         }
 
@@ -84,34 +90,49 @@ const noSuchFunctionError = 'Received RPC for unknown function: '
 
 const remotelyCallableFunctions = {}
 
-function incomingRPCListener(message, sender) {
-    if (message && message[RPC_CALL] === RPC_CALL) {
-        const funcName = message.funcName
-        const args = message.hasOwnProperty('args') ? message.args : []
-        const func = remotelyCallableFunctions[funcName]
-        if (func === undefined) {
-            console.error(noSuchFunctionError, funcName)
-            return {
-                error: `No such function registered for RPC: ${funcName}`,
-                [RPC_RESPONSE]: RPC_RESPONSE,
-            }
-        }
-        const extraArg = {
-            tab: sender.tab,
+function incomingRPCListener(message, sender, sendResponse) {
+    if (!message || message[RPC_CALL] !== RPC_CALL) {
+        return false
+    }
+
+    function handleResponse(value) {
+        // Chrome seems fine returning a Promise
+        if (!message.isFirefox) {
+            return Promise.resolve(value)
         }
 
-        // Run the function, and await its value if it returns a promise.
-        const returnValue = func(extraArg, ...args)
-        return Promise.resolve(returnValue)
+        // Set up to call `sendResponse` callback on FF, and immediately return `true`
+        Promise.resolve(value)
+            .then(sendResponse)
+            .catch(sendResponse)
+        return true
+    }
+
+    const funcName = message.funcName
+    const args = message.hasOwnProperty('args') ? message.args : []
+    const func = remotelyCallableFunctions[funcName]
+    if (func === undefined) {
+        console.error(noSuchFunctionError, funcName)
+
+        return handleResponse({
+            error: `No such function registered for RPC: ${funcName}`,
+            [RPC_RESPONSE]: RPC_RESPONSE,
+        })
+    }
+
+    // Run the function, and await its value if it returns a promise.
+    const returnValue = func({ tab: sender.tab }, ...args)
+    return handleResponse(
+        Promise.resolve(returnValue)
             .then(returnValue => ({
                 returnValue,
                 [RPC_RESPONSE]: RPC_RESPONSE,
             }))
             .catch(error => ({
-                errorMessage: error.message,
+                error: error.message,
                 [RPC_RESPONSE]: RPC_RESPONSE,
-            }))
-    }
+            })),
+    )
 }
 
 // A bit of global state to ensure we only attach the event listener once.
