@@ -41,7 +41,7 @@ class Container extends React.Component {
             constants.HIDE_RESULTS_KEY,
             false,
         )
-        const position = await getLocalStorage(constants.POSITION_KEY, 'above')
+        const position = await getLocalStorage(constants.POSITION_KEY, 'side')
         this.setState({
             hideResults,
             position,
