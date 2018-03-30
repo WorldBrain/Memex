@@ -34,7 +34,7 @@ export const handleRender = ({ docs, totalCount }) => {
 
         const position = await utils.getLocalStorage(
             constants.POSITION_KEY,
-            'above',
+            'side',
         )
         const containerID = constants.SEARCH_ENGINES.google.container[position]
         const container = document.getElementById(containerID)

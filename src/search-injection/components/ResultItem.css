@@ -15,7 +15,7 @@
 
 .url {
     color: var(--memex-green);
-    font-size: 0.8em;
+    font-size: 1em;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: pre;
