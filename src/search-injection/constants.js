@@ -24,7 +24,7 @@ export const SEARCH_ENGINES = {
             side: 'results--sidebar',
         },
         containerType: 'class',
-    }
+    },
 }
 
 // These are values of the `tbm` query param in Google searches. It denotes
