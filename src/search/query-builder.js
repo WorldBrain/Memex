@@ -53,6 +53,7 @@ class QueryBuilder {
     tags = new Set()
     isBadTerm = false
     showOnlyBookmarks = false
+    showOnlyLaterlist = false
 
     /**
      * @returns {IndexQuery}
@@ -67,7 +68,8 @@ class QueryBuilder {
         isBadTerm: this.isBadTerm,
         timeFilter: this.timeFilter,
         bookmarksFilter: this.showOnlyBookmarks,
-    });
+        laterlistFilter: this.showOnlyLaterlist,
+    })
 
     skipUntil(skip) {
         this.skip = skip
@@ -81,6 +83,11 @@ class QueryBuilder {
 
     bookmarksFilter(showOnlyBookmarks) {
         this.showOnlyBookmarks = showOnlyBookmarks
+        return this
+    }
+
+    laterlistFilter(showOnlyLaterlist) {
+        this.showOnlyLaterlist = showOnlyLaterlist
         return this
     }
 

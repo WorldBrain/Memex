@@ -153,6 +153,24 @@ const changeHasBookmark = (state, index) => {
     return { ...state, searchResult }
 }
 
+const changeHasLaterlist = (state, index) => {
+    const currResult = state.searchResult.docs[index]
+
+    const searchResult = {
+        ...state.searchResult,
+        docs: [
+            ...state.searchResult.docs.slice(0, index),
+            {
+                ...currResult,
+                hasLaterlist: !currResult.hasLaterlist,
+            },
+            ...state.searchResult.docs.slice(index + 1),
+        ],
+    }
+
+    return { ...state, searchResult }
+}
+
 const incSearchCount = state => ({
     ...state,
     searchCount: state.searchCount + 1,

@@ -89,6 +89,7 @@ export default function pipeline({
     pageDoc: { _id: id, content = {}, url },
     visits = [],
     bookmarkDocs = [],
+    laterlistDocs = [],
     rejectNoContent = true,
 }) {
     // First apply transformations to the URL
@@ -110,6 +111,7 @@ export default function pipeline({
 
     // Create timestamps to be indexed as Sets
     const bookmarks = bookmarkDocs.map(transformMetaDoc)
+    const laterlist = laterlistDocs.map(transformMetaDoc)
 
     return Promise.resolve({
         id,
@@ -119,6 +121,7 @@ export default function pipeline({
         domain: keyGen.domain(hostname),
         visits: new Set(visits.map(keyGen.visit)),
         bookmarks: new Set(bookmarks.map(keyGen.bookmark)),
+        laterlist: new Set(laterlist.map(keyGen.laterlist)),
         tags: new Set(),
     })
 }

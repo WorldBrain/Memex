@@ -3,12 +3,14 @@ import 'src/activity-logger/background'
 import 'src/page-storage/background'
 import 'src/search/background'
 import 'src/bookmarks/background'
+import 'src/laterlist/background'
 import 'src/analytics/background'
 import 'src/omnibar'
 import { installTimeStorageKey } from 'src/imports/background'
 import { generatePageDocId } from 'src/page-storage'
 import { generateVisitDocId } from 'src/activity-logger'
 import { generateBookmarkDocId } from 'src/bookmarks'
+import { generateLaterlistDocId } from 'src/laterlist'
 import {
     constants as blacklistConsts,
     blacklist,
@@ -32,6 +34,7 @@ export const UNINSTALL_URL =
 window.generatePageDocId = generatePageDocId
 window.generateVisitDocId = generateVisitDocId
 window.generateBookmarkDocId = generateBookmarkDocId
+window.generateLaterlistDocId = generateLaterlistDocId
 window.index = index
 
 async function openOverview() {

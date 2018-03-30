@@ -51,24 +51,37 @@ async function timeFilterBackSearch({
     limit,
     skip,
     bookmarksFilter,
+    laterlistFilter,
 }) {
     // Back search bookmarks in all cases
-    const data = [
+
+    let data = [
         await reverseRangeLookup({
             ...timeFilter.get('bookmark/'),
             limit: skip + limit,
         }),
     ]
-
-    // Add result of visit back search if bookmarks flag not set
-    if (!bookmarksFilter) {
-        // Lookup for all time filters for non-bookmark search
-        data.push(
+    data.push(
+        await reverseRangeLookup({
+            ...timeFilter.get('visit/'),
+            limit: skip + limit,
+        }),
+    )
+    if (bookmarksFilter) {
+        data = [
             await reverseRangeLookup({
-                ...timeFilter.get('visit/'),
+                ...timeFilter.get('bookmark/'),
                 limit: skip + limit,
             }),
-        )
+        ]
+    }
+    if (laterlistFilter) {
+        data = [
+            await reverseRangeLookup({
+                ...timeFilter.get('laterlist/'),
+                limit: skip + limit,
+            }),
+        ]
     }
 
     return new Map([...data.reduce((acc, curr) => [...acc, ...curr], [])])
@@ -83,8 +96,19 @@ async function timeFilterBackSearch({
  * @param {IndexQuery}
  * @returns {Map<string, IndexTermValue>}
  */
-async function timeFilterSearch({ timeFilter, bookmarksFilter }) {
-    const timeRange = timeFilter.get(bookmarksFilter ? 'bookmark/' : 'visit/')
+async function timeFilterSearch({
+    timeFilter,
+    bookmarksFilter,
+    laterlistFilter,
+}) {
+    let filter = 'visit/'
+    if (bookmarksFilter) {
+        filter = 'bookmark/'
+    }
+    if (laterlistFilter) {
+        filter = 'laterlist/'
+    }
+    const timeRange = timeFilter.get(filter)
     const data = [await rangeLookup(timeRange)]
 
     // Perform union of results between all filter types (for now)
@@ -115,11 +139,22 @@ async function filterResultsByBookmarks(pageResultsMap) {
     )
 }
 
+async function filterResultsByLaterlist(pageResultsMap) {
+    const pageLookupDocs = await lookupByKeys([...pageResultsMap.keys()])
+
+    return new Map(
+        [...pageResultsMap].filter(
+            ([pageKey, lookupDoc]) =>
+                pageLookupDocs.get(pageKey).laterlist.size,
+        ),
+    )
+}
+
 /**
  * @param {IndexQuery} query
  * @returns {Map<string, IndexTermValue>}
  */
-async function tagsSearch({ tags, bookmarksFilter }) {
+async function tagsSearch({ tags, bookmarksFilter, laterlistFilter }) {
     if (!tags.size) {
         return null
     }
@@ -134,16 +169,20 @@ async function tagsSearch({ tags, bookmarksFilter }) {
     // Union the nested `pageId => scores` Maps for each tag
     const pageResultsMap = unionNestedMaps(tagsValuesMap)
 
-    return bookmarksFilter
-        ? filterResultsByBookmarks(pageResultsMap)
-        : pageResultsMap
+    if (bookmarksFilter) {
+        return filterResultsByBookmarks(pageResultsMap)
+    } else if (laterlistFilter) {
+        return filterResultsByLaterlist(pageResultsMap)
+    } else {
+        return pageResultsMap
+    }
 }
 
 /**
  * @param {IndexQuery} query
  * @returns {Map<string, IndexTermValue>}
  */
-async function domainSearch({ domain, bookmarksFilter }) {
+async function domainSearch({ domain, bookmarksFilter, laterlistFilter }) {
     if (!domain.size) {
         return null
     }
@@ -158,16 +197,20 @@ async function domainSearch({ domain, bookmarksFilter }) {
     // Union the nested 'pageId => scores' Maps for each domain
     const pageResultsMap = unionNestedMaps(domainValuesMap)
 
-    return bookmarksFilter
-        ? filterResultsByBookmarks(pageResultsMap)
-        : pageResultsMap
+    if (bookmarksFilter) {
+        return filterResultsByBookmarks(pageResultsMap)
+    } else if (laterlistFilter) {
+        return filterResultsByLaterlist(pageResultsMap)
+    } else {
+        return pageResultsMap
+    }
 }
 
 /**
  * @param {IndexQuery} query
  * @returns {Map<string, IndexTermValue>}
  */
-async function termSearch({ query, bookmarksFilter }) {
+async function termSearch({ query, bookmarksFilter, laterlistFilter }) {
     // Exit early for wildcard
     if (!query.size) {
         return null
@@ -194,9 +237,13 @@ async function termSearch({ query, bookmarksFilter }) {
         ...(await boostedTitleSearch({ query })),
     ])
 
-    return bookmarksFilter
-        ? filterResultsByBookmarks(pageResultsMap)
-        : pageResultsMap
+    if (bookmarksFilter) {
+        return filterResultsByBookmarks(pageResultsMap)
+    } else if (laterlistFilter) {
+        return filterResultsByLaterlist(pageResultsMap)
+    } else {
+        return pageResultsMap
+    }
 }
 
 /**

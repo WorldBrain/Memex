@@ -69,6 +69,20 @@ const Filters = props => (
                         </span>
                     </label>
                 </div>
+                <div className={localStyles.bookmarks}>
+                    <input
+                        type="checkbox"
+                        name="showOnlyLaterlist"
+                        id="showOnlyLaterlist"
+                        checked={props.showOnlyLaterlist}
+                        onChange={props.onShowOnlyLaterlistChange}
+                    />
+                    <label htmlFor="showOnlyLaterlist">
+                        <span className={localStyles.checkboxText}>
+                            Only Show Laterlist
+                        </span>
+                    </label>
+                </div>
             </div>
         </div>
     </div>
@@ -77,6 +91,8 @@ const Filters = props => (
 Filters.propTypes = {
     showOnlyBookmarks: PropTypes.bool.isRequired,
     onShowOnlyBookmarksChange: PropTypes.func.isRequired,
+    showOnlyLaterlist: PropTypes.bool.isRequired,
+    onShowOnlyLaterlistChange: PropTypes.func.isRequired,
     clearAllFilters: PropTypes.func.isRequired,
     isClearFilterButtonShown: PropTypes.bool.isRequired,
     tagFilterManager: PropTypes.node,

@@ -5,6 +5,7 @@ import * as actions from './actions'
 const defaultState = {
     showFilters: false,
     onlyBookmarks: false,
+    onlyLaterlist: false,
     popup: '', // Blank is no popup shown, 'tag' is tags filter, 'domain' is domains filter
     tags: [],
     domains: [],
@@ -58,7 +59,15 @@ const setFilters = filterKey => (state, filters) => ({
 
 const toggleBookmarkFilter = state => ({
     ...state,
+    onlyLaterlist: state.onlyLaterlist ? false : state.onlyLaterlist,
     onlyBookmarks: !state.onlyBookmarks,
+    showFilters: true,
+})
+
+const toggleLaterlistFilter = state => ({
+    ...state,
+    onlyBookmarks: state.onlyBookmarks ? false : state.onlyBookmarks,
+    onlyLaterlist: !state.onlyLaterlist,
     showFilters: true,
 })
 
@@ -86,6 +95,7 @@ export default createReducer(
         [actions.setTagFilters]: setFilters('tags'),
         [actions.setDomainFilters]: setFilters('domains'),
         [actions.toggleBookmarkFilter]: toggleBookmarkFilter,
+        [actions.toggleLaterlistFilter]: toggleLaterlistFilter,
         [actions.showFilter]: state => ({
             ...state,
             showFilters: !state.showFilters,

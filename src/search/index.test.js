@@ -18,6 +18,7 @@ describe('Search index', () => {
                 },
             },
             bookmarkDocs: [],
+            laterlistDocs: [],
             visits: [visit1],
         })
         const { docs: results1 } = await search.search({
@@ -42,6 +43,7 @@ describe('Search index', () => {
                     domain: 'domain/test.com',
                     visits: new Set([`visit/${visit1}`]),
                     bookmarks: new Set([]),
+                    laterlist: new Set([]),
                     tags: new Set([]),
                     latest: visit1,
                 },
@@ -59,6 +61,7 @@ describe('Search index', () => {
                 },
             },
             bookmarkDocs: [],
+            laterlistDocs: [],
             visits: [visit2],
         })
         const { docs: results2 } = await search.search({
@@ -76,6 +79,7 @@ describe('Search index', () => {
                     domain: 'domain/test.com',
                     visits: new Set([`visit/${visit2}`]),
                     bookmarks: new Set([]),
+                    laterlist: new Set([]),
                     tags: new Set([]),
                     latest: visit2,
                 },

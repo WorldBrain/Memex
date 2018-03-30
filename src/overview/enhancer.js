@@ -40,6 +40,12 @@ const locationSync = ReduxQuerySync.enhancer({
                 filterActs.toggleBookmarkFilter(parseBool(onlyBookmarks)),
             defaultValue: false,
         },
+        showOnlylaterlist: {
+            selector: filters.onlyLaterlist,
+            action: onlyLaterlist =>
+                filterActs.toggleLaterlistFilter(parseBool(onlyLaterlist)),
+            defaultValue: false,
+        },
         tags: {
             selector: filters.tagsStringify,
             action: tags => filterActs.setTagFilters(tags),

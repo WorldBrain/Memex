@@ -31,6 +31,7 @@ class PopupContainer extends Component {
     // We only need these atts from the page we're requesting
     static pageProjection = {
         bookmarks: true,
+        laterlist: true,
         tags: true,
     }
 
@@ -45,7 +46,8 @@ class PopupContainer extends Component {
         this.deleteDocs = remoteFunction('deleteDocsByUrl')
         this.removeBookmarkByUrl = remoteFunction('removeBookmarkByUrl')
         this.createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
-
+        this.removeLaterlistByUrl = remoteFunction('removeLaterlistByUrl')
+        this.createLaterlistByUrl = remoteFunction('createLaterlistByUrl')
         this.onSearchChange = this.onSearchChange.bind(this)
         this.onPauseChange = this.onPauseChange.bind(this)
         this.onSearchEnter = this.onSearchEnter.bind(this)
@@ -156,6 +158,18 @@ class PopupContainer extends Component {
 
         // Not yet bookmarked
         return constants.BOOKMARK_BTN_STATE.UNBOOKMARK
+    }
+
+    get laterlistBtnState() {
+        if (!this.state.isLoggable || this.state.isBlacklisted) {
+            return constants.LATERLIST_BTN_STATE.DISABLED
+        }
+
+        if (this.state.page != null && this.state.page.laterlist.length) {
+            return constants.LATERLIST_BTN_STATE.LATERLIST
+        }
+
+        return constants.LATERLIST_BTN_STATE.UNLATERLIST
     }
 
     get pageTags() {
@@ -320,6 +334,21 @@ class PopupContainer extends Component {
         window.close()
     }
 
+    handleAddLaterlist = () => {
+        if (
+            this.laterlistBtnState === constants.LATERLIST_BTN_STATE.UNLATERLIST
+        ) {
+            this.createLaterlistByUrl(this.state.url, this.state.tabID)
+        } else if (
+            this.laterlistBtnState === constants.LATERLIST_BTN_STATE.LATERLIST
+        ) {
+            this.removeLaterlistByUrl(this.state.url)
+        }
+
+        updateLastActive() // Consider user active (analytics)
+        window.close()
+    }
+
     toggleTagPopup = () =>
         this.setState(state => ({
             ...state,
@@ -378,6 +407,24 @@ class PopupContainer extends Component {
                     constants.BOOKMARK_BTN_STATE.BOOKMARK
                         ? 'Unbookmark this Page'
                         : 'Bookmark this Page'}
+                </Button>
+                <Button
+                    onClick={this.handleAddLaterlist}
+                    btnClass={
+                        this.laterlistBtnState ===
+                        constants.LATERLIST_BTN_STATE.LATERLIST
+                            ? styles.bmk
+                            : styles.notBmk
+                    }
+                    disabled={
+                        this.laterlistBtnState ===
+                        constants.LATERLIST_BTN_STATE.DISABLED
+                    }
+                >
+                    {this.laterlistBtnState ===
+                    constants.LATERLIST_BTN_STATE.LATERLIST
+                        ? 'Remove from Read It Later List'
+                        : 'Read It Later'}
                 </Button>
                 {this.renderTagButton()}
                 <hr />

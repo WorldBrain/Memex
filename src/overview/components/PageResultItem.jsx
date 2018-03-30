@@ -89,6 +89,7 @@ PageResultItem.propTypes = {
     url: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
     hasBookmark: PropTypes.bool.isRequired, // eslint-disable-line
+    hasLaterlist: PropTypes.bool.isRequired, // eslint-disable-line
     isDeleting: PropTypes.bool.isRequired,
     onTrashBtnClick: PropTypes.func.isRequired,
     onToggleBookmarkClick: PropTypes.func.isRequired,

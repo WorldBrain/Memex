@@ -25,10 +25,11 @@ export const keyGen = {
     title: key => `title/${key}`,
     visit: key => `visit/${key}`,
     bookmark: key => `bookmark/${key}`,
+    laterlist: key => `laterlist/${key}`,
 }
 
 export const removeKeyType = key =>
-    key.replace(/^(term|title|visit|url|domain|tag|bookmark)\//, '')
+    key.replace(/^(term|title|visit|url|domain|tag|bookmark|laterlist)\//, '')
 
 export const idbBatchToPromise = batch =>
     new Promise((resolve, reject) =>
@@ -254,9 +255,10 @@ const defLookupOpts = {
     concurrency: 5,
 }
 
-export const initSingleLookup = (
-    { defaultValue = null, asBuffer = false } = defLookupOpts,
-) => async key => {
+export const initSingleLookup = ({
+    defaultValue = null,
+    asBuffer = false,
+} = defLookupOpts) => async key => {
     try {
         return await index.get(key, { asBuffer })
     } catch (error) {
@@ -275,9 +277,11 @@ export const initSingleLookup = (
  *  of keys to lookup in index. Unique expected. Returns Promise resolving to single or Map of
  *  documents matching given `keys` param.
  */
-export const initLookupByKeys = (
-    { concurrency = 5, defaultValue = null, asBuffer = false } = defLookupOpts,
-) => async keys => {
+export const initLookupByKeys = ({
+    concurrency = 5,
+    defaultValue = null,
+    asBuffer = false,
+} = defLookupOpts) => async keys => {
     const singleLookup = initSingleLookup({ defaultValue, asBuffer })
     let entries
 

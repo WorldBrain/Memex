@@ -1,4 +1,5 @@
 import { bookmarkKeyPrefix } from 'src/bookmarks'
+import { laterlistKeyPrefix } from 'src/laterlist'
 import { visitKeyPrefix } from 'src/activity-logger'
 import index from '.'
 import pipeline from './pipeline'
@@ -52,6 +53,7 @@ export const addPageTermsConcurrent = makeIndexFnConcSafe(req =>
 )
 
 export const addBookmarkConcurrent = makeIndexFnConcSafe(addBookmark)
+export const addLaterlistConcurrent = makeIndexFnConcSafe(addLaterlist)
 
 /**
  * @param {string} pageId ID/key of document to associate new bookmark entry with.
@@ -72,6 +74,18 @@ async function addBookmark(pageId, timestamp = Date.now()) {
     await index.put(pageId, reverseIndexDoc)
 }
 
+async function addLaterlist(pageId, timestamp = Date.now()) {
+    const reverseIndexDoc = await fetchExistingPage(pageId)
+
+    const laterlistKey = `${laterlistKeyPrefix}${timestamp}`
+
+    // Add new entry to laterlist index
+    await index.put(laterlistKey, { pageId })
+
+    // Add laterlist index key to reverse page doc and update index entry
+    reverseIndexDoc.laterlist.add(laterlistKey)
+    await index.put(pageId, reverseIndexDoc)
+}
 /**
  * @param {IndexTermValue} currTermVal
  * @param {IndexLookupDoc} indexDoc
@@ -121,6 +135,7 @@ async function indexMetaTimestamps(indexDoc) {
     const indexBatch = index.batch()
     const timeValuesMap = await lookupByKeys([
         ...indexDoc.bookmarks,
+        ...indexDoc.laterlist,
         ...indexDoc.visits,
     ])
 
@@ -152,6 +167,10 @@ async function indexPage(indexDoc) {
               bookmarks: new Set([
                   ...existingDoc.bookmarks,
                   ...indexDoc.bookmarks,
+              ]),
+              laterlist: new Set([
+                  ...existingDoc.laterlist,
+                  ...indexDoc.laterlist,
               ]),
               tags: existingDoc.tags,
           }
@@ -213,8 +232,9 @@ async function addPageTerms(indexDoc) {
         ...existingDoc,
         terms: new Set([...existingDoc.terms, ...indexDoc.terms]),
     }
-    const timer = `indexing page content (${augIndexDoc.terms
-        .size} terms): ${indexDoc.id}`
+    const timer = `indexing page content (${augIndexDoc.terms.size} terms): ${
+        indexDoc.id
+    }`
 
     console.time(timer)
     await Promise.all([

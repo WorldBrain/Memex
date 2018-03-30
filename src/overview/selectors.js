@@ -156,11 +156,13 @@ export const isNewSearchLoading = createSelector(
 export const isEmptyQuery = createSelector(
     currentQueryParams,
     filterSelectors.onlyBookmarks,
+    filterSelectors.onlyLaterlist,
     filterSelectors.tags,
     filterSelectors.domains,
     (
         { query, startDate, endDate },
         showOnlyBookmarks,
+        showOnlyLaterlist,
         filterTags,
         filterDomains,
     ) =>
@@ -168,6 +170,7 @@ export const isEmptyQuery = createSelector(
         !startDate &&
         !endDate &&
         !showOnlyBookmarks &&
+        !showOnlyLaterlist &&
         !filterTags.length &&
         !filterDomains.length,
 )

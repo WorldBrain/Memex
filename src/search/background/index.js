@@ -38,6 +38,7 @@ const transformPageForSending = (page, projectOpts) => ({
     terms: projectOpts.terms ? destructPageAtt(page.terms) : [],
     visits: projectOpts.visits ? destructPageAtt(page.visits) : [],
     bookmarks: projectOpts.bookmarks ? destructPageAtt(page.bookmarks) : [],
+    laterlist: projectOpts.laterlist ? destructPageAtt(page.laterlist) : [],
     tags: projectOpts.tags ? destructPageAtt(page.tags).map(removeKeyType) : [],
 })
 
