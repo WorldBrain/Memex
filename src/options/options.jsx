@@ -17,7 +17,7 @@ const ReduxDevTools =
         : undefined
 
 // Set up the sentry runtime error config
-if (process.env.SENTRY_DSN && process.env.SENTRY_DSN.length) {
+if (process.env.SENTRY_DSN) {
     Raven.config(process.env.SENTRY_DSN).install()
 }
 
