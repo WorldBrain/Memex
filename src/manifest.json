@@ -57,13 +57,15 @@
         "storage"
     ],
     "web_accessible_resources": [
-        "/lib/pdf.worker.min.js"
+        "/lib/pdf.worker.min.js",
+        "/img/*",
+        "/content_script.css"
     ],
     "omnibox": {
         "keyword": "w"
     },
     "options_ui": {
-        "page": "./options/options.html",
+        "page": "./options/options.html#/settings",
         "open_in_tab": true
     },
     "manifest_version": 2
