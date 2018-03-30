@@ -1,4 +1,3 @@
-import { CronJob } from 'cron'
 import moment from 'moment-timezone'
 
 import analytics from '../'
@@ -39,15 +38,15 @@ const getActivePeriodVars = period => {
 }
 
 /**
+ *  Affording checking of the last activity event ping for specified time `period`,
+ *  sending off a new event if determined to be needed.
  * @param {'month'|'week'|'day'} period
  * @param {any} activePeriodVars
- * @returns {() => Promise<void>} Function affording checking of the last activity event ping for specified time `period`,
- *  sending off a new event if determined to be needed.
  */
-const attemptPeriodicPing = (
+const attemptPeriodicPing = async (
     period,
     { installKey, activityKey, action },
-) => async () => {
+) => {
     const {
         [activityKey]: lastActivityPing,
         [installKey]: lastInstallPing,
@@ -88,18 +87,19 @@ const attemptPeriodicPing = (
     }
 }
 
+// Schedule all periodic ping attempts at a random minute past the hour, every hour
 const createPeriodicEventJob = period =>
-    new CronJob({
-        cronTime: SCHEDULES.EVERY_HOUR(),
-        start: true,
-        onTick: attemptPeriodicPing(period, getActivePeriodVars(period)),
+    browser.alarms.create(period, {
+        // fire the initial alarm in a random minute,
+        // this will ensure all of the created alarms fire at different time of the hour
+        delayInMinutes: Math.floor(Math.random() * 60),
+        periodInMinutes: SCHEDULES.EVERY_HOUR,
     })
 
-// Schedule all periodic ping attempts at a random minute past the hour, every hour
-const jobs = [
-    createPeriodicEventJob('month'),
-    createPeriodicEventJob('week'),
-    createPeriodicEventJob('day'),
-]
+browser.alarms.onAlarm.addListener(alarm =>
+    attemptPeriodicPing(alarm.name, getActivePeriodVars(alarm.name)),
+)
 
-export default jobs
+createPeriodicEventJob('month')
+createPeriodicEventJob('week')
+createPeriodicEventJob('day')
