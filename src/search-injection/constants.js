@@ -24,7 +24,7 @@ export const SEARCH_ENGINES = {
             side: 'results--sidebar',
         },
         containerType: 'class',
-    }
+    },
 }
 
 // Action names

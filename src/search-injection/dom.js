@@ -43,11 +43,8 @@ export const handleRender = ({ docs, totalCount }) => {
         }
         const containerType = searchEngine.containerType
         const containerIdentifier = searchEngine.container[position]
-        if (containerType == 'class') {
-            const container = document.getElementsByClassName(containerIdentifier)
-        } else {
-            const container = document.getElementById(containerIdentifier)
-        }
+        const container = (containerType === 'class') ? document.getElementsByClassName(containerIdentifier) : document.getElementById(containerIdentifier)
+        
 
         // If re-rendering remove the already present component
         const component = document.getElementById('memexResults')
