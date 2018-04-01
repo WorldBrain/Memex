@@ -3,6 +3,30 @@ import { MapEventTypeToInt } from './constants'
 import db from './db'
 
 class Analytics {
+    _queueEvents = []
+    _loaded = 0
+    _operationsMap = {
+        successful_search: undefined,
+        unsuccessful_search: undefined,
+        datepicker: undefined,
+        bookmark_filter: undefined,
+        tag_filter: undefined,
+        domain_filter: undefined,
+        tagging: undefined,
+        bookmark: undefined,
+        blacklist: undefined,
+        address_bar_search: undefined,
+        datepicker_nlp: undefined,
+        nlp_search: undefined,
+    }
+
+    registerOperations() {
+        Object.keys(this._operationsMap).map((data, i) =>
+            this._queueEvents.push(data),
+        )
+        this._loaded = 1
+    }
+
     /**
      * Save to db
      * @param {any} params
@@ -26,6 +50,8 @@ class Analytics {
             data: eventArgs.data || {},
             timestamp,
         }
+
+        this._queueEvents.push(params)
 
         if (MapEventTypeToInt[eventArgs.type].notifType) {
             this._processEvent({
@@ -76,13 +102,6 @@ class Analytics {
 
         // console.log((await browser.storage.local.get(type))[type])
     }
-
-    /**
-     * Reconstruct the count when cache becomes invalid
-     *
-     *@param {EventTrackInfo} params
-     */
-    async _fromDexie(type) {}
 }
 
 export default Analytics

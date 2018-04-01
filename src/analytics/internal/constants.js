@@ -151,3 +151,18 @@ export const MapEventTypeToInt = {
         id: 40,
     },
 }
+
+export const analysisEventTypes = [
+    'successful_search',
+    'unsuccessful_search',
+    'datepicker',
+    'bookmark_filter',
+    'tag_filter',
+    'domain_filter',
+    'tagging',
+    'bookmark',
+    'blacklist',
+    'address_bar_search',
+    'datepicker_nlp',
+    'nlp_search',
+]
