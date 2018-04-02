@@ -54,7 +54,7 @@ const Privacy = props => (
             <OutLink className={localStyles.link} href="https://WorldBrain.io/">
                 Piwik
             </OutLink>, an open-source alternative, and host the gathered data
-            on our servers.
+            on our servers. For crash reporting we use Sentry.io.
             <br />
             <br />
             <h3>Opting-out of Usage Statistics</h3>
