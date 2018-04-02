@@ -106,7 +106,9 @@ function fetchDOMFromUrl(url, timeout) {
                     if (this.readyState === 4) {
                         switch (this.status) {
                             case 200:
-                                return resolve(this.responseXML)
+                                return resolve(
+                                    createDOMFromText(this.responseText),
+                                )
                             case 0:
                             default:
                                 return req.onerror()
@@ -116,9 +118,24 @@ function fetchDOMFromUrl(url, timeout) {
 
                 req.open('GET', url)
 
-                // Sets the responseXML to be of Document/DOM type
-                req.responseType = 'document'
+                // Sets the responseXML to be of DOMString type (to parse into Document)
+                req.responseType = 'text'
                 req.send()
             }),
     }
+}
+
+/**
+ * Parse the DOMString text and create a new Document instanc eseparate to `window.document`.
+ * See: https://www.xfive.co/blog/how-to-parse-html-response-without-loading-any-images/
+ *
+ * @param {DOMString} data
+ * @return {Document}
+ */
+function createDOMFromText(data) {
+    const doc = document.implementation.createHTMLDocument()
+    const html = doc.createElement('html')
+    html.innerHTML = data
+    doc.replaceChild(html, doc.getElementsByTagName('html')[0])
+    return doc
 }
