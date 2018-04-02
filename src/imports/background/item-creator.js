@@ -103,10 +103,7 @@ export default class ImportItemCreator {
     * @param {(url: string) => bool} [alreadyExists] Opt. checker function to check against existing data.
     * @return {(items: BrowserItem[]) => Map<string, any>} Function that filters array of browser items into a Map of encoded URL strings to import items.
     */
-    _filterItemsByUrl = (
-        transform = f => f,
-        alreadyExists = url => false,
-    ) => items => {
+    _filterItemsByUrl = (transform, existsSet) => items => {
         const importItems = new Map()
 
         for (let i = 0; i < items.length; i++) {
@@ -119,7 +116,8 @@ export default class ImportItemCreator {
                 // Asssociate the item with the encoded URL in results Map
                 const url = normalizeUrl(items[i].url)
 
-                if (!alreadyExists(url)) {
+                if (!existsSet.has(url)) {
+                    existsSet.add(url)
                     importItems.set(url, transform(items[i]))
                 }
             } catch (err) {
@@ -171,7 +169,7 @@ export default class ImportItemCreator {
         if (this._bmLimit > 0) {
             const itemsFilter = this._filterItemsByUrl(
                 deriveImportItem(TYPE.BOOKMARK),
-                url => this._bmKeys.has(url),
+                this._bmKeys,
             )
 
             yield* this._iterateItems(
@@ -185,7 +183,7 @@ export default class ImportItemCreator {
         if (this._histLimit > 0) {
             const itemsFilter = this._filterItemsByUrl(
                 deriveImportItem(TYPE.HISTORY),
-                url => this._histKeys.has(url),
+                this._histKeys,
             )
 
             yield* this._iterateItems(

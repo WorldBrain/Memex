@@ -40,6 +40,33 @@ const runSuite = (DATA: TestData) => async () => {
         await state.fetchEsts()
     })
 
+    test('duped input items do not influence state', async () => {
+        // Init fake data source with duped history
+        const dataSources = new DataSources({
+            history: [...DATA.history, ...DATA.history],
+            bookmarks: [],
+        })
+
+        const itemCreator = new ItemCreator({ dataSources })
+        const localState = new State({ itemCreator }) as any
+        await localState.fetchEsts()
+
+        expect(localState.counts.completed).toEqual({ h: 0, b: 0 })
+        expect(localState.counts.remaining).toEqual({
+            // The actual counts should only be length of 1x test history (input is 2x)
+            h: DATA.history.length,
+            b: 0,
+        })
+
+        // Expect to iterate through the 1x # of item items
+        let itemCount = 0
+        for await (const { chunk } of localState.fetchItems()) {
+            const values = Object.entries(chunk)
+            itemCount += values.length
+        }
+        expect(itemCount).toBe(DATA.history.length)
+    })
+
     test('state can get initd from cache', async () => {
         // Force update mock Cache with fake counts
         state._cache.counts = { ...DATA.fakeCacheCounts }
@@ -193,32 +220,28 @@ const runSuite = (DATA: TestData) => async () => {
 }
 
 // Run import tests against different sized history/bookmark data sets
-describe(
-    'Import items derivation (hist: 1000+, bm: 1000+)',
-    runSuite(initData(urlLists.large, urlLists.large)),
-)
-describe(
-    'Import items derivation (hist: 1000+, bm: 30)',
-    runSuite(initData(urlLists.large, urlLists.large.slice(0, 30))),
-)
-describe(
-    'Import items derivation (hist: 200+, bm: 30)',
-    runSuite(initData(urlLists.med, urlLists.med.slice(0, 30))),
-)
-describe(
-    'Import items derivation (hist: 1000+, bm: 200+) - no bm intersection',
-    runSuite(initData(urlLists.large, urlLists.med)),
-)
-describe(
-    'Import items derivation (hist: 200+, bm: 1000+) - no bm intersection',
-    runSuite(initData(urlLists.med, urlLists.large)),
-)
-describe(
-    'Import items derivation (hist: 1000+, bm: 0)',
-    runSuite(initData(urlLists.large, [])),
-)
-describe(
-    'Import items derivation (hist: 0, bm: 200+)',
-    runSuite(initData([], urlLists.med)),
-)
-describe('Import items derivation (hist: 0, bm: 0)', runSuite(initData([], [])))
+describe('Import items derivation', () => {
+    describe(
+        'hist: 1000+, bm: 1000+',
+        runSuite(initData(urlLists.large, urlLists.large)),
+    )
+    describe(
+        'hist: 1000+, bm: 30',
+        runSuite(initData(urlLists.large, urlLists.large.slice(0, 30))),
+    )
+    describe(
+        'hist: 200+, bm: 30',
+        runSuite(initData(urlLists.med, urlLists.med.slice(0, 30))),
+    )
+    describe(
+        'hist: 1000+, bm: 200+ - no bm intersection',
+        runSuite(initData(urlLists.large, urlLists.med)),
+    )
+    describe(
+        'hist: 200+, bm: 1000+ - no bm intersection',
+        runSuite(initData(urlLists.med, urlLists.large)),
+    )
+    describe('hist: 1000+, bm: 0', runSuite(initData(urlLists.large, [])))
+    describe('hist: 0, bm: 200+', runSuite(initData([], urlLists.med)))
+    describe('hist: 0, bm: 0', runSuite(initData([], [])))
+})

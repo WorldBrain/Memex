@@ -35,8 +35,21 @@ export default class Cache {
         }
     }
 
+    async _diffAgainstStored(inputMap) {
+        let entries = [...inputMap]
+
+        for await (const { chunk } of this.getItems(true)) {
+            const currChunkKeys = new Set(Object.keys(chunk))
+            entries = entries.filter(([key]) => !currChunkKeys.has(key))
+        }
+
+        return new Map(entries)
+    }
+
     async persistItems(data) {
-        this.chunks.push(mapToObject(data))
+        const filteredData = await this._diffAgainstStored(data)
+
+        this.chunks.push(mapToObject(filteredData))
         return data.size
     }
 
