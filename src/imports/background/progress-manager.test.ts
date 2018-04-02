@@ -141,32 +141,34 @@ const runSuite = (DATA: TestData, skip = false) => async () => {
     )
 }
 
-describe(
-    'Import progress manager (hist: 200+, bm:30)',
-    runSuite(initData(urlLists.med, urlLists.med.slice(0, 30))),
-)
-describe(
-    'Import progress manager (hist: 30, bm:200+) - no bm intersection',
-    runSuite(initData(urlLists.large.slice(0, 30), urlLists.med)),
-)
-describe(
-    'Import progress manager (hist: 500, bm:200+) - no bm intersection',
-    runSuite(initData(urlLists.large.slice(500), urlLists.med)),
-)
-describe(
-    'Import progress manager (hist: 200+, bm:disabled)',
-    runSuite(initData(urlLists.med, [], { h: true, b: false })),
-)
-describe(
-    'Import progress manager (hist: disabled, bm:200+)',
-    runSuite(initData([], urlLists.med, { h: false, b: true })),
-)
-describe(
-    'Import progress manager (hist: disabled, bm: disabled)',
-    runSuite(initData([], [], { h: false, b: false })),
-)
+describe('Import progress manager', () => {
+    describe(
+        'hist: 200+, bm:30',
+        runSuite(initData(urlLists.med, urlLists.med.slice(0, 30))),
+    )
+    describe(
+        'hist: 30, bm:200+ - no bm intersection',
+        runSuite(initData(urlLists.large.slice(0, 30), urlLists.med)),
+    )
+    describe(
+        'hist: 500, bm:200+ - no bm intersection',
+        runSuite(initData(urlLists.large.slice(500), urlLists.med)),
+    )
+    describe(
+        'hist: 200+, bm:disabled',
+        runSuite(initData(urlLists.med, [], { h: true, b: false })),
+    )
+    describe(
+        'hist: disabled, bm:200+',
+        runSuite(initData([], urlLists.med, { h: false, b: true })),
+    )
+    describe(
+        'hist: disabled, bm: disabled',
+        runSuite(initData([], [], { h: false, b: false })),
+    )
 
-describe(
-    'Import progress manager (hist: 4000+, bm: disabled)',
-    runSuite(initData(urlLists.xlarge, [], { h: true, b: false }), true),
-)
+    describe(
+        'hist: 4000+, bm: disabled',
+        runSuite(initData(urlLists.xlarge, [], { h: true, b: false }), true),
+    )
+})
