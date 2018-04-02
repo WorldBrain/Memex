@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
+import Raven from 'raven-js'
 
 class ErrorBoundary extends Component {
     static propTypes = {
@@ -15,6 +16,7 @@ class ErrorBoundary extends Component {
     }
 
     componentDidCatch(error, info) {
+        Raven.captureException(error, { extra: info })
         this.setState(state => ({ ...state, error }))
     }
 
@@ -22,7 +24,11 @@ class ErrorBoundary extends Component {
         const { component: ErrorView, children } = this.props
         const { error } = this.state
 
-        return error ? <ErrorView stack={error.stack} message={error.message} /> : children
+        return error ? (
+            <ErrorView stack={error.stack} message={error.message} />
+        ) : (
+            children
+        )
     }
 }
 
