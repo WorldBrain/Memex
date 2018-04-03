@@ -1,5 +1,6 @@
 import promiseLimit from 'promise-limit'
 
+import { decode } from 'src/util/encode-url-for-id'
 import index, { indexQueue } from './'
 
 // Key generation functions
@@ -15,7 +16,7 @@ export const keyGen = {
 }
 
 export const removeKeyType = (key = '') =>
-    key.replace(/^(term|title|visit|url|domain|tag|bookmark)\//, '')
+    key.replace(/^(page|term|title|visit|url|domain|tag|bookmark)\//, '')
 
 /**
  * @param {(args: any) => Promise<any>} fn Any async function to place on the index operations queue.
@@ -182,10 +183,10 @@ export const reverseRangeLookup = ({ limit = Infinity, ...iteratorOpts }) =>
  * @returns {Promise<any>} Resolves to an object containing `histKeys` and `bmKeys` Sets of found history and
  *  bookmark keys, respectively, for all pages indexed.
  */
-export const grabExistingKeys = (trimPrefix = true) => {
+export const grabExistingKeys = () => {
     return new Promise(resolve => {
-        let histKeys = new Set()
-        let bmKeys = new Set()
+        const histKeys = new Set()
+        const bmKeys = new Set()
 
         index.db
             .createReadStream({
@@ -195,17 +196,13 @@ export const grabExistingKeys = (trimPrefix = true) => {
                 valueAsBuffer: false,
             })
             .on('data', ({ key, value }) => {
+                const url = decode(removeKeyType(key))
                 if (value && value.bookmarks && value.bookmarks.size) {
-                    bmKeys.add(key)
+                    bmKeys.add(url)
                 }
-                histKeys.add(key)
+                histKeys.add(url)
             })
             .on('end', () => {
-                if (trimPrefix) {
-                    histKeys = new Set([...histKeys].map(removeKeyType))
-                    bmKeys = new Set([...bmKeys].map(removeKeyType))
-                }
-
                 resolve({
                     histKeys,
                     bmKeys,
