@@ -235,6 +235,7 @@ input[type='checkbox'] {
 
 .pillContainer {
     display: inline-block;
+    display: -moz-groupbox;
     background-color: #3eb995;
     color: white;
     margin-left: 5px;
