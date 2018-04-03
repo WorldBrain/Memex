@@ -74,35 +74,21 @@ export const extractContent = (
  * @param {number} [boost=0.2] Boost to apply on base score.
  * @returns {Map<string, IndexTermValue>} Map of page IDs to boosted scores.
  */
-export const boostScores = (termValuesMap, boost = 0.2) =>
-    [...termValuesMap.values()].reduce((pageScoresMap, termValue) => {
-        // Skip empty values
-        if (termValue == null) {
-            return pageScoresMap
-        }
-
-        // For each assoc. page to the term...
-        for (const [pageId, score] of termValue) {
-            const currScore = +score.latest
-
-            if (!Number.isNaN(currScore)) {
-                let newScore
-
-                // ... boost score (extra boost, if found multiple times)
-                if (pageScoresMap.has(pageId)) {
-                    newScore = currScore + currScore * (boost + 0.1)
-                } else {
-                    newScore = currScore + currScore * boost
-                }
-
-                pageScoresMap.set(pageId, {
-                    latest: newScore.toFixed(),
-                })
-            }
-        }
-
+export function boostScores(pageScoresMap, boost = 0) {
+    if (boost === 0) {
         return pageScoresMap
-    }, new Map())
+    }
+
+    for (const [pageId, score] of pageScoresMap) {
+        const currScore = +score.latest
+
+        if (!Number.isNaN(currScore)) {
+            const newScore = currScore * (1 + boost)
+            pageScoresMap.set(pageId, { latest: newScore.toFixed() })
+        }
+    }
+    return pageScoresMap
+}
 
 /**
  * Transforms an indexed document into a search result.
