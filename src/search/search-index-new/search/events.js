@@ -20,17 +20,33 @@ export async function mapUrlsToLatestEvents(
             (endDate != null && time > endDate) ||
             (startDate != null && time < startDate)
         ) {
-            return
+            return false
         }
 
         latestEvents.set(url, time)
+        return true
     }
 
+    // Previously used `.anyOf()` + `.eachPrimaryKey()` in a single query
+    //  Turns out it's _way_ faster to do multiple parrallel queries for this
+    //  (URLs are not unique in visits index)
     if (!bookmarks) {
-        await db.visits
-            .where('url')
-            .anyOf(urls)
-            .eachPrimaryKey(([time, url]) => attemptAdd({ time, url }))
+        // Simple state to keep track of when to finish each query
+        const doneFlags = [...urls].map(url => false)
+        await Promise.all(
+            [...urls].map((url, i) =>
+                db.visits
+                    .where('url')
+                    .equals(url)
+                    .reverse()
+                    // Mark of current query as done as soon as visit passes adding criteria
+                    .until(() => doneFlags[i])
+                    .eachPrimaryKey(
+                        ([time, url]) =>
+                            (doneFlags[i] = attemptAdd({ time, url })),
+                    ),
+            ),
+        )
     }
 
     await db.bookmarks
