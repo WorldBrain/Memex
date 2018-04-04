@@ -17,6 +17,19 @@ export const SEARCH_ENGINES = {
     },
 }
 
+// These are values of the `tbm` query param in Google searches. It denotes
+// the type of search performed. More discussion on these:
+//   https://productforums.google.com/forum/#!msg/webmasters/8fPg1I2p34w/Xsdw0stkDwAJ
+export const UNWANTED_GOOGLE_SEARCH_TYPES = [
+    'vid', // Google video
+    'nws', // Google news
+    'bks', // Google books
+    'fin', // Google finance
+    'lcl', // Google quick maps
+    'isch', // Google images
+    'pers', // Google personal
+]
+
 // Action names
 export const OPEN_OVERVIEW = 'openOverviewURL'
 export const OPEN_OPTIONS = 'openOptionsURL'
