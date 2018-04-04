@@ -118,18 +118,25 @@ async function fullSearch({ queryTerms = [], ...params }) {
 
     let urlScoresMap
 
-    // Blank search; simply do lookback from `endDate` on visits and score URLs by latest
-    if (!queryTerms.length) {
+    // Few different cases of search params we can take short-cuts on
+    if (!queryTerms.length && filteredUrls != null) {
+        // Blank search + domain/tags filters: just grab the events for filtered URLs and paginate
+        console.time('TIMER - mapUrlsToLatestEvents()')
+        urlScoresMap = await mapUrlsToLatestEvents(params, filteredUrls)
+        console.timeEnd('TIMER - mapUrlsToLatestEvents()')
+    } else if (!queryTerms.length) {
+        // Blank search: simply do lookback from `endDate` on visits and score URLs by latest
         console.time('TIMER - groupLatestEventsByUrl()')
-        urlScoresMap = await groupLatestEventsByUrl(params, filteredUrls)
+        urlScoresMap = await groupLatestEventsByUrl(params)
         console.timeEnd('TIMER - groupLatestEventsByUrl()')
     } else {
-        // Do terms lookup first then latest event lookup (within time bounds) for each result
+        // Terms search: do terms lookup first then latest event lookup (within time bounds) for each result
         console.time('TIMER - textSearch()')
         const urlScoreMultiMap = await textSearch({ queryTerms }, filteredUrls)
         console.timeEnd('TIMER - textSearch()')
-        const urls = new Set(urlScoreMultiMap.keys())
+
         console.time('TIMER - mapUrlsToLatestEvents()')
+        const urls = new Set(urlScoreMultiMap.keys())
         const latestEvents = await mapUrlsToLatestEvents(params, urls)
         console.timeEnd('TIMER - mapUrlsToLatestEvents()')
 

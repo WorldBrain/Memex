@@ -43,17 +43,18 @@ export async function mapUrlsToLatestEvents(
 
 /**
  * Goes through visits and bookmarks index from `endDate` until it groups enough URLs.
- * Space: O(skip + limit) - constant
- * Time: depends on how much visits per page; should be around log N as it's a range lookup
+ * The `.until` in the query chain forces time and space to be constant to `skip + limit`
  *
  * @param {SearchParams} params
- * @param {Set<string>} [filteredURLs] Filtered URL whitelist to only include (opt.).
  * @return {Map<string, number> | null} Map of URL keys to latest visit time numbers. Should be size <= skip + limit.
  */
-export async function groupLatestEventsByUrl(
-    { startDate = 0, endDate = Date.now(), skip = 0, limit = 10, bookmarks },
-    filteredUrls,
-) {
+export async function groupLatestEventsByUrl({
+    startDate = 0,
+    endDate = Date.now(),
+    skip = 0,
+    limit = 10,
+    bookmarks,
+}) {
     // Lookback from endDate to get needed amount of visits
     const latestVisits = new Map()
     if (!bookmarks) {
@@ -71,11 +72,8 @@ export async function groupLatestEventsByUrl(
             .until(() => latestVisits.size >= skip + limit)
             // For each visit PK, reduce down into Map of URL keys to latest visit time
             .eachPrimaryKey(([time, url]) => {
-                // Only ever record the latest visit for each URL (first due to IndexedDB keys ordering)
-                if (
-                    !latestVisits.has(url) &&
-                    (filteredUrls == null || filteredUrls.has(url))
-                ) {
+                // Only ever record the latest visit for each URL (first due to IndexedDB reverse keys ordering)
+                if (!latestVisits.has(url)) {
                     latestVisits.set(url, time)
                 }
             })
@@ -88,11 +86,7 @@ export async function groupLatestEventsByUrl(
         .between(startDate, endDate, true, true)
         .reverse()
         .until(() => latestBookmarks.size >= skip + limit)
-        .each(({ time, url }) => {
-            if (filteredUrls == null || filteredUrls.has(url)) {
-                latestBookmarks.set(url, time)
-            }
-        })
+        .each(({ time, url }) => latestBookmarks.set(url, time))
 
     // Merge results
     const latestEvents = new Map()
