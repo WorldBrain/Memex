@@ -1,6 +1,7 @@
 import { createAction } from 'redux-act'
 
 import analytics from 'src/analytics'
+import internalAnalytics from 'src/analytics/internal'
 import db from 'src/pouchdb'
 import { CMDS, IMPORT_CONN_NAME } from './constants'
 import * as selectors from './selectors'
