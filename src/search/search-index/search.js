@@ -164,17 +164,13 @@ async function domainSearch({ domain, bookmarksFilter }) {
 }
 
 /**
- * @param {IndexQuery} query
- * @returns {Map<string, IndexTermValue>}
+ * @param {(term: string) => string} keyMapFn
+ * @param {number} [boost]
+ * @returns {(q: IndexQuery) => Promise<Map<string, IndexTermValue>>}
  */
-async function termSearch({ query, bookmarksFilter }) {
-    // Exit early for wildcard
-    if (!query.size) {
-        return null
-    }
-
+const initTermSearch = (keyGenFn, boost) => async ({ query }) => {
     // For each term, do index lookup to grab the associated page IDs value
-    const termValuesMap = await lookupByKeys([...query].map(keyGen.term))
+    const termValuesMap = await lookupByKeys([...query].map(keyGenFn))
 
     // If the terms are all indexed, union the nested 'pageId => weights' Maps for each term (clean up the structure),
     //  however if any of the terms searched are not indexed, don't use terms results
@@ -187,32 +183,36 @@ async function termSearch({ query, bookmarksFilter }) {
         pageValuesMap = intersectManyMaps([...termValuesMap.values()])
     }
 
-    // Merge in boosted docs for other fields
-    const pageResultsMap = new Map([
-        ...pageValuesMap,
-        ...(await boostedUrlSearch({ query })),
-        ...(await boostedTitleSearch({ query })),
+    return boostScores(pageValuesMap, boost)
+}
+
+const baseTermSearch = initTermSearch(keyGen.term)
+const boostedTitleSearch = initTermSearch(keyGen.title, 0.2)
+const boostedUrlSearch = initTermSearch(keyGen.url, 0.1)
+
+/**
+ * @param {IndexQuery} query
+ * @returns {Map<string, IndexTermValue>}
+ */
+async function termSearch({ bookmarksFilter, ...query }) {
+    // Exit early for wildcard
+    if (!query.query.size) {
+        return null
+    }
+
+    // Perform terms search on each index
+    const [content, title, url] = await Promise.all([
+        baseTermSearch(query),
+        boostedTitleSearch(query),
+        boostedUrlSearch(query),
     ])
+
+    const pageResultsMap = new Map([...content, ...title, ...url])
 
     return bookmarksFilter
         ? filterResultsByBookmarks(pageResultsMap)
         : pageResultsMap
 }
-
-/**
- * @param {(term: string) => string} keyMapFn
- * @param {number} boost
- * @returns {(q: IndexQuery) => Map<string, IndexTermValue>}
- */
-const boostedTermSearch = (keyGenFn, boost) => async ({ query }) => {
-    // For each term, do index lookup to grab the associated page IDs value
-    const titleTermValuesMap = await lookupByKeys([...query].map(keyGenFn))
-
-    return boostScores(titleTermValuesMap, boost)
-}
-
-const boostedTitleSearch = boostedTermSearch(keyGen.title, 0.2)
-const boostedUrlSearch = boostedTermSearch(keyGen.url, 0.1)
 
 /**
  * Takes in final search results (should be page size) and performs the reverse index lookup

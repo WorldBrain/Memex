@@ -1,17 +1,33 @@
-import { SEARCH_ENGINES } from './constants'
+import { SEARCH_ENGINES, UNWANTED_GOOGLE_SEARCH_TYPES } from './constants'
 
 export const matchURL = url => {
     // url: (string) location.href
     // match url against search engines regexs
     // returns: the search engine it matches to or false
 
+    let matchingKey
     for (const key in SEARCH_ENGINES) {
-        // eslint-disable-line prefer-const
-        const regex = SEARCH_ENGINES[key].regex
-        if (url.match(regex) !== null) return key
+        if (SEARCH_ENGINES[key].regex.test(url)) {
+            matchingKey = key
+            break
+        }
     }
+
+    if (!matchingKey) {
+        return false
+    }
+
+    // Google specific fix: `tbm` query param is used to determine google search type (videos, images, etc.)
+    // Make sure that it is not set to one of the unwanted types of search
+    const searchType = getUrlSearchParams(url).get('tbm')
+    if (!UNWANTED_GOOGLE_SEARCH_TYPES.includes(searchType)) {
+        return matchingKey
+    }
+
     return false
 }
+
+const getUrlSearchParams = url => new URL(url).searchParams
 
 export const fetchQuery = url => {
     // url: (string) location.href
@@ -19,8 +35,8 @@ export const fetchQuery = url => {
     // and fetches the query param from the url
     // returns: query
 
-    const urlObj = new URL(url)
-    const query = urlObj.searchParams.get('q')
+    const searchParams = getUrlSearchParams(url)
+    const query = searchParams.get('q')
     return query
 }
 
