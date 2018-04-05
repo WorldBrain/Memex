@@ -139,6 +139,11 @@ const makePortMessagingThunk = ({
     port.postMessage({ cmd })
 }
 
+export const recalcEsts = makePortMessagingThunk({
+    action: prepareImport(),
+    cmd: CMDS.RECALC,
+})
+
 // Batch controlling thunks
 export const stop = makePortMessagingThunk({
     action: cancelImport(),

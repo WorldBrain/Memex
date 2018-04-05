@@ -66,6 +66,16 @@ export const isIdle = getImportStatusFlag(STATUS.IDLE)
 export const isRunning = getImportStatusFlag(STATUS.RUNNING)
 export const isPaused = getImportStatusFlag(STATUS.PAUSED)
 export const isStopped = getImportStatusFlag(STATUS.STOPPED)
+export const shouldRenderEsts = createSelector(
+    isIdle,
+    isLoading,
+    (idle, loading) => idle || loading,
+)
+export const shouldRenderProgress = createSelector(
+    isRunning,
+    isPaused,
+    (running, paused) => running || paused,
+)
 
 /**
  * Derives ready-to-use download details data (rendered into rows).

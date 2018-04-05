@@ -85,6 +85,8 @@ export default class ImportConnectionHandler {
                 return this.cancelImport()
             case CMDS.FINISH:
                 return this.finishImport()
+            case CMDS.RECALC:
+                return this.recalcState()
             case CMDS.SET_CONCURRENCY:
                 return (this.importer.concurrency = payload)
             case CMDS.SET_PROCESS_ERRS:
@@ -92,6 +94,13 @@ export default class ImportConnectionHandler {
             default:
                 return console.error(`unknown command: ${cmd}`)
         }
+    }
+
+    async recalcState() {
+        stateManager.dirtyEsts()
+        const estimateCounts = await stateManager.fetchEsts(this._quickMode)
+
+        this.port.postMessage({ cmd: CMDS.INIT, ...estimateCounts })
     }
 
     /**

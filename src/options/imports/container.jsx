@@ -24,8 +24,8 @@ class ImportContainer extends Component {
         isRunning: PropTypes.bool.isRequired,
         isPaused: PropTypes.bool.isRequired,
         isStopped: PropTypes.bool.isRequired,
-        isLoading: PropTypes.bool.isRequired,
-        isIdle: PropTypes.bool.isRequired,
+        shouldRenderEsts: PropTypes.bool.isRequired,
+        shouldRenderProgress: PropTypes.bool.isRequired,
         isStartBtnDisabled: PropTypes.bool.isRequired,
         downloadData: PropTypes.arrayOf(PropTypes.object).isRequired,
         progressPercent: PropTypes.number.isRequired,
@@ -94,8 +94,7 @@ class ImportContainer extends Component {
     renderCancelButton = () => (
         <ActionButton
             handleClick={this.handleCancelBtnClick}
-            isHidden={this.props.isIdle}
-            isDisabled={this.props.isStopped}
+            isHidden={!this.props.shouldRenderProgress}
             customClass={'cancel'}
         >
             Cancel
@@ -251,24 +250,41 @@ class ImportContainer extends Component {
         </Wrapper>
     )
 
-    render() {
-        const { isRunning, isIdle, isLoading, isStopped, isPaused } = this.props
+    renderMainTable() {
+        if (this.props.shouldRenderEsts) {
+            return this.renderEstimatesTable()
+        }
 
+        if (this.props.shouldRenderProgress) {
+            return this.renderProgressTable()
+        }
+
+        return this.renderStatusReport()
+    }
+
+    renderButtonBar = () => (
+        <ButtonBar helpText={this.renderHelpText()} {...this.props}>
+            {this.props.shouldRenderEsts && (
+                <Wrapper>
+                    <AdvSettingCheckbox {...this.props} />
+                    <ActionButton
+                        handleClick={this.props.boundActions.recalcEsts}
+                        customClass="recalc"
+                    >
+                        <i className="material-icons">autorenew</i>
+                    </ActionButton>
+                </Wrapper>
+            )}
+            {this.renderCancelButton()}
+            {this.renderImportButton()}
+        </ButtonBar>
+    )
+
+    render() {
         return (
             <Import {...this.props}>
-                {(isIdle || isLoading) && this.renderEstimatesTable()}
-                {(isRunning || isPaused) && this.renderProgressTable()}
-                {isStopped && this.renderStatusReport()}
-                <ButtonBar
-                    isRunning={isRunning}
-                    helpText={this.renderHelpText()}
-                >
-                    {(isIdle || isLoading) && (
-                        <AdvSettingCheckbox {...this.props} />
-                    )}
-                    {!isStopped && this.renderCancelButton()}
-                    {this.renderImportButton()}
-                </ButtonBar>
+                {this.renderMainTable()}
+                {this.renderButtonBar()}
             </Import>
         )
     }
@@ -279,7 +295,8 @@ const mapStateToProps = state => ({
     isPaused: selectors.isPaused(state),
     isStopped: selectors.isStopped(state),
     isLoading: selectors.isLoading(state),
-    isIdle: selectors.isIdle(state),
+    shouldRenderEsts: selectors.shouldRenderEsts(state),
+    shouldRenderProgress: selectors.shouldRenderProgress(state),
     isStartBtnDisabled: selectors.isStartBtnDisabled(state),
     downloadData: selectors.downloadDetailsData(state),
     estimates: selectors.estimates(state),
