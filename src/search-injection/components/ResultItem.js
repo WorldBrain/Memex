@@ -13,21 +13,21 @@ const ResultItem = props => {
                 onClick={props.onLinkClick}
                 target="_blank"
             >
-                {props.content.title}
+                {props.title}
             </a>
             <p className={styles.url}>{props.url}</p>
             <div className={styles.displayTime}>
                 {' '}
-                {niceTime(+props.displayTime)}{' '}
+                {niceTime(props.displayTime)}{' '}
             </div>
         </div>
     )
 }
 
 ResultItem.propTypes = {
-    displayTime: PropTypes.string.isRequired,
+    displayTime: PropTypes.number.isRequired,
     url: PropTypes.string.isRequired,
-    content: PropTypes.object.isRequired,
+    title: PropTypes.string.isRequired,
     onLinkClick: PropTypes.func.isRequired,
 }
 export default ResultItem
