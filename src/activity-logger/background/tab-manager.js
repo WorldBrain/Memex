@@ -82,13 +82,17 @@ export class TabManager {
      * @param {() => Promise<void>} cb The page log logic to delay.
      */
     scheduleTabLog(id, logCb) {
-        const tab = this.getTabState(id)
-        tab.scheduleLog(logCb)
+        try {
+            const tab = this.getTabState(id)
+            tab.scheduleLog(logCb)
+        } catch (err) {}
     }
 
     clearScheduledLog(id) {
-        const tab = this.getTabState(id)
-        tab.cancelPendingOps()
+        try {
+            const tab = this.getTabState(id)
+            tab.cancelPendingOps()
+        } catch (err) {}
     }
 
     /**
