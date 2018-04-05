@@ -108,3 +108,7 @@ Responsiveness Settings
         display: none;
     }
 }
+
+.tooltipDesc {
+    font-size: 14px;
+}

@@ -101,6 +101,9 @@ async function createBundle(
                 ? 'https://analytics.worldbrain.io'
                 : 'http://localhost:1234',
             PIWIK_SITE_ID: '1',
+            SENTRY_DSN: production
+                ? 'https://205014a0f65e4160a29db2935250b47c@sentry.io/305612'
+                : undefined,
         }),
         { global: true },
     )
