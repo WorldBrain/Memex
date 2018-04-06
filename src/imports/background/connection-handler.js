@@ -1,4 +1,6 @@
 import { CMDS, DEF_CONCURRENCY } from 'src/options/imports/constants'
+import { WARN_NOTIF, WARN_INFO_URL } from './constants'
+import createNotif from 'src/util/notifications'
 import ProgressManager from './progress-manager'
 import stateManager from './state-manager'
 
@@ -108,6 +110,12 @@ export default class ImportConnectionHandler {
      * or not to process that given type of imports.
      */
     async startImport(allowTypes) {
+        if (!this._quickMode) {
+            createNotif(WARN_NOTIF, () =>
+                browser.tabs.create({ url: WARN_INFO_URL }),
+            )
+        }
+
         stateManager.allowTypes = allowTypes
 
         if (!await this.getImportInProgressFlag()) {
