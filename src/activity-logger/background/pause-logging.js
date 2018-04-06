@@ -1,13 +1,6 @@
 /* eslint eqeqeq: 0 */
+import createNotif from 'src/util/notifications'
 import { PAUSE_STORAGE_KEY } from '..'
-
-const getNotifOptions = (message, requireInteraction = false) => ({
-    type: 'basic',
-    iconUrl: '/img/worldbrain-logo-narrow.png',
-    title: 'WorldBrain Activity Logger',
-    message,
-    requireInteraction,
-})
 
 export const pauseIconPath = '/img/worldbrain-logo-narrow-pause.png'
 export const unpauseIconPath = '/img/worldbrain-logo-narrow-bw.png'
@@ -66,12 +59,11 @@ function handlePause(timeout) {
     }
 
     return setTimeout(() => {
-        browser.notifications.create(
-            getNotifOptions(
-                'Activity logger now running in background again',
-                true,
-            ),
-        )
+        createNotif({
+            message: 'Activity logger now running in background again',
+            title: 'WorldBrain Activity Logger',
+            requireInteraction: true,
+        })
         setState(false)
     }, timeout * 60000)
 }

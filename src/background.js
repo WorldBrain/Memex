@@ -10,7 +10,7 @@ import {
 } from 'src/blacklist/background'
 import { index } from 'src/search'
 import analytics from 'src/analytics'
-import updateNotification from 'src/util/update-notification'
+import createNotif from 'src/util/notifications'
 import { OPEN_OVERVIEW, OPEN_OPTIONS } from 'src/search-injection/constants'
 import db from 'src/search/search-index-new'
 import * as models from 'src/search/search-index-new/models'
@@ -26,6 +26,11 @@ export const UNINSTALL_URL =
     process.env.NODE_ENV === 'production'
         ? 'http://worldbrain.io/uninstall'
         : ''
+export const NEW_FEATURE_NOTIF = {
+    title: 'NEW FEATURE: Tagging',
+    message: 'Click for more Information',
+    url: 'https://worldbrain.helprace.com/i34-feature-tagging',
+}
 
 window.oldIndex = index
 
@@ -62,7 +67,13 @@ async function onInstall() {
 
 async function onUpdate() {
     // Notification with updates when we update
-    updateNotification()
+    await createNotif(
+        {
+            title: NEW_FEATURE_NOTIF.title,
+            message: NEW_FEATURE_NOTIF.message,
+        },
+        () => browser.tabs.create({ url: NEW_FEATURE_NOTIF.url }),
+    )
 }
 
 browser.commands.onCommand.addListener(command => {
