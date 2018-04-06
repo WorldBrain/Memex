@@ -36,16 +36,19 @@ export const handleRender = ({ docs, totalCount }) => {
             constants.POSITION_KEY,
             'side',
         )
-        
+
         const currentURL = window.location.href
-        const searchEngine = constants.SEARCH_ENGINES[utils.matchURL(currentURL)]
-        if (!searchEngine) {
+        const searchEngine = utils.matchURL(currentURL)
+        const searchEngineObj = constants.SEARCH_ENGINES[searchEngine]
+        if (!searchEngineObj) {
             return false
         }
-        const containerType = searchEngine.containerType
-        const containerIdentifier = searchEngine.container[position]
-        const container = (containerType === 'class') ? document.getElementsByClassName(containerIdentifier)[0] : document.getElementById(containerIdentifier)
-        
+        const containerType = searchEngineObj.containerType
+        const containerIdentifier = searchEngineObj.container[position]
+        const container =
+            containerType === 'class'
+                ? document.getElementsByClassName(containerIdentifier)[0]
+                : document.getElementById(containerIdentifier)
 
         // If re-rendering remove the already present component
         const component = document.getElementById('memexResults')
@@ -65,6 +68,7 @@ export const handleRender = ({ docs, totalCount }) => {
                 results={docs.slice(0, limit)}
                 len={totalCount}
                 rerender={renderComponent}
+                searchEngine={searchEngine}
             />,
             target,
         )

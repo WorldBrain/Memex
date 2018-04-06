@@ -68,22 +68,66 @@
     width: 71%;
 }
 
-.above {
+.google_above {
     & .settingsButton {
         right: -10px;
     }
 
     & .resultsText {
         padding-left: 16px;
+        width: 76%;
     }
 }
 
-.side {
+.google_side {
     width: 454px;
 
     & .settingsButton {
         right: -5px;
         top: 14px;
+    }
+}
+
+.duckduckgo_above {
+    margin-top: 4px;
+
+    & .linksContainer {
+        margin-top: 4px;
+        margin-bottom: 8px;
+    }
+
+    & .resultsText {
+        width: 76%;
+    }
+
+    & .settingsButton {
+        top: 6px;
+    }
+
+    & .dropdown {
+        right: 5px;
+    }
+}
+
+.duckduckgo_side {
+    margin-top: 7px;
+
+    & .resultsText {
+        font-size: 1.05em;
+    }
+
+    & .links {
+        font-size: 0.85em;
+    }
+
+    & .settingsButton {
+        right: -4px;
+        top: 9px;
+    }
+
+    & .dropdown {
+        top: 30px;
+        right: 5px;
     }
 }
 

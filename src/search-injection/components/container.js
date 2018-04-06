@@ -13,6 +13,7 @@ class Container extends React.Component {
         results: PropTypes.arrayOf(PropTypes.object).isRequired,
         len: PropTypes.number.isRequired,
         rerender: PropTypes.func.isRequired,
+        searchEngine: PropTypes.string.isRequired,
     }
 
     constructor(props) {
@@ -34,6 +35,7 @@ class Container extends React.Component {
         dropdown: false,
         removed: false,
         position: null,
+        searchEngine: '',
     }
 
     async componentDidMount() {
@@ -125,7 +127,7 @@ class Container extends React.Component {
 
     render() {
         const { position } = this.state
-
+        const { searchEngine } = this.props
         // If the state.removed is true, show the RemovedText component
         if (this.state.removed)
             return <RemovedText undo={this.undoRemove} position={position} />
@@ -137,6 +139,7 @@ class Container extends React.Component {
         return (
             <Results
                 position={position}
+                searchEngine={searchEngine}
                 totalCount={this.props.len}
                 seeMoreResults={this.seeMoreResults}
                 toggleHideResults={this.toggleHideResults}

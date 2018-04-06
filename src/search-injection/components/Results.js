@@ -7,11 +7,12 @@ import styles from './Results.css'
 
 const Results = props => {
     const logoURL = browser.extension.getURL('img/worldbrain-logo-wo-beta.png')
+    const searchEngineClass = `${props.searchEngine}_${props.position}`
     return (
         <div
             className={classNames(
                 styles.MEMEX_CONTAINER,
-                styles[props.position],
+                styles[searchEngineClass],
             )}
         >
             <div className={styles.header}>
@@ -57,6 +58,7 @@ const Results = props => {
 
 Results.propTypes = {
     position: PropTypes.string.isRequired,
+    searchEngine: PropTypes.string.isRequired,
     totalCount: PropTypes.number.isRequired,
     seeMoreResults: PropTypes.func.isRequired,
     toggleHideResults: PropTypes.func.isRequired,
