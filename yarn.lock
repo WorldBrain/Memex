@@ -10012,6 +10012,12 @@ web-ext@^1.10.0:
     yargs "6.6.0"
     zip-dir "1.0.2"
 
+webextension-polyfill-ts@^0.8.3:
+  version "0.8.3"
+  resolved "https://registry.yarnpkg.com/webextension-polyfill-ts/-/webextension-polyfill-ts-0.8.3.tgz#53fbdf72a961d3c1b3fb16765d106d3ef325aa2f"
+  dependencies:
+    webextension-polyfill "^0.2.1"
+
 webextension-polyfill@^0.2.1:
   version "0.2.1"
   resolved "https://registry.yarnpkg.com/webextension-polyfill/-/webextension-polyfill-0.2.1.tgz#cdfc9126033039f1713553157d35beff1d4d6f4a"

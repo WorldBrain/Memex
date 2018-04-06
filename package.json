@@ -155,7 +155,8 @@
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0",
     "watchify": "^3.9.0",
-    "web-ext": "^1.10.0"
+    "web-ext": "^1.10.0",
+    "webextension-polyfill-ts": "^0.8.3"
   },
   "resolutions": {
     "abstract-leveldown": "4.0.3"
