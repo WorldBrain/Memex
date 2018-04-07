@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import Checkbox from './Checkbox'
 import styles from './SearchInjection.css'
 
-const SearchInjection = ({ isInjectionEnabled, toggleInjection }) => {
+const SearchInjection = ({ injectionPreference, toggleInjection }) => {
     return (
         <div>
             <p className={styles.settingsHeader}>
@@ -13,10 +13,18 @@ const SearchInjection = ({ isInjectionEnabled, toggleInjection }) => {
             <Checkbox
                 name="google"
                 id="google-checkbox"
-                isChecked={isInjectionEnabled}
+                isChecked={injectionPreference.google}
                 handleChange={toggleInjection}
             >
                 Google
+            </Checkbox>
+            <Checkbox
+                name="duckduckgo"
+                id="ddg-checkbox"
+                isChecked={injectionPreference.duckduckgo}
+                handleChange={toggleInjection}
+            >
+                DuckDuckGo
             </Checkbox>
             <p>
                 Want others?{' '}
@@ -32,7 +40,7 @@ const SearchInjection = ({ isInjectionEnabled, toggleInjection }) => {
 }
 
 SearchInjection.propTypes = {
-    isInjectionEnabled: PropTypes.bool.isRequired,
+    injectionPreference: PropTypes.object.isRequired,
     toggleInjection: PropTypes.func.isRequired,
 }
 

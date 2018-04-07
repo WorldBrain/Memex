@@ -2,7 +2,11 @@ import React from 'react'
 
 import analytics from 'src/analytics'
 import SearchInjection from './SearchInjection'
-import { getLocalStorage, setLocalStorage } from 'src/search-injection/utils'
+import {
+    getLocalStorage,
+    setLocalStorage,
+    SEARCH_INJECTION_DEFAULT,
+} from 'src/search-injection/utils'
 import { SEARCH_INJECTION_KEY } from 'src/search-injection/constants'
 
 class SearchInjectionContainer extends React.Component {
@@ -12,40 +16,45 @@ class SearchInjectionContainer extends React.Component {
     }
 
     state = {
-        isInjectionEnabled: false,
+        injectionPreference: {
+            google: true,
+            duckduckgo: true,
+        },
     }
 
     async componentDidMount() {
-        const isInjectionEnabled = await getLocalStorage(
+        const injectionPreference = await getLocalStorage(
             SEARCH_INJECTION_KEY,
-            true,
+            SEARCH_INJECTION_DEFAULT,
         )
         this.setState({
-            isInjectionEnabled,
+            injectionPreference,
         })
     }
 
-    async toggleInjection() {
-        const toggled = !this.state.isInjectionEnabled
-        await setLocalStorage(SEARCH_INJECTION_KEY, toggled)
+    async toggleInjection(name) {
+        const { injectionPreference } = this.state
+        // Toggle that field
+        injectionPreference[name] = !injectionPreference[name]
+        await setLocalStorage(SEARCH_INJECTION_KEY, injectionPreference)
 
-        if (!toggled) {
+        if (!injectionPreference[name]) {
             analytics.trackEvent({
                 category: 'Search integration',
                 action: 'Disabled',
-                name: 'Options script',
+                name,
             })
         }
 
         this.setState({
-            isInjectionEnabled: toggled,
+            injectionPreference,
         })
     }
 
     render() {
         return (
             <SearchInjection
-                isInjectionEnabled={this.state.isInjectionEnabled}
+                injectionPreference={this.state.injectionPreference}
                 toggleInjection={this.toggleInjection}
             />
         )

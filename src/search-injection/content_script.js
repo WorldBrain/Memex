@@ -40,14 +40,12 @@ const init = async () => {
 
     const searchInjection = await utils.getLocalStorage(
         constants.SEARCH_INJECTION_KEY,
-        true,
+        constants.SEARCH_INJECTION_DEFAULT,
     )
-
-    if (!searchInjection) return
 
     const url = window.location.href
     const matched = utils.matchURL(url)
-    if (matched) {
+    if (matched && searchInjection[matched]) {
         const query = utils.fetchQuery(url)
         search(query)
     }
