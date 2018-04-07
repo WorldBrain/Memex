@@ -1,0 +1,50 @@
+/* stylelint-disable declaration-no-important */
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    flex-direction: column;
+    margin: 8px;
+}
+
+.buttongroup {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    margin-top: 8px;
+}
+
+.textarea {
+    font-size: 16px;
+    font-family: 'Open Sans';
+    color: #3eb995;
+    font-style: italic;
+    resize: none;
+}
+
+.cancel {
+    background-color: white;
+    border: none;
+    color: #3eb995;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    font-style: italic;
+    font-weight: lighter;
+    font-family: 'Open Sans';
+}
+
+.add {
+    background-color: #3eb995;
+    border: none;
+    color: white;
+    padding: 4px 16px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    font-family: 'Open Sans';
+    border-radius: 2px;
+}

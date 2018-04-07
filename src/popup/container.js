@@ -6,7 +6,7 @@ import analytics, { updateLastActive } from 'src/analytics'
 import extractQueryFilters from 'src/util/nlp-time-filter'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { isLoggable, getPauseState } from 'src/activity-logger'
-import { IndexDropdown } from 'src/common-ui/containers'
+import { IndexDropdown, CommentDropdown } from 'src/common-ui/containers'
 import Popup from './components/Popup'
 import Button from './components/Button'
 import BlacklistConfirm from './components/BlacklistConfirm'
@@ -45,6 +45,7 @@ class PopupContainer extends Component {
         this.deleteDocs = remoteFunction('deleteDocsByUrl')
         this.removeBookmarkByUrl = remoteFunction('removeBookmarkByUrl')
         this.createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
+        this.createCommentsByUrl = remoteFunction('createCommentsByUrl') // mine
 
         this.onSearchChange = this.onSearchChange.bind(this)
         this.onPauseChange = this.onPauseChange.bind(this)
@@ -67,6 +68,7 @@ class PopupContainer extends Component {
         blacklistChoice: false,
         blacklistConfirm: false,
         tagMode: false,
+        commentMode: false, // mine
 
         // Behaviour switching flags
         domainDelete: false,
@@ -142,6 +144,9 @@ class PopupContainer extends Component {
     get isTagBtnDisabled() {
         return !this.state.isLoggable || this.state.page == null
     }
+    get isCommentBtnDisabled() {
+        return !this.state.isLoggable || this.state.page == null
+    }
 
     get bookmarkBtnState() {
         // Cannot bookmark
@@ -165,6 +170,16 @@ class PopupContainer extends Component {
         }
 
         return this.state.page.tags
+    }
+
+    // mine
+    get pageComment() {
+        // No assoc. page indexed, or commentless page
+        if (this.state.page == null || this.state.page.comments == null) {
+            return []
+        }
+
+        return this.state.page.comments
     }
 
     onBlacklistBtnClick(domainDelete = false) {
@@ -326,6 +341,12 @@ class PopupContainer extends Component {
             tagMode: !state.tagMode,
         }))
 
+    toggleCommentPopup = () =>
+        this.setState(state => ({
+            ...state,
+            commentMode: !state.commentMode,
+        }))
+
     renderTagButton() {
         return (
             <Button
@@ -337,9 +358,26 @@ class PopupContainer extends Component {
             </Button>
         )
     }
+    renderCommentButton() {
+        return (
+            <Button
+                onClick={this.toggleCommentPopup}
+                disabled={this.isCommentBtnDisabled}
+                btnClass={styles.comment}
+            >
+                Add Comment
+            </Button>
+        )
+    }
 
     renderChildren() {
-        const { blacklistConfirm, pauseValue, isPaused, tagMode } = this.state
+        const {
+            blacklistConfirm,
+            pauseValue,
+            isPaused,
+            tagMode,
+            commentMode,
+        } = this.state
         if (blacklistConfirm) {
             return (
                 <BlacklistConfirm
@@ -358,7 +396,9 @@ class PopupContainer extends Component {
                 />
             )
         }
-
+        if (commentMode) {
+            return <CommentDropdown />
+        }
         return (
             <div>
                 <Button
@@ -380,6 +420,7 @@ class PopupContainer extends Component {
                         : 'Bookmark this Page'}
                 </Button>
                 {this.renderTagButton()}
+                {this.renderCommentButton()}
                 <hr />
                 <HistoryPauser
                     onConfirm={this.onPauseConfirm}
@@ -414,11 +455,11 @@ class PopupContainer extends Component {
     }
 
     render() {
-        const { searchValue, tagMode } = this.state
+        const { searchValue, tagMode, commentMode } = this.state
 
         return (
             <Popup
-                shouldRenderSearch={!tagMode}
+                shouldRenderSearch={!tagMode && !commentMode}
                 searchValue={searchValue}
                 onSearchChange={this.onSearchChange}
                 onSearchEnter={this.onSearchEnter}
