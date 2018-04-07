@@ -1,12 +1,15 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import niceTime from 'src/util/nice-time'
+import { matchURL } from '../utils'
+import classNames from 'classnames'
 
 import styles from './ResultItem.css'
 
 const ResultItem = props => {
+    const searchEngine = matchURL(location.href)
     return (
-        <div className={styles.result}>
+        <div className={classNames(styles.result, styles[searchEngine])}>
             <a
                 className={styles.title}
                 href={props.url}

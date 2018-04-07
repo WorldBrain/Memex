@@ -90,6 +90,7 @@
 
 .duckduckgo_above {
     margin-top: 7px;
+    margin-bottom: 15px;
 
     & .linksContainer {
         margin-top: 4px;
@@ -111,6 +112,7 @@
 
 .duckduckgo_side {
     margin-top: 7px;
+    margin-bottom: 15px;
 
     & .resultsText {
         font-size: 1.05em;
