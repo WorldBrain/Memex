@@ -85,25 +85,26 @@ export const shouldRenderProgress = createSelector(
 export const downloadDetailsData = createSelector(
     downloadData,
     downloadDataFilter,
-    (downloadData, filter) =>
-        downloadData
-            .filter(({ status }) => {
+    (downloadData, filter) => {
+        if (filter !== FILTERS.ALL) {
+            downloadData = downloadData.filter(({ status }) => {
                 switch (filter) {
                     case FILTERS.SUCC:
                         return status !== DL_STAT.FAIL
                     case FILTERS.FAIL:
                         return status === DL_STAT.FAIL
-                    case FILTERS.ALL:
                     default:
                         return true
                 }
             })
-            .reverse()
-            .map(({ url, status, error }) => ({
-                url,
-                downloaded: status,
-                error,
-            })),
+        }
+
+        return downloadData.map(({ url, status, error }) => ({
+            url,
+            downloaded: status,
+            error,
+        }))
+    },
 )
 
 const getProgress = (success, fail, total, allow) => ({

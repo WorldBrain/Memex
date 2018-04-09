@@ -58,8 +58,8 @@ const addDownloadDetailsReducer = (
     ...state,
     ...updateCountReducer(state, type, status === DL_STAT.SUCC),
     downloadData: [
+        { url, type, status, error }, // Prepend new details row
         ...state.downloadData,
-        { url, type, status, error }, // Add new details row
     ],
 })
 
