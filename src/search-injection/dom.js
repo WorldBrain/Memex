@@ -21,7 +21,7 @@ export const injectCSS = file => {
     d.prepend(link)
 }
 
-export const handleRender = ({ docs, totalCount }) => {
+export const handleRender = ({ docs, totalCount }, searchEngine) => {
     // docs: (array of objects) returned by the search
     // totalCount: (int) number of results found
     // Injects CSS into the search page.
@@ -37,8 +37,6 @@ export const handleRender = ({ docs, totalCount }) => {
             'side',
         )
 
-        const currentURL = window.location.href
-        const searchEngine = utils.matchURL(currentURL)
         const searchEngineObj = constants.SEARCH_ENGINES[searchEngine]
         if (!searchEngineObj) {
             return false

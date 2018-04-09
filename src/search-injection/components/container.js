@@ -57,6 +57,7 @@ class Container extends React.Component {
             <ResultItem
                 key={i}
                 onLinkClick={this.handleResultLinkClick}
+                searchEngine={this.props.searchEngine}
                 {...result}
             />
         ))
@@ -126,20 +127,23 @@ class Container extends React.Component {
     }
 
     render() {
-        const { position } = this.state
-        const { searchEngine } = this.props
         // If the state.removed is true, show the RemovedText component
         if (this.state.removed)
-            return <RemovedText undo={this.undoRemove} position={position} />
+            return (
+                <RemovedText
+                    undo={this.undoRemove}
+                    position={this.state.position}
+                />
+            )
 
-        if (!position) {
+        if (!this.state.position) {
             return null
         }
 
         return (
             <Results
-                position={position}
-                searchEngine={searchEngine}
+                position={this.state.position}
+                searchEngine={this.props.searchEngine}
                 totalCount={this.props.len}
                 seeMoreResults={this.seeMoreResults}
                 toggleHideResults={this.toggleHideResults}
