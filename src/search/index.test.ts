@@ -85,9 +85,7 @@ const runSuite = useOld => () => {
             const { docs } = await search({ query: 'fox' })
 
             expect(docs.length).toBe(1)
-            const [id, score] = docs[0]
-            expect(id).toEqual(PAGE_ID_3)
-            expect(score).toEqual(DATA.VISIT_3)
+            expect(docs[0]).toEqual([PAGE_ID_3, DATA.VISIT_3])
         })
 
         test('multi-term search', async () => {
@@ -96,9 +94,20 @@ const runSuite = useOld => () => {
             })
 
             expect(docs.length).toBe(1)
-            const [id, score] = docs[0]
-            expect(id).toEqual(PAGE_ID_3)
-            expect(score).toEqual(DATA.VISIT_3)
+            expect(docs[0]).toEqual([PAGE_ID_3, DATA.VISIT_3])
+        })
+
+        test('boosted title term search', async () => {
+            // Term appears in both test pages 1 and 2, but is in title of 1
+            const { docs: docsTitle } = await search({ query: 'dummy' })
+
+            expect(docsTitle.length).toBe(2)
+            // First score will be multipled
+            expect(docsTitle[0]).toEqual([
+                PAGE_ID_1,
+                Math.trunc(DATA.VISIT_1 * 1.2),
+            ])
+            expect(docsTitle[1]).toEqual([PAGE_ID_2, DATA.VISIT_2])
         })
 
         test('time-filtered blank search', async () => {

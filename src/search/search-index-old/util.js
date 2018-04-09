@@ -68,7 +68,7 @@ export function boostScores(pageScoresMap, boost = 0) {
         const currScore = +score.latest
 
         if (!Number.isNaN(currScore)) {
-            const newScore = currScore * (1 + boost)
+            const newScore = Math.trunc(currScore * (1 + boost))
             pageScoresMap.set(pageId, { latest: newScore.toFixed() })
         }
     }
