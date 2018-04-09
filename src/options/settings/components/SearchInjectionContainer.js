@@ -2,24 +2,15 @@ import React from 'react'
 
 import analytics from 'src/analytics'
 import SearchInjection from './SearchInjection'
+import { getLocalStorage, setLocalStorage } from 'src/search-injection/utils'
 import {
-    getLocalStorage,
-    setLocalStorage,
+    SEARCH_INJECTION_KEY,
     SEARCH_INJECTION_DEFAULT,
-} from 'src/search-injection/utils'
-import { SEARCH_INJECTION_KEY } from 'src/search-injection/constants'
+} from 'src/search-injection/constants'
 
 class SearchInjectionContainer extends React.Component {
-    constructor(props) {
-        super(props)
-        this.toggleInjection = this.toggleInjection.bind(this)
-    }
-
     state = {
-        injectionPreference: {
-            google: true,
-            duckduckgo: true,
-        },
+        injectionPreference: { ...SEARCH_INJECTION_DEFAULT },
     }
 
     async componentDidMount() {
@@ -32,9 +23,9 @@ class SearchInjectionContainer extends React.Component {
         })
     }
 
-    async toggleInjection(name) {
+    bindToggleInjection = name => async () => {
         const { injectionPreference } = this.state
-        // Toggle that field
+        // Toggle that particular search engine key
         injectionPreference[name] = !injectionPreference[name]
         await setLocalStorage(SEARCH_INJECTION_KEY, injectionPreference)
 
@@ -55,7 +46,8 @@ class SearchInjectionContainer extends React.Component {
         return (
             <SearchInjection
                 injectionPreference={this.state.injectionPreference}
-                toggleInjection={this.toggleInjection}
+                toggleGoogle={this.bindToggleInjection('google')}
+                toggleDDG={this.bindToggleInjection('duckduckgo')}
             />
         )
     }
