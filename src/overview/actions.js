@@ -141,7 +141,6 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
     const state = getState()
     const searchParams = {
         ...currentQueryParams,
-        getTotalCount: true,
         showOnlyBookmarks: filters.onlyBookmarks(state),
         tags: filters.tags(state),
         domains: filters.domains(state),

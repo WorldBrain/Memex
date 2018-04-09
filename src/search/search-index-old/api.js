@@ -34,7 +34,6 @@ export async function search({
     domains = [],
     skip = 0,
     limit = 10,
-    getTotalCount = false,
     showOnlyBookmarks = false,
     mapResultsFunc = mapResultsToPouchDocs,
 }) {
@@ -57,7 +56,7 @@ export async function search({
         return {
             docs: [],
             resultsExhausted: true,
-            totalCount: getTotalCount ? 0 : undefined,
+            totalCount: null,
             isBadTerm: true,
         }
     }
@@ -65,9 +64,7 @@ export async function search({
     console.log('DEBUG: query', indexQuery)
 
     // Get index results, filtering out any unexpectedly structured results
-    const { results, totalCount } = await searchConcurrent(indexQuery, {
-        count: getTotalCount,
-    })
+    const { results, totalCount } = await searchConcurrent(indexQuery)
 
     // console.log('got results', results)
 

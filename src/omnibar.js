@@ -77,7 +77,6 @@ async function makeSuggestion(query, suggest) {
     const searchResults = await search({
         ...queryFilters,
         limit: 5,
-        getTotalCount: true,
     })
 
     analytics.trackEvent({

@@ -43,7 +43,7 @@ export async function search({
         return {
             docs: [],
             resultsExhausted: true,
-            totalCount: 0,
+            totalCount: null,
             isBadTerm: true,
         }
     }
@@ -116,6 +116,7 @@ async function fullSearch({ queryTerms = [], ...params }) {
     const filteredUrls = await findFilteredUrls(params)
     console.timeEnd('TIMER - findFilteredUrls()')
 
+    let totalCount = null
     let urlScoresMap
 
     // Few different cases of search params we can take short-cuts on
@@ -124,6 +125,8 @@ async function fullSearch({ queryTerms = [], ...params }) {
         console.time('TIMER - mapUrlsToLatestEvents()')
         urlScoresMap = await mapUrlsToLatestEvents(params, filteredUrls)
         console.timeEnd('TIMER - mapUrlsToLatestEvents()')
+        totalCount = urlScoresMap.size
+        console.log(totalCount, urlScoresMap)
     } else if (!queryTerms.length) {
         // Blank search: simply do lookback from `endDate` on visits and score URLs by latest
         console.time('TIMER - groupLatestEventsByUrl()')
@@ -143,10 +146,8 @@ async function fullSearch({ queryTerms = [], ...params }) {
         console.time('TIMER - applyScores()')
         urlScoresMap = applyScores(urlScoreMultiMap, latestEvents)
         console.timeEnd('TIMER - applyScores()')
+        totalCount = urlScoresMap.size
     }
 
-    return {
-        ids: paginate(urlScoresMap, params),
-        totalCount: urlScoresMap.size,
-    }
+    return { ids: paginate(urlScoresMap, params), totalCount }
 }

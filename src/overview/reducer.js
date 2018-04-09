@@ -10,7 +10,7 @@ const defaultState = {
     searchResult: {
         docs: [], // The current search result list
         resultsExhausted: false,
-        totalCount: 0,
+        totalCount: null,
     },
     // The current search input values
     currentQueryParams: {

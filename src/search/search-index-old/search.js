@@ -294,15 +294,10 @@ function intersectResultMaps(
  * Performs a search based on data supplied in the `query`.
  *
  * @param {IndexQuery} query
- * @param {boolean} [count=false] Specifies whether to return the `totalCount` of results for query.
  * @returns {SearchResult[]}
  */
-export async function search(
-    query = { skip: 0, limit: 10 },
-    { count = false } = { count: false },
-) {
+export async function search(query = { skip: 0, limit: 10 }) {
     const paginateResults = paginate(query)
-    let totalResultCount
     console.time('total search')
 
     console.time('tags search')
@@ -329,10 +324,6 @@ export async function search(
         tagsPageResultsMap,
     )
 
-    if (count) {
-        totalResultCount = pageResultsMap.size
-    }
-
     // Structure all results as `SearchResult`s (minimal `document`)
     let results = [...pageResultsMap].map(([id, { latest }]) => [id, +latest])
 
@@ -342,7 +333,10 @@ export async function search(
 
     return {
         results,
-        totalCount: totalResultCount,
+        totalCount:
+            query.query.size || query.domain.size || query.tags.size
+                ? pageResultsMap.size
+                : null,
     }
 }
 
