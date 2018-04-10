@@ -398,7 +398,7 @@ class PopupContainer extends Component {
                 </LinkButton>
                 <LinkButton
                     href={`${constants.OPTIONS_URL}#/notifications`}
-                    icon="notifications_active"
+                    btnClass={styles.notificationIcon}
                 >
                     Notifications{' '}
                     <div

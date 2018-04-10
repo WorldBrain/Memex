@@ -6,23 +6,21 @@ import desktopNotification from './desktopNotification'
 export default async function fetchNewNotifs() {
     try {
         const unreadCountOne = await setUnreadCount(0)
-        const res = await fetch(
-            'https://salty-fjord-43561.herokuapp.com/api/notifications',
-        )
+        const res = await fetch('http://159.65.117.205:3000/api/notifications')
         const installTimestamp = (await browser.storage.local.get(
             'extension_install_time',
         )).extension_install_time
 
         const newNotes = await res.json()
+
         newNotes.forEach(function(element) {
-            const dateTimestamp = new Date(element.date).getTime()
-            if (installTimestamp <= dateTimestamp) {
+            if (installTimestamp <= element.created_at) {
                 db.put({
                     _id: 'notifs_' + element._id,
                     MongoId: element._id,
                     title: element.title,
                     body: element.body,
-                    date: element.date,
+                    date: element.created_at,
                     viewed: false,
                 })
             }

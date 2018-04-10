@@ -38,11 +38,12 @@
 }
 
 .toggle {
-    margin: 20px -20px -15px -20px;
     background-color: #f9f9f9;
     padding: 20px;
     font-size: 13px;
     padding-bottom: 40px;
+    max-width: 100%;
+    margin: 20px auto;
 }
 
 .messageReadOrUnreadIcon {
