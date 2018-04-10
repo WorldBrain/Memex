@@ -1,7 +1,7 @@
 import { addPage, addTag, updateTimestampMeta } from './index'
 import { ExportedPage } from '../migration'
 
-async function importPage(page: ExportedPage) {
+async function importPage(page: Partial<ExportedPage>) {
     await addPage({
         pageDoc: {
             content: page.content,
