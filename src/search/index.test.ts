@@ -110,6 +110,17 @@ const runSuite = useOld => () => {
             expect(docsTitle[1]).toEqual([PAGE_ID_2, DATA.VISIT_2])
         })
 
+        test('boosted url term search', async () => {
+            // Term appears in page 3's URL
+            const { docs: docsTitle } = await search({ query: 'test' })
+
+            expect(docsTitle.length).toBe(1)
+            expect(docsTitle[0]).toEqual([
+                PAGE_ID_3,
+                Math.trunc(DATA.VISIT_3 * 1.1),
+            ])
+        })
+
         test('time-filtered blank search', async () => {
             // Upper-bound
             const { docs: docsA } = await search({ endDate: DATA.BOOKMARK_1 })
