@@ -25,11 +25,16 @@ export const showDeleteConfirm = createAction(
 )
 export const hideDeleteConfirm = createAction('overview/hideDeleteConfirm')
 export const resetDeleteConfirm = createAction('overview/resetDeleteConfirm')
+export const resetSharePopup = createAction('overview/resetSharePopup')
 export const changeHasBookmark = createAction('overview/changeHasBookmark')
 export const incSearchCount = createAction('overview/incSearchCount')
 export const initSearchCount = createAction('overview/initSearchCount')
 export const setResultDeleting = createAction('overview/setResultDeleting')
-
+export const resetActiveShareIndex = createAction(
+    'overview/resetActiveShareIndex',
+)
+export const setActiveShareIndex = createAction('overview/setActiveShareIndex')
+export const copy = createAction('overview/truecopy')
 export const resetActiveTagIndex = createAction('overview/resetActiveTagIndex')
 export const setActiveTagIndex = createAction('overview/setActiveTagIndex')
 export const addTag = createAction('overview/localAddTag', (tag, index) => ({
@@ -261,6 +266,28 @@ export const showTags = index => (dispatch, getState) => {
     } else {
         dispatch(setActiveTagIndex(index))
     }
+}
+
+export const openShare = index => (dispatch, getState) => {
+    const activeShareIndex = selectors.activeShareIndex(getState())
+    if (activeShareIndex === index) {
+        dispatch(resetActiveShareIndex())
+    } else {
+        dispatch(setActiveShareIndex(index))
+    }
+}
+
+export const changeCopy = url => (dispatch, getState) => {
+    const copied = selectors.copy(getState())
+    if (copied === false || copied === undefined) {
+        dispatch(copy(true))
+    } else {
+        dispatch(copy(false))
+    }
+}
+
+export const resetCopy = index => (dispatch, getState) => {
+    dispatch(copy(false))
 }
 
 export const filterTag = tag => (dispatch, getState) => {

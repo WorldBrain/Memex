@@ -28,7 +28,6 @@ const Overview = props => (
         />
 
         <ShareButtons />
-
         <div className={showFilterClass(props)}>{props.filters}</div>
         <div
             className={styles.main}

@@ -186,6 +186,10 @@ export default createReducer(
                 deleting: index,
             },
         }),
+        [actions.resetActiveShareIndex]: state => ({
+            ...state,
+            activeShareIndex: defaultState.activeShareIndex,
+        }),
         [actions.nextPage]: state => ({
             ...state,
             currentPage: state.currentPage + 1,
@@ -198,6 +202,15 @@ export default createReducer(
             ...state,
             activeTagIndex: defaultState.activeTagIndex,
         }),
+        [actions.resetSharePopup]: state => ({
+            ...state,
+            sharePopup: defaultState.sharePopup,
+        }),
+        [actions.copy]: (state, copy) => ({
+            ...state,
+            copy: copy,
+        }),
+        [actions.setActiveShareIndex]: payloadReducer('activeShareIndex'),
         [actions.setActiveTagIndex]: payloadReducer('activeTagIndex'),
         [actions.addTag]: addTag,
         [actions.delTag]: delTag,

@@ -55,6 +55,11 @@ const PageResultItem = props => (
                             onClick={props.onTrashBtnClick}
                         />
                         <button
+                            className={classNames(styles.button, styles.share)}
+                            onClick={props.onShareBtnClick}
+                            ref={props.setShareButtonRef}
+                        />
+                        <button
                             disabled={props.isDeleting}
                             className={getBookmarkClass(props)}
                             onClick={props.onToggleBookmarkClick}
@@ -63,6 +68,7 @@ const PageResultItem = props => (
                 </div>
             </div>
         </a>
+        {props.shareManager}
         {props.tagManager}
     </li>
 )
@@ -79,8 +85,11 @@ PageResultItem.propTypes = {
     onToggleBookmarkClick: PropTypes.func.isRequired,
     tagPills: PropTypes.array.isRequired,
     tagManager: PropTypes.node,
+    shareManager: PropTypes.node,
+    onShareBtnClick: PropTypes.func,
     onTagBtnClick: PropTypes.func.isRequired,
     setTagButtonRef: PropTypes.func.isRequired,
+    setShareButtonRef: PropTypes.func.isRequired,
 }
 
 export default PageResultItem
