@@ -36,8 +36,16 @@ export const handleRender = ({ docs, totalCount }) => {
             constants.POSITION_KEY,
             'side',
         )
-        const containerID = constants.SEARCH_ENGINES.google.container[position]
-        const container = document.getElementById(containerID)
+        
+        const currentURL = window.location.href
+        const searchEngine = constants.SEARCH_ENGINES[utils.matchURL(currentURL)]
+        if (!searchEngine) {
+            return false
+        }
+        const containerType = searchEngine.containerType
+        const containerIdentifier = searchEngine.container[position]
+        const container = (containerType === 'class') ? document.getElementsByClassName(containerIdentifier)[0] : document.getElementById(containerIdentifier)
+        
 
         // If re-rendering remove the already present component
         const component = document.getElementById('memexResults')

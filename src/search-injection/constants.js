@@ -6,6 +6,7 @@ export const LIMIT = {
 
 // regex - Regular Expression to match the url
 // container - ID of the container to append elements
+// containerType - specify what element type the container is
 
 export const SEARCH_ENGINES = {
     google: {
@@ -14,6 +15,15 @@ export const SEARCH_ENGINES = {
             above: 'center_col',
             side: 'rhs_block',
         },
+        containerType: 'id',
+    },
+    duckduckgo: {
+        regex: /(http[s]?:\/\/)?(www.)?duckduckgo[.\w]+\/\?q=.*/,
+        container: {
+            above: 'results--main',
+            side: 'results--sidebar',
+        },
+        containerType: 'class',
     },
 }
 
