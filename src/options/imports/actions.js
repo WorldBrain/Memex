@@ -2,7 +2,7 @@ import { createAction } from 'redux-act'
 
 import analytics from 'src/analytics'
 import db from 'src/pouchdb'
-import { CMDS, IMPORT_CONN_NAME, OLD_EXT_KEYS } from './constants'
+import { CMDS, IMPORT_CONN_NAME } from './constants'
 import * as selectors from './selectors'
 
 export const filterDownloadDetails = createAction(
@@ -30,8 +30,6 @@ export const readyImport = createAction('imports/readyImport')
 export const cancelImport = createAction('imports/cancelImport')
 export const pauseImport = createAction('imports/pauseImport')
 export const resumeImport = createAction('imports/resumeImport')
-
-export const setShowOldExt = createAction('imports/setShowOldExt')
 
 // Adv settings mode actions
 export const toggleAdvMode = createAction('imports-adv/toggleAdvMode')
@@ -117,21 +115,11 @@ const getCmdMessageHandler = dispatch => ({ cmd, ...payload }) => {
 let port
 
 /**
- * Handles initing the imports runtime connection with the background script's batch import logic,
- * as well as checking local storage to see if old extension imports needs to be shown.
+ * Handles initing the imports runtime connection with the background script's batch import logic.
  */
 export const init = () => async dispatch => {
     port = browser.runtime.connect({ name: IMPORT_CONN_NAME })
     port.onMessage.addListener(getCmdMessageHandler(dispatch))
-
-    const { [OLD_EXT_KEYS.INDEX]: index } = await browser.storage.local.get(
-        OLD_EXT_KEYS.INDEX,
-    )
-
-    // If old ext data exists, set the view state to show
-    if (index && index.index instanceof Array && index.index.length) {
-        dispatch(setShowOldExt(true))
-    }
 }
 
 /**
@@ -150,6 +138,11 @@ const makePortMessagingThunk = ({
     dispatch(action)
     port.postMessage({ cmd })
 }
+
+export const recalcEsts = makePortMessagingThunk({
+    action: prepareImport(),
+    cmd: CMDS.RECALC,
+})
 
 // Batch controlling thunks
 export const stop = makePortMessagingThunk({

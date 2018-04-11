@@ -1,14 +1,15 @@
 {
-  "search.exclude": {
-    "**/node_modules": true,
-    "**/extension": true
-  },
-  "stylelint.enable": true,
-  "eslint.enable": true,
-  "editor.formatOnSave": true,
-  "prettier.trailingComma": "all",
-  "prettier.tabWidth": 4,
-  "prettier.singleQuote": true,
-  "prettier.semi": false,
-  "prettier.cssEnable": ["css"]
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/extension": true
+    },
+    "stylelint.enable": true,
+    "eslint.enable": true,
+    "tslint.enable": true,
+    "editor.formatOnSave": true,
+    "prettier.trailingComma": "all",
+    "prettier.tabWidth": 4,
+    "prettier.singleQuote": true,
+    "prettier.semi": false,
+    "typescript.tsdk": "node_modules/typescript/lib"
 }

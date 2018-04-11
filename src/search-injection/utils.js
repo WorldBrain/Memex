@@ -46,7 +46,8 @@ export const getLocalStorage = async (KEY, defVal) => {
     // gets the value, or if undefined stores it
     // returns: fetched value
 
-    const value = (await browser.storage.local.get(KEY))[KEY]
+    const { [KEY]: value } = await browser.storage.local.get(KEY)
+
     if (value === undefined && defVal) return await setLocalStorage(KEY, defVal)
     return value
 }

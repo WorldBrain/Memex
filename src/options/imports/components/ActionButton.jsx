@@ -41,7 +41,8 @@ ActionButton.propTypes = {
     handleClick: PropTypes.func.isRequired,
 
     // Misc
-    children: PropTypes.string.isRequired, // Button text
+    children: PropTypes.oneOfType([PropTypes.string, PropTypes.node])
+        .isRequired, // Button text
 }
 
 export default ActionButton

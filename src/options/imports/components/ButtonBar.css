@@ -64,6 +64,15 @@
     padding: 0.6em 4em;
 }
 
+.recalc {
+    width: 50px;
+    margin: 0 10px;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .startImport {
     background: #3eb995;
     color: white;

@@ -13,8 +13,8 @@ export class TabManager {
     /**
      * @param {tabs.Tab} tab The browser tab to start keeping track of.
      */
-    trackTab = ({ id, active }) =>
-        this._tabs.set(id, new Tab({ isActive: active }))
+    trackTab = ({ id, active, url }) =>
+        this._tabs.set(id, new Tab({ isActive: active, url }))
 
     /**
      * @param {number} id The ID of the tab as assigned by web ext API.
@@ -50,13 +50,14 @@ export class TabManager {
      * @param {number} id The ID of the tab to stop reset tracking of.
      * @returns {Tab} The state of the previously tracked tab assoc. with `id`.
      */
-    resetTab(id, activeState) {
+    resetTab(id, activeState, url) {
         const oldTab = this.removeTab(id)
         this._tabs.set(
             id,
             new Tab({
                 isActive: activeState,
                 navState: oldTab.navState,
+                url,
             }),
         )
         return oldTab
@@ -81,13 +82,17 @@ export class TabManager {
      * @param {() => Promise<void>} cb The page log logic to delay.
      */
     scheduleTabLog(id, logCb) {
-        const tab = this.getTabState(id)
-        tab.scheduleLog(logCb)
+        try {
+            const tab = this.getTabState(id)
+            tab.scheduleLog(logCb)
+        } catch (err) {}
     }
 
     clearScheduledLog(id) {
-        const tab = this.getTabState(id)
-        tab.cancelPendingOps()
+        try {
+            const tab = this.getTabState(id)
+            tab.cancelPendingOps()
+        } catch (err) {}
     }
 
     /**

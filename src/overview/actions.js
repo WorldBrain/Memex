@@ -1,6 +1,5 @@
 import { createAction } from 'redux-act'
 
-import { generatePageDocId } from 'src/page-storage'
 import analytics, { updateLastActive } from 'src/analytics'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { actions as filterActs, selectors as filters } from './filters'
@@ -46,9 +45,9 @@ export const setTooltip = createAction('overview/setTooltip')
 export const toggleShowTooltip = createAction('overview/toggleShowTooltip')
 export const setShowTooltip = createAction('overview/setShowTooltip')
 
-const deleteDocsByUrl = remoteFunction('deleteDocsByUrl')
-const createBookmarkByUrl = remoteFunction('createBookmarkByUrl')
-const removeBookmarkByUrl = remoteFunction('removeBookmarkByUrl')
+const deletePages = remoteFunction('delPages')
+const createBookmarkByUrl = remoteFunction('addBookmark')
+const removeBookmarkByUrl = remoteFunction('delBookmark')
 
 const getCmdMessageHandler = dispatch => ({ cmd, ...payload }) => {
     switch (cmd) {
@@ -95,10 +94,9 @@ const easter = () => dispatch =>
                     {
                         content: { title: constants.EGG_TITLE },
                         url: constants.EGG_URL,
-                        _attachments: { src: constants.EGG_IMG },
+                        screenshot: constants.EGG_IMG,
                         displayTime: Date.now().toString(),
                         hasBookmark: false,
-                        egg: true,
                         tags: [],
                     },
                 ],
@@ -143,7 +141,6 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
     const state = getState()
     const searchParams = {
         ...currentQueryParams,
-        getTotalCount: true,
         showOnlyBookmarks: filters.onlyBookmarks(state),
         tags: filters.tags(state),
         domains: filters.domains(state),
@@ -219,12 +216,10 @@ export const deleteDocs = () => async (dispatch, getState) => {
         dispatch(hideDeleteConfirm())
 
         // Remove all assoc. docs from the database + index
-        await deleteDocsByUrl(url)
-
-        const pageId = await generatePageDocId({ url })
+        await deletePages([url])
 
         // Hide the result item + confirm modal directly (optimistically)
-        dispatch(hideResultItem(pageId))
+        dispatch(hideResultItem(url))
     } catch (error) {
     } finally {
         dispatch(setResultDeleting(undefined))
@@ -247,9 +242,9 @@ export const toggleBookmark = (url, index) => async (dispatch, getState) => {
     try {
         // Either perform adding or removal of bookmark if
         if (hasBookmark) {
-            await removeBookmarkByUrl(url)
+            await removeBookmarkByUrl({ url })
         } else {
-            await createBookmarkByUrl(url)
+            await createBookmarkByUrl({ url })
         }
     } catch (error) {
         dispatch(changeHasBookmark(index)) // Reset UI state in case of error
