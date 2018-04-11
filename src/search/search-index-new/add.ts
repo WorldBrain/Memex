@@ -1,37 +1,23 @@
 import db from '.'
-import normalizeUrl from 'src/util/encode-url-for-id'
+import normalizeUrl from '../../util/encode-url-for-id'
+import pipeline, { PipelineReq, transformUrl } from './pipeline'
 import { Page, FavIcon } from './models'
-import pipeline, { transformUrl } from './pipeline'
-
-/**
- * @typedef {Object} VisitInteraction
- * @property {number} duration Time user was active during visit (ms).
- * @property {number} scrollPx Y-axis pixel scrolled to at point in time.
- * @property {number} scrollPerc
- * @property {number} scrollMaxPx Furthest y-axis pixel scrolled to during visit.
- * @property {number} scrollMaxPerc
- */
-
-/**
- * @typedef {Object} PageAddRequest
- * @property {any} pageData TODO: type
- * @property {number[]} [visits=[]] Opt. visit times to assoc. with Page.
- * @property {number} [bookmark] Opt. bookmark time to assoc. with Page.
- */
+import { VisitInteraction, PageAddRequest } from './types'
 
 /**
  * Adds/updates a page + associated visit (pages never exist without either an assoc.
  *  visit or bookmark in current model).
- *
- * @param {PageAddReq} req
- * @return {Promise<void>}
  */
-export async function addPage({ visits = [], bookmark, ...pipelineReq }) {
-    const { favIconURI, ...pageData } = await pipeline(pipelineReq)
+export async function addPage({
+    visits = [],
+    bookmark,
+    pageDoc,
+}: PageAddRequest) {
+    const { favIconURI, ...pageData } = await pipeline({ pageDoc })
 
     try {
         await db.transaction('rw', db.tables, async () => {
-            const page = new Page(pageData)
+            const page = new Page(pageData as any)
 
             if (favIconURI != null) {
                 await new FavIcon({ hostname: page.hostname, favIconURI })
@@ -56,16 +42,12 @@ export async function addPage({ visits = [], bookmark, ...pipelineReq }) {
     }
 }
 
-/**
- * @param {PageAddReq} pipelineReq
- * @return {Promise<void>}
- */
-export async function addPageTerms(pipelineReq) {
+export async function addPageTerms(pipelineReq: PipelineReq) {
     const pageData = await pipeline(pipelineReq)
 
     try {
         await db.transaction('rw', db.tables, async () => {
-            const page = new Page(pageData)
+            const page = new Page(pageData as any)
             await page.loadRels()
             await page.save()
         })
@@ -76,16 +58,15 @@ export async function addPageTerms(pipelineReq) {
 
 /**
  * Updates an existing specified visit with interactions data.
- *
- * @param {string} url The URL of the visit to get.
- * @param {string|number} time
- * @param {VisitInteraction} data
- * @return {Promise<void>}
  */
-export async function updateTimestampMeta(url, time, data) {
+export async function updateTimestampMeta(
+    url: string,
+    time: number,
+    data: Partial<VisitInteraction>,
+) {
     const normalized = normalizeUrl(url)
 
-    return db.transaction('rw', db.visits, () =>
+    await db.transaction('rw', db.visits, () =>
         db.visits
             .where('[time+url]')
             .equals([time, normalized])
@@ -93,7 +74,7 @@ export async function updateTimestampMeta(url, time, data) {
     )
 }
 
-export async function addVisit(url, time = Date.now()) {
+export async function addVisit(url: string, time = Date.now()) {
     const normalized = normalizeUrl(url)
 
     return db.transaction('rw', db.tables, async () => {
@@ -110,7 +91,7 @@ export async function addVisit(url, time = Date.now()) {
     })
 }
 
-export async function addFavIcon(url, favIconURI) {
+export async function addFavIcon(url: string, favIconURI: string) {
     const { hostname } = transformUrl(url)
 
     return new FavIcon({ hostname, favIconURI }).save()

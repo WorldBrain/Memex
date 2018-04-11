@@ -13,5 +13,15 @@ export const PAGE_DOC_1 = {
             'Skype viruses and scams continue threatening the users. Skype virus is a group of malicious programs and phishing scams that target popular telecommunication application’s users',
     },
     url: 'https://www.2-spyware.com/remove-skype-virus.html',
-    _id: 'page/2-spyware.com%2Fremove-skype-virus.html',
+    normalizedUrl: '2-spyware.com/remove-skype-virus.html',
+    _id: 'page/Mi1zcHl3YXJlLmNvbS9yZW1vdmUtc2t5cGUtdmlydXMuaHRtbA%3D%3D',
 }
+
+export const TEST_VISIT_1 = Date.now()
+export const TEST_BOOKMARK_1 = Date.now() + 5000
+
+// Single yellow pixel made using http://png-pixel.com/
+export const TEST_SCREENSHOT =
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5/hPwAIAgL/4d1j8wAAAABJRU5ErkJggg=='
+export const TEST_FAVICON =
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5/hPwAIAgL/4d1j8wAAAABJRU5ErkJggg=='

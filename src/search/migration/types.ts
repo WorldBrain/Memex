@@ -1,14 +1,11 @@
+import { VisitInteraction } from '../search-index-new'
+
 export type ExportedTag = string
 export type ExportedBookmark = number
 export type ExportedDataURL = string
 
-export interface ExportedPageVisit {
+export interface ExportedPageVisit extends Partial<VisitInteraction> {
     timestamp: number
-    duration?: number
-    scrollPx?: number
-    scrollPerc?: number
-    scrollMaxPx?: number
-    scrollMaxPerc?: number
 }
 
 export interface ExportedPageContent {

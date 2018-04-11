@@ -13,7 +13,7 @@
         "skipLibCheck": true,
         "strictNullChecks": false,
         "outDir": "tmp",
-        "lib": ["es2017", "dom"],
+        "lib": ["es2017", "dom", "esnext.asynciterable"],
         "paths": {
             "abstract-leveldown": ["node_modules/abstract-leveldown"]
         }
