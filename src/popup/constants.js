@@ -10,6 +10,5 @@ export const BOOKMARK_BTN_STATE = {
     UNBOOKMARK: 2,
 }
 
-export const FEEDBACK_URL = '/options/options.html#/help'
 export const OVERVIEW_URL = '/overview/overview.html'
-export const OPTIONS_URL = '/options/options.html#/settings'
+export const OPTIONS_URL = '/options/options.html'

@@ -256,7 +256,7 @@ class PopupContainer extends Component {
                 constants.BLACKLIST_BTN_STATE.BLACKLISTED ? (
                 <LinkButton
                     href={`${constants.OPTIONS_URL}#/blacklist`}
-                    icon="block"
+                    itemClass={styles.itemBlacklisted}
                     btnClass={styles.itemBtnBlacklisted}
                 >
                     This Page is Blacklisted. Undo>>
@@ -277,7 +277,7 @@ class PopupContainer extends Component {
 
         // Domain vs URL choice button
         return (
-            <SplitButton icon="block">
+            <SplitButton iconClass={styles.blacklist}>
                 <Button onClick={this.onBlacklistBtnClick(true)}>Domain</Button>
                 <Button onClick={this.onBlacklistBtnClick(false)}>URL</Button>
             </SplitButton>
@@ -389,7 +389,7 @@ class PopupContainer extends Component {
                 </LinkButton>
                 <UpgradeButton />
                 <ButtonIcon
-                    href={constants.OPTIONS_URL}
+                    href={`${constants.OPTIONS_URL}#/settings`}
                     icon="settings"
                     buttonType={1}
                     btnClass={styles.settings}
