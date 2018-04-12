@@ -143,12 +143,13 @@ export default class ImportCache {
 
     /**
      * @param {Map<T,U>} inputMap Map to diff against current items state.
+     * @param {boolean} includeErrs
      * @returns {Map<T,U>} Subset (submap?) of `inputMap` containing no entries deemed to already exist in state.
      */
-    async _diffAgainstStored(inputMap) {
+    async _diffAgainstStored(inputMap, includeErrs) {
         let entries = [...inputMap]
 
-        for await (const { chunk } of this.getItems(true)) {
+        for await (const { chunk } of this.getItems(!includeErrs)) {
             const currChunkKeys = new Set(keys(chunk))
             entries = entries.filter(([key]) => !currChunkKeys.has(key))
         }
@@ -191,10 +192,14 @@ export default class ImportCache {
     /**
      * @param {Map<string, ImportItem>} itemsMap URL keys to ImportItem values to persist
      * @param {IMPORT_TYPE} type
+     * @param {boolean} [includeErrs=false]
      * @returns {number} The amount of items added to cache, post-filtering.
      */
-    async persistItems(itemsMap) {
-        const filteredData = await this._diffAgainstStored(itemsMap)
+    async persistItems(itemsMap, includeErrs = false) {
+        const filteredData = await this._diffAgainstStored(
+            itemsMap,
+            includeErrs,
+        )
 
         if (!filteredData.size) {
             return 0 // Die early if nothing needed

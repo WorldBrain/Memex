@@ -31,6 +31,7 @@ class ImportContainer extends Component {
         progressPercent: PropTypes.number.isRequired,
         showDownloadDetails: PropTypes.bool.isRequired,
         downloadDataFilter: PropTypes.string.isRequired,
+        recalcEsts: PropTypes.func.isRequired,
 
         // Misc
         boundActions: PropTypes.object.isRequired,
@@ -268,7 +269,7 @@ class ImportContainer extends Component {
                 <Wrapper>
                     <AdvSettingCheckbox {...this.props} />
                     <ActionButton
-                        handleClick={this.props.boundActions.recalcEsts}
+                        handleClick={this.props.recalcEsts}
                         customClass="recalc"
                     >
                         <i className="material-icons">autorenew</i>
@@ -313,6 +314,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
     boundActions: bindActionCreators(actions, dispatch),
+    recalcEsts: () => dispatch(actions.recalcEsts()),
     toggleAdvMode: () => dispatch(actions.toggleAdvMode()),
 })
 

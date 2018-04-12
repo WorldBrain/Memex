@@ -27,6 +27,8 @@ export class ImportStateManager {
         [TYPE.BOOKMARK]: true,
     }
 
+    _includeErrs = false
+
     /**
      * @type {any} Object containing boolean flags for each import item type key, representing whether
      *  or not that type should be saved to state (user configurable via UI import-type checkboxes).
@@ -124,7 +126,10 @@ export class ImportStateManager {
             }
 
             // Cache current processed chunk for checking against future chunks (count state change happens in here)
-            const numAdded = await this._cache.persistItems(data)
+            const numAdded = await this._cache.persistItems(
+                data,
+                this._includeErrs,
+            )
             this.remaining[type] += numAdded // Inc count state
         }
     }
@@ -155,14 +160,16 @@ export class ImportStateManager {
      * if it deems current state to be out-of-date.
      *
      * @param {boolean} [quick=false] Determines if quick mode is set (only limited recent history).
+     * @param {boolean} [includeErrs=false]
      * @return {EstimateCounts}
      */
-    async fetchEsts(quick = false) {
+    async fetchEsts(quick = false, includeErrs = false) {
         this._itemCreator.limits = quick
             ? ImportStateManager.QUICK_MODE_ITEM_LIMITS
             : {}
 
         if (this._cache.expired) {
+            this._includeErrs = includeErrs
             // Perform calcs to update state
             await this._calcCounts()
             await this._cache.persistEsts(this.counts)

@@ -130,23 +130,33 @@ export const init = () => async dispatch => {
  * @param {() => void} [cb] Opt. callback to run before any dispatch.
  */
 const makePortMessagingThunk = ({
-    action,
+    actionCreator,
     cmd,
     cb = f => f,
-}) => () => dispatch => {
+}) => payload => dispatch => {
     cb()
-    dispatch(action)
-    port.postMessage({ cmd })
+    dispatch(actionCreator(payload))
+    port.postMessage({ cmd, payload })
 }
 
 export const recalcEsts = makePortMessagingThunk({
-    action: prepareImport(),
+    actionCreator: prepareImport,
     cmd: CMDS.RECALC,
+})
+
+export const setPrevFailed = makePortMessagingThunk({
+    actionCreator: setProcessErrs,
+    cmd: CMDS.SET_PROCESS_ERRS,
+})
+
+export const setConcurrencyLevel = makePortMessagingThunk({
+    actionCreator: setConcurrency,
+    cmd: CMDS.SET_CONCURRENCY,
 })
 
 // Batch controlling thunks
 export const stop = makePortMessagingThunk({
-    action: cancelImport(),
+    actionCreator: cancelImport,
     cmd: CMDS.CANCEL,
     cb: () =>
         analytics.trackEvent({
@@ -156,7 +166,7 @@ export const stop = makePortMessagingThunk({
 })
 
 export const pause = makePortMessagingThunk({
-    action: pauseImport(),
+    actionCreator: pauseImport,
     cmd: CMDS.PAUSE,
     cb: () =>
         analytics.trackEvent({
@@ -166,7 +176,7 @@ export const pause = makePortMessagingThunk({
 })
 
 export const resume = makePortMessagingThunk({
-    action: resumeImport(),
+    actionCreator: resumeImport,
     cmd: CMDS.RESUME,
     cb: () =>
         analytics.trackEvent({
@@ -176,7 +186,7 @@ export const resume = makePortMessagingThunk({
 })
 
 export const finish = makePortMessagingThunk({
-    action: finishImport(),
+    actionCreator: finishImport,
     cmd: CMDS.FINISH,
     cb: () =>
         analytics.trackEvent({
@@ -200,14 +210,4 @@ export const start = () => (dispatch, getState) => {
         cmd: CMDS.START,
         payload: selectors.allowTypes(state),
     })
-}
-
-export const setConcurrencyLevel = concurrency => dispatch => {
-    dispatch(setConcurrency(concurrency))
-    port.postMessage({ cmd: CMDS.SET_CONCURRENCY, payload: concurrency })
-}
-
-export const setPrevFailed = value => dispatch => {
-    dispatch(setProcessErrs(value))
-    port.postMessage({ cmd: CMDS.SET_PROCESS_ERRS, payload: value })
 }

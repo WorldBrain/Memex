@@ -146,6 +146,8 @@ export default createReducer(
         [actions.setProcessErrs]: (state, processErrors) => ({
             ...state,
             processErrors,
+            importStatus: STATUS.LOADING,
+            loadingMsg: 'Preparing import.',
         }),
     },
     defaultState,

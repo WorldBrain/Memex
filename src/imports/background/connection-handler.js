@@ -22,6 +22,8 @@ export default class ImportConnectionHandler {
      */
     _quickMode
 
+    _includeErrs = false
+
     constructor({ port, quick = false }) {
         // Main `runtime.Port` that this class hides away to handle connection with the imports UI script
         this.port = port
@@ -92,16 +94,25 @@ export default class ImportConnectionHandler {
             case CMDS.SET_CONCURRENCY:
                 return (this.importer.concurrency = payload)
             case CMDS.SET_PROCESS_ERRS:
-                return (this.importer.processErrors = payload)
+                return this.setProcessErrs(payload)
             default:
                 return console.error(`unknown command: ${cmd}`)
         }
     }
 
+    async setProcessErrs(includeErrs) {
+        this._includeErrs = includeErrs
+        await this.recalcState()
+    }
+
     async recalcState() {
         stateManager.dirtyEsts()
-        const estimateCounts = await stateManager.fetchEsts(this._quickMode)
+        const estimateCounts = await stateManager.fetchEsts(
+            this._quickMode,
+            this._includeErrs,
+        )
 
+        console.log(estimateCounts)
         this.port.postMessage({ cmd: CMDS.INIT, ...estimateCounts })
     }
 
