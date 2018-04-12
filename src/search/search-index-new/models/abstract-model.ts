@@ -1,15 +1,13 @@
-/* eslint-disable eqeqeq */
-
 /**
  * Basic Model blueprint. Each Model representing a Dexie index table should extend this.
  */
-export default class AbstractModel {
+export default abstract class AbstractModel {
     /**
      * Models can have properties that we don't want to be enumerable, and hence not stored in the DB when
      *  writing statements like `db.put(someModelInstance)`. This is default props that can be passed to
      *  `Object.defineProperty`.
      */
-    static DEF_NON_ENUM_PROP = {
+    public static DEF_NON_ENUM_PROP: PropertyDescriptor = {
         enumerable: false,
         writable: true,
     }
@@ -18,7 +16,7 @@ export default class AbstractModel {
      * @param {Blob} blob
      * @return {string} Data URI representation of input `blob`.
      */
-    static blobToDataURL = blob => URL.createObjectURL(blob)
+    public static blobToDataURL = (blob: Blob) => URL.createObjectURL(blob)
 
     /**
      * See: https://stackoverflow.com/a/12300351
@@ -26,7 +24,7 @@ export default class AbstractModel {
      * @param {string} url Data URI.
      * @return {Blob} Blob representation of input `url`.
      */
-    static dataURLToBlob = url => {
+    public static dataURLToBlob = (url: string) => {
         const byteString = atob(url.split(',')[1])
         const mimeType = url
             .split(',')[0]
@@ -42,18 +40,10 @@ export default class AbstractModel {
         return new Blob([buffer], { type: mimeType })
     }
 
-    constructor() {
-        if (this.constructor == AbstractModel) {
-            throw new Error("Abstract classes can't be instantiated.")
-        }
-    }
-
     /**
      * Persist the current Modol instance to the `db`.
      *
      * @return {Promise<any>}
      */
-    save() {
-        throw new Error(`Method 'save' not implemented by subclass`)
-    }
+    public abstract async save()
 }

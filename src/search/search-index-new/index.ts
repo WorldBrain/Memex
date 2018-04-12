@@ -1,30 +1,25 @@
-import Storage from './storage'
+import Storage, { Props } from './storage'
 
 // Create main singleton to interact with DB in the ext
-let realIndex = null
-const index = new Proxy(
-    {},
-    {
-        get: (target, key) => {
-            if (!realIndex) {
-                init()
-            }
-            if (key === 'db') {
-                return realIndex
-            }
+let realIndex: Storage = null
+const index = new Proxy<Storage>({} as Storage, {
+    get: (target, key) => {
+        if (!realIndex) {
+            init()
+        }
+        if (key === 'db') {
+            return realIndex
+        }
 
-            let prop = realIndex[key]
-            if (typeof prop === 'function') {
-                prop = prop.bind(realIndex)
-            }
-            return prop
-        },
+        let prop = realIndex[key]
+        if (typeof prop === 'function') {
+            prop = prop.bind(realIndex)
+        }
+        return prop
     },
-)
+})
 
-export function init(idbOpts = {}) {
-    realIndex = new Storage(idbOpts)
-}
+export const init = (props?: Props) => (realIndex = new Storage(props))
 
 export { Storage }
 export default index
@@ -65,4 +60,4 @@ export { getPage, grabExistingKeys } from './util'
 export { search, suggest, getMatchingPageCount } from './search'
 
 // Mock for old index queue; to remove with old index code
-export const indexQueue = { clear() { } }
+export const indexQueue = { clear: () => undefined }
