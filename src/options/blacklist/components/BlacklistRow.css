@@ -1,4 +1,17 @@
-.blacklistActions {
+.row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.expression {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    max-width: 35rem;
+}
+
+.actions {
     float: right;
     position: relative;
     right: -20px;
