@@ -1,5 +1,5 @@
 import { CMDS, DEF_CONCURRENCY } from 'src/options/imports/constants'
-import { WARN_NOTIF, WARN_INFO_URL } from './constants'
+import { REMINDER_NOTIF, WARN_NOTIF, WARN_INFO_URL } from './constants'
 import createNotif from 'src/util/notifications'
 import ProgressManager from './progress-manager'
 import stateManager from './state-manager'
@@ -134,6 +134,10 @@ export default class ImportConnectionHandler {
      */
     async finishImport() {
         this.setImportInProgressFlag(false)
+
+        if (!this._quickMode) {
+            createNotif(REMINDER_NOTIF)
+        }
 
         // Re-init the estimates view with updated estimates data
         const estimateCounts = await stateManager.fetchEsts(this._quickMode)
