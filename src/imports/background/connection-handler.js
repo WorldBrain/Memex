@@ -69,6 +69,10 @@ export default class ImportConnectionHandler {
     itemObserver = {
         next: msg => this.port.postMessage({ cmd: CMDS.NEXT, ...msg }),
         complete: () => {
+            if (!this._quickMode) {
+                createNotif(REMINDER_NOTIF)
+            }
+
             this.port.postMessage({ cmd: CMDS.COMPLETE })
             this.setImportInProgressFlag(false)
         },
@@ -146,10 +150,6 @@ export default class ImportConnectionHandler {
     async finishImport() {
         this.setImportInProgressFlag(false)
 
-        if (!this._quickMode) {
-            createNotif(REMINDER_NOTIF)
-        }
-
         // Re-init the estimates view with updated estimates data
         const estimateCounts = await stateManager.fetchEsts(this._quickMode)
         this.port.postMessage({ cmd: CMDS.INIT, ...estimateCounts })
@@ -158,6 +158,10 @@ export default class ImportConnectionHandler {
     async cancelImport() {
         this.importer.stop()
         this.setImportInProgressFlag(false)
+
+        if (!this._quickMode) {
+            createNotif(REMINDER_NOTIF)
+        }
 
         // Resume UI at complete state
         this.port.postMessage({ cmd: CMDS.COMPLETE })
