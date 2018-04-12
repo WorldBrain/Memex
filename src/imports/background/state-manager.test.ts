@@ -111,6 +111,21 @@ const runSuite = (DATA: TestData) => async () => {
         await testEstimateCounts()
     })
 
+    test('counts calcs should be consistent', async () => {
+        state.dirtyEsts()
+        let lastCounts = await state.fetchEsts()
+
+        for (let i = 0; i < 5; i++) {
+            state.dirtyEsts()
+            const counts = await state.fetchEsts()
+
+            // Current counts and last should be same
+            expect(lastCounts).toEqual(counts)
+
+            lastCounts = counts
+        }
+    })
+
     test('import items can be iterated through', async () => {
         const bookmarkItemUrls = []
         const historyItemUrls = []
