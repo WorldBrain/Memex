@@ -16,8 +16,6 @@ import { connect } from 'react-redux'
 fetchNewNotifs()
 setInterval(fetchNewNotifs, 1000 * 60)
 
-console.log('ok?1')
-
 class NotificationsContainer extends Component {
     constructor(props) {
         super(props)
@@ -27,7 +25,7 @@ class NotificationsContainer extends Component {
             showAll: false,
             unreadMessagesCount: 0,
         }
-        console.log(this.props.unreadMessagesCount)
+
         this.setShowAll = this.setShowAll.bind(this)
         this.setMarkAllRead = this.setMarkAllRead.bind(this)
     }
