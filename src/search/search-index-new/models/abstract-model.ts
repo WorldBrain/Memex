@@ -14,9 +14,9 @@ export default abstract class AbstractModel {
 
     /**
      * @param {Blob} blob
-     * @return {string} Data URI representation of input `blob`.
+     * @return {string} URL that links to in-memory `blob`.
      */
-    public static blobToDataURL = (blob: Blob) => URL.createObjectURL(blob)
+    public static getBlobURL = (blob: Blob) => URL.createObjectURL(blob)
 
     /**
      * See: https://stackoverflow.com/a/12300351

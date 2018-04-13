@@ -10,7 +10,6 @@ const tagsProp = Symbol('assocTags')
 const bookmarkProp = Symbol('assocBookmark')
 const latestProp = Symbol('latestEvent')
 const screenshot = Symbol('screenshotURI')
-const favIcon = Symbol('favIconURI')
 
 export default class Page extends AbstractModel {
     /**
@@ -33,7 +32,6 @@ export default class Page extends AbstractModel {
         bookmark,
         visits = [],
         screenshotURI,
-        favIconURI,
     }) {
         super()
         this.url = url
@@ -45,7 +43,6 @@ export default class Page extends AbstractModel {
         this.titleTerms = titleTerms
         this.domain = domain
         this.screenshotURI = screenshotURI
-        this.favIconURI = favIconURI
 
         Object.defineProperties(this, {
             [visitsProp]: {
@@ -60,14 +57,9 @@ export default class Page extends AbstractModel {
                 value: [],
                 ...AbstractModel.DEF_NON_ENUM_PROP,
             },
-            [favIcon]: AbstractModel.DEF_NON_ENUM_PROP,
             [screenshot]: AbstractModel.DEF_NON_ENUM_PROP,
             [latestProp]: AbstractModel.DEF_NON_ENUM_PROP,
         })
-    }
-
-    get favIconURI() {
-        return this[favIcon]
     }
 
     get screenshotURI() {
@@ -98,14 +90,7 @@ export default class Page extends AbstractModel {
     set screenshotURI(input) {
         if (input) {
             this.screenshot = AbstractModel.dataURLToBlob(input)
-            this[screenshot] = AbstractModel.blobToDataURL(this.screenshot)
-        }
-    }
-
-    set favIconURI(url) {
-        if (url) {
-            this.favIcon = AbstractModel.dataURLToBlob(url)
-            this[favIcon] = AbstractModel.blobToDataURL(this.favIcon)
+            this[screenshot] = AbstractModel.getBlobURL(this.screenshot)
         }
     }
 
@@ -181,28 +166,14 @@ export default class Page extends AbstractModel {
      * TODO: Find a better way to manage Blobs and Data URIs on models?
      */
     loadBlobs() {
-        // Unset the fields if they're invalid
-        const handleInvalid = (urlProp, blobProp) => {
-            this[urlProp] = undefined
-            this[blobProp] = undefined
-        }
-
         try {
             // Got Blob, but no data URL
             if (this.screenshot && !this[screenshot]) {
-                this[screenshot] = AbstractModel.blobToDataURL(this.screenshot)
+                this[screenshot] = AbstractModel.getBlobURL(this.screenshot)
             }
         } catch (err) {
-            handleInvalid(screenshot, 'screenshot')
-        }
-
-        try {
-            // Same thing for favicon
-            if (this.favIcon && !this[favIcon]) {
-                this[favIcon] = AbstractModel.blobToDataURL(this.favIcon)
-            }
-        } catch (err) {
-            handleInvalid(favIcon, 'favIcon')
+            this.screenshot = undefined
+            this[screenshot] = undefined
         }
     }
 
@@ -252,11 +223,6 @@ export default class Page extends AbstractModel {
                 this._mergeTerms('terms', existing.terms)
                 this._mergeTerms('urlTerms', existing.urlTerms)
                 this._mergeTerms('titleTerms', existing.titleTerms)
-
-                // Use existing Blobs if none defined
-                if (!this.favIcon && existing.favIcon) {
-                    this.favIcon = existing.favIcon
-                }
 
                 if (!this.screenshot && existing.screenshot) {
                     this.screenshot = existing.screenshot
