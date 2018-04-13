@@ -57,7 +57,12 @@ export { getPage, grabExistingKeys } from './util'
 // Searching & suggesting
 //
 
-export { search, suggest, getMatchingPageCount } from './search'
+export {
+    search,
+    suggest,
+    getMatchingPageCount,
+    domainHasFavIcon,
+} from './search'
 
 // Mock for old index queue; to remove with old index code
 export const indexQueue = { clear: () => undefined }

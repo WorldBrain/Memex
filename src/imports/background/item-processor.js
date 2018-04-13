@@ -112,10 +112,15 @@ export default class ImportItemProcessor {
      * @returns {PageDoc}
      */
     async _createPageDoc({ url }) {
+        const includeFavIcon = !await index.domainHasFavIcon(url)
+
         // Do the page data fetch
         const fetch = fetchPageData({
             url,
-            opts: fetchPageDataOpts,
+            opts: {
+                ...fetchPageDataOpts,
+                includeFavIcon,
+            },
         })
 
         this.abortXHR = fetch.cancel

@@ -150,3 +150,5 @@ export { default as suggest } from './suggest'
 export { grabExistingKeys } from './util'
 export { indexQueue } from './'
 export { initSingleLookup }
+
+export const domainHasFavIcon = url => Promise.resolve(false)

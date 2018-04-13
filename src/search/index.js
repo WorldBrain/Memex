@@ -104,6 +104,10 @@ export async function getMatchingPageCount(...args) {
     return await (await getBackend()).getMatchingPageCount(...args)
 }
 
+export async function domainHasFavIcon(...args) {
+    return await (await getBackend()).domainHasFavIcon(...args)
+}
+
 export const indexQueue = {
     clear: async () => {
         ;(await getBackend()).indexQueue.clear()

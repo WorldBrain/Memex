@@ -6,6 +6,8 @@ import { findFilteredUrls } from './filters'
 import { textSearch } from './text-search'
 import { paginate, applyScores } from './util'
 
+export { domainHasFavIcon } from './fav-icon'
+
 /**
  * @typedef {Object} SearchParams
  * @property {string[]} [tags=[]]
@@ -22,7 +24,6 @@ import { paginate, applyScores } from './util'
  * @property {string} 0 URL of found page.
  * @property {number} 1 Timestamp of latest event.
  */
-
 export async function search({
     query,
     showOnlyBookmarks,
