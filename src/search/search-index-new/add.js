@@ -1,6 +1,6 @@
 import db from '.'
 import normalizeUrl from 'src/util/encode-url-for-id'
-import { Page } from './models'
+import { Page, FavIcon } from './models'
 import pipeline from './pipeline'
 
 /**
@@ -27,13 +27,19 @@ import pipeline from './pipeline'
  * @return {Promise<void>}
  */
 export async function addPage({ visits = [], bookmark, ...pipelineReq }) {
-    const pageData = await pipeline(pipelineReq)
+    const { favIconURI, ...pageData } = await pipeline(pipelineReq)
     const timerLabel = `TIMER - add page: "${pageData.url}"`
 
     console.time(timerLabel)
     try {
         await db.transaction('rw', db.tables, async () => {
             const page = new Page(pageData)
+
+            // Record a new fav-icon, if present (continue on straight-away)
+            if (favIconURI != null) {
+                new FavIcon({ domain: page.domain, favIconURI }).save().catch()
+            }
+
             // Load any current assoc. data for this page
             await page.loadRels()
 
