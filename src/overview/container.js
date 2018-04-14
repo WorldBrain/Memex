@@ -317,7 +317,7 @@ const mapDispatchToProps = dispatch => ({
     },
     handlePillClick: tag => event => {
         event.preventDefault()
-        dispatch(actions.filterTag(tag))
+        dispatch(filterActs.toggleTagFilter(tag))
     },
     addTag: resultIndex => tag => dispatch(actions.addTag(tag, resultIndex)),
     delTag: resultIndex => tag => dispatch(actions.delTag(tag, resultIndex)),
