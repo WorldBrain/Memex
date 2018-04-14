@@ -45,7 +45,7 @@ export const OPEN_OVERVIEW = 'openOverviewURL'
 export const OPEN_OPTIONS = 'openOptionsURL'
 // Storage keys
 export const HIDE_RESULTS_KEY = 'HIDE_MEMEX_RESULTS'
-export const SEARCH_INJECTION_KEY = 'SEARCH_INJECTION_'
+export const SEARCH_INJECTION_KEY = 'SEARCH_INJECTION'
 export const POSITION_KEY = 'RESULTS_POSITION_'
 
 // Default Search Injection Object

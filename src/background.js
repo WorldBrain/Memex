@@ -11,7 +11,11 @@ import {
 import { index } from 'src/search'
 import analytics from 'src/analytics'
 import createNotif from 'src/util/notifications'
-import { OPEN_OVERVIEW, OPEN_OPTIONS } from 'src/search-injection/constants'
+import {
+    OPEN_OVERVIEW,
+    OPEN_OPTIONS,
+    SEARCH_INJECTION_KEY,
+} from 'src/search-injection/constants'
 import db from 'src/search/search-index-new'
 import * as models from 'src/search/search-index-new/models'
 
@@ -74,6 +78,20 @@ async function onUpdate() {
         },
         () => browser.tabs.create({ url: NEW_FEATURE_NOTIF.url }),
     )
+
+    // Check whether old Search Injection boolean exists and replace it with new object
+    const searchInjectionKey = (await browser.storage.local.get(
+        SEARCH_INJECTION_KEY,
+    ))[SEARCH_INJECTION_KEY]
+
+    if (typeof searchInjectionKey === 'boolean') {
+        browser.storage.local.set({
+            [SEARCH_INJECTION_KEY]: {
+                google: searchInjectionKey,
+                duckduckgo: true,
+            },
+        })
+    }
 }
 
 browser.commands.onCommand.addListener(command => {

@@ -13,7 +13,7 @@ const ResultItem = props => (
             onClick={props.onLinkClick}
             target="_blank"
         >
-            {props.content.title}
+            {props.title}
         </a>
         <p className={styles.url}>{props.url}</p>
         <div className={styles.displayTime}>
@@ -25,7 +25,7 @@ const ResultItem = props => (
 
 ResultItem.propTypes = {
     searchEngine: PropTypes.string.isRequired,
-    displayTime: PropTypes.string.isRequired,
+    displayTime: PropTypes.number.isRequired,
     url: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
     onLinkClick: PropTypes.func.isRequired,
