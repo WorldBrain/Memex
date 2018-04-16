@@ -13,7 +13,7 @@ export default class ImportCache {
     static STORAGE_PREFIX = 'import-items-'
     static ERR_STORAGE_PREFIX = 'err-import-items-'
     static DAY_IN_MS = 1000 * 60 * 60 * 24
-    static DEF_CHUNK_SIZE = 100
+    static DEF_CHUNK_SIZE = 50
 
     static INIT_ESTS = {
         calculatedAt: 0,
@@ -25,6 +25,11 @@ export default class ImportCache {
             [TYPE.BOOKMARK]: 0,
             [TYPE.HISTORY]: 0,
         },
+    }
+
+    static DEF_CHUNK = {
+        type: TYPE.HISTORY,
+        entries: {},
     }
 
     /**
@@ -51,10 +56,12 @@ export default class ImportCache {
      * @param {string} chunkKey
      * @return {{ chunk: any | null, chunkKey: string }} Object containing the data for that chunk + the chunk key.
      */
-    static async _getChunk(chunkKey) {
-        const storage = await browser.storage.local.get(chunkKey)
+    static async _getChunk(chunkKey, def = ImportCache.DEF_CHUNK) {
+        const storage = await browser.storage.local.get({ [chunkKey]: def })
         return { chunk: storage[chunkKey], chunkKey }
     }
+
+    static _getChunkKey = (prefix, seq) => prefix + seq
 
     constructor({ initChunkSize = ImportCache.DEF_CHUNK_SIZE }) {
         this.chunkSize = initChunkSize
@@ -107,10 +114,23 @@ export default class ImportCache {
         }
     }
 
+    _getCurrChunkKey = () =>
+        ImportCache._getChunkKey(
+            ImportCache.STORAGE_PREFIX,
+            this.storageKeyStack.length - 1,
+        )
+
     _getNextChunkKey = () =>
-        `${ImportCache.STORAGE_PREFIX}${this.storageKeyStack.length}`
+        ImportCache._getChunkKey(
+            ImportCache.STORAGE_PREFIX,
+            this.storageKeyStack.length,
+        )
+
     _getNextErrChunkKey = () =>
-        `${ImportCache.ERR_STORAGE_PREFIX}${this.errStorageKeyStack.length}`
+        ImportCache._getChunkKey(
+            ImportCache.ERR_STORAGE_PREFIX,
+            this.errStorageKeyStack.length,
+        )
 
     async persistEsts(ests) {
         this.calculatedAt = Date.now()
@@ -126,11 +146,11 @@ export default class ImportCache {
     /**
      * Splits up a Map into an Array of objects of specified size to use as state chunks.
      *
-     * @param {Map<string|number, any>} map Map of key value pairs.
+     * @param {Map<string|number, any>} itemsMap Map of key value pairs.
      * @returns {any[]} Array of objects of size `this.chunkSize`, created from input Map.
      */
-    _splitChunks(map) {
-        const pairs = [...map]
+    _splitChunks(itemsMap) {
+        const pairs = [...itemsMap]
         const chunks = []
 
         for (let i = 0; i < pairs.length; i += this.chunkSize) {
@@ -142,12 +162,12 @@ export default class ImportCache {
     }
 
     /**
-     * @param {Map<T,U>} inputMap Map to diff against current items state.
+     * @param {Map<T,U>} itemsMap Map to diff against current items state.
      * @param {boolean} includeErrs
      * @returns {Map<T,U>} Subset (submap?) of `inputMap` containing no entries deemed to already exist in state.
      */
-    async _diffAgainstStored(inputMap, includeErrs) {
-        let entries = [...inputMap]
+    async _diffAgainstStored(itemsMap, includeErrs) {
+        let entries = [...itemsMap]
 
         for await (const { chunk } of this.getItems(!includeErrs)) {
             const currChunkKeys = new Set(keys(chunk))
@@ -158,9 +178,44 @@ export default class ImportCache {
     }
 
     /**
-     * @param {any} chunk Chunk of total state to store.
+     * @param {Map<string, any>} itemsMap
+     * @param {IMPORT_TYPE} type
+     * @return {Map<string, any>}
      */
-    async _addChunk(chunk) {
+    async _fillCurrChunk(itemsMap, type) {
+        const chunkKey = this._getCurrChunkKey()
+
+        const { chunk } = await ImportCache._getChunk(chunkKey)
+
+        const currSize = Object.keys(chunk.entries).length
+        const remaining = this.chunkSize - currSize
+
+        // Chunk is full or different type
+        if (remaining <= 0 || type !== chunk.type) {
+            return itemsMap
+        }
+
+        // Fill current chunk in storage with items
+        const pendingEntries = [...itemsMap].slice(0, remaining)
+        await browser.storage.local.set({
+            [chunkKey]: {
+                ...chunk,
+                entries: {
+                    ...chunk.entries,
+                    ...mapToObject(new Map(pendingEntries)),
+                },
+            },
+        })
+
+        // Return the remaining entries in a Map
+        return new Map([...itemsMap].slice(remaining))
+    }
+
+    /**
+     * @param {any} chunk Chunk of total state to store.
+     * @param {IMPORT_TYPE} type
+     */
+    async _addChunk(chunk, type) {
         const chunkKey = this._getNextChunkKey()
 
         // Track new storage key in local key state
@@ -168,7 +223,7 @@ export default class ImportCache {
 
         // Store new chunk + update persisted import chunk keys state
         await browser.storage.local.set({
-            [chunkKey]: chunk,
+            [chunkKey]: { entries: chunk, type },
             [ImportCache.STATE_STORAGE_KEY]: [...this.storageKeyStack],
         })
     }
@@ -195,27 +250,31 @@ export default class ImportCache {
      * @param {boolean} [includeErrs=false]
      * @returns {number} The amount of items added to cache, post-filtering.
      */
-    async persistItems(itemsMap, includeErrs = false) {
-        const filteredData = await this._diffAgainstStored(
-            itemsMap,
-            includeErrs,
-        )
+    async persistItems(itemsMap, type, includeErrs = false) {
+        let filteredItems = await this._diffAgainstStored(itemsMap, includeErrs)
+        const numItemsToAdd = filteredItems.size
 
-        if (!filteredData.size) {
+        if (!numItemsToAdd) {
             return 0 // Die early if nothing needed
         }
 
-        // Split into specific-size chunks (if enough input)
-        for (const itemsChunk of this._splitChunks(filteredData)) {
-            await this._addChunk(itemsChunk)
+        // Fill out current (prev) chunk if needed
+        if (this.storageKeyStack.length > 0) {
+            filteredItems = await this._fillCurrChunk(filteredItems, type)
         }
 
-        return filteredData.size
+        // Split into specific-size chunks (if enough input)
+        for (const itemsChunk of this._splitChunks(filteredItems)) {
+            await this._addChunk(itemsChunk, type)
+        }
+
+        return numItemsToAdd
     }
 
     async *getItems(includeErrs = false) {
         for (const chunkKey of this.storageKeyStack) {
-            yield await ImportCache._getChunk(chunkKey)
+            const { chunk: { entries } } = await ImportCache._getChunk(chunkKey)
+            yield { chunk: entries, chunkKey }
         }
 
         if (includeErrs) {
@@ -225,7 +284,7 @@ export default class ImportCache {
 
     async *getErrItems() {
         for (const chunkKey of this.errStorageKeyStack) {
-            yield await ImportCache._getChunk(chunkKey)
+            yield await ImportCache._getChunk(chunkKey, {})
         }
     }
 
@@ -235,16 +294,16 @@ export default class ImportCache {
      * @return {ImportItem | null} The removed import item, corresponding to `itemKey`, if exists
      */
     async removeItem(chunkKey, itemKey) {
-        const { [chunkKey]: chunk } = await browser.storage.local.get({
-            [chunkKey]: {},
-        })
+        const { chunk } = await ImportCache._getChunk(chunkKey)
 
         // Destructure existing state, removing the unwanted item
-        const { [itemKey]: itemToRemove, ...remainingChunk } = chunk
+        const { [itemKey]: itemToRemove, ...entries } = chunk.entries
 
         if (itemToRemove != null) {
             // Then update storage with remaining state, if anything was removed
-            await browser.storage.local.set({ [chunkKey]: remainingChunk })
+            await browser.storage.local.set({
+                [chunkKey]: { ...chunk, entries },
+            })
         }
 
         return itemToRemove

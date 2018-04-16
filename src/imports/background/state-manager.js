@@ -128,6 +128,7 @@ export class ImportStateManager {
             // Cache current processed chunk for checking against future chunks (count state change happens in here)
             const numAdded = await this._cache.persistItems(
                 data,
+                type,
                 this._includeErrs,
             )
             this.remaining[type] += numAdded // Inc count state
