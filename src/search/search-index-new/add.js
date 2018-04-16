@@ -28,9 +28,7 @@ import pipeline from './pipeline'
  */
 export async function addPage({ visits = [], bookmark, ...pipelineReq }) {
     const { favIconURI, ...pageData } = await pipeline(pipelineReq)
-    const timerLabel = `TIMER - add page: "${pageData.url}"`
 
-    console.time(timerLabel)
     try {
         await db.transaction('rw', db.tables, async () => {
             const page = new Page(pageData)
@@ -57,8 +55,6 @@ export async function addPage({ visits = [], bookmark, ...pipelineReq }) {
         })
     } catch (error) {
         console.error(error)
-    } finally {
-        console.timeEnd(timerLabel)
     }
 }
 
@@ -68,10 +64,7 @@ export async function addPage({ visits = [], bookmark, ...pipelineReq }) {
  */
 export async function addPageTerms(pipelineReq) {
     const pageData = await pipeline(pipelineReq)
-    const timerLabel = `TIMER - add #${pageData.terms
-        .length} terms to page: "${pageData.url}"`
 
-    console.time(timerLabel)
     try {
         await db.transaction('rw', db.tables, async () => {
             const page = new Page(pageData)
@@ -80,8 +73,6 @@ export async function addPageTerms(pipelineReq) {
         })
     } catch (error) {
         console.error(error)
-    } finally {
-        console.timeEnd(timerLabel)
     }
 }
 

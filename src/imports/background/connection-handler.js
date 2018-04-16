@@ -116,7 +116,6 @@ export default class ImportConnectionHandler {
             this._includeErrs,
         )
 
-        console.log(estimateCounts)
         this.port.postMessage({ cmd: CMDS.INIT, ...estimateCounts })
     }
 

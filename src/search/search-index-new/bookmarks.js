@@ -72,9 +72,6 @@ export async function handleBookmarkCreation(browserId, { url }) {
         page = new Page(await pipeline({ pageDoc: { url, ...pageData } }))
     }
 
-    const timerLabel = `TIMER - add bookmark for page: "${page.url}"`
-    console.time(timerLabel)
-
     try {
         await db.transaction('rw', db.tables, async () => {
             await page.loadRels()
@@ -83,7 +80,5 @@ export async function handleBookmarkCreation(browserId, { url }) {
         })
     } catch (err) {
         console.error(err)
-    } finally {
-        console.timeEnd(timerLabel)
     }
 }
