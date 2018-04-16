@@ -35,15 +35,14 @@ export default class ImportDataSources {
      */
     async *history() {
         // Get all history from browser (last 3 months), filter on existing DB pages
-        const baseTime = moment().subtract(
-            ImportDataSources.LOOKBACK_WEEKS,
-            'weeks',
-        )
+        const baseTime = moment()
+            .startOf('day')
+            .subtract(ImportDataSources.LOOKBACK_WEEKS, 'weeks')
 
         // Fetch and filter history in week batches to limit space
         for (
             let time = moment();
-            time.isAfter(baseTime);
+            time.isSameOrAfter(baseTime);
             time.subtract(1, 'week')
         ) {
             yield this._history.search(this._createHistParams(time.valueOf()))
