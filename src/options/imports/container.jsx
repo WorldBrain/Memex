@@ -16,7 +16,7 @@ import DownloadDetails from './components/DownloadDetails'
 import DownloadDetailsRow from './components/DownloadDetailsRow'
 import StatusReport from './components/StatusReport'
 import AdvSettingCheckbox from './components/AdvSettingsCheckbox'
-import ShowDownloadDetails from './components/ShowDownloadDetails'
+// import ShowDownloadDetails from './components/ShowDownloadDetails'
 
 class ImportContainer extends Component {
     static propTypes = {
@@ -215,10 +215,10 @@ class ImportContainer extends Component {
         <Wrapper>
             <ProgressBar progress={this.props.progressPercent} />
             <ProgressTable {...this.props} />
-            <ShowDownloadDetails
+            {/* <ShowDownloadDetails
                 changeShowDetails={this.props.boundActions.showDownloadDetails}
                 showDownloadDetails={this.props.showDownloadDetails}
-            />
+            /> */}
             {this.props.showDownloadDetails && (
                 <DownloadDetails
                     filterHandlers={this.getDetailFilterHandlers()}
@@ -236,9 +236,9 @@ class ImportContainer extends Component {
                 {...this.props}
                 changeShowDetails={this.props.boundActions.showDownloadDetails}
             >
-                {this.props.showDownloadDetails
+                {/* {this.props.showDownloadDetails
                     ? 'Hide Details'
-                    : 'Show Details'}
+                    : 'Show Details'} */}
             </StatusReport>
             {this.props.showDownloadDetails && (
                 <DownloadDetails

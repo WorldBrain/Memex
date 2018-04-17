@@ -57,10 +57,11 @@ const addDownloadDetailsReducer = (
 ) => ({
     ...state,
     ...updateCountReducer(state, type, status === DL_STAT.SUCC),
-    downloadData: [
-        { url, type, status, error }, // Prepend new details row
-        ...state.downloadData,
-    ],
+    // TODO: Removing for now due to UI perf issues
+    // downloadData: [
+    //     { url, type, status, error }, // Prepend new details row
+    //     ...state.downloadData,
+    // ],
 })
 
 const toggleAllowTypeReducer = (state, type) => ({
