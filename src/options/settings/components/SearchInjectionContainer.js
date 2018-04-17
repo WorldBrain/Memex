@@ -2,6 +2,8 @@ import React from 'react'
 
 import analytics from 'src/analytics'
 import SearchInjection from './SearchInjection'
+import Checkbox from './Checkbox'
+
 import { getLocalStorage, setLocalStorage } from 'src/search-injection/utils'
 import {
     SEARCH_INJECTION_KEY,
@@ -44,11 +46,20 @@ class SearchInjectionContainer extends React.Component {
 
     render() {
         return (
-            <SearchInjection
-                injectionPreference={this.state.injectionPreference}
-                toggleGoogle={this.bindToggleInjection('google')}
-                toggleDDG={this.bindToggleInjection('duckduckgo')}
-            />
+            <SearchInjection>
+                <Checkbox
+                    isChecked={this.state.injectionPreference.google}
+                    handleChange={this.bindToggleInjection('google')}
+                >
+                    Google
+                </Checkbox>
+                <Checkbox
+                    isChecked={this.state.injectionPreference.duckduckgo}
+                    handleChange={this.bindToggleInjection('duckduckgo')}
+                >
+                    DuckDuckGo
+                </Checkbox>
+            </SearchInjection>
         )
     }
 }

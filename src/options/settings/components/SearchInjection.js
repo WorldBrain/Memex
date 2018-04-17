@@ -1,27 +1,15 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import Checkbox from './Checkbox'
 import styles from './SearchInjection.css'
 
-const SearchInjection = ({ injectionPreference, toggleGoogle, toggleDDG }) => {
+const SearchInjection = ({ children }) => {
     return (
         <div>
             <p className={styles.settingsHeader}>
                 Show Memex Results in Search Engines
             </p>
-            <Checkbox
-                isChecked={injectionPreference.google}
-                handleChange={toggleGoogle}
-            >
-                Google
-            </Checkbox>
-            <Checkbox
-                isChecked={injectionPreference.duckduckgo}
-                handleChange={toggleDDG}
-            >
-                DuckDuckGo
-            </Checkbox>
+            {children}
             <p>
                 Want others?{' '}
                 <a
@@ -36,9 +24,7 @@ const SearchInjection = ({ injectionPreference, toggleGoogle, toggleDDG }) => {
 }
 
 SearchInjection.propTypes = {
-    injectionPreference: PropTypes.object.isRequired,
-    toggleGoogle: PropTypes.func.isRequired,
-    toggleDDG: PropTypes.func.isRequired,
+    children: PropTypes.arrayOf(PropTypes.element).isRequired,
 }
 
 export default SearchInjection
