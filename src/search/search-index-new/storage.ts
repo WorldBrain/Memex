@@ -38,7 +38,7 @@ export default class Storage extends Dexie {
     public tags: Dexie.Table<Tag, [string, string]>
 
     /**
-     * @type {Dexie.Table} Represents fav-icons associated with domains.
+     * @type {Dexie.Table} Represents fav-icons associated with hostnames.
      */
     public favIcons: Dexie.Table<FavIcon, string>
 
@@ -57,11 +57,11 @@ export default class Storage extends Dexie {
      */
     private _initSchema() {
         this.version(1).stores({
-            pages: 'url, *terms, *titleTerms, *urlTerms, domain',
+            pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
             visits: '[time+url], url',
             bookmarks: 'url, time',
             tags: '[name+url], name, url',
-            favIcons: 'domain',
+            favIcons: 'hostname',
         })
 
         // ... add versions/migration logic here

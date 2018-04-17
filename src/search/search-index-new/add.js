@@ -35,7 +35,9 @@ export async function addPage({ visits = [], bookmark, ...pipelineReq }) {
 
             // Record a new fav-icon, if present (continue on straight-away)
             if (favIconURI != null) {
-                new FavIcon({ domain: page.domain, favIconURI }).save().catch()
+                await new FavIcon({ hostname: page.hostname, favIconURI })
+                    .save()
+                    .catch()
             }
 
             // Load any current assoc. data for this page

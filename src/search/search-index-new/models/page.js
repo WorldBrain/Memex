@@ -29,6 +29,7 @@ export default class Page extends AbstractModel {
         urlTerms,
         titleTerms,
         domain,
+        hostname,
         bookmark,
         visits = [],
         screenshotURI,
@@ -42,6 +43,7 @@ export default class Page extends AbstractModel {
         this.urlTerms = urlTerms
         this.titleTerms = titleTerms
         this.domain = domain
+        this.hostname = hostname
         this.screenshotURI = screenshotURI
 
         Object.defineProperties(this, {
@@ -202,7 +204,6 @@ export default class Page extends AbstractModel {
     }
 
     delete() {
-        console.log('deleting', this)
         return db.transaction('rw', db.tables, () =>
             Promise.all([
                 db.visits.where({ url: this.url }).delete(),

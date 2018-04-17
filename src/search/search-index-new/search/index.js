@@ -7,6 +7,7 @@ import { textSearch } from './text-search'
 import { paginate, applyScores } from './util'
 
 export { domainHasFavIcon } from './fav-icon'
+export { suggest } from './suggest'
 
 /**
  * @typedef {Object} SearchParams
@@ -81,25 +82,6 @@ export async function search({
 export async function getMatchingPageCount(pattern) {
     const re = new RegExp(pattern, 'i')
     return await db.pages.filter(page => re.test(page.url)).count()
-}
-
-export async function suggest(query = '', type, limit = 10) {
-    // Start building the WhereClause from appropriate table
-    const whereClause = (() => {
-        switch (type) {
-            case 'domain':
-                return db.pages.where('domain')
-            case 'tag':
-            default:
-                return db.tags.where('name')
-        }
-    })()
-
-    // Perform suggestion matching
-    return await whereClause
-        .startsWith(query)
-        .limit(limit)
-        .uniqueKeys()
 }
 
 /**

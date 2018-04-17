@@ -4,18 +4,18 @@ import AbstractModel from './abstract-model'
 const favIcon = Symbol('favIconURI')
 
 export interface Props {
-    domain: string
+    hostname: string
     favIconURI: string
 }
 
 export default class FavIcon extends AbstractModel {
-    public domain: string
+    public hostname: string
     public favIcon: Blob
 
-    constructor({ domain, favIconURI }: Props) {
+    constructor({ hostname, favIconURI }: Props) {
         super()
 
-        this.domain = domain
+        this.hostname = hostname
         this.favIconURI = favIconURI
 
         // Non-enumerable prop to hold the favIcon in-mem Blob link
@@ -39,7 +39,7 @@ export default class FavIcon extends AbstractModel {
 
     public async delete() {
         return db.transaction('rw', db.favIcons, () =>
-            db.favIcons.delete(this.domain),
+            db.favIcons.delete(this.hostname),
         )
     }
 

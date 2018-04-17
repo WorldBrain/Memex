@@ -15,7 +15,7 @@ export default function pipeline({
     rejectNoContent = true,
 }) {
     // First apply transformations to the URL
-    const { pathname, hostname } = transformUrl(url)
+    const { pathname, hostname, domain } = transformUrl(url)
 
     // Throw error if no searchable content; we don't really want to index these (for now) so allow callers
     //  to handle (probably by ignoring)
@@ -39,7 +39,8 @@ export default function pipeline({
         terms,
         urlTerms,
         titleTerms,
-        domain: hostname,
+        domain,
+        hostname,
         tags: [],
         ...data,
     })

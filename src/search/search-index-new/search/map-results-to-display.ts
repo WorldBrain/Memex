@@ -31,7 +31,7 @@ const mapPageToDisplay = (
 ) =>
     async function([url]: SearchResult): Promise<SearchDisplayResult> {
         const page = pagesMap.get(url)
-        const favIcon = favIconsMap.get(page.domain)
+        const favIcon = favIconsMap.get(page.hostname)
         await page.loadRels()
 
         return {
@@ -55,23 +55,23 @@ export async function mapResultsToDisplay(
     const resultUrls = results.map(([url]) => url)
 
     const pagesMap = new Map<string, Page>()
-    const domainsSet = new Set<string>()
+    const hostnamesSet = new Set<string>()
     const favIconsMap = new Map<string, FavIcon>()
 
-    // Grab all pages + tags for pages, creating a Map for easy lookup-by-URL + set of domains
+    // Grab all pages + tags for pages, creating a Map for easy lookup-by-URL + set of hostnames
     await db.pages
         .where('url')
         .anyOf(resultUrls)
         .each(page => {
-            domainsSet.add(page.domain)
+            hostnamesSet.add(page.hostname)
             pagesMap.set(page.url, page)
         })
 
-    // Grab all corresponding fav-icons for domains set
+    // Grab all corresponding fav-icons for hostnames set
     await db.favIcons
-        .where('domain')
-        .anyOf(...domainsSet)
-        .each(favIcon => favIconsMap.set(favIcon.domain, favIcon))
+        .where('hostname')
+        .anyOf(...hostnamesSet)
+        .each(favIcon => favIconsMap.set(favIcon.hostname, favIcon))
 
     // Grab all the Pages needed for results (mapping over input `results` to maintain order)
     return await Promise.all(
