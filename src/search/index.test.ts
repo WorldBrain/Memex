@@ -296,6 +296,25 @@ const runSuite = useOld => () => {
             ),
         )
 
+        testOnlyNew('(sub)domains search', async () => {
+            const { docs: domainDocs } = await search({
+                domains: ['lorem.com'],
+            })
+            const { docs: subDocs } = await search({
+                domains: ['sub.lorem.com'],
+            })
+            const { docs: combinedDocs } = await search({
+                domains: ['lorem.com', 'sub.lorem.com'],
+            })
+
+            // Same as domain search encompasses all subdomains; we may add scoring later
+            expect(domainDocs).toEqual(combinedDocs)
+
+            // Subdomain search should not return docs on same domain but different subdomain
+            expect(domainDocs).not.toEqual(subDocs)
+            expect(subDocs).toEqual([[PAGE_ID_2, DATA.VISIT_2]])
+        })
+
         const testTags = (singleQuery, multiQuery) => async () => {
             const runChecks = docs => {
                 expect(docs.length).toBe(2)
@@ -331,6 +350,16 @@ const runSuite = useOld => () => {
             expect(await index.suggest('t', 'domain')).toEqual(expected2)
             expect(await index.suggest('te', 'domain')).toEqual(expected2)
             expect(await index.suggest('tet', 'domain')).not.toEqual(expected2)
+
+            // New implementation should also support hostnames
+            if (!useOld) {
+                const expected3 = ['sub.lorem.com']
+                expect(await index.suggest('s', 'domain')).toEqual(expected3)
+                expect(await index.suggest('su', 'domain')).toEqual(expected3)
+                expect(await index.suggest('sus', 'domain')).not.toEqual(
+                    expected3,
+                )
+            }
         })
 
         test('tags suggest', async () => {
