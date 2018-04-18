@@ -1,5 +1,6 @@
 import db from '..'
 import { Page, FavIcon } from '../models'
+import { SearchParams, SearchResult } from '../types'
 
 export interface SearchDisplayResult {
     url: string
@@ -10,19 +11,6 @@ export interface SearchDisplayResult {
     favIcon: string
     tags: string[]
 }
-
-// TODO: move somewhere
-export interface SearchParams {
-    domains: string[]
-    tags: string[]
-    queryTerms: string[]
-    endDate?: number
-    startDate?: number
-    skip: number
-    limit: number
-}
-
-export type SearchResult = [string, number]
 
 const mapPageToDisplay = (
     pagesMap: Map<string, Page>,
