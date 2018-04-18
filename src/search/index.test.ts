@@ -44,14 +44,17 @@ const search = (params = {}) =>
 
 // Runs the same tests for either the new or old index
 const runSuite = useOld => () => {
-    // Old model uses page IDs (derived from URL), new model simply uses URL
+    // Old model uses page IDs (derived from URL), new model simply uses normalized URL
     const PAGE_ID_1 = useOld ? 'page/bG9yZW0uY29tL3Rlc3Qy' : 'lorem.com/test2'
-    const PAGE_ID_2 = useOld ? 'page/bG9yZW0uY29tL3Rlc3Qx' : 'lorem.com/test1'
+    const PAGE_ID_2 = useOld
+        ? 'page/c3ViLmxvcmVtLmNvbS90ZXN0MQ%3D%3D'
+        : 'sub.lorem.com/test1'
     const PAGE_ID_3 = useOld ? 'page/dGVzdC5jb20vdGVzdA%3D%3D' : 'test.com/test'
     const PAGE_ID_4 = useOld ? 'page/dGVzdC5jb20vdG1w' : 'test.com/tmp'
 
     // Some things may be broken in old one, but no plans on fixing
     const testOnlyNew = useOld ? test.skip : test
+    const testOnlyOld = useOld ? test : test.skip
 
     // Set what index to use for tests + initialize data
     beforeAll(async () => {
@@ -206,6 +209,7 @@ const runSuite = useOld => () => {
             },
         )
 
+        // NOTE: some differences with how domain filtering works in new index
         test('time-filtered + terms + domains search', async () => {
             const { docs } = await search({
                 startDate: DATA.VISIT_1,
@@ -214,17 +218,23 @@ const runSuite = useOld => () => {
                 domains: ['lorem.com'],
             })
 
-            expect(docs.length).toBe(2)
-            expect(docs[0]).toEqual([PAGE_ID_2, DATA.VISIT_2])
-            expect(docs[1]).toEqual([PAGE_ID_1, DATA.VISIT_1])
+            expect(docs.length).toBe(useOld ? 1 : 2)
+
+            if (useOld) {
+                expect(docs[0]).toEqual([PAGE_ID_1, DATA.VISIT_1])
+            } else {
+                expect(docs[0]).toEqual([PAGE_ID_2, DATA.VISIT_2])
+                expect(docs[1]).toEqual([PAGE_ID_1, DATA.VISIT_1])
+            }
         })
 
+        // NOTE: some differences with how domain filtering works in new index
         test('time-filtered + terms + domains + tags search', async () => {
             const { docs } = await search({
                 startDate: DATA.VISIT_1,
                 endDate: DATA.VISIT_2,
                 query: 'lorem ipsum',
-                domains: ['lorem.com'],
+                domains: ['sub.lorem.com'],
                 tags: ['quality'],
             })
 
@@ -244,20 +254,30 @@ const runSuite = useOld => () => {
             expect(docsB.length).toBe(0)
         })
 
+        // NOTE: some differences with how domain filtering works in new index
         const testDomains = (singleQuery, multiQuery) => async () => {
             const { docs: loremDocs } = await search(singleQuery)
 
-            expect(loremDocs.length).toBe(2)
-            expect(loremDocs[0]).toEqual([PAGE_ID_2, DATA.VISIT_2])
-            expect(loremDocs[1]).toEqual([PAGE_ID_1, DATA.VISIT_1])
+            expect(loremDocs.length).toBe(useOld ? 1 : 2)
+            if (useOld) {
+                expect(loremDocs[0]).toEqual([PAGE_ID_1, DATA.VISIT_1])
+            } else {
+                expect(loremDocs[0]).toEqual([PAGE_ID_2, DATA.VISIT_2])
+                expect(loremDocs[1]).toEqual([PAGE_ID_1, DATA.VISIT_1])
+            }
 
             // Multi-domain
             const { docs: testDocs } = await search(multiQuery)
 
-            expect(testDocs.length).toBe(3)
-            expect(testDocs[0]).toEqual([PAGE_ID_3, DATA.VISIT_3])
-            expect(testDocs[1]).toEqual([PAGE_ID_2, DATA.VISIT_2])
-            expect(testDocs[2]).toEqual([PAGE_ID_1, DATA.VISIT_1])
+            expect(testDocs.length).toBe(useOld ? 2 : 3)
+            if (useOld) {
+                expect(testDocs[0]).toEqual([PAGE_ID_3, DATA.VISIT_3])
+                expect(testDocs[1]).toEqual([PAGE_ID_1, DATA.VISIT_1])
+            } else {
+                expect(testDocs[0]).toEqual([PAGE_ID_3, DATA.VISIT_3])
+                expect(testDocs[1]).toEqual([PAGE_ID_2, DATA.VISIT_2])
+                expect(testDocs[2]).toEqual([PAGE_ID_1, DATA.VISIT_1])
+            }
         }
 
         test(

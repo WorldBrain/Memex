@@ -10,7 +10,7 @@ export const PAGE_1 = {
     },
 }
 export const PAGE_2 = {
-    url: 'https://www.lorem.com/test1',
+    url: 'https://sub.lorem.com/test1',
     content: {
         fullText: 'Lorem Ipsum is simply dummy text of the printing industry',
         title: 'page 2',
