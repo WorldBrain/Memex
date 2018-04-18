@@ -6,7 +6,7 @@
     /* Base size of the children elements */
     margin-bottom: 30px;
     position: relative;
-    animation: fadeIn 0.5s ease-in;
+    animation: fadeIn 1s ease-in;
     margin-top: -20px;
 }
 
@@ -64,7 +64,7 @@
     display: inline-block;
     margin-bottom: 3px;
     font-size: 1.1em;
-    font-weight: 100;
+    font-weight: 400;
     width: 71%;
 }
 
