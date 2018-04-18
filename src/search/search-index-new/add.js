@@ -33,26 +33,22 @@ export async function addPage({ visits = [], bookmark, ...pipelineReq }) {
         await db.transaction('rw', db.tables, async () => {
             const page = new Page(pageData)
 
-            // Record a new fav-icon, if present (continue on straight-away)
             if (favIconURI != null) {
                 await new FavIcon({ hostname: page.hostname, favIconURI })
                     .save()
                     .catch()
             }
 
-            // Load any current assoc. data for this page
             await page.loadRels()
 
             // Create Visits for each specified time, or a single Visit for "now" if no assoc event
             visits = !visits.length && bookmark == null ? [Date.now()] : visits
             visits.forEach(time => page.addVisit(time))
 
-            // Create bookmark, if given
             if (bookmark != null) {
                 page.setBookmark(bookmark)
             }
 
-            // Persist current state
             await page.save()
         })
     } catch (error) {

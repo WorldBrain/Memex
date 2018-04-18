@@ -9,7 +9,6 @@ import ImportCache from './cache'
  *
  * @typedef {Object} ItemTypeCount
  * @property {number} h
- * @property {number} o
  * @property {number} b
  */
 
@@ -152,7 +151,7 @@ export class ImportStateManager {
      * Forces the persisted estimates state to be "dirtied", meaning next `fetchEsts` attempt will
      * require a complete recalc rather than using the persisted state/cache.
      */
-    dirtyEsts() {
+    dirtyEstsCache() {
         this._cache.expired = true
     }
 
@@ -171,12 +170,13 @@ export class ImportStateManager {
 
         if (this._cache.expired) {
             this._includeErrs = includeErrs
-            // Perform calcs to update state
+            // Perform calcs to update counts state
             await this._calcCounts()
             await this._cache.persistEsts(this.counts)
 
-            // Expire cache immediately if quick mode (next read attempt will recalc)
-            if (quick) this._cache.expired = true
+            if (quick) {
+                this.dirtyEstsCache()
+            }
         }
 
         return this.counts

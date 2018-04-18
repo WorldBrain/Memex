@@ -50,7 +50,7 @@ export async function fetchBlacklist() {
 
 async function storeBlacklist(blacklist = []) {
     const serialized = JSON.stringify(blacklist)
-    await importStateManager.dirtyEsts()
+    await importStateManager.dirtyEstsCache()
 
     return browser.storage.local.set({ [STORAGE_KEY]: serialized })
 }

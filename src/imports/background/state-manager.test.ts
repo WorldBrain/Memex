@@ -97,7 +97,7 @@ const runSuite = (DATA: TestData) => async () => {
 
     test('counts can be calculated (cache miss)', async () => {
         // Ensure cache is dirtied
-        state.dirtyEsts()
+        state.dirtyEstsCache()
         expect(state._cache.expired).toBe(true)
 
         await testEstimateCounts()
@@ -112,11 +112,11 @@ const runSuite = (DATA: TestData) => async () => {
     })
 
     test('counts calcs should be consistent', async () => {
-        state.dirtyEsts()
+        state.dirtyEstsCache()
         let lastCounts = await state.fetchEsts()
 
         for (let i = 0; i < 5; i++) {
-            state.dirtyEsts()
+            state.dirtyEstsCache()
             const counts = await state.fetchEsts()
 
             // Current counts and last should be same

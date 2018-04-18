@@ -110,7 +110,7 @@ export default class ImportConnectionHandler {
     }
 
     async recalcState() {
-        stateManager.dirtyEsts()
+        stateManager.dirtyEstsCache()
         const estimateCounts = await stateManager.fetchEsts(
             this._quickMode,
             this._includeErrs,
