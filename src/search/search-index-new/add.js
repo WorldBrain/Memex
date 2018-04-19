@@ -1,7 +1,7 @@
 import db from '.'
 import normalizeUrl from 'src/util/encode-url-for-id'
 import { Page, FavIcon } from './models'
-import pipeline from './pipeline'
+import pipeline, { transformUrl } from './pipeline'
 
 /**
  * @typedef {Object} VisitInteraction
@@ -108,4 +108,10 @@ export async function addVisit(url, time = Date.now()) {
         matchingPage.addVisit(time)
         return await matchingPage.save()
     })
+}
+
+export async function addFavIcon(url, favIconURI) {
+    const { hostname } = transformUrl(url)
+
+    return new FavIcon({ hostname, favIconURI }).save()
 }

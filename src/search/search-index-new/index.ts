@@ -29,7 +29,13 @@ export default index
 // Adding stuff
 //
 
-export { addPage, addPageTerms, updateTimestampMeta, addVisit } from './add'
+export {
+    addPage,
+    addPageTerms,
+    updateTimestampMeta,
+    addVisit,
+    addFavIcon,
+} from './add'
 
 //
 // Deleting stuff

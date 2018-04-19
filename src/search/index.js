@@ -35,6 +35,10 @@ export async function addVisit(...args) {
     return await (await getBackend()).addVisit(...args)
 }
 
+export async function addFavIcon(...args) {
+    return await (await getBackend()).addFavIcon(...args)
+}
+
 //
 // Deleting stuff
 //

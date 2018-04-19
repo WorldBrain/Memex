@@ -152,3 +152,5 @@ export { indexQueue } from './'
 export { initSingleLookup }
 
 export const domainHasFavIcon = url => Promise.resolve(false)
+
+export const addFavIcon = (url, dataUrl) => Promise.resolve()

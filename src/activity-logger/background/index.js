@@ -1,7 +1,9 @@
+import debounce from 'lodash/debounce'
+
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import initPauser from './pause-logging'
 import { updateVisitInteractionData } from './util'
-import { handleUrl } from './tab-change-listeners'
+import { handleFavIcon, handleUrl } from './tab-change-listeners'
 import tabManager from './tab-manager'
 
 // Allow logging pause state toggle to be called from other scripts
@@ -51,7 +53,14 @@ browser.webNavigation.onCommitted.addListener(
     },
 )
 
+// Putting a debounce on this, as some sites can really spam the fav-icon changes when they first load
+const debouncedFavListener = debounce(handleFavIcon, 200)
+
 browser.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
+    if (changeInfo.favIconUrl) {
+        await debouncedFavListener(tabId, changeInfo, tab)
+    }
+
     if (changeInfo.url) {
         await handleUrl(tabId, changeInfo, tab)
     }

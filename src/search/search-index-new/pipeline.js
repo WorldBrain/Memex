@@ -2,6 +2,8 @@ import normalizeUrl from 'src/util/encode-url-for-id'
 
 import { extractTerms, transformUrl } from '../search-index-old/pipeline'
 
+export { transformUrl }
+
 /**
  * Given some page data, applies some transformations to the text and
  * returns page data ready for creation of new Page model instance.
