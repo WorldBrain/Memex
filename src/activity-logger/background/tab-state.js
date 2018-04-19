@@ -15,7 +15,7 @@ import ScrollState from './scroll-state'
  *  (see: https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/webNavigation).
  */
 class Tab {
-    static DEF_LOG_DELAY = 10000
+    static DEF_LOG_DELAY = 4000
 
     /**
      * @param {any} args

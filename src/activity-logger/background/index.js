@@ -127,7 +127,10 @@ browser.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
                 tabId,
                 () =>
                     // Wait until its DOM has loaded, and activated before attemping log
-                    whenTabActive({ tabId })
+                    Promise.all([
+                        whenPageDOMLoaded({ tabId }),
+                        whenTabActive({ tabId }),
+                    ])
                         .then(() => logPageVisit(tabId))
                         .catch(console.error), // Ignore any tab state interuptions
             )
