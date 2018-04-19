@@ -1,5 +1,3 @@
-/* eslint-env jest */
-
 import memdown from 'memdown'
 import * as indexedDB from 'fake-indexeddb'
 import * as IDBKeyRange from 'fake-indexeddb/lib/FDBKeyRange'
@@ -8,6 +6,8 @@ import * as index from './'
 import * as oldIndex from './search-index-old'
 import * as newIndex from './search-index-new'
 import * as DATA from './index.test.data'
+
+jest.mock('./search-index-new/models/abstract-model')
 
 async function insertTestData() {
     // Insert some test data for all tests to use
@@ -404,6 +404,19 @@ const runSuite = useOld => () => {
         })
 
         afterEach(() => (jasmine.DEFAULT_TIMEOUT_INTERVAL = origTimeout))
+
+        testOnlyNew('add fav-icon', async () => {
+            const hostname1 = 'lorem.com'
+            const hostname2 = 'sub.lorem.com'
+
+            await index.addFavIcon(DATA.PAGE_1.url, DATA.FAV_1)
+            await index.addFavIcon(DATA.PAGE_2.url, DATA.FAV_1)
+
+            const fav1 = await newIndex.default.favIcons.get(hostname1)
+            const fav2 = await newIndex.default.favIcons.get(hostname2)
+            expect(fav1.hostname).toBe(hostname1)
+            expect(fav2.hostname).toBe(hostname2)
+        })
 
         test('page adding affects search', async () => {
             const tmpVisit = Date.now()
