@@ -89,7 +89,7 @@ class NotificationsContainer extends Component {
             .catch(err => console.log(err))
     }
 
-    renderMessageDetailsRows = (readMessages, isRead = true) => {
+    renderMessageDetailsRows = (readMessages, isRead) => {
         if (this.state.showAll && isRead) {
             return [
                 readMessages
@@ -124,9 +124,9 @@ class NotificationsContainer extends Component {
         }
     }
 
-    renderMesaagesTable = readMessages => (
+    renderMesaagesTable = (readMessages, isRead) => (
         <UnreadMessages>
-            {this.renderMessageDetailsRows(readMessages, false)}
+            {this.renderMessageDetailsRows(readMessages, isRead)}
         </UnreadMessages>
     )
 
@@ -157,7 +157,7 @@ class NotificationsContainer extends Component {
                             You have no new notification
                         </div>
                     )}
-                    {this.renderMesaagesTable(unreadMessages)}
+                    {this.renderMesaagesTable(unreadMessages, false)}
                 </section>
                 <section className={styles.sectionReadMessages}>
                     <div className={styles.unreadMessage}>
@@ -175,7 +175,7 @@ class NotificationsContainer extends Component {
                             No past notifications.
                         </div>
                     )}
-                    {this.renderMesaagesTable(readMessages)}
+                    {this.renderMesaagesTable(readMessages, true)}
                 </section>
             </div>
         )
