@@ -8,16 +8,17 @@ async function getFavIcon({ tabId }) {
         return undefined
     }
 
-    const response = await fetch(tab.favIconUrl)
+    return await fetchFavIcon(tab.favIconUrl)
+}
+
+export async function fetchFavIcon(url) {
+    const response = await fetch(url)
 
     if (response.status >= 400 && response.status < 600) {
-        return Promise.reject(
-            new Error(`Bad response from server: ${response.status}`),
-        )
+        throw new Error(`Bad fav-icon response from server: ${response.status}`)
     }
 
-    const dataUrl = await responseToDataUrl(response)
-    return dataUrl
+    return await responseToDataUrl(response)
 }
 
 export default getFavIcon

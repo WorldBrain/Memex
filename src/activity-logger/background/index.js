@@ -1,57 +1,12 @@
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
-import { whenPageDOMLoaded, whenTabActive } from 'src/util/tab-events'
-import { updateTimestampMeta } from 'src/search'
-import { blacklist } from 'src/blacklist/background'
-import { logPageVisit, logInitPageVisit } from './log-page-visit'
 import initPauser from './pause-logging'
+import { updateVisitInteractionData } from './util'
+import { handleUrl } from './tab-change-listeners'
 import tabManager from './tab-manager'
-import { isLoggable, getPauseState } from '..'
-
-// `tabs.onUpdated` event fires on tab open - generally takes a few ms, which we can skip attemping visit update
-const fauxVisitThreshold = 100
 
 // Allow logging pause state toggle to be called from other scripts
 const toggleLoggingPause = initPauser()
 makeRemotelyCallable({ toggleLoggingPause })
-
-/**
- * Combines all "logibility" conditions for logging on given tab data to determine
- * whether or not a tab should be logged.
- *
- * @param {tabs.Tab}
- * @returns {Promise<boolean>}
- */
-async function shouldLogTab(tab) {
-    // Short-circuit before async logic, if possible
-    if (tab.incognito || !tab.url || !isLoggable(tab)) {
-        return false
-    }
-
-    // First check if we want to log this page (hence the 'maybe' in the name).
-    const isBlacklisted = await blacklist.checkWithBlacklist()
-    const isPaused = await getPauseState()
-
-    return !isPaused && !isBlacklisted(tab)
-}
-
-/**
- * Handles update of assoc. visit with derived tab state data, using the tab state.
- *
- * @param {Tab} tab The tab state to derive visit meta data from.
- */
-const updateVisitInteractionData = ({
-    url,
-    visitTime,
-    activeTime,
-    scrollState,
-}) =>
-    updateTimestampMeta(url, +visitTime, {
-        duration: activeTime,
-        scrollPx: scrollState.pixel,
-        scrollMaxPx: scrollState.maxPixel,
-        scrollPerc: scrollState.percent,
-        scrollMaxPerc: scrollState.maxPercent,
-    })
 
 // Ensure tab scroll states are kept in-sync with scroll events from the content script
 browser.runtime.onMessage.addListener(
@@ -97,43 +52,7 @@ browser.webNavigation.onCommitted.addListener(
 )
 
 browser.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
-    // `changeInfo` should only contain `url` prop if URL changed - what we care about for scheduling logging
     if (changeInfo.url) {
-        try {
-            // Ensures the URL change counts as a new visit in tab state (tab ID doesn't change)
-            const oldTab = tabManager.resetTab(
-                tabId,
-                tab.active,
-                changeInfo.url,
-            )
-            if (
-                oldTab.url !== changeInfo.url &&
-                oldTab.activeTime > fauxVisitThreshold &&
-                (await shouldLogTab(oldTab))
-            ) {
-                // Send off request for updating that prev. visit's tab state, if active long enough
-                updateVisitInteractionData(oldTab)
-            }
-        } catch (err) {}
-
-        if (await shouldLogTab(tab)) {
-            // Run stage 1 of visit indexing
-            whenPageDOMLoaded({ tabId })
-                .then(() => logInitPageVisit(tabId))
-                .catch(console.error)
-
-            // Schedule stage 2 of visit indexing (don't wait for stage 1)
-            tabManager.scheduleTabLog(
-                tabId,
-                () =>
-                    // Wait until its DOM has loaded, and activated before attemping log
-                    Promise.all([
-                        whenPageDOMLoaded({ tabId }),
-                        whenTabActive({ tabId }),
-                    ])
-                        .then(() => logPageVisit(tabId))
-                        .catch(console.error), // Ignore any tab state interuptions
-            )
-        }
+        await handleUrl(tabId, changeInfo, tab)
     }
 })
