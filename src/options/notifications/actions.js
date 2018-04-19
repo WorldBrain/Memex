@@ -6,6 +6,6 @@ export const unreadMessagesCount = createAction(
 )
 
 export const unreadMessagesUpdate = () => async dispatch => {
-    const unreadMessages = await setUnreadCount(0)
+    const unreadMessages = await setUnreadCount()
     dispatch(unreadMessagesCount(unreadMessages))
 }

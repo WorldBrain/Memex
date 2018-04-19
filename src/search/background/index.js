@@ -12,6 +12,7 @@ import {
     delPagesByDomain,
     delPagesByPattern,
     getMatchingPageCount,
+    addNotification,
 } from '../'
 
 makeRemotelyCallable({
@@ -25,6 +26,7 @@ makeRemotelyCallable({
     delPagesByPattern,
     getMatchingPageCount,
     pageLookup: url => getPage(url).then(transformPageForSending),
+    addNotification,
 })
 
 async function transformPageForSending(page) {

@@ -25,7 +25,7 @@ const messageRow = ({ doc, handleClick, isOpen }) => (
                 <div className={localStyles.toggle} key={doc.title}>
                     <div
                         className={localStyles.docBody}
-                        dangerouslySetInnerHTML={{ __html: doc.body }}
+                        dangerouslySetInnerHTML={{ __html: doc.message }}
                     />
                     <br />
                     <br />

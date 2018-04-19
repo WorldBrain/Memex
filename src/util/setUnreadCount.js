@@ -1,17 +1,10 @@
-import db from '../pouchdb'
+import db from 'src/search/search-index-new'
 
-export default async function setUnreadCount(itemToCount) {
+export default async function setUnreadCount() {
     try {
-        const response = await db.allDocs({
-            include_docs: true,
-            attachments: true,
-            startkey: 'notifs',
-            endkey: 'notifs\ufff0',
-        })
+        const response = await db.notifications.toArray()
 
-        const unreadMessages = response.rows.filter(
-            notif => notif.doc.viewed === false,
-        )
+        const unreadMessages = response.filter(notif => notif.viewed === false)
         return unreadMessages.length
     } catch (err) {
         console.log('err', err)

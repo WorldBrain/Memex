@@ -2,10 +2,13 @@ import db from '../../../pouchdb'
 import setUnreadCount from '../../../util/setUnreadCount'
 import updateWBBadge from '../updateWBBadge'
 import desktopNotification from './desktopNotification'
+import { remoteFunction } from 'src/util/webextensionRPC'
+
+const addNotification = remoteFunction('addNotification')
 
 export default async function fetchNewNotifs() {
     try {
-        const unreadCountOne = await setUnreadCount(0)
+        const unreadCountOne = await setUnreadCount()
         const res = await fetch('http://159.65.117.205:3000/api/notifications')
         const installTimestamp = (await browser.storage.local.get(
             'extension_install_time',
@@ -25,9 +28,19 @@ export default async function fetchNewNotifs() {
                 })
             }
         })
+
+        for (let i = 0; i < newNotes.length; i++) {
+            await addNotification({
+                id: 'notifs_' + newNotes[i]._id,
+                title: newNotes[i].title,
+                message: newNotes[i].body,
+                date: newNotes[i].created_at,
+                viewed: false,
+            })
+        }
         await setUnreadCount()
         await updateWBBadge()
-        const unreadCountTwo = await setUnreadCount(0)
+        const unreadCountTwo = await setUnreadCount()
         if (unreadCountTwo > unreadCountOne) {
             desktopNotification()
         }

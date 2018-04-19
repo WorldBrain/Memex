@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 
-import db from '../../../src/pouchdb'
+import { remoteFunction } from 'src/util/webextensionRPC'
+import db from 'src/search/search-index-new'
 import styles from './Notifs.css'
 import setUnreadCount from '../../util/setUnreadCount'
 import fetchNewNotifs from './polling/fetchNewNotifs'
@@ -13,6 +14,8 @@ import * as selectors from './selectors'
 
 import { connect } from 'react-redux'
 
+const addNotification = remoteFunction('addNotification')
+
 fetchNewNotifs()
 setInterval(fetchNewNotifs, 1000 * 60)
 
@@ -20,7 +23,7 @@ class NotificationsContainer extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            notifs: {},
+            notifs: [],
             selectedNotificationId: -1,
             showAll: false,
             unreadMessagesCount: 0,
@@ -31,32 +34,23 @@ class NotificationsContainer extends Component {
     }
 
     componentDidMount() {
-        db
-            .changes({
-                live: true,
-                include_docs: true,
-            })
-            .on('change', function(c) {})
         this.setStateFromPouch()
         this.props.handleReadNotification()
     }
 
-    selectNotification = doc => () => {
+    selectNotification = doc => async () => {
         try {
             this.setState({
                 selectedNotificationId:
-                    this.state.selectedNotificationId === doc._id
-                        ? ''
-                        : doc._id,
+                    this.state.selectedNotificationId === doc.id ? '' : doc.id,
             })
 
-            if (!doc.viewed) {
-                db.put({
-                    ...doc,
-                    viewed: true,
-                })
-            }
-            setUnreadCount()
+            await addNotification({
+                ...doc,
+                viewed: true,
+            })
+
+            // setUnreadCount(s)
             updateWBBadge()
             this.props.handleReadNotification()
         } catch (err) {
@@ -70,16 +64,18 @@ class NotificationsContainer extends Component {
         })
     }
 
-    setMarkAllRead() {
-        const unreadMessages = this.state.notifs.rows.filter(
-            notif => notif.doc.viewed === false,
+    async setMarkAllRead() {
+        const unreadMessages = this.state.notifs.filter(
+            notif => notif.viewed === false,
         )
-        unreadMessages.map((notif, i) =>
-            db.put({
-                ...notif.doc,
+
+        for (let i = 0; i < unreadMessages.length; i++) {
+            await addNotification({
+                ...unreadMessages[i],
                 viewed: true,
-            }),
-        )
+            })
+        }
+
         this.setStateFromPouch()
         setUnreadCount()
         updateWBBadge()
@@ -87,19 +83,14 @@ class NotificationsContainer extends Component {
     }
 
     setStateFromPouch() {
-        db
-            .allDocs({
-                include_docs: true,
-                attachments: true,
-                startkey: 'notifs',
-                endkey: 'notifs\ufff0',
-            })
+        db.notifications
+            .toArray()
             .then(notifs => this.setState(state => ({ ...state, notifs })))
             .catch(err => console.log(err))
     }
 
-    renderMessageDetailsRows = readMessages => {
-        if (this.state.showAll) {
+    renderMessageDetailsRows = (readMessages, isRead = true) => {
+        if (this.state.showAll && isRead) {
             return [
                 readMessages
                     .reverse()
@@ -107,11 +98,10 @@ class NotificationsContainer extends Component {
                         <MessageRow
                             key={i}
                             isOpen={
-                                this.state.selectedNotificationId ===
-                                notif.doc._id
+                                this.state.selectedNotificationId === notif.id
                             }
-                            doc={notif.doc}
-                            handleClick={this.selectNotification(notif.doc)}
+                            doc={notif}
+                            handleClick={this.selectNotification(notif)}
                         />
                     )),
             ]
@@ -124,11 +114,10 @@ class NotificationsContainer extends Component {
                         <MessageRow
                             key={i}
                             isOpen={
-                                this.state.selectedNotificationId ===
-                                notif.doc._id
+                                this.state.selectedNotificationId === notif.id
                             }
-                            doc={notif.doc}
-                            handleClick={this.selectNotification(notif.doc)}
+                            doc={notif}
+                            handleClick={this.selectNotification(notif)}
                         />
                     )),
             ]
@@ -137,18 +126,17 @@ class NotificationsContainer extends Component {
 
     renderMesaagesTable = readMessages => (
         <UnreadMessages>
-            {this.renderMessageDetailsRows(readMessages)}
+            {this.renderMessageDetailsRows(readMessages, false)}
         </UnreadMessages>
     )
 
     render() {
-        console.log(this.props)
         const { notifs } = this.state
-        const unreadMessages = notifs.rows
-            ? notifs.rows.filter(notif => notif.doc.viewed === false)
+        const unreadMessages = notifs.length
+            ? notifs.filter(notif => notif.viewed === false)
             : []
-        const readMessages = notifs.rows
-            ? notifs.rows.filter(notif => notif.doc.viewed === true)
+        const readMessages = notifs.length
+            ? notifs.filter(notif => notif.viewed === true)
             : []
 
         return (
