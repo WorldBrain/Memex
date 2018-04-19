@@ -13,6 +13,7 @@ class Container extends React.Component {
         results: PropTypes.arrayOf(PropTypes.object).isRequired,
         len: PropTypes.number.isRequired,
         rerender: PropTypes.func.isRequired,
+        searchEngine: PropTypes.string.isRequired,
     }
 
     constructor(props) {
@@ -34,6 +35,7 @@ class Container extends React.Component {
         dropdown: false,
         removed: false,
         position: null,
+        searchEngine: '',
     }
 
     async componentDidMount() {
@@ -55,6 +57,7 @@ class Container extends React.Component {
             <ResultItem
                 key={i}
                 onLinkClick={this.handleResultLinkClick}
+                searchEngine={this.props.searchEngine}
                 {...result}
             />
         ))
@@ -124,19 +127,23 @@ class Container extends React.Component {
     }
 
     render() {
-        const { position } = this.state
-
         // If the state.removed is true, show the RemovedText component
         if (this.state.removed)
-            return <RemovedText undo={this.undoRemove} position={position} />
+            return (
+                <RemovedText
+                    undo={this.undoRemove}
+                    position={this.state.position}
+                />
+            )
 
-        if (!position) {
+        if (!this.state.position) {
             return null
         }
 
         return (
             <Results
-                position={position}
+                position={this.state.position}
+                searchEngine={this.props.searchEngine}
                 totalCount={this.props.len}
                 seeMoreResults={this.seeMoreResults}
                 toggleHideResults={this.toggleHideResults}

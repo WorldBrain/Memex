@@ -6,6 +6,7 @@ export const LIMIT = {
 
 // regex - Regular Expression to match the url
 // container - ID of the container to append elements
+// containerType - specify what element type the container is
 
 export const SEARCH_ENGINES = {
     google: {
@@ -14,6 +15,15 @@ export const SEARCH_ENGINES = {
             above: 'center_col',
             side: 'rhs_block',
         },
+        containerType: 'id',
+    },
+    duckduckgo: {
+        regex: /(http[s]?:\/\/)?(www.)?duckduckgo[.\w]+\/\?q=.*/,
+        container: {
+            above: 'results--main',
+            side: 'results--sidebar',
+        },
+        containerType: 'class',
     },
 }
 
@@ -37,3 +47,9 @@ export const OPEN_OPTIONS = 'openOptionsURL'
 export const HIDE_RESULTS_KEY = 'HIDE_MEMEX_RESULTS'
 export const SEARCH_INJECTION_KEY = 'SEARCH_INJECTION'
 export const POSITION_KEY = 'RESULTS_POSITION_'
+
+// Default Search Injection Object
+export const SEARCH_INJECTION_DEFAULT = {
+    google: true,
+    duckduckgo: true,
+}

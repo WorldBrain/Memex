@@ -4,6 +4,9 @@ import { handleRender } from './dom'
 
 import { SEARCH_CONN_NAME, CMDS } from '../overview/constants'
 
+const url = window.location.href
+const matched = utils.matchURL(url)
+
 const cmdHandler = ({ cmd, ...payload }) => {
     // cmd: (string) status of the search result returned
     // payload: (object) contains doc and totalCount
@@ -13,7 +16,7 @@ const cmdHandler = ({ cmd, ...payload }) => {
         case CMDS.RESULTS:
             // Render only if there is atleast one result
             if (payload.searchResult.docs.length) {
-                handleRender(payload.searchResult)
+                handleRender(payload.searchResult, matched)
             }
             break
         case CMDS.ERROR:
@@ -40,14 +43,10 @@ const init = async () => {
 
     const searchInjection = await utils.getLocalStorage(
         constants.SEARCH_INJECTION_KEY,
-        true,
+        constants.SEARCH_INJECTION_DEFAULT,
     )
 
-    if (!searchInjection) return
-
-    const url = window.location.href
-    const matched = utils.matchURL(url)
-    if (matched) {
+    if (matched && searchInjection[matched]) {
         const query = utils.fetchQuery(url)
         search(query)
     }

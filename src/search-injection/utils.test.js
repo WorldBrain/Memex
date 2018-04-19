@@ -4,22 +4,46 @@ import * as utils from './utils'
 
 describe('URL', () => {
     const URLS = {
-        simple: 'https://www.google.com/search?q=test',
-        complex:
-            'https://www.google.co.in/search?q=test+with+space&rlz=1C5CHFA_enIN722IN722&oq=test&aqs=chrome..69i57j69i60l4j69i65.13361j0j1&sourceid=chrome&ie=UTF-8',
-        nomatch: 'https://www.google.com/ie=UTF-8&&sourceid=chrome',
+        google: {
+            simple: 'https://www.google.com/search?q=test',
+            spacedquery:
+                'https://www.google.co.in/search?q=test+with+space&sourceid=chrome&ie=UTF-8',
+            nomatch: 'https://www.google.com/ie=UTF-8&&sourceid=chrome',
+            image: 'https://www.google.co.in/search?q=test&tbm=isch',
+            maps:
+                'https://www.google.co.in/search?q=chennai+hotels&sa=X&ved=0ahUKEwi9rqGEtbLaAhWJpI8KHVJvAyEQri4I1wEwFw&tbm=lcl',
+        },
+        ddg: {
+            simple: 'https://duckduckgo.com/?q=test&t=canonical&ia=web',
+            spacedquery: 'https://duckduckgo.com/?q=spaced+query&t=hb&ia=qa',
+            nomatch: 'https://duckduckgo.com/?t=canonical&ia=web',
+        },
     }
 
-    test('should match url', () => {
-        const result1 = utils.matchURL(URLS.simple)
-        const result2 = utils.matchURL(URLS.complex)
-        expect(result1).toBe('google')
-        expect(result2).toBe('google')
+    test('should match google url', () => {
+        expect(utils.matchURL(URLS.google.simple)).toBe('google')
+        expect(utils.matchURL(URLS.google.spacedquery)).toBe('google')
+    })
+
+    test('should match duckduckgo url', () => {
+        expect(utils.matchURL(URLS.ddg.simple)).toBe('duckduckgo')
+        expect(utils.matchURL(URLS.ddg.spacedquery)).toBe('duckduckgo')
     })
 
     test('should not match url', () => {
-        const result = utils.matchURL(URLS.nomatch)
-        expect(result).toBeFalsy()
+        expect(utils.matchURL(URLS.google.nomatch)).toBeFalsy()
+        expect(utils.matchURL(URLS.google.image)).toBeFalsy()
+        expect(utils.matchURL(URLS.google.maps)).toBeFalsy()
+        expect(utils.matchURL(URLS.ddg.nomatch)).toBeFalsy()
+    })
+
+    test('should fetch query', () => {
+        expect(utils.fetchQuery(URLS.google.simple)).toBe('test')
+        expect(utils.fetchQuery(URLS.google.spacedquery)).toBe(
+            'test with space',
+        )
+        expect(utils.fetchQuery(URLS.ddg.simple)).toBe('test')
+        expect(utils.fetchQuery(URLS.ddg.spacedquery)).toBe('spaced query')
     })
 })
 
