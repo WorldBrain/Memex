@@ -16,7 +16,7 @@ import DownloadDetails from './components/DownloadDetails'
 import DownloadDetailsRow from './components/DownloadDetailsRow'
 import StatusReport from './components/StatusReport'
 import AdvSettingCheckbox from './components/AdvSettingsCheckbox'
-import ShowDownloadDetails from './components/ShowDownloadDetails'
+// import ShowDownloadDetails from './components/ShowDownloadDetails'
 
 class ImportContainer extends Component {
     static propTypes = {
@@ -31,6 +31,7 @@ class ImportContainer extends Component {
         progressPercent: PropTypes.number.isRequired,
         showDownloadDetails: PropTypes.bool.isRequired,
         downloadDataFilter: PropTypes.string.isRequired,
+        recalcEsts: PropTypes.func.isRequired,
 
         // Misc
         boundActions: PropTypes.object.isRequired,
@@ -214,10 +215,10 @@ class ImportContainer extends Component {
         <Wrapper>
             <ProgressBar progress={this.props.progressPercent} />
             <ProgressTable {...this.props} />
-            <ShowDownloadDetails
+            {/* <ShowDownloadDetails
                 changeShowDetails={this.props.boundActions.showDownloadDetails}
                 showDownloadDetails={this.props.showDownloadDetails}
-            />
+            /> */}
             {this.props.showDownloadDetails && (
                 <DownloadDetails
                     filterHandlers={this.getDetailFilterHandlers()}
@@ -235,9 +236,9 @@ class ImportContainer extends Component {
                 {...this.props}
                 changeShowDetails={this.props.boundActions.showDownloadDetails}
             >
-                {this.props.showDownloadDetails
+                {/* {this.props.showDownloadDetails
                     ? 'Hide Details'
-                    : 'Show Details'}
+                    : 'Show Details'} */}
             </StatusReport>
             {this.props.showDownloadDetails && (
                 <DownloadDetails
@@ -268,7 +269,7 @@ class ImportContainer extends Component {
                 <Wrapper>
                     <AdvSettingCheckbox {...this.props} />
                     <ActionButton
-                        handleClick={this.props.boundActions.recalcEsts}
+                        handleClick={this.props.recalcEsts}
                         customClass="recalc"
                     >
                         <i className="material-icons">autorenew</i>
@@ -313,6 +314,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
     boundActions: bindActionCreators(actions, dispatch),
+    recalcEsts: () => dispatch(actions.recalcEsts()),
     toggleAdvMode: () => dispatch(actions.toggleAdvMode()),
 })
 

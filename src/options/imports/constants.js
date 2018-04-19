@@ -64,7 +64,7 @@ export const CMDS = {
 }
 
 /** Estimated time to download a doc (seconds) */
-export const DOC_TIME_EST = 3
+export const DOC_TIME_EST = 0.5
 
 export const DEF_CONCURRENCY = 10
 

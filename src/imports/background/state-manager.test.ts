@@ -97,7 +97,7 @@ const runSuite = (DATA: TestData) => async () => {
 
     test('counts can be calculated (cache miss)', async () => {
         // Ensure cache is dirtied
-        state.dirtyEsts()
+        state.dirtyEstsCache()
         expect(state._cache.expired).toBe(true)
 
         await testEstimateCounts()
@@ -109,6 +109,21 @@ const runSuite = (DATA: TestData) => async () => {
 
         // Run same estimate counts test again with filled cache
         await testEstimateCounts()
+    })
+
+    test('counts calcs should be consistent', async () => {
+        state.dirtyEstsCache()
+        let lastCounts = await state.fetchEsts()
+
+        for (let i = 0; i < 5; i++) {
+            state.dirtyEstsCache()
+            const counts = await state.fetchEsts()
+
+            // Current counts and last should be same
+            expect(lastCounts).toEqual(counts)
+
+            lastCounts = counts
+        }
     })
 
     test('import items can be iterated through', async () => {

@@ -6,6 +6,9 @@ import { findFilteredUrls } from './filters'
 import { textSearch } from './text-search'
 import { paginate, applyScores } from './util'
 
+export { domainHasFavIcon } from './fav-icon'
+export { suggest } from './suggest'
+
 /**
  * @typedef {Object} SearchParams
  * @property {string[]} [tags=[]]
@@ -22,7 +25,6 @@ import { paginate, applyScores } from './util'
  * @property {string} 0 URL of found page.
  * @property {number} 1 Timestamp of latest event.
  */
-
 export async function search({
     query,
     showOnlyBookmarks,
@@ -61,13 +63,8 @@ export async function search({
         'r',
         db.tables,
         async () => {
-            console.time('TIMER - main search')
             const results = await fullSearch(params)
-            console.timeEnd('TIMER - main search')
-
-            console.time('TIMER - result mapping')
             const docs = await mapResultsFunc(results.ids, params)
-            console.timeEnd('TIMER - result mapping')
 
             return { docs, totalCount: results.totalCount }
         },
@@ -87,34 +84,13 @@ export async function getMatchingPageCount(pattern) {
     return await db.pages.filter(page => re.test(page.url)).count()
 }
 
-export async function suggest(query = '', type, limit = 10) {
-    // Start building the WhereClause from appropriate table
-    const whereClause = (() => {
-        switch (type) {
-            case 'domain':
-                return db.pages.where('domain')
-            case 'tag':
-            default:
-                return db.tags.where('name')
-        }
-    })()
-
-    // Perform suggestion matching
-    return await whereClause
-        .startsWith(query)
-        .limit(limit)
-        .uniqueKeys()
-}
-
 /**
  * Main search logic. Calls the rest of serach depending on input search params.
  *
  * @param {SearchParams} params
  */
 async function fullSearch({ queryTerms = [], ...params }) {
-    console.time('TIMER - findFilteredUrls()')
     const filteredUrls = await findFilteredUrls(params)
-    console.timeEnd('TIMER - findFilteredUrls()')
 
     let totalCount = null
     let urlScoresMap
@@ -122,30 +98,19 @@ async function fullSearch({ queryTerms = [], ...params }) {
     // Few different cases of search params we can take short-cuts on
     if (!queryTerms.length && filteredUrls != null) {
         // Blank search + domain/tags filters: just grab the events for filtered URLs and paginate
-        console.time('TIMER - mapUrlsToLatestEvents()')
         urlScoresMap = await mapUrlsToLatestEvents(params, filteredUrls)
-        console.timeEnd('TIMER - mapUrlsToLatestEvents()')
         totalCount = urlScoresMap.size
-        console.log(totalCount, urlScoresMap)
     } else if (!queryTerms.length) {
         // Blank search: simply do lookback from `endDate` on visits and score URLs by latest
-        console.time('TIMER - groupLatestEventsByUrl()')
         urlScoresMap = await groupLatestEventsByUrl(params)
-        console.timeEnd('TIMER - groupLatestEventsByUrl()')
     } else {
         // Terms search: do terms lookup first then latest event lookup (within time bounds) for each result
-        console.time('TIMER - textSearch()')
         const urlScoreMultiMap = await textSearch({ queryTerms }, filteredUrls)
-        console.timeEnd('TIMER - textSearch()')
 
-        console.time('TIMER - mapUrlsToLatestEvents()')
         const urls = new Set(urlScoreMultiMap.keys())
         const latestEvents = await mapUrlsToLatestEvents(params, urls)
-        console.timeEnd('TIMER - mapUrlsToLatestEvents()')
 
-        console.time('TIMER - applyScores()')
         urlScoresMap = applyScores(urlScoreMultiMap, latestEvents)
-        console.timeEnd('TIMER - applyScores()')
         totalCount = urlScoresMap.size
     }
 

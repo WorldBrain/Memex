@@ -32,7 +32,8 @@ export async function logInitPageVisit(tabId, secsSinceLastIndex = 20) {
             }
         }
 
-        const analysisRes = await analysePage({ tabId })
+        const allowFavIcon = !await index.domainHasFavIcon(tab.url)
+        const analysisRes = await analysePage({ tabId, allowFavIcon })
 
         // Don't index full-text just yet
         delete analysisRes.content.fullText

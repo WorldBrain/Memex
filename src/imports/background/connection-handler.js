@@ -1,5 +1,5 @@
 import { CMDS, DEF_CONCURRENCY } from 'src/options/imports/constants'
-import { WARN_NOTIF, WARN_INFO_URL } from './constants'
+import { REMINDER_NOTIF, WARN_NOTIF, WARN_INFO_URL } from './constants'
 import createNotif from 'src/util/notifications'
 import ProgressManager from './progress-manager'
 import stateManager from './state-manager'
@@ -21,6 +21,8 @@ export default class ImportConnectionHandler {
      * @type {boolean} Used to flag special quick imports on first install.
      */
     _quickMode
+
+    _includeErrs = false
 
     constructor({ port, quick = false }) {
         // Main `runtime.Port` that this class hides away to handle connection with the imports UI script
@@ -67,6 +69,10 @@ export default class ImportConnectionHandler {
     itemObserver = {
         next: msg => this.port.postMessage({ cmd: CMDS.NEXT, ...msg }),
         complete: () => {
+            if (!this._quickMode) {
+                createNotif(REMINDER_NOTIF)
+            }
+
             this.port.postMessage({ cmd: CMDS.COMPLETE })
             this.setImportInProgressFlag(false)
         },
@@ -92,15 +98,23 @@ export default class ImportConnectionHandler {
             case CMDS.SET_CONCURRENCY:
                 return (this.importer.concurrency = payload)
             case CMDS.SET_PROCESS_ERRS:
-                return (this.importer.processErrors = payload)
+                return this.setProcessErrs(payload)
             default:
                 return console.error(`unknown command: ${cmd}`)
         }
     }
 
+    async setProcessErrs(includeErrs) {
+        this._includeErrs = includeErrs
+        await this.recalcState()
+    }
+
     async recalcState() {
-        stateManager.dirtyEsts()
-        const estimateCounts = await stateManager.fetchEsts(this._quickMode)
+        stateManager.dirtyEstsCache()
+        const estimateCounts = await stateManager.fetchEsts(
+            this._quickMode,
+            this._includeErrs,
+        )
 
         this.port.postMessage({ cmd: CMDS.INIT, ...estimateCounts })
     }
@@ -143,6 +157,10 @@ export default class ImportConnectionHandler {
     async cancelImport() {
         this.importer.stop()
         this.setImportInProgressFlag(false)
+
+        if (!this._quickMode) {
+            createNotif(REMINDER_NOTIF)
+        }
 
         // Resume UI at complete state
         this.port.postMessage({ cmd: CMDS.COMPLETE })

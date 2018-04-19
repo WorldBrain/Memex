@@ -35,6 +35,10 @@ export async function addVisit(...args) {
     return await (await getBackend()).addVisit(...args)
 }
 
+export async function addFavIcon(...args) {
+    return await (await getBackend()).addFavIcon(...args)
+}
+
 //
 // Deleting stuff
 //
@@ -102,6 +106,10 @@ export async function suggest(...args) {
 
 export async function getMatchingPageCount(...args) {
     return await (await getBackend()).getMatchingPageCount(...args)
+}
+
+export async function domainHasFavIcon(...args) {
+    return await (await getBackend()).domainHasFavIcon(...args)
 }
 
 export const indexQueue = {

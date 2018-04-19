@@ -9,7 +9,6 @@ import ImportCache from './cache'
  *
  * @typedef {Object} ItemTypeCount
  * @property {number} h
- * @property {number} o
  * @property {number} b
  */
 
@@ -26,6 +25,8 @@ export class ImportStateManager {
         [TYPE.HISTORY]: true,
         [TYPE.BOOKMARK]: true,
     }
+
+    _includeErrs = false
 
     /**
      * @type {any} Object containing boolean flags for each import item type key, representing whether
@@ -124,7 +125,11 @@ export class ImportStateManager {
             }
 
             // Cache current processed chunk for checking against future chunks (count state change happens in here)
-            const numAdded = await this._cache.persistItems(data)
+            const numAdded = await this._cache.persistItems(
+                data,
+                type,
+                this._includeErrs,
+            )
             this.remaining[type] += numAdded // Inc count state
         }
     }
@@ -146,7 +151,7 @@ export class ImportStateManager {
      * Forces the persisted estimates state to be "dirtied", meaning next `fetchEsts` attempt will
      * require a complete recalc rather than using the persisted state/cache.
      */
-    dirtyEsts() {
+    dirtyEstsCache() {
         this._cache.expired = true
     }
 
@@ -155,20 +160,23 @@ export class ImportStateManager {
      * if it deems current state to be out-of-date.
      *
      * @param {boolean} [quick=false] Determines if quick mode is set (only limited recent history).
+     * @param {boolean} [includeErrs=false]
      * @return {EstimateCounts}
      */
-    async fetchEsts(quick = false) {
+    async fetchEsts(quick = false, includeErrs = false) {
         this._itemCreator.limits = quick
             ? ImportStateManager.QUICK_MODE_ITEM_LIMITS
             : {}
 
         if (this._cache.expired) {
-            // Perform calcs to update state
+            this._includeErrs = includeErrs
+            // Perform calcs to update counts state
             await this._calcCounts()
             await this._cache.persistEsts(this.counts)
 
-            // Expire cache immediately if quick mode (next read attempt will recalc)
-            if (quick) this._cache.expired = true
+            if (quick) {
+                this.dirtyEstsCache()
+            }
         }
 
         return this.counts

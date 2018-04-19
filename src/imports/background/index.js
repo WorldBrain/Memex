@@ -9,7 +9,9 @@ export const importStateStorageKey = 'import_items'
 export const installTimeStorageKey = 'extension_install_time'
 
 // Allow UI scripts to dirty estimates cache
-makeRemotelyCallable({ dirtyEstsCache: () => importStateManager.dirtyEsts() })
+makeRemotelyCallable({
+    dirtyEstsCache: () => importStateManager.dirtyEstsCache(),
+})
 
 // Allow content-script or UI to connect and communicate control of imports
 browser.runtime.onConnect.addListener(port => {

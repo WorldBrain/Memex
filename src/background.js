@@ -8,7 +8,7 @@ import {
     constants as blacklistConsts,
     blacklist,
 } from 'src/blacklist/background'
-import { index } from 'src/search'
+import * as index from 'src/search'
 import analytics from 'src/analytics'
 import createNotif from 'src/util/notifications'
 import {
@@ -19,7 +19,8 @@ import {
 import db from 'src/search/search-index-new'
 import * as models from 'src/search/search-index-new/models'
 
-window.index = db
+window.index = index
+window.storage = db
 window.indexModels = models
 
 export const OVERVIEW_URL = '/overview/overview.html'
@@ -35,8 +36,6 @@ export const NEW_FEATURE_NOTIF = {
     message: 'Click for more Information',
     url: 'https://worldbrain.helprace.com/i34-feature-tagging',
 }
-
-window.oldIndex = index
 
 async function openOverview() {
     const [currentTab] = await browser.tabs.query({ active: true })

@@ -19,18 +19,15 @@ export default async function extractPageContent(
     doc = document,
     url = location.href,
 ) {
-    const htmlTimerLabel = `TIMER - HTML proc: ${url}`
     // If it is a PDF, run code for pdf instead.
     if (url.endsWith('.pdf')) {
         return await extractPdfContent({ url })
     }
 
-    console.time(htmlTimerLabel)
     // Apply simple transformations to clean the page's HTML
     const { text: processedHtml } = transformPageHTML({
         html: doc.body.innerHTML,
     })
-    console.timeEnd(htmlTimerLabel)
 
     const metadata = getMetadata(doc, url, PAGE_METADATA_RULES)
 

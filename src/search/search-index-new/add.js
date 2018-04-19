@@ -1,7 +1,7 @@
 import db from '.'
 import normalizeUrl from 'src/util/encode-url-for-id'
-import { Page } from './models'
-import pipeline from './pipeline'
+import { Page, FavIcon } from './models'
+import pipeline, { transformUrl } from './pipeline'
 
 /**
  * @typedef {Object} VisitInteraction
@@ -27,32 +27,32 @@ import pipeline from './pipeline'
  * @return {Promise<void>}
  */
 export async function addPage({ visits = [], bookmark, ...pipelineReq }) {
-    const pageData = await pipeline(pipelineReq)
-    const timerLabel = `TIMER - add page: "${pageData.url}"`
+    const { favIconURI, ...pageData } = await pipeline(pipelineReq)
 
-    console.time(timerLabel)
     try {
         await db.transaction('rw', db.tables, async () => {
             const page = new Page(pageData)
-            // Load any current assoc. data for this page
+
+            if (favIconURI != null) {
+                await new FavIcon({ hostname: page.hostname, favIconURI })
+                    .save()
+                    .catch()
+            }
+
             await page.loadRels()
 
             // Create Visits for each specified time, or a single Visit for "now" if no assoc event
             visits = !visits.length && bookmark == null ? [Date.now()] : visits
             visits.forEach(time => page.addVisit(time))
 
-            // Create bookmark, if given
             if (bookmark != null) {
                 page.setBookmark(bookmark)
             }
 
-            // Persist current state
             await page.save()
         })
     } catch (error) {
         console.error(error)
-    } finally {
-        console.timeEnd(timerLabel)
     }
 }
 
@@ -62,10 +62,7 @@ export async function addPage({ visits = [], bookmark, ...pipelineReq }) {
  */
 export async function addPageTerms(pipelineReq) {
     const pageData = await pipeline(pipelineReq)
-    const timerLabel = `TIMER - add #${pageData.terms
-        .length} terms to page: "${pageData.url}"`
 
-    console.time(timerLabel)
     try {
         await db.transaction('rw', db.tables, async () => {
             const page = new Page(pageData)
@@ -74,8 +71,6 @@ export async function addPageTerms(pipelineReq) {
         })
     } catch (error) {
         console.error(error)
-    } finally {
-        console.timeEnd(timerLabel)
     }
 }
 
@@ -113,4 +108,10 @@ export async function addVisit(url, time = Date.now()) {
         matchingPage.addVisit(time)
         return await matchingPage.save()
     })
+}
+
+export async function addFavIcon(url, favIconURI) {
+    const { hostname } = transformUrl(url)
+
+    return new FavIcon({ hostname, favIconURI }).save()
 }

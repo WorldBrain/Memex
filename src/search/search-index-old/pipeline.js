@@ -42,15 +42,46 @@ export function transformUrl(url) {
 
     try {
         parsed = new URL(normalized)
+
+        return {
+            hostname: parsed.hostname,
+            pathname: parsed.pathname,
+            domain: extractRootDomain(parsed.hostname),
+        }
     } catch (error) {
         console.error(`cannot parse URL: ${url}`)
-        return { hostname: normalized, pathname: normalized }
+        return {
+            hostname: normalized,
+            pathname: normalized,
+            domain: normalized,
+        }
+    }
+}
+
+/**
+ * Derived from answer in: https://stackoverflow.com/a/23945027
+ *
+ * @param {string} hostname
+ * @return {string}
+ */
+function extractRootDomain(hostname) {
+    const splitArr = hostname.split('.')
+    const len = splitArr.length
+
+    // Extracting the root domain here if there is a subdomain
+    if (len > 2) {
+        hostname = `${splitArr[len - 2]}.${splitArr[len - 1]}`
+
+        // Check to see if it's using a ccTLD (i.e. ".me.uk")
+        if (
+            splitArr[len - 1].length === 2 &&
+            [2, 3].includes(splitArr[len - 2].length)
+        ) {
+            hostname = `${splitArr[len - 3]}.${hostname}`
+        }
     }
 
-    return {
-        hostname: parsed ? parsed.hostname : normalized,
-        pathname: parsed ? parsed.pathname : normalized,
-    }
+    return hostname
 }
 
 /**

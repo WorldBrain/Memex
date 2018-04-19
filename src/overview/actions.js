@@ -263,19 +263,6 @@ export const showTags = index => (dispatch, getState) => {
     }
 }
 
-export const filterTag = tag => (dispatch, getState) => {
-    const state = getState()
-    const query = selectors.query(state)
-
-    const transformedTag = `#${tag.split(' ').join('+')} `
-
-    const newQuery = query.includes(transformedTag.slice(0, -1))
-        ? query.replace(transformedTag, '') // Either remove it, if already there
-        : transformedTag + query // or prepend it, if not there
-
-    dispatch(setQueryTagsDomains(newQuery))
-}
-
 const stripTagPattern = tag =>
     tag
         .slice(1)

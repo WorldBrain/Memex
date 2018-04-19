@@ -40,10 +40,12 @@ export const allowTypesString = createSelector(allowTypes, state => {
     return val.join('+')
 })
 
-export const showDownloadDetails = createSelector(
-    imports,
-    state => state.showDownloadDetails,
-)
+// TODO: Mocked out for now due to UI performance issues with show details views
+export const showDownloadDetails = () => false
+// export const showDownloadDetails = createSelector(
+//     imports,
+//     state => state.showDownloadDetails,
+// )
 
 // Adv settings mode
 export const advMode = createSelector(imports, state => state.isAdvEnabled)

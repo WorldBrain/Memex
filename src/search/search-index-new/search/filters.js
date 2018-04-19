@@ -24,7 +24,7 @@ async function tagSearch({ tags }) {
 
 /**
  * Space: O(#matchingURLs}
- * Time: O(#domains * log n)
+ * Time: O(#domains * 2 log n)
  *
  * @param {SearchParams} params
  * @return {Promise<Set<string> | null>}
@@ -34,12 +34,17 @@ async function domainSearch({ domains }) {
         return null
     }
 
-    const urls = await db.pages
+    const hostnameUrls = await db.pages
+        .where('hostname')
+        .anyOf(domains)
+        .primaryKeys()
+
+    const domainUrls = await db.pages
         .where('domain')
         .anyOf(domains)
         .primaryKeys()
 
-    return new Set(urls)
+    return new Set([...domainUrls, ...hostnameUrls])
 }
 
 /**
