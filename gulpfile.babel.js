@@ -307,59 +307,53 @@ gulp.task(
 
 // Tasks for publishing the extension
 
-gulp.task(
-    'publish-extension:chrome',
-    /*['package'],*/ () => {
-        const extensionID = process.env.WEBSTORE_EXTENSION_ID
-        const webStore = ChromeStore({
-            extensionId: extensionID,
-            clientId: process.env.WEBSTORE_CLIENT_ID,
-            clientSecret: process.env.WEBSTORE_CLIENT_SECRET,
-            refreshToken: process.env.WEBSTORE_REFRESH_TOKEN,
-        })
-        const tokenP = webStore.fetchToken()
-        const uploadP = tokenP.then(token =>
-            webStore.uploadExisting(
-                fs.createReadStream('dist/extension.zip'),
-                token,
-            ),
-        )
+gulp.task('publish-extension:chrome', ['package'], () => {
+    const extensionID = process.env.WEBSTORE_EXTENSION_ID
+    const webStore = ChromeStore({
+        extensionId: extensionID,
+        clientId: process.env.WEBSTORE_CLIENT_ID,
+        clientSecret: process.env.WEBSTORE_CLIENT_SECRET,
+        refreshToken: process.env.WEBSTORE_REFRESH_TOKEN,
+    })
+    const tokenP = webStore.fetchToken()
+    const uploadP = tokenP.then(token =>
+        webStore.uploadExisting(
+            fs.createReadStream('dist/extension.zip'),
+            token,
+        ),
+    )
 
-        return Promise.all([tokenP, uploadP]).then(([token]) =>
-            webStore.publish('default', token),
-        )
-    },
-)
+    return Promise.all([tokenP, uploadP]).then(([token]) =>
+        webStore.publish('default', token),
+    )
+})
 
-gulp.task(
-    'publish-extension:firefox',
-    /*['package'],*/ () => {
-        return signAddon({
-            id: 'info@worldbrain.io',
-            xpiPath: 'dist/extension.zip',
-            version: JSON.parse(fs.readFileSync('package.json')).version,
-            apiKey: process.env.AMO_API_KEY,
-            apiSecret: process.env.AMO_API_SECRET,
-            channel: 'listed',
-            downloadDir: 'downloaded_amo',
+gulp.task('publish-extension:firefox', ['package'], () => {
+    return signAddon({
+        id: 'info@worldbrain.io',
+        xpiPath: 'dist/extension.zip',
+        version: JSON.parse(fs.readFileSync('package.json')).version,
+        apiKey: process.env.AMO_API_KEY,
+        apiSecret: process.env.AMO_API_SECRET,
+        channel: 'listed',
+        downloadDir: 'downloaded_amo',
+    })
+        .then(function(result) {
+            if (result.success) {
+                console.log('The following signed files were downloaded:')
+                console.log(result.downloadedFiles)
+                console.log('Your extension ID is:')
+                console.log(result.id)
+            } else {
+                console.error('Your add-on could not be signed!')
+                console.error('Check the console for details.')
+            }
+            console.log(result.success ? 'SUCCESS' : 'FAIL')
         })
-            .then(function(result) {
-                if (result.success) {
-                    console.log('The following signed files were downloaded:')
-                    console.log(result.downloadedFiles)
-                    console.log('Your extension ID is:')
-                    console.log(result.id)
-                } else {
-                    console.error('Your add-on could not be signed!')
-                    console.error('Check the console for details.')
-                }
-                console.log(result.success ? 'SUCCESS' : 'FAIL')
-            })
-            .catch(function(error) {
-                console.error('Signing error:', error)
-            })
-    },
-)
+        .catch(function(error) {
+            console.error('Signing error:', error)
+        })
+})
 
 gulp.task('publish-extension', [
     'publish-extension:chrome',
