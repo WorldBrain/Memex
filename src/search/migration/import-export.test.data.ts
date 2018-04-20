@@ -1,3 +1,14 @@
+import { ExportedPage } from './'
+
+export const TEST_VISIT_1 = Date.now()
+export const TEST_BOOKMARK_1 = Date.now() + 5000
+
+// Single yellow pixel made using http://png-pixel.com/
+export const TEST_SCREENSHOT =
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5/hPwAIAgL/4d1j8wAAAABJRU5ErkJggg=='
+export const TEST_FAVICON =
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5/hPwAIAgL/4d1j8wAAAABJRU5ErkJggg=='
+
 export const PAGE_DOC_1 = {
     content: {
         fullText:
@@ -17,11 +28,85 @@ export const PAGE_DOC_1 = {
     _id: 'page/Mi1zcHl3YXJlLmNvbS9yZW1vdmUtc2t5cGUtdmlydXMuaHRtbA%3D%3D',
 }
 
-export const TEST_VISIT_1 = Date.now()
-export const TEST_BOOKMARK_1 = Date.now() + 5000
+export const EXPORTED_PAGE_1: Partial<ExportedPage> = {
+    // Import indexed (searchable) data
+    url: '2-spyware.com/remove-skype-virus.html',
+    domain: '2-spyware.com',
+    hostname: '2-spyware.com',
+    terms: [
+        'result',
+        'affected',
+        'machine',
+        'slow',
+        'practically',
+        'unusable',
+        'bitcoin',
+        'mining',
+        'primary',
+        'goal',
+        'malware',
+        'popular',
+        'versions',
+        'skype',
+        'designed',
+        'steal',
+        'users',
+        'personal',
+        'information',
+        'sensitive',
+        'computer',
+        'data',
+        'distribute',
+        'malicious',
+        'content',
+        'sending',
+        'messages',
+        'telling',
+        'hey',
+        'check',
+        'video',
+        'nice',
+        'photo',
+        'link',
+        'instance',
+        'koobface',
+        'virus',
+        'spreading',
+        'featuring',
+        'links',
+        'shocking',
+        'hilarious',
+        'videos',
+        'username',
+        'attached',
+    ],
+    urlTerms: ['remove-skype-virus', 'html', 'remove', 'skype', 'virus'],
+    titleTerms: [
+        'remove',
+        'skype',
+        'virus',
+        'removal',
+        'guide',
+        'jan',
+        '2018',
+        'update',
+    ],
 
-// Single yellow pixel made using http://png-pixel.com/
-export const TEST_SCREENSHOT =
-    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5/hPwAIAgL/4d1j8wAAAABJRU5ErkJggg=='
-export const TEST_FAVICON =
-    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5/hPwAIAgL/4d1j8wAAAABJRU5ErkJggg=='
+    // Display data used for UI
+    text: PAGE_DOC_1.content.fullText,
+    fullUrl: PAGE_DOC_1.url,
+    fullTitle: PAGE_DOC_1.content.title,
+    screenshotURI: TEST_SCREENSHOT,
+
+    // Misc data not really used for anything; prev in Pouch
+    keywords: PAGE_DOC_1.content.keywords,
+    description: PAGE_DOC_1.content.description,
+    canonicalUrl: PAGE_DOC_1.content.canonicalUrl,
+    lang: PAGE_DOC_1.content.lang,
+
+    // Data used for other, non-page, data colletions
+    bookmark: TEST_BOOKMARK_1,
+    favIconURI: TEST_FAVICON,
+    visits: [{ timestamp: TEST_VISIT_1 }],
+    tags: ['virus', 'fix'],
+}

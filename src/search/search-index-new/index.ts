@@ -22,6 +22,8 @@ const index = new Proxy<Storage>({} as Storage, {
 export const init = (props?: Props) => (realIndex = new Storage(props))
 
 export * from './types'
+export * from './models'
+
 export { Storage }
 export default index
 

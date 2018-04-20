@@ -1,3 +1,9 @@
+export type VisitInput = number
+export type BookmarkInput = number
+export type PageID = string
+export type PageScore = number
+export type SearchResult = [PageID, PageScore]
+
 export interface SearchParams {
     domains: string[]
     tags: string[]
@@ -32,8 +38,8 @@ export interface VisitInteraction {
  */
 export interface PageAddRequest {
     pageDoc: PageDoc
-    visits: number[]
-    bookmark: number
+    visits: VisitInput[]
+    bookmark: BookmarkInput
 }
 
 export interface PageDoc {
@@ -45,8 +51,8 @@ export interface PageDoc {
 export interface PageContent {
     fullText: string
     title: string
+    lang?: string
+    canonicalUrl?: string
+    description?: string
+    keywords?: string[]
 }
-
-export type PageID = string
-export type PageScore = number
-export type SearchResult = [PageID, PageScore]

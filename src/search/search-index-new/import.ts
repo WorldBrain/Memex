@@ -4,10 +4,13 @@ import { ExportedPage } from '../migration'
 async function importPage(page: Partial<ExportedPage>) {
     await addPage({
         pageDoc: {
-            content: page.content,
-            url: page.url,
-            screenshotURI: page.screenshot,
-            favIconURI: page.favIcon,
+            content: {
+                fullText: page.text,
+                title: page.fullTitle,
+            },
+            url: page.fullUrl,
+            screenshotURI: page.screenshotURI,
+            favIconURI: page.favIconURI,
         },
         bookmark: page.bookmark,
         visits: page.visits.map(visit => visit.timestamp),

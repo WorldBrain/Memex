@@ -12,16 +12,21 @@ const latestProp = Symbol('latestEvent')
 const screenshot = Symbol('screenshotURI')
 
 export interface Props {
+    // Indexed/searchable data
     url: string
-    text: string
-    fullUrl: string
-    fullTitle: string
     terms: string[]
     urlTerms: string[]
     titleTerms: string[]
     domain: string
     hostname: string
-    screenshotURI: string
+
+    // Display data
+    text: string
+    fullUrl: string
+    fullTitle: string
+    screenshotURI?: string
+
+    // Misc. opt. data
     lang?: string
     canonicalUrl?: string
     description?: string

@@ -3,7 +3,7 @@ import whenAllSettled from 'when-all-settled'
 import exportOldPages, { ExportParams } from '../search-index-old/export'
 import importNewPage from '../search-index-new/import'
 
-class MigrationManager {
+export class MigrationManager {
     static DEF_PARAMS: ExportParams = {
         chunkSize: 10,
         startKey: 'page/',
@@ -58,5 +58,3 @@ class MigrationManager {
         this.isCancelled = true
     }
 }
-
-export default MigrationManager

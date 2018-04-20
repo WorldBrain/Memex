@@ -1,4 +1,4 @@
-import { VisitInteraction } from '../search-index-new'
+import { VisitInteraction, Page } from '../search-index-new'
 
 export type ExportedTag = string
 export type ExportedBookmark = number
@@ -8,20 +8,19 @@ export interface ExportedPageVisit extends Partial<VisitInteraction> {
     timestamp: number
 }
 
-export interface ExportedPageContent {
-    lang: string
-    title: string
-    fullText: string
-    keywords?: string[]
-    description?: string
+export interface ExportedPage extends Page {
+    bookmark: number
+    visits: ExportedPageVisit[]
+    tags: string[]
+    favIconURI?: string
 }
 
-export interface ExportedPage {
-    url: string
-    content: ExportedPageContent
-    visits: ExportedPageVisit[]
-    tags: ExportedTag[]
-    bookmark?: ExportedBookmark
-    screenshot?: ExportedDataURL
-    favIcon?: ExportedDataURL
+export interface OldIndexPage {
+    id: string
+    terms: Set<string>
+    titleTerms: Set<string>
+    urlTerms: Set<string>
+    visits: Set<string>
+    bookmarks: Set<string>
+    tags: Set<string>
 }

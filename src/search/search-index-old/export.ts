@@ -1,9 +1,12 @@
 import whenAllSettled from 'when-all-settled'
 
 import db from '../../pouchdb'
-import { ExportedPage, ExportedPageVisit } from '../migration'
+import { decode } from '../../util/encode-url-for-id'
+import { ExportedPage, ExportedPageVisit, OldIndexPage } from '../migration'
 import { removeKeyType, initLookupByKeys } from './util'
 import index from './index'
+import { PageDoc } from '../search-index-new'
+import { transformUrl } from '../search-index-new/pipeline'
 
 export interface ExportParams {
     chunkSize: number
@@ -25,7 +28,7 @@ async function* exportPages(
     }: Partial<ExportParams> = DEF_PARAMS,
 ) {
     let lastKey = startKey
-    let batch: Map<string, any>
+    let batch: Map<string, OldIndexPage>
 
     do {
         // Get batch for current key + limit, then update the key for next iteration
@@ -44,9 +47,9 @@ const fetchIndexPageBatch = (
     from: string,
     to: string,
     limit: number,
-): Promise<Map<string, any>> =>
+): Promise<Map<string, OldIndexPage>> =>
     new Promise((resolve, reject) => {
-        const data = new Map<string, any>()
+        const data = new Map<string, OldIndexPage>()
         ;(<any>index)
             .createReadStream({
                 gte: from,
@@ -65,8 +68,8 @@ interface VisitMeta extends ExportedPageVisit {
 }
 
 interface PageAttachments {
-    screenshot: string
-    favIcon: string
+    screenshotURI: string
+    favIconURI: string
 }
 
 const attachmentToDataUrl = ({ content_type, data }) =>
@@ -77,24 +80,34 @@ function extractAttachments(pouchDoc): Partial<PageAttachments> {
         return {}
     }
 
-    let favIcon, screenshot
+    let favIconURI, screenshotURI
     if (pouchDoc._attachments.screenshot) {
-        screenshot = attachmentToDataUrl(pouchDoc._attachments.screenshot)
+        screenshotURI = attachmentToDataUrl(pouchDoc._attachments.screenshot)
     }
     if (pouchDoc._attachments.favIcon) {
-        favIcon = attachmentToDataUrl(pouchDoc._attachments.favIcon)
+        favIconURI = attachmentToDataUrl(pouchDoc._attachments.favIcon)
     }
 
-    return { screenshot, favIcon }
+    return { screenshotURI, favIconURI }
 }
 
 async function fetchPouchData(pageKey: string): Promise<Partial<ExportedPage>> {
-    const pouchDoc = await db.get(pageKey, { attachments: true })
+    const pouchDoc: PageDoc = await db.get(pageKey, { attachments: true })
+    const content = pouchDoc.content || {}
     const attachments = extractAttachments(pouchDoc)
 
+    const { hostname, domain } = transformUrl(pouchDoc.url)
+
     return {
-        url: pouchDoc.url,
-        content: { ...(pouchDoc.content || {}) },
+        fullUrl: pouchDoc.url,
+        fullTitle: content.title || pouchDoc.title,
+        text: content.fullText,
+        lang: content.lang,
+        canonicalUrl: content.canonicalUrl,
+        description: content.description,
+        keywords: content.keywords,
+        hostname,
+        domain,
         ...attachments,
     }
 }
@@ -114,23 +127,30 @@ async function fetchVisitsData(visits: string[]): Promise<ExportedPageVisit[]> {
 }
 
 async function processKey(
-    [pageKey, indexDoc]: [string, any],
+    [pageKey, indexDoc]: [string, OldIndexPage],
 ): Promise<Partial<ExportedPage>> {
+    // Decode the URL inside the old ID to get the new index ID
+    const url = decode(removeKeyType(indexDoc.id))
+
     const displayData = await fetchPouchData(pageKey).catch(
         err => console.error(err) || {},
     )
 
     const visits = await fetchVisitsData([...indexDoc.visits]).catch(
-        err => console.error(err) || [],
+        err => console.error(err) || ([] as ExportedPageVisit[]),
     )
 
     return {
-        ...displayData,
+        url,
+        terms: [...indexDoc.terms].map(removeKeyType),
+        titleTerms: [...indexDoc.titleTerms].map(removeKeyType),
+        urlTerms: [...indexDoc.urlTerms].map(removeKeyType),
         visits,
         bookmark: indexDoc.bookmarks.size
             ? formatMetaKey([...indexDoc.bookmarks][0])
             : undefined,
         tags: [...indexDoc.tags].map(removeKeyType),
+        ...displayData,
     }
 }
 
