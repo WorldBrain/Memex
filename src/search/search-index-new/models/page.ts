@@ -11,48 +11,65 @@ const bookmarkProp = Symbol('assocBookmark')
 const latestProp = Symbol('latestEvent')
 const screenshot = Symbol('screenshotURI')
 
-export default class Page extends AbstractModel {
-    /**
-     * @param {Object} args
-     * @param {string} args.url
-     * @param {string} args.text
-     * @param {string[]} args.terms
-     * @param {Visit} [args.visits=[]] Opt. Visits to assoc. with.
-     * @param {Bookmark} [args.bookmark] Opt. Bookmark to assoc. with.
-     */
-    constructor({
-        url,
-        text,
-        fullUrl,
-        fullTitle,
-        terms,
-        urlTerms,
-        titleTerms,
-        domain,
-        hostname,
-        bookmark,
-        visits = [],
-        screenshotURI,
-    }) {
+export interface Props {
+    url: string
+    text: string
+    fullUrl: string
+    fullTitle: string
+    terms: string[]
+    urlTerms: string[]
+    titleTerms: string[]
+    domain: string
+    hostname: string
+    screenshotURI: string
+    lang?: string
+    canonicalUrl?: string
+    description?: string
+    keywords?: string[]
+}
+
+type TermsIndexName = 'terms' | 'urlTerms' | 'titleTerms'
+
+export default class Page extends AbstractModel implements Props {
+    public url: string
+    public text: string
+    public fullUrl: string
+    public fullTitle: string
+    public terms: string[]
+    public urlTerms: string[]
+    public titleTerms: string[]
+    public domain: string
+    public hostname: string
+    public screenshot: Blob
+    public lang?: string
+    public canonicalUrl?: string
+    public description?: string
+    public keywords?: string[]
+
+    constructor(props: Props) {
         super()
-        this.url = url
-        this.fullUrl = fullUrl
-        this.fullTitle = fullTitle
-        this.text = text
-        this.terms = terms
-        this.urlTerms = urlTerms
-        this.titleTerms = titleTerms
-        this.domain = domain
-        this.hostname = hostname
-        this.screenshotURI = screenshotURI
+        this.url = props.url
+        this.fullUrl = props.fullUrl
+        this.fullTitle = props.fullTitle
+        this.text = props.text
+        this.terms = props.terms
+        this.urlTerms = props.urlTerms
+        this.titleTerms = props.titleTerms
+        this.domain = props.domain
+        this.hostname = props.hostname
+        this.screenshotURI = props.screenshotURI
+        this.lang = props.lang
+        this.canonicalUrl = props.canonicalUrl
+        this.description = props.description
+        this.keywords = props.keywords
 
         Object.defineProperties(this, {
             [visitsProp]: {
-                value: visits,
+                value: [],
                 ...AbstractModel.DEF_NON_ENUM_PROP,
             },
             [bookmarkProp]: {
-                value: bookmark,
+                value: undefined,
                 ...AbstractModel.DEF_NON_ENUM_PROP,
             },
             [tagsProp]: {
@@ -82,14 +99,12 @@ export default class Page extends AbstractModel {
 
     /**
      * Pages should be deleted if no events associated with them any more.
-     *
-     * @return {boolean}
      */
     get shouldDelete() {
-        return !this.hasBookmark && !this[visitsProp].length
+        return !this.hasBookmark && this[visitsProp].length === 0
     }
 
-    set screenshotURI(input) {
+    set screenshotURI(input: string) {
         if (input) {
             this.screenshot = AbstractModel.dataURLToBlob(input)
             this[screenshot] = AbstractModel.getBlobURL(this.screenshot)
@@ -99,40 +114,43 @@ export default class Page extends AbstractModel {
     /**
      * @param {number} [upperBound]
      * @return {number} Latest event timestamp below `upperBound`.
-    */
-    getLatest(upperBound = Date.now()) {
+     */
+    public getLatest(upperBound = Date.now()) {
         let max = 0
-        for (const visit of this[visitsProp]) {
+        let visit: Visit
+
+        for (visit of this[visitsProp]) {
             if (visit.time > max && visit.time <= upperBound) {
                 max = visit.time
             }
         }
 
-        const bm = this[bookmarkProp]
+        const bm: Bookmark = this[bookmarkProp]
         if (bm != null && bm.time > max && bm.time <= upperBound) {
-            max = this[bookmarkProp].time
+            max = bm.time
         }
 
         return max
     }
 
-    /**
-     * @param {number} [time=Date.now()]
-     */
     addVisit(time = Date.now()) {
         this[visitsProp].push(new Visit({ url: this.url, time }))
     }
 
-    addTag(name) {
-        const index = this[tagsProp].findIndex(tag => tag.name === name)
+    addTag(name: string) {
+        const index = (this[tagsProp] as Tag[]).findIndex(
+            tag => tag.name === name,
+        )
 
         if (index === -1) {
             this[tagsProp].push(new Tag({ url: this.url, name }))
         }
     }
 
-    delTag(name) {
-        const index = this[tagsProp].findIndex(tag => tag.name === name)
+    delTag(name: string) {
+        const index = (this[tagsProp] as Tag[]).findIndex(
+            tag => tag.name === name,
+        )
 
         if (index !== -1) {
             this[tagsProp] = [
@@ -153,10 +171,10 @@ export default class Page extends AbstractModel {
     /**
      * Merges some terms with the current terms state.
      *
-     * @param {('terms'|'urlTerms'|'titleTerms')} termProp The name of which terms state to update.
-     * @param {string[]} [terms=[]] Array of terms to merge with current state.
+     * @param {TermsIndexName} termProp The name of which terms state to update.
+     * @param {string[]} terms Array of terms to merge with current state.
      */
-    _mergeTerms(termProp, terms = []) {
+    _mergeTerms(termProp: TermsIndexName, terms: string[]) {
         this[termProp] = [...new Set([...this[termProp], ...terms])]
     }
 
