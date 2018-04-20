@@ -1,5 +1,5 @@
 import transformPageText from 'src/util/transform-page-text'
-import { DEFAULT_TERM_SEPARATOR } from './search-index'
+import { DEFAULT_TERM_SEPARATOR } from './util'
 
 /**
  * @typedef IndexQuery

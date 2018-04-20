@@ -12,14 +12,14 @@ const iconClasses = classNames({
 
 const BlacklistRow = ({ expression, onDeleteClicked }) => (
     <tr>
-        <td colSpan={3}>
-            <span>{expression}</span>
+        <td className={styles.row} colSpan={3}>
+            <div className={styles.expression}>{expression}</div>
 
-            <span className={styles.blacklistActions}>
+            <div className={styles.actions}>
                 <button className={blacklistButton} onClick={onDeleteClicked}>
                     <i className={iconClasses}>remove_circle_outline</i>
                 </button>
-            </span>
+            </div>
         </td>
     </tr>
 )

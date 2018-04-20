@@ -15,14 +15,13 @@ const Warning = ({ children }) => (
 const Import = ({
     isLoading,
     loadingMsg,
-    isIdle,
-    isRunning,
     isStopped,
-    isPaused,
+    shouldRenderEsts,
+    shouldRenderProgress,
     children,
 }) => (
     <form>
-        {(isIdle || isLoading) && (
+        {shouldRenderEsts && (
             <div>
                 <div className={localStyles.stepNumber}>
                     Step 1/3: Analysing Browser History and Bookmarks{' '}
@@ -44,7 +43,7 @@ const Import = ({
                 </div>
             </div>
         )}
-        {(isRunning || isPaused) && (
+        {shouldRenderProgress && (
             <div>
                 <div className={localStyles.stepNumber}>
                     Step 2/3: Download Progress{' '}
@@ -73,7 +72,7 @@ const Import = ({
                 </div>
             )}
         </div>
-        {(isIdle || isLoading) && <AdvSettings />}
+        {shouldRenderEsts && <AdvSettings />}
     </form>
 )
 
@@ -88,10 +87,9 @@ Import.propTypes = {
     children: PropTypes.arrayOf(PropTypes.node).isRequired,
     isLoading: PropTypes.bool.isRequired,
     loadingMsg: PropTypes.string,
-    isRunning: PropTypes.bool.isRequired,
-    isIdle: PropTypes.bool.isRequired,
     isStopped: PropTypes.bool.isRequired,
-    isPaused: PropTypes.bool.isRequired,
+    shouldRenderEsts: PropTypes.bool.isRequired,
+    shouldRenderProgress: PropTypes.bool.isRequired,
 }
 
 export default Import

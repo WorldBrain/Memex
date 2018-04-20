@@ -13,6 +13,7 @@ const searchUpdateActions = [
     filterActs.toggleBookmarkFilter.getType(),
     filterActs.addTagFilter.getType(),
     filterActs.delTagFilter.getType(),
+    filterActs.toggleTagFilter.getType(),
     filterActs.addDomainFilter.getType(),
     filterActs.delDomainFilter.getType(),
     filterActs.resetFilters.getType(),

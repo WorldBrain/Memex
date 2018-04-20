@@ -136,9 +136,9 @@ export const totalResultCount = createSelector(
 )
 
 export const shouldShowCount = createSelector(
-    currentQueryParams,
-    ({ query, startDate, endDate }) =>
-        query.length > 0 || startDate != null || endDate != null,
+    totalResultCount,
+    isLoading,
+    (count, isLoading) => count != null && !isLoading,
 )
 
 export const needsPagWaypoint = createSelector(

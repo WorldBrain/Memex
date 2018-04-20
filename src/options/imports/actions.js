@@ -2,7 +2,7 @@ import { createAction } from 'redux-act'
 
 import analytics from 'src/analytics'
 import db from 'src/pouchdb'
-import { CMDS, IMPORT_CONN_NAME, OLD_EXT_KEYS } from './constants'
+import { CMDS, IMPORT_CONN_NAME } from './constants'
 import * as selectors from './selectors'
 
 export const filterDownloadDetails = createAction(
@@ -30,8 +30,6 @@ export const readyImport = createAction('imports/readyImport')
 export const cancelImport = createAction('imports/cancelImport')
 export const pauseImport = createAction('imports/pauseImport')
 export const resumeImport = createAction('imports/resumeImport')
-
-export const setShowOldExt = createAction('imports/setShowOldExt')
 
 // Adv settings mode actions
 export const toggleAdvMode = createAction('imports-adv/toggleAdvMode')
@@ -117,21 +115,11 @@ const getCmdMessageHandler = dispatch => ({ cmd, ...payload }) => {
 let port
 
 /**
- * Handles initing the imports runtime connection with the background script's batch import logic,
- * as well as checking local storage to see if old extension imports needs to be shown.
+ * Handles initing the imports runtime connection with the background script's batch import logic.
  */
 export const init = () => async dispatch => {
     port = browser.runtime.connect({ name: IMPORT_CONN_NAME })
     port.onMessage.addListener(getCmdMessageHandler(dispatch))
-
-    const { [OLD_EXT_KEYS.INDEX]: index } = await browser.storage.local.get(
-        OLD_EXT_KEYS.INDEX,
-    )
-
-    // If old ext data exists, set the view state to show
-    if (index && index.index instanceof Array && index.index.length) {
-        dispatch(setShowOldExt(true))
-    }
 }
 
 /**
@@ -142,18 +130,33 @@ export const init = () => async dispatch => {
  * @param {() => void} [cb] Opt. callback to run before any dispatch.
  */
 const makePortMessagingThunk = ({
-    action,
+    actionCreator,
     cmd,
     cb = f => f,
-}) => () => dispatch => {
+}) => payload => dispatch => {
     cb()
-    dispatch(action)
-    port.postMessage({ cmd })
+    dispatch(actionCreator(payload))
+    port.postMessage({ cmd, payload })
 }
+
+export const recalcEsts = makePortMessagingThunk({
+    actionCreator: prepareImport,
+    cmd: CMDS.RECALC,
+})
+
+export const setPrevFailed = makePortMessagingThunk({
+    actionCreator: setProcessErrs,
+    cmd: CMDS.SET_PROCESS_ERRS,
+})
+
+export const setConcurrencyLevel = makePortMessagingThunk({
+    actionCreator: setConcurrency,
+    cmd: CMDS.SET_CONCURRENCY,
+})
 
 // Batch controlling thunks
 export const stop = makePortMessagingThunk({
-    action: cancelImport(),
+    actionCreator: cancelImport,
     cmd: CMDS.CANCEL,
     cb: () =>
         analytics.trackEvent({
@@ -163,7 +166,7 @@ export const stop = makePortMessagingThunk({
 })
 
 export const pause = makePortMessagingThunk({
-    action: pauseImport(),
+    actionCreator: pauseImport,
     cmd: CMDS.PAUSE,
     cb: () =>
         analytics.trackEvent({
@@ -173,7 +176,7 @@ export const pause = makePortMessagingThunk({
 })
 
 export const resume = makePortMessagingThunk({
-    action: resumeImport(),
+    actionCreator: resumeImport,
     cmd: CMDS.RESUME,
     cb: () =>
         analytics.trackEvent({
@@ -183,7 +186,7 @@ export const resume = makePortMessagingThunk({
 })
 
 export const finish = makePortMessagingThunk({
-    action: finishImport(),
+    actionCreator: finishImport,
     cmd: CMDS.FINISH,
     cb: () =>
         analytics.trackEvent({
@@ -207,14 +210,4 @@ export const start = () => (dispatch, getState) => {
         cmd: CMDS.START,
         payload: selectors.allowTypes(state),
     })
-}
-
-export const setConcurrencyLevel = concurrency => dispatch => {
-    dispatch(setConcurrency(concurrency))
-    port.postMessage({ cmd: CMDS.SET_CONCURRENCY, payload: concurrency })
-}
-
-export const setPrevFailed = value => dispatch => {
-    dispatch(setProcessErrs(value))
-    port.postMessage({ cmd: CMDS.SET_PROCESS_ERRS, payload: value })
 }

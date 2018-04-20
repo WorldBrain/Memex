@@ -24,7 +24,7 @@ export default async function extractPageContent(
         return await extractPdfContent({ url })
     }
 
-    // // Apply simple transformations to clean the page's HTML
+    // Apply simple transformations to clean the page's HTML
     const { text: processedHtml } = transformPageHTML({
         html: doc.body.innerHTML,
     })

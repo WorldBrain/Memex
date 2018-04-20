@@ -15,14 +15,16 @@ const StatusReport = ({
             <p>{`Succeeded (${successCount})`}</p>
             <p>{`Failed (${failCount})`}</p>
             <p>{`Total (${successCount + failCount})`}</p>
-            <p>
-                <a
-                    className={localStyles.showDetails}
-                    onClick={changeShowDetails}
-                >
-                    {children}
-                </a>
-            </p>
+            {children && (
+                <p>
+                    <a
+                        className={localStyles.showDetails}
+                        onClick={changeShowDetails}
+                    >
+                        {children}
+                    </a>
+                </p>
+            )}
         </div>
     </div>
 )
@@ -31,7 +33,7 @@ StatusReport.propTypes = {
     successCount: PropTypes.number.isRequired,
     failCount: PropTypes.number.isRequired,
     changeShowDetails: PropTypes.func.isRequired,
-    children: PropTypes.string.isRequired,
+    children: PropTypes.string,
 }
 
 export default StatusReport

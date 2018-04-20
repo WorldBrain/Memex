@@ -6,7 +6,7 @@
     /* Base size of the children elements */
     margin-bottom: 30px;
     position: relative;
-    animation: fadeIn 0.5s ease-in;
+    animation: fadeIn 1s ease-in;
     margin-top: -20px;
 }
 
@@ -64,26 +64,72 @@
     display: inline-block;
     margin-bottom: 3px;
     font-size: 1.1em;
-    font-weight: 100;
+    font-weight: 400;
     width: 71%;
 }
 
-.above {
+.google_above {
     & .settingsButton {
         right: -10px;
     }
 
     & .resultsText {
         padding-left: 16px;
+        width: 76%;
     }
 }
 
-.side {
+.google_side {
     width: 454px;
 
     & .settingsButton {
         right: -5px;
         top: 14px;
+    }
+}
+
+.duckduckgo_above {
+    margin-top: 7px;
+    margin-bottom: 15px;
+
+    & .linksContainer {
+        margin-top: 4px;
+        margin-bottom: 8px;
+    }
+
+    & .resultsText {
+        width: 76%;
+    }
+
+    & .settingsButton {
+        top: 6px;
+    }
+
+    & .dropdown {
+        right: 5px;
+    }
+}
+
+.duckduckgo_side {
+    margin-top: 7px;
+    margin-bottom: 15px;
+
+    & .resultsText {
+        font-size: 1.05em;
+    }
+
+    & .links {
+        font-size: 0.85em;
+    }
+
+    & .settingsButton {
+        right: -4px;
+        top: 9px;
+    }
+
+    & .dropdown {
+        top: 30px;
+        right: 5px;
     }
 }
 

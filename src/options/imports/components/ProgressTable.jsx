@@ -50,12 +50,6 @@ const ProgressTable = ({ progress, allowTypes }) => (
             {allowTypes[TYPE.BOOKMARK] && (
                 <ProgressRow label="Bookmarks" {...progress[TYPE.BOOKMARK]} />
             )}
-            {allowTypes[TYPE.OLD] && (
-                <ProgressRow
-                    label="Old Extension Data"
-                    {...progress[TYPE.OLD]}
-                />
-            )}
         </tbody>
     </table>
 )

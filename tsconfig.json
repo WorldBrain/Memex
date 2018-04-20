@@ -1,0 +1,23 @@
+{
+    "compilerOptions": {
+        "allowJs": true,
+        "target": "ESNext",
+        "module": "ES2015",
+        "moduleResolution": "node",
+        "jsx": "react",
+        "noImplicitAny": false,
+        "sourceMap": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "skipDefaultLibCheck": true,
+        "skipLibCheck": true,
+        "strictNullChecks": false,
+        "outDir": "tmp",
+        "lib": ["es2017", "dom"],
+        "paths": {
+            "abstract-leveldown": ["node_modules/abstract-leveldown"]
+        }
+    },
+    "include": ["./src/**/*"],
+    "exclude": ["node_modules", "./src/**/*.js"]
+}

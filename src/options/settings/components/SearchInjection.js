@@ -1,23 +1,15 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import Checkbox from './Checkbox'
 import styles from './SearchInjection.css'
 
-const SearchInjection = ({ isInjectionEnabled, toggleInjection }) => {
+const SearchInjection = ({ children }) => {
     return (
         <div>
             <p className={styles.settingsHeader}>
                 Show Memex Results in Search Engines
             </p>
-            <Checkbox
-                name="google"
-                id="google-checkbox"
-                isChecked={isInjectionEnabled}
-                handleChange={toggleInjection}
-            >
-                Google
-            </Checkbox>
+            {children}
             <p>
                 Want others?{' '}
                 <a
@@ -32,8 +24,7 @@ const SearchInjection = ({ isInjectionEnabled, toggleInjection }) => {
 }
 
 SearchInjection.propTypes = {
-    isInjectionEnabled: PropTypes.bool.isRequired,
-    toggleInjection: PropTypes.func.isRequired,
+    children: PropTypes.arrayOf(PropTypes.element).isRequired,
 }
 
 export default SearchInjection

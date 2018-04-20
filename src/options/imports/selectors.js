@@ -24,7 +24,6 @@ export const totals = createSelector(imports, state => state.totals)
 const completed = createSelector(imports, state => state.completed)
 export const allowTypes = createSelector(imports, state => state.allowTypes)
 export const loadingMsg = createSelector(imports, state => state.loadingMsg)
-export const showOldExt = createSelector(imports, state => state.showOldExt)
 
 /**
  * Currently only used for analytics; derive the import type from `allowTypes` state
@@ -41,10 +40,12 @@ export const allowTypesString = createSelector(allowTypes, state => {
     return val.join('+')
 })
 
-export const showDownloadDetails = createSelector(
-    imports,
-    state => state.showDownloadDetails,
-)
+// TODO: Mocked out for now due to UI performance issues with show details views
+export const showDownloadDetails = () => false
+// export const showDownloadDetails = createSelector(
+//     imports,
+//     state => state.showDownloadDetails,
+// )
 
 // Adv settings mode
 export const advMode = createSelector(imports, state => state.isAdvEnabled)
@@ -67,6 +68,16 @@ export const isIdle = getImportStatusFlag(STATUS.IDLE)
 export const isRunning = getImportStatusFlag(STATUS.RUNNING)
 export const isPaused = getImportStatusFlag(STATUS.PAUSED)
 export const isStopped = getImportStatusFlag(STATUS.STOPPED)
+export const shouldRenderEsts = createSelector(
+    isIdle,
+    isLoading,
+    (idle, loading) => idle || loading,
+)
+export const shouldRenderProgress = createSelector(
+    isRunning,
+    isPaused,
+    (running, paused) => running || paused,
+)
 
 /**
  * Derives ready-to-use download details data (rendered into rows).
@@ -76,25 +87,26 @@ export const isStopped = getImportStatusFlag(STATUS.STOPPED)
 export const downloadDetailsData = createSelector(
     downloadData,
     downloadDataFilter,
-    (downloadData, filter) =>
-        downloadData
-            .filter(({ status }) => {
+    (downloadData, filter) => {
+        if (filter !== FILTERS.ALL) {
+            downloadData = downloadData.filter(({ status }) => {
                 switch (filter) {
                     case FILTERS.SUCC:
                         return status !== DL_STAT.FAIL
                     case FILTERS.FAIL:
                         return status === DL_STAT.FAIL
-                    case FILTERS.ALL:
                     default:
                         return true
                 }
             })
-            .reverse()
-            .map(({ url, status, error }) => ({
-                url,
-                downloaded: status,
-                error,
-            })),
+        }
+
+        return downloadData.map(({ url, status, error }) => ({
+            url,
+            downloaded: status,
+            error,
+        }))
+    },
 )
 
 const getProgress = (success, fail, total, allow) => ({
@@ -115,7 +127,6 @@ export const progress = createSelector(
     (...args) => ({
         [TYPE.HISTORY]: getProgress(...args.map(arg => arg[TYPE.HISTORY])),
         [TYPE.BOOKMARK]: getProgress(...args.map(arg => arg[TYPE.BOOKMARK])),
-        [TYPE.OLD]: getProgress(...args.map(arg => arg[TYPE.OLD])),
     }),
 )
 
@@ -124,8 +135,7 @@ export const successCount = createSelector(
     allowTypes,
     (progress, allowTypes) =>
         (allowTypes.h ? progress[TYPE.HISTORY].success : 0) +
-        (allowTypes.b ? progress[TYPE.BOOKMARK].success : 0) +
-        (allowTypes.o ? progress[TYPE.OLD].success : 0),
+        (allowTypes.b ? progress[TYPE.BOOKMARK].success : 0),
 )
 
 export const failCount = createSelector(
@@ -133,8 +143,7 @@ export const failCount = createSelector(
     allowTypes,
     (progress, allowTypes) =>
         (allowTypes.h ? progress[TYPE.HISTORY].fail : 0) +
-        (allowTypes.b ? progress[TYPE.BOOKMARK].fail : 0) +
-        (allowTypes.o ? progress[TYPE.OLD].fail : 0),
+        (allowTypes.b ? progress[TYPE.BOOKMARK].fail : 0),
 )
 
 export const progressPercent = createSelector(
@@ -142,13 +151,11 @@ export const progressPercent = createSelector(
     allowTypes,
     (progress, allowTypes) => {
         const total =
-            (allowTypes.h ? progress[TYPE.HISTORY].total : 0) +
-            (allowTypes.b ? progress[TYPE.BOOKMARK].total : 0) +
-            (allowTypes.o ? progress[TYPE.OLD].total : 0)
+            (allowTypes[TYPE.HISTORY] ? progress[TYPE.HISTORY].total : 0) +
+            (allowTypes[TYPE.BOOKMARK] ? progress[TYPE.BOOKMARK].total : 0)
         const complete =
-            (allowTypes.h ? progress[TYPE.HISTORY].complete : 0) +
-            (allowTypes.b ? progress[TYPE.BOOKMARK].complete : 0) +
-            (allowTypes.o ? progress[TYPE.OLD].complete : 0)
+            (allowTypes[TYPE.HISTORY] ? progress[TYPE.HISTORY].complete : 0) +
+            (allowTypes[TYPE.BOOKMARK] ? progress[TYPE.BOOKMARK].complete : 0)
 
         return complete / total * 100
     },
@@ -183,7 +190,6 @@ export const estimates = createSelector(
             completed[TYPE.BOOKMARK],
             totals[TYPE.BOOKMARK],
         ),
-        [TYPE.OLD]: getEstimate(completed[TYPE.OLD], totals[TYPE.OLD]),
     }),
 )
 
@@ -191,16 +197,16 @@ export const isStartBtnDisabled = createSelector(
     allowTypes,
     estimates,
     (allowTypes, estimates) => {
-        const pickByAllowedTypes = pickBy((val, key) => val)
-        const allCheckboxesDisabled = () =>
-            !Object.values(allowTypes).reduce((prev, curr) => prev || curr)
+        const pickByAllowedTypes = pickBy((isAllowed, type) => isAllowed)
 
         // Map-reduce the remaining (allowed) estimates to disable button when remaining is 0
-        const noImportsRemaining = () =>
-            Object.keys(pickByAllowedTypes(allowTypes))
-                .map(importType => estimates[importType].remaining === 0)
-                .reduce((prev, curr) => prev && curr)
+        const noImportsRemaining = Object.keys(pickByAllowedTypes(allowTypes))
+            .map(importType => estimates[importType].remaining === 0)
+            .reduce((prev, curr) => prev && curr, true)
 
-        return allCheckboxesDisabled() || noImportsRemaining()
+        const allCheckboxesDisabled =
+            !allowTypes[TYPE.HISTORY] && !allowTypes[TYPE.BOOKMARK]
+
+        return allCheckboxesDisabled || noImportsRemaining
     },
 )

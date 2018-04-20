@@ -1,30 +1,18 @@
 import PausableTimer from 'src/util/pausable-timer'
 import ScrollState from './scroll-state'
 
-/**
- * Tab state contains user interaction data for the current ongoing visit in this tab. It can also
- * handle scheduling a future logging event. TODO: do we need to pass this down here?
- *
- * @class Tab
- * @property {number} activeTime Non-neg int representing accumulated active time in ms.
- * @property {boolean} isActive Flag that denotes activity.
- * @property {number} lastActivated Epoch timestamp representing last time being activated.
- * @property {string} visitTime Epoch timestamp representing the time of the visit event associated with this tab.
- * @property {ScrollState} scrollState Each tab will have their scroll state tracked.
- * @property {any} navState Each tab will have their last `webNavigation` nav event's data tracked
- *  (see: https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/webNavigation).
- */
 class Tab {
-    static DEF_LOG_DELAY = 10000
+    static DEF_LOG_DELAY = 4000
 
     /**
      * @param {any} args
      * @param {number} [logDelay] The # of ms a user must be active on this tab before calling scheduled log.
      */
     constructor(
-        { isActive = false, visitTime = `${Date.now()}`, navState = {} },
+        { url, isActive = false, visitTime = `${Date.now()}`, navState = {} },
         logDelay = Tab.DEF_LOG_DELAY,
     ) {
+        this.url = url
         this.isActive = isActive
         this.visitTime = visitTime
         this.navState = navState

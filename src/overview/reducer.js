@@ -10,7 +10,7 @@ const defaultState = {
     searchResult: {
         docs: [], // The current search result list
         resultsExhausted: false,
-        totalCount: 0,
+        totalCount: null,
     },
     // The current search input values
     currentQueryParams: {
@@ -51,9 +51,9 @@ function setEndDate(state, date) {
     }
 }
 
-function hideResultItem(state, pageId) {
+function hideResultItem(state, url) {
     return update('searchResult.docs', docs =>
-        remove(doc => doc._id === pageId)(docs),
+        remove(doc => doc.url === url)(docs),
     )(state)
 }
 

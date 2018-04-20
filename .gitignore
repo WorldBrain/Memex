@@ -7,3 +7,4 @@ jest_0/
 *.swp
 yarn-error.log
 publish.sh
+coverage/

@@ -4,9 +4,9 @@ import classNames from 'classnames'
 
 import styles from './Button.css'
 
-const Button = ({ children, btnClass, ...btnProps }) => (
+const Button = ({ children, btnClass, itemClass, ...btnProps }) => (
     <button
-        className={classNames(styles.item, styles.itemBtn, btnClass)}
+        className={classNames(styles.item, styles.itemBtn, itemClass)}
         {...btnProps}
     >
         <div className={classNames(styles.customIcon, btnClass)} />
@@ -17,6 +17,7 @@ const Button = ({ children, btnClass, ...btnProps }) => (
 Button.propTypes = {
     children: PropTypes.string.isRequired,
     btnClass: PropTypes.string,
+    itemClass: PropTypes.string,
 }
 
 export default Button

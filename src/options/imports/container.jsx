@@ -16,7 +16,7 @@ import DownloadDetails from './components/DownloadDetails'
 import DownloadDetailsRow from './components/DownloadDetailsRow'
 import StatusReport from './components/StatusReport'
 import AdvSettingCheckbox from './components/AdvSettingsCheckbox'
-import ShowDownloadDetails from './components/ShowDownloadDetails'
+// import ShowDownloadDetails from './components/ShowDownloadDetails'
 
 class ImportContainer extends Component {
     static propTypes = {
@@ -24,13 +24,14 @@ class ImportContainer extends Component {
         isRunning: PropTypes.bool.isRequired,
         isPaused: PropTypes.bool.isRequired,
         isStopped: PropTypes.bool.isRequired,
-        isLoading: PropTypes.bool.isRequired,
-        isIdle: PropTypes.bool.isRequired,
+        shouldRenderEsts: PropTypes.bool.isRequired,
+        shouldRenderProgress: PropTypes.bool.isRequired,
         isStartBtnDisabled: PropTypes.bool.isRequired,
         downloadData: PropTypes.arrayOf(PropTypes.object).isRequired,
         progressPercent: PropTypes.number.isRequired,
         showDownloadDetails: PropTypes.bool.isRequired,
         downloadDataFilter: PropTypes.string.isRequired,
+        recalcEsts: PropTypes.func.isRequired,
 
         // Misc
         boundActions: PropTypes.object.isRequired,
@@ -94,8 +95,7 @@ class ImportContainer extends Component {
     renderCancelButton = () => (
         <ActionButton
             handleClick={this.handleCancelBtnClick}
-            isHidden={this.props.isIdle}
-            isDisabled={this.props.isStopped}
+            isHidden={!this.props.shouldRenderProgress}
             customClass={'cancel'}
         >
             Cancel
@@ -170,9 +170,6 @@ class ImportContainer extends Component {
             onAllowHistoryClick={this.handleEstTableCheck(
                 constants.IMPORT_TYPE.HISTORY,
             )}
-            onAllowOldExtClick={this.handleEstTableCheck(
-                constants.IMPORT_TYPE.OLD,
-            )}
         />
     )
 
@@ -218,10 +215,10 @@ class ImportContainer extends Component {
         <Wrapper>
             <ProgressBar progress={this.props.progressPercent} />
             <ProgressTable {...this.props} />
-            <ShowDownloadDetails
+            {/* <ShowDownloadDetails
                 changeShowDetails={this.props.boundActions.showDownloadDetails}
                 showDownloadDetails={this.props.showDownloadDetails}
-            />
+            /> */}
             {this.props.showDownloadDetails && (
                 <DownloadDetails
                     filterHandlers={this.getDetailFilterHandlers()}
@@ -239,9 +236,9 @@ class ImportContainer extends Component {
                 {...this.props}
                 changeShowDetails={this.props.boundActions.showDownloadDetails}
             >
-                {this.props.showDownloadDetails
+                {/* {this.props.showDownloadDetails
                     ? 'Hide Details'
-                    : 'Show Details'}
+                    : 'Show Details'} */}
             </StatusReport>
             {this.props.showDownloadDetails && (
                 <DownloadDetails
@@ -254,24 +251,41 @@ class ImportContainer extends Component {
         </Wrapper>
     )
 
-    render() {
-        const { isRunning, isIdle, isLoading, isStopped, isPaused } = this.props
+    renderMainTable() {
+        if (this.props.shouldRenderEsts) {
+            return this.renderEstimatesTable()
+        }
 
+        if (this.props.shouldRenderProgress) {
+            return this.renderProgressTable()
+        }
+
+        return this.renderStatusReport()
+    }
+
+    renderButtonBar = () => (
+        <ButtonBar helpText={this.renderHelpText()} {...this.props}>
+            {this.props.shouldRenderEsts && (
+                <Wrapper>
+                    <AdvSettingCheckbox {...this.props} />
+                    <ActionButton
+                        handleClick={this.props.recalcEsts}
+                        customClass="recalc"
+                    >
+                        <i className="material-icons">autorenew</i>
+                    </ActionButton>
+                </Wrapper>
+            )}
+            {this.renderCancelButton()}
+            {this.renderImportButton()}
+        </ButtonBar>
+    )
+
+    render() {
         return (
             <Import {...this.props}>
-                {(isIdle || isLoading) && this.renderEstimatesTable()}
-                {(isRunning || isPaused) && this.renderProgressTable()}
-                {isStopped && this.renderStatusReport()}
-                <ButtonBar
-                    isRunning={isRunning}
-                    helpText={this.renderHelpText()}
-                >
-                    {(isIdle || isLoading) && (
-                        <AdvSettingCheckbox {...this.props} />
-                    )}
-                    {!isStopped && this.renderCancelButton()}
-                    {this.renderImportButton()}
-                </ButtonBar>
+                {this.renderMainTable()}
+                {this.renderButtonBar()}
             </Import>
         )
     }
@@ -282,9 +296,9 @@ const mapStateToProps = state => ({
     isPaused: selectors.isPaused(state),
     isStopped: selectors.isStopped(state),
     isLoading: selectors.isLoading(state),
-    isIdle: selectors.isIdle(state),
+    shouldRenderEsts: selectors.shouldRenderEsts(state),
+    shouldRenderProgress: selectors.shouldRenderProgress(state),
     isStartBtnDisabled: selectors.isStartBtnDisabled(state),
-    showOldExt: selectors.showOldExt(state),
     downloadData: selectors.downloadDetailsData(state),
     estimates: selectors.estimates(state),
     progress: selectors.progress(state),
@@ -300,6 +314,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
     boundActions: bindActionCreators(actions, dispatch),
+    recalcEsts: () => dispatch(actions.recalcEsts()),
     toggleAdvMode: () => dispatch(actions.toggleAdvMode()),
 })
 

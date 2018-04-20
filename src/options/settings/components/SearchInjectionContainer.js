@@ -2,52 +2,64 @@ import React from 'react'
 
 import analytics from 'src/analytics'
 import SearchInjection from './SearchInjection'
+import Checkbox from './Checkbox'
+
 import { getLocalStorage, setLocalStorage } from 'src/search-injection/utils'
-import { SEARCH_INJECTION_KEY } from 'src/search-injection/constants'
+import {
+    SEARCH_INJECTION_KEY,
+    SEARCH_INJECTION_DEFAULT,
+} from 'src/search-injection/constants'
 
 class SearchInjectionContainer extends React.Component {
-    constructor(props) {
-        super(props)
-        this.toggleInjection = this.toggleInjection.bind(this)
-    }
-
     state = {
-        isInjectionEnabled: false,
+        injectionPreference: { ...SEARCH_INJECTION_DEFAULT },
     }
 
     async componentDidMount() {
-        const isInjectionEnabled = await getLocalStorage(
+        const injectionPreference = await getLocalStorage(
             SEARCH_INJECTION_KEY,
-            true,
+            SEARCH_INJECTION_DEFAULT,
         )
         this.setState({
-            isInjectionEnabled,
+            injectionPreference,
         })
     }
 
-    async toggleInjection() {
-        const toggled = !this.state.isInjectionEnabled
-        await setLocalStorage(SEARCH_INJECTION_KEY, toggled)
+    bindToggleInjection = name => async () => {
+        const { injectionPreference } = this.state
+        // Toggle that particular search engine key
+        injectionPreference[name] = !injectionPreference[name]
+        await setLocalStorage(SEARCH_INJECTION_KEY, injectionPreference)
 
-        if (!toggled) {
+        if (!injectionPreference[name]) {
             analytics.trackEvent({
                 category: 'Search integration',
                 action: 'Disabled',
-                name: 'Options script',
+                name,
             })
         }
 
         this.setState({
-            isInjectionEnabled: toggled,
+            injectionPreference,
         })
     }
 
     render() {
         return (
-            <SearchInjection
-                isInjectionEnabled={this.state.isInjectionEnabled}
-                toggleInjection={this.toggleInjection}
-            />
+            <SearchInjection>
+                <Checkbox
+                    isChecked={this.state.injectionPreference.google}
+                    handleChange={this.bindToggleInjection('google')}
+                >
+                    Google
+                </Checkbox>
+                <Checkbox
+                    isChecked={this.state.injectionPreference.duckduckgo}
+                    handleChange={this.bindToggleInjection('duckduckgo')}
+                >
+                    DuckDuckGo
+                </Checkbox>
+            </SearchInjection>
         )
     }
 }

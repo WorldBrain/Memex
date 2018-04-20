@@ -11,14 +11,16 @@ const getTagClass = () =>
 
 const FilterPill = ({ value, onClick = f => f }) => (
     <span className={localStyles.pillContainer}>
-        <span className={getTagClass()} title={value}>
-            {value}
-        </span>
-        <span className={localStyles.closeIcon}>
-            <i className="material-icons" onClick={onClick}>
-                clear
-            </i>
-        </span>
+        <div className={localStyles.pillSecondaryContainer}>
+            <span className={getTagClass()} title={value}>
+                {value}
+            </span>
+            <span className={localStyles.closeIcon}>
+                <i className="material-icons" onClick={onClick}>
+                    clear
+                </i>
+            </span>
+        </div>
     </span>
 )
 

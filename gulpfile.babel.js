@@ -1,10 +1,8 @@
-import 'core-js/fn/object/entries' // shim Object.entries
+import 'babel-polyfill'
 import fs from 'fs'
-import { exec as nodeExec } from 'child_process'
-import pify from 'pify'
-import streamToPromise from 'stream-to-promise'
 import gulp from 'gulp'
 import zip from 'gulp-zip'
+import streamToPromise from 'stream-to-promise'
 import composeUglify from 'gulp-uglify/composer'
 import identity from 'gulp-identity'
 import source from 'vinyl-source-stream'
@@ -14,6 +12,7 @@ import browserify from 'browserify'
 import gulpSeq from 'gulp-sequence'
 import watchify from 'watchify'
 import babelify from 'babelify'
+import tsify from 'tsify'
 import envify from 'loose-envify/custom'
 import eslint from 'gulp-eslint'
 import path from 'path'
@@ -21,8 +20,6 @@ import cssModulesify from 'css-modulesify'
 import cssnext from 'postcss-cssnext'
 import ChromeStore from 'chrome-webstore-upload'
 const signAddon = require('sign-addon').default
-
-const exec = pify(nodeExec)
 
 // === Tasks for building the source code; result is put into ./extension ===
 
@@ -45,7 +42,7 @@ const commonUIEntry = './src/common-ui/components/index.js'
 
 const sourceFiles = [
     {
-        entries: ['./src/background.js'],
+        entries: ['./src/background-entry.js'],
         output: 'background.js',
         destination: './extension',
     },
@@ -84,7 +81,7 @@ const browserifySettings = {
 // Set up `gulp-uglify` to work with `uglify-es` (ES6 support)
 const uglify = composeUglify(require('uglify-es'), console)
 
-async function createBundle(
+function createBundle(
     { entries, output, destination, cssOutput },
     { watch = false, production = false },
 ) {
@@ -93,7 +90,8 @@ async function createBundle(
               browserify({ ...watchify.args, ...browserifySettings, entries }),
           ).on('update', bundle)
         : browserify({ ...browserifySettings, entries })
-    b.transform(babelify)
+    b.plugin(tsify)
+    b.transform(babelify, { extensions: ['.js', '.jsx', '.ts', '.tsx'] })
     b.transform(
         envify({
             NODE_ENV: production ? 'production' : 'development',
@@ -101,6 +99,9 @@ async function createBundle(
                 ? 'https://analytics.worldbrain.io'
                 : 'http://localhost:1234',
             PIWIK_SITE_ID: '1',
+            SENTRY_DSN: production
+                ? 'https://205014a0f65e4160a29db2935250b47c@sentry.io/305612'
+                : undefined,
         }),
         { global: true },
     )
@@ -113,37 +114,40 @@ async function createBundle(
         })
     }
 
-    function bundle(callback) {
-        const startTime = Date.now()
-        b
-            .bundle()
-            .on('error', err => {
-                console.error(err.stack)
-                // Fail entire gulp build if browserify emits error, but not in dev/watch mode
-                if (!watch) {
-                    process.exit(1)
-                }
-            })
-            .pipe(source(output))
-            .pipe(buffer())
-            .pipe(
-                production
-                    ? uglify({
-                          output: { ascii_only: true },
-                      })
-                    : identity(),
-            )
-            .pipe(gulp.dest(destination))
-            .on('end', () => {
-                const time = (Date.now() - startTime) / 1000
-                console.log(`Bundled ${output} in ${time}s.`)
-                if (!watch) {
-                    callback()
-                }
-            })
+    function bundle() {
+        return new Promise((resolve, reject) => {
+            const startTime = Date.now()
+            b
+                .bundle()
+                .on('error', err => {
+                    console.error('ERROR creating bundle', err)
+                    console.error(err.stack)
+                    // Fail entire gulp build if browserify emits error, but not in dev/watch mode
+                    if (!watch) {
+                        reject(err)
+                        process.exit(1)
+                    }
+                })
+                .pipe(source(output))
+                .pipe(buffer())
+                .pipe(
+                    production
+                        ? uglify({
+                              output: { ascii_only: true },
+                          })
+                        : identity(),
+                )
+                .pipe(gulp.dest(destination))
+                .on('end', () => {
+                    const time = (Date.now() - startTime) / 1000
+                    console.log(`Bundled ${output} in ${time}s.`)
+                    if (!watch) {
+                        resolve()
+                    }
+                })
+        })
     }
-
-    await pify(bundle)()
+    return bundle()
 }
 
 gulp.task('propagateVersionNumber', () => {
@@ -170,22 +174,25 @@ gulp.task('copyStaticFiles-watch', ['copyStaticFiles'], () => {
     })
 })
 
-gulp.task('build-prod', ['copyStaticFiles'], async () => {
-    const ps = sourceFiles.map(bundle =>
-        createBundle(bundle, { watch: false, production: true }),
-    )
-    await Promise.all(ps)
-})
+gulp.task('build-prod', ['copyStaticFiles'], () =>
+    Promise.all(
+        sourceFiles.map(bundle =>
+            createBundle(bundle, { watch: false, production: true }),
+        ),
+    ),
+)
 
-gulp.task('build', ['copyStaticFiles'], async () => {
-    const ps = sourceFiles.map(bundle => createBundle(bundle, { watch: false }))
-    await Promise.all(ps)
-})
+gulp.task('build', ['copyStaticFiles'], () =>
+    Promise.all(
+        sourceFiles.map(bundle => createBundle(bundle, { watch: false })),
+    ),
+)
 
-gulp.task('build-watch', ['copyStaticFiles-watch'], async () => {
-    const ps = sourceFiles.map(bundle => createBundle(bundle, { watch: true }))
-    await Promise.all(ps)
-})
+gulp.task('build-watch', ['copyStaticFiles-watch'], () =>
+    Promise.all(
+        sourceFiles.map(bundle => createBundle(bundle, { watch: true })),
+    ),
+)
 
 // === Tasks for linting the source code ===
 
@@ -193,16 +200,19 @@ const stylelintOptions = {
     reporters: [{ formatter: 'string', console: true }],
 }
 
-gulp.task('lint', async () => {
+gulp.task('lint', () => {
     const failLintError = process.argv.slice(-1)[0] !== 'watch'
 
+    // Run eslint stream
     let eslintStream = gulp
         .src(['src/**/*.js', 'src/**/*.jsx'])
         .pipe(eslint())
         .pipe(eslint.format())
+
     if (failLintError) {
         eslintStream = eslintStream.pipe(eslint.failAfterError())
     }
+
     eslintStream = eslintStream.pipe(
         eslint.results(results => {
             // For clarity, also give some output when there are no errors.
@@ -211,21 +221,22 @@ gulp.task('lint', async () => {
             }
         }),
     )
-    await streamToPromise(eslintStream)
 
-    const stylelintStream = gulp
-        .src(['src/**/*.css'])
-        .pipe(
-            stylelint({
-                ...stylelintOptions,
-                failAfterError: failLintError,
-            }),
-        )
-        .on('error', e => {
-            console.error(e)
-            process.exit(1)
-        })
-    await streamToPromise(stylelintStream)
+    return streamToPromise(eslintStream).then(() => {
+        const stylelintStream = gulp
+            .src(['src/**/*.css'])
+            .pipe(
+                stylelint({
+                    ...stylelintOptions,
+                    failAfterError: failLintError,
+                }),
+            )
+            .on('error', e => {
+                console.error(e)
+                process.exit(1)
+            })
+        return streamToPromise(stylelintStream)
+    })
 })
 
 gulp.task('lint-watch', ['lint'], callback => {
@@ -295,7 +306,7 @@ gulp.task(
 
 // Tasks for publishing the extension
 
-gulp.task('publish-extension:chrome', ['package'], async () => {
+gulp.task('publish-extension:chrome', ['package'], () => {
     const extensionID = process.env.WEBSTORE_EXTENSION_ID
     const webStore = ChromeStore({
         extensionId: extensionID,
@@ -303,12 +314,17 @@ gulp.task('publish-extension:chrome', ['package'], async () => {
         clientSecret: process.env.WEBSTORE_CLIENT_SECRET,
         refreshToken: process.env.WEBSTORE_REFRESH_TOKEN,
     })
-    const token = await webStore.fetchToken()
-    await webStore.uploadExisting(
-        fs.createReadStream('dist/extension.zip'),
-        token,
+    const tokenP = webStore.fetchToken()
+    const uploadP = tokenP.then(token =>
+        webStore.uploadExisting(
+            fs.createReadStream('dist/extension.zip'),
+            token,
+        ),
     )
-    await webStore.publish('default', token)
+
+    return Promise.all([tokenP, uploadP]).then(([token]) =>
+        webStore.publish('default', token),
+    )
 })
 
 gulp.task('publish-extension:firefox', ['package'], () => {
@@ -342,24 +358,3 @@ gulp.task('publish-extension', [
     'publish-extension:chrome',
     'publish-extension:firefox',
 ])
-
-/* DEPRECATED */
-gulp.task('package-firefox-old', async () => {
-    const filename = getFilename()
-    const buildXpiCommand = `web-ext -s ./extension -a ./dist/firefox build`
-    await exec(buildXpiCommand)
-    // web-ext will have named the file ${filename}.zip. Change .zip to .xpi.
-    await exec(`mv dist/firefox/${filename}.zip dist/firefox/${filename}.xpi`)
-})
-
-/* DEPRECATED */
-gulp.task('package-chromium-old', async () => {
-    const filename = getFilename()
-    const buildCrxCommand =
-        `crx pack ./extension` +
-        ` -o ./dist/chromium/${filename}.crx` +
-        ` -p .chrome-extension-key.pem`
-    // crx fails if the output directory is not there.
-    await exec(`mkdir -p dist/chromium`)
-    await exec(buildCrxCommand)
-})

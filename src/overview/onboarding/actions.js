@@ -13,8 +13,11 @@ export const setProgress = createAction('onboarding/setProgress')
 export const setImportsDone = createAction('onboarding/setImportsDone')
 export const setImportsStarted = createAction('onboarding/setImportsStarted')
 
-export const init = () => (dispatch, getState) =>
-    new ImportsConnHandler(IMPORT_CONN_NAME, dispatch, getState)
+export const init = () => (dispatch, getState) => {
+    if (selectors.isVisible(getState())) {
+        return new ImportsConnHandler(IMPORT_CONN_NAME, dispatch, getState)
+    }
+}
 
 /**
  * Background script connection state handler, which sets up the connection and dispatches
@@ -26,7 +29,6 @@ class ImportsConnHandler {
     static ONBOARDING_ALLOW_TYPES = {
         [TYPE.HISTORY]: true,
         [TYPE.BOOKMARK]: false,
-        [TYPE.OLD]: false,
     }
 
     _cancelled = false

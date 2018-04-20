@@ -2,13 +2,15 @@ import get from 'lodash/fp/get'
 import fromPairs from 'lodash/fp/fromPairs'
 import PouchDB from 'pouchdb-browser' // maps to pouchdb-memory in Jest, see .jest-config.json
 import PouchDBFind from 'pouchdb-find'
+import PouchDBErase from 'pouchdb-erase'
 import { blobToBase64String } from 'blob-util'
 import { pageKeyPrefix, pageDocsSelector } from 'src/page-storage'
 import { visitKeyPrefix } from 'src/activity-logger'
-import { bookmarkKeyPrefix } from 'src/bookmarks'
-import encodeUrl from 'src/util/encode-url-for-id'
+import { bookmarkKeyPrefix } from 'src/search/bookmarks'
+import { normalizeAndEncode } from 'src/util/encode-url-for-id'
 
 PouchDB.plugin(PouchDBFind)
+PouchDB.plugin(PouchDBErase)
 
 const pouchdbOptions = {
     name: 'webmemex',
@@ -93,7 +95,7 @@ export async function getAttachmentAsDataUrl({
  *  on given URL via type. Any extra options to `PouchDB.allDocs` can be passed in as the second arg.
  */
 export function fetchDocTypesByUrl(url) {
-    const encodedUrl = encodeUrl(url)
+    const encodedUrl = normalizeAndEncode(url)
 
     return (typePrefix, opts = { include_docs: true }) =>
         db.allDocs({

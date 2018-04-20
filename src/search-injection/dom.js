@@ -21,7 +21,7 @@ export const injectCSS = file => {
     d.prepend(link)
 }
 
-export const handleRender = ({ docs, totalCount }) => {
+export const handleRender = ({ docs, totalCount }, searchEngine) => {
     // docs: (array of objects) returned by the search
     // totalCount: (int) number of results found
     // Injects CSS into the search page.
@@ -36,8 +36,17 @@ export const handleRender = ({ docs, totalCount }) => {
             constants.POSITION_KEY,
             'side',
         )
-        const containerID = constants.SEARCH_ENGINES.google.container[position]
-        const container = document.getElementById(containerID)
+
+        const searchEngineObj = constants.SEARCH_ENGINES[searchEngine]
+        if (!searchEngineObj) {
+            return false
+        }
+        const containerType = searchEngineObj.containerType
+        const containerIdentifier = searchEngineObj.container[position]
+        const container =
+            containerType === 'class'
+                ? document.getElementsByClassName(containerIdentifier)[0]
+                : document.getElementById(containerIdentifier)
 
         // If re-rendering remove the already present component
         const component = document.getElementById('memexResults')
@@ -57,6 +66,7 @@ export const handleRender = ({ docs, totalCount }) => {
                 results={docs.slice(0, limit)}
                 len={totalCount}
                 rerender={renderComponent}
+                searchEngine={searchEngine}
             />,
             target,
         )

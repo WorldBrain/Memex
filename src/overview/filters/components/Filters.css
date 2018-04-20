@@ -224,17 +224,20 @@ input[type='checkbox'] {
 .closeIcon {
     margin-right: 5px;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    align-content: center;
 
     & i {
         font-size: 15px;
         vertical-align: middle;
         margin-right: -3px;
-        margin-top: -12px;
     }
 }
 
 .pillContainer {
     display: inline-block;
+    display: -moz-groupbox;
     background-color: #3eb995;
     color: white;
     margin-left: 5px;
@@ -254,4 +257,13 @@ input[type='checkbox'] {
     cursor: pointer;
     position: absolute;
     margin-top: 1px;
+}
+
+.pillSecondaryContainer {
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
