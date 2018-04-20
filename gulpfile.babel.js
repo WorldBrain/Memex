@@ -18,7 +18,7 @@ import eslint from 'gulp-eslint'
 import path from 'path'
 import cssModulesify from 'css-modulesify'
 import cssnext from 'postcss-cssnext'
-import * as ChromeStore from 'chrome-webstore-upload'
+import ChromeStore from 'chrome-webstore-upload'
 const signAddon = require('sign-addon').default
 
 // === Tasks for building the source code; result is put into ./extension ===
@@ -156,6 +156,7 @@ gulp.task('propagateVersionNumber', () => {
     const manifest = JSON.parse(fs.readFileSync('./src/manifest.json'))
     manifest.version = version
     fs.writeFileSync('./src/manifest.json', JSON.stringify(manifest, null, 4))
+    console.log('version: ', version)
 })
 
 gulp.task('copyStaticFiles', ['propagateVersionNumber'], () => {
