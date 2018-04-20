@@ -35,7 +35,6 @@ class Container extends React.Component {
         dropdown: false,
         removed: false,
         position: null,
-        searchEngine: '',
     }
 
     async componentDidMount() {
@@ -94,11 +93,29 @@ class Container extends React.Component {
         }))
     }
 
+    /**
+     * Handles persisting the enabled (removed) state for current search engine, without affecting other
+     * search engine preferences.
+     *
+     * @param {boolean} isEnabled
+     */
+    async _persistEnabledChange(isEnabled) {
+        const prevState = await getLocalStorage(
+            constants.SEARCH_INJECTION_KEY,
+            constants.SEARCH_INJECTION_DEFAULT,
+        )
+
+        await setLocalStorage(constants.SEARCH_INJECTION_KEY, {
+            ...prevState,
+            [this.props.searchEngine]: isEnabled,
+        })
+    }
+
     async removeResults() {
         // Sets the search injection key to false
         // And sets removed state to true
         // Triggering the Removed text UI to pop up
-        await setLocalStorage(constants.SEARCH_INJECTION_KEY, false)
+        await this._persistEnabledChange(false)
 
         this.trackEvent({
             category: 'Search integration',
@@ -113,10 +130,9 @@ class Container extends React.Component {
     }
 
     async undoRemove() {
-        await setLocalStorage(constants.SEARCH_INJECTION_KEY, true)
-        this.setState({
-            removed: false,
-        })
+        await this._persistEnabledChange(true)
+
+        this.setState({ removed: false })
     }
 
     async changePosition() {
