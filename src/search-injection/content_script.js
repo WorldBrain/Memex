@@ -34,7 +34,7 @@ const search = query => {
     const port = browser.runtime.connect({ name: SEARCH_CONN_NAME })
     port.onMessage.addListener(cmdHandler)
 
-    port.postMessage({ cmd: CMDS.SEARCH, searchParams: { query } })
+    port.postMessage({ cmd: CMDS.SEARCH, searchParams: { query, limit: 5 } })
 }
 
 const init = async () => {

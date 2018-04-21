@@ -150,16 +150,14 @@ export default async function pipeline({
 
     // Ensure a pouch page doc exists for current page
     let newPage = false
-    try {
-        await db.get(id)
-    } catch (err) {
-        if (err.status === 404) {
-            newPage = true
-            await db.put({ _id: id, url, title: content.title, content })
-        } else {
+    await db.get(id).catch(err => {
+        if (err.status !== 404) {
             throw err
         }
-    }
+
+        newPage = true
+        return db.put({ _id: id, url, content })
+    })
 
     if (favIconURI) {
         await handleAttachment(id, 'favIcon', favIconURI)

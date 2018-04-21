@@ -124,6 +124,7 @@ export default async function mapResultsToPouchDocs(results, searchParams) {
         pageDocs.map(async ({ _attachments, ...doc }) => ({
             ...doc,
             ...(await processAttachments({ _attachments, ...doc })),
+            title: doc.content.title || doc.title,
             hasBookmark: resultsMap.get(doc._id).hasBookmark,
             displayTime: resultsMap.get(doc._id).timestamp,
             tags: resultsMap.get(doc._id).tags.map(removeKeyType),
