@@ -203,3 +203,28 @@
     background-repeat: no-repeat;
     background-size: 20px;
 }
+
+.notificationIcon {
+    background-image: url('/img/notifications-icon.png');
+    background-repeat: no-repeat;
+    background-size: 20px;
+}
+
+.badge {
+    display: inline-block;
+    background-color: #3eb995;
+    padding: 2px 12px;
+    margin-left: 130px;
+    border-radius: 24px;
+    color: white;
+    float: right;
+}
+
+.loadbadge {
+    display: inline-block;
+    padding: 2px 10px;
+    margin-left: 10px;
+    border-radius: 10px;
+    color: white;
+    float: right;
+}

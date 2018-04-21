@@ -1,6 +1,6 @@
 import Dexie from 'dexie'
 
-import { Page, Visit, Bookmark, Tag, FavIcon } from './models'
+import { Page, Visit, Bookmark, Tag, FavIcon, Notification } from './models'
 
 export interface Props {
     indexedDB: IDBFactory
@@ -42,6 +42,11 @@ export default class Storage extends Dexie {
      */
     public favIcons: Dexie.Table<FavIcon, string>
 
+    /**
+     * @type {Dexie.Table} Represents notifications.
+     */
+    notifications
+
     constructor({ indexedDB, IDBKeyRange, dbName } = Storage.DEF_PARAMS) {
         super(dbName || Storage.DEF_PARAMS.dbName, {
             indexedDB: indexedDB || window.indexedDB,
@@ -62,6 +67,7 @@ export default class Storage extends Dexie {
             bookmarks: 'url, time',
             tags: '[name+url], name, url',
             favIcons: 'hostname',
+            notifications: 'id, title, message, date, viewed',
         })
 
         // ... add versions/migration logic here
@@ -72,6 +78,7 @@ export default class Storage extends Dexie {
         this.bookmarks.mapToClass(Bookmark)
         this.tags.mapToClass(Tag)
         this.favIcons.mapToClass(FavIcon)
+        this.notifications.mapToClass(Notification)
     }
 
     /**

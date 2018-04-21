@@ -1,0 +1,66 @@
+.tableContainer {
+    max-height: 475px;
+    overflow-y: scroll;
+    clear: both;
+}
+
+.table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 14px;
+    box-shadow: 0 3px 20px 2px rgba(0, 0, 0, 0.08);
+
+    & th,
+    & td {
+        border-collapse: collapse;
+        color: #777;
+        border-bottom: 1px solid #3eb9954f;
+        padding: 15px 15px;
+    }
+
+    & th {
+        background: #333;
+        color: white;
+        font-weight: 200;
+        font-size: 14px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+    }
+
+    & tr td {
+        text-align: left;
+        cursor: pointer;
+
+        &:first-child {
+            text-align: left;
+        }
+    }
+}
+
+.toggle {
+    background-color: #f9f9f9;
+    padding: 20px;
+    font-size: 13px;
+    padding-bottom: 40px;
+    max-width: 100%;
+    margin: 20px auto;
+}
+
+.messageReadOrUnreadIcon {
+    float: right;
+    position: relative;
+}
+
+.dateNotif {
+    float: right;
+}
+
+.icon {
+    font-size: 1.5em;
+    cursor: pointer;
+    float: right;
+}
+
+.docBody img {
+    max-width: 100%;
+}

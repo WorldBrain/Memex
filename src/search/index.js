@@ -117,3 +117,9 @@ export const indexQueue = {
         ;(await getBackend()).indexQueue.clear()
     },
 }
+
+// Notifications
+
+export async function addNotification(...args) {
+    return await newBackend.addNotification(...args)
+}

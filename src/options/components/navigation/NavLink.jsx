@@ -27,6 +27,12 @@ const NavLink = ({ route, state, children }) => {
         [styles.done]: state.isStopped,
     })
 
+    const badgeCondition = classNames({
+        [styles.isNavActive]: children,
+        [styles.badge]: state.unreadMessagesCount,
+        [styles.loadbadge]: !state.unreadMessagesCount,
+    })
+
     return (
         <li>
             <div className={navClasses}>
@@ -39,6 +45,11 @@ const NavLink = ({ route, state, children }) => {
                 {route.component !== 'faq' && (
                     <Link className={navClasses} to={route.pathname}>
                         {route.name}
+                        {route.name === 'Notifications' && (
+                            <div className={badgeCondition}>
+                                {state.unreadMessagesCount}
+                            </div>
+                        )}
                     </Link>
                 )}
             </div>

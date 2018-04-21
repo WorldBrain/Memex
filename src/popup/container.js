@@ -17,6 +17,7 @@ import * as constants from './constants'
 import UpgradeButton from './components/UpgradeButton'
 import ButtonIcon from './components/ButtonIcon'
 import styles from './components/Button.css'
+import setUnreadCount from '../util/setUnreadCount'
 
 class PopupContainer extends Component {
     static propTypes = {
@@ -92,6 +93,14 @@ class PopupContainer extends Component {
         this.getInitBlacklistBtnState()
             .then(updateState)
             .catch(noop)
+        this.getInitNotificationState()
+            .then(updateState)
+            .catch(noop)
+    }
+
+    async getInitNotificationState() {
+        const res = await setUnreadCount(0)
+        return res === 0 ? { unread: false } : { unread: true, notifs: res }
     }
 
     async getInitPageData() {
@@ -386,6 +395,19 @@ class PopupContainer extends Component {
                     href="https://worldbrain.io/vote_feature"
                 >
                     Vote for Next Features
+                </LinkButton>
+                <LinkButton
+                    href={`${constants.OPTIONS_URL}#/notifications`}
+                    btnClass={styles.notificationIcon}
+                >
+                    Notifications{' '}
+                    <div
+                        className={
+                            this.state.unread ? styles.badge : styles.loadbadge
+                        }
+                    >
+                        {this.state.notifs}
+                    </div>
                 </LinkButton>
                 <UpgradeButton />
                 <ButtonIcon

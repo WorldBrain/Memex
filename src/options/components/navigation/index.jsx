@@ -7,6 +7,7 @@ import { bindActionCreators } from 'redux'
 
 import Nav from './Nav'
 import NavLink from './NavLink'
+import * as notificationSelectors from '../../notifications/selectors'
 
 class Navigation extends Component {
     isActive(route) {
@@ -14,7 +15,14 @@ class Navigation extends Component {
     }
 
     renderNavLinks() {
-        const { isRunning, isIdle, isLoading, isStopped, isPaused } = this.props
+        const {
+            isRunning,
+            isIdle,
+            isLoading,
+            isStopped,
+            isPaused,
+            unreadMessagesCount,
+        } = this.props
 
         const state = {
             isRunning: isRunning,
@@ -22,6 +30,7 @@ class Navigation extends Component {
             isLoading: isLoading,
             isStopped: isStopped,
             isPaused: isPaused,
+            unreadMessagesCount: unreadMessagesCount,
         }
 
         return this.props.routes
@@ -46,6 +55,7 @@ Navigation.propTypes = {
     isLoading: PropTypes.bool.isRequired,
     isStopped: PropTypes.bool.isRequired,
     isPaused: PropTypes.bool.isRequired,
+    unreadMessagesCount: PropTypes.number.isRequired,
 }
 
 const mapStateToProps = state => ({
@@ -55,6 +65,7 @@ const mapStateToProps = state => ({
     isLoading: selectors.isLoading(state),
     isIdle: selectors.isIdle(state),
     isStartBtnDisabled: selectors.isStartBtnDisabled(state),
+    unreadMessagesCount: notificationSelectors.unreadMessagesCount(state),
 })
 
 const mapDispatchToProps = dispatch => ({

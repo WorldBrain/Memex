@@ -86,3 +86,22 @@
 .done {
     text-decoration: line-through;
 }
+
+.badge {
+    display: inline-block;
+    background-color: #3eb995;
+    padding: 0 20px;
+    border-radius: 24px;
+    color: white;
+    float: right;
+    margin-right: 10px;
+
+    &.isNavActive {
+        background-color: white;
+        color: #3eb995;
+    }
+}
+
+.loadbadge {
+    display: none;
+}
