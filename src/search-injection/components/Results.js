@@ -37,12 +37,13 @@ const Results = props => {
                 </div>
                 <button
                     className={styles.settingsButton}
-                    onClick={props.toggleDropDown}
+                    onClick={props.toggleDropdown}
                 />
                 {props.dropdown ? (
                     <Dropdown
                         remove={props.removeResults}
                         rerender={props.changePosition}
+                        closeDropdown={props.closeDropdown}
                     />
                 ) : (
                     ''
@@ -63,7 +64,8 @@ Results.propTypes = {
     seeMoreResults: PropTypes.func.isRequired,
     toggleHideResults: PropTypes.func.isRequired,
     hideResults: PropTypes.bool.isRequired,
-    toggleDropDown: PropTypes.func.isRequired,
+    toggleDropdown: PropTypes.func.isRequired,
+    closeDropdown: PropTypes.func.isRequired,
     dropdown: PropTypes.bool.isRequired,
     removeResults: PropTypes.func.isRequired,
     changePosition: PropTypes.func.isRequired,

@@ -12,27 +12,56 @@ const openSettings = () => {
     browser.runtime.sendMessage(message)
 }
 
-const Dropdown = props => {
-    return (
-        <div className={styles.dropdownContainer}>
-            <ul className={styles.dropdown}>
-                <li className={styles.dropdownElement} onClick={openSettings}>
-                    Settings
-                </li>
-                <li className={styles.dropdownElement} onClick={props.rerender}>
-                    Change position of Memex
-                </li>
-                <li className={styles.dropdownElement} onClick={props.remove}>
-                    Remove Results Forever
-                </li>
-            </ul>
-        </div>
-    )
-}
+class Dropdown extends React.Component {
+    static propTypes = {
+        remove: PropTypes.func.isRequired,
+        rerender: PropTypes.func.isRequired,
+        closeDropdown: PropTypes.func.isRequired,
+    }
 
-Dropdown.propTypes = {
-    remove: PropTypes.func.isRequired,
-    rerender: PropTypes.func.isRequired,
+    componentDidMount() {
+        document.addEventListener('click', this.handleOutsideClick)
+    }
+
+    componentWillUnmount() {
+        document.removeEventListener('click', this.handleOutsideClick)
+    }
+
+    handleOutsideClick = e => {
+        if (this.dropdownRef && !this.dropdownRef.contains(e.target))
+            this.props.closeDropdown()
+    }
+
+    setDropdownRef = node => {
+        this.dropdownRef = node
+    }
+
+    render() {
+        return (
+            <div ref={this.setDropdownRef} className={styles.dropdownContainer}>
+                <ul className={styles.dropdown}>
+                    <li
+                        className={styles.dropdownElement}
+                        onClick={openSettings}
+                    >
+                        Settings
+                    </li>
+                    <li
+                        className={styles.dropdownElement}
+                        onClick={this.props.rerender}
+                    >
+                        Change position of Memex
+                    </li>
+                    <li
+                        className={styles.dropdownElement}
+                        onClick={this.props.remove}
+                    >
+                        Remove Results Forever
+                    </li>
+                </ul>
+            </div>
+        )
+    }
 }
 
 export default Dropdown
