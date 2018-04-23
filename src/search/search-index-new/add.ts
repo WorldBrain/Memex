@@ -1,8 +1,7 @@
-import db from '.'
+import db, { VisitInteraction, PageAddRequest } from '.'
 import normalizeUrl from '../../util/encode-url-for-id'
 import pipeline, { PipelineReq, transformUrl } from './pipeline'
 import { Page, FavIcon } from './models'
-import { VisitInteraction, PageAddRequest } from './types'
 
 /**
  * Adds/updates a page + associated visit (pages never exist without either an assoc.

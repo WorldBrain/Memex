@@ -1,4 +1,4 @@
-import db from '..'
+import db, { VisitInteraction } from '..'
 import AbstractModel from './abstract-model'
 import Visit from './visit'
 import Bookmark from './bookmark'
@@ -138,8 +138,8 @@ export default class Page extends AbstractModel implements Props {
         return max
     }
 
-    addVisit(time = Date.now()) {
-        this[visitsProp].push(new Visit({ url: this.url, time }))
+    addVisit(time = Date.now(), data: Partial<VisitInteraction> = {}) {
+        this[visitsProp].push(new Visit({ url: this.url, time, ...data }))
     }
 
     addTag(name: string) {

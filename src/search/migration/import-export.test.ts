@@ -72,7 +72,7 @@ describe('Old=>New index migration', () => {
         test('Importing data to new index', async () => {
             search.getBackend._reset({ useOld: false })
 
-            await importNewPage(data.EXPORTED_PAGE_1)
+            await importNewPage(data.EXPORTED_PAGE_1 as ExportedPage)
 
             const { docs: [result] } = await search.search({
                 query: 'mining',

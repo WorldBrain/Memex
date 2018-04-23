@@ -9,10 +9,10 @@ export interface ExportedPageVisit extends Partial<VisitInteraction> {
 }
 
 export interface ExportedPage extends Page {
-    bookmark: number
     visits: ExportedPageVisit[]
     tags: string[]
     favIconURI?: string
+    bookmark?: number
 }
 
 export interface OldIndexPage {

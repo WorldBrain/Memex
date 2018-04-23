@@ -27,6 +27,16 @@ export default class Visit extends EventModel {
      */
     scrollMaxPerc
 
+    constructor({ url, time, ...props }) {
+        super({ url, time })
+
+        this.duration = props.duration
+        this.scrollPx = props.scrollPx
+        this.scrollPerc = props.scrollPerc
+        this.scrollMaxPx = props.scrollMaxPx
+        this.scrollMaxPerc = props.scrollMaxPerc
+    }
+
     save() {
         return db.visits.put(this)
     }
