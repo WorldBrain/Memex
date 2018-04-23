@@ -1,5 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import onClickOutside from 'react-onclickoutside'
 
 import { OPEN_OPTIONS } from '../constants'
 import styles from './Dropdown.css'
@@ -19,26 +20,13 @@ class Dropdown extends React.Component {
         closeDropdown: PropTypes.func.isRequired,
     }
 
-    componentDidMount() {
-        document.addEventListener('click', this.handleOutsideClick)
-    }
-
-    componentWillUnmount() {
-        document.removeEventListener('click', this.handleOutsideClick)
-    }
-
-    handleOutsideClick = e => {
-        if (this.dropdownRef && !this.dropdownRef.contains(e.target))
-            this.props.closeDropdown()
-    }
-
-    setDropdownRef = node => {
-        this.dropdownRef = node
+    handleClickOutside = () => {
+        this.props.closeDropdown()
     }
 
     render() {
         return (
-            <div ref={this.setDropdownRef} className={styles.dropdownContainer}>
+            <div className={styles.dropdownContainer}>
                 <ul className={styles.dropdown}>
                     <li
                         className={styles.dropdownElement}
@@ -64,4 +52,4 @@ class Dropdown extends React.Component {
     }
 }
 
-export default Dropdown
+export default onClickOutside(Dropdown)
