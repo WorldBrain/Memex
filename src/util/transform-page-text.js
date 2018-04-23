@@ -8,7 +8,8 @@ const termSeparator = new RegExp(DEFAULT_TERM_SEPARATOR.source, 'gu')
 const allWhitespacesPattern = /\s+/g
 const nonWordsPattern = /[\u2000-\u206F\u2E00-\u2E7F\\!"#$%&()*+,./:;<=>?[\]^_`{|}~«»。（）ㅇ©ºø°]/gi
 const apostrophePattern = /['’]/g
-const dashPattern = /(\S+)-(\S+)/g
+const wantedDashPattern = /(\S+)-(\S+)/g
+const unwantedDashPattern = /\s+-\s+/g
 const longWords = /\b\w{30,}\b/gi
 const randomDigits = /\b(\d{1,3}|\d{5,})\b/gi
 const urlPattern = urlRegex()
@@ -40,20 +41,20 @@ const combinePunctuation = (text = '') => text.replace(apostrophePattern, '')
 
 // Extract individual words from any words-connected-by-dashes
 const splitDashes = (text = '') => {
-    const matches = text.match(dashPattern)
+    const matches = text.match(wantedDashPattern)
 
     if (matches == null) {
-        return text
+        return text.replace(unwantedDashPattern, ' ')
     }
 
-    return (
-        text +
-        ' ' +
-        matches
-            .map(match => match.split('-')) // Split up dash-words
-            .reduce((a, b) => [...a, ...b]) // Flatten split word
-            .join(' ')
-    )
+    // Split up dash-words, deriving new words to add to the text
+    const newWords = matches
+        .map(match => match.split('-'))
+        .reduce((a, b) => [...a, ...b])
+        .join(' ')
+
+    // Ensure to remove any other dash/hyphens in the text that don't connect words (have spaces around)
+    return `${text} ${newWords}`.replace(unwantedDashPattern, ' ')
 }
 
 const removeDiacritics = (text = '') => {
