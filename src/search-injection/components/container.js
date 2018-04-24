@@ -21,7 +21,8 @@ class Container extends React.Component {
         this.renderResultItems = this.renderResultItems.bind(this)
         this.seeMoreResults = this.seeMoreResults.bind(this)
         this.toggleHideResults = this.toggleHideResults.bind(this)
-        this.toggleDropDown = this.toggleDropDown.bind(this)
+        this.toggleDropdown = this.toggleDropdown.bind(this)
+        this.closeDropdown = this.closeDropdown.bind(this)
         this.removeResults = this.removeResults.bind(this)
         this.undoRemove = this.undoRemove.bind(this)
         this.changePosition = this.changePosition.bind(this)
@@ -86,11 +87,17 @@ class Container extends React.Component {
         })
     }
 
-    toggleDropDown() {
+    toggleDropdown() {
         this.setState(state => ({
             ...state,
             dropdown: !state.dropdown,
         }))
+    }
+
+    closeDropdown() {
+        this.setState({
+            dropdown: false,
+        })
     }
 
     /**
@@ -164,7 +171,8 @@ class Container extends React.Component {
                 seeMoreResults={this.seeMoreResults}
                 toggleHideResults={this.toggleHideResults}
                 hideResults={this.state.hideResults}
-                toggleDropDown={this.toggleDropDown}
+                toggleDropdown={this.toggleDropdown}
+                closeDropdown={this.closeDropdown}
                 dropdown={this.state.dropdown}
                 removeResults={this.removeResults}
                 changePosition={this.changePosition}

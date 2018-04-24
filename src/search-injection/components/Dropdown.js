@@ -1,5 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import onClickOutside from 'react-onclickoutside'
 
 import { OPEN_OPTIONS } from '../constants'
 import styles from './Dropdown.css'
@@ -12,27 +13,43 @@ const openSettings = () => {
     browser.runtime.sendMessage(message)
 }
 
-const Dropdown = props => {
-    return (
-        <div className={styles.dropdownContainer}>
-            <ul className={styles.dropdown}>
-                <li className={styles.dropdownElement} onClick={openSettings}>
-                    Settings
-                </li>
-                <li className={styles.dropdownElement} onClick={props.rerender}>
-                    Change position of Memex
-                </li>
-                <li className={styles.dropdownElement} onClick={props.remove}>
-                    Remove Results Forever
-                </li>
-            </ul>
-        </div>
-    )
+class Dropdown extends React.Component {
+    static propTypes = {
+        remove: PropTypes.func.isRequired,
+        rerender: PropTypes.func.isRequired,
+        closeDropdown: PropTypes.func.isRequired,
+    }
+
+    handleClickOutside = () => {
+        this.props.closeDropdown()
+    }
+
+    render() {
+        return (
+            <div className={styles.dropdownContainer}>
+                <ul className={styles.dropdown}>
+                    <li
+                        className={styles.dropdownElement}
+                        onClick={openSettings}
+                    >
+                        Settings
+                    </li>
+                    <li
+                        className={styles.dropdownElement}
+                        onClick={this.props.rerender}
+                    >
+                        Change position of Memex
+                    </li>
+                    <li
+                        className={styles.dropdownElement}
+                        onClick={this.props.remove}
+                    >
+                        Remove Results Forever
+                    </li>
+                </ul>
+            </div>
+        )
+    }
 }
 
-Dropdown.propTypes = {
-    remove: PropTypes.func.isRequired,
-    rerender: PropTypes.func.isRequired,
-}
-
-export default Dropdown
+export default onClickOutside(Dropdown)
