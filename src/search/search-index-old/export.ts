@@ -121,7 +121,7 @@ async function fetchVisitsData(visits: string[]): Promise<ExportedPageVisit[]> {
 
     // Reshape found visit index docs to ExportedPageVisit shape
     return [...lookupMap].map(([visitKey, { pageId, ...visit }]) => ({
-        timestamp: formatMetaKey(visitKey),
+        time: formatMetaKey(visitKey),
         ...visit,
     }))
 }

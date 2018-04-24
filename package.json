@@ -94,6 +94,7 @@
     "chrome-webstore-upload": "^0.2.2",
     "crx": "^3.2.1",
     "css-modulesify": "git+https://github.com/Treora/css-modulesify#95447d1",
+    "datauri": "^1.1.0",
     "encoding-down": "^4.0.0",
     "eslint": "^4.1.0",
     "eslint-config-prettier": "^2.6.0",

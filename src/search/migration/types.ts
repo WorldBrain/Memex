@@ -5,14 +5,14 @@ export type ExportedBookmark = number
 export type ExportedDataURL = string
 
 export interface ExportedPageVisit extends Partial<VisitInteraction> {
-    timestamp: number
+    time: number
 }
 
 export interface ExportedPage extends Page {
     visits: ExportedPageVisit[]
     tags: string[]
     favIconURI?: string
-    bookmark?: number
+    bookmark: number
 }
 
 export interface OldIndexPage {

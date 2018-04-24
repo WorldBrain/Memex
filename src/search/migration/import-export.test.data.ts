@@ -107,6 +107,6 @@ export const EXPORTED_PAGE_1: Partial<ExportedPage> = {
     // Data used for other, non-page, data colletions
     bookmark: TEST_BOOKMARK_1,
     favIconURI: TEST_FAVICON,
-    visits: [{ timestamp: TEST_VISIT_1 }],
+    visits: [{ time: TEST_VISIT_1 }],
     tags: ['virus', 'fix'],
 }

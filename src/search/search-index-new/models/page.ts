@@ -102,6 +102,14 @@ export default class Page extends AbstractModel implements Props {
         return this[tagsProp].map(tag => tag.name)
     }
 
+    get visits() {
+        return this[visitsProp]
+    }
+
+    get bookmark() {
+        return this[bookmarkProp]
+    }
+
     /**
      * Pages should be deleted if no events associated with them any more.
      */

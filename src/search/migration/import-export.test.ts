@@ -69,11 +69,52 @@ describe('Old=>New index migration', () => {
             await insertTestPageIntoOldIndex()
         })
 
+        // Try to find the page data stored for given test data from DB - check everything
+        async function testStoredPage(expectedData: Partial<ExportedPage>) {
+            const storedPage = await newIndex.default.pages.get(
+                expectedData.url,
+            )
+
+            const {
+                visits,
+                screenshotURI,
+                favIconURI,
+                bookmark,
+                tags,
+                ...expected,
+            } = expectedData
+            const { screenshot, ...page } = storedPage
+
+            // Test standard data
+            expect(page).toEqual(expected)
+
+            // Test assoc. data via getters
+            await storedPage.loadRels()
+            expect(storedPage.screenshotURI).toBe(screenshotURI)
+            expect(storedPage.hasBookmark).toBe(true)
+            expect(storedPage.bookmark.time).toBe(bookmark)
+
+            expect(storedPage.tags).toEqual(expect.arrayContaining(tags))
+            expect(storedPage.visits.map(visit => visit.time)).toEqual(
+                expect.arrayContaining(visits.map(visit => visit.time)),
+            )
+
+            await newIndex.default.favIcons
+                .get(expectedData.hostname)
+                .then(storedFav => {
+                    if (storedFav) {
+                        expect(storedFav.hostname).toBe(page.hostname)
+                        expect(storedFav.favIconURI).toBe(favIconURI)
+                    }
+                })
+        }
+
         test('Importing data to new index', async () => {
             search.getBackend._reset({ useOld: false })
 
             await importNewPage(data.EXPORTED_PAGE_1 as ExportedPage)
 
+            // Make sure search works post-import
             const { docs: [result] } = await search.search({
                 query: 'mining',
                 mapResultsFunc: r => r,
@@ -83,6 +124,9 @@ describe('Old=>New index migration', () => {
                 data.PAGE_DOC_1.normalizedUrl,
                 data.TEST_BOOKMARK_1,
             ])
+
+            // Test against the new Page + FavIcon from the DB
+            await testStoredPage(data.EXPORTED_PAGE_1)
         })
 
         test('Simple full migration', async () => {
@@ -107,6 +151,9 @@ describe('Old=>New index migration', () => {
             // New index should get same doc with updated unencoded URL ID
             const newResultPostMigration = await doSearch()
             expect(newResultPostMigration[0]).toEqual(data.EXPORTED_PAGE_1.url)
+
+            // Test against the new Page + FavIcon from the DB
+            await testStoredPage(data.EXPORTED_PAGE_1)
         })
     })
 })

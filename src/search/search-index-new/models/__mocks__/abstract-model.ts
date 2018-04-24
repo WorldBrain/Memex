@@ -1,10 +1,17 @@
+import * as DataURI from 'datauri'
+
+const datauri = new DataURI()
+
 export default abstract class AbstractModel {
     public static DEF_NON_ENUM_PROP: PropertyDescriptor = {
         enumerable: false,
         writable: true,
     }
 
-    public static getBlobURL = (blob: Buffer) => blob.toString()
+    public static getBlobURL = (buffer: Buffer) => {
+        datauri.format('.png', buffer)
+        return datauri.content
+    }
 
     public static dataURLToBlob = (url: string) => {
         const regex = /^data:.+\/(.+);base64,(.*)$/

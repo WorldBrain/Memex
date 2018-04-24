@@ -21,9 +21,7 @@ async function importPage({
             page.setBookmark(bookmark)
         }
 
-        visits.forEach(({ timestamp, ...data }) =>
-            page.addVisit(timestamp, data),
-        )
+        visits.forEach(({ time, ...data }) => page.addVisit(time, data))
         tags.forEach(tag => page.addTag(tag))
 
         await page.save()
