@@ -1,3 +1,4 @@
+import { idleManager } from 'src/util/idle'
 import randomString from 'src/util/random-string'
 import { SHOULD_TRACK_STORAGE_KEY as SHOULD_TRACK } from 'src/options/privacy/constants'
 
@@ -37,7 +38,11 @@ class Analytics {
         this._siteId = siteId
         this._host = url + Analytics.API_PATH
 
-        browser.idle.onStateChanged.addListener(this._handleIdleStateChange)
+        // Schedule sending of network req when user is idle or locks screen
+        idleManager.scheduleIdleCbs({
+            onIdle: this._sendBulkReq,
+            onLocked: this._sendBulkReq,
+        })
     }
 
     get defaultParams() {
@@ -51,20 +56,6 @@ class Analytics {
             h: now.getHours(),
             m: now.getMinutes(),
             s: now.getSeconds(),
-        }
-    }
-
-    /**
-     * When system is idle (60s) or gets locked, try to clear the request pool and track all the
-     * recently recorded events.
-     */
-    _handleIdleStateChange = state => {
-        switch (state) {
-            case 'idle':
-            case 'locked':
-                return this._sendBulkReq()
-            case 'active':
-            default:
         }
     }
 
@@ -106,27 +97,24 @@ class Analytics {
     /**
      * Send a bulk request to the Piwik HTTP Tracking API. Batches all pooled requests, then resets them.
      *
+     * @throws Any network errors.
      * @return {Promise<boolean>}
      */
-    async _sendBulkReq() {
+    _sendBulkReq = async () => {
         if (!this._pool.size || !await this.shouldTrack()) {
             this._pool.clear() // Clear pool if user turned off tracking
             return
         }
 
-        try {
-            const res = await fetch(this._host, {
-                method: 'POST',
-                header: Analytics.JSON_HEADER,
-                body: JSON.stringify({ requests: this._serializePoolReqs() }),
-            })
+        const res = await fetch(this._host, {
+            method: 'POST',
+            header: Analytics.JSON_HEADER,
+            body: JSON.stringify({ requests: this._serializePoolReqs() }),
+        })
 
-            if (res.ok) {
-                this._pool.clear()
-                return true
-            }
-        } catch (err) {}
-        return false
+        if (res.ok) {
+            this._pool.clear()
+        }
     }
 
     async shouldTrack() {
