@@ -13,7 +13,7 @@ const ResultItem = props => (
             onClick={props.onLinkClick}
             target="_blank"
         >
-            {props.title}
+            {props.title || props.url}
         </a>
         <p className={styles.url}>{props.url}</p>
         <div className={styles.displayTime}>
