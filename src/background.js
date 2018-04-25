@@ -18,6 +18,7 @@ import {
 } from 'src/search-injection/constants'
 import db from 'src/search/search-index-new'
 import * as models from 'src/search/search-index-new/models'
+import 'src/search/migration'
 
 window.index = index
 window.storage = db

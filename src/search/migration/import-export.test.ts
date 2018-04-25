@@ -8,7 +8,8 @@ import * as newIndex from '../search-index-new'
 import exportOldPages from '../search-index-old/export'
 import importNewPage from '../search-index-new/import'
 import * as data from './import-export.test.data'
-import { MigrationManager, ExportedPage } from './'
+import { MigrationManager } from './migration-manager'
+import { ExportedPage } from './types'
 
 jest.mock('../search-index-new/models/abstract-model')
 
@@ -145,7 +146,7 @@ describe('Old=>New index migration', () => {
             expect(oldResult[0]).toEqual(data.PAGE_DOC_1._id)
 
             // Perform migration then reset the backend to point to new index
-            await new MigrationManager().start()
+            await new MigrationManager({}).start()
             search.getBackend._reset({ useOld: false })
 
             // New index should get same doc with updated unencoded URL ID
