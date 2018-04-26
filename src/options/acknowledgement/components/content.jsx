@@ -56,15 +56,13 @@ const AcknowledgementContainer = () => (
         <h3 className={localStyles.title}>
             A list of people who made meaningful contributions
         </h3>
-        <p>
+        <div>
             Only because of these people, the WorldBrain/Memex project can
             exist. We are deeply thankful for the hours of work & the passion
             they contributed to this project.
             <br />
             <br />
             <img src={'/../../../../img/thanks.gif'} />
-        </p>
-        <p>
             <h4 className={localStyles.title}>Contributors</h4>
             <ul className={localStyles.ul}>
                 <li>
@@ -161,7 +159,7 @@ const AcknowledgementContainer = () => (
                     <b>Digital Science</b> | 5.500 €
                 </li>
             </ul>
-        </p>
+        </div>
     </div>
 )
 

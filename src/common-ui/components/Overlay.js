@@ -34,7 +34,9 @@ class Overlay extends Component {
     }
 
     componentWillUnmount() {
-        document.body.removeChild(this.overlayRoot)
+        if (document.body.contains(this.overlayRoot)) {
+            document.body.removeChild(this.overlayRoot)
+        }
     }
 
     handleClick = event =>
