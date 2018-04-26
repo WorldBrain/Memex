@@ -1,6 +1,6 @@
 import fetchPageData from 'src/page-analysis/background/fetch-page-data'
 import { IMPORT_TYPE, DOWNLOAD_STATUS } from 'src/options/imports/constants'
-import * as index from 'src/search'
+import searchIndex from 'src/search'
 
 const fetchPageDataOpts = {
     includePageContent: true,
@@ -101,7 +101,7 @@ export default class ImportItemProcessor {
     async _storeDocs({ pageDoc, bookmark, visits = [] }) {
         this._checkCancelled()
 
-        return await index.addPage({ pageDoc, visits, bookmark })
+        return await searchIndex.addPage({ pageDoc, visits, bookmark })
     }
 
     /**
@@ -112,7 +112,7 @@ export default class ImportItemProcessor {
      * @returns {PageDoc}
      */
     async _createPageDoc({ url }) {
-        const includeFavIcon = !await index.domainHasFavIcon(url)
+        const includeFavIcon = !await searchIndex.domainHasFavIcon(url)
 
         // Do the page data fetch
         const fetch = fetchPageData({

@@ -22,17 +22,14 @@ export const hasData = () =>
             return resolve(false)
         }
 
-        let empty = true
         index.db
             .createReadStream({
                 keys: true,
                 values: false,
                 limit: 1,
             })
-            .on('data', () => {
-                empty = false
-            })
-            .on('end', () => resolve(!empty))
+            .on('data', datum => resolve(!!datum)) // Resolve as soon as data emitted
+            .on('end', () => resolve(false))
     })
 
 export async function search({

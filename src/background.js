@@ -8,9 +8,9 @@ import {
     constants as blacklistConsts,
     blacklist,
 } from 'src/blacklist/background'
-import * as index from 'src/search'
+import searchIndex from 'src/search'
 import analytics from 'src/analytics'
-import createNotif from 'src/util/notifications'
+// import createNotif from 'src/util/notifications'
 import {
     OPEN_OVERVIEW,
     OPEN_OPTIONS,
@@ -20,7 +20,7 @@ import db from 'src/search/search-index-new'
 import * as models from 'src/search/search-index-new/models'
 import 'src/search/migration'
 
-window.index = index
+window.index = searchIndex
 window.storage = db
 window.indexModels = models
 

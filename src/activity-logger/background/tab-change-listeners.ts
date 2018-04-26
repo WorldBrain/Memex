@@ -1,6 +1,6 @@
 import { browser, Tabs } from 'webextension-polyfill-ts'
 
-import * as index from '../../search'
+import searchIndex from '../../search'
 import { whenPageDOMLoaded, whenTabActive } from '../../util/tab-events'
 import { logPageVisit, logInitPageVisit } from './log-page-visit'
 import { fetchFavIcon } from '../../page-analysis/background/get-fav-icon'
@@ -69,10 +69,13 @@ export const handleFavIcon: TabChangeListener = async function(
     { favIconUrl },
     tab,
 ) {
-    if ((await shouldLogTab(tab)) && !await index.domainHasFavIcon(tab.url)) {
+    if (
+        (await shouldLogTab(tab)) &&
+        !await searchIndex.domainHasFavIcon(tab.url)
+    ) {
         try {
             const favIconDataUrl = await fetchFavIcon(favIconUrl)
-            await index.addFavIcon(tab.url, favIconDataUrl)
+            await searchIndex.addFavIcon(tab.url, favIconDataUrl)
         } catch (err) {
             console.error(err)
             // Do nothing

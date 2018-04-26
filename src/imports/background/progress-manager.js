@@ -1,7 +1,7 @@
 import promiseLimit from 'promise-limit'
 import noop from 'lodash/fp/noop'
 
-import { indexQueue } from 'src/search'
+import searchIndex from 'src/search'
 import ItemProcessor from './item-processor'
 
 class ImportProgressManager {
@@ -178,7 +178,7 @@ class ImportProgressManager {
         this.processors = []
 
         // Ensure index queue is cleared so queued up item's indexing doesn't happen
-        indexQueue.clear()
+        searchIndex.queue.clear()
     }
 }
 

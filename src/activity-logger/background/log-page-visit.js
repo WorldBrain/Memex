@@ -1,7 +1,7 @@
 import moment from 'moment'
 
 import analysePage from 'src/page-analysis/background'
-import * as index from 'src/search'
+import searchIndex from 'src/search'
 import tabManager from './tab-manager'
 
 /**
@@ -17,7 +17,7 @@ export async function logInitPageVisit(tabId, secsSinceLastIndex = 20) {
     const { visitTime } = tabManager.getTabState(tabId)
 
     try {
-        const existingPage = await index.getPage(tab.url)
+        const existingPage = await searchIndex.getPage(tab.url)
 
         if (existingPage != null) {
             // Store just new visit if existing page has been indexed recently (`secsSinceLastIndex`)
@@ -28,17 +28,17 @@ export async function logInitPageVisit(tabId, secsSinceLastIndex = 20) {
                 )
             ) {
                 tabManager.clearScheduledLog(tabId)
-                return await index.addVisit(tab.url, +visitTime)
+                return await searchIndex.addVisit(tab.url, +visitTime)
             }
         }
 
-        const allowFavIcon = !await index.domainHasFavIcon(tab.url)
+        const allowFavIcon = !await searchIndex.domainHasFavIcon(tab.url)
         const analysisRes = await analysePage({ tabId, allowFavIcon })
 
         // Don't index full-text just yet
         delete analysisRes.content.fullText
 
-        await index.addPage({
+        await searchIndex.addPage({
             pageDoc: { url: tab.url, ...analysisRes },
             visits: [visitTime],
             rejectNoContent: false,
@@ -67,7 +67,7 @@ export async function logPageVisit(tabId) {
     })
 
     // Index all the terms for the page
-    await index.addPageTerms({
+    await searchIndex.addPageTerms({
         pageDoc: { url, content },
     })
 }

@@ -11,7 +11,7 @@ export async function addPage({
     visits = [],
     bookmark,
     pageDoc,
-}: PageAddRequest) {
+}: Partial<PageAddRequest>) {
     const { favIconURI, ...pageData } = await pipeline({ pageDoc })
 
     try {

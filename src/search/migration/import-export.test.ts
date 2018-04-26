@@ -2,7 +2,7 @@ import memdown from 'memdown'
 import * as indexedDB from 'fake-indexeddb'
 import * as IDBKeyRange from 'fake-indexeddb/lib/FDBKeyRange'
 import { handleAttachment as addPouchPageAttachment } from '../../page-storage/store-page'
-import * as search from '../'
+import index from '../'
 import * as oldIndex from '../search-index-old'
 import * as newIndex from '../search-index-new'
 import exportOldPages from '../search-index-old/export'
@@ -14,22 +14,21 @@ import { ExportedPage } from './types'
 jest.mock('../search-index-new/models/abstract-model')
 
 async function insertTestPageIntoOldIndex() {
-    search.getBackend._reset({ useOld: true })
+    index.useOld = true
 
-    await search.addPage({
+    await index.addPage({
         pageDoc: data.PAGE_DOC_1,
-        bookmarkDocs: [],
         visits: [data.TEST_VISIT_1],
     })
     await Promise.all(
         data.EXPORTED_PAGE_1.tags.map(tag =>
-            search.addTag(data.PAGE_DOC_1.url, tag),
+            index.addTag(data.PAGE_DOC_1.url, tag),
         ),
     )
-    await search.addBookmark({
+    await index.addBookmark({
         url: data.PAGE_DOC_1.url,
         timestamp: data.TEST_BOOKMARK_1,
-    })
+    } as any)
     await addPouchPageAttachment(
         data.PAGE_DOC_1._id,
         'screenshot',
@@ -111,15 +110,15 @@ describe('Old=>New index migration', () => {
         }
 
         test('Importing data to new index', async () => {
-            search.getBackend._reset({ useOld: false })
+            index.useOld = false
 
             await importNewPage(data.EXPORTED_PAGE_1 as ExportedPage)
 
             // Make sure search works post-import
-            const { docs: [result] } = await search.search({
+            const { docs: [result] } = await index.search({
                 query: 'mining',
                 mapResultsFunc: r => r,
-            })
+            } as any)
 
             expect(result).toEqual([
                 data.PAGE_DOC_1.normalizedUrl,
@@ -133,21 +132,21 @@ describe('Old=>New index migration', () => {
         test('Simple full migration', async () => {
             // Set up to do same search, resolving to first result
             const doSearch = () =>
-                search
+                index
                     .search({
                         query: 'virus',
                         mapResultsFunc: results =>
                             results.map(([id, time, doc]) => [id, time]),
-                    })
+                    } as any)
                     .then(res => res.docs[0])
 
-            search.getBackend._reset({ useOld: true })
+            index.useOld = true
             const oldResult = await doSearch()
             expect(oldResult[0]).toEqual(data.PAGE_DOC_1._id)
 
             // Perform migration then reset the backend to point to new index
             await new MigrationManager({}).start()
-            search.getBackend._reset({ useOld: false })
+            index.useOld = false
 
             // New index should get same doc with updated unencoded URL ID
             const newResultPostMigration = await doSearch()

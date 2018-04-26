@@ -1,30 +1,19 @@
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import searchConnectionHandler from './search-connection-handler'
-import {
-    addTag,
-    delTag,
-    suggest,
-    delBookmark,
-    addBookmark,
-    handleBookmarkCreation,
-    getPage,
-    delPages,
-    delPagesByDomain,
-    delPagesByPattern,
-    getMatchingPageCount,
-} from '../'
+import indexInterface from '../'
 
 makeRemotelyCallable({
-    addTag,
-    delTag,
-    suggest,
-    addBookmark,
-    delBookmark,
-    delPages,
-    delPagesByDomain,
-    delPagesByPattern,
-    getMatchingPageCount,
-    pageLookup: url => getPage(url).then(transformPageForSending),
+    addTag: indexInterface.addTag,
+    delTag: indexInterface.delTag,
+    suggest: indexInterface.suggest,
+    addBookmark: indexInterface.addBookmark,
+    delBookmark: indexInterface.delBookmark,
+    delPages: indexInterface.delPages,
+    delPagesByDomain: indexInterface.delPagesByDomain,
+    delPagesByPattern: indexInterface.delPagesByPattern,
+    getMatchingPageCount: indexInterface.getMatchingPageCount,
+    pageLookup: url =>
+        indexInterface.getPage(url).then(transformPageForSending),
 })
 
 async function transformPageForSending(page) {
@@ -44,9 +33,9 @@ browser.runtime.onConnect.addListener(searchConnectionHandler)
 
 const handleBookmarkRemoval = (id, { node }) =>
     node.url
-        ? delBookmark(node)
+        ? indexInterface.delBookmark(node)
         : console.warn('Cannot remove bookmark with no URL', node)
 
 // Store and index any new browser bookmark
-browser.bookmarks.onCreated.addListener(handleBookmarkCreation)
+browser.bookmarks.onCreated.addListener(indexInterface.handleBookmarkCreation)
 browser.bookmarks.onRemoved.addListener(handleBookmarkRemoval)

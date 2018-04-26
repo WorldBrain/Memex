@@ -2,48 +2,50 @@ import memdown from 'memdown'
 import * as indexedDB from 'fake-indexeddb'
 import * as IDBKeyRange from 'fake-indexeddb/lib/FDBKeyRange'
 
-import * as index from './'
+import { SearchIndex } from './'
 import * as oldIndex from './search-index-old'
 import * as newIndex from './search-index-new'
 import * as DATA from './index.test.data'
 
 jest.mock('./search-index-new/models/abstract-model')
 
-async function insertTestData() {
-    // Insert some test data for all tests to use
-    await index.addPage({ pageDoc: DATA.PAGE_3, visits: [DATA.VISIT_3] })
-    await index.addPage({
-        pageDoc: DATA.PAGE_2,
-        visits: [DATA.VISIT_2],
-        bookmark: DATA.BOOKMARK_1,
-    })
-    await index.addPage({ pageDoc: DATA.PAGE_1, visits: [DATA.VISIT_1] })
-
-    // Add some test tags
-    await index.addTag(DATA.PAGE_3.url, 'good')
-    await index.addTag(DATA.PAGE_3.url, 'quality')
-    await index.addTag(DATA.PAGE_2.url, 'quality')
-}
-
-async function resetTestData(dbName = 'test') {
-    // Don't have any destroy methods available;
-    //   => update pointer to memdown and manually delete fake-indexeddb's DB
-    indexedDB.deleteDatabase(dbName)
-    oldIndex.init({ levelDown: memdown() })
-    newIndex.init({ indexedDB, IDBKeyRange, dbName })
-
-    await insertTestData()
-}
-
-// Bind projecting-out just ID and score from results to search
-const search = (params = {}) =>
-    index.search({
-        mapResultsFunc: res => res.map(([id, score]) => [id, score]),
-        ...params,
-    })
-
 // Runs the same tests for either the new or old index
 const runSuite = useOld => () => {
+    const index = new SearchIndex(useOld)
+
+    async function insertTestData() {
+        // Insert some test data for all tests to use
+        await index.addPage({ pageDoc: DATA.PAGE_3, visits: [DATA.VISIT_3] })
+        await index.addPage({
+            pageDoc: DATA.PAGE_2,
+            visits: [DATA.VISIT_2],
+            bookmark: DATA.BOOKMARK_1,
+        })
+        await index.addPage({ pageDoc: DATA.PAGE_1, visits: [DATA.VISIT_1] })
+
+        // Add some test tags
+        await index.addTag(DATA.PAGE_3.url, 'good')
+        await index.addTag(DATA.PAGE_3.url, 'quality')
+        await index.addTag(DATA.PAGE_2.url, 'quality')
+    }
+
+    async function resetTestData(dbName = 'test') {
+        // Don't have any destroy methods available;
+        //   => update pointer to memdown and manually delete fake-indexeddb's DB
+        indexedDB.deleteDatabase(dbName)
+        oldIndex.init({ levelDown: memdown() })
+        newIndex.init({ indexedDB, IDBKeyRange, dbName })
+
+        await insertTestData()
+    }
+
+    // Bind projecting-out just ID and score from results to search
+    const search = (params = {}) =>
+        index.search({
+            mapResultsFunc: res => res.map(([id, score]) => [id, score]),
+            ...params,
+        } as any)
+
     // Old model uses page IDs (derived from URL), new model simply uses normalized URL
     const PAGE_ID_1 = useOld ? 'page/bG9yZW0uY29tL3Rlc3Qy' : 'lorem.com/test2'
     const PAGE_ID_2 = useOld
@@ -58,7 +60,6 @@ const runSuite = useOld => () => {
 
     // Set what index to use for tests + initialize data
     beforeAll(async () => {
-        index.getBackend._reset({ useOld })
         await resetTestData()
     })
 
@@ -521,7 +522,10 @@ const runSuite = useOld => () => {
             ) // Base test data expectation
 
             // Add bm to 3rd test page
-            await index.addBookmark({ url: DATA.PAGE_1.url, timestamp: tmpBm })
+            await index.addBookmark({
+                url: DATA.PAGE_1.url,
+                timestamp: tmpBm,
+            } as any)
             const { docs } = await search({ showOnlyBookmarks: true })
 
             expect(docs.length).toBe(2)
