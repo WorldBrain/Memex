@@ -1,4 +1,6 @@
 import urlRegex from 'url-regex'
+import Raven from 'raven-js'
+
 import 'src/activity-logger/background'
 import 'src/search/background'
 import 'src/analytics/background'
@@ -23,6 +25,11 @@ import 'src/search/migration'
 window.index = searchIndex
 window.storage = db
 window.indexModels = models
+
+// Set up the sentry runtime error config
+if (process.env.SENTRY_DSN) {
+    Raven.config(process.env.SENTRY_DSN).install()
+}
 
 export const OVERVIEW_URL = '/overview/overview.html'
 export const OPTIONS_URL = '/options/options.html'
