@@ -17,13 +17,31 @@ const rootReducer = combineReducers({
 
 const rootEpic = combineEpics(...Object.values(overview.epics))
 
+/**
+ * Used to transform the redux state before sending to raven, filtering out
+ * anything we don't need to know.
+ */
+const stateTransformer = ({ overview, ...state }) => ({
+    ...state,
+    overview: {
+        ...overview,
+        searchResult: {
+            ...overview.searchResult,
+            // Filter out personal stuff from results; not really useful for our knowledge
+            docs: overview.searchResult.docs.map(
+                ({ url, title, favIcon, screenshot, ...doc }) => doc,
+            ),
+        },
+    },
+})
+
 export default function configureStore({ ReduxDevTools = undefined } = {}) {
     const middlewares = [createEpicMiddleware(rootEpic), thunk]
 
     // Set up the sentry runtime error config + redux middleware
     if (process.env.SENTRY_DSN) {
         Raven.config(process.env.SENTRY_DSN).install()
-        middlewares.push(createRavenMiddleware(Raven))
+        middlewares.push(createRavenMiddleware(Raven, { stateTransformer }))
     }
 
     const enhancers = [overview.enhancer, applyMiddleware(...middlewares)]
