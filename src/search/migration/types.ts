@@ -1,4 +1,5 @@
-import { VisitInteraction, Page } from '../search-index-new'
+import { VisitInteraction } from '../search-index-new'
+import { PageConstructorOptions } from '../search-index-new/models/page'
 
 export type ExportedTag = string
 export type ExportedBookmark = number
@@ -8,7 +9,7 @@ export interface ExportedPageVisit extends Partial<VisitInteraction> {
     time: number
 }
 
-export interface ExportedPage extends Page {
+export interface ExportedPage extends PageConstructorOptions {
     visits: ExportedPageVisit[]
     tags: string[]
     favIconURI?: string

@@ -11,7 +11,7 @@ const bookmarkProp = Symbol('assocBookmark')
 const latestProp = Symbol('latestEvent')
 const screenshot = Symbol('screenshotURI')
 
-export interface Props {
+export interface PageConstructorOptions {
     // Indexed/searchable data
     url: string
     terms: string[]
@@ -31,11 +31,13 @@ export interface Props {
     canonicalUrl?: string
     description?: string
     keywords?: string[]
+    pouchMigrationError?: boolean
 }
 
 type TermsIndexName = 'terms' | 'urlTerms' | 'titleTerms'
 
-export default class Page extends AbstractModel implements Props {
+export default class Page extends AbstractModel
+    implements PageConstructorOptions {
     public url: string
     public text: string
     public fullUrl: string
@@ -50,8 +52,9 @@ export default class Page extends AbstractModel implements Props {
     public canonicalUrl?: string
     public description?: string
     public keywords?: string[]
+    public pouchMigrationError?: boolean
 
-    constructor(props: Props) {
+    constructor(props: PageConstructorOptions) {
         super()
         this.url = props.url
         this.fullUrl = props.fullUrl
@@ -62,11 +65,14 @@ export default class Page extends AbstractModel implements Props {
         this.titleTerms = props.titleTerms
         this.domain = props.domain
         this.hostname = props.hostname
-        this.screenshotURI = props.screenshotURI
-        this.lang = props.lang
-        this.canonicalUrl = props.canonicalUrl
-        this.description = props.description
-        this.keywords = props.keywords
+
+        if (props.screenshotURI) this.screenshotURI = props.screenshotURI
+        if (props.lang) this.lang = props.lang
+        if (props.canonicalUrl) this.canonicalUrl = props.canonicalUrl
+        if (props.description) this.description = props.description
+        if (props.keywords) this.keywords = props.keywords
+        if (props.pouchMigrationError)
+            this.pouchMigrationError = props.pouchMigrationError
 
         Object.defineProperties(this, {
             [visitsProp]: {

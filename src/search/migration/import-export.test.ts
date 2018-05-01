@@ -110,10 +110,9 @@ describe('Old=>New index migration', () => {
         }
 
         test('Importing data to new index', async () => {
-            index.useOld = false
-
             await importNewPage(data.EXPORTED_PAGE_1 as ExportedPage)
 
+            index.useOld = false
             // Make sure search works post-import
             const { docs: [result] } = await index.search({
                 query: 'mining',

@@ -9,6 +9,8 @@ export interface Props {
     onComplete: () => void
 }
 
+class MigrationInterrupt extends Error {}
+
 export class MigrationManager {
     public static PROGRESS_STORAGE_KEY = 'migration-progress'
     public static FINISHED_STATE = ''
@@ -78,7 +80,7 @@ export class MigrationManager {
         this.isCancelled = false
         await MigrationManager.persistProgressState(this.currKey)
 
-        throw new Error()
+        throw new MigrationInterrupt()
     }
 
     private async handleComplete() {
@@ -124,8 +126,12 @@ export class MigrationManager {
 
             await this.handleComplete()
         } catch (err) {
-            // Error only used to signal interruption
-            return
+            if (err instanceof MigrationInterrupt) {
+                // Error only used to signal interruption
+                return
+            }
+
+            throw err
         }
     }
 
