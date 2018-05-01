@@ -3,6 +3,7 @@ import whenAllSettled from 'when-all-settled'
 
 import exportOldPages, { ExportParams } from '../search-index-old/export'
 import importNewPage from '../search-index-new/import'
+import analytics from '../../analytics'
 
 export interface Props {
     concurrency: number
@@ -130,6 +131,12 @@ export class MigrationManager {
                 // Error only used to signal interruption
                 return
             }
+
+            analytics.trackEvent({
+                category: 'Migration',
+                action: 'Error',
+                name: err.toString(),
+            })
 
             throw err
         }
