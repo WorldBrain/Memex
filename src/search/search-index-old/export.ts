@@ -72,6 +72,17 @@ interface PageAttachments {
     favIconURI: string
 }
 
+function deriveFallbackDisplay(url: string) {
+    const { hostname, domain } = transformUrl(url)
+
+    return {
+        hostname,
+        domain,
+        fullUrl: `https://${url}`,
+        pouchMigrationError: true,
+    }
+}
+
 const attachmentToDataUrl = ({ content_type, data }) =>
     `data:${content_type};base64,${data}`
 
@@ -132,8 +143,9 @@ async function processKey(
     // Decode the URL inside the old ID to get the new index ID
     const url = decode(removeKeyType(indexDoc.id))
 
-    const displayData = await fetchPouchData(pageKey).catch(
-        err => console.error(err) || {},
+    // Attempt fetching of display data, or flag as issue + fallback fullUrl (known Pouch errors in old model)
+    const displayData = await fetchPouchData(pageKey).catch(err =>
+        deriveFallbackDisplay(url),
     )
 
     const visits = await fetchVisitsData([...indexDoc.visits]).catch(
