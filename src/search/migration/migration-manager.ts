@@ -79,8 +79,6 @@ export class MigrationManager {
      */
     private async handleInterruption() {
         this.isCancelled = false
-        await MigrationManager.persistProgressState(this.currKey)
-
         throw new MigrationInterrupt()
     }
 
@@ -100,6 +98,7 @@ export class MigrationManager {
 
         for await (const { pages, lastKey } of exportOldPages(exportParams)) {
             this.currKey = lastKey
+            await MigrationManager.persistProgressState(this.currKey)
 
             if (this.isCancelled) {
                 await this.handleInterruption()
