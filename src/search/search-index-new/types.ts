@@ -40,6 +40,7 @@ export interface PageAddRequest {
     pageDoc: PageDoc
     visits: VisitInput[]
     bookmark: BookmarkInput
+    rejectNoContent?: boolean
 }
 
 export interface PageDoc {

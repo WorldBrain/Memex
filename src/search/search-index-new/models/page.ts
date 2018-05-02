@@ -194,7 +194,11 @@ export default class Page extends AbstractModel
      * @param {string[]} terms Array of terms to merge with current state.
      */
     _mergeTerms(termProp: TermsIndexName, terms: string[]) {
-        this[termProp] = [...new Set([...this[termProp], ...terms])]
+        if (!this[termProp]) {
+            this[termProp] = terms
+        } else {
+            this[termProp] = [...new Set([...this[termProp], ...terms])]
+        }
     }
 
     /**

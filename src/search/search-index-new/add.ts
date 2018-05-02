@@ -11,12 +11,16 @@ export async function addPage({
     visits = [],
     bookmark,
     pageDoc,
+    rejectNoContent,
 }: Partial<PageAddRequest>) {
-    const { favIconURI, ...pageData } = await pipeline({ pageDoc })
+    const { favIconURI, ...pageData } = await pipeline({
+        pageDoc,
+        rejectNoContent,
+    })
 
     try {
         await db.transaction('rw', db.tables, async () => {
-            const page = new Page(pageData as any)
+            const page = new Page(pageData)
 
             if (favIconURI != null) {
                 await new FavIcon({ hostname: page.hostname, favIconURI })
@@ -46,7 +50,7 @@ export async function addPageTerms(pipelineReq: PipelineReq) {
 
     try {
         await db.transaction('rw', db.tables, async () => {
-            const page = new Page(pageData as any)
+            const page = new Page(pageData)
             await page.loadRels()
             await page.save()
         })
