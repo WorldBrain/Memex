@@ -38,25 +38,21 @@ export const handleUrl: TabChangeListener = async function(
     { url },
     tab,
 ) {
-    await handleVisitEnd(tabId, { url }, tab).catch()
+    await handleVisitEnd(tabId, { url }, tab).catch(e => e)
 
     if (await shouldLogTab(tab)) {
         // Run stage 1 of visit indexing
-        whenPageDOMLoaded({ tabId })
-            .then(() => logInitPageVisit(tabId))
-            .catch(console.error)
+        await whenPageDOMLoaded({ tabId }).catch(console.error)
+        await logInitPageVisit(tabId)
 
-        // Schedule stage 2 of visit indexing (don't wait for stage 1)
-        tabManager.scheduleTabLog(
-            tabId,
-            () =>
-                // Wait until its DOM has loaded, and activated before attemping log
-                Promise.all([
-                    whenPageDOMLoaded({ tabId }),
-                    whenTabActive({ tabId }),
-                ])
-                    .then(() => logPageVisit(tabId))
-                    .catch(console.error), // Ignore any tab state interuptions
+        // Schedule stage 2 of visit indexing soon after - if user stays on page
+        tabManager.scheduleTabLog(tabId, () =>
+            Promise.all([
+                whenPageDOMLoaded({ tabId }),
+                whenTabActive({ tabId }),
+            ])
+                .then(() => logPageVisit(tabId))
+                .catch(console.error),
         )
     }
 }
