@@ -1,0 +1,32 @@
+.textarea {
+    resize: none;
+    font-size: 15px;
+    color: #74bfa5;
+    border: none;
+    font-family: 'Open Sans';
+    background: #fdfbfb;
+
+    &:focus {
+        outline: none;
+    }
+}
+
+.disabled {
+    filter: saturation(0);
+    cursor: not-allowed;
+    opacity: 0.6;
+    padding: 5px;
+    border-radius: 5px;
+    border: none;
+    background: #aaa;
+    color: white;
+}
+
+.button {
+    background: #3eb995;
+    color: #fff;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    padding: 5px;
+}
