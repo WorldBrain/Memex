@@ -4,6 +4,8 @@ import whenAllSettled from 'when-all-settled'
 import exportOldPages, { ExportParams } from '../search-index-old/export'
 import importNewPage from '../search-index-new/import'
 import analytics from '../../analytics'
+import createNotif from '../../util/notifications'
+import { MIGRATE_NOTIF, INFO_LINK } from './constants'
 
 export interface Props {
     concurrency: number
@@ -14,6 +16,7 @@ class MigrationInterrupt extends Error {}
 
 export class MigrationManager {
     public static PROGRESS_STORAGE_KEY = 'migration-progress'
+    public static NOTIF_STORAGE_KEY = 'migration-notif-shown'
     public static FINISHED_STATE = ''
     public static DEF_PARAMS: ExportParams = {
         chunkSize: 10,
@@ -144,7 +147,22 @@ export class MigrationManager {
     /**
      * Schedules for the migration iterations to stop when next check happens (once per iteration).
      */
-    public stop() {
+    public async stop() {
         this.isCancelled = true
+
+        const {
+            [MigrationManager.NOTIF_STORAGE_KEY]: notifAlreadyShown,
+        } = await browser.storage.local.get(MigrationManager.NOTIF_STORAGE_KEY)
+
+        if (!notifAlreadyShown && this.isFinished) {
+            await createNotif(MIGRATE_NOTIF, () =>
+                browser.tabs.create({ url: INFO_LINK }),
+            )
+
+            // Set the flag so this condition should never pass again
+            await browser.storage.local.set({
+                [MigrationManager.NOTIF_STORAGE_KEY]: true,
+            })
+        }
     }
 }

@@ -1,13 +1,10 @@
-import createNotif from '../../util/notifications'
 import { idleManager } from '../../util/idle'
 import { MigrationManager } from './migration-manager'
 import searchIndex from '../'
-import { MIGRATE_NOTIF } from './constants'
 import analytics from '../../analytics'
 
 const migrator = new MigrationManager({
     onComplete() {
-        createNotif(MIGRATE_NOTIF as any)
         // Update global setting to force switch to using new index for all interface methods
         searchIndex.useOld = false
         analytics.trackEvent({ category: 'Migration', action: 'Completed' })
