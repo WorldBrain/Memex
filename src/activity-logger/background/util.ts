@@ -1,6 +1,6 @@
 import { browser, Tabs } from 'webextension-polyfill-ts'
 
-import { updateTimestampMeta } from '../../search'
+import searchIndex from '../../search'
 import { blacklist } from '../../blacklist/background'
 import { isLoggable, getPauseState } from '..'
 import { TabState } from './types'
@@ -33,7 +33,7 @@ export const updateVisitInteractionData = ({
     activeTime,
     scrollState,
 }: TabState) =>
-    updateTimestampMeta(url, +visitTime, {
+    searchIndex.updateTimestampMeta(url, +visitTime, {
         duration: activeTime,
         scrollPx: scrollState.pixel,
         scrollMaxPx: scrollState.maxPixel,

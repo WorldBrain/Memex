@@ -1,18 +1,31 @@
-import db, { addPage, addTag } from './index'
-import { ExportedPage } from '../import-export'
+import db, { addPage, addTag, updateTimestampMeta, Page, FavIcon } from '.'
+import { ExportedPage } from '../migration'
 
-export async function importPage(page: ExportedPage) {
-  await (<any>addPage)({
-    pageDoc: {
-      content: page.content,
-      url: page.url,
-    },
-    visits: page.visits,
-    bookmark: page.bookmark,
-    // screenshotURI: page.screenshot,
-    // favIconURI: page.favIcon,
-  })
-  for (const tag of page.tags) {
-    await addTag(page.url, tag)
-  }
+async function importPage({
+    bookmark,
+    visits,
+    tags,
+    favIconURI,
+    ...pageData,
+}: ExportedPage) {
+    return db.transaction('rw', db.tables, async () => {
+        const page = new Page(pageData)
+
+        if (favIconURI != null) {
+            await new FavIcon({ hostname: page.hostname, favIconURI })
+                .save()
+                .catch()
+        }
+
+        if (bookmark != null) {
+            page.setBookmark(bookmark)
+        }
+
+        visits.forEach(({ time, ...data }) => page.addVisit(time, data))
+        tags.forEach(tag => page.addTag(tag))
+
+        await page.save()
+    })
 }
+
+export default importPage

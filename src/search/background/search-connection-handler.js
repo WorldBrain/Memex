@@ -1,5 +1,5 @@
 import { CMDS, SEARCH_CONN_NAME } from 'src/overview/constants'
-import { search } from 'src/search'
+import searchIndex from 'src/search'
 
 /**
  * Connects function affording search to a runtime messaging port.
@@ -8,7 +8,7 @@ import { search } from 'src/search'
  */
 const connectSearch = port => async ({ searchParams, overwrite }) => {
     try {
-        const searchResult = await search(searchParams)
+        const searchResult = await searchIndex.search(searchParams)
 
         port.postMessage({
             cmd: CMDS.RESULTS,

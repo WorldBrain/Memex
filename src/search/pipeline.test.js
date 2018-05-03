@@ -96,6 +96,14 @@ const runSuite = useOld => () => {
         })
     })
 
+    test('extract terms from a document ignoring - spaced - hyphens', () => {
+        testExtractTerms({
+            input:
+                'very   -   often -   the - people forget - to - optimize important code',
+            output: DATA.EXPECTED_TERMS,
+        })
+    })
+
     test('extract terms from a document removing useless whitespace', () => {
         testExtractTerms({
             input: 'very often the people forget to optimize important code',

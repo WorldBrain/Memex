@@ -23,22 +23,28 @@ browser.notifications.onClicked.addListener(id => {
  * Firefox supports only a subset of notif options. If you pass unknowns, it throws Errors.
  * So filter them down if browser is FF, else nah.
  */
-function filterOpts({ type, iconUrl, title, message, ...rest }: NotifOpts): NotifOpts {
+function filterOpts({
+    type,
+    iconUrl,
+    title,
+    message,
+    ...rest,
+}: NotifOpts): NotifOpts {
     const opts = { type, iconUrl, title, message }
-    return browser.runtime.getBrowserInfo != null
-        ? opts
-        : { ...opts, ...rest }
+    return browser.runtime.getBrowserInfo != null ? opts : { ...opts, ...rest }
 }
 
 async function createNotification(
-    notifOptions: NotifOpts,
+    notifOptions: Partial<NotifOpts>,
     onClick = noop as Function,
 ) {
-    const id = await browser.notifications.create(filterOpts({
-        type: DEF_TYPE,
-        iconUrl: DEF_ICON_URL,
-        ...notifOptions,
-    }))
+    const id = await browser.notifications.create(
+        filterOpts({
+            type: DEF_TYPE,
+            iconUrl: DEF_ICON_URL,
+            ...(notifOptions as NotifOpts),
+        }),
+    )
 
     onClickListeners.set(id, onClick)
 }

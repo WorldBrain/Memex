@@ -1,5 +1,5 @@
 import normalizeUrl from 'src/util/encode-url-for-id'
-import { grabExistingKeys } from 'src/search'
+import searchIndex from 'src/search'
 import { checkWithBlacklist } from 'src/blacklist/background/interface'
 import { isLoggable } from 'src/activity-logger'
 import { IMPORT_TYPE as TYPE } from 'src/options/imports/constants'
@@ -47,7 +47,7 @@ export default class ImportItemCreator {
     constructor({
         limits = ImportItemCreator.DEF_LIMITS,
         dataSources = new DataSources({}),
-        existingKeySource = grabExistingKeys,
+        existingKeySource = () => searchIndex.grabExistingKeys(),
     }) {
         this.limits = limits
         this._dataSources = dataSources

@@ -1,4 +1,4 @@
-import db from '..'
+import db, { VisitInteraction } from '..'
 import AbstractModel from './abstract-model'
 import Visit from './visit'
 import Bookmark from './bookmark'
@@ -11,48 +11,76 @@ const bookmarkProp = Symbol('assocBookmark')
 const latestProp = Symbol('latestEvent')
 const screenshot = Symbol('screenshotURI')
 
-export default class Page extends AbstractModel {
-    /**
-     * @param {Object} args
-     * @param {string} args.url
-     * @param {string} args.text
-     * @param {string[]} args.terms
-     * @param {Visit} [args.visits=[]] Opt. Visits to assoc. with.
-     * @param {Bookmark} [args.bookmark] Opt. Bookmark to assoc. with.
-     */
-    constructor({
-        url,
-        text,
-        fullUrl,
-        fullTitle,
-        terms,
-        urlTerms,
-        titleTerms,
-        domain,
-        hostname,
-        bookmark,
-        visits = [],
-        screenshotURI,
-    }) {
+export interface PageConstructorOptions {
+    // Indexed/searchable data
+    url: string
+    terms: string[]
+    urlTerms: string[]
+    titleTerms: string[]
+    domain: string
+    hostname: string
+
+    // Display data
+    text: string
+    fullUrl: string
+    fullTitle: string
+    screenshotURI?: string
+
+    // Misc. opt. data
+    lang?: string
+    canonicalUrl?: string
+    description?: string
+    keywords?: string[]
+    pouchMigrationError?: boolean
+}
+
+type TermsIndexName = 'terms' | 'urlTerms' | 'titleTerms'
+
+export default class Page extends AbstractModel
+    implements PageConstructorOptions {
+    public url: string
+    public text: string
+    public fullUrl: string
+    public fullTitle: string
+    public terms: string[]
+    public urlTerms: string[]
+    public titleTerms: string[]
+    public domain: string
+    public hostname: string
+    public screenshot: Blob
+    public lang?: string
+    public canonicalUrl?: string
+    public description?: string
+    public keywords?: string[]
+    public pouchMigrationError?: boolean
+
+    constructor(props: PageConstructorOptions) {
         super()
-        this.url = url
-        this.fullUrl = fullUrl
-        this.fullTitle = fullTitle
-        this.text = text
-        this.terms = terms
-        this.urlTerms = urlTerms
-        this.titleTerms = titleTerms
-        this.domain = domain
-        this.hostname = hostname
-        this.screenshotURI = screenshotURI
+        this.url = props.url
+        this.fullUrl = props.fullUrl
+        this.fullTitle = props.fullTitle
+        this.text = props.text
+        this.terms = props.terms
+        this.urlTerms = props.urlTerms
+        this.titleTerms = props.titleTerms
+        this.domain = props.domain
+        this.hostname = props.hostname
+
+        if (props.screenshotURI) this.screenshotURI = props.screenshotURI
+        if (props.lang) this.lang = props.lang
+        if (props.canonicalUrl) this.canonicalUrl = props.canonicalUrl
+        if (props.description) this.description = props.description
+        if (props.keywords) this.keywords = props.keywords
+        if (props.pouchMigrationError)
+            this.pouchMigrationError = props.pouchMigrationError
 
         Object.defineProperties(this, {
             [visitsProp]: {
-                value: visits,
+                value: [],
                 ...AbstractModel.DEF_NON_ENUM_PROP,
             },
             [bookmarkProp]: {
-                value: bookmark,
+                value: undefined,
                 ...AbstractModel.DEF_NON_ENUM_PROP,
             },
             [tagsProp]: {
@@ -80,16 +108,22 @@ export default class Page extends AbstractModel {
         return this[tagsProp].map(tag => tag.name)
     }
 
-    /**
-     * Pages should be deleted if no events associated with them any more.
-     *
-     * @return {boolean}
-     */
-    get shouldDelete() {
-        return !this.hasBookmark && !this[visitsProp].length
+    get visits() {
+        return this[visitsProp]
     }
 
-    set screenshotURI(input) {
+    get bookmark() {
+        return this[bookmarkProp]
+    }
+
+    /**
+     * Pages should be deleted if no events associated with them any more.
+     */
+    get shouldDelete() {
+        return !this.hasBookmark && this[visitsProp].length === 0
+    }
+
+    set screenshotURI(input: string) {
         if (input) {
             this.screenshot = AbstractModel.dataURLToBlob(input)
             this[screenshot] = AbstractModel.getBlobURL(this.screenshot)
@@ -99,40 +133,43 @@ export default class Page extends AbstractModel {
     /**
      * @param {number} [upperBound]
      * @return {number} Latest event timestamp below `upperBound`.
-    */
-    getLatest(upperBound = Date.now()) {
+     */
+    public getLatest(upperBound = Date.now()) {
         let max = 0
-        for (const visit of this[visitsProp]) {
+        let visit: Visit
+
+        for (visit of this[visitsProp]) {
             if (visit.time > max && visit.time <= upperBound) {
                 max = visit.time
             }
         }
 
-        const bm = this[bookmarkProp]
+        const bm: Bookmark = this[bookmarkProp]
         if (bm != null && bm.time > max && bm.time <= upperBound) {
-            max = this[bookmarkProp].time
+            max = bm.time
         }
 
         return max
     }
 
-    /**
-     * @param {number} [time=Date.now()]
-     */
-    addVisit(time = Date.now()) {
-        this[visitsProp].push(new Visit({ url: this.url, time }))
+    addVisit(time = Date.now(), data: Partial<VisitInteraction> = {}) {
+        this[visitsProp].push(new Visit({ url: this.url, time, ...data }))
     }
 
-    addTag(name) {
-        const index = this[tagsProp].findIndex(tag => tag.name === name)
+    addTag(name: string) {
+        const index = (this[tagsProp] as Tag[]).findIndex(
+            tag => tag.name === name,
+        )
 
         if (index === -1) {
             this[tagsProp].push(new Tag({ url: this.url, name }))
         }
     }
 
-    delTag(name) {
-        const index = this[tagsProp].findIndex(tag => tag.name === name)
+    delTag(name: string) {
+        const index = (this[tagsProp] as Tag[]).findIndex(
+            tag => tag.name === name,
+        )
 
         if (index !== -1) {
             this[tagsProp] = [
@@ -153,11 +190,15 @@ export default class Page extends AbstractModel {
     /**
      * Merges some terms with the current terms state.
      *
-     * @param {('terms'|'urlTerms'|'titleTerms')} termProp The name of which terms state to update.
-     * @param {string[]} [terms=[]] Array of terms to merge with current state.
+     * @param {TermsIndexName} termProp The name of which terms state to update.
+     * @param {string[]} terms Array of terms to merge with current state.
      */
-    _mergeTerms(termProp, terms = []) {
-        this[termProp] = [...new Set([...this[termProp], ...terms])]
+    _mergeTerms(termProp: TermsIndexName, terms: string[]) {
+        if (!this[termProp]) {
+            this[termProp] = terms
+        } else {
+            this[termProp] = [...new Set([...this[termProp], ...terms])]
+        }
     }
 
     /**

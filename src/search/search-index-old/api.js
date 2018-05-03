@@ -7,24 +7,30 @@ import { addTimestampConcurrent } from './add'
 import { searchConcurrent } from './search'
 import { delPagesConcurrent } from './del'
 import { initSingleLookup, keyGen, removeKeyType } from './util'
+import { MigrationManager } from '../migration/migration-manager'
 
-export function hasData() {
-    return new Promise((resolve, reject) => {
-        let empty = true
+export const hasData = () =>
+    new Promise(async (resolve, reject) => {
+        // IF migration finished, skip data check and say to use new index
+        const storage = await browser.storage.local.get(
+            MigrationManager.PROGRESS_STORAGE_KEY,
+        )
+        if (
+            storage[MigrationManager.PROGRESS_STORAGE_KEY] ===
+            MigrationManager.FINISHED_STATE
+        ) {
+            return resolve(false)
+        }
+
         index.db
             .createReadStream({
                 keys: true,
                 values: false,
                 limit: 1,
             })
-            .on('data', function(data) {
-                empty = false
-            })
-            .on('end', function() {
-                resolve(!empty)
-            })
+            .on('data', datum => resolve(!!datum)) // Resolve as soon as data emitted
+            .on('end', () => resolve(false))
     })
-}
 
 export async function search({
     query = '',
