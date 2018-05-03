@@ -10,7 +10,6 @@ import {
     constants as onboardingConsts,
 } from './onboarding'
 import { selectors as filters, actions as filterActs } from './filters'
-import { SHOULD_TRACK_STORAGE_KEY } from 'src/options/privacy/constants'
 
 const parseBool = str => str === 'true'
 
@@ -73,7 +72,6 @@ const hydrateStateFromStorage = store => {
         onboardingActs.setImportsDone,
     )
     hydrate(onboardingConsts.STORAGE_KEYS.progress, onboardingActs.setProgress)
-    hydrate(SHOULD_TRACK_STORAGE_KEY, onboardingActs.setShouldTrack)
     hydrate(constants.SHOW_TOOL_TIP, actions.setShowTooltip)
     hydrate(constants.TOOL_TIP, actions.setTooltip)
 }
@@ -90,7 +88,6 @@ const syncStateToStorage = store =>
             onboarding.isImportsDone(state),
         )
         dump(onboardingConsts.STORAGE_KEYS.progress, onboarding.progress(state))
-        dump(SHOULD_TRACK_STORAGE_KEY, onboarding.shouldTrack(state))
         dump(constants.SHOW_TOOL_TIP, selectors.showTooltip(state))
         dump(constants.TOOL_TIP, selectors.tooltip(state))
     })

@@ -4,19 +4,38 @@ import analytics from 'src/analytics'
 import { IMPORT_TYPE as TYPE, CMDS } from 'src/options/imports/constants'
 import { IMPORT_CONN_NAME } from './constants'
 import * as selectors from './selectors'
+import { SHOULD_TRACK_STORAGE_KEY as SHOULD_TRACK } from '../../options/privacy/constants'
 
 export const setShouldTrack = createAction('onboarding/setShouldTrack')
-export const toggleShouldTrack = createAction('onboarding/toggleShouldTrack')
 export const setVisible = createAction('onboarding/setVisible')
 export const incProgress = createAction('onboarding/incProgress')
 export const setProgress = createAction('onboarding/setProgress')
 export const setImportsDone = createAction('onboarding/setImportsDone')
 export const setImportsStarted = createAction('onboarding/setImportsStarted')
 
+const persistShouldTrack = flag =>
+    browser.storage.local.set({ [SHOULD_TRACK]: flag })
+
 export const init = () => (dispatch, getState) => {
     if (selectors.isVisible(getState())) {
+        browser.storage.local
+            .get(SHOULD_TRACK)
+            .then(
+                storage =>
+                    storage[SHOULD_TRACK] == null
+                        ? persistShouldTrack(selectors.shouldTrack(getState()))
+                        : dispatch(setShouldTrack(!!storage[SHOULD_TRACK])),
+            )
+            .catch()
+
         return new ImportsConnHandler(IMPORT_CONN_NAME, dispatch, getState)
     }
+}
+
+export const toggleShouldTrack = () => async (dispatch, getState) => {
+    const toggled = !selectors.shouldTrack(getState())
+    await persistShouldTrack(toggled)
+    dispatch(setShouldTrack(toggled))
 }
 
 /**
