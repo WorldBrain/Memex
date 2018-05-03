@@ -1,5 +1,4 @@
 import urlRegex from 'url-regex'
-import Raven from 'raven-js'
 
 import 'src/activity-logger/background'
 import 'src/search/background'
@@ -21,15 +20,13 @@ import {
 import db from 'src/search/search-index-new'
 import * as models from 'src/search/search-index-new/models'
 import 'src/search/migration'
+import initSentry from './util/raven'
 
 window.index = searchIndex
 window.storage = db
 window.indexModels = models
 
-// Set up the sentry runtime error config
-if (process.env.SENTRY_DSN) {
-    Raven.config(process.env.SENTRY_DSN).install()
-}
+initSentry()
 
 export const OVERVIEW_URL = '/overview/overview.html'
 export const OPTIONS_URL = '/options/options.html'
