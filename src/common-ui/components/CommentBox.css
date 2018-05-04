@@ -1,10 +1,16 @@
+.commentBox {
+    margin-top: 10px;
+}
+
 .textarea {
     resize: none;
-    font-size: 15px;
+    font-size: 13px;
     color: #74bfa5;
-    border: none;
     font-family: 'Open Sans';
     background: #fdfbfb;
+    border: 1px #999 solid;
+    box-shadow: inset 0 0 9px -3px black;
+    padding: 5px;
 
     &:focus {
         outline: none;
@@ -15,11 +21,11 @@
     filter: saturation(0);
     cursor: not-allowed;
     opacity: 0.6;
-    padding: 5px;
-    border-radius: 5px;
-    border: none;
     background: #aaa;
-    color: white;
+    color: #fff;
+    padding: 3px 20px;
+    border-radius: 10px;
+    border: none;
 }
 
 .button {
@@ -27,6 +33,21 @@
     color: #fff;
     cursor: pointer;
     border: none;
-    border-radius: 5px;
-    padding: 5px;
+    border-radius: 10px;
+    padding: 3px 20px;
+}
+
+.cancel {
+    color: #aaa;
+    font-size: 12px;
+    margin-right: 10px;
+    margin-top: 2px;
+    cursor: pointer;
+}
+
+.buttonHolder {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
 }

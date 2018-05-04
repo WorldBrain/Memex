@@ -3,6 +3,9 @@ import PropTypes from 'prop-types'
 
 import styles from './CommentBox.css'
 
+const DEFAULT_ROWS = 5
+const MAX_CHARS_PER_ROW = 48
+
 class CommentBox extends React.Component {
     static propTypes = {
         comment: PropTypes.object,
@@ -11,67 +14,93 @@ class CommentBox extends React.Component {
     state = {
         commentInput: this.props.comment ? this.props.comment.body : '',
         isDisabled: true,
+        defaultRows: DEFAULT_ROWS,
     }
 
     componentDidMount() {
+        // Increase rows instead of having a scrollbar
+        this.inputRef.addEventListener('scroll', e => {
+            while (e.target.scrollTop) e.target.rows += 1
+        })
         this.inputRef.focus()
+
+        // Set the default rows for the passed comment
+        if (this.props.comment) {
+            const defaultRows = Math.ceil(
+                this.props.comment.body.length / MAX_CHARS_PER_ROW,
+            )
+            this.setState({
+                defaultRows,
+            })
+        }
     }
 
     handleChange = e => {
-        let disabled = true
+        let isDisabled = false
         const { comment } = this.props
-        if (!comment && e.target.value.length > 0) disabled = false
-        else if (comment && e.target.value !== comment.body) disabled = false
+
+        // Make isDisabled true if
+        // 1) No comment is already present and the input field is empty
+        // 2) Comment is already present and user has changed it
+        if (e.target.value.length === 0) {
+            isDisabled = true
+            this.inputRef.rows = DEFAULT_ROWS
+        } else if (comment && e.target.value === comment.body) {
+            isDisabled = true
+            this.inputRef.rows = this.state.defaultRows
+        }
         this.setState({
             commentInput: e.target.value,
-            isDisabled: disabled,
+            isDisabled,
         })
     }
 
     setInputRef = node => (this.inputRef = node)
 
-    cancel = () =>
+    cancel = () => {
+        this.inputRef.rows = this.state.defaultRows
+        this.inputRef.focus()
         this.setState({
             commentInput: this.props.comment.body,
             isDisabled: true,
         })
+    }
 
     renderCancelButton = () => {
-        if (this.props.comment && !this.state.isDisabled)
+        const { comment } = this.props
+        if (comment && this.state.commentInput !== comment.body)
             return (
-                <button
-                    className={
-                        this.state.isDisabled ? styles.disabled : styles.button
-                    }
-                    onClick={this.cancel}
-                >
+                <a className={styles.cancel} onClick={this.cancel}>
                     Cancel
-                </button>
+                </a>
             )
         return null
     }
 
     render() {
         return (
-            <div>
+            <div className={styles.commentBox}>
                 <textarea
-                    rows="5"
-                    cols="20"
+                    rows={this.state.defaultRows}
+                    cols="40"
                     className={styles.textarea}
-                    id="something"
                     value={this.state.commentInput}
                     onChange={this.handleChange}
                     ref={this.setInputRef}
                 />
                 <br />
-                <button
-                    className={styles.button}
-                    disabled={this.state.isDisabled}
-                >
-                    {this.props.comment ? 'Update' : 'Add'}
-                </button>
-
-                {this.renderCancelButton()}
+                <div className={styles.buttonHolder}>
+                    {this.renderCancelButton()}
+                    <button
+                        className={
+                            this.state.isDisabled
+                                ? styles.disabled
+                                : styles.button
+                        }
+                    >
+                        {this.props.comment ? 'Update' : 'Add'}
+                    </button>
+                </div>
             </div>
         )
     }
