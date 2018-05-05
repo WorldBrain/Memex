@@ -6,9 +6,9 @@ import { Wrapper } from 'src/common-ui/components'
 import DeleteConfirmModal from './DeleteConfirmModal'
 import Header from './Header'
 import styles from './Overview.css'
-import ShareButtons from './ShareButtons'
 import Tooltip from './Tooltip'
 import Head from 'src/options/containers/Head'
+import Sidebar from './Sidebar'
 
 const showFilterClass = ({ showFilters }) =>
     classNames({
@@ -29,7 +29,7 @@ const Overview = props => (
             isTooltipRenderable={props.isTooltipRenderable}
         />
 
-        <ShareButtons />
+        <Sidebar />
 
         <div className={showFilterClass(props)}>{props.filters}</div>
         <div
