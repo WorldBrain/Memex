@@ -1,0 +1,32 @@
+.customMenu {
+    position: fixed;
+    right: 0px;
+    z-index: 1100;
+    width: 340px;
+    height: 100%;
+    margin-top: -25px;
+    transition: all 0.5s;
+    box-shadow: -4px 2px 20px 1px rgba(62, 185, 149, 0.0902);
+}
+
+.sidebar {
+    padding: 30px 15px;
+    height: 100%;
+    background: #fff;
+}
+
+.sidebarTitle,
+.previous {
+    color: #3eb995;
+    margin-top: 0px;
+    margin-bottom: 5px;
+    font-weight: 100;
+}
+
+.sidebarTitle {
+    font-size: 18px;
+}
+
+.previous {
+    font-size: 15px;
+}
