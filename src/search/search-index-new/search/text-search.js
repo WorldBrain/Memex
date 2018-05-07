@@ -1,31 +1,25 @@
+import some from 'lodash/some'
+
 import db from '..'
 
 /**
  * Performs a query for a single term on a given multi-index.
  *
  * @param {string} term
- * @param {string} index
- * @return {Promise<string[]>} Resolves to Array of unique URL keys of matched Pages.
+ * @param {string[]} excluded
+ * @return {(index: string) => Promise<string[]>} Resolves to Array of unique URL keys of matched Pages.
  */
-const termQuery = (term, index) =>
-    db.pages
-        .where(index)
-        .equals(term)
-        .primaryKeys()
+const termQuery = (term, excluded) => index => {
+    let coll = db.pages.where(index).equals(term)
 
-/**
- * For a given term, run all index lookups at the same time. Return when done.
- *
- * @param {string} term
- */
-async function lookupTerm(term) {
-    const [content, title, url] = await Promise.all([
-        termQuery(term, 'terms'),
-        termQuery(term, 'titleTerms'),
-        termQuery(term, 'urlTerms'),
-    ])
+    // Adding a `.filter/.and` clause to a collection means it needs to iterate through
+    if (excluded && excluded.length) {
+        coll = coll.filter(
+            page => !some(page[index], term => excluded.includes(term)),
+        )
+    }
 
-    return { content, title, url }
+    return coll.primaryKeys()
 }
 
 const scoreTermResults = filteredUrls =>
@@ -55,13 +49,25 @@ const intersectTermResults = (a, b) =>
     new Map([...a].filter(([url]) => b.has(url)))
 
 /**
-* @param {SearchParams} params
-* @param {Set<string> | null} filteredUrls Opt. white-list of URLs to only include.
-* @return {Promise<Map<string, number>>} Map of found URL keys to score multipliers, depending on what index term found in.
-*/
-export async function textSearch({ queryTerms }, filteredUrls) {
+ * @param {SearchParams} params
+ * @param {Set<string> | null} filteredUrls Opt. white-list of URLs to only include.
+ * @return {Promise<Map<string, number>>} Map of found URL keys to score multipliers, depending on what index term found in.
+ */
+export async function textSearch({ terms, termsExclude }, filteredUrls) {
     // For each term create an object of with props of matched URL arrays for each index: content, title, and url
-    const termResults = await Promise.all(queryTerms.map(lookupTerm))
+    const termResults = await Promise.all(
+        [...terms].map(async term => {
+            const queryIndex = termQuery(term, termsExclude)
+
+            const [content, title, url] = await Promise.all([
+                queryIndex('terms'),
+                queryIndex('titleTerms'),
+                queryIndex('urlTerms'),
+            ])
+
+            return { content, title, url }
+        }),
+    )
 
     // Creates a Map of URLs to score multipliers, based on if they were found in title, URL, or content terms,
     //  These are intersected between results for separate words

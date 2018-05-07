@@ -13,7 +13,9 @@ export { suggest } from './suggest'
  * @typedef {Object} SearchParams
  * @property {string[]} [tags=[]]
  * @property {string[]} [domains=[]]
- * @property {string[]} [queryTerms=[]]
+ * @property {string[]} [domainsExclude=[]]
+ * @property {string[]} [terms=[]]
+ * @property {string[]} [termsExclude=[]]
  * @property {number} [startDate=0] Lower-bound for visit time.
  * @property {number} [endDate=Date.now()] Upper-bound for visit time.
  * @property {number} [skip=0]
@@ -40,6 +42,8 @@ export async function search({
         .filterTags(tags)
         .get()
 
+    console.log(qb)
+
     // Short-circuit search if bad term
     if (qb.isBadTerm) {
         return {
@@ -54,8 +58,10 @@ export async function search({
     const params = {
         ...restParams,
         bookmarks: showOnlyBookmarks,
-        queryTerms: [...qb.query],
+        terms: [...qb.query],
+        termsExclude: [...qb.queryExclude],
         domains: [...qb.domain],
+        domainsExclude: [...qb.domainExclude],
         tags: [...qb.tags],
     }
 
@@ -89,23 +95,26 @@ export async function getMatchingPageCount(pattern) {
  *
  * @param {SearchParams} params
  */
-async function fullSearch({ queryTerms = [], ...params }) {
+async function fullSearch({ terms = [], termsExclude = [], ...params }) {
     const filteredUrls = await findFilteredUrls(params)
 
     let totalCount = null
     let urlScoresMap
 
     // Few different cases of search params we can take short-cuts on
-    if (!queryTerms.length && filteredUrls != null) {
+    if (!terms.length && filteredUrls != null) {
         // Blank search + domain/tags filters: just grab the events for filtered URLs and paginate
         urlScoresMap = await mapUrlsToLatestEvents(params, filteredUrls)
         totalCount = urlScoresMap.size
-    } else if (!queryTerms.length) {
+    } else if (!terms.length) {
         // Blank search: simply do lookback from `endDate` on visits and score URLs by latest
         urlScoresMap = await groupLatestEventsByUrl(params)
     } else {
         // Terms search: do terms lookup first then latest event lookup (within time bounds) for each result
-        const urlScoreMultiMap = await textSearch({ queryTerms }, filteredUrls)
+        const urlScoreMultiMap = await textSearch(
+            { terms, termsExclude },
+            filteredUrls,
+        )
 
         const urls = new Set(urlScoreMultiMap.keys())
         const latestEvents = await mapUrlsToLatestEvents(params, urls)

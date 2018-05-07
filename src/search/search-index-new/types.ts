@@ -6,8 +6,10 @@ export type SearchResult = [PageID, PageScore]
 
 export interface SearchParams {
     domains: string[]
+    domainsExclude: string[]
     tags: string[]
-    queryTerms: string[]
+    terms: string[]
+    termsExclude: string[]
     endDate?: number
     startDate?: number
     skip: number
