@@ -50,6 +50,12 @@ const PageResultItem = props => (
                             ref={props.setTagButtonRef}
                         />
                         <button
+                            className={classNames(
+                                styles.button,
+                                styles.comment,
+                            )}
+                        />
+                        <button
                             disabled={props.isDeleting}
                             className={classNames(styles.button, styles.trash)}
                             onClick={props.onTrashBtnClick}

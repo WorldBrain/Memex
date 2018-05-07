@@ -193,6 +193,14 @@
     margin-top: 3px;
 }
 
+.comment {
+    background-image: url('/img/comment.svg');
+    opacity: 0.4;
+    width: 30px;
+    height: 30px;
+    margin-top: -1px;
+}
+
 .bookmark {
     background-image: url('/img/star_full.svg');
     opacity: 0.8;
