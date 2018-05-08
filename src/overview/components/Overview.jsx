@@ -29,8 +29,6 @@ const Overview = props => (
             isTooltipRenderable={props.isTooltipRenderable}
         />
 
-        <Sidebar />
-
         <div className={showFilterClass(props)}>{props.filters}</div>
         <div
             className={styles.main}

@@ -18,6 +18,7 @@ import ResultsMessage from './components/ResultsMessage'
 import TagPill from './components/TagPill'
 import Onboarding, { selectors as onboarding } from './onboarding'
 import Filters, { selectors as filters, actions as filterActs } from './filters'
+import Sidebar from './sidebar'
 import NoResultBadTerm from './components/NoResultBadTerm'
 import localStyles from './components/Overview.css'
 
@@ -265,6 +266,7 @@ class OverviewContainer extends Component {
                 >
                     {this.renderResults()}
                 </Overview>
+                <Sidebar />
                 <Onboarding />
             </Wrapper>
         )
