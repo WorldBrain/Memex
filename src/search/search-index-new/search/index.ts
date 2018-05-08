@@ -1,5 +1,5 @@
-import db from '..'
-import QueryBuilder from 'src/search/query-builder'
+import db, { SearchParams, PageResultsMap } from '..'
+import QueryBuilder from '../../query-builder'
 import { groupLatestEventsByUrl, mapUrlsToLatestEvents } from './events'
 import { mapResultsToDisplay } from './map-results-to-display'
 import { findFilteredUrls } from './filters'
@@ -9,31 +9,13 @@ import { paginate, applyScores } from './util'
 export { domainHasFavIcon } from './fav-icon'
 export { suggest } from './suggest'
 
-/**
- * @typedef {Object} SearchParams
- * @property {string[]} [tags=[]]
- * @property {string[]} [domains=[]]
- * @property {string[]} [domainsExclude=[]]
- * @property {string[]} [terms=[]]
- * @property {string[]} [termsExclude=[]]
- * @property {number} [startDate=0] Lower-bound for visit time.
- * @property {number} [endDate=Date.now()] Upper-bound for visit time.
- * @property {number} [skip=0]
- * @property {number} [limit=10]
- */
-
-/**
- * @typedef {Array} SearchResult
- * @property {string} 0 URL of found page.
- * @property {number} 1 Timestamp of latest event.
- */
 export async function search({
     query,
     showOnlyBookmarks,
     mapResultsFunc = mapResultsToDisplay,
     domains = [],
     tags = [],
-    ...restParams
+    ...restParams,
 }) {
     // Extract query terms via QueryBuilder (may change)
     const qb = new QueryBuilder()
@@ -41,8 +23,6 @@ export async function search({
         .filterDomains(domains)
         .filterTags(tags)
         .get()
-
-    console.log(qb)
 
     // Short-circuit search if bad term
     if (qb.isBadTerm) {
@@ -63,16 +43,16 @@ export async function search({
         domains: [...qb.domain],
         domainsExclude: [...qb.domainExclude],
         tags: [...qb.tags],
-    }
+    } as SearchParams
 
     const { docs, totalCount } = await db.transaction(
         'r',
         db.tables,
         async () => {
             const results = await fullSearch(params)
-            const docs = await mapResultsFunc(results.ids, params)
+            const mappedDocs = await mapResultsFunc(results.ids, params)
 
-            return { docs, totalCount: results.totalCount }
+            return { docs: mappedDocs, totalCount: results.totalCount }
         },
     )
 
@@ -92,19 +72,24 @@ export async function getMatchingPageCount(pattern) {
 
 /**
  * Main search logic. Calls the rest of serach depending on input search params.
- *
- * @param {SearchParams} params
  */
-async function fullSearch({ terms = [], termsExclude = [], ...params }) {
+async function fullSearch({
+    terms = [],
+    termsExclude = [],
+    ...params,
+}: SearchParams) {
     const filteredUrls = await findFilteredUrls(params)
 
-    let totalCount = null
-    let urlScoresMap
+    let totalCount: number = null
+    let urlScoresMap: PageResultsMap
 
     // Few different cases of search params we can take short-cuts on
-    if (!terms.length && filteredUrls != null) {
+    if (!terms.length && filteredUrls.isDataFiltered) {
         // Blank search + domain/tags filters: just grab the events for filtered URLs and paginate
-        urlScoresMap = await mapUrlsToLatestEvents(params, filteredUrls)
+        urlScoresMap = await mapUrlsToLatestEvents(
+            params as any,
+            filteredUrls.include,
+        )
         totalCount = urlScoresMap.size
     } else if (!terms.length) {
         // Blank search: simply do lookback from `endDate` on visits and score URLs by latest
@@ -117,7 +102,7 @@ async function fullSearch({ terms = [], termsExclude = [], ...params }) {
         )
 
         const urls = new Set(urlScoreMultiMap.keys())
-        const latestEvents = await mapUrlsToLatestEvents(params, urls)
+        const latestEvents = await mapUrlsToLatestEvents(params as any, urls)
 
         urlScoresMap = applyScores(urlScoreMultiMap, latestEvents)
         totalCount = urlScoresMap.size
