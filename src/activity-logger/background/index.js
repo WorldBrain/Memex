@@ -29,11 +29,12 @@ browser.tabs.onActivated.addListener(({ tabId }) =>
 
 // Runs stage 3 of the visit indexing
 browser.tabs.onRemoved.addListener(tabId => {
-    try {
-        // Remove tab from tab tracking state and update the visit with tab-derived metadata
-        const tab = tabManager.removeTab(tabId)
+    // Remove tab from tab tracking state and update the visit with tab-derived metadata
+    const tab = tabManager.removeTab(tabId)
+
+    if (tab != null) {
         updateVisitInteractionData(tab)
-    } catch (error) {}
+    }
 })
 
 /**

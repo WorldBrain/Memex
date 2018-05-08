@@ -18,16 +18,10 @@ export class TabManager {
 
     /**
      * @param {number} id The ID of the tab as assigned by web ext API.
-     * @returns {Tab} The state for tab stored under given ID.
-     * @throws {Error} If input `id` does not correspond to any tab stored in state.
+     * @returns {Tab|undefined} The state for tab stored under given ID, or undefined if no matching tab.
      */
     getTabState(id) {
-        const tab = this._tabs.get(id)
-        if (tab == null) {
-            throw new Error(`No tab stored under ID: ${id}`)
-        }
-
-        return tab
+        return this._tabs.get(id)
     }
 
     /**
@@ -36,11 +30,15 @@ export class TabManager {
      */
     removeTab(id) {
         const toRemove = this.getTabState(id)
-        toRemove.cancelPendingOps()
-        this._tabs.delete(id)
 
-        // If still active when closed, toggle active state to force time recalc
-        toRemove.toggleActiveState()
+        if (toRemove != null) {
+            toRemove.cancelPendingOps()
+            this._tabs.delete(id)
+
+            // If still active when closed, toggle active state to force time recalc
+            toRemove.toggleActiveState()
+        }
+
         return toRemove
     }
 
@@ -52,14 +50,18 @@ export class TabManager {
      */
     resetTab(id, activeState, url) {
         const oldTab = this.removeTab(id)
-        this._tabs.set(
-            id,
-            new Tab({
-                isActive: activeState,
-                navState: oldTab.navState,
-                url,
-            }),
-        )
+
+        if (oldTab != null) {
+            this._tabs.set(
+                id,
+                new Tab({
+                    isActive: activeState,
+                    navState: oldTab.navState,
+                    url,
+                }),
+            )
+        }
+
         return oldTab
     }
 
@@ -82,17 +84,19 @@ export class TabManager {
      * @param {() => Promise<void>} cb The page log logic to delay.
      */
     scheduleTabLog(id, logCb) {
-        try {
-            const tab = this.getTabState(id)
+        const tab = this.getTabState(id)
+
+        if (tab != null) {
             tab.scheduleLog(logCb)
-        } catch (err) {}
+        }
     }
 
     clearScheduledLog(id) {
-        try {
-            const tab = this.getTabState(id)
+        const tab = this.getTabState(id)
+
+        if (tab != null) {
             tab.cancelPendingOps()
-        } catch (err) {}
+        }
     }
 
     /**
@@ -100,10 +104,11 @@ export class TabManager {
      * @param {any} newState The new scroll state to set.
      */
     updateTabScrollState(id, newState) {
-        try {
-            const tab = this.getTabState(id)
+        const tab = this.getTabState(id)
+
+        if (tab != null) {
             tab.scrollState.updateState(newState)
-        } catch (err) {}
+        }
     }
 
     /**
@@ -112,10 +117,11 @@ export class TabManager {
      *  and ` webNavigation.TransitionType` under `type` prop.
      */
     updateNavState(id, navState) {
-        try {
-            const tab = this.getTabState(id)
+        const tab = this.getTabState(id)
+
+        if (tab != null) {
             tab.navState = navState
-        } catch (err) {}
+        }
     }
 }
 

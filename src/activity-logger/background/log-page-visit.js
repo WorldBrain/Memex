@@ -14,7 +14,12 @@ export async function logInitPageVisit(tabId, secsSinceLastIndex = 20) {
     const tab = await browser.tabs.get(tabId)
     console.log('indexing page title & url:', tab.url)
 
-    const { visitTime } = tabManager.getTabState(tabId)
+    const tabState = tabManager.getTabState(tabId)
+
+    // If tab is untracked, can't log it
+    if (tabState == null) {
+        return
+    }
 
     try {
         const existingPage = await searchIndex.getPage(tab.url)
@@ -24,11 +29,14 @@ export async function logInitPageVisit(tabId, secsSinceLastIndex = 20) {
             //  also clear scheduled content indexing
             if (
                 moment(existingPage.latest).isAfter(
-                    moment(+visitTime).subtract(secsSinceLastIndex, 'seconds'),
+                    moment(+tabState.visitTime).subtract(
+                        secsSinceLastIndex,
+                        'seconds',
+                    ),
                 )
             ) {
                 tabManager.clearScheduledLog(tabId)
-                return await searchIndex.addVisit(tab.url, +visitTime)
+                return await searchIndex.addVisit(tab.url, +tabState.visitTime)
             }
         }
 
@@ -40,7 +48,7 @@ export async function logInitPageVisit(tabId, secsSinceLastIndex = 20) {
 
         await searchIndex.addPage({
             pageDoc: { url: tab.url, ...analysisRes },
-            visits: [visitTime],
+            visits: [tabState.visitTime],
             rejectNoContent: false,
         })
     } catch (err) {

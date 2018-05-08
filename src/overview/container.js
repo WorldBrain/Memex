@@ -34,7 +34,7 @@ class OverviewContainer extends Component {
         showInitSearchMsg: PropTypes.bool.isRequired,
         resetActiveTagIndex: PropTypes.func.isRequired,
         searchResults: PropTypes.arrayOf(PropTypes.object).isRequired,
-        totalResultCount: PropTypes.number.isRequired,
+        totalResultCount: PropTypes.number,
         shouldShowCount: PropTypes.bool.isRequired,
         needsWaypoint: PropTypes.bool.isRequired,
         handleTrashBtnClick: PropTypes.func.isRequired,

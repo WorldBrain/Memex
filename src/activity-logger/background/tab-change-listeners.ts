@@ -21,6 +21,7 @@ export const handleVisitEnd: TabChangeListener = async function(
 
     // Send off request for updating that prev. visit's tab state, if active long enough
     if (
+        oldTab != null &&
         oldTab.url !== url &&
         oldTab.activeTime > fauxVisitThreshold &&
         (await shouldLogTab({ url: oldTab.url, incognito } as Tabs.Tab))

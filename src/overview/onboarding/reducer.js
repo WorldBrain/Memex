@@ -18,10 +18,6 @@ export default createReducer(
             ...state,
             shouldTrack,
         }),
-        [actions.toggleShouldTrack]: state => ({
-            ...state,
-            shouldTrack: !state.shouldTrack,
-        }),
         [actions.setVisible]: (state, isVisible) => ({ ...state, isVisible }),
         [actions.setProgress]: (state, progress) => ({ ...state, progress }),
         [actions.incProgress]: (state, inc = 1) => ({

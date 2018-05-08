@@ -1,14 +1,12 @@
 import 'babel-polyfill'
 import React from 'react'
 import { render } from 'react-dom'
-import Raven from 'raven-js'
 
+import initSentry from '../util/raven'
 import { ErrorBoundary, RuntimeError } from 'src/common-ui/components'
 import Popup from './container'
 
-if (process.env.SENTRY_DSN) {
-    Raven.config(process.env.SENTRY_DSN).install()
-}
+initSentry()
 
 render(
     <ErrorBoundary component={RuntimeError}>

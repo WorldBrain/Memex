@@ -1,6 +1,7 @@
 import { createStore, combineReducers, compose, applyMiddleware } from 'redux'
 import thunk from 'redux-thunk'
 
+import initSentry from '../util/raven'
 import * as imports from './imports'
 import * as blacklist from './blacklist'
 import * as privacy from './privacy'
@@ -12,10 +13,14 @@ const rootReducer = combineReducers({
 })
 
 export default function configureStore({ ReduxDevTools = undefined } = {}) {
+    const middlewares = [thunk]
+
+    initSentry(middlewares)
+
     const enhancers = [
         imports.enhancer,
         privacy.enhancer,
-        applyMiddleware(thunk),
+        applyMiddleware(...middlewares),
     ]
 
     if (ReduxDevTools) {

@@ -1,4 +1,5 @@
 import urlRegex from 'url-regex'
+
 import 'src/activity-logger/background'
 import 'src/search/background'
 import 'src/analytics/background'
@@ -19,10 +20,13 @@ import {
 import db from 'src/search/search-index-new'
 import * as models from 'src/search/search-index-new/models'
 import 'src/search/migration'
+import initSentry from './util/raven'
 
 window.index = searchIndex
 window.storage = db
 window.indexModels = models
+
+initSentry()
 
 export const OVERVIEW_URL = '/overview/overview.html'
 export const OPTIONS_URL = '/options/options.html'
