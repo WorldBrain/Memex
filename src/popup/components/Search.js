@@ -6,6 +6,7 @@ import styles from './Popup.css'
 const Search = ({ onSearchEnter, onSearchChange, searchValue }) => (
     <form className={styles.searchContainer}>
         <input
+            autoFocus
             className={styles.search}
             name="query"
             placeholder="Search your memory"
