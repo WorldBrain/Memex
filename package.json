@@ -92,6 +92,7 @@
     "reselect": "^3.0.1",
     "response-to-data-url": "^0.1.0",
     "rxjs": "^5.5.5",
+    "scroll-to-element": "^2.0.0",
     "through2": "^2.0.3",
     "url-regex": "^4.1.1",
     "webextension-polyfill": "^0.2.1",
