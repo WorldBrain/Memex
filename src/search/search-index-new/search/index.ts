@@ -86,14 +86,13 @@ async function fullSearch({
     // Few different cases of search params we can take short-cuts on
     if (!terms.length && filteredUrls.isDataFiltered) {
         // Blank search + domain/tags filters: just grab the events for filtered URLs and paginate
-        urlScoresMap = await mapUrlsToLatestEvents(
-            params as any,
-            filteredUrls.include,
-        )
+        urlScoresMap = await mapUrlsToLatestEvents(params, [
+            ...filteredUrls.include,
+        ])
         totalCount = urlScoresMap.size
     } else if (!terms.length) {
         // Blank search: simply do lookback from `endDate` on visits and score URLs by latest
-        urlScoresMap = await groupLatestEventsByUrl(params)
+        urlScoresMap = await groupLatestEventsByUrl(params, filteredUrls)
     } else {
         // Terms search: do terms lookup first then latest event lookup (within time bounds) for each result
         const urlScoreMultiMap = await textSearch(
@@ -101,8 +100,8 @@ async function fullSearch({
             filteredUrls,
         )
 
-        const urls = new Set(urlScoreMultiMap.keys())
-        const latestEvents = await mapUrlsToLatestEvents(params as any, urls)
+        const urls = [...urlScoreMultiMap.keys()]
+        const latestEvents = await mapUrlsToLatestEvents(params, urls)
 
         urlScoresMap = applyScores(urlScoreMultiMap, latestEvents)
         totalCount = urlScoresMap.size
