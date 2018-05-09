@@ -168,6 +168,10 @@ amdefine@>=0.0.4:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/amdefine/-/amdefine-1.0.1.tgz#4a5282ac164729e93619bcfd3ad151f817ce91f5"
 
+ancestors@0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/ancestors/-/ancestors-0.0.3.tgz#124eb944447d68b302057047d15d077a9da5179d"
+
 ansi-align@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/ansi-align/-/ansi-align-2.0.0.tgz#c36aeccba563b89ceb556f3690f0b1d9e3547f7f"
@@ -2744,6 +2748,35 @@ doiuse@^2.4.1:
     through2 "^0.6.3"
     yargs "^3.5.4"
 
+dom-anchor-text-position@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/dom-anchor-text-position/-/dom-anchor-text-position-4.0.0.tgz#4c839b3bded94f0cab0f06a0189468f3f1ec2bb2"
+  dependencies:
+    dom-node-iterator "^3.5.0"
+    dom-seek "^4.0.1"
+
+dom-anchor-text-quote@^4.0.2:
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/dom-anchor-text-quote/-/dom-anchor-text-quote-4.0.2.tgz#2a1e0cd4e06c79b0bfa1284aecbf7062028fc2d7"
+  dependencies:
+    diff-match-patch "^1.0.0"
+    dom-anchor-text-position "^4.0.0"
+
+dom-highlight-range@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/dom-highlight-range/-/dom-highlight-range-1.0.1.tgz#0634cb60fcf4565c2b222e32b66c626358148747"
+
+dom-node-iterator@^3.5.0:
+  version "3.5.3"
+  resolved "https://registry.yarnpkg.com/dom-node-iterator/-/dom-node-iterator-3.5.3.tgz#32b68aa440962f1734487029f544a3db704637b7"
+
+dom-seek@^4.0.1:
+  version "4.0.3"
+  resolved "https://registry.yarnpkg.com/dom-seek/-/dom-seek-4.0.3.tgz#f14dddf04b3fb062d901c7b00b0c142a06e0a94b"
+  dependencies:
+    ancestors "0.0.3"
+    index-of "^0.2.0"
+
 dom-serializer@0, dom-serializer@~0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/dom-serializer/-/dom-serializer-0.1.0.tgz#073c697546ce0780ce23be4a28e293e40bc30c82"
@@ -4407,6 +4440,10 @@ indent-string@^2.1.0:
 indent-string@^3.0.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/indent-string/-/indent-string-3.2.0.tgz#4a5fd6d27cc332f37e5419a504dbb837105c9289"
+
+index-of@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/index-of/-/index-of-0.2.0.tgz#38c1e2367ea55dffad3b6eb592ec1cc3090d7d65"
 
 indexes-of@^1.0.1:
   version "1.0.1"
