@@ -245,6 +245,10 @@ input[type='checkbox'] {
     border-radius: 5px;
 }
 
+.isExclusive {
+    background-color: #ff4600;
+}
+
 .bookmarks {
     height: 19px;
     padding-top: 2px;

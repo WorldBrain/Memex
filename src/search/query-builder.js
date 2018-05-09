@@ -1,4 +1,5 @@
 import transformPageText from 'src/util/transform-page-text'
+import { DOMAIN_TLD_PATTERN, HASH_TAG_PATTERN } from 'src/overview/constants'
 import { DEFAULT_TERM_SEPARATOR } from './util'
 
 /**
@@ -17,10 +18,10 @@ import { DEFAULT_TERM_SEPARATOR } from './util'
 
 class QueryBuilder {
     // Pattern to match entire string to `domain.tld`-like format + optional subdomain prefix and ccTLD postfix
-    static DOMAIN_TLD_PATTERN = /^(\w+\.)?[\w-]{2,}\.\w{2,3}(\.\w{2})?$/
+    static DOMAIN_TLD_PATTERN = DOMAIN_TLD_PATTERN
 
     // Pattern to match hashtags - spaces can be represented via '+'
-    static HASH_TAG_PATTERN = /^-?#\w[\w+]*$/
+    static HASH_TAG_PATTERN = HASH_TAG_PATTERN
     static EXCLUDE_PATTERN = /^-\w+/
 
     /**
@@ -113,11 +114,15 @@ class QueryBuilder {
 
     filterDomains(domains = []) {
         for (const domain of domains) {
-            if (QueryBuilder.EXCLUDE_PATTERN.test(domain)) {
-                this.domainExclude.add(domain)
-            } else {
-                this.domain.add(domain)
-            }
+            this.domain.add(domain)
+        }
+
+        return this
+    }
+
+    filterExcDomains(domains = []) {
+        for (const domain of domains) {
+            this.domainExclude.add(domain)
         }
 
         return this

@@ -143,7 +143,8 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
         ...currentQueryParams,
         showOnlyBookmarks: filters.onlyBookmarks(state),
         tags: filters.tags(state),
-        domains: filters.domains(state),
+        domains: filters.domainsInc(state),
+        domainsExclude: filters.domainsExc(state),
         limit: constants.PAGE_SIZE,
         skip: selectors.resultsSkip(state),
     }
@@ -287,7 +288,12 @@ export const setQueryTagsDomains = (input, isEnter) => (dispatch, getState) => {
             // If 'domain.tld.cctld?' pattern in input, remove it and add to filter state
             if (constants.DOMAIN_TLD_PATTERN.test(term)) {
                 removeFromInputVal(term)
-                dispatch(filterActs.toggleDomainFilter(term))
+
+                if (term.startsWith('-')) {
+                    dispatch(filterActs.toggleExcDomainFilter(term.slice(1)))
+                } else {
+                    dispatch(filterActs.toggleIncDomainFilter(term))
+                }
             }
         })
     }

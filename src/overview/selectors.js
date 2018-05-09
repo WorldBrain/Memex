@@ -157,7 +157,7 @@ export const isEmptyQuery = createSelector(
     currentQueryParams,
     filterSelectors.onlyBookmarks,
     filterSelectors.tags,
-    filterSelectors.domains,
+    filterSelectors.displayDomains,
     (
         { query, startDate, endDate },
         showOnlyBookmarks,

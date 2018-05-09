@@ -14,11 +14,14 @@ const searchUpdateActions = [
     filterActs.addTagFilter.getType(),
     filterActs.delTagFilter.getType(),
     filterActs.toggleTagFilter.getType(),
-    filterActs.addDomainFilter.getType(),
-    filterActs.delDomainFilter.getType(),
-    filterActs.resetFilters.getType(),
+    filterActs.addIncDomainFilter.getType(),
+    filterActs.addExcDomainFilter.getType(),
+    filterActs.delIncDomainFilter.getType(),
+    filterActs.delExcDomainFilter.getType(),
+    filterActs.setIncDomainFilters.getType(),
+    filterActs.setExcDomainFilters.getType(),
     filterActs.setTagFilters.getType(),
-    filterActs.setDomainFilters.getType(),
+    filterActs.resetFilters.getType(),
     onboardingActs.setVisible.getType(),
 ]
 

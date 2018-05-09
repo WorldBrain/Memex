@@ -14,6 +14,7 @@ export async function search({
     showOnlyBookmarks,
     mapResultsFunc = mapResultsToDisplay,
     domains = [],
+    domainsExclude = [],
     tags = [],
     ...restParams,
 }) {
@@ -21,6 +22,7 @@ export async function search({
     const qb = new QueryBuilder()
         .searchTerm(query)
         .filterDomains(domains)
+        .filterExcDomains(domainsExclude)
         .filterTags(tags)
         .get()
 

@@ -7,7 +7,8 @@ const defaultState = {
     onlyBookmarks: false,
     popup: '', // Blank is no popup shown, 'tag' is tags filter, 'domain' is domains filter
     tags: [],
-    domains: [],
+    domainsInc: [],
+    domainsExc: [],
 }
 
 const addFilter = filterKey => (state, value) => ({
@@ -80,11 +81,15 @@ export default createReducer(
         [actions.addTagFilter]: addFilter('tags'),
         [actions.delTagFilter]: delFilter('tags'),
         [actions.toggleTagFilter]: toggleFilter('tags'),
-        [actions.addDomainFilter]: addFilter('domains'),
-        [actions.delDomainFilter]: delFilter('domains'),
-        [actions.toggleDomainFilter]: toggleFilter('domains'),
+        [actions.addExcDomainFilter]: addFilter('domainsExc'),
+        [actions.delExcDomainFilter]: delFilter('domainsExc'),
+        [actions.addIncDomainFilter]: addFilter('domainsInc'),
+        [actions.delIncDomainFilter]: delFilter('domainsInc'),
+        [actions.toggleIncDomainFilter]: toggleFilter('domainsInc'),
+        [actions.toggleExcDomainFilter]: toggleFilter('domainsExc'),
         [actions.setTagFilters]: setFilters('tags'),
-        [actions.setDomainFilters]: setFilters('domains'),
+        [actions.setIncDomainFilters]: setFilters('domainsInc'),
+        [actions.setExcDomainFilters]: setFilters('domainsExc'),
         [actions.toggleBookmarkFilter]: toggleBookmarkFilter,
         [actions.showFilter]: state => ({
             ...state,
