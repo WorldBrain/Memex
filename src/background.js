@@ -3,6 +3,7 @@ import urlRegex from 'url-regex'
 import 'src/activity-logger/background'
 import 'src/search/background'
 import 'src/analytics/background'
+import 'src/direct-linking/background'
 import 'src/omnibar'
 import { installTimeStorageKey } from 'src/imports/background'
 import {
