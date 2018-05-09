@@ -1,4 +1,4 @@
-import { bodyLoader } from './utils'
+import { bodyLoader } from 'src/util/loader'
 import * as interactions from './interactions'
 
 export async function init() {

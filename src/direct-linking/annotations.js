@@ -28,7 +28,7 @@ export async function descriptorToRange({ descriptor }) {
     return textQuote.toRange(root, descriptor.content)
 }
 
-export default function markRange({ range, cssClass }) {
+export function markRange({ range, cssClass }) {
     highlightRange(range, cssClass)
 }
 
