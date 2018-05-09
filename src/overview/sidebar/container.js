@@ -18,10 +18,12 @@ class SidebarContainer extends React.Component {
 
     render() {
         return (
-            <Sidebar
-                showSidebar={this.props.showSidebar}
-                handleStateChange={this.handleStateChange}
-            />
+            <div>
+                <Sidebar
+                    showSidebar={this.props.showSidebar}
+                    handleStateChange={this.handleStateChange}
+                />
+            </div>
         )
     }
 }

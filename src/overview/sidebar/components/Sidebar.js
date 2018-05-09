@@ -13,7 +13,7 @@ const extraStyles = {
     bmMenu: {
         position: 'fixed',
         right: 0,
-        top: '100px',
+        top: '97px',
         zIndex: 1100,
         width: '340px',
         height: '100%',
@@ -26,6 +26,10 @@ const extraStyles = {
         height: 0,
         display: 'none',
     },
+    bmOverlay: {
+        top: '71px',
+        left: 0,
+    },
 }
 
 const Sidebar = ({ showSidebar, handleStateChange }) => (
@@ -35,7 +39,6 @@ const Sidebar = ({ showSidebar, handleStateChange }) => (
         width={340}
         styles={extraStyles}
         right
-        noOverlay
     >
         <div className={styles.sidebar}>
             <p className={styles.sidebarTitle}>Highlights</p>

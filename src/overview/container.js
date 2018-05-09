@@ -18,7 +18,7 @@ import ResultsMessage from './components/ResultsMessage'
 import TagPill from './components/TagPill'
 import Onboarding, { selectors as onboarding } from './onboarding'
 import Filters, { selectors as filters, actions as filterActs } from './filters'
-import Sidebar from './sidebar'
+import Sidebar, { actions as sidebarActs } from './sidebar'
 import NoResultBadTerm from './components/NoResultBadTerm'
 import localStyles from './components/Overview.css'
 
@@ -42,6 +42,7 @@ class OverviewContainer extends Component {
         handleTrashBtnClick: PropTypes.func.isRequired,
         handleToggleBm: PropTypes.func.isRequired,
         handleTagBtnClick: PropTypes.func.isRequired,
+        handleCommentBtnClick: PropTypes.func.isRequired,
         handlePillClick: PropTypes.func.isRequired,
         addTag: PropTypes.func.isRequired,
         delTag: PropTypes.func.isRequired,
@@ -125,6 +126,7 @@ class OverviewContainer extends Component {
                 tagManager={this.renderTagsManager(doc, i)}
                 setTagButtonRef={this.setTagButtonRef}
                 onTagBtnClick={this.props.handleTagBtnClick(i)}
+                onCommentBtnClick={this.props.handleCommentBtnClick(doc)}
                 tagPills={this.renderTagPills(doc, i)}
                 {...doc}
             />
@@ -334,6 +336,10 @@ const mapDispatchToProps = dispatch => ({
     handlePillClick: tag => event => {
         event.preventDefault()
         dispatch(filterActs.toggleTagFilter(tag))
+    },
+    handleCommentBtnClick: doc => event => {
+        event.preventDefault()
+        dispatch(sidebarActs.setShowSidebar(true))
     },
     addTag: resultIndex => tag => dispatch(actions.addTag(tag, resultIndex)),
     delTag: resultIndex => tag => dispatch(actions.delTag(tag, resultIndex)),
