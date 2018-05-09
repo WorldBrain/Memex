@@ -1,4 +1,5 @@
 import { delayed } from './utils'
+import { createDirectLink } from '../direct-linking/interactions'
 
 export function setupTooltipTrigger() {
     document.body.addEventListener('mouseup', () => {
@@ -6,7 +7,7 @@ export function setupTooltipTrigger() {
     })
 }
 
-export const conditionallyTriggerTooltip = delayed(() => {
+export const conditionallyTriggerTooltip = delayed(async () => {
     if (isTooltipShown()) {
         return
     }
@@ -16,6 +17,7 @@ export const conditionallyTriggerTooltip = delayed(() => {
     }
 
     console.log('show tooltip')
+    console.log(await createDirectLink())
 }, 300)
 
 function isTooltipShown() {}
