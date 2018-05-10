@@ -60,22 +60,28 @@ class QueryBuilder {
     isBadTerm = false
     showOnlyBookmarks = false
 
+    constructor(useOld = false) {
+        this.useOld = useOld
+    }
+
     /**
      * @returns {IndexQuery}
      * @memberof QueryBuilder
      */
-    get = () => ({
-        query: this.query,
-        queryExclude: this.queryExclude,
-        limit: this.limit,
-        skip: this.skip,
-        domain: this.domain,
-        domainExclude: this.domainExclude,
-        tags: this.tags,
-        isBadTerm: this.isBadTerm,
-        timeFilter: this.timeFilter,
-        bookmarksFilter: this.showOnlyBookmarks,
-    });
+    get() {
+        return {
+            query: this.query,
+            queryExclude: this.queryExclude,
+            limit: this.limit,
+            skip: this.skip,
+            domain: this.domain,
+            domainExclude: this.domainExclude,
+            tags: this.tags,
+            isBadTerm: this.isBadTerm,
+            timeFilter: this.timeFilter,
+            bookmarksFilter: this.showOnlyBookmarks,
+        }
+    }
 
     skipUntil(skip) {
         this.skip = skip
@@ -143,7 +149,10 @@ class QueryBuilder {
             }
 
             if (QueryBuilder.DOMAIN_TLD_PATTERN.test(term)) {
-                this[isExclusive ? 'domainExclude' : 'domain'].add(term)
+                const domainIndex =
+                    isExclusive && !this.useOld ? 'domainExclude' : 'domain'
+
+                this[domainIndex].add(term)
                 continue
             }
 

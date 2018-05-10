@@ -46,7 +46,7 @@ export async function search({
     query = query.trim() // Don't count whitespace searches
 
     // Create SI query
-    const indexQuery = new QueryBuilder()
+    const indexQuery = new QueryBuilder(true)
         .searchTerm(query)
         .filterTime({ startDate, endDate }, 'bookmark/')
         .filterTime({ startDate, endDate }, 'visit/')
