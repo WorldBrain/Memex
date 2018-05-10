@@ -1,17 +1,20 @@
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
+import DirectLinkingBackend from './backend'
 import { setupRequestInterceptor } from './redirect'
 import { AnnotationRequests } from './request'
 
+const backend = new DirectLinkingBackend()
 const sendAnnotation = ({ tabId, annotation }) => {
-    console.log('sending msg to', tabId)
     browser.tabs.sendMessage(tabId, { type: 'direct-link', annotation })
 }
-const requests = new AnnotationRequests(sendAnnotation)
+const requests = new AnnotationRequests(backend, sendAnnotation)
 makeRemotelyCallable(
     {
         followAnnotationRequest: ({ tab }) => {
-            console.log('following request', tab.id)
             requests.followAnnotationRequest(tab.id)
+        },
+        createDirectLink: (info, request) => {
+            return backend.createDirectLink(request)
         },
     },
     { insertExtraArg: true },

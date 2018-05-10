@@ -1,5 +1,5 @@
 import { bodyLoader } from 'src/util/loader'
-import { remoteFunction } from '../util/webextensionRPC'
+import { remoteFunction } from 'src/util/webextensionRPC'
 import * as rendering from './rendering'
 import * as interactions from './interactions'
 
