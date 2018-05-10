@@ -23,9 +23,15 @@ const termQuery = (term: string, excluded: string[]) => (
 
     // Adding a `.filter/.and` clause to a collection means it needs to iterate through
     if (excluded.length) {
-        coll = coll.filter(
-            page => !some(page[index], t => excluded.includes(t)),
-        )
+        coll = coll.filter(page => {
+            const uniqueTerms = new Set([
+                ...page.terms,
+                ...page.titleTerms,
+                ...page.urlTerms,
+            ])
+
+            return !some(excluded, t => uniqueTerms.has(t))
+        })
     }
 
     return coll.primaryKeys()
@@ -57,7 +63,10 @@ const scoreTermResults = (filteredUrls: FilteredURLs) =>
         const add = (multiplier: number) => (url: string) => {
             const existing = urlScoreMap.get(url)
 
-            if (filteredUrls.isAllowed(url) && (!existing || existing < multiplier)) {
+            if (
+                filteredUrls.isAllowed(url) &&
+                (!existing || existing < multiplier)
+            ) {
                 urlScoreMap.set(url, multiplier)
             }
         }
