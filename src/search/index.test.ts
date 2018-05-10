@@ -622,17 +622,18 @@ const runSuite = useOld => () => {
         })
 
         test('delete pages by domain', async () => {
-            const { docs: existingDocs } = await search({
+            const { docs: preDelete } = await search({
                 domains: ['test.com'],
             })
-            expect(existingDocs.length).toBe(1)
+            expect(preDelete.length).toBe(1)
 
             await index.delPagesByDomain('test.com')
 
-            const { docs: deletedDocs } = await search({
+            const { docs: postDelete } = await search({
                 domains: ['test.com'],
             })
-            expect(deletedDocs.length).toBe(0)
+
+            expect(postDelete).not.toEqual(preDelete)
         })
 
         // TODO: This is a HACK. Something gets very messed up testing the old version...
