@@ -46,6 +46,10 @@
     &:hover .notBookmark {
         opacity: 0.5;
     }
+
+    &:hover .comment {
+        opacity: 0.5;
+    }
 }
 
 /* List entries shown as context around a search result */
