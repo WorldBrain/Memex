@@ -249,7 +249,12 @@ gulp.task('lint-watch', ['lint'], callback => {
     })
 
     gulp.watch(['src/**/*.css']).on('change', event => {
-        return gulp.src(event.path).pipe(stylelint(stylelintOptions))
+        return gulp.src(event.path).pipe(
+            stylelint({
+                ...stylelintOptions,
+                failAfterError: false,
+            }),
+        )
     })
 
     // Don't call callback, to wait forever.
