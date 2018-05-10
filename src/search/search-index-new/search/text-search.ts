@@ -1,11 +1,11 @@
-import some from 'lodash/some'
-
 import db, {
     SearchParams,
     FilteredURLs,
     TermsIndexName,
     PageResultsMap,
 } from '..'
+
+const some = require('lodash/some')
 
 export interface TermResults {
     content: string[]
