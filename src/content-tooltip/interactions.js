@@ -1,5 +1,5 @@
 import { delayed } from './utils'
-import { createDirectLink } from '../direct-linking/interactions'
+import { createDirectLink } from '../direct-linking/content_script/interactions'
 
 export function setupTooltipTrigger() {
     document.body.addEventListener('mouseup', () => {
