@@ -1,11 +1,11 @@
 import scrollToElement from 'scroll-to-element'
+import { remoteFunction } from 'src/util/webextensionRPC'
 import * as annotations from './annotations'
-import * as backend from './backend'
 
 export async function createDirectLink() {
     const url = window.location.href
     const anchor = await extractAnchor()
-    return backend.createAnnotationLink({ url, anchor })
+    return await remoteFunction('createDirectLink')({ url, anchor })
 }
 
 async function extractAnchor() {

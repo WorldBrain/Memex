@@ -1,3 +1,5 @@
+import DirectLinkingBackend from './backend'
+
 export type Annotation = any
 
 // This thing sends the annotation back to the tab once it's loaded
@@ -21,16 +23,11 @@ interface StoredAnnotationRequestMap {
 export class AnnotationRequests {
     private requests: StoredAnnotationRequestMap = {}
 
-    constructor(private annotationSender: AnnotationSender) {
+    constructor(private backend: DirectLinkingBackend, private annotationSender: AnnotationSender) {
     }
 
     request(request: AnnotationRequest) {
-        const annotationPromise = (async () => {
-            const response = await fetch(this._buildAnnotationUrl(request))
-            const data = await response.json()
-            return data
-        })()
-
+        const annotationPromise = this.backend.fetchAnnotationData(request)
         this.requests[request.tabId] = { ...request, annotationPromise }
     }
 
@@ -47,9 +44,5 @@ export class AnnotationRequests {
         })
 
         return true
-    }
-
-    _buildAnnotationUrl(request: AnnotationRequest) {
-        return `${request.memexLinkOrigin}/${request.annotationId}/annotation.json`
     }
 }
