@@ -125,6 +125,11 @@ export const isBadTerm = createSelector(
     results => !!results.isBadTerm,
 )
 
+export const isInvalidSearch = createSelector(
+    searchResult,
+    results => !!results.isInvalidSearch,
+)
+
 const resultsExhausted = createSelector(
     searchResult,
     results => results.resultsExhausted,

@@ -82,7 +82,7 @@ class FiltersContainer extends PureComponent {
 
         return [
             ...pills,
-            ...this._appendExpandPillsBtn('domain', this.props.filterDomains),
+            ...this._appendExpandPillsBtn('domain', this.props.displayDomains),
         ]
     }
 
@@ -108,7 +108,7 @@ class FiltersContainer extends PureComponent {
         if (data.length > SHOWN_FILTER_LIMIT) {
             return [
                 <ExpandButton
-                    key="+"
+                    key={data.length}
                     setRef={this.addFurtherTagRef}
                     value={`+${data.length - SHOWN_FILTER_LIMIT}`}
                     onClick={this.props.setFilterPopup(source)}

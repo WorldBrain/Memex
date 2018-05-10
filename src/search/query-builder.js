@@ -14,6 +14,7 @@ import { DEFAULT_TERM_SEPARATOR } from './util'
  * @property {number} [skip=0]
  * @property {number} [limit=10]
  * @property {boolean} [isBadTerm=false] Flag denoting whether or not searched query is not specific enough.
+ * @property {boolean} isInvalidSearch
  */
 
 class QueryBuilder {
@@ -78,6 +79,8 @@ class QueryBuilder {
             domainExclude: this.domainExclude,
             tags: this.tags,
             isBadTerm: this.isBadTerm,
+            // Can't do a terms exclusion without some terms already defined
+            isInvalidSearch: this.queryExclude.size && !this.query.size,
             timeFilter: this.timeFilter,
             bookmarksFilter: this.showOnlyBookmarks,
         }
@@ -142,6 +145,11 @@ class QueryBuilder {
         const terms = { exclude: [], include: [] }
 
         for (let term of termsArr) {
+            // Edge-case; can't seem to remove in the `.split` delimiter pattern
+            if (term === '-') {
+                continue
+            }
+
             const isExclusive = QueryBuilder.EXCLUDE_PATTERN.test(term)
 
             if (isExclusive) {

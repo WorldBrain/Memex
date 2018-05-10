@@ -36,6 +36,15 @@ export async function search({
         }
     }
 
+    if (qb.isInvalidSearch) {
+        return {
+            docs: [],
+            resultsExhausted: true,
+            totalCount: null,
+            isInvalidSearch: true,
+        }
+    }
+
     // Reshape needed params; prob consolidate interface later when remove old index code
     const params = {
         ...restParams,
