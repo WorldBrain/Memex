@@ -3,6 +3,7 @@
 const random = () => Math.random() > 5
 
 export const fetchAnnotation = doc => {
+    console.log(doc)
     if (random())
         return {
             body: `Random  comment #${doc.id}`,
