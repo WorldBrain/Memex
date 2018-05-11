@@ -26,14 +26,14 @@ More on that on our website: worldbrain.io
 
 **Separate Docs**
 
-1. [Contributing](./docs/Contributing-Guide.md)
-    * [Getting Started](./docs/Contributing-Guide.md#getting-started)
-    * [Installation](./docs/Contributing-Guide.md#installation)
-    * [Running The Extension](./docs/Contributing-Guide.md#running-the-extension)
-1. [Code Overview](./docs/Contributing-Guide.md#code-overview)
-    * [A brief overview of Web Extensions](./docs/Contributing-Guide.md#a-brief-overview-of-web-e)
-    * [Application Structure](./docs/Contributing-Guide.md#application-structure)
-    * [Dependencies](./docs/Contributing-Guide.md#dependencies)
+1. [Contributing](./CONTRIBUTING.md)
+    * [Getting Started](./CONTRIBUTING.md#getting-started)
+    * [Installation](./CONTRIBUTING.md#installation)
+    * [Running The Extension](./CONTRIBUTING.md#running-the-extension)
+1. [Code Overview](./CONTRIBUTING.md#code-overview)
+    * [A brief overview of Web Extensions](./CONTRIBUTING.md#a-brief-overview-of-web-e)
+    * [Application Structure](./CONTRIBUTING.md#application-structure)
+    * [Dependencies](./CONTRIBUTING.md#dependencies)
 1. [In Depth How it Works](./docs/How-It-Works.md)
 
 ## Project Status
@@ -45,7 +45,7 @@ Want to help out? If you are:
  - A Marketer, A Designer or Investor please Email info@worldbrain.io
  - If you want to [donate click here](https://www.patreon.com/WorldBrain)! :moneybag:
 
-**If your a developer Please see [Contributing!](./docs/Contributing-Guide.md)**
+**If your a developer Please see [Contributing!](./CONTRIBUTING.md)**
 
 Have questions?
 - [Feedback](#contact), how can we make our extension better?

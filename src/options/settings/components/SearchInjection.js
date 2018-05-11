@@ -14,7 +14,7 @@ const SearchInjection = ({ children }) => {
                 Want others?{' '}
                 <a
                     target="_new"
-                    href="https://github.com/WorldBrain/Memex/blob/master/docs/Contributing-Guide.md"
+                    href="https://github.com/WorldBrain/Memex/blob/master/CONTRIBUTING.md"
                 >
                     Help integrating them
                 </a>.
