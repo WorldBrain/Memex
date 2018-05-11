@@ -108,10 +108,10 @@ $ git clone https://github.com/${GH_USERNAME}/Memex
 $ git remote add -f upstream https://github.com/WorldBrain/Memex
 ```
 
-**Create and move to a new local branch based on our current `master` branch:**
+**Create and move to a new local branch based on our current `develop` branch:**
 
 ```sh
-$ git checkout -b ${BRANCH_NAME} upstream/master
+$ git checkout -b ${BRANCH_NAME} upstream/develop
 ```
 
 _...have a play around..._
@@ -122,16 +122,16 @@ _...have a play around..._
 $ git push -u origin ${BRANCH_NAME}
 ```
 
-From there, you can make Pull Requests from your pushed branches to any of our Memex repo's branches
+From there, you can make Pull Requests from your pushed branches to any `feature/*` branches on our Memex repo
 via your forked repository on GitHub.
 
 You can keep your forked repo's branches in-sync with our upstream changes. We recommend doing this before
 making or requesting any reviews on PRs.
 
-**Replay all your commits on top of our current `master` branch:**
+**Replay all your commits on top of our current `develop` branch:**
 
 ```sh
-$ git pull --rebase upstream master
+$ git pull --rebase upstream develop
 ```
 
 **Overwrite your personal forked repo's branch with your synced local branch state:**
