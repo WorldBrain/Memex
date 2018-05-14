@@ -57,22 +57,22 @@ export function delBookmark({ url }) {
  * https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/bookmarks/onCreated
  */
 export async function handleBookmarkCreation(browserId, { url }) {
-    const normalized = normalizeUrl(url)
-
-    let page = await db.pages.get(normalized)
-
-    // No existing page for BM; need to try and make new from a remote DOM fetch
-    if (page == null) {
-        const fetch = fetchPageData({
-            url,
-            opts: { includePageContent: true, includeFavIcon: true },
-        })
-
-        const pageData = await fetch.run()
-        page = new Page(await pipeline({ pageDoc: { url, ...pageData } }))
-    }
-
     try {
+        const normalized = normalizeUrl(url)
+
+        let page = await db.pages.get(normalized)
+
+        // No existing page for BM; need to try and make new from a remote DOM fetch
+        if (page == null) {
+            const fetch = fetchPageData({
+                url,
+                opts: { includePageContent: true, includeFavIcon: true },
+            })
+
+            const pageData = await fetch.run()
+            page = new Page(await pipeline({ pageDoc: { url, ...pageData } }))
+        }
+
         await db.transaction('rw', db.tables, async () => {
             await page.loadRels()
             page.setBookmark()

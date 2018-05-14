@@ -1,3 +1,5 @@
+import noop from 'lodash/fp/noop'
+
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import searchConnectionHandler from './search-connection-handler'
 import indexInterface from '../'
@@ -6,7 +8,7 @@ makeRemotelyCallable({
     addTag: indexInterface.addTag,
     delTag: indexInterface.delTag,
     suggest: indexInterface.suggest,
-    addBookmark: indexInterface.addBookmark,
+    addBookmark: (...args) => indexInterface.addBookmark(...args).catch(noop),
     delBookmark: indexInterface.delBookmark,
     delPages: indexInterface.delPages,
     delPagesByDomain: indexInterface.delPagesByDomain,
