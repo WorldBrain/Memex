@@ -33,10 +33,12 @@ export const updateVisitInteractionData = ({
     activeTime,
     scrollState,
 }: TabState) =>
-    searchIndex.updateTimestampMeta(url, +visitTime, {
-        duration: activeTime,
-        scrollPx: scrollState.pixel,
-        scrollMaxPx: scrollState.maxPixel,
-        scrollPerc: scrollState.percent,
-        scrollMaxPerc: scrollState.maxPercent,
-    })
+    searchIndex
+        .updateTimestampMeta(url, +visitTime, {
+            duration: activeTime,
+            scrollPx: scrollState.pixel,
+            scrollMaxPx: scrollState.maxPixel,
+            scrollPerc: scrollState.percent,
+            scrollMaxPerc: scrollState.maxPercent,
+        })
+        .catch(f => f)
