@@ -43,7 +43,7 @@ export const handleUrl: TabChangeListener = async function(
 
     if (await shouldLogTab(tab)) {
         // Run stage 1 of visit indexing
-        await whenPageDOMLoaded({ tabId }).catch(console.error)
+        await whenPageDOMLoaded({ tabId })
         await logInitPageVisit(tabId)
 
         // Schedule stage 2 of visit indexing soon after - if user stays on page
@@ -53,7 +53,9 @@ export const handleUrl: TabChangeListener = async function(
                 whenTabActive({ tabId }),
             ])
                 .then(() => logPageVisit(tabId))
-                .catch(console.error),
+                .catch(err => {
+                    return
+                }),
         )
     }
 }
@@ -70,12 +72,7 @@ export const handleFavIcon: TabChangeListener = async function(
         (await shouldLogTab(tab)) &&
         !await searchIndex.domainHasFavIcon(tab.url)
     ) {
-        try {
-            const favIconDataUrl = await fetchFavIcon(favIconUrl)
-            await searchIndex.addFavIcon(tab.url, favIconDataUrl)
-        } catch (err) {
-            console.error(err)
-            // Do nothing
-        }
+        const favIconDataUrl = await fetchFavIcon(favIconUrl)
+        await searchIndex.addFavIcon(tab.url, favIconDataUrl)
     }
 }
