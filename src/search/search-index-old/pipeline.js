@@ -37,8 +37,13 @@ const urlNormalizationOpts = {
  *  the URL with protocol and opt. `www` parts removed will be returned for both values.
  */
 export function transformUrl(url) {
-    let parsed
-    const normalized = normalizeUrl(url, urlNormalizationOpts)
+    let parsed, normalized
+
+    try {
+        normalized = normalizeUrl(url, urlNormalizationOpts)
+    } catch (error) {
+        normalized = url
+    }
 
     try {
         parsed = new URL(normalized)

@@ -50,10 +50,16 @@ function applyQueryParamsRules(url) {
  * @returns {string}
  */
 export default function normalize(url, customOpts = {}) {
-    let normalized = normalizeUrl(url, {
-        ...normalizationOpts,
-        ...customOpts,
-    })
+    let normalized
+
+    try {
+        normalized = normalizeUrl(url, {
+            ...normalizationOpts,
+            ...customOpts,
+        })
+    } catch (err) {
+        normalized = url
+    }
 
     if (!customOpts.skipQueryRules) {
         normalized = applyQueryParamsRules(normalized)

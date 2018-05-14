@@ -29,10 +29,16 @@ export const defaultOpts = {
 export default function fetchPageData(
     { url = '', timeout = 10000, opts = defaultOpts } = { opts: defaultOpts },
 ) {
-    const normalizedUrl = normalizeUrl(url, {
-        ...normalizationOpts,
-        removeQueryParameters: [/.*/i],
-    })
+    let normalizedUrl
+
+    try {
+        normalizedUrl = normalizeUrl(url, {
+            ...normalizationOpts,
+            removeQueryParameters: [/.*/i],
+        })
+    } catch (err) {
+        normalizedUrl = url
+    }
 
     let run, cancel
 
