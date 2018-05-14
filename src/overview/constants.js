@@ -26,7 +26,9 @@ export const SHOWN_TAGS_LIMIT = 3
 export const SHOWN_FILTER_LIMIT = 3
 
 /* Pattern to match entire string to `domain.tld`-like format + optional subdomain prefix and ccTLD postfix */
-export const DOMAIN_TLD_PATTERN = /^-?(\w+\.)?[\w-]{2,}\.\w{2,3}(\.\w{2})?$/
+export const DOMAIN_TLD_PATTERN = /^(site:)?-?(\w+\.)?[\w-]{2,}\.\w{2,3}(\.\w{2})?$/
+export const EXCLUDE_PATTERN = /^(site:)?-(?=\w+)/
+export const TERM_CLEAN_PATTERN = /^(site:)?-?(?=\w+)/
 
 /* Pattern to match hashtags - spaces can be represented via '+' */
 export const HASH_TAG_PATTERN = /^-?#\w[\w+]*$/

@@ -289,11 +289,13 @@ export const setQueryTagsDomains = (input, isEnter) => (dispatch, getState) => {
             if (constants.DOMAIN_TLD_PATTERN.test(term)) {
                 removeFromInputVal(term)
 
-                if (term.startsWith('-')) {
-                    dispatch(filterActs.toggleExcDomainFilter(term.slice(1)))
-                } else {
-                    dispatch(filterActs.toggleIncDomainFilter(term))
-                }
+                // Choose to exclude or include domain, basead on pattern
+                const act = constants.EXCLUDE_PATTERN.test(term)
+                    ? filterActs.toggleExcDomainFilter
+                    : filterActs.toggleIncDomainFilter
+
+                term = term.replace(constants.TERM_CLEAN_PATTERN, '')
+                dispatch(act(term))
             }
         })
     }

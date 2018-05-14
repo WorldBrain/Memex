@@ -1,5 +1,10 @@
 import transformPageText from 'src/util/transform-page-text'
-import { DOMAIN_TLD_PATTERN, HASH_TAG_PATTERN } from 'src/overview/constants'
+import {
+    EXCLUDE_PATTERN,
+    DOMAIN_TLD_PATTERN,
+    HASH_TAG_PATTERN,
+    TERM_CLEAN_PATTERN,
+} from 'src/overview/constants'
 import { DEFAULT_TERM_SEPARATOR } from './util'
 
 /**
@@ -18,12 +23,25 @@ import { DEFAULT_TERM_SEPARATOR } from './util'
  */
 
 class QueryBuilder {
-    // Pattern to match entire string to `domain.tld`-like format + optional subdomain prefix and ccTLD postfix
+    /**
+     * Pattern to match entire string to `domain.tld`-like format + optional subdomain prefix and ccTLD postfix.
+     */
     static DOMAIN_TLD_PATTERN = DOMAIN_TLD_PATTERN
 
-    // Pattern to match hashtags - spaces can be represented via '+'
+    /**
+     * Pattern to match hashtags - spaces can be represented via '+'.
+     */
     static HASH_TAG_PATTERN = HASH_TAG_PATTERN
-    static EXCLUDE_PATTERN = /^-\w+/
+
+    /**
+     * Matches a given excluded domain or term query term. Hyphen must be before some word/s.
+     */
+    static EXCLUDE_PATTERN = EXCLUDE_PATTERN
+
+    /**
+     * Used to match against some optional leading syntax like 'site:' and '-'
+     */
+    static TERM_CLEAN_PATTERN = TERM_CLEAN_PATTERN
 
     /**
      * Slice off '#' prefix and replace any '+' with space char
@@ -151,10 +169,7 @@ class QueryBuilder {
             }
 
             const isExclusive = QueryBuilder.EXCLUDE_PATTERN.test(term)
-
-            if (isExclusive) {
-                term = term.slice(1)
-            }
+            term = term.replace(QueryBuilder.TERM_CLEAN_PATTERN, '')
 
             if (QueryBuilder.DOMAIN_TLD_PATTERN.test(term)) {
                 const domainIndex =
