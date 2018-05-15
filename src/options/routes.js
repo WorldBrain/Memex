@@ -5,6 +5,7 @@ import Acknowledgements from './acknowledgement/components/content'
 import Tutorial from './tutorial'
 import Statistics from './statistics'
 import Settings from './settings'
+import Overview from '../overview'
 
 export default [
     {
@@ -15,9 +16,10 @@ export default [
     },
     {
         name: 'Go back to Search',
-        pathname: '/overview/overview.html',
+        pathname: '/overview',
+        component: Overview,
         icon: 'search',
-        isExternal: true,
+        useOwnLayout: true,
     },
     {
         name: 'Settings',

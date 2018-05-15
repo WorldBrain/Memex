@@ -1,14 +1,12 @@
 import 'babel-polyfill'
 import React from 'react'
 import ReactDOM from 'react-dom'
-import { Router, Route, IndexRedirect, hashHistory } from 'react-router'
 import { Provider } from 'react-redux'
 
 import { ErrorBoundary, RuntimeError } from 'src/common-ui/components'
-import { withPageTracking } from 'src/common-ui/hocs'
 import configureStore from './store'
-import Layout from './layout'
-import Routes from './routes'
+import Router from './router'
+import routes from './routes'
 
 // Include development tools if we are not building for production
 const ReduxDevTools =
@@ -21,18 +19,7 @@ const store = configureStore({ ReduxDevTools })
 ReactDOM.render(
     <Provider store={store}>
         <ErrorBoundary component={RuntimeError}>
-            <Router history={hashHistory}>
-                <Route path="/" component={withPageTracking(Layout)}>
-                    <IndexRedirect to="/blacklist" />
-                    {Routes.map(route => (
-                        <Route
-                            key={route.pathname}
-                            path={route.pathname}
-                            component={route.component}
-                        />
-                    ))}
-                </Route>
-            </Router>
+            <Router routes={routes} />
         </ErrorBoundary>
     </Provider>,
     document.getElementById('app'),
