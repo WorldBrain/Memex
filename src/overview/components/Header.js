@@ -44,7 +44,7 @@ const Header = ({
         <div className={styles.links}>
             <OutLink
                 className={styles.upgrade}
-                href="https://worldbrain.io/pricing"
+                to="https://worldbrain.io/pricing"
             >
                 Upgrade Memex
             </OutLink>

@@ -16,8 +16,8 @@ export default [
     {
         name: 'Go back to Search',
         pathname: '/overview/overview.html',
-        component: 'faq',
         icon: 'search',
+        isExternal: true,
     },
     {
         name: 'Settings',
@@ -52,8 +52,8 @@ export default [
     {
         name: 'Help Me Please',
         pathname: 'https://worldbrain.io/help',
-        component: 'faq',
         icon: 'help',
+        isExternal: true,
     },
     {
         name: 'Tutorial',

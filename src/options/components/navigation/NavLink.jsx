@@ -1,67 +1,44 @@
-import React from 'react'
+import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
 import { Link } from 'react-router'
-import classNames from 'classnames'
+import cx from 'classnames'
 
 import { OutLink } from 'src/common-ui/containers'
 import styles from './styles.css'
 
-const NavLink = ({ route, state, children }) => {
-    const navClasses = classNames({
-        [styles.navLink]: true,
-        [styles.isActive]: children,
-    })
+class NavLink extends PureComponent {
+    static propTypes = {
+        name: PropTypes.string.isRequired,
+        icon: PropTypes.string.isRequired,
+        pathname: PropTypes.string.isRequired,
+        isActive: PropTypes.bool,
+        isExternal: PropTypes.bool,
+    }
 
-    const navIcon = classNames({
-        [styles.navIcon]: true,
-        'material-icons': true,
-    })
+    get LinkComponent() {
+        return this.props.isExternal ? OutLink : Link
+    }
 
-    const analysisCondition = classNames({
-        [styles.active]: state.isIdle || state.isLoading,
-        [styles.done]: state.isRunning || state.isStopped || state.isPaused,
-    })
+    navClasses = () =>
+        cx(styles.navLink, { [styles.isActive]: this.props.isActive })
 
-    const progressCondition = classNames({
-        [styles.active]: state.isRunning || state.isPaused,
-        [styles.done]: state.isStopped,
-    })
-
-    return (
-        <li>
-            <div className={navClasses}>
-                <i className={navIcon}>{route.icon}</i>
-                {route.component === 'faq' && (
-                    <OutLink className={navClasses} href={route.pathname}>
-                        {route.name}
-                    </OutLink>
-                )}
-                {route.component !== 'faq' && (
-                    <Link className={navClasses} to={route.pathname}>
-                        {route.name}
-                    </Link>
-                )}
-            </div>
-            {route.name === 'Import' &&
-                children && (
-                    <div className={styles.importSubItems}>
-                        <div className={analysisCondition}>1. Analysis</div>
-                        <div className={progressCondition}>
-                            2. Download Progress
-                        </div>
-                        <div className={state.isStopped ? styles.active : null}>
-                            3. Status Report
-                        </div>
-                    </div>
-                )}
-        </li>
-    )
-}
-
-NavLink.propTypes = {
-    route: PropTypes.object.isRequired,
-    state: PropTypes.object.isRequired,
-    children: PropTypes.bool.isRequired,
+    render() {
+        return (
+            <li>
+                <div className={this.navClasses()}>
+                    <i className={cx(styles.navIcon, 'material-icons')}>
+                        {this.props.icon}
+                    </i>
+                    <this.LinkComponent
+                        className={this.navClasses()}
+                        to={this.props.pathname}
+                    >
+                        {this.props.name}
+                    </this.LinkComponent>
+                </div>
+            </li>
+        )
+    }
 }
 
 export default NavLink

@@ -14,7 +14,7 @@ const AcknowledgementContainer = () => (
             Many thanks goes out to our{' '}
             <OutLink
                 className={cx(localStyles.links, 'piwik_link')}
-                href="https://worldbrain.io/team"
+                to="https://worldbrain.io/team"
             >
                 team of contributors, advisors and investors
             </OutLink>
@@ -26,7 +26,7 @@ const AcknowledgementContainer = () => (
             <br />This software is{' '}
             <OutLink
                 className={cx(localStyles.links, 'piwik_link')}
-                href="https://github.com/WorldBrain/WebMemex/blob/master/License"
+                to="https://github.com/WorldBrain/WebMemex/blob/master/License"
             >
                 open-source
             </OutLink>, for anyone to reuse, recycle, redistribute and add to.
@@ -39,14 +39,14 @@ const AcknowledgementContainer = () => (
             You can do so either by supporting our development with{' '}
             <OutLink
                 className={cx(localStyles.links, 'piwik_link')}
-                href="https://github.com/WorldBrain/WebMemex/"
+                to="https://github.com/WorldBrain/WebMemex/"
             >
                 your mind
             </OutLink>{' '}
             or{' '}
             <OutLink
                 className={cx(localStyles.links, 'piwik_link')}
-                href="https://patreon.com/WorldBrain"
+                to="https://patreon.com/WorldBrain"
             >
                 your money
             </OutLink>.
