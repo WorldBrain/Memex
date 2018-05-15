@@ -1,12 +1,12 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { Router, Route, IndexRedirect, hashHistory } from 'react-router'
+import { Router, Route, IndexRedirect } from 'react-router'
+import history from './history'
 
 import { withPageTracking } from 'src/common-ui/hocs'
 import Layout from './layout'
 
 class MemexRouter extends React.Component {
-    static history = hashHistory
     static propTypes = {
         routes: PropTypes.array.isRequired,
     }
@@ -30,7 +30,7 @@ class MemexRouter extends React.Component {
 
     render() {
         return (
-            <Router history={MemexRouter.history}>
+            <Router history={history}>
                 <Route path="/">
                     <Route component={withPageTracking(Layout)}>
                         <IndexRedirect to="/blacklist" />

@@ -5,7 +5,6 @@ import { bindActionCreators } from 'redux'
 import Waypoint from 'react-waypoint'
 import reduce from 'lodash/fp/reduce'
 
-import analytics from 'src/analytics'
 import { Wrapper, LoadingIndicator } from 'src/common-ui/components'
 import { IndexDropdown } from 'src/common-ui/containers'
 import * as actions from './actions'
@@ -23,7 +22,6 @@ import localStyles from './components/Overview.css'
 
 class OverviewContainer extends Component {
     static propTypes = {
-        grabFocusOnMount: PropTypes.bool.isRequired,
         handleInputChange: PropTypes.func.isRequired,
         handleInputClick: PropTypes.func.isRequired,
         onBottomReached: PropTypes.func.isRequired,
@@ -46,17 +44,13 @@ class OverviewContainer extends Component {
         delTag: PropTypes.func.isRequired,
         resetFilterPopup: PropTypes.func.isRequired,
         showOnboarding: PropTypes.bool.isRequired,
-        // fetchNextTooltip: PropTypes.func.isRequired,
-        // isFirstTooltip: PropTypes.bool.isRequired,
+        init: PropTypes.func.isRequired,
     }
 
     componentDidMount() {
-        analytics.trackPage({ title: document.title })
-
         document.addEventListener('click', this.handleOutsideClick, false)
-        if (this.props.grabFocusOnMount) {
-            this.inputQueryEl.focus()
-        }
+        this.inputQueryEl.focus()
+        this.props.init()
     }
 
     componentWillUnmount() {
@@ -305,6 +299,7 @@ const mapDispatchToProps = dispatch => ({
             onShowFilterChange: filterActs.showFilter,
             resetFilterPopup: filterActs.resetFilterPopup,
             fetchNextTooltip: actions.fetchNextTooltip,
+            init: actions.init,
         },
         dispatch,
     ),
