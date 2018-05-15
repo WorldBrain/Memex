@@ -2409,7 +2409,11 @@ boom@5.x.x:
   dependencies:
     hoek "4.x.x"
 
+<<<<<<< HEAD
 bowser@^1.0.0, bowser@^1.7.3:
+=======
+bowser@^1.7.3:
+>>>>>>> React tooltip preparation
   version "1.9.3"
   resolved "https://registry.yarnpkg.com/bowser/-/bowser-1.9.3.tgz#6643ae4d783f31683f6d23156976b74183862162"
 
@@ -6483,7 +6487,11 @@ husky@^0.14.3:
     normalize-path "^1.0.0"
     strip-indent "^2.0.0"
 
+<<<<<<< HEAD
 hyphenate-style-name@^1.0.1, hyphenate-style-name@^1.0.2:
+=======
+hyphenate-style-name@^1.0.2:
+>>>>>>> React tooltip preparation
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/hyphenate-style-name/-/hyphenate-style-name-1.0.2.tgz#31160a36930adaf1fc04c6074f7eb41465d4ec4b"
 
@@ -6632,6 +6640,7 @@ inline-source-map@~0.6.0:
   dependencies:
     source-map "~0.5.3"
 
+<<<<<<< HEAD
 inline-style-prefixer@^2.0.5:
   version "2.0.5"
   resolved "https://registry.yarnpkg.com/inline-style-prefixer/-/inline-style-prefixer-2.0.5.tgz#c153c7e88fd84fef5c602e95a8168b2770671fe7"
@@ -6642,10 +6651,16 @@ inline-style-prefixer@^2.0.5:
 inline-style-prefixer@^3.0.6:
   version "3.0.8"
   resolved "https://registry.yarnpkg.com/inline-style-prefixer/-/inline-style-prefixer-3.0.8.tgz#8551b8e5b4d573244e66a34b04f7d32076a2b534"
+=======
+inline-style-prefixer@^4.0.0:
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/inline-style-prefixer/-/inline-style-prefixer-4.0.2.tgz#d390957d26f281255fe101da863158ac6eb60911"
+>>>>>>> React tooltip preparation
   dependencies:
     bowser "^1.7.3"
     css-in-js-utils "^2.0.0"
 
+<<<<<<< HEAD
 inquirer@5.1.0:
   version "5.1.0"
   resolved "https://registry.yarnpkg.com/inquirer/-/inquirer-5.1.0.tgz#19da508931892328abbbdd4c477f1efc65abfd67"
@@ -6664,6 +6679,8 @@ inquirer@5.1.0:
     strip-ansi "^4.0.0"
     through "^2.3.6"
 
+=======
+>>>>>>> React tooltip preparation
 inquirer@^0.12.0:
   version "0.12.0"
   resolved "https://registry.yarnpkg.com/inquirer/-/inquirer-0.12.0.tgz#1ef2bfd63504df0bc75785fff8c2c41df12f077e"
@@ -11440,6 +11457,7 @@ quick-lru@^1.0.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/quick-lru/-/quick-lru-1.1.0.tgz#4360b17c61136ad38078397ff11416e186dcfbb8"
 
+<<<<<<< HEAD
 radium@^0.19.0:
   version "0.19.6"
   resolved "https://registry.yarnpkg.com/radium/-/radium-0.19.6.tgz#b86721d08dbd303b061a4ae2ebb06cc6e335ae72"
@@ -11447,6 +11465,14 @@ radium@^0.19.0:
     array-find "^1.0.0"
     exenv "^1.2.1"
     inline-style-prefixer "^2.0.5"
+=======
+radium@^0.24.0:
+  version "0.24.0"
+  resolved "https://registry.yarnpkg.com/radium/-/radium-0.24.0.tgz#32ca64e5cb8226cac3887d5eaf9a150516600de0"
+  dependencies:
+    exenv "^1.2.1"
+    inline-style-prefixer "^4.0.0"
+>>>>>>> React tooltip preparation
     prop-types "^15.5.8"
 
 ramda@^0.25.0:
