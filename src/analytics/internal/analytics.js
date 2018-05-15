@@ -1,6 +1,6 @@
-import { MapEventTypeToInt } from './constants'
-
-import db from './db'
+import { MapEventTypeToInt, MapNotifTypeToIntArray } from './constants'
+import db from 'src/search/search-index-new'
+import AnalyticsStorage from './AnalyticsStorage'
 
 class Analytics {
     _queueEvents = []
@@ -28,13 +28,63 @@ class Analytics {
     }
 
     /**
-     * Save to db
-     * @param {any} params
-     * @return {Promise<boolean>}
+     * Track any user-invoked events internally.
+     *
+     * @param {EventTrackInfo} eventArgs
      */
-    _saveToDB = async params => {
-        await db.eventLog.add(params)
-        // console.log(await db.eventLog.toArray())
+    async storeEventLogStatistics(eventArgs) {
+        const params = {
+            ...eventArgs,
+            type: MapEventTypeToInt[eventArgs.type].id,
+            data: eventArgs.data || {},
+        }
+
+        const notifParams = {
+            last_time_used: eventArgs.timestamp,
+            value: MapEventTypeToInt[eventArgs.type].notifType,
+        }
+
+        AnalyticsStorage({
+            event: params,
+            statistics: MapEventTypeToInt[eventArgs.type].notifType
+                ? notifParams
+                : undefined,
+        })
+    }
+
+    /**
+     * Load Initial data from dexie for the particular event type
+     * Query to dexie and store into _operationsMap
+     * @param {notifType} type of notif event
+     */
+    async loadInititalData(notifType) {
+        console.log('Here')
+        await db.transactions('r', db.tables, async () => {
+            const eventLog = db.eventLog
+                .where('type')
+                .anyOf(MapNotifTypeToIntArray[notifType])
+                .count()
+
+            console.log(eventLog)
+
+            if (this._operationsMap[notifType] === undefined) {
+                this._operationsMap[notifType] = eventLog
+            } else {
+                this._operationsMap[notifType] += eventLog
+            }
+        })
+    }
+
+    incrementvalue(notifType) {
+        if (!this._operationsMap[notifType]) {
+            this._operationsMap[notifType] = 1
+        } else {
+            this._operationsMap[notifType] += 1
+        }
+    }
+
+    getCountNotif(notifType) {
+        return this._operationsMap[notifType]
     }
 
     /**
@@ -42,65 +92,41 @@ class Analytics {
      *
      * @param {EventTrackInfo} eventArgs
      */
-    async storeEvent(eventArgs) {
+    async processEvent(eventArgs) {
+        this.loadInititalData('bookmark')
+
+        this._loaded = 1
+        console.log(eventArgs)
+        // Prepare the event to store the event in dexie db.
         const timestamp = Date.now()
 
         const params = {
-            type: MapEventTypeToInt[eventArgs.type].id,
-            data: eventArgs.data || {},
+            ...eventArgs,
             timestamp,
         }
 
-        this._queueEvents.push(params)
+        // If all the items has been loaded initially
+        if (this._loaded === 1) {
+            // If all the event has processed then directly save the event into db
+            if (!this._queueEvents.length) {
+                await this.storeEventLogStatistics(params)
+            } else {
+                while (this._queueEvents.length) {
+                    const event = this._queueEvents[0]
+                    this._queueEvents.shift()
 
-        if (MapEventTypeToInt[eventArgs.type].notifType) {
-            this._processEvent({
-                type: MapEventTypeToInt[eventArgs.type].notifType,
-                timestamp,
-            })
+                    // Event happens on the client side
+                    if (event instanceof Object) {
+                        await this.storeEventLogStatistics(event)
+                    } else {
+                        // Initial load data from dexie
+                        await this.loadInititalData(event)
+                    }
+                }
+            }
+        } else {
+            this._queueEvents.push(params)
         }
-
-        await this._saveToDB(params)
-    }
-
-    /**
-     * Updates the statistics in localStorage and Dexie
-     *
-     * @param {EventTrackInfo} params
-     */
-    async _processEvent({ type, timestamp }) {
-        // Without caching
-        console.time('Aggregator value with dexie')
-        const eventData = await db.eventAggregator
-            .where('type')
-            .equals(type)
-            .toArray()
-
-        await db.eventAggregator.put({
-            type,
-            data: {
-                last_time_used: timestamp,
-                count: eventData.length ? eventData[0].data.count + 1 : 1,
-            },
-        })
-
-        console.timeEnd('Aggregator value with dexie')
-        // console.log(await db.eventAggregator.toArray())
-
-        // With localStorage
-        console.time('Aggregator value with localStorage')
-        const eventDataL = (await browser.storage.local.get(type))[type]
-
-        await browser.storage.local.set({
-            [type]: {
-                count: eventDataL ? eventDataL.count + 1 : 1,
-                last_time_used: timestamp,
-            },
-        })
-
-        console.timeEnd('Aggregator value with localStorage')
-
-        // console.log((await browser.storage.local.get(type))[type])
     }
 }
 

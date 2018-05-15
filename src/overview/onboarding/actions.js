@@ -81,7 +81,7 @@ class ImportsConnHandler {
             action: 'Cancelled import',
         })
 
-        internalAnalytics.storeEvent({
+        internalAnalytics.processEvent({
             type: 'onboarding_cancel_import',
         })
 
@@ -96,7 +96,7 @@ class ImportsConnHandler {
                 action: 'Finished import',
             })
 
-            internalAnalytics.storeEvent({
+            internalAnalytics.processEvent({
                 type: 'onboarding_finish_import',
             })
         }

@@ -185,21 +185,21 @@ function storeSearch(searchResult, overwrite, state) {
         type = 'unsuccessful_search'
     }
 
-    internalAnalytics.storeEvent({ type: type })
+    internalAnalytics.processEvent({ type: type })
 
     if (query.length > 0) {
-        internalAnalytics.storeEvent({ type: 'nlp_search' })
+        internalAnalytics.processEvent({ type: 'nlp_search' })
     }
 
     if (filters.onlyBookmarks(state)) {
-        internalAnalytics.storeEvent({ type: 'bookmark_filter' })
+        internalAnalytics.processEvent({ type: 'bookmark_filter' })
     }
 
     if (filters.tags(state).length) {
-        internalAnalytics.storeEvent({ type: 'tag_filter' })
+        internalAnalytics.processEvent({ type: 'tag_filter' })
     }
     if (filters.domains(state).length) {
-        internalAnalytics.storeEvent({ type: 'domain_filter' })
+        internalAnalytics.processEvent({ type: 'domain_filter' })
     }
 }
 
@@ -238,7 +238,7 @@ export const deleteDocs = () => async (dispatch, getState) => {
         action: 'Delete result',
     })
 
-    internalAnalytics.storeEvent({
+    internalAnalytics.processEvent({
         type: 'delete_result',
     })
 
@@ -269,7 +269,7 @@ export const toggleBookmark = (url, index) => async (dispatch, getState) => {
             : 'Create result bookmark',
     })
 
-    internalAnalytics.storeEvent({
+    internalAnalytics.processEvent({
         type: hasBookmark ? 'remove_result_bookmark' : 'create_result_bookmark',
     })
 

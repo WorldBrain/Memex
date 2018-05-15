@@ -152,17 +152,17 @@ export const MapEventTypeToInt = {
     },
 }
 
-export const analysisEventTypes = [
-    'successful_search',
-    'unsuccessful_search',
-    'datepicker',
-    'bookmark_filter',
-    'tag_filter',
-    'domain_filter',
-    'tagging',
-    'bookmark',
-    'blacklist',
-    'address_bar_search',
-    'datepicker_nlp',
-    'nlp_search',
-]
+export const MapNotifTypeToIntArray = {
+    successful_search: [1, 2],
+    unsuccessful_search: [3],
+    datepicker: [4, 5, 6, 7],
+    bookmark_filter: [8],
+    tag_filter: [9],
+    domain_filter: [10],
+    tagging: [12, 13, 21, 22],
+    bookmark: [14, 15, 16, 17, 18, 19, 20],
+    blacklist: [23, 24, 25],
+    address_bar_search: [33, 34, 35],
+    datepicker_nlp: [36, 37],
+    nlp_search: [38],
+}

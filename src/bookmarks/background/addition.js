@@ -58,7 +58,7 @@ export async function createNewPageForBookmark(id, bookmarkInfo) {
             action: 'Create browser bookmark',
         })
 
-        internalAnalytics.storeEvent({
+        internalAnalytics.processEvent({
             type: 'create_browser_bookmark',
         })
     }
@@ -129,7 +129,7 @@ export async function createBookmarkByUrl(url, tabId = null) {
         action: 'Create popup bookmark',
     })
 
-    internalAnalytics.storeEvent({
+    internalAnalytics.processEvent({
         type: 'create_popup_bookmark',
     })
 }

@@ -92,7 +92,7 @@ class DateRangeSelection extends Component {
             action: nlpDate ? 'Successful NLP query' : 'Unsuccessful NLP query',
         })
 
-        internalAnalytics.storeEvent({
+        internalAnalytics.processEvent({
             type:
                 'datepicker_by_nlp_' +
                 (isStartDate ? 'start_date' : 'end_date'),
@@ -166,7 +166,7 @@ class DateRangeSelection extends Component {
             action: date ? 'Date selection' : 'Date clear',
         })
 
-        internalAnalytics.storeEvent({
+        internalAnalytics.processEvent({
             type: date
                 ? 'datepicker_by_dropdown_' +
                   (isStartDate ? 'start_date' : 'end_date')

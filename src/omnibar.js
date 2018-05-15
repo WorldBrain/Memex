@@ -90,7 +90,7 @@ async function makeSuggestion(query, suggest) {
         value: searchResults.totalCount,
     })
 
-    internalAnalytics.storeEvent({
+    internalAnalytics.processEvent({
         type:
             searchResults.totalCount > 0
                 ? 'successful_omnibar_search'

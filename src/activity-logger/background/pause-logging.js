@@ -65,7 +65,7 @@ function handlePause(timeout) {
         action: 'Resume indexing',
     })
 
-    internalAnalytics.storeEvent({
+    internalAnalytics.processEvent({
         type: 'resume_indexing',
     })
 

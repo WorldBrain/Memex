@@ -165,7 +165,7 @@ export const stop = makePortMessagingThunk({
             action: 'Cancel import',
         })
 
-        internalAnalytics.storeEvent({
+        internalAnalytics.processEvent({
             type: 'cancel_import',
         })
     },
@@ -180,7 +180,7 @@ export const pause = makePortMessagingThunk({
             action: 'Pause import',
         })
 
-        internalAnalytics.storeEvent({
+        internalAnalytics.processEvent({
             type: 'pause_import',
         })
     },
@@ -195,7 +195,7 @@ export const resume = makePortMessagingThunk({
             action: 'Resume import',
         })
 
-        internalAnalytics.storeEvent({
+        internalAnalytics.processEvent({
             type: 'resume_import',
         })
     },
@@ -210,7 +210,7 @@ export const finish = makePortMessagingThunk({
             action: 'Finish import',
         })
 
-        internalAnalytics.storeEvent({
+        internalAnalytics.processEvent({
             type: 'finish_import',
         })
     },
@@ -226,7 +226,7 @@ export const start = () => (dispatch, getState) => {
         value: selectors.concurrency(state),
     })
 
-    internalAnalytics.storeEvent({
+    internalAnalytics.processEvent({
         type: 'start_import',
     })
 

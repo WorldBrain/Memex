@@ -180,7 +180,7 @@ class PopupContainer extends Component {
                 action: domainDelete ? 'Blacklist domain' : 'Blacklist site',
             })
 
-            internalAnalytics.storeEvent({
+            internalAnalytics.processEvent({
                 type: domainDelete ? 'blacklist_domain' : 'blacklist_site',
             })
 
@@ -206,7 +206,7 @@ class PopupContainer extends Component {
             value: isPaused ? undefined : pauseValue,
         })
 
-        internalAnalytics.storeEvent({
+        internalAnalytics.processEvent({
             type: isPaused ? 'resume_indexing' : 'pause_indexing',
         })
 
@@ -240,7 +240,7 @@ class PopupContainer extends Component {
                 action: 'Popup search',
             })
 
-            internalAnalytics.storeEvent({
+            internalAnalytics.processEvent({
                 type: 'search_popup',
             })
 

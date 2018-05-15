@@ -25,7 +25,7 @@ export const toggleTrackingOptOut = value => async dispatch => {
             name: newState,
         })
 
-    internalAnalytics.storeEvent({
+    internalAnalytics.processEvent({
         type: 'change_tracking_pref_' + newState,
     })
 
