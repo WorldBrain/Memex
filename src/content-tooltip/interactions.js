@@ -1,26 +1,27 @@
 import { delayed } from './utils'
 import { createDirectLink } from '../direct-linking/content_script/interactions'
 
-export function setupTooltipTrigger() {
-    document.body.addEventListener('mouseup', () => {
-        conditionallyTriggerTooltip()
+export function setupTooltipTrigger(callback) {
+    document.body.addEventListener('mouseup', event => {
+        conditionallyTriggerTooltip(
+            { x: event.clientX, y: event.clientY },
+            callback,
+        )
     })
 }
 
-export const conditionallyTriggerTooltip = delayed(async () => {
-    if (isTooltipShown()) {
-        return
-    }
+export const conditionallyTriggerTooltip = delayed(
+    async (position, callback) => {
+        if (!userSelectedText()) {
+            return
+        }
 
-    if (!userSelectedText()) {
-        return
-    }
-
-    console.log('show tooltip')
-    console.log(await createDirectLink())
-}, 300)
-
-function isTooltipShown() {}
+        callback(position)
+        // console.log('show tooltip')
+        console.log(await createDirectLink())
+    },
+    300,
+)
 
 function userSelectedText() {
     const selection = document.getSelection()
