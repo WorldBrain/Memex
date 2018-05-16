@@ -43,6 +43,9 @@ export const NEW_FEATURE_NOTIF = {
         'https://worldbrain.helprace.com/i62-feature-memex-links-highlight-any-text-and-create-a-link-to-it',
 }
 
+export const USER_ID = 'user-id'
+const API_PATH = '/api/v1/returnToken'
+
 async function openOverview() {
     const [currentTab] = await browser.tabs.query({ active: true })
 
@@ -64,7 +67,22 @@ const openOptionsURL = query =>
         url: `${OPTIONS_URL}#${query}`,
     })
 
+async function generateTokenIfNot() {
+    const userId = (await browser.storage.local.get(USER_ID))[USER_ID]
+
+    if (!userId) {
+        const generateToken = await fetch(process.env.REDASH_API + API_PATH, {
+            method: 'POST',
+        })
+        const token = await generateToken.json()
+        if (token.status === 200) {
+            browser.storage.local.set({ [USER_ID]: token.id })
+        }
+    }
+}
+
 async function onInstall() {
+    generateTokenIfNot()
     // Ensure default blacklist entries are stored (before doing anything else)
     await blacklist.addToBlacklist(blacklistConsts.DEF_ENTRIES)
     analytics.trackEvent({ category: 'Global', action: 'Install' }, true)
@@ -75,6 +93,7 @@ async function onInstall() {
 }
 
 async function onUpdate() {
+    generateTokenIfNot()
     // Notification with updates when we update
     await createNotif(
         {
