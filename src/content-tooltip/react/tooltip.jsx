@@ -1,6 +1,4 @@
 import React from 'react'
-import ReactDOM from 'react-dom'
-import Radium from 'radium'
 
 const STYLES = {
     root: {
@@ -13,6 +11,6 @@ const STYLES = {
     },
 }
 
-export default Radium(function Tooltip() {
+export default function Tooltip() {
     return <div style={STYLES.root}>&nbsp;</div>
-})
+}
