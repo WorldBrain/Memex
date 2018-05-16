@@ -1,6 +1,7 @@
-import Storage, { Props } from './storage'
+import Storage, { Props, StorageManager } from './storage'
 
 // Create main singleton to interact with DB in the ext
+const storageManager = new StorageManager()
 let realIndex: Storage = null
 const index = new Proxy<Storage>({} as Storage, {
     get: (target, key) => {
@@ -19,12 +20,15 @@ const index = new Proxy<Storage>({} as Storage, {
     },
 })
 
-export const init = (props?: Props) => (realIndex = new Storage(props))
+export const init = (props?: Props) => {
+    realIndex = new Storage({ ...props, storageManager })
+    storageManager._finishInitialization(realIndex)
+}
 
 export * from './types'
 export * from './models'
 
-export { Storage }
+export { Storage, storageManager }
 export default index
 
 //
