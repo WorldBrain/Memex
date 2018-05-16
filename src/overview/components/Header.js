@@ -1,5 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import { Link } from 'react-router'
 
 import { OutLink } from 'src/common-ui/containers'
 import DateRangeSelection from './DateRangeSelection'
@@ -48,9 +49,9 @@ const Header = ({
             >
                 Upgrade Memex
             </OutLink>
-            <a href="/options/options.html#/settings">
+            <Link to="/settings">
                 <img src="/img/settings-icon.png" className={styles.icon} />
-            </a>
+            </Link>
         </div>
     </div>
 )

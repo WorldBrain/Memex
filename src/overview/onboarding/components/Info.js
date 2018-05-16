@@ -1,4 +1,5 @@
 import React, { PureComponent } from 'react'
+import { Link } from 'react-router'
 
 import analytics from 'src/analytics'
 import localStyles from './Onboarding.css'
@@ -23,13 +24,13 @@ class Info extends PureComponent {
                                 src="/img/shortcuts.png"
                             />
                         </p>
-                        <a
+                        <Link
                             className={localStyles.choiceBtn}
                             type="button"
-                            href="/options/options.html#/tutorial"
+                            to="/tutorial"
                         >
                             See Full Tutorial
-                        </a>
+                        </Link>
                     </div>
                 </div>
             </div>

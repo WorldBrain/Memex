@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router'
 import PropTypes from 'prop-types'
 
 import { OutLink } from 'src/common-ui/containers'
@@ -36,12 +37,9 @@ const Privacy = props => (
             blacklist)<br />
             The data is solely used to improve Memex stability, usability and
             features, and is not shared with any 3rd party. <br />
-            <a
-                className={localStyles.link}
-                href="/options/options.html#/statistics"
-            >
+            <Link className={localStyles.link} to="/statistics">
                 Here
-            </a>{' '}
+            </Link>{' '}
             is a complete list of all the data points Memex gathers currently.
             To cross-check this list you can examine our source code{' '}
             <OutLink

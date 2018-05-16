@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import { Link } from 'react-router'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
@@ -150,22 +151,19 @@ class OverviewContainer extends Component {
         <ResultsMessage>
             <div className={localStyles.title}>
                 You didn't visit or{' '}
-                <a
-                    style={{ color: '#777' }}
-                    href="/options/options.html#/import"
-                >
+                <Link style={{ color: '#777' }} to="/import">
                     import
-                </a>
+                </Link>
                 <br /> <p className={localStyles.subTitle}>any websites yet.</p>
             </div>
             <div>
-                <a
+                <Link
                     className={localStyles.choiceBtn}
                     type="button"
-                    href="/options/options.html#/import"
+                    to="/import"
                 >
                     Import History & Bookmarks
-                </a>
+                </Link>
             </div>
         </ResultsMessage>
     )
