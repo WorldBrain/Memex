@@ -1,13 +1,14 @@
-import internalAnalytics from 'src/search/search-index-new'
+import CountStatistics from './CountStatistics'
 
 class AnalyticsStatisticsStorage {
     constructor(notifType) {
         this.notifType = notifType
     }
 
-    store(notifType) {
-        if (this.notifType === notifType) {
-            internalAnalytics.incrementvalue(notifType)
+    store(event) {
+        const stats = new CountStatistics()
+        if (this.notifType === event.notifType) {
+            stats.processEvent(event)
         }
     }
 }

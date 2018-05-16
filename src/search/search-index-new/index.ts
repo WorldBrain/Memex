@@ -80,3 +80,6 @@ export {
 
 // Mock for old index queue; to remove with old index code
 export const indexQueue = { clear: () => undefined }
+
+// For event log
+export { storeEvent } from './eventLog'

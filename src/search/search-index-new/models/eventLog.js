@@ -10,6 +10,7 @@ export default class eventLog extends AbstractModel {
     }
 
     save() {
+        console.log(this)
         return db.eventLog.put(this)
     }
 }

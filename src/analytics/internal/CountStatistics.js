@@ -1,7 +1,13 @@
-class CountStatistics {
-    processEvent({ oldValue, event }) {}
+import internalAnalytics from 'src/analytics/internal'
 
-    fromDexie() {}
+class CountStatistics {
+    processEvent(event) {
+        internalAnalytics.incrementvalue(event)
+    }
+
+    fromDexie(notifType) {
+        internalAnalytics.loadInititalData(notifType)
+    }
 }
 
 export default CountStatistics

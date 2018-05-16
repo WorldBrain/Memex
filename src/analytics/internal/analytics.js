@@ -1,6 +1,7 @@
 import { MapEventTypeToInt, MapNotifTypeToIntArray } from './constants'
 import db from 'src/search/search-index-new'
 import AnalyticsStorage from './AnalyticsStorage'
+import SendToServer from './sendToServer'
 
 class Analytics {
     _queueEvents = []
@@ -41,7 +42,7 @@ class Analytics {
 
         const notifParams = {
             last_time_used: eventArgs.timestamp,
-            value: MapEventTypeToInt[eventArgs.type].notifType,
+            notifType: MapEventTypeToInt[eventArgs.type].notifType,
         }
 
         AnalyticsStorage({
@@ -57,29 +58,51 @@ class Analytics {
      * Query to dexie and store into _operationsMap
      * @param {notifType} type of notif event
      */
-    async loadInititalData(notifType) {
-        console.log('Here')
-        await db.transactions('r', db.tables, async () => {
-            const eventLog = db.eventLog
+    async loadInititalData(notifType, isCacheUpdate = false) {
+        await db.transaction('rw', db.tables, async () => {
+            const eventLogCount = await db.eventLog
                 .where('type')
                 .anyOf(MapNotifTypeToIntArray[notifType])
                 .count()
 
-            console.log(eventLog)
+            const eventLogLastTimeUsed = await db.eventLog
+                .where('type')
+                .anyOf(MapNotifTypeToIntArray[notifType])
+                .last()
 
-            if (this._operationsMap[notifType] === undefined) {
-                this._operationsMap[notifType] = eventLog
+            // If the data is out of date then we have to update with dexie query and initial loading of data
+            if (this._operationsMap[notifType] === undefined || isCacheUpdate) {
+                // if there is any entry in the dexie then update data of cache
+                if (eventLogLastTimeUsed) {
+                    this._operationsMap[notifType] = {
+                        last_time_used: eventLogLastTimeUsed.timestamp,
+                        value: eventLogCount,
+                    }
+                }
             } else {
-                this._operationsMap[notifType] += eventLog
+                if (eventLogLastTimeUsed) {
+                    this._operationsMap[notifType] = {
+                        last_time_used: eventLogLastTimeUsed.timestamp,
+                        value:
+                            eventLogCount +
+                            this._operationsMap[notifType].value,
+                    }
+                }
             }
         })
     }
 
-    incrementvalue(notifType) {
-        if (!this._operationsMap[notifType]) {
-            this._operationsMap[notifType] = 1
+    incrementvalue(event) {
+        if (!this._operationsMap[event.notifType]) {
+            this._operationsMap[event.notifType] = {
+                value: 1,
+                last_time_used: event.last_time_used,
+            }
         } else {
-            this._operationsMap[notifType] += 1
+            this._operationsMap[event.notifType] = {
+                value: this._operationsMap[event.notifType].value + 1,
+                last_time_used: event.last_time_used,
+            }
         }
     }
 
@@ -93,10 +116,7 @@ class Analytics {
      * @param {EventTrackInfo} eventArgs
      */
     async processEvent(eventArgs) {
-        this.loadInititalData('bookmark')
-
         this._loaded = 1
-        console.log(eventArgs)
         // Prepare the event to store the event in dexie db.
         const timestamp = Date.now()
 
@@ -127,6 +147,9 @@ class Analytics {
         } else {
             this._queueEvents.push(params)
         }
+
+        // Send the data to redash server
+        SendToServer.trackEvent(params)
     }
 }
 

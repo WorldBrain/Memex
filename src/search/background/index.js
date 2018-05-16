@@ -1,5 +1,6 @@
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import indexInterface from '../'
+import { storeEvent } from '../search-index-new/'
 
 makeRemotelyCallable({
     addTag: indexInterface.addTag,
@@ -12,6 +13,7 @@ makeRemotelyCallable({
     delPagesByPattern: indexInterface.delPagesByPattern,
     getMatchingPageCount: indexInterface.getMatchingPageCount,
     search: indexInterface.search,
+    storeEvent: storeEvent,
     pageLookup: url =>
         indexInterface.getPage(url).then(transformPageForSending),
 })
