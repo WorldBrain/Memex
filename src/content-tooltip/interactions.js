@@ -1,5 +1,17 @@
+import React from 'react'
+import ReactDOM from 'react-dom'
+
+import Container from './react/container'
 import { delayed } from './utils'
-import { createDirectLink } from '../direct-linking/content_script/interactions'
+
+export function setupUIContainer(target) {
+    return new Promise(resolve => {
+        ReactDOM.render(
+            <Container onInit={showTooltip => resolve(showTooltip)} />,
+            target,
+        )
+    })
+}
 
 export function setupTooltipTrigger(callback) {
     document.body.addEventListener('mouseup', event => {
@@ -17,8 +29,7 @@ export const conditionallyTriggerTooltip = delayed(
         }
 
         callback(position)
-        // console.log('show tooltip')
-        console.log(await createDirectLink())
+        // console.log(await createDirectLink())
     },
     300,
 )

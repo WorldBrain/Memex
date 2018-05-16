@@ -1,6 +1,5 @@
 import { bodyLoader } from 'src/util/loader'
 import * as interactions from './interactions'
-import renderUI from './react'
 
 export async function init() {
     await bodyLoader()
@@ -9,9 +8,8 @@ export async function init() {
     target.setAttribute('id', 'memex-direct-linking-tooltip')
     document.body.appendChild(target)
 
-    renderUI(target)
-
-    interactions.setupTooltipTrigger(({ x, y }) => {})
+    const showTooltip = await interactions.setupUIContainer(target)
+    interactions.setupTooltipTrigger(showTooltip)
 }
 
 init()

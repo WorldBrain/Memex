@@ -1,18 +1,42 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import OnClickOutside from 'react-onclickoutside'
 import Tooltip from './tooltip'
 
-export default function Container(props) {
-    if (!props.tooltipPosition) {
-        return null
+class Container extends React.Component {
+    static propTypes = {
+        onInit: PropTypes.func.isRequired,
     }
 
-    return <Tooltip position={props.tooltipPosition}>test</Tooltip>
+    state = {
+        showTooltip: false,
+        position: {},
+    }
+
+    componentDidMount() {
+        this.props.onInit(this.showTooltip)
+    }
+
+    showTooltip = position =>
+        this.setState({
+            showTooltip: true,
+            position,
+        })
+
+    handleClickOutside = () =>
+        this.setState({
+            showTooltip: false,
+            position: {},
+        })
+
+    render() {
+        const { showTooltip, position } = this.state
+        return (
+            <div className="memex-tooltip-container">
+                {showTooltip ? <Tooltip {...position} /> : null}
+            </div>
+        )
+    }
 }
 
-Container.propTypes = {
-    tooltipPosition: PropTypes.shape({
-        x: PropTypes.number,
-        y: PropTypes.number,
-    }),
-}
+export default OnClickOutside(Container)
