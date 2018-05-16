@@ -1,16 +1,23 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 const STYLES = {
     root: {
         position: 'absolute',
-        left: '50px',
-        top: '50px',
         width: '50px',
         height: '50px',
         background: 'red',
     },
 }
 
-export default function Tooltip() {
-    return <div style={STYLES.root}>&nbsp;</div>
+const Tooltip = ({ x, y }) => {
+    const styles = { ...STYLES.root, left: x, top: y }
+    return <div style={styles}>&nbsp;</div>
 }
+
+Tooltip.propTypes = {
+    x: PropTypes.number.isRequired,
+    y: PropTypes.number.isRequired,
+}
+
+export default Tooltip
