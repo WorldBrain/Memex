@@ -67,14 +67,20 @@ const openOptionsURL = query =>
         url: `${OPTIONS_URL}#${query}`,
     })
 
-async function generateTokenIfNot() {
+async function generateTokenIfNot(installTime) {
     const userId = (await browser.storage.local.get(USER_ID))[USER_ID]
 
     if (!userId) {
         const generateToken = await fetch(process.env.REDASH_API + API_PATH, {
             method: 'POST',
+            headers: {
+                'Content-type':
+                    'application/x-www-form-urlencoded; charset=UTF-8',
+            },
+            body: `install_time=${installTime}`,
         })
         const token = await generateToken.json()
+
         if (token.status === 200) {
             browser.storage.local.set({ [USER_ID]: token.id })
         }
@@ -82,7 +88,6 @@ async function generateTokenIfNot() {
 }
 
 async function onInstall() {
-    generateTokenIfNot()
     // Ensure default blacklist entries are stored (before doing anything else)
     await blacklist.addToBlacklist(blacklistConsts.DEF_ENTRIES)
     analytics.trackEvent({ category: 'Global', action: 'Install' }, true)
@@ -90,10 +95,15 @@ async function onInstall() {
     browser.tabs.create({ url: `${OVERVIEW_URL}?install=true` })
     // Store the timestamp of when the extension was installed + default blacklist
     browser.storage.local.set({ [installTimeStorageKey]: Date.now() })
+
+    const installTime = (await browser.storage.local.get(
+        installTimeStorageKey,
+    ))[installTimeStorageKey]
+
+    generateTokenIfNot(installTime)
 }
 
 async function onUpdate() {
-    generateTokenIfNot()
     // Notification with updates when we update
     await createNotif(
         {
@@ -116,6 +126,12 @@ async function onUpdate() {
             },
         })
     }
+
+    const installTime = (await browser.storage.local.get(
+        installTimeStorageKey,
+    ))[installTimeStorageKey]
+
+    generateTokenIfNot(installTime)
 }
 
 browser.commands.onCommand.addListener(command => {
