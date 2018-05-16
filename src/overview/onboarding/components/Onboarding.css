@@ -7,10 +7,10 @@
     justify-content: space-between;
     text-align: center;
     box-shadow: 0px 6px 7px -7px #777;
-}
 
-a {
-    text-decoration: none !important; /* stylelint-disable-line declaration-no-important */
+    & a {
+        text-decoration: none !important; /* stylelint-disable-line declaration-no-important */
+    }
 }
 
 .choiceBtnContainer {
