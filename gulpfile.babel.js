@@ -96,6 +96,9 @@ function createBundle(
             SENTRY_DSN: production
                 ? 'https://205014a0f65e4160a29db2935250b47c@sentry.io/305612'
                 : undefined,
+            REDASH_API: production
+                ? 'http://159.65.117.205:5000'
+                : 'http://localhost:1234',
         }),
         { global: true },
     )
