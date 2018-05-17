@@ -7,7 +7,10 @@ const hydrateImportsFromStorage = store => {
         browser.storage.local.get(key).then(data => {
             if (!data[key]) return
 
-            const parsedData = JSON.parse(data[key])
+            const parsedData =
+                typeof data[key] === 'string'
+                    ? JSON.parse(data[key])
+                    : data[key]
             store.dispatch(action(parsedData))
         })
 
@@ -20,8 +23,7 @@ const hydrateImportsFromStorage = store => {
 
 const syncImportsToStorage = store =>
     store.subscribe(() => {
-        const dump = (key, data) =>
-            browser.storage.local.set({ [key]: JSON.stringify(data) })
+        const dump = (key, data) => browser.storage.local.set({ [key]: data })
 
         const state = store.getState()
         dump(STORAGE_KEYS.ALLOW_TYPES, selectors.allowTypes(state))
