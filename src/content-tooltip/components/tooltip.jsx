@@ -25,23 +25,23 @@ const Tooltip = ({
     closeTooltip,
     openSettings,
 }) => (
-    <div
-        className={deriveTooltipClass(state)}
-        style={{ left: x, top: y }}
-        id="memex-tooltip"
-    >
-        <AnimationWrapper>{tooltipComponent}</AnimationWrapper>
+        <div
+            className={deriveTooltipClass(state)}
+            style={{ left: x, top: y }}
+            id="memex-tooltip"
+        >
+            <AnimationWrapper>{tooltipComponent}</AnimationWrapper>
 
-        <span className={styles.buttons}>
-            <a onClick={closeTooltip} className={styles.smallButton}>
-                <img className={styles.imgCross} src={images.cross} />
-            </a>
-            <a onClick={openSettings} className={styles.smallButton}>
-                <img className={styles.imgSettings} src={images.settings} />
-            </a>
-        </span>
-    </div>
-)
+            <span className={styles.buttons}>
+                <a onClick={closeTooltip} className={styles.smallButton}>
+                    <img className={styles.imgCross} src={images.cross} />
+                </a>
+                <a onClick={openSettings} className={styles.smallButton}>
+                    <img className={styles.imgSettings} src={images.settings} />
+                </a>
+            </span>
+        </div>
+    )
 
 Tooltip.propTypes = {
     x: PropTypes.number.isRequired,
