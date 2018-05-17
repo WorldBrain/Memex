@@ -2410,6 +2410,7 @@ boom@5.x.x:
     hoek "4.x.x"
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 bowser@^1.0.0, bowser@^1.7.3:
 =======
 bowser@^1.7.3:
@@ -2417,6 +2418,8 @@ bowser@^1.7.3:
   version "1.9.3"
   resolved "https://registry.yarnpkg.com/bowser/-/bowser-1.9.3.tgz#6643ae4d783f31683f6d23156976b74183862162"
 
+=======
+>>>>>>> Created different tooltip states and add styles.
 boxen@^1.0.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/boxen/-/boxen-1.3.0.tgz#55c6c39a8ba58d9c61ad22cd877532deb665a20b"
@@ -3756,13 +3759,6 @@ css-color-function@~1.3.3:
 css-color-names@0.0.4:
   version "0.0.4"
   resolved "https://registry.yarnpkg.com/css-color-names/-/css-color-names-0.0.4.tgz#808adc2e79cf84738069b646cb20ec27beb629e0"
-
-css-in-js-utils@^2.0.0:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/css-in-js-utils/-/css-in-js-utils-2.0.1.tgz#3b472b398787291b47cfe3e44fecfdd9e914ba99"
-  dependencies:
-    hyphenate-style-name "^1.0.2"
-    isobject "^3.0.1"
 
 css-loader@^0.28.11:
   version "0.28.11"
@@ -6488,6 +6484,7 @@ husky@^0.14.3:
     strip-indent "^2.0.0"
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 hyphenate-style-name@^1.0.1, hyphenate-style-name@^1.0.2:
 =======
 hyphenate-style-name@^1.0.2:
@@ -6495,6 +6492,8 @@ hyphenate-style-name@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/hyphenate-style-name/-/hyphenate-style-name-1.0.2.tgz#31160a36930adaf1fc04c6074f7eb41465d4ec4b"
 
+=======
+>>>>>>> Created different tooltip states and add styles.
 iconv-lite@0.4.19:
   version "0.4.19"
   resolved "https://registry.yarnpkg.com/iconv-lite/-/iconv-lite-0.4.19.tgz#f7468f60135f5e5dad3399c0a81be9a1603a082b"
@@ -6641,6 +6640,7 @@ inline-source-map@~0.6.0:
     source-map "~0.5.3"
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 inline-style-prefixer@^2.0.5:
   version "2.0.5"
   resolved "https://registry.yarnpkg.com/inline-style-prefixer/-/inline-style-prefixer-2.0.5.tgz#c153c7e88fd84fef5c602e95a8168b2770671fe7"
@@ -6681,6 +6681,8 @@ inquirer@5.1.0:
 
 =======
 >>>>>>> React tooltip preparation
+=======
+>>>>>>> Created different tooltip states and add styles.
 inquirer@^0.12.0:
   version "0.12.0"
   resolved "https://registry.yarnpkg.com/inquirer/-/inquirer-0.12.0.tgz#1ef2bfd63504df0bc75785fff8c2c41df12f077e"
@@ -11458,6 +11460,7 @@ quick-lru@^1.0.0:
   resolved "https://registry.yarnpkg.com/quick-lru/-/quick-lru-1.1.0.tgz#4360b17c61136ad38078397ff11416e186dcfbb8"
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 radium@^0.19.0:
   version "0.19.6"
   resolved "https://registry.yarnpkg.com/radium/-/radium-0.19.6.tgz#b86721d08dbd303b061a4ae2ebb06cc6e335ae72"
@@ -11475,6 +11478,8 @@ radium@^0.24.0:
 >>>>>>> React tooltip preparation
     prop-types "^15.5.8"
 
+=======
+>>>>>>> Created different tooltip states and add styles.
 ramda@^0.25.0:
   version "0.25.0"
   resolved "https://registry.yarnpkg.com/ramda/-/ramda-0.25.0.tgz#8fdf68231cffa90bc2f9460390a0cb74a29b29a9"
