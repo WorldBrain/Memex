@@ -1,6 +1,7 @@
 import React from 'react'
-import styles from './tooltip.css'
+import PropTypes from 'prop-types'
 
+import styles from './tooltip.css'
 import { getExtURL } from '../utils'
 
 const images = {
@@ -10,7 +11,7 @@ const images = {
     check: getExtURL('/img/check.svg'),
 }
 
-export const initialComponent = (
+export const InitialComponent = ({ createLink }) => (
     <div className={styles.createLinkButton}>
         <div className={styles.icon}>
             <img src={images.logo} />
@@ -19,31 +20,50 @@ export const initialComponent = (
             Create own links on every website
         </div>
         <div className={styles.tooltipDivider} />
-        <div className={styles.headingLink}>
+        <div className={styles.headingLink} onClick={createLink}>
             <img src={images.link} />
             <span>Create Link to Highlight</span>
         </div>
     </div>
 )
 
-export const creatingLinkComponent = (
-    <div className={styles.progressIndicator}>Creating link...</div>
+InitialComponent.propTypes = {
+    createLink: PropTypes.func.isRequired,
+}
+
+export const CreatingLinkComponent = () => (
+    <div className={styles.progressIndicator}>
+        <div className={styles.icon}>
+            <img src={images.iconWhite} />
+        </div>
+        <div className={styles.ldsEllipsis}>
+            <div />
+            <div />
+            <div />
+            <div />
+        </div>
+    </div>
 )
 
-export const createdLinkComponent = (
+export const CreatedLinkComponent = ({ link, copyFunc }) => (
     <div className={styles.createdMessage}>
         <div className={styles.icon}>
             <img src={images.iconWhite} />
         </div>
-        <a href="#" target="_blank" className={styles.url}>
-            LINK
+        <a href="" onClick={copyFunc} target="_blank" className={styles.url}>
+            {link}
         </a>
         <br />
         <div className={styles.clickToCopy}>Click to copy</div>
     </div>
 )
 
-export const copiedComponent = (
+CreatedLinkComponent.propTypes = {
+    link: PropTypes.string.isRequired,
+    copyFunc: PropTypes.func.isRequired,
+}
+
+export const CopiedComponent = () => (
     <div className={styles.copiedMessage}>
         <div className={styles.icon}>
             <img src={images.iconWhite} />
@@ -53,4 +73,6 @@ export const copiedComponent = (
     </div>
 )
 
-export const errorComponent = <div className={styles.errorMessage}>Error</div>
+export const ErrorComponent = () => (
+    <div className={styles.errorMessage}>Error</div>
+)
