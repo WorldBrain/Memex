@@ -32,8 +32,12 @@ export default class FavIcon extends AbstractModel {
 
     set favIconURI(dataURI: string) {
         if (dataURI) {
-            this.favIcon = AbstractModel.dataURLToBlob(dataURI)
-            this[favIcon] = AbstractModel.getBlobURL(this.favIcon)
+            try {
+                this.favIcon = AbstractModel.dataURLToBlob(dataURI)
+                this[favIcon] = AbstractModel.getBlobURL(this.favIcon)
+            } catch (err) {
+                console.error(err)
+            }
         }
     }
 
@@ -44,6 +48,11 @@ export default class FavIcon extends AbstractModel {
     }
 
     public async save() {
-        return db.transaction('rw', db.favIcons, () => db.favIcons.put(this))
+        return db.transaction('rw', db.favIcons, () => {
+            // Could have been errors converting the data url to blob
+            if (this.favIcon !== null) {
+                db.favIcons.put(this)
+            }
+        })
     }
 }
