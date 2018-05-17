@@ -134,26 +134,17 @@ class QueryBuilder {
         return this
     }
 
-    filterTags(data) {
-        data.forEach(tag => this.tags.add(tag))
-        return this
-    }
-
-    filterDomains(domains = []) {
-        for (const domain of domains) {
-            this.domain.add(domain)
+    _filterGen = filterName => (dataToAdd = []) => {
+        for (const data of dataToAdd) {
+            this[filterName].add(data)
         }
 
         return this
     }
 
-    filterExcDomains(domains = []) {
-        for (const domain of domains) {
-            this.domainExclude.add(domain)
-        }
-
-        return this
-    }
+    filterTags = this._filterGen('tags')
+    filterDomains = this._filterGen('domain')
+    filterExcDomains = this._filterGen('domainExclude')
 
     /**
      * Filter out terms those terms that match any tags/domain pattern from an array of terms.

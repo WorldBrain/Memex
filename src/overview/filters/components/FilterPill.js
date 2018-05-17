@@ -4,7 +4,7 @@ import cx from 'classnames'
 
 import styles from './Filters.css'
 
-const FilterPill = ({ value, onClick = f => f, isExclusive = false }) => (
+const FilterPill = ({ value, onClick, isExclusive = false }) => (
     <span
         className={cx(styles.pillContainer, {
             [styles.isExclusive]: isExclusive,
@@ -30,7 +30,7 @@ const FilterPill = ({ value, onClick = f => f, isExclusive = false }) => (
 
 FilterPill.propTypes = {
     value: PropTypes.string.isRequired,
-    onClick: PropTypes.func,
+    onClick: PropTypes.func.isRequired,
     isExclusive: PropTypes.bool,
 }
 
