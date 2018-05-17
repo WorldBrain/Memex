@@ -1,11 +1,7 @@
 {
     "name": "WorldBrain's Memex",
     "short_name": "Memex",
-<<<<<<< HEAD
     "version": "0.3.3",
-=======
-    "version": "0.3.2",
->>>>>>> version update to 0.3.2
     "offline_enabled": true,
     "description":
         "Find previously visited websites & PDFs in seconds. Full-text search your browsing history and bookmarks.",
@@ -16,10 +12,7 @@
         {
             "matches": ["<all_urls>"],
             "js": ["lib/browser-polyfill.js", "content_script.js"],
-<<<<<<< HEAD
             "css": ["/content_script.css"],
-=======
->>>>>>> version update to 0.3.2
             "run_at": "document_start"
         }
     ],
