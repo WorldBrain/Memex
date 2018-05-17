@@ -35,7 +35,7 @@ browser.runtime.onConnect.addListener(searchConnectionHandler)
 
 const handleBookmarkRemoval = (id, { node }) =>
     node.url
-        ? indexInterface.delBookmark(node)
+        ? indexInterface.delBookmark(node).catch(console.error)
         : console.warn('Cannot remove bookmark with no URL', node)
 
 // Store and index any new browser bookmark
