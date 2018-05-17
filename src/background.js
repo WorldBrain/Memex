@@ -22,6 +22,7 @@ import db, { storageManager } from 'src/search/search-index-new'
 import * as models from 'src/search/search-index-new/models'
 import 'src/search/migration'
 import initSentry from './util/raven'
+import generateToken from 'src/util/generate-token'
 
 window.index = searchIndex
 window.storage = db
@@ -42,9 +43,6 @@ export const NEW_FEATURE_NOTIF = {
     url:
         'https://worldbrain.helprace.com/i62-feature-memex-links-highlight-any-text-and-create-a-link-to-it',
 }
-
-export const USER_ID = 'user-id'
-const API_PATH = '/api/v1/returnToken'
 
 async function openOverview() {
     const [currentTab] = await browser.tabs.query({ active: true })
@@ -67,26 +65,6 @@ const openOptionsURL = query =>
         url: `${OPTIONS_URL}#${query}`,
     })
 
-async function generateTokenIfNot(installTime) {
-    const userId = (await browser.storage.local.get(USER_ID))[USER_ID]
-
-    if (!userId) {
-        const generateToken = await fetch(process.env.REDASH_API + API_PATH, {
-            method: 'POST',
-            headers: {
-                'Content-type':
-                    'application/x-www-form-urlencoded; charset=UTF-8',
-            },
-            body: `install_time=${installTime}`,
-        })
-        const token = await generateToken.json()
-
-        if (token.status === 200) {
-            browser.storage.local.set({ [USER_ID]: token.id })
-        }
-    }
-}
-
 async function onInstall() {
     const now = Date.now()
 
@@ -98,7 +76,7 @@ async function onInstall() {
     // Store the timestamp of when the extension was installed + default blacklist
     browser.storage.local.set({ [installTimeStorageKey]: now })
 
-    generateTokenIfNot(now)
+    await generateToken(now)
 }
 
 async function onUpdate() {
@@ -129,7 +107,7 @@ async function onUpdate() {
         installTimeStorageKey,
     ))[installTimeStorageKey]
 
-    generateTokenIfNot(installTime)
+    await generateToken(installTime)
 }
 
 browser.commands.onCommand.addListener(command => {
