@@ -12,16 +12,14 @@ const cssClasses = {
     copied: 'stateLinkCopied',
 }
 
-const Tooltip = ({ x, y, state, tooltipComponent }) => {
-    return (
-        <div
-            className={classNames(styles.tooltip, styles[cssClasses[state]])}
-            style={{ left: x, top: y }}
-        >
-            {tooltipComponent}
-        </div>
-    )
-}
+const Tooltip = ({ x, y, state, tooltipComponent }) => (
+    <div
+        className={classNames(styles.tooltip, styles[cssClasses[state]])}
+        style={{ left: x, top: y }}
+    >
+        {tooltipComponent}
+    </div>
+)
 
 Tooltip.propTypes = {
     x: PropTypes.number.isRequired,

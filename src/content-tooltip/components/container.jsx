@@ -3,7 +3,15 @@ import PropTypes from 'prop-types'
 import OnClickOutside from 'react-onclickoutside'
 
 import Tooltip from './tooltip'
-import * as components from './tooltipStates'
+import { createDirectLink } from 'src/direct-linking/content_script/interactions'
+import {
+    InitialComponent,
+    CreatingLinkComponent,
+    CreatedLinkComponent,
+    CopiedComponent,
+    ErrorComponent,
+} from './tooltipStates'
+import { copyToClipboard } from '../utils'
 
 class Container extends React.Component {
     static propTypes = {
@@ -13,7 +21,8 @@ class Container extends React.Component {
     state = {
         showTooltip: false,
         position: {},
-        tooltipState: 'copied',
+        tooltipState: 'pristine',
+        linkURL: '',
     }
 
     componentDidMount() {
@@ -24,6 +33,7 @@ class Container extends React.Component {
         this.setState({
             showTooltip: true,
             position,
+            tooltipState: 'pristine',
         })
 
     handleClickOutside = () =>
@@ -32,24 +42,52 @@ class Container extends React.Component {
             position: {},
         })
 
+    setTooltipState = state =>
+        this.setState({
+            tooltipState: state,
+        })
+
+    createLink = async () => {
+        this.setState({
+            tooltipState: 'running',
+        })
+        const { url } = await createDirectLink()
+        this.setState({
+            tooltipState: 'done',
+            linkURL: url,
+        })
+    }
+
+    copyLinkToClipboard = event => {
+        event.preventDefault()
+        copyToClipboard(this.state.linkURL)
+        this.setState({
+            tooltipState: 'copied',
+        })
+    }
+
     renderTooltipComponent = () => {
         switch (this.state.tooltipState) {
             case 'pristine':
-                return components.initialComponent
+                return <InitialComponent createLink={this.createLink} />
             case 'running':
-                return components.creatingLinkComponent
+                return <CreatingLinkComponent />
             case 'done':
-                return components.createdLinkComponent
+                return (
+                    <CreatedLinkComponent
+                        link={this.state.linkURL}
+                        copyFunc={this.copyLinkToClipboard}
+                    />
+                )
             case 'copied':
-                return components.copiedComponent
+                return <CopiedComponent />
             default:
-                return components.errorComponent
+                return <ErrorComponent />
         }
     }
 
     render() {
         const { showTooltip, position, tooltipState } = this.state
-        console.log(position)
         return (
             <div className="memex-tooltip-container">
                 {showTooltip ? (
