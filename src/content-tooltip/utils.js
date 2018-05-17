@@ -13,3 +13,5 @@ export function delayed(f, delay) {
         }, delay)
     }
 }
+
+export const getExtURL = location => browser.extension.getURL(location)

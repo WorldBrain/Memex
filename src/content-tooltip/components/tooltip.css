@@ -1,0 +1,201 @@
+.tooltip {
+    display: flex;
+    position: absolute;
+    height: 40px;
+    text-align: center;
+    transform: translate(-90%, 50%);
+    font-size: 13px;
+    border: 2px solid #3eb995;
+    padding: 5px 5px;
+    border-radius: 5px;
+    background-color: #3eb995;
+    color: white;
+    line-height: 1.2em;
+    width: 220px;
+}
+
+.url {
+    box-sizing: border-box;
+    display: block;
+    text-overflow: ellipsis;
+    width: 95%;
+    padding: 0 0;
+    overflow: hidden;
+    white-space: nowrap;
+    margin-top: 3px;
+}
+
+.tooltip.stateInitial {
+    display: flex;
+    align-items: center;
+    width: 255px;
+    background-color: white;
+}
+
+/*  Worldbrain logo on the left of the tooltip */
+.tooltip::before {
+    border: solid transparent;
+    content: ' ';
+    height: 30px;
+    width: 30px;
+    position: absolute;
+    right: 93%;
+    top: 16%;
+    pointer-events: none;
+    border-color: #3eb995;
+    border-width: 2px;
+    border-bottom-color: transparent;
+    border-left-color: transparent;
+    border-radius: 50%;
+    transform: rotate(225deg);
+    background-color: #3eb995;
+}
+
+.tooltip.stateInitial::before {
+    background-color: white;
+    right: 93.5%;
+}
+
+/* The pointer of the tooltip */
+.tooltip::after {
+    bottom: 77%;
+    left: 85%;
+    border: solid transparent;
+    content: ' ';
+    height: 20px;
+    width: 20px;
+    position: absolute;
+    pointer-events: none;
+    border-color: #3eb995;
+    border-width: 2px;
+    border-bottom-color: transparent;
+    border-left-color: transparent;
+    transform: rotate(-45deg);
+    background-color: white;
+}
+
+.tooltip.stateCreatedLink::after,
+.tooltip.stateLinkCopied::after {
+    bottom: 80%;
+    background-color: #3eb995;
+}
+
+.createLinkButton {
+    display: flex;
+    flex-direction: row;
+    margin: 0 2px;
+    color: #3eb995;
+
+    & .headingLink {
+        display: flex;
+        align-items: center;
+        z-index: 10;
+        cursor: pointer;
+
+        & img {
+            width: auto;
+            height: 20px;
+        }
+
+        & span {
+            margin-left: 5px;
+        }
+    }
+
+    & .headingOwnlinks {
+        margin-right: 25px;
+        width: 150px;
+        z-index: 10;
+        cursor: pointer;
+    }
+
+    & .tooltipDivider {
+        height: 50px;
+        display: block;
+        margin: 0 8px;
+        width: 1px;
+        background: #3eb995;
+        position: absolute;
+        left: 45.5%;
+        top: 0;
+    }
+}
+
+.icon {
+    display: flex;
+    width: 20px;
+    position: absolute;
+    top: 15px;
+    left: -10px;
+
+    & img {
+        width: auto;
+        height: 20px;
+    }
+}
+
+.progressIndicator {
+    display: inline;
+}
+
+.errorMessage {
+    display: inline;
+}
+
+.createdMessage {
+    align-items: center;
+    width: 100%;
+    height: 90%;
+    margin-left: 10px;
+
+    & img {
+        width: 30px;
+        height: auto;
+    }
+
+    & a {
+        color: white;
+        text-decoration: none;
+
+        span {
+            margin-left: 5px;
+        }
+    }
+
+    & .icon {
+        top: 17px;
+        left: -10px;
+    }
+
+    & .clickToCopy {
+        color: white;
+        position: absolute;
+        bottom: 1%;
+        left: 39%;
+        font-size: 0.7em;
+    }
+}
+
+.copiedMessage {
+    align-items: center;
+    width: 100%;
+    height: 90%;
+    margin-left: 10px;
+    font-size: 1.1em;
+
+    & .icon {
+        top: 17px;
+        left: -10px;
+    }
+
+    & .check {
+        width: 30px;
+        height: auto;
+        margin-top: 6px;
+    }
+
+    & .copiedText {
+        margin-left: 5px;
+        margin-top: 6px;
+    }
+}

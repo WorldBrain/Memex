@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 
-import Container from './react/container'
+import Container from './components/container'
 import { delayed } from './utils'
 
 export function setupUIContainer(target) {
@@ -29,7 +29,6 @@ export const conditionallyTriggerTooltip = delayed(
         }
 
         callback(position)
-        // console.log(await createDirectLink())
     },
     300,
 )
