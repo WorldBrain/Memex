@@ -3,9 +3,9 @@ import PropTypes from 'prop-types'
 
 import localStyles from './NoResult.css'
 
-const NoResultBadTerm = ({ children }) => (
+const NoResultBadTerm = ({ title = 'No Results', children }) => (
     <div>
-        <div className={localStyles.title}>No Results </div>
+        <div className={localStyles.title}>{title}</div>
         <div className={localStyles.subtitle}>
             {children}
             <br />
@@ -35,6 +35,7 @@ const NoResultBadTerm = ({ children }) => (
 )
 
 NoResultBadTerm.propTypes = {
+    title: PropTypes.string,
     children: PropTypes.string.isRequired,
 }
 

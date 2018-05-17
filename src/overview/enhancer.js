@@ -44,9 +44,14 @@ const locationSync = ReduxQuerySync.enhancer({
             action: tags => filterActs.setTagFilters(tags),
             defaultValue: '',
         },
-        domains: {
-            selector: filters.domainsStringify,
-            action: domains => filterActs.setDomainFilters(domains),
+        domainsInc: {
+            selector: filters.domainsIncStringify,
+            action: domains => filterActs.setIncDomainFilters(domains),
+            defaultValue: '',
+        },
+        domainsExc: {
+            selector: filters.domainsExcStringify,
+            action: domains => filterActs.setExcDomainFilters(domains),
             defaultValue: '',
         },
         install: {

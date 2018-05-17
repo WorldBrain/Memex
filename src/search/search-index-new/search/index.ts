@@ -1,5 +1,5 @@
-import db from '..'
-import QueryBuilder from 'src/search/query-builder'
+import db, { SearchParams, PageResultsMap } from '..'
+import QueryBuilder from '../../query-builder'
 import { groupLatestEventsByUrl, mapUrlsToLatestEvents } from './events'
 import { mapResultsToDisplay } from './map-results-to-display'
 import { findFilteredUrls } from './filters'
@@ -9,34 +9,20 @@ import { paginate, applyScores } from './util'
 export { domainHasFavIcon } from './fav-icon'
 export { suggest } from './suggest'
 
-/**
- * @typedef {Object} SearchParams
- * @property {string[]} [tags=[]]
- * @property {string[]} [domains=[]]
- * @property {string[]} [queryTerms=[]]
- * @property {number} [startDate=0] Lower-bound for visit time.
- * @property {number} [endDate=Date.now()] Upper-bound for visit time.
- * @property {number} [skip=0]
- * @property {number} [limit=10]
- */
-
-/**
- * @typedef {Array} SearchResult
- * @property {string} 0 URL of found page.
- * @property {number} 1 Timestamp of latest event.
- */
 export async function search({
     query,
     showOnlyBookmarks,
     mapResultsFunc = mapResultsToDisplay,
     domains = [],
+    domainsExclude = [],
     tags = [],
-    ...restParams
+    ...restParams,
 }) {
     // Extract query terms via QueryBuilder (may change)
     const qb = new QueryBuilder()
         .searchTerm(query)
         .filterDomains(domains)
+        .filterExcDomains(domainsExclude)
         .filterTags(tags)
         .get()
 
@@ -50,23 +36,34 @@ export async function search({
         }
     }
 
+    if (qb.isInvalidSearch) {
+        return {
+            docs: [],
+            resultsExhausted: true,
+            totalCount: null,
+            isInvalidSearch: true,
+        }
+    }
+
     // Reshape needed params; prob consolidate interface later when remove old index code
     const params = {
         ...restParams,
         bookmarks: showOnlyBookmarks,
-        queryTerms: [...qb.query],
+        terms: [...qb.query],
+        termsExclude: [...qb.queryExclude],
         domains: [...qb.domain],
+        domainsExclude: [...qb.domainExclude],
         tags: [...qb.tags],
-    }
+    } as SearchParams
 
     const { docs, totalCount } = await db.transaction(
         'r',
         db.tables,
         async () => {
             const results = await fullSearch(params)
-            const docs = await mapResultsFunc(results.ids, params)
+            const mappedDocs = await mapResultsFunc(results.ids, params)
 
-            return { docs, totalCount: results.totalCount }
+            return { docs: mappedDocs, totalCount: results.totalCount }
         },
     )
 
@@ -86,28 +83,35 @@ export async function getMatchingPageCount(pattern) {
 
 /**
  * Main search logic. Calls the rest of serach depending on input search params.
- *
- * @param {SearchParams} params
  */
-async function fullSearch({ queryTerms = [], ...params }) {
+async function fullSearch({
+    terms = [],
+    termsExclude = [],
+    ...params,
+}: SearchParams) {
     const filteredUrls = await findFilteredUrls(params)
 
-    let totalCount = null
-    let urlScoresMap
+    let totalCount: number = null
+    let urlScoresMap: PageResultsMap
 
     // Few different cases of search params we can take short-cuts on
-    if (!queryTerms.length && filteredUrls != null) {
+    if (!terms.length && filteredUrls.isDataFiltered) {
         // Blank search + domain/tags filters: just grab the events for filtered URLs and paginate
-        urlScoresMap = await mapUrlsToLatestEvents(params, filteredUrls)
+        urlScoresMap = await mapUrlsToLatestEvents(params, [
+            ...filteredUrls.include,
+        ])
         totalCount = urlScoresMap.size
-    } else if (!queryTerms.length) {
+    } else if (!terms.length) {
         // Blank search: simply do lookback from `endDate` on visits and score URLs by latest
-        urlScoresMap = await groupLatestEventsByUrl(params)
+        urlScoresMap = await groupLatestEventsByUrl(params, filteredUrls)
     } else {
         // Terms search: do terms lookup first then latest event lookup (within time bounds) for each result
-        const urlScoreMultiMap = await textSearch({ queryTerms }, filteredUrls)
+        const urlScoreMultiMap = await textSearch(
+            { terms, termsExclude },
+            filteredUrls,
+        )
 
-        const urls = new Set(urlScoreMultiMap.keys())
+        const urls = [...urlScoreMultiMap.keys()]
         const latestEvents = await mapUrlsToLatestEvents(params, urls)
 
         urlScoresMap = applyScores(urlScoreMultiMap, latestEvents)

@@ -316,6 +316,38 @@ const runSuite = useOld => () => {
             expect(subDocs).toEqual([[PAGE_ID_2, DATA.VISIT_2]])
         })
 
+        testOnlyNew('domains exclusion search', async () => {
+            const { docs: a } = await search({
+                domainsExclude: ['test.com'],
+            })
+
+            expect(a).toEqual([
+                [PAGE_ID_2, DATA.VISIT_2],
+                [PAGE_ID_1, DATA.VISIT_1],
+            ])
+
+            // Effectively the same query
+            const { docs: b } = await search({
+                query: '-test.com',
+            })
+
+            expect(b).toEqual(a)
+        })
+
+        testOnlyNew('terms exclusion search', async () => {
+            const { docs: a } = await search({
+                query: 'page -lorem',
+            })
+
+            expect(a).toEqual([[PAGE_ID_3, Math.trunc(DATA.VISIT_3 * 1.2)]])
+
+            const { docs: b } = await search({
+                query: 'page -lorem -wild',
+            })
+
+            expect(b).toEqual([])
+        })
+
         const testTags = (singleQuery, multiQuery) => async () => {
             const runChecks = docs => {
                 expect(docs.length).toBe(2)
@@ -590,17 +622,18 @@ const runSuite = useOld => () => {
         })
 
         test('delete pages by domain', async () => {
-            const { docs: existingDocs } = await search({
+            const { docs: preDelete } = await search({
                 domains: ['test.com'],
             })
-            expect(existingDocs.length).toBe(1)
+            expect(preDelete.length).toBe(1)
 
             await index.delPagesByDomain('test.com')
 
-            const { docs: deletedDocs } = await search({
+            const { docs: postDelete } = await search({
                 domains: ['test.com'],
             })
-            expect(deletedDocs.length).toBe(0)
+
+            expect(postDelete).not.toEqual(preDelete)
         })
 
         // TODO: This is a HACK. Something gets very messed up testing the old version...

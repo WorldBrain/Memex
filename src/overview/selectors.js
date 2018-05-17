@@ -125,6 +125,11 @@ export const isBadTerm = createSelector(
     results => !!results.isBadTerm,
 )
 
+export const isInvalidSearch = createSelector(
+    searchResult,
+    results => !!results.isInvalidSearch,
+)
+
 const resultsExhausted = createSelector(
     searchResult,
     results => results.resultsExhausted,
@@ -157,7 +162,7 @@ export const isEmptyQuery = createSelector(
     currentQueryParams,
     filterSelectors.onlyBookmarks,
     filterSelectors.tags,
-    filterSelectors.domains,
+    filterSelectors.displayDomains,
     (
         { query, startDate, endDate },
         showOnlyBookmarks,

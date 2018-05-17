@@ -31,6 +31,7 @@ class OverviewContainer extends Component {
         isNewSearchLoading: PropTypes.bool.isRequired,
         noResults: PropTypes.bool.isRequired,
         isBadTerm: PropTypes.bool.isRequired,
+        isInvalidSearch: PropTypes.bool.isRequired,
         showInitSearchMsg: PropTypes.bool.isRequired,
         resetActiveTagIndex: PropTypes.func.isRequired,
         searchResults: PropTypes.arrayOf(PropTypes.object).isRequired,
@@ -187,6 +188,17 @@ class OverviewContainer extends Component {
             )
         }
 
+        if (this.props.isInvalidSearch) {
+            return (
+                <ResultsMessage>
+                    <NoResultBadTerm title="Invalid search query">
+                        You can't exclude terms without including at least 1
+                        term to search
+                    </NoResultBadTerm>
+                </ResultsMessage>
+            )
+        }
+
         if (this.props.showInitSearchMsg) {
             return this.renderInitMessage()
         }
@@ -266,6 +278,7 @@ const mapStateToProps = state => ({
     currentQueryParams: selectors.currentQueryParams(state),
     noResults: selectors.noResults(state),
     isBadTerm: selectors.isBadTerm(state),
+    isInvalidSearch: selectors.isInvalidSearch(state),
     searchResults: selectors.results(state),
     isDeleteConfShown: selectors.isDeleteConfShown(state),
     needsWaypoint: selectors.needsPagWaypoint(state),

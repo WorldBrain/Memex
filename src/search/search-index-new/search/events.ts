@@ -1,15 +1,11 @@
-import db, { Storage } from '..'
+import db, { Storage, SearchParams, PageResultsMap, FilteredURLs } from '..'
 
 /**
  * Given some URLs, grab the latest assoc. event timestamp for each one within the time filter bounds.
- *
- * @param {SearchParams} params
- * @param {Iterable<string>} urls
- * @return {Map<string, number>} Map of URL keys to latest visit timestamps.
  */
 export async function mapUrlsToLatestEvents(
-    { endDate, startDate, bookmarks },
-    urls,
+    { endDate, startDate, bookmarks }: Partial<SearchParams>,
+    urls: string[],
 ) {
     const latestEvents = new Map()
 
@@ -32,12 +28,12 @@ export async function mapUrlsToLatestEvents(
     //  (URLs are not unique in visits index)
     if (!bookmarks) {
         // Simple state to keep track of when to finish each query
-        const doneFlags = [...urls].map(url => false)
+        const doneFlags = urls.map(url => false)
         await Promise.all(
-            [...urls].map((url, i) =>
+            urls.map((currUrl, i) =>
                 db.visits
                     .where('url')
-                    .equals(url)
+                    .equals(currUrl)
                     .reverse()
                     // Mark of current query as done as soon as visit passes adding criteria
                     .until(() => doneFlags[i])
@@ -61,18 +57,20 @@ export async function mapUrlsToLatestEvents(
  * Goes through visits and bookmarks index from `endDate` until it groups enough URLs.
  * The `.until` in the query chain forces time and space to be constant to `skip + limit`
  *
- * @param {SearchParams} params
- * @return {Map<string, number> | null} Map of URL keys to latest visit time numbers. Should be size <= skip + limit.
+ * @return Map of URL keys to latest visit time numbers. Should be size <= skip + limit.
  */
-export async function groupLatestEventsByUrl({
-    startDate = 0,
-    endDate = Date.now(),
-    skip = 0,
-    limit = 10,
-    bookmarks,
-}) {
+export async function groupLatestEventsByUrl(
+    {
+        startDate = 0,
+        endDate = Date.now(),
+        skip = 0,
+        limit = 10,
+        bookmarks,
+    }: Partial<SearchParams>,
+    filteredUrls: FilteredURLs,
+): Promise<PageResultsMap> {
     // Lookback from endDate to get needed amount of visits
-    const latestVisits = new Map()
+    const latestVisits: PageResultsMap = new Map()
     if (!bookmarks) {
         await db.visits
             .where('[time+url]')
@@ -89,14 +87,14 @@ export async function groupLatestEventsByUrl({
             // For each visit PK, reduce down into Map of URL keys to latest visit time
             .eachPrimaryKey(([time, url]) => {
                 // Only ever record the latest visit for each URL (first due to IndexedDB reverse keys ordering)
-                if (!latestVisits.has(url)) {
+                if (!latestVisits.has(url) && filteredUrls.isAllowed(url)) {
                     latestVisits.set(url, time)
                 }
             })
     }
 
     // Similar lookback on bookmarks
-    const latestBookmarks = new Map()
+    const latestBookmarks: PageResultsMap = new Map()
     await db.bookmarks
         .where('time')
         .between(startDate, endDate, true, true)
@@ -105,7 +103,7 @@ export async function groupLatestEventsByUrl({
         .each(({ time, url }) => latestBookmarks.set(url, time))
 
     // Merge results
-    const latestEvents = new Map()
+    const latestEvents: PageResultsMap = new Map()
     const addToMap = (time, url) => {
         const existing = latestEvents.get(url) || 0
         if (existing < time) {
