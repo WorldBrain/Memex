@@ -37,6 +37,9 @@ export async function descriptorToRange({ descriptor }) {
     }
 
     const rangeFromPosition = domTextPosition.toRange(root, descriptor.content)
+    if (!rangeFromPosition) {
+        return null
+    }
     if (rangeFromPosition.toString() === descriptor.content.string) {
         return rangeFromPosition
     }
@@ -45,6 +48,9 @@ export async function descriptorToRange({ descriptor }) {
         root,
         descriptor.content.textQuote,
     )
+    if (!rangeFromQuote) {
+        return null
+    }
     if (
         hasAncestor(
             rangeFromQuote.commonAncestorContainer,
