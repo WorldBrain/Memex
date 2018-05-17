@@ -67,6 +67,6 @@ browser.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
             await handleUrl(tabId, changeInfo, tab)
         }
     } catch (err) {
-        // Ignore errors
+        console.error(err)
     }
 })
