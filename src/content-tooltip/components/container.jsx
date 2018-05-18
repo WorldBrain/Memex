@@ -3,11 +3,10 @@ import PropTypes from 'prop-types'
 import OnClickOutside from 'react-onclickoutside'
 
 import Tooltip from './tooltip'
-import { createDirectLink } from 'src/direct-linking/content_script/interactions'
+import { createAndCopyDirectLink } from 'src/direct-linking/content_script/interactions'
 import {
     InitialComponent,
     CreatingLinkComponent,
-    CreatedLinkComponent,
     CopiedComponent,
     ErrorComponent,
 } from './tooltipStates'
@@ -68,9 +67,9 @@ class Container extends React.Component {
         this.setState({
             tooltipState: 'running',
         })
-        const { url } = await createDirectLink()
+        const { url } = await createAndCopyDirectLink()
         this.setState({
-            tooltipState: 'done',
+            tooltipState: 'copied',
             linkURL: url,
         })
     }
@@ -98,13 +97,6 @@ class Container extends React.Component {
                 return <InitialComponent createLink={this.createLink} />
             case 'running':
                 return <CreatingLinkComponent />
-            case 'done':
-                return (
-                    <CreatedLinkComponent
-                        link={this.state.linkURL}
-                        copyFunc={this.copyLinkToClipboard}
-                    />
-                )
             case 'copied':
                 return <CopiedComponent />
             default:

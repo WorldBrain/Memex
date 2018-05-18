@@ -1,11 +1,14 @@
 import scrollToElement from 'scroll-to-element'
 import { remoteFunction } from 'src/util/webextensionRPC'
+import { copyToClipboard } from './utils'
 import * as annotations from './annotations'
 
-export async function createDirectLink() {
+export async function createAndCopyDirectLink() {
     const url = window.location.href
     const anchor = await extractAnchor()
-    return await remoteFunction('createDirectLink')({ url, anchor })
+    const result = await remoteFunction('createDirectLink')({ url, anchor })
+    copyToClipboard(result.url)
+    return result
 }
 
 async function extractAnchor() {
