@@ -29,12 +29,14 @@ class Container extends React.Component {
         this.props.onInit(this.showTooltip)
     }
 
-    showTooltip = position =>
-        this.setState({
-            showTooltip: true,
-            position,
-            tooltipState: 'pristine',
-        })
+    showTooltip = position => {
+        if (this.state.tooltipState !== 'running')
+            this.setState({
+                showTooltip: true,
+                position,
+                tooltipState: 'pristine',
+            })
+    }
 
     handleClickOutside = () =>
         this.setState({
