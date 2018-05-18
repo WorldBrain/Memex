@@ -148,8 +148,39 @@
     }
 }
 
-/* Loading CSS */
+/* Right side buttons */
+.buttons {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    width: 15px;
+    height: 46px;
+    position: absolute;
+    right: 3px;
+    top: 3px;
+    z-index: 100001;
 
+    & .smallButton img {
+        height: 15px;
+        display: block;
+        cursor: pointer;
+    }
+
+    & .imgSettings {
+        width: 15px;
+    }
+
+    & .imgInfo {
+        width: 13px;
+    }
+
+    & .imgCross {
+        width: 10px;
+    }
+}
+
+/* Loading CSS */
 .ldsEllipsis {
     display: inline-block;
     position: relative;

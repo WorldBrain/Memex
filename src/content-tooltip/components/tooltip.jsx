@@ -16,9 +16,15 @@ const cssClasses = {
 const images = {
     logo: getExtURL('/img/worldbrain-logo-narrow.png'),
     logoWhite: getExtURL('/img/icon_white.svg'),
+    info: getExtURL('/img/info.svg'),
+    cross: getExtURL('/img/cross.svg'),
+    settings: getExtURL('/img/settings.svg'),
 }
 
-const Tooltip = ({ x, y, state, tooltipComponent }) => (
+const SETTINGS_URL = getExtURL('/options/options.html')
+console.log(SETTINGS_URL)
+
+const Tooltip = ({ x, y, state, tooltipComponent, closeTooltip }) => (
     <div
         className={classNames(styles.tooltip, styles[cssClasses[state]])}
         style={{ left: x, top: y }}
@@ -26,7 +32,20 @@ const Tooltip = ({ x, y, state, tooltipComponent }) => (
         <span className={styles.icon}>
             <img src={state === 'copied' ? images.logoWhite : images.logo} />
         </span>
+
         {tooltipComponent}
+
+        <span className={styles.buttons}>
+            <a onClick={closeTooltip} className={styles.smallButton}>
+                <img className={styles.imgCross} src={images.cross} />
+            </a>
+            <a href={SETTINGS_URL} className={styles.smallButton}>
+                <img className={styles.imgSettings} src={images.settings} />
+            </a>
+            <a href="#" className={styles.smallButton}>
+                <img className={styles.imgInfo} src={images.info} />
+            </a>
+        </span>
     </div>
 )
 
@@ -35,6 +54,7 @@ Tooltip.propTypes = {
     y: PropTypes.number.isRequired,
     state: PropTypes.string.isRequired,
     tooltipComponent: PropTypes.element.isRequired,
+    closeTooltip: PropTypes.func.isRequired,
 }
 
 export default Tooltip
