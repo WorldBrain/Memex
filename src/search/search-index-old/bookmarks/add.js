@@ -22,13 +22,13 @@ async function getAttachments(pageData) {
 }
 
 export async function handleBookmarkCreation(id, bookmarkInfo) {
-    let pageDoc = {
-        _id: generatePageDocId({ url: bookmarkInfo.url }),
-        url: bookmarkInfo.url,
-        title: bookmarkInfo.title,
-    }
-
     try {
+        let pageDoc = {
+            _id: generatePageDocId({ url: bookmarkInfo.url }),
+            url: bookmarkInfo.url,
+            title: bookmarkInfo.title,
+        }
+
         const fetch = fetchPageData({
             url: bookmarkInfo.url,
             opts: {
@@ -44,15 +44,15 @@ export async function handleBookmarkCreation(id, bookmarkInfo) {
             _attachments: await getAttachments(pageData),
             content: pageData.content,
         }
-    } catch (err) {
-        console.error(
-            'Error occurred while fetching page data: ',
-            err.toString(),
-        )
-    } finally {
+
         const bookmarkDoc = transformToBookmarkDoc(pageDoc)(bookmarkInfo)
         addPageConcurrent({ pageDoc, bookmarkDocs: [bookmarkDoc] })
         db.bulkDocs([bookmarkDoc, pageDoc])
+    } catch (err) {
+        console.error(
+            'Error occurred while creating bookmark: ',
+            err.toString(),
+        )
     }
 }
 

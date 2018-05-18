@@ -30,7 +30,7 @@ export const makeIndexFnConcSafe = fn => (...args) =>
                 .then(resolve)
                 .catch(reject),
         ),
-    )
+    ).catch(console.error)
 
 export const idbBatchToPromise = batch =>
     new Promise((resolve, reject) =>
