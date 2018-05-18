@@ -119,7 +119,7 @@ export class StorageManager {
         _.each(collection.indices || [], (fieldName) => {
             const fieldDef = collection.fields[fieldName]
             if (fieldDef.type === 'text') {
-                object[fieldName] = [...extractTerms(object[fieldName], 'term')]
+                object[fieldName] = [...extractTerms(object[fieldName], '_')]
             }
         })
 
