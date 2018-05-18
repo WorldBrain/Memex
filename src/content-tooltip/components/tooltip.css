@@ -1,45 +1,45 @@
 .tooltip {
     display: flex;
+    align-items: center;
     position: absolute;
-    height: 40px;
-    text-align: center;
-    transform: translate(-90%, 50%);
     font-size: 13px;
-    border: 2px solid #3eb995;
+    background-color: #fff;
+    color: #3eb995;
+    height: 40px;
+    width: 150px;
     padding: 5px 5px;
     border-radius: 5px;
+    border: 2px solid #3eb995;
+    text-align: center;
+    line-height: 1.2em;
+    transform: translate(-90%, 50%);
+    z-index: 100000;
+    box-sizing: content-box;
+
+    & > div {
+        width: 85%;
+        margin: 0px auto;
+    }
+
+    & * {
+        box-sizing: content-box;
+    }
+}
+
+.tooltip.stateLinkCopied {
     background-color: #3eb995;
     color: white;
-    line-height: 1.2em;
-    width: 220px;
-}
-
-.url {
-    box-sizing: border-box;
-    display: block;
-    text-overflow: ellipsis;
-    width: 95%;
-    padding: 0 0;
-    overflow: hidden;
-    white-space: nowrap;
-    margin-top: 3px;
-}
-
-.tooltip.stateInitial {
-    display: flex;
-    align-items: center;
-    width: 255px;
-    background-color: white;
 }
 
 /*  Worldbrain logo on the left of the tooltip */
 .tooltip::before {
+    box-sizing: content-box;
     border: solid transparent;
     content: ' ';
     height: 30px;
     width: 30px;
     position: absolute;
-    right: 93%;
+    right: 89.5%;
     top: 16%;
     pointer-events: none;
     border-color: #3eb995;
@@ -48,18 +48,18 @@
     border-left-color: transparent;
     border-radius: 50%;
     transform: rotate(225deg);
-    background-color: #3eb995;
+    background-color: #fff;
 }
 
-.tooltip.stateInitial::before {
-    background-color: white;
-    right: 93.5%;
+.tooltip.stateLinkCopied::before {
+    background-color: #3eb995;
 }
 
 /* The pointer of the tooltip */
 .tooltip::after {
+    box-sizing: content-box;
     bottom: 77%;
-    left: 85%;
+    left: 80%;
     border: solid transparent;
     content: ' ';
     height: 20px;
@@ -71,55 +71,12 @@
     border-bottom-color: transparent;
     border-left-color: transparent;
     transform: rotate(-45deg);
-    background-color: white;
+    background-color: #fff;
 }
 
-.tooltip.stateCreatedLink::after,
-.tooltip.stateLinkCopied::after,
-.tooltip.stateCreatingLink::after {
+.tooltip.stateLinkCopied::after {
     bottom: 80%;
     background-color: #3eb995;
-}
-
-.createLinkButton {
-    display: flex;
-    flex-direction: row;
-    margin: 0 2px;
-    color: #3eb995;
-
-    & .headingLink {
-        display: flex;
-        align-items: center;
-        z-index: 10;
-        cursor: pointer;
-
-        & img {
-            width: auto;
-            height: 20px;
-        }
-
-        & span {
-            margin-left: 5px;
-        }
-    }
-
-    & .headingOwnlinks {
-        margin-right: 25px;
-        width: 150px;
-        z-index: 10;
-        cursor: pointer;
-    }
-
-    & .tooltipDivider {
-        height: 50px;
-        display: block;
-        margin: 0 8px;
-        width: 1px;
-        background: #3eb995;
-        position: absolute;
-        left: 45.5%;
-        top: 0;
-    }
 }
 
 .icon {
@@ -127,76 +84,67 @@
     width: 20px;
     position: absolute;
     top: 15px;
-    left: -10px;
+    left: -8px;
 
     & img {
-        width: 20px;
+        width: 15px;
         height: 20px;
     }
 }
 
-.progressIndicator {
-    align-items: center;
-    margin: -10px auto;
+.createLinkButton {
+    cursor: pointer;
+    z-index: 10;
 
-    & .icon {
-        top: 15px;
-        left: -13px;
+    & .createLinkText {
+        position: absolute;
+        bottom: 3%;
+        left: 25%;
+        font-size: 1em;
+        font-weight: 600;
     }
+
+    & .createLinkImg {
+        width: 25px;
+        height: 25px;
+        padding-bottom: 14px;
+        margin: 0px auto;
+    }
+}
+
+.progressIndicator {
+    margin: -10px auto;
 }
 
 .errorMessage {
-    display: inline;
+    margin: -10px auto;
 }
 
-.createdMessage {
-    align-items: center;
-    width: 100%;
-    height: 90%;
-    margin-left: 10px;
+.linkReady {
+    display: block;
+    margin-top: 3px;
+    cursor: pointer;
 
-    & .url {
-        color: white;
-        text-decoration: none;
-        margin-top: 11px;
-    }
-
-    & .icon {
-        top: 15px;
-        left: -13px;
-    }
-
-    & .clickToCopy {
-        color: white;
-        position: absolute;
-        bottom: 1%;
-        left: 39%;
-        font-size: 0.7em;
+    & .linkReadyStrong {
+        font-weight: 800;
+        font-size: 1.1em;
     }
 }
 
 .copiedMessage {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    height: 90%;
-    margin-left: 10px;
     font-size: 1.1em;
-
-    & .icon {
-        top: 15px;
-        left: -13px;
-    }
+    display: flex;
+    height: 50px;
+    align-items: center;
 
     & .check {
         width: 30px;
         height: auto;
-        margin-top: 6px;
     }
 
     & .copiedText {
-        margin-left: 5px;
-        margin-top: 6px;
+        width: 60%;
+        margin-right: 8px;
     }
 }
 
@@ -207,6 +155,7 @@
     position: relative;
     width: 64px;
     height: 64px;
+    margin: 0px auto;
 
     & div {
         position: absolute;
@@ -214,7 +163,7 @@
         width: 11px;
         height: 11px;
         border-radius: 50%;
-        background: #fff;
+        background: #3eb995;
         animation-timing-function: cubic-bezier(0, 1, 1, 0);
     }
 
