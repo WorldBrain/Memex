@@ -31,21 +31,6 @@ export const CreatingLinkComponent = () => (
     </div>
 )
 
-export const CreatedLinkComponent = ({ copyFunc }) => (
-    <div className={styles.createdMessage}>
-        <div className={styles.linkReady} onClick={copyFunc}>
-            <span className={styles.linkReadyStrong}>
-                Your link is ready.{' '}
-            </span>{' '}
-            Click to copy.
-        </div>
-    </div>
-)
-
-CreatedLinkComponent.propTypes = {
-    copyFunc: PropTypes.func.isRequired,
-}
-
 export const CopiedComponent = () => (
     <div className={styles.copiedMessage}>
         <span className={styles.copiedText}>Link copied to clipboard</span>
