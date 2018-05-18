@@ -16,14 +16,15 @@ export function setupUIContainer(target) {
 export function setupTooltipTrigger(callback) {
     document.body.addEventListener('mouseup', event => {
         conditionallyTriggerTooltip(
-            { x: event.clientX, y: event.clientY },
+            { x: event.pageX, y: event.pageY },
             callback,
+            event,
         )
     })
 }
 
 export const conditionallyTriggerTooltip = delayed(
-    async (position, callback) => {
+    async (position, callback, event) => {
         if (!userSelectedText()) {
             return
         }
