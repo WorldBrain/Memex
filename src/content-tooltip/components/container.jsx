@@ -97,6 +97,7 @@ class Container extends React.Component {
                         {...position}
                         state={tooltipState}
                         tooltipComponent={this.renderTooltipComponent()}
+                        closeTooltip={this.handleClickOutside}
                     />
                 ) : null}
             </div>
