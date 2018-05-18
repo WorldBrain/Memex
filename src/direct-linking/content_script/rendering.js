@@ -12,7 +12,7 @@ export async function highlightAnnotation({ annotation }) {
             timeoutMiliseconds: 5000,
         },
     )
-    // console.log('found range', range)
+    console.log('found range', range)
     markRange({ range, cssClass: 'memex-highlight' })
     document.querySelector('.memex-highlight').style.background = '#3eb995'
 }

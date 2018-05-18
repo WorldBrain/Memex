@@ -36,14 +36,6 @@ export async function descriptorToRange({ descriptor }) {
         return domTextQuote.toRange(root, descriptor.content)
     }
 
-    const rangeFromPosition = domTextPosition.toRange(root, descriptor.content)
-    if (!rangeFromPosition) {
-        return null
-    }
-    if (rangeFromPosition.toString() === descriptor.content.string) {
-        return rangeFromPosition
-    }
-
     const rangeFromQuote = domTextQuote.toRange(
         root,
         descriptor.content.textQuote,
@@ -52,15 +44,23 @@ export async function descriptorToRange({ descriptor }) {
         return null
     }
     if (
-        hasAncestor(
+        !hasAncestor(
             rangeFromQuote.commonAncestorContainer,
-            node => node.tagName === 'script',
+            node => node.tagName && node.tagName.toLowerCase() === 'script',
         )
     ) {
-        return null
+        return rangeFromQuote
     }
 
-    return rangeFromQuote
+    const rangeFromPosition = domTextPosition.toRange(root, descriptor.content)
+    if (!rangeFromPosition) {
+        return null
+    }
+    if (rangeFromPosition.toString() === descriptor.content.string) {
+        return rangeFromPosition
+    }
+
+    return null
 }
 
 export function markRange({ range, cssClass }) {
