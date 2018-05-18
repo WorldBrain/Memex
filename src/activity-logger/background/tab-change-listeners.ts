@@ -1,8 +1,9 @@
 import { browser, Tabs } from 'webextension-polyfill-ts'
+import noop from 'lodash/noop'
 
 import searchIndex from '../../search'
 import { whenPageDOMLoaded, whenTabActive } from '../../util/tab-events'
-import { logPageVisit, logInitPageVisit } from './log-page-visit'
+import logPageVisit from './log-page-visit'
 import { fetchFavIcon } from '../../page-analysis/background/get-fav-icon'
 import { shouldLogTab, updateVisitInteractionData } from './util'
 import { TabState, TabChangeListener } from './types'
@@ -39,24 +40,15 @@ export const handleUrl: TabChangeListener = async function(
     { url },
     tab,
 ) {
-    await handleVisitEnd(tabId, { url }, tab).catch(e => e)
+    await handleVisitEnd(tabId, { url }, tab).catch(console.error)
 
     if (await shouldLogTab(tab)) {
-        // Run stage 1 of visit indexing
-        await whenPageDOMLoaded({ tabId })
-        await logInitPageVisit(tabId)
-
-        // Schedule stage 2 of visit indexing soon after - if user stays on page
-        tabManager.scheduleTabLog(tabId, () =>
-            Promise.all([
-                whenPageDOMLoaded({ tabId }),
-                whenTabActive({ tabId }),
-            ])
-                .then(() => logPageVisit(tabId))
-                .catch(err => {
-                    return
-                }),
-        )
+        return Promise.all([
+            whenPageDOMLoaded({ tabId }),
+            whenTabActive({ tabId }),
+        ])
+            .then(() => logPageVisit(tab))
+            .catch(noop)
     }
 }
 
@@ -70,9 +62,9 @@ export const handleFavIcon: TabChangeListener = async function(
 ) {
     if (
         (await shouldLogTab(tab)) &&
-        !await searchIndex.domainHasFavIcon(tab.url)
+        !await searchIndex.domainHasFavIcon(tab.url).catch(noop)
     ) {
         const favIconDataUrl = await fetchFavIcon(favIconUrl)
-        await searchIndex.addFavIcon(tab.url, favIconDataUrl)
+        await searchIndex.addFavIcon(tab.url, favIconDataUrl).catch(noop)
     }
 }
