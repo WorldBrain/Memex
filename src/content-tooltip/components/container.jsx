@@ -12,6 +12,7 @@ import {
     ErrorComponent,
 } from './tooltipStates'
 import { copyToClipboard } from '../utils'
+import { OPEN_OPTIONS } from 'src/search-injection/constants'
 
 class Container extends React.Component {
     static propTypes = {
@@ -38,11 +39,25 @@ class Container extends React.Component {
             })
     }
 
-    handleClickOutside = () =>
+    handleClickOutside = () => {
+        const selection = document.getSelection()
+        selection.removeAllRanges()
         this.setState({
             showTooltip: false,
             position: {},
         })
+    }
+
+    closeTooltip = event => {
+        event.preventDefault()
+        event.stopPropagation()
+        const selection = document.getSelection()
+        selection.removeAllRanges()
+        this.setState({
+            showTooltip: false,
+            position: {},
+        })
+    }
 
     setTooltipState = state =>
         this.setState({
@@ -66,6 +81,15 @@ class Container extends React.Component {
         this.setState({
             tooltipState: 'copied',
         })
+    }
+
+    openSettings = event => {
+        event.preventDefault()
+        const message = {
+            action: OPEN_OPTIONS,
+            query: 'settings',
+        }
+        browser.runtime.sendMessage(message)
     }
 
     renderTooltipComponent = () => {
@@ -97,7 +121,8 @@ class Container extends React.Component {
                         {...position}
                         state={tooltipState}
                         tooltipComponent={this.renderTooltipComponent()}
-                        closeTooltip={this.handleClickOutside}
+                        closeTooltip={this.closeTooltip}
+                        openSettings={this.openSettings}
                     />
                 ) : null}
             </div>

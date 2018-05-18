@@ -21,13 +21,18 @@ const images = {
     settings: getExtURL('/img/settings.svg'),
 }
 
-const SETTINGS_URL = getExtURL('/options/options.html')
-console.log(SETTINGS_URL)
-
-const Tooltip = ({ x, y, state, tooltipComponent, closeTooltip }) => (
+const Tooltip = ({
+    x,
+    y,
+    state,
+    tooltipComponent,
+    closeTooltip,
+    openSettings,
+}) => (
     <div
         className={classNames(styles.tooltip, styles[cssClasses[state]])}
         style={{ left: x, top: y }}
+        id="memex-tooltip"
     >
         <span className={styles.icon}>
             <img src={state === 'copied' ? images.logoWhite : images.logo} />
@@ -39,7 +44,7 @@ const Tooltip = ({ x, y, state, tooltipComponent, closeTooltip }) => (
             <a onClick={closeTooltip} className={styles.smallButton}>
                 <img className={styles.imgCross} src={images.cross} />
             </a>
-            <a href={SETTINGS_URL} className={styles.smallButton}>
+            <a onClick={openSettings} className={styles.smallButton}>
                 <img className={styles.imgSettings} src={images.settings} />
             </a>
             <a href="#" className={styles.smallButton}>
@@ -55,6 +60,7 @@ Tooltip.propTypes = {
     state: PropTypes.string.isRequired,
     tooltipComponent: PropTypes.element.isRequired,
     closeTooltip: PropTypes.func.isRequired,
+    openSettings: PropTypes.func.isRequired,
 }
 
 export default Tooltip
