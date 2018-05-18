@@ -108,7 +108,6 @@ const setImportState = val => genericReducer('importStatus', val)
 
 export default createReducer(
     {
-        [actions.initAllowTypes]: payloadReducer('allowTypes'),
         [actions.prepareImport]: prepareImportReducer,
         [actions.startImport]: setImportState(STATUS.RUNNING),
         [actions.stopImport]: setImportState(STATUS.STOPPED),
@@ -128,6 +127,17 @@ export default createReducer(
         [actions.initDownloadData]: payloadReducer('downloadData'),
 
         // Adv settings mode reducers
+        [actions.initAllowTypes]: (state, allowTypes) => ({
+            ...state,
+            allowTypes: {
+                [TYPE.BOOKMARK]:
+                    allowTypes[TYPE.BOOKMARK] ||
+                    defaultState.allowTypes[TYPE.BOOKMARK],
+                [TYPE.HISTORY]:
+                    allowTypes[TYPE.HISTORY] ||
+                    defaultState.allowTypes[TYPE.HISTORY],
+            },
+        }),
         [actions.setConcurrency]: (state, concurrency) => ({
             ...state,
             concurrency,
