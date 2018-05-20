@@ -8,7 +8,10 @@ import dummyData from './dummy-data/index'
 export const getAllLists = createAction('overview/listData')
 export const updatePageLists = createAction('overview/updateList')
 export const createList = createAction('overview/addList')
-export const deleteList = createAction('overview/deleteList')
+export const deleteList = createAction('overview/deleteList', (id, index) => ({
+    id,
+    index,
+}))
 export const updateListName = createAction(
     'overview/updateListName',
     (value, index) => ({
@@ -19,9 +22,18 @@ export const updateListName = createAction(
 
 export const addPagetoList = createAction('overview/addPagetoList')
 export const removePageFromList = createAction('overview/removePageFromList')
+export const showListDeleteModal = createAction(
+    'overview/showListDeleteModal',
+    (id, index) => ({
+        id,
+        index,
+    }),
+)
+export const hideListDeleteModal = createAction('overview/hideListDeleteModal')
 // TODO: change names
-export const hideDeleteConfirm = createAction('overview/hideDeleteConfirm')
-export const resetDeleteConfirm = createAction('overview/resetDeleteConfirm')
+export const resetListDeleteModal = createAction(
+    'overview/resetListDeleteModal',
+)
 export const resetActiveListIndex = createAction(
     'overview/resetActiveListIndex',
 )
@@ -66,11 +78,18 @@ export default class ListStorageHandler {
 
     delListById() {}
 
-    updateList = index => event => {
+    updateList = index => async event => {
         event.preventDefault()
         const { value } = event.target.elements['listName']
         this._dispatch(resetActiveListIndex())
         this._dispatch(updateListName(value, index))
+    }
+
+    deleteList = () => event => {
+        event.preventDefault()
+        const { id, deleting } = selectors.deleteConfirmProps(this._getState())
+        this._dispatch(deleteList(id, deleting))
+        this._dispatch(resetListDeleteModal())
     }
 
     addPagetoList() {}

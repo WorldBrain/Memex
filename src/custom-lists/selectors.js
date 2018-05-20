@@ -29,3 +29,22 @@ export const results = createSelector(
             isEditing: i === listIndex,
         })),
 )
+
+export const deleteConfirmProps = createSelector(
+    customLists,
+    state => state.deleteConfirmProps,
+)
+export const isDeleteConfShown = createSelector(
+    deleteConfirmProps,
+    state => state.isShown,
+)
+
+export const getDeletingIndex = createSelector(
+    deleteConfirmProps,
+    state => state.deleting,
+)
+
+export const getDeletingID = createSelector(
+    deleteConfirmProps,
+    state => state.id,
+)

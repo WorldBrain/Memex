@@ -1,13 +1,14 @@
 import React, { Component } from 'react'
-import PropsTypes from 'prop-types'
+import PropTypes from 'prop-types'
 import cx from 'classnames'
 
 import styles from './Index.css'
 
 class PageList extends Component {
     static propTypes = {
-        listName: PropsTypes.string.isRequired,
-        onEditButtonClick: PropsTypes.func.isRequired,
+        listName: PropTypes.string.isRequired,
+        onEditButtonClick: PropTypes.func.isRequired,
+        onCrossButtonClick: PropTypes.func.isRequired,
     }
 
     constructor(props) {
@@ -46,6 +47,7 @@ class PageList extends Component {
                 {this.state.isMouseInside ? (
                     <button
                         className={cx(styles.deleteButton, styles.button)}
+                        onClick={this.props.onCrossButtonClick}
                     />
                 ) : null}
             </div>

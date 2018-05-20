@@ -17,7 +17,7 @@ const defaultState = {
     lists: [],
     deleteConfirmProps: {
         isShown: false,
-        url: undefined,
+        id: undefined,
         // Used to keep track of any particular result (use index)
         deleting: undefined,
     },
@@ -45,14 +45,13 @@ const updateList = (state, { value, index }) => ({
     ],
 })
 
-const deleteList = (state, index) => {}
-
-// const showDeleteConfirm = () => { }
-
-// const hideDeleteConfirm = () => { }
+const deleteList = (state, { id, index }) => ({
+    ...state,
+    lists: [...state.lists.slice(0, index), ...state.lists.slice(index + 1)],
+})
 
 const addPageToList = (state, { url, index }) => {
-    // TODO: Maybe an use id instead
+    // TODO: Maybe use id instead
     const doc = state.lists[index]
     const docs = [
         ...state.lists.slice(0, index),
@@ -72,7 +71,6 @@ const addPageToList = (state, { url, index }) => {
     }
 }
 // TODO: Change all the following functions
-// const deletePageFromList = (state, index) => { }
 const deletePageFromList = (state, { tag, index }) => {
     const doc = state.searchResult.docs[index]
     const removalIndex = doc.tags.findIndex(val => val === tag)
@@ -101,15 +99,18 @@ const deletePageFromList = (state, { tag, index }) => {
     }
 }
 
-const showDeleteConfirm = (state, { url, index }) => ({
-    ...state,
-    deleteConfirmProps: {
-        ...state.deleteConfirmProps,
-        isShown: true,
-        url,
-        deleting: index,
-    },
-})
+const showDeleteConfirm = (state, { id, index }) => {
+    console.log(id, index)
+    return {
+        ...state,
+        deleteConfirmProps: {
+            ...state.deleteConfirmProps,
+            isShown: true,
+            id,
+            deleting: index,
+        },
+    }
+}
 
 const hideDeleteConfirm = state => ({
     ...state,
@@ -134,8 +135,12 @@ export default createReducer(
         [actions.deleteList]: deleteList,
         [actions.addPagetoList]: addPageToList,
         [actions.removePageFromList]: deletePageFromList,
-        [actions.showDeleteConfirm]: showDeleteConfirm,
-        [actions.hideDeleteConfirm]: hideDeleteConfirm,
+        [actions.showListDeleteModal]: showDeleteConfirm,
+        [actions.hideListDeleteModal]: hideDeleteConfirm,
+        [actions.resetListDeleteModal]: state => ({
+            ...state,
+            deleteConfirmProps: { ...defaultState.deleteConfirmProps },
+        }),
     },
     defaultState,
 )
