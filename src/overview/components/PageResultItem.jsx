@@ -19,7 +19,12 @@ const PageResultItem = props => (
         {props.isDeleting && (
             <LoadingIndicator className={styles.deletingSpinner} />
         )}
-        <a className={styles.root} href={props.url} target="_blank">
+        <a
+            draggable="true"
+            className={styles.root}
+            href={props.url}
+            target="_blank"
+        >
             <div className={styles.screenshotContainer}>
                 <img
                     className={styles.screenshot}
