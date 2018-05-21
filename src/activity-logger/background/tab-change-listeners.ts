@@ -40,15 +40,19 @@ export const handleUrl: TabChangeListener = async function(
     { url },
     tab,
 ) {
-    await handleVisitEnd(tabId, { url }, tab).catch(console.error)
+    try {
+        await handleVisitEnd(tabId, { url }, tab).catch(noop)
 
-    if (await shouldLogTab(tab)) {
-        return Promise.all([
-            whenPageDOMLoaded({ tabId }),
-            whenTabActive({ tabId }),
-        ])
-            .then(() => logPageVisit(tab))
-            .catch(noop)
+        if (await shouldLogTab(tab)) {
+            await Promise.all([
+                whenPageDOMLoaded({ tabId }),
+                whenTabActive({ tabId }),
+            ])
+
+            await logPageVisit(tab)
+        }
+    } catch (err) {
+        console.error(err)
     }
 }
 
@@ -60,11 +64,15 @@ export const handleFavIcon: TabChangeListener = async function(
     { favIconUrl },
     tab,
 ) {
-    if (
-        (await shouldLogTab(tab)) &&
-        !await searchIndex.domainHasFavIcon(tab.url).catch(noop)
-    ) {
-        const favIconDataUrl = await fetchFavIcon(favIconUrl)
-        await searchIndex.addFavIcon(tab.url, favIconDataUrl).catch(noop)
+    try {
+        if (
+            (await shouldLogTab(tab)) &&
+            !await searchIndex.domainHasFavIcon(tab.url)
+        ) {
+            const favIconDataUrl = await fetchFavIcon(favIconUrl)
+            await searchIndex.addFavIcon(tab.url, favIconDataUrl)
+        }
+    } catch (err) {
+        console.error(err)
     }
 }

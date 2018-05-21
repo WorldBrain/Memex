@@ -61,15 +61,11 @@ const debouncedFavListener = debounce(handleFavIcon, 200)
 const debouncedUrlListener = debounce(handleUrl, 1000)
 
 browser.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
-    try {
-        if (changeInfo.favIconUrl) {
-            await debouncedFavListener(tabId, changeInfo, tab)
-        }
+    if (changeInfo.favIconUrl) {
+        await debouncedFavListener(tabId, changeInfo, tab)
+    }
 
-        if (changeInfo.url) {
-            await debouncedUrlListener(tabId, changeInfo, tab)
-        }
-    } catch (err) {
-        console.error(err)
+    if (changeInfo.url) {
+        await debouncedUrlListener(tabId, changeInfo, tab)
     }
 })
