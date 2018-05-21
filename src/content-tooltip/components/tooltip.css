@@ -23,6 +23,7 @@
 
     & * {
         box-sizing: content-box;
+        font-family: sans-serif;
     }
 }
 
@@ -58,7 +59,7 @@
 /* The pointer of the tooltip */
 .tooltip::after {
     box-sizing: content-box;
-    bottom: 77%;
+    bottom: 76%;
     left: 80%;
     border: solid transparent;
     content: ' ';
@@ -99,9 +100,9 @@
     & .createLinkText {
         position: absolute;
         bottom: 3%;
-        left: 25%;
+        left: 27%;
         font-size: 1em;
-        font-weight: 600;
+        font-weight: 400;
     }
 
     & .createLinkImg {
@@ -132,7 +133,7 @@
 }
 
 .copiedMessage {
-    font-size: 1.1em;
+    font-size: 1em;
     display: flex;
     height: 50px;
     align-items: center;

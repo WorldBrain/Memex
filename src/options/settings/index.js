@@ -1,3 +1,3 @@
-import SearchInjectionContainer from './components/SearchInjectionContainer'
+import Container from './container'
 
-export default SearchInjectionContainer
+export default Container
