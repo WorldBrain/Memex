@@ -28,10 +28,8 @@ export const copyToClipboard = text => {
     document.body.removeChild(dummy)
 }
 
-export const getTooltipState = async () => {
-    return await getLocalStorage(TOOLTIP_STORAGE_NAME, TOOLTIP_DEFAULT_OPTION)
-}
+export const getTooltipState = async () =>
+    await getLocalStorage(TOOLTIP_STORAGE_NAME, TOOLTIP_DEFAULT_OPTION)
 
-export const setTooltipState = async tooltipValue => {
-    return await setLocalStorage(TOOLTIP_STORAGE_NAME, tooltipValue)
-}
+export const setTooltipState = async tooltipValue =>
+    await setLocalStorage(TOOLTIP_STORAGE_NAME, tooltipValue)

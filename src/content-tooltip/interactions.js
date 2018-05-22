@@ -21,7 +21,8 @@ export function destroyTooltipTrigger() {
 
 export const conditionallyTriggerTooltip = delayed(
     async (position, callback, event) => {
-        if (!userSelectedText()) {
+        const isTooltipEnabled = await getTooltipState()
+        if (!userSelectedText() || !isTooltipEnabled) {
             return
         }
 

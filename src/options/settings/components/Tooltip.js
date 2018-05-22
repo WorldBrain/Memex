@@ -1,11 +1,7 @@
 import React from 'react'
 
 import Checkbox from './Checkbox'
-import { getLocalStorage, setLocalStorage } from 'src/util/storage'
-import {
-    TOOLTIP_STORAGE_NAME,
-    TOOLTIP_DEFAULT_OPTION,
-} from 'src/content-tooltip/constants'
+import { getTooltipState, setTooltipState } from 'src/content-tooltip/utils'
 
 import styles from './settings.css'
 
@@ -15,10 +11,7 @@ class Tooltip extends React.Component {
     }
 
     async componentDidMount() {
-        const tooltip = await getLocalStorage(
-            TOOLTIP_STORAGE_NAME,
-            TOOLTIP_DEFAULT_OPTION,
-        )
+        const tooltip = await getTooltipState()
         this.setState({
             tooltip,
         })
@@ -26,7 +19,7 @@ class Tooltip extends React.Component {
 
     toggleTooltip = async () => {
         const tooltip = !this.state.tooltip
-        await setLocalStorage(TOOLTIP_STORAGE_NAME, tooltip)
+        await setTooltipState(tooltip)
         this.setState({
             tooltip,
         })
