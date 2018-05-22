@@ -3,7 +3,7 @@ import ScrollState from './scroll-state'
 import { TabState, NavState } from './types'
 
 class Tab implements TabState {
-    static DEF_LOG_DELAY = 4000
+    static DEF_LOG_DELAY = 0
 
     url: string
     isActive: boolean
@@ -56,11 +56,18 @@ class Tab implements TabState {
     scheduleLog(logCb: Function) {
         this.cancelPendingOps()
 
+        // Just run straight away if no delay set
+        if (this._logDelay === 0) {
+            return Promise.resolve(logCb())
+        }
+
         this._timer = new PausableTimer({
             delay: this._logDelay,
             cb: logCb,
             start: this.isActive, // Start timer if currently active
         })
+
+        return Promise.resolve()
     }
 
     /**
