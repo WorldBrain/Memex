@@ -6,6 +6,7 @@ import analytics, { updateLastActive } from 'src/analytics'
 import extractQueryFilters from 'src/util/nlp-time-filter'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { isLoggable, getPauseState } from 'src/activity-logger'
+import { getTooltipState, setTooltipState } from 'src/content-tooltip/utils'
 import { IndexDropdown } from 'src/common-ui/containers'
 import Popup from './components/Popup'
 import Button from './components/Button'
@@ -16,6 +17,7 @@ import SplitButton from './components/SplitButton'
 import * as constants from './constants'
 import UpgradeButton from './components/UpgradeButton'
 import ButtonIcon from './components/ButtonIcon'
+import ToggleTooltip from './components/ToggleTooltip'
 import styles from './components/Button.css'
 
 class PopupContainer extends Component {
@@ -60,6 +62,9 @@ class PopupContainer extends Component {
         // Behaviour switching flags
         domainDelete: false,
         isPaused: false,
+
+        // Tooltip Flag
+        isTooltipEnabled: true,
     }
 
     async componentDidMount() {
@@ -92,6 +97,14 @@ class PopupContainer extends Component {
         this.getInitBlacklistBtnState()
             .then(updateState)
             .catch(noop)
+        this.getInitTooltipState()
+            .then(updateState)
+            .catch(noop)
+    }
+
+    async getInitTooltipState() {
+        const isTooltipEnabled = await getTooltipState()
+        return { isTooltipEnabled }
     }
 
     async getInitPageData() {
@@ -226,6 +239,14 @@ class PopupContainer extends Component {
             }) // New tab with query
             window.close() // Close the popup
         }
+    }
+
+    toggleTooltip = async () => {
+        const isTooltipEnabled = !this.state.isTooltipEnabled
+        await setTooltipState(isTooltipEnabled)
+        this.setState({
+            isTooltipEnabled,
+        })
     }
 
     // Hides full-popup confirm
@@ -380,6 +401,11 @@ class PopupContainer extends Component {
                     {this.renderPauseChoices()}
                 </HistoryPauser>
                 {this.renderBlacklistButton()}
+                <hr />
+                <ToggleTooltip
+                    isChecked={this.state.isTooltipEnabled}
+                    handleChange={this.toggleTooltip}
+                />
                 <hr />
                 <LinkButton
                     btnClass={styles.voteIcon}
