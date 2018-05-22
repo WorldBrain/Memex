@@ -1,6 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router'
 import Slider from 'react-slick'
+
 import LocalStyles from './style.css'
 
 const settings = {

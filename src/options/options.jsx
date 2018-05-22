@@ -2,8 +2,8 @@ import 'babel-polyfill'
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { Provider } from 'react-redux'
-
 import { ErrorBoundary, RuntimeError } from 'src/common-ui/components'
+
 import configureStore from './store'
 import Router from './router'
 import routes from './routes'
@@ -20,6 +20,7 @@ ReactDOM.render(
     <Provider store={store}>
         <ErrorBoundary component={RuntimeError}>
             <Router routes={routes} />
+            {ReduxDevTools && <ReduxDevTools />}
         </ErrorBoundary>
     </Provider>,
     document.getElementById('app'),

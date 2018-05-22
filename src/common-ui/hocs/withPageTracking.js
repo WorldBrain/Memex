@@ -20,8 +20,6 @@ const withPageTracking = Component =>
             this.trackPage = debounce(100)(this._trackPage)
         }
 
-        _trackPage = () => analytics.trackPage({ title: document.title })
-
         componentDidMount() {
             this.trackPage()
         }
@@ -31,6 +29,8 @@ const withPageTracking = Component =>
                 this.trackPage()
             }
         }
+
+        _trackPage = () => analytics.trackPage({ title: document.title })
 
         render() {
             return <Component {...this.props} />

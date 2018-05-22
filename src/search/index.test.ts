@@ -65,13 +65,13 @@ const runSuite = useOld => () => {
 
     describe('read ops', () => {
         test('fetch page by URL', async () => {
-            const runChecks = async page => {
-                expect(page).toBeDefined()
-                expect(page).not.toBeNull()
-                expect(page.hasBookmark).toBe(false)
-                expect(page.tags).toEqual(['good', 'quality'])
+            const runChecks = async currPage => {
+                expect(currPage).toBeDefined()
+                expect(currPage).not.toBeNull()
+                expect(currPage.hasBookmark).toBe(false)
+                expect(currPage.tags).toEqual(['good', 'quality'])
 
-                expect(page.latest).toEqual(DATA.VISIT_3)
+                expect(currPage.latest).toEqual(DATA.VISIT_3)
             }
 
             runChecks(await index.getPage(DATA.PAGE_3.url))
