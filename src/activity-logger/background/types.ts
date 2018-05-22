@@ -1,5 +1,7 @@
 import { WebNavigation, Tabs } from 'webextension-polyfill-ts'
 
+export type NavState = Partial<WebNavigation.OnCommittedDetailsType>
+
 export interface ScrollState {
     pixel: number
     maxPixel: number
@@ -14,11 +16,15 @@ export interface ScrollState {
 export interface TabState {
     url: string
     isActive: boolean
-    visitTime: string
+    visitTime: number
     activeTime: number
     lastActivated: number
     scrollState: ScrollState
-    navState: Partial<WebNavigation.OnCommittedDetailsType>
+    navState: NavState
 }
 
-export type TabChangeListener = (tabId: number, changeInfo: Tabs.OnUpdatedChangeInfoType, tab: Tabs.Tab) => Promise<void>
+export type TabChangeListener = (
+    tabId: number,
+    changeInfo: Tabs.OnUpdatedChangeInfoType,
+    tab: Tabs.Tab,
+) => Promise<void>

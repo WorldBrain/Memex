@@ -54,19 +54,18 @@ browser.webNavigation.onCommitted.addListener(
     },
 )
 
-// Putting a debounce on this, as some sites can really spam the fav-icon changes when they first load
+// Debounce as some sites can really spam the fav-icon changes when they first load
 const debouncedFavListener = debounce(handleFavIcon, 200)
 
-browser.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
-    try {
-        if (changeInfo.favIconUrl) {
-            await debouncedFavListener(tabId, changeInfo, tab)
-        }
+// Longer debonce on URL changes to deal with redirections
+const debouncedUrlListener = debounce(handleUrl, 1000)
 
-        if (changeInfo.url) {
-            await handleUrl(tabId, changeInfo, tab)
-        }
-    } catch (err) {
-        // Ignore errors
+browser.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
+    if (changeInfo.favIconUrl) {
+        await debouncedFavListener(tabId, changeInfo, tab)
+    }
+
+    if (changeInfo.url) {
+        await debouncedUrlListener(tabId, changeInfo, tab)
     }
 })

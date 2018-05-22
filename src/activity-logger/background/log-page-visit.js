@@ -1,23 +1,19 @@
 import moment from 'moment'
 
-import analysePage from 'src/page-analysis/background'
-import searchIndex from 'src/search'
 import tabManager from './tab-manager'
+import analysePage from '../../page-analysis/background'
+import searchIndex from '../../search'
 
 /**
- * Performs initial page indexing on small amount of available content (title, URL) + visit.
- *
- * @param {number} tabId
- * @param {number} [secsSinceLastIndex=20]
+ * Performs page data indexing for a browser tab. Immediately
+ * indexes display data, and searchable title/URL terms, but returns
+ * an async callback for manual invocation of text indexing.
  */
-export async function logInitPageVisit(tabId, secsSinceLastIndex = 20) {
-    const tab = await browser.tabs.get(tabId)
-    console.log('indexing page title & url:', tab.url)
+async function logPageVisit(tab, secsSinceLastVisit = 20) {
+    const internalTabState = tabManager.getTabState(tab.id)
 
-    const tabState = tabManager.getTabState(tabId)
-
-    // If tab is untracked, can't log it
-    if (tabState == null) {
+    // Cannot process if tab not tracked
+    if (internalTabState == null) {
         return
     }
 
@@ -29,53 +25,45 @@ export async function logInitPageVisit(tabId, secsSinceLastIndex = 20) {
             //  also clear scheduled content indexing
             if (
                 moment(existingPage.latest).isAfter(
-                    moment(+tabState.visitTime).subtract(
-                        secsSinceLastIndex,
+                    moment(internalTabState.visitTime).subtract(
+                        secsSinceLastVisit,
                         'seconds',
                     ),
                 )
             ) {
-                tabManager.clearScheduledLog(tabId)
-                return await searchIndex.addVisit(tab.url, +tabState.visitTime)
+                console.log('skipping page due to recent visit:', tab.url)
+                tabManager.clearScheduledLog(tab.id)
+
+                return await searchIndex.addVisit(
+                    tab.url,
+                    internalTabState.visitTime,
+                )
             }
         }
 
         const allowFavIcon = !await searchIndex.domainHasFavIcon(tab.url)
-        const analysisRes = await analysePage({ tabId, allowFavIcon })
+        const analysisRes = await analysePage({ tabId: tab.id, allowFavIcon })
 
-        // Don't index full-text just yet
+        // Don't index full-text in this stage
+        const contentCopy = { ...analysisRes.content }
         delete analysisRes.content.fullText
 
+        console.log('indexing page:', tab.url)
         await searchIndex.addPage({
             pageDoc: { url: tab.url, ...analysisRes },
-            visits: [tabState.visitTime],
+            visits: [internalTabState.visitTime],
             rejectNoContent: false,
         })
+
+        // Return function to afford manual invoking text indexing
+        return () =>
+            searchIndex.addPageTerms({
+                pageDoc: { url: tab.url, content: contentCopy },
+            })
     } catch (err) {
-        // If any problems in this stage, clear the later-scheduled content indexing stage
-        tabManager.clearScheduledLog(tabId)
+        tabManager.clearScheduledLog(tab.id)
         throw err
     }
 }
 
-/**
- * Performs page content indexing page text, screenshot, etc. Should happen only after a user has been active on a
- * tab for a certain amount of time.
- *
- * @param {number} tabId
- */
-export async function logPageVisit(tabId) {
-    const { url } = await browser.tabs.get(tabId)
-
-    // Call `analysePage` again, this time just to get full terms
-    const { content } = await analysePage({
-        tabId,
-        allowScreenshot: false,
-        allowFavIcon: false,
-    })
-
-    // Index all the terms for the page
-    await searchIndex.addPageTerms({
-        pageDoc: { url, content },
-    })
-}
+export default logPageVisit
