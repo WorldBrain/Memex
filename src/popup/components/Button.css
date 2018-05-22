@@ -203,3 +203,43 @@
     background-repeat: no-repeat;
     background-size: 20px;
 }
+
+.linkIcon {
+    background-image: url('/img/link.svg');
+    background-repeat: no-repeat;
+    background-size: 20px;
+    float: left;
+}
+
+.tooltipToggle {
+    display: inline-block;
+    margin-top: 0;
+    margin-left: 10px;
+    height: 20px;
+    width: 60px;
+    cursor: pointer;
+    text-indent: -9999px;
+    background: grey;
+    border-radius: 100px;
+    position: relative;
+
+    &::after {
+        content: '';
+        position: absolute;
+        left: 5px;
+        width: 12px;
+        height: 12px;
+        top: 4px;
+        background: #fff;
+        border-radius: 90px;
+        transition: 0.3s;
+    }
+}
+
+.activeToggle {
+    &::after {
+        left: calc(100% - 5px);
+        transform: translateX(-100%);
+    }
+    background: #3eb995;
+}
