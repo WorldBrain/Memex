@@ -112,7 +112,7 @@ class BlacklistContainer extends Component {
             return (
                 <div className={styles.blacklistAlert}>
                     This is an invalid RegExp! You can test your regex{' '}
-                    <OutLink href="https://regexr.com/">here</OutLink>
+                    <OutLink to="https://regexr.com/">here</OutLink>
                 </div>
             )
         }

@@ -8,6 +8,7 @@ import Header from './Header'
 import styles from './Overview.css'
 import ShareButtons from './ShareButtons'
 import Tooltip from './Tooltip'
+import Head from 'src/options/containers/Head'
 
 const showFilterClass = ({ showFilters }) =>
     classNames({
@@ -17,6 +18,7 @@ const showFilterClass = ({ showFilters }) =>
 
 const Overview = props => (
     <Wrapper>
+        <Head />
         <Header {...props} />
 
         <Tooltip

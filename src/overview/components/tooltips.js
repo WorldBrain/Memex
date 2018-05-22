@@ -72,7 +72,7 @@ const tooltips = [
     {
         title: 'Import Existing Bookmarks & History',
         description:
-            'By default, Memex makes the pages available you visit after installation. But you can also <a target="_new" href="/options/options.html#/import">import all your bookmarks, and the browsing history</a> of the last 90 days.',
+            'By default, Memex makes the pages available you visit after installation. But you can also <a href="#/import">import all your bookmarks, and the browsing history</a> of the last 90 days.',
     },
 ]
 

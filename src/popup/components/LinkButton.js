@@ -6,7 +6,7 @@ import Button from './Button'
 import styles from './Button.css'
 
 const LinkButton = ({ href, ...btnProps }) => (
-    <OutLink className={styles.link} href={href} tabIndex="-1">
+    <OutLink className={styles.link} to={href} tabIndex="-1">
         <Button {...btnProps} />
     </OutLink>
 )

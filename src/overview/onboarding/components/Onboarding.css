@@ -1,20 +1,20 @@
 .container {
-    padding: 0 8em;
-    padding-bottom: 2em;
-    margin-bottom: 2em;
+    padding: 0 5em;
+    padding-bottom: 1.5em;
+    margin-bottom: 1.5em;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     text-align: center;
     box-shadow: 0px 6px 7px -7px #777;
-}
 
-a {
-    text-decoration: none !important; /* stylelint-disable-line declaration-no-important */
+    & a {
+        text-decoration: none !important; /* stylelint-disable-line declaration-no-important */
+    }
 }
 
 .choiceBtnContainer {
-    font-size: 1.1rem;
+    font-size: 0.8rem;
     color: #3eb995;
     font-weight: lighter;
     display: block;
@@ -55,12 +55,13 @@ a {
     border-radius: 25px;
     font-weight: 300;
     border: 1px solid #3eb995;
-    font-size: 1.1rem;
     color: #3eb995;
     cursor: pointer;
     height: 35px;
     margin-left: 12px;
     margin-right: 12px;
+    text-decoration: none;
+    font-size: 0.8rem;
 
     &:hover,
     &:active {
@@ -134,12 +135,14 @@ a {
 }
 
 .message {
-    font-size: 20px;
-    font-weight: 200;
     color: #777;
     line-height: 1.7em;
     text-align: center;
     margin-bottom: 15px;
+
+    & > p {
+        font-size: 14px;
+    }
 }
 
 .OptIn {

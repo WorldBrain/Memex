@@ -5,6 +5,7 @@ import Acknowledgements from './acknowledgement/components/content'
 import Tutorial from './tutorial'
 import Statistics from './statistics'
 import Settings from './settings'
+import Overview from '../overview'
 
 export default [
     {
@@ -15,9 +16,10 @@ export default [
     },
     {
         name: 'Go back to Search',
-        pathname: '/overview/overview.html',
-        component: 'faq',
+        pathname: '/overview',
+        component: Overview,
         icon: 'search',
+        useOwnLayout: true,
     },
     {
         name: 'Settings',
@@ -52,8 +54,8 @@ export default [
     {
         name: 'Help Me Please',
         pathname: 'https://worldbrain.io/help',
-        component: 'faq',
         icon: 'help',
+        isExternal: true,
     },
     {
         name: 'Tutorial',

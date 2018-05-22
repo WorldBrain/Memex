@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router'
 import Slider from 'react-slick'
 import LocalStyles from './style.css'
 
@@ -18,12 +19,9 @@ const Tutorial = () => (
                     After installing, the extension runs in the background and
                     indexes the pages you visit with a 15s delay. But you can
                     also{' '}
-                    <a
-                        className={LocalStyles.link}
-                        href="/options/options.html#/import"
-                    >
+                    <Link className={LocalStyles.link} to="/import">
                         import your history/bookmarks from before.
-                    </a>
+                    </Link>
                     <br />To find websites again, there are 3 ways to search
                     with the words you remember:
                 </p>
@@ -144,12 +142,9 @@ const Tutorial = () => (
                         }}
                         src="/img/worldbrain-logo-narrow-bw-48.png"
                     />-icon in the menu and select "
-                    <a
-                        className={LocalStyles.link}
-                        href="/options/options.html#/import"
-                    >
+                    <Link className={LocalStyles.link} to="/import">
                         Import History & Bookmarks
-                    </a>".
+                    </Link>".
                 </p>
                 <p className={LocalStyles.list}>
                     <img

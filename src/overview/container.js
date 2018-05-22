@@ -1,11 +1,11 @@
 import React, { Component } from 'react'
+import { Link } from 'react-router'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import Waypoint from 'react-waypoint'
 import reduce from 'lodash/fp/reduce'
 
-import analytics from 'src/analytics'
 import { Wrapper, LoadingIndicator } from 'src/common-ui/components'
 import { IndexDropdown } from 'src/common-ui/containers'
 import * as actions from './actions'
@@ -23,7 +23,6 @@ import localStyles from './components/Overview.css'
 
 class OverviewContainer extends Component {
     static propTypes = {
-        grabFocusOnMount: PropTypes.bool.isRequired,
         handleInputChange: PropTypes.func.isRequired,
         handleInputClick: PropTypes.func.isRequired,
         onBottomReached: PropTypes.func.isRequired,
@@ -46,17 +45,13 @@ class OverviewContainer extends Component {
         delTag: PropTypes.func.isRequired,
         resetFilterPopup: PropTypes.func.isRequired,
         showOnboarding: PropTypes.bool.isRequired,
-        // fetchNextTooltip: PropTypes.func.isRequired,
-        // isFirstTooltip: PropTypes.bool.isRequired,
+        init: PropTypes.func.isRequired,
     }
 
     componentDidMount() {
-        analytics.trackPage({ title: document.title })
-
         document.addEventListener('click', this.handleOutsideClick, false)
-        if (this.props.grabFocusOnMount) {
-            this.inputQueryEl.focus()
-        }
+        this.inputQueryEl.focus()
+        this.props.init()
     }
 
     componentWillUnmount() {
@@ -156,22 +151,19 @@ class OverviewContainer extends Component {
         <ResultsMessage>
             <div className={localStyles.title}>
                 You didn't visit or{' '}
-                <a
-                    style={{ color: '#777' }}
-                    href="/options/options.html#/import"
-                >
+                <Link style={{ color: '#777' }} to="/import">
                     import
-                </a>
+                </Link>
                 <br /> <p className={localStyles.subTitle}>any websites yet.</p>
             </div>
             <div>
-                <a
+                <Link
                     className={localStyles.choiceBtn}
                     type="button"
-                    href="/options/options.html#/import"
+                    to="/import"
                 >
                     Import History & Bookmarks
-                </a>
+                </Link>
             </div>
         </ResultsMessage>
     )
@@ -305,6 +297,7 @@ const mapDispatchToProps = dispatch => ({
             onShowFilterChange: filterActs.showFilter,
             resetFilterPopup: filterActs.resetFilterPopup,
             fetchNextTooltip: actions.fetchNextTooltip,
+            init: actions.init,
         },
         dispatch,
     ),
