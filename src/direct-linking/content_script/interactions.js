@@ -14,7 +14,6 @@ export async function createAndCopyDirectLink() {
 async function extractAnchor() {
     const selection = document.getSelection()
     const descriptor = await annotations.selectionToDescriptor({ selection })
-    // console.log(selection, descriptor)
     return {
         quote: selection.toString(),
         descriptor,
