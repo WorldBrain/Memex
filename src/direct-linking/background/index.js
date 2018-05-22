@@ -43,11 +43,14 @@ export default class DirectLinkingBackground {
     }
 
     async createDirectLink({ tab }, request) {
+        console.log(request)
         const pageTitle = tab.title
         const result = await this.backend.createDirectLink(request)
         await this.storage.insertDirectLink({
             pageTitle,
+            body: request.anchor.quote,
             url: result.url,
+            selector: request.anchor,
         })
         return result
     }

@@ -23,7 +23,7 @@
     "package": "gulp package",
     "package-src": "gulp package-source-code",
     "test": "jest --verbose --silent --config=.jest-config.json",
-    "test-watch": "jest --verbose --silent --watch --config=.jest-config.json",
+    "test-watch": "jest --verbose --watch --config=.jest-config.json",
     "test-coverage": "jest --silent --coverage --config=.jest-config.json",
     "firefox": "web-ext -s extension run --bc",
     "lint": "npm-run-all --parallel lint:*",

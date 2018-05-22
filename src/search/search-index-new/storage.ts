@@ -1,8 +1,8 @@
-const _ = require('lodash')
+import groupBy from 'lodash/fp/groupBy'
 import Dexie from 'dexie'
 
-import { extractTerms } from '../search-index-old/pipeline'
 import { Page, Visit, Bookmark, Tag, FavIcon } from './models'
+import { StorageManager } from './storage-manager'
 
 export interface Props {
     indexedDB: IDBFactory
@@ -52,15 +52,15 @@ export default class Storage extends Dexie {
             IDBKeyRange: IDBKeyRange || window['IDBKeyRange'],
         })
 
-        this._initSchema(storageManager && storageManager._getDexieSchema())
+        this._initSchema(storageManager && storageManager._getDexieHistory())
     }
 
     /**
      * See docs for explanation of Dexie table schema syntax:
      * http://dexie.org/docs/Version/Version.stores()
      */
-    private _initSchema(extra) {
-        extra = extra || { version: 0, schema: {} }
+    private _initSchema(dexieHistory) {
+        dexieHistory = dexieHistory || []
         const baseVersion = 1
         const baseSchema = {
             pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
@@ -71,11 +71,15 @@ export default class Storage extends Dexie {
         }
         this.version(baseVersion).stores(baseSchema)
 
-        const finalVersion = baseVersion + extra.version
-        const finalSchema = Object.assign(baseSchema, extra.schema)
-        this.version(finalVersion).stores(finalSchema).upgrade(() => { })
-
-        // ... add versions/migration logic here
+        dexieHistory.forEach(({ version, schema, migrations }) => {
+            const finalVersion = baseVersion + version
+            const finalSchema = Object.assign(baseSchema, schema)
+            this.version(finalVersion).stores(finalSchema).upgrade(() => {
+                migrations.forEach(migration => {
+                    // TODO: Call migration with some object that allows for data manipulation
+                })
+            })
+        })
 
         // Set up model classes
         this.pages.mapToClass(Page)
@@ -94,59 +98,5 @@ export default class Storage extends Dexie {
         for (const table of this.tables) {
             await table.clear()
         }
-    }
-}
-
-export class StorageManager {
-    public initialized = false
-    private _registeredCollections = {}
-    private _initializationPromise
-    private _initializationResolve
-    private _storage
-
-    constructor() {
-        this._initializationPromise = new Promise(resolve => this._initializationResolve = resolve)
-    }
-
-    registerCollection(name, def) {
-        this._registeredCollections[name] = def
-    }
-
-    async putObject(collectionName: string, object) {
-        await this._initializationPromise
-
-        const collection = this._registeredCollections[collectionName]
-        _.each(collection.indices || [], (fieldName) => {
-            const fieldDef = collection.fields[fieldName]
-            if (fieldDef.type === 'text') {
-                object[fieldName] = [...extractTerms(object[fieldName], '_')]
-            }
-        })
-
-        await this._storage[collectionName].put(object)
-    }
-
-    _finishInitialization(storage) {
-        this._storage = storage
-        this._initializationResolve()
-    }
-
-    _getDexieSchema() {
-        let version = 0
-        const schema = {}
-        _.each(this._registeredCollections, (collectionDef, collectionName) => {
-            const dexieTable = []
-            _(collectionDef.fields)
-                .toPairs()
-                .sortBy(([fieldName, fieldDef]) => fieldDef.pk ? 0 : 1)
-                .each(([fieldName, fieldDef]) => {
-                    const listPrefix = fieldDef.type === 'text' ? '*' : ''
-                    const dexieField = `${listPrefix}${fieldName}`
-                    dexieTable.push(dexieField)
-                })
-            schema[collectionName] = dexieTable.join(', ')
-            version += collectionDef.version
-        })
-        return { version, schema }
     }
 }
