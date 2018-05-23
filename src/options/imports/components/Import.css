@@ -124,6 +124,7 @@
     margin: 1em 0;
     flex-direction: row;
     color: #d5969e;
+    margin-top: 30px;
 }
 
 .warningText {

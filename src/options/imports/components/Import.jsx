@@ -30,15 +30,12 @@ const Import = ({
                     <p className={localStyles.stepImportText}>
                         If you want, you can also make your existing browsing
                         history and bookmarks available for full-text search.
-                        Even without doing that, you still can search everything
-                        you visit after installing the tool.
+                        <br />Even without doing that, you still can search
+                        everything you visit after installing the tool.
                     </p>
                     <Warning>
-                        This process may slow down your internet connection.
-                    </Warning>
-                    <Warning>
-                        Since our importer cannot render pages, the content of
-                        urls coming from web-apps (i.e. Asana) is not searchable
+                        Re-downloading so many urls may slow down your regular
+                        browsing a bit.
                     </Warning>
                 </div>
             </div>
