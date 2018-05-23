@@ -10,6 +10,7 @@ class SidebarContainer extends React.Component {
     static propTypes = {
         showSidebar: PropTypes.bool.isRequired,
         setShowSidebar: PropTypes.func.isRequired,
+        annotation: PropTypes.object.isRequired,
     }
 
     handleStateChange = ({ isOpen }) => {
@@ -21,6 +22,7 @@ class SidebarContainer extends React.Component {
             <div>
                 <Sidebar
                     showSidebar={this.props.showSidebar}
+                    annotation={this.props.annotation}
                     handleStateChange={this.handleStateChange}
                 />
             </div>
@@ -30,6 +32,7 @@ class SidebarContainer extends React.Component {
 
 const mapStateToProps = state => ({
     showSidebar: selectors.showSidebar(state),
+    annotation: selectors.annotation(state),
 })
 
 const mapDispatchToProps = dispatch => ({

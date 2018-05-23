@@ -32,7 +32,7 @@ const extraStyles = {
     },
 }
 
-const Sidebar = ({ showSidebar, handleStateChange }) => (
+const Sidebar = ({ showSidebar, handleStateChange, annotation }) => (
     <Menu
         isOpen={showSidebar}
         onStateChange={handleStateChange}
@@ -42,7 +42,7 @@ const Sidebar = ({ showSidebar, handleStateChange }) => (
     >
         <div className={styles.sidebar}>
             <p className={styles.sidebarTitle}>Highlights</p>
-            <CommentBox comment={undefined} />
+            <CommentBox comment={annotation} />
         </div>
     </Menu>
 )
@@ -50,6 +50,7 @@ const Sidebar = ({ showSidebar, handleStateChange }) => (
 Sidebar.propTypes = {
     showSidebar: PropTypes.bool.isRequired,
     handleStateChange: PropTypes.func.isRequired,
+    annotation: PropTypes.object,
 }
 
 export default Sidebar

@@ -339,7 +339,7 @@ const mapDispatchToProps = dispatch => ({
     },
     handleCommentBtnClick: doc => event => {
         event.preventDefault()
-        dispatch(sidebarActs.fetchAnnotation(doc))
+        dispatch(sidebarActs.fetchAnnotationAct(doc))
     },
     addTag: resultIndex => tag => dispatch(actions.addTag(tag, resultIndex)),
     delTag: resultIndex => tag => dispatch(actions.delTag(tag, resultIndex)),

@@ -12,7 +12,7 @@ class CommentBox extends React.Component {
     }
 
     state = {
-        commentInput: this.props.comment ? this.props.comment.body : '',
+        commentInput: '',
         isDisabled: true,
         defaultRows: DEFAULT_ROWS,
     }
@@ -22,14 +22,19 @@ class CommentBox extends React.Component {
         this.inputRef.addEventListener('scroll', e => {
             while (e.target.scrollTop) e.target.rows += 1
         })
-        this.inputRef.focus()
+    }
 
-        // Set the default rows for the passed comment
-        if (this.props.comment) {
-            const defaultRows = Math.ceil(
-                this.props.comment.body.length / MAX_CHARS_PER_ROW,
-            )
+    componentWillReceiveProps(nextProps) {
+        if (this.props.comment !== nextProps.comment) {
+            const comment = nextProps.comment
+            const tempRows =
+                Math.ceil(comment.body.length / MAX_CHARS_PER_ROW) + 1
+            const defaultRows =
+                DEFAULT_ROWS > tempRows ? DEFAULT_ROWS : tempRows
+            console.log(defaultRows, tempRows)
+            this.inputRef.focus()
             this.setState({
+                commentInput: comment.body,
                 defaultRows,
             })
         }
@@ -78,6 +83,7 @@ class CommentBox extends React.Component {
     }
 
     render() {
+        console.log(this.state)
         return (
             <div className={styles.commentBox}>
                 <textarea
