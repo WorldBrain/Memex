@@ -16,6 +16,7 @@ import { OPEN_OPTIONS } from 'src/search-injection/constants'
 class Container extends React.Component {
     static propTypes = {
         onInit: PropTypes.func.isRequired,
+        createAndCopyDirectLink: PropTypes.func.isRequired,
     }
 
     state = {
@@ -67,7 +68,7 @@ class Container extends React.Component {
         this.setState({
             tooltipState: 'running',
         })
-        const { url } = await createAndCopyDirectLink()
+        const { url } = await this.props.createAndCopyDirectLink()
         this.setState({
             tooltipState: 'copied',
             linkURL: url,

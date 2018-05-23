@@ -1,4 +1,6 @@
 import { bodyLoader } from 'src/util/loader'
+import { createAndCopyDirectLink } from 'src/direct-linking/content_script/interactions'
+import setupUIContainer from './components'
 import * as interactions from './interactions'
 import { injectCSS } from 'src/search-injection/dom'
 
@@ -12,7 +14,9 @@ export async function init() {
     const cssFile = browser.extension.getURL('/content_script.css')
     injectCSS(cssFile)
 
-    const showTooltip = await interactions.setupUIContainer(target)
+    const showTooltip = await setupUIContainer(target, {
+        createAndCopyDirectLink,
+    })
     interactions.setupTooltipTrigger(showTooltip)
 }
 
