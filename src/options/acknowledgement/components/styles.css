@@ -7,7 +7,7 @@
 
 .title {
     color: #3eb995;
-    font-weight: bold;
+    font-weight: 600;
     font-size: 18px;
     letter-spacing: 1px;
 }
@@ -91,7 +91,7 @@
 .contribute {
     font-size: 16px;
     color: #666;
-    font-weight: bold;
+    font-weight: 600;
     margin-top: 10px;
     letter-spacing: 1px;
 }
