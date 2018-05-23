@@ -3,6 +3,7 @@ import Dexie from 'dexie'
 
 import { Page, Visit, Bookmark, Tag, FavIcon } from './models'
 import { StorageManager } from './storage-manager'
+import { getDexieHistory } from './storage-dexie-schema'
 
 export interface Props {
     indexedDB: IDBFactory
@@ -52,7 +53,7 @@ export default class Storage extends Dexie {
             IDBKeyRange: IDBKeyRange || window['IDBKeyRange'],
         })
 
-        this._initSchema(storageManager && storageManager._getDexieHistory())
+        this._initSchema(storageManager && getDexieHistory(storageManager.registry))
     }
 
     /**
