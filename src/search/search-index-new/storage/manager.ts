@@ -24,8 +24,6 @@ export class StorageManager {
         Object.entries(collection.fields).forEach(([fieldName, fieldDef]) => {
             if (fieldDef['_index'] && fieldDef['type'] === 'text') {
                 object[`_${fieldName}_terms`] = [...extractTerms(object[fieldName], '_')]
-            } else if (fieldDef['type'] === 'json') {
-                object[fieldName] = JSON.stringify(object[fieldName])
             }
         })
 
