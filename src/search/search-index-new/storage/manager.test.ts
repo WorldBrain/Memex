@@ -1,6 +1,6 @@
 /* eslint-env jest */
-import { StorageManager } from './storage-manager'
-import { getDexieHistory } from './storage-dexie-schema'
+import { StorageManager } from './manager'
+import { getDexieHistory } from './dexie-schema'
 
 describe('StorageManager', () => {
     describe('Dexie schema generation', () => {

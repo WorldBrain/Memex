@@ -1,9 +1,9 @@
 import groupBy from 'lodash/fp/groupBy'
 import Dexie from 'dexie'
 
-import { Page, Visit, Bookmark, Tag, FavIcon } from './models'
-import { StorageManager } from './storage-manager'
-import { getDexieHistory } from './storage-dexie-schema'
+import { Page, Visit, Bookmark, Tag, FavIcon } from '../models'
+import { StorageManager } from './manager'
+import { getDexieHistory } from './dexie-schema'
 
 export interface Props {
     indexedDB: IDBFactory

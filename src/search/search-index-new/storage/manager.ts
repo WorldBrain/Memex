@@ -1,5 +1,5 @@
-import { extractTerms } from '../search-index-old/pipeline'
-import { StorageRegistry } from './storage-registry'
+import { extractTerms } from '../../search-index-old/pipeline'
+import StorageRegistry from './registry'
 
 export class StorageManager {
     public initialized = false
