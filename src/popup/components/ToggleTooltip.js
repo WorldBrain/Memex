@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 import Button from './Button'
-import { ToggleSwitch } from 'src/common-ui/components'
+import ToggleSwitch from './ToggleSwitch'
 import styles from './Button.css'
 
 const ToggleTooltip = ({ isChecked, handleChange }) => (
@@ -10,12 +10,7 @@ const ToggleTooltip = ({ isChecked, handleChange }) => (
         <Button onClick={handleChange} icon="link" btnClass={styles.linkIcon}>
             <span>
                 Memex.Link Tooltip
-                <ToggleSwitch
-                    className={styles.tooltipToggle}
-                    activeClassName={styles.activeToggle}
-                    isChecked={isChecked}
-                    onChange={handleChange}
-                />
+                <ToggleSwitch isChecked={isChecked} onChange={handleChange} />
             </span>
         </Button>
     </div>

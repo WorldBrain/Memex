@@ -1,5 +1,4 @@
-import { delayed } from './utils'
-
+import { delayed, getTooltipState } from './utils'
 let mouseupListener = null
 
 export function setupTooltipTrigger(callback) {
