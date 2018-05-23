@@ -1,17 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-
-import Container from './components/container'
 import { delayed } from './utils'
-
-export function setupUIContainer(target) {
-    return new Promise(resolve => {
-        ReactDOM.render(
-            <Container onInit={showTooltip => resolve(showTooltip)} />,
-            target,
-        )
-    })
-}
 
 export function setupTooltipTrigger(callback) {
     document.body.addEventListener('mouseup', event => {
