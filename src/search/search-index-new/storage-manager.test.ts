@@ -1,5 +1,6 @@
 /* eslint-env jest */
 import { StorageManager } from './storage-manager'
+import { getDexieHistory } from './storage-dexie-schema'
 
 describe('StorageManager', () => {
     describe('Dexie schema generation', () => {
@@ -43,7 +44,7 @@ describe('StorageManager', () => {
                 },
                 indices: ['slug']
             })
-            expect(storageManager._getDexieHistory()).toEqual([
+            expect(getDexieHistory(storageManager.registry)).toEqual([
                 {
                     "version": 1,
                     "schema": {
