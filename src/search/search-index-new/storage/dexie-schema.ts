@@ -1,4 +1,4 @@
-import { StorageRegistry } from './storage-registry'
+import StorageRegistry from './registry'
 
 export function getDexieHistory(storageRegistry: StorageRegistry) {
     const collections = {}

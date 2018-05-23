@@ -1,4 +1,4 @@
-export class StorageRegistry {
+export default class StorageRegistry {
     public collections = {}
     public collectionsByVersion = {}
 

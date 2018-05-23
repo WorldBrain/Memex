@@ -1,5 +1,5 @@
 import Storage, { Props } from './storage'
-import { StorageManager } from './storage-manager'
+import { StorageManager } from './storage/manager'
 
 // Create main singleton to interact with DB in the ext
 const storageManager = new StorageManager()
