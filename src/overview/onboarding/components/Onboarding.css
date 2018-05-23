@@ -19,7 +19,6 @@
     font-weight: lighter;
     display: block;
     min-height: 160px;
-    margin-bottom: 15px;
 }
 
 .readyMsg {
@@ -61,7 +60,7 @@
     margin-left: 12px;
     margin-right: 12px;
     text-decoration: none;
-    font-size: 0.8rem;
+    font-size: 1rem;
 
     &:hover,
     &:active {
@@ -141,7 +140,7 @@
     margin-bottom: 15px;
 
     & > p {
-        font-size: 14px;
+        font-size: 18px;
     }
 }
 
