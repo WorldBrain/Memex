@@ -4,6 +4,9 @@ import Dexie from 'dexie'
 import { Page, Visit, Bookmark, Tag, FavIcon } from '../models'
 import { StorageManager } from './manager'
 import { getDexieHistory } from './dexie-schema'
+import { DexieSchema } from './types'
+
+export * from './types'
 
 export interface Props {
     indexedDB: IDBFactory
@@ -17,7 +20,7 @@ export default class Storage extends Dexie {
         indexedDB: null,
         IDBKeyRange: null,
         dbName: 'memex',
-        storageManager: null
+        storageManager: null,
     }
     public static MIN_STR = ''
     public static MAX_STR = String.fromCharCode(65535)
@@ -47,20 +50,24 @@ export default class Storage extends Dexie {
      */
     public favIcons: Dexie.Table<FavIcon, string>
 
-    constructor({ indexedDB, IDBKeyRange, dbName, storageManager } = Storage.DEF_PARAMS) {
+    constructor(
+        { indexedDB, IDBKeyRange, dbName, storageManager } = Storage.DEF_PARAMS,
+    ) {
         super(dbName || Storage.DEF_PARAMS.dbName, {
             indexedDB: indexedDB || window.indexedDB,
             IDBKeyRange: IDBKeyRange || window['IDBKeyRange'],
         })
 
-        this._initSchema(storageManager && getDexieHistory(storageManager.registry))
+        this._initSchema(
+            storageManager && getDexieHistory(storageManager.registry),
+        )
     }
 
     /**
      * See docs for explanation of Dexie table schema syntax:
      * http://dexie.org/docs/Version/Version.stores()
      */
-    private _initSchema(dexieHistory) {
+    private _initSchema(dexieHistory: DexieSchema[]) {
         dexieHistory = dexieHistory || []
         const baseVersion = 1
         const baseSchema = {
@@ -75,11 +82,13 @@ export default class Storage extends Dexie {
         dexieHistory.forEach(({ version, schema, migrations }) => {
             const finalVersion = baseVersion + version
             const finalSchema = Object.assign(baseSchema, schema)
-            this.version(finalVersion).stores(finalSchema).upgrade(() => {
-                migrations.forEach(migration => {
-                    // TODO: Call migration with some object that allows for data manipulation
+            this.version(finalVersion)
+                .stores(finalSchema)
+                .upgrade(() => {
+                    migrations.forEach(migration => {
+                        // TODO: Call migration with some object that allows for data manipulation
+                    })
                 })
-            })
         })
 
         // Set up model classes

@@ -1,3 +1,5 @@
+import { ManageableStorage } from './storage'
+
 export type VisitInput = number
 export type BookmarkInput = number
 export type PageID = string
@@ -68,4 +70,8 @@ export interface PageContent {
     canonicalUrl?: string
     description?: string
     keywords?: string[]
+}
+
+export abstract class FeatureStorage {
+    constructor(protected storageManager: ManageableStorage) {}
 }
