@@ -8,6 +8,7 @@ export default class DirectLinkingStorage extends FeatureStorage {
             version: new Date(2018, 5, 31),
             fields: {
                 pageTitle: { type: 'text' },
+                pageUrl: { type: 'url' },
                 body: { type: 'text' },
                 selector: { type: 'json' },
                 createdWhen: { type: 'datetime' },
@@ -17,9 +18,10 @@ export default class DirectLinkingStorage extends FeatureStorage {
         })
     }
 
-    async insertDirectLink({ pageTitle, url, body, selector }) {
+    async insertDirectLink({ pageTitle, pageUrl, url, body, selector }) {
         await this.storageManager.putObject('directLinks', {
             pageTitle,
+            pageUrl,
             body,
             selector,
             createdWhen: new Date(),

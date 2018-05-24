@@ -1,5 +1,6 @@
 import StorageRegistry from './registry'
-export type FieldType = 'text' | 'json' | 'datetime' | 'string'
+import { Field } from './fields'
+export type FieldType = 'text' | 'json' | 'datetime' | 'string' | 'url'
 
 // TODO
 export interface MigrationRunner {
@@ -17,6 +18,7 @@ export interface CollectionFields {
 
 export interface CollectionField {
     type: FieldType
+    fieldObject?: Field
     pk?: boolean
     _index?: boolean
 }

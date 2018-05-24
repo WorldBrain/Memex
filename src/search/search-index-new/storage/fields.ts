@@ -36,3 +36,7 @@ function _default(option, def) {
         return def
     }
 }
+
+export default {
+    url: UrlField
+}

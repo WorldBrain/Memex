@@ -3,7 +3,6 @@ import PropTypes from 'prop-types'
 import OnClickOutside from 'react-onclickoutside'
 
 import Tooltip from './tooltip'
-import { createAndCopyDirectLink } from 'src/direct-linking/content_script/interactions'
 import {
     InitialComponent,
     CreatingLinkComponent,
