@@ -16,6 +16,13 @@ export async function init() {
 
     const showTooltip = await setupUIContainer(target, {
         createAndCopyDirectLink,
+        openSettings: () => {
+            const message = {
+                action: OPEN_OPTIONS,
+                query: 'settings',
+            }
+            browser.runtime.sendMessage(message)
+        },
     })
     interactions.setupTooltipTrigger(showTooltip)
 }

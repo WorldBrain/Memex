@@ -9,7 +9,7 @@ import {
     CreatingLinkComponent,
     CopiedComponent,
     ErrorComponent,
-} from './tooltipStates'
+} from './tooltip-states'
 import { copyToClipboard } from '../utils'
 import { OPEN_OPTIONS } from 'src/search-injection/constants'
 
@@ -17,6 +17,7 @@ class Container extends React.Component {
     static propTypes = {
         onInit: PropTypes.func.isRequired,
         createAndCopyDirectLink: PropTypes.func.isRequired,
+        openSettings: PropTypes.func.isRequired,
     }
 
     state = {
@@ -85,11 +86,7 @@ class Container extends React.Component {
 
     openSettings = event => {
         event.preventDefault()
-        const message = {
-            action: OPEN_OPTIONS,
-            query: 'settings',
-        }
-        browser.runtime.sendMessage(message)
+        this.props.openSettings()
     }
 
     renderTooltipComponent = () => {
