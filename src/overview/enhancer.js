@@ -14,6 +14,7 @@ import { selectors as filters, actions as filterActs } from './filters'
 
 const parseBool = str => str === 'true'
 const parseNumber = str => Number(str)
+const stringifyArr = arr => arr.join(',')
 
 // Keep search query in sync with the query parameter in the window location.
 const locationSync = ReduxQuerySync.enhancer({
@@ -21,11 +22,6 @@ const locationSync = ReduxQuerySync.enhancer({
     initialTruth: 'location', // Initialise store from current location.
     history,
     params: {
-        query: {
-            selector: selectors.query,
-            action: actions.setQueryTagsDomains,
-            defaultValue: '',
-        },
         startDate: {
             selector: selectors.startDate,
             action: actions.setStartDate,
@@ -43,25 +39,33 @@ const locationSync = ReduxQuerySync.enhancer({
             defaultValue: false,
         },
         tags: {
-            selector: filters.tagsStringify,
+            selector: filters.tags,
             action: filterActs.setTagFilters,
-            defaultValue: '',
+            valueToString: stringifyArr,
+            defaultValue: [],
         },
         domainsInc: {
-            selector: filters.domainsIncStringify,
+            selector: filters.domainsInc,
             action: filterActs.setIncDomainFilters,
-            defaultValue: '',
+            valueToString: stringifyArr,
+            defaultValue: [],
         },
         domainsExc: {
-            selector: filters.domainsExcStringify,
+            selector: filters.domainsExc,
             action: filterActs.setExcDomainFilters,
-            defaultValue: '',
+            valueToString: stringifyArr,
+            defaultValue: [],
         },
         install: {
             selector: onboarding.isVisible,
             action: onboardingActs.setVisible,
             stringToValue: parseBool,
             defaultValue: false,
+        },
+        query: {
+            selector: selectors.query,
+            action: actions.setQueryTagsDomains,
+            defaultValue: '',
         },
     },
 })
