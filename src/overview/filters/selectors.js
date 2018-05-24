@@ -21,11 +21,6 @@ export const onlyBookmarks = createSelector(
     state => state.onlyBookmarks,
 )
 
-const stringifyFilters = f => f.join(',')
-export const tagsStringify = createSelector(tags, stringifyFilters)
-export const domainsIncStringify = createSelector(domainsInc, stringifyFilters)
-export const domainsExcStringify = createSelector(domainsExc, stringifyFilters)
-
 export const showDomainsFilter = createSelector(
     popup,
     popup => popup === 'domain',

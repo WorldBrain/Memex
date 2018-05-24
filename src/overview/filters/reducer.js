@@ -51,9 +51,12 @@ const toggleFilter = filterKey => (state, value) => {
     }
 }
 
+const parseStringFilters = str => (str === '' ? [] : str.split(','))
+
 const setFilters = filterKey => (state, filters) => ({
     ...state,
-    [filterKey]: typeof filters === 'string' ? filters.split(',') : filters,
+    [filterKey]:
+        typeof filters === 'string' ? parseStringFilters(filters) : filters,
     showFilters: true,
 })
 
