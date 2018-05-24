@@ -1,8 +1,22 @@
-export default class StorageRegistry {
-    public collections = {}
-    public collectionsByVersion = {}
+import {
+    RegisterableStorage,
+    CollectionDefinitions,
+    CollectionDefinition,
+} from './types'
 
-    registerCollection(name, defs) {
+export interface RegistryCollections {
+    [collName: string]: CollectionDefinition
+}
+
+export interface RegistryCollectionsVersionMap {
+    [collVersion: number]: CollectionDefinition[]
+}
+
+export default class StorageRegistry implements RegisterableStorage {
+    public collections: RegistryCollections = {}
+    public collectionsByVersion: RegistryCollectionsVersionMap = {}
+
+    registerCollection(name: string, defs: CollectionDefinitions) {
         if (!(defs instanceof Array)) {
             defs = [defs]
         }
@@ -17,7 +31,8 @@ export default class StorageRegistry {
             })
 
             const version = def.version.getTime()
-            this.collectionsByVersion[version] = this.collectionsByVersion[version] || []
+            this.collectionsByVersion[version] =
+                this.collectionsByVersion[version] || []
             this.collectionsByVersion[version].push(def)
         })
     }

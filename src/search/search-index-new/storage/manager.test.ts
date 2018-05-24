@@ -10,20 +10,20 @@ describe('StorageManager', () => {
                 version: new Date(2018, 5, 20),
                 fields: {
                     slug: { type: 'string', pk: true },
-                    field1: { type: 'string' }
+                    field1: { type: 'string' },
                 },
-                indices: ['slug']
+                indices: ['slug'],
             })
 
-            const migrateEggs = () => { }
+            const migrateEggs = () => Promise.resolve()
             storageManager.registerCollection('eggs', [
                 {
                     version: new Date(2018, 5, 20),
                     fields: {
                         slug: { type: 'string', pk: true },
-                        field1: { type: 'string' }
+                        field1: { type: 'string' },
                     },
-                    indices: ['slug']
+                    indices: ['slug'],
                 },
                 {
                     version: new Date(2018, 5, 25),
@@ -33,43 +33,43 @@ describe('StorageManager', () => {
                         field2: { type: 'text' },
                     },
                     indices: ['slug', 'field2'],
-                    migrate: migrateEggs
-                }
+                    migrate: migrateEggs,
+                },
             ])
             storageManager.registerCollection('foo', {
                 version: new Date(2018, 5, 28),
                 fields: {
                     slug: { type: 'string', pk: true },
-                    field1: { type: 'string' }
+                    field1: { type: 'string' },
                 },
-                indices: ['slug']
+                indices: ['slug'],
             })
             expect(getDexieHistory(storageManager.registry)).toEqual([
                 {
-                    "version": 1,
-                    "schema": {
-                        "eggs": "slug, field1",
-                        "spam": "slug, field1"
+                    version: 1,
+                    schema: {
+                        eggs: 'slug, field1',
+                        spam: 'slug, field1',
                     },
-                    "migrations": [],
+                    migrations: [],
                 },
                 {
-                    "version": 2,
-                    "schema": {
-                        "eggs": "slug, *field2, field1",
-                        "spam": "slug, field1"
+                    version: 2,
+                    schema: {
+                        eggs: 'slug, *field2, field1',
+                        spam: 'slug, field1',
                     },
-                    "migrations": [migrateEggs],
+                    migrations: [migrateEggs],
                 },
                 {
-                    "version": 3,
-                    "schema": {
-                        "eggs": "slug, *field2, field1",
-                        "foo": "slug, field1",
-                        "spam": "slug, field1"
+                    version: 3,
+                    schema: {
+                        eggs: 'slug, *field2, field1',
+                        foo: 'slug, field1',
+                        spam: 'slug, field1',
                     },
-                    "migrations": [],
-                }
+                    migrations: [],
+                },
             ])
         })
     })

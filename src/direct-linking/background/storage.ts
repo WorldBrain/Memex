@@ -1,5 +1,9 @@
-export default class DirectLinkingStorage {
-    constructor(private storageManager) {
+import { FeatureStorage } from '../../search/search-index-new'
+
+export default class DirectLinkingStorage extends FeatureStorage {
+    constructor(storageManager) {
+        super(storageManager)
+
         this.storageManager.registerCollection('directLinks', {
             version: new Date(2018, 5, 31),
             fields: {
@@ -7,9 +11,9 @@ export default class DirectLinkingStorage {
                 body: { type: 'text' },
                 selector: { type: 'json' },
                 createdWhen: { type: 'datetime' },
-                url: { type: 'string', pk: true }
+                url: { type: 'string', pk: true },
             },
-            indices: ['pageTitle', 'body', 'createdWhen', 'url']
+            indices: ['pageTitle', 'body', 'createdWhen', 'url'],
         })
     }
 
@@ -19,7 +23,7 @@ export default class DirectLinkingStorage {
             body,
             selector,
             createdWhen: new Date(),
-            url
+            url,
         })
     }
 }
