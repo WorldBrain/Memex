@@ -23,6 +23,10 @@ export class StorageManager implements ManageableStorage {
         const collection = this.registry.collections[collectionName]
         const indices = collection.indices || []
         Object.entries(collection.fields).forEach(([fieldName, fieldDef]) => {
+            if (fieldDef.fieldObject) {
+                object[fieldName] = fieldDef.fieldObject.prepareForStorage(object[fieldName])
+            }
+
             if (fieldDef._index && fieldDef.type === 'text') {
                 object[`_${fieldName}_terms`] = [...extractTerms(object[fieldName])]
             }

@@ -3,6 +3,7 @@ import {
     CollectionDefinitions,
     CollectionDefinition,
 } from './types'
+import FIELD_TYPES from './fields'
 
 export interface RegistryCollections {
     [collName: string]: CollectionDefinition
@@ -24,6 +25,14 @@ export default class StorageRegistry implements RegisterableStorage {
         defs.sort(def => def.version.getTime()).forEach(def => {
             this.collections[name] = def
             def.name = name
+
+            const fields = def.fields
+            Object.entries(fields).forEach(([fieldName, fieldDef]) => {
+                const FieldClass = FIELD_TYPES[fieldDef.type]
+                if (FieldClass) {
+                    fieldDef.fieldObject = new FieldClass(fieldDef)
+                }
+            })
 
             const indices = def.indices || []
             indices.forEach(fieldName => {
