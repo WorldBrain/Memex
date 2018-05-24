@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import classNames from 'classnames'
 
 import { getExtURL } from '../utils'
+import { INFO_URL } from '../constants'
 import styles from './tooltip.css'
 
 const cssClasses = {
@@ -47,7 +48,7 @@ const Tooltip = ({
             <a onClick={openSettings} className={styles.smallButton}>
                 <img className={styles.imgSettings} src={images.settings} />
             </a>
-            <a href="#" className={styles.smallButton}>
+            <a href={INFO_URL} className={styles.smallButton}>
                 <img className={styles.imgInfo} src={images.info} />
             </a>
         </span>
