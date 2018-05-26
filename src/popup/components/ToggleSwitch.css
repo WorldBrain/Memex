@@ -42,10 +42,11 @@
     color: #ddd;
     font-size: 0.8em;
     position: absolute;
-    margin-left: -37px;
+    margin-left: -33px;
     margin-top: 2px;
 }
 
 .activeText {
     color: #fff;
+    margin-left: -44px;
 }

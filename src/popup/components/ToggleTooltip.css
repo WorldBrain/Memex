@@ -10,6 +10,7 @@
     width: 15px;
     height: 15px;
     position: absolute;
-    top: 10px;
+    top: 13px;
     left: 60%;
+    cursor: pointer;
 }
