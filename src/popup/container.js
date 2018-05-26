@@ -245,9 +245,7 @@ class PopupContainer extends Component {
         const isTooltipEnabled = !this.state.isTooltipEnabled
         await setTooltipState(isTooltipEnabled)
 
-        if (!isTooltipEnabled) {
-            setTimeout(() => window.close(), 500)
-        }
+        setTimeout(() => window.close(), 500)
 
         this.setState({
             isTooltipEnabled,
