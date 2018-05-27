@@ -37,9 +37,10 @@ export const UNINSTALL_URL =
         ? 'http://worldbrain.io/uninstall'
         : ''
 export const NEW_FEATURE_NOTIF = {
-    title: 'NEW FEATURE: Tagging',
-    message: 'Click for more Information',
-    url: 'https://worldbrain.helprace.com/i34-feature-tagging',
+    title: 'NEW FEATURE: Exclude Terms/Domains',
+    message: 'Click to learn more',
+    url:
+        'https://worldbrain.helprace.com/i61-feature-excluding-terms-and-domains',
 }
 
 async function openOverview() {
@@ -74,14 +75,14 @@ async function onInstall() {
 }
 
 async function onUpdate() {
-    // Notification with updates when we update
-    // await createNotif(
-    //     {
-    //         title: NEW_FEATURE_NOTIF.title,
-    //         message: NEW_FEATURE_NOTIF.message,
-    //     },
-    //     () => browser.tabs.create({ url: NEW_FEATURE_NOTIF.url }),
-    // )
+    //Notification with updates when we update
+    await createNotif(
+        {
+            title: NEW_FEATURE_NOTIF.title,
+            message: NEW_FEATURE_NOTIF.message,
+        },
+        () => browser.tabs.create({ url: NEW_FEATURE_NOTIF.url }),
+    )
 
     // Check whether old Search Injection boolean exists and replace it with new object
     const searchInjectionKey = (await browser.storage.local.get(
