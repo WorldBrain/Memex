@@ -14,7 +14,7 @@ import {
 } from 'src/blacklist/background'
 import searchIndex from 'src/search'
 import analytics from 'src/analytics'
-// import createNotif from 'src/util/notifications'
+import createNotif from 'src/util/notifications'
 import {
     OPEN_OVERVIEW,
     OPEN_OPTIONS,
@@ -84,7 +84,7 @@ async function onInstall() {
 }
 
 async function onUpdate() {
-    //Notification with updates when we update
+    // Notification with updates when we update
     await createNotif(
         {
             title: NEW_FEATURE_NOTIF.title,
