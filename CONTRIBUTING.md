@@ -1,13 +1,5 @@
 # <a id="contributing" href="#contributing">Contributing</a>
 
-**If you are a Developer head to [Getting Started](#getting-started)**
-
-**If you are a Designer, Marketer, or Investor**
-Please Email Oliver Sauter: info@worldbrain.io
-
-**If you would like to donate a bit of money**
-Please support us on [Patreon](https://www.patreon.com/WorldBrain) :moneybag:
-
 ## Getting Started
 
 We have broken up tasks into three levels, **easy**, **medium** and **hard** tasks. You can choose based on your skill level or how much time you would like to put into contributing. **After finding a Task you would like to help out with please see [Installation Instructions](#installation)**.
