@@ -31,7 +31,7 @@ class CommentBox extends React.Component {
                 Math.ceil(comment.body.length / MAX_CHARS_PER_ROW) + 1
             const defaultRows =
                 DEFAULT_ROWS > tempRows ? DEFAULT_ROWS : tempRows
-            console.log(defaultRows, tempRows)
+
             this.inputRef.focus()
             this.setState({
                 commentInput: comment.body,

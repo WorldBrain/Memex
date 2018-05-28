@@ -8,7 +8,7 @@ import Header from './Header'
 import styles from './Overview.css'
 import Tooltip from './Tooltip'
 import Head from 'src/options/containers/Head'
-import Sidebar from './Sidebar'
+import Sidebar from '../Sidebar'
 
 const showFilterClass = ({ showFilters }) =>
     classNames({
@@ -28,6 +28,8 @@ const Overview = props => (
             fetchNextTooltip={props.fetchNextTooltip}
             isTooltipRenderable={props.isTooltipRenderable}
         />
+
+        <Sidebar />
 
         <div className={showFilterClass(props)}>{props.filters}</div>
         <div

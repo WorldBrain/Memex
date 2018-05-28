@@ -1,0 +1,44 @@
+.container {
+    width: 400px;
+    background-color: #f8f8f8;
+    border-radius: 5px;
+    padding: 10px;
+    color: #3eb995;
+    font-family: sans-serif;
+    font-size: 14px;
+    border: 1px #979797 solid;
+}
+
+.body {
+    font-style: italic;
+    font-weight: 200;
+    margin-bottom: 10px;
+}
+
+.showMore {
+    margin: 10px auto;
+    width: 20%;
+    text-align: center;
+    cursor: pointer;
+}
+
+.footer {
+    height: 15px;
+    margin-top: 10px;
+}
+
+.timestamp {
+    width: 85%;
+    display: inline-block;
+}
+
+.footerAside {
+    width: 15%;
+    display: inline-block;
+    text-align: right;
+}
+
+.icon {
+    margin: 0px 5px;
+    cursor: pointer;
+}
