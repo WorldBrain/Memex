@@ -53,12 +53,6 @@ const sourceFiles = [
         cssOutput: 'content_script.css',
     },
     {
-        entries: ['./src/overview/overview.jsx', commonUIEntry],
-        output: 'overview.js',
-        destination: './extension/overview',
-        cssOutput: 'overview.css',
-    },
-    {
         entries: ['./src/options/options.jsx', commonUIEntry],
         output: 'options.js',
         destination: './extension/options',

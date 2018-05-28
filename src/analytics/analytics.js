@@ -144,7 +144,7 @@ class Analytics {
         }
 
         if (force) {
-            await this._sendReq(params)
+            await this._sendReq(params).catch(console.error)
         } else {
             this._poolReq(params)
         }

@@ -10,8 +10,13 @@ const getButtonClass = buttonType =>
         [styles.settingsIcon]: buttonType,
     })
 
-const ButtonIcon = ({ icon, buttonType, btnClass, ...btnProps }) => (
-    <OutLink className={getButtonClass(buttonType)} tabIndex="-1" {...btnProps}>
+const ButtonIcon = ({ icon, buttonType, btnClass, href, ...btnProps }) => (
+    <OutLink
+        className={getButtonClass(buttonType)}
+        tabIndex="-1"
+        to={href}
+        {...btnProps}
+    >
         <div
             className={classNames(
                 styles.customIcon,
@@ -26,6 +31,7 @@ ButtonIcon.propTypes = {
     icon: PropTypes.string,
     buttonType: PropTypes.number,
     btnClass: PropTypes.string,
+    href: PropTypes.string,
 }
 
 export default ButtonIcon

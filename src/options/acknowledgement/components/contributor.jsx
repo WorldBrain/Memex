@@ -17,7 +17,7 @@ class Contributor extends Component {
             return (
                 <OutLink
                     className={localStyles.links}
-                    href={item[Object.keys(item)[0]]}
+                    to={item[Object.keys(item)[0]]}
                     key={id}
                 >
                     <img
@@ -44,7 +44,7 @@ class Contributor extends Component {
                         {contributor.position}
                     </span>
                     <br />
-                    <OutLink className={localStyles.web} href={contributor.web}>
+                    <OutLink className={localStyles.web} to={contributor.web}>
                         {contributor.web}
                     </OutLink>
                     <br />

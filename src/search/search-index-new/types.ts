@@ -3,15 +3,27 @@ export type BookmarkInput = number
 export type PageID = string
 export type PageScore = number
 export type SearchResult = [PageID, PageScore]
+export type TermsIndexName = 'terms' | 'urlTerms' | 'titleTerms'
+export type PageResultsMap = Map<PageID, PageScore>
 
 export interface SearchParams {
     domains: string[]
+    domainsExclude: string[]
     tags: string[]
-    queryTerms: string[]
+    terms: string[]
+    termsExclude: string[]
+    bookmarks: boolean
     endDate?: number
     startDate?: number
     skip: number
     limit: number
+}
+
+export interface FilteredURLs {
+    include: Set<string>
+    exclude: Set<string>
+    isDataFiltered: boolean
+    isAllowed(url: string): boolean
 }
 
 /**

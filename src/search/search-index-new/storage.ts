@@ -14,8 +14,8 @@ export default class Storage extends Dexie {
         IDBKeyRange: null,
         dbName: 'memex',
     }
-    private static MIN_STR = ''
-    private static MAX_STR = String.fromCharCode(65535)
+    public static MIN_STR = ''
+    public static MAX_STR = String.fromCharCode(65535)
 
     /**
      * @type {Dexie.Table} Represents page data - our main data type.

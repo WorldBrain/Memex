@@ -1,10 +1,9 @@
+import { Tabs } from 'webextension-polyfill-ts'
 import Tab from './tab-state'
+import { NavState } from './types'
 
 export class TabManager {
-    /**
-     * @property {Map<number, Tab>}
-     */
-    _tabs = new Map()
+    private _tabs = new Map<number, Tab>()
 
     get size() {
         return this._tabs.size
@@ -13,14 +12,14 @@ export class TabManager {
     /**
      * @param {tabs.Tab} tab The browser tab to start keeping track of.
      */
-    trackTab = ({ id, active, url }) =>
+    trackTab = ({ id, active, url }: Tabs.Tab) =>
         this._tabs.set(id, new Tab({ isActive: active, url }))
 
     /**
      * @param {number} id The ID of the tab as assigned by web ext API.
      * @returns {Tab|undefined} The state for tab stored under given ID, or undefined if no matching tab.
      */
-    getTabState(id) {
+    getTabState(id: number) {
         return this._tabs.get(id)
     }
 
@@ -28,7 +27,7 @@ export class TabManager {
      * @param {number} id The ID of the tab to stop keeping track of.
      * @returns {Tab}
      */
-    removeTab(id) {
+    removeTab(id: number) {
         const toRemove = this.getTabState(id)
 
         if (toRemove != null) {
@@ -48,7 +47,7 @@ export class TabManager {
      * @param {number} id The ID of the tab to stop reset tracking of.
      * @returns {Tab} The state of the previously tracked tab assoc. with `id`.
      */
-    resetTab(id, activeState, url) {
+    resetTab(id: number, activeState: boolean, url: string) {
         const oldTab = this.removeTab(id)
 
         if (oldTab != null) {
@@ -70,7 +69,7 @@ export class TabManager {
      *
      * @param {number} id The ID of the tab to set to active.
      */
-    activateTab(id) {
+    activateTab(id: number) {
         for (const [tabId, tab] of this._tabs) {
             // Toggle active state on currently active and the new candidate tab
             if (tab.isActive || tabId === id) {
@@ -83,7 +82,7 @@ export class TabManager {
      * @param {number} id The ID of the tab to set to associate the debounced log with.
      * @param {() => Promise<void>} cb The page log logic to delay.
      */
-    scheduleTabLog(id, logCb) {
+    scheduleTabLog(id: number, logCb: Function) {
         const tab = this.getTabState(id)
 
         if (tab != null) {
@@ -91,7 +90,7 @@ export class TabManager {
         }
     }
 
-    clearScheduledLog(id) {
+    clearScheduledLog(id: number) {
         const tab = this.getTabState(id)
 
         if (tab != null) {
@@ -103,7 +102,7 @@ export class TabManager {
      * @param {number} id The ID of the tab to set to update scroll state for.
      * @param {any} newState The new scroll state to set.
      */
-    updateTabScrollState(id, newState) {
+    updateTabScrollState(id: number, newState) {
         const tab = this.getTabState(id)
 
         if (tab != null) {
@@ -112,11 +111,11 @@ export class TabManager {
     }
 
     /**
-     * @param {number} id The ID of the tab to set to update navigation state for.
-     * @param {any} navState Object containing `webNavigation.TransitionQualifier`s under `qualifiers` prop
+     * @param id The ID of the tab to set to update navigation state for.
+     * @param navState Object containing `webNavigation.TransitionQualifier`s under `qualifiers` prop
      *  and ` webNavigation.TransitionType` under `type` prop.
      */
-    updateNavState(id, navState) {
+    updateNavState(id: number, navState: NavState) {
         const tab = this.getTabState(id)
 
         if (tab != null) {
@@ -128,6 +127,6 @@ export class TabManager {
 // Set up singleton to use throughout bg script
 const manager = new TabManager()
 
-window.man = manager
+window['man'] = manager
 
 export default manager

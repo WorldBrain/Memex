@@ -2,6 +2,15 @@
     position: relative;
     margin: 0 auto;
     float: right;
+
+    & p {
+        margin-right: -10px;
+    }
+
+    & a {
+        text-decoration: none;
+        color: #3eb995;
+    }
 }
 
 .shareIcons {
@@ -9,7 +18,7 @@
     display: flex;
     flex-direction: column;
     margin-top: 100px;
-    margin-left: -30px;
+    margin-left: -36px;
     width: 7%;
     height: 500px;
 }
@@ -31,7 +40,7 @@
 .fedLink {
     text-decoration: none;
     position: absolute;
-    color: #fff;
+    color: #fff !important; /* stylelint-disable-line declaration-no-important */
     background-color: #3eb99587;
     transform: rotate(90deg);
     margin-top: 100px;
@@ -41,7 +50,7 @@
     padding: 14px 20px 17px 20px;
     transform-origin: 0 100%;
     font-weight: 100;
-    letter-spacing: 2;
+    letter-spacing: 2px;
 }
 
 .shareText {
@@ -57,15 +66,6 @@
 .shareImg {
     width: 25px;
     height: 25px;
-}
-
-p {
-    margin-right: -10px;
-}
-
-a {
-    text-decoration: none;
-    color: #3eb995;
 }
 
 .chatBox {

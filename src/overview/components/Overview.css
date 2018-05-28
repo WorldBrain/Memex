@@ -80,8 +80,11 @@
 .links {
     display: flex;
     justify-content: flex-end;
+    align-content: center;
     width: 180px;
     margin-left: -50px;
+    font-weight: normal;
+    height: 25px;
 
     @media (max-width: 1200px) {
         width: 24px;
@@ -89,6 +92,10 @@
 
     @media (max-width: 1000px) {
         display: none;
+    }
+
+    > a {
+        height: 25px;
     }
 }
 
@@ -99,6 +106,8 @@
 
 .main {
     margin-top: 100px;
+    font-size: 0.65rem;
+    font-weight: normal;
 
     @media (max-width: 1000px) {
         margin-top: 100px !important; /* stylelint-disable-line declaration-no-important */

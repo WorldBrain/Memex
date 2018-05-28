@@ -3,14 +3,15 @@
 A browser extension that lets you create, search and eventually share your personal web of knowledge
 
  - **Full-Text-Search** all websites you visited and bookmarked
+ - **Filter by time, domain or custom tags**
+ - **Use Memex alongside your favorite search-engine** Support for Google and DuckDuckGo. 
  - **Full Data Privacy** All data is stored and processed on your own computer and will **never ever ever EVER** be shared or used without your consent. Here at WorldBrain, we are highly concerned about your privacy and security please see our [privacy policy](#privacy-policy) for more details.
 
 Lookout for these exciting new features in the future:
- - **Automatically Rate** how useful you perceive the websites you visit based on your interactions with it.
  - **Add notes, comments and links** to similar valuable resources
+ - **Automatically Rate** how useful you perceive the websites you visit based on your interactions with it.
  - **Integrate** with all your favorite services such as Facebook, Evernote and Twitter.
  - **Sync** with all of your browsers, smart-phones, tablets, smart-fridges, electric cars, space-ships etc.
- - **Share** recommendations, comments, links & ratings with your network.
  - **Discover** new content that has high value in your network
  - **Diversify** the content you find by looking through great sources on the opposite side of your 'value' system. Break out of your 'filter bubble'
 
@@ -37,13 +38,15 @@ More on that on our website: worldbrain.io
 1. [In Depth How it Works](./docs/How-It-Works.md)
 
 ## Project Status
-We are currently on the cusp of releasing a brand new version of the extension. See [roadmap](https://trello.com/b/mdqEuBjb) for more details
+Memex is [available for Chrome and Firefox](https://worldbrain.io) and no breaking changes are expected anytime soon. 
+It's under active development by [our wonderful team](https://worldbrain.io/team), including 3 GSoC students.
 
-The old one can still be found here: worldbrain.io/download
+### Next Features:
+- Create Hyperlinks to highlights in the text of websites
+- Comments, Annotations
+- Custom Lists: Add page(s) to list(s)
 
-Want to help out? If you are:
- - A Marketer, A Designer or Investor please Email info@worldbrain.io
- - If you want to [donate click here](https://www.patreon.com/WorldBrain)! :moneybag:
+
 
 **If your a developer Please see [Contributing!](./CONTRIBUTING.md)**
 
@@ -51,7 +54,7 @@ Have questions?
 - [Feedback](#contact), how can we make our extension better?
 - [General Questions or Concerns](#contact)
 - [Feature Requests](#feature-requests), <!-- vote for or add any new features you may want to see! --> What features would you like to see in our app? All ideas & requests are welcome!
-- [Bugs or Issues](https://github.com/WorldBrain/Research-Engine/issues/new), is something broken or not working as you feel it should?
+- [Bugs or Issues](https://github.com/WorldBrain/Memex/issues/new), is something broken or not working as you feel it should?
 
 ## How the WorldBrain Extension Works
 
@@ -65,21 +68,20 @@ As you browse through websites WorldBrain will work automatically in the backgro
 
 ## Contact
 
-Find us in [our Team chat](https://chat.worldbrain.io/) or contact us [via email](mailto:info@worldbrain.io).
+Find us in [our Team chat](https://join-worldbrain.herokuapp.com/) or contact us [via email](mailto:info@worldbrain.io).
 
 ### Feedback, Questions or Concerns
 **How can we make our extension better?**
 
 Please email: feedback@worldbrain.io
-or drop by our [team chat](https://chat.worldbrain.io/) and post a message in #TownSquare
+or drop by our [team chat](https://join-worldbrain.herokuapp.com/) and post a message in #general
 
 ### Feature Requests
 **Request <!-- Vote and Comment on -->  any new features you may want to see!**
 
 <!-- Please visit our [Feature Requests Page](**TODO**) -->
 Please either create a new [issue](https://github.com/WorldBrain/WebMemex/issues/new)
-or send us a message in the team chat's feature_request channel!
-You can join here https://chat.worldbrain.io/
+or send us a message in the [team chat](https://join-worldbrain.herokuapp.com/) in the #feature_request channel!
 
 ### Bugs and Issues
 **Is the extension acting funny?**
@@ -104,6 +106,8 @@ It is actually impossible for us to do so as all of your data is kept on your lo
 
 External resources
 
-* [Donate to WorldBrain - www.patreon.com](https://www.patreon.com/WorldBrain)
-* [Join the WorldBrain community! - chat.worldbrain.io](https://chat.worldbrain.io/)
-* [Worldbrain is creating a structural solution to online (scientific) misinformation - www.worldbrain.io](https://worldbrain.io)
+* [Worldbrain is creating a structural solution to online (scientific) misinformation - www.worldbrain.io](https://worldbrain.io/vision)
+
+## Thanks to 
+[Sentry.io](https://sentry.io) for offering free error tracking to open-source projects and generally having an awesome product
+

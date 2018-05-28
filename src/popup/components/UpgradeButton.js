@@ -7,7 +7,7 @@ import styles from './UpgradeButton.css'
 const UpgradeButton = () => (
     <OutLink
         className={classNames(styles.upgradeButton)}
-        href="https://worldbrain.io/pricing"
+        to="https://worldbrain.io/pricing"
     >
         Upgrade Memex
     </OutLink>

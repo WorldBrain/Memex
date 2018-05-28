@@ -1,6 +1,7 @@
 import { compose } from 'redux'
 import ReduxQuerySync from 'redux-query-sync'
 
+import history from '../options/history'
 import * as selectors from './selectors'
 import * as actions from './actions'
 import * as constants from './constants'
@@ -12,47 +13,59 @@ import {
 import { selectors as filters, actions as filterActs } from './filters'
 
 const parseBool = str => str === 'true'
+const parseNumber = str => Number(str)
+const stringifyArr = arr => arr.join(',')
 
 // Keep search query in sync with the query parameter in the window location.
 const locationSync = ReduxQuerySync.enhancer({
     replaceState: true, // We don't want back/forward to stop at every change.
     initialTruth: 'location', // Initialise store from current location.
+    history,
     params: {
-        query: {
-            selector: selectors.query,
-            action: query => actions.setQueryTagsDomains(query, true),
-            defaultValue: '',
-        },
         startDate: {
             selector: selectors.startDate,
-            action: startDate => actions.setStartDate(Number(startDate)),
-            defaultValue: undefined,
+            action: actions.setStartDate,
+            stringToValue: parseNumber,
         },
         endDate: {
             selector: selectors.endDate,
-            action: endDate => actions.setEndDate(Number(endDate)),
-            defaultValue: undefined,
+            action: actions.setEndDate,
+            stringToValue: parseNumber,
         },
         showOnlyBookmarks: {
             selector: filters.onlyBookmarks,
-            action: onlyBookmarks =>
-                filterActs.toggleBookmarkFilter(parseBool(onlyBookmarks)),
+            action: filterActs.toggleBookmarkFilter,
+            stringToValue: parseBool,
             defaultValue: false,
         },
         tags: {
-            selector: filters.tagsStringify,
-            action: tags => filterActs.setTagFilters(tags),
-            defaultValue: '',
+            selector: filters.tags,
+            action: filterActs.setTagFilters,
+            valueToString: stringifyArr,
+            defaultValue: [],
         },
-        domains: {
-            selector: filters.domainsStringify,
-            action: domains => filterActs.setDomainFilters(domains),
-            defaultValue: '',
+        domainsInc: {
+            selector: filters.domainsInc,
+            action: filterActs.setIncDomainFilters,
+            valueToString: stringifyArr,
+            defaultValue: [],
+        },
+        domainsExc: {
+            selector: filters.domainsExc,
+            action: filterActs.setExcDomainFilters,
+            valueToString: stringifyArr,
+            defaultValue: [],
         },
         install: {
             selector: onboarding.isVisible,
-            action: value => onboardingActs.setVisible(parseBool(value)),
+            action: onboardingActs.setVisible,
+            stringToValue: parseBool,
             defaultValue: false,
+        },
+        query: {
+            selector: selectors.query,
+            action: actions.setQueryTagsDomains,
+            defaultValue: '',
         },
     },
 })

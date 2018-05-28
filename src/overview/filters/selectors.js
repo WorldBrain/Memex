@@ -2,20 +2,23 @@ import { createSelector } from 'reselect'
 
 export const filters = state => state.filters
 
-export const popup = state => filters(state).popup
-export const tags = state => filters(state).tags
-export const domains = state => filters(state).domains
+export const popup = createSelector(filters, state => state.popup)
+export const tags = createSelector(filters, state => state.tags)
+export const domainsInc = createSelector(filters, state => state.domainsInc)
+export const domainsExc = createSelector(filters, state => state.domainsExc)
+export const displayDomains = createSelector(
+    domainsInc,
+    domainsExc,
+    (inc, exc) => [
+        ...inc.map(value => ({ value, isExclusive: false })),
+        ...exc.map(value => ({ value, isExclusive: true })),
+    ],
+)
 
 export const showFilters = createSelector(filters, state => state.showFilters)
 export const onlyBookmarks = createSelector(
     filters,
     state => state.onlyBookmarks,
-)
-
-export const tagsStringify = createSelector(tags, tags => tags.join(','))
-
-export const domainsStringify = createSelector(domains, domains =>
-    domains.join(','),
 )
 
 export const showDomainsFilter = createSelector(
@@ -32,7 +35,11 @@ export const showTagsFilter = createSelector(popup, popup => popup === 'tag')
 export const showClearFiltersBtn = createSelector(
     onlyBookmarks,
     tags,
-    domains,
-    (onlyBookmarks, tags, domains) =>
-        onlyBookmarks || !!tags.length || !!domains.length,
+    domainsInc,
+    domainsExc,
+    (onlyBookmarks, tags, domainsInc, domainsExc) =>
+        onlyBookmarks ||
+        !!tags.length ||
+        !!domainsInc.length ||
+        !!domainsExc.length,
 )

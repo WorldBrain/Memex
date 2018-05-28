@@ -10,5 +10,5 @@ export const BOOKMARK_BTN_STATE = {
     UNBOOKMARK: 2,
 }
 
-export const OVERVIEW_URL = '/overview/overview.html'
 export const OPTIONS_URL = '/options/options.html'
+export const OVERVIEW_URL = `${OPTIONS_URL}#/overview`

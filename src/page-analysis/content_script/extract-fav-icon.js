@@ -25,7 +25,9 @@ async function getFavIcon(favIconUrl) {
 
         const dataUrl = await responseToDataUrl(response)
         return dataUrl
-    } catch (err) {} // carry on without fav-icon
+    } catch (err) {
+        return undefined // carry on without fav-icon
+    }
 }
 
 /**

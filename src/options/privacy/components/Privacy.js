@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router'
 import PropTypes from 'prop-types'
 
 import { OutLink } from 'src/common-ui/containers'
@@ -21,7 +22,7 @@ const Privacy = props => (
             information on that you can watch our{' '}
             <OutLink
                 className={localStyles.link}
-                href="https://worldbrain.io/vision"
+                to="https://worldbrain.io/vision"
             >
                 vision video
             </OutLink>.
@@ -36,22 +37,19 @@ const Privacy = props => (
             blacklist)<br />
             The data is solely used to improve Memex stability, usability and
             features, and is not shared with any 3rd party. <br />
-            <a
-                className={localStyles.link}
-                href="/options/options.html#/statistics"
-            >
+            <Link className={localStyles.link} to="/statistics">
                 Here
-            </a>{' '}
+            </Link>{' '}
             is a complete list of all the data points Memex gathers currently.
             To cross-check this list you can examine our source code{' '}
             <OutLink
                 className={localStyles.link}
-                href="https://github.com/WorldBrain/Memex"
+                to="https://github.com/WorldBrain/Memex"
             >
                 on GitHub
             </OutLink>. To protect your privacy, we don't use Google Analytics.
             Instead we use{' '}
-            <OutLink className={localStyles.link} href="https://WorldBrain.io/">
+            <OutLink className={localStyles.link} to="https://WorldBrain.io/">
                 Piwik
             </OutLink>, an open-source alternative, and host the gathered data
             on our servers.

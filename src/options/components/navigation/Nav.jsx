@@ -1,19 +1,19 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import { Link } from 'react-router'
 
 import styles from './styles.css'
-import * as constants from '../../../popup/constants'
 
 const Nav = ({ children }) => {
     return (
         <nav className={styles.root}>
             <div className={styles.icon_div}>
-                <a href={`${constants.OVERVIEW_URL}#/overview`}>
+                <Link to="/overview">
                     <img
                         src="/img/worldbrain-logo.png"
                         className={styles.icon}
                     />
-                </a>
+                </Link>
             </div>
             <ul className={styles.nav}>{children}</ul>
         </nav>

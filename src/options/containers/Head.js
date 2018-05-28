@@ -11,6 +11,8 @@ import { Helmet } from 'react-helmet'
  */
 const renderHeadContent = location => {
     switch (location.pathname) {
+        case '/overview':
+            return <title>🔍 Results</title>
         case '/tutorial':
             return <title>Settings - Tutorial</title>
         case '/help':

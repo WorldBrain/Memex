@@ -10,7 +10,16 @@ body {
     font-weight: 200;
 }
 
+strong {
+    font-weight: 600;
+}
+
+h3 {
+    font-weight: 600;
+}
+
 .root {
+    background-color: white;
     display: flex;
     flex-direction: row;
 }

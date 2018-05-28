@@ -1,11 +1,11 @@
 import React, { Component } from 'react'
+import { Link } from 'react-router'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import Waypoint from 'react-waypoint'
 import reduce from 'lodash/fp/reduce'
 
-import analytics from 'src/analytics'
 import { Wrapper, LoadingIndicator } from 'src/common-ui/components'
 import { IndexDropdown } from 'src/common-ui/containers'
 import * as actions from './actions'
@@ -23,7 +23,6 @@ import localStyles from './components/Overview.css'
 
 class OverviewContainer extends Component {
     static propTypes = {
-        grabFocusOnMount: PropTypes.bool.isRequired,
         handleInputChange: PropTypes.func.isRequired,
         handleInputClick: PropTypes.func.isRequired,
         onBottomReached: PropTypes.func.isRequired,
@@ -31,6 +30,7 @@ class OverviewContainer extends Component {
         isNewSearchLoading: PropTypes.bool.isRequired,
         noResults: PropTypes.bool.isRequired,
         isBadTerm: PropTypes.bool.isRequired,
+        isInvalidSearch: PropTypes.bool.isRequired,
         showInitSearchMsg: PropTypes.bool.isRequired,
         resetActiveTagIndex: PropTypes.func.isRequired,
         searchResults: PropTypes.arrayOf(PropTypes.object).isRequired,
@@ -45,17 +45,13 @@ class OverviewContainer extends Component {
         delTag: PropTypes.func.isRequired,
         resetFilterPopup: PropTypes.func.isRequired,
         showOnboarding: PropTypes.bool.isRequired,
-        // fetchNextTooltip: PropTypes.func.isRequired,
-        // isFirstTooltip: PropTypes.bool.isRequired,
+        init: PropTypes.func.isRequired,
     }
 
     componentDidMount() {
-        analytics.trackPage({ title: document.title })
-
         document.addEventListener('click', this.handleOutsideClick, false)
-        if (this.props.grabFocusOnMount) {
-            this.inputQueryEl.focus()
-        }
+        this.inputQueryEl.focus()
+        this.props.init()
     }
 
     componentWillUnmount() {
@@ -155,22 +151,19 @@ class OverviewContainer extends Component {
         <ResultsMessage>
             <div className={localStyles.title}>
                 You didn't visit or{' '}
-                <a
-                    style={{ color: '#777' }}
-                    href="/options/options.html#/import"
-                >
+                <Link style={{ color: '#777' }} to="/import">
                     import
-                </a>
+                </Link>
                 <br /> <p className={localStyles.subTitle}>any websites yet.</p>
             </div>
             <div>
-                <a
+                <Link
                     className={localStyles.choiceBtn}
                     type="button"
-                    href="/options/options.html#/import"
+                    to="/import"
                 >
                     Import History & Bookmarks
-                </a>
+                </Link>
             </div>
         </ResultsMessage>
     )
@@ -182,6 +175,17 @@ class OverviewContainer extends Component {
                     <NoResultBadTerm>
                         Search terms are too common, or have been filtered out
                         to increase performance.
+                    </NoResultBadTerm>
+                </ResultsMessage>
+            )
+        }
+
+        if (this.props.isInvalidSearch) {
+            return (
+                <ResultsMessage>
+                    <NoResultBadTerm title="Invalid search query">
+                        You can't exclude terms without including at least 1
+                        term to search
                     </NoResultBadTerm>
                 </ResultsMessage>
             )
@@ -266,6 +270,7 @@ const mapStateToProps = state => ({
     currentQueryParams: selectors.currentQueryParams(state),
     noResults: selectors.noResults(state),
     isBadTerm: selectors.isBadTerm(state),
+    isInvalidSearch: selectors.isInvalidSearch(state),
     searchResults: selectors.results(state),
     isDeleteConfShown: selectors.isDeleteConfShown(state),
     needsWaypoint: selectors.needsPagWaypoint(state),
@@ -292,6 +297,7 @@ const mapDispatchToProps = dispatch => ({
             onShowFilterChange: filterActs.showFilter,
             resetFilterPopup: filterActs.resetFilterPopup,
             fetchNextTooltip: actions.fetchNextTooltip,
+            init: actions.init,
         },
         dispatch,
     ),

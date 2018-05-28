@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router'
 import cx from 'classnames'
 
 import localStyles from './styles.css'
@@ -18,12 +19,9 @@ const Help = () => (
                 1 min video intro{' '}
             </a>{' '}
             or read the more detailed{' '}
-            <a
-                className={localStyles.link}
-                href="/options/options.html#/tutorial"
-            >
+            <Link className={localStyles.link} to="/tutorial">
                 step by step guide
-            </a>.
+            </Link>.
         </div>
 
         <div className={localStyles.content}>

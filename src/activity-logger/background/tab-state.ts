@@ -1,15 +1,27 @@
-import PausableTimer from 'src/util/pausable-timer'
+import PausableTimer from '../../util/pausable-timer'
 import ScrollState from './scroll-state'
+import { TabState, NavState } from './types'
 
-class Tab {
-    static DEF_LOG_DELAY = 4000
+class Tab implements TabState {
+    static DEF_LOG_DELAY = 0
 
-    /**
-     * @param {any} args
-     * @param {number} [logDelay] The # of ms a user must be active on this tab before calling scheduled log.
-     */
+    url: string
+    isActive: boolean
+    visitTime: number
+    activeTime: number
+    lastActivated: number
+    scrollState: ScrollState
+    navState: NavState
+    private _timer: PausableTimer
+    private _logDelay: number
+
     constructor(
-        { url, isActive = false, visitTime = `${Date.now()}`, navState = {} },
+        {
+            url,
+            isActive = false,
+            visitTime = Date.now(),
+            navState = {},
+        }: Partial<TabState>,
         logDelay = Tab.DEF_LOG_DELAY,
     ) {
         this.url = url
@@ -24,30 +36,38 @@ class Tab {
         this._logDelay = logDelay
     }
 
-    /**
-     * Sets up a PausableTimer to run the given log function. This can be stopped, started, or cancelled.
-     *
-     * @param {() => any} logCb Logic to schedule to run on this tab later.
-     */
-    scheduleLog(logCb) {
-        this.cancelPendingOps()
-        this._timer = new PausableTimer({
-            delay: this._logDelay,
-            cb: logCb,
-            start: this.isActive, // Start timer if currently active
-        })
-    }
-
-    _pauseLogTimer() {
+    private _pauseLogTimer() {
         if (this._timer != null) {
             this._timer.pause()
         }
     }
 
-    _resumeLogTimer() {
+    private _resumeLogTimer() {
         if (this._timer != null) {
             this._timer.resume()
         }
+    }
+
+    /**
+     * Sets up a PausableTimer to run the given log function. This can be stopped, started, or cancelled.
+     *
+     * @param logCb Logic to schedule to run on this tab later.
+     */
+    scheduleLog(logCb: Function) {
+        this.cancelPendingOps()
+
+        // Just run straight away if no delay set
+        if (this._logDelay === 0) {
+            return Promise.resolve(logCb())
+        }
+
+        this._timer = new PausableTimer({
+            delay: this._logDelay,
+            cb: logCb,
+            start: this.isActive, // Start timer if currently active
+        })
+
+        return Promise.resolve()
     }
 
     /**

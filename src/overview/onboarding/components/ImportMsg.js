@@ -1,4 +1,5 @@
 import React, { PureComponent } from 'react'
+import { Link } from 'react-router'
 import PropTypes from 'prop-types'
 import cx from 'classnames'
 
@@ -23,13 +24,9 @@ class ImportMsg extends PureComponent {
                 Get Started
             </a>
             or
-            <a
-                className={localStyles.choiceBtn}
-                type="button"
-                href="/options/options.html#/import"
-            >
+            <Link className={localStyles.choiceBtn} type="button" to="/import">
                 Import Rest of History
-            </a>
+            </Link>
         </span>
     )
 

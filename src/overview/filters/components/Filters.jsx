@@ -64,9 +64,7 @@ const Filters = props => (
                         onChange={props.onShowOnlyBookmarksChange}
                     />
                     <label htmlFor="showOnlyBookmarks">
-                        <span className={localStyles.checkboxText}>
-                            Only Show Bookmarks
-                        </span>
+                        Only Show Bookmarks
                     </label>
                 </div>
             </div>

@@ -12,6 +12,10 @@
         padding: 15px;
     }
 
+    & th {
+        font-weight: 600;
+    }
+
     & td {
         color: #666;
         min-width: 180px;
@@ -104,7 +108,7 @@
 .stepNumber {
     font-size: 18px;
     color: #3eb995;
-    font-weight: bold;
+    font-weight: 600;
     letter-spacing: 1px;
     margin-top: 20px;
     margin-bottom: 10px;
@@ -120,6 +124,7 @@
     margin: 1em 0;
     flex-direction: row;
     color: #d5969e;
+    margin-top: 30px;
 }
 
 .warningText {
@@ -227,6 +232,7 @@
     color: #c8c8c8;
     border-bottom: 1px solid #c8c8c8;
     font-size: 16px;
+    font-weight: 600;
     width: 250px;
     line-height: 2;
 }
@@ -234,11 +240,10 @@
 .reportDetails {
     font-size: 14px;
     color: #4d4b4c;
-    font-weight: bold;
+    font-weight: 600;
     letter-spacing: 1px;
     margin-top: 10px;
     margin-bottom: 10px;
-    line-height: 0.7;
 }
 
 .disabled {

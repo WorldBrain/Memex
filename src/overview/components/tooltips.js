@@ -9,6 +9,16 @@
  */
 const tooltips = [
     {
+        title: 'Exclude terms and domains',
+        description:
+            "Type a '-' in front of words or domains to exclude pages containing them from the results",
+    },
+    {
+        title: 'Use Google queries',
+        description:
+            "Use 'site:' or '-' in your query to filter by domains or exclude them. AND OR are not supported yet.",
+    },
+    {
         title: 'Search Everywhere',
         description:
             "Use your browser's address bar to search from anywhere you are. <br/><br/>Just type:<br/><img src='/img/shortcuts.png'><img/>",
@@ -33,7 +43,6 @@ const tooltips = [
         description:
             "Quickly tag and group any page via the <img style='height:18px; vertical-align:bottom' src='/img/worldbrain-logo-narrow-bw-16.png'/>-icon in the menu bar or via the results list." /* or with the <a id='shortcuts' href='chrome://extensions/configureCommands'>shortcuts</a> you defined. */,
     },
-
     {
         title: "Better than the browser's built-in search",
         description:
@@ -72,7 +81,7 @@ const tooltips = [
     {
         title: 'Import Existing Bookmarks & History',
         description:
-            'By default, Memex makes the pages available you visit after installation. But you can also <a target="_new" href="/options/options.html#/import">import all your bookmarks, and the browsing history</a> of the last 90 days.',
+            'By default, Memex makes the pages available you visit after installation. But you can also <a href="#/import">import all your bookmarks, and the browsing history</a> of the last 90 days.',
     },
 ]
 

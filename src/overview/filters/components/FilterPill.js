@@ -1,21 +1,25 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import classNames from 'classnames'
+import cx from 'classnames'
 
-import localStyles from './Filters.css'
+import styles from './Filters.css'
 
-const getTagClass = () =>
-    classNames(localStyles.tagname, {
-        [localStyles.notExpanded]: true,
-    })
-
-const FilterPill = ({ value, onClick = f => f }) => (
-    <span className={localStyles.pillContainer}>
-        <div className={localStyles.pillSecondaryContainer}>
-            <span className={getTagClass()} title={value}>
+const FilterPill = ({ value, onClick, isExclusive = false }) => (
+    <span
+        className={cx(styles.pillContainer, {
+            [styles.isExclusive]: isExclusive,
+        })}
+    >
+        <div className={styles.pillSecondaryContainer}>
+            <span
+                className={cx(styles.tagname, {
+                    [styles.notExpanded]: true,
+                })}
+                title={value}
+            >
                 {value}
             </span>
-            <span className={localStyles.closeIcon}>
+            <span className={styles.closeIcon}>
                 <i className="material-icons" onClick={onClick}>
                     clear
                 </i>
@@ -26,7 +30,8 @@ const FilterPill = ({ value, onClick = f => f }) => (
 
 FilterPill.propTypes = {
     value: PropTypes.string.isRequired,
-    onClick: PropTypes.func,
+    onClick: PropTypes.func.isRequired,
+    isExclusive: PropTypes.bool,
 }
 
 export default FilterPill

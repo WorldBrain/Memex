@@ -22,7 +22,7 @@ const Privacy = () => (
                 </a>, or post them to{' '}
                 <OutLink
                     className={localStyles.link}
-                    href="https://worldbrain.io/faq"
+                    to="https://worldbrain.io/faq"
                 >
                     our FAQs
                 </OutLink>.
