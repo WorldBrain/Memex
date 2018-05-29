@@ -3,7 +3,7 @@ import DirectLinkingBackend from './backend'
 export type Annotation = any
 
 // This thing sends the annotation back to the tab once it's loaded
-export type AnnotationSender = ({ annotation, tabId }: { annotation: Annotation, tabId }) => void
+export type AnnotationSender = ({ annotation, tabId }: { annotation: Annotation, tabId: string }) => void
 
 export interface AnnotationRequest {
     memexLinkOrigin: string

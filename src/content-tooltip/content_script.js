@@ -1,4 +1,5 @@
 import { bodyLoader } from 'src/util/loader'
+import { OPEN_OPTIONS } from 'src/search-injection/constants'
 import { createAndCopyDirectLink } from 'src/direct-linking/content_script/interactions'
 import setupUIContainer from './components'
 import * as interactions from './interactions'

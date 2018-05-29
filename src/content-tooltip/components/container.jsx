@@ -10,7 +10,6 @@ import {
     ErrorComponent,
 } from './tooltip-states'
 import { copyToClipboard } from '../utils'
-import { OPEN_OPTIONS } from 'src/search-injection/constants'
 
 class Container extends React.Component {
     static propTypes = {
