@@ -22,12 +22,29 @@ interface StoredAnnotationRequestMap {
 
 export class AnnotationRequests {
     private requests: StoredAnnotationRequestMap = {}
+    private preventAutomaticAnchoring = null
 
     constructor(private backend: DirectLinkingBackend, private annotationSender: AnnotationSender) {
     }
 
+    pauseAutomaticAnchoring() {
+        const prevent = {}
+        prevent['promise'] = new Promise(resolve => {
+            prevent['resolve'] = resolve
+        })
+        this.preventAutomaticAnchoring = prevent
+    }
+
+    resumeAutomaticAnchoring() {
+        this.preventAutomaticAnchoring['resolve']()
+        this.preventAutomaticAnchoring = null
+    }
+
     request(request: AnnotationRequest) {
-        const annotationPromise = this.backend.fetchAnnotationData(request)
+        let annotationPromise = this.backend.fetchAnnotationData(request)
+        if (this.preventAutomaticAnchoring) {
+            annotationPromise = annotationPromise.then(response => this.preventAutomaticAnchoring.promise.then(() => response))
+        }
         this.requests[request.tabId] = { ...request, annotationPromise }
     }
 

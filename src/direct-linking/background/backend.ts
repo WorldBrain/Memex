@@ -35,6 +35,7 @@ export default class DirectLinkingBackend {
     async fetchAnnotationData({ annotationId }: { annotationId: string }) {
         const response = await fetch(this._buildAnnotationUrl({ annotationId }))
         const data = await response.json()
+        // console.log('Received annotation data:', data)
         return data
     }
 
