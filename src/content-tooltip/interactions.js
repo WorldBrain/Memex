@@ -1,5 +1,3 @@
-import React from 'react'
-import ReactDOM from 'react-dom'
 import { delayed } from './utils'
 
 export function setupTooltipTrigger(callback) {
