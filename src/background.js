@@ -134,3 +134,4 @@ browser.runtime.setUninstallURL(UNINSTALL_URL)
 const directLinking = new DirectLinkingBackground({ storageManager })
 directLinking.setupRemoteFunctions()
 directLinking.setupRequestInterceptor()
+window.directLinking = directLinking
