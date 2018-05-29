@@ -28,10 +28,9 @@ window.indexModels = models
 
 initSentry()
 
-export const OPTIONS_URL = '/options/options.html'
+export const OPTIONS_URL = '/options.html'
 export const OVERVIEW_URL = `${OPTIONS_URL}#/overview`
 export const OLD_EXT_UPDATE_KEY = 'updated-from-old-ext'
-export const UPDATE_URL = '/update/update.html'
 export const UNINSTALL_URL =
     process.env.NODE_ENV === 'production'
         ? 'http://worldbrain.io/uninstall'

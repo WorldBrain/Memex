@@ -1,8 +1,9 @@
+/* stylelint-disable  */
 @charset 'UTF-8';
 
 /* Slider */
 .slick-loading .slick-list {
-    background: #fff url('') center center no-repeat;
+    background: #fff center center no-repeat;
 }
 
 /* Icons */
@@ -10,10 +11,6 @@
     font-family: 'slick';
     font-weight: normal;
     font-style: normal;
-
-    src: url('./fonts/slick.eot');
-    src: url('./fonts/slick.eot?#iefix') format('embedded-opentype'),
-        url('./fonts/slick.svg#slick') format('svg');
 }
 
 /* Arrows */
@@ -66,7 +63,7 @@
     color: black;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    content: url('../img/arrow.svg');
+    content: url('/img/arrow.svg');
     width: 75px;
     display: inline-block;
 }

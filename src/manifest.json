@@ -25,7 +25,7 @@
     "incognito": "spanning",
     "browser_action": {
         "default_title": "WorldBrain's Memex",
-        "default_popup": "./popup/popup.html"
+        "default_popup": "./popup.html"
     },
     "commands": {
         "openOverview": {
@@ -65,7 +65,7 @@
         "keyword": "w"
     },
     "options_ui": {
-        "page": "./options/options.html#/settings",
+        "page": "./options.html#/settings",
         "open_in_tab": true
     },
     "manifest_version": 2

@@ -6,7 +6,7 @@ install:
 script:
     - npm run test
     - npm run lint
-    - npm run build
+    - npm run build:ci
 cache:
     yarn: true
     directories:

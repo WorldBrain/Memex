@@ -71,7 +71,7 @@ export const handleFavIcon: TabChangeListener = async function(
     try {
         if (
             (await shouldLogTab(tab)) &&
-            !await searchIndex.domainHasFavIcon(tab.url)
+            !(await searchIndex.domainHasFavIcon(tab.url))
         ) {
             const favIconDataUrl = await fetchFavIcon(favIconUrl)
             await searchIndex.addFavIcon(tab.url, favIconDataUrl)

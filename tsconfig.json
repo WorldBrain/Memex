@@ -13,11 +13,8 @@
         "skipLibCheck": true,
         "strictNullChecks": false,
         "outDir": "tmp",
-        "lib": ["es2017", "dom", "esnext.asynciterable"],
-        "paths": {
-            "abstract-leveldown": ["node_modules/abstract-leveldown"]
-        }
+        "lib": ["es2017", "dom", "esnext.asynciterable"]
     },
     "include": ["./src/**/*"],
-    "exclude": ["node_modules", "./src/**/*.js"]
+    "exclude": ["node_modules", "./src/**/*.js", "./src/**/*.jsx"]
 }

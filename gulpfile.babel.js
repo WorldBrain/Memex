@@ -55,13 +55,13 @@ const sourceFiles = [
     {
         entries: ['./src/options/options.jsx', commonUIEntry],
         output: 'options.js',
-        destination: './extension/options',
+        destination: './extension',
         cssOutput: 'options.css',
     },
     {
         entries: ['./src/popup/popup.js', commonUIEntry],
         output: 'popup.js',
-        destination: './extension/popup',
+        destination: './extension',
         cssOutput: 'popup.css',
     },
 ]
@@ -111,8 +111,7 @@ function createBundle(
     function bundle() {
         return new Promise((resolve, reject) => {
             const startTime = Date.now()
-            b
-                .bundle()
+            b.bundle()
                 .on('error', err => {
                     console.error('ERROR creating bundle', err)
                     console.error(err.stack)

@@ -68,9 +68,7 @@ describe('eventToPromise', () => {
                 const resolveHandler = jest.fn()
                 eventToPromise({
                     resolve: resolveOpts,
-                })
-                    .then(resolveHandler)
-                    .catch()
+                }).then(resolveHandler)
 
                 await null
                 expect(resolveHandler).not.toBeCalled()
@@ -122,9 +120,7 @@ describe('eventToPromise', () => {
         const resolveHandler = jest.fn()
         eventToPromise({
             resolve: resolveOpts,
-        })
-            .then(resolveHandler)
-            .catch()
+        }).then(resolveHandler)
 
         await null
         expect(resolveHandler).not.toBeCalled()

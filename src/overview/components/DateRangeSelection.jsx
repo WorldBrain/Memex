@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import moment from 'moment'
 import chrono from 'chrono-node'
 import DatePicker from 'react-datepicker'
-import 'react-datepicker/dist/react-datepicker-cssmodules.css'
+import 'react-datepicker/dist/react-datepicker.css'
 
 import analytics from 'src/analytics'
 import { DATE_PICKER_DATE_FORMAT as FORMAT } from '../constants'
