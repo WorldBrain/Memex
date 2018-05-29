@@ -1,5 +1,6 @@
 import { createSelector } from 'reselect'
 import pickBy from 'lodash/fp/pickBy'
+import moment from 'moment'
 
 import {
     FILTERS,
@@ -167,8 +168,10 @@ const getMins = time =>
     Math.floor((time - getHours(time) * 3600) / 60).toFixed(0)
 const getPaddedMins = time =>
     getMins(time) < 10 ? `0${getMins(time)}` : getMins(time)
-const getTimeEstStr = time => `${getHours(time)}:${getPaddedMins(time)} h`
-
+const getTimeEstStr = time =>
+    `${getHours(time)}:${getPaddedMins(time)}` === '0:00'
+        ? '0:00'
+        : moment.duration(`${getHours(time)}:${getPaddedMins(time)}`).humanize()
 const getEstimate = (complete, remaining) => ({
     complete,
     remaining,
