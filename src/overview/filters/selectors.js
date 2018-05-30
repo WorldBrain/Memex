@@ -6,6 +6,7 @@ export const popup = createSelector(filters, state => state.popup)
 export const tags = createSelector(filters, state => state.tags)
 export const domainsInc = createSelector(filters, state => state.domainsInc)
 export const domainsExc = createSelector(filters, state => state.domainsExc)
+export const listFilter = createSelector(filters, state => state.lists)
 export const displayDomains = createSelector(
     domainsInc,
     domainsExc,
@@ -42,4 +43,9 @@ export const showClearFiltersBtn = createSelector(
         !!tags.length ||
         !!domainsInc.length ||
         !!domainsExc.length,
+)
+
+export const listFilterActive = createSelector(
+    listFilter,
+    lists => lists !== '',
 )

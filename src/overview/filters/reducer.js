@@ -1,6 +1,7 @@
 import { createReducer } from 'redux-act'
 
 import * as actions from './actions'
+// import { filter } from 'rxjs/operator/filter';
 
 const defaultState = {
     showFilters: false,
@@ -9,15 +10,33 @@ const defaultState = {
     tags: [],
     domainsInc: [],
     domainsExc: [],
+    // Will contain **ID** only one list for now
+    lists: '',
 }
 
-const addFilter = filterKey => (state, value) => ({
-    ...state,
-    [filterKey]: [...state[filterKey], value],
-    showFilters: true,
-})
+const addFilter = filterKey => (state, value) => {
+    if (filterKey === 'lists') {
+        return {
+            ...state,
+            [filterKey]: value,
+        }
+    }
+
+    return {
+        ...state,
+        [filterKey]: [...state[filterKey], value],
+        showFilters: true,
+    }
+}
 
 const delFilter = filterKey => (state, value) => {
+    if (filterKey === 'lists') {
+        return {
+            ...state,
+            [filterKey]: '',
+        }
+    }
+
     const removalIndex = state[filterKey].indexOf(value)
 
     if (removalIndex === -1) {
@@ -41,6 +60,13 @@ const toggleFilter = filterKey => (state, value) => {
         return addFilter(filterKey)(state, value)
     }
 
+    if (filterKey === 'lists') {
+        return {
+            ...state,
+            [filterKey]: '',
+        }
+    }
+
     return {
         ...state,
         [filterKey]: [
@@ -53,11 +79,18 @@ const toggleFilter = filterKey => (state, value) => {
 
 const parseStringFilters = str => (str === '' ? [] : str.split(','))
 
+const decideFilters = (filterKey, filters) => {
+    if (filterKey === 'lists') {
+        return filters
+    }
+
+    return typeof filters === 'string' ? parseStringFilters(filters) : filters
+}
+
 const setFilters = filterKey => (state, filters) => {
     const newState = {
         ...state,
-        [filterKey]:
-            typeof filters === 'string' ? parseStringFilters(filters) : filters,
+        [filterKey]: decideFilters(filterKey, filters),
     }
 
     newState.showFilters =
@@ -92,6 +125,9 @@ export default createReducer(
         [actions.addTagFilter]: addFilter('tags'),
         [actions.delTagFilter]: delFilter('tags'),
         [actions.toggleTagFilter]: toggleFilter('tags'),
+        [actions.addListFilter]: addFilter('lists'),
+        [actions.delListFilter]: delFilter('lists'),
+        [actions.toggleListFilter]: toggleFilter('lists'),
         [actions.addExcDomainFilter]: addFilter('domainsExc'),
         [actions.delExcDomainFilter]: delFilter('domainsExc'),
         [actions.addIncDomainFilter]: addFilter('domainsInc'),
@@ -99,6 +135,7 @@ export default createReducer(
         [actions.toggleIncDomainFilter]: toggleFilter('domainsInc'),
         [actions.toggleExcDomainFilter]: toggleFilter('domainsExc'),
         [actions.setTagFilters]: setFilters('tags'),
+        [actions.setListFilters]: setFilters('lists'),
         [actions.setIncDomainFilters]: setFilters('domainsInc'),
         [actions.setExcDomainFilters]: setFilters('domainsExc'),
         [actions.toggleBookmarkFilter]: toggleBookmarkFilter,

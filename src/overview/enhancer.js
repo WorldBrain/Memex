@@ -56,6 +56,11 @@ const locationSync = ReduxQuerySync.enhancer({
             valueToString: stringifyArr,
             defaultValue: [],
         },
+        lists: {
+            selector: filters.listFilter,
+            action: filterActs.setListFilters,
+            defaultValue: '',
+        },
         install: {
             selector: onboarding.isVisible,
             action: onboardingActs.setVisible,
@@ -117,6 +122,9 @@ const storageSync = storeCreator => (reducer, initState, enhancer) => {
     return store
 }
 
-const enhancer = compose(locationSync, storageSync)
+const enhancer = compose(
+    locationSync,
+    storageSync,
+)
 
 export default enhancer
