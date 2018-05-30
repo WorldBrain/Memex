@@ -1,0 +1,116 @@
+.showAll {
+    background: #f7f5f7ab;
+    color: #504c4c;
+    padding: 12px 0px;
+    font-size: 1.55em;
+    text-align: center;
+    cursor: pointer;
+}
+
+.hr {
+    border-color: #b0e0d2;
+    width: 50px;
+    margin-top: 12px;
+}
+
+.collection {
+    color: #767676;
+}
+
+.myCollection {
+    font-size: 1.45em;
+    padding: 0px 70px 0px 10px;
+}
+
+.plus {
+    font-size: 2em;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.listForm {
+    height: 30px;
+    width: 170px;
+    border-radius: 3px;
+    border: 1px solid transparent;
+    border-top: none;
+    box-shadow: inset 0 2px 1px darkslategrey;
+    outline: none;
+}
+
+.createListForm {
+    display: flex;
+    background: #d7d7d7;
+    height: 50px;
+    align-items: center;
+    justify-content: center;
+}
+
+.tick {
+    background-image: url('/img/tick.svg');
+    width: 30px;
+    height: 30px;
+    float: left;
+    position: absolute;
+    left: 0px;
+}
+
+.listItem {
+    background: #d7d7d7;
+}
+
+.pageList {
+    background: #fcfbfb;
+    display: flex;
+    align-items: center;
+    height: 50px;
+    color: #767676;
+    position: relative;
+
+    &:hover {
+        background-color: #d7d7d7;
+    }
+}
+
+.pageListDrag {
+    background-color: #d7d7d7;
+}
+
+.editButton {
+    background-image: url('/img/pen.svg');
+    width: 36px;
+    height: 32px;
+    float: left;
+    position: absolute;
+    left: 0px;
+}
+
+.deleteButton {
+    background-image: url('/img/cross_circle.svg');
+    width: 19px;
+    height: 19px;
+    float: right;
+    position: absolute;
+    right: 7px;
+}
+
+.button {
+    display: inline;
+    border: none;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-size: contain;
+    cursor: pointer;
+    outline: none;
+    padding: 0px;
+}
+
+.listName {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0px 15px 2px 30px;
+    font-size: 1.4em;
+    font-weight: 300;
+    cursor: pointer;
+}
