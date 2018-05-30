@@ -5,6 +5,7 @@ import classNames from 'classnames'
 import { LoadingIndicator } from 'src/common-ui/components'
 import niceTime from 'src/util/nice-time'
 import styles from './PageResultItem.css'
+import SemiCircularRibbon from './SemiCircularRibbon'
 
 const nullImg = '/img/null-icon.png'
 
@@ -19,62 +20,100 @@ const PageResultItem = props => (
         {props.isDeleting && (
             <LoadingIndicator className={styles.deletingSpinner} />
         )}
-        <a
-            draggable="true"
-            className={styles.root}
-            href={props.url}
-            target="_blank"
-        >
-            <div className={styles.screenshotContainer}>
-                <img
-                    className={styles.screenshot}
-                    src={props.screenshot == null ? nullImg : props.screenshot}
-                />
-            </div>
-            <div className={styles.descriptionContainer}>
-                <div className={styles.title} title={props.title}>
-                    {props.favIcon && (
-                        <img className={styles.favIcon} src={props.favIcon} />
-                    )}
-                    {props.title}
+        <div className={styles.rootContainer}>
+            <a
+                draggable="true"
+                className={styles.root}
+                href={props.url}
+                target="_blank"
+            >
+                <div className={styles.screenshotContainer}>
+                    <img
+                        className={styles.screenshot}
+                        src={
+                            props.screenshot == null
+                                ? nullImg
+                                : props.screenshot
+                        }
+                    />
                 </div>
-                <div className={styles.url}>{props.url}</div>
-                <div className={styles.time}>
-                    <div className={styles.displayTime}>
-                        {' '}
-                        {niceTime(props.displayTime)}{' '}
+                <div className={styles.descriptionContainer}>
+                    <div className={styles.title} title={props.title}>
+                        {props.favIcon && (
+                            <img
+                                className={styles.favIcon}
+                                src={props.favIcon}
+                            />
+                        )}
+                        {props.title}
                     </div>
-                    <span className={styles.tagList}>{props.tagPills}</span>
-                    <div
-                        className={styles.buttonsContainer}
-                        onClick={e => e.preventDefault()}
-                    >
-                        <button
-                            className={classNames(styles.button, styles.tag)}
-                            onClick={props.onTagBtnClick}
-                            ref={props.setTagButtonRef}
-                        />
-                        <button
-                            className={classNames(
-                                styles.button,
-                                styles.comment,
-                            )}
-                            onClick={props.onCommentBtnClick}
-                        />
-                        <button
-                            disabled={props.isDeleting}
-                            className={classNames(styles.button, styles.trash)}
-                            onClick={props.onTrashBtnClick}
-                        />
-                        <button
-                            disabled={props.isDeleting}
-                            className={getBookmarkClass(props)}
-                            onClick={props.onToggleBookmarkClick}
-                        />
+                    <div className={styles.url}>{props.url}</div>
+                    <div className={styles.time}>
+                        <div className={styles.displayTime}>
+                            {' '}
+                            {niceTime(props.displayTime)}{' '}
+                        </div>
+                        <span className={styles.tagList}>{props.tagPills}</span>
+                        <div
+                            className={styles.buttonsContainer}
+                            onClick={e => e.preventDefault()}
+                        >
+                            <button
+                                className={classNames(
+                                    styles.button,
+                                    styles.tag,
+                                )}
+                                onClick={props.onTagBtnClick}
+                                ref={props.setTagButtonRef}
+                            />
+                            <button
+                                className={classNames(
+                                    styles.button,
+                                    styles.comment,
+                                )}
+                                onClick={this.props.onCommentBtnClick}
+                            />
+                            <button
+                                disabled={props.isDeleting}
+                                className={classNames(
+                                    styles.button,
+                                    styles.trash,
+                                )}
+                                onClick={props.onTrashBtnClick}
+                            />
+                            <button
+                                disabled={props.isDeleting}
+                                className={getBookmarkClass(props)}
+                                onClick={props.onToggleBookmarkClick}
+                            />
+                        </div>
                     </div>
                 </div>
+            </a>
+            <div className={styles.crossRibbon}>
+                {props.isListFilterActive && (
+                    <SemiCircularRibbon title="Remove from currently selected list">
+                        <img
+                            onClick={props.handleCrossRibbonClick}
+                            src="/img/cross.svg"
+                            style={{ maxWidth: '100%', maxHeight: '100%' }}
+                        />
+                    </SemiCircularRibbon>
+                )}
             </div>
-        </a>
+            <div>
+                {props.showListDropdown && (
+                    <SemiCircularRibbon>
+                        <input
+                            type="checkbox"
+                            checked={props.isUrlEdited}
+                            className={styles.checkbox}
+                        />
+                        <label onClick={props.handleToggleUrlToEdit} />
+                    </SemiCircularRibbon>
+                )}
+            </div>
+        </div>
         {props.tagManager}
     </li>
 )
@@ -94,6 +133,11 @@ PageResultItem.propTypes = {
     tagManager: PropTypes.node,
     onTagBtnClick: PropTypes.func.isRequired,
     setTagButtonRef: PropTypes.func.isRequired,
+    isListFilterActive: PropTypes.bool.isRequired,
+    handleCrossRibbonClick: PropTypes.func.isRequired,
+    showListDropdown: PropTypes.bool.isRequired,
+    isUrlEdited: PropTypes.bool.isRequired,
+    handleToggleUrlToEdit: PropTypes.func.isRequired,
 }
 
 export default PageResultItem

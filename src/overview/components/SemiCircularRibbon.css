@@ -1,0 +1,18 @@
+.ribbon {
+    right: -25px;
+    top: -1px;
+    width: 25px;
+    height: 25px;
+    border-radius: 0 50% 50% 0;
+    border: 1px solid rgba(62, 185, 149, 0.0902);
+    background-color: #fefefe;
+    color: inherit;
+    box-shadow: 0 3px 0px 0px rgba(62, 185, 149, 0.0902);
+    position: absolute;
+    border-right: 0;
+    border-left: 0;
+    display: flex;
+    justify-content: center;
+    padding: 5px 0;
+    cursor: pointer;
+}

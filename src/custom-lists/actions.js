@@ -4,6 +4,7 @@ import * as selectors from './selectors'
 // import { custom-lists } from '../custom-lists/selectors';
 
 import dummyData from './dummy-data/index'
+// // import { selectors as filters } from 'src/overview/filters'
 
 export const getAllLists = createAction('custom-lists/listData')
 export const updatePageLists = createAction('custom-lists/updateList')
@@ -43,7 +44,6 @@ export const showListDeleteModal = createAction(
 export const hideListDeleteModal = createAction(
     'custom-lists/hideListDeleteModal',
 )
-// TODO: change names
 export const resetListDeleteModal = createAction(
     'custom-lists/resetListDeleteModal',
 )
@@ -52,6 +52,15 @@ export const resetActiveListIndex = createAction(
 )
 export const setActiveListIndex = createAction(
     'custom-lists/setActiveListIndex',
+)
+export const toggleListDropdown = createAction(
+    'custom-lists/toggleListDropdown',
+)
+
+export const toggleUrlToEdit = createAction('custom-lists/toggleUrlToEdit')
+
+export const toggleListFilterIndex = createAction(
+    'custom-lists/toggleListFilterIndex',
 )
 
 // returns instance of ListStorageHandler class
@@ -67,9 +76,13 @@ export const showEditBox = index => (dispatch, getState) => {
     }
 }
 
-/** 
- * @class
-*/
+export const delPageFromList = doc => async (dispatch, getState) => {
+    const index = selectors.listFilterIndex(getState())
+    dispatch(removePageFromList(doc.url, index))
+}
+
+// TODO: change this damn thing
+// Maybe remove it :|smil
 export default class ListStorageHandler {
     constructor(dispatch, getState) {
         this._dispatch = dispatch
@@ -80,6 +93,11 @@ export default class ListStorageHandler {
         this._dispatch(getAllLists(dummyData))
     }
 
+    getListById() {}
+
+    delListById() {}
+
+    // TODO:  Make these 3 functions more general. :
     async createList(event) {
         event.preventDefault()
         const { value } = event.target.elements['listName']
@@ -91,10 +109,6 @@ export default class ListStorageHandler {
         }
         this._dispatch(createList(list))
     }
-
-    getListById() {}
-
-    delListById() {}
 
     updateList = index => async event => {
         event.preventDefault()

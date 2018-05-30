@@ -7,7 +7,6 @@ import DeleteConfirmModal from './DeleteConfirmModal'
 import Header from './Header'
 import styles from './Overview.css'
 import Head from 'src/options/containers/Head'
-// import Tooltip from './Tooltip'
 
 const showFilterClass = ({ showFilters }) =>
     classNames({
@@ -15,25 +14,25 @@ const showFilterClass = ({ showFilters }) =>
         [styles.hideFilter]: !showFilters,
     })
 
+const showListDropdown = ({ showListDropdown }) =>
+    classNames({
+        [styles.filtersContainer]: true,
+        [styles.hideFilter]: !showListDropdown,
+    })
+
 const Overview = props => (
     <Wrapper>
         <Head />
         <Header {...props} />
 
-        <Tooltip
-            showTooltip={props.showTooltip}
-            toggleShowTooltip={props.toggleShowTooltip}
-            tooltip={props.tooltip}
-            fetchNextTooltip={props.fetchNextTooltip}
-            isTooltipRenderable={props.isTooltipRenderable}
-            scrollDisabled={props.scrollDisabled}
-        />
-
         <div className={showFilterClass(props)}>{props.filters}</div>
         <div
             className={styles.main}
             style={{
-                marginTop: props.showFilters ? '180px' : '100px',
+                marginTop:
+                    props.showListDropdown || props.showFilters
+                        ? '180px'
+                        : '100px',
             }}
         >
             {props.children}
@@ -53,11 +52,8 @@ Overview.propTypes = {
     deleteDocs: PropTypes.func.isRequired,
     showFilters: PropTypes.bool.isRequired,
     filters: PropTypes.node.isRequired,
-    // showTooltip: PropTypes.bool.isRequired,
-    // toggleShowTooltip: PropTypes.func.isRequired,
-    // tooltip: PropTypes.object,
-    // fetchNextTooltip: PropTypes.func.isRequired,
-    // isTooltipRenderable: PropTypes.bool.isRequired,
+    listEditDropdown: PropTypes.node.isRequired,
+    showListDropdown: PropTypes.bool.isRequired,
 }
 
 export default Overview

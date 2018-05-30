@@ -5,13 +5,14 @@ import * as actions from './actions'
 const defaultState = {
     listCount: null,
     activeListIndex: -1,
+    listFilterIndex: null,
     /** list will contain some data like
      * {
      *  id: Unique ID of the list
      *  listName: @[string],
      *  pages: [Array of urls].
      * }
-     * 
+     *
      */
     lists: [],
     deleteConfirmProps: {
@@ -20,6 +21,8 @@ const defaultState = {
         // Used to keep track of any particular result (use index)
         deleting: undefined,
     },
+    listEditDropdown: false,
+    urlsToEdit: [],
 }
 
 const getAllLists = (state, lists) => ({
@@ -51,23 +54,22 @@ const deleteList = (state, { id, index }) => ({
 
 const addPageToList = (state, { url, index }) => {
     // TODO: Maybe use id instead
-    const list = state.lists[index]
+    const { lists } = state
+    const list = lists[index]
+
+    if (list.pages.indexOf(url) > -1) return state
+
     const newList = {
         ...list,
-        pages: [...list.pages, { url }],
+        pages: [...list.pages, url],
     }
     return {
         ...state,
-        lists: [
-            ...state.lists.slice(0, index),
-            newList,
-            ...state.lists.slice(index + 1),
-        ],
+        lists: [...lists.slice(0, index), newList, ...lists.slice(index + 1)],
     }
 }
 
 const showDeleteConfirm = (state, { id, index }) => {
-    console.log(id, index)
     return {
         ...state,
         deleteConfirmProps: {
@@ -89,6 +91,41 @@ const hideDeleteConfirm = state => ({
 
 const payloadReducer = key => (state, payload) => ({ ...state, [key]: payload })
 
+const toggleListFilterIndex = (state, index) => {
+    const { listFilterIndex } = state
+    if (listFilterIndex === null || listFilterIndex !== index) {
+        return {
+            ...state,
+            listFilterIndex: index,
+        }
+    }
+
+    return {
+        ...state,
+        listFilterIndex: null,
+    }
+}
+
+const toggleUrlToEdit = (state, url) => {
+    const { urlsToEdit } = state
+    const index = urlsToEdit.indexOf(url)
+
+    if (index > -1) {
+        return {
+            ...state,
+            urlsToEdit: [
+                ...urlsToEdit.slice(0, index),
+                ...urlsToEdit.slice(index + 1),
+            ],
+        }
+    }
+
+    return {
+        ...state,
+        urlsToEdit: [...urlsToEdit, url],
+    }
+}
+
 export default createReducer(
     {
         [actions.getAllLists]: getAllLists,
@@ -103,10 +140,16 @@ export default createReducer(
         [actions.addPagetoList]: addPageToList,
         [actions.showListDeleteModal]: showDeleteConfirm,
         [actions.hideListDeleteModal]: hideDeleteConfirm,
+        [actions.toggleListFilterIndex]: toggleListFilterIndex,
         [actions.resetListDeleteModal]: state => ({
             ...state,
             deleteConfirmProps: { ...defaultState.deleteConfirmProps },
         }),
+        [actions.toggleListDropdown]: state => ({
+            ...state,
+            listEditDropdown: !state.listEditDropdown,
+        }),
+        [actions.toggleUrlToEdit]: toggleUrlToEdit,
     },
     defaultState,
 )

@@ -4,38 +4,7 @@ const list = [
         index: 3,
         name: 'Esse ut veniam ullamco excepteur.',
         isDeletable: false,
-        pages: [
-            {
-                url: 'http://Woodlands.name/Ladera',
-            },
-            {
-                url: 'http://Waiohinu.name/Gilmore',
-            },
-            {
-                url: 'http://Sedley.name/Moquino',
-            },
-            {
-                url: 'http://Nile.name/Montura',
-            },
-            {
-                url: 'http://Steinhatchee.name/Oretta',
-            },
-            {
-                url: 'http://Gasquet.name/Haring',
-            },
-            {
-                url: 'http://Datil.name/Blairstown',
-            },
-            {
-                url: 'http://Kiskimere.name/Rehrersburg',
-            },
-            {
-                url: 'http://Falconaire.name/Jacksonwald',
-            },
-            {
-                url: 'http://Boling.name/Levant',
-            },
-        ],
+        pages: [],
     },
     {
         _id: '5afaed176f1e0550250b0742',
@@ -228,44 +197,6 @@ const list = [
             },
             {
                 url: 'http://Rosedale.name/Efland',
-            },
-        ],
-    },
-    {
-        _id: '5afaed17739fc30bd77eb17c',
-        index: 8,
-        name: 'Ad reprehenderit ea amet tempor enim magna laboris.',
-        isDeletable: true,
-        pages: [
-            {
-                url: 'http://Summerset.name/Ribera',
-            },
-            {
-                url: 'http://Saddlebrooke.name/Walton',
-            },
-            {
-                url: 'http://Kula.name/Silkworth',
-            },
-            {
-                url: 'http://Machias.name/Sperryville',
-            },
-            {
-                url: 'http://Greenfields.name/Clara',
-            },
-            {
-                url: 'http://Inkerman.name/Sultana',
-            },
-            {
-                url: 'http://Allendale.name/Faywood',
-            },
-            {
-                url: 'http://Dunbar.name/Mahtowa',
-            },
-            {
-                url: 'http://Guilford.name/Cliffside',
-            },
-            {
-                url: 'http://Dale.name/Osmond',
             },
         ],
     },

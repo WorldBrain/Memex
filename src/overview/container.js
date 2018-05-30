@@ -24,6 +24,8 @@ import Sidebar, {
 } from './sidebar'
 import NoResultBadTerm from './components/NoResultBadTerm'
 import localStyles from './components/Overview.css'
+import { actions as listActs, selectors as customLists } from 'src/custom-lists'
+import { ListEditDropdown } from 'src/custom-lists/components'
 
 class OverviewContainer extends Component {
     static propTypes = {
@@ -53,6 +55,16 @@ class OverviewContainer extends Component {
         showOnboarding: PropTypes.bool.isRequired,
         mouseOnSidebar: PropTypes.bool.isRequired,
         init: PropTypes.func.isRequired,
+        handleToggleUrlToEdit: PropTypes.func.isRequired,
+        showListDropdown: PropTypes.bool.isRequired,
+        listStorageHandler: PropTypes.func.isRequired,
+        isListFilterActive: PropTypes.bool.isRequired,
+        handleCrossRibbonClick: PropTypes.func.isRequired,
+    }
+
+    constructor(props) {
+        super(props)
+        this._listStorageHandler = this.props.listStorageHandler()
     }
 
     componentDidMount() {
@@ -132,6 +144,10 @@ class OverviewContainer extends Component {
                 onTagBtnClick={this.props.handleTagBtnClick(i)}
                 onCommentBtnClick={this.props.handleCommentBtnClick(doc)}
                 tagPills={this.renderTagPills(doc, i)}
+                isListFilterActive={this.props.isListFilterActive}
+                showListDropdown={this.props.showListDropdown}
+                handleToggleUrlToEdit={this.props.handleToggleUrlToEdit(doc)}
+                handleCrossRibbonClick={this.props.handleCrossRibbonClick(doc)}
                 {...doc}
             />
         ))
@@ -263,6 +279,8 @@ class OverviewContainer extends Component {
 
     renderFilters = () => <Filters setDropdownRef={this.trackDropwdownRef} />
 
+    renderListDropdown = () => <ListEditDropdown />
+
     render() {
         return (
             <Wrapper>
@@ -271,6 +289,7 @@ class OverviewContainer extends Component {
                     setInputRef={this.setInputRef}
                     onInputChange={this.props.handleInputChange}
                     filters={this.renderFilters()}
+                    listEditDropdown={this.renderListDropdown()}
                     onQuerySearchKeyDown={this.handleSearchEnter}
                     isSearchDisabled={this.props.showOnboarding}
                     scrollDisabled={this.props.mouseOnSidebar}
@@ -305,6 +324,8 @@ const mapStateToProps = state => ({
     isFirstTooltip: selectors.isFirstTooltip(state),
     isTooltipRenderable: selectors.isTooltipRenderable(state),
     mouseOnSidebar: sidebarSels.mouseOnSidebar(state),
+    isListFilterActive: filters.listFilterActive(state),
+    showListDropdown: customLists.listEditDropdown(state),
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -320,6 +341,7 @@ const mapDispatchToProps = dispatch => ({
             resetFilterPopup: filterActs.resetFilterPopup,
             fetchNextTooltip: actions.fetchNextTooltip,
             init: actions.init,
+            onListDropdownChange: listActs.toggleListDropdown,
         },
         dispatch,
     ),
@@ -354,6 +376,13 @@ const mapDispatchToProps = dispatch => ({
     addTag: resultIndex => tag => dispatch(actions.addTag(tag, resultIndex)),
     delTag: resultIndex => tag => dispatch(actions.delTag(tag, resultIndex)),
     toggleShowTooltip: event => dispatch(actions.toggleShowTooltip()),
+    listStorageHandler: () => dispatch(listActs.listStorage()),
+    handleToggleUrlToEdit: ({ url }) => () =>
+        dispatch(listActs.toggleUrlToEdit(url)),
+    handleCrossRibbonClick: ({ url }) => event => {
+        dispatch(listActs.removePageFromList(url))
+        dispatch(actions.hideResultItem(url))
+    },
 })
 
 export default connect(
