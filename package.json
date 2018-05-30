@@ -11,6 +11,7 @@
     "build": "npm run build:clean && webpack",
     "build:ci": "npm run build:clean && webpack --env.ci",
     "build:prod": "npm run build:clean && webpack --env.prod",
+    "build:package": "npm run build:clean && webpack --env.prod --env.package",
     "build:clean": "rm -rf ./extension",
     "build:old-prod": "npm run build:clean && gulp build-prod",
     "build:old": "npm run build:clean && gulp build",
@@ -93,6 +94,7 @@
     "when-all-settled": "^0.1.1"
   },
   "devDependencies": {
+    "@sentry/webpack-plugin": "^1.5.2",
     "@types/jest": "^22.1.4",
     "autoprefixer": "^7.1.1",
     "babel-eslint": "^7.2.3",
@@ -147,7 +149,9 @@
     "loose-envify": "^1.3.1",
     "material-design-icons": "^3.0.1",
     "memdown": "^2.0.0",
+    "mini-css-extract-plugin": "^0.4.0",
     "npm-run-all": "^4.1.3",
+    "optimize-css-assets-webpack-plugin": "^4.0.2",
     "pify": "^3.0.0",
     "postcss-cssnext": "^3.1.0",
     "postcss-loader": "^2.1.5",
@@ -180,16 +184,18 @@
     "typescript": "^2.7.2",
     "uglify-es": "^3.1.7",
     "uglifyify": "^4.0.1",
+    "uglifyjs-webpack-plugin": "^1.2.5",
     "url-loader": "^1.0.1",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0",
     "watchify": "^3.9.0",
     "web-ext": "^1.10.0",
     "webextension-polyfill-ts": "^0.8.3",
-    "webpack": "^4.10.0",
+    "webpack": "^4.10.1",
     "webpack-build-notifier": "^0.1.25",
     "webpack-chrome-extension-reloader": "^0.6.9",
-    "webpack-cli": "^2.1.3"
+    "webpack-cli": "^2.1.3",
+    "zip-webpack-plugin": "^3.0.0"
   },
   "resolutions": {
     "abstract-leveldown": "4.0.3"

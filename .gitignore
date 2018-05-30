@@ -9,3 +9,4 @@ yarn-error.log
 coverage/
 publish.sh
 stats.json
+.sentryclirc

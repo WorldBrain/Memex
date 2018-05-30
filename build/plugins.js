@@ -6,11 +6,15 @@ import HtmlIncAssetsPlugin from 'html-webpack-include-assets-plugin'
 import HardSourcePlugin from 'hard-source-webpack-plugin'
 import StylelintPlugin from 'stylelint-webpack-plugin'
 import BuildNotifPlugin from 'webpack-build-notifier'
+import CssExtractPlugin from 'mini-css-extract-plugin'
+import SentryPlugin from '@sentry/webpack-plugin'
+import ZipPlugin from 'zip-webpack-plugin'
 // Disabling this for now as it adds 2-4 seconds to inc. build time - look into finding out why
 // import WebExtReloadPlugin from 'webpack-chrome-extension-reloader'
 
 import initEnv from './env'
 import * as staticFiles from './static-files'
+import { output } from './config'
 
 /**
  * @param {boolean} tslint Denotes whether or not to enable linting on this thread as well as type checking.
@@ -31,9 +35,13 @@ export default function({
     template,
     notifsEnabled = false,
     isCI = false,
+    shouldPackage = false,
+    packagePath = '../dist',
+    extPackageName = 'extension.zip',
+    sourcePackageName = 'source-code.zip',
 }) {
     const plugins = [
-        new EnvironmentPlugin(initEnv(mode === 'development')),
+        new EnvironmentPlugin(initEnv({ mode })),
         new CopyPlugin(staticFiles.copyPatterns),
         new HtmlPlugin({
             title: 'Popup',
@@ -51,6 +59,9 @@ export default function({
             append: false,
             assets: staticFiles.htmlAssets,
         }),
+        new CssExtractPlugin({
+            filename: '[name].css',
+        }),
     ]
 
     if (mode === 'development') {
@@ -59,6 +70,14 @@ export default function({
             // new WebExtReloadPlugin({
             //     port: webExtReloadPort,
             // }),
+        )
+    } else if (mode === 'production') {
+        plugins.push(
+            new SentryPlugin({
+                release: process.env.npm_package_version,
+                include: output.path,
+                dryRun: true,
+            }),
         )
     }
 
@@ -71,6 +90,16 @@ export default function({
         plugins.push(
             new BuildNotifPlugin({
                 title: 'Memex Build',
+            }),
+        )
+    }
+
+    if (shouldPackage) {
+        plugins.push(
+            new ZipPlugin({
+                path: packagePath,
+                filename: extPackageName,
+                exclude: [/\.map/],
             }),
         )
     }
