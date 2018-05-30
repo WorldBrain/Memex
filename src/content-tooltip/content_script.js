@@ -1,7 +1,7 @@
 import { bodyLoader } from 'src/util/loader'
 import { OPEN_OPTIONS } from 'src/search-injection/constants'
 import { createAndCopyDirectLink } from 'src/direct-linking/content_script/interactions'
-import setupUIContainer from './components'
+import { setupUIContainer, destroyUIContainer } from './components'
 import * as interactions from './interactions'
 import { injectCSS } from 'src/search-injection/dom'
 
@@ -23,6 +23,11 @@ export async function init() {
                 query: 'settings',
             }
             browser.runtime.sendMessage(message)
+        },
+        destroyTooltip: () => {
+            interactions.destroyTooltipTrigger()
+            destroyUIContainer(target)
+            target.remove()
         },
     })
     interactions.setupTooltipTrigger(showTooltip)

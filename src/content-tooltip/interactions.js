@@ -1,13 +1,22 @@
 import { delayed } from './utils'
 
+let mouseupListener = null
+
 export function setupTooltipTrigger(callback) {
-    document.body.addEventListener('mouseup', event => {
+    mouseupListener = event => {
         conditionallyTriggerTooltip(
             { x: event.pageX, y: event.pageY },
             callback,
             event,
         )
-    })
+    }
+
+    document.body.addEventListener('mouseup', mouseupListener)
+}
+
+export function destroyTooltipTrigger() {
+    document.body.removeEventListener('mouseup', mouseupListener)
+    mouseupListener = null
 }
 
 export const conditionallyTriggerTooltip = delayed(
