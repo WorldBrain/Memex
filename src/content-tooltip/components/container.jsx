@@ -16,6 +16,7 @@ class Container extends React.Component {
         onInit: PropTypes.func.isRequired,
         createAndCopyDirectLink: PropTypes.func.isRequired,
         openSettings: PropTypes.func.isRequired,
+        destroy: PropTypes.func.isRequired,
     }
 
     state = {
@@ -39,8 +40,6 @@ class Container extends React.Component {
     }
 
     handleClickOutside = () => {
-        const selection = document.getSelection()
-        selection.removeAllRanges()
         this.setState({
             showTooltip: false,
             position: {},
@@ -50,8 +49,7 @@ class Container extends React.Component {
     closeTooltip = event => {
         event.preventDefault()
         event.stopPropagation()
-        const selection = document.getSelection()
-        selection.removeAllRanges()
+        this.props.destroy()
         this.setState({
             showTooltip: false,
             position: {},
