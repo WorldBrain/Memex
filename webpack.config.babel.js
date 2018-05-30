@@ -6,12 +6,8 @@ export default (env = {}) => {
         mode: env.prod ? 'production' : 'development',
         notifsEnabled: !!env.notifs,
         isCI: !!env.ci,
+        shouldPackage: !!env.package,
     })
-
-    // CI doesn't need source-maps
-    if (env.ci) {
-        delete conf.devtool
-    }
 
     return conf
 }

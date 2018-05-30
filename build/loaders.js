@@ -1,5 +1,6 @@
 // NOTE: Loader `include` paths are relative to this module
 import path from 'path'
+import CssExtractPlugin from 'mini-css-extract-plugin'
 
 export const threadLoader = {
     loader: 'thread-loader',
@@ -28,14 +29,23 @@ export const tsLoader = {
 }
 
 export const styleLoader = {
-    loader: 'style-loader',
+    // style-loader's general method of inserting <style> tags into the `document` doesn't
+    //  seem to play nicely with the content_script. It would be nice to find a work-around
+    //  later as style-loader is nicer for dev.
+    // loader: 'style-loader',
+    loader: CssExtractPlugin.loader,
 }
 
-export const cssLoader = {
+export const cssModulesLoader = {
     loader: 'css-loader',
     options: {
         modules: true,
+        importLoaders: 1,
     },
+}
+
+export const cssVanillaLoader = {
+    loader: 'css-loader',
 }
 
 export const postcssLoader = {
@@ -61,7 +71,7 @@ export const svgLoader = {
     loader: 'svg-inline-loader',
 }
 
-export default ({ context, isCI = false }) => {
+export default ({ mode, context, isCI = false }) => {
     const main = {
         test: /\.(j|t)sx?$/,
         include: path.resolve(context, './src'),
@@ -71,13 +81,13 @@ export default ({ context, isCI = false }) => {
     const cssModules = {
         test: /\.css$/,
         include: path.resolve(context, './src'),
-        use: [styleLoader, cssLoader, postcssLoader],
+        use: [styleLoader, cssModulesLoader, postcssLoader],
     }
 
     const cssVanilla = {
         test: /\.css$/,
         include: path.resolve(context, './node_modules'),
-        use: [styleLoader, 'css-loader'],
+        use: [styleLoader, cssVanillaLoader],
     }
 
     const lint = {
@@ -90,6 +100,9 @@ export default ({ context, isCI = false }) => {
         return [main, cssModules, cssVanilla]
     }
 
-    main.use = [threadLoader, ...main.use]
+    if (mode !== 'production') {
+        main.use = [threadLoader, ...main.use]
+    }
+
     return [main, lint, cssModules, cssVanilla]
 }
