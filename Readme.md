@@ -4,7 +4,7 @@ A browser extension that lets you create, search and eventually share your perso
 
  - **Full-Text-Search** all websites you visited and bookmarked
  - **Filter by time, domain or custom tags**
- - **Use Memex alongside your favorite search-engine** Support for Google and DuckDuckGo. 
+ - **Use Memex alongside your favorite search-engine** Support for Google and DuckDuckGo.
  - **Full Data Privacy** All data is stored and processed on your own computer and will **never ever ever EVER** be shared or used without your consent. Here at WorldBrain, we are highly concerned about your privacy and security please see our [privacy policy](#privacy-policy) for more details.
 
 Lookout for these exciting new features in the future:
@@ -38,7 +38,7 @@ More on that on our website: worldbrain.io
 1. [In Depth How it Works](./docs/How-It-Works.md)
 
 ## Project Status
-Memex is [available for Chrome and Firefox](https://worldbrain.io) and no breaking changes are expected anytime soon. 
+Memex is [available for Chrome and Firefox](https://worldbrain.io) and no breaking changes are expected anytime soon.
 It's under active development by [our wonderful team](https://worldbrain.io/team), including 3 GSoC students.
 
 ### Next Features:
@@ -108,9 +108,9 @@ External resources
 
 * [Worldbrain is creating a structural solution to online (scientific) misinformation - www.worldbrain.io](https://worldbrain.io/vision)
 
-## Thanks to 
+## Thanks to
 [Sentry.io](https://sentry.io) for offering free error tracking to open-source projects and generally having an awesome product
 
 [BrowserStack](http://www.browserstack.com) for helping us face the complexity of building a quality tool that has to work with many different kinds of devices.
 
-<img alt="BrowserStack logo" src="https://p14.zdusercontent.com/attachment/1015988/Ny9tlE4d3aFnTRy2fCe5DnGmD?token=eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..ysDfVKpj0e7uNy7L8mDXvg.x-oSnNSTgDj6-ankmKZ6HzYgcFO0Se6om0uPk6a0wXTGflh2TtpYfsJbNMhZSC7LctlPyfup03x4on1U_4MuDrxiCDoFGioyBbeRf7uL3fPBWtshWHK9FGYsoTvw0RsdGJqNgn7gsmrv4Y1gH4WKWDOcj5jP-eGgNXDqIaYrijkuZ9CFgYvSPZcD6ybAGiv9CFN4BV9DE-XHngL853-wr77P6kxfOklowd5Jch6iK7vbksQYng8L4i20hHs8bWCnbClx0M9xmhyeNqHUMqpS8z6cEZtjDZPDC6I6RX7se-U.Ol6p4nL5NFEEKvB77PN0-g" width="300" height="157">
+![BrowserStack logo](./browserstack.png)
