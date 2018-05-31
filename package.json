@@ -1,6 +1,6 @@
 {
   "name": "worldbrain-extension",
-  "version": "0.3.3",
+  "version": "3.2.4",
   "homepage": "https://worldbrain.io",
   "license": "MIT",
   "repository": {
@@ -21,6 +21,7 @@
     "cache:clean": "rm -rf ./node_modules/.cache",
     "stats": "webpack --profile --json > stats.json",
     "package": "gulp package",
+    "publish": "node publish",
     "package-src": "gulp package-source-code",
     "test": "jest --verbose --silent --config=.jest-config.json",
     "test-watch": "jest --verbose --silent --watch --config=.jest-config.json",
