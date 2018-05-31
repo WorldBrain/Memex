@@ -81,7 +81,6 @@ exports.anchor = (root, selectors, options = {}) ->
       return querySelector(TextPositionAnchor, root, position, options)
       .then(maybeAssertQuote)
 
-  
   return promise
 
 
