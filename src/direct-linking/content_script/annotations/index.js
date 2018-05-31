@@ -1,5 +1,6 @@
 import * as domTextQuote from 'dom-anchor-text-quote'
 import * as domTextPosition from 'dom-anchor-text-position'
+import * as hypAnchoring from './anchoring/html'
 import highlightRange from 'dom-highlight-range'
 
 export function isSelectionWithinCorpus({ selection, corpus }) {
@@ -18,15 +19,9 @@ export async function selectionToDescriptor({ selection }) {
 
     const range = selection.getRangeAt(0)
     const root = document.body
-    const textQuote = domTextQuote.fromRange(root, range)
-    const textPosition = domTextPosition.fromRange(root, range)
     return {
-        strategy: 'dom-anchor-text-position-or-quote',
-        content: {
-            textQuote,
-            textPosition,
-            string: range.toString(),
-        },
+        strategy: 'hyp-anchoring',
+        content: hypAnchoring.describe(root, range),
     }
 }
 
@@ -34,6 +29,9 @@ export async function descriptorToRange({ descriptor }) {
     const root = document.body
     if (descriptor.strategy === 'dom-anchor-text-quote') {
         return domTextQuote.toRange(root, descriptor.content)
+    }
+    if (descriptor.strategy === 'hyp-anchoring') {
+        return hypAnchoring.anchor(root, descriptor.content)
     }
 
     const rangeFromQuote = domTextQuote.toRange(
