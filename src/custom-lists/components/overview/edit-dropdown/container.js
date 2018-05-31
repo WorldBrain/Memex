@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
-import { bindActionCreators } from 'redux'
+// import { bindActionCreators } from 'redux'
 
 import Dropdown from './DropdownContainer'
 import EditDropdown from './ListEditDropdown'
@@ -26,12 +26,8 @@ class ListEditDropdown extends Component {
         })
     }
 
-    // yaha se dropdown ko props jayange
-    handleRenderDropdown = () => {
-        console.log(this.state.addToList)
-
-        return this.state.addToList ? <Dropdown {...this.props} /> : null
-    }
+    handleRenderDropdown = () =>
+        this.state.addToList ? <Dropdown {...this.props} /> : null
 
     render() {
         return (
@@ -50,11 +46,7 @@ const mapStateToProps = state => ({
     results: selectors.results(state),
 })
 
-const mapDispatchToProps = (dispatch, getState) => ({
-    ...bindActionCreators({}, dispatch),
-})
-
 export default connect(
     mapStateToProps,
-    mapDispatchToProps,
+    null,
 )(ListEditDropdown)

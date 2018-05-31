@@ -31,9 +31,7 @@ export const addPagetoList = createAction(
         index,
     }),
 )
-export const removePageFromList = createAction(
-    'custom-lists/removePageFromList',
-)
+export const hidePageFromList = createAction('custom-lists/hidePageFromList')
 export const showListDeleteModal = createAction(
     'custom-lists/showListDeleteModal',
     (id, index) => ({
@@ -78,7 +76,35 @@ export const showEditBox = index => (dispatch, getState) => {
 
 export const delPageFromList = doc => async (dispatch, getState) => {
     const index = selectors.listFilterIndex(getState())
-    dispatch(removePageFromList(doc.url, index))
+    dispatch(hidePageFromList(doc.url, index))
+}
+
+export const getListFromDB = () => async (dispatch, getState) => {
+    dispatch(getAllLists(dummyData))
+}
+
+export const createPageList = name => async (dispatch, getState) => {
+    const list = {
+        _id: null,
+        name,
+        isDeletable: true,
+        pages: [],
+    }
+    dispatch(createList(list))
+}
+
+export const updateList = (index, name) => async (dispatch, getState) => {
+    dispatch(updateListName(name, index))
+}
+
+export const deletePageList = () => async (dispatch, getState) => {
+    const { id, deleting } = selectors.deleteConfirmProps(getState())
+    dispatch(deleteList(id, deleting))
+    dispatch(resetListDeleteModal())
+}
+
+export const addUrltoList = (url, index, id) => async (dispatch, getState) => {
+    dispatch(addPagetoList(url, index))
 }
 
 // TODO: change this damn thing

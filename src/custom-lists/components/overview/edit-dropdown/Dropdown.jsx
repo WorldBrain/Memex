@@ -9,10 +9,10 @@ const Dropdown = props => (
         <div className={styles.dropdownText}>
             <form className={styles.searchContainer}>
                 <input
-                    onChange={props.onTagSearchChange}
-                    onKeyDown={props.onTagSearchKeyDown}
+                    onChange={props.onListSearchChange}
+                    onKeyDown={props.onListSearchKeyDown}
                     ref={props.setInputRef}
-                    value={props.tagSearchValue}
+                    value={props.ListSearchValue}
                     className={styles.search}
                     name="query"
                     placeholder="Search and add to lists"
@@ -34,10 +34,10 @@ const Dropdown = props => (
 
 Dropdown.propTypes = {
     children: PropTypes.node.isRequired,
-    onTagSearchChange: PropTypes.func.isRequired,
-    onTagSearchKeyDown: PropTypes.func.isRequired,
+    onListSearchChange: PropTypes.func.isRequired,
+    onListSearchKeyDown: PropTypes.func.isRequired,
     setInputRef: PropTypes.func.isRequired,
-    tagSearchValue: PropTypes.string.isRequired,
+    ListSearchValue: PropTypes.string.isRequired,
 }
 
 export default Dropdown

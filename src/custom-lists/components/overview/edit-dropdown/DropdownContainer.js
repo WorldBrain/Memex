@@ -9,10 +9,6 @@ import DropdownRow from './DropdownRow'
 
 class DropdownContainer extends Component {
     static propTypes = {
-        // Opt. cb to run when new tag added to state
-        onFilterAdd: PropTypes.func,
-
-        // Opt. cb to run when tag deleted from state
         onFilterDel: PropTypes.func,
         results: PropTypes.array.isRequired,
     }
@@ -26,19 +22,19 @@ class DropdownContainer extends Component {
     constructor(props) {
         super(props)
 
-        this.fetchTagSuggestions = debounce(300)(this.fetchTagSuggestions)
+        this.fetchListSuggestions = debounce(300)(this.fetchListSuggestions)
 
         this.state = {
             searchVal: '',
             isLoading: false,
             displayFilters: props.results, // Display state objects; will change all the time
-            filters: props.results, // Actual tags associated with the page; will only change when DB updates
+            filters: props.results, // Actual lists associated with the page; will only change when DB updates
             focused: props.results.length ? 0 : -1,
         }
     }
 
     /**
-     * Domain inputs need to allow '.' while tags shouldn't.
+     * Domain inputs need to allow '.' while lists shouldn't.
      */
     get inputBlockPattern() {
         return /[^\w\s-]/gi
@@ -47,28 +43,24 @@ class DropdownContainer extends Component {
     setInputRef = el => (this.inputEl = el)
 
     /**
-     * Selector for derived display tags state
+     * Selector for derived display lists state
      */
-    getDisplayTags = () =>
+    getDisplayLists = () =>
         this.state.displayFilters.map((value, i) => ({
             value,
-            // TODO: active = state all/none/some
-            active: this.isPageTag(value),
+            active: this.isPageList(value),
             focused: this.state.focused === i,
         }))
 
-    isPageTag = () => {}
+    isPageList = () => {}
 
-    /**
-     * Selector for derived search value/new tag input state
-     */
     getSearchVal = () =>
         this.state.searchVal
             .trim()
             .replace(/\s\s+/g, ' ')
             .toLowerCase()
 
-    canCreateTag() {
+    canCreateList() {
         if (!this.allowIndexUpdate) {
             return false
         }
@@ -78,13 +70,19 @@ class DropdownContainer extends Component {
         return (
             !!searchVal.length &&
             !this.state.displayFilters.reduce(
-                (acc, tag) => acc || tag === searchVal,
+                (acc, list) => acc || list === searchVal,
                 false,
             )
         )
     }
 
-    fetchTagSuggestions = async () => {
+    suggest = searchKey => {
+        return this.state.filters.filter(obj =>
+            Object.keys(obj).some(key => obj[key].includes(searchKey)),
+        )
+    }
+
+    fetchListSuggestions = async () => {
         const searchVal = this.getSearchVal()
         if (!searchVal.length) {
             return
@@ -94,7 +92,7 @@ class DropdownContainer extends Component {
 
         try {
             // TODO: write a suggestion function, just string matching
-            suggestions = []
+            suggestions = this.suggest(searchVal)
         } catch (err) {
         } finally {
             this.setState(state => ({
@@ -105,14 +103,10 @@ class DropdownContainer extends Component {
         }
     }
 
-    /**
-     * Used for clicks on displayed tags. Will either add or remove tags to the page
-     * depending on their current status as assoc. tags or not.
-     */
     // TODO: Needs a lot of work
     // Changes state from all -> none -> all| none -> all -> none| some -> none -> all -> some
-    handleTagSelection = index => async event => {
-        const listId = this.getDisplayTags()[index].value._id
+    handleListSelection = index => async event => {
+        const listId = this.getDisplayLists()[index].value._id
         const { filters } = this.state
         const listIndex = filters.findIndex(val => val._id === listId)
         const list = filters[listIndex]
@@ -155,7 +149,7 @@ class DropdownContainer extends Component {
         event.preventDefault()
 
         if (this.state.displayFilters.length) {
-            return this.handleTagSelection(this.state.focused)(event)
+            return this.handleListSelection(this.state.focused)(event)
         }
 
         return null
@@ -163,9 +157,7 @@ class DropdownContainer extends Component {
 
     handleSearchArrowPress(event) {
         event.preventDefault()
-
-        // One extra index if the "add new tag" thing is showing
-        let offset = this.canCreateTag() ? 0 : 1
+        let offset = this.canCreateList() ? 0 : 1
 
         if (!this.allowIndexUpdate) offset = 1
 
@@ -202,47 +194,45 @@ class DropdownContainer extends Component {
     handleSearchChange = event => {
         const searchVal = event.target.value
 
-        // Block input of non-words, spaces and hypens for tags
         if (this.inputBlockPattern.test(searchVal)) {
             return
         }
 
-        // If user backspaces to clear input, show the current assoc tags again
         const displayFilters = !searchVal.length
             ? this.state.filters
             : this.state.displayFilters
 
         this.setState(
             state => ({ ...state, searchVal, displayFilters }),
-            this.fetchTagSuggestions, // Debounced suggestion fetch
+            this.fetchListSuggestions, // Debounced suggestion fetch
         )
     }
 
-    renderTags() {
-        const tags = this.getDisplayTags()
+    renderLists() {
+        const lists = this.getDisplayLists()
 
-        const tagOptions = tags.map((list, i) => (
+        const listOptions = lists.map((list, i) => (
             <DropdownRow
                 {...list}
                 key={i}
-                handleClick={this.handleTagSelection(i)}
+                handleClick={this.handleListSelection(i)}
             />
         ))
 
-        return tagOptions
+        return listOptions
     }
 
     render() {
         return (
             <Dropdown
-                onTagSearchChange={this.handleSearchChange}
-                onTagSearchKeyDown={this.handleSearchKeyDown}
+                onListSearchChange={this.handleSearchChange}
+                onListSearchKeyDown={this.handleSearchKeyDown}
                 setInputRef={this.setInputRef}
-                numberOfTags={this.state.filters.length}
-                tagSearchValue={this.state.searchVal}
+                numberOfLists={this.state.filters.length}
+                listSearchValue={this.state.searchVal}
                 {...this.props}
             >
-                {this.renderTags()}
+                {this.renderLists()}
             </Dropdown>
         )
     }
