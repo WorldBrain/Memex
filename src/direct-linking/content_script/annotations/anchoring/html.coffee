@@ -61,11 +61,6 @@ exports.anchor = (root, selectors, options = {}) ->
   # order, from simple to complex.
   promise = Promise.reject('unable to anchor')
 
-  if quote?
-    promise = promise.catch ->
-      # Note: similarity of the quote is implied.
-      return querySelector(TextQuoteAnchor, root, quote, options)
-
   if fragment?
     promise = promise.catch ->
       return querySelector(FragmentAnchor, root, fragment, options)
@@ -81,7 +76,11 @@ exports.anchor = (root, selectors, options = {}) ->
       return querySelector(TextPositionAnchor, root, position, options)
       .then(maybeAssertQuote)
 
-  
+  if quote?
+    promise = promise.catch ->
+      # Note: similarity of the quote is implied.
+      return querySelector(TextQuoteAnchor, root, quote, options)
+
   return promise
 
 
