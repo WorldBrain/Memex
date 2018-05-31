@@ -76,11 +76,10 @@ class DropdownContainer extends Component {
         )
     }
 
-    suggest = searchKey => {
-        return this.state.filters.filter(obj =>
-            Object.keys(obj).some(key => obj[key].includes(searchKey)),
+    suggest = searchKey =>
+        this.state.filters.filter(obj =>
+            obj.name.toLowerCase().includes(searchKey),
         )
-    }
 
     fetchListSuggestions = async () => {
         const searchVal = this.getSearchVal()
@@ -90,17 +89,12 @@ class DropdownContainer extends Component {
 
         let suggestions = this.state.filters
 
-        try {
-            // TODO: write a suggestion function, just string matching
-            suggestions = this.suggest(searchVal)
-        } catch (err) {
-        } finally {
-            this.setState(state => ({
-                ...state,
-                displayFilters: suggestions,
-                focused: 0,
-            }))
-        }
+        suggestions = this.suggest(searchVal)
+        this.setState(state => ({
+            ...state,
+            displayFilters: suggestions,
+            focused: 0,
+        }))
     }
 
     // TODO: Needs a lot of work

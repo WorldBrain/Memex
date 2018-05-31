@@ -33,7 +33,7 @@ class EditDropdown extends PureComponent {
                                 <button
                                     className={cx(styles.delete, styles.button)}
                                 />
-                                Delete4
+                                Delete
                             </span>
                             <span className={styles.test}>
                                 <button

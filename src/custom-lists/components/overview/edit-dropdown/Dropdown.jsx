@@ -12,7 +12,7 @@ const Dropdown = props => (
                     onChange={props.onListSearchChange}
                     onKeyDown={props.onListSearchKeyDown}
                     ref={props.setInputRef}
-                    value={props.ListSearchValue}
+                    value={props.listSearchValue}
                     className={styles.search}
                     name="query"
                     placeholder="Search and add to lists"
@@ -37,7 +37,7 @@ Dropdown.propTypes = {
     onListSearchChange: PropTypes.func.isRequired,
     onListSearchKeyDown: PropTypes.func.isRequired,
     setInputRef: PropTypes.func.isRequired,
-    ListSearchValue: PropTypes.string.isRequired,
+    listSearchValue: PropTypes.string,
 }
 
 export default Dropdown

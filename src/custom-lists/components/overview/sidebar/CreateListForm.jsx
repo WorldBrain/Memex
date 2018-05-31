@@ -16,7 +16,7 @@ const CreateListForm = props => (
                 name="listName"
                 type="text"
                 autoComplete="off"
-                placeHolder="List Name"
+                placeholder="List Name"
                 defaultValue={props.value}
                 autoFocus
                 required

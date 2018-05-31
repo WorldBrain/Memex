@@ -110,7 +110,9 @@ class ListContainer extends Component {
                         />
 
                         {this.renderCreateList(this.state.showCreateList)}
-                        <div>{this.renderAllLists()}</div>
+                        <div className={extStyles.allLists}>
+                            {this.renderAllLists()}
+                        </div>
                         <DeleteConfirmModal
                             isShown={this.props.isDeleteConfShown}
                             onClose={this.props.resetListDeleteModal}
