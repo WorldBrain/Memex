@@ -4,7 +4,7 @@ import initLoaderRules from './loaders'
 import initPlugins from './plugins'
 import initMinimizers from './minimizers'
 
-export const extensions = ['.ts', '.tsx', '.js', '.jsx']
+export const extensions = ['.ts', '.tsx', '.js', '.jsx', '.coffee']
 
 export const entry = {
     background: './src/background-entry.js',
