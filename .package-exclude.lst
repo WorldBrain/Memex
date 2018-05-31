@@ -1,0 +1,8 @@
+.git/**
+node_modules/**
+dist/**
+extension/**
+coverage/**
+.sentryclirc
+yarn-error.log
+*.pem
