@@ -101,6 +101,9 @@ We will never retain or sell your data.
 It is actually impossible for us to do so as all of your data is kept on your local machine.
 :see_no_evil::hear_no_evil::speak_no_evil:
 
+The only data we obtain are some analytics on how you use the tool, this data will never contain any personal data like URLs you visit or terms you search. Also you can completely opt out from that and become a ghost for us. We then have no indication that you even exist.
+
+For a complete list of things we track, visit our [privacy policy](https://worldbrain.io/privacy-policy/).
 
 ## See also
 
