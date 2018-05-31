@@ -50,7 +50,11 @@
         "unlimitedStorage",
         "storage"
     ],
-    "web_accessible_resources": ["/lib/pdf.worker.min.js", "/img/*"],
+    "web_accessible_resources": [
+        "/lib/pdf.worker.min.js",
+        "/img/*",
+        "/content_script.css"
+    ],
     "omnibox": {
         "keyword": "w"
     },
