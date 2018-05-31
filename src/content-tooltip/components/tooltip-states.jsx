@@ -10,7 +10,7 @@ const images = {
 }
 
 export const InitialComponent = ({ createLink }) => (
-    <div className={styles.createLinkButton} onClick={createLink}>
+    <div className={styles.createLinkButton} onMouseDown={createLink}>
         <img className={styles.createLinkImg} src={images.link} />
         <div className={styles.createLinkText}>Create Link</div>
     </div>
