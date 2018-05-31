@@ -113,4 +113,4 @@ External resources
 
 [BrowserStack](http://www.browserstack.com) for helping us face the complexity of building a quality tool that has to work with many different kinds of devices.
 
-![BrowserStack logo](./browserstack.png)
+<img alt="BrowserStack logo" src="/WorldBrain/Memex/raw/develop/browserstack.png" width="300" height="70">
