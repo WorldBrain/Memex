@@ -9,7 +9,7 @@
     border: 1px #979797 solid;
 }
 
-.body {
+.highlight {
     font-style: italic;
     font-weight: 200;
     margin-bottom: 10px;
@@ -20,6 +20,7 @@
     width: 20%;
     text-align: center;
     cursor: pointer;
+    font-weight: 500;
 }
 
 .footer {
@@ -28,17 +29,64 @@
 }
 
 .timestamp {
-    width: 85%;
+    width: 70%;
     display: inline-block;
 }
 
 .footerAside {
-    width: 15%;
+    width: 30%;
     display: inline-block;
     text-align: right;
+}
+
+.footerText {
+    color: #818181;
+    cursor: pointer;
+}
+
+.footerGreenText {
+    background-color: #3eb995;
+    color: white;
+    margin: 0px 8px;
+    padding: 3px 10px;
+    border-radius: 10px;
+    cursor: pointer;
 }
 
 .icon {
     margin: 0px 5px;
     cursor: pointer;
+}
+
+.annotationTextarea {
+    font-size: 13px;
+    width: 380px;
+    resize: none;
+    background-color: #fdfbfb;
+    box-shadow: #0000005c 1px 0px 13px -3px inset;
+    border: 0.5px #0000005c solid;
+    color: #3eb995;
+    padding: 5px;
+}
+
+.tagsInput {
+    width: 370px;
+    height: 15px;
+    border-radius: 10px;
+    background-color: #fdfbfb;
+    margin-top: 7px;
+    font-size: 11px;
+    padding: 3px 8px 4px 10px;
+    color: #3eb995;
+    box-shadow: #0000005c 0px 0px 5px 0px inset;
+    border: 0.5px #0000005c solid;
+
+    &::placeholder {
+        color: #3eb995;
+    }
+}
+
+textarea:focus,
+input:focus {
+    outline: none;
 }

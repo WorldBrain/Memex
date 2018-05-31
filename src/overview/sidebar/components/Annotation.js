@@ -11,10 +11,16 @@ class Annotation extends React.Component {
     state = {
         truncated: false,
         truncatedText: '',
+
+        annotationText: '',
+        annotationEditMode: false,
+
+        footerState: 'default',
     }
 
     componentDidMount() {
         const { annotation } = this.props
+
         if (annotation.highlight.length > 280) {
             const truncatedText = annotation.highlight.slice(0, 280) + ' [..]'
             this.setState({
@@ -22,27 +28,89 @@ class Annotation extends React.Component {
                 truncated: true,
             })
         }
+
+        if (annotation.body) {
+            this.setState({
+                annotationText: annotation.body,
+            })
+        }
+    }
+
+    handleChange = e => {
+        this.setState({
+            annotationText: e.target.value,
+        })
     }
 
     renderTimestamp() {
-        return <div className={styles.timestamp}>Oct 12, 2008</div>
+        const { footerState } = this.state
+        return (
+            <div className={styles.timestamp}>
+                {footerState === 'default' ? 'October 12 2008' : ''}
+            </div>
+        )
     }
 
     renderFooterIcons() {
         return (
             <div className={styles.footerAside}>
-                <span className={styles.icon}>x</span>
+                <span
+                    className={styles.icon}
+                    onClick={this.toggleEditAnnotation}
+                >
+                    x
+                </span>
                 <span className={styles.icon}>x</span>
                 <span className={styles.icon}>x</span>
             </div>
         )
     }
 
-    toggleTruncate = () => {
-        const truncated = !this.state.truncated
+    renderEditButtons() {
+        return (
+            <div className={styles.footerAside}>
+                <span
+                    className={styles.footerText}
+                    onClick={this.toggleEditAnnotation}
+                >
+                    Cancel
+                </span>
+                <span className={styles.footerGreenText}>Save</span>
+            </div>
+        )
+    }
+
+    findFooterRenderer(state) {
+        if (state === 'default') return this.renderFooterIcons()
+        else if (state === 'edit') return this.renderEditButtons()
+    }
+
+    renderFooter() {
+        const { footerState } = this.state
+        return (
+            <div className={styles.footer}>
+                {this.renderTimestamp()}
+                {this.findFooterRenderer(footerState)}
+            </div>
+        )
+    }
+
+    toggleState = stateName => () => {
+        const toggled = !this.state[stateName]
         this.setState({
-            truncated,
+            [stateName]: toggled,
         })
+    }
+
+    setFooterState = footerState => () =>
+        this.setState({
+            footerState,
+        })
+
+    toggleEditAnnotation = () => {
+        this.toggleState('annotationEditMode')()
+        if (this.state.footerState === 'edit') this.setFooterState('default')()
+        else this.setFooterState('edit')()
     }
 
     renderShowButton() {
@@ -61,15 +129,38 @@ class Annotation extends React.Component {
         else return this.props.annotation.highlight
     }
 
+    renderAnnotationInput() {
+        if (this.state.annotationEditMode)
+            return (
+                <div className={styles.annotationInput}>
+                    <textarea
+                        rows="5"
+                        cols="20"
+                        className={styles.annotationTextarea}
+                        value={this.state.annotationText}
+                        onChange={this.handleChange}
+                    />
+                    <input
+                        type="text"
+                        className={styles.tagsInput}
+                        placeholder="Add tags"
+                    />
+                </div>
+            )
+        return null
+    }
+
     render() {
         return (
             <div className={styles.container}>
-                <div className={styles.body}>{this.renderHighlight()}</div>
-                {this.renderShowButton()}
-                <div className={styles.footer}>
-                    {this.renderTimestamp()}
-                    {this.renderFooterIcons()}
+                <div className={styles.highlight}>
+                    {this.renderHighlight()}
+                    {this.renderShowButton()}
                 </div>
+
+                {this.renderAnnotationInput()}
+
+                <div className={styles.footer}>{this.renderFooter()}</div>
             </div>
         )
     }

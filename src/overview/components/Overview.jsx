@@ -8,7 +8,7 @@ import Header from './Header'
 import styles from './Overview.css'
 import Tooltip from './Tooltip'
 import Head from 'src/options/containers/Head'
-import Sidebar from '../Sidebar'
+import Sidebar from '../sidebar'
 
 const showFilterClass = ({ showFilters }) =>
     classNames({
