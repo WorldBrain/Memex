@@ -196,7 +196,7 @@
     "watchify": "^3.9.0",
     "web-ext": "^1.10.0",
     "webextension-polyfill-ts": "^0.8.3",
-    "webpack": "^4.10.1",
+    "webpack": "^4.10.2",
     "webpack-build-notifier": "^0.1.25",
     "webpack-chrome-extension-reloader": "^0.6.9",
     "webpack-cli": "^2.1.3",
