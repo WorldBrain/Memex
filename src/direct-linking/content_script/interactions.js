@@ -17,7 +17,7 @@ async function extractAnchor() {
 
     const descriptor = await annotations.selectionToDescriptor({ selection })
     return {
-        quote: selection.toString(),
+        quote,
         descriptor,
     }
 }
