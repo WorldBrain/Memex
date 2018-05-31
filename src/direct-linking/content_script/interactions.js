@@ -3,6 +3,8 @@ import { remoteFunction } from 'src/util/webextensionRPC'
 import { copyToClipboard } from './utils'
 import * as annotations from './annotations'
 
+import styles from './styles.css'
+
 export async function createAndCopyDirectLink() {
     const url = window.location.href
     const anchor = await extractAnchor()
@@ -23,7 +25,7 @@ async function extractAnchor() {
 }
 
 export function scrollToHighlight() {
-    const $highlight = document.querySelector('.memex-highlight')
+    const $highlight = document.querySelector('.' + styles['memex-highlight'])
     if ($highlight) {
         setTimeout(() => {
             scrollToElement($highlight, { offset: -125 })

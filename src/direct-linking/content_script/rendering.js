@@ -1,6 +1,8 @@
 import { retryUntil } from '../utils'
 import { descriptorToRange, markRange } from './annotations'
 
+import styles from './styles.css'
+
 export async function highlightAnnotation({ annotation }) {
     // console.log('highlighting')
     const descriptor = annotation.anchors[0].descriptor
@@ -13,6 +15,5 @@ export async function highlightAnnotation({ annotation }) {
         },
     )
     console.log('Memex - found range:', range, range.toString())
-    markRange({ range, cssClass: 'memex-highlight' })
-    document.querySelector('.memex-highlight').style.background = '#3eb995'
+    markRange({ range, cssClass: styles['memex-highlight'] })
 }
