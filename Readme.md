@@ -110,6 +110,7 @@ External resources
 
 ## Thanks to 
 [Sentry.io](https://sentry.io) for offering free error tracking to open-source projects and generally having an awesome product
+
 [BrowserStack](http://www.browserstack.com) for helping us face the complexity of building a quality tool that has to work with many different kinds of devices.
 
 ![BrowserStack logo](https://p14.zdusercontent.com/attachment/1015988/Ny9tlE4d3aFnTRy2fCe5DnGmD?token=eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..ysDfVKpj0e7uNy7L8mDXvg.x-oSnNSTgDj6-ankmKZ6HzYgcFO0Se6om0uPk6a0wXTGflh2TtpYfsJbNMhZSC7LctlPyfup03x4on1U_4MuDrxiCDoFGioyBbeRf7uL3fPBWtshWHK9FGYsoTvw0RsdGJqNgn7gsmrv4Y1gH4WKWDOcj5jP-eGgNXDqIaYrijkuZ9CFgYvSPZcD6ybAGiv9CFN4BV9DE-XHngL853-wr77P6kxfOklowd5Jch6iK7vbksQYng8L4i20hHs8bWCnbClx0M9xmhyeNqHUMqpS8z6cEZtjDZPDC6I6RX7se-U.Ol6p4nL5NFEEKvB77PN0-g)
