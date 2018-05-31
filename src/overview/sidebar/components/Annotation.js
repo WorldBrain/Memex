@@ -9,8 +9,7 @@ class Annotation extends React.Component {
     }
 
     state = {
-        truncated: false,
-        truncatedText: '',
+        truncated: {},
 
         annotationText: '',
         annotationEditMode: false,
@@ -20,20 +19,32 @@ class Annotation extends React.Component {
 
     componentDidMount() {
         const { annotation } = this.props
+        const truncated = {}
+        let annotationText = ''
 
-        if (annotation.highlight.length > 280) {
-            const truncatedText = annotation.highlight.slice(0, 280) + ' [..]'
-            this.setState({
-                truncatedText,
-                truncated: true,
-            })
-        }
+        if (annotation.highlight)
+            truncated.highlight = this.getTruncatedObject(annotation.highlight)
 
         if (annotation.body) {
-            this.setState({
-                annotationText: annotation.body,
-            })
+            truncated.annotation = this.getTruncatedObject(annotation.body)
+            annotationText = annotation.body
         }
+
+        this.setState({
+            truncated,
+            annotationText,
+        })
+    }
+
+    getTruncatedObject = text => {
+        if (text.length > 280) {
+            const truncatedText = text.slice(0, 280) + ' [..]'
+            return {
+                isTruncated: true,
+                text: truncatedText,
+            }
+        }
+        return null
     }
 
     handleChange = e => {
@@ -102,6 +113,15 @@ class Annotation extends React.Component {
         })
     }
 
+    toggleTruncation = name => () => {
+        const truncated = { ...this.state.truncated }
+        truncated[name].isTruncated = !truncated[name].isTruncated
+
+        this.setState({
+            truncated,
+        })
+    }
+
     setFooterState = footerState => () =>
         this.setState({
             footerState,
@@ -113,11 +133,16 @@ class Annotation extends React.Component {
         else this.setFooterState('edit')()
     }
 
-    renderShowButton() {
-        if (this.state.truncatedText) {
+    renderShowButton(name) {
+        const { truncated } = this.state
+        if (truncated[name]) {
             return (
-                <div className={styles.showMore} onClick={this.toggleTruncate}>
-                    Show {this.state.truncated ? 'more' : 'less'}
+                <div
+                    className={styles.showMore}
+                    onClick={this.toggleTruncation(name)}
+                >
+                    Show{' '}
+                    {this.state.truncated[name].isTruncated ? 'more' : 'less'}
                 </div>
             )
         }
@@ -125,8 +150,18 @@ class Annotation extends React.Component {
     }
 
     renderHighlight() {
-        if (this.state.truncated) return this.state.truncatedText
+        const { truncated } = this.state
+        if (truncated.highlight && truncated.highlight.isTruncated)
+            return truncated.highlight.text
         else return this.props.annotation.highlight
+    }
+
+    renderAnnotation() {
+        const { truncated, annotationEditMode } = this.state
+        if (annotationEditMode) return ''
+        if (truncated.annotation && truncated.annotation.isTruncated)
+            return truncated.annotation.text
+        else return this.props.annotation.body
     }
 
     renderAnnotationInput() {
@@ -156,6 +191,13 @@ class Annotation extends React.Component {
                 <div className={styles.highlight}>
                     {this.renderHighlight()}
                     {this.renderShowButton()}
+                </div>
+
+                <div className={styles.annotationText}>
+                    {this.renderAnnotation()}
+                    {this.state.annotationEditMode
+                        ? null
+                        : this.renderShowButton('annotation')}
                 </div>
 
                 {this.renderAnnotationInput()}

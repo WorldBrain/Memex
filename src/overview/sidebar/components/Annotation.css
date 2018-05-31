@@ -15,12 +15,19 @@
     margin-bottom: 10px;
 }
 
-.showMore {
-    margin: 10px auto;
+.showmore {
+    margin: 8px auto;
     width: 20%;
     text-align: center;
     cursor: pointer;
     font-weight: 500;
+    font-size: 0.9em;
+}
+
+.annotationText {
+    margin-left: 10px;
+    font-size: 13px;
+    font-weight: 300;
 }
 
 .footer {
