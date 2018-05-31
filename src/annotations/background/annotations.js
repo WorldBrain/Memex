@@ -3,7 +3,6 @@
 const random = () => Math.random() > 0
 
 export const fetchAnnotation = doc => {
-    console.log(doc)
     if (random())
         return {
             body: `Random  comment at url ${doc.url}`,

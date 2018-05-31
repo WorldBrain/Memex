@@ -4,7 +4,7 @@ import * as actions from './actions'
 
 const defaultState = {
     showSidebar: false,
-    annotation: undefined,
+    annotation: {},
 }
 
 const setShowSidebar = (state, showSidebar) => ({

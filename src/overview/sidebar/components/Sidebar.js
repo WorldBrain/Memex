@@ -50,7 +50,7 @@ const Sidebar = ({ showSidebar, handleStateChange, annotation }) => (
 Sidebar.propTypes = {
     showSidebar: PropTypes.bool.isRequired,
     handleStateChange: PropTypes.func.isRequired,
-    annotation: PropTypes.object,
+    annotation: PropTypes.object.isRequired,
 }
 
 export default Sidebar

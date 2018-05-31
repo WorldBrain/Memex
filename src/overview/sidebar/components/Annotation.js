@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import styles from './annotation.css'
+import styles from './Annotation.css'
 
 class Annotation extends React.Component {
     static propTypes = {
@@ -68,7 +68,7 @@ class Annotation extends React.Component {
                 {this.renderShowButton()}
                 <div className={styles.footer}>
                     {this.renderTimestamp()}
-                    {this.renderFooterInfo()}
+                    {this.renderFooterIcons()}
                 </div>
             </div>
         )

@@ -8,7 +8,7 @@ const MAX_CHARS_PER_ROW = 48
 
 class CommentBox extends React.Component {
     static propTypes = {
-        comment: PropTypes.object,
+        comment: PropTypes.object.isRequired,
     }
 
     state = {
@@ -83,7 +83,6 @@ class CommentBox extends React.Component {
     }
 
     render() {
-        console.log(this.state)
         return (
             <div className={styles.commentBox}>
                 <textarea
