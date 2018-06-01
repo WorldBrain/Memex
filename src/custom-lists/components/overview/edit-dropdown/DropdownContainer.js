@@ -33,9 +33,6 @@ class DropdownContainer extends Component {
         }
     }
 
-    /**
-     * Domain inputs need to allow '.' while lists shouldn't.
-     */
     get inputBlockPattern() {
         return /[^\w\s-]/gi
     }
@@ -115,6 +112,16 @@ class DropdownContainer extends Component {
         else if (newurlState === 'all') newurlState = 'none'
         else if (newurlState === 'none') newurlState = 'all'
         else if (newurlState === 'some') newurlState = 'none'
+
+        // TODO: dispatch actions to temporary change the state unless apply is hit.
+        switch (newurlState) {
+            case 'all':
+                break
+            case 'none':
+                break
+            case 'some':
+                break
+        }
 
         this.setState(state => ({
             ...state,

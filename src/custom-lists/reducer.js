@@ -1,4 +1,6 @@
 import { createReducer } from 'redux-act'
+import difference from 'lodash/fp/difference'
+import intersection from 'lodash/fp/intersection'
 
 import * as actions from './actions'
 
@@ -23,11 +25,18 @@ const defaultState = {
     },
     listEditDropdown: false,
     urlsToEdit: [],
+    tempLists: [],
 }
 
 const getAllLists = (state, lists) => ({
     ...state,
     lists,
+    tempLists: lists,
+})
+
+const setTempLists = state => ({
+    ...state,
+    tempLists: state.lists,
 })
 
 const createList = (state, list) => ({
@@ -126,6 +135,67 @@ const toggleUrlToEdit = (state, url) => {
     }
 }
 
+const bulkRemovePagesFromList = (state, id) => {
+    const { urlsToEdit } = state
+    const list = state.tempLists.find(x => x._id === id)
+    const index = state.tempLists.indexOf(list)
+
+    // difference returns Arr1 - Arr2 (all values of Arr2 removed from Arr1)
+    return {
+        ...state,
+        tempLists: [
+            ...state.tempLists.slice(0, index),
+            {
+                ...list,
+                pages: difference(list.pages, urlsToEdit),
+            },
+            ...state.tempLists.slice(index + 1),
+        ],
+    }
+}
+
+const bulkAddPagesToList = (state, id) => {
+    const { urlsToEdit } = state
+    const list = state.tempLists.find(x => x._id === id)
+    const index = state.tempLists.indexOf(list)
+
+    // difference returns Arr1 - Arr2 (all values of Arr2 removed from Arr1)
+    return {
+        ...state,
+        tempLists: [
+            ...state.tempLists.slice(0, index),
+            {
+                ...list,
+                pages: intersection(list.pages, urlsToEdit),
+            },
+            ...state.tempLists.slice(index + 1),
+        ],
+    }
+}
+
+const saveTempToLists = state => ({
+    ...state,
+    lists: state.tempLists,
+})
+
+const resetPagesinTempList = (state, id) => {
+    const tempList = state.tempLists.find(x => x._id === id)
+    const list = state.lists.find(x => x._id === id)
+    const index = state.tempLists.indexOf(list)
+
+    return {
+        ...state,
+        tempLists: [
+            ...state.tempLists.slice(0, index),
+            {
+                ...tempList,
+                pages: list.pages,
+            },
+            ...state.tempLists.slice(index + 1),
+        ],
+    }
+}
+
 export default createReducer(
     {
         [actions.getAllLists]: getAllLists,
@@ -150,6 +220,11 @@ export default createReducer(
             listEditDropdown: !state.listEditDropdown,
         }),
         [actions.toggleUrlToEdit]: toggleUrlToEdit,
+        [actions.bulkAddPagesToList]: bulkAddPagesToList,
+        [actions.bulkRemovePagesFromList]: bulkRemovePagesFromList,
+        [actions.applyBulkEdits]: saveTempToLists,
+        [actions.resetPagesinTempList]: resetPagesinTempList,
+        [actions.setTempLists]: setTempLists,
     },
     defaultState,
 )

@@ -61,6 +61,22 @@ export const toggleListFilterIndex = createAction(
     'custom-lists/toggleListFilterIndex',
 )
 
+export const bulkAddPagesToList = createAction(
+    'custom-lists/bulkAddPagesToList',
+)
+
+export const bulkRemovePagesFromList = createAction(
+    'custom-lists/bulkRemovePagesFromList',
+)
+
+export const applyBulkEdits = createAction('custom-lists/applyBulkEdits')
+
+export const resetPagesinTempList = createAction(
+    'custom-lists/resetPagesinTempList',
+)
+
+export const setTempLists = createAction('custom-lists/setTempLists')
+
 // returns instance of ListStorageHandler class
 export const listStorage = () => (dispatch, getState) =>
     new ListStorageHandler(dispatch, getState)
