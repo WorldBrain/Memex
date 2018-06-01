@@ -33,3 +33,8 @@
     float: right;
     margin-top: 3px;
 }
+
+.minus {
+    max-height: 2px;
+    font-weight: 800;
+}
