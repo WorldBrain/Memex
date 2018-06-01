@@ -3,7 +3,7 @@ import React from 'react'
 import Checkbox from './Checkbox'
 import { getTooltipState, setTooltipState } from 'src/content-tooltip/utils'
 
-import styles from './settings.css'
+import styles from './Settings.css'
 
 class Tooltip extends React.Component {
     state = {
