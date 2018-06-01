@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 
 import Sidebar from './components/Sidebar'
+import Annotation from './components/Annotation'
 import * as selectors from './selectors'
 import * as actions from './actions'
 
@@ -10,11 +11,17 @@ class SidebarContainer extends React.Component {
     static propTypes = {
         showSidebar: PropTypes.bool.isRequired,
         setShowSidebar: PropTypes.func.isRequired,
-        annotation: PropTypes.object.isRequired,
+        annotations: PropTypes.object.isRequired,
     }
 
     handleStateChange = ({ isOpen }) => {
         if (!isOpen) this.props.setShowSidebar(false)
+    }
+
+    renderAnnotations = () => {
+        return this.props.annotations.map((annotation, i) => (
+            <Annotation annotation={annotation} key={i} />
+        ))
     }
 
     render() {
@@ -22,7 +29,7 @@ class SidebarContainer extends React.Component {
             <div>
                 <Sidebar
                     showSidebar={this.props.showSidebar}
-                    annotation={this.props.annotation}
+                    renderAnnotations={this.renderAnnotations}
                     handleStateChange={this.handleStateChange}
                 />
             </div>
@@ -32,7 +39,7 @@ class SidebarContainer extends React.Component {
 
 const mapStateToProps = state => ({
     showSidebar: selectors.showSidebar(state),
-    annotation: selectors.annotation(state),
+    annotations: selectors.annotations(state),
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -40,4 +47,7 @@ const mapDispatchToProps = dispatch => ({
         dispatch(actions.setShowSidebar(showSidebar)),
 })
 
-export default connect(mapStateToProps, mapDispatchToProps)(SidebarContainer)
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps,
+)(SidebarContainer)

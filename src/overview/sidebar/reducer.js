@@ -4,7 +4,7 @@ import * as actions from './actions'
 
 const defaultState = {
     showSidebar: false,
-    annotation: {},
+    annotations: [],
 }
 
 const setShowSidebar = (state, showSidebar) => ({
@@ -17,16 +17,16 @@ const closeSidebar = state => ({
     showSidebar: false,
 })
 
-const setAnnotation = (state, annotation) => ({
+const setAnnotations = (state, annotations) => ({
     ...state,
-    annotation: annotation,
+    annotations: annotations,
 })
 
 export default createReducer(
     {
         [actions.setShowSidebar]: setShowSidebar,
         [actions.closeSidebar]: closeSidebar,
-        [actions.setAnnotation]: setAnnotation,
+        [actions.setAnnotations]: setAnnotations,
     },
     defaultState,
 )

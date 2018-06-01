@@ -3,7 +3,6 @@ import PropTypes from 'prop-types'
 import Menu from 'react-burger-menu/lib/menus/slide'
 
 import { CommentBox } from 'src/common-ui/components'
-import Annotation from './Annotation'
 import styles from './Sidebar.css'
 
 // Styles for react-burger-menu
@@ -33,7 +32,7 @@ const extraStyles = {
     },
 }
 
-const Sidebar = ({ showSidebar, handleStateChange, annotation }) => (
+const Sidebar = ({ showSidebar, handleStateChange, renderAnnotations }) => (
     <Menu
         isOpen={showSidebar}
         onStateChange={handleStateChange}
@@ -45,7 +44,7 @@ const Sidebar = ({ showSidebar, handleStateChange, annotation }) => (
             <p className={styles.sidebarTitle}>Annotations</p>
             <CommentBox />
             <div className={styles.annotationContainer}>
-                <Annotation annotation={annotation} />
+                {renderAnnotations()}
             </div>
         </div>
     </Menu>
@@ -54,7 +53,7 @@ const Sidebar = ({ showSidebar, handleStateChange, annotation }) => (
 Sidebar.propTypes = {
     showSidebar: PropTypes.bool.isRequired,
     handleStateChange: PropTypes.func.isRequired,
-    annotation: PropTypes.object.isRequired,
+    renderAnnotations: PropTypes.func.isRequired,
 }
 
 export default Sidebar
