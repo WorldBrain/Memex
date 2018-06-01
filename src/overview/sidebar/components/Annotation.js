@@ -30,6 +30,8 @@ class Annotation extends React.Component {
             annotationText = annotation.body
         }
 
+        console.log(this.props)
+
         this.setState({
             truncated,
             annotationText,
@@ -65,14 +67,12 @@ class Annotation extends React.Component {
     renderFooterIcons() {
         return (
             <div className={styles.footerAside}>
+                <span className={styles.trashIcon} />
                 <span
-                    className={styles.icon}
+                    className={styles.editIcon}
                     onClick={this.toggleEditAnnotation}
-                >
-                    x
-                </span>
-                <span className={styles.icon}>x</span>
-                <span className={styles.icon}>x</span>
+                />
+                <span className={styles.goToPageIcon} />
             </div>
         )
     }
@@ -190,7 +190,7 @@ class Annotation extends React.Component {
             <div className={styles.container}>
                 <div className={styles.highlight}>
                     {this.renderHighlight()}
-                    {this.renderShowButton()}
+                    {this.renderShowButton('highlight')}
                 </div>
 
                 <div className={styles.annotationText}>
