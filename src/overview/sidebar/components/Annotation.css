@@ -60,7 +60,8 @@
     margin-left: 6px;
 }
 
-.footerGreenText {
+.footerGreenText,
+.tagPill {
     background-color: #3eb995;
     color: white;
     margin-left: 8px;
@@ -68,6 +69,17 @@
     padding: 3px 10px;
     border-radius: 10px;
     cursor: pointer;
+}
+
+.tagPill {
+    font-size: 0.8em;
+    margin-left: 0px;
+    margin-right: 5px;
+}
+
+.tagsContainer {
+    height: 15px;
+    margin-top: 5px;
 }
 
 .icon {

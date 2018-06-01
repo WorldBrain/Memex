@@ -1,5 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import moment from 'moment'
 
 import styles from './Annotation.css'
 
@@ -16,6 +17,8 @@ class Annotation extends React.Component {
         annotationText: '',
         annotationEditMode: false,
 
+        containsTags: false,
+
         footerState: 'default',
     }
 
@@ -23,6 +26,7 @@ class Annotation extends React.Component {
         const { annotation } = this.props
         const truncated = {}
         let annotationText = ''
+        let containsTags = false
 
         if (annotation.highlight)
             truncated.highlight = this.getTruncatedObject(annotation.highlight)
@@ -32,9 +36,12 @@ class Annotation extends React.Component {
             annotationText = annotation.body
         }
 
+        if (annotation.tags.length) containsTags = true
+
         this.setState({
             truncated,
             annotationText,
+            containsTags,
         })
     }
 
@@ -57,9 +64,12 @@ class Annotation extends React.Component {
 
     renderTimestamp() {
         const { footerState } = this.state
+        const timestamp = moment(this.props.annotation.timestamp).format(
+            'MMMM D YYYY',
+        )
         return (
             <div className={styles.timestamp}>
-                {footerState === 'default' ? 'October 12 2008' : ''}
+                {footerState === 'default' ? timestamp : ''}
             </div>
         )
     }
@@ -116,6 +126,15 @@ class Annotation extends React.Component {
                 </span>
             </div>
         )
+    }
+
+    renderTagPills() {
+        const { tags } = this.props.annotation
+        return tags.map((tag, i) => (
+            <span key={i} className={styles.tagPill}>
+                {tag}
+            </span>
+        ))
     }
 
     findFooterRenderer(state) {
@@ -213,6 +232,9 @@ class Annotation extends React.Component {
         return null
     }
 
+    deriveTagsClass = () =>
+        this.state.containsTags ? styles.tagsContainer : ''
+
     render() {
         return (
             <div className={styles.container}>
@@ -226,6 +248,9 @@ class Annotation extends React.Component {
                     {this.state.annotationEditMode
                         ? null
                         : this.renderShowButton('annotation')}
+                    <div className={this.deriveTagsClass()}>
+                        {this.renderTagPills()}
+                    </div>
                 </div>
 
                 {this.renderAnnotationInput()}
