@@ -8,21 +8,22 @@ To comply with the [anatomy of a WebExtension](https://developer.mozilla.org/en-
 this extension consists of the following parts (found in
 [`extension/`](extension/) after compilation):
 
-- `background.js` always runs, in an 'empty invisible tab', listening for
-  messages and events.
-- `content_script.js` is loaded into every web page that is visited. It is
-  invisible from that web page's own scripts, and can talk to the background
-  script.
-- `overview/overview.html`, with the resources in that folder, provides the main
-  user interface.
-- `options/options.html` (plus resources) is a technically separate application
-  that provides the settings page.
+-   `background.js` always runs, in an 'empty invisible tab', listening for
+    messages and events.
+-   `content_script.js` is loaded into every web page that is visited. It is
+    invisible from that web page's own scripts, and can talk to the background
+    script.
+-   `overview/overview.html`, with the resources in that folder, provides the main
+    user interface.
+-   `options/options.html` (plus resources) is a technically separate application
+    that provides the settings page.
 
 The parts communicate in two ways:
-- Messaging through `browser.sendMessage`, usually done implicitly by using a
-  remote procedure call ([`util/webextensionRPC.js`](src/util/webextensionRPC.js)).
-- Through the in-browser PouchDB database, they get to see the same data, and
-  can react to changes made by other parts.
+
+-   Messaging through `browser.sendMessage`, usually done implicitly by using a
+    remote procedure call ([`util/webextensionRPC.js`](src/util/webextensionRPC.js)).
+-   Through the in-browser PouchDB database, they get to see the same data, and
+    can react to changes made by other parts.
 
 Besides these parts,
 [`browser-polyfill.js`](https://github.com/mozilla/webextension-polyfill/)
@@ -51,13 +52,13 @@ the next module is triggered to start analysing the page.
 ### [`src/page-analysis/`](src/page-analysis/): (web)page analysis
 
 This extracts and stores information about the page in a given tab, such as:
-- A full html version of the rendered page, by 'freeze-drying' it.
-- The plain text of the page, mainly for the full-text search.
-- Metadata, such as its author, title, etcetera.
-- A screenshot for visual recognition.
+
+-   A full html version of the rendered page, by 'freeze-drying' it.
+-   The plain text of the page, mainly for the full-text search.
+-   Metadata, such as its author, title, etcetera.
+-   A screenshot for visual recognition.
 
 ### [`src/page-storage/`](src/page-storage/): (web)page storage
-
 
 Code for displaying the locally stored web pages, making them accessible on
 their own URL.
@@ -100,11 +101,9 @@ could perhaps be packaged and published as an NPM module some day.
 
 ### `...`: other stuff
 
-The build process is a `Makefile`, that runs some `npm` commands specified in
-`package.json`, which in turn start the corresponding tasks in
-`gulpfile.babel.js` (transpiled by settings in `.babelrc`). All lurking there
-so you only have to type `make` to get things running.
+The build process is implemented using webpack v4. The main build entrypoint lives in
+`webpack.config.babel.js` with the core logic split up into several modules in the `build/` directory.
 
 And a bunch of other development tool configurations, the usual cruft.
 
-So much for the code tour. :zzz:  Any questions? :point_up:
+So much for the code tour. :zzz: Any questions? :point_up:
