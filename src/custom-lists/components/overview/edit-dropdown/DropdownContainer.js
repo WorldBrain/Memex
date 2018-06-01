@@ -11,6 +11,11 @@ class DropdownContainer extends Component {
     static propTypes = {
         onFilterDel: PropTypes.func,
         results: PropTypes.array.isRequired,
+        bulkAddPagesToList: PropTypes.func.isRequired,
+        bulkRemovePagesFromList: PropTypes.func.isRequired,
+        applyBulkEdits: PropTypes.func.isRequired,
+        resetPagesinTempList: PropTypes.func.isRequired,
+        setTempLists: PropTypes.func.isRequired,
     }
 
     static defaultProps = {
@@ -31,6 +36,10 @@ class DropdownContainer extends Component {
             filters: props.results, // Actual lists associated with the page; will only change when DB updates
             focused: props.results.length ? 0 : -1,
         }
+    }
+
+    componentWillMount() {
+        this.props.setTempLists()
     }
 
     get inputBlockPattern() {
@@ -116,10 +125,13 @@ class DropdownContainer extends Component {
         // TODO: dispatch actions to temporary change the state unless apply is hit.
         switch (newurlState) {
             case 'all':
+                this.props.bulkAddPagesToList(listId)
                 break
             case 'none':
+                this.props.bulkRemovePagesFromList(listId)
                 break
             case 'some':
+                this.props.resetPagesinTempList(listId)
                 break
         }
 

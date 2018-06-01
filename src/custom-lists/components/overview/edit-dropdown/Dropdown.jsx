@@ -26,7 +26,12 @@ const Dropdown = props => (
             </div>
             <div>
                 <span style={{ padding: '0 14px' }}>0 list(s) selected</span>
-                <span className={styles.applyButton}>Apply</span>
+                <span
+                    onClick={props.applyBulkEdits}
+                    className={styles.applyButton}
+                >
+                    Apply
+                </span>
             </div>
         </div>
     </div>
@@ -38,6 +43,7 @@ Dropdown.propTypes = {
     onListSearchKeyDown: PropTypes.func.isRequired,
     setInputRef: PropTypes.func.isRequired,
     listSearchValue: PropTypes.string,
+    applyBulkEdits: PropTypes.func.isRequired,
 }
 
 export default Dropdown

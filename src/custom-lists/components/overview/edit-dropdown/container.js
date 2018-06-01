@@ -1,15 +1,16 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
-// import { bindActionCreators } from 'redux'
+import { bindActionCreators } from 'redux'
 
 import Dropdown from './DropdownContainer'
 import EditDropdown from './ListEditDropdown'
-import { selectors } from 'src/custom-lists'
+import { selectors, actions } from 'src/custom-lists'
 
 class ListEditDropdown extends Component {
     static propTypes = {
         urlsAdded: PropTypes.arrayOf(String).isRequired,
+        applyBulkEdits: PropTypes.func.isRequired,
     }
 
     constructor(props) {
@@ -20,7 +21,7 @@ class ListEditDropdown extends Component {
     }
 
     toggleAddToList = () => {
-        console.log('toggle')
+        this.props.applyBulkEdits()
         this.setState({
             addToList: !this.state.addToList,
         })
@@ -46,7 +47,20 @@ const mapStateToProps = state => ({
     results: selectors.results(state),
 })
 
+const mapDispatchToProps = dispatch => ({
+    ...bindActionCreators(
+        {
+            bulkAddPagesToList: actions.bulkAddPagesToList,
+            bulkRemovePagesFromList: actions.bulkRemovePagesFromList,
+            applyBulkEdits: actions.applyBulkEdits,
+            resetPagesinTempList: actions.resetPagesinTempList,
+            setTempLists: actions.setTempLists,
+        },
+        dispatch,
+    ),
+})
+
 export default connect(
     mapStateToProps,
-    null,
+    mapDispatchToProps,
 )(ListEditDropdown)

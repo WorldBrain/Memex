@@ -16,7 +16,7 @@ export const styles = {
         padding: '4em 0',
         background: '#FCFBFB',
         overflow: 'unset',
-        fontSize: '0.75rem',
+        fontSize: '0.68rem',
     },
     bmMorphShape: {
         fill: '#373a47',

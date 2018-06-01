@@ -1,6 +1,6 @@
 import { createReducer } from 'redux-act'
 import difference from 'lodash/fp/difference'
-import intersection from 'lodash/fp/intersection'
+import union from 'lodash/fp/union'
 
 import * as actions from './actions'
 
@@ -155,9 +155,12 @@ const bulkRemovePagesFromList = (state, id) => {
 }
 
 const bulkAddPagesToList = (state, id) => {
+    console.log(id)
+
     const { urlsToEdit } = state
     const list = state.tempLists.find(x => x._id === id)
     const index = state.tempLists.indexOf(list)
+    console.log(list, index)
 
     // difference returns Arr1 - Arr2 (all values of Arr2 removed from Arr1)
     return {
@@ -166,7 +169,7 @@ const bulkAddPagesToList = (state, id) => {
             ...state.tempLists.slice(0, index),
             {
                 ...list,
-                pages: intersection(list.pages, urlsToEdit),
+                pages: union(list.pages, urlsToEdit),
             },
             ...state.tempLists.slice(index + 1),
         ],
