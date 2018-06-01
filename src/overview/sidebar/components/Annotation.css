@@ -57,6 +57,7 @@
 .footerText {
     color: #818181;
     cursor: pointer;
+    margin-left: 6px;
 }
 
 .footerGreenText {

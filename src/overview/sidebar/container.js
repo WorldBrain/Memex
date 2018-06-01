@@ -11,16 +11,25 @@ class SidebarContainer extends React.Component {
     static propTypes = {
         showSidebar: PropTypes.bool.isRequired,
         setShowSidebar: PropTypes.func.isRequired,
-        annotations: PropTypes.object.isRequired,
+        annotations: PropTypes.array.isRequired,
     }
 
     handleStateChange = ({ isOpen }) => {
         if (!isOpen) this.props.setShowSidebar(false)
     }
 
+    updateAnnotation = () => console.log('Updated annotation')
+
+    deleteAnnotation = () => console.log('Deleted Annotation')
+
     renderAnnotations = () => {
         return this.props.annotations.map((annotation, i) => (
-            <Annotation annotation={annotation} key={i} />
+            <Annotation
+                annotation={annotation}
+                key={i}
+                deleteFn={this.deleteAnnotation}
+                updateFn={this.updateAnnotation}
+            />
         ))
     }
 

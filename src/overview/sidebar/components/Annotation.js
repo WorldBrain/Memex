@@ -5,7 +5,9 @@ import styles from './Annotation.css'
 
 class Annotation extends React.Component {
     static propTypes = {
-        annotation: PropTypes.object,
+        annotation: PropTypes.object.isRequired,
+        deleteFn: PropTypes.func.isRequired,
+        updateFn: PropTypes.func.isRequired,
     }
 
     state = {
@@ -29,8 +31,6 @@ class Annotation extends React.Component {
             truncated.annotation = this.getTruncatedObject(annotation.body)
             annotationText = annotation.body
         }
-
-        console.log(this.props)
 
         this.setState({
             truncated,
@@ -67,7 +67,10 @@ class Annotation extends React.Component {
     renderFooterIcons() {
         return (
             <div className={styles.footerAside}>
-                <span className={styles.trashIcon} />
+                <span
+                    className={styles.trashIcon}
+                    onClick={this.setFooterState('delete')}
+                />
                 <span
                     className={styles.editIcon}
                     onClick={this.toggleEditAnnotation}
@@ -86,7 +89,31 @@ class Annotation extends React.Component {
                 >
                     Cancel
                 </span>
-                <span className={styles.footerGreenText}>Save</span>
+                <span
+                    className={styles.footerGreenText}
+                    onClick={this.props.updateFn}
+                >
+                    Save
+                </span>
+            </div>
+        )
+    }
+
+    renderDeleteButtons() {
+        return (
+            <div className={styles.footerAside}>
+                <span
+                    className={styles.footerGreenText}
+                    onClick={this.props.deleteFn}
+                >
+                    Yes
+                </span>
+                <span
+                    className={styles.footerText}
+                    onClick={this.setFooterState('default')}
+                >
+                    Cancel
+                </span>
             </div>
         )
     }
@@ -94,6 +121,7 @@ class Annotation extends React.Component {
     findFooterRenderer(state) {
         if (state === 'default') return this.renderFooterIcons()
         else if (state === 'edit') return this.renderEditButtons()
+        else if (state === 'delete') return this.renderDeleteButtons()
     }
 
     renderFooter() {
