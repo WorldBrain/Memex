@@ -171,7 +171,7 @@ const getPaddedMins = time =>
 const getTimeEstStr = time => {
     const timeEstimate = `${getHours(time)}:${getPaddedMins(time)}`
     return timeEstimate === '0:00'
-        ? '0:00'
+        ? timeEstimate
         : moment.duration(timeEstimate).humanize()
 }
 const getEstimate = (complete, remaining) => ({
