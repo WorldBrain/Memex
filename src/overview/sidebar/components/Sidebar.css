@@ -2,6 +2,7 @@
     padding: 30px 15px;
     height: 100%;
     background: #fafafa;
+    overflow-y: scroll;
 }
 
 .sidebarTitle,
@@ -22,6 +23,12 @@
 
 .annotationContainer {
     margin-top: 10px;
-    overflow-y: scroll;
     height: auto;
+    max-height: 100vh;
+    background: #fafafa;
+}
+
+.extraHeight {
+    height: 100px;
+    background-color: #fafafa;
 }

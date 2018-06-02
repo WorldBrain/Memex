@@ -45,6 +45,7 @@ const Sidebar = ({ showSidebar, handleStateChange, renderAnnotations }) => (
             <CommentBox />
             <div className={styles.annotationContainer}>
                 {renderAnnotations()}
+                <div className={styles.extraHeight} />
             </div>
         </div>
     </Menu>

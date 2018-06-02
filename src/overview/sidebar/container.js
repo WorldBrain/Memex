@@ -14,6 +14,18 @@ class SidebarContainer extends React.Component {
         annotations: PropTypes.array.isRequired,
     }
 
+    componentDidMount() {
+        document.addEventListener('scroll', this.preventParentScroll)
+    }
+
+    componentWillUnmount() {
+        document.removeEventListener('scroll', this.preventParentScroll)
+    }
+
+    preventParentScroll = event => {
+        if (this.props.showSidebar) window.scrollTo(0, 0)
+    }
+
     handleStateChange = ({ isOpen }) => {
         if (!isOpen) this.props.setShowSidebar(false)
     }
