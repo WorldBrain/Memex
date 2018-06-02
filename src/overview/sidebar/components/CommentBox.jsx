@@ -81,6 +81,11 @@ class CommentBox extends React.Component {
                     ref={this.setInputRef}
                 />
                 <br />
+                <input
+                    type="text"
+                    className={styles.tagsInput}
+                    placeholder="Add tags"
+                />
                 <div className={styles.buttonHolder}>
                     {this.renderCancelButton()}
                     <button className={styles.greenButton} onClick={this.save}>
