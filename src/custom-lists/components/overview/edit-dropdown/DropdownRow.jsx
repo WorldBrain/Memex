@@ -16,7 +16,16 @@ class DropdownRow extends PureComponent {
             case 'all':
                 return <i className="material-icons">done</i>
             case 'some':
-                return <span className={styles.minus}>-</span>
+                return (
+                    <span
+                        className={styles.minus}
+                        title={`Only some of the selected element(s) are on this list/have this tag.
+                        Click once to remove all, twice to add all, three
+                        times to go back to default`}
+                    >
+                        -
+                    </span>
+                )
             default:
                 return null
         }

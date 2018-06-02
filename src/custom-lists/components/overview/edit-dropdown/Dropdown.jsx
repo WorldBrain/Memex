@@ -21,11 +21,9 @@ const Dropdown = props => (
                 />
                 <i className="material-icons">search</i>
             </form>
-            <div style={{ overflowY: 'auto', maxHeight: '240px' }}>
-                {props.children}
-            </div>
-            <div>
-                <span style={{ padding: '0 14px' }}>0 list(s) selected</span>
+            <div className={styles.dropdownBody}>{props.children}</div>
+            <div className={styles.dropdownFooter}>
+                <span className={styles.listSelected}>0 list(s) selected</span>
                 <span
                     onClick={props.applyBulkEdits}
                     className={styles.applyButton}

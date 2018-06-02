@@ -54,33 +54,14 @@ class DropdownContainer extends Component {
     getDisplayLists = () =>
         this.state.displayFilters.map((value, i) => ({
             value,
-            active: this.isPageList(value),
             focused: this.state.focused === i,
         }))
-
-    isPageList = () => {}
 
     getSearchVal = () =>
         this.state.searchVal
             .trim()
             .replace(/\s\s+/g, ' ')
             .toLowerCase()
-
-    canCreateList() {
-        if (!this.allowIndexUpdate) {
-            return false
-        }
-
-        const searchVal = this.getSearchVal()
-
-        return (
-            !!searchVal.length &&
-            !this.state.displayFilters.reduce(
-                (acc, list) => acc || list === searchVal,
-                false,
-            )
-        )
-    }
 
     suggest = searchKey =>
         this.state.filters.filter(obj =>
@@ -170,7 +151,7 @@ class DropdownContainer extends Component {
 
     handleSearchArrowPress(event) {
         event.preventDefault()
-        let offset = this.canCreateList() ? 0 : 1
+        let offset = 0
 
         if (!this.allowIndexUpdate) offset = 1
 
@@ -241,7 +222,6 @@ class DropdownContainer extends Component {
                 onListSearchChange={this.handleSearchChange}
                 onListSearchKeyDown={this.handleSearchKeyDown}
                 setInputRef={this.setInputRef}
-                numberOfLists={this.state.filters.length}
                 listSearchValue={this.state.searchVal}
                 {...this.props}
             >

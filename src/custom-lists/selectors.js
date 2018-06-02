@@ -46,7 +46,7 @@ const getListUrlState = (lists, urlsToEdit) => {
 
     const diff = difference(pages, urlsToEdit)
     const diffLen = diff.length
-    if (diffLen === 0 && pagesLen <= editLen) return 'all'
+    if (diffLen === 0 && pagesLen >= editLen) return 'all'
     else if (diffLen === pagesLen) return 'none'
 
     return 'some'
@@ -89,4 +89,9 @@ export const getDeletingID = createSelector(
 export const listEditDropdown = createSelector(
     customLists,
     state => state.listEditDropdown,
+)
+
+export const showAddToList = createSelector(
+    customLists,
+    state => state.showAddToList,
 )

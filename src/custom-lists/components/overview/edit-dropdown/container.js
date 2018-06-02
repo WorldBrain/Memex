@@ -11,6 +11,8 @@ class ListEditDropdown extends Component {
     static propTypes = {
         urlsAdded: PropTypes.arrayOf(String).isRequired,
         applyBulkEdits: PropTypes.func.isRequired,
+        handleToggleAddToList: PropTypes.func.isRequired,
+        showAddToList: PropTypes.bool.isRequired,
     }
 
     constructor(props) {
@@ -20,20 +22,13 @@ class ListEditDropdown extends Component {
         }
     }
 
-    toggleAddToList = () => {
-        this.props.applyBulkEdits()
-        this.setState({
-            addToList: !this.state.addToList,
-        })
-    }
-
     handleRenderDropdown = () =>
-        this.state.addToList ? <Dropdown {...this.props} /> : null
+        this.props.showAddToList ? <Dropdown {...this.props} /> : null
 
     render() {
         return (
             <EditDropdown
-                toggleAddToList={this.toggleAddToList}
+                toggleAddToList={this.props.handleToggleAddToList}
                 urlsAdded={this.props.urlsAdded}
                 handleRenderDropdown={this.handleRenderDropdown()}
                 {...this.props}
@@ -45,6 +40,7 @@ class ListEditDropdown extends Component {
 const mapStateToProps = state => ({
     urlsAdded: selectors.getUrlsToEdit(state),
     results: selectors.results(state),
+    showAddToList: selectors.showAddToList(state),
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -55,6 +51,8 @@ const mapDispatchToProps = dispatch => ({
             applyBulkEdits: actions.applyBulkEdits,
             resetPagesinTempList: actions.resetPagesinTempList,
             setTempLists: actions.setTempLists,
+            handleToggleAddToList: actions.handleToggleAddToList,
+            closeAddToList: actions.closeAddToList,
         },
         dispatch,
     ),

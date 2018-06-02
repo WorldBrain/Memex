@@ -26,6 +26,7 @@ const defaultState = {
     listEditDropdown: false,
     urlsToEdit: [],
     tempLists: [],
+    showAddToList: false,
 }
 
 const getAllLists = (state, lists) => ({
@@ -155,12 +156,9 @@ const bulkRemovePagesFromList = (state, id) => {
 }
 
 const bulkAddPagesToList = (state, id) => {
-    console.log(id)
-
     const { urlsToEdit } = state
     const list = state.tempLists.find(x => x._id === id)
     const index = state.tempLists.indexOf(list)
-    console.log(list, index)
 
     // difference returns Arr1 - Arr2 (all values of Arr2 removed from Arr1)
     return {
@@ -199,6 +197,16 @@ const resetPagesinTempList = (state, id) => {
     }
 }
 
+const toggleAddToList = state => ({
+    ...state,
+    showAddToList: !state.showAddToList,
+})
+
+const closeAddToList = state => ({
+    ...state,
+    showAddToList: false,
+})
+
 export default createReducer(
     {
         [actions.getAllLists]: getAllLists,
@@ -228,6 +236,8 @@ export default createReducer(
         [actions.applyBulkEdits]: saveTempToLists,
         [actions.resetPagesinTempList]: resetPagesinTempList,
         [actions.setTempLists]: setTempLists,
+        [actions.toggleAddToList]: toggleAddToList,
+        [actions.closeAddToList]: closeAddToList,
     },
     defaultState,
 )

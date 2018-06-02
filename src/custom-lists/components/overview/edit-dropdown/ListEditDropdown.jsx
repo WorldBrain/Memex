@@ -1,15 +1,19 @@
 import React, { PureComponent } from 'react'
 import cx from 'classnames'
-import Proptypes from 'prop-types'
+import PropTypes from 'prop-types'
+import onClickOutside from 'react-onclickoutside'
 
 import styles from './ListEditDropdown.css'
 
 class EditDropdown extends PureComponent {
     static propTypes = {
-        urlsAdded: Proptypes.arrayOf(String).isRequired,
-        toggleAddToList: Proptypes.func.isRequired,
-        handleRenderDropdown: Proptypes.node,
+        urlsAdded: PropTypes.arrayOf(PropTypes.string).isRequired,
+        toggleAddToList: PropTypes.func.isRequired,
+        handleRenderDropdown: PropTypes.node,
+        closeAddToList: PropTypes.func.isRequired,
     }
+
+    handleClickOutside = () => this.props.closeAddToList()
 
     render() {
         return (
@@ -60,4 +64,4 @@ class EditDropdown extends PureComponent {
     }
 }
 
-export default EditDropdown
+export default onClickOutside(EditDropdown)

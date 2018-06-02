@@ -83,3 +83,16 @@
     text-decoration: none;
     cursor: pointer;
 }
+
+.listSelected {
+    padding: 0 14px;
+}
+
+.dropdownBody {
+    overflow-y: auto;
+    max-height: 240px;
+}
+
+.dropdownFooter {
+    padding: 12px 12px;
+}

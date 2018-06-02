@@ -77,6 +77,10 @@ export const resetPagesinTempList = createAction(
 
 export const setTempLists = createAction('custom-lists/setTempLists')
 
+export const toggleAddToList = createAction('custom-lists/toggleAddToList')
+
+export const closeAddToList = createAction('custom-lists/closeAddToList')
+
 // returns instance of ListStorageHandler class
 export const listStorage = () => (dispatch, getState) =>
     new ListStorageHandler(dispatch, getState)
@@ -123,6 +127,10 @@ export const addUrltoList = (url, index, id) => async (dispatch, getState) => {
     dispatch(addPagetoList(url, index))
 }
 
+export const handleToggleAddToList = () => (dispatch, getState) => {
+    dispatch(applyBulkEdits())
+    dispatch(toggleAddToList())
+}
 // TODO: change this damn thing
 // Maybe remove it :|smil
 export default class ListStorageHandler {
