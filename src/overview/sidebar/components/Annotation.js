@@ -7,8 +7,8 @@ import styles from './Annotation.css'
 class Annotation extends React.Component {
     static propTypes = {
         annotation: PropTypes.object.isRequired,
-        deleteFn: PropTypes.func.isRequired,
-        updateFn: PropTypes.func.isRequired,
+        deleteAnnotation: PropTypes.func.isRequired,
+        updateAnnotation: PropTypes.func.isRequired,
     }
 
     state = {
@@ -101,7 +101,7 @@ class Annotation extends React.Component {
                 </span>
                 <span
                     className={styles.footerGreenText}
-                    onClick={this.props.updateFn}
+                    onClick={this.props.updateAnnotation}
                 >
                     Save
                 </span>
@@ -114,7 +114,7 @@ class Annotation extends React.Component {
             <div className={styles.footerAside}>
                 <span
                     className={styles.footerGreenText}
-                    onClick={this.props.deleteFn}
+                    onClick={this.props.deleteAnnotation}
                 >
                     Yes
                 </span>

@@ -34,13 +34,15 @@ class SidebarContainer extends React.Component {
 
     deleteAnnotation = () => console.log('Deleted Annotation')
 
+    saveComment = () => console.log('Saved annotation')
+
     renderAnnotations = () => {
         return this.props.annotations.map((annotation, i) => (
             <Annotation
                 annotation={annotation}
                 key={i}
-                deleteFn={this.deleteAnnotation}
-                updateFn={this.updateAnnotation}
+                deleteAnnotation={this.deleteAnnotation}
+                updateAnnotation={this.updateAnnotation}
             />
         ))
     }
@@ -52,6 +54,7 @@ class SidebarContainer extends React.Component {
                     showSidebar={this.props.showSidebar}
                     renderAnnotations={this.renderAnnotations}
                     handleStateChange={this.handleStateChange}
+                    saveComment={this.saveComment}
                 />
             </div>
         )
