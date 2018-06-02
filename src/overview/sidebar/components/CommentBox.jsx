@@ -11,9 +11,10 @@ class CommentBox extends React.Component {
 
     state = {
         commentInput: '',
-        isDisabled: true,
         textareaRows: constants.DEFAULT_ROWS,
         minimized: true,
+        isHidden: false,
+        tags: [],
     }
 
     componentDidMount() {
@@ -25,11 +26,10 @@ class CommentBox extends React.Component {
     }
 
     handleChange = e => {
-        let { isDisabled, minimized, textareaRows } = this.state
+        let { minimized, textareaRows } = this.state
         const comment = e.target.value
 
         if (comment.length === 0) {
-            isDisabled = true
             textareaRows = constants.DEFAULT_ROWS
         } else if (minimized) {
             minimized = false
@@ -38,7 +38,6 @@ class CommentBox extends React.Component {
 
         this.setState({
             commentInput: comment,
-            isDisabled,
             textareaRows,
         })
     }
@@ -50,17 +49,33 @@ class CommentBox extends React.Component {
         this.inputRef.focus()
         this.setState({
             commentInput: '',
-            isDisabled: true,
             textareaRows: constants.DEFAULT_ROWS,
         })
     }
 
     save = () => {
-        const { commentInput } = this.state
-        if (commentInput.length) this.props.saveComment()
+        const { commentInput, tags } = this.state
+        if (commentInput.length) {
+            this.props.saveComment({
+                comment: commentInput,
+                tags,
+            })
+            this.setState({
+                commentInput: '',
+                textareaRows: constants.DEFAULT_ROWS,
+                isHidden: true,
+            })
+        }
     }
 
-    renderCancelButton = () => {
+    toggleHidden = () => {
+        const isHidden = !this.state.isHidden
+        this.setState({
+            isHidden,
+        })
+    }
+
+    renderCancelButton() {
         return (
             <a className={styles.cancel} onClick={this.cancel}>
                 Cancel
@@ -68,7 +83,17 @@ class CommentBox extends React.Component {
         )
     }
 
-    render() {
+    renderAddNoteButton() {
+        if (!this.state.isHidden) return null
+        return (
+            <button className={styles.addNote} onClick={this.toggleHidden}>
+                Add note
+            </button>
+        )
+    }
+
+    renderCommentBox() {
+        if (this.state.isHidden) return null
         return (
             <div className={styles.commentBox}>
                 <textarea
@@ -92,6 +117,19 @@ class CommentBox extends React.Component {
                         Save
                     </button>
                 </div>
+            </div>
+        )
+    }
+
+    render() {
+        return (
+            <div
+                className={
+                    this.state.isHidden ? styles.commentBoxContainer : ''
+                }
+            >
+                {this.renderCommentBox()}
+                {this.renderAddNoteButton()}
             </div>
         )
     }

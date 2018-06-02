@@ -1,3 +1,7 @@
+.commentBoxContainer {
+    height: 20px;
+}
+
 .commentBox {
     margin-top: 10px;
 }
@@ -51,7 +55,8 @@
     border: none;
 }
 
-.greenButton {
+.greenButton,
+.addNote {
     background: #3eb995;
     color: #fff;
     cursor: pointer;
@@ -59,6 +64,12 @@
     border-radius: 10px;
     padding: 3px 18px;
     font-size: 12px;
+}
+
+.addNote {
+    position: absolute;
+    top: 10px;
+    right: 10px;
 }
 
 .cancel {

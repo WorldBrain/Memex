@@ -34,7 +34,15 @@ class SidebarContainer extends React.Component {
 
     deleteAnnotation = () => console.log('Deleted Annotation')
 
-    saveComment = () => console.log('Saved annotation')
+    saveComment = ({ comment, tags }) => {
+        const annotation = {
+            highlight: null,
+            body: comment,
+            tags,
+            timestamp: new Date(),
+        }
+        console.log(annotation)
+    }
 
     renderAnnotations = () => {
         return this.props.annotations.map((annotation, i) => (
