@@ -34,6 +34,12 @@ class SidebarContainer extends React.Component {
 
     deleteAnnotation = () => console.log('Deleted Annotation')
 
+    openAnnotationURL = url => () =>
+        browser.tabs.create({
+            active: true,
+            url,
+        })
+
     saveComment = ({ comment, tags }) => {
         const annotation = {
             highlight: null,
@@ -51,6 +57,7 @@ class SidebarContainer extends React.Component {
                 key={i}
                 deleteAnnotation={this.deleteAnnotation}
                 updateAnnotation={this.updateAnnotation}
+                openAnnotationURL={this.openAnnotationURL}
             />
         ))
     }
