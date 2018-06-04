@@ -96,7 +96,7 @@
   },
   "devDependencies": {
     "@sentry/webpack-plugin": "^1.5.2",
-    "@storybook/react": "^3.4.6",
+    "@storybook/react": "^4.0.0-alpha.8",
     "@types/jest": "^22.1.4",
     "autoprefixer": "^7.1.1",
     "babel-core": "^6.26.3",
