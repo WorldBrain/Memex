@@ -7,6 +7,7 @@ import { actions as filterActs, selectors as filters } from './filters'
 import * as constants from './constants'
 import * as selectors from './selectors'
 import { fetchTooltip } from './components/tooltips'
+import { actions as listActs } from 'src/custom-lists'
 
 export const setLoading = createAction('overview/setLoading')
 export const nextPage = createAction('overview/nextPage')
@@ -27,6 +28,7 @@ export const changeHasBookmark = createAction('overview/changeHasBookmark')
 export const incSearchCount = createAction('overview/incSearchCount')
 export const initSearchCount = createAction('overview/initSearchCount')
 export const setResultDeleting = createAction('overview/setResultDeleting')
+export const bulkSetHasBookmark = createAction('overview/bulkSetHasBookmark')
 
 export const resetActiveTagIndex = createAction('overview/resetActiveTagIndex')
 export const setActiveTagIndex = createAction('overview/setActiveTagIndex')
@@ -101,6 +103,7 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
     }
 
     dispatch(setLoading(true))
+    dispatch(listActs.resetUrlToEdit())
 
     if (showTooltip) {
         dispatch(fetchNextTooltip())

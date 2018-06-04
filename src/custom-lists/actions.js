@@ -57,6 +57,8 @@ export const toggleListDropdown = createAction(
 
 export const toggleUrlToEdit = createAction('custom-lists/toggleUrlToEdit')
 
+export const resetUrlToEdit = createAction('custom-lists/resetUrlToEdit')
+
 export const toggleListFilterIndex = createAction(
     'custom-lists/toggleListFilterIndex',
 )

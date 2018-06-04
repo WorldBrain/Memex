@@ -161,6 +161,11 @@ const initSearchCount = (state, searchCount) => ({ ...state, searchCount })
 
 const payloadReducer = key => (state, payload) => ({ ...state, [key]: payload })
 
+const bulkSetHasBookmark = (state, urls) => {
+    // const list = []
+    return state
+}
+
 export default createReducer(
     {
         [actions.appendSearchResult]: handleSearchResult({ overwrite: false }),
@@ -201,6 +206,7 @@ export default createReducer(
         [actions.setActiveTagIndex]: payloadReducer('activeTagIndex'),
         [actions.addTag]: addTag,
         [actions.delTag]: delTag,
+        [actions.bulkSetHasBookmark]: bulkSetHasBookmark,
         [actions.setTooltip]: (state, tooltip) => ({
             ...state,
             tooltip: tooltip,

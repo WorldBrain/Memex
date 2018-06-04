@@ -207,6 +207,11 @@ const closeAddToList = state => ({
     showAddToList: false,
 })
 
+const resetUrlToEdit = state => ({
+    ...state,
+    urlsToEdit: [],
+})
+
 export default createReducer(
     {
         [actions.getAllLists]: getAllLists,
@@ -238,6 +243,7 @@ export default createReducer(
         [actions.setTempLists]: setTempLists,
         [actions.toggleAddToList]: toggleAddToList,
         [actions.closeAddToList]: closeAddToList,
+        [actions.resetUrlToEdit]: resetUrlToEdit,
     },
     defaultState,
 )
