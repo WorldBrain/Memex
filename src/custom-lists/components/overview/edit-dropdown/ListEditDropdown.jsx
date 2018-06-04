@@ -11,6 +11,7 @@ class EditDropdown extends PureComponent {
         toggleAddToList: PropTypes.func.isRequired,
         handleRenderDropdown: PropTypes.node,
         closeAddToList: PropTypes.func.isRequired,
+        handleFavBtnClick: PropTypes.func.isRequired,
     }
 
     handleClickOutside = () => this.props.closeAddToList()
@@ -30,6 +31,7 @@ class EditDropdown extends PureComponent {
                                         styles.favourite,
                                         styles.button,
                                     )}
+                                    onClick={this.props.handleFavBtnClick}
                                 />
                                 Favourite
                             </span>

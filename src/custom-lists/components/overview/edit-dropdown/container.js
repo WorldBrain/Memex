@@ -6,6 +6,7 @@ import { bindActionCreators } from 'redux'
 import Dropdown from './DropdownContainer'
 import EditDropdown from './ListEditDropdown'
 import { selectors, actions } from 'src/custom-lists'
+import { actions as overviewActs } from 'src/overview'
 
 class ListEditDropdown extends Component {
     static propTypes = {
@@ -13,6 +14,7 @@ class ListEditDropdown extends Component {
         applyBulkEdits: PropTypes.func.isRequired,
         handleToggleAddToList: PropTypes.func.isRequired,
         showAddToList: PropTypes.bool.isRequired,
+        handleFavButtonClick: PropTypes.func.isRequired,
     }
 
     constructor(props) {
@@ -31,6 +33,9 @@ class ListEditDropdown extends Component {
                 toggleAddToList={this.props.handleToggleAddToList}
                 urlsAdded={this.props.urlsAdded}
                 handleRenderDropdown={this.handleRenderDropdown()}
+                handleFavBtnClick={this.props.handleFavButtonClick(
+                    this.props.urlsAdded,
+                )}
                 {...this.props}
             />
         )
@@ -56,6 +61,11 @@ const mapDispatchToProps = dispatch => ({
         },
         dispatch,
     ),
+    handleFavButtonClick: urls => () => {
+        console.log(overviewActs)
+
+        dispatch(overviewActs.bulkSetHasBookmark(urls))
+    },
 })
 
 export default connect(
