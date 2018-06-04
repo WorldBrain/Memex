@@ -4,7 +4,6 @@ import { createAndCopyDirectLink } from 'src/direct-linking/content_script/inter
 import { setupUIContainer, destroyUIContainer } from './components'
 import * as interactions from './interactions'
 import { injectCSS } from 'src/search-injection/dom'
-import { OPEN_OPTIONS } from 'src/search-injection/constants'
 
 export async function init() {
     await bodyLoader()
