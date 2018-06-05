@@ -22,46 +22,7 @@
     justify-content: space-between;
 }
 
-.button {
-    display: inline;
-    border: none;
-    background-color: transparent;
-    background-repeat: no-repeat;
-    background-size: contain;
-    cursor: pointer;
-    outline: none;
-    padding: 0px;
-}
-
-.favourite {
-    background-image: url('/img/star_full_grey.svg');
-    width: 20px;
-    height: 20px;
-    padding: 0 15px;
-}
-
-.delete {
-    background-image: url('/img/trash_new_grey.svg');
-    width: 20px;
-    height: 20px;
-    padding: 0 15px;
-}
-
-.addTag {
-    background-image: url('/img/tag_grey.svg');
-    width: 20px;
-    height: 20px;
-    padding: 0 15px;
-}
-
-.addToList {
-    background-image: url('/img/addToList.svg');
-    width: 20px;
-    height: 20px;
-    padding: 0 15px;
-}
-
-.test {
+.buttons {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -69,9 +30,10 @@
     font-weight: 700;
     padding: 0 15px;
     color: #c0c0c0;
+    cursor: pointer;
 }
 
-.test1 {
+.addToList {
     position: relative;
 }
 

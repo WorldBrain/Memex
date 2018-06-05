@@ -25,36 +25,18 @@ class EditDropdown extends PureComponent {
                     </div>
                     <div>
                         <div className={styles.buttonContainer}>
-                            <span className={styles.test}>
-                                <button
-                                    className={cx(
-                                        styles.favourite,
-                                        styles.button,
-                                    )}
-                                    onClick={this.props.handleFavBtnClick}
-                                />
+                            <span
+                                className={styles.buttons}
+                                onClick={this.props.handleFavBtnClick}
+                            >
                                 Favourite
                             </span>
-                            <span className={styles.test}>
-                                <button
-                                    className={cx(styles.delete, styles.button)}
-                                />
-                                Delete
-                            </span>
-                            <span className={styles.test}>
-                                <button
-                                    className={cx(styles.addTag, styles.button)}
-                                />
-                                Add Tags
-                            </span>
-                            <span className={cx(styles.test, styles.test1)}>
-                                <button
-                                    className={cx(
-                                        styles.addToList,
-                                        styles.button,
-                                    )}
-                                    onClick={this.props.toggleAddToList}
-                                />
+                            <span className={styles.buttons}>Delete</span>
+                            <span className={styles.buttons}>Add Tags</span>
+                            <span
+                                className={cx(styles.buttons, styles.addToList)}
+                                onClick={this.props.toggleAddToList}
+                            >
                                 Add To List(s)
                                 {this.props.handleRenderDropdown}
                             </span>
