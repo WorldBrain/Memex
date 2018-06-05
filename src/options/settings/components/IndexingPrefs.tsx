@@ -52,7 +52,7 @@ class IndexingPrefs extends React.PureComponent<Props> {
                     isChecked={this.props.bookmarks}
                     handleChange={this.props.toggleBookmarks}
                 >
-                    All that I bookmarked
+                    All that I bookmarked/tagged
                 </Checkbox>
                 <Checkbox
                     id="index-links"
@@ -65,7 +65,6 @@ class IndexingPrefs extends React.PureComponent<Props> {
                     id="index-stubs"
                     isChecked={this.props.stubs}
                     handleChange={this.props.toggleStubs}
-                    isDisabled={this.props.visits}
                 >
                     Make title and url always searchable (recommended)
                 </Checkbox>

@@ -9,6 +9,7 @@
         "sourceMap": true,
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
+        "allowSyntheticDefaultImports": true,
         "skipDefaultLibCheck": true,
         "skipLibCheck": true,
         "strictNullChecks": false,

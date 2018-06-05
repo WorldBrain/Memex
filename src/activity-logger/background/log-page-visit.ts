@@ -1,3 +1,4 @@
+import { Tabs } from 'webextension-polyfill-ts'
 import moment from 'moment'
 
 import tabManager from './tab-manager'
@@ -9,7 +10,7 @@ import searchIndex from '../../search'
  * indexes display data, and searchable title/URL terms, but returns
  * an async callback for manual invocation of text indexing.
  */
-async function logPageVisit(tab, secsSinceLastVisit = 20) {
+export async function logPageStub(tab: Tabs.Tab, secsSinceLastVisit = 20) {
     const internalTabState = tabManager.getTabState(tab.id)
 
     // Cannot process if tab not tracked
@@ -31,7 +32,6 @@ async function logPageVisit(tab, secsSinceLastVisit = 20) {
                     ),
                 )
             ) {
-                console.log('skipping page due to recent visit:', tab.url)
                 tabManager.clearScheduledLog(tab.id)
 
                 return await searchIndex.addVisit(
@@ -41,29 +41,45 @@ async function logPageVisit(tab, secsSinceLastVisit = 20) {
             }
         }
 
-        const allowFavIcon = !await searchIndex.domainHasFavIcon(tab.url)
+        const allowFavIcon = !(await searchIndex.domainHasFavIcon(tab.url))
         const analysisRes = await analysePage({ tabId: tab.id, allowFavIcon })
 
         // Don't index full-text in this stage
-        const contentCopy = { ...analysisRes.content }
         delete analysisRes.content.fullText
 
-        console.log('indexing page:', tab.url)
         await searchIndex.addPage({
             pageDoc: { url: tab.url, ...analysisRes },
             visits: [internalTabState.visitTime],
             rejectNoContent: false,
         })
-
-        // Return function to afford manual invoking text indexing
-        return () =>
-            searchIndex.addPageTerms({
-                pageDoc: { url: tab.url, content: contentCopy },
-            })
     } catch (err) {
         tabManager.clearScheduledLog(tab.id)
         throw err
     }
 }
 
-export default logPageVisit
+export async function logPageVisit(tab: Tabs.Tab, textOnly = true) {
+    const analysisRes = await analysePage({
+        tabId: tab.id,
+        allowFavIcon: false,
+        allowScreenshot: !textOnly,
+    })
+
+    const pageDoc = { url: tab.url, ...analysisRes }
+
+    if (textOnly) {
+        return searchIndex.addPageTerms({ pageDoc })
+    }
+
+    const internalTabState = tabManager.getTabState(tab.id)
+
+    // Cannot process if tab not tracked
+    if (internalTabState == null) {
+        return
+    }
+
+    await searchIndex.addPage({
+        pageDoc,
+        visits: [internalTabState.visitTime],
+    })
+}

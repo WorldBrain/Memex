@@ -3,11 +3,12 @@ import noop from 'lodash/noop'
 
 import searchIndex from '../../search'
 import { whenPageDOMLoaded, whenTabActive } from '../../util/tab-events'
-import logPageVisit from './log-page-visit'
+import { logPageStub, logPageVisit } from './log-page-visit'
 import { fetchFavIcon } from '../../page-analysis/background/get-fav-icon'
 import { shouldLogTab, updateVisitInteractionData } from './util'
 import { TabState, TabChangeListener } from './types'
 import tabManager from './tab-manager'
+import { STORAGE_KEYS as IDXING_PREF_KEYS } from '../../options/settings/constants'
 
 // `tabs.onUpdated` event fires on tab open - generally takes a few ms, which we can skip attemping visit update
 const fauxVisitThreshold = 100
@@ -44,16 +45,34 @@ export const handleUrl: TabChangeListener = async function(
         await handleVisitEnd(tabId, { url }, tab).catch(noop)
 
         if (await shouldLogTab(tab)) {
-            // Run stage 1 of visit indexing
+            // Grab indexing prefs from storage. TODO: better way/place to do this?
+            const {
+                [IDXING_PREF_KEYS.STUBS]: shouldLogStubs,
+                [IDXING_PREF_KEYS.VISITS]: shouldLogVisits,
+                [IDXING_PREF_KEYS.VISIT_DELAY]: logDelay,
+            } = await browser.storage.local.get([
+                IDXING_PREF_KEYS.STUBS,
+                IDXING_PREF_KEYS.VISITS,
+                IDXING_PREF_KEYS.VISIT_DELAY,
+            ])
+
+            // Run stage 1 of visit indexing immediately (skip if user settings)
             await whenPageDOMLoaded({ tabId })
-            const indexText = await logPageVisit(tab)
+            if (shouldLogStubs) {
+                await logPageStub(tab)
+            }
 
             // Schedule stage 2 of visit indexing soon after - if user stays on page
-            await tabManager.scheduleTabLog(tabId, () =>
-                whenTabActive({ tabId })
-                    .then(indexText)
-                    .catch(console.error),
-            )
+            if (shouldLogVisits) {
+                await tabManager.scheduleTabLog(
+                    tabId,
+                    () =>
+                        whenTabActive({ tabId })
+                            .then(() => logPageVisit(tab, shouldLogStubs))
+                            .catch(console.error),
+                    logDelay,
+                )
+            }
         }
     } catch (err) {
         console.error(err)

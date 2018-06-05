@@ -44,5 +44,5 @@ export default async function analysePage({
             onRejection: err => undefined,
         },
     )
-    return { favIconURI, screenshotURI, content }
+    return { favIconURI, screenshotURI, content: content || {} }
 }
