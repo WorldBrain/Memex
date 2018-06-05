@@ -74,7 +74,7 @@ class PageList extends Component {
                 onMouseEnter={this.mouseEnter}
                 onMouseLeave={this.mouseLeave}
                 className={this.mainClass}
-                onDragOver={e => e.preventDefault()}
+                onDragOver={this.handleDragEnter}
                 onDrop={this.handleDrop}
                 title={this.props.listName}
                 onDragEnter={this.handleDragEnter}
