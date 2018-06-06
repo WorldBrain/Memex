@@ -52,10 +52,19 @@ class PageList extends Component {
         })
     }
 
+    handleDragOver = e => {
+        e.preventDefault()
+        this.setState({
+            isDragInside: true,
+        })
+    }
+
     handleDragLeave = () => {
+        // setTimeout(
         this.setState({
             isDragInside: false,
         })
+        // , 500)
     }
 
     handleDrop = event => {
@@ -63,9 +72,12 @@ class PageList extends Component {
         this.setState({
             isDragInside: false,
         })
+        // const url = event.dataTransfer.getData('URL')
         // Gets the URL of the dropped list item
-        const url = event.dataTransfer.getData('URL')
-        this.props.onAddPageToList(url)
+        const data = event.dataTransfer.getData('text/plain')
+        console.log(data.split(','))
+
+        this.props.onAddPageToList(data.split(','))
     }
 
     render() {
@@ -74,7 +86,7 @@ class PageList extends Component {
                 onMouseEnter={this.mouseEnter}
                 onMouseLeave={this.mouseLeave}
                 className={this.mainClass}
-                onDragOver={this.handleDragEnter}
+                onDragOver={this.handleDragOver}
                 onDrop={this.handleDrop}
                 title={this.props.listName}
                 onDragEnter={this.handleDragEnter}

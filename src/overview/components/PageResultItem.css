@@ -301,3 +301,19 @@
         border-radius: 1px;
     }
 }
+
+.dragElement {
+    text-decoration: none;
+    display: none;
+    border: solid 2px #3eb995;
+    font-size: 0.9em;
+    padding: 5px;
+    max-height: 50px;
+    max-width: 300px;
+    text-align: center;
+    font-weight: 800;
+    background: #3eb995;
+    color: #fff;
+    opacity: 1;
+    position: absolute;
+}

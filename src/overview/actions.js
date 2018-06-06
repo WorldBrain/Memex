@@ -103,7 +103,6 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
     }
 
     dispatch(setLoading(true))
-    dispatch(listActs.resetUrlToEdit())
 
     if (showTooltip) {
         dispatch(fetchNextTooltip())
@@ -111,6 +110,7 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
 
     // Overwrite of results should always reset the current page before searching
     if (overwrite) {
+        dispatch(listActs.resetUrlToEdit())
         dispatch(resetPage())
     }
 

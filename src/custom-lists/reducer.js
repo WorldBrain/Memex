@@ -27,6 +27,7 @@ const defaultState = {
     urlsToEdit: [],
     tempLists: [],
     showAddToList: false,
+    urlDragged: '',
 }
 
 const getAllLists = (state, lists) => ({
@@ -69,10 +70,13 @@ const addPageToList = (state, { url, index }) => {
 
     if (list.pages.indexOf(url) > -1) return state
 
+    const urlAdded = typeof filters === 'string' ? [url] : url
+
     const newList = {
         ...list,
-        pages: [...list.pages, url],
+        pages: union(list.pages, urlAdded),
     }
+
     return {
         ...state,
         lists: [...lists.slice(0, index), newList, ...lists.slice(index + 1)],
@@ -212,6 +216,11 @@ const resetUrlToEdit = state => ({
     urlsToEdit: [],
 })
 
+const setUrlDragged = (state, url) => ({
+    ...state,
+    urlDragged: url,
+})
+
 export default createReducer(
     {
         [actions.getAllLists]: getAllLists,
@@ -244,6 +253,7 @@ export default createReducer(
         [actions.toggleAddToList]: toggleAddToList,
         [actions.closeAddToList]: closeAddToList,
         [actions.resetUrlToEdit]: resetUrlToEdit,
+        [actions.setUrlDragged]: setUrlDragged,
     },
     defaultState,
 )

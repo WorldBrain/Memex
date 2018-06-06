@@ -95,3 +95,8 @@ export const showAddToList = createSelector(
     customLists,
     state => state.showAddToList,
 )
+
+export const getUrlDragged = createSelector(
+    customLists,
+    state => state.urlDragged,
+)

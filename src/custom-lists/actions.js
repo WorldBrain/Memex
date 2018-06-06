@@ -63,6 +63,7 @@ export const toggleListFilterIndex = createAction(
     'custom-lists/toggleListFilterIndex',
 )
 
+// TODO: (imp) Replace two add with just one add action.
 export const bulkAddPagesToList = createAction(
     'custom-lists/bulkAddPagesToList',
 )
@@ -82,6 +83,8 @@ export const setTempLists = createAction('custom-lists/setTempLists')
 export const toggleAddToList = createAction('custom-lists/toggleAddToList')
 
 export const closeAddToList = createAction('custom-lists/closeAddToList')
+
+export const setUrlDragged = createAction('custom-lists/setUrlDragged')
 
 // returns instance of ListStorageHandler class
 export const listStorage = () => (dispatch, getState) =>
