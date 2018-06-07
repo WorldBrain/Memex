@@ -29,16 +29,13 @@ const Tooltip = ({
     tooltipComponent,
     closeTooltip,
     openSettings,
+    description,
 }) => (
     <div
         className={classNames(styles.tooltip, styles[cssClasses[state]])}
         style={{ left: x, top: y }}
         id="memex-tooltip"
     >
-        <span className={styles.icon}>
-            <img src={state === 'copied' ? images.logoWhite : images.logo} />
-        </span>
-
         {tooltipComponent}
 
         <span className={styles.buttons}>
@@ -52,6 +49,8 @@ const Tooltip = ({
                 <img className={styles.imgInfo} src={images.info} />
             </a>
         </span>
+
+        <div className={styles.descriptionContainer}>{description}</div>
     </div>
 )
 
@@ -62,6 +61,7 @@ Tooltip.propTypes = {
     tooltipComponent: PropTypes.element.isRequired,
     closeTooltip: PropTypes.func.isRequired,
     openSettings: PropTypes.func.isRequired,
+    description: PropTypes.string.isRequired,
 }
 
 export default Tooltip

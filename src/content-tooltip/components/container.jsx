@@ -109,6 +109,7 @@ class TooltipContainer extends React.Component {
                         tooltipComponent={this.renderTooltipComponent()}
                         closeTooltip={this.closeTooltip}
                         openSettings={this.openSettings}
+                        description={''}
                     />
                 ) : null}
             </div>
