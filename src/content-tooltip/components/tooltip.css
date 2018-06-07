@@ -5,11 +5,11 @@
     font-size: 13px;
     background-color: #fff;
     color: #3eb995;
-    height: 40px;
-    width: 150px;
+    height: 30px;
+    width: 80px;
     padding: 5px 5px;
     border-radius: 5px;
-    border: 2px solid #3eb995;
+    border: 2px solid #d1d1d1;
     text-align: center;
     line-height: 1.2em;
     transform: translate(-90%, 50%);
@@ -32,7 +32,8 @@
     color: white;
 }
 
-/*  Worldbrain logo on the left of the tooltip */
+/*
+
 .tooltip::before {
     box-sizing: content-box;
     border: solid transparent;
@@ -55,19 +56,19 @@
 .tooltip.stateLinkCopied::before {
     background-color: #3eb995;
 }
+*/
 
-/* The pointer of the tooltip */
 .tooltip::after {
     box-sizing: content-box;
     bottom: 76%;
     left: 80%;
     border: solid transparent;
     content: ' ';
-    height: 20px;
-    width: 20px;
+    height: 10px;
+    width: 10px;
     position: absolute;
     pointer-events: none;
-    border-color: #3eb995;
+    border-color: #d1d1d1;
     border-width: 2px;
     border-bottom-color: transparent;
     border-left-color: transparent;
@@ -75,10 +76,12 @@
     background-color: #fff;
 }
 
+/*
 .tooltip.stateLinkCopied::after {
     bottom: 80%;
     background-color: #3eb995;
 }
+*/
 
 .icon {
     display: flex;
@@ -108,8 +111,9 @@
     & .createLinkImg {
         width: 25px;
         height: 25px;
-        padding-bottom: 14px;
-        margin: 0px auto;
+        margin-left: 10px;
+        margin-top: 1px;
+        transform: rotate(45deg);
     }
 }
 
@@ -153,14 +157,16 @@
 .buttons {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: space-around;
     align-items: center;
     width: 15px;
-    height: 46px;
+    height: 30px;
     position: absolute;
     right: 3px;
-    top: 3px;
+    top: 5px;
     z-index: 100001;
+    border-left: 2px solid #d1d1d1;
+    padding-left: 7px;
 
     & .smallButton img {
         height: 15px;
@@ -170,6 +176,7 @@
 
     & .imgSettings {
         width: 15px;
+        margin-top: 1px;
     }
 
     & .imgInfo {
@@ -178,6 +185,7 @@
 
     & .imgCross {
         width: 10px;
+        margin-bottom: 1px;
     }
 }
 

@@ -12,7 +12,6 @@ const images = {
 export const InitialComponent = ({ createLink }) => (
     <div className={styles.createLinkButton} onMouseDown={createLink}>
         <img className={styles.createLinkImg} src={images.link} />
-        <div className={styles.createLinkText}>Create Link</div>
     </div>
 )
 
@@ -33,7 +32,6 @@ export const CreatingLinkComponent = () => (
 
 export const CopiedComponent = () => (
     <div className={styles.copiedMessage}>
-        <span className={styles.copiedText}>Link copied to clipboard</span>
         <img className={styles.check} src={images.check} />
     </div>
 )
