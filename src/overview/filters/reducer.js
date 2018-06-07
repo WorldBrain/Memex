@@ -53,17 +53,25 @@ const toggleFilter = filterKey => (state, value) => {
 
 const parseStringFilters = str => (str === '' ? [] : str.split(','))
 
-const setFilters = filterKey => (state, filters) => ({
-    ...state,
-    [filterKey]:
-        typeof filters === 'string' ? parseStringFilters(filters) : filters,
-    showFilters: true,
-})
+const setFilters = filterKey => (state, filters) => {
+    const newState = {
+        ...state,
+        [filterKey]:
+            typeof filters === 'string' ? parseStringFilters(filters) : filters,
+    }
+
+    newState.showFilters =
+        newState.tags.length > 0 ||
+        newState.domainsExc.length > 0 ||
+        newState.domainsInc.length > 0 ||
+        newState.onlyBookmarks
+
+    return newState
+}
 
 const toggleBookmarkFilter = state => ({
     ...state,
     onlyBookmarks: !state.onlyBookmarks,
-    showFilters: true,
 })
 
 const resetFilters = state => ({

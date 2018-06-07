@@ -1,27 +1,34 @@
+import { Bookmarks } from 'webextension-polyfill-ts'
+
 import db from '.'
-import normalizeUrl from 'src/util/encode-url-for-id'
-import analysePage from 'src/page-analysis/background'
-import fetchPageData from 'src/page-analysis/background/fetch-page-data'
+import normalizeUrl from '../../util/encode-url-for-id'
+import analysePage from '../../page-analysis/background'
+import fetchPageData from '../../page-analysis/background/fetch-page-data'
 import pipeline from './pipeline'
 import { Page } from './models'
 
-export async function addBookmark({ url, timestamp = Date.now(), tabId }) {
+export async function addBookmark({
+    url,
+    timestamp = Date.now(),
+    tabId,
+}: {
+    url: string
+    timestamp: number
+    tabId: number
+}) {
     const normalized = normalizeUrl(url)
-
     let page = await db.pages.get(normalized)
 
     // No existing page for BM; need to make new via content-script if `tabId` provided
     if (page == null) {
         if (tabId == null) {
             throw new Error(
-                'Page does not exist for URL and no tabID provided to extract content:',
-                normalized,
+                `Page does not exist for URL and no tabID provided to extract content: ${normalized}`,
             )
         }
 
-        // TODO: handle screenshot, favicon
-        const { content } = await analysePage({ tabId })
-        const [pageDoc] = await pipeline({ pageDoc: { content, url } })
+        const analysisRes = await analysePage({ tabId, allowFavIcon: false })
+        const pageDoc = await pipeline({ pageDoc: { ...analysisRes, url } })
         page = new Page(pageDoc)
     }
 
@@ -32,7 +39,7 @@ export async function addBookmark({ url, timestamp = Date.now(), tabId }) {
     })
 }
 
-export function delBookmark({ url }) {
+export function delBookmark({ url }: Bookmarks.BookmarkTreeNode) {
     const normalized = normalizeUrl(url)
 
     return db.transaction('rw', db.tables, async () => {
@@ -56,7 +63,10 @@ export function delBookmark({ url }) {
  * Handles the browser `bookmarks.onCreated` event:
  * https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/bookmarks/onCreated
  */
-export async function handleBookmarkCreation(browserId, { url }) {
+export async function handleBookmarkCreation(
+    browserId: string,
+    { url }: Bookmarks.BookmarkTreeNode,
+) {
     try {
         const normalized = normalizeUrl(url)
 
