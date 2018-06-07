@@ -9,14 +9,25 @@ const images = {
     check: getExtURL('/img/check.svg'),
 }
 
-export const InitialComponent = ({ createLink }) => (
-    <div className={styles.createLinkButton} onMouseDown={createLink}>
+export const InitialComponent = ({
+    setDescription,
+    removeDescription,
+    createLink,
+}) => (
+    <div
+        className={styles.createLinkButton}
+        onMouseDown={createLink}
+        onMouseEnter={setDescription}
+        onMouseLeave={removeDescription}
+    >
         <img className={styles.createLinkImg} src={images.link} />
     </div>
 )
 
 InitialComponent.propTypes = {
     createLink: PropTypes.func.isRequired,
+    setDescription: PropTypes.func.isRequired,
+    removeDescription: PropTypes.func.isRequired,
 }
 
 export const CreatingLinkComponent = () => (

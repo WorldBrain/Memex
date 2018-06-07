@@ -24,6 +24,7 @@ class TooltipContainer extends React.Component {
         position: { x: 250, y: 200 },
         tooltipState: 'pristine',
         linkURL: '',
+        description: '',
     }
 
     componentDidMount() {
@@ -85,10 +86,28 @@ class TooltipContainer extends React.Component {
         this.props.openSettings()
     }
 
+    setDescription = description => () =>
+        this.setState({
+            description,
+        })
+
+    removeDescription = () =>
+        this.setState({
+            description: '',
+        })
+
     renderTooltipComponent = () => {
         switch (this.state.tooltipState) {
             case 'pristine':
-                return <InitialComponent createLink={this.createLink} />
+                return (
+                    <InitialComponent
+                        setDescription={this.setDescription(
+                            'Share link to highlight',
+                        )}
+                        removeDescription={this.removeDescription}
+                        createLink={this.createLink}
+                    />
+                )
             case 'running':
                 return <CreatingLinkComponent />
             case 'copied':
@@ -99,7 +118,8 @@ class TooltipContainer extends React.Component {
     }
 
     render() {
-        const { showTooltip, position, tooltipState } = this.state
+        const { showTooltip, position, tooltipState, description } = this.state
+
         return (
             <div className="memex-tooltip-container">
                 {showTooltip ? (
@@ -109,7 +129,9 @@ class TooltipContainer extends React.Component {
                         tooltipComponent={this.renderTooltipComponent()}
                         closeTooltip={this.closeTooltip}
                         openSettings={this.openSettings}
-                        description={''}
+                        description={description}
+                        setDescription={this.setDescription}
+                        removeDescription={this.removeDescription}
                     />
                 ) : null}
             </div>
