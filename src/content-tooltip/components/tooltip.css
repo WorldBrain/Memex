@@ -1,24 +1,25 @@
 .tooltip {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     position: absolute;
     font-size: 13px;
     background-color: #fff;
     color: #3eb995;
     height: 30px;
-    width: 80px;
-    padding: 5px 5px;
+    width: 90px;
+    padding: 5px 0px;
     border-radius: 5px;
-    border: 2px solid #d1d1d1;
+    border: 2px solid #dedede;
     text-align: center;
     line-height: 1.2em;
     transform: translate(-90%, 50%);
     z-index: 100000;
     box-sizing: content-box;
+    transition: height 0.15s ease-in;
 
     & > div {
         width: 85%;
-        margin: 0px auto;
     }
 
     & * {
@@ -27,6 +28,7 @@
     }
 }
 
+/*
 .tooltip.stateLinkCopied {
     background-color: #3eb995;
     color: white;
@@ -68,12 +70,20 @@
     width: 10px;
     position: absolute;
     pointer-events: none;
-    border-color: #d1d1d1;
+    border-color: #dedede;
     border-width: 2px;
     border-bottom-color: transparent;
     border-left-color: transparent;
     transform: rotate(-45deg);
     background-color: #fff;
+}
+
+.tooltip.expanded {
+    height: 40px;
+
+    &::after {
+        bottom: 86%;
+    }
 }
 
 /*
@@ -111,8 +121,8 @@
     & .createLinkImg {
         width: 25px;
         height: 25px;
-        margin-left: 10px;
-        margin-top: 1px;
+        margin-top: 3px;
+        margin-left: -11px;
         transform: rotate(45deg);
     }
 }
@@ -165,7 +175,7 @@
     right: 3px;
     top: 5px;
     z-index: 100001;
-    border-left: 2px solid #d1d1d1;
+    border-left: 2px solid #dedede;
     padding-left: 7px;
 
     & .smallButton img {
@@ -187,6 +197,13 @@
         width: 10px;
         margin-bottom: 1px;
     }
+}
+
+.descriptionContainer {
+    max-height: 15px;
+    width: 90px !important; /* stylelint-disable-line declaration-no-important */
+    font-size: 0.7em;
+    color: #3eb995;
 }
 
 /* Loading CSS */
