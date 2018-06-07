@@ -76,8 +76,8 @@ export default class ImportDataSources {
         yield childGroups.bms
 
         // Recursively process next levels (not expected to get deep)
-        for (const dirNode of childGroups.dirs) {
-            yield* this.bookmarks(dirNode)
+        for (const dir of childGroups.dirs) {
+            yield* this.bookmarks(dir)
         }
     }
 }
