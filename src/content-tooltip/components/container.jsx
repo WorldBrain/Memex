@@ -11,7 +11,7 @@ import {
 } from './tooltip-states'
 import { copyToClipboard } from '../utils'
 
-class Container extends React.Component {
+class TooltipContainer extends React.Component {
     static propTypes = {
         onInit: PropTypes.func.isRequired,
         createAndCopyDirectLink: PropTypes.func.isRequired,
@@ -20,8 +20,8 @@ class Container extends React.Component {
     }
 
     state = {
-        showTooltip: false,
-        position: {},
+        showTooltip: true,
+        position: { x: 250, y: 200 },
         tooltipState: 'pristine',
         linkURL: '',
     }
@@ -116,4 +116,4 @@ class Container extends React.Component {
     }
 }
 
-export default OnClickOutside(Container)
+export default OnClickOutside(TooltipContainer)
