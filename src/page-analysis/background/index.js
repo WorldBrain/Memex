@@ -7,7 +7,7 @@ import makeScreenshot from './make-screenshot'
 
 /**
  * @typedef {Object} PageAnalysisResult
- * @property {string} content Object containing `fullText`, and other meta data extracted from the DOM.
+ * @property {any} content Object containing `fullText`, and other meta data extracted from the DOM.
  * @property {string} [favIcon] Data URL representing the favicon.
  * @property {string} [screenshot] Data URL representing the screenshot.
  */
@@ -38,12 +38,11 @@ export default async function analysePage({
     ]
 
     // When every task has either completed or failed, return what we got
-    const [
-        content,
-        screenshotURI,
-        favIconURI,
-    ] = await whenAllSettled(dataFetchingPromises, {
-        onRejection: err => undefined,
-    })
+    const [content, screenshotURI, favIconURI] = await whenAllSettled(
+        dataFetchingPromises,
+        {
+            onRejection: err => undefined,
+        },
+    )
     return { favIconURI, screenshotURI, content }
 }
