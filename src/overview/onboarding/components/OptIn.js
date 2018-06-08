@@ -12,13 +12,15 @@ class OptIn extends PureComponent {
         return (
             <div className={localStyles.optInContainer}>
                 {this.props.children}
-                <p className={localStyles.OptIn}>
-                    Send 100% private & anonymous usage statistics
-                    <p className={localStyles.SubOptIn}>
+                <div className={localStyles.optInTextContainer}>
+                    <p className={localStyles.optIn}>
+                        Send 100% private & anonymous usage statistics
+                    </p>
+                    <p className={localStyles.subOptIn}>
                         None of your history or searches, only interactions with
                         software
                     </p>
-                </p>
+                </div>
             </div>
         )
     }
