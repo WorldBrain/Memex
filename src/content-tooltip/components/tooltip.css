@@ -6,21 +6,17 @@
     font-size: 13px;
     background-color: #fff;
     color: #3eb995;
-    height: 30px;
+    height: 40px;
     width: 90px;
-    padding: 5px 0px;
+    padding: 0px 0px;
     border-radius: 5px;
     border: 2px solid #dedede;
     text-align: center;
     line-height: 1.2em;
-    transform: translate(-90%, 50%);
+    transform: translate(-45%, 45%);
     z-index: 100000;
     box-sizing: content-box;
     transition: height 0.15s ease-in;
-
-    & > div {
-        width: 85%;
-    }
 
     & * {
         box-sizing: content-box;
@@ -76,10 +72,11 @@
     border-left-color: transparent;
     transform: rotate(-45deg);
     background-color: #fff;
+    transition: all 0.1s ease-in;
 }
 
 .tooltip.expanded {
-    height: 40px;
+    height: 50px;
 
     &::after {
         bottom: 86%;
@@ -106,9 +103,27 @@
     }
 }
 
+.createLinkButton,
+.progressIndicator,
+.copiedMessage {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 40px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
 .createLinkButton {
     cursor: pointer;
     z-index: 10;
+    width: 85%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
 
     & .createLinkText {
         position: absolute;
@@ -128,7 +143,7 @@
 }
 
 .progressIndicator {
-    margin: -10px auto;
+    width: 60%;
 }
 
 .errorMessage {
@@ -153,7 +168,7 @@
     align-items: center;
 
     & .check {
-        width: 30px;
+        width: 25px;
         height: auto;
     }
 
@@ -200,9 +215,12 @@
 }
 
 .descriptionContainer {
+    position: absolute;
+    bottom: 0px;
     max-height: 15px;
-    width: 90px !important; /* stylelint-disable-line declaration-no-important */
+    width: 90px;
     font-size: 0.7em;
+    font-family: sans-serif;
     color: #3eb995;
 }
 
@@ -210,13 +228,13 @@
 .ldsEllipsis {
     display: inline-block;
     position: relative;
-    width: 64px;
-    height: 64px;
+    width: 60px;
+    height: 30px;
     margin: 0px auto;
 
     & div {
         position: absolute;
-        top: 27px;
+        top: 10px;
         width: 11px;
         height: 11px;
         border-radius: 50%;

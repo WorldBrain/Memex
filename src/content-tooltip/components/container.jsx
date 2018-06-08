@@ -20,7 +20,7 @@ class TooltipContainer extends React.Component {
     }
 
     state = {
-        showTooltip: true,
+        showTooltip: false,
         position: { x: 250, y: 200 },
         tooltipState: 'pristine',
         linkURL: '',
@@ -65,6 +65,7 @@ class TooltipContainer extends React.Component {
     createLink = async () => {
         this.setState({
             tooltipState: 'running',
+            description: '',
         })
         const { url } = await this.props.createAndCopyDirectLink()
         this.setState({
@@ -111,7 +112,14 @@ class TooltipContainer extends React.Component {
             case 'running':
                 return <CreatingLinkComponent />
             case 'copied':
-                return <CopiedComponent />
+                return (
+                    <CopiedComponent
+                        setDescription={this.setDescription(
+                            'Copied to clipboard',
+                        )}
+                        removeDescription={this.removeDescription}
+                    />
+                )
             default:
                 return <ErrorComponent />
         }

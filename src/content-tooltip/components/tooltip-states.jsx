@@ -6,7 +6,7 @@ import { getExtURL } from '../utils'
 
 const images = {
     link: getExtURL('/img/link.svg'),
-    check: getExtURL('/img/check.svg'),
+    check: getExtURL('/img/green_check.svg'),
 }
 
 export const InitialComponent = ({
@@ -41,11 +41,20 @@ export const CreatingLinkComponent = () => (
     </div>
 )
 
-export const CopiedComponent = () => (
-    <div className={styles.copiedMessage}>
+export const CopiedComponent = ({ setDescription, removeDescription }) => (
+    <div
+        className={styles.copiedMessage}
+        onMouseEnter={setDescription}
+        onMouseLeave={removeDescription}
+    >
         <img className={styles.check} src={images.check} />
     </div>
 )
+
+CopiedComponent.propTypes = {
+    setDescription: PropTypes.func.isRequired,
+    removeDescription: PropTypes.func.isRequired,
+}
 
 export const ErrorComponent = () => (
     <div className={styles.errorMessage}>Error</div>
