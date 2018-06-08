@@ -4,24 +4,24 @@ import debounce from 'lodash/fp/debounce'
 import noop from 'lodash/fp/noop'
 
 import { updateLastActive } from 'src/analytics'
-import Dropdown from './Dropdown'
-import DropdownRow from './DropdownRow'
+import { AddListDropdownRow, AddListDropdown } from '../components'
 
 class DropdownContainer extends Component {
     static propTypes = {
         onFilterDel: PropTypes.func,
         results: PropTypes.array.isRequired,
-        bulkAddPagesToList: PropTypes.func.isRequired,
-        bulkRemovePagesFromList: PropTypes.func.isRequired,
-        applyBulkEdits: PropTypes.func.isRequired,
-        resetPagesinTempList: PropTypes.func.isRequired,
-        setTempLists: PropTypes.func.isRequired,
+        bulkAddPagesToList: PropTypes.func,
+        bulkRemovePagesFromList: PropTypes.func,
+        applyBulkEdits: PropTypes.func,
+        resetPagesinTempList: PropTypes.func,
+        setTempLists: PropTypes.func,
+        mode: PropTypes.string.isRequired,
     }
 
     static defaultProps = {
         onFilterAdd: noop,
         onFilterDel: noop,
-        initFilters: [],
+        results: [],
     }
 
     constructor(props) {
@@ -39,11 +39,16 @@ class DropdownContainer extends Component {
     }
 
     componentWillMount() {
-        this.props.setTempLists()
+        // The temporary list array gets updated.
+        if (this.overviewMode()) this.props.setTempLists()
     }
 
     get inputBlockPattern() {
         return /[^\w\s-]/gi
+    }
+
+    overviewMode() {
+        return this.props.mode === 'overview'
     }
 
     setInputRef = el => (this.inputEl = el)
@@ -63,6 +68,7 @@ class DropdownContainer extends Component {
             .replace(/\s\s+/g, ' ')
             .toLowerCase()
 
+    // Temporary suggestion function.
     suggest = searchKey =>
         this.state.filters.filter(obj =>
             obj.name.toLowerCase().includes(searchKey),
@@ -206,7 +212,7 @@ class DropdownContainer extends Component {
         const lists = this.getDisplayLists()
 
         const listOptions = lists.map((list, i) => (
-            <DropdownRow
+            <AddListDropdownRow
                 {...list}
                 key={i}
                 handleClick={this.handleListSelection(i)}
@@ -218,15 +224,16 @@ class DropdownContainer extends Component {
 
     render() {
         return (
-            <Dropdown
+            <AddListDropdown
                 onListSearchChange={this.handleSearchChange}
                 onListSearchKeyDown={this.handleSearchKeyDown}
                 setInputRef={this.setInputRef}
                 listSearchValue={this.state.searchVal}
+                overviewMode={this.overviewMode()}
                 {...this.props}
             >
                 {this.renderLists()}
-            </Dropdown>
+            </AddListDropdown>
         )
     }
 }

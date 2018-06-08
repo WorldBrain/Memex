@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
 import { bindActionCreators } from 'redux'
 
-import Dropdown from './DropdownContainer'
+import { AddListDropdownContainer } from 'src/common-ui/containers'
 import EditDropdown from './ListEditDropdown'
 import { selectors, actions } from 'src/custom-lists'
 import { actions as overviewActs } from 'src/overview'
@@ -25,7 +25,9 @@ class ListEditDropdown extends Component {
     }
 
     handleRenderDropdown = () =>
-        this.props.showAddToList ? <Dropdown {...this.props} /> : null
+        this.props.showAddToList ? (
+            <AddListDropdownContainer {...this.props} mode="overview" />
+        ) : null
 
     render() {
         return (
@@ -62,8 +64,6 @@ const mapDispatchToProps = dispatch => ({
         dispatch,
     ),
     handleFavButtonClick: urls => () => {
-        console.log(overviewActs)
-
         dispatch(overviewActs.bulkSetHasBookmark(urls))
     },
 })

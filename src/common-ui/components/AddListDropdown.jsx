@@ -1,11 +1,17 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import cx from 'classnames'
 
-import styles from './Dropdown.css'
+import styles from './AddListDropdown.css'
 
 const Dropdown = props => (
-    <div className={styles.dropdown}>
-        <div className={styles.dropdownTextAfter} />
+    <div
+        className={cx({
+            [styles.dropdown]: props.overviewMode,
+            [styles.popup]: !props.overviewMode,
+        })}
+    >
+        {props.overviewMode && <div className={styles.dropdownTextAfter} />}
         <div className={styles.dropdownText}>
             <form className={styles.searchContainer}>
                 <input
@@ -23,12 +29,14 @@ const Dropdown = props => (
             </form>
             <div className={styles.dropdownBody}>{props.children}</div>
             <div className={styles.dropdownFooter}>
-                <span className={styles.listSelected}>0 list(s) selected</span>
+                <span>0 list(s) selected</span>
                 <span
                     onClick={props.applyBulkEdits}
-                    className={styles.applyButton}
+                    className={cx(styles.applyButton, {
+                        [styles.applyButtonPopup]: !props.overviewMode,
+                    })}
                 >
-                    Apply
+                    {props.overviewMode ? 'Apply' : 'Set Quick-Add Default'}
                 </span>
             </div>
         </div>
@@ -42,6 +50,7 @@ Dropdown.propTypes = {
     setInputRef: PropTypes.func.isRequired,
     listSearchValue: PropTypes.string,
     applyBulkEdits: PropTypes.func.isRequired,
+    overviewMode: PropTypes.bool.isRequired,
 }
 
 export default Dropdown

@@ -8,7 +8,10 @@ import extractQueryFilters from 'src/util/nlp-time-filter'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { isLoggable, getPauseState } from 'src/activity-logger'
 import { getTooltipState, setTooltipState } from 'src/content-tooltip/utils'
-import { IndexDropdown } from 'src/common-ui/containers'
+import {
+    IndexDropdown,
+    AddListDropdownContainer,
+} from 'src/common-ui/containers'
 import Popup from './components/Popup'
 import Button from './components/Button'
 import BlacklistConfirm from './components/BlacklistConfirm'
@@ -20,6 +23,7 @@ import UpgradeButton from './components/UpgradeButton'
 import ButtonIcon from './components/ButtonIcon'
 import ToggleTooltip from './components/ToggleTooltip'
 import styles from './components/Button.css'
+import dummyLists from 'src/custom-lists/dummy-data'
 
 class PopupContainer extends Component {
     static propTypes = {
@@ -309,25 +313,25 @@ class PopupContainer extends Component {
             // Standard blacklist button
             return this.blacklistBtnState ===
                 constants.BLACKLIST_BTN_STATE.BLACKLISTED ? (
-                <LinkButton
-                    href={`${constants.OPTIONS_URL}#/blacklist`}
-                    itemClass={styles.itemBlacklisted}
-                    btnClass={styles.itemBtnBlacklisted}
-                >
-                    This Page is Blacklisted. Undo>>
+                    <LinkButton
+                        href={`${constants.OPTIONS_URL}#/blacklist`}
+                        itemClass={styles.itemBlacklisted}
+                        btnClass={styles.itemBtnBlacklisted}
+                    >
+                        This Page is Blacklisted. Undo>>
                 </LinkButton>
-            ) : (
-                <Button
-                    onClick={this.setBlacklistChoice}
-                    disabled={
-                        this.blacklistBtnState ===
-                        constants.BLACKLIST_BTN_STATE.DISABLED
-                    }
-                    btnClass={styles.blacklist}
-                >
-                    Blacklist Current Page
+                ) : (
+                    <Button
+                        onClick={this.setBlacklistChoice}
+                        disabled={
+                            this.blacklistBtnState ===
+                            constants.BLACKLIST_BTN_STATE.DISABLED
+                        }
+                        btnClass={styles.blacklist}
+                    >
+                        Blacklist Current Page
                 </Button>
-            )
+                )
         }
 
         // Domain vs URL choice button
@@ -428,7 +432,9 @@ class PopupContainer extends Component {
         }
 
         if (listMode) {
-            return <div>Add List</div>
+            return (
+                <AddListDropdownContainer mode="popup" results={dummyLists} />
+            )
         }
 
         return (
@@ -437,7 +443,7 @@ class PopupContainer extends Component {
                     onClick={this.handleAddBookmark}
                     btnClass={
                         this.bookmarkBtnState ===
-                        constants.BOOKMARK_BTN_STATE.BOOKMARK
+                            constants.BOOKMARK_BTN_STATE.BOOKMARK
                             ? styles.bmk
                             : styles.notBmk
                     }
@@ -447,7 +453,7 @@ class PopupContainer extends Component {
                     }
                 >
                     {this.bookmarkBtnState ===
-                    constants.BOOKMARK_BTN_STATE.BOOKMARK
+                        constants.BOOKMARK_BTN_STATE.BOOKMARK
                         ? 'Unbookmark this Page'
                         : 'Bookmark this Page'}
                 </Button>
@@ -492,11 +498,11 @@ class PopupContainer extends Component {
     }
 
     render() {
-        const { searchValue, tagMode } = this.state
+        const { searchValue, tagMode, listMode } = this.state
 
         return (
             <Popup
-                shouldRenderSearch={!tagMode}
+                shouldRenderSearch={tagMode === listMode}
                 searchValue={searchValue}
                 onSearchChange={this.onSearchChange}
                 onSearchEnter={this.onSearchEnter}

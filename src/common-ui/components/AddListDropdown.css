@@ -77,22 +77,31 @@
     border-radius: 7px;
     font-family: 'Arial';
     color: #fff;
-    font-size: 16px;
+    font-size: 13px;
+    font-weight: 600;
     background: #00c596;
-    padding: 4px 14px 4px 14px;
+    padding: 4px;
     text-decoration: none;
     cursor: pointer;
-}
-
-.listSelected {
-    padding: 0 14px;
 }
 
 .dropdownBody {
     overflow-y: auto;
     max-height: 240px;
+    min-height: 200px;
 }
 
 .dropdownFooter {
-    padding: 12px 12px;
+    display: flex;
+    justify-content: space-around;
+    padding-top: 12px;
+}
+
+.popup {
+    padding: 5px;
+    font-size: 1.2em;
+}
+
+.applyButtonPopup {
+    border-radius: 0%;
 }

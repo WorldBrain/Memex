@@ -2,7 +2,7 @@ import React, { PureComponent } from 'react'
 import cx from 'classnames'
 import PropTypes from 'prop-types'
 
-import styles from './DropdownRow.css'
+import styles from './AddListDropdownRow.css'
 
 class DropdownRow extends PureComponent {
     static propTypes = {
