@@ -18,7 +18,10 @@ import ResultsMessage from './components/ResultsMessage'
 import TagPill from './components/TagPill'
 import Onboarding, { selectors as onboarding } from './onboarding'
 import Filters, { selectors as filters, actions as filterActs } from './filters'
-import Sidebar, { actions as sidebarActs } from './sidebar'
+import Sidebar, {
+    selectors as sidebarSels,
+    actions as sidebarActs,
+} from './sidebar'
 import NoResultBadTerm from './components/NoResultBadTerm'
 import localStyles from './components/Overview.css'
 
@@ -48,6 +51,7 @@ class OverviewContainer extends Component {
         delTag: PropTypes.func.isRequired,
         resetFilterPopup: PropTypes.func.isRequired,
         showOnboarding: PropTypes.bool.isRequired,
+        mouseOnSidebar: PropTypes.bool.isRequired,
         init: PropTypes.func.isRequired,
     }
 
@@ -226,7 +230,11 @@ class OverviewContainer extends Component {
                         results in your digital memory
                     </ResultsMessage>
                 )}
-                <ResultList scrollDisabled={this.props.showOnboarding}>
+                <ResultList
+                    scrollDisabled={
+                        this.props.showOnboarding || this.props.mouseOnSidebar
+                    }
+                >
                     {this.renderResultItems()}
                 </ResultList>
             </Wrapper>
@@ -295,6 +303,7 @@ const mapStateToProps = state => ({
     tooltip: selectors.tooltip(state),
     isFirstTooltip: selectors.isFirstTooltip(state),
     isTooltipRenderable: selectors.isTooltipRenderable(state),
+    mouseOnSidebar: sidebarSels.mouseOnSidebar(state),
 })
 
 const mapDispatchToProps = dispatch => ({

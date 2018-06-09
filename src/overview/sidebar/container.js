@@ -12,18 +12,7 @@ class SidebarContainer extends React.Component {
         showSidebar: PropTypes.bool.isRequired,
         setShowSidebar: PropTypes.func.isRequired,
         annotations: PropTypes.array.isRequired,
-    }
-
-    componentDidMount() {
-        document.addEventListener('scroll', this.preventParentScroll)
-    }
-
-    componentWillUnmount() {
-        document.removeEventListener('scroll', this.preventParentScroll)
-    }
-
-    preventParentScroll = event => {
-        if (this.props.showSidebar) window.scrollTo(0, 0)
+        toggleMouseOnSidebar: PropTypes.func.isRequired,
     }
 
     handleStateChange = ({ isOpen }) => {
@@ -70,6 +59,7 @@ class SidebarContainer extends React.Component {
                     renderAnnotations={this.renderAnnotations}
                     handleStateChange={this.handleStateChange}
                     saveComment={this.saveComment}
+                    toggleMouseOnSidebar={this.props.toggleMouseOnSidebar}
                 />
             </div>
         )
@@ -84,6 +74,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
     setShowSidebar: showSidebar =>
         dispatch(actions.setShowSidebar(showSidebar)),
+    toggleMouseOnSidebar: event => dispatch(actions.toggleMouseOnSidebar()),
 })
 
 export default connect(

@@ -37,6 +37,7 @@ const Sidebar = ({
     handleStateChange,
     renderAnnotations,
     saveComment,
+    toggleMouseOnSidebar,
 }) => (
     <Menu
         isOpen={showSidebar}
@@ -48,7 +49,11 @@ const Sidebar = ({
         <div className={styles.sidebar}>
             {showSidebar ? <CommentBox saveComment={saveComment} /> : null}
 
-            <div className={styles.annotationContainer}>
+            <div
+                className={styles.annotationContainer}
+                onMouseEnter={toggleMouseOnSidebar}
+                onMouseLeave={toggleMouseOnSidebar}
+            >
                 {renderAnnotations()}
                 <div className={styles.extraHeight} />
             </div>
@@ -61,6 +66,7 @@ Sidebar.propTypes = {
     handleStateChange: PropTypes.func.isRequired,
     renderAnnotations: PropTypes.func.isRequired,
     saveComment: PropTypes.func.isRequired,
+    toggleMouseOnSidebar: PropTypes.func.isRequired,
 }
 
 export default Sidebar

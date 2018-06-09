@@ -4,8 +4,20 @@ import cx from 'classnames'
 
 import styles from './ResultList.css'
 
+// Calculate height of the list to prevent scrolling
+// Height = 90vh + amount of height scrolled
+const calcHeight = scrollDisabled => {
+    if (!scrollDisabled) return {}
+    return {
+        height: 0.9 * window.innerHeight + window.pageYOffset + 20,
+    }
+}
+
 const ResultList = ({ children, scrollDisabled = false }) => (
-    <ul className={cx(styles.root, { [styles.noScroll]: scrollDisabled })}>
+    <ul
+        style={calcHeight(scrollDisabled)}
+        className={cx(styles.root, { [styles.noScroll]: scrollDisabled })}
+    >
         {children}
     </ul>
 )
