@@ -2,8 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 
-import Sidebar from './components/Sidebar'
-import Annotation from './components/Annotation'
+import Sidebar, { Annotation } from 'src/sidebar-overlay/components/'
 import * as selectors from './selectors'
 import * as actions from './actions'
 
