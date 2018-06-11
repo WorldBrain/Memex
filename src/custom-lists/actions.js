@@ -109,6 +109,7 @@ export const getListFromDB = () => async (dispatch, getState) => {
 }
 
 export const createPageList = name => async (dispatch, getState) => {
+    // gets id from DB after it is added
     const list = {
         _id: null,
         name,
@@ -118,7 +119,8 @@ export const createPageList = name => async (dispatch, getState) => {
     dispatch(createList(list))
 }
 
-export const updateList = (index, name) => async (dispatch, getState) => {
+export const updateList = (index, name, id) => async (dispatch, getState) => {
+    dispatch(resetActiveListIndex())
     dispatch(updateListName(name, index))
 }
 
@@ -136,8 +138,8 @@ export const handleToggleAddToList = () => (dispatch, getState) => {
     dispatch(applyBulkEdits())
     dispatch(toggleAddToList())
 }
-// TODO: change this damn thing
-// Maybe remove it :|smil
+
+// TODO: Remove this class after checking.
 export default class ListStorageHandler {
     constructor(dispatch, getState) {
         this._dispatch = dispatch

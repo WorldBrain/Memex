@@ -16,7 +16,7 @@ import { styles } from './ReactBurgerMenu'
 
 class ListContainer extends Component {
     static propTypes = {
-        listStorageHandler: PropTypes.func.isRequired,
+        getListFromDB: PropTypes.func.isRequired,
         lists: PropTypes.array.isRequired,
         handleEditBtnClick: PropTypes.func.isRequired,
         isDeleteConfShown: PropTypes.bool.isRequired,
@@ -24,18 +24,22 @@ class ListContainer extends Component {
         handleCrossBtnClick: PropTypes.func.isRequired,
         handleListItemClick: PropTypes.func.isRequired,
         resetFilters: PropTypes.func.isRequired,
+        createPageList: PropTypes.func.isRequired,
+        updateList: PropTypes.func.isRequired,
+        handleAddPageList: PropTypes.func.isRequired,
+        handleDeleteList: PropTypes.func.isRequired,
     }
 
     constructor(props) {
         super(props)
-        this._listStorageHandler = this.props.listStorageHandler()
         this.state = {
             showCreateList: false,
         }
     }
 
     componentWillMount() {
-        this._listStorageHandler.getListFromDB()
+        // Gets all the list from the DB to populate the sidebar.
+        this.props.getListFromDB()
     }
 
     handleRenderCreateList = () =>
@@ -43,11 +47,22 @@ class ListContainer extends Component {
             showCreateList: !this.state.showCreateList,
         })
 
-    handleCreateListSubmit = e => {
-        this._listStorageHandler.createList(e)
+    // TODO: change this method;
+    handleCreateListSubmit = event => {
+        event.preventDefault()
+        const { value } = event.target.elements['listName']
+        // value = list name
+        this.props.createPageList(value)
         this.setState({
             showCreateList: false,
         })
+    }
+
+    handleUpdateList = ({ _id }, index) => event => {
+        event.preventDefault()
+        const { value } = event.target.elements['listName']
+        // value = list name
+        this.props.updateList(index, value, _id)
     }
 
     renderAllLists = () => {
@@ -62,19 +77,13 @@ class ListContainer extends Component {
                         list._id,
                         i,
                     )}
-                    onAddPageToList={this._listStorageHandler.addPagetoList(
-                        list._id,
-                        i,
-                    )}
-                    onCrossButtonClick={this.props.handleCrossBtnClick(
-                        list._id,
-                        i,
-                    )}
+                    onAddPageToList={this.props.handleAddPageList(list, i)}
+                    onCrossButtonClick={this.props.handleCrossBtnClick(list, i)}
                 />
             ) : (
                 <CreateListForm
                     key={i}
-                    onCheckboxClick={this._listStorageHandler.updateList(i)}
+                    onCheckboxClick={this.handleUpdateList(list, i)}
                     value={list.name}
                 />
             )
@@ -116,7 +125,7 @@ class ListContainer extends Component {
                         <DeleteConfirmModal
                             isShown={this.props.isDeleteConfShown}
                             onClose={this.props.resetListDeleteModal}
-                            deleteList={this._listStorageHandler.deleteList()}
+                            deleteList={this.props.handleDeleteList}
                         />
                     </Menu>
                 </div>
@@ -135,6 +144,9 @@ const mapDispatchToProps = (dispatch, getState) => ({
         {
             resetListDeleteModal: actions.resetListDeleteModal,
             resetFilters: filterActs.resetFilters,
+            getListFromDB: actions.getListFromDB,
+            createPageList: actions.createPageList,
+            updateList: actions.updateList,
         },
         dispatch,
     ),
@@ -143,13 +155,20 @@ const mapDispatchToProps = (dispatch, getState) => ({
         event.preventDefault()
         dispatch(actions.showEditBox(index))
     },
-    handleCrossBtnClick: (_id, index) => event => {
+    handleCrossBtnClick: ({ _id }, index) => event => {
         event.preventDefault()
         dispatch(actions.showListDeleteModal(_id, index))
     },
     handleListItemClick: (_id, index) => () => {
         dispatch(actions.toggleListFilterIndex(index))
         dispatch(filterActs.toggleListFilter(_id))
+    },
+    handleAddPageList: ({ _id }, index) => url => {
+        dispatch(actions.addUrltoList(url, index, _id))
+    },
+    handleDeleteList: e => {
+        e.preventDefault()
+        dispatch(actions.deletePageList())
     },
 })
 
