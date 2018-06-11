@@ -1,44 +1,54 @@
 import React, { Component } from 'react'
-import PropTypes from 'prop-types'
 import debounce from 'lodash/fp/debounce'
 import noop from 'lodash/fp/noop'
 
-import internalAnalytics from 'src/analytics/internal'
-import { updateLastActive } from 'src/analytics'
-import { remoteFunction } from 'src/util/webextensionRPC'
+import internalAnalytics from '../../analytics/internal'
+import { updateLastActive } from '../../analytics'
+import { remoteFunction } from '../../util/webextensionRPC'
 import {
     IndexDropdown,
     IndexDropdownNewRow,
     IndexDropdownRow,
 } from '../components'
 
-class IndexDropdownContainer extends Component {
-    static propTypes = {
-        // The URL to use for dis/associating new tags with; set this to keep in sync with index
-        url: PropTypes.string,
+export interface Props {
+    source: 'tag' | 'domain'
+    /* The URL to use for dis/associating new tags with; set this to keep in sync with index. */
+    url?: string
+    hover?: boolean
+    tabId?: number
+    /* Tag Filters that are previously present in the location. */
+    initFilters?: string[]
+    /* Opt. cb to run when new tag added to state. */
+    onFilterAdd?: (filter: string) => void
+    /* Opt. cb to run when tag deleted from state. */
+    onFilterDel?: (filter: string) => void
+}
 
-        // Opt. cb to run when new tag added to state
-        onFilterAdd: PropTypes.func,
+export interface State {
+    searchVal: string
+    isLoading: boolean
+    displayFilters: string[]
+    filters: string[]
+    focused: number
+}
 
-        // Opt. cb to run when tag deleted from state
-        onFilterDel: PropTypes.func,
-
-        // Tag Filters that are previously present in the location
-        initFilters: PropTypes.arrayOf(PropTypes.string),
-
-        source: PropTypes.oneOf(['tag', 'domain']).isRequired,
-    }
-
+class IndexDropdownContainer extends Component<Props, State> {
     static defaultProps = {
         onFilterAdd: noop,
         onFilterDel: noop,
         initFilters: [],
     }
 
+    private suggestRPC
+    private addTagRPC
+    private delTagRPC
+    private inputEl: HTMLInputElement
+
     constructor(props) {
         super(props)
 
-        this.suggest = remoteFunction('suggest')
+        this.suggestRPC = remoteFunction('suggest')
         this.addTagRPC = remoteFunction('addTag')
         this.delTagRPC = remoteFunction('delTag')
 
@@ -56,67 +66,64 @@ class IndexDropdownContainer extends Component {
     /**
      * Domain inputs need to allow '.' while tags shouldn't.
      */
-    get inputBlockPattern() {
+    private get inputBlockPattern() {
         return this.props.source === 'domain' ? /[^\w\s-.]/gi : /[^\w\s-]/gi
     }
 
     /**
      * Decides whether or not to allow index update. Currently determined by `props.url` setting.
      */
-    get allowIndexUpdate() {
+    private get allowIndexUpdate() {
         return this.props.url != null
     }
 
-    /**
-     *
-     */
-    async storeTrackEvent(isAdded) {
-        let { source } = this.props
-        const { hover } = this.props
+    private async storeTrackEvent(isAdded: boolean) {
+        const { hover, source } = this.props
 
         // Make first letter capital
-        source = source.charAt(0).toUpperCase() + source.substr(1)
+        const sourceType = source.charAt(0).toUpperCase() + source.substr(1)
 
         // Only for add and remove from the popup or overview, we have already covered filter in overview
         if (this.allowIndexUpdate) {
             if (hover) {
                 internalAnalytics.processEvent({
-                    type: isAdded ? 'add' + source : 'delete' + source,
+                    type: isAdded ? 'add' + sourceType : 'delete' + sourceType,
                 })
             } else {
                 internalAnalytics.processEvent({
                     type: isAdded
-                        ? 'addPopup' + source
-                        : 'deletePopup' + source,
+                        ? 'addPopup' + sourceType
+                        : 'deletePopup' + sourceType,
                 })
             }
         }
     }
 
-    isPageTag = value => this.state.filters.includes(value)
-
-    setInputRef = el => (this.inputEl = el)
-
     /**
      * Selector for derived display tags state
      */
-    getDisplayTags = () =>
-        this.state.displayFilters.map((value, i) => ({
+    private getDisplayTags() {
+        return this.state.displayFilters.map((value, i) => ({
             value,
-            active: this.isPageTag(value),
+            active: this.pageHasTag(value),
             focused: this.state.focused === i,
         }))
+    }
+
+    private pageHasTag = (value: string) => this.state.filters.includes(value)
+    private setInputRef = (el: HTMLInputElement) => (this.inputEl = el)
 
     /**
      * Selector for derived search value/new tag input state
      */
-    getSearchVal = () =>
-        this.state.searchVal
+    private getSearchVal() {
+        return this.state.searchVal
             .trim()
             .replace(/\s\s+/g, ' ')
             .toLowerCase()
+    }
 
-    canCreateTag() {
+    private canCreateTag() {
         if (!this.allowIndexUpdate) {
             return false
         }
@@ -135,72 +142,85 @@ class IndexDropdownContainer extends Component {
     /**
      * Used for 'Enter' presses or 'Add new tag' clicks.
      */
-    addTag = async () => {
+    private addTag = async () => {
         const newTag = this.getSearchVal()
-        let newTags = this.state.filters
+        const newTags = [newTag, ...this.state.filters]
 
-        try {
-            if (this.allowIndexUpdate) {
-                await this.addTagRPC(this.props.url, newTag)
-            }
-            newTags = [newTag, ...this.state.filters]
-            this.storeTrackEvent(true)
-        } catch (err) {
-        } finally {
-            this.inputEl.focus()
-            this.setState(state => ({
-                ...state,
-                searchVal: '',
-                filters: newTags,
-                displayFilters: newTags,
-                focused: 0,
-            }))
-            this.props.onFilterAdd(newTag)
-            updateLastActive() // Consider user active (analytics)
+        if (this.allowIndexUpdate) {
+            this.addTagRPC({
+                url: this.props.url,
+                tag: newTag,
+                tabId: this.props.tabId,
+            }).catch(console.error)
         }
+
+        this.storeTrackEvent(true)
+
+        this.inputEl.focus()
+        this.setState(state => ({
+            ...state,
+            searchVal: '',
+            filters: newTags,
+            displayFilters: newTags,
+            focused: 0,
+        }))
+
+        this.props.onFilterAdd(newTag)
+        updateLastActive() // Consider user active (analytics)
     }
 
     /**
      * Used for clicks on displayed tags. Will either add or remove tags to the page
      * depending on their current status as assoc. tags or not.
      */
-    handleTagSelection = index => async event => {
+    private handleTagSelection = (index: number) => async event => {
         const tag = this.getDisplayTags()[index].value
         const tagIndex = this.state.filters.findIndex(val => val === tag)
 
-        let tagsReducer = tags => tags
+        let tagsReducer: (filters: string[]) => string[] = t => t
+
         // Either add or remove it to the main `state.tags` array
-        try {
-            if (tagIndex === -1) {
-                if (this.allowIndexUpdate) {
-                    await this.addTagRPC(this.props.url, tag)
-                }
-                this.props.onFilterAdd(tag)
-                tagsReducer = tags => [tag, ...tags]
-                this.storeTrackEvent(true)
-            } else {
-                if (this.allowIndexUpdate) {
-                    await this.delTagRPC(this.props.url, tag)
-                }
-                this.props.onFilterDel(tag)
-                tagsReducer = tags => [
-                    ...tags.slice(0, tagIndex),
-                    ...tags.slice(tagIndex + 1),
-                ]
-                this.storeTrackEvent(false)
+        if (tagIndex === -1) {
+            if (this.allowIndexUpdate) {
+                this.addTagRPC({
+                    url: this.props.url,
+                    tag,
+                    tabId: this.props.tabId,
+                }).catch(console.error)
             }
-        } catch (err) {
-        } finally {
-            this.setState(state => ({
-                ...state,
-                filters: tagsReducer(state.filters),
-                focused: index,
-            }))
-            updateLastActive() // Consider user active (analytics)
+
+            this.props.onFilterAdd(tag)
+            tagsReducer = tags => [tag, ...tags]
+            this.storeTrackEvent(true)
+        } else {
+            if (this.allowIndexUpdate) {
+                this.delTagRPC({
+                    url: this.props.url,
+                    tag,
+                    tabId: this.props.tabId,
+                }).catch(console.error)
+            }
+
+            this.props.onFilterDel(tag)
+            tagsReducer = tags => [
+                ...tags.slice(0, tagIndex),
+                ...tags.slice(tagIndex + 1),
+            ]
+            this.storeTrackEvent(false)
         }
+
+        this.setState(state => ({
+            ...state,
+            filters: tagsReducer(state.filters),
+            focused: index,
+        }))
+
+        updateLastActive() // Consider user active (analytics)
     }
 
-    handleSearchEnterPress(event) {
+    private handleSearchEnterPress(
+        event: React.KeyboardEvent<HTMLInputElement>,
+    ) {
         event.preventDefault()
 
         if (
@@ -217,7 +237,9 @@ class IndexDropdownContainer extends Component {
         return null
     }
 
-    handleSearchArrowPress(event) {
+    private handleSearchArrowPress(
+        event: React.KeyboardEvent<HTMLInputElement>,
+    ) {
         event.preventDefault()
 
         // One extra index if the "add new tag" thing is showing
@@ -245,18 +267,21 @@ class IndexDropdownContainer extends Component {
         }))
     }
 
-    handleSearchKeyDown = event => {
+    handleSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
         switch (event.key) {
             case 'Enter':
                 return this.handleSearchEnterPress(event)
             case 'ArrowUp':
             case 'ArrowDown':
                 return this.handleSearchArrowPress(event)
+            default:
         }
     }
 
-    handleSearchChange = event => {
-        const searchVal = event.target.value
+    private handleSearchChange = (
+        event: React.SyntheticEvent<HTMLInputElement>,
+    ) => {
+        const searchVal = event.currentTarget.value
 
         // Block input of non-words, spaces and hypens for tags
         if (this.inputBlockPattern.test(searchVal)) {
@@ -274,7 +299,7 @@ class IndexDropdownContainer extends Component {
         )
     }
 
-    fetchTagSuggestions = async () => {
+    private fetchTagSuggestions = async () => {
         const searchVal = this.getSearchVal()
         if (!searchVal.length) {
             return
@@ -283,8 +308,9 @@ class IndexDropdownContainer extends Component {
         let suggestions = this.state.filters
 
         try {
-            suggestions = await this.suggest(searchVal, this.props.source)
+            suggestions = await this.suggestRPC(searchVal, this.props.source)
         } catch (err) {
+            console.error(err)
         } finally {
             this.setState(state => ({
                 ...state,
@@ -294,7 +320,7 @@ class IndexDropdownContainer extends Component {
         }
     }
 
-    renderTags() {
+    private renderTags() {
         const tags = this.getDisplayTags()
 
         const tagOptions = tags.map((tag, i) => (
