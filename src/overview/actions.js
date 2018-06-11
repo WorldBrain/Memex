@@ -114,21 +114,23 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
         return dispatch(easter())
     }
 
+    // Grab needed derived state for search
     const state = getState()
+    const searchParams = {
+        ...currentQueryParams,
+        showOnlyBookmarks: filters.onlyBookmarks(state),
+        tags: filters.tags(state),
+        domains: filters.domainsInc(state),
+        domainsExclude: filters.domainsExc(state),
+        limit: constants.PAGE_SIZE,
+        skip: selectors.resultsSkip(state),
+    }
 
     try {
         // Tell background script to search
-        const searchResult = await requestSearch({
-            ...currentQueryParams,
-            showOnlyBookmarks: filters.onlyBookmarks(state),
-            tags: filters.tags(state),
-            domains: filters.domainsInc(state),
-            domainsExclude: filters.domainsExc(state),
-            limit: constants.PAGE_SIZE,
-            skip: selectors.resultsSkip(state),
-        })
-
+        const searchResult = await requestSearch(searchParams)
         dispatch(updateSearchResult({ overwrite, searchResult }))
+
         if (searchResult.docs.length) {
             dispatch(incSearchCount())
         }
