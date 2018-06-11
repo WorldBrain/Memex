@@ -5,6 +5,7 @@ body {
     font-size: 12px;
     font-family: 'Open Sans';
     font-weight: 200;
+    background: #fff !important; /* stylelint-disable-line declaration-no-important */
 }
 
 hr {

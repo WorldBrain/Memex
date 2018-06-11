@@ -7,9 +7,6 @@ import * as constants from './constants'
 import * as selectors from './selectors'
 import { fetchTooltip } from './components/tooltips'
 
-// Will contain the runtime port which will allow bi-directional communication to the background script
-let port
-
 export const setLoading = createAction('overview/setLoading')
 export const nextPage = createAction('overview/nextPage')
 export const resetPage = createAction('overview/resetPage')
@@ -48,24 +45,7 @@ export const setShowTooltip = createAction('overview/setShowTooltip')
 const deletePages = remoteFunction('delPages')
 const createBookmarkByUrl = remoteFunction('addBookmark')
 const removeBookmarkByUrl = remoteFunction('delBookmark')
-
-const getCmdMessageHandler = dispatch => ({ cmd, ...payload }) => {
-    switch (cmd) {
-        case constants.CMDS.RESULTS:
-            dispatch(updateSearchResult(payload))
-            if (payload.searchResult.docs.length) {
-                dispatch(incSearchCount())
-            }
-            break
-        case constants.CMDS.ERROR:
-            dispatch(handleErrors(payload))
-            break
-        default:
-            console.error(
-                `Background script sent unknown command '${cmd}' with payload:\n${payload}`,
-            )
-    }
-}
+const requestSearch = remoteFunction('search')
 
 /**
  * Init a connection to the index running in the background script, allowing
@@ -73,9 +53,6 @@ const getCmdMessageHandler = dispatch => ({ cmd, ...payload }) => {
  * Also perform an initial search to populate the view (empty query = get all docs)
  */
 export const init = () => (dispatch, getState) => {
-    port = browser.runtime.connect({ name: constants.SEARCH_CONN_NAME })
-    port.onMessage.addListener(getCmdMessageHandler(dispatch))
-
     // Only do init search if empty query; if query set, the epic will trigger a search
     if (selectors.isEmptyQuery(getState())) {
         dispatch(search({ overwrite: true }))
@@ -149,8 +126,18 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
         skip: selectors.resultsSkip(state),
     }
 
-    // Tell background script to search
-    port.postMessage({ cmd: constants.CMDS.SEARCH, searchParams, overwrite })
+    try {
+        // Tell background script to search
+        const searchResult = await requestSearch(searchParams)
+        dispatch(updateSearchResult({ overwrite, searchResult }))
+
+        if (searchResult.docs.length) {
+            dispatch(incSearchCount())
+        }
+    } catch (error) {
+        dispatch(handleErrors({ error, query: currentQueryParams.query }))
+    }
+
     updateLastActive() // Consider user active (analytics)
 }
 
@@ -193,7 +180,7 @@ const updateSearchResult = ({ searchResult, overwrite = false }) => (
 
 // TODO stateful error handling
 const handleErrors = ({ query, error }) => dispatch => {
-    console.error(`Search for '${query}' errored: ${error}`)
+    console.error(`Search for '${query}' errored: ${error.toString()}`)
     dispatch(setLoading(false))
 }
 
