@@ -1,7 +1,7 @@
 .ribbon {
-    right: -25px;
+    right: -20px;
     top: -1px;
-    width: 25px;
+    width: 21px;
     height: 25px;
     border-radius: 0 50% 50% 0;
     border: 1px solid rgba(62, 185, 149, 0.0902);
@@ -12,7 +12,8 @@
     border-right: 0;
     border-left: 0;
     display: flex;
-    justify-content: center;
-    padding: 5px 0;
+
+    /* justify-content: center; */
+    padding: 5px 0px;
     cursor: pointer;
 }

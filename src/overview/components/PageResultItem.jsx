@@ -146,10 +146,10 @@ class PageResultItem extends PureComponent {
                     </a>
                     <div className={styles.crossRibbon}>
                         {this.props.isListFilterActive && (
-                            <SemiCircularRibbon title="Remove from currently selected list">
+                            <SemiCircularRibbon title="Remove from this collection">
                                 <img
                                     onClick={this.props.handleCrossRibbonClick}
-                                    src="/img/cross.svg"
+                                    src="/img/cross_grey.svg"
                                     style={{
                                         maxWidth: '100%',
                                         maxHeight: '100%',
