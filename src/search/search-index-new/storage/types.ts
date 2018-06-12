@@ -141,5 +141,5 @@ export interface DexieSchema {
 }
 
 export abstract class FeatureStorage {
-    constructor(protected storageManager: ManageableStorage) {}
+    constructor(protected storageManager: ManageableStorage) { }
 }
