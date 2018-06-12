@@ -1,11 +1,8 @@
 import { Bookmarks } from 'webextension-polyfill-ts'
 
 import db from '.'
-import normalizeUrl from '../../util/encode-url-for-id'
-import analysePage from '../../page-analysis/background'
-import fetchPageData from '../../page-analysis/background/fetch-page-data'
-import pipeline from './pipeline'
-import { Page } from './models'
+import { createPageViaBmTagActs } from './on-demand-indexing'
+import { getPage } from './util'
 
 export async function addBookmark({
     url,
@@ -13,50 +10,32 @@ export async function addBookmark({
     tabId,
 }: {
     url: string
-    timestamp: number
-    tabId: number
+    timestamp?: number
+    tabId?: number
 }) {
-    const normalized = normalizeUrl(url)
-    let page = await db.pages.get(normalized)
+    let page = await getPage(url)
 
-    // No existing page for BM; need to make new via content-script if `tabId` provided
-    if (page == null) {
-        if (tabId == null) {
-            throw new Error(
-                `Page does not exist for URL and no tabID provided to extract content: ${normalized}`,
-            )
-        }
-
-        const analysisRes = await analysePage({ tabId, allowFavIcon: false })
-        const pageDoc = await pipeline({ pageDoc: { ...analysisRes, url } })
-        page = new Page(pageDoc)
+    if (page == null || page.isStub) {
+        page = await createPageViaBmTagActs({ url, tabId })
     }
 
-    return db.transaction('rw', db.tables, async () => {
-        await page.loadRels()
-        page.setBookmark(timestamp)
-        await page.save()
-    })
+    page.setBookmark(timestamp)
+    await page.save()
 }
 
-export function delBookmark({ url }: Bookmarks.BookmarkTreeNode) {
-    const normalized = normalizeUrl(url)
+export async function delBookmark({ url }: Bookmarks.BookmarkTreeNode) {
+    const page = await getPage(url)
 
-    return db.transaction('rw', db.tables, async () => {
-        const page = await db.pages.get(normalized)
+    if (page != null) {
+        page.delBookmark()
 
-        if (page != null) {
-            await page.loadRels()
-            page.delBookmark()
-
-            // Delete if Page left orphaned, else just save current state
-            if (page.shouldDelete) {
-                await page.delete()
-            } else {
-                await page.save()
-            }
+        // Delete if Page left orphaned, else just save current state
+        if (page.shouldDelete) {
+            await page.delete()
+        } else {
+            await page.save()
         }
-    })
+    }
 }
 
 /**
@@ -68,26 +47,7 @@ export async function handleBookmarkCreation(
     { url }: Bookmarks.BookmarkTreeNode,
 ) {
     try {
-        const normalized = normalizeUrl(url)
-
-        let page = await db.pages.get(normalized)
-
-        // No existing page for BM; need to try and make new from a remote DOM fetch
-        if (page == null) {
-            const fetch = fetchPageData({
-                url,
-                opts: { includePageContent: true, includeFavIcon: true },
-            })
-
-            const pageData = await fetch.run()
-            page = new Page(await pipeline({ pageDoc: { url, ...pageData } }))
-        }
-
-        await db.transaction('rw', db.tables, async () => {
-            await page.loadRels()
-            page.setBookmark()
-            await page.save()
-        })
+        await addBookmark({ url })
     } catch (err) {
         console.error(err)
     }

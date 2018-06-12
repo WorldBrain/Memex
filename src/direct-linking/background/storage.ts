@@ -1,4 +1,10 @@
-import { FeatureStorage } from '../../search/search-index-new'
+import { browser, Tabs } from 'webextension-polyfill-ts'
+
+import {
+    FeatureStorage,
+    createPageFromTab,
+} from '../../search/search-index-new'
+import { STORAGE_KEYS as IDXING_PREF_KEYS } from '../../options/settings/constants'
 
 export default class DirectLinkingStorage extends FeatureStorage {
     constructor(storageManager) {
@@ -32,5 +38,27 @@ export default class DirectLinkingStorage extends FeatureStorage {
             createdWhen: new Date(),
             url,
         })
+    }
+
+    async indexPageFromTab({ id, url }: Tabs.Tab) {
+        const {
+            [IDXING_PREF_KEYS.LINKS]: fullyIndexLinks,
+        } = await browser.storage.local.get(IDXING_PREF_KEYS.LINKS)
+
+        const page = await createPageFromTab({
+            tabId: id,
+            url,
+            stubOnly: !fullyIndexLinks,
+        })
+
+        await page.loadRels()
+
+        // Add new visit if none, else page won't appear in results
+        // TODO: remove once search changes to incorporate assoc. page data apart from bookmarks/visits
+        if (!page.visits.length) {
+            page.addVisit()
+        }
+
+        await page.save()
     }
 }

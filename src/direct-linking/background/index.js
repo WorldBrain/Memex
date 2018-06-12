@@ -52,6 +52,10 @@ export default class DirectLinkingBackground {
             url: result.url,
             selector: request.anchor,
         })
+
+        // Attempt to (re-)index, if user preference set, but don't wait for it
+        this.storage.indexPageFromTab(tab)
+
         return result
     }
 }

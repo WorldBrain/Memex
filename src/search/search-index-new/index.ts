@@ -78,5 +78,7 @@ export {
     domainHasFavIcon,
 } from './search'
 
+export { createPageFromTab, createPageFromUrl } from './on-demand-indexing'
+
 // Mock for old index queue; to remove with old index code
 export const indexQueue = { clear: () => undefined }
