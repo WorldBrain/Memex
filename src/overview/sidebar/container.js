@@ -59,6 +59,7 @@ class SidebarContainer extends React.Component {
                     handleStateChange={this.handleStateChange}
                     saveComment={this.saveComment}
                     toggleMouseOnSidebar={this.props.toggleMouseOnSidebar}
+                    env={'overview'}
                 />
             </div>
         )

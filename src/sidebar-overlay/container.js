@@ -26,6 +26,7 @@ class SidebarContainer extends React.Component {
                 showSidebar
                 saveComment={this.saveComment}
                 renderAnnotations={this.renderAnnotations}
+                env={'iframe'}
             />
         )
     }

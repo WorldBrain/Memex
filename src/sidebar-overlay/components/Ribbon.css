@@ -13,7 +13,7 @@
 }
 
 .ribbonSidebarActive {
-    transform: translate(-343px, 0);
+    transform: translate(-340px, 0);
 }
 
 .sidebarFrame {
@@ -22,6 +22,7 @@
     right: 0;
     border: 0;
     outline: 0;
+    z-index: 99999;
     transform: translate(400px, 0);
     transition: all 0.2s ease-in;
 }

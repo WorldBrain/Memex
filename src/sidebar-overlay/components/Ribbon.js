@@ -39,7 +39,7 @@ class Ribbon extends React.Component {
                     src={sidebarURL}
                     height={window.innerHeight}
                     id="memex_annotations_sidebar"
-                    width={343}
+                    width={340}
                     className={cx(styles.sidebarFrame, {
                         [styles.sidebarActive]: isSidebarActive,
                     })}

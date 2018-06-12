@@ -4,33 +4,7 @@ import Menu from 'react-burger-menu/lib/menus/slide'
 
 import CommentBox from './CommentBox'
 import styles from './Sidebar.css'
-
-// Styles for react-burger-menu
-const extraStyles = {
-    bmMenuWrap: {
-        top: 0,
-    },
-    bmMenu: {
-        position: 'fixed',
-        right: 0,
-        top: '97px',
-        zIndex: 1100,
-        width: '340px',
-        height: '100%',
-        marginTop: '-25px',
-        transition: 'all 0.5s',
-        boxShadow: '-4px 2px 20px 1px rgba(62, 185, 149, 0.0902)',
-    },
-    bmBurgerButton: {
-        width: 0,
-        height: 0,
-        display: 'none',
-    },
-    bmOverlay: {
-        top: '71px',
-        left: 0,
-    },
-}
+import MenuStyles from './MenuStyles.js'
 
 const Sidebar = ({
     showSidebar,
@@ -38,12 +12,13 @@ const Sidebar = ({
     renderAnnotations,
     saveComment,
     toggleMouseOnSidebar,
+    env,
 }) => (
     <Menu
         isOpen={showSidebar}
         onStateChange={handleStateChange}
         width={340}
-        styles={extraStyles}
+        styles={MenuStyles(env)}
         right
     >
         <div className={styles.sidebar}>
@@ -67,6 +42,7 @@ Sidebar.propTypes = {
     renderAnnotations: PropTypes.func.isRequired,
     saveComment: PropTypes.func.isRequired,
     toggleMouseOnSidebar: PropTypes.func.isRequired,
+    env: PropTypes.string.isRequired,
 }
 
 export default Sidebar
