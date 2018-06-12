@@ -28,11 +28,11 @@ export const tsLoader = {
     },
 }
 
-export const styleLoader = {
-    // style-loader's general method of inserting <style> tags into the `document` doesn't
-    //  seem to play nicely with the content_script. It would be nice to find a work-around
-    //  later as style-loader is nicer for dev.
-    // loader: 'style-loader',
+export const injectStylesLoader = {
+    loader: 'style-loader',
+}
+
+export const extractStylesLoader = {
     loader: CssExtractPlugin.loader,
 }
 
@@ -71,7 +71,12 @@ export const svgLoader = {
     loader: 'svg-inline-loader',
 }
 
-export default ({ mode, context, isCI = false }) => {
+export default ({ mode, context, isCI = false, injectStyles = false }) => {
+    // style-loader's general method of inserting <style> tags into the `document` doesn't
+    //  seem to play nicely with the content_script. It would be nice to find a work-around
+    //  later as style-loader is nicer for dev.
+    const styleLoader = injectStyles ? injectStylesLoader : extractStylesLoader
+
     const main = {
         test: /\.(j|t)sx?$/,
         include: path.resolve(context, './src'),

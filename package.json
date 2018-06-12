@@ -31,7 +31,8 @@
     "lint:js": "eslint --ext js --ext jsx src",
     "lint:css": "stylelint 'src/**/*.css'",
     "format": "prettier --config prettier.config.js --write '**/*.{js,jsx,css}'",
-    "precommit": "lint-staged"
+    "precommit": "lint-staged",
+    "storybook": "start-storybook -p 9001 -c .storybook"
   },
   "lint-staged": {
     "*.{js,jsx,css}": [
@@ -95,8 +96,10 @@
   },
   "devDependencies": {
     "@sentry/webpack-plugin": "^1.5.2",
+    "@storybook/react": "^4.0.0-alpha.8",
     "@types/jest": "^22.1.4",
     "autoprefixer": "^7.1.1",
+    "babel-core": "^6.26.3",
     "babel-eslint": "^7.2.3",
     "babel-jest": "^20.0.3",
     "babel-loader": "^7.1.4",
