@@ -22,7 +22,7 @@ export default class CustomListStorage extends FeatureStorage {
     }
 
     // Function to insert into the DB
-    async insertCustomLists({ title, isDeletable = true, isNestable = true, body, selector }) {
+    async insertCustomList({ title, isDeletable = true, isNestable = true, body, selector }) {
         await this.storageManager.putObject(COLLECTION_NAME, {
             title,
             isDeletable,

@@ -17,7 +17,8 @@ const CreateListForm = props => (
                 type="text"
                 autoComplete="off"
                 placeholder="List Name"
-                defaultValue={props.value}
+                value={props.value}
+                onChange={props.handleNameChange}
                 autoFocus
                 required
             />
@@ -28,6 +29,7 @@ const CreateListForm = props => (
 CreateListForm.propTypes = {
     onCheckboxClick: PropTypes.func.isRequired,
     value: PropTypes.string,
+    handleNameChange: PropTypes.func.isRequired,
 }
 
 export default CreateListForm

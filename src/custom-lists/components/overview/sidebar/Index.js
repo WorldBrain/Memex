@@ -34,12 +34,32 @@ class ListContainer extends Component {
         super(props)
         this.state = {
             showCreateList: false,
+            listName: null,
+            updatedListName: null,
         }
     }
 
     componentWillMount() {
         // Gets all the list from the DB to populate the sidebar.
         this.props.getListFromDB()
+    }
+
+    get inputBlockPattern() {
+        return /[^\w\s-]/gi
+    }
+
+    handleSearchChange = field => event => {
+        const { value } = event.target
+
+        // Block input of non-words, spaces and hypens for tags
+        if (this.inputBlockPattern.test(value)) {
+            return
+        }
+
+        this.setState(state => ({
+            ...state,
+            [field]: value,
+        }))
     }
 
     handleRenderCreateList = () =>
@@ -55,6 +75,7 @@ class ListContainer extends Component {
         this.props.createPageList(value)
         this.setState({
             showCreateList: false,
+            listName: null,
         })
     }
 
@@ -63,11 +84,30 @@ class ListContainer extends Component {
         const { value } = event.target.elements['listName']
         // value = list name
         this.props.updateList(index, value, _id)
+        this.setState({
+            updatedListName: null,
+        })
     }
 
     renderAllLists = () => {
         return this.props.lists.map((list, i) => {
-            return !list.isEditing ? (
+            if (list.isEditing) {
+                return (
+                    <CreateListForm
+                        key={i}
+                        onCheckboxClick={this.handleUpdateList(list, i)}
+                        handleNameChange={this.handleSearchChange(
+                            'updatedListName',
+                        )}
+                        value={
+                            typeof this.state.updatedListName === 'string'
+                                ? this.state.updatedListName
+                                : list.name
+                        }
+                    />
+                )
+            }
+            return (
                 <ListItem
                     key={i}
                     listName={list.name}
@@ -80,19 +120,17 @@ class ListContainer extends Component {
                     onAddPageToList={this.props.handleAddPageList(list, i)}
                     onCrossButtonClick={this.props.handleCrossBtnClick(list, i)}
                 />
-            ) : (
-                <CreateListForm
-                    key={i}
-                    onCheckboxClick={this.handleUpdateList(list, i)}
-                    value={list.name}
-                />
             )
         })
     }
 
     renderCreateList = (shouldDisplayForm, value = null) =>
         shouldDisplayForm ? (
-            <CreateListForm onCheckboxClick={this.handleCreateListSubmit} />
+            <CreateListForm
+                onCheckboxClick={this.handleCreateListSubmit}
+                handleNameChange={this.handleSearchChange('listName')}
+                value={this.state.listName}
+            />
         ) : null
 
     render() {
