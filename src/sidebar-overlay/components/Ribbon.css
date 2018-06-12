@@ -1,0 +1,68 @@
+.ribbon {
+    position: fixed;
+    top: 50px;
+    right: 0;
+    width: 50px;
+    height: 65px;
+    background-color: #3eb995;
+    z-index: 99999;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    transform: translate(0, 0);
+    transition: all 0.2s ease-in;
+}
+
+.ribbonSidebarActive {
+    transform: translate(-343px, 0);
+}
+
+.sidebarFrame {
+    position: fixed;
+    top: 0;
+    right: 0;
+    border: 0;
+    outline: 0;
+    transform: translate(400px, 0);
+    transition: all 0.2s ease-in;
+}
+
+.sidebarActive {
+    transform: translate(0, 0);
+}
+
+.logo,
+.cancel,
+.settings {
+    background-repeat: no-repeat;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.logo {
+    background-image: url('/img/worldbrain-logo-white.svg');
+    background-size: 22px;
+    width: 22px;
+    height: 30px;
+    margin-left: 14px;
+    margin-top: 5px;
+}
+
+.cancel {
+    background-image: url('/img/cancel-white.svg');
+    fill: white;
+    background-size: 12px;
+    width: 12px;
+    height: 12px;
+    margin-left: 8px;
+    margin-top: 10px;
+}
+
+.settings {
+    background-image: url('/img/settings-white.svg');
+    fill: white;
+    background-size: 17px;
+    width: 15px;
+    height: 15px;
+    margin-left: 10px;
+    margin-top: 0px;
+}
