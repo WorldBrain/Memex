@@ -64,7 +64,6 @@ class TooltipContainer extends React.Component {
     createLink = async () => {
         this.setState({
             tooltipState: 'running',
-            description: '',
         })
         const { url } = await this.props.createAndCopyDirectLink()
         this.setState({
@@ -100,7 +99,7 @@ class TooltipContainer extends React.Component {
     }
 
     render() {
-        const { showTooltip, position, tooltipState, description } = this.state
+        const { showTooltip, position, tooltipState } = this.state
 
         return (
             <div className="memex-tooltip-container">
