@@ -159,12 +159,6 @@ function trackSearch(searchResult, overwrite, state) {
     if (filters.onlyBookmarks(state)) {
         action += ' (BM only)'
     }
-    if (filters.tags(state).length) {
-        action += ' (Tag only)'
-    }
-    if (filters.domains(state).length) {
-        action += ' (Domain only)'
-    }
 
     const name = overwrite
         ? selectors.queryParamsDisplay(state)
@@ -193,13 +187,6 @@ function storeSearch(searchResult, overwrite, state) {
 
     if (filters.onlyBookmarks(state)) {
         internalAnalytics.processEvent({ type: 'bookmark_filter' })
-    }
-
-    if (filters.tags(state).length) {
-        internalAnalytics.processEvent({ type: 'tag_filter' })
-    }
-    if (filters.domains(state).length) {
-        internalAnalytics.processEvent({ type: 'domain_filter' })
     }
 }
 
