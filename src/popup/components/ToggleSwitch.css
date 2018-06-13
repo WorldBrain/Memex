@@ -1,0 +1,52 @@
+.switch {
+    cursor: pointer;
+    text-indent: -9999px;
+    width: 60px;
+    height: 20px;
+    background: grey;
+    display: inline-block;
+    border-radius: 100px;
+    position: relative;
+    margin-top: 0px;
+    margin-left: 50px;
+
+    &::after {
+        content: '';
+        position: absolute;
+        top: 4px;
+        left: 5px;
+        width: 12px;
+        height: 12px;
+        background: #fff;
+        border-radius: 90px;
+        transition: 0.3s;
+    }
+}
+
+.activeSwitch {
+    &::after {
+        left: calc(100% - 5px);
+        transform: translateX(-100%);
+    }
+    background: #3eb995;
+}
+
+.input {
+    height: 0;
+    width: 0;
+    visibility: hidden;
+}
+
+.text {
+    z-index: 10;
+    color: #ddd;
+    font-size: 0.8em;
+    position: absolute;
+    margin-left: -33px;
+    margin-top: 2px;
+}
+
+.activeText {
+    color: #fff;
+    margin-left: -44px;
+}

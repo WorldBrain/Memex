@@ -1,5 +1,4 @@
-import { delayed } from './utils'
-
+import { delayed, getTooltipState } from './utils'
 let mouseupListener = null
 
 export function setupTooltipTrigger(callback) {
@@ -21,7 +20,8 @@ export function destroyTooltipTrigger() {
 
 export const conditionallyTriggerTooltip = delayed(
     async (position, callback, event) => {
-        if (!userSelectedText()) {
+        const isTooltipEnabled = await getTooltipState()
+        if (!userSelectedText() || !isTooltipEnabled) {
             return
         }
 
