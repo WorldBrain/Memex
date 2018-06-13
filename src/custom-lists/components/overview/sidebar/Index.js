@@ -39,7 +39,7 @@ class ListContainer extends Component {
         }
     }
 
-    componentWillMount() {
+    async componentWillMount() {
         // Gets all the list from the DB to populate the sidebar.
         this.props.getListFromDB()
     }

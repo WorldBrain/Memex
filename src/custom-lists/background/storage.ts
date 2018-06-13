@@ -13,12 +13,12 @@ export default class CustomListStorage extends FeatureStorage {
             version: new Date(2018, 6, 12),
             fields: {
                 '++id': { type: 'string', pk: true },
-                title: { type: 'text' },
+                name: { type: 'text' },
                 isDeletable: { type: 'binary' },
                 isNestable: { type: 'binary' },
                 createdAt: { type: 'datetime' },
             },
-            indices: ['++id', 'title', 'isDeletable', 'createdAt'],
+            indices: ['++id', 'name', 'isDeletable', 'createdAt'],
         })
 
         this.storageManager.registerCollection(PAGE_LIST_ENTRY, {
@@ -34,9 +34,9 @@ export default class CustomListStorage extends FeatureStorage {
     }
 
     // Function to insert into the DB
-    async insertCustomList({ title, isDeletable = true, isNestable = true }) {
+    async insertCustomList({ name, isDeletable = 1, isNestable = 1 }) {
         await this.storageManager.putObject(COLLECTION_NAME, {
-            title,
+            name,
             isDeletable,
             isNestable,
             createdAt: new Date(),

@@ -17,7 +17,7 @@ const CreateListForm = props => (
                 type="text"
                 autoComplete="off"
                 placeholder="List Name"
-                value={props.value}
+                value={props.value || ''}
                 onChange={props.handleNameChange}
                 autoFocus
                 required

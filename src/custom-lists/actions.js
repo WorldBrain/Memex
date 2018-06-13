@@ -1,5 +1,9 @@
 import { createAction } from 'redux-act'
+
+import { updateLastActive } from 'src/analytics'
+import { remoteFunction } from 'src/util/webextensionRPC'
 import * as selectors from './selectors'
+
 // import constants from './constants'
 // import { custom-lists } from '../custom-lists/selectors';
 
@@ -110,13 +114,23 @@ export const getListFromDB = () => async (dispatch, getState) => {
 
 export const createPageList = name => async (dispatch, getState) => {
     // gets id from DB after it is added
+    // TODO: add id
     const list = {
         _id: null,
         name,
         isDeletable: true,
         pages: [],
     }
-    dispatch(createList(list))
+
+    try {
+        // Create List
+        await remoteFunction('createCustomList')({ name })
+        dispatch(createList(list))
+    } catch (error) {
+        console.log(error)
+    } finally {
+        updateLastActive() // consider user active.
+    }
 }
 
 export const updateList = (index, name, id) => async (dispatch, getState) => {
