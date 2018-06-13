@@ -135,7 +135,15 @@ export const createPageList = name => async (dispatch, getState) => {
 
 export const updateList = (index, name, id) => async (dispatch, getState) => {
     dispatch(resetActiveListIndex())
-    dispatch(updateListName(name, index))
+    try {
+        // TODO: change the ID with different Id
+        await remoteFunction('updateListName')({ id: 3, name })
+        dispatch(updateListName(name, index))
+    } catch (e) {
+        console.log(e)
+    } finally {
+        updateLastActive() // consider user active.
+    }
 }
 
 export const deletePageList = () => async (dispatch, getState) => {

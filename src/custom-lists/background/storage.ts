@@ -43,6 +43,15 @@ export default class CustomListStorage extends FeatureStorage {
         })
     }
 
+    // TODO: Maybe send the full name list object
+    async updateListName({ id, name }) {
+        await this.storageManager.putObject(COLLECTION_NAME, {
+            id,
+            name,
+            createdAt: new Date(),
+        })
+    }
+
     async insertPageToList({ listId, pageUrl = true }) {
         await this.storageManager.putObject(PAGE_LIST_ENTRY, {
             listId,

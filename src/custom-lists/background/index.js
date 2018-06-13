@@ -15,12 +15,22 @@ export default class CustomListBackground {
             insertPageToList: (...params) => {
                 return this.insertPageToList(...params)
             },
+            updateListName: (...params) => {
+                return this.updateList(...params)
+            },
         })
     }
     // TODO: Implement this function for adding list to DB
 
     async createCustomList({ name }) {
         await this.storage.insertCustomList({
+            name,
+        })
+    }
+
+    async updateList({ id, name }) {
+        await this.storage.updateListName({
+            id,
             name,
         })
     }
