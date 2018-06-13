@@ -1,26 +1,15 @@
 import React from 'react'
-
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
 
+import AnimationWrapper from './AnimationWrapper'
 import { getExtURL } from '../utils'
 import { INFO_URL } from '../constants'
 import styles from './tooltip.css'
 
-// const cssClasses = {
-//     pristine: 'stateInitial',
-//     running: 'stateCreatingLink',
-//     done: 'stateCreatedLink',
-//     error: 'stateLinkError',
-//     copied: 'stateLinkCopied',
-// }
-
 const images = {
-    logo: getExtURL('/img/worldbrain-logo-narrow.png'),
-    logoWhite: getExtURL('/img/icon_white.svg'),
-    info: getExtURL('/img/info.svg'),
-    cross: getExtURL('/img/cross.svg'),
-    settings: getExtURL('/img/settings.svg'),
+    cross: getExtURL('/img/cross_grey.svg'),
+    settings: getExtURL('/img/settings_grey.svg'),
 }
 
 const deriveTooltipClass = state =>
@@ -41,7 +30,7 @@ const Tooltip = ({
         style={{ left: x, top: y }}
         id="memex-tooltip"
     >
-        {tooltipComponent}
+        <AnimationWrapper>{tooltipComponent}</AnimationWrapper>
 
         <span className={styles.buttons}>
             <a onClick={closeTooltip} className={styles.smallButton}>

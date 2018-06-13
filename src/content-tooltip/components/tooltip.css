@@ -10,7 +10,7 @@
     width: 90px;
     padding: 0px 0px;
     border-radius: 5px;
-    border: 2px solid #c2c2c2;
+    border: 1px solid #c2c2c2;
     text-align: center;
     line-height: 1.2em;
     transform: translate(-45%, 45%);
@@ -25,38 +25,6 @@
     }
 }
 
-/*
-.tooltip.stateLinkCopied {
-    background-color: #3eb995;
-    color: white;
-}
-
-/*
-
-.tooltip::before {
-    box-sizing: content-box;
-    border: solid transparent;
-    content: ' ';
-    height: 30px;
-    width: 30px;
-    position: absolute;
-    right: 89.5%;
-    top: 16%;
-    pointer-events: none;
-    border-color: #3eb995;
-    border-width: 2px;
-    border-bottom-color: transparent;
-    border-left-color: transparent;
-    border-radius: 50%;
-    transform: rotate(225deg);
-    background-color: #fff;
-}
-
-.tooltip.stateLinkCopied::before {
-    background-color: #3eb995;
-}
-*/
-
 .tooltip::after {
     box-sizing: content-box;
     bottom: 76%;
@@ -68,32 +36,23 @@
     position: absolute;
     pointer-events: none;
     border-color: #c2c2c2;
-    border-width: 2px;
+    border-width: 1px;
     border-bottom-color: transparent;
     border-left-color: transparent;
     transform: rotate(-45deg);
     background-color: #fff;
-    transition: all 0.1s ease-in;
-}
-
-.tooltip.expanded {
-    height: 50px;
-
-    &::after {
-        bottom: 86%;
-    }
+    transition: all 0.2s ease-in;
+    transition-delay: 0.3s;
 }
 
 .tooltip.stateCopied {
-    width: 250px;
-}
+    animation: expand-width 0.2s ease-in 0.3s;
+    animation-fill-mode: forwards;
 
-/*
-.tooltip.stateLinkCopied::after {
-    bottom: 80%;
-    background-color: #3eb995;
+    &::after {
+        left: 47%;
+    }
 }
-*/
 
 .icon {
     display: flex;
@@ -108,6 +67,18 @@
     }
 }
 
+/* .animationContainer {
+    transition: all 0.2s ease-in;
+}
+
+.animationSlideIn {
+    animation: slideIn 0.2s ease-in;
+}
+
+.animationSlideOut {
+    animation: slideOut 0.2s ease-in;
+} */
+
 .createLinkButton,
 .progressIndicator,
 .copiedMessage {
@@ -119,7 +90,7 @@
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    animation: bottom-up 0.2s ease-in;
+    animation: slideIn 0.2s ease-in;
 }
 
 .createLinkButton {
@@ -175,12 +146,16 @@
     & .check {
         width: 25px;
         height: auto;
+        animation: slideRight 0.2s ease-in 0.2s;
+        animation-fill-mode: both;
     }
 
     & .copiedTextContainer {
         height: 35px;
         padding-left: 5px;
         padding-top: 5px;
+        animation: expand-text 0.2s ease-in 0.4s;
+        animation-fill-mode: both;
 
         & .greenText {
             margin: 0;
@@ -224,24 +199,10 @@
         margin-top: 1px;
     }
 
-    & .imgInfo {
-        width: 13px;
-    }
-
     & .imgCross {
         width: 10px;
         margin-bottom: 1px;
     }
-}
-
-.descriptionContainer {
-    position: absolute;
-    bottom: 0px;
-    max-height: 15px;
-    width: 90px;
-    font-size: 0.7em;
-    font-family: sans-serif;
-    color: #3eb995;
 }
 
 /* Loading CSS */
@@ -313,7 +274,7 @@
     }
 }
 
-@keyframes bottom-up {
+@keyframes slideIn {
     0% {
         transform: translate(0, 30px);
         opacity: 0.1;
@@ -321,6 +282,50 @@
 
     100% {
         transform: translate(0, 0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    0% {
+        transform: translate(0, 0);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(0, -60px);
+        opacity: 0.1;
+    }
+}
+
+@keyframes slideRight {
+    0% {
+        transform: translateX(30px);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
+
+@keyframes expand-width {
+    0% {
+        width: 90px;
+    }
+
+    100% {
+        width: 250px;
+    }
+}
+
+@keyframes expand-text {
+    0% {
+        transform: scaleX(0.01);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scaleX(1);
         opacity: 1;
     }
 }
