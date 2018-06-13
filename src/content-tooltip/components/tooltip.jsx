@@ -1,4 +1,5 @@
 import React from 'react'
+
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
 
@@ -22,9 +23,9 @@ const images = {
     settings: getExtURL('/img/settings.svg'),
 }
 
-const deriveTooltipClass = description =>
+const deriveTooltipClass = state =>
     classNames(styles.tooltip, {
-        [styles.expanded]: description.length,
+        [styles.stateCopied]: state === 'copied',
     })
 
 const Tooltip = ({
@@ -34,42 +35,25 @@ const Tooltip = ({
     tooltipComponent,
     closeTooltip,
     openSettings,
-    description,
-    setDescription,
-    removeDescription,
 }) => (
     <div
-        className={deriveTooltipClass(description)}
+        className={deriveTooltipClass(state)}
         style={{ left: x, top: y }}
         id="memex-tooltip"
     >
         {tooltipComponent}
 
         <span className={styles.buttons}>
-            <a
-                onClick={closeTooltip}
-                className={styles.smallButton}
-                onMouseEnter={setDescription('Close tooltip for now')}
-                onMouseLeave={removeDescription}
-            >
+            <a onClick={closeTooltip} className={styles.smallButton}>
                 <img className={styles.imgCross} src={images.cross} />
             </a>
-            <a
-                onClick={openSettings}
-                className={styles.smallButton}
-                onMouseEnter={setDescription('Memex settings')}
-                onMouseLeave={removeDescription}
-            >
+            <a onClick={openSettings} className={styles.smallButton}>
                 <img className={styles.imgSettings} src={images.settings} />
             </a>
             <a href={INFO_URL} className={styles.smallButton}>
                 <img className={styles.imgInfo} src={images.info} />
             </a>
         </span>
-
-        {description && (
-            <div className={styles.descriptionContainer}>{description}</div>
-        )}
     </div>
 )
 
@@ -80,9 +64,6 @@ Tooltip.propTypes = {
     tooltipComponent: PropTypes.element.isRequired,
     closeTooltip: PropTypes.func.isRequired,
     openSettings: PropTypes.func.isRequired,
-    description: PropTypes.string.isRequired,
-    setDescription: PropTypes.func.isRequired,
-    removeDescription: PropTypes.func.isRequired,
 }
 
 export default Tooltip
