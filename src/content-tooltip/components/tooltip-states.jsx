@@ -5,29 +5,18 @@ import styles from './tooltip.css'
 import { getExtURL } from '../utils'
 
 const images = {
-    link: getExtURL('/img/link.svg'),
+    share: getExtURL('/img/share.svg'),
     check: getExtURL('/img/green_check.svg'),
 }
 
-export const InitialComponent = ({
-    setDescription,
-    removeDescription,
-    createLink,
-}) => (
-    <div
-        className={styles.createLinkButton}
-        onMouseDown={createLink}
-        onMouseEnter={setDescription}
-        onMouseLeave={removeDescription}
-    >
-        <img className={styles.createLinkImg} src={images.link} />
+export const InitialComponent = ({ createLink }) => (
+    <div className={styles.createLinkButton} onMouseDown={createLink}>
+        <img className={styles.createLinkImg} src={images.share} />
     </div>
 )
 
 InitialComponent.propTypes = {
     createLink: PropTypes.func.isRequired,
-    setDescription: PropTypes.func.isRequired,
-    removeDescription: PropTypes.func.isRequired,
 }
 
 export const CreatingLinkComponent = () => (
@@ -41,20 +30,19 @@ export const CreatingLinkComponent = () => (
     </div>
 )
 
-export const CopiedComponent = ({ setDescription, removeDescription }) => (
-    <div
-        className={styles.copiedMessage}
-        onMouseEnter={setDescription}
-        onMouseLeave={removeDescription}
-    >
+export const CopiedComponent = () => (
+    <div className={styles.copiedMessage}>
         <img className={styles.check} src={images.check} />
+        <div className={styles.copiedTextContainer}>
+            <p className={styles.greenText}>
+                Link to highlight copied to clipboard
+            </p>
+            <p className={styles.greyText}>
+                Everyone opening it can see this quote
+            </p>
+        </div>
     </div>
 )
-
-CopiedComponent.propTypes = {
-    setDescription: PropTypes.func.isRequired,
-    removeDescription: PropTypes.func.isRequired,
-}
 
 export const ErrorComponent = () => (
     <div className={styles.errorMessage}>Error</div>

@@ -24,7 +24,6 @@ class TooltipContainer extends React.Component {
         position: { x: 250, y: 200 },
         tooltipState: 'pristine',
         linkURL: '',
-        description: '',
     }
 
     componentDidMount() {
@@ -87,39 +86,14 @@ class TooltipContainer extends React.Component {
         this.props.openSettings()
     }
 
-    setDescription = description => () =>
-        this.setState({
-            description,
-        })
-
-    removeDescription = () =>
-        this.setState({
-            description: '',
-        })
-
     renderTooltipComponent = () => {
         switch (this.state.tooltipState) {
             case 'pristine':
-                return (
-                    <InitialComponent
-                        setDescription={this.setDescription(
-                            'Share link to highlight',
-                        )}
-                        removeDescription={this.removeDescription}
-                        createLink={this.createLink}
-                    />
-                )
+                return <InitialComponent createLink={this.createLink} />
             case 'running':
                 return <CreatingLinkComponent />
             case 'copied':
-                return (
-                    <CopiedComponent
-                        setDescription={this.setDescription(
-                            'Copied to clipboard',
-                        )}
-                        removeDescription={this.removeDescription}
-                    />
-                )
+                return <CopiedComponent />
             default:
                 return <ErrorComponent />
         }
@@ -137,9 +111,6 @@ class TooltipContainer extends React.Component {
                         tooltipComponent={this.renderTooltipComponent()}
                         closeTooltip={this.closeTooltip}
                         openSettings={this.openSettings}
-                        description={description}
-                        setDescription={this.setDescription}
-                        removeDescription={this.removeDescription}
                     />
                 ) : null}
             </div>
