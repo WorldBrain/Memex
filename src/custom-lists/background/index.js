@@ -13,6 +13,9 @@ export default class DirectLinkingBackground {
                 createCustomList: (...params) => {
                     return this.createCustomList(...params)
                 },
+                insertPageToList: (...params) => {
+                    return this.insertPageToList(...params)
+                },
             },
             { insertExtraArg: true },
         )
@@ -20,6 +23,10 @@ export default class DirectLinkingBackground {
     // TODO: Implement this function for adding list to DB
 
     async createCustomList(name) {
+        return ''
+    }
+
+    async insertPageToList({ id }, pageUrl) {
         return ''
     }
 }
