@@ -40,10 +40,6 @@ export const extractStylesLoader = {
     loader: CssExtractPlugin.loader,
 }
 
-export const coffeescriptLoader = {
-    loader: 'coffeescript-loader',
-}
-
 export const cssModulesLoader = {
     loader: 'css-loader',
     options: {

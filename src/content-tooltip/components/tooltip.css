@@ -81,9 +81,9 @@
     & .createLinkText {
         position: absolute;
         bottom: 3%;
-        left: 27%;
+        left: 25%;
         font-size: 1em;
-        font-weight: 400;
+        font-weight: 600;
     }
 
     & .createLinkImg {
