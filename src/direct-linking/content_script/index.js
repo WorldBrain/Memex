@@ -8,14 +8,22 @@ export async function init() {
     remoteFunction('followAnnotationRequest')()
 }
 
+export function setupAnchorFallbackOverlay() {}
+
 browser.runtime.onMessage.addListener(request => {
     if (request.type !== 'direct-link') {
         return
     }
 
     ;(async () => {
-        await rendering.highlightAnnotation({ annotation: request.annotation })
-        interactions.scrollToHighlight()
+        const highlightSuccessful = await rendering.highlightAnnotation({
+            annotation: request.annotation,
+        })
+        if (highlightSuccessful) {
+            interactions.scrollToHighlight()
+        } else {
+            setupAnchorFallbackOverlay()
+        }
     })()
 })
 
