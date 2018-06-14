@@ -35,7 +35,7 @@ export const CopiedComponent = () => (
         <img className={styles.check} src={images.check} />
         <div className={styles.copiedTextContainer}>
             <p className={styles.greenText}>
-                Link to highlight copied to clipboard
+                Highlight link copied to clipboard
             </p>
             <p className={styles.greyText}>
                 Everyone opening it can see this quote
