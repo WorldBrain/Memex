@@ -39,9 +39,6 @@ const Tooltip = ({
             <a onClick={openSettings} className={styles.smallButton}>
                 <img className={styles.imgSettings} src={images.settings} />
             </a>
-            <a href={INFO_URL} className={styles.smallButton}>
-                <img className={styles.imgInfo} src={images.info} />
-            </a>
         </span>
     </div>
 )
