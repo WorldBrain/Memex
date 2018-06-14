@@ -37,18 +37,3 @@ export async function delBookmark({ url }: Bookmarks.BookmarkTreeNode) {
         }
     }
 }
-
-/**
- * Handles the browser `bookmarks.onCreated` event:
- * https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/bookmarks/onCreated
- */
-export async function handleBookmarkCreation(
-    browserId: string,
-    { url }: Bookmarks.BookmarkTreeNode,
-) {
-    try {
-        await addBookmark({ url })
-    } catch (err) {
-        console.error(err)
-    }
-}

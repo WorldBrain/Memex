@@ -1,5 +1,6 @@
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import indexInterface from '../'
+import { tabManager } from '../../activity-logger/background/'
 
 makeRemotelyCallable({
     addTag: indexInterface.addTag,
@@ -28,11 +29,31 @@ async function transformPageForSending(page) {
     }
 }
 
-const handleBookmarkRemoval = (id, { node }) =>
-    node.url
-        ? indexInterface.delBookmark(node).catch(console.error)
-        : console.warn('Cannot remove bookmark with no URL', node)
-
-// Store and index any new browser bookmark
-browser.bookmarks.onCreated.addListener(indexInterface.handleBookmarkCreation)
+// Handle any new browser bookmark actions (bookmark mananger or bookmark btn in URL bar)
+browser.bookmarks.onCreated.addListener(handleBookmarkCreation)
 browser.bookmarks.onRemoved.addListener(handleBookmarkRemoval)
+
+async function handleBookmarkRemoval(id, { node }) {
+    // Created folders won't have `url`; ignore these
+    if (!node.url) {
+        return
+    }
+
+    return await indexInterface.delBookmark(node).catch(console.error)
+}
+
+async function handleBookmarkCreation(id, node) {
+    // Created folders won't have `url`; ignore these
+    if (!node.url) {
+        return
+    }
+
+    let tabId
+    const activeTab = tabManager.getActiveTab()
+
+    if (activeTab != null && activeTab.url === node.url) {
+        tabId = activeTab.id
+    }
+
+    return await indexInterface.addBookmark({ url: node.url, tabId })
+}

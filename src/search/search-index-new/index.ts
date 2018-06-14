@@ -59,7 +59,7 @@ export { addTag, delTag } from './tags'
 // Bookmarks-specific
 //
 
-export { addBookmark, delBookmark, handleBookmarkCreation } from './bookmarks'
+export { addBookmark, delBookmark } from './bookmarks'
 
 //
 // Utilities

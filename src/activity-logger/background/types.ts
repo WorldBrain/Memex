@@ -14,6 +14,7 @@ export interface ScrollState {
  * handle scheduling a future logging event. TODO: do we need to pass this down here?
  */
 export interface TabState {
+    id?: number
     url: string
     isActive: boolean
     visitTime: number

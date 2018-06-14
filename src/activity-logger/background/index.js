@@ -69,3 +69,5 @@ browser.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
         await debouncedUrlListener(tabId, changeInfo, tab)
     }
 })
+
+export { tabManager }

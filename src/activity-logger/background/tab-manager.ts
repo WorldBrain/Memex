@@ -1,6 +1,6 @@
 import { Tabs } from 'webextension-polyfill-ts'
 import Tab from './tab-state'
-import { NavState } from './types'
+import { TabState, NavState } from './types'
 
 export class TabManager {
     static DELAY_UNIT = 1000
@@ -24,6 +24,19 @@ export class TabManager {
      */
     getTabState(id: number) {
         return this._tabs.get(id)
+    }
+
+    getActiveTab() {
+        let activeTab: TabState = null
+
+        for (const [id, tab] of this._tabs) {
+            if (tab.isActive) {
+                activeTab = { ...tab, id }
+                break
+            }
+        }
+
+        return activeTab
     }
 
     /**
