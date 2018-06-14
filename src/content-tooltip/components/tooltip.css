@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css?family=Lato');
+
 .tooltip {
     display: flex;
     align-items: center;
@@ -7,7 +9,7 @@
     background-color: #fff;
     color: #3eb995;
     height: 40px;
-    width: 90px;
+    width: 70px;
     padding: 0px 0px;
     border-radius: 5px;
     border: 1px solid #c2c2c2;
@@ -21,14 +23,14 @@
 
     & * {
         box-sizing: content-box;
-        font-family: sans-serif;
+        font-family: 'Lato', sans-serif;
     }
 }
 
 .tooltip::after {
     box-sizing: content-box;
-    bottom: 76%;
-    left: 80%;
+    bottom: 84%;
+    left: 41.5%;
     border: solid transparent;
     content: ' ';
     height: 10px;
@@ -90,7 +92,6 @@
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    animation: slideIn 0.2s ease-in;
 }
 
 .createLinkButton {
@@ -113,13 +114,14 @@
     & .createLinkImg {
         width: 25px;
         height: 25px;
-        margin-top: 3px;
-        margin-left: -11px;
+        margin-top: 0px;
+        margin-left: -18px;
     }
 }
 
 .progressIndicator {
     width: 60%;
+    animation: slideIn 0.2s ease-in;
 }
 
 .errorMessage {
@@ -138,10 +140,8 @@
 }
 
 .copiedMessage {
-    font-size: 1em;
-    display: flex;
-    height: 50px;
-    align-items: center;
+    width: 88%;
+    animation: slideIn 0.2s ease-in;
 
     & .check {
         width: 25px;
@@ -152,23 +152,26 @@
 
     & .copiedTextContainer {
         height: 35px;
-        padding-left: 5px;
+        padding-left: 4px;
         padding-top: 5px;
-        animation: expand-text 0.2s ease-in 0.4s;
+        animation: fadeInRight 0.2s ease-in 0.4s;
         animation-fill-mode: both;
+        margin-left: 4px;
 
         & .greenText {
             margin: 0;
             padding: 0;
-            font-size: 12px;
+            font-size: 11px;
             color: #3db994;
+            font-weight: 800;
         }
 
         & .greyText {
             margin: 0;
             padding: 0;
-            font-size: 10px;
+            font-size: 9px;
             color: #c2c2c2;
+            text-align: left;
         }
     }
 }
@@ -182,11 +185,11 @@
     width: 15px;
     height: 30px;
     position: absolute;
-    right: 3px;
+    right: 6px;
     top: 5px;
     z-index: 100001;
-    border-left: 2px solid #e5e5e5;
-    padding-left: 7px;
+    border-left: 1px solid #e5e5e5;
+    padding-left: 5px;
 
     & .smallButton img {
         height: 15px;
@@ -209,15 +212,16 @@
 .ldsEllipsis {
     display: inline-block;
     position: relative;
-    width: 60px;
+    width: 40px;
     height: 30px;
-    margin: 0px auto;
+    margin-left: -3px;
+    margin-top: 3px;
 
     & div {
         position: absolute;
         top: 10px;
-        width: 11px;
-        height: 11px;
+        width: 8px;
+        height: 8px;
         border-radius: 50%;
         background: #3eb995;
         animation-timing-function: cubic-bezier(0, 1, 1, 0);
@@ -225,22 +229,22 @@
 
     & div:nth-child(1) {
         left: 6px;
-        animation: lds-ellipsis1 0.6s infinite;
+        animation: lds-ellipsis1 0.6s infinite 0.2s;
     }
 
     & div:nth-child(2) {
         left: 6px;
-        animation: lds-ellipsis2 0.6s infinite;
+        animation: lds-ellipsis2 0.6s infinite 0.2s;
     }
 
     & div:nth-child(3) {
-        left: 26px;
-        animation: lds-ellipsis2 0.6s infinite;
+        left: 18px;
+        animation: lds-ellipsis2 0.6s infinite 0.2s;
     }
 
     & div:nth-child(4) {
-        left: 45px;
-        animation: lds-ellipsis3 0.6s infinite;
+        left: 31px;
+        animation: lds-ellipsis3 0.6s infinite 0.2s;
     }
 }
 
@@ -270,14 +274,14 @@
     }
 
     100% {
-        transform: translate(19px, 0);
+        transform: translate(11px, 0);
     }
 }
 
 @keyframes slideIn {
     0% {
-        transform: translate(0, 30px);
-        opacity: 0.1;
+        transform: translate(0, 15px);
+        opacity: 0;
     }
 
     100% {
@@ -300,7 +304,7 @@
 
 @keyframes slideRight {
     0% {
-        transform: translateX(30px);
+        transform: translateX(20px);
     }
 
     100% {
@@ -318,14 +322,14 @@
     }
 }
 
-@keyframes expand-text {
+@keyframes fadeInRight {
     0% {
-        transform: scaleX(0.01);
+        transform: translateX(50px);
         opacity: 0;
     }
 
     100% {
-        transform: scaleX(1);
+        transform: translateX(0);
         opacity: 1;
     }
 }

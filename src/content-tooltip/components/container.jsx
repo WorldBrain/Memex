@@ -28,6 +28,34 @@ class TooltipContainer extends React.Component {
 
     componentDidMount() {
         this.props.onInit(this.showTooltip)
+
+        document.addEventListener('keypress', this.justStoryBook)
+    }
+
+    componentWillUnmount() {
+        document.removeEventListener('keypress', this.justStoryBook)
+    }
+
+    justStoryBook = e => {
+        console.log('beep boop', e.key)
+        if (e.key === 'l')
+            this.setState({
+                showTooltip: true,
+                position: { x: 250, y: 250 },
+                tooltipState: 'running',
+            })
+        else if (e.key === 'c')
+            this.setState({
+                showTooltip: true,
+                position: { x: 250, y: 250 },
+                tooltipState: 'copied',
+            })
+        else if (e.key === 'p')
+            this.setState({
+                showTooltip: true,
+                position: { x: 250, y: 250 },
+                tooltipState: 'pristine',
+            })
     }
 
     showTooltip = position => {
