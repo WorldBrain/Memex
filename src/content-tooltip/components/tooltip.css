@@ -52,7 +52,7 @@
     animation-fill-mode: forwards;
 
     &::after {
-        left: 47%;
+        left: 48%;
     }
 }
 
@@ -123,17 +123,18 @@
         height: auto;
         animation: slideRight 0.2s ease-in 0.2s;
         animation-fill-mode: both;
+        margin-left: 5px;
     }
 
     & .copiedTextContainer {
         height: 35px;
-        width: 173px;
+        width: 190px;
         padding-left: 4px;
         padding-top: 5px;
         animation: fadeInRight 0.2s ease-in 0.3s;
         animation-fill-mode: both;
-        margin-left: 4px;
         text-align: left;
+        margin-left: 3px;
 
         & .greenText {
             margin: 0;
@@ -295,7 +296,7 @@
     }
 
     100% {
-        width: 250px;
+        width: 260px;
     }
 }
 
