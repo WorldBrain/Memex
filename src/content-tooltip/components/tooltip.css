@@ -48,38 +48,13 @@
 }
 
 .tooltip.stateCopied {
-    animation: expand-width 0.2s ease-in 0.3s;
+    animation: expand-width 0.1s ease-in 0.2s;
     animation-fill-mode: forwards;
 
     &::after {
         left: 47%;
     }
 }
-
-.icon {
-    display: flex;
-    width: 20px;
-    position: absolute;
-    top: 15px;
-    left: -8px;
-
-    & img {
-        width: 15px;
-        height: 20px;
-    }
-}
-
-/* .animationContainer {
-    transition: all 0.2s ease-in;
-}
-
-.animationSlideIn {
-    animation: slideIn 0.2s ease-in;
-}
-
-.animationSlideOut {
-    animation: slideOut 0.2s ease-in;
-} */
 
 .createLinkButton,
 .progressIndicator,
@@ -152,16 +127,18 @@
 
     & .copiedTextContainer {
         height: 35px;
+        width: 173px;
         padding-left: 4px;
         padding-top: 5px;
-        animation: fadeInRight 0.2s ease-in 0.4s;
+        animation: fadeInRight 0.2s ease-in 0.3s;
         animation-fill-mode: both;
         margin-left: 4px;
+        text-align: left;
 
         & .greenText {
             margin: 0;
             padding: 0;
-            font-size: 11px;
+            font-size: 12px;
             color: #3db994;
             font-weight: 800;
         }
@@ -169,9 +146,9 @@
         & .greyText {
             margin: 0;
             padding: 0;
-            font-size: 9px;
-            color: #c2c2c2;
-            text-align: left;
+            font-size: 10px;
+            color: #a2a2a2;
+            font-weight: 400;
         }
     }
 }
