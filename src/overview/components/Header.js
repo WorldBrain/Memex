@@ -41,7 +41,7 @@ const Header = ({
                     title="Click to view filters"
                 />
             </div>
-            <div
+            {/* <div
                 className={styles.linkFilter}
                 onClick={props.onListDropdownChange}
             >
@@ -50,7 +50,7 @@ const Header = ({
                     className={styles.iconEdit}
                     title="Edit many results"
                 />
-            </div>
+            </div> */}
         </div>
         <div className={styles.links}>
             <OutLink
