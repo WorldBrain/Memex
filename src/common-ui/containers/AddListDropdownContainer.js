@@ -4,7 +4,12 @@ import debounce from 'lodash/fp/debounce'
 import noop from 'lodash/fp/noop'
 
 import { updateLastActive } from 'src/analytics'
-import { AddListDropdownRow, AddListDropdown } from '../components'
+import { remoteFunction } from 'src/util/webextensionRPC'
+import {
+    AddListDropdownRow,
+    AddListDropdown,
+    IndexDropdownNewRow,
+} from '../components'
 
 class DropdownContainer extends Component {
     static propTypes = {
@@ -16,6 +21,7 @@ class DropdownContainer extends Component {
         resetPagesinTempList: PropTypes.func,
         setTempLists: PropTypes.func,
         mode: PropTypes.string.isRequired,
+        url: PropTypes.string,
     }
 
     static defaultProps = {
@@ -28,6 +34,8 @@ class DropdownContainer extends Component {
         super(props)
 
         this.fetchListSuggestions = debounce(300)(this.fetchListSuggestions)
+        this.addList = remoteFunction('createCustomList')
+        this.addUrlToList = remoteFunction('insertPageToList')
 
         this.state = {
             searchVal: '',
@@ -47,12 +55,62 @@ class DropdownContainer extends Component {
         return /[^\w\s-]/gi
     }
 
+    get allowIndexUpdate() {
+        return this.props.url != null
+    }
+
     overviewMode() {
         return this.props.mode === 'overview'
     }
 
     setInputRef = el => (this.inputEl = el)
 
+    canCreateList() {
+        if (!this.allowIndexUpdate) {
+            return false
+        }
+
+        const searchVal = this.getSearchVal()
+
+        return (
+            !!searchVal.length &&
+            !this.state.displayFilters.reduce(
+                (acc, tag) => acc || tag.name === searchVal,
+                false,
+            )
+        )
+    }
+
+    addPageToList = () => {}
+
+    createList = async () => {
+        const newList = {
+            name: this.getSearchVal(),
+            pages: [],
+        }
+
+        let newLists = this.state.filters
+
+        try {
+            if (this.allowIndexUpdate) {
+                await this.addList({ name: newList })
+            }
+            newLists = [newList, ...this.state.filters]
+        } catch (err) {
+        } finally {
+            this.inputEl.focus()
+            this.setState(state => ({
+                ...state,
+                searchVal: '',
+                filters: newLists,
+                displayFilters: newLists,
+                focused: 0,
+            }))
+            // TODO: see what this does.
+            // this.props.onFilterAdd(newList)
+            updateLastActive() // Consider user active (analytics)
+        }
+    }
     /**
      * Selector for derived display lists state
      */
@@ -148,6 +206,13 @@ class DropdownContainer extends Component {
     handleSearchEnterPress(event) {
         event.preventDefault()
 
+        if (
+            this.canCreateList() &&
+            this.state.focused === this.state.displayFilters.length
+        ) {
+            return this.createList()
+        }
+
         if (this.state.displayFilters.length) {
             return this.handleListSelection(this.state.focused)(event)
         }
@@ -157,7 +222,7 @@ class DropdownContainer extends Component {
 
     handleSearchArrowPress(event) {
         event.preventDefault()
-        let offset = 0
+        let offset = this.canCreateList() ? 1 : 0
 
         if (!this.allowIndexUpdate) offset = 1
 
@@ -218,6 +283,17 @@ class DropdownContainer extends Component {
                 handleClick={this.handleListSelection(i)}
             />
         ))
+
+        if (this.canCreateList()) {
+            listOptions.unshift(
+                <IndexDropdownNewRow
+                    key="+"
+                    value={this.state.searchVal}
+                    onClick={this.createList}
+                    focused={this.state.focused === 0}
+                />,
+            )
+        }
 
         return listOptions
     }
