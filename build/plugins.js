@@ -78,7 +78,7 @@ export default function({
             new SentryPlugin({
                 release: process.env.npm_package_version,
                 include: output.path,
-                dryRun: true,
+                dryRun: shouldPackage,
             }),
         )
     }
