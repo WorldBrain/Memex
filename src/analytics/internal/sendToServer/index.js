@@ -1,7 +1,7 @@
 import SendToServer from './SendToServer'
 
 const sendToServer = new SendToServer({
-    url: process.env.REDASH_HOST,
+    url: process.env.ANALYTICS_HOST,
 })
 
 export default sendToServer

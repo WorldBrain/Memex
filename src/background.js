@@ -4,6 +4,7 @@ import 'src/activity-logger/background'
 import 'src/search/background'
 import 'src/analytics/background'
 import DirectLinkingBackground from 'src/direct-linking/background'
+import EventLogBackground from 'src/analytics/internal/background'
 import 'src/omnibar'
 import { installTimeStorageKey } from 'src/imports/background'
 import {
@@ -146,3 +147,7 @@ const directLinking = new DirectLinkingBackground({ storageManager })
 directLinking.setupRemoteFunctions()
 directLinking.setupRequestInterceptor()
 window.directLinking = directLinking
+
+const eventLog = new EventLogBackground({ storageManager })
+eventLog.setupRemoteFunctions()
+window.eventLog = eventLog

@@ -1,11 +1,8 @@
-import { MapEventTypeToInt, MapNotifTypeToIntArray } from './constants'
-import db from 'src/search/search-index-new'
+import { MapEventTypeToInt } from './constants'
 import AnalyticsStorage from './AnalyticsStorage'
 import SendToServer from './sendToServer'
 
 class Analytics {
-    _queueEvents = []
-    _loaded = 0
     _operationsMap = {
         successful_search: undefined,
         unsuccessful_search: undefined,
@@ -22,10 +19,10 @@ class Analytics {
     }
 
     registerOperations() {
-        Object.keys(this._operationsMap).map((data, i) =>
-            this._queueEvents.push(data),
-        )
-        this._loaded = 1
+        // Object.keys(this._operationsMap).map((data, i) =>
+        //     // this.loadInitialData(data)
+        //     data = data + ""
+        // )
     }
 
     /**
@@ -37,7 +34,7 @@ class Analytics {
         const params = {
             ...eventArgs,
             type: MapEventTypeToInt[eventArgs.type].id,
-            data: eventArgs.data || {},
+            other: eventArgs.data || {},
         }
 
         const notifParams = {
@@ -59,37 +56,38 @@ class Analytics {
      * @param {notifType} type of notif event
      */
     async loadInititalData(notifType, isCacheUpdate = false) {
-        await db.transaction('rw', db.tables, async () => {
-            const eventLogCount = await db.eventLog
-                .where('type')
-                .anyOf(MapNotifTypeToIntArray[notifType])
-                .count()
+        // await db.transaction('rw', db.tables, async () => {
+        //     let eventLogCount = 0
+        //     for(let i = 0; i < MapNotifTypeToIntArray[notifType].length(); i++) {
+        //         const eventCountNotif = await db.eventLog
+        //             .where('type')
+        //             .equals(MapNotifTypeToIntArray[notifType][i])
+        //             .count()
+        //         if(eventCountNotif) {
+        //             eventLogCount += eventCountNotif
+        //         }
+        //     }
+        //     const eventLogLastTimeUsed = await db.eventLog
+        //         .where('type')
+        //         .anyOf(MapNotifTypeToIntArray[notifType])
+        //         .last()
+        //     console.log(eventLogLastTimeUsed, eventLogCount)
+        //     // if there is any entry in the dexie then update data of cache
+        //     if(!eventLogLastTimeUsed) {
+        //         return
+        //     }
+        //     // If the data is out of date then we have to update with dexie query and initial loading of data
+        //     if (this.getCountNotif() === undefined || isCacheUpdate) {
+        //         this.updateValue(notifType, { last_time_used: eventLogLastTimeUsed.timestamp,value: eventLogCount})
+        //     } else {
+        //         this.updateValue(notifType, { last_time_used: eventLogLastTimeUsed.timestamp,value: eventLogCount + this._operationsMap[notifType].value})
+        //    }
+        // })
+    }
 
-            const eventLogLastTimeUsed = await db.eventLog
-                .where('type')
-                .anyOf(MapNotifTypeToIntArray[notifType])
-                .last()
-
-            // If the data is out of date then we have to update with dexie query and initial loading of data
-            if (this._operationsMap[notifType] === undefined || isCacheUpdate) {
-                // if there is any entry in the dexie then update data of cache
-                if (eventLogLastTimeUsed) {
-                    this._operationsMap[notifType] = {
-                        last_time_used: eventLogLastTimeUsed.timestamp,
-                        value: eventLogCount,
-                    }
-                }
-            } else {
-                if (eventLogLastTimeUsed) {
-                    this._operationsMap[notifType] = {
-                        last_time_used: eventLogLastTimeUsed.timestamp,
-                        value:
-                            eventLogCount +
-                            this._operationsMap[notifType].value,
-                    }
-                }
-            }
-        })
+    // Update the value when the memeory variables is out of update or load initial data
+    updateValue(notifType, isCacheUpdate, value) {
+        this._operationsMap[notifType] = value
     }
 
     incrementvalue(event) {
@@ -116,37 +114,16 @@ class Analytics {
      * @param {EventTrackInfo} eventArgs
      */
     async processEvent(eventArgs) {
-        this._loaded = 1
         // Prepare the event to store the event in dexie db.
-        const timestamp = Date.now()
+        const time = Date.now()
 
         const params = {
             ...eventArgs,
-            timestamp,
+            time,
+            other: [],
         }
 
-        // If all the items has been loaded initially
-        if (this._loaded === 1) {
-            // If all the event has processed then directly save the event into db
-            if (!this._queueEvents.length) {
-                await this.storeEventLogStatistics(params)
-            } else {
-                while (this._queueEvents.length) {
-                    const event = this._queueEvents[0]
-                    this._queueEvents.shift()
-
-                    // Event happens on the client side
-                    if (event instanceof Object) {
-                        await this.storeEventLogStatistics(event)
-                    } else {
-                        // Initial load data from dexie
-                        await this.loadInititalData(event)
-                    }
-                }
-            }
-        } else {
-            this._queueEvents.push(params)
-        }
+        await this.storeEventLogStatistics(params)
 
         // Send the data to redash server
         SendToServer.trackEvent(params)

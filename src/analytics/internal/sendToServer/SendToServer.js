@@ -2,16 +2,12 @@ import { idleManager } from 'src/util/idle'
 import { SHOULD_TRACK_STORAGE_KEY as SHOULD_TRACK } from 'src/options/privacy/constants'
 
 class SendToServer {
-    static API_PATH = './'
-    static JSON_HEADERS = {
-        Accept: 'application/json, text/plain, */*',
-        'Content-Type': 'application/json',
-    }
+    static API_PATH = '/event'
 
     /**
      * Pool of requests that have been tracked, which will be periodically cleared and sent off in bulk.
      */
-    _pool = new Set()
+    _pool = []
 
     /**
      * @param {Object} args
@@ -27,33 +23,28 @@ class SendToServer {
         })
     }
 
-    get defaultParams() {
-        return {
-            user_id: 123,
-        }
+    /**
+     * Get user id *
+     */
+    get getUserId() {
+        const userId = 123
+        return userId
     }
 
     /**
-     * @param {any} [params={}] Any optional piwik HTTP params.
-     * @returns {URLSearchParams}
+     *
+     * @param {params} params if params is there, then send request directly without wait, otherwise send pool request
      */
-    _formReqParams(params = {}) {
-        const searchParams = new URLSearchParams()
-
-        params = { ...this.defaultParams, ...params }
-        for (const prop in params) {
-            if (params[prop] != null) {
-                searchParams.set(prop, params[prop])
-            }
+    _formReqParams(params = undefined) {
+        const data = {
+            id: this.getUserId,
+            data: params ? [...params] : [...this._pool],
         }
 
-        return searchParams
+        return data
     }
 
-    _serializePoolReqs = () =>
-        [...this._pool].map(params => `?${params.toString()}`)
-
-    _poolReq = params => this._pool.add(this._formReqParams(params))
+    _poolReq = params => this._pool.push(params)
 
     /**
      * Send a request to the Redash HTTP Tracking API. Takes care of calculating all default
@@ -62,11 +53,16 @@ class SendToServer {
      * @param {any} params
      * @return {Promise<Response>}
      */
-    _sendReq = params =>
+    _sendReq = event => {
         fetch(this._host, {
             method: 'POST',
-            body: this._formReqParams(params),
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(this._formReqParams(event)),
         })
+    }
 
     /**
      * Send a bulk request to the Piwik HTTP Tracking API. Batches all pooled requests, then resets them.
@@ -75,19 +71,22 @@ class SendToServer {
      * @return {Promise<boolean>}
      */
     _sendBulkReq = async () => {
-        if (!this._pool.size || !await this.shouldTrack()) {
-            this._pool.clear() // Clear pool if user turned off tracking
+        if (!this._pool.length || !(await this.shouldTrack())) {
+            this._pool.length = 0 // Clear pool if user turned off tracking
             return
         }
 
         const res = await fetch(this._host, {
             method: 'POST',
-            header: SendToServer.JSON_HEADER,
-            body: JSON.stringify({ requests: this._serializePoolReqs() }),
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(this._formReqParams()),
         })
 
-        if (res.ok) {
-            this._pool.clear()
+        if (res.status) {
+            this._pool.length = 0
         }
     }
 
@@ -106,16 +105,15 @@ class SendToServer {
      * @param {boolean} [force=false] Whether or not to send immediately or just add to request pool.
      */
     async trackEvent(event, force = false) {
-        console.log(event)
-        // if (!await this.shouldTrack()) {
-        //     return
-        // }
+        if (!(await this.shouldTrack())) {
+            return
+        }
 
-        // if (force) {
-        //     await this._sendReq(event)
-        // } else {
-        //     this._poolReq(event)
-        // }
+        if (force) {
+            await this._sendReq(event)
+        } else {
+            this._poolReq(event)
+        }
     }
 }
 

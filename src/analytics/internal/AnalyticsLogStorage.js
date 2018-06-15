@@ -1,7 +1,7 @@
 import { remoteFunction } from 'src/util/webextensionRPC'
-const storeEventInDexie = remoteFunction('storeEvent')
+const storeEventDexie = remoteFunction('storeEvent')
 
 export default async function storeEvent(params) {
     // Store the data in dexie db
-    await storeEventInDexie(params)
+    await storeEventDexie(params)
 }
