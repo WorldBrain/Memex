@@ -4,7 +4,6 @@ import classNames from 'classnames'
 
 import AnimationWrapper from './AnimationWrapper'
 import { getExtURL } from '../utils'
-import { INFO_URL } from '../constants'
 import styles from './tooltip.css'
 
 const images = {
