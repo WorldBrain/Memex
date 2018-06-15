@@ -1,6 +1,6 @@
 import memdown from 'memdown'
-import * as indexedDB from 'fake-indexeddb'
-import * as IDBKeyRange from 'fake-indexeddb/lib/FDBKeyRange'
+import indexedDB from 'fake-indexeddb'
+import IDBKeyRange from 'fake-indexeddb/lib/FDBKeyRange'
 import { handleAttachment as addPouchPageAttachment } from '../../page-storage/store-page'
 import index from '../'
 import * as oldIndex from '../search-index-old'
@@ -22,7 +22,7 @@ async function insertTestPageIntoOldIndex() {
     })
     await Promise.all(
         data.EXPORTED_PAGE_1.tags.map(tag =>
-            index.addTag(data.PAGE_DOC_1.url, tag),
+            index.addTag({ url: data.PAGE_DOC_1.url, tag }),
         ),
     )
     await index.addBookmark({
@@ -57,7 +57,9 @@ describe('Old=>New index migration', () => {
         })
 
         test('Exporting old-index data', async () => {
-            for await (const { pages: [page] } of exportOldPages()) {
+            for await (const {
+                pages: [page],
+            } of exportOldPages()) {
                 expect(page).toEqual(data.EXPORTED_PAGE_1)
             }
         })
@@ -81,7 +83,7 @@ describe('Old=>New index migration', () => {
                 favIconURI,
                 bookmark,
                 tags,
-                ...expected,
+                ...expected
             } = expectedData
             const { screenshot, ...page } = storedPage
 
@@ -114,7 +116,9 @@ describe('Old=>New index migration', () => {
 
             index.useOld = false
             // Make sure search works post-import
-            const { docs: [result] } = await index.search({
+            const {
+                docs: [result],
+            } = await index.search({
                 query: 'mining',
                 mapResultsFunc: r => r,
             } as any)

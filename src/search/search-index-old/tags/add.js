@@ -56,7 +56,7 @@ export async function setTags({ pageId, url }, tags) {
  * @param {string[]} tags Array of tags to associate with page.
  * @returns {Promise<void>}
  */
-export async function addTag(url, tag) {
+export async function addTag({ url, tag }) {
     const pageId = await generatePageDocId({ url })
 
     const reverseIndexDoc = await fetchExistingPage(pageId)
