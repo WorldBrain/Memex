@@ -32,16 +32,29 @@ $ npm install -g yarn
 
 **Run `yarn` to install dependencies**
 
+This could take a while....
+
 ```sh
 $ yarn
 ```
-
-**This could take a while....**
 
 **Now run `yarn watch` to compile incremental builds**
 
 ```sh
 $ yarn watch
+```
+
+**You can also enable optional OS build notifications in watch mode**
+
+```sh
+$ yarn watch:notif
+```
+
+Subsequent development builds are sped up via use of caching. If any odd side-effects are encountered
+between builds, you can clear the cache to ensure your next build is completely fresh.
+
+```sh
+$ yarn cache:clean
 ```
 
 ## Running The Extension
@@ -301,16 +314,9 @@ See [Mozilla Omnibox Docs](https://developer.mozilla.org/en-US/Add-ons/WebExtens
 
 This initializes the user database using [PouchDB](https://pouchdb.com/)
 
-#### **...**: other stuff
-
-The build process is based on `yarn`, that runs some `npm` commands specified in
-`package.json`, which in turn start the corresponding tasks in
-`gulpfile.babel.js` (transpiled by settings in `.babelrc`).
-
 ## Dependencies
 
 -   [react](https://reactjs.org/) - A Javascript component-based 'framework' (it's actually a library) used for the User Interface
 -   [react-redux](https://github.com/reactjs/react-redux) - A global state handler that syncs with react to create a nice workflow.
--   [babel](https://babeljs.io/) - This is used for compiling ES7=>6=>5
--   [browserify](http://browserify.org/) - Combined with babel allows us to bundle up our dependencies using the `import 'module'` syntax
--   [gulp](https://gulpjs.com/) - Combined with browserify + babel this gives us the ability to listen to any saved changes in our code and automatically compile it for use in a Browser Extension
+-   [babel](https://babeljs.io/)
+-   [webpack](https://webpack.js.org/)
