@@ -153,7 +153,14 @@ export const deletePageList = () => async (dispatch, getState) => {
 }
 
 export const addUrltoList = (url, index, id) => async (dispatch, getState) => {
-    dispatch(addPagetoList(url, index))
+    try {
+        await remoteFunction('insertPageToList')({ id, url })
+    } catch (e) {
+        console.log(e)
+    } finally {
+        dispatch(addPagetoList(url, index))
+        updateLastActive()
+    }
 }
 
 export const handleToggleAddToList = () => (dispatch, getState) => {

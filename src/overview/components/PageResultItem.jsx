@@ -45,7 +45,7 @@ class PageResultItem extends PureComponent {
         // TODO: May bring the render function here
         const crt = document.getElementById('dragged-element')
         crt.style.display = 'block'
-        document.body.appendChild(crt)
+        // document.body.appendChild(crt)
 
         // TODO: see if another data type is allowed
         if (urlsAdded.indexOf(url) > -1) {
@@ -53,7 +53,8 @@ class PageResultItem extends PureComponent {
         } else {
             e.dataTransfer.setData('text/plain', url)
         }
-        e.dataTransfer.setDragImage(crt, -15, -15)
+
+        e.dataTransfer.setDragImage(crt, 15, 15)
     }
 
     render() {

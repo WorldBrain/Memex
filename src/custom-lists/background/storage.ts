@@ -52,7 +52,8 @@ export default class CustomListStorage extends FeatureStorage {
         })
     }
 
-    async insertPageToList({ listId, pageUrl = true }) {
+    // TODO: check if the list ID exists in the DB, if not cannot add.
+    async insertPageToList({ listId, pageUrl }) {
         await this.storageManager.putObject(PAGE_LIST_ENTRY, {
             listId,
             pageUrl,

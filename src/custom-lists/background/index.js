@@ -20,7 +20,6 @@ export default class CustomListBackground {
             },
         })
     }
-    // TODO: Implement this function for adding list to DB
 
     async createCustomList({ name }) {
         await this.storage.insertCustomList({
@@ -35,7 +34,10 @@ export default class CustomListBackground {
         })
     }
 
-    async insertPageToList({ id }, pageUrl) {
-        return ''
+    async insertPageToList({ id, url }) {
+        await this.storage.insertPageToList({
+            listId: id,
+            pageUrl: url,
+        })
     }
 }
