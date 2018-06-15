@@ -21,7 +21,7 @@
     "cache:clean": "rimraf ./node_modules/.cache",
     "stats": "webpack --profile --json > stats.json",
     "package": "gulp package",
-    "publish": "node publish",
+    "publish-ext": "source publish.sh && node publish",
     "package-src": "gulp package-source-code",
     "test": "jest --verbose --silent --config=.jest-config.json",
     "test-watch": "jest --verbose --silent --watch --config=.jest-config.json",
