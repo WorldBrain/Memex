@@ -13,15 +13,15 @@ import {
 
 export interface Props {
     source: 'tag' | 'domain'
-    /* The URL to use for dis/associating new tags with; set this to keep in sync with index. */
+    /** The URL to use for dis/associating new tags with; set this to keep in sync with index. */
     url?: string
     hover?: boolean
     tabId?: number
-    /* Tag Filters that are previously present in the location. */
+    /** Tag Filters that are previously present in the location. */
     initFilters?: string[]
-    /* Opt. cb to run when new tag added to state. */
+    /** Opt. cb to run when new tag added to state. */
     onFilterAdd?: (filter: string) => void
-    /* Opt. cb to run when tag deleted from state. */
+    /** Opt. cb to run when tag deleted from state. */
     onFilterDel?: (filter: string) => void
 }
 
@@ -34,7 +34,7 @@ export interface State {
 }
 
 class IndexDropdownContainer extends Component<Props, State> {
-    static defaultProps = {
+    static defaultProps: Partial<Props> = {
         onFilterAdd: noop,
         onFilterDel: noop,
         initFilters: [],
@@ -45,7 +45,7 @@ class IndexDropdownContainer extends Component<Props, State> {
     private delTagRPC
     private inputEl: HTMLInputElement
 
-    constructor(props) {
+    constructor(props: Props) {
         super(props)
 
         this.suggestRPC = remoteFunction('suggest')

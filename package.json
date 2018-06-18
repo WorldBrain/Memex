@@ -87,7 +87,7 @@
         "react-slick": "^0.15.4",
         "react-waypoint": "^7.3.0",
         "redux": "^3.7.0",
-        "redux-act": "^1.3.0",
+        "redux-act": "^1.7.4",
         "redux-observable": "^0.14.1",
         "redux-query-sync": "^0.1.7",
         "redux-thunk": "^2.2.0",
