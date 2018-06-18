@@ -7,7 +7,7 @@ import DirectLinkingStorage from './storage'
 export default class DirectLinkingBackground {
     constructor({ storageManager }) {
         this.backend = new DirectLinkingBackend()
-        this.storage = new DirectLinkingStorage(storageManager)
+        this.storage = new DirectLinkingStorage({ storageManager })
         this.sendAnnotation = ({ tabId, annotation }) => {
             browser.tabs.sendMessage(tabId, { type: 'direct-link', annotation })
         }

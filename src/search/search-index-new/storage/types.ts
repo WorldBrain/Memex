@@ -108,3 +108,7 @@ export interface DexieSchema {
         [collName: string]: string
     }
 }
+
+export abstract class FeatureStorage {
+    constructor(protected storageManager: ManageableStorage) {}
+}
