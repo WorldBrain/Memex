@@ -33,6 +33,27 @@ export default class CustomListStorage extends FeatureStorage {
         })
     }
 
+    // Return all the list in the DB
+    //  TODO: Use pagination if required.
+    async fetchAllList() {
+        return ''
+    }
+
+    // TODO: Returns all the pages associated with the list.
+    async fetchListPages() {
+        return ''
+    }
+
+    // TODO: for naming lists uniquely and issuing warning about duplicate names
+    async checkListNameExists() {
+        return ''
+    }
+
+    // TODO: Returns list By Id
+    async getListById({ id }) {
+        return ''
+    }
+
     // Function to insert into the DB
     async insertCustomList({ name, isDeletable = 1, isNestable = 1 }) {
         await this.storageManager.putObject(COLLECTION_NAME, {
@@ -52,6 +73,11 @@ export default class CustomListStorage extends FeatureStorage {
         })
     }
 
+    // Delete List from the DB.
+    async removeList({ id }) {
+        await Promise.resolve()
+    }
+
     // TODO: check if the list ID exists in the DB, if not cannot add.
     async insertPageToList({ listId, pageUrl }) {
         await this.storageManager.putObject(PAGE_LIST_ENTRY, {
@@ -59,5 +85,12 @@ export default class CustomListStorage extends FeatureStorage {
             pageUrl,
             createdAt: new Date(),
         })
+    }
+
+    async removePageFromList({ listId, pageUrl }) {
+        // await this.storageManager.deletetObject(PAGE_LIST_ENTRY, {
+        //     listId,
+        //     pageUrl,
+        // })
     }
 }

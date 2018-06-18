@@ -18,7 +18,23 @@ export default class CustomListBackground {
             updateListName: (...params) => {
                 return this.updateList(...params)
             },
+            removeList: (...params) => {
+                return this.removeList(...params)
+            },
+            removePageFromList: (...params) => {
+                return this.removePageFromList(...params)
+            },
+            getListById: (...params) => {
+                return this.getListById(...params)
+            },
+            getAllLists: (...params) => {
+                return this.getAllLists(...params)
+            },
         })
+    }
+
+    async getAllLists() {
+        await this.storage.fetchAllList()
     }
 
     async createCustomList({ name }) {
@@ -38,6 +54,25 @@ export default class CustomListBackground {
         await this.storage.insertPageToList({
             listId: id,
             pageUrl: url,
+        })
+    }
+
+    async removeList({ id }) {
+        await this.storage.removeList({
+            id,
+        })
+    }
+
+    async removePageFromList({ id, pageUrl }) {
+        await this.storage.removePageFromList({
+            id,
+            pageUrl,
+        })
+    }
+
+    async getListById({ id }) {
+        await this.storage.getListById({
+            id,
         })
     }
 }
