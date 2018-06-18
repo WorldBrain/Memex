@@ -119,3 +119,10 @@
     max-height: 65vh;
     overflow-y: auto;
 }
+
+.sameNameWarning {
+    display: flex;
+    justify-content: center;
+    color: red;
+    font-weight: 400;
+}

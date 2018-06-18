@@ -23,6 +23,11 @@ const CreateListForm = props => (
                 required
             />
         </form>
+        {props.showWarning && (
+            <small className={styles.sameNameWarning}>
+                List name already taken.
+            </small>
+        )}
     </div>
 )
 
@@ -30,6 +35,7 @@ CreateListForm.propTypes = {
     onCheckboxClick: PropTypes.func.isRequired,
     value: PropTypes.string,
     handleNameChange: PropTypes.func.isRequired,
+    showWarning: PropTypes.bool,
 }
 
 export default CreateListForm

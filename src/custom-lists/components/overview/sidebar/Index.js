@@ -36,6 +36,7 @@ class ListContainer extends Component {
             showCreateList: false,
             listName: null,
             updatedListName: null,
+            showWarning: false,
         }
     }
 
@@ -72,7 +73,9 @@ class ListContainer extends Component {
         event.preventDefault()
         const { value } = event.target.elements['listName']
         // value = list name
+        // TODO: Place a check here for same list name or place it in the createPageList
         this.props.createPageList(value)
+
         this.setState({
             showCreateList: false,
             listName: null,
@@ -104,6 +107,7 @@ class ListContainer extends Component {
                                 ? this.state.updatedListName
                                 : list.name
                         }
+                        showWarning={this.state.showWarning}
                     />
                 )
             }
@@ -130,6 +134,7 @@ class ListContainer extends Component {
                 onCheckboxClick={this.handleCreateListSubmit}
                 handleNameChange={this.handleSearchChange('listName')}
                 value={this.state.listName}
+                showWarning={this.state.showWarning}
             />
         ) : null
 

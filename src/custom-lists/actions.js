@@ -123,6 +123,7 @@ export const createPageList = name => async (dispatch, getState) => {
     }
 
     try {
+        // TODO: Return Id of the added list to update in the state.
         // Create List
         await remoteFunction('createCustomList')({ name })
         dispatch(createList(list))
