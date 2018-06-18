@@ -10,8 +10,8 @@ export interface ScrollState {
 }
 
 /**
- * Tab state contains user interaction data for the current ongoing visit in this tab. It can also
- * handle scheduling a future logging event. TODO: do we need to pass this down here?
+ * Represents a tab as it related to the internal operations of the ext; some similarity
+ * with the browser Tabs API's tab state.
  */
 export interface TabState {
     id?: number
@@ -29,3 +29,9 @@ export type TabChangeListener = (
     changeInfo: Tabs.OnUpdatedChangeInfoType,
     tab: Tabs.Tab,
 ) => Promise<void>
+
+export type LoggableTabChecker = (tab: Tabs.Tab) => Promise<boolean>
+export type VisitInteractionUpdater = (interalTab: TabState) => Promise<void>
+export type FavIconFetcher = (url: string) => Promise<string>
+export type FavIconChecker = (url: string) => Promise<boolean>
+export type FavIconCreator = (url: string, data: string) => Promise<void>
