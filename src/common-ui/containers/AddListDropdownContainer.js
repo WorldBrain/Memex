@@ -117,7 +117,9 @@ class DropdownContainer extends Component {
     getDisplayLists = () =>
         this.state.displayFilters.map((value, i) => ({
             value,
-            focused: this.state.focused === i,
+            focused: !this.canCreateList()
+                ? this.state.focused === i
+                : this.state.focused === i + 1,
         }))
 
     getSearchVal = () =>
@@ -206,10 +208,7 @@ class DropdownContainer extends Component {
     handleSearchEnterPress(event) {
         event.preventDefault()
 
-        if (
-            this.canCreateList() &&
-            this.state.focused === this.state.displayFilters.length
-        ) {
+        if (this.canCreateList() && this.state.focused === 0) {
             return this.createList()
         }
 
@@ -222,7 +221,7 @@ class DropdownContainer extends Component {
 
     handleSearchArrowPress(event) {
         event.preventDefault()
-        let offset = this.canCreateList() ? 1 : 0
+        let offset = this.canCreateList() ? 0 : 1
 
         if (!this.allowIndexUpdate) offset = 1
 

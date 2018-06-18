@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 
 import styles from './AddListDropdownRow.css'
 
-class DropdownRow extends PureComponent {
+class AddListDropdownRow extends PureComponent {
     static propTypes = {
         value: PropTypes.object.isRequired,
         focused: PropTypes.bool,
@@ -59,4 +59,4 @@ class DropdownRow extends PureComponent {
     }
 }
 
-export default DropdownRow
+export default AddListDropdownRow

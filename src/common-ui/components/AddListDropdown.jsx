@@ -4,7 +4,7 @@ import cx from 'classnames'
 
 import styles from './AddListDropdown.css'
 
-const Dropdown = props => (
+const AddListDropdown = props => (
     <div
         className={cx({
             [styles.dropdown]: props.overviewMode,
@@ -43,14 +43,14 @@ const Dropdown = props => (
     </div>
 )
 
-Dropdown.propTypes = {
+AddListDropdown.propTypes = {
     children: PropTypes.node.isRequired,
     onListSearchChange: PropTypes.func.isRequired,
     onListSearchKeyDown: PropTypes.func.isRequired,
     setInputRef: PropTypes.func.isRequired,
     listSearchValue: PropTypes.string,
-    applyBulkEdits: PropTypes.func.isRequired,
+    applyBulkEdits: PropTypes.func,
     overviewMode: PropTypes.bool.isRequired,
 }
 
-export default Dropdown
+export default AddListDropdown
