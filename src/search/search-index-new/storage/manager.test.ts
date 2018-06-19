@@ -48,25 +48,25 @@ describe('StorageManager', () => {
                 {
                     version: 1,
                     schema: {
-                        eggs: 'slug, field1',
-                        spam: 'slug, field1',
+                        eggs: 'slug',
+                        spam: 'slug',
                     },
                     migrations: [],
                 },
                 {
                     version: 2,
                     schema: {
-                        eggs: 'slug, *field2, field1',
-                        spam: 'slug, field1',
+                        eggs: 'slug, *field2',
+                        spam: 'slug',
                     },
                     migrations: [migrateEggs],
                 },
                 {
                     version: 3,
                     schema: {
-                        eggs: 'slug, *field2, field1',
-                        foo: 'slug, field1',
-                        spam: 'slug, field1',
+                        eggs: 'slug, *field2',
+                        foo: 'slug',
+                        spam: 'slug',
                     },
                     migrations: [],
                 },
