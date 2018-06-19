@@ -1,10 +1,11 @@
 import groupBy from 'lodash/fp/groupBy'
 import Dexie from 'dexie'
+import 'dexie-mongoify'
 
 import { Page, Visit, Bookmark, Tag, FavIcon } from '../models'
 import { StorageManager } from './manager'
 import { getDexieHistory } from './dexie-schema'
-import { DexieSchema } from './types'
+import { DexieSchema, FilterQuery } from './types'
 
 export * from './types'
 
@@ -25,28 +26,41 @@ export default class Storage extends Dexie {
     public static MIN_STR = ''
     public static MAX_STR = String.fromCharCode(65535)
 
+    // Quick typings as `dexie-mongoify` doesn't contain any
+    public collection: <T>(
+        name: string,
+    ) => {
+        find(query: FilterQuery<T>): Dexie.Collection<T, any>
+        count(query: FilterQuery<T>): Promise<number>
+        update(
+            query: FilterQuery<T>,
+            update,
+        ): Promise<{ modifiedCount: number }>
+        remove(query: FilterQuery<T>): Promise<{ deletedCount: number }>
+    }
+
     /**
-     * @type {Dexie.Table} Represents page data - our main data type.
+     * Represents page data - our main data type.
      */
     public pages: Dexie.Table<Page, string>
 
     /**
-     * @type {Dexie.Table} Represents page visit timestamp and activity data.
+     * Represents page visit timestamp and activity data.
      */
     public visits: Dexie.Table<Visit, [number, string]>
 
     /**
-     * @type {Dexie.Table} Represents page visit timestamp and activity data.
+     * Represents page visit timestamp and activity data.
      */
     public bookmarks: Dexie.Table<Bookmark, string>
 
     /**
-     * @type {Dexie.Table} Represents tags associated with Pages.
+     * Represents tags associated with Pages.
      */
     public tags: Dexie.Table<Tag, [string, string]>
 
     /**
-     * @type {Dexie.Table} Represents fav-icons associated with hostnames.
+     * Represents fav-icons associated with hostnames.
      */
     public favIcons: Dexie.Table<FavIcon, string>
 

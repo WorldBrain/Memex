@@ -1,5 +1,8 @@
+import { FilterQuery as MongoFilterQuery } from 'mongodb'
+
 import StorageRegistry from './registry'
 import { Field } from './fields'
+
 export type FieldType = 'text' | 'json' | 'datetime' | 'string' | 'url'
 
 // TODO
@@ -7,6 +10,14 @@ export interface MigrationRunner {
     (): Promise<void>
     _seen?: boolean
 }
+
+export interface FindOpts {
+    reverse?: boolean
+    skip?: number
+    limit?: number
+}
+
+export type FilterQuery<T> = MongoFilterQuery<T>
 
 export type CollectionDefinitions =
     | CollectionDefinition[]
@@ -39,6 +50,18 @@ export interface ManageableStorage extends RegisterableStorage {
     initialized: boolean
     registry: StorageRegistry
     putObject(collectionName: string, object): Promise<void>
+    findObject<T>(collectionName: string, filter: FilterQuery<T>): Promise<T>
+    findAll<T>(collectionName: string, filter: FilterQuery<T>): Promise<T[]>
+    countAll<T>(collectionName: string, filter: FilterQuery<T>): Promise<number>
+    deleteObject<T>(
+        collectionName: string,
+        filter: FilterQuery<T>,
+    ): Promise<number>
+    updateObject<T>(
+        collectionName: string,
+        filter: FilterQuery<T>,
+        update,
+    ): Promise<number>
     _finishInitialization(storage): void
 }
 
