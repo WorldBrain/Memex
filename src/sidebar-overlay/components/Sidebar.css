@@ -4,7 +4,7 @@
 }
 
 .sidebar {
-    padding: 10px 15px;
+    padding: 0px;
     height: 100%;
     background: #fafafa;
     overflow-y: scroll;
@@ -27,12 +27,7 @@
 }
 
 .annotationContainer {
-    margin-top: 10px;
-    height: 100%;
+    margin: 20px 15px;
+    margin-bottom: 100px;
     background: #fafafa;
-}
-
-.extraHeight {
-    height: 100px;
-    background-color: #fafafa;
 }

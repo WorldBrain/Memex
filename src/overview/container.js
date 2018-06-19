@@ -273,6 +273,7 @@ class OverviewContainer extends Component {
                     filters={this.renderFilters()}
                     onQuerySearchKeyDown={this.handleSearchEnter}
                     isSearchDisabled={this.props.showOnboarding}
+                    scrollDisabled={this.props.mouseOnSidebar}
                 >
                     {this.renderResults()}
                 </Overview>

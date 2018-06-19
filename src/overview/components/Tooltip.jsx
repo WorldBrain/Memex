@@ -4,10 +4,11 @@ import classNames from 'classnames'
 
 import localStyles from './Tooltip.css'
 
-const mainTooltipContainer = showTooltip =>
+const mainTooltipContainer = (showTooltip, scrollDisabled) =>
     classNames({
         [localStyles.mainTooltip]: true,
         [localStyles.isActive]: showTooltip,
+        [localStyles.counterMargin]: scrollDisabled,
     })
 
 const tooltipButton = showTooltip =>
@@ -21,8 +22,9 @@ const Tooltip = ({
     tooltip,
     fetchNextTooltip,
     isTooltipRenderable,
+    scrollDisabled,
 }) => (
-    <div className={mainTooltipContainer(showTooltip)}>
+    <div className={mainTooltipContainer(showTooltip, scrollDisabled)}>
         <div className={localStyles.tooltipButton}>
             <div
                 className={tooltipButton(showTooltip)}
@@ -54,6 +56,7 @@ const Tooltip = ({
 
 Tooltip.propTypes = {
     showTooltip: PropTypes.bool.isRequired,
+    scrollDisabled: PropTypes.bool.isRequired,
     toggleShowTooltip: PropTypes.func.isRequired,
     tooltip: PropTypes.object,
     fetchNextTooltip: PropTypes.func.isRequired,

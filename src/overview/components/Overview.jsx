@@ -8,7 +8,6 @@ import Header from './Header'
 import styles from './Overview.css'
 import Tooltip from './Tooltip'
 import Head from 'src/options/containers/Head'
-import Sidebar from '../sidebar'
 
 const showFilterClass = ({ showFilters }) =>
     classNames({
@@ -27,9 +26,8 @@ const Overview = props => (
             tooltip={props.tooltip}
             fetchNextTooltip={props.fetchNextTooltip}
             isTooltipRenderable={props.isTooltipRenderable}
+            scrollDisabled={props.scrollDisabled}
         />
-
-        <Sidebar />
 
         <div className={showFilterClass(props)}>{props.filters}</div>
         <div
@@ -60,6 +58,7 @@ Overview.propTypes = {
     tooltip: PropTypes.object,
     fetchNextTooltip: PropTypes.func.isRequired,
     isTooltipRenderable: PropTypes.bool.isRequired,
+    scrollDisabled: PropTypes.bool.isRequired,
 }
 
 export default Overview

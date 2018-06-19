@@ -20,17 +20,17 @@ const Sidebar = ({
         width={340}
         styles={MenuStyles(env)}
         right
+        noOverlay
     >
-        <div className={styles.sidebar}>
+        <div
+            className={styles.sidebar}
+            onMouseEnter={toggleMouseOnSidebar}
+            onMouseLeave={toggleMouseOnSidebar}
+        >
             {showSidebar ? <CommentBox saveComment={saveComment} /> : null}
 
-            <div
-                className={styles.annotationContainer}
-                onMouseEnter={toggleMouseOnSidebar}
-                onMouseLeave={toggleMouseOnSidebar}
-            >
+            <div className={styles.annotationContainer}>
                 {renderAnnotations()}
-                <div className={styles.extraHeight} />
             </div>
         </div>
     </Menu>

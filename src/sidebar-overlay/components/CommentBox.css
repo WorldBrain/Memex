@@ -3,7 +3,8 @@
 }
 
 .commentBox {
-    margin-top: 10px;
+    margin: 10px 15px;
+    margin-bottom: 0px;
 }
 
 .textarea {
