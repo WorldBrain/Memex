@@ -88,6 +88,18 @@ export const toggleAddToList = createAction('custom-lists/toggleAddToList')
 export const closeAddToList = createAction('custom-lists/closeAddToList')
 
 export const setUrlDragged = createAction('custom-lists/setUrlDragged')
+export const closeCreateListForm = createAction(
+    'custom-lists/closeCreateListForm',
+)
+export const openCreateListForm = createAction(
+    'custom-lists/openCreateListForm',
+)
+export const toggleCreateListForm = createAction(
+    'custom-lists/toggleCreateListForm',
+)
+export const showCommonNameWarning = createAction(
+    'custom-lists/showCommonNameWarning',
+)
 
 // returns instance of ListStorageHandler class
 export const listStorage = () => (dispatch, getState) =>
@@ -110,7 +122,7 @@ export const delPageFromList = doc => async (dispatch, getState) => {
 export const getListFromDB = () => async (dispatch, getState) => {
     try {
         const lists = await remoteFunction('getAllLists')()
-        dispatch(getAllLists(lists))
+        dispatch(getAllLists(lists || []))
     } catch (err) {
         console.log(err)
     } finally {
@@ -126,14 +138,20 @@ export const createPageList = name => async (dispatch, getState) => {
         // Create List
         // TODO: Return Id of the added list to update in the state.
         const id = await remoteFunction('createCustomList')({ name })
-        const list = {
-            id,
-            name,
-            isDeletable: true,
-            pages: [],
-        }
+        if (id) {
+            const list = {
+                id,
+                name,
+                isDeletable: true,
+                pages: [],
+            }
 
-        dispatch(createList(list))
+            dispatch(createList(list))
+            dispatch(closeCreateListForm())
+        } else {
+            // TODO: dispatch function for same name error.
+            dispatch(showCommonNameWarning())
+        }
     } catch (error) {
         console.log(error)
     } finally {

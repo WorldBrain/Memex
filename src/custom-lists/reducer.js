@@ -28,6 +28,8 @@ const defaultState = {
     tempLists: [],
     showAddToList: false,
     urlDragged: '',
+    showCreateListForm: false,
+    showCommonNameWarning: false,
 }
 
 const getAllLists = (state, lists) => ({
@@ -221,6 +223,26 @@ const setUrlDragged = (state, url) => ({
     urlDragged: url,
 })
 
+const openCreateListForm = state => ({
+    ...state,
+    showCreateListForm: true,
+})
+
+const closeCreateListForm = state => ({
+    ...state,
+    showCreateListForm: false,
+})
+
+const toggleCreateListForm = state => ({
+    ...state,
+    showCreateListForm: !state.showCreateListForm,
+})
+
+const showCommonNameWarning = state => ({
+    ...state,
+    showCommonNameWarning: true,
+})
+
 export default createReducer(
     {
         [actions.getAllLists]: getAllLists,
@@ -254,6 +276,10 @@ export default createReducer(
         [actions.closeAddToList]: closeAddToList,
         [actions.resetUrlToEdit]: resetUrlToEdit,
         [actions.setUrlDragged]: setUrlDragged,
+        [actions.openCreateListForm]: openCreateListForm,
+        [actions.closeCreateListForm]: closeCreateListForm,
+        [actions.toggleCreateListForm]: toggleCreateListForm,
+        [actions.showCommonNameWarning]: showCommonNameWarning,
     },
     defaultState,
 )

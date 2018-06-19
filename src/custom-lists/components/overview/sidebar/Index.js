@@ -28,12 +28,14 @@ class ListContainer extends Component {
         updateList: PropTypes.func.isRequired,
         handleAddPageList: PropTypes.func.isRequired,
         handleDeleteList: PropTypes.func.isRequired,
+        toggleCreateListForm: PropTypes.func.isRequired,
+        showCreateList: PropTypes.bool.isRequired,
+        showCommonNameWarning: PropTypes.bool.isRequired,
     }
 
     constructor(props) {
         super(props)
         this.state = {
-            showCreateList: false,
             listName: null,
             updatedListName: null,
             showWarning: false,
@@ -63,11 +65,6 @@ class ListContainer extends Component {
         }))
     }
 
-    handleRenderCreateList = () =>
-        this.setState({
-            showCreateList: !this.state.showCreateList,
-        })
-
     // TODO: change this method;
     handleCreateListSubmit = event => {
         event.preventDefault()
@@ -75,11 +72,6 @@ class ListContainer extends Component {
         // value = list name
         // TODO: Place a check here for same list name or place it in the createPageList
         this.props.createPageList(value)
-
-        this.setState({
-            showCreateList: false,
-            listName: null,
-        })
     }
 
     handleUpdateList = ({ id }, index) => event => {
@@ -131,7 +123,7 @@ class ListContainer extends Component {
                 onCheckboxClick={this.handleCreateListSubmit}
                 handleNameChange={this.handleSearchChange('listName')}
                 value={this.state.listName}
-                showWarning={this.state.showWarning}
+                showWarning={this.props.showCommonNameWarning}
             />
         ) : null
 
@@ -155,10 +147,12 @@ class ListContainer extends Component {
                         <hr className={extStyles.hr} />
 
                         <MyCollection
-                            handleRenderCreateList={this.handleRenderCreateList}
+                            handleRenderCreateList={
+                                this.props.toggleCreateListForm
+                            }
                         />
 
-                        {this.renderCreateList(this.state.showCreateList)}
+                        {this.renderCreateList(this.props.showCreateList)}
                         <div className={extStyles.allLists}>
                             {this.renderAllLists()}
                         </div>
@@ -177,6 +171,8 @@ class ListContainer extends Component {
 const mapStateToProps = state => ({
     lists: selectors.results(state),
     isDeleteConfShown: selectors.isDeleteConfShown(state),
+    showCreateList: selectors.showCreateListForm(state),
+    showCommonNameWarning: selectors.showCommonNameWarning(state),
 })
 
 const mapDispatchToProps = (dispatch, getState) => ({
@@ -187,6 +183,7 @@ const mapDispatchToProps = (dispatch, getState) => ({
             getListFromDB: actions.getListFromDB,
             createPageList: actions.createPageList,
             updateList: actions.updateList,
+            toggleCreateListForm: actions.toggleCreateListForm,
         },
         dispatch,
     ),

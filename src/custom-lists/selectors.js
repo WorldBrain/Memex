@@ -112,3 +112,13 @@ export const getUrlDragged = createSelector(
     customLists,
     state => state.urlDragged,
 )
+
+export const showCreateListForm = createSelector(
+    customLists,
+    state => state.showCreateListForm,
+)
+
+export const showCommonNameWarning = createSelector(
+    customLists,
+    state => state.showCommonNameWarning,
+)

@@ -13,12 +13,12 @@ export default class CustomListStorage extends FeatureStorage {
             version: new Date(2018, 6, 12),
             fields: {
                 '++id': { type: 'string', pk: true },
-                name: { type: 'text' },
+                '&name': { type: 'text' },
                 isDeletable: { type: 'binary' },
                 isNestable: { type: 'binary' },
                 createdAt: { type: 'datetime' },
             },
-            indices: ['++id', 'name', 'isDeletable', 'createdAt'],
+            indices: ['++id', '&name', 'isDeletable', 'createdAt'],
         })
 
         this.storageManager.registerCollection(PAGE_LIST_ENTRY, {
