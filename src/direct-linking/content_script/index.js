@@ -5,7 +5,9 @@ import * as interactions from './interactions'
 
 export async function init() {
     await bodyLoader()
-    remoteFunction('followAnnotationRequest')()
+    setTimeout(() => {
+        remoteFunction('followAnnotationRequest')()
+    }, 500)
 }
 
 export function setupAnchorFallbackOverlay() {}
