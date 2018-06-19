@@ -33,12 +33,14 @@ export default class CustomListBackground {
         })
     }
 
+    // TODO: ALSO GET ALL THE PAGES RELATED TO LIST.
     async getAllLists() {
-        await this.storage.fetchAllList()
+        const lists = await this.storage.fetchAllList()
+        return lists
     }
 
     async createCustomList({ name }) {
-        await this.storage.insertCustomList({
+        return await this.storage.insertCustomList({
             name,
         })
     }
@@ -50,10 +52,11 @@ export default class CustomListBackground {
         })
     }
 
+    // TODO: Just a hack, find a better way.
     async insertPageToList({ id, url }) {
         await this.storage.insertPageToList({
             listId: id,
-            pageUrl: url,
+            pageUrl: url[0],
         })
     }
 

@@ -82,11 +82,11 @@ class ListContainer extends Component {
         })
     }
 
-    handleUpdateList = ({ _id }, index) => event => {
+    handleUpdateList = ({ id }, index) => event => {
         event.preventDefault()
         const { value } = event.target.elements['listName']
         // value = list name
-        this.props.updateList(index, value, _id)
+        this.props.updateList(index, value, id)
         this.setState({
             updatedListName: null,
         })
@@ -117,10 +117,7 @@ class ListContainer extends Component {
                     listName={list.name}
                     isFiltered={list.isFilterIndex}
                     onEditButtonClick={this.props.handleEditBtnClick(i)}
-                    onListItemClick={this.props.handleListItemClick(
-                        list._id,
-                        i,
-                    )}
+                    onListItemClick={this.props.handleListItemClick(list.id, i)}
                     onAddPageToList={this.props.handleAddPageList(list, i)}
                     onCrossButtonClick={this.props.handleCrossBtnClick(list, i)}
                 />
@@ -198,16 +195,16 @@ const mapDispatchToProps = (dispatch, getState) => ({
         event.preventDefault()
         dispatch(actions.showEditBox(index))
     },
-    handleCrossBtnClick: ({ _id }, index) => event => {
+    handleCrossBtnClick: ({ id }, index) => event => {
         event.preventDefault()
-        dispatch(actions.showListDeleteModal(_id, index))
+        dispatch(actions.showListDeleteModal(id, index))
     },
-    handleListItemClick: (_id, index) => () => {
+    handleListItemClick: (id, index) => () => {
         dispatch(actions.toggleListFilterIndex(index))
-        dispatch(filterActs.toggleListFilter(_id))
+        dispatch(filterActs.toggleListFilter(id))
     },
-    handleAddPageList: ({ _id }, index) => url => {
-        dispatch(actions.addUrltoList(url, index, _id))
+    handleAddPageList: ({ id }, index) => url => {
+        dispatch(actions.addUrltoList(url, index, id))
     },
     handleDeleteList: e => {
         e.preventDefault()

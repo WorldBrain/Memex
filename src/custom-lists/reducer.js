@@ -142,7 +142,7 @@ const toggleUrlToEdit = (state, url) => {
 
 const bulkRemovePagesFromList = (state, id) => {
     const { urlsToEdit } = state
-    const list = state.tempLists.find(x => x._id === id)
+    const list = state.tempLists.find(x => x.id === id)
     const index = state.tempLists.indexOf(list)
 
     // difference returns Arr1 - Arr2 (all values of Arr2 removed from Arr1)
@@ -161,7 +161,7 @@ const bulkRemovePagesFromList = (state, id) => {
 
 const bulkAddPagesToList = (state, id) => {
     const { urlsToEdit } = state
-    const list = state.tempLists.find(x => x._id === id)
+    const list = state.tempLists.find(x => x.id === id)
     const index = state.tempLists.indexOf(list)
 
     // difference returns Arr1 - Arr2 (all values of Arr2 removed from Arr1)
@@ -184,8 +184,8 @@ const saveTempToLists = state => ({
 })
 
 const resetPagesinTempList = (state, id) => {
-    const tempList = state.tempLists.find(x => x._id === id)
-    const list = state.lists.find(x => x._id === id)
+    const tempList = state.tempLists.find(x => x.id === id)
+    const list = state.lists.find(x => x.id === id)
     const index = state.tempLists.indexOf(list)
 
     return {

@@ -1,13 +1,13 @@
 const list = [
     {
-        _id: '5afaed178c4d884ca6329788',
+        id: '5afaed178c4d884ca6329788',
         index: 3,
         name: 'Esse ut veniam ullamco excepteur',
         isDeletable: false,
         pages: [],
     },
     {
-        _id: '5afaed176f1e0550250b0742',
+        id: '5afaed176f1e0550250b0742',
         index: 4,
         name: 'Adipisicing Lorem incididunt dolore duis dolore',
         isDeletable: true,
@@ -87,7 +87,7 @@ const list = [
         ],
     },
     {
-        _id: '5afaed172881724fe9a2730a',
+        id: '5afaed172881724fe9a2730a',
         index: 5,
         name: 'Sint velit et proident irure ex enim ad id consectetur velit',
         isEditing: true,
@@ -144,7 +144,7 @@ const list = [
         ],
     },
     {
-        _id: '5afaed17f08c3f5ab031f5fe',
+        id: '5afaed17f08c3f5ab031f5fe',
         index: 6,
         name:
             'Officia ut proident esse nulla reprehenderit ullamco elit mollit.',
@@ -177,7 +177,7 @@ const list = [
         ],
     },
     {
-        _id: '5afaed17d1d58cdb1962bfb5',
+        id: '5afaed17d1d58cdb1962bfb5',
         index: 7,
         name: 'Sint irure nostrud dolore quis ea occaecat',
         isEditing: true,

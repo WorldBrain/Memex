@@ -153,9 +153,9 @@ class DropdownContainer extends Component {
     // TODO: Needs a lot of work
     // Changes state from all -> none -> all| none -> all -> none| some -> none -> all -> some
     handleListSelection = index => async event => {
-        const listId = this.getDisplayLists()[index].value._id
+        const listId = this.getDisplayLists()[index].value.id
         const { filters } = this.state
-        const listIndex = filters.findIndex(val => val._id === listId)
+        const listIndex = filters.findIndex(val => val.id === listId)
         const list = filters[listIndex]
         const { listUrlState } = list
         let { newurlState } = list

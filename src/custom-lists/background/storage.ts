@@ -36,7 +36,8 @@ export default class CustomListStorage extends FeatureStorage {
     // Return all the list in the DB
     //  TODO: Use pagination if required.
     async fetchAllList() {
-        return ''
+        const x = await this.storageManager.findAll(COLLECTION_NAME, {})
+        return x
     }
 
     // TODO: Returns all the pages associated with the list.
@@ -56,7 +57,7 @@ export default class CustomListStorage extends FeatureStorage {
 
     // Function to insert into the DB
     async insertCustomList({ name, isDeletable = 1, isNestable = 1 }) {
-        await this.storageManager.putObject(COLLECTION_NAME, {
+        return await this.storageManager.putObject(COLLECTION_NAME, {
             name,
             isDeletable,
             isNestable,
@@ -75,7 +76,9 @@ export default class CustomListStorage extends FeatureStorage {
 
     // Delete List from the DB.
     async removeList({ id }) {
-        await Promise.resolve()
+        await this.storageManager.deleteObject(COLLECTION_NAME, {
+            id,
+        })
     }
 
     // TODO: check if the list ID exists in the DB, if not cannot add.

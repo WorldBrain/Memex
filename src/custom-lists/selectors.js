@@ -5,8 +5,18 @@ import { selectors as filters } from 'src/overview/filters'
 
 // TODO: Needs some work.
 const sortAlphabetically = (a, b) => {
-    if (a.name.toLowerCase() < b.name.toLowerCase()) return -1
-    if (a.name.toLowerCase() > b.name.toLowerCase()) return 1
+    if (
+        typeof a === 'string' &&
+        typeof b === 'string' &&
+        a.name.toLowerCase() < b.name.toLowerCase()
+    )
+        return -1
+    if (
+        typeof a === 'string' &&
+        typeof b === 'string' &&
+        a.name.toLowerCase() > b.name.toLowerCase()
+    )
+        return 1
     return 0
 }
 
@@ -39,7 +49,9 @@ export const getUrlsToEdit = createSelector(
 // Will determine if all/some/none pages are on the list.
 const getListUrlState = (lists, urlsToEdit) => {
     const { pages } = lists
-    const pagesLen = pages.length
+    let pagesLen = 0
+    // TODO: TEMPORARY CHECK UNTIL PAGES NOT ADDED TO LIST.
+    if (pages) pagesLen = pages.length
     const editLen = urlsToEdit.length
 
     if (editLen === 0 || pagesLen === 0) return 'none'
@@ -62,7 +74,7 @@ export const results = createSelector(
         lists.map((pageDoc, i) => ({
             ...pageDoc,
             isEditing: i === listIndex,
-            isFilterIndex: listFilter === pageDoc._id,
+            isFilterIndex: listFilter === pageDoc.id,
             listUrlState: getListUrlState(pageDoc, urlsToEdit),
         })),
 )

@@ -7,7 +7,6 @@ import * as selectors from './selectors'
 // import constants from './constants'
 // import { custom-lists } from '../custom-lists/selectors';
 
-import dummyData from './dummy-data/index'
 // // import { selectors as filters } from 'src/overview/filters'
 
 export const getAllLists = createAction('custom-lists/listData')
@@ -109,23 +108,31 @@ export const delPageFromList = doc => async (dispatch, getState) => {
 }
 
 export const getListFromDB = () => async (dispatch, getState) => {
-    dispatch(getAllLists(dummyData))
+    try {
+        const lists = await remoteFunction('getAllLists')()
+        dispatch(getAllLists(lists))
+    } catch (err) {
+        console.log(err)
+    } finally {
+        updateLastActive() // Consider user active
+    }
 }
 
 export const createPageList = name => async (dispatch, getState) => {
     // gets id from DB after it is added
     // TODO: add id
-    const list = {
-        _id: null,
-        name,
-        isDeletable: true,
-        pages: [],
-    }
 
     try {
-        // TODO: Return Id of the added list to update in the state.
         // Create List
-        await remoteFunction('createCustomList')({ name })
+        // TODO: Return Id of the added list to update in the state.
+        const id = await remoteFunction('createCustomList')({ name })
+        const list = {
+            id,
+            name,
+            isDeletable: true,
+            pages: [],
+        }
+
         dispatch(createList(list))
     } catch (error) {
         console.log(error)
@@ -149,8 +156,17 @@ export const updateList = (index, name, id) => async (dispatch, getState) => {
 
 export const deletePageList = () => async (dispatch, getState) => {
     const { id, deleting } = selectors.deleteConfirmProps(getState())
-    dispatch(deleteList(id, deleting))
-    dispatch(resetListDeleteModal())
+
+    try {
+        // DB call to remove List by ID.
+        await remoteFunction('removeList')({ id })
+    } catch (err) {
+        console.log(err)
+    } finally {
+        dispatch(deleteList(id, deleting))
+        dispatch(resetListDeleteModal())
+        updateLastActive() // Consider user active
+    }
 }
 
 export const addUrltoList = (url, index, id) => async (dispatch, getState) => {
@@ -177,7 +193,7 @@ export default class ListStorageHandler {
     }
 
     async getListFromDB() {
-        this._dispatch(getAllLists(dummyData))
+        this._dispatch(getAllLists([]))
     }
 
     getListById() {}
@@ -189,7 +205,7 @@ export default class ListStorageHandler {
         event.preventDefault()
         const { value } = event.target.elements['listName']
         const list = {
-            _id: null,
+            id: null,
             name: value,
             isDeletable: true,
             pages: [],
@@ -211,7 +227,7 @@ export default class ListStorageHandler {
         this._dispatch(resetListDeleteModal())
     }
 
-    addPagetoList = (_id, index) => url => {
+    addPagetoList = (id, index) => url => {
         this._dispatch(addPagetoList(url, index))
     }
 
