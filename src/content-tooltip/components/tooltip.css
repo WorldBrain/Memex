@@ -1,0 +1,251 @@
+.tooltip {
+    display: flex;
+    align-items: center;
+    position: absolute;
+    font-size: 13px;
+    background-color: #fff;
+    color: #3eb995;
+    height: 40px;
+    width: 150px;
+    padding: 5px 5px;
+    border-radius: 5px;
+    border: 2px solid #3eb995;
+    text-align: center;
+    line-height: 1.2em;
+    transform: translate(-90%, 50%);
+    z-index: 100000;
+    box-sizing: content-box;
+
+    & > div {
+        width: 85%;
+        margin: 0px auto;
+    }
+
+    & * {
+        box-sizing: content-box;
+        font-family: sans-serif;
+    }
+}
+
+.tooltip.stateLinkCopied {
+    background-color: #3eb995;
+    color: white;
+}
+
+/*  Worldbrain logo on the left of the tooltip */
+.tooltip::before {
+    box-sizing: content-box;
+    border: solid transparent;
+    content: ' ';
+    height: 30px;
+    width: 30px;
+    position: absolute;
+    right: 89.5%;
+    top: 16%;
+    pointer-events: none;
+    border-color: #3eb995;
+    border-width: 2px;
+    border-bottom-color: transparent;
+    border-left-color: transparent;
+    border-radius: 50%;
+    transform: rotate(225deg);
+    background-color: #fff;
+}
+
+.tooltip.stateLinkCopied::before {
+    background-color: #3eb995;
+}
+
+/* The pointer of the tooltip */
+.tooltip::after {
+    box-sizing: content-box;
+    bottom: 76%;
+    left: 80%;
+    border: solid transparent;
+    content: ' ';
+    height: 20px;
+    width: 20px;
+    position: absolute;
+    pointer-events: none;
+    border-color: #3eb995;
+    border-width: 2px;
+    border-bottom-color: transparent;
+    border-left-color: transparent;
+    transform: rotate(-45deg);
+    background-color: #fff;
+}
+
+.tooltip.stateLinkCopied::after {
+    bottom: 80%;
+    background-color: #3eb995;
+}
+
+.icon {
+    display: flex;
+    width: 20px;
+    position: absolute;
+    top: 15px;
+    left: -8px;
+
+    & img {
+        width: 15px;
+        height: 20px;
+    }
+}
+
+.createLinkButton {
+    cursor: pointer;
+    z-index: 10;
+
+    & .createLinkText {
+        position: absolute;
+        bottom: 3%;
+        left: 27%;
+        font-size: 1em;
+        font-weight: 400;
+    }
+
+    & .createLinkImg {
+        width: 25px;
+        height: 25px;
+        padding-bottom: 14px;
+        margin: 0px auto;
+    }
+}
+
+.progressIndicator {
+    margin: -10px auto;
+}
+
+.errorMessage {
+    margin: -10px auto;
+}
+
+.linkReady {
+    display: block;
+    margin-top: 3px;
+    cursor: pointer;
+
+    & .linkReadyStrong {
+        font-weight: 800;
+        font-size: 1.1em;
+    }
+}
+
+.copiedMessage {
+    font-size: 1em;
+    display: flex;
+    height: 50px;
+    align-items: center;
+
+    & .check {
+        width: 30px;
+        height: auto;
+    }
+
+    & .copiedText {
+        width: 60%;
+        margin-right: 8px;
+    }
+}
+
+/* Right side buttons */
+.buttons {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    width: 15px;
+    height: 46px;
+    position: absolute;
+    right: 3px;
+    top: 3px;
+    z-index: 100001;
+
+    & .smallButton img {
+        height: 15px;
+        display: block;
+        cursor: pointer;
+    }
+
+    & .imgSettings {
+        width: 15px;
+    }
+
+    & .imgInfo {
+        width: 13px;
+    }
+
+    & .imgCross {
+        width: 10px;
+    }
+}
+
+/* Loading CSS */
+.ldsEllipsis {
+    display: inline-block;
+    position: relative;
+    width: 64px;
+    height: 64px;
+    margin: 0px auto;
+
+    & div {
+        position: absolute;
+        top: 27px;
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        background: #3eb995;
+        animation-timing-function: cubic-bezier(0, 1, 1, 0);
+    }
+
+    & div:nth-child(1) {
+        left: 6px;
+        animation: lds-ellipsis1 0.6s infinite;
+    }
+
+    & div:nth-child(2) {
+        left: 6px;
+        animation: lds-ellipsis2 0.6s infinite;
+    }
+
+    & div:nth-child(3) {
+        left: 26px;
+        animation: lds-ellipsis2 0.6s infinite;
+    }
+
+    & div:nth-child(4) {
+        left: 45px;
+        animation: lds-ellipsis3 0.6s infinite;
+    }
+}
+
+@keyframes lds-ellipsis1 {
+    0% {
+        transform: scale(0);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes lds-ellipsis3 {
+    0% {
+        transform: scale(1);
+    }
+
+    100% {
+        transform: scale(0);
+    }
+}
+
+@keyframes lds-ellipsis2 {
+    0% {
+        transform: translate(0, 0);
+    }
+
+    100% {
+        transform: translate(19px, 0);
+    }
+}

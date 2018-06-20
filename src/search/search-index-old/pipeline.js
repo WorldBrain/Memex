@@ -92,10 +92,10 @@ function extractRootDomain(hostname) {
 /**
  *
  * @param {string} text
- * @param {'term'|'title'|'url'} key The key under which the extracted terms are categorized.
+ * @param {'term'|'title'|'url'|'_'} key The key under which the extracted terms are categorized.
  * @returns {Set<string>} Set of "words-of-interest" - determined by pre-proc logic in `transformPageText` - extracted from `text`.
  */
-export function extractTerms(text, key) {
+export function extractTerms(text, key = '_') {
     if (!text || !text.length) {
         return new Set()
     }

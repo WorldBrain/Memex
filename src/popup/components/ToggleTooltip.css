@@ -1,0 +1,16 @@
+.toggleDiv {
+    position: relative;
+}
+
+.infoLink {
+    background-image: url('/img/info_green.svg');
+    background-repeat: no-repeat;
+    background-size: 15px;
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    position: absolute;
+    top: 13px;
+    left: 61%;
+    cursor: pointer;
+}
