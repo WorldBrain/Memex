@@ -22,4 +22,12 @@ export default class EventLogStorage extends FeatureStorage {
             other,
         })
     }
+
+    async getCount({ filter }) {
+        return await this.storageManager.countAll('eventLog', filter)
+    }
+
+    async getLatestEvent({ filter }) {
+        return await this.storageManager.findAll('eventLog', filter)
+    }
 }

@@ -1,6 +1,10 @@
-import { MapEventTypeToInt } from './constants'
-import AnalyticsStorage from './AnalyticsStorage'
+import { MapEventTypeToInt, MapNotifTypeToIntArray } from './constants'
 import SendToServer from './sendToServer'
+import { remoteFunction } from 'src/util/webextensionRPC'
+import AnalyticsLogStorage from './AnalyticsLogStorage'
+
+const getCount = remoteFunction('getCount')
+const getLatestEvent = remoteFunction('getLatestEvent')
 
 class Analytics {
     _operationsMap = {
@@ -18,11 +22,18 @@ class Analytics {
         nlp_search: undefined,
     }
 
-    registerOperations() {
-        // Object.keys(this._operationsMap).map((data, i) =>
-        //     // this.loadInitialData(data)
-        //     data = data + ""
-        // )
+    async registerOperations() {
+        for (const event of Object.keys(this._operationsMap)) {
+            await this.loadInitialData(event)
+        }
+    }
+
+    async fromDexie(notifType) {
+        await this.loadInititalData(notifType, true)
+    }
+
+    async statisticsStorage(event) {
+        await this.incrementvalue(event)
     }
 
     /**
@@ -38,16 +49,15 @@ class Analytics {
         }
 
         const notifParams = {
-            last_time_used: eventArgs.timestamp,
+            last_time_used: eventArgs.time,
             notifType: MapEventTypeToInt[eventArgs.type].notifType,
         }
 
-        AnalyticsStorage({
-            event: params,
-            statistics: MapEventTypeToInt[eventArgs.type].notifType
-                ? notifParams
-                : undefined,
-        })
+        await AnalyticsLogStorage(params)
+
+        if (MapEventTypeToInt[eventArgs.type].notifType) {
+            await this.statisticsStorage(notifParams)
+        }
     }
 
     /**
@@ -55,42 +65,50 @@ class Analytics {
      * Query to dexie and store into _operationsMap
      * @param {notifType} type of notif event
      */
-    async loadInititalData(notifType, isCacheUpdate = false) {
-        // await db.transaction('rw', db.tables, async () => {
-        //     let eventLogCount = 0
-        //     for(let i = 0; i < MapNotifTypeToIntArray[notifType].length(); i++) {
-        //         const eventCountNotif = await db.eventLog
-        //             .where('type')
-        //             .equals(MapNotifTypeToIntArray[notifType][i])
-        //             .count()
-        //         if(eventCountNotif) {
-        //             eventLogCount += eventCountNotif
-        //         }
-        //     }
-        //     const eventLogLastTimeUsed = await db.eventLog
-        //         .where('type')
-        //         .anyOf(MapNotifTypeToIntArray[notifType])
-        //         .last()
-        //     console.log(eventLogLastTimeUsed, eventLogCount)
-        //     // if there is any entry in the dexie then update data of cache
-        //     if(!eventLogLastTimeUsed) {
-        //         return
-        //     }
-        //     // If the data is out of date then we have to update with dexie query and initial loading of data
-        //     if (this.getCountNotif() === undefined || isCacheUpdate) {
-        //         this.updateValue(notifType, { last_time_used: eventLogLastTimeUsed.timestamp,value: eventLogCount})
-        //     } else {
-        //         this.updateValue(notifType, { last_time_used: eventLogLastTimeUsed.timestamp,value: eventLogCount + this._operationsMap[notifType].value})
-        //    }
-        // })
+    async loadInitialData(notifType, isCacheUpdate = false) {
+        let eventLogCount = 0
+        let latestEvent = 0
+
+        for (let i = 0; i < MapNotifTypeToIntArray[notifType].length; i++) {
+            const filter = {
+                type: MapNotifTypeToIntArray[notifType][i],
+            }
+
+            // TODO: Not working this method, have to make more optimize
+            const latest = await getLatestEvent(filter)
+
+            if (latest.length) {
+                latestEvent = Math.max(latest[0].time, latestEvent)
+            }
+
+            const eventCountNotif = await getCount({ filter })
+            eventLogCount += eventCountNotif
+        }
+
+        // TODO; on the latest event time
+        if (eventLogCount === 0) {
+            return
+        }
+
+        if (this.getCountNotif() === undefined || isCacheUpdate) {
+            await this.updateValue(notifType, {
+                last_time_used: latestEvent,
+                value: eventLogCount,
+            })
+        } else {
+            await this.updateValue(notifType, {
+                last_time_used: latestEvent,
+                value: eventLogCount + this._operationsMap[notifType].value,
+            })
+        }
     }
 
     // Update the value when the memeory variables is out of update or load initial data
-    updateValue(notifType, isCacheUpdate, value) {
+    async updateValue(notifType, value) {
         this._operationsMap[notifType] = value
     }
 
-    incrementvalue(event) {
+    async incrementvalue(event) {
         if (!this._operationsMap[event.notifType]) {
             this._operationsMap[event.notifType] = {
                 value: 1,
@@ -116,6 +134,8 @@ class Analytics {
     async processEvent(eventArgs) {
         // Prepare the event to store the event in dexie db.
         const time = Date.now()
+
+        console.log(this._operationsMap)
 
         const params = {
             ...eventArgs,

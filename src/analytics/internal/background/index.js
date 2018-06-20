@@ -11,10 +11,24 @@ export default class DirectLinkingBackground {
             storeEvent: (...params) => {
                 return this.storeEvent(...params)
             },
+            getCount: (...params) => {
+                return this.getCount(...params)
+            },
+            getLatestEvent: (...params) => {
+                return this.getLatestEvent(...params)
+            },
         })
     }
 
     async storeEvent(request) {
         await this.storage.storeEvent(request)
+    }
+
+    async getCount(request) {
+        return await this.storage.getCount(request)
+    }
+
+    async getLatestEvent(request) {
+        return await this.storage.getLatestEvent(request)
     }
 }
