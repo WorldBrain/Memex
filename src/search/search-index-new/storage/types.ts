@@ -36,7 +36,8 @@ export interface CollectionField {
 
 export interface CollectionDefinition {
     version: Date
-    indices: string[]
+    /** Sorted array of fields that will be indexed. Primary key index should be the first element. */
+    indices: Array<string | [string, string]>
     fields: CollectionFields
     migrate?: MigrationRunner
     name?: string
