@@ -1,5 +1,10 @@
 import StorageRegistry, { RegistryCollections } from './registry'
-import { DexieSchema, CollectionDefinition, MigrationRunner } from './types'
+import {
+    DexieSchema,
+    CollectionDefinition,
+    MigrationRunner,
+    IndexType,
+} from './types'
 
 export function getDexieHistory(storageRegistry: StorageRegistry) {
     const collections = {}
@@ -11,7 +16,7 @@ export function getDexieHistory(storageRegistry: StorageRegistry) {
         .forEach(([versionTimestamp, defs]) => {
             defs.forEach(def => (collections[def.name] = def))
             versions.push({
-                ..._getDexieSchema(collections),
+                ...getDexieSchema(collections),
                 version: ++version,
             })
         })
@@ -19,20 +24,14 @@ export function getDexieHistory(storageRegistry: StorageRegistry) {
     return versions
 }
 
-export function _getDexieSchema(collections: RegistryCollections) {
+function getDexieSchema(collections: RegistryCollections) {
     const schema = {}
     const migrations: MigrationRunner[] = []
 
     Object.entries(collections).forEach(([collectionName, collectionDef]) => {
-        const dexieTable: string[] = []
-
-        collectionDef.indices.forEach(indexName => {
-            const fieldDef = collectionDef.fields[indexName]
-            const listPrefix = fieldDef.type === 'text' ? '*' : ''
-            const dexieField = `${listPrefix}${indexName}`
-            dexieTable.push(dexieField)
-        })
-        schema[collectionName] = dexieTable.join(', ')
+        schema[collectionName] = collectionDef.indices
+            .map(convertIndexToDexieExps(collectionDef))
+            .join(', ')
 
         if (collectionDef.migrate && !collectionDef.migrate._seen) {
             collectionDef.migrate._seen = true // TODO: Clean this up, should have no side-effects
@@ -42,3 +41,19 @@ export function _getDexieSchema(collections: RegistryCollections) {
 
     return { schema, migrations }
 }
+
+/**
+ * Handles converting from StorageManager index definitions to Dexie index expressions.
+ */
+const convertIndexToDexieExps = (def: CollectionDefinition) =>
+    function(index: IndexType) {
+        // Convert from StorageManager compound index to Dexie compound index
+        if (index instanceof Array) {
+            return `[${index[0]}+${index[1]}]`
+        }
+
+        const fieldDef = def.fields[index]
+        const listPrefix = fieldDef.type === 'text' ? '*' : ''
+
+        return `${listPrefix}${index}`
+    }

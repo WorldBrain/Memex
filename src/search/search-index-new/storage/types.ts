@@ -5,6 +5,8 @@ import { Field } from './fields'
 
 export type FieldType = 'text' | 'json' | 'datetime' | 'string' | 'url'
 
+export type IndexType = string | [string, string]
+
 // TODO
 export interface MigrationRunner {
     (): Promise<void>
@@ -36,7 +38,7 @@ export interface CollectionField {
 export interface CollectionDefinition {
     version: Date
     /** Sorted array of fields that will be indexed. Primary key index should be the first element. */
-    indices: Array<string | [string, string]>
+    indices: IndexType[]
     fields: CollectionFields
     migrate?: MigrationRunner
     name?: string
