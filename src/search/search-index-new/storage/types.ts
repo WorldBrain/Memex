@@ -3,7 +3,17 @@ import { FilterQuery as MongoFilterQuery } from 'mongodb'
 import StorageRegistry from './registry'
 import { Field } from './fields'
 
-export type FieldType = 'text' | 'json' | 'datetime' | 'string' | 'url' | 'bool'
+export type FieldType =
+    | 'text'
+    | 'json'
+    | 'datetime'
+    | 'timestamp'
+    | 'string'
+    | 'url'
+    | 'int'
+    | 'float'
+    | 'blob'
+    | 'bool'
 
 // TODO
 export interface MigrationRunner {
