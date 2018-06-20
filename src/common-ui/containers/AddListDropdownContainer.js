@@ -93,7 +93,11 @@ class DropdownContainer extends Component {
 
         try {
             if (this.allowIndexUpdate) {
-                await this.addList({ name: newList })
+                const id = await this.addList({ name: this.getSearchVal() })
+                await this.addUrlToList({
+                    id,
+                    url: [this.props.url],
+                })
             }
             newLists = [newList, ...this.state.filters]
         } catch (err) {

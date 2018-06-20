@@ -41,21 +41,18 @@ export default class CustomListStorage extends FeatureStorage {
         // TODO: Very inefficient
         const promises = x.map(async (list: ListObject) => {
             const pages = await this.storageManager.findAll(PAGE_LIST_ENTRY, { listId: list.id })
+            delete list["_&name_terms"]
             return {
                 ...list,
                 pages: pages.map((page: PageObject) => page.pageUrl),
             }
+            // change this
         })
         return Promise.all(promises)
     }
 
     // TODO: Returns all the pages associated with the list.
     async fetchListPages() {
-        return ''
-    }
-
-    // TODO: for naming lists uniquely and issuing warning about duplicate names
-    async checkListNameExists() {
         return ''
     }
 
