@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 
-import Sidebar from './Sidebar'
+import SidebarContainer from './sidebarContainer'
 import Ribbon from './Ribbon'
 
 export const setupRibbonUI = target => {
@@ -17,5 +17,4 @@ export const destroyAll = target => () => {
     document.body.removeChild(target)
 }
 
-export { default as Annotation } from './AnnotationContainer'
-export default Sidebar
+export default SidebarContainer

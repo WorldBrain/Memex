@@ -1,35 +1,21 @@
 import React from 'react'
-import Sidebar, { Annotation } from './components'
+import PropTypes from 'prop-types'
+import { Provider } from 'react-redux'
 
-class SidebarContainer extends React.Component {
-    saveComment = () => console.log('Saving Comment')
+import { store } from './redux'
+import Sidebar from './components'
 
-    renderAnnotations = () => {
-        const annotation = {
-            highlight: 'This is an highlight',
-            body: 'Nothing.',
-            url: 'https://google.com',
-            tags: ['Sup', 'Dup'],
-            timestamp: new Date().getTime(),
-        }
-        return (
-            <Annotation
-                annotation={annotation}
-                openAnnotationURL={url => () => console.log(url)}
-            />
-        )
-    }
+const Container = props => (
+    <Provider store={store}>
+        <Sidebar {...props} />
+    </Provider>
+)
 
-    render() {
-        return (
-            <Sidebar
-                showSidebar
-                saveComment={this.saveComment}
-                renderAnnotations={this.renderAnnotations}
-                env={'iframe'}
-            />
-        )
-    }
+Container.propTypes = {
+    showSidebar: PropTypes.bool,
+    setShowSidebar: PropTypes.func,
+    toggleMouseOnSidebar: PropTypes.func,
+    env: PropTypes.string,
 }
 
-export default SidebarContainer
+export default Container
