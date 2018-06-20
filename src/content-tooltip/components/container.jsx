@@ -11,7 +11,7 @@ import {
 } from './tooltip-states'
 import { copyToClipboard } from '../utils'
 
-class Container extends React.Component {
+class TooltipContainer extends React.Component {
     static propTypes = {
         onInit: PropTypes.func.isRequired,
         createAndCopyDirectLink: PropTypes.func.isRequired,
@@ -21,7 +21,7 @@ class Container extends React.Component {
 
     state = {
         showTooltip: false,
-        position: {},
+        position: { x: 250, y: 200 },
         tooltipState: 'pristine',
         linkURL: '',
     }
@@ -100,6 +100,7 @@ class Container extends React.Component {
 
     render() {
         const { showTooltip, position, tooltipState } = this.state
+
         return (
             <div className="memex-tooltip-container">
                 {showTooltip ? (
@@ -116,4 +117,4 @@ class Container extends React.Component {
     }
 }
 
-export default OnClickOutside(Container)
+export default OnClickOutside(TooltipContainer)

@@ -2,25 +2,19 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
 
+import AnimationWrapper from './AnimationWrapper'
 import { getExtURL } from '../utils'
-import { INFO_URL } from '../constants'
 import styles from './tooltip.css'
 
-const cssClasses = {
-    pristine: 'stateInitial',
-    running: 'stateCreatingLink',
-    done: 'stateCreatedLink',
-    error: 'stateLinkError',
-    copied: 'stateLinkCopied',
+const images = {
+    cross: getExtURL('/img/cross_grey.svg'),
+    settings: getExtURL('/img/settings_grey.svg'),
 }
 
-const images = {
-    logo: getExtURL('/img/worldbrain-logo-narrow.png'),
-    logoWhite: getExtURL('/img/icon_white.svg'),
-    info: getExtURL('/img/info.svg'),
-    cross: getExtURL('/img/cross.svg'),
-    settings: getExtURL('/img/settings.svg'),
-}
+const deriveTooltipClass = state =>
+    classNames(styles.tooltip, {
+        [styles.stateCopied]: state === 'copied',
+    })
 
 const Tooltip = ({
     x,
@@ -31,15 +25,11 @@ const Tooltip = ({
     openSettings,
 }) => (
     <div
-        className={classNames(styles.tooltip, styles[cssClasses[state]])}
+        className={deriveTooltipClass(state)}
         style={{ left: x, top: y }}
         id="memex-tooltip"
     >
-        <span className={styles.icon}>
-            <img src={state === 'copied' ? images.logoWhite : images.logo} />
-        </span>
-
-        {tooltipComponent}
+        <AnimationWrapper>{tooltipComponent}</AnimationWrapper>
 
         <span className={styles.buttons}>
             <a onClick={closeTooltip} className={styles.smallButton}>
@@ -47,9 +37,6 @@ const Tooltip = ({
             </a>
             <a onClick={openSettings} className={styles.smallButton}>
                 <img className={styles.imgSettings} src={images.settings} />
-            </a>
-            <a href={INFO_URL} className={styles.smallButton}>
-                <img className={styles.imgInfo} src={images.info} />
             </a>
         </span>
     </div>

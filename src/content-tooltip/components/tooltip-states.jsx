@@ -5,14 +5,13 @@ import styles from './tooltip.css'
 import { getExtURL } from '../utils'
 
 const images = {
-    link: getExtURL('/img/link.svg'),
-    check: getExtURL('/img/check.svg'),
+    share: getExtURL('/img/share.svg'),
+    check: getExtURL('/img/green_check.svg'),
 }
 
 export const InitialComponent = ({ createLink }) => (
     <div className={styles.createLinkButton} onMouseDown={createLink}>
-        <img className={styles.createLinkImg} src={images.link} />
-        <div className={styles.createLinkText}>Create Link</div>
+        <img className={styles.createLinkImg} src={images.share} />
     </div>
 )
 
@@ -33,8 +32,15 @@ export const CreatingLinkComponent = () => (
 
 export const CopiedComponent = () => (
     <div className={styles.copiedMessage}>
-        <span className={styles.copiedText}>Link copied to clipboard</span>
         <img className={styles.check} src={images.check} />
+        <div className={styles.copiedTextContainer}>
+            <p className={styles.greenText}>
+                Highlight link copied to clipboard
+            </p>
+            <p className={styles.greyText}>
+                Everyone opening it can see this quote
+            </p>
+        </div>
     </div>
 )
 
