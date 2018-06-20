@@ -64,6 +64,8 @@ export default class Storage extends Dexie {
      */
     public favIcons: Dexie.Table<FavIcon, string>
 
+    private storageManager: StorageManager
+
     constructor(
         { indexedDB, IDBKeyRange, dbName, storageManager } = Storage.DEF_PARAMS,
     ) {
@@ -72,30 +74,92 @@ export default class Storage extends Dexie {
             IDBKeyRange: IDBKeyRange || window['IDBKeyRange'],
         })
 
-        this._initSchema(
-            storageManager && getDexieHistory(storageManager.registry),
-        )
+        this.storageManager = storageManager
+
+        this._initSchema()
     }
 
     /**
      * See docs for explanation of Dexie table schema syntax:
      * http://dexie.org/docs/Version/Version.stores()
      */
-    private _initSchema(dexieHistory: DexieSchema[]) {
-        dexieHistory = dexieHistory || []
-        const baseVersion = 1
-        const baseSchema = {
-            pages: 'url, *terms, *titleTerms, *urlTerms, domain, hostname',
-            visits: '[time+url], url',
-            bookmarks: 'url, time',
-            tags: '[name+url], name, url',
-            favIcons: 'hostname',
-        }
-        this.version(baseVersion).stores(baseSchema)
+    private _initSchema() {
+        // TODO: move these declarations to own feature storage classes
+        this.storageManager.registerCollection('pages', {
+            version: new Date(2018, 1, 1),
+            fields: {
+                url: { type: 'string' },
+                fullUrl: { type: 'text' },
+                fullTitle: { type: 'text' },
+                text: { type: 'text' },
+                domain: { type: 'string' },
+                hostname: { type: 'string' },
+                screenshot: { type: 'blob' },
+                lang: { type: 'string' },
+                canonicalUrl: { type: 'url' },
+                description: { type: 'text' },
+            },
+            indices: [
+                { field: 'url', pk: true },
+                { field: 'text', fullTextIndexName: 'terms' },
+                { field: 'fullTitle', fullTextIndexName: 'titleTerms' },
+                { field: 'fullUrl', fullTextIndexName: 'urlTerms' },
+                { field: 'domain' },
+                { field: 'hostname' },
+            ],
+        })
+
+        this.storageManager.registerCollection('visits', {
+            version: new Date(2018, 1, 1),
+            fields: {
+                url: { type: 'string' },
+                time: { type: 'timestamp' },
+                duration: { type: 'int' },
+                scrollMaxPerc: { type: 'float' },
+                scrollMaxPx: { type: 'float' },
+                scrollPerc: { type: 'float' },
+                scrollPx: { type: 'float' },
+            },
+            indices: [{ field: ['time', 'url'], pk: true }, { field: 'url' }],
+        })
+
+        this.storageManager.registerCollection('bookmarks', {
+            version: new Date(2018, 1, 1),
+            fields: {
+                url: { type: 'string' },
+                time: { type: 'timestamp' },
+            },
+            indices: [{ field: 'url', pk: true }, { field: 'time' }],
+        })
+
+        this.storageManager.registerCollection('tags', {
+            version: new Date(2018, 1, 1),
+            fields: {
+                url: { type: 'string' },
+                name: { type: 'string' },
+            },
+            indices: [
+                { field: ['name', 'url'], pk: true },
+                { field: 'name' },
+                { field: 'url' },
+            ],
+        })
+
+        this.storageManager.registerCollection('favIcons', {
+            version: new Date(2018, 1, 1),
+            fields: {
+                hostname: { type: 'string' },
+                favIcon: { type: 'blob' },
+            },
+            indices: [{ field: 'hostname', pk: true }],
+        })
+
+        const dexieHistory = getDexieHistory(this.storageManager.registry)
+        const baseVersion = 0
 
         dexieHistory.forEach(({ version, schema, migrations }) => {
             const finalVersion = baseVersion + version
-            const finalSchema = Object.assign(baseSchema, schema)
+            const finalSchema = schema
             this.version(finalVersion)
                 .stores(finalSchema)
                 .upgrade(() => {
