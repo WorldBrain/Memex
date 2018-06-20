@@ -30,7 +30,6 @@ export interface CollectionFields {
 export interface CollectionField {
     type: FieldType
     fieldObject?: Field
-    pk?: boolean
     _index?: boolean
 }
 

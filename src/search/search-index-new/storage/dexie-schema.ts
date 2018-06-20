@@ -25,11 +25,8 @@ export function _getDexieSchema(collections: RegistryCollections) {
 
     Object.entries(collections).forEach(([collectionName, collectionDef]) => {
         const dexieTable: string[] = []
-        const sortedIndexedFields = collectionDef.indices.sort(
-            indexName => (collectionDef.fields[indexName].pk ? -1 : 1),
-        )
 
-        sortedIndexedFields.forEach(indexName => {
+        collectionDef.indices.forEach(indexName => {
             const fieldDef = collectionDef.fields[indexName]
             const listPrefix = fieldDef.type === 'text' ? '*' : ''
             const dexieField = `${listPrefix}${indexName}`
