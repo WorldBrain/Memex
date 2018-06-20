@@ -1,4 +1,5 @@
 import { FeatureStorage } from '../../search/search-index-new'
+import { ListObject, PageObject } from './types'
 
 const COLLECTION_NAME: string = 'customLists'
 const PAGE_LIST_ENTRY = 'pageListEntries'
@@ -37,7 +38,15 @@ export default class CustomListStorage extends FeatureStorage {
     //  TODO: Use pagination if required.
     async fetchAllList() {
         const x = await this.storageManager.findAll(COLLECTION_NAME, {})
-        return x
+        // TODO: Very inefficient
+        const promises = x.map(async (list: ListObject) => {
+            const pages = await this.storageManager.findAll(PAGE_LIST_ENTRY, { listId: list.id })
+            return {
+                ...list,
+                pages: pages.map((page: PageObject) => page.pageUrl),
+            }
+        })
+        return Promise.all(promises)
     }
 
     // TODO: Returns all the pages associated with the list.
