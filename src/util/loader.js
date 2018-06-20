@@ -16,14 +16,11 @@ export function loader(promiseCreator) {
 
 export const bodyLoader = loader(() => {
     return new Promise(resolve => {
-        if (
-            document.readyState === 'complete' ||
-            document.readyState === 'interactive'
-        ) {
+        if (document.readyState === 'complete') {
             return resolve()
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('load', () => {
             resolve()
         })
     })
