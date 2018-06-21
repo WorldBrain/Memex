@@ -4,8 +4,8 @@ import * as actions from './actions'
 
 const defaultState = {
     showSidebar: false,
-    annotations: [],
     mouseOnSidebar: false,
+    pageUrl: '',
 }
 
 const setShowSidebar = (state, showSidebar) => ({
@@ -18,9 +18,9 @@ const closeSidebar = state => ({
     showSidebar: false,
 })
 
-const setAnnotations = (state, annotations) => ({
+const setPageUrl = (state, pageUrl) => ({
     ...state,
-    annotations: annotations,
+    pageUrl: pageUrl,
 })
 
 const toggleMouseOnSidebar = state => ({
@@ -32,7 +32,7 @@ export default createReducer(
     {
         [actions.setShowSidebar]: setShowSidebar,
         [actions.closeSidebar]: closeSidebar,
-        [actions.setAnnotations]: setAnnotations,
+        [actions.setPageUrl]: setPageUrl,
         [actions.toggleMouseOnSidebar]: toggleMouseOnSidebar,
     },
     defaultState,

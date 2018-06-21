@@ -347,9 +347,9 @@ const mapDispatchToProps = dispatch => ({
         event.preventDefault()
         dispatch(filterActs.toggleTagFilter(tag))
     },
-    handleCommentBtnClick: doc => event => {
+    handleCommentBtnClick: ({ url }) => event => {
         event.preventDefault()
-        dispatch(sidebarActs.fetchAnnotationAct(doc))
+        dispatch(sidebarActs.openSidebar(url))
     },
     addTag: resultIndex => tag => dispatch(actions.addTag(tag, resultIndex)),
     delTag: resultIndex => tag => dispatch(actions.delTag(tag, resultIndex)),

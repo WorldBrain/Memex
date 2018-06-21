@@ -6,24 +6,22 @@ import Sidebar from 'src/sidebar-overlay/'
 import * as selectors from './selectors'
 import * as actions from './actions'
 
-class SidebarContainer extends React.Component {
-    static propTypes = {
-        showSidebar: PropTypes.bool.isRequired,
-        setShowSidebar: PropTypes.func.isRequired,
-        toggleMouseOnSidebar: PropTypes.func.isRequired,
-    }
+const SidebarContainer = props => (
+    <div>
+        {props.showSidebar ? <Sidebar {...props} env={'overview'} /> : null}
+    </div>
+)
 
-    render() {
-        return (
-            <div>
-                <Sidebar {...this.props} env={'overview'} />
-            </div>
-        )
-    }
+SidebarContainer.propTypes = {
+    showSidebar: PropTypes.bool.isRequired,
+    setShowSidebar: PropTypes.func.isRequired,
+    toggleMouseOnSidebar: PropTypes.func.isRequired,
+    pageUrl: PropTypes.string.isRequired,
 }
 
 const mapStateToProps = state => ({
     showSidebar: selectors.showSidebar(state),
+    pageUrl: selectors.pageUrl(state),
 })
 
 const mapDispatchToProps = dispatch => ({

@@ -1,18 +1,16 @@
 import { createAction } from 'redux-act'
-import { fetchAnnotations } from 'src/annotations/background/annotations'
 
 export const setShowSidebar = createAction('overview-sidebar/setShowSidebar')
 
 export const closeSidebar = createAction('overview-sidebar/closeSidebar')
 
-export const setAnnotations = createAction('overview-sidebar/setAnnotations')
+export const setPageUrl = createAction('overview-sidebar/setPageUrl')
 
 export const toggleMouseOnSidebar = createAction(
     'overview-sidebar/toggleMouseOnSidebar',
 )
 
-export const fetchAnnotationAct = doc => async (dispatch, getState) => {
+export const openSidebar = url => async (dispatch, getState) => {
     dispatch(setShowSidebar(true))
-    const annotations = await fetchAnnotations(doc)
-    dispatch(setAnnotations(annotations))
+    dispatch(setPageUrl(url))
 }
