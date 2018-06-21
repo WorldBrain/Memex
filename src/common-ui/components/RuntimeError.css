@@ -3,7 +3,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: fill-available;
+    height: stretch;
     font-size: 20px;
     overflow: scroll;
     background-color: #fdfdfd;

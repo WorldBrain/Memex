@@ -3,12 +3,14 @@
     color: #3eb995;
     font-weight: 600;
     letter-spacing: 1px;
-    margin-top: 20px;
+    margin-top: 40px;
     margin-bottom: 10px;
 }
 
 p {
     font-size: 16px;
+    margin-top: 10px;
+    margin-bottom: 20px;
 }
 
 a {

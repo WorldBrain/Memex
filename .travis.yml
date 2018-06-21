@@ -1,12 +1,12 @@
 language: node_js
 node_js:
-    - "6"
+    - "lts/*"
 install:
     - yarn install --frozen-lockfile
 script:
     - npm run test
     - npm run lint
-    - npm run build
+    - npm run build:ci
 cache:
     yarn: true
     directories:

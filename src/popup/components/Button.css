@@ -172,12 +172,14 @@
     background-image: url('/img/settings.svg');
     background-repeat: no-repeat;
     background-size: 20px;
+    margin-top: 0px;
 }
 
 .help {
     background-image: url('/img/help.svg');
     background-repeat: no-repeat;
     background-size: 20px;
+    margin-top: 0px;
 }
 
 .buttonIcons {
@@ -202,4 +204,11 @@
     background-image: url('/img/vote.svg');
     background-repeat: no-repeat;
     background-size: 20px;
+}
+
+.linkIcon {
+    background-image: url('/img/link.svg');
+    background-repeat: no-repeat;
+    background-size: 20px;
+    float: left;
 }

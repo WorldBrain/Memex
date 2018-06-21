@@ -5,6 +5,7 @@ body {
     font-size: 12px;
     font-family: 'Open Sans';
     font-weight: 200;
+    background: #fff !important; /* stylelint-disable-line declaration-no-important */
 }
 
 hr {
@@ -20,6 +21,7 @@ hr {
     background-color: rgb(255, 255, 255);
     margin: -8px;
     font-size: 1.2em;
+    height: 395px;
 }
 
 .searchContainer {

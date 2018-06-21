@@ -6,7 +6,7 @@ import initSentry from '../util/raven'
 import * as imports from './imports'
 import * as blacklist from './blacklist'
 import * as privacy from './privacy'
-import * as overview from '../overview'
+import * as overviewPage from '../overview'
 import { reducer as onboarding } from '../overview/onboarding'
 import { reducer as filters } from '../overview/filters'
 
@@ -14,12 +14,12 @@ const rootReducer = combineReducers({
     blacklist: blacklist.reducer,
     imports: imports.reducer,
     privacy: privacy.reducer,
-    overview: overview.reducer,
+    overview: overviewPage.reducer,
     onboarding,
     filters,
 })
 
-const rootEpic = combineEpics(...Object.values(overview.epics))
+const rootEpic = combineEpics(...Object.values(overviewPage.epics))
 
 /**
  * Used to transform the redux state before sending to raven, filtering out
@@ -45,7 +45,7 @@ export default function configureStore({ ReduxDevTools = undefined } = {}) {
     initSentry(middlewares, stateTransformer)
 
     const enhancers = [
-        overview.enhancer,
+        overviewPage.enhancer,
         imports.enhancer,
         privacy.enhancer,
         applyMiddleware(...middlewares),

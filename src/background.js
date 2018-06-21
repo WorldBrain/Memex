@@ -3,6 +3,7 @@ import urlRegex from 'url-regex'
 import 'src/activity-logger/background'
 import 'src/search/background'
 import 'src/analytics/background'
+import DirectLinkingBackground from 'src/direct-linking/background'
 import 'src/omnibar'
 import { installTimeStorageKey } from 'src/imports/background'
 import {
@@ -17,7 +18,7 @@ import {
     OPEN_OPTIONS,
     SEARCH_INJECTION_KEY,
 } from 'src/search-injection/constants'
-import db from 'src/search/search-index-new'
+import db, { storageManager } from 'src/search/search-index-new'
 import * as models from 'src/search/search-index-new/models'
 import 'src/search/migration'
 import initSentry from './util/raven'
@@ -28,10 +29,9 @@ window.indexModels = models
 
 initSentry()
 
-export const OPTIONS_URL = '/options/options.html'
+export const OPTIONS_URL = '/options.html'
 export const OVERVIEW_URL = `${OPTIONS_URL}#/overview`
 export const OLD_EXT_UPDATE_KEY = 'updated-from-old-ext'
-export const UPDATE_URL = '/update/update.html'
 export const UNINSTALL_URL =
     process.env.NODE_ENV === 'production'
         ? 'http://worldbrain.io/uninstall'
@@ -130,3 +130,8 @@ browser.runtime.onInstalled.addListener(details => {
 
 // Open uninstall survey on ext. uninstall
 browser.runtime.setUninstallURL(UNINSTALL_URL)
+
+const directLinking = new DirectLinkingBackground({ storageManager })
+directLinking.setupRemoteFunctions()
+directLinking.setupRequestInterceptor()
+window.directLinking = directLinking

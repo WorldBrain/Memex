@@ -80,6 +80,11 @@
     }
 }
 
+.optInTextContainer {
+    display: flex;
+    flex-direction: column;
+}
+
 .optInContainer {
     display: flex;
     justify-content: space-around;
@@ -144,7 +149,7 @@
     }
 }
 
-.OptIn {
+.optIn {
     font-size: 20px;
     font-weight: 200;
     color: #777;
@@ -152,13 +157,13 @@
     text-align: left;
 }
 
-.SubOptIn {
+.subOptIn {
     font-size: 15px;
     font-weight: 200;
     color: #777;
     line-height: 1em;
     margin-bottom: 15px;
-    margin-top: 6px;
+    margin-top: 15px;
     text-align: left;
 }
 

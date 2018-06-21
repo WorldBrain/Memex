@@ -4,7 +4,7 @@ A browser extension that lets you create, search and eventually share your perso
 
  - **Full-Text-Search** all websites you visited and bookmarked
  - **Filter by time, domain or custom tags**
- - **Use Memex alongside your favorite search-engine** Support for Google and DuckDuckGo. 
+ - **Use Memex alongside your favorite search-engine** Support for Google and DuckDuckGo.
  - **Full Data Privacy** All data is stored and processed on your own computer and will **never ever ever EVER** be shared or used without your consent. Here at WorldBrain, we are highly concerned about your privacy and security please see our [privacy policy](#privacy-policy) for more details.
 
 Lookout for these exciting new features in the future:
@@ -38,7 +38,7 @@ More on that on our website: worldbrain.io
 1. [In Depth How it Works](./docs/How-It-Works.md)
 
 ## Project Status
-Memex is [available for Chrome and Firefox](https://worldbrain.io) and no breaking changes are expected anytime soon. 
+Memex is [available for Chrome and Firefox](https://worldbrain.io) and no breaking changes are expected anytime soon.
 It's under active development by [our wonderful team](https://worldbrain.io/team), including 3 GSoC students.
 
 ### Next Features:
@@ -101,6 +101,9 @@ We will never retain or sell your data.
 It is actually impossible for us to do so as all of your data is kept on your local machine.
 :see_no_evil::hear_no_evil::speak_no_evil:
 
+The only data we obtain are some analytics on how you use the tool, this data will never contain any personal data like URLs you visit or terms you search. Also you can completely opt out from that and become a ghost for us. We then have no indication that you even exist.
+
+For a complete list of things we track, visit our [privacy policy](https://worldbrain.io/privacy-policy/).
 
 ## See also
 
@@ -108,6 +111,9 @@ External resources
 
 * [Worldbrain is creating a structural solution to online (scientific) misinformation - www.worldbrain.io](https://worldbrain.io/vision)
 
-## Thanks to 
+## Thanks to
 [Sentry.io](https://sentry.io) for offering free error tracking to open-source projects and generally having an awesome product
 
+[BrowserStack](http://www.browserstack.com) for helping us face the complexity of building a quality tool that has to work with many different kinds of devices.
+
+<img alt="BrowserStack logo" src="https://raw.githubusercontent.com/WorldBrain/Memex/develop/browserstack.png" width="300" height="70">

@@ -1,6 +1,6 @@
 /* eslint-env jest */
 
-import * as JSDOM from 'jsdom'
+import { JSDOM } from 'jsdom'
 import extractPageContent from './extract-page-content'
 
 describe('Extract page content', () => {
@@ -29,20 +29,23 @@ describe('Extract page content', () => {
 
     test('extract content from an HTML page', async () => {
         // eslint-disable-next-line new-cap
-        const document = new JSDOM.jsdom(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>My title</title>
-            <meta name="keywords" content="key words for all">
-            <meta name="description" content="some kind of description">
-        </head>
-        <body>
-            <p>Hello world</p>
-        </body>
-        </html>
+        const dom = new JSDOM(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>My title</title>
+                <meta name="keywords" content="key words for all">
+                <meta name="description" content="some kind of description">
+            </head>
+            <body>
+                <p>Hello world</p>
+            </body>
+            </html>
         `)
-        const content = await extractPageContent(document, 'https://test.com')
+        const content = await extractPageContent(
+            dom.window.document,
+            'https://test.com',
+        )
         expect(content).toEqual({
             fullText: ' Hello world ',
             lang: 'en',

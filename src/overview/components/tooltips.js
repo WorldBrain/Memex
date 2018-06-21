@@ -71,7 +71,7 @@ const tooltips = [
     {
         title: 'Block pages from being indexed',
         description:
-            'You can blacklist domains, urls and use regular expressions (a bit geeky) to block websites from being stored when you visit them. </br></br> <a target="_new" href="/options/options.html#/blacklist"><button class="_src_overview_components_Tooltip__buttontooltipempty">Go to Blacklist Settings</button></a> ',
+            'You can blacklist domains, urls and use regular expressions (a bit geeky) to block websites from being stored when you visit them. </br></br> <a target="_new" href="/options.html#/blacklist"><button class="_src_overview_components_Tooltip__buttontooltipempty">Go to Blacklist Settings</button></a> ',
     },
     {
         title: 'Pause indexing for a certain amount of time',

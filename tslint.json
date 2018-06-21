@@ -1,5 +1,8 @@
 {
     "extends": ["tslint-react", "tslint-config-prettier"],
+    "jsRules": {
+        "no-empty": true
+    },
     "rules": {
         "class-name": true,
         "comment-format": [true, "check-space"],

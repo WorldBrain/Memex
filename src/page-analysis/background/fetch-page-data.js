@@ -49,7 +49,7 @@ export default function fetchPageData(
                 ? await extractPdfContent({ url })
                 : undefined,
         })
-        cancel = () => {}
+        cancel = () => undefined
     } else {
         const req = fetchDOMFromUrl(url, timeout)
         cancel = req.cancel

@@ -1,5 +1,6 @@
 import { createSelector } from 'reselect'
 import pickBy from 'lodash/fp/pickBy'
+import moment from 'moment'
 
 import {
     FILTERS,
@@ -157,7 +158,7 @@ export const progressPercent = createSelector(
             (allowTypes[TYPE.HISTORY] ? progress[TYPE.HISTORY].complete : 0) +
             (allowTypes[TYPE.BOOKMARK] ? progress[TYPE.BOOKMARK].complete : 0)
 
-        return complete / total * 100
+        return (complete / total) * 100
     },
 )
 
@@ -167,8 +168,12 @@ const getMins = time =>
     Math.floor((time - getHours(time) * 3600) / 60).toFixed(0)
 const getPaddedMins = time =>
     getMins(time) < 10 ? `0${getMins(time)}` : getMins(time)
-const getTimeEstStr = time => `${getHours(time)}:${getPaddedMins(time)} h`
-
+const getTimeEstStr = time => {
+    const timeEstimate = `${getHours(time)}:${getPaddedMins(time)}`
+    return timeEstimate === '0:00'
+        ? timeEstimate
+        : moment.duration(timeEstimate).humanize()
+}
 const getEstimate = (complete, remaining) => ({
     complete,
     remaining,
