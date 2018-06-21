@@ -28,6 +28,11 @@ export default class EventLogStorage extends FeatureStorage {
     }
 
     async getLatestEvent({ filter }) {
-        return await this.storageManager.findAll('eventLog', filter)
+        const opts = {
+            reverse: true,
+            limit: 1,
+        }
+
+        return await this.storageManager.findObject('eventLog', filter, opts)
     }
 }

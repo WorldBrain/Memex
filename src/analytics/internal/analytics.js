@@ -75,10 +75,10 @@ class Analytics {
             }
 
             // TODO: Not working this method, have to make more optimize
-            const latest = await getLatestEvent(filter)
+            const latest = await getLatestEvent({ filter })
 
-            if (latest.length) {
-                latestEvent = Math.max(latest[0].time, latestEvent)
+            if (latest) {
+                latestEvent = Math.max(latest.time, latestEvent)
             }
 
             const eventCountNotif = await getCount({ filter })

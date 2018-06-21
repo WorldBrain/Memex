@@ -14,8 +14,7 @@ import {
 export class StorageManager implements ManageableStorage {
     static DEF_SUGGEST_LIMIT = 10
     static DEF_FIND_OPTS: Partial<FindOpts> = {
-        reverse: true,
-        limit: 1,
+        reverse: false,
     }
 
     public initialized = false
