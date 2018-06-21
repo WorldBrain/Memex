@@ -28,7 +28,7 @@ export function scrollToHighlight() {
     const $highlight = document.querySelector('.' + styles['memex-highlight'])
     if ($highlight) {
         setTimeout(() => {
-            scrollToElement($highlight, { offset: -125 })
+            scrollToElement($highlight, { offset: -225 })
         }, 300)
     } else {
         console.error('Oops, no highlight found to scroll to')
