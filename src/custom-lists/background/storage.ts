@@ -36,8 +36,8 @@ export default class CustomListStorage extends FeatureStorage {
 
     // Return all the list in the DB
     //  TODO: Use pagination if required.
-    async fetchAllList() {
-        const x = await this.storageManager.findAll(COLLECTION_NAME, {})
+    async fetchAllList(query = {}) {
+        const x = await this.storageManager.findAll(COLLECTION_NAME, query)
         // TODO: Very inefficient
         const promises = x.map(async (list: ListObject) => {
             const pages = await this.storageManager.findAll(PAGE_LIST_ENTRY, { listId: list.id })
@@ -101,5 +101,15 @@ export default class CustomListStorage extends FeatureStorage {
         //     listId,
         //     pageUrl,
         // })
+    }
+
+    // TODO: change this method.
+    async getListNameSuggestions({ name }) {
+        // var nameRegex = new RegExp("^" + name, "i");
+        const x = await this.fetchAllList({ name: { $gte: name } })
+        // const x = await this.storageManager.findAll(COLLECTION_NAME, {
+        //     name: { $gte: name },
+        // })
+        return x
     }
 }

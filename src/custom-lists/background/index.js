@@ -30,6 +30,12 @@ export default class CustomListBackground {
             getAllLists: (...params) => {
                 return this.getAllLists(...params)
             },
+            getListAssocPage: (...params) => {
+                return this.getListAssocPage(...params)
+            },
+            getListNameSuggestions: (...params) => {
+                return this.getListNameSuggestions(...params)
+            },
         })
     }
 
@@ -77,5 +83,9 @@ export default class CustomListBackground {
         await this.storage.getListById({
             id,
         })
+    }
+
+    async getListNameSuggestions(name) {
+        return await this.storage.getListNameSuggestions({ name })
     }
 }
