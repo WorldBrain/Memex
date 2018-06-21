@@ -50,8 +50,16 @@ export interface ManageableStorage extends RegisterableStorage {
     initialized: boolean
     registry: StorageRegistry
     putObject(collectionName: string, object): Promise<void>
-    findObject<T>(collectionName: string, filter: FilterQuery<T>): Promise<T>
-    findAll<T>(collectionName: string, filter: FilterQuery<T>): Promise<T[]>
+    findObject<T>(
+        collectionName: string,
+        filter: FilterQuery<T>,
+        opts?: FindOpts,
+    ): Promise<T>
+    findAll<T>(
+        collectionName: string,
+        filter: FilterQuery<T>,
+        opts?: FindOpts,
+    ): Promise<T[]>
     countAll<T>(collectionName: string, filter: FilterQuery<T>): Promise<number>
     deleteObject<T>(
         collectionName: string,
