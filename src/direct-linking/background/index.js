@@ -3,6 +3,7 @@ import DirectLinkingBackend from './backend'
 import { setupRequestInterceptor } from './redirect'
 import { AnnotationRequests } from './request'
 import DirectLinkingStorage from './storage'
+import { stripURL } from '../utils'
 
 export default class DirectLinkingBackground {
     constructor({ storageManager }) {
@@ -25,6 +26,9 @@ export default class DirectLinkingBackground {
                 },
                 createDirectLink: (...params) => {
                     return this.createDirectLink(...params)
+                },
+                getAllAnnotations: (...params) => {
+                    return this.getAllAnnotationsByUrl(...params)
                 },
             },
             { insertExtraArg: true },
@@ -57,5 +61,11 @@ export default class DirectLinkingBackground {
         this.storage.indexPageFromTab(tab)
 
         return result
+    }
+
+    async getAllAnnotationsByUrl({ tab }, url) {
+        let pageUrl = url === null ? tab.url : url
+        pageUrl = stripURL(pageUrl)
+        return await this.storage.getAnnotationsByUrl(pageUrl)
     }
 }

@@ -1,9 +1,9 @@
 import { createAction } from 'redux-act'
-import { fetchAnnotations } from 'src/annotations/background/annotations'
+import { remoteFunction } from 'src/util/webextensionRPC'
 
 export const setAnnotations = createAction('overview-sidebar/setAnnotations')
 
-export const fetchAnnotationAct = doc => async (dispatch, getState) => {
-    const annotations = await fetchAnnotations(doc)
+export const fetchAnnotationAct = pageUrl => async (dispatch, getState) => {
+    const annotations = await remoteFunction('getAllAnnotations')(pageUrl)
     dispatch(setAnnotations(annotations))
 }

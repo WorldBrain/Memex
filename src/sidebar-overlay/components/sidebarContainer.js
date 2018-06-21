@@ -12,8 +12,9 @@ class SidebarContainer extends React.Component {
         setShowSidebar: PropTypes.func,
         toggleMouseOnSidebar: PropTypes.func,
         env: PropTypes.string,
+        pageUrl: PropTypes.string,
         annotations: PropTypes.array.isRequired,
-        fetchAnnotation: PropTypes.func.isRequired,
+        fetchAnnotations: PropTypes.func.isRequired,
     }
 
     static defaultProps = {
@@ -21,6 +22,11 @@ class SidebarContainer extends React.Component {
         setShowSidebar: () => null,
         toggleMouseOnSidebar: () => null,
         env: 'iframe',
+        pageUrl: null,
+    }
+
+    async componentDidMount() {
+        await this.props.fetchAnnotations(this.props.pageUrl)
     }
 
     handleStateChange = ({ isOpen }) => {
@@ -28,12 +34,12 @@ class SidebarContainer extends React.Component {
     }
 
     renderAnnotations = () => {
-        this.props.annotations.map((annotation, key) => {
-            ;<Annotation
+        this.props.annotations.map((annotation, key) => (
+            <Annotation
                 annotation={annotation}
                 openAnnotationURL={url => () => console.log(url)}
             />
-        })
+        ))
     }
 
     render() {
@@ -55,7 +61,7 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-    fetchAnnotations: actions.fetchAnnotationAct(dispatch),
+    fetchAnnotations: pageUrl => dispatch(actions.fetchAnnotationAct(pageUrl)),
 })
 
 export default connect(

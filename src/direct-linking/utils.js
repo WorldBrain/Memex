@@ -43,3 +43,9 @@ export function retryUntil(
         tryOrRetryLater()
     })
 }
+
+export function stripURL(url) {
+    const regex = new RegExp(/.+:\/\/(.+)/g)
+    const match = regex.exec(url)
+    return match[1]
+}

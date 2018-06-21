@@ -7,6 +7,8 @@ import {
 } from '../../search/search-index-new/storage'
 import { STORAGE_KEYS as IDXING_PREF_KEYS } from '../../options/settings/constants'
 
+export const COLLECTION_NAME = 'directLinks'
+
 export default class DirectLinkingStorage extends FeatureStorage {
     private _browserStorageArea: Storage.StorageArea
 
@@ -21,7 +23,7 @@ export default class DirectLinkingStorage extends FeatureStorage {
 
         this._browserStorageArea = browserStorageArea
 
-        this.storageManager.registerCollection('directLinks', {
+        this.storageManager.registerCollection(COLLECTION_NAME, {
             version: new Date(2018, 5, 31),
             fields: {
                 pageTitle: { type: 'text' },
@@ -51,7 +53,7 @@ export default class DirectLinkingStorage extends FeatureStorage {
     }
 
     async insertDirectLink({ pageTitle, pageUrl, url, body, selector }) {
-        await this.storageManager.putObject('directLinks', {
+        await this.storageManager.putObject(COLLECTION_NAME, {
             pageTitle,
             pageUrl,
             body,
@@ -79,5 +81,11 @@ export default class DirectLinkingStorage extends FeatureStorage {
         }
 
         await page.save()
+    }
+
+    async getAnnotationsByUrl(pageUrl) {
+        return await this.storageManager.findAll(COLLECTION_NAME, {
+            pageUrl,
+        })
     }
 }
