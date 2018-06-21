@@ -309,6 +309,7 @@ class DropdownContainer extends Component {
                 setInputRef={this.setInputRef}
                 listSearchValue={this.state.searchVal}
                 overviewMode={this.overviewMode()}
+                listCount={this.state.filters.length}
                 {...this.props}
             >
                 {this.renderLists()}

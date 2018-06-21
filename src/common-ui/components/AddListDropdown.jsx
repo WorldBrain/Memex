@@ -29,15 +29,15 @@ const AddListDropdown = props => (
             </form>
             <div className={styles.dropdownBody}>{props.children}</div>
             <div className={styles.dropdownFooter}>
-                <span>0 list(s) selected</span>
-                <span
+                <span>{props.listCount} list(s) selected</span>
+                {/* <span
                     onClick={props.applyBulkEdits}
                     className={cx(styles.applyButton, {
                         [styles.applyButtonPopup]: !props.overviewMode,
                     })}
                 >
                     {props.overviewMode ? 'Apply' : 'Set Quick-Add Default'}
-                </span>
+                </span> */}
             </div>
         </div>
     </div>
@@ -49,8 +49,9 @@ AddListDropdown.propTypes = {
     onListSearchKeyDown: PropTypes.func.isRequired,
     setInputRef: PropTypes.func.isRequired,
     listSearchValue: PropTypes.string,
-    applyBulkEdits: PropTypes.func,
+    // applyBulkEdits: PropTypes.func,
     overviewMode: PropTypes.bool.isRequired,
+    listCount: PropTypes.string.isRequired,
 }
 
 export default AddListDropdown
