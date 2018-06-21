@@ -51,7 +51,7 @@ AddListDropdown.propTypes = {
     listSearchValue: PropTypes.string,
     // applyBulkEdits: PropTypes.func,
     overviewMode: PropTypes.bool.isRequired,
-    listCount: PropTypes.string.isRequired,
+    listCount: PropTypes.number.isRequired,
 }
 
 export default AddListDropdown

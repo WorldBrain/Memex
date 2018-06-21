@@ -124,6 +124,7 @@ class DropdownContainer extends Component {
             focused: !this.canCreateList()
                 ? this.state.focused === i
                 : this.state.focused === i + 1,
+            isActive: this.isPageInList(value),
         }))
 
     getSearchVal = () =>
@@ -274,6 +275,10 @@ class DropdownContainer extends Component {
             state => ({ ...state, searchVal, displayFilters }),
             this.fetchListSuggestions, // Debounced suggestion fetch
         )
+    }
+
+    isPageInList = ({ pages }) => {
+        return pages.indexOf(this.props.url) > -1
     }
 
     renderLists() {

@@ -9,6 +9,7 @@ class AddListDropdownRow extends PureComponent {
         value: PropTypes.object.isRequired,
         focused: PropTypes.bool,
         handleClick: PropTypes.func.isRequired,
+        isActive: PropTypes.bool.isRequired,
     }
 
     handleListStateRender = () => {
@@ -51,7 +52,9 @@ class AddListDropdownRow extends PureComponent {
                         {this.props.value.name}
                     </div>
                     <span style={{ flex: 1 }}>
-                        {this.handleListStateRender()}
+                        {this.props.isActive && (
+                            <i className="material-icons">done</i>
+                        )}
                     </span>
                 </div>
             </div>
