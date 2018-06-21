@@ -107,7 +107,7 @@ Util.xpathFromNode = (el, relativeRoot) ->
   try
     result = simpleXPathJQuery.call el, relativeRoot
   catch exception
-    console.log "jQuery-based XPath construction failed! Falling back to manual."
+    console.log "MEMEX: jQuery-based XPath construction failed! Falling back to manual."
     result = simpleXPathPure.call el, relativeRoot
   result
 

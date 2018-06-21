@@ -31,6 +31,6 @@ export function scrollToHighlight() {
             scrollToElement($highlight, { offset: -225 })
         }, 300)
     } else {
-        console.error('Oops, no highlight found to scroll to')
+        console.error('MEMEX: Oops, no highlight found to scroll to')
     }
 }
