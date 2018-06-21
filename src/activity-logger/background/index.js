@@ -2,6 +2,7 @@ import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import initPauser from './pause-logging'
 import { updateVisitInteractionData } from './util'
 import TabChangeListener from './tab-change-listeners'
+import PageVisitLogger from './log-page-visit'
 import tabManager from './tab-manager'
 
 // Allow logging pause state toggle to be called from other scripts
@@ -52,7 +53,8 @@ browser.webNavigation.onCommitted.addListener(
     },
 )
 
-const tabChangeListener = new TabChangeListener({ tabManager })
+const pageVisitLogger = new PageVisitLogger({ tabManager })
+const tabChangeListener = new TabChangeListener({ tabManager, pageVisitLogger })
 
 browser.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
     if (changeInfo.favIconUrl) {

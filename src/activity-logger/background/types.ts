@@ -35,3 +35,5 @@ export type VisitInteractionUpdater = (interalTab: TabState) => Promise<void>
 export type FavIconFetcher = (url: string) => Promise<string>
 export type FavIconChecker = (url: string) => Promise<boolean>
 export type FavIconCreator = (url: string, data: string) => Promise<void>
+export type PageCreator = (url: string, data: string) => Promise<void>
+export type PageTermsAdder = (url: string, data: string) => Promise<void>

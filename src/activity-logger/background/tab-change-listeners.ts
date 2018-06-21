@@ -3,8 +3,12 @@ import noop from 'lodash/noop'
 import debounce from 'lodash/debounce'
 
 import searchIndex from '../../search'
-import { whenPageDOMLoaded, whenTabActive } from '../../util/tab-events'
-import { logPageStub, logPageVisit } from './log-page-visit'
+import {
+    TabEventChecker,
+    whenPageDOMLoaded,
+    whenTabActive,
+} from '../../util/tab-events'
+import PageVisitLogger from './log-page-visit'
 import { fetchFavIcon } from '../../page-analysis/background/get-fav-icon'
 import { shouldLogTab, updateVisitInteractionData } from './util'
 import { TabManager } from './tab-manager'
@@ -20,12 +24,15 @@ import {
 
 interface Props {
     tabManager: TabManager
+    pageVisitLogger: PageVisitLogger
     storageArea: Storage.StorageArea
     loggableTabCheck: LoggableTabChecker
     visitUpdate: VisitInteractionUpdater
     favIconFetch: FavIconFetcher
     favIconCheck: FavIconChecker
     favIconCreate: FavIconCreator
+    domLoadCheck: TabEventChecker
+    tabActiveCheck: TabEventChecker
 }
 
 export default class TabChangeListeners {
@@ -44,6 +51,9 @@ export default class TabChangeListeners {
     private _fetchFavIcon: FavIconFetcher
     private _checkFavIcon: FavIconChecker
     private _createFavIcon: FavIconCreator
+    private _pageDOMLoaded: TabEventChecker
+    private _tabActive: TabEventChecker
+    private _pageVisitLogger: PageVisitLogger
 
     /**
      * Handles scheduling the main page indexing logic that happens on browser tab URL change,
@@ -58,20 +68,26 @@ export default class TabChangeListeners {
 
     constructor({
         tabManager,
+        pageVisitLogger,
         storageArea = browser.storage.local,
         loggableTabCheck = shouldLogTab,
         visitUpdate = updateVisitInteractionData,
         favIconFetch = fetchFavIcon,
         favIconCheck = searchIndex.domainHasFavIcon,
         favIconCreate = searchIndex.addFavIcon,
+        domLoadCheck = whenPageDOMLoaded,
+        tabActiveCheck = whenTabActive,
     }: Props) {
         this._tabManager = tabManager
+        this._pageVisitLogger = pageVisitLogger
         this._storage = storageArea
         this._checkTabLoggable = loggableTabCheck
         this._updateTabVisit = visitUpdate
         this._fetchFavIcon = favIconFetch
         this._checkFavIcon = favIconCheck
         this._createFavIcon = favIconCreate
+        this._pageDOMLoaded = domLoadCheck
+        this._tabActive = tabActiveCheck
 
         // Set up debounces for different tab change listeners as some sites can
         // really spam the fav-icon changes when they first load and to avoid some URL redirects.
@@ -140,9 +156,9 @@ export default class TabChangeListeners {
             const indexingPrefs = await this.fetchIndexingPrefs()
 
             // Run stage 1 of visit indexing immediately (depends on user settings)
-            await whenPageDOMLoaded({ tabId })
+            await this._pageDOMLoaded({ tabId })
             if (indexingPrefs.shouldLogStubs) {
-                await logPageStub(tab)
+                await this._pageVisitLogger.logPageStub(tab)
             }
 
             // Schedule stage 2 of visit indexing soon after - if user stays on page
@@ -150,9 +166,12 @@ export default class TabChangeListeners {
                 await this._tabManager.scheduleTabLog(
                     tabId,
                     () =>
-                        whenTabActive({ tabId })
+                        this._tabActive({ tabId })
                             .then(() =>
-                                logPageVisit(tab, indexingPrefs.shouldLogStubs),
+                                this._pageVisitLogger.logPageVisit(
+                                    tab,
+                                    indexingPrefs.shouldLogStubs,
+                                ),
                             )
                             .catch(console.error),
                     indexingPrefs.logDelay,
