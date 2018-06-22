@@ -45,7 +45,7 @@ class Analytics {
         const params = {
             ...eventArgs,
             type: MapEventTypeToInt[eventArgs.type].id,
-            other: eventArgs.data || {},
+            details: eventArgs.details || {},
         }
 
         const notifParams = {
@@ -140,7 +140,7 @@ class Analytics {
         const params = {
             ...eventArgs,
             time,
-            other: [],
+            details: {},
         }
 
         await this.storeEventLogStatistics(params)

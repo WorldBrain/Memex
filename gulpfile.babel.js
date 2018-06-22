@@ -96,9 +96,6 @@ function createBundle(
             SENTRY_DSN: production
                 ? 'https://205014a0f65e4160a29db2935250b47c@sentry.io/305612'
                 : undefined,
-            ANALYTICS_HOST: production
-                ? 'https://analytics.worldbrain.io'
-                : 'http://localhost:3000',
         }),
         { global: true },
     )

@@ -1,5 +1,7 @@
 import { idleManager } from 'src/util/idle'
 import { SHOULD_TRACK_STORAGE_KEY as SHOULD_TRACK } from 'src/options/privacy/constants'
+import { USER_ID, generateTokenIfNot } from 'src/util/generate-token'
+import { installTimeStorageKey } from 'src/imports/background'
 
 class SendToServer {
     static API_PATH = '/event'
@@ -24,20 +26,21 @@ class SendToServer {
     }
 
     /**
-     * Get user id *
-     */
-    get getUserId() {
-        const userId = 123
-        return userId
-    }
-
-    /**
      *
      * @param {params} params if params is there, then send request directly without wait, otherwise send pool request
      */
-    _formReqParams(params = undefined) {
+    async _formReqParams(params = undefined) {
+        let userId = await this.userId()
+
+        if (!userId) {
+            const installTime = (await browser.storage.local.get(
+                installTimeStorageKey,
+            ))[installTimeStorageKey]
+            userId = await generateTokenIfNot(installTime)
+        }
+
         const data = {
-            id: this.getUserId,
+            id: userId,
             data: params ? [...params] : [...this._pool],
         }
 
@@ -53,14 +56,14 @@ class SendToServer {
      * @param {any} params
      * @return {Promise<Response>}
      */
-    _sendReq = event => {
+    _sendReq = async event => {
         fetch(this._host, {
             method: 'POST',
             headers: {
                 Accept: 'application/json',
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(this._formReqParams(event)),
+            body: JSON.stringify(await this._formReqParams(event)),
         })
     }
 
@@ -76,18 +79,25 @@ class SendToServer {
             return
         }
 
-        const res = await fetch(this._host, {
+        let res = await fetch(this._host, {
             method: 'POST',
             headers: {
                 Accept: 'application/json',
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(this._formReqParams()),
+            body: JSON.stringify(await this._formReqParams()),
         })
 
-        if (res.status) {
+        res = await res.json()
+
+        if (res.success) {
             this._pool.length = 0
         }
+    }
+
+    async userId() {
+        const userId = (await browser.storage.local.get(USER_ID))[USER_ID]
+        return userId
     }
 
     async shouldTrack() {
