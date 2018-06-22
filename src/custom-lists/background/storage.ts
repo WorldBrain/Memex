@@ -26,7 +26,7 @@ export default class CustomListStorage extends FeatureStorage {
             // different version for adding a new table.
             version: new Date(2018, 6, 12),
             fields: {
-                listId: { type: 'string' },
+                listId: { type: 'string', pk: true },
                 pageUrl: { type: 'string' },
                 createdAt: { type: 'datetime' },
             },

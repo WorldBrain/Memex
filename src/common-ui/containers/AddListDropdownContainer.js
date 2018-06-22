@@ -37,6 +37,7 @@ class DropdownContainer extends Component {
         this.addList = remoteFunction('createCustomList')
         this.addUrlToList = remoteFunction('insertPageToList')
         this.getListNameSuggestions = remoteFunction('getListNameSuggestions')
+        this.getListById = remoteFunction('getListById')
 
         this.state = {
             searchVal: '',
@@ -220,10 +221,73 @@ class DropdownContainer extends Component {
         }
 
         if (this.state.displayFilters.length) {
-            return this.handleListSelection(this.state.focused)(event)
+            // return this.handleListSelection(this.state.focused)(event)
+            return this.handleListClick(this.state.focused)(event)
         }
 
         return null
+    }
+
+    // TODO: Put DB calls at appropriate place
+    handleListClick = index => async event => {
+        let list
+        const listId = this.getDisplayLists()[index].value.id
+        const { filters } = this.state
+        const listIndex = filters.findIndex(val => val.id === listId)
+        if (listIndex === -1) {
+            list = this.getDisplayLists()[index].value
+        } else {
+            list = filters[listIndex]
+        }
+
+        const { pages } = list
+        const pageIndex = pages.indexOf(this.props.url)
+
+        let pagesReducer = pages => pages
+        let listReducer = lists => lists
+        // Either add or remove it to the main `state.pages` array
+        try {
+            if (pageIndex === -1) {
+                pagesReducer = pages => [this.props.url, ...pages]
+            } else {
+                // this.props.onFilterDel(tag)
+                pagesReducer = pages => [
+                    ...pages.slice(0, pageIndex),
+                    ...pages.slice(pageIndex + 1),
+                ]
+            }
+            if (listIndex === -1) {
+                listReducer = lists => [
+                    {
+                        ...list,
+                        pages: pagesReducer(list.pages),
+                    },
+                    ...lists,
+                ]
+            } else {
+                // this.props.onFilterDel(tag)
+                listReducer = list => [
+                    ...list.slice(0, listIndex),
+                    ...list.slice(listIndex + 1),
+                ]
+            }
+        } catch (err) {
+        } finally {
+            this.setState(state => ({
+                ...state,
+                filters: listReducer(state.filters),
+                displayFilters: [
+                    ...this.state.displayFilters.slice(0, index),
+                    {
+                        ...this.state.displayFilters[index],
+                        pages: pagesReducer(pages),
+                    },
+                    ...this.state.displayFilters.slice(index + 1),
+                ],
+                focused: index,
+            }))
+            updateLastActive() // Consider user active (analytics)
+        }
     }
 
     handleSearchArrowPress(event) {
@@ -290,7 +354,7 @@ class DropdownContainer extends Component {
             <AddListDropdownRow
                 {...list}
                 key={i}
-                handleClick={this.handleListSelection(i)}
+                handleClick={this.handleListClick(i)}
             />
         ))
 
