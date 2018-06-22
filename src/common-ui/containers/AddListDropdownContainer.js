@@ -146,7 +146,6 @@ class DropdownContainer extends Component {
         if (!searchVal.length) {
             return
         }
-        // console.log(await this.getListNameSuggestions(searchVal))
         let suggestions = this.state.filters
 
         // suggestions = this.suggest(searchVal)
@@ -257,6 +256,11 @@ class DropdownContainer extends Component {
                 ]
             }
             if (listIndex === -1) {
+                await this.addUrlToList({
+                    id: listId,
+                    url: [this.props.url],
+                })
+
                 listReducer = lists => [
                     {
                         ...list,
@@ -266,6 +270,11 @@ class DropdownContainer extends Component {
                 ]
             } else {
                 // this.props.onFilterDel(tag)
+                // TODO: Code refactorisation
+                await remoteFunction('removePageFromList')({
+                    id: listId,
+                    url: this.props.url,
+                })
                 listReducer = list => [
                     ...list.slice(0, listIndex),
                     ...list.slice(listIndex + 1),

@@ -36,6 +36,9 @@ export default class CustomListBackground {
             getListNameSuggestions: (...params) => {
                 return this.getListNameSuggestions(...params)
             },
+            checkPageInList: (...params) => {
+                return this.checkPageInList(...params)
+            },
         })
     }
 
@@ -72,10 +75,10 @@ export default class CustomListBackground {
         })
     }
 
-    async removePageFromList({ id, pageUrl }) {
+    async removePageFromList({ id, url }) {
         await this.storage.removePageFromList({
-            id,
-            pageUrl,
+            listId: id,
+            pageUrl: url,
         })
     }
 
@@ -87,5 +90,12 @@ export default class CustomListBackground {
 
     async getListNameSuggestions(name) {
         return await this.storage.getListNameSuggestions({ name })
+    }
+
+    async checkPageInList({ id, url }) {
+        return await this.storage.checkPageInList({
+            listId: id,
+            pageUrl: url,
+        })
     }
 }

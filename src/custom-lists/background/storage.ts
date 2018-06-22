@@ -97,19 +97,38 @@ export default class CustomListStorage extends FeatureStorage {
     }
 
     async removePageFromList({ listId, pageUrl }) {
-        // await this.storageManager.deletetObject(PAGE_LIST_ENTRY, {
-        //     listId,
-        //     pageUrl,
-        // })
+        const x = await this.storageManager.deleteObject(PAGE_LIST_ENTRY, {
+            $and: [
+                { listId: { $eq: listId } },
+                { pageUrl: { $eq: pageUrl } },
+            ],
+        })
+
+        return x
+    }
+
+    async checkPageInList({ listId, pageUrl }) {
+
+        const x = await this.storageManager.findObject(PAGE_LIST_ENTRY, {
+            $and: [
+                { listId: { $eq: listId } },
+                { pageUrl: { $eq: pageUrl } },
+            ],
+        })
+
+        return x
     }
 
     // TODO: change this method.
     async getListNameSuggestions({ name }) {
-        // var nameRegex = new RegExp("^" + name, "i");
-        const x = await this.fetchAllList({ name: { $gte: name } })
-        // const x = await this.storageManager.findAll(COLLECTION_NAME, {
-        //     name: { $gte: name },
-        // })
+        var nameRegex = new RegExp("^" + name, "i");
+        const x = await this.fetchAllList({
+            name: {
+                $regex: {
+                    $eq: nameRegex,
+                }
+            }
+        })
         return x
     }
 }
