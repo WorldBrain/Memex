@@ -173,13 +173,13 @@ function storeSearch(searchResult, overwrite, state) {
 
     let type
 
-    if (searchResult.totalCount > 0) {
-        type = overwrite ? 'successful_search' : 'paginate_search'
-    } else {
+    if (searchResult.totalCount === 0) {
         type = 'unsuccessful_search'
+    } else {
+        type = overwrite ? 'successful_search' : 'paginate_search'
     }
 
-    internalAnalytics.processEvent({ type: type })
+    internalAnalytics.processEvent({ type })
 
     if (query.length > 0) {
         internalAnalytics.processEvent({ type: 'nlp_search' })
@@ -187,6 +187,17 @@ function storeSearch(searchResult, overwrite, state) {
 
     if (filters.onlyBookmarks(state)) {
         internalAnalytics.processEvent({ type: 'bookmark_filter' })
+    }
+
+    if (filters.tags(state).length > 0) {
+        internalAnalytics.processEvent({ type: 'tag_filter' })
+    }
+
+    if (
+        filters.domainsInc(state).length > 0 ||
+        filters.domainsExc(state).length > 0
+    ) {
+        internalAnalytics.processEvent({ type: 'domain_filter' })
     }
 }
 
