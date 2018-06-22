@@ -30,6 +30,9 @@ export default class DirectLinkingBackground {
                 getAllAnnotations: (...params) => {
                     return this.getAllAnnotationsByUrl(...params)
                 },
+                createComment: (...params) => {
+                    return this.createComment(...params)
+                },
             },
             { insertExtraArg: true },
         )
@@ -67,5 +70,15 @@ export default class DirectLinkingBackground {
         let pageUrl = url === null ? tab.url : url
         pageUrl = stripURL(pageUrl)
         return await this.storage.getAnnotationsByUrl(pageUrl)
+    }
+
+    async createComment({ tab }, url, comment) {
+        let pageUrl = url === null ? tab.url : url
+        pageUrl = stripURL(pageUrl)
+        return await this.storage.createComment({
+            pageTitle: tab.title,
+            pageUrl,
+            comment,
+        })
     }
 }

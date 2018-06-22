@@ -54,12 +54,9 @@ class CommentBox extends React.Component {
     }
 
     save = () => {
-        const { commentInput, tags } = this.state
+        const { commentInput } = this.state
         if (commentInput.length) {
-            this.props.saveComment({
-                comment: commentInput,
-                tags,
-            })
+            this.props.saveComment(commentInput)
             this.setState({
                 commentInput: '',
                 textareaRows: constants.DEFAULT_ROWS,

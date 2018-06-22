@@ -24,11 +24,12 @@ export default class DirectLinkingStorage extends FeatureStorage {
         this._browserStorageArea = browserStorageArea
 
         this.storageManager.registerCollection(COLLECTION_NAME, {
-            version: new Date(2018, 5, 31),
+            version: new Date(2018, 6, 27),
             fields: {
                 pageTitle: { type: 'text' },
                 pageUrl: { type: 'url' },
                 body: { type: 'text' },
+                comment: { type: 'text' },
                 selector: { type: 'json' },
                 createdWhen: { type: 'datetime' },
                 url: { type: 'string' },
@@ -38,6 +39,7 @@ export default class DirectLinkingStorage extends FeatureStorage {
                 { field: 'pageTitle' },
                 { field: 'body' },
                 { field: 'createdWhen' },
+                { field: 'comment' },
             ],
         })
     }
@@ -60,6 +62,7 @@ export default class DirectLinkingStorage extends FeatureStorage {
             selector,
             createdWhen: new Date(),
             url,
+            comment: '',
         })
     }
 
@@ -83,9 +86,22 @@ export default class DirectLinkingStorage extends FeatureStorage {
         await page.save()
     }
 
-    async getAnnotationsByUrl(pageUrl) {
+    async getAnnotationsByUrl(pageUrl: string) {
         return await this.storageManager.findAll(COLLECTION_NAME, {
             pageUrl,
+        })
+    }
+
+    async createComment({ pageTitle, pageUrl, comment }) {
+        const uniqueUrl: string = `${pageUrl}/#${new Date().getTime()}`
+        return await this.storageManager.putObject(COLLECTION_NAME, {
+            pageTitle,
+            pageUrl,
+            comment,
+            createdWhen: new Date(),
+            body: '',
+            selector: {},
+            url: uniqueUrl,
         })
     }
 }

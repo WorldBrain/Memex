@@ -15,6 +15,7 @@ class SidebarContainer extends React.Component {
         pageUrl: PropTypes.string,
         annotations: PropTypes.array.isRequired,
         fetchAnnotations: PropTypes.func.isRequired,
+        saveComment: PropTypes.func.isRequired,
     }
 
     static defaultProps = {
@@ -34,10 +35,15 @@ class SidebarContainer extends React.Component {
     }
 
     renderAnnotations = () => {
-        this.props.annotations.map((annotation, key) => (
+        const annotations = this.props.annotations.sort(
+            (x, y) => x.createdWhen > y.createdWhen,
+        )
+        console.log(annotations)
+        return annotations.map((annotation, index) => (
             <Annotation
                 annotation={annotation}
                 openAnnotationURL={url => () => console.log(url)}
+                key={index}
             />
         ))
     }
@@ -51,6 +57,7 @@ class SidebarContainer extends React.Component {
                 toggleMouseOnSidebar={this.props.toggleMouseOnSidebar}
                 renderAnnotations={this.renderAnnotations}
                 env={this.props.env}
+                saveComment={this.props.saveComment(this.props.pageUrl)}
             />
         )
     }
@@ -62,6 +69,8 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
     fetchAnnotations: pageUrl => dispatch(actions.fetchAnnotationAct(pageUrl)),
+    saveComment: pageUrl => comment =>
+        dispatch(actions.saveComment(pageUrl, comment)),
 })
 
 export default connect(

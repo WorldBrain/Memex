@@ -8,9 +8,9 @@ import styles from './Annotation.css'
 class AnnotationContainer extends React.Component {
     static propTypes = {
         annotation: PropTypes.object.isRequired,
-        deleteAnnotation: PropTypes.func.isRequired,
-        updateAnnotation: PropTypes.func.isRequired,
-        openAnnotationURL: PropTypes.func.isRequired,
+        deleteAnnotation: PropTypes.func,
+        updateAnnotation: PropTypes.func,
+        openAnnotationURL: PropTypes.func,
     }
 
     state = {
@@ -30,15 +30,15 @@ class AnnotationContainer extends React.Component {
         let annotationText = ''
         let containsTags = false
 
-        if (annotation.highlight)
-            truncated.highlight = this.getTruncatedObject(annotation.highlight)
+        if (annotation.body)
+            truncated.highlight = this.getTruncatedObject(annotation.body)
 
-        if (annotation.body) {
-            truncated.annotation = this.getTruncatedObject(annotation.body)
-            annotationText = annotation.body
+        if (annotation.comment) {
+            truncated.annotation = this.getTruncatedObject(annotation.comment)
+            annotationText = annotation.comment
         }
 
-        if (annotation.tags.length) containsTags = true
+        if (annotation.tags && annotation.tags.length) containsTags = true
 
         this.setState({
             truncated,
@@ -133,6 +133,7 @@ class AnnotationContainer extends React.Component {
 
     renderTagPills = () => {
         const { tags } = this.props.annotation
+        if (!tags) return
         return tags.map((tag, i) => (
             <span key={i} className={styles.tagPill}>
                 {tag}
@@ -203,7 +204,7 @@ class AnnotationContainer extends React.Component {
         const { truncated } = this.state
         if (truncated.highlight && truncated.highlight.isTruncated)
             return truncated.highlight.text
-        else return this.props.annotation.highlight
+        else return this.props.annotation.body
     }
 
     renderAnnotation = () => {
@@ -211,7 +212,7 @@ class AnnotationContainer extends React.Component {
         if (annotationEditMode) return ''
         if (truncated.annotation && truncated.annotation.isTruncated)
             return truncated.annotation.text
-        else return this.props.annotation.body
+        else return this.props.annotation.comment
     }
 
     renderAnnotationInput = () => {
