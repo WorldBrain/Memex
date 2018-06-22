@@ -6,6 +6,7 @@ import {
     CollectionDefinitions,
     CollectionDefinition,
     CollectionField,
+    IndexDefinition,
     FilterQuery,
     FindOpts,
 } from './types'
@@ -22,18 +23,21 @@ export class StorageManager implements ManageableStorage {
     private _storage: Storage
 
     private static _processIndexedField(
-        indexName: string,
+        fieldName: string,
+        indexDef: IndexDefinition,
         fieldDef: CollectionField,
         object,
     ) {
         if (fieldDef.fieldObject) {
-            object[indexName] = fieldDef.fieldObject.prepareForStorage(
-                object[indexName],
+            object[fieldName] = fieldDef.fieldObject.prepareForStorage(
+                object[fieldName],
             )
         }
 
         if (fieldDef._index && fieldDef.type === 'text') {
-            object[`_${indexName}_terms`] = [...extractTerms(object[indexName])]
+            const fullTextField =
+                indexDef.fullTextIndexName || `_${fieldName}_terms`
+            object[fullTextField] = [...extractTerms(object[fieldName])]
         }
     }
 
@@ -41,27 +45,23 @@ export class StorageManager implements ManageableStorage {
      * Handles mutation of a document to be inserted/updated to storage,
      * depending on needed processing of indexed fields.
      */
-    private static _processIndexedFields(
-        collection: CollectionDefinition,
-        object,
-    ) {
-        const indices = collection.indices || []
+    private static _processIndexedFields(def: CollectionDefinition, object) {
+        const indices = def.indices || []
 
-        indices.forEach(index => {
-            if (index instanceof Array) {
-                index.forEach(indexName =>
-                    StorageManager._processIndexedField(
-                        indexName,
-                        collection.fields[indexName],
-                        object,
-                    ),
-                )
-            } else {
+        indices.forEach(indexDef => {
+            const processField = (fieldName: string) =>
                 StorageManager._processIndexedField(
-                    index,
-                    collection.fields[index],
+                    fieldName,
+                    indexDef,
+                    def.fields[fieldName],
                     object,
                 )
+
+            // Compound indexes need to process all specified fields
+            if (indexDef.field instanceof Array) {
+                indexDef.field.forEach(processField)
+            } else {
+                processField(indexDef.field)
             }
         })
     }

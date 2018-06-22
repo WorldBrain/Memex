@@ -3,7 +3,7 @@ import {
     DexieSchema,
     CollectionDefinition,
     MigrationRunner,
-    IndexType,
+    IndexDefinition,
 } from './types'
 
 export function getDexieHistory(storageRegistry: StorageRegistry) {
@@ -29,9 +29,7 @@ function getDexieSchema(collections: RegistryCollections) {
     const migrations: MigrationRunner[] = []
 
     Object.entries(collections).forEach(([collectionName, collectionDef]) => {
-        schema[collectionName] = collectionDef.indices
-            .map(convertIndexToDexieExps(collectionDef))
-            .join(', ')
+        schema[collectionName] = convertIndexToDexieExps(collectionDef)
 
         if (collectionDef.migrate && !collectionDef.migrate._seen) {
             collectionDef.migrate._seen = true // TODO: Clean this up, should have no side-effects
@@ -45,15 +43,25 @@ function getDexieSchema(collections: RegistryCollections) {
 /**
  * Handles converting from StorageManager index definitions to Dexie index expressions.
  */
-const convertIndexToDexieExps = (def: CollectionDefinition) =>
-    function(index: IndexType) {
-        // Convert from StorageManager compound index to Dexie compound index
-        if (index instanceof Array) {
-            return `[${index[0]}+${index[1]}]`
-        }
+const convertIndexToDexieExps = ({ fields, indices }: CollectionDefinition) =>
+    indices
+        // .sort(({ pk }) => (pk ? -1 : 1)) // PK indexes always come first in Dexie
+        .map(indexDef => {
+            // Convert from StorageManager compound index to Dexie compound index
+            // Note that all other `IndexDefinition` opts are ignored for compound indexes
+            if (indexDef.field instanceof Array) {
+                return `[${indexDef.field[0]}+${indexDef.field[1]}]`
+            }
 
-        const fieldDef = def.fields[index]
-        const listPrefix = fieldDef.type === 'text' ? '*' : ''
+            // Create Dexie MultiEntry index for text fields: http://dexie.org/docs/MultiEntry-Index
+            // TODO: throw error if text field + PK index
+            const fieldDef = fields[indexDef.field]
+            let listPrefix = fieldDef.type === 'text' ? '*' : ''
 
-        return `${listPrefix}${index}`
-    }
+            // Note that order of these statements matters
+            listPrefix = indexDef.unique ? '&' : listPrefix
+            listPrefix = indexDef.pk && indexDef.autoInc ? '++' : listPrefix
+
+            return `${listPrefix}${indexDef.field}`
+        })
+        .join(', ')

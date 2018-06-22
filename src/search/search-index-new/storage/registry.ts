@@ -2,7 +2,7 @@ import {
     RegisterableStorage,
     CollectionDefinitions,
     CollectionDefinition,
-    IndexType,
+    IndexDefinition,
 } from './types'
 import FIELD_TYPES from './fields'
 
@@ -22,18 +22,19 @@ export default class StorageRegistry implements RegisterableStorage {
      * Handles mutating a collection's definition to flag all fields that are declared to be
      * indexable as indexed fields.
      */
-    private static _registerIndexedFields = (def: CollectionDefinition) => {
+    private static _registerIndexedFields(def: CollectionDefinition) {
         const flagField = (fieldName: string) =>
             (def.fields[fieldName]._index = true)
 
-        return function(index: IndexType) {
+        const indices = def.indices || []
+        indices.forEach(({ field }) => {
             // Compound indexes need to flag all specified fields
-            if (index instanceof Array) {
-                index.forEach(flagField)
+            if (field instanceof Array) {
+                field.forEach(flagField)
             } else {
-                flagField(index)
+                flagField(field)
             }
-        }
+        })
     }
 
     registerCollection(name: string, defs: CollectionDefinitions) {
@@ -53,8 +54,7 @@ export default class StorageRegistry implements RegisterableStorage {
                 }
             })
 
-            const indices = def.indices || []
-            indices.forEach(StorageRegistry._registerIndexedFields(def))
+            StorageRegistry._registerIndexedFields(def)
 
             const version = def.version.getTime()
             this.collectionsByVersion[version] =

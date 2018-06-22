@@ -12,7 +12,7 @@ describe('StorageManager', () => {
                     slug: { type: 'string' },
                     field1: { type: 'string' },
                 },
-                indices: ['slug'],
+                indices: [{ field: 'slug', pk: true }],
             })
 
             const migrateEggs = () => Promise.resolve()
@@ -23,7 +23,7 @@ describe('StorageManager', () => {
                         slug: { type: 'string' },
                         field1: { type: 'string' },
                     },
-                    indices: ['slug'],
+                    indices: [{ field: 'slug', pk: true }],
                 },
                 {
                     version: new Date(2018, 5, 25),
@@ -32,7 +32,7 @@ describe('StorageManager', () => {
                         field1: { type: 'string' },
                         field2: { type: 'text' },
                     },
-                    indices: ['slug', 'field2'],
+                    indices: [{ field: 'slug', pk: true }, { field: 'field2' }],
                     migrate: migrateEggs,
                 },
             ])
@@ -43,7 +43,7 @@ describe('StorageManager', () => {
                     slug: { type: 'string' },
                     field1: { type: 'string' },
                 },
-                indices: ['slug'],
+                indices: [{ field: 'slug', pk: true }],
             })
 
             storageManager.registerCollection('ham', {
@@ -52,7 +52,10 @@ describe('StorageManager', () => {
                     nameFirst: { type: 'string' },
                     nameLast: { type: 'string' },
                 },
-                indices: [['nameLast', 'nameFirst'], 'nameLast'],
+                indices: [
+                    { field: ['nameLast', 'nameFirst'], pk: true },
+                    { field: 'nameLast' },
+                ],
             })
 
             const dexieSchemas = getDexieHistory(storageManager.registry)

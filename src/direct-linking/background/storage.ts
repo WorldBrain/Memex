@@ -14,7 +14,12 @@ export default class DirectLinkingStorage extends FeatureStorage {
                 createdWhen: { type: 'datetime' },
                 url: { type: 'string' },
             },
-            indices: ['url', 'pageTitle', 'body', 'createdWhen'],
+            indices: [
+                { field: 'url', pk: true },
+                { field: 'pageTitle' },
+                { field: 'body' },
+                { field: 'createdWhen' },
+            ],
         })
     }
 
