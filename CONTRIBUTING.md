@@ -14,6 +14,8 @@ We have broken up tasks into three levels, **easy**, **medium** and **hard** tas
 
 **This assumes a basic knowledge of `git`, `npm` and usage of the `command line`.**
 
+** Please ensure you are running on an environment using [the latest LTS version of Node](https://nodejs.org/en/).**
+
 ### First steps:
 
 **Clone this repo:**
@@ -24,11 +26,8 @@ $ git clone https://github.com/WorldBrain/Memex
 
 **Install yarn:**
 
-Ensure you are running on an environment using [the latest LTS version of Node](https://nodejs.org/en/).
-
-```sh
-$ npm install -g yarn
-```
+We recommend intalling the latest stable version of Yarn by following the instructions specific to your operating system on the [Yarn
+installation page](https://yarnpkg.com/en/docs/install).
 
 **Run `yarn` to install dependencies**
 
