@@ -87,8 +87,9 @@
 
 .dropdownBody {
     overflow-y: auto;
-    max-height: 240px;
-    min-height: 200px;
+
+    /* max-height: 240px;
+    min-height: 200px; */
 }
 
 .dropdownFooter {
