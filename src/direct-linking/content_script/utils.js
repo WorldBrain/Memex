@@ -4,7 +4,6 @@ export const copyToClipboard = text => {
     dummy.setAttribute('value', text)
     dummy.select()
     const success = document.execCommand('copy')
-    console.log('Copy direct link success', success)
     document.body.removeChild(dummy)
     return success
 }

@@ -23,7 +23,7 @@ const defaultState = {
     totals: defaultStats, // Static state to use to derive remaining counts from
     importStatus: STATUS.LOADING,
     loadingMsg:
-        'Please wait while we analyze & prepare your browsing history & bookmarks',
+        'Analysing your browsing history & bookmarks for importing. This can take a few moments.',
     downloadDataFilter: FILTERS.ALL,
     concurrency: DEF_CONCURRENCY,
     isAdvEnabled: false,
@@ -83,7 +83,7 @@ const finishImportsReducer = ({ loading = false }) => state => ({
 const prepareImportReducer = state => ({
     ...state,
     importStatus: STATUS.LOADING,
-    loadingMsg: 'Preparing import.',
+    loadingMsg: 'Recalcuating Download Size.',
 })
 
 const cancelImportReducer = state => ({

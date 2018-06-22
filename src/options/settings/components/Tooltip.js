@@ -29,6 +29,16 @@ class Tooltip extends React.Component {
         return (
             <div>
                 <p className={styles.settingsHeader}>Memex.Link</p>
+                <p>
+                    With Memex.Links you can highlight any piece of text on the
+                    web and share a link to it.{' '}
+                    <a
+                        target="_blank"
+                        href="https://worldbrain.helprace.com/i62-feature-memex-links-highlight-any-text-and-create-a-link-to-it"
+                    >
+                        More Information
+                    </a>
+                </p>
                 <Checkbox
                     isChecked={this.state.tooltip}
                     handleChange={this.toggleTooltip}

@@ -123,14 +123,14 @@
         height: auto;
         animation: slideRight 0.2s ease-in 0.2s;
         animation-fill-mode: both;
-        margin-left: 5px;
+        margin-left: 12px;
     }
 
     & .copiedTextContainer {
         height: 35px;
         width: 190px;
         padding-left: 4px;
-        padding-top: 8px;
+        padding-top: 7px;
         animation: fadeInRight 0.2s ease-in 0.3s;
         animation-fill-mode: both;
         text-align: left;

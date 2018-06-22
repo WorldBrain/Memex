@@ -45,7 +45,7 @@ Range.sniff = (r) ->
   else if r.start and typeof r.start is "object"
     new Range.NormalizedRange(r)
   else
-    console.error("Could not sniff range type")
+    console.error("MEMEX: Could not sniff range type")
     false
 
 
@@ -77,8 +77,8 @@ Range.nodeFromXPath = (xpath, root=document) ->
       # See http://www.w3.org/TR/DOM-Level-3-XPath/xpath.html#XPathException
       # This does not necessarily make any sense, but this what we see
       # happening.
-      console.log "XPath evaluation failed."
-      console.log "Trying fallback..."
+      console.log "MEMEX: XPath evaluation failed."
+      console.log "MEMEX: Trying fallback..."
       # We have a an 'evaluator' for the really simple expressions that
       # should work for the simple expressions we generate.
       Util.nodeFromXPath(xp, root)
@@ -154,7 +154,7 @@ class Range.BrowserRange
   # Returns an instance of Range.NormalizedRange
   normalize: (root) ->
     if @tainted
-      console.error("You may only call normalize() once on a BrowserRange!")
+      console.error("MEMEX: You may only call normalize() once on a BrowserRange!")
       return false
     else
       @tainted = true

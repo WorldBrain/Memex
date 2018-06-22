@@ -24,12 +24,13 @@ export async function highlightAnnotation({ annotation }) {
                     timeoutMiliseconds: 5000,
                 },
             )
-            console.log('Memex - found range:', range, range.toString())
-
             markRange({ range, cssClass: styles['memex-highlight'] })
         })
     } catch (e) {
-        console.error('Error during annotation anchoring/highlighting:', e)
+        console.error(
+            'MEMEX: Error during annotation anchoring/highlighting:',
+            e,
+        )
         console.error(e.stack)
         return false
     }
