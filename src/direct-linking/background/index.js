@@ -33,6 +33,12 @@ export default class DirectLinkingBackground {
                 createComment: (...params) => {
                     return this.createComment(...params)
                 },
+                editAnnotation: (...params) => {
+                    return this.editAnnotation(...params)
+                },
+                deleteAnnotation: (...params) => {
+                    return this.deleteAnnotation(...params)
+                },
             },
             { insertExtraArg: true },
         )
@@ -80,5 +86,13 @@ export default class DirectLinkingBackground {
             pageUrl,
             comment,
         })
+    }
+
+    async editAnnotation({ tab }, pk, comment) {
+        return await this.storage.editAnnotation(pk, comment)
+    }
+
+    async deleteAnnotation({ tab }, pk) {
+        return await this.storage.deleteAnnotation(pk)
     }
 }

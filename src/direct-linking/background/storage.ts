@@ -104,4 +104,18 @@ export default class DirectLinkingStorage extends FeatureStorage {
             url: uniqueUrl,
         })
     }
+
+    async editAnnotation(url: string, comment: string) {
+        return await this.storageManager.updateObject(COLLECTION_NAME, {
+            url,
+        }, {
+                comment,
+            })
+    }
+
+    async deleteAnnotation(url: string) {
+        return await this.storageManager.deleteObject(COLLECTION_NAME, {
+            url,
+        })
+    }
 }

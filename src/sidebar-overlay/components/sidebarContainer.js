@@ -16,6 +16,8 @@ class SidebarContainer extends React.Component {
         annotations: PropTypes.array.isRequired,
         fetchAnnotations: PropTypes.func.isRequired,
         saveComment: PropTypes.func.isRequired,
+        editAnnotation: PropTypes.func.isRequired,
+        deleteAnnotation: PropTypes.func.isRequired,
     }
 
     static defaultProps = {
@@ -43,6 +45,8 @@ class SidebarContainer extends React.Component {
             <Annotation
                 annotation={annotation}
                 openAnnotationURL={url => () => console.log(url)}
+                editAnnotation={this.props.editAnnotation}
+                deleteAnnotation={this.props.deleteAnnotation}
                 key={index}
             />
         ))
@@ -71,6 +75,10 @@ const mapDispatchToProps = dispatch => ({
     fetchAnnotations: pageUrl => dispatch(actions.fetchAnnotationAct(pageUrl)),
     saveComment: pageUrl => comment =>
         dispatch(actions.saveComment(pageUrl, comment)),
+    editAnnotation: pageUrl => (url, comment) =>
+        dispatch(actions.editAnnotation(pageUrl, url, comment)),
+    deleteAnnotation: pageUrl => url =>
+        dispatch(actions.deleteAnnotation(pageUrl, url)),
 })
 
 export default connect(
