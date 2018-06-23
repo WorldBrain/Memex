@@ -87,6 +87,7 @@ export default class DirectLinkingStorage extends FeatureStorage {
     }
 
     async getAnnotationsByUrl(pageUrl: string) {
+        console.log(pageUrl)
         return await this.storageManager.findAll(COLLECTION_NAME, {
             pageUrl,
         })

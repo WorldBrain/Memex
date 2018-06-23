@@ -19,6 +19,7 @@ export default class DirectLinkingBackground {
     }
 
     setupRemoteFunctions() {
+        console.log('blipity blo')
         makeRemotelyCallable(
             {
                 followAnnotationRequest: (...params) => {
@@ -72,9 +73,9 @@ export default class DirectLinkingBackground {
         return result
     }
 
-    async getAllAnnotationsByUrl({ tab }, url) {
+    async getAllAnnotationsByUrl({ tab }, url, strip = true) {
         let pageUrl = url === null ? tab.url : url
-        pageUrl = stripURL(pageUrl)
+        if (strip) pageUrl = stripURL(pageUrl)
         return await this.storage.getAnnotationsByUrl(pageUrl)
     }
 

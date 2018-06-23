@@ -40,20 +40,18 @@ class SidebarContainer extends React.Component {
         const annotations = this.props.annotations.sort(
             (x, y) => x.createdWhen > y.createdWhen,
         )
-        console.log(annotations)
-        return annotations.map((annotation, index) => (
+        return annotations.map(annotation => (
             <Annotation
                 annotation={annotation}
                 openAnnotationURL={url => () => console.log(url)}
                 editAnnotation={this.props.editAnnotation}
                 deleteAnnotation={this.props.deleteAnnotation}
-                key={index}
+                key={annotation.url}
             />
         ))
     }
 
     render() {
-        console.log(this.props)
         return (
             <Sidebar
                 showSidebar={this.props.showSidebar}
@@ -75,9 +73,9 @@ const mapDispatchToProps = dispatch => ({
     fetchAnnotations: pageUrl => dispatch(actions.fetchAnnotationAct(pageUrl)),
     saveComment: pageUrl => comment =>
         dispatch(actions.saveComment(pageUrl, comment)),
-    editAnnotation: pageUrl => (url, comment) =>
+    editAnnotation: ({ pageUrl, url, comment }) =>
         dispatch(actions.editAnnotation(pageUrl, url, comment)),
-    deleteAnnotation: pageUrl => url =>
+    deleteAnnotation: ({ pageUrl, url }) =>
         dispatch(actions.deleteAnnotation(pageUrl, url)),
 })
 
