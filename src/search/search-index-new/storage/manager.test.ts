@@ -58,6 +58,19 @@ describe('StorageManager', () => {
                 ],
             })
 
+            storageManager.registerCollection('people', {
+                version: new Date(2018, 6, 23),
+                fields: {
+                    id: { type: 'string' },
+                    name: { type: 'string' },
+                    ssn: { type: 'string' },
+                },
+                indices: [
+                    { field: 'id', pk: true, autoInc: true },
+                    { field: 'ssn', unique: true },
+                ],
+            })
+
             const dexieSchemas = getDexieHistory(storageManager.registry)
 
             expect(dexieSchemas[0]).toEqual({
@@ -95,6 +108,18 @@ describe('StorageManager', () => {
                     foo: 'slug',
                     spam: 'slug',
                     ham: '[nameLast+nameFirst], nameLast',
+                },
+                migrations: [],
+            })
+
+            expect(dexieSchemas[4]).toEqual({
+                version: 5,
+                schema: {
+                    eggs: 'slug, *field2',
+                    foo: 'slug',
+                    spam: 'slug',
+                    ham: '[nameLast+nameFirst], nameLast',
+                    people: '++id, &ssn',
                 },
                 migrations: [],
             })
