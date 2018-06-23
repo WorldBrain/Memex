@@ -13,24 +13,34 @@ export default class CustomListStorage extends FeatureStorage {
             // different version for adding a new table.
             version: new Date(2018, 6, 12),
             fields: {
-                '++id': { type: 'string', pk: true },
-                '&name': { type: 'text' },
+                id: { type: 'string', pk: true },
+                name: { type: 'text' },
                 isDeletable: { type: 'binary' },
                 isNestable: { type: 'binary' },
                 createdAt: { type: 'datetime' },
             },
-            indices: ['++id', '&name', 'isDeletable', 'createdAt'],
+            indices: [
+                { field: 'id', pk: true, autoInc: true },
+                { field: 'name', unique: true },
+                { field: 'isDeletable' },
+                { field: 'isNestable' },
+                { field: 'createdAt' },
+            ],
         })
 
         this.storageManager.registerCollection(PAGE_LIST_ENTRY, {
             // different version for adding a new table.
             version: new Date(2018, 6, 12),
             fields: {
-                listId: { type: 'string', pk: true },
+                listId: { type: 'string' },
                 pageUrl: { type: 'string' },
                 createdAt: { type: 'datetime' },
             },
-            indices: ['listId', 'pageUrl'],
+            indices: [
+                { field: 'listId' },
+                { field: 'pageUrl' },
+                { field: ['listId', 'pageUrl'], pk: true },
+            ],
         })
     }
 

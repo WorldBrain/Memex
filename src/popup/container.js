@@ -74,6 +74,9 @@ class PopupContainer extends Component {
     }
 
     async componentDidMount() {
+        console.log(await this.listsContainingPage({ url: this.state.url }))
+        console.log(remoteFunction('getListAssocPage')({ url: this.state.url }))
+
         const [currentTab] = await browser.tabs.query({
             active: true,
             currentWindow: true,
@@ -313,25 +316,25 @@ class PopupContainer extends Component {
             // Standard blacklist button
             return this.blacklistBtnState ===
                 constants.BLACKLIST_BTN_STATE.BLACKLISTED ? (
-                    <LinkButton
-                        href={`${constants.OPTIONS_URL}#/blacklist`}
-                        itemClass={styles.itemBlacklisted}
-                        btnClass={styles.itemBtnBlacklisted}
-                    >
-                        This Page is Blacklisted. Undo>>
+                <LinkButton
+                    href={`${constants.OPTIONS_URL}#/blacklist`}
+                    itemClass={styles.itemBlacklisted}
+                    btnClass={styles.itemBtnBlacklisted}
+                >
+                    This Page is Blacklisted. Undo>>
                 </LinkButton>
-                ) : (
-                    <Button
-                        onClick={this.setBlacklistChoice}
-                        disabled={
-                            this.blacklistBtnState ===
-                            constants.BLACKLIST_BTN_STATE.DISABLED
-                        }
-                        btnClass={styles.blacklist}
-                    >
-                        Blacklist Current Page
+            ) : (
+                <Button
+                    onClick={this.setBlacklistChoice}
+                    disabled={
+                        this.blacklistBtnState ===
+                        constants.BLACKLIST_BTN_STATE.DISABLED
+                    }
+                    btnClass={styles.blacklist}
+                >
+                    Blacklist Current Page
                 </Button>
-                )
+            )
         }
 
         // Domain vs URL choice button
@@ -447,7 +450,7 @@ class PopupContainer extends Component {
                     onClick={this.handleAddBookmark}
                     btnClass={
                         this.bookmarkBtnState ===
-                            constants.BOOKMARK_BTN_STATE.BOOKMARK
+                        constants.BOOKMARK_BTN_STATE.BOOKMARK
                             ? styles.bmk
                             : styles.notBmk
                     }
@@ -457,7 +460,7 @@ class PopupContainer extends Component {
                     }
                 >
                     {this.bookmarkBtnState ===
-                        constants.BOOKMARK_BTN_STATE.BOOKMARK
+                    constants.BOOKMARK_BTN_STATE.BOOKMARK
                         ? 'Unbookmark this Page'
                         : 'Bookmark this Page'}
                 </Button>
