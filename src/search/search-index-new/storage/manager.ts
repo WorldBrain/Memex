@@ -4,6 +4,9 @@ import StorageRegistry from './registry'
 import {
     ManageableStorage,
     CollectionDefinitions,
+    CollectionDefinition,
+    CollectionField,
+    IndexDefinition,
     FilterQuery,
     FindOpts,
 } from './types'
@@ -18,6 +21,50 @@ export class StorageManager implements ManageableStorage {
     private _initializationPromise: Promise<void>
     private _initializationResolve: Function
     private _storage: Storage
+
+    private static _processIndexedField(
+        fieldName: string,
+        indexDef: IndexDefinition,
+        fieldDef: CollectionField,
+        object,
+    ) {
+        if (fieldDef.fieldObject) {
+            object[fieldName] = fieldDef.fieldObject.prepareForStorage(
+                object[fieldName],
+            )
+        }
+
+        if (fieldDef._index && fieldDef.type === 'text') {
+            const fullTextField =
+                indexDef.fullTextIndexName || `_${fieldName}_terms`
+            object[fullTextField] = [...extractTerms(object[fieldName])]
+        }
+    }
+
+    /**
+     * Handles mutation of a document to be inserted/updated to storage,
+     * depending on needed processing of indexed fields.
+     */
+    private static _processIndexedFields(def: CollectionDefinition, object) {
+        const indices = def.indices || []
+
+        indices.forEach(indexDef => {
+            const processField = (fieldName: string) =>
+                StorageManager._processIndexedField(
+                    fieldName,
+                    indexDef,
+                    def.fields[fieldName],
+                    object,
+                )
+
+            // Compound indexes need to process all specified fields
+            if (indexDef.field instanceof Array) {
+                indexDef.field.forEach(processField)
+            } else {
+                processField(indexDef.field)
+            }
+        })
+    }
 
     constructor() {
         this._initializationPromise = new Promise(
@@ -61,20 +108,7 @@ export class StorageManager implements ManageableStorage {
         await this._initializationPromise
 
         const collection = this.registry.collections[collectionName]
-        const indices = collection.indices || []
-        Object.entries(collection.fields).forEach(([fieldName, fieldDef]) => {
-            if (fieldDef.fieldObject) {
-                object[fieldName] = fieldDef.fieldObject.prepareForStorage(
-                    object[fieldName],
-                )
-            }
-
-            if (fieldDef._index && fieldDef.type === 'text') {
-                object[`_${fieldName}_terms`] = [
-                    ...extractTerms(object[fieldName]),
-                ]
-            }
-        })
+        StorageManager._processIndexedFields(collection, object)
 
         await this._storage[collectionName].put(object)
     }
@@ -152,6 +186,10 @@ export class StorageManager implements ManageableStorage {
         update,
     ) {
         await this._initializationPromise
+
+        // TODO: extract underlying collection doc fields from update object
+        // const collection = this.registry.collections[collectionName]
+        // StorageManager._processIndexedFields(collection, object)
 
         const { modifiedCount } = await this._storage
             .collection(collectionName)
