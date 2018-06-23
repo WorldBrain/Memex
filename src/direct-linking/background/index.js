@@ -3,7 +3,7 @@ import DirectLinkingBackend from './backend'
 import { setupRequestInterceptor } from './redirect'
 import { AnnotationRequests } from './request'
 import DirectLinkingStorage from './storage'
-import { stripURL } from '../utils'
+import normalizeUrl from 'src/util/encode-url-for-id'
 
 export default class DirectLinkingBackground {
     constructor({ storageManager }) {
@@ -19,7 +19,6 @@ export default class DirectLinkingBackground {
     }
 
     setupRemoteFunctions() {
-        console.log('blipity blo')
         makeRemotelyCallable(
             {
                 followAnnotationRequest: (...params) => {
@@ -73,15 +72,14 @@ export default class DirectLinkingBackground {
         return result
     }
 
-    async getAllAnnotationsByUrl({ tab }, url, strip = true) {
+    async getAllAnnotationsByUrl({ tab }, url) {
         let pageUrl = url === null ? tab.url : url
-        if (strip) pageUrl = stripURL(pageUrl)
+        pageUrl = normalizeUrl(pageUrl)
         return await this.storage.getAnnotationsByUrl(pageUrl)
     }
 
     async createComment({ tab }, url, comment) {
-        let pageUrl = url === null ? tab.url : url
-        pageUrl = stripURL(pageUrl)
+        const pageUrl = url === null ? tab.url : url
         return await this.storage.createComment({
             pageTitle: tab.title,
             pageUrl,
