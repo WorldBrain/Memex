@@ -25,6 +25,11 @@
         box-sizing: content-box;
         font-family: 'Lato', sans-serif;
     }
+
+    & img {
+        margin-bottom: 0px !important; /* stylelint-disable-line declaration-no-important */
+        padding: 0px !important; /* stylelint-disable-line declaration-no-important */
+    }
 }
 
 .tooltip::after {
@@ -123,7 +128,7 @@
         height: auto;
         animation: slideRight 0.2s ease-in 0.2s;
         animation-fill-mode: both;
-        margin-left: 12px;
+        margin-left: 6px;
     }
 
     & .copiedTextContainer {
@@ -134,6 +139,7 @@
         animation: fadeInRight 0.2s ease-in 0.3s;
         animation-fill-mode: both;
         text-align: left;
+        text-shadow: none;
         margin-left: 3px;
 
         & .greenText {
