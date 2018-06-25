@@ -142,12 +142,19 @@ browser.runtime.onInstalled.addListener(details => {
 })
 
 browser.storage.local.get([USER_ID, installTimeStorageKey]).then(res => {
-    const API_PATH = `/uninstall?user=${res[USER_ID]}&uninstallTime=${
-        res[installTimeStorageKey]
-    }`
+    let URL = UNINSTALL_URL
+
+    // TODO get the data on your first iteration
+    if (res[USER_ID]) {
+        URL =
+            API_HOST +
+            `/uninstall?user=${res[USER_ID]}&uninstallTime=${
+                res[installTimeStorageKey]
+            }`
+    }
 
     // Open uninstall survey on ext. uninstall
-    browser.runtime.setUninstallURL(API_HOST + API_PATH)
+    browser.runtime.setUninstallURL(URL)
 })
 
 const directLinking = new DirectLinkingBackground({ storageManager })
