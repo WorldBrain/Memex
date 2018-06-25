@@ -37,10 +37,10 @@ export const UNINSTALL_URL =
         ? 'http://worldbrain.io/uninstall'
         : ''
 export const NEW_FEATURE_NOTIF = {
-    title: 'NEW FEATURE: Exclude Terms/Domains',
+    title: 'NEW FEATURE: Memex.Links',
     message: 'Click to learn more',
     url:
-        'https://worldbrain.helprace.com/i61-feature-excluding-terms-and-domains',
+        'https://worldbrain.helprace.com/i62-feature-memex-links-highlight-any-text-and-create-a-link-to-it',
 }
 
 async function openOverview() {
