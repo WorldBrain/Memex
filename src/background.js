@@ -76,7 +76,7 @@ async function onInstall() {
     // Store the timestamp of when the extension was installed + default blacklist
     browser.storage.local.set({ [installTimeStorageKey]: now })
 
-    await generateToken(now)
+    await generateToken({ installTime: now })
 }
 
 async function onUpdate() {
@@ -107,7 +107,7 @@ async function onUpdate() {
         installTimeStorageKey,
     ))[installTimeStorageKey]
 
-    await generateToken(installTime)
+    await generateToken({ installTime })
 }
 
 browser.commands.onCommand.addListener(command => {
