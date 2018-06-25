@@ -1,35 +1,14 @@
 import { injectCSS } from 'src/search-injection/dom'
 import { setupRibbonUI } from './components'
+import { bodyLoader } from 'src/util/loader'
 
-export function loader(promiseCreator) {
-    let promise
-
-    return (...args) => {
-        if (!promise) {
-            promise = promiseCreator(...args).then(res => {
-                promise.loaded = true
-                return res
-            })
-        }
-
-        return promise
-    }
-}
-
-export const bodyLoader = loader(() => {
-    return new Promise(resolve => {
-        if (
-            document.readyState === 'complete' ||
-            document.readyState === 'interactive'
-        ) {
-            return resolve()
-        }
-
-        document.addEventListener('DOMContentLoaded', resolve)
-    })
-})
+import { getLocalStorage } from 'src/util/storage'
+import { TOOLTIP_STORAGE_NAME } from 'src/content-tooltip/constants'
 
 const init = async () => {
+    const isTooltipEnabled = await getLocalStorage(TOOLTIP_STORAGE_NAME)
+    if (!isTooltipEnabled) return
+
     await bodyLoader()
 
     const target = document.createElement('div')
