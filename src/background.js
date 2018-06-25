@@ -141,16 +141,14 @@ browser.runtime.onInstalled.addListener(details => {
     }
 })
 
-browser.storage.local.get([USER_ID, installTimeStorageKey]).then(res => {
+browser.storage.local.get(USER_ID).then(res => {
     let URL = UNINSTALL_URL
 
     // TODO get the data on your first iteration
     if (res[USER_ID]) {
         URL =
             API_HOST +
-            `/uninstall?user=${res[USER_ID]}&uninstallTime=${
-                res[installTimeStorageKey]
-            }`
+            `/uninstall?user=${res[USER_ID]}&uninstallTime=${Date.now()}`
     }
 
     // Open uninstall survey on ext. uninstall
