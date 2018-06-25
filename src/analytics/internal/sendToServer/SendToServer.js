@@ -5,6 +5,10 @@ import { installTimeStorageKey } from 'src/imports/background'
 
 class SendToServer {
     static API_PATH = '/event'
+    static JSON_HEADER = {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+    }
 
     /**
      * Pool of requests that have been tracked, which will be periodically cleared and sent off in bulk.
@@ -41,7 +45,7 @@ class SendToServer {
 
         const data = {
             id: userId,
-            data: params ? [...params] : [...this._pool],
+            data: params ? [{ ...params }] : [...this._pool],
         }
 
         return data
@@ -59,10 +63,7 @@ class SendToServer {
     _sendReq = async event => {
         fetch(this._host, {
             method: 'POST',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-            },
+            headers: SendToServer.JSON_HEADER,
             body: JSON.stringify(await this._formReqParams(event)),
         })
     }
@@ -81,10 +82,7 @@ class SendToServer {
 
         let res = await fetch(this._host, {
             method: 'POST',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-            },
+            headers: SendToServer.JSON_HEADER,
             body: JSON.stringify(await this._formReqParams()),
         })
 
@@ -97,6 +95,7 @@ class SendToServer {
 
     async userId() {
         const userId = (await browser.storage.local.get(USER_ID))[USER_ID]
+
         return userId
     }
 

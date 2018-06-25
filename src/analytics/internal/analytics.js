@@ -1,31 +1,34 @@
 import { MapEventTypeToInt, MapNotifTypeToIntArray } from './constants'
-import SendToServer from './sendToServer'
+import sendToServer from './sendToServer'
 import { remoteFunction } from 'src/util/webextensionRPC'
-import AnalyticsLogStorage from './AnalyticsLogStorage'
+import analyticsLogStorage from './AnalyticsLogStorage'
 
 const getCount = remoteFunction('getCount')
 const getLatestEvent = remoteFunction('getLatestEvent')
 
 class Analytics {
     _operationsMap = {
-        successful_search: undefined,
-        unsuccessful_search: undefined,
-        datepicker: undefined,
-        bookmark_filter: undefined,
-        tag_filter: undefined,
-        domain_filter: undefined,
-        tagging: undefined,
-        bookmark: undefined,
-        blacklist: undefined,
-        address_bar_search: undefined,
-        datepicker_nlp: undefined,
-        nlp_search: undefined,
+        successful_search: { count: 0 },
+        unsuccessful_search: { count: 0 },
+        datepicker: { count: 0 },
+        bookmark_filter: { count: 0 },
+        tag_filter: { count: 0 },
+        domain_filter: { count: 0 },
+        tagging: { count: 0 },
+        bookmark: { count: 0 },
+        blacklist: { count: 0 },
+        address_bar_search: { count: 0 },
+        datepicker_nlp: { count: 0 },
+        nlp_search: { count: 0 },
     }
 
     async registerOperations() {
-        for (const event of Object.keys(this._operationsMap)) {
-            await this.loadInitialData(event)
-        }
+        await new Promise((resolve, reject) => {
+            for (const event of Object.keys(this._operationsMap)) {
+                this.loadInitialData(event)
+            }
+            resolve()
+        })
     }
 
     async fromDexie(notifType) {
@@ -33,7 +36,7 @@ class Analytics {
     }
 
     async statisticsStorage(event) {
-        await this.incrementvalue(event)
+        await this.incrementValue(event)
     }
 
     /**
@@ -49,11 +52,11 @@ class Analytics {
         }
 
         const notifParams = {
-            last_time_used: eventArgs.time,
+            latest_time: eventArgs.time,
             notifType: MapEventTypeToInt[eventArgs.type].notifType,
         }
 
-        await AnalyticsLogStorage(params)
+        await analyticsLogStorage(params)
 
         if (MapEventTypeToInt[eventArgs.type].notifType) {
             await this.statisticsStorage(notifParams)
@@ -69,19 +72,15 @@ class Analytics {
         let eventLogCount = 0
         let latestEvent = 0
 
-        for (let i = 0; i < MapNotifTypeToIntArray[notifType].length; i++) {
-            const filter = {
-                type: MapNotifTypeToIntArray[notifType][i],
-            }
-
-            // TODO: Not working this method, have to make more optimize
-            const latest = await getLatestEvent({ filter })
+        for (const type of MapNotifTypeToIntArray[notifType]) {
+            // TODO: Have to make more optimize
+            const latest = await getLatestEvent({ type })
 
             if (latest) {
                 latestEvent = Math.max(latest.time, latestEvent)
             }
 
-            const eventCountNotif = await getCount({ filter })
+            const eventCountNotif = await getCount({ type })
             eventLogCount += eventCountNotif
         }
 
@@ -90,17 +89,10 @@ class Analytics {
             return
         }
 
-        if (this.getCountNotif() === undefined || isCacheUpdate) {
-            await this.updateValue(notifType, {
-                last_time_used: latestEvent,
-                value: eventLogCount,
-            })
-        } else {
-            await this.updateValue(notifType, {
-                last_time_used: latestEvent,
-                value: eventLogCount + this._operationsMap[notifType].value,
-            })
-        }
+        await this.updateValue(notifType, {
+            latest_time: latestEvent,
+            count: eventLogCount,
+        })
     }
 
     // Update the value when the memeory variables is out of update or load initial data
@@ -108,17 +100,10 @@ class Analytics {
         this._operationsMap[notifType] = value
     }
 
-    async incrementvalue(event) {
-        if (!this._operationsMap[event.notifType]) {
-            this._operationsMap[event.notifType] = {
-                value: 1,
-                last_time_used: event.last_time_used,
-            }
-        } else {
-            this._operationsMap[event.notifType] = {
-                value: this._operationsMap[event.notifType].value + 1,
-                last_time_used: event.last_time_used,
-            }
+    async incrementValue(event) {
+        this._operationsMap[event.notifType] = {
+            count: this._operationsMap[event.notifType].count + 1,
+            latest_time: event.latest_time,
         }
     }
 
@@ -146,7 +131,7 @@ class Analytics {
         await this.storeEventLogStatistics(params)
 
         // Send the data to redash server
-        SendToServer.trackEvent(params)
+        sendToServer.trackEvent(params)
     }
 }
 

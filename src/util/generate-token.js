@@ -5,7 +5,7 @@ const API_PATH = '/user-token'
 
 export const USER_ID = 'user-id'
 
-export default async function generateTokenIfNot({
+export async function generateTokenIfNot({
     installTime,
     hostname = API_HOST,
     pathname = API_PATH,

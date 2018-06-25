@@ -7,11 +7,15 @@ export default class EventLogStorage extends FeatureStorage {
         this.storageManager.registerCollection('eventLog', {
             version: new Date(2018, 6, 14),
             fields: {
-                time: { type: 'datetime', pk: true },
+                time: { type: 'datetime' },
                 type: { type: 'string' },
-                other: { type: 'json' },
+                details: { type: 'json' },
             },
-            indices: ['time', 'type'],
+            indices: [
+                { field: ['time', 'type'], pk: true },
+                { field: 'time' },
+                { field: 'type' },
+            ],
         })
     }
 
@@ -23,16 +27,22 @@ export default class EventLogStorage extends FeatureStorage {
         })
     }
 
-    async getCount({ filter }) {
+    async getCount({ type }) {
+        const filter = {
+            type
+        }
         return await this.storageManager.countAll('eventLog', filter)
     }
 
-    async getLatestEvent({ filter }) {
+    async getLatestEvent({ type }) {
         const opts = {
             reverse: true,
             limit: 1,
         }
 
+        const filter = {
+            type
+        }
         return await this.storageManager.findObject('eventLog', filter, opts)
     }
 }

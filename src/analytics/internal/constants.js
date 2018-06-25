@@ -1,6 +1,7 @@
 export const API_HOST =
-    'https://a8495szyaa.execute-api.eu-central-1.amazonaws.com/' +
-    (process.env.NODE_ENV === 'production' ? 'production' : 'staging')
+    process.env.NODE_ENV === 'production'
+        ? 'https://2s1jj0js02.execute-api.eu-central-1.amazonaws.com/production'
+        : 'https://a8495szyaa.execute-api.eu-central-1.amazonaws.com/staging'
 
 // This is used to change the event type into integer to optimize the space
 export const MapEventTypeToInt = {
@@ -150,6 +151,10 @@ export const MapEventTypeToInt = {
     onboarding_finish_import: {
         id: 40,
     },
+    add_blacklist_entry: {
+        id: 41,
+        notifType: 'blacklist',
+    },
 }
 
 export const MapNotifTypeToIntArray = {
@@ -161,7 +166,7 @@ export const MapNotifTypeToIntArray = {
     domain_filter: [10],
     tagging: [12, 13, 21, 22],
     bookmark: [14, 15, 16, 17, 18, 19, 20],
-    blacklist: [23, 24, 25],
+    blacklist: [23, 24, 25, 41],
     address_bar_search: [33, 34, 35],
     datepicker_nlp: [36, 37],
     nlp_search: [38],

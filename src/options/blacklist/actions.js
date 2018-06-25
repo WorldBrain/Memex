@@ -44,7 +44,7 @@ export const addToBlacklist = expression => async (dispatch, getState) => {
     })
 
     internalAnalytics.processEvent({
-        type: 'add_lacklist_entry',
+        type: 'add_blacklist_entry',
     })
 
     const oldBlacklist = selectors.blacklist(getState())

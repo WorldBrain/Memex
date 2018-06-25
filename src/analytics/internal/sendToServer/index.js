@@ -1,9 +1,8 @@
 import SendToServer from './SendToServer'
+import { API_HOST } from '../constants'
 
 const sendToServer = new SendToServer({
-    url:
-        'https://a8495szyaa.execute-api.eu-central-1.amazonaws.com/' +
-        (process.env.NODE_ENV === 'production' ? 'production' : 'staging'),
+    url: API_HOST,
 })
 
 export default sendToServer
