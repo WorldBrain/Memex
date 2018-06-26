@@ -4,13 +4,13 @@ export const setShowSidebar = createAction('overview-sidebar/setShowSidebar')
 
 export const closeSidebar = createAction('overview-sidebar/closeSidebar')
 
-export const setPageUrl = createAction('overview-sidebar/setPageUrl')
+export const setPageInfo = createAction('overview-sidebar/setPageInfo')
 
 export const toggleMouseOnSidebar = createAction(
     'overview-sidebar/toggleMouseOnSidebar',
 )
 
-export const openSidebar = url => async (dispatch, getState) => {
+export const openSidebar = (url, title) => async dispatch => {
     dispatch(setShowSidebar(true))
-    dispatch(setPageUrl(url))
+    dispatch(setPageInfo({ url, title }))
 }

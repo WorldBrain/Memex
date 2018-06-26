@@ -5,7 +5,10 @@ import * as actions from './actions'
 const defaultState = {
     showSidebar: false,
     mouseOnSidebar: false,
-    pageUrl: '',
+    page: {
+        url: '',
+        title: '',
+    },
 }
 
 const setShowSidebar = (state, showSidebar) => ({
@@ -18,9 +21,9 @@ const closeSidebar = state => ({
     showSidebar: false,
 })
 
-const setPageUrl = (state, pageUrl) => ({
+const setPageInfo = (state, page) => ({
     ...state,
-    pageUrl: pageUrl,
+    page: page,
 })
 
 const toggleMouseOnSidebar = state => ({
@@ -32,7 +35,7 @@ export default createReducer(
     {
         [actions.setShowSidebar]: setShowSidebar,
         [actions.closeSidebar]: closeSidebar,
-        [actions.setPageUrl]: setPageUrl,
+        [actions.setPageInfo]: setPageInfo,
         [actions.toggleMouseOnSidebar]: toggleMouseOnSidebar,
     },
     defaultState,

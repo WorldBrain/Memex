@@ -1,28 +1,28 @@
 import { createAction } from 'redux-act'
 import { remoteFunction } from 'src/util/webextensionRPC'
 
-export const setAnnotations = createAction('overview-sidebar/setAnnotations')
+export const setAnnotations = createAction('setAnnotations')
 
-const fetchAndDispatchAnnotations = async (dispatch, pageUrl) => {
+export const setPageInfo = createAction('setPageInfo')
+
+export const fetchAnnotationAct = () => async (dispatch, getState) => {
+    const pageUrl = getState().page.url
     const annotations = await remoteFunction('getAllAnnotations')(pageUrl)
     dispatch(setAnnotations(annotations))
 }
 
-export const fetchAnnotationAct = pageUrl => async dispatch => {
-    await fetchAndDispatchAnnotations(dispatch, pageUrl)
+export const saveComment = comment => async (dispatch, getState) => {
+    const { url, title } = getState().page
+    await remoteFunction('createComment')({ url, title, comment })
+    dispatch(fetchAnnotationAct())
 }
 
-export const saveComment = (pageUrl, comment) => async dispatch => {
-    await remoteFunction('createComment')(pageUrl, comment)
-    await fetchAndDispatchAnnotations(dispatch, pageUrl)
-}
-
-export const editAnnotation = (pageUrl, url, comment) => async dispatch => {
+export const editAnnotation = (url, comment) => async dispatch => {
     await remoteFunction('editAnnotation')(url, comment)
-    await fetchAndDispatchAnnotations(dispatch, pageUrl)
+    dispatch(fetchAnnotationAct())
 }
 
-export const deleteAnnotation = (pageUrl, url) => async dispatch => {
+export const deleteAnnotation = url => async dispatch => {
     await remoteFunction('deleteAnnotation')(url)
-    await fetchAndDispatchAnnotations(dispatch, pageUrl)
+    dispatch(fetchAnnotationAct())
 }

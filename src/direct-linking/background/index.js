@@ -83,10 +83,11 @@ export default class DirectLinkingBackground {
         }))
     }
 
-    async createComment({ tab }, url, comment) {
+    async createComment({ tab }, { url, title, comment }) {
         const pageUrl = url === null ? tab.url : url
+        const pageTitle = title === null ? tab.title : title
         return await this.storage.createComment({
-            pageTitle: tab.title,
+            pageTitle,
             pageUrl,
             comment,
         })

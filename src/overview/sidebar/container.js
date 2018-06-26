@@ -12,6 +12,7 @@ class SidebarContainer extends React.Component {
         setShowSidebar: PropTypes.func.isRequired,
         toggleMouseOnSidebar: PropTypes.func.isRequired,
         pageUrl: PropTypes.string.isRequired,
+        pageTitle: PropTypes.string.isRequired,
         closeSidebar: PropTypes.func.isRequired,
     }
 
@@ -31,6 +32,7 @@ class SidebarContainer extends React.Component {
 const mapStateToProps = state => ({
     showSidebar: selectors.showSidebar(state),
     pageUrl: selectors.pageUrl(state),
+    pageTitle: selectors.pageTitle(state),
 })
 
 const mapDispatchToProps = dispatch => ({

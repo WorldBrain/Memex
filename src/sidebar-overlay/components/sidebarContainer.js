@@ -13,6 +13,7 @@ class SidebarContainer extends React.Component {
         toggleMouseOnSidebar: PropTypes.func,
         env: PropTypes.string,
         pageUrl: PropTypes.string,
+        pageTitle: PropTypes.string,
         annotations: PropTypes.array.isRequired,
         fetchAnnotations: PropTypes.func.isRequired,
         saveComment: PropTypes.func.isRequired,
@@ -26,10 +27,13 @@ class SidebarContainer extends React.Component {
         toggleMouseOnSidebar: () => null,
         env: 'iframe',
         pageUrl: null,
+        pageTitle: null,
     }
 
     async componentDidMount() {
-        await this.props.fetchAnnotations(this.props.pageUrl)
+        const { pageTitle, pageUrl, setPageInfo, fetchAnnotations } = this.props
+        setPageInfo(pageUrl, pageTitle)
+        await fetchAnnotations()
     }
 
     handleStateChange = ({ isOpen }) => {
@@ -60,7 +64,7 @@ class SidebarContainer extends React.Component {
                 toggleMouseOnSidebar={this.props.toggleMouseOnSidebar}
                 renderAnnotations={this.renderAnnotations}
                 env={this.props.env}
-                saveComment={this.props.saveComment(this.props.pageUrl)}
+                saveComment={this.props.saveComment}
             />
         )
     }
@@ -71,13 +75,12 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-    fetchAnnotations: pageUrl => dispatch(actions.fetchAnnotationAct(pageUrl)),
-    saveComment: pageUrl => comment =>
-        dispatch(actions.saveComment(pageUrl, comment)),
-    editAnnotation: ({ pageUrl, url, comment }) =>
-        dispatch(actions.editAnnotation(pageUrl, url, comment)),
-    deleteAnnotation: ({ pageUrl, url }) =>
-        dispatch(actions.deleteAnnotation(pageUrl, url)),
+    setPageInfo: (url, title) => dispatch(actions.setPageInfo({ url, title })),
+    fetchAnnotations: () => dispatch(actions.fetchAnnotationAct()),
+    saveComment: comment => dispatch(actions.saveComment(comment)),
+    editAnnotation: ({ url, comment }) =>
+        dispatch(actions.editAnnotation(url, comment)),
+    deleteAnnotation: ({ url }) => dispatch(actions.deleteAnnotation(url)),
 })
 
 export default connect(

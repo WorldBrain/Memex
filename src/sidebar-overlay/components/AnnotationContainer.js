@@ -67,20 +67,20 @@ class AnnotationContainer extends React.Component {
     handleDeleteAnnotation = e => {
         e.preventDefault()
         e.stopPropagation()
-        const { pageUrl, url } = this.props.annotation
+        const { url } = this.props.annotation
         this.setFooterState('default')
-        this.props.deleteAnnotation({ pageUrl, url })
+        this.props.deleteAnnotation({ url })
     }
 
     handleEditAnnotation = e => {
         e.preventDefault()
         e.stopPropagation()
-        const { pageUrl, url, comment } = this.props.annotation
+        const { url, comment } = this.props.annotation
         const { annotationText } = this.state
 
         if (annotationText === comment) return
 
-        this.props.editAnnotation({ pageUrl, url, comment: annotationText })
+        this.props.editAnnotation({ url, comment: annotationText })
         this.toggleEditAnnotation()
     }
 
