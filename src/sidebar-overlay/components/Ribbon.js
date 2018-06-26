@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import cx from 'classnames'
+import onClickOutside from 'react-onclickoutside'
 
 import styles from './Ribbon.css'
 
@@ -18,6 +19,12 @@ class Ribbon extends React.Component {
         const isSidebarActive = !this.state.isSidebarActive
         this.setState({
             isSidebarActive,
+        })
+    }
+
+    handleClickOutside = () => {
+        this.setState({
+            isSidebarActive: false,
         })
     }
 
@@ -49,9 +56,4 @@ class Ribbon extends React.Component {
     }
 }
 
-Ribbon.propTypes = {
-    destroy: PropTypes.func.isRequired,
-    sidebarURL: PropTypes.string.isRequired,
-}
-
-export default Ribbon
+export default onClickOutside(Ribbon)
