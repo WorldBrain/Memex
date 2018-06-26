@@ -19,6 +19,7 @@ const CreateListForm = props => (
                 placeholder="List Name"
                 value={props.value || ''}
                 onChange={props.handleNameChange}
+                ref={props.setInputRef}
                 autoFocus
                 required
             />
@@ -36,6 +37,7 @@ CreateListForm.propTypes = {
     value: PropTypes.string,
     handleNameChange: PropTypes.func.isRequired,
     showWarning: PropTypes.bool,
+    setInputRef: PropTypes.func.isRequired,
 }
 
 export default CreateListForm

@@ -37,9 +37,9 @@ export default class CustomListStorage extends FeatureStorage {
                 createdAt: { type: 'datetime' },
             },
             indices: [
+                { field: ['listId', 'pageUrl'], pk: true },
                 { field: 'listId' },
                 { field: 'pageUrl' },
-                { field: ['listId', 'pageUrl'], pk: true },
             ],
         })
     }
@@ -62,8 +62,10 @@ export default class CustomListStorage extends FeatureStorage {
     }
 
     // TODO: Returns all the pages associated with the list.
-    async fetchListPages() {
-        return ''
+    async fetchListPages(listId) {
+        const pages = await this.storageManager.findAll(PAGE_LIST_ENTRY, { listId })
+
+        return pages
     }
 
     // TODO: Returns list By Id

@@ -1,4 +1,5 @@
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
+import normalizeUrl from 'src/util/encode-url-for-id'
 import CustomListStorage from './storage'
 
 export default class CustomListBackground {
@@ -39,13 +40,29 @@ export default class CustomListBackground {
             checkPageInList: (...params) => {
                 return this.checkPageInList(...params)
             },
+            fetchListPages: (...params) => {
+                return this.fetchListPages(...params)
+            },
         })
     }
 
-    // TODO: ALSO GET ALL THE PAGES RELATED TO LIST.
     async getAllLists() {
         const lists = await this.storage.fetchAllList()
         return lists
+    }
+
+    /**
+     * Takes and ID and returns an array
+     * @param {Number} listId
+     */
+    async fetchListPages(listId) {
+        return this.storage.fetchListPages(listId)
+    }
+
+    async getListAssocPage({ url }) {
+        return this.storage.getListAssocPage({
+            url: normalizeUrl(url),
+        })
     }
 
     async createCustomList({ name }) {
@@ -65,7 +82,7 @@ export default class CustomListBackground {
     async insertPageToList({ id, url }) {
         await this.storage.insertPageToList({
             listId: id,
-            pageUrl: url[0],
+            pageUrl: normalizeUrl(url[0]),
         })
     }
 
@@ -78,7 +95,7 @@ export default class CustomListBackground {
     async removePageFromList({ id, url }) {
         await this.storage.removePageFromList({
             listId: id,
-            pageUrl: url,
+            pageUrl: normalizeUrl(url),
         })
     }
 
@@ -95,7 +112,7 @@ export default class CustomListBackground {
     async checkPageInList({ id, url }) {
         return await this.storage.checkPageInList({
             listId: id,
-            pageUrl: url,
+            pageUrl: normalizeUrl(url),
         })
     }
 }

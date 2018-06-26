@@ -11,6 +11,7 @@ import CreateListForm from './CreateListForm'
 import ListItem from './ListItem'
 import DeleteConfirmModal from './DeleteConfirmModal'
 import { actions as filterActs } from 'src/overview/filters'
+// import { remoteFunction } from 'src/util/webextensionRPC'
 
 import { styles } from './ReactBurgerMenu'
 
@@ -51,6 +52,8 @@ class ListContainer extends Component {
         return /[^\w\s-]/gi
     }
 
+    setInputRef = el => (this.inputEl = el)
+
     handleSearchChange = field => event => {
         const { value } = event.target
 
@@ -77,7 +80,7 @@ class ListContainer extends Component {
         const { value } = event.target.elements['listName']
         // value = list name
         // TODO: Place a check here for same list name or place it in the createPageList
-        this.props.createPageList(this.getSearchVal(value))
+        this.props.createPageList(this.getSearchVal(value), this.inputEl)
     }
 
     handleUpdateList = ({ id }, index) => event => {
@@ -106,6 +109,7 @@ class ListContainer extends Component {
                                 : list.name
                         }
                         showWarning={this.state.showWarning}
+                        setInputRef={this.setInputRef}
                     />
                 )
             }
@@ -130,6 +134,7 @@ class ListContainer extends Component {
                 handleNameChange={this.handleSearchChange('listName')}
                 value={this.state.listName}
                 showWarning={this.props.showCommonNameWarning}
+                setInputRef={this.setInputRef}
             />
         ) : null
 

@@ -74,9 +74,6 @@ class PopupContainer extends Component {
     }
 
     async componentDidMount() {
-        console.log(await this.listsContainingPage({ url: this.state.url }))
-        console.log(remoteFunction('getListAssocPage')({ url: this.state.url }))
-
         const [currentTab] = await browser.tabs.query({
             active: true,
             currentWindow: true,

@@ -1,4 +1,7 @@
-import db, { SearchParams, FilteredURLs } from '..'
+import db, { SearchParams, FilteredURLs, storageManager } from '..'
+import { remoteFunction } from '../../../util/webextensionRPC'
+import CustomListBackground from '../../../custom-lists/background'
+import intersection from 'lodash/fp/intersection'
 
 const pageIndexLookup = (index: string, matches: string[]) =>
     db.pages
@@ -19,14 +22,31 @@ export class FilteredURLsManager implements FilteredURLs {
         incDomainUrls,
         excDomainUrls,
         tagUrls,
+        listUrls,
     }: {
-        [key: string]: Set<string>
-    }) {
+            [key: string]: Set<string>,
+        }) {
+
         // Perform intersection, only if both includes sets defined, else just merge them
-        const initInclude =
-            incDomainUrls && tagUrls
-                ? [...incDomainUrls].filter(url => tagUrls.has(url))
-                : [...(incDomainUrls || []), ...(tagUrls || [])]
+        const allUrls = [
+            incDomainUrls ? [...incDomainUrls] : incDomainUrls,
+            tagUrls ? [...tagUrls] : tagUrls,
+            listUrls ? [...listUrls] : listUrls,
+        ].filter(urls => {
+            return urls
+        })
+
+        let initInclude
+        if (allUrls.length > 1) {
+            initInclude = intersection(...allUrls)
+        } else {
+            initInclude = [...(incDomainUrls || []), ...(tagUrls || []), ...(listUrls || [])]
+        }
+
+        // const initInclude =
+        //     incDomainUrls && tagUrls && listUrls
+        //         ? [...incDomainUrls].filter(url => (tagUrls.has(url) && listUrls.has(url)))
+        //         : [...(incDomainUrls || []), ...(tagUrls || []), ...(listUrls || [])]
 
         // Ensure no excluded URLs in included sets
         this.include = excDomainUrls
@@ -34,7 +54,7 @@ export class FilteredURLsManager implements FilteredURLs {
             : new Set(initInclude)
 
         this.exclude = excDomainUrls || new Set()
-        this.isDataFiltered = !!(incDomainUrls || tagUrls)
+        this.isDataFiltered = !!(incDomainUrls || tagUrls || listUrls)
     }
 
     private isIncluded(url: string) {
@@ -86,17 +106,33 @@ const incDomainSearch = ({ domains }: Partial<SearchParams>) =>
 const excDomainSearch = ({ domainsExclude }: Partial<SearchParams>) =>
     domainSearch(domainsExclude)
 
+
+async function listSearch({ lists }: Partial<SearchParams>) {
+    if (!lists || !lists.length) {
+        return undefined
+    }
+    const customList = new CustomListBackground({ storageManager })
+
+    const urls = new Set<string>()
+
+    const listEnteries = await customList.fetchListPages(1)
+    listEnteries.map(({ pageUrl }: any) => urls.add(pageUrl))
+
+    return urls
+}
+
 /**
  * of URLs that match the filters to use as a white-list.
  */
 export async function findFilteredUrls(
     params: Partial<SearchParams>,
 ): Promise<FilteredURLs> {
-    const [incDomainUrls, excDomainUrls, tagUrls] = await Promise.all([
+    const [incDomainUrls, excDomainUrls, tagUrls, listUrls] = await Promise.all([
         incDomainSearch(params),
         excDomainSearch(params),
         tagSearch(params),
+        listSearch(params)
     ])
 
-    return new FilteredURLsManager({ tagUrls, incDomainUrls, excDomainUrls })
+    return new FilteredURLsManager({ tagUrls, incDomainUrls, excDomainUrls, listUrls })
 }

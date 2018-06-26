@@ -128,6 +128,7 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
         domainsExclude: filters.domainsExc(state),
         limit: constants.PAGE_SIZE,
         skip: selectors.resultsSkip(state),
+        lists: filters.listFilter(state),
     }
 
     try {

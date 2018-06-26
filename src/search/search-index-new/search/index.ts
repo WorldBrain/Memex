@@ -16,6 +16,7 @@ export async function search({
     domains = [],
     domainsExclude = [],
     tags = [],
+    lists = [],
     ...restParams,
 }) {
     // Extract query terms via QueryBuilder (may change)
@@ -24,6 +25,7 @@ export async function search({
         .filterDomains(domains)
         .filterExcDomains(domainsExclude)
         .filterTags(tags)
+        .filterLists(lists)
         .get()
 
     // Short-circuit search if bad term
@@ -45,6 +47,7 @@ export async function search({
         }
     }
 
+    // WTF
     // Reshape needed params; prob consolidate interface later when remove old index code
     const params = {
         ...restParams,
@@ -54,6 +57,7 @@ export async function search({
         domains: [...qb.domain],
         domainsExclude: [...qb.domainExclude],
         tags: [...qb.tags],
+        lists: [...qb.lists],
     } as SearchParams
 
     const { docs, totalCount } = await db.transaction(
@@ -61,6 +65,7 @@ export async function search({
         db.tables,
         async () => {
             const results = await fullSearch(params)
+
             const mappedDocs = await mapResultsFunc(results.ids, params)
 
             return { docs: mappedDocs, totalCount: results.totalCount }
@@ -96,15 +101,18 @@ async function fullSearch({
 
     // Few different cases of search params we can take short-cuts on
     if (!terms.length && filteredUrls.isDataFiltered) {
+
         // Blank search + domain/tags filters: just grab the events for filtered URLs and paginate
         urlScoresMap = await mapUrlsToLatestEvents(params, [
             ...filteredUrls.include,
         ])
         totalCount = urlScoresMap.size
     } else if (!terms.length) {
+
         // Blank search: simply do lookback from `endDate` on visits and score URLs by latest
         urlScoresMap = await groupLatestEventsByUrl(params, filteredUrls)
     } else {
+
         // Terms search: do terms lookup first then latest event lookup (within time bounds) for each result
         const urlScoreMultiMap = await textSearch(
             { terms, termsExclude },
