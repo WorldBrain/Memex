@@ -71,6 +71,18 @@ describe('StorageManager', () => {
                 ],
             })
 
+            storageManager.registerCollection('dogs', {
+                version: new Date(2018, 6, 26),
+                fields: {
+                    id: { type: 'string' },
+                    biography: { type: 'text' },
+                },
+                indices: [
+                    { field: 'biography', fullTextIndexName: 'biographyTerms' },
+                    { field: 'id', pk: true },
+                ],
+            })
+
             const dexieSchemas = getDexieHistory(storageManager.registry)
 
             expect(dexieSchemas[0]).toEqual({
@@ -85,7 +97,7 @@ describe('StorageManager', () => {
             expect(dexieSchemas[1]).toEqual({
                 version: 2,
                 schema: {
-                    eggs: 'slug, *field2',
+                    eggs: 'slug, *_field2_terms',
                     spam: 'slug',
                 },
                 migrations: [migrateEggs],
@@ -94,7 +106,7 @@ describe('StorageManager', () => {
             expect(dexieSchemas[2]).toEqual({
                 version: 3,
                 schema: {
-                    eggs: 'slug, *field2',
+                    eggs: 'slug, *_field2_terms',
                     foo: 'slug',
                     spam: 'slug',
                 },
@@ -104,7 +116,7 @@ describe('StorageManager', () => {
             expect(dexieSchemas[3]).toEqual({
                 version: 4,
                 schema: {
-                    eggs: 'slug, *field2',
+                    eggs: 'slug, *_field2_terms',
                     foo: 'slug',
                     spam: 'slug',
                     ham: '[nameLast+nameFirst], nameLast',
@@ -115,11 +127,24 @@ describe('StorageManager', () => {
             expect(dexieSchemas[4]).toEqual({
                 version: 5,
                 schema: {
-                    eggs: 'slug, *field2',
+                    eggs: 'slug, *_field2_terms',
                     foo: 'slug',
                     spam: 'slug',
                     ham: '[nameLast+nameFirst], nameLast',
                     people: '++id, &ssn',
+                },
+                migrations: [],
+            })
+
+            expect(dexieSchemas[5]).toEqual({
+                version: 6,
+                schema: {
+                    eggs: 'slug, *_field2_terms',
+                    foo: 'slug',
+                    spam: 'slug',
+                    ham: '[nameLast+nameFirst], nameLast',
+                    people: '++id, &ssn',
+                    dogs: 'id, *biographyTerms',
                 },
                 migrations: [],
             })
