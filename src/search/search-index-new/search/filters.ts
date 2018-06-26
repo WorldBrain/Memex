@@ -115,7 +115,9 @@ async function listSearch({ lists }: Partial<SearchParams>) {
 
     const urls = new Set<string>()
 
-    const listEnteries = await customList.fetchListPages(1)
+    // The list filter contains only one list at a time
+    // It is just a temporary hack until multiple lists for filtering in used.
+    const listEnteries = await customList.fetchListPages(Number(lists[0]))
     listEnteries.map(({ pageUrl }: any) => urls.add(pageUrl))
 
     return urls
