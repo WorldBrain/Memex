@@ -13,7 +13,7 @@ class SendToServer {
     /**
      * Pool of requests that have been tracked, which will be periodically cleared and sent off in bulk.
      */
-    _pool = []
+    _pool = new Set()
 
     /**
      * @param {Object} args
@@ -33,25 +33,18 @@ class SendToServer {
      *
      * @param {params} params if params is there, then send request directly without wait, otherwise send pool request
      */
-    async _formReqParams(params = undefined) {
-        let userId = await this.userId()
-
-        if (!userId) {
-            const installTime = (await browser.storage.local.get(
-                installTimeStorageKey,
-            ))[installTimeStorageKey]
-            userId = await generateTokenIfNot(installTime)
-        }
+    async _serializePoolReqs(param = undefined) {
+        const userId = await this.userId()
 
         const data = {
             id: userId,
-            data: params ? [{ ...params }] : [...this._pool],
+            data: param ? [{ ...param }] : [...this._pool],
         }
 
         return data
     }
 
-    _poolReq = params => this._pool.push(params)
+    _poolReq = params => this._pool.add(params)
 
     /**
      * Send a request to the Redash HTTP Tracking API. Takes care of calculating all default
@@ -64,7 +57,7 @@ class SendToServer {
         fetch(this._host, {
             method: 'POST',
             headers: SendToServer.JSON_HEADER,
-            body: JSON.stringify(await this._formReqParams(event)),
+            body: JSON.stringify(await this._serializePoolReqs(event)),
         })
     }
 
@@ -75,26 +68,31 @@ class SendToServer {
      * @return {Promise<boolean>}
      */
     _sendBulkReq = async () => {
-        if (!this._pool.length || !(await this.shouldTrack())) {
-            this._pool.length = 0 // Clear pool if user turned off tracking
+        if (!this._pool.size || !(await this.shouldTrack())) {
+            this._pool.clear() // Clear pool if user turned off tracking
             return
         }
 
-        let res = await fetch(this._host, {
+        const res = await fetch(this._host, {
             method: 'POST',
             headers: SendToServer.JSON_HEADER,
-            body: JSON.stringify(await this._formReqParams()),
+            body: JSON.stringify(await this._serializePoolReqs()),
         })
 
-        res = await res.json()
-
-        if (res.success) {
-            this._pool.length = 0
+        if (res.ok) {
+            this._pool.clear()
         }
     }
 
     async userId() {
-        const userId = (await browser.storage.local.get(USER_ID))[USER_ID]
+        let userId = (await browser.storage.local.get(USER_ID))[USER_ID]
+
+        while (!userId) {
+            const installTime = (await browser.storage.local.get(
+                installTimeStorageKey,
+            ))[installTimeStorageKey]
+            userId = await generateTokenIfNot(installTime)
+        }
 
         return userId
     }
@@ -119,7 +117,7 @@ class SendToServer {
         }
 
         if (force) {
-            await this._sendReq(event)
+            await this._sendReq(event).catch(console.error)
         } else {
             this._poolReq(event)
         }

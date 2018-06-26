@@ -141,7 +141,7 @@ class Analytics {
         await this.storeEventLogStatistics(params)
 
         // Send the data to redash server
-        sendToServer.trackEvent(params)
+        sendToServer.trackEvent(params, params.force)
     }
 }
 
