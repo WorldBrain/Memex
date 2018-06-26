@@ -23,16 +23,16 @@ export default class StorageRegistry implements RegisterableStorage {
      * indexable as indexed fields.
      */
     private static _registerIndexedFields(def: CollectionDefinition) {
-        const flagField = (fieldName: string) =>
-            (def.fields[fieldName]._index = true)
+        const flagField = (indexDefIdx: number) => (fieldName: string) =>
+            (def.fields[fieldName]._index = indexDefIdx)
 
         const indices = def.indices || []
-        indices.forEach(({ field }) => {
+        indices.forEach(({ field }, i) => {
             // Compound indexes need to flag all specified fields
             if (field instanceof Array) {
-                field.forEach(flagField)
+                field.forEach(flagField(i))
             } else {
-                flagField(field)
+                flagField(i)(field)
             }
         })
     }
@@ -47,7 +47,7 @@ export default class StorageRegistry implements RegisterableStorage {
             def.name = name
 
             const fields = def.fields
-            Object.entries(fields).forEach(([fieldName, fieldDef]) => {
+            Object.entries(fields).forEach(([, fieldDef]) => {
                 const FieldClass = FIELD_TYPES[fieldDef.type]
                 
                 if (FieldClass) {

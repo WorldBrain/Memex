@@ -30,7 +30,11 @@ export interface CollectionFields {
 export interface CollectionField {
     type: FieldType
     fieldObject?: Field
-    _index?: boolean
+    /**
+     * Used internally for fields that are also indexed. Should be set to the index of the
+     * corresponding `IndexDefinition` in the `CollectionDefinition`'s `indices` array.
+     */
+    _index?: number
 }
 
 export type IndexSourceFields = string | [string, string]

@@ -45,7 +45,7 @@ function getDexieSchema(collections: RegistryCollections) {
  */
 const convertIndexToDexieExps = ({ fields, indices }: CollectionDefinition) =>
     indices
-        // .sort(({ pk }) => (pk ? -1 : 1)) // PK indexes always come first in Dexie
+        .sort(({ pk }) => (pk ? -1 : 1)) // PK indexes always come first in Dexie
         .map(indexDef => {
             // Convert from StorageManager compound index to Dexie compound index
             // Note that all other `IndexDefinition` opts are ignored for compound indexes
