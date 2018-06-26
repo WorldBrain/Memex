@@ -22,6 +22,7 @@ const searchUpdateActions = [
     filterActs.setExcDomainFilters.getType(),
     filterActs.setTagFilters.getType(),
     filterActs.resetFilters.getType(),
+    filterActs.toggleListFilter.getType(),
     onboardingActs.setVisible.getType(),
 ]
 
