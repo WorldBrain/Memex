@@ -34,6 +34,7 @@ export default class CustomListStorage extends FeatureStorage {
             fields: {
                 listId: { type: 'string' },
                 pageUrl: { type: 'string' },
+                fullUrl: { type: 'string' },
                 createdAt: { type: 'datetime' },
             },
             indices: [
@@ -54,11 +55,22 @@ export default class CustomListStorage extends FeatureStorage {
             delete list["_&name_terms"]
             return {
                 ...list,
-                pages: pages.map((page: PageObject) => page.pageUrl),
+                pages: pages.map((page: PageObject) => page.fullUrl),
             }
             // change this
         })
         return Promise.all(promises)
+    }
+
+    async fetchListById(id: Number) {
+        const list = await this.storageManager.findObject(COLLECTION_NAME, { id })
+        // TODO: Very inefficient
+        const pages = await this.storageManager.findAll(PAGE_LIST_ENTRY, { listId: list.id })
+        delete list["_&name_terms"]
+        return {
+            ...list,
+            pages: pages.map((page: PageObject) => page.fullUrl),
+        }
     }
 
     // TODO: Returns all the pages associated with the list.
@@ -85,11 +97,16 @@ export default class CustomListStorage extends FeatureStorage {
 
     // TODO: Maybe send the full name list object
     async updateListName({ id, name }) {
-        await this.storageManager.putObject(COLLECTION_NAME, {
-            id,
-            name,
-            createdAt: new Date(),
-        })
+        console.log(typeof id, name);
+        await this.storageManager.updateObject(COLLECTION_NAME, {
+            id
+        },
+            {
+                $set: {
+                    name,
+                    createdAt: new Date(),
+                }
+            })
     }
 
     // Delete List from the DB.
@@ -100,10 +117,11 @@ export default class CustomListStorage extends FeatureStorage {
     }
 
     // TODO: check if the list ID exists in the DB, if not cannot add.
-    async insertPageToList({ listId, pageUrl }) {
+    async insertPageToList({ listId, pageUrl, fullUrl }) {
         await this.storageManager.putObject(PAGE_LIST_ENTRY, {
             listId,
             pageUrl,
+            fullUrl,
             createdAt: new Date(),
         })
     }

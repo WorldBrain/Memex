@@ -176,7 +176,7 @@ export const updateList = (index, name, id) => async (dispatch, getState) => {
     dispatch(resetActiveListIndex())
     try {
         // TODO: change the ID with different Id
-        await remoteFunction('updateListName')({ id: 3, name })
+        await remoteFunction('updateListName')({ id, name })
         dispatch(updateListName(name, index))
     } catch (e) {
         console.log(e)

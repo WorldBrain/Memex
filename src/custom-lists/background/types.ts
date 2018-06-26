@@ -10,4 +10,5 @@ export interface PageObject {
     pageUrl: string
     crearedAt: Date
     listId: Number
+    fullUrl: string
 }

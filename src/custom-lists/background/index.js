@@ -83,6 +83,7 @@ export default class CustomListBackground {
         await this.storage.insertPageToList({
             listId: id,
             pageUrl: normalizeUrl(url[0]),
+            fullUrl: url[0],
         })
     }
 
