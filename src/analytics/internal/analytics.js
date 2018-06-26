@@ -16,23 +16,23 @@ class Analytics {
         )
     }
 
-    _operationsMap = {
-        successful_search: { count: 0 },
-        unsuccessful_search: { count: 0 },
+    _eventStats = {
+        successfulSearch: { count: 0 },
+        unsuccessfulSearch: { count: 0 },
         datepicker: { count: 0 },
-        bookmark_filter: { count: 0 },
-        tag_filter: { count: 0 },
-        domain_filter: { count: 0 },
+        bookmarkFilter: { count: 0 },
+        tagFilter: { count: 0 },
+        domainFilter: { count: 0 },
         tagging: { count: 0 },
         bookmark: { count: 0 },
         blacklist: { count: 0 },
-        address_bar_search: { count: 0 },
-        datepicker_nlp: { count: 0 },
-        nlp_search: { count: 0 },
+        addressBarSearch: { count: 0 },
+        datepickerNlp: { count: 0 },
+        nlpSearch: { count: 0 },
     }
 
     async registerOperations() {
-        for (const event of Object.keys(this._operationsMap)) {
+        for (const event of Object.keys(this._eventStats)) {
             this.loadInitialData(event)
         }
 
@@ -60,7 +60,7 @@ class Analytics {
         }
 
         const notifParams = {
-            latest_time: eventArgs.time,
+            latestTime: eventArgs.time,
             notifType: MapEventTypeToInt[eventArgs.type].notifType,
         }
 
@@ -73,7 +73,7 @@ class Analytics {
 
     /**
      * Load Initial data from dexie for the particular event type
-     * Query to dexie and store into _operationsMap
+     * Query to dexie and store into _eventStats
      * @param {notifType} type of notif event
      */
     async loadInitialData(notifType, isCacheUpdate = false) {
@@ -98,25 +98,25 @@ class Analytics {
         }
 
         await this.updateValue(notifType, {
-            latest_time: latestEvent,
+            latestTime: latestEvent,
             count: eventLogCount,
         })
     }
 
     // Update the value when the memeory variables is out of update or load initial data
     async updateValue(notifType, value) {
-        this._operationsMap[notifType] = value
+        this._eventStats[notifType] = value
     }
 
     async incrementValue(event) {
-        this._operationsMap[event.notifType] = {
-            count: this._operationsMap[event.notifType].count + 1,
-            latest_time: event.latest_time,
+        this._eventStats[event.notifType] = {
+            count: this._eventStats[event.notifType].count + 1,
+            latestTime: event.latestTime,
         }
     }
 
     getCountNotif(notifType) {
-        return this._operationsMap[notifType]
+        return this._eventStats[notifType]
     }
 
     /**
@@ -130,7 +130,7 @@ class Analytics {
         // Prepare the event to store the event in dexie db.
         const time = Date.now()
 
-        console.log(this._operationsMap)
+        console.log(this._eventStats)
 
         const params = {
             ...eventArgs,

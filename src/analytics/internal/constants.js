@@ -5,169 +5,169 @@ export const API_HOST =
 
 // This is used to change the event type into integer to optimize the space
 export const MapEventTypeToInt = {
-    successful_search: {
+    successfulSearch: {
         id: 1,
-        notifType: 'successful_search',
+        notifType: 'successfulSearch',
     },
-    paginate_search: {
+    paginateSearch: {
         id: 2,
-        notifType: 'successful_search',
+        notifType: 'successfulSearch',
     },
-    unsuccessful_search: {
+    unsuccessfulSearch: {
         id: 3,
-        notifType: 'unsuccessful_search',
+        notifType: 'unsuccessfulSearch',
     },
-    datepicker_by_dropdown_start_date: {
+    datepickerByDropdownStartDate: {
         id: 4,
         notifType: 'datepicker',
     },
-    datepicker_clear_start_date: {
+    datepickerClearStartDate: {
         id: 5,
         notifType: 'datepicker',
     },
-    datepicker_by_dropdown_end_date: {
+    datepickerByDropdownEndDate: {
         id: 6,
         notifType: 'datepicker',
     },
-    datepicker_clear_end_date: {
+    datepickerClearEndDate: {
         id: 7,
         notifType: 'datepicker',
     },
-    bookmark_filter: {
+    bookmarkFilter: {
         id: 8,
-        notifType: 'bookmark_filter',
+        notifType: 'bookmarkFilter',
     },
-    tag_filter: {
+    tagFilter: {
         id: 9,
-        notifType: 'tag_filter',
+        notifType: 'tagFilter',
     },
-    domain_filter: {
+    domainFilter: {
         id: 10,
-        notifType: 'domain_filter',
+        notifType: 'domainFilter',
     },
-    add_tag: {
+    addTag: {
         id: 12,
         notifType: 'tagging',
     },
-    delete_tag: {
+    deleteTag: {
         id: 13,
         notifType: 'tagging',
     },
-    delete_result: {
+    deleteResult: {
         id: 14,
     },
-    create_result_bookmark: {
+    createResultBookmark: {
         id: 15,
         notifType: 'bookmark',
     },
-    remove_result_bookmark: {
+    removeResultBookmark: {
         id: 16,
         notifType: 'bookmark',
     },
-    create_browser_bookmark: {
+    createBrowserBookmark: {
         id: 17,
         notifType: 'bookmark',
     },
-    remove_browser_bookmark: {
+    removeBrowserBookmark: {
         id: 18,
         notifType: 'bookmark',
     },
-    create_popup_bookmark: {
+    createPopupBookmark: {
         id: 19,
         notifType: 'bookmark',
     },
-    remove_popup_bookmark: {
+    removePopupBookmark: {
         id: 20,
         notifType: 'bookmark',
     },
-    add_popup_tag: {
+    addPopupTag: {
         id: 21,
         notifType: 'tagging',
     },
-    delete_popup_tag: {
+    deletePopupTag: {
         id: 22,
         notifType: 'tagging',
     },
-    blacklist_site: {
+    blacklistSite: {
         id: 23,
         notifType: 'blacklist',
     },
-    blacklist_domain: {
+    blacklistDomain: {
         id: 24,
         notifType: 'blacklist',
     },
-    remove_blacklist_entry: {
+    removeBlacklistEntry: {
         id: 25,
         notifType: 'blacklist',
     },
-    'change_tracking_pref_opt-out': {
+    'changeTrackingPrefopt-out': {
         id: 26,
     },
-    'change_tracking_pref_opt-in': {
+    'changeTrackingPrefopt-in': {
         id: 27,
     },
-    start_import: {
+    startImport: {
         id: 28,
     },
-    pause_import: {
+    pauseImport: {
         id: 29,
     },
-    resume_import: {
+    resumeImport: {
         id: 30,
     },
-    cancel_import: {
+    cancelImport: {
         id: 31,
     },
-    finish_import: {
+    finishImport: {
         id: 32,
     },
-    search_popup: {
+    searchPopup: {
         id: 33,
-        notifType: 'address_bar_search',
+        notifType: 'addressBarSearch',
     },
-    successful_omnibar_search: {
+    successfulOmnibarSearch: {
         id: 34,
-        notifType: 'address_bar_search',
+        notifType: 'addressBarSearch',
     },
-    unsuccessful_omnibar_search: {
+    unsuccessfulOmnibarSearch: {
         id: 35,
-        notifType: 'address_bar_search',
+        notifType: 'addressBarSearch',
     },
-    datepicker_by_nlp_start_date: {
+    datepickerByNlpStartDate: {
         id: 36,
-        notifType: 'datepicker_nlp',
+        notifType: 'datepickerNlp',
     },
-    datepicker_by_nlp_end_date: {
+    datepickerByNlpEndDate: {
         id: 37,
-        notifType: 'datepicker_nlp',
+        notifType: 'datepickerNlp',
     },
-    nlp_search: {
+    nlpSearch: {
         id: 38,
-        notifType: 'nlp_search',
+        notifType: 'nlpSearch',
     },
-    onboarding_cancel_import: {
+    onboardingCancelImport: {
         id: 39,
     },
-    onboarding_finish_import: {
+    onboardingFinishImport: {
         id: 40,
     },
-    add_blacklist_entry: {
+    addBlacklistEntry: {
         id: 41,
         notifType: 'blacklist',
     },
 }
 
 export const MapNotifTypeToIntArray = {
-    successful_search: [1, 2],
-    unsuccessful_search: [3],
+    successfulSearch: [1, 2],
+    unsuccessfulSearch: [3],
     datepicker: [4, 5, 6, 7],
-    bookmark_filter: [8],
-    tag_filter: [9],
-    domain_filter: [10],
+    bookmarkFilter: [8],
+    tagFilter: [9],
+    domainFilter: [10],
     tagging: [12, 13, 21, 22],
     bookmark: [14, 15, 16, 17, 18, 19, 20],
     blacklist: [23, 24, 25, 41],
-    address_bar_search: [33, 34, 35],
-    datepicker_nlp: [36, 37],
-    nlp_search: [38],
+    addressBarSearch: [33, 34, 35],
+    datepickerNlp: [36, 37],
+    nlpSearch: [38],
 }

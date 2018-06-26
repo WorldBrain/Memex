@@ -71,16 +71,22 @@ class IndexDropdownContainer extends Component {
      *
      */
     async storeTrackEvent(isAdded) {
-        const { source, hover } = this.props
+        let { source } = this.props
+        const { hover } = this.props
+
+        // Make first letter capital
+        source = source.charAt(0).toUpperCase() + source.substr(1)
 
         // Only for add and remove from the popup or overview, we have already covered filter in overview
         if (this.allowIndexUpdate) {
             internalAnalytics.processEvent({
                 type: hover
-                    ? isAdded ? 'add_' + source : 'delete_' + source
+                    ? isAdded
+                        ? 'add' + source
+                        : 'delete' + source
                     : isAdded
-                      ? 'add_popup_' + source
-                      : 'delete_popup_' + source,
+                        ? 'addPopup' + source
+                        : 'deletePopup' + source,
             })
         }
     }

@@ -174,30 +174,30 @@ function storeSearch(searchResult, overwrite, state) {
     let type
 
     if (searchResult.totalCount === 0) {
-        type = 'unsuccessful_search'
+        type = 'unsuccessfulSearch'
     } else {
-        type = overwrite ? 'successful_search' : 'paginate_search'
+        type = overwrite ? 'successfulSearch' : 'paginateSearch'
     }
 
     internalAnalytics.processEvent({ type })
 
     if (query.length > 0) {
-        internalAnalytics.processEvent({ type: 'nlp_search' })
+        internalAnalytics.processEvent({ type: 'nlpSearch' })
     }
 
     if (filters.onlyBookmarks(state)) {
-        internalAnalytics.processEvent({ type: 'bookmark_filter' })
+        internalAnalytics.processEvent({ type: 'bookmarkFilter' })
     }
 
     if (filters.tags(state).length > 0) {
-        internalAnalytics.processEvent({ type: 'tag_filter' })
+        internalAnalytics.processEvent({ type: 'tagFilter' })
     }
 
     if (
         filters.domainsInc(state).length > 0 ||
         filters.domainsExc(state).length > 0
     ) {
-        internalAnalytics.processEvent({ type: 'domain_filter' })
+        internalAnalytics.processEvent({ type: 'domainFilter' })
     }
 }
 
@@ -237,7 +237,7 @@ export const deleteDocs = () => async (dispatch, getState) => {
     })
 
     internalAnalytics.processEvent({
-        type: 'delete_result',
+        type: 'deleteResult',
     })
 
     try {
@@ -268,7 +268,7 @@ export const toggleBookmark = (url, index) => async (dispatch, getState) => {
     })
 
     internalAnalytics.processEvent({
-        type: hasBookmark ? 'remove_result_bookmark' : 'create_result_bookmark',
+        type: hasBookmark ? 'removeResultBookmark' : 'createResultBookmark',
     })
 
     try {

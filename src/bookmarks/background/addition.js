@@ -59,7 +59,7 @@ export async function createNewPageForBookmark(id, bookmarkInfo) {
         })
 
         internalAnalytics.processEvent({
-            type: 'create_browser_bookmark',
+            type: 'createBrowserBookmark',
         })
     }
 }
@@ -130,6 +130,6 @@ export async function createBookmarkByUrl(url, tabId = null) {
     })
 
     internalAnalytics.processEvent({
-        type: 'create_popup_bookmark',
+        type: 'createPopupBookmark',
     })
 }

@@ -93,8 +93,8 @@ async function makeSuggestion(query, suggest) {
     internalAnalytics.processEvent({
         type:
             searchResults.totalCount > 0
-                ? 'successful_omnibar_search'
-                : 'unsuccessful_omnibar_search',
+                ? 'successfulOmnibarSearch'
+                : 'unsuccessfulOmnibarSearch',
     })
 
     // A subsequent search could have already started and finished while we
@@ -114,7 +114,9 @@ async function makeSuggestion(query, suggest) {
         setOmniboxMessage('No results found for this query.')
     } else {
         setOmniboxMessage(
-            `Found these ${searchResults.totalCount} pages in your memory: (press enter to see all results)`,
+            `Found these ${
+                searchResults.totalCount
+            } pages in your memory: (press enter to see all results)`,
         )
     }
 

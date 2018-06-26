@@ -82,7 +82,7 @@ class ImportsConnHandler {
         })
 
         internalAnalytics.processEvent({
-            type: 'onboarding_cancel_import',
+            type: 'onboardingCancelImport',
         })
 
         this._port.postMessage({ cmd: CMDS.CANCEL })
@@ -97,7 +97,7 @@ class ImportsConnHandler {
             })
 
             internalAnalytics.processEvent({
-                type: 'onboarding_finish_import',
+                type: 'onboardingFinishImport',
             })
         }
         this._dispatch(setImportsDone(true))
@@ -106,7 +106,7 @@ class ImportsConnHandler {
     /**
      * Responds to messages sent from background script over the runtime connection by dispatching
      * appropriate redux actions. Non-handled messages are ignored.
-    */
+     */
     handleCmds = ({ cmd, ...payload }) => {
         switch (cmd) {
             case CMDS.INIT: // Tell it to start immediately after BG connman sends INIT ready signal

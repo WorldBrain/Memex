@@ -181,7 +181,7 @@ class PopupContainer extends Component {
             })
 
             internalAnalytics.processEvent({
-                type: domainDelete ? 'blacklist_domain' : 'blacklist_site',
+                type: domainDelete ? 'blacklistDomain' : 'blacklistSite',
             })
 
             this.addToBlacklist(url)
@@ -207,7 +207,7 @@ class PopupContainer extends Component {
         })
 
         internalAnalytics.processEvent({
-            type: isPaused ? 'resume_indexing' : 'pause_indexing',
+            type: isPaused ? 'resumeIndexing' : 'pauseIndexing',
         })
 
         // Tell background script to do on extension level
@@ -241,7 +241,7 @@ class PopupContainer extends Component {
             })
 
             internalAnalytics.processEvent({
-                type: 'search_popup',
+                type: 'searchPopup',
             })
 
             const queryFilters = extractQueryFilters(this.state.searchValue)

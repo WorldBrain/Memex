@@ -66,7 +66,7 @@ function handlePause(timeout) {
     })
 
     internalAnalytics.processEvent({
-        type: 'resume_indexing',
+        type: 'resumeIndexing',
     })
 
     return setTimeout(() => {
