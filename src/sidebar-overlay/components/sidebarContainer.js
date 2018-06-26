@@ -38,8 +38,9 @@ class SidebarContainer extends React.Component {
 
     renderAnnotations = () => {
         const annotations = this.props.annotations.sort(
-            (x, y) => x.createdWhen > y.createdWhen,
+            (x, y) => x.createdWhen < y.createdWhen,
         )
+
         return annotations.map(annotation => (
             <Annotation
                 annotation={annotation}

@@ -86,9 +86,10 @@ class AnnotationContainer extends React.Component {
 
     renderTimestamp = () => {
         const { footerState } = this.state
-        const timestamp = moment(this.props.annotation.timestamp).format(
-            'MMMM D YYYY',
-        )
+        const createdWhen = new Date(this.props.annotation.createdWhen)
+
+        const timestamp = moment(createdWhen).format('MMMM D YYYY')
+
         return (
             <div className={styles.timestamp}>
                 {footerState === 'default' ? timestamp : ''}
