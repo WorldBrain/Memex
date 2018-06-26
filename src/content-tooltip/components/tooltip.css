@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css?family=Lato');
+@import url('/fonts/lato/lato.css');
 
 .tooltip {
     display: flex;
@@ -128,12 +128,11 @@
         height: auto;
         animation: slideRight 0.2s ease-in 0.2s;
         animation-fill-mode: both;
-        margin-left: 6px;
+        margin-left: 8px;
     }
 
     & .copiedTextContainer {
         height: 35px;
-        width: 190px;
         padding-left: 4px;
         padding-top: 7px;
         animation: fadeInRight 0.2s ease-in 0.3s;
@@ -304,7 +303,7 @@
     }
 
     100% {
-        width: 260px;
+        width: 250px;
     }
 }
 
