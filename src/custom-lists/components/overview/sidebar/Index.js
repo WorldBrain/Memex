@@ -119,7 +119,7 @@ class ListContainer extends Component {
                     listName={list.name}
                     isFiltered={list.isFilterIndex}
                     onEditButtonClick={this.props.handleEditBtnClick(i)}
-                    onListItemClick={this.props.handleListItemClick(list.id, i)}
+                    onListItemClick={this.props.handleListItemClick(list, i)}
                     onAddPageToList={this.props.handleAddPageList(list, i)}
                     onCrossButtonClick={this.props.handleCrossBtnClick(list, i)}
                 />
@@ -207,7 +207,7 @@ const mapDispatchToProps = (dispatch, getState) => ({
         event.preventDefault()
         dispatch(actions.showListDeleteModal(id, index))
     },
-    handleListItemClick: (id, index) => () => {
+    handleListItemClick: ({ id }, index) => () => {
         dispatch(actions.toggleListFilterIndex(index))
         dispatch(filterActs.toggleListFilter(id))
     },

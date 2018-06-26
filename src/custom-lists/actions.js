@@ -7,7 +7,7 @@ import * as selectors from './selectors'
 // import constants from './constants'
 // import { custom-lists } from '../custom-lists/selectors';
 
-// // import { selectors as filters } from 'src/overview/filters'
+import { selectors as filters } from 'src/overview/filters'
 
 export const getAllLists = createAction('custom-lists/listData')
 export const updatePageLists = createAction('custom-lists/updateList')
@@ -114,9 +114,22 @@ export const showEditBox = index => (dispatch, getState) => {
     }
 }
 
-export const delPageFromList = doc => async (dispatch, getState) => {
-    const index = selectors.listFilterIndex(getState())
-    dispatch(hidePageFromList(doc.url, index))
+export const delPageFromList = url => async (dispatch, getState) => {
+    try {
+        // const lists = await remoteFunction('getAllLists')()
+        const index = selectors.listFilterIndex(getState())
+        const listId = filters.listFilter(getState())
+        await remoteFunction('removePageFromList')({
+            id: Number(listId),
+            url,
+        })
+
+        dispatch(hidePageFromList(url, index))
+    } catch (err) {
+        console.log(err)
+    } finally {
+        updateLastActive() // Consider user active
+    }
 }
 
 export const getListFromDB = () => async (dispatch, getState) => {
