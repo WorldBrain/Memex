@@ -7,6 +7,15 @@ const getCount = remoteFunction('getCount')
 const getLatestEvent = remoteFunction('getLatestEvent')
 
 class Analytics {
+    _startRegisterEvents
+    _doneRegisterEvents
+
+    constructor() {
+        this._startRegisterEvents = new Promise(
+            resolve => (this._doneRegisterEvents = resolve),
+        )
+    }
+
     _operationsMap = {
         successful_search: { count: 0 },
         unsuccessful_search: { count: 0 },
@@ -23,12 +32,13 @@ class Analytics {
     }
 
     async registerOperations() {
-        await new Promise((resolve, reject) => {
-            for (const event of Object.keys(this._operationsMap)) {
-                this.loadInitialData(event)
-            }
-            resolve()
-        })
+        await this._startRegisterEvents
+
+        for (const event of Object.keys(this._operationsMap)) {
+            this.loadInitialData(event)
+        }
+
+        this._doneRegisterEvents()
     }
 
     async fromDexie(notifType) {

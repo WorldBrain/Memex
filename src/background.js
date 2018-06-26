@@ -25,6 +25,7 @@ import 'src/search/migration'
 import initSentry from './util/raven'
 import { USER_ID, generateTokenIfNot } from 'src/util/generate-token'
 import { API_HOST } from 'src/analytics/internal/constants'
+import { storageChangesManager } from 'src/util/storage-changes'
 
 window.index = searchIndex
 window.storage = db
@@ -141,18 +142,8 @@ browser.runtime.onInstalled.addListener(details => {
     }
 })
 
-browser.storage.local.get(USER_ID).then(res => {
-    let URL = UNINSTALL_URL
-
-    // TODO get the data on your first iteration
-    if (res[USER_ID]) {
-        URL =
-            API_HOST +
-            `/uninstall?user=${res[USER_ID]}&uninstallTime=${Date.now()}`
-    }
-
-    // Open uninstall survey on ext. uninstall
-    browser.runtime.setUninstallURL(URL)
+storageChangesManager.addListener('local', USER_ID, ({ newValue }) => {
+    browser.runtime.setUninstallURL(`${API_HOST}/uninstall?user=${newValue}`)
 })
 
 const directLinking = new DirectLinkingBackground({ storageManager })
