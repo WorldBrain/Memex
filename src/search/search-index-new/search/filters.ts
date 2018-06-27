@@ -2,6 +2,8 @@ import db, { SearchParams, FilteredURLs, storageManager } from '..'
 import { remoteFunction } from '../../../util/webextensionRPC'
 import CustomListBackground from '../../../custom-lists/background'
 import intersection from 'lodash/fp/intersection'
+import flatten from 'lodash/fp/flatten'
+import difference from 'lodash/fp/difference'
 
 const pageIndexLookup = (index: string, matches: string[]) =>
     db.pages
@@ -27,31 +29,33 @@ export class FilteredURLsManager implements FilteredURLs {
             [key: string]: Set<string>,
         }) {
 
-        // Perform intersection, only if both includes sets defined, else just merge them
+        // Exclude any undefined URLs filters
         const allUrls = [
             incDomainUrls ? [...incDomainUrls] : incDomainUrls,
             tagUrls ? [...tagUrls] : tagUrls,
             listUrls ? [...listUrls] : listUrls,
-        ].filter(urls => {
-            return urls
-        })
+        ].filter(urls => urls != null)
 
         let initInclude
         if (allUrls.length > 1) {
             initInclude = intersection(...allUrls)
         } else {
-            initInclude = [...(incDomainUrls || []), ...(tagUrls || []), ...(listUrls || [])]
+            initInclude = flatten(allUrls)
         }
 
-        // const initInclude =
-        //     incDomainUrls && tagUrls && listUrls
-        //         ? [...incDomainUrls].filter(url => (tagUrls.has(url) && listUrls.has(url)))
-        //         : [...(incDomainUrls || []), ...(tagUrls || []), ...(listUrls || [])]
+        /* Old intersection and difference
+        const initInclude =
+            incDomainUrls && tagUrls && listUrls
+                ? [...incDomainUrls].filter(url => (tagUrls.has(url) && listUrls.has(url)))
+                : [...(incDomainUrls || []), ...(tagUrls || []), ...(listUrls || [])]
 
-        // Ensure no excluded URLs in included sets
         this.include = excDomainUrls
             ? new Set([...initInclude].filter(url => !excDomainUrls.has(url)))
             : new Set(initInclude)
+        */
+
+        // Ensure no excluded URLs in included sets
+        this.include = new Set(difference(initInclude, [...excDomainUrls]))
 
         this.exclude = excDomainUrls || new Set()
         this.isDataFiltered = !!(incDomainUrls || tagUrls || listUrls)
@@ -118,7 +122,7 @@ async function listSearch({ lists }: Partial<SearchParams>) {
     // The list filter contains only one list at a time
     // It is just a temporary hack until multiple lists for filtering in used.
     const listEnteries = await customList.fetchListPages(Number(lists[0]))
-    listEnteries.map(({ pageUrl }: any) => urls.add(pageUrl))
+    listEnteries.forEach(({ pageUrl }: any) => urls.add(pageUrl))
 
     return urls
 }
