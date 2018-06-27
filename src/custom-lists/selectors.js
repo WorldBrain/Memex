@@ -74,7 +74,7 @@ export const results = createSelector(
         lists.map((pageDoc, i) => ({
             ...pageDoc,
             isEditing: i === listIndex,
-            isFilterIndex: listFilter === pageDoc.id,
+            isFilterIndex: Number(listFilter) === pageDoc.id,
             listUrlState: getListUrlState(pageDoc, urlsToEdit),
         })),
 )
