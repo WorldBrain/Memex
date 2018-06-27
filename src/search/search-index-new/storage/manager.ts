@@ -12,6 +12,7 @@ import {
 } from './types'
 
 export class StorageManager implements ManageableStorage {
+    static DEF_SUGGEST_LIMIT = 10
     static DEF_FIND_OPTS: Partial<FindOpts> = {
         reverse: false,
     }
@@ -145,6 +146,40 @@ export class StorageManager implements ManageableStorage {
 
         const coll = await this._find<T>(collectionName, filter, findOpts)
         return coll.toArray()
+    }
+
+    /**
+     * @param collectionName The name of the collection to query.
+     * @param filter Note this is not a fully-featured filter query, like in other methods.
+     *  Only the first `{ [indexName]: stringQuery }` will be taken and used; everything else is ignored.
+     * @param [findOpts] Note that only `reverse` and `limit` options will be applied.
+     * @returns Promise that resolves to the first `findOpts.limit` matches of the
+     *  query to the index, both specified in `filter`.
+     */
+    async suggest<T>(
+        collectionName: string,
+        filter: FilterQuery<T>,
+        {
+            limit = StorageManager.DEF_SUGGEST_LIMIT,
+            reverse,
+        }: FindOpts = StorageManager.DEF_FIND_OPTS,
+    ) {
+        await this._initializationPromise
+
+        // Grab first entry from the filter query; ignore rest for now
+        const [[indexName, value]] = Object.entries(filter)
+
+        let coll = this._storage
+            .table<T>(collectionName)
+            .where(indexName)
+            .startsWith(value)
+            .limit(limit)
+
+        if (reverse) {
+            coll = coll.reverse()
+        }
+
+        return coll.uniqueKeys()
     }
 
     /**
