@@ -6,9 +6,9 @@ import noop from 'lodash/fp/noop'
 import { updateLastActive } from 'src/analytics'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import {
-    AddListDropdownRow,
-    AddListDropdown,
     IndexDropdownNewRow,
+    IndexDropdown,
+    IndexDropdownRow,
 } from '../components'
 
 class DropdownContainer extends Component {
@@ -123,10 +123,8 @@ class DropdownContainer extends Component {
     getDisplayLists = () =>
         this.state.displayFilters.map((value, i) => ({
             value,
-            focused: !this.canCreateList()
-                ? this.state.focused === i
-                : this.state.focused === i + 1,
-            isActive: this.isPageInList(value),
+            active: this.isPageInList(value),
+            focused: this.state.focused === i,
         }))
 
     getSearchVal = () =>
@@ -215,7 +213,10 @@ class DropdownContainer extends Component {
     handleSearchEnterPress(event) {
         event.preventDefault()
 
-        if (this.canCreateList() && this.state.focused === 0) {
+        if (
+            this.canCreateList() &&
+            this.state.focused === this.state.displayFilters.length
+        ) {
             return this.createList()
         }
 
@@ -301,6 +302,7 @@ class DropdownContainer extends Component {
 
     handleSearchArrowPress(event) {
         event.preventDefault()
+
         let offset = this.canCreateList() ? 0 : 1
 
         if (!this.allowIndexUpdate) offset = 1
@@ -360,20 +362,22 @@ class DropdownContainer extends Component {
         const lists = this.getDisplayLists()
 
         const listOptions = lists.map((list, i) => (
-            <AddListDropdownRow
+            <IndexDropdownRow
                 {...list}
                 key={i}
-                handleClick={this.handleListClick(i)}
+                onClick={this.handleListSelection(i)}
             />
         ))
 
         if (this.canCreateList()) {
-            listOptions.unshift(
+            listOptions.push(
                 <IndexDropdownNewRow
                     key="+"
                     value={this.state.searchVal}
                     onClick={this.createList}
-                    focused={this.state.focused === 0}
+                    focused={
+                        this.state.focused === this.state.displayFilters.length
+                    }
                 />,
             )
         }
@@ -383,17 +387,27 @@ class DropdownContainer extends Component {
 
     render() {
         return (
-            <AddListDropdown
-                onListSearchChange={this.handleSearchChange}
-                onListSearchKeyDown={this.handleSearchKeyDown}
+            // <AddListDropdown
+            // onTagSearchChange={this.handleSearchChange}
+            // onTagSearchKeyDown={this.handleSearchKeyDown}
+            //     setInputRef={this.setInputRef}
+            //     tagSearchValue={this.state.searchVal}
+            //     overviewMode={this.overviewMode()}
+            //     numberOfTags={this.state.filters.length}
+            //     {...this.props}
+            // >
+            //     {this.renderLists()}
+            // </AddListDropdown>
+            <IndexDropdown
+                onTagSearchChange={this.handleSearchChange}
+                onTagSearchKeyDown={this.handleSearchKeyDown}
                 setInputRef={this.setInputRef}
-                listSearchValue={this.state.searchVal}
-                overviewMode={this.overviewMode()}
-                listCount={this.state.filters.length}
+                numberOfTags={this.state.filters.length}
+                tagSearchValue={this.state.searchVal}
                 {...this.props}
             >
                 {this.renderLists()}
-            </AddListDropdown>
+            </IndexDropdown>
         )
     }
 }

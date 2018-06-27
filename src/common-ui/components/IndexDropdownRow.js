@@ -35,7 +35,7 @@ class IndexDropdownRow extends PureComponent {
     render() {
         return (
             <div className={this.mainClass} onClick={this.props.onClick}>
-                {this.props.value}
+                {this.props.value.name || this.props.value}
                 {this.props.active && <i className="material-icons">done</i>}
             </div>
         )
