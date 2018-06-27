@@ -113,6 +113,7 @@
     font-size: 1.4em;
     font-weight: 300;
     cursor: pointer;
+    width: 100%;
 }
 
 .allLists {
