@@ -50,14 +50,17 @@ export default class CustomListStorage extends FeatureStorage {
     async fetchAllList(query = {}) {
         const x = await this.storageManager.findAll(COLLECTION_NAME, query)
         // TODO: Very inefficient
-        const promises = x.map(async (list: ListObject) => {
+        return this.changeListsbeforeSending(x)
+    }
+
+    async changeListsbeforeSending(lists: object[]) {
+        const promises = lists.map(async (list: ListObject) => {
             const pages = await this.storageManager.findAll(PAGE_LIST_ENTRY, { listId: list.id })
             delete list["_&name_terms"]
             return {
                 ...list,
                 pages: pages.map((page: PageObject) => page.fullUrl),
             }
-            // change this
         })
         return Promise.all(promises)
     }
@@ -97,7 +100,6 @@ export default class CustomListStorage extends FeatureStorage {
 
     // TODO: Maybe send the full name list object
     async updateListName({ id, name }) {
-        console.log(typeof id, name);
         await this.storageManager.updateObject(COLLECTION_NAME, {
             id
         },
@@ -151,14 +153,9 @@ export default class CustomListStorage extends FeatureStorage {
 
     // TODO: change this method.
     async getListNameSuggestions({ name }) {
-        var nameRegex = new RegExp("^" + name, "i");
-        const x = await this.fetchAllList({
-            name: {
-                $regex: {
-                    $eq: nameRegex,
-                }
-            }
+        const lists = await this.storageManager.suggest(COLLECTION_NAME, {
+            name
         })
-        return x
+        return this.changeListsbeforeSending(lists)
     }
 }
