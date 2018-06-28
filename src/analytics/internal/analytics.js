@@ -50,12 +50,13 @@ class Analytics {
      * @param {EventTrackInfo} eventArgs
      */
     async storeEventLogStatistics(eventArgs) {
+        // If details is not there then add default value
         const params = {
             ...eventArgs,
-            type: EVENT_TYPES[eventArgs.type].id,
             details: eventArgs.details || {},
         }
 
+        // Create notificaitions params
         const notifParams = {
             latestTime: eventArgs.time,
             notifType: EVENT_TYPES[eventArgs.type].notifType,

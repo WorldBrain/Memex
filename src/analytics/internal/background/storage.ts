@@ -1,5 +1,5 @@
 import { FeatureStorage } from '../../../search/search-index-new'
-import { NOTIF_TYPE_EVENT_IDS } from '../constants'
+import { NOTIF_TYPE_EVENT_IDS, EVENT_TYPES } from '../constants'
 
 export default class EventLogStorage extends FeatureStorage {
     constructor(storageManager) {
@@ -20,11 +20,11 @@ export default class EventLogStorage extends FeatureStorage {
         })
     }
 
-    async storeEvent({ time, other, type }) {
+    async storeEvent({ time, details, type }) {
         await this.storageManager.putObject('eventLog', {
             time,
-            type,
-            other,
+            type: EVENT_TYPES[type].id,
+            details,
         })
     }
 
