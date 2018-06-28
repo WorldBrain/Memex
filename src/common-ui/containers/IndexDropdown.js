@@ -79,15 +79,17 @@ class IndexDropdownContainer extends Component {
 
         // Only for add and remove from the popup or overview, we have already covered filter in overview
         if (this.allowIndexUpdate) {
-            internalAnalytics.processEvent({
-                type: hover
-                    ? isAdded
-                        ? 'add' + source
-                        : 'delete' + source
-                    : isAdded
+            if (hover) {
+                internalAnalytics.processEvent({
+                    type: isAdded ? 'add' + source : 'delete' + source,
+                })
+            } else {
+                internalAnalytics.processEvent({
+                    type: isAdded
                         ? 'addPopup' + source
                         : 'deletePopup' + source,
-            })
+                })
+            }
         }
     }
 

@@ -1,7 +1,7 @@
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import EventLogStorage from './storage'
 
-export default class DirectLinkingBackground {
+export default class EventLogBackground {
     constructor({ storageManager }) {
         this.storage = new EventLogStorage(storageManager)
     }
@@ -11,11 +11,8 @@ export default class DirectLinkingBackground {
             storeEvent: (...params) => {
                 return this.storeEvent(...params)
             },
-            getCount: (...params) => {
-                return this.getCount(...params)
-            },
-            getLatestEvent: (...params) => {
-                return this.getLatestEvent(...params)
+            getLatestTimeWithCount: (...params) => {
+                return this.getLatestTimeWithCount(...params)
             },
         })
     }
@@ -24,11 +21,7 @@ export default class DirectLinkingBackground {
         await this.storage.storeEvent(request)
     }
 
-    async getCount(request) {
-        return await this.storage.getCount(request)
-    }
-
-    async getLatestEvent(request) {
-        return await this.storage.getLatestEvent(request)
+    async getLatestTimeWithCount(request) {
+        return await this.storage.getLatestTimeWithCount(request)
     }
 }

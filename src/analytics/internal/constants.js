@@ -4,7 +4,7 @@ export const API_HOST =
         : 'https://a8495szyaa.execute-api.eu-central-1.amazonaws.com/staging'
 
 // This is used to change the event type into integer to optimize the space
-export const MapEventTypeToInt = {
+export const EVENT_TYPES = {
     successfulSearch: {
         id: 1,
         notifType: 'successfulSearch',
@@ -157,7 +157,7 @@ export const MapEventTypeToInt = {
     },
 }
 
-export const MapNotifTypeToIntArray = {
+export const NOTIF_TYPE_EVENT_IDS = {
     successfulSearch: [1, 2],
     unsuccessfulSearch: [3],
     datepicker: [4, 5, 6, 7],

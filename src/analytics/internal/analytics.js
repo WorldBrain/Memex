@@ -1,16 +1,17 @@
-import { MapEventTypeToInt, MapNotifTypeToIntArray } from './constants'
-import sendToServer from './sendToServer'
-import { remoteFunction } from 'src/util/webextensionRPC'
-import analyticsLogStorage from './AnalyticsLogStorage'
-
-const getCount = remoteFunction('getCount')
-const getLatestEvent = remoteFunction('getLatestEvent')
+import { EVENT_TYPES } from './constants'
 
 class Analytics {
     _initDataLoaded
     _setDataLoaded
 
-    constructor() {
+    constructor({ serverConnector, remoteFunction }) {
+        this._remoteFunction = remoteFunction
+        this._serverConnector = serverConnector
+        this.getLatestTimeWithCount = this._remoteFunction(
+            'getLatestTimeWithCount',
+        )
+        this.storeEvent = remoteFunction('storeEvent')
+
         this._initDataLoaded = new Promise(
             resolve => (this._setDataLoaded = resolve),
         )
@@ -33,7 +34,7 @@ class Analytics {
 
     async registerOperations() {
         for (const event of Object.keys(this._eventStats)) {
-            this.loadInitialData(event)
+            await this.loadInitialData(event)
         }
 
         this._setDataLoaded()
@@ -41,10 +42,6 @@ class Analytics {
 
     async fromDexie(notifType) {
         await this.loadInititalData(notifType, true)
-    }
-
-    async statisticsStorage(event) {
-        await this.incrementValue(event)
     }
 
     /**
@@ -55,19 +52,20 @@ class Analytics {
     async storeEventLogStatistics(eventArgs) {
         const params = {
             ...eventArgs,
-            type: MapEventTypeToInt[eventArgs.type].id,
+            type: EVENT_TYPES[eventArgs.type].id,
             details: eventArgs.details || {},
         }
 
         const notifParams = {
             latestTime: eventArgs.time,
-            notifType: MapEventTypeToInt[eventArgs.type].notifType,
+            notifType: EVENT_TYPES[eventArgs.type].notifType,
         }
 
-        await analyticsLogStorage(params)
+        // Store the event in dexie
+        await this.storeEvent(params)
 
-        if (MapEventTypeToInt[eventArgs.type].notifType) {
-            await this.statisticsStorage(notifParams)
+        if (EVENT_TYPES[eventArgs.type].notifType) {
+            await this.incrementValue(notifParams)
         }
     }
 
@@ -77,30 +75,14 @@ class Analytics {
      * @param {notifType} type of notif event
      */
     async loadInitialData(notifType, isCacheUpdate = false) {
-        let eventLogCount = 0
-        let latestEvent = 0
-
-        for (const type of MapNotifTypeToIntArray[notifType]) {
-            // TODO: Have to make more optimize
-            const latest = await getLatestEvent({ type })
-
-            if (latest) {
-                latestEvent = Math.max(latest.time, latestEvent)
-            }
-
-            const eventCountNotif = await getCount({ type })
-            eventLogCount += eventCountNotif
-        }
-
-        // TODO; on the latest event time
-        if (eventLogCount === 0) {
+        const latestTimeWithCount = await this.getLatestTimeWithCount({
+            notifType,
+        })
+        if (!latestTimeWithCount) {
             return
         }
 
-        await this.updateValue(notifType, {
-            latestTime: latestEvent,
-            count: eventLogCount,
-        })
+        await this.updateValue(notifType, latestTimeWithCount)
     }
 
     // Update the value when the memeory variables is out of update or load initial data
@@ -141,7 +123,7 @@ class Analytics {
         await this.storeEventLogStatistics(params)
 
         // Send the data to redash server
-        sendToServer.trackEvent(params, params.force)
+        this._serverConnector.trackEvent(params, params.force)
     }
 }
 

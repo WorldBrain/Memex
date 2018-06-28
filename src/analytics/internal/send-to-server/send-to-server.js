@@ -33,15 +33,13 @@ class SendToServer {
      *
      * @param {params} params if params is there, then send request directly without wait, otherwise send pool request
      */
-    async _serializePoolReqs(param = undefined) {
-        const userId = await this.userId()
-
+    static _serializePoolReqs(userId, events) {
         const data = {
             id: userId,
-            data: param ? [{ ...param }] : [...this._pool],
+            data: [...events],
         }
 
-        return data
+        return JSON.stringify(data)
     }
 
     _poolReq = params => this._pool.add(params)
@@ -54,10 +52,12 @@ class SendToServer {
      * @return {Promise<Response>}
      */
     _sendReq = async event => {
-        fetch(this._host, {
+        const userId = await this.userId()
+
+        await fetch(this._host, {
             method: 'POST',
             headers: SendToServer.JSON_HEADER,
-            body: JSON.stringify(await this._serializePoolReqs(event)),
+            body: SendToServer._serializePoolReqs(userId, [{ ...event }]),
         })
     }
 
@@ -73,10 +73,12 @@ class SendToServer {
             return
         }
 
+        const userId = await this.userId()
+
         const res = await fetch(this._host, {
             method: 'POST',
             headers: SendToServer.JSON_HEADER,
-            body: JSON.stringify(await this._serializePoolReqs()),
+            body: SendToServer._serializePoolReqs(userId, this._pool),
         })
 
         if (res.ok) {
