@@ -365,7 +365,7 @@ class DropdownContainer extends Component {
             <IndexDropdownRow
                 {...list}
                 key={i}
-                onClick={this.handleListSelection(i)}
+                onClick={this.handleListClick(i)}
             />
         ))
 

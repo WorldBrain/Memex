@@ -55,7 +55,7 @@ export class FilteredURLsManager implements FilteredURLs {
         */
 
         // Ensure no excluded URLs in included sets
-        this.include = new Set(difference(initInclude, [...excDomainUrls]))
+        this.include = new Set(difference(initInclude, [...(excDomainUrls || [])]))
 
         this.exclude = excDomainUrls || new Set()
         this.isDataFiltered = !!(incDomainUrls || tagUrls || listUrls)
@@ -115,13 +115,15 @@ async function listSearch({ lists }: Partial<SearchParams>) {
     if (!lists || !lists.length) {
         return undefined
     }
+
     const customList = new CustomListBackground({ storageManager })
 
     const urls = new Set<string>()
 
     // The list filter contains only one list at a time
     // It is just a temporary hack until multiple lists for filtering in used.
-    const listEnteries = await customList.fetchListPages(Number(lists[0]))
+    // Eg: The list: String i.e = "23" gets converted into ["2", "3"] converting back to 23.
+    const listEnteries = await customList.fetchListPages(Number(lists.join('')))
     listEnteries.forEach(({ pageUrl }: any) => urls.add(pageUrl))
 
     return urls
