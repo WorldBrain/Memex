@@ -10,7 +10,7 @@ class AnnotationContainer extends React.Component {
         annotation: PropTypes.object.isRequired,
         deleteAnnotation: PropTypes.func.isRequired,
         editAnnotation: PropTypes.func.isRequired,
-        openAnnotationURL: PropTypes.func,
+        goToAnnotation: PropTypes.func.isRequired,
     }
 
     state = {
@@ -98,7 +98,6 @@ class AnnotationContainer extends React.Component {
     }
 
     renderFooterIcons = () => {
-        const goToUrl = this.props.openAnnotationURL(this.props.annotation.url)
         return (
             <div className={styles.footerAside}>
                 <span
@@ -109,7 +108,10 @@ class AnnotationContainer extends React.Component {
                     className={styles.editIcon}
                     onClick={this.toggleEditAnnotation}
                 />
-                <span className={styles.goToPageIcon} onClick={goToUrl} />
+                <span
+                    className={styles.goToPageIcon}
+                    onClick={this.props.goToAnnotation}
+                />
             </div>
         )
     }

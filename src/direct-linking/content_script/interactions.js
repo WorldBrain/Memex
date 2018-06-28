@@ -43,3 +43,9 @@ export function scrollToHighlight() {
         console.error('MEMEX: Oops, no highlight found to scroll to')
     }
 }
+
+export function removeHighlights() {
+    const className = styles['memex-highlight']
+    const highlights = document.querySelectorAll('.' + className)
+    highlights.forEach(highlight => highlight.classList.remove(className))
+}

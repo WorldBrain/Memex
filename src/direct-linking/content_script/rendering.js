@@ -9,7 +9,11 @@ const Raven = AllRaven['default']
 export async function highlightAnnotation({ annotation }) {
     try {
         await Raven.context(async () => {
-            const descriptor = annotation.anchors[0].descriptor
+            let descriptor
+            if (annotation.anchors)
+                descriptor = annotation.anchors[0].descriptor
+            else descriptor = annotation.selector.descriptor
+
             Raven.captureBreadcrumb({
                 message: 'annotation-selector-received',
                 category: 'annotations',
