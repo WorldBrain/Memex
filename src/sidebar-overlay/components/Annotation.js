@@ -1,9 +1,15 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import styles from './Annotation.css'
+import cx from 'classnames'
 
 const Annotation = props => (
-    <div className={styles.container}>
+    <div
+        className={cx(styles.container, {
+            [props.isClickable]: styles.pointer,
+        })}
+        onClick={props.goToAnnotation}
+    >
         <div className={styles.highlight}>
             {props.renderHighlight()}
             {props.renderShowButton('highlight')}
@@ -34,6 +40,8 @@ Annotation.propTypes = {
     renderTagPills: PropTypes.func.isRequired,
     renderAnnotationInput: PropTypes.func.isRequired,
     renderFooter: PropTypes.func.isRequired,
+    goToAnnotation: PropTypes.func.isRequired,
+    isClickable: PropTypes.bool.isRequired,
 }
 
 export default Annotation

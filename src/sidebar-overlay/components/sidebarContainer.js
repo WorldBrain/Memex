@@ -42,19 +42,10 @@ class SidebarContainer extends React.Component {
         if (!isOpen) this.props.setShowSidebar(false)
     }
 
-    goToAnnotation = annotation => async e => {
-        e.preventDefault()
-        e.stopPropagation()
-
+    goToAnnotation = annotation => async () => {
         // If annotation is a comment, do nothing
-        if (!annotation.body) return false
-        else if (this.props.env === 'overview') {
-            // If sidebar is opened in overview:
-            // Open annotation url in new tab instead.
-            browser.tabs.create({
-                url: annotation.url,
-            })
-        } else {
+        if (this.props.env === 'overview' || !annotation.body) return false
+        else {
             // await highlightAndScroll(annotation)
             remoteExecute('highlightAndScroll')(annotation)
         }
@@ -72,6 +63,7 @@ class SidebarContainer extends React.Component {
                 editAnnotation={this.props.editAnnotation}
                 deleteAnnotation={this.props.deleteAnnotation}
                 key={annotation.url}
+                env={this.props.env}
             />
         ))
     }

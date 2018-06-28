@@ -11,6 +11,7 @@ class AnnotationContainer extends React.Component {
         deleteAnnotation: PropTypes.func.isRequired,
         editAnnotation: PropTypes.func.isRequired,
         goToAnnotation: PropTypes.func.isRequired,
+        env: PropTypes.string.isRequired,
     }
 
     state = {
@@ -98,6 +99,7 @@ class AnnotationContainer extends React.Component {
     }
 
     renderFooterIcons = () => {
+        const { annotation, env } = this.props
         return (
             <div className={styles.footerAside}>
                 <span
@@ -108,10 +110,11 @@ class AnnotationContainer extends React.Component {
                     className={styles.editIcon}
                     onClick={this.toggleEditAnnotation}
                 />
-                <span
-                    className={styles.goToPageIcon}
-                    onClick={this.props.goToAnnotation}
-                />
+                {env === 'overview' && annotation.body ? (
+                    <a href={annotation.url} target="blank">
+                        <span className={styles.goToPageIcon} />
+                    </a>
+                ) : null}
             </div>
         )
     }
@@ -262,6 +265,9 @@ class AnnotationContainer extends React.Component {
     deriveTagsClass = () =>
         this.state.containsTags ? styles.tagsContainer : ''
 
+    deriveIsClickable = () =>
+        this.props.env === 'iframe' && this.props.annotation.body
+
     render() {
         return (
             <Annotation
@@ -273,6 +279,8 @@ class AnnotationContainer extends React.Component {
                 renderTagPills={this.renderTagPills}
                 renderAnnotationInput={this.renderAnnotationInput}
                 renderFooter={this.renderFooter}
+                goToAnnotation={this.props.goToAnnotation}
+                isClickable={this.deriveIsClickable()}
             />
         )
     }

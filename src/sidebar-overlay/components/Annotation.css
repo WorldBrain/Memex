@@ -12,6 +12,10 @@
     margin-top: 10px;
 }
 
+.pointer {
+    cursor: pointer;
+}
+
 .highlight {
     font-style: italic;
     font-weight: 200;
