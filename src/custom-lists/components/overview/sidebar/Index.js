@@ -68,11 +68,7 @@ class ListContainer extends Component {
         }))
     }
 
-    getSearchVal = value =>
-        value
-            .trim()
-            .replace(/\s\s+/g, ' ')
-            .toLowerCase()
+    getSearchVal = value => value.trim().replace(/\s\s+/g, ' ')
 
     // TODO: change this method;
     handleCreateListSubmit = event => {
@@ -80,7 +76,16 @@ class ListContainer extends Component {
         const { value } = event.target.elements['listName']
         // value = list name
         // TODO: Place a check here for same list name or place it in the createPageList
-        this.props.createPageList(this.getSearchVal(value), this.inputEl)
+        this.props.createPageList(
+            this.getSearchVal(value),
+            this.vacateInputField,
+        )
+    }
+
+    vacateInputField = () => {
+        this.setState({
+            listName: null,
+        })
     }
 
     handleUpdateList = ({ id }, index) => event => {

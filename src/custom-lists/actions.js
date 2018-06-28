@@ -100,6 +100,9 @@ export const toggleCreateListForm = createAction(
 export const showCommonNameWarning = createAction(
     'custom-lists/showCommonNameWarning',
 )
+export const removeCommonNameWarning = createAction(
+    'custom-lists/removeCommonNameWarning',
+)
 
 // returns instance of ListStorageHandler class
 export const listStorage = () => (dispatch, getState) =>
@@ -143,7 +146,7 @@ export const getListFromDB = () => async (dispatch, getState) => {
     }
 }
 
-export const createPageList = name => async (dispatch, getState) => {
+export const createPageList = (name, cb) => async (dispatch, getState) => {
     // gets id from DB after it is added
     // TODO: add id
 
@@ -161,8 +164,9 @@ export const createPageList = name => async (dispatch, getState) => {
 
             dispatch(createList(list))
             dispatch(closeCreateListForm())
+            dispatch(removeCommonNameWarning())
+            cb()
         } else {
-            // TODO: dispatch function for same name error.
             dispatch(showCommonNameWarning())
         }
     } catch (error) {

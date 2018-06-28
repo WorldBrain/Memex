@@ -127,11 +127,7 @@ class DropdownContainer extends Component {
             focused: this.state.focused === i,
         }))
 
-    getSearchVal = () =>
-        this.state.searchVal
-            .trim()
-            .replace(/\s\s+/g, ' ')
-            .toLowerCase()
+    getSearchVal = () => this.state.searchVal.trim().replace(/\s\s+/g, ' ')
 
     // Temporary suggestion function.
     suggest = searchKey =>

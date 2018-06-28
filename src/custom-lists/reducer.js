@@ -243,6 +243,11 @@ const showCommonNameWarning = state => ({
     showCommonNameWarning: true,
 })
 
+const removeCommonNameWarning = state => ({
+    ...state,
+    showCommonNameWarning: false,
+})
+
 export default createReducer(
     {
         [actions.getAllLists]: getAllLists,
@@ -280,6 +285,7 @@ export default createReducer(
         [actions.closeCreateListForm]: closeCreateListForm,
         [actions.toggleCreateListForm]: toggleCreateListForm,
         [actions.showCommonNameWarning]: showCommonNameWarning,
+        [actions.removeCommonNameWarning]: removeCommonNameWarning,
     },
     defaultState,
 )
