@@ -89,6 +89,13 @@ class PopupContainer extends Component {
             isLoggable: isLoggable({ url: currentTab.url }),
         })
 
+        this.insertRibbon = remoteFunction('insertRibbon', {
+            tabId: currentTab.id,
+        })
+        this.removeRibbon = remoteFunction('removeRibbon', {
+            tabId: currentTab.id,
+        })
+
         this.getInitPageData()
             .then(updateState)
             .catch(noop)
@@ -257,6 +264,9 @@ class PopupContainer extends Component {
     toggleTooltip = async () => {
         const isTooltipEnabled = !this.state.isTooltipEnabled
         await setTooltipState(isTooltipEnabled)
+
+        if (isTooltipEnabled) this.insertRibbon()
+        else this.removeRibbon()
 
         setTimeout(() => window.close(), 500)
 

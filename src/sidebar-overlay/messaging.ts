@@ -1,27 +1,27 @@
 
-const remoteFunctions = {}
+let remoteFunctions = {}
 
-const _setupListener = ( messageHandler : function) : void => {
+const _setupListener = (messageHandler: any): void => {
     window.addEventListener('message', messageHandler, false)
 }
 
-const _removeListener = ( messageHandler : function) : void => {
+const _removeListener = (messageHandler: any): void => {
     window.removeEventListener('message', messageHandler)
 }
 
 const _listener = async (event) => {
-    const message : Message = event.data
+    const message: Message = event.data
 
     // Small validation if it's a memex request
-    if (!message.origin_memex){
+    if (!message.origin_memex) {
         return false
     }
-    
+
     const funcName = message.functionName
     const args = message.hasOwnProperty('args') ? message.args : []
     const func = remoteFunctions[funcName]
 
-    if (func === undefined){
+    if (func === undefined) {
         return false
     }
 
@@ -34,21 +34,25 @@ interface Message {
     args: any
 }
 
-const _postMessage = ( message: Message ) : void => {
+const _postMessage = (message: Message): void => {
     // Right now, message transfer is only from frame to parent
     let targetWindow = top
     targetWindow.postMessage(message, '*')
 }
 
 
-export const setUpRemoteFunctions = ( functionList ) => {
+export const setUpRemoteFunctions = (functionList) => {
     Object.assign(remoteFunctions, functionList)
     _setupListener(_listener)
 }
 
+export const removeMessageListener = () => {
+    _removeListener(_listener)
+    remoteFunctions = {}
+}
 
-export const remoteExecute = ( functionName : string): any => (...args: any[]) => {
-    const message : Message = {
+export const remoteExecute = (functionName: string): any => (...args: any[]) => {
+    const message: Message = {
         functionName,
         origin_memex: true,
         args,
