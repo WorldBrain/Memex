@@ -32,7 +32,11 @@ export const hasData = () =>
             .on('end', () => resolve(false))
     })
 
-export async function search({
+export async function search() {
+    return { requiresMigration: true, docs: [], totalCount: 0 }
+}
+
+export async function searchOld({
     query = '',
     startDate,
     endDate,

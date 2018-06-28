@@ -653,5 +653,5 @@ const runSuite = useOld => () => {
     })
 }
 
-describe('New search index integration', runSuite(false))
-describe('Old search index integration', runSuite(true))
+describe('Search index integration', runSuite(false))
+// describe('Old search index integration', runSuite(true))

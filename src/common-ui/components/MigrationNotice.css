@@ -1,0 +1,44 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 410px;
+    margin: 0 auto;
+    border: 2px solid #979797;
+    padding: 50px 20px;
+    color: #3eb995;
+    background: white;
+}
+
+.banner {
+    width: 60%;
+    height: auto;
+    margin: 20px 20px;
+    margin-left: 30px;
+}
+
+.header {
+    font-weight: normal;
+    font-size: 28px;
+}
+
+.text {
+    text-align: center;
+    font-size: 15px;
+    margin: 12px 0;
+}
+
+.button {
+    border: none;
+    background-color: #3eb995;
+    color: white;
+    border-radius: 5px;
+    padding: 10px 35px;
+    font-size: 18px;
+    cursor: pointer;
+
+    &[disabled] {
+        background-color: #a4e2d0;
+        cursor: default;
+    }
+}

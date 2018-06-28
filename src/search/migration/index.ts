@@ -2,6 +2,7 @@ import { idleManager } from '../../util/idle'
 import { MigrationManager } from './migration-manager'
 import searchIndex from '../'
 import analytics from '../../analytics'
+import { makeRemotelyCallable } from '../../util/webextensionRPC'
 
 const migrator = new MigrationManager({
     onComplete() {
@@ -19,6 +20,18 @@ searchIndex.dataReady.then(() => {
             onActive: () => migrator.stop(),
         })
     }
+})
+
+let isRunning = false
+
+// Allow migration to be started on-demand remotely
+makeRemotelyCallable({
+    startMigration: async () => {
+        isRunning = true
+        await migrator.start()
+        MigrationManager.showNotif()
+    },
+    isMigrating: () => isRunning,
 })
 
 export * from './types'
