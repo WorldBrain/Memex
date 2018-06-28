@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css?family=Lato');
+@import url('/fonts/lato/lato.css');
 
 .tooltip {
     display: flex;
@@ -24,6 +24,11 @@
     & * {
         box-sizing: content-box;
         font-family: 'Lato', sans-serif;
+    }
+
+    & img {
+        margin-bottom: 0px !important; /* stylelint-disable-line declaration-no-important */
+        padding: 0px !important; /* stylelint-disable-line declaration-no-important */
     }
 }
 
@@ -123,17 +128,17 @@
         height: auto;
         animation: slideRight 0.2s ease-in 0.2s;
         animation-fill-mode: both;
-        margin-left: 12px;
+        margin-left: 8px;
     }
 
     & .copiedTextContainer {
         height: 35px;
-        width: 190px;
         padding-left: 4px;
         padding-top: 7px;
         animation: fadeInRight 0.2s ease-in 0.3s;
         animation-fill-mode: both;
         text-align: left;
+        text-shadow: none;
         margin-left: 3px;
 
         & .greenText {
@@ -298,7 +303,7 @@
     }
 
     100% {
-        width: 260px;
+        width: 250px;
     }
 }
 

@@ -21,7 +21,11 @@ export function destroyTooltipTrigger() {
 export const conditionallyTriggerTooltip = delayed(
     async (position, callback, event) => {
         const isTooltipEnabled = await getTooltipState()
-        if (!userSelectedText() || !isTooltipEnabled) {
+        if (
+            !userSelectedText() ||
+            !isTooltipEnabled ||
+            isTargetInsideTooltip(event)
+        ) {
             return
         }
 
@@ -34,4 +38,14 @@ function userSelectedText() {
     const selection = document.getSelection()
     const userSelectedText = !!selection && !selection.isCollapsed
     return userSelectedText
+}
+
+function isTargetInsideTooltip(event) {
+    const $tooltipContainer = document.querySelector(
+        '#memex-direct-linking-tooltip',
+    )
+    if (!$tooltipContainer)
+        // edge case, where the destroy() is called
+        return true
+    return $tooltipContainer.contains(event.target)
 }

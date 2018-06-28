@@ -16,6 +16,7 @@ export const htmlAssets = [
         path: 'https://fonts.googleapis.com/css?family=Libre+Franklin:100"',
         type: 'css',
     },
+    'fonts/lato/lato.css',
 ]
 
 /**
@@ -44,7 +45,10 @@ export const copyPatterns = [
         to: 'lib/',
     },
     { from: 'node_modules/pdfjs-dist/build/pdf.worker.min.js', to: 'lib/' },
-
+    {
+        from: 'fonts/lato/*.{woff2,css}',
+        to: 'fonts/lato/[name].[ext]',
+    },
     {
         from:
             'node_modules/material-design-icons/iconfont/*.{eot,ttf,woff,woff2,css}',

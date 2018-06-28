@@ -31,7 +31,7 @@ const initTsPlugin = tslint =>
         ignoreLints: ['class-name', 'no-shadowed-variable', 'comment-format'],
     })
 
-export default function ({
+export default function({
     webExtReloadPort = 9090,
     mode = 'development',
     template,
@@ -78,7 +78,7 @@ export default function ({
             new SentryPlugin({
                 release: process.env.npm_package_version,
                 include: output.path,
-                dryRun: shouldPackage,
+                dryRun: !shouldPackage,
             }),
         )
     }

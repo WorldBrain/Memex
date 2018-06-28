@@ -50,10 +50,6 @@ class TooltipContainer extends React.Component {
         event.preventDefault()
         event.stopPropagation()
         this.props.destroy()
-        this.setState({
-            showTooltip: false,
-            position: {},
-        })
     }
 
     setTooltipState = state =>
