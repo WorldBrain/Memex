@@ -6,7 +6,7 @@ import cx from 'classnames'
 const Annotation = props => (
     <div
         className={cx(styles.container, {
-            [props.isClickable]: styles.pointer,
+            [styles.pointer]: props.isClickable,
         })}
         onClick={props.goToAnnotation}
     >

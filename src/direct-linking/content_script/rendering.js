@@ -6,7 +6,8 @@ import styles from './styles.css'
 
 const Raven = AllRaven['default']
 
-export async function highlightAnnotation({ annotation }) {
+export async function highlightAnnotation({ annotation, isDark }) {
+    const highlightClass = isDark ? 'memex-highlight-dark' : 'memex-highlight'
     try {
         await Raven.context(async () => {
             let descriptor
@@ -28,7 +29,7 @@ export async function highlightAnnotation({ annotation }) {
                     timeoutMiliseconds: 5000,
                 },
             )
-            markRange({ range, cssClass: styles['memex-highlight'] })
+            markRange({ range, cssClass: styles[highlightClass] })
         })
     } catch (e) {
         console.error(

@@ -1,9 +1,11 @@
 import { injectCSS } from 'src/search-injection/dom'
 import { setupRibbonUI } from './components'
 import { bodyLoader } from 'src/util/loader'
-import { highlightAndScroll } from './utils'
+
+import { highlightAndScroll } from './interactions'
 import { setUpRemoteFunctions } from './messaging'
 import { getLocalStorage } from 'src/util/storage'
+
 import { TOOLTIP_STORAGE_NAME } from 'src/content-tooltip/constants'
 
 const init = async () => {

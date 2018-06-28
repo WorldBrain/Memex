@@ -265,8 +265,9 @@ class AnnotationContainer extends React.Component {
     deriveTagsClass = () =>
         this.state.containsTags ? styles.tagsContainer : ''
 
-    deriveIsClickable = () =>
-        this.props.env === 'iframe' && this.props.annotation.body
+    deriveIsClickable = () => {
+        return this.props.env === 'iframe' && this.props.annotation.body !== ''
+    }
 
     render() {
         return (

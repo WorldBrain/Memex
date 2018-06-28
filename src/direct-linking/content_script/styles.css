@@ -1,3 +1,9 @@
 .memex-highlight {
+    background: rgb(62, 185, 149, 0.4);
+    transition: all 0.3s ease-in;
+}
+
+.memex-highlight-dark {
     background: rgb(62, 185, 149);
+    transition: all 0.3s ease-in;
 }

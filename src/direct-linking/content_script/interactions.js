@@ -33,8 +33,9 @@ function selectTextFromRange(range) {
     selection.addRange(range)
 }
 
-export function scrollToHighlight() {
-    const $highlight = document.querySelector('.' + styles['memex-highlight'])
+export function scrollToHighlight({ isDark }) {
+    const highlightClass = isDark ? 'memex-highlight-dark' : 'memex-highlight'
+    const $highlight = document.querySelector('.' + styles[highlightClass])
     if ($highlight) {
         setTimeout(() => {
             scrollToElement($highlight, { offset: -225 })
@@ -44,8 +45,9 @@ export function scrollToHighlight() {
     }
 }
 
-export function removeHighlights() {
-    const className = styles['memex-highlight']
+export function removeHighlights({ isDark }) {
+    const highlightClass = isDark ? 'memex-highlight-dark' : 'memex-highlight'
+    const className = styles[highlightClass]
     const highlights = document.querySelectorAll('.' + className)
     highlights.forEach(highlight => highlight.classList.remove(className))
 }
