@@ -47,8 +47,8 @@ export default class CustomListStorage extends FeatureStorage {
 
     // Return all the list in the DB
     //  TODO: Use pagination if required.
-    async fetchAllList(query = {}) {
-        const x = await this.storageManager.findAll(COLLECTION_NAME, query)
+    async fetchAllList({ query = {}, opts = {} }) {
+        const x = await this.storageManager.findAll(COLLECTION_NAME, query, opts)
         // TODO: Very inefficient
         return this.changeListsbeforeSending(x)
     }
@@ -56,7 +56,7 @@ export default class CustomListStorage extends FeatureStorage {
     async changeListsbeforeSending(lists: object[]) {
         const promises = lists.map(async (list: ListObject) => {
             const pages = await this.storageManager.findAll(PAGE_LIST_ENTRY, { listId: list.id })
-            delete list["_&name_terms"]
+            delete list["_name_terms"]
             return {
                 ...list,
                 pages: pages.map((page: PageObject) => page.fullUrl),
@@ -69,7 +69,7 @@ export default class CustomListStorage extends FeatureStorage {
         const list = await this.storageManager.findObject(COLLECTION_NAME, { id })
         // TODO: Very inefficient
         const pages = await this.storageManager.findAll(PAGE_LIST_ENTRY, { listId: list.id })
-        delete list["_&name_terms"]
+        delete list["_name_terms"]
         return {
             ...list,
             pages: pages.map((page: PageObject) => page.fullUrl),
@@ -151,7 +151,6 @@ export default class CustomListStorage extends FeatureStorage {
         return x
     }
 
-    // TODO: change this method.
     async getListNameSuggestions({ name }) {
         const lists = await this.storageManager.suggest(COLLECTION_NAME, {
             name

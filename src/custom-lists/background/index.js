@@ -46,8 +46,8 @@ export default class CustomListBackground {
         })
     }
 
-    async getAllLists() {
-        const lists = await this.storage.fetchAllList()
+    async getAllLists({ query = {}, opts = {} }) {
+        const lists = await this.storage.fetchAllList({ query, opts })
         return lists
     }
 

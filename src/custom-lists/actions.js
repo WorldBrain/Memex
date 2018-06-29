@@ -137,7 +137,7 @@ export const delPageFromList = url => async (dispatch, getState) => {
 
 export const getListFromDB = () => async (dispatch, getState) => {
     try {
-        const lists = await remoteFunction('getAllLists')()
+        const lists = await remoteFunction('getAllLists')({})
         dispatch(getAllLists(lists || []))
     } catch (err) {
         console.log(err)

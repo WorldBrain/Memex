@@ -57,17 +57,11 @@ class OverviewContainer extends Component {
         init: PropTypes.func.isRequired,
         handleToggleUrlToEdit: PropTypes.func.isRequired,
         showListDropdown: PropTypes.bool.isRequired,
-        listStorageHandler: PropTypes.func.isRequired,
         isListFilterActive: PropTypes.bool.isRequired,
         handleCrossRibbonClick: PropTypes.func.isRequired,
         urlsAdded: PropTypes.arrayOf(PropTypes.string).isRequired,
         urlDragged: PropTypes.string.isRequired,
         setUrlDragged: PropTypes.func.isRequired,
-    }
-
-    constructor(props) {
-        super(props)
-        this._listStorageHandler = this.props.listStorageHandler()
     }
 
     componentDidMount() {
@@ -404,7 +398,6 @@ const mapDispatchToProps = dispatch => ({
     addTag: resultIndex => tag => dispatch(actions.addTag(tag, resultIndex)),
     delTag: resultIndex => tag => dispatch(actions.delTag(tag, resultIndex)),
     toggleShowTooltip: event => dispatch(actions.toggleShowTooltip()),
-    listStorageHandler: () => dispatch(listActs.listStorage()),
     handleToggleUrlToEdit: ({ url }) => () =>
         dispatch(listActs.toggleUrlToEdit(url)),
     handleCrossRibbonClick: ({ url }) => event => {

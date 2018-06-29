@@ -19,7 +19,7 @@ class IndexDropdown extends PureComponent {
         tagSearchValue: PropTypes.string.isRequired,
         hover: PropTypes.bool,
         isForAnnotation: PropTypes.bool,
-        source: PropTypes.oneOf(['tag', 'domain']).isRequired,
+        source: PropTypes.oneOf(['tag', 'domain', 'list']).isRequired,
         url: PropTypes.string,
         allowAdd: PropTypes.bool,
     }
@@ -36,13 +36,28 @@ class IndexDropdown extends PureComponent {
     }
 
     get searchPlaceholder() {
-        return `Search & Add ${
-            this.props.source === 'domain' ? 'Domains' : 'Tags'
-        }`
+        return `Search & Add ${this.placeholder}`
+    }
+
+    get placeholder() {
+        let placeholder
+        switch (this.props.source) {
+            case 'tag':
+                placeholder = 'Tags'
+                break
+            case 'domain':
+                placeholder = 'Domain'
+                break
+            case 'list':
+                placeholder = 'Lists'
+                break
+            default:
+        }
+        return placeholder
     }
 
     get unit() {
-        return this.props.source === 'domain' ? 'domains' : 'tags'
+        return this.placeholder.toLowerCase()
     }
 
     render() {

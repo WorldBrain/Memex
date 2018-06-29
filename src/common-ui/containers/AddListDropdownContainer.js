@@ -15,6 +15,7 @@ class DropdownContainer extends Component {
     static propTypes = {
         onFilterDel: PropTypes.func,
         results: PropTypes.array.isRequired,
+        initSuggestions: PropTypes.array.isRequired,
         bulkAddPagesToList: PropTypes.func,
         bulkRemovePagesFromList: PropTypes.func,
         applyBulkEdits: PropTypes.func,
@@ -42,7 +43,7 @@ class DropdownContainer extends Component {
         this.state = {
             searchVal: '',
             isLoading: false,
-            displayFilters: props.results, // Display state objects; will change all the time
+            displayFilters: props.initSuggestions, // Display state objects; will change all the time
             filters: props.results, // Actual lists associated with the page; will only change when DB updates
             focused: props.results.length ? 0 : -1,
         }
@@ -400,6 +401,7 @@ class DropdownContainer extends Component {
                 setInputRef={this.setInputRef}
                 numberOfTags={this.state.filters.length}
                 tagSearchValue={this.state.searchVal}
+                source="list"
                 {...this.props}
             >
                 {this.renderLists()}
