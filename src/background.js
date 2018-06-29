@@ -22,6 +22,7 @@ import db, { storageManager } from 'src/search/search-index-new'
 import * as models from 'src/search/search-index-new/models'
 import 'src/search/migration'
 import initSentry from './util/raven'
+import generateToken from 'src/util/generate-token'
 
 window.index = searchIndex
 window.storage = db
@@ -65,13 +66,17 @@ const openOptionsURL = query =>
     })
 
 async function onInstall() {
+    const now = Date.now()
+
     // Ensure default blacklist entries are stored (before doing anything else)
     await blacklist.addToBlacklist(blacklistConsts.DEF_ENTRIES)
     analytics.trackEvent({ category: 'Global', action: 'Install' }, true)
     // Open onboarding page
     browser.tabs.create({ url: `${OVERVIEW_URL}?install=true` })
     // Store the timestamp of when the extension was installed + default blacklist
-    browser.storage.local.set({ [installTimeStorageKey]: Date.now() })
+    browser.storage.local.set({ [installTimeStorageKey]: now })
+
+    await generateToken({ installTime: now })
 }
 
 async function onUpdate() {
@@ -97,6 +102,12 @@ async function onUpdate() {
             },
         })
     }
+
+    const installTime = (await browser.storage.local.get(
+        installTimeStorageKey,
+    ))[installTimeStorageKey]
+
+    await generateToken({ installTime })
 }
 
 browser.commands.onCommand.addListener(command => {
