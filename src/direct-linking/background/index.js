@@ -3,7 +3,7 @@ import DirectLinkingBackend from './backend'
 import { setupRequestInterceptor } from './redirect'
 import { AnnotationRequests } from './request'
 import DirectLinkingStorage from './storage'
-import normalizeUrl from 'src/util/encode-url-for-id'
+import normalize from '../../util/encode-url-for-id'
 
 export default class DirectLinkingBackground {
     constructor({ storageManager }) {
@@ -74,7 +74,7 @@ export default class DirectLinkingBackground {
 
     async getAllAnnotationsByUrl({ tab }, url) {
         let pageUrl = url === null ? tab.url : url
-        pageUrl = normalizeUrl(pageUrl)
+        pageUrl = normalize(pageUrl)
         const annotations = await this.storage.getAnnotationsByUrl(pageUrl)
 
         return annotations.map(annotation => ({

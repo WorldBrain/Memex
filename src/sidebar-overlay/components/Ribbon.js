@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import cx from 'classnames'
 import onClickOutside from 'react-onclickoutside'
 import { remoteFunction } from 'src/util/webextensionRPC'
+import { remoteExecute } from '../messaging'
 
 import styles from './Ribbon.css'
 
@@ -28,11 +29,23 @@ class Ribbon extends React.Component {
         })
     }
 
-    toggleSidebar = () => {
+    reloadAnnotations = async () => {
+        const annotations = await remoteFunction('getAllAnnotations')(
+            window.location.href,
+        )
+        this.setState({
+            annotations,
+        })
+    }
+
+    toggleSidebar = async () => {
         const isSidebarActive = !this.state.isSidebarActive
 
-        if (isSidebarActive) this.props.highlightAll(this.state.annotations)
-        else {
+        if (isSidebarActive) {
+            remoteExecute('reloadAnnotations')()
+            await this.reloadAnnotations()
+            this.props.highlightAll(this.state.annotations)
+        } else {
             this.props.removeHighlights({ isDark: false })
             this.props.removeHighlights({ isDark: true })
         }
@@ -47,6 +60,8 @@ class Ribbon extends React.Component {
             isSidebarActive: false,
         })
     }
+
+    setiFrameRef = node => (this.iFrame = node)
 
     render() {
         const { isSidebarActive } = this.state
@@ -67,6 +82,7 @@ class Ribbon extends React.Component {
                     height={window.innerHeight}
                     id="memex_annotations_sidebar"
                     width={340}
+                    ref={this.setiFrameRef}
                     className={cx(styles.sidebarFrame, {
                         [styles.sidebarActive]: isSidebarActive,
                     })}

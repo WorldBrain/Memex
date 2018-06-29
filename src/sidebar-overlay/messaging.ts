@@ -1,5 +1,13 @@
 
-let remoteFunctions = {}
+interface remoteFunction {
+    (...args: any[]): any;
+}
+
+interface remoteFunctionsList {
+    [propName: string]: remoteFunction;
+}
+
+let remoteFunctions: remoteFunctionsList = {}
 
 const _setupListener = (messageHandler: any): void => {
     window.addEventListener('message', messageHandler, false)
@@ -17,9 +25,9 @@ const _listener = async (event) => {
         return false
     }
 
-    const funcName = message.functionName
-    const args = message.hasOwnProperty('args') ? message.args : []
-    const func = remoteFunctions[funcName]
+    const funcName: string = message.functionName
+    const args: any[] = message.hasOwnProperty('args') ? message.args : []
+    const func: remoteFunction = remoteFunctions[funcName]
 
     if (func === undefined) {
         return false
@@ -31,17 +39,19 @@ const _listener = async (event) => {
 interface Message {
     functionName: string,
     origin_memex: boolean,
-    args: any
+    args: any,
 }
 
-const _postMessage = (message: Message): void => {
-    // Right now, message transfer is only from frame to parent
-    let targetWindow = top
+const _postMessage = (message: Message, iframeWindow?: Window): void => {
+    const targetWindow = iframeWindow ? iframeWindow : top
     targetWindow.postMessage(message, '*')
 }
 
-
-export const setUpRemoteFunctions = (functionList) => {
+/**
+ * Sets up an object of function which can be called from either the parent or from the iFrame
+ * @param {remoteFunctionsList} functionList An object of functions which needs to be remotely executed
+ */
+export const setUpRemoteFunctions = (functionList: remoteFunctionsList) => {
     Object.assign(remoteFunctions, functionList)
     _setupListener(_listener)
 }
@@ -51,11 +61,11 @@ export const removeMessageListener = () => {
     remoteFunctions = {}
 }
 
-export const remoteExecute = (functionName: string): any => (...args: any[]) => {
+export const remoteExecute = (functionName: string, iframeWindow?: Window): any => (...args: any[]) => {
     const message: Message = {
         functionName,
         origin_memex: true,
         args,
     }
-    _postMessage(message)
+    _postMessage(message, iframeWindow)
 }

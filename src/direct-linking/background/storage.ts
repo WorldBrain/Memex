@@ -55,6 +55,7 @@ export default class DirectLinkingStorage extends FeatureStorage {
     }
 
     async insertDirectLink({ pageTitle, pageUrl, url, body, selector }) {
+        console.log('in insertDirectLink', pageUrl)
         await this.storageManager.putObject(COLLECTION_NAME, {
             pageTitle,
             pageUrl,
@@ -87,6 +88,7 @@ export default class DirectLinkingStorage extends FeatureStorage {
     }
 
     async getAnnotationsByUrl(pageUrl: string) {
+        console.log('In get annotations: ', pageUrl)
         return await this.storageManager.findAll(COLLECTION_NAME, {
             pageUrl,
         })

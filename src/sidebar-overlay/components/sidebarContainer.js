@@ -6,7 +6,7 @@ import { selectors, actions } from '../redux'
 import Sidebar from './Sidebar'
 import Annotation from './AnnotationContainer'
 
-import { remoteExecute } from '../messaging'
+import { remoteExecute, setUpRemoteFunctions } from '../messaging'
 
 class SidebarContainer extends React.Component {
     static propTypes = {
@@ -36,6 +36,15 @@ class SidebarContainer extends React.Component {
         const { pageTitle, pageUrl, setPageInfo, fetchAnnotations } = this.props
         setPageInfo(pageUrl, pageTitle)
         await fetchAnnotations()
+        if (this.props.env === 'iframe') this.setupiFrameMessaging()
+    }
+
+    setupiFrameMessaging = () => {
+        setUpRemoteFunctions({
+            reloadAnnotations: async () => {
+                await this.props.fetchAnnotations()
+            },
+        })
     }
 
     handleStateChange = ({ isOpen }) => {
