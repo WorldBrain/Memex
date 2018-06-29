@@ -169,8 +169,6 @@ function trackSearch(searchResult, overwrite, state) {
 
 // Internal analytics store
 function storeSearch(searchResult, overwrite, state) {
-    const query = selectors.query(state)
-
     let type
 
     if (searchResult.totalCount === 0) {
@@ -180,10 +178,6 @@ function storeSearch(searchResult, overwrite, state) {
     }
 
     internalAnalytics.processEvent({ type })
-
-    if (query.length > 0) {
-        internalAnalytics.processEvent({ type: 'nlpSearch' })
-    }
 
     if (filters.onlyBookmarks(state)) {
         internalAnalytics.processEvent({ type: 'bookmarkFilter' })
@@ -341,6 +335,10 @@ export const setQueryTagsDomains = (input, isEnter = true) => (
                 })
             }
         })
+    }
+
+    if (input.length > 0) {
+        internalAnalytics.processEvent({ type: 'nlpSearch' })
     }
 
     dispatch(setQuery(input))
