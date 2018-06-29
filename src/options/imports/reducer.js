@@ -83,7 +83,7 @@ const finishImportsReducer = ({ loading = false }) => state => ({
 const prepareImportReducer = state => ({
     ...state,
     importStatus: STATUS.LOADING,
-    loadingMsg: 'Recalcuating Download Size.',
+    loadingMsg: 'Recalculating Download Size.',
 })
 
 const cancelImportReducer = state => ({
