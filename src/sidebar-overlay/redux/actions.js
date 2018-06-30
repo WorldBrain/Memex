@@ -3,7 +3,7 @@ import { remoteFunction } from 'src/util/webextensionRPC'
 
 export const setAnnotations = createAction('setAnnotations')
 
-export const setHighlightedText = createAction('setHighlightedText')
+export const setAnchor = createAction('setAnchor')
 
 export const setPageInfo = createAction('setPageInfo')
 
@@ -17,9 +17,17 @@ export const createAnnotation = (comment, body) => async (
     dispatch,
     getState,
 ) => {
-    const { url, title } = getState().page
-    await remoteFunction('createAnnotation')({ url, title, body, comment })
-    dispatch(setHighlightedText(''))
+    const state = getState()
+    const { url, title } = state.page
+    const selector = state.anchor
+    await remoteFunction('createAnnotation')({
+        url,
+        title,
+        body,
+        comment,
+        selector,
+    })
+    dispatch(setAnchor(null))
     dispatch(fetchAnnotationAct())
 }
 

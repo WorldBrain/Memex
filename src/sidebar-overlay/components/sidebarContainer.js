@@ -20,7 +20,7 @@ class SidebarContainer extends React.Component {
         fetchAnnotations: PropTypes.func.isRequired,
         editAnnotation: PropTypes.func.isRequired,
         deleteAnnotation: PropTypes.func.isRequired,
-        setHighlightedText: PropTypes.func.isRequired,
+        setAnchor: PropTypes.func.isRequired,
     }
 
     static defaultProps = {
@@ -46,8 +46,8 @@ class SidebarContainer extends React.Component {
             reloadAnnotations: async () => {
                 await this.props.fetchAnnotations()
             },
-            setHighlightedText: text => {
-                this.props.setHighlightedText(text)
+            sendAnchorToSidebar: anchor => {
+                this.props.setAnchor(anchor)
             },
         })
     }
@@ -105,7 +105,7 @@ const mapDispatchToProps = dispatch => ({
     editAnnotation: ({ url, comment }) =>
         dispatch(actions.editAnnotation(url, comment)),
     deleteAnnotation: ({ url }) => dispatch(actions.deleteAnnotation(url)),
-    setHighlightedText: text => dispatch(actions.setAnnotations(text)),
+    setAnchor: anchor => dispatch(actions.setAnchor(anchor)),
 })
 
 export default connect(

@@ -1,3 +1,3 @@
 export const annotations = state => state.annotations
 
-export const highlightedText = state => state.highlightedText
+export const anchor = state => state.anchor

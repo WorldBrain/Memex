@@ -13,10 +13,10 @@ export interface Annotation {
     pageTitle: string
     pageUrl: string
     body: string
+    selector: object
     createdWhen?: Date
     url?: string
     comment?: string
-    selector?: object
 }
 
 export default class DirectLinkingStorage extends FeatureStorage {
@@ -129,15 +129,21 @@ export default class DirectLinkingStorage extends FeatureStorage {
         })
     }
 
-    async createAnnotation({ pageTitle, pageUrl, body, comment }: Annotation) {
+    async createAnnotation({
+        pageTitle,
+        pageUrl,
+        body,
+        comment,
+        selector,
+    }: Annotation) {
         const uniqueUrl: string = `${pageUrl}/#${new Date().getTime()}`
         return await this.storageManager.putObject(COLLECTION_NAME, {
             pageTitle,
             pageUrl,
             comment,
             body,
+            selector,
             createdWhen: new Date(),
-            selector: null,
             url: uniqueUrl,
         })
     }

@@ -39,6 +39,9 @@ export default class DirectLinkingBackground {
                 deleteAnnotation: (...params) => {
                     return this.deleteAnnotation(...params)
                 },
+                openSidebarWithHighlight: (...params) => {
+                    return this.openSidebarWithHighlight(...params)
+                },
             },
             { insertExtraArg: true },
         )
@@ -51,12 +54,16 @@ export default class DirectLinkingBackground {
         })
     }
 
-    async triggerSidebar() {
+    async triggerSidebar(functionName, ...args) {
         const [currentTab] = await browser.tabs.query({
             active: true,
             currentWindow: true,
         })
-        await remoteFunction('openSidebarOverlay', { tabId: currentTab.id })()
+        await remoteFunction(functionName, { tabId: currentTab.id })(...args)
+    }
+
+    async openSidebarWithHighlight({ tab }, anchor) {
+        this.triggerSidebar('openSidebarAndSendAnchor', anchor)
     }
 
     followAnnotationRequest({ tab }) {
@@ -92,7 +99,7 @@ export default class DirectLinkingBackground {
         }))
     }
 
-    async createAnnotation({ tab }, { url, title, comment, body }) {
+    async createAnnotation({ tab }, { url, title, comment, body, selector }) {
         const pageUrl = url === null ? tab.url : url
         const pageTitle = title === null ? tab.title : title
         return await this.storage.createAnnotation({
@@ -100,6 +107,7 @@ export default class DirectLinkingBackground {
             pageTitle,
             comment,
             body,
+            selector,
         })
     }
 

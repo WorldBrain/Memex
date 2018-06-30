@@ -17,6 +17,12 @@ export async function createAndCopyDirectLink() {
     return result
 }
 
+export async function createAnnotation() {
+    const selection = document.getSelection()
+    const anchor = await extractAnchor(selection)
+    await remoteFunction('openSidebarWithHighlight')(anchor)
+}
+
 async function extractAnchor(selection) {
     const quote = selection.toString()
 

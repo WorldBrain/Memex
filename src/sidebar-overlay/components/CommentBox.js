@@ -10,7 +10,10 @@ import styles from './CommentBox.css'
 class CommentBox extends React.Component {
     static propTypes = {
         createAnnotation: PropTypes.func.isRequired,
-        highlightedText: PropTypes.string.isRequired,
+        anchor: PropTypes.shape({
+            quote: PropTypes.string.isRequired,
+            descriptor: PropTypes.object.isRequired,
+        }),
     }
 
     state = {
@@ -59,8 +62,9 @@ class CommentBox extends React.Component {
 
     save = () => {
         const { commentInput } = this.state
-        const body = this.props.highlightedText
-        if (commentInput.length || body.length) {
+        const { anchor } = this.props
+        if (commentInput.length || anchor) {
+            const body = anchor ? anchor.quote : ''
             this.props.createAnnotation(commentInput, body)
             this.setState({
                 commentInput: '',
@@ -124,12 +128,12 @@ class CommentBox extends React.Component {
     }
 
     renderHighlightedText() {
-        if (!this.props.highlightedText) return null
+        if (!this.props.anchor) return null
         return (
             <div className={styles.highlighted}>
                 <div className={styles.newAnnotation}>New Annotation</div>
                 <div className={styles.highlightedText}>
-                    {this.props.highlightedText}
+                    {this.props.anchor.quote}
                 </div>
             </div>
         )
@@ -150,7 +154,7 @@ class CommentBox extends React.Component {
     }
 }
 const mapStateToProps = state => ({
-    highlightedText: selectors.highlightedText(state),
+    anchor: selectors.anchor(state),
 })
 const mapDispatchToProps = dispatch => ({
     createAnnotation: (comment, body) =>

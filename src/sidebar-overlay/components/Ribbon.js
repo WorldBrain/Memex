@@ -36,6 +36,9 @@ class Ribbon extends React.Component {
             openSidebarOverlay: () => {
                 this.openSidebar()
             },
+            openSidebarAndSendAnchor: async anchor => {
+                await this.openSidebarAndSendAnchor(anchor)
+            },
         })
     }
 
@@ -79,6 +82,15 @@ class Ribbon extends React.Component {
 
     openSidebar = async () => {
         await this.reloadAnnotations()
+        this.setState({
+            isSidebarActive: true,
+        })
+    }
+
+    openSidebarAndSendAnchor = async anchor => {
+        await remoteExecute('sendAnchorToSidebar', this.iFrame.contentWindow)(
+            anchor,
+        )
         this.setState({
             isSidebarActive: true,
         })
