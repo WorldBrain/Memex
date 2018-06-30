@@ -18,7 +18,6 @@ class SidebarContainer extends React.Component {
         pageTitle: PropTypes.string,
         annotations: PropTypes.array.isRequired,
         fetchAnnotations: PropTypes.func.isRequired,
-        saveComment: PropTypes.func.isRequired,
         editAnnotation: PropTypes.func.isRequired,
         deleteAnnotation: PropTypes.func.isRequired,
     }
@@ -85,7 +84,6 @@ class SidebarContainer extends React.Component {
                 toggleMouseOnSidebar={this.props.toggleMouseOnSidebar}
                 renderAnnotations={this.renderAnnotations}
                 env={this.props.env}
-                saveComment={this.props.saveComment}
             />
         )
     }
@@ -98,7 +96,6 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
     setPageInfo: (url, title) => dispatch(actions.setPageInfo({ url, title })),
     fetchAnnotations: () => dispatch(actions.fetchAnnotationAct()),
-    saveComment: comment => dispatch(actions.saveComment(comment)),
     editAnnotation: ({ url, comment }) =>
         dispatch(actions.editAnnotation(url, comment)),
     deleteAnnotation: ({ url }) => dispatch(actions.deleteAnnotation(url)),

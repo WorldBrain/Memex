@@ -9,6 +9,16 @@ import { STORAGE_KEYS as IDXING_PREF_KEYS } from '../../options/settings/constan
 
 export const COLLECTION_NAME = 'directLinks'
 
+export interface Annotation {
+    pageTitle: string
+    pageUrl: string
+    body: string
+    createdWhen?: Date
+    url?: string
+    comment?: string
+    selector?: object
+}
+
 export default class DirectLinkingStorage extends FeatureStorage {
     private _browserStorageArea: Storage.StorageArea
 
@@ -73,7 +83,13 @@ export default class DirectLinkingStorage extends FeatureStorage {
         }
     }
 
-    async insertDirectLink({ pageTitle, pageUrl, url, body, selector }) {
+    async insertDirectLink({
+        pageTitle,
+        pageUrl,
+        url,
+        body,
+        selector,
+    }: Annotation) {
         console.log('in insertDirectLink', pageUrl)
         await this.storageManager.putObject(COLLECTION_NAME, {
             pageTitle,
@@ -113,15 +129,15 @@ export default class DirectLinkingStorage extends FeatureStorage {
         })
     }
 
-    async createComment({ pageTitle, pageUrl, comment }) {
+    async createAnnotation({ pageTitle, pageUrl, body, comment }: Annotation) {
         const uniqueUrl: string = `${pageUrl}/#${new Date().getTime()}`
         return await this.storageManager.putObject(COLLECTION_NAME, {
             pageTitle,
             pageUrl,
             comment,
+            body,
             createdWhen: new Date(),
-            body: '',
-            selector: {},
+            selector: null,
             url: uniqueUrl,
         })
     }

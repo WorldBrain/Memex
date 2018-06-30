@@ -11,9 +11,12 @@ export const fetchAnnotationAct = () => async (dispatch, getState) => {
     dispatch(setAnnotations(annotations))
 }
 
-export const saveComment = comment => async (dispatch, getState) => {
+export const createAnnotation = (comment, body) => async (
+    dispatch,
+    getState,
+) => {
     const { url, title } = getState().page
-    await remoteFunction('createComment')({ url, title, comment })
+    await remoteFunction('createAnnotation')({ url, title, body, comment })
     dispatch(fetchAnnotationAct())
 }
 

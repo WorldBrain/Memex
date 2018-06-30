@@ -6,31 +6,24 @@ import CommentBox from './CommentBox'
 import styles from './Sidebar.css'
 import MenuStyles from './MenuStyles.js'
 
-const Sidebar = ({
-    showSidebar,
-    handleStateChange,
-    renderAnnotations,
-    saveComment,
-    toggleMouseOnSidebar,
-    env,
-}) => (
+const Sidebar = props => (
     <Menu
-        isOpen={showSidebar}
-        onStateChange={handleStateChange}
+        isOpen={props.showSidebar}
+        onStateChange={props.handleStateChange}
         width={340}
-        styles={MenuStyles(env)}
+        styles={MenuStyles(props.env)}
         right
         noOverlay
     >
         <div
             className={styles.sidebar}
-            onMouseEnter={toggleMouseOnSidebar}
-            onMouseLeave={toggleMouseOnSidebar}
+            onMouseEnter={props.toggleMouseOnSidebar}
+            onMouseLeave={props.toggleMouseOnSidebar}
         >
-            {showSidebar ? <CommentBox saveComment={saveComment} /> : null}
+            {props.showSidebar ? <CommentBox /> : null}
 
             <div className={styles.annotationContainer}>
-                {renderAnnotations()}
+                {props.renderAnnotations()}
             </div>
         </div>
     </Menu>
@@ -40,7 +33,6 @@ Sidebar.propTypes = {
     showSidebar: PropTypes.bool.isRequired,
     handleStateChange: PropTypes.func.isRequired,
     renderAnnotations: PropTypes.func.isRequired,
-    saveComment: PropTypes.func.isRequired,
     toggleMouseOnSidebar: PropTypes.func.isRequired,
     env: PropTypes.string.isRequired,
 }

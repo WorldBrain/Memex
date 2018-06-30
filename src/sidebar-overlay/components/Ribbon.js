@@ -51,7 +51,11 @@ class Ribbon extends React.Component {
     reloadAnnotations = async () => {
         await remoteExecute('reloadAnnotations', this.iFrame.contentWindow)()
         await this.fetchAnnotations()
-        this.props.highlightAll(this.state.annotations)
+
+        const highlightables = this.state.annotations.filter(
+            annotation => annotation.selector,
+        )
+        this.props.highlightAll(highlightables)
     }
 
     removeAllHighlights = () => {

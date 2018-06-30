@@ -30,8 +30,8 @@ export default class DirectLinkingBackground {
                 getAllAnnotations: (...params) => {
                     return this.getAllAnnotationsByUrl(...params)
                 },
-                createComment: (...params) => {
-                    return this.createComment(...params)
+                createAnnotation: (...params) => {
+                    return this.createAnnotation(...params)
                 },
                 editAnnotation: (...params) => {
                     return this.editAnnotation(...params)
@@ -92,13 +92,14 @@ export default class DirectLinkingBackground {
         }))
     }
 
-    async createComment({ tab }, { url, title, comment }) {
+    async createAnnotation({ tab }, { url, title, comment, body }) {
         const pageUrl = url === null ? tab.url : url
         const pageTitle = title === null ? tab.title : title
-        return await this.storage.createComment({
-            pageTitle: normalize(pageTitle),
-            pageUrl,
+        return await this.storage.createAnnotation({
+            pageUrl: normalize(pageUrl),
+            pageTitle,
             comment,
+            body,
         })
     }
 

@@ -1,12 +1,15 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import { connect } from 'react-redux'
+
+import { actions } from '../redux'
 
 import * as constants from '../constants'
 import styles from './CommentBox.css'
 
 class CommentBox extends React.Component {
     static propTypes = {
-        saveComment: PropTypes.func.isRequired,
+        createAnnotation: PropTypes.func.isRequired,
     }
 
     state = {
@@ -55,8 +58,9 @@ class CommentBox extends React.Component {
 
     save = () => {
         const { commentInput } = this.state
+        const body = ''
         if (commentInput.length) {
-            this.props.saveComment(commentInput)
+            this.props.createAnnotation(commentInput, body)
             this.setState({
                 commentInput: '',
                 textareaRows: constants.DEFAULT_ROWS,
@@ -132,4 +136,11 @@ class CommentBox extends React.Component {
     }
 }
 
-export default CommentBox
+const mapDispatchToProps = dispatch => ({
+    createAnnotation: comment => dispatch(actions.createAnnotation(comment)),
+})
+
+export default connect(
+    null,
+    mapDispatchToProps,
+)(CommentBox)
