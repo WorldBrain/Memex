@@ -1,4 +1,4 @@
-import { makeRemotelyCallable } from 'src/util/webextensionRPC'
+import { makeRemotelyCallable, remoteFunction } from 'src/util/webextensionRPC'
 import DirectLinkingBackend from './backend'
 import { setupRequestInterceptor } from './redirect'
 import { AnnotationRequests } from './request'
@@ -51,6 +51,14 @@ export default class DirectLinkingBackground {
         })
     }
 
+    async triggerSidebar() {
+        const [currentTab] = await browser.tabs.query({
+            active: true,
+            currentWindow: true,
+        })
+        await remoteFunction('openSidebarOverlay', { tabId: currentTab.id })()
+    }
+
     followAnnotationRequest({ tab }) {
         this.requests.followAnnotationRequest(tab.id)
     }
@@ -60,7 +68,7 @@ export default class DirectLinkingBackground {
         const result = await this.backend.createDirectLink(request)
         await this.storage.insertDirectLink({
             pageTitle,
-            pageUrl: tab.url,
+            pageUrl: normalize(tab.url),
             body: request.anchor.quote,
             url: result.url,
             selector: request.anchor,
@@ -69,6 +77,7 @@ export default class DirectLinkingBackground {
         // Attempt to (re-)index, if user preference set, but don't wait for it
         this.storage.indexPageFromTab(tab)
 
+        await this.triggerSidebar()
         return result
     }
 
@@ -87,7 +96,7 @@ export default class DirectLinkingBackground {
         const pageUrl = url === null ? tab.url : url
         const pageTitle = title === null ? tab.title : title
         return await this.storage.createComment({
-            pageTitle,
+            pageTitle: normalize(pageTitle),
             pageUrl,
             comment,
         })

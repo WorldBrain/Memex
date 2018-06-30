@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import cx from 'classnames'
 import onClickOutside from 'react-onclickoutside'
-import { remoteFunction } from 'src/util/webextensionRPC'
+import { remoteFunction, makeRemotelyCallable } from 'src/util/webextensionRPC'
 import { remoteExecute } from '../messaging'
 
 import styles from './Ribbon.css'
@@ -21,6 +21,25 @@ class Ribbon extends React.Component {
     }
 
     async componentDidMount() {
+        this.setupRPCfunctions()
+
+        const annotations = await remoteFunction('getAllAnnotations')(
+            window.location.href,
+        )
+        this.setState({
+            annotations,
+        })
+    }
+
+    setupRPCfunctions = () => {
+        makeRemotelyCallable({
+            openSidebarOverlay: () => {
+                this.openSidebar()
+            },
+        })
+    }
+
+    fetchAnnotations = async () => {
         const annotations = await remoteFunction('getAllAnnotations')(
             window.location.href,
         )
@@ -30,24 +49,23 @@ class Ribbon extends React.Component {
     }
 
     reloadAnnotations = async () => {
-        const annotations = await remoteFunction('getAllAnnotations')(
-            window.location.href,
-        )
-        this.setState({
-            annotations,
-        })
+        await remoteExecute('reloadAnnotations', this.iFrame.contentWindow)()
+        await this.fetchAnnotations()
+        this.props.highlightAll(this.state.annotations)
+    }
+
+    removeAllHighlights = () => {
+        this.props.removeHighlights({ isDark: false })
+        this.props.removeHighlights({ isDark: true })
     }
 
     toggleSidebar = async () => {
         const isSidebarActive = !this.state.isSidebarActive
 
         if (isSidebarActive) {
-            remoteExecute('reloadAnnotations')()
             await this.reloadAnnotations()
-            this.props.highlightAll(this.state.annotations)
         } else {
-            this.props.removeHighlights({ isDark: false })
-            this.props.removeHighlights({ isDark: true })
+            this.removeAllHighlights()
         }
 
         this.setState({
@@ -55,7 +73,15 @@ class Ribbon extends React.Component {
         })
     }
 
+    openSidebar = async () => {
+        await this.reloadAnnotations()
+        this.setState({
+            isSidebarActive: true,
+        })
+    }
+
     handleClickOutside = () => {
+        this.removeAllHighlights()
         this.setState({
             isSidebarActive: false,
         })

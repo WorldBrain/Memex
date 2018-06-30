@@ -20,28 +20,47 @@ export default class DirectLinkingStorage extends FeatureStorage {
         browserStorageArea: Storage.StorageArea
     }) {
         super(storageManager)
-
         this._browserStorageArea = browserStorageArea
 
-        this.storageManager.registerCollection(COLLECTION_NAME, {
-            version: new Date(2018, 6, 27),
-            fields: {
-                pageTitle: { type: 'text' },
-                pageUrl: { type: 'url' },
-                body: { type: 'text' },
-                comment: { type: 'text' },
-                selector: { type: 'json' },
-                createdWhen: { type: 'datetime' },
-                url: { type: 'string' },
+        this.storageManager.registerCollection(COLLECTION_NAME, [
+            {
+                version: new Date(2018, 6, 27),
+                fields: {
+                    pageTitle: { type: 'text' },
+                    pageUrl: { type: 'url' },
+                    body: { type: 'text' },
+                    selector: { type: 'json' },
+                    createdWhen: { type: 'datetime' },
+                    url: { type: 'string' },
+                },
+                indices: [
+                    { field: 'url', pk: true },
+                    { field: 'pageTitle' },
+                    { field: 'body' },
+                    { field: 'createdWhen' },
+                ],
             },
-            indices: [
-                { field: 'url', pk: true },
-                { field: 'pageTitle' },
-                { field: 'body' },
-                { field: 'createdWhen' },
-                { field: 'comment' },
-            ],
-        })
+            {
+                version: new Date(2018, 6, 30),
+                fields: {
+                    pageTitle: { type: 'text' },
+                    pageUrl: { type: 'url' },
+                    body: { type: 'text' },
+                    comment: { type: 'text' },
+                    selector: { type: 'json' },
+                    createdWhen: { type: 'datetime' },
+                    url: { type: 'string' },
+                },
+                indices: [
+                    { field: 'url', pk: true },
+                    { field: 'pageTitle' },
+                    { field: 'pageUrl' },
+                    { field: 'body' },
+                    { field: 'createdWhen' },
+                    { field: 'comment' },
+                ],
+            },
+        ])
     }
 
     private async fetchIndexingPrefs(): Promise<{ shouldIndexLinks: boolean }> {
@@ -88,7 +107,7 @@ export default class DirectLinkingStorage extends FeatureStorage {
     }
 
     async getAnnotationsByUrl(pageUrl: string) {
-        console.log('In get annotations: ', pageUrl)
+        console.log('In get annotations:', pageUrl)
         return await this.storageManager.findAll(COLLECTION_NAME, {
             pageUrl,
         })
@@ -108,11 +127,15 @@ export default class DirectLinkingStorage extends FeatureStorage {
     }
 
     async editAnnotation(url: string, comment: string) {
-        return await this.storageManager.updateObject(COLLECTION_NAME, {
-            url,
-        }, {
+        return await this.storageManager.updateObject(
+            COLLECTION_NAME,
+            {
+                url,
+            },
+            {
                 comment,
-            })
+            },
+        )
     }
 
     async deleteAnnotation(url: string) {

@@ -1,10 +1,9 @@
-
 interface remoteFunction {
-    (...args: any[]): any;
+    (...args: any[]): any
 }
 
 interface remoteFunctionsList {
-    [propName: string]: remoteFunction;
+    [propName: string]: remoteFunction
 }
 
 let remoteFunctions: remoteFunctionsList = {}
@@ -17,7 +16,7 @@ const _removeListener = (messageHandler: any): void => {
     window.removeEventListener('message', messageHandler)
 }
 
-const _listener = async (event) => {
+const _listener = async event => {
     const message: Message = event.data
 
     // Small validation if it's a memex request
@@ -37,9 +36,9 @@ const _listener = async (event) => {
 }
 
 interface Message {
-    functionName: string,
-    origin_memex: boolean,
-    args: any,
+    functionName: string
+    origin_memex: boolean
+    args: any
 }
 
 const _postMessage = (message: Message, iframeWindow?: Window): void => {
@@ -61,7 +60,10 @@ export const removeMessageListener = () => {
     remoteFunctions = {}
 }
 
-export const remoteExecute = (functionName: string, iframeWindow?: Window): any => (...args: any[]) => {
+export const remoteExecute = (
+    functionName: string,
+    iframeWindow?: Window,
+): any => (...args: any[]) => {
     const message: Message = {
         functionName,
         origin_memex: true,
