@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 
-import { actions } from '../redux'
+import { selectors, actions } from '../redux'
 
 import * as constants from '../constants'
 import styles from './CommentBox.css'
@@ -10,6 +10,7 @@ import styles from './CommentBox.css'
 class CommentBox extends React.Component {
     static propTypes = {
         createAnnotation: PropTypes.func.isRequired,
+        highlightedText: PropTypes.string.isRequired,
     }
 
     state = {
@@ -58,8 +59,8 @@ class CommentBox extends React.Component {
 
     save = () => {
         const { commentInput } = this.state
-        const body = ''
-        if (commentInput.length) {
+        const body = this.props.highlightedText
+        if (commentInput.length || body.length) {
             this.props.createAnnotation(commentInput, body)
             this.setState({
                 commentInput: '',
@@ -122,6 +123,18 @@ class CommentBox extends React.Component {
         )
     }
 
+    renderHighlightedText() {
+        if (!this.props.highlightedText) return null
+        return (
+            <div className={styles.highlighted}>
+                <div className={styles.newAnnotation}>New Annotation</div>
+                <div className={styles.highlightedText}>
+                    {this.props.highlightedText}
+                </div>
+            </div>
+        )
+    }
+
     render() {
         return (
             <div
@@ -129,18 +142,22 @@ class CommentBox extends React.Component {
                     this.state.isHidden ? styles.commentBoxContainer : ''
                 }
             >
+                {this.renderHighlightedText()}
                 {this.renderCommentBox()}
                 {this.renderAddNoteButton()}
             </div>
         )
     }
 }
-
+const mapStateToProps = state => ({
+    highlightedText: selectors.highlightedText(state),
+})
 const mapDispatchToProps = dispatch => ({
-    createAnnotation: comment => dispatch(actions.createAnnotation(comment)),
+    createAnnotation: (comment, body) =>
+        dispatch(actions.createAnnotation(comment, body)),
 })
 
 export default connect(
-    null,
+    mapStateToProps,
     mapDispatchToProps,
 )(CommentBox)

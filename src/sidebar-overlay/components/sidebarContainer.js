@@ -20,6 +20,7 @@ class SidebarContainer extends React.Component {
         fetchAnnotations: PropTypes.func.isRequired,
         editAnnotation: PropTypes.func.isRequired,
         deleteAnnotation: PropTypes.func.isRequired,
+        setHighlightedText: PropTypes.func.isRequired,
     }
 
     static defaultProps = {
@@ -35,13 +36,18 @@ class SidebarContainer extends React.Component {
         const { pageTitle, pageUrl, setPageInfo, fetchAnnotations } = this.props
         setPageInfo(pageUrl, pageTitle)
         await fetchAnnotations()
-        if (this.props.env === 'iframe') this.setupiFrameMessaging()
+        if (this.props.env === 'iframe') {
+            this.setupiFrameMessaging()
+        }
     }
 
     setupiFrameMessaging = () => {
         setUpRemoteFunctions({
             reloadAnnotations: async () => {
                 await this.props.fetchAnnotations()
+            },
+            setHighlightedText: text => {
+                this.props.setHighlightedText(text)
             },
         })
     }
@@ -99,6 +105,7 @@ const mapDispatchToProps = dispatch => ({
     editAnnotation: ({ url, comment }) =>
         dispatch(actions.editAnnotation(url, comment)),
     deleteAnnotation: ({ url }) => dispatch(actions.deleteAnnotation(url)),
+    setHighlightedText: text => dispatch(actions.setAnnotations(text)),
 })
 
 export default connect(

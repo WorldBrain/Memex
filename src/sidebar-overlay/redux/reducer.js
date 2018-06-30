@@ -4,6 +4,7 @@ import * as actions from './actions'
 
 const defaultState = {
     annotations: [],
+    highlightedText: '',
     page: {
         url: null,
         title: null,
@@ -20,10 +21,16 @@ const setPageInfo = (state, page) => ({
     page: page,
 })
 
+const setHighlightedText = (state, text) => ({
+    ...state,
+    highlightedText: text,
+})
+
 export default createReducer(
     {
         [actions.setAnnotations]: setAnnotations,
         [actions.setPageInfo]: setPageInfo,
+        [actions.setHighlightedText]: setHighlightedText,
     },
     defaultState,
 )

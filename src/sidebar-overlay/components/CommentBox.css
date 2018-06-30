@@ -2,6 +2,21 @@
     height: 20px;
 }
 
+.highlighted {
+    color: #3eb995;
+    font-family: 'Open Sans';
+    margin: 10px 20px;
+
+    & .newAnnotation {
+        font-size: 15px;
+        margin-bottom: 10px;
+    }
+
+    & .highlightedText {
+        font-size: 13px;
+    }
+}
+
 .commentBox {
     margin: 10px 15px;
     margin-bottom: 0px;
