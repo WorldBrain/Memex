@@ -9,14 +9,20 @@ const images = {
     check: getExtURL('/img/green_check.svg'),
 }
 
-export const InitialComponent = ({ createLink }) => (
-    <div className={styles.createLinkButton} onMouseDown={createLink}>
-        <img className={styles.createLinkImg} src={images.share} />
+export const InitialComponent = ({ createLink, createAnnotation }) => (
+    <div className={styles.createButtons}>
+        <div className={styles.annotateButton} onMouseDown={createAnnotation}>
+            <img src={images.share} />
+        </div>
+        <div className={styles.linkButton} onMouseDown={createLink}>
+            <img src={images.share} />
+        </div>
     </div>
 )
 
 InitialComponent.propTypes = {
     createLink: PropTypes.func.isRequired,
+    createAnnotation: PropTypes.func.isRequired,
 }
 
 export const CreatingLinkComponent = () => (
@@ -41,6 +47,12 @@ export const CopiedComponent = () => (
                 Everyone opening it can see this quote
             </p>
         </div>
+    </div>
+)
+
+export const DoneComponent = () => (
+    <div className={styles.doneComponent}>
+        <img className={styles.check} src={images.check} />
     </div>
 )
 

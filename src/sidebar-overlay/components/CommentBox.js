@@ -10,6 +10,7 @@ import styles from './CommentBox.css'
 class CommentBox extends React.Component {
     static propTypes = {
         createAnnotation: PropTypes.func.isRequired,
+        setAnchor: PropTypes.func.isRequired,
         anchor: PropTypes.shape({
             quote: PropTypes.string.isRequired,
             descriptor: PropTypes.object.isRequired,
@@ -54,6 +55,7 @@ class CommentBox extends React.Component {
     cancel = () => {
         this.inputRef.rows = this.state.textareaRows
         this.inputRef.focus()
+        this.props.setAnchor(null)
         this.setState({
             commentInput: '',
             textareaRows: constants.DEFAULT_ROWS,
@@ -159,6 +161,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
     createAnnotation: (comment, body) =>
         dispatch(actions.createAnnotation(comment, body)),
+    setAnchor: anchor => dispatch(actions.setAnchor(anchor)),
 })
 
 export default connect(

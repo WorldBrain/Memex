@@ -19,8 +19,11 @@ export async function createAndCopyDirectLink() {
 
 export async function createAnnotation() {
     const selection = document.getSelection()
+    const range = selection.getRangeAt(0)
+
     const anchor = await extractAnchor(selection)
     await remoteFunction('openSidebarWithHighlight')(anchor)
+    selectTextFromRange(range)
 }
 
 async function extractAnchor(selection) {

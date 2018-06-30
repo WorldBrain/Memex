@@ -61,9 +61,12 @@ class Ribbon extends React.Component {
         this.props.highlightAll(highlightables)
     }
 
-    removeAllHighlights = () => {
+    closeSidebarOps = async () => {
         this.props.removeHighlights({ isDark: false })
         this.props.removeHighlights({ isDark: true })
+        await remoteExecute('sendAnchorToSidebar', this.iFrame.contentWindow)(
+            null,
+        )
     }
 
     toggleSidebar = async () => {
@@ -72,7 +75,7 @@ class Ribbon extends React.Component {
         if (isSidebarActive) {
             await this.reloadAnnotations()
         } else {
-            this.removeAllHighlights()
+            this.closeSidebarOps()
         }
 
         this.setState({
@@ -97,7 +100,7 @@ class Ribbon extends React.Component {
     }
 
     handleClickOutside = () => {
-        this.removeAllHighlights()
+        this.closeSidebarOps()
         this.setState({
             isSidebarActive: false,
         })

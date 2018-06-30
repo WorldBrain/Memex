@@ -1,6 +1,9 @@
 import { bodyLoader } from 'src/util/loader'
 import { OPEN_OPTIONS } from 'src/search-injection/constants'
-import { createAndCopyDirectLink } from 'src/direct-linking/content_script/interactions'
+import {
+    createAndCopyDirectLink,
+    createAnnotation,
+} from 'src/direct-linking/content_script/interactions'
 import { setupUIContainer, destroyUIContainer } from './components'
 import * as interactions from './interactions'
 import { injectCSS } from 'src/search-injection/dom'
@@ -17,6 +20,7 @@ export async function init() {
 
     const showTooltip = await setupUIContainer(target, {
         createAndCopyDirectLink,
+        createAnnotation,
         openSettings: () => {
             const message = {
                 action: OPEN_OPTIONS,
