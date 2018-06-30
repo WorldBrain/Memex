@@ -1,5 +1,4 @@
 import { createSelector } from 'reselect'
-import difference from 'lodash/fp/difference'
 
 import { selectors as filters } from 'src/overview/filters'
 
@@ -46,24 +45,6 @@ export const getUrlsToEdit = createSelector(
     state => state.urlsToEdit,
 )
 
-// Will determine if all/some/none pages are on the list.
-const getListUrlState = (lists, urlsToEdit) => {
-    const { pages } = lists
-    let pagesLen = 0
-    // TODO: TEMPORARY CHECK UNTIL PAGES NOT ADDED TO LIST.
-    if (pages) pagesLen = pages.length
-    const editLen = urlsToEdit.length
-
-    if (editLen === 0 || pagesLen === 0) return 'none'
-
-    const diff = difference(pages, urlsToEdit)
-    const diffLen = diff.length
-    if (diffLen === 0 && pagesLen >= editLen) return 'all'
-    else if (diffLen === pagesLen) return 'none'
-
-    return 'some'
-}
-
 export const results = createSelector(
     getSortedLists,
     activeListIndex,
@@ -75,7 +56,6 @@ export const results = createSelector(
             ...pageDoc,
             isEditing: i === listIndex,
             isFilterIndex: Number(listFilter) === pageDoc.id,
-            listUrlState: getListUrlState(pageDoc, urlsToEdit),
         })),
 )
 

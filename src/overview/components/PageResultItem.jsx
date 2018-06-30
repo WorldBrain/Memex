@@ -32,27 +32,17 @@ class PageResultItem extends PureComponent {
         setTagButtonRef: PropTypes.func.isRequired,
         isListFilterActive: PropTypes.bool.isRequired,
         handleCrossRibbonClick: PropTypes.func.isRequired,
-        showListDropdown: PropTypes.bool.isRequired,
-        isUrlEdited: PropTypes.bool.isRequired,
-        handleToggleUrlToEdit: PropTypes.func.isRequired,
-        urlsAdded: PropTypes.array.isRequired,
         setUrlDragged: PropTypes.func.isRequired,
     }
 
     dragStart = e => {
-        const { urlsAdded, url, setUrlDragged } = this.props
+        const { url, setUrlDragged } = this.props
         setUrlDragged(url)
         // TODO: May bring the render function here
         const crt = document.getElementById('dragged-element')
         crt.style.display = 'block'
-        // document.body.appendChild(crt)
 
-        // TODO: see if another data type is allowed
-        if (urlsAdded.indexOf(url) > -1) {
-            e.dataTransfer.setData('text/plain', urlsAdded)
-        } else {
-            e.dataTransfer.setData('text/plain', url)
-        }
+        e.dataTransfer.setData('text/plain', url)
 
         e.dataTransfer.setDragImage(crt, 15, 15)
     }
@@ -155,20 +145,6 @@ class PageResultItem extends PureComponent {
                                         maxWidth: '100%',
                                         maxHeight: '100%',
                                     }}
-                                />
-                            </SemiCircularRibbon>
-                        )}
-                    </div>
-                    <div>
-                        {this.props.showListDropdown && (
-                            <SemiCircularRibbon>
-                                <input
-                                    type="checkbox"
-                                    checked={this.props.isUrlEdited}
-                                    className={styles.checkbox}
-                                />
-                                <label
-                                    onClick={this.props.handleToggleUrlToEdit}
                                 />
                             </SemiCircularRibbon>
                         )}

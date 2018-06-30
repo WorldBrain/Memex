@@ -1,5 +1,4 @@
 import { createReducer } from 'redux-act'
-import difference from 'lodash/fp/difference'
 import union from 'lodash/fp/union'
 
 import * as actions from './actions'
@@ -23,10 +22,6 @@ const defaultState = {
         // Used to keep track of any particular result (use index)
         deleting: undefined,
     },
-    listEditDropdown: false,
-    urlsToEdit: [],
-    tempLists: [],
-    showAddToList: false,
     urlDragged: '',
     showCreateListForm: false,
     showCommonNameWarning: false,
@@ -36,11 +31,6 @@ const getAllLists = (state, lists) => ({
     ...state,
     lists,
     tempLists: lists,
-})
-
-const setTempLists = state => ({
-    ...state,
-    tempLists: state.lists,
 })
 
 const createList = (state, list) => ({
@@ -122,102 +112,6 @@ const toggleListFilterIndex = (state, index) => {
     }
 }
 
-const toggleUrlToEdit = (state, url) => {
-    const { urlsToEdit } = state
-    const index = urlsToEdit.indexOf(url)
-
-    if (index > -1) {
-        return {
-            ...state,
-            urlsToEdit: [
-                ...urlsToEdit.slice(0, index),
-                ...urlsToEdit.slice(index + 1),
-            ],
-        }
-    }
-
-    return {
-        ...state,
-        urlsToEdit: [...urlsToEdit, url],
-    }
-}
-
-const bulkRemovePagesFromList = (state, id) => {
-    const { urlsToEdit } = state
-    const list = state.tempLists.find(x => x.id === id)
-    const index = state.tempLists.indexOf(list)
-
-    // difference returns Arr1 - Arr2 (all values of Arr2 removed from Arr1)
-    return {
-        ...state,
-        tempLists: [
-            ...state.tempLists.slice(0, index),
-            {
-                ...list,
-                pages: difference(list.pages, urlsToEdit),
-            },
-            ...state.tempLists.slice(index + 1),
-        ],
-    }
-}
-
-const bulkAddPagesToList = (state, id) => {
-    const { urlsToEdit } = state
-    const list = state.tempLists.find(x => x.id === id)
-    const index = state.tempLists.indexOf(list)
-
-    // difference returns Arr1 - Arr2 (all values of Arr2 removed from Arr1)
-    return {
-        ...state,
-        tempLists: [
-            ...state.tempLists.slice(0, index),
-            {
-                ...list,
-                pages: union(list.pages, urlsToEdit),
-            },
-            ...state.tempLists.slice(index + 1),
-        ],
-    }
-}
-
-const saveTempToLists = state => ({
-    ...state,
-    lists: state.tempLists,
-})
-
-const resetPagesinTempList = (state, id) => {
-    const tempList = state.tempLists.find(x => x.id === id)
-    const list = state.lists.find(x => x.id === id)
-    const index = state.tempLists.indexOf(list)
-
-    return {
-        ...state,
-        tempLists: [
-            ...state.tempLists.slice(0, index),
-            {
-                ...tempList,
-                pages: list.pages,
-            },
-            ...state.tempLists.slice(index + 1),
-        ],
-    }
-}
-
-const toggleAddToList = state => ({
-    ...state,
-    showAddToList: !state.showAddToList,
-})
-
-const closeAddToList = state => ({
-    ...state,
-    showAddToList: false,
-})
-
-const resetUrlToEdit = state => ({
-    ...state,
-    urlsToEdit: [],
-})
-
 const setUrlDragged = (state, url) => ({
     ...state,
     urlDragged: url,
@@ -267,19 +161,6 @@ export default createReducer(
             ...state,
             deleteConfirmProps: { ...defaultState.deleteConfirmProps },
         }),
-        [actions.toggleListDropdown]: state => ({
-            ...state,
-            listEditDropdown: !state.listEditDropdown,
-        }),
-        [actions.toggleUrlToEdit]: toggleUrlToEdit,
-        [actions.bulkAddPagesToList]: bulkAddPagesToList,
-        [actions.bulkRemovePagesFromList]: bulkRemovePagesFromList,
-        [actions.applyBulkEdits]: saveTempToLists,
-        [actions.resetPagesinTempList]: resetPagesinTempList,
-        [actions.setTempLists]: setTempLists,
-        [actions.toggleAddToList]: toggleAddToList,
-        [actions.closeAddToList]: closeAddToList,
-        [actions.resetUrlToEdit]: resetUrlToEdit,
         [actions.setUrlDragged]: setUrlDragged,
         [actions.openCreateListForm]: openCreateListForm,
         [actions.closeCreateListForm]: closeCreateListForm,

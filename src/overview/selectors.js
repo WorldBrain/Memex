@@ -2,7 +2,6 @@ import { createSelector } from 'reselect'
 
 import * as filterSelectors from './filters/selectors'
 import * as constants from './constants'
-import { selectors as customLists } from 'src/custom-lists'
 
 /**
  * Either set display title to be the top-level title field, else look in content. Fallback is the URL.
@@ -103,15 +102,13 @@ export const results = createSelector(
     isDeleteConfShown,
     deletingResultIndex,
     activeTagIndex,
-    customLists.getUrlsToEdit,
-    (docs, modalShown, deleting, tagIndex, urlsToEdit) =>
+    (docs, modalShown, deleting, tagIndex) =>
         docs.map((pageDoc, i) => ({
             ...pageDoc,
             title: decideTitle(pageDoc),
             isDeleting: !modalShown && i === deleting,
             tagPillsData: pageDoc.tags.slice(0, constants.SHOWN_TAGS_LIMIT),
             shouldDisplayTagPopup: i === tagIndex,
-            isUrlEdited: urlsToEdit.indexOf(pageDoc.url) > -1,
         })),
 )
 

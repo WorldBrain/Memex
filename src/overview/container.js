@@ -25,7 +25,6 @@ import Sidebar, {
 import NoResultBadTerm from './components/NoResultBadTerm'
 import localStyles from './components/Overview.css'
 import { actions as listActs, selectors as customLists } from 'src/custom-lists'
-import { ListEditDropdown } from 'src/custom-lists/components'
 
 class OverviewContainer extends Component {
     static propTypes = {
@@ -56,10 +55,8 @@ class OverviewContainer extends Component {
         mouseOnSidebar: PropTypes.bool.isRequired,
         init: PropTypes.func.isRequired,
         handleToggleUrlToEdit: PropTypes.func.isRequired,
-        showListDropdown: PropTypes.bool.isRequired,
         isListFilterActive: PropTypes.bool.isRequired,
         handleCrossRibbonClick: PropTypes.func.isRequired,
-        urlsAdded: PropTypes.arrayOf(PropTypes.string).isRequired,
         urlDragged: PropTypes.string.isRequired,
         setUrlDragged: PropTypes.func.isRequired,
     }
@@ -142,10 +139,8 @@ class OverviewContainer extends Component {
                 onCommentBtnClick={this.props.handleCommentBtnClick(doc)}
                 tagPills={this.renderTagPills(doc, i)}
                 isListFilterActive={this.props.isListFilterActive}
-                showListDropdown={this.props.showListDropdown}
                 handleToggleUrlToEdit={this.props.handleToggleUrlToEdit(doc)}
                 handleCrossRibbonClick={this.props.handleCrossRibbonClick(doc)}
-                urlsAdded={this.props.urlsAdded}
                 setUrlDragged={this.props.setUrlDragged}
                 {...doc}
             />
@@ -278,15 +273,7 @@ class OverviewContainer extends Component {
 
     renderFilters = () => <Filters setDropdownRef={this.trackDropwdownRef} />
 
-    renderListDropdown = () => <ListEditDropdown />
-
     renderDragElement = () => {
-        let pagesDragged = 1
-        const { urlDragged, urlsAdded } = this.props
-        if (urlsAdded.length && urlsAdded.indexOf(urlDragged) > -1) {
-            pagesDragged = urlsAdded.length
-        }
-
         return (
             <div
                 id="dragged-element"
@@ -294,7 +281,7 @@ class OverviewContainer extends Component {
                 href="#"
             >
                 {' '}
-                Add {pagesDragged} page(s)
+                Add 1 page
             </div>
         )
     }
@@ -307,7 +294,6 @@ class OverviewContainer extends Component {
                     setInputRef={this.setInputRef}
                     onInputChange={this.props.handleInputChange}
                     filters={this.renderFilters()}
-                    listEditDropdown={this.renderListDropdown()}
                     onQuerySearchKeyDown={this.handleSearchEnter}
                     isSearchDisabled={this.props.showOnboarding}
                     scrollDisabled={this.props.mouseOnSidebar}
@@ -344,8 +330,6 @@ const mapStateToProps = state => ({
     isTooltipRenderable: selectors.isTooltipRenderable(state),
     mouseOnSidebar: sidebarSels.mouseOnSidebar(state),
     isListFilterActive: filters.listFilterActive(state),
-    showListDropdown: customLists.listEditDropdown(state),
-    urlsAdded: customLists.getUrlsToEdit(state),
     urlDragged: customLists.getUrlDragged(state),
 })
 

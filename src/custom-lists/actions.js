@@ -66,23 +66,6 @@ export const toggleListFilterIndex = createAction(
     'custom-lists/toggleListFilterIndex',
 )
 
-// TODO: (imp) Replace two add with just one add action.
-export const bulkAddPagesToList = createAction(
-    'custom-lists/bulkAddPagesToList',
-)
-
-export const bulkRemovePagesFromList = createAction(
-    'custom-lists/bulkRemovePagesFromList',
-)
-
-export const applyBulkEdits = createAction('custom-lists/applyBulkEdits')
-
-export const resetPagesinTempList = createAction(
-    'custom-lists/resetPagesinTempList',
-)
-
-export const setTempLists = createAction('custom-lists/setTempLists')
-
 export const toggleAddToList = createAction('custom-lists/toggleAddToList')
 
 export const closeAddToList = createAction('custom-lists/closeAddToList')
@@ -213,11 +196,6 @@ export const addUrltoList = (url, index, id) => async (dispatch, getState) => {
         dispatch(addPagetoList(url, index))
         updateLastActive()
     }
-}
-
-export const handleToggleAddToList = () => (dispatch, getState) => {
-    dispatch(applyBulkEdits())
-    dispatch(toggleAddToList())
 }
 
 // TODO: Remove this class after checking.

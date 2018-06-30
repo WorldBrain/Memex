@@ -14,12 +14,6 @@ const showFilterClass = ({ showFilters }) =>
         [styles.hideFilter]: !showFilters,
     })
 
-const showListDropdown = ({ showListDropdown }) =>
-    classNames({
-        [styles.filtersContainer]: true,
-        [styles.hideFilter]: !showListDropdown,
-    })
-
 const Overview = props => (
     <Wrapper>
         <Head />
