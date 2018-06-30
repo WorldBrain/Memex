@@ -29,7 +29,7 @@ class PageList extends Component {
                 [styles.pageListDrag]: this.state.isDragInside,
             },
             {
-                [styles.pageListDrag]: this.props.isFiltered,
+                [styles.filtered]: this.props.isFiltered,
             },
         )
     }

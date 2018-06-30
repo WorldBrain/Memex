@@ -20,5 +20,6 @@ export function setupUIContainer(
     })
 }
 
-ReactDOM.render(<Container {...state} />, target)
+export function destroyUIContainer(target) {
+    ReactDOM.unmountComponentAtNode(target)
 }

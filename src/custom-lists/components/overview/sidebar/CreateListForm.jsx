@@ -23,6 +23,7 @@ const CreateListForm = props => (
                 autoFocus
                 required
             />
+            <button className={cx(styles.deleteButton, styles.button)} />
         </form>
         {props.showWarning && (
             <small className={styles.sameNameWarning}>

@@ -239,8 +239,8 @@ export class StorageManager implements ManageableStorage {
 
         let coll =
             findOpts.ignoreCase &&
-            findOpts.ignoreCase.length &&
-            findOpts.ignoreCase[0] === indexName
+                findOpts.ignoreCase.length &&
+                findOpts.ignoreCase[0] === indexName
                 ? whereClause.startsWithIgnoreCase(value)
                 : whereClause.startsWith(value)
 

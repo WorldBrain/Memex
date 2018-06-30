@@ -76,6 +76,10 @@
     background-color: #d7d7d7;
 }
 
+.filtered {
+    background-color: #a9a4a4;
+}
+
 .editButton {
     background-image: url('/img/pen.svg');
     width: 36px;
@@ -114,6 +118,7 @@
     font-weight: 300;
     cursor: pointer;
     width: 100%;
+    height: 100%;
 }
 
 .allLists {

@@ -4,6 +4,7 @@ import { ListObject, PageObject } from './types'
 const COLLECTION_NAME: string = 'customLists'
 const PAGE_LIST_ENTRY = 'pageListEntries'
 
+// TODO: Add typings for the class
 export default class CustomListStorage extends FeatureStorage {
     constructor(storageManager) {
         super(storageManager)
@@ -83,9 +84,15 @@ export default class CustomListStorage extends FeatureStorage {
         return pages
     }
 
-    // TODO: Returns list By Id
-    async getListById({ id }) {
-        return ''
+    async getListAssocPage({ url }) {
+        const pages = await this.storageManager.findAll(PAGE_LIST_ENTRY, {
+            pageUrl: url,
+        })
+        const promises = pages.map(async (page: PageObject) => {
+            const list = await this.fetchListById(page.listId)
+            return list
+        })
+        return Promise.all(promises)
     }
 
     // Function to insert into the DB

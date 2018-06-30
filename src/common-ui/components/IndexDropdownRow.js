@@ -10,8 +10,11 @@ import annotationStyles from './IndexDropdownAnnotation.css'
  */
 class IndexDropdownRow extends PureComponent {
     static propTypes = {
-        value: PropTypes.oneOfType([PropTypes.string, PropTypes.element])
-            .isRequired,
+        value: PropTypes.oneOfType([
+            PropTypes.string,
+            PropTypes.object,
+            PropTypes.element,
+        ]).isRequired,
         active: PropTypes.bool,
         onClick: PropTypes.func.isRequired,
         focused: PropTypes.bool,
