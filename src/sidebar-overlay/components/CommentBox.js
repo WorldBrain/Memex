@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 
 import { selectors, actions } from '../redux'
-
+import { IndexDropdown } from 'src/common-ui/containers'
 import * as constants from '../constants'
 import styles from './CommentBox.css'
 
@@ -83,6 +83,29 @@ class CommentBox extends React.Component {
         })
     }
 
+    addTag = newTag => {
+        const tags = [newTag, ...this.state.tags]
+        this.setState({
+            tags,
+        })
+    }
+
+    delTag = tag => {
+        const oldTags = [...this.state.tags]
+        const tagIndex = oldTags.indexOf(tag)
+
+        if (tagIndex === -1) return null
+
+        const tags = [
+            ...oldTags.slice(0, tagIndex),
+            ...oldTags.slice(tagIndex + 1),
+        ]
+
+        this.setState({
+            tags,
+        })
+    }
+
     renderCancelButton() {
         return (
             <a className={styles.cancel} onClick={this.cancel}>
@@ -114,10 +137,13 @@ class CommentBox extends React.Component {
                     ref={this.setInputRef}
                 />
                 <br />
-                <input
-                    type="text"
-                    className={styles.tagsInput}
-                    placeholder="Add tags"
+                <IndexDropdown
+                    isForAnnotation
+                    allowAdd
+                    initFilters={this.state.tags}
+                    onFilterAdd={this.addTag}
+                    onFilterDel={this.delTag}
+                    source="tag"
                 />
                 <div className={styles.buttonHolder}>
                     {this.renderCancelButton()}

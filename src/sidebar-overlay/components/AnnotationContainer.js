@@ -4,6 +4,7 @@ import moment from 'moment'
 
 import Annotation from './Annotation'
 import styles from './Annotation.css'
+import { IndexDropdown } from '../../common-ui/containers'
 
 class AnnotationContainer extends React.Component {
     static propTypes = {
@@ -21,6 +22,7 @@ class AnnotationContainer extends React.Component {
         annotationEditMode: false,
 
         containsTags: false,
+        tags: [],
 
         footerState: 'default',
     }
@@ -83,6 +85,29 @@ class AnnotationContainer extends React.Component {
 
         this.props.editAnnotation({ url, comment: annotationText })
         this.toggleEditAnnotation()
+    }
+
+    addTag = newTag => {
+        const tags = [newTag, ...this.state.tags]
+        this.setState({
+            tags,
+        })
+    }
+
+    delTag = tag => {
+        const oldTags = [...this.state.tags]
+        const tagIndex = oldTags.indexOf(tag)
+
+        if (tagIndex === -1) return null
+
+        const tags = [
+            ...oldTags.slice(0, tagIndex),
+            ...oldTags.slice(tagIndex + 1),
+        ]
+
+        this.setState({
+            tags,
+        })
     }
 
     renderTimestamp = () => {
@@ -252,10 +277,13 @@ class AnnotationContainer extends React.Component {
                         value={this.state.annotationText}
                         onChange={this.handleChange}
                     />
-                    <input
-                        type="text"
-                        className={styles.tagsInput}
-                        placeholder="Add tags"
+                    <IndexDropdown
+                        isForAnnotation
+                        url={this.props.annotation.url}
+                        initFilters={this.state.tags}
+                        onFilterAdd={this.addTag}
+                        onFilterDel={this.delTag}
+                        source="tag"
                     />
                 </div>
             )
@@ -270,6 +298,7 @@ class AnnotationContainer extends React.Component {
     }
 
     render() {
+        console.log(this.state.tags)
         return (
             <Annotation
                 renderHighlight={this.renderHighlight}
