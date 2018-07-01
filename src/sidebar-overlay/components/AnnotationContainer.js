@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import moment from 'moment'
+import { remoteFunction } from '../../util/webextensionRPC'
 
 import Annotation from './Annotation'
 import styles from './Annotation.css'
@@ -27,7 +28,7 @@ class AnnotationContainer extends React.Component {
         footerState: 'default',
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         const { annotation } = this.props
         const truncated = {}
         let annotationText = ''
@@ -41,12 +42,15 @@ class AnnotationContainer extends React.Component {
             annotationText = annotation.comment
         }
 
-        if (annotation.tags && annotation.tags.length) containsTags = true
+        const tags = await remoteFunction('getAnnotationTags')(annotation.url)
+        console.log(tags)
+        if (tags.length) containsTags = true
 
         this.setState({
             truncated,
             annotationText,
             containsTags,
+            tags,
         })
     }
 
@@ -109,6 +113,8 @@ class AnnotationContainer extends React.Component {
             tags,
         })
     }
+
+    getTags = () => this.state.tags.map(tag => tag.name)
 
     renderTimestamp = () => {
         const { footerState } = this.state
@@ -183,11 +189,11 @@ class AnnotationContainer extends React.Component {
     }
 
     renderTagPills = () => {
-        const { tags } = this.props.annotation
+        const { tags } = this.state
         if (!tags) return
         return tags.map((tag, i) => (
             <span key={i} className={styles.tagPill}>
-                {tag}
+                {tag.name}
             </span>
         ))
     }
@@ -280,7 +286,7 @@ class AnnotationContainer extends React.Component {
                     <IndexDropdown
                         isForAnnotation
                         url={this.props.annotation.url}
-                        initFilters={this.state.tags}
+                        initFilters={this.getTags()}
                         onFilterAdd={this.addTag}
                         onFilterDel={this.delTag}
                         source="tag"
@@ -298,7 +304,6 @@ class AnnotationContainer extends React.Component {
     }
 
     render() {
-        console.log(this.state.tags)
         return (
             <Annotation
                 renderHighlight={this.renderHighlight}

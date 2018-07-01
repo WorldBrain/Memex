@@ -11,44 +11,25 @@ import {
     IndexDropdownRow,
 } from '../components'
 
-<<<<<<< HEAD:src/common-ui/containers/IndexDropdown.tsx
 export interface Props {
     source: 'tag' | 'domain'
     /** The URL to use for dis/associating new tags with; set this to keep in sync with index. */
     url?: string
     hover?: boolean
     tabId?: number
+    /** Whether the tags are for annotations */
+    isForAnnotation?: boolean
+    /** Manual flag to display "Add tag" without creating a tag */
+    allowAdd?: boolean
     /** Tag Filters that are previously present in the location. */
     initFilters?: string[]
     /** Opt. cb to run when new tag added to state. */
     onFilterAdd?: (filter: string) => void
     /** Opt. cb to run when tag deleted from state. */
     onFilterDel?: (filter: string) => void
+    /** Opt. cb with new tag to be added to a new annotation */
+    onNewTagAdd: (filter: string) => void
 }
-=======
-class IndexDropdownContainer extends Component {
-    static propTypes = {
-        // The URL to use for dis/associating new tags with; set this to keep in sync with index
-        url: PropTypes.string,
-
-        // Opt. cb to run when new tag added to state
-        onFilterAdd: PropTypes.func,
-
-        // Opt. cb to run when tag deleted from state
-        onFilterDel: PropTypes.func,
-
-        // Whether the tags are for annotations ( changes a few rules )
-        isForAnnotation: PropTypes.bool,
-
-        // Whether new tags can be created ( scenario: Sidebar/CommentBox )
-        allowAdd: PropTypes.bool,
-
-        // Opt. cb with new tag to be added to annotation
-        onNewTagAdd: PropTypes.func,
-
-        // Tag Filters that are previously present in the location
-        initFilters: PropTypes.arrayOf(PropTypes.string),
->>>>>>> Add IndexDropdown to CommentBox and Annotation.:src/common-ui/containers/IndexDropdown.js
 
 export interface State {
     searchVal: string
@@ -76,6 +57,11 @@ class IndexDropdownContainer extends Component<Props, State> {
         this.suggestRPC = remoteFunction('suggest')
         this.addTagRPC = remoteFunction('addTag')
         this.delTagRPC = remoteFunction('delTag')
+
+        if (this.props.isForAnnotation) {
+            this.addTagRPC = remoteFunction('addAnnotationTag')
+            this.delTagRPC = remoteFunction('delAnnotationTag')
+        }
 
         this.fetchTagSuggestions = debounce(300)(this.fetchTagSuggestions)
 
@@ -148,13 +134,8 @@ class IndexDropdownContainer extends Component<Props, State> {
             .toLowerCase()
     }
 
-<<<<<<< HEAD:src/common-ui/containers/IndexDropdown.tsx
     private canCreateTag() {
-        if (!this.allowIndexUpdate) {
-=======
-    canCreateTag() {
         if (!this.allowIndexUpdate && !this.props.allowAdd) {
->>>>>>> Add IndexDropdown to CommentBox and Annotation.:src/common-ui/containers/IndexDropdown.js
             return false
         }
 
