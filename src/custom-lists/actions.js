@@ -87,10 +87,6 @@ export const removeCommonNameWarning = createAction(
     'custom-lists/removeCommonNameWarning',
 )
 
-// returns instance of ListStorageHandler class
-export const listStorage = () => (dispatch, getState) =>
-    new ListStorageHandler(dispatch, getState)
-
 export const showEditBox = index => (dispatch, getState) => {
     const activeListIndex = selectors.activeListIndex(getState())
     if (activeListIndex === index) {
@@ -131,11 +127,9 @@ export const getListFromDB = () => async (dispatch, getState) => {
 
 export const createPageList = (name, cb) => async (dispatch, getState) => {
     // gets id from DB after it is added
-    // TODO: add id
 
     try {
         // Create List
-        // TODO: Return Id of the added list to update in the state.
         const id = await remoteFunction('createCustomList')({ name })
         if (id) {
             const list = {
@@ -162,7 +156,6 @@ export const createPageList = (name, cb) => async (dispatch, getState) => {
 export const updateList = (index, name, id) => async (dispatch, getState) => {
     dispatch(resetActiveListIndex())
     try {
-        // TODO: change the ID with different Id
         await remoteFunction('updateListName')({ id, name })
         dispatch(updateListName(name, index))
     } catch (e) {
@@ -196,53 +189,4 @@ export const addUrltoList = (url, index, id) => async (dispatch, getState) => {
         dispatch(addPagetoList(url, index))
         updateLastActive()
     }
-}
-
-// TODO: Remove this class after checking.
-export default class ListStorageHandler {
-    constructor(dispatch, getState) {
-        this._dispatch = dispatch
-        this._getState = getState
-    }
-
-    async getListFromDB() {
-        this._dispatch(getAllLists([]))
-    }
-
-    getListById() {}
-
-    delListById() {}
-
-    // TODO:  Make these 3 functions more general. :
-    async createList(event) {
-        event.preventDefault()
-        const { value } = event.target.elements['listName']
-        const list = {
-            id: null,
-            name: value,
-            isDeletable: true,
-            pages: [],
-        }
-        this._dispatch(createList(list))
-    }
-
-    updateList = index => async event => {
-        event.preventDefault()
-        const { value } = event.target.elements['listName']
-        this._dispatch(resetActiveListIndex())
-        this._dispatch(updateListName(value, index))
-    }
-
-    deleteList = () => event => {
-        event.preventDefault()
-        const { id, deleting } = selectors.deleteConfirmProps(this._getState())
-        this._dispatch(deleteList(id, deleting))
-        this._dispatch(resetListDeleteModal())
-    }
-
-    addPagetoList = (id, index) => url => {
-        this._dispatch(addPagetoList(url, index))
-    }
-
-    delPageFromList() {}
 }

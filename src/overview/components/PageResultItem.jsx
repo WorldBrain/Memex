@@ -38,7 +38,6 @@ class PageResultItem extends PureComponent {
     dragStart = e => {
         const { url, setUrlDragged } = this.props
         setUrlDragged(url)
-        // TODO: May bring the render function here
         const crt = document.getElementById('dragged-element')
         crt.style.display = 'block'
 

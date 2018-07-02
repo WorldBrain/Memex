@@ -70,12 +70,10 @@ class ListContainer extends Component {
 
     getSearchVal = value => value.trim().replace(/\s\s+/g, ' ')
 
-    // TODO: change this method;
     handleCreateListSubmit = event => {
         event.preventDefault()
         const { value } = event.target.elements['listName']
         // value = list name
-        // TODO: Place a check here for same list name or place it in the createPageList
         this.props.createPageList(
             this.getSearchVal(value),
             this.vacateInputField,
@@ -203,7 +201,6 @@ const mapDispatchToProps = (dispatch, getState) => ({
         },
         dispatch,
     ),
-    listStorageHandler: () => dispatch(actions.listStorage()),
     handleEditBtnClick: index => event => {
         event.preventDefault()
         dispatch(actions.showEditBox(index))

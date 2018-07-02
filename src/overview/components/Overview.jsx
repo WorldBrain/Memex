@@ -23,10 +23,7 @@ const Overview = props => (
         <div
             className={styles.main}
             style={{
-                marginTop:
-                    props.showListDropdown || props.showFilters
-                        ? '180px'
-                        : '100px',
+                marginTop: props.showFilters ? '180px' : '100px',
             }}
         >
             {props.children}
@@ -47,8 +44,6 @@ Overview.propTypes = {
     deleteDocs: PropTypes.func.isRequired,
     showFilters: PropTypes.bool.isRequired,
     filters: PropTypes.node.isRequired,
-    listEditDropdown: PropTypes.node.isRequired,
-    showListDropdown: PropTypes.bool.isRequired,
     renderDragElement: PropTypes.node.isRequired,
     // showTooltip: PropTypes.bool.isRequired,
     // toggleShowTooltip: PropTypes.func.isRequired,

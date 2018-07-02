@@ -113,7 +113,7 @@ class DropdownContainer extends Component {
                 displayFilters: newLists,
                 focused: 0,
             }))
-            // TODO: see what this does.
+
             // this.props.onFilterAdd(newList)
             updateLastActive() // Consider user active (analytics)
         }
@@ -152,61 +152,6 @@ class DropdownContainer extends Component {
         }))
     }
 
-    // TODO: Needs a lot of work
-    // Changes state from all -> none -> all| none -> all -> none| some -> none -> all -> some
-    handleListSelection = index => async event => {
-        const listId = this.getDisplayLists()[index].value.id
-        const { filters } = this.state
-        const listIndex = filters.findIndex(val => val.id === listId)
-        const list = filters[listIndex]
-        const { listUrlState } = list
-        let { newurlState } = list
-
-        if (listUrlState === 'some' && !newurlState) newurlState = 'none'
-        else if (listUrlState === 'none' && !newurlState) newurlState = 'all'
-        else if (listUrlState === 'all' && !newurlState) newurlState = 'none'
-        else if (listUrlState === 'some' && newurlState === 'all')
-            newurlState = 'some'
-        else if (newurlState === 'all') newurlState = 'none'
-        else if (newurlState === 'none') newurlState = 'all'
-        else if (newurlState === 'some') newurlState = 'none'
-
-        // TODO: dispatch actions to temporary change the state unless apply is hit.
-        switch (newurlState) {
-            case 'all':
-                this.props.bulkAddPagesToList(listId)
-                break
-            case 'none':
-                this.props.bulkRemovePagesFromList(listId)
-                break
-            case 'some':
-                this.props.resetPagesinTempList(listId)
-                break
-        }
-
-        this.setState(state => ({
-            ...state,
-            filters: [
-                ...filters.slice(0, listIndex),
-                {
-                    ...list,
-                    newurlState,
-                },
-                ...filters.slice(listIndex + 1),
-            ],
-            displayFilters: [
-                ...this.state.displayFilters.slice(0, index),
-                {
-                    ...this.state.displayFilters[index],
-                    listUrlState: newurlState,
-                },
-                ...this.state.displayFilters.slice(index + 1),
-            ],
-            focused: index,
-        }))
-        updateLastActive()
-    }
-
     handleSearchEnterPress(event) {
         event.preventDefault()
 
@@ -225,7 +170,6 @@ class DropdownContainer extends Component {
         return null
     }
 
-    // TODO: Put DB calls at appropriate place
     handleListClick = index => async event => {
         let list
         const listId = this.getDisplayLists()[index].value.id

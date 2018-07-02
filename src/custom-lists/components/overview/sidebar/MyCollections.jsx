@@ -1,7 +1,6 @@
 import React from 'react'
 import styles from './Index.css'
 import PropTypes from 'prop-types'
-// TODO: search find a better name
 
 const List = props => (
     <div className={styles.collection}>

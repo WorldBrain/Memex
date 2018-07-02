@@ -9,7 +9,6 @@ export default class CustomListStorage extends FeatureStorage {
     constructor(storageManager) {
         super(storageManager)
 
-        // TODO: Name it lists instead of suctom lists
         this.storageManager.registerCollection(COLLECTION_NAME, {
             // different version for adding a new table.
             version: new Date(2018, 6, 12),
@@ -77,7 +76,6 @@ export default class CustomListStorage extends FeatureStorage {
         }
     }
 
-    // TODO: Returns all the pages associated with the list.
     async fetchListPages(listId) {
         const pages = await this.storageManager.findAll(PAGE_LIST_ENTRY, { listId })
 
@@ -105,7 +103,6 @@ export default class CustomListStorage extends FeatureStorage {
         })
     }
 
-    // TODO: Maybe send the full name list object
     async updateListName({ id, name }) {
         await this.storageManager.updateObject(COLLECTION_NAME, {
             id
