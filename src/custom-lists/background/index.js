@@ -106,8 +106,11 @@ export default class CustomListBackground {
         })
     }
 
-    async getListNameSuggestions(name) {
-        return await this.storage.getListNameSuggestions({ name })
+    async getListNameSuggestions(name, url) {
+        return await this.storage.getListNameSuggestions({
+            name,
+            url: normalizeUrl(url),
+        })
     }
 
     async checkPageInList({ id, url }) {

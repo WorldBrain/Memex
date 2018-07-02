@@ -89,7 +89,8 @@ class DropdownContainer extends Component {
     createList = async () => {
         const newList = {
             name: this.getSearchVal(),
-            pages: [this.props.url],
+            pages: [],
+            active: true,
         }
 
         let newLists = this.state.filters
@@ -124,17 +125,11 @@ class DropdownContainer extends Component {
     getDisplayLists = () =>
         this.state.displayFilters.map((value, i) => ({
             value,
-            active: this.isPageInList(value),
+            active: value.active,
             focused: this.state.focused === i,
         }))
 
     getSearchVal = () => this.state.searchVal.trim().replace(/\s\s+/g, ' ')
-
-    // Temporary suggestion function.
-    suggest = searchKey =>
-        this.state.filters.filter(obj =>
-            obj.name.toLowerCase().includes(searchKey),
-        )
 
     fetchListSuggestions = async () => {
         const searchVal = this.getSearchVal()
@@ -144,7 +139,11 @@ class DropdownContainer extends Component {
         let suggestions = this.state.filters
 
         // suggestions = this.suggest(searchVal)
-        suggestions = await this.getListNameSuggestions(searchVal)
+        suggestions = await this.getListNameSuggestions(
+            searchVal,
+            this.props.url,
+        )
+
         this.setState(state => ({
             ...state,
             displayFilters: suggestions,
@@ -181,21 +180,17 @@ class DropdownContainer extends Component {
             list = filters[listIndex]
         }
 
-        const { pages } = list
-        const pageIndex = pages.indexOf(this.props.url)
+        const { active } = list
 
-        let pagesReducer = pages => pages
+        let pagesReducer
         let listReducer = lists => lists
         // Either add or remove it to the main `state.pages` array
         try {
-            if (pageIndex === -1) {
-                pagesReducer = pages => [this.props.url, ...pages]
+            if (active) {
+                pagesReducer = false
             } else {
                 // this.props.onFilterDel(tag)
-                pagesReducer = pages => [
-                    ...pages.slice(0, pageIndex),
-                    ...pages.slice(pageIndex + 1),
-                ]
+                pagesReducer = true
             }
             if (listIndex === -1) {
                 await this.addUrlToList({
@@ -206,7 +201,7 @@ class DropdownContainer extends Component {
                 listReducer = lists => [
                     {
                         ...list,
-                        pages: pagesReducer(list.pages),
+                        active: pagesReducer,
                     },
                     ...lists,
                 ]
@@ -231,7 +226,7 @@ class DropdownContainer extends Component {
                     ...this.state.displayFilters.slice(0, index),
                     {
                         ...this.state.displayFilters[index],
-                        pages: pagesReducer(pages),
+                        active: pagesReducer,
                     },
                     ...this.state.displayFilters.slice(index + 1),
                 ],
@@ -293,10 +288,6 @@ class DropdownContainer extends Component {
             state => ({ ...state, searchVal, displayFilters }),
             this.fetchListSuggestions, // Debounced suggestion fetch
         )
-    }
-
-    isPageInList = ({ pages }) => {
-        return pages.indexOf(this.props.url) > -1
     }
 
     renderLists() {
