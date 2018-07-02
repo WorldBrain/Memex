@@ -23,7 +23,12 @@ const CreateListForm = props => (
                 autoFocus
                 required
             />
-            <button className={cx(styles.deleteButton, styles.button)} />
+            {props.closeCreateListForm && (
+                <button
+                    onClick={props.closeCreateListForm}
+                    className={cx(styles.deleteButton, styles.button)}
+                />
+            )}
         </form>
         {props.showWarning && (
             <small className={styles.sameNameWarning}>
@@ -39,6 +44,7 @@ CreateListForm.propTypes = {
     handleNameChange: PropTypes.func.isRequired,
     showWarning: PropTypes.bool,
     setInputRef: PropTypes.func.isRequired,
+    closeCreateListForm: PropTypes.func,
 }
 
 export default CreateListForm

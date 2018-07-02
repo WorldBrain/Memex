@@ -32,6 +32,7 @@ class ListContainer extends Component {
         toggleCreateListForm: PropTypes.func.isRequired,
         showCreateList: PropTypes.bool.isRequired,
         showCommonNameWarning: PropTypes.bool.isRequired,
+        closeCreateListForm: PropTypes.func.isRequired,
     }
 
     constructor(props) {
@@ -138,6 +139,7 @@ class ListContainer extends Component {
                 value={this.state.listName}
                 showWarning={this.props.showCommonNameWarning}
                 setInputRef={this.setInputRef}
+                closeCreateListForm={this.props.closeCreateListForm}
             />
         ) : null
 
@@ -198,6 +200,7 @@ const mapDispatchToProps = (dispatch, getState) => ({
             createPageList: actions.createPageList,
             updateList: actions.updateList,
             toggleCreateListForm: actions.toggleCreateListForm,
+            closeCreateListForm: actions.closeCreateListForm,
         },
         dispatch,
     ),
