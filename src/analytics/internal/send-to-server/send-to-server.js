@@ -54,7 +54,7 @@ class SendToServer {
     _sendReq = async event => {
         const userId = await this.userId()
 
-        await fetch(this._host, {
+        return await fetch(this._host, {
             method: 'POST',
             headers: SendToServer.JSON_HEADER,
             body: SendToServer._serializePoolReqs(userId, [{ ...event }]),

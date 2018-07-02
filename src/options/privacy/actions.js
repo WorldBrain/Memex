@@ -26,7 +26,9 @@ export const toggleTrackingOptOut = value => async dispatch => {
         })
 
     internalAnalytics.processEvent({
-        type: 'changeTrackingPref' + newState,
+        type:
+            'changeTrackingPref' + (newState === 'opt-in' ? 'OptIn' : 'OptOut'),
+        force: true,
     })
 
     // Do event track after state change, as the event may be a noop if opt-out state is already set

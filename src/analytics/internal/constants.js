@@ -100,10 +100,10 @@ export const EVENT_TYPES = {
         id: 25,
         notifType: 'blacklist',
     },
-    'changeTrackingPrefopt-out': {
+    changeTrackingPrefOptOut: {
         id: 26,
     },
-    'changeTrackingPrefopt-in': {
+    changeTrackingPrefOptIn: {
         id: 27,
     },
     startImport: {

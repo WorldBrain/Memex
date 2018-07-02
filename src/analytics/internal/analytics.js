@@ -5,11 +5,8 @@ class Analytics {
     _setDataLoaded
 
     constructor({ serverConnector, remoteFunction }) {
-        this._remoteFunction = remoteFunction
         this._serverConnector = serverConnector
-        this.getLatestTimeWithCount = this._remoteFunction(
-            'getLatestTimeWithCount',
-        )
+        this.getLatestTimeWithCount = remoteFunction('getLatestTimeWithCount')
         this.storeEvent = remoteFunction('storeEvent')
 
         this._initDataLoaded = new Promise(
@@ -112,8 +109,6 @@ class Analytics {
 
         // Prepare the event to store the event in dexie db.
         const time = Date.now()
-
-        console.log(this._eventStats)
 
         const params = {
             ...eventArgs,
