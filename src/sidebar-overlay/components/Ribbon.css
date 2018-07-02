@@ -5,7 +5,7 @@
     width: 50px;
     height: 65px;
     background-color: #3eb995;
-    z-index: 99999;
+    z-index: 2147483647;
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
     transform: translate(0, 0);
@@ -22,7 +22,7 @@
     right: 0;
     border: 0;
     outline: 0;
-    z-index: 99999;
+    z-index: 2147483647;
     transform: translate(400px, 0);
     transition: all 0.2s ease-in;
 }

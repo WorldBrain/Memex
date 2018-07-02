@@ -92,11 +92,15 @@ export default class DirectLinkingBackground {
         let pageUrl = url === null ? tab.url : url
         pageUrl = normalize(pageUrl)
         const annotations = await this.storage.getAnnotationsByUrl(pageUrl)
-
-        return annotations.map(annotation => ({
-            ...annotation,
-            createdWhen: annotation.createdWhen.getTime(),
-        }))
+        return annotations.map(
+            ({ createdWhen, lastEdited, ...annotation }) => ({
+                ...annotation,
+                createdWhen: createdWhen.getTime(),
+                lastEdited: Object.keys(lastEdited).length
+                    ? lastEdited.getTime()
+                    : null,
+            }),
+        )
     }
 
     async createAnnotation(

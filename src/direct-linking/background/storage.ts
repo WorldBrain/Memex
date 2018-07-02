@@ -70,6 +70,28 @@ export default class DirectLinkingStorage extends FeatureStorage {
                     { field: 'comment' },
                 ],
             },
+            {
+                version: new Date(2018, 7, 2),
+                fields: {
+                    pageTitle: { type: 'text' },
+                    pageUrl: { type: 'url' },
+                    body: { type: 'text' },
+                    comment: { type: 'text' },
+                    selector: { type: 'json' },
+                    createdWhen: { type: 'datetime' },
+                    url: { type: 'string' },
+                    lastEdited: { type: 'datetime' },
+                },
+                indices: [
+                    { field: 'url', pk: true },
+                    { field: 'pageTitle' },
+                    { field: 'pageUrl' },
+                    { field: 'body' },
+                    { field: 'createdWhen' },
+                    { field: 'lastEdited' },
+                    { field: 'comment' },
+                ],
+            },
         ])
     }
 
@@ -90,13 +112,13 @@ export default class DirectLinkingStorage extends FeatureStorage {
         body,
         selector,
     }: Annotation) {
-        console.log('in insertDirectLink', pageUrl)
         await this.storageManager.putObject(COLLECTION_NAME, {
             pageTitle,
             pageUrl,
             body,
             selector,
             createdWhen: new Date(),
+            lastEdited: {},
             url,
             comment: '',
         })
@@ -123,7 +145,6 @@ export default class DirectLinkingStorage extends FeatureStorage {
     }
 
     async getAnnotationsByUrl(pageUrl: string) {
-        console.log('In get annotations:', pageUrl)
         return await this.storageManager.findAll(COLLECTION_NAME, {
             pageUrl,
         })
@@ -144,6 +165,7 @@ export default class DirectLinkingStorage extends FeatureStorage {
             body,
             selector,
             createdWhen: new Date(),
+            lastEdited: {},
             url,
         })
     }
@@ -152,10 +174,11 @@ export default class DirectLinkingStorage extends FeatureStorage {
         return await this.storageManager.updateObject(
             COLLECTION_NAME,
             {
-                url,
+                url: url,
             },
             {
                 comment,
+                lastEdited: new Date(),
             },
         )
     }

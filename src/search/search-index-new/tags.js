@@ -32,6 +32,7 @@ export const addTag = modifyTag(true)
 
 const modifyAnnotationTag = shouldAdd => (url, tag) => {
     return db.transaction('rw', db.tables, async () => {
+        window.dl = db.directLinks
         const annotation = await db.directLinks.get(url)
 
         if (annotation == null) {

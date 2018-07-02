@@ -29,6 +29,7 @@ class AnnotationContainer extends React.Component {
     }
 
     async componentDidMount() {
+        console.log(this.props.annotation)
         const { annotation } = this.props
         const truncated = {}
         let annotationText = ''
@@ -105,13 +106,22 @@ class AnnotationContainer extends React.Component {
 
     renderTimestamp = () => {
         const { footerState } = this.state
-        const createdWhen = new Date(this.props.annotation.createdWhen)
 
-        const timestamp = moment(createdWhen).format('MMMM D YYYY')
+        if (footerState !== 'default') {
+            return <div className={styles.timestamp} />
+        }
+
+        const { createdWhen, lastEdited } = this.props.annotation
+        let dateObject
+        if (!lastEdited) dateObject = new Date(createdWhen)
+        else dateObject = new Date(lastEdited)
+
+        const timestamp = moment(dateObject).format('MMMM D YYYY')
 
         return (
             <div className={styles.timestamp}>
-                {footerState === 'default' ? timestamp : ''}
+                {lastEdited ? 'Last edit: ' : null}
+                {timestamp}
             </div>
         )
     }

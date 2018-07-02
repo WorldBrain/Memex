@@ -31,7 +31,14 @@ class CommentBox extends React.Component {
         this.inputRef.addEventListener('scroll', e => {
             while (e.target.scrollTop) e.target.rows += 1
         })
+
+        if (this.props.anchor)
+            this.setState({
+                isHidden: false,
+            })
     }
+
+    isHidden = () => this.state.isHidden && !this.props.anchor
 
     handleChange = e => {
         let { minimized, textareaRows } = this.state
@@ -115,7 +122,7 @@ class CommentBox extends React.Component {
     }
 
     renderAddNoteButton() {
-        if (!this.state.isHidden) return null
+        if (!this.isHidden()) return null
         return (
             <button className={styles.addNote} onClick={this.toggleHidden}>
                 Add note
@@ -124,7 +131,7 @@ class CommentBox extends React.Component {
     }
 
     renderCommentBox() {
-        if (this.state.isHidden) return null
+        if (this.isHidden()) return null
         return (
             <div className={styles.commentBox}>
                 <textarea
@@ -169,11 +176,7 @@ class CommentBox extends React.Component {
 
     render() {
         return (
-            <div
-                className={
-                    this.state.isHidden ? styles.commentBoxContainer : ''
-                }
-            >
+            <div className={this.isHidden() ? styles.commentBoxContainer : ''}>
                 {this.renderHighlightedText()}
                 {this.renderCommentBox()}
                 {this.renderAddNoteButton()}
