@@ -43,13 +43,21 @@ class AnnotationContainer extends React.Component {
         }
 
         const tags = await remoteFunction('getAnnotationTags')(annotation.url)
-        console.log(tags)
         if (tags.length) containsTags = true
 
         this.setState({
             truncated,
             annotationText,
             containsTags,
+            tags,
+        })
+    }
+
+    reloadTags = async () => {
+        const tags = await remoteFunction('getAnnotationTags')(
+            this.props.annotation.url,
+        )
+        this.setState({
             tags,
         })
     }
@@ -85,33 +93,12 @@ class AnnotationContainer extends React.Component {
         const { url, comment } = this.props.annotation
         const { annotationText } = this.state
 
-        if (annotationText === comment) return
+        if (annotationText === comment) {
+            this.toggleEditAnnotation()
+        }
 
         this.props.editAnnotation({ url, comment: annotationText })
         this.toggleEditAnnotation()
-    }
-
-    addTag = newTag => {
-        const tags = [newTag, ...this.state.tags]
-        this.setState({
-            tags,
-        })
-    }
-
-    delTag = tag => {
-        const oldTags = [...this.state.tags]
-        const tagIndex = oldTags.indexOf(tag)
-
-        if (tagIndex === -1) return null
-
-        const tags = [
-            ...oldTags.slice(0, tagIndex),
-            ...oldTags.slice(tagIndex + 1),
-        ]
-
-        this.setState({
-            tags,
-        })
     }
 
     getTags = () => this.state.tags.map(tag => tag.name)
@@ -287,8 +274,8 @@ class AnnotationContainer extends React.Component {
                         isForAnnotation
                         url={this.props.annotation.url}
                         initFilters={this.getTags()}
-                        onFilterAdd={this.addTag}
-                        onFilterDel={this.delTag}
+                        onFilterAdd={this.reloadTags}
+                        onFilterDel={this.reloadTags}
                         source="tag"
                     />
                 </div>

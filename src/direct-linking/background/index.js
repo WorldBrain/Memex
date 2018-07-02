@@ -84,7 +84,7 @@ export default class DirectLinkingBackground {
         // Attempt to (re-)index, if user preference set, but don't wait for it
         this.storage.indexPageFromTab(tab)
 
-        await this.triggerSidebar()
+        await this.triggerSidebar('openSidebarOverlay')
         return result
     }
 
@@ -99,11 +99,15 @@ export default class DirectLinkingBackground {
         }))
     }
 
-    async createAnnotation({ tab }, { url, title, comment, body, selector }) {
+    async createAnnotation(
+        { tab },
+        { url, title, comment, body, selector, uniqueUrl },
+    ) {
         const pageUrl = url === null ? tab.url : url
         const pageTitle = title === null ? tab.title : title
         return await this.storage.createAnnotation({
             pageUrl: normalize(pageUrl),
+            url: uniqueUrl,
             pageTitle,
             comment,
             body,

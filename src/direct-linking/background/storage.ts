@@ -133,10 +133,10 @@ export default class DirectLinkingStorage extends FeatureStorage {
         pageTitle,
         pageUrl,
         body,
+        url,
         comment,
         selector,
     }: Annotation) {
-        const uniqueUrl: string = `${pageUrl}/#${new Date().getTime()}`
         return await this.storageManager.putObject(COLLECTION_NAME, {
             pageTitle,
             pageUrl,
@@ -144,7 +144,7 @@ export default class DirectLinkingStorage extends FeatureStorage {
             body,
             selector,
             createdWhen: new Date(),
-            url: uniqueUrl,
+            url,
         })
     }
 

@@ -63,11 +63,11 @@ class CommentBox extends React.Component {
     }
 
     save = () => {
-        const { commentInput } = this.state
+        const { commentInput, tags } = this.state
         const { anchor } = this.props
         if (commentInput.length || anchor) {
             const body = anchor ? anchor.quote : ''
-            this.props.createAnnotation(commentInput, body)
+            this.props.createAnnotation(commentInput, body, tags)
             this.setState({
                 commentInput: '',
                 textareaRows: constants.DEFAULT_ROWS,
@@ -185,8 +185,8 @@ const mapStateToProps = state => ({
     anchor: selectors.anchor(state),
 })
 const mapDispatchToProps = dispatch => ({
-    createAnnotation: (comment, body) =>
-        dispatch(actions.createAnnotation(comment, body)),
+    createAnnotation: (comment, body, tags) =>
+        dispatch(actions.createAnnotation(comment, body, tags)),
     setAnchor: anchor => dispatch(actions.setAnchor(anchor)),
 })
 
