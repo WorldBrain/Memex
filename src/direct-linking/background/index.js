@@ -42,6 +42,9 @@ export default class DirectLinkingBackground {
                 openSidebarWithHighlight: (...params) => {
                     return this.openSidebarWithHighlight(...params)
                 },
+                toggleSidebar: () => {
+                    return this.toggleSidebar()
+                },
             },
             { insertExtraArg: true },
         )
@@ -60,6 +63,10 @@ export default class DirectLinkingBackground {
             currentWindow: true,
         })
         await remoteFunction(functionName, { tabId: currentTab.id })(...args)
+    }
+
+    async toggleSidebar() {
+        await this.triggerSidebar('toggleSidebarOverlay')
     }
 
     async openSidebarWithHighlight({ tab }, anchor) {
@@ -84,7 +91,7 @@ export default class DirectLinkingBackground {
         // Attempt to (re-)index, if user preference set, but don't wait for it
         this.storage.indexPageFromTab(tab)
 
-        await this.triggerSidebar('openSidebarOverlay')
+        await this.triggerSidebar('toggleSidebarOverlay')
         return result
     }
 

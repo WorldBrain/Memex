@@ -8,6 +8,7 @@ import Annotation from './AnnotationContainer'
 
 import { goToAnnotation } from '../interactions'
 import { setUpRemoteFunctions } from '../messaging'
+import { remoteFunction } from '../../util/webextensionRPC'
 
 class SidebarContainer extends React.Component {
     static propTypes = {
@@ -57,6 +58,15 @@ class SidebarContainer extends React.Component {
         if (!isOpen) this.props.setShowSidebar(false)
     }
 
+    closeSidebar = () => {
+        const { env, setShowSidebar } = this.props
+        if (env === 'overview') {
+            setShowSidebar(false)
+        } else {
+            remoteFunction('toggleSidebar')()
+        }
+    }
+
     renderAnnotations = () => {
         const annotations = this.props.annotations.sort(
             (x, y) => x.createdWhen < y.createdWhen,
@@ -84,6 +94,7 @@ class SidebarContainer extends React.Component {
                 handleStateChange={this.handleStateChange}
                 toggleMouseOnSidebar={this.props.toggleMouseOnSidebar}
                 renderAnnotations={this.renderAnnotations}
+                closeSidebar={this.closeSidebar}
                 env={this.props.env}
             />
         )

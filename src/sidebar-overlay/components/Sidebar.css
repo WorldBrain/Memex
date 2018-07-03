@@ -10,6 +10,14 @@
     overflow-y: scroll;
 }
 
+.closeButton {
+    color: green;
+    font-size: 20px;
+    margin-top: 5px;
+    margin-left: 15px;
+    cursor: pointer;
+}
+
 .sidebarTitle,
 .previous {
     color: #3eb995;

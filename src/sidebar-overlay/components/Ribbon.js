@@ -33,8 +33,8 @@ class Ribbon extends React.Component {
 
     setupRPCfunctions = () => {
         makeRemotelyCallable({
-            openSidebarOverlay: () => {
-                this.openSidebar()
+            toggleSidebarOverlay: async () => {
+                await this.toggleSidebar()
             },
             openSidebarAndSendAnchor: async anchor => {
                 await this.openSidebarAndSendAnchor(anchor)

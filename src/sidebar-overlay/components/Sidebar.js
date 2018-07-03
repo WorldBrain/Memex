@@ -20,6 +20,9 @@ const Sidebar = props => (
             onMouseEnter={props.toggleMouseOnSidebar}
             onMouseLeave={props.toggleMouseOnSidebar}
         >
+            <div className={styles.closeButton} onClick={props.closeSidebar}>
+                X
+            </div>
             {props.showSidebar ? <CommentBox /> : null}
 
             <div className={styles.annotationContainer}>
@@ -34,6 +37,7 @@ Sidebar.propTypes = {
     handleStateChange: PropTypes.func.isRequired,
     renderAnnotations: PropTypes.func.isRequired,
     toggleMouseOnSidebar: PropTypes.func.isRequired,
+    closeSidebar: PropTypes.func.isRequired,
     env: PropTypes.string.isRequired,
 }
 
