@@ -177,8 +177,10 @@ export default class DirectLinkingStorage extends FeatureStorage {
                 url: url,
             },
             {
-                comment,
-                lastEdited: new Date(),
+                $set: {
+                    comment,
+                    lastEdited: new Date(),
+                },
             },
         )
     }

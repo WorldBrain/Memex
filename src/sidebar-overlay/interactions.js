@@ -5,9 +5,14 @@ import {
 } from 'src/direct-linking/content_script/interactions'
 
 import { injectCSS } from 'src/search-injection/dom'
-import { makeRemotelyCallable } from 'src/util/webextensionRPC'
-import { setUpRemoteFunctions, removeMessageListener } from './messaging'
+import { makeRemotelyCallable, remoteFunction } from 'src/util/webextensionRPC'
+import {
+    setUpRemoteFunctions,
+    removeMessageListener,
+    remoteExecute,
+} from './messaging'
 import { setupRibbonUI, destroyAll } from './components'
+import { retryUntilErrorResolves } from './utils'
 
 /**
  * Given an annotation object, highlights that text and removes other highlights
@@ -77,5 +82,45 @@ export const setupRPC = () => {
         removeRibbon: () => {
             removeRibbon()
         },
+        goToAnnotation: async annotation => {
+            await highlightAndScroll(annotation)
+        },
     })
+}
+
+/**
+ * HOF to return a function which
+ * Scrolls to annotation or creates a new tab and then scrolls to annotation
+ * Depending on the environment of the sidebar.
+ * @param {*} annotation The annotation to go to.
+ * @param {string} env The sidebar enviroment in which the function is being executed.
+ * @param {string} pageUrl Url of the page highlight is in.
+ * @returns {Promise<function>}
+ */
+
+export const goToAnnotation = (env, pageUrl) => annotation => async () => {
+    // If annotation is a comment, do nothing
+    if (!annotation.body) return false
+    else if (env === 'overview') {
+        const tab = await browser.tabs.create({
+            active: true,
+            url: pageUrl,
+        })
+
+        retryUntilErrorResolves(
+            async () =>
+                await remoteFunction('goToAnnotation', {
+                    tabId: tab.id,
+                })(annotation),
+            { intervalMiliseconds: 1500, timeoutMiliseconds: 12000 },
+        )
+
+        // setTimeout(async () => {
+        //     await remoteFunction('goToAnnotation', { tabId: tab.id })(
+        //         annotation,
+        //     )
+        // }, 3000)
+    } else {
+        remoteExecute('highlightAndScroll')(annotation)
+    }
 }

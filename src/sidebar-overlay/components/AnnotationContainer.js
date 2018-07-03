@@ -29,7 +29,6 @@ class AnnotationContainer extends React.Component {
     }
 
     async componentDidMount() {
-        console.log(this.props.annotation)
         const { annotation } = this.props
         const truncated = {}
         let annotationText = ''
@@ -115,7 +114,7 @@ class AnnotationContainer extends React.Component {
         let dateObject
         if (!lastEdited) dateObject = new Date(createdWhen)
         else dateObject = new Date(lastEdited)
-
+        console.log('last ', lastEdited)
         const timestamp = moment(dateObject).format('MMMM D YYYY')
 
         return (
@@ -301,6 +300,7 @@ class AnnotationContainer extends React.Component {
     }
 
     render() {
+        const { goToAnnotation, annotation } = this.props
         return (
             <Annotation
                 renderHighlight={this.renderHighlight}
@@ -311,7 +311,7 @@ class AnnotationContainer extends React.Component {
                 renderTagPills={this.renderTagPills}
                 renderAnnotationInput={this.renderAnnotationInput}
                 renderFooter={this.renderFooter}
-                goToAnnotation={this.props.goToAnnotation}
+                goToAnnotation={goToAnnotation(annotation)}
                 isClickable={this.deriveIsClickable()}
             />
         )

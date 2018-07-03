@@ -6,7 +6,8 @@ import { selectors, actions } from '../redux'
 import Sidebar from './Sidebar'
 import Annotation from './AnnotationContainer'
 
-import { remoteExecute, setUpRemoteFunctions } from '../messaging'
+import { goToAnnotation } from '../interactions'
+import { setUpRemoteFunctions } from '../messaging'
 
 class SidebarContainer extends React.Component {
     static propTypes = {
@@ -56,15 +57,6 @@ class SidebarContainer extends React.Component {
         if (!isOpen) this.props.setShowSidebar(false)
     }
 
-    goToAnnotation = annotation => async () => {
-        // If annotation is a comment, do nothing
-        if (this.props.env === 'overview' || !annotation.body) return false
-        else {
-            // await highlightAndScroll(annotation)
-            remoteExecute('highlightAndScroll')(annotation)
-        }
-    }
-
     renderAnnotations = () => {
         const annotations = this.props.annotations.sort(
             (x, y) => x.createdWhen < y.createdWhen,
@@ -73,7 +65,10 @@ class SidebarContainer extends React.Component {
         return annotations.map(annotation => (
             <Annotation
                 annotation={annotation}
-                goToAnnotation={this.goToAnnotation(annotation)}
+                goToAnnotation={goToAnnotation(
+                    this.props.env,
+                    this.props.pageUrl,
+                )}
                 editAnnotation={this.props.editAnnotation}
                 deleteAnnotation={this.props.deleteAnnotation}
                 key={annotation.url}

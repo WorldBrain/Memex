@@ -66,6 +66,14 @@ export default class DirectLinkingBackground {
         this.triggerSidebar('openSidebarAndSendAnchor', anchor)
     }
 
+    async goToAnnotation({ tab }, annotation) {
+        const { id } = await browser.tabs.create({
+            active: true,
+            url: annotation.pageUrl,
+        })
+        await remoteFunction('goToAnnotation', { tabId: id })(annotation)
+    }
+
     followAnnotationRequest({ tab }) {
         this.requests.followAnnotationRequest(tab.id)
     }
@@ -96,9 +104,7 @@ export default class DirectLinkingBackground {
             ({ createdWhen, lastEdited, ...annotation }) => ({
                 ...annotation,
                 createdWhen: createdWhen.getTime(),
-                lastEdited: Object.keys(lastEdited).length
-                    ? lastEdited.getTime()
-                    : null,
+                lastEdited: lastEdited.getTime ? lastEdited.getTime() : null,
             }),
         )
     }
