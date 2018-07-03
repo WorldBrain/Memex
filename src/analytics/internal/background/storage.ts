@@ -1,4 +1,4 @@
-import { FeatureStorage } from '../../../search/search-index-new'
+import { FeatureStorage } from '../../../search/search-index-new/storage'
 import { NOTIF_TYPE_EVENT_IDS, EVENT_TYPES } from '../constants'
 
 export default class EventLogStorage extends FeatureStorage {
@@ -38,12 +38,19 @@ export default class EventLogStorage extends FeatureStorage {
         }
 
         for (const type of NOTIF_TYPE_EVENT_IDS[notifType]) {
-            const latest = await this.storageManager.findObject('eventLog', { type }, opts)
+            const latest = await this.storageManager.findObject(
+                'eventLog',
+                { type },
+                opts,
+            )
             if (latest) {
                 latestEvent = Math.max(latest['time'], latestEvent)
             }
 
-            const eventCountNotif = await this.storageManager.countAll('eventLog', { type })
+            const eventCountNotif = await this.storageManager.countAll(
+                'eventLog',
+                { type },
+            )
             eventLogCount += Number(eventCountNotif)
         }
 

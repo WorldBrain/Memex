@@ -4,6 +4,9 @@ import cx from 'classnames'
 
 import styles from './IndexDropdown.css'
 
+/**
+ * @augments {PureComponent<{onTagSearchChange: any, onTagSearchKeyDown: any, setInputRef: any, numberOfTags: any, tagSearchValue: any}, *>}
+ */
 class IndexDropdown extends PureComponent {
     static propTypes = {
         children: PropTypes.array.isRequired,
@@ -26,9 +29,9 @@ class IndexDropdown extends PureComponent {
     }
 
     get searchPlaceholder() {
-        return `Search & Add ${this.props.source === 'domain'
-            ? 'Domains'
-            : 'Tags'}`
+        return `Search & Add ${
+            this.props.source === 'domain' ? 'Domains' : 'Tags'
+        }`
     }
 
     get unit() {

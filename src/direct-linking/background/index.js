@@ -7,7 +7,7 @@ import DirectLinkingStorage from './storage'
 export default class DirectLinkingBackground {
     constructor({ storageManager }) {
         this.backend = new DirectLinkingBackend()
-        this.storage = new DirectLinkingStorage(storageManager)
+        this.storage = new DirectLinkingStorage({ storageManager })
         this.sendAnnotation = ({ tabId, annotation }) => {
             browser.tabs.sendMessage(tabId, { type: 'direct-link', annotation })
         }
@@ -52,6 +52,10 @@ export default class DirectLinkingBackground {
             url: result.url,
             selector: request.anchor,
         })
+
+        // Attempt to (re-)index, if user preference set, but don't wait for it
+        this.storage.indexPageFromTab(tab)
+
         return result
     }
 }

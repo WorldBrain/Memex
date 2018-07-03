@@ -1,4 +1,4 @@
-/* 
+/*
 DOM manipulation helper functions
 */
 
@@ -21,7 +21,10 @@ export const injectCSS = file => {
     d.prepend(link)
 }
 
-export const handleRender = ({ docs, totalCount }, searchEngine) => {
+export const handleRender = (
+    { docs, totalCount, requiresMigration },
+    searchEngine,
+) => {
     // docs: (array of objects) returned by the search
     // totalCount: (int) number of results found
     // Injects CSS into the search page.
@@ -67,6 +70,7 @@ export const handleRender = ({ docs, totalCount }, searchEngine) => {
                 len={totalCount}
                 rerender={renderComponent}
                 searchEngine={searchEngine}
+                requiresMigration={requiresMigration}
             />,
             target,
         )

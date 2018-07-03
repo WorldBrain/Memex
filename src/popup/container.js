@@ -140,7 +140,7 @@ class PopupContainer extends Component {
     }
 
     get isTagBtnDisabled() {
-        return !this.state.isLoggable || this.state.page == null
+        return !this.state.isLoggable
     }
 
     get bookmarkBtnState() {
@@ -380,6 +380,7 @@ class PopupContainer extends Component {
             return (
                 <IndexDropdown
                     url={this.state.url}
+                    tabId={this.state.tabID}
                     initFilters={this.pageTags}
                     source="tag"
                 />

@@ -50,12 +50,14 @@ class SearchInjectionContainer extends React.Component {
                 <Checkbox
                     isChecked={this.state.injectionPreference.google}
                     handleChange={this.bindToggleInjection('google')}
+                    id="si-google"
                 >
                     Google
                 </Checkbox>
                 <Checkbox
                     isChecked={this.state.injectionPreference.duckduckgo}
                     handleChange={this.bindToggleInjection('duckduckgo')}
+                    id="si-ddg"
                 >
                     DuckDuckGo
                 </Checkbox>

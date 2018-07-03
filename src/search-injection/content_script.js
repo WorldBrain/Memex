@@ -22,7 +22,7 @@ async function init() {
             const query = utils.fetchQuery(url)
             const searchRes = await requestSearch({ query, limit: 5 })
 
-            if (searchRes.docs.length) {
+            if (searchRes.docs.length || searchRes.requiresMigration) {
                 handleRender(searchRes, matched)
             }
         } catch (err) {}

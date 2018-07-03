@@ -1,15 +1,16 @@
-import { browser, Tabs } from 'webextension-polyfill-ts'
-
 import searchIndex from '../../search'
 import { blacklist } from '../../blacklist/background'
 import { isLoggable, getPauseState } from '..'
-import { TabState } from './types'
+import { LoggableTabChecker, VisitInteractionUpdater } from './types'
 
 /**
  * Combines all "loggable" conditions for logging on given tab data to determine
  * whether or not a tab should be logged.
  */
-export async function shouldLogTab({ url, incognito }: Tabs.Tab) {
+export const shouldLogTab: LoggableTabChecker = async function({
+    url,
+    incognito,
+}) {
     // Short-circuit before async logic, if possible
     if (incognito || !url || !isLoggable({ url })) {
         return false
@@ -27,12 +28,12 @@ export async function shouldLogTab({ url, incognito }: Tabs.Tab) {
  *
  * @param {Tab} tab The tab state to derive visit meta data from.
  */
-export const updateVisitInteractionData = ({
+export const updateVisitInteractionData: VisitInteractionUpdater = ({
     url,
     visitTime,
     activeTime,
     scrollState,
-}: TabState) =>
+}) =>
     searchIndex
         .updateTimestampMeta(url, +visitTime, {
             duration: activeTime,

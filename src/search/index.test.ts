@@ -1,6 +1,6 @@
 import memdown from 'memdown'
-import * as indexedDB from 'fake-indexeddb'
-import * as IDBKeyRange from 'fake-indexeddb/lib/FDBKeyRange'
+import indexedDB from 'fake-indexeddb'
+import IDBKeyRange from 'fake-indexeddb/lib/FDBKeyRange'
 
 import { SearchIndex } from './'
 import * as oldIndex from './search-index-old'
@@ -24,9 +24,9 @@ const runSuite = useOld => () => {
         await index.addPage({ pageDoc: DATA.PAGE_1, visits: [DATA.VISIT_1] })
 
         // Add some test tags
-        await index.addTag(DATA.PAGE_3.url, 'good')
-        await index.addTag(DATA.PAGE_3.url, 'quality')
-        await index.addTag(DATA.PAGE_2.url, 'quality')
+        await index.addTag({ url: DATA.PAGE_3.url, tag: 'good' })
+        await index.addTag({ url: DATA.PAGE_3.url, tag: 'quality' })
+        await index.addTag({ url: DATA.PAGE_2.url, tag: 'quality' })
     }
 
     async function resetTestData(dbName = 'test') {
@@ -518,7 +518,7 @@ const runSuite = useOld => () => {
             )
 
             // This page doesn't have any tags; 'quality' tag has 2 other pages
-            await index.addTag(DATA.PAGE_1.url, 'quality')
+            await index.addTag({ url: DATA.PAGE_1.url, tag: 'quality' })
 
             const { docs: after } = await search({ tags: ['quality'] })
             expect(after.length).toBe(3)
@@ -527,14 +527,14 @@ const runSuite = useOld => () => {
             )
         })
 
-        test('tag deleting affects search', async () => {
+        testOnlyNew('tag deleting affects search', async () => {
             const { docs: before } = await search({ tags: ['quality'] })
             expect(before.length).toBe(2)
             expect(before).toEqual(
                 expect.arrayContaining([[PAGE_ID_2, DATA.VISIT_2]]),
             )
 
-            await index.delTag(DATA.PAGE_2.url, 'quality')
+            await index.delTag({ url: DATA.PAGE_2.url, tag: 'quality' })
 
             const { docs: after } = await search({ tags: ['quality'] })
             expect(after.length).toBe(1)
@@ -653,5 +653,5 @@ const runSuite = useOld => () => {
     })
 }
 
-describe('New search index integration', runSuite(false))
-describe('Old search index integration', runSuite(true))
+describe('Search index integration', runSuite(false))
+// describe('Old search index integration', runSuite(true))

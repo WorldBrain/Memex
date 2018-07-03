@@ -123,6 +123,10 @@ export default class Page extends AbstractModel
         return !this.hasBookmark && this[visitsProp].length === 0
     }
 
+    get isStub() {
+        return this.text == null && (this.terms == null || !this.terms.length)
+    }
+
     set screenshotURI(input: string) {
         if (input) {
             this.screenshot = AbstractModel.dataURLToBlob(input)

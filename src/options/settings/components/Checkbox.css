@@ -44,17 +44,22 @@
     }
 
     &:disabled + label {
-        color: #3eb995;
+        color: #d4d1d1;
         cursor: auto;
     }
 
     &:disabled + label::before {
-        box-shadow: none;
-        box-shadow: 0 0 0 2pt #3eb995;
-        border-radius: 1px;
+        background: #d4d1d1;
+        box-shadow: 0 0 0 2pt #d4d1d1;
+        outline: #d4d1d1;
     }
+}
+
+.container {
+    margin: 10px 0;
 }
 
 .checkboxText {
     color: #666;
+    font-size: 16px;
 }

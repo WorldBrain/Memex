@@ -7,7 +7,7 @@ import Waypoint from 'react-waypoint'
 import reduce from 'lodash/fp/reduce'
 
 import { Wrapper, LoadingIndicator } from 'src/common-ui/components'
-import { IndexDropdown } from 'src/common-ui/containers'
+import { IndexDropdown, MigrationNotice } from 'src/common-ui/containers'
 import * as actions from './actions'
 import * as selectors from './selectors'
 import * as constants from './constants'
@@ -26,6 +26,7 @@ class OverviewContainer extends Component {
         handleInputChange: PropTypes.func.isRequired,
         handleInputClick: PropTypes.func.isRequired,
         onBottomReached: PropTypes.func.isRequired,
+        isMigrationRequired: PropTypes.bool.isRequired,
         isLoading: PropTypes.bool.isRequired,
         isNewSearchLoading: PropTypes.bool.isRequired,
         noResults: PropTypes.bool.isRequired,
@@ -169,6 +170,14 @@ class OverviewContainer extends Component {
     )
 
     renderResults() {
+        if (this.props.isMigrationRequired) {
+            return (
+                <ResultsMessage>
+                    <MigrationNotice />
+                </ResultsMessage>
+            )
+        }
+
         if (this.props.isBadTerm) {
             return (
                 <ResultsMessage>
@@ -210,9 +219,7 @@ class OverviewContainer extends Component {
             <Wrapper>
                 {this.props.shouldShowCount && (
                     <ResultsMessage small>
-                        Found <strong>
-                            {this.props.totalResultCount}
-                        </strong>{' '}
+                        Found <strong>{this.props.totalResultCount}</strong>{' '}
                         results in your digital memory
                     </ResultsMessage>
                 )}
@@ -268,6 +275,7 @@ const mapStateToProps = state => ({
     isLoading: selectors.isLoading(state),
     isNewSearchLoading: selectors.isNewSearchLoading(state),
     currentQueryParams: selectors.currentQueryParams(state),
+    isMigrationRequired: selectors.isMigrationRequired(state),
     noResults: selectors.noResults(state),
     isBadTerm: selectors.isBadTerm(state),
     isInvalidSearch: selectors.isInvalidSearch(state),
@@ -330,4 +338,7 @@ const mapDispatchToProps = dispatch => ({
     toggleShowTooltip: event => dispatch(actions.toggleShowTooltip()),
 })
 
-export default connect(mapStateToProps, mapDispatchToProps)(OverviewContainer)
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps,
+)(OverviewContainer)

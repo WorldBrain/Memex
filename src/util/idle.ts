@@ -11,7 +11,7 @@ interface IdleHandlers {
 }
 
 export class IdleManager {
-    public static DEF_INTERVAL = 20
+    public static DEF_INTERVAL = 60
 
     private interval: number
 

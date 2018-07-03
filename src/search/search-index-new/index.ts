@@ -59,7 +59,7 @@ export { addTag, delTag } from './tags'
 // Bookmarks-specific
 //
 
-export { addBookmark, delBookmark, handleBookmarkCreation } from './bookmarks'
+export { addBookmark, delBookmark } from './bookmarks'
 
 //
 // Utilities
@@ -77,6 +77,8 @@ export {
     getMatchingPageCount,
     domainHasFavIcon,
 } from './search'
+
+export { createPageFromTab, createPageFromUrl } from './on-demand-indexing'
 
 // Mock for old index queue; to remove with old index code
 export const indexQueue = { clear: () => undefined }

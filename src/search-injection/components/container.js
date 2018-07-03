@@ -7,6 +7,7 @@ import ResultItem from './ResultItem'
 import RemovedText from './RemovedText'
 import * as constants from '../constants'
 import { getLocalStorage, setLocalStorage } from '../utils'
+import { MigrationNotice } from '../../common-ui/containers'
 
 class Container extends React.Component {
     static propTypes = {
@@ -14,6 +15,7 @@ class Container extends React.Component {
         len: PropTypes.number.isRequired,
         rerender: PropTypes.func.isRequired,
         searchEngine: PropTypes.string.isRequired,
+        requiresMigration: PropTypes.bool.isRequired,
     }
 
     constructor(props) {
@@ -150,6 +152,10 @@ class Container extends React.Component {
     }
 
     render() {
+        if (this.props.requiresMigration) {
+            return <MigrationNotice showBanner />
+        }
+
         // If the state.removed is true, show the RemovedText component
         if (this.state.removed)
             return (

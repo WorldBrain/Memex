@@ -1,4 +1,4 @@
-import * as DataURI from 'datauri'
+import DataURI from 'datauri'
 
 const datauri = new DataURI()
 
