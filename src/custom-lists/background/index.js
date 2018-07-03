@@ -5,7 +5,7 @@ import CustomListStorage from './storage'
 export default class CustomListBackground {
     constructor({ storageManager }) {
         // Makes the custom list Table in indexed DB.
-        this.storage = new CustomListStorage(storageManager)
+        this.storage = new CustomListStorage({ storageManager })
     }
 
     setupRemoteFunctions() {

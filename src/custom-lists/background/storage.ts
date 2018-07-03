@@ -1,4 +1,4 @@
-import Page, { FeatureStorage } from '../../search/search-index-new'
+import { FeatureStorage } from '../../search/search-index-new/storage'
 import { ListObject, PageObject } from './types'
 
 const COLLECTION_NAME = 'customLists'
@@ -6,7 +6,7 @@ const PAGE_LIST_ENTRY = 'pageListEntries'
 
 // TODO: Add typings for the class
 export default class CustomListStorage extends FeatureStorage {
-    constructor(storageManager) {
+    constructor({ storageManager }) {
         super(storageManager)
 
         this.storageManager.registerCollection(COLLECTION_NAME, {
@@ -123,6 +123,10 @@ export default class CustomListStorage extends FeatureStorage {
     async removeList({ id }: { id: number }) {
         await this.storageManager.deleteObject(COLLECTION_NAME, {
             id,
+        })
+        // Delete All pages associated with that list also
+        await this.storageManager.deleteObject(PAGE_LIST_ENTRY, {
+            listId: id,
         })
     }
 
