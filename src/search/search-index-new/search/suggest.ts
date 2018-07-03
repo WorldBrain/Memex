@@ -27,3 +27,14 @@ export async function suggest(query = '', type: SuggestType, limit = 10) {
             return applyQuery<Tag, [string, string]>(db.tags.where('name'))
     }
 }
+
+// Used to provide initial suggestions for tags that are not associated with the list.
+export async function extendedSuggest(notInclude = [], type: SuggestType, limit = 20) {
+    const applyQuery = <T, Key>(where: Dexie.WhereClause<T, Key>) =>
+        where
+            .noneOf(notInclude)
+            .limit(limit)
+            .uniqueKeys()
+
+    return await applyQuery<Tag, [string, string]>(db.tags.where('name'))
+}

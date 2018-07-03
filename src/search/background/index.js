@@ -6,6 +6,7 @@ makeRemotelyCallable({
     addTag: indexInterface.addTag,
     delTag: indexInterface.delTag,
     suggest: indexInterface.suggest,
+    extendedSuggest: indexInterface.extendedSuggest,
     addBookmark: indexInterface.addBookmark,
     delBookmark: indexInterface.delBookmark,
     delPages: indexInterface.delPages,

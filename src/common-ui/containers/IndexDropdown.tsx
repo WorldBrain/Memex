@@ -28,7 +28,9 @@ export interface Props {
     /** Opt. cb to run when tag deleted from state. */
     onFilterDel?: (filter: string) => void
     /** Opt. cb with new tag to be added to a new annotation */
-    onNewTagAdd: (filter: string) => void
+    onNewTagAdd?: (filter: string) => void
+    // initial suggestions from the popup
+    initSuggestions?: string[]
 }
 
 export interface State {
@@ -69,7 +71,8 @@ class IndexDropdownContainer extends Component<Props, State> {
         this.state = {
             searchVal: '',
             isLoading: false,
-            displayFilters: props.initFilters, // Display state objects; will change all the time
+            displayFilters: props.initSuggestions
+                ? props.initSuggestions : props.initFilters, // Display state objects; will change all the time
             filters: props.initFilters, // Actual tags associated with the page; will only change when DB updates
             focused: props.initFilters.length ? 0 : -1,
         }

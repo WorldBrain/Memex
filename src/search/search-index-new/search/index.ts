@@ -7,7 +7,7 @@ import { textSearch } from './text-search'
 import { paginate, applyScores } from './util'
 
 export { domainHasFavIcon } from './fav-icon'
-export { suggest } from './suggest'
+export { suggest, extendedSuggest } from './suggest'
 
 export async function search({
     query,

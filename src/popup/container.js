@@ -47,6 +47,7 @@ class PopupContainer extends Component {
         this.createBookmarkByUrl = remoteFunction('addBookmark')
         this.listsContainingPage = remoteFunction('getListAssocPage')
         this.fetchAllList = remoteFunction('getAllLists')
+        this.initTagSuggestions = remoteFunction('extendedSuggest')
     }
 
     state = {
@@ -128,9 +129,12 @@ class PopupContainer extends Component {
         const listsAssocWithPage = await this.listsContainingPage({
             url: this.state.url,
         })
+        const page = await this.pageLookup(this.state.url)
 
         // Get ids of all the lists associated with the page.
         const listIds = listsAssocWithPage.map(({ id }) => id)
+        // Get 20 more tags that are not related related to the list.
+        const tags = await this.initTagSuggestions(page.tags, 'tag')
 
         // Get rest 20 lists not associated with the page.
         const lists = await this.fetchAllList({
@@ -140,8 +144,9 @@ class PopupContainer extends Component {
             opts: { limit: 20 },
         })
         return {
-            page: await this.pageLookup(this.state.url),
-            initSuggestions: [...listsAssocWithPage, ...lists],
+            page,
+            initListSuggestions: [...listsAssocWithPage, ...lists],
+            initTagSuggestions: [...page.tags, ...tags],
             lists: listsAssocWithPage,
         }
     }
@@ -445,6 +450,7 @@ class PopupContainer extends Component {
                     url={this.state.url}
                     tabId={this.state.tabID}
                     initFilters={this.pageTags}
+                    initSuggestions={this.state.initTagSuggestions}
                     source="tag"
                 />
             )
@@ -455,7 +461,7 @@ class PopupContainer extends Component {
                 <AddListDropdownContainer
                     mode="popup"
                     results={this.state.lists}
-                    initSuggestions={this.state.initSuggestions}
+                    initSuggestions={this.state.initListSuggestions}
                     url={this.state.url}
                 />
             )
