@@ -34,7 +34,7 @@ export default class DirectLinkingStorage extends FeatureStorage {
 
         this.storageManager.registerCollection(COLLECTION_NAME, [
             {
-                version: new Date(2018, 6, 27),
+                version: new Date(2018, 5, 31),
                 fields: {
                     pageTitle: { type: 'text' },
                     pageUrl: { type: 'url' },
@@ -51,7 +51,7 @@ export default class DirectLinkingStorage extends FeatureStorage {
                 ],
             },
             {
-                version: new Date(2018, 6, 30),
+                version: new Date(2018, 7, 3),
                 fields: {
                     pageTitle: { type: 'text' },
                     pageUrl: { type: 'url' },
@@ -59,28 +59,8 @@ export default class DirectLinkingStorage extends FeatureStorage {
                     comment: { type: 'text' },
                     selector: { type: 'json' },
                     createdWhen: { type: 'datetime' },
-                    url: { type: 'string' },
-                },
-                indices: [
-                    { field: 'url', pk: true },
-                    { field: 'pageTitle' },
-                    { field: 'pageUrl' },
-                    { field: 'body' },
-                    { field: 'createdWhen' },
-                    { field: 'comment' },
-                ],
-            },
-            {
-                version: new Date(2018, 7, 2),
-                fields: {
-                    pageTitle: { type: 'text' },
-                    pageUrl: { type: 'url' },
-                    body: { type: 'text' },
-                    comment: { type: 'text' },
-                    selector: { type: 'json' },
-                    createdWhen: { type: 'datetime' },
-                    url: { type: 'string' },
                     lastEdited: { type: 'datetime' },
+                    url: { type: 'string' },
                 },
                 indices: [
                     { field: 'url', pk: true },
@@ -88,7 +68,6 @@ export default class DirectLinkingStorage extends FeatureStorage {
                     { field: 'pageUrl' },
                     { field: 'body' },
                     { field: 'createdWhen' },
-                    { field: 'lastEdited' },
                     { field: 'comment' },
                 ],
             },

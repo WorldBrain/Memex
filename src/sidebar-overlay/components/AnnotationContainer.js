@@ -114,7 +114,6 @@ class AnnotationContainer extends React.Component {
         let dateObject
         if (!lastEdited) dateObject = new Date(createdWhen)
         else dateObject = new Date(lastEdited)
-        console.log('last ', lastEdited)
         const timestamp = moment(dateObject).format('MMMM D YYYY')
 
         return (
@@ -138,9 +137,10 @@ class AnnotationContainer extends React.Component {
                     onClick={this.toggleEditAnnotation}
                 />
                 {env === 'overview' && annotation.body ? (
-                    <a href={annotation.url} target="blank">
-                        <span className={styles.goToPageIcon} />
-                    </a>
+                    <span
+                        className={styles.goToPageIcon}
+                        onClick={this.props.goToAnnotation(annotation)}
+                    />
                 ) : null}
             </div>
         )
@@ -296,6 +296,7 @@ class AnnotationContainer extends React.Component {
         this.state.containsTags ? styles.tagsContainer : ''
 
     deriveIsClickable = () => {
+        // Container box is only clickable if it's in iframe and it's a comment
         return this.props.env === 'iframe' && this.props.annotation.body !== ''
     }
 

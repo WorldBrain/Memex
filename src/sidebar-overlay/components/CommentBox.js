@@ -66,6 +66,7 @@ class CommentBox extends React.Component {
         this.setState({
             commentInput: '',
             textareaRows: constants.DEFAULT_ROWS,
+            hidden: true,
         })
     }
 
@@ -79,6 +80,7 @@ class CommentBox extends React.Component {
                 commentInput: '',
                 textareaRows: constants.DEFAULT_ROWS,
                 isHidden: true,
+                tags: [],
             })
         }
     }

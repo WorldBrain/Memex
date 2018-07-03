@@ -8,7 +8,7 @@ const Annotation = props => (
         className={cx(styles.container, {
             [styles.pointer]: props.isClickable,
         })}
-        onClick={props.goToAnnotation}
+        onClick={props.isClickable ? props.goToAnnotation : null}
     >
         <div className={styles.highlight}>
             {props.renderHighlight()}

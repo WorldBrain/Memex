@@ -20,17 +20,17 @@ export const createAnnotation = (comment, body, tags) => async (
     const state = getState()
     const { url, title } = state.page
     const selector = state.anchor
-    const uniqueUrl = `${url}/#${new Date().getTime()}`
 
     // Write annotation to database
-    await remoteFunction('createAnnotation')({
+    const uniqueUrl = await remoteFunction('createAnnotation')({
         url,
         title,
         body,
         comment,
         selector,
-        uniqueUrl,
     })
+
+    console.log('new: ', uniqueUrl)
 
     // Write tags to database
     tags.forEach(async tag => {

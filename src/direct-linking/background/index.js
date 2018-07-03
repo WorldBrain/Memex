@@ -66,14 +66,6 @@ export default class DirectLinkingBackground {
         this.triggerSidebar('openSidebarAndSendAnchor', anchor)
     }
 
-    async goToAnnotation({ tab }, annotation) {
-        const { id } = await browser.tabs.create({
-            active: true,
-            url: annotation.pageUrl,
-        })
-        await remoteFunction('goToAnnotation', { tabId: id })(annotation)
-    }
-
     followAnnotationRequest({ tab }) {
         this.requests.followAnnotationRequest(tab.id)
     }
@@ -109,13 +101,12 @@ export default class DirectLinkingBackground {
         )
     }
 
-    async createAnnotation(
-        { tab },
-        { url, title, comment, body, selector, uniqueUrl },
-    ) {
+    async createAnnotation({ tab }, { url, title, comment, body, selector }) {
         const pageUrl = url === null ? tab.url : url
         const pageTitle = title === null ? tab.title : title
-        return await this.storage.createAnnotation({
+        const uniqueUrl = `${pageUrl}/#${new Date().getTime()}`
+
+        await this.storage.createAnnotation({
             pageUrl: normalize(pageUrl),
             url: uniqueUrl,
             pageTitle,
@@ -123,6 +114,8 @@ export default class DirectLinkingBackground {
             body,
             selector,
         })
+
+        return uniqueUrl
     }
 
     async editAnnotation({ tab }, pk, comment) {
