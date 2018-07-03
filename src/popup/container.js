@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import qs from 'query-string'
 
 import analytics, { updateLastActive } from 'src/analytics'
+import internalAnalytics from 'src/analytics/internal'
 import extractQueryFilters from 'src/util/nlp-time-filter'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { isLoggable, getPauseState } from 'src/activity-logger'
@@ -179,6 +180,10 @@ class PopupContainer extends Component {
                 action: domainDelete ? 'Blacklist domain' : 'Blacklist site',
             })
 
+            internalAnalytics.processEvent({
+                type: domainDelete ? 'blacklistDomain' : 'blacklistSite',
+            })
+
             this.addToBlacklist(url)
             this.setState(state => ({
                 ...state,
@@ -199,6 +204,10 @@ class PopupContainer extends Component {
             category: 'Popup',
             action: isPaused ? 'Resume indexing' : 'Pause indexing',
             value: isPaused ? undefined : pauseValue,
+        })
+
+        internalAnalytics.processEvent({
+            type: isPaused ? 'resumeIndexing' : 'pauseIndexing',
         })
 
         // Tell background script to do on extension level
@@ -229,6 +238,10 @@ class PopupContainer extends Component {
             analytics.trackEvent({
                 category: 'Search',
                 action: 'Popup search',
+            })
+
+            internalAnalytics.processEvent({
+                type: 'searchPopup',
             })
 
             const queryFilters = extractQueryFilters(this.state.searchValue)

@@ -1,6 +1,7 @@
 import { createAction } from 'redux-act'
 
 import analytics from 'src/analytics'
+import internalAnalytics from 'src/analytics/internal'
 import { IMPORT_TYPE as TYPE, CMDS } from 'src/options/imports/constants'
 import { IMPORT_CONN_NAME } from './constants'
 import * as selectors from './selectors'
@@ -80,6 +81,10 @@ class ImportsConnHandler {
             action: 'Cancelled import',
         })
 
+        internalAnalytics.processEvent({
+            type: 'onboardingCancelImport',
+        })
+
         this._port.postMessage({ cmd: CMDS.CANCEL })
         this.complete()
     }
@@ -90,6 +95,10 @@ class ImportsConnHandler {
                 category: 'Onboarding',
                 action: 'Finished import',
             })
+
+            internalAnalytics.processEvent({
+                type: 'onboardingFinishImport',
+            })
         }
         this._dispatch(setImportsDone(true))
     }
@@ -97,7 +106,7 @@ class ImportsConnHandler {
     /**
      * Responds to messages sent from background script over the runtime connection by dispatching
      * appropriate redux actions. Non-handled messages are ignored.
-    */
+     */
     handleCmds = ({ cmd, ...payload }) => {
         switch (cmd) {
             case CMDS.INIT: // Tell it to start immediately after BG connman sends INIT ready signal

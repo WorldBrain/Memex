@@ -1,6 +1,7 @@
 import { createAction } from 'redux-act'
 
 import analytics, { updateLastActive } from 'src/analytics'
+import internalAnalytics from 'src/analytics/internal'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import * as selectors from './selectors'
 import { STORAGE_KEY } from './constants'
@@ -41,6 +42,11 @@ export const addToBlacklist = expression => async (dispatch, getState) => {
         category: 'Blacklist',
         action: 'Add blacklist entry',
     })
+
+    internalAnalytics.processEvent({
+        type: 'addBlacklistEntry',
+    })
+
     const oldBlacklist = selectors.blacklist(getState())
     const newEntry = { expression, dateAdded: Date.now() }
 
@@ -70,6 +76,11 @@ export const removeFromBlacklist = index => async (dispatch, getState) => {
         category: 'Blacklist',
         action: 'Remove blacklist entry',
     })
+
+    internalAnalytics.processEvent({
+        type: 'removeBlacklistEntry',
+    })
+
     const oldBlacklist = selectors.blacklist(getState())
     const newBlacklist = [
         ...oldBlacklist.slice(0, index),

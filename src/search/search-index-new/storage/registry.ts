@@ -49,6 +49,7 @@ export default class StorageRegistry implements RegisterableStorage {
             const fields = def.fields
             Object.entries(fields).forEach(([fieldName, fieldDef]) => {
                 const FieldClass = FIELD_TYPES[fieldDef.type]
+                
                 if (FieldClass) {
                     fieldDef.fieldObject = new FieldClass(fieldDef)
                 }

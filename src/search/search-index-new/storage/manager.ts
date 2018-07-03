@@ -85,6 +85,7 @@ export class StorageManager implements ManageableStorage {
         let coll = await this._storage
             .collection<T>(collectionName)
             .find(filter)
+        
 
         if (findOpts.reverse) {
             coll = coll.reverse()

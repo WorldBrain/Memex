@@ -5,6 +5,7 @@ import qs from 'query-string'
 import moment from 'moment'
 
 import analytics from 'src/analytics'
+import internalAnalytics from 'src/analytics/internal'
 import shortUrl from 'src/util/short-url'
 import searchIndex from 'src/search'
 import extractTimeFiltersFromQuery, {
@@ -89,6 +90,13 @@ async function makeSuggestion(query, suggest) {
         value: searchResults.totalCount,
     })
 
+    internalAnalytics.processEvent({
+        type:
+            searchResults.totalCount > 0
+                ? 'successfulOmnibarSearch'
+                : 'unsuccessfulOmnibarSearch',
+    })
+
     // A subsequent search could have already started and finished while we
     // were busy searching, so we ensure we do not overwrite its results.
     if (
@@ -106,7 +114,9 @@ async function makeSuggestion(query, suggest) {
         setOmniboxMessage('No results found for this query.')
     } else {
         setOmniboxMessage(
-            `Found these ${searchResults.totalCount} pages in your memory: (press enter to see all results)`,
+            `Found these ${
+                searchResults.totalCount
+            } pages in your memory: (press enter to see all results)`,
         )
     }
 

@@ -1,6 +1,7 @@
 import { createAction } from 'redux-act'
 
 import analytics, { updateLastActive } from 'src/analytics'
+import internalAnalytics from 'src/analytics/internal'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { actions as filterActs, selectors as filters } from './filters'
 import * as constants from './constants'
@@ -166,11 +167,40 @@ function trackSearch(searchResult, overwrite, state) {
     analytics.trackEvent({ category: 'Search', action, name, value })
 }
 
+// Internal analytics store
+function storeSearch(searchResult, overwrite, state) {
+    let type
+
+    if (searchResult.totalCount === 0) {
+        type = 'unsuccessfulSearch'
+    } else {
+        type = overwrite ? 'successfulSearch' : 'paginateSearch'
+    }
+
+    internalAnalytics.processEvent({ type })
+
+    if (filters.onlyBookmarks(state)) {
+        internalAnalytics.processEvent({ type: 'bookmarkFilter' })
+    }
+
+    if (filters.tags(state).length > 0) {
+        internalAnalytics.processEvent({ type: 'tagFilter' })
+    }
+
+    if (
+        filters.domainsInc(state).length > 0 ||
+        filters.domainsExc(state).length > 0
+    ) {
+        internalAnalytics.processEvent({ type: 'domainFilter' })
+    }
+}
+
 const updateSearchResult = ({ searchResult, overwrite = false }) => (
     dispatch,
     getState,
 ) => {
     trackSearch(searchResult, overwrite, getState())
+    storeSearch(searchResult, overwrite, getState())
 
     const searchAction = overwrite ? setSearchResult : appendSearchResult
 
@@ -200,6 +230,10 @@ export const deleteDocs = () => async (dispatch, getState) => {
         action: 'Delete result',
     })
 
+    internalAnalytics.processEvent({
+        type: 'deleteResult',
+    })
+
     try {
         dispatch(hideDeleteConfirm())
 
@@ -225,6 +259,10 @@ export const toggleBookmark = (url, index) => async (dispatch, getState) => {
         action: hasBookmark
             ? 'Remove result bookmark'
             : 'Create result bookmark',
+    })
+
+    internalAnalytics.processEvent({
+        type: hasBookmark ? 'removeResultBookmark' : 'createResultBookmark',
     })
 
     try {
@@ -273,6 +311,10 @@ export const setQueryTagsDomains = (input, isEnter = true) => (
             if (constants.HASH_TAG_PATTERN.test(term)) {
                 removeFromInputVal(term)
                 dispatch(filterActs.toggleTagFilter(stripTagPattern(term)))
+                analytics.trackEvent({
+                    category: 'Tag',
+                    action: 'Filter by Tag',
+                })
             }
 
             // If 'domain.tld.cctld?' pattern in input, remove it and add to filter state
@@ -286,8 +328,17 @@ export const setQueryTagsDomains = (input, isEnter = true) => (
 
                 term = term.replace(constants.TERM_CLEAN_PATTERN, '')
                 dispatch(act(term))
+
+                analytics.trackEvent({
+                    category: 'Domain',
+                    action: 'Filter by Domain',
+                })
             }
         })
+    }
+
+    if (input.length > 0) {
+        internalAnalytics.processEvent({ type: 'nlpSearch' })
     }
 
     dispatch(setQuery(input))
