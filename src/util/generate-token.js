@@ -1,5 +1,5 @@
-import { installTimeStorageKey } from 'src/imports/background'
 import { API_HOST } from 'src/analytics/internal/constants'
+import { INSTALL_TIME_KEY } from '../constants'
 
 const API_PATH = '/user-token'
 
@@ -18,7 +18,7 @@ export async function generateTokenIfNot({
     // if install time is not present then current time stores as install time and send to server same
     if (!installTime) {
         installTime = Date.now()
-        browser.storage.local.set({ [installTimeStorageKey]: installTime })
+        browser.storage.local.set({ [INSTALL_TIME_KEY]: installTime })
     }
 
     const generateToken = await fetch(hostname + pathname, {

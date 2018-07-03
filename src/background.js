@@ -6,7 +6,7 @@ import 'src/analytics/background'
 import DirectLinkingBackground from 'src/direct-linking/background'
 import EventLogBackground from 'src/analytics/internal/background'
 import 'src/omnibar'
-import { installTimeStorageKey } from 'src/imports/background'
+import { INSTALL_TIME_KEY } from './constants'
 import {
     constants as blacklistConsts,
     blacklist,
@@ -77,7 +77,7 @@ async function onInstall() {
     // Open onboarding page
     browser.tabs.create({ url: `${OVERVIEW_URL}?install=true` })
     // Store the timestamp of when the extension was installed + default blacklist
-    browser.storage.local.set({ [installTimeStorageKey]: now })
+    browser.storage.local.set({ [INSTALL_TIME_KEY]: now })
 
     await generateTokenIfNot({ installTime: now })
 }
@@ -106,9 +106,9 @@ async function onUpdate() {
         })
     }
 
-    const installTime = (await browser.storage.local.get(
-        installTimeStorageKey,
-    ))[installTimeStorageKey]
+    const installTime = (await browser.storage.local.get(INSTALL_TIME_KEY))[
+        INSTALL_TIME_KEY
+    ]
 
     await generateTokenIfNot({ installTime })
 }

@@ -1,7 +1,7 @@
 import { idleManager } from 'src/util/idle'
 import { SHOULD_TRACK_STORAGE_KEY as SHOULD_TRACK } from 'src/options/privacy/constants'
 import { USER_ID, generateTokenIfNot } from 'src/util/generate-token'
-import { installTimeStorageKey } from 'src/imports/background'
+import { INSTALL_TIME_KEY } from '../../../constants'
 
 class SendToServer {
     static API_PATH = '/event'
@@ -91,8 +91,8 @@ class SendToServer {
 
         while (!userId) {
             const installTime = (await browser.storage.local.get(
-                installTimeStorageKey,
-            ))[installTimeStorageKey]
+                INSTALL_TIME_KEY,
+            ))[INSTALL_TIME_KEY]
             userId = await generateTokenIfNot(installTime)
         }
 
