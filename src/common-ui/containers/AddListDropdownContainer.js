@@ -87,23 +87,24 @@ class DropdownContainer extends Component {
     addPageToList = () => {}
 
     createList = async () => {
-        const newList = {
-            name: this.getSearchVal(),
-            pages: [],
-            active: true,
-        }
-
         let newLists = this.state.filters
 
         try {
             if (this.allowIndexUpdate) {
+                // Adds a list as well as add this page to list.
                 const id = await this.addList({ name: this.getSearchVal() })
                 await this.addUrlToList({
                     id,
                     url: [this.props.url],
                 })
+                const newList = {
+                    id,
+                    name: this.getSearchVal(),
+                    pages: [],
+                    active: true,
+                }
+                newLists = [newList, ...this.state.filters]
             }
-            newLists = [newList, ...this.state.filters]
         } catch (err) {
         } finally {
             this.inputEl.focus()
@@ -182,16 +183,10 @@ class DropdownContainer extends Component {
 
         const { active } = list
 
-        let pagesReducer
+        const pagesReducer = !active
         let listReducer = lists => lists
         // Either add or remove it to the main `state.pages` array
         try {
-            if (active) {
-                pagesReducer = false
-            } else {
-                // this.props.onFilterDel(tag)
-                pagesReducer = true
-            }
             if (listIndex === -1) {
                 await this.addUrlToList({
                     id: listId,
@@ -201,6 +196,7 @@ class DropdownContainer extends Component {
                 listReducer = lists => [
                     {
                         ...list,
+                        id: listId,
                         active: pagesReducer,
                     },
                     ...lists,

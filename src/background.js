@@ -5,11 +5,8 @@ import 'src/search/background'
 import 'src/analytics/background'
 import 'src/imports/background'
 import DirectLinkingBackground from 'src/direct-linking/background'
-<<<<<<< f6baa88c31efde337c7216d58f374acc32a02d82
 import EventLogBackground from 'src/analytics/internal/background'
-=======
 import CustomListBackground from 'src/custom-lists/background'
->>>>>>> Make lists table in indexed DB
 import 'src/omnibar'
 import { INSTALL_TIME_KEY } from './constants'
 import {
