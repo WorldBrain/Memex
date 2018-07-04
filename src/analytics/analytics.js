@@ -23,6 +23,9 @@ class Analytics {
         'Content-Type': 'application/json',
     }
 
+    // Chrome should have tracking on by default
+    static DEF_TRACKING = typeof browser.runtime.getBrowserInfo === 'undefined'
+
     /**
      * @property {Set<URLSearchParam>} Pool of requests that have been tracked, which will be
      *  periodically cleared and sent off in bulk.
@@ -101,7 +104,7 @@ class Analytics {
      * @return {Promise<boolean>}
      */
     _sendBulkReq = async () => {
-        if (!this._pool.size || !await this.shouldTrack()) {
+        if (!this._pool.size || !(await this.shouldTrack())) {
             this._pool.clear() // Clear pool if user turned off tracking
             return
         }
@@ -119,7 +122,7 @@ class Analytics {
 
     async shouldTrack() {
         const storage = await browser.storage.local.get({
-            [SHOULD_TRACK]: true,
+            [SHOULD_TRACK]: Analytics.DEF_TRACKING,
         })
 
         return storage[SHOULD_TRACK]
@@ -132,7 +135,7 @@ class Analytics {
      * @param {boolean} [force=false] Whether or not to send immediately or just add to request pool.
      */
     async trackEvent(eventArgs, force = false) {
-        if (!await this.shouldTrack()) {
+        if (!(await this.shouldTrack())) {
             return
         }
 
@@ -156,7 +159,7 @@ class Analytics {
      * @param {LinkTrackInfo} linkArgs
      */
     async trackLink({ linkType, url }) {
-        if (!await this.shouldTrack()) {
+        if (!(await this.shouldTrack())) {
             return
         }
 
@@ -170,7 +173,7 @@ class Analytics {
      * @param {string} args.title The title of the page to track
      */
     async trackPage({ title }) {
-        if (!await this.shouldTrack()) {
+        if (!(await this.shouldTrack())) {
             return
         }
 
