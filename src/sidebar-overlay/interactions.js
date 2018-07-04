@@ -6,11 +6,6 @@ import {
 
 import { injectCSS } from 'src/search-injection/dom'
 import { makeRemotelyCallable, remoteFunction } from 'src/util/webextensionRPC'
-import {
-    setUpRemoteFunctions,
-    removeMessageListener,
-    remoteExecute,
-} from './messaging'
 import { setupRibbonUI, destroyAll } from './components'
 import { retryUntilErrorResolves } from './utils'
 
@@ -56,18 +51,12 @@ export const insertRibbon = () => {
     injectCSS(cssFile)
 
     setupRibbonUI(target)
-
-    setUpRemoteFunctions({
-        highlightAndScroll: (annotation, ...args) =>
-            highlightAndScroll(annotation),
-    })
 }
 
 const removeRibbon = () => {
     if (!target) return
 
     destroyAll(target)()
-    removeMessageListener()
     target = null
 }
 
@@ -95,10 +84,15 @@ export const setupRPC = () => {
  * @param {*} annotation The annotation to go to.
  * @param {string} env The sidebar enviroment in which the function is being executed.
  * @param {string} pageUrl Url of the page highlight is in.
+ * @param {function} highlightAndScroll Remote function which gets the passed annotation
  * @returns {Promise<function>}
  */
 
-export const goToAnnotation = (env, pageUrl) => annotation => async () => {
+export const goToAnnotation = (
+    env,
+    pageUrl,
+    highlightAndScroll,
+) => annotation => async () => {
     // If annotation is a comment, do nothing
     if (!annotation.body) return false
     else if (env === 'overview') {
@@ -121,6 +115,6 @@ export const goToAnnotation = (env, pageUrl) => annotation => async () => {
         //     )
         // }, 3000)
     } else {
-        remoteExecute('highlightAndScroll')(annotation)
+        highlightAndScroll(annotation)
     }
 }

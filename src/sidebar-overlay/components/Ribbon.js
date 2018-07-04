@@ -2,8 +2,10 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import cx from 'classnames'
 import onClickOutside from 'react-onclickoutside'
+
+import { highlightAndScroll } from '../interactions'
 import { remoteFunction, makeRemotelyCallable } from 'src/util/webextensionRPC'
-import { remoteExecute } from '../messaging'
+import FrameCommunication from '../messaging'
 
 import styles from './Ribbon.css'
 
@@ -23,12 +25,20 @@ class Ribbon extends React.Component {
     async componentDidMount() {
         this.setupRPCfunctions()
 
+        this.frameFC = new FrameCommunication(this.iFrame.contentWindow)
+        this.setupFrameFunctions()
+
         const annotations = await remoteFunction('getAllAnnotations')(
             window.location.href,
         )
+
         this.setState({
             annotations,
         })
+    }
+
+    componentWillUnmount() {
+        this.frameFC.removeMessageListener()
     }
 
     setupRPCfunctions = () => {
@@ -38,6 +48,17 @@ class Ribbon extends React.Component {
             },
             openSidebarAndSendAnchor: async anchor => {
                 await this.openSidebarAndSendAnchor(anchor)
+            },
+        })
+    }
+
+    setupFrameFunctions = () => {
+        this.frameFC.setUpRemoteFunctions({
+            toggleSidebar: async () => {
+                await this.toggleSidebar()
+            },
+            highlightAndScroll: annotation => {
+                highlightAndScroll(annotation)
             },
         })
     }
@@ -52,7 +73,7 @@ class Ribbon extends React.Component {
     }
 
     reloadAnnotations = async () => {
-        await remoteExecute('reloadAnnotations', this.iFrame.contentWindow)()
+        await this.frameFC.remoteExecute('reloadAnnotations')()
         await this.fetchAnnotations()
 
         const highlightables = this.state.annotations.filter(
@@ -64,9 +85,7 @@ class Ribbon extends React.Component {
     closeSidebarOps = async () => {
         this.props.removeHighlights({ isDark: false })
         this.props.removeHighlights({ isDark: true })
-        await remoteExecute('sendAnchorToSidebar', this.iFrame.contentWindow)(
-            null,
-        )
+        await this.frameFC.remoteExecute('sendAnchorToSidebar')(null)
     }
 
     toggleSidebar = async () => {
@@ -91,9 +110,7 @@ class Ribbon extends React.Component {
     }
 
     openSidebarAndSendAnchor = async anchor => {
-        await remoteExecute('sendAnchorToSidebar', this.iFrame.contentWindow)(
-            anchor,
-        )
+        await this.frameFC.remoteExecute('sendAnchorToSidebar')(anchor)
         this.setState({
             isSidebarActive: true,
         })

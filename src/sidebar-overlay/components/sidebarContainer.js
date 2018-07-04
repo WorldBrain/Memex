@@ -7,8 +7,8 @@ import Sidebar from './Sidebar'
 import Annotation from './AnnotationContainer'
 
 import { goToAnnotation } from '../interactions'
-import { setUpRemoteFunctions } from '../messaging'
-import { remoteFunction } from '../../util/webextensionRPC'
+import FrameCommunication from '../messaging'
+// import { remoteFunction } from '../../util/webextensionRPC'
 
 class SidebarContainer extends React.Component {
     static propTypes = {
@@ -39,12 +39,14 @@ class SidebarContainer extends React.Component {
         setPageInfo(pageUrl, pageTitle)
         await fetchAnnotations()
         if (this.props.env === 'iframe') {
-            this.setupiFrameMessaging()
+            this.setupFrameFunctions()
         }
     }
 
-    setupiFrameMessaging = () => {
-        setUpRemoteFunctions({
+    parentFC = new FrameCommunication()
+
+    setupFrameFunctions = () => {
+        this.parentFC.setUpRemoteFunctions({
             reloadAnnotations: async () => {
                 await this.props.fetchAnnotations()
             },
@@ -63,8 +65,17 @@ class SidebarContainer extends React.Component {
         if (env === 'overview') {
             setShowSidebar(false)
         } else {
-            remoteFunction('toggleSidebar')()
+            // remoteFunction('toggleSidebar')()
+            this.parentFC.remoteExecute('toggleSidebar')()
         }
+    }
+
+    goToAnnotation = () => {
+        return goToAnnotation(
+            this.props.env,
+            this.props.pageUrl,
+            this.parentFC.remoteExecute('highlightAndScroll'),
+        )
     }
 
     renderAnnotations = () => {
@@ -75,10 +86,7 @@ class SidebarContainer extends React.Component {
         return annotations.map(annotation => (
             <Annotation
                 annotation={annotation}
-                goToAnnotation={goToAnnotation(
-                    this.props.env,
-                    this.props.pageUrl,
-                )}
+                goToAnnotation={this.goToAnnotation()}
                 editAnnotation={this.props.editAnnotation}
                 deleteAnnotation={this.props.deleteAnnotation}
                 key={annotation.url}
