@@ -28,6 +28,9 @@ import { actions as listActs, selectors as customLists } from 'src/custom-lists'
 import SidebarIcons from './sidebar-left/components/SidebarIcons'
 import { actions as sidebarLeftActs } from './sidebar-left'
 import * as sidebar from './sidebar-left/selectors'
+import NotificationList from './components/NotificationList'
+import Notification from './components/Notification'
+import * as notifications from './notifications'
 
 class OverviewContainer extends Component {
     static propTypes = {
@@ -68,6 +71,7 @@ class OverviewContainer extends Component {
         delListFilter: PropTypes.func.isRequired,
         resetUrlDragged: PropTypes.func.isRequired,
         isSidebarOpen: PropTypes.bool.isRequired,
+        showInbox: PropTypes.bool.isRequired,
     }
 
     componentDidMount() {
@@ -220,7 +224,27 @@ class OverviewContainer extends Component {
         </ResultsMessage>
     )
 
+    renderNotificationItems() {
+        return notifications.NOTIFS.map((notification, i) => (
+            <Notification
+                key={i}
+                title={notification.title}
+                message={notification.message}
+                buttonText={notification.button}
+                date={notification.date}
+            />
+        ))
+    }
+
     renderResults() {
+        if (this.props.showInbox) {
+            return (
+                <NotificationList>
+                    {this.renderNotificationItems()}
+                </NotificationList>
+            )
+        }
+
         if (this.props.isMigrationRequired) {
             return (
                 <ResultsMessage>
@@ -362,6 +386,7 @@ const mapStateToProps = state => ({
     mouseOverSidebar: sidebar.mouseOverSidebar(state),
     isSidebarOpen: sidebar.isSidebarOpen(state),
     filterActive: filters.showClearFiltersBtn(state),
+    showInbox: selectors.showInbox(state),
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -375,6 +400,7 @@ const mapDispatchToProps = dispatch => ({
             resetActiveTagIndex: actions.resetActiveTagIndex,
             onShowFilterChange: filterActs.showFilter,
             fetchNextTooltip: actions.fetchNextTooltip,
+            toggleInbox: actions.toggleInbox,
             init: actions.init,
             setUrlDragged: listActs.setUrlDragged,
             showSearchFilters: sidebarLeftActs.openSidebarFilterMode,

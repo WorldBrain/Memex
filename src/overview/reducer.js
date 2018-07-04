@@ -28,6 +28,7 @@ const defaultState = {
     activeTagIndex: -1,
     tooltip: null,
     showTooltip: true,
+    showInbox: false,
 }
 
 function setQuery(state, query) {
@@ -212,6 +213,10 @@ export default createReducer(
         [actions.setShowTooltip]: (state, showTooltip) => ({
             ...state,
             showTooltip: showTooltip,
+        }),
+        [actions.toggleInbox]: state => ({
+            ...state,
+            showInbox: !state.showInbox,
         }),
     },
     defaultState,

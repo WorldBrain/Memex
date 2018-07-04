@@ -1,0 +1,131 @@
+.mainNotifContainer {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: 30px;
+    background-color: #fff;
+    padding: 10px;
+    box-shadow: 0 4px 20px 1px rgba(62, 185, 149, 0.0902);
+}
+
+.logo {
+    background-color: #f3f3f3;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+}
+
+.logo img {
+    width: 20px;
+    height: auto;
+    margin: 7px 10px;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+}
+
+.messageWhy {
+    display: flex;
+    flex-direction: row;
+}
+
+.titleMessage {
+    display: flex;
+    flex-direction: column;
+    width: 600px;
+    margin: 0 10px;
+    font-size: 16px;
+}
+
+.title {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.message {
+    color: #777;
+}
+
+.buttonTick {
+    display: flex;
+    flex-direction: row;
+    margin: 30px 10px 10px 10px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.button {
+    padding: 10px 20px;
+    background-color: #3eb995;
+    color: white;
+    font-size: 14px;
+    width: fit-content;
+    border-radius: 2px;
+    cursor: pointer;
+}
+
+.tick i {
+    color: #3eb995;
+    font-weight: 600;
+}
+
+.onlyTick {
+    justify-content: flex-end;
+}
+
+.showMore {
+    cursor: pointer;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 5px;
+}
+
+.why {
+    position: relative;
+    display: inline-table;
+    color: #777;
+}
+
+.why .whyText {
+    visibility: hidden;
+    width: 240px;
+    background-color: #fff;
+    color: #777;
+    text-align: center;
+    border-radius: 6px;
+    position: absolute;
+    z-index: 1;
+    top: 220%;
+    left: 50%;
+    margin-left: -120px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    border: 1px solid #c2c2c2;
+    padding: 10px 20px;
+}
+
+.why .whyText::after {
+    box-sizing: content-box;
+    top: -13%;
+    left: 50%;
+    border: solid transparent;
+    content: '';
+    height: 20px;
+    width: 20px;
+    position: absolute;
+    pointer-events: none;
+    border-color: #c2c2c2;
+    border-width: 1px;
+    border-bottom-color: transparent;
+    border-left-color: transparent;
+    transform: rotate(-45deg);
+    background-color: #fff;
+}
+
+.why:hover .whyText {
+    visibility: visible;
+    opacity: 1;
+}

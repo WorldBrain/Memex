@@ -33,6 +33,9 @@ const Header = ({
             </div>
         </div>
         <div className={styles.links}>
+            <div className={styles.inbox} onClick={props.toggleInbox}>
+                Inbox
+            </div>
             <OutLink
                 className={styles.upgrade}
                 to="https://worldbrain.io/pricing"
@@ -59,6 +62,8 @@ Header.propTypes = {
     onShowFilterChange: PropTypes.func.isRequired,
     onQuerySearchKeyDown: PropTypes.func.isRequired,
     isSearchDisabled: PropTypes.bool,
+    toggleInbox: PropTypes.func.isRequired,
+    showInbox: PropTypes.bool.isRequired,
 }
 
 export default Header

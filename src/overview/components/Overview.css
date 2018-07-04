@@ -81,12 +81,13 @@
     display: flex;
     justify-content: flex-end;
     align-content: center;
-    width: 180px;
-    margin-left: -50px;
+    width: 350px;
+    margin-left: -225px;
     font-weight: normal;
-    height: 25px;
+    align-items: center;
 
     @media (max-width: 1200px) {
+        margin-left: 0;
         width: 24px;
     }
 
@@ -192,6 +193,7 @@
     text-decoration: none;
     padding-top: 1px;
     padding-right: 30px;
+    padding-left: 30px;
     color: #3eb995;
 
     &:hover {
@@ -259,4 +261,21 @@
     opacity: 1;
     position: absolute;
     top: -90vh;
+}
+
+.inbox {
+    font-size: 18px;
+    text-decoration: none;
+    padding: 23px 50px;
+    color: #777;
+    background-color: #e3e3e3;
+    cursor: pointer;
+
+    &:hover {
+        color: #3eb995;
+    }
+
+    @media (max-width: 1260px) {
+        display: none;
+    }
 }
