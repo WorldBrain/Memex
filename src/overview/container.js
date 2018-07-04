@@ -224,6 +224,21 @@ class OverviewContainer extends Component {
         </ResultsMessage>
     )
 
+    isNotificationTruncated(message) {
+        const NotificationCharLimit = 100
+
+        if (message.length <= NotificationCharLimit) {
+            return false
+        } else {
+            const lastSpaceBeforeCutoff = message.lastIndexOf(
+                ' ',
+                NotificationCharLimit,
+            )
+            const trunctatedText = message.substr(0, lastSpaceBeforeCutoff)
+            return trunctatedText
+        }
+    }
+
     renderNotificationItems() {
         return notifications.NOTIFS.map((notification, i) => (
             <Notification

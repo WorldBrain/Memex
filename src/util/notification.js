@@ -1,7 +1,4 @@
 import * as notifications from 'src/overview/notifications'
-import { remoteFunction } from './webextensionRPC'
-
-const storeNotification = remoteFunction('storeNotification')
 
 export default async function initNotification() {
     for (let notification of notifications.NEW_NOTIFS) {
@@ -10,6 +7,6 @@ export default async function initNotification() {
             sentTime: Date.now(),
         }
 
-        await storeNotification(notification)
+        await window.notification.storeNotification(notification)
     }
 }
