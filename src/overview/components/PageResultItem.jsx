@@ -33,6 +33,8 @@ class PageResultItem extends PureComponent {
         isListFilterActive: PropTypes.bool.isRequired,
         handleCrossRibbonClick: PropTypes.func.isRequired,
         setUrlDragged: PropTypes.func.isRequired,
+        index: PropTypes.number.isRequired,
+        scrollDisabled: PropTypes.bool.isRequired,
     }
 
     dragStart = e => {
@@ -56,7 +58,12 @@ class PageResultItem extends PureComponent {
                 {this.props.isDeleting && (
                     <LoadingIndicator className={styles.deletingSpinner} />
                 )}
-                <div className={styles.rootContainer}>
+                <div
+                    className={classNames(styles.rootContainer, {
+                        [styles.noScroll]:
+                            this.props.index === 0 && this.props.scrollDisabled,
+                    })}
+                >
                     <a
                         draggable="true"
                         onDragStart={this.dragStart}

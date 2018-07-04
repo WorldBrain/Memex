@@ -32,6 +32,8 @@ class ListContainer extends Component {
         showCreateList: PropTypes.bool.isRequired,
         showCommonNameWarning: PropTypes.bool.isRequired,
         closeCreateListForm: PropTypes.func.isRequired,
+        setMouseOver: PropTypes.func.isRequired,
+        resetMouseOver: PropTypes.func.isRequired,
     }
 
     constructor(props) {
@@ -151,31 +153,38 @@ class ListContainer extends Component {
                         noOverlay
                         customBurgerIcon={<img src="/img/sidebar_icon.svg" />}
                         customCrossIcon={<img src="/img/cross.svg" />}
+                        // onMouseLeave={this.props.resetMouseOver}
+                        // onMouseEnter={this.props.setMouseOver}
                     >
-                        <a
-                            onClick={this.props.resetFilters}
-                            className={extStyles.showAll}
+                        <div
+                            onMouseLeave={this.props.resetMouseOver}
+                            onMouseEnter={this.props.setMouseOver}
                         >
-                            Show All
-                        </a>
+                            <a
+                                onClick={this.props.resetFilters}
+                                className={extStyles.showAll}
+                            >
+                                Show All
+                            </a>
 
-                        <hr className={extStyles.hr} />
+                            <hr className={extStyles.hr} />
 
-                        <MyCollection
-                            handleRenderCreateList={
-                                this.props.toggleCreateListForm
-                            }
-                        />
+                            <MyCollection
+                                handleRenderCreateList={
+                                    this.props.toggleCreateListForm
+                                }
+                            />
 
-                        {this.renderCreateList(this.props.showCreateList)}
-                        <div className={extStyles.allLists}>
-                            {this.renderAllLists()}
+                            {this.renderCreateList(this.props.showCreateList)}
+                            <div className={extStyles.allLists}>
+                                {this.renderAllLists()}
+                            </div>
+                            <DeleteConfirmModal
+                                isShown={this.props.isDeleteConfShown}
+                                onClose={this.props.resetListDeleteModal}
+                                deleteList={this.props.handleDeleteList}
+                            />
                         </div>
-                        <DeleteConfirmModal
-                            isShown={this.props.isDeleteConfShown}
-                            onClose={this.props.resetListDeleteModal}
-                            deleteList={this.props.handleDeleteList}
-                        />
                     </Menu>
                 </div>
             </div>
@@ -200,6 +209,8 @@ const mapDispatchToProps = (dispatch, getState) => ({
             updateList: actions.updateList,
             toggleCreateListForm: actions.toggleCreateListForm,
             closeCreateListForm: actions.closeCreateListForm,
+            setMouseOver: actions.setMouseOver,
+            resetMouseOver: actions.resetMouseOver,
         },
         dispatch,
     ),

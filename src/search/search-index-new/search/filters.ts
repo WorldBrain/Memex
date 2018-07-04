@@ -36,6 +36,7 @@ export class FilteredURLsManager implements FilteredURLs {
             listUrls ? [...listUrls] : listUrls,
         ].filter(urls => urls != null)
 
+        // Depends on no. of applied filters whether to take intersection or just flatten.
         let initInclude
         if (allUrls.length > 1) {
             initInclude = intersection(...allUrls)

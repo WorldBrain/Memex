@@ -317,3 +317,7 @@
     opacity: 1;
     position: absolute;
 }
+
+.noScroll {
+    margin-top: 0;
+}

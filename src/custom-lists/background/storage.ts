@@ -53,7 +53,7 @@ export default class CustomListStorage extends FeatureStorage {
     }
 
     // Takes the list as they come from Db and does some pre-processing before sending.
-    async changeListsbeforeSending(lists: object[], pageEnteries) {
+    async changeListsbeforeSending(lists: object[], pageEnteries: object[]) {
         const mappedLists = lists.map((list: ListObject) => {
             const page = pageEnteries.find(({ listId }: PageObject) => listId === list.id)
             delete list["_name_terms"]
@@ -78,12 +78,12 @@ export default class CustomListStorage extends FeatureStorage {
     }
 
     // Return all the pages associated with a list.
-    async fetchListPages(listId) {
+    async fetchListPages(listId: Number) {
         return await this.storageManager.findAll(PAGE_LIST_ENTRY, { listId })
     }
 
     // Returns all the lists containing a certain page.
-    async getListAssocPage({ url }) {
+    async getListAssocPage({ url }: { url: string }) {
         const pages = await this.storageManager.findAll(PAGE_LIST_ENTRY, {
             pageUrl: url,
         })
@@ -97,7 +97,9 @@ export default class CustomListStorage extends FeatureStorage {
     }
 
     // Function to insert into the DB
-    async insertCustomList({ name, isDeletable = 1, isNestable = 1 }) {
+    async insertCustomList({ name, isDeletable = 1, isNestable = 1 }: {
+        name: string, isDeletable: 0 | 1, isNestable: 0 | 1
+    }) {
         return await this.storageManager.putObject(COLLECTION_NAME, {
             name,
             isDeletable,
@@ -106,7 +108,7 @@ export default class CustomListStorage extends FeatureStorage {
         })
     }
 
-    async updateListName({ id, name }) {
+    async updateListName({ id, name }: { id: Number, name: string }) {
         await this.storageManager.updateObject(COLLECTION_NAME, {
             id
         },
@@ -129,17 +131,24 @@ export default class CustomListStorage extends FeatureStorage {
         })
     }
 
-    // TODO: check if the list ID exists in the DB, if not cannot add.
+    // Adds mapping to lists and pages table.
     async insertPageToList({ listId, pageUrl, fullUrl }:
         { listId: number, pageUrl: string, fullUrl: string }) {
-        await this.storageManager.putObject(PAGE_LIST_ENTRY, {
-            listId,
-            pageUrl,
-            fullUrl,
-            createdAt: new Date(),
-        })
+
+        // check if the list ID exists in the DB, if not cannot add.
+        const idExists = Boolean(await this.fetchListById(listId))
+
+        if (idExists) {
+            await this.storageManager.putObject(PAGE_LIST_ENTRY, {
+                listId,
+                pageUrl,
+                fullUrl,
+                createdAt: new Date(),
+            })
+        }
     }
 
+    // Removes the page from list.
     async removePageFromList({ listId, pageUrl }: {
         listId: number, pageUrl: number
     }) {
@@ -153,8 +162,7 @@ export default class CustomListStorage extends FeatureStorage {
         return x
     }
 
-    async checkPageInList({ listId, pageUrl }) {
-
+    async checkPageInList({ listId, pageUrl }: { listId: Number, pageUrl: string }) {
         const x = await this.storageManager.findObject(PAGE_LIST_ENTRY, {
             $and: [
                 { listId: { $eq: listId } },
@@ -166,16 +174,18 @@ export default class CustomListStorage extends FeatureStorage {
     }
 
     // Suggestions based on search in popup
-    async getListNameSuggestions({ name, url }) {
+    async getListNameSuggestions({ name, url }: { name: string, url: string }) {
         const lists = await this.storageManager.suggest(COLLECTION_NAME, {
             name
         })
         const listIds = lists.map(({ id }: ListObject) => id)
 
+        // Gets all the pages associated with all the lists.
         const pageEnteries = await this.storageManager.findAll(PAGE_LIST_ENTRY, {
             listId: { $in: [...listIds] }, pageUrl: url,
         })
 
+        // Final pre-processing before sending in the lists.
         return this.changeListsbeforeSending(lists, pageEnteries)
     }
 }

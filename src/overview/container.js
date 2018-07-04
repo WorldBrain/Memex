@@ -59,6 +59,7 @@ class OverviewContainer extends Component {
         handleCrossRibbonClick: PropTypes.func.isRequired,
         urlDragged: PropTypes.string.isRequired,
         setUrlDragged: PropTypes.func.isRequired,
+        mouseOverList: PropTypes.bool.isRequired,
     }
 
     componentDidMount() {
@@ -69,6 +70,10 @@ class OverviewContainer extends Component {
 
     componentWillUnmount() {
         document.removeEventListener('click', this.handleOutsideClick, false)
+    }
+
+    get scrollDisabled() {
+        return this.props.showOnboarding || this.props.mouseOverList || this.props.mouseOnSidebar
     }
 
     dropdownRefs = []
@@ -131,6 +136,8 @@ class OverviewContainer extends Component {
         const resultItems = this.props.searchResults.map((doc, i) => (
             <PageResultItem
                 key={i}
+                index={i}
+                scrollDisabled={this.scrollDisabled}
                 onTrashBtnClick={this.props.handleTrashBtnClick(doc, i)}
                 onToggleBookmarkClick={this.props.handleToggleBm(doc, i)}
                 tagManager={this.renderTagsManager(doc, i)}
@@ -240,11 +247,7 @@ class OverviewContainer extends Component {
                         results in your digital memory
                     </ResultsMessage>
                 )}
-                <ResultList
-                    scrollDisabled={
-                        this.props.showOnboarding || this.props.mouseOnSidebar
-                    }
-                >
+                <ResultList scrollDisabled={this.scrollDisabled}>
                     {this.renderResultItems()}
                 </ResultList>
             </Wrapper>
@@ -331,6 +334,7 @@ const mapStateToProps = state => ({
     mouseOnSidebar: sidebarSels.mouseOnSidebar(state),
     isListFilterActive: filters.listFilterActive(state),
     urlDragged: customLists.getUrlDragged(state),
+    mouseOverList: customLists.mouseOverSidebar(state),
 })
 
 const mapDispatchToProps = dispatch => ({

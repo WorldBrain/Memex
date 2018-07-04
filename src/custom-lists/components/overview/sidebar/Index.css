@@ -3,8 +3,9 @@
     color: #504c4c;
     padding: 12px 0px;
     font-size: 1.55em;
-    text-align: center;
     cursor: pointer;
+    display: flex;
+    justify-content: center;
 }
 
 .hr {
