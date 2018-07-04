@@ -11,7 +11,6 @@ import CreateListForm from './CreateListForm'
 import ListItem from './ListItem'
 import DeleteConfirmModal from './DeleteConfirmModal'
 import { actions as filterActs } from 'src/overview/filters'
-// import { remoteFunction } from 'src/util/webextensionRPC'
 
 import { styles } from './ReactBurgerMenu'
 

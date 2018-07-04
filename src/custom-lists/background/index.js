@@ -59,6 +59,10 @@ export default class CustomListBackground {
         return this.storage.fetchListPages(listId)
     }
 
+    /**
+     * Takes the url and return all the associated pages with it
+     * @param {string} url
+     */
     async getListAssocPage({ url }) {
         return this.storage.getListAssocPage({
             url: normalizeUrl(url),
@@ -78,12 +82,11 @@ export default class CustomListBackground {
         })
     }
 
-    // TODO: Just a hack, find a better way.
     async insertPageToList({ id, url }) {
         await this.storage.insertPageToList({
             listId: id,
-            pageUrl: normalizeUrl(url[0]),
-            fullUrl: url[0],
+            pageUrl: normalizeUrl(url),
+            fullUrl: url,
         })
     }
 

@@ -74,8 +74,10 @@ class PageList extends Component {
         })
         // const url = event.dataTransfer.getData('URL')
         // Gets the URL of the dropped list item
-        const data = event.dataTransfer.getData('text/plain')
-        this.props.onAddPageToList(data.split(','))
+        const url = event.dataTransfer.getData('text/plain')
+        console.log(url)
+
+        this.props.onAddPageToList(url)
     }
 
     render() {

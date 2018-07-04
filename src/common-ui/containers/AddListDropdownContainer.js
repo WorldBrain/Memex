@@ -95,7 +95,7 @@ class DropdownContainer extends Component {
                 const id = await this.addList({ name: this.getSearchVal() })
                 await this.addUrlToList({
                     id,
-                    url: [this.props.url],
+                    url: this.props.url,
                 })
                 const newList = {
                     id,
@@ -190,7 +190,7 @@ class DropdownContainer extends Component {
             if (listIndex === -1) {
                 await this.addUrlToList({
                     id: listId,
-                    url: [this.props.url],
+                    url: this.props.url,
                 })
 
                 listReducer = lists => [

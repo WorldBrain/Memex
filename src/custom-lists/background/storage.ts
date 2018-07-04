@@ -52,6 +52,7 @@ export default class CustomListStorage extends FeatureStorage {
         return this.changeListsbeforeSending(x, [])
     }
 
+    // Takes the list as they come from Db and does some pre-processing before sending.
     async changeListsbeforeSending(lists: object[], pageEnteries) {
         const mappedLists = lists.map((list: ListObject) => {
             const page = pageEnteries.find(({ listId }: PageObject) => listId === list.id)
@@ -78,9 +79,7 @@ export default class CustomListStorage extends FeatureStorage {
 
     // Return all the pages associated with a list.
     async fetchListPages(listId) {
-        const pages = await this.storageManager.findAll(PAGE_LIST_ENTRY, { listId })
-
-        return pages
+        return await this.storageManager.findAll(PAGE_LIST_ENTRY, { listId })
     }
 
     // Returns all the lists containing a certain page.
