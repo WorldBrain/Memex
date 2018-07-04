@@ -49,6 +49,7 @@ const deletePages = remoteFunction('delPages')
 const createBookmarkByUrl = remoteFunction('addBookmark')
 const removeBookmarkByUrl = remoteFunction('delBookmark')
 const requestSearch = remoteFunction('search')
+const getUnreadCount = remoteFunction('getUnreadCount')
 
 /**
  * Init a connection to the index running in the background script, allowing
@@ -94,6 +95,7 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
     dispatch,
     getState,
 ) => {
+    console.log(await getUnreadCount())
     const firstState = getState()
     const currentQueryParams = selectors.currentQueryParams(firstState)
     const showTooltip = selectors.showTooltip(firstState)

@@ -36,8 +36,9 @@ export default class NotificationStorage extends FeatureStorage {
     async getUnreadCount() {
         return await this.storageManager.countAll(
             'notifications',
-            { readTime: undefined },
+            { $match: {
+                readTime: {'$exists':false},
+            }},
         )
-      
     }
 }

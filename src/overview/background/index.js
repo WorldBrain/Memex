@@ -7,7 +7,6 @@ export default class NotificationBackground {
     }
 
     setupRemoteFunctions() {
-        console.log('Here')
         makeRemotelyCallable({
             storeNotification: (...params) => {
                 return this.storeNotification(...params)
