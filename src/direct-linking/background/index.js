@@ -91,7 +91,6 @@ export default class DirectLinkingBackground {
         // Attempt to (re-)index, if user preference set, but don't wait for it
         this.storage.indexPageFromTab(tab)
 
-        await this.triggerSidebar('toggleSidebarOverlay')
         return result
     }
 

@@ -73,9 +73,10 @@ class CommentBox extends React.Component {
     save = () => {
         const { commentInput, tags } = this.state
         const { anchor } = this.props
-        if (commentInput.length || anchor) {
+        const strippedComment = commentInput.trim()
+        if (strippedComment.length || anchor) {
             const body = anchor ? anchor.quote : ''
-            this.props.createAnnotation(commentInput, body, tags)
+            this.props.createAnnotation(strippedComment, body, tags)
             this.setState({
                 commentInput: '',
                 textareaRows: constants.DEFAULT_ROWS,

@@ -37,6 +37,7 @@
     font-weight: 300;
     overflow: hidden;
     word-wrap: break-word;
+    white-space: pre-wrap;
 }
 
 .footer {

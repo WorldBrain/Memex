@@ -48,6 +48,11 @@ class Ribbon extends React.Component {
             },
             openSidebarAndSendAnchor: async anchor => {
                 await this.openSidebarAndSendAnchor(anchor)
+
+                const highlightables = this.state.annotations.filter(
+                    annotation => annotation.selector,
+                )
+                this.props.highlightAll(highlightables)
             },
         })
     }
