@@ -525,6 +525,12 @@ class PopupContainer extends Component {
                     icon="help"
                     btnClass={styles.help}
                 />
+                <ButtonIcon
+                    href={`${constants.OVERVIEW_URL}#/`}
+                    icon="notification"
+                    btnClass={styles.notification}
+                    value={3}
+                />
             </div>
         )
     }

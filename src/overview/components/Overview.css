@@ -81,8 +81,8 @@
     display: flex;
     justify-content: flex-end;
     align-content: center;
-    width: 350px;
-    margin-left: -225px;
+    width: 360px;
+    margin-left: -230px;
     font-weight: normal;
     align-items: center;
 
@@ -266,7 +266,7 @@
 .inbox {
     font-size: 18px;
     text-decoration: none;
-    padding: 23px 50px;
+    padding: 23px 25px;
     color: #777;
     background-color: #e3e3e3;
     cursor: pointer;
@@ -278,4 +278,12 @@
     @media (max-width: 1260px) {
         display: none;
     }
+}
+
+.inboxCount {
+    color: #fff;
+    background-color: #3eb995;
+    border-radius: 15px;
+    margin-left: 10px;
+    padding: 3px 18px;
 }

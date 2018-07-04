@@ -35,6 +35,7 @@ const Header = ({
         <div className={styles.links}>
             <div className={styles.inbox} onClick={props.toggleInbox}>
                 Inbox
+                <span className={styles.inboxCount}>5</span>
             </div>
             <OutLink
                 className={styles.upgrade}
