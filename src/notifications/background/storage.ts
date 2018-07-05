@@ -22,32 +22,21 @@ export default class NotificationStorage extends FeatureStorage {
         })
     }
 
-    async storeNotification({ id, title, message, buttonText, sentTime, deliveredTime, readTime, link }) {
-        await this.storageManager.putObject('notifications', {
-            id,
-            title,
-            message,
-            buttonText,
-            sentTime,
-            deliveredTime,
-            readTime,
-            link,
-        })
+    async storeNotification(notification) {
+        await this.storageManager.putObject('notifications', notification)
     }
 
-    async getNotifications() {
+    async getNotifications(isRead) {
         return await this.storageManager.findAll(
             'notifications',
-            {},
+            { readTime: { $exists: isRead } },
         )
     }
 
     async getUnreadCount() {
         return await this.storageManager.countAll(
             'notifications',
-            { $match: {
-                readTime: {'$exists':false},
-            }},
+            { readTime: { $exists: false } },
         )
     }
 }

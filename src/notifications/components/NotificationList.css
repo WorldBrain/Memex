@@ -4,3 +4,10 @@
     padding: 0;
     max-width: 800px;
 }
+
+.heading {
+    font-size: 20px;
+    color: #777;
+    margin: 30px 0;
+    text-align: center;
+}

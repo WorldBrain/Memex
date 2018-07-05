@@ -7,11 +7,16 @@ import * as actions from './actions'
 import * as selectors from './selectors'
 import NotificationList from './components/NotificationList'
 import Notification from './components/Notification'
+import StatusHeading from './components/StatusHeading'
 
 class NotificationContainer extends Component {
     static propTypes = {
-        notifications: PropTypes.arrayOf(PropTypes.object),
+        unreadNotificationList: PropTypes.arrayOf(PropTypes.object).isRequired,
+        readNotificationList: PropTypes.arrayOf(PropTypes.object).isRequired,
         init: PropTypes.func.isRequired,
+        showMoreIndex: PropTypes.string,
+        handleToggleShowMore: PropTypes.func.isRequired,
+        handleTick: PropTypes.func.isRequired,
     }
 
     componentDidMount() {
@@ -19,7 +24,7 @@ class NotificationContainer extends Component {
     }
 
     isNotificationTruncated(message) {
-        const NotificationCharLimit = 100
+        const NotificationCharLimit = 150
 
         if (message.length <= NotificationCharLimit) {
             return false
@@ -29,7 +34,7 @@ class NotificationContainer extends Component {
     }
 
     truncateText(message) {
-        const NotificationCharLimit = 100
+        const NotificationCharLimit = 150
 
         const lastSpaceBeforeCutoff = message.lastIndexOf(
             ' ',
@@ -39,49 +44,78 @@ class NotificationContainer extends Component {
         return trunctatedText
     }
 
-    renderNotificationItems() {
-        return this.props.notifications.map((notification, i) => {
+    renderNotificationItems(notifications, isUnread) {
+        const { showMoreIndex, handleToggleShowMore, handleTick } = this.props
+
+        return notifications.map((notification, i) => {
             const isTruncated = this.isNotificationTruncated(
                 notification.message,
             )
 
-            const trucatedMessage = isTruncated
-                ? this.truncateText(notification.message)
-                : notification.message
+            const trucatedMessage =
+                isTruncated && showMoreIndex !== notification.id
+                    ? this.truncateText(notification.message)
+                    : notification.message
 
             return (
                 <Notification
                     key={i}
                     title={notification.title}
                     message={trucatedMessage}
-                    buttonText={notification.button}
+                    buttonText={notification.buttonText}
                     date={notification.date}
                     isShowMore={isTruncated}
+                    showMore={handleToggleShowMore(
+                        showMoreIndex === notification.id
+                            ? undefined
+                            : notification.id,
+                    )}
+                    isMore={showMoreIndex !== notification.id}
+                    handleTick={handleTick(notification)}
+                    isUnread={isUnread}
+                    link={notification.link}
                 />
             )
         })
     }
 
     render() {
+        const { unreadNotificationList, readNotificationList } = this.props
+        console.log(this.props.showMoreIndex)
         return (
             <NotificationList>
-                {this.renderNotificationItems()}
+                <StatusHeading>New</StatusHeading>
+                {this.renderNotificationItems(unreadNotificationList, true)}
+                <StatusHeading>Read</StatusHeading>
+                {this.renderNotificationItems(readNotificationList, false)}
             </NotificationList>
         )
     }
 }
 
 const mapStateToProps = state => ({
-    notifications: selectors.notificationList(state),
+    readNotificationList: selectors.readNotificationList(state),
+    unreadNotificationList: selectors.unreadNotificationList(state),
+    showMoreIndex: selectors.showMoreIndex(state),
 })
 
 const mapDispatchToProps = dispatch => ({
     ...bindActionCreators(
         {
             init: actions.init,
+            setShowMoreIndex: actions.setShowMoreIndex,
+            resetShowMoreIndex: actions.resetShowMoreIndex,
         },
         dispatch,
     ),
+    handleToggleShowMore: index => event => {
+        event.preventDefault()
+        dispatch(actions.setShowMoreIndex(index))
+    },
+    handleTick: notification => event => {
+        event.preventDefault()
+        dispatch(actions.handleReadNotif(notification))
+    },
 })
 
 export default connect(

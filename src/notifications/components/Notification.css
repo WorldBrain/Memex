@@ -65,11 +65,13 @@
     width: fit-content;
     border-radius: 2px;
     cursor: pointer;
+    text-decoration: none;
 }
 
 .tick i {
     color: #3eb995;
     font-weight: 600;
+    cursor: pointer;
 }
 
 .onlyTick {

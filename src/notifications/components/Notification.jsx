@@ -23,8 +23,11 @@ const Notification = props => (
                             {props.message}
                         </div>
                         {props.isShowMore && (
-                            <div className={localStyles.showMore}>
-                                Show More
+                            <div
+                                className={localStyles.showMore}
+                                onClick={props.showMore}
+                            >
+                                Show {props.isMore ? 'More' : 'Less'}
                             </div>
                         )}
                     </div>
@@ -37,16 +40,23 @@ const Notification = props => (
                         </span>
                     </div>
                 </div>
-                <div className={hasOnlyButton(props.buttonText)}>
-                    {props.buttonText && (
-                        <div className={localStyles.button}>
-                            {props.buttonText}
-                        </div>
-                    )}
-                    <div className={localStyles.tick}>
-                        <i className="material-icons">done</i>
+                {(props.isUnread || props.buttonText) && (
+                    <div className={hasOnlyButton(props.buttonText)}>
+                        {props.buttonText && (
+                            <a href={props.link} className={localStyles.button}>
+                                {props.buttonText}
+                            </a>
+                        )}
+                        {props.isUnread && (
+                            <div
+                                className={localStyles.tick}
+                                onClick={props.handleTick}
+                            >
+                                <i className="material-icons">done</i>
+                            </div>
+                        )}
                     </div>
-                </div>
+                )}
             </div>
         </div>
     </li>
@@ -57,6 +67,11 @@ Notification.propTypes = {
     message: PropTypes.string.isRequired,
     buttonText: PropTypes.string,
     isShowMore: PropTypes.bool.isRequired,
+    showMore: PropTypes.func.isRequired,
+    isMore: PropTypes.bool.isRequired,
+    handleTick: PropTypes.func.isRequired,
+    isUnread: PropTypes.bool.isRequired,
+    link: PropTypes.string,
 }
 
 export default Notification
