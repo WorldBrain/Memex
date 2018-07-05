@@ -124,7 +124,7 @@ async function listSearch({ lists }: Partial<SearchParams>) {
     // The list filter contains only one list at a time
     // It is just a temporary hack until multiple lists for filtering in used.
     // Eg: The list: String i.e = "23" gets converted into ["2", "3"] converting back to 23.
-    const listEnteries = await customList.fetchListPages(Number(lists.join('')))
+    const listEnteries = await customList.fetchListPages({ listId: Number(lists.join('')) })
     listEnteries.forEach(({ pageUrl }: any) => urls.add(pageUrl))
 
     return urls

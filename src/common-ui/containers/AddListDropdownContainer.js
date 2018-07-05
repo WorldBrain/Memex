@@ -38,7 +38,6 @@ class DropdownContainer extends Component {
         this.addList = remoteFunction('createCustomList')
         this.addUrlToList = remoteFunction('insertPageToList')
         this.getListNameSuggestions = remoteFunction('getListNameSuggestions')
-        this.getListById = remoteFunction('getListById')
 
         this.state = {
             searchVal: '',

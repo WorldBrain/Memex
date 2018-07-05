@@ -1,5 +1,5 @@
 export interface PageList {
-    id: Number
+    id: number
     name: string
     pages?: string[]
     isNestable: 0 | 1
@@ -9,6 +9,6 @@ export interface PageList {
 export interface PageListEntry {
     pageUrl: string
     crearedAt: Date
-    listId: Number
+    listId: number
     fullUrl: string
 }

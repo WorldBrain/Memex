@@ -1,15 +1,15 @@
 import { FeatureStorage } from '../../search/search-index-new/storage'
 import { PageList, PageListEntry } from './types'
 
-const COLLECTION_NAME = 'customLists'
-const PAGE_LIST_ENTRY = 'pageListEntries'
 
 // TODO: Add typings for the class
 export default class CustomListStorage extends FeatureStorage {
+    static CUSTOM_LISTS_COLL = 'customLists'
+    static LIST_ENTRIES_COLL = 'pageListEntries'
+
     constructor({ storageManager }) {
         super(storageManager)
-
-        this.storageManager.registerCollection(COLLECTION_NAME, {
+        this.storageManager.registerCollection(CustomListStorage.CUSTOM_LISTS_COLL, {
             // different version for adding a new table.
             version: new Date(2018, 6, 12),
             fields: {
@@ -28,7 +28,8 @@ export default class CustomListStorage extends FeatureStorage {
             ],
         })
 
-        this.storageManager.registerCollection(PAGE_LIST_ENTRY, {
+
+        this.storageManager.registerCollection(CustomListStorage.LIST_ENTRIES_COLL, {
             // different version for adding a new table.
             version: new Date(2018, 6, 12),
             fields: {
@@ -45,15 +46,8 @@ export default class CustomListStorage extends FeatureStorage {
         })
     }
 
-    // Return all the list in the DB
-    //  TODO: Use pagination if required and decide correct types
-    async fetchAllList({ query = {}, opts = {} }: { query?: any; opts?: any }) {
-        const x = await this.storageManager.findAll(COLLECTION_NAME, query, opts)
-        return this.changeListsbeforeSending(x, [])
-    }
-
     // Takes the list as they come from Db and does some pre-processing before sending.
-    async changeListsbeforeSending(lists: object[], pageEnteries: object[]) {
+    private async changeListsBeforeSending(lists: object[], pageEnteries: object[]) {
         const mappedLists = lists.map((list: PageList) => {
             const page = pageEnteries.find(({ listId }: PageListEntry) => listId === list.id)
             delete list["_name_terms"]
@@ -67,40 +61,47 @@ export default class CustomListStorage extends FeatureStorage {
         return mappedLists
     }
 
-    async fetchListById(id: Number) {
-        const list = await this.storageManager.findObject(COLLECTION_NAME, { id })
-        const pages = await this.storageManager.findAll(PAGE_LIST_ENTRY, { listId: list.id })
+    // Return all the list in the DB
+    //  TODO: Use pagination if required and decide correct types
+    async fetchAllLists({ query = {}, opts = {} }: { query?: any; opts?: any }) {
+        const x = await this.storageManager.findAll(CustomListStorage.CUSTOM_LISTS_COLL, query, opts)
+        return this.changeListsBeforeSending(x, [])
+    }
+
+    async fetchListById(id: number) {
+        const list = await this.storageManager.findObject(CustomListStorage.CUSTOM_LISTS_COLL, { id })
+        const pages = await this.storageManager.findAll(CustomListStorage.LIST_ENTRIES_COLL, { listId: list.id })
         delete list["_name_terms"]
-        return {
+        return list ? {
             ...list,
             pages: pages.map((page: PageListEntry) => page.fullUrl),
-        }
+        } : null
     }
 
     // Return all the pages associated with a list.
-    async fetchListPages(listId: Number) {
-        return await this.storageManager.findAll(PAGE_LIST_ENTRY, { listId })
+    async fetchListPages(listId: number) {
+        return await this.storageManager.findAll(CustomListStorage.LIST_ENTRIES_COLL, { listId })
     }
 
     // Returns all the lists containing a certain page.
-    async getListAssocPage({ url }: { url: string }) {
-        const pages = await this.storageManager.findAll(PAGE_LIST_ENTRY, {
+    async fetchListAssocPage({ url }: { url: string }) {
+        const pages = await this.storageManager.findAll(CustomListStorage.LIST_ENTRIES_COLL, {
             pageUrl: url,
         })
         const listIds = pages.map(({ listId }: PageListEntry) => listId)
-        const lists = await this.fetchAllList({
+        const lists = await this.fetchAllLists({
             query: {
                 id: { $in: listIds }
             }
         })
-        return this.changeListsbeforeSending(lists, pages)
+        return this.changeListsBeforeSending(lists, pages)
     }
 
     // Function to insert into the DB
     async insertCustomList({ name, isDeletable = 1, isNestable = 1 }: {
         name: string, isDeletable: 0 | 1, isNestable: 0 | 1
     }) {
-        return await this.storageManager.putObject(COLLECTION_NAME, {
+        return await this.storageManager.putObject(CustomListStorage.CUSTOM_LISTS_COLL, {
             name,
             isDeletable,
             isNestable,
@@ -108,8 +109,8 @@ export default class CustomListStorage extends FeatureStorage {
         })
     }
 
-    async updateListName({ id, name }: { id: Number, name: string }) {
-        await this.storageManager.updateObject(COLLECTION_NAME, {
+    async updateListName({ id, name }: { id: number, name: string }) {
+        await this.storageManager.updateObject(CustomListStorage.CUSTOM_LISTS_COLL, {
             id
         },
             {
@@ -122,11 +123,11 @@ export default class CustomListStorage extends FeatureStorage {
 
     // Delete List from the DB.
     async removeList({ id }: { id: number }) {
-        await this.storageManager.deleteObject(COLLECTION_NAME, {
+        await this.storageManager.deleteObject(CustomListStorage.CUSTOM_LISTS_COLL, {
             id,
         })
         // Delete All pages associated with that list also
-        await this.storageManager.deleteObject(PAGE_LIST_ENTRY, {
+        await this.storageManager.deleteObject(CustomListStorage.LIST_ENTRIES_COLL, {
             listId: id,
         })
     }
@@ -139,7 +140,7 @@ export default class CustomListStorage extends FeatureStorage {
         const idExists = Boolean(await this.fetchListById(listId))
 
         if (idExists) {
-            await this.storageManager.putObject(PAGE_LIST_ENTRY, {
+            await this.storageManager.putObject(CustomListStorage.LIST_ENTRIES_COLL, {
                 listId,
                 pageUrl,
                 fullUrl,
@@ -152,18 +153,16 @@ export default class CustomListStorage extends FeatureStorage {
     async removePageFromList({ listId, pageUrl }: {
         listId: number, pageUrl: number
     }) {
-        const x = await this.storageManager.deleteObject(PAGE_LIST_ENTRY, {
-            $and: [
-                { listId: { $eq: listId } },
-                { pageUrl: { $eq: pageUrl } },
-            ],
+        const x = await this.storageManager.deleteObject(CustomListStorage.LIST_ENTRIES_COLL, {
+            listId,
+            pageUrl
         })
 
         return x
     }
 
-    async checkPageInList({ listId, pageUrl }: { listId: Number, pageUrl: string }) {
-        const x = await this.storageManager.findObject(PAGE_LIST_ENTRY, {
+    async checkPageInList({ listId, pageUrl }: { listId: number, pageUrl: string }) {
+        const x = await this.storageManager.findObject(CustomListStorage.LIST_ENTRIES_COLL, {
             $and: [
                 { listId: { $eq: listId } },
                 { pageUrl: { $eq: pageUrl } },
@@ -175,17 +174,17 @@ export default class CustomListStorage extends FeatureStorage {
 
     // Suggestions based on search in popup
     async getListNameSuggestions({ name, url }: { name: string, url: string }) {
-        const lists = await this.storageManager.suggest(COLLECTION_NAME, {
+        const lists = await this.storageManager.suggest(CustomListStorage.CUSTOM_LISTS_COLL, {
             name
         })
         const listIds = lists.map(({ id }: PageList) => id)
 
         // Gets all the pages associated with all the lists.
-        const pageEnteries = await this.storageManager.findAll(PAGE_LIST_ENTRY, {
-            listId: { $in: [...listIds] }, pageUrl: url,
+        const pageEnteries = await this.storageManager.findAll(CustomListStorage.LIST_ENTRIES_COLL, {
+            listId: { $in: listIds }, pageUrl: url,
         })
 
         // Final pre-processing before sending in the lists.
-        return this.changeListsbeforeSending(lists, pageEnteries)
+        return this.changeListsBeforeSending(lists, pageEnteries)
     }
 }

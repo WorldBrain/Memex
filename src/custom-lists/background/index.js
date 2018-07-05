@@ -25,14 +25,11 @@ export default class CustomListBackground {
             removePageFromList: (...params) => {
                 return this.removePageFromList(...params)
             },
-            getListById: (...params) => {
-                return this.getListById(...params)
-            },
             getAllLists: (...params) => {
                 return this.getAllLists(...params)
             },
-            getListAssocPage: (...params) => {
-                return this.getListAssocPage(...params)
+            fetchListAssocPage: (...params) => {
+                return this.fetchListAssocPage(...params)
             },
             getListNameSuggestions: (...params) => {
                 return this.getListNameSuggestions(...params)
@@ -47,7 +44,7 @@ export default class CustomListBackground {
     }
 
     async getAllLists({ query = {}, opts = {} }) {
-        const lists = await this.storage.fetchAllList({ query, opts })
+        const lists = await this.storage.fetchAllLists({ query, opts })
         return lists
     }
 
@@ -55,7 +52,7 @@ export default class CustomListBackground {
      * Takes and ID and returns an array
      * @param {Number} listId
      */
-    async fetchListPages(listId) {
+    async fetchListPages({ listId }) {
         return this.storage.fetchListPages(listId)
     }
 
@@ -63,8 +60,8 @@ export default class CustomListBackground {
      * Takes the url and return all the associated pages with it
      * @param {string} url
      */
-    async getListAssocPage({ url }) {
-        return this.storage.getListAssocPage({
+    async fetchListAssocPage({ url }) {
+        return this.storage.fetchListAssocPage({
             url: normalizeUrl(url),
         })
     }
@@ -100,12 +97,6 @@ export default class CustomListBackground {
         await this.storage.removePageFromList({
             listId: id,
             pageUrl: normalizeUrl(url),
-        })
-    }
-
-    async getListById({ id }) {
-        await this.storage.getListById({
-            id,
         })
     }
 
