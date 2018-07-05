@@ -113,7 +113,7 @@ const excDomainSearch = ({ domainsExclude }: Partial<SearchParams>) =>
 
 
 async function listSearch({ lists }: Partial<SearchParams>) {
-    if (!lists || !lists.length) {
+    if (!lists || !lists.length || !lists[0].length) {
         return undefined
     }
 
@@ -124,7 +124,7 @@ async function listSearch({ lists }: Partial<SearchParams>) {
     // The list filter contains only one list at a time
     // It is just a temporary hack until multiple lists for filtering in used.
     // Eg: The list: String i.e = "23" gets converted into ["2", "3"] converting back to 23.
-    const listEnteries = await customList.fetchListPages({ id: Number(lists.join('')) })
+    const listEnteries = await customList.fetchListPages({ id: Number(lists[0]) })
     listEnteries.forEach(({ pageUrl }: any) => urls.add(pageUrl))
 
     return urls

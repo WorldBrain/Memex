@@ -25,7 +25,7 @@ export async function search({
         .filterDomains(domains)
         .filterExcDomains(domainsExclude)
         .filterTags(tags)
-        .filterLists(lists)
+        .filterLists([lists])
         .get()
 
     // Short-circuit search if bad term
