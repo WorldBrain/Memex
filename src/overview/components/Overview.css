@@ -275,7 +275,7 @@
         color: #3eb995;
     }
 
-    @media (max-width: 1260px) {
+    @media (max-width: 1650px) {
         display: none;
     }
 }
