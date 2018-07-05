@@ -142,5 +142,15 @@ export interface DexieSchema {
 }
 
 export abstract class FeatureStorage {
-    constructor(protected storageManager: ManageableStorage) { }
+    protected collections: { [name: string]: CollectionDefinitions }
+
+    constructor(protected storageManager: ManageableStorage) {
+
+    }
+
+    registerCollections() {
+        for (const name in this.collections || {}) {
+            this.storageManager.registerCollection(name, this.collections[name])
+        }
+    }
 }

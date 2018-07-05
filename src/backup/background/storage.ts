@@ -22,9 +22,12 @@ export default class BackupStorage extends FeatureStorage {
 
     constructor({ storageManager }: { storageManager: StorageManager }) {
         super(storageManager)
+        this.registerCollections()
     }
 
     registerChange({ collection, pk, operation }: { collection: string, pk: string, operation: string }) {
+        console.log('registering change to collection', collection, 'with pk', pk)
+
         this.storageManager.putObject('backupChanges', {
             timestamp: new Date(),
             collection,
