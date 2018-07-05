@@ -50,15 +50,17 @@ export default class CustomListBackground {
 
     /**
      * Takes and ID and returns an array
-     * @param {Number} listId
+     * @param {Object} obj
+     * @param {number} obj.id
      */
-    async fetchListPages({ listId }) {
-        return this.storage.fetchListPages(listId)
+    async fetchListPages({ id }) {
+        return this.storage.fetchListPages(id)
     }
 
     /**
      * Takes the url and return all the associated pages with it
-     * @param {string} url
+     * @param {Object} obj
+     * @param {string} obj.url
      */
     async fetchListAssocPage({ url }) {
         return this.storage.fetchListAssocPage({
@@ -66,12 +68,28 @@ export default class CustomListBackground {
         })
     }
 
+    /**
+     * Create a custom list
+     *
+     * @param {Object} obj
+     * @param {string} obj.name
+     * @returns {number} id
+     * @memberof CustomListBackground
+     */
     async createCustomList({ name }) {
         return await this.storage.insertCustomList({
             name,
         })
     }
 
+    /**
+     * Update List name
+     *
+     * @param {Object} obj
+     * @param {number} obj.id
+     * @param {string} obj.name
+     * @memberof CustomListBackground
+     */
     async updateList({ id, name }) {
         await this.storage.updateListName({
             id,
@@ -79,6 +97,14 @@ export default class CustomListBackground {
         })
     }
 
+    /**
+     *  Adds pages into lists.
+     *
+     * @param {Object} obj
+     * @param {number} obj.id
+     * @param {string} obj.url
+     * @memberof CustomListBackground
+     */
     async insertPageToList({ id, url }) {
         await this.storage.insertPageToList({
             listId: id,
@@ -87,12 +113,27 @@ export default class CustomListBackground {
         })
     }
 
+    /**
+     * Deletes list
+     *
+     * @param {Object} obj
+     * @param {number} obj.id
+     * @memberof CustomListBackground
+     */
     async removeList({ id }) {
         await this.storage.removeList({
             id,
         })
     }
 
+    /**
+     * Removes pages from list, doesn't delete them actually
+     *
+     * @param {Object} obj
+     * @param {number} obj.id
+     * @param {string} obj.url
+     * @memberof CustomListBackground
+     */
     async removePageFromList({ id, url }) {
         await this.storage.removePageFromList({
             listId: id,
@@ -100,13 +141,30 @@ export default class CustomListBackground {
         })
     }
 
-    async getListNameSuggestions(name, url) {
+    /**
+     * Returns suggestions based on provided search value.
+     * @param {Object} obj
+     * @param {string} obj.name
+     * @param {string} obj.url
+     * @returns
+     * @memberof CustomListBackground
+     */
+    async getListNameSuggestions({ name, url }) {
         return await this.storage.getListNameSuggestions({
             name,
             url: normalizeUrl(url),
         })
     }
 
+    /**
+     * check if the page is actually in list
+     *
+     * @param {Object} obj
+     * @param {number} id
+     * @param {string} url
+     * @returns
+     * @memberof CustomListBackground
+     */
     async checkPageInList({ id, url }) {
         return await this.storage.checkPageInList({
             listId: id,

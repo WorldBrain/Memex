@@ -139,10 +139,10 @@ class DropdownContainer extends Component {
         let suggestions = this.state.filters
 
         // suggestions = this.suggest(searchVal)
-        suggestions = await this.getListNameSuggestions(
-            searchVal,
-            this.props.url,
-        )
+        suggestions = await this.getListNameSuggestions({
+            name: searchVal,
+            url: this.props.url,
+        })
 
         this.setState(state => ({
             ...state,
