@@ -11,6 +11,8 @@ class SputHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         os.makedirs(dirpath, exist_ok=True)
         with open(filepath, "wb") as dst:
             dst.write(self.rfile.read(length))
+        self.send_response(200, 'OK')
+        self.end_headers()
 
 
 def run(server_class=http.server.HTTPServer, handler_class=http.server.BaseHTTPRequestHandler):

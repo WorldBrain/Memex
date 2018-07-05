@@ -220,9 +220,10 @@ export class StorageManager extends EventEmitter implements ManageableStorage {
 
     async* streamCollection(collectionName: string) {
         const table = this._storage[collectionName]
-        const pks = await table.primaryKeys()
+        console.log(table)
+        const pks = await table.toCollection().primaryKeys()
         for (const pk of pks) {
-            yield await { pk, object: table.get(pk) }
+            yield await { pk, object: await table.get(pk) }
         }
     }
 

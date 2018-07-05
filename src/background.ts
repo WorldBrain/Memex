@@ -10,6 +10,7 @@ import DirectLinkingBackground from './direct-linking/background'
 import EventLogBackground from './analytics/internal/background'
 import CustomListBackground from './custom-lists/background'
 import NotificationBackground from './notifications/background'
+import * as backup from './backup/background'
 import BackgroundScript from './background-script'
 
 // Features that auto-setup
@@ -35,12 +36,21 @@ internalAnalytics.registerOperations(eventLog)
 const customList = new CustomListBackground({ storageManager })
 customList.setupRemoteFunctions()
 
+const backupModule = new backup.BackupBackgroundModule({
+    storageManager,
+    backend: new backup.SimpleHttpBackend({ url: 'http://localhost:8000' }),
+    lastBackupStorage: new backup.LocalLastBackupStorage({ key: 'lastBackup' }),
+})
+backupModule.startRecordingChangesIfNeeded()
+
+
 const bgScript = new BackgroundScript({ notifsBackground: notifications })
 bgScript.setupRemoteFunctions()
 bgScript.setupWebExtAPIHandlers()
 
 // Attach interesting features onto global window scope for interested users
 window['db'] = db
+window['backup'] = backupModule
 window['storageMan'] = storageManager
 window['bgScript'] = bgScript
 window['eventLog'] = eventLog
