@@ -54,7 +54,7 @@ class NotificationContainer extends Component {
 
             const trucatedMessage =
                 isTruncated && showMoreIndex !== notification.id
-                    ? this.truncateText(notification.message)
+                    ? this.truncateText(notification.message) + '...'
                     : notification.message
 
             return (

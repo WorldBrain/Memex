@@ -27,9 +27,14 @@ export default class NotificationStorage extends FeatureStorage {
     }
 
     async getNotifications(isRead) {
+        const opt = {
+            reverse: true,
+        }
+
         return await this.storageManager.findAll(
             'notifications',
             { readTime: { $exists: isRead } },
+            opt,
         )
     }
 
