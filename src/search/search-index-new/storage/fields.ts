@@ -26,7 +26,6 @@ export class UrlField extends Field {
         if (this.config.normalize) {
             input = normalize(input)
         }
-        console.log("in fields.ts", input)
         return input
     }
 }
@@ -38,5 +37,5 @@ function _default(option, def) {
 }
 
 export default {
-    url: UrlField
+    url: UrlField,
 }

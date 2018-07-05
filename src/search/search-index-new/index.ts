@@ -55,13 +55,7 @@ export { delPages, delPagesByDomain, delPagesByPattern } from './del'
 // Tags-specific
 //
 
-export {
-    addTag,
-    delTag,
-    addAnnotationTag,
-    delAnnotationTag,
-    getAnnotationTags,
-} from './tags'
+export { addTag, delTag } from './tags'
 
 //
 // Bookmarks-specific

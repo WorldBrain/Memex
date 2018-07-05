@@ -6,8 +6,10 @@ import {
     ManageableStorage,
 } from '../../search/search-index-new/storage'
 import { STORAGE_KEYS as IDXING_PREF_KEYS } from '../../options/settings/constants'
+import { Tag } from '../../search/search-index-new/models'
 
 export const COLLECTION_NAME = 'directLinks'
+const TAGS_TABLE = 'tags'
 
 export interface Annotation {
     pageTitle: string
@@ -15,6 +17,7 @@ export interface Annotation {
     body: string
     selector: object
     createdWhen?: Date
+    lastEdited?: Date
     url?: string
     comment?: string
 }
@@ -168,5 +171,20 @@ export default class DirectLinkingStorage extends FeatureStorage {
         return await this.storageManager.deleteObject(COLLECTION_NAME, {
             url,
         })
+    }
+
+    async getTagsByAnnotationUrl(url: string) {
+        return await this.storageManager.findAll(TAGS_TABLE, {
+            url: url,
+        })
+    }
+
+    modifyTags = (shouldAdd: boolean) => async (name: string, url: string) => {
+        const tag = new Tag({ name, url })
+        if (shouldAdd) {
+            tag.save()
+        } else {
+            tag.delete()
+        }
     }
 }

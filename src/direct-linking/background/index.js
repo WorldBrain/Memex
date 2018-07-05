@@ -45,6 +45,15 @@ export default class DirectLinkingBackground {
                 toggleSidebar: () => {
                     return this.toggleSidebar()
                 },
+                getAnnotationTags: (...params) => {
+                    return this.getTagsByAnnotationUrl(...params)
+                },
+                addAnnotationTag: (...params) => {
+                    return this.addTagForAnnotation(...params)
+                },
+                delAnnotationTag: (...params) => {
+                    return this.delTagForAnnotation(...params)
+                },
             },
             { insertExtraArg: true },
         )
@@ -82,7 +91,7 @@ export default class DirectLinkingBackground {
         const result = await this.backend.createDirectLink(request)
         await this.storage.insertDirectLink({
             pageTitle,
-            pageUrl: normalize(tab.url),
+            pageUrl: tab.url,
             body: request.anchor.quote,
             url: result.url,
             selector: request.anchor,
@@ -113,7 +122,7 @@ export default class DirectLinkingBackground {
         const uniqueUrl = `${pageUrl}/#${new Date().getTime()}`
 
         await this.storage.createAnnotation({
-            pageUrl: normalize(pageUrl),
+            pageUrl: pageUrl,
             url: uniqueUrl,
             pageTitle,
             comment,
@@ -130,5 +139,17 @@ export default class DirectLinkingBackground {
 
     async deleteAnnotation({ tab }, pk) {
         return await this.storage.deleteAnnotation(pk)
+    }
+
+    async getTagsByAnnotationUrl({ tab }, url) {
+        return await this.storage.getTagsByAnnotationUrl(url)
+    }
+
+    async addTagForAnnotation({ tab }, { tag, url }) {
+        return await this.storage.modifyTags(true)(tag, url)
+    }
+
+    async delTagForAnnotation({ tab }, { tag, url }) {
+        return await this.storage.modifyTags(false)(tag, url)
     }
 }

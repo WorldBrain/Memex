@@ -5,9 +5,6 @@ import { tabManager } from '../../activity-logger/background/'
 makeRemotelyCallable({
     addTag: indexInterface.addTag,
     delTag: indexInterface.delTag,
-    addAnnotationTag: indexInterface.addAnnotationTag,
-    delAnnotationTag: indexInterface.delAnnotationTag,
-    getAnnotationTags: indexInterface.getAnnotationTags,
     suggest: indexInterface.suggest,
     addBookmark: indexInterface.addBookmark,
     delBookmark: indexInterface.delBookmark,
