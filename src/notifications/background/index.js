@@ -17,8 +17,11 @@ export default class NotificationBackground {
             storeNotification: (...params) => {
                 return this.storeNotification(...params)
             },
-            getUnreadCount: (...params) => {
-                return this.getUnreadCount(...params)
+            getUnreadCount: () => {
+                return this.getUnreadCount()
+            },
+            getNotifications: () => {
+                return this.getNotifications()
             },
         })
     }
@@ -29,6 +32,10 @@ export default class NotificationBackground {
 
     async getUnreadCount() {
         return await this.storage.getUnreadCount()
+    }
+
+    async getNotifications() {
+        return await this.storage.getNotifications()
     }
 
     async initNotification() {

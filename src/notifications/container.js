@@ -1,21 +1,26 @@
 import React, { Component } from 'react'
-// import PropTypes from 'prop-types'
+import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 
-// import * as actions from './actions'
-// import * as selectors from './selectors'
+import * as actions from './actions'
+import * as selectors from './selectors'
 import NotificationList from './components/NotificationList'
 import Notification from './components/Notification'
-import * as notifications from './notifications'
 
 class NotificationContainer extends Component {
     static propTypes = {
-        // showInbox: PropTypes.bool.isRequired,
+        notifications: PropTypes.arrayOf(PropTypes.object),
+        init: PropTypes.func.isRequired,
+    }
+
+    componentDidMount() {
+        this.props.init()
     }
 
     isNotificationTruncated(message) {
         const NotificationCharLimit = 100
+
         if (message.length <= NotificationCharLimit) {
             return false
         } else {
@@ -35,10 +40,11 @@ class NotificationContainer extends Component {
     }
 
     renderNotificationItems() {
-        return notifications.NOTIFS.map((notification, i) => {
+        return this.props.notifications.map((notification, i) => {
             const isTruncated = this.isNotificationTruncated(
                 notification.message,
             )
+
             const trucatedMessage = isTruncated
                 ? this.truncateText(notification.message)
                 : notification.message
@@ -66,13 +72,13 @@ class NotificationContainer extends Component {
 }
 
 const mapStateToProps = state => ({
-    // showInbox: selectors.showInbox(state),
+    notifications: selectors.notificationList(state),
 })
 
 const mapDispatchToProps = dispatch => ({
     ...bindActionCreators(
         {
-            // toggleInbox: actions.toggleInbox,
+            init: actions.init,
         },
         dispatch,
     ),

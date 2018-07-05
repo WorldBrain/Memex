@@ -3,4 +3,5 @@ import * as actions from './actions'
 import reducer from './reducer'
 import NotificationContainer from './container'
 
-export { selectors, actions, reducer, NotificationContainer }
+export { selectors, actions, reducer }
+export default NotificationContainer

@@ -14,7 +14,7 @@ import { reducer as customLists } from 'src/custom-lists'
 // Search filters in the sidebar
 import { reducer as searchFilters } from 'src/search-filters'
 import { reducer as sidebarLeft } from 'src/overview/sidebar-left'
-import { reducer as notifications } from '../notifications'
+import * as notifications from '../notifications'
 
 const rootReducer = combineReducers({
     blacklist: blacklist.reducer,
@@ -27,7 +27,7 @@ const rootReducer = combineReducers({
     customLists,
     searchFilters,
     sidebarLeft,
-    notifications,
+    notifications: notifications.reducer,
 })
 
 const rootEpic = combineEpics(...Object.values(overviewPage.epics))

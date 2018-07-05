@@ -35,6 +35,13 @@ export default class NotificationStorage extends FeatureStorage {
         })
     }
 
+    async getNotifications() {
+        return await this.storageManager.findAll(
+            'notifications',
+            {},
+        )
+    }
+
     async getUnreadCount() {
         return await this.storageManager.countAll(
             'notifications',

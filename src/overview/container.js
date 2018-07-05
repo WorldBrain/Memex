@@ -28,7 +28,7 @@ import { actions as listActs, selectors as customLists } from 'src/custom-lists'
 import SidebarIcons from './sidebar-left/components/SidebarIcons'
 import { actions as sidebarLeftActs } from './sidebar-left'
 import * as sidebar from './sidebar-left/selectors'
-import { NotificationContainer } from '../notifications'
+import NotificationContainer from '../notifications'
 
 class OverviewContainer extends Component {
     static propTypes = {
