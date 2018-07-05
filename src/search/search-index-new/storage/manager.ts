@@ -23,46 +23,45 @@ export class StorageManager implements ManageableStorage {
     private _initializationResolve: Function
     private _storage: Storage
 
+    /**
+     * Handles mutation of a document to be inserted/updated to storage,
+     * depending on needed pre-processing for a given indexed field.
+     */
     private static _processIndexedField(
         fieldName: string,
         indexDef: IndexDefinition,
         fieldDef: CollectionField,
         object,
     ) {
-        if (fieldDef.fieldObject) {
-            object[fieldName] = fieldDef.fieldObject.prepareForStorage(
-                object[fieldName],
-            )
-        }
-
-        if (fieldDef._index && fieldDef.type === 'text') {
-            const fullTextField =
-                indexDef.fullTextIndexName || `_${fieldName}_terms`
-            object[fullTextField] = [...extractTerms(object[fieldName])]
+        switch (fieldDef.type) {
+            case 'text':
+                const fullTextField =
+                    indexDef.fullTextIndexName || `_${fieldName}_terms`
+                object[fullTextField] = [...extractTerms(object[fieldName])]
+                break
+            default:
         }
     }
 
     /**
      * Handles mutation of a document to be inserted/updated to storage,
-     * depending on needed processing of indexed fields.
+     * depending on needed pre-processing of fields.
      */
-    private static _processIndexedFields(def: CollectionDefinition, object) {
-        const indices = def.indices || []
+    private static _processFields(def: CollectionDefinition, object) {
+        Object.entries(def.fields).forEach(([fieldName, fieldDef]) => {
+            if (fieldDef.fieldObject) {
+                object[fieldName] = fieldDef.fieldObject.prepareForStorage(
+                    object[fieldName],
+                )
+            }
 
-        indices.forEach(indexDef => {
-            const processField = (fieldName: string) =>
+            if (fieldDef._index != null) {
                 StorageManager._processIndexedField(
                     fieldName,
-                    indexDef,
-                    def.fields[fieldName],
+                    def.indices[fieldDef._index],
+                    fieldDef,
                     object,
                 )
-
-            // Compound indexes need to process all specified fields
-            if (indexDef.field instanceof Array) {
-                indexDef.field.forEach(processField)
-            } else {
-                processField(indexDef.field)
             }
         })
     }
@@ -85,7 +84,6 @@ export class StorageManager implements ManageableStorage {
         let coll = await this._storage
             .collection<T>(collectionName)
             .find(filter)
-        
 
         if (findOpts.reverse) {
             coll = coll.reverse()
@@ -110,7 +108,7 @@ export class StorageManager implements ManageableStorage {
         await this._initializationPromise
 
         const collection = this.registry.collections[collectionName]
-        StorageManager._processIndexedFields(collection, object)
+        StorageManager._processFields(collection, object)
 
         await this._storage[collectionName].put(object)
     }
