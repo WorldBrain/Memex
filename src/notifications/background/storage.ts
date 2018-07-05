@@ -11,6 +11,7 @@ export default class NotificationStorage extends FeatureStorage {
                 title: { type: 'string' },
                 message: { type: 'string' },
                 buttonText: {type: 'string'},
+                link: {type: 'string'},
                 sentTime: {type: 'datetime'},
                 deliveredTime: {type: 'datetime'},
                 readTime: {type: 'datetime'},
@@ -21,7 +22,7 @@ export default class NotificationStorage extends FeatureStorage {
         })
     }
 
-    async storeNotification({ id, title, message, buttonText, sentTime, deliveredTime, readTime }) {
+    async storeNotification({ id, title, message, buttonText, sentTime, deliveredTime, readTime, link }) {
         await this.storageManager.putObject('notifications', {
             id,
             title,
@@ -30,6 +31,7 @@ export default class NotificationStorage extends FeatureStorage {
             sentTime,
             deliveredTime,
             readTime,
+            link,
         })
     }
 

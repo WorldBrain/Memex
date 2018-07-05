@@ -22,7 +22,11 @@ const Notification = props => (
                         <div className={localStyles.message}>
                             {props.message}
                         </div>
-                        <div className={localStyles.showMore}>Show More</div>
+                        {props.isShowMore && (
+                            <div className={localStyles.showMore}>
+                                Show More
+                            </div>
+                        )}
                     </div>
                     <div className={localStyles.why}>
                         Why am I seeing this?
@@ -52,6 +56,7 @@ Notification.propTypes = {
     title: PropTypes.string.isRequired,
     message: PropTypes.string.isRequired,
     buttonText: PropTypes.string,
+    isShowMore: PropTypes.bool.isRequired,
 }
 
 export default Notification

@@ -28,9 +28,7 @@ import { actions as listActs, selectors as customLists } from 'src/custom-lists'
 import SidebarIcons from './sidebar-left/components/SidebarIcons'
 import { actions as sidebarLeftActs } from './sidebar-left'
 import * as sidebar from './sidebar-left/selectors'
-import NotificationList from './components/NotificationList'
-import Notification from './components/Notification'
-import * as notifications from './notifications'
+import { NotificationContainer } from '../notifications'
 
 class OverviewContainer extends Component {
     static propTypes = {
@@ -224,40 +222,9 @@ class OverviewContainer extends Component {
         </ResultsMessage>
     )
 
-    isNotificationTruncated(message) {
-        const NotificationCharLimit = 100
-
-        if (message.length <= NotificationCharLimit) {
-            return false
-        } else {
-            const lastSpaceBeforeCutoff = message.lastIndexOf(
-                ' ',
-                NotificationCharLimit,
-            )
-            const trunctatedText = message.substr(0, lastSpaceBeforeCutoff)
-            return trunctatedText
-        }
-    }
-
-    renderNotificationItems() {
-        return notifications.NOTIFS.map((notification, i) => (
-            <Notification
-                key={i}
-                title={notification.title}
-                message={notification.message}
-                buttonText={notification.button}
-                date={notification.date}
-            />
-        ))
-    }
-
     renderResults() {
         if (this.props.showInbox) {
-            return (
-                <NotificationList>
-                    {this.renderNotificationItems()}
-                </NotificationList>
-            )
+            return <NotificationContainer />
         }
 
         if (this.props.isMigrationRequired) {

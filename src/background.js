@@ -7,7 +7,7 @@ import 'src/imports/background'
 import DirectLinkingBackground from 'src/direct-linking/background'
 import EventLogBackground from 'src/analytics/internal/background'
 import CustomListBackground from 'src/custom-lists/background'
-import NotificationBackground from 'src/overview/background'
+import NotificationBackground from 'src/notifications/background'
 import 'src/omnibar'
 import { INSTALL_TIME_KEY } from './constants'
 import {
@@ -29,7 +29,6 @@ import initSentry from './util/raven'
 import { USER_ID, generateTokenIfNot } from 'src/util/generate-token'
 import { API_HOST } from 'src/analytics/internal/constants'
 import { storageChangesManager } from 'src/util/storage-changes'
-import initNotification from 'src/util/notification'
 
 window.index = searchIndex
 window.storage = db
@@ -114,7 +113,6 @@ async function onUpdate() {
     ]
 
     await generateTokenIfNot({ installTime })
-    await initNotification()
 }
 
 browser.commands.onCommand.addListener(command => {
@@ -163,5 +161,5 @@ const customList = new CustomListBackground({ storageManager })
 customList.setupRemoteFunctions()
 
 const notification = new NotificationBackground({ storageManager })
-notification.setupRemoteFunctions()
+notification.setup()
 window.notification = notification

@@ -1,9 +1,15 @@
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import NotificationStorage from './storage'
+import * as notifications from '../notifications'
 
 export default class NotificationBackground {
     constructor({ storageManager }) {
         this.storage = new NotificationStorage(storageManager)
+    }
+
+    async setup() {
+        this.setupRemoteFunctions()
+        await this.initNotification()
     }
 
     setupRemoteFunctions() {
@@ -23,5 +29,16 @@ export default class NotificationBackground {
 
     async getUnreadCount() {
         return await this.storage.getUnreadCount()
+    }
+
+    async initNotification() {
+        for (let notification of notifications.NEW_NOTIFS) {
+            notification = {
+                ...notification,
+                sentTime: Date.now(),
+            }
+
+            await this.storeNotification(notification)
+        }
     }
 }

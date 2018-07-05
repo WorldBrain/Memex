@@ -29,7 +29,7 @@ export const NEW_NOTIFS = [
         id: 'direct_links_inital_notification',
         title: 'New Feature: Memex.Link',
         message:
-            'Test Message Test MessageTest Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message ',
+            'Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message ',
         button: 'Learn More',
         link: 'worldbrain.io',
     },
