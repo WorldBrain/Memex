@@ -1,5 +1,5 @@
 import { FeatureStorage } from '../../search/search-index-new/storage'
-import { ListObject, PageObject } from './types'
+import { PageList, PageListEntry } from './types'
 
 const COLLECTION_NAME = 'customLists'
 const PAGE_LIST_ENTRY = 'pageListEntries'
@@ -54,8 +54,8 @@ export default class CustomListStorage extends FeatureStorage {
 
     // Takes the list as they come from Db and does some pre-processing before sending.
     async changeListsbeforeSending(lists: object[], pageEnteries: object[]) {
-        const mappedLists = lists.map((list: ListObject) => {
-            const page = pageEnteries.find(({ listId }: PageObject) => listId === list.id)
+        const mappedLists = lists.map((list: PageList) => {
+            const page = pageEnteries.find(({ listId }: PageListEntry) => listId === list.id)
             delete list["_name_terms"]
             return {
                 ...list,
@@ -73,7 +73,7 @@ export default class CustomListStorage extends FeatureStorage {
         delete list["_name_terms"]
         return {
             ...list,
-            pages: pages.map((page: PageObject) => page.fullUrl),
+            pages: pages.map((page: PageListEntry) => page.fullUrl),
         }
     }
 
@@ -87,7 +87,7 @@ export default class CustomListStorage extends FeatureStorage {
         const pages = await this.storageManager.findAll(PAGE_LIST_ENTRY, {
             pageUrl: url,
         })
-        const listIds = pages.map(({ listId }: PageObject) => listId)
+        const listIds = pages.map(({ listId }: PageListEntry) => listId)
         const lists = await this.fetchAllList({
             query: {
                 id: { $in: listIds }
@@ -178,7 +178,7 @@ export default class CustomListStorage extends FeatureStorage {
         const lists = await this.storageManager.suggest(COLLECTION_NAME, {
             name
         })
-        const listIds = lists.map(({ id }: ListObject) => id)
+        const listIds = lists.map(({ id }: PageList) => id)
 
         // Gets all the pages associated with all the lists.
         const pageEnteries = await this.storageManager.findAll(PAGE_LIST_ENTRY, {

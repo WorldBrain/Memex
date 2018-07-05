@@ -1,4 +1,4 @@
-export interface ListObject {
+export interface PageList {
     id: Number
     name: string
     pages?: string[]
@@ -6,7 +6,7 @@ export interface ListObject {
     isDeletable: 0 | 1
 }
 
-export interface PageObject {
+export interface PageListEntry {
     pageUrl: string
     crearedAt: Date
     listId: Number
