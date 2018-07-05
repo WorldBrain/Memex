@@ -81,7 +81,7 @@ class NotificationContainer extends Component {
 
     render() {
         const { unreadNotificationList, readNotificationList } = this.props
-        console.log(this.props.showMoreIndex)
+
         return (
             <NotificationList>
                 <StatusHeading>

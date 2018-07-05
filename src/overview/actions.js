@@ -358,6 +358,6 @@ export const fetchNextTooltip = () => async dispatch => {
 }
 
 export const updateUnreadNotif = () => async (dispatch, getState) => {
-    const unreadNotis = await unreadNotifications()
-    dispatch(setUnreadNotifCount(unreadNotis))
+    const unreadNotifs = await unreadNotifications()
+    dispatch(setUnreadNotifCount(unreadNotifs))
 }

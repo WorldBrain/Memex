@@ -1,11 +1,11 @@
 import { createAction } from 'redux-act'
-import { remoteFunction } from 'src/util/webextensionRPC'
+import { remoteFunction } from '../util/webextensionRPC'
 import { actions as overviewActs } from '../overview'
 
-export const setReadNotificationList = createAction(
+export const setReadNotificationList = createAction<any>(
     'notifications/setReadNotificationList',
 )
-export const setUnreadNotificationList = createAction(
+export const setUnreadNotificationList = createAction<any>(
     'notifications/setUnreadNotificationList',
 )
 export const setShowMoreIndex = createAction('notifications/setShowMoreIndex')
