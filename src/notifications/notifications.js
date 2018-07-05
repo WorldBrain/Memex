@@ -5,7 +5,7 @@ export const NEW_NOTIFS = [
         message:
             'Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message ',
         buttonText: 'Learn More',
-        link: 'worldbrain.io',
+        link: 'https://worldbrain.io',
         sentTime: 1530786142840,
     },
     {
@@ -14,7 +14,7 @@ export const NEW_NOTIFS = [
         message:
             'Test Message Test MessageTest Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message ',
         buttonText: 'Learn More',
-        link: 'worldbrain.io',
+        link: 'https://worldbrain.io',
         sentTime: 1530786142840,
     },
     {
@@ -23,7 +23,7 @@ export const NEW_NOTIFS = [
         message:
             'Test Message Test MessageTest Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message ',
         buttonText: 'Learn More',
-        link: 'worldbrain.io',
+        link: 'https://worldbrain.io',
         sentTime: 1530786142840,
     },
     {
@@ -32,7 +32,7 @@ export const NEW_NOTIFS = [
         message:
             'Test Message Test MessageTest Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message ',
         buttonText: 'Learn More',
-        link: 'worldbrain.io',
+        link: 'https://worldbrain.io',
         sentTime: 1530786142840,
     },
     {
@@ -41,7 +41,7 @@ export const NEW_NOTIFS = [
         message:
             'Test Message Test MessageTest Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message ',
         buttonText: 'Learn More',
-        link: 'worldbrain.io',
+        link: 'https://worldbrain.io',
         sentTime: 1530786142840,
     },
     {
@@ -50,7 +50,7 @@ export const NEW_NOTIFS = [
         message:
             'Test Message Test MessageTest Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message Test Message ',
         buttonText: 'Learn More',
-        link: 'worldbrain.io',
+        link: 'https://worldbrain.io',
         sentTime: 1530793168585,
     },
     {

@@ -43,7 +43,11 @@ const Notification = props => (
                 {(props.isUnread || props.buttonText) && (
                     <div className={hasOnlyButton(props.buttonText)}>
                         {props.buttonText && (
-                            <a href={props.link} className={localStyles.button}>
+                            <a
+                                href={props.link}
+                                className={localStyles.button}
+                                target="_blank"
+                            >
                                 {props.buttonText}
                             </a>
                         )}
