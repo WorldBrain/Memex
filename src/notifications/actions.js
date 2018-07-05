@@ -1,6 +1,6 @@
 import { createAction } from 'redux-act'
 import { remoteFunction } from 'src/util/webextensionRPC'
-import UnreadNotifications from 'src/util/unread-notifications'
+import { actions as overviewActs } from '../overview'
 
 export const setReadNotificationList = createAction(
     'notifications/setReadNotificationList',
@@ -9,7 +9,6 @@ export const setUnreadNotificationList = createAction(
     'notifications/setUnreadNotificationList',
 )
 export const setShowMoreIndex = createAction('notifications/setShowMoreIndex')
-export const setUnreadNotis = createAction('notifications/setUnreadNotis')
 
 const getNotifications = remoteFunction('getNotifications')
 const storeNotification = remoteFunction('storeNotification')
@@ -20,7 +19,6 @@ export const init = () => async (dispatch, getState) => {
 
     dispatch(setUnreadNotificationList(unreadnotifications))
     dispatch(setReadNotificationList(readnotifications))
-    updateUnreadNotif()
 }
 
 export const handleReadNotif = notification => async (dispatch, getState) => {
@@ -28,9 +26,6 @@ export const handleReadNotif = notification => async (dispatch, getState) => {
         ...notification,
         readTime: Date.now(),
     })
-}
-
-export const updateUnreadNotif = () => async (dispatch, getState) => {
-    const unreadNotis = await UnreadNotifications()
-    dispatch(setUnreadNotis(unreadNotis))
+    dispatch(overviewActs.updateUnreadNotif())
+    dispatch(init())
 }

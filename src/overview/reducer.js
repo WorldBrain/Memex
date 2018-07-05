@@ -29,6 +29,7 @@ const defaultState = {
     tooltip: null,
     showTooltip: true,
     showInbox: false,
+    unreadNotifCount: 0,
 }
 
 function setQuery(state, query) {
@@ -217,6 +218,10 @@ export default createReducer(
         [actions.toggleInbox]: state => ({
             ...state,
             showInbox: !state.showInbox,
+        }),
+        [actions.setUnreadNotifCount]: (state, notifs) => ({
+            ...state,
+            unreadNotifCount: notifs,
         }),
     },
     defaultState,

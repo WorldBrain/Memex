@@ -19,10 +19,6 @@ export default createReducer(
             ...state,
             unreadNotificationList: notifications,
         }),
-        [actions.setUnreadNotis]: (state, notifs) => ({
-            ...state,
-            unreadNotifications: notifs,
-        }),
         [actions.setShowMoreIndex]: (state, index) => ({
             ...state,
             showMoreIndex: index,

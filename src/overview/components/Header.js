@@ -35,9 +35,11 @@ const Header = ({
         <div className={styles.links}>
             <div className={styles.inbox} onClick={props.toggleInbox}>
                 Inbox
-                <span className={styles.inboxCount}>
-                    {props.unreadNotifications}
-                </span>
+                {props.unreadNotifCount !== 0 && (
+                    <span className={styles.inboxCount}>
+                        {props.unreadNotifCount}
+                    </span>
+                )}
             </div>
             <OutLink
                 className={styles.upgrade}
@@ -67,7 +69,7 @@ Header.propTypes = {
     isSearchDisabled: PropTypes.bool,
     toggleInbox: PropTypes.func.isRequired,
     showInbox: PropTypes.bool.isRequired,
-    unreadNotifications: PropTypes.number.isRequired,
+    unreadNotifCount: PropTypes.number.isRequired,
 }
 
 export default Header

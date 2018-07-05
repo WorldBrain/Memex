@@ -199,3 +199,4 @@ export const isTooltipRenderable = createSelector(
 )
 
 export const showInbox = state => overview(state).showInbox
+export const unreadNotifCount = state => overview(state).unreadNotifCount

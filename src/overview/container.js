@@ -10,7 +10,6 @@ import { Wrapper, LoadingIndicator } from 'src/common-ui/components'
 import { IndexDropdown, MigrationNotice } from 'src/common-ui/containers'
 import * as actions from './actions'
 import * as selectors from './selectors'
-import * as notifSelectors from '../notifications/selectors'
 import * as constants from './constants'
 import ResultList from './components/ResultList'
 import Overview from './components/Overview'
@@ -370,7 +369,7 @@ const mapStateToProps = state => ({
     isSidebarOpen: sidebar.isSidebarOpen(state),
     filterActive: filters.showClearFiltersBtn(state),
     showInbox: selectors.showInbox(state),
-    unreadNotifications: notifSelectors.unreadNotifications(state),
+    unreadNotifCount: selectors.unreadNotifCount(state),
 })
 
 const mapDispatchToProps = dispatch => ({

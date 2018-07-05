@@ -84,9 +84,15 @@ class NotificationContainer extends Component {
         console.log(this.props.showMoreIndex)
         return (
             <NotificationList>
-                <StatusHeading>New</StatusHeading>
+                <StatusHeading>
+                    {unreadNotificationList.length === 0
+                        ? 'There is no new notification.'
+                        : 'New'}
+                </StatusHeading>
                 {this.renderNotificationItems(unreadNotificationList, true)}
-                <StatusHeading>Read</StatusHeading>
+                {readNotificationList.length !== 0 && (
+                    <StatusHeading>Read</StatusHeading>
+                )}
                 {this.renderNotificationItems(readNotificationList, false)}
             </NotificationList>
         )

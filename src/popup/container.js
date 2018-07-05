@@ -23,6 +23,7 @@ import UpgradeButton from './components/UpgradeButton'
 import ButtonIcon from './components/ButtonIcon'
 import ToggleTooltip from './components/ToggleTooltip'
 import styles from './components/Button.css'
+import unreadNotifications from 'src/util/unread-notifications'
 
 class PopupContainer extends Component {
     static propTypes = {
@@ -73,6 +74,8 @@ class PopupContainer extends Component {
 
         // Tooltip Flag
         isTooltipEnabled: true,
+
+        unreadNotifCount: 0,
     }
 
     async componentDidMount() {
@@ -118,6 +121,14 @@ class PopupContainer extends Component {
         this.getInitTooltipState()
             .then(updateState)
             .catch(noop)
+        this.getInitNotificationState()
+            .then(updateState)
+            .catch(noop)
+    }
+
+    async getInitNotificationState() {
+        const res = await unreadNotifications()
+        return { unreadNotifCount: res }
     }
 
     async getInitTooltipState() {
@@ -436,6 +447,7 @@ class PopupContainer extends Component {
             isPaused,
             tagMode,
             listMode,
+            unreadNotifCount,
         } = this.state
         if (blacklistConfirm) {
             return (
@@ -529,7 +541,8 @@ class PopupContainer extends Component {
                     href={`${constants.OVERVIEW_URL}#/`}
                     icon="notification"
                     btnClass={styles.notification}
-                    value={3}
+                    value={unreadNotifCount}
+                    isNotif
                 />
             </div>
         )

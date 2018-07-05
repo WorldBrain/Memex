@@ -16,6 +16,7 @@ const ButtonIcon = ({
     btnClass,
     href,
     value,
+    isNotif,
     ...btnProps
 }) => (
     <OutLink
@@ -31,7 +32,10 @@ const ButtonIcon = ({
                 btnClass,
             )}
         />
-        {value && <div className={styles.notificationBadge}>{value}</div>}
+        {isNotif &&
+            value !== 0 && (
+                <div className={styles.notificationBadge}>{value}</div>
+            )}
     </OutLink>
 )
 
@@ -41,6 +45,7 @@ ButtonIcon.propTypes = {
     btnClass: PropTypes.string,
     href: PropTypes.string,
     value: PropTypes.number,
+    isNotif: PropTypes.bool,
 }
 
 export default ButtonIcon
