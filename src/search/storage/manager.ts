@@ -1,4 +1,4 @@
-import Dexie from 'dexie'
+import { EventEmitter } from 'events'
 import { extractTerms } from '../pipeline'
 import Storage from '.'
 import StorageRegistry from './registry'
@@ -14,7 +14,7 @@ import {
     SuggestResult,
 } from './types'
 
-export class StorageManager implements ManageableStorage {
+export class StorageManager extends EventEmitter implements ManageableStorage {
     static DEF_SUGGEST_LIMIT = 10
     static DEF_FIND_OPTS: Partial<FindOpts> = {
         reverse: false,
@@ -85,6 +85,8 @@ export class StorageManager implements ManageableStorage {
     }
 
     constructor() {
+        super()
+
         this._initializationPromise = new Promise(
             resolve => (this._initializationResolve = resolve),
         )
@@ -212,6 +214,18 @@ export class StorageManager implements ManageableStorage {
         return docs
     }
 
+    async findByPk(collectionName: string, pk: string) {
+        return await this._storage[collectionName].get(pk)
+    }
+
+    async* streamCollection(collectionName: string) {
+        const table = this._storage[collectionName]
+        const pks = await table.primaryKeys()
+        for (const pk of pks) {
+            yield await { pk, object: table.get(pk) }
+        }
+    }
+
     /**
      * @param collectionName The name of the collection to query.
      * @param filter Note this is not a fully-featured filter query, like in other methods.
@@ -245,8 +259,8 @@ export class StorageManager implements ManageableStorage {
 
         let coll =
             findOpts.ignoreCase &&
-            findOpts.ignoreCase.length &&
-            findOpts.ignoreCase[0] === indexName
+                findOpts.ignoreCase.length &&
+                findOpts.ignoreCase[0] === indexName
                 ? whereClause.startsWithIgnoreCase(value)
                 : whereClause.startsWith(value)
 
@@ -328,6 +342,42 @@ export class StorageManager implements ManageableStorage {
 
     _finishInitialization(storage) {
         this._storage = storage
+        this._setupChangeEvent()
         this._initializationResolve()
+    }
+
+    _setupChangeEvent() {
+        if (this.listenerCount('changing') === 0) {
+            return
+        }
+
+        for (const collectionName in this.registry.collections) {
+            if (this.registry.collections[collectionName].watch === false) {
+                continue
+            }
+
+            const table = this._storage[collectionName]
+            table.hook('creating', (pk, obj, transaction) => {
+                this.emit('changing', {
+                    operation: 'create',
+                    collection: collectionName,
+                    pk,
+                })
+            })
+            table.hook('updating', (mods, pk, obj, transaction) => {
+                this.emit('changing', {
+                    operation: 'update',
+                    collection: collectionName,
+                    pk,
+                })
+            })
+            table.hook('deleting', (pk, obj, transaction) => {
+                this.emit('changing', {
+                    operation: 'delete',
+                    collection: collectionName,
+                    pk,
+                })
+            })
+        }
     }
 }

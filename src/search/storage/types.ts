@@ -88,6 +88,7 @@ export interface CollectionDefinition {
     fields: CollectionFields
     migrate?: MigrationRunner
     name?: string
+    watch?: boolean // should we include this in the 'changing' event? defaults to true
 }
 
 export interface RegisterableStorage {
@@ -141,5 +142,5 @@ export interface DexieSchema {
 }
 
 export abstract class FeatureStorage {
-    constructor(protected storageManager: ManageableStorage) {}
+    constructor(protected storageManager: ManageableStorage) { }
 }
