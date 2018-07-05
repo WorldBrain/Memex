@@ -4,6 +4,7 @@ export interface PageList {
     pages?: string[]
     isNestable: 0 | 1
     isDeletable: 0 | 1
+    active?: boolean
 }
 
 export interface PageListEntry {

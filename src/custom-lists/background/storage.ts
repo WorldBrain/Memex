@@ -1,5 +1,6 @@
 import { FeatureStorage } from '../../search/search-index-new/storage'
 import { PageList, PageListEntry } from './types'
+import { Page } from 'csstype';
 
 
 // TODO: Add typings for the class
@@ -47,9 +48,9 @@ export default class CustomListStorage extends FeatureStorage {
     }
 
     // Takes the list as they come from Db and does some pre-processing before sending.
-    private async changeListsBeforeSending(lists: object[], pageEnteries: object[]) {
-        const mappedLists = lists.map((list: PageList) => {
-            const page = pageEnteries.find(({ listId }: PageListEntry) => listId === list.id)
+    private changeListsBeforeSending(lists: PageList[], pageEntries: PageListEntry[]): PageList[] {
+        const mappedLists = lists.map((list) => {
+            const page = pageEntries.find(({ listId }) => listId === list.id)
             delete list["_name_terms"]
             return {
                 ...list,
@@ -64,31 +65,44 @@ export default class CustomListStorage extends FeatureStorage {
     // Return all the list in the DB
     //  TODO: Use pagination if required and decide correct types
     async fetchAllLists({ query = {}, opts = {} }: { query?: any; opts?: any }) {
-        const x = await this.storageManager.findAll(CustomListStorage.CUSTOM_LISTS_COLL, query, opts)
+        const x = await this.storageManager.findAll<PageList>(CustomListStorage.CUSTOM_LISTS_COLL, query, opts)
         return this.changeListsBeforeSending(x, [])
     }
 
     async fetchListById(id: number) {
-        const list = await this.storageManager.findObject(CustomListStorage.CUSTOM_LISTS_COLL, { id })
-        const pages = await this.storageManager.findAll(CustomListStorage.LIST_ENTRIES_COLL, { listId: list.id })
+        const list = await this.storageManager.findObject<PageList>(
+            CustomListStorage.CUSTOM_LISTS_COLL,
+            { id }
+        )
+        const pages = await this.storageManager.findAll<PageListEntry>(
+            CustomListStorage.LIST_ENTRIES_COLL,
+            {
+                listId: list.id
+            })
         delete list["_name_terms"]
         return list ? {
             ...list,
-            pages: pages.map((page: PageListEntry) => page.fullUrl),
+            pages: pages.map(({ fullUrl }) => fullUrl),
         } : null
     }
 
     // Return all the pages associated with a list.
     async fetchListPages(listId: number) {
-        return await this.storageManager.findAll(CustomListStorage.LIST_ENTRIES_COLL, { listId })
+        return await this.storageManager.findAll(
+            CustomListStorage.LIST_ENTRIES_COLL,
+            {
+                listId,
+            })
     }
 
     // Returns all the lists containing a certain page.
     async fetchListAssocPage({ url }: { url: string }) {
-        const pages = await this.storageManager.findAll(CustomListStorage.LIST_ENTRIES_COLL, {
-            pageUrl: url,
-        })
-        const listIds = pages.map(({ listId }: PageListEntry) => listId)
+        const pages = await this.storageManager.findAll<PageListEntry>(
+            CustomListStorage.LIST_ENTRIES_COLL,
+            {
+                pageUrl: url,
+            })
+        const listIds = pages.map(({ listId }) => listId)
         const lists = await this.fetchAllLists({
             query: {
                 id: { $in: listIds }
@@ -101,18 +115,22 @@ export default class CustomListStorage extends FeatureStorage {
     async insertCustomList({ name, isDeletable = 1, isNestable = 1 }: {
         name: string, isDeletable: 0 | 1, isNestable: 0 | 1
     }) {
-        return await this.storageManager.putObject(CustomListStorage.CUSTOM_LISTS_COLL, {
-            name,
-            isDeletable,
-            isNestable,
-            createdAt: new Date(),
-        })
+        return await this.storageManager.putObject(
+            CustomListStorage.CUSTOM_LISTS_COLL,
+            {
+                name,
+                isDeletable,
+                isNestable,
+                createdAt: new Date(),
+            })
     }
 
     async updateListName({ id, name }: { id: number, name: string }) {
-        await this.storageManager.updateObject(CustomListStorage.CUSTOM_LISTS_COLL, {
-            id
-        },
+        await this.storageManager.updateObject(
+            CustomListStorage.CUSTOM_LISTS_COLL,
+            {
+                id
+            },
             {
                 $set: {
                     name,
@@ -153,38 +171,42 @@ export default class CustomListStorage extends FeatureStorage {
     async removePageFromList({ listId, pageUrl }: {
         listId: number, pageUrl: number
     }) {
-        const x = await this.storageManager.deleteObject(CustomListStorage.LIST_ENTRIES_COLL, {
-            listId,
-            pageUrl
-        })
+        const x = await this.storageManager.deleteObject(
+            CustomListStorage.LIST_ENTRIES_COLL, {
+                listId,
+                pageUrl
+            })
 
         return x
     }
 
     async checkPageInList({ listId, pageUrl }: { listId: number, pageUrl: string }) {
-        const x = await this.storageManager.findObject(CustomListStorage.LIST_ENTRIES_COLL, {
-            $and: [
-                { listId: { $eq: listId } },
-                { pageUrl: { $eq: pageUrl } },
-            ],
-        })
+        const x = await this.storageManager.findObject(
+            CustomListStorage.LIST_ENTRIES_COLL, {
+                $and: [
+                    { listId: { $eq: listId } },
+                    { pageUrl: { $eq: pageUrl } },
+                ],
+            })
 
         return x
     }
 
     // Suggestions based on search in popup
     async getListNameSuggestions({ name, url }: { name: string, url: string }) {
-        const lists = await this.storageManager.suggest(CustomListStorage.CUSTOM_LISTS_COLL, {
-            name
-        })
-        const listIds = lists.map(({ id }: PageList) => id)
+        const lists = await this.storageManager.suggest<PageList>(
+            CustomListStorage.CUSTOM_LISTS_COLL, {
+                name
+            })
+        const listIds = lists.map(({ id }) => id)
 
         // Gets all the pages associated with all the lists.
-        const pageEnteries = await this.storageManager.findAll(CustomListStorage.LIST_ENTRIES_COLL, {
-            listId: { $in: listIds }, pageUrl: url,
-        })
+        const pageEntries = await this.storageManager.findAll<PageListEntry>(
+            CustomListStorage.LIST_ENTRIES_COLL, {
+                listId: { $in: listIds }, pageUrl: url,
+            })
 
         // Final pre-processing before sending in the lists.
-        return this.changeListsBeforeSending(lists, pageEnteries)
+        return this.changeListsBeforeSending(lists, pageEntries)
     }
 }
