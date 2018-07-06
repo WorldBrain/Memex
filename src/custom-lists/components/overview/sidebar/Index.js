@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
-import { slide as Menu } from 'react-burger-menu'
 import { bindActionCreators } from 'redux'
 
 import { actions, selectors } from 'src/custom-lists'
@@ -11,8 +10,6 @@ import CreateListForm from './CreateListForm'
 import ListItem from './ListItem'
 import DeleteConfirmModal from 'src/overview/components/DeleteConfirmModal'
 import { actions as filterActs } from 'src/overview/filters'
-
-import { styles } from './ReactBurgerMenu'
 
 class ListContainer extends Component {
     static propTypes = {
@@ -148,47 +145,32 @@ class ListContainer extends Component {
 
     render() {
         return (
-            <div>
-                <div>
-                    <Menu
-                        styles={styles}
-                        noOverlay
-                        customBurgerIcon={<img src="/img/sidebar_icon.svg" />}
-                        customCrossIcon={<img src="/img/cross.svg" />}
-                        // onMouseLeave={this.props.resetMouseOver}
-                        // onMouseEnter={this.props.setMouseOver}
-                    >
-                        <div
-                            onMouseLeave={this.props.resetMouseOver}
-                            onMouseEnter={this.props.setMouseOver}
-                        >
-                            <a
-                                onClick={this.props.resetFilters}
-                                className={extStyles.showAll}
-                            >
-                                clear all filters
-                            </a>
+            <div
+                onMouseLeave={this.props.resetMouseOver}
+                onMouseEnter={this.props.setMouseOver}
+            >
+                <a
+                    onClick={this.props.resetFilters}
+                    className={extStyles.showAll}
+                >
+                    clear all filters
+                </a>
 
-                            <hr className={extStyles.hr} />
+                <hr className={extStyles.hr} />
 
-                            <MyCollection
-                                handleRenderCreateList={
-                                    this.props.toggleCreateListForm
-                                }
-                            />
+                <MyCollection
+                    handleRenderCreateList={this.props.toggleCreateListForm}
+                />
 
-                            {this.renderCreateList(this.props.showCreateList)}
-                            <div className={extStyles.allLists}>
-                                {this.renderAllLists()}
-                            </div>
-                            <DeleteConfirmModal
-                                isShown={this.props.isDeleteConfShown}
-                                onClose={this.props.resetListDeleteModal}
-                                deleteDocs={this.props.handleDeleteList}
-                            />
-                        </div>
-                    </Menu>
+                {this.renderCreateList(this.props.showCreateList)}
+                <div className={extStyles.allLists}>
+                    {this.renderAllLists()}
                 </div>
+                <DeleteConfirmModal
+                    isShown={this.props.isDeleteConfShown}
+                    onClose={this.props.resetListDeleteModal}
+                    deleteDocs={this.props.handleDeleteList}
+                />
             </div>
         )
     }

@@ -1,0 +1,36 @@
+.filterButton {
+    background-image: url('/img/filter.png');
+    width: 40px;
+    height: 40px;
+
+    &:hover {
+        background-image: url('/img/filter.png');
+    }
+}
+
+.listButton {
+    background-image: url('/img/list_popup.svg');
+    width: 31px;
+    height: 35px;
+}
+
+.button {
+    display: inline;
+    border: none;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-size: contain;
+    cursor: pointer;
+    outline: none;
+    padding: 0px;
+}
+
+.buttonContainer {
+    position: absolute;
+    display: flex !important; /* stylelint-disable-line declaration-no-important */
+    justify-content: space-between;
+    top: 2px;
+    left: 12px;
+    width: 33%;
+    align-items: baseline;
+}

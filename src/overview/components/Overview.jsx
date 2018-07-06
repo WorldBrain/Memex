@@ -7,6 +7,7 @@ import DeleteConfirmModal from './DeleteConfirmModal'
 import Header from './Header'
 import styles from './Overview.css'
 import Head from 'src/options/containers/Head'
+import SideBar from '../sidebar-left/container'
 
 const showFilterClass = ({ showFilters }) =>
     classNames({
@@ -18,7 +19,7 @@ const Overview = props => (
     <Wrapper>
         <Head />
         <Header {...props} />
-
+        <SideBar />
         <div className={showFilterClass(props)}>{props.filters}</div>
         <div
             className={styles.main}
