@@ -104,12 +104,12 @@ export default class CustomListStorage extends FeatureStorage {
 
     /**
      * Return all the pages associated with a list. 
-     * 
-     * @param {number} listId
+     * @param {Object} obj
+     * @param {number} obj.listId
      * @returns 
      * @memberof CustomListStorage
      */
-    async fetchListPages(listId: number) {
+    async fetchListPagesById({ listId }: { listId: number }) {
         return await this.storageManager.findAll(
             CustomListStorage.LIST_ENTRIES_COLL,
             {
@@ -125,7 +125,7 @@ export default class CustomListStorage extends FeatureStorage {
      * @returns 
      * @memberof CustomListStorage
      */
-    async fetchListAssocPage({ url }: { url: string }) {
+    async fetchListPagesByIdByUrl({ url }: { url: string }) {
         const pages = await this.storageManager.findAll<PageListEntry>(
             CustomListStorage.LIST_ENTRIES_COLL,
             {
@@ -280,7 +280,7 @@ export default class CustomListStorage extends FeatureStorage {
      * @returns 
      * @memberof CustomListStorage
      */
-    async getListNameSuggestions({ name, url }: { name: string, url: string }) {
+    async fetchListNameSuggestions({ name, url }: { name: string, url: string }) {
         const lists = await this.storageManager.suggest<PageList>(
             CustomListStorage.CUSTOM_LISTS_COLL, {
                 name

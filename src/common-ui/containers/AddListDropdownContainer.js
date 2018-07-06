@@ -37,7 +37,9 @@ class DropdownContainer extends Component {
         this.fetchListSuggestions = debounce(300)(this.fetchListSuggestions)
         this.addList = remoteFunction('createCustomList')
         this.addUrlToList = remoteFunction('insertPageToList')
-        this.getListNameSuggestions = remoteFunction('getListNameSuggestions')
+        this.fetchListNameSuggestions = remoteFunction(
+            'fetchListNameSuggestions',
+        )
 
         this.state = {
             searchVal: '',
@@ -139,7 +141,7 @@ class DropdownContainer extends Component {
         let suggestions = this.state.filters
 
         // suggestions = this.suggest(searchVal)
-        suggestions = await this.getListNameSuggestions({
+        suggestions = await this.fetchListNameSuggestions({
             name: searchVal,
             url: this.props.url,
         })

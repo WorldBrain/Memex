@@ -30,7 +30,7 @@ const defaultState = {
     mouseOverSidebar: false,
 }
 
-const getAllLists = (state, lists) => ({
+const fetchAllLists = (state, lists) => ({
     ...state,
     lists,
     tempLists: lists,
@@ -157,7 +157,7 @@ const resetMouseOver = state => ({
 
 export default createReducer(
     {
-        [actions.getAllLists]: getAllLists,
+        [actions.fetchAllLists]: fetchAllLists,
         [actions.resetActiveListIndex]: state => ({
             ...state,
             activeListIndex: defaultState.activeListIndex,

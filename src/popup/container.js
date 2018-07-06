@@ -45,8 +45,8 @@ class PopupContainer extends Component {
         this.deletePagesByDomain = remoteFunction('delPagesByDomain')
         this.removeBookmarkByUrl = remoteFunction('delBookmark')
         this.createBookmarkByUrl = remoteFunction('addBookmark')
-        this.listsContainingPage = remoteFunction('fetchListAssocPage')
-        this.fetchAllLists = remoteFunction('getAllLists')
+        this.listsContainingPage = remoteFunction('fetchListPagesByIdByUrl')
+        this.fetchAllLists = remoteFunction('fetchAllLists')
         this.initTagSuggestions = remoteFunction('extendedSuggest')
     }
 

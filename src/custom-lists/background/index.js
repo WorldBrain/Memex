@@ -25,26 +25,27 @@ export default class CustomListBackground {
             removePageFromList: (...params) => {
                 return this.removePageFromList(...params)
             },
-            getAllLists: (...params) => {
-                return this.getAllLists(...params)
+            fetchAllLists: (...params) => {
+                return this.fetchAllLists(...params)
             },
 
-            fetchListAssocPage: (...params) => {
-                return this.fetchListAssocPage(...params)
+            fetchListPagesByIdByUrl: (...params) => {
+                return this.fetchListPagesByIdByUrl(...params)
             },
-            getListNameSuggestions: (...params) => {
-                return this.getListNameSuggestions(...params)
+            fetchListNameSuggestions: (...params) => {
+                return this.fetchListNameSuggestions(...params)
             },
             checkPageInList: (...params) => {
                 return this.checkPageInList(...params)
             },
-            fetchListPages: (...params) => {
-                return this.fetchListPages(...params)
+            fetchListPagesById: (...params) => {
+                return this.fetchListPagesById(...params)
             },
         })
     }
 
-    async getAllLists({ query = {}, opts = {} }) {
+    // TODO: Change this method to be more general.
+    async fetchAllLists({ query = {}, opts = {} }) {
         const lists = await this.storage.fetchAllLists({ query, opts })
         return lists
     }
@@ -54,8 +55,10 @@ export default class CustomListBackground {
      * @param {Object} obj
      * @param {number} obj.id
      */
-    async fetchListPages({ id }) {
-        return this.storage.fetchListPages(id)
+    async fetchListPagesById({ id }) {
+        return this.storage.fetchListPagesById({
+            listId: id,
+        })
     }
 
     /**
@@ -63,8 +66,8 @@ export default class CustomListBackground {
      * @param {Object} obj
      * @param {string} obj.url
      */
-    async fetchListAssocPage({ url }) {
-        return this.storage.fetchListAssocPage({
+    async fetchListPagesByIdByUrl({ url }) {
+        return this.storage.fetchListPagesByIdByUrl({
             url: normalizeUrl(url),
         })
     }
@@ -150,8 +153,8 @@ export default class CustomListBackground {
      * @returns
      * @memberof CustomListBackground
      */
-    async getListNameSuggestions({ name, url }) {
-        return await this.storage.getListNameSuggestions({
+    async fetchListNameSuggestions({ name, url }) {
+        return await this.storage.fetchListNameSuggestions({
             name,
             url: normalizeUrl(url),
         })

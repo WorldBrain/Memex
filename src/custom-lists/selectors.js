@@ -21,7 +21,7 @@ const sortAlphabetically = (a, b) => {
 
 export const customLists = state => state.customLists
 
-export const getAllLists = createSelector(customLists, state => state.lists)
+export const fetchAllLists = createSelector(customLists, state => state.lists)
 export const getListCount = createSelector(
     customLists,
     state => state.listCount,
@@ -36,7 +36,7 @@ export const listFilterIndex = createSelector(
     state => state.listFilterIndex,
 )
 
-export const getSortedLists = createSelector(getAllLists, lists => {
+export const getSortedLists = createSelector(fetchAllLists, lists => {
     return lists.sort(sortAlphabetically)
 })
 

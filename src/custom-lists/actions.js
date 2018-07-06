@@ -9,7 +9,7 @@ import * as selectors from './selectors'
 
 import { selectors as filters } from 'src/overview/filters'
 
-export const getAllLists = createAction('custom-lists/listData')
+export const fetchAllLists = createAction('custom-lists/listData')
 export const updatePageLists = createAction('custom-lists/updateList')
 export const createList = createAction('custom-lists/addList')
 export const deleteList = createAction(
@@ -100,7 +100,7 @@ export const showEditBox = index => (dispatch, getState) => {
 
 export const delPageFromList = url => async (dispatch, getState) => {
     try {
-        // const lists = await remoteFunction('getAllLists')()
+        // const lists = await remoteFunction('fetchAllLists')()
         const index = selectors.listFilterIndex(getState())
         const listId = filters.listFilter(getState())
         await remoteFunction('removePageFromList')({
@@ -118,8 +118,8 @@ export const delPageFromList = url => async (dispatch, getState) => {
 
 export const getListFromDB = () => async (dispatch, getState) => {
     try {
-        const lists = await remoteFunction('getAllLists')({})
-        dispatch(getAllLists(lists || []))
+        const lists = await remoteFunction('fetchAllLists')({})
+        dispatch(fetchAllLists(lists || []))
     } catch (err) {
         console.log(err)
     } finally {
