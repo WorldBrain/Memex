@@ -8,11 +8,6 @@ export default class NotificationBackground {
         this.storage = new NotificationStorage(storageManager)
     }
 
-    async setup() {
-        this.setupRemoteFunctions()
-        await this.initNotification()
-    }
-
     setupRemoteFunctions() {
         makeRemotelyCallable({
             storeNotification: (...params) => {
