@@ -166,7 +166,7 @@ class ListContainer extends Component {
                                 onClick={this.props.resetFilters}
                                 className={extStyles.showAll}
                             >
-                                Show All
+                                clear all filters
                             </a>
 
                             <hr className={extStyles.hr} />

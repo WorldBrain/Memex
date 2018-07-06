@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import cx from 'classnames'
 
-import styles from './Index.css'
+import styles from './ListItem.css'
 
 class PageList extends Component {
     static propTypes = {
@@ -75,9 +75,17 @@ class PageList extends Component {
         // const url = event.dataTransfer.getData('URL')
         // Gets the URL of the dropped list item
         const url = event.dataTransfer.getData('text/plain')
-        console.log(url)
-
         this.props.onAddPageToList(url)
+    }
+
+    handleEditBtnClick = e => {
+        e.stopPropagation()
+        this.props.onEditButtonClick(e)
+    }
+
+    handleCrossBtnClicktest1 = e => {
+        e.stopPropagation()
+        this.props.onCrossButtonClick(e)
     }
 
     render() {
@@ -91,23 +99,19 @@ class PageList extends Component {
                 title={this.props.listName}
                 onDragEnter={this.handleDragEnter}
                 onDragLeave={this.handleDragLeave}
+                onClick={this.props.onListItemClick}
             >
+                <div className={styles.listName}>{this.props.listName}</div>
                 {this.state.isMouseInside ? (
                     <button
                         className={cx(styles.editButton, styles.button)}
-                        onClick={this.props.onEditButtonClick}
+                        onClick={this.handleEditBtnClick}
                     />
                 ) : null}
-                <div
-                    onClick={this.props.onListItemClick}
-                    className={styles.listName}
-                >
-                    {this.props.listName}
-                </div>
                 {this.state.isMouseInside ? (
                     <button
                         className={cx(styles.deleteButton, styles.button)}
-                        onClick={this.props.onCrossButtonClick}
+                        onClick={this.handleCrossBtnClick}
                     />
                 ) : null}
             </div>

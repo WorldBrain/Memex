@@ -15,8 +15,9 @@ export const styles = {
     bmMenu: {
         padding: '4em 0',
         background: '#FCFBFB',
-        overflow: 'unset',
         fontSize: '0.68rem',
+        overflowX: 'unset',
+        overflowY: 'unset',
     },
     bmMorphShape: {
         fill: '#373a47',

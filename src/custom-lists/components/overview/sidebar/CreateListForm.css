@@ -1,0 +1,58 @@
+.listForm {
+    height: 30px;
+    width: 73%;
+    border: 1px solid transparent;
+    border-top: none;
+    box-shadow: inset 0 2px 1px darkslategrey;
+    outline: none;
+}
+
+.createListForm {
+    display: flex;
+    background: #d7d7d7;
+    height: 50px;
+    width: 300px;
+    align-items: center;
+    position: relative;
+    padding-left: 12px;
+}
+
+.tick {
+    background-image: url('/img/tick.svg');
+    width: 40px;
+    height: 40px;
+    float: right;
+    right: 31px;
+    position: absolute;
+
+    &:hover {
+        background-image: url('/img/tick_green.svg');
+    }
+}
+
+.deleteButton {
+    background-image: url('/img/cross_circle.svg');
+    width: 21px;
+    height: 21px;
+    float: right;
+    position: absolute;
+    right: 7px;
+}
+
+.button {
+    display: inline;
+    border: none;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-size: contain;
+    cursor: pointer;
+    outline: none;
+    padding: 0px;
+}
+
+.sameNameWarning {
+    display: flex;
+    justify-content: center;
+    color: red;
+    font-weight: 400;
+}

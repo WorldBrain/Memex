@@ -1,0 +1,79 @@
+.listItem {
+    background: #d7d7d7;
+}
+
+.pageList {
+    background: #fcfbfb;
+    display: flex;
+    align-items: center;
+    height: 50px;
+    color: #767676;
+    position: relative;
+    width: 100%;
+    transition: width 0.5s ease-in, background-color 1000ms linear;
+    cursor: pointer;
+
+    &:hover {
+        background-color: #d7d7d7;
+        width: 300px;
+        overflow-x: unset;
+    }
+
+    & > .listName {
+        width: 227px;
+    }
+
+    &:hover > .deleteButton {
+        visibility: visible;
+        opacity: 1;
+    }
+}
+
+.pageListDrag {
+    background-color: #d7d7d7;
+}
+
+.filtered {
+    background-color: #e5e5e5;
+    font-weight: 600;
+}
+
+.editButton {
+    background-image: url('/img/pen.svg');
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    right: 35px;
+}
+
+.deleteButton {
+    background-image: url('/img/cross_circle.svg');
+    width: 21px;
+    height: 21px;
+    position: absolute;
+    right: 9px;
+    display: none;
+    visibility: hidden;
+    transition: visibility 0.5s, opacity 0.5s linear;
+}
+
+.button {
+    display: inline;
+    border: none;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-size: contain;
+    cursor: pointer;
+    outline: none;
+    padding: 0px;
+}
+
+.listName {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0px 15px 2px 30px;
+    font-size: 1.4em;
+    cursor: pointer;
+    width: 100%;
+}

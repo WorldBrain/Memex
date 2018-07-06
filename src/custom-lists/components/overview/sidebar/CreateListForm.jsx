@@ -2,7 +2,7 @@ import React from 'react'
 import cx from 'classnames'
 import PropTypes from 'prop-types'
 
-import styles from './Index.css'
+import styles from './CreateListForm.css'
 
 const CreateListForm = props => (
     <div>
@@ -10,7 +10,6 @@ const CreateListForm = props => (
             className={styles.createListForm}
             onSubmit={props.onCheckboxClick}
         >
-            <button type="submit" className={cx(styles.tick, styles.button)} />
             <input
                 className={styles.listForm}
                 name="listName"
@@ -23,12 +22,11 @@ const CreateListForm = props => (
                 autoFocus
                 required
             />
-            {props.closeCreateListForm && (
-                <button
-                    onClick={props.closeCreateListForm}
-                    className={cx(styles.deleteButton, styles.button)}
-                />
-            )}
+            <button type="submit" className={cx(styles.tick, styles.button)} />
+            <button
+                onClick={props.closeCreateListForm}
+                className={cx(styles.deleteButton, styles.button)}
+            />
         </form>
         {props.showWarning && (
             <small className={styles.sameNameWarning}>
