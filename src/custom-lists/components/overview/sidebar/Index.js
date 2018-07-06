@@ -9,7 +9,7 @@ import extStyles from './Index.css'
 import MyCollection from './MyCollections'
 import CreateListForm from './CreateListForm'
 import ListItem from './ListItem'
-import DeleteConfirmModal from './DeleteConfirmModal'
+import DeleteConfirmModal from 'src/overview/components/DeleteConfirmModal'
 import { actions as filterActs } from 'src/overview/filters'
 
 import { styles } from './ReactBurgerMenu'
@@ -45,7 +45,7 @@ class ListContainer extends Component {
         }
     }
 
-    async componentWillMount() {
+    async componentDidMount() {
         // Gets all the list from the DB to populate the sidebar.
         this.props.getListFromDB()
     }
@@ -83,9 +83,10 @@ class ListContainer extends Component {
     }
 
     vacateInputField = () => {
-        this.setState({
+        this.setState(state => ({
+            ...state,
             listName: null,
-        })
+        }))
     }
 
     handleUpdateList = ({ id }, index) => event => {
@@ -93,9 +94,10 @@ class ListContainer extends Component {
         const { value } = event.target.elements['listName']
         // value = list name
         this.props.updateList(index, this.getSearchVal(value), id)
-        this.setState({
+        this.setState(state => ({
+            ...state,
             updatedListName: null,
-        })
+        }))
     }
 
     renderAllLists = () => {
@@ -182,7 +184,7 @@ class ListContainer extends Component {
                             <DeleteConfirmModal
                                 isShown={this.props.isDeleteConfShown}
                                 onClose={this.props.resetListDeleteModal}
-                                deleteList={this.props.handleDeleteList}
+                                deleteDocs={this.props.handleDeleteList}
                             />
                         </div>
                     </Menu>

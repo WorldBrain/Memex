@@ -61,7 +61,7 @@ class DropdownContainer extends Component {
         return this.props.url != null
     }
 
-    overviewMode() {
+    get overviewMode() {
         return this.props.mode === 'overview'
     }
 

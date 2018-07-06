@@ -28,6 +28,7 @@ export default class CustomListBackground {
             getAllLists: (...params) => {
                 return this.getAllLists(...params)
             },
+
             fetchListAssocPage: (...params) => {
                 return this.fetchListAssocPage(...params)
             },

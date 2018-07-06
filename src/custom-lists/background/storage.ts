@@ -1,9 +1,6 @@
 import { FeatureStorage } from '../../search/search-index-new/storage'
 import { PageList, PageListEntry } from './types'
-import { Page } from 'csstype';
 
-
-// TODO: Add typings for the class
 export default class CustomListStorage extends FeatureStorage {
     static CUSTOM_LISTS_COLL = 'customLists'
     static LIST_ENTRIES_COLL = 'pageListEntries'
@@ -47,7 +44,15 @@ export default class CustomListStorage extends FeatureStorage {
         })
     }
 
-    // Takes the list as they come from Db and does some pre-processing before sending.
+    /**
+     * Takes the list as they come from Db and does some pre-processing before sending.
+     * 
+     * @private
+     * @param {PageList[]} lists 
+     * @param {PageListEntry[]} pageEntries 
+     * @returns {PageList[]} 
+     * @memberof CustomListStorage
+     */
     private changeListsBeforeSending(lists: PageList[], pageEntries: PageListEntry[]): PageList[] {
         const mappedLists = lists.map((list) => {
             const page = pageEntries.find(({ listId }) => listId === list.id)
@@ -63,30 +68,47 @@ export default class CustomListStorage extends FeatureStorage {
     }
 
     // Return all the list in the DB
-    //  TODO: Use pagination if required and decide correct types
+    //  TODO: Use pagination if required
     async fetchAllLists({ query = {}, opts = {} }: { query?: any; opts?: any }) {
         const x = await this.storageManager.findAll<PageList>(CustomListStorage.CUSTOM_LISTS_COLL, query, opts)
         return this.changeListsBeforeSending(x, [])
     }
 
+    /**
+     *  Fetch list By Id.
+     * 
+     * @param {number} id 
+     * @returns {PageList}
+     * @memberof CustomListStorage
+     */
     async fetchListById(id: number) {
         const list = await this.storageManager.findObject<PageList>(
             CustomListStorage.CUSTOM_LISTS_COLL,
             { id }
         )
+
+        if (!list) return null
+
         const pages = await this.storageManager.findAll<PageListEntry>(
             CustomListStorage.LIST_ENTRIES_COLL,
             {
                 listId: list.id
             })
         delete list["_name_terms"]
-        return list ? {
+        return {
             ...list,
             pages: pages.map(({ fullUrl }) => fullUrl),
-        } : null
+        }
     }
 
-    // Return all the pages associated with a list.
+
+    /**
+     * Return all the pages associated with a list. 
+     * 
+     * @param {number} listId
+     * @returns 
+     * @memberof CustomListStorage
+     */
     async fetchListPages(listId: number) {
         return await this.storageManager.findAll(
             CustomListStorage.LIST_ENTRIES_COLL,
@@ -95,7 +117,14 @@ export default class CustomListStorage extends FeatureStorage {
             })
     }
 
-    // Returns all the lists containing a certain page.
+    /**
+     * Returns all the lists containing a certain page.
+     * 
+     * @param {Object} obj
+     * @param {string} obj.url
+     * @returns 
+     * @memberof CustomListStorage
+     */
     async fetchListAssocPage({ url }: { url: string }) {
         const pages = await this.storageManager.findAll<PageListEntry>(
             CustomListStorage.LIST_ENTRIES_COLL,
@@ -111,7 +140,16 @@ export default class CustomListStorage extends FeatureStorage {
         return this.changeListsBeforeSending(lists, pages)
     }
 
-    // Function to insert into the DB
+    /**
+     * Function to insert into the DB
+     * 
+     * @param {Object} obj
+     * @param {string} obj.name
+     * @param {0|1} obj.isNestable
+     * @param {0|1} obj.isDeletable
+     * @returns  
+     * @memberof CustomListStorage
+     */
     async insertCustomList({ name, isDeletable = 1, isNestable = 1 }: {
         name: string, isDeletable: 0 | 1, isNestable: 0 | 1
     }) {
@@ -125,6 +163,15 @@ export default class CustomListStorage extends FeatureStorage {
             })
     }
 
+    /**
+     * Updates list name
+     * 
+     * @param {Object} obj
+     * @param {number} obj.id
+     * @param {string} obj.name
+     * @returns 
+     * @memberof CustomListStorage
+     */
     async updateListName({ id, name }: { id: number, name: string }) {
         await this.storageManager.updateObject(
             CustomListStorage.CUSTOM_LISTS_COLL,
@@ -139,7 +186,14 @@ export default class CustomListStorage extends FeatureStorage {
             })
     }
 
-    // Delete List from the DB.
+    /**
+     * Delete List from the DB. 
+     * 
+     * @param {Object} obj
+     * @param {number} obj.id
+     * @returns  
+     * @memberof CustomListStorage
+     */
     async removeList({ id }: { id: number }) {
         await this.storageManager.deleteObject(CustomListStorage.CUSTOM_LISTS_COLL, {
             id,
@@ -150,7 +204,15 @@ export default class CustomListStorage extends FeatureStorage {
         })
     }
 
-    // Adds mapping to lists and pages table.
+    /**
+     *  Adds mapping to lists and pages table. 
+     * 
+     * @param {Object} obj
+     * @param {number} obj.listId
+     * @param {pageUrl} obj.pageUrl
+     * @param {fullUrl} obj.fullUrl 
+     * @memberof CustomListStorage
+     */
     async insertPageToList({ listId, pageUrl, fullUrl }:
         { listId: number, pageUrl: string, fullUrl: string }) {
 
@@ -167,7 +229,15 @@ export default class CustomListStorage extends FeatureStorage {
         }
     }
 
-    // Removes the page from list.
+    /**
+     * Removes the page from list. 
+     * 
+     * @param {Object} obj
+     * @param {number} obj.listId
+     * @param {string} obj.pageUrl
+     * @returns 
+     * @memberof CustomListStorage
+     */
     async removePageFromList({ listId, pageUrl }: {
         listId: number, pageUrl: number
     }) {
@@ -180,6 +250,15 @@ export default class CustomListStorage extends FeatureStorage {
         return x
     }
 
+    /**
+     * Check if page exists in the list.
+     * 
+     * @param {Object} obj
+     * @param {number} obj.listId
+     * @param {string} obj.pageUrl
+     * @returns  
+     * @memberof CustomListStorage
+     */
     async checkPageInList({ listId, pageUrl }: { listId: number, pageUrl: string }) {
         const x = await this.storageManager.findObject(
             CustomListStorage.LIST_ENTRIES_COLL, {
@@ -192,7 +271,15 @@ export default class CustomListStorage extends FeatureStorage {
         return x
     }
 
-    // Suggestions based on search in popup
+    /**
+     * Suggestions based on search in popup
+     * 
+     * @param {Object} obj
+     * @param {string} obj.name
+     * @param {string} obj.url
+     * @returns 
+     * @memberof CustomListStorage
+     */
     async getListNameSuggestions({ name, url }: { name: string, url: string }) {
         const lists = await this.storageManager.suggest<PageList>(
             CustomListStorage.CUSTOM_LISTS_COLL, {
