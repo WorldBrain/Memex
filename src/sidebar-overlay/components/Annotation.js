@@ -10,12 +10,21 @@ const Annotation = props => (
         })}
         onClick={props.isClickable ? props.goToAnnotation : null}
     >
-        <div className={styles.highlight}>
-            {props.renderHighlight()}
+        <div
+            className={
+                props.isJustComment ? styles.highlight : styles.noDisplay
+            }
+        >
+            "{props.renderHighlight()}"
             {props.renderShowButton('highlight')}
         </div>
 
-        <div className={styles.annotationText}>
+        <div
+            className={cx({
+                [styles.annotationText]: props.shouldCommentBoxBeVisible,
+                [styles.dashedBorder]: props.isJustComment,
+            })}
+        >
             {props.renderAnnotation()}
             {props.annotationEditMode
                 ? null
@@ -42,6 +51,8 @@ Annotation.propTypes = {
     renderFooter: PropTypes.func.isRequired,
     goToAnnotation: PropTypes.func.isRequired,
     isClickable: PropTypes.bool.isRequired,
+    shouldCommentBoxBeVisible: PropTypes.bool.isRequired,
+    isJustComment: PropTypes.number.isRequired,
 }
 
 export default Annotation

@@ -1,19 +1,22 @@
 @import url('/fonts/googlefonts/ibm-plex-serif.css');
 
-* {
-    margin: 0;
-    box-sizing: border-box;
-}
-
 .sidebar {
     padding: 0px;
     height: 100%;
-    background: #fafafa;
+    background: #fff;
     overflow-y: scroll;
+    border-left: 3px solid #fafafa;
+
+    & > * {
+        font-family: 'IBM Plex Serif', serif;
+        margin: 0;
+        box-sizing: border-box;
+    }
 }
 
 .closeButton {
-    color: green;
+    color: #000;
+    font-weight: 800;
     font-size: 20px;
     margin-top: 5px;
     margin-left: 15px;
@@ -37,7 +40,7 @@
 }
 
 .annotationContainer {
-    margin: 20px 15px;
+    margin: 20px 0px;
     margin-bottom: 100px;
-    background: #fafafa;
+    background: #fff;
 }

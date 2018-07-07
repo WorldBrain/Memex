@@ -104,21 +104,19 @@ class AnnotationContainer extends React.Component {
     getTags = () => this.state.tags.map(tag => tag.name)
 
     renderTimestamp = () => {
-        const { footerState } = this.state
-
-        if (footerState !== 'default') {
-            return <div className={styles.timestamp} />
-        }
-
         const { createdWhen, lastEdited } = this.props.annotation
         let dateObject
         if (!lastEdited) dateObject = new Date(createdWhen)
         else dateObject = new Date(lastEdited)
-        const timestamp = moment(dateObject).format('MMMM D YYYY')
+        const timestamp = moment(dateObject)
+            .format('MMMM D YYYY')
+            .toUpperCase()
 
         return (
             <div className={styles.timestamp}>
-                {lastEdited ? 'Last edit: ' : null}
+                {lastEdited ? (
+                    <span className={styles.lastEdit}>Last Edit: </span>
+                ) : null}
                 {timestamp}
             </div>
         )
@@ -150,16 +148,16 @@ class AnnotationContainer extends React.Component {
         return (
             <div className={styles.footerAside}>
                 <span
+                    className={styles.footerBoldText}
+                    onClick={this.handleEditAnnotation}
+                >
+                    Save
+                </span>
+                <span
                     className={styles.footerText}
                     onClick={this.toggleEditAnnotation}
                 >
                     Cancel
-                </span>
-                <span
-                    className={styles.footerGreenText}
-                    onClick={this.handleEditAnnotation}
-                >
-                    Save
                 </span>
             </div>
         )
@@ -168,11 +166,12 @@ class AnnotationContainer extends React.Component {
     renderDeleteButtons = () => {
         return (
             <div className={styles.footerAside}>
+                <span className={styles.deleteReally}>Really?</span>
                 <span
-                    className={styles.footerGreenText}
+                    className={styles.footerBoldText}
                     onClick={this.handleDeleteAnnotation}
                 >
-                    Yes
+                    Delete
                 </span>
                 <span
                     className={styles.footerText}
@@ -241,13 +240,14 @@ class AnnotationContainer extends React.Component {
         const { truncated } = this.state
         if (truncated[name]) {
             return (
-                <div
+                <span
                     className={styles.showMore}
                     onClick={this.toggleTruncation(name)}
                 >
-                    Show{' '}
-                    {this.state.truncated[name].isTruncated ? 'more' : 'less'}
-                </div>
+                    {this.state.truncated[name].isTruncated
+                        ? '----->'
+                        : '<----'}
+                </span>
             )
         }
         return null
@@ -300,6 +300,14 @@ class AnnotationContainer extends React.Component {
         return this.props.env === 'iframe' && this.props.annotation.body !== ''
     }
 
+    shouldCommentBoxBeVisible = () => {
+        return (
+            (this.props.annotation.comment.length > 0 ||
+                this.state.containsTags) &&
+            !this.state.annotationEditMode
+        )
+    }
+
     render() {
         const { goToAnnotation, annotation } = this.props
         return (
@@ -314,6 +322,8 @@ class AnnotationContainer extends React.Component {
                 renderFooter={this.renderFooter}
                 goToAnnotation={goToAnnotation(annotation)}
                 isClickable={this.deriveIsClickable()}
+                shouldCommentBoxBeVisible={this.shouldCommentBoxBeVisible()}
+                isJustComment={this.props.annotation.body.length}
             />
         )
     }

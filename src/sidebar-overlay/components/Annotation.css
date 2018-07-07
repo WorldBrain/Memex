@@ -1,15 +1,21 @@
 .container {
     width: 300px;
-    background-color: #f8f8f8;
+    background-color: #fff;
     border-radius: 5px;
     padding: 10px;
     padding-bottom: 12px;
-    color: #3eb995;
+    color: #000;
     font-family: sans-serif;
     font-size: 13px;
-    border: 1px #979797 solid;
-    margin-left: 7px;
+    border: 1px #d2d2d2 solid;
+    margin-left: 18px;
+    position: relative;
     margin-top: 10px;
+    padding-top: 0;
+
+    & > * {
+        font-family: 'IBM Plex Serif', serif;
+    }
 }
 
 .pointer {
@@ -18,26 +24,37 @@
 
 .highlight {
     font-style: italic;
-    font-weight: 200;
+    font-weight: 500;
     margin-bottom: 10px;
+    margin-top: 30px;
+}
+
+.noDisplay {
+    display: none;
 }
 
 .showMore {
-    margin: 6px auto;
-    width: 40%;
-    text-align: center;
+    margin-left: 5px;
     cursor: pointer;
     font-weight: 500;
     font-size: 0.9em;
+    letter-spacing: -2px;
 }
 
 .annotationText {
-    margin-left: 10px;
+    border-bottom: 1px solid #d2d2d2;
     font-size: 12px;
-    font-weight: 300;
+    font-weight: 500;
     overflow: hidden;
     word-wrap: break-word;
     white-space: pre-wrap;
+    background: #fafafa;
+    margin: 0 -10px;
+    padding: 30px 10px 15px 10px;
+
+    &.dashed-border {
+        border-top: 1px dashed #d2d2d2;
+    }
 }
 
 .footer {
@@ -46,45 +63,71 @@
 }
 
 .timestamp {
-    width: 65%;
+    width: 45%;
+    font-size: 11px;
+    text-align: right;
     display: inline-block;
     vertical-align: middle;
-    margin-top: -5px;
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-weight: 400;
+    color: #222;
+
+    & .lastEdit {
+        font-weight: 400;
+        color: #929292;
+        margin-right: 10px;
+    }
 }
 
 .footerAside {
-    width: 35%;
+    width: 100%;
     display: inline-block;
+    font-size: 13px;
     text-align: right;
-    font-size: 12px;
+    margin-top: -4px;
+    margin-left: -7px;
+}
+
+.footerBoldText {
+    color: #000;
+    margin-left: 8px;
+    margin-right: 0px;
+    cursor: pointer;
+    font-weight: 700;
 }
 
 .footerText {
     color: #818181;
     cursor: pointer;
-    margin-left: 6px;
+    margin-left: 10px;
 }
 
-.footerGreenText,
-.tagPill {
-    background-color: #3eb995;
-    color: white;
-    margin-left: 8px;
-    margin-right: 0px;
-    padding: 3px 10px;
-    border-radius: 10px;
-    cursor: pointer;
+.deleteReally {
+    font-weight: 800;
+    font-size: 15px;
+    float: left;
+    color: #000;
+    margin-left: 10px;
+    margin-top: -2px;
 }
 
 .tagPill {
     font-size: 0.8em;
-    margin-left: 0px;
-    margin-right: 5px;
+    font-weight: 800;
+    background-color: #c6f3e5;
+    color: #000;
+    margin-left: 8px;
+    margin-right: 0px;
+    padding: 5px;
+    border-radius: 10px;
+    cursor: pointer;
 }
 
 .tagsContainer {
     height: 20px;
-    margin-top: 5px;
+    margin-top: 15px;
 }
 
 .icon {
@@ -96,11 +139,12 @@
     font-size: 12px;
     width: 280px;
     resize: none;
-    background-color: #fdfbfb;
-    box-shadow: #0000005c 1px 0px 13px -3px inset;
-    border: 0.5px #0000005c solid;
-    color: #3eb995;
+    color: #222;
+    font-family: 'IBM Plex Serif', serif;
+    background: #f7f7f7;
+    border: none;
     padding: 5px;
+    border-bottom: 1px dashed #d2d2d2;
 }
 
 .tagsInput {
@@ -129,22 +173,40 @@ input:focus {
     background-image: url('/img/trash_new.svg');
     background-repeat: no-repeat;
     background-size: 15px;
-    width: 15px;
-    height: 16px;
     display: inline-block;
     cursor: pointer;
     margin-left: 5px;
+    background-color: transparent;
+    background-position: center;
+    border-radius: 0;
+    border-radius: 50%;
+    padding: 3px;
+    width: 25px;
+    height: 25px;
+    float: left;
+
+    &:hover {
+        background-color: #efefef;
+    }
 }
 
 .editIcon {
     background-image: url('/img/edit.svg');
     background-repeat: no-repeat;
     background-size: 17px;
-    width: 17px;
-    height: 17px;
+    background-position: center;
     display: inline-block;
     cursor: pointer;
-    margin-left: 7px;
+    border-radius: 50%;
+    padding: 3px;
+    width: 25px;
+    height: 25px;
+    vertical-align: 0px;
+    float: left;
+
+    &:hover {
+        background-color: #efefef;
+    }
 }
 
 .goToPageIcon {

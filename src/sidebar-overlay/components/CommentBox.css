@@ -3,7 +3,7 @@
 }
 
 .highlighted {
-    color: #3eb995;
+    color: #000;
     font-family: 'Open Sans';
     margin: 10px 20px;
 
@@ -24,13 +24,14 @@
 
 .textarea {
     resize: none;
+    font-weight: 500;
     font-size: 13px;
-    color: #74bfa5;
-    font-family: 'Open Sans';
-    background: #fdfbfb;
-    border: 1px #999 solid;
-    box-shadow: inset 0 0 9px -3px black;
-    padding: 5px 10px;
+    color: #222;
+    font-family: 'IBM Plex Serif', serif;
+    background: #f7f7f7;
+    border: none;
+    border-radius: 2px;
+    padding: 10px 7px;
     margin-left: 5px;
 
     &:focus {
@@ -38,7 +39,7 @@
     }
 
     &::placeholder {
-        color: #3eb995;
+        color: #aaa;
     }
 }
 
