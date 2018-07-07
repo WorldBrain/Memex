@@ -45,7 +45,7 @@ class PopupContainer extends Component {
         this.deletePagesByDomain = remoteFunction('delPagesByDomain')
         this.removeBookmarkByUrl = remoteFunction('delBookmark')
         this.createBookmarkByUrl = remoteFunction('addBookmark')
-        this.listsContainingPage = remoteFunction('fetchListPagesByIdByUrl')
+        this.listsContainingPage = remoteFunction('fetchListPagesByUrl')
         this.fetchAllLists = remoteFunction('fetchAllLists')
         this.initTagSuggestions = remoteFunction('extendedSuggest')
     }
@@ -138,10 +138,12 @@ class PopupContainer extends Component {
 
         // Get rest 20 lists not associated with the page.
         const lists = await this.fetchAllLists({
-            query: {
-                id: { $nin: listIds },
-            },
-            opts: { limit: 20 },
+            // query: {
+            //     id: { $nin: listIds },
+            // },
+            // opts: { limit: 20 },
+            excludeIds: listIds,
+            limit: 20,
         })
         return {
             page,

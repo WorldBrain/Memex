@@ -125,7 +125,7 @@ export default class CustomListStorage extends FeatureStorage {
      * @returns 
      * @memberof CustomListStorage
      */
-    async fetchListPagesByIdByUrl({ url }: { url: string }) {
+    async fetchListPagesByUrl({ url }: { url: string }) {
         const pages = await this.storageManager.findAll<PageListEntry>(
             CustomListStorage.LIST_ENTRIES_COLL,
             {

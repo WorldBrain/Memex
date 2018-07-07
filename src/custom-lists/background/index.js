@@ -29,8 +29,8 @@ export default class CustomListBackground {
                 return this.fetchAllLists(...params)
             },
 
-            fetchListPagesByIdByUrl: (...params) => {
-                return this.fetchListPagesByIdByUrl(...params)
+            fetchListPagesByUrl: (...params) => {
+                return this.fetchListPagesByUrl(...params)
             },
             fetchListNameSuggestions: (...params) => {
                 return this.fetchListNameSuggestions(...params)
@@ -44,8 +44,16 @@ export default class CustomListBackground {
         })
     }
 
-    // TODO: Change this method to be more general.
-    async fetchAllLists({ query = {}, opts = {} }) {
+    async fetchAllLists({ excludeIds = [], skip, limit }) {
+        const query = {
+            id: { $nin: excludeIds },
+        }
+
+        const opts = {
+            limit,
+            skip,
+        }
+
         const lists = await this.storage.fetchAllLists({ query, opts })
         return lists
     }
@@ -66,8 +74,8 @@ export default class CustomListBackground {
      * @param {Object} obj
      * @param {string} obj.url
      */
-    async fetchListPagesByIdByUrl({ url }) {
-        return this.storage.fetchListPagesByIdByUrl({
+    async fetchListPagesByUrl({ url }) {
+        return this.storage.fetchListPagesByUrl({
             url: normalizeUrl(url),
         })
     }

@@ -52,7 +52,7 @@ class DropdownContainer extends Component {
 
     componentWillMount() {
         // The temporary list array gets updated.
-        if (this.overviewMode()) this.props.setTempLists()
+        if (this.overviewMode) this.props.setTempLists()
     }
 
     get inputBlockPattern() {
