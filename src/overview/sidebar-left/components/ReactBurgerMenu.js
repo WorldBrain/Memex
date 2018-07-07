@@ -14,7 +14,7 @@ export const styles = {
     },
     bmMenu: {
         padding: '4em 0',
-        background: '#FCFBFB',
+        background: '#FFFFFF',
         fontSize: '0.68rem',
         overflowX: 'unset',
         overflowY: 'unset',

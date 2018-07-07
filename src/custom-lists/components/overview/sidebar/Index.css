@@ -1,13 +1,3 @@
-.showAll {
-    background: #f7f5f7ab;
-    color: #504c4c;
-    padding: 3px 0px;
-    font-size: 1.35em;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-}
-
 .hr {
     border-color: #b0e0d2;
     width: 50px;

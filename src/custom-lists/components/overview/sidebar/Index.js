@@ -20,7 +20,6 @@ class ListContainer extends Component {
         resetListDeleteModal: PropTypes.func.isRequired,
         handleCrossBtnClick: PropTypes.func.isRequired,
         handleListItemClick: PropTypes.func.isRequired,
-        resetFilters: PropTypes.func.isRequired,
         createPageList: PropTypes.func.isRequired,
         updateList: PropTypes.func.isRequired,
         handleAddPageList: PropTypes.func.isRequired,
@@ -149,13 +148,6 @@ class ListContainer extends Component {
                 onMouseLeave={this.props.resetMouseOver}
                 onMouseEnter={this.props.setMouseOver}
             >
-                <a
-                    onClick={this.props.resetFilters}
-                    className={extStyles.showAll}
-                >
-                    clear all filters
-                </a>
-
                 <hr className={extStyles.hr} />
 
                 <MyCollection
@@ -187,7 +179,6 @@ const mapDispatchToProps = (dispatch, getState) => ({
     ...bindActionCreators(
         {
             resetListDeleteModal: actions.resetListDeleteModal,
-            resetFilters: filterActs.resetFilters,
             getListFromDB: actions.getListFromDB,
             createPageList: actions.createPageList,
             updateList: actions.updateList,

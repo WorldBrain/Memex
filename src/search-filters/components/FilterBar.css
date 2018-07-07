@@ -1,0 +1,24 @@
+.collection {
+    color: #767676;
+    cursor: pointer;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 5px;
+    margin-top: 35px;
+
+    &:hover {
+        background-color: #d7d7d7;
+    }
+}
+
+.myCollection {
+    font-size: 1.45em;
+    padding: 0px 70px 0px 10px;
+}
+
+.plus {
+    font-size: 2em;
+    font-weight: bold;
+}

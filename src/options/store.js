@@ -12,6 +12,8 @@ import { reducer as onboarding } from '../overview/onboarding'
 import { reducer as filters } from '../overview/filters'
 import { reducer as sidebar } from 'src/overview/sidebar'
 import { reducer as customLists } from 'src/custom-lists'
+// Search filters in the sidebar
+import { reducer as searchFilters } from 'src/search-filters'
 
 const rootReducer = combineReducers({
     blacklist: blacklist.reducer,
@@ -23,6 +25,7 @@ const rootReducer = combineReducers({
     filters,
     sidebar,
     customLists,
+    searchFilters,
 })
 
 const rootEpic = combineEpics(...Object.values(overviewPage.epics))

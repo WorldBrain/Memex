@@ -1,43 +1,33 @@
 import React, { PureComponent } from 'react'
 import { connect } from 'react-redux'
 // import PropTypes from 'prop-types'
-import { slide as Menu } from 'react-burger-menu'
-import cx from 'classnames'
 // import { bindActionCreators } from 'redux'
 
 import { ListSideBar } from 'src/custom-lists/components'
+import SearchFilters from 'src/search-filters/container'
 
-import localStyles from './Sidebar.css'
-import { styles } from './ReactBurgerMenu'
+// TODO: compress into one
+import Sidebar from './components/SideBar'
+import ClearFilter from './components/ClearFilter'
 
 class SidebarContainer extends PureComponent {
-    test = () => {}
+    renderSearchFilters = () => <SearchFilters />
+
+    // TODO: Find a better name for list sidebar
+    renderListSidebar = () => <ListSideBar />
+
+    renderClearFilters = () => <ClearFilter />
+
     render() {
         return (
-            <Menu
-                styles={styles}
-                noOverlay
-                customBurgerIcon={<img src="/img/sidebar_icon.svg" />}
-                customCrossIcon={<img src="/img/cross.svg" />}
+            <Sidebar
+                searchFilters={this.renderSearchFilters()}
+                listSidebar={this.renderListSidebar()}
+                resetFilters={this.renderClearFilters()}
+                content={this.renderSearchFilters()}
             >
-                <div className={localStyles.buttonContainer}>
-                    <button
-                        className={cx(
-                            localStyles.filterButton,
-                            localStyles.button,
-                        )}
-                    />
-                    <button
-                        className={cx(
-                            localStyles.listButton,
-                            localStyles.button,
-                        )}
-                    />
-                </div>
-                <div>
-                    <ListSideBar />
-                </div>
-            </Menu>
+                {this.renderSearchFilters()}
+            </Sidebar>
         )
     }
 }

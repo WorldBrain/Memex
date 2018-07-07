@@ -1,0 +1,52 @@
+.container {
+    font-size: 1.5em;
+    color: #8b8b8b;
+    padding: 0 10px;
+}
+
+.listName {
+    white-space: nowrap;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.9em;
+    flex: 10;
+    cursor: pointer;
+    text-align: left;
+}
+
+.menuItem {
+    display: flex;
+    padding: 8px 8px 8px 8px;
+    cursor: pointer;
+    border-bottom: 1px solid #dbdbdb;
+    word-wrap: break-word;
+
+    &:hover,
+    &:focus,
+    &:active {
+        background-color: #f7f7f7;
+        outline: none;
+    }
+}
+
+.menuItemFocused {
+    background-color: #f7f7f7;
+}
+
+.tick {
+    float: right;
+    background-image: url('/img/tick_green.svg');
+    width: 21px;
+}
+
+.button {
+    display: inline;
+    border: none;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-size: contain;
+    cursor: pointer;
+    outline: none;
+    padding: 0px;
+}
