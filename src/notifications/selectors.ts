@@ -1,4 +1,6 @@
-const notifications = state => state.notifications
+import { State } from './reducer'
+
+const notifications = (state: any): State => state.notifications
 
 export const readNotificationList = state =>
     notifications(state).readNotificationList
