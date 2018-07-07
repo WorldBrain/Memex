@@ -44,6 +44,7 @@ class IndexDropdownContainer extends Component<Props, State> {
         onFilterAdd: noop,
         onFilterDel: noop,
         initFilters: [],
+        isForAnnotation: false,
     }
 
     private suggestRPC
@@ -339,6 +340,7 @@ class IndexDropdownContainer extends Component<Props, State> {
                 {...tag}
                 key={i}
                 onClick={this.handleTagSelection(i)}
+                {...this.props}
             />
         ))
 
@@ -351,6 +353,7 @@ class IndexDropdownContainer extends Component<Props, State> {
                     focused={
                         this.state.focused === this.state.displayFilters.length
                     }
+                    isForAnnotation={this.props.isForAnnotation}
                 />,
             )
         }

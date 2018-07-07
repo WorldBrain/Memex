@@ -3,9 +3,10 @@ import PropTypes from 'prop-types'
 import cx from 'classnames'
 
 import localStyles from './IndexDropdown.css'
+import annotationStyles from './IndexDropdownAnnotation.css'
 
 /**
- * @augments {PureComponent<{onClick: any}, *>}
+ * @augments {PureComponent<{onClick: any}, {isForAnnotation: bool}, *>}
  */
 class IndexDropdownRow extends PureComponent {
     static propTypes = {
@@ -14,11 +15,18 @@ class IndexDropdownRow extends PureComponent {
         active: PropTypes.bool,
         onClick: PropTypes.func.isRequired,
         focused: PropTypes.bool,
+        isForAnnotation: PropTypes.bool,
+    }
+
+    componentWillMount() {
+        this.styles = this.props.isForAnnotation
+            ? annotationStyles
+            : localStyles
     }
 
     get mainClass() {
-        return cx(localStyles.menuItem, {
-            [localStyles.menuItemFocused]: this.props.focused,
+        return cx(this.styles.menuItem, {
+            [this.styles.menuItemFocused]: this.props.focused,
         })
     }
 

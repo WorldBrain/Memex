@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import cx from 'classnames'
 
 import styles from './IndexDropdown.css'
+import annotationStyles from './IndexDropdownAnnotation.css'
 
 /**
  * @augments {PureComponent<{onTagSearchChange: any, onTagSearchKeyDown: any, setInputRef: any, numberOfTags: any, tagSearchValue: any}, *>}
@@ -17,14 +18,19 @@ class IndexDropdown extends PureComponent {
         setInputRef: PropTypes.func.isRequired,
         tagSearchValue: PropTypes.string.isRequired,
         hover: PropTypes.bool,
+        isForAnnotation: PropTypes.bool,
         source: PropTypes.oneOf(['tag', 'domain']).isRequired,
         url: PropTypes.string,
     }
 
+    componentWillMount() {
+        this.styles = this.props.isForAnnotation ? annotationStyles : styles
+    }
+
     get mainClass() {
-        return cx(styles.tagDiv, {
-            [styles.tagDivFromOverview]: this.props.hover,
-            [styles.tagDivForFilter]: !this.props.url,
+        return cx(this.styles.tagDiv, {
+            [this.styles.tagDivFromOverview]: this.props.hover,
+            [this.styles.tagDivForFilter]: !this.props.url,
         })
     }
 
@@ -41,9 +47,9 @@ class IndexDropdown extends PureComponent {
     render() {
         return (
             <div className={this.mainClass} ref={this.props.setTagDivRef}>
-                <form className={styles.searchContainer}>
+                <form className={this.styles.searchContainer}>
                     <input
-                        className={styles.search}
+                        className={this.styles.search}
                         name="query"
                         placeholder={this.searchPlaceholder}
                         onChange={this.props.onTagSearchChange}
@@ -55,10 +61,12 @@ class IndexDropdown extends PureComponent {
                     />
                     <i className="material-icons">search</i>
                 </form>
-                <div className={styles.tagContainer}>{this.props.children}</div>
-                <div className={styles.summaryTagContainer}>
-                    <div className={styles.numberTags}>
-                        <span className={styles.bold}>
+                <div className={this.styles.tagContainer}>
+                    {this.props.children}
+                </div>
+                <div className={this.styles.summaryTagContainer}>
+                    <div className={this.styles.numberTags}>
+                        <span className={this.styles.bold}>
                             {this.props.numberOfTags}
                         </span>{' '}
                         {this.unit} selected

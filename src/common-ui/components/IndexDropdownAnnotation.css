@@ -1,0 +1,116 @@
+.menuItem {
+    display: block;
+    padding: 10px 8px 10px 30px;
+    cursor: pointer;
+    border: 1px solid #d2d2d2;
+    border-bottom: none;
+    word-wrap: break-word;
+    font-size: 12px;
+
+    &:hover,
+    &:focus,
+    &:active {
+        background-color: #f7f7f7;
+        outline: none;
+    }
+}
+
+.menuItemFocused {
+    background-color: #f7f7f7;
+}
+
+.menuItem i {
+    font-size: 12px;
+    float: right;
+    margin-top: 3px;
+}
+
+.tagContainer {
+    width: 100%;
+    max-height: 400px;
+    overflow-y: scroll;
+
+    &:focus {
+        outline: none;
+    }
+}
+
+.numberTags {
+    align-items: flex-start;
+    margin-top: 6px;
+    color: #777;
+    font-weight: 800;
+}
+
+.summaryTagContainer {
+    font-size: 12px;
+    width: 100%;
+    display: flex;
+    padding-top: 4px;
+    justify-content: space-around;
+    padding-bottom: 4px;
+    background: white;
+    border: 1px solid #d2d2d2;
+}
+
+.searchContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 6px;
+    margin-bottom: 0;
+    background-color: #f7f7f7;
+
+    & > i {
+        color: #3eb995;
+        padding: 0;
+    }
+}
+
+.search {
+    width: 90%;
+    font-size: 12px;
+    font-weight: 200;
+    padding: 5px;
+    border: none;
+    background-color: #f7f7f7;
+
+    &:placeholder-shown {
+        font-style: italic;
+        font-family: 'IBM Plex Serif', serif;
+    }
+
+    &::placeholder {
+        color: #d2d2d2;
+    }
+
+    &:focus {
+        outline: none;
+    }
+}
+
+.bold {
+    font-weight: bold;
+}
+
+.tagDiv {
+    box-shadow: none;
+}
+
+.tagDivFromOverview {
+    position: absolute;
+    width: 300px;
+    z-index: 1;
+    background-color: #fff;
+    margin-left: 500px;
+
+    @media (max-width: 835px) {
+        right: 10px;
+    }
+}
+
+.tagDivForFilter {
+    width: 295px;
+    margin-left: 5px;
+    z-index: 1;
+}
