@@ -295,11 +295,19 @@ class AnnotationContainer extends React.Component {
     deriveTagsClass = () =>
         this.state.containsTags ? styles.tagsContainer : ''
 
+    deriveIsComment = () => this.props.annotation.body.length > 0
+
+    deriveIsIFrame = () => this.props.env === 'iframe'
+
     deriveIsClickable = () => {
         // Container box is only clickable if it's in iframe and it's a comment
-        return this.props.env === 'iframe' && this.props.annotation.body !== ''
+        return this.props.env === 'iframe' && this.deriveIsComment()
     }
 
+    /**
+     * Comment box (#fafafa bg) should only be visible if there is a comment
+     * or the annotation has tags. It shouldn't be visible in edit mode.
+     */
     shouldCommentBoxBeVisible = () => {
         return (
             (this.props.annotation.comment.length > 0 ||
@@ -321,9 +329,9 @@ class AnnotationContainer extends React.Component {
                 renderAnnotationInput={this.renderAnnotationInput}
                 renderFooter={this.renderFooter}
                 goToAnnotation={goToAnnotation(annotation)}
-                isClickable={this.deriveIsClickable()}
+                isIFrame={this.deriveIsIFrame()}
                 shouldCommentBoxBeVisible={this.shouldCommentBoxBeVisible()}
-                isJustComment={this.props.annotation.body.length}
+                isJustComment={this.deriveIsComment()}
             />
         )
     }

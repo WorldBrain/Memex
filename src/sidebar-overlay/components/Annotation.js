@@ -6,9 +6,12 @@ import cx from 'classnames'
 const Annotation = props => (
     <div
         className={cx(styles.container, {
-            [styles.pointer]: props.isClickable,
+            [styles.pointer]: props.isIFrame && props.isJustComment,
+            [styles.iframe]: props.isIFrame,
         })}
-        onClick={props.isClickable ? props.goToAnnotation : null}
+        onClick={
+            props.isIFrame && props.isJustComment ? props.goToAnnotation : null
+        }
     >
         <div
             className={
@@ -50,9 +53,9 @@ Annotation.propTypes = {
     renderAnnotationInput: PropTypes.func.isRequired,
     renderFooter: PropTypes.func.isRequired,
     goToAnnotation: PropTypes.func.isRequired,
-    isClickable: PropTypes.bool.isRequired,
+    isIFrame: PropTypes.bool.isRequired,
     shouldCommentBoxBeVisible: PropTypes.bool.isRequired,
-    isJustComment: PropTypes.number.isRequired,
+    isJustComment: PropTypes.bool.isRequired,
 }
 
 export default Annotation

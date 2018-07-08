@@ -1,3 +1,5 @@
+@import '/fonts/lato/lato.css';
+
 .container {
     width: 300px;
     background-color: #fff;
@@ -16,6 +18,10 @@
     & > * {
         font-family: 'IBM Plex Serif', serif;
     }
+
+    &.iframe {
+        margin-left: 7px;
+    }
 }
 
 .pointer {
@@ -27,6 +33,8 @@
     font-weight: 500;
     margin-bottom: 10px;
     margin-top: 30px;
+    padding: 5px 6px;
+    line-height: 19px;
 }
 
 .noDisplay {
@@ -45,11 +53,13 @@
     border-bottom: 1px solid #d2d2d2;
     font-size: 12px;
     font-weight: 500;
+    font-family: 'Lato', sans-serif;
+    line-height: 19px;
     overflow: hidden;
     word-wrap: break-word;
     white-space: pre-wrap;
     background: #fafafa;
-    margin: 0 -10px;
+    margin: 0 -10px 10px -10px;
     padding: 30px 10px 15px 10px;
 
     &.dashed-border {
@@ -71,13 +81,14 @@
     position: absolute;
     top: 10px;
     right: 15px;
-    font-weight: 400;
+    font-weight: 600;
+    font-family: 'Lato', sans-serif;
     color: #222;
 
     & .lastEdit {
         font-weight: 400;
         color: #929292;
-        margin-right: 10px;
+        margin-right: 5px;
     }
 }
 
@@ -121,7 +132,6 @@
     margin-left: 8px;
     margin-right: 0px;
     padding: 5px;
-    border-radius: 10px;
     cursor: pointer;
 }
 
@@ -140,10 +150,12 @@
     width: 280px;
     resize: none;
     color: #222;
-    font-family: 'IBM Plex Serif', serif;
+    font-family: 'Lato', sans-serif;
     background: #f7f7f7;
     border: none;
-    padding: 5px;
+    padding: 10px;
+    line-height: 19px;
+    font-weight: 400;
     border-bottom: 1px dashed #d2d2d2;
 }
 

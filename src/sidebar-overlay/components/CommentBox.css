@@ -4,16 +4,24 @@
 
 .highlighted {
     color: #000;
-    font-family: 'Open Sans';
     margin: 10px 20px;
+    border-bottom: 1px dashed #d2d2d2;
+    padding-bottom: 20px;
 
     & .newAnnotation {
         font-size: 15px;
-        margin-bottom: 10px;
+        margin-bottom: 20px;
+        font-weight: 800;
+        font-family: 'Lato', serif;
     }
 
     & .highlightedText {
         font-size: 13px;
+        font-family: 'IBM Plex Serif', serif;
+        line-height: 19px;
+        margin-left: 12px;
+        font-style: italic;
+        width: 90%;
     }
 }
 
@@ -23,7 +31,7 @@
 }
 
 .textarea {
-    resize: none;
+    resize: vertical;
     font-weight: 500;
     font-size: 13px;
     color: #222;
@@ -33,13 +41,14 @@
     border-radius: 2px;
     padding: 10px 7px;
     margin-left: 5px;
+    margin-bottom: 5px;
 
     &:focus {
         outline: none;
     }
 
     &::placeholder {
-        color: #aaa;
+        color: #d2d2d2;
     }
 }
 
@@ -72,7 +81,27 @@
     border: none;
 }
 
-.greenButton,
+.save {
+    font-size: 14px;
+    font-weight: bold;
+    color: #000;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    background: transparent;
+    margin-right: 10px;
+    margin-top: 5.5px;
+}
+
+.cancel {
+    color: #222;
+    font-size: 14px;
+    font-weight: 500;
+    margin-right: 10px;
+    cursor: pointer;
+    margin-top: 7px;
+}
+
 .addNote {
     background: #3eb995;
     color: #fff;
@@ -81,21 +110,9 @@
     border-radius: 10px;
     padding: 3px 18px;
     font-size: 12px;
-}
-
-.addNote {
     position: absolute;
     top: 10px;
     right: 10px;
-}
-
-.cancel {
-    color: #aaa;
-    font-size: 12px;
-    font-weight: 500;
-    margin-right: 10px;
-    margin-top: 2px;
-    cursor: pointer;
 }
 
 .buttonHolder {

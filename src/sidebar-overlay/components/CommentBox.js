@@ -116,14 +116,6 @@ class CommentBox extends React.Component {
         })
     }
 
-    renderCancelButton() {
-        return (
-            <a className={styles.cancel} onClick={this.cancel}>
-                Cancel
-            </a>
-        )
-    }
-
     renderAddNoteButton() {
         if (!this.isHidden()) return null
         return (
@@ -142,7 +134,7 @@ class CommentBox extends React.Component {
                     cols="38"
                     className={styles.textarea}
                     value={this.state.commentInput}
-                    placeholder={'Add new note'}
+                    placeholder={'Add your comment...'}
                     onChange={this.handleChange}
                     ref={this.setInputRef}
                 />
@@ -156,10 +148,12 @@ class CommentBox extends React.Component {
                     source="tag"
                 />
                 <div className={styles.buttonHolder}>
-                    {this.renderCancelButton()}
-                    <button className={styles.greenButton} onClick={this.save}>
+                    <button className={styles.save} onClick={this.save}>
                         Save
                     </button>
+                    <a className={styles.cancel} onClick={this.cancel}>
+                        Cancel
+                    </a>
                 </div>
             </div>
         )
@@ -171,7 +165,7 @@ class CommentBox extends React.Component {
             <div className={styles.highlighted}>
                 <div className={styles.newAnnotation}>New Annotation</div>
                 <div className={styles.highlightedText}>
-                    {this.props.anchor.quote}
+                    "{this.props.anchor.quote}"
                 </div>
             </div>
         )
