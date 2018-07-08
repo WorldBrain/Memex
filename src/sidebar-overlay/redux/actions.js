@@ -3,6 +3,8 @@ import { remoteFunction } from 'src/util/webextensionRPC'
 
 export const setAnnotations = createAction('setAnnotations')
 
+export const setActiveAnnotation = createAction('setActiveAnnotation')
+
 export const setAnchor = createAction('setAnchor')
 
 export const setPageInfo = createAction('setPageInfo')
@@ -29,8 +31,6 @@ export const createAnnotation = (comment, body, tags) => async (
         comment,
         selector,
     })
-
-    console.log('new: ', uniqueUrl)
 
     // Write tags to database
     tags.forEach(async tag => {

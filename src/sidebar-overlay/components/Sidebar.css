@@ -1,4 +1,5 @@
 @import url('/fonts/googlefonts/ibm-plex-serif.css');
+@import url('/fonts/googlefonts/lato.css');
 
 .sidebar {
     padding: 0px;
@@ -43,4 +44,36 @@
     margin: 20px 0px;
     margin-bottom: 100px;
     background: #fff;
+}
+
+.flexContainer {
+    display: flex;
+    justify-content: center;
+}
+
+.allnotes {
+    font: 600 14px 'Lato', sans-serif;
+    display: inline-block;
+    position: relative;
+    margin-top: 25px;
+
+    &::after {
+        content: '';
+        width: 70px;
+        height: 1px;
+        background: #d2d2d2;
+        position: absolute;
+        top: 49%;
+        margin-left: 20px;
+    }
+
+    &::before {
+        content: '';
+        width: 70px;
+        height: 1px;
+        background: #d2d2d2;
+        position: absolute;
+        top: 49%;
+        margin-left: -90px;
+    }
 }

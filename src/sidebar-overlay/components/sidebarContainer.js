@@ -23,6 +23,8 @@ class SidebarContainer extends React.Component {
         editAnnotation: PropTypes.func.isRequired,
         deleteAnnotation: PropTypes.func.isRequired,
         setAnchor: PropTypes.func.isRequired,
+        setActiveAnnotation: PropTypes.func.isRequired,
+        activeAnnotation: PropTypes.string.isRequired,
     }
 
     static defaultProps = {
@@ -74,7 +76,10 @@ class SidebarContainer extends React.Component {
         return goToAnnotation(
             this.props.env,
             this.props.pageUrl,
-            this.parentFC.remoteExecute('highlightAndScroll'),
+            annotation => {
+                this.props.setActiveAnnotation(annotation.url)
+                this.parentFC.remoteExecute('highlightAndScroll')(annotation)
+            },
         )
     }
 
@@ -91,6 +96,7 @@ class SidebarContainer extends React.Component {
                 deleteAnnotation={this.props.deleteAnnotation}
                 key={annotation.url}
                 env={this.props.env}
+                isActive={this.props.activeAnnotation === annotation.url}
             />
         ))
     }
@@ -111,6 +117,7 @@ class SidebarContainer extends React.Component {
 
 const mapStateToProps = state => ({
     annotations: selectors.annotations(state),
+    activeAnnotation: selectors.activeAnnotation(state),
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -120,6 +127,7 @@ const mapDispatchToProps = dispatch => ({
         dispatch(actions.editAnnotation(url, comment)),
     deleteAnnotation: ({ url }) => dispatch(actions.deleteAnnotation(url)),
     setAnchor: anchor => dispatch(actions.setAnchor(anchor)),
+    setActiveAnnotation: key => dispatch(actions.setActiveAnnotation(key)),
 })
 
 export default connect(

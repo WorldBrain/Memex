@@ -25,6 +25,10 @@ const Sidebar = props => (
             </div>
             {props.showSidebar ? <CommentBox /> : null}
 
+            <div className={styles.flexContainer}>
+                <div className={styles.allnotes}>All Notes</div>
+            </div>
+
             <div className={styles.annotationContainer}>
                 {props.renderAnnotations()}
             </div>

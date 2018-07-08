@@ -8,6 +8,7 @@ const Annotation = props => (
         className={cx(styles.container, {
             [styles.pointer]: props.isIFrame && props.isJustComment,
             [styles.iframe]: props.isIFrame,
+            [styles.active]: props.isActive,
         })}
         onClick={
             props.isIFrame && props.isJustComment ? props.goToAnnotation : null
@@ -56,6 +57,7 @@ Annotation.propTypes = {
     isIFrame: PropTypes.bool.isRequired,
     shouldCommentBoxBeVisible: PropTypes.bool.isRequired,
     isJustComment: PropTypes.bool.isRequired,
+    isActive: PropTypes.bool.isRequired,
 }
 
 export default Annotation

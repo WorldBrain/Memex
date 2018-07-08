@@ -14,6 +14,7 @@ class AnnotationContainer extends React.Component {
         editAnnotation: PropTypes.func.isRequired,
         goToAnnotation: PropTypes.func.isRequired,
         env: PropTypes.string.isRequired,
+        isActive: PropTypes.bool.isRequired,
     }
 
     state = {
@@ -332,6 +333,7 @@ class AnnotationContainer extends React.Component {
                 isIFrame={this.deriveIsIFrame()}
                 shouldCommentBoxBeVisible={this.shouldCommentBoxBeVisible()}
                 isJustComment={this.deriveIsComment()}
+                isActive={this.props.isActive}
             />
         )
     }

@@ -1,5 +1,3 @@
-@import '/fonts/lato/lato.css';
-
 .container {
     width: 300px;
     background-color: #fff;
@@ -14,9 +12,20 @@
     position: relative;
     margin-top: 10px;
     padding-top: 0;
+    box-shadow: 0px 0px 5px 0px #00000050;
+    transition: border 0.2s ease-in;
 
     & > * {
         font-family: 'IBM Plex Serif', serif;
+    }
+
+    &:hover {
+        border-color: #3db994;
+    }
+
+    &.active {
+        border-color: #3db994;
+        box-shadow: 0px 0px 5px 1px #00000050;
     }
 
     &.iframe {
