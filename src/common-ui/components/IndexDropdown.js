@@ -22,6 +22,7 @@ class IndexDropdown extends PureComponent {
         source: PropTypes.oneOf(['tag', 'domain', 'list']).isRequired,
         url: PropTypes.string,
         allowAdd: PropTypes.bool,
+        isForSidebar: PropTypes.bool,
     }
 
     componentWillMount() {
@@ -32,6 +33,7 @@ class IndexDropdown extends PureComponent {
         return cx(this.styles.tagDiv, {
             [this.styles.tagDivFromOverview]: this.props.hover,
             [this.styles.tagDivForFilter]: !this.props.url,
+            [this.styles.tagDivForFilterSB]: this.props.isForSidebar,
         })
     }
 
@@ -81,16 +83,22 @@ class IndexDropdown extends PureComponent {
                     />
                     <i className="material-icons">search</i>
                 </form>
-                <div className={this.styles.tagContainer}>
+                <div
+                    className={cx(styles.tagContainerSB, {
+                        [styles.tagContainer]: this.props.isForSidebar,
+                    })}
+                >
                     {this.props.children}
                 </div>
-                <div className={this.styles.summaryTagContainer}>
-                    <div className={this.styles.numberTags}>
-                        <span className={this.styles.bold}>
-                            {this.props.numberOfTags}
-                        </span>{' '}
-                        {this.unit} selected
-                    </div>
+                <div className={styles.summaryTagContainer}>
+                    {!this.props.isForSidebar && (
+                        <div className={styles.numberTags}>
+                            <span className={styles.bold}>
+                                {this.props.numberOfTags}
+                            </span>{' '}
+                            {this.unit} selected
+                        </div>
+                    )}
                 </div>
             </div>
         )

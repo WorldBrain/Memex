@@ -12,8 +12,8 @@ class FilteredRow extends PureComponent {
             PropTypes.element,
         ]).isRequired,
         focused: PropTypes.bool,
-        handleClick: PropTypes.func.isRequired,
-        isActive: PropTypes.bool.isRequired,
+        onClick: PropTypes.func.isRequired,
+        active: PropTypes.bool.isRequired,
     }
 
     get mainClass() {
@@ -25,14 +25,11 @@ class FilteredRow extends PureComponent {
     render() {
         return (
             <div className={styles.container}>
-                <div
-                    className={this.mainClass}
-                    onClick={this.props.handleClick}
-                >
+                <div className={this.mainClass} onClick={this.props.onClick}>
                     <div className={styles.listName} title={this.props.value}>
                         {this.props.value}
                     </div>
-                    {this.props.isActive && (
+                    {this.props.active && (
                         <button className={cx(styles.tick, styles.button)} />
                     )}
                 </div>

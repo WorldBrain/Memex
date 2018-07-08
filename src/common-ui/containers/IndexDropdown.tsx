@@ -11,6 +11,8 @@ import {
     IndexDropdownRow,
 } from '../components'
 
+import { FilteredRow } from '../../search-filters/components'
+
 export interface Props {
     source: 'tag' | 'domain'
     /** The URL to use for dis/associating new tags with; set this to keep in sync with index. */
@@ -31,6 +33,7 @@ export interface Props {
     onNewTagAdd?: (filter: string) => void
     // initial suggestions from the popup
     initSuggestions?: string[]
+    isForSidebar?: boolean
 }
 
 export interface State {
@@ -338,8 +341,10 @@ class IndexDropdownContainer extends Component<Props, State> {
     private renderTags() {
         const tags = this.getDisplayTags()
 
+        const Row = this.props.isForSidebar ? FilteredRow : IndexDropdownRow
+
         const tagOptions = tags.map((tag, i) => (
-            <IndexDropdownRow
+            <Row
                 {...tag}
                 key={i}
                 onClick={this.handleTagSelection(i)}
@@ -364,6 +369,7 @@ class IndexDropdownContainer extends Component<Props, State> {
 
         return tagOptions
     }
+
 
     render() {
         return (

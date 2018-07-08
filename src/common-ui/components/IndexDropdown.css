@@ -33,6 +33,16 @@
     }
 }
 
+.tagContainerSB {
+    width: 100%;
+    max-height: 400px;
+    overflow-y: auto;
+
+    &:focus {
+        outline: none;
+    }
+}
+
 .numberTags {
     align-items: flex-start;
     margin-top: 6px;
@@ -106,4 +116,12 @@
     z-index: 1;
     background-color: #fff;
     box-shadow: 0px 4px 7px 0px #3eb995;
+}
+
+.tagDivForFilterSB {
+    z-index: 1;
+    background-color: #fff;
+    width: unset;
+    box-shadow: unset;
+    margin-top: 17px;
 }
