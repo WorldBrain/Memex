@@ -11,6 +11,25 @@ import Sidebar from './components/SideBar'
 import ClearFilter from './components/ClearFilter'
 
 class SidebarContainer extends PureComponent {
+    constructor(props) {
+        super(props)
+        this.state = {
+            showSearchFilters: false,
+        }
+    }
+
+    handleShowSearchFilters = () => {
+        this.setState({
+            showSearchFilters: true,
+        })
+    }
+
+    handleHideSearchFilters = () => {
+        this.setState({
+            showSearchFilters: false,
+        })
+    }
+
     renderSearchFilters = () => <SearchFilters />
 
     // TODO: Find a better name for list sidebar
@@ -18,15 +37,22 @@ class SidebarContainer extends PureComponent {
 
     renderClearFilters = () => <ClearFilter />
 
+    renderBody = () => {
+        return this.state.showSearchFilters
+            ? this.renderSearchFilters()
+            : this.renderListSidebar()
+    }
+
     render() {
         return (
             <Sidebar
                 searchFilters={this.renderSearchFilters()}
                 listSidebar={this.renderListSidebar()}
                 resetFilters={this.renderClearFilters()}
-                content={this.renderSearchFilters()}
+                handleHideSearchFilters={this.handleHideSearchFilters}
+                handleShowSearchFilters={this.handleShowSearchFilters}
             >
-                {this.renderSearchFilters()}
+                {this.renderBody()}
             </Sidebar>
         )
     }

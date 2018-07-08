@@ -462,7 +462,7 @@ class PopupContainer extends Component {
             return (
                 <AddListDropdownContainer
                     mode="popup"
-                    results={this.state.lists}
+                    results={this.state.lists || []}
                     initSuggestions={this.state.initListSuggestions}
                     url={this.state.url}
                 />

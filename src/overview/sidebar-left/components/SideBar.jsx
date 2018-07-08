@@ -10,6 +10,8 @@ class SidebarContainer extends PureComponent {
     static propTypes = {
         resetFilters: PropTypes.node.isRequired,
         children: PropTypes.node.isRequired,
+        handleShowSearchFilters: PropTypes.func.isRequired,
+        handleHideSearchFilters: PropTypes.func.isRequired,
     }
 
     render() {
@@ -26,12 +28,14 @@ class SidebarContainer extends PureComponent {
                             localStyles.filterButton,
                             localStyles.button,
                         )}
+                        onClick={this.props.handleShowSearchFilters}
                     />
                     <button
                         className={cx(
                             localStyles.listButton,
                             localStyles.button,
                         )}
+                        onClick={this.props.handleHideSearchFilters}
                     />
                 </div>
                 {this.props.resetFilters}
