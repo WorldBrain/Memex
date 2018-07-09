@@ -4,6 +4,7 @@ import { USER_ID, generateTokenIfNot } from 'src/util/generate-token'
 import { INSTALL_TIME_KEY } from '../../../constants'
 
 class SendToServer {
+    static DEF_TRACKING = true
     static API_PATH = '/event'
     static JSON_HEADER = {
         Accept: 'application/json',
@@ -101,7 +102,7 @@ class SendToServer {
 
     async shouldTrack() {
         const storage = await browser.storage.local.get({
-            [SHOULD_TRACK]: true,
+            [SHOULD_TRACK]: SendToServer.DEF_TRACKING,
         })
 
         return storage[SHOULD_TRACK]

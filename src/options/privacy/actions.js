@@ -37,10 +37,10 @@ export const toggleTrackingOptOut = value => async dispatch => {
 
     // Do event track after state change, as the event may be a noop if opt-out state is already set
     if (isOptIn) {
-        dispatch(setTrackingFlag(value))
+        dispatch(setTrackingFlag(isOptIn))
         await trackEvent()
     } else {
         await trackEvent()
-        dispatch(setTrackingFlag(value))
+        dispatch(setTrackingFlag(isOptIn))
     }
 }
