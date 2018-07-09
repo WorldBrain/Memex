@@ -44,10 +44,10 @@ export class StorageManager implements ManageableStorage {
     }
 
     /**
-     * Handles mutation of a document to be inserted/updated to storage,
+     * Handles mutation of a document to be written to storage,
      * depending on needed pre-processing of fields.
      */
-    private static _processFields(def: CollectionDefinition, object) {
+    private static _processFieldsForWrites(def: CollectionDefinition, object) {
         Object.entries(def.fields).forEach(([fieldName, fieldDef]) => {
             if (fieldDef.fieldObject) {
                 object[fieldName] = fieldDef.fieldObject.prepareForStorage(
@@ -62,6 +62,18 @@ export class StorageManager implements ManageableStorage {
                     fieldDef,
                     object,
                 )
+            }
+        })
+    }
+
+    /**
+     * Handles mutation of a document to be read from storage,
+     * depending on needed pre-processing of fields.
+     */
+    private static _processFieldsForReads(def: CollectionDefinition, object) {
+        Object.entries(def.fields).forEach(([fieldName, fieldDef]) => {
+            if (fieldDef.fieldObject) {
+                object[fieldName] = fieldDef.fieldObject.prepareFromStorage(object[fieldName])
             }
         })
     }
@@ -108,7 +120,7 @@ export class StorageManager implements ManageableStorage {
         await this._initializationPromise
 
         const collection = this.registry.collections[collectionName]
-        StorageManager._processFields(collection, object)
+        StorageManager._processFieldsForWrites(collection, object)
 
         await this._storage[collectionName].put(object)
     }
@@ -127,7 +139,14 @@ export class StorageManager implements ManageableStorage {
         await this._initializationPromise
 
         const coll = await this._find<T>(collectionName, filter, findOpts)
-        return coll.first()
+        const doc = await coll.first()
+
+        if (doc != null) {
+            const collection = this.registry.collections[collectionName]
+            StorageManager._processFieldsForReads(collection, doc)
+        }
+
+        return doc
     }
 
     /**
@@ -144,7 +163,12 @@ export class StorageManager implements ManageableStorage {
         await this._initializationPromise
 
         const coll = await this._find<T>(collectionName, filter, findOpts)
-        return coll.toArray()
+        const docs = await coll.toArray()
+
+        const collection = this.registry.collections[collectionName]
+        docs.forEach(doc => StorageManager._processFieldsForReads(collection, doc))
+
+        return docs
     }
 
     /**
