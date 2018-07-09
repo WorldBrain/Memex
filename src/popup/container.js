@@ -95,6 +95,9 @@ class PopupContainer extends Component {
         this.removeRibbon = remoteFunction('removeRibbon', {
             tabId: currentTab.id,
         })
+        this.openSidebar = remoteFunction('toggleSidebarOverlay', {
+            tabId: currentTab.id,
+        })
 
         this.getInitPageData()
             .then(updateState)
@@ -265,10 +268,14 @@ class PopupContainer extends Component {
         const isTooltipEnabled = !this.state.isTooltipEnabled
         await setTooltipState(isTooltipEnabled)
 
-        if (isTooltipEnabled) this.insertRibbon()
-        else this.removeRibbon()
-
-        setTimeout(() => window.close(), 500)
+        if (isTooltipEnabled) {
+            await this.insertRibbon()
+            await this.openSidebar()
+            window.close()
+        } else {
+            this.removeRibbon()
+            setTimeout(() => window.close(), 500)
+        }
 
         this.setState({
             isTooltipEnabled,

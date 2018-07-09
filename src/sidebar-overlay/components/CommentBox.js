@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
+import cx from 'classnames'
 
 import { selectors, actions } from '../redux'
 import { IndexDropdown } from 'src/common-ui/containers'
@@ -15,6 +16,7 @@ class CommentBox extends React.Component {
             quote: PropTypes.string.isRequired,
             descriptor: PropTypes.object.isRequired,
         }),
+        env: PropTypes.string.isRequired,
     }
 
     state = {
@@ -128,7 +130,11 @@ class CommentBox extends React.Component {
     renderCommentBox() {
         if (this.isHidden()) return null
         return (
-            <div className={styles.commentBox}>
+            <div
+                className={cx(styles.commentBox, {
+                    [styles.iframe]: this.props.env === 'iframe',
+                })}
+            >
                 <textarea
                     rows={this.state.textareaRows}
                     cols="38"

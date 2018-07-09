@@ -134,19 +134,22 @@
 }
 
 .tagPill {
-    font-size: 0.8em;
+    font-size: 13px;
     font-weight: 800;
     background-color: #c6f3e5;
     color: #000;
     margin-left: 8px;
     margin-right: 0px;
+    margin-top: 5px;
     padding: 5px;
     cursor: pointer;
 }
 
 .tagsContainer {
-    height: 20px;
+    height: auto;
     margin-top: 15px;
+    display: flex;
+    flex-wrap: wrap;
 }
 
 .icon {

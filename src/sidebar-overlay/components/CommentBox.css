@@ -28,6 +28,12 @@
 .commentBox {
     margin: 10px 15px;
     margin-bottom: 0px;
+
+    &.iframe {
+        & .textarea {
+            width: 280px;
+        }
+    }
 }
 
 .textarea {
@@ -48,7 +54,7 @@
     }
 
     &::placeholder {
-        color: #d2d2d2;
+        color: #999;
     }
 }
 
@@ -82,6 +88,7 @@
 }
 
 .save {
+    font-family: 'Lato', sans-serif;
     font-size: 14px;
     font-weight: bold;
     color: #000;
@@ -94,7 +101,8 @@
 }
 
 .cancel {
-    color: #222;
+    font-family: 'Lato', sans-serif;
+    color: #444;
     font-size: 14px;
     font-weight: 500;
     margin-right: 10px;

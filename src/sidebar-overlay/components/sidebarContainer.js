@@ -65,9 +65,9 @@ class SidebarContainer extends React.Component {
     closeSidebar = () => {
         const { env, setShowSidebar } = this.props
         if (env === 'overview') {
+            this.props.toggleMouseOnSidebar()
             setShowSidebar(false)
         } else {
-            // remoteFunction('toggleSidebar')()
             this.parentFC.remoteExecute('toggleSidebar')()
         }
     }

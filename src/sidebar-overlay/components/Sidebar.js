@@ -23,7 +23,7 @@ const Sidebar = props => (
             <div className={styles.closeButton} onClick={props.closeSidebar}>
                 X
             </div>
-            {props.showSidebar ? <CommentBox /> : null}
+            {props.showSidebar ? <CommentBox env={props.env} /> : null}
 
             <div className={styles.flexContainer}>
                 <div className={styles.allnotes}>All Notes</div>
