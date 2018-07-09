@@ -8,8 +8,7 @@ const defState = {
     progress: 0,
     isImportsDone: false,
     isImportsStarted: false,
-    // Chrome version tracks analytics by default
-    shouldTrack: typeof browser.runtime.getBrowserInfo === 'undefined',
+    shouldTrack: true,
 }
 
 export default createReducer(
