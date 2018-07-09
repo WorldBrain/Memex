@@ -8,8 +8,7 @@ import { SHOULD_TRACK_STORAGE_KEY as SHOULD_TRACK } from '../constants'
 import Privacy from './Privacy'
 
 class PrivacyContainer extends React.PureComponent {
-    // Chrome should have tracking on by default
-    static DEF_TRACKING = typeof browser.runtime.getBrowserInfo === 'undefined'
+    static DEF_TRACKING = true
 
     static propTypes = {
         trackChange: PropTypes.func.isRequired,

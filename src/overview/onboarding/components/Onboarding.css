@@ -155,6 +155,8 @@
     color: #777;
     text-align: center;
     text-align: left;
+    margin-top: 0;
+    margin-bottom: 0;
 }
 
 .subOptIn {

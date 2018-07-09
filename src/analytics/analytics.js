@@ -23,8 +23,7 @@ class Analytics {
         'Content-Type': 'application/json',
     }
 
-    // Chrome should have tracking on by default
-    static DEF_TRACKING = typeof browser.runtime.getBrowserInfo === 'undefined'
+    static DEF_TRACKING = true
 
     /**
      * @property {Set<URLSearchParam>} Pool of requests that have been tracked, which will be
