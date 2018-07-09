@@ -2,10 +2,10 @@
     background-image: url('/img/filter.png');
     width: 40px;
     height: 40px;
+}
 
-    &:hover {
-        background-image: url('/img/filter.png');
-    }
+.filterEnabled {
+    background-image: url('/img/filter_filled.svg');
 }
 
 .listButton {

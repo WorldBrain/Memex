@@ -36,7 +36,7 @@
 
 .tick {
     float: right;
-    background-image: url('/img/tick_green.svg');
+    background-image: url('/img/tick_extended.svg');
     width: 21px;
 }
 

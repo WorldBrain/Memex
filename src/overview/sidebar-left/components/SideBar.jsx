@@ -12,6 +12,7 @@ class SidebarContainer extends PureComponent {
         children: PropTypes.node.isRequired,
         handleShowSearchFilters: PropTypes.func.isRequired,
         handleHideSearchFilters: PropTypes.func.isRequired,
+        showSearchFilters: PropTypes.bool.isRequired,
     }
 
     render() {
@@ -20,13 +21,17 @@ class SidebarContainer extends PureComponent {
                 styles={styles}
                 noOverlay
                 customBurgerIcon={<img src="/img/sidebar_icon.svg" />}
-                customCrossIcon={<img src="/img/cross.svg" />}
+                customCrossIcon={<img src="/img/cross_grey.svg" />}
             >
                 <div className={localStyles.buttonContainer}>
                     <button
                         className={cx(
-                            localStyles.filterButton,
                             localStyles.button,
+                            localStyles.filterButton,
+                            {
+                                [localStyles.filterEnabled]: this.props
+                                    .showSearchFilters,
+                            },
                         )}
                         onClick={this.props.handleShowSearchFilters}
                     />

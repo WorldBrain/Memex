@@ -34,16 +34,21 @@ class SearchFiltersContainer extends PureComponent {
 
     renderFilteredTags = () => {
         return !this.props.tagFilterDropdown
-            ? this.props.filteredTags.map(tag => (
-                  <FilteredRow value={tag} onClick={() => {}} active />
+            ? this.props.filteredTags.map((tag, i) => (
+                  <FilteredRow key={i} value={tag} onClick={() => {}} active />
               ))
             : null
     }
 
     renderFilteredDomains = () => {
         return !this.props.domainFilterDropdown
-            ? this.props.filteredDomains.map(domain => (
-                  <FilteredRow value={domain.value} onClick={() => {}} active />
+            ? this.props.filteredDomains.map((domain, i) => (
+                  <FilteredRow
+                      key={i}
+                      value={domain.value}
+                      onClick={() => {}}
+                      active
+                  />
               ))
             : null
     }

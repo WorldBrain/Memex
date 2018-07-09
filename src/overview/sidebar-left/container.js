@@ -51,6 +51,7 @@ class SidebarContainer extends PureComponent {
                 resetFilters={this.renderClearFilters()}
                 handleHideSearchFilters={this.handleHideSearchFilters}
                 handleShowSearchFilters={this.handleShowSearchFilters}
+                showSearchFilters={this.state.showSearchFilters}
             >
                 {this.renderBody()}
             </Sidebar>
