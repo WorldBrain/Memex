@@ -51,8 +51,9 @@ f = <Frame Element>.contentWindow
 fc = new FrameCommunication(f)
 fc.setUpRemoteFunction({foo: something()}) // Sets up functions on the parent side
 fc.remoteExecute(funcName)(args) // Executes function on the frame side
- */
 
+TODO: Any better name?
+ */
 class FrameCommunication implements FCInterface {
     remoteFunctions: RemoteFunctionsList = {}
     iframeWindow: Window = null
@@ -101,6 +102,8 @@ class FrameCommunication implements FCInterface {
 
     private _listener = async (event: MessageEvent) => {
         const message: Message = event.data
+
+        // Todo: verify if request is coming from sidebar.html
 
         // Small validation if it's a memex request
         if (!message.origin_memex) {
