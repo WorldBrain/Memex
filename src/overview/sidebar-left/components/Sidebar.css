@@ -9,9 +9,9 @@
 }
 
 .listButton {
-    background-image: url('/img/list_popup.svg');
-    width: 31px;
-    height: 35px;
+    background-image: url('/img/collections.svg');
+    width: 25px;
+    height: 31px;
 }
 
 .button {

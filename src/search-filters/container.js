@@ -12,9 +12,9 @@ import {
     BookmarkFilter,
     FilterBar,
     FilteredRow,
+    IndexDropdownSB,
 } from './components'
 import { actions, selectors } from './'
-import { IndexDropdown } from 'src/common-ui/containers'
 
 class SearchFiltersContainer extends PureComponent {
     static propTypes = {
@@ -33,43 +33,33 @@ class SearchFiltersContainer extends PureComponent {
     renderBookmarkFilter = () => <BookmarkFilter />
 
     renderFilteredTags = () => {
-        return this.props.tagFilterDropdown ? (
-            <IndexDropdown
-                onFilterAdd={this.props.addTagFilter}
-                onFilterDel={this.props.delTagFilter}
-                initFilters={this.props.filteredTags}
-                isForSidebar
-                initSuggestions={this.props.filteredTags}
-                source="tag"
-            />
-        ) : (
-            this.props.filteredTags.map(tag => (
-                <FilteredRow value={tag} onClick={() => {}} active />
-            ))
-        )
+        return !this.props.tagFilterDropdown
+            ? this.props.filteredTags.map(tag => (
+                  <FilteredRow value={tag} onClick={() => {}} active />
+              ))
+            : null
     }
 
     renderFilteredDomains = () => {
-        return this.props.domainFilterDropdown ? (
-            <IndexDropdown
-                onFilterAdd={this.props.addDomainFilter}
-                onFilterDel={this.props.delIncDomainFilter}
-                initFilters={this.props.filteredDomains}
-                isForSidebar
-                initSuggestions={this.props.filteredDomains}
-                source="domain"
-            />
-        ) : (
-            this.props.filteredDomains.map(domain => (
-                <FilteredRow value={domain.value} onClick={() => {}} active />
-            ))
-        )
+        return !this.props.domainFilterDropdown
+            ? this.props.filteredDomains.map(domain => (
+                  <FilteredRow value={domain.value} onClick={() => {}} active />
+              ))
+            : null
     }
 
     renderTagFilter = () =>
         !this.props.tagFilterDropdown ? (
             <FilterBar onBarClick={this.props.showTagFilter} filter="Tag" />
-        ) : null
+        ) : (
+            <IndexDropdownSB
+                onFilterAdd={this.props.addTagFilter}
+                onFilterDel={this.props.delTagFilter}
+                initFilters={this.props.filteredTags}
+                initSuggestions={this.props.filteredTags}
+                source="tag"
+            />
+        )
 
     renderDomainFilter = () =>
         !this.props.domainFilterDropdown ? (
@@ -77,7 +67,15 @@ class SearchFiltersContainer extends PureComponent {
                 onBarClick={this.props.showDomainFilter}
                 filter="Domain"
             />
-        ) : null
+        ) : (
+            <IndexDropdownSB
+                onFilterAdd={this.props.addDomainFilter}
+                onFilterDel={this.props.delIncDomainFilter}
+                initFilters={this.props.filteredDomains}
+                initSuggestions={this.props.filteredDomains}
+                source="domain"
+            />
+        )
 
     render() {
         return (

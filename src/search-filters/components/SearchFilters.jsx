@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
 
-// import styles from './BookmarkFilter'
+import styles from './SearchFilters.css'
 
 class SearchFilters extends PureComponent {
     static propTypes = {
@@ -15,9 +15,11 @@ class SearchFilters extends PureComponent {
         return (
             <div>
                 {this.props.tagFilter}
-                {this.props.filteredTags}
+                <div className={styles.filtered}>{this.props.filteredTags}</div>
+                <div className={styles.filtered}>
+                    {this.props.filteredDomains}
+                </div>
                 {this.props.domainFilter}
-                {this.props.filteredDomains}
             </div>
         )
     }
