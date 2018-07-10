@@ -27,10 +27,6 @@ class OnboardingContainer extends PureComponent {
 
         // Init the connection to imports module in BG script
         this._importsConnMan = this.props.initConnection()
-
-        // Chrome users don't need to see the switch; FF do
-        this._showTrackingOptIn =
-            typeof browser.runtime.getBrowserInfo !== 'undefined'
     }
 
     cancelImport = () => this._importsConnMan.cancel()
@@ -38,21 +34,6 @@ class OnboardingContainer extends PureComponent {
     handleClose = event => {
         this.cancelImport()
         this.props.setVisible(false)()
-    }
-
-    renderOptIn() {
-        if (!this._showTrackingOptIn) {
-            return null
-        }
-
-        return (
-            <OptIn>
-                <ToggleSwitch
-                    isChecked={this.props.shouldTrack}
-                    onChange={this.props.toggleShouldTrack}
-                />
-            </OptIn>
-        )
     }
 
     render() {
@@ -73,7 +54,12 @@ class OnboardingContainer extends PureComponent {
                     />
                 </Importer>
                 <Info />
-                {this.renderOptIn()}
+                <OptIn>
+                    <ToggleSwitch
+                        isChecked={this.props.shouldTrack}
+                        onChange={this.props.toggleShouldTrack}
+                    />
+                </OptIn>
             </Overlay>
         )
     }
@@ -93,4 +79,7 @@ const mapDispatchToProps = dispatch => ({
     toggleShouldTrack: () => dispatch(actions.toggleShouldTrack()),
 })
 
-export default connect(mapStateToProps, mapDispatchToProps)(OnboardingContainer)
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps,
+)(OnboardingContainer)
