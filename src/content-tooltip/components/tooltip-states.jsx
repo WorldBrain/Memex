@@ -7,12 +7,13 @@ import { getExtURL } from '../utils'
 const images = {
     share: getExtURL('/img/share.svg'),
     check: getExtURL('/img/green_check.svg'),
+    annotate: getExtURL('/img/annotate.svg'),
 }
 
 export const InitialComponent = ({ createLink, createAnnotation }) => (
     <div className={styles.createButtons}>
         <div className={styles.annotateButton} onMouseDown={createAnnotation}>
-            <img src={images.share} />
+            <img src={images.annotate} />
         </div>
         <div className={styles.linkButton} onMouseDown={createLink}>
             <img src={images.share} />

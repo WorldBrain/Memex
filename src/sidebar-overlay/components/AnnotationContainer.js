@@ -128,12 +128,12 @@ class AnnotationContainer extends React.Component {
         return (
             <div className={styles.footerAside}>
                 <span
-                    className={styles.trashIcon}
-                    onClick={this.setFooterState('delete')}
-                />
-                <span
                     className={styles.editIcon}
                     onClick={this.toggleEditAnnotation}
+                />
+                <span
+                    className={styles.trashIcon}
+                    onClick={this.setFooterState('delete')}
                 />
                 {env === 'overview' && annotation.body ? (
                     <span
