@@ -12,6 +12,7 @@ import {
 } from './types'
 
 export class StorageManager implements ManageableStorage {
+    static DEF_SUGGEST_CASE_IGNORE = true
     static DEF_SUGGEST_LIMIT = 10
     static DEF_FIND_OPTS: Partial<FindOpts> = {
         reverse: false,
@@ -183,6 +184,7 @@ export class StorageManager implements ManageableStorage {
         collectionName: string,
         filter: FilterQuery<T>,
         {
+            ignoreCase = StorageManager.DEF_SUGGEST_CASE_IGNORE,
             limit = StorageManager.DEF_SUGGEST_LIMIT,
             reverse,
         }: FindOpts = StorageManager.DEF_FIND_OPTS,
@@ -192,11 +194,15 @@ export class StorageManager implements ManageableStorage {
         // Grab first entry from the filter query; ignore rest for now
         const [[indexName, value]] = Object.entries(filter)
 
-        let coll = this._storage
+        const whereClause = this._storage
             .table<T>(collectionName)
             .where(indexName)
-            .startsWith(value)
-            .limit(limit)
+
+        let coll = ignoreCase
+            ? whereClause.startsWithIgnoreCase(value)
+            : whereClause.startsWith(value)
+
+        coll = coll.limit(limit)
 
         if (reverse) {
             coll = coll.reverse()

@@ -12,6 +12,7 @@ export interface MigrationRunner {
 }
 
 export interface FindOpts {
+    ignoreCase?: boolean
     reverse?: boolean
     skip?: number
     limit?: number
