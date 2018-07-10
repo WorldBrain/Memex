@@ -1,23 +1,35 @@
-import React, { PureComponent } from 'react'
+import React from 'react'
 import PropTypes from 'prop-types'
-import { slide as Menu } from 'react-burger-menu'
 import cx from 'classnames'
 
-import localStyles from './Sidebar.css'
+import styles from './SidebarIcons.css'
 
-const SidebarIcons = props => (
-    <div className={localStyles.buttonContainer}>
-        <button
-            className={cx(localStyles.button, localStyles.filterButton, {
-                [localStyles.filterEnabled]: props.showSearchFilters,
+const SidebarIcons = props => {
+    return (
+        <div
+            className={cx(styles.buttonContainerOverview, {
+                [styles.buttonContainer]: !props.overviewMode,
             })}
-            onClick={props.handleShowSearchFilters}
-        />
-        <button
-            className={cx(localStyles.listButton, localStyles.button)}
-            onClick={props.handleHideSearchFilters}
-        />
-    </div>
-)
+        >
+            <button
+                className={cx(styles.button, styles.filterButton, {
+                    [styles.filterEnabled]: props.showSearchFilters,
+                })}
+                onClick={props.filterBtnClick}
+            />
+            <button
+                className={cx(styles.listButton, styles.button)}
+                onClick={props.listBtnClick}
+            />
+        </div>
+    )
+}
+
+SidebarIcons.propTypes = {
+    filterBtnClick: PropTypes.func.isRequired,
+    listBtnClick: PropTypes.func.isRequired,
+    overviewMode: PropTypes.bool,
+    showSearchFilters: PropTypes.bool,
+}
 
 export default SidebarIcons

@@ -25,6 +25,8 @@ import Sidebar, {
 import NoResultBadTerm from './components/NoResultBadTerm'
 import localStyles from './components/Overview.css'
 import { actions as listActs, selectors as customLists } from 'src/custom-lists'
+import SidebarIcons from './sidebar/components/SidebarIcons'
+import { actions as sidebarActs } from './sidebar'
 
 class OverviewContainer extends Component {
     static propTypes = {
@@ -60,6 +62,8 @@ class OverviewContainer extends Component {
         urlDragged: PropTypes.string.isRequired,
         setUrlDragged: PropTypes.func.isRequired,
         mouseOverList: PropTypes.bool.isRequired,
+        showSearchFilters: PropTypes.func.isRequired,
+        hideSearchFilters: PropTypes.func.isRequired,
     }
 
     componentDidMount() {
@@ -89,6 +93,14 @@ class OverviewContainer extends Component {
             this.props.handleInputClick(event)
         }
     }
+
+    renderSidebarIcons = () => (
+        <SidebarIcons
+            filterBtnClick={this.props.showSearchFilters}
+            listBtnClick={this.props.hideSearchFilters}
+            overviewMode
+        />
+    )
 
     renderTagsManager = ({ shouldDisplayTagPopup, url, tags }, index) =>
         shouldDisplayTagPopup ? (
@@ -301,6 +313,7 @@ class OverviewContainer extends Component {
                     isSearchDisabled={this.props.showOnboarding}
                     scrollDisabled={this.props.mouseOnSidebar}
                     renderDragElement={this.renderDragElement()}
+                    sidebarIcons={this.renderSidebarIcons()}
                 >
                     {this.renderResults()}
                 </Overview>
@@ -352,6 +365,8 @@ const mapDispatchToProps = dispatch => ({
             init: actions.init,
             onListDropdownChange: listActs.toggleListDropdown,
             setUrlDragged: listActs.setUrlDragged,
+            showSearchFilters: sidebarActs.openSidebarFilterMode,
+            hideSearchFilters: sidebarActs.openSidebarListMode,
         },
         dispatch,
     ),

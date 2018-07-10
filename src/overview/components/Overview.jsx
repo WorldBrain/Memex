@@ -19,6 +19,7 @@ const Overview = props => (
     <Wrapper>
         <Head />
         <Header {...props} />
+        {props.sidebarIcons}
         <SideBar />
         <div className={showFilterClass(props)}>{props.filters}</div>
         <div
@@ -46,6 +47,7 @@ Overview.propTypes = {
     showFilters: PropTypes.bool.isRequired,
     filters: PropTypes.node.isRequired,
     renderDragElement: PropTypes.node.isRequired,
+    sidebarIcons: PropTypes.node.isRequired,
     // showTooltip: PropTypes.bool.isRequired,
     // toggleShowTooltip: PropTypes.func.isRequired,
     // tooltip: PropTypes.object,

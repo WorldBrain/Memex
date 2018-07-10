@@ -10,13 +10,14 @@ import { selectors, actions } from './'
 // TODO: compress into one
 import Sidebar from './components/SideBar'
 import ClearFilter from './components/ClearFilter'
+import SidebarIcons from './components/SidebarIcons'
 
 class SidebarContainer extends PureComponent {
     static propTypes = {
         filterMode: PropTypes.bool.isRequired,
         hideSearchFilters: PropTypes.func.isRequired,
         showSearchFilters: PropTypes.func.isRequired,
-        isSidebarOpen: PropTypes.func.isRequired,
+        isSidebarOpen: PropTypes.bool.isRequired,
     }
 
     renderSearchFilters = () => <SearchFilters />
@@ -32,6 +33,14 @@ class SidebarContainer extends PureComponent {
             : this.renderListSidebar()
     }
 
+    renderSidebarIcons = () => (
+        <SidebarIcons
+            filterBtnClick={this.props.showSearchFilters}
+            listBtnClick={this.props.hideSearchFilters}
+            showSearchFilters={this.props.filterMode}
+        />
+    )
+
     render() {
         return (
             <Sidebar
@@ -42,6 +51,7 @@ class SidebarContainer extends PureComponent {
                 handleShowSearchFilters={this.props.showSearchFilters}
                 showSearchFilters={this.props.filterMode}
                 isSidebarOpen={this.props.isSidebarOpen}
+                sidebarIcons={this.renderSidebarIcons()}
             >
                 {this.renderChildren()}
             </Sidebar>
