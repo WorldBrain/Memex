@@ -25,8 +25,8 @@ import Sidebar, {
 import NoResultBadTerm from './components/NoResultBadTerm'
 import localStyles from './components/Overview.css'
 import { actions as listActs, selectors as customLists } from 'src/custom-lists'
-import SidebarIcons from './sidebar/components/SidebarIcons'
-import { actions as sidebarActs } from './sidebar'
+import SidebarIcons from './sidebar-left/components/SidebarIcons'
+import { actions as sidebarLeftActs } from './sidebar-left'
 
 class OverviewContainer extends Component {
     static propTypes = {
@@ -365,8 +365,8 @@ const mapDispatchToProps = dispatch => ({
             init: actions.init,
             onListDropdownChange: listActs.toggleListDropdown,
             setUrlDragged: listActs.setUrlDragged,
-            showSearchFilters: sidebarActs.openSidebarFilterMode,
-            hideSearchFilters: sidebarActs.openSidebarListMode,
+            showSearchFilters: sidebarLeftActs.openSidebarFilterMode,
+            hideSearchFilters: sidebarLeftActs.openSidebarListMode,
         },
         dispatch,
     ),
