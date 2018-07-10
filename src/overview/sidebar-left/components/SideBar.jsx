@@ -10,6 +10,7 @@ class Sidebar extends PureComponent {
         children: PropTypes.node.isRequired,
         isSidebarOpen: PropTypes.bool.isRequired,
         sidebarIcons: PropTypes.node.isRequired,
+        captureStateChange: PropTypes.node.isRequired,
     }
 
     render() {
@@ -20,6 +21,7 @@ class Sidebar extends PureComponent {
                 customBurgerIcon={null}
                 customCrossIcon={<img src="/img/cross_grey.svg" />}
                 isOpen={this.props.isSidebarOpen}
+                onStateChange={this.props.captureStateChange}
             >
                 {this.props.sidebarIcons}
                 {this.props.resetFilters}

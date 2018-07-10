@@ -27,12 +27,18 @@ const closeSidebar = state => ({
     openSidebar: true,
 })
 
+const setSidebarState = (state, isOpen) => ({
+    ...state,
+    openSidebar: isOpen,
+})
+
 export default createReducer(
     {
         [actions.openSidebar]: openSidebar,
         [actions.closeSidebar]: closeSidebar,
         [actions.showFilters]: showFilters,
         [actions.hideFilters]: hideFilters,
+        [actions.setSidebarState]: setSidebarState,
     },
     defaultState,
 )

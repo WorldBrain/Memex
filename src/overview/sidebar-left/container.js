@@ -18,7 +18,12 @@ class SidebarContainer extends PureComponent {
         hideSearchFilters: PropTypes.func.isRequired,
         showSearchFilters: PropTypes.func.isRequired,
         isSidebarOpen: PropTypes.bool.isRequired,
+        closeSidebar: PropTypes.func.isRequired,
+        setSidebarState: PropTypes.func.isRequired,
     }
+
+    // Capture state of the react-burger-menu
+    captureStateChange = ({ isOpen }) => this.props.setSidebarState(isOpen)
 
     renderSearchFilters = () => <SearchFilters />
 
@@ -52,6 +57,8 @@ class SidebarContainer extends PureComponent {
                 showSearchFilters={this.props.filterMode}
                 isSidebarOpen={this.props.isSidebarOpen}
                 sidebarIcons={this.renderSidebarIcons()}
+                closeSidebar={this.props.closeSidebar}
+                captureStateChange={this.captureStateChange}
             >
                 {this.renderChildren()}
             </Sidebar>
@@ -70,9 +77,11 @@ const mapDispatchToProps = dispatch => ({
             showSearchFilters: actions.openSidebarFilterMode,
             hideSearchFilters: actions.openSidebarListMode,
             closeSidebar: actions.closeSidebar,
+            setSidebarState: actions.setSidebarState,
         },
         dispatch,
     ),
+    // setSidebarState: isOpen => () => dispatch(actions.setSidebarState(isOpen)),
 })
 
 export default connect(

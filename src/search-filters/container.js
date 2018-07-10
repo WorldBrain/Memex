@@ -7,6 +7,7 @@ import {
     selectors as filters,
     actions as filterActs,
 } from 'src/overview/filters'
+import { Checkbox } from 'src/common-ui/components'
 import {
     SearchFilters,
     BookmarkFilter,
@@ -81,6 +82,12 @@ class SearchFiltersContainer extends PureComponent {
                 source="domain"
             />
         )
+
+    renderBookmarkFilter = () => (
+        <Checkbox isChecked handleChange={() => {}}>
+            Bookmarks only
+        </Checkbox>
+    )
 
     render() {
         return (
