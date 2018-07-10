@@ -6,6 +6,7 @@ import { bindActionCreators } from 'redux'
 import { ListSideBar } from 'src/custom-lists/components'
 import SearchFilters from 'src/search-filters/container'
 import { selectors, actions } from './'
+import { actions as filterActs } from '../filters'
 
 // TODO: compress into one
 import Sidebar from './components/SideBar'
@@ -20,6 +21,7 @@ class SidebarContainer extends PureComponent {
         isSidebarOpen: PropTypes.bool.isRequired,
         closeSidebar: PropTypes.func.isRequired,
         setSidebarState: PropTypes.func.isRequired,
+        clearAllFilters: PropTypes.func.isRequired,
     }
 
     // Capture state of the react-burger-menu
@@ -30,7 +32,9 @@ class SidebarContainer extends PureComponent {
     // TODO: Find a better name for list sidebar
     renderListSidebar = () => <ListSideBar />
 
-    renderClearFilters = () => <ClearFilter />
+    renderClearFilters = () => (
+        <ClearFilter resetFilters={this.props.clearAllFilters} />
+    )
 
     renderChildren = () => {
         return this.props.filterMode
@@ -81,7 +85,7 @@ const mapDispatchToProps = dispatch => ({
         },
         dispatch,
     ),
-    // setSidebarState: isOpen => () => dispatch(actions.setSidebarState(isOpen)),
+    clearAllFilters: () => dispatch(filterActs.resetFilters()),
 })
 
 export default connect(
