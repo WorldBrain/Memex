@@ -4,6 +4,7 @@ export const styles = {
         width: '50px',
         height: '50px',
         left: '16px',
+        display: 'none',
     },
     bmBurgerBars: {
         background: '#373a47',

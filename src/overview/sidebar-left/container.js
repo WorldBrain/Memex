@@ -1,33 +1,22 @@
 import React, { PureComponent } from 'react'
 import { connect } from 'react-redux'
-// import PropTypes from 'prop-types'
-// import { bindActionCreators } from 'redux'
+import PropTypes from 'prop-types'
+import { bindActionCreators } from 'redux'
 
 import { ListSideBar } from 'src/custom-lists/components'
 import SearchFilters from 'src/search-filters/container'
+import { selectors, actions } from './'
 
 // TODO: compress into one
 import Sidebar from './components/SideBar'
 import ClearFilter from './components/ClearFilter'
 
 class SidebarContainer extends PureComponent {
-    constructor(props) {
-        super(props)
-        this.state = {
-            showSearchFilters: false,
-        }
-    }
-
-    handleShowSearchFilters = () => {
-        this.setState({
-            showSearchFilters: true,
-        })
-    }
-
-    handleHideSearchFilters = () => {
-        this.setState({
-            showSearchFilters: false,
-        })
+    static propTypes = {
+        filterMode: PropTypes.bool.isRequired,
+        hideSearchFilters: PropTypes.func.isRequired,
+        showSearchFilters: PropTypes.func.isRequired,
+        isSidebarOpen: PropTypes.func.isRequired,
     }
 
     renderSearchFilters = () => <SearchFilters />
@@ -37,8 +26,8 @@ class SidebarContainer extends PureComponent {
 
     renderClearFilters = () => <ClearFilter />
 
-    renderBody = () => {
-        return this.state.showSearchFilters
+    renderChildren = () => {
+        return this.props.filterMode
             ? this.renderSearchFilters()
             : this.renderListSidebar()
     }
@@ -49,17 +38,34 @@ class SidebarContainer extends PureComponent {
                 searchFilters={this.renderSearchFilters()}
                 listSidebar={this.renderListSidebar()}
                 resetFilters={this.renderClearFilters()}
-                handleHideSearchFilters={this.handleHideSearchFilters}
-                handleShowSearchFilters={this.handleShowSearchFilters}
-                showSearchFilters={this.state.showSearchFilters}
+                handleHideSearchFilters={this.props.hideSearchFilters}
+                handleShowSearchFilters={this.props.showSearchFilters}
+                showSearchFilters={this.props.filterMode}
+                isSidebarOpen={this.props.isSidebarOpen}
             >
-                {this.renderBody()}
+                {this.renderChildren()}
             </Sidebar>
         )
     }
 }
 
+const mapStateToProps = state => ({
+    isSidebarOpen: selectors.isSidebarOpen(state),
+    filterMode: selectors.showFilters(state),
+})
+
+const mapDispatchToProps = dispatch => ({
+    ...bindActionCreators(
+        {
+            showSearchFilters: actions.openSidebarFilterMode,
+            hideSearchFilters: actions.openSidebarListMode,
+            closeSidebar: actions.closeSidebar,
+        },
+        dispatch,
+    ),
+})
+
 export default connect(
-    null,
-    null,
+    mapStateToProps,
+    mapDispatchToProps,
 )(SidebarContainer)

@@ -13,6 +13,7 @@ class SidebarContainer extends PureComponent {
         handleShowSearchFilters: PropTypes.func.isRequired,
         handleHideSearchFilters: PropTypes.func.isRequired,
         showSearchFilters: PropTypes.bool.isRequired,
+        isSidebarOpen: PropTypes.bool.isRequired,
     }
 
     render() {
@@ -20,8 +21,9 @@ class SidebarContainer extends PureComponent {
             <Menu
                 styles={styles}
                 noOverlay
-                customBurgerIcon={<img src="/img/sidebar_icon.svg" />}
+                customBurgerIcon={null}
                 customCrossIcon={<img src="/img/cross_grey.svg" />}
+                isOpen={this.props.isSidebarOpen}
             >
                 <div className={localStyles.buttonContainer}>
                     <button
