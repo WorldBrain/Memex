@@ -83,6 +83,8 @@
 .optInTextContainer {
     display: flex;
     flex-direction: column;
+    width: 110%;
+    margin-left: 1%;
 }
 
 .optInContainer {
@@ -164,8 +166,8 @@
     font-weight: 200;
     color: #777;
     line-height: 1em;
-    margin-bottom: 15px;
-    margin-top: 15px;
+    margin-bottom: 5px;
+    margin-top: 5px;
     text-align: left;
 }
 

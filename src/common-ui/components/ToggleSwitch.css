@@ -7,7 +7,6 @@
     display: block;
     border-radius: 100px;
     position: relative;
-    margin-top: 18px;
 
     &::after {
         content: '';
