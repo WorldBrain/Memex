@@ -10,6 +10,7 @@ const Annotation = props => (
             [styles.iframe]: props.isIFrame,
             [styles.active]: props.isActive,
         })}
+        id={props.id}
         onClick={
             props.isIFrame && props.isJustComment ? props.goToAnnotation : null
         }
@@ -58,6 +59,7 @@ Annotation.propTypes = {
     shouldCommentBoxBeVisible: PropTypes.bool.isRequired,
     isJustComment: PropTypes.bool.isRequired,
     isActive: PropTypes.bool.isRequired,
+    id: PropTypes.string.isRequired,
 }
 
 export default Annotation

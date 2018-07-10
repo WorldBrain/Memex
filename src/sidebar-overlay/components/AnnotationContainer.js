@@ -334,6 +334,7 @@ class AnnotationContainer extends React.Component {
                 shouldCommentBoxBeVisible={this.shouldCommentBoxBeVisible()}
                 isJustComment={this.deriveIsComment()}
                 isActive={this.props.isActive}
+                id={this.props.annotation.url}
             />
         )
     }

@@ -55,6 +55,9 @@ class SidebarContainer extends React.Component {
             sendAnchorToSidebar: anchor => {
                 this.props.setAnchor(anchor)
             },
+            focusAnnotation: url => {
+                this.focusAnnotation(url)
+            },
         })
     }
 
@@ -72,6 +75,9 @@ class SidebarContainer extends React.Component {
         }
     }
 
+    /**
+     * Takes the user to the actual higlighted text.
+     */
     goToAnnotation = () => {
         return goToAnnotation(
             this.props.env,
@@ -81,6 +87,16 @@ class SidebarContainer extends React.Component {
                 this.parentFC.remoteExecute('highlightAndScroll')(annotation)
             },
         )
+    }
+
+    /**
+     * Sets the annotation container active
+     */
+    focusAnnotation = url => {
+        console.log(url)
+        const $container = document.getElementById(url)
+        this.props.setActiveAnnotation(url)
+        $container.scrollIntoView({ block: 'start', behavior: 'smooth' })
     }
 
     renderAnnotations = () => {

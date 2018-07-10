@@ -46,6 +46,10 @@ class Ribbon extends React.Component {
             toggleSidebarOverlay: async () => {
                 await this.toggleSidebar()
             },
+            /**
+             * Opens sidebar and displays the "New annotation" message above Comment Box.
+             * @param {*} anchor The anchor of the selected text
+             */
             openSidebarAndSendAnchor: async anchor => {
                 await this.openSidebarAndSendAnchor(anchor)
 
@@ -53,6 +57,16 @@ class Ribbon extends React.Component {
                     annotation => annotation.selector,
                 )
                 this.props.highlightAll(highlightables)
+            },
+            /**
+             * Gets called when "Go to annotation" icon is clicked in overview.
+             * Highlights and scrolls to annotation, open sidebar and
+             * focuses the annotation container.
+             */
+            goToAnnotation: async annotation => {
+                await highlightAndScroll(annotation)
+                this.openSidebar()
+                this.frameFC.remoteExecute('focusAnnotation')(annotation.url)
             },
         })
     }

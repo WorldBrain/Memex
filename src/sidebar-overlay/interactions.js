@@ -71,9 +71,6 @@ export const setupRPC = () => {
         removeRibbon: () => {
             removeRibbon()
         },
-        goToAnnotation: async annotation => {
-            await highlightAndScroll(annotation)
-        },
     })
 }
 
