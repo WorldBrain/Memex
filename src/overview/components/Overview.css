@@ -267,12 +267,11 @@
     font-size: 18px;
     text-decoration: none;
     padding: 23px 25px;
-    color: #777;
-    background-color: #e3e3e3;
+    color: #3eb995;
     cursor: pointer;
 
     &:hover {
-        color: #3eb995;
+        color: #777;
     }
 
     @media (max-width: 1650px) {
@@ -286,4 +285,9 @@
     border-radius: 15px;
     margin-left: 10px;
     padding: 3px 18px;
+}
+
+.activeInbox {
+    background-color: #e3e3e3;
+    color: #777;
 }

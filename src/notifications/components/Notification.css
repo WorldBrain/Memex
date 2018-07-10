@@ -34,8 +34,7 @@
 .titleMessage {
     display: flex;
     flex-direction: column;
-    width: 600px;
-    margin: 0 10px;
+    margin: 6px 10px;
     font-size: 16px;
 }
 
@@ -61,7 +60,7 @@
     padding: 10px 20px;
     background-color: #3eb995;
     color: white;
-    font-size: 14px;
+    font-size: 16px;
     width: fit-content;
     border-radius: 2px;
     cursor: pointer;

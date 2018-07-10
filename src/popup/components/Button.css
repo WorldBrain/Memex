@@ -111,15 +111,15 @@
 
 .button {
     float: right;
-    width: 9%;
+    width: 10%;
     border: none;
     background: none;
     padding: 0;
     cursor: pointer;
     font-family: 'Open Sans';
     font-weight: 100;
-    margin-top: 13px;
-    margin-right: px;
+    margin-top: 17px;
+    margin-right: 6px;
     outline: 0;
     color: #909090;
     text-decoration: none;
@@ -130,7 +130,7 @@
 }
 
 .settingsIcon {
-    margin-right: 18px;
+    margin-right: 12px;
 }
 
 .icon {
@@ -191,7 +191,7 @@
 }
 
 .buttonIcons {
-    background-size: cover;
+    background-size: 22px;
 }
 
 .pauseIcon {

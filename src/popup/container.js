@@ -538,7 +538,7 @@ class PopupContainer extends Component {
                     btnClass={styles.help}
                 />
                 <ButtonIcon
-                    href={`${constants.OVERVIEW_URL}#/`}
+                    href={`${constants.OVERVIEW_URL}?showInbox=true`}
                     icon="notification"
                     btnClass={styles.notification}
                     value={unreadNotifCount}

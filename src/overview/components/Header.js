@@ -1,10 +1,17 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { Link } from 'react-router'
+import classNames from 'classnames'
 
 import { OutLink } from 'src/common-ui/containers'
 import DateRangeSelection from './DateRangeSelection'
 import styles from './Overview.css'
+
+const showInboxClass = ({ showInbox }) =>
+    classNames({
+        [styles.inbox]: true,
+        [styles.activeInbox]: showInbox,
+    })
 
 const Header = ({
     currentQueryParams: { query, startDate, endDate },
@@ -33,7 +40,7 @@ const Header = ({
             </div>
         </div>
         <div className={styles.links}>
-            <div className={styles.inbox} onClick={props.toggleInbox}>
+            <div className={showInboxClass(props)} onClick={props.toggleInbox}>
                 Inbox
                 {props.unreadNotifCount !== 0 && (
                     <span className={styles.inboxCount}>

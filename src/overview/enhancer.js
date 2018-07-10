@@ -72,6 +72,12 @@ const locationSync = ReduxQuerySync.enhancer({
             action: actions.setQueryTagsDomains,
             defaultValue: '',
         },
+        showInbox: {
+            selector: selectors.showInbox,
+            action: actions.toggleInbox,
+            stringToValue: parseBool,
+            defaultValue: false,
+        },
     },
 })
 

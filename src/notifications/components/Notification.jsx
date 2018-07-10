@@ -19,9 +19,10 @@ const Notification = props => (
                 <div className={localStyles.messageWhy}>
                     <div className={localStyles.titleMessage}>
                         <div className={localStyles.title}>{props.title}</div>
-                        <div className={localStyles.message}>
-                            {props.message}
-                        </div>
+                        <div
+                            className={localStyles.message}
+                            dangerouslySetInnerHTML={{ __html: props.message }}
+                        />
                         {props.isShowMore && (
                             <div
                                 className={localStyles.showMore}
