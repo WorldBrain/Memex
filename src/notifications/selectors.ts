@@ -4,18 +4,17 @@ import { NOTIFICATIONS_PAGE_SIZE } from './constants'
 
 const notifications = (state: any): State => state.notifications
 
-export const readNotificationList = state =>
-    notifications(state).readNotificationList
-export const unreadNotificationList = state =>
-    notifications(state).unreadNotificationList
-export const showMoreIndex = state => notifications(state).showMoreIndex
-export const currentPage = state => notifications(state).currentPage
+export const readNotificationList = createSelector(notifications, state => state.readNotificationList)
+
+export const unreadNotificationList = createSelector(notifications, state => state.unreadNotificationList)
+export const showMoreIndex = createSelector(notifications, state => state.showMoreIndex)
+export const currentPage = createSelector(notifications, state => state.currentPage)
 
 export const notificationsSkip = createSelector(
     currentPage,
     page => page * NOTIFICATIONS_PAGE_SIZE,
 )
-export const isLoading = state => notifications(state).isLoading
+export const isLoading = createSelector(notifications, state => state.isLoading)
 export const resultsExhausted = createSelector(
     readNotificationList,
     results => results.resultExhausted
@@ -25,7 +24,7 @@ export const needsWaypoint = createSelector(
     isLoading,
     (isExhausted, loading) => !loading && !isExhausted,
 )
-export const isReadExpanded = state => notifications(state).isReadExpanded
+export const isReadExpanded = createSelector(notifications, state => state.isReadExpanded)
 export const isReadShow = createSelector(
     readNotificationList,
     isReadExpanded,

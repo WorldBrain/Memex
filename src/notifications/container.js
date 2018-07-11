@@ -26,6 +26,11 @@ class NotificationContainer extends Component {
         isReadExpanded: PropTypes.bool.isRequired,
         toggleReadExpand: PropTypes.func.isRequired,
         isReadShow: PropTypes.bool.isRequired,
+        messageCharLimit: PropTypes.number.isRequired,
+    }
+
+    static defaultProps = {
+        messageCharLimit: 150,
     }
 
     componentDidMount() {
@@ -33,13 +38,7 @@ class NotificationContainer extends Component {
     }
 
     isNotificationTruncated(message) {
-        const NotificationCharLimit = 150
-
-        if (message.length <= NotificationCharLimit) {
-            return false
-        } else {
-            return true
-        }
+        return message.length > this.props.messageCharLimit
     }
 
     truncateText(message) {
@@ -49,7 +48,8 @@ class NotificationContainer extends Component {
             ' ',
             NotificationCharLimit,
         )
-        const trunctatedText = message.substr(0, lastSpaceBeforeCutoff)
+        const trunctatedText =
+            message.substr(0, lastSpaceBeforeCutoff) + '&#8230;'
         return trunctatedText
     }
 
@@ -63,7 +63,7 @@ class NotificationContainer extends Component {
 
             const trucatedMessage =
                 isTruncated && showMoreIndex !== notification.id
-                    ? this.truncateText(notification.message) + '...'
+                    ? this.truncateText(notification.message)
                     : notification.message
 
             return (
@@ -125,7 +125,7 @@ class NotificationContainer extends Component {
             <NotificationList>
                 <StatusHeading>
                     {unreadNotificationList.length === 0
-                        ? 'There is no new notification.'
+                        ? 'There are no new notification.'
                         : 'New'}
                 </StatusHeading>
                 {this.renderNotificationItems(unreadNotificationList, true)}
