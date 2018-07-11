@@ -164,7 +164,6 @@ class CommentBox extends React.Component {
             >
                 <textarea
                     rows={this.state.textareaRows}
-                    cols="38"
                     className={styles.textarea}
                     value={this.state.commentInput}
                     placeholder={'Add your comment...'}

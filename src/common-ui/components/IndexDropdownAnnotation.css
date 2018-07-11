@@ -82,7 +82,7 @@
     }
 
     &::placeholder {
-        color: #999;
+        color: #4a4a4a;
     }
 
     &:focus {
@@ -111,7 +111,5 @@
 }
 
 .tagDivForFilter {
-    width: 295px;
-    margin-left: 5px;
     z-index: 1;
 }

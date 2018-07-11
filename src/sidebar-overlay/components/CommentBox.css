@@ -26,19 +26,14 @@
 }
 
 .commentBox {
-    margin: 10px 15px;
+    margin: 10px 18.5px;
     margin-bottom: 0px;
-
-    &.iframe {
-        & .textarea {
-            width: 280px;
-        }
-    }
 }
 
 .textarea {
     resize: vertical;
     font-weight: 500;
+    width: 300px;
     font-size: 13px;
     color: #222;
     font-family: 'IBM Plex Serif', serif;
@@ -46,7 +41,6 @@
     border: none;
     border-radius: 2px;
     padding: 10px 7px;
-    margin-left: 5px;
     margin-bottom: 5px;
 
     &:focus {
@@ -54,7 +48,7 @@
     }
 
     &::placeholder {
-        color: #999;
+        color: #4a4a4a;
     }
 }
 

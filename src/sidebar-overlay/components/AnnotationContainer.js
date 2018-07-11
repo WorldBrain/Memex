@@ -274,11 +274,13 @@ class AnnotationContainer extends React.Component {
     }
 
     renderTagInput() {
+        console.log(this.state.tags)
+        const tagStringArray = this.state.tags.map(tag => tag.name)
         if (this.state.tagInput)
             return (
                 <IndexDropdown
                     isForAnnotation
-                    allowAdd
+                    url={this.props.annotation.url}
                     initFilters={this.state.tags}
                     onFilterAdd={this.addTag}
                     onFilterDel={this.delTag}
@@ -286,7 +288,6 @@ class AnnotationContainer extends React.Component {
                 />
             )
         else {
-            const tagStringArray = this.state.tags.map(tag => tag.name)
             return (
                 <TagHolder
                     tags={tagStringArray}
@@ -306,6 +307,7 @@ class AnnotationContainer extends React.Component {
                         className={styles.annotationTextarea}
                         value={this.state.annotationText}
                         onChange={this.handleChange}
+                        placeholder="Add comment..."
                     />
                     {this.renderTagInput()}
                 </div>
@@ -316,14 +318,9 @@ class AnnotationContainer extends React.Component {
     deriveTagsClass = () =>
         this.state.containsTags ? styles.tagsContainer : ''
 
-    deriveIsComment = () => this.props.annotation.body.length > 0
+    deriveIsJustComment = () => !this.props.annotation.body
 
     deriveIsIFrame = () => this.props.env === 'iframe'
-
-    deriveIsClickable = () => {
-        // Container box is only clickable if it's in iframe and it's a comment
-        return this.props.env === 'iframe' && this.deriveIsComment()
-    }
 
     /**
      * Comment box (#fafafa bg) should only be visible if there is a comment
@@ -352,7 +349,7 @@ class AnnotationContainer extends React.Component {
                 goToAnnotation={goToAnnotation(annotation)}
                 isIFrame={this.deriveIsIFrame()}
                 shouldCommentBoxBeVisible={this.shouldCommentBoxBeVisible()}
-                isJustComment={this.deriveIsComment()}
+                isJustComment={this.deriveIsJustComment()}
                 isActive={this.props.isActive}
                 id={this.props.annotation.url}
             />

@@ -6,7 +6,7 @@ import cx from 'classnames'
 const Annotation = props => (
     <div
         className={cx(styles.container, {
-            [styles.pointer]: props.isIFrame && props.isJustComment,
+            [styles.pointer]: props.isIFrame && !props.isJustComment,
             [styles.iframe]: props.isIFrame,
             [styles.active]: props.isActive,
         })}
@@ -17,7 +17,7 @@ const Annotation = props => (
     >
         <div
             className={
-                props.isJustComment ? styles.highlight : styles.noDisplay
+                !props.isJustComment ? styles.highlight : styles.noDisplay
             }
         >
             "{props.renderHighlight()}"
@@ -27,7 +27,7 @@ const Annotation = props => (
         <div
             className={cx({
                 [styles.annotationText]: props.shouldCommentBoxBeVisible,
-                [styles.dashedBorder]: props.isJustComment,
+                [styles.isJustComment]: props.isJustComment,
             })}
         >
             {props.renderAnnotation()}
