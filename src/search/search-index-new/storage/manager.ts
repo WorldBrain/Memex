@@ -74,7 +74,9 @@ export class StorageManager implements ManageableStorage {
     private static _processFieldsForReads(def: CollectionDefinition, object) {
         Object.entries(def.fields).forEach(([fieldName, fieldDef]) => {
             if (fieldDef.fieldObject) {
-                object[fieldName] = fieldDef.fieldObject.prepareFromStorage(object[fieldName])
+                object[fieldName] = fieldDef.fieldObject.prepareFromStorage(
+                    object[fieldName],
+                )
             }
         })
     }
@@ -89,14 +91,25 @@ export class StorageManager implements ManageableStorage {
         this.registry.registerCollection(name, defs)
     }
 
-    private async _find<T>(
+    // TODO: Afford full find support for ignoreCase opt; currently just uses the first filter entry
+    private _findIgnoreCase<T>(collectionName: string, filter: FilterQuery<T>) {
+        // Grab first entry from the filter query; ignore rest for now
+        const [[indexName, value]] = Object.entries(filter)
+
+        return this._storage
+            .table<T>(collectionName)
+            .where(indexName)
+            .equalsIgnoreCase(value)
+    }
+
+    private _find<T>(
         collectionName: string,
         filter: FilterQuery<T>,
         findOpts: FindOpts,
     ) {
-        let coll = await this._storage
-            .collection<T>(collectionName)
-            .find(filter)
+        let coll = findOpts.ignoreCase
+            ? this._findIgnoreCase<T>(collectionName, filter)
+            : this._storage.collection<T>(collectionName).find(filter)
 
         if (findOpts.reverse) {
             coll = coll.reverse()
@@ -139,7 +152,7 @@ export class StorageManager implements ManageableStorage {
     ): Promise<T> {
         await this._initializationPromise
 
-        const coll = await this._find<T>(collectionName, filter, findOpts)
+        const coll = this._find<T>(collectionName, filter, findOpts)
         const doc = await coll.first()
 
         if (doc != null) {
@@ -163,11 +176,13 @@ export class StorageManager implements ManageableStorage {
     ): Promise<T[]> {
         await this._initializationPromise
 
-        const coll = await this._find<T>(collectionName, filter, findOpts)
+        const coll = this._find<T>(collectionName, filter, findOpts)
         const docs = await coll.toArray()
 
         const collection = this.registry.collections[collectionName]
-        docs.forEach(doc => StorageManager._processFieldsForReads(collection, doc))
+        docs.forEach(doc =>
+            StorageManager._processFieldsForReads(collection, doc),
+        )
 
         return docs
     }
