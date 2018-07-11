@@ -23,6 +23,7 @@ export const setUnreadCount = createAction<number>('notific ations/setUnreadCoun
 const fetchUnreadNotifications = remoteFunction('fetchUnreadNotifications')
 const fetchReadNotifications = remoteFunction('fetchReadNotifications')
 const storeNotification = remoteFunction('storeNotification')
+const getUnreadCount = remoteFunction('getUnreadCount')
 
 export const init = () => async (dispatch, getState) => {
     dispatch(getUnreadNotifications())
@@ -57,7 +58,7 @@ export const handleReadNotif = notification => async (dispatch, getState) => {
         ...notification,
         readTime: Date.now(),
     })
-    dispatch(overviewActs.updateUnreadNotif())
+    dispatch(updateUnreadNotif())
     
     dispatch(getUnreadNotifications())
     dispatch(getReadNotifications({ overwrite: true }))
@@ -69,4 +70,9 @@ export const handleReadNotif = notification => async (dispatch, getState) => {
 export const getMoreNotifications = () => dispatch => {
     dispatch(nextPage())
     dispatch(getReadNotifications())
+}
+
+export const updateUnreadNotif = () => async (dispatch, getState) => {
+    const unreadNotifs = await getUnreadCount()
+    dispatch(setUnreadCount(unreadNotifs))
 }

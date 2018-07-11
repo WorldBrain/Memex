@@ -371,7 +371,7 @@ const mapStateToProps = state => ({
     isSidebarOpen: sidebar.isSidebarOpen(state),
     filterActive: filters.showClearFiltersBtn(state),
     showInbox: notifSelectors.showInbox(state),
-    unreadNotifCount: selectors.unreadNotifCount(state),
+    unreadNotifCount: notifSelectors.unreadNotifCount(state),
 })
 
 const mapDispatchToProps = dispatch => ({

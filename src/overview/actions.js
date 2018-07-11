@@ -6,6 +6,7 @@ import { remoteFunction } from 'src/util/webextensionRPC'
 import { actions as filterActs, selectors as filters } from '../search-filters'
 import * as constants from './constants'
 import * as selectors from './selectors'
+import * as notifActions from '../notifications/actions'
 import { fetchTooltip } from './components/tooltips'
 import unreadNotifications from 'src/util/unread-notifications'
 
@@ -44,8 +45,6 @@ export const setTooltip = createAction('overview/setTooltip')
 export const toggleShowTooltip = createAction('overview/toggleShowTooltip')
 export const setShowTooltip = createAction('overview/setShowTooltip')
 
-export const setUnreadNotifCount = createAction('overview/setUnreadNotifCount')
-
 const deletePages = remoteFunction('delPages')
 const createBookmarkByUrl = remoteFunction('addBookmark')
 const removeBookmarkByUrl = remoteFunction('delBookmark')
@@ -57,7 +56,7 @@ const requestSearch = remoteFunction('search')
  * Also perform an initial search to populate the view (empty query = get all docs)
  */
 export const init = () => (dispatch, getState) => {
-    dispatch(updateUnreadNotif())
+    dispatch(notifActions.updateUnreadNotif())
 
     // Only do init search if empty query; if query set, the epic will trigger a search
     if (selectors.isEmptyQuery(getState())) {
@@ -353,9 +352,4 @@ export const setQueryTagsDomains = (input, isEnter = true) => (
 export const fetchNextTooltip = () => async dispatch => {
     const tooltip = await fetchTooltip()
     dispatch(setTooltip(tooltip))
-}
-
-export const updateUnreadNotif = () => async (dispatch, getState) => {
-    const unreadNotifs = await unreadNotifications()
-    dispatch(setUnreadNotifCount(unreadNotifs))
 }

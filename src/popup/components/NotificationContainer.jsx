@@ -1,8 +1,12 @@
 import React, { Component } from 'react'
+
 import unreadNotifications from 'src/util/unread-notifications'
 import ButtonIcon from './ButtonIcon'
 import styles from './Button.css'
 import * as constants from '../constants'
+import { remoteFunction } from '../../util/webextensionRPC'
+
+const getUnreadCount = remoteFunction('getUnreadCount')
 
 class NotificationContainer extends Component {
     state = {
@@ -20,7 +24,7 @@ class NotificationContainer extends Component {
     }
 
     async getInitNotificationState() {
-        const res = await unreadNotifications()
+        const res = await getUnreadCount()
         return { unreadNotifCount: res }
     }
 

@@ -28,7 +28,6 @@ const defaultState = {
     activeTagIndex: -1,
     tooltip: null,
     showTooltip: true,
-    unreadNotifCount: 0,
 }
 
 function setQuery(state, query) {
@@ -213,10 +212,6 @@ export default createReducer(
         [actions.setShowTooltip]: (state, showTooltip) => ({
             ...state,
             showTooltip: showTooltip,
-        }),
-        [actions.setUnreadNotifCount]: (state, notifs) => ({
-            ...state,
-            unreadNotifCount: notifs,
         }),
     },
     defaultState,
