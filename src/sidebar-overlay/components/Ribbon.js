@@ -142,6 +142,13 @@ class Ribbon extends React.Component {
         })
     }
 
+    openSettings = () => {
+        browser.tabs.create({
+            url: browser.extension.getURL('/options.html#/settings'),
+            active: true,
+        })
+    }
+
     setiFrameRef = node => (this.iFrame = node)
 
     render() {
@@ -154,9 +161,14 @@ class Ribbon extends React.Component {
                         [styles.ribbonSidebarActive]: isSidebarActive,
                     })}
                 >
+                    <div className={styles.buttonHolder}>
+                        <span
+                            className={styles.settings}
+                            onClick={this.openSettings}
+                        />
+                        <span className={styles.cancel} onClick={destroy} />
+                    </div>
                     <div className={styles.logo} onClick={this.toggleSidebar} />
-                    <span className={styles.cancel} onClick={destroy} />
-                    <span className={styles.settings} />
                 </div>
                 <iframe
                     src={sidebarURL}
