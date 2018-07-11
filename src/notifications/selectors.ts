@@ -23,11 +23,11 @@ export const resultsExhausted = createSelector(
 export const needsWaypoint = createSelector(
     resultsExhausted,
     isLoading,
-    (isExhausted, isLoading) => !isLoading && !isExhausted,
+    (isExhausted, loading) => !loading && !isExhausted,
 )
 export const isReadExpanded = state => notifications(state).isReadExpanded
 export const isReadShow = createSelector(
     readNotificationList,
     isReadExpanded,
-    (readNotificationList, isReadExpanded) => isReadExpanded && readNotificationList.notifications.length !== 0
+    (notifs, readExpand) => readExpand && notifs.notifications.length !== 0
 )

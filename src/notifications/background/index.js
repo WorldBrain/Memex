@@ -1,9 +1,10 @@
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import NotificationStorage from './storage'
 import * as notifications from '../notifications'
-const LAST_NOTIF_TIME = 'last-notif-releast-time'
 
 export default class NotificationBackground {
+    static LAST_NOTIF_TIME = 'last-notif-releast-time'
+
     constructor({ storageManager }) {
         this.storage = new NotificationStorage(storageManager)
     }
@@ -47,8 +48,8 @@ export default class NotificationBackground {
 
     async initNotification() {
         const lastReleaseTime = (await browser.storage.local.get(
-            LAST_NOTIF_TIME,
-        ))[LAST_NOTIF_TIME]
+            NotificationBackground.LAST_NOTIF_TIME,
+        ))[NotificationBackground.LAST_NOTIF_TIME]
 
         for (let notification of notifications.NEW_NOTIFS) {
             notification = {
@@ -61,6 +62,8 @@ export default class NotificationBackground {
             }
         }
 
-        browser.storage.local.set({ [LAST_NOTIF_TIME]: Date.now() })
+        browser.storage.local.set({
+            [NotificationBackground.LAST_NOTIF_TIME]: Date.now(),
+        })
     }
 }

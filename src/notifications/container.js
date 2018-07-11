@@ -129,7 +129,7 @@ class NotificationContainer extends Component {
                         : 'New'}
                 </StatusHeading>
                 {this.renderNotificationItems(unreadNotificationList, true)}
-                {readNotificationList.length !== 0 && (
+                {readNotificationList.notifications.length !== 0 && (
                     <ReadHeader
                         isReadExpanded={this.props.isReadExpanded}
                         toggleReadExpand={this.props.toggleReadExpand}
