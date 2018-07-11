@@ -49,8 +49,8 @@ export const NEW_FEATURE_NOTIF = {
     url: 'https://worldbrain.helprace.com/i66-annotations-comments',
 }
 
-const notification = new NotificationBackground({ storageManager })
-notification.setupRemoteFunctions()
+const notifications = new NotificationBackground({ storageManager })
+notifications.setupRemoteFunctions()
 
 async function openOverview() {
     const [currentTab] = await browser.tabs.query({ active: true })
@@ -74,7 +74,7 @@ const openOptionsURL = query =>
     })
 
 async function onInstall() {
-    await notification.initNotification()
+    await notifications.initNotification()
     const now = Date.now()
 
     // Ensure default blacklist entries are stored (before doing anything else)
@@ -89,7 +89,7 @@ async function onInstall() {
 }
 
 async function onUpdate() {
-    await notification.initNotification()
+    await notifications.initNotification()
 
     // Notification with updates when we update
     await createNotif(
@@ -166,4 +166,4 @@ window.eventLog = eventLog
 const customList = new CustomListBackground({ storageManager })
 customList.setupRemoteFunctions()
 
-window.notification = notification
+window.notifications = notifications

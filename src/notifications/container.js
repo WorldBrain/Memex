@@ -2,21 +2,30 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
+import Waypoint from 'react-waypoint'
 
+import { LoadingIndicator } from 'src/common-ui/components'
 import * as actions from './actions'
 import * as selectors from './selectors'
 import NotificationList from './components/NotificationList'
 import Notification from './components/Notification'
 import StatusHeading from './components/StatusHeading'
+import ReadHeader from './components/ReadHeader'
 
 class NotificationContainer extends Component {
     static propTypes = {
         unreadNotificationList: PropTypes.arrayOf(PropTypes.object).isRequired,
-        readNotificationList: PropTypes.arrayOf(PropTypes.object).isRequired,
+        readNotificationList: PropTypes.object.isRequired,
         init: PropTypes.func.isRequired,
         showMoreIndex: PropTypes.string,
         handleToggleShowMore: PropTypes.func.isRequired,
         handleTick: PropTypes.func.isRequired,
+        onBottomReached: PropTypes.func.isRequired,
+        isLoading: PropTypes.bool.isRequired,
+        needsWaypoint: PropTypes.bool.isRequired,
+        isReadExpanded: PropTypes.bool.isRequired,
+        toggleReadExpand: PropTypes.func.isRequired,
+        isReadShow: PropTypes.bool.isRequired,
     }
 
     componentDidMount() {
@@ -79,6 +88,36 @@ class NotificationContainer extends Component {
         })
     }
 
+    renderNotification() {
+        const { readNotificationList, isReadShow } = this.props
+
+        if (!isReadShow) {
+            return
+        }
+
+        const notificationResults = this.renderNotificationItems(
+            readNotificationList.notifications,
+            false,
+        )
+
+        // Insert waypoint at the end of results to trigger loading new items when
+        // scrolling down
+        if (this.props.needsWaypoint) {
+            notificationResults.push(
+                <Waypoint
+                    onEnter={this.props.onBottomReached}
+                    key="waypoint"
+                />,
+            )
+        }
+
+        if (this.props.isLoading) {
+            notificationResults.push(<LoadingIndicator key="loading" />)
+        }
+
+        return notificationResults
+    }
+
     render() {
         const { unreadNotificationList, readNotificationList } = this.props
 
@@ -91,9 +130,12 @@ class NotificationContainer extends Component {
                 </StatusHeading>
                 {this.renderNotificationItems(unreadNotificationList, true)}
                 {readNotificationList.length !== 0 && (
-                    <StatusHeading>Read</StatusHeading>
+                    <ReadHeader
+                        isReadExpanded={this.props.isReadExpanded}
+                        toggleReadExpand={this.props.toggleReadExpand}
+                    />
                 )}
-                {this.renderNotificationItems(readNotificationList, false)}
+                {this.renderNotification()}
             </NotificationList>
         )
     }
@@ -103,14 +145,18 @@ const mapStateToProps = state => ({
     readNotificationList: selectors.readNotificationList(state),
     unreadNotificationList: selectors.unreadNotificationList(state),
     showMoreIndex: selectors.showMoreIndex(state),
+    isLoading: selectors.isLoading(state),
+    needsWaypoint: selectors.needsWaypoint(state),
+    isReadExpanded: selectors.isReadExpanded(state),
+    isReadShow: selectors.isReadShow(state),
 })
 
 const mapDispatchToProps = dispatch => ({
     ...bindActionCreators(
         {
             init: actions.init,
-            setShowMoreIndex: actions.setShowMoreIndex,
-            resetShowMoreIndex: actions.resetShowMoreIndex,
+            onBottomReached: actions.getMoreNotifications,
+            toggleReadExpand: actions.toggleReadExpand,
         },
         dispatch,
     ),

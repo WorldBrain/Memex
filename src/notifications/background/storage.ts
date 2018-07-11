@@ -26,16 +26,36 @@ export default class NotificationStorage extends FeatureStorage {
         await this.storageManager.putObject('notifications', notification)
     }
 
-    async getNotifications(isRead) {
+    async fetchUnreadNotifications() {
         const opt = {
             reverse: true,
         }
 
         return await this.storageManager.findAll(
             'notifications',
-            { readTime: { $exists: isRead } },
+            { readTime: { $exists: false } },
             opt,
         )
+    }
+
+    async fetchReadNotifications({ limit, skip }) {
+        console.log(limit, skip)
+        const opt = {
+            reverse: true,
+            limit: limit,
+            skip: skip,
+        }
+
+        const results = await this.storageManager.findAll(
+            'notifications',
+            { readTime: { $exists: true } },
+            opt,
+        )
+
+        return {
+            notifications: results,
+            resultExhausted: results.length < limit,
+        }
     }
 
     async getUnreadCount() {

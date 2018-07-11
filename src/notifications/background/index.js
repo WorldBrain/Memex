@@ -16,8 +16,11 @@ export default class NotificationBackground {
             getUnreadCount: () => {
                 return this.getUnreadCount()
             },
-            getNotifications: (...params) => {
-                return this.getNotifications(...params)
+            fetchUnreadNotifications: () => {
+                return this.fetchUnreadNotifications()
+            },
+            fetchReadNotifications: (...params) => {
+                return this.fetchReadNotifications(...params)
             },
         })
     }
@@ -30,8 +33,16 @@ export default class NotificationBackground {
         return await this.storage.getUnreadCount()
     }
 
-    async getNotifications(request) {
-        return await this.storage.getNotifications(request)
+    async fetchUnreadNotifications() {
+        return await this.storage.fetchUnreadNotifications()
+    }
+
+    /**
+     *
+     * @param {request} request that contains { limit }
+     */
+    async fetchReadNotifications(request) {
+        return await this.storage.fetchReadNotifications(request)
     }
 
     async initNotification() {
