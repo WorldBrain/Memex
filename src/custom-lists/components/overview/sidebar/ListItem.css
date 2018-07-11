@@ -15,17 +15,12 @@
 
     &:hover {
         background-color: #d7d7d7;
-        width: 300px;
+        width: 320px;
         overflow-x: unset;
     }
 
     & > .listName {
         width: 227px;
-    }
-
-    &:hover > .deleteButton {
-        visibility: visible;
-        opacity: 1;
     }
 }
 
@@ -39,22 +34,23 @@
 }
 
 .editButton {
-    background-image: url('/img/pen.svg');
-    width: 40px;
-    height: 40px;
-    position: absolute;
-    right: 35px;
+    background-image: url('/img/list_edit.svg');
+    width: 28px;
+    height: 28px;
+    visibility: hidden;
+    animation: appear 0.6s forwards;
 }
 
 .deleteButton {
-    background-image: url('/img/cross_circle.svg');
-    width: 21px;
-    height: 21px;
-    position: absolute;
-    right: 9px;
-    display: none;
+    background-image: url('/img/trash_closed_new.svg');
+    width: 28px;
+    height: 28px;
     visibility: hidden;
-    transition: visibility 0.5s, opacity 0.5s linear;
+    animation: appear 0.6s forwards;
+
+    &:hover {
+        background-image: url('/img/trash_open_new.svg');
+    }
 }
 
 .button {
@@ -76,4 +72,25 @@
     font-size: 1.4em;
     cursor: pointer;
     width: 100%;
+}
+
+.buttonContainer {
+    position: absolute;
+    right: 0px;
+    display: flex;
+    justify-content: space-evenly;
+    width: 90px;
+    align-items: center;
+}
+
+@keyframes appear {
+    0% {
+        transform: scale(0);
+        visibility: hidden;
+    }
+
+    100% {
+        transform: scale(1);
+        visibility: visible;
+    }
 }

@@ -83,7 +83,7 @@ class PageList extends Component {
         this.props.onEditButtonClick(e)
     }
 
-    handleCrossBtnClicktest1 = e => {
+    handleCrossBtnClick = e => {
         e.stopPropagation()
         this.props.onCrossButtonClick(e)
     }
@@ -102,18 +102,20 @@ class PageList extends Component {
                 onClick={this.props.onListItemClick}
             >
                 <div className={styles.listName}>{this.props.listName}</div>
-                {this.state.isMouseInside ? (
-                    <button
-                        className={cx(styles.editButton, styles.button)}
-                        onClick={this.handleEditBtnClick}
-                    />
-                ) : null}
-                {this.state.isMouseInside ? (
-                    <button
-                        className={cx(styles.deleteButton, styles.button)}
-                        onClick={this.handleCrossBtnClick}
-                    />
-                ) : null}
+                <div className={styles.buttonContainer}>
+                    {this.state.isMouseInside ? (
+                        <button
+                            className={cx(styles.editButton, styles.button)}
+                            onClick={this.handleEditBtnClick}
+                        />
+                    ) : null}
+                    {this.state.isMouseInside ? (
+                        <button
+                            className={cx(styles.deleteButton, styles.button)}
+                            onClick={this.handleCrossBtnClick}
+                        />
+                    ) : null}
+                </div>
             </div>
         )
     }
