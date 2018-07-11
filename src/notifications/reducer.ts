@@ -13,6 +13,8 @@ export interface State {
     currentPage: number
     isLoading: boolean
     isReadExpanded: boolean
+    showInbox: boolean
+    unreadNotifCount: number
 }
 
 const defaultState: State = {
@@ -26,6 +28,8 @@ const defaultState: State = {
     currentPage: 0,
     isLoading: true,
     isReadExpanded: false,
+    showInbox: false,
+    unreadNotifCount: 0,
 }
 
 const nextPage = () => (state: State) => ({
@@ -51,6 +55,11 @@ const toggleExpand = () => state => ({
     isReadExpanded: !state.isReadExpanded,
 })
 
+const toggleShowInbox = () => state => ({
+    ...state,
+    showInbox: !state.showInbox,
+})
+
 const initState = <T>(key) => (state: State, payload: T) => ({
     ...state,
     [key]: payload,
@@ -66,5 +75,7 @@ reducer.on(actions.setLoading, initState<boolean>('isLoading'))
 reducer.on(actions.appendReadNotificationResult, handleNotificationResult({ overwrite: false }))
 reducer.on(actions.setReadNotificationResult, handleNotificationResult({ overwrite: true }))
 reducer.on(actions.toggleReadExpand, toggleExpand())
+reducer.on(actions.toggleInbox, toggleShowInbox())
+reducer.on(actions.setUnreadCount, initState<number>('unreadNotifCount'))
 
 export default reducer

@@ -6,6 +6,7 @@ import classNames from 'classnames'
 import { OutLink } from 'src/common-ui/containers'
 import DateRangeSelection from './DateRangeSelection'
 import styles from './Overview.css'
+import InboxButton from 'src/notifications/components/InboxButton'
 
 const showInboxClass = ({ showInbox }) =>
     classNames({
@@ -40,14 +41,11 @@ const Header = ({
             </div>
         </div>
         <div className={styles.links}>
-            <div className={showInboxClass(props)} onClick={props.toggleInbox}>
-                Inbox
-                {props.unreadNotifCount !== 0 && (
-                    <span className={styles.inboxCount}>
-                        {props.unreadNotifCount}
-                    </span>
-                )}
-            </div>
+            <InboxButton
+                toggleInbox={props.toggleInbox}
+                showInbox={props.showInbox}
+                unreadNotifCount={props.unreadNotifCount}
+            />
             <OutLink
                 className={styles.upgrade}
                 to="https://worldbrain.io/pricing"

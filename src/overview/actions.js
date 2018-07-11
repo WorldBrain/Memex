@@ -44,8 +44,6 @@ export const setTooltip = createAction('overview/setTooltip')
 export const toggleShowTooltip = createAction('overview/toggleShowTooltip')
 export const setShowTooltip = createAction('overview/setShowTooltip')
 
-export const toggleInbox = createAction('overview/toggleInbox')
-
 export const setUnreadNotifCount = createAction('overview/setUnreadNotifCount')
 
 const deletePages = remoteFunction('delPages')

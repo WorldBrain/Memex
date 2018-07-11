@@ -11,6 +11,8 @@ import { IndexDropdown, MigrationNotice } from 'src/common-ui/containers'
 import * as actions from './actions'
 import * as selectors from './selectors'
 import * as constants from './constants'
+import * as notifActions from '../notifications/actions'
+import * as notifSelectors from '../notifications/selectors'
 import ResultList from './components/ResultList'
 import Overview from './components/Overview'
 import PageResultItem from './components/PageResultItem'
@@ -368,7 +370,7 @@ const mapStateToProps = state => ({
     mouseOverSidebar: sidebar.mouseOverSidebar(state),
     isSidebarOpen: sidebar.isSidebarOpen(state),
     filterActive: filters.showClearFiltersBtn(state),
-    showInbox: selectors.showInbox(state),
+    showInbox: notifSelectors.showInbox(state),
     unreadNotifCount: selectors.unreadNotifCount(state),
 })
 
@@ -383,7 +385,7 @@ const mapDispatchToProps = dispatch => ({
             resetActiveTagIndex: actions.resetActiveTagIndex,
             onShowFilterChange: filterActs.showFilter,
             fetchNextTooltip: actions.fetchNextTooltip,
-            toggleInbox: actions.toggleInbox,
+            toggleInbox: notifActions.toggleInbox,
             init: actions.init,
             setUrlDragged: listActs.setUrlDragged,
             showSearchFilters: sidebarLeftActs.openSidebarFilterMode,

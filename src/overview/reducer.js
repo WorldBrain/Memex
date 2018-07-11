@@ -28,7 +28,6 @@ const defaultState = {
     activeTagIndex: -1,
     tooltip: null,
     showTooltip: true,
-    showInbox: false,
     unreadNotifCount: 0,
 }
 
@@ -214,10 +213,6 @@ export default createReducer(
         [actions.setShowTooltip]: (state, showTooltip) => ({
             ...state,
             showTooltip: showTooltip,
-        }),
-        [actions.toggleInbox]: state => ({
-            ...state,
-            showInbox: !state.showInbox,
         }),
         [actions.setUnreadNotifCount]: (state, notifs) => ({
             ...state,

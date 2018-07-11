@@ -4,6 +4,8 @@ import ReduxQuerySync from 'redux-query-sync'
 import history from '../options/history'
 import * as selectors from './selectors'
 import * as actions from './actions'
+import * as notifActions from '../notifications/actions'
+import * as notifSelectors from '../notifications/selectors'
 import * as constants from './constants'
 import {
     selectors as onboarding,
@@ -73,8 +75,8 @@ const locationSync = ReduxQuerySync.enhancer({
             defaultValue: '',
         },
         showInbox: {
-            selector: selectors.showInbox,
-            action: actions.toggleInbox,
+            selector: notifSelectors.showInbox,
+            action: notifActions.toggleInbox,
             stringToValue: parseBool,
             defaultValue: false,
         },

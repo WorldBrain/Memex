@@ -198,5 +198,4 @@ export const isTooltipRenderable = createSelector(
     (tooltip, showTooltip) => tooltip !== null && showTooltip,
 )
 
-export const showInbox = state => overview(state).showInbox
 export const unreadNotifCount = state => overview(state).unreadNotifCount

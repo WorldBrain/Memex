@@ -30,3 +30,5 @@ export const isReadShow = createSelector(
     isReadExpanded,
     (notifs, readExpand) => readExpand && notifs.notifications.length !== 0
 )
+export const showInbox = createSelector(notifications, state => state.showInbox)
+export const unreadNotifCount = createSelector(notifications, state => state.unreadNotifCount)

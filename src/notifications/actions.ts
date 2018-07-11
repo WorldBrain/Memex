@@ -17,6 +17,8 @@ export const setLoading = createAction<boolean>('notifications/setLoading')
 export const toggleReadExpand = createAction('notifications/toggleReadExpand')
 export const appendReadNotificationResult = createAction<any>('notifications/setSearchResult')
 export const setReadNotificationResult = createAction<any>('notifications/setReadNotificationResult')
+export const toggleInbox = createAction<any>('notifications/toggleInbox')
+export const setUnreadCount = createAction<number>('notific ations/setUnreadCount')
 
 const fetchUnreadNotifications = remoteFunction('fetchUnreadNotifications')
 const fetchReadNotifications = remoteFunction('fetchReadNotifications')
@@ -29,6 +31,7 @@ export const init = () => async (dispatch, getState) => {
 
 export const getReadNotifications = ({ overwrite } = { overwrite: false }) => async (dispatch, getState) => {
     dispatch(setLoading(true))
+
 
     const readNotifications = await fetchReadNotifications({
         limit: constants.NOTIFICATIONS_PAGE_SIZE,
