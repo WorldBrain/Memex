@@ -13,8 +13,8 @@ export default class CustomListStorage extends FeatureStorage {
             fields: {
                 id: { type: 'string', pk: true },
                 name: { type: 'text' },
-                isDeletable: { type: 'binary' },
-                isNestable: { type: 'binary' },
+                isDeletable: { type: 'bool' },
+                isNestable: { type: 'bool' },
                 createdAt: { type: 'datetime' },
             },
             indices: [
@@ -145,13 +145,13 @@ export default class CustomListStorage extends FeatureStorage {
      * 
      * @param {Object} obj
      * @param {string} obj.name
-     * @param {0|1} obj.isNestable
-     * @param {0|1} obj.isDeletable
+     * @param {boolean} obj.isNestable
+     * @param {boolean} obj.isDeletable
      * @returns  
      * @memberof CustomListStorage
      */
-    async insertCustomList({ name, isDeletable = 1, isNestable = 1 }: {
-        name: string, isDeletable: 0 | 1, isNestable: 0 | 1
+    async insertCustomList({ name, isDeletable = true, isNestable = true }: {
+        name: string, isDeletable: boolean, isNestable: boolean
     }) {
         return await this.storageManager.putObject(
             CustomListStorage.CUSTOM_LISTS_COLL,
@@ -295,5 +295,21 @@ export default class CustomListStorage extends FeatureStorage {
 
         // Final pre-processing before sending in the lists.
         return this.changeListsBeforeSending(lists, pageEntries)
+    }
+
+    /**
+     * 
+     * @param {Object} obj
+     * @param {string} obj.name
+     * @returns {PageList}
+     * @memberof CustomListStorage
+     */
+    async fetchListIgnoreCase({ name }: { name: string }) {
+        return await this.storageManager.findObject<PageList>(
+            CustomListStorage.CUSTOM_LISTS_COLL, {
+                name,
+            }, {
+                ignoreCase: true,
+            })
     }
 }

@@ -41,6 +41,9 @@ export default class CustomListBackground {
             fetchListPagesById: (...params) => {
                 return this.fetchListPagesById(...params)
             },
+            fetchListIgnoreCase: (...params) => {
+                return this.fetchListIgnoreCase(...params)
+            },
         })
     }
 
@@ -172,8 +175,8 @@ export default class CustomListBackground {
      * check if the page is actually in list
      *
      * @param {Object} obj
-     * @param {number} id
-     * @param {string} url
+     * @param {number} obj.id
+     * @param {string} obj.url
      * @returns
      * @memberof CustomListBackground
      */
@@ -182,5 +185,17 @@ export default class CustomListBackground {
             listId: id,
             pageUrl: normalizeUrl(url),
         })
+    }
+
+    /**
+     * Fetch lists while ignoring the case used in the name
+     *
+     * @param {Object}  obj
+     * @param {string}  obj.name
+     * @returns
+     * @memberof CustomListBackground
+     */
+    async fetchListIgnoreCase({ name }) {
+        return await this.storage.fetchListIgnoreCase({ name })
     }
 }

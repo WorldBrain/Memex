@@ -132,8 +132,13 @@ export const createPageList = (name, cb) => async (dispatch, getState) => {
 
     try {
         // Create List
-        const id = await remoteFunction('createCustomList')({ name })
-        if (id) {
+        const listExist = Boolean(
+            await remoteFunction('fetchListIgnoreCase')({ name }),
+        )
+
+        if (!listExist) {
+            // Gets the id of the created list for future reference
+            const id = await remoteFunction('createCustomList')({ name })
             const list = {
                 id,
                 name,

@@ -10,7 +10,7 @@ class Sidebar extends PureComponent {
         children: PropTypes.node.isRequired,
         isSidebarOpen: PropTypes.bool.isRequired,
         sidebarIcons: PropTypes.node.isRequired,
-        captureStateChange: PropTypes.node.isRequired,
+        captureStateChange: PropTypes.func.isRequired,
     }
 
     render() {
