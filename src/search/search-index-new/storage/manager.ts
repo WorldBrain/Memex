@@ -12,6 +12,7 @@ import {
 } from './types'
 
 export class StorageManager implements ManageableStorage {
+    static DEF_SUGGEST_CASE_IGNORE = true
     static DEF_SUGGEST_LIMIT = 10
     static DEF_FIND_OPTS: Partial<FindOpts> = {
         reverse: false,
@@ -44,10 +45,10 @@ export class StorageManager implements ManageableStorage {
     }
 
     /**
-     * Handles mutation of a document to be inserted/updated to storage,
+     * Handles mutation of a document to be written to storage,
      * depending on needed pre-processing of fields.
      */
-    private static _processFields(def: CollectionDefinition, object) {
+    private static _processFieldsForWrites(def: CollectionDefinition, object) {
         Object.entries(def.fields).forEach(([fieldName, fieldDef]) => {
             if (fieldDef.fieldObject) {
                 object[fieldName] = fieldDef.fieldObject.prepareForStorage(
@@ -66,6 +67,20 @@ export class StorageManager implements ManageableStorage {
         })
     }
 
+    /**
+     * Handles mutation of a document to be read from storage,
+     * depending on needed pre-processing of fields.
+     */
+    private static _processFieldsForReads(def: CollectionDefinition, object) {
+        Object.entries(def.fields).forEach(([fieldName, fieldDef]) => {
+            if (fieldDef.fieldObject) {
+                object[fieldName] = fieldDef.fieldObject.prepareFromStorage(
+                    object[fieldName],
+                )
+            }
+        })
+    }
+
     constructor() {
         this._initializationPromise = new Promise(
             resolve => (this._initializationResolve = resolve),
@@ -76,14 +91,25 @@ export class StorageManager implements ManageableStorage {
         this.registry.registerCollection(name, defs)
     }
 
-    private async _find<T>(
+    // TODO: Afford full find support for ignoreCase opt; currently just uses the first filter entry
+    private _findIgnoreCase<T>(collectionName: string, filter: FilterQuery<T>) {
+        // Grab first entry from the filter query; ignore rest for now
+        const [[indexName, value]] = Object.entries(filter)
+
+        return this._storage
+            .table<T>(collectionName)
+            .where(indexName)
+            .equalsIgnoreCase(value)
+    }
+
+    private _find<T>(
         collectionName: string,
         filter: FilterQuery<T>,
         findOpts: FindOpts,
     ) {
-        let coll = await this._storage
-            .collection<T>(collectionName)
-            .find(filter)
+        let coll = findOpts.ignoreCase
+            ? this._findIgnoreCase<T>(collectionName, filter)
+            : this._storage.collection<T>(collectionName).find(filter)
 
         if (findOpts.reverse) {
             coll = coll.reverse()
@@ -108,7 +134,7 @@ export class StorageManager implements ManageableStorage {
         await this._initializationPromise
 
         const collection = this.registry.collections[collectionName]
-        StorageManager._processFields(collection, object)
+        StorageManager._processFieldsForWrites(collection, object)
 
         await this._storage[collectionName].put(object)
     }
@@ -126,8 +152,15 @@ export class StorageManager implements ManageableStorage {
     ): Promise<T> {
         await this._initializationPromise
 
-        const coll = await this._find<T>(collectionName, filter, findOpts)
-        return coll.first()
+        const coll = this._find<T>(collectionName, filter, findOpts)
+        const doc = await coll.first()
+
+        if (doc != null) {
+            const collection = this.registry.collections[collectionName]
+            StorageManager._processFieldsForReads(collection, doc)
+        }
+
+        return doc
     }
 
     /**
@@ -143,8 +176,15 @@ export class StorageManager implements ManageableStorage {
     ): Promise<T[]> {
         await this._initializationPromise
 
-        const coll = await this._find<T>(collectionName, filter, findOpts)
-        return coll.toArray()
+        const coll = this._find<T>(collectionName, filter, findOpts)
+        const docs = await coll.toArray()
+
+        const collection = this.registry.collections[collectionName]
+        docs.forEach(doc =>
+            StorageManager._processFieldsForReads(collection, doc),
+        )
+
+        return docs
     }
 
     /**
@@ -159,6 +199,7 @@ export class StorageManager implements ManageableStorage {
         collectionName: string,
         filter: FilterQuery<T>,
         {
+            ignoreCase = StorageManager.DEF_SUGGEST_CASE_IGNORE,
             limit = StorageManager.DEF_SUGGEST_LIMIT,
             reverse,
         }: FindOpts = StorageManager.DEF_FIND_OPTS,
@@ -168,11 +209,15 @@ export class StorageManager implements ManageableStorage {
         // Grab first entry from the filter query; ignore rest for now
         const [[indexName, value]] = Object.entries(filter)
 
-        let coll = this._storage
+        const whereClause = this._storage
             .table<T>(collectionName)
             .where(indexName)
-            .startsWith(value)
-            .limit(limit)
+
+        let coll = ignoreCase
+            ? whereClause.startsWithIgnoreCase(value)
+            : whereClause.startsWith(value)
+
+        coll = coll.limit(limit)
 
         if (reverse) {
             coll = coll.reverse()

@@ -3,7 +3,7 @@ import { FilterQuery as MongoFilterQuery } from 'mongodb'
 import StorageRegistry from './registry'
 import { Field } from './fields'
 
-export type FieldType = 'text' | 'json' | 'datetime' | 'string' | 'url'
+export type FieldType = 'text' | 'json' | 'datetime' | 'string' | 'url' | 'bool'
 
 // TODO
 export interface MigrationRunner {
@@ -12,6 +12,7 @@ export interface MigrationRunner {
 }
 
 export interface FindOpts {
+    ignoreCase?: boolean
     reverse?: boolean
     skip?: number
     limit?: number
