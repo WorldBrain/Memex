@@ -34,11 +34,14 @@ const nextPage = () => (state: State) => ({
 })
 
 // Updates notifications result state by either overwriting or appending
-const handleNotificationResult = () => (state, newNotificationResult) => {
-    const readNotificationList = {  
-        ...newNotificationResult,
-        notifications: [...state.readNotificationList.notifications, ...newNotificationResult.notifications],
-    }
+const handleNotificationResult = ({ overwrite }) => (state, newNotificationResult) => {
+    
+    const readNotificationList = overwrite
+        ? newNotificationResult
+        : {  
+            ...newNotificationResult,
+            notifications: [...state.readNotificationList.notifications, ...newNotificationResult.notifications],
+        }
 
     return { ...state, readNotificationList }
 }
@@ -60,7 +63,8 @@ reducer.on(actions.setUnreadNotificationList, initState<boolean>('unreadNotifica
 reducer.on(actions.setShowMoreIndex, initState<boolean>('showMoreIndex'))
 reducer.on(actions.nextPage, nextPage())
 reducer.on(actions.setLoading, initState<boolean>('isLoading'))
-reducer.on(actions.appendReadNotificationResult, handleNotificationResult())
+reducer.on(actions.appendReadNotificationResult, handleNotificationResult({ overwrite: false }))
+reducer.on(actions.setReadNotificationResult, handleNotificationResult({ overwrite: true }))
 reducer.on(actions.toggleReadExpand, toggleExpand())
 
 export default reducer

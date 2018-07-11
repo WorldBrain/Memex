@@ -7,6 +7,7 @@ import * as constants from './constants'
 export const setReadNotificationList = createAction<any>(
     'notifications/setReadNotificationList',
 )
+
 export const setUnreadNotificationList = createAction<any>(
     'notifications/setUnreadNotificationList',
 )
@@ -15,6 +16,7 @@ export const nextPage = createAction('notifications/nextPage')
 export const setLoading = createAction<boolean>('notifications/setLoading')
 export const toggleReadExpand = createAction('notifications/toggleReadExpand')
 export const appendReadNotificationResult = createAction<any>('notifications/setSearchResult')
+export const setReadNotificationResult = createAction<any>('notifications/setReadNotificationResult')
 
 const fetchUnreadNotifications = remoteFunction('fetchUnreadNotifications')
 const fetchReadNotifications = remoteFunction('fetchReadNotifications')
@@ -25,7 +27,7 @@ export const init = () => async (dispatch, getState) => {
     dispatch(getReadNotifications())
 }
 
-export const getReadNotifications = () => async (dispatch, getState) => {
+export const getReadNotifications = ({ overwrite } = { overwrite: false }) => async (dispatch, getState) => {
     dispatch(setLoading(true))
 
     const readNotifications = await fetchReadNotifications({
@@ -33,7 +35,9 @@ export const getReadNotifications = () => async (dispatch, getState) => {
         skip: selectors.notificationsSkip(getState()),
     })
 
-    dispatch(appendReadNotificationResult(readNotifications))
+    const notifAction = overwrite? setReadNotificationResult: appendReadNotificationResult
+
+    dispatch(notifAction(readNotifications))
     dispatch(setLoading(false))
 }
 
@@ -53,7 +57,7 @@ export const handleReadNotif = notification => async (dispatch, getState) => {
     dispatch(overviewActs.updateUnreadNotif())
     
     dispatch(getUnreadNotifications())
-    dispatch(getReadNotifications())
+    dispatch(getReadNotifications({ overwrite: true }))
 }
 
 /**
