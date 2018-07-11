@@ -4,6 +4,7 @@ import moment from 'moment'
 import { remoteFunction } from '../../util/webextensionRPC'
 
 import Annotation from './Annotation'
+import TagHolder from './TagHolder.js'
 import styles from './Annotation.css'
 import { IndexDropdown } from '../../common-ui/containers'
 
@@ -25,6 +26,7 @@ class AnnotationContainer extends React.Component {
 
         containsTags: false,
         tags: [],
+        tagInput: false,
 
         footerState: 'default',
     }
@@ -103,6 +105,8 @@ class AnnotationContainer extends React.Component {
     }
 
     getTags = () => this.state.tags.map(tag => tag.name)
+
+    _setTagInput = value => () => this.setState({ tagInput: value })
 
     renderTimestamp = () => {
         const { createdWhen, lastEdited } = this.props.annotation
@@ -185,8 +189,8 @@ class AnnotationContainer extends React.Component {
     }
 
     renderTagPills = () => {
-        const { tags } = this.state
-        if (!tags) return
+        const { tags, annotationEditMode } = this.state
+        if (!tags || annotationEditMode) return
         return tags.map((tag, i) => (
             <span key={i} className={styles.tagPill}>
                 {tag.name}
@@ -269,6 +273,29 @@ class AnnotationContainer extends React.Component {
         else return this.props.annotation.comment
     }
 
+    renderTagInput() {
+        if (this.state.tagInput)
+            return (
+                <IndexDropdown
+                    isForAnnotation
+                    allowAdd
+                    initFilters={this.state.tags}
+                    onFilterAdd={this.addTag}
+                    onFilterDel={this.delTag}
+                    source="tag"
+                />
+            )
+        else {
+            const tagStringArray = this.state.tags.map(tag => tag.name)
+            return (
+                <TagHolder
+                    tags={tagStringArray}
+                    clickHandler={this._setTagInput(true)}
+                />
+            )
+        }
+    }
+
     renderAnnotationInput = () => {
         if (this.state.annotationEditMode)
             return (
@@ -280,14 +307,7 @@ class AnnotationContainer extends React.Component {
                         value={this.state.annotationText}
                         onChange={this.handleChange}
                     />
-                    <IndexDropdown
-                        isForAnnotation
-                        url={this.props.annotation.url}
-                        initFilters={this.getTags()}
-                        onFilterAdd={this.reloadTags}
-                        onFilterDel={this.reloadTags}
-                        source="tag"
-                    />
+                    {this.renderTagInput()}
                 </div>
             )
         return null

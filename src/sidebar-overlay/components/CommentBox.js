@@ -5,6 +5,7 @@ import cx from 'classnames'
 
 import { selectors, actions } from '../redux'
 import { IndexDropdown } from 'src/common-ui/containers'
+import TagHolder from './TagHolder'
 import * as constants from '../constants'
 import styles from './CommentBox.css'
 
@@ -24,6 +25,7 @@ class CommentBox extends React.Component {
         textareaRows: constants.DEFAULT_ROWS,
         minimized: true,
         isHidden: false,
+        tagInput: false,
         tags: [],
     }
 
@@ -69,6 +71,8 @@ class CommentBox extends React.Component {
             commentInput: '',
             textareaRows: constants.DEFAULT_ROWS,
             isHidden: true,
+            tagInput: false,
+            tags: [],
         })
     }
 
@@ -118,6 +122,8 @@ class CommentBox extends React.Component {
         })
     }
 
+    _setTagInput = value => () => this.setState({ tagInput: value })
+
     renderAddNoteButton() {
         if (!this.isHidden()) return null
         return (
@@ -125,6 +131,27 @@ class CommentBox extends React.Component {
                 Add note
             </button>
         )
+    }
+
+    renderTagInput() {
+        if (this.state.tagInput)
+            return (
+                <IndexDropdown
+                    isForAnnotation
+                    allowAdd
+                    initFilters={this.state.tags}
+                    onFilterAdd={this.addTag}
+                    onFilterDel={this.delTag}
+                    source="tag"
+                />
+            )
+        else
+            return (
+                <TagHolder
+                    tags={this.state.tags}
+                    clickHandler={this._setTagInput(true)}
+                />
+            )
     }
 
     renderCommentBox() {
@@ -143,16 +170,10 @@ class CommentBox extends React.Component {
                     placeholder={'Add your comment...'}
                     onChange={this.handleChange}
                     ref={this.setInputRef}
+                    onClick={this._setTagInput(false)}
                 />
                 <br />
-                <IndexDropdown
-                    isForAnnotation
-                    allowAdd
-                    initFilters={this.state.tags}
-                    onFilterAdd={this.addTag}
-                    onFilterDel={this.delTag}
-                    source="tag"
-                />
+                {this.renderTagInput()}
                 <div className={styles.buttonHolder}>
                     <button className={styles.save} onClick={this.save}>
                         Save
