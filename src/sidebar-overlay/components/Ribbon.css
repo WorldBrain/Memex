@@ -24,7 +24,7 @@
     right: 0;
     border: 0;
     outline: 0;
-    z-index: 2147483647;
+    z-index: 2147483646;
     transform: translate(400px, 0);
     transition: all 0.2s ease-in;
 }
@@ -38,6 +38,20 @@
     padding: 3px 0;
     width: 86%;
     margin: 0px auto;
+}
+
+.close {
+    position: fixed;
+    top: 10px;
+    right: 322px;
+    cursor: pointer;
+    font-family: 'Lato', sans-serif;
+    font-size: 25px;
+    color: #3eb995;
+    z-index: 2147483647;
+    background: #e1ece9;
+    padding: 2px 7.5px 4px 7.5px;
+    border-radius: 25px;
 }
 
 .logo,

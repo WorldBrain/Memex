@@ -20,9 +20,6 @@ const Sidebar = props => (
             onMouseEnter={props.toggleMouseOnSidebar}
             onMouseLeave={props.toggleMouseOnSidebar}
         >
-            <div className={styles.closeButton} onClick={props.closeSidebar}>
-                X
-            </div>
             {props.showSidebar ? <CommentBox env={props.env} /> : null}
 
             <div className={styles.flexContainer}>

@@ -170,6 +170,14 @@ class Ribbon extends React.Component {
                     </div>
                     <div className={styles.logo} onClick={this.toggleSidebar} />
                 </div>
+                <div
+                    className={cx({
+                        [styles.close]: isSidebarActive,
+                    })}
+                    onClick={this.toggleSidebar}
+                >
+                    X
+                </div>
                 <iframe
                     src={sidebarURL}
                     height={window.innerHeight}
