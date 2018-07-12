@@ -1,5 +1,7 @@
 import { EventEmitter } from 'events'
+import { makeRemotelyCallable } from '../../util/webextensionRPC'
 import { StorageManager } from "../../search/search-index-new/storage/manager"
+import { setupRequestInterceptor } from './redirect'
 import BackupStorage from './storage'
 import { BackupBackend } from './backend'
 export * from './backend'
@@ -22,10 +24,24 @@ export class BackupBackgroundModule {
         this.backend = backend
 
         this.storageManager.on('changing', ({ collection, pk, operation }: { collection: string, pk: string, operation: string }) => {
-            console.log('change detected, we are interested', this.recordingChanges)
+            // console.log('change detected, we are interested', this.recordingChanges)
             if (this.recordingChanges) {
-                this.storage.registerChange({ collection, pk, operation })
+                // this.storage.registerChange({ collection, pk, operation })
             }
+        })
+    }
+
+    setupRemoteFunctions() {
+        makeRemotelyCallable({
+            getBackupProviderLoginLink: async (params) => {
+                return await this.backend.getLoginUrl(params)
+            }
+        })
+    }
+
+    setupRequestInterceptor() {
+        setupRequestInterceptor({
+            webRequest: window['browser'].webRequest,
         })
     }
 

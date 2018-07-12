@@ -45,6 +45,7 @@ export default ({ context = __dirname, mode = 'development', ...opts }) => {
             mainFields: ['browser', 'main', 'module'],
             alias: {
                 src: path.resolve(context, './src'),
+                external: path.resolve(context, './external'),
             },
         },
         stats: {

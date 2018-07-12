@@ -1,16 +1,5 @@
 import { EventEmitter } from "events"
-
-export abstract class BackupBackend {
-    async startBackup({ events }: { events: EventEmitter }): Promise<any> {
-
-    }
-    async commitBackup({ events }: { events: EventEmitter }): Promise<any> {
-
-    }
-
-    abstract storeObject({ collection, pk, object, events }: { collection: string, pk: string, object: object, events: EventEmitter }): Promise<any>
-    abstract deleteObject({ collection, pk, events }: { collection: string, pk: string, events: EventEmitter }): Promise<any>
-}
+import { BackupBackend } from "./types"
 
 export class SimpleHttpBackend extends BackupBackend {
     private url
@@ -30,6 +19,6 @@ export class SimpleHttpBackend extends BackupBackend {
     }
 
     async deleteObject({ collection, pk, events }: { collection: string, pk: string, events: EventEmitter }): Promise<any> {
-
+        throw new Error('Not yet implemented  :(')
     }
 }

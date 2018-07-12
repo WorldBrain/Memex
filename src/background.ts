@@ -38,11 +38,17 @@ customList.setupRemoteFunctions()
 
 const backupModule = new backup.BackupBackgroundModule({
     storageManager,
-    backend: new backup.SimpleHttpBackend({ url: 'http://localhost:8000' }),
+    backend: new backup.RemoteStorageBackend({
+        apiKeys: {
+            googledrive:
+                '455172385517-dctnft2hrh4iqpbjqn7rbmn94ge2p3n4.apps.googleusercontent.com',
+        },
+    }),
     lastBackupStorage: new backup.LocalLastBackupStorage({ key: 'lastBackup' }),
 })
+backupModule.setupRemoteFunctions()
+backupModule.setupRequestInterceptor()
 backupModule.startRecordingChangesIfNeeded()
-
 
 const bgScript = new BackgroundScript({ notifsBackground: notifications })
 bgScript.setupRemoteFunctions()
