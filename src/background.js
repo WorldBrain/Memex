@@ -74,7 +74,7 @@ const openOptionsURL = query =>
     })
 
 async function onInstall() {
-    await notifications.initNotification()
+    await notifications.deliverStaticNotifications()
     const now = Date.now()
 
     // Ensure default blacklist entries are stored (before doing anything else)
@@ -89,7 +89,7 @@ async function onInstall() {
 }
 
 async function onUpdate() {
-    await notifications.initNotification()
+    await notifications.deliverStaticNotifications()
 
     // Notification with updates when we update
     await createNotif(

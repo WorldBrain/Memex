@@ -46,7 +46,7 @@ export default class NotificationBackground {
         return await this.storage.fetchReadNotifications(request)
     }
 
-    async initNotification() {
+    async deliverStaticNotifications() {
         const lastReleaseTime = (await browser.storage.local.get(
             NotificationBackground.LAST_NOTIF_TIME,
         ))[NotificationBackground.LAST_NOTIF_TIME]
