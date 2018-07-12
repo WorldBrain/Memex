@@ -37,7 +37,8 @@ export class StorageManager implements ManageableStorage {
         switch (fieldDef.type) {
             case 'text':
                 const fullTextField =
-                    indexDef.fullTextIndexName || `_${fieldName}_terms`
+                    indexDef.fullTextIndexName ||
+                    StorageRegistry.createTermsIndex(fieldName)
                 object[fullTextField] = [...extractTerms(object[fieldName])]
                 break
             default:

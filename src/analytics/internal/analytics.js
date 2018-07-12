@@ -47,12 +47,6 @@ class Analytics {
      * @param {EventTrackInfo} eventArgs
      */
     async storeEventLogStatistics(eventArgs) {
-        // If details is not there then add default value
-        const params = {
-            ...eventArgs,
-            details: eventArgs.details || {},
-        }
-
         // Create notificaitions params
         const notifParams = {
             latestTime: eventArgs.time,
@@ -60,10 +54,10 @@ class Analytics {
         }
 
         // Store the event in dexie
-        await this.storeEvent(params)
+        await this.storeEvent(eventArgs)
 
         if (EVENT_TYPES[eventArgs.type].notifType) {
-            await this.incrementValue(notifParams)
+            this.incrementValue(notifParams)
         }
     }
 
@@ -76,19 +70,20 @@ class Analytics {
         const latestTimeWithCount = await this.getLatestTimeWithCount({
             notifType,
         })
+
         if (!latestTimeWithCount) {
             return
         }
 
-        await this.updateValue(notifType, latestTimeWithCount)
+        this.updateValue(notifType, latestTimeWithCount)
     }
 
     // Update the value when the memeory variables is out of update or load initial data
-    async updateValue(notifType, value) {
+    updateValue(notifType, value) {
         this._eventStats[notifType] = value
     }
 
-    async incrementValue(event) {
+    incrementValue(event) {
         this._eventStats[event.notifType] = {
             count: this._eventStats[event.notifType].count + 1,
             latestTime: event.latestTime,
@@ -113,7 +108,6 @@ class Analytics {
         const params = {
             ...eventArgs,
             time,
-            details: {},
         }
 
         await this.storeEventLogStatistics(params)

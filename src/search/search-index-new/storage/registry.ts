@@ -15,6 +15,9 @@ export interface RegistryCollectionsVersionMap {
 }
 
 export default class StorageRegistry implements RegisterableStorage {
+    public static createTermsIndex = (fieldName: string) =>
+        `_${fieldName}_terms`
+
     public collections: RegistryCollections = {}
     public collectionsByVersion: RegistryCollectionsVersionMap = {}
 
