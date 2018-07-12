@@ -1,5 +1,6 @@
 import ImportContainer from './imports'
 import SettingsContainer from './containers/settings'
+import BackupSettingsContainer from './backup'
 import Privacy from './privacy'
 import Acknowledgements from './acknowledgement/components/content'
 import Tutorial from './tutorial'
@@ -31,6 +32,12 @@ export default [
         name: 'Import History & Bookmarks',
         pathname: '/import',
         component: ImportContainer,
+        icon: 'file_download',
+    },
+    {
+        name: 'Backup',
+        pathname: '/backup',
+        component: BackupSettingsContainer,
         icon: 'file_download',
     },
     {
