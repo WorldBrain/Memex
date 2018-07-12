@@ -8,7 +8,6 @@ import * as constants from './constants'
 import * as selectors from './selectors'
 import * as notifActions from '../notifications/actions'
 import { fetchTooltip } from './components/tooltips'
-import unreadNotifications from 'src/util/unread-notifications'
 
 export const setLoading = createAction('overview/setLoading')
 export const nextPage = createAction('overview/nextPage')

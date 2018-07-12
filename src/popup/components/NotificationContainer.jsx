@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 
-import unreadNotifications from 'src/util/unread-notifications'
 import ButtonIcon from './ButtonIcon'
 import styles from './Button.css'
 import * as constants from '../constants'

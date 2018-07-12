@@ -1,18 +1,11 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { Link } from 'react-router'
-import classNames from 'classnames'
 
 import { OutLink } from 'src/common-ui/containers'
 import DateRangeSelection from './DateRangeSelection'
 import styles from './Overview.css'
 import InboxButton from 'src/notifications/components/InboxButton'
-
-const showInboxClass = ({ showInbox }) =>
-    classNames({
-        [styles.inbox]: true,
-        [styles.activeInbox]: showInbox,
-    })
 
 const Header = ({
     currentQueryParams: { query, startDate, endDate },
