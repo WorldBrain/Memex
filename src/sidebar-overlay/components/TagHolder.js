@@ -10,8 +10,9 @@ import styles from './TagHolder.css'
 
 class TagHolder extends React.Component {
     static propTypes = {
-        tags: PropTypes.arrayOf(PropTypes.string).isRequired,
+        tags: PropTypes.arrayOf(PropTypes.object).isRequired,
         clickHandler: PropTypes.func.isRequired,
+        deleteTag: PropTypes.func,
     }
 
     state = {
@@ -19,6 +20,16 @@ class TagHolder extends React.Component {
     }
 
     componentDidMount() {
+        this.findMaxTagsAllowed()
+    }
+
+    componentDidUpdate(prevProps) {
+        if (this.props.tags.length !== prevProps.tags.length) {
+            this.findMaxTagsAllowed()
+        }
+    }
+
+    findMaxTagsAllowed() {
         if (!this.props.tags.length) return
         const maxTagsAllowed = maxPossibleTags(this.props.tags)
         this.setState({
@@ -26,9 +37,33 @@ class TagHolder extends React.Component {
         })
     }
 
+    deleteFn = ({ name, url }) => e => {
+        e.preventDefault()
+        e.stopPropagation()
+        this.props.deleteTag({
+            tag: name,
+            url,
+        })
+    }
+
+    renderTags() {
+        return this.props.tags.map((tag, index) => {
+            if (index >= this.state.maxTagsAllowed) return null
+            return (
+                <span key={tag.name} className={styles.tag}>
+                    {tag.name}
+                    <span className={styles.cross} onClick={this.deleteFn(tag)}>
+                        x
+                    </span>
+                </span>
+            )
+        })
+    }
+
     renderTagsLeft() {
         const { maxTagsAllowed } = this.state
         const { tags } = this.props
+        console.log(maxTagsAllowed, tags)
 
         if (!maxTagsAllowed || !(tags.length - maxTagsAllowed)) return null
         const tagsLeft = this.props.tags.length - this.state.maxTagsAllowed
@@ -41,14 +76,8 @@ class TagHolder extends React.Component {
                 {!this.props.tags.length ? (
                     <span className={styles.placeholder}>Tag Comment...</span>
                 ) : null}
-                {this.props.tags.map((tag, index) => {
-                    if (index >= this.state.maxTagsAllowed) return null
-                    return (
-                        <span key={tag} className={styles.tag}>
-                            {tag}
-                        </span>
-                    )
-                })}
+
+                {this.renderTags()}
                 {this.renderTagsLeft()}
                 <span className={styles.plus}>+</span>
             </div>

@@ -96,12 +96,16 @@ class AnnotationContainer extends React.Component {
         const { url, comment } = this.props.annotation
         const { annotationText } = this.state
 
-        if (annotationText === comment) {
-            this.toggleEditAnnotation()
+        if (annotationText !== comment) {
+            this.props.editAnnotation({ url, comment: annotationText })
         }
 
-        this.props.editAnnotation({ url, comment: annotationText })
-        this.toggleEditAnnotation()
+        this.reloadTags()
+        this.setState({
+            annotationEditMode: false,
+            tagInput: false,
+            footerState: 'default',
+        })
     }
 
     getTags = () => this.state.tags.map(tag => tag.name)
@@ -280,17 +284,19 @@ class AnnotationContainer extends React.Component {
                 <IndexDropdown
                     isForAnnotation
                     url={this.props.annotation.url}
-                    initFilters={this.state.tags}
-                    onFilterAdd={this.addTag}
-                    onFilterDel={this.delTag}
+                    initFilters={tagStringArray}
                     source="tag"
                 />
             )
         else {
             return (
                 <TagHolder
-                    tags={tagStringArray}
+                    tags={this.state.tags}
                     clickHandler={this._setTagInput(true)}
+                    deleteTag={tag => {
+                        remoteFunction('delAnnotationTag')(tag)
+                        this.reloadTags()
+                    }}
                 />
             )
         }

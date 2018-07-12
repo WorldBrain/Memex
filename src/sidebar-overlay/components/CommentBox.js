@@ -134,6 +134,8 @@ class CommentBox extends React.Component {
     }
 
     renderTagInput() {
+        const tagObjs = this.state.tags.map(tag => ({ name: tag }))
+
         if (this.state.tagInput)
             return (
                 <IndexDropdown
@@ -148,8 +150,9 @@ class CommentBox extends React.Component {
         else
             return (
                 <TagHolder
-                    tags={this.state.tags}
+                    tags={tagObjs}
                     clickHandler={this._setTagInput(true)}
+                    deleteTag={({ name }) => this.delTag(name)}
                 />
             )
     }

@@ -34,14 +34,13 @@ export function retryUntilErrorResolves(
     })
 }
 
-// Compute the maximum width of a  Tag pill
+// Compute the maximum width of a Tag pill
 const avgLetterPx = 6
-const tagPillPadding = 10
-const tagPillMarginRight = 8
+// Padding + Margin + X button
+const tagPillExtra = 10 + 8 + 12
 const tagContainerWidth = 240
 
-const computeTagPillWidth = letters =>
-    letters * avgLetterPx + tagPillPadding + tagPillMarginRight
+const computeTagPillWidth = letters => letters * avgLetterPx + tagPillExtra
 
 /**
  * Given a list of tags, computes the maximum possible of tags the container can
@@ -53,12 +52,10 @@ export const maxPossibleTags = tags => {
     let totalTagsWidth = 0
     let tagsAllowed = 0
     while (tagsAllowed < tags.length) {
-        const tag = tags[tagsAllowed]
+        const tag = tags[tagsAllowed].name
         totalTagsWidth += computeTagPillWidth(tag.length)
         if (totalTagsWidth >= tagContainerWidth) break
         tagsAllowed++
     }
     return tagsAllowed
 }
-
-window.mpt = maxPossibleTags
