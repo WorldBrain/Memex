@@ -274,7 +274,6 @@ class AnnotationContainer extends React.Component {
     }
 
     renderTagInput() {
-        console.log(this.state.tags)
         const tagStringArray = this.state.tags.map(tag => tag.name)
         if (this.state.tagInput)
             return (

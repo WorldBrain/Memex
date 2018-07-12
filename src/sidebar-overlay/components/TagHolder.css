@@ -6,18 +6,20 @@
     background-color: #f7f7f7;
     height: 30px;
     overflow-x: hidden;
+    position: relative;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
 }
 
 .tag {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 800;
     background-color: #c6f3e5;
     color: #000;
-    margin-left: 5px;
-    margin-right: 3px;
-    padding: 2px 5px;
+    padding: 3px 5px;
     cursor: pointer;
-    margin-top: 0.7px;
+    margin-right: 8px;
 }
 
 .placeholder {
@@ -25,4 +27,19 @@
     margin-top: 3px;
     margin-left: 3px;
     color: #4a4a4a;
+}
+
+.plus {
+    font-size: 21px;
+    position: absolute;
+    right: 10px;
+    top: 0px;
+    font-weight: bold;
+    color: #555;
+}
+
+.tagsLeft {
+    font-weight: 800;
+    color: #888;
+    font-family: 'Lato', sans-serif;
 }
