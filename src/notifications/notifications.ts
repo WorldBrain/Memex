@@ -1,4 +1,26 @@
-export const NEW_NOTIFS = [
+interface NotifDefinition {
+    id: string
+    title: string
+    message: string
+    buttonText?: string
+    link?: string
+    sentTime: number
+}
+
+
+/**
+ * Add New Notification Here
+ * Add the new notification in {NOTIFS} array
+ * There are some fields that are mandtory and some of them are optional
+ * Fields and its description - * indicates that it is mandtory
+ *      id* - Should be unique (feature_name + notification + incNumber)
+ *      title* - Title of the notifications - Do not support html tags
+ *      message* - Message in the text - It supports html tags (for example h1, i, b)
+ *      sentTime* - Time when create the notif, get the current unix time (Date.now()) - Important, the notif insertation in db depends on it
+ *      buttonText - If there is any link then text of button
+ *      link - If there is any button then open link when click it
+ */
+export const NOTIFS: NotifDefinition[] = [
     {
         id: 'direct_links_inital_notification',
         title: 'New Feature: Memex.Link',
