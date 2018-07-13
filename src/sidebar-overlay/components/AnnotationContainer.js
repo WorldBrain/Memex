@@ -1,5 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import cx from 'classnames'
 import moment from 'moment'
 import { remoteFunction } from '../../util/webextensionRPC'
 
@@ -225,7 +226,9 @@ class AnnotationContainer extends React.Component {
         })
     }
 
-    toggleTruncation = name => () => {
+    toggleTruncation = name => e => {
+        e.preventDefault()
+        e.stopPropagation()
         const truncated = { ...this.state.truncated }
         truncated[name].isTruncated = !truncated[name].isTruncated
 
@@ -250,13 +253,11 @@ class AnnotationContainer extends React.Component {
         if (truncated[name]) {
             return (
                 <span
-                    className={styles.showMore}
+                    className={cx(styles.showMore, {
+                        [styles.rotated]: !truncated[name].isTruncated,
+                    })}
                     onClick={this.toggleTruncation(name)}
-                >
-                    {this.state.truncated[name].isTruncated
-                        ? '----->'
-                        : '<----'}
-                </span>
+                />
             )
         }
         return null
