@@ -15,21 +15,29 @@ export const setTrackingFlag = createAction(
     },
 )
 
-export const toggleTrackingOptOut = value => async dispatch => {
-    const isOptIn = value === 'y' || value === true
+export const toggleTrackingOptOut = (
+    isOptIn,
+    skipEventTrack = false,
+) => async dispatch => {
+    const trackEvent = force => {
+        if (skipEventTrack) {
+            return Promise.resolve()
+        }
 
-    const trackEvent = () => {
-        const trackEvent = analytics.trackEvent({
-            category: 'Privacy',
-            action: 'Change tracking pref',
-            name: isOptIn ? 'opt-in' : 'opt-out',
-        })
+        const trackEvent = analytics.trackEvent(
+            {
+                category: 'Privacy',
+                action: 'Change tracking pref',
+                name: isOptIn ? 'opt-in' : 'opt-out',
+            },
+            force,
+        )
 
         const processEvent = internalAnalytics.processEvent({
             type: isOptIn
                 ? 'changeTrackingPrefOptIn'
                 : 'changeTrackingPrefOptOut',
-            force: true,
+            force,
         })
 
         return Promise.all([trackEvent, processEvent])
@@ -38,9 +46,9 @@ export const toggleTrackingOptOut = value => async dispatch => {
     // Do event track after state change, as the event may be a noop if opt-out state is already set
     if (isOptIn) {
         dispatch(setTrackingFlag(isOptIn))
-        await trackEvent()
+        await trackEvent(false)
     } else {
-        await trackEvent()
+        await trackEvent(true)
         dispatch(setTrackingFlag(isOptIn))
     }
 }
