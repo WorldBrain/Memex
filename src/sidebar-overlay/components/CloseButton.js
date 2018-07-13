@@ -9,6 +9,7 @@ const CloseButton = ({ isActive, isOverview, clickHandler }) => (
         className={cx({
             [styles.close]: isActive,
             [styles.overview]: isOverview,
+            [styles.hidden]: !isActive,
         })}
         onClick={clickHandler}
     >
