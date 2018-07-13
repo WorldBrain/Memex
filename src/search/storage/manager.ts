@@ -220,7 +220,6 @@ export class StorageManager extends EventEmitter implements ManageableStorage {
 
     async* streamCollection(collectionName: string) {
         const table = this._storage[collectionName]
-        console.log(table)
         const pks = await table.toCollection().primaryKeys()
         for (const pk of pks) {
             yield await { pk, object: await table.get(pk) }
@@ -290,7 +289,7 @@ export class StorageManager extends EventEmitter implements ManageableStorage {
      * @param filter
      * @returns Promise that resolves to the number of objects in the collection which match the filter.
      */
-    async countAll<T>(collectionName: string, filter: FilterQuery<T>) {
+    async countAll<T>(collectionName: string, filter: FilterQuery<T>): Promise<number> {
         await this._initializationPromise
 
         return this._storage

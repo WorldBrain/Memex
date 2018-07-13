@@ -48,7 +48,7 @@ export default class BackupStorage extends FeatureStorage {
                 yield {
                     ...change,
                     forget: async () => {
-                        this.storageManager.deleteObject('backupChange', change)
+                        await this.storageManager.deleteObject('backupChange', change)
                     }
                 }
             }

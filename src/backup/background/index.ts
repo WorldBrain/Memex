@@ -63,7 +63,8 @@ export class BackupBackgroundModule {
 
         (async () => {
             this.startRecordingChanges()
-            const lastBackupTime = await this.lastBackupStorage.getLastBackupTime()
+            // TODO:         Added null && for debugging purposes, remove!!!!!
+            const lastBackupTime = null && await this.lastBackupStorage.getLastBackupTime()
             const backupTime = new Date()
             await this.lastBackupStorage.storeLastBackupTime(backupTime)
 
@@ -77,19 +78,38 @@ export class BackupBackgroundModule {
                     } else {
                         await this.backend.deleteObject({ ...change, events })
                     }
+                    await change.forget()
                 }
             } else { // Just back up everything
                 console.log('found collections', Object.keys(this.storageManager.registry.collections))
 
-                for (const collectionName in this.storageManager.registry.collections) {
-                    if (collectionName === 'backupChanges') {
-                        continue
-                    }
+                const collectionNames =
+                    Object.keys(this.storageManager.registry.collections)
+                        .filter(key => key !== 'backupChanges')
+
+                const collectionCountPairs = await Promise.all(collectionNames.map(async collectionName => {
+                    return [collectionName, await this.storageManager.countAll(collectionName, {})]
+                }))
+
+                const info = { type: 'complete', totalObjects: 0, processedObjects: 0, currentCollection: null, collections: {} }
+                for (const [collectionName, objectCount] of collectionCountPairs) {
+                    info.collections[collectionName] = { objectCount }
+                    info.totalObjects += <number>objectCount
+                }
+
+                events.emit('info', info)
+
+                for (const collectionName of collectionNames) {
+                    info.currentCollection = { name: collectionName, processedObjects: 0 }
+                    events.emit('info', info)
 
                     console.log('backing up collection', collectionName)
                     for await (const { pk, object } of this.storageManager.streamCollection(collectionName)) {
                         // console.log('backing up %s - %s', collectionName, pk)
                         await this.backend.storeObject({ collection: collectionName, pk, object, events })
+                        info.processedObjects += 1
+                        info.currentCollection.processedObjects += 1
+                        events.emit('info', info)
                     }
                 }
             }
