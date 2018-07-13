@@ -25,8 +25,14 @@ class PrivacyContainer extends React.PureComponent {
     handleTrackChange = async event => {
         const shouldTrack =
             event.target.value === 'y' || event.target.value === true
-        await this.props.trackChange(shouldTrack)
-        browser.storage.local.set({ [SHOULD_TRACK]: shouldTrack })
+
+        if (shouldTrack) {
+            browser.storage.local.set({ [SHOULD_TRACK]: shouldTrack })
+            await this.props.trackChange(shouldTrack)
+        } else {
+            await this.props.trackChange(shouldTrack)
+            browser.storage.local.set({ [SHOULD_TRACK]: shouldTrack })
+        }
     }
 
     render() {
