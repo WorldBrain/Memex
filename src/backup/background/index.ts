@@ -42,6 +42,7 @@ export class BackupBackgroundModule {
     setupRequestInterceptor() {
         setupRequestInterceptor({
             webRequest: window['browser'].webRequest,
+            handleLoginRedirectedBack: this.backend.handleLoginRedirectedBack.bind(this.backend)
         })
     }
 

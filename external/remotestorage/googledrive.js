@@ -22,9 +22,9 @@ const util = require('./util')
 
 const BASE_URL = 'https://www.googleapis.com'
 const AUTH_URL = 'https://accounts.google.com/o/oauth2/auth'
-const AUTH_SCOPE = 'https://www.googleapis.com/auth/drive'
+const AUTH_SCOPE = 'https://www.googleapis.com/auth/drive.appdata'
 const SETTINGS_KEY = 'remotestorage:googledrive'
-const PATH_PREFIX = '/remotestorage'
+const PATH_PREFIX = '/appDataFolder'
 
 const GD_DIR_MIME_TYPE = 'application/vnd.google-apps.folder'
 const RS_DIR_MIME_TYPE = 'application/json; charset=UTF-8'
@@ -511,6 +511,7 @@ GoogleDrive.prototype = {
      */
     _getFile: function(path, options) {
         return this._getFileId(path).then(id => {
+            // console.log('_getFile id of %s = %s', path, id)
             return this._getMeta(id).then(meta => {
                 let etagWithoutQuotes
                 if (typeof meta === 'object' && typeof meta.etag === 'string') {
@@ -605,8 +606,9 @@ GoogleDrive.prototype = {
                 'GET',
                 BASE_URL +
                     '/drive/v2/files?' +
-                    'q=' +
-                    encodeURIComponent(query) +
+                    // TODO: Remove this ugly hack that is necessary because somehow listing of appDataFolder is not done correctly!!!
+                    // 'q=' +
+                    // encodeURIComponent(query) +
                     '&fields=' +
                     encodeURIComponent(fields) +
                     '&maxResults=1000',
@@ -669,6 +671,10 @@ GoogleDrive.prototype = {
     _getParentId: function(path) {
         const foldername = parentPath(path)
 
+        if (path === '/appDataFolder/') {
+            return Promise.resolve('appDataFolder')
+        }
+
         return this._getFileId(foldername).then(parentId => {
             if (parentId) {
                 return Promise.resolve(parentId)
@@ -719,11 +725,15 @@ GoogleDrive.prototype = {
      * @private
      */
     _getFileId: function(path) {
+        // console.log('get file id of', path)
+
         let id
 
         if (path === '/') {
             // "root" is a special alias for the fileId of the root folder
             return Promise.resolve('root')
+        } else if (path === '/appDataFolder/') {
+            return Promise.resolve('appDataFolder')
         } else if ((id = this._fileIdCache.get(path))) {
             // id is cached.
             return Promise.resolve(id)
@@ -754,6 +764,9 @@ GoogleDrive.prototype = {
      * @private
      */
     _getMeta: function(id) {
+        // console.log(id)
+        // console.trace()
+
         return this._request(
             'GET',
             BASE_URL + '/drive/v2/files/' + id,
