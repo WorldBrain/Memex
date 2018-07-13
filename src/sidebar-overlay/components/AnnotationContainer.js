@@ -114,6 +114,8 @@ class AnnotationContainer extends React.Component {
     _setTagInput = value => () => this.setState({ tagInput: value })
 
     renderTimestamp = () => {
+        if (this.state.annotationEditMode) return null
+
         const { createdWhen, lastEdited } = this.props.annotation
         let dateObject
         if (!lastEdited) dateObject = new Date(createdWhen)
@@ -313,6 +315,11 @@ class AnnotationContainer extends React.Component {
                         className={styles.annotationTextarea}
                         value={this.state.annotationText}
                         onChange={this.handleChange}
+                        onClick={() => {
+                            this.setState({
+                                tagInput: false,
+                            })
+                        }}
                         placeholder="Add comment..."
                     />
                     {this.renderTagInput()}

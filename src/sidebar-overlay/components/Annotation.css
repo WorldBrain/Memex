@@ -12,7 +12,7 @@
     position: relative;
     margin-top: 10px;
     padding-top: 0;
-    box-shadow: 0px 0px 5px 0px #00000050;
+    box-shadow: 0px 0px 5px 0px #00000040;
     transition: border 0.2s ease-in;
 
     & > * {
@@ -29,7 +29,6 @@
     }
 
     &.iframe {
-        /* TODO Fix all inconsistensies caused by iFrame */
         margin-left: 7px;
 
         .trashIcon,
@@ -87,13 +86,13 @@
     overflow: hidden;
     word-wrap: break-word;
     white-space: pre-wrap;
-    background: #fafafa;
+    background: #f0f0f0;
     margin: 0 -10px 13px -10px;
     padding: 15px 10px 15px 10px;
     border-top: 1px dashed #d2d2d2;
 
     &.isJustComment {
-        padding-top: 30px;
+        padding-top: 35px;
         border: none;
         border-radius: 5px;
     }
@@ -106,16 +105,16 @@
 
 .timestamp {
     width: 45%;
-    font-size: 11px;
+    font-size: 10px;
     text-align: right;
     display: inline-block;
     vertical-align: middle;
     position: absolute;
-    top: 10px;
-    right: 15px;
+    top: 14px;
+    right: 20px;
     font-weight: 600;
     font-family: 'Lato', sans-serif;
-    color: #222;
+    color: #4a4a4a;
 
     & .lastEdit {
         font-weight: 400;
@@ -139,6 +138,12 @@
     margin-right: 0px;
     cursor: pointer;
     font-weight: 700;
+    padding: 3px;
+    background-color: transparent;
+
+    &:hover {
+        background-color: #efefef;
+    }
 }
 
 .footerText {
@@ -221,6 +226,7 @@ input:focus {
 }
 
 .trashIcon {
+    box-sizing: border-box;
     background-image: url('/img/trash_closed.svg');
     background-repeat: no-repeat;
     background-size: 18px;
@@ -243,6 +249,7 @@ input:focus {
 }
 
 .editIcon {
+    box-sizing: border-box;
     background-image: url('/img/newedit.svg');
     background-repeat: no-repeat;
     background-size: 18px;
@@ -266,9 +273,10 @@ input:focus {
     background-image: url('/img/gotopage.svg');
     background-repeat: no-repeat;
     background-size: 27px;
-    width: 23px;
-    height: 23px;
-    margin-top: -1.5px;
+    background-position-x: 1px;
+    width: 26px;
+    height: 26px;
+    margin-top: -0.5px;
     margin-right: -3px;
     display: inline-block;
     cursor: pointer;

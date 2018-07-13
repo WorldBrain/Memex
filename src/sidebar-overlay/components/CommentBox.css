@@ -31,6 +31,7 @@
 }
 
 .textarea {
+    box-sizing: border-box;
     resize: vertical;
     font-weight: 500;
     width: 300px;

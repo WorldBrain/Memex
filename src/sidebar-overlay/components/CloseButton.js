@@ -8,8 +8,8 @@ const CloseButton = ({ isActive, isOverview, clickHandler }) => (
     <div
         className={cx({
             [styles.close]: isActive,
-            [styles.overview]: isOverview,
             [styles.hidden]: !isActive,
+            [styles.overview]: isOverview,
         })}
         onClick={clickHandler}
     >
@@ -19,7 +19,7 @@ const CloseButton = ({ isActive, isOverview, clickHandler }) => (
 
 CloseButton.propTypes = {
     isActive: PropTypes.bool.isRequired,
-    isOverview: PropTypes.bool.isRequired,
+    isOverview: PropTypes.bool,
     clickHandler: PropTypes.func.isRequired,
 }
 
