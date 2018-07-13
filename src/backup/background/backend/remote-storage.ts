@@ -44,7 +44,7 @@ export class RemoteStorageBackend extends BackupBackend {
     }
 
     async storeObject({ collection, pk, object, events }: { collection: string, pk: string, object: object, events: EventEmitter }): Promise<any> {
-        throw new Error('Not yet implemented  :(')
+        await this.remoteStorage.put(`${collection}/${pk}`, JSON.stringify(object), 'application/json')
     }
 
     async deleteObject({ collection, pk, events }: { collection: string, pk: string, events: EventEmitter }): Promise<any> {
