@@ -19,15 +19,14 @@ class PrivacyContainer extends React.PureComponent {
             [SHOULD_TRACK]: PrivacyContainer.DEF_TRACKING,
         })
 
-        this.props.trackChange(storage[SHOULD_TRACK])
+        this.props.trackChange(storage[SHOULD_TRACK], true)
     }
 
-    handleTrackChange = event => {
+    handleTrackChange = async event => {
         const shouldTrack =
             event.target.value === 'y' || event.target.value === true
+        await this.props.trackChange(shouldTrack)
         browser.storage.local.set({ [SHOULD_TRACK]: shouldTrack })
-
-        this.props.trackChange(shouldTrack)
     }
 
     render() {
@@ -45,8 +44,8 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-    trackChange: shouldTrack =>
-        dispatch(actions.toggleTrackingOptOut(shouldTrack)),
+    trackChange: (shouldTrack, skipEventTrack = false) =>
+        dispatch(actions.toggleTrackingOptOut(shouldTrack, skipEventTrack)),
 })
 
 export default connect(
