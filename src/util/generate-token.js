@@ -10,6 +10,12 @@ export async function generateTokenIfNot({
     hostname = API_HOST,
     pathname = API_PATH,
 }) {
+    const isDoNotTrackEnabled = window.navigator.doNotTrack
+
+    if (isDoNotTrackEnabled) {
+        return null
+    }
+
     const userId = (await browser.storage.local.get(USER_ID))[USER_ID]
     if (userId) {
         return userId
@@ -34,4 +40,6 @@ export async function generateTokenIfNot({
         browser.storage.local.set({ [USER_ID]: token.id })
         return token.id
     }
+
+    return null
 }

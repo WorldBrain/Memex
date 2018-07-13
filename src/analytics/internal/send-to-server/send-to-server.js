@@ -101,11 +101,13 @@ class SendToServer {
     }
 
     async shouldTrack() {
+        const idDoNotTrackEnabled = window.navigator.doNotTrack
+
         const storage = await browser.storage.local.get({
             [SHOULD_TRACK]: SendToServer.DEF_TRACKING,
         })
 
-        return storage[SHOULD_TRACK]
+        return storage[SHOULD_TRACK] && !idDoNotTrackEnabled
     }
 
     /**
