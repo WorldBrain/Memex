@@ -38,7 +38,6 @@ Sidebar.propTypes = {
     handleStateChange: PropTypes.func.isRequired,
     renderAnnotations: PropTypes.func.isRequired,
     toggleMouseOnSidebar: PropTypes.func.isRequired,
-    closeSidebar: PropTypes.func.isRequired,
     env: PropTypes.string.isRequired,
 }
 

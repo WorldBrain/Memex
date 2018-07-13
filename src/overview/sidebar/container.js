@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import onClickOutside from 'react-onclickoutside'
-import Sidebar from 'src/sidebar-overlay/'
+import Sidebar, { CloseButton } from 'src/sidebar-overlay/'
 import * as selectors from './selectors'
 import * as actions from './actions'
 
@@ -24,6 +24,15 @@ class SidebarContainer extends React.Component {
                 {this.props.showSidebar ? (
                     <Sidebar {...this.props} env={'overview'} />
                 ) : null}
+                <CloseButton
+                    isActive={this.props.showSidebar}
+                    isOverview
+                    clickHandler={e => {
+                        e.preventDefault()
+                        this.props.setShowSidebar(false)
+                        this.props.toggleMouseOnSidebar()
+                    }}
+                />
             </div>
         )
     }

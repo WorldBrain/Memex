@@ -8,6 +8,7 @@ import { remoteFunction, makeRemotelyCallable } from 'src/util/webextensionRPC'
 import FrameCommunication from '../messaging'
 
 import styles from './Ribbon.css'
+import CloseButton from './CloseButton'
 
 class Ribbon extends React.Component {
     static propTypes = {
@@ -170,14 +171,10 @@ class Ribbon extends React.Component {
                     </div>
                     <div className={styles.logo} onClick={this.toggleSidebar} />
                 </div>
-                <div
-                    className={cx({
-                        [styles.close]: isSidebarActive,
-                    })}
-                    onClick={this.toggleSidebar}
-                >
-                    X
-                </div>
+                <CloseButton
+                    isActive={isSidebarActive}
+                    clickHandler={this.toggleSidebar}
+                />
                 <iframe
                     src={sidebarURL}
                     height={window.innerHeight}

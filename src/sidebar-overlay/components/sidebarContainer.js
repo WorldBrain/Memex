@@ -65,16 +65,6 @@ class SidebarContainer extends React.Component {
         if (!isOpen) this.props.setShowSidebar(false)
     }
 
-    closeSidebar = () => {
-        const { env, setShowSidebar } = this.props
-        if (env === 'overview') {
-            this.props.toggleMouseOnSidebar()
-            setShowSidebar(false)
-        } else {
-            this.parentFC.remoteExecute('toggleSidebar')()
-        }
-    }
-
     /**
      * Takes the user to the actual higlighted text.
      */
@@ -124,7 +114,6 @@ class SidebarContainer extends React.Component {
                 handleStateChange={this.handleStateChange}
                 toggleMouseOnSidebar={this.props.toggleMouseOnSidebar}
                 renderAnnotations={this.renderAnnotations}
-                closeSidebar={this.closeSidebar}
                 env={this.props.env}
             />
         )
