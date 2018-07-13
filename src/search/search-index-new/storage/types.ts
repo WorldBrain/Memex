@@ -22,7 +22,7 @@ export interface MigrationRunner {
 }
 
 export interface FindOpts {
-    ignoreCase?: boolean
+    ignoreCase?: string[]
     reverse?: boolean
     skip?: number
     limit?: number

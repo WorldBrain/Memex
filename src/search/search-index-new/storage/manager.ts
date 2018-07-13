@@ -1,6 +1,7 @@
 import { extractTerms } from '../../search-index-old/pipeline'
 import Storage from '../storage'
 import StorageRegistry from './registry'
+import { UnimplementedError, InvalidFindOptsError } from './errors'
 import {
     ManageableStorage,
     CollectionDefinitions,
@@ -12,7 +13,6 @@ import {
 } from './types'
 
 export class StorageManager implements ManageableStorage {
-    static DEF_SUGGEST_CASE_IGNORE = true
     static DEF_SUGGEST_LIMIT = 10
     static DEF_FIND_OPTS: Partial<FindOpts> = {
         reverse: false,
@@ -93,9 +93,25 @@ export class StorageManager implements ManageableStorage {
     }
 
     // TODO: Afford full find support for ignoreCase opt; currently just uses the first filter entry
-    private _findIgnoreCase<T>(collectionName: string, filter: FilterQuery<T>) {
+    private _findIgnoreCase<T>(
+        collectionName: string,
+        filter: FilterQuery<T>,
+        findOpts: FindOpts,
+    ) {
         // Grab first entry from the filter query; ignore rest for now
-        const [[indexName, value]] = Object.entries(filter)
+        const [[indexName, value], ...fields] = Object.entries(filter)
+
+        if (fields.length) {
+            throw new UnimplementedError(
+                'find methods with ignoreCase only support querying a single field.',
+            )
+        }
+
+        if (findOpts.ignoreCase[0] !== indexName) {
+            throw new InvalidFindOptsError(
+                'specified ignoreCase field is not in filter query',
+            )
+        }
 
         return this._storage
             .table<T>(collectionName)
@@ -108,9 +124,10 @@ export class StorageManager implements ManageableStorage {
         filter: FilterQuery<T>,
         findOpts: FindOpts,
     ) {
-        let coll = findOpts.ignoreCase
-            ? this._findIgnoreCase<T>(collectionName, filter)
-            : this._storage.collection<T>(collectionName).find(filter)
+        let coll =
+            findOpts.ignoreCase && findOpts.ignoreCase.length
+                ? this._findIgnoreCase<T>(collectionName, filter, findOpts)
+                : this._storage.collection<T>(collectionName).find(filter)
 
         if (findOpts.reverse) {
             coll = coll.reverse()
@@ -200,27 +217,35 @@ export class StorageManager implements ManageableStorage {
         collectionName: string,
         filter: FilterQuery<T>,
         {
-            ignoreCase = StorageManager.DEF_SUGGEST_CASE_IGNORE,
             limit = StorageManager.DEF_SUGGEST_LIMIT,
-            reverse,
+            ...findOpts
         }: FindOpts = StorageManager.DEF_FIND_OPTS,
     ) {
         await this._initializationPromise
 
         // Grab first entry from the filter query; ignore rest for now
-        const [[indexName, value]] = Object.entries(filter)
+        const [[indexName, value], ...fields] = Object.entries(filter)
+
+        if (fields.length) {
+            throw new UnimplementedError(
+                'suggest only supports querying a single field.',
+            )
+        }
 
         const whereClause = this._storage
             .table<T>(collectionName)
             .where(indexName)
 
-        let coll = ignoreCase
-            ? whereClause.startsWithIgnoreCase(value)
-            : whereClause.startsWith(value)
+        let coll =
+            findOpts.ignoreCase &&
+            findOpts.ignoreCase.length &&
+            findOpts.ignoreCase[0] === indexName
+                ? whereClause.startsWithIgnoreCase(value)
+                : whereClause.startsWith(value)
 
         coll = coll.limit(limit)
 
-        if (reverse) {
+        if (findOpts.reverse) {
             coll = coll.reverse()
         }
 

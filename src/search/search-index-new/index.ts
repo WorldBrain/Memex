@@ -21,6 +21,8 @@ const index = new Proxy<Storage>({} as Storage, {
     },
 })
 
+window['storageMan'] = storageManager
+
 export const init = (props?: Props) => {
     realIndex = new Storage({ ...props, storageManager })
     storageManager._finishInitialization(realIndex)
