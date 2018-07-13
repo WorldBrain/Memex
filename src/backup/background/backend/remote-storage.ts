@@ -1,3 +1,4 @@
+import * as queryString from 'query-string'
 import * as RemoteStorage from 'external/remotestorage'
 import { EventEmitter } from "events"
 import { BackupBackend } from "./types"
@@ -31,6 +32,15 @@ export class RemoteStorageBackend extends BackupBackend {
         RemoteStorage.Authorize.setLocation = origSetLocation
 
         return location['href'] || location
+    }
+
+    // TODO: Find better name. The back-end redirects back to this URL with some stuff appended.
+    async handleLoginRedirectedBack(locationHref: string) {
+        const params = queryString.parse(locationHref.split('#')[1])
+        const accessToken = params['access_token']
+        this.remoteStorage.remote.configure({
+            token: accessToken,
+        })
     }
 
     async storeObject({ collection, pk, object, events }: { collection: string, pk: string, object: object, events: EventEmitter }): Promise<any> {

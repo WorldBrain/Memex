@@ -4,13 +4,12 @@ import BackupSettings from './presentation'
 
 export default class BackupSettingsContainer extends React.Component {
     handleLoginRequested = async () => {
-        console.log(
-            await remoteFunction('getBackupProviderLoginLink')({
-                returnURL:
-                    'http://memex.cloud/backup/auth-redirect/google-drive',
-                provider: 'googledrive',
-            }),
-        )
+        window.location.href = await remoteFunction(
+            'getBackupProviderLoginLink',
+        )({
+            returnURL: 'http://memex.cloud/backup/auth-redirect/google-drive',
+            provider: 'googledrive',
+        })
     }
 
     render() {

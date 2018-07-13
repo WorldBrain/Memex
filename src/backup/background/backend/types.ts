@@ -5,6 +5,9 @@ export abstract class BackupBackend {
         return null
     }
 
+    async handleLoginRedirectedBack(locationHref: string) {
+    }
+
     async startBackup({ events }: { events: EventEmitter }): Promise<any> {
         return
     }
