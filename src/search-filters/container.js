@@ -29,6 +29,8 @@ class SearchFiltersContainer extends PureComponent {
         delIncDomainFilter: PropTypes.func.isRequired,
         tagFilterDropdown: PropTypes.bool.isRequired,
         domainFilterDropdown: PropTypes.bool.isRequired,
+        bookmarkFilter: PropTypes.bool.isRequired,
+        onShowOnlyBookmarksChange: PropTypes.func.isRequired,
     }
 
     renderBookmarkFilter = () => <BookmarkFilter />
@@ -84,7 +86,11 @@ class SearchFiltersContainer extends PureComponent {
         )
 
     renderBookmarkFilter = () => (
-        <Checkbox isChecked handleChange={() => {}}>
+        <Checkbox
+            id="toggle-bookmark"
+            isChecked={this.props.bookmarkFilter}
+            handleChange={this.props.onShowOnlyBookmarksChange}
+        >
             Bookmarks only
         </Checkbox>
     )
@@ -107,6 +113,7 @@ const mapStateToProps = state => ({
     filteredDomains: filters.displayDomains(state),
     domainFilterDropdown: selectors.domainFilter(state),
     tagFilterDropdown: selectors.tagFilter(state),
+    bookmarkFilter: filters.onlyBookmarks(state),
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -119,8 +126,9 @@ const mapDispatchToProps = dispatch => ({
         },
         dispatch,
     ),
-    onShowOnlyBookmarksChange: () =>
-        dispatch(filterActs.toggleBookmarkFilter()),
+    onShowOnlyBookmarksChange: () => {
+        dispatch(filterActs.toggleBookmarkFilter())
+    },
     clearAllFilters: () => dispatch(filterActs.resetFilters()),
     // handleFilterClick: source => () => dispatch(filterActs.setFilterPopup(source)),
     addTagFilter: tag => dispatch(filterActs.addTagFilter(tag)),
