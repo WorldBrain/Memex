@@ -16,6 +16,7 @@ import {
     IndexDropdownSB,
 } from './components'
 import { actions, selectors } from './'
+import { selectors as sidebar } from '../overview/sidebar-left'
 
 class SearchFiltersContainer extends PureComponent {
     static propTypes = {
@@ -31,6 +32,7 @@ class SearchFiltersContainer extends PureComponent {
         domainFilterDropdown: PropTypes.bool.isRequired,
         bookmarkFilter: PropTypes.bool.isRequired,
         onShowOnlyBookmarksChange: PropTypes.func.isRequired,
+        isSidebarOpen: PropTypes.bool.isRequired,
     }
 
     renderBookmarkFilter = () => <BookmarkFilter />
@@ -66,6 +68,7 @@ class SearchFiltersContainer extends PureComponent {
                 initFilters={this.props.filteredTags}
                 initSuggestions={this.props.filteredTags}
                 source="tag"
+                isSidebarOpen={this.props.isSidebarOpen}
             />
         )
 
@@ -82,6 +85,7 @@ class SearchFiltersContainer extends PureComponent {
                 initFilters={this.props.filteredDomains}
                 initSuggestions={this.props.filteredDomains}
                 source="domain"
+                isSidebarOpen={this.props.isSidebarOpen}
             />
         )
 
@@ -114,6 +118,7 @@ const mapStateToProps = state => ({
     domainFilterDropdown: selectors.domainFilter(state),
     tagFilterDropdown: selectors.tagFilter(state),
     bookmarkFilter: filters.onlyBookmarks(state),
+    isSidebarOpen: sidebar.isSidebarOpen(state),
 })
 
 const mapDispatchToProps = dispatch => ({
