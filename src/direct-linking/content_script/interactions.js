@@ -42,6 +42,7 @@ function selectTextFromRange(range) {
     selection.addRange(range)
 }
 
+// TODO: Move all highglight related functions to sidebar-overlay
 export function scrollToHighlight({ isDark }) {
     const highlightClass = isDark ? 'memex-highlight-dark' : 'memex-highlight'
     const $highlight = document.querySelector('.' + styles[highlightClass])

@@ -1,12 +1,17 @@
 import * as AllRaven from 'raven-js'
 import { retryUntil } from '../utils'
+import { attachEventListenersToNewHighlights } from '../../sidebar-overlay/interactions'
 import { descriptorToRange, markRange } from './annotations'
 
 import styles from './styles.css'
 
 const Raven = AllRaven['default']
 
-export async function highlightAnnotation({ annotation, isDark }) {
+export async function highlightAnnotation(
+    { annotation, isDark },
+    focusOnAnnotation = null,
+) {
+    // TODO: Simplify class naming
     const highlightClass = isDark ? 'memex-highlight-dark' : 'memex-highlight'
     try {
         await Raven.context(async () => {
@@ -30,6 +35,12 @@ export async function highlightAnnotation({ annotation, isDark }) {
                 },
             )
             markRange({ range, cssClass: styles[highlightClass] })
+
+            attachEventListenersToNewHighlights(
+                styles[highlightClass],
+                annotation,
+                focusOnAnnotation,
+            )
         })
     } catch (e) {
         console.error(

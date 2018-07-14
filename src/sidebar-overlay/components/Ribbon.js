@@ -92,6 +92,10 @@ class Ribbon extends React.Component {
         })
     }
 
+    focusAnnotationContainer = annotationUrl => {
+        this.frameFC.remoteExecute('focusAnnotation')(annotationUrl)
+    }
+
     reloadAnnotations = async () => {
         await this.frameFC.remoteExecute('reloadAnnotations')()
         await this.fetchAnnotations()
@@ -99,13 +103,14 @@ class Ribbon extends React.Component {
         const highlightables = this.state.annotations.filter(
             annotation => annotation.selector,
         )
-        this.props.highlightAll(highlightables)
+        this.props.highlightAll(highlightables, this.focusAnnotationContainer)
     }
 
     closeSidebarOps = async () => {
         this.props.removeHighlights({ isDark: false })
         this.props.removeHighlights({ isDark: true })
         await this.frameFC.remoteExecute('sendAnchorToSidebar')(null)
+        this.frameFC.remoteExecute('focusAnnotation')('')
     }
 
     toggleSidebar = async () => {
@@ -136,7 +141,8 @@ class Ribbon extends React.Component {
         })
     }
 
-    handleClickOutside = () => {
+    handleClickOutside = e => {
+        if (e.target.dataset.annotation === 'yes') return
         this.closeSidebarOps()
         this.setState({
             isSidebarActive: false,

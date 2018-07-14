@@ -24,9 +24,10 @@ export const highlightAndScroll = async annotation => {
  * Given an array of annotation objects, highlights all of them.
  * @param {Array<*>} annotations Array of annotations to highlight
  */
-export const highlightAnnotations = async annotations => {
+export const highlightAnnotations = async (annotations, focusOnAnnotation) => {
     annotations.forEach(
-        async annotation => await highlightAnnotation({ annotation }),
+        async annotation =>
+            await highlightAnnotation({ annotation }, focusOnAnnotation),
     )
 }
 
@@ -114,4 +115,26 @@ export const goToAnnotation = (
     } else {
         highlightAndScroll(annotation)
     }
+}
+
+export const attachEventListenersToNewHighlights = (
+    highlightClass,
+    annotation,
+    focusOnAnnotation,
+) => {
+    const newHighlights = document.querySelectorAll(
+        `.${highlightClass}:not([data-annotation])`,
+    )
+    newHighlights.forEach(highlight => {
+        highlight.dataset.annotation = 'yes'
+
+        if (!focusOnAnnotation) return
+
+        highlight.addEventListener('click', async e => {
+            e.preventDefault()
+            removeHighlights({ isDark: true })
+            await highlightAnnotation({ annotation, isDark: true }, null)
+            focusOnAnnotation(annotation.url)
+        })
+    })
 }

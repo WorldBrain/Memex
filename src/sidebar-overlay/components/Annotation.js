@@ -12,7 +12,7 @@ const Annotation = props => (
         })}
         id={props.id}
         onClick={
-            props.isIFrame && props.isJustComment ? props.goToAnnotation : null
+            props.isIFrame && !props.isJustComment ? props.goToAnnotation : null
         }
     >
         <div

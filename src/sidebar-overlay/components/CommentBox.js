@@ -77,6 +77,7 @@ class CommentBox extends React.Component {
     }
 
     save = () => {
+        // TODO: Fix tags not getting stored right
         const { commentInput, tags } = this.state
         const { anchor } = this.props
         const strippedComment = commentInput.trim()

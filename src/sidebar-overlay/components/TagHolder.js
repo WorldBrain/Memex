@@ -63,7 +63,6 @@ class TagHolder extends React.Component {
     renderTagsLeft() {
         const { maxTagsAllowed } = this.state
         const { tags } = this.props
-        console.log(maxTagsAllowed, tags)
 
         if (!maxTagsAllowed || !(tags.length - maxTagsAllowed)) return null
         const tagsLeft = this.props.tags.length - this.state.maxTagsAllowed
