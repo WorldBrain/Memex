@@ -4,7 +4,7 @@ import Menu from 'react-burger-menu/lib/menus/slide'
 
 import CommentBox from './CommentBox'
 import styles from './Sidebar.css'
-import MenuStyles from './MenuStyles.js'
+import MenuStyles from './MenuStyles'
 
 const Sidebar = props => (
     <Menu

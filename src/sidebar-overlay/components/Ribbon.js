@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import cx from 'classnames'
 import onClickOutside from 'react-onclickoutside'
 
-import { highlightAndScroll } from '../interactions'
+import { highlightAndScroll } from '../content_script/interactions'
 import { remoteFunction, makeRemotelyCallable } from 'src/util/webextensionRPC'
 import FrameCommunication from '../messaging'
 
@@ -142,7 +142,8 @@ class Ribbon extends React.Component {
     }
 
     handleClickOutside = e => {
-        if (e.target.dataset.annotation === 'yes') return
+        if (!this.state.isSidebarActive) return
+        else if (e.target.dataset.annotation === 'yes') return
         this.closeSidebarOps()
         this.setState({
             isSidebarActive: false,

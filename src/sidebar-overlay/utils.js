@@ -1,4 +1,5 @@
 import { RetryTimeoutError } from '../direct-linking/utils'
+import { remoteFunction } from '../util/webextensionRPC'
 
 export function retryUntilErrorResolves(
     promiseCreator,
@@ -58,4 +59,40 @@ export const maxPossibleTags = tags => {
         tagsAllowed++
     }
     return tagsAllowed
+}
+
+/**
+ * HOF to return a function which
+ * Scrolls to annotation or creates a new tab and then scrolls to annotation
+ * Depending on the environment of the sidebar.
+ * @param {*} annotation The annotation to go to.
+ * @param {string} env The sidebar enviroment in which the function is being executed.
+ * @param {string} pageUrl Url of the page highlight is in.
+ * @param {function} highlightAndScroll Remote function which gets the passed annotation
+ * @returns {Promise<function>}
+ */
+
+export const goToAnnotation = (
+    env,
+    pageUrl,
+    highlightAndScroll,
+) => annotation => async () => {
+    // If annotation is a comment, do nothing
+    if (!annotation.body) return false
+    else if (env === 'overview') {
+        const tab = await browser.tabs.create({
+            active: true,
+            url: pageUrl,
+        })
+
+        retryUntilErrorResolves(
+            async () =>
+                await remoteFunction('goToAnnotation', {
+                    tabId: tab.id,
+                })(annotation),
+            { intervalMiliseconds: 1500, timeoutMiliseconds: 12000 },
+        )
+    } else {
+        highlightAndScroll(annotation)
+    }
 }

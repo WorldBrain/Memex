@@ -4,8 +4,10 @@ import ReactDOM from 'react-dom'
 import SidebarContainer from './sidebarContainer'
 import Ribbon from './Ribbon'
 
-import { highlightAnnotations } from '../interactions'
-import { removeHighlights } from 'src/direct-linking/content_script/interactions'
+import {
+    highlightAnnotations,
+    removeHighlights,
+} from '../content_script/interactions'
 
 export const setupRibbonUI = target => {
     const sidebarURL = browser.extension.getURL('sidebar.html')

@@ -1,9 +1,6 @@
-import scrollToElement from 'scroll-to-element'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { copyToClipboard } from './utils'
 import * as annotations from './annotations'
-
-import styles from './styles.css'
 
 export async function createAndCopyDirectLink() {
     const selection = document.getSelection()
@@ -40,24 +37,4 @@ function selectTextFromRange(range) {
     const selection = document.getSelection()
     selection.removeAllRanges()
     selection.addRange(range)
-}
-
-// TODO: Move all highglight related functions to sidebar-overlay
-export function scrollToHighlight({ isDark }) {
-    const highlightClass = isDark ? 'memex-highlight-dark' : 'memex-highlight'
-    const $highlight = document.querySelector('.' + styles[highlightClass])
-    if ($highlight) {
-        setTimeout(() => {
-            scrollToElement($highlight, { offset: -225 })
-        }, 300)
-    } else {
-        console.error('MEMEX: Oops, no highlight found to scroll to')
-    }
-}
-
-export function removeHighlights({ isDark }) {
-    const highlightClass = isDark ? 'memex-highlight-dark' : 'memex-highlight'
-    const className = styles[highlightClass]
-    const highlights = document.querySelectorAll('.' + className)
-    highlights.forEach(highlight => highlight.classList.remove(className))
 }

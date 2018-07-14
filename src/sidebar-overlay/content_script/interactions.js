@@ -1,13 +1,23 @@
-import { highlightAnnotation } from 'src/direct-linking/content_script/rendering'
-import {
-    scrollToHighlight,
-    removeHighlights,
-} from 'src/direct-linking/content_script/interactions'
+import scrollToElement from 'scroll-to-element'
 
+import { highlightAnnotation } from 'src/direct-linking/content_script/rendering'
 import { injectCSS } from 'src/search-injection/dom'
-import { makeRemotelyCallable, remoteFunction } from 'src/util/webextensionRPC'
-import { setupRibbonUI, destroyAll } from './components'
-import { retryUntilErrorResolves } from './utils'
+import { makeRemotelyCallable } from 'src/util/webextensionRPC'
+import { setupRibbonUI, destroyAll } from '../components'
+
+import styles from 'src/direct-linking/content_script/styles.css'
+
+export function scrollToHighlight({ isDark }) {
+    const highlightClass = isDark ? 'memex-highlight-dark' : 'memex-highlight'
+    const $highlight = document.querySelector('.' + styles[highlightClass])
+    if ($highlight) {
+        setTimeout(() => {
+            scrollToElement($highlight, { offset: -225 })
+        }, 300)
+    } else {
+        console.error('MEMEX: Oops, no highlight found to scroll to')
+    }
+}
 
 /**
  * Given an annotation object, highlights that text and removes other highlights
@@ -75,47 +85,7 @@ export const setupRPC = () => {
     })
 }
 
-/**
- * HOF to return a function which
- * Scrolls to annotation or creates a new tab and then scrolls to annotation
- * Depending on the environment of the sidebar.
- * @param {*} annotation The annotation to go to.
- * @param {string} env The sidebar enviroment in which the function is being executed.
- * @param {string} pageUrl Url of the page highlight is in.
- * @param {function} highlightAndScroll Remote function which gets the passed annotation
- * @returns {Promise<function>}
- */
-
-export const goToAnnotation = (
-    env,
-    pageUrl,
-    highlightAndScroll,
-) => annotation => async () => {
-    // If annotation is a comment, do nothing
-    if (!annotation.body) return false
-    else if (env === 'overview') {
-        const tab = await browser.tabs.create({
-            active: true,
-            url: pageUrl,
-        })
-
-        retryUntilErrorResolves(
-            async () =>
-                await remoteFunction('goToAnnotation', {
-                    tabId: tab.id,
-                })(annotation),
-            { intervalMiliseconds: 1500, timeoutMiliseconds: 12000 },
-        )
-
-        // setTimeout(async () => {
-        //     await remoteFunction('goToAnnotation', { tabId: tab.id })(
-        //         annotation,
-        //     )
-        // }, 3000)
-    } else {
-        highlightAndScroll(annotation)
-    }
-}
+let listener = null
 
 export const attachEventListenersToNewHighlights = (
     highlightClass,
@@ -130,11 +100,26 @@ export const attachEventListenersToNewHighlights = (
 
         if (!focusOnAnnotation) return
 
-        highlight.addEventListener('click', async e => {
+        listener = async e => {
             e.preventDefault()
+            if (!e.target.dataset.annotation) return
             removeHighlights({ isDark: true })
             await highlightAnnotation({ annotation, isDark: true }, null)
             focusOnAnnotation(annotation.url)
-        })
+        }
+
+        highlight.addEventListener('click', listener, false)
+    })
+}
+
+export function removeHighlights({ isDark }) {
+    const highlightClass = isDark ? 'memex-highlight-dark' : 'memex-highlight'
+    const className = styles[highlightClass]
+    const highlights = document.querySelectorAll('.' + className)
+
+    highlights.forEach(highlight => {
+        highlight.classList.remove(className)
+        highlight.dataset.annotation = ''
+        highlight.removeEventListener('click', listener)
     })
 }

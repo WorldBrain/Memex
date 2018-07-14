@@ -6,7 +6,7 @@ import { selectors, actions } from '../redux'
 import Sidebar from './Sidebar'
 import Annotation from './AnnotationContainer'
 
-import { goToAnnotation } from '../interactions'
+import { goToAnnotation } from '../utils'
 import FrameCommunication from '../messaging'
 // import { remoteFunction } from '../../util/webextensionRPC'
 
@@ -83,10 +83,10 @@ class SidebarContainer extends React.Component {
      * Sets the annotation container active
      */
     focusAnnotation = url => {
-        console.log(url)
+        if (!url) return
         const $container = document.getElementById(url)
         this.props.setActiveAnnotation(url)
-        $container.scrollIntoView({ block: 'start', behavior: 'smooth' })
+        $container.scrollIntoView({ block: 'center', behavior: 'smooth' })
     }
 
     renderAnnotations = () => {
