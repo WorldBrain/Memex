@@ -10,7 +10,7 @@
     color: #767676;
     position: relative;
     width: 100%;
-    transition: width 0.5s ease-in, background-color 1000ms linear;
+    transition: width 0.3s ease-in, background-color 1000ms linear;
     cursor: pointer;
 
     &:hover {

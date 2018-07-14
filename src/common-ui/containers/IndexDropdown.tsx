@@ -42,6 +42,7 @@ export interface State {
     displayFilters: string[]
     filters: string[]
     focused: number
+    clearFieldBtn: boolean
 }
 
 class IndexDropdownContainer extends Component<Props, State> {
@@ -78,6 +79,7 @@ class IndexDropdownContainer extends Component<Props, State> {
                 ? props.initSuggestions : props.initFilters, // Display state objects; will change all the time
             filters: props.initFilters, // Actual tags associated with the page; will only change when DB updates
             focused: props.initFilters.length ? 0 : -1,
+            clearFieldBtn: false,
         }
     }
 
@@ -94,6 +96,12 @@ class IndexDropdownContainer extends Component<Props, State> {
     private get allowIndexUpdate() {
         return this.props.url != null
     }
+
+
+    private showClearfieldBtn() {
+        return !this.props.isForSidebar ? false : this.state.clearFieldBtn
+    }
+
 
     private async storeTrackEvent(isAdded: boolean) {
         const { hover, source } = this.props
@@ -305,16 +313,30 @@ class IndexDropdownContainer extends Component<Props, State> {
         if (this.inputBlockPattern.test(searchVal)) {
             return
         }
-
         // If user backspaces to clear input, show the current assoc tags again
-        const displayFilters = !searchVal.length
-            ? this.state.filters
-            : this.state.displayFilters
+        let displayFilters
+        let clearFieldBtn
+        if (!searchVal.length) {
+            displayFilters = this.state.filters
+            clearFieldBtn = false
+        } else {
+            displayFilters = this.state.displayFilters
+            clearFieldBtn = true
+        }
+
 
         this.setState(
-            state => ({ ...state, searchVal, displayFilters }),
+            state => ({ ...state, searchVal, displayFilters, clearFieldBtn }),
             this.fetchTagSuggestions, // Debounced suggestion fetch
         )
+    }
+
+    clearSearchField = () => {
+        this.setState(state => ({
+            ...state,
+            searchVal: '',
+            clearFieldBtn: false,
+        }))
     }
 
     private fetchTagSuggestions = async () => {
@@ -379,6 +401,8 @@ class IndexDropdownContainer extends Component<Props, State> {
                 setInputRef={this.setInputRef}
                 numberOfTags={this.state.filters.length}
                 tagSearchValue={this.state.searchVal}
+                clearSearchField={this.clearSearchField}
+                showClearfieldBtn={this.showClearfieldBtn()}
                 {...this.props}
             >
                 {this.renderTags()}

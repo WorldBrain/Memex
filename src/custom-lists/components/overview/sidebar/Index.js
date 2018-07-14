@@ -28,8 +28,6 @@ class ListContainer extends Component {
         showCreateList: PropTypes.bool.isRequired,
         showCommonNameWarning: PropTypes.bool.isRequired,
         closeCreateListForm: PropTypes.func.isRequired,
-        setMouseOver: PropTypes.func.isRequired,
-        resetMouseOver: PropTypes.func.isRequired,
     }
 
     constructor(props) {
@@ -144,10 +142,7 @@ class ListContainer extends Component {
 
     render() {
         return (
-            <div
-                onMouseLeave={this.props.resetMouseOver}
-                onMouseEnter={this.props.setMouseOver}
-            >
+            <div>
                 <hr className={extStyles.hr} />
 
                 <MyCollection
@@ -184,8 +179,6 @@ const mapDispatchToProps = (dispatch, getState) => ({
             updateList: actions.updateList,
             toggleCreateListForm: actions.toggleCreateListForm,
             closeCreateListForm: actions.closeCreateListForm,
-            setMouseOver: actions.setMouseOver,
-            resetMouseOver: actions.resetMouseOver,
         },
         dispatch,
     ),

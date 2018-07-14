@@ -86,8 +86,6 @@ export const showCommonNameWarning = createAction(
 export const removeCommonNameWarning = createAction(
     'custom-lists/removeCommonNameWarning',
 )
-export const setMouseOver = createAction('custom-lists/setMouseOver')
-export const resetMouseOver = createAction('custom-lists/resetMouseOver')
 
 export const showEditBox = index => (dispatch, getState) => {
     const activeListIndex = selectors.activeListIndex(getState())

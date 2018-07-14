@@ -6,7 +6,7 @@ import styles from './IndexDropdown.css'
 import annotationStyles from './IndexDropdownAnnotation.css'
 
 /**
- * @augments {PureComponent<{onTagSearchChange: any, onTagSearchKeyDown: any, setInputRef: any, numberOfTags: any, tagSearchValue: any}, *>}
+ * @augments {PureComponent<{onTagSearchChange: any, onTagSearchKeyDown: any, setInputRef: any, numberOfTags: any, tagSearchValue: any, clearSearchField?: any, showClearfieldBtn?: any}, *>}
  */
 class IndexDropdown extends PureComponent {
     static propTypes = {
@@ -23,6 +23,8 @@ class IndexDropdown extends PureComponent {
         url: PropTypes.string,
         allowAdd: PropTypes.bool,
         isForSidebar: PropTypes.bool,
+        clearSearchField: PropTypes.func,
+        showClearfieldBtn: PropTypes.bool,
     }
 
     componentWillMount() {
@@ -81,10 +83,15 @@ class IndexDropdown extends PureComponent {
                         value={this.props.tagSearchValue}
                         autoFocus
                     />
-                    {!this.props.changeIcon ? (
+                    {!this.props.showClearfieldBtn ? (
                         <i className="material-icons">search</i>
                     ) : (
-                        <i className="material-icons">cancel</i>
+                        <i
+                            onClick={this.props.clearSearchField}
+                            className={cx('material-icons', styles.closeButton)}
+                        >
+                            cancel
+                        </i>
                     )}
                 </form>
                 <div
@@ -94,16 +101,16 @@ class IndexDropdown extends PureComponent {
                 >
                     {this.props.children}
                 </div>
-                <div className={styles.summaryTagContainer}>
-                    {!this.props.isForSidebar && (
+                {!this.props.isForSidebar && (
+                    <div className={styles.summaryTagContainer}>
                         <div className={styles.numberTags}>
                             <span className={styles.bold}>
                                 {this.props.numberOfTags}
                             </span>{' '}
                             {this.unit} selected
                         </div>
-                    )}
-                </div>
+                    </div>
+                )}
             </div>
         )
     }

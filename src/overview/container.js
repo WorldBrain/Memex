@@ -27,6 +27,7 @@ import localStyles from './components/Overview.css'
 import { actions as listActs, selectors as customLists } from 'src/custom-lists'
 import SidebarIcons from './sidebar-left/components/SidebarIcons'
 import { actions as sidebarLeftActs } from './sidebar-left'
+import * as sidebar from './sidebar-left/selectors'
 
 class OverviewContainer extends Component {
     static propTypes = {
@@ -61,7 +62,7 @@ class OverviewContainer extends Component {
         handleCrossRibbonClick: PropTypes.func.isRequired,
         urlDragged: PropTypes.string.isRequired,
         setUrlDragged: PropTypes.func.isRequired,
-        mouseOverList: PropTypes.bool.isRequired,
+        mouseOverSidebar: PropTypes.bool.isRequired,
         showSearchFilters: PropTypes.func.isRequired,
         hideSearchFilters: PropTypes.func.isRequired,
     }
@@ -77,7 +78,7 @@ class OverviewContainer extends Component {
     }
 
     get scrollDisabled() {
-        return this.props.showOnboarding || this.props.mouseOverList || this.props.mouseOnSidebar
+        return this.props.showOnboarding || this.props.mouseOverSidebar || this.props.mouseOnSidebar
     }
 
     dropdownRefs = []
@@ -348,7 +349,7 @@ const mapStateToProps = state => ({
     mouseOnSidebar: sidebarSels.mouseOnSidebar(state),
     isListFilterActive: filters.listFilterActive(state),
     urlDragged: customLists.getUrlDragged(state),
-    mouseOverList: customLists.mouseOverSidebar(state),
+    mouseOverSidebar: sidebar.mouseOverSidebar(state),
 })
 
 const mapDispatchToProps = dispatch => ({

@@ -22,6 +22,8 @@ class SidebarContainer extends PureComponent {
         closeSidebar: PropTypes.func.isRequired,
         setSidebarState: PropTypes.func.isRequired,
         clearAllFilters: PropTypes.func.isRequired,
+        setMouseOver: PropTypes.func.isRequired,
+        resetMouseOver: PropTypes.func.isRequired,
     }
 
     // Capture state of the react-burger-menu
@@ -63,6 +65,8 @@ class SidebarContainer extends PureComponent {
                 sidebarIcons={this.renderSidebarIcons()}
                 closeSidebar={this.props.closeSidebar}
                 captureStateChange={this.captureStateChange}
+                onMouseLeave={this.props.resetMouseOver}
+                onMouseEnter={this.props.setMouseOver}
             >
                 {this.renderChildren()}
             </Sidebar>
@@ -82,6 +86,8 @@ const mapDispatchToProps = dispatch => ({
             hideSearchFilters: actions.openSidebarListMode,
             closeSidebar: actions.closeSidebar,
             setSidebarState: actions.setSidebarState,
+            setMouseOver: actions.setMouseOver,
+            resetMouseOver: actions.resetMouseOver,
         },
         dispatch,
     ),

@@ -102,8 +102,3 @@ export const showCommonNameWarning = createSelector(
     customLists,
     state => state.showCommonNameWarning,
 )
-
-export const mouseOverSidebar = createSelector(
-    customLists,
-    state => state.mouseOverSidebar,
-)

@@ -5,6 +5,10 @@ import * as actions from './actions'
 const defaultState = {
     openSidebar: false,
     showFilters: false,
+    /** this state is used to remove scrolling from the overview results when
+    moused over them.
+    */
+    mouseOverSidebar: false,
 }
 
 const showFilters = state => ({
@@ -32,6 +36,16 @@ const setSidebarState = (state, isOpen) => ({
     openSidebar: isOpen,
 })
 
+const setMouseOver = state => ({
+    ...state,
+    mouseOverSidebar: true,
+})
+
+const resetMouseOver = state => ({
+    ...state,
+    mouseOverSidebar: false,
+})
+
 export default createReducer(
     {
         [actions.openSidebar]: openSidebar,
@@ -39,6 +53,8 @@ export default createReducer(
         [actions.showFilters]: showFilters,
         [actions.hideFilters]: hideFilters,
         [actions.setSidebarState]: setSidebarState,
+        [actions.setMouseOver]: setMouseOver,
+        [actions.resetMouseOver]: resetMouseOver,
     },
     defaultState,
 )

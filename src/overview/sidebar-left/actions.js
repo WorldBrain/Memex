@@ -15,3 +15,6 @@ export const openSidebarListMode = () => dispatch => {
     dispatch(openSidebar())
     dispatch(hideFilters())
 }
+
+export const setMouseOver = createAction('custom-lists/setMouseOver')
+export const resetMouseOver = createAction('custom-lists/resetMouseOver')

@@ -73,6 +73,22 @@
     }
 }
 
+.closeButton {
+    padding: 0;
+    cursor: pointer;
+    animation: appear 0.4s forwards 0s;
+}
+
+@keyframes appear {
+    0% {
+        transform: scale(0);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
 .search {
     width: 90%;
     font-size: 14px;

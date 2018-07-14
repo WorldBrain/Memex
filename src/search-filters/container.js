@@ -58,7 +58,7 @@ class SearchFiltersContainer extends PureComponent {
                   <FilteredRow
                       key={i}
                       value={value}
-                      onClick={value => this.props.addIncDomainFilter(value)}
+                      onClick={value => this.props.addDomainFilter(value)}
                       active
                   />
               ))

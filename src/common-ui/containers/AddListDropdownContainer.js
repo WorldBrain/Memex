@@ -29,6 +29,7 @@ class DropdownContainer extends Component {
         onFilterAdd: noop,
         onFilterDel: noop,
         results: [],
+        displayFilters: [],
     }
 
     constructor(props) {
@@ -150,7 +151,7 @@ class DropdownContainer extends Component {
 
         this.setState(state => ({
             ...state,
-            displayFilters: suggestions,
+            displayFilters: suggestions || [],
             focused: 0,
         }))
     }

@@ -11,6 +11,8 @@ class Sidebar extends PureComponent {
         isSidebarOpen: PropTypes.bool.isRequired,
         sidebarIcons: PropTypes.node.isRequired,
         captureStateChange: PropTypes.func.isRequired,
+        onMouseLeave: PropTypes.func.isRequired,
+        onMouseEnter: PropTypes.func.isRequired,
     }
 
     render() {
@@ -23,10 +25,15 @@ class Sidebar extends PureComponent {
                 isOpen={this.props.isSidebarOpen}
                 onStateChange={this.props.captureStateChange}
             >
-                {this.props.sidebarIcons}
-                {this.props.resetFilters}
-                {/* <ListSideBar /> */}
-                {this.props.children}
+                <div
+                    onMouseLeave={this.props.onMouseLeave}
+                    onMouseEnter={this.props.onMouseEnter}
+                >
+                    {this.props.sidebarIcons}
+                    {this.props.resetFilters}
+                    {/* <ListSideBar /> */}
+                    {this.props.children}
+                </div>
             </Menu>
         )
     }

@@ -25,9 +25,6 @@ const defaultState = {
     urlDragged: '',
     showCreateListForm: false,
     showCommonNameWarning: false,
-    // this state is used to remove scrolling from the overview results when
-    // moused over them.
-    mouseOverSidebar: false,
 }
 
 const fetchAllLists = (state, lists) => ({
@@ -145,16 +142,6 @@ const removeCommonNameWarning = state => ({
     showCommonNameWarning: false,
 })
 
-const setMouseOver = state => ({
-    ...state,
-    mouseOverSidebar: true,
-})
-
-const resetMouseOver = state => ({
-    ...state,
-    mouseOverSidebar: false,
-})
-
 export default createReducer(
     {
         [actions.fetchAllLists]: fetchAllLists,
@@ -180,8 +167,6 @@ export default createReducer(
         [actions.toggleCreateListForm]: toggleCreateListForm,
         [actions.showCommonNameWarning]: showCommonNameWarning,
         [actions.removeCommonNameWarning]: removeCommonNameWarning,
-        [actions.setMouseOver]: setMouseOver,
-        [actions.resetMouseOver]: resetMouseOver,
     },
     defaultState,
 )
