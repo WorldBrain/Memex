@@ -34,7 +34,7 @@ export const createAnnotation = (comment, body, tags) => async (
 
     // Write tags to database
     tags.forEach(async tag => {
-        await remoteFunction('addAnnotationTag')(uniqueUrl, tag)
+        await remoteFunction('addAnnotationTag')({ tag, url: uniqueUrl })
     })
 
     dispatch(setAnchor(null))
