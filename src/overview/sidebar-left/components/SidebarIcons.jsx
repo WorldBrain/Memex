@@ -20,6 +20,7 @@ const SidebarIcons = props => {
             <button
                 className={cx(styles.listButton, styles.button)}
                 onClick={props.listBtnClick}
+                onDragEnter={props.onPageDrag}
             />
         </div>
     )
@@ -30,6 +31,7 @@ SidebarIcons.propTypes = {
     listBtnClick: PropTypes.func.isRequired,
     overviewMode: PropTypes.bool,
     showSearchFilters: PropTypes.bool,
+    onPageDrag: PropTypes.func,
 }
 
 export default SidebarIcons

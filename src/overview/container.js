@@ -99,6 +99,7 @@ class OverviewContainer extends Component {
             filterBtnClick={this.props.showSearchFilters}
             listBtnClick={this.props.hideSearchFilters}
             overviewMode
+            onPageDrag={this.props.hideSearchFilters}
         />
     )
 

@@ -21,8 +21,10 @@ class SearchFilters extends PureComponent {
                     {this.props.filteredDomains}
                 </div>
                 {this.props.domainFilter}
-                <span>Others</span>
-                {this.props.bookmarkFilter}
+                <div className={styles.otherFilters}>
+                    <span className={styles.others}>Others</span>
+                    {this.props.bookmarkFilter}
+                </div>
             </div>
         )
     }

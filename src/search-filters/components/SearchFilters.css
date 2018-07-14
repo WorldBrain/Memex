@@ -2,3 +2,13 @@
     max-height: 200px;
     overflow-y: auto;
 }
+
+.otherFilters {
+    padding: 0 15px;
+    margin-top: 35px;
+}
+
+.others {
+    font-size: 1.45em;
+    color: #767676;
+}

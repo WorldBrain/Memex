@@ -27,12 +27,14 @@ class SearchFiltersContainer extends PureComponent {
         addDomainFilter: PropTypes.func.isRequired,
         showDomainFilter: PropTypes.func.isRequired,
         showTagFilter: PropTypes.func.isRequired,
-        delIncDomainFilter: PropTypes.func.isRequired,
         tagFilterDropdown: PropTypes.bool.isRequired,
         domainFilterDropdown: PropTypes.bool.isRequired,
         bookmarkFilter: PropTypes.bool.isRequired,
         onShowOnlyBookmarksChange: PropTypes.func.isRequired,
         isSidebarOpen: PropTypes.bool.isRequired,
+        hideTagFilter: PropTypes.func.isRequired,
+        hideDomainFilter: PropTypes.func.isRequired,
+        delIncDomainFilter: PropTypes.func.isRequired,
     }
 
     renderBookmarkFilter = () => <BookmarkFilter />
@@ -40,7 +42,12 @@ class SearchFiltersContainer extends PureComponent {
     renderFilteredTags = () => {
         return !this.props.tagFilterDropdown
             ? this.props.filteredTags.map((tag, i) => (
-                  <FilteredRow key={i} value={tag} onClick={() => {}} active />
+                  <FilteredRow
+                      key={i}
+                      value={tag}
+                      onClick={tag => this.props.addTagFilter(tag)}
+                      active
+                  />
               ))
             : null
     }
@@ -69,6 +76,7 @@ class SearchFiltersContainer extends PureComponent {
                 initSuggestions={this.props.filteredTags}
                 source="tag"
                 isSidebarOpen={this.props.isSidebarOpen}
+                onClose={this.props.hideTagFilter}
             />
         )
 
@@ -86,6 +94,7 @@ class SearchFiltersContainer extends PureComponent {
                 initSuggestions={this.props.filteredDomains}
                 source="domain"
                 isSidebarOpen={this.props.isSidebarOpen}
+                onClose={this.props.hideDomainFilter}
             />
         )
 

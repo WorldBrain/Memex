@@ -1,5 +1,6 @@
 import React from 'react'
 import cx from 'classnames'
+import PropTypes from 'prop-types'
 
 import styles from './Ribbon.css'
 
@@ -8,9 +9,7 @@ const Ribbon = props => (
         <div className={styles.buttonContainer}>
             <button
                 className={cx(styles.editButton, styles.button)}
-                onClick={() => {
-                    console.log('dd')
-                }}
+                onClick={props.tickBtnClick}
             />
             <button
                 className={cx(styles.deleteButton, styles.button)}
@@ -21,5 +20,9 @@ const Ribbon = props => (
         </div>
     </div>
 )
+
+Ribbon.propTypes = {
+    tickBtnClick: PropTypes.func.isRequired,
+}
 
 export default Ribbon

@@ -13,7 +13,7 @@
     position: absolute;
     top: 36px;
     width: 100px;
-    animation: slideOutFromLeft 0.5s ease-out 0s forwards;
+    animation: slideOutFromLeft 0.2s ease-out 0s forwards;
 }
 
 .buttonContainer {

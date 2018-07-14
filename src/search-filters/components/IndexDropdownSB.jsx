@@ -8,12 +8,20 @@ import { IndexDropdown } from 'src/common-ui/containers'
 const IndexDropdownSB = props => (
     <div className={styles.container}>
         <IndexDropdown {...props} isForSidebar />
-        {props.isSidebarOpen && <Ribbon />}
+        {props.isSidebarOpen && (
+            <Ribbon
+                tickBtnClick={props.onClose}
+                crossBtnClick={() => {
+                    const a = 'b'
+                }}
+            />
+        )}
     </div>
 )
 
 IndexDropdownSB.propTypes = {
     isSidebarOpen: PropTypes.bool.isRequired,
+    onClose: PropTypes.func.isRequired,
 }
 
 export default IndexDropdownSB

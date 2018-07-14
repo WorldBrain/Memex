@@ -1,7 +1,7 @@
 .filterButton {
     background-image: url('/img/filter.png');
-    width: 63px;
-    height: 57px;
+    width: 51px;
+    height: 53px;
 }
 
 .filterEnabled {
@@ -10,8 +10,9 @@
 
 .listButton {
     background-image: url('/img/collections.svg');
-    width: 38px;
-    height: 44px;
+    width: 32px;
+    height: 40px;
+    opacity: 0.5;
 }
 
 .button {
@@ -28,15 +29,15 @@
 .buttonContainerOverview {
     position: fixed;
     display: flex !important; /* stylelint-disable-line declaration-no-important */
-    justify-content: space-evenly;
-    align-items: baseline;
-    width: 12%;
+    flex-direction: column;
+    align-items: center;
 }
 
 .buttonContainer {
     position: absolute;
     display: flex !important; /* stylelint-disable-line declaration-no-important */
     justify-content: space-between;
+    flex-direction: row;
     top: 2px;
     left: 12px;
     width: 33%;
