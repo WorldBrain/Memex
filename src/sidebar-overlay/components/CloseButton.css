@@ -13,6 +13,7 @@
     border-radius: 25px;
     animation: moveLeft 0.4s linear;
     animation-fill-mode: forwards;
+    line-height: normal;
 
     &.overview {
         top: 80px;

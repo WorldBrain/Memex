@@ -4,6 +4,7 @@ import { highlightAnnotation } from 'src/direct-linking/content_script/rendering
 import { injectCSS } from 'src/search-injection/dom'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import { setupRibbonUI, destroyAll } from '../components'
+import { OPEN_OPTIONS } from '../../search-injection/constants'
 
 import styles from 'src/direct-linking/content_script/styles.css'
 
@@ -122,4 +123,12 @@ export function removeHighlights({ isDark }) {
         highlight.dataset.annotation = ''
         highlight.removeEventListener('click', listener)
     })
+}
+
+export const openSettings = () => {
+    const message = {
+        action: OPEN_OPTIONS,
+        query: 'settings',
+    }
+    browser.runtime.sendMessage(message)
 }

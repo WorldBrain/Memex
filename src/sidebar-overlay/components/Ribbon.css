@@ -12,6 +12,7 @@
     transition: all 0.2s ease-in;
     box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.3);
     border: 1px solid #c2c2c2;
+    line-height: normal;
 }
 
 .ribbonSidebarActive {
@@ -50,11 +51,11 @@
 
 .logo {
     background-image: url('/img/worldbrain-logo-narrow.png');
-    background-size: 22px;
-    width: 22px;
-    height: 30px;
-    margin-left: 11px;
+    background-size: 24px;
     margin-top: 12px;
+    width: 24px;
+    height: 36px;
+    margin-left: 8px;
 }
 
 .cancel {

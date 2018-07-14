@@ -78,7 +78,6 @@
 }
 
 .annotationText {
-    border-bottom: 1px solid #d2d2d2;
     font-size: 13px;
     font-weight: 500;
     font-family: 'Lato', sans-serif;
@@ -90,11 +89,14 @@
     margin: 0 -10px 13px -10px;
     padding: 15px 10px 15px 10px;
     border-top: 1px dashed #d2d2d2;
+    border-bottom: 1px solid #d2d2d2;
 
     &.isJustComment {
         padding-top: 35px;
-        border: none;
-        border-radius: 5px;
+        border-top: none;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+        border-bottom: 1px solid #d2d2d2;
     }
 }
 

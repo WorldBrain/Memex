@@ -3,7 +3,6 @@ import PropTypes from 'prop-types'
 import cx from 'classnames'
 import onClickOutside from 'react-onclickoutside'
 
-import { highlightAndScroll } from '../content_script/interactions'
 import { remoteFunction, makeRemotelyCallable } from 'src/util/webextensionRPC'
 import FrameCommunication from '../messaging'
 
@@ -16,6 +15,8 @@ class Ribbon extends React.Component {
         sidebarURL: PropTypes.string.isRequired,
         highlightAll: PropTypes.func.isRequired,
         removeHighlights: PropTypes.func.isRequired,
+        highlightAndScroll: PropTypes.func.isRequired,
+        openSettings: PropTypes.func.isRequired,
     }
 
     state = {
@@ -65,7 +66,7 @@ class Ribbon extends React.Component {
              * focuses the annotation container.
              */
             goToAnnotation: async annotation => {
-                await highlightAndScroll(annotation)
+                await this.props.highlightAndScroll(annotation)
                 this.openSidebar()
                 this.frameFC.remoteExecute('focusAnnotation')(annotation.url)
             },
@@ -78,7 +79,7 @@ class Ribbon extends React.Component {
                 await this.toggleSidebar()
             },
             highlightAndScroll: annotation => {
-                highlightAndScroll(annotation)
+                this.props.highlightAndScroll(annotation)
             },
         })
     }
@@ -150,13 +151,6 @@ class Ribbon extends React.Component {
         })
     }
 
-    openSettings = () => {
-        browser.tabs.create({
-            url: browser.extension.getURL('/options.html#/settings'),
-            active: true,
-        })
-    }
-
     setiFrameRef = node => (this.iFrame = node)
 
     render() {
@@ -172,7 +166,7 @@ class Ribbon extends React.Component {
                     <div className={styles.buttonHolder}>
                         <span
                             className={styles.settings}
-                            onClick={this.openSettings}
+                            onClick={this.props.openSettings}
                         />
                         <span className={styles.cancel} onClick={destroy} />
                     </div>
