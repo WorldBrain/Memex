@@ -81,7 +81,11 @@ class IndexDropdown extends PureComponent {
                         value={this.props.tagSearchValue}
                         autoFocus
                     />
-                    <i className="material-icons">search</i>
+                    {!this.props.changeIcon ? (
+                        <i className="material-icons">search</i>
+                    ) : (
+                        <i className="material-icons">cancel</i>
+                    )}
                 </form>
                 <div
                     className={cx(styles.tagContainerSB, {

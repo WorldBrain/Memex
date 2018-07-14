@@ -54,11 +54,11 @@ class SearchFiltersContainer extends PureComponent {
 
     renderFilteredDomains = () => {
         return !this.props.domainFilterDropdown
-            ? this.props.filteredDomains.map((domain, i) => (
+            ? this.props.filteredDomains.map(({ value }, i) => (
                   <FilteredRow
                       key={i}
-                      value={domain.value}
-                      onClick={() => {}}
+                      value={value}
+                      onClick={value => this.props.addIncDomainFilter(value)}
                       active
                   />
               ))
@@ -76,7 +76,7 @@ class SearchFiltersContainer extends PureComponent {
                 initSuggestions={this.props.filteredTags}
                 source="tag"
                 isSidebarOpen={this.props.isSidebarOpen}
-                onClose={this.props.hideTagFilter}
+                closeDropdown={this.props.hideTagFilter}
             />
         )
 
@@ -94,7 +94,7 @@ class SearchFiltersContainer extends PureComponent {
                 initSuggestions={this.props.filteredDomains}
                 source="domain"
                 isSidebarOpen={this.props.isSidebarOpen}
-                onClose={this.props.hideDomainFilter}
+                closeDropdown={this.props.hideDomainFilter}
             />
         )
 
