@@ -13,7 +13,7 @@ const CloseButton = ({ isActive, isOverview, clickHandler }) => (
         })}
         onClick={clickHandler}
     >
-        X
+        <span className={styles.closeIcon} />
     </div>
 )
 

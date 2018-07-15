@@ -1,26 +1,50 @@
 .close {
     position: fixed;
-    top: 10px;
-    right: -20px;
-    opacity: 0;
+    top: 0px;
+    right: 334px;
+    opacity: 1;
     cursor: pointer;
-    font-family: 'Lato', sans-serif;
-    font-size: 18px;
     color: #3eb995;
     z-index: 2147483647;
-    background: #e1ece9;
     padding: 2px 7.5px 4px 7.5px;
-    border-radius: 25px;
-    animation: moveLeft 0.4s linear;
-    animation-fill-mode: forwards;
     line-height: normal;
+    background: #fff;
+    border-bottom-left-radius: 5px;
+    border-bottom: 1px solid #d0cece;
+    border-left: 1px solid #d0cece;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    transition: opacity 0.3s ease-in 0.2s;
 
     &.overview {
-        top: 80px;
+        top: 72px;
+        right: 330px;
+        padding-top: 5px;
+        padding-bottom: 5px;
     }
 
     &.hidden {
         animation: moveRight 0.4s linear;
+    }
+}
+
+.closeIcon {
+    background-image: url('/img/cross_grey.svg');
+    background-size: 15px;
+    display: block;
+    padding-top: 16px;
+    cursor: pointer;
+    background-repeat: no-repeat;
+    width: 29px;
+    height: 29px;
+    background-position: 6.5px 6.5px;
+    border-radius: 50%;
+    margin-right: 0;
+    margin-left: 0;
+
+    &:hover {
+        background-image: url('/img/cross.svg');
+        background-color: #efefef;
     }
 }
 

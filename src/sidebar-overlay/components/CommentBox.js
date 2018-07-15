@@ -131,12 +131,27 @@ class CommentBox extends React.Component {
 
     _setTagInput = value => () => this.setState({ tagInput: value })
 
+    openSettings = () => {
+        const settingsUrl = browser.extension.getURL('/options.html#/settings')
+        browser.tabs.create({
+            url: settingsUrl,
+            active: true,
+        })
+    }
+
     renderAddNoteButton() {
-        if (!this.isHidden()) return null
         return (
-            <button className={styles.addNote} onClick={this.toggleHidden}>
-                Add note
-            </button>
+            <div className={styles.topBar}>
+                <span className={styles.settings} onClick={this.openSettings} />
+                <div
+                    className={cx(styles.addNote, {
+                        [styles.disabled]: !this.state.isHidden,
+                    })}
+                    onClick={this.state.isHidden ? this.toggleHidden : null}
+                >
+                    Add Comment
+                </div>
+            </div>
         )
     }
 
@@ -211,9 +226,9 @@ class CommentBox extends React.Component {
         if (this.inputRef) this.inputRef.focus()
         return (
             <div className={this.isHidden() ? styles.commentBoxContainer : ''}>
+                {this.renderAddNoteButton()}
                 {this.renderHighlightedText()}
                 {this.renderCommentBox()}
-                {this.renderAddNoteButton()}
             </div>
         )
     }
