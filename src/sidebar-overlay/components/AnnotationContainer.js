@@ -328,7 +328,12 @@ class AnnotationContainer extends React.Component {
         return null
     }
 
-    deriveTagsClass = () => (this.state.tags.length ? styles.tagsContainer : '')
+    deriveTagsClass = () =>
+        cx({
+            [styles.tagsContainer]: this.state.tags.length,
+            [styles.noComment]:
+                this.state.tags.length && !this.props.annotation.comment,
+        })
 
     deriveIsJustComment = () => !this.props.annotation.body
 
@@ -336,12 +341,11 @@ class AnnotationContainer extends React.Component {
 
     /**
      * Comment box (#fafafa bg) should only be visible if there is a comment
-     * or the annotation has tags. It shouldn't be visible in edit mode.
+     * or the annotaion isn't edit mode.
      */
     shouldCommentBoxBeVisible = () => {
         return (
-            (this.props.annotation.comment.length > 0 ||
-                this.state.tags.length) &&
+            this.props.annotation.comment.length > 0 &&
             !this.state.annotationEditMode
         )
     }

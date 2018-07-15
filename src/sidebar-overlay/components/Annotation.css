@@ -3,7 +3,7 @@
     width: 300px;
     background-color: #fff;
     border-radius: 5px;
-    padding: 10px;
+    padding: 10px 0px;
     padding-bottom: 12px;
     color: #000;
     font-family: sans-serif;
@@ -17,7 +17,7 @@
     transition: border 0.2s ease-in;
 
     & > * {
-        font-family: 'IBM Plex Serif', serif;
+        font-family: 'Lato', sans-serif;
     }
 
     &:hover {
@@ -35,11 +35,12 @@
 }
 
 .highlight {
+    font-family: 'IBM Plex Serif', serif;
     font-style: italic;
     font-weight: 500;
     margin-bottom: 10px;
     margin-top: 30px;
-    padding: 5px 6px;
+    padding: 5px 15px;
     line-height: 19px;
 }
 
@@ -76,22 +77,20 @@
     word-wrap: break-word;
     white-space: pre-wrap;
     background: #f0f0f0;
-    margin: 0 -10px 13px -10px;
+    margin: 0px;
     padding: 15px 10px 15px 10px;
     border-top: 1px dashed #d2d2d2;
-    border-bottom: 1px solid #d2d2d2;
 
     &.isJustComment {
         padding-top: 35px;
         border-top: none;
         border-top-left-radius: 5px;
         border-top-right-radius: 5px;
-        border-bottom: 1px solid #d2d2d2;
     }
 }
 
 .footer {
-    height: 15px;
+    height: 19px;
     margin-top: 10px;
 }
 
@@ -120,8 +119,10 @@
     display: inline-block;
     font-size: 13px;
     text-align: right;
-    margin-top: -5px;
-    margin-left: -7px;
+    border-top: 1px solid #d2d2d2;
+    margin-top: -10px;
+    margin-left: 0px;
+    padding-top: 8px;
 }
 
 .footerBoldText {
@@ -130,6 +131,7 @@
     margin-right: 0px;
     cursor: pointer;
     font-weight: 700;
+    font-size: 14px;
     padding: 3px;
     background-color: transparent;
 
@@ -142,6 +144,7 @@
     color: #818181;
     cursor: pointer;
     margin-left: 10px;
+    font-size: 14px;
 }
 
 .deleteReally {
@@ -169,6 +172,12 @@
     margin-top: 8px;
     display: flex;
     flex-wrap: wrap;
+
+    &.noComment {
+        margin-top: -8px;
+        margin-left: 15px;
+        padding-bottom: 15px;
+    }
 }
 
 .icon {
@@ -188,7 +197,6 @@
     line-height: 19px;
     font-weight: 400;
     margin-bottom: 5px;
-    border-bottom: 1px dashed #d2d2d2;
     box-sizing: border-box;
     margin-top: 10px;
 
@@ -256,7 +264,7 @@ input:focus {
     height: 28px;
     float: left;
     margin-top: -2px;
-    margin-left: 7px;
+    margin-left: 10px;
 
     &:hover {
         background-color: #efefef;
@@ -271,7 +279,7 @@ input:focus {
     width: 26px;
     height: 26px;
     margin-top: -0.5px;
-    margin-right: -3px;
+    margin-right: 10px;
     display: inline-block;
     cursor: pointer;
     margin-left: 2px;

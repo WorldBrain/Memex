@@ -6,6 +6,7 @@
     border-bottom: none;
     word-wrap: break-word;
     font-size: 12px;
+    font-family: 'Open Sans';
 
     &:hover,
     &:focus,
@@ -39,10 +40,10 @@
     align-items: flex-start;
     margin-top: 6px;
     color: #777;
-    font-weight: 800;
 }
 
 .summaryTagContainer {
+    font-family: 'Open Sans';
     font-size: 12px;
     width: 100%;
     display: flex;
@@ -78,7 +79,7 @@
     &:placeholder-shown {
         font-style: italic;
         font-weight: 200;
-        font-family: 'Lato', sans-serif;
+        font-family: 'Open Sans';
     }
 
     &::placeholder {

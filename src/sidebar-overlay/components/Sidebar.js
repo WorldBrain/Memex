@@ -14,6 +14,7 @@ const Sidebar = props => (
         styles={MenuStyles(props.env)}
         right
         noOverlay
+        disableCloseOnEsc
     >
         <div
             className={styles.sidebar}
@@ -21,10 +22,6 @@ const Sidebar = props => (
             onMouseLeave={props.toggleMouseOnSidebar}
         >
             {props.showSidebar ? <CommentBox env={props.env} /> : null}
-
-            <div className={styles.flexContainer}>
-                <div className={styles.allnotes}>All Notes</div>
-            </div>
 
             <div className={styles.annotationContainer}>
                 {props.renderAnnotations()}
