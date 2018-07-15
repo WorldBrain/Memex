@@ -62,14 +62,19 @@ class TooltipContainer extends React.Component {
         })
     }
 
-    createAnnotation = async () => {
-        this.setState({
-            tooltipState: 'runnning',
-        })
+    createAnnotation = async e => {
+        e.preventDefault()
+        e.stopPropagation()
         await this.props.createAnnotation()
-        this.setState({
-            tooltipState: 'done',
-        })
+
+        // quick hack, to prevent the tooltip from popping again
+        setTimeout(() => {
+            this.setState({
+                tooltipState: 'runnning',
+                showTooltip: false,
+                position: {},
+            })
+        }, 400)
     }
 
     openSettings = event => {

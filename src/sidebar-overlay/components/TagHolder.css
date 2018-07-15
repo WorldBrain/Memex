@@ -20,24 +20,24 @@
 .tag {
     font-size: 12px;
     font-weight: 800;
-    background-color: #c6f3e5;
-    color: #000;
+    background-color: #3eb995;
+    color: #fff;
     padding: 3px 5px;
     margin-right: 8px;
 }
 
 .placeholder {
     display: inline-block;
-    margin-top: 3px;
     margin-left: 3px;
     color: #4a4a4a;
+    font-style: italic;
 }
 
 .plus {
     font-size: 21px;
     position: absolute;
     right: 10px;
-    top: 0px;
+    top: 2px;
     font-weight: bold;
     color: #555;
 }

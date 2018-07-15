@@ -1,4 +1,5 @@
 .container {
+    box-sizing: border-box;
     width: 300px;
     background-color: #fff;
     border-radius: 5px;
@@ -8,7 +9,7 @@
     font-family: sans-serif;
     font-size: 13px;
     border: 1px #d2d2d2 solid;
-    margin-left: 19px;
+    margin-left: 17px;
     position: relative;
     margin-top: 10px;
     padding-top: 0;
@@ -26,17 +27,6 @@
     &.active {
         border-color: #3db994;
         box-shadow: 0px 0px 5px 1px #00000050;
-    }
-
-    &.iframe {
-        margin-left: 7px;
-
-        .trashIcon,
-        .editIcon {
-            margin-top: -5px;
-            width: 24px;
-            height: 24px;
-        }
     }
 }
 
@@ -166,8 +156,8 @@
 .tagPill {
     font-size: 12px;
     font-weight: 800;
-    background-color: #c6f3e5;
-    color: #000;
+    background-color: #3eb995;
+    color: #fff;
     margin-right: 8px;
     margin-top: 5px;
     padding: 3px 5px;
@@ -199,6 +189,8 @@
     font-weight: 400;
     margin-bottom: 5px;
     border-bottom: 1px dashed #d2d2d2;
+    box-sizing: border-box;
+    margin-top: 10px;
 
     &::placeholder {
         color: #4a4a4a;

@@ -328,8 +328,7 @@ class AnnotationContainer extends React.Component {
         return null
     }
 
-    deriveTagsClass = () =>
-        this.state.containsTags ? styles.tagsContainer : ''
+    deriveTagsClass = () => (this.state.tags.length ? styles.tagsContainer : '')
 
     deriveIsJustComment = () => !this.props.annotation.body
 
@@ -342,7 +341,7 @@ class AnnotationContainer extends React.Component {
     shouldCommentBoxBeVisible = () => {
         return (
             (this.props.annotation.comment.length > 0 ||
-                this.state.containsTags) &&
+                this.state.tags.length) &&
             !this.state.annotationEditMode
         )
     }

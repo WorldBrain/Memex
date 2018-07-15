@@ -30,8 +30,7 @@ class CommentBox extends React.Component {
     }
 
     componentDidMount() {
-        // Increase rows instead of having a scrollbar
-        this.inputRef.focus()
+        // Auto resize textarea
         this.inputRef.addEventListener('scroll', e => {
             let i = 0
             // i prevents infinity loop when resizing
@@ -209,6 +208,7 @@ class CommentBox extends React.Component {
     }
 
     render() {
+        if (this.inputRef) this.inputRef.focus()
         return (
             <div className={this.isHidden() ? styles.commentBoxContainer : ''}>
                 {this.renderHighlightedText()}
