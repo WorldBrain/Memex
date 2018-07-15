@@ -1,6 +1,4 @@
 .commentBoxContainer {
-    height: 20px;
-
     & > * {
         font-family: 'Lato', sans-serif;
     }

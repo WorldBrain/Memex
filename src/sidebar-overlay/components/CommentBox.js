@@ -99,12 +99,10 @@ class CommentBox extends React.Component {
         }
     }
 
-    toggleHidden = () => {
-        const isHidden = !this.state.isHidden
+    setHidden = value => () =>
         this.setState({
-            isHidden,
+            isHidden: value,
         })
-    }
 
     addTag = newTag => {
         const tags = [newTag, ...this.state.tags]
@@ -147,7 +145,7 @@ class CommentBox extends React.Component {
                     className={cx(styles.addNote, {
                         [styles.disabled]: !this.state.isHidden,
                     })}
-                    onClick={this.state.isHidden ? this.toggleHidden : null}
+                    onClick={this.state.isHidden ? this.setHidden(false) : null}
                 >
                     Add Comment
                 </div>

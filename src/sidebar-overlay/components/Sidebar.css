@@ -41,6 +41,13 @@
     font-size: 15px;
 }
 
+.separator {
+    height: 2px;
+    background-color: #efefef;
+    width: 89%;
+    margin: 20px auto;
+}
+
 .annotationContainer {
     margin: 30px 0px;
     margin-top: -20px;

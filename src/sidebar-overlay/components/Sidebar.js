@@ -23,6 +23,8 @@ const Sidebar = props => (
         >
             {props.showSidebar ? <CommentBox env={props.env} /> : null}
 
+            <div className={styles.separator} />
+
             <div className={styles.annotationContainer}>
                 {props.renderAnnotations()}
             </div>
