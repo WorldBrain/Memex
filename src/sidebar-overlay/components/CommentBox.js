@@ -33,7 +33,14 @@ class CommentBox extends React.Component {
         // Increase rows instead of having a scrollbar
         this.inputRef.focus()
         this.inputRef.addEventListener('scroll', e => {
-            while (e.target.scrollTop) e.target.rows += 1
+            let i = 0
+            // i prevents infinity loop when resizing
+            while (e.target.scrollTop && i++ < 30) {
+                // For dynamically getting the height even if resized
+                let height = window.getComputedStyle(e.target).height
+                height = parseInt(height, 10)
+                e.target.style.height = height + 20 + 'px'
+            }
         })
 
         if (this.props.anchor)
@@ -50,6 +57,7 @@ class CommentBox extends React.Component {
 
         if (comment.length === 0) {
             textareaRows = constants.DEFAULT_ROWS
+            this.inputRef.style.height = ''
         } else if (minimized) {
             minimized = false
             textareaRows = constants.MAXED_ROWS

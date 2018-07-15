@@ -43,6 +43,7 @@
     border-radius: 2px;
     padding: 10px 7px;
     margin-bottom: 5px;
+    min-height: 40px;
 
     &:focus {
         outline: none;
