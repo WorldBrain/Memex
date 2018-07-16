@@ -107,8 +107,7 @@ class Ribbon extends React.Component {
     }
 
     closeSidebarOps = async () => {
-        this.props.removeHighlights({ isDark: false })
-        this.props.removeHighlights({ isDark: true })
+        this.props.removeHighlights()
         await this.frameFC.remoteExecute('sendAnchorToSidebar')(null)
         this.frameFC.remoteExecute('focusAnnotation')('')
     }
@@ -143,7 +142,7 @@ class Ribbon extends React.Component {
 
     handleClickOutside = e => {
         if (!this.state.isSidebarActive) return
-        else if (e.target.dataset.annotation === 'yes') return
+        else if (e.target.dataset.annotation) return
         this.closeSidebarOps()
         this.setState({
             isSidebarActive: false,

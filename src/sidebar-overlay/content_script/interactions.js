@@ -8,9 +8,11 @@ import { OPEN_OPTIONS } from '../../search-injection/constants'
 
 import styles from 'src/direct-linking/content_script/styles.css'
 
-export function scrollToHighlight({ isDark }) {
-    const highlightClass = isDark ? 'memex-highlight-dark' : 'memex-highlight'
-    const $highlight = document.querySelector('.' + styles[highlightClass])
+export function scrollToHighlight(annotation) {
+    const baseClass = styles['memex-highlight']
+    const $highlight = document.querySelector(
+        `.${baseClass}[data-annotation="${annotation.url}"]`,
+    )
     if ($highlight) {
         setTimeout(() => {
             scrollToElement($highlight, { offset: -225 })
@@ -26,9 +28,9 @@ export function scrollToHighlight({ isDark }) {
  * @param {*} annotation Annotation object which has the selector to be highlighted
  */
 export const highlightAndScroll = async annotation => {
-    removeHighlights({ isDark: true })
-    await highlightAnnotation({ annotation, isDark: true })
-    scrollToHighlight({ isDark: true })
+    removeHighlights(true)
+    makeHighlightDark(annotation)
+    scrollToHighlight(annotation)
 }
 
 /**
@@ -89,23 +91,21 @@ export const setupRPC = () => {
 let listener = null
 
 export const attachEventListenersToNewHighlights = (
-    highlightClass,
     annotation,
     focusOnAnnotation,
 ) => {
     const newHighlights = document.querySelectorAll(
-        `.${highlightClass}:not([data-annotation])`,
+        `.${styles['memex-highlight']}:not([data-annotation])`,
     )
     newHighlights.forEach(highlight => {
-        highlight.dataset.annotation = 'yes'
-
+        highlight.dataset.annotation = annotation.url
         if (!focusOnAnnotation) return
 
         listener = async e => {
             e.preventDefault()
             if (!e.target.dataset.annotation) return
-            removeHighlights({ isDark: true })
-            await highlightAnnotation({ annotation, isDark: true }, null)
+            removeHighlights(true)
+            makeHighlightDark(annotation)
             focusOnAnnotation(annotation.url)
         }
 
@@ -113,15 +113,30 @@ export const attachEventListenersToNewHighlights = (
     })
 }
 
-export function removeHighlights({ isDark }) {
-    const highlightClass = isDark ? 'memex-highlight-dark' : 'memex-highlight'
-    const className = styles[highlightClass]
-    const highlights = document.querySelectorAll('.' + className)
+export const makeHighlightDark = annotation => {
+    const baseClass = styles['memex-highlight']
+    const highlights = document.querySelectorAll(
+        `.${baseClass}[data-annotation="${annotation.url}"]`,
+    )
 
     highlights.forEach(highlight => {
-        highlight.classList.remove(className)
-        highlight.dataset.annotation = ''
-        highlight.removeEventListener('click', listener)
+        highlight.classList.add(styles['dark'])
+    })
+}
+
+export function removeHighlights(isDark) {
+    const baseClass = '.' + styles['memex-highlight']
+    const darkClass = isDark ? '.' + styles['dark'] : ''
+    const highlightClass = `${baseClass}${darkClass}`
+    const highlights = document.querySelectorAll(highlightClass)
+
+    highlights.forEach(highlight => {
+        if (isDark) highlight.classList.remove(styles['dark'])
+        else {
+            highlight.classList.remove(styles['memex-highlight'])
+            highlight.dataset.annotation = ''
+            highlight.removeEventListener('click', listener)
+        }
     })
 }
 

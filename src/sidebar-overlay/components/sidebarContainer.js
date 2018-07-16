@@ -8,7 +8,6 @@ import Annotation from './AnnotationContainer'
 
 import { goToAnnotation } from '../utils'
 import FrameCommunication from '../messaging'
-// import { remoteFunction } from '../../util/webextensionRPC'
 
 class SidebarContainer extends React.Component {
     static propTypes = {

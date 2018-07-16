@@ -12,7 +12,8 @@ export async function highlightAnnotation(
     focusOnAnnotation = null,
 ) {
     // TODO: Simplify class naming
-    const highlightClass = isDark ? 'memex-highlight-dark' : 'memex-highlight'
+    const baseClass = styles['memex-highlight']
+    // const darkClass = isDark ? styles['dark'] : ''
     try {
         await Raven.context(async () => {
             let descriptor
@@ -34,13 +35,10 @@ export async function highlightAnnotation(
                     timeoutMiliseconds: 5000,
                 },
             )
-            markRange({ range, cssClass: styles[highlightClass] })
 
-            attachEventListenersToNewHighlights(
-                styles[highlightClass],
-                annotation,
-                focusOnAnnotation,
-            )
+            markRange({ range, cssClass: baseClass })
+
+            attachEventListenersToNewHighlights(annotation, focusOnAnnotation)
         })
     } catch (e) {
         console.error(
