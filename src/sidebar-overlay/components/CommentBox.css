@@ -20,17 +20,18 @@
     }
 
     & .highlightedText {
-        font-size: 13px;
+        font-size: 14px;
         font-family: 'IBM Plex Serif', serif;
         line-height: 19px;
         margin-left: 12px;
+        letter-spacing: 0.5px;
         font-style: italic;
         width: 90%;
     }
 }
 
 .commentBox {
-    margin: 10px 18.5px;
+    margin: 0px 0px;
     margin-bottom: 0px;
 }
 
@@ -38,7 +39,7 @@
     box-sizing: border-box;
     resize: vertical;
     font-weight: 500;
-    width: 300px;
+    width: 94.5%;
     font-size: 13px;
     color: #222;
     font-style: italic;
@@ -46,9 +47,10 @@
     border: none;
     border-radius: 2px;
     padding: 10px 7px;
+    margin: 10px;
+    margin-left: 8px;
     margin-bottom: 5px;
     min-height: 40px;
-    margin-top: 40px;
 
     &:focus {
         outline: none;
@@ -67,7 +69,7 @@
     margin-left: 8px;
     margin-bottom: 6px;
     font-size: 11px;
-    padding: 3px 8px 4px 10px;
+    padding: 2px 10px 3px 10px;
     color: #3eb995;
     box-shadow: #0000005c 0px 0px 5px 0px inset;
     border: 0.5px #0000005c solid;
@@ -98,7 +100,7 @@
     outline: none;
     background: transparent;
     margin-right: 10px;
-    margin-top: 5.5px;
+    margin-top: 6px;
 }
 
 .cancel {
@@ -166,7 +168,7 @@
 }
 
 .buttonHolder {
-    margin: 3px 2px 10px 0px;
+    margin: -10px 2px 60px 0px;
     display: flex;
     flex-direction: row;
     justify-content: flex-end;

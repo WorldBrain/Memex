@@ -29,7 +29,7 @@
     height: 100%;
     z-index: 2147483646;
     transform: translate(400px, 0);
-    transition: all 0.2s ease-in;
+    transition: all 0.05s ease-in;
 }
 
 .sidebarActive {

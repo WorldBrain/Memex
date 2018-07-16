@@ -1,6 +1,6 @@
 .container {
     box-sizing: border-box;
-    width: 300px;
+    width: 95%;
     background-color: #fff;
     border-radius: 5px;
     padding: 10px 0px;
@@ -9,12 +9,12 @@
     font-family: sans-serif;
     font-size: 13px;
     border: 1px #d2d2d2 solid;
-    margin-left: 17px;
+    margin-left: 8px;
     position: relative;
-    margin-top: 10px;
+    margin-top: 13px;
     padding-top: 0;
     box-shadow: 0px 0px 5px 0px #00000040;
-    transition: border 0.2s ease-in;
+    transition: border 0.05s ease-in;
 
     & > * {
         font-family: 'Lato', sans-serif;
@@ -25,7 +25,7 @@
     }
 
     &.active {
-        border-color: #3db994;
+        border-color: #3db994b8;
         box-shadow: 0px 0px 5px 1px #00000050;
     }
 }
@@ -37,11 +37,13 @@
 .highlight {
     font-family: 'IBM Plex Serif', serif;
     font-style: italic;
-    font-weight: 500;
-    margin-bottom: 10px;
+    font-weight: 400;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    margin-bottom: 16px;
     margin-top: 30px;
-    padding: 5px 15px;
-    line-height: 19px;
+    padding: 7px 15px;
+    line-height: 20px;
 }
 
 .noDisplay {
@@ -72,14 +74,13 @@
     font-size: 13px;
     font-weight: 500;
     font-family: 'Lato', sans-serif;
-    line-height: 19px;
+    line-height: 16px;
     overflow: hidden;
     word-wrap: break-word;
     white-space: pre-wrap;
     background: #f0f0f0;
     margin: 0px;
     padding: 15px 10px 15px 10px;
-    border-top: 1px dashed #d2d2d2;
 
     &.isJustComment {
         padding-top: 35px;
@@ -122,7 +123,7 @@
     border-top: 1px solid #d2d2d2;
     margin-top: -10px;
     margin-left: 0px;
-    padding-top: 8px;
+    padding-top: 11px;
 }
 
 .footerBoldText {
@@ -144,6 +145,7 @@
     color: #818181;
     cursor: pointer;
     margin-left: 10px;
+    margin-right: 10px;
     font-size: 14px;
 }
 
@@ -152,8 +154,8 @@
     font-size: 15px;
     float: left;
     color: #000;
-    margin-left: 10px;
-    margin-top: -2px;
+    margin-left: 15px;
+    margin-top: -1px;
 }
 
 .tagPill {
@@ -163,8 +165,9 @@
     color: #fff;
     margin-right: 8px;
     margin-top: 5px;
-    padding: 3px 5px;
+    padding: 2px 10px 3px 10px;
     cursor: pointer;
+    border-radius: 15px;
 }
 
 .tagsContainer {
@@ -175,7 +178,7 @@
 
     &.noComment {
         margin-top: -8px;
-        margin-left: 15px;
+        margin-left: 10px;
         padding-bottom: 15px;
     }
 }
@@ -187,7 +190,7 @@
 
 .annotationTextarea {
     font-size: 13px;
-    width: 280px;
+    width: 95%;
     resize: none;
     color: #222;
     font-family: 'Lato', sans-serif;
@@ -196,12 +199,14 @@
     padding: 10px;
     line-height: 19px;
     font-weight: 400;
-    margin-bottom: 5px;
+    margin-bottom: 2px;
+    margin-left: 8px;
+    margin-top: 9px;
     box-sizing: border-box;
-    margin-top: 10px;
 
     &::placeholder {
         color: #4a4a4a;
+        font-style: italic;
     }
 }
 
@@ -234,11 +239,11 @@ input:focus {
     background-size: 18px;
     display: inline-block;
     cursor: pointer;
-    margin-top: -2px;
     background-color: transparent;
     background-position: center;
     border-radius: 0;
     border-radius: 50%;
+    margin-top: -5px;
     padding: 3px;
     width: 28px;
     height: 28px;
@@ -263,7 +268,7 @@ input:focus {
     width: 28px;
     height: 28px;
     float: left;
-    margin-top: -2px;
+    margin-top: -5px;
     margin-left: 10px;
 
     &:hover {

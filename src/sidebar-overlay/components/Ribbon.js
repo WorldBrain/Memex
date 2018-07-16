@@ -16,7 +16,6 @@ class Ribbon extends React.Component {
         highlightAll: PropTypes.func.isRequired,
         removeHighlights: PropTypes.func.isRequired,
         highlightAndScroll: PropTypes.func.isRequired,
-        openSettings: PropTypes.func.isRequired,
     }
 
     state = {
@@ -164,10 +163,6 @@ class Ribbon extends React.Component {
                     })}
                 >
                     <div className={styles.buttonHolder}>
-                        <span
-                            className={styles.settings}
-                            onClick={this.props.openSettings}
-                        />
                         <span className={styles.cancel} onClick={destroy} />
                     </div>
                     <div className={styles.logo} onClick={this.toggleSidebar} />

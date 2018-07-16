@@ -1,4 +1,4 @@
-@import url('/fonts/googlefonts/ibm-plex-serif.css');
+@import url('https://fonts.googleapis.com/css?family=IBM+Plex+Serif:300i');
 @import url('/fonts/googlefonts/lato.css');
 
 .sidebar {
@@ -12,6 +12,7 @@
         font-family: 'IBM Plex Serif', serif;
         margin: 0;
         box-sizing: border-box;
+        margin-top: 52px;
     }
 }
 
@@ -42,6 +43,9 @@
 
 .annotationContainer {
     margin: 30px 0px;
+    margin-top: -20px;
+    width: 330px;
+    margin-left: 5px;
     margin-bottom: 100px;
     background: #fff;
 }
