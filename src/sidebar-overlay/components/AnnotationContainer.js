@@ -67,8 +67,31 @@ class AnnotationContainer extends React.Component {
     }
 
     getTruncatedObject = text => {
+        // For the edge case where user enters a lot of newlines
+        // This piece of code, counts the new lines and finds
+        // the position until which to truncate
+
+        let newlineCount = 0
+        let i = 0
+        let shouldTruncateForNewLines = false
+
+        while (i < text.length) {
+            if (text[i++] === '\n') newlineCount++
+            if (newlineCount > 4) {
+                shouldTruncateForNewLines = true
+                // Now i stores the position for max possible characters
+                break
+            }
+        }
+
         if (text.length > 280) {
             const truncatedText = text.slice(0, 280) + ' [..]'
+            return {
+                isTruncated: true,
+                text: truncatedText,
+            }
+        } else if (shouldTruncateForNewLines) {
+            const truncatedText = text.slice(0, i) + '[..]'
             return {
                 isTruncated: true,
                 text: truncatedText,
