@@ -46,6 +46,7 @@
     background-color: #efefef;
     width: 89%;
     margin: 20px auto;
+    display: none;
 }
 
 .annotationContainer {

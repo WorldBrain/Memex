@@ -38,7 +38,7 @@
     height: 29px;
     background-position: 6.5px 6.5px;
     border-radius: 50%;
-    margin-right: 0;
+    margin-right: 3px;
     margin-left: 0;
 
     &:hover {

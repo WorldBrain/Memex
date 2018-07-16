@@ -37,7 +37,7 @@
     box-sizing: border-box;
     resize: vertical;
     font-weight: 500;
-    width: 94.5%;
+    width: 95%;
     font-size: 13px;
     color: #222;
     font-style: italic;
@@ -45,7 +45,7 @@
     border: none;
     border-radius: 2px;
     padding: 10px 7px;
-    margin: 10px;
+    margin: 5px;
     margin-left: 8px;
     margin-bottom: 5px;
     min-height: 40px;
@@ -121,7 +121,7 @@
     z-index: 2147483647;
     left: 0px;
     top: 0;
-    padding-right: 12px;
+    padding-right: 8px;
     height: 40px;
     border-bottom: 1px solid #d2d2d2;
     box-sizing: border-box;

@@ -7,7 +7,7 @@
     word-wrap: break-word;
     font-size: 12px;
     font-family: 'Open Sans';
-    width: 82.3%;
+    width: 95%;
     margin-left: 8px;
 
     &:hover,
@@ -64,7 +64,7 @@
     padding: 4px 6px;
     margin-bottom: 0;
     background-color: #f7f7f7;
-    width: 91.1%;
+    width: 95%;
     margin-left: 8px;
 
     & > i {
