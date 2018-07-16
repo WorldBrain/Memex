@@ -1,4 +1,5 @@
 import React, { PureComponent } from 'react'
+import ReactDOM from 'react-dom'
 import PropTypes from 'prop-types'
 import cx from 'classnames'
 
@@ -20,12 +21,27 @@ class IndexDropdownRow extends PureComponent {
         focused: PropTypes.bool,
         isForAnnotation: PropTypes.bool,
         allowAdd: PropTypes.bool,
+        scrollIntoView: PropTypes.func.isRequired,
     }
 
     componentWillMount() {
         this.styles = this.props.isForAnnotation
             ? annotationStyles
             : localStyles
+    }
+
+    componentDidMount() {
+        this.ensureVisible()
+    }
+
+    componentDidUpdate() {
+        this.ensureVisible()
+    }
+
+    ensureVisible = () => {
+        if (this.props.focused) {
+            this.props.scrollIntoView(ReactDOM.findDOMNode(this))
+        }
     }
 
     get mainClass() {

@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import ReactDOM from 'react-dom'
 import debounce from 'lodash/fp/debounce'
 import noop from 'lodash/fp/noop'
 
@@ -76,7 +77,8 @@ class IndexDropdownContainer extends Component<Props, State> {
             searchVal: '',
             isLoading: false,
             displayFilters: props.initSuggestions
-                ? props.initSuggestions : props.initFilters, // Display state objects; will change all the time
+                ? props.initSuggestions
+                : props.initFilters, // Display state objects; will change all the time
             filters: props.initFilters, // Actual tags associated with the page; will only change when DB updates
             focused: props.initFilters.length ? 0 : -1,
             clearFieldBtn: false,
@@ -97,11 +99,9 @@ class IndexDropdownContainer extends Component<Props, State> {
         return this.props.url != null
     }
 
-
     private showClearfieldBtn() {
         return !this.props.isForSidebar ? false : this.state.clearFieldBtn
     }
-
 
     private async storeTrackEvent(isAdded: boolean) {
         const { hover, source } = this.props
@@ -324,7 +324,6 @@ class IndexDropdownContainer extends Component<Props, State> {
             clearFieldBtn = true
         }
 
-
         this.setState(
             state => ({ ...state, searchVal, displayFilters, clearFieldBtn }),
             this.fetchTagSuggestions, // Debounced suggestion fetch
@@ -360,6 +359,17 @@ class IndexDropdownContainer extends Component<Props, State> {
         }
     }
 
+    scrollElementIntoViewIfNeeded(domNode: HTMLElement) {
+        // Determine if `domNode` fully fits inside `containerDomNode`.
+        // If not, set the container's scrollTop appropriately.
+        // Below are two ways to do it
+        // 1. Element.ScrollIntoView()
+        // domNode.scrollIntoView({ behavior: 'smooth' })
+        // 2. Use Element.scrollTop()
+        const parentNode = domNode.parentNode as HTMLElement
+        parentNode.scrollTop = domNode.offsetTop - parentNode.offsetTop
+    }
+
     private renderTags() {
         const tags = this.getDisplayTags()
 
@@ -371,6 +381,7 @@ class IndexDropdownContainer extends Component<Props, State> {
                 key={i}
                 onClick={this.handleTagSelection(i)}
                 {...this.props}
+                scrollIntoView={this.scrollElementIntoViewIfNeeded}
             />
         ))
 
@@ -385,13 +396,13 @@ class IndexDropdownContainer extends Component<Props, State> {
                     }
                     isForAnnotation={this.props.isForAnnotation}
                     allowAdd={this.props.allowAdd}
+                    scrollIntoView={this.scrollElementIntoViewIfNeeded}
                 />,
             )
         }
 
         return tagOptions
     }
-
 
     render() {
         return (

@@ -1,4 +1,5 @@
 import React, { PureComponent } from 'react'
+import ReactDOM from 'react-dom'
 import cx from 'classnames'
 import PropTypes from 'prop-types'
 
@@ -12,14 +13,29 @@ class FilteredRow extends PureComponent {
             PropTypes.element,
         ]).isRequired,
         focused: PropTypes.bool,
-        onClick: PropTypes.func.isRequired,
         active: PropTypes.bool.isRequired,
+        onClick: PropTypes.func.isRequired,
+        scrollIntoView: PropTypes.func.isRequired,
+    }
+
+    componentDidMount() {
+        this.ensureVisible()
+    }
+
+    componentDidUpdate() {
+        this.ensureVisible()
     }
 
     get mainClass() {
         return cx(styles.menuItem, {
             [styles.menuItemFocused]: this.props.focused,
         })
+    }
+
+    ensureVisible = () => {
+        if (this.props.focused) {
+            this.props.scrollIntoView(ReactDOM.findDOMNode(this))
+        }
     }
 
     render() {

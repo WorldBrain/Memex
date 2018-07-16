@@ -1,29 +1,58 @@
-import React from 'react'
+import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
 import cx from 'classnames'
 
 import styles from './SidebarIcons.css'
+import InfoTooltip from './Tooltip'
 
-const SidebarIcons = props => {
-    return (
-        <div
-            className={cx(styles.buttonContainerOverview, {
-                [styles.buttonContainer]: !props.overviewMode,
-            })}
-        >
-            <button
-                className={cx(styles.button, styles.filterButton, {
-                    [styles.filterEnabled]: props.showSearchFilters,
+class SidebarIcons extends PureComponent {
+    constructor(props) {
+        super(props)
+        this.state = {
+            // Capture mouse over events and display tooltip
+            showCollTooltip: false,
+        }
+    }
+
+    handleShowCollTooltip = () => {
+        this.setState({
+            showCollTooltip: true,
+        })
+    }
+
+    handleHideCollTooltip = () => {
+        this.setState({
+            showCollTooltip: false,
+        })
+    }
+
+    render() {
+        return (
+            <div
+                className={cx(styles.buttonContainerOverview, {
+                    [styles.buttonContainer]: !this.props.overviewMode,
                 })}
-                onClick={props.filterBtnClick}
-            />
-            <button
-                className={cx(styles.listButton, styles.button)}
-                onClick={props.listBtnClick}
-                onDragEnter={props.onPageDrag}
-            />
-        </div>
-    )
+            >
+                <button
+                    className={cx(styles.button, styles.filterButton, {
+                        [styles.filterEnabled]: this.props.showSearchFilters,
+                    })}
+                    onClick={this.props.filterBtnClick}
+                />
+                <InfoTooltip
+                    showTooltip={this.state.showCollTooltip}
+                    content="My collections"
+                />
+                <button
+                    className={cx(styles.listButton, styles.button)}
+                    onClick={this.props.listBtnClick}
+                    onDragEnter={this.props.onPageDrag}
+                    onMouseOver={this.handleShowCollTooltip}
+                    onMouseOut={this.handleHideCollTooltip}
+                />
+            </div>
+        )
+    }
 }
 
 SidebarIcons.propTypes = {
