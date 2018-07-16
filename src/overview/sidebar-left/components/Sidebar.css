@@ -34,3 +34,7 @@
     width: 33%;
     align-items: baseline;
 }
+
+.container {
+    height: 100%;
+}

@@ -31,6 +31,7 @@
     display: flex !important; /* stylelint-disable-line declaration-no-important */
     flex-direction: column;
     align-items: center;
+    left: 12px;
 }
 
 .buttonContainer {

@@ -31,7 +31,7 @@ const Header = ({
                     disabled={props.isSearchDisabled}
                 />
             </div>
-            <div
+            {/* <div
                 className={styles.linkFilter}
                 onClick={props.onShowFilterChange}
             >
@@ -39,16 +39,6 @@ const Header = ({
                     src="/img/filter.png"
                     className={styles.iconFilter}
                     title="Click to view filters"
-                />
-            </div>
-            {/* <div
-                className={styles.linkFilter}
-                onClick={props.onListDropdownChange}
-            >
-                <img
-                    src="/img/edit.svg"
-                    className={styles.iconEdit}
-                    title="Edit many results"
                 />
             </div> */}
         </div>

@@ -70,6 +70,11 @@ class DropdownContainer extends Component {
         return this.props.mode === 'overview'
     }
 
+    scrollElementIntoViewIfNeeded(domNode) {
+        const parentNode = domNode.parentNode
+        parentNode.scrollTop = domNode.offsetTop - parentNode.offsetTop
+    }
+
     setInputRef = el => (this.inputEl = el)
 
     canCreateList() {
@@ -298,6 +303,7 @@ class DropdownContainer extends Component {
                 {...list}
                 key={i}
                 onClick={this.handleListClick(i)}
+                scrollIntoView={this.scrollElementIntoViewIfNeeded}
             />
         ))
 
@@ -310,6 +316,7 @@ class DropdownContainer extends Component {
                     focused={
                         this.state.focused === this.state.displayFilters.length
                     }
+                    scrollIntoView={this.scrollElementIntoViewIfNeeded}
                 />,
             )
         }
