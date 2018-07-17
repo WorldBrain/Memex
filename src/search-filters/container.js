@@ -108,6 +108,10 @@ class SearchFiltersContainer extends PureComponent {
         </Checkbox>
     )
 
+    renderTypeFilter = () => (
+        <FilterBar onBarClick={this.props.showTagFilter} filter="Type" />
+    )
+
     render() {
         return (
             <SearchFilters
@@ -116,6 +120,7 @@ class SearchFiltersContainer extends PureComponent {
                 domainFilter={this.renderDomainFilter()}
                 filteredTags={this.renderFilteredTags()}
                 filteredDomains={this.renderFilteredDomains()}
+                typeFilters={this.renderTypeFilter()}
             />
         )
     }

@@ -17,8 +17,9 @@ export const styles = {
         padding: '4em 0',
         background: '#FFFFFF',
         fontSize: '0.68rem',
-        overflowX: 'unset',
-        overflowY: 'unset',
+        overflow: 'visible',
+        transition: 'all 0.5s',
+        boxShadow: '-4px 2px 20px 1px rgba(62, 185, 149, 0.0902)',
     },
     bmMorphShape: {
         fill: '#373a47',
@@ -35,5 +36,6 @@ export const styles = {
         height: '100%',
         transition: 'all 0.5s',
         boxShadow: '5px -1px 4px -5px #333',
+        overflow: 'visible',
     },
 }

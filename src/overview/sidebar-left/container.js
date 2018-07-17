@@ -11,7 +11,7 @@ import { actions as filterActs } from '../filters'
 // TODO: compress into one
 import Sidebar from './components/SideBar'
 import ClearFilter from './components/ClearFilter'
-import SidebarIcons from './components/SidebarIcons'
+import ButtonContainer from './components/ButtonContainer'
 
 class SidebarContainer extends PureComponent {
     static propTypes = {
@@ -44,20 +44,27 @@ class SidebarContainer extends PureComponent {
             : this.renderListSidebar()
     }
 
-    renderSidebarIcons = () => (
-        <SidebarIcons
-            filterBtnClick={this.props.showSearchFilters}
-            listBtnClick={this.props.hideSearchFilters}
-            showSearchFilters={this.props.filterMode}
-        />
-    )
+    renderSidebarIcons = () =>
+        this.props.isSidebarOpen ? (
+            <ButtonContainer
+                filterBtnClick={this.props.showSearchFilters}
+                listBtnClick={this.props.hideSearchFilters}
+                showSearchFilters={this.props.filterMode}
+                resetFilters={this.props.clearAllFilters}
+                closeSidebar={this.closeSidebar}
+            />
+        ) : null
+
+    closeSidebar = () => {
+        this.props.resetMouseOver()
+        this.props.closeSidebar()
+    }
 
     render() {
         return (
             <Sidebar
                 searchFilters={this.renderSearchFilters()}
                 listSidebar={this.renderListSidebar()}
-                resetFilters={this.renderClearFilters()}
                 handleHideSearchFilters={this.props.hideSearchFilters}
                 handleShowSearchFilters={this.props.showSearchFilters}
                 showSearchFilters={this.props.filterMode}

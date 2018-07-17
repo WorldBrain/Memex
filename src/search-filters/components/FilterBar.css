@@ -6,7 +6,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 0 5px;
-    margin-top: 35px;
+    margin-top: 15px;
 
     &:hover {
         background-color: #d7d7d7;

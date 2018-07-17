@@ -3,12 +3,9 @@ import styles from './Index.css'
 import PropTypes from 'prop-types'
 
 const List = props => (
-    <div className={styles.collection}>
+    <div className={styles.collection} onClick={props.handleRenderCreateList}>
         <span className={styles.myCollection}> My Collections </span>
-        <span className={styles.plus} onClick={props.handleRenderCreateList}>
-            {' '}
-            +{' '}
-        </span>
+        <span className={styles.plus}> + </span>
     </div>
 )
 

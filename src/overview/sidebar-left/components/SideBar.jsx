@@ -7,10 +7,9 @@ import localStyles from './Sidebar.css'
 
 class Sidebar extends PureComponent {
     static propTypes = {
-        resetFilters: PropTypes.node.isRequired,
         children: PropTypes.node.isRequired,
         isSidebarOpen: PropTypes.bool.isRequired,
-        sidebarIcons: PropTypes.node.isRequired,
+        sidebarIcons: PropTypes.node,
         captureStateChange: PropTypes.func.isRequired,
         onMouseLeave: PropTypes.func.isRequired,
         onMouseEnter: PropTypes.func.isRequired,
@@ -32,7 +31,6 @@ class Sidebar extends PureComponent {
                     className={localStyles.container}
                 >
                     {this.props.sidebarIcons}
-                    {this.props.resetFilters}
                     {/* <ListSideBar /> */}
                     {this.props.children}
                 </div>

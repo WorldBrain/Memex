@@ -1,18 +1,25 @@
 .filterButton {
-    background-image: url('/img/filter.png');
-    width: 51px;
-    height: 53px;
+    background-image: url('/img/filter_filled.svg');
+    width: 32px;
+    height: 32px;
+    opacity: 0.5;
 }
 
 .filterEnabled {
-    background-image: url('/img/filter_filled.svg');
+    background-image: url('/img/filter_filled_green.svg');
+    opacity: 1;
 }
 
 .listButton {
     background-image: url('/img/collections.svg');
-    width: 32px;
-    height: 40px;
+    width: 30px;
+    height: 30px;
     opacity: 0.5;
+}
+
+.collectionEnabled {
+    background-image: url('/img/collections_green.svg');
+    opacity: 1;
 }
 
 .button {
@@ -29,9 +36,11 @@
 .buttonContainerOverview {
     position: fixed;
     display: flex !important; /* stylelint-disable-line declaration-no-important */
-    flex-direction: column;
+    flex-direction: row-reverse;
     align-items: center;
     left: 12px;
+    width: 8%;
+    justify-content: space-evenly;
 }
 
 .buttonContainer {
@@ -41,6 +50,27 @@
     flex-direction: row;
     top: 2px;
     left: 12px;
-    width: 33%;
+    width: 40%;
     align-items: baseline;
+}
+
+.smallButton {
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    color: #767676;
+    padding: 2px 4px;
+    border-radius: 3%;
+
+    &:hover {
+        background-color: #efefef;
+    }
+}
+
+.enabled {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
 }

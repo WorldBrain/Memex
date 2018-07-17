@@ -28,7 +28,7 @@ const openSidebar = state => ({
 
 const closeSidebar = state => ({
     ...state,
-    openSidebar: true,
+    openSidebar: false,
 })
 
 const setSidebarState = (state, isOpen) => ({

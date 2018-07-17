@@ -63,6 +63,7 @@ class OverviewContainer extends Component {
         urlDragged: PropTypes.string.isRequired,
         setUrlDragged: PropTypes.func.isRequired,
         mouseOverSidebar: PropTypes.bool.isRequired,
+        filterActive: PropTypes.bool.isRequired,
         showSearchFilters: PropTypes.func.isRequired,
         hideSearchFilters: PropTypes.func.isRequired,
     }
@@ -101,6 +102,8 @@ class OverviewContainer extends Component {
             listBtnClick={this.props.hideSearchFilters}
             overviewMode
             onPageDrag={this.props.hideSearchFilters}
+            filterActive={this.props.filterActive}
+            isListFilterActive={this.props.isListFilterActive}
         />
     )
 
@@ -350,6 +353,7 @@ const mapStateToProps = state => ({
     isListFilterActive: filters.listFilterActive(state),
     urlDragged: customLists.getUrlDragged(state),
     mouseOverSidebar: sidebar.mouseOverSidebar(state),
+    filterActive: filters.showClearFiltersBtn(state),
 })
 
 const mapDispatchToProps = dispatch => ({

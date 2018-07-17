@@ -10,6 +10,7 @@ class SearchFilters extends PureComponent {
         filteredTags: PropTypes.node,
         filteredDomains: PropTypes.node,
         bookmarkFilter: PropTypes.node.isRequired,
+        typeFilters: PropTypes.node.isRequired,
     }
 
     render() {
@@ -21,6 +22,7 @@ class SearchFilters extends PureComponent {
                     {this.props.filteredDomains}
                 </div>
                 {this.props.domainFilter}
+                {this.props.typeFilters}
                 <div className={styles.otherFilters}>
                     <span className={styles.others}>Others</span>
                     {this.props.bookmarkFilter}

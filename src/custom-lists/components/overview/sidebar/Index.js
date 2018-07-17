@@ -143,15 +143,15 @@ class ListContainer extends Component {
     render() {
         return (
             <div>
-                <hr className={extStyles.hr} />
-
                 <MyCollection
                     handleRenderCreateList={this.props.toggleCreateListForm}
                 />
 
                 {this.renderCreateList(this.props.showCreateList)}
                 <div className={extStyles.allLists}>
-                    {this.renderAllLists()}
+                    <div style={{ overflow: 'unset' }}>
+                        {this.renderAllLists()}
+                    </div>
                 </div>
                 <DeleteConfirmModal
                     isShown={this.props.isDeleteConfShown}

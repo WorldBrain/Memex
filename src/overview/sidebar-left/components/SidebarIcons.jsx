@@ -33,23 +33,36 @@ class SidebarIcons extends PureComponent {
                     [styles.buttonContainer]: !this.props.overviewMode,
                 })}
             >
-                <button
-                    className={cx(styles.button, styles.filterButton, {
-                        [styles.filterEnabled]: this.props.showSearchFilters,
-                    })}
-                    onClick={this.props.filterBtnClick}
-                />
+                <div className={styles.enabled}>
+                    <button
+                        className={cx(styles.button, styles.filterButton, {
+                            [styles.filterEnabled]: this.props.filterActive,
+                        })}
+                        onClick={this.props.filterBtnClick}
+                    />
+                    {this.props.filterActive && (
+                        <div className={styles.smallButton}>clear</div>
+                    )}
+                </div>
                 <InfoTooltip
                     showTooltip={this.state.showCollTooltip}
                     content="My collections"
                 />
-                <button
-                    className={cx(styles.listButton, styles.button)}
-                    onClick={this.props.listBtnClick}
-                    onDragEnter={this.props.onPageDrag}
-                    onMouseOver={this.handleShowCollTooltip}
-                    onMouseOut={this.handleHideCollTooltip}
-                />
+                <div className={styles.enabled}>
+                    <button
+                        className={cx(styles.listButton, styles.button, {
+                            [styles.collectionEnabled]: this.props
+                                .isListFilterActive,
+                        })}
+                        onClick={this.props.listBtnClick}
+                        onDragEnter={this.props.onPageDrag}
+                        onMouseOver={this.handleShowCollTooltip}
+                        onMouseOut={this.handleHideCollTooltip}
+                    />
+                    {this.props.isListFilterActive && (
+                        <div className={styles.smallButton}>show all</div>
+                    )}
+                </div>
             </div>
         )
     }
@@ -59,8 +72,9 @@ SidebarIcons.propTypes = {
     filterBtnClick: PropTypes.func.isRequired,
     listBtnClick: PropTypes.func.isRequired,
     overviewMode: PropTypes.bool,
-    showSearchFilters: PropTypes.bool,
     onPageDrag: PropTypes.func,
+    filterActive: PropTypes.bool.isRequired,
+    isListFilterActive: PropTypes.bool.isRequired,
 }
 
 export default SidebarIcons

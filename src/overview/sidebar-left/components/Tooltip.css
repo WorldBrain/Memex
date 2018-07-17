@@ -13,13 +13,11 @@
     background-color: #fff;
     color: #767676;
     text-align: center;
-
-    /* border-radius: 6px; */
     padding: 2px 3px;
     position: absolute;
+    top: -27px;
     z-index: 90;
-    left: 27px;
-    border: 1px solid #76767626;
+    border: 1px solid #11080826;
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
     font-size: 0.7em;
 }

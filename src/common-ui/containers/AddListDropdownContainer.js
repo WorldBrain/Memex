@@ -212,7 +212,6 @@ class DropdownContainer extends Component {
                 ]
             } else {
                 // this.props.onFilterDel(tag)
-                // TODO: Code refactorisation
                 await remoteFunction('removePageFromList')({
                     id: listId,
                     url: this.props.url,
