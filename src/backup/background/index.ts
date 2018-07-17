@@ -33,10 +33,25 @@ export class BackupBackgroundModule {
 
     setupRemoteFunctions() {
         makeRemotelyCallable({
-            getBackupProviderLoginLink: async (params) => {
+            getBackupProviderLoginLink: async (info, params) => {
                 return await this.backend.getLoginUrl(params)
+            },
+            startBackup: ({ tab }, params) => {
+                const events = this.doBackup()
+                const sendEvent = (eventType, event) => window['browser'].tabs.sendMessage(
+                    tab.id,
+                    {
+                        type: 'backup-event', event: { type: eventType, ...(event || {}) },
+                    }
+                )
+                events.on('info', event => sendEvent('info', event))
+                events.on('fail', event => sendEvent('info', event))
+                events.on('success', event => sendEvent('info', event))
+            },
+            isBackupAuthenticated: async (info, params) => {
+                return this.backend.isAuthenticated()
             }
-        })
+        }, { insertExtraArg: true })
     }
 
     setupRequestInterceptor() {
@@ -97,11 +112,11 @@ export class BackupBackgroundModule {
                     info.totalObjects += <number>objectCount
                 }
 
-                events.emit('info', info)
+                events.emit('info', { info })
 
                 for (const collectionName of collectionNames) {
                     info.currentCollection = { name: collectionName, processedObjects: 0 }
-                    events.emit('info', info)
+                    events.emit('info', { info })
 
                     console.log('backing up collection', collectionName)
                     for await (const { pk, object } of this.storageManager.streamCollection(collectionName)) {
@@ -109,7 +124,7 @@ export class BackupBackgroundModule {
                         await this.backend.storeObject({ collection: collectionName, pk, object, events })
                         info.processedObjects += 1
                         info.currentCollection.processedObjects += 1
-                        events.emit('info', info)
+                        events.emit('info', { info })
                     }
                 }
             }

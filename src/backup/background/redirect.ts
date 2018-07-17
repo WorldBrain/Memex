@@ -11,6 +11,7 @@ export function setupRequestInterceptor({ webRequest, handleLoginRedirectedBack 
 
 export function makeRequestHandler({ handleLoginRedirectedBack }) {
     return ({ url, tabId }) => {
+        console.log('Got Google login redirect:', url)
         handleLoginRedirectedBack(url)
         const targetUrl = 'chrome-extension://hideohpekofebnpgkolicememphnnidf/options.html#/backup'
         return { redirectUrl: targetUrl }
