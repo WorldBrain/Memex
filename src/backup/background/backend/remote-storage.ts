@@ -5,6 +5,7 @@ import { BackupBackend } from "./types"
 
 export class RemoteStorageBackend extends BackupBackend {
     private remoteStorage
+    private _isAuthenticated = false
 
     constructor({ apiKeys }) {
         super()
@@ -12,6 +13,11 @@ export class RemoteStorageBackend extends BackupBackend {
         this.remoteStorage = new (<any>RemoteStorage).default({ cache: false })
         this.remoteStorage.setApiKeys(apiKeys)
         this.remoteStorage.access.claim('worldbrain-memex', 'rw')
+        this.remoteStorage.on('connected', () => console.log('rs connected'))
+        // this.remoteStorage.on('not-connected', () => console.log('rs not-connected'))
+
+        // this.remoteStorage.on('connected', () => this._isAuthenticated = true)
+        // this.remoteStorage.on('disconnected', () => this._isAuthenticated = false)
     }
 
     async getLoginUrl({ provider, returnURL }: { provider: string, returnURL: string }) {
@@ -32,6 +38,10 @@ export class RemoteStorageBackend extends BackupBackend {
         RemoteStorage.Authorize.setLocation = origSetLocation
 
         return location['href'] || location
+    }
+
+    async isAuthenticated() {
+        return this._isAuthenticated
     }
 
     // TODO: Find better name. The back-end redirects back to this URL with some stuff appended.
