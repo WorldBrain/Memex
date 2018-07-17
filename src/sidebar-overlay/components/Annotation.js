@@ -14,6 +14,8 @@ const Annotation = props => (
         onClick={
             props.isIFrame && !props.isJustComment ? props.goToAnnotation : null
         }
+        onMouseEnter={props.onMouseEnter}
+        onMouseLeave={props.onMouseLeave}
     >
         <div
             className={
@@ -59,6 +61,8 @@ Annotation.propTypes = {
     shouldCommentBoxBeVisible: PropTypes.bool.isRequired,
     isJustComment: PropTypes.bool.isRequired,
     isActive: PropTypes.bool.isRequired,
+    onMouseEnter: PropTypes.func.isRequired,
+    onMouseLeave: PropTypes.func.isRequired,
     id: PropTypes.string.isRequired,
 }
 

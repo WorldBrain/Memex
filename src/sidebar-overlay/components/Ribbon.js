@@ -16,6 +16,8 @@ class Ribbon extends React.Component {
         highlightAll: PropTypes.func.isRequired,
         removeHighlights: PropTypes.func.isRequired,
         highlightAndScroll: PropTypes.func.isRequired,
+        makeHighlightMedium: PropTypes.func.isRequired,
+        removeMediumHighlights: PropTypes.func.isRequired,
     }
 
     state = {
@@ -79,6 +81,12 @@ class Ribbon extends React.Component {
             },
             highlightAndScroll: annotation => {
                 this.props.highlightAndScroll(annotation)
+            },
+            makeHighlightMedium: annotation => {
+                this.props.makeHighlightMedium(annotation)
+            },
+            removeMediumHighlights: () => {
+                this.props.removeMediumHighlights()
             },
         })
     }

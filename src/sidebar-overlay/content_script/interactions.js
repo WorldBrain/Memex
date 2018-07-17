@@ -113,10 +113,30 @@ export const attachEventListenersToNewHighlights = (
     })
 }
 
-export const makeHighlightDark = annotation => {
+export const removeMediumHighlights = () => {
+    // Remove previous "medium" highlights
+    const baseClass = styles['memex-highlight']
+    const mediumClass = styles['medium']
+    const prevHighlights = document.querySelectorAll(
+        `.${baseClass}.${mediumClass}`,
+    )
+    prevHighlights.forEach(highlight => highlight.classList.remove(mediumClass))
+}
+
+export const makeHighlightMedium = ({ url }) => {
+    // Make the current annotation as a "medium" highlight
+    const baseClass = styles['memex-highlight']
+    const mediumClass = styles['medium']
+    const highlights = document.querySelectorAll(
+        `.${baseClass}[data-annotation="${url}"]`,
+    )
+    highlights.forEach(highlight => highlight.classList.add(mediumClass))
+}
+
+export const makeHighlightDark = ({ url }) => {
     const baseClass = styles['memex-highlight']
     const highlights = document.querySelectorAll(
-        `.${baseClass}[data-annotation="${annotation.url}"]`,
+        `.${baseClass}[data-annotation="${url}"]`,
     )
 
     highlights.forEach(highlight => {

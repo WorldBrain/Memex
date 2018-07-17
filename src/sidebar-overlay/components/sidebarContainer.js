@@ -88,6 +88,22 @@ class SidebarContainer extends React.Component {
         $container.scrollIntoView({ block: 'center', behavior: 'smooth' })
     }
 
+    /**
+     * Makes highlight dark a little when the container is hovered
+     */
+    makeHighlightMedium = annotation => () => {
+        if (this.props.env === 'overview') return
+        this.parentFC.remoteExecute('makeHighlightMedium')(annotation)
+    }
+
+    /**
+     * Removes all medium highlights
+     */
+    removeMediumHighlights = () => {
+        if (this.props.env === 'overview') return
+        this.parentFC.remoteExecute('removeMediumHighlights')()
+    }
+
     renderAnnotations = () => {
         const annotations = this.props.annotations.sort(
             (x, y) => x.createdWhen < y.createdWhen,
@@ -101,6 +117,8 @@ class SidebarContainer extends React.Component {
                 deleteAnnotation={this.props.deleteAnnotation}
                 key={annotation.url}
                 env={this.props.env}
+                onMouseEnter={this.makeHighlightMedium}
+                onMouseLeave={this.removeMediumHighlights}
                 isActive={this.props.activeAnnotation === annotation.url}
             />
         ))
