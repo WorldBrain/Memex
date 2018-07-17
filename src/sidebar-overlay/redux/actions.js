@@ -5,6 +5,8 @@ export const setAnnotations = createAction('setAnnotations')
 
 export const setActiveAnnotation = createAction('setActiveAnnotation')
 
+export const setHoveredAnnotation = createAction('setActiveAnnotation')
+
 export const setAnchor = createAction('setAnchor')
 
 export const setPageInfo = createAction('setPageInfo')

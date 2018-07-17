@@ -104,6 +104,10 @@ class Ribbon extends React.Component {
         this.frameFC.remoteExecute('focusAnnotation')(annotationUrl)
     }
 
+    hoverAnnotationContainer = annotationUrl => {
+        this.frameFC.remoteExecute('setHoveredAnnotation')(annotationUrl)
+    }
+
     reloadAnnotations = async () => {
         await this.frameFC.remoteExecute('reloadAnnotations')()
         await this.fetchAnnotations()
@@ -111,7 +115,11 @@ class Ribbon extends React.Component {
         const highlightables = this.state.annotations.filter(
             annotation => annotation.selector,
         )
-        this.props.highlightAll(highlightables, this.focusAnnotationContainer)
+        this.props.highlightAll(
+            highlightables,
+            this.focusAnnotationContainer,
+            this.hoverAnnotationContainer,
+        )
     }
 
     closeSidebarOps = async () => {

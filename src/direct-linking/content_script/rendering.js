@@ -10,6 +10,7 @@ const Raven = AllRaven['default']
 export async function highlightAnnotation(
     { annotation, isDark },
     focusOnAnnotation = null,
+    hoverAnnotationContainer = null,
 ) {
     // TODO: Simplify class naming
     const baseClass = styles['memex-highlight']
@@ -38,7 +39,11 @@ export async function highlightAnnotation(
 
             markRange({ range, cssClass: baseClass })
 
-            attachEventListenersToNewHighlights(annotation, focusOnAnnotation)
+            attachEventListenersToNewHighlights(
+                annotation,
+                focusOnAnnotation,
+                hoverAnnotationContainer,
+            )
         })
     } catch (e) {
         console.error(

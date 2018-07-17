@@ -23,7 +23,9 @@ class SidebarContainer extends React.Component {
         deleteAnnotation: PropTypes.func.isRequired,
         setAnchor: PropTypes.func.isRequired,
         setActiveAnnotation: PropTypes.func.isRequired,
+        setHoveredAnnotation: PropTypes.func.isRequired,
         activeAnnotation: PropTypes.string.isRequired,
+        hoveredAnnotation: PropTypes.string.isRequired,
     }
 
     static defaultProps = {
@@ -57,6 +59,9 @@ class SidebarContainer extends React.Component {
             focusAnnotation: url => {
                 this.focusAnnotation(url)
             },
+            setHoveredAnnotation: url => {
+                this.props.setHoveredAnnotation(url)
+            },
         })
     }
 
@@ -82,9 +87,9 @@ class SidebarContainer extends React.Component {
      * Sets the annotation container active
      */
     focusAnnotation = url => {
+        this.props.setActiveAnnotation(url)
         if (!url) return
         const $container = document.getElementById(url)
-        this.props.setActiveAnnotation(url)
         $container.scrollIntoView({ block: 'center', behavior: 'smooth' })
     }
 
@@ -108,7 +113,6 @@ class SidebarContainer extends React.Component {
         const annotations = this.props.annotations.sort(
             (x, y) => x.createdWhen < y.createdWhen,
         )
-
         return annotations.map(annotation => (
             <Annotation
                 annotation={annotation}
@@ -120,6 +124,7 @@ class SidebarContainer extends React.Component {
                 onMouseEnter={this.makeHighlightMedium}
                 onMouseLeave={this.removeMediumHighlights}
                 isActive={this.props.activeAnnotation === annotation.url}
+                isHovered={this.props.hoveredAnnotation === annotation.url}
             />
         ))
     }
@@ -140,6 +145,7 @@ class SidebarContainer extends React.Component {
 const mapStateToProps = state => ({
     annotations: selectors.annotations(state),
     activeAnnotation: selectors.activeAnnotation(state),
+    hoveredAnnotation: selectors.activeAnnotation(state),
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -150,6 +156,7 @@ const mapDispatchToProps = dispatch => ({
     deleteAnnotation: ({ url }) => dispatch(actions.deleteAnnotation(url)),
     setAnchor: anchor => dispatch(actions.setAnchor(anchor)),
     setActiveAnnotation: key => dispatch(actions.setActiveAnnotation(key)),
+    setHoveredAnnotation: key => dispatch(actions.setActiveAnnotation(key)),
 })
 
 export default connect(

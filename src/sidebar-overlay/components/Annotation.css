@@ -24,6 +24,10 @@
         border-color: #3db994;
     }
 
+    &.isHovered {
+        border-color: #3db994;
+    }
+
     &.active {
         border-color: #3db994b8;
         box-shadow: 0px 0px 5px 1px #00000050;

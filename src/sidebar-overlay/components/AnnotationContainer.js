@@ -17,6 +17,7 @@ class AnnotationContainer extends React.Component {
         goToAnnotation: PropTypes.func.isRequired,
         env: PropTypes.string.isRequired,
         isActive: PropTypes.bool.isRequired,
+        isHovered: PropTypes.bool.isRequired,
         onMouseEnter: PropTypes.func.isRequired,
         onMouseLeave: PropTypes.func.isRequired,
     }
@@ -393,6 +394,7 @@ class AnnotationContainer extends React.Component {
                 isJustComment={this.deriveIsJustComment()}
                 onMouseEnter={this.props.onMouseEnter(this.props.annotation)}
                 onMouseLeave={this.props.onMouseLeave}
+                isHovered={this.props.isHovered}
                 isActive={this.props.isActive}
                 id={this.props.annotation.url}
             />

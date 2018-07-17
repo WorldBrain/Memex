@@ -37,10 +37,18 @@ export const highlightAndScroll = async annotation => {
  * Given an array of annotation objects, highlights all of them.
  * @param {Array<*>} annotations Array of annotations to highlight
  */
-export const highlightAnnotations = async (annotations, focusOnAnnotation) => {
+export const highlightAnnotations = async (
+    annotations,
+    focusOnAnnotation,
+    hoverAnnotationContainer,
+) => {
     annotations.forEach(
         async annotation =>
-            await highlightAnnotation({ annotation }, focusOnAnnotation),
+            await highlightAnnotation(
+                { annotation },
+                focusOnAnnotation,
+                hoverAnnotationContainer,
+            ),
     )
 }
 
@@ -88,11 +96,14 @@ export const setupRPC = () => {
     })
 }
 
-let listener = null
+let clickListener = null
+let mouseenterListener = null
+let mouseleaveListener = null
 
 export const attachEventListenersToNewHighlights = (
     annotation,
     focusOnAnnotation,
+    hoverAnnotationContainer,
 ) => {
     const newHighlights = document.querySelectorAll(
         `.${styles['memex-highlight']}:not([data-annotation])`,
@@ -101,15 +112,29 @@ export const attachEventListenersToNewHighlights = (
         highlight.dataset.annotation = annotation.url
         if (!focusOnAnnotation) return
 
-        listener = async e => {
+        clickListener = async e => {
             e.preventDefault()
             if (!e.target.dataset.annotation) return
             removeHighlights(true)
             makeHighlightDark(annotation)
             focusOnAnnotation(annotation.url)
         }
+        highlight.addEventListener('click', clickListener, false)
 
-        highlight.addEventListener('click', listener, false)
+        mouseenterListener = e => {
+            if (!e.target.dataset.annotation) return
+            removeMediumHighlights()
+            makeHighlightMedium(annotation)
+            hoverAnnotationContainer(annotation.url)
+        }
+        highlight.addEventListener('mouseenter', mouseenterListener, false)
+
+        mouseleaveListener = e => {
+            if (!e.target.dataset.annotation) return
+            removeMediumHighlights()
+            hoverAnnotationContainer('')
+        }
+        highlight.addEventListener('mouseleave', mouseleaveListener, false)
     })
 }
 
@@ -155,7 +180,9 @@ export function removeHighlights(isDark) {
         else {
             highlight.classList.remove(styles['memex-highlight'])
             highlight.dataset.annotation = ''
-            highlight.removeEventListener('click', listener)
+            highlight.removeEventListener('click', clickListener)
+            highlight.removeEventListener('mouseenter', mouseenterListener)
+            highlight.removeEventListener('mouseleave', mouseleaveListener)
         }
     })
 }

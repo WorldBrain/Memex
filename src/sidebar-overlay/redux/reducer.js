@@ -13,6 +13,8 @@ const defaultState = {
     },
     // PK (url) of the active annotation
     activeAnnotation: '',
+    // PK (url) of the annotation which the user's mouse is over
+    hoveredAnnotation: '',
 }
 
 const setAnnotations = (state, annotations) => ({
@@ -35,12 +37,18 @@ const setActiveAnnotation = (state, activeUrl) => ({
     activeAnnotation: activeUrl,
 })
 
+const setHoveredAnnotation = (state, hoveredUrl) => ({
+    ...state,
+    activeAnnotation: hoveredUrl,
+})
+
 export default createReducer(
     {
         [actions.setAnnotations]: setAnnotations,
         [actions.setPageInfo]: setPageInfo,
         [actions.setAnchor]: setAnchor,
         [actions.setActiveAnnotation]: setActiveAnnotation,
+        [actions.setHoveredAnnotation]: setHoveredAnnotation,
     },
     defaultState,
 )

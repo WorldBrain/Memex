@@ -8,6 +8,7 @@ const Annotation = props => (
         className={cx(styles.container, {
             [styles.pointer]: props.isIFrame && !props.isJustComment,
             [styles.iframe]: props.isIFrame,
+            [styles.isHovered]: props.isHovered,
             [styles.active]: props.isActive,
         })}
         id={props.id}
@@ -61,6 +62,7 @@ Annotation.propTypes = {
     shouldCommentBoxBeVisible: PropTypes.bool.isRequired,
     isJustComment: PropTypes.bool.isRequired,
     isActive: PropTypes.bool.isRequired,
+    isHovered: PropTypes.bool.isRequired,
     onMouseEnter: PropTypes.func.isRequired,
     onMouseLeave: PropTypes.func.isRequired,
     id: PropTypes.string.isRequired,
