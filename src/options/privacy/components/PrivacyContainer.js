@@ -25,8 +25,15 @@ class PrivacyContainer extends React.PureComponent {
     handleTrackChange = async event => {
         const shouldTrack =
             event.target.value === 'y' || event.target.value === true
-        await this.props.trackChange(shouldTrack)
-        browser.storage.local.set({ [SHOULD_TRACK]: shouldTrack })
+
+        // Storage flag must be set before event track else analytics manager will ignore in case of switching on
+        if (shouldTrack) {
+            await browser.storage.local.set({ [SHOULD_TRACK]: shouldTrack })
+            await this.props.trackChange(shouldTrack)
+        } else {
+            await this.props.trackChange(shouldTrack)
+            browser.storage.local.set({ [SHOULD_TRACK]: shouldTrack })
+        }
     }
 
     render() {
