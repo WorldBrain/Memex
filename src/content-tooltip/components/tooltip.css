@@ -94,13 +94,34 @@
         flex-direction: row;
         align-items: center;
         justify-content: center;
-    }
 
-    & img {
-        width: 25px;
-        height: 25px;
-        margin-top: 0px;
-        margin-right: -5px;
+        & .annotateIcon {
+            background-image: url('/img/annotate.svg');
+            background-size: 24px;
+            background-repeat: no-repeat;
+            width: 25px;
+            height: 25px;
+            margin-top: 3px;
+            margin-right: -8px;
+
+            &:hover {
+                background-image: url('/img/annotate_hover.svg');
+            }
+        }
+
+        & .shareIcon {
+            background-image: url('/img/share.svg');
+            background-size: 23px;
+            background-repeat: no-repeat;
+            width: 25px;
+            height: 25px;
+            margin-top: 1px;
+            margin-right: -6px;
+
+            &:hover {
+                background-image: url('/img/share_hover.svg');
+            }
+        }
     }
 }
 
