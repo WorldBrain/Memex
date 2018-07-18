@@ -1,6 +1,6 @@
 .container {
     box-sizing: border-box;
-    width: 95%;
+    width: 95.3%;
     background-color: #fff;
     border-radius: 5px;
     padding: 10px 0px;
@@ -163,7 +163,7 @@
 }
 
 .tagPill {
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 800;
     background-color: #3eb995;
     color: #fff;

@@ -6,8 +6,8 @@
     border-top: none;
     word-wrap: break-word;
     font-size: 12px;
-    font-family: 'Open Sans';
-    width: 95%;
+    font-family: 'Lato', sans-serif;
+    width: 82.9%;
     margin-left: 8px;
 
     &:hover,
@@ -45,7 +45,7 @@
 }
 
 .summaryTagContainer {
-    font-family: 'Open Sans';
+    font-family: 'Lato', sans-serif;
     font-size: 12px;
     display: flex;
     justify-content: space-around;
@@ -61,10 +61,11 @@
     align-items: center;
     justify-content: space-between;
     border-bottom: 1px dashed #d2d2d28c;
-    padding: 4px 6px;
+    padding: 0px 6px;
+    height: 39px;
     margin-bottom: 0;
     background-color: #f7f7f7;
-    width: 95%;
+    width: 91.5%;
     margin-left: 8px;
 
     & > i {
@@ -77,16 +78,17 @@
 
 .search {
     width: 90%;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 500;
-    padding: 5px;
+    padding-left: 5px;
+    height: 38px;
     border: none;
     background-color: #f7f7f7;
 
     &:placeholder-shown {
         font-style: italic;
         font-weight: 500;
-        font-family: 'Open Sans';
+        font-family: 'Lato', sans-serif;
     }
 
     &::placeholder {

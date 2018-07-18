@@ -1,5 +1,5 @@
 .tagHolder {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 200;
     padding: 5px;
     width: 95%;
@@ -7,7 +7,7 @@
     border: none;
     margin-bottom: 17px;
     background-color: #f7f7f7;
-    height: 30px;
+    height: 40px;
     overflow-x: hidden;
     position: relative;
     display: flex;
@@ -21,7 +21,7 @@
 }
 
 .tag {
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 800;
     background-color: #3eb995;
     color: #fff;
@@ -40,8 +40,8 @@
 .plus {
     font-size: 21px;
     position: absolute;
-    right: 10px;
-    top: 2px;
+    right: 15px;
+    top: 6px;
     font-weight: bold;
     color: #555;
 }
