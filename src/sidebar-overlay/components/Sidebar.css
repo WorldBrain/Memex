@@ -8,6 +8,10 @@
     overflow-y: scroll;
     border-left: 3px solid #e1ece9;
 
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
     & > * {
         font-family: 'IBM Plex Serif', serif;
         margin: 0;
