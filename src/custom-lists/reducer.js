@@ -1,5 +1,4 @@
 import { createReducer } from 'redux-act'
-import union from 'lodash/fp/union'
 
 import * as actions from './actions'
 
@@ -60,13 +59,11 @@ const addPageToList = (state, { url, index }) => {
     const { lists } = state
     const list = lists[index]
 
-    if (list.pages.indexOf(url) > -1) return state
-
-    const urlAdded = typeof filters === 'string' ? [url] : url
+    if (list.pages.includes(url)) return state
 
     const newList = {
         ...list,
-        pages: union(list.pages, urlAdded),
+        pages: [...list.pages, url],
     }
 
     return {

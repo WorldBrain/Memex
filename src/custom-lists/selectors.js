@@ -1,21 +1,13 @@
 import { createSelector } from 'reselect'
-
-import { selectors as filters } from 'src/overview/filters'
+// import { selectors } from '../search-filters'
+// TODO: check why not working the other way around.
+import * as selectors from '../search-filters/selectors'
+// import { selectors as filters } from '../overview/filters'
 
 // TODO: Needs some work.
 const sortAlphabetically = (a, b) => {
-    if (
-        typeof a === 'string' &&
-        typeof b === 'string' &&
-        a.name.toLowerCase() < b.name.toLowerCase()
-    )
-        return -1
-    if (
-        typeof a === 'string' &&
-        typeof b === 'string' &&
-        a.name.toLowerCase() > b.name.toLowerCase()
-    )
-        return 1
+    if (a.name.toLowerCase() < b.name.toLowerCase()) return -1
+    if (a.name.toLowerCase() > b.name.toLowerCase()) return 1
     return 0
 }
 
@@ -48,15 +40,15 @@ export const getUrlsToEdit = createSelector(
 export const results = createSelector(
     getSortedLists,
     activeListIndex,
-    filters.listFilter,
-    // TODO: Come up with a good name
-    getUrlsToEdit,
-    (lists, listIndex, listFilter, urlsToEdit) =>
-        lists.map((pageDoc, i) => ({
+    selectors.listFilter,
+    // getUrlsToEdit,
+    (lists, listIndex, listFilter) => {
+        return lists.map((pageDoc, i) => ({
             ...pageDoc,
             isEditing: i === listIndex,
             isFilterIndex: Number(listFilter) === pageDoc.id,
-        })),
+        }))
+    },
 )
 
 export const deleteConfirmProps = createSelector(

@@ -16,3 +16,60 @@ export const filterTypes = createSelector(
     searchFilters,
     state => state.showFilterTypes,
 )
+
+export const popup = createSelector(searchFilters, state => state.popup)
+export const tags = createSelector(searchFilters, state => state.tags)
+export const domainsInc = createSelector(
+    searchFilters,
+    state => state.domainsInc,
+)
+export const domainsExc = createSelector(
+    searchFilters,
+    state => state.domainsExc,
+)
+export const listFilter = createSelector(searchFilters, state => state.lists)
+export const displayDomains = createSelector(
+    domainsInc,
+    domainsExc,
+    (inc, exc) => [
+        ...inc.map(value => ({ value, isExclusive: false })),
+        ...exc.map(value => ({ value, isExclusive: true })),
+    ],
+)
+
+export const showFilters = createSelector(
+    searchFilters,
+    state => state.showFilters,
+)
+export const onlyBookmarks = createSelector(
+    searchFilters,
+    state => state.onlyBookmarks,
+)
+
+export const showDomainsFilter = createSelector(
+    popup,
+    popup => popup === 'domain',
+)
+
+export const showTagsFilter = createSelector(popup, popup => popup === 'tag')
+
+/**
+ * Selector to toggle clear filter button
+ * As new filters are added, corersponding changes need to made to this function
+ */
+export const showClearFiltersBtn = createSelector(
+    onlyBookmarks,
+    tags,
+    domainsInc,
+    domainsExc,
+    (onlyBookmarks, tags, domainsInc, domainsExc) =>
+        onlyBookmarks ||
+        !!tags.length ||
+        !!domainsInc.length ||
+        !!domainsExc.length,
+)
+
+export const listFilterActive = createSelector(
+    listFilter,
+    lists => lists !== '',
+)

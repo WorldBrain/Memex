@@ -9,7 +9,7 @@ import MyCollection from './MyCollections'
 import CreateListForm from './CreateListForm'
 import ListItem from './ListItem'
 import DeleteConfirmModal from 'src/overview/components/DeleteConfirmModal'
-import { actions as filterActs } from 'src/overview/filters'
+import { actions as filterActs } from '../../../../search-filters'
 
 class ListContainer extends Component {
     static propTypes = {

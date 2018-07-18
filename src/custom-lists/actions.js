@@ -7,7 +7,7 @@ import * as selectors from './selectors'
 // import constants from './constants'
 // import { custom-lists } from '../custom-lists/selectors';
 
-import { selectors as filters } from 'src/overview/filters'
+import { selectors as filters } from 'src/search-filters'
 
 export const fetchAllLists = createAction('custom-lists/listData')
 export const updatePageLists = createAction('custom-lists/updateList')

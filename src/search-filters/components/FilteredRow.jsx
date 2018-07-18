@@ -50,7 +50,12 @@ class FilteredRow extends PureComponent {
         return (
             <div className={styles.container}>
                 <div className={this.mainClass} onClick={this.props.onClick}>
-                    <div className={styles.listName} title={this.props.value}>
+                    <div
+                        className={cx(styles.listName, {
+                            [styles.available]: !this.props.available,
+                        })}
+                        title={this.props.value}
+                    >
                         {this.props.value}
                     </div>
                     {this.props.isExclusive && (

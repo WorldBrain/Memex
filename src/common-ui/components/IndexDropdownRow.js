@@ -4,10 +4,9 @@ import PropTypes from 'prop-types'
 import cx from 'classnames'
 
 import localStyles from './IndexDropdown.css'
-import annotationStyles from './IndexDropdownAnnotation.css'
-
+import sidebarStyles from './IndexDropdownSidebar.css'
 /**
- * @augments {PureComponent<{onClick: any}, {isForAnnotation: bool}, *>}
+ * @augments {PureComponent<{onClick: any, scrollIntoView: any, isForSidebar: any}, {isForAnnotation: bool}, *>}
  */
 class IndexDropdownRow extends PureComponent {
     static propTypes = {
@@ -21,6 +20,7 @@ class IndexDropdownRow extends PureComponent {
         focused: PropTypes.bool,
         isForAnnotation: PropTypes.bool,
         allowAdd: PropTypes.bool,
+        isForSidebar: PropTypes.bool,
         scrollIntoView: PropTypes.func.isRequired,
     }
 
@@ -38,6 +38,11 @@ class IndexDropdownRow extends PureComponent {
         this.ensureVisible()
     }
 
+    get styles() {
+        return this.props.isForSidebar ? sidebarStyles : localStyles
+    }
+
+    // Scroll with key navigation
     ensureVisible = () => {
         if (this.props.focused) {
             this.props.scrollIntoView(ReactDOM.findDOMNode(this))

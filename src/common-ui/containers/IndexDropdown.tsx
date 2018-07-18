@@ -12,8 +12,6 @@ import {
     IndexDropdownRow,
 } from '../components'
 
-import { FilteredRow } from '../../search-filters/components'
-
 export interface Props {
     source: 'tag' | 'domain'
     /** The URL to use for dis/associating new tags with; set this to keep in sync with index. */
@@ -373,15 +371,16 @@ class IndexDropdownContainer extends Component<Props, State> {
     private renderTags() {
         const tags = this.getDisplayTags()
 
-        const Row = this.props.isForSidebar ? FilteredRow : IndexDropdownRow
+        // const Row = this.props.isForSidebar ? FilteredRow : IndexDropdownRow
 
         const tagOptions = tags.map((tag, i) => (
-            <Row
+            <IndexDropdownRow
                 {...tag}
                 key={i}
                 onClick={this.handleTagSelection(i)}
                 {...this.props}
                 scrollIntoView={this.scrollElementIntoViewIfNeeded}
+                isForSidebar={this.props.isForSidebar}
             />
         ))
 
@@ -397,6 +396,7 @@ class IndexDropdownContainer extends Component<Props, State> {
                     isForAnnotation={this.props.isForAnnotation}
                     allowAdd={this.props.allowAdd}
                     scrollIntoView={this.scrollElementIntoViewIfNeeded}
+                    isForSidebar={this.props.isForSidebar}
                 />,
             )
         }

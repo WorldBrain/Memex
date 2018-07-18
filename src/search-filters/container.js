@@ -2,11 +2,6 @@ import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
-
-import {
-    selectors as filters,
-    actions as filterActs,
-} from 'src/overview/filters'
 import { Checkbox } from 'src/common-ui/components'
 import {
     SearchFilters,
@@ -65,7 +60,7 @@ class SearchFiltersContainer extends PureComponent {
                   <FilteredRow
                       key={i}
                       value={tag}
-                      onClick={tag => this.props.addTagFilter(tag)}
+                      onClick={() => this.props.delTagFilter(tag)}
                       active
                   />
               ))
@@ -144,8 +139,7 @@ class SearchFiltersContainer extends PureComponent {
 
     renderTypeFilter = () => (
         <FilterBar
-            onBarClick={e => {
-                console.log('stare')
+            onBarClick={() => {
                 this.props.toggleFilterTypes()
             }}
             filter="Type"
@@ -168,11 +162,11 @@ class SearchFiltersContainer extends PureComponent {
 }
 
 const mapStateToProps = state => ({
-    filteredTags: filters.tags(state),
-    filteredDomains: filters.displayDomains(state),
+    filteredTags: selectors.tags(state),
+    filteredDomains: selectors.displayDomains(state),
     domainFilterDropdown: selectors.domainFilter(state),
     tagFilterDropdown: selectors.tagFilter(state),
-    bookmarkFilter: filters.onlyBookmarks(state),
+    bookmarkFilter: selectors.onlyBookmarks(state),
     isSidebarOpen: sidebar.isSidebarOpen(state),
     showfilteredTypes: selectors.filterTypes(state),
 })
@@ -191,17 +185,15 @@ const mapDispatchToProps = dispatch => ({
         dispatch,
     ),
     onShowOnlyBookmarksChange: () => {
-        dispatch(filterActs.toggleBookmarkFilter())
+        dispatch(actions.toggleBookmarkFilter())
     },
-    clearAllFilters: () => dispatch(filterActs.resetFilters()),
-    // handleFilterClick: source => () => dispatch(filterActs.setFilterPopup(source)),
-    addTagFilter: tag => dispatch(filterActs.addTagFilter(tag)),
-    delTagFilter: tag => dispatch(filterActs.delTagFilter(tag)),
-    addDomainFilter: domain => dispatch(filterActs.addIncDomainFilter(domain)),
-    delIncDomainFilter: domain =>
-        dispatch(filterActs.delIncDomainFilter(domain)),
-    delExcDomainFilter: domain =>
-        dispatch(filterActs.delExcDomainFilter(domain)),
+    clearAllFilters: () => dispatch(actions.resetFilters()),
+    // handleFilterClick: source => () => dispatch(actions.setFilterPopup(source)),
+    addTagFilter: tag => dispatch(actions.addTagFilter(tag)),
+    delTagFilter: tag => dispatch(actions.delTagFilter(tag)),
+    addDomainFilter: domain => dispatch(actions.addIncDomainFilter(domain)),
+    delIncDomainFilter: domain => dispatch(actions.delIncDomainFilter(domain)),
+    delExcDomainFilter: domain => dispatch(actions.delExcDomainFilter(domain)),
 })
 
 export default connect(

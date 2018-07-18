@@ -6,6 +6,17 @@ import styles from './SidebarIcons.css'
 import InfoTooltip from './Tooltip'
 
 class SidebarIcons extends PureComponent {
+    static propTypes = {
+        filterBtnClick: PropTypes.func.isRequired,
+        listBtnClick: PropTypes.func.isRequired,
+        overviewMode: PropTypes.bool,
+        onPageDrag: PropTypes.func,
+        onClearBtnClick: PropTypes.func,
+        onShowBtnClick: PropTypes.func,
+        filterActive: PropTypes.bool.isRequired,
+        isListFilterActive: PropTypes.bool.isRequired,
+    }
+
     constructor(props) {
         super(props)
         this.state = {
@@ -41,7 +52,12 @@ class SidebarIcons extends PureComponent {
                         onClick={this.props.filterBtnClick}
                     />
                     {this.props.filterActive && (
-                        <div className={styles.smallButton}>clear</div>
+                        <div
+                            onClick={this.props.onClearBtnClick}
+                            className={styles.smallButton}
+                        >
+                            clear
+                        </div>
                     )}
                 </div>
                 <InfoTooltip
@@ -60,21 +76,17 @@ class SidebarIcons extends PureComponent {
                         onMouseOut={this.handleHideCollTooltip}
                     />
                     {this.props.isListFilterActive && (
-                        <div className={styles.smallButton}>show all</div>
+                        <div
+                            onClick={this.props.onShowBtnClick}
+                            className={styles.smallButton}
+                        >
+                            show all
+                        </div>
                     )}
                 </div>
             </div>
         )
     }
-}
-
-SidebarIcons.propTypes = {
-    filterBtnClick: PropTypes.func.isRequired,
-    listBtnClick: PropTypes.func.isRequired,
-    overviewMode: PropTypes.bool,
-    onPageDrag: PropTypes.func,
-    filterActive: PropTypes.bool.isRequired,
-    isListFilterActive: PropTypes.bool.isRequired,
 }
 
 export default SidebarIcons

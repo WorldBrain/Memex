@@ -35,9 +35,6 @@ export default class CustomListBackground {
             fetchListNameSuggestions: (...params) => {
                 return this.fetchListNameSuggestions(...params)
             },
-            checkPageInList: (...params) => {
-                return this.checkPageInList(...params)
-            },
             fetchListPagesById: (...params) => {
                 return this.fetchListPagesById(...params)
             },
@@ -168,22 +165,6 @@ export default class CustomListBackground {
         return await this.storage.fetchListNameSuggestions({
             name,
             url: normalizeUrl(url),
-        })
-    }
-
-    /**
-     * check if the page is actually in list
-     *
-     * @param {Object} obj
-     * @param {number} obj.id
-     * @param {string} obj.url
-     * @returns
-     * @memberof CustomListBackground
-     */
-    async checkPageInList({ id, url }) {
-        return await this.storage.checkPageInList({
-            listId: id,
-            pageUrl: normalizeUrl(url),
         })
     }
 

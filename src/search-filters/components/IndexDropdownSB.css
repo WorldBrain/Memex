@@ -1,4 +1,5 @@
 .container {
     display: inline-flex;
     position: relative;
+    width: 100%;
 }

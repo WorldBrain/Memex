@@ -4,9 +4,9 @@ import PropTypes from 'prop-types'
 import { bindActionCreators } from 'redux'
 
 import { ListSideBar } from 'src/custom-lists/components'
-import SearchFilters from 'src/search-filters/container'
+// import SearchFilters from 'src/search-filters/container'
 import { selectors, actions } from './'
-import { actions as filterActs } from '../filters'
+import SearchFilters, { actions as filterActs } from '../../search-filters'
 
 // TODO: compress into one
 import Sidebar from './components/SideBar'
@@ -27,7 +27,11 @@ class SidebarContainer extends PureComponent {
     }
 
     // Capture state of the react-burger-menu
-    captureStateChange = ({ isOpen }) => this.props.setSidebarState(isOpen)
+    captureStateChange = ({ isOpen }) => {
+        // reset mouse over when either close button clicked or esc pressed
+        if (!isOpen) this.props.resetMouseOver()
+        this.props.setSidebarState(isOpen)
+    }
 
     renderSearchFilters = () => <SearchFilters />
 

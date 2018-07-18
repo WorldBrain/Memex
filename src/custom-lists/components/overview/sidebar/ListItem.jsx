@@ -35,46 +35,50 @@ class PageList extends Component {
     }
 
     mouseEnter = () => {
-        this.setState({
+        this.setState(state => ({
+            ...state,
             isMouseInside: true,
-        })
+        }))
     }
 
     mouseLeave = () => {
-        this.setState({
+        this.setState(state => ({
+            ...state,
             isMouseInside: false,
-        })
+        }))
     }
 
     handleDragEnter = () => {
-        this.setState({
+        this.setState(state => ({
+            ...state,
             isDragInside: true,
-        })
+        }))
     }
 
     handleDragOver = e => {
         e.preventDefault()
-        this.setState({
+        this.setState(state => ({
+            ...state,
             isDragInside: true,
-        })
+        }))
     }
 
     handleDragLeave = () => {
-        // setTimeout(
-        this.setState({
+        this.setState(state => ({
+            ...state,
             isDragInside: false,
-        })
-        // , 500)
+        }))
     }
 
-    handleDrop = event => {
-        event.preventDefault()
-        this.setState({
+    handleDrop = e => {
+        e.preventDefault()
+        this.setState(state => ({
+            ...state,
             isDragInside: false,
-        })
-        // const url = event.dataTransfer.getData('URL')
+        }))
+        // const url = e.dataTransfer.getData('URL')
         // Gets the URL of the dropped list item
-        const url = event.dataTransfer.getData('text/plain')
+        const url = e.dataTransfer.getData('text/plain')
         this.props.onAddPageToList(url)
     }
 

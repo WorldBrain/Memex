@@ -3,7 +3,7 @@ import { createAction } from 'redux-act'
 import analytics, { updateLastActive } from 'src/analytics'
 import internalAnalytics from 'src/analytics/internal'
 import { remoteFunction } from 'src/util/webextensionRPC'
-import { actions as filterActs, selectors as filters } from './filters'
+import { actions as filterActs, selectors as filters } from '../search-filters'
 import * as constants from './constants'
 import * as selectors from './selectors'
 import { fetchTooltip } from './components/tooltips'
@@ -268,7 +268,7 @@ export const toggleBookmark = (url, index) => async (dispatch, getState) => {
     internalAnalytics.processEvent({
         type: hasBookmark ? 'removeResultBookmark' : 'createResultBookmark',
     })
-    
+
     // Reset UI state in case of error
     const errHandler = err => dispatch(changeHasBookmark(index))
 

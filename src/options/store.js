@@ -9,7 +9,6 @@ import * as privacy from './privacy'
 import * as settings from './settings'
 import * as overviewPage from '../overview'
 import { reducer as onboarding } from '../overview/onboarding'
-import { reducer as filters } from '../overview/filters'
 import { reducer as sidebar } from 'src/overview/sidebar'
 import { reducer as customLists } from 'src/custom-lists'
 // Search filters in the sidebar
@@ -23,7 +22,6 @@ const rootReducer = combineReducers({
     overview: overviewPage.reducer,
     settings: settings.reducer,
     onboarding,
-    filters,
     sidebar,
     customLists,
     searchFilters,

@@ -3,6 +3,10 @@
     overflow-y: auto;
 }
 
+.filtered::-webkit-scrollbar {
+    width: 5px;
+}
+
 .otherFilters {
     padding: 0 15px;
     margin-top: 15px;

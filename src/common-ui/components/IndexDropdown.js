@@ -4,6 +4,7 @@ import cx from 'classnames'
 
 import styles from './IndexDropdown.css'
 import annotationStyles from './IndexDropdownAnnotation.css'
+import sidebarStyles from './IndexDropdownSidebar.css'
 
 /**
  * @augments {PureComponent<{onTagSearchChange: any, onTagSearchKeyDown: any, setInputRef: any, numberOfTags: any, tagSearchValue: any, clearSearchField?: any, showClearfieldBtn?: any}, *>}
@@ -27,8 +28,10 @@ class IndexDropdown extends PureComponent {
         showClearfieldBtn: PropTypes.bool,
     }
 
-    componentWillMount() {
-        this.styles = this.props.isForAnnotation ? annotationStyles : styles
+    get styles() {
+        if (this.props.isForAnnotation) return annotationStyles
+        else if (this.props.isForSidebar) return sidebarStyles
+        return styles
     }
 
     get mainClass() {
@@ -50,7 +53,7 @@ class IndexDropdown extends PureComponent {
                 placeholder = 'Tags'
                 break
             case 'domain':
-                placeholder = 'Domain'
+                placeholder = 'Domains'
                 break
             case 'list':
                 placeholder = 'Lists'
@@ -86,25 +89,28 @@ class IndexDropdown extends PureComponent {
                     {!this.props.showClearfieldBtn ? (
                         <i className="material-icons">search</i>
                     ) : (
-                        <i
-                            onClick={this.props.clearSearchField}
-                            className={cx('material-icons', styles.closeButton)}
-                        >
-                            cancel
+                            <i
+                                onClick={this.props.clearSearchField}
+                                className={cx(
+                                    'material-icons',
+                                    this.styles.closeButton,
+                                )}
+                            >
+                                cancel
                         </i>
-                    )}
+                        )}
                 </form>
                 <div
-                    className={cx(styles.tagContainerSB, {
-                        [styles.tagContainer]: this.props.isForSidebar,
+                    className={cx(this.styles.tagContainerSB, {
+                        [this.styles.tagContainer]: this.props.isForSidebar,
                     })}
                 >
                     {this.props.children}
                 </div>
                 {!this.props.isForSidebar && (
-                    <div className={styles.summaryTagContainer}>
-                        <div className={styles.numberTags}>
-                            <span className={styles.bold}>
+                    <div className={this.styles.summaryTagContainer}>
+                        <div className={this.styles.numberTags}>
+                            <span className={this.styles.bold}>
                                 {this.props.numberOfTags}
                             </span>{' '}
                             {this.unit} selected

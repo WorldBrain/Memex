@@ -95,11 +95,12 @@ export default class CustomListStorage extends FeatureStorage {
     /**
      *  Fetch list By Id.
      *
+     * @private
      * @param {number} id
      * @returns {PageList}
      * @memberof CustomListStorage
      */
-    async fetchListById(id: number) {
+    private async fetchListById(id: number) {
         const list = await this.storageManager.findObject<PageList>(
             CustomListStorage.CUSTOM_LISTS_COLL,
             { id },
@@ -200,7 +201,7 @@ export default class CustomListStorage extends FeatureStorage {
      * @memberof CustomListStorage
      */
     async updateListName({ id, name }: { id: number; name: string }) {
-        await this.storageManager.updateObject(
+        return await this.storageManager.updateObject(
             CustomListStorage.CUSTOM_LISTS_COLL,
             {
                 id,
@@ -260,7 +261,7 @@ export default class CustomListStorage extends FeatureStorage {
         const idExists = Boolean(await this.fetchListById(listId))
 
         if (idExists) {
-            await this.storageManager.putObject(
+            return await this.storageManager.putObject(
                 CustomListStorage.LIST_ENTRIES_COLL,
                 {
                     listId,
@@ -293,35 +294,6 @@ export default class CustomListStorage extends FeatureStorage {
             {
                 listId,
                 pageUrl,
-            },
-        )
-
-        return x
-    }
-
-    /**
-     * Check if page exists in the list.
-     *
-     * @param {Object} obj
-     * @param {number} obj.listId
-     * @param {string} obj.pageUrl
-     * @returns
-     * @memberof CustomListStorage
-     */
-    async checkPageInList({
-        listId,
-        pageUrl,
-    }: {
-        listId: number
-        pageUrl: string
-    }) {
-        const x = await this.storageManager.findObject(
-            CustomListStorage.LIST_ENTRIES_COLL,
-            {
-                $and: [
-                    { listId: { $eq: listId } },
-                    { pageUrl: { $eq: pageUrl } },
-                ],
             },
         )
 

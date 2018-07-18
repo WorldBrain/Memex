@@ -17,11 +17,11 @@ import PageResultItem from './components/PageResultItem'
 import ResultsMessage from './components/ResultsMessage'
 import TagPill from './components/TagPill'
 import Onboarding, { selectors as onboarding } from './onboarding'
-import Filters, { selectors as filters, actions as filterActs } from './filters'
 import Sidebar, {
     selectors as sidebarSels,
     actions as sidebarActs,
 } from './sidebar'
+import { selectors as filters, actions as filterActs } from '../search-filters'
 import NoResultBadTerm from './components/NoResultBadTerm'
 import localStyles from './components/Overview.css'
 import { actions as listActs, selectors as customLists } from 'src/custom-lists'
@@ -66,6 +66,8 @@ class OverviewContainer extends Component {
         filterActive: PropTypes.bool.isRequired,
         showSearchFilters: PropTypes.func.isRequired,
         hideSearchFilters: PropTypes.func.isRequired,
+        resetFilters: PropTypes.func.isRequired,
+        delListFilter: PropTypes.func.isRequired,
     }
 
     componentDidMount() {
@@ -104,6 +106,8 @@ class OverviewContainer extends Component {
             onPageDrag={this.props.hideSearchFilters}
             filterActive={this.props.filterActive}
             isListFilterActive={this.props.isListFilterActive}
+            onClearBtnClick={this.props.resetFilters}
+            onShowBtnClick={this.props.delListFilter}
         />
     )
 
@@ -291,8 +295,6 @@ class OverviewContainer extends Component {
         }
     }
 
-    renderFilters = () => <Filters setDropdownRef={this.trackDropwdownRef} />
-
     renderDragElement = () => {
         return (
             <div
@@ -313,7 +315,6 @@ class OverviewContainer extends Component {
                     {...this.props}
                     setInputRef={this.setInputRef}
                     onInputChange={this.props.handleInputChange}
-                    filters={this.renderFilters()}
                     onQuerySearchKeyDown={this.handleSearchEnter}
                     isSearchDisabled={this.props.showOnboarding}
                     scrollDisabled={this.props.mouseOnSidebar}
@@ -373,6 +374,8 @@ const mapDispatchToProps = dispatch => ({
             setUrlDragged: listActs.setUrlDragged,
             showSearchFilters: sidebarLeftActs.openSidebarFilterMode,
             hideSearchFilters: sidebarLeftActs.openSidebarListMode,
+            resetFilters: filterActs.resetFilters,
+            delListFilter: filterActs.delListFilter,
         },
         dispatch,
     ),

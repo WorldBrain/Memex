@@ -10,7 +10,7 @@ import {
     actions as onboardingActs,
     constants as onboardingConsts,
 } from './onboarding'
-import { selectors as filters, actions as filterActs } from './filters'
+import { selectors as filters, actions as filterActs } from '../search-filters'
 
 const parseBool = str => str === 'true'
 const parseNumber = str => Number(str)

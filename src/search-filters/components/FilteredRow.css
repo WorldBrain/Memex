@@ -62,3 +62,7 @@
     color: #00acc3;
     font-size: 0.85em;
 }
+
+.available {
+    opacity: 0.8;
+}
