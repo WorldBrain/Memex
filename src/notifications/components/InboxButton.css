@@ -1,12 +1,12 @@
 .inbox {
-    font-size: 18px;
+    font-size: 15px;
     text-decoration: none;
-    padding: 23px 25px;
-    color: #3eb995;
+    padding: 25px;
+    color: #777;
     cursor: pointer;
 
     &:hover {
-        color: #777;
+        color: #3eb995;
     }
 
     @media (max-width: 1650px) {

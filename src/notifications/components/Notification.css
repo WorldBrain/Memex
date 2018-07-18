@@ -4,21 +4,13 @@
     justify-content: space-between;
     margin-top: 30px;
     background-color: #fff;
-    padding: 10px;
+    padding: 20px;
     box-shadow: 0 4px 20px 1px rgba(62, 185, 149, 0.0902);
-}
-
-.logo {
-    background-color: #f3f3f3;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
 }
 
 .logo img {
     width: 20px;
     height: auto;
-    margin: 7px 10px;
 }
 
 .content {
@@ -33,31 +25,34 @@
 
 .titleMessage {
     display: flex;
+    width: 674px;
     flex-direction: column;
-    margin: 6px 10px;
-    font-size: 16px;
+    margin: 0 10px 0 20px;
+    font-size: 14px;
 }
 
 .title {
-    font-size: 20px;
+    font-size: 16px;
     font-weight: 600;
     margin-bottom: 10px;
 }
 
 .message {
     color: #777;
+    text-align: justify;
+    font-size: 14px;
 }
 
 .buttonTick {
     display: flex;
     flex-direction: row;
-    margin: 30px 0 10px 10px;
+    margin: 30px 0 0 20px;
     align-items: center;
     justify-content: space-between;
 }
 
 .button {
-    padding: 10px 20px;
+    padding: 8px 20px;
     background-color: #3eb995;
     color: white;
     font-size: 16px;
@@ -71,6 +66,7 @@
     color: #3eb995;
     font-weight: 600;
     cursor: pointer;
+    font-size: 20px;
 }
 
 .onlyTick {
@@ -82,24 +78,26 @@
     font-weight: bold;
     text-align: center;
     margin-top: 5px;
+    font-size: 14px;
 }
 
 .why {
     position: relative;
     display: inline-table;
     color: #777;
+    width: 30px;
 }
 
 .why .whyText {
     visibility: hidden;
-    width: 240px;
+    width: 225px;
     background-color: #fff;
     color: #777;
     text-align: center;
     border-radius: 6px;
     position: absolute;
     z-index: 1;
-    top: 220%;
+    top: 135%;
     left: 50%;
     margin-left: -120px;
     opacity: 0;
