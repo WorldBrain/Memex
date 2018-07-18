@@ -51,10 +51,11 @@ export default class NotificationBackground {
             NotificationBackground.LAST_NOTIF_TIME,
         ))[NotificationBackground.LAST_NOTIF_TIME]
 
-        for (let notification of notifications.NOTIFS) {
+        for (let notification of notifications.NOTIFS.notifs) {
             notification = {
                 ...notification,
                 deliveredTime: Date.now(),
+                sentTime: notifications.releaseTime,
             }
 
             if (!lastReleaseTime || lastReleaseTime < notification.sentTime) {

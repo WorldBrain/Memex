@@ -11,6 +11,9 @@ import NotificationList from './components/NotificationList'
 import Notification from './components/Notification'
 import StatusHeading from './components/StatusHeading'
 import ReadHeader from './components/ReadHeader'
+import Button from './components/Button'
+import ActionButton from './components/ActionButton'
+import * as privacyActions from 'src/options/privacy/actions'
 
 class NotificationContainer extends Component {
     static propTypes = {
@@ -53,6 +56,40 @@ class NotificationContainer extends Component {
         return trunctatedText
     }
 
+    renderButtons(buttons) {
+        if (!buttons) {
+            return null
+        }
+
+        return buttons.map((button, i) => {
+            if (button.action.type === 'go_to_url') {
+                return (
+                    <Button
+                        url={button.action.url}
+                        label={button.label}
+                        context={button.action.context}
+                        key={i}
+                    />
+                )
+            } else {
+                const actionName = button.action.name
+                const actionFunction = button.action.type
+                const key = button.action.key
+
+                console.log(actionName, actionFunction, key)
+                return (
+                    <ActionButton
+                        key={i}
+                        label={button.label}
+                        handleClick={() => {
+                            return null
+                        }}
+                    />
+                )
+            }
+        })
+    }
+
     renderNotificationItems(notifications, isUnread) {
         const { showMoreIndex, handleToggleShowMore, handleTick } = this.props
 
@@ -71,7 +108,7 @@ class NotificationContainer extends Component {
                     key={i}
                     title={notification.title}
                     message={trucatedMessage}
-                    buttonText={notification.buttonText}
+                    buttonText={notification.buttons}
                     date={notification.date}
                     isShowMore={isTruncated}
                     showMore={handleToggleShowMore(
@@ -82,7 +119,7 @@ class NotificationContainer extends Component {
                     isMore={showMoreIndex !== notification.id}
                     handleTick={handleTick(notification)}
                     isUnread={isUnread}
-                    link={notification.link}
+                    buttons={this.renderButtons(notification.buttons)}
                 />
             )
         })

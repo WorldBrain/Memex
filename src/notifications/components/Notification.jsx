@@ -43,15 +43,7 @@ const Notification = props => (
                 </div>
                 {(props.isUnread || props.buttonText) && (
                     <div className={hasOnlyButton(props.buttonText)}>
-                        {props.buttonText && (
-                            <a
-                                href={props.link}
-                                className={localStyles.button}
-                                target="_blank"
-                            >
-                                {props.buttonText}
-                            </a>
-                        )}
+                        {props.buttons}
                         {props.isUnread && (
                             <div
                                 className={localStyles.tick}
@@ -70,13 +62,16 @@ const Notification = props => (
 Notification.propTypes = {
     title: PropTypes.string.isRequired,
     message: PropTypes.string.isRequired,
-    buttonText: PropTypes.string,
+    buttonText: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.arrayOf(PropTypes.object),
+    ]),
     isShowMore: PropTypes.bool.isRequired,
     showMore: PropTypes.func.isRequired,
     isMore: PropTypes.bool.isRequired,
     handleTick: PropTypes.func.isRequired,
     isUnread: PropTypes.bool.isRequired,
-    link: PropTypes.string,
+    buttons: PropTypes.arrayOf(PropTypes.node),
 }
 
 export default Notification
