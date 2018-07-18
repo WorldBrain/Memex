@@ -11,7 +11,7 @@ interface NotifDefinition {
     buttons?: ButtonDefinition[]
 }
 
-interface notifs {
+interface Notifs {
     releaseTime: number
     notifs: NotifDefinition[]
 }
@@ -27,7 +27,7 @@ interface notifs {
  *      message* - Message in the text - It supports html tags (for example h1, i, b)
  *      releaseTime* - Time when create the notif, get the current unix time (Date.now()) - Important, the notif insertation in db depends on it
  */
-export const NOTIFS: notifs = {
+export const NOTIFS: Notifs = {
     releaseTime: 1531929627308,
     notifs: [
         {
