@@ -1,4 +1,5 @@
 .memex-highlight {
+    background: rgb(62, 185, 149, 0.3);
     transition: all 0.1s linear;
     cursor: pointer;
 
@@ -7,6 +8,6 @@
     }
 
     &.dark {
-        background: rgb(62, 185, 149, 0.3);
+        background: rgb(62, 185, 149, 0.7);
     }
 }
