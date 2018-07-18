@@ -12,6 +12,7 @@ export const setAnchor = createAction('setAnchor')
 export const setPageInfo = createAction('setPageInfo')
 
 export const fetchAnnotationAct = () => async (dispatch, getState) => {
+    dispatch(setAnnotations([]))
     const pageUrl = getState().page.url
     const annotations = await remoteFunction('getAllAnnotations')(pageUrl)
     dispatch(setAnnotations(annotations))

@@ -16,6 +16,7 @@ class IndexDropdownRow extends PureComponent {
         onClick: PropTypes.func.isRequired,
         focused: PropTypes.bool,
         isForAnnotation: PropTypes.bool,
+        allowAdd: PropTypes.bool,
     }
 
     componentWillMount() {
@@ -27,6 +28,7 @@ class IndexDropdownRow extends PureComponent {
     get mainClass() {
         return cx(this.styles.menuItem, {
             [this.styles.menuItemFocused]: this.props.focused,
+            [this.styles.commentBox]: this.props.allowAdd,
         })
     }
 

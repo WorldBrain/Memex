@@ -7,7 +7,7 @@
     word-wrap: break-word;
     font-size: 12px;
     font-family: 'Lato', sans-serif;
-    width: 82.9%;
+    width: 297px;
     margin-left: 8px;
 
     &:hover,
@@ -15,6 +15,10 @@
     &:active {
         background-color: #f7f7f7;
         outline: none;
+    }
+
+    &.commentBox {
+        width: 319px;
     }
 }
 
@@ -69,8 +73,12 @@
     height: 39px;
     margin-bottom: 0;
     background-color: #f7f7f7;
-    width: 91.5%;
+    width: 297px;
     margin-left: 8px;
+
+    &.commentBox {
+        width: 319px;
+    }
 
     & > i {
         color: #3eb995;

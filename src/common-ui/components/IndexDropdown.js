@@ -21,6 +21,7 @@ class IndexDropdown extends PureComponent {
         isForAnnotation: PropTypes.bool,
         source: PropTypes.oneOf(['tag', 'domain']).isRequired,
         url: PropTypes.string,
+        allowAdd: PropTypes.bool,
     }
 
     componentWillMount() {
@@ -47,7 +48,11 @@ class IndexDropdown extends PureComponent {
     render() {
         return (
             <div className={this.mainClass} ref={this.props.setTagDivRef}>
-                <form className={this.styles.searchContainer}>
+                <form
+                    className={cx(this.styles.searchContainer, {
+                        [this.styles.commentBox]: this.props.allowAdd,
+                    })}
+                >
                     <input
                         className={this.styles.search}
                         name="query"

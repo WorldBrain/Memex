@@ -354,6 +354,7 @@ class IndexDropdownContainer extends Component<Props, State> {
                         this.state.focused === this.state.displayFilters.length
                     }
                     isForAnnotation={this.props.isForAnnotation}
+                    allowAdd={this.props.allowAdd}
                 />,
             )
         }
