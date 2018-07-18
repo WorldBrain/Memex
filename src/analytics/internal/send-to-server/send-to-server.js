@@ -1,6 +1,6 @@
 import { idleManager } from 'src/util/idle'
 import { SHOULD_TRACK_STORAGE_KEY as SHOULD_TRACK } from 'src/options/privacy/constants'
-import { USER_ID, generateTokenIfNot } from 'src/util/generate-token'
+import { generateTokenIfNot } from 'src/util/generate-token'
 import { INSTALL_TIME_KEY } from '../../../constants'
 
 class SendToServer {
@@ -53,6 +53,10 @@ class SendToServer {
      * @return {Promise<Response>}
      */
     _sendReq = async event => {
+        if (!(await this.shouldTrack())) {
+            return
+        }
+
         const userId = await this.fetchUserId()
 
         if (!userId) {
@@ -96,8 +100,6 @@ class SendToServer {
     }
 
     async fetchUserId() {
-        let userId = (await browser.storage.local.get(USER_ID))[USER_ID]
-
         if (!(await this.shouldTrack())) {
             return null
         }
@@ -105,7 +107,7 @@ class SendToServer {
         const installTime = (await browser.storage.local.get(INSTALL_TIME_KEY))[
             INSTALL_TIME_KEY
         ]
-        userId = await generateTokenIfNot(installTime)
+        const userId = await generateTokenIfNot(installTime)
 
         return userId
     }
@@ -121,7 +123,7 @@ class SendToServer {
             [SHOULD_TRACK]: SendToServer.DEF_TRACKING,
         })
 
-        return storage[SHOULD_TRACK] && !isDoNotTrackEnabled
+        return storage[SHOULD_TRACK]
     }
 
     /**
