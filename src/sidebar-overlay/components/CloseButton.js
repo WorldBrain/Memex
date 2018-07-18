@@ -6,8 +6,7 @@ import styles from './CloseButton.css'
 
 const CloseButton = ({ isActive, isOverview, clickHandler }) => (
     <div
-        className={cx({
-            [styles.close]: isActive,
+        className={cx(styles.close, {
             [styles.hidden]: !isActive,
             [styles.overview]: isOverview,
         })}

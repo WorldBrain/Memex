@@ -24,7 +24,7 @@
     }
 
     &.hidden {
-        animation: moveRight 0.4s linear;
+        display: none;
     }
 }
 
