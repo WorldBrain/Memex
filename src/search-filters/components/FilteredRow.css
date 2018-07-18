@@ -9,7 +9,7 @@
     font-weight: 500;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-size: 0.9em;
+    font-size: 0.82em;
     flex: 10;
     cursor: pointer;
     text-align: left;
@@ -49,4 +49,16 @@
     cursor: pointer;
     outline: none;
     padding: 0px;
+}
+
+.exclusion {
+    float: right;
+    background-image: url('/img/exlusion.svg');
+    width: 21px;
+    margin-right: 2px;
+}
+
+.soon {
+    color: #00acc3;
+    font-size: 0.85em;
 }

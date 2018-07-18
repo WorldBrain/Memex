@@ -14,8 +14,16 @@ class FilteredRow extends PureComponent {
         ]).isRequired,
         focused: PropTypes.bool,
         active: PropTypes.bool.isRequired,
+        isExclusive: PropTypes.bool.isRequired,
         onClick: PropTypes.func.isRequired,
-        scrollIntoView: PropTypes.func.isRequired,
+        scrollIntoView: PropTypes.func,
+        // If the fearure is available yet
+        available: PropTypes.bool,
+    }
+
+    static defaultProps = {
+        isExclusive: false,
+        available: true,
     }
 
     componentDidMount() {
@@ -45,9 +53,21 @@ class FilteredRow extends PureComponent {
                     <div className={styles.listName} title={this.props.value}>
                         {this.props.value}
                     </div>
-                    {this.props.active && (
-                        <button className={cx(styles.tick, styles.button)} />
+                    {this.props.isExclusive && (
+                        <button
+                            className={cx(styles.exclusion, styles.button)}
+                        />
                     )}
+                    {this.props.active &&
+                        this.props.available && (
+                            <button
+                                className={cx(styles.tick, styles.button)}
+                            />
+                        )}
+                    {this.props.active &&
+                        !this.props.available && (
+                            <span className={styles.soon}>Soon</span>
+                        )}
                 </div>
             </div>
         )

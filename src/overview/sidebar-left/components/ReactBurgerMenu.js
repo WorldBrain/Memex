@@ -32,7 +32,7 @@ export const styles = {
         right: 'inherit',
         top: '70px',
         left: '-1px',
-        width: '227px',
+        width: '250px',
         height: '100%',
         transition: 'all 0.5s',
         boxShadow: '5px -1px 4px -5px #333',

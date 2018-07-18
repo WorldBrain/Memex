@@ -21,7 +21,7 @@ import { selectors as sidebar } from '../overview/sidebar-left'
 class SearchFiltersContainer extends PureComponent {
     static propTypes = {
         filteredTags: PropTypes.arrayOf(PropTypes.string).isRequired,
-        filteredDomains: PropTypes.arrayOf(PropTypes.string).isRequired,
+        filteredDomains: PropTypes.arrayOf(PropTypes.object).isRequired,
         addTagFilter: PropTypes.func.isRequired,
         delTagFilter: PropTypes.func.isRequired,
         addDomainFilter: PropTypes.func.isRequired,
@@ -35,6 +35,26 @@ class SearchFiltersContainer extends PureComponent {
         hideTagFilter: PropTypes.func.isRequired,
         hideDomainFilter: PropTypes.func.isRequired,
         delIncDomainFilter: PropTypes.func.isRequired,
+        toggleFilterTypes: PropTypes.func.isRequired,
+        showfilteredTypes: PropTypes.bool.isRequired,
+    }
+
+    constructor(props) {
+        super(props)
+        // Temporary dummy data for showing features.
+        this.state = {
+            filterTypes: [
+                { value: 'Websites', active: true, available: true },
+                { value: 'Annotations', active: true, available: false },
+                { value: 'Highlights', active: true, available: false },
+                { value: 'Comments', active: true, available: false },
+                {
+                    value: 'Recieved Memex.Links',
+                    active: true,
+                    available: false,
+                },
+            ],
+        }
     }
 
     renderBookmarkFilter = () => <BookmarkFilter />
@@ -52,14 +72,28 @@ class SearchFiltersContainer extends PureComponent {
             : null
     }
 
+    renderFilteredTypes = () =>
+        this.props.showfilteredTypes
+            ? this.state.filterTypes.map(({ value, active, available }, i) => (
+                  <FilteredRow
+                      key={i}
+                      value={value}
+                      onClick={() => {}}
+                      active={active}
+                      available={available}
+                  />
+              ))
+            : null
+
     renderFilteredDomains = () => {
         return !this.props.domainFilterDropdown
-            ? this.props.filteredDomains.map(({ value }, i) => (
+            ? this.props.filteredDomains.map(({ value, isExclusive }, i) => (
                   <FilteredRow
                       key={i}
                       value={value}
                       onClick={value => this.props.addDomainFilter(value)}
                       active
+                      isExclusive={isExclusive}
                   />
               ))
             : null
@@ -109,7 +143,13 @@ class SearchFiltersContainer extends PureComponent {
     )
 
     renderTypeFilter = () => (
-        <FilterBar onBarClick={this.props.showTagFilter} filter="Type" />
+        <FilterBar
+            onBarClick={e => {
+                console.log('stare')
+                this.props.toggleFilterTypes()
+            }}
+            filter="Type"
+        />
     )
 
     render() {
@@ -120,6 +160,7 @@ class SearchFiltersContainer extends PureComponent {
                 domainFilter={this.renderDomainFilter()}
                 filteredTags={this.renderFilteredTags()}
                 filteredDomains={this.renderFilteredDomains()}
+                filteredTypes={this.renderFilteredTypes()}
                 typeFilters={this.renderTypeFilter()}
             />
         )
@@ -133,6 +174,7 @@ const mapStateToProps = state => ({
     tagFilterDropdown: selectors.tagFilter(state),
     bookmarkFilter: filters.onlyBookmarks(state),
     isSidebarOpen: sidebar.isSidebarOpen(state),
+    showfilteredTypes: selectors.filterTypes(state),
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -142,6 +184,9 @@ const mapDispatchToProps = dispatch => ({
             showDomainFilter: actions.showDomainFilter,
             hideTagFilter: actions.hideTagFilter,
             showTagFilter: actions.showTagFilter,
+            showFilterTypes: actions.showFilterTypes,
+            hideFilterTypes: actions.hideFilterTypes,
+            toggleFilterTypes: actions.toggleFilterTypes,
         },
         dispatch,
     ),

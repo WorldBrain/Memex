@@ -12,3 +12,7 @@
     font-size: 1.45em;
     color: #767676;
 }
+
+.menuItem:last-child {
+    border-bottom: none;
+}
