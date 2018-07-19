@@ -31,6 +31,8 @@ class Ribbon extends React.Component {
         this.frameFC = new FrameCommunication(this.iFrame.contentWindow)
         this.setupFrameFunctions()
 
+        this.setupScrollListeners()
+
         const annotations = await remoteFunction('getAllAnnotations')(
             window.location.href,
         )
@@ -91,6 +93,34 @@ class Ribbon extends React.Component {
         })
     }
 
+    setupScrollListeners() {
+        let isInsideFrame = false
+
+        this.iFrame.addEventListener(
+            'mouseenter',
+            () => {
+                isInsideFrame = true
+            },
+            false,
+        )
+        this.iFrame.addEventListener(
+            'mouseleave',
+            () => {
+                isInsideFrame = false
+            },
+            false,
+        )
+
+        document.addEventListener(
+            'scroll',
+            () => {
+                const top = window.pageYOffset
+                if (isInsideFrame) window.scrollTo(0, top)
+            },
+            false,
+        )
+    }
+
     fetchAnnotations = async () => {
         const annotations = await remoteFunction('getAllAnnotations')(
             window.location.href,
@@ -98,6 +128,17 @@ class Ribbon extends React.Component {
         this.setState({
             annotations,
         })
+    }
+
+    togglePageScrolling = isEnabled => () => {
+        if (isEnabled) {
+            document.body.style.maxHeight = ''
+            document.body.style.overflow = 'auto'
+        } else {
+            document.body.style.maxHeight =
+                window.innerHeight + window.pageYOffset + 'px'
+            document.body.style.overflow = 'hidden'
+        }
     }
 
     focusAnnotationContainer = annotationUrl => {
@@ -108,7 +149,7 @@ class Ribbon extends React.Component {
         this.frameFC.remoteExecute('setHoveredAnnotation')(annotationUrl)
     }
 
-    reloadAnnotations = async () => {
+    openSidebarOps = async () => {
         await this.frameFC.remoteExecute('reloadAnnotations')()
         await this.fetchAnnotations()
 
@@ -120,19 +161,22 @@ class Ribbon extends React.Component {
             this.focusAnnotationContainer,
             this.hoverAnnotationContainer,
         )
+
+        this.togglePageScrolling(false)
     }
 
     closeSidebarOps = async () => {
         this.props.removeHighlights()
         await this.frameFC.remoteExecute('sendAnchorToSidebar')(null)
         this.frameFC.remoteExecute('focusAnnotation')('')
+        this.togglePageScrolling(true)
     }
 
     toggleSidebar = async () => {
         const isSidebarActive = !this.state.isSidebarActive
 
         if (isSidebarActive) {
-            await this.reloadAnnotations()
+            await this.openSidebarOps()
         } else {
             this.closeSidebarOps()
         }
@@ -143,7 +187,7 @@ class Ribbon extends React.Component {
     }
 
     openSidebar = async () => {
-        await this.reloadAnnotations()
+        await this.openSidebarOps()
         this.setState({
             isSidebarActive: true,
         })
