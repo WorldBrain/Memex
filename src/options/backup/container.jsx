@@ -13,7 +13,14 @@ export default class BackupSettingsContainer extends React.Component {
             }
         })
 
-        const isAuthenticated = await remoteFunction('isBackupAuthenticated')()
+        const isAuthenticated =
+            false && (await remoteFunction('isBackupAuthenticated')())
+        const isConnected = await remoteFunction('isBackupConnected')()
+
+        if (isAuthenticated && !isConnected) {
+            return await this.handleBackupEvent()
+        }
+
         this.setState({
             status: isAuthenticated ? 'authenticated' : 'unauthenticated',
         })
@@ -21,7 +28,7 @@ export default class BackupSettingsContainer extends React.Component {
 
     handleBackupEvent(event) {
         if (event.type === 'info') {
-            this.setState({ info: event.info })
+            this.setState({ status: 'running', info: event.info })
         } else if (event.type === 'success') {
             this.setState({ status: 'success' })
         } else if (event.type === 'fail') {
@@ -30,12 +37,10 @@ export default class BackupSettingsContainer extends React.Component {
     }
 
     handleLoginRequested = async () => {
-        this.setState({ status: 'running' })
-
         window.location.href = await remoteFunction(
             'getBackupProviderLoginLink',
         )({
-            returnURL: 'http://memex.cloud/backup/auth-redirect/google-drive',
+            returnUrl: 'http://memex.cloud/backup/auth-redirect/google-drive',
             provider: 'googledrive',
         })
     }
@@ -51,6 +56,7 @@ export default class BackupSettingsContainer extends React.Component {
                     info={this.state.info}
                     status={this.state.status || 'running'}
                     onLoginRequested={this.handleLoginRequested}
+                    startBackup={() => remoteFunction('startBackup')()}
                 />
             </div>
         )

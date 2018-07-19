@@ -9,6 +9,10 @@ export abstract class BackupBackend {
         return false
     }
 
+    async isConnected() {
+        return false
+    }
+
     async handleLoginRedirectedBack(locationHref: string) {
     }
 
