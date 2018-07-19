@@ -7,7 +7,7 @@
     word-wrap: break-word;
     font-size: 12px;
     font-family: 'Lato', sans-serif;
-    width: 297px;
+    width: 257px;
     margin-left: 8px;
 
     &:hover,
@@ -18,7 +18,7 @@
     }
 
     &.commentBox {
-        width: 319px;
+        width: 280px;
     }
 }
 
@@ -73,11 +73,11 @@
     height: 39px;
     margin-bottom: 0;
     background-color: #f7f7f7;
-    width: 297px;
+    width: 285px;
     margin-left: 8px;
 
     &.commentBox {
-        width: 319px;
+        width: 308px;
     }
 
     & > i {
@@ -93,7 +93,7 @@
     font-size: 14px;
     font-weight: 500;
     padding-left: 5px;
-    height: 38px;
+    height: 37px;
     border: none;
     background-color: #f7f7f7;
 
