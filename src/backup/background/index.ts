@@ -33,7 +33,8 @@ export class BackupBackgroundModule {
     setupRemoteFunctions() {
         makeRemotelyCallable({
             getBackupProviderLoginLink: async (info, params) => {
-                return await this.backend.getLoginUrl(params)
+                const url = await this.backend.getLoginUrl(params)
+                return url
             },
             startBackup: ({ tab }, params) => {
                 const events = this.doBackup()
@@ -49,7 +50,10 @@ export class BackupBackgroundModule {
             },
             isBackupAuthenticated: async (info, params) => {
                 return this.backend.isAuthenticated()
-            }
+            },
+            isBackupConnected: async (info, params) => {
+                return this.backend.isConnected()
+            },
         }, { insertExtraArg: true })
     }
 
