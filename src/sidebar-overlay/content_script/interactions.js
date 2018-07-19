@@ -194,3 +194,18 @@ export const openSettings = () => {
     }
     browser.runtime.sendMessage(message)
 }
+
+export const sortAnnotationByPosition = annotations => {
+    const annotationsWithTops = annotations.map(annotation => {
+        const firstHighlight = document.querySelector(
+            `.${styles['memex-highlight']}[data-annotation="${
+                annotation.url
+            }"]`,
+        )
+        return {
+            ...annotation,
+            offsetTop: firstHighlight ? firstHighlight.offsetTop : Infinity,
+        }
+    })
+    return annotationsWithTops.sort((a, b) => a.offsetTop > b.offsetTop)
+}

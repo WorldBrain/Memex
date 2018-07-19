@@ -18,6 +18,7 @@ class Ribbon extends React.Component {
         highlightAndScroll: PropTypes.func.isRequired,
         makeHighlightMedium: PropTypes.func.isRequired,
         removeMediumHighlights: PropTypes.func.isRequired,
+        sortAnnotationByPosition: PropTypes.func.isRequired,
     }
 
     state = {
@@ -151,25 +152,33 @@ class Ribbon extends React.Component {
     }
 
     openSidebarOps = async () => {
-        await this.frameFC.remoteExecute('reloadAnnotations')()
+        // await this.frameFC.remoteExecute('reloadAnnotations')()
         await this.fetchAnnotations()
 
         const highlightables = this.state.annotations.filter(
             annotation => annotation.selector,
         )
-        this.props.highlightAll(
+        await this.props.highlightAll(
             highlightables,
             this.focusAnnotationContainer,
             this.hoverAnnotationContainer,
         )
 
         this.togglePageScrolling(false)
+
+        setTimeout(() => {
+            const sorted = this.props.sortAnnotationByPosition(
+                this.state.annotations,
+            )
+            this.frameFC.remoteExecute('setAnnotations')(sorted)
+        }, 400)
     }
 
     closeSidebarOps = async () => {
         this.props.removeHighlights()
         await this.frameFC.remoteExecute('sendAnchorToSidebar')(null)
         this.frameFC.remoteExecute('focusAnnotation')('')
+        this.frameFC.remoteExecute('setAnnotations')([])
         this.togglePageScrolling(true)
     }
 

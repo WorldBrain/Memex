@@ -24,6 +24,7 @@ class SidebarContainer extends React.Component {
         setAnchor: PropTypes.func.isRequired,
         setActiveAnnotation: PropTypes.func.isRequired,
         setHoveredAnnotation: PropTypes.func.isRequired,
+        setAnnotations: PropTypes.func.isRequired,
         activeAnnotation: PropTypes.string.isRequired,
         hoveredAnnotation: PropTypes.string.isRequired,
     }
@@ -40,9 +41,10 @@ class SidebarContainer extends React.Component {
     async componentDidMount() {
         const { pageTitle, pageUrl, setPageInfo, fetchAnnotations } = this.props
         setPageInfo(pageUrl, pageTitle)
-        await fetchAnnotations()
         if (this.props.env === 'iframe') {
             this.setupFrameFunctions()
+        } else {
+            await fetchAnnotations()
         }
     }
 
@@ -52,6 +54,10 @@ class SidebarContainer extends React.Component {
         this.parentFC.setUpRemoteFunctions({
             reloadAnnotations: async () => {
                 await this.props.fetchAnnotations()
+            },
+            setAnnotations: annotations => {
+                console.log(annotations)
+                this.props.setAnnotations(annotations)
             },
             sendAnchorToSidebar: anchor => {
                 this.props.setAnchor(anchor)
@@ -110,9 +116,9 @@ class SidebarContainer extends React.Component {
     }
 
     renderAnnotations = () => {
-        const annotations = this.props.annotations.sort(
-            (x, y) => x.createdWhen < y.createdWhen,
-        )
+        const { annotations } = this.props
+        console.log(annotations)
+        if (!annotations) return
         return annotations.map(annotation => (
             <Annotation
                 annotation={annotation}
@@ -151,6 +157,8 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
     setPageInfo: (url, title) => dispatch(actions.setPageInfo({ url, title })),
     fetchAnnotations: () => dispatch(actions.fetchAnnotationAct()),
+    setAnnotations: annotations =>
+        dispatch(actions.setAnnotations(annotations)),
     editAnnotation: ({ url, comment }) =>
         dispatch(actions.editAnnotation(url, comment)),
     deleteAnnotation: ({ url }) => dispatch(actions.deleteAnnotation(url)),

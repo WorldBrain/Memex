@@ -10,6 +10,7 @@ import {
     highlightAndScroll,
     makeHighlightMedium,
     removeMediumHighlights,
+    sortAnnotationByPosition,
 } from '../content_script/interactions'
 
 export const setupRibbonUI = target => {
@@ -24,6 +25,7 @@ export const setupRibbonUI = target => {
             highlightAndScroll={highlightAndScroll}
             makeHighlightMedium={makeHighlightMedium}
             removeMediumHighlights={removeMediumHighlights}
+            sortAnnotationByPosition={sortAnnotationByPosition}
         />,
         target,
     )
