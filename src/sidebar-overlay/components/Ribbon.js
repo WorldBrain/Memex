@@ -95,11 +95,13 @@ class Ribbon extends React.Component {
 
     setupScrollListeners() {
         let isInsideFrame = false
+        let top = null
 
         this.iFrame.addEventListener(
             'mouseenter',
             () => {
                 isInsideFrame = true
+                top = window.pageYOffset
             },
             false,
         )
@@ -114,7 +116,6 @@ class Ribbon extends React.Component {
         document.addEventListener(
             'scroll',
             () => {
-                const top = window.pageYOffset
                 if (isInsideFrame) window.scrollTo(0, top)
             },
             false,

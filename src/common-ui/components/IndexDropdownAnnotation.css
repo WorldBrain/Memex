@@ -9,6 +9,7 @@
     font-family: 'Lato', sans-serif;
     width: 257px;
     margin-left: 8px;
+    box-sizing: border-box;
 
     &:hover,
     &:focus,
@@ -75,6 +76,7 @@
     background-color: #f7f7f7;
     width: 285px;
     margin-left: 8px;
+    box-sizing: border-box;
 
     &.commentBox {
         width: 308px;
@@ -96,6 +98,7 @@
     height: 37px;
     border: none;
     background-color: #f7f7f7;
+    box-sizing: border-box;
 
     &:placeholder-shown {
         font-style: italic;
