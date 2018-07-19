@@ -7,7 +7,7 @@
     word-wrap: break-word;
     font-size: 12px;
     font-family: 'Lato', sans-serif;
-    width: 257px;
+    width: 95%;
     margin-left: 8px;
     box-sizing: border-box;
 
@@ -19,7 +19,7 @@
     }
 
     &.commentBox {
-        width: 280px;
+        width: 95%;
     }
 }
 
@@ -74,12 +74,12 @@
     height: 39px;
     margin-bottom: 0;
     background-color: #f7f7f7;
-    width: 285px;
+    width: 95%;
     margin-left: 8px;
     box-sizing: border-box;
 
     &.commentBox {
-        width: 308px;
+        width: 95%;
     }
 
     & > i {
