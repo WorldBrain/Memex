@@ -20,6 +20,7 @@ const Sidebar = props => (
             className={styles.sidebar}
             onMouseEnter={props.toggleMouseOnSidebar}
             onMouseLeave={props.toggleMouseOnSidebar}
+            id="memex_sidebar_panel"
         >
             {props.showSidebar ? <CommentBox env={props.env} /> : null}
 

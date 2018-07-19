@@ -41,6 +41,8 @@ class AnnotationContainer extends React.Component {
         let annotationText = ''
         let containsTags = false
 
+        this.tagInputContainer = null
+
         if (annotation.body)
             truncated.highlight = this.getTruncatedObject(annotation.body)
 
@@ -52,12 +54,37 @@ class AnnotationContainer extends React.Component {
         const tags = await remoteFunction('getAnnotationTags')(annotation.url)
         if (tags.length) containsTags = true
 
+        this.attachEventListener()
+
         this.setState({
             truncated,
             annotationText,
             containsTags,
             tags,
         })
+    }
+
+    attachEventListener = () => {
+        // Attaches on click listener to close the tags input
+        // when clicked outside
+        // TODO: Use refs instead of manually calling it
+        const sidebar = document.querySelector('#memex_sidebar_panel')
+        sidebar.addEventListener(
+            'click',
+            e => {
+                if (this.state.tagsInput) return
+                else if (
+                    this.tagInputContainer &&
+                    this.tagInputContainer.contains(e.target)
+                )
+                    return
+
+                this.setState({
+                    tagInput: false,
+                })
+            },
+            false,
+        )
     }
 
     reloadTags = async () => {
@@ -276,6 +303,10 @@ class AnnotationContainer extends React.Component {
         else this.setFooterState('edit')()
     }
 
+    setTagRef = node => {
+        this.tagInputContainer = node
+    }
+
     renderShowButton = name => {
         const { truncated } = this.state
         if (truncated[name]) {
@@ -348,7 +379,7 @@ class AnnotationContainer extends React.Component {
                         }}
                         placeholder="Add comment..."
                     />
-                    {this.renderTagInput()}
+                    <div ref={this.setTagRef}>{this.renderTagInput()}</div>
                 </div>
             )
         return null

@@ -42,6 +42,8 @@ class CommentBox extends React.Component {
             }
         })
 
+        this.attachEventListener()
+
         if (this.props.anchor)
             this.setState({
                 isHidden: false,
@@ -49,6 +51,29 @@ class CommentBox extends React.Component {
     }
 
     isHidden = () => this.state.isHidden && !this.props.anchor
+
+    attachEventListener = () => {
+        // Attaches on click listener to close the tags input
+        // when clicked outside
+        // TODO: Use refs instead of manually calling it
+        const sidebar = document.querySelector('#memex_sidebar_panel')
+        sidebar.addEventListener(
+            'click',
+            e => {
+                if (this.state.tagsInput) return
+                else if (
+                    this.tagInputContainer &&
+                    this.tagInputContainer.contains(e.target)
+                )
+                    return
+
+                this.setState({
+                    tagInput: false,
+                })
+            },
+            false,
+        )
+    }
 
     handleChange = e => {
         let { minimized, textareaRows } = this.state
@@ -129,6 +154,8 @@ class CommentBox extends React.Component {
 
     _setTagInput = value => () => this.setState({ tagInput: value })
 
+    setTagRef = node => (this.tagInputContainer = node)
+
     openSettings = () => {
         const settingsUrl = browser.extension.getURL('/options.html#/settings')
         browser.tabs.create({
@@ -195,7 +222,7 @@ class CommentBox extends React.Component {
                     onClick={this._setTagInput(false)}
                 />
                 <br />
-                {this.renderTagInput()}
+                <div ref={this.setTagRef}>{this.renderTagInput()}</div>
                 <div className={styles.buttonHolder}>
                     <button className={styles.save} onClick={this.save}>
                         Save
