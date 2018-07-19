@@ -24,9 +24,8 @@ export class BackupBackgroundModule {
         this.backend = backend
 
         this.storageManager.on('changing', ({ collection, pk, operation }: { collection: string, pk: string, operation: string }) => {
-            // console.log('change detected, we are interested', this.recordingChanges)
             if (this.recordingChanges) {
-                // this.storage.registerChange({ collection, pk, operation })
+                this.storage.registerChange({ collection, pk, operation })
             }
         })
     }
