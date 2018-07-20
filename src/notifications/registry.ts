@@ -2,7 +2,7 @@ import * as privacyAct from '../options/privacy/actions'
 
 export const actionRegistry = {
     'track-option-change': ({ definition }) => {
-        return privacyAct.toggleTrackingOptOut(definition.key)
+        return () => privacyAct.storeTrackingOption(definition.key)
     },
     'go-to-url': ({ definition }) => {
         return () => {

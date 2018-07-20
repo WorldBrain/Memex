@@ -40,7 +40,7 @@ export const NOTIFS: Notifs = {
                     action: {
                         type: 'go-to-url',
                         url: 'https://worldbrain.io',
-                        context: 'new_tab'
+                        context: 'new-tab'
                     },
                     label: 'Learn More',
                 }

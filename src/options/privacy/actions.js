@@ -2,6 +2,7 @@ import { createAction } from 'redux-act'
 
 import analytics from 'src/analytics'
 import internalAnalytics from 'src/analytics/internal'
+import { SHOULD_TRACK_STORAGE_KEY as SHOULD_TRACK } from './constants'
 
 export const setTrackingFlag = createAction(
     'privacy/setTrackingFlag',
@@ -19,6 +20,14 @@ export const toggleTrackingOptOut = (
     isOptIn,
     skipEventTrack = false,
 ) => async dispatch => {
+    dispatch(setTrackingFlag(isOptIn))
+    await storeTrackingOption(isOptIn, skipEventTrack)
+}
+
+export async function storeTrackingOption(isOptIn, skipEventTrack = false) {
+    const storeLocalStorage = () =>
+        browser.storage.local.set({ [SHOULD_TRACK]: isOptIn })
+
     const trackEvent = force => {
         if (skipEventTrack) {
             return Promise.resolve()
@@ -45,10 +54,10 @@ export const toggleTrackingOptOut = (
 
     // Do event track after state change, as the event may be a noop if opt-out state is already set
     if (isOptIn) {
-        dispatch(setTrackingFlag(isOptIn))
+        await storeLocalStorage()
         await trackEvent(false)
     } else {
         await trackEvent(true)
-        dispatch(setTrackingFlag(isOptIn))
+        storeLocalStorage()
     }
 }
