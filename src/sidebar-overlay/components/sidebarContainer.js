@@ -56,7 +56,6 @@ class SidebarContainer extends React.Component {
                 await this.props.fetchAnnotations()
             },
             setAnnotations: annotations => {
-                console.log(annotations)
                 this.props.setAnnotations(annotations)
             },
             sendAnchorToSidebar: anchor => {

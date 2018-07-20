@@ -64,27 +64,25 @@ class AnnotationContainer extends React.Component {
         })
     }
 
+    maybeCloseTagsDropdown = e => {
+        if (!this.state.tagInput) return
+        else if (
+            this.tagInputContainer &&
+            this.tagInputContainer.contains(e.target)
+        )
+            return
+
+        this.setState({
+            tagInput: false,
+        })
+    }
+
     attachEventListener = () => {
         // Attaches on click listener to close the tags input
         // when clicked outside
         // TODO: Use refs instead of manually calling it
         const sidebar = document.querySelector('#memex_sidebar_panel')
-        sidebar.addEventListener(
-            'click',
-            e => {
-                if (this.state.tagsInput) return
-                else if (
-                    this.tagInputContainer &&
-                    this.tagInputContainer.contains(e.target)
-                )
-                    return
-
-                this.setState({
-                    tagInput: false,
-                })
-            },
-            false,
-        )
+        sidebar.addEventListener('click', this.maybeCloseTagsDropdown, false)
     }
 
     reloadTags = async () => {
@@ -292,15 +290,18 @@ class AnnotationContainer extends React.Component {
         })
     }
 
-    setFooterState = footerState => () =>
+    setFooterState = footerState => e => {
+        e.preventDefault()
+        e.stopPropagation()
         this.setState({
             footerState,
         })
+    }
 
-    toggleEditAnnotation = () => {
+    toggleEditAnnotation = e => {
         this.toggleState('annotationEditMode')()
-        if (this.state.footerState === 'edit') this.setFooterState('default')()
-        else this.setFooterState('edit')()
+        if (this.state.footerState === 'edit') this.setFooterState('default')(e)
+        else this.setFooterState('edit')(e)
     }
 
     setTagRef = node => {

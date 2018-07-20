@@ -9,7 +9,7 @@ import TagHolder from './TagHolder'
 import * as constants from '../constants'
 import styles from './CommentBox.css'
 
-class CommentBox extends React.Component {
+class CommentBox extends React.PureComponent {
     static propTypes = {
         createAnnotation: PropTypes.func.isRequired,
         setAnchor: PropTypes.func.isRequired,
@@ -50,30 +50,28 @@ class CommentBox extends React.Component {
             })
     }
 
-    isHidden = () => this.state.isHidden && !this.props.anchor
+    maybeCloseTagsDropdown = e => {
+        if (!this.state.tagInput) return
+        else if (
+            this.tagInputContainer &&
+            this.tagInputContainer.contains(e.target)
+        )
+            return
+
+        this.setState({
+            tagInput: false,
+        })
+    }
 
     attachEventListener = () => {
         // Attaches on click listener to close the tags input
         // when clicked outside
         // TODO: Use refs instead of manually calling it
         const sidebar = document.querySelector('#memex_sidebar_panel')
-        sidebar.addEventListener(
-            'click',
-            e => {
-                if (this.state.tagsInput) return
-                else if (
-                    this.tagInputContainer &&
-                    this.tagInputContainer.contains(e.target)
-                )
-                    return
-
-                this.setState({
-                    tagInput: false,
-                })
-            },
-            false,
-        )
+        sidebar.addEventListener('click', this.maybeCloseTagsDropdown, false)
     }
+
+    isHidden = () => this.state.isHidden && !this.props.anchor
 
     handleChange = e => {
         let { minimized, textareaRows } = this.state
@@ -206,6 +204,7 @@ class CommentBox extends React.Component {
 
     renderCommentBox() {
         if (this.isHidden()) return null
+        if (this.inputRef) this.inputRef.focus()
         return (
             <div
                 className={cx(styles.commentBox, {
@@ -248,7 +247,6 @@ class CommentBox extends React.Component {
     }
 
     render() {
-        if (this.inputRef) this.inputRef.focus()
         return (
             <div className={this.isHidden() ? styles.commentBoxContainer : ''}>
                 {this.renderAddNoteButton()}

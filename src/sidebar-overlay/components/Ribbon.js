@@ -205,9 +205,7 @@ class Ribbon extends React.Component {
 
     openSidebarAndSendAnchor = async anchor => {
         await this.frameFC.remoteExecute('sendAnchorToSidebar')(anchor)
-        this.setState({
-            isSidebarActive: true,
-        })
+        await this.openSidebar()
     }
 
     handleClickOutside = e => {

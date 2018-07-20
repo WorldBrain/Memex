@@ -1,5 +1,6 @@
 import { createAction } from 'redux-act'
 import { remoteFunction } from 'src/util/webextensionRPC'
+import { remove } from 'lodash/array'
 
 export const setAnnotations = createAction('setAnnotations')
 
@@ -44,12 +45,21 @@ export const createAnnotation = (comment, body, tags) => async (
     dispatch(fetchAnnotationAct())
 }
 
-export const editAnnotation = (url, comment) => async dispatch => {
+export const editAnnotation = (url, comment) => async (dispatch, getState) => {
     await remoteFunction('editAnnotation')(url, comment)
-    dispatch(fetchAnnotationAct())
+
+    const annotations = [...getState().annotations]
+    annotations.forEach(annotation => {
+        if (annotation.url === url) annotation.comment = comment
+    })
+    dispatch(setAnnotations(annotations))
 }
 
-export const deleteAnnotation = url => async dispatch => {
+export const deleteAnnotation = url => async (dispatch, getState) => {
     await remoteFunction('deleteAnnotation')(url)
-    dispatch(fetchAnnotationAct())
+
+    const annotations = [...getState().annotations]
+    const predicate = annotation => annotation.url === url
+    remove(annotations, predicate)
+    dispatch(setAnnotations(annotations))
 }
