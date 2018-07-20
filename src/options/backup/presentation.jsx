@@ -2,13 +2,12 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 export default function BackupSettings(props) {
-    console.log(props.status)
     if (props.status === 'unauthenticated') {
         return <PreLogin onLoginRequested={props.onLoginRequested} />
     } else if (props.status === 'authenticated') {
-        return <PreBackup />
+        return <PreBackup startBackup={props.startBackup} />
     } else if (props.status === 'running') {
-        return <BackupRunning />
+        return <BackupRunning info={props.info} />
     } else if (props.status === 'success' || props.status === 'fail') {
         return <PostBackup status={props.status} />
     }
@@ -56,6 +55,10 @@ PreBackup.propTypes = {
     startBackup: PropTypes.func.isRequired,
 }
 
-export function BackupRunning(props) {}
+export function BackupRunning(props) {
+    return <span>{JSON.stringify(props)}</span>
+}
 
-export function PostBackup(props) {}
+export function PostBackup(props) {
+    return null
+}

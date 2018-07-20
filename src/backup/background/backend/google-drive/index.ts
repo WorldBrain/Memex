@@ -41,7 +41,7 @@ export class DriveBackupBackend {
     }
 
     async isConnected() {
-        return !!(await this.tokenManager.tokenStore.retrieveToken('access'))
+        return !!(await this.tokenManager.tokenStore.retrieveAccessToken())
     }
 
     async handleLoginRedirectedBack(locationHref: string) {
@@ -56,6 +56,9 @@ export class DriveBackupBackend {
     }
 
     async storeObject({ collection, pk, object, events }: { collection: string, pk: string, object: object, events: EventEmitter }): Promise<any> {
+        // await new Promise(resolve => setTimeout(resolve, 300))
+        // if ([].length < 50) return
+
         await this.client.storeObject({ collection, pk, object })
     }
 

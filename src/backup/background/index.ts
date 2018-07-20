@@ -37,6 +37,7 @@ export class BackupBackgroundModule {
                 return url
             },
             startBackup: ({ tab }, params) => {
+                console.log('starting backup!')
                 const events = this.doBackup()
                 const sendEvent = (eventType, event) => window['browser'].tabs.sendMessage(
                     tab.id,
@@ -49,10 +50,10 @@ export class BackupBackgroundModule {
                 events.on('success', event => sendEvent('info', event))
             },
             isBackupAuthenticated: async (info, params) => {
-                return this.backend.isAuthenticated()
+                return await this.backend.isAuthenticated()
             },
             isBackupConnected: async (info, params) => {
-                return this.backend.isConnected()
+                return await this.backend.isConnected()
             },
         }, { insertExtraArg: true })
     }
