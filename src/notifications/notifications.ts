@@ -38,7 +38,7 @@ export const NOTIFS: Notifs = {
             buttons: [
                 {
                     action: {
-                        type: 'go_to_url',
+                        type: 'go-to-url',
                         url: 'https://worldbrain.io',
                         context: 'new_tab'
                     },
@@ -54,9 +54,7 @@ export const NOTIFS: Notifs = {
             buttons: [
                 {
                     action: {
-                        type: 'toggleTrackingOptOut',
-                        name: 'privacyActions',
-                        context: 'same',
+                        type: 'track-option-change',
                         key: true,
                     },
                     label: 'Enable Tracking',

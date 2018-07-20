@@ -11,9 +11,9 @@ import NotificationList from './components/NotificationList'
 import Notification from './components/Notification'
 import StatusHeading from './components/StatusHeading'
 import ReadHeader from './components/ReadHeader'
-import Button from './components/Button'
+// import Button from './components/Button'
 import ActionButton from './components/ActionButton'
-import * as privacyActions from 'src/options/privacy/actions'
+import { actionRegistry } from './registry'
 
 class NotificationContainer extends Component {
     static propTypes = {
@@ -62,31 +62,17 @@ class NotificationContainer extends Component {
         }
 
         return buttons.map((button, i) => {
-            if (button.action.type === 'go_to_url') {
-                return (
-                    <Button
-                        url={button.action.url}
-                        label={button.label}
-                        context={button.action.context}
-                        key={i}
-                    />
-                )
-            } else {
-                const actionName = button.action.name
-                const actionFunction = button.action.type
-                const key = button.action.key
+            const { action } = button
 
-                console.log(actionName, actionFunction, key)
-                return (
-                    <ActionButton
-                        key={i}
-                        label={button.label}
-                        handleClick={() => {
-                            return null
-                        }}
-                    />
-                )
-            }
+            return (
+                <ActionButton
+                    key={i}
+                    label={button.label}
+                    handleClick={actionRegistry[action.type]({
+                        definition: action,
+                    })}
+                />
+            )
         })
     }
 

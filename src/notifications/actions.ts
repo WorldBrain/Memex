@@ -33,7 +33,6 @@ export const init = () => async (dispatch, getState) => {
 export const getReadNotifications = ({ overwrite } = { overwrite: false }) => async (dispatch, getState) => {
     dispatch(setLoading(true))
 
-
     const readNotifications = await fetchReadNotifications({
         limit: constants.NOTIFICATIONS_PAGE_SIZE,
         skip: selectors.notificationsSkip(getState()),
