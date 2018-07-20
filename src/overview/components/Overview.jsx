@@ -10,18 +10,23 @@ import SideBar from '../sidebar-left/container'
 
 const Overview = props => (
     <Wrapper>
-        <Head />
-        <Header {...props} />
+        <div onDrop={props.resetUrlDragged}>
+            <Head />
+            <Header {...props} />
 
-        {props.sidebarIcons}
-        <SideBar />
-        <div className={styles.main}>{props.children}</div>
-        <DeleteConfirmModal
-            isShown={props.isDeleteConfShown}
-            onClose={props.resetDeleteConfirm}
-            deleteDocs={props.deleteDocs}
-        />
-        {props.renderDragElement}
+            {props.sidebarIcons}
+            <SideBar
+                disableOnClickOutside={Boolean(props.urlDragged)}
+            // disableOnClickOutside={true}
+            />
+            <div className={styles.main}>{props.children}</div>
+            <DeleteConfirmModal
+                isShown={props.isDeleteConfShown}
+                onClose={props.resetDeleteConfirm}
+                deleteDocs={props.deleteDocs}
+            />
+            {props.renderDragElement}
+        </div>
     </Wrapper>
 )
 
@@ -32,6 +37,8 @@ Overview.propTypes = {
     deleteDocs: PropTypes.func.isRequired,
     renderDragElement: PropTypes.node.isRequired,
     sidebarIcons: PropTypes.node.isRequired,
+    urlDragged: PropTypes.string.isRequired,
+    resetUrlDragged: PropTypes.func.isRequired,
 }
 
 export default Overview

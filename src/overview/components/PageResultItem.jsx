@@ -33,6 +33,8 @@ class PageResultItem extends PureComponent {
         isListFilterActive: PropTypes.bool.isRequired,
         handleCrossRibbonClick: PropTypes.func.isRequired,
         setUrlDragged: PropTypes.func.isRequired,
+        hideSearchFilters: PropTypes.func.isRequired,
+        isSidebarOpen: PropTypes.bool.isRequired,
     }
 
     dragStart = e => {
@@ -44,6 +46,7 @@ class PageResultItem extends PureComponent {
         e.dataTransfer.setData('text/plain', url)
 
         e.dataTransfer.setDragImage(crt, 15, 15)
+        if (this.props.isSidebarOpen) this.props.hideSearchFilters()
     }
 
     render() {

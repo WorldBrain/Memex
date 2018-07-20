@@ -18,9 +18,10 @@
 }
 
 .menuItem i {
-    font-size: 12px;
+    font-size: 18px;
     float: right;
-    margin-top: 3px;
+    margin-top: 1px;
+    margin-right: -7px;
 }
 
 .tagContainer {

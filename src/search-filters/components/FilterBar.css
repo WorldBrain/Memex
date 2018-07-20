@@ -15,10 +15,12 @@
 
 .myCollection {
     font-size: 1.45em;
+    font-weight: 500;
     padding: 0px 70px 0px 10px;
 }
 
 .plus {
     font-size: 2em;
     font-weight: bold;
+    margin-right: 13px;
 }

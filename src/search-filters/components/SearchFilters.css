@@ -15,6 +15,7 @@
 .others {
     font-size: 1.45em;
     color: #767676;
+    font-weight: 500;
 }
 
 .menuItem:last-child {

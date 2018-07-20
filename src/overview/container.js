@@ -53,7 +53,6 @@ class OverviewContainer extends Component {
         handlePillClick: PropTypes.func.isRequired,
         addTag: PropTypes.func.isRequired,
         delTag: PropTypes.func.isRequired,
-        resetFilterPopup: PropTypes.func.isRequired,
         showOnboarding: PropTypes.bool.isRequired,
         mouseOnSidebar: PropTypes.bool.isRequired,
         init: PropTypes.func.isRequired,
@@ -68,6 +67,7 @@ class OverviewContainer extends Component {
         hideSearchFilters: PropTypes.func.isRequired,
         resetFilters: PropTypes.func.isRequired,
         delListFilter: PropTypes.func.isRequired,
+        isSidebarOpen: PropTypes.bool.isRequired,
     }
 
     componentDidMount() {
@@ -170,6 +170,8 @@ class OverviewContainer extends Component {
                 handleToggleUrlToEdit={this.props.handleToggleUrlToEdit(doc)}
                 handleCrossRibbonClick={this.props.handleCrossRibbonClick(doc)}
                 setUrlDragged={this.props.setUrlDragged}
+                hideSearchFilters={this.props.hideSearchFilters}
+                isSidebarOpen={this.props.isSidebarOpen}
                 {...doc}
             />
         ))
@@ -291,7 +293,6 @@ class OverviewContainer extends Component {
             !wereAnyClicked(this.dropdownRefs)
         ) {
             this.props.resetActiveTagIndex()
-            this.props.resetFilterPopup()
         }
     }
 
@@ -303,7 +304,7 @@ class OverviewContainer extends Component {
                 href="#"
             >
                 {' '}
-                Add 1 page
+                + Add to Collection
             </div>
         )
     }
@@ -354,6 +355,7 @@ const mapStateToProps = state => ({
     isListFilterActive: filters.listFilterActive(state),
     urlDragged: customLists.urlDragged(state),
     mouseOverSidebar: sidebar.mouseOverSidebar(state),
+    isSidebarOpen: sidebar.isSidebarOpen(state),
     filterActive: filters.showClearFiltersBtn(state),
 })
 
@@ -367,13 +369,13 @@ const mapDispatchToProps = dispatch => ({
             deleteDocs: actions.deleteDocs,
             resetActiveTagIndex: actions.resetActiveTagIndex,
             onShowFilterChange: filterActs.showFilter,
-            resetFilterPopup: filterActs.resetFilterPopup,
             fetchNextTooltip: actions.fetchNextTooltip,
             init: actions.init,
             onListDropdownChange: listActs.toggleListDropdown,
             setUrlDragged: listActs.setUrlDragged,
             showSearchFilters: sidebarLeftActs.openSidebarFilterMode,
             hideSearchFilters: sidebarLeftActs.openSidebarListMode,
+            resetUrlDragged: listActs.setUrlDragged,
             resetFilters: filterActs.resetFilters,
             delListFilter: filterActs.delListFilter,
         },

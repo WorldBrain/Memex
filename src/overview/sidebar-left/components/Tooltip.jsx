@@ -4,7 +4,7 @@ import cx from 'classnames'
 
 import styles from './Tooltip.css'
 
-const Tooltip = ({ showTooltip, content }) => {
+const Tooltip = ({ showTooltip, children }) => {
     return (
         <div className={styles.tooltip}>
             <span
@@ -12,7 +12,7 @@ const Tooltip = ({ showTooltip, content }) => {
                     [styles.hideTooltip]: !showTooltip,
                 })}
             >
-                {content}
+                {children}
             </span>
         </div>
     )
@@ -21,7 +21,7 @@ const Tooltip = ({ showTooltip, content }) => {
 Tooltip.propTypes = {
     showTooltip: PropTypes.bool.isRequired,
     // Also add support for node
-    content: PropTypes.string.isRequired,
+    children: PropTypes.string.isRequired,
 }
 
 export default Tooltip

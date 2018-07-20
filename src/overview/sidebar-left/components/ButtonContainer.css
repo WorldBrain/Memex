@@ -14,8 +14,7 @@
     display: flex !important; /* stylelint-disable-line declaration-no-important */
     justify-content: space-between;
     top: 0px;
-    width: 116%;
-    height: 7%;
+    width: 285px;
     background-color: #fff;
     border-bottom-right-radius: 5px;
     border-width: 0 1px 1px 0;
@@ -23,6 +22,7 @@
     border-color: #d0cece;
     z-index: 1200;
     align-items: center;
+    height: 45px;
 }
 
 .container {
@@ -33,7 +33,7 @@
     background-image: url('/img/cross_grey.svg');
     background-size: 15px;
     display: block;
-    margin-right: 2px;
+    margin-right: 5px;
     background-repeat: no-repeat;
     width: 29px;
     height: 29px;
@@ -65,6 +65,7 @@
     background-image: url('/img/collections.svg');
     background-size: 20px;
     display: block;
+    margin-left: 10px;
     background-repeat: no-repeat;
     width: 35px;
     height: 35px;
@@ -78,17 +79,29 @@
 
 .clearFilters {
     color: #767676;
-    padding: 3px 4px;
+    padding: 3px 6px;
+    margin-left: 80px;
     height: 24px;
-    font-size: 1.2em;
-    border-radius: 2%;
+    font-size: 1.1em;
     cursor: pointer;
 
     &:hover {
         background-color: #efefef;
+        border-radius: 5%;
     }
 }
 
 .filterEnabled {
     background-color: #efefef;
+}
+
+.wrapper {
+    display: flex;
+    width: 85%;
+    margin-left: 10px;
+    align-items: center;
+}
+
+.wrapperFE {
+    width: 35%;
 }

@@ -13,6 +13,7 @@ class Sidebar extends PureComponent {
         captureStateChange: PropTypes.func.isRequired,
         onMouseLeave: PropTypes.func.isRequired,
         onMouseEnter: PropTypes.func.isRequired,
+        // closeSidebar: PropTypes.func.isRequired
     }
 
     render() {
@@ -31,7 +32,6 @@ class Sidebar extends PureComponent {
                     className={localStyles.container}
                 >
                     {this.props.sidebarIcons}
-                    {/* <ListSideBar /> */}
                     {this.props.children}
                 </div>
             </Menu>

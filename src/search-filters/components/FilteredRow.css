@@ -36,8 +36,7 @@
 
 .tick {
     float: right;
-    background-image: url('/img/tick_extended.svg');
-    width: 21px;
+    width: 19px;
 }
 
 .button {
@@ -54,8 +53,8 @@
 .exclusion {
     float: right;
     background-image: url('/img/exlusion.svg');
-    width: 21px;
-    margin-right: 2px;
+    width: 18px;
+    margin-right: 7px;
 }
 
 .soon {

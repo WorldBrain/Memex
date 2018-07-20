@@ -30,6 +30,7 @@ class SearchFiltersContainer extends PureComponent {
         hideTagFilter: PropTypes.func.isRequired,
         hideDomainFilter: PropTypes.func.isRequired,
         delIncDomainFilter: PropTypes.func.isRequired,
+        delExcDomainFilter: PropTypes.func.isRequired,
         toggleFilterTypes: PropTypes.func.isRequired,
         showfilteredTypes: PropTypes.bool.isRequired,
     }
@@ -44,7 +45,7 @@ class SearchFiltersContainer extends PureComponent {
                 { value: 'Highlights', active: true, available: false },
                 { value: 'Comments', active: true, available: false },
                 {
-                    value: 'Recieved Memex.Links',
+                    value: 'Received Memex.Links',
                     active: true,
                     available: false,
                 },
@@ -86,12 +87,20 @@ class SearchFiltersContainer extends PureComponent {
                   <FilteredRow
                       key={i}
                       value={value}
-                      onClick={value => this.props.addDomainFilter(value)}
+                      onClick={this.toggleDomainFilter({ value, isExclusive })}
                       active
                       isExclusive={isExclusive}
                   />
               ))
             : null
+    }
+
+    toggleDomainFilter = ({ value, isExclusive }) => () => {
+        console.log(value, isExclusive)
+
+        !isExclusive
+            ? this.props.delIncDomainFilter(value)
+            : this.props.delExcDomainFilter(value)
     }
 
     renderTagFilter = () =>
@@ -119,8 +128,12 @@ class SearchFiltersContainer extends PureComponent {
             <IndexDropdownSB
                 onFilterAdd={this.props.addDomainFilter}
                 onFilterDel={this.props.delIncDomainFilter}
-                initFilters={this.props.filteredDomains}
-                initSuggestions={this.props.filteredDomains}
+                initFilters={this.props.filteredDomains.map(
+                    ({ value }) => value,
+                )}
+                initSuggestions={this.props.filteredDomains.map(
+                    ({ value }) => value,
+                )}
                 source="domain"
                 isSidebarOpen={this.props.isSidebarOpen}
                 closeDropdown={this.props.hideDomainFilter}
@@ -147,6 +160,8 @@ class SearchFiltersContainer extends PureComponent {
     )
 
     render() {
+        console.log(this.props.filteredDomains, 'huhu')
+
         return (
             <SearchFilters
                 bookmarkFilter={this.renderBookmarkFilter()}

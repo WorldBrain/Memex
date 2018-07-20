@@ -50,6 +50,7 @@ class SidebarIcons extends PureComponent {
                             [styles.filterEnabled]: this.props.filterActive,
                         })}
                         onClick={this.props.filterBtnClick}
+                        id="filter-icon"
                     />
                     {this.props.filterActive && (
                         <div
@@ -63,7 +64,9 @@ class SidebarIcons extends PureComponent {
                 <InfoTooltip
                     showTooltip={this.state.showCollTooltip}
                     content="My collections"
-                />
+                >
+                    My collections
+                </InfoTooltip>
                 <div className={styles.enabled}>
                     <button
                         className={cx(styles.listButton, styles.button, {
@@ -74,6 +77,7 @@ class SidebarIcons extends PureComponent {
                         onDragEnter={this.props.onPageDrag}
                         onMouseOver={this.handleShowCollTooltip}
                         onMouseOut={this.handleHideCollTooltip}
+                        id="collection-icon"
                     />
                     {this.props.isListFilterActive && (
                         <div

@@ -66,8 +66,14 @@ class FilteredRow extends PureComponent {
                     {this.props.active &&
                         this.props.available && (
                             <button
-                                className={cx(styles.tick, styles.button)}
-                            />
+                                className={cx(
+                                    'material-icons',
+                                    styles.tick,
+                                    styles.button,
+                                )}
+                            >
+                                done
+                            </button>
                         )}
                     {this.props.active &&
                         !this.props.available && (

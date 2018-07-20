@@ -5,7 +5,7 @@
     border: 1px solid #d2d2d28c;
     border-top: none;
     word-wrap: break-word;
-    font-size: 12px;
+    font-size: 13px;
     font-family: 'Open Sans';
     width: 95%;
     margin-left: 8px;
@@ -24,9 +24,10 @@
 }
 
 .menuItem i {
-    font-size: 12px;
+    font-size: 18px;
     float: right;
-    margin-top: 3px;
+    margin-top: 1px;
+    margin-right: -7px;
 }
 
 .tagContainer {
@@ -71,14 +72,14 @@
     & > i {
         color: #3eb995;
         padding: 0;
-        margin-right: 7px;
+        margin-right: 2px;
         margin-top: 1px;
     }
 }
 
 .search {
     width: 90%;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 500;
     padding: 5px;
     border: none;

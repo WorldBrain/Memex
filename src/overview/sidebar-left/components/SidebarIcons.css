@@ -36,10 +36,11 @@
 .buttonContainerOverview {
     position: fixed;
     display: flex !important; /* stylelint-disable-line declaration-no-important */
-    flex-direction: row-reverse;
+    flex-direction: column;
     align-items: center;
-    left: 12px;
-    width: 8%;
+    top: 100px;
+    left: -8px;
+    width: 105px;
     justify-content: space-evenly;
 }
 
@@ -74,6 +75,7 @@
     align-items: center;
     justify-content: space-between;
     height: 60px;
+    margin-top: 10px;
 }
 
 @keyframes appear {

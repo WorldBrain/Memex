@@ -1,17 +1,22 @@
 .listForm {
     height: 30px;
-    width: 73%;
-    border: 1px solid transparent;
+    width: 70%;
+    border: 0px solid transparent;
     border-top: none;
-    box-shadow: inset 0 2px 1px darkslategrey;
+    box-shadow: inset 1px 1px 3px #3eb995;
     outline: none;
+    padding-left: 15px;
+    font-size: 13px;
+    font-family: 'lato';
+    font-style: italic;
+    padding-top: 4px;
 }
 
 .createListForm {
     display: flex;
     background: #d7d7d7;
     height: 50px;
-    width: 300px;
+    width: 335px;
     align-items: center;
     position: relative;
     padding-left: 12px;
@@ -22,7 +27,7 @@
     width: 40px;
     height: 40px;
     float: right;
-    right: 31px;
+    right: 8px;
     position: absolute;
 
     &:hover {
@@ -36,7 +41,13 @@
     height: 21px;
     float: right;
     position: absolute;
-    right: 7px;
+    right: 54px;
+    top: 17px;
+
+    &:hover {
+        background-color: #3eb995;
+        border-radius: 50%;
+    }
 }
 
 .button {
@@ -47,7 +58,7 @@
     background-size: contain;
     cursor: pointer;
     outline: none;
-    padding: 0px;
+    margin-top: -2px;
 }
 
 .sameNameWarning {

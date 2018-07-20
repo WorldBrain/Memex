@@ -28,6 +28,7 @@ class ListContainer extends Component {
         showCreateList: PropTypes.bool.isRequired,
         showCommonNameWarning: PropTypes.bool.isRequired,
         closeCreateListForm: PropTypes.func.isRequired,
+        resetUrlDragged: PropTypes.func.isRequired,
     }
 
     constructor(props) {
@@ -123,6 +124,7 @@ class ListContainer extends Component {
                     onListItemClick={this.props.handleListItemClick(list, i)}
                     onAddPageToList={this.props.handleAddPageList(list, i)}
                     onCrossButtonClick={this.props.handleCrossBtnClick(list, i)}
+                    resetUrlDragged={this.props.resetUrlDragged}
                 />
             )
         })
@@ -142,7 +144,11 @@ class ListContainer extends Component {
 
     render() {
         return (
-            <div>
+            <div
+                style={{
+                    marginTop: '15px',
+                }}
+            >
                 <MyCollection
                     handleRenderCreateList={this.props.toggleCreateListForm}
                 />
@@ -179,6 +185,7 @@ const mapDispatchToProps = (dispatch, getState) => ({
             updateList: actions.updateList,
             toggleCreateListForm: actions.toggleCreateListForm,
             closeCreateListForm: actions.closeCreateListForm,
+            resetUrlDragged: actions.resetUrlDragged,
         },
         dispatch,
     ),

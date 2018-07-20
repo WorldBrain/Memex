@@ -71,6 +71,7 @@ export const toggleAddToList = createAction('custom-lists/toggleAddToList')
 export const closeAddToList = createAction('custom-lists/closeAddToList')
 
 export const setUrlDragged = createAction('custom-lists/setUrlDragged')
+export const resetUrlDragged = createAction('custom-lists/resetUrlDragged')
 export const closeCreateListForm = createAction(
     'custom-lists/closeCreateListForm',
 )

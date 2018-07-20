@@ -19,13 +19,15 @@
 
 .myCollection {
     font-size: 1.45em;
-    padding: 0px 70px 0px 10px;
+    font-weight: 500;
+    padding: 0px 70px 0px 0px;
 }
 
 .plus {
     font-size: 2em;
     font-weight: bold;
     cursor: pointer;
+    margin-right: 5px;
 }
 
 .button {

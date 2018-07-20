@@ -3,19 +3,18 @@
 }
 
 .pageList {
-    background: #fcfbfb;
     display: flex;
     align-items: center;
-    height: 50px;
+    height: 40px;
     color: #767676;
     position: relative;
     width: 100%;
-    transition: width 0.3s ease-in, background-color 1000ms linear;
+    transition: width 0.1s ease-in, background-color 100ms linear;
     cursor: pointer;
 
     &:hover {
         background-color: #d7d7d7;
-        width: 320px;
+        width: 335px;
         overflow-x: unset;
     }
 
@@ -35,18 +34,18 @@
 
 .editButton {
     background-image: url('/img/list_edit.svg');
-    width: 28px;
-    height: 28px;
+    width: 20px;
+    height: 20px;
     visibility: hidden;
-    animation: appear 0.6s forwards;
+    animation: appear 0.2s forwards;
 }
 
 .deleteButton {
     background-image: url('/img/trash_closed_new.svg');
-    width: 28px;
-    height: 28px;
+    width: 20px;
+    height: 20px;
     visibility: hidden;
-    animation: appear 0.6s forwards;
+    animation: appear 0.2s forwards;
 
     &:hover {
         background-image: url('/img/trash_open_new.svg');
@@ -61,7 +60,7 @@
     background-size: contain;
     cursor: pointer;
     outline: none;
-    padding: 0px;
+    margin-top: 3px;
 }
 
 .listName {

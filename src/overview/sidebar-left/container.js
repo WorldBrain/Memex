@@ -2,11 +2,15 @@ import React, { PureComponent } from 'react'
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
 import { bindActionCreators } from 'redux'
+import onClickOutside from 'react-onclickoutside'
 
 import { ListSideBar } from 'src/custom-lists/components'
 // import SearchFilters from 'src/search-filters/container'
 import { selectors, actions } from './'
-import SearchFilters, { actions as filterActs } from '../../search-filters'
+import SearchFilters, {
+    actions as filterActs,
+    selectors as filters,
+} from '../../search-filters'
 
 // TODO: compress into one
 import Sidebar from './components/SideBar'
@@ -24,6 +28,7 @@ class SidebarContainer extends PureComponent {
         clearAllFilters: PropTypes.func.isRequired,
         setMouseOver: PropTypes.func.isRequired,
         resetMouseOver: PropTypes.func.isRequired,
+        showClearFiltersBtn: PropTypes.bool.isRequired,
     }
 
     // Capture state of the react-burger-menu
@@ -31,6 +36,15 @@ class SidebarContainer extends PureComponent {
         // reset mouse over when either close button clicked or esc pressed
         if (!isOpen) this.props.resetMouseOver()
         this.props.setSidebarState(isOpen)
+    }
+
+    handleClickOutside = e => {
+        console.log(e.type, e.target.id)
+        const { id } = e.target
+        if (id !== 'filter-icon' && id !== 'collection-icon') {
+            setTimeout(() => this.props.closeSidebar(), 100)
+            // this.props.closeSidebar()
+        }
     }
 
     renderSearchFilters = () => <SearchFilters />
@@ -56,6 +70,7 @@ class SidebarContainer extends PureComponent {
                 showSearchFilters={this.props.filterMode}
                 resetFilters={this.props.clearAllFilters}
                 closeSidebar={this.closeSidebar}
+                showClearFiltersBtn={this.props.showClearFiltersBtn}
             />
         ) : null
 
@@ -88,6 +103,7 @@ class SidebarContainer extends PureComponent {
 const mapStateToProps = state => ({
     isSidebarOpen: selectors.isSidebarOpen(state),
     filterMode: selectors.showFilters(state),
+    showClearFiltersBtn: filters.showClearFiltersBtn(state),
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -108,4 +124,4 @@ const mapDispatchToProps = dispatch => ({
 export default connect(
     mapStateToProps,
     mapDispatchToProps,
-)(SidebarContainer)
+)(onClickOutside(SidebarContainer))

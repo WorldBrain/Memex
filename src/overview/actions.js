@@ -28,7 +28,6 @@ export const changeHasBookmark = createAction('overview/changeHasBookmark')
 export const incSearchCount = createAction('overview/incSearchCount')
 export const initSearchCount = createAction('overview/initSearchCount')
 export const setResultDeleting = createAction('overview/setResultDeleting')
-export const bulkSetHasBookmark = createAction('overview/bulkSetHasBookmark')
 
 export const resetActiveTagIndex = createAction('overview/resetActiveTagIndex')
 export const setActiveTagIndex = createAction('overview/setActiveTagIndex')

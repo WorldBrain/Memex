@@ -4,7 +4,17 @@ import cx from 'classnames'
 
 import styles from './ButtonContainer.css'
 
-class SidebarIcons extends PureComponent {
+class ButtonContainer extends PureComponent {
+    static propTypes = {
+        filterBtnClick: PropTypes.func.isRequired,
+        listBtnClick: PropTypes.func.isRequired,
+        overviewMode: PropTypes.bool,
+        showSearchFilters: PropTypes.bool,
+        showClearFiltersBtn: PropTypes.bool.isRequired,
+        resetFilters: PropTypes.func.isRequired,
+        closeSidebar: PropTypes.func.isRequired,
+    }
+
     render() {
         return (
             <div
@@ -13,12 +23,9 @@ class SidebarIcons extends PureComponent {
                 })}
             >
                 <div
-                    style={{
-                        display: 'flex',
-                        justifyContent: 'space-evenly',
-                        width: '72%',
-                        alignItems: 'center',
-                    }}
+                    className={cx(styles.wrapper, {
+                        [styles.wrapperFE]: !this.props.showClearFiltersBtn,
+                    })}
                 >
                     <button
                         className={cx(styles.button, styles.filterButton, {
@@ -34,12 +41,14 @@ class SidebarIcons extends PureComponent {
                         })}
                         onClick={this.props.listBtnClick}
                     />
-                    <span
-                        className={styles.clearFilters}
-                        onClick={this.props.resetFilters}
-                    >
-                        clear filters
-                    </span>
+                    {this.props.showClearFiltersBtn && (
+                        <span
+                            className={styles.clearFilters}
+                            onClick={this.props.resetFilters}
+                        >
+                            clear filters
+                        </span>
+                    )}
                 </div>
                 <button
                     className={cx(styles.closeIcon, styles.button)}
@@ -50,13 +59,4 @@ class SidebarIcons extends PureComponent {
     }
 }
 
-SidebarIcons.propTypes = {
-    filterBtnClick: PropTypes.func.isRequired,
-    listBtnClick: PropTypes.func.isRequired,
-    overviewMode: PropTypes.bool,
-    showSearchFilters: PropTypes.bool,
-    resetFilters: PropTypes.func.isRequired,
-    closeSidebar: PropTypes.func.isRequired,
-}
-
-export default SidebarIcons
+export default ButtonContainer

@@ -128,6 +128,11 @@ const setUrlDragged = (state, url) => ({
     urlDragged: url,
 })
 
+const resetUrlDragged = state => ({
+    ...state,
+    urlDragged: '',
+})
+
 const openCreateListForm = state => ({
     ...state,
     showCreateListForm: true,
@@ -173,6 +178,7 @@ export default createReducer(
             deleteConfirmProps: { ...defaultState.deleteConfirmProps },
         }),
         [actions.setUrlDragged]: setUrlDragged,
+        [actions.resetUrlDragged]: resetUrlDragged,
         [actions.openCreateListForm]: openCreateListForm,
         [actions.closeCreateListForm]: closeCreateListForm,
         [actions.toggleCreateListForm]: toggleCreateListForm,

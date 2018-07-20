@@ -161,51 +161,6 @@ const initSearchCount = (state, searchCount) => ({ ...state, searchCount })
 
 const payloadReducer = key => (state, payload) => ({ ...state, [key]: payload })
 
-// TODO: Think of some good variable names
-const bulkSetHasBookmark = (state, urls) => {
-    let { docs } = state.searchResult
-    const { hasBookmark } = docs[0]
-    const urlIndices = []
-    const sameBookmarks = docs.filter((doc, i) => {
-        if (urls.indexOf(doc.url) > -1) {
-            urlIndices.push(i)
-            return doc.hasBookmark !== hasBookmark
-        }
-    })
-
-    if (sameBookmarks.length > 0) {
-        urlIndices.map(index => {
-            docs = [
-                ...docs.slice(0, index),
-                {
-                    ...docs[index],
-                    hasBookmark: true,
-                },
-                ...docs.slice(index + 1),
-            ]
-        })
-    } else {
-        urlIndices.map(index => {
-            docs = [
-                ...docs.slice(0, index),
-                {
-                    ...docs[index],
-                    hasBookmark: !docs[index].hasBookmark,
-                },
-                ...docs.slice(index + 1),
-            ]
-        })
-    }
-
-    return {
-        ...state,
-        searchResult: {
-            ...state.searchResult,
-            docs,
-        },
-    }
-}
-
 export default createReducer(
     {
         [actions.appendSearchResult]: handleSearchResult({ overwrite: false }),
@@ -246,7 +201,6 @@ export default createReducer(
         [actions.setActiveTagIndex]: payloadReducer('activeTagIndex'),
         [actions.addTag]: addTag,
         [actions.delTag]: delTag,
-        [actions.bulkSetHasBookmark]: bulkSetHasBookmark,
         [actions.setTooltip]: (state, tooltip) => ({
             ...state,
             tooltip: tooltip,
