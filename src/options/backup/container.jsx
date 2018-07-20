@@ -4,26 +4,31 @@ import { remoteFunction } from 'src/util/webextensionRPC'
 import BackupSettings from './presentation'
 
 export default class BackupSettingsContainer extends React.Component {
-    state = { status: null }
+    state = { status: null, info: null }
 
     async componentDidMount() {
-        browser.runtime.onMessage.addListener(message => {
-            if (message.type === 'backup-event') {
-                this.handleBackupEvent(message.event)
-            }
-        })
+        browser.runtime.onMessage.addListener(this.messageListener)
 
-        const isAuthenticated =
-            false && (await remoteFunction('isBackupAuthenticated')())
+        const isAuthenticated = await remoteFunction('isBackupAuthenticated')()
         const isConnected = await remoteFunction('isBackupConnected')()
 
         if (isAuthenticated && !isConnected) {
-            return await this.handleBackupEvent()
+            return await this.handleLoginRequested()
         }
 
         this.setState({
             status: isAuthenticated ? 'authenticated' : 'unauthenticated',
         })
+    }
+
+    componentWillUnmount() {
+        browser.runtime.onMessage.removeListener(this.messageListener)
+    }
+
+    messageListener = message => {
+        if (message.type === 'backup-event') {
+            this.handleBackupEvent(message.event)
+        }
     }
 
     handleBackupEvent(event) {

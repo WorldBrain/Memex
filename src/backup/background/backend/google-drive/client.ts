@@ -16,8 +16,6 @@ export class GoogleDriveClient {
         if (!folderCreated) {
             await this.cacheFolderContentIDs(collectionFolderId)
         }
-        console.log(collectionFolderId)
-        return
 
         let fileId = this.idCache[collectionFolderId][pk]
         if (!fileId) {
@@ -71,19 +69,15 @@ export class GoogleDriveClient {
         const response = await this._request(`/files`, {
             method: 'POST',
             body: JSON.stringify({
-                name,
+                title: name,
                 mimeType: 'application/vnd.google-apps.folder',
-                parents: [
-                    {
-                        id: parentId,
-                    },
-                ],
+                parents: [parentId],
             }),
             headers: {
                 'Content-Type': 'application/json',
             },
         })
-        this.idCache[parentId] = {}
+        this.idCache[response.id] = {}
         return { id: response.id, created: true }
     }
 
@@ -108,7 +102,6 @@ export class GoogleDriveClient {
 
         const url = baseUrl + path
         const response = await fetch(url, options)
-        console.log(url, options.json)
         return options.json ? await response.json() : response
     }
 }
