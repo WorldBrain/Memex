@@ -17,7 +17,6 @@ export const filterTypes = createSelector(
     state => state.showFilterTypes,
 )
 
-export const popup = createSelector(searchFilters, state => state.popup)
 export const tags = createSelector(searchFilters, state => state.tags)
 export const domainsInc = createSelector(
     searchFilters,
@@ -45,13 +44,6 @@ export const onlyBookmarks = createSelector(
     searchFilters,
     state => state.onlyBookmarks,
 )
-
-export const showDomainsFilter = createSelector(
-    popup,
-    popup => popup === 'domain',
-)
-
-export const showTagsFilter = createSelector(popup, popup => popup === 'tag')
 
 /**
  * Selector to toggle clear filter button

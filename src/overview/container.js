@@ -352,7 +352,7 @@ const mapStateToProps = state => ({
     isTooltipRenderable: selectors.isTooltipRenderable(state),
     mouseOnSidebar: sidebarSels.mouseOnSidebar(state),
     isListFilterActive: filters.listFilterActive(state),
-    urlDragged: customLists.getUrlDragged(state),
+    urlDragged: customLists.urlDragged(state),
     mouseOverSidebar: sidebar.mouseOverSidebar(state),
     filterActive: filters.showClearFiltersBtn(state),
 })

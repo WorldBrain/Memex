@@ -10,8 +10,6 @@ export const toggleFilterTypes = createAction(
     'search-filters/toggleFilterTypes',
 )
 
-export const setFilterPopup = createAction('search-filters/setFilterPopup')
-export const resetFilterPopup = createAction('search-filters/resetFilterPopup')
 export const addTagFilter = createAction('search-filters/addTagFilter')
 export const delTagFilter = createAction('search-filters/delTagFilter')
 export const toggleTagFilter = createAction('search-filters/toggleTagFilter')

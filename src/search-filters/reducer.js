@@ -2,6 +2,20 @@ import { createReducer } from 'redux-act'
 
 import * as actions from './actions'
 
+/**
+ * @typedef {Object} FilterState
+ * @property {boolean} showTagFilter Show Filter tag dropdown
+ * @property {boolean} showDomainFilter Show domain dropdown in sidebar
+ * @property {boolean} showFilterTypes Show filter types in sidebar
+ * @property {boolean} showFilters REMOVE
+ * @property {boolean} onlyBookmarks show only bookmark filters
+ * @property {string} popup REMOVE
+ * @property {tags} string[] Tags to be filtered
+ * @property {domainInc} string[] Domains to included in filtering
+ * @property {domainExc} string[]   Domain to be exdluded in filtering
+ * @property {lists} string list to be included in filtering
+ */
+
 const defaultState = {
     showTagFilter: false,
     showDomainFilter: false,
@@ -149,11 +163,6 @@ const resetFilters = state => ({
     showFilters: state.showFilters,
 })
 
-const setPopup = (state, popup = defaultState.popup) => ({
-    ...state,
-    popup: popup === state.popup ? defaultState.popup : popup,
-})
-
 export default createReducer(
     {
         [actions.hideDomainFilter]: hideDomainFilter,
@@ -164,8 +173,6 @@ export default createReducer(
         [actions.hideFilterTypes]: hideFilterTypes,
         [actions.toggleFilterTypes]: toggleFilterTypes,
         [actions.resetFilters]: resetFilters,
-        [actions.setFilterPopup]: setPopup,
-        [actions.resetFilterPopup]: setPopup,
         [actions.addTagFilter]: addFilter('tags'),
         [actions.delTagFilter]: delFilter('tags'),
         [actions.toggleTagFilter]: toggleFilter('tags'),

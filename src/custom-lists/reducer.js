@@ -2,18 +2,32 @@ import { createReducer } from 'redux-act'
 
 import * as actions from './actions'
 
+/**
+ *
+ * @typedef {Object} Lists
+ * @property {number} id
+ * @property {name} string - Indicates name of the list.
+ * @property {boolean} isDeletable - Indicates if the list can be deleted.
+ * @property {boolean} isNestable - Indicates if list can be nested.
+ * @property {string[]} pages- Indicates pages contained in the list.
+ */
+
+// TODO: complete this.
+
+/**
+ *
+ * @typedef {Object} ListState
+ * @property {number} activeListIndex
+ * @property {number} listFilterIndex
+ * @property {Lists[]} lists
+ * @property {string} urlDragged
+ * @property {boolean} showCommonNameWarning
+ * @property {boolean} showCreateListForm
+ */
+
 const defaultState = {
-    listCount: null,
     activeListIndex: -1,
     listFilterIndex: null,
-    /** list will contain some data like
-     * {
-     *  id: Unique ID of the list
-     *  listName: @[string],
-     *  pages: [Array of urls].
-     * }
-     *
-     */
     lists: [],
     deleteConfirmProps: {
         isShown: false,

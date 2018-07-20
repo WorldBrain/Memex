@@ -13,11 +13,7 @@ const sortAlphabetically = (a, b) => {
 
 export const customLists = state => state.customLists
 
-export const fetchAllLists = createSelector(customLists, state => state.lists)
-export const getListCount = createSelector(
-    customLists,
-    state => state.listCount,
-)
+export const allLists = createSelector(customLists, state => state.lists)
 export const activeListIndex = createSelector(
     customLists,
     state => state.activeListIndex,
@@ -28,7 +24,7 @@ export const listFilterIndex = createSelector(
     state => state.listFilterIndex,
 )
 
-export const getSortedLists = createSelector(fetchAllLists, lists => {
+export const getSortedLists = createSelector(allLists, lists => {
     return lists.sort(sortAlphabetically)
 })
 
@@ -41,7 +37,6 @@ export const results = createSelector(
     getSortedLists,
     activeListIndex,
     selectors.listFilter,
-    // getUrlsToEdit,
     (lists, listIndex, listFilter) => {
         return lists.map((pageDoc, i) => ({
             ...pageDoc,
@@ -60,15 +55,12 @@ export const isDeleteConfShown = createSelector(
     state => state.isShown,
 )
 
-export const getDeletingIndex = createSelector(
+export const deletingIndex = createSelector(
     deleteConfirmProps,
     state => state.deleting,
 )
 
-export const getDeletingID = createSelector(
-    deleteConfirmProps,
-    state => state.id,
-)
+export const deletingID = createSelector(deleteConfirmProps, state => state.id)
 
 export const listEditDropdown = createSelector(
     customLists,
@@ -80,10 +72,7 @@ export const showAddToList = createSelector(
     state => state.showAddToList,
 )
 
-export const getUrlDragged = createSelector(
-    customLists,
-    state => state.urlDragged,
-)
+export const urlDragged = createSelector(customLists, state => state.urlDragged)
 
 export const showCreateListForm = createSelector(
     customLists,
