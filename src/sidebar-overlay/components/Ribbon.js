@@ -98,6 +98,13 @@ class Ribbon extends React.Component {
             removeMediumHighlights: () => {
                 this.props.removeMediumHighlights()
             },
+            updateAnnotations: async () => {
+                // Remove selection
+                const selection = document.getSelection()
+                selection.removeAllRanges()
+                this.props.removeHighlights()
+                await this.openSidebarOps()
+            },
         })
     }
 

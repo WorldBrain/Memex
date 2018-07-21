@@ -181,8 +181,8 @@ export function removeHighlights(isDark) {
     const highlights = document.querySelectorAll(highlightClass)
 
     highlights.forEach(highlight => {
-        if (isDark) highlight.classList.remove(styles['dark'])
-        else {
+        highlight.classList.remove(styles['dark'])
+        if (!isDark) {
             highlight.classList.remove(styles['memex-highlight'])
             highlight.dataset.annotation = ''
             highlight.removeEventListener('click', clickListener)

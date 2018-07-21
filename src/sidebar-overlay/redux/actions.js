@@ -19,7 +19,7 @@ export const fetchAnnotationAct = () => async (dispatch, getState) => {
     dispatch(setAnnotations(annotations))
 }
 
-export const createAnnotation = (comment, body, tags) => async (
+export const createAnnotation = (comment, body, tags, env) => async (
     dispatch,
     getState,
 ) => {
@@ -42,7 +42,8 @@ export const createAnnotation = (comment, body, tags) => async (
     })
 
     dispatch(setAnchor(null))
-    dispatch(fetchAnnotationAct())
+    dispatch(setActiveAnnotation(uniqueUrl))
+    if (env === 'overview') dispatch(fetchAnnotationAct())
 }
 
 export const editAnnotation = (url, comment) => async (dispatch, getState) => {

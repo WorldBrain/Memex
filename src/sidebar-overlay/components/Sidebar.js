@@ -22,7 +22,12 @@ const Sidebar = props => (
             onMouseLeave={props.toggleMouseOnSidebar}
             id="memex_sidebar_panel"
         >
-            {props.showSidebar ? <CommentBox env={props.env} /> : null}
+            {props.showSidebar ? (
+                <CommentBox
+                    env={props.env}
+                    updateAnnotations={props.updateAnnotations}
+                />
+            ) : null}
 
             <div className={styles.separator} />
 
@@ -38,6 +43,7 @@ Sidebar.propTypes = {
     handleStateChange: PropTypes.func.isRequired,
     renderAnnotations: PropTypes.func.isRequired,
     toggleMouseOnSidebar: PropTypes.func.isRequired,
+    updateAnnotations: PropTypes.func.isRequired,
     env: PropTypes.string.isRequired,
 }
 

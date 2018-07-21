@@ -106,6 +106,11 @@ class SidebarContainer extends React.Component {
         )
     }
 
+    updateAnnotations = async () => {
+        await this.parentFC.remoteExecute('updateAnnotations')()
+        setTimeout(() => this.focusAnnotation(this.props.activeAnnotation), 300)
+    }
+
     /**
      * Makes highlight dark a little when the container is hovered
      */
@@ -123,8 +128,10 @@ class SidebarContainer extends React.Component {
     }
 
     renderAnnotations = () => {
-        const { annotations } = this.props
+        const { annotations, env } = this.props
         if (!annotations) return
+        if (env === 'overview')
+            annotations.sort((x, y) => x.createdWhen > y.createdWhen)
         return annotations.map(annotation => (
             <Annotation
                 annotation={annotation}
@@ -148,6 +155,7 @@ class SidebarContainer extends React.Component {
                 handleStateChange={this.handleStateChange}
                 toggleMouseOnSidebar={this.props.toggleMouseOnSidebar}
                 renderAnnotations={this.renderAnnotations}
+                updateAnnotations={this.updateAnnotations}
                 env={this.props.env}
             />
         )

@@ -18,6 +18,7 @@ class CommentBox extends React.PureComponent {
             descriptor: PropTypes.object.isRequired,
         }),
         env: PropTypes.string.isRequired,
+        updateAnnotations: PropTypes.func.isRequired,
     }
 
     state = {
@@ -108,17 +109,18 @@ class CommentBox extends React.PureComponent {
 
     save = () => {
         const { commentInput, tags } = this.state
-        const { anchor } = this.props
+        const { anchor, env } = this.props
         const strippedComment = commentInput.trim()
         if (strippedComment.length || anchor) {
             const body = anchor ? anchor.quote : ''
-            this.props.createAnnotation(strippedComment, body, tags)
+            this.props.createAnnotation(strippedComment, body, tags, env)
             this.setState({
                 commentInput: '',
                 textareaRows: constants.DEFAULT_ROWS,
                 isHidden: true,
                 tags: [],
             })
+            this.props.updateAnnotations()
         }
     }
 
@@ -260,8 +262,8 @@ const mapStateToProps = state => ({
     anchor: selectors.anchor(state),
 })
 const mapDispatchToProps = dispatch => ({
-    createAnnotation: (comment, body, tags) =>
-        dispatch(actions.createAnnotation(comment, body, tags)),
+    createAnnotation: (comment, body, tags, env) =>
+        dispatch(actions.createAnnotation(comment, body, tags, env)),
     setAnchor: anchor => dispatch(actions.setAnchor(anchor)),
 })
 
