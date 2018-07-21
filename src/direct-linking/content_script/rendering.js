@@ -8,13 +8,11 @@ import styles from './styles.css'
 const Raven = AllRaven['default']
 
 export async function highlightAnnotation(
-    { annotation, isDark },
+    { annotation },
     focusOnAnnotation = null,
     hoverAnnotationContainer = null,
 ) {
-    // TODO: Simplify class naming
     const baseClass = styles['memex-highlight']
-    // const darkClass = isDark ? styles['dark'] : ''
     try {
         await Raven.context(async () => {
             let descriptor

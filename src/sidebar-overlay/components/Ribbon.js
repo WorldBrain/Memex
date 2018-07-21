@@ -70,9 +70,13 @@ class Ribbon extends React.Component {
              * focuses the annotation container.
              */
             goToAnnotation: async annotation => {
-                await this.props.highlightAndScroll(annotation)
-                this.openSidebar()
-                this.frameFC.remoteExecute('focusAnnotation')(annotation.url)
+                await this.openSidebar()
+                setTimeout(() => {
+                    this.props.highlightAndScroll(annotation)
+                    this.frameFC.remoteExecute('focusAnnotation')(
+                        annotation.url,
+                    )
+                }, 300)
             },
         })
     }

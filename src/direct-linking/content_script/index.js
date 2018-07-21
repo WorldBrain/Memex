@@ -22,7 +22,8 @@ browser.runtime.onMessage.addListener(request => {
             annotation: request.annotation,
         })
         if (highlightSuccessful) {
-            interactions.scrollToHighlight({ isDark: false })
+            interactions.makeHighlightDark(request.annotation)
+            interactions.scrollToHighlight(request.annotation)
         } else {
             setupAnchorFallbackOverlay()
         }

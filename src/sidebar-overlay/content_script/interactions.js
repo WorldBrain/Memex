@@ -13,6 +13,7 @@ export function scrollToHighlight(annotation) {
     const $highlight = document.querySelector(
         `.${baseClass}[data-annotation="${annotation.url}"]`,
     )
+
     if ($highlight) {
         setTimeout(() => {
             scrollToElement($highlight, { offset: -225 })
