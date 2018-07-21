@@ -3,7 +3,7 @@ import { injectCSS } from 'src/search-injection/dom'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import { setupRibbonUI, destroyAll } from '../components'
 import { OPEN_OPTIONS } from '../../search-injection/constants'
-
+import { getOffsetTop } from '../utils'
 import styles from 'src/direct-linking/content_script/styles.css'
 
 export function scrollToHighlight(annotation) {
@@ -14,7 +14,7 @@ export function scrollToHighlight(annotation) {
 
     if ($highlight) {
         // Elements offset Top - offset
-        const top = $highlight.offsetTop - 100
+        const top = getOffsetTop($highlight) - 100
         setTimeout(() => {
             window.scrollTo({
                 top,
@@ -209,7 +209,7 @@ export const sortAnnotationByPosition = annotations => {
         )
         return {
             ...annotation,
-            offsetTop: firstHighlight ? firstHighlight.offsetTop : Infinity,
+            offsetTop: firstHighlight ? getOffsetTop(firstHighlight) : Infinity,
         }
     })
     return annotationsWithTops.sort((a, b) => a.offsetTop > b.offsetTop)

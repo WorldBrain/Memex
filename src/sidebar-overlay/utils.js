@@ -96,3 +96,13 @@ export const goToAnnotation = (
         highlightAndScroll(annotation)
     }
 }
+
+export const getOffsetTop = element => {
+    let el = element
+    let offset = 0
+    while (el) {
+        offset = offset + el.offsetTop
+        el = el.offsetParent
+    }
+    return offset
+}
