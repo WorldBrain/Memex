@@ -39,7 +39,7 @@ const setActiveAnnotation = (state, activeUrl) => ({
 
 const setHoveredAnnotation = (state, hoveredUrl) => ({
     ...state,
-    activeAnnotation: hoveredUrl,
+    setHoveredAnnotation: hoveredUrl,
 })
 
 export default createReducer(

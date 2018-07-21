@@ -170,7 +170,7 @@ const mapDispatchToProps = dispatch => ({
     deleteAnnotation: ({ url }) => dispatch(actions.deleteAnnotation(url)),
     setAnchor: anchor => dispatch(actions.setAnchor(anchor)),
     setActiveAnnotation: key => dispatch(actions.setActiveAnnotation(key)),
-    setHoveredAnnotation: key => dispatch(actions.setActiveAnnotation(key)),
+    setHoveredAnnotation: key => dispatch(actions.setHoveredAnnotation(key)),
 })
 
 export default connect(

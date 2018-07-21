@@ -6,7 +6,7 @@ export const setAnnotations = createAction('setAnnotations')
 
 export const setActiveAnnotation = createAction('setActiveAnnotation')
 
-export const setHoveredAnnotation = createAction('setActiveAnnotation')
+export const setHoveredAnnotation = createAction('setHoveredAnnotation')
 
 export const setAnchor = createAction('setAnchor')
 
