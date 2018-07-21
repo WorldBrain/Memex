@@ -410,6 +410,7 @@ class AnnotationContainer extends React.Component {
 
     render() {
         const { goToAnnotation, annotation } = this.props
+        console.log(this.props.isActive)
         return (
             <Annotation
                 renderHighlight={this.renderHighlight}

@@ -24,6 +24,9 @@ class Ribbon extends React.Component {
     state = {
         isSidebarActive: false,
         annotations: [],
+        // For preventing the page scroll, when sidebar is open
+        isInsideFrame: false,
+        top: null,
     }
 
     async componentDidMount() {
@@ -86,8 +89,8 @@ class Ribbon extends React.Component {
             toggleSidebar: async () => {
                 await this.toggleSidebar()
             },
-            highlightAndScroll: annotation => {
-                this.props.highlightAndScroll(annotation)
+            highlightAndScroll: async annotation => {
+                await this.highlightAndScroll(annotation)
             },
             makeHighlightMedium: annotation => {
                 this.props.makeHighlightMedium(annotation)
@@ -99,21 +102,22 @@ class Ribbon extends React.Component {
     }
 
     setupScrollListeners() {
-        let isInsideFrame = false
-        let top = null
-
         this.iFrame.addEventListener(
             'mouseenter',
             () => {
-                isInsideFrame = true
-                top = window.pageYOffset
+                this.setState({
+                    isInsideFrame: true,
+                    top: window.pageYOffset,
+                })
             },
             false,
         )
         this.iFrame.addEventListener(
             'mouseleave',
             () => {
-                isInsideFrame = false
+                this.setState({
+                    isInsideFrame: false,
+                })
             },
             false,
         )
@@ -121,10 +125,24 @@ class Ribbon extends React.Component {
         document.addEventListener(
             'scroll',
             () => {
+                const { top, isInsideFrame } = this.state
                 if (isInsideFrame) window.scrollTo(0, top)
             },
             false,
         )
+    }
+
+    highlightAndScroll = async annotation => {
+        const top = await this.props.highlightAndScroll(annotation)
+        this.setState({
+            isInsideFrame: false,
+            top: top,
+        })
+        setTimeout(() => {
+            this.setState({
+                isInsideFrame: true,
+            })
+        }, 500)
     }
 
     fetchAnnotations = async () => {
@@ -134,17 +152,6 @@ class Ribbon extends React.Component {
         this.setState({
             annotations,
         })
-    }
-
-    togglePageScrolling = isEnabled => () => {
-        if (isEnabled) {
-            document.body.style.maxHeight = ''
-            document.body.style.overflow = 'auto'
-        } else {
-            document.body.style.maxHeight =
-                window.innerHeight + window.pageYOffset + 'px'
-            document.body.style.overflow = 'hidden'
-        }
     }
 
     focusAnnotationContainer = annotationUrl => {
@@ -168,8 +175,6 @@ class Ribbon extends React.Component {
             this.hoverAnnotationContainer,
         )
 
-        this.togglePageScrolling(false)
-
         setTimeout(() => {
             const sorted = this.props.sortAnnotationByPosition(
                 this.state.annotations,
@@ -183,7 +188,6 @@ class Ribbon extends React.Component {
         await this.frameFC.remoteExecute('sendAnchorToSidebar')(null)
         this.frameFC.remoteExecute('focusAnnotation')('')
         this.frameFC.remoteExecute('setAnnotations')([])
-        this.togglePageScrolling(true)
     }
 
     toggleSidebar = async () => {

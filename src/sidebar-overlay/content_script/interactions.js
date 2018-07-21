@@ -1,5 +1,3 @@
-import scrollToElement from 'scroll-to-element'
-
 import { highlightAnnotation } from 'src/direct-linking/content_script/rendering'
 import { injectCSS } from 'src/search-injection/dom'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
@@ -15,9 +13,15 @@ export function scrollToHighlight(annotation) {
     )
 
     if ($highlight) {
+        // Elements offset Top - offset
+        const top = $highlight.offsetTop - 100
         setTimeout(() => {
-            scrollToElement($highlight, { offset: -225 })
+            window.scrollTo({
+                top,
+                behavior: 'smooth',
+            })
         }, 300)
+        return top
     } else {
         console.error('MEMEX: Oops, no highlight found to scroll to')
     }
@@ -31,7 +35,7 @@ export function scrollToHighlight(annotation) {
 export const highlightAndScroll = async annotation => {
     removeHighlights(true)
     makeHighlightDark(annotation)
-    scrollToHighlight(annotation)
+    return scrollToHighlight(annotation)
 }
 
 /**

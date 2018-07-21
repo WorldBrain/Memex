@@ -124,7 +124,6 @@ class SidebarContainer extends React.Component {
 
     renderAnnotations = () => {
         const { annotations } = this.props
-        console.log(annotations)
         if (!annotations) return
         return annotations.map(annotation => (
             <Annotation
