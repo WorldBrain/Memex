@@ -123,15 +123,19 @@ const toggleListFilterIndex = (state, index) => {
     }
 }
 
-const setUrlDragged = (state, url) => ({
-    ...state,
-    urlDragged: url,
-})
+const setUrlDragged = (state, url) => {
+    return {
+        ...state,
+        urlDragged: url,
+    }
+}
 
-const resetUrlDragged = state => ({
-    ...state,
-    urlDragged: '',
-})
+const resetUrlDragged = state => {
+    return {
+        ...state,
+        urlDragged: '',
+    }
+}
 
 const openCreateListForm = state => ({
     ...state,

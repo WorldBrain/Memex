@@ -4,9 +4,6 @@ import { updateLastActive } from 'src/analytics'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import * as selectors from './selectors'
 
-// import constants from './constants'
-// import { custom-lists } from '../custom-lists/selectors';
-
 import { selectors as filters } from 'src/search-filters'
 
 export const fetchAllLists = createAction('custom-lists/listData')
@@ -65,10 +62,6 @@ export const resetUrlToEdit = createAction('custom-lists/resetUrlToEdit')
 export const toggleListFilterIndex = createAction(
     'custom-lists/toggleListFilterIndex',
 )
-
-export const toggleAddToList = createAction('custom-lists/toggleAddToList')
-
-export const closeAddToList = createAction('custom-lists/closeAddToList')
 
 export const setUrlDragged = createAction('custom-lists/setUrlDragged')
 export const resetUrlDragged = createAction('custom-lists/resetUrlDragged')

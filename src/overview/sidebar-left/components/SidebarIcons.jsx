@@ -22,6 +22,7 @@ class SidebarIcons extends PureComponent {
         this.state = {
             // Capture mouse over events and display tooltip
             showCollTooltip: false,
+            showFilterTooltip: false,
         }
     }
 
@@ -37,6 +38,18 @@ class SidebarIcons extends PureComponent {
         })
     }
 
+    handleShowFilterTooltip = () => {
+        this.setState({
+            showFilterTooltip: true,
+        })
+    }
+
+    handleHideFilterTooltip = () => {
+        this.setState({
+            showFilterTooltip: false,
+        })
+    }
+
     render() {
         return (
             <div
@@ -44,6 +57,9 @@ class SidebarIcons extends PureComponent {
                     [styles.buttonContainer]: !this.props.overviewMode,
                 })}
             >
+                <InfoTooltip showTooltip={this.state.showFilterTooltip}>
+                    Filters
+                </InfoTooltip>
                 <div className={styles.enabled}>
                     <button
                         className={cx(styles.button, styles.filterButton, {
@@ -51,6 +67,8 @@ class SidebarIcons extends PureComponent {
                         })}
                         onClick={this.props.filterBtnClick}
                         id="filter-icon"
+                        onMouseOver={this.handleShowFilterTooltip}
+                        onMouseOut={this.handleHideFilterTooltip}
                     />
                     {this.props.filterActive && (
                         <div

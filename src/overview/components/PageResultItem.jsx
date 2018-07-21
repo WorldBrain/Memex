@@ -34,18 +34,22 @@ class PageResultItem extends PureComponent {
         handleCrossRibbonClick: PropTypes.func.isRequired,
         setUrlDragged: PropTypes.func.isRequired,
         hideSearchFilters: PropTypes.func.isRequired,
+        resetUrlDragged: PropTypes.func.isRequired,
         isSidebarOpen: PropTypes.bool.isRequired,
     }
 
     dragStart = e => {
         const { url, setUrlDragged } = this.props
+        // console.log(e.type);
+        // console.log('drag  triggered');
+
         setUrlDragged(url)
         const crt = document.getElementById('dragged-element')
         crt.style.display = 'block'
 
         e.dataTransfer.setData('text/plain', url)
 
-        e.dataTransfer.setDragImage(crt, 15, 15)
+        e.dataTransfer.setDragImage(crt, 10, 10)
         if (this.props.isSidebarOpen) this.props.hideSearchFilters()
     }
 
@@ -63,6 +67,7 @@ class PageResultItem extends PureComponent {
                     <a
                         draggable="true"
                         onDragStart={this.dragStart}
+                        onDragEnd={this.props.resetUrlDragged}
                         className={styles.root}
                         href={this.props.url}
                         target="_blank"

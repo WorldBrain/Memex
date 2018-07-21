@@ -160,6 +160,7 @@ const toggleBookmarkFilter = state => ({
 
 const resetFilters = state => ({
     ...defaultState,
+    lists: state.lists,
     showFilters: state.showFilters,
 })
 

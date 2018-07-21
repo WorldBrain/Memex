@@ -96,8 +96,6 @@ class SearchFiltersContainer extends PureComponent {
     }
 
     toggleDomainFilter = ({ value, isExclusive }) => () => {
-        console.log(value, isExclusive)
-
         !isExclusive
             ? this.props.delIncDomainFilter(value)
             : this.props.delExcDomainFilter(value)
@@ -160,8 +158,6 @@ class SearchFiltersContainer extends PureComponent {
     )
 
     render() {
-        console.log(this.props.filteredDomains, 'huhu')
-
         return (
             <SearchFilters
                 bookmarkFilter={this.renderBookmarkFilter()}

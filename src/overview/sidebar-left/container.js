@@ -16,6 +16,7 @@ import SearchFilters, {
 import Sidebar from './components/SideBar'
 import ClearFilter from './components/ClearFilter'
 import ButtonContainer from './components/ButtonContainer'
+import { selectors as customLists } from '../../custom-lists'
 
 class SidebarContainer extends PureComponent {
     static propTypes = {
@@ -29,6 +30,7 @@ class SidebarContainer extends PureComponent {
         setMouseOver: PropTypes.func.isRequired,
         resetMouseOver: PropTypes.func.isRequired,
         showClearFiltersBtn: PropTypes.bool.isRequired,
+        urlDragged: PropTypes.bool.isRequired,
     }
 
     // Capture state of the react-burger-menu
@@ -39,12 +41,14 @@ class SidebarContainer extends PureComponent {
     }
 
     handleClickOutside = e => {
-        console.log(e.type, e.target.id)
         const { id } = e.target
-        if (id !== 'filter-icon' && id !== 'collection-icon') {
-            setTimeout(() => this.props.closeSidebar(), 100)
-            // this.props.closeSidebar()
-        }
+        // Delay the closing of the sidebar for 100ms to check is something is
+        // being dragged.
+        setTimeout(() => {
+            if (id !== 'filter-icon' && id !== 'collection-icon') {
+                if (!this.props.urlDragged) this.props.closeSidebar()
+            }
+        }, 100)
     }
 
     renderSearchFilters = () => <SearchFilters />
@@ -104,6 +108,7 @@ const mapStateToProps = state => ({
     isSidebarOpen: selectors.isSidebarOpen(state),
     filterMode: selectors.showFilters(state),
     showClearFiltersBtn: filters.showClearFiltersBtn(state),
+    urlDragged: customLists.urlDragged(state),
 })
 
 const mapDispatchToProps = dispatch => ({

@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import cx from 'classnames'
 
 import styles from './ListItem.css'
+// import { urlDragged } from '../../../selectors';
 
 class PageList extends Component {
     static propTypes = {
@@ -12,7 +13,6 @@ class PageList extends Component {
         onAddPageToList: PropTypes.func.isRequired,
         isFiltered: PropTypes.bool.isRequired,
         onListItemClick: PropTypes.func.isRequired,
-        resetUrlDragged: PropTypes.func.isRequired,
     }
 
     constructor(props) {
@@ -80,7 +80,7 @@ class PageList extends Component {
         // const url = e.dataTransfer.getData('URL')
         // Gets the URL of the dropped list item
         const url = e.dataTransfer.getData('text/plain')
-        this.props.resetUrlDragged()
+        // this.props.resetUrlDragged()
         this.props.onAddPageToList(url)
     }
 

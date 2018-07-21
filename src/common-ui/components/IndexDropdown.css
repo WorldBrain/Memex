@@ -17,6 +17,10 @@
     background-color: #f7f7f7;
 }
 
+.remove {
+    display: none;
+}
+
 .menuItem i {
     font-size: 18px;
     float: right;
@@ -139,6 +143,5 @@
     z-index: 1;
     background-color: #fff;
     box-shadow: unset;
-    margin-top: 17px;
     width: 100%;
 }

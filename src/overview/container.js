@@ -67,6 +67,7 @@ class OverviewContainer extends Component {
         hideSearchFilters: PropTypes.func.isRequired,
         resetFilters: PropTypes.func.isRequired,
         delListFilter: PropTypes.func.isRequired,
+        resetUrlDragged: PropTypes.func.isRequired,
         isSidebarOpen: PropTypes.bool.isRequired,
     }
 
@@ -170,6 +171,7 @@ class OverviewContainer extends Component {
                 handleToggleUrlToEdit={this.props.handleToggleUrlToEdit(doc)}
                 handleCrossRibbonClick={this.props.handleCrossRibbonClick(doc)}
                 setUrlDragged={this.props.setUrlDragged}
+                resetUrlDragged={this.props.resetUrlDragged}
                 hideSearchFilters={this.props.hideSearchFilters}
                 isSidebarOpen={this.props.isSidebarOpen}
                 {...doc}
@@ -320,6 +322,7 @@ class OverviewContainer extends Component {
                     isSearchDisabled={this.props.showOnboarding}
                     scrollDisabled={this.props.mouseOnSidebar}
                     renderDragElement={this.renderDragElement()}
+                    disbleOutsideClick={Boolean(this.props.urlDragged)}
                     sidebarIcons={this.renderSidebarIcons()}
                 >
                     {this.renderResults()}
@@ -375,7 +378,8 @@ const mapDispatchToProps = dispatch => ({
             setUrlDragged: listActs.setUrlDragged,
             showSearchFilters: sidebarLeftActs.openSidebarFilterMode,
             hideSearchFilters: sidebarLeftActs.openSidebarListMode,
-            resetUrlDragged: listActs.setUrlDragged,
+            setUrlDragged: listActs.setUrlDragged,
+            resetUrlDragged: listActs.resetUrlDragged,
             resetFilters: filterActs.resetFilters,
             delListFilter: filterActs.delListFilter,
         },

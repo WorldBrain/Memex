@@ -18,11 +18,17 @@ class SearchFilters extends PureComponent {
         return (
             <div>
                 {this.props.tagFilter}
-                <div className={styles.filtered}>{this.props.filteredTags}</div>
+                {this.props.filteredTags && (
+                    <div className={styles.filtered}>
+                        {this.props.filteredTags}
+                    </div>
+                )}
                 {this.props.domainFilter}
-                <div className={styles.filtered}>
-                    {this.props.filteredDomains}
-                </div>
+                {this.props.filteredDomains && (
+                    <div className={styles.filtered}>
+                        {this.props.filteredDomains}
+                    </div>
+                )}
                 {this.props.typeFilters}
                 <div className={styles.filtered}>
                     {this.props.filteredTypes}
