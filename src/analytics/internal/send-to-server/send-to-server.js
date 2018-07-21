@@ -1,6 +1,6 @@
 import { idleManager } from 'src/util/idle'
 import { SHOULD_TRACK_STORAGE_KEY as SHOULD_TRACK } from 'src/options/privacy/constants'
-import { USER_ID, generateTokenIfNot } from 'src/util/generate-token'
+import { generateTokenIfNot } from 'src/util/generate-token'
 import { INSTALL_TIME_KEY } from '../../../constants'
 
 class SendToServer {
@@ -53,7 +53,15 @@ class SendToServer {
      * @return {Promise<Response>}
      */
     _sendReq = async event => {
-        const userId = await this.userId()
+        if (!(await this.shouldTrack())) {
+            return
+        }
+
+        const userId = await this.fetchUserId()
+
+        if (!userId) {
+            return
+        }
 
         return await fetch(this._host, {
             method: 'POST',
@@ -63,7 +71,7 @@ class SendToServer {
     }
 
     /**
-     * Send a bulk request to the Piwik HTTP Tracking API. Batches all pooled requests, then resets them.
+     * Send a bulk request to the AWS Tracking API. Batches all pooled requests, then resets them.
      *
      * @throws Any network errors.
      * @return {Promise<boolean>}
@@ -74,7 +82,11 @@ class SendToServer {
             return
         }
 
-        const userId = await this.userId()
+        const userId = await this.fetchUserId()
+
+        if (!userId) {
+            return
+        }
 
         const res = await fetch(this._host, {
             method: 'POST',
@@ -87,20 +99,26 @@ class SendToServer {
         }
     }
 
-    async userId() {
-        let userId = (await browser.storage.local.get(USER_ID))[USER_ID]
-
-        while (!userId) {
-            const installTime = (await browser.storage.local.get(
-                INSTALL_TIME_KEY,
-            ))[INSTALL_TIME_KEY]
-            userId = await generateTokenIfNot(installTime)
+    async fetchUserId() {
+        if (!(await this.shouldTrack())) {
+            return null
         }
+
+        const installTime = (await browser.storage.local.get(INSTALL_TIME_KEY))[
+            INSTALL_TIME_KEY
+        ]
+        const userId = await generateTokenIfNot(installTime)
 
         return userId
     }
 
     async shouldTrack() {
+        const isDoNotTrackEnabled = window.navigator.doNotTrack
+
+        if (isDoNotTrackEnabled) {
+            return false
+        }
+
         const storage = await browser.storage.local.get({
             [SHOULD_TRACK]: SendToServer.DEF_TRACKING,
         })

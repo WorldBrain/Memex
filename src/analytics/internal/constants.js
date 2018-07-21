@@ -4,6 +4,18 @@ export const API_HOST =
         : 'https://a8495szyaa.execute-api.eu-central-1.amazonaws.com/staging'
 
 // This is used to change the event type into integer to optimize the space
+
+/**
+ * Add new event type
+ * Add the type of event in EVENT_TYPES array
+ * Properties: * i
+ *      id*: id will be the incremented number
+ *      notifTyep: If there is any activity based notification for this type then add notifType and add the same id in the NOTIF_TYPE_EVENT_IDS array
+ *
+ * NOTIF_TYPE_EVENT_IDS
+ *      if the notifType already exists the add the id directly otherwise make a new key and insert in the array
+ */
+
 export const EVENT_TYPES = {
     successfulSearch: {
         id: 1,

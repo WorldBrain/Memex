@@ -35,8 +35,37 @@ export const init = () => (dispatch, getState) => {
 
 export const toggleShouldTrack = () => async (dispatch, getState) => {
     const toggled = !selectors.shouldTrack(getState())
-    await persistShouldTrack(toggled)
-    dispatch(setShouldTrack(toggled))
+
+    const trackEvent = force => {
+        const trackEvent = analytics.trackEvent(
+            {
+                category: 'Privacy',
+                action: 'Change tracking pref',
+                name: toggled ? 'opt-in' : 'opt-out',
+            },
+            force,
+        )
+
+        const processEvent = internalAnalytics.processEvent({
+            type: toggled
+                ? 'changeTrackingPrefOptIn'
+                : 'changeTrackingPrefOptOut',
+            force,
+        })
+
+        return Promise.all([trackEvent, processEvent])
+    }
+
+    if (toggled) {
+        await persistShouldTrack(toggled)
+        dispatch(setShouldTrack(toggled))
+        await trackEvent(false)
+    } else {
+        // It is up becuase of better user interface, just toggle and then make changes in localStorage
+        dispatch(setShouldTrack(toggled))
+        await trackEvent(true)
+        await persistShouldTrack(toggled)
+    }
 }
 
 /**
