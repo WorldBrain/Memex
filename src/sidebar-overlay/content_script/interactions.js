@@ -181,15 +181,28 @@ export function removeHighlights(isDark) {
     const highlights = document.querySelectorAll(highlightClass)
 
     highlights.forEach(highlight => {
+        // isDark only removes the dark classname
         highlight.classList.remove(styles['dark'])
         if (!isDark) {
-            highlight.classList.remove(styles['memex-highlight'])
-            highlight.dataset.annotation = ''
-            highlight.removeEventListener('click', clickListener)
-            highlight.removeEventListener('mouseenter', mouseenterListener)
-            highlight.removeEventListener('mouseleave', mouseleaveListener)
+            removeHighlight(highlight)
         }
     })
+}
+
+const removeHighlight = highlight => {
+    highlight.classList.remove(styles['memex-highlight'])
+    highlight.dataset.annotation = ''
+    highlight.removeEventListener('click', clickListener)
+    highlight.removeEventListener('mouseenter', mouseenterListener)
+    highlight.removeEventListener('mouseleave', mouseleaveListener)
+}
+
+export const removeAnnotationHighlights = ({ url }) => {
+    const baseClass = styles['memex-highlight']
+    const highlights = document.querySelectorAll(
+        `.${baseClass}[data-annotation="${url}"]`,
+    )
+    highlights.forEach(highlight => removeHighlight(highlight))
 }
 
 export const openSettings = () => {

@@ -137,9 +137,8 @@ class AnnotationContainer extends React.Component {
     handleDeleteAnnotation = e => {
         e.preventDefault()
         e.stopPropagation()
-        const { url } = this.props.annotation
         this._setFooterState('default')
-        this.props.deleteAnnotation({ url })
+        this.props.deleteAnnotation(this.props.annotation)
     }
 
     handleEditAnnotation = e => {
@@ -387,7 +386,10 @@ class AnnotationContainer extends React.Component {
      * or the annotaion isn't edit mode.
      */
     shouldCommentBoxBeVisible = () => {
-        return this.props.annotation.comment && !this.state.annotationEditMode
+        return (
+            this.props.annotation.comment.length > 0 &&
+            !this.state.annotationEditMode
+        )
     }
 
     render() {

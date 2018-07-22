@@ -19,6 +19,7 @@ class Ribbon extends React.Component {
         makeHighlightMedium: PropTypes.func.isRequired,
         removeMediumHighlights: PropTypes.func.isRequired,
         sortAnnotationByPosition: PropTypes.func.isRequired,
+        removeAnnotationHighlights: PropTypes.func.isRequired,
     }
 
     state = {
@@ -97,6 +98,9 @@ class Ribbon extends React.Component {
             },
             removeMediumHighlights: () => {
                 this.props.removeMediumHighlights()
+            },
+            deleteAnnotation: annotation => {
+                this.props.removeAnnotationHighlights(annotation)
             },
             updateAnnotations: async () => {
                 // Remove selection

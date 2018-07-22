@@ -111,6 +111,12 @@ class SidebarContainer extends React.Component {
         setTimeout(() => this.focusAnnotation(this.props.activeAnnotation), 300)
     }
 
+    deleteAnnotation = annotation => {
+        if (annotation.body)
+            this.parentFC.remoteExecute('deleteAnnotation')(annotation)
+        this.props.deleteAnnotation(annotation)
+    }
+
     /**
      * Makes highlight dark a little when the container is hovered
      */
@@ -137,7 +143,7 @@ class SidebarContainer extends React.Component {
                 annotation={annotation}
                 goToAnnotation={this.goToAnnotation()}
                 editAnnotation={this.props.editAnnotation}
-                deleteAnnotation={this.props.deleteAnnotation}
+                deleteAnnotation={this.deleteAnnotation}
                 key={annotation.url}
                 env={this.props.env}
                 onMouseEnter={this.makeHighlightMedium}

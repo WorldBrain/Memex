@@ -61,8 +61,8 @@ const Annotation = props => (
 
 Annotation.propTypes = {
     truncatedHighlightText: PropTypes.string.isRequired,
-    showMoreHighlight: PropTypes.node.isRequired,
-    showMoreAnnotation: PropTypes.node.isRequired,
+    showMoreHighlight: PropTypes.node,
+    showMoreAnnotation: PropTypes.node,
     truncatedAnnotationText: PropTypes.string.isRequired,
     annotationEditMode: PropTypes.bool.isRequired,
     tagClasses: PropTypes.string.isRequired,
@@ -74,7 +74,7 @@ Annotation.propTypes = {
     ),
     dateDetails: PropTypes.shape({
         timestamp: PropTypes.string.isRequired,
-        lastEdited: PropTypes.number.isRequired,
+        lastEdited: PropTypes.number,
     }),
     renderAnnotationInput: PropTypes.func.isRequired,
     renderFooter: PropTypes.func.isRequired,
