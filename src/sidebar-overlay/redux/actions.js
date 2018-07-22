@@ -8,6 +8,8 @@ export const setActiveAnnotation = createAction('setActiveAnnotation')
 
 export const setHoveredAnnotation = createAction('setHoveredAnnotation')
 
+export const setAnnotationCount = createAction('setAnnotationCount')
+
 export const setAnchor = createAction('setAnchor')
 
 export const setPageInfo = createAction('setPageInfo')
@@ -17,6 +19,12 @@ export const fetchAnnotationAct = () => async (dispatch, getState) => {
     const pageUrl = getState().page.url
     const annotations = await remoteFunction('getAllAnnotations')(pageUrl)
     dispatch(setAnnotations(annotations))
+}
+
+export const findAnnotationCount = () => async (dispatch, getState) => {
+    const pageUrl = getState().page.url
+    const annotations = await remoteFunction('getAllAnnotations')(pageUrl)
+    dispatch(setAnnotationCount(annotations.length))
 }
 
 export const createAnnotation = (comment, body, tags, env) => async (

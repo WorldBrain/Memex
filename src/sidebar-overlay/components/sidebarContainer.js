@@ -20,6 +20,7 @@ class SidebarContainer extends React.Component {
         pageTitle: PropTypes.string,
         annotations: PropTypes.array.isRequired,
         fetchAnnotations: PropTypes.func.isRequired,
+        findAnnotationCount: PropTypes.func.isRequired,
         editAnnotation: PropTypes.func.isRequired,
         deleteAnnotation: PropTypes.func.isRequired,
         setAnchor: PropTypes.func.isRequired,
@@ -28,6 +29,7 @@ class SidebarContainer extends React.Component {
         setAnnotations: PropTypes.func.isRequired,
         activeAnnotation: PropTypes.string.isRequired,
         hoveredAnnotation: PropTypes.string.isRequired,
+        annotationCount: PropTypes.number.isRequired,
     }
 
     static defaultProps = {
@@ -40,8 +42,15 @@ class SidebarContainer extends React.Component {
     }
 
     async componentDidMount() {
-        const { pageTitle, pageUrl, setPageInfo, fetchAnnotations } = this.props
+        const {
+            pageTitle,
+            pageUrl,
+            setPageInfo,
+            fetchAnnotations,
+            findAnnotationCount,
+        } = this.props
         setPageInfo(pageUrl, pageTitle)
+        await findAnnotationCount()
         if (this.props.env === 'iframe') {
             this.setupFrameFunctions()
         } else {
@@ -135,9 +144,9 @@ class SidebarContainer extends React.Component {
     }
 
     renderAnnotations = () => {
-        const { annotations, env } = this.props
+        const { annotations, env, annotationCount } = this.props
 
-        if (!annotations.length) return <Loader />
+        if (annotationCount && !annotations.length) return <Loader />
 
         if (env === 'overview')
             annotations.sort((x, y) => x.createdWhen > y.createdWhen)
@@ -176,6 +185,7 @@ const mapStateToProps = state => ({
     annotations: selectors.annotations(state),
     activeAnnotation: selectors.activeAnnotation(state),
     hoveredAnnotation: selectors.activeAnnotation(state),
+    annotationCount: selectors.annotationCount(state),
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -189,6 +199,7 @@ const mapDispatchToProps = dispatch => ({
     setAnchor: anchor => dispatch(actions.setAnchor(anchor)),
     setActiveAnnotation: key => dispatch(actions.setActiveAnnotation(key)),
     setHoveredAnnotation: key => dispatch(actions.setHoveredAnnotation(key)),
+    findAnnotationCount: () => dispatch(actions.findAnnotationCount()),
 })
 
 export default connect(
