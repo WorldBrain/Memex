@@ -138,7 +138,7 @@ class AnnotationContainer extends React.Component {
         e.preventDefault()
         e.stopPropagation()
         const { url } = this.props.annotation
-        this.setFooterState('default')
+        this._setFooterState('default')
         this.props.deleteAnnotation({ url })
     }
 
@@ -164,7 +164,7 @@ class AnnotationContainer extends React.Component {
 
     _setTagInput = value => () => this.setState({ tagInput: value })
 
-    renderTimestamp = () => {
+    getDateDetails = () => {
         if (this.state.annotationEditMode) return null
 
         const { createdWhen, lastEdited } = this.props.annotation
@@ -175,14 +175,10 @@ class AnnotationContainer extends React.Component {
             .format('MMMM D YYYY')
             .toUpperCase()
 
-        return (
-            <div className={styles.timestamp}>
-                {lastEdited ? (
-                    <span className={styles.lastEdit}>Last Edit: </span>
-                ) : null}
-                {timestamp}
-            </div>
-        )
+        return {
+            timestamp,
+            lastEdited,
+        }
     }
 
     renderFooterIcons = () => {
@@ -195,7 +191,7 @@ class AnnotationContainer extends React.Component {
                 />
                 <span
                     className={styles.trashIcon}
-                    onClick={this.setFooterState('delete')}
+                    onClick={this._setFooterState('delete')}
                 />
                 {env === 'overview' && annotation.body ? (
                     <span
@@ -238,22 +234,12 @@ class AnnotationContainer extends React.Component {
                 </span>
                 <span
                     className={styles.footerText}
-                    onClick={this.setFooterState('default')}
+                    onClick={this._setFooterState('default')}
                 >
                     Cancel
                 </span>
             </div>
         )
-    }
-
-    renderTagPills = () => {
-        const { tags, annotationEditMode } = this.state
-        if (!tags || annotationEditMode) return
-        return tags.map((tag, i) => (
-            <span key={i} className={styles.tagPill}>
-                {tag.name}
-            </span>
-        ))
     }
 
     findFooterRenderer(state) {
@@ -266,13 +252,12 @@ class AnnotationContainer extends React.Component {
         const { footerState } = this.state
         return (
             <div className={styles.footer}>
-                {this.renderTimestamp()}
                 {this.findFooterRenderer(footerState)}
             </div>
         )
     }
 
-    toggleState = stateName => () => {
+    _toggleState = stateName => () => {
         const toggled = !this.state[stateName]
         this.setState({
             [stateName]: toggled,
@@ -290,7 +275,7 @@ class AnnotationContainer extends React.Component {
         })
     }
 
-    setFooterState = footerState => e => {
+    _setFooterState = footerState => e => {
         e.preventDefault()
         e.stopPropagation()
         this.setState({
@@ -299,9 +284,10 @@ class AnnotationContainer extends React.Component {
     }
 
     toggleEditAnnotation = e => {
-        this.toggleState('annotationEditMode')()
-        if (this.state.footerState === 'edit') this.setFooterState('default')(e)
-        else this.setFooterState('edit')(e)
+        this._toggleState('annotationEditMode')()
+        if (this.state.footerState === 'edit')
+            this._setFooterState('default')(e)
+        else this._setFooterState('edit')(e)
     }
 
     setTagRef = node => {
@@ -323,14 +309,14 @@ class AnnotationContainer extends React.Component {
         return null
     }
 
-    renderHighlight = () => {
+    getHighlightText = () => {
         const { truncated } = this.state
         if (truncated.highlight && truncated.highlight.isTruncated)
             return truncated.highlight.text
         else return this.props.annotation.body
     }
 
-    renderAnnotation = () => {
+    getAnnotationText = () => {
         const { truncated, annotationEditMode } = this.state
         if (annotationEditMode) return ''
         if (truncated.annotation && truncated.annotation.isTruncated)
@@ -364,26 +350,25 @@ class AnnotationContainer extends React.Component {
     }
 
     renderAnnotationInput = () => {
-        if (this.state.annotationEditMode)
-            return (
-                <div className={styles.annotationInput}>
-                    <textarea
-                        rows="5"
-                        cols="20"
-                        className={styles.annotationTextarea}
-                        value={this.state.annotationText}
-                        onChange={this.handleChange}
-                        onClick={() => {
-                            this.setState({
-                                tagInput: false,
-                            })
-                        }}
-                        placeholder="Add comment..."
-                    />
-                    <div ref={this.setTagRef}>{this.renderTagInput()}</div>
-                </div>
-            )
-        return null
+        if (!this.state.annotationEditMode) return null
+        return (
+            <div className={styles.annotationInput}>
+                <textarea
+                    rows="5"
+                    cols="20"
+                    className={styles.annotationTextarea}
+                    value={this.state.annotationText}
+                    onChange={this.handleChange}
+                    onClick={() => {
+                        this.setState({
+                            tagInput: false,
+                        })
+                    }}
+                    placeholder="Add comment..."
+                />
+                <div ref={this.setTagRef}>{this.renderTagInput()}</div>
+            </div>
+        )
     }
 
     deriveTagsClass = () =>
@@ -402,23 +387,21 @@ class AnnotationContainer extends React.Component {
      * or the annotaion isn't edit mode.
      */
     shouldCommentBoxBeVisible = () => {
-        return (
-            this.props.annotation.comment.length > 0 &&
-            !this.state.annotationEditMode
-        )
+        return this.props.annotation.comment && !this.state.annotationEditMode
     }
 
     render() {
         const { goToAnnotation, annotation } = this.props
-        console.log(this.props.isActive)
         return (
             <Annotation
-                renderHighlight={this.renderHighlight}
-                renderShowButton={this.renderShowButton}
-                renderAnnotation={this.renderAnnotation}
+                truncatedHighlightText={this.getHighlightText()}
+                truncatedAnnotationText={this.getAnnotationText()}
+                showMoreHighlight={this.renderShowButton('highlight')}
+                showMoreAnnotation={this.renderShowButton('annotation')}
                 annotationEditMode={this.state.annotationEditMode}
-                deriveTagsClass={this.deriveTagsClass}
-                renderTagPills={this.renderTagPills}
+                tagClasses={this.deriveTagsClass()}
+                tags={this.state.tags}
+                dateDetails={this.getDateDetails()}
                 renderAnnotationInput={this.renderAnnotationInput}
                 renderFooter={this.renderFooter}
                 goToAnnotation={goToAnnotation(annotation)}

@@ -18,13 +18,20 @@ const Annotation = props => (
         onMouseEnter={props.onMouseEnter}
         onMouseLeave={props.onMouseLeave}
     >
+        <div className={styles.timestamp}>
+            {props.dateDetails.lastEdited ? (
+                <span className={styles.lastEdit}>Last Edit: </span>
+            ) : null}
+            {props.dateDetails.timestamp}
+        </div>
+
         <div
             className={
                 !props.isJustComment ? styles.highlight : styles.noDisplay
             }
         >
-            "{props.renderHighlight()}"
-            {props.renderShowButton('highlight')}
+            "{props.truncatedHighlightText}"
+            {props.showMoreHighlight}
         </div>
 
         <div
@@ -33,12 +40,16 @@ const Annotation = props => (
                 [styles.isJustComment]: props.isJustComment,
             })}
         >
-            {props.renderAnnotation()}
-            {props.annotationEditMode
-                ? null
-                : props.renderShowButton('annotation')}
-            <div className={props.deriveTagsClass()}>
-                {props.renderTagPills()}
+            {props.truncatedAnnotationText}
+            {props.annotationEditMode ? null : props.showMoreAnnotation}
+            <div className={props.tagClasses}>
+                {props.annotationEditMode
+                    ? null
+                    : props.tags.map((tag, i) => (
+                          <span key={i} className={styles.tagPill}>
+                              {tag.name}
+                          </span>
+                      ))}
             </div>
         </div>
 
@@ -49,12 +60,22 @@ const Annotation = props => (
 )
 
 Annotation.propTypes = {
-    renderHighlight: PropTypes.func.isRequired,
-    renderShowButton: PropTypes.func.isRequired,
-    renderAnnotation: PropTypes.func.isRequired,
+    truncatedHighlightText: PropTypes.string.isRequired,
+    showMoreHighlight: PropTypes.node.isRequired,
+    showMoreAnnotation: PropTypes.node.isRequired,
+    truncatedAnnotationText: PropTypes.string.isRequired,
     annotationEditMode: PropTypes.bool.isRequired,
-    deriveTagsClass: PropTypes.func.isRequired,
-    renderTagPills: PropTypes.func.isRequired,
+    tagClasses: PropTypes.string.isRequired,
+    tags: PropTypes.arrayOf(
+        PropTypes.shape({
+            name: PropTypes.string.isRequired,
+            url: PropTypes.string.isRequired,
+        }),
+    ),
+    dateDetails: PropTypes.shape({
+        timestamp: PropTypes.string.isRequired,
+        lastEdited: PropTypes.number.isRequired,
+    }),
     renderAnnotationInput: PropTypes.func.isRequired,
     renderFooter: PropTypes.func.isRequired,
     goToAnnotation: PropTypes.func.isRequired,

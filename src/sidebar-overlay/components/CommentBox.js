@@ -45,6 +45,8 @@ class CommentBox extends React.PureComponent {
 
         this.attachEventListener()
 
+        if (this.inputRef) this.inputRef.focus()
+
         if (this.props.anchor)
             this.setState({
                 isHidden: false,
@@ -164,22 +166,6 @@ class CommentBox extends React.PureComponent {
         })
     }
 
-    renderAddNoteButton() {
-        return (
-            <div className={styles.topBar}>
-                <span className={styles.settings} onClick={this.openSettings} />
-                <div
-                    className={cx(styles.addNote, {
-                        [styles.disabled]: !this.state.isHidden,
-                    })}
-                    onClick={this.state.isHidden ? this.setHidden(false) : null}
-                >
-                    Add Comment
-                </div>
-            </div>
-        )
-    }
-
     renderTagInput() {
         const tagObjs = this.state.tags.map(tag => ({ name: tag }))
 
@@ -204,56 +190,64 @@ class CommentBox extends React.PureComponent {
             )
     }
 
-    renderCommentBox() {
-        if (this.isHidden()) return null
-        if (this.inputRef) this.inputRef.focus()
-        return (
-            <div
-                className={cx(styles.commentBox, {
-                    [styles.iframe]: this.props.env === 'iframe',
-                })}
-            >
-                <textarea
-                    rows={this.state.textareaRows}
-                    className={styles.textarea}
-                    value={this.state.commentInput}
-                    placeholder={'Add your comment...'}
-                    onChange={this.handleChange}
-                    ref={this.setInputRef}
-                    onClick={this._setTagInput(false)}
-                />
-                <br />
-                <div ref={this.setTagRef}>{this.renderTagInput()}</div>
-                <div className={styles.buttonHolder}>
-                    <button className={styles.save} onClick={this.save}>
-                        Save
-                    </button>
-                    <a className={styles.cancel} onClick={this.cancel}>
-                        Cancel
-                    </a>
-                </div>
-            </div>
-        )
-    }
-
-    renderHighlightedText() {
-        if (!this.props.anchor) return null
-        return (
-            <div className={styles.highlighted}>
-                <div className={styles.newAnnotation}>New Annotation</div>
-                <div className={styles.highlightedText}>
-                    "{this.props.anchor.quote}"
-                </div>
-            </div>
-        )
-    }
-
     render() {
         return (
             <div className={this.isHidden() ? styles.commentBoxContainer : ''}>
-                {this.renderAddNoteButton()}
-                {this.renderHighlightedText()}
-                {this.renderCommentBox()}
+                <div className={styles.topBar}>
+                    <span
+                        className={styles.settings}
+                        onClick={this.openSettings}
+                    />
+                    <div
+                        className={cx(styles.addNote, {
+                            [styles.disabled]: !this.state.isHidden,
+                        })}
+                        onClick={
+                            this.state.isHidden ? this.setHidden(false) : null
+                        }
+                    >
+                        Add Comment
+                    </div>
+                </div>
+
+                {this.props.anchor ? (
+                    <div className={styles.highlighted}>
+                        <div className={styles.newAnnotation}>
+                            New Annotation
+                        </div>
+                        <div className={styles.highlightedText}>
+                            "{this.props.anchor.quote}"
+                        </div>
+                    </div>
+                ) : null}
+
+                {this.isHidden() ? null : (
+                    <div
+                        className={cx(styles.commentBox, {
+                            [styles.iframe]: this.props.env === 'iframe',
+                        })}
+                    >
+                        <textarea
+                            rows={this.state.textareaRows}
+                            className={styles.textarea}
+                            value={this.state.commentInput}
+                            placeholder={'Add your comment...'}
+                            onChange={this.handleChange}
+                            ref={this.setInputRef}
+                            onClick={this._setTagInput(false)}
+                        />
+                        <br />
+                        <div ref={this.setTagRef}>{this.renderTagInput()}</div>
+                        <div className={styles.buttonHolder}>
+                            <button className={styles.save} onClick={this.save}>
+                                Save
+                            </button>
+                            <a className={styles.cancel} onClick={this.cancel}>
+                                Cancel
+                            </a>
+                        </div>
+                    </div>
+                )}
             </div>
         )
     }
