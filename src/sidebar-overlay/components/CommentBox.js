@@ -28,6 +28,8 @@ class CommentBox extends React.PureComponent {
         isHidden: false,
         tagInput: false,
         tags: [],
+
+        displayHighlightTruncated: true,
     }
 
     componentDidMount() {
@@ -46,11 +48,6 @@ class CommentBox extends React.PureComponent {
         this.attachEventListener()
 
         if (this.inputRef) this.inputRef.focus()
-
-        if (this.props.anchor)
-            this.setState({
-                isHidden: false,
-            })
     }
 
     maybeCloseTagsDropdown = e => {
@@ -74,6 +71,10 @@ class CommentBox extends React.PureComponent {
         sidebar.addEventListener('click', this.maybeCloseTagsDropdown, false)
     }
 
+    isHighlightLong = () => {
+        return this.props.anchor && this.props.anchor.quote.length > 280
+    }
+
     isHidden = () => this.state.isHidden && !this.props.anchor
 
     handleChange = e => {
@@ -91,6 +92,22 @@ class CommentBox extends React.PureComponent {
         this.setState({
             commentInput: comment,
             textareaRows,
+        })
+    }
+
+    getHighlightText = () => {
+        const highlight = this.props.anchor.quote
+        if (this.isHighlightLong() && this.state.displayHighlightTruncated) {
+            const truncatedText = highlight.slice(0, 280) + ' [..]'
+            return truncatedText
+        }
+        return highlight
+    }
+
+    toggleTruncation = () => {
+        const displayHighlightTruncated = !this.state.displayHighlightTruncated
+        this.setState({
+            displayHighlightTruncated,
         })
     }
 
@@ -217,7 +234,15 @@ class CommentBox extends React.PureComponent {
                             New Annotation
                         </div>
                         <div className={styles.highlightedText}>
-                            "{this.props.anchor.quote}"
+                            "{this.getHighlightText()}"
+                            <span
+                                className={cx(styles.showMore, {
+                                    [styles.rotated]: !this.state
+                                        .displayHighlightTruncated,
+                                    [styles.noDisplay]: !this.isHighlightLong(),
+                                })}
+                                onClick={this.toggleTruncation}
+                            />
                         </div>
                     </div>
                 ) : null}
