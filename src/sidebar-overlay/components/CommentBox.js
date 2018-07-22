@@ -122,7 +122,8 @@ class CommentBox extends React.PureComponent {
                 isHidden: true,
                 tags: [],
             })
-            this.props.updateAnnotations()
+            // Update highlights only if there is an anchor
+            if (anchor) this.props.updateAnnotations()
         }
     }
 

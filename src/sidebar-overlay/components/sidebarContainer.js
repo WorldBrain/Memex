@@ -5,6 +5,7 @@ import { connect } from 'react-redux'
 import { selectors, actions } from '../redux'
 import Sidebar from './Sidebar'
 import Annotation from './AnnotationContainer'
+import Loader from './Loader'
 
 import { goToAnnotation, retryUntilErrorResolves } from '../utils'
 import FrameCommunication from '../messaging'
@@ -135,9 +136,12 @@ class SidebarContainer extends React.Component {
 
     renderAnnotations = () => {
         const { annotations, env } = this.props
-        if (!annotations) return
+
+        if (!annotations.length) return <Loader />
+
         if (env === 'overview')
             annotations.sort((x, y) => x.createdWhen > y.createdWhen)
+
         return annotations.map(annotation => (
             <Annotation
                 annotation={annotation}
