@@ -27,7 +27,6 @@ const defaultState = {
     downloadDataFilter: FILTERS.ALL,
     concurrency: DEF_CONCURRENCY,
     isAdvEnabled: false,
-    isFileUploading: false,
     allowTypes: {
         [TYPE.HISTORY]: false,
         [TYPE.BOOKMARK]: false,
@@ -141,10 +140,6 @@ export default createReducer(
         [actions.setConcurrency]: (state, concurrency) => ({
             ...state,
             concurrency,
-        }),
-        [actions.setFileUploading]: (state, isFileUploading) => ({
-            ...state,
-            isFileUploading,
         }),
         [actions.toggleAdvMode]: state => ({
             ...state,

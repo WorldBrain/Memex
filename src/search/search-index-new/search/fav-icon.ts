@@ -1,5 +1,6 @@
 import db from '..'
-import { transformUrl } from '../../search-index-old/pipeline'
+import { FavIcon } from '../models'
+import { transformUrl } from '../pipeline'
 
 export async function domainHasFavIcon(url: string) {
     const { hostname } = transformUrl(url)

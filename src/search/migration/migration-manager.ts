@@ -1,7 +1,6 @@
 import { browser } from 'webextension-polyfill-ts'
 import whenAllSettled from 'when-all-settled'
 
-import exportOldPages, { ExportParams } from '../search-index-old/export'
 import importNewPage from '../search-index-new/import'
 import analytics from '../../analytics'
 import createNotif from '../../util/notifications'
@@ -12,13 +11,17 @@ export interface Props {
     onComplete: () => void
 }
 
+async function* exportOldPages(params) {
+    throw new Error('Migration is no longer supported.')
+}
+
 class MigrationInterrupt extends Error {}
 
 export class MigrationManager {
     public static PROGRESS_STORAGE_KEY = 'migration-progress'
     public static NOTIF_STORAGE_KEY = 'migration-notif-shown'
     public static FINISHED_STATE = ''
-    public static DEF_PARAMS: ExportParams = {
+    public static DEF_PARAMS = {
         chunkSize: 10,
         startKey: 'page/',
         endKey: 'page/\uffff',
@@ -102,7 +105,7 @@ export class MigrationManager {
      * Will reject if `stop()` method has been called. Will resolve when old
      * page data is exhausted.
      */
-    private async migrate(opts: Partial<ExportParams>) {
+    private async migrate(opts) {
         const exportParams = { ...MigrationManager.DEF_PARAMS, ...opts }
 
         for await (const { pages, lastKey } of exportOldPages(exportParams)) {

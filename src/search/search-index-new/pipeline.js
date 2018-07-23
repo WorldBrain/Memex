@@ -1,8 +1,88 @@
-import normalizeUrl from 'src/util/encode-url-for-id'
+import normalizeUrl from '../../util/encode-url-for-id'
+import transformPageText from '../../util/transform-page-text'
+import { DEFAULT_TERM_SEPARATOR, extractContent } from '../util'
 
-import { extractTerms, transformUrl } from '../search-index-old/pipeline'
+/**
+ * Derived from answer in: https://stackoverflow.com/a/23945027
+ *
+ * @param {string} hostname
+ * @return {string}
+ */
+function extractRootDomain(hostname) {
+    const splitArr = hostname.split('.')
+    const len = splitArr.length
 
-export { transformUrl }
+    // Extracting the root domain here if there is a subdomain
+    if (len > 2) {
+        hostname = `${splitArr[len - 2]}.${splitArr[len - 1]}`
+
+        // Check to see if it's using a ccTLD (i.e. ".me.uk")
+        if (
+            splitArr[len - 1].length === 2 &&
+            [2, 3].includes(splitArr[len - 2].length)
+        ) {
+            hostname = `${splitArr[len - 3]}.${hostname}`
+        }
+    }
+
+    return hostname
+}
+
+/**
+ * @param {string} url A raw URL string to attempt to extract parts from.
+ * @returns {any} Object containing `hostname` and `pathname` props. Values should be the `domain.tld.cctld` part and
+ *  everything after, respectively. If regex matching failed on given URL, error will be logged and simply
+ *  the URL with protocol and opt. `www` parts removed will be returned for both values.
+ */
+export function transformUrl(url) {
+    let parsed, normalized
+
+    try {
+        normalized = normalizeUrl(url, { skipProtocolTrim: true })
+    } catch (error) {
+        normalized = url
+    }
+
+    try {
+        parsed = new URL(normalized)
+
+        return {
+            hostname: parsed.hostname,
+            pathname: parsed.pathname,
+            domain: extractRootDomain(parsed.hostname),
+        }
+    } catch (error) {
+        console.error(`cannot parse URL: ${normalized}`)
+        return {
+            hostname: normalized,
+            pathname: normalized,
+            domain: normalized,
+        }
+    }
+}
+
+/**
+ *
+ * @param {string} text
+ * @returns {Set<string>} Set of "words-of-interest" - determined by pre-proc logic in `transformPageText` - extracted from `text`.
+ */
+export function extractTerms(text) {
+    if (!text || !text.length) {
+        return new Set()
+    }
+
+    const { text: transformedText } = transformPageText({ text })
+
+    if (!transformedText || !transformedText.length) {
+        return new Set()
+    }
+
+    return new Set(
+        extractContent(transformedText, {
+            separator: DEFAULT_TERM_SEPARATOR,
+        }),
+    )
+}
 
 /**
  * Given some page data, applies some transformations to the text and

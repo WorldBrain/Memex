@@ -13,16 +13,6 @@ const migrator = new MigrationManager({
     },
 })
 
-// Schedule migrator to run when browser is idle (only if old index is still in use)
-searchIndex.dataReady.then(() => {
-    if (searchIndex.useOld) {
-        idleManager.scheduleIdleCbs({
-            onIdle: () => migrator.start(),
-            onActive: () => migrator.stop(),
-        })
-    }
-})
-
 let isRunning = false
 
 // Allow migration to be started on-demand remotely

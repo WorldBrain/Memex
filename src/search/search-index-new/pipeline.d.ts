@@ -35,3 +35,4 @@ export interface URLParts {
 }
 
 export function transformUrl(url: string): URLParts
+export function extractTerms(text: string): Set<string>

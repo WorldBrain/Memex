@@ -1,4 +1,4 @@
-import { extractTerms } from '../../search-index-old/pipeline'
+import { extractTerms } from '../pipeline'
 import Storage from '../storage'
 import StorageRegistry from './registry'
 import { UnimplementedError, InvalidFindOptsError } from './errors'

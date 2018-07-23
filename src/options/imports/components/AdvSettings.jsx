@@ -1,7 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import TestDataUpload from './TestDataUpload'
 import Concurrency from './Concurrency'
 import PrevFailedCheckbox from './PrevFailedCheckbox'
 
@@ -20,9 +19,6 @@ const AdvSettings = ({ onPrevFailedToggle, prevFailedValue, ...props }) => (
                             checked={prevFailedValue}
                             onChange={onPrevFailedToggle}
                         />
-                    </li>
-                    <li className={styles.settingsListItem}>
-                        <TestDataUpload {...props} />
                     </li>
                 </ul>
             </div>

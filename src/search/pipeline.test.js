@@ -1,20 +1,14 @@
 /* eslint-env jest */
-
-import newPipeline from './search-index-new/pipeline'
-import oldPipeline, { extractTerms } from './search-index-old/pipeline'
+import pipeline, { extractTerms } from './search-index-new/pipeline'
 import * as DATA from './pipeline.test.data'
 
-const runSuite = useOld => () => {
-    // New index pipeline has removed unused visit, bookmark inputs and removed all IDB key prefixing ('term/')
-    const pipeline = useOld ? oldPipeline : newPipeline
-    const attachPrefix = useOld ? s => 'term/' + s : s => s
+function testExtractTerms({ input, output = DATA.EXPECTED_TERMS }) {
+    const result = extractTerms(input)
 
-    function testExtractTerms({ input, output = DATA.EXPECTED_TERMS }) {
-        const result = extractTerms(input, useOld ? 'term' : undefined)
+    expect(result).toEqual(new Set(output))
+}
 
-        expect(result).toEqual(new Set(output.map(attachPrefix)))
-    }
-
+describe('Search index pipeline', () => {
     test('process a document', async () => {
         const result = await pipeline({
             pageDoc: DATA.PAGE_1,
@@ -23,13 +17,7 @@ const runSuite = useOld => () => {
             rejectNoContent: true,
         })
 
-        // Pipeline outputs differently in both implementations too as pages now contain additional data
-        //  that was prev. in Pouch (Pouch docs never went through pipeline - weird design).
-        const expected = useOld
-            ? DATA.EXPECTED_OUTPUT_OLD
-            : DATA.EXPECTED_OUTPUT_NEW
-
-        expect(result).toEqual(expect.objectContaining(expected))
+        expect(result).toEqual(expect.objectContaining(DATA.EXPECTED_OUTPUT))
     })
 
     test('extract terms from a document', () => {
@@ -157,7 +145,4 @@ const runSuite = useOld => () => {
                 'very often the people forget to people optimize important code',
         })
     })
-}
-
-describe('Old search index pipeline', runSuite(true))
-describe('New search index pipeline', runSuite(false))
+})
