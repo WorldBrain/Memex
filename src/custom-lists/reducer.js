@@ -69,7 +69,6 @@ const deleteList = (state, { id, index }) => ({
 })
 
 const addPageToList = (state, { url, index }) => {
-    // TODO: Maybe use id instead
     const { lists } = state
     const list = lists[index]
 
@@ -97,14 +96,6 @@ const showDeleteConfirm = (state, { id, index }) => {
         },
     }
 }
-
-const hideDeleteConfirm = state => ({
-    ...state,
-    deleteConfirmProps: {
-        ...defaultState.deleteConfirmProps,
-        deleting: state.deleteConfirmProps.deleting,
-    },
-})
 
 const payloadReducer = key => (state, payload) => ({ ...state, [key]: payload })
 
@@ -175,7 +166,6 @@ export default createReducer(
         [actions.deleteList]: deleteList,
         [actions.addPagetoList]: addPageToList,
         [actions.showListDeleteModal]: showDeleteConfirm,
-        [actions.hideListDeleteModal]: hideDeleteConfirm,
         [actions.toggleListFilterIndex]: toggleListFilterIndex,
         [actions.resetListDeleteModal]: state => ({
             ...state,

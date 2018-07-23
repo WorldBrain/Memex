@@ -71,8 +71,10 @@ class DropdownContainer extends Component {
     }
 
     scrollElementIntoViewIfNeeded(domNode) {
-        const parentNode = domNode.parentNode
-        parentNode.scrollTop = domNode.offsetTop - parentNode.offsetTop
+        // const parentNode = domNode.parentNode
+        // parentNode.scrollTop = domNode.offsetTop - parentNode.offsetTop
+        // domNode.scrollIntoView({ behaviour: 'smooth', block: 'nearest' })
+        domNode.scrollIntoViewIfNeeded()
     }
 
     setInputRef = el => (this.inputEl = el)
@@ -97,37 +99,33 @@ class DropdownContainer extends Component {
 
     createList = async () => {
         let newLists = this.state.filters
-
-        try {
-            if (this.allowIndexUpdate) {
-                // Adds a list as well as add this page to list.
-                const id = await this.addList({ name: this.getSearchVal() })
-                await this.addUrlToList({
-                    id,
-                    url: this.props.url,
+        if (this.allowIndexUpdate) {
+            // Adds a list as well as add this page to list.
+            this.addList({ name: this.getSearchVal() })
+                .then(id => {
+                    const newList = {
+                        id,
+                        name: this.getSearchVal(),
+                        pages: [this.props.url],
+                        active: true,
+                    }
+                    this.addUrlToList({
+                        id,
+                        url: this.props.url,
+                    })
+                    newLists = [newList, ...this.state.filters]
+                    this.setState(state => ({
+                        ...state,
+                        searchVal: '',
+                        filters: newLists,
+                        displayFilters: newLists,
+                        focused: 0,
+                    }))
                 })
-                const newList = {
-                    id,
-                    name: this.getSearchVal(),
-                    pages: [],
-                    active: true,
-                }
-                newLists = [newList, ...this.state.filters]
-            }
-        } catch (err) {
-        } finally {
-            this.inputEl.focus()
-            this.setState(state => ({
-                ...state,
-                searchVal: '',
-                filters: newLists,
-                displayFilters: newLists,
-                focused: 0,
-            }))
-
-            // this.props.onFilterAdd(newList)
-            updateLastActive() // Consider user active (analytics)
+                .catch(console.log)
         }
+        this.inputEl.focus()
+        updateLastActive() // Consider user active (analytics)
     }
     /**
      * Selector for derived display lists state

@@ -30,7 +30,7 @@ class SidebarContainer extends PureComponent {
         setMouseOver: PropTypes.func.isRequired,
         resetMouseOver: PropTypes.func.isRequired,
         showClearFiltersBtn: PropTypes.bool.isRequired,
-        urlDragged: PropTypes.bool.isRequired,
+        urlDragged: PropTypes.string.isRequired,
     }
 
     // Capture state of the react-burger-menu

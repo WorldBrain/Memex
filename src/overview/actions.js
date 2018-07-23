@@ -7,7 +7,6 @@ import { actions as filterActs, selectors as filters } from '../search-filters'
 import * as constants from './constants'
 import * as selectors from './selectors'
 import { fetchTooltip } from './components/tooltips'
-import { actions as listActs } from 'src/custom-lists'
 
 export const setLoading = createAction('overview/setLoading')
 export const nextPage = createAction('overview/nextPage')
@@ -109,7 +108,6 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
 
     // Overwrite of results should always reset the current page before searching
     if (overwrite) {
-        dispatch(listActs.resetUrlToEdit())
         dispatch(resetPage())
     }
 

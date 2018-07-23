@@ -22,10 +22,9 @@
 }
 
 .menuItem i {
-    font-size: 18px;
+    font-size: 12px;
     float: right;
-    margin-top: 1px;
-    margin-right: -7px;
+    margin-top: 3px;
 }
 
 .tagContainer {

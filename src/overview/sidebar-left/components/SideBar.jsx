@@ -18,23 +18,26 @@ class Sidebar extends PureComponent {
 
     render() {
         return (
-            <Menu
-                styles={styles}
-                noOverlay
-                customBurgerIcon={null}
-                customCrossIcon={<img src="/img/cross_grey.svg" />}
-                isOpen={this.props.isSidebarOpen}
-                onStateChange={this.props.captureStateChange}
+            <div
+                onMouseLeave={this.props.onMouseLeave}
+                onMouseEnter={this.props.onMouseEnter}
             >
-                <div
-                    onMouseLeave={this.props.onMouseLeave}
-                    onMouseEnter={this.props.onMouseEnter}
-                    className={localStyles.container}
+                <Menu
+                    styles={styles}
+                    noOverlay
+                    customBurgerIcon={null}
+                    customCrossIcon={<img src="/img/cross_grey.svg" />}
+                    isOpen={this.props.isSidebarOpen}
+                    onStateChange={this.props.captureStateChange}
                 >
-                    {this.props.sidebarIcons}
-                    {this.props.children}
-                </div>
-            </Menu>
+                    <div
+                        className={localStyles.container}
+                    >
+                        {this.props.sidebarIcons}
+                        {this.props.children}
+                    </div>
+                </Menu>
+            </div>
         )
     }
 }

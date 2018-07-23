@@ -7,7 +7,6 @@ import * as selectors from './selectors'
 import { selectors as filters } from 'src/search-filters'
 
 export const fetchAllLists = createAction('custom-lists/listData')
-export const updatePageLists = createAction('custom-lists/updateList')
 export const createList = createAction('custom-lists/addList')
 export const deleteList = createAction(
     'custom-lists/deleteList',
@@ -39,9 +38,6 @@ export const showListDeleteModal = createAction(
         index,
     }),
 )
-export const hideListDeleteModal = createAction(
-    'custom-lists/hideListDeleteModal',
-)
 export const resetListDeleteModal = createAction(
     'custom-lists/resetListDeleteModal',
 )
@@ -51,13 +47,6 @@ export const resetActiveListIndex = createAction(
 export const setActiveListIndex = createAction(
     'custom-lists/setActiveListIndex',
 )
-export const toggleListDropdown = createAction(
-    'custom-lists/toggleListDropdown',
-)
-
-export const toggleUrlToEdit = createAction('custom-lists/toggleUrlToEdit')
-
-export const resetUrlToEdit = createAction('custom-lists/resetUrlToEdit')
 
 export const toggleListFilterIndex = createAction(
     'custom-lists/toggleListFilterIndex',

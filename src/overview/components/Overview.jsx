@@ -14,10 +14,8 @@ const Overview = props => (
         <Header {...props} />
 
         {props.sidebarIcons}
-        <SideBar
-            disableOnClickOutside={props.disbleOutsideClick}
-        // disableOnClickOutside={true}
-        />
+        <SideBar disableOnClickOutside={props.disbleOutsideClick} />
+
         <div className={styles.main}>{props.children}</div>
         <DeleteConfirmModal
             isShown={props.isDeleteConfShown}

@@ -31,16 +31,6 @@ const Header = ({
                     disabled={props.isSearchDisabled}
                 />
             </div>
-            {/* <div
-                className={styles.linkFilter}
-                onClick={props.onShowFilterChange}
-            >
-                <img
-                    src="/img/filter.png"
-                    className={styles.iconFilter}
-                    title="Click to view filters"
-                />
-            </div> */}
         </div>
         <div className={styles.links}>
             <OutLink
@@ -69,7 +59,6 @@ Header.propTypes = {
     onShowFilterChange: PropTypes.func.isRequired,
     onQuerySearchKeyDown: PropTypes.func.isRequired,
     isSearchDisabled: PropTypes.bool,
-    onListDropdownChange: PropTypes.func.isRequired,
 }
 
 export default Header

@@ -103,7 +103,7 @@ export default class CustomListBackground {
      * @memberof CustomListBackground
      */
     async updateList({ id, name }) {
-        await this.storage.updateListName({
+        return await this.storage.updateListName({
             id,
             name,
         })
@@ -118,7 +118,7 @@ export default class CustomListBackground {
      * @memberof CustomListBackground
      */
     async insertPageToList({ id, url }) {
-        await this.storage.insertPageToList({
+        return await this.storage.insertPageToList({
             listId: id,
             pageUrl: normalizeUrl(url),
             fullUrl: url,
@@ -133,7 +133,7 @@ export default class CustomListBackground {
      * @memberof CustomListBackground
      */
     async removeList({ id }) {
-        await this.storage.removeList({
+        return await this.storage.removeList({
             id,
         })
     }
@@ -147,7 +147,7 @@ export default class CustomListBackground {
      * @memberof CustomListBackground
      */
     async removePageFromList({ id, url }) {
-        await this.storage.removePageFromList({
+        return await this.storage.removePageFromList({
             listId: id,
             pageUrl: normalizeUrl(url),
         })

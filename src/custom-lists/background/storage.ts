@@ -316,13 +316,21 @@ export default class CustomListStorage extends FeatureStorage {
         name: string
         url: string
     }) {
-        const lists = await this.storageManager.suggest<PageList>(
+        const suggestions = await this.storageManager.suggest(
             CustomListStorage.CUSTOM_LISTS_COLL,
             {
                 name,
             },
+            {
+                suggestPks: true,
+            },
         )
-        const listIds = lists.map(({ id }) => id)
+        const listIds = suggestions.map(({ pk }) => pk)
+        //
+        const lists: PageList[] = suggestions.map(({ pk, suggestion }) => ({
+            id: pk,
+            name: suggestion,
+        }))
 
         // Gets all the pages associated with all the lists.
         const pageEntries = await this.storageManager.findAll<PageListEntry>(

@@ -56,7 +56,6 @@ class OverviewContainer extends Component {
         showOnboarding: PropTypes.bool.isRequired,
         mouseOnSidebar: PropTypes.bool.isRequired,
         init: PropTypes.func.isRequired,
-        handleToggleUrlToEdit: PropTypes.func.isRequired,
         isListFilterActive: PropTypes.bool.isRequired,
         handleCrossRibbonClick: PropTypes.func.isRequired,
         urlDragged: PropTypes.string.isRequired,
@@ -168,7 +167,6 @@ class OverviewContainer extends Component {
                 onCommentBtnClick={this.props.handleCommentBtnClick(doc)}
                 tagPills={this.renderTagPills(doc, i)}
                 isListFilterActive={this.props.isListFilterActive}
-                handleToggleUrlToEdit={this.props.handleToggleUrlToEdit(doc)}
                 handleCrossRibbonClick={this.props.handleCrossRibbonClick(doc)}
                 setUrlDragged={this.props.setUrlDragged}
                 resetUrlDragged={this.props.resetUrlDragged}
@@ -374,7 +372,6 @@ const mapDispatchToProps = dispatch => ({
             onShowFilterChange: filterActs.showFilter,
             fetchNextTooltip: actions.fetchNextTooltip,
             init: actions.init,
-            onListDropdownChange: listActs.toggleListDropdown,
             setUrlDragged: listActs.setUrlDragged,
             showSearchFilters: sidebarLeftActs.openSidebarFilterMode,
             hideSearchFilters: sidebarLeftActs.openSidebarListMode,
@@ -416,8 +413,6 @@ const mapDispatchToProps = dispatch => ({
     addTag: resultIndex => tag => dispatch(actions.addTag(tag, resultIndex)),
     delTag: resultIndex => tag => dispatch(actions.delTag(tag, resultIndex)),
     toggleShowTooltip: event => dispatch(actions.toggleShowTooltip()),
-    handleToggleUrlToEdit: ({ url }) => () =>
-        dispatch(listActs.toggleUrlToEdit(url)),
     handleCrossRibbonClick: ({ url }) => event => {
         dispatch(listActs.delPageFromList(url))
         dispatch(actions.hideResultItem(url))

@@ -2,8 +2,8 @@ export interface PageList {
     id: number
     name: string
     pages?: string[]
-    isNestable: boolean
-    isDeletable: boolean
+    isNestable?: boolean
+    isDeletable?: boolean
     active?: boolean
 }
 
