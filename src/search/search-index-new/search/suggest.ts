@@ -36,5 +36,20 @@ export async function extendedSuggest(notInclude = [], type: SuggestType, limit 
             .limit(limit)
             .uniqueKeys()
 
-    return await applyQuery<Tag, [string, string]>(db.tags.where('name'))
+    switch (type) {
+        case 'domain': {
+            const domains = await applyQuery<Page, string>(
+                db.pages.where('domain'),
+            )
+            const hostnames = await applyQuery<Page, string>(
+                db.pages.where('hostname'),
+            )
+            return [...new Set([...domains, ...hostnames])]
+        }
+        case 'tag':
+        default:
+            return applyQuery<Tag, [string, string]>(db.tags.where('name'))
+    }
+
+    // return await applyQuery<Tag, [string, string]>(db.tags.where('name'))
 }

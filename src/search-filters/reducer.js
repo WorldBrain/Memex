@@ -28,6 +28,8 @@ const defaultState = {
     domainsExc: [],
     // Will contain **ID** only one list for now
     lists: '',
+    suggestedTags: [],
+    suggestedDomains: [],
 }
 
 const hideDomainFilter = state => ({
@@ -158,6 +160,16 @@ const toggleBookmarkFilter = state => ({
     onlyBookmarks: !state.onlyBookmarks,
 })
 
+const setSuggestedTags = (state, tags) => ({
+    ...state,
+    suggestedTags: tags,
+})
+
+const setSuggestedDomains = (state, domains) => ({
+    ...state,
+    suggestedDomains: domains,
+})
+
 const resetFilters = state => ({
     ...defaultState,
     lists: state.lists,
@@ -191,6 +203,8 @@ export default createReducer(
         [actions.setIncDomainFilters]: setFilters('domainsInc'),
         [actions.setExcDomainFilters]: setFilters('domainsExc'),
         [actions.toggleBookmarkFilter]: toggleBookmarkFilter,
+        [actions.setSuggestedTags]: setSuggestedTags,
+        [actions.setSuggestedDomains]: setSuggestedDomains,
         [actions.showFilter]: state => ({
             ...state,
             showFilters: !state.showFilters,

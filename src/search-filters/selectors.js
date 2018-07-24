@@ -18,6 +18,8 @@ export const filterTypes = createSelector(
 )
 
 export const tags = createSelector(searchFilters, state => state.tags)
+export const suggestedTags = createSelector(searchFilters, state => state.suggestedTags)
+export const suggestedDomains = createSelector(searchFilters, state => state.suggestedDomains)
 export const domainsInc = createSelector(
     searchFilters,
     state => state.domainsInc,

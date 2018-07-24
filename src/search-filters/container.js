@@ -31,6 +31,10 @@ class SearchFiltersContainer extends PureComponent {
         hideDomainFilter: PropTypes.func.isRequired,
         delIncDomainFilter: PropTypes.func.isRequired,
         delExcDomainFilter: PropTypes.func.isRequired,
+        fetchSuggestedTags: PropTypes.func.isRequired,
+        suggestedTags: PropTypes.arrayOf(PropTypes.string).isRequired,
+        fetchSuggestedDomains: PropTypes.func.isRequired,
+        suggestedDomains: PropTypes.arrayOf(PropTypes.string).isRequired,
         toggleFilterTypes: PropTypes.func.isRequired,
         showfilteredTypes: PropTypes.bool.isRequired,
     }
@@ -53,45 +57,52 @@ class SearchFiltersContainer extends PureComponent {
         }
     }
 
+    componentDidMount() {
+        /** fetch initial suggested tags and domains to prepopulate 
+        filter dropdown **/
+        this.props.fetchSuggestedTags()
+        this.props.fetchSuggestedDomains()
+    }
+
     renderBookmarkFilter = () => <BookmarkFilter />
 
     renderFilteredTags = () => {
         return !this.props.tagFilterDropdown
             ? this.props.filteredTags.map((tag, i) => (
-                  <FilteredRow
-                      key={i}
-                      value={tag}
-                      onClick={() => this.props.delTagFilter(tag)}
-                      active
-                  />
-              ))
+                <FilteredRow
+                    key={i}
+                    value={tag}
+                    onClick={() => this.props.delTagFilter(tag)}
+                    active
+                />
+            ))
             : null
     }
 
     renderFilteredTypes = () =>
         this.props.showfilteredTypes
             ? this.state.filterTypes.map(({ value, active, available }, i) => (
-                  <FilteredRow
-                      key={i}
-                      value={value}
-                      onClick={() => {}}
-                      active={active}
-                      available={available}
-                  />
-              ))
+                <FilteredRow
+                    key={i}
+                    value={value}
+                    onClick={() => { }}
+                    active={active}
+                    available={available}
+                />
+            ))
             : null
 
     renderFilteredDomains = () => {
         return !this.props.domainFilterDropdown
             ? this.props.filteredDomains.map(({ value, isExclusive }, i) => (
-                  <FilteredRow
-                      key={i}
-                      value={value}
-                      onClick={this.toggleDomainFilter({ value, isExclusive })}
-                      active
-                      isExclusive={isExclusive}
-                  />
-              ))
+                <FilteredRow
+                    key={i}
+                    value={value}
+                    onClick={this.toggleDomainFilter({ value, isExclusive })}
+                    active
+                    isExclusive={isExclusive}
+                />
+            ))
             : null
     }
 
@@ -105,16 +116,16 @@ class SearchFiltersContainer extends PureComponent {
         !this.props.tagFilterDropdown ? (
             <FilterBar onBarClick={this.props.showTagFilter} filter="Tag" />
         ) : (
-            <IndexDropdownSB
-                onFilterAdd={this.props.addTagFilter}
-                onFilterDel={this.props.delTagFilter}
-                initFilters={this.props.filteredTags}
-                initSuggestions={this.props.filteredTags}
-                source="tag"
-                isSidebarOpen={this.props.isSidebarOpen}
-                closeDropdown={this.props.hideTagFilter}
-            />
-        )
+                <IndexDropdownSB
+                    onFilterAdd={this.props.addTagFilter}
+                    onFilterDel={this.props.delTagFilter}
+                    initFilters={this.props.filteredTags}
+                    initSuggestions={this.props.suggestedTags}
+                    source="tag"
+                    isSidebarOpen={this.props.isSidebarOpen}
+                    closeDropdown={this.props.hideTagFilter}
+                />
+            )
 
     renderDomainFilter = () =>
         !this.props.domainFilterDropdown ? (
@@ -123,20 +134,18 @@ class SearchFiltersContainer extends PureComponent {
                 filter="Domain"
             />
         ) : (
-            <IndexDropdownSB
-                onFilterAdd={this.props.addDomainFilter}
-                onFilterDel={this.props.delIncDomainFilter}
-                initFilters={this.props.filteredDomains.map(
-                    ({ value }) => value,
-                )}
-                initSuggestions={this.props.filteredDomains.map(
-                    ({ value }) => value,
-                )}
-                source="domain"
-                isSidebarOpen={this.props.isSidebarOpen}
-                closeDropdown={this.props.hideDomainFilter}
-            />
-        )
+                <IndexDropdownSB
+                    onFilterAdd={this.props.addDomainFilter}
+                    onFilterDel={this.props.delIncDomainFilter}
+                    initFilters={this.props.filteredDomains.map(
+                        ({ value }) => value,
+                    )}
+                    initSuggestions={this.props.suggestedDomains}
+                    source="domain"
+                    isSidebarOpen={this.props.isSidebarOpen}
+                    closeDropdown={this.props.hideDomainFilter}
+                />
+            )
 
     renderBookmarkFilter = () => (
         <Checkbox
@@ -180,6 +189,8 @@ const mapStateToProps = state => ({
     bookmarkFilter: selectors.onlyBookmarks(state),
     isSidebarOpen: sidebar.isSidebarOpen(state),
     showfilteredTypes: selectors.filterTypes(state),
+    suggestedTags: selectors.suggestedTags(state),
+    suggestedDomains: selectors.suggestedDomains(state),
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -192,6 +203,8 @@ const mapDispatchToProps = dispatch => ({
             showFilterTypes: actions.showFilterTypes,
             hideFilterTypes: actions.hideFilterTypes,
             toggleFilterTypes: actions.toggleFilterTypes,
+            fetchSuggestedTags: actions.fetchSuggestedTags,
+            fetchSuggestedDomains: actions.fetchSuggestedDomains,
         },
         dispatch,
     ),
@@ -200,7 +213,10 @@ const mapDispatchToProps = dispatch => ({
     },
     clearAllFilters: () => dispatch(actions.resetFilters()),
     // handleFilterClick: source => () => dispatch(actions.setFilterPopup(source)),
-    addTagFilter: tag => dispatch(actions.addTagFilter(tag)),
+    addTagFilter: tag => {
+        dispatch(actions.addTagFilter(tag))
+        dispatch(actions.fetchSuggestedTags())
+    },
     delTagFilter: tag => dispatch(actions.delTagFilter(tag)),
     addDomainFilter: domain => dispatch(actions.addIncDomainFilter(domain)),
     delIncDomainFilter: domain => dispatch(actions.delIncDomainFilter(domain)),
