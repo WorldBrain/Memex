@@ -5,8 +5,6 @@ import * as actions from './actions'
 const defaultState = {
     annotations: [],
     annotationCount: 0,
-    // When a user creates an annotation via tooltip, the anchor gets saved in state
-    anchor: null,
     // Information about the page to pass to the storage
     page: {
         url: null,
@@ -33,11 +31,6 @@ const setPageInfo = (state, page) => ({
     page: page,
 })
 
-const setAnchor = (state, anchor) => ({
-    ...state,
-    anchor: anchor,
-})
-
 const setActiveAnnotation = (state, activeUrl) => ({
     ...state,
     activeAnnotation: activeUrl,
@@ -52,7 +45,6 @@ export default createReducer(
     {
         [actions.setAnnotations]: setAnnotations,
         [actions.setPageInfo]: setPageInfo,
-        [actions.setAnchor]: setAnchor,
         [actions.setActiveAnnotation]: setActiveAnnotation,
         [actions.setHoveredAnnotation]: setHoveredAnnotation,
         [actions.setAnnotationCount]: setAnnotationCount,

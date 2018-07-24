@@ -3,10 +3,6 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import cx from 'classnames'
 
-import {
-    selectors as sidebarSelectors,
-    actions as sidebarActions,
-} from '../../redux'
 import { selectors, actions } from '../'
 import { IndexDropdown } from 'src/common-ui/containers'
 import TagHolder from '../../components/TagHolder'
@@ -99,7 +95,7 @@ class CommentBox extends React.PureComponent {
 
     getHighlightText = () => {
         const highlight = this.props.anchor.quote
-        if (this.isHighlightLong() && this.props.displayHighlightTruncated) {
+        if (this.props.displayHighlightTruncated) {
             const truncatedText = highlight.slice(0, 280) + ' [..]'
             return truncatedText
         }
@@ -162,7 +158,6 @@ class CommentBox extends React.PureComponent {
     }
 
     render() {
-        console.log('props', this.props)
         return (
             <div className={this.isHidden() ? styles.commentBoxContainer : ''}>
                 <div className={styles.topBar}>
@@ -235,7 +230,7 @@ class CommentBox extends React.PureComponent {
     }
 }
 const mapStateToProps = state => ({
-    anchor: sidebarSelectors.anchor(state),
+    anchor: selectors.anchor(state),
     commentInput: selectors.commentInput(state),
     textareaRows: selectors.textareaRows(state),
     isHidden: selectors.isHidden(state),
@@ -244,7 +239,6 @@ const mapStateToProps = state => ({
     tags: selectors.tags(state),
 })
 const mapDispatchToProps = dispatch => ({
-    setAnchor: anchor => dispatch(sidebarActions.setAnchor(anchor)),
     setCommentInput: input => dispatch(actions.setCommentInput(input)),
     setTextareaRows: rows => dispatch(actions.setTextareaRows(rows)),
     setHidden: value => dispatch(actions.setHidden(value)),

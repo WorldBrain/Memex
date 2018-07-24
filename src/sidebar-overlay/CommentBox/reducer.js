@@ -9,6 +9,7 @@ const defaultState = {
     tagInput: false,
     tags: [],
     displayHighlightTruncated: true,
+    anchor: null,
 }
 
 const addTag = (state, newTag) => ({
@@ -53,6 +54,14 @@ export default createReducer(
         [actions.emptyTags]: state => ({
             ...state,
             tags: [],
+        }),
+        [actions.setAnchor]: (state, anchor) => ({
+            ...state,
+            anchor,
+        }),
+        [actions.setHighlightTruncation]: (state, value) => ({
+            ...state,
+            displayHighlightTruncated: value,
         }),
         [actions.addTag]: addTag,
         [actions.deleteTag]: deleteTag,

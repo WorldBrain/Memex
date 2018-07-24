@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 
 import { selectors, actions } from '../redux'
+import { actions as commentActions } from '../CommentBox'
 import Sidebar from './Sidebar'
 import Annotation from './AnnotationContainer'
 import Loader from './Loader'
@@ -23,7 +24,7 @@ class SidebarContainer extends React.Component {
         findAnnotationCount: PropTypes.func.isRequired,
         editAnnotation: PropTypes.func.isRequired,
         deleteAnnotation: PropTypes.func.isRequired,
-        setAnchor: PropTypes.func.isRequired,
+        recieveAnchor: PropTypes.func.isRequired,
         setActiveAnnotation: PropTypes.func.isRequired,
         setHoveredAnnotation: PropTypes.func.isRequired,
         setAnnotations: PropTypes.func.isRequired,
@@ -50,12 +51,12 @@ class SidebarContainer extends React.Component {
             findAnnotationCount,
         } = this.props
         setPageInfo(pageUrl, pageTitle)
-        await findAnnotationCount()
         if (this.props.env === 'iframe') {
             this.setupFrameFunctions()
         } else {
             await fetchAnnotations()
         }
+        await findAnnotationCount()
     }
 
     parentFC = new FrameCommunication()
@@ -69,7 +70,7 @@ class SidebarContainer extends React.Component {
                 this.props.setAnnotations(annotations)
             },
             sendAnchorToSidebar: anchor => {
-                this.props.setAnchor(anchor)
+                this.props.recieveAnchor(anchor)
             },
             focusAnnotation: url => {
                 this.focusAnnotation(url)
@@ -196,7 +197,7 @@ const mapDispatchToProps = dispatch => ({
     editAnnotation: ({ url, comment }) =>
         dispatch(actions.editAnnotation(url, comment)),
     deleteAnnotation: ({ url }) => dispatch(actions.deleteAnnotation(url)),
-    setAnchor: anchor => dispatch(actions.setAnchor(anchor)),
+    recieveAnchor: anchor => dispatch(commentActions.receiveAnchor(anchor)),
     setActiveAnnotation: key => dispatch(actions.setActiveAnnotation(key)),
     setHoveredAnnotation: key => dispatch(actions.setHoveredAnnotation(key)),
     findAnnotationCount: () => dispatch(actions.findAnnotationCount()),

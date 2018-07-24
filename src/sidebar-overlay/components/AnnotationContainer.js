@@ -164,7 +164,10 @@ class AnnotationContainer extends React.Component {
     _setTagInput = value => () => this.setState({ tagInput: value })
 
     getDateDetails = () => {
-        if (this.state.annotationEditMode) return null
+        if (this.state.annotationEditMode)
+            return {
+                timestamp: '',
+            }
 
         const { createdWhen, lastEdited } = this.props.annotation
         let dateObject

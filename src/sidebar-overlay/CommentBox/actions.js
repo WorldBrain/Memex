@@ -1,5 +1,5 @@
 import { createAction } from 'redux-act'
-import { createAnnotation, setAnchor } from '../redux/actions'
+import { createAnnotation } from '../redux/actions'
 import { DEFAULT_ROWS } from '../constants'
 
 export const setCommentInput = createAction('setCommentInput')
@@ -9,6 +9,10 @@ export const setTextareaRows = createAction('setTextareaRows')
 export const setHidden = createAction('setHidden')
 
 export const setTagInput = createAction('setTagInput')
+
+export const setAnchor = createAction('setAnchor')
+
+export const setHighlightTruncation = createAction('setHighlightTruncation')
 
 export const toggleHighlightTruncation = createAction(
     'toggleHighlightTruncation',
@@ -36,4 +40,9 @@ export const saveAnnotation = (comment, body, tags, env) => dispatch => {
 export const cancelAnnotation = () => dispatch => {
     dispatch(setAnchor(null))
     resetCommentBox(dispatch)
+}
+
+export const receiveAnchor = anchor => dispatch => {
+    dispatch(setHighlightTruncation(true))
+    dispatch(setAnchor(anchor))
 }
