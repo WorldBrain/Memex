@@ -39,7 +39,6 @@ export default class NotificationStorage extends FeatureStorage {
     }
 
     async fetchReadNotifications({ limit, skip }) {
-        console.log(limit, skip)
         const opt = {
             reverse: true,
             limit: limit,
