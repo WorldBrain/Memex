@@ -15,6 +15,7 @@ export interface State {
     isReadExpanded: boolean
     showInbox: boolean
     unreadNotifCount: number
+    shouldTrack: boolean
 }
 
 const defaultState: State = {
@@ -30,6 +31,7 @@ const defaultState: State = {
     isReadExpanded: false,
     showInbox: false,
     unreadNotifCount: 0,
+    shouldTrack: true,
 }
 
 const nextPage = () => (state: State) => ({
@@ -77,5 +79,6 @@ reducer.on(actions.setReadNotificationResult, handleNotificationResult({ overwri
 reducer.on(actions.toggleReadExpand, toggleExpand())
 reducer.on(actions.toggleInbox, toggleShowInbox())
 reducer.on(actions.setUnreadCount, initState<number>('unreadNotifCount'))
+reducer.on(actions.setShouldTrack, initState<boolean>('shouldTrack'))
 
 export default reducer

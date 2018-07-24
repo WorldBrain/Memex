@@ -7,7 +7,7 @@ const Button = props => (
     <a
         href={props.url}
         className={localStyles.button}
-        target={props.context === 'new_tab' ? '_blank' : '_self'}
+        target={props.context === 'new-tab' ? '_blank' : '_self'}
     >
         {props.label}
     </a>

@@ -1,8 +1,11 @@
 import { createAction } from 'redux-act'
+import { browser } from 'webextension-polyfill-ts'
+
 import { remoteFunction } from '../util/webextensionRPC'
 import { actions as overviewActs } from '../overview'
 import * as selectors from './selectors'
 import * as constants from './constants'
+import { SHOULD_TRACK_STORAGE_KEY as SHOULD_TRACK } from '../options/privacy/constants'
 
 export const setReadNotificationList = createAction<any>(
     'notifications/setReadNotificationList',
@@ -19,6 +22,7 @@ export const appendReadNotificationResult = createAction<any>('notifications/set
 export const setReadNotificationResult = createAction<any>('notifications/setReadNotificationResult')
 export const toggleInbox = createAction<any>('notifications/toggleInbox')
 export const setUnreadCount = createAction<number>('notific ations/setUnreadCount')
+export const setShouldTrack = createAction<any>('notifications/setShouldTrack')
 
 const fetchUnreadNotifications = remoteFunction('fetchUnreadNotifications')
 const fetchReadNotifications = remoteFunction('fetchReadNotifications')
@@ -26,6 +30,11 @@ const storeNotification = remoteFunction('storeNotification')
 const getUnreadCount = remoteFunction('getUnreadCount')
 
 export const init = () => async (dispatch, getState) => {
+    const shouldTrack = (await browser.storage.local.get(SHOULD_TRACK))[
+        SHOULD_TRACK
+    ]
+
+    dispatch(setShouldTrack(shouldTrack === true))
     dispatch(getUnreadNotifications())
     dispatch(getReadNotifications())
 }

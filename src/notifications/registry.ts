@@ -1,8 +1,8 @@
 import * as privacyAct from '../options/privacy/actions'
 
 export const actionRegistry = {
-    'track-option-change': ({ definition }) => {
-        return () => privacyAct.storeTrackingOption(definition.key)
+    'toggle-storage-option': ({ definition }) => {
+        privacyAct.storeTrackingOption(definition.value)
     },
     'go-to-url': ({ definition }) => {
         return () => {

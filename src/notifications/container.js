@@ -4,16 +4,17 @@ import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import Waypoint from 'react-waypoint'
 
-import { LoadingIndicator } from 'src/common-ui/components'
+import { LoadingIndicator, ToggleSwitch } from 'src/common-ui/components'
 import * as actions from './actions'
 import * as selectors from './selectors'
 import NotificationList from './components/NotificationList'
 import Notification from './components/Notification'
 import StatusHeading from './components/StatusHeading'
 import ReadHeader from './components/ReadHeader'
-// import Button from './components/Button'
+import Button from './components/Button'
 import ActionButton from './components/ActionButton'
 import { actionRegistry } from './registry'
+import OptIn from './components/OptIn'
 
 class NotificationContainer extends Component {
     static propTypes = {
@@ -30,6 +31,8 @@ class NotificationContainer extends Component {
         toggleReadExpand: PropTypes.func.isRequired,
         isReadShow: PropTypes.bool.isRequired,
         messageCharLimit: PropTypes.number.isRequired,
+        shouldTrack: PropTypes.bool.isRequired,
+        setShouldTrack: PropTypes.func.isRequired,
     }
 
     static defaultProps = {
@@ -45,18 +48,33 @@ class NotificationContainer extends Component {
     }
 
     truncateText(message) {
-        const NotificationCharLimit = 150
 
         const lastSpaceBeforeCutoff = message.lastIndexOf(
             ' ',
-            NotificationCharLimit,
+            this.props.messageCharLimit,
         )
         const trunctatedText =
             message.substr(0, lastSpaceBeforeCutoff) + '&#8230;'
         return trunctatedText
     }
+    
+    handleToggleStorageOption(action) {
+        const { shouldTrack } = this.props
+
+        action = {
+            ...action,
+            value: !shouldTrack,
+        }
+
+        this.props.setShouldTrack(!shouldTrack)
+        actionRegistry[action.type]({
+            definition: action,
+        })
+    }
 
     renderButtons(buttons) {
+        const { shouldTrack } = this.props
+
         if (!buttons) {
             return null
         }
@@ -64,15 +82,35 @@ class NotificationContainer extends Component {
         return buttons.map((button, i) => {
             const { action } = button
 
-            return (
-                <ActionButton
-                    key={i}
-                    label={button.label}
-                    handleClick={actionRegistry[action.type]({
-                        definition: action,
-                    })}
-                />
-            )
+            if(action.type === 'go-to-url') {
+                return (
+                    <Button
+                        key={i}
+                        url={action.url}
+                        label={button.label}
+                        context={action.context}
+                    />
+                )
+            } else if(action.type === 'toggle-storage-option') {
+                return (
+                    <OptIn key={i}>
+                        <ToggleSwitch
+                            isChecked={shouldTrack}
+                            onChange={() => this.handleToggleStorageOption(action)}
+                        />
+                    </OptIn>
+                )
+            } else {
+                return (
+                    <ActionButton
+                        key={i}
+                        label={button.label}
+                        handleClick={actionRegistry[action.type]({
+                            definition: action,
+                        })}
+                    />
+                )
+            }
         })
     }
 
@@ -172,6 +210,7 @@ const mapStateToProps = state => ({
     needsWaypoint: selectors.needsWaypoint(state),
     isReadExpanded: selectors.isReadExpanded(state),
     isReadShow: selectors.isReadShow(state),
+    shouldTrack: selectors.shouldTrack(state),
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -180,6 +219,7 @@ const mapDispatchToProps = dispatch => ({
             init: actions.init,
             onBottomReached: actions.getMoreNotifications,
             toggleReadExpand: actions.toggleReadExpand,
+            setShouldTrack: actions.setShouldTrack,
         },
         dispatch,
     ),

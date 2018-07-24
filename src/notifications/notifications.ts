@@ -1,3 +1,5 @@
+import { SHOULD_TRACK_STORAGE_KEY } from '../options/privacy/constants'
+
 interface ButtonDefinition {
     action?: any
     label: string
@@ -28,7 +30,7 @@ interface Notifs {
  *      releaseTime* - Time when create the notif, get the current unix time (Date.now()) - Important, the notif insertation in db depends on it
  */
 export const NOTIFS: Notifs = {
-    releaseTime: 1531929627308,
+    releaseTime: 1532421254491,
     notifs: [
         {
             id: 'direct_links_inital_notification',
@@ -43,6 +45,14 @@ export const NOTIFS: Notifs = {
                         context: 'new-tab'
                     },
                     label: 'Learn More',
+                },
+                {
+                    action: {
+                        type: 'go-to-url',
+                        url: 'https://memex.io',
+                        context: 'new-tab'
+                    },
+                    label: 'Learn More',
                 }
             ],
         },
@@ -54,10 +64,18 @@ export const NOTIFS: Notifs = {
             buttons: [
                 {
                     action: {
-                        type: 'track-option-change',
-                        key: true,
+                        type: 'toggle-storage-option',
+                        key: SHOULD_TRACK_STORAGE_KEY,
                     },
                     label: 'Enable Tracking',
+                },
+                {
+                    action: {
+                        type: 'go-to-url',
+                        url: 'https://memex.io',
+                        context: 'new-tab'
+                    },
+                    label: 'Learn More',
                 }
             ],
         },
