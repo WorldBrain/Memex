@@ -1,13 +1,13 @@
 import { createStore, applyMiddleware, combineReducers } from 'redux'
 import thunk from 'redux-thunk'
-import reducer from './reducer'
-import commentBox from '../CommentBox/reducer'
+import sidebar from './reducer'
+import { reducer as commentBox } from '../CommentBox/'
 
 const rootReducer = combineReducers({
-    ...reducer,
+    sidebar,
     commentBox,
 })
 
-const store = createStore(rootReducer, applyMiddleware(thunk))
+const store = createStore(rootReducer, undefined, applyMiddleware(thunk))
 
 export default store

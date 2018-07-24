@@ -3,7 +3,11 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import cx from 'classnames'
 
-import { selectors, actions } from '../../redux'
+import {
+    selectors as sidebarSelectors,
+    actions as sidebarActions,
+} from '../../redux'
+import { selectors, actions } from '../'
 import { IndexDropdown } from 'src/common-ui/containers'
 import TagHolder from '../../components/TagHolder'
 import * as constants from '../../constants'
@@ -12,25 +16,27 @@ import styles from './CommentBox.css'
 
 class CommentBox extends React.PureComponent {
     static propTypes = {
-        createAnnotation: PropTypes.func.isRequired,
-        setAnchor: PropTypes.func.isRequired,
         anchor: PropTypes.shape({
             quote: PropTypes.string.isRequired,
             descriptor: PropTypes.object.isRequired,
         }),
         env: PropTypes.string.isRequired,
+        commentInput: PropTypes.string.isRequired,
+        textareaRows: PropTypes.number.isRequired,
+        isHidden: PropTypes.bool.isRequired,
+        tagInput: PropTypes.bool.isRequired,
+        tags: PropTypes.arrayOf(PropTypes.string),
+        displayHighlightTruncated: PropTypes.bool.isRequired,
+        saveAnnotation: PropTypes.func.isRequired,
         updateAnnotations: PropTypes.func.isRequired,
-    }
-
-    state = {
-        commentInput: '',
-        textareaRows: constants.DEFAULT_ROWS,
-        minimized: true,
-        isHidden: false,
-        tagInput: false,
-        tags: [],
-
-        displayHighlightTruncated: true,
+        cancelAnnotation: PropTypes.func.isRequired,
+        setCommentInput: PropTypes.func.isRequired,
+        setTextareaRows: PropTypes.func.isRequired,
+        setHidden: PropTypes.func.isRequired,
+        setTagInput: PropTypes.func.isRequired,
+        toggleHighlightTruncation: PropTypes.func.isRequired,
+        addTag: PropTypes.func.isRequired,
+        deleteTag: PropTypes.func.isRequired,
     }
 
     componentDidMount() {
@@ -52,16 +58,14 @@ class CommentBox extends React.PureComponent {
     }
 
     maybeCloseTagsDropdown = e => {
-        if (!this.state.tagInput) return
+        if (!this.props.tagInput) return
         else if (
             this.tagInputContainer &&
             this.tagInputContainer.contains(e.target)
         )
             return
 
-        this.setState({
-            tagInput: false,
-        })
+        this.props.setTagInput(false)
     }
 
     attachEventListener = () => {
@@ -76,104 +80,52 @@ class CommentBox extends React.PureComponent {
         return this.props.anchor && this.props.anchor.quote.length > 280
     }
 
-    isHidden = () => this.state.isHidden && !this.props.anchor
+    isHidden = () => this.props.isHidden && !this.props.anchor
 
     handleChange = e => {
-        let { minimized, textareaRows } = this.state
+        let { textareaRows } = this.props
         const comment = e.target.value
 
         if (comment.length === 0) {
             textareaRows = constants.DEFAULT_ROWS
             this.inputRef.style.height = ''
-        } else if (minimized) {
-            minimized = false
+        } else {
             textareaRows = constants.MAXED_ROWS
         }
 
-        this.setState({
-            commentInput: comment,
-            textareaRows,
-        })
+        this.props.setCommentInput(comment)
+        this.props.setTextareaRows(textareaRows)
     }
 
     getHighlightText = () => {
         const highlight = this.props.anchor.quote
-        if (this.isHighlightLong() && this.state.displayHighlightTruncated) {
+        if (this.isHighlightLong() && this.props.displayHighlightTruncated) {
             const truncatedText = highlight.slice(0, 280) + ' [..]'
             return truncatedText
         }
         return highlight
     }
 
-    toggleTruncation = () => {
-        const displayHighlightTruncated = !this.state.displayHighlightTruncated
-        this.setState({
-            displayHighlightTruncated,
-        })
-    }
-
     setInputRef = node => (this.inputRef = node)
 
     cancel = () => {
-        this.inputRef.rows = this.state.textareaRows
-        this.inputRef.focus()
-        this.props.setAnchor(null)
-        this.setState({
-            commentInput: '',
-            textareaRows: constants.DEFAULT_ROWS,
-            isHidden: true,
-            tagInput: false,
-            tags: [],
-        })
+        this.props.cancelAnnotation()
     }
 
     save = () => {
-        const { commentInput, tags } = this.state
-        const { anchor, env } = this.props
-        const strippedComment = commentInput.trim()
-        if (strippedComment.length || anchor) {
-            const body = anchor ? anchor.quote : ''
-            this.props.createAnnotation(strippedComment, body, tags, env)
-            this.setState({
-                commentInput: '',
-                textareaRows: constants.DEFAULT_ROWS,
-                isHidden: true,
-                tags: [],
-            })
+        const strippedComment = this.props.commentInput.trim()
+        if (strippedComment.length || this.props.anchor) {
+            const body = this.props.anchor ? this.props.anchor.quote : ''
+            this.props.saveAnnotation(
+                strippedComment,
+                body,
+                this.props.tags,
+                this.props.env,
+            )
             // Update highlights only if there is an anchor
-            if (anchor) this.props.updateAnnotations()
+            if (this.props.anchor) this.props.updateAnnotations()
         }
     }
-
-    setHidden = value => () =>
-        this.setState({
-            isHidden: value,
-        })
-
-    addTag = newTag => {
-        const tags = [newTag, ...this.state.tags]
-        this.setState({
-            tags,
-        })
-    }
-
-    delTag = tag => {
-        const oldTags = [...this.state.tags]
-        const tagIndex = oldTags.indexOf(tag)
-
-        if (tagIndex === -1) return null
-
-        const tags = [
-            ...oldTags.slice(0, tagIndex),
-            ...oldTags.slice(tagIndex + 1),
-        ]
-
-        this.setState({
-            tags,
-        })
-    }
-
-    _setTagInput = value => () => this.setState({ tagInput: value })
 
     setTagRef = node => (this.tagInputContainer = node)
 
@@ -186,16 +138,16 @@ class CommentBox extends React.PureComponent {
     }
 
     renderTagInput() {
-        const tagObjs = this.state.tags.map(tag => ({ name: tag }))
+        const tagObjs = this.props.tags.map(tag => ({ name: tag }))
 
-        if (this.state.tagInput)
+        if (this.props.tagInput)
             return (
                 <IndexDropdown
                     isForAnnotation
                     allowAdd
-                    initFilters={this.state.tags}
-                    onFilterAdd={this.addTag}
-                    onFilterDel={this.delTag}
+                    initFilters={this.props.tags}
+                    onFilterAdd={this.props.addTag}
+                    onFilterDel={this.props.deleteTag}
                     source="tag"
                 />
             )
@@ -203,13 +155,14 @@ class CommentBox extends React.PureComponent {
             return (
                 <TagHolder
                     tags={tagObjs}
-                    clickHandler={this._setTagInput(true)}
-                    deleteTag={({ name }) => this.delTag(name)}
+                    clickHandler={() => this.props.setTagInput(true)}
+                    deleteTag={({ name }) => this.props.deleteTag(name)}
                 />
             )
     }
 
     render() {
+        console.log('props', this.props)
         return (
             <div className={this.isHidden() ? styles.commentBoxContainer : ''}>
                 <div className={styles.topBar}>
@@ -219,10 +172,12 @@ class CommentBox extends React.PureComponent {
                     />
                     <div
                         className={cx(styles.addNote, {
-                            [styles.disabled]: !this.state.isHidden,
+                            [styles.disabled]: !this.props.isHidden,
                         })}
                         onClick={
-                            this.state.isHidden ? this.setHidden(false) : null
+                            this.props.isHidden
+                                ? this.props.setHidden(false)
+                                : null
                         }
                     >
                         Add Comment
@@ -238,11 +193,11 @@ class CommentBox extends React.PureComponent {
                             "{this.getHighlightText()}"
                             <span
                                 className={cx(styles.showMore, {
-                                    [styles.rotated]: !this.state
+                                    [styles.rotated]: !this.props
                                         .displayHighlightTruncated,
                                     [styles.noDisplay]: !this.isHighlightLong(),
                                 })}
-                                onClick={this.toggleTruncation}
+                                onClick={this.props.toggleHighlightTruncation}
                             />
                         </div>
                     </div>
@@ -255,13 +210,13 @@ class CommentBox extends React.PureComponent {
                         })}
                     >
                         <textarea
-                            rows={this.state.textareaRows}
+                            rows={this.props.textareaRows}
                             className={styles.textarea}
-                            value={this.state.commentInput}
+                            value={this.props.commentInput}
                             placeholder={'Add your comment...'}
                             onChange={this.handleChange}
                             ref={this.setInputRef}
-                            onClick={this._setTagInput(false)}
+                            onClick={() => this.props.setTagInput(false)}
                         />
                         <br />
                         <div ref={this.setTagRef}>{this.renderTagInput()}</div>
@@ -280,12 +235,26 @@ class CommentBox extends React.PureComponent {
     }
 }
 const mapStateToProps = state => ({
-    anchor: selectors.anchor(state),
+    anchor: sidebarSelectors.anchor(state),
+    commentInput: selectors.commentInput(state),
+    textareaRows: selectors.textareaRows(state),
+    isHidden: selectors.isHidden(state),
+    tagInput: selectors.tagInput(state),
+    displayHighlightTruncated: selectors.displayHighlightTruncated(state),
+    tags: selectors.tags(state),
 })
 const mapDispatchToProps = dispatch => ({
-    createAnnotation: (comment, body, tags, env) =>
-        dispatch(actions.createAnnotation(comment, body, tags, env)),
-    setAnchor: anchor => dispatch(actions.setAnchor(anchor)),
+    setAnchor: anchor => dispatch(sidebarActions.setAnchor(anchor)),
+    setCommentInput: input => dispatch(actions.setCommentInput(input)),
+    setTextareaRows: rows => dispatch(actions.setTextareaRows(rows)),
+    setHidden: value => dispatch(actions.setHidden(value)),
+    setTagInput: value => dispatch(actions.setTagInput(value)),
+    toggleHighlightTruncation: () =>
+        dispatch(actions.toggleHighlightTruncation()),
+    saveAnnotation: (...args) => dispatch(actions.saveAnnotation(...args)),
+    cancelAnnotation: () => dispatch(actions.cancelAnnotation()),
+    addTag: tag => dispatch(actions.addTag(tag)),
+    deleteTag: tag => dispatch(actions.deleteTag(tag)),
 })
 
 export default connect(

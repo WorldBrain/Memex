@@ -2,24 +2,23 @@ import { createSelector } from 'reselect'
 
 const commentBox = state => state.commentBox
 
-export const setCommentInput = createSelector(
+export const commentInput = createSelector(
     commentBox,
-    state => state.setCommentInput,
+    state => state.commentInput,
 )
 
-export const setTextareaRows = createSelector(
+export const textareaRows = createSelector(
     commentBox,
-    state => state.setTextareaRows,
+    state => state.textareaRows,
 )
 
-export const setHidden = createSelector(commentBox, state => state.setHidden)
+export const isHidden = createSelector(commentBox, state => state.isHidden)
 
-export const setTagInput = createSelector(
+export const tagInput = createSelector(commentBox, state => state.tagInput)
+
+export const displayHighlightTruncated = createSelector(
     commentBox,
-    state => state.setTagInput,
+    state => state.displayHighlightTruncated,
 )
 
-export const toggleHighlightTruncation = createSelector(
-    commentBox,
-    state => state.toggleHighlightTruncation,
-)
+export const tags = createSelector(commentBox, state => state.tags)

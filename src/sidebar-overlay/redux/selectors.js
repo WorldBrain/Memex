@@ -1,9 +1,22 @@
-export const annotations = state => state.annotations
+import { createSelector } from 'reselect'
 
-export const anchor = state => state.anchor
+export const sidebar = state => state.sidebar
 
-export const activeAnnotation = state => state.activeAnnotation
+export const annotations = createSelector(sidebar, state => state.annotations)
 
-export const hoveredAnnotation = state => state.hoveredAnnotation
+export const anchor = createSelector(sidebar, state => state.anchor)
 
-export const annotationCount = state => state.annotationCount
+export const activeAnnotation = createSelector(
+    sidebar,
+    state => state.activeAnnotation,
+)
+
+export const hoveredAnnotation = createSelector(
+    sidebar,
+    state => state.hoveredAnnotation,
+)
+
+export const annotationCount = createSelector(
+    sidebar,
+    state => state.annotationCount,
+)

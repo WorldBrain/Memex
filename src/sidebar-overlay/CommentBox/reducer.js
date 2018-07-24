@@ -11,6 +11,23 @@ const defaultState = {
     displayHighlightTruncated: true,
 }
 
+const addTag = (state, newTag) => ({
+    ...state,
+    tags: [newTag, ...state.tags],
+})
+
+const deleteTag = (state, tag) => {
+    const oldTags = [...state.tags]
+    const tagIndex = oldTags.indexOf(tag)
+
+    if (tagIndex === -1) return state
+
+    return {
+        ...state,
+        tags: [...oldTags.slice(0, tagIndex), ...oldTags.slice(tagIndex + 1)],
+    }
+}
+
 export default createReducer(
     {
         [actions.setCommentInput]: (state, commentInput) => ({
@@ -33,6 +50,12 @@ export default createReducer(
             ...state,
             displayHighlightTruncated: !state.displayHighlightTruncated,
         }),
+        [actions.emptyTags]: state => ({
+            ...state,
+            tags: [],
+        }),
+        [actions.addTag]: addTag,
+        [actions.deleteTag]: deleteTag,
     },
     defaultState,
 )
