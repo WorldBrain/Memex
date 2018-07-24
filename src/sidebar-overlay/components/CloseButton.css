@@ -2,7 +2,6 @@
     position: fixed;
     top: 0px;
     right: 334px;
-    opacity: 1;
     cursor: pointer;
     color: #3eb995;
     z-index: 2147483647;
@@ -14,13 +13,16 @@
     border-left: 1px solid #d0cece;
     padding-top: 5px;
     padding-bottom: 5px;
-    transition: opacity 0.3s ease-in 0.2s;
+    animation: fadeIn 0.15s linear 0s;
+    animation-fill-mode: both;
 
     &.overview {
         top: 72px;
         right: 330px;
         padding-top: 5px;
         padding-bottom: 5px;
+        animation: fadeIn 0.2s ease-in 0.19s;
+        animation-fill-mode: both;
     }
 
     &.hidden {
@@ -47,35 +49,14 @@
     }
 }
 
-@keyframes moveLeft {
+@keyframes fadeIn {
     0% {
-        right: -20px;
         opacity: 0;
-    }
-
-    90% {
-        opacity: 0.8;
+        transform: translate(40px, 0);
     }
 
     100% {
         opacity: 1;
-        right: 326px;
-    }
-}
-
-@keyframes moveRight {
-    0% {
-        right: 326px;
-        opacity: 1;
-    }
-
-    20% {
-        opacity: 0.8;
-    }
-
-    100% {
-        opacity: 0;
-        right: -20px;
-        display: none;
+        transform: translate(0, 0);
     }
 }

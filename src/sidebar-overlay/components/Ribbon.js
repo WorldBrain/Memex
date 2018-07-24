@@ -75,12 +75,16 @@ class Ribbon extends React.Component {
              */
             goToAnnotation: async annotation => {
                 await this.openSidebar()
-                setTimeout(() => {
-                    this.props.highlightAndScroll(annotation)
+                setTimeout(async () => {
+                    const top = await this.props.highlightAndScroll(annotation)
+                    this.setState({
+                        top,
+                        isInsideFrame: true,
+                    })
                     this.frameFC.remoteExecute('focusAnnotation')(
                         annotation.url,
                     )
-                }, 300)
+                }, 500)
             },
         })
     }
