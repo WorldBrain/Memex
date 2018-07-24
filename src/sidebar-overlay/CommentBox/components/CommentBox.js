@@ -37,20 +37,21 @@ class CommentBox extends React.PureComponent {
 
     componentDidMount() {
         // Auto resize textarea
-        this.inputRef.addEventListener('scroll', e => {
-            let i = 0
-            // i prevents infinity loop when resizing
-            while (e.target.scrollTop && i++ < 30) {
-                // For dynamically getting the height even if resized
-                let height = window.getComputedStyle(e.target).height
-                height = parseInt(height, 10)
-                e.target.style.height = height + 20 + 'px'
-            }
-        })
+        if (this.inputRef) {
+            this.inputRef.focus()
+            this.inputRef.addEventListener('scroll', e => {
+                let i = 0
+                // i prevents infinity loop when resizing
+                while (e.target.scrollTop && i++ < 30) {
+                    // For dynamically getting the height even if resized
+                    let height = window.getComputedStyle(e.target).height
+                    height = parseInt(height, 10)
+                    e.target.style.height = height + 20 + 'px'
+                }
+            })
+        }
 
         this.attachEventListener()
-
-        if (this.inputRef) this.inputRef.focus()
     }
 
     maybeCloseTagsDropdown = e => {
@@ -119,7 +120,7 @@ class CommentBox extends React.PureComponent {
                 this.props.env,
             )
             // Update highlights only if there is an anchor
-            if (this.props.anchor) this.props.updateAnnotations()
+            if (this.props.env === 'iframe') this.props.updateAnnotations()
         }
     }
 
@@ -171,7 +172,7 @@ class CommentBox extends React.PureComponent {
                         })}
                         onClick={
                             this.props.isHidden
-                                ? this.props.setHidden(false)
+                                ? () => this.props.setHidden(false)
                                 : null
                         }
                     >

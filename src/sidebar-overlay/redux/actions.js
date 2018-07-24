@@ -60,7 +60,7 @@ export const createAnnotation = (comment, body, tags, env) => async (
 export const editAnnotation = (url, comment) => async (dispatch, getState) => {
     await remoteFunction('editAnnotation')(url, comment)
     const state = getState()
-    const annotations = [...selectors.annotation(state)]
+    const annotations = [...selectors.annotations(state)]
     annotations.forEach(annotation => {
         if (annotation.url === url) annotation.comment = comment
     })
@@ -70,7 +70,7 @@ export const editAnnotation = (url, comment) => async (dispatch, getState) => {
 export const deleteAnnotation = url => async (dispatch, getState) => {
     await remoteFunction('deleteAnnotation')(url)
     const state = getState()
-    const annotations = [...selectors.annotation(state)]
+    const annotations = [...selectors.annotations(state)]
     const predicate = annotation => annotation.url === url
     remove(annotations, predicate)
     dispatch(setAnnotations(annotations))

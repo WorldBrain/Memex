@@ -24,7 +24,7 @@ export const addTag = createAction('addTag')
 
 export const deleteTag = createAction('deleteTag')
 
-const resetCommentBox = dispatch => {
+const resetCommentBox = () => dispatch => {
     dispatch(setCommentInput(''))
     dispatch(setTextareaRows(DEFAULT_ROWS))
     dispatch(setHidden(true))
@@ -34,12 +34,12 @@ const resetCommentBox = dispatch => {
 
 export const saveAnnotation = (comment, body, tags, env) => dispatch => {
     dispatch(createAnnotation(comment, body, tags, env))
-    resetCommentBox(dispatch)
+    dispatch(resetCommentBox())
 }
 
 export const cancelAnnotation = () => dispatch => {
     dispatch(setAnchor(null))
-    resetCommentBox(dispatch)
+    dispatch(resetCommentBox())
 }
 
 export const receiveAnchor = anchor => dispatch => {

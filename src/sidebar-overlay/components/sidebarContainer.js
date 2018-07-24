@@ -28,6 +28,7 @@ class SidebarContainer extends React.Component {
         setActiveAnnotation: PropTypes.func.isRequired,
         setHoveredAnnotation: PropTypes.func.isRequired,
         setAnnotations: PropTypes.func.isRequired,
+        setHidden: PropTypes.func.isRequired,
         activeAnnotation: PropTypes.string.isRequired,
         hoveredAnnotation: PropTypes.string.isRequired,
         annotationCount: PropTypes.number.isRequired,
@@ -82,7 +83,12 @@ class SidebarContainer extends React.Component {
     }
 
     handleStateChange = ({ isOpen }) => {
-        if (!isOpen) this.props.setShowSidebar(false)
+        if (!isOpen) {
+            this.props.setShowSidebar(false)
+            this.props.setAnnotations([])
+            this.props.setHidden(false)
+            console.log(false)
+        }
     }
 
     /**
@@ -150,7 +156,7 @@ class SidebarContainer extends React.Component {
         if (annotationCount && !annotations.length) return <Loader />
 
         if (env === 'overview')
-            annotations.sort((x, y) => x.createdWhen > y.createdWhen)
+            annotations.sort((x, y) => x.createdWhen < y.createdWhen)
 
         return annotations.map(annotation => (
             <Annotation
@@ -201,6 +207,7 @@ const mapDispatchToProps = dispatch => ({
     setActiveAnnotation: key => dispatch(actions.setActiveAnnotation(key)),
     setHoveredAnnotation: key => dispatch(actions.setHoveredAnnotation(key)),
     findAnnotationCount: () => dispatch(actions.findAnnotationCount()),
+    setHidden: value => dispatch(commentActions.setHidden(value)),
 })
 
 export default connect(
