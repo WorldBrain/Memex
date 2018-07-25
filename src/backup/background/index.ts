@@ -83,8 +83,7 @@ export class BackupBackgroundModule {
 
         (async () => {
             this.startRecordingChanges()
-            // TODO:         Added null && for debugging purposes, remove!!!!!
-            const lastBackupTime = null && await this.lastBackupStorage.getLastBackupTime()
+            const lastBackupTime = await this.lastBackupStorage.getLastBackupTime()
             const backupTime = new Date()
             await this.lastBackupStorage.storeLastBackupTime(backupTime)
 
@@ -93,10 +92,11 @@ export class BackupBackgroundModule {
             if (lastBackupTime) { // Already one backup has been made, so make incremental one
                 for await (const change of this.storage.streamChanges(backupTime)) {
                     if (change.operation !== 'delete') {
-                        const object = await this.storageManager.findByPk(change.collection, change.pk)
-                        await this.backend.storeObject({ collection: change.collection, pk: change.pk, object, events })
+                        console.log(change)
+                        const object = await this.storageManager.findByPk(change.collection, change.objectPk)
+                        await this.backend.storeObject({ collection: change.collection, pk: change.objectPk, object, events })
                     } else {
-                        await this.backend.deleteObject({ ...change, events })
+                        await this.backend.deleteObject({ collection: change.collection, pk: change.objectPk, events })
                     }
                     await change.forget()
                 }
