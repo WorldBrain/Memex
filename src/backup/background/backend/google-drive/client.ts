@@ -1,7 +1,7 @@
 import { DriveTokenManager } from './token-manager'
 
 export class GoogleDriveClient {
-    private idCache = {}
+    private idCache: { [parentId: string]: { [childName: string]: string } } = {}
     private baseUrl = 'https://www.googleapis.com'
 
     constructor(private tokenManager: DriveTokenManager) {
@@ -15,15 +15,7 @@ export class GoogleDriveClient {
         await this.tokenManager.refreshAccessToken()
 
         const { id: collectionFolderId, created: folderCreated } = await this.createFolder({ parentId: "appDataFolder", name: collection })
-        if (!folderCreated) {
-            await this.cacheFolderContentIDs(collectionFolderId)
-        }
-
-        let fileId = this.idCache[collectionFolderId][pk]
-        if (fileId === 'NEW') {
-            await this.cacheFolderContentIDs(collectionFolderId)
-            fileId = this.idCache[collectionFolderId][pk]
-        }
+        let fileId = await this.getFolderChildId(collectionFolderId, pk)
 
         const metadata = {
             name: pk,
@@ -61,9 +53,28 @@ export class GoogleDriveClient {
         }
     }
 
+    async deleteObject({ collection, pk }: { collection: string, pk: string }) {
+        await this.tokenManager.refreshAccessToken()
+
+        const collectionFolderId = await this.getFolderChildId('appDataFolder', collection)
+        if (!collectionFolderId) {
+            return
+        }
+
+        const fileId = await this.getFolderChildId(collectionFolderId, pk)
+        if (!fileId) {
+            return
+        }
+
+        await this._request(`/files/${fileId}`, {
+            method: 'DELETE'
+        })
+        delete this.idCache[collectionFolderId][pk]
+    }
+
     async cacheFolderContentIDs(parentId: string) {
         const query = parentId !== 'appDataFolder' ? `q=${encodeURIComponent(`'${parentId}' in parents`)}&` : ''
-        const entries = <Array<any>>(await this._request(`/files?${query}&spaces=appDataFolder`)).files
+        const entries = <Array<any>>(await this._request(`/files?${query}spaces=appDataFolder`)).files
 
         if (!this.idCache[parentId]) {
             this.idCache[parentId] = {}
@@ -71,6 +82,20 @@ export class GoogleDriveClient {
         for (const entry of entries) {
             this.idCache[parentId][entry.name] = entry.id
         }
+    }
+
+    async getFolderChildId(parentId: string, childName: string) {
+        if (!this.idCache[parentId]) {
+            await this.cacheFolderContentIDs(parentId)
+        }
+
+        let childId = this.idCache[parentId][childName]
+        if (childId === 'NEW') {
+            await this.cacheFolderContentIDs(parentId)
+            childId = this.idCache[parentId][childName]
+        }
+
+        return childId
     }
 
     async createFolder({ parentId, name }: { parentId: string, name: string }) {
