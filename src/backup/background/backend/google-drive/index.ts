@@ -7,33 +7,38 @@ const DEFAULT_AUTH_SCOPE = 'https://www.googleapis.com/auth/drive.appdata'
 
 export class DriveBackupBackend {
     public authUrl = 'https://accounts.google.com/o/oauth2/v2/auth'
+    public memexCloudOrigin: string
     private clientId
     private scope
     private client: GoogleDriveClient
     private tokenManager: DriveTokenManager
 
-    constructor({ clientId, tokenStore, scope = DEFAULT_AUTH_SCOPE }: { clientId: string, tokenStore: DriveTokenStore, scope?: string }) {
-        this.clientId = clientId
+    constructor(
+        { tokenStore, memexCloudOrigin, scope = DEFAULT_AUTH_SCOPE }:
+            { tokenStore: DriveTokenStore, memexCloudOrigin: string, scope?: string }
+    ) {
         this.scope = scope
-        this.tokenManager = new DriveTokenManager({ tokenStore })
+        this.tokenManager = new DriveTokenManager({ tokenStore, memexCloudOrigin })
         this.client = new GoogleDriveClient(this.tokenManager)
+        this.memexCloudOrigin = memexCloudOrigin
     }
 
     async getLoginUrl({ provider, returnUrl }: { provider: string, returnUrl: string }): Promise<string | null> {
-        const hashPos = returnUrl.indexOf('#')
-        let url = this.authUrl
-        url += this.authUrl.indexOf('?') > 0 ? '&' : '?'
-        url += 'redirect_uri=' + encodeURIComponent(returnUrl.replace(/#.*$/, ''))
-        url += '&scope=' + encodeURIComponent(this.scope)
-        url += '&client_id=' + encodeURIComponent(this.clientId)
-        url += '&include_granted_scopes=true'
-        if (hashPos !== -1 && hashPos + 1 !== returnUrl.length) {
-            url +=
-                '&state=' + encodeURIComponent(returnUrl.substring(hashPos + 1))
-        }
-        url += '&response_type=token'
 
-        return url
+        // const hashPos = returnUrl.indexOf('#')
+        // let url = this.authUrl
+        // url += this.authUrl.indexOf('?') > 0 ? '&' : '?'
+        // url += 'redirect_uri=' + encodeURIComponent(returnUrl.replace(/#.*$/, ''))
+        // url += '&scope=' + encodeURIComponent(this.scope)
+        // url += '&client_id=' + encodeURIComponent(this.clientId)
+        // url += '&include_granted_scopes=true'
+        // if (hashPos !== -1 && hashPos + 1 !== returnUrl.length) {
+        //     url +=
+        //         '&state=' + encodeURIComponent(returnUrl.substring(hashPos + 1))
+        // }
+        // url += '&response_type=token'
+
+        return `${this.memexCloudOrigin}/auth/google?scope=${this.scope}`
     }
 
     async isAuthenticated() {
@@ -45,7 +50,10 @@ export class DriveBackupBackend {
     }
 
     async handleLoginRedirectedBack(locationHref: string) {
-        await this.tokenManager.handleLoginRedirectedBack(locationHref)
+        const response = await fetch(locationHref)
+        const { profile, accessToken, refreshToken, expiresInSeconds } = await response.json()
+        // console.log({ profile, accessToken, refreshToken, expiresInSeconds })
+        await this.tokenManager.handleNewTokens({ accessToken, refreshToken, expiresInSeconds })
     }
 
     async startBackup({ events }: { events: EventEmitter }): Promise<any> {

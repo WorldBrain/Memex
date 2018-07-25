@@ -12,6 +12,8 @@ export class GoogleDriveClient {
     }
 
     async storeObject({ collection, pk, object }: { collection: string, pk: string, object: object }) {
+        await this.tokenManager.refreshAccessToken()
+
         const { id: collectionFolderId, created: folderCreated } = await this.createFolder({ parentId: "appDataFolder", name: collection })
         if (!folderCreated) {
             await this.cacheFolderContentIDs(collectionFolderId)
@@ -31,6 +33,7 @@ export class GoogleDriveClient {
             }
             const response = await this._request('/files?uploadType=resumable', {
                 prefix: 'upload',
+                json: false,
                 method: 'POST',
                 body: JSON.stringify(metadata),
                 headers: {
@@ -39,17 +42,22 @@ export class GoogleDriveClient {
             })
 
             const serialized = JSON.stringify(object)
-            await this._request(response.getResponseHeader('Location'), {
+            await this._request(response.headers.get('Location'), {
                 prefix: null,
                 json: false,
-                method: 'POST',
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Content-Length': serialized.length
+                },
                 body: serialized
             })
         }
     }
 
     async cacheFolderContentIDs(parentId: string) {
-        const entries = <Array<any>>(await this._request(`/files?q=${encodeURIComponent(`'${parentId}' in parents`)}`)).files
+        const query = parentId !== 'appDataFolder' ? `q=${encodeURIComponent(`'${parentId}' in parents`)}&` : ''
+        const entries = <Array<any>>(await this._request(`/files?${query}&spaces=appDataFolder`)).files
 
         if (!this.idCache[parentId]) {
             this.idCache[parentId] = {}
@@ -69,7 +77,7 @@ export class GoogleDriveClient {
         const response = await this._request(`/files`, {
             method: 'POST',
             body: JSON.stringify({
-                title: name,
+                name,
                 mimeType: 'application/vnd.google-apps.folder',
                 parents: [parentId],
             }),
@@ -77,6 +85,7 @@ export class GoogleDriveClient {
                 'Content-Type': 'application/json',
             },
         })
+        this.idCache[parentId][name] = response.id
         this.idCache[response.id] = {}
         return { id: response.id, created: true }
     }
@@ -92,7 +101,10 @@ export class GoogleDriveClient {
             options.json = true
         }
 
-        let baseUrl = this.baseUrl
+        let baseUrl = ''
+        if (options.prefix !== null) {
+            baseUrl = this.baseUrl
+        }
         if (options.prefix === 'main') {
             baseUrl += '/drive/v3'
         } else if (options.prefix === 'upload') {
