@@ -18,36 +18,38 @@ export class GoogleDriveClient {
         if (!folderCreated) {
             await this.cacheFolderContentIDs(collectionFolderId)
         }
-
         let fileId = this.idCache[collectionFolderId][pk]
-        if (!fileId) {
-            const metadata = {
-                title: pk,
-                mimeType: 'application/json',
-                parents: [collectionFolderId],
-            }
-            const response = await this._request('/files?uploadType=resumable', {
-                prefix: 'upload',
-                json: false,
-                method: 'POST',
-                body: JSON.stringify(metadata),
-                headers: {
-                    'Content-Type': 'application/json; charset=UTF-8',
-                },
-            })
 
-            const serialized = JSON.stringify(object)
-            await this._request(response.headers.get('Location'), {
-                prefix: null,
-                json: false,
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Content-Length': serialized.length
-                },
-                body: serialized
-            })
+        const metadata = {
+            name: pk,
+            mimeType: 'application/json',
         }
+        if (!fileId) {
+            metadata['parents'] = [collectionFolderId]
+        }
+
+        const uploadUri = `/files${fileId ? `/${fileId}` : ''}?uploadType=resumable`
+        const response = await this._request(uploadUri, {
+            prefix: 'upload',
+            json: false,
+            method: !fileId ? 'POST' : 'PATCH',
+            body: JSON.stringify(metadata),
+            headers: {
+                'Content-Type': 'application/json; charset=UTF-8',
+            },
+        })
+
+        const serialized = JSON.stringify(object)
+        await this._request(response.headers.get('Location'), {
+            prefix: null,
+            json: false,
+            method: !fileId ? 'PUT' : 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Content-Length': serialized.length
+            },
+            body: serialized
+        })
     }
 
     async cacheFolderContentIDs(parentId: string) {
