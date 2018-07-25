@@ -61,7 +61,8 @@ export class BackupBackgroundModule {
     setupRequestInterceptor() {
         setupRequestInterceptor({
             webRequest: window['browser'].webRequest,
-            handleLoginRedirectedBack: this.backend.handleLoginRedirectedBack.bind(this.backend)
+            handleLoginRedirectedBack: this.backend.handleLoginRedirectedBack.bind(this.backend),
+            memexCloudOrigin: _getMemexCloudOrigin()
         })
     }
 
@@ -169,3 +170,12 @@ export class LocalLastBackupStorage implements LastBackupStorage {
         localStorage.setItem(this.key, JSON.stringify(time.getTime()))
     }
 }
+
+export function _getMemexCloudOrigin() {
+    if (process.env.NODE_ENV !== 'production') {
+        return 'http://localhost:3002'
+    } else {
+        return 'https://memex.cloud'
+    }
+}
+

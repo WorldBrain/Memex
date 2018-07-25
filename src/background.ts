@@ -43,8 +43,7 @@ const backupModule = new backup.BackupBackgroundModule({
         tokenStore: new driveBackup.LocalStorageDriveTokenStore({
             prefix: 'drive-token-',
         }),
-        clientId:
-            '455172385517-dctnft2hrh4iqpbjqn7rbmn94ge2p3n4.apps.googleusercontent.com',
+        memexCloudOrigin: backup._getMemexCloudOrigin(),
     }),
     lastBackupStorage: new backup.LocalLastBackupStorage({ key: 'lastBackup' }),
 })
