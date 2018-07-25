@@ -6,23 +6,24 @@ import { actions as overviewActs } from '../overview'
 import * as selectors from './selectors'
 import * as constants from './constants'
 import { SHOULD_TRACK_STORAGE_KEY as SHOULD_TRACK } from '../options/privacy/constants'
+import { NotifDefinition } from './notifications'
 
-export const setReadNotificationList = createAction<any>(
+export const setReadNotificationList = createAction<NotifDefinition[]>(
     'notifications/setReadNotificationList',
 )
 
-export const setUnreadNotificationList = createAction<any>(
+export const setUnreadNotificationList = createAction<NotifDefinition[]>(
     'notifications/setUnreadNotificationList',
 )
 export const setShowMoreIndex = createAction('notifications/setShowMoreIndex')
 export const nextPage = createAction('notifications/nextPage')
 export const setLoading = createAction<boolean>('notifications/setLoading')
 export const toggleReadExpand = createAction('notifications/toggleReadExpand')
-export const appendReadNotificationResult = createAction<any>('notifications/setSearchResult')
-export const setReadNotificationResult = createAction<any>('notifications/setReadNotificationResult')
+export const appendReadNotificationResult = createAction<NotifDefinition[]>('notifications/setSearchResult')
+export const setReadNotificationResult = createAction<NotifDefinition[]>('notifications/setReadNotificationResult')
 export const toggleInbox = createAction<any>('notifications/toggleInbox')
 export const setUnreadCount = createAction<number>('notific ations/setUnreadCount')
-export const setShouldTrack = createAction<any>('notifications/setShouldTrack')
+export const setShouldTrack = createAction<boolean>('notifications/setShouldTrack')
 
 const fetchUnreadNotifications = remoteFunction('fetchUnreadNotifications')
 const fetchReadNotifications = remoteFunction('fetchReadNotifications')

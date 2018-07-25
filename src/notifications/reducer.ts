@@ -1,14 +1,14 @@
 import { createReducer } from 'redux-act'
-
+import { NotifDefinition } from './notifications'
 import * as actions from './actions'
 
 export interface State {
     readNotificationList: {
-        notifications: any[]
+        notifications: NotifDefinition[]
         resultExhausted: boolean
     }
-    unreadNotificationList: any[]
-    showMoreIndex?: any
+    unreadNotificationList: NotifDefinition[]
+    showMoreIndex?: string
     unreadNotifications: number
     currentPage: number
     isLoading: boolean
@@ -69,8 +69,8 @@ const initState = <T>(key) => (state: State, payload: T) => ({
 
 const reducer = createReducer<State>({}, defaultState)
 
-reducer.on(actions.setReadNotificationList, initState<boolean>('readNotificationList'))
-reducer.on(actions.setUnreadNotificationList, initState<boolean>('unreadNotificationList'))
+reducer.on(actions.setReadNotificationList, initState<NotifDefinition[]>('readNotificationList'))
+reducer.on(actions.setUnreadNotificationList, initState<NotifDefinition[]>('unreadNotificationList'))
 reducer.on(actions.setShowMoreIndex, initState<boolean>('showMoreIndex'))
 reducer.on(actions.nextPage, nextPage())
 reducer.on(actions.setLoading, initState<boolean>('isLoading'))

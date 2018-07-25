@@ -3,7 +3,7 @@ import NotificationStorage from './storage'
 import * as notifications from '../notifications'
 
 export default class NotificationBackground {
-    static LAST_NOTIF_TIME = 'last-notif-releast-time'
+    static LAST_NOTIF_TIME = 'last-notif-proc-timestamp'
 
     constructor({ storageManager }) {
         this.storage = new NotificationStorage(storageManager)
@@ -51,7 +51,7 @@ export default class NotificationBackground {
             NotificationBackground.LAST_NOTIF_TIME,
         ))[NotificationBackground.LAST_NOTIF_TIME]
 
-        for (let notification of notifications.NOTIFS.notifs) {
+        for (let notification of notifications.NOTIFS) {
             notification = {
                 ...notification,
                 deliveredTime: Date.now(),
