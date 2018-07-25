@@ -90,6 +90,11 @@ export class BackupBackgroundModule {
             await this.backend.startBackup({ events })
 
             if (lastBackupTime) { // Already one backup has been made, so make incremental one
+                const info = {
+                    type: 'incremental',
+                    totalObjects: await this.storageManager.countAll('backupChanges', {}),
+                    processedObjects: 0,
+                }
                 for await (const change of this.storage.streamChanges(backupTime)) {
                     if (change.operation !== 'delete') {
                         console.log(change)
@@ -99,6 +104,9 @@ export class BackupBackgroundModule {
                         await this.backend.deleteObject({ collection: change.collection, pk: change.objectPk, events })
                     }
                     await change.forget()
+
+                    info.processedObjects += 1
+                    events.emit('info', { info })
                 }
             } else { // Just back up everything
                 console.log('found collections', Object.keys(this.storageManager.registry.collections))
