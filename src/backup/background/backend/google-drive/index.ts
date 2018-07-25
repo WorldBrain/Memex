@@ -64,13 +64,10 @@ export class DriveBackupBackend {
     }
 
     async storeObject({ collection, pk, object, events }: { collection: string, pk: string, object: object, events: EventEmitter }): Promise<any> {
-        // await new Promise(resolve => setTimeout(resolve, 300))
-        // if ([].length < 50) return
-
         await this.client.storeObject({ collection, pk, object })
     }
 
     async deleteObject({ collection, pk, events }: { collection: string, pk: string, events: EventEmitter }): Promise<any> {
-
+        await this.client.deleteObject({ collection, pk })
     }
 }
