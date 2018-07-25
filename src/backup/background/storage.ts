@@ -16,6 +16,7 @@ export default class BackupStorage extends FeatureStorage {
                     { pk: true, field: 'timestamp' },
                 ],
                 watch: false,
+                backup: false,
             }
         ]
     }

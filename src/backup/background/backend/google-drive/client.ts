@@ -18,7 +18,12 @@ export class GoogleDriveClient {
         if (!folderCreated) {
             await this.cacheFolderContentIDs(collectionFolderId)
         }
+
         let fileId = this.idCache[collectionFolderId][pk]
+        if (fileId === 'NEW') {
+            await this.cacheFolderContentIDs(collectionFolderId)
+            fileId = this.idCache[collectionFolderId][pk]
+        }
 
         const metadata = {
             name: pk,
@@ -50,6 +55,10 @@ export class GoogleDriveClient {
             },
             body: serialized
         })
+
+        if (!fileId) {
+            this.idCache[collectionFolderId][pk] = 'NEW'
+        }
     }
 
     async cacheFolderContentIDs(parentId: string) {
