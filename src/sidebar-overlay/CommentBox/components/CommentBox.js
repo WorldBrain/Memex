@@ -96,7 +96,7 @@ class CommentBox extends React.PureComponent {
 
     getHighlightText = () => {
         const highlight = this.props.anchor.quote
-        if (this.props.displayHighlightTruncated) {
+        if (this.isHighlightLong() && this.props.displayHighlightTruncated) {
             const truncatedText = highlight.slice(0, 280) + ' [..]'
             return truncatedText
         }
@@ -119,7 +119,7 @@ class CommentBox extends React.PureComponent {
                 this.props.tags,
                 this.props.env,
             )
-            // Update highlights only if there is an anchor
+            // Update highlights only if it's in iframe
             if (this.props.env === 'iframe') this.props.updateAnnotations()
         }
     }

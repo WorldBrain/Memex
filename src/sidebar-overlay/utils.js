@@ -90,7 +90,7 @@ export const goToAnnotation = (
                 await remoteFunction('goToAnnotation', {
                     tabId: tab.id,
                 })(annotation),
-            { intervalMiliseconds: 1500, timeoutMiliseconds: 12000 },
+            { intervalMiliseconds: 1500, timeoutMiliseconds: 15000 },
         )
     } else {
         highlightAndScroll(annotation)

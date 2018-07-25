@@ -3,7 +3,10 @@ import { remoteFunction } from 'src/util/webextensionRPC'
 import { remove } from 'lodash/array'
 
 import * as selectors from './selectors'
-import { setAnchor } from '../CommentBox/actions'
+import {
+    selectors as commentSelectors,
+    actions as commentActions,
+} from '../CommentBox'
 
 export const setAnnotations = createAction('setAnnotations')
 
@@ -36,8 +39,7 @@ export const createAnnotation = (comment, body, tags, env) => async (
 ) => {
     const state = getState()
     const { url, title } = selectors.page(state)
-    const anchor = selectors.anchor(state)
-
+    const anchor = commentSelectors.anchor(state)
     // Write annotation to database
     const uniqueUrl = await remoteFunction('createAnnotation')({
         url,
@@ -52,7 +54,7 @@ export const createAnnotation = (comment, body, tags, env) => async (
         await remoteFunction('addAnnotationTag')({ tag, url: uniqueUrl })
     })
 
-    dispatch(setAnchor(null))
+    dispatch(commentActions.setAnchor(null))
     dispatch(setActiveAnnotation(uniqueUrl))
     if (env === 'overview') dispatch(fetchAnnotationAct())
 }
