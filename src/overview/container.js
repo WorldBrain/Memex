@@ -372,6 +372,7 @@ const mapStateToProps = state => ({
     filterActive: filters.showClearFiltersBtn(state),
     showInbox: notifSelectors.showInbox(state),
     unreadNotifCount: notifSelectors.unreadNotifCount(state),
+    showUnreadCount: notifSelectors.showUnreadCount(state),
 })
 
 const mapDispatchToProps = dispatch => ({

@@ -38,6 +38,7 @@ const Header = ({
                 toggleInbox={props.toggleInbox}
                 showInbox={props.showInbox}
                 unreadNotifCount={props.unreadNotifCount}
+                showUnreadCount={props.showUnreadCount}
             />
             <OutLink
                 className={styles.upgrade}
@@ -68,6 +69,7 @@ Header.propTypes = {
     toggleInbox: PropTypes.func.isRequired,
     showInbox: PropTypes.bool.isRequired,
     unreadNotifCount: PropTypes.number.isRequired,
+    showUnreadCount: PropTypes.bool.isRequired,
 }
 
 export default Header

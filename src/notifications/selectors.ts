@@ -33,3 +33,7 @@ export const isReadShow = createSelector(
 export const showInbox = createSelector(notifications, state => state.showInbox)
 export const unreadNotifCount = createSelector(notifications, state => state.unreadNotifCount)
 export const shouldTrack =  createSelector(notifications, state => state.shouldTrack)
+export const showUnreadCount = createSelector(
+    unreadNotifCount,
+    (count) => count !== 0,
+)
