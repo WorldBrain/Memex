@@ -24,12 +24,7 @@ export class GoogleDriveClient {
             const metadata = {
                 title: pk,
                 mimeType: 'application/json',
-                parents: [
-                    {
-                        kind: 'drive#fileLink',
-                        id: collectionFolderId,
-                    },
-                ],
+                parents: [collectionFolderId],
             }
             const response = await this._request('/files?uploadType=resumable', {
                 prefix: 'upload',
