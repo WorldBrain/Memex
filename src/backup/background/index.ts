@@ -104,8 +104,9 @@ export class BackupBackgroundModule {
                 console.log('found collections', Object.keys(this.storageManager.registry.collections))
 
                 const collectionNames =
-                    Object.keys(this.storageManager.registry.collections)
-                        .filter(key => key !== 'backupChanges')
+                    Object.entries(this.storageManager.registry.collections)
+                        .filter(([key, value]) => value.backup !== false)
+                        .map(([key, value]) => key)
 
                 const collectionCountPairs = await Promise.all(collectionNames.map(async collectionName => {
                     return [collectionName, await this.storageManager.countAll(collectionName, {})]
