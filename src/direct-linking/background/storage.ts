@@ -9,6 +9,7 @@ import { STORAGE_KEYS as IDXING_PREF_KEYS } from '../../options/settings/constan
 import { Tag } from '../../search/search-index-new/models'
 
 export const COLLECTION_NAME = 'directLinks'
+export const ANNOTATION_TABLE = 'annotations'
 const TAGS_TABLE = 'tags'
 
 export interface Annotation {
@@ -94,7 +95,7 @@ export default class DirectLinkingStorage extends FeatureStorage {
         body,
         selector,
     }: Annotation) {
-        await this.storageManager.putObject(COLLECTION_NAME, {
+        await this.storageManager.putObject(ANNOTATION_TABLE, {
             pageTitle,
             pageUrl,
             body,
@@ -125,9 +126,75 @@ export default class DirectLinkingStorage extends FeatureStorage {
 
         await page.save()
     }
+}
+
+export class AnnotationStorage extends FeatureStorage {
+    private _browserStorageArea: Storage.StorageArea
+
+    constructor({
+        storageManager,
+        browserStorageArea = browser.storage.local,
+    }: {
+        storageManager: ManageableStorage
+        browserStorageArea: Storage.StorageArea
+    }) {
+        super(storageManager)
+        this._browserStorageArea = browserStorageArea
+
+        this.storageManager.registerCollection(ANNOTATION_TABLE, {
+            version: new Date(2018, 7, 26),
+            fields: {
+                pageTitle: { type: 'text' },
+                pageUrl: { type: 'url' },
+                body: { type: 'text' },
+                comment: { type: 'text' },
+                selector: { type: 'json' },
+                createdWhen: { type: 'datetime' },
+                lastEdited: { type: 'datetime' },
+                url: { type: 'string' },
+            },
+            indices: [
+                { field: 'url', pk: true },
+                { field: 'pageTitle' },
+                { field: 'body' },
+                { field: 'createdWhen' },
+                { field: 'comment' },
+            ],
+        })
+    }
+
+    private async fetchIndexingPrefs(): Promise<{ shouldIndexLinks: boolean }> {
+        const storage = await this._browserStorageArea.get(
+            IDXING_PREF_KEYS.LINKS,
+        )
+
+        return {
+            shouldIndexLinks: !!storage[IDXING_PREF_KEYS.LINKS],
+        }
+    }
+
+    async indexPageFromTab({ id, url }: Tabs.Tab) {
+        const indexingPrefs = await this.fetchIndexingPrefs()
+
+        const page = await createPageFromTab({
+            tabId: id,
+            url,
+            stubOnly: !indexingPrefs.shouldIndexLinks,
+        })
+
+        await page.loadRels()
+
+        // Add new visit if none, else page won't appear in results
+        // TODO: remove once search changes to incorporate assoc. page data apart from bookmarks/visits
+        if (!page.visits.length) {
+            page.addVisit()
+        }
+
+        await page.save()
+    }
 
     async getAnnotationsByUrl(pageUrl: string) {
-        return await this.storageManager.findAll(COLLECTION_NAME, {
+        return await this.storageManager.findAll(ANNOTATION_TABLE, {
             pageUrl,
         })
     }
@@ -140,7 +207,7 @@ export default class DirectLinkingStorage extends FeatureStorage {
         comment,
         selector,
     }: Annotation) {
-        return await this.storageManager.putObject(COLLECTION_NAME, {
+        return await this.storageManager.putObject(ANNOTATION_TABLE, {
             pageTitle,
             pageUrl,
             comment,
@@ -154,7 +221,7 @@ export default class DirectLinkingStorage extends FeatureStorage {
 
     async editAnnotation(url: string, comment: string) {
         return await this.storageManager.updateObject(
-            COLLECTION_NAME,
+            ANNOTATION_TABLE,
             {
                 url: url,
             },
@@ -168,7 +235,7 @@ export default class DirectLinkingStorage extends FeatureStorage {
     }
 
     async deleteAnnotation(url: string) {
-        return await this.storageManager.deleteObject(COLLECTION_NAME, {
+        return await this.storageManager.deleteObject(ANNOTATION_TABLE, {
             url,
         })
     }

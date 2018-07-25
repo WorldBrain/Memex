@@ -2,13 +2,14 @@ import { makeRemotelyCallable, remoteFunction } from 'src/util/webextensionRPC'
 import DirectLinkingBackend from './backend'
 import { setupRequestInterceptor } from './redirect'
 import { AnnotationRequests } from './request'
-import DirectLinkingStorage from './storage'
+import DirectLinkingStorage, { AnnotationStorage } from './storage'
 import normalize from '../../util/encode-url-for-id'
 
 export default class DirectLinkingBackground {
     constructor({ storageManager }) {
         this.backend = new DirectLinkingBackend()
-        this.storage = new DirectLinkingStorage({ storageManager })
+        this.directLinkingStorage = new DirectLinkingStorage({ storageManager })
+        this.annotationStorage = new AnnotationStorage({ storageManager })
         this.sendAnnotation = ({ tabId, annotation }) => {
             browser.tabs.sendMessage(tabId, { type: 'direct-link', annotation })
         }
@@ -89,7 +90,7 @@ export default class DirectLinkingBackground {
     async createDirectLink({ tab }, request) {
         const pageTitle = tab.title
         const result = await this.backend.createDirectLink(request)
-        await this.storage.insertDirectLink({
+        await this.annotationStorage.insertDirectLink({
             pageTitle,
             pageUrl: tab.url,
             body: request.anchor.quote,
@@ -106,7 +107,9 @@ export default class DirectLinkingBackground {
     async getAllAnnotationsByUrl({ tab }, url) {
         let pageUrl = url === null ? tab.url : url
         pageUrl = normalize(pageUrl)
-        const annotations = await this.storage.getAnnotationsByUrl(pageUrl)
+        const annotations = await this.annotationStorage.getAnnotationsByUrl(
+            pageUrl,
+        )
         return annotations.map(
             ({ createdWhen, lastEdited, ...annotation }) => ({
                 ...annotation,
@@ -121,7 +124,7 @@ export default class DirectLinkingBackground {
         const pageTitle = title === null ? tab.title : title
         const uniqueUrl = `${pageUrl}/#${new Date().getTime()}`
 
-        await this.storage.createAnnotation({
+        await this.annotationStorage.createAnnotation({
             pageUrl: pageUrl,
             url: uniqueUrl,
             pageTitle,
@@ -134,22 +137,22 @@ export default class DirectLinkingBackground {
     }
 
     async editAnnotation({ tab }, pk, comment) {
-        return await this.storage.editAnnotation(pk, comment)
+        return await this.annotationStorage.editAnnotation(pk, comment)
     }
 
     async deleteAnnotation({ tab }, pk) {
-        return await this.storage.deleteAnnotation(pk)
+        return await this.annotationStorage.deleteAnnotation(pk)
     }
 
     async getTagsByAnnotationUrl({ tab }, url) {
-        return await this.storage.getTagsByAnnotationUrl(url)
+        return await this.annotationStorage.getTagsByAnnotationUrl(url)
     }
 
     async addTagForAnnotation({ tab }, { tag, url }) {
-        return await this.storage.modifyTags(true)(tag, url)
+        return await this.annotationStorage.modifyTags(true)(tag, url)
     }
 
     async delTagForAnnotation({ tab }, { tag, url }) {
-        return await this.storage.modifyTags(false)(tag, url)
+        return await this.annotationStorage.modifyTags(false)(tag, url)
     }
 }
