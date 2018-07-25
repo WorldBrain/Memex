@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
 import { bindActionCreators } from 'redux'
+import cx from 'classnames'
 
 import { actions, selectors } from 'src/custom-lists'
 import extStyles from './Index.css'
@@ -10,6 +11,7 @@ import CreateListForm from './CreateListForm'
 import ListItem from './ListItem'
 import DeleteConfirmModal from 'src/overview/components/DeleteConfirmModal'
 import { actions as filterActs } from '../../../../search-filters'
+import * as sidebar from '../../../../overview/sidebar-left/selectors'
 
 class ListContainer extends Component {
     static propTypes = {
@@ -27,6 +29,7 @@ class ListContainer extends Component {
         toggleCreateListForm: PropTypes.func.isRequired,
         showCreateList: PropTypes.bool.isRequired,
         showCommonNameWarning: PropTypes.bool.isRequired,
+        isSidebarOpen: PropTypes.bool.isRequired,
         closeCreateListForm: PropTypes.func.isRequired,
         resetUrlDragged: PropTypes.func.isRequired,
     }
@@ -154,8 +157,16 @@ class ListContainer extends Component {
                 />
 
                 {this.renderCreateList(this.props.showCreateList)}
-                <div className={extStyles.allLists}>
-                    <div style={{ overflow: 'unset' }}>
+                <div
+                    className={cx({
+                        [extStyles.allLists]: this.props.isSidebarOpen,
+                    })}
+                >
+                    <div
+                        className={cx({
+                            [extStyles.wrapper]: this.props.isSidebarOpen,
+                        })}
+                    >
                         {this.renderAllLists()}
                     </div>
                 </div>
@@ -174,6 +185,7 @@ const mapStateToProps = state => ({
     isDeleteConfShown: selectors.isDeleteConfShown(state),
     showCreateList: selectors.showCreateListForm(state),
     showCommonNameWarning: selectors.showCommonNameWarning(state),
+    isSidebarOpen: sidebar.isSidebarOpen(state),
 })
 
 const mapDispatchToProps = (dispatch, getState) => ({

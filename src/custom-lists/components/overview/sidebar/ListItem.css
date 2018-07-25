@@ -8,7 +8,7 @@
     height: 40px;
     color: #767676;
     position: relative;
-    width: 100%;
+    width: 250px;
     transition: width 0.1s ease-in, background-color 100ms linear;
     cursor: pointer;
 

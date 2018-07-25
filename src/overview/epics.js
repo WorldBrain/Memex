@@ -23,6 +23,7 @@ const searchUpdateActions = [
     filterActs.setTagFilters.getType(),
     filterActs.resetFilters.getType(),
     filterActs.toggleListFilter.getType(),
+    filterActs.delListFilter.getType(),
     onboardingActs.setVisible.getType(),
 ]
 
