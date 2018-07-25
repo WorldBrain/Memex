@@ -23,8 +23,10 @@ export const applyScores = (
         [...urlScoreMap]
             // Visits may be filtered down by time; only keep URLs appearing in visits Map
             .filter(([url]) => latestVisitsMap.has(url))
-            .map(([url, multi]): [string, number] => [
-                url,
-                Math.trunc(latestVisitsMap.get(url) * multi),
-            ]),
+            .map(
+                ([url, multi]): [string, number] => [
+                    url,
+                    Math.trunc(latestVisitsMap.get(url) * multi),
+                ],
+            ),
     )

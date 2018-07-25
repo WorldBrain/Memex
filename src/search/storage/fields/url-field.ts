@@ -1,5 +1,5 @@
 import { Field, FieldConfig } from './field'
-import normalize from '../../../../util/encode-url-for-id'
+import normalize from '../../../util/encode-url-for-id'
 
 export interface UrlFieldConfig extends FieldConfig {
     normalize?: boolean

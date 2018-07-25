@@ -22,7 +22,9 @@ export async function addBookmark({
     await page.save()
 }
 
-export async function delBookmark({ url }: Bookmarks.BookmarkTreeNode) {
+export async function delBookmark({
+    url,
+}: Partial<Bookmarks.BookmarkTreeNode>) {
     const page = await getPage(url)
 
     if (page != null) {

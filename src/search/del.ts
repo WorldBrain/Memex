@@ -1,7 +1,7 @@
 import Dexie from 'dexie'
 
 import db, { Page } from '.'
-import normalizeUrl from '../../util/encode-url-for-id'
+import normalizeUrl from '../util/encode-url-for-id'
 
 type QueryApplier = (table: typeof db.pages) => Dexie.Collection<Page, string>
 
@@ -23,8 +23,8 @@ export function delPagesByDomain(url: string) {
 }
 
 // WARNING: Inefficient; goes through entire table
-export function delPagesByPattern(pattern: string) {
-    const re = new RegExp(pattern, 'i')
+export function delPagesByPattern(pattern: string | RegExp) {
+    const re = typeof pattern === 'string' ? new RegExp(pattern, 'i') : pattern
 
     return deletePages(table => table.filter(page => re.test(page.url)))
 }

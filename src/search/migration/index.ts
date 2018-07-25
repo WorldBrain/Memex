@@ -1,14 +1,11 @@
-/* tslint:disable */
-import { idleManager } from '../../util/idle'
 import { MigrationManager } from './migration-manager'
-import searchIndex from '../'
-import analytics from '../../analytics'
 import { makeRemotelyCallable } from '../../util/webextensionRPC'
+import analytics from '../../analytics'
 
 const migrator = new MigrationManager({
     onComplete() {
         // Update global setting to force switch to using new index for all interface methods
-        searchIndex.useOld = false
+        // searchIndex.useOld = false
         analytics.trackEvent({ category: 'Migration', action: 'Completed' })
     },
 })

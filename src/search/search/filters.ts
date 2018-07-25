@@ -1,10 +1,9 @@
+import db, { SearchParams, FilteredURLs, storageManager } from '..'
+import { remoteFunction } from '../../util/webextensionRPC'
+import CustomListBackground from '../../custom-lists/background'
 import intersection from 'lodash/fp/intersection'
 import flatten from 'lodash/fp/flatten'
 import difference from 'lodash/fp/difference'
-
-import db, { SearchParams, FilteredURLs, storageManager } from '..'
-import { remoteFunction } from '../../../util/webextensionRPC'
-import CustomListBackground from '../../../custom-lists/background'
 
 const pageIndexLookup = (index: string, matches: string[]) =>
     db.pages

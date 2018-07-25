@@ -1,5 +1,5 @@
-import { VisitInteraction } from '../search-index-new'
-import { PageConstructorOptions } from '../search-index-new/models/page'
+import { VisitInteraction } from '..'
+import { PageConstructorOptions } from '../models/page'
 
 export type ExportedTag = string
 export type ExportedBookmark = number

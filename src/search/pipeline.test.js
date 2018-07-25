@@ -1,5 +1,5 @@
 /* eslint-env jest */
-import pipeline, { extractTerms } from './search-index-new/pipeline'
+import pipeline, { extractTerms } from './pipeline'
 import * as DATA from './pipeline.test.data'
 
 function testExtractTerms({ input, output = DATA.EXPECTED_TERMS }) {

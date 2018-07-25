@@ -1,5 +1,5 @@
 import normalizeUrl from 'src/util/encode-url-for-id'
-import searchIndex from 'src/search'
+import * as searchIndex from 'src/search'
 import { checkWithBlacklist } from 'src/blacklist/background/interface'
 import { isLoggable } from 'src/activity-logger'
 import { IMPORT_TYPE as TYPE } from 'src/options/imports/constants'

@@ -3,7 +3,7 @@ import moment from 'moment'
 
 import { TabManager } from './tab-manager'
 import analyzePage, { PageAnalyzer } from '../../page-analysis/background'
-import searchIndex from '../../search'
+import * as searchIndex from '../../search'
 import { FavIconChecker } from './types'
 
 interface Props {

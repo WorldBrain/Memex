@@ -1,16 +1,15 @@
 import indexedDB from 'fake-indexeddb'
 import IDBKeyRange from 'fake-indexeddb/lib/FDBKeyRange'
-import index from '../'
-import * as newIndex from '../search-index-new'
-import importNewPage from '../search-index-new/import'
+import db, * as index from '../'
+import importNewPage from './import'
 import * as data from './import-export.test.data'
 import { MigrationManager } from './migration-manager'
 import { ExportedPage } from './types'
 
-jest.mock('../search-index-new/models/abstract-model')
+jest.mock('../models/abstract-model')
 
 async function insertTestPageIntoOldIndex() {
-    index.useOld = true
+    // index.useOld = false
 
     await index.addPage({
         pageDoc: data.PAGE_DOC_1,
@@ -29,7 +28,7 @@ async function insertTestPageIntoOldIndex() {
 
 async function resetDataSources(dbName = 'test') {
     indexedDB.deleteDatabase(dbName)
-    newIndex.init({ indexedDB, IDBKeyRange, dbName })
+    index.init({ indexedDB, IDBKeyRange, dbName })
 }
 
 describe('Old=>New index migration', () => {
@@ -48,9 +47,7 @@ describe('Old=>New index migration', () => {
 
         // Try to find the page data stored for given test data from DB - check everything
         async function testStoredPage(expectedData: Partial<ExportedPage>) {
-            const storedPage = await newIndex.default.pages.get(
-                expectedData.url,
-            )
+            const storedPage = await db.pages.get(expectedData.url)
 
             const {
                 visits,
@@ -76,20 +73,18 @@ describe('Old=>New index migration', () => {
                 expect.arrayContaining(visits.map(visit => visit.time)),
             )
 
-            await newIndex.default.favIcons
-                .get(expectedData.hostname)
-                .then(storedFav => {
-                    if (storedFav) {
-                        expect(storedFav.hostname).toBe(page.hostname)
-                        expect(storedFav.favIconURI).toBe(favIconURI)
-                    }
-                })
+            await db.favIcons.get(expectedData.hostname).then(storedFav => {
+                if (storedFav) {
+                    expect(storedFav.hostname).toBe(page.hostname)
+                    expect(storedFav.favIconURI).toBe(favIconURI)
+                }
+            })
         }
 
         test.skip('Importing data to new index', async () => {
             await importNewPage(data.EXPORTED_PAGE_1 as ExportedPage)
 
-            index.useOld = false
+            // index.useOld = false
             // Make sure search works post-import
             const {
                 docs: [result],
@@ -118,13 +113,13 @@ describe('Old=>New index migration', () => {
                 } as any).then(res => res.docs[0])
             }
 
-            index.useOld = true
+            // index.useOld = true
             const oldResult = await doSearch()
             expect(oldResult[0]).toEqual(data.PAGE_DOC_1._id)
 
             // Perform migration then reset the backend to point to new index
             await new MigrationManager({}).start()
-            index.useOld = false
+            // index.useOld = false
 
             // New index should get same doc with updated unencoded URL ID
             const newResultPostMigration = await doSearch()

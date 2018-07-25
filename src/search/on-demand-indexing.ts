@@ -1,10 +1,10 @@
 import { browser } from 'webextension-polyfill-ts'
 
-import analysePage from '../../page-analysis/background'
-import fetchPageData from '../../page-analysis/background/fetch-page-data'
+import analysePage from '../page-analysis/background'
+import fetchPageData from '../page-analysis/background/fetch-page-data'
 import pipeline from './pipeline'
 import { Page } from './models'
-import { STORAGE_KEYS as IDXING_PREF_KEYS } from '../../options/settings/constants'
+import { STORAGE_KEYS as IDXING_PREF_KEYS } from '../options/settings/constants'
 
 interface Props {
     url: string

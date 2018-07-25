@@ -1,7 +1,7 @@
 import { browser } from 'webextension-polyfill-ts'
 import whenAllSettled from 'when-all-settled'
 
-import importNewPage from '../search-index-new/import'
+import importNewPage from './import'
 import analytics from '../../analytics'
 import createNotif from '../../util/notifications'
 import { MIGRATE_NOTIF, INFO_LINK } from './constants'
@@ -12,7 +12,7 @@ export interface Props {
 }
 
 async function* exportOldPages(params) {
-    throw new Error('Migration is no longer supported.')
+    throw new Error('Migration from old index is no longer supported.')
 }
 
 class MigrationInterrupt extends Error {}

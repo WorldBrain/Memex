@@ -1,5 +1,5 @@
-import db, { Page, FavIcon } from '.'
-import { ExportedPage } from '../migration'
+import db, { Page, FavIcon } from '..'
+import { ExportedPage } from './types'
 
 async function importPage({
     bookmark,

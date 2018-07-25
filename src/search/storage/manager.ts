@@ -1,5 +1,5 @@
 import { extractTerms } from '../pipeline'
-import Storage from '../storage'
+import Storage from '.'
 import StorageRegistry from './registry'
 import { UnimplementedError, InvalidFindOptsError } from './errors'
 import {

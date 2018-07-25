@@ -1,5 +1,5 @@
 import db, { VisitInteraction, PageAddRequest } from '.'
-import normalizeUrl from '../../util/encode-url-for-id'
+import normalizeUrl from '../util/encode-url-for-id'
 import pipeline, { PipelineReq, transformUrl } from './pipeline'
 import { Page, FavIcon } from './models'
 import { getPage } from './util'

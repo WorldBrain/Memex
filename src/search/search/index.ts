@@ -1,5 +1,5 @@
 import db, { SearchParams, PageResultsMap } from '..'
-import QueryBuilder from '../../query-builder'
+import QueryBuilder from '../query-builder'
 import { groupLatestEventsByUrl, mapUrlsToLatestEvents } from './events'
 import { mapResultsToDisplay } from './map-results-to-display'
 import { findFilteredUrls } from './filters'

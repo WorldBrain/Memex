@@ -12,7 +12,6 @@ import initData, { TestData, diff } from './state-manager.test.data'
 jest.mock('src/blacklist/background/interface')
 jest.mock('src/util/encode-url-for-id')
 jest.mock('src/activity-logger')
-jest.mock('src/search')
 jest.mock('./item-processor')
 jest.mock('./cache')
 jest.mock('./data-sources')
@@ -27,7 +26,13 @@ const runSuite = (DATA: TestData, skip = false) => async () => {
             bookmarks: DATA.bookmarks,
         })
 
-        const itemCreator = new ItemCreator({ dataSources })
+        const itemCreator = new ItemCreator({
+            dataSources,
+            existingKeySource: async () => ({
+                histKeys: new Set(),
+                bmKeys: new Set(),
+            }),
+        })
         stateManager = new State({ itemCreator })
 
         if (DATA.allowTypes) {

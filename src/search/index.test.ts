@@ -1,19 +1,16 @@
 import indexedDB from 'fake-indexeddb'
 import IDBKeyRange from 'fake-indexeddb/lib/FDBKeyRange'
 
-import { SearchIndex } from './'
-import * as newIndex from './search-index-new'
+import db, * as index from '.'
 import * as DATA from './index.test.data'
 import { intersection, flatten, difference } from 'lodash'
 
-jest.mock('./search-index-new/models/abstract-model')
+jest.mock('./models/abstract-model')
 jest.mock('lodash/fp/intersection')
 jest.mock('lodash/fp/flatten')
 jest.mock('lodash/fp/difference')
 
 describe('Search index integration', () => {
-    const index = new SearchIndex()
-
     async function insertTestData() {
         // Insert some test data for all tests to use
         await index.addPage({ pageDoc: DATA.PAGE_3, visits: [DATA.VISIT_3] })
@@ -32,7 +29,7 @@ describe('Search index integration', () => {
 
     async function resetTestData(dbName = 'test') {
         indexedDB.deleteDatabase(dbName)
-        newIndex.init({ indexedDB, IDBKeyRange, dbName })
+        index.init({ indexedDB, IDBKeyRange, dbName })
 
         await insertTestData()
     }
@@ -412,8 +409,8 @@ describe('Search index integration', () => {
             await index.addFavIcon(DATA.PAGE_1.url, DATA.FAV_1)
             await index.addFavIcon(DATA.PAGE_2.url, DATA.FAV_1)
 
-            const fav1 = await newIndex.default.favIcons.get(hostname1)
-            const fav2 = await newIndex.default.favIcons.get(hostname2)
+            const fav1 = await db.favIcons.get(hostname1)
+            const fav2 = await db.favIcons.get(hostname2)
             expect(fav1.hostname).toBe(hostname1)
             expect(fav2.hostname).toBe(hostname2)
         })
