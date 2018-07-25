@@ -153,7 +153,7 @@ class CommentBox extends React.PureComponent {
                 <TagHolder
                     tags={tagObjs}
                     clickHandler={() => this.props.setTagInput(true)}
-                    deleteTag={({ name }) => this.props.deleteTag(name)}
+                    deleteTag={({ tag }) => this.props.deleteTag(tag)}
                 />
             )
     }

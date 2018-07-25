@@ -101,10 +101,6 @@ export const setupRPC = () => {
     })
 }
 
-let clickListener = null
-let mouseenterListener = null
-let mouseleaveListener = null
-
 export const attachEventListenersToNewHighlights = (
     annotation,
     focusOnAnnotation,
@@ -117,7 +113,7 @@ export const attachEventListenersToNewHighlights = (
         highlight.dataset.annotation = annotation.url
         if (!focusOnAnnotation) return
 
-        clickListener = async e => {
+        const clickListener = async e => {
             e.preventDefault()
             if (!e.target.dataset.annotation) return
             removeHighlights(true)
@@ -126,7 +122,7 @@ export const attachEventListenersToNewHighlights = (
         }
         highlight.addEventListener('click', clickListener, false)
 
-        mouseenterListener = e => {
+        const mouseenterListener = e => {
             if (!e.target.dataset.annotation) return
             removeMediumHighlights()
             makeHighlightMedium(annotation)
@@ -134,7 +130,7 @@ export const attachEventListenersToNewHighlights = (
         }
         highlight.addEventListener('mouseenter', mouseenterListener, false)
 
-        mouseleaveListener = e => {
+        const mouseleaveListener = e => {
             if (!e.target.dataset.annotation) return
             removeMediumHighlights()
             hoverAnnotationContainer('')
@@ -190,11 +186,13 @@ export function removeHighlights(isDark) {
 }
 
 const removeHighlight = highlight => {
-    highlight.classList.remove(styles['memex-highlight'])
-    highlight.dataset.annotation = ''
-    highlight.removeEventListener('click', clickListener)
-    highlight.removeEventListener('mouseenter', mouseenterListener)
-    highlight.removeEventListener('mouseleave', mouseleaveListener)
+    // Delete the surrounding span element,
+    // while preserving the text inside
+
+    const parent = highlight.parentNode
+    while (highlight.firstChild)
+        parent.insertBefore(highlight.firstChild, highlight)
+    parent.removeChild(highlight)
 }
 
 export const removeAnnotationHighlights = ({ url }) => {
