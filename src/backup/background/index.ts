@@ -7,6 +7,15 @@ import { BackupBackend } from './backend'
 export * from './backend'
 
 
+export interface CompleteBackupProgressInfo {
+    type: 'complete'
+    totalObjects: number
+    processedObjects: number
+    currentCollection: { name: string, processedObjects: number }
+    collections: { [name: string]: { objectCount: number } }
+}
+
+
 export class BackupBackgroundModule {
     storageManager: StorageManager
     storage: BackupStorage
@@ -37,7 +46,6 @@ export class BackupBackgroundModule {
                 return url
             },
             startBackup: ({ tab }, params) => {
-                console.log('starting backup!')
                 const events = this.doBackup()
                 const sendEvent = (eventType, event) => window['browser'].tabs.sendMessage(
                     tab.id,
@@ -88,60 +96,12 @@ export class BackupBackgroundModule {
             await this.lastBackupStorage.storeLastBackupTime(backupTime)
 
             await this.backend.startBackup({ events })
-
             if (lastBackupTime) { // Already one backup has been made, so make incremental one
-                const info = {
-                    type: 'incremental',
-                    totalObjects: await this.storageManager.countAll('backupChanges', {}),
-                    processedObjects: 0,
-                }
-                for await (const change of this.storage.streamChanges(backupTime)) {
-                    if (change.operation !== 'delete') {
-                        console.log(change)
-                        const object = await this.storageManager.findByPk(change.collection, change.objectPk)
-                        await this.backend.storeObject({ collection: change.collection, pk: change.objectPk, object, events })
-                    } else {
-                        await this.backend.deleteObject({ collection: change.collection, pk: change.objectPk, events })
-                    }
-                    await change.forget()
-
-                    info.processedObjects += 1
-                    events.emit('info', { info })
-                }
+                await this._doIncrementalBackup(backupTime, events)
             } else { // Just back up everything
-                console.log('found collections', Object.keys(this.storageManager.registry.collections))
-
-                const collectionNames =
-                    Object.entries(this.storageManager.registry.collections)
-                        .filter(([key, value]) => value.backup !== false)
-                        .map(([key, value]) => key)
-
-                const collectionCountPairs = await Promise.all(collectionNames.map(async collectionName => {
-                    return [collectionName, await this.storageManager.countAll(collectionName, {})]
-                }))
-
-                const info = { type: 'complete', totalObjects: 0, processedObjects: 0, currentCollection: null, collections: {} }
-                for (const [collectionName, objectCount] of collectionCountPairs) {
-                    info.collections[collectionName] = { objectCount }
-                    info.totalObjects += <number>objectCount
-                }
-
-                events.emit('info', { info })
-
-                for (const collectionName of collectionNames) {
-                    info.currentCollection = { name: collectionName, processedObjects: 0 }
-                    events.emit('info', { info })
-
-                    console.log('backing up collection', collectionName)
-                    for await (const { pk, object } of this.storageManager.streamCollection(collectionName)) {
-                        // console.log('backing up %s - %s', collectionName, pk)
-                        await this.backend.storeObject({ collection: collectionName, pk, object, events })
-                        info.processedObjects += 1
-                        info.currentCollection.processedObjects += 1
-                        events.emit('info', { info })
-                    }
-                }
+                await this._doCompleteBackup(events)
             }
+            await this.backend.commitBackup({ events })
         })().then(() => {
             events.emit('success')
         }).catch(e => {
@@ -151,6 +111,77 @@ export class BackupBackgroundModule {
         })
 
         return events
+    }
+
+    async _doIncrementalBackup(untilWhen: Date, events: EventEmitter) {
+        const info = {
+            type: 'incremental',
+            totalObjects: await this.storageManager.countAll('backupChanges', {}),
+            processedObjects: 0,
+        }
+        for await (const change of this.storage.streamChanges(untilWhen)) {
+            await this._backupChange(change, events)
+            await change.forget()
+
+            info.processedObjects += 1
+            events.emit('info', { info })
+        }
+    }
+
+    _backupChange = async (change, events) => {
+        if (change.operation !== 'delete') {
+            const object = await this.storageManager.findByPk(change.collection, change.objectPk)
+            await this.backend.storeObject({ collection: change.collection, pk: change.objectPk, object, events })
+        } else {
+            await this.backend.deleteObject({ collection: change.collection, pk: change.objectPk, events })
+        }
+    }
+
+    async _doCompleteBackup(events: EventEmitter) {
+        const collections = this._getCollectionsToBackup()
+
+        console.log('Found collections to backup', collections)
+
+        const info: CompleteBackupProgressInfo = await this._createCompleteBackupInfo(collections)
+        events.emit('info', { info })
+
+        for (const collection of collections) {
+            info.currentCollection = { name: collection.name, processedObjects: 0 }
+            events.emit('info', { info })
+
+            console.log('Backing up collection', collection.name)
+            for await (const { pk, object } of this.storageManager.streamCollection(collection.name)) {
+                // console.log('backing up %s - %s', collectionName, pk)
+                await this.backend.storeObject({ collection: collection.name, pk, object: { object, schemaVersion: collection.version }, events })
+                info.processedObjects += 1
+                info.currentCollection.processedObjects += 1
+                events.emit('info', { info })
+            }
+        }
+    }
+
+    _getCollectionsToBackup(): { name: string, version: Date }[] {
+        return Object.entries(this.storageManager.registry.collections)
+            .filter(([key, value]) => value.backup !== false)
+            .map(([key, value]) => ({
+                name: key,
+                version: value.version
+            }))
+    }
+
+    async _createCompleteBackupInfo(collections: { name: string }[]): Promise<CompleteBackupProgressInfo> {
+        const info: CompleteBackupProgressInfo = { type: 'complete', totalObjects: 0, processedObjects: 0, currentCollection: null, collections: {} }
+
+        const collectionCountPairs = <[string, number][]>await Promise.all(collections.map(async ({ name }) => {
+            return [name, await this.storageManager.countAll(name, {})]
+        }))
+
+        for (const [collectionName, objectCount] of collectionCountPairs) {
+            info.collections[collectionName] = { objectCount }
+            info.totalObjects += <number>objectCount
+        }
+
+        return info
     }
 }
 
