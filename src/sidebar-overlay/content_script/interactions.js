@@ -82,7 +82,7 @@ export const insertRibbon = () => {
 
 const removeRibbon = () => {
     if (!target) return
-
+    removeHighlights()
     destroyAll(target)()
     target = null
 }
