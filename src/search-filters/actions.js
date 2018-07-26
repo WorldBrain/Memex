@@ -66,5 +66,9 @@ export const fetchSuggestedDomains = () => async (dispatch, getState) => {
     const filteredDomains = selectors.displayDomains(getState())
     const domains = filteredDomains.map(({ value }) => value)
     const suggestedDomains = await remoteFunction('extendedSuggest')(domains, 'domain')
-    dispatch(setSuggestedDomains([...(filteredDomains || []), ...suggestedDomains]))
+
+    dispatch(setSuggestedDomains([...(filteredDomains || []), ...(suggestedDomains || []).map(domain => ({
+        value: domain,
+        isExclusive: false,
+    }))]))
 }

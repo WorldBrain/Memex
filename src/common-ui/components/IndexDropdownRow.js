@@ -5,6 +5,7 @@ import cx from 'classnames'
 
 import localStyles from './IndexDropdown.css'
 import sidebarStyles from './IndexDropdownSidebar.css'
+import annotationStyles from './IndexDropdownAnnotation.css'
 /**
  * @augments {PureComponent<{onClick: any, scrollIntoView: any, isForSidebar: any}, {isForAnnotation: bool}, *>}
  */
@@ -24,12 +25,6 @@ class IndexDropdownRow extends PureComponent {
         scrollIntoView: PropTypes.func.isRequired,
     }
 
-    componentWillMount() {
-        this.styles = this.props.isForAnnotation
-            ? annotationStyles
-            : localStyles
-    }
-
     componentDidMount() {
         this.ensureVisible()
     }
@@ -39,7 +34,9 @@ class IndexDropdownRow extends PureComponent {
     }
 
     get styles() {
-        return this.props.isForSidebar ? sidebarStyles : localStyles
+        if (this.props.isForAnnotation) return annotationStyles
+        else if (this.props.isForSidebar) return sidebarStyles
+        return localStyles
     }
 
     // Scroll with key navigation

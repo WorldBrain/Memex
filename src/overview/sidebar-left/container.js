@@ -42,13 +42,13 @@ class SidebarContainer extends PureComponent {
 
     handleClickOutside = e => {
         const { id } = e.target
-        // Delay the closing of the sidebar for 100ms to check is something is
+        // Delay the closing of the sidebar for 200ms to check is something is
         // being dragged.
         setTimeout(() => {
             if (id !== 'filter-icon' && id !== 'collection-icon') {
                 if (!this.props.urlDragged) this.props.closeSidebar()
             }
-        }, 100)
+        }, 200)
     }
 
     renderSearchFilters = () => <SearchFilters />

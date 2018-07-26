@@ -140,7 +140,9 @@ class SearchFiltersContainer extends PureComponent {
                     initFilters={this.props.filteredDomains.map(
                         ({ value }) => value,
                     )}
-                    initSuggestions={this.props.suggestedDomains}
+                    initSuggestions={this.props.suggestedDomains.map(
+                        ({ value }) => value,
+                    )}
                     source="domain"
                     isSidebarOpen={this.props.isSidebarOpen}
                     closeDropdown={this.props.hideDomainFilter}

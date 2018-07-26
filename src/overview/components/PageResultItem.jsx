@@ -35,6 +35,7 @@ class PageResultItem extends PureComponent {
         setUrlDragged: PropTypes.func.isRequired,
         hideSearchFilters: PropTypes.func.isRequired,
         resetUrlDragged: PropTypes.func.isRequired,
+        onCommentBtnClick: PropTypes.func.isRequired,
         isSidebarOpen: PropTypes.bool.isRequired,
     }
 
