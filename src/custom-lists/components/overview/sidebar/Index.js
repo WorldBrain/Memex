@@ -12,6 +12,7 @@ import ListItem from './ListItem'
 import DeleteConfirmModal from 'src/overview/components/DeleteConfirmModal'
 import { actions as filterActs } from '../../../../search-filters'
 import * as sidebar from '../../../../overview/sidebar-left/selectors'
+import { Wrapper } from '../../../../common-ui/components'
 
 class ListContainer extends Component {
     static propTypes = {
@@ -147,11 +148,7 @@ class ListContainer extends Component {
 
     render() {
         return (
-            <div
-                style={{
-                    marginTop: '15px',
-                }}
-            >
+            <Wrapper>
                 <MyCollection
                     handleRenderCreateList={this.props.toggleCreateListForm}
                 />
@@ -165,6 +162,7 @@ class ListContainer extends Component {
                     <div
                         className={cx({
                             [extStyles.wrapper]: this.props.isSidebarOpen,
+                            [extStyles.allListsInner]: this.props.isSidebarOpen,
                         })}
                     >
                         {this.renderAllLists()}
@@ -175,7 +173,7 @@ class ListContainer extends Component {
                     onClose={this.props.resetListDeleteModal}
                     deleteDocs={this.props.handleDeleteList}
                 />
-            </div>
+            </Wrapper>
         )
     }
 }

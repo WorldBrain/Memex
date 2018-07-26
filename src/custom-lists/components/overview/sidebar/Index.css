@@ -4,19 +4,10 @@
     margin-top: 12px;
 }
 
-.wrapper {
-    min-height: 55vh;
-    min-width: 26vw;
-    overflow: auto;
-    max-height: 65vh;
-
-    /* overflow-y: scroll; */
-    overflow-x: hidden;
-}
-
 .collection {
     color: #767676;
     margin-bottom: 12px;
+    margin-top: 15px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -52,15 +43,15 @@
 }
 
 .allLists {
-    /* max-height: 65vh;
-    min-width: 26vw;
-    overflow: auto; */
-
-    overflow: hidden;
+    height: inherit;
     min-width: 24.8vw;
-    min-height: 39vh;
-    margin-bottom: 70px;
-    max-height: 63vh;
+    overflow: hidden;
+}
+
+.allListsInner {
+    height: inherit;
+    min-width: 26vw;
+    overflow-y: auto;
 }
 
 /* width */
