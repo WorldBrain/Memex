@@ -24,20 +24,6 @@ export class DriveBackupBackend {
     }
 
     async getLoginUrl({ provider, returnUrl }: { provider: string, returnUrl: string }): Promise<string | null> {
-
-        // const hashPos = returnUrl.indexOf('#')
-        // let url = this.authUrl
-        // url += this.authUrl.indexOf('?') > 0 ? '&' : '?'
-        // url += 'redirect_uri=' + encodeURIComponent(returnUrl.replace(/#.*$/, ''))
-        // url += '&scope=' + encodeURIComponent(this.scope)
-        // url += '&client_id=' + encodeURIComponent(this.clientId)
-        // url += '&include_granted_scopes=true'
-        // if (hashPos !== -1 && hashPos + 1 !== returnUrl.length) {
-        //     url +=
-        //         '&state=' + encodeURIComponent(returnUrl.substring(hashPos + 1))
-        // }
-        // url += '&response_type=token'
-
         return `${this.memexCloudOrigin}/auth/google?scope=${this.scope}`
     }
 
@@ -51,9 +37,8 @@ export class DriveBackupBackend {
 
     async handleLoginRedirectedBack(locationHref: string) {
         const response = await fetch(locationHref)
-        const { profile, accessToken, refreshToken, expiresInSeconds } = await response.json()
-        // console.log({ profile, accessToken, refreshToken, expiresInSeconds })
-        await this.tokenManager.handleNewTokens({ accessToken, refreshToken, expiresInSeconds })
+        const { profile, accessToken, expiresInSeconds } = await response.json()
+        await this.tokenManager.handleNewTokens({ accessToken, refreshToken: null, expiresInSeconds })
     }
 
     async startBackup({ events }: { events: EventEmitter }): Promise<any> {
