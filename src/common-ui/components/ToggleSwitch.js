@@ -17,18 +17,35 @@ class ToggleSwitch extends PureComponent {
         activeClassName: localStyles.activeSwitch,
     }
 
+    constructor(props) {
+        super(props)
+
+        this.state = {
+            isChecked: props.isChecked,
+        }
+    }
+
     deriveClass = () =>
         cx(this.props.className, {
             [this.props.activeClassName]: this.props.isChecked,
         })
+
+    handleClick = event => {
+        this.setState(state => ({
+            ...state,
+            isChecked: !state.isChecked,
+        }))
+
+        this.props.onChange()
+    }
 
     render() {
         return (
             <label className={this.deriveClass()}>
                 <input
                     className={localStyles.input}
-                    checked={this.props.isChecked}
-                    onChange={this.props.onChange}
+                    checked={this.state.isChecked}
+                    onChange={this.handleClick}
                     type="checkbox"
                 />
             </label>
