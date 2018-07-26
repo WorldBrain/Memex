@@ -30,7 +30,6 @@ class SidebarContainer extends React.Component {
                     clickHandler={e => {
                         e.preventDefault()
                         this.props.setShowSidebar(false)
-                        this.props.toggleMouseOnSidebar()
                     }}
                 />
             </div>
@@ -47,7 +46,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
     setShowSidebar: showSidebar =>
         dispatch(actions.setShowSidebar(showSidebar)),
-    toggleMouseOnSidebar: event => dispatch(actions.toggleMouseOnSidebar()),
+    toggleMouseOnSidebar: () => dispatch(actions.toggleMouseOnSidebar()),
     closeSidebar: () => dispatch(actions.closeSidebar()),
 })
 
