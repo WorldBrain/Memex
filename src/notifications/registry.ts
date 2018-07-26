@@ -1,12 +1,12 @@
-import * as privacyAct from '../options/privacy/actions'
+import { storeTrackingOption } from '../analytics/store-tracking-option'
 
 export const actionRegistry = {
     'toggle-storage-option': ({ definition }) => {
-        privacyAct.storeTrackingOption(definition.value)
+        storeTrackingOption(definition.value)
     },
     'go-to-url': ({ definition }) => {
         return () => {
             window.location.href = definition.url
         }
-    }
+    },
 }

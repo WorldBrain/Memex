@@ -1,22 +1,22 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import localStyles from './Notification.css'
+import styles from './Notification.css'
 
-const Button = props => (
+const OpenLinkButton = props => (
     <a
         href={props.url}
-        className={localStyles.button}
+        className={styles.button}
         target={props.context === 'new-tab' ? '_blank' : '_self'}
     >
         {props.label}
     </a>
 )
 
-Button.propTypes = {
+OpenLinkButton.propTypes = {
     url: PropTypes.string.isRequired,
     label: PropTypes.string.isRequired,
     context: PropTypes.string,
 }
 
-export default Button
+export default OpenLinkButton

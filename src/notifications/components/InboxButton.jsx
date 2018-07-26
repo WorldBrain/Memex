@@ -4,8 +4,7 @@ import classNames from 'classnames'
 import styles from './InboxButton.css'
 
 const showInboxClass = showInbox =>
-    classNames({
-        [styles.inbox]: true,
+    classNames(styles.inbox, {
         [styles.activeInbox]: showInbox,
     })
 

@@ -2,15 +2,15 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
 
-import localStyles from './ReadHeader.css'
+import styles from './ReadHeader.css'
 
 const isExpanded = expanded =>
-    classNames(localStyles.expIcon, {
-        [localStyles.expanded]: expanded,
+    classNames(styles.expIcon, {
+        [styles.expanded]: expanded,
     })
 
 const ReadHeader = props => (
-    <div className={localStyles.readHeader} onClick={props.toggleReadExpand}>
+    <div className={styles.readHeader} onClick={props.toggleReadExpand}>
         <span>Read</span>
         <img
             className={isExpanded(props.isReadExpanded)}

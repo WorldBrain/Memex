@@ -2,41 +2,43 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
 
-import localStyles from './Notification.css'
+import styles from './Notification.css'
 
 const hasOnlyButton = hasButton =>
-    classNames(localStyles.buttonTick, {
-        [localStyles.onlyTick]: !hasButton,
+    classNames(styles.buttonTick, {
+        [styles.onlyTick]: !hasButton,
     })
 
 const Notification = props => (
     <li>
-        <div className={localStyles.mainNotifContainer}>
-            <div className={localStyles.whyContainer}>
-                <div className={localStyles.why}>
+        <div className={styles.mainNotifContainer}>
+            <div className={styles.whyContainer}>
+                <div className={styles.why}>
                     Why am I seeing this?
-                    <span className={localStyles.whyText}>
-                        This notification has been stored in the code of
-                        last update. No connection to our servers have been
-                        made to send it to you.
+                    <span className={styles.whyText}>
+                        This notification has been stored in the code of last
+                        update. No connection to our servers has been made to
+                        send it to you.
                     </span>
                 </div>
             </div>
-            <div className={localStyles.notifContainer}>
-                <div className={localStyles.logo}>
+            <div className={styles.notifContainer}>
+                <div className={styles.logo}>
                     <img src="/img/worldbrain-logo-narrow.png" />
                 </div>
-                <div className={localStyles.content}>
-                    <div className={localStyles.messageWhy}>
-                        <div className={localStyles.titleMessage}>
-                            <div className={localStyles.title}>{props.title}</div>
+                <div className={styles.content}>
+                    <div className={styles.messageWhy}>
+                        <div className={styles.titleMessage}>
+                            <div className={styles.title}>{props.title}</div>
                             <div
-                                className={localStyles.message}
-                                dangerouslySetInnerHTML={{ __html: props.message }}
+                                className={styles.message}
+                                dangerouslySetInnerHTML={{
+                                    __html: props.message,
+                                }}
                             />
                             {props.isShowMore && (
                                 <div
-                                    className={localStyles.showMore}
+                                    className={styles.showMore}
                                     onClick={props.showMore}
                                 >
                                     Show {props.isMore ? 'More' : 'Less'}
@@ -46,12 +48,12 @@ const Notification = props => (
                     </div>
                     {(props.isUnread || props.buttonText) && (
                         <div className={hasOnlyButton(props.buttonText)}>
-                            <div className={localStyles.buttonsContainer}>
+                            <div className={styles.buttonsContainer}>
                                 {props.buttons}
                             </div>
                             {props.isUnread && (
                                 <div
-                                    className={localStyles.tick}
+                                    className={styles.tick}
                                     onClick={props.handleTick}
                                 >
                                     <i className="material-icons">done</i>

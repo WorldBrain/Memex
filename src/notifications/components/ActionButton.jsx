@@ -1,16 +1,16 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import localStyles from './Notification.css'
+import styles from './Notification.css'
 
 const ActionButton = props => (
-    <div className={localStyles.button} onClick={props.handleClick}>
-        {props.label}
-    </div>
+    <button className={styles.actionButton} onClick={props.handleClick}>
+        {props.children}
+    </button>
 )
 
 ActionButton.propTypes = {
-    label: PropTypes.string.isRequired,
+    children: PropTypes.string.isRequired,
     handleClick: PropTypes.func.isRequired,
 }
 

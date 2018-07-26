@@ -2,13 +2,13 @@ import { SHOULD_TRACK_STORAGE_KEY } from '../options/privacy/constants'
 
 export interface ActionDefinition {
     /** Type of the button the button, it can be go-to-url etc. */
-    type: string,
+    type: string
     /** Url of the button if the button is to open a new link */
-    url?: string,
+    url?: string
     /** It is used for open the new tab or self tab {new-tab|self} */
-    context?: string,
+    context?: string
     /** Key when we need to use the variable of the local storage */
-    key?: string,
+    key?: string
 }
 
 export interface ButtonDefinition {
@@ -33,16 +33,6 @@ export interface NotifDefinition {
 /** Time when create the notif, get the current unix time (Date.now()) - Important, the notif insertation in db depends on it */
 export const releaseTime: number = 1532421254491
 
-/**
- * Add New Notification Here
- * Add the new notification in {NOTIFS} array
- * There are some fields that are mandtory and some of them are optional
- * Fields and its description - * indicates that it is mandtory
- *      id* - Should be unique (feature_name + notification + incNumber)
- *      title* - Title of the notifications - Do not support html tags
- *      message* - Message in the text - It supports html tags (for example h1, i, b)
- *      releaseTime* - Time when create the notif, get the current unix time (Date.now()) - Important, the notif insertation in db depends on it
- */
 export const NOTIFS: NotifDefinition[] = [
     {
         id: 'direct_links_inital_notification',
@@ -54,7 +44,7 @@ export const NOTIFS: NotifDefinition[] = [
                 action: {
                     type: 'go-to-url',
                     url: 'https://worldbrain.io',
-                    context: 'new-tab'
+                    context: 'new-tab',
                 },
                 label: 'Learn More',
             },
@@ -62,10 +52,10 @@ export const NOTIFS: NotifDefinition[] = [
                 action: {
                     type: 'go-to-url',
                     url: 'https://memex.io',
-                    context: 'new-tab'
+                    context: 'new-tab',
                 },
                 label: 'Learn More',
-            }
+            },
         ],
     },
     {
@@ -85,10 +75,10 @@ export const NOTIFS: NotifDefinition[] = [
                 action: {
                     type: 'go-to-url',
                     url: 'https://memex.io',
-                    context: 'new-tab'
+                    context: 'new-tab',
                 },
                 label: 'Learn More',
-            }
+            },
         ],
     },
     {

@@ -11,7 +11,7 @@ import NotificationList from './components/NotificationList'
 import Notification from './components/Notification'
 import StatusHeading from './components/StatusHeading'
 import ReadHeader from './components/ReadHeader'
-import Button from './components/Button'
+import OpenLinkButton from './components/OpenLinkButton'
 import ActionButton from './components/ActionButton'
 import { actionRegistry } from './registry'
 import OptIn from './components/OptIn'
@@ -48,16 +48,14 @@ class NotificationContainer extends Component {
     }
 
     truncateText(message) {
-
         const lastSpaceBeforeCutoff = message.lastIndexOf(
             ' ',
             this.props.messageCharLimit,
         )
-        const trunctatedText =
-            message.substr(0, lastSpaceBeforeCutoff) + '&#8230;'
+        const trunctatedText = message.substr(0, lastSpaceBeforeCutoff) + '...'
         return trunctatedText
     }
-    
+
     handleToggleStorageOption(action) {
         const { shouldTrack } = this.props
 
@@ -82,21 +80,23 @@ class NotificationContainer extends Component {
         return buttons.map((button, i) => {
             const { action } = button
 
-            if(action.type === 'go-to-url') {
+            if (action.type === 'go-to-url') {
                 return (
-                    <Button
+                    <OpenLinkButton
                         key={i}
                         url={action.url}
                         label={button.label}
                         context={action.context}
                     />
                 )
-            } else if(action.type === 'toggle-storage-option') {
+            } else if (action.type === 'toggle-storage-option') {
                 return (
                     <OptIn key={i}>
                         <ToggleSwitch
                             isChecked={shouldTrack}
-                            onChange={() => this.handleToggleStorageOption(action)}
+                            onChange={() =>
+                                this.handleToggleStorageOption(action)
+                            }
                         />
                     </OptIn>
                 )
@@ -104,11 +104,12 @@ class NotificationContainer extends Component {
                 return (
                     <ActionButton
                         key={i}
-                        label={button.label}
                         handleClick={actionRegistry[action.type]({
                             definition: action,
                         })}
-                    />
+                    >
+                        {button.label}
+                    </ActionButton>
                 )
             }
         })
@@ -141,7 +142,7 @@ class NotificationContainer extends Component {
                             : notification.id,
                     )}
                     isMore={showMoreIndex !== notification.id}
-                    handleTick={handleTick(notification)}
+                    handleTick={handleTick(notification, i)}
                     isUnread={isUnread}
                     buttons={this.renderButtons(notification.buttons)}
                 />
@@ -149,7 +150,7 @@ class NotificationContainer extends Component {
         })
     }
 
-    renderNotification() {
+    renderReadNotifications() {
         const { readNotificationList, isReadShow } = this.props
 
         if (!isReadShow) {
@@ -179,6 +180,12 @@ class NotificationContainer extends Component {
         return notificationResults
     }
 
+    renderUnreadNotifications() {
+        const { unreadNotificationList } = this.props
+
+        return this.renderNotificationItems(unreadNotificationList, true)
+    }
+
     render() {
         const { unreadNotificationList, readNotificationList } = this.props
 
@@ -189,14 +196,14 @@ class NotificationContainer extends Component {
                         ? 'There are no new notification.'
                         : 'New'}
                 </StatusHeading>
-                {this.renderNotificationItems(unreadNotificationList, true)}
+                {this.renderUnreadNotifications()}
                 {readNotificationList.notifications.length !== 0 && (
                     <ReadHeader
                         isReadExpanded={this.props.isReadExpanded}
                         toggleReadExpand={this.props.toggleReadExpand}
                     />
                 )}
-                {this.renderNotification()}
+                {this.renderReadNotifications()}
             </NotificationList>
         )
     }
@@ -227,9 +234,9 @@ const mapDispatchToProps = dispatch => ({
         event.preventDefault()
         dispatch(actions.setShowMoreIndex(index))
     },
-    handleTick: notification => event => {
+    handleTick: (notification, index) => event => {
         event.preventDefault()
-        dispatch(actions.handleReadNotif(notification))
+        dispatch(actions.handleReadNotif(notification, index))
     },
 })
 

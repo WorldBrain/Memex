@@ -5,7 +5,7 @@ import styles from './Button.css'
 import * as constants from '../constants'
 import { remoteFunction } from '../../util/webextensionRPC'
 
-const getUnreadCount = remoteFunction('getUnreadCount')
+const fetchUnreadCount = remoteFunction('fetchUnreadCount')
 
 class NotificationContainer extends Component {
     state = {
@@ -23,7 +23,7 @@ class NotificationContainer extends Component {
     }
 
     async getInitNotificationState() {
-        const res = await getUnreadCount()
+        const res = await fetchUnreadCount()
         return { unreadNotifCount: res }
     }
 

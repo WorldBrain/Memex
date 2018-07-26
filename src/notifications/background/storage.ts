@@ -10,15 +10,13 @@ export default class NotificationStorage extends FeatureStorage {
                 id: { type: 'string' },
                 title: { type: 'string' },
                 message: { type: 'string' },
-                buttonText: {type: 'string'},
-                link: {type: 'string'},
-                sentTime: {type: 'datetime'},
-                deliveredTime: {type: 'datetime'},
-                readTime: {type: 'datetime'},
+                buttonText: { type: 'string' },
+                link: { type: 'string' },
+                sentTime: { type: 'datetime' },
+                deliveredTime: { type: 'datetime' },
+                readTime: { type: 'datetime' },
             },
-            indices: [
-                { field: 'id', pk: true },
-            ],
+            indices: [{ field: 'id', pk: true }],
         })
     }
 
@@ -57,10 +55,23 @@ export default class NotificationStorage extends FeatureStorage {
         }
     }
 
-    async getUnreadCount() {
-        return await this.storageManager.countAll(
+    async fetchUnreadCount() {
+        return await this.storageManager.countAll('notifications', {
+            readTime: { $exists: false },
+        })
+    }
+
+    async readNotification(id) {
+        const notification = await this.storageManager.findObject(
             'notifications',
-            { readTime: { $exists: false } },
+            {
+                id,
+            },
         )
+
+        await this.storageManager.putObject('notifications', {
+            ...notification,
+            readTime: Date.now(),
+        })
     }
 }

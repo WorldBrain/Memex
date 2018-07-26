@@ -40,17 +40,45 @@ const nextPage = () => (state: State) => ({
 })
 
 // Updates notifications result state by either overwriting or appending
-const handleNotificationResult = ({ overwrite }) => (state, newNotificationResult) => {
-    
+const handleNotificationResult = ({ overwrite }) => (
+    state,
+    newNotificationResult,
+) => {
     const readNotificationList = overwrite
         ? newNotificationResult
-        : {  
-            ...newNotificationResult,
-            notifications: [...state.readNotificationList.notifications, ...newNotificationResult.notifications],
-        }
+        : {
+              ...newNotificationResult,
+              notifications: [
+                  ...state.readNotificationList.notifications,
+                  ...newNotificationResult.notifications,
+              ],
+          }
 
     return { ...state, readNotificationList }
 }
+
+const removeUnReadNotif = () => (state, index) => {
+    const unreadNotificationList = [
+        ...state.unreadNotificationList.slice(0, index),
+        ...state.unreadNotificationList.slice(index + 1),
+    ]
+
+    return {
+        ...state,
+        unreadNotificationList,
+    }
+}
+
+const addReadNotif = () => (state, notification) => ({
+    ...state,
+    readNotificationList: {
+        ...state.readNotificationList,
+        notifications: [
+            notification,
+            ...state.readNotificationList.notifications,
+        ],
+    },
+})
 
 const toggleExpand = () => state => ({
     ...state,
@@ -69,16 +97,30 @@ const initState = <T>(key) => (state: State, payload: T) => ({
 
 const reducer = createReducer<State>({}, defaultState)
 
-reducer.on(actions.setReadNotificationList, initState<NotifDefinition[]>('readNotificationList'))
-reducer.on(actions.setUnreadNotificationList, initState<NotifDefinition[]>('unreadNotificationList'))
+reducer.on(
+    actions.setReadNotificationList,
+    initState<NotifDefinition[]>('readNotificationList'),
+)
+reducer.on(
+    actions.setUnreadNotificationList,
+    initState<NotifDefinition[]>('unreadNotificationList'),
+)
 reducer.on(actions.setShowMoreIndex, initState<boolean>('showMoreIndex'))
 reducer.on(actions.nextPage, nextPage())
 reducer.on(actions.setLoading, initState<boolean>('isLoading'))
-reducer.on(actions.appendReadNotificationResult, handleNotificationResult({ overwrite: false }))
-reducer.on(actions.setReadNotificationResult, handleNotificationResult({ overwrite: true }))
+reducer.on(
+    actions.appendReadNotificationResult,
+    handleNotificationResult({ overwrite: false }),
+)
+reducer.on(
+    actions.setReadNotificationResult,
+    handleNotificationResult({ overwrite: true }),
+)
 reducer.on(actions.toggleReadExpand, toggleExpand())
 reducer.on(actions.toggleInbox, toggleShowInbox())
 reducer.on(actions.setUnreadCount, initState<number>('unreadNotifCount'))
 reducer.on(actions.setShouldTrack, initState<boolean>('shouldTrack'))
+reducer.on(actions.removeUnReadNotif, removeUnReadNotif())
+reducer.on(actions.addReadNotif, addReadNotif())
 
 export default reducer

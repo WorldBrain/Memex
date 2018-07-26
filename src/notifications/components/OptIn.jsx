@@ -1,15 +1,13 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import localStyles from './Notification.css'
+import styles from './Notification.css'
 
 const OptIn = props => (
-    <div className={localStyles.optInContainer}>
+    <div className={styles.optInContainer}>
         {props.children}
-        <div className={localStyles.optInTextContainer}>
-            <p className={localStyles.optIn}>
-                Change tracking
-            </p>
+        <div className={styles.optInTextContainer}>
+            <p className={styles.optIn}>Change tracking</p>
         </div>
     </div>
 )

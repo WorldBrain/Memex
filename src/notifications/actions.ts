@@ -19,16 +19,31 @@ export const setShowMoreIndex = createAction('notifications/setShowMoreIndex')
 export const nextPage = createAction('notifications/nextPage')
 export const setLoading = createAction<boolean>('notifications/setLoading')
 export const toggleReadExpand = createAction('notifications/toggleReadExpand')
-export const appendReadNotificationResult = createAction<NotifDefinition[]>('notifications/setSearchResult')
-export const setReadNotificationResult = createAction<NotifDefinition[]>('notifications/setReadNotificationResult')
+export const appendReadNotificationResult = createAction<NotifDefinition[]>(
+    'notifications/setSearchResult',
+)
+export const setReadNotificationResult = createAction<NotifDefinition[]>(
+    'notifications/setReadNotificationResult',
+)
 export const toggleInbox = createAction<any>('notifications/toggleInbox')
-export const setUnreadCount = createAction<number>('notific ations/setUnreadCount')
-export const setShouldTrack = createAction<boolean>('notifications/setShouldTrack')
+export const setUnreadCount = createAction<number>(
+    'notific ations/setUnreadCount',
+)
+export const setShouldTrack = createAction<boolean>(
+    'notifications/setShouldTrack',
+)
+export const removeUnReadNotif = createAction<number>(
+    'notifications/removeUnReadNotif',
+)
+export const addReadNotif = createAction<NotifDefinition>(
+    'notifications/addReadNotif',
+)
 
 const fetchUnreadNotifications = remoteFunction('fetchUnreadNotifications')
 const fetchReadNotifications = remoteFunction('fetchReadNotifications')
 const storeNotification = remoteFunction('storeNotification')
-const getUnreadCount = remoteFunction('getUnreadCount')
+const fetchUnreadCount = remoteFunction('fetchUnreadCount')
+const readNotification = remoteFunction('readNotification')
 
 export const init = () => async (dispatch, getState) => {
     const shouldTrack = (await browser.storage.local.get(SHOULD_TRACK))[
@@ -40,7 +55,9 @@ export const init = () => async (dispatch, getState) => {
     dispatch(getReadNotifications())
 }
 
-export const getReadNotifications = ({ overwrite } = { overwrite: false }) => async (dispatch, getState) => {
+export const getReadNotifications = (
+    { overwrite } = { overwrite: false },
+) => async (dispatch, getState) => {
     dispatch(setLoading(true))
 
     const readNotifications = await fetchReadNotifications({
@@ -48,7 +65,9 @@ export const getReadNotifications = ({ overwrite } = { overwrite: false }) => as
         skip: selectors.notificationsSkip(getState()),
     })
 
-    const notifAction = overwrite? setReadNotificationResult: appendReadNotificationResult
+    const notifAction = overwrite
+        ? setReadNotificationResult
+        : appendReadNotificationResult
 
     dispatch(notifAction(readNotifications))
     dispatch(setLoading(false))
@@ -62,15 +81,14 @@ export const getUnreadNotifications = () => async (dispatch, getState) => {
     dispatch(setLoading(false))
 }
 
-export const handleReadNotif = notification => async (dispatch, getState) => {
-    await storeNotification({
-        ...notification,
-        readTime: Date.now(),
-    })
-    dispatch(updateUnreadNotif())
-    
-    dispatch(getUnreadNotifications())
-    dispatch(getReadNotifications({ overwrite: true }))
+export const handleReadNotif = (notification, index) => async (
+    dispatch,
+    getState,
+) => {
+    await readNotification(notification.id)
+
+    dispatch(removeUnReadNotif(index))
+    dispatch(addReadNotif(notification))
 }
 
 /**
@@ -82,6 +100,6 @@ export const getMoreNotifications = () => dispatch => {
 }
 
 export const updateUnreadNotif = () => async (dispatch, getState) => {
-    const unreadNotifs = await getUnreadCount()
+    const unreadNotifs = await fetchUnreadCount()
     dispatch(setUnreadCount(unreadNotifs))
 }
