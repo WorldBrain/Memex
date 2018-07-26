@@ -40,6 +40,7 @@ export class DriveTokenManager {
 
         const response = await fetch(`${this.memexCloudOrigin}/auth/google/refresh`, {
             method: 'POST',
+            credentials: 'include',
             body: JSON.stringify({
                 refreshToken: this.refreshToken
             }),

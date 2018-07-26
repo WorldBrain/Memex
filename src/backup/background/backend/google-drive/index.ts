@@ -46,7 +46,7 @@ export class DriveBackupBackend {
     }
 
     async isConnected() {
-        return !!(await this.tokenManager.tokenStore.retrieveAccessToken())
+        return !!(await this.tokenManager.tokenStore.retrieveRefreshToken())
     }
 
     async handleLoginRedirectedBack(locationHref: string) {
