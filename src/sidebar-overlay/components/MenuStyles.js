@@ -3,6 +3,7 @@
 const baseStyles = {
     bmMenuWrap: {
         top: 0,
+        transition: 'all 0s',
     },
     bmMenu: {
         position: 'fixed',
@@ -12,7 +13,7 @@ const baseStyles = {
         width: '340px',
         height: '100%',
         marginTop: '-25px',
-        transition: 'all 0.5s',
+        transition: 'all 0s',
         boxShadow: '-4px 2px 20px 1px rgba(62, 185, 149, 0.0902)',
     },
     bmBurgerButton: {
