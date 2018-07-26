@@ -9,7 +9,7 @@ export async function createAndCopyDirectLink() {
 
     const anchor = await extractAnchor(selection)
     const result = await remoteFunction('createDirectLink')({ url, anchor })
-    copyToClipboard(result.link)
+    copyToClipboard(result.url)
     selectTextFromRange(range)
     return result
 }

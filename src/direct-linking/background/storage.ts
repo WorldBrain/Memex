@@ -8,7 +8,7 @@ import {
 import { STORAGE_KEYS as IDXING_PREF_KEYS } from '../../options/settings/constants'
 import { Tag } from '../../search/search-index-new/models'
 
-export const COLLECTION_NAME = 'directLinks'
+export const DIRECTLINK_TABLE = 'directLinks'
 export const ANNOTATION_TABLE = 'annotations'
 const TAGS_TABLE = 'tags'
 
@@ -36,7 +36,7 @@ export default class DirectLinkingStorage extends FeatureStorage {
         super(storageManager)
         this._browserStorageArea = browserStorageArea
 
-        this.storageManager.registerCollection(COLLECTION_NAME, [
+        this.storageManager.registerCollection(DIRECTLINK_TABLE, [
             {
                 version: new Date(2018, 5, 31),
                 fields: {
@@ -95,7 +95,7 @@ export default class DirectLinkingStorage extends FeatureStorage {
         body,
         selector,
     }: Annotation) {
-        await this.storageManager.putObject(ANNOTATION_TABLE, {
+        await this.storageManager.putObject(DIRECTLINK_TABLE, {
             pageTitle,
             pageUrl,
             body,
@@ -128,6 +128,7 @@ export default class DirectLinkingStorage extends FeatureStorage {
     }
 }
 
+// TODO: Move to src/annotations in the future
 export class AnnotationStorage extends FeatureStorage {
     private _browserStorageArea: Storage.StorageArea
 
@@ -196,6 +197,25 @@ export class AnnotationStorage extends FeatureStorage {
     async getAnnotationsByUrl(pageUrl: string) {
         return await this.storageManager.findAll(ANNOTATION_TABLE, {
             pageUrl,
+        })
+    }
+
+    async insertDirectLink({
+        pageTitle,
+        pageUrl,
+        url,
+        body,
+        selector,
+    }: Annotation) {
+        await this.storageManager.putObject(ANNOTATION_TABLE, {
+            pageTitle,
+            pageUrl,
+            body,
+            selector,
+            createdWhen: new Date(),
+            lastEdited: {},
+            url,
+            comment: '',
         })
     }
 
