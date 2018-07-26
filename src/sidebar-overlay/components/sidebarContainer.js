@@ -20,8 +20,8 @@ class SidebarContainer extends React.Component {
         pageUrl: PropTypes.string,
         pageTitle: PropTypes.string,
         annotations: PropTypes.array.isRequired,
+        isLoading: PropTypes.bool.isRequired,
         fetchAnnotations: PropTypes.func.isRequired,
-        findAnnotationCount: PropTypes.func.isRequired,
         editAnnotation: PropTypes.func.isRequired,
         deleteAnnotation: PropTypes.func.isRequired,
         recieveAnchor: PropTypes.func.isRequired,
@@ -29,9 +29,9 @@ class SidebarContainer extends React.Component {
         setHoveredAnnotation: PropTypes.func.isRequired,
         setAnnotations: PropTypes.func.isRequired,
         setHidden: PropTypes.func.isRequired,
+        setIsLoading: PropTypes.func.isRequired,
         activeAnnotation: PropTypes.string.isRequired,
         hoveredAnnotation: PropTypes.string.isRequired,
-        annotationCount: PropTypes.number.isRequired,
     }
 
     static defaultProps = {
@@ -44,20 +44,13 @@ class SidebarContainer extends React.Component {
     }
 
     async componentDidMount() {
-        const {
-            pageTitle,
-            pageUrl,
-            setPageInfo,
-            fetchAnnotations,
-            findAnnotationCount,
-        } = this.props
+        const { pageTitle, pageUrl, setPageInfo, fetchAnnotations } = this.props
         setPageInfo(pageUrl, pageTitle)
         if (this.props.env === 'iframe') {
             this.setupFrameFunctions()
         } else {
             await fetchAnnotations()
         }
-        await findAnnotationCount()
     }
 
     parentFC = new FrameCommunication()
@@ -69,6 +62,7 @@ class SidebarContainer extends React.Component {
             },
             setAnnotations: annotations => {
                 this.props.setAnnotations(annotations)
+                this.props.setIsLoading(false)
             },
             sendAnchorToSidebar: anchor => {
                 this.props.recieveAnchor(anchor)
@@ -79,6 +73,9 @@ class SidebarContainer extends React.Component {
             setHoveredAnnotation: url => {
                 this.props.setHoveredAnnotation(url)
             },
+            setLoaderActive: () => {
+                this.props.setIsLoading(true)
+            },
         })
     }
 
@@ -87,7 +84,6 @@ class SidebarContainer extends React.Component {
             this.props.setShowSidebar(false)
             this.props.setAnnotations([])
             this.props.setHidden(false)
-            console.log(false)
         }
     }
 
@@ -151,9 +147,9 @@ class SidebarContainer extends React.Component {
     }
 
     renderAnnotations = () => {
-        const { annotations, env, annotationCount } = this.props
+        const { annotations, env } = this.props
 
-        if (annotationCount && !annotations.length) return <Loader />
+        if (this.props.isLoading) return <Loader />
 
         if (env === 'overview')
             annotations.sort((x, y) => x.createdWhen < y.createdWhen)
@@ -192,7 +188,7 @@ const mapStateToProps = state => ({
     annotations: selectors.annotations(state),
     activeAnnotation: selectors.activeAnnotation(state),
     hoveredAnnotation: selectors.activeAnnotation(state),
-    annotationCount: selectors.annotationCount(state),
+    isLoading: selectors.isLoading(state),
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -206,8 +202,8 @@ const mapDispatchToProps = dispatch => ({
     recieveAnchor: anchor => dispatch(commentActions.receiveAnchor(anchor)),
     setActiveAnnotation: key => dispatch(actions.setActiveAnnotation(key)),
     setHoveredAnnotation: key => dispatch(actions.setHoveredAnnotation(key)),
-    findAnnotationCount: () => dispatch(actions.findAnnotationCount()),
     setHidden: value => dispatch(commentActions.setHidden(value)),
+    setIsLoading: value => dispatch(actions.setIsLoading(value)),
 })
 
 export default connect(

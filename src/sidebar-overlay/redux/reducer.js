@@ -5,6 +5,7 @@ import * as actions from './actions'
 const defaultState = {
     annotations: [],
     annotationCount: 0,
+    isLoading: true,
     // Information about the page to pass to the storage
     page: {
         url: null,
@@ -24,6 +25,11 @@ const setAnnotations = (state, annotations) => ({
 const setAnnotationCount = (state, value) => ({
     ...state,
     annotationCount: value,
+})
+
+const setIsLoading = (state, value) => ({
+    ...state,
+    isLoading: value,
 })
 
 const setPageInfo = (state, page) => ({
@@ -48,6 +54,7 @@ export default createReducer(
         [actions.setActiveAnnotation]: setActiveAnnotation,
         [actions.setHoveredAnnotation]: setHoveredAnnotation,
         [actions.setAnnotationCount]: setAnnotationCount,
+        [actions.setIsLoading]: setIsLoading,
     },
     defaultState,
 )

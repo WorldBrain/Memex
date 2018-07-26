@@ -176,7 +176,6 @@ class AnnotationContainer extends React.Component {
         const timestamp = moment(dateObject)
             .format('MMMM D YYYY')
             .toUpperCase()
-
         return {
             timestamp,
             lastEdited,

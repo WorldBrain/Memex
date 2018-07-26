@@ -16,14 +16,18 @@ export const setHoveredAnnotation = createAction('setHoveredAnnotation')
 
 export const setAnnotationCount = createAction('setAnnotationCount')
 
+export const setIsLoading = createAction('setIsLoading')
+
 export const setPageInfo = createAction('setPageInfo')
 
 export const fetchAnnotationAct = () => async (dispatch, getState) => {
     dispatch(setAnnotations([]))
+    dispatch(setIsLoading(true))
     const state = getState()
     const { url } = selectors.page(state)
     const annotations = await remoteFunction('getAllAnnotations')(url)
     dispatch(setAnnotations(annotations))
+    dispatch(setIsLoading(false))
 }
 
 export const findAnnotationCount = () => async (dispatch, getState) => {
@@ -64,7 +68,10 @@ export const editAnnotation = (url, comment) => async (dispatch, getState) => {
     const state = getState()
     const annotations = [...selectors.annotations(state)]
     annotations.forEach(annotation => {
-        if (annotation.url === url) annotation.comment = comment
+        if (annotation.url === url) {
+            annotation.comment = comment
+            annotation.lastEdited = new Date().getTime()
+        }
     })
     dispatch(setAnnotations(annotations))
 }
