@@ -1,9 +1,10 @@
-import db, { SearchParams, FilteredURLs, storageManager } from '..'
-import { remoteFunction } from '../../../util/webextensionRPC'
-import CustomListBackground from '../../../custom-lists/background'
 import intersection from 'lodash/fp/intersection'
 import flatten from 'lodash/fp/flatten'
 import difference from 'lodash/fp/difference'
+
+import db, { SearchParams, FilteredURLs, storageManager } from '..'
+import { remoteFunction } from '../../../util/webextensionRPC'
+import CustomListBackground from '../../../custom-lists/background'
 
 const pageIndexLookup = (index: string, matches: string[]) =>
     db.pages
@@ -36,23 +37,8 @@ export class FilteredURLsManager implements FilteredURLs {
         ].filter(urls => urls != null)
 
         // Depends on no. of applied filters whether to take intersection or just flatten.
-        let initInclude
-        if (allUrls.length > 1) {
-            initInclude = intersection(...allUrls)
-        } else {
-            initInclude = flatten(allUrls)
-        }
-
-        /* Old intersection and difference
         const initInclude =
-            incDomainUrls && tagUrls && listUrls
-                ? [...incDomainUrls].filter(url => (tagUrls.has(url) && listUrls.has(url)))
-                : [...(incDomainUrls || []), ...(tagUrls || []), ...(listUrls || [])]
-
-        this.include = excDomainUrls
-            ? new Set([...initInclude].filter(url => !excDomainUrls.has(url)))
-            : new Set(initInclude)
-        */
+            allUrls.length > 1 ? intersection(...allUrls) : flatten(allUrls)
 
         // Ensure no excluded URLs in included sets
         this.include = new Set(

@@ -5,7 +5,6 @@ import DataSources from './data-sources'
 import ItemCreator from './item-creator'
 import Progress from './progress-manager'
 import Processor from './item-processor'
-import { ImportItem } from './types'
 
 import * as urlLists from './url-list.test.data'
 import initData, { TestData, diff } from './state-manager.test.data'

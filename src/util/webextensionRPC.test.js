@@ -32,7 +32,9 @@ describe('remoteFunction', () => {
         const remoteFunc = remoteFunction('remoteFunc', { tabId: 1 })
         try {
             await remoteFunc()
-        } catch (e) {}
+        } catch (e) {
+            // Do nothing
+        }
         expect(browser.tabs.sendMessage).toHaveBeenCalledTimes(1)
         expect(browser.runtime.sendMessage).toHaveBeenCalledTimes(0)
     })
@@ -41,7 +43,9 @@ describe('remoteFunction', () => {
         const remoteFunc = remoteFunction('remoteFunc')
         try {
             await remoteFunc()
-        } catch (e) {}
+        } catch (e) {
+            // Do nothing
+        }
         expect(browser.tabs.sendMessage).toHaveBeenCalledTimes(0)
         expect(browser.runtime.sendMessage).toHaveBeenCalledTimes(1)
     })

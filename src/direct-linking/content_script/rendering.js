@@ -16,9 +16,9 @@ export async function highlightAnnotation(
     try {
         await Raven.context(async () => {
             let descriptor
-            if (annotation.anchors)
+            if (annotation.anchors) {
                 descriptor = annotation.anchors[0].descriptor
-            else descriptor = annotation.selector.descriptor
+            } else descriptor = annotation.selector.descriptor
 
             Raven.captureBreadcrumb({
                 message: 'annotation-selector-received',

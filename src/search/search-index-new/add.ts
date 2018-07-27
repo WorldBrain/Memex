@@ -86,7 +86,7 @@ export async function addVisit(url: string, time = Date.now()) {
     }
 
     matchingPage.addVisit(time)
-    return await matchingPage.save()
+    return matchingPage.save()
 }
 
 export async function addFavIcon(url: string, favIconURI: string) {

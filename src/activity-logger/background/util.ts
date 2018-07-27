@@ -17,7 +17,7 @@ export const shouldLogTab: LoggableTabChecker = async function({
     }
 
     // First check if we want to log this page (hence the 'maybe' in the name).
-    const isBlacklisted = await blacklist.checkWithBlacklist()
+    const isBlacklisted = await blacklist.checkWithBlacklist() // tslint:disable-line
     const isPaused = await getPauseState()
 
     return !isPaused && !isBlacklisted({ url })

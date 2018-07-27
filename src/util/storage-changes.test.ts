@@ -1,5 +1,3 @@
-import { browser, Storage } from 'webextension-polyfill-ts'
-
 import { storageChangesManager, StorageAreaName } from './storage-changes'
 
 const storageAreas: StorageAreaName[] = ['sync', 'local', 'managed']

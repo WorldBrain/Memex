@@ -18,7 +18,7 @@ export const addPageToTagValue = pageEntry =>
         } else {
             value = new Map([pageEntry]) // Make new Map value for non-existent tag key
         }
-        return await index.put(tagKey, value)
+        return index.put(tagKey, value)
     }
 
 /**

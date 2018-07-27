@@ -59,8 +59,9 @@ class CommentBox extends React.PureComponent {
         else if (
             this.tagInputContainer &&
             this.tagInputContainer.contains(e.target)
-        )
+        ) {
             return
+        }
 
         this.props.setTagInput(false)
     }
@@ -137,7 +138,7 @@ class CommentBox extends React.PureComponent {
     renderTagInput() {
         const tagObjs = this.props.tags.map(tag => ({ name: tag }))
 
-        if (this.props.tagInput)
+        if (this.props.tagInput) {
             return (
                 <IndexDropdown
                     isForAnnotation
@@ -148,7 +149,7 @@ class CommentBox extends React.PureComponent {
                     source="tag"
                 />
             )
-        else
+        } else {
             return (
                 <TagHolder
                     tags={tagObjs}
@@ -156,6 +157,7 @@ class CommentBox extends React.PureComponent {
                     deleteTag={({ tag }) => this.props.deleteTag(tag)}
                 />
             )
+        }
     }
 
     render() {

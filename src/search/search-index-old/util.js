@@ -217,11 +217,12 @@ const defLookupOpts = {
     concurrency: 5,
 }
 
-export const initSingleLookup = (
-    { defaultValue = null, asBuffer = false } = defLookupOpts,
-) => async key => {
+export const initSingleLookup = ({
+    defaultValue = null,
+    asBuffer = false,
+} = defLookupOpts) => async key => {
     try {
-        return await index.get(key, { asBuffer })
+        return index.get(key, { asBuffer })
     } catch (error) {
         if (error.notFound) {
             return defaultValue
@@ -238,9 +239,11 @@ export const initSingleLookup = (
  *  of keys to lookup in index. Unique expected. Returns Promise resolving to single or Map of
  *  documents matching given `keys` param.
  */
-export const initLookupByKeys = (
-    { concurrency = 5, defaultValue = null, asBuffer = false } = defLookupOpts,
-) => async keys => {
+export const initLookupByKeys = ({
+    concurrency = 5,
+    defaultValue = null,
+    asBuffer = false,
+} = defLookupOpts) => async keys => {
     const singleLookup = initSingleLookup({ defaultValue, asBuffer })
     let entries
 

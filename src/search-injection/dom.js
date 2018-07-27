@@ -90,7 +90,7 @@ export const handleRender = (
     if (
         document.readyState === 'complete' ||
         document.readyState === 'interactive'
-    )
+    ) {
         renderComponent()
-    else document.addEventListener('DOMContentLoaded', renderComponent, true)
+    } else document.addEventListener('DOMContentLoaded', renderComponent, true)
 }

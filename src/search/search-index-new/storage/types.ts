@@ -1,4 +1,4 @@
-import { FilterQuery as MongoFilterQuery } from 'mongodb'
+import { FilterQuery as MongoFilterQuery } from 'mongodb' // tslint:disable-line
 
 import StorageRegistry from './registry'
 import { Field } from './fields'

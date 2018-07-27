@@ -90,7 +90,7 @@ export const goToAnnotation = (
 
         retryUntilErrorResolves(
             async () =>
-                await remoteFunction('goToAnnotation', {
+                remoteFunction('goToAnnotation', {
                     tabId: tab.id,
                 })(annotation),
             { intervalMiliseconds: 3000, timeoutMiliseconds: 15000 },

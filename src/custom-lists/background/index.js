@@ -54,8 +54,7 @@ export default class CustomListBackground {
             skip,
         }
 
-        const lists = await this.storage.fetchAllLists({ query, opts })
-        return lists
+        return this.storage.fetchAllLists({ query, opts })
     }
 
     /**
@@ -89,7 +88,7 @@ export default class CustomListBackground {
      * @memberof CustomListBackground
      */
     async createCustomList({ name }) {
-        return await this.storage.insertCustomList({
+        return this.storage.insertCustomList({
             name,
         })
     }
@@ -103,7 +102,7 @@ export default class CustomListBackground {
      * @memberof CustomListBackground
      */
     async updateList({ id, name }) {
-        return await this.storage.updateListName({
+        return this.storage.updateListName({
             id,
             name,
         })
@@ -118,7 +117,7 @@ export default class CustomListBackground {
      * @memberof CustomListBackground
      */
     async insertPageToList({ id, url }) {
-        return await this.storage.insertPageToList({
+        return this.storage.insertPageToList({
             listId: id,
             pageUrl: normalizeUrl(url),
             fullUrl: url,
@@ -133,7 +132,7 @@ export default class CustomListBackground {
      * @memberof CustomListBackground
      */
     async removeList({ id }) {
-        return await this.storage.removeList({
+        return this.storage.removeList({
             id,
         })
     }
@@ -147,7 +146,7 @@ export default class CustomListBackground {
      * @memberof CustomListBackground
      */
     async removePageFromList({ id, url }) {
-        return await this.storage.removePageFromList({
+        return this.storage.removePageFromList({
             listId: id,
             pageUrl: normalizeUrl(url),
         })
@@ -162,7 +161,7 @@ export default class CustomListBackground {
      * @memberof CustomListBackground
      */
     async fetchListNameSuggestions({ name, url }) {
-        return await this.storage.fetchListNameSuggestions({
+        return this.storage.fetchListNameSuggestions({
             name,
             url: normalizeUrl(url),
         })
@@ -177,6 +176,6 @@ export default class CustomListBackground {
      * @memberof CustomListBackground
      */
     async fetchListIgnoreCase({ name }) {
-        return await this.storage.fetchListIgnoreCase({ name })
+        return this.storage.fetchListIgnoreCase({ name })
     }
 }

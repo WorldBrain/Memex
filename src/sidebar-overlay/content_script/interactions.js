@@ -51,13 +51,12 @@ export const highlightAnnotations = async (
     focusOnAnnotation,
     hoverAnnotationContainer,
 ) => {
-    annotations.forEach(
-        async annotation =>
-            await highlightAnnotation(
-                { annotation },
-                focusOnAnnotation,
-                hoverAnnotationContainer,
-            ),
+    annotations.forEach(async annotation =>
+        highlightAnnotation(
+            { annotation },
+            focusOnAnnotation,
+            hoverAnnotationContainer,
+        ),
     )
 }
 
@@ -217,8 +216,9 @@ export function removeHighlights(isDark) {
  */
 const removeHighlight = highlight => {
     const parent = highlight.parentNode
-    while (highlight.firstChild)
+    while (highlight.firstChild) {
         parent.insertBefore(highlight.firstChild, highlight)
+    }
     parent.removeChild(highlight)
 }
 

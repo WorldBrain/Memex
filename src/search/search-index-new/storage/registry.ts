@@ -2,7 +2,6 @@ import {
     RegisterableStorage,
     CollectionDefinitions,
     CollectionDefinition,
-    IndexDefinition,
 } from './types'
 import FIELD_TYPES from './fields'
 
@@ -50,10 +49,10 @@ export default class StorageRegistry implements RegisterableStorage {
             def.name = name
             const fields = def.fields
             Object.entries(fields).forEach(([, fieldDef]) => {
-                const FieldClass = FIELD_TYPES[fieldDef.type]
+                const fieldClass = FIELD_TYPES[fieldDef.type]
 
-                if (FieldClass) {
-                    fieldDef.fieldObject = new FieldClass(fieldDef)
+                if (fieldClass) {
+                    fieldDef.fieldObject = new fieldClass(fieldDef)
                 }
             })
 

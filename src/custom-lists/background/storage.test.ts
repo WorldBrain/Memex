@@ -7,10 +7,8 @@ import { StorageManager } from '../../search/search-index-new/storage/manager'
 
 const runSuite = () => () => {
     // New storage manager instance
-    const storageManagerL = new StorageManager()
-    const fakeIndex = new CustomListBackground({
-        storageManager: storageManagerL,
-    })
+    const storageManager = new StorageManager()
+    const fakeIndex = new CustomListBackground({ storageManager })
     async function insertTestData() {
         // Insert some test data for all tests to use
         await fakeIndex.createCustomList(DATA.LIST_1)
@@ -25,14 +23,16 @@ const runSuite = () => () => {
     // insertTestData()
     async function resetTestData(dbName = 'Memex') {
         indexedDB.deleteDatabase(dbName)
-        const StorageL = new Storage({
-            indexedDB,
-            IDBKeyRange,
-            dbName,
-            storageManager: storageManagerL,
-        })
+
         // Passing fake IndexedDB to the storage manager
-        storageManagerL._finishInitialization(StorageL)
+        storageManager._finishInitialization(
+            new Storage({
+                indexedDB,
+                IDBKeyRange,
+                dbName,
+                storageManager,
+            }),
+        )
 
         await insertTestData()
     }

@@ -220,6 +220,7 @@ class DropdownContainer extends Component {
                 ]
             }
         } catch (err) {
+            // Do nothing
         } finally {
             this.setState(state => ({
                 ...state,

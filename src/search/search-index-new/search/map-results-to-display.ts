@@ -62,7 +62,7 @@ export async function mapResultsToDisplay(
         .each(favIcon => favIconsMap.set(favIcon.hostname, favIcon))
 
     // Grab all the Pages needed for results (mapping over input `results` to maintain order)
-    return await Promise.all(
+    return Promise.all(
         results.map(mapPageToDisplay(pagesMap, favIconsMap, params)),
     )
 }
