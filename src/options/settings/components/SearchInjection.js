@@ -1,16 +1,16 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import styles from './settings.css'
+import styles from './Settings.css'
 
 const SearchInjection = ({ children }) => {
     return (
-        <div>
-            <p className={styles.settingsHeader}>
+        <div className={styles.container}>
+            <h1 className={styles.header}>
                 Show Memex Results in Search Engines
-            </p>
+            </h1>
             {children}
-            <p>
+            <p className={styles.subText}>
                 Want others?{' '}
                 <a
                     target="_new"

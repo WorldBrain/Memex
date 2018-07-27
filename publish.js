@@ -1,6 +1,18 @@
+const path = require('path')
 const fs = require('fs')
+const { config: configEnv } = require('dotenv')
 const ChromeStore = require('chrome-webstore-upload')
 const signAddon = require('sign-addon').default
+
+const ENV_FILE = 'publish.sh'
+const envPath = path.resolve(process.cwd(), ENV_FILE)
+
+if (!fs.existsSync(envPath)) {
+    console.error('Secret env file is missing; cannot proceed with publish')
+    process.exit(1)
+}
+
+configEnv({ path: envPath })
 
 async function publishChrome() {
     try {

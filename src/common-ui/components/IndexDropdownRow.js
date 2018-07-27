@@ -4,6 +4,9 @@ import cx from 'classnames'
 
 import localStyles from './IndexDropdown.css'
 
+/**
+ * @augments {PureComponent<{onClick: any}, *>}
+ */
 class IndexDropdownRow extends PureComponent {
     static propTypes = {
         value: PropTypes.oneOfType([PropTypes.string, PropTypes.element])

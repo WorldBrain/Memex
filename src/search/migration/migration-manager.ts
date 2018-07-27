@@ -44,6 +44,12 @@ export class MigrationManager {
     private concurrency: number
     private onComplete: () => void
 
+    public static async showNotif() {
+        return await createNotif(MIGRATE_NOTIF, () =>
+            browser.tabs.create({ url: INFO_LINK }),
+        )
+    }
+
     constructor({
         concurrency = MigrationManager.DEF_PARAMS.chunkSize,
         onComplete = () => false,
@@ -155,9 +161,7 @@ export class MigrationManager {
         } = await browser.storage.local.get(MigrationManager.NOTIF_STORAGE_KEY)
 
         if (!notifAlreadyShown && this.isFinished) {
-            await createNotif(MIGRATE_NOTIF, () =>
-                browser.tabs.create({ url: INFO_LINK }),
-            )
+            await MigrationManager.showNotif()
 
             // Set the flag so this condition should never pass again
             await browser.storage.local.set({

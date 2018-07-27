@@ -6,6 +6,7 @@ import initSentry from '../util/raven'
 import * as imports from './imports'
 import * as blacklist from './blacklist'
 import * as privacy from './privacy'
+import * as settings from './settings'
 import * as overviewPage from '../overview'
 import { reducer as onboarding } from '../overview/onboarding'
 import { reducer as filters } from '../overview/filters'
@@ -15,6 +16,7 @@ const rootReducer = combineReducers({
     imports: imports.reducer,
     privacy: privacy.reducer,
     overview: overviewPage.reducer,
+    settings: settings.reducer,
     onboarding,
     filters,
 })
@@ -47,6 +49,7 @@ export default function configureStore({ ReduxDevTools = undefined } = {}) {
     const enhancers = [
         overviewPage.enhancer,
         imports.enhancer,
+        settings.enhancer,
         applyMiddleware(...middlewares),
     ]
 

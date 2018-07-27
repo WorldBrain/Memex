@@ -2,6 +2,7 @@ import {
     RegisterableStorage,
     CollectionDefinitions,
     CollectionDefinition,
+    IndexDefinition,
 } from './types'
 import FIELD_TYPES from './fields'
 
@@ -14,8 +15,30 @@ export interface RegistryCollectionsVersionMap {
 }
 
 export default class StorageRegistry implements RegisterableStorage {
+    public static createTermsIndex = (fieldName: string) =>
+        `_${fieldName}_terms`
+
     public collections: RegistryCollections = {}
     public collectionsByVersion: RegistryCollectionsVersionMap = {}
+
+    /**
+     * Handles mutating a collection's definition to flag all fields that are declared to be
+     * indexable as indexed fields.
+     */
+    private static _registerIndexedFields(def: CollectionDefinition) {
+        const flagField = (indexDefIdx: number) => (fieldName: string) =>
+            (def.fields[fieldName]._index = indexDefIdx)
+
+        const indices = def.indices || []
+        indices.forEach(({ field }, i) => {
+            // Compound indexes need to flag all specified fields
+            if (field instanceof Array) {
+                field.forEach(flagField(i))
+            } else {
+                flagField(i)(field)
+            }
+        })
+    }
 
     registerCollection(name: string, defs: CollectionDefinitions) {
         if (!(defs instanceof Array)) {
@@ -27,17 +50,15 @@ export default class StorageRegistry implements RegisterableStorage {
             def.name = name
 
             const fields = def.fields
-            Object.entries(fields).forEach(([fieldName, fieldDef]) => {
+            Object.entries(fields).forEach(([, fieldDef]) => {
                 const FieldClass = FIELD_TYPES[fieldDef.type]
+                
                 if (FieldClass) {
                     fieldDef.fieldObject = new FieldClass(fieldDef)
                 }
             })
 
-            const indices = def.indices || []
-            indices.forEach(fieldName => {
-                def.fields[fieldName]._index = true
-            })
+            StorageRegistry._registerIndexedFields(def)
 
             const version = def.version.getTime()
             this.collectionsByVersion[version] =

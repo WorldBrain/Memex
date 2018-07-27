@@ -30,7 +30,7 @@ export class SearchIndex {
     }
 
     private get backend(): typeof newBackend {
-        return this.useOld ? oldBackend as any : newBackend
+        return this.useOld ? (oldBackend as any) : newBackend
     }
 
     private bindIndexMethod = (name: string) => (...args) =>
@@ -55,7 +55,6 @@ export class SearchIndex {
     // Bookmarks
     addBookmark = this.bindIndexMethod('addBookmark')
     delBookmark = this.bindIndexMethod('delBookmark')
-    handleBookmarkCreation = this.bindIndexMethod('handleBookmarkCreation')
 
     // Utilities
     grabExistingKeys = this.bindIndexMethod('grabExistingKeys')

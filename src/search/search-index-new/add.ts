@@ -2,6 +2,7 @@ import db, { VisitInteraction, PageAddRequest } from '.'
 import normalizeUrl from '../../util/encode-url-for-id'
 import pipeline, { PipelineReq, transformUrl } from './pipeline'
 import { Page, FavIcon } from './models'
+import { getPage } from './util'
 
 /**
  * Adds/updates a page + associated visit (pages never exist without either an assoc.
@@ -78,20 +79,14 @@ export async function updateTimestampMeta(
 }
 
 export async function addVisit(url: string, time = Date.now()) {
-    const normalized = normalizeUrl(url)
+    const matchingPage = await getPage(url)
 
-    return db.transaction('rw', db.tables, async () => {
-        const matchingPage = await db.pages.get(normalized)
-        if (matchingPage == null) {
-            throw new Error(
-                `Cannot add visit for non-existent page: ${normalized}`,
-            )
-        }
+    if (matchingPage == null) {
+        throw new Error(`Cannot add visit for non-existent page: ${url}`)
+    }
 
-        await matchingPage.loadRels()
-        matchingPage.addVisit(time)
-        return await matchingPage.save()
-    })
+    matchingPage.addVisit(time)
+    return await matchingPage.save()
 }
 
 export async function addFavIcon(url: string, favIconURI: string) {

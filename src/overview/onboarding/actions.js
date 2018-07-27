@@ -1,6 +1,7 @@
 import { createAction } from 'redux-act'
 
 import analytics from 'src/analytics'
+import internalAnalytics from 'src/analytics/internal'
 import { IMPORT_TYPE as TYPE, CMDS } from 'src/options/imports/constants'
 import { IMPORT_CONN_NAME } from './constants'
 import * as selectors from './selectors'
@@ -34,8 +35,37 @@ export const init = () => (dispatch, getState) => {
 
 export const toggleShouldTrack = () => async (dispatch, getState) => {
     const toggled = !selectors.shouldTrack(getState())
-    await persistShouldTrack(toggled)
-    dispatch(setShouldTrack(toggled))
+
+    const trackEvent = force => {
+        const trackEvent = analytics.trackEvent(
+            {
+                category: 'Privacy',
+                action: 'Change tracking pref',
+                name: toggled ? 'opt-in' : 'opt-out',
+            },
+            force,
+        )
+
+        const processEvent = internalAnalytics.processEvent({
+            type: toggled
+                ? 'changeTrackingPrefOptIn'
+                : 'changeTrackingPrefOptOut',
+            force,
+        })
+
+        return Promise.all([trackEvent, processEvent])
+    }
+
+    if (toggled) {
+        await persistShouldTrack(toggled)
+        dispatch(setShouldTrack(toggled))
+        await trackEvent(false)
+    } else {
+        // It is up becuase of better user interface, just toggle and then make changes in localStorage
+        dispatch(setShouldTrack(toggled))
+        await trackEvent(true)
+        await persistShouldTrack(toggled)
+    }
 }
 
 /**
@@ -80,6 +110,10 @@ class ImportsConnHandler {
             action: 'Cancelled import',
         })
 
+        internalAnalytics.processEvent({
+            type: 'onboardingCancelImport',
+        })
+
         this._port.postMessage({ cmd: CMDS.CANCEL })
         this.complete()
     }
@@ -90,6 +124,10 @@ class ImportsConnHandler {
                 category: 'Onboarding',
                 action: 'Finished import',
             })
+
+            internalAnalytics.processEvent({
+                type: 'onboardingFinishImport',
+            })
         }
         this._dispatch(setImportsDone(true))
     }
@@ -97,7 +135,7 @@ class ImportsConnHandler {
     /**
      * Responds to messages sent from background script over the runtime connection by dispatching
      * appropriate redux actions. Non-handled messages are ignored.
-    */
+     */
     handleCmds = ({ cmd, ...payload }) => {
         switch (cmd) {
             case CMDS.INIT: // Tell it to start immediately after BG connman sends INIT ready signal

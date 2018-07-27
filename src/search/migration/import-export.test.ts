@@ -1,12 +1,13 @@
 import memdown from 'memdown'
-import * as indexedDB from 'fake-indexeddb'
-import * as IDBKeyRange from 'fake-indexeddb/lib/FDBKeyRange'
+import indexedDB from 'fake-indexeddb'
+import IDBKeyRange from 'fake-indexeddb/lib/FDBKeyRange'
 import { handleAttachment as addPouchPageAttachment } from '../../page-storage/store-page'
 import index from '../'
 import * as oldIndex from '../search-index-old'
 import * as newIndex from '../search-index-new'
 import exportOldPages from '../search-index-old/export'
 import importNewPage from '../search-index-new/import'
+import { searchOld } from '../search-index-old/api'
 import * as data from './import-export.test.data'
 import { MigrationManager } from './migration-manager'
 import { ExportedPage } from './types'
@@ -22,7 +23,7 @@ async function insertTestPageIntoOldIndex() {
     })
     await Promise.all(
         data.EXPORTED_PAGE_1.tags.map(tag =>
-            index.addTag(data.PAGE_DOC_1.url, tag),
+            index.addTag({ url: data.PAGE_DOC_1.url, tag }),
         ),
     )
     await index.addBookmark({
@@ -57,7 +58,9 @@ describe('Old=>New index migration', () => {
         })
 
         test('Exporting old-index data', async () => {
-            for await (const { pages: [page] } of exportOldPages()) {
+            for await (const {
+                pages: [page],
+            } of exportOldPages()) {
                 expect(page).toEqual(data.EXPORTED_PAGE_1)
             }
         })
@@ -81,7 +84,7 @@ describe('Old=>New index migration', () => {
                 favIconURI,
                 bookmark,
                 tags,
-                ...expected,
+                ...expected
             } = expectedData
             const { screenshot, ...page } = storedPage
 
@@ -114,7 +117,9 @@ describe('Old=>New index migration', () => {
 
             index.useOld = false
             // Make sure search works post-import
-            const { docs: [result] } = await index.search({
+            const {
+                docs: [result],
+            } = await index.search({
                 query: 'mining',
                 mapResultsFunc: r => r,
             } as any)
@@ -130,14 +135,14 @@ describe('Old=>New index migration', () => {
 
         test('Simple full migration', async () => {
             // Set up to do same search, resolving to first result
-            const doSearch = () =>
-                index
-                    .search({
-                        query: 'virus',
-                        mapResultsFunc: results =>
-                            results.map(([id, time, doc]) => [id, time]),
-                    } as any)
-                    .then(res => res.docs[0])
+            const doSearch = () => {
+                const run = index.useOld ? searchOld : index.search
+                return run({
+                    query: 'virus',
+                    mapResultsFunc: results =>
+                        results.map(([id, time, doc]) => [id, time]),
+                } as any).then(res => res.docs[0])
+            }
 
             index.useOld = true
             const oldResult = await doSearch()

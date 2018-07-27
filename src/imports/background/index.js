@@ -6,7 +6,6 @@ import { IMPORT_CONN_NAME as ONBOARDING_CONN } from 'src/overview/onboarding/con
 
 // Constants
 export const importStateStorageKey = 'import_items'
-export const installTimeStorageKey = 'extension_install_time'
 
 // Allow UI scripts to dirty estimates cache
 makeRemotelyCallable({

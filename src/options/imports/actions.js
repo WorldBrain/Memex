@@ -1,6 +1,7 @@
 import { createAction } from 'redux-act'
 
 import analytics from 'src/analytics'
+import internalAnalytics from 'src/analytics/internal'
 import db from 'src/pouchdb'
 import { CMDS, IMPORT_CONN_NAME } from './constants'
 import * as selectors from './selectors'
@@ -158,41 +159,61 @@ export const setConcurrencyLevel = makePortMessagingThunk({
 export const stop = makePortMessagingThunk({
     actionCreator: cancelImport,
     cmd: CMDS.CANCEL,
-    cb: () =>
+    cb: () => {
         analytics.trackEvent({
             category: 'Imports',
             action: 'Cancel import',
-        }),
+        })
+
+        internalAnalytics.processEvent({
+            type: 'cancelImport',
+        })
+    },
 })
 
 export const pause = makePortMessagingThunk({
     actionCreator: pauseImport,
     cmd: CMDS.PAUSE,
-    cb: () =>
+    cb: () => {
         analytics.trackEvent({
             category: 'Imports',
             action: 'Pause import',
-        }),
+        })
+
+        internalAnalytics.processEvent({
+            type: 'pauseImport',
+        })
+    },
 })
 
 export const resume = makePortMessagingThunk({
     actionCreator: resumeImport,
     cmd: CMDS.RESUME,
-    cb: () =>
+    cb: () => {
         analytics.trackEvent({
             category: 'Imports',
             action: 'Resume import',
-        }),
+        })
+
+        internalAnalytics.processEvent({
+            type: 'resumeImport',
+        })
+    },
 })
 
 export const finish = makePortMessagingThunk({
     actionCreator: finishImport,
     cmd: CMDS.FINISH,
-    cb: () =>
+    cb: () => {
         analytics.trackEvent({
             category: 'Imports',
             action: 'Finish import',
-        }),
+        })
+
+        internalAnalytics.processEvent({
+            type: 'finishImport',
+        })
+    },
 })
 
 export const start = () => (dispatch, getState) => {
@@ -203,6 +224,10 @@ export const start = () => (dispatch, getState) => {
         action: 'Start import',
         name: selectors.allowTypesString(state),
         value: selectors.concurrency(state),
+    })
+
+    internalAnalytics.processEvent({
+        type: 'startImport',
     })
 
     dispatch(prepareImport())

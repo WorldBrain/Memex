@@ -1,14 +1,19 @@
 import { extractTerms } from '../../search-index-old/pipeline'
 import Storage from '../storage'
 import StorageRegistry from './registry'
+import { UnimplementedError, InvalidFindOptsError } from './errors'
 import {
     ManageableStorage,
     CollectionDefinitions,
+    CollectionDefinition,
+    CollectionField,
+    IndexDefinition,
     FilterQuery,
     FindOpts,
 } from './types'
 
 export class StorageManager implements ManageableStorage {
+    static DEF_SUGGEST_LIMIT = 10
     static DEF_FIND_OPTS: Partial<FindOpts> = {
         reverse: false,
     }
@@ -18,6 +23,64 @@ export class StorageManager implements ManageableStorage {
     private _initializationPromise: Promise<void>
     private _initializationResolve: Function
     private _storage: Storage
+
+    /**
+     * Handles mutation of a document to be inserted/updated to storage,
+     * depending on needed pre-processing for a given indexed field.
+     */
+    private static _processIndexedField(
+        fieldName: string,
+        indexDef: IndexDefinition,
+        fieldDef: CollectionField,
+        object,
+    ) {
+        switch (fieldDef.type) {
+            case 'text':
+                const fullTextField =
+                    indexDef.fullTextIndexName ||
+                    StorageRegistry.createTermsIndex(fieldName)
+                object[fullTextField] = [...extractTerms(object[fieldName])]
+                break
+            default:
+        }
+    }
+
+    /**
+     * Handles mutation of a document to be written to storage,
+     * depending on needed pre-processing of fields.
+     */
+    private static _processFieldsForWrites(def: CollectionDefinition, object) {
+        Object.entries(def.fields).forEach(([fieldName, fieldDef]) => {
+            if (fieldDef.fieldObject) {
+                object[fieldName] = fieldDef.fieldObject.prepareForStorage(
+                    object[fieldName],
+                )
+            }
+
+            if (fieldDef._index != null) {
+                StorageManager._processIndexedField(
+                    fieldName,
+                    def.indices[fieldDef._index],
+                    fieldDef,
+                    object,
+                )
+            }
+        })
+    }
+
+    /**
+     * Handles mutation of a document to be read from storage,
+     * depending on needed pre-processing of fields.
+     */
+    private static _processFieldsForReads(def: CollectionDefinition, object) {
+        Object.entries(def.fields).forEach(([fieldName, fieldDef]) => {
+            if (fieldDef.fieldObject) {
+                object[fieldName] = fieldDef.fieldObject.prepareFromStorage(
+                    object[fieldName],
+                )
+            }
+        })
+    }
 
     constructor() {
         this._initializationPromise = new Promise(
@@ -29,14 +92,42 @@ export class StorageManager implements ManageableStorage {
         this.registry.registerCollection(name, defs)
     }
 
-    private async _find<T>(
+    // TODO: Afford full find support for ignoreCase opt; currently just uses the first filter entry
+    private _findIgnoreCase<T>(
         collectionName: string,
         filter: FilterQuery<T>,
         findOpts: FindOpts,
     ) {
-        let coll = await this._storage
-            .collection<T>(collectionName)
-            .find(filter)
+        // Grab first entry from the filter query; ignore rest for now
+        const [[indexName, value], ...fields] = Object.entries(filter)
+
+        if (fields.length) {
+            throw new UnimplementedError(
+                'find methods with ignoreCase only support querying a single field.',
+            )
+        }
+
+        if (findOpts.ignoreCase[0] !== indexName) {
+            throw new InvalidFindOptsError(
+                'specified ignoreCase field is not in filter query',
+            )
+        }
+
+        return this._storage
+            .table<T>(collectionName)
+            .where(indexName)
+            .equalsIgnoreCase(value)
+    }
+
+    private _find<T>(
+        collectionName: string,
+        filter: FilterQuery<T>,
+        findOpts: FindOpts,
+    ) {
+        let coll =
+            findOpts.ignoreCase && findOpts.ignoreCase.length
+                ? this._findIgnoreCase<T>(collectionName, filter, findOpts)
+                : this._storage.collection<T>(collectionName).find(filter)
 
         if (findOpts.reverse) {
             coll = coll.reverse()
@@ -61,20 +152,7 @@ export class StorageManager implements ManageableStorage {
         await this._initializationPromise
 
         const collection = this.registry.collections[collectionName]
-        const indices = collection.indices || []
-        Object.entries(collection.fields).forEach(([fieldName, fieldDef]) => {
-            if (fieldDef.fieldObject) {
-                object[fieldName] = fieldDef.fieldObject.prepareForStorage(
-                    object[fieldName],
-                )
-            }
-
-            if (fieldDef._index && fieldDef.type === 'text') {
-                object[`_${fieldName}_terms`] = [
-                    ...extractTerms(object[fieldName]),
-                ]
-            }
-        })
+        StorageManager._processFieldsForWrites(collection, object)
 
         await this._storage[collectionName].put(object)
     }
@@ -92,8 +170,15 @@ export class StorageManager implements ManageableStorage {
     ): Promise<T> {
         await this._initializationPromise
 
-        const coll = await this._find<T>(collectionName, filter, findOpts)
-        return coll.first()
+        const coll = this._find<T>(collectionName, filter, findOpts)
+        const doc = await coll.first()
+
+        if (doc != null) {
+            const collection = this.registry.collections[collectionName]
+            StorageManager._processFieldsForReads(collection, doc)
+        }
+
+        return doc
     }
 
     /**
@@ -109,8 +194,62 @@ export class StorageManager implements ManageableStorage {
     ): Promise<T[]> {
         await this._initializationPromise
 
-        const coll = await this._find<T>(collectionName, filter, findOpts)
-        return coll.toArray()
+        const coll = this._find<T>(collectionName, filter, findOpts)
+        const docs = await coll.toArray()
+
+        const collection = this.registry.collections[collectionName]
+        docs.forEach(doc =>
+            StorageManager._processFieldsForReads(collection, doc),
+        )
+
+        return docs
+    }
+
+    /**
+     * @param collectionName The name of the collection to query.
+     * @param filter Note this is not a fully-featured filter query, like in other methods.
+     *  Only the first `{ [indexName]: stringQuery }` will be taken and used; everything else is ignored.
+     * @param [findOpts] Note that only `reverse` and `limit` options will be applied.
+     * @returns Promise that resolves to the first `findOpts.limit` matches of the
+     *  query to the index, both specified in `filter`.
+     */
+    async suggest<T>(
+        collectionName: string,
+        filter: FilterQuery<T>,
+        {
+            limit = StorageManager.DEF_SUGGEST_LIMIT,
+            ...findOpts
+        }: FindOpts = StorageManager.DEF_FIND_OPTS,
+    ) {
+        await this._initializationPromise
+
+        // Grab first entry from the filter query; ignore rest for now
+        const [[indexName, value], ...fields] = Object.entries(filter)
+
+        if (fields.length) {
+            throw new UnimplementedError(
+                'suggest only supports querying a single field.',
+            )
+        }
+
+        const whereClause = this._storage
+            .table<T>(collectionName)
+            .where(indexName)
+
+        let coll =
+            findOpts.ignoreCase &&
+            findOpts.ignoreCase.length &&
+            findOpts.ignoreCase[0] === indexName
+                ? whereClause.startsWithIgnoreCase(value)
+                : whereClause.startsWith(value)
+
+        coll = coll.limit(limit)
+
+        if (findOpts.reverse) {
+            coll = coll.reverse()
+        }
+
+        return coll.uniqueKeys()
     }
 
     /**
@@ -152,6 +291,10 @@ export class StorageManager implements ManageableStorage {
         update,
     ) {
         await this._initializationPromise
+
+        // TODO: extract underlying collection doc fields from update object
+        // const collection = this.registry.collections[collectionName]
+        // StorageManager._processIndexedFields(collection, object)
 
         const { modifiedCount } = await this._storage
             .collection(collectionName)

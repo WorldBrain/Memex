@@ -6,6 +6,7 @@ import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 
 import analytics from 'src/analytics'
+import internalAnalytics from 'src/analytics/internal'
 import { DATE_PICKER_DATE_FORMAT as FORMAT } from '../constants'
 import styles from './DateRangeSelection.css'
 import './datepicker-overrides.css'
@@ -91,6 +92,10 @@ class DateRangeSelection extends Component {
             action: nlpDate ? 'Successful NLP query' : 'Unsuccessful NLP query',
         })
 
+        internalAnalytics.processEvent({
+            type: 'datepickerByNlp' + (isStartDate ? 'StartDate' : 'EndDate'),
+        })
+
         // Get the time from the NLP query, if it could be parsed
         if (nlpDate != null) {
             return nlpDate.getTime()
@@ -157,6 +162,13 @@ class DateRangeSelection extends Component {
         analytics.trackEvent({
             category: isStartDate ? 'Overview start date' : 'Overview end date',
             action: date ? 'Date selection' : 'Date clear',
+        })
+
+        internalAnalytics.processEvent({
+            type: date
+                ? 'datepickerByDropdown' +
+                  (isStartDate ? 'StartDate' : 'EndDate')
+                : 'datepickerClear' + (isStartDate ? 'StartDate' : 'EndDate'),
         })
 
         const updateDate = isStartDate

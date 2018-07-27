@@ -3,16 +3,18 @@ import urlRegex from 'url-regex'
 import 'src/activity-logger/background'
 import 'src/search/background'
 import 'src/analytics/background'
+import 'src/imports/background'
 import DirectLinkingBackground from 'src/direct-linking/background'
+import EventLogBackground from 'src/analytics/internal/background'
 import 'src/omnibar'
-import { installTimeStorageKey } from 'src/imports/background'
+import { INSTALL_TIME_KEY } from './constants'
 import {
     constants as blacklistConsts,
     blacklist,
 } from 'src/blacklist/background'
 import searchIndex from 'src/search'
 import analytics from 'src/analytics'
-import createNotif from 'src/util/notifications'
+// import createNotif from 'src/util/notifications'
 import {
     OPEN_OVERVIEW,
     OPEN_OPTIONS,
@@ -22,6 +24,9 @@ import db, { storageManager } from 'src/search/search-index-new'
 import * as models from 'src/search/search-index-new/models'
 import 'src/search/migration'
 import initSentry from './util/raven'
+import { USER_ID, generateTokenIfNot } from 'src/util/generate-token'
+import { API_HOST } from 'src/analytics/internal/constants'
+import { storageChangesManager } from 'src/util/storage-changes'
 
 window.index = searchIndex
 window.storage = db
@@ -37,10 +42,10 @@ export const UNINSTALL_URL =
         ? 'http://worldbrain.io/uninstall'
         : ''
 export const NEW_FEATURE_NOTIF = {
-    title: 'NEW FEATURE: Exclude Terms/Domains',
+    title: 'NEW FEATURE: Memex.Links',
     message: 'Click to learn more',
     url:
-        'https://worldbrain.helprace.com/i61-feature-excluding-terms-and-domains',
+        'https://worldbrain.helprace.com/i62-feature-memex-links-highlight-any-text-and-create-a-link-to-it',
 }
 
 async function openOverview() {
@@ -65,24 +70,28 @@ const openOptionsURL = query =>
     })
 
 async function onInstall() {
+    const now = Date.now()
+
     // Ensure default blacklist entries are stored (before doing anything else)
     await blacklist.addToBlacklist(blacklistConsts.DEF_ENTRIES)
     analytics.trackEvent({ category: 'Global', action: 'Install' }, true)
     // Open onboarding page
     browser.tabs.create({ url: `${OVERVIEW_URL}?install=true` })
     // Store the timestamp of when the extension was installed + default blacklist
-    browser.storage.local.set({ [installTimeStorageKey]: Date.now() })
+    browser.storage.local.set({ [INSTALL_TIME_KEY]: now })
+
+    await generateTokenIfNot({ installTime: now })
 }
 
 async function onUpdate() {
     // Notification with updates when we update
-    await createNotif(
-        {
-            title: NEW_FEATURE_NOTIF.title,
-            message: NEW_FEATURE_NOTIF.message,
-        },
-        () => browser.tabs.create({ url: NEW_FEATURE_NOTIF.url }),
-    )
+    // await createNotif(
+    //     {
+    //         title: NEW_FEATURE_NOTIF.title,
+    //         message: NEW_FEATURE_NOTIF.message,
+    //     },
+    //     () => browser.tabs.create({ url: NEW_FEATURE_NOTIF.url }),
+    // )
 
     // Check whether old Search Injection boolean exists and replace it with new object
     const searchInjectionKey = (await browser.storage.local.get(
@@ -97,6 +106,12 @@ async function onUpdate() {
             },
         })
     }
+
+    const installTime = (await browser.storage.local.get(INSTALL_TIME_KEY))[
+        INSTALL_TIME_KEY
+    ]
+
+    await generateTokenIfNot({ installTime })
 }
 
 browser.commands.onCommand.addListener(command => {
@@ -128,10 +143,15 @@ browser.runtime.onInstalled.addListener(details => {
     }
 })
 
-// Open uninstall survey on ext. uninstall
-browser.runtime.setUninstallURL(UNINSTALL_URL)
+storageChangesManager.addListener('local', USER_ID, ({ newValue }) => {
+    browser.runtime.setUninstallURL(`${API_HOST}/uninstall?user=${newValue}`)
+})
 
 const directLinking = new DirectLinkingBackground({ storageManager })
 directLinking.setupRemoteFunctions()
 directLinking.setupRequestInterceptor()
 window.directLinking = directLinking
+
+const eventLog = new EventLogBackground({ storageManager })
+eventLog.setupRemoteFunctions()
+window.eventLog = eventLog

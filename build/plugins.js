@@ -52,7 +52,7 @@ export default function({
             template,
         }),
         new HtmlPlugin({
-            title: 'Settings',
+            title: 'Memex',
             chunks: ['options'],
             filename: 'options.html',
             template,

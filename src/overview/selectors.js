@@ -120,6 +120,11 @@ export const showInitSearchMsg = createSelector(
         !results.length && !searchCount && !isLoading,
 )
 
+export const isMigrationRequired = createSelector(
+    searchResult,
+    results => !!results.requiresMigration,
+)
+
 export const isBadTerm = createSelector(
     searchResult,
     results => !!results.isBadTerm,

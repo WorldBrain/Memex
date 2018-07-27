@@ -3,8 +3,6 @@ import ScrollState from './scroll-state'
 import { TabState, NavState } from './types'
 
 class Tab implements TabState {
-    static DEF_LOG_DELAY = 0
-
     url: string
     isActive: boolean
     visitTime: number
@@ -13,17 +11,13 @@ class Tab implements TabState {
     scrollState: ScrollState
     navState: NavState
     private _timer: PausableTimer
-    private _logDelay: number
 
-    constructor(
-        {
-            url,
-            isActive = false,
-            visitTime = Date.now(),
-            navState = {},
-        }: Partial<TabState>,
-        logDelay = Tab.DEF_LOG_DELAY,
-    ) {
+    constructor({
+        url,
+        isActive = false,
+        visitTime = Date.now(),
+        navState = {},
+    }: Partial<TabState>) {
         this.url = url
         this.isActive = isActive
         this.visitTime = visitTime
@@ -33,7 +27,6 @@ class Tab implements TabState {
         this.lastActivated = Date.now()
 
         this._timer = null
-        this._logDelay = logDelay
     }
 
     private _pauseLogTimer() {
@@ -53,16 +46,16 @@ class Tab implements TabState {
      *
      * @param logCb Logic to schedule to run on this tab later.
      */
-    scheduleLog(logCb: Function) {
+    scheduleLog(logCb: Function, delay = 0) {
         this.cancelPendingOps()
 
         // Just run straight away if no delay set
-        if (this._logDelay === 0) {
+        if (delay === 0) {
             return Promise.resolve(logCb())
         }
 
         this._timer = new PausableTimer({
-            delay: this._logDelay,
+            delay,
             cb: logCb,
             start: this.isActive, // Start timer if currently active
         })
