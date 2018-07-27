@@ -1,6 +1,6 @@
 .menuItem {
     display: block;
-    padding: 8px 8px 8px 30px;
+    padding: 8px 17px 8px 25px;
     cursor: pointer;
     border-bottom: 1px solid #eaecef;
     word-wrap: break-word;
@@ -22,9 +22,8 @@
 }
 
 .menuItem i {
-    font-size: 12px;
+    font-size: 18px;
     float: right;
-    margin-top: 3px;
 }
 
 .tagContainer {

@@ -1,15 +1,14 @@
 .menuItem {
     display: block;
-    padding: 7px 17px 9px 21px;
+    padding: 7px 21px 9px 14px;
     cursor: pointer;
-    border: 1px solid #d2d2d28c;
+    border-bottom: 1px solid #d2d2d28c;
     border-top: none;
     word-wrap: break-word;
-    font-size: 13px;
-    font-family: 'Open Sans';
-    width: 95%;
-    margin-left: 8px;
-    color: black;
+    font-size: 14px;
+    font-family: 'lato';
+    padding-left: 25px;
+    color: #8b8b8b;
 
     &:hover,
     &:focus,
@@ -28,6 +27,7 @@
     float: right;
     margin-top: 1px;
     margin-right: -7px;
+    color: black;
 }
 
 .tagContainer {
@@ -47,7 +47,7 @@
 }
 
 .summaryTagContainer {
-    font-family: 'Open Sans';
+    font-family: 'lato';
     font-size: 12px;
     display: flex;
     justify-content: space-around;
@@ -63,16 +63,13 @@
     align-items: center;
     justify-content: space-between;
     border-bottom: 1px dashed #d2d2d28c;
-    padding: 4px 6px;
+    padding: 4px 11px;
     margin-bottom: 0;
     background-color: #f7f7f7;
-    width: 95%;
-    margin-left: 8px;
 
     & > i {
         color: #3eb995;
         padding: 0;
-        margin-right: 2px;
         margin-top: 1px;
     }
 }
@@ -88,7 +85,7 @@
     &:placeholder-shown {
         font-style: italic;
         font-weight: 500;
-        font-family: 'Open Sans';
+        font-family: 'lato';
     }
 
     &::placeholder {

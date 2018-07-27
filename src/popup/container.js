@@ -425,7 +425,7 @@ class PopupContainer extends Component {
             disabled={this.isTagBtnDisabled}
             btnClass={styles.addToList}
         >
-            Add To List
+            Add To Collection(s)
         </Button>
     )
 
