@@ -87,10 +87,7 @@ export const getUnreadNotifications = async () => {
     // dispatch(setLoading(false))
 }
 
-export const handleReadNotif = (notification, i) => async (
-    dispatch,
-    getState,
-) => {
+export const handleReadNotif = notification => async (dispatch, getState) => {
     await readNotification(notification.id)
     const notificationsList = selectors.notificationsList(getState())
 

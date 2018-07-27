@@ -142,7 +142,7 @@ class NotificationContainer extends Component {
                             : notification.id,
                     )}
                     isMore={showMoreIndex !== notification.id}
-                    handleTick={handleTick(notification, i)}
+                    handleTick={handleTick(notification)}
                     isUnread={isUnread}
                     buttons={this.renderButtons(notification.buttons)}
                 />
@@ -234,9 +234,9 @@ const mapDispatchToProps = dispatch => ({
         event.preventDefault()
         dispatch(actions.setShowMoreIndex(index))
     },
-    handleTick: (notification, index) => event => {
+    handleTick: notification => event => {
         event.preventDefault()
-        dispatch(actions.handleReadNotif(notification, index))
+        dispatch(actions.handleReadNotif(notification))
     },
 })
 
