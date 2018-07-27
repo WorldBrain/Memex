@@ -1,13 +1,12 @@
 import { createReducer } from 'redux-act'
-import { NotifDefinition } from './notifications'
+import { Notification } from './types'
 import * as actions from './actions'
 
 export interface State {
-    readNotificationList: {
-        notifications: NotifDefinition[]
+    notificationsList: {
+        notifications: Notification[]
         resultExhausted: boolean
     }
-    unreadNotificationList: NotifDefinition[]
     showMoreIndex?: string
     unreadNotifications: number
     currentPage: number
@@ -19,11 +18,10 @@ export interface State {
 }
 
 const defaultState: State = {
-    readNotificationList: {
+    notificationsList: {
         notifications: [],
         resultExhausted: false,
     },
-    unreadNotificationList: [],
     showMoreIndex: undefined,
     unreadNotifications: 0,
     currentPage: 0,
@@ -57,28 +55,37 @@ const handleNotificationResult = ({ overwrite }) => (
     return { ...state, readNotificationList }
 }
 
-const removeUnReadNotif = () => (state, index) => {
-    const unreadNotificationList = [
-        ...state.unreadNotificationList.slice(0, index),
-        ...state.unreadNotificationList.slice(index + 1),
-    ]
+const handleReadNotification = () => (state, index) => {
+    const notification = state.notificationsList.notifications[index]
 
     return {
         ...state,
-        unreadNotificationList,
+        notificationsList: {
+            ...state.notificationsList,
+            notifications: [
+                ...state.notificationsList.notifications.slice(0, index),
+                {
+                    ...notification,
+                    isRead: true,
+                },
+                ...state.notificationsList.notifications.slice(index + 1),
+            ],
+        },
     }
 }
 
-const addReadNotif = () => (state, notification) => ({
-    ...state,
-    readNotificationList: {
-        ...state.readNotificationList,
-        notifications: [
-            notification,
-            ...state.readNotificationList.notifications,
-        ],
-    },
-})
+const appendNotifications = () => (state, newNotifications) => {
+    return {
+        ...state,
+        notificationsList: {
+            ...newNotifications,
+            notifications: [
+                ...state.notificationsList.notifications,
+                ...newNotifications.notifications,
+            ],
+        },
+    }
+}
 
 const toggleExpand = () => state => ({
     ...state,
@@ -98,29 +105,18 @@ const initState = <T>(key) => (state: State, payload: T) => ({
 const reducer = createReducer<State>({}, defaultState)
 
 reducer.on(
-    actions.setReadNotificationList,
-    initState<NotifDefinition[]>('readNotificationList'),
-)
-reducer.on(
-    actions.setUnreadNotificationList,
-    initState<NotifDefinition[]>('unreadNotificationList'),
+    actions.setNotificationsResult,
+    initState<Notification[]>('notificationsList'),
 )
 reducer.on(actions.setShowMoreIndex, initState<boolean>('showMoreIndex'))
 reducer.on(actions.nextPage, nextPage())
 reducer.on(actions.setLoading, initState<boolean>('isLoading'))
-reducer.on(
-    actions.appendReadNotificationResult,
-    handleNotificationResult({ overwrite: false }),
-)
-reducer.on(
-    actions.setReadNotificationResult,
-    handleNotificationResult({ overwrite: true }),
-)
+
 reducer.on(actions.toggleReadExpand, toggleExpand())
 reducer.on(actions.toggleInbox, toggleShowInbox())
 reducer.on(actions.setUnreadCount, initState<number>('unreadNotifCount'))
 reducer.on(actions.setShouldTrack, initState<boolean>('shouldTrack'))
-reducer.on(actions.removeUnReadNotif, removeUnReadNotif())
-reducer.on(actions.addReadNotif, addReadNotif())
+reducer.on(actions.handleReadNotification, handleReadNotification())
+reducer.on(actions.appendResult, appendNotifications())
 
 export default reducer

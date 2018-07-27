@@ -3,16 +3,23 @@ import { createSelector } from 'reselect'
 import { NOTIFICATIONS_PAGE_SIZE } from './constants'
 
 const notifications = (state: any): State => state.notifications
-
+export const notificationsList = createSelector(
+    notifications,
+    state => state.notificationsList,
+)
+export const readNotifications = createSelector(notificationsList, notifs =>
+    notifs.notifications.filter(notif => notif.isRead === true),
+)
 export const readNotificationList = createSelector(
-    notifications,
-    state => state.readNotificationList,
+    notificationsList,
+    readNotifications,
+    (notifs, readNotifs) => ({ ...notifs, notifications: readNotifs }),
+)
+export const unreadNotificationList = createSelector(
+    notificationsList,
+    notifs => notifs.notifications.filter(notif => !notif.isRead),
 )
 
-export const unreadNotificationList = createSelector(
-    notifications,
-    state => state.unreadNotificationList,
-)
 export const showMoreIndex = createSelector(
     notifications,
     state => state.showMoreIndex,
@@ -28,7 +35,7 @@ export const notificationsSkip = createSelector(
 )
 export const isLoading = createSelector(notifications, state => state.isLoading)
 export const resultsExhausted = createSelector(
-    readNotificationList,
+    notificationsList,
     results => results.resultExhausted,
 )
 export const needsWaypoint = createSelector(

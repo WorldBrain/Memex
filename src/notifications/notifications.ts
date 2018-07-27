@@ -1,34 +1,7 @@
 import { SHOULD_TRACK_STORAGE_KEY } from '../options/privacy/constants'
+import * as actionTypes from './action-types'
 
-export interface ActionDefinition {
-    /** Type of the button the button, it can be go-to-url etc. */
-    type: string
-    /** Url of the button if the button is to open a new link */
-    url?: string
-    /** It is used for open the new tab or self tab {new-tab|self} */
-    context?: string
-    /** Key when we need to use the variable of the local storage */
-    key?: string
-}
-
-export interface ButtonDefinition {
-    action?: ActionDefinition
-    label: string
-    primary?: boolean
-}
-
-export interface NotifDefinition {
-    /** Should be unique (feature_name + notification + incNumber) */
-    id: string
-    /** Title of the notifications - Do not support html tags */
-    title: string
-    /** Message in the text - It supports html tags (for example h1, i, b) */
-    message: string
-    /** Buttons that will be present in the notifications
-     * It can be any action button or link button
-     */
-    buttons?: ButtonDefinition[]
-}
+import { NotifDefinition } from './types'
 
 /** Time when create the notif, get the current unix time (Date.now()) - Important, the notif insertation in db depends on it */
 export const releaseTime: number = 1532421254491
@@ -42,7 +15,7 @@ export const NOTIFS: NotifDefinition[] = [
         buttons: [
             {
                 action: {
-                    type: 'go-to-url',
+                    type: actionTypes.OPEN_URL,
                     url: 'https://worldbrain.io',
                     context: 'new-tab',
                 },
@@ -50,7 +23,7 @@ export const NOTIFS: NotifDefinition[] = [
             },
             {
                 action: {
-                    type: 'go-to-url',
+                    type: actionTypes.OPEN_URL,
                     url: 'https://memex.io',
                     context: 'new-tab',
                 },
@@ -66,14 +39,14 @@ export const NOTIFS: NotifDefinition[] = [
         buttons: [
             {
                 action: {
-                    type: 'toggle-storage-option',
+                    type: actionTypes.TOGGLE_SETTING,
                     key: SHOULD_TRACK_STORAGE_KEY,
                 },
                 label: 'Enable Tracking',
             },
             {
                 action: {
-                    type: 'go-to-url',
+                    type: actionTypes.OPEN_URL,
                     url: 'https://memex.io',
                     context: 'new-tab',
                 },

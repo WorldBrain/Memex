@@ -1,10 +1,11 @@
 import { storeTrackingOption } from '../analytics/store-tracking-option'
+import * as actionTypes from './action-types'
 
 export const actionRegistry = {
-    'toggle-storage-option': ({ definition }) => {
+    [actionTypes.TOGGLE_SETTING]: ({ definition }) => {
         storeTrackingOption(definition.value)
     },
-    'go-to-url': ({ definition }) => {
+    [actionTypes.OPEN_URL]: ({ definition }) => {
         return () => {
             window.location.href = definition.url
         }

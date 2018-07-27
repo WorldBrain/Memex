@@ -62,16 +62,14 @@ export default class NotificationStorage extends FeatureStorage {
     }
 
     async readNotification(id) {
-        const notification = await this.storageManager.findObject(
+        await this.storageManager.updateObject(
             'notifications',
+            { id },
             {
-                id,
+                $set: {
+                    readTime: Date.now(),
+                },
             },
         )
-
-        await this.storageManager.putObject('notifications', {
-            ...notification,
-            readTime: Date.now(),
-        })
     }
 }
