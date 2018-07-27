@@ -1,0 +1,60 @@
+{
+    "env": {
+        "browser": true,
+        "webextensions": true
+    },
+    "extends": [
+        "plugin:jest/recommended",
+        "plugin:promise/recommended",
+        "standard",
+        "standard-react",
+        "prettier",
+        "prettier/react",
+        "prettier/standard"
+    ],
+    "plugins": ["prettier", "jest", "standard", "promise", "react"],
+    "parser": "babel-eslint",
+    "parserOptions": {
+        "sourceType": "module",
+        "ecmaFeatures": {
+            "jsx": true
+        }
+    },
+    "rules": {
+        "camelcase": "error",
+        "comma-dangle": ["error", "always-multiline"],
+        "curly": "error",
+        "quotes": "off",
+        "no-var": "error",
+        "prefer-const": "error",
+        "indent": "off",
+        "handle-callback-err": "off",
+        "jsx-quotes": "off",
+        "operator-linebreak": "off",
+        "space-before-function-paren": "off",
+        "space-infix-ops": "off",
+        "no-empty": "error",
+        "no-multiple-empty-lines": ["error", { "max": 2, "maxEOF": 0 }],
+        "no-multi-spaces": ["error", { "ignoreEOLComments": true }],
+        "no-unused-vars": "error",
+        "no-return-await": "error",
+        "promise/avoid-new": "off",
+        "promise/param-names": "off",
+        "promise/always-return": "off",
+        "promise/catch-or-return": "off",
+        "promise/valid-params": "off",
+        "import/no-webpack-loader-syntax": "off",
+        "prefer-promise-reject-errors": "off",
+        "valid-jsdoc": "off",
+        "react/jsx-indent": "off",
+        "react/jsx-indent-props": "off",
+        "react/jsx-filename-extension": "off",
+        "react/prefer-stateless-function": [
+            "error",
+            { "ignorePureComponents": true }
+        ],
+        "react/sort-comp": "warn",
+        "react/jsx-max-props-per-line": [1, { "when": "multiline" }],
+        "jest/no-disabled-tests": "off"
+    }
+}

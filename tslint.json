@@ -1,11 +1,14 @@
 {
-    "extends": ["tslint-react", "tslint-config-prettier"],
+    "extends": ["tslint:latest", "tslint-react", "tslint-config-prettier"],
     "jsRules": {
         "no-empty": true
     },
     "rules": {
+        "adjacent-overload-signatures": false,
+        "array-type": false,
         "class-name": true,
         "comment-format": [true, "check-space"],
+        "curly": true,
         "forin": true,
         "interface-name": [true, "never-prefix"],
         "jsdoc-format": true,
@@ -13,6 +16,9 @@
         "jsx-boolean-value": false,
         "jsx-no-lambda": false,
         "label-position": true,
+        "max-classes-per-file": false,
+        "member-access": false,
+        "member-ordering": false,
         "no-arg": true,
         "no-console": [true, "debug", "info", "trace"],
         "no-construct": true,
@@ -20,10 +26,15 @@
         "no-duplicate-variable": true,
         "no-empty": true,
         "no-eval": true,
+        "no-implicit-dependencies": [true, "dev"],
+        "no-object-literal-type-assertion": false,
         "no-shadowed-variable": true,
         "no-string-literal": false,
         "no-switch-case-fall-through": true,
+        "no-submodule-imports": false,
         "no-unused-expression": true,
+        "no-var-requires": false,
+        "object-literal-sort-keys": false,
         "one-line": [
             true,
             "check-catch",
@@ -31,16 +42,20 @@
             "check-open-brace",
             "check-whitespace"
         ],
+        "only-arrow-functions": false,
+        "ordered-imports": false,
+        "prefer-const": true,
         "radix": true,
         "switch-default": true,
+        "trailing-comma": true,
         "triple-equals": [true, "allow-null-check"],
         "typedef": [true, "property-declaration"],
+        "valid-jsdoc": false,
         "variable-name": [
             true,
             "ban-keywords",
             "check-format",
-            "allow-leading-underscore",
-            "allow-pascal-case"
+            "allow-leading-underscore"
         ]
     }
 }
