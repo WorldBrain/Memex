@@ -193,7 +193,7 @@ class NotificationContainer extends Component {
             <NotificationList>
                 <StatusHeading>
                     {unreadNotificationList.length === 0
-                        ? 'There are no new notification.'
+                        ? 'There are no new notifications.'
                         : 'New'}
                 </StatusHeading>
                 {this.renderUnreadNotifications()}
