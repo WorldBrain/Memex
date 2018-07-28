@@ -12,7 +12,6 @@ export interface ActionDefinition {
 export interface ButtonDefinition {
     action?: ActionDefinition
     label: string
-    primary?: boolean
 }
 
 export interface NotifDefinition {
