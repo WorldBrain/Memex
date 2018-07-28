@@ -1,6 +1,9 @@
 import { RetryTimeoutError } from '../direct-linking/utils'
 import { remoteFunction } from '../util/webextensionRPC'
 
+/**
+ * Keeps executing a promiseCreator function till no error is thrown.
+ */
 export function retryUntilErrorResolves(
     promiseCreator,
     { intervalMiliseconds, timeoutMiliseconds },
@@ -36,7 +39,7 @@ export function retryUntilErrorResolves(
 }
 
 // Compute the maximum width of a Tag pill
-const avgLetterPx = 6
+const avgLetterPx = 8
 // Padding + Margin + X button
 const tagPillExtra = 10 + 8 + 12
 const tagContainerWidth = 240
@@ -97,6 +100,11 @@ export const goToAnnotation = (
     }
 }
 
+/**
+ * Calculates the number of pixels from the starting of the webpage.
+ * @param {HTMLElement} element DOM element to calculate the offsetTop.
+ * @returns The number of pixels from the starting of the webpage.
+ */
 export const getOffsetTop = element => {
     let el = element
     let offset = 0
