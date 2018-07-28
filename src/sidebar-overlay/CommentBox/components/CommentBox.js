@@ -97,7 +97,7 @@ class CommentBox extends React.PureComponent {
     getHighlightText = () => {
         const highlight = this.props.anchor.quote
         if (this.isHighlightLong() && this.props.displayHighlightTruncated) {
-            const truncatedText = highlight.slice(0, 280) + ' [..]'
+            const truncatedText = highlight.slice(0, 280) + ' [...]'
             return truncatedText
         }
         return highlight
