@@ -3,6 +3,9 @@
     "jsRules": {
         "no-empty": true
     },
+    "linterOptions": {
+        "exclude": ["node_modules/**/*", "src/**/*.{js,jsx}"]
+    },
     "rules": {
         "adjacent-overload-signatures": false,
         "array-type": false,
@@ -47,6 +50,7 @@
         "prefer-const": true,
         "radix": true,
         "switch-default": true,
+        "strict-type-predicates": false,
         "trailing-comma": true,
         "triple-equals": [true, "allow-null-check"],
         "typedef": [true, "property-declaration"],

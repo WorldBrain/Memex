@@ -26,9 +26,6 @@ const initTsPlugin = tslint =>
         checkSyntacticErrors: true,
         async: false,
         tslint,
-        // Hacky workaround for now as this plugin tries to lint imported TS node_modules for some reason
-        // CI linting will still pick these up
-        ignoreLints: ['class-name', 'no-shadowed-variable', 'comment-format'],
     })
 
 export default function({
