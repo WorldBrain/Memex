@@ -7,17 +7,12 @@ export const notificationsList = createSelector(
     notifications,
     state => state.notificationsList,
 )
-export const readNotifications = createSelector(notificationsList, notifs =>
-    notifs.notifications.filter(notif => notif.isRead === true),
-)
-export const readNotificationList = createSelector(
-    notificationsList,
-    readNotifications,
-    (notifs, readNotifs) => ({ ...notifs, notifications: readNotifs }),
+export const readNotificationList = createSelector(notificationsList, notifs =>
+    notifs.filter(notif => notif.isRead === true),
 )
 export const unreadNotificationList = createSelector(
     notificationsList,
-    notifs => notifs.notifications.filter(notif => !notif.isRead),
+    notifs => notifs.filter(notif => !notif.isRead),
 )
 
 export const showMoreIndex = createSelector(
@@ -35,8 +30,8 @@ export const notificationsSkip = createSelector(
 )
 export const isLoading = createSelector(notifications, state => state.isLoading)
 export const resultsExhausted = createSelector(
-    notificationsList,
-    results => results.resultExhausted,
+    notifications,
+    state => state.resultExhausted,
 )
 export const needsWaypoint = createSelector(
     resultsExhausted,
@@ -50,7 +45,7 @@ export const isReadExpanded = createSelector(
 export const isReadShow = createSelector(
     readNotificationList,
     isReadExpanded,
-    (notifs, readExpand) => readExpand && notifs.notifications.length !== 0,
+    (notifs, readExpand) => readExpand && notifs.length !== 0,
 )
 export const showInbox = createSelector(notifications, state => state.showInbox)
 export const initUnreadNotifCount = createSelector(

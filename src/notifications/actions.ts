@@ -92,8 +92,8 @@ export const handleReadNotif = notification => async (dispatch, getState) => {
     const notificationsList = selectors.notificationsList(getState())
 
     const index = await new Promise((resolve, reject) => {
-        for (let i = 0; i < notificationsList.notifications.length; i++) {
-            if (notificationsList.notifications[i].id === notification.id) {
+        for (let i = 0; i < notificationsList.length; i++) {
+            if (notificationsList[i].id === notification.id) {
                 resolve(i)
                 break
             }

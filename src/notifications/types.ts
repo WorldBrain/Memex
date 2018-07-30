@@ -4,7 +4,7 @@ export interface ActionDefinition {
     /** Url of the button if the button is to open a new link */
     url?: string
     /** It is used for open the new tab or self tab {new-tab|self} */
-    context?: string
+    context?: 'new-tab' | 'self'
     /** Key when we need to use the variable of the local storage */
     key?: string
 }

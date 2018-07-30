@@ -3,12 +3,9 @@ import { Notification } from './types'
 import * as actions from './actions'
 
 export interface State {
-    notificationsList: {
-        notifications: Notification[]
-        resultExhausted: boolean
-    }
+    notificationsList: Notification[]
+    resultExhausted: boolean
     showMoreIndex?: string
-    unreadNotifications: number
     currentPage: number
     isLoading: boolean
     isReadExpanded: boolean
@@ -18,12 +15,9 @@ export interface State {
 }
 
 const defaultState: State = {
-    notificationsList: {
-        notifications: [],
-        resultExhausted: false,
-    },
+    notificationsList: [],
+    resultExhausted: false,
     showMoreIndex: undefined,
-    unreadNotifications: 0,
     currentPage: 0,
     isLoading: true,
     isReadExpanded: false,
@@ -56,36 +50,37 @@ const handleNotificationResult = ({ overwrite }) => (
 }
 
 const handleReadNotification = () => (state, index) => {
-    const notification = state.notificationsList.notifications[index]
+    const notification = state.notificationsList[index]
 
     return {
         ...state,
-        notificationsList: {
-            ...state.notificationsList,
-            notifications: [
-                ...state.notificationsList.notifications.slice(0, index),
-                {
-                    ...notification,
-                    isRead: true,
-                },
-                ...state.notificationsList.notifications.slice(index + 1),
-            ],
-        },
+        notificationsList: [
+            ...state.notificationsList.slice(0, index),
+            {
+                ...notification,
+                isRead: true,
+            },
+            ...state.notificationsList.slice(index + 1),
+        ],
     }
 }
 
 const appendNotifications = () => (state, newNotifications) => {
     return {
         ...state,
-        notificationsList: {
-            ...newNotifications,
-            notifications: [
-                ...state.notificationsList.notifications,
-                ...newNotifications.notifications,
-            ],
-        },
+        notificationsList: [
+            ...state.notificationsList,
+            ...newNotifications.notifications,
+        ],
+        resultExhausted: newNotifications.resultExhausted,
     }
 }
+
+const setNotifications = () => (state, notifications) => ({
+    ...state,
+    notificationsList: notifications.notifications,
+    resultExhausted: notifications.resultExhausted,
+})
 
 const toggleExpand = () => state => ({
     ...state,
@@ -104,10 +99,7 @@ const initState = <T>(key) => (state: State, payload: T) => ({
 
 const reducer = createReducer<State>({}, defaultState)
 
-reducer.on(
-    actions.setNotificationsResult,
-    initState<Notification[]>('notificationsList'),
-)
+reducer.on(actions.setNotificationsResult, setNotifications())
 reducer.on(actions.setShowMoreIndex, initState<boolean>('showMoreIndex'))
 reducer.on(actions.nextPage, nextPage())
 reducer.on(actions.setLoading, initState<boolean>('isLoading'))

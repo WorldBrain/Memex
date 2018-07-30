@@ -15,11 +15,12 @@ import OpenLinkButton from './components/OpenLinkButton'
 import ActionButton from './components/ActionButton'
 import { actionRegistry } from './registry'
 import OptIn from './components/OptIn'
+import * as actionTypes from './action-types'
 
 class NotificationContainer extends Component {
     static propTypes = {
         unreadNotificationList: PropTypes.arrayOf(PropTypes.object).isRequired,
-        readNotificationList: PropTypes.object.isRequired,
+        readNotificationList: PropTypes.arrayOf(PropTypes.object).isRequired,
         init: PropTypes.func.isRequired,
         showMoreIndex: PropTypes.string,
         handleToggleShowMore: PropTypes.func.isRequired,
@@ -32,7 +33,6 @@ class NotificationContainer extends Component {
         isReadShow: PropTypes.bool.isRequired,
         messageCharLimit: PropTypes.number.isRequired,
         shouldTrack: PropTypes.bool.isRequired,
-        setShouldTrack: PropTypes.func.isRequired,
     }
 
     static defaultProps = {
@@ -56,15 +56,12 @@ class NotificationContainer extends Component {
         return trunctatedText
     }
 
-    handleToggleStorageOption(action) {
-        const { shouldTrack } = this.props
-
+    handleToggleStorageOption(action, value) {
         action = {
             ...action,
-            value: !shouldTrack,
+            value,
         }
 
-        this.props.setShouldTrack(!shouldTrack)
         actionRegistry[action.type]({
             definition: action,
         })
@@ -80,7 +77,7 @@ class NotificationContainer extends Component {
         return buttons.map((button, i) => {
             const { action } = button
 
-            if (action.type === 'go-to-url') {
+            if (action.type === actionTypes.OPEN_URL) {
                 return (
                     <OpenLinkButton
                         key={i}
@@ -89,13 +86,13 @@ class NotificationContainer extends Component {
                         context={action.context}
                     />
                 )
-            } else if (action.type === 'toggle-storage-option') {
+            } else if (action.type === actionTypes.TOGGLE_SETTING) {
                 return (
                     <OptIn key={i}>
                         <ToggleSwitch
                             isChecked={shouldTrack}
-                            onChange={() =>
-                                this.handleToggleStorageOption(action)
+                            onChange={val =>
+                                this.handleToggleStorageOption(action, val)
                             }
                         />
                     </OptIn>
@@ -152,13 +149,12 @@ class NotificationContainer extends Component {
 
     renderReadNotifications() {
         const { readNotificationList, isReadShow } = this.props
-
         if (!isReadShow) {
             return
         }
 
         const notificationResults = this.renderNotificationItems(
-            readNotificationList.notifications,
+            readNotificationList,
             false,
         )
 
@@ -197,7 +193,7 @@ class NotificationContainer extends Component {
                         : 'New'}
                 </StatusHeading>
                 {this.renderUnreadNotifications()}
-                {readNotificationList.notifications.length !== 0 && (
+                {readNotificationList.length !== 0 && (
                     <ReadHeader
                         isReadExpanded={this.props.isReadExpanded}
                         toggleReadExpand={this.props.toggleReadExpand}
@@ -226,7 +222,6 @@ const mapDispatchToProps = dispatch => ({
             init: actions.init,
             onBottomReached: actions.getMoreNotifications,
             toggleReadExpand: actions.toggleReadExpand,
-            setShouldTrack: actions.setShouldTrack,
         },
         dispatch,
     ),
