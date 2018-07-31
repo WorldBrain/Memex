@@ -34,20 +34,29 @@ class ToggleSwitch extends Component {
         })
 
     handleClick = event => {
-        this.props.onChange(!(this.props.isChecked || this.state.isChecked))
+        if (this.props.isChecked === true || this.props.isChecked === false) {
+            this.props.onChange(!this.props.isChecked)
+        } else {
+            this.props.onChange(!this.state.isChecked)
 
-        this.setState(state => ({
-            ...state,
-            isChecked: !(this.props.isChecked || this.state.isChecked),
-        }))
+            this.setState(state => ({
+                ...state,
+                isChecked: !this.state.isChecked,
+            }))
+        }
     }
 
     render() {
+        const isUncontrolled =
+            this.props.isChecked === true || this.props.isChecked === false
+
         return (
             <label className={this.deriveClass()}>
                 <input
                     className={localStyles.input}
-                    checked={this.state.isChecked}
+                    checked={
+                        !isUncontrolled ? this.state.isChecked : isUncontrolled
+                    }
                     onChange={this.handleClick}
                     type="checkbox"
                 />
