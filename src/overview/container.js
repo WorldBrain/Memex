@@ -375,7 +375,6 @@ const mapDispatchToProps = dispatch => ({
             setUrlDragged: listActs.setUrlDragged,
             showSearchFilters: sidebarLeftActs.openSidebarFilterMode,
             hideSearchFilters: sidebarLeftActs.openSidebarListMode,
-            setUrlDragged: listActs.setUrlDragged,
             resetUrlDragged: listActs.resetUrlDragged,
             resetFilters: filterActs.resetFilters,
             delListFilter: filterActs.delListFilter,
