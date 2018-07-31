@@ -1,28 +1,29 @@
-import React, { PureComponent } from 'react'
+import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import cx from 'classnames'
 
 import localStyles from './ToggleSwitch.css'
 
-class ToggleSwitch extends PureComponent {
+class ToggleSwitch extends Component {
     static propTypes = {
         isChecked: PropTypes.bool,
         onChange: PropTypes.func.isRequired,
         className: PropTypes.string,
         activeClassName: PropTypes.string,
+        defaultValue: PropTypes.bool,
     }
 
     static defaultProps = {
         className: localStyles.switch,
         activeClassName: localStyles.activeSwitch,
-        isChecked: false,
+        defaultValue: false,
     }
 
     constructor(props) {
         super(props)
 
         this.state = {
-            isChecked: props.isChecked ? props.isChecked : false,
+            isChecked: props.isChecked || props.defaultValue,
         }
     }
 
@@ -33,11 +34,11 @@ class ToggleSwitch extends PureComponent {
         })
 
     handleClick = event => {
-        this.props.onChange(!this.state.isChecked)
+        this.props.onChange(!(this.props.isChecked || this.state.isChecked))
 
         this.setState(state => ({
             ...state,
-            isChecked: !state.isChecked,
+            isChecked: !(this.props.isChecked || this.state.isChecked),
         }))
     }
 

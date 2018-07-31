@@ -90,7 +90,7 @@ class NotificationContainer extends Component {
                 return (
                     <OptIn key={i}>
                         <ToggleSwitch
-                            isChecked={shouldTrack}
+                            defaultValue={shouldTrack}
                             onChange={val =>
                                 this.handleToggleStorageOption(action, val)
                             }
