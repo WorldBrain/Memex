@@ -236,27 +236,27 @@ const runSuite = (DATA: TestData) => async () => {
 
 // Run import tests against different sized history/bookmark data sets
 describe('Import items derivation', () => {
-    describe(
-        'hist: 1000+, bm: 1000+',
-        runSuite(initData(urlLists.large, urlLists.large)),
-    )
-    describe(
-        'hist: 1000+, bm: 30',
-        runSuite(initData(urlLists.large, urlLists.large.slice(0, 30))),
-    )
+    // describe(
+    //     'hist: 1000+, bm: 1000+',
+    //     runSuite(initData(urlLists.large, urlLists.large)),
+    // )
+    // describe(
+    //     'hist: 1000+, bm: 30',
+    //     runSuite(initData(urlLists.large, urlLists.large.slice(0, 30))),
+    // )
     describe(
         'hist: 200+, bm: 30',
         runSuite(initData(urlLists.med, urlLists.med.slice(0, 30))),
     )
-    describe(
-        'hist: 1000+, bm: 200+ - no bm intersection',
-        runSuite(initData(urlLists.large, urlLists.med)),
-    )
-    describe(
-        'hist: 200+, bm: 1000+ - no bm intersection',
-        runSuite(initData(urlLists.med, urlLists.large)),
-    )
-    describe('hist: 1000+, bm: 0', runSuite(initData(urlLists.large, [])))
+    // describe(
+    //     'hist: 1000+, bm: 200+ - no bm intersection',
+    //     runSuite(initData(urlLists.large, urlLists.med)),
+    // )
+    // describe(
+    //     'hist: 200+, bm: 1000+ - no bm intersection',
+    //     runSuite(initData(urlLists.med, urlLists.large)),
+    // )
+    // describe('hist: 1000+, bm: 0', runSuite(initData(urlLists.large, [])))
     describe('hist: 0, bm: 200+', runSuite(initData([], urlLists.med)))
     describe('hist: 0, bm: 0', runSuite(initData([], [])))
 })
