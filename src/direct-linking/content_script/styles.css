@@ -1,3 +1,13 @@
 .memex-highlight {
-    background: rgb(62, 185, 149);
+    background: rgb(62, 185, 149, 0.3);
+    transition: all 0.1s linear;
+    cursor: pointer;
+
+    &.medium {
+        background: rgb(62, 185, 149, 0.5);
+    }
+
+    &.dark {
+        background: rgb(62, 185, 149, 0.7);
+    }
 }

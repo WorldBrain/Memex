@@ -46,8 +46,8 @@ export const copyPatterns = [
     },
     { from: 'node_modules/pdfjs-dist/build/pdf.worker.min.js', to: 'lib/' },
     {
-        from: 'fonts/lato/*.{woff2,css}',
-        to: 'fonts/lato/[name].[ext]',
+        from: 'fonts/*/*',
+        to: 'fonts/googlefonts/[name].[ext]',
     },
     {
         from:

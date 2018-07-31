@@ -121,7 +121,7 @@
     font-family: 'Open Sans';
     color: grey;
     animation-name: fadeIn;
-    animation-duration: 0.5s;
+    animation-duration: 0.4s;
     animation-iteration-count: 1;
     animation-timing-function: ease-in;
     font-weight: 200;

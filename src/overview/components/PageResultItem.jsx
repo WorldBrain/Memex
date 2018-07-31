@@ -50,6 +50,13 @@ const PageResultItem = props => (
                             ref={props.setTagButtonRef}
                         />
                         <button
+                            className={classNames(
+                                styles.button,
+                                styles.comment,
+                            )}
+                            onClick={props.onCommentBtnClick}
+                        />
+                        <button
                             disabled={props.isDeleting}
                             className={classNames(styles.button, styles.trash)}
                             onClick={props.onTrashBtnClick}
@@ -76,6 +83,7 @@ PageResultItem.propTypes = {
     hasBookmark: PropTypes.bool.isRequired, // eslint-disable-line
     isDeleting: PropTypes.bool.isRequired,
     onTrashBtnClick: PropTypes.func.isRequired,
+    onCommentBtnClick: PropTypes.func.isRequired,
     onToggleBookmarkClick: PropTypes.func.isRequired,
     tagPills: PropTypes.array.isRequired,
     tagManager: PropTypes.node,

@@ -13,6 +13,7 @@ const images = {
 
 const deriveTooltipClass = state =>
     classNames(styles.tooltip, {
+        [styles.statePristine]: state === 'pristine',
         [styles.stateCopied]: state === 'copied',
     })
 

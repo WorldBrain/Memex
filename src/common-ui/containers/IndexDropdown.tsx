@@ -17,12 +17,18 @@ export interface Props {
     url?: string
     hover?: boolean
     tabId?: number
+    /** Whether the tags are for annotations */
+    isForAnnotation?: boolean
+    /** Manual flag to display "Add tag" without creating a tag */
+    allowAdd?: boolean
     /** Tag Filters that are previously present in the location. */
     initFilters?: string[]
     /** Opt. cb to run when new tag added to state. */
     onFilterAdd?: (filter: string) => void
     /** Opt. cb to run when tag deleted from state. */
     onFilterDel?: (filter: string) => void
+    /** Opt. cb with new tag to be added to a new annotation */
+    onNewTagAdd: (filter: string) => void
 }
 
 export interface State {
@@ -38,6 +44,7 @@ class IndexDropdownContainer extends Component<Props, State> {
         onFilterAdd: noop,
         onFilterDel: noop,
         initFilters: [],
+        isForAnnotation: false,
     }
 
     private suggestRPC
@@ -51,6 +58,11 @@ class IndexDropdownContainer extends Component<Props, State> {
         this.suggestRPC = remoteFunction('suggest')
         this.addTagRPC = remoteFunction('addTag')
         this.delTagRPC = remoteFunction('delTag')
+
+        if (this.props.isForAnnotation) {
+            this.addTagRPC = remoteFunction('addAnnotationTag')
+            this.delTagRPC = remoteFunction('delAnnotationTag')
+        }
 
         this.fetchTagSuggestions = debounce(300)(this.fetchTagSuggestions)
 
@@ -124,7 +136,7 @@ class IndexDropdownContainer extends Component<Props, State> {
     }
 
     private canCreateTag() {
-        if (!this.allowIndexUpdate) {
+        if (!this.allowIndexUpdate && !this.props.allowAdd) {
             return false
         }
 
@@ -328,6 +340,7 @@ class IndexDropdownContainer extends Component<Props, State> {
                 {...tag}
                 key={i}
                 onClick={this.handleTagSelection(i)}
+                {...this.props}
             />
         ))
 
@@ -340,6 +353,8 @@ class IndexDropdownContainer extends Component<Props, State> {
                     focused={
                         this.state.focused === this.state.displayFilters.length
                     }
+                    isForAnnotation={this.props.isForAnnotation}
+                    allowAdd={this.props.allowAdd}
                 />,
             )
         }

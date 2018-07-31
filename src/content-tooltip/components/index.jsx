@@ -4,7 +4,7 @@ import TooltipContainer from './container'
 
 export function setupUIContainer(
     target,
-    { createAndCopyDirectLink, openSettings, destroyTooltip },
+    { createAndCopyDirectLink, openSettings, destroyTooltip, createAnnotation },
 ) {
     return new Promise(resolve => {
         ReactDOM.render(
@@ -12,6 +12,7 @@ export function setupUIContainer(
                 onInit={showTooltip => resolve(showTooltip)}
                 destroy={destroyTooltip}
                 createAndCopyDirectLink={createAndCopyDirectLink}
+                createAnnotation={createAnnotation}
                 openSettings={openSettings}
             />,
             target,

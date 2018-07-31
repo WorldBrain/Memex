@@ -1,1 +1,19 @@
-<svg fill="#3EB995" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve"><g><path d="M74.7,60.7c-4.6,0-8.6,2.2-11.2,5.5L39.1,53.7c0.3-1.2,0.5-2.4,0.5-3.7c0-1.4-0.3-2.7-0.7-4l24.2-12.4   c2.6,3.5,6.7,5.7,11.4,5.7C82.6,39.3,89,32.9,89,25c0-7.9-6.4-14.3-14.3-14.3c-7.9,0-14.3,6.4-14.3,14.3c0,1.3,0.2,2.5,0.6,3.7   L36.5,41.2c-2.6-3.3-6.7-5.5-11.2-5.5C17.4,35.7,11,42.1,11,50s6.4,14.3,14.3,14.3c4.7,0,8.8-2.3,11.4-5.8L61,71   c-0.4,1.3-0.7,2.6-0.7,4c0,7.9,6.4,14.3,14.3,14.3C82.6,89.3,89,82.9,89,75C89,67.1,82.6,60.7,74.7,60.7z"></path></g></svg>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 19 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 51 (57462) - http://www.bohemiancoding.com/sketch -->
+    <title>Group 7</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-2" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Annotations" transform="translate(-3576.000000, -1554.000000)">
+            <rect fill="#FFFFFF" x="0" y="0" width="4815" height="6943"></rect>
+            <g id="Group-7" transform="translate(3577.000000, 1555.000000)" stroke="#3DB994" stroke-width="2">
+                <circle id="Oval" cx="13.9430844" cy="2.94308438" r="2.94308437"></circle>
+                <circle id="Oval-Copy-2" cx="2.94308437" cy="8.94308438" r="2.94308437"></circle>
+                <circle id="Oval-Copy-3" cx="13.9430844" cy="14.9430844" r="2.94308437"></circle>
+                <path d="M11.8861687,4 L6,7.31096992" id="Path-2"></path>
+                <path d="M11.8861687,11 L6,14.3109699" id="Path-2-Copy" transform="translate(8.943084, 12.655485) scale(1, -1) translate(-8.943084, -12.655485) "></path>
+            </g>
+        </g>
+    </g>
+</svg>

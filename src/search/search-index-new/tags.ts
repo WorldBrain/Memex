@@ -1,4 +1,3 @@
-import db from '.'
 import { createPageViaBmTagActs } from './on-demand-indexing'
 import { getPage } from './util'
 

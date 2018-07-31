@@ -18,6 +18,10 @@ import ResultsMessage from './components/ResultsMessage'
 import TagPill from './components/TagPill'
 import Onboarding, { selectors as onboarding } from './onboarding'
 import Filters, { selectors as filters, actions as filterActs } from './filters'
+import Sidebar, {
+    selectors as sidebarSels,
+    actions as sidebarActs,
+} from './sidebar'
 import NoResultBadTerm from './components/NoResultBadTerm'
 import localStyles from './components/Overview.css'
 
@@ -41,11 +45,13 @@ class OverviewContainer extends Component {
         handleTrashBtnClick: PropTypes.func.isRequired,
         handleToggleBm: PropTypes.func.isRequired,
         handleTagBtnClick: PropTypes.func.isRequired,
+        handleCommentBtnClick: PropTypes.func.isRequired,
         handlePillClick: PropTypes.func.isRequired,
         addTag: PropTypes.func.isRequired,
         delTag: PropTypes.func.isRequired,
         resetFilterPopup: PropTypes.func.isRequired,
         showOnboarding: PropTypes.bool.isRequired,
+        mouseOnSidebar: PropTypes.bool.isRequired,
         init: PropTypes.func.isRequired,
     }
 
@@ -124,6 +130,7 @@ class OverviewContainer extends Component {
                 tagManager={this.renderTagsManager(doc, i)}
                 setTagButtonRef={this.setTagButtonRef}
                 onTagBtnClick={this.props.handleTagBtnClick(i)}
+                onCommentBtnClick={this.props.handleCommentBtnClick(doc)}
                 tagPills={this.renderTagPills(doc, i)}
                 {...doc}
             />
@@ -223,7 +230,11 @@ class OverviewContainer extends Component {
                         results in your digital memory
                     </ResultsMessage>
                 )}
-                <ResultList scrollDisabled={this.props.showOnboarding}>
+                <ResultList
+                    scrollDisabled={
+                        this.props.showOnboarding || this.props.mouseOnSidebar
+                    }
+                >
                     {this.renderResultItems()}
                 </ResultList>
             </Wrapper>
@@ -262,9 +273,11 @@ class OverviewContainer extends Component {
                     filters={this.renderFilters()}
                     onQuerySearchKeyDown={this.handleSearchEnter}
                     isSearchDisabled={this.props.showOnboarding}
+                    scrollDisabled={this.props.mouseOnSidebar}
                 >
                     {this.renderResults()}
                 </Overview>
+                <Sidebar />
                 <Onboarding />
             </Wrapper>
         )
@@ -291,6 +304,7 @@ const mapStateToProps = state => ({
     tooltip: selectors.tooltip(state),
     isFirstTooltip: selectors.isFirstTooltip(state),
     isTooltipRenderable: selectors.isTooltipRenderable(state),
+    mouseOnSidebar: sidebarSels.mouseOnSidebar(state),
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -332,6 +346,10 @@ const mapDispatchToProps = dispatch => ({
     handlePillClick: tag => event => {
         event.preventDefault()
         dispatch(filterActs.toggleTagFilter(tag))
+    },
+    handleCommentBtnClick: ({ url, title }) => event => {
+        event.preventDefault()
+        dispatch(sidebarActs.openSidebar(url, title))
     },
     addTag: resultIndex => tag => dispatch(actions.addTag(tag, resultIndex)),
     delTag: resultIndex => tag => dispatch(actions.delTag(tag, resultIndex)),
