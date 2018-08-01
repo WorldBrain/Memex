@@ -87,8 +87,10 @@ class Ribbon extends React.Component {
                     )
                 }, 500)
             },
-            toggleIFrameRender: shouldRenderIFrame =>
-                this.setState(state => ({ shouldRenderIFrame })),
+            toggleIFrameRender: shouldRenderIFrame => {
+                this.setState(state => ({ shouldRenderIFrame }))
+                if (!shouldRenderIFrame) this.frameFC = null
+            },
         })
     }
 
@@ -181,6 +183,8 @@ class Ribbon extends React.Component {
     }
 
     openSidebarOps = async () => {
+        if (!this.frameFC)
+            this.frameFC = new FrameCommunication(this.iFrame.contentWindow)
         await this.frameFC.remoteExecute('setLoaderActive')()
         await this.fetchAnnotations()
         const highlightables = this.state.annotations.filter(
