@@ -333,6 +333,8 @@ class AnnotationContainer extends React.Component {
                     isForAnnotation
                     url={this.props.annotation.url}
                     initFilters={tagStringArray}
+                    onFilterAdd={this.reloadTags}
+                    onFilterDel={this.reloadTags}
                     source="tag"
                 />
             )
