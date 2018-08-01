@@ -183,8 +183,12 @@ class Ribbon extends React.Component {
     }
 
     openSidebarOps = async () => {
-        if (!this.frameFC)
+        if (!this.frameFC) {
+            this.setState({
+                shouldRenderIFrame: true,
+            })
             this.frameFC = new FrameCommunication(this.iFrame.contentWindow)
+        }
         await this.frameFC.remoteExecute('setLoaderActive')()
         await this.fetchAnnotations()
         const highlightables = this.state.annotations.filter(
