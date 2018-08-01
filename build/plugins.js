@@ -103,8 +103,9 @@ export default function({
                 filename: extPackageName,
                 exclude: [/\.map/],
             }),
-            // TODO: do this in node
-            new PostCompilePlugin(() => exec('sh package-source-code.sh')),
+            new PostCompilePlugin(() =>
+                exec('git archive -o dist/source-code.zip master'),
+            ),
         )
     }
 
