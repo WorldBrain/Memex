@@ -28,6 +28,7 @@ class Ribbon extends React.Component {
         // For preventing the page scroll, when sidebar is open
         isInsideFrame: false,
         top: null,
+        shouldRenderIFrame: true,
     }
 
     async componentDidMount() {
@@ -86,6 +87,8 @@ class Ribbon extends React.Component {
                     )
                 }, 500)
             },
+            toggleIFrameRender: shouldRenderIFrame =>
+                this.setState(state => ({ shouldRenderIFrame })),
         })
     }
 
@@ -241,9 +244,30 @@ class Ribbon extends React.Component {
 
     setiFrameRef = node => (this.iFrame = node)
 
+    renderIFrame() {
+        if (!this.state.shouldRenderIFrame && !this.state.isSidebarActive) {
+            console.log('stopping render of iFrame')
+            return null
+        }
+
+        console.log('starting render of iFrame')
+        return (
+            <iframe
+                src={this.props.sidebarURL}
+                height={window.innerHeight}
+                id="memex_annotations_sidebar"
+                width={340}
+                ref={this.setiFrameRef}
+                className={cx(styles.sidebarFrame, {
+                    [styles.sidebarActive]: this.state.isSidebarActive,
+                })}
+            />
+        )
+    }
+
     render() {
         const { isSidebarActive } = this.state
-        const { destroy, sidebarURL } = this.props
+        const { destroy } = this.props
         return (
             <div>
                 <div
@@ -260,16 +284,7 @@ class Ribbon extends React.Component {
                     isActive={isSidebarActive}
                     clickHandler={this.toggleSidebar}
                 />
-                <iframe
-                    src={sidebarURL}
-                    height={window.innerHeight}
-                    id="memex_annotations_sidebar"
-                    width={340}
-                    ref={this.setiFrameRef}
-                    className={cx(styles.sidebarFrame, {
-                        [styles.sidebarActive]: isSidebarActive,
-                    })}
-                />
+                {this.renderIFrame()}
             </div>
         )
     }
