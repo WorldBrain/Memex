@@ -4,10 +4,10 @@ class Analytics {
     _initDataLoaded
     _setDataLoaded
 
-    constructor({ serverConnector, remoteFunction }) {
-        this._serverConnector = serverConnector
+    constructor({ remoteFunction }) {
         this.getLatestTimeWithCount = remoteFunction('getLatestTimeWithCount')
         this.storeEvent = remoteFunction('storeEvent')
+        this._serverTrackEvent = remoteFunction('trackEvent')
 
         this._initDataLoaded = new Promise(
             resolve => (this._setDataLoaded = resolve),
@@ -113,7 +113,7 @@ class Analytics {
         await this.storeEventLogStatistics(params)
 
         // Send the data to analytics server
-        await this._serverConnector.trackEvent(params, params.force)
+        await this._serverTrackEvent(params, params.force)
     }
 }
 
