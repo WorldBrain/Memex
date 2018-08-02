@@ -44,7 +44,7 @@ export default class CustomListBackground {
         })
     }
 
-    async fetchAllLists({ excludeIds = [], skip, limit }) {
+    async fetchAllLists({ excludeIds = [], skip = 0, limit = 20 }) {
         const query = {
             id: { $nin: excludeIds },
         }

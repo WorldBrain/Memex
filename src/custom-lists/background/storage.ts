@@ -7,6 +7,8 @@ export default class CustomListStorage extends FeatureStorage {
 
     constructor({ storageManager }) {
         super(storageManager)
+        // console.log('running const');
+
         this.storageManager.registerCollection(
             CustomListStorage.CUSTOM_LISTS_COLL,
             {
@@ -323,6 +325,7 @@ export default class CustomListStorage extends FeatureStorage {
             },
             {
                 suggestPks: true,
+                ignoreCase: ['name'],
             },
         )
         const listIds = suggestions.map(({ pk }) => pk)
