@@ -13,6 +13,12 @@
     box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.3);
     border: 1px solid #c2c2c2;
     line-height: normal;
+    text-align: start;
+    font-family: serif;
+
+    &:-webkit-fullscreen {
+        display: none;
+    }
 }
 
 .ribbonSidebarActive {
@@ -67,8 +73,8 @@
     background-size: 12px;
     width: 12px;
     height: 12px;
-    margin-left: 5px;
-    margin-top: 0px;
+    margin-left: 4px;
+    margin-top: 1px;
 }
 
 .settings {
