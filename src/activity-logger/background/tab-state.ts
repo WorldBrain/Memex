@@ -2,6 +2,7 @@ import PausableTimer from '../../util/pausable-timer'
 import ScrollState from './scroll-state'
 import { TabState, NavState } from './types'
 import { remoteFunction } from '../../util/webextensionRPC'
+import { isLoggable } from '..'
 
 class Tab implements TabState {
     id: number
@@ -78,15 +79,17 @@ class Tab implements TabState {
      *
      * @param {number} [now=Date.now()] When the active state changed.
      */
-    toggleActiveState(now = Date.now()) {
+    toggleActiveState(skipRemoteCall = false, now = Date.now()) {
         if (this.isActive) {
             this.activeTime = this.activeTime + now - this.lastActivated
             this._pauseLogTimer()
-            this._toggleRenderSidebarIFrame(false)
         } else {
             this.lastActivated = now
             this._resumeLogTimer()
-            this._toggleRenderSidebarIFrame(true)
+        }
+
+        if (!skipRemoteCall && isLoggable({ url: this.url })) {
+            this._toggleRenderSidebarIFrame(!this.isActive)
         }
 
         this.isActive = !this.isActive

@@ -51,7 +51,7 @@ export class TabManager {
             this._tabs.delete(id)
 
             // If still active when closed, toggle active state to force time recalc
-            toRemove.toggleActiveState()
+            toRemove.toggleActiveState(true)
         }
 
         return toRemove
