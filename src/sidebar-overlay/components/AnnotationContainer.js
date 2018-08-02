@@ -324,7 +324,7 @@ class AnnotationContainer extends React.Component {
 
     getHighlightText = () => {
         const { truncated } = this.state
-        if (truncated.highlight && truncated.highlight.isTruncated)
+        if (truncated && truncated.highlight && truncated.highlight.isTruncated)
             return truncated.highlight.text
         else return this.props.annotation.body
     }
@@ -332,7 +332,11 @@ class AnnotationContainer extends React.Component {
     getAnnotationText = () => {
         const { truncated, annotationEditMode } = this.state
         if (annotationEditMode) return ''
-        if (truncated.annotation && truncated.annotation.isTruncated)
+        if (
+            truncated &&
+            truncated.annotation &&
+            truncated.annotation.isTruncated
+        )
             return truncated.annotation.text
         else return this.props.annotation.comment
     }
