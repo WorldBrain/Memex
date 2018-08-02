@@ -17,8 +17,13 @@ const ToggleTooltip = ({ isChecked, handleChange }) => (
             btnClass={buttonStyles.linkIcon}
         >
             <span>
-                Memex.Link Tooltip
-                <ToggleSwitch isChecked={isChecked} onChange={handleChange} />
+                Show Sidebar/Tooltip
+                <span className={styles.switch}>
+                    <ToggleSwitch
+                        isChecked={isChecked}
+                        onChange={handleChange}
+                    />
+                </span>
             </span>
         </Button>
         <OutLink className={styles.infoLink} href={INFO_URL} tabIndex="-1" />
