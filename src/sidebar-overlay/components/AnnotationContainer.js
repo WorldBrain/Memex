@@ -151,15 +151,14 @@ class AnnotationContainer extends React.Component {
         e.stopPropagation()
         const { url, comment } = this.props.annotation
         const { annotationText, truncated } = this.state
-        let newTruncated
+        const newTruncated = {
+            ...truncated,
+        }
 
         if (annotationText !== comment) {
             this.props.editAnnotation({ url, comment: annotationText })
             // Recalculate if truncation is needed
-            newTruncated = {
-                ...truncated,
-                annotation: this.getTruncatedObject(annotationText),
-            }
+            newTruncated.annotation = this.getTruncatedObject(annotationText)
         }
 
         this.reloadTags()
@@ -309,6 +308,7 @@ class AnnotationContainer extends React.Component {
 
     renderShowButton = name => {
         const { truncated } = this.state
+        if (!truncated) return null
         if (truncated[name]) {
             return (
                 <span
@@ -324,7 +324,8 @@ class AnnotationContainer extends React.Component {
 
     getHighlightText = () => {
         const { truncated } = this.state
-        if (truncated.highlight && truncated.highlight.isTruncated)
+        console.log(truncated)
+        if (truncated && truncated.highlight && truncated.highlight.isTruncated)
             return truncated.highlight.text
         else return this.props.annotation.body
     }
@@ -332,7 +333,11 @@ class AnnotationContainer extends React.Component {
     getAnnotationText = () => {
         const { truncated, annotationEditMode } = this.state
         if (annotationEditMode) return ''
-        if (truncated.annotation && truncated.annotation.isTruncated)
+        if (
+            truncated &&
+            truncated.annotation &&
+            truncated.annotation.isTruncated
+        )
             return truncated.annotation.text
         else return this.props.annotation.comment
     }
