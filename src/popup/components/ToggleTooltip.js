@@ -3,8 +3,6 @@ import PropTypes from 'prop-types'
 
 import Button from './Button'
 import ToggleSwitch from './ToggleSwitch'
-import { OutLink } from 'src/common-ui/containers'
-import { INFO_URL } from 'src/content-tooltip/constants'
 
 import styles from './ToggleTooltip.css'
 import buttonStyles from './Button.css'
@@ -26,7 +24,6 @@ const ToggleTooltip = ({ isChecked, handleChange }) => (
                 </span>
             </span>
         </Button>
-        <OutLink className={styles.infoLink} href={INFO_URL} tabIndex="-1" />
     </div>
 )
 
