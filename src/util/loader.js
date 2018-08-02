@@ -25,3 +25,15 @@ export const bodyLoader = loader(() => {
         })
     })
 })
+
+export const interactiveLoader = loader(() => {
+    return new Promise(resolve => {
+        if (document.readyState !== 'loading') {
+            return resolve()
+        }
+
+        document.addEventListener('readystatechange', () => {
+            if (document.readyState !== 'loading') return resolve()
+        })
+    })
+})

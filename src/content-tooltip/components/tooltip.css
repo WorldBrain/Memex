@@ -1,4 +1,4 @@
-@import url('/fonts/lato/lato.css');
+@import url('/fonts/googlefonts/lato.css');
 
 .tooltip {
     display: flex;
@@ -61,9 +61,18 @@
     }
 }
 
-.createLinkButton,
+.tooltip.statePristine {
+    width: 105px;
+
+    &::after {
+        left: 45%;
+    }
+}
+
+.createButtons,
 .progressIndicator,
-.copiedMessage {
+.copiedMessage,
+.doneComponent {
     position: absolute;
     top: 0;
     left: 0;
@@ -74,28 +83,45 @@
     justify-content: center;
 }
 
-.createLinkButton {
-    cursor: pointer;
+.createButtons {
     z-index: 10;
-    width: 85%;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
+    width: 70%;
 
-    & .createLinkText {
-        position: absolute;
-        bottom: 3%;
-        left: 25%;
-        font-size: 1em;
-        font-weight: 600;
-    }
+    & div {
+        cursor: pointer;
+        flex-basis: 50%;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
 
-    & .createLinkImg {
-        width: 25px;
-        height: 25px;
-        margin-top: 0px;
-        margin-left: -18px;
+        & .annotateIcon {
+            background-image: url('/img/annotate.svg');
+            background-size: 24px;
+            background-repeat: no-repeat;
+            width: 25px;
+            height: 25px;
+            margin-top: 3px;
+            margin-right: -8px;
+
+            &:hover {
+                background-image: url('/img/annotate_hover.svg');
+            }
+        }
+
+        & .shareIcon {
+            background-image: url('/img/share.svg');
+            background-size: 23px;
+            background-repeat: no-repeat;
+            width: 25px;
+            height: 25px;
+            margin-top: 1px;
+            margin-right: -6px;
+
+            &:hover {
+                background-image: url('/img/share_hover.svg');
+            }
+        }
     }
 }
 
@@ -116,6 +142,16 @@
     & .linkReadyStrong {
         font-weight: 800;
         font-size: 1.1em;
+    }
+}
+
+.doneComponent {
+    width: 70%;
+    animation: slideIn 0.2s ease-in;
+
+    & .check {
+        width: 25px;
+        height: auto;
     }
 }
 

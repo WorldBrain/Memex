@@ -9,14 +9,19 @@ import Container from './components/container'
 import * as utils from './utils'
 import * as constants from './constants'
 
-export const injectCSS = file => {
-    // filename: (string) url of the CSS file
-    // injects the css into the webpage
+/**
+ * Injects a CSS stylesheet into the webpage.
+ * @param {string} cssUrl URL of the stylesheet to inject
+ */
+export const injectCSS = cssUrl => {
+    // Check if the css file is already present in the webpage
+    const node = document.querySelector(`link[href="${cssUrl}"]`)
+    if (node) return
 
     const link = document.createElement('link')
     link.type = 'text/css'
     link.rel = 'stylesheet'
-    link.href = file
+    link.href = cssUrl
     const d = document.body || document.head || document.documentElement
     d.prepend(link)
 }

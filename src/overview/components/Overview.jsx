@@ -6,7 +6,6 @@ import { Wrapper } from 'src/common-ui/components'
 import DeleteConfirmModal from './DeleteConfirmModal'
 import Header from './Header'
 import styles from './Overview.css'
-import ShareButtons from './ShareButtons'
 import Tooltip from './Tooltip'
 import Head from 'src/options/containers/Head'
 
@@ -27,9 +26,8 @@ const Overview = props => (
             tooltip={props.tooltip}
             fetchNextTooltip={props.fetchNextTooltip}
             isTooltipRenderable={props.isTooltipRenderable}
+            scrollDisabled={props.scrollDisabled}
         />
-
-        <ShareButtons />
 
         <div className={showFilterClass(props)}>{props.filters}</div>
         <div
@@ -60,6 +58,7 @@ Overview.propTypes = {
     tooltip: PropTypes.object,
     fetchNextTooltip: PropTypes.func.isRequired,
     isTooltipRenderable: PropTypes.bool.isRequired,
+    scrollDisabled: PropTypes.bool.isRequired,
 }
 
 export default Overview

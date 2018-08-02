@@ -46,6 +46,10 @@
     &:hover .notBookmark {
         opacity: 0.5;
     }
+
+    &:hover .comment {
+        opacity: 0.5;
+    }
 }
 
 /* List entries shown as context around a search result */
@@ -191,6 +195,14 @@
     opacity: 0.3;
     width: 20px;
     margin-top: 3px;
+}
+
+.comment {
+    background-image: url('/img/comment.svg');
+    opacity: 0.4;
+    width: 30px;
+    height: 30px;
+    margin-top: -1px;
 }
 
 .bookmark {

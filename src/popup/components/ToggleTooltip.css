@@ -2,6 +2,10 @@
     position: relative;
 }
 
+.switch {
+    position: absolute;
+}
+
 .infoLink {
     background-image: url('/img/info_green.svg');
     background-repeat: no-repeat;
@@ -11,6 +15,6 @@
     height: 15px;
     position: absolute;
     top: 13px;
-    left: 61%;
+    left: 65%;
     cursor: pointer;
 }

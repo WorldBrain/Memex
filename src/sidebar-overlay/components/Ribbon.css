@@ -1,0 +1,88 @@
+.ribbon {
+    position: fixed;
+    top: 35%;
+    right: 0;
+    width: 40px;
+    height: 80px;
+    background-color: #fff;
+    z-index: 2147483647;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    transform: translate(0, 0);
+    transition: all 0s ease-in;
+    box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.3);
+    border: 1px solid #c2c2c2;
+    line-height: normal;
+    text-align: start;
+    font-family: serif;
+
+    &:-webkit-fullscreen {
+        display: none;
+    }
+}
+
+.ribbonSidebarActive {
+    opacity: 0;
+}
+
+.sidebarFrame {
+    position: fixed;
+    top: 0;
+    right: 0;
+    border: 0;
+    outline: 0;
+    width: 340px;
+    height: 100%;
+    z-index: 2147483646;
+    transform: translate(400px, 0);
+    transition: all 0.05s ease-in;
+}
+
+.sidebarActive {
+    transform: translate(0, 0);
+}
+
+.buttonHolder {
+    border-bottom: 1px solid #c2c2c2;
+    padding: 3px 0;
+    width: 86%;
+    margin: 0px auto;
+    display: block;
+}
+
+.logo,
+.cancel,
+.settings {
+    background-repeat: no-repeat;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.logo {
+    background-image: url('/img/worldbrain-logo-narrow.png');
+    background-size: 24px;
+    margin-top: 12px;
+    width: 24px;
+    height: 36px;
+    margin-left: 8px;
+}
+
+.cancel {
+    background-image: url('/img/cross_grey.svg');
+    fill: white;
+    background-size: 12px;
+    width: 12px;
+    height: 12px;
+    margin-left: 4px;
+    margin-top: 1px;
+}
+
+.settings {
+    background-image: url('/img/settings_grey.svg');
+    fill: white;
+    background-size: 17px;
+    width: 15px;
+    height: 15px;
+    margin-left: 0px;
+    margin-top: 0px;
+}

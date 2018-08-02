@@ -1,9 +1,6 @@
-import scrollToElement from 'scroll-to-element'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { copyToClipboard } from './utils'
 import * as annotations from './annotations'
-
-import styles from './styles.css'
 
 export async function createAndCopyDirectLink() {
     const selection = document.getSelection()
@@ -15,6 +12,15 @@ export async function createAndCopyDirectLink() {
     copyToClipboard(result.url)
     selectTextFromRange(range)
     return result
+}
+
+export async function createAnnotation() {
+    const selection = document.getSelection()
+    const range = selection.getRangeAt(0)
+
+    const anchor = await extractAnchor(selection)
+    await remoteFunction('openSidebarWithHighlight')(anchor)
+    selectTextFromRange(range)
 }
 
 async function extractAnchor(selection) {
@@ -31,15 +37,4 @@ function selectTextFromRange(range) {
     const selection = document.getSelection()
     selection.removeAllRanges()
     selection.addRange(range)
-}
-
-export function scrollToHighlight() {
-    const $highlight = document.querySelector('.' + styles['memex-highlight'])
-    if ($highlight) {
-        setTimeout(() => {
-            scrollToElement($highlight, { offset: -225 })
-        }, 300)
-    } else {
-        console.error('MEMEX: Oops, no highlight found to scroll to')
-    }
 }

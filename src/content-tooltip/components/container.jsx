@@ -8,13 +8,14 @@ import {
     CreatingLinkComponent,
     CopiedComponent,
     ErrorComponent,
+    DoneComponent,
 } from './tooltip-states'
-import { copyToClipboard } from '../utils'
 
 class TooltipContainer extends React.Component {
     static propTypes = {
         onInit: PropTypes.func.isRequired,
         createAndCopyDirectLink: PropTypes.func.isRequired,
+        createAnnotation: PropTypes.func.isRequired,
         openSettings: PropTypes.func.isRequired,
         destroy: PropTypes.func.isRequired,
     }
@@ -22,8 +23,7 @@ class TooltipContainer extends React.Component {
     state = {
         showTooltip: false,
         position: { x: 250, y: 200 },
-        tooltipState: 'pristine',
-        linkURL: '',
+        tooltipState: 'copied',
     }
 
     componentDidMount() {
@@ -52,28 +52,29 @@ class TooltipContainer extends React.Component {
         this.props.destroy()
     }
 
-    setTooltipState = state =>
-        this.setState({
-            tooltipState: state,
-        })
-
     createLink = async () => {
         this.setState({
             tooltipState: 'running',
         })
-        const { url } = await this.props.createAndCopyDirectLink()
+        await this.props.createAndCopyDirectLink()
         this.setState({
             tooltipState: 'copied',
-            linkURL: url,
         })
     }
 
-    copyLinkToClipboard = event => {
-        event.preventDefault()
-        copyToClipboard(this.state.linkURL)
-        this.setState({
-            tooltipState: 'copied',
-        })
+    createAnnotation = async e => {
+        e.preventDefault()
+        e.stopPropagation()
+        await this.props.createAnnotation()
+
+        // quick hack, to prevent the tooltip from popping again
+        setTimeout(() => {
+            this.setState({
+                tooltipState: 'runnning',
+                showTooltip: false,
+                position: {},
+            })
+        }, 400)
     }
 
     openSettings = event => {
@@ -84,11 +85,18 @@ class TooltipContainer extends React.Component {
     renderTooltipComponent = () => {
         switch (this.state.tooltipState) {
             case 'pristine':
-                return <InitialComponent createLink={this.createLink} />
+                return (
+                    <InitialComponent
+                        createLink={this.createLink}
+                        createAnnotation={this.createAnnotation}
+                    />
+                )
             case 'running':
                 return <CreatingLinkComponent />
             case 'copied':
                 return <CopiedComponent />
+            case 'done':
+                return <DoneComponent />
             default:
                 return <ErrorComponent />
         }

@@ -11,4 +11,8 @@ export default class Tag extends AbstractModel {
     save() {
         return db.tags.put(this)
     }
+
+    delete() {
+        return db.tags.delete([this.name, this.url])
+    }
 }

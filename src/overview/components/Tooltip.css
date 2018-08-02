@@ -17,6 +17,10 @@ b {
     z-index: 1;
 }
 
+.counterMargin {
+    margin-top: 17px;
+}
+
 .tooltipButton {
     display: flex;
     cursor: pointer;

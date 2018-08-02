@@ -1,0 +1,141 @@
+.menuItem {
+    display: block;
+    padding: 7px 17px 9px 21px;
+    cursor: pointer;
+    border: 1px solid #d2d2d28c;
+    border-top: none;
+    word-wrap: break-word;
+    font-size: 14px;
+    font-family: 'Lato', sans-serif;
+    width: 95%;
+    margin-left: 8px;
+    box-sizing: border-box;
+
+    &:hover,
+    &:focus,
+    &:active {
+        background-color: #f7f7f7;
+        outline: none;
+    }
+
+    &.commentBox {
+        width: 95%;
+    }
+}
+
+.menuItemFocused {
+    background-color: #f7f7f7;
+}
+
+.menuItem i {
+    font-size: 12px;
+    float: right;
+    margin-top: 3px;
+}
+
+.tagContainer {
+    width: 100%;
+    max-height: 400px;
+    overflow-y: scroll;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    &:focus {
+        outline: none;
+    }
+}
+
+.numberTags {
+    align-items: flex-start;
+    margin-top: 6px;
+    color: #777;
+}
+
+.summaryTagContainer {
+    font-family: 'Lato', sans-serif;
+    font-size: 12px;
+    display: flex;
+    justify-content: space-around;
+    padding-bottom: 4px;
+    background: white;
+    width: 94.3%;
+    margin-bottom: 16px;
+    margin-left: 8px;
+}
+
+.searchContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px dashed #d2d2d28c;
+    padding: 0px 6px;
+    height: 39px;
+    margin-bottom: 0;
+    background-color: #f7f7f7;
+    width: 95%;
+    margin-left: 8px;
+    box-sizing: border-box;
+
+    &.commentBox {
+        width: 95%;
+    }
+
+    & > i {
+        color: #3eb995;
+        padding: 0;
+        margin-right: 7px;
+        margin-top: 1px;
+    }
+}
+
+.search {
+    width: 90%;
+    font-size: 14px;
+    font-weight: 500;
+    padding-left: 5px;
+    height: 37px;
+    border: none;
+    background-color: #f7f7f7;
+    box-sizing: border-box;
+
+    &:placeholder-shown {
+        font-style: italic;
+        font-weight: 500;
+        font-family: 'Lato', sans-serif;
+    }
+
+    &::placeholder {
+        color: #4a4a4a;
+    }
+
+    &:focus {
+        outline: none;
+    }
+}
+
+.bold {
+    font-weight: bold;
+}
+
+.tagDiv {
+    box-shadow: none;
+}
+
+.tagDivFromOverview {
+    position: absolute;
+    width: 300px;
+    z-index: 1;
+    background-color: #fff;
+    margin-left: 500px;
+
+    @media (max-width: 835px) {
+        right: 10px;
+    }
+}
+
+.tagDivForFilter {
+    z-index: 1;
+    width: 99.7%;
+}

@@ -51,6 +51,9 @@ export class SearchIndex {
     // Tags
     addTag = this.bindIndexMethod('addTag')
     delTag = this.bindIndexMethod('delTag')
+    addAnnotationTag = this.bindIndexMethod('addAnnotationTag')
+    delAnnotationTag = this.bindIndexMethod('delAnnotationTag')
+    getAnnotationTags = this.bindIndexMethod('getAnnotationTags')
 
     // Bookmarks
     addBookmark = this.bindIndexMethod('addBookmark')

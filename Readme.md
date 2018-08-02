@@ -20,7 +20,7 @@ More on that on our website: worldbrain.io
 ### Table Of Content
 
 1. [Project Status](#project-status)
-1. [How it Works](#how-it-works.md)
+1. [How it Works](#how-the-worldbrain-extension-works)
 1. [Contact](#contact)
 1. [License + Privacy Policy](#license-+-privacy-policy)
 1. [See also](#see-also)

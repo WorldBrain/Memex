@@ -26,6 +26,11 @@ export interface FindOpts {
     reverse?: boolean
     skip?: number
     limit?: number
+    /**
+     * Returns associated PKs for each found suggestion.
+     * _Only used in suggest methods._
+     */
+    suggestPks?: boolean
 }
 
 export type FilterQuery<T> = MongoFilterQuery<T>
@@ -89,6 +94,12 @@ export interface RegisterableStorage {
     registerCollection(name: string, defs: CollectionDefinitions): void
 }
 
+export interface SuggestResult {
+    suggestion: string
+    collectionName: string
+    pk?: any
+}
+
 export interface ManageableStorage extends RegisterableStorage {
     initialized: boolean
     registry: StorageRegistry
@@ -113,6 +124,11 @@ export interface ManageableStorage extends RegisterableStorage {
         filter: FilterQuery<T>,
         update,
     ): Promise<number>
+    suggest<T>(
+        collectionName: string,
+        filter: FilterQuery<T>,
+        opts?: FindOpts,
+    ): Promise<SuggestResult[]>
     _finishInitialization(storage): void
 }
 

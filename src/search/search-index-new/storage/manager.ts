@@ -10,6 +10,7 @@ import {
     IndexDefinition,
     FilterQuery,
     FindOpts,
+    SuggestResult,
 } from './types'
 
 export class StorageManager implements ManageableStorage {
@@ -220,7 +221,7 @@ export class StorageManager implements ManageableStorage {
             limit = StorageManager.DEF_SUGGEST_LIMIT,
             ...findOpts
         }: FindOpts = StorageManager.DEF_FIND_OPTS,
-    ) {
+    ): Promise<SuggestResult[]> {
         await this._initializationPromise
 
         // Grab first entry from the filter query; ignore rest for now
@@ -249,7 +250,14 @@ export class StorageManager implements ManageableStorage {
             coll = coll.reverse()
         }
 
-        return coll.uniqueKeys()
+        const suggestions = (await coll.uniqueKeys()) as string[]
+        const pks = findOpts.suggestPks ? await coll.primaryKeys() : []
+
+        return suggestions.map((suggestion, i) => ({
+            suggestion,
+            collectionName,
+            pk: pks[i],
+        }))
     }
 
     /**

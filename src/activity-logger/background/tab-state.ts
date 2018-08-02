@@ -1,8 +1,11 @@
 import PausableTimer from '../../util/pausable-timer'
 import ScrollState from './scroll-state'
 import { TabState, NavState } from './types'
+import { remoteFunction } from '../../util/webextensionRPC'
+import { isLoggable } from '..'
 
 class Tab implements TabState {
+    id: number
     url: string
     isActive: boolean
     visitTime: number
@@ -11,13 +14,16 @@ class Tab implements TabState {
     scrollState: ScrollState
     navState: NavState
     private _timer: PausableTimer
+    private _toggleRenderSidebarIFrame: (shouldRender: boolean) => Promise<void>
 
     constructor({
+        id,
         url,
         isActive = false,
         visitTime = Date.now(),
         navState = {},
     }: Partial<TabState>) {
+        this.id = id
         this.url = url
         this.isActive = isActive
         this.visitTime = visitTime
@@ -25,6 +31,10 @@ class Tab implements TabState {
         this.scrollState = new ScrollState()
         this.activeTime = 0
         this.lastActivated = Date.now()
+
+        this._toggleRenderSidebarIFrame = remoteFunction('toggleIFrameRender', {
+            tabId: id,
+        })
 
         this._timer = null
     }
@@ -69,13 +79,17 @@ class Tab implements TabState {
      *
      * @param {number} [now=Date.now()] When the active state changed.
      */
-    toggleActiveState(now = Date.now()) {
+    toggleActiveState(skipRemoteCall = false, now = Date.now()) {
         if (this.isActive) {
             this.activeTime = this.activeTime + now - this.lastActivated
             this._pauseLogTimer()
         } else {
             this.lastActivated = now
             this._resumeLogTimer()
+        }
+
+        if (!skipRemoteCall && isLoggable({ url: this.url })) {
+            this._toggleRenderSidebarIFrame(!this.isActive)
         }
 
         this.isActive = !this.isActive

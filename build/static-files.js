@@ -4,6 +4,7 @@
  */
 export const htmlAssets = [
     'fonts/material-icons/material-icons.css',
+    'fonts/googlefonts/lato.css',
     'lib/browser-polyfill.js',
     'style/slick.css',
     'style/slick-theme.css',
@@ -13,10 +14,9 @@ export const htmlAssets = [
         type: 'css',
     },
     {
-        path: 'https://fonts.googleapis.com/css?family=Libre+Franklin:100"',
+        path: 'https://fonts.googleapis.com/css?family=Libre+Franklin:100',
         type: 'css',
     },
-    'fonts/lato/lato.css',
 ]
 
 /**
@@ -46,8 +46,8 @@ export const copyPatterns = [
     },
     { from: 'node_modules/pdfjs-dist/build/pdf.worker.min.js', to: 'lib/' },
     {
-        from: 'fonts/lato/*.{woff2,css}',
-        to: 'fonts/lato/[name].[ext]',
+        from: 'fonts/*/*',
+        to: 'fonts/googlefonts/[name].[ext]',
     },
     {
         from:
