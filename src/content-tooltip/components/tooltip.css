@@ -9,7 +9,7 @@
     background-color: #fff;
     color: #3eb995;
     height: 40px;
-    width: 70px;
+    width: 90px;
     padding: 0px 0px;
     border-radius: 5px;
     border: 1px solid #c2c2c2;
@@ -62,7 +62,7 @@
 }
 
 .tooltip.statePristine {
-    width: 105px;
+    width: 120px;
 
     &::after {
         left: 45%;
@@ -85,9 +85,10 @@
 
 .createButtons {
     z-index: 10;
-    width: 70%;
+    width: 80%;
 
     & div {
+        margin-right: 5px;
         cursor: pointer;
         flex-basis: 50%;
         display: flex;
@@ -120,6 +121,20 @@
 
             &:hover {
                 background-image: url('/img/share_hover.svg');
+            }
+        }
+
+        & .searchIcon {
+            background-image: url('/img/search-icon.png');
+            background-size: 23px;
+            background-repeat: no-repeat;
+            width: 25px;
+            height: 25px;
+            margin-top: 1px;
+            margin-right: -6px;
+
+            &:hover {
+                background-image: url('/img/search-icon.png');
             }
         }
     }
