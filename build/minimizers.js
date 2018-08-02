@@ -10,5 +10,13 @@ export default () => [
             output: { ascii_only: true },
         },
     }),
-    new CssAssetsPlugin({}),
+    new CssAssetsPlugin({
+        cssProcessorOptions: {
+            autoprefixer: { disable: true },
+            safe: true,
+            discardComments: {
+                removeAll: true,
+            },
+        },
+    }),
 ]
