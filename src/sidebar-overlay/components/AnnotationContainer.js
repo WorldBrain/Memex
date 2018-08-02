@@ -324,7 +324,6 @@ class AnnotationContainer extends React.Component {
 
     getHighlightText = () => {
         const { truncated } = this.state
-        console.log(truncated)
         if (truncated && truncated.highlight && truncated.highlight.isTruncated)
             return truncated.highlight.text
         else return this.props.annotation.body
