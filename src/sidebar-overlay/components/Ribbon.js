@@ -34,7 +34,6 @@ class Ribbon extends React.Component {
     async componentDidMount() {
         this.setupRPCfunctions()
 
-        this.frameFC = new FrameCommunication(this.iFrame.contentWindow)
         this.setupFrameFunctions()
 
         this.setupScrollListeners()
@@ -46,6 +45,17 @@ class Ribbon extends React.Component {
         this.setState({
             annotations,
         })
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        // If this update results in the iframe being rendered + prev state was not
+        if (
+            !prevState.shouldRenderIFrame &&
+            !prevState.isSidebarActive &&
+            this.state.shouldRenderIFrame
+        ) {
+            this.setupFrameFunctions()
+        }
     }
 
     componentWillUnmount() {
@@ -88,13 +98,20 @@ class Ribbon extends React.Component {
                 }, 500)
             },
             toggleIFrameRender: shouldRenderIFrame => {
-                this.setState(state => ({ shouldRenderIFrame }))
-                if (!shouldRenderIFrame) this.frameFC = null
+                this.setState(state => {
+                    if (!shouldRenderIFrame && !state.isSidebarActive) {
+                        this.frameFC = null
+                    }
+
+                    return { shouldRenderIFrame }
+                })
             },
         })
     }
 
     setupFrameFunctions = () => {
+        this.frameFC = new FrameCommunication(this.iFrame.contentWindow)
+
         this.frameFC.setUpRemoteFunctions({
             toggleSidebar: async () => {
                 await this.toggleSidebar()
@@ -119,9 +136,7 @@ class Ribbon extends React.Component {
                 await this.openSidebarOps()
             },
         })
-    }
 
-    setupScrollListeners() {
         this.iFrame.addEventListener(
             'mouseenter',
             () => {
@@ -141,7 +156,9 @@ class Ribbon extends React.Component {
             },
             false,
         )
+    }
 
+    setupScrollListeners() {
         document.addEventListener(
             'scroll',
             () => {
@@ -184,11 +201,9 @@ class Ribbon extends React.Component {
 
     openSidebarOps = async () => {
         if (!this.frameFC) {
-            this.setState({
-                shouldRenderIFrame: true,
-            })
-            this.frameFC = new FrameCommunication(this.iFrame.contentWindow)
+            this.setupFrameFunctions()
         }
+
         await this.frameFC.remoteExecute('setLoaderActive')()
         await this.fetchAnnotations()
         const highlightables = this.state.annotations.filter(
@@ -254,11 +269,9 @@ class Ribbon extends React.Component {
 
     renderIFrame() {
         if (!this.state.shouldRenderIFrame && !this.state.isSidebarActive) {
-            console.log('stopping render of iFrame')
             return null
         }
 
-        console.log('starting render of iFrame')
         return (
             <iframe
                 src={this.props.sidebarURL}
