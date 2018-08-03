@@ -8,7 +8,10 @@ import extractQueryFilters from 'src/util/nlp-time-filter'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { isLoggable, getPauseState } from 'src/activity-logger'
 import { getTooltipState, setTooltipState } from 'src/content-tooltip/utils'
-import { IndexDropdown } from 'src/common-ui/containers'
+import {
+    IndexDropdown,
+    AddListDropdownContainer,
+} from 'src/common-ui/containers'
 import Popup from './components/Popup'
 import Button from './components/Button'
 import BlacklistConfirm from './components/BlacklistConfirm'
@@ -42,6 +45,9 @@ class PopupContainer extends Component {
         this.deletePagesByDomain = remoteFunction('delPagesByDomain')
         this.removeBookmarkByUrl = remoteFunction('delBookmark')
         this.createBookmarkByUrl = remoteFunction('addBookmark')
+        this.listsContainingPage = remoteFunction('fetchListPagesByUrl')
+        this.fetchAllLists = remoteFunction('fetchAllLists')
+        this.initTagSuggestions = remoteFunction('extendedSuggest')
     }
 
     state = {
@@ -59,6 +65,7 @@ class PopupContainer extends Component {
         blacklistChoice: false,
         blacklistConfirm: false,
         tagMode: false,
+        listMode: false,
 
         // Behaviour switching flags
         domainDelete: false,
@@ -119,7 +126,31 @@ class PopupContainer extends Component {
     }
 
     async getInitPageData() {
-        return { page: await this.pageLookup(this.state.url) }
+        const listsAssocWithPage = await this.listsContainingPage({
+            url: this.state.url,
+        })
+        const page = await this.pageLookup(this.state.url)
+
+        // Get ids of all the lists associated with the page.
+        const listIds = listsAssocWithPage.map(({ id }) => id)
+        // Get 20 more tags that are not related related to the list.
+        const tags = await this.initTagSuggestions(page.tags, 'tag')
+
+        // Get rest 20 lists not associated with the page.
+        const lists = await this.fetchAllLists({
+            // query: {
+            //     id: { $nin: listIds },
+            // },
+            // opts: { limit: 20 },
+            excludeIds: listIds,
+            limit: 20,
+        })
+        return {
+            page,
+            initListSuggestions: [...listsAssocWithPage, ...lists],
+            initTagSuggestions: [...page.tags, ...tags],
+            lists: listsAssocWithPage,
+        }
     }
 
     async getInitPauseState() {
@@ -370,6 +401,12 @@ class PopupContainer extends Component {
             tagMode: !state.tagMode,
         }))
 
+    toggleListPopup = () =>
+        this.setState(state => ({
+            ...state,
+            listMode: !state.listMode,
+        }))
+
     renderTagButton() {
         return (
             <Button
@@ -382,8 +419,24 @@ class PopupContainer extends Component {
         )
     }
 
+    renderAddToList = () => (
+        <Button
+            onClick={this.toggleListPopup}
+            disabled={this.isTagBtnDisabled}
+            btnClass={styles.addToList}
+        >
+            Add To Collection(s)
+        </Button>
+    )
+
     renderChildren() {
-        const { blacklistConfirm, pauseValue, isPaused, tagMode } = this.state
+        const {
+            blacklistConfirm,
+            pauseValue,
+            isPaused,
+            tagMode,
+            listMode,
+        } = this.state
         if (blacklistConfirm) {
             return (
                 <BlacklistConfirm
@@ -399,7 +452,19 @@ class PopupContainer extends Component {
                     url={this.state.url}
                     tabId={this.state.tabID}
                     initFilters={this.pageTags}
+                    initSuggestions={this.state.initTagSuggestions}
                     source="tag"
+                />
+            )
+        }
+
+        if (listMode) {
+            return (
+                <AddListDropdownContainer
+                    mode="popup"
+                    results={this.state.lists || []}
+                    initSuggestions={this.state.initListSuggestions}
+                    url={this.state.url}
                 />
             )
         }
@@ -425,6 +490,7 @@ class PopupContainer extends Component {
                         : 'Bookmark this Page'}
                 </Button>
                 {this.renderTagButton()}
+                {this.renderAddToList()}
                 <hr />
                 <HistoryPauser
                     onConfirm={this.onPauseConfirm}
@@ -464,11 +530,11 @@ class PopupContainer extends Component {
     }
 
     render() {
-        const { searchValue, tagMode } = this.state
+        const { searchValue, tagMode, listMode } = this.state
 
         return (
             <Popup
-                shouldRenderSearch={!tagMode}
+                shouldRenderSearch={tagMode === listMode}
                 searchValue={searchValue}
                 onSearchChange={this.onSearchChange}
                 onSearchEnter={this.onSearchEnter}

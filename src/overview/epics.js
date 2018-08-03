@@ -4,7 +4,7 @@ import 'rxjs/add/operator/filter'
 
 import * as actions from './actions'
 import { actions as onboardingActs } from './onboarding'
-import { actions as filterActs } from './filters'
+import { actions as filterActs } from '../search-filters'
 
 const searchUpdateActions = [
     actions.setQuery.getType(),
@@ -22,6 +22,8 @@ const searchUpdateActions = [
     filterActs.setExcDomainFilters.getType(),
     filterActs.setTagFilters.getType(),
     filterActs.resetFilters.getType(),
+    filterActs.toggleListFilter.getType(),
+    filterActs.delListFilter.getType(),
     onboardingActs.setVisible.getType(),
 ]
 

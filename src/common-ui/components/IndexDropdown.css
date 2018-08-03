@@ -17,6 +17,10 @@
     background-color: #f7f7f7;
 }
 
+.remove {
+    display: none;
+}
+
 .menuItem i {
     font-size: 18px;
     float: right;
@@ -26,6 +30,16 @@
     width: 100%;
     max-height: 401px;
     overflow-y: scroll;
+
+    &:focus {
+        outline: none;
+    }
+}
+
+.tagContainerSB {
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
 
     &:focus {
         outline: none;
@@ -59,6 +73,22 @@
     & > i {
         color: #3eb995;
         padding: 0;
+    }
+}
+
+.closeButton {
+    padding: 0;
+    cursor: pointer;
+    animation: appear 0.4s forwards 0s;
+}
+
+@keyframes appear {
+    0% {
+        transform: scale(0);
+    }
+
+    100% {
+        transform: scale(1);
     }
 }
 
@@ -105,4 +135,11 @@
     z-index: 1;
     background-color: #fff;
     box-shadow: 0px 4px 7px 0px #3eb995;
+}
+
+.tagDivForFilterSB {
+    z-index: 1;
+    background-color: #fff;
+    box-shadow: unset;
+    width: 100%;
 }

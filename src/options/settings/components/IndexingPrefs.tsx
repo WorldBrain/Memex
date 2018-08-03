@@ -1,7 +1,7 @@
 import * as React from 'react'
 
 import { VISIT_DELAY_RANGE } from '../constants'
-import Checkbox, { CheckboxToggle } from './Checkbox'
+import { Checkbox, CheckboxToggle } from '../../../common-ui/components'
 const styles = require('./Settings.css')
 
 export interface Props {

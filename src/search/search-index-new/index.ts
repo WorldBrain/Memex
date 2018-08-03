@@ -78,6 +78,7 @@ export {
     suggest,
     getMatchingPageCount,
     domainHasFavIcon,
+    extendedSuggest,
 } from './search'
 
 export { createPageFromTab, createPageFromUrl } from './on-demand-indexing'

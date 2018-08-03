@@ -1,0 +1,65 @@
+.hr {
+    border-color: #b0e0d2;
+    width: 50px;
+    margin-top: 12px;
+}
+
+.collection {
+    color: #767676;
+    margin-bottom: 12px;
+    margin-top: 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+
+    &:hover {
+        background-color: #d7d7d7;
+    }
+}
+
+.myCollection {
+    font-size: 1.45em;
+    font-weight: 500;
+    padding: 0px 70px 0px 0px;
+}
+
+.plus {
+    font-size: 2em;
+    font-weight: bold;
+    cursor: pointer;
+    margin-right: 5px;
+}
+
+.button {
+    display: inline;
+    border: none;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-size: contain;
+    cursor: pointer;
+    outline: none;
+    padding: 0px;
+}
+
+.allLists {
+    height: inherit;
+    min-width: 24.8vw;
+    overflow: hidden;
+}
+
+.allListsInner {
+    height: inherit;
+    min-width: 26vw;
+    overflow-y: auto;
+}
+
+/* width */
+.allLists::-webkit-scrollbar {
+    display: none;
+}
+
+/* Track */
+.allLists::-webkit-scrollbar-track {
+    display: none;
+}

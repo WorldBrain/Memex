@@ -212,3 +212,9 @@
     background-size: 20px;
     float: left;
 }
+
+.addToList {
+    background-image: url('/img/list_popup.svg');
+    background-repeat: no-repeat;
+    background-size: 20px;
+}

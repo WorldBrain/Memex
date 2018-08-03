@@ -10,7 +10,7 @@ import {
     actions as onboardingActs,
     constants as onboardingConsts,
 } from './onboarding'
-import { selectors as filters, actions as filterActs } from './filters'
+import { selectors as filters, actions as filterActs } from '../search-filters'
 
 const parseBool = str => str === 'true'
 const parseNumber = str => Number(str)
@@ -55,6 +55,11 @@ const locationSync = ReduxQuerySync.enhancer({
             action: filterActs.setExcDomainFilters,
             valueToString: stringifyArr,
             defaultValue: [],
+        },
+        lists: {
+            selector: filters.listFilter,
+            action: filterActs.setListFilters,
+            defaultValue: '',
         },
         install: {
             selector: onboarding.isVisible,
@@ -117,6 +122,9 @@ const storageSync = storeCreator => (reducer, initState, enhancer) => {
     return store
 }
 
-const enhancer = compose(locationSync, storageSync)
+const enhancer = compose(
+    locationSync,
+    storageSync,
+)
 
 export default enhancer

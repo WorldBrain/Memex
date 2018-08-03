@@ -1,0 +1,89 @@
+.filterButton {
+    background-image: url('/img/filter_filled.svg');
+    width: 32px;
+    height: 32px;
+    opacity: 0.5;
+}
+
+.filterEnabled {
+    background-image: url('/img/filter_filled_green.svg');
+    opacity: 1;
+}
+
+.listButton {
+    background-image: url('/img/collections.svg');
+    width: 30px;
+    height: 30px;
+    opacity: 0.5;
+}
+
+.collectionEnabled {
+    background-image: url('/img/collections_green.svg');
+    opacity: 1;
+}
+
+.button {
+    display: inline;
+    border: none;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-size: contain;
+    cursor: pointer;
+    outline: none;
+    padding: 0px;
+}
+
+.buttonContainerOverview {
+    position: fixed;
+    display: flex !important; /* stylelint-disable-line declaration-no-important */
+    flex-direction: column;
+    align-items: center;
+    top: 100px;
+    left: -8px;
+    width: 105px;
+    justify-content: space-evenly;
+}
+
+.buttonContainer {
+    position: absolute;
+    display: flex !important; /* stylelint-disable-line declaration-no-important */
+    justify-content: space-between;
+    flex-direction: row;
+    top: 2px;
+    left: 12px;
+    width: 40%;
+    align-items: baseline;
+}
+
+.smallButton {
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    color: #767676;
+    padding: 2px 4px;
+    border-radius: 3%;
+    animation: appear 0.4s forwards 0s;
+
+    &:hover {
+        background-color: #efefef;
+    }
+}
+
+.enabled {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    margin-top: 10px;
+}
+
+@keyframes appear {
+    0% {
+        transform: scale(0);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}

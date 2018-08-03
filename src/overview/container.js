@@ -17,13 +17,17 @@ import PageResultItem from './components/PageResultItem'
 import ResultsMessage from './components/ResultsMessage'
 import TagPill from './components/TagPill'
 import Onboarding, { selectors as onboarding } from './onboarding'
-import Filters, { selectors as filters, actions as filterActs } from './filters'
 import Sidebar, {
     selectors as sidebarSels,
     actions as sidebarActs,
 } from './sidebar'
+import { selectors as filters, actions as filterActs } from '../search-filters'
 import NoResultBadTerm from './components/NoResultBadTerm'
 import localStyles from './components/Overview.css'
+import { actions as listActs, selectors as customLists } from 'src/custom-lists'
+import SidebarIcons from './sidebar-left/components/SidebarIcons'
+import { actions as sidebarLeftActs } from './sidebar-left'
+import * as sidebar from './sidebar-left/selectors'
 
 class OverviewContainer extends Component {
     static propTypes = {
@@ -49,10 +53,21 @@ class OverviewContainer extends Component {
         handlePillClick: PropTypes.func.isRequired,
         addTag: PropTypes.func.isRequired,
         delTag: PropTypes.func.isRequired,
-        resetFilterPopup: PropTypes.func.isRequired,
         showOnboarding: PropTypes.bool.isRequired,
         mouseOnSidebar: PropTypes.bool.isRequired,
         init: PropTypes.func.isRequired,
+        isListFilterActive: PropTypes.bool.isRequired,
+        handleCrossRibbonClick: PropTypes.func.isRequired,
+        urlDragged: PropTypes.string.isRequired,
+        setUrlDragged: PropTypes.func.isRequired,
+        mouseOverSidebar: PropTypes.bool.isRequired,
+        filterActive: PropTypes.bool.isRequired,
+        showSearchFilters: PropTypes.func.isRequired,
+        hideSearchFilters: PropTypes.func.isRequired,
+        resetFilters: PropTypes.func.isRequired,
+        delListFilter: PropTypes.func.isRequired,
+        resetUrlDragged: PropTypes.func.isRequired,
+        isSidebarOpen: PropTypes.bool.isRequired,
     }
 
     componentDidMount() {
@@ -63,6 +78,14 @@ class OverviewContainer extends Component {
 
     componentWillUnmount() {
         document.removeEventListener('click', this.handleOutsideClick, false)
+    }
+
+    get scrollDisabled() {
+        return (
+            this.props.showOnboarding ||
+            this.props.mouseOverSidebar ||
+            this.props.mouseOnSidebar
+        )
     }
 
     dropdownRefs = []
@@ -78,6 +101,19 @@ class OverviewContainer extends Component {
             this.props.handleInputClick(event)
         }
     }
+
+    renderSidebarIcons = () => (
+        <SidebarIcons
+            filterBtnClick={this.props.showSearchFilters}
+            listBtnClick={this.props.hideSearchFilters}
+            overviewMode
+            onPageDrag={this.props.hideSearchFilters}
+            filterActive={this.props.filterActive}
+            isListFilterActive={this.props.isListFilterActive}
+            onClearBtnClick={this.props.resetFilters}
+            onShowBtnClick={this.props.delListFilter}
+        />
+    )
 
     renderTagsManager = ({ shouldDisplayTagPopup, url, tags }, index) =>
         shouldDisplayTagPopup ? (
@@ -125,6 +161,8 @@ class OverviewContainer extends Component {
         const resultItems = this.props.searchResults.map((doc, i) => (
             <PageResultItem
                 key={i}
+                index={i}
+                scrollDisabled={this.scrollDisabled}
                 onTrashBtnClick={this.props.handleTrashBtnClick(doc, i)}
                 onToggleBookmarkClick={this.props.handleToggleBm(doc, i)}
                 tagManager={this.renderTagsManager(doc, i)}
@@ -132,6 +170,12 @@ class OverviewContainer extends Component {
                 onTagBtnClick={this.props.handleTagBtnClick(i)}
                 onCommentBtnClick={this.props.handleCommentBtnClick(doc)}
                 tagPills={this.renderTagPills(doc, i)}
+                isListFilterActive={this.props.isListFilterActive}
+                handleCrossRibbonClick={this.props.handleCrossRibbonClick(doc)}
+                setUrlDragged={this.props.setUrlDragged}
+                resetUrlDragged={this.props.resetUrlDragged}
+                hideSearchFilters={this.props.hideSearchFilters}
+                isSidebarOpen={this.props.isSidebarOpen}
                 {...doc}
             />
         ))
@@ -230,11 +274,7 @@ class OverviewContainer extends Component {
                         results in your digital memory
                     </ResultsMessage>
                 )}
-                <ResultList
-                    scrollDisabled={
-                        this.props.showOnboarding || this.props.mouseOnSidebar
-                    }
-                >
+                <ResultList scrollDisabled={this.scrollDisabled}>
                     {this.renderResultItems()}
                 </ResultList>
             </Wrapper>
@@ -257,11 +297,21 @@ class OverviewContainer extends Component {
             !wereAnyClicked(this.dropdownRefs)
         ) {
             this.props.resetActiveTagIndex()
-            this.props.resetFilterPopup()
         }
     }
 
-    renderFilters = () => <Filters setDropdownRef={this.trackDropwdownRef} />
+    renderDragElement = () => {
+        return (
+            <div
+                id="dragged-element"
+                className={localStyles.dragElement}
+                href="#"
+            >
+                {' '}
+                + Add to Collection
+            </div>
+        )
+    }
 
     render() {
         return (
@@ -270,10 +320,12 @@ class OverviewContainer extends Component {
                     {...this.props}
                     setInputRef={this.setInputRef}
                     onInputChange={this.props.handleInputChange}
-                    filters={this.renderFilters()}
                     onQuerySearchKeyDown={this.handleSearchEnter}
                     isSearchDisabled={this.props.showOnboarding}
                     scrollDisabled={this.props.mouseOnSidebar}
+                    renderDragElement={this.renderDragElement()}
+                    disbleOutsideClick={Boolean(this.props.urlDragged)}
+                    sidebarIcons={this.renderSidebarIcons()}
                 >
                     {this.renderResults()}
                 </Overview>
@@ -305,6 +357,11 @@ const mapStateToProps = state => ({
     isFirstTooltip: selectors.isFirstTooltip(state),
     isTooltipRenderable: selectors.isTooltipRenderable(state),
     mouseOnSidebar: sidebarSels.mouseOnSidebar(state),
+    isListFilterActive: filters.listFilterActive(state),
+    urlDragged: customLists.urlDragged(state),
+    mouseOverSidebar: sidebar.mouseOverSidebar(state),
+    isSidebarOpen: sidebar.isSidebarOpen(state),
+    filterActive: filters.showClearFiltersBtn(state),
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -317,9 +374,14 @@ const mapDispatchToProps = dispatch => ({
             deleteDocs: actions.deleteDocs,
             resetActiveTagIndex: actions.resetActiveTagIndex,
             onShowFilterChange: filterActs.showFilter,
-            resetFilterPopup: filterActs.resetFilterPopup,
             fetchNextTooltip: actions.fetchNextTooltip,
             init: actions.init,
+            setUrlDragged: listActs.setUrlDragged,
+            showSearchFilters: sidebarLeftActs.openSidebarFilterMode,
+            hideSearchFilters: sidebarLeftActs.openSidebarListMode,
+            resetUrlDragged: listActs.resetUrlDragged,
+            resetFilters: filterActs.resetFilters,
+            delListFilter: filterActs.delListFilter,
         },
         dispatch,
     ),
@@ -354,6 +416,10 @@ const mapDispatchToProps = dispatch => ({
     addTag: resultIndex => tag => dispatch(actions.addTag(tag, resultIndex)),
     delTag: resultIndex => tag => dispatch(actions.delTag(tag, resultIndex)),
     toggleShowTooltip: event => dispatch(actions.toggleShowTooltip()),
+    handleCrossRibbonClick: ({ url }) => event => {
+        dispatch(listActs.delPageFromList(url))
+        dispatch(actions.hideResultItem(url))
+    },
 })
 
 export default connect(

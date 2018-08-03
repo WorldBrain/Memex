@@ -1,0 +1,107 @@
+.button {
+    display: inline;
+    border: none;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-size: contain;
+    cursor: pointer;
+    outline: none;
+    padding: 0px;
+}
+
+.buttonContainer {
+    position: absolute;
+    display: flex !important; /* stylelint-disable-line declaration-no-important */
+    justify-content: space-between;
+    top: 0px;
+    width: 285px;
+    background-color: #fff;
+    border-bottom-right-radius: 5px;
+    border-width: 0 1px 1px 0;
+    border-style: solid;
+    border-color: #d0cece;
+    z-index: 1200;
+    align-items: center;
+    height: 45px;
+}
+
+.container {
+    height: 100%;
+}
+
+.closeIcon {
+    background-image: url('/img/cross_grey.svg');
+    background-size: 15px;
+    display: block;
+    margin-right: 5px;
+    background-repeat: no-repeat;
+    width: 29px;
+    height: 29px;
+    background-position: 6.5px 6.5px;
+    border-radius: 50%;
+
+    &:hover {
+        background-image: url('/img/cross.svg');
+        background-color: #efefef;
+    }
+}
+
+.filterButton {
+    background-image: url('/img/filter_filled.svg');
+    background-size: 20px;
+    display: block;
+    background-repeat: no-repeat;
+    width: 35px;
+    height: 35px;
+    background-position: 7.5px 7.5px;
+    border-radius: 50%;
+
+    &:hover {
+        background-color: #efefef;
+    }
+}
+
+.listButton {
+    background-image: url('/img/collections.svg');
+    background-size: 20px;
+    display: block;
+    margin-left: 10px;
+    background-repeat: no-repeat;
+    width: 35px;
+    height: 35px;
+    background-position: 7.5px 6.5px;
+    border-radius: 50%;
+
+    &:hover {
+        background-color: #efefef;
+    }
+}
+
+.clearFilters {
+    color: #767676;
+    padding: 3px 6px;
+    margin-left: 80px;
+    height: 24px;
+    font-size: 1.1em;
+    cursor: pointer;
+
+    &:hover {
+        background-color: #efefef;
+        border-radius: 5%;
+    }
+}
+
+.filterEnabled {
+    background-color: #efefef;
+}
+
+.wrapper {
+    display: flex;
+    width: 85%;
+    margin-left: 10px;
+    align-items: center;
+}
+
+.wrapperFE {
+    width: 35%;
+}

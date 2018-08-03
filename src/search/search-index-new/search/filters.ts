@@ -1,4 +1,9 @@
-import db, { SearchParams, FilteredURLs } from '..'
+import db, { SearchParams, FilteredURLs, storageManager } from '..'
+import { remoteFunction } from '../../../util/webextensionRPC'
+import CustomListBackground from '../../../custom-lists/background'
+import intersection from 'lodash/fp/intersection'
+import flatten from 'lodash/fp/flatten'
+import difference from 'lodash/fp/difference'
 
 const pageIndexLookup = (index: string, matches: string[]) =>
     db.pages
@@ -19,22 +24,43 @@ export class FilteredURLsManager implements FilteredURLs {
         incDomainUrls,
         excDomainUrls,
         tagUrls,
+        listUrls,
     }: {
         [key: string]: Set<string>
     }) {
-        // Perform intersection, only if both includes sets defined, else just merge them
-        const initInclude =
-            incDomainUrls && tagUrls
-                ? [...incDomainUrls].filter(url => tagUrls.has(url))
-                : [...(incDomainUrls || []), ...(tagUrls || [])]
+        // Exclude any undefined URLs filters
+        const allUrls = [
+            incDomainUrls ? [...incDomainUrls] : incDomainUrls,
+            tagUrls ? [...tagUrls] : tagUrls,
+            listUrls ? [...listUrls] : listUrls,
+        ].filter(urls => urls != null)
 
-        // Ensure no excluded URLs in included sets
+        // Depends on no. of applied filters whether to take intersection or just flatten.
+        let initInclude
+        if (allUrls.length > 1) {
+            initInclude = intersection(...allUrls)
+        } else {
+            initInclude = flatten(allUrls)
+        }
+
+        /* Old intersection and difference
+        const initInclude =
+            incDomainUrls && tagUrls && listUrls
+                ? [...incDomainUrls].filter(url => (tagUrls.has(url) && listUrls.has(url)))
+                : [...(incDomainUrls || []), ...(tagUrls || []), ...(listUrls || [])]
+
         this.include = excDomainUrls
             ? new Set([...initInclude].filter(url => !excDomainUrls.has(url)))
             : new Set(initInclude)
+        */
+
+        // Ensure no excluded URLs in included sets
+        this.include = new Set(
+            difference(initInclude, [...(excDomainUrls || [])]),
+        )
 
         this.exclude = excDomainUrls || new Set()
-        this.isDataFiltered = !!(incDomainUrls || tagUrls)
+        this.isDataFiltered = !!(incDomainUrls || tagUrls || listUrls)
     }
 
     private isIncluded(url: string) {
@@ -86,17 +112,45 @@ const incDomainSearch = ({ domains }: Partial<SearchParams>) =>
 const excDomainSearch = ({ domainsExclude }: Partial<SearchParams>) =>
     domainSearch(domainsExclude)
 
+async function listSearch({ lists }: Partial<SearchParams>) {
+    if (!lists || !lists.length || !lists[0].length) {
+        return undefined
+    }
+
+    const customList = new CustomListBackground({ storageManager })
+
+    const urls = new Set<string>()
+
+    // The list filter contains only one list at a time
+    // It is just a temporary hack until multiple lists for filtering in used.
+    // Eg: The list: String i.e = "23" gets converted into ["2", "3"] converting back to 23.
+    const listEnteries = await customList.fetchListPagesById({
+        id: Number(lists[0]),
+    })
+    listEnteries.forEach(({ pageUrl }: any) => urls.add(pageUrl))
+
+    return urls
+}
+
 /**
  * of URLs that match the filters to use as a white-list.
  */
 export async function findFilteredUrls(
     params: Partial<SearchParams>,
 ): Promise<FilteredURLs> {
-    const [incDomainUrls, excDomainUrls, tagUrls] = await Promise.all([
-        incDomainSearch(params),
-        excDomainSearch(params),
-        tagSearch(params),
-    ])
+    const [incDomainUrls, excDomainUrls, tagUrls, listUrls] = await Promise.all(
+        [
+            incDomainSearch(params),
+            excDomainSearch(params),
+            tagSearch(params),
+            listSearch(params),
+        ],
+    )
 
-    return new FilteredURLsManager({ tagUrls, incDomainUrls, excDomainUrls })
+    return new FilteredURLsManager({
+        tagUrls,
+        incDomainUrls,
+        excDomainUrls,
+        listUrls,
+    })
 }

@@ -6,6 +6,7 @@ import 'src/analytics/background'
 import 'src/imports/background'
 import DirectLinkingBackground from 'src/direct-linking/background'
 import EventLogBackground from 'src/analytics/internal/background'
+import CustomListBackground from 'src/custom-lists/background'
 import 'src/omnibar'
 import { INSTALL_TIME_KEY } from './constants'
 import {
@@ -154,3 +155,6 @@ window.directLinking = directLinking
 const eventLog = new EventLogBackground({ storageManager })
 eventLog.setupRemoteFunctions()
 window.eventLog = eventLog
+
+const customList = new CustomListBackground({ storageManager })
+customList.setupRemoteFunctions()

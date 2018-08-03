@@ -6,8 +6,12 @@ import { SearchIndex } from './'
 import * as oldIndex from './search-index-old'
 import * as newIndex from './search-index-new'
 import * as DATA from './index.test.data'
+import { intersection, flatten, difference } from 'lodash'
 
 jest.mock('./search-index-new/models/abstract-model')
+jest.mock('lodash/fp/intersection')
+jest.mock('lodash/fp/flatten')
+jest.mock('lodash/fp/difference')
 
 // Runs the same tests for either the new or old index
 const runSuite = useOld => () => {

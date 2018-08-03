@@ -31,16 +31,6 @@ const Header = ({
                     disabled={props.isSearchDisabled}
                 />
             </div>
-            <div
-                className={styles.linkFilter}
-                onClick={props.onShowFilterChange}
-            >
-                <img
-                    src="/img/filter.png"
-                    className={styles.iconFilter}
-                    title="Click to view filters"
-                />
-            </div>
         </div>
         <div className={styles.links}>
             <OutLink
