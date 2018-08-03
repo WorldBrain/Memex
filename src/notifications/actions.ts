@@ -5,8 +5,8 @@ import { remoteFunction } from '../util/webextensionRPC'
 import { actions as overviewActs } from '../overview'
 import * as selectors from './selectors'
 import * as constants from './constants'
-import { SHOULD_TRACK_STORAGE_KEY as SHOULD_TRACK } from '../options/privacy/constants'
 import { NotifDefinition } from './types'
+import * as storageKeys from './storage-keys-notif'
 
 export const setShowMoreIndex = createAction('notifications/setShowMoreIndex')
 export const nextPage = createAction('notifications/nextPage')
@@ -23,9 +23,7 @@ export const toggleInbox = createAction<any>('notifications/toggleInbox')
 export const setUnreadCount = createAction<number>(
     'notifications/setUnreadCount',
 )
-export const setShouldTrack = createAction<boolean>(
-    'notifications/setShouldTrack',
-)
+export const setStorageKeys = createAction<any>('notifications/setStorageKeys')
 export const handleReadNotification = createAction<number>(
     'notifications/handleReadNotification',
 )
@@ -37,12 +35,25 @@ const fetchUnreadCount = remoteFunction('fetchUnreadCount')
 const readNotification = remoteFunction('readNotification')
 
 export const init = () => async (dispatch, getState) => {
-    const shouldTrack = (await browser.storage.local.get(SHOULD_TRACK))[
-        SHOULD_TRACK
-    ]
+    const storage = await initStorageValue()
 
-    dispatch(setShouldTrack(shouldTrack === true))
+    dispatch(setStorageKeys(storage))
     dispatch(handleResults())
+}
+
+export const initStorageValue = async () => {
+    const keys = {}
+    for (const key of Object.keys(storageKeys)) {
+        const value = (await browser.storage.local.get(storageKeys[key]))[
+            storageKeys[key]
+        ]
+
+        // Special case for SHOULD_TRACK_STORAGE_KEY, becuase the default value is not false
+        keys[storageKeys[key]] =
+            key === 'SHOULD_TRACK_STORAGE_KEY' ? value === true : value
+    }
+
+    return keys
 }
 
 export const handleResults = () => async (dispatch, getState) => {

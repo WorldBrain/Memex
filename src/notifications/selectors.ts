@@ -58,9 +58,9 @@ export const unreadNotifCount = createSelector(
     (notifs, countUnread) =>
         notifs && notifs.length ? notifs.length : countUnread,
 )
-export const shouldTrack = createSelector(
+export const localStorageNotif = createSelector(
     notifications,
-    state => state.shouldTrack,
+    state => state.localStorageNotif,
 )
 export const showUnreadCount = createSelector(
     unreadNotifCount,

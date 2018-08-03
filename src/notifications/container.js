@@ -32,7 +32,7 @@ class NotificationContainer extends Component {
         toggleReadExpand: PropTypes.func.isRequired,
         isReadShow: PropTypes.bool.isRequired,
         messageCharLimit: PropTypes.number.isRequired,
-        shouldTrack: PropTypes.bool.isRequired,
+        localStorageNotif: PropTypes.object.isRequired,
     }
 
     static defaultProps = {
@@ -68,7 +68,7 @@ class NotificationContainer extends Component {
     }
 
     renderButtons(buttons) {
-        const { shouldTrack } = this.props
+        const { localStorageNotif } = this.props
 
         if (!buttons) {
             return null
@@ -90,7 +90,7 @@ class NotificationContainer extends Component {
                 return (
                     <OptIn key={i}>
                         <ToggleSwitch
-                            defaultValue={shouldTrack}
+                            defaultValue={localStorageNotif[action.key]}
                             onChange={val =>
                                 this.handleToggleStorageOption(action, val)
                             }
@@ -213,7 +213,7 @@ const mapStateToProps = state => ({
     needsWaypoint: selectors.needsWaypoint(state),
     isReadExpanded: selectors.isReadExpanded(state),
     isReadShow: selectors.isReadShow(state),
-    shouldTrack: selectors.shouldTrack(state),
+    localStorageNotif: selectors.localStorageNotif(state),
 })
 
 const mapDispatchToProps = dispatch => ({

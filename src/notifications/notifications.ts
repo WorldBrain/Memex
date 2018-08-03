@@ -1,4 +1,5 @@
-import { SHOULD_TRACK_STORAGE_KEY } from '../options/privacy/constants'
+// Use these keys in case of action buttons, import the keys in the storage-keys-notif module
+import * as storageKeys from './storage-keys-notif'
 import * as actionTypes from './action-types'
 
 import { NotifDefinition } from './types'
