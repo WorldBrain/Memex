@@ -116,6 +116,7 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
     }
 
     // Grab needed derived state for search
+
     const state = getState()
     const searchParams = {
         ...currentQueryParams,
@@ -125,7 +126,8 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
         domainsExclude: filters.domainsExc(state),
         limit: constants.PAGE_SIZE,
         skip: selectors.resultsSkip(state),
-        lists: filters.listFilter(state),
+        // lists for now is just id of one list
+        lists: [filters.listFilter(state)],
     }
 
     try {

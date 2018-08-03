@@ -7,8 +7,6 @@ export default class CustomListStorage extends FeatureStorage {
 
     constructor({ storageManager }) {
         super(storageManager)
-        // console.log('running const');
-
         this.storageManager.registerCollection(
             CustomListStorage.CUSTOM_LISTS_COLL,
             {
