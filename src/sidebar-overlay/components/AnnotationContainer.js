@@ -22,34 +22,41 @@ class AnnotationContainer extends React.Component {
         onMouseLeave: PropTypes.func.isRequired,
     }
 
-    state = {
-        truncated: {},
+    constructor(props) {
+        super(props)
+        const annotationObj = this.props.annotation
+        let highlight, annotation
+        let annotationText = ''
+        if (annotationObj.body)
+            highlight = this.getTruncatedObject(annotationObj.body)
 
-        annotationText: '',
-        annotationEditMode: false,
+        if (annotationObj.comment) {
+            annotation = this.getTruncatedObject(annotationObj.comment)
+            annotationText = annotationObj.comment
+        }
 
-        containsTags: false,
-        tags: [],
-        tagInput: false,
+        this.state = {
+            truncated: {
+                highlight,
+                annotation,
+            },
 
-        footerState: 'default',
+            annotationText,
+            annotationEditMode: false,
+
+            containsTags: false,
+            tags: [],
+            tagInput: false,
+
+            footerState: 'default',
+        }
     }
 
     async componentDidMount() {
         const { annotation } = this.props
-        const truncated = {}
-        let annotationText = ''
         let containsTags = false
 
         this.tagInputContainer = null
-
-        if (annotation.body)
-            truncated.highlight = this.getTruncatedObject(annotation.body)
-
-        if (annotation.comment) {
-            truncated.annotation = this.getTruncatedObject(annotation.comment)
-            annotationText = annotation.comment
-        }
 
         const tags = await remoteFunction('getAnnotationTags')(annotation.url)
         if (tags.length) containsTags = true
@@ -57,8 +64,6 @@ class AnnotationContainer extends React.Component {
         this.attachEventListener()
 
         this.setState({
-            truncated,
-            annotationText,
             containsTags,
             tags,
         })
@@ -145,10 +150,15 @@ class AnnotationContainer extends React.Component {
         e.preventDefault()
         e.stopPropagation()
         const { url, comment } = this.props.annotation
-        const { annotationText } = this.state
+        const { annotationText, truncated } = this.state
+        const newTruncated = {
+            ...truncated,
+        }
 
         if (annotationText !== comment) {
             this.props.editAnnotation({ url, comment: annotationText })
+            // Recalculate if truncation is needed
+            newTruncated.annotation = this.getTruncatedObject(annotationText)
         }
 
         this.reloadTags()
@@ -156,6 +166,7 @@ class AnnotationContainer extends React.Component {
             annotationEditMode: false,
             tagInput: false,
             footerState: 'default',
+            truncated: newTruncated,
         })
     }
 
@@ -297,6 +308,7 @@ class AnnotationContainer extends React.Component {
 
     renderShowButton = name => {
         const { truncated } = this.state
+        if (!truncated) return null
         if (truncated[name]) {
             return (
                 <span
@@ -312,7 +324,7 @@ class AnnotationContainer extends React.Component {
 
     getHighlightText = () => {
         const { truncated } = this.state
-        if (truncated.highlight && truncated.highlight.isTruncated)
+        if (truncated && truncated.highlight && truncated.highlight.isTruncated)
             return truncated.highlight.text
         else return this.props.annotation.body
     }
@@ -320,7 +332,11 @@ class AnnotationContainer extends React.Component {
     getAnnotationText = () => {
         const { truncated, annotationEditMode } = this.state
         if (annotationEditMode) return ''
-        if (truncated.annotation && truncated.annotation.isTruncated)
+        if (
+            truncated &&
+            truncated.annotation &&
+            truncated.annotation.isTruncated
+        )
             return truncated.annotation.text
         else return this.props.annotation.comment
     }
@@ -333,6 +349,8 @@ class AnnotationContainer extends React.Component {
                     isForAnnotation
                     url={this.props.annotation.url}
                     initFilters={tagStringArray}
+                    onFilterAdd={this.reloadTags}
+                    onFilterDel={this.reloadTags}
                     source="tag"
                 />
             )

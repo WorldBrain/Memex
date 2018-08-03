@@ -8,7 +8,7 @@
     border-radius: 100px;
     position: relative;
     margin-top: 0px;
-    margin-left: 50px;
+    margin-left: 40px;
 
     &::after {
         content: '';
