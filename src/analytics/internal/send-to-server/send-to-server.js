@@ -63,7 +63,7 @@ class SendToServer {
             return
         }
 
-        return await fetch(this._host, {
+        return fetch(this._host, {
             method: 'POST',
             headers: SendToServer.JSON_HEADER,
             body: SendToServer._serializePoolReqs(userId, [{ ...event }]),

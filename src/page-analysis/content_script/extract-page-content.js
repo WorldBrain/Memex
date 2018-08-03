@@ -21,7 +21,7 @@ export default async function extractPageContent(
 ) {
     // If it is a PDF, run code for pdf instead.
     if (url.endsWith('.pdf')) {
-        return await extractPdfContent({ url })
+        return extractPdfContent({ url })
     }
 
     // Apply simple transformations to clean the page's HTML

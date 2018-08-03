@@ -1,6 +1,5 @@
 import { Bookmarks } from 'webextension-polyfill-ts'
 
-import db from '.'
 import { createPageViaBmTagActs } from './on-demand-indexing'
 import { getPage } from './util'
 

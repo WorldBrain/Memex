@@ -16,10 +16,8 @@ export default abstract class AbstractModel {
     public static dataURLToBlob = (url: string) => {
         const regex = /^data:.+\/(.+);base64,(.*)$/
 
-        const matches = url.match(regex)
-        const ext = matches[1]
-        const data = matches[2]
-        return new Buffer(data, 'base64')
+        const [, , data] = url.match(regex)
+        return Buffer.from(data, 'base64')
     }
 
     public abstract async save()

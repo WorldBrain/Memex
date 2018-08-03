@@ -26,6 +26,6 @@ export default class EventLogBackground {
     }
 
     async getLatestTimeWithCount(request) {
-        return await this.storage.getLatestTimeWithCount(request)
+        return this.storage.getLatestTimeWithCount(request)
     }
 }

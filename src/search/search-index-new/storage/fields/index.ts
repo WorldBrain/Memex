@@ -1,9 +1,12 @@
 import { BoolField } from './bool-field'
 import { UrlField } from './url-field'
 
-export { Field } from './field'
+import { Field } from './field'
 
-export default {
+const FIELD_TYPES: { [key: string]: typeof Field } = {
     url: UrlField,
     bool: BoolField,
 }
+
+export { Field }
+export default FIELD_TYPES

@@ -108,7 +108,9 @@ export default class CustomListStorage extends FeatureStorage {
             { id },
         )
 
-        if (!list) return null
+        if (!list) {
+            return null
+        }
 
         const pages = await this.storageManager.findAll<PageListEntry>(
             CustomListStorage.LIST_ENTRIES_COLL,
@@ -131,7 +133,7 @@ export default class CustomListStorage extends FeatureStorage {
      * @memberof CustomListStorage
      */
     async fetchListPagesById({ listId }: { listId: number }) {
-        return await this.storageManager.findAll(
+        return this.storageManager.findAll(
             CustomListStorage.LIST_ENTRIES_COLL,
             {
                 listId,
@@ -182,7 +184,7 @@ export default class CustomListStorage extends FeatureStorage {
         isDeletable: boolean
         isNestable: boolean
     }) {
-        return await this.storageManager.putObject(
+        return this.storageManager.putObject(
             CustomListStorage.CUSTOM_LISTS_COLL,
             {
                 name,
@@ -203,7 +205,7 @@ export default class CustomListStorage extends FeatureStorage {
      * @memberof CustomListStorage
      */
     async updateListName({ id, name }: { id: number; name: string }) {
-        return await this.storageManager.updateObject(
+        return this.storageManager.updateObject(
             CustomListStorage.CUSTOM_LISTS_COLL,
             {
                 id,
@@ -263,7 +265,7 @@ export default class CustomListStorage extends FeatureStorage {
         const idExists = Boolean(await this.fetchListById(listId))
 
         if (idExists) {
-            return await this.storageManager.putObject(
+            return this.storageManager.putObject(
                 CustomListStorage.LIST_ENTRIES_COLL,
                 {
                     listId,
@@ -356,7 +358,7 @@ export default class CustomListStorage extends FeatureStorage {
      * @memberof CustomListStorage
      */
     async fetchListIgnoreCase({ name }: { name: string }) {
-        return await this.storageManager.findObject<PageList>(
+        return this.storageManager.findObject<PageList>(
             CustomListStorage.CUSTOM_LISTS_COLL,
             {
                 name,

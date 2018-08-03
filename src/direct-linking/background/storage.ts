@@ -195,7 +195,7 @@ export class AnnotationStorage extends FeatureStorage {
     }
 
     async getAnnotationsByUrl(pageUrl: string) {
-        return await this.storageManager.findAll(ANNOTATION_TABLE, {
+        return this.storageManager.findAll(ANNOTATION_TABLE, {
             pageUrl,
         })
     }
@@ -227,7 +227,7 @@ export class AnnotationStorage extends FeatureStorage {
         comment,
         selector,
     }: Annotation) {
-        return await this.storageManager.putObject(ANNOTATION_TABLE, {
+        return this.storageManager.putObject(ANNOTATION_TABLE, {
             pageTitle,
             pageUrl,
             comment,
@@ -240,11 +240,9 @@ export class AnnotationStorage extends FeatureStorage {
     }
 
     async editAnnotation(url: string, comment: string) {
-        return await this.storageManager.updateObject(
+        return this.storageManager.updateObject(
             ANNOTATION_TABLE,
-            {
-                url: url,
-            },
+            { url },
             {
                 $set: {
                     comment,
@@ -255,14 +253,14 @@ export class AnnotationStorage extends FeatureStorage {
     }
 
     async deleteAnnotation(url: string) {
-        return await this.storageManager.deleteObject(ANNOTATION_TABLE, {
+        return this.storageManager.deleteObject(ANNOTATION_TABLE, {
             url,
         })
     }
 
     async getTagsByAnnotationUrl(url: string) {
-        return await this.storageManager.findAll(TAGS_TABLE, {
-            url: url,
+        return this.storageManager.findAll(TAGS_TABLE, {
+            url,
         })
     }
 

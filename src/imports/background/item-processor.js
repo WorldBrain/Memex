@@ -101,7 +101,7 @@ export default class ImportItemProcessor {
     async _storeDocs({ pageDoc, bookmark, visits = [] }) {
         this._checkCancelled()
 
-        return await searchIndex.addPage({ pageDoc, visits, bookmark })
+        return searchIndex.addPage({ pageDoc, visits, bookmark })
     }
 
     /**
@@ -112,7 +112,7 @@ export default class ImportItemProcessor {
      * @returns {PageDoc}
      */
     async _createPageDoc({ url }) {
-        const includeFavIcon = !await searchIndex.domainHasFavIcon(url)
+        const includeFavIcon = !(await searchIndex.domainHasFavIcon(url))
 
         // Do the page data fetch
         const fetch = fetchPageData({
@@ -170,7 +170,7 @@ export default class ImportItemProcessor {
         switch (importItem.type) {
             case IMPORT_TYPE.BOOKMARK:
             case IMPORT_TYPE.HISTORY:
-                return await this._processHistory(importItem)
+                return this._processHistory(importItem)
             default:
                 throw new Error('Unknown import type')
         }

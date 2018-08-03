@@ -8,7 +8,7 @@ async function getFavIcon({ tabId }) {
         return undefined
     }
 
-    return await fetchFavIcon(tab.favIconUrl)
+    return fetchFavIcon(tab.favIconUrl)
 }
 
 export async function fetchFavIcon(url) {
@@ -18,7 +18,7 @@ export async function fetchFavIcon(url) {
         throw new Error(`Bad fav-icon response from server: ${response.status}`)
     }
 
-    return await responseToDataUrl(response)
+    return responseToDataUrl(response)
 }
 
 export default getFavIcon

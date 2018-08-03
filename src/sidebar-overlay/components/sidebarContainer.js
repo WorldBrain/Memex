@@ -125,8 +125,9 @@ class SidebarContainer extends React.Component {
     }
 
     deleteAnnotation = annotation => {
-        if (annotation.body)
+        if (annotation.body) {
             this.parentFC.remoteExecute('deleteAnnotation')(annotation)
+        }
         this.props.deleteAnnotation(annotation)
     }
 
@@ -151,8 +152,9 @@ class SidebarContainer extends React.Component {
 
         if (this.props.isLoading) return <Loader />
 
-        if (env === 'overview')
+        if (env === 'overview') {
             annotations.sort((x, y) => x.createdWhen < y.createdWhen)
+        }
 
         return annotations.map(annotation => (
             <Annotation

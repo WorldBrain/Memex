@@ -1,5 +1,3 @@
-import { browser, Idle } from 'webextension-polyfill-ts'
-
 import { IdleManager } from './idle'
 
 describe('Browser idle manager', () => {

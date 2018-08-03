@@ -137,22 +137,22 @@ export default class DirectLinkingBackground {
     }
 
     async editAnnotation({ tab }, pk, comment) {
-        return await this.annotationStorage.editAnnotation(pk, comment)
+        return this.annotationStorage.editAnnotation(pk, comment)
     }
 
     async deleteAnnotation({ tab }, pk) {
-        return await this.annotationStorage.deleteAnnotation(pk)
+        return this.annotationStorage.deleteAnnotation(pk)
     }
 
     async getTagsByAnnotationUrl({ tab }, url) {
-        return await this.annotationStorage.getTagsByAnnotationUrl(url)
+        return this.annotationStorage.getTagsByAnnotationUrl(url)
     }
 
     async addTagForAnnotation({ tab }, { tag, url }) {
-        return await this.annotationStorage.modifyTags(true)(tag, url)
+        return this.annotationStorage.modifyTags(true)(tag, url)
     }
 
     async delTagForAnnotation({ tab }, { tag, url }) {
-        return await this.annotationStorage.modifyTags(false)(tag, url)
+        return this.annotationStorage.modifyTags(false)(tag, url)
     }
 }

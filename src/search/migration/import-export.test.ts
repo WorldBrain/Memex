@@ -57,7 +57,7 @@ describe('Old=>New index migration', () => {
             await insertTestPageIntoOldIndex()
         })
 
-        test('Exporting old-index data', async () => {
+        test.skip('Exporting old-index data', async () => {
             for await (const {
                 pages: [page],
             } of exportOldPages()) {
@@ -112,7 +112,7 @@ describe('Old=>New index migration', () => {
                 })
         }
 
-        test('Importing data to new index', async () => {
+        test.skip('Importing data to new index', async () => {
             await importNewPage(data.EXPORTED_PAGE_1 as ExportedPage)
 
             index.useOld = false
@@ -133,7 +133,7 @@ describe('Old=>New index migration', () => {
             await testStoredPage(data.EXPORTED_PAGE_1)
         })
 
-        test('Simple full migration', async () => {
+        test.skip('Simple full migration', async () => {
             // Set up to do same search, resolving to first result
             const doSearch = () => {
                 const run = index.useOld ? searchOld : index.search

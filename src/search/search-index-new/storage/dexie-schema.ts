@@ -1,10 +1,5 @@
 import StorageRegistry, { RegistryCollections } from './registry'
-import {
-    DexieSchema,
-    CollectionDefinition,
-    MigrationRunner,
-    IndexDefinition,
-} from './types'
+import { DexieSchema, CollectionDefinition, MigrationRunner } from './types'
 
 export function getDexieHistory(storageRegistry: StorageRegistry) {
     const collections = {}
@@ -43,8 +38,8 @@ function getDexieSchema(collections: RegistryCollections) {
 /**
  * Handles converting from StorageManager index definitions to Dexie index expressions.
  */
-const convertIndexToDexieExps = ({ fields, indices }: CollectionDefinition) =>
-    indices
+function convertIndexToDexieExps({ fields, indices }: CollectionDefinition) {
+    return indices
         .sort(({ pk }) => (pk ? -1 : 1)) // PK indexes always come first in Dexie
         .map(indexDef => {
             // Convert from StorageManager compound index to Dexie compound index
@@ -69,6 +64,7 @@ const convertIndexToDexieExps = ({ fields, indices }: CollectionDefinition) =>
             return `${listPrefix}${indexDef.field}`
         })
         .join(', ')
+}
 
 /**
  * Takes the generated schema versions, based on the registed collections, and finds the

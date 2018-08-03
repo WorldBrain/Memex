@@ -1,4 +1,4 @@
-import { browser, Storage } from 'webextension-polyfill-ts'
+import { browser } from 'webextension-polyfill-ts'
 import whenAllSettled from 'when-all-settled'
 
 import exportOldPages, { ExportParams } from '../search-index-old/export'
@@ -45,7 +45,7 @@ export class MigrationManager {
     private onComplete: () => void
 
     public static async showNotif() {
-        return await createNotif(MIGRATE_NOTIF, () =>
+        return createNotif(MIGRATE_NOTIF, () =>
             browser.tabs.create({ url: INFO_LINK }),
         )
     }
@@ -57,7 +57,7 @@ export class MigrationManager {
         this.concurrency = concurrency
         this.onComplete = onComplete
 
-        this.rehydrateProgressState()
+        this.rehydrateProgressState() // tslint:disable-line
     }
 
     public get isFinished() {
@@ -140,7 +140,7 @@ export class MigrationManager {
                 return
             }
 
-            analytics.trackEvent({
+            await analytics.trackEvent({
                 category: 'Migration',
                 action: 'Error',
                 name: err.toString(),
