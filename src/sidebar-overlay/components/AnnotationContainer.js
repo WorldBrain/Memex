@@ -402,6 +402,7 @@ class AnnotationContainer extends React.Component {
             [styles.tagsContainer]: this.state.tags.length,
             [styles.noComment]:
                 this.state.tags.length && !this.props.annotation.comment,
+            [styles.noDisplay]: this.state.annotationEditMode,
         })
 
     deriveIsJustComment = () => !this.props.annotation.body
