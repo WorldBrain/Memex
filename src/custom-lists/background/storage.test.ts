@@ -97,7 +97,7 @@ const runSuite = () => () => {
 
         test('fetch lists with some urls excluded', async () => {
             const lists = await fakeIndex.fetchAllLists({
-                excludeIds: [1, 2],
+                excludeIds: [1, 2] as any[],
             })
 
             expect(lists).toBeDefined()

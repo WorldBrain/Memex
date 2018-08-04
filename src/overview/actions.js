@@ -96,8 +96,9 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
     const firstState = getState()
     const currentQueryParams = selectors.currentQueryParams(firstState)
     const showTooltip = selectors.showTooltip(firstState)
-    if (filters.showClearFiltersBtn(getState()))
+    if (filters.showClearFiltersBtn(getState())) {
         dispatch(sidebarActs.openSidebarFilterMode())
+    }
 
     if (currentQueryParams.query.includes('#')) {
         return
@@ -228,6 +229,35 @@ export const getMoreResults = () => dispatch => {
     dispatch(search())
 }
 
+// Remove tags with no associated paged from filters
+export const removeTagFromFilter = () => (dispatch, getState) => {
+    const filterTags = filters.tags(getState()) || []
+    if (!filterTags.length) {
+        return
+    }
+    const pages = selectors.results(getState())
+    const isOnPage = {}
+    filterTags.forEach(tag => {
+        isOnPage[tag] = false
+    })
+
+    pages.forEach(page => {
+        filterTags.forEach(tag => {
+            if (!isOnPage[tag]) {
+                if (page.tags.indexOf(tag) > -1) {
+                    isOnPage[tag] = true
+                }
+            }
+        })
+    })
+
+    Object.entries(isOnPage).forEach(([key, value]) => {
+        if (!value) {
+            dispatch(filterActs.delTagFilter(key))
+        }
+    })
+}
+
 export const deleteDocs = () => async (dispatch, getState) => {
     const url = selectors.urlToDelete(getState())
 
@@ -251,6 +281,7 @@ export const deleteDocs = () => async (dispatch, getState) => {
     } catch (error) {
         // Do nothing
     } finally {
+        dispatch(removeTagFromFilter())
         dispatch(setResultDeleting(undefined))
         updateLastActive() // Consider user active (analytics)
     }
