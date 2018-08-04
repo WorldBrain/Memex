@@ -58,12 +58,13 @@ class Container extends React.Component {
             false,
         )
         const position = await getLocalStorage(constants.POSITION_KEY, 'side')
+
         const fetchNotif = await this.fetchNotifById(SEARCH_ENGINE_NOTIF.id)
 
         this.setState({
             hideResults,
             position,
-            isNotif: !fetchNotif.readTime,
+            isNotif: fetchNotif && !fetchNotif.readTime,
         })
     }
 
@@ -190,8 +191,6 @@ class Container extends React.Component {
         const { button } = SEARCH_ENGINE_NOTIF
         const { action } = button
 
-        console.log(action)
-
         if (action.type === actionTypes.OPEN_URL) {
             return (
                 <OpenLinkButton
@@ -227,7 +226,7 @@ class Container extends React.Component {
     renderNotification() {
         const { isNotif } = this.state
 
-        if (!isNotif) {
+        if (!isNotif || !SEARCH_ENGINE_NOTIF.id) {
             return null
         }
 
