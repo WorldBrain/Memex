@@ -31,6 +31,7 @@ class SidebarContainer extends React.Component {
         setAnnotations: PropTypes.func.isRequired,
         setHidden: PropTypes.func.isRequired,
         setIsLoading: PropTypes.func.isRequired,
+        focusCommentBox: PropTypes.func.isRequired,
         activeAnnotation: PropTypes.string.isRequired,
         hoveredAnnotation: PropTypes.string.isRequired,
     }
@@ -58,8 +59,8 @@ class SidebarContainer extends React.Component {
 
     setupFrameFunctions = () => {
         this.parentFC.setUpRemoteFunctions({
-            reloadAnnotations: async () => {
-                await this.props.fetchAnnotations()
+            focusCommentBox: value => {
+                this.props.focusCommentBox(value)
             },
             setAnnotations: annotations => {
                 this.props.setAnnotations(annotations)
@@ -211,6 +212,8 @@ const mapDispatchToProps = dispatch => ({
     setHoveredAnnotation: key => dispatch(actions.setHoveredAnnotation(key)),
     setHidden: value => dispatch(commentActions.setHidden(value)),
     setIsLoading: value => dispatch(actions.setIsLoading(value)),
+    focusCommentBox: value =>
+        dispatch(commentActions.setFocusCommentBox(value)),
 })
 
 export default connect(

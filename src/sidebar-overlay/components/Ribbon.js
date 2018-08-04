@@ -203,7 +203,6 @@ class Ribbon extends React.Component {
         if (!this.frameFC) {
             this.setupFrameFunctions()
         }
-
         await this.frameFC.remoteExecute('setLoaderActive')()
         await this.fetchAnnotations()
         const highlightables = this.state.annotations.filter(
@@ -214,6 +213,7 @@ class Ribbon extends React.Component {
             this.focusAnnotationContainer,
             this.hoverAnnotationContainer,
         )
+        this.frameFC.remoteExecute('focusCommentBox')(true)
 
         setTimeout(() => {
             const sorted = this.props.sortAnnotationByPosition(
@@ -228,6 +228,7 @@ class Ribbon extends React.Component {
         await this.frameFC.remoteExecute('sendAnchorToSidebar')(null)
         this.frameFC.remoteExecute('focusAnnotation')('')
         this.frameFC.remoteExecute('setAnnotations')([])
+        this.frameFC.remoteExecute('focusCommentBox')(false)
     }
 
     toggleSidebar = async () => {
