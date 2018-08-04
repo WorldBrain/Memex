@@ -5,6 +5,7 @@ import { connect } from 'react-redux'
 import { selectors, actions } from '../redux'
 import { actions as commentActions } from '../CommentBox'
 import Sidebar from './Sidebar'
+import EmptyMessage from './EmptyMessage'
 import Annotation from './AnnotationContainer'
 import Loader from './Loader'
 
@@ -148,9 +149,13 @@ class SidebarContainer extends React.Component {
     }
 
     renderAnnotations = () => {
-        const { annotations, env } = this.props
+        const { annotations, env, isLoading } = this.props
 
-        if (this.props.isLoading) return <Loader />
+        if (isLoading) return <Loader />
+
+        if (!this.props.isLoading && !this.props.annotations.length) {
+            return <EmptyMessage />
+        }
 
         if (env === 'overview') {
             annotations.sort((x, y) => x.createdWhen < y.createdWhen)
