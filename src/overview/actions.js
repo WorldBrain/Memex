@@ -7,6 +7,7 @@ import { actions as filterActs, selectors as filters } from '../search-filters'
 import * as constants from './constants'
 import * as selectors from './selectors'
 import { fetchTooltip } from './components/tooltips'
+import { actions as sidebarActs } from './sidebar-left'
 
 export const setLoading = createAction('overview/setLoading')
 export const nextPage = createAction('overview/nextPage')
@@ -95,6 +96,8 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
     const firstState = getState()
     const currentQueryParams = selectors.currentQueryParams(firstState)
     const showTooltip = selectors.showTooltip(firstState)
+    if (filters.showClearFiltersBtn(getState()))
+        dispatch(sidebarActs.openSidebarFilterMode())
 
     if (currentQueryParams.query.includes('#')) {
         return

@@ -133,7 +133,7 @@ const runSuite = () => () => {
             })
             runChecks(updatedList)
             runChecks(newName)
-            //No of pages and list updated
+            // No of pages and list updated
             expect(updatedList).toBe(1)
             // Test the name is updated correctly
             expect(newName.name).toBe('new name')
@@ -156,7 +156,7 @@ const runSuite = () => () => {
             // Nothing updated
             expect(updatedList).toBe(0)
             // cannot found anything with the new name
-            expect(newName).toBeUndefined
+            expect(newName).toBeUndefined()
         })
     })
 
@@ -165,7 +165,7 @@ const runSuite = () => () => {
             const lists = await fakeIndex.removeList({ id: 3 })
             expect(lists).toBeDefined()
             expect(lists).not.toBeNull()
-            //No of pages and list deleted by
+            // No of pages and list deleted by
             expect(lists).toEqual({ list: 1, pages: 1 })
         })
 
@@ -176,7 +176,7 @@ const runSuite = () => () => {
             })
             expect(pages).toBeDefined()
             expect(pages).not.toBeNull()
-            //No of pages deleted
+            // No of pages deleted
             expect(pages).toBe(1)
         })
     })
