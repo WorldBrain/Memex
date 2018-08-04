@@ -29,7 +29,7 @@ export default class NotificationStorage extends FeatureStorage {
             reverse: true,
         }
 
-        return await this.storageManager.findAll(
+        return this.storageManager.findAll(
             'notifications',
             { readTime: { $exists: false } },
             opt,
@@ -39,8 +39,8 @@ export default class NotificationStorage extends FeatureStorage {
     async fetchReadNotifications({ limit, skip }) {
         const opt = {
             reverse: true,
-            limit: limit,
-            skip: skip,
+            limit,
+            skip,
         }
 
         const results = await this.storageManager.findAll(
@@ -56,7 +56,7 @@ export default class NotificationStorage extends FeatureStorage {
     }
 
     async fetchUnreadCount() {
-        return await this.storageManager.countAll('notifications', {
+        return this.storageManager.countAll('notifications', {
             readTime: { $exists: false },
         })
     }

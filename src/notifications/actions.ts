@@ -58,7 +58,7 @@ export const initStorageValue = async () => {
 
 export const handleResults = () => async (dispatch, getState) => {
     dispatch(setLoading(true))
-    let readNotifications = await getReadNotifications({
+    const readNotifications = await getReadNotifications({
         notificationsSkip: selectors.notificationsSkip(getState()),
     })
     const unreadNotifications = await getUnreadNotifications()
@@ -76,7 +76,7 @@ export const handleResults = () => async (dispatch, getState) => {
 }
 
 export const getReadNotifications = async ({ notificationsSkip }) => {
-    let readNotifications = await fetchReadNotifications({
+    const readNotifications = await fetchReadNotifications({
         limit: constants.NOTIFICATIONS_PAGE_SIZE,
         skip: notificationsSkip,
     })
