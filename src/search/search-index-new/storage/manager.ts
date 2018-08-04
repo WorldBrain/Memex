@@ -22,7 +22,7 @@ export class StorageManager implements ManageableStorage {
     public initialized = false
     public registry = new StorageRegistry()
     private _initializationPromise: Promise<void>
-    private _initializationResolve: Function
+    private _initializationResolve: () => void
     private _storage: Storage
 
     /**
@@ -155,7 +155,7 @@ export class StorageManager implements ManageableStorage {
         const collection = this.registry.collections[collectionName]
         StorageManager._processFieldsForWrites(collection, object)
 
-        return await this._storage[collectionName].put(object)
+        return this._storage[collectionName].put(object)
     }
 
     /**
@@ -268,7 +268,7 @@ export class StorageManager implements ManageableStorage {
     async countAll<T>(collectionName: string, filter: FilterQuery<T>) {
         await this._initializationPromise
 
-        return await this._storage.collection(collectionName).count(filter)
+        return this._storage.collection(collectionName).count(filter)
     }
 
     /**

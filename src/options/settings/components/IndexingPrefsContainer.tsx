@@ -2,7 +2,6 @@ import { connect } from 'react-redux'
 
 import * as acts from '../actions'
 import * as selectors from '../selectors'
-import { State } from '../reducer'
 import IndexingPrefs, { Props as IndexingPrefsProps } from './IndexingPrefs'
 
 const mapStateToProps = (state): Partial<IndexingPrefsProps> => ({

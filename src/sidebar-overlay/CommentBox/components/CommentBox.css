@@ -97,6 +97,12 @@
     background: transparent;
     margin-right: 10px;
     margin-top: 6px;
+
+    &:focus,
+    &:active {
+        background-color: #88888840;
+        border-radius: 5px;
+    }
 }
 
 .cancel {
@@ -189,8 +195,8 @@
         transform: rotate(-180deg);
         transform-origin: center;
     }
+}
 
-    &.noDisplay {
-        display: none;
-    }
+.noDisplay {
+    display: none;
 }

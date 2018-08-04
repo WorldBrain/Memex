@@ -21,6 +21,7 @@ class CommentBox extends React.PureComponent {
         textareaRows: PropTypes.number.isRequired,
         isHidden: PropTypes.bool.isRequired,
         tagInput: PropTypes.bool.isRequired,
+        focusCommentBox: PropTypes.bool.isRequired,
         tags: PropTypes.arrayOf(PropTypes.string),
         displayHighlightTruncated: PropTypes.bool.isRequired,
         saveAnnotation: PropTypes.func.isRequired,
@@ -29,6 +30,7 @@ class CommentBox extends React.PureComponent {
         setCommentInput: PropTypes.func.isRequired,
         setTextareaRows: PropTypes.func.isRequired,
         setHidden: PropTypes.func.isRequired,
+        // setFocusCommentBox: PropTypes.func.isRequired,
         setTagInput: PropTypes.func.isRequired,
         toggleHighlightTruncation: PropTypes.func.isRequired,
         addTag: PropTypes.func.isRequired,
@@ -54,13 +56,25 @@ class CommentBox extends React.PureComponent {
         this.attachEventListener()
     }
 
+    componentDidUpdate(prevProps) {
+        if (
+            !prevProps.focusCommentBox &&
+            this.props.focusCommentBox &&
+            this.inputRef
+        ) {
+            this.inputRef.focus()
+        }
+    }
+
     maybeCloseTagsDropdown = e => {
         if (!this.props.tagInput) return
         else if (
-            this.tagInputContainer &&
-            this.tagInputContainer.contains(e.target)
-        )
+            (this.tagInputContainer &&
+                this.tagInputContainer.contains(e.target)) ||
+            e.target === this.saveButton
+        ) {
             return
+        }
 
         this.props.setTagInput(false)
     }
@@ -92,6 +106,14 @@ class CommentBox extends React.PureComponent {
 
         this.props.setCommentInput(comment)
         this.props.setTextareaRows(textareaRows)
+    }
+
+    handleKeyDown = e => {
+        if (e.key === 'Tab') {
+            e.preventDefault()
+            e.stopPropagation()
+            this.props.setTagInput(true)
+        }
     }
 
     getHighlightText = () => {
@@ -126,6 +148,8 @@ class CommentBox extends React.PureComponent {
 
     setTagRef = node => (this.tagInputContainer = node)
 
+    setSaveRef = node => (this.saveButton = node)
+
     openSettings = () => {
         const settingsUrl = browser.extension.getURL('/options.html#/settings')
         browser.tabs.create({
@@ -134,10 +158,17 @@ class CommentBox extends React.PureComponent {
         })
     }
 
+    showCommentBox = () => {
+        this.props.setHidden(false)
+        setTimeout(() => {
+            this.inputRef.focus()
+        }, 100)
+    }
+
     renderTagInput() {
         const tagObjs = this.props.tags.map(tag => ({ name: tag }))
 
-        if (this.props.tagInput)
+        if (this.props.tagInput) {
             return (
                 <IndexDropdown
                     isForAnnotation
@@ -148,7 +179,7 @@ class CommentBox extends React.PureComponent {
                     source="tag"
                 />
             )
-        else
+        } else {
             return (
                 <TagHolder
                     tags={tagObjs}
@@ -156,6 +187,7 @@ class CommentBox extends React.PureComponent {
                     deleteTag={({ tag }) => this.props.deleteTag(tag)}
                 />
             )
+        }
     }
 
     render() {
@@ -171,9 +203,7 @@ class CommentBox extends React.PureComponent {
                             [styles.disabled]: !this.props.isHidden,
                         })}
                         onClick={
-                            this.props.isHidden
-                                ? () => this.props.setHidden(false)
-                                : null
+                            this.props.isHidden ? this.showCommentBox : null
                         }
                     >
                         Add Comment
@@ -199,33 +229,37 @@ class CommentBox extends React.PureComponent {
                     </div>
                 ) : null}
 
-                {this.isHidden() ? null : (
-                    <div
-                        className={cx(styles.commentBox, {
-                            [styles.iframe]: this.props.env === 'iframe',
-                        })}
-                    >
-                        <textarea
-                            rows={this.props.textareaRows}
-                            className={styles.textarea}
-                            value={this.props.commentInput}
-                            placeholder={'Add your comment...'}
-                            onChange={this.handleChange}
-                            ref={this.setInputRef}
-                            onClick={() => this.props.setTagInput(false)}
-                        />
-                        <br />
-                        <div ref={this.setTagRef}>{this.renderTagInput()}</div>
-                        <div className={styles.buttonHolder}>
-                            <button className={styles.save} onClick={this.save}>
-                                Save
-                            </button>
-                            <a className={styles.cancel} onClick={this.cancel}>
-                                Cancel
-                            </a>
-                        </div>
+                <div
+                    className={cx(styles.commentBox, {
+                        [styles.iframe]: this.props.env === 'iframe',
+                        [styles.noDisplay]: this.isHidden(),
+                    })}
+                >
+                    <textarea
+                        rows={this.props.textareaRows}
+                        className={styles.textarea}
+                        value={this.props.commentInput}
+                        placeholder={'Add your comment...'}
+                        onChange={this.handleChange}
+                        onKeyDown={this.handleKeyDown}
+                        ref={this.setInputRef}
+                        onClick={() => this.props.setTagInput(false)}
+                    />
+                    <br />
+                    <div ref={this.setTagRef}>{this.renderTagInput()}</div>
+                    <div className={styles.buttonHolder}>
+                        <button
+                            className={styles.save}
+                            ref={this.setSaveRef}
+                            onClick={this.save}
+                        >
+                            Save
+                        </button>
+                        <a className={styles.cancel} onClick={this.cancel}>
+                            Cancel
+                        </a>
                     </div>
-                )}
+                </div>
             </div>
         )
     }
@@ -238,11 +272,13 @@ const mapStateToProps = state => ({
     tagInput: selectors.tagInput(state),
     displayHighlightTruncated: selectors.displayHighlightTruncated(state),
     tags: selectors.tags(state),
+    focusCommentBox: selectors.focusCommentBox(state),
 })
 const mapDispatchToProps = dispatch => ({
     setCommentInput: input => dispatch(actions.setCommentInput(input)),
     setTextareaRows: rows => dispatch(actions.setTextareaRows(rows)),
     setHidden: value => dispatch(actions.setHidden(value)),
+    setFocusCommentBox: value => dispatch(actions.setFocusCommentBox(value)),
     setTagInput: value => dispatch(actions.setTagInput(value)),
     toggleHighlightTruncation: () =>
         dispatch(actions.toggleHighlightTruncation()),

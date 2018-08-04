@@ -1,3 +1,4 @@
+/* eslint-disable */
 import index, { indexQueue } from '.'
 import { initSingleLookup, initLookupByKeys, idbBatchToPromise } from './util'
 

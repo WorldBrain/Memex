@@ -141,7 +141,7 @@ export default class TabChangeListeners {
                 incognito,
             } as Tabs.Tab))
         ) {
-            this._updateTabVisit(oldTab)
+            await this._updateTabVisit(oldTab)
         }
     }
 

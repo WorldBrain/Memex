@@ -66,13 +66,27 @@ export default class Page extends AbstractModel
         this.domain = props.domain
         this.hostname = props.hostname
 
-        if (props.screenshotURI) this.screenshotURI = props.screenshotURI
-        if (props.lang) this.lang = props.lang
-        if (props.canonicalUrl) this.canonicalUrl = props.canonicalUrl
-        if (props.description) this.description = props.description
-        if (props.keywords) this.keywords = props.keywords
-        if (props.pouchMigrationError)
+        if (props.screenshotURI) {
+            this.screenshotURI = props.screenshotURI
+        }
+
+        if (props.lang) {
+            this.lang = props.lang
+        }
+
+        if (props.canonicalUrl) {
+            this.canonicalUrl = props.canonicalUrl
+        }
+
+        if (props.description) {
+            this.description = props.description
+        }
+        if (props.keywords) {
+            this.keywords = props.keywords
+        }
+        if (props.pouchMigrationError) {
             this.pouchMigrationError = props.pouchMigrationError
+        }
 
         Object.defineProperties(this, {
             [visitsProp]: {
@@ -198,11 +212,9 @@ export default class Page extends AbstractModel
      * @param {string[]} terms Array of terms to merge with current state.
      */
     _mergeTerms(termProp: TermsIndexName, terms: string[]) {
-        if (!this[termProp]) {
-            this[termProp] = terms
-        } else {
-            this[termProp] = [...new Set([...this[termProp], ...terms])]
-        }
+        this[termProp] = !this[termProp]
+            ? terms
+            : [...new Set([...this[termProp], ...terms])]
     }
 
     /**

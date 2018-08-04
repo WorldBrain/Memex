@@ -244,6 +244,7 @@ export const deleteDocs = () => async (dispatch, getState) => {
         // Hide the result item + confirm modal directly (optimistically)
         dispatch(hideResultItem(url))
     } catch (error) {
+        // Do nothing
     } finally {
         dispatch(setResultDeleting(undefined))
         updateLastActive() // Consider user active (analytics)

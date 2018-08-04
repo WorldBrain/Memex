@@ -1,6 +1,8 @@
-import { BrowserItem, ImportItemType } from './types'
+import { BrowserItem } from './types'
 
-type AllowTypes = { [key: string]: boolean }
+interface AllowTypes {
+    [key: string]: boolean
+}
 
 export interface TestData {
     allowTypes: AllowTypes

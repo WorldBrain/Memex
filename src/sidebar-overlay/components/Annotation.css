@@ -185,6 +185,10 @@
         margin-left: 10px;
         padding-bottom: 15px;
     }
+
+    &.noDisplay {
+        display: none;
+    }
 }
 
 .icon {

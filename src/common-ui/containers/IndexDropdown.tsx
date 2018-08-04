@@ -110,11 +110,11 @@ class IndexDropdownContainer extends Component<Props, State> {
         // Only for add and remove from the popup or overview, we have already covered filter in overview
         if (this.allowIndexUpdate) {
             if (hover) {
-                internalAnalytics.processEvent({
+                await internalAnalytics.processEvent({
                     type: isAdded ? 'add' + sourceType : 'delete' + sourceType,
                 })
             } else {
-                internalAnalytics.processEvent({
+                await internalAnalytics.processEvent({
                     type: isAdded
                         ? 'addPopup' + sourceType
                         : 'deletePopup' + sourceType,
@@ -178,7 +178,7 @@ class IndexDropdownContainer extends Component<Props, State> {
             }).catch(console.error)
         }
 
-        this.storeTrackEvent(true)
+        await this.storeTrackEvent(true)
 
         this.inputEl.focus()
         this.setState(state => ({
@@ -215,7 +215,7 @@ class IndexDropdownContainer extends Component<Props, State> {
 
             this.props.onFilterAdd(tag)
             tagsReducer = tags => [tag, ...tags]
-            this.storeTrackEvent(true)
+            await this.storeTrackEvent(true)
         } else {
             if (this.allowIndexUpdate) {
                 this.delTagRPC({
@@ -230,7 +230,7 @@ class IndexDropdownContainer extends Component<Props, State> {
                 ...tags.slice(0, tagIndex),
                 ...tags.slice(tagIndex + 1),
             ]
-            this.storeTrackEvent(false)
+            await this.storeTrackEvent(false)
         }
 
         this.setState(state => ({
@@ -269,7 +269,9 @@ class IndexDropdownContainer extends Component<Props, State> {
         // One extra index if the "add new tag" thing is showing
         let offset = this.canCreateTag() ? 0 : 1
 
-        if (!this.allowIndexUpdate) offset = 1
+        if (!this.allowIndexUpdate) {
+            offset = 1
+        }
 
         // Calculate the next focused index depending on current focus and direction
         let focusedReducer

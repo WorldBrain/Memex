@@ -83,7 +83,7 @@ export async function search({
 // WARNING: Inefficient; goes through entire table
 export async function getMatchingPageCount(pattern) {
     const re = new RegExp(pattern, 'i')
-    return await db.pages.filter(page => re.test(page.url)).count()
+    return db.pages.filter(page => re.test(page.url)).count()
 }
 
 /**

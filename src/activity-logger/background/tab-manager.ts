@@ -100,15 +100,15 @@ export class TabManager {
      * @param {() => Promise<void>} cb The page log logic to delay.
      * @param {number} [delay] The number of seconds to delay for.
      */
-    scheduleTabLog(
+    async scheduleTabLog(
         id: number,
-        logCb: Function,
+        logCb: () => void | Promise<void>,
         delay = TabManager.DEF_LOG_DELAY,
     ) {
         const tab = this.getTabState(id)
 
         if (tab != null) {
-            tab.scheduleLog(logCb, delay * TabManager.DELAY_UNIT)
+            return tab.scheduleLog(logCb, delay * TabManager.DELAY_UNIT)
         }
     }
 

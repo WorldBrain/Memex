@@ -88,13 +88,16 @@ export const goToAnnotation = (
             url: pageUrl,
         })
 
-        retryUntilErrorResolves(
-            async () =>
-                await remoteFunction('goToAnnotation', {
+        const listener = (tabId, changeInfo) => {
+            if (tabId === tab.id && changeInfo.status === 'complete') {
+                remoteFunction('goToAnnotation', {
                     tabId: tab.id,
-                })(annotation),
-            { intervalMiliseconds: 3000, timeoutMiliseconds: 15000 },
-        )
+                })(annotation)
+                browser.tabs.onUpdated.removeListener(listener)
+            }
+        }
+
+        browser.tabs.onUpdated.addListener(listener)
     } else {
         highlightAndScroll(annotation)
     }

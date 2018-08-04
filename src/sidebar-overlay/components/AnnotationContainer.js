@@ -27,8 +27,9 @@ class AnnotationContainer extends React.Component {
         const annotationObj = this.props.annotation
         let highlight, annotation
         let annotationText = ''
-        if (annotationObj.body)
+        if (annotationObj.body) {
             highlight = this.getTruncatedObject(annotationObj.body)
+        }
 
         if (annotationObj.comment) {
             annotation = this.getTruncatedObject(annotationObj.comment)
@@ -74,8 +75,9 @@ class AnnotationContainer extends React.Component {
         else if (
             this.tagInputContainer &&
             this.tagInputContainer.contains(e.target)
-        )
+        ) {
             return
+        }
 
         this.setState({
             tagInput: false,
@@ -175,10 +177,11 @@ class AnnotationContainer extends React.Component {
     _setTagInput = value => () => this.setState({ tagInput: value })
 
     getDateDetails = () => {
-        if (this.state.annotationEditMode)
+        if (this.state.annotationEditMode) {
             return {
                 timestamp: '',
             }
+        }
 
         const { createdWhen, lastEdited } = this.props.annotation
         let dateObject
@@ -297,9 +300,9 @@ class AnnotationContainer extends React.Component {
 
     toggleEditAnnotation = e => {
         this._toggleState('annotationEditMode')()
-        if (this.state.footerState === 'edit')
+        if (this.state.footerState === 'edit') {
             this._setFooterState('default')(e)
-        else this._setFooterState('edit')(e)
+        } else this._setFooterState('edit')(e)
     }
 
     setTagRef = node => {
@@ -324,9 +327,13 @@ class AnnotationContainer extends React.Component {
 
     getHighlightText = () => {
         const { truncated } = this.state
-        if (truncated && truncated.highlight && truncated.highlight.isTruncated)
+        if (
+            truncated &&
+            truncated.highlight &&
+            truncated.highlight.isTruncated
+        ) {
             return truncated.highlight.text
-        else return this.props.annotation.body
+        } else return this.props.annotation.body
     }
 
     getAnnotationText = () => {
@@ -336,14 +343,14 @@ class AnnotationContainer extends React.Component {
             truncated &&
             truncated.annotation &&
             truncated.annotation.isTruncated
-        )
+        ) {
             return truncated.annotation.text
-        else return this.props.annotation.comment
+        } else return this.props.annotation.comment
     }
 
     renderTagInput() {
         const tagStringArray = this.state.tags.map(tag => tag.name)
-        if (this.state.tagInput)
+        if (this.state.tagInput) {
             return (
                 <IndexDropdown
                     isForAnnotation
@@ -354,7 +361,7 @@ class AnnotationContainer extends React.Component {
                     source="tag"
                 />
             )
-        else {
+        } else {
             return (
                 <TagHolder
                     tags={this.state.tags}
@@ -395,6 +402,7 @@ class AnnotationContainer extends React.Component {
             [styles.tagsContainer]: this.state.tags.length,
             [styles.noComment]:
                 this.state.tags.length && !this.props.annotation.comment,
+            [styles.noDisplay]: this.state.annotationEditMode,
         })
 
     deriveIsJustComment = () => !this.props.annotation.body

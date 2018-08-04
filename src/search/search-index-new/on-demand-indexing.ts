@@ -81,8 +81,8 @@ export async function createPageViaBmTagActs(props: Props) {
     } = await browser.storage.local.get(IDXING_PREF_KEYS.BOOKMARKS)
 
     if (props.tabId) {
-        return await createPageFromTab({ stubOnly: !fullyIndex, ...props })
+        return createPageFromTab({ stubOnly: !fullyIndex, ...props })
     }
 
-    return await createPageFromUrl({ stubOnly: !fullyIndex, ...props })
+    return createPageFromUrl({ stubOnly: !fullyIndex, ...props })
 }

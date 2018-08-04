@@ -131,13 +131,13 @@ export async function delPagesByDomain(url) {
     )
 
     const pageIds = [...domainIndex].map(([pageId]) => pageId)
-    return await delPagesConcurrent(pageIds)
+    return delPagesConcurrent(pageIds)
 }
 
 export async function delPagesByPattern(regex) {
     const pageRows = await fetchPagesByUrlPattern(regex)
     const pageIds = pageRows.map(({ id }) => id)
-    return await delPagesConcurrent(pageIds)
+    return delPagesConcurrent(pageIds)
 }
 
 export async function getMatchingPageCount(regex) {
