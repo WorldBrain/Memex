@@ -1,7 +1,7 @@
 .ribbon {
     position: fixed;
     top: 35%;
-    right: 0;
+    right: -50px;
     width: 40px;
     height: 80px;
     background-color: #fff;
@@ -15,6 +15,7 @@
     line-height: normal;
     text-align: start;
     font-family: serif;
+    animation: slideLeft 0.15s ease-in 1s 1 forwards;
 
     &:-webkit-fullscreen {
         display: none;
@@ -85,4 +86,14 @@
     height: 15px;
     margin-left: 0px;
     margin-top: 0px;
+}
+
+@keyframes slideLeft {
+    0% {
+        right: -50px;
+    }
+
+    100% {
+        right: 0px;
+    }
 }
