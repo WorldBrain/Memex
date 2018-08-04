@@ -69,9 +69,8 @@ class CommentBox extends React.PureComponent {
     maybeCloseTagsDropdown = e => {
         if (!this.props.tagInput) return
         else if (
-            this.tagInputContainer &&
-            this.tagInputContainer.contains(e.target) &&
-            // when clicking save button while tabbing
+            (this.tagInputContainer &&
+                this.tagInputContainer.contains(e.target)) ||
             e.target === this.saveButton
         ) {
             return
