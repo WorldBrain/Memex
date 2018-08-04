@@ -8,6 +8,14 @@ import RemovedText from './RemovedText'
 import * as constants from '../constants'
 import { getLocalStorage, setLocalStorage } from '../utils'
 import { MigrationNotice } from '../../common-ui/containers'
+import Notification from './Notification'
+import { SEARCH_ENGINE_NOTIF } from '../../notifications/notifications'
+import * as actionTypes from '../../notifications/action-types'
+import { actionRegistry } from '../../notifications/registry'
+import ActionButton from '../../notifications/components/ActionButton'
+import OptIn from '../../notifications/components/OptIn'
+import OpenLinkButton from '../../notifications/components/OpenLinkButton'
+import { ToggleSwitch } from '../../common-ui/components'
 
 class Container extends React.Component {
     static propTypes = {
@@ -28,9 +36,12 @@ class Container extends React.Component {
         this.removeResults = this.removeResults.bind(this)
         this.undoRemove = this.undoRemove.bind(this)
         this.changePosition = this.changePosition.bind(this)
+        this.handleClickTick = this.handleClickTick.bind(this)
 
         this.updateLastActive = remoteFunction('updateLastActive')
         this.trackEvent = remoteFunction('trackEvent')
+        this.readNotification = remoteFunction('readNotification')
+        this.fetchNotifById = remoteFunction('fetchNotifById')
     }
 
     state = {
@@ -38,6 +49,7 @@ class Container extends React.Component {
         dropdown: false,
         removed: false,
         position: null,
+        isNotif: true,
     }
 
     async componentDidMount() {
@@ -46,9 +58,12 @@ class Container extends React.Component {
             false,
         )
         const position = await getLocalStorage(constants.POSITION_KEY, 'side')
+        const fetchNotif = await this.fetchNotifById(SEARCH_ENGINE_NOTIF.id)
+
         this.setState({
             hideResults,
             position,
+            isNotif: !fetchNotif.readTime,
         })
     }
 
@@ -151,6 +166,81 @@ class Container extends React.Component {
         this.props.rerender()
     }
 
+    async handleClickTick() {
+        await this.readNotification(SEARCH_ENGINE_NOTIF.id)
+        console.log('Here')
+
+        this.setState({
+            isNotif: false,
+        })
+    }
+
+    handleToggleStorageOption(action, value) {
+        action = {
+            ...action,
+            value,
+        }
+
+        actionRegistry[action.type]({
+            definition: action,
+        })
+    }
+
+    renderButton() {
+        const { button } = SEARCH_ENGINE_NOTIF
+        const { action } = button
+
+        console.log(action)
+
+        if (action.type === actionTypes.OPEN_URL) {
+            return (
+                <OpenLinkButton
+                    url={action.url}
+                    label={button.label}
+                    context={action.context}
+                />
+            )
+        } else if (action.type === actionTypes.TOGGLE_SETTING) {
+            return (
+                <OptIn>
+                    <ToggleSwitch
+                        defaultValue
+                        onChange={val =>
+                            this.handleToggleStorageOption(action, val)
+                        }
+                    />
+                </OptIn>
+            )
+        } else {
+            return (
+                <ActionButton
+                    handleClick={actionRegistry[action.type]({
+                        definition: action,
+                    })}
+                >
+                    {button.label}
+                </ActionButton>
+            )
+        }
+    }
+
+    renderNotification() {
+        const { isNotif } = this.state
+
+        if (!isNotif) {
+            return null
+        }
+
+        return (
+            <Notification
+                title={SEARCH_ENGINE_NOTIF.title}
+                message={SEARCH_ENGINE_NOTIF.message}
+                button={this.renderButton()}
+                handleTick={this.handleClickTick}
+            />
+        )
+    }
+
     render() {
         if (this.props.requiresMigration) {
             return <MigrationNotice showBanner />
@@ -184,6 +274,7 @@ class Container extends React.Component {
                 removeResults={this.removeResults}
                 changePosition={this.changePosition}
                 renderResultItems={this.renderResultItems}
+                renderNotification={this.renderNotification()}
             />
         )
     }

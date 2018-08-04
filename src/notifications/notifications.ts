@@ -34,3 +34,18 @@ export const releaseTime: number = 1532947573751
 },
 */
 export const NOTIFS: NotifDefinition[] = []
+
+// Dummy search engine notification
+export const SEARCH_ENGINE_NOTIF = {
+    id: 'direct_links_inital_notification31',
+    title: 'New Feature: Comments & Annotation',
+    message:
+        'Highlight any text on the web and add comments to it. Also attach comments to every websites you find.',
+    button: {
+        action: {
+            type: actionTypes.TOGGLE_SETTING,
+            key: storageKeys.SHOULD_TRACK_STORAGE_KEY,
+        },
+        label: 'Enable Tracking',
+    },
+}

@@ -72,4 +72,8 @@ export default class NotificationStorage extends FeatureStorage {
             },
         )
     }
+
+    async fetchNotifById(id) {
+        return this.storageManager.findObject('notifications', { id })
+    }
 }

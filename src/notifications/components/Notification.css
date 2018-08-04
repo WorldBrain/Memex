@@ -68,13 +68,18 @@
 .button {
     padding: 8px 20px;
     background-color: #3eb995;
-    color: white;
+    color: white !important; /* stylelint-disable */
     font-size: 16px;
     width: fit-content;
     border-radius: 2px;
-    cursor: pointer;
+    cursor: pointer !important;
     text-decoration: none;
     margin-right: 10px;
+    text-align: center;
+
+    &:hover {
+        text-decoration: none !important;
+    }
 }
 
 .tick {

@@ -1,0 +1,38 @@
+.mainContainer {
+    display: flex;
+    flex-direction: row;
+    border: 1px solid #3eb995;
+    box-shadow: -1px 1px 4px #3eb995;
+    margin-bottom: 15px;
+    margin-top: 15px;
+    padding: 10px 5px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.alertIcon {
+    width: 80px;
+}
+
+.messageTitle {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    margin: 0 10px 0 0;
+    text-align: center;
+}
+
+.message {
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+.title {
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.tick {
+    width: 64px;
+    cursor: pointer;
+}

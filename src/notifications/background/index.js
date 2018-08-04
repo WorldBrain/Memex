@@ -26,6 +26,9 @@ export default class NotificationBackground {
             readNotification: id => {
                 return this.readNotification(id)
             },
+            fetchNotifById: id => {
+                return this.fetchNotifById(id)
+            },
         })
     }
 
@@ -50,6 +53,10 @@ export default class NotificationBackground {
 
     async readNotification(id) {
         await this.storage.readNotification(id)
+    }
+
+    async fetchNotifById(id) {
+        return this.storage.fetchNotifById(id)
     }
 
     async deliverStaticNotifications() {
