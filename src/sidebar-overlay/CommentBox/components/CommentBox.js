@@ -233,7 +233,7 @@ class CommentBox extends React.PureComponent {
                 <div
                     className={cx(styles.commentBox, {
                         [styles.iframe]: this.props.env === 'iframe',
-                        [styles.noDisplay]: this.props.isHidden,
+                        [styles.noDisplay]: this.isHidden(),
                     })}
                 >
                     <textarea
