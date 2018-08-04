@@ -58,7 +58,9 @@ class CommentBox extends React.PureComponent {
         if (!this.props.tagInput) return
         else if (
             this.tagInputContainer &&
-            this.tagInputContainer.contains(e.target)
+            this.tagInputContainer.contains(e.target) &&
+            // when clicking save button while tabbing
+            e.target === this.saveButton
         ) {
             return
         }
@@ -95,6 +97,14 @@ class CommentBox extends React.PureComponent {
         this.props.setTextareaRows(textareaRows)
     }
 
+    handleKeyDown = e => {
+        if (e.key === 'Tab') {
+            e.preventDefault()
+            e.stopPropagation()
+            this.props.setTagInput(true)
+        }
+    }
+
     getHighlightText = () => {
         const highlight = this.props.anchor.quote
         if (this.isHighlightLong() && this.props.displayHighlightTruncated) {
@@ -126,6 +136,8 @@ class CommentBox extends React.PureComponent {
     }
 
     setTagRef = node => (this.tagInputContainer = node)
+
+    setSaveRef = node => (this.saveButton = node)
 
     openSettings = () => {
         const settingsUrl = browser.extension.getURL('/options.html#/settings')
@@ -213,13 +225,18 @@ class CommentBox extends React.PureComponent {
                             value={this.props.commentInput}
                             placeholder={'Add your comment...'}
                             onChange={this.handleChange}
+                            onKeyDown={this.handleKeyDown}
                             ref={this.setInputRef}
                             onClick={() => this.props.setTagInput(false)}
                         />
                         <br />
                         <div ref={this.setTagRef}>{this.renderTagInput()}</div>
                         <div className={styles.buttonHolder}>
-                            <button className={styles.save} onClick={this.save}>
+                            <button
+                                className={styles.save}
+                                ref={this.setSaveRef}
+                                onClick={this.save}
+                            >
                                 Save
                             </button>
                             <a className={styles.cancel} onClick={this.cancel}>
