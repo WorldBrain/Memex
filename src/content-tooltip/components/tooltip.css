@@ -218,11 +218,13 @@
     }
 
     & .imgSettings {
-        margin-top: 1px;
+        width: 13px;
+        margin-top: 4px;
     }
 
     & .imgCross {
-        margin-bottom: 1px;
+        width: 11px;
+        margin-top: 2px;
     }
 }
 
