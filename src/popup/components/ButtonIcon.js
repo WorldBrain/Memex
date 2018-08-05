@@ -10,7 +10,15 @@ const getButtonClass = buttonType =>
         [styles.settingsIcon]: buttonType,
     })
 
-const ButtonIcon = ({ icon, buttonType, btnClass, href, ...btnProps }) => (
+const ButtonIcon = ({
+    icon,
+    buttonType,
+    btnClass,
+    href,
+    value,
+    isNotif,
+    ...btnProps
+}) => (
     <OutLink
         className={getButtonClass(buttonType)}
         tabIndex="-1"
@@ -24,6 +32,10 @@ const ButtonIcon = ({ icon, buttonType, btnClass, href, ...btnProps }) => (
                 btnClass,
             )}
         />
+        {isNotif &&
+            value !== 0 && (
+                <div className={styles.notificationBadge}>{value}</div>
+            )}
     </OutLink>
 )
 
@@ -32,6 +44,8 @@ ButtonIcon.propTypes = {
     buttonType: PropTypes.number,
     btnClass: PropTypes.string,
     href: PropTypes.string,
+    value: PropTypes.number,
+    isNotif: PropTypes.bool,
 }
 
 export default ButtonIcon

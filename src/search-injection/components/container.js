@@ -8,6 +8,14 @@ import RemovedText from './RemovedText'
 import * as constants from '../constants'
 import { getLocalStorage, setLocalStorage } from '../utils'
 import { MigrationNotice } from '../../common-ui/containers'
+import Notification from './Notification'
+import { NOTIFS } from '../../notifications/notifications'
+import * as actionTypes from '../../notifications/action-types'
+import { actionRegistry } from '../../notifications/registry'
+import ActionButton from '../../notifications/components/ActionButton'
+import OptIn from '../../notifications/components/OptIn'
+import { ToggleSwitch } from '../../common-ui/components'
+import internalAnalytics from '../../analytics/internal'
 
 class Container extends React.Component {
     static propTypes = {
@@ -28,9 +36,12 @@ class Container extends React.Component {
         this.removeResults = this.removeResults.bind(this)
         this.undoRemove = this.undoRemove.bind(this)
         this.changePosition = this.changePosition.bind(this)
+        this.handleClickTick = this.handleClickTick.bind(this)
 
         this.updateLastActive = remoteFunction('updateLastActive')
         this.trackEvent = remoteFunction('trackEvent')
+        this.readNotification = remoteFunction('readNotification')
+        this.fetchNotifById = remoteFunction('fetchNotifById')
     }
 
     state = {
@@ -38,17 +49,38 @@ class Container extends React.Component {
         dropdown: false,
         removed: false,
         position: null,
+        isNotif: true,
+        notification: {},
     }
 
     async componentDidMount() {
+        let notification
+
+        for (const notif of NOTIFS) {
+            if (notif.search) {
+                notification = {
+                    ...notif.search,
+                    id: notif.id,
+                }
+            }
+        }
+
         const hideResults = await getLocalStorage(
             constants.HIDE_RESULTS_KEY,
             false,
         )
         const position = await getLocalStorage(constants.POSITION_KEY, 'side')
+
+        let fetchNotif
+        if (notification) {
+            fetchNotif = await this.fetchNotifById(notification.id)
+        }
+
         this.setState({
             hideResults,
             position,
+            isNotif: fetchNotif && !fetchNotif.readTime,
+            notification,
         })
     }
 
@@ -151,6 +183,107 @@ class Container extends React.Component {
         this.props.rerender()
     }
 
+    async handleClickTick() {
+        internalAnalytics.processEvent({
+            type: 'readNotificationSearchEngine',
+            details: {
+                notificationId: this.state.notification.id,
+            },
+        })
+
+        await this.readNotification(this.state.notification.id)
+
+        this.setState({
+            isNotif: false,
+        })
+    }
+
+    handleToggleStorageOption(action, value) {
+        internalAnalytics.processEvent({
+            type: 'toggleStorageSearchEngine',
+            details: {
+                notificationId: this.state.notification.id,
+            },
+        })
+
+        action = {
+            ...action,
+            value,
+        }
+
+        actionRegistry[action.type]({
+            definition: action,
+        })
+    }
+
+    handleClickOpenNewTabButton(url) {
+        internalAnalytics.processEvent({
+            type: 'clickOpenNewLinkButtonSearch',
+            details: {
+                notificationId: this.state.notification.id,
+            },
+        })
+
+        window.open(url, '_blank').focus()
+    }
+
+    renderButton() {
+        const { buttons } = this.state.notification
+        const { action } = buttons[0]
+
+        if (action.type === actionTypes.OPEN_URL) {
+            return (
+                <ActionButton
+                    handleClick={() =>
+                        this.handleClickOpenNewTabButton(action.url)
+                    }
+                    fromSearch
+                >
+                    {buttons[0].label}
+                </ActionButton>
+            )
+        } else if (action.type === actionTypes.TOGGLE_SETTING) {
+            return (
+                <OptIn fromSearch label={buttons[0].label}>
+                    <ToggleSwitch
+                        defaultValue
+                        onChange={val =>
+                            this.handleToggleStorageOption(action, val)
+                        }
+                        fromSearch
+                    />
+                </OptIn>
+            )
+        } else {
+            return (
+                <ActionButton
+                    handleClick={actionRegistry[action.type]({
+                        definition: action,
+                    })}
+                >
+                    {buttons[0].label}
+                </ActionButton>
+            )
+        }
+    }
+
+    renderNotification() {
+        const { isNotif } = this.state
+
+        if (!isNotif || !this.state.notification.id) {
+            return null
+        }
+
+        return (
+            <Notification
+                title={this.state.notification.title}
+                message={this.state.notification.message}
+                button={this.renderButton()}
+                handleTick={this.handleClickTick}
+            />
+        )
+    }
+
     render() {
         if (this.props.requiresMigration) {
             return <MigrationNotice showBanner />
@@ -184,6 +317,7 @@ class Container extends React.Component {
                 removeResults={this.removeResults}
                 changePosition={this.changePosition}
                 renderResultItems={this.renderResultItems}
+                renderNotification={this.renderNotification()}
             />
         )
     }

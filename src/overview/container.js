@@ -11,6 +11,8 @@ import { IndexDropdown, MigrationNotice } from 'src/common-ui/containers'
 import * as actions from './actions'
 import * as selectors from './selectors'
 import * as constants from './constants'
+import * as notifActions from '../notifications/actions'
+import * as notifSelectors from '../notifications/selectors'
 import ResultList from './components/ResultList'
 import Overview from './components/Overview'
 import PageResultItem from './components/PageResultItem'
@@ -28,6 +30,7 @@ import { actions as listActs, selectors as customLists } from 'src/custom-lists'
 import SidebarIcons from './sidebar-left/components/SidebarIcons'
 import { actions as sidebarLeftActs } from './sidebar-left'
 import * as sidebar from './sidebar-left/selectors'
+import NotificationContainer from '../notifications'
 
 class OverviewContainer extends Component {
     static propTypes = {
@@ -68,6 +71,7 @@ class OverviewContainer extends Component {
         delListFilter: PropTypes.func.isRequired,
         resetUrlDragged: PropTypes.func.isRequired,
         isSidebarOpen: PropTypes.bool.isRequired,
+        showInbox: PropTypes.bool.isRequired,
     }
 
     componentDidMount() {
@@ -221,6 +225,10 @@ class OverviewContainer extends Component {
     )
 
     renderResults() {
+        if (this.props.showInbox) {
+            return <NotificationContainer />
+        }
+
         if (this.props.isMigrationRequired) {
             return (
                 <ResultsMessage>
@@ -362,6 +370,9 @@ const mapStateToProps = state => ({
     mouseOverSidebar: sidebar.mouseOverSidebar(state),
     isSidebarOpen: sidebar.isSidebarOpen(state),
     filterActive: filters.showClearFiltersBtn(state),
+    showInbox: notifSelectors.showInbox(state),
+    unreadNotifCount: notifSelectors.unreadNotifCount(state),
+    showUnreadCount: notifSelectors.showUnreadCount(state),
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -375,6 +386,7 @@ const mapDispatchToProps = dispatch => ({
             resetActiveTagIndex: actions.resetActiveTagIndex,
             onShowFilterChange: filterActs.showFilter,
             fetchNextTooltip: actions.fetchNextTooltip,
+            toggleInbox: notifActions.toggleInboxMid,
             init: actions.init,
             setUrlDragged: listActs.setUrlDragged,
             showSearchFilters: sidebarLeftActs.openSidebarFilterMode,

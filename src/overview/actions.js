@@ -6,6 +6,7 @@ import { remoteFunction } from 'src/util/webextensionRPC'
 import { actions as filterActs, selectors as filters } from '../search-filters'
 import * as constants from './constants'
 import * as selectors from './selectors'
+import * as notifActions from '../notifications/actions'
 import { fetchTooltip } from './components/tooltips'
 import { actions as sidebarActs } from './sidebar-left'
 
@@ -55,6 +56,8 @@ const requestSearch = remoteFunction('search')
  * Also perform an initial search to populate the view (empty query = get all docs)
  */
 export const init = () => (dispatch, getState) => {
+    dispatch(notifActions.updateUnreadNotif())
+
     // Only do init search if empty query; if query set, the epic will trigger a search
     if (selectors.isEmptyQuery(getState())) {
         dispatch(search({ overwrite: true }))

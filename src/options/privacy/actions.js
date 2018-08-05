@@ -1,7 +1,6 @@
 import { createAction } from 'redux-act'
 
-import analytics from 'src/analytics'
-import internalAnalytics from 'src/analytics/internal'
+import { storeTrackingOption } from 'src/analytics/store-tracking-option'
 
 export const setTrackingFlag = createAction(
     'privacy/setTrackingFlag',
@@ -19,36 +18,6 @@ export const toggleTrackingOptOut = (
     isOptIn,
     skipEventTrack = false,
 ) => async dispatch => {
-    const trackEvent = force => {
-        if (skipEventTrack) {
-            return Promise.resolve()
-        }
-
-        const trackEvent = analytics.trackEvent(
-            {
-                category: 'Privacy',
-                action: 'Change tracking pref',
-                name: isOptIn ? 'opt-in' : 'opt-out',
-            },
-            force,
-        )
-
-        const processEvent = internalAnalytics.processEvent({
-            type: isOptIn
-                ? 'changeTrackingPrefOptIn'
-                : 'changeTrackingPrefOptOut',
-            force,
-        })
-
-        return Promise.all([trackEvent, processEvent])
-    }
-
-    // Do event track after state change, as the event may be a noop if opt-out state is already set
-    if (isOptIn) {
-        dispatch(setTrackingFlag(isOptIn))
-        await trackEvent(false)
-    } else {
-        await trackEvent(true)
-        dispatch(setTrackingFlag(isOptIn))
-    }
+    dispatch(setTrackingFlag(isOptIn))
+    await storeTrackingOption(isOptIn, skipEventTrack)
 }

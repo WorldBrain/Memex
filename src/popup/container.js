@@ -23,6 +23,7 @@ import UpgradeButton from './components/UpgradeButton'
 import ButtonIcon from './components/ButtonIcon'
 import ToggleTooltip from './components/ToggleTooltip'
 import styles from './components/Button.css'
+import NotificationContainer from './components/NotificationContainer'
 
 class PopupContainer extends Component {
     static propTypes = {
@@ -437,6 +438,7 @@ class PopupContainer extends Component {
             tagMode,
             listMode,
         } = this.state
+        
         if (blacklistConfirm) {
             return (
                 <BlacklistConfirm
@@ -525,6 +527,7 @@ class PopupContainer extends Component {
                     icon="help"
                     btnClass={styles.help}
                 />
+                <NotificationContainer />
             </div>
         )
     }
