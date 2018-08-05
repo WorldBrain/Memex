@@ -72,7 +72,10 @@ class Container extends React.Component {
         )
         const position = await getLocalStorage(constants.POSITION_KEY, 'side')
 
-        const fetchNotif = await this.fetchNotifById(notification.id)
+        let fetchNotif
+        if (notification) {
+            fetchNotif = await this.fetchNotifById(notification.id)
+        }
 
         this.setState({
             hideResults,

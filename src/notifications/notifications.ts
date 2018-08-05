@@ -61,8 +61,9 @@ export const NOTIFS: NotifDefinition[] = [
     {
         id: 'direct_links_inital_notification',
         search: {
-            title: 'New Feature: Memex.Link',
-            message: 'Test Message',
+            title: 'New Feature: Comments & Annotation',
+            message:
+                'Highlight any text on the web and add comments to it. Also attach comments to every websites you find.',
             buttons: [
                 {
                     action: {
@@ -75,8 +76,9 @@ export const NOTIFS: NotifDefinition[] = [
             ],
         },
         system: {
-            title: 'New Feature: Memex.Link',
-            message: 'Test Message',
+            title: 'New Feature: Comments & Annotation',
+            message:
+                'Highlight any text on the web and add comments to it. Also attach comments to every websites you find.',
             buttons: [
                 {
                     action: {
