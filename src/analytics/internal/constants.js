@@ -191,6 +191,9 @@ export const EVENT_TYPES = {
     clickOnSystemNotification: {
         id: 49,
     },
+    toggleStorageSearchEngine: {
+        id: 50,
+    },
 }
 
 export const NOTIF_TYPE_EVENT_IDS = {

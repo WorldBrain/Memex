@@ -187,6 +187,9 @@ class Container extends React.Component {
     async handleClickTick() {
         internalAnalytics.processEvent({
             type: 'readNotificationSearchEngine',
+            details: {
+                notificationId: this.state.notification.id,
+            },
         })
 
         await this.readNotification(this.state.notification.id)
@@ -197,6 +200,13 @@ class Container extends React.Component {
     }
 
     handleToggleStorageOption(action, value) {
+        internalAnalytics.processEvent({
+            type: 'toggleStorageSearchEngine',
+            details: {
+                notificationId: this.state.notification.id,
+            },
+        })
+
         action = {
             ...action,
             value,
