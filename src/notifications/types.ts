@@ -14,9 +14,7 @@ export interface ButtonDefinition {
     label: string
 }
 
-export interface NotifDefinition {
-    /** Should be unique (feature_name + notification + incNumber) */
-    id: string
+export interface OneNotifDef {
     /** Title of the notifications - Do not support html tags */
     title: string
     /** Message in the text - It supports html tags (for example h1, i, b) */
@@ -25,6 +23,14 @@ export interface NotifDefinition {
      * It can be any action button or link button
      */
     buttons?: ButtonDefinition[]
+}
+
+export interface NotifDefinition {
+    /** Should be unique (feature_name + notification + incNumber) */
+    id: string
+    overview?: OneNotifDef
+    search?: OneNotifDef
+    system?: OneNotifDef
 }
 
 export interface Notification extends NotifDefinition {

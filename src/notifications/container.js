@@ -11,11 +11,11 @@ import NotificationList from './components/NotificationList'
 import Notification from './components/Notification'
 import StatusHeading from './components/StatusHeading'
 import ReadHeader from './components/ReadHeader'
-import OpenLinkButton from './components/OpenLinkButton'
 import ActionButton from './components/ActionButton'
 import { actionRegistry } from './registry'
 import OptIn from './components/OptIn'
 import * as actionTypes from './action-types'
+import internalAnalytics from '../analytics/internal'
 
 class NotificationContainer extends Component {
     static propTypes = {
@@ -57,6 +57,10 @@ class NotificationContainer extends Component {
     }
 
     handleToggleStorageOption(action, value) {
+        internalAnalytics.processEvent({
+            type: 'clickStorageChangeNotifButton',
+        })
+
         action = {
             ...action,
             value,
@@ -65,6 +69,14 @@ class NotificationContainer extends Component {
         actionRegistry[action.type]({
             definition: action,
         })
+    }
+
+    handleOpenNewTab(url) {
+        internalAnalytics.processEvent({
+            type: 'clickOpenNewLinkButton',
+        })
+
+        window.open(url, '_blank').focus()
     }
 
     renderButtons(buttons) {
@@ -79,12 +91,12 @@ class NotificationContainer extends Component {
 
             if (action.type === actionTypes.OPEN_URL) {
                 return (
-                    <OpenLinkButton
+                    <ActionButton
                         key={i}
-                        url={action.url}
-                        label={button.label}
-                        context={action.context}
-                    />
+                        handleClick={() => this.handleOpenNewTab(action.url)}
+                    >
+                        {button.label}
+                    </ActionButton>
                 )
             } else if (action.type === actionTypes.TOGGLE_SETTING) {
                 return (

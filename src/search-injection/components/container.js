@@ -9,13 +9,14 @@ import * as constants from '../constants'
 import { getLocalStorage, setLocalStorage } from '../utils'
 import { MigrationNotice } from '../../common-ui/containers'
 import Notification from './Notification'
-import { SEARCH_ENGINE_NOTIF } from '../../notifications/notifications'
+import { NOTIFS } from '../../notifications/notifications'
 import * as actionTypes from '../../notifications/action-types'
 import { actionRegistry } from '../../notifications/registry'
 import ActionButton from '../../notifications/components/ActionButton'
 import OptIn from '../../notifications/components/OptIn'
 import OpenLinkButton from '../../notifications/components/OpenLinkButton'
 import { ToggleSwitch } from '../../common-ui/components'
+import internalAnalytics from '../../analytics/internal'
 
 class Container extends React.Component {
     static propTypes = {
@@ -50,21 +51,34 @@ class Container extends React.Component {
         removed: false,
         position: null,
         isNotif: true,
+        notification: {},
     }
 
     async componentDidMount() {
+        let notification
+
+        for (const notif of NOTIFS) {
+            if (notif.search) {
+                notification = {
+                    ...notif.search,
+                    id: notif.id,
+                }
+            }
+        }
+
         const hideResults = await getLocalStorage(
             constants.HIDE_RESULTS_KEY,
             false,
         )
         const position = await getLocalStorage(constants.POSITION_KEY, 'side')
 
-        const fetchNotif = await this.fetchNotifById(SEARCH_ENGINE_NOTIF.id)
+        const fetchNotif = await this.fetchNotifById(notification.id)
 
         this.setState({
             hideResults,
             position,
             isNotif: fetchNotif && !fetchNotif.readTime,
+            notification,
         })
     }
 
@@ -168,8 +182,11 @@ class Container extends React.Component {
     }
 
     async handleClickTick() {
-        await this.readNotification(SEARCH_ENGINE_NOTIF.id)
-        console.log('Here')
+        internalAnalytics.processEvent({
+            type: 'readNotificationSearchEngine',
+        })
+
+        await this.readNotification(this.state.notification.id)
 
         this.setState({
             isNotif: false,
@@ -188,14 +205,14 @@ class Container extends React.Component {
     }
 
     renderButton() {
-        const { button } = SEARCH_ENGINE_NOTIF
-        const { action } = button
+        const { buttons } = this.state.notification
+        const { action } = buttons[0]
 
         if (action.type === actionTypes.OPEN_URL) {
             return (
                 <OpenLinkButton
                     url={action.url}
-                    label={button.label}
+                    label={buttons[0].label}
                     context={action.context}
                 />
             )
@@ -217,7 +234,7 @@ class Container extends React.Component {
                         definition: action,
                     })}
                 >
-                    {button.label}
+                    {buttons[0].label}
                 </ActionButton>
             )
         }
@@ -226,14 +243,14 @@ class Container extends React.Component {
     renderNotification() {
         const { isNotif } = this.state
 
-        if (!isNotif || !SEARCH_ENGINE_NOTIF.id) {
+        if (!isNotif || !this.state.notification.id) {
             return null
         }
 
         return (
             <Notification
-                title={SEARCH_ENGINE_NOTIF.title}
-                message={SEARCH_ENGINE_NOTIF.message}
+                title={this.state.notification.title}
+                message={this.state.notification.message}
                 button={this.renderButton()}
                 handleTick={this.handleClickTick}
             />

@@ -1,5 +1,5 @@
 import { browser, Notifications } from 'webextension-polyfill-ts'
-
+import internalAnalytics from '../analytics/internal'
 export const DEF_ICON_URL = '/img/worldbrain-logo-narrow.png'
 export const DEF_TYPE = 'basic'
 
@@ -11,6 +11,10 @@ export interface NotifOpts extends Notifications.CreateNotificationOptions {
 const onClickListeners = new Map<string, (id: string) => void>()
 
 browser.notifications.onClicked.addListener(id => {
+    internalAnalytics.processEvent({
+        type: 'clickOnSystemNotification',
+    })
+
     browser.notifications.clear(id)
 
     const listener = onClickListeners.get(id)

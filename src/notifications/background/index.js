@@ -1,6 +1,8 @@
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import NotificationStorage from './storage'
 import * as notifications from '../notifications'
+import createNotif from 'src/util/notifications'
+import internalAnalytics from 'src/analytics/internal'
 
 export default class NotificationBackground {
     static LAST_NOTIF_TIME = 'last-notif-proc-timestamp'
@@ -65,14 +67,44 @@ export default class NotificationBackground {
         ))[NotificationBackground.LAST_NOTIF_TIME]
 
         for (let notification of notifications.NOTIFS) {
-            notification = {
-                ...notification,
-                deliveredTime: Date.now(),
-                sentTime: notifications.releaseTime,
+            if (notification.system) {
+                if (
+                    !lastReleaseTime ||
+                    lastReleaseTime < notification.sentTime
+                ) {
+                    const url = notification.system.buttons[0].action.url
+
+                    // Notification with updates when we update
+                    await createNotif(
+                        {
+                            title: notification.system.title,
+                            message: notification.system.message,
+                        },
+                        () => {
+                            internalAnalytics.processEvent({
+                                type: 'clickOnSystemNotification',
+                            })
+
+                            return browser.tabs.create({ url })
+                        },
+                    )
+                }
             }
 
-            if (!lastReleaseTime || lastReleaseTime < notification.sentTime) {
-                await this.storeNotification(notification)
+            if (notification.overview) {
+                notification = {
+                    ...notification.search,
+                    id: notification.id,
+                    deliveredTime: Date.now(),
+                    sentTime: notifications.releaseTime,
+                }
+
+                if (
+                    !lastReleaseTime ||
+                    lastReleaseTime < notification.sentTime
+                ) {
+                    await this.storeNotification(notification)
+                }
             }
         }
 

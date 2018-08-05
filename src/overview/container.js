@@ -386,7 +386,7 @@ const mapDispatchToProps = dispatch => ({
             resetActiveTagIndex: actions.resetActiveTagIndex,
             onShowFilterChange: filterActs.showFilter,
             fetchNextTooltip: actions.fetchNextTooltip,
-            toggleInbox: notifActions.toggleInbox,
+            toggleInbox: notifActions.toggleInboxMid,
             init: actions.init,
             setUrlDragged: listActs.setUrlDragged,
             showSearchFilters: sidebarLeftActs.openSidebarFilterMode,

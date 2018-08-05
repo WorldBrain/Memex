@@ -167,6 +167,30 @@ export const EVENT_TYPES = {
         id: 41,
         notifType: 'blacklist',
     },
+    readNotificationSearchEngine: {
+        id: 42,
+    },
+    readNotificationOverview: {
+        id: 43,
+    },
+    readNotificationPagination: {
+        id: 44,
+    },
+    openInboxOveview: {
+        id: 45,
+    },
+    clickStorageChangeNotifButton: {
+        id: 46,
+    },
+    clickOpenNewLinkButton: {
+        id: 47,
+    },
+    closeInboxOveview: {
+        id: 48,
+    },
+    clickOnSystemNotification: {
+        id: 49,
+    },
 }
 
 export const NOTIF_TYPE_EVENT_IDS = {
