@@ -1,0 +1,38 @@
+.optInTextContainer {
+    display: flex;
+    flex-direction: column;
+    width: 110%;
+    margin-left: 1%;
+}
+
+.optInContainer {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin-right: 10px;
+    padding: 4px;
+    background: #eee;
+    border-radius: 2px;
+}
+
+.optIn {
+    font-size: 16px;
+    font-weight: 200;
+    color: #777;
+    text-align: center;
+    text-align: left;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.searchOptinContainer {
+    flex-direction: column;
+}
+
+.searchOptinTextContainer {
+    justify-content: space-around;
+}
+
+.searchOptIn {
+    font-size: 16px;
+}

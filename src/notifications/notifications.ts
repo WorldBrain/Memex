@@ -67,11 +67,10 @@ export const NOTIFS: NotifDefinition[] = [
             buttons: [
                 {
                     action: {
-                        type: actionTypes.OPEN_URL,
-                        url: 'https://worldbrain.io',
-                        context: 'new-tab',
+                        type: actionTypes.TOGGLE_SETTING,
+                        key: storageKeys.SHOULD_TRACK_STORAGE_KEY,
                     },
-                    label: 'Learn More',
+                    label: 'Enable Tracking',
                 },
             ],
         },

@@ -1,13 +1,29 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import classNames from 'classnames'
 
-import styles from './Notification.css'
+import styles from './OptIn.css'
+
+const optInContainer = fromSearch =>
+    classNames(styles.optInContainer, {
+        [styles.searchOptinContainer]: fromSearch,
+    })
+
+const optInTextContainer = fromSearch =>
+    classNames(styles.optInContainer, {
+        [styles.searchOptinTextContainer]: fromSearch,
+    })
+
+const optIn = fromSearch =>
+    classNames(styles.optIn, {
+        [styles.searchOptIn]: fromSearch,
+    })
 
 const OptIn = props => (
-    <div className={styles.optInContainer}>
+    <div className={optInContainer(props.fromSearch)}>
         {props.children}
-        <div className={styles.optInTextContainer}>
-            <p className={styles.optIn}>{props.label}</p>
+        <div className={optInTextContainer(props.fromSearch)}>
+            <p className={optIn(props.fromSearch)}>{props.label}</p>
         </div>
     </div>
 )
@@ -15,6 +31,7 @@ const OptIn = props => (
 OptIn.propTypes = {
     children: PropTypes.node.isRequired,
     label: PropTypes.string.isRequired,
+    fromSearch: PropTypes.bool,
 }
 
 export default OptIn

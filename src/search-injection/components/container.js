@@ -222,7 +222,7 @@ class Container extends React.Component {
             )
         } else if (action.type === actionTypes.TOGGLE_SETTING) {
             return (
-                <OptIn>
+                <OptIn fromSearch label={buttons[0].label}>
                     <ToggleSwitch
                         defaultValue
                         onChange={val =>
