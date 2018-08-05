@@ -20,7 +20,7 @@
         top: 72px;
         right: 330px;
         z-index: 1200;
-        height: 45px;
+        height: 43px;
         padding-top: 5px;
         padding-bottom: 5px;
         animation: fadeIn 0s linear 0s;
@@ -36,14 +36,14 @@
     background-image: url('/img/cross_grey.svg');
     background-size: 15px;
     display: block;
-    margin-top: 3px;
+    margin-top: 2px;
     cursor: pointer;
     background-repeat: no-repeat;
     width: 29px;
     height: 29px;
     background-position: 6.5px 6.5px;
     border-radius: 50%;
-    margin-right: 3px;
+    margin-right: 2px;
     margin-left: 0;
 
     &:hover {
