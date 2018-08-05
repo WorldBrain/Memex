@@ -15,10 +15,13 @@
     padding-bottom: 5px;
     animation: fadeIn 0s linear 0s;
     animation-fill-mode: both;
+    height: 45px;
 
     &.overview {
         top: 72px;
         right: 330px;
+        z-index: 1200;
+        height: 45px;
         padding-top: 5px;
         padding-bottom: 5px;
         animation: fadeIn 0s linear 0s;
@@ -34,6 +37,7 @@
     background-image: url('/img/cross_grey.svg');
     background-size: 15px;
     display: block;
+    margin-top: 3px;
     cursor: pointer;
     background-repeat: no-repeat;
     width: 29px;
