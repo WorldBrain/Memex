@@ -100,7 +100,7 @@ class NotificationContainer extends Component {
                 )
             } else if (action.type === actionTypes.TOGGLE_SETTING) {
                 return (
-                    <OptIn key={i}>
+                    <OptIn key={i} label={button.label}>
                         <ToggleSwitch
                             defaultValue={localStorageNotif[action.key]}
                             onChange={val =>

@@ -228,6 +228,7 @@ class Container extends React.Component {
                         onChange={val =>
                             this.handleToggleStorageOption(action, val)
                         }
+                        fromSearch
                     />
                 </OptIn>
             )

@@ -18,3 +18,7 @@
         text-decoration: none !important;
     }
 }
+
+.searchButton {
+    cursor: pointer;
+}

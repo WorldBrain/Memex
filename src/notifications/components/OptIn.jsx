@@ -7,13 +7,14 @@ const OptIn = props => (
     <div className={styles.optInContainer}>
         {props.children}
         <div className={styles.optInTextContainer}>
-            <p className={styles.optIn}>Change tracking</p>
+            <p className={styles.optIn}>{props.label}</p>
         </div>
     </div>
 )
 
 OptIn.propTypes = {
     children: PropTypes.node.isRequired,
+    label: PropTypes.string.isRequired,
 }
 
 export default OptIn

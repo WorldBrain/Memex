@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
 
-import styles from './Notification.css'
+import styles from './OpenLinkButton.css'
 
 const openLinkButtonSearch = fromSearch =>
     classNames(styles.button, {
@@ -23,7 +23,7 @@ OpenLinkButton.propTypes = {
     url: PropTypes.string.isRequired,
     label: PropTypes.string.isRequired,
     context: PropTypes.string,
-    fromSearch: PropTypes.string,
+    fromSearch: PropTypes.bool,
 }
 
 export default OpenLinkButton
