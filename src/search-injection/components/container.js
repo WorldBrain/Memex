@@ -217,6 +217,7 @@ class Container extends React.Component {
                     url={action.url}
                     label={buttons[0].label}
                     context={action.context}
+                    fromSearch
                 />
             )
         } else if (action.type === actionTypes.TOGGLE_SETTING) {
