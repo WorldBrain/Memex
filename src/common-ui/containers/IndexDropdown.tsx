@@ -110,11 +110,11 @@ class IndexDropdownContainer extends Component<Props, State> {
         // Only for add and remove from the popup or overview, we have already covered filter in overview
         if (this.allowIndexUpdate) {
             if (hover) {
-                await internalAnalytics.processEvent({
+                internalAnalytics.processEvent({
                     type: isAdded ? 'add' + sourceType : 'delete' + sourceType,
                 })
             } else {
-                await internalAnalytics.processEvent({
+                internalAnalytics.processEvent({
                     type: isAdded
                         ? 'addPopup' + sourceType
                         : 'deletePopup' + sourceType,
@@ -169,6 +169,7 @@ class IndexDropdownContainer extends Component<Props, State> {
     private addTag = async () => {
         const newTag = this.getSearchVal()
         const newTags = [newTag, ...this.state.filters]
+        // log
 
         if (this.allowIndexUpdate) {
             this.addTagRPC({
@@ -181,6 +182,7 @@ class IndexDropdownContainer extends Component<Props, State> {
         await this.storeTrackEvent(true)
 
         this.inputEl.focus()
+
         this.setState(state => ({
             ...state,
             searchVal: '',
