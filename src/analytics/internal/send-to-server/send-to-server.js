@@ -142,6 +142,7 @@ class SendToServer {
         } else {
             this._poolReq(event)
         }
+        console.log(this._pool)
     }
 }
 

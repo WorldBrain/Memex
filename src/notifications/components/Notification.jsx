@@ -52,12 +52,14 @@ const Notification = props => (
                                 {props.buttons}
                             </div>
                             {props.isUnread && (
-                                <div
+                                <img
                                     className={styles.tick}
                                     onClick={props.handleTick}
-                                >
-                                    <i className="material-icons">done</i>
-                                </div>
+                                    title="Mark as Read"
+                                    src={browser.extension.getURL(
+                                        'img/tick_green.svg',
+                                    )}
+                                />
                             )}
                         </div>
                     )}

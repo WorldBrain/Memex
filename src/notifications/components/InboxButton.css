@@ -23,6 +23,8 @@
 }
 
 .activeInbox {
-    background-color: #e3e3e3;
     color: #777;
+    border-bottom: 6px solid #3eb995;
+    margin-top: -1px;
+    padding-bottom: 19px;
 }

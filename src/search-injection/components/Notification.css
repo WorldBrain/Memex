@@ -2,8 +2,9 @@
     display: flex;
     flex-direction: row;
     border: 1px solid #3eb995;
-    box-shadow: -1px 1px 4px #3eb995;
+    box-shadow: 0px 1px 4px #3eb995;
     margin-bottom: 15px;
+    font-family: 'lato';
     margin-top: 15px;
     padding: 10px 5px;
     align-items: center;
@@ -11,20 +12,25 @@
 }
 
 .alertIcon {
-    width: 80px;
+    width: 60px;
+    margin-top: 4px;
+    margin-right: 5px;
 }
 
 .messageTitle {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     flex-direction: column;
-    margin: 0 10px 0 0;
+    margin: -1px 10px 0 3px;
     text-align: left;
+    width: 100%;
 }
 
 .message {
     font-size: 14px;
-    margin-top: 10px;
+    margin-top: 5px;
+    width: 100%;
+    align-items: flex-start;
 }
 
 .title {
@@ -33,6 +39,12 @@
 }
 
 .tick {
-    width: 64px;
+    width: 60px;
+    margin-right: 3px;
     cursor: pointer;
+
+    &:hover {
+        background-color: #efefef;
+        border-radius: 90px;
+    }
 }
