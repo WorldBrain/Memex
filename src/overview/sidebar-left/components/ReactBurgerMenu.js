@@ -12,6 +12,7 @@ export const styles = {
     bmCrossButton: {
         height: '15px',
         width: '15px',
+        display: 'none',
     },
     bmMenu: {
         padding: '4em 0',
