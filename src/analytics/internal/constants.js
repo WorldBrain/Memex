@@ -194,6 +194,9 @@ export const EVENT_TYPES = {
     toggleStorageSearchEngine: {
         id: 50,
     },
+    clickOpenNewLinkButtonSearch: {
+        id: 51,
+    },
 }
 
 export const NOTIF_TYPE_EVENT_IDS = {

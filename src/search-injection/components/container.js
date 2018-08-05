@@ -14,7 +14,6 @@ import * as actionTypes from '../../notifications/action-types'
 import { actionRegistry } from '../../notifications/registry'
 import ActionButton from '../../notifications/components/ActionButton'
 import OptIn from '../../notifications/components/OptIn'
-import OpenLinkButton from '../../notifications/components/OpenLinkButton'
 import { ToggleSwitch } from '../../common-ui/components'
 import internalAnalytics from '../../analytics/internal'
 
@@ -217,18 +216,31 @@ class Container extends React.Component {
         })
     }
 
+    handleClickOpenNewTabButton(url) {
+        internalAnalytics.processEvent({
+            type: 'clickOpenNewLinkButtonSearch',
+            details: {
+                notificationId: this.state.notification.id,
+            },
+        })
+
+        window.open(url, '_blank').focus()
+    }
+
     renderButton() {
         const { buttons } = this.state.notification
         const { action } = buttons[0]
 
         if (action.type === actionTypes.OPEN_URL) {
             return (
-                <OpenLinkButton
-                    url={action.url}
-                    label={buttons[0].label}
-                    context={action.context}
+                <ActionButton
+                    handleClick={() =>
+                        this.handleClickOpenNewTabButton(action.url)
+                    }
                     fromSearch
-                />
+                >
+                    {buttons[0].label}
+                </ActionButton>
             )
         } else if (action.type === actionTypes.TOGGLE_SETTING) {
             return (

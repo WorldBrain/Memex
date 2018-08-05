@@ -1,10 +1,19 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import classNames from 'classnames'
 
-import styles from './Notification.css'
+import styles from './ActionButton.css'
+
+const actionButton = fromSearch =>
+    classNames(styles.actionButton, {
+        [styles.searchActionButton]: fromSearch,
+    })
 
 const ActionButton = props => (
-    <button className={styles.actionButton} onClick={props.handleClick}>
+    <button
+        className={actionButton(props.fromSearch)}
+        onClick={props.handleClick}
+    >
         {props.children}
     </button>
 )
@@ -12,6 +21,7 @@ const ActionButton = props => (
 ActionButton.propTypes = {
     children: PropTypes.string.isRequired,
     handleClick: PropTypes.func.isRequired,
+    fromSearch: PropTypes.bool,
 }
 
 export default ActionButton

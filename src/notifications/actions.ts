@@ -114,6 +114,9 @@ export const handleReadNotif = notification => async (dispatch, getState) => {
 
     internalAnalytics.processEvent({
         type: 'readNotificationOverview',
+        details: {
+            notificationId: notification.id,
+        },
     })
 
     dispatch(handleReadNotification(Number(index)))

@@ -56,9 +56,12 @@ class NotificationContainer extends Component {
         return trunctatedText
     }
 
-    handleToggleStorageOption(action, value) {
+    handleToggleStorageOption(action, value, id) {
         internalAnalytics.processEvent({
             type: 'clickStorageChangeNotifButton',
+            details: {
+                notificationId: id,
+            },
         })
 
         action = {
@@ -71,15 +74,18 @@ class NotificationContainer extends Component {
         })
     }
 
-    handleOpenNewTab(url) {
+    handleOpenNewTab(url, id) {
         internalAnalytics.processEvent({
             type: 'clickOpenNewLinkButton',
+            details: {
+                notificationId: id,
+            },
         })
 
         window.open(url, '_blank').focus()
     }
 
-    renderButtons(buttons) {
+    renderButtons(buttons, id) {
         const { localStorageNotif } = this.props
 
         if (!buttons) {
@@ -93,7 +99,9 @@ class NotificationContainer extends Component {
                 return (
                     <ActionButton
                         key={i}
-                        handleClick={() => this.handleOpenNewTab(action.url)}
+                        handleClick={() =>
+                            this.handleOpenNewTab(action.url, id)
+                        }
                     >
                         {button.label}
                     </ActionButton>
@@ -104,7 +112,7 @@ class NotificationContainer extends Component {
                         <ToggleSwitch
                             defaultValue={localStorageNotif[action.key]}
                             onChange={val =>
-                                this.handleToggleStorageOption(action, val)
+                                this.handleToggleStorageOption(action, val, id)
                             }
                         />
                     </OptIn>
@@ -153,7 +161,10 @@ class NotificationContainer extends Component {
                     isMore={showMoreIndex !== notification.id}
                     handleTick={handleTick(notification)}
                     isUnread={isUnread}
-                    buttons={this.renderButtons(notification.buttons)}
+                    buttons={this.renderButtons(
+                        notification.buttons,
+                        notification.id,
+                    )}
                 />
             )
         })
