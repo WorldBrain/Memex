@@ -93,7 +93,7 @@ export default class NotificationBackground {
 
             if (notification.overview) {
                 notification = {
-                    ...notification.search,
+                    ...notification.overview,
                     id: notification.id,
                     deliveredTime: Date.now(),
                     sentTime: notifications.releaseTime,
