@@ -20,12 +20,13 @@ export function scrollToHighlight(annotation) {
 
     if ($highlight) {
         scrollToElement($highlight, {
-            offset: -100,
+            offset: -200,
+            duration: 400,
         })
         // The pixels scrolled need to be returned in
         // order to restrict scrolling when mouse is
         // over the iFrame
-        const top = getOffsetTop($highlight) - 100
+        const top = getOffsetTop($highlight) - 200
         return top
     } else {
         console.error('MEMEX: Oops, no highlight found to scroll to')

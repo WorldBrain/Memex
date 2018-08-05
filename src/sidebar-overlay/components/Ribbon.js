@@ -179,7 +179,7 @@ class Ribbon extends React.Component {
             this.setState({
                 isInsideFrame: true,
             })
-        }, 500)
+        }, 50)
     }
 
     fetchAnnotations = async () => {
