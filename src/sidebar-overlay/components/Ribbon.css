@@ -62,7 +62,7 @@
 .logo {
     background-image: url('/img/worldbrain-logo-narrow.png');
     background-size: 24px;
-    margin-top: 12px;
+    margin-top: 7px;
     width: 24px;
     height: 36px;
     margin-left: 8px;
@@ -71,11 +71,11 @@
 .cancel {
     background-image: url('/img/cross_grey.svg');
     fill: white;
-    background-size: 12px;
-    width: 12px;
-    height: 12px;
-    margin-left: 4px;
-    margin-top: 1px;
+    background-size: 16px;
+    width: 16px;
+    height: 16px;
+    margin-left: 9px;
+    margin-top: 5px;
 }
 
 .settings {

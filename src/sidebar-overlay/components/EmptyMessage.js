@@ -8,7 +8,14 @@ const EmptyMessage = () => (
             {' '}
             No comments and annotations made yet{' '}
         </div>
-        <a className={styles.learnHow}> Learn How </a>
+        <a
+            target="_blank"
+            href="https://worldbrain.helprace.com/i66-annotations-comments"
+            className={styles.learnHow}
+        >
+            {' '}
+            Learn How{' '}
+        </a>
     </div>
 )
 

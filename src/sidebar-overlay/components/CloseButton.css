@@ -15,7 +15,6 @@
     padding-bottom: 5px;
     animation: fadeIn 0s linear 0s;
     animation-fill-mode: both;
-    height: 45px;
 
     &.overview {
         top: 72px;

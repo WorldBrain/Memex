@@ -19,7 +19,7 @@ export const styles = {
         background: '#FFFFFF',
         fontSize: '0.68rem',
         overflow: 'visible',
-        transition: 'all 0.5s',
+        transition: 'all 0s',
         boxShadow: '-4px 2px 20px 1px rgba(62, 185, 149, 0.0902)',
     },
     bmMorphShape: {
@@ -35,7 +35,7 @@ export const styles = {
         left: '-1px',
         width: '250px',
         height: '100%',
-        transition: 'all 0.2s',
+        transition: 'all 0s',
         borderRight: '2px solid #e1ece9',
         overflow: 'visible',
     },
