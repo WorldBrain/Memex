@@ -86,16 +86,6 @@ const runSuite = () => () => {
         })
 
         test('fetch Pages associated with list by url', async () => {
-            const runChecks = async currPage => {
-                expect(currPage).toBeDefined()
-                expect(currPage).not.toBeNull()
-            }
-
-            runChecks(
-                await fakeIndex.fetchListPagesByUrl({
-                    url: 'https://www.ipsum.com/test',
-                }),
-            )
             const lists = await fakeIndex.fetchListPagesByUrl({
                 url: 'https://www.ipsum.com/test',
             })
@@ -103,6 +93,91 @@ const runSuite = () => () => {
             expect(lists).toBeDefined()
             expect(lists).not.toBeNull()
             expect(lists.length).toBe(2)
+        })
+
+        test('fetch lists with some urls excluded', async () => {
+            const lists = await fakeIndex.fetchAllLists({
+                excludeIds: [1, 2] as any[],
+            })
+
+            expect(lists).toBeDefined()
+            expect(lists).not.toBeNull()
+            expect(lists.length).toBe(1)
+            expect(lists[0].id).not.toBe(1)
+            expect(lists[0].id).not.toBe(2)
+        })
+
+        test('fetch lists with limits', async () => {
+            const lists = await fakeIndex.fetchAllLists({
+                limit: 1,
+            })
+
+            expect(lists).toBeDefined()
+            expect(lists).not.toBeNull()
+            expect(lists.length).toBe(1)
+        })
+    })
+
+    describe('update ops', () => {
+        test('update list name', async () => {
+            const runChecks = async currPage => {
+                expect(currPage).toBeDefined()
+                expect(currPage).not.toBeNull()
+            }
+            const updatedList = await fakeIndex.updateList({
+                id: 3,
+                name: 'new name',
+            })
+            const newName = await fakeIndex.fetchListIgnoreCase({
+                name: 'new name',
+            })
+            runChecks(updatedList)
+            runChecks(newName)
+            // No of pages and list updated
+            expect(updatedList).toBe(1)
+            // Test the name is updated correctly
+            expect(newName.name).toBe('new name')
+        })
+
+        test('fail to update list name', async () => {
+            const runChecks = async currPage => {
+                expect(currPage).toBeDefined()
+                expect(currPage).not.toBeNull()
+            }
+            const updatedList = await fakeIndex.updateList({
+                id: 4,
+                name: 'another new name',
+            })
+            const newName = await fakeIndex.fetchListIgnoreCase({
+                name: 'another new name',
+            })
+            runChecks(updatedList)
+
+            // Nothing updated
+            expect(updatedList).toBe(0)
+            // cannot found anything with the new name
+            expect(newName).toBeUndefined()
+        })
+    })
+
+    describe('delete ops', () => {
+        test('delete list along with associated pages', async () => {
+            const lists = await fakeIndex.removeList({ id: 3 })
+            expect(lists).toBeDefined()
+            expect(lists).not.toBeNull()
+            // No of pages and list deleted by
+            expect(lists).toEqual({ list: 1, pages: 1 })
+        })
+
+        test('Remove page from list', async () => {
+            const pages = await fakeIndex.removePageFromList({
+                id: 1,
+                url: 'https://www.ipsum.com/test',
+            })
+            expect(pages).toBeDefined()
+            expect(pages).not.toBeNull()
+            // No of pages deleted
+            expect(pages).toBe(1)
         })
     })
 }

@@ -7,8 +7,6 @@ export default class CustomListStorage extends FeatureStorage {
 
     constructor({ storageManager }) {
         super(storageManager)
-        // console.log('running const');
-
         this.storageManager.registerCollection(
             CustomListStorage.CUSTOM_LISTS_COLL,
             {
@@ -228,19 +226,20 @@ export default class CustomListStorage extends FeatureStorage {
      * @memberof CustomListStorage
      */
     async removeList({ id }: { id: number }) {
-        await this.storageManager.deleteObject(
+        const list = await this.storageManager.deleteObject(
             CustomListStorage.CUSTOM_LISTS_COLL,
             {
                 id,
             },
         )
         // Delete All pages associated with that list also
-        await this.storageManager.deleteObject(
+        const pages = await this.storageManager.deleteObject(
             CustomListStorage.LIST_ENTRIES_COLL,
             {
                 listId: id,
             },
         )
+        return { list, pages }
     }
 
     /**

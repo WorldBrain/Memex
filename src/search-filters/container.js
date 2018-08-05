@@ -34,7 +34,7 @@ class SearchFiltersContainer extends PureComponent {
         fetchSuggestedTags: PropTypes.func.isRequired,
         suggestedTags: PropTypes.arrayOf(PropTypes.string).isRequired,
         fetchSuggestedDomains: PropTypes.func.isRequired,
-        suggestedDomains: PropTypes.arrayOf(PropTypes.string).isRequired,
+        suggestedDomains: PropTypes.arrayOf(PropTypes.object).isRequired,
         toggleFilterTypes: PropTypes.func.isRequired,
         showfilteredTypes: PropTypes.bool.isRequired,
     }
