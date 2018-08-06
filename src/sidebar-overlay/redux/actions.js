@@ -22,6 +22,19 @@ export const setIsLoading = createAction('setIsLoading')
 
 export const setPageInfo = createAction('setPageInfo')
 
+const fetchAllTags = async annotations => {
+    const tags = {}
+    await Promise.all(
+        annotations.map(async ({ url }) => {
+            const annotationTags = await remoteFunction('getAnnotationTags')(
+                url,
+            )
+            tags[url] = annotationTags
+        }),
+    )
+    return tags
+}
+
 export const fetchAnnotationAct = () => async (dispatch, getState) => {
     dispatch(setAnnotations([]))
     dispatch(setIsLoading(true))
@@ -35,17 +48,11 @@ export const fetchAnnotationAct = () => async (dispatch, getState) => {
     dispatch(setIsLoading(false))
 }
 
-const fetchAllTags = async annotations => {
-    const tags = {}
-    await Promise.all(
-        annotations.map(async ({ url }) => {
-            const annotationTags = await remoteFunction('getAnnotationTags')(
-                url,
-            )
-            tags[url] = annotationTags
-        }),
-    )
-    return tags
+export const setAnnotationAndTags = annotations => async dispatch => {
+    const tags = await fetchAllTags(annotations)
+    dispatch(setTags(tags))
+    dispatch(setAnnotations(annotations))
+    dispatch(setIsLoading(false))
 }
 
 export const findAnnotationCount = () => async (dispatch, getState) => {

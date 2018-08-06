@@ -24,6 +24,7 @@ class SidebarContainer extends React.Component {
         tags: PropTypes.object.isRequired,
         isLoading: PropTypes.bool.isRequired,
         fetchAnnotations: PropTypes.func.isRequired,
+        setAnnotationAndTags: PropTypes.func.isRequired,
         editAnnotation: PropTypes.func.isRequired,
         deleteAnnotation: PropTypes.func.isRequired,
         recieveAnchor: PropTypes.func.isRequired,
@@ -64,8 +65,7 @@ class SidebarContainer extends React.Component {
                 this.props.focusCommentBox(value)
             },
             setAnnotations: annotations => {
-                this.props.setAnnotations(annotations)
-                this.props.setIsLoading(false)
+                this.props.setAnnotationAndTags(annotations)
             },
             sendAnchorToSidebar: anchor => {
                 this.props.recieveAnchor(anchor)
@@ -205,6 +205,8 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
     setPageInfo: (url, title) => dispatch(actions.setPageInfo({ url, title })),
     fetchAnnotations: () => dispatch(actions.fetchAnnotationAct()),
+    setAnnotationAndTags: annotations =>
+        dispatch(actions.setAnnotationAndTags(annotations)),
     setAnnotations: annotations =>
         dispatch(actions.setAnnotations(annotations)),
     editAnnotation: ({ url, comment }) =>
