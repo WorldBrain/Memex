@@ -21,10 +21,8 @@
         font-size: 14px;
         font-family: 'IBM Plex Serif', serif;
         line-height: 19px;
-        margin-left: 12px;
         letter-spacing: 0.5px;
         font-style: italic;
-        width: 90%;
     }
 }
 
@@ -99,6 +97,12 @@
     background: transparent;
     margin-right: 10px;
     margin-top: 6px;
+
+    &:focus,
+    &:active {
+        background-color: #88888840;
+        border-radius: 5px;
+    }
 }
 
 .cancel {
@@ -122,9 +126,10 @@
     left: 0px;
     top: 0;
     padding-right: 8px;
-    height: 40px;
+    height: 42px;
     border-bottom: 1px solid #d2d2d2;
     box-sizing: border-box;
+    box-shadow: 4px 5px 28px 1px white;
 }
 
 .addNote {
@@ -190,8 +195,8 @@
         transform: rotate(-180deg);
         transform-origin: center;
     }
+}
 
-    &.noDisplay {
-        display: none;
-    }
+.noDisplay {
+    display: none;
 }

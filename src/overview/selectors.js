@@ -1,6 +1,6 @@
 import { createSelector } from 'reselect'
 
-import * as filterSelectors from './filters/selectors'
+import { selectors as filterSelectors } from '../search-filters'
 import * as constants from './constants'
 
 /**

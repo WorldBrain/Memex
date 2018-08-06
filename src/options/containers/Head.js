@@ -2,6 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { withRouter } from 'react-router'
 import { Helmet } from 'react-helmet'
+import qs from 'query-string'
 
 /**
  * Determine what to render in `<head>` depending on the current routing location state.
@@ -10,9 +11,11 @@ import { Helmet } from 'react-helmet'
  * @param {string} location.pathname
  */
 const renderHeadContent = location => {
+    const showInbox = qs.parse(location.search).showInbox
+
     switch (location.pathname) {
         case '/overview':
-            return <title>🔍 Results</title>
+            return <title>{showInbox ? 'Inbox' : '🔍 Results'}</title>
         case '/tutorial':
             return <title>Settings - Tutorial</title>
         case '/help':

@@ -8,7 +8,7 @@
     top: 0;
     left: 0;
     right: 0;
-    z-index: 10;
+    z-index: 2000;
     background-color: #fafafa;
     padding: 0 60px;
     box-shadow: 0 2px 4px rgba(220, 220, 220, 0.7);
@@ -81,12 +81,13 @@
     display: flex;
     justify-content: flex-end;
     align-content: center;
-    width: 180px;
-    margin-left: -50px;
+    width: 360px;
+    margin-left: -230px;
     font-weight: normal;
-    height: 25px;
+    align-items: center;
 
     @media (max-width: 1200px) {
+        margin-left: 0;
         width: 24px;
     }
 
@@ -192,6 +193,7 @@
     text-decoration: none;
     padding-top: 1px;
     padding-right: 30px;
+    padding-left: 30px;
     color: #3eb995;
 
     &:hover {
@@ -237,4 +239,55 @@
     padding-top: 50px;
     margin-bottom: 15px;
     font-style: italic;
+}
+
+.iconEdit {
+    height: 37px;
+    width: 33px;
+}
+
+.dragElement {
+    display: none;
+    border: solid 2px #3eb995;
+    border-radius: 10%;
+    font-size: 0.9em;
+    padding: 5px;
+    max-height: 50px;
+    max-width: 300px;
+    text-align: center;
+    font-weight: 500;
+    background: #3eb995;
+    color: #fff;
+    opacity: 1;
+    position: absolute;
+    top: -90vh;
+}
+
+.inbox {
+    font-size: 18px;
+    text-decoration: none;
+    padding: 23px 25px;
+    color: #3eb995;
+    cursor: pointer;
+
+    &:hover {
+        color: #777;
+    }
+
+    @media (max-width: 1650px) {
+        display: none;
+    }
+}
+
+.inboxCount {
+    color: #fff;
+    background-color: #3eb995;
+    border-radius: 15px;
+    margin-left: 10px;
+    padding: 3px 18px;
+}
+
+.activeInbox {
+    background-color: #e3e3e3;
+    color: #777;
 }

@@ -1,7 +1,7 @@
 .ribbon {
     position: fixed;
     top: 35%;
-    right: 0;
+    right: -50px;
     width: 40px;
     height: 80px;
     background-color: #fff;
@@ -13,6 +13,13 @@
     box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.3);
     border: 1px solid #c2c2c2;
     line-height: normal;
+    text-align: start;
+    font-family: serif;
+    animation: slideLeft 0.15s ease-in 1s 1 forwards;
+
+    &:-webkit-fullscreen {
+        display: none;
+    }
 }
 
 .ribbonSidebarActive {
@@ -55,7 +62,7 @@
 .logo {
     background-image: url('/img/worldbrain-logo-narrow.png');
     background-size: 24px;
-    margin-top: 12px;
+    margin-top: 7px;
     width: 24px;
     height: 36px;
     margin-left: 8px;
@@ -64,11 +71,11 @@
 .cancel {
     background-image: url('/img/cross_grey.svg');
     fill: white;
-    background-size: 12px;
-    width: 12px;
-    height: 12px;
-    margin-left: 5px;
-    margin-top: 0px;
+    background-size: 16px;
+    width: 16px;
+    height: 16px;
+    margin-left: 9px;
+    margin-top: 5px;
 }
 
 .settings {
@@ -79,4 +86,14 @@
     height: 15px;
     margin-left: 0px;
     margin-top: 0px;
+}
+
+@keyframes slideLeft {
+    0% {
+        right: -50px;
+    }
+
+    100% {
+        right: 0px;
+    }
 }

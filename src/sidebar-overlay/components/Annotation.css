@@ -75,7 +75,7 @@
 }
 
 .annotationText {
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 500;
     font-family: 'Lato', sans-serif;
     line-height: 16px;
@@ -84,7 +84,7 @@
     white-space: pre-wrap;
     background: #f0f0f0;
     margin: 0px;
-    padding: 15px 10px 15px 10px;
+    padding: 15px 10px 15px 15px;
 
     &.isJustComment {
         padding-top: 35px;
@@ -163,20 +163,20 @@
 }
 
 .tagPill {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 800;
-    background-color: #3eb995;
+    background-color: #3eb995d9;
     color: #fff;
     margin-right: 8px;
     margin-top: 5px;
     padding: 2px 10px 3px 10px;
     cursor: pointer;
-    border-radius: 15px;
+    border-radius: 3px;
 }
 
 .tagsContainer {
     height: auto;
-    margin-top: 8px;
+    padding-top: 13px;
     display: flex;
     flex-wrap: wrap;
 
@@ -184,6 +184,10 @@
         margin-top: -8px;
         margin-left: 10px;
         padding-bottom: 15px;
+    }
+
+    &.noDisplay {
+        display: none;
     }
 }
 

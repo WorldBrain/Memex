@@ -21,7 +21,6 @@ hr {
     background-color: rgb(255, 255, 255);
     margin: -8px;
     font-size: 1.2em;
-    height: 395px;
 }
 
 .searchContainer {
@@ -57,7 +56,7 @@ hr {
     }
 
     &::placeholder {
-        color: #3eb995;
+        color: #777;
     }
 
     &:focus {

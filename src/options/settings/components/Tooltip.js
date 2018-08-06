@@ -1,6 +1,7 @@
 import React from 'react'
 
-import Checkbox from './Checkbox'
+// import Checkbox from './Checkbox'
+import { Checkbox } from 'src/common-ui/components'
 import { getTooltipState, setTooltipState } from 'src/content-tooltip/utils'
 
 import styles from './Settings.css'

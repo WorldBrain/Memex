@@ -15,8 +15,9 @@ export interface SearchParams {
     bookmarks: boolean
     endDate?: number
     startDate?: number
-    skip: number
-    limit: number
+    skip?: number
+    limit?: number
+    lists: string[]
 }
 
 export interface FilteredURLs {

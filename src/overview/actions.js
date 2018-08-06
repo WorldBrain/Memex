@@ -3,10 +3,12 @@ import { createAction } from 'redux-act'
 import analytics, { updateLastActive } from 'src/analytics'
 import internalAnalytics from 'src/analytics/internal'
 import { remoteFunction } from 'src/util/webextensionRPC'
-import { actions as filterActs, selectors as filters } from './filters'
+import { actions as filterActs, selectors as filters } from '../search-filters'
 import * as constants from './constants'
 import * as selectors from './selectors'
+import * as notifActions from '../notifications/actions'
 import { fetchTooltip } from './components/tooltips'
+import { actions as sidebarActs } from './sidebar-left'
 
 export const setLoading = createAction('overview/setLoading')
 export const nextPage = createAction('overview/nextPage')
@@ -54,6 +56,8 @@ const requestSearch = remoteFunction('search')
  * Also perform an initial search to populate the view (empty query = get all docs)
  */
 export const init = () => (dispatch, getState) => {
+    dispatch(notifActions.updateUnreadNotif())
+
     // Only do init search if empty query; if query set, the epic will trigger a search
     if (selectors.isEmptyQuery(getState())) {
         dispatch(search({ overwrite: true }))
@@ -95,6 +99,9 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
     const firstState = getState()
     const currentQueryParams = selectors.currentQueryParams(firstState)
     const showTooltip = selectors.showTooltip(firstState)
+    if (filters.showClearFiltersBtn(getState())) {
+        dispatch(sidebarActs.openSidebarFilterMode())
+    }
 
     if (currentQueryParams.query.includes('#')) {
         return
@@ -116,6 +123,7 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
     }
 
     // Grab needed derived state for search
+
     const state = getState()
     const searchParams = {
         ...currentQueryParams,
@@ -125,6 +133,8 @@ export const search = ({ overwrite } = { overwrite: false }) => async (
         domainsExclude: filters.domainsExc(state),
         limit: constants.PAGE_SIZE,
         skip: selectors.resultsSkip(state),
+        // lists for now is just id of one list
+        lists: [filters.listFilter(state)],
     }
 
     try {
@@ -222,6 +232,35 @@ export const getMoreResults = () => dispatch => {
     dispatch(search())
 }
 
+// Remove tags with no associated paged from filters
+export const removeTagFromFilter = () => (dispatch, getState) => {
+    const filterTags = filters.tags(getState()) || []
+    if (!filterTags.length) {
+        return
+    }
+    const pages = selectors.results(getState())
+    const isOnPage = {}
+    filterTags.forEach(tag => {
+        isOnPage[tag] = false
+    })
+
+    pages.forEach(page => {
+        filterTags.forEach(tag => {
+            if (!isOnPage[tag]) {
+                if (page.tags.indexOf(tag) > -1) {
+                    isOnPage[tag] = true
+                }
+            }
+        })
+    })
+
+    Object.entries(isOnPage).forEach(([key, value]) => {
+        if (!value) {
+            dispatch(filterActs.delTagFilter(key))
+        }
+    })
+}
+
 export const deleteDocs = () => async (dispatch, getState) => {
     const url = selectors.urlToDelete(getState())
 
@@ -243,7 +282,9 @@ export const deleteDocs = () => async (dispatch, getState) => {
         // Hide the result item + confirm modal directly (optimistically)
         dispatch(hideResultItem(url))
     } catch (error) {
+        // Do nothing
     } finally {
+        dispatch(removeTagFromFilter())
         dispatch(setResultDeleting(undefined))
         updateLastActive() // Consider user active (analytics)
     }
@@ -264,7 +305,7 @@ export const toggleBookmark = (url, index) => async (dispatch, getState) => {
     internalAnalytics.processEvent({
         type: hasBookmark ? 'removeResultBookmark' : 'createResultBookmark',
     })
-    
+
     // Reset UI state in case of error
     const errHandler = err => dispatch(changeHasBookmark(index))
 

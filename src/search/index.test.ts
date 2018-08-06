@@ -6,8 +6,12 @@ import { SearchIndex } from './'
 import * as oldIndex from './search-index-old'
 import * as newIndex from './search-index-new'
 import * as DATA from './index.test.data'
+import { intersection, flatten, difference } from 'lodash'
 
 jest.mock('./search-index-new/models/abstract-model')
+jest.mock('lodash/fp/intersection')
+jest.mock('lodash/fp/flatten')
+jest.mock('lodash/fp/difference')
 
 // Runs the same tests for either the new or old index
 const runSuite = useOld => () => {
@@ -56,8 +60,6 @@ const runSuite = useOld => () => {
 
     // Some things may be broken in old one, but no plans on fixing
     const testOnlyNew = useOld ? test.skip : test
-    const testOnlyOld = useOld ? test : test.skip
-
     // Set what index to use for tests + initialize data
     beforeAll(async () => {
         await resetTestData()
@@ -74,8 +76,8 @@ const runSuite = useOld => () => {
                 expect(currPage.latest).toEqual(DATA.VISIT_3)
             }
 
-            runChecks(await index.getPage(DATA.PAGE_3.url))
-            runChecks(await index.getPage('test.com/test')) // Should get normalized the same
+            await runChecks(await index.getPage(DATA.PAGE_3.url))
+            await runChecks(await index.getPage('test.com/test')) // Should get normalized the same
 
             const page = await index.getPage(DATA.PAGE_2.url)
 

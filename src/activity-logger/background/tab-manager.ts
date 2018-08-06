@@ -16,7 +16,7 @@ export class TabManager {
      * @param {tabs.Tab} tab The browser tab to start keeping track of.
      */
     trackTab = ({ id, active, url }: Tabs.Tab) =>
-        this._tabs.set(id, new Tab({ isActive: active, url }))
+        this._tabs.set(id, new Tab({ id, isActive: active, url }))
 
     /**
      * @param {number} id The ID of the tab as assigned by web ext API.
@@ -51,7 +51,7 @@ export class TabManager {
             this._tabs.delete(id)
 
             // If still active when closed, toggle active state to force time recalc
-            toRemove.toggleActiveState()
+            toRemove.toggleActiveState(true)
         }
 
         return toRemove
@@ -70,6 +70,7 @@ export class TabManager {
             this._tabs.set(
                 id,
                 new Tab({
+                    id,
                     isActive: activeState,
                     navState: oldTab.navState,
                     url,
@@ -99,15 +100,15 @@ export class TabManager {
      * @param {() => Promise<void>} cb The page log logic to delay.
      * @param {number} [delay] The number of seconds to delay for.
      */
-    scheduleTabLog(
+    async scheduleTabLog(
         id: number,
-        logCb: Function,
+        logCb: () => void | Promise<void>,
         delay = TabManager.DEF_LOG_DELAY,
     ) {
         const tab = this.getTabState(id)
 
         if (tab != null) {
-            tab.scheduleLog(logCb, delay * TabManager.DELAY_UNIT)
+            return tab.scheduleLog(logCb, delay * TabManager.DELAY_UNIT)
         }
     }
 

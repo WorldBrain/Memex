@@ -77,6 +77,14 @@
         padding-left: 16px;
         width: 76%;
     }
+
+    & .mainContainer {
+        width: 93.8%;
+
+        & .messageTitle {
+            width: 64%;
+        }
+    }
 }
 
 .google_side {
@@ -85,6 +93,14 @@
     & .settingsButton {
         right: -5px;
         top: 14px;
+    }
+
+    & .mainContainer {
+        width: 90.8%;
+
+        & .messageTitle {
+            width: 64%;
+        }
     }
 }
 

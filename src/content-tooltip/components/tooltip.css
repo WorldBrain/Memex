@@ -62,9 +62,10 @@
 }
 
 .tooltip.statePristine {
+    <<<<<<<HEAD
     width: 120px;
-
-    &::after {
+    =======width: 110px;
+    >>>>>>>develop &::after {
         left: 45%;
     }
 }
@@ -85,9 +86,11 @@
 
 .createButtons {
     z-index: 10;
+    <<<<<<<HEAD
     width: 80%;
-
-    & div {
+    =======width: 65%;
+    margin-left: 6px;
+    >>>>>>>develop & div {
         margin-right: 5px;
         cursor: pointer;
         flex-basis: 50%;
@@ -103,7 +106,7 @@
             width: 25px;
             height: 25px;
             margin-top: 3px;
-            margin-right: -8px;
+            margin-right: -4px;
 
             &:hover {
                 background-image: url('/img/annotate_hover.svg');
@@ -117,7 +120,7 @@
             width: 25px;
             height: 25px;
             margin-top: 1px;
-            margin-right: -6px;
+            margin-right: -8px;
 
             &:hover {
                 background-image: url('/img/share_hover.svg');
@@ -218,7 +221,7 @@
     flex-direction: column;
     justify-content: space-around;
     align-items: center;
-    width: 15px;
+    width: 13px;
     height: 30px;
     position: absolute;
     right: 6px;
@@ -228,19 +231,18 @@
     padding-left: 5px;
 
     & .smallButton img {
-        height: 15px;
         display: block;
         cursor: pointer;
     }
 
     & .imgSettings {
-        width: 15px;
-        margin-top: 1px;
+        width: 13px;
+        margin-top: 4px;
     }
 
     & .imgCross {
-        width: 10px;
-        margin-bottom: 1px;
+        width: 11px;
+        margin-top: 2px;
     }
 }
 

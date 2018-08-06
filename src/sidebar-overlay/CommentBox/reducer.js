@@ -10,6 +10,7 @@ const defaultState = {
     tags: [],
     displayHighlightTruncated: true,
     anchor: null,
+    focusCommentBox: false,
 }
 
 const addTag = (state, newTag) => ({
@@ -58,6 +59,10 @@ export default createReducer(
         [actions.setAnchor]: (state, anchor) => ({
             ...state,
             anchor,
+        }),
+        [actions.setFocusCommentBox]: (state, value) => ({
+            ...state,
+            focusCommentBox: value,
         }),
         [actions.setHighlightTruncation]: (state, value) => ({
             ...state,

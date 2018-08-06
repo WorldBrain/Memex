@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { generatePageDocId } from 'src/page-storage'
 import index from '..'
 import { fetchExistingPage, initSingleLookup, keyGen } from '../util'

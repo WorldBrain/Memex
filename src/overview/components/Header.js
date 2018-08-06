@@ -5,6 +5,7 @@ import { Link } from 'react-router'
 import { OutLink } from 'src/common-ui/containers'
 import DateRangeSelection from './DateRangeSelection'
 import styles from './Overview.css'
+import InboxButton from 'src/notifications/components/InboxButton'
 
 const Header = ({
     currentQueryParams: { query, startDate, endDate },
@@ -31,18 +32,14 @@ const Header = ({
                     disabled={props.isSearchDisabled}
                 />
             </div>
-            <div
-                className={styles.linkFilter}
-                onClick={props.onShowFilterChange}
-            >
-                <img
-                    src="/img/filter.png"
-                    className={styles.iconFilter}
-                    title="Click to view filters"
-                />
-            </div>
         </div>
         <div className={styles.links}>
+            <InboxButton
+                toggleInbox={props.toggleInbox}
+                showInbox={props.showInbox}
+                unreadNotifCount={props.unreadNotifCount}
+                showUnreadCount={props.showUnreadCount}
+            />
             <OutLink
                 className={styles.upgrade}
                 to="https://worldbrain.io/pricing"
@@ -69,6 +66,10 @@ Header.propTypes = {
     onShowFilterChange: PropTypes.func.isRequired,
     onQuerySearchKeyDown: PropTypes.func.isRequired,
     isSearchDisabled: PropTypes.bool,
+    toggleInbox: PropTypes.func.isRequired,
+    showInbox: PropTypes.bool.isRequired,
+    unreadNotifCount: PropTypes.number.isRequired,
+    showUnreadCount: PropTypes.bool.isRequired,
 }
 
 export default Header

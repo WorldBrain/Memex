@@ -1,3 +1,4 @@
+/* tslint:disable */
 import whenAllSettled from 'when-all-settled'
 
 import db from '../../pouchdb'
@@ -20,13 +21,11 @@ const DEF_PARAMS: ExportParams = {
     endKey: 'page/\uffff',
 }
 
-async function* exportPages(
-    {
-        chunkSize = DEF_PARAMS.chunkSize,
-        startKey = DEF_PARAMS.startKey,
-        endKey = DEF_PARAMS.endKey,
-    }: Partial<ExportParams> = DEF_PARAMS,
-) {
+async function* exportPages({
+    chunkSize = DEF_PARAMS.chunkSize,
+    startKey = DEF_PARAMS.startKey,
+    endKey = DEF_PARAMS.endKey,
+}: Partial<ExportParams> = DEF_PARAMS) {
     let lastKey = startKey
     let batch: Map<string, OldIndexPage>
 
@@ -137,9 +136,9 @@ async function fetchVisitsData(visits: string[]): Promise<ExportedPageVisit[]> {
     }))
 }
 
-async function processKey(
-    [pageKey, indexDoc]: [string, OldIndexPage],
-): Promise<Partial<ExportedPage>> {
+async function processKey([pageKey, indexDoc]: [string, OldIndexPage]): Promise<
+    Partial<ExportedPage>
+> {
     // Decode the URL inside the old ID to get the new index ID
     const url = decode(removeKeyType(indexDoc.id))
 

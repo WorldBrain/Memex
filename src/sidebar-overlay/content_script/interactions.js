@@ -1,3 +1,5 @@
+import scrollToElement from 'scroll-to-element'
+
 import { highlightAnnotation } from 'src/direct-linking/content_script/rendering'
 import { injectCSS } from 'src/search-injection/dom'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
@@ -17,14 +19,14 @@ export function scrollToHighlight(annotation) {
     )
 
     if ($highlight) {
-        // Elements offset Top - offset
-        const top = getOffsetTop($highlight) - 100
-        setTimeout(() => {
-            window.scrollTo({
-                top,
-                behavior: 'smooth',
-            })
-        }, 300)
+        scrollToElement($highlight, {
+            offset: -200,
+            duration: 400,
+        })
+        // The pixels scrolled need to be returned in
+        // order to restrict scrolling when mouse is
+        // over the iFrame
+        const top = getOffsetTop($highlight) - 200
         return top
     } else {
         console.error('MEMEX: Oops, no highlight found to scroll to')
@@ -51,13 +53,12 @@ export const highlightAnnotations = async (
     focusOnAnnotation,
     hoverAnnotationContainer,
 ) => {
-    annotations.forEach(
-        async annotation =>
-            await highlightAnnotation(
-                { annotation },
-                focusOnAnnotation,
-                hoverAnnotationContainer,
-            ),
+    annotations.forEach(async annotation =>
+        highlightAnnotation(
+            { annotation },
+            focusOnAnnotation,
+            hoverAnnotationContainer,
+        ),
     )
 }
 
@@ -217,8 +218,9 @@ export function removeHighlights(isDark) {
  */
 const removeHighlight = highlight => {
     const parent = highlight.parentNode
-    while (highlight.firstChild)
+    while (highlight.firstChild) {
         parent.insertBefore(highlight.firstChild, highlight)
+    }
     parent.removeChild(highlight)
 }
 

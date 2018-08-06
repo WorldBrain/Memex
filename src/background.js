@@ -6,6 +6,8 @@ import 'src/analytics/background'
 import 'src/imports/background'
 import DirectLinkingBackground from 'src/direct-linking/background'
 import EventLogBackground from 'src/analytics/internal/background'
+import CustomListBackground from 'src/custom-lists/background'
+import NotificationBackground from 'src/notifications/background'
 import 'src/omnibar'
 import { INSTALL_TIME_KEY } from './constants'
 import {
@@ -14,7 +16,6 @@ import {
 } from 'src/blacklist/background'
 import searchIndex from 'src/search'
 import analytics from 'src/analytics'
-// import createNotif from 'src/util/notifications'
 import {
     OPEN_OVERVIEW,
     OPEN_OPTIONS,
@@ -42,11 +43,13 @@ export const UNINSTALL_URL =
         ? 'http://worldbrain.io/uninstall'
         : ''
 export const NEW_FEATURE_NOTIF = {
-    title: 'NEW FEATURE: Memex.Links',
+    title: 'NEW FEATURE: Annotations',
     message: 'Click to learn more',
-    url:
-        'https://worldbrain.helprace.com/i62-feature-memex-links-highlight-any-text-and-create-a-link-to-it',
+    url: 'https://worldbrain.helprace.com/i66-annotations-comments',
 }
+
+const notifications = new NotificationBackground({ storageManager })
+notifications.setupRemoteFunctions()
 
 async function openOverview() {
     const [currentTab] = await browser.tabs.query({ active: true })
@@ -70,6 +73,7 @@ const openOptionsURL = query =>
     })
 
 async function onInstall() {
+    await notifications.deliverStaticNotifications()
     const now = Date.now()
 
     // Ensure default blacklist entries are stored (before doing anything else)
@@ -84,14 +88,7 @@ async function onInstall() {
 }
 
 async function onUpdate() {
-    // Notification with updates when we update
-    // await createNotif(
-    //     {
-    //         title: NEW_FEATURE_NOTIF.title,
-    //         message: NEW_FEATURE_NOTIF.message,
-    //     },
-    //     () => browser.tabs.create({ url: NEW_FEATURE_NOTIF.url }),
-    // )
+    await notifications.deliverStaticNotifications()
 
     // Check whether old Search Injection boolean exists and replace it with new object
     const searchInjectionKey = (await browser.storage.local.get(
@@ -155,3 +152,8 @@ window.directLinking = directLinking
 const eventLog = new EventLogBackground({ storageManager })
 eventLog.setupRemoteFunctions()
 window.eventLog = eventLog
+
+const customList = new CustomListBackground({ storageManager })
+customList.setupRemoteFunctions()
+
+window.notifications = notifications

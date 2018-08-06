@@ -44,8 +44,9 @@ function isTargetInsideTooltip(event) {
     const $tooltipContainer = document.querySelector(
         '#memex-direct-linking-tooltip',
     )
-    if (!$tooltipContainer)
+    if (!$tooltipContainer) {
         // edge case, where the destroy() is called
         return true
+    }
     return $tooltipContainer.contains(event.target)
 }

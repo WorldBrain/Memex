@@ -1,0 +1,9 @@
+.showAll {
+    background: #eaeaea;
+    color: #949494;
+    padding: 3px 0px;
+    font-size: 1.35em;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+}

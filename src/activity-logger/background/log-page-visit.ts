@@ -35,7 +35,7 @@ export default class PageVisitLogger {
         pageFetch = searchIndex.getPage,
         visitCreate = searchIndex.addVisit,
         favIconCheck = searchIndex.domainHasFavIcon,
-        momentLib = moment
+        momentLib = moment,
     }: Props) {
         this._tabManager = tabManager
         this._analyzePage = pageAnalyzer
@@ -76,7 +76,7 @@ export default class PageVisitLogger {
                 ) {
                     this._tabManager.clearScheduledLog(tab.id)
 
-                    return await this._createVisit(
+                    return this._createVisit(
                         tab.url,
                         internalTabState.visitTime,
                     )

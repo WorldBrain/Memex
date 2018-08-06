@@ -49,6 +49,7 @@ const Results = props => {
                     ''
                 )}
             </div>
+            {props.renderNotification}
             <div className={styles.resultsBox}>
                 {// Render only if hideResults is false
                 props.hideResults ? '' : props.renderResultItems()}
@@ -70,6 +71,7 @@ Results.propTypes = {
     removeResults: PropTypes.func.isRequired,
     changePosition: PropTypes.func.isRequired,
     renderResultItems: PropTypes.func.isRequired,
+    renderNotification: PropTypes.node,
 }
 
 export default Results

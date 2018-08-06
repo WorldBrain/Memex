@@ -1,3 +1,4 @@
+/* tslint:disable */
 import { idleManager } from '../../util/idle'
 import { MigrationManager } from './migration-manager'
 import searchIndex from '../'

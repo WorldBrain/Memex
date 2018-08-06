@@ -26,7 +26,7 @@ export interface PipelineRes {
     text: string
 }
 
-export default function pipeline(props: PipelineReq): PipelineRes
+export default function pipeline(props: PipelineReq): Promise<PipelineRes>
 
 export interface URLParts {
     domain: string

@@ -1,0 +1,69 @@
+.listForm {
+    height: 30px;
+    width: 70%;
+    border: 0px solid transparent;
+    border-top: none;
+    box-shadow: inset 1px 1px 3px #3eb995;
+    outline: none;
+    padding-left: 15px;
+    font-size: 13px;
+    font-family: 'lato';
+    font-style: italic;
+    padding-top: 4px;
+}
+
+.createListForm {
+    display: flex;
+    background: #d7d7d7;
+    height: 50px;
+    width: 335px;
+    align-items: center;
+    position: relative;
+    padding-left: 12px;
+}
+
+.tick {
+    background-image: url('/img/tick.svg');
+    width: 40px;
+    height: 40px;
+    float: right;
+    right: 8px;
+    position: absolute;
+
+    &:hover {
+        background-image: url('/img/tick_green.svg');
+    }
+}
+
+.deleteButton {
+    background-image: url('/img/cross_circle.svg');
+    width: 21px;
+    height: 21px;
+    float: right;
+    position: absolute;
+    right: 54px;
+    top: 17px;
+
+    &:hover {
+        background-color: #3eb995;
+        border-radius: 50%;
+    }
+}
+
+.button {
+    display: inline;
+    border: none;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-size: contain;
+    cursor: pointer;
+    outline: none;
+    margin-top: -2px;
+}
+
+.sameNameWarning {
+    display: flex;
+    justify-content: center;
+    color: red;
+    font-weight: 400;
+}
