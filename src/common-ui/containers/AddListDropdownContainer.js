@@ -73,8 +73,9 @@ class DropdownContainer extends Component {
     scrollElementIntoViewIfNeeded(domNode) {
         // const parentNode = domNode.parentNode
         // parentNode.scrollTop = domNode.offsetTop - parentNode.offsetTop
-        // domNode.scrollIntoView({ behaviour: 'smooth', block: 'nearest' })
-        domNode.scrollIntoViewIfNeeded()
+        domNode.scrollIntoView({ behaviour: 'smooth', block: 'nearest' })
+        // Gives error in FF.
+        // domNode.scrollIntoViewIfNeeded()
     }
 
     setInputRef = el => (this.inputEl = el)

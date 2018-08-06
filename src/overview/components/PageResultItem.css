@@ -180,6 +180,7 @@
 .notBookmark {
     background-image: url('/img/star_empty.svg');
     opacity: 0.3;
+    margin-top: 1px;
     width: 25px;
 
     &:hover {
