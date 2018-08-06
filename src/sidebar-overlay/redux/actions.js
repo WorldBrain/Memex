@@ -10,6 +10,8 @@ import {
 
 export const setAnnotations = createAction('setAnnotations')
 
+export const setTags = createAction('setTags')
+
 export const setActiveAnnotation = createAction('setActiveAnnotation')
 
 export const setHoveredAnnotation = createAction('setHoveredAnnotation')
@@ -26,8 +28,24 @@ export const fetchAnnotationAct = () => async (dispatch, getState) => {
     const state = getState()
     const { url } = selectors.page(state)
     const annotations = await remoteFunction('getAllAnnotations')(url)
+    const tags = await fetchAllTags(annotations)
+
+    dispatch(setTags(tags))
     dispatch(setAnnotations(annotations))
     dispatch(setIsLoading(false))
+}
+
+const fetchAllTags = async annotations => {
+    const tags = {}
+    await Promise.all(
+        annotations.map(async ({ url }) => {
+            const annotationTags = await remoteFunction('getAnnotationTags')(
+                url,
+            )
+            tags[url] = annotationTags
+        }),
+    )
+    return tags
 }
 
 export const findAnnotationCount = () => async (dispatch, getState) => {
