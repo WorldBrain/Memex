@@ -67,3 +67,8 @@ export const showUnreadCount = createSelector(
     unreadNotifCount,
     count => count !== 0,
 )
+export const isLoadingBar = createSelector(
+    notificationsList,
+    unreadNotificationList,
+    (totalNotifs, notifs) => !(totalNotifs.length || notifs.length),
+)

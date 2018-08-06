@@ -33,6 +33,7 @@ class NotificationContainer extends Component {
         isReadShow: PropTypes.bool.isRequired,
         messageCharLimit: PropTypes.number.isRequired,
         localStorageNotif: PropTypes.object.isRequired,
+        isLoadingBar: PropTypes.bool.isRequired,
     }
 
     static defaultProps = {
@@ -208,7 +209,7 @@ class NotificationContainer extends Component {
     renderStatusHeading() {
         const { unreadNotificationList } = this.props
 
-        if (this.props.isLoading) {
+        if (this.props.isLoadingBar) {
             return <LoadingIndicator key="loading" />
         } else {
             return (
@@ -249,6 +250,7 @@ const mapStateToProps = state => ({
     isReadExpanded: selectors.isReadExpanded(state),
     isReadShow: selectors.isReadShow(state),
     localStorageNotif: selectors.localStorageNotif(state),
+    isLoadingBar: selectors.isLoadingBar(state),
 })
 
 const mapDispatchToProps = dispatch => ({
