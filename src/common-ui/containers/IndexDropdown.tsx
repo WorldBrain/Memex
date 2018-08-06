@@ -375,8 +375,6 @@ class IndexDropdownContainer extends Component<Props, State> {
     private renderTags() {
         const tags = this.getDisplayTags()
 
-        // const Row = this.props.isForSidebar ? FilteredRow : IndexDropdownRow
-
         const tagOptions = tags.map((tag, i) => (
             <IndexDropdownRow
                 {...tag}
