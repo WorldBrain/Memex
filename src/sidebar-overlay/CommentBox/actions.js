@@ -14,6 +14,8 @@ export const setAnchor = createAction('setAnchor')
 
 export const setHighlightTruncation = createAction('setHighlightTruncation')
 
+export const setFocusCommentBox = createAction('setFocusCommentBox')
+
 export const toggleHighlightTruncation = createAction(
     'toggleHighlightTruncation',
 )

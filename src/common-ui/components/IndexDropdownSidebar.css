@@ -1,0 +1,123 @@
+.menuItem {
+    display: block;
+    padding: 7px 21px 9px 14px;
+    cursor: pointer;
+    border-bottom: 1px solid #d2d2d28c;
+    border-top: none;
+    word-wrap: break-word;
+    font-size: 14px;
+    font-family: 'lato';
+    padding-left: 25px;
+    color: #8b8b8b;
+
+    &:hover,
+    &:focus,
+    &:active {
+        background-color: #f7f7f7;
+        outline: none;
+    }
+}
+
+.menuItemFocused {
+    background-color: #f7f7f7;
+}
+
+.menuItem i {
+    font-size: 18px;
+    float: right;
+    margin-top: 1px;
+    margin-right: -7px;
+    color: black;
+}
+
+.tagContainer {
+    width: 100%;
+    max-height: 170px;
+    overflow-y: scroll;
+
+    &:focus {
+        outline: none;
+    }
+}
+
+.numberTags {
+    align-items: flex-start;
+    margin-top: 6px;
+    color: #777;
+}
+
+.summaryTagContainer {
+    font-family: 'lato';
+    font-size: 12px;
+    display: flex;
+    justify-content: space-around;
+    padding-bottom: 4px;
+    background: white;
+    width: 94.3%;
+    margin-bottom: 16px;
+    margin-left: 8px;
+}
+
+.searchContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px dashed #d2d2d28c;
+    padding: 4px 11px;
+    margin-bottom: 0;
+    background-color: #f7f7f7;
+
+    & > i {
+        color: #3eb995;
+        padding: 0;
+        margin-top: 1px;
+    }
+}
+
+.search {
+    width: 90%;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 5px;
+    border: none;
+    background-color: #f7f7f7;
+
+    &:placeholder-shown {
+        font-style: italic;
+        font-weight: 500;
+        font-family: 'lato';
+    }
+
+    &::placeholder {
+        color: #4a4a4a;
+    }
+
+    &:focus {
+        outline: none;
+    }
+}
+
+.bold {
+    font-weight: bold;
+}
+
+.tagDiv {
+    box-shadow: none;
+}
+
+.tagDivFromOverview {
+    position: absolute;
+    width: 300px;
+    z-index: 1;
+    background-color: #fff;
+    margin-left: 500px;
+
+    @media (max-width: 835px) {
+        right: 10px;
+    }
+}
+
+.tagDivForFilter {
+    z-index: 1;
+    width: 99.7%;
+}

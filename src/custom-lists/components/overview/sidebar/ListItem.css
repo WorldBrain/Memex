@@ -1,0 +1,95 @@
+.listItem {
+    background: #d7d7d7;
+}
+
+.pageList {
+    display: flex;
+    align-items: center;
+    height: 40px;
+    color: #767676;
+    position: relative;
+    width: 250px;
+    transition: width 0.1s ease-in, background-color 100ms linear;
+    cursor: pointer;
+
+    &:hover {
+        background-color: #d7d7d7;
+        width: 335px;
+        overflow-x: unset;
+    }
+
+    & > .listName {
+        width: 250px;
+    }
+}
+
+.pageListDrag {
+    background-color: #d7d7d7;
+}
+
+.filtered {
+    background-color: #e5e5e5;
+    font-weight: 600;
+}
+
+.editButton {
+    background-image: url('/img/list_edit.svg');
+    width: 20px;
+    height: 20px;
+    visibility: hidden;
+    animation: appear 0.2s forwards;
+}
+
+.deleteButton {
+    background-image: url('/img/trash_closed_new.svg');
+    width: 20px;
+    height: 20px;
+    visibility: hidden;
+    animation: appear 0.2s forwards;
+
+    &:hover {
+        background-image: url('/img/trash_open_new.svg');
+    }
+}
+
+.button {
+    display: inline;
+    border: none;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-size: contain;
+    cursor: pointer;
+    outline: none;
+    margin-top: 3px;
+}
+
+.listName {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0px 15px 2px 30px;
+    font-size: 1.4em;
+    cursor: pointer;
+    width: 100%;
+}
+
+.buttonContainer {
+    position: absolute;
+    right: 0px;
+    display: flex;
+    justify-content: space-evenly;
+    width: 90px;
+    align-items: center;
+}
+
+@keyframes appear {
+    0% {
+        transform: scale(0);
+        visibility: hidden;
+    }
+
+    100% {
+        transform: scale(1);
+        visibility: visible;
+    }
+}

@@ -15,6 +15,7 @@ import { DEFAULT_TERM_SEPARATOR } from './util'
  * @property {Set<string>} domain Set of domains a user has chosen to filter, or extracted from query.
  * @property {Set<string>} domainExclude Set of domains a user has chosen to filter-out, or extracted from query.
  * @property {Set<string>} tags Set of tags a user has chosen to filter, or extracted from query.
+ * @property {Set<string>} lists Set of lists a user has chosen to filter, or extracted from query.
  * @property {Map<string, any>} timeFilter Map of different time filter ranges to apply to search.
  * @property {number} [skip=0]
  * @property {number} [limit=10]
@@ -76,6 +77,7 @@ class QueryBuilder {
     domain = new Set()
     domainExclude = new Set()
     tags = new Set()
+    lists = new Set()
     isBadTerm = false
     showOnlyBookmarks = false
 
@@ -96,6 +98,7 @@ class QueryBuilder {
             domain: this.domain,
             domainExclude: this.domainExclude,
             tags: this.tags,
+            lists: this.lists,
             isBadTerm: this.isBadTerm,
             // Can't do a terms exclusion without some terms already defined
             isInvalidSearch: this.queryExclude.size && !this.query.size,
@@ -145,6 +148,7 @@ class QueryBuilder {
     filterTags = this._filterGen('tags')
     filterDomains = this._filterGen('domain')
     filterExcDomains = this._filterGen('domainExclude')
+    filterLists = this._filterGen('lists')
 
     /**
      * Filter out terms those terms that match any tags/domain pattern from an array of terms.

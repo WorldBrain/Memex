@@ -25,7 +25,9 @@ async function init() {
             if (searchRes.docs.length || searchRes.requiresMigration) {
                 handleRender(searchRes, matched)
             }
-        } catch (err) {}
+        } catch (err) {
+            // Let it fail
+        }
     }
 }
 

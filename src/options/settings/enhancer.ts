@@ -9,7 +9,9 @@ import { STORAGE_KEYS as KEYS } from './constants'
 function hydrateFromStorage(store: Store<any>) {
     const hydrate = (key, action, defVal = undefined) =>
         browser.storage.local.get({ [key]: defVal }).then(storage => {
-            if (storage[key] == null) return
+            if (storage[key] == null) {
+                return
+            }
 
             store.dispatch(action(storage[key]))
         })

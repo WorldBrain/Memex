@@ -2,7 +2,7 @@ import React from 'react'
 
 import analytics from 'src/analytics'
 import SearchInjection from './SearchInjection'
-import Checkbox from './Checkbox'
+import { Checkbox } from '../../../common-ui/components'
 
 import { getLocalStorage, setLocalStorage } from 'src/search-injection/utils'
 import {

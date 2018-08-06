@@ -1,0 +1,70 @@
+.container {
+    font-size: 14px;
+    color: #8b8b8b;
+}
+
+.listName {
+    white-space: nowrap;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 14px;
+    flex: 10;
+    font-family: 'lato';
+    cursor: pointer;
+    text-align: left;
+}
+
+.menuItem {
+    display: flex;
+    padding: 8px;
+    padding-left: 25px;
+    padding-right: 15px;
+    cursor: pointer;
+    border-bottom: 1px solid #dbdbdb;
+    word-wrap: break-word;
+
+    &:hover,
+    &:focus,
+    &:active {
+        background-color: #f7f7f7;
+        outline: none;
+    }
+}
+
+.menuItemFocused {
+    background-color: #f7f7f7;
+}
+
+.tick {
+    float: right;
+    width: 19px;
+}
+
+.button {
+    display: inline;
+    border: none;
+    font-size: 18px;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-size: contain;
+    cursor: pointer;
+    outline: none;
+    padding: 0px;
+}
+
+.exclusion {
+    float: right;
+    background-image: url('/img/exlusion.svg');
+    width: 18px;
+    margin-right: 7px;
+}
+
+.soon {
+    color: #00acc3;
+    font-size: 0.85em;
+}
+
+.available {
+    opacity: 0.8;
+}

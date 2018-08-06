@@ -6,6 +6,7 @@ makeRemotelyCallable({
     addTag: indexInterface.addTag,
     delTag: indexInterface.delTag,
     suggest: indexInterface.suggest,
+    extendedSuggest: indexInterface.extendedSuggest,
     addBookmark: indexInterface.addBookmark,
     delBookmark: indexInterface.delBookmark,
     delPages: indexInterface.delPages,
@@ -39,7 +40,7 @@ async function handleBookmarkRemoval(id, { node }) {
         return
     }
 
-    return await indexInterface.delBookmark(node).catch(console.error)
+    return indexInterface.delBookmark(node).catch(console.error)
 }
 
 async function handleBookmarkCreation(id, node) {
@@ -55,5 +56,5 @@ async function handleBookmarkCreation(id, node) {
         tabId = activeTab.id
     }
 
-    return await indexInterface.addBookmark({ url: node.url, tabId })
+    return indexInterface.addBookmark({ url: node.url, tabId })
 }

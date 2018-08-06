@@ -176,7 +176,7 @@
 
 .tagsContainer {
     height: auto;
-    padding-top: 20px;
+    padding-top: 13px;
     display: flex;
     flex-wrap: wrap;
 
@@ -184,6 +184,10 @@
         margin-top: -8px;
         margin-left: 10px;
         padding-bottom: 15px;
+    }
+
+    &.noDisplay {
+        display: none;
     }
 }
 

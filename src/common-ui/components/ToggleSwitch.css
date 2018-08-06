@@ -22,15 +22,20 @@
 }
 
 .activeSwitch {
+    background: #3eb995;
+
     &::after {
         left: calc(100% - 5px);
         transform: translateX(-100%);
     }
-    background: #3eb995;
 }
 
 .input {
     height: 0;
     width: 0;
     visibility: hidden;
+}
+
+.searchSwitch {
+    cursor: pointer;
 }

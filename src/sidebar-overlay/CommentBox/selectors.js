@@ -24,3 +24,8 @@ export const displayHighlightTruncated = createSelector(
 )
 
 export const tags = createSelector(commentBox, state => state.tags)
+
+export const focusCommentBox = createSelector(
+    commentBox,
+    state => state.focusCommentBox,
+)

@@ -4,13 +4,15 @@ import ReduxQuerySync from 'redux-query-sync'
 import history from '../options/history'
 import * as selectors from './selectors'
 import * as actions from './actions'
+import * as notifActions from '../notifications/actions'
+import * as notifSelectors from '../notifications/selectors'
 import * as constants from './constants'
 import {
     selectors as onboarding,
     actions as onboardingActs,
     constants as onboardingConsts,
 } from './onboarding'
-import { selectors as filters, actions as filterActs } from './filters'
+import { selectors as filters, actions as filterActs } from '../search-filters'
 
 const parseBool = str => str === 'true'
 const parseNumber = str => Number(str)
@@ -56,6 +58,11 @@ const locationSync = ReduxQuerySync.enhancer({
             valueToString: stringifyArr,
             defaultValue: [],
         },
+        lists: {
+            selector: filters.listFilter,
+            action: filterActs.setListFilters,
+            defaultValue: '',
+        },
         install: {
             selector: onboarding.isVisible,
             action: onboardingActs.setVisible,
@@ -66,6 +73,12 @@ const locationSync = ReduxQuerySync.enhancer({
             selector: selectors.query,
             action: actions.setQueryTagsDomains,
             defaultValue: '',
+        },
+        showInbox: {
+            selector: notifSelectors.showInbox,
+            action: notifActions.toggleInbox,
+            stringToValue: parseBool,
+            defaultValue: false,
         },
     },
 })
@@ -117,6 +130,9 @@ const storageSync = storeCreator => (reducer, initState, enhancer) => {
     return store
 }
 
-const enhancer = compose(locationSync, storageSync)
+const enhancer = compose(
+    locationSync,
+    storageSync,
+)
 
 export default enhancer

@@ -56,7 +56,7 @@ class Tab implements TabState {
      *
      * @param logCb Logic to schedule to run on this tab later.
      */
-    scheduleLog(logCb: Function, delay = 0) {
+    scheduleLog(logCb: () => void | Promise<void>, delay = 0) {
         this.cancelPendingOps()
 
         // Just run straight away if no delay set

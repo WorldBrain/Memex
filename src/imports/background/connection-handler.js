@@ -132,7 +132,7 @@ export default class ImportConnectionHandler {
 
         stateManager.allowTypes = allowTypes
 
-        if (!await this.getImportInProgressFlag()) {
+        if (!(await this.getImportInProgressFlag())) {
             await stateManager.fetchEsts(this._quickMode)
         }
 
@@ -175,7 +175,7 @@ export default class ImportConnectionHandler {
     }
 
     async setImportInProgressFlag(value) {
-        return await browser.storage.local.set({
+        return browser.storage.local.set({
             [ImportConnectionHandler.IMPORTS_PROGRESS_KEY]: value,
         })
     }

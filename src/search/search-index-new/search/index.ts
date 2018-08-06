@@ -7,7 +7,7 @@ import { textSearch } from './text-search'
 import { paginate, applyScores } from './util'
 
 export { domainHasFavIcon } from './fav-icon'
-export { suggest } from './suggest'
+export { suggest, extendedSuggest } from './suggest'
 
 export async function search({
     query,
@@ -16,7 +16,8 @@ export async function search({
     domains = [],
     domainsExclude = [],
     tags = [],
-    ...restParams,
+    lists = [],
+    ...restParams
 }) {
     // Extract query terms via QueryBuilder (may change)
     const qb = new QueryBuilder()
@@ -24,6 +25,7 @@ export async function search({
         .filterDomains(domains)
         .filterExcDomains(domainsExclude)
         .filterTags(tags)
+        .filterLists(lists)
         .get()
 
     // Short-circuit search if bad term
@@ -45,6 +47,7 @@ export async function search({
         }
     }
 
+    // WTF
     // Reshape needed params; prob consolidate interface later when remove old index code
     const params = {
         ...restParams,
@@ -54,6 +57,7 @@ export async function search({
         domains: [...qb.domain],
         domainsExclude: [...qb.domainExclude],
         tags: [...qb.tags],
+        lists: [...qb.lists],
     } as SearchParams
 
     const { docs, totalCount } = await db.transaction(
@@ -61,6 +65,7 @@ export async function search({
         db.tables,
         async () => {
             const results = await fullSearch(params)
+
             const mappedDocs = await mapResultsFunc(results.ids, params)
 
             return { docs: mappedDocs, totalCount: results.totalCount }
@@ -78,7 +83,7 @@ export async function search({
 // WARNING: Inefficient; goes through entire table
 export async function getMatchingPageCount(pattern) {
     const re = new RegExp(pattern, 'i')
-    return await db.pages.filter(page => re.test(page.url)).count()
+    return db.pages.filter(page => re.test(page.url)).count()
 }
 
 /**
@@ -87,7 +92,7 @@ export async function getMatchingPageCount(pattern) {
 async function fullSearch({
     terms = [],
     termsExclude = [],
-    ...params,
+    ...params
 }: SearchParams) {
     const filteredUrls = await findFilteredUrls(params)
 

@@ -118,10 +118,11 @@
     cursor: pointer;
     font-family: 'Open Sans';
     font-weight: 100;
-    margin-top: 13px;
-    margin-right: 5px;
+    margin-top: 17px;
+    margin-right: 6px;
     outline: 0;
     color: #909090;
+    text-decoration: none;
 
     i {
         font-size: 24px;
@@ -129,7 +130,7 @@
 }
 
 .settingsIcon {
-    margin-right: 18px;
+    margin-right: 12px;
 }
 
 .icon {
@@ -175,6 +176,13 @@
     margin-top: 0px;
 }
 
+.notification {
+    background-image: url('/img/notification.svg');
+    background-repeat: no-repeat;
+    background-size: 20px;
+    margin-top: 0px;
+}
+
 .help {
     background-image: url('/img/help.svg');
     background-repeat: no-repeat;
@@ -183,7 +191,7 @@
 }
 
 .buttonIcons {
-    background-size: cover;
+    background-size: 22px;
 }
 
 .pauseIcon {
@@ -211,4 +219,23 @@
     background-repeat: no-repeat;
     background-size: 20px;
     float: left;
+}
+
+.addToList {
+    background-image: url('/img/list_popup.svg');
+    background-repeat: no-repeat;
+    background-size: 20px;
+}
+
+.notificationBadge {
+    background-color: #c12908;
+    color: white;
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    position: relative;
+    top: -33px;
+    left: 21px;
 }

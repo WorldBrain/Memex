@@ -5,6 +5,7 @@ import { connect } from 'react-redux'
 import { selectors, actions } from '../redux'
 import { actions as commentActions } from '../CommentBox'
 import Sidebar from './Sidebar'
+import EmptyMessage from './EmptyMessage'
 import Annotation from './AnnotationContainer'
 import Loader from './Loader'
 
@@ -30,6 +31,7 @@ class SidebarContainer extends React.Component {
         setAnnotations: PropTypes.func.isRequired,
         setHidden: PropTypes.func.isRequired,
         setIsLoading: PropTypes.func.isRequired,
+        focusCommentBox: PropTypes.func.isRequired,
         activeAnnotation: PropTypes.string.isRequired,
         hoveredAnnotation: PropTypes.string.isRequired,
     }
@@ -57,8 +59,8 @@ class SidebarContainer extends React.Component {
 
     setupFrameFunctions = () => {
         this.parentFC.setUpRemoteFunctions({
-            reloadAnnotations: async () => {
-                await this.props.fetchAnnotations()
+            focusCommentBox: value => {
+                this.props.focusCommentBox(value)
             },
             setAnnotations: annotations => {
                 this.props.setAnnotations(annotations)
@@ -125,8 +127,9 @@ class SidebarContainer extends React.Component {
     }
 
     deleteAnnotation = annotation => {
-        if (annotation.body)
+        if (annotation.body) {
             this.parentFC.remoteExecute('deleteAnnotation')(annotation)
+        }
         this.props.deleteAnnotation(annotation)
     }
 
@@ -147,12 +150,17 @@ class SidebarContainer extends React.Component {
     }
 
     renderAnnotations = () => {
-        const { annotations, env } = this.props
+        const { annotations, env, isLoading } = this.props
 
-        if (this.props.isLoading) return <Loader />
+        if (isLoading) return <Loader />
 
-        if (env === 'overview')
+        if (!this.props.isLoading && !this.props.annotations.length) {
+            return <EmptyMessage />
+        }
+
+        if (env === 'overview') {
             annotations.sort((x, y) => x.createdWhen < y.createdWhen)
+        }
 
         return annotations.map(annotation => (
             <Annotation
@@ -204,6 +212,8 @@ const mapDispatchToProps = dispatch => ({
     setHoveredAnnotation: key => dispatch(actions.setHoveredAnnotation(key)),
     setHidden: value => dispatch(commentActions.setHidden(value)),
     setIsLoading: value => dispatch(actions.setIsLoading(value)),
+    focusCommentBox: value =>
+        dispatch(commentActions.setFocusCommentBox(value)),
 })
 
 export default connect(

@@ -1,0 +1,179 @@
+.mainNotifContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin-top: 30px;
+    background-color: #fff;
+    padding: 4px 20px 20px 20px;
+    box-shadow: 0 4px 20px 1px rgba(62, 185, 149, 0.0902);
+    min-width: 800px;
+}
+
+.whyContainer {
+    display: flex;
+    justify-content: flex-end;
+    position: relative;
+    top: 14px;
+}
+
+.notifContainer {
+    display: flex;
+    flex-direction: row;
+}
+
+.logo img {
+    width: 20px;
+    height: auto;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.messageWhy {
+    display: flex;
+    flex-direction: row;
+}
+
+.titleMessage {
+    display: flex;
+    flex-direction: column;
+    margin: 0 10px 0 20px;
+    font-size: 14px;
+}
+
+.title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    max-width: 600px;
+}
+
+.message {
+    color: #777;
+    text-align: justify;
+    font-size: 14px;
+}
+
+.buttonTick {
+    display: flex;
+    flex-direction: row;
+    margin: 30px 0 -3px 20px;
+    align-items: flex-end;
+    justify-content: space-between;
+}
+
+.button {
+    padding: 8px 20px;
+    background-color: #3eb995;
+    color: white !important; /* stylelint-disable */
+    font-size: 16px;
+    width: fit-content;
+    border-radius: 2px;
+    cursor: pointer !important;
+    text-decoration: none;
+    margin-right: 10px;
+    text-align: center;
+
+    &:hover {
+        text-decoration: none !important;
+    }
+}
+
+.tick {
+    width: 40px;
+    margin-bottom: -6px;
+    padding-top: 0px;
+    cursor: pointer;
+
+    &:hover {
+        background-color: #efefef;
+        border-radius: 90px;
+    }
+}
+
+.tick i {
+    color: #3eb995;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.onlyTick {
+    justify-content: flex-end;
+}
+
+.showMore {
+    cursor: pointer;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 5px;
+    font-size: 14px;
+}
+
+.why {
+    position: relative;
+    display: inline-table;
+    color: #777;
+}
+
+.why .whyText {
+    visibility: hidden;
+    width: 225px;
+    background-color: #fff;
+    color: #777;
+    text-align: center;
+    border-radius: 6px;
+    position: absolute;
+    z-index: 1;
+    top: 225%;
+    left: 50%;
+    margin-left: -120px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    border: 1px solid #c2c2c2;
+    padding: 10px 20px;
+}
+
+.why .whyText::after {
+    box-sizing: content-box;
+    top: -13%;
+    left: 50%;
+    border: solid transparent;
+    content: '';
+    height: 20px;
+    width: 20px;
+    position: absolute;
+    pointer-events: none;
+    border-color: #c2c2c2;
+    border-width: 1px;
+    border-bottom-color: transparent;
+    border-left-color: transparent;
+    transform: rotate(-45deg);
+    background-color: #fff;
+}
+
+.why:hover .whyText {
+    visibility: visible;
+    opacity: 1;
+}
+
+.buttonsContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.actionButton {
+    padding: 10px 20px;
+    background-color: #3eb995;
+    color: white;
+    font-size: 16px;
+    width: fit-content;
+    border-radius: 2px;
+    cursor: pointer;
+    text-decoration: none;
+    margin-right: 10px;
+    border: 0;
+}

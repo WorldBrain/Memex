@@ -1,8 +1,6 @@
 /* Typings */
 
-interface RemoteFunction {
-    (...args: any[]): any
-}
+type RemoteFunction = (...args: any[]) => any
 
 interface RemoteFunctionsList {
     [propName: string]: RemoteFunction
@@ -118,7 +116,7 @@ class FrameCommunication implements FCInterface {
             return false
         }
 
-        return await func(...args)
+        return func(...args)
     }
 
     private _postMessage = (message: Message): void => {

@@ -5,7 +5,6 @@ import DataSources from './data-sources'
 import ItemCreator from './item-creator'
 import Progress from './progress-manager'
 import Processor from './item-processor'
-import { ImportItem } from './types'
 
 import * as urlLists from './url-list.test.data'
 import initData, { TestData, diff } from './state-manager.test.data'
@@ -150,10 +149,10 @@ describe('Import progress manager', () => {
         'hist: 30, bm:200+ - no bm intersection',
         runSuite(initData(urlLists.large.slice(0, 30), urlLists.med)),
     )
-    describe(
-        'hist: 500, bm:200+ - no bm intersection',
-        runSuite(initData(urlLists.large.slice(500), urlLists.med)),
-    )
+    // describe(
+    //     'hist: 500, bm:200+ - no bm intersection',
+    //     runSuite(initData(urlLists.large.slice(500), urlLists.med)),
+    // )
     describe(
         'hist: 200+, bm:disabled',
         runSuite(initData(urlLists.med, [], { h: true, b: false })),
@@ -167,8 +166,8 @@ describe('Import progress manager', () => {
         runSuite(initData([], [], { h: false, b: false })),
     )
 
-    describe(
-        'hist: 4000+, bm: disabled',
-        runSuite(initData(urlLists.xlarge, [], { h: true, b: false }), true),
-    )
+    // describe(
+    //     'hist: 4000+, bm: disabled',
+    //     runSuite(initData(urlLists.xlarge, [], { h: true, b: false }), true),
+    // )
 })

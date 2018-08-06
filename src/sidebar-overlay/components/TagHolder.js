@@ -66,6 +66,7 @@ class TagHolder extends React.Component {
 
         if (!maxTagsAllowed || !(tags.length - maxTagsAllowed)) return null
         const tagsLeft = this.props.tags.length - this.state.maxTagsAllowed
+        if (tagsLeft < 1) return null
         return <span className={styles.tagsLeft}>+{tagsLeft}</span>
     }
 

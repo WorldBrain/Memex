@@ -3,7 +3,14 @@ import { StorageManager } from './storage/manager'
 
 // Create main singleton to interact with DB in the ext
 const storageManager = new StorageManager()
+window['storageMan'] = storageManager
 let realIndex: Storage = null
+
+export const init = (props?: Props) => {
+    realIndex = new Storage({ ...props, storageManager })
+    storageManager._finishInitialization(realIndex)
+}
+
 const index = new Proxy<Storage>({} as Storage, {
     get: (target, key) => {
         if (!realIndex) {
@@ -20,13 +27,6 @@ const index = new Proxy<Storage>({} as Storage, {
         return prop
     },
 })
-
-window['storageMan'] = storageManager
-
-export const init = (props?: Props) => {
-    realIndex = new Storage({ ...props, storageManager })
-    storageManager._finishInitialization(realIndex)
-}
 
 export * from './types'
 export * from './models'
@@ -78,6 +78,7 @@ export {
     suggest,
     getMatchingPageCount,
     domainHasFavIcon,
+    extendedSuggest,
 } from './search'
 
 export { createPageFromTab, createPageFromUrl } from './on-demand-indexing'

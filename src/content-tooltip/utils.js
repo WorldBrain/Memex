@@ -30,7 +30,7 @@ export const copyToClipboard = text => {
 }
 
 export const getTooltipState = async () =>
-    await getLocalStorage(TOOLTIP_STORAGE_NAME, TOOLTIP_DEFAULT_OPTION)
+    getLocalStorage(TOOLTIP_STORAGE_NAME, TOOLTIP_DEFAULT_OPTION)
 
 export const setTooltipState = async tooltipValue =>
-    await setLocalStorage(TOOLTIP_STORAGE_NAME, tooltipValue)
+    setLocalStorage(TOOLTIP_STORAGE_NAME, tooltipValue)

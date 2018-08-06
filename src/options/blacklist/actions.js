@@ -64,6 +64,7 @@ export const addToBlacklist = expression => async (dispatch, getState) => {
             dispatch(setMatchedCount(count))
         }
     } catch (error) {
+        // Do nothing
     } finally {
         updateLastActive() // Consider user active (analytics)
         dispatch(setIsLoading(false))

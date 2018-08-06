@@ -43,13 +43,11 @@ const Annotation = props => (
             {props.truncatedAnnotationText}
             {props.annotationEditMode ? null : props.showMoreAnnotation}
             <div className={props.tagClasses}>
-                {props.annotationEditMode
-                    ? null
-                    : props.tags.map((tag, i) => (
-                          <span key={i} className={styles.tagPill}>
-                              {tag.name}
-                          </span>
-                      ))}
+                {props.tags.map((tag, i) => (
+                    <span key={i} className={styles.tagPill}>
+                        {tag.name}
+                    </span>
+                ))}
             </div>
         </div>
 

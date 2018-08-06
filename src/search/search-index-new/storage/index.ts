@@ -1,11 +1,10 @@
-import groupBy from 'lodash/fp/groupBy'
 import Dexie from 'dexie'
 import 'dexie-mongoify'
 
 import { Page, Visit, Bookmark, Tag, FavIcon } from '../models'
 import { StorageManager } from './manager'
 import { getDexieHistory } from './dexie-schema'
-import { DexieSchema, FilterQuery } from './types'
+import { FilterQuery } from './types'
 
 export * from './types'
 

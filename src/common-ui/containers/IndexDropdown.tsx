@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import ReactDOM from 'react-dom'
 import debounce from 'lodash/fp/debounce'
 import noop from 'lodash/fp/noop'
 
@@ -28,7 +29,10 @@ export interface Props {
     /** Opt. cb to run when tag deleted from state. */
     onFilterDel?: (filter: string) => void
     /** Opt. cb with new tag to be added to a new annotation */
-    onNewTagAdd: (filter: string) => void
+    onNewTagAdd?: (filter: string) => void
+    // initial suggestions from the popup
+    initSuggestions?: string[]
+    isForSidebar?: boolean
 }
 
 export interface State {
@@ -37,6 +41,7 @@ export interface State {
     displayFilters: string[]
     filters: string[]
     focused: number
+    clearFieldBtn: boolean
 }
 
 class IndexDropdownContainer extends Component<Props, State> {
@@ -69,9 +74,12 @@ class IndexDropdownContainer extends Component<Props, State> {
         this.state = {
             searchVal: '',
             isLoading: false,
-            displayFilters: props.initFilters, // Display state objects; will change all the time
+            displayFilters: props.initSuggestions
+                ? props.initSuggestions
+                : props.initFilters, // Display state objects; will change all the time
             filters: props.initFilters, // Actual tags associated with the page; will only change when DB updates
             focused: props.initFilters.length ? 0 : -1,
+            clearFieldBtn: false,
         }
     }
 
@@ -87,6 +95,10 @@ class IndexDropdownContainer extends Component<Props, State> {
      */
     private get allowIndexUpdate() {
         return this.props.url != null
+    }
+
+    private showClearfieldBtn() {
+        return !this.props.isForSidebar ? false : this.state.clearFieldBtn
     }
 
     private async storeTrackEvent(isAdded: boolean) {
@@ -157,6 +169,7 @@ class IndexDropdownContainer extends Component<Props, State> {
     private addTag = async () => {
         const newTag = this.getSearchVal()
         const newTags = [newTag, ...this.state.filters]
+        // log
 
         if (this.allowIndexUpdate) {
             this.addTagRPC({
@@ -166,9 +179,10 @@ class IndexDropdownContainer extends Component<Props, State> {
             }).catch(console.error)
         }
 
-        this.storeTrackEvent(true)
+        await this.storeTrackEvent(true)
 
         this.inputEl.focus()
+
         this.setState(state => ({
             ...state,
             searchVal: '',
@@ -203,7 +217,7 @@ class IndexDropdownContainer extends Component<Props, State> {
 
             this.props.onFilterAdd(tag)
             tagsReducer = tags => [tag, ...tags]
-            this.storeTrackEvent(true)
+            await this.storeTrackEvent(true)
         } else {
             if (this.allowIndexUpdate) {
                 this.delTagRPC({
@@ -218,7 +232,7 @@ class IndexDropdownContainer extends Component<Props, State> {
                 ...tags.slice(0, tagIndex),
                 ...tags.slice(tagIndex + 1),
             ]
-            this.storeTrackEvent(false)
+            await this.storeTrackEvent(false)
         }
 
         this.setState(state => ({
@@ -257,7 +271,9 @@ class IndexDropdownContainer extends Component<Props, State> {
         // One extra index if the "add new tag" thing is showing
         let offset = this.canCreateTag() ? 0 : 1
 
-        if (!this.allowIndexUpdate) offset = 1
+        if (!this.allowIndexUpdate) {
+            offset = 1
+        }
 
         // Calculate the next focused index depending on current focus and direction
         let focusedReducer
@@ -299,16 +315,29 @@ class IndexDropdownContainer extends Component<Props, State> {
         if (this.inputBlockPattern.test(searchVal)) {
             return
         }
-
         // If user backspaces to clear input, show the current assoc tags again
-        const displayFilters = !searchVal.length
-            ? this.state.filters
-            : this.state.displayFilters
+        let displayFilters
+        let clearFieldBtn
+        if (!searchVal.length) {
+            displayFilters = this.state.filters
+            clearFieldBtn = false
+        } else {
+            displayFilters = this.state.displayFilters
+            clearFieldBtn = true
+        }
 
         this.setState(
-            state => ({ ...state, searchVal, displayFilters }),
+            state => ({ ...state, searchVal, displayFilters, clearFieldBtn }),
             this.fetchTagSuggestions, // Debounced suggestion fetch
         )
+    }
+
+    clearSearchField = () => {
+        this.setState(state => ({
+            ...state,
+            searchVal: '',
+            clearFieldBtn: false,
+        }))
     }
 
     private fetchTagSuggestions = async () => {
@@ -332,8 +361,21 @@ class IndexDropdownContainer extends Component<Props, State> {
         }
     }
 
+    scrollElementIntoViewIfNeeded(domNode: HTMLElement) {
+        // Determine if `domNode` fully fits inside `containerDomNode`.
+        // If not, set the container's scrollTop appropriately.
+        // Below are two ways to do it
+        // 1. Element.ScrollIntoView()
+        domNode.scrollIntoView({ behavior: 'instant', block: 'nearest' })
+        // 2. Use Element.scrollTop()
+        // const parentNode = domNode.parentNode as HTMLElement
+        // parentNode.scrollTop = domNode.offsetTop - parentNode.offsetTop
+    }
+
     private renderTags() {
         const tags = this.getDisplayTags()
+
+        // const Row = this.props.isForSidebar ? FilteredRow : IndexDropdownRow
 
         const tagOptions = tags.map((tag, i) => (
             <IndexDropdownRow
@@ -341,6 +383,8 @@ class IndexDropdownContainer extends Component<Props, State> {
                 key={i}
                 onClick={this.handleTagSelection(i)}
                 {...this.props}
+                scrollIntoView={this.scrollElementIntoViewIfNeeded}
+                isForSidebar={this.props.isForSidebar}
             />
         ))
 
@@ -355,6 +399,8 @@ class IndexDropdownContainer extends Component<Props, State> {
                     }
                     isForAnnotation={this.props.isForAnnotation}
                     allowAdd={this.props.allowAdd}
+                    scrollIntoView={this.scrollElementIntoViewIfNeeded}
+                    isForSidebar={this.props.isForSidebar}
                 />,
             )
         }
@@ -370,6 +416,8 @@ class IndexDropdownContainer extends Component<Props, State> {
                 setInputRef={this.setInputRef}
                 numberOfTags={this.state.filters.length}
                 tagSearchValue={this.state.searchVal}
+                clearSearchField={this.clearSearchField}
+                showClearfieldBtn={this.showClearfieldBtn()}
                 {...this.props}
             >
                 {this.renderTags()}

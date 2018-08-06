@@ -1,0 +1,47 @@
+.optInTextContainer {
+    display: flex;
+    flex-direction: column;
+    width: 110%;
+    margin-left: 1%;
+}
+
+.optInContainer {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background: #fff;
+}
+
+.optIn {
+    font-size: 16px;
+    font-weight: 200;
+    color: #3eb995;
+    text-align: center;
+    margin-top: 0;
+    margin-left: 10px;
+    margin-bottom: 1px;
+}
+
+.searchOptinContainer {
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    margin-right: 5px;
+    width: 120px;
+    background: #fff;
+}
+
+.searchOptinTextContainer {
+    justify-content: space-around;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+}
+
+.searchOptIn {
+    font-size: 16px;
+    margin-top: 3px;
+    margin-left: 0px;
+    font-weight: 300;
+    color: #3eb995;
+}
