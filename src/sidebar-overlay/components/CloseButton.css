@@ -20,11 +20,11 @@
         top: 72px;
         right: 330px;
         z-index: 1200;
-        height: 43px;
         padding-top: 5px;
         padding-bottom: 5px;
         animation: fadeIn 0s linear 0s;
         animation-fill-mode: both;
+        height: 42px;
     }
 
     &.hidden {
