@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="124px" height="53px" viewBox="0 0 124 53" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 50.2 (55047) - http://www.bohemiancoding.com/sketch -->
-    <title>Triangle</title>
+<svg width="46px" height="28px" viewBox="0 0 46 28" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 51 (57462) - http://www.bohemiancoding.com/sketch -->
+    <title>arrow</title>
     <desc>Created with Sketch.</desc>
     <defs></defs>
-    <g id="Page-2" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="memex-annotation-states-v1" transform="translate(-1348.000000, -2099.000000)" fill="#4A4A4A">
-            <polygon id="Triangle" points="1410 2099 1472 2152 1348 2152"></polygon>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="arrow" transform="translate(23.000000, 14.000000) rotate(90.000000) translate(-23.000000, -14.000000) translate(9.000000, -9.000000)" fill="#3EB995" fill-rule="nonzero">
+            <polygon id="Shape" transform="translate(14.205523, 23.000000) rotate(90.000000) translate(-14.205523, -23.000000) " points="31.7306493 36.6803973 36.6803967 31.7306499 14.2150952 9.3196033 -8.2693507 31.7306499 -3.3196033 36.6803973 14.2150952 19.1456989"></polygon>
         </g>
     </g>
 </svg>

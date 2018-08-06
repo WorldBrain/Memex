@@ -1,0 +1,17 @@
+.mainContainer {
+    text-align: center;
+}
+
+.title {
+    color: #3eb995;
+    font-size: 30px;
+    font-weight: 800;
+    padding-top: 10px;
+    margin-bottom: 20px;
+    font-style: italic;
+}
+
+.subtitle {
+    color: #3eb995;
+    font-size: 18px;
+}
