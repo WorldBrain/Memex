@@ -96,17 +96,8 @@
         align-items: center;
         justify-content: center;
 
-        & .commonIconStyle {
-            background-size: 24px;
-            background-repeat: no-repeat;
-            width: 25px;
-            height: 25px;
-        }
-
         & .annotateIcon {
             background-image: url('/img/annotate.svg');
-            margin-top: 3px;
-            margin-right: -8px;
 
             &:hover {
                 background-image: url('/img/annotate_hover.svg');
@@ -115,8 +106,6 @@
 
         & .shareIcon {
             background-image: url('/img/share.svg');
-            margin-top: 1px;
-            margin-right: -6px;
 
             &:hover {
                 background-image: url('/img/share_hover.svg');
@@ -125,14 +114,23 @@
 
         & .searchIcon {
             background-image: url('/img/search-icon.png');
-            margin-top: 1px;
-            margin-right: -6px;
 
             &:hover {
                 background-image: url('/img/search-icon.png');
             }
         }
     }
+}
+
+.annotateIcon,
+.shareIcon,
+.searchIcon {
+    background-size: 24px;
+    background-repeat: no-repeat;
+    width: 25px;
+    height: 25px;
+    margin-top: 3px;
+    margin-right: -8px;
 }
 
 .progressIndicator {
