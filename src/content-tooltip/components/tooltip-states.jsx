@@ -13,13 +13,19 @@ const images = {
 
 export const InitialComponent = ({ createLink, createAnnotation }) => (
     <div className={styles.createButtons}>
-        <div className={styles.linkButton} onMouseDown={createLink}>
+        <div
+            className={[styles.linkButton, styles.commonIconStyle]}
+            onMouseDown={null}
+        >
             <span className={styles.searchIcon} />
         </div>
-        <div className={styles.annotateButton} onMouseDown={createAnnotation}>
+        <div
+            className={[styles.annotateButton, styles.commonIconStyle]}
+            onMouseDown={createAnnotation}
+        >
             <span className={styles.annotateIcon} />
         </div>
-        <div className={styles.linkButton}>
+        <div className={[styles.linkButton, styles.commonIconStyle]}>
             <span className={styles.shareIcon} />
         </div>
     </div>

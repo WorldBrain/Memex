@@ -62,10 +62,9 @@
 }
 
 .tooltip.statePristine {
-    <<<<<<<HEAD
     width: 120px;
-    =======width: 110px;
-    >>>>>>>develop &::after {
+
+    &::after {
         left: 45%;
     }
 }
@@ -86,11 +85,9 @@
 
 .createButtons {
     z-index: 10;
-    <<<<<<<HEAD
     width: 80%;
-    =======width: 65%;
-    margin-left: 6px;
-    >>>>>>>develop & div {
+
+    & div {
         margin-right: 5px;
         cursor: pointer;
         flex-basis: 50%;
@@ -99,14 +96,17 @@
         align-items: center;
         justify-content: center;
 
-        & .annotateIcon {
-            background-image: url('/img/annotate.svg');
+        & .commonIconStyle {
             background-size: 24px;
             background-repeat: no-repeat;
             width: 25px;
             height: 25px;
+        }
+
+        & .annotateIcon {
+            background-image: url('/img/annotate.svg');
             margin-top: 3px;
-            margin-right: -4px;
+            margin-right: -8px;
 
             &:hover {
                 background-image: url('/img/annotate_hover.svg');
@@ -115,12 +115,8 @@
 
         & .shareIcon {
             background-image: url('/img/share.svg');
-            background-size: 23px;
-            background-repeat: no-repeat;
-            width: 25px;
-            height: 25px;
             margin-top: 1px;
-            margin-right: -8px;
+            margin-right: -6px;
 
             &:hover {
                 background-image: url('/img/share_hover.svg');
@@ -129,10 +125,6 @@
 
         & .searchIcon {
             background-image: url('/img/search-icon.png');
-            background-size: 23px;
-            background-repeat: no-repeat;
-            width: 25px;
-            height: 25px;
             margin-top: 1px;
             margin-right: -6px;
 
@@ -221,7 +213,7 @@
     flex-direction: column;
     justify-content: space-around;
     align-items: center;
-    width: 13px;
+    width: 15px;
     height: 30px;
     position: absolute;
     right: 6px;
@@ -231,18 +223,19 @@
     padding-left: 5px;
 
     & .smallButton img {
+        height: 15px;
         display: block;
         cursor: pointer;
     }
 
     & .imgSettings {
-        width: 13px;
-        margin-top: 4px;
+        width: 15px;
+        margin-top: 1px;
     }
 
     & .imgCross {
-        width: 11px;
-        margin-top: 2px;
+        width: 10px;
+        margin-bottom: 1px;
     }
 }
 
