@@ -197,6 +197,9 @@ export const EVENT_TYPES = {
     clickOpenNewLinkButtonSearch: {
         id: 51,
     },
+    resumeIndexing: {
+        id: 52,
+    },
 }
 
 export const NOTIF_TYPE_EVENT_IDS = {

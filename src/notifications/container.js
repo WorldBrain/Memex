@@ -16,7 +16,9 @@ import { actionRegistry } from './registry'
 import OptIn from './components/OptIn'
 import * as actionTypes from './action-types'
 import NoNotification from './components/NoNotification'
-import internalAnalytics from '../analytics/internal'
+import { remoteFunction } from 'src/util/webextensionRPC'
+
+const processEvent = remoteFunction('processEvent')
 
 class NotificationContainer extends Component {
     static propTypes = {
@@ -59,7 +61,7 @@ class NotificationContainer extends Component {
     }
 
     handleToggleStorageOption(action, value, id) {
-        internalAnalytics.processEvent({
+        processEvent({
             type: 'clickStorageChangeNotifButton',
             details: {
                 notificationId: id,
@@ -77,7 +79,7 @@ class NotificationContainer extends Component {
     }
 
     handleOpenNewTab(url, id) {
-        internalAnalytics.processEvent({
+        processEvent({
             type: 'clickOpenNewLinkButton',
             details: {
                 notificationId: id,

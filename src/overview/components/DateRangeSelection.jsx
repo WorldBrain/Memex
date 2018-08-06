@@ -6,10 +6,12 @@ import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 
 import analytics from 'src/analytics'
-import internalAnalytics from 'src/analytics/internal'
+import { remoteFunction } from 'src/util/webextensionRPC'
 import { DATE_PICKER_DATE_FORMAT as FORMAT } from '../constants'
 import styles from './DateRangeSelection.css'
 import './datepicker-overrides.css'
+
+const processEvent = remoteFunction('processEvent')
 
 class DateRangeSelection extends Component {
     static propTypes = {
@@ -92,7 +94,7 @@ class DateRangeSelection extends Component {
             action: nlpDate ? 'Successful NLP query' : 'Unsuccessful NLP query',
         })
 
-        internalAnalytics.processEvent({
+        processEvent({
             type: 'datepickerByNlp' + (isStartDate ? 'StartDate' : 'EndDate'),
         })
 
@@ -164,7 +166,7 @@ class DateRangeSelection extends Component {
             action: date ? 'Date selection' : 'Date clear',
         })
 
-        internalAnalytics.processEvent({
+        processEvent({
             type: date
                 ? 'datepickerByDropdown' +
                   (isStartDate ? 'StartDate' : 'EndDate')

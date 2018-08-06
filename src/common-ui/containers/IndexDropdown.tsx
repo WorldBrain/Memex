@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom'
 import debounce from 'lodash/fp/debounce'
 import noop from 'lodash/fp/noop'
 
-import internalAnalytics from '../../analytics/internal'
 import { updateLastActive } from '../../analytics'
 import { remoteFunction } from '../../util/webextensionRPC'
 import {
@@ -55,6 +54,7 @@ class IndexDropdownContainer extends Component<Props, State> {
     private suggestRPC
     private addTagRPC
     private delTagRPC
+    private processEvent
     private inputEl: HTMLInputElement
 
     constructor(props: Props) {
@@ -63,6 +63,7 @@ class IndexDropdownContainer extends Component<Props, State> {
         this.suggestRPC = remoteFunction('suggest')
         this.addTagRPC = remoteFunction('addTag')
         this.delTagRPC = remoteFunction('delTag')
+        this.processEvent = remoteFunction('processEvent')
 
         if (this.props.isForAnnotation) {
             this.addTagRPC = remoteFunction('addAnnotationTag')
@@ -110,11 +111,11 @@ class IndexDropdownContainer extends Component<Props, State> {
         // Only for add and remove from the popup or overview, we have already covered filter in overview
         if (this.allowIndexUpdate) {
             if (hover) {
-                internalAnalytics.processEvent({
+                this.processEvent({
                     type: isAdded ? 'add' + sourceType : 'delete' + sourceType,
                 })
             } else {
-                internalAnalytics.processEvent({
+                this.processEvent({
                     type: isAdded
                         ? 'addPopup' + sourceType
                         : 'deletePopup' + sourceType,

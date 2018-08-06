@@ -1,14 +1,11 @@
 import { EVENT_TYPES } from './constants'
+import sendToServer from './send-to-server'
 
 class Analytics {
     _initDataLoaded
     _setDataLoaded
 
-    constructor({ remoteFunction }) {
-        this.getLatestTimeWithCount = remoteFunction('getLatestTimeWithCount')
-        this.storeEvent = remoteFunction('storeEvent')
-        this._serverTrackEvent = remoteFunction('trackEvent')
-
+    constructor() {
         this._initDataLoaded = new Promise(
             resolve => (this._setDataLoaded = resolve),
         )
@@ -54,7 +51,7 @@ class Analytics {
         }
 
         // Store the event in dexie
-        await this.storeEvent(eventArgs)
+        await window.eventLog.storeEvent(eventArgs)
 
         if (EVENT_TYPES[eventArgs.type].notifType) {
             this.incrementValue(notifParams)
@@ -67,9 +64,11 @@ class Analytics {
      * @param {notifType} type of notif event
      */
     async loadInitialData(notifType, isCacheUpdate = false) {
-        const latestTimeWithCount = await this.getLatestTimeWithCount({
-            notifType,
-        })
+        const latestTimeWithCount = await window.eventLog.getLatestTimeWithCount(
+            {
+                notifType,
+            },
+        )
 
         if (!latestTimeWithCount) {
             return
@@ -113,7 +112,7 @@ class Analytics {
         await this.storeEventLogStatistics(params)
 
         // Send the data to analytics server
-        await this._serverTrackEvent(params, params.force)
+        await sendToServer.trackEvent(params, params.force)
     }
 }
 

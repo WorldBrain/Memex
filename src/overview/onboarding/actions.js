@@ -1,7 +1,7 @@
 import { createAction } from 'redux-act'
 
 import analytics from 'src/analytics'
-import internalAnalytics from 'src/analytics/internal'
+import { remoteFunction } from 'src/util/webextensionRPC'
 import { IMPORT_TYPE as TYPE, CMDS } from 'src/options/imports/constants'
 import { IMPORT_CONN_NAME } from './constants'
 import * as selectors from './selectors'
@@ -13,6 +13,8 @@ export const incProgress = createAction('onboarding/incProgress')
 export const setProgress = createAction('onboarding/setProgress')
 export const setImportsDone = createAction('onboarding/setImportsDone')
 export const setImportsStarted = createAction('onboarding/setImportsStarted')
+
+const processEvent = remoteFunction('processEvent')
 
 const persistShouldTrack = flag =>
     browser.storage.local.set({ [SHOULD_TRACK]: flag })
@@ -46,14 +48,14 @@ export const toggleShouldTrack = () => async (dispatch, getState) => {
             force,
         )
 
-        const processEvent = internalAnalytics.processEvent({
+        const processEventToStore = processEvent({
             type: toggled
                 ? 'changeTrackingPrefOptIn'
                 : 'changeTrackingPrefOptOut',
             force,
         })
 
-        return Promise.all([trackEvent, processEvent])
+        return Promise.all([trackEvent, processEventToStore])
     }
 
     if (toggled) {
@@ -110,7 +112,7 @@ class ImportsConnHandler {
             action: 'Cancelled import',
         })
 
-        internalAnalytics.processEvent({
+        processEvent({
             type: 'onboardingCancelImport',
         })
 
@@ -125,7 +127,7 @@ class ImportsConnHandler {
                 action: 'Finished import',
             })
 
-            internalAnalytics.processEvent({
+            processEvent({
                 type: 'onboardingFinishImport',
             })
         }

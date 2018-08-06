@@ -1,5 +1,5 @@
 import analytics from '.'
-import internalAnalytics from './internal'
+import { remoteFunction } from 'src/util/webextensionRPC'
 import { SHOULD_TRACK_STORAGE_KEY as SHOULD_TRACK } from 'src/options/privacy/constants'
 
 export async function storeTrackingOption(isOptIn, skipEventTrack = false) {
@@ -20,7 +20,7 @@ export async function storeTrackingOption(isOptIn, skipEventTrack = false) {
             force,
         )
 
-        const processEvent = internalAnalytics.processEvent({
+        const processEvent = remoteFunction('processEvent')({
             type: isOptIn
                 ? 'changeTrackingPrefOptIn'
                 : 'changeTrackingPrefOptOut',

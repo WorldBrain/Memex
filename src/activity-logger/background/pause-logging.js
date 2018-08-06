@@ -60,16 +60,16 @@ function handlePause(timeout) {
         return timeout
     }
 
-    analytics.trackEvent({
-        category: 'Popup',
-        action: 'Resume indexing',
-    })
-
-    internalAnalytics.processEvent({
-        type: 'resumeIndexing',
-    })
-
     return setTimeout(() => {
+        analytics.trackEvent({
+            category: 'Popup',
+            action: 'Resume indexing',
+        })
+
+        internalAnalytics.processEvent({
+            type: 'resumeIndexing',
+        })
+
         createNotif({
             message: 'Activity logger now running in background again',
             title: 'WorldBrain Activity Logger',

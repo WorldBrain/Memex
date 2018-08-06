@@ -3,7 +3,6 @@ import PropTypes from 'prop-types'
 import qs from 'query-string'
 
 import analytics, { updateLastActive } from 'src/analytics'
-import internalAnalytics from 'src/analytics/internal'
 import extractQueryFilters from 'src/util/nlp-time-filter'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { isLoggable, getPauseState } from 'src/activity-logger'
@@ -49,6 +48,7 @@ class PopupContainer extends Component {
         this.listsContainingPage = remoteFunction('fetchListPagesByUrl')
         this.fetchAllLists = remoteFunction('fetchAllLists')
         this.initTagSuggestions = remoteFunction('extendedSuggest')
+        this.processEvent = remoteFunction('processEvent')
     }
 
     state = {
@@ -222,7 +222,7 @@ class PopupContainer extends Component {
                 action: domainDelete ? 'Blacklist domain' : 'Blacklist site',
             })
 
-            internalAnalytics.processEvent({
+            this.processEvent({
                 type: domainDelete ? 'blacklistDomain' : 'blacklistSite',
             })
 
@@ -248,7 +248,7 @@ class PopupContainer extends Component {
             value: isPaused ? undefined : pauseValue,
         })
 
-        internalAnalytics.processEvent({
+        this.processEvent({
             type: isPaused ? 'resumeIndexing' : 'pauseIndexing',
         })
 
@@ -282,7 +282,7 @@ class PopupContainer extends Component {
                 action: 'Popup search',
             })
 
-            internalAnalytics.processEvent({
+            this.processEvent({
                 type: 'searchPopup',
             })
 
@@ -438,7 +438,7 @@ class PopupContainer extends Component {
             tagMode,
             listMode,
         } = this.state
-        
+
         if (blacklistConfirm) {
             return (
                 <BlacklistConfirm
