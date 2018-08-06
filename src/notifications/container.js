@@ -15,6 +15,7 @@ import ActionButton from './components/ActionButton'
 import { actionRegistry } from './registry'
 import OptIn from './components/OptIn'
 import * as actionTypes from './action-types'
+import NoNotification from './components/NoNotification'
 import internalAnalytics from '../analytics/internal'
 
 class NotificationContainer extends Component {
@@ -212,12 +213,12 @@ class NotificationContainer extends Component {
         if (this.props.isLoadingBar) {
             return <LoadingIndicator key="loading" />
         } else {
-            return (
-                <StatusHeading>
-                    {unreadNotificationList.length === 0
-                        ? 'There are no new notifications.'
-                        : 'New'}
-                </StatusHeading>
+            return unreadNotificationList.length !== 0 ? (
+                <StatusHeading>New</StatusHeading>
+            ) : (
+                <NoNotification title="No new notifications">
+                    ¯\_(ツ)_/¯
+                </NoNotification>
             )
         }
     }
