@@ -44,12 +44,13 @@
 
 .allLists {
     height: inherit;
-    min-width: 24.8vw;
+    min-width: 20vw;
     overflow: hidden;
 }
 
 .allListsInner {
     height: inherit;
+    min-width: 20vw;
     overflow-y: auto;
 }
 
