@@ -12,7 +12,6 @@ import { IndexDropdown } from '../../common-ui/containers'
 class AnnotationContainer extends React.Component {
     static propTypes = {
         annotation: PropTypes.object.isRequired,
-        tags: PropTypes.array.isRequired,
         deleteAnnotation: PropTypes.func.isRequired,
         editAnnotation: PropTypes.func.isRequired,
         goToAnnotation: PropTypes.func.isRequired,
@@ -46,16 +45,29 @@ class AnnotationContainer extends React.Component {
             annotationText,
             annotationEditMode: false,
 
-            tags: props.tags || [],
+            containsTags: false,
+            tags: [],
             tagInput: false,
 
             footerState: 'default',
         }
     }
 
-    componentDidMount() {
+    async componentDidMount() {
+        const { annotation } = this.props
+        let containsTags = false
+
         this.tagInputContainer = null
+
+        const tags = await remoteFunction('getAnnotationTags')(annotation.url)
+        if (tags.length) containsTags = true
+
         this.attachEventListener()
+
+        this.setState({
+            containsTags,
+            tags,
+        })
     }
 
     maybeCloseTagsDropdown = e => {

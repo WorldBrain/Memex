@@ -15,7 +15,6 @@ import ActionButton from './components/ActionButton'
 import { actionRegistry } from './registry'
 import OptIn from './components/OptIn'
 import * as actionTypes from './action-types'
-import NoNotification from './components/NoNotification'
 import internalAnalytics from '../analytics/internal'
 
 class NotificationContainer extends Component {
@@ -34,7 +33,6 @@ class NotificationContainer extends Component {
         isReadShow: PropTypes.bool.isRequired,
         messageCharLimit: PropTypes.number.isRequired,
         localStorageNotif: PropTypes.object.isRequired,
-        isLoadingBar: PropTypes.bool.isRequired,
     }
 
     static defaultProps = {
@@ -207,28 +205,16 @@ class NotificationContainer extends Component {
         return this.renderNotificationItems(unreadNotificationList, true)
     }
 
-    renderStatusHeading() {
-        const { unreadNotificationList } = this.props
-
-        if (this.props.isLoadingBar) {
-            return <LoadingIndicator key="loading" />
-        } else {
-            return unreadNotificationList.length !== 0 ? (
-                <StatusHeading>New</StatusHeading>
-            ) : (
-                <NoNotification title="No new notifications">
-                    ¯\_(ツ)_/¯
-                </NoNotification>
-            )
-        }
-    }
-
     render() {
-        const { readNotificationList } = this.props
+        const { unreadNotificationList, readNotificationList } = this.props
 
         return (
             <NotificationList>
-                {this.renderStatusHeading()}
+                <StatusHeading>
+                    {unreadNotificationList.length === 0
+                        ? 'There are no new notifications.'
+                        : 'New'}
+                </StatusHeading>
                 {this.renderUnreadNotifications()}
                 {readNotificationList.length !== 0 && (
                     <ReadHeader
@@ -251,7 +237,6 @@ const mapStateToProps = state => ({
     isReadExpanded: selectors.isReadExpanded(state),
     isReadShow: selectors.isReadShow(state),
     localStorageNotif: selectors.localStorageNotif(state),
-    isLoadingBar: selectors.isLoadingBar(state),
 })
 
 const mapDispatchToProps = dispatch => ({

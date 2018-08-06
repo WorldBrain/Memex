@@ -21,10 +21,8 @@ class SidebarContainer extends React.Component {
         pageUrl: PropTypes.string,
         pageTitle: PropTypes.string,
         annotations: PropTypes.array.isRequired,
-        tags: PropTypes.object.isRequired,
         isLoading: PropTypes.bool.isRequired,
         fetchAnnotations: PropTypes.func.isRequired,
-        setAnnotationAndTags: PropTypes.func.isRequired,
         editAnnotation: PropTypes.func.isRequired,
         deleteAnnotation: PropTypes.func.isRequired,
         recieveAnchor: PropTypes.func.isRequired,
@@ -65,7 +63,8 @@ class SidebarContainer extends React.Component {
                 this.props.focusCommentBox(value)
             },
             setAnnotations: annotations => {
-                this.props.setAnnotationAndTags(annotations)
+                this.props.setAnnotations(annotations)
+                this.props.setIsLoading(false)
             },
             sendAnchorToSidebar: anchor => {
                 this.props.recieveAnchor(anchor)
@@ -166,7 +165,6 @@ class SidebarContainer extends React.Component {
         return annotations.map(annotation => (
             <Annotation
                 annotation={annotation}
-                tags={this.props.tags[annotation.url]}
                 goToAnnotation={this.goToAnnotation()}
                 editAnnotation={this.props.editAnnotation}
                 deleteAnnotation={this.deleteAnnotation}
@@ -196,7 +194,6 @@ class SidebarContainer extends React.Component {
 
 const mapStateToProps = state => ({
     annotations: selectors.annotations(state),
-    tags: selectors.tags(state),
     activeAnnotation: selectors.activeAnnotation(state),
     hoveredAnnotation: selectors.activeAnnotation(state),
     isLoading: selectors.isLoading(state),
@@ -205,8 +202,6 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
     setPageInfo: (url, title) => dispatch(actions.setPageInfo({ url, title })),
     fetchAnnotations: () => dispatch(actions.fetchAnnotationAct()),
-    setAnnotationAndTags: annotations =>
-        dispatch(actions.setAnnotationAndTags(annotations)),
     setAnnotations: annotations =>
         dispatch(actions.setAnnotations(annotations)),
     editAnnotation: ({ url, comment }) =>

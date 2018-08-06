@@ -42,10 +42,6 @@
     left: -8px;
     width: 105px;
     justify-content: space-evenly;
-
-    @media (max-width: 835px) {
-        display: none !important; /* stylelint-disable-line declaration-no-important */
-    }
 }
 
 .buttonContainer {

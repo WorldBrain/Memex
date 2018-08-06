@@ -4,7 +4,6 @@ import * as actions from './actions'
 
 const defaultState = {
     annotations: [],
-    tags: {},
     annotationCount: 0,
     isLoading: true,
     // Information about the page to pass to the storage
@@ -21,11 +20,6 @@ const defaultState = {
 const setAnnotations = (state, annotations) => ({
     ...state,
     annotations: annotations,
-})
-
-const setTags = (state, tags) => ({
-    ...state,
-    tags: tags,
 })
 
 const setAnnotationCount = (state, value) => ({
@@ -56,7 +50,6 @@ const setHoveredAnnotation = (state, hoveredUrl) => ({
 export default createReducer(
     {
         [actions.setAnnotations]: setAnnotations,
-        [actions.setTags]: setTags,
         [actions.setPageInfo]: setPageInfo,
         [actions.setActiveAnnotation]: setActiveAnnotation,
         [actions.setHoveredAnnotation]: setHoveredAnnotation,

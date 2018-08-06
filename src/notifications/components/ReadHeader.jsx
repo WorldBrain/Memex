@@ -11,7 +11,7 @@ const isExpanded = expanded =>
 
 const ReadHeader = props => (
     <div className={styles.readHeader} onClick={props.toggleReadExpand}>
-        <span>See Previous</span>
+        <span>Read</span>
         <img
             className={isExpanded(props.isReadExpanded)}
             src="/img/triangle.svg"
