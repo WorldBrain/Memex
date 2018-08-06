@@ -28,6 +28,7 @@ import initSentry from './util/raven'
 import { USER_ID, generateTokenIfNot } from 'src/util/generate-token'
 import { API_HOST } from 'src/analytics/internal/constants'
 import { storageChangesManager } from 'src/util/storage-changes'
+import internalAnalytics from 'src/analytics/internal'
 
 window.index = searchIndex
 window.storage = db
@@ -152,6 +153,7 @@ window.directLinking = directLinking
 const eventLog = new EventLogBackground({ storageManager })
 eventLog.setupRemoteFunctions()
 window.eventLog = eventLog
+internalAnalytics.registerOperations()
 
 const customList = new CustomListBackground({ storageManager })
 customList.setupRemoteFunctions()
