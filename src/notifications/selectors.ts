@@ -53,10 +53,11 @@ export const initUnreadNotifCount = createSelector(
     state => state.unreadNotifCount,
 )
 export const unreadNotifCount = createSelector(
+    notificationsList,
     unreadNotificationList,
     initUnreadNotifCount,
-    (notifs, countUnread) =>
-        notifs && notifs.length ? notifs.length : countUnread,
+    (totalNotifs, notifs, countUnread) =>
+        totalNotifs.length || notifs.length ? notifs.length : countUnread,
 )
 export const localStorageNotif = createSelector(
     notifications,

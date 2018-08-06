@@ -205,16 +205,28 @@ class NotificationContainer extends Component {
         return this.renderNotificationItems(unreadNotificationList, true)
     }
 
-    render() {
-        const { unreadNotificationList, readNotificationList } = this.props
+    renderStatusHeading() {
+        const { unreadNotificationList } = this.props
 
-        return (
-            <NotificationList>
+        if (this.props.isLoading) {
+            return <LoadingIndicator key="loading" />
+        } else {
+            return (
                 <StatusHeading>
                     {unreadNotificationList.length === 0
                         ? 'There are no new notifications.'
                         : 'New'}
                 </StatusHeading>
+            )
+        }
+    }
+
+    render() {
+        const { readNotificationList } = this.props
+
+        return (
+            <NotificationList>
+                {this.renderStatusHeading()}
                 {this.renderUnreadNotifications()}
                 {readNotificationList.length !== 0 && (
                     <ReadHeader
