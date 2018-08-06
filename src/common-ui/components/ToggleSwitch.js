@@ -38,8 +38,7 @@ class ToggleSwitch extends Component {
 
     deriveClass = () =>
         cx(this.props.className, {
-            [this.props.activeClassName]:
-                this.props.isChecked || this.state.isChecked,
+            [this.props.activeClassName]: this.isCheckedValue,
             [this.props.fromSearch]: localStorage.searchSwitch,
         })
 
