@@ -3,7 +3,6 @@ import { remoteFunction } from 'src/util/webextensionRPC'
 import { remove } from 'lodash/array'
 
 import * as selectors from './selectors'
-import internalAnalytics from 'src/analytics/internal'
 
 import {
     selectors as commentSelectors,
@@ -68,7 +67,7 @@ export const createAnnotation = (comment, body, tags, env) => async (
     dispatch,
     getState,
 ) => {
-    internalAnalytics.processEvent({
+    remoteFunction('processEvent')({
         type: 'createAnnotation',
     })
 
