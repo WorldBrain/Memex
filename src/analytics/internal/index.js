@@ -1,8 +1,8 @@
 import Analytics from './analytics'
-import { remoteFunction } from 'src/util/webextensionRPC'
+import sendToServer from './send-to-server'
 
 const analytics = new Analytics({
-    remoteFunction,
+    serverConnector: sendToServer,
 })
 
 export default analytics

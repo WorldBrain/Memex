@@ -1,7 +1,6 @@
 import { createAction } from 'redux-act'
 
 import analytics, { updateLastActive } from 'src/analytics'
-import internalAnalytics from 'src/analytics/internal'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import * as selectors from './selectors'
 import { STORAGE_KEY } from './constants'
@@ -9,6 +8,7 @@ import { STORAGE_KEY } from './constants'
 const deletePagesByPattern = remoteFunction('delPagesByPattern')
 const getMatchingPageCount = remoteFunction('getMatchingPageCount')
 const dirtyEstsCache = remoteFunction('dirtyEstsCache')
+const processEvent = remoteFunction('processEvent')
 
 export const setMatchedCount = createAction('settings/setMatchedCount')
 export const setModalShow = createAction('settings/setModalShow')
@@ -43,7 +43,7 @@ export const addToBlacklist = expression => async (dispatch, getState) => {
         action: 'Add blacklist entry',
     })
 
-    internalAnalytics.processEvent({
+    processEvent({
         type: 'addBlacklistEntry',
     })
 
@@ -78,7 +78,7 @@ export const removeFromBlacklist = index => async (dispatch, getState) => {
         action: 'Remove blacklist entry',
     })
 
-    internalAnalytics.processEvent({
+    processEvent({
         type: 'removeBlacklistEntry',
     })
 

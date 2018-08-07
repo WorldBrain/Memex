@@ -4,10 +4,8 @@ class Analytics {
     _initDataLoaded
     _setDataLoaded
 
-    constructor({ remoteFunction }) {
-        this.getLatestTimeWithCount = remoteFunction('getLatestTimeWithCount')
-        this.storeEvent = remoteFunction('storeEvent')
-        this._serverTrackEvent = remoteFunction('trackEvent')
+    constructor({ serverConnector }) {
+        this._serverConnector = serverConnector
 
         this._initDataLoaded = new Promise(
             resolve => (this._setDataLoaded = resolve),
@@ -29,7 +27,9 @@ class Analytics {
         nlpSearch: { count: 0 },
     }
 
-    async registerOperations() {
+    async registerOperations(eventLog) {
+        this.eventLog = eventLog
+
         for (const event of Object.keys(this._eventStats)) {
             await this.loadInitialData(event)
         }
@@ -54,7 +54,7 @@ class Analytics {
         }
 
         // Store the event in dexie
-        await this.storeEvent(eventArgs)
+        await this.eventLog.storeEvent(eventArgs)
 
         if (EVENT_TYPES[eventArgs.type].notifType) {
             this.incrementValue(notifParams)
@@ -67,7 +67,7 @@ class Analytics {
      * @param {notifType} type of notif event
      */
     async loadInitialData(notifType, isCacheUpdate = false) {
-        const latestTimeWithCount = await this.getLatestTimeWithCount({
+        const latestTimeWithCount = await this.eventLog.getLatestTimeWithCount({
             notifType,
         })
 
@@ -113,7 +113,7 @@ class Analytics {
         await this.storeEventLogStatistics(params)
 
         // Send the data to analytics server
-        await this._serverTrackEvent(params, params.force)
+        await this._serverConnector.trackEvent(params, params.force)
     }
 }
 

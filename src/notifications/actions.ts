@@ -7,7 +7,6 @@ import * as selectors from './selectors'
 import * as constants from './constants'
 import { NotifDefinition } from './types'
 import * as storageKeys from './storage-keys-notif'
-import internalAnalytics from '../analytics/internal'
 
 export const setShowMoreIndex = createAction('notifications/setShowMoreIndex')
 export const nextPage = createAction('notifications/nextPage')
@@ -34,6 +33,7 @@ const fetchReadNotifications = remoteFunction('fetchReadNotifications')
 const storeNotification = remoteFunction('storeNotification')
 const fetchUnreadCount = remoteFunction('fetchUnreadCount')
 const readNotification = remoteFunction('readNotification')
+const processEvent = remoteFunction('processEvent')
 
 export const init = () => async (dispatch, getState) => {
     const storage = await initStorageValue()
@@ -112,7 +112,7 @@ export const handleReadNotif = notification => async (dispatch, getState) => {
         }
     })
 
-    internalAnalytics.processEvent({
+    processEvent({
         type: 'readNotificationOverview',
         details: {
             notificationId: notification.id,
@@ -137,7 +137,7 @@ export const handleMoreResult = () => async (dispatch, getState) => {
         })),
     }
 
-    internalAnalytics.processEvent({
+    processEvent({
         type: 'readNotificationPagination',
     })
 
@@ -161,7 +161,7 @@ export const updateUnreadNotif = () => async (dispatch, getState) => {
 export const toggleInboxMid = val => (dispatch, getState) => {
     const showInbox = selectors.showInbox(getState())
 
-    internalAnalytics.processEvent({
+    processEvent({
         type: !showInbox ? 'openInboxOveview' : 'closeInboxOveview',
     })
 

@@ -1,6 +1,7 @@
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import EventLogStorage from './storage'
 import sendToServer from '../send-to-server'
+import internalAnalytics from '../'
 
 export default class EventLogBackground {
     constructor({ storageManager }) {
@@ -17,6 +18,9 @@ export default class EventLogBackground {
             },
             trackEvent: (...params) => {
                 return sendToServer.trackEvent(...params)
+            },
+            processEvent: (...params) => {
+                return internalAnalytics.processEvent(...params)
             },
         })
     }

@@ -15,7 +15,6 @@ import { actionRegistry } from '../../notifications/registry'
 import ActionButton from '../../notifications/components/ActionButton'
 import OptIn from '../../notifications/components/OptIn'
 import { ToggleSwitch } from '../../common-ui/components'
-import internalAnalytics from '../../analytics/internal'
 
 class Container extends React.Component {
     static propTypes = {
@@ -42,6 +41,7 @@ class Container extends React.Component {
         this.trackEvent = remoteFunction('trackEvent')
         this.readNotification = remoteFunction('readNotification')
         this.fetchNotifById = remoteFunction('fetchNotifById')
+        this.processEvent = remoteFunction('processEvent')
     }
 
     state = {
@@ -184,7 +184,7 @@ class Container extends React.Component {
     }
 
     async handleClickTick() {
-        internalAnalytics.processEvent({
+        this.processEvent({
             type: 'readNotificationSearchEngine',
             details: {
                 notificationId: this.state.notification.id,
@@ -199,7 +199,7 @@ class Container extends React.Component {
     }
 
     handleToggleStorageOption(action, value) {
-        internalAnalytics.processEvent({
+        this.processEvent({
             type: 'toggleStorageSearchEngine',
             details: {
                 notificationId: this.state.notification.id,
@@ -217,7 +217,7 @@ class Container extends React.Component {
     }
 
     handleClickOpenNewTabButton(url) {
-        internalAnalytics.processEvent({
+        this.processEvent({
             type: 'clickOpenNewLinkButtonSearch',
             details: {
                 notificationId: this.state.notification.id,

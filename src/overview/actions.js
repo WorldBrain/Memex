@@ -1,7 +1,6 @@
 import { createAction } from 'redux-act'
 
 import analytics, { updateLastActive } from 'src/analytics'
-import internalAnalytics from 'src/analytics/internal'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { actions as filterActs, selectors as filters } from '../search-filters'
 import * as constants from './constants'
@@ -49,6 +48,7 @@ const deletePages = remoteFunction('delPages')
 const createBookmarkByUrl = remoteFunction('addBookmark')
 const removeBookmarkByUrl = remoteFunction('delBookmark')
 const requestSearch = remoteFunction('search')
+const processEvent = remoteFunction('processEvent')
 
 /**
  * Init a connection to the index running in the background script, allowing
@@ -187,21 +187,21 @@ function storeSearch(searchResult, overwrite, state) {
         type = overwrite ? 'successfulSearch' : 'paginateSearch'
     }
 
-    internalAnalytics.processEvent({ type })
+    processEvent({ type })
 
     if (filters.onlyBookmarks(state)) {
-        internalAnalytics.processEvent({ type: 'bookmarkFilter' })
+        processEvent({ type: 'bookmarkFilter' })
     }
 
     if (filters.tags(state).length > 0) {
-        internalAnalytics.processEvent({ type: 'tagFilter' })
+        processEvent({ type: 'tagFilter' })
     }
 
     if (
         filters.domainsInc(state).length > 0 ||
         filters.domainsExc(state).length > 0
     ) {
-        internalAnalytics.processEvent({ type: 'domainFilter' })
+        processEvent({ type: 'domainFilter' })
     }
 }
 
@@ -269,7 +269,7 @@ export const deleteDocs = () => async (dispatch, getState) => {
         action: 'Delete result',
     })
 
-    internalAnalytics.processEvent({
+    processEvent({
         type: 'deleteResult',
     })
 
@@ -302,7 +302,7 @@ export const toggleBookmark = (url, index) => async (dispatch, getState) => {
             : 'Create result bookmark',
     })
 
-    internalAnalytics.processEvent({
+    processEvent({
         type: hasBookmark ? 'removeResultBookmark' : 'createResultBookmark',
     })
 
@@ -378,7 +378,7 @@ export const setQueryTagsDomains = (input, isEnter = true) => (
     }
 
     if (input.length > 0) {
-        internalAnalytics.processEvent({ type: 'nlpSearch' })
+        processEvent({ type: 'nlpSearch' })
     }
 
     dispatch(setQuery(input))
