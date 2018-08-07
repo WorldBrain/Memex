@@ -153,7 +153,7 @@ window.directLinking = directLinking
 const eventLog = new EventLogBackground({ storageManager })
 eventLog.setupRemoteFunctions()
 window.eventLog = eventLog
-internalAnalytics.registerOperations()
+internalAnalytics.registerOperations(eventLog)
 
 const customList = new CustomListBackground({ storageManager })
 customList.setupRemoteFunctions()

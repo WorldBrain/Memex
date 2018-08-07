@@ -83,6 +83,9 @@ export default class NotificationBackground {
                         () => {
                             internalAnalytics.processEvent({
                                 type: 'clickOnSystemNotification',
+                                details: {
+                                    notificationId: notification.id,
+                                },
                             })
 
                             return browser.tabs.create({ url })
