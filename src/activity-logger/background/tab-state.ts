@@ -89,7 +89,9 @@ class Tab implements TabState {
         }
 
         if (!skipRemoteCall && isLoggable({ url: this.url })) {
-            this._toggleRenderSidebarIFrame(!this.isActive)
+            this._toggleRenderSidebarIFrame(!this.isActive).catch(err => {
+                // Do nothing
+            })
         }
 
         this.isActive = !this.isActive
