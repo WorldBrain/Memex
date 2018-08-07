@@ -1,7 +1,6 @@
 import { createAction } from 'redux-act'
 import { createAnnotation } from '../redux/actions'
 import { DEFAULT_ROWS } from '../constants'
-import { remoteFunction } from '../../util/webextensionRPC'
 
 export const setCommentInput = createAction('setCommentInput')
 
@@ -36,10 +35,6 @@ const resetCommentBox = () => dispatch => {
 }
 
 export const saveAnnotation = (comment, body, tags, env) => async dispatch => {
-    remoteFunction('processEvent')({
-        type: 'createAnnotationPage',
-    })
-
     dispatch(createAnnotation(comment, body, tags, env))
     dispatch(resetCommentBox())
 }
