@@ -247,10 +247,19 @@ class PopupContainer extends Component {
             action: isPaused ? 'Resume indexing' : 'Pause indexing',
             value: isPaused ? undefined : pauseValue,
         })
-
-        this.processEvent({
-            type: isPaused ? 'resumeIndexing' : 'pauseIndexing',
-        })
+        console.log(isPaused)
+        if (isPaused) {
+            this.processEvent({
+                type: 'resumeIndexing',
+            })
+        } else {
+            this.processEvent({
+                type: 'pauseIndexing',
+                details: {
+                    pauseValue,
+                },
+            })
+        }
 
         // Tell background script to do on extension level
         this.toggleLoggingPause(pauseValue)

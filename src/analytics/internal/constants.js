@@ -200,6 +200,9 @@ export const EVENT_TYPES = {
     resumeIndexing: {
         id: 52,
     },
+    pauseIndexing: {
+        id: 53,
+    },
 }
 
 export const NOTIF_TYPE_EVENT_IDS = {
