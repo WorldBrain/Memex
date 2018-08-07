@@ -24,7 +24,13 @@ const Notification = props => (
             </div>
             <div className={styles.notifContainer}>
                 <div className={styles.logo}>
-                    <img src="/img/worldbrain-logo-narrow.png" />
+                    <a
+                        href="https://worldbrain.io/"
+                        target="_blank"
+                        className={styles.link}
+                    >
+                        <img src="/img/worldbrain-logo-narrow.png" />
+                    </a>
                 </div>
                 <div className={styles.content}>
                     <div className={styles.messageWhy}>
