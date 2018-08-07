@@ -106,18 +106,20 @@ class OverviewContainer extends Component {
         }
     }
 
-    renderSidebarIcons = () => (
-        <SidebarIcons
-            filterBtnClick={this.props.showSearchFilters}
-            listBtnClick={this.props.hideSearchFilters}
-            overviewMode
-            onPageDrag={this.props.hideSearchFilters}
-            filterActive={this.props.filterActive}
-            isListFilterActive={this.props.isListFilterActive}
-            onClearBtnClick={this.props.resetFilters}
-            onShowBtnClick={this.props.delListFilter}
-        />
-    )
+    renderSidebarIcons = () => {
+        return !this.props.showInbox ? (
+            <SidebarIcons
+                filterBtnClick={this.props.showSearchFilters}
+                listBtnClick={this.props.hideSearchFilters}
+                overviewMode
+                onPageDrag={this.props.hideSearchFilters}
+                filterActive={this.props.filterActive}
+                isListFilterActive={this.props.isListFilterActive}
+                onClearBtnClick={this.props.resetFilters}
+                onShowBtnClick={this.props.delListFilter}
+            />
+        ) : null
+    }
 
     renderTagsManager = ({ shouldDisplayTagPopup, url, tags }, index) =>
         shouldDisplayTagPopup ? (

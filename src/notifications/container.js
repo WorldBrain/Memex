@@ -9,7 +9,6 @@ import * as actions from './actions'
 import * as selectors from './selectors'
 import NotificationList from './components/NotificationList'
 import Notification from './components/Notification'
-import StatusHeading from './components/StatusHeading'
 import ReadHeader from './components/ReadHeader'
 import ActionButton from './components/ActionButton'
 import { actionRegistry } from './registry'
@@ -215,13 +214,11 @@ class NotificationContainer extends Component {
         if (this.props.isLoadingBar) {
             return <LoadingIndicator key="loading" />
         } else {
-            return unreadNotificationList.length !== 0 ? (
-                <StatusHeading>New</StatusHeading>
-            ) : (
+            return unreadNotificationList.length === 0 ? (
                 <NoNotification title="No new notifications">
                     ¯\_(ツ)_/¯
                 </NoNotification>
-            )
+            ) : null
         }
     }
 
