@@ -221,7 +221,6 @@ class Ribbon extends React.Component {
 
     closeSidebarOps = async () => {
         this.props.removeHighlights()
-        await this.frameFC.remoteExecute('sendAnchorToSidebar')(null)
         this.frameFC.remoteExecute('focusAnnotation')('')
         this.frameFC.remoteExecute('setAnnotations')([])
         this.frameFC.remoteExecute('focusCommentBox')(false)
