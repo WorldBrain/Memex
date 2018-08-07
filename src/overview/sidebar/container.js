@@ -13,10 +13,10 @@ class SidebarContainer extends React.Component {
         toggleMouseOnSidebar: PropTypes.func.isRequired,
         pageUrl: PropTypes.string.isRequired,
         pageTitle: PropTypes.string.isRequired,
-        closeSidebarAct: PropTypes.func.isRequired,
+        closeSidebar: PropTypes.func.isRequired,
     }
 
-    handleClickOutside = () => this.props.closeSidebarAct()
+    handleClickOutside = () => this.props.closeSidebar()
 
     render() {
         return (
@@ -45,9 +45,9 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
     setShowSidebar: showSidebar =>
-        dispatch(actions.setShowSidebar(showSidebar)),
+        dispatch(actions.setShowSideBarMid(showSidebar)),
     toggleMouseOnSidebar: () => dispatch(actions.toggleMouseOnSidebar()),
-    closeSidebarAct: () => dispatch(actions.closeSidebarAct()),
+    closeSidebar: () => dispatch(actions.closeSidebar()),
 })
 
 const enhancedSidebar = onClickOutside(SidebarContainer)

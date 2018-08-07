@@ -36,9 +36,8 @@ const resetCommentBox = () => dispatch => {
 }
 
 export const saveAnnotation = (comment, body, tags, env) => async dispatch => {
-    await remoteFunction('trackEvent')({
+    remoteFunction('processEvent')({
         type: 'createAnnotationPage',
-        time: Date.now(),
     })
 
     dispatch(createAnnotation(comment, body, tags, env))

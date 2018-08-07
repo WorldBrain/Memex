@@ -230,7 +230,7 @@ export const EVENT_TYPES = {
     enableTooltipPopup: {
         id: 62,
     },
-    disbleTooltipPopup: {
+    disableTooltipPopup: {
         id: 63,
     },
 }

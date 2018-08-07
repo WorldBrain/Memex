@@ -309,11 +309,10 @@ class PopupContainer extends Component {
         const isTooltipEnabled = !this.state.isTooltipEnabled
         await setTooltipState(isTooltipEnabled)
 
-        await remoteFunction('trackEvent')({
+        this.processEvent({
             type: isTooltipEnabled
                 ? 'enableTooltipPopup'
                 : 'disableTooltipPopup',
-            time: Date.now(),
         })
 
         if (isTooltipEnabled) {

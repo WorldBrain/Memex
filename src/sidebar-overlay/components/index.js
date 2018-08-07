@@ -27,9 +27,8 @@ export const setupRibbonUI = target => {
 }
 
 export const destroyAll = target => async () => {
-    await remoteFunction('trackEvent')({
+    remoteFunction('processEvent')({
         type: 'disableSidebarPage',
-        time: Date.now(),
     })
 
     ReactDOM.unmountComponentAtNode(target)
