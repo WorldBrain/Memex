@@ -233,6 +233,9 @@ export const EVENT_TYPES = {
     disableTooltipPopup: {
         id: 63,
     },
+    deleteAnnotation: {
+        id: 64,
+    },
 }
 
 export const NOTIF_TYPE_EVENT_IDS = {

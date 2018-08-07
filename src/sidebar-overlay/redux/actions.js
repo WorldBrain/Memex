@@ -107,6 +107,10 @@ export const editAnnotation = (url, comment) => async (dispatch, getState) => {
 }
 
 export const deleteAnnotation = url => async (dispatch, getState) => {
+    remoteFunction('processEvent')({
+        type: 'deleteAnnotation',
+    })
+
     await remoteFunction('deleteAnnotation')(url)
     const state = getState()
     const annotations = [...selectors.annotations(state)]
