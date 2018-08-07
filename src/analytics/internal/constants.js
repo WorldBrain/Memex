@@ -236,6 +236,18 @@ export const EVENT_TYPES = {
     deleteAnnotation: {
         id: 64,
     },
+    createCollection: {
+        id: 65,
+    },
+    insertPageToCollection: {
+        id: 66,
+    },
+    removeCollection: {
+        id: 67,
+    },
+    removePageFromCollection: {
+        id: 68,
+    },
 }
 
 export const NOTIF_TYPE_EVENT_IDS = {
