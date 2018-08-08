@@ -101,7 +101,7 @@ class ListContainer extends Component {
 
     renderAllLists = () => {
         return this.props.lists.map((list, i) => {
-            if (list.isEditing) {
+            if (list.isEditing && this.props.isSidebarOpen) {
                 return (
                     <CreateListForm
                         key={i}
@@ -135,7 +135,7 @@ class ListContainer extends Component {
     }
 
     renderCreateList = (shouldDisplayForm, value = null) =>
-        shouldDisplayForm ? (
+        shouldDisplayForm && this.props.isSidebarOpen ? (
             <CreateListForm
                 onCheckboxClick={this.handleCreateListSubmit}
                 handleNameChange={this.handleSearchChange('listName')}
