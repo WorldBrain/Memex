@@ -3,8 +3,10 @@ import ReactDOM from 'react-dom'
 
 import SidebarContainer from './sidebarContainer'
 import Ribbon from './Ribbon'
-
+import { remoteFunction } from '../../util/webextensionRPC'
 import * as interactions from '../content_script/interactions'
+
+const processEventRPC = remoteFunction('processEvent')
 
 export const setupRibbonUI = target => {
     const sidebarURL = browser.extension.getURL('sidebar.html')
@@ -26,6 +28,8 @@ export const setupRibbonUI = target => {
 }
 
 export const destroyAll = target => () => {
+    processEventRPC({ type: 'disableSidebarPage' })
+
     ReactDOM.unmountComponentAtNode(target)
     document.body.removeChild(target)
 }
