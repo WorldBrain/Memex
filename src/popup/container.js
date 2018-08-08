@@ -309,6 +309,12 @@ class PopupContainer extends Component {
         const isTooltipEnabled = !this.state.isTooltipEnabled
         await setTooltipState(isTooltipEnabled)
 
+        this.processEvent({
+            type: isTooltipEnabled
+                ? 'enableTooltipPopup'
+                : 'disableTooltipPopup',
+        })
+
         if (isTooltipEnabled) {
             await this.insertRibbon()
             await this.openSidebar()

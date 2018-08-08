@@ -2,11 +2,19 @@ import { createAction } from 'redux-act'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { remove } from 'lodash/array'
 
-import * as selectors from './selectors'
 import {
     selectors as commentSelectors,
     actions as commentActions,
 } from '../CommentBox'
+import * as selectors from './selectors'
+
+const getAllAnnotationsRPC = remoteFunction('getAllAnnotations')
+const getAnnotationTagsRPC = remoteFunction('getAnnotationTags')
+const addAnnotationTagRPC = remoteFunction('addAnnotationTag')
+const createAnnotationRPC = remoteFunction('createAnnotation')
+const editAnnotationRPC = remoteFunction('editAnnotation')
+const deleteAnnotationRPC = remoteFunction('deleteAnnotation')
+const processEventRPC = remoteFunction('processEvent')
 
 export const setAnnotations = createAction('setAnnotations')
 
@@ -26,9 +34,7 @@ const fetchAllTags = async annotations => {
     const tags = {}
     await Promise.all(
         annotations.map(async ({ url }) => {
-            const annotationTags = await remoteFunction('getAnnotationTags')(
-                url,
-            )
+            const annotationTags = await getAnnotationTagsRPC(url)
             tags[url] = annotationTags
         }),
     )
@@ -40,7 +46,7 @@ export const fetchAnnotationAct = () => async (dispatch, getState) => {
     dispatch(setIsLoading(true))
     const state = getState()
     const { url } = selectors.page(state)
-    const annotations = await remoteFunction('getAllAnnotations')(url)
+    const annotations = await getAllAnnotationsRPC(url)
     const tags = await fetchAllTags(annotations)
 
     dispatch(setTags(tags))
@@ -58,7 +64,7 @@ export const setAnnotationAndTags = annotations => async dispatch => {
 export const findAnnotationCount = () => async (dispatch, getState) => {
     const state = getState()
     const { url } = selectors.page(state)
-    const annotations = await remoteFunction('getAllAnnotations')(url)
+    const annotations = await getAllAnnotationsRPC(url)
     dispatch(setAnnotationCount(annotations.length))
 }
 
@@ -66,11 +72,13 @@ export const createAnnotation = (comment, body, tags, env) => async (
     dispatch,
     getState,
 ) => {
+    processEventRPC({ type: 'createAnnotation' })
+
     const state = getState()
     const { url, title } = selectors.page(state)
     const anchor = commentSelectors.anchor(state)
     // Write annotation to database
-    const uniqueUrl = await remoteFunction('createAnnotation')({
+    const uniqueUrl = await createAnnotationRPC({
         url,
         title,
         body,
@@ -80,7 +88,7 @@ export const createAnnotation = (comment, body, tags, env) => async (
 
     // Write tags to database
     tags.forEach(async tag => {
-        await remoteFunction('addAnnotationTag')({ tag, url: uniqueUrl })
+        await addAnnotationTagRPC({ tag, url: uniqueUrl })
     })
 
     dispatch(commentActions.setAnchor(null))
@@ -89,7 +97,7 @@ export const createAnnotation = (comment, body, tags, env) => async (
 }
 
 export const editAnnotation = (url, comment) => async (dispatch, getState) => {
-    await remoteFunction('editAnnotation')(url, comment)
+    await editAnnotationRPC(url, comment)
     const state = getState()
     const annotations = [...selectors.annotations(state)]
     annotations.forEach(annotation => {
@@ -102,7 +110,9 @@ export const editAnnotation = (url, comment) => async (dispatch, getState) => {
 }
 
 export const deleteAnnotation = url => async (dispatch, getState) => {
-    await remoteFunction('deleteAnnotation')(url)
+    processEventRPC({ type: 'deleteAnnotation' })
+
+    await deleteAnnotationRPC(url)
     const state = getState()
     const annotations = [...selectors.annotations(state)]
     const predicate = annotation => annotation.url === url
