@@ -237,7 +237,7 @@ class Ribbon extends React.Component {
 
         if (processEvent) {
             processEvent({
-                type: isSidebarActive ? 'openSidebarPage' : 'CloseSideBarPage',
+                type: isSidebarActive ? 'openSidebarPage' : 'closeSidebarPage',
             })
         }
 

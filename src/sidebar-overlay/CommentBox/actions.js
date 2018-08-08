@@ -34,7 +34,7 @@ const resetCommentBox = () => dispatch => {
     dispatch(emptyTags())
 }
 
-export const saveAnnotation = (comment, body, tags, env) => async dispatch => {
+export const saveAnnotation = (comment, body, tags, env) => dispatch => {
     dispatch(createAnnotation(comment, body, tags, env))
     dispatch(resetCommentBox())
 }

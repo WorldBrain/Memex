@@ -218,7 +218,7 @@ export const EVENT_TYPES = {
     openSidebarPage: {
         id: 58,
     },
-    CloseSideBarPage: {
+    closeSidebarPage: {
         id: 59,
     },
     createAnnotationPage: {
