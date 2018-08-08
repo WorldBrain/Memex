@@ -31,6 +31,7 @@ import SidebarIcons from './sidebar-left/components/SidebarIcons'
 import { actions as sidebarLeftActs } from './sidebar-left'
 import * as sidebar from './sidebar-left/selectors'
 import NotificationContainer from '../notifications'
+import BackToSearch from './components/BackToSearch'
 
 class OverviewContainer extends Component {
     static propTypes = {
@@ -118,7 +119,9 @@ class OverviewContainer extends Component {
                 onClearBtnClick={this.props.resetFilters}
                 onShowBtnClick={this.props.delListFilter}
             />
-        ) : null
+        ) : (
+            <BackToSearch />
+        )
     }
 
     renderTagsManager = ({ shouldDisplayTagPopup, url, tags }, index) =>

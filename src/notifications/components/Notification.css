@@ -14,8 +14,6 @@
     justify-content: flex-end;
     position: relative;
     top: 14px;
-    width: 90%;
-    margin-left: 10%;
 }
 
 .notifContainer {
@@ -178,8 +176,4 @@
     text-decoration: none;
     margin-right: 10px;
     border: 0;
-}
-
-.link {
-    display: block;
 }
