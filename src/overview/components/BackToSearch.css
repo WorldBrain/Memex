@@ -1,0 +1,27 @@
+.mainContainer {
+    position: fixed;
+    display: flex;
+    flex-direction: row;
+    top: 100px;
+    justify-content: space-evenly;
+    background-color: #efefef;
+    padding: 10px 13px 10px 3px;
+    margin-left: 10px;
+    cursor: pointer;
+    text-decoration: none;
+    color: black;
+}
+
+.image {
+    transform: rotate(90deg);
+    margin-right: 8px;
+}
+
+.image img {
+    width: 25px;
+    height: auto;
+}
+
+.text {
+    font-size: 16px;
+}
