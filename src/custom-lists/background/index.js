@@ -1,6 +1,7 @@
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import normalizeUrl from 'src/util/encode-url-for-id'
 import CustomListStorage from './storage'
+import internalAnalytics from '../../analytics/internal'
 
 export default class CustomListBackground {
     constructor({ storageManager }) {
@@ -88,6 +89,10 @@ export default class CustomListBackground {
      * @memberof CustomListBackground
      */
     async createCustomList({ name }) {
+        internalAnalytics.processEvent({
+            type: 'createCollection',
+        })
+
         return this.storage.insertCustomList({
             name,
         })
@@ -117,6 +122,10 @@ export default class CustomListBackground {
      * @memberof CustomListBackground
      */
     async insertPageToList({ id, url }) {
+        internalAnalytics.processEvent({
+            type: 'insertPageToCollection',
+        })
+
         return this.storage.insertPageToList({
             listId: id,
             pageUrl: normalizeUrl(url),
@@ -132,6 +141,10 @@ export default class CustomListBackground {
      * @memberof CustomListBackground
      */
     async removeList({ id }) {
+        internalAnalytics.processEvent({
+            type: 'removeCollection',
+        })
+
         return this.storage.removeList({
             id,
         })
@@ -146,6 +159,10 @@ export default class CustomListBackground {
      * @memberof CustomListBackground
      */
     async removePageFromList({ id, url }) {
+        internalAnalytics.processEvent({
+            type: 'removePageFromCollection',
+        })
+
         return this.storage.removePageFromList({
             listId: id,
             pageUrl: normalizeUrl(url),

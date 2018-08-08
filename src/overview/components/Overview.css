@@ -103,6 +103,7 @@
 .icon {
     height: 25px;
     width: 25px;
+    margin-bottom: -6px;
 }
 
 .main {

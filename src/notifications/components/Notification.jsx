@@ -16,9 +16,9 @@ const Notification = props => (
                 <div className={styles.why}>
                     Why am I seeing this?
                     <span className={styles.whyText}>
-                        This notification has been stored in the code of last
-                        update. No connection to our servers has been made to
-                        send it to you.
+                        #privacyfirst. This notification has been stored in the
+                        code of last update. No connection to our servers has
+                        been made to send it to you.
                     </span>
                 </div>
             </div>

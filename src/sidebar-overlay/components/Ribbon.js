@@ -233,6 +233,13 @@ class Ribbon extends React.Component {
 
     toggleSidebar = async () => {
         const isSidebarActive = !this.state.isSidebarActive
+        const processEvent = remoteFunction('processEvent')
+
+        if (processEvent) {
+            processEvent({
+                type: isSidebarActive ? 'openSidebarPage' : 'closeSidebarPage',
+            })
+        }
 
         if (isSidebarActive) {
             await this.openSidebarOps()
