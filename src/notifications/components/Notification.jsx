@@ -16,21 +16,15 @@ const Notification = props => (
                 <div className={styles.why}>
                     Why am I seeing this?
                     <span className={styles.whyText}>
-                        This notification has been stored in the code of last
-                        update. No connection to our servers has been made to
-                        send it to you.
+                        #privacyfirst. This notification has been stored in the
+                        code of last update. No connection to our servers has
+                        been made to send it to you.
                     </span>
                 </div>
             </div>
             <div className={styles.notifContainer}>
                 <div className={styles.logo}>
-                    <a
-                        href="https://worldbrain.io/"
-                        target="_blank"
-                        className={styles.link}
-                    >
-                        <img src="/img/worldbrain-logo-narrow.png" />
-                    </a>
+                    <img src="/img/worldbrain-logo-narrow.png" />
                 </div>
                 <div className={styles.content}>
                     <div className={styles.messageWhy}>
