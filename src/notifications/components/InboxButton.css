@@ -20,6 +20,7 @@
     border-radius: 15px;
     margin-left: 10px;
     padding: 3px 18px;
+    padding-top: 2px;
 }
 
 .activeInbox {
