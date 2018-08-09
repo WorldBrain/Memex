@@ -43,6 +43,10 @@
     transform: translate(0, 0);
 }
 
+.onFullScreen {
+    display: none;
+}
+
 .buttonHolder {
     border-bottom: 1px solid #c2c2c2;
     padding: 3px 0;

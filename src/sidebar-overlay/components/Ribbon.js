@@ -24,6 +24,7 @@ class Ribbon extends React.Component {
 
     state = {
         isSidebarActive: false,
+        isFullScreen: false,
         annotations: [],
         // For preventing the page scroll, when sidebar is open
         isInsideFrame: false,
@@ -268,6 +269,11 @@ class Ribbon extends React.Component {
         })
     }
 
+    onFullScreenCall = e => {
+        console.log('onFullScreenCall()')
+        this.setState({ isFullScreen: e })
+    }
+
     setiFrameRef = node => (this.iFrame = node)
 
     renderIFrame() {
@@ -290,13 +296,16 @@ class Ribbon extends React.Component {
     }
 
     render() {
-        const { isSidebarActive } = this.state
+        const { isSidebarActive, isFullScreen } = this.state
+        const onFullScreenCall = this.onFullScreenCall
         const { destroy } = this.props
+
         return (
             <div>
                 <div
                     className={cx(styles.ribbon, {
                         [styles.ribbonSidebarActive]: isSidebarActive,
+                        [styles.onFullScreen]: isFullScreen,
                     })}
                 >
                     <div className={styles.buttonHolder}>
@@ -309,6 +318,21 @@ class Ribbon extends React.Component {
                     clickHandler={this.toggleSidebar}
                 />
                 {this.renderIFrame()}
+
+                {/* {For hiding the ribbion when fullScreen event is fired} */}
+                {document.addEventListener(
+                    'webkitfullscreenchange',
+                    function() {
+                        if (
+                            document.webkitIsFullScreen ||
+                            document.mozIsFullScreen
+                        ) {
+                            onFullScreenCall(true)
+                        } else {
+                            onFullScreenCall(false)
+                        }
+                    },
+                )}
             </div>
         )
     }
