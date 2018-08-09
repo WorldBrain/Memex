@@ -15,12 +15,13 @@
     "moduleNameMapper": {
         "\\.(css|less)$": "identity-obj-proxy"
     },
-    "moduleFileExtensions": ["js", "jsx", "ts", "tsx"],
+    "moduleFileExtensions": ["js", "jsx", "ts", "tsx", "json"],
     "setupFiles": ["jest-webextension-mock", "./setupJest.js"],
     "unmockedModulePathPatterns": [
         "<rootDir>/node_modules/react",
         "<rootDir>/node_modules/react-dom",
         "<rootDir>/node_modules/react-addons-test-utils",
         "<rootDir>/node_modules/fbjs"
-    ]
+    ],
+    "preset": "jest-puppeteer"
 }

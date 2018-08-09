@@ -33,6 +33,11 @@
             "pre-commit": "pretty-quick --staged"
         }
     },
+    "jest": {
+        "moduleFileExtensions": [
+            "json"
+        ]
+    },
     "dependencies": {
         "babel-polyfill": "^6.26.0",
         "blob-util": "^1.2.1",
@@ -132,6 +137,7 @@
         "jest": "^23.5.0",
         "jest-cli": "^23.5.0",
         "jest-fetch-mock": "^1.2.0",
+        "jest-puppeteer": "^3.2.1",
         "jest-sourcemaps": "^1.0.1",
         "jest-webextension-mock": "^3.2.0",
         "material-design-icons": "^3.0.1",
@@ -144,6 +150,8 @@
         "prettier": "^1.13.7",
         "pretty-quick": "^1.6.0",
         "react-test-renderer": "^16.4.2",
+        "puppeteer": "^1.6.2",
+        "react-addons-test-utils": "^15.6.0",
         "redux-devtools": "^3.4.1",
         "redux-devtools-dock-monitor": "^1.1.3",
         "redux-devtools-log-monitor": "^1.4.0",
