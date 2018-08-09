@@ -6,13 +6,16 @@ import { OutLink } from 'src/common-ui/containers'
 import DateRangeSelection from './DateRangeSelection'
 import styles from './Overview.css'
 import InboxButton from 'src/notifications/components/InboxButton'
+import * as constants from 'src/popup/constants'
 
 const Header = ({
     currentQueryParams: { query, startDate, endDate },
     ...props
 }) => (
     <div className={styles.navbar}>
-        <div className={styles.logo} />
+        <a href={constants.OVERVIEW_URL}>
+            <div className={styles.logo} />
+        </a>
         <div className={styles.container}>
             <div className={styles.searchField}>
                 <input

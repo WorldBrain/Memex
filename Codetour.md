@@ -99,6 +99,14 @@ Tools to help during development. They are not used in production builds.
 Contains small generic things, stuff that is not project-specific. Things that
 could perhaps be packaged and published as an NPM module some day.
 
+### [`src/search-filters/`](src/search-filters/): search filters
+
+Contains the UI for various filters that are supported in the search, like filter by tags/domains/collections/bookmarks.
+
+### [`src/custom-lists/`](src/custom-lists/): search filters
+
+Contains everything related to the collections feature, which enables users to group pages into collections/lists.
+
 ### `...`: other stuff
 
 The build process is implemented using webpack v4. The main build entrypoint lives in

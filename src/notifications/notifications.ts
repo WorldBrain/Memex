@@ -59,6 +59,41 @@ export const releaseTime: number = 1533513202569
 */
 export const NOTIFS: NotifDefinition[] = [
     {
+        id: 'Announce Annotations',
+        search: {
+            title: 'New Feature: Annotation',
+            message:
+                'Highlight any text on the web and add comments to it. Also attach comments to every websites you find.',
+            buttons: [
+                {
+                    action: {
+                        type: actionTypes.OPEN_URL,
+                        url:
+                            'https://worldbrain.helprace.com/i66-feature-annotations-comments',
+                        context: 'new-tab',
+                    },
+                    label: 'Learn More',
+                },
+            ],
+        },
+        overview: {
+            title: 'New Feature: Comments & Annotation',
+            message:
+                'Highlight any text on the web and add comments to it. Also attach comments to every websites you find.',
+            buttons: [
+                {
+                    action: {
+                        type: actionTypes.OPEN_URL,
+                        url:
+                            'https://worldbrain.helprace.com/i66-feature-annotations-comments',
+                        context: 'new-tab',
+                    },
+                    label: 'Learn More',
+                },
+            ],
+        },
+    },
+    {
         id: 'Announce Collections',
         search: {
             title: 'New Feature: Collections',
@@ -99,42 +134,6 @@ export const NOTIFS: NotifDefinition[] = [
                         type: actionTypes.OPEN_URL,
                         url:
                             'https://worldbrain.helprace.com/i67-feature-collections',
-                        context: 'new-tab',
-                    },
-                    label: 'Learn More',
-                },
-            ],
-        },
-    },
-
-    {
-        id: 'Announce Annotations',
-        search: {
-            title: 'New Feature: Annotation',
-            message:
-                'Highlight any text on the web and add comments to it. Also attach comments to every websites you find.',
-            buttons: [
-                {
-                    action: {
-                        type: actionTypes.OPEN_URL,
-                        url:
-                            'https://worldbrain.helprace.com/i66-feature-annotations-comments',
-                        context: 'new-tab',
-                    },
-                    label: 'Learn More',
-                },
-            ],
-        },
-        overview: {
-            title: 'New Feature: Comments & Annotation',
-            message:
-                'Highlight any text on the web and add comments to it. Also attach comments to every websites you find.',
-            buttons: [
-                {
-                    action: {
-                        type: actionTypes.OPEN_URL,
-                        url:
-                            'https://worldbrain.helprace.com/i66-feature-annotations-comments',
                         context: 'new-tab',
                     },
                     label: 'Learn More',

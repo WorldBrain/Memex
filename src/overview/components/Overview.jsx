@@ -32,7 +32,7 @@ Overview.propTypes = {
     resetDeleteConfirm: PropTypes.func.isRequired,
     deleteDocs: PropTypes.func.isRequired,
     renderDragElement: PropTypes.node.isRequired,
-    sidebarIcons: PropTypes.node.isRequired,
+    sidebarIcons: PropTypes.node,
     disbleOutsideClick: PropTypes.bool.isRequired,
 }
 
