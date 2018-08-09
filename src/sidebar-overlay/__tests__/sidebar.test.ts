@@ -1,5 +1,7 @@
 import puppeteer from 'puppeteer'
 
+import styles from 'src/overview/components/PageResultItem.css'
+
 const EXT_PATH = 'extension'
 const EXT_ID = 'alnbjhgekjgejonkjfkdnfohblemabal'
 
@@ -35,6 +37,10 @@ describe('Memex bootup test', async () => {
         },
         100000,
     )
+
+    test('check if inserted page entry exists', async () => {
+        console.log(styles.deletingSpinner)
+    })
 
     afterAll(async () => {
         await browser.close()

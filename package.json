@@ -36,7 +36,10 @@
     "jest": {
         "moduleFileExtensions": [
             "json"
-        ]
+        ],
+        "moduleNameMapper": {
+            "\\.(css|less)$": "<rootDir>/node_modules/jest-css-modules"
+        }
     },
     "dependencies": {
         "babel-polyfill": "^6.26.0",
