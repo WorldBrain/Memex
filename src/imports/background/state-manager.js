@@ -44,9 +44,6 @@ export class ImportStateManager {
      */
     remaining
 
-    /**
-     * @param {ImportCache} [cacheBackend] Affords state persistence.
-     */
     constructor({
         cacheBackend = new ImportCache({}),
         itemCreator = new ItemCreator({}),
