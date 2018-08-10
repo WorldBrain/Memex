@@ -46,6 +46,12 @@ class Ribbon extends React.Component {
         this.setState({
             annotations,
         })
+        // For hiding the ribbion when fullScreen event is fired
+        document.addEventListener(
+            'webkitfullscreenchange',
+            this.onFullScreenCall,
+            false,
+        )
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -303,7 +309,6 @@ class Ribbon extends React.Component {
 
     render() {
         const { isSidebarActive, isFullScreen } = this.state
-        const onFullScreenCall = this.onFullScreenCall
         const { destroy } = this.props
 
         return (
@@ -324,13 +329,6 @@ class Ribbon extends React.Component {
                     clickHandler={this.toggleSidebar}
                 />
                 {this.renderIFrame()}
-
-                {/* {For hiding the ribbion when fullScreen event is fired} */}
-                {document.addEventListener(
-                    'webkitfullscreenchange',
-                    onFullScreenCall,
-                    false,
-                )}
             </div>
         )
     }
