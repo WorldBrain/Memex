@@ -47,8 +47,15 @@ class Ribbon extends React.Component {
             annotations,
         })
         // For hiding the ribbion when fullScreen event is fired
+        // For chrome
         document.addEventListener(
             'webkitfullscreenchange',
+            this.onFullScreenCall,
+            false,
+        )
+        // For Firefox
+        document.addEventListener(
+            'mozfullscreenchange',
             this.onFullScreenCall,
             false,
         )
@@ -280,7 +287,6 @@ class Ribbon extends React.Component {
     }
 
     onFullScreenCall = () => {
-        console.log('onFullScreenCall()')
         let isFullScreenBool
         if (document.webkitIsFullScreen || document.mozIsFullScreen) {
             isFullScreenBool = true
