@@ -203,6 +203,51 @@ export const EVENT_TYPES = {
     pauseIndexing: {
         id: 53,
     },
+    closeCommentSidebar: {
+        id: 54,
+    },
+    openCommentSidebar: {
+        id: 55,
+    },
+    createAnnotation: {
+        id: 56,
+    },
+    removeRibbon: {
+        id: 57,
+    },
+    openSidebarPage: {
+        id: 58,
+    },
+    closeSidebarPage: {
+        id: 59,
+    },
+    createAnnotationPage: {
+        id: 60,
+    },
+    disableSidebarPage: {
+        id: 61,
+    },
+    enableTooltipPopup: {
+        id: 62,
+    },
+    disableTooltipPopup: {
+        id: 63,
+    },
+    deleteAnnotation: {
+        id: 64,
+    },
+    createCollection: {
+        id: 65,
+    },
+    insertPageToCollection: {
+        id: 66,
+    },
+    removeCollection: {
+        id: 67,
+    },
+    removePageFromCollection: {
+        id: 68,
+    },
 }
 
 export const NOTIF_TYPE_EVENT_IDS = {

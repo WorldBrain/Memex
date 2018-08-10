@@ -1,6 +1,6 @@
 {
     "name": "worldbrain-extension",
-    "version": "0.7.2",
+    "version": "0.7.3",
     "homepage": "https://worldbrain.io",
     "license": "MIT",
     "repository": {
@@ -175,7 +175,7 @@
         "tslint": "^5.11.0",
         "tslint-config-prettier": "^1.14.0",
         "tslint-react": "^3.6.0",
-        "typescript": "2.8",
+        "typescript": "^3.0.1",
         "uglifyjs-webpack-plugin": "^1.2.7",
         "url-loader": "^1.0.1",
         "web-ext": "^1.10.0",

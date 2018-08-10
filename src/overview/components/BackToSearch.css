@@ -1,0 +1,33 @@
+.mainContainer {
+    position: fixed;
+    display: flex;
+    flex-direction: row;
+    top: 100px;
+    font-family: 'lato';
+    justify-content: space-evenly;
+    padding: 11px 13px 10px 7px;
+    color: #777;
+    margin-left: 20px;
+    margin-top: -10px;
+    cursor: pointer;
+    text-decoration: none;
+
+    &:hover {
+        background-color: #efefef;
+        border-radius: 4px;
+    }
+}
+
+.image {
+    transform: rotate(90deg);
+    margin-right: 8px;
+}
+
+.image img {
+    width: 25px;
+    height: auto;
+}
+
+.text {
+    font-size: 16px;
+}

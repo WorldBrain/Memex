@@ -45,7 +45,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
     setShowSidebar: showSidebar =>
-        dispatch(actions.setShowSidebar(showSidebar)),
+        dispatch(actions.setShowSideBarMid(showSidebar)),
     toggleMouseOnSidebar: () => dispatch(actions.toggleMouseOnSidebar()),
     closeSidebar: () => dispatch(actions.closeSidebar()),
 })
