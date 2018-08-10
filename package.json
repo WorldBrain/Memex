@@ -91,6 +91,7 @@
         "@types/jest": "^22.1.4",
         "@types/mongodb": "^3.0.21",
         "@types/react": "^16.3.16",
+        "@types/react-redux": "^6.0.6",
         "autoprefixer": "^7.1.1",
         "babel-core": "^6.26.3",
         "babel-eslint": "^7.2.3",
