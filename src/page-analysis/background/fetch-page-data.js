@@ -8,10 +8,19 @@ import extractPdfContent from 'src/page-analysis/content_script/extract-pdf-cont
 /**
  * @typedef IFetchPageDataOpts
  * @type {Object}
- * @property {boolean} includeFreezeDry Denotes whether to attempt freeze-dry fetch.
- * @property {boolean} includePageContent Denotes whether to attempt page text + metadata fetch.
- * @property {boolean} includeFavIcon Denotes whether to attempt favicon fetch.
+ * @property {boolean} [includeFreezeDry] Denotes whether to attempt freeze-dry fetch.
+ * @property {boolean} [includePageContent] Denotes whether to attempt page text + metadata fetch.
+ * @property {boolean} [includeFavIcon] Denotes whether to attempt favicon fetch.
  */
+
+/**
+ * @typedef FetchPageDataArgs
+ * @type {Object}
+ * @property {string} url The URL which points to the page to fetch text + meta-data for.
+ * @property {number} [timeout=5000] The amount of ms to wait before throwing a fetch timeout error.
+ * @property {IFetchPageDataOpts} opts
+ */
+
 export const defaultOpts = {
     includePageContent: false,
     includeFavIcon: false,
@@ -21,9 +30,7 @@ export const defaultOpts = {
  * Given a URL will attempt an async fetch of the text and metadata from the page
  * which the URL points to.
  *
- * @param {string} url The URL which points to the page to fetch text + meta-data for.
- * @param {number} [timeout=5000] The amount of ms to wait before throwing a fetch timeout error.
- * @param {IFetchPageDataOpts} opts
+ * @param {FetchPageDataArgs} [args]
  * @returns {any} Object containing `run` async cb and `cancel` cb to afford control over the request.
  */
 export default function fetchPageData(
