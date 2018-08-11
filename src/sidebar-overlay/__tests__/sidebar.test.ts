@@ -107,7 +107,7 @@ describe('Memex overview test', async () => {
         saveButton.click()
         // Query fetches div having an id, which at the moment is just the annotation
         const savedComment = await page.waitForSelector(
-            '#memex_sidebar_panel div[id]:not(#add_comment_btn)',
+            '#memex_sidebar_panel div[id]:not(#add_comment_btn):not(#tags_container)',
         )
         const text = await savedComment.$eval(
             'div:nth-child(3)',
@@ -145,7 +145,65 @@ describe('Memex overview test', async () => {
         expect(isShown).toBeTruthy()
     })
 
+    test('Write comment with tags', async () => {
+        await page.type('.bm-menu textarea', 'Writing a comment with tags')
+        const tagsContainer = await page.$('.bm-menu #tags_container')
+        const tagsHolder = await tagsContainer.$('div')
+        expect(tagsHolder).toBeDefined()
+
+        tagsHolder.click()
+
+        const tagsDropdown = await page.waitForSelector(
+            '#tags_container div form input',
+        )
+        expect(tagsDropdown).toBeDefined()
+
+        // Add 3 tags
+        await tagsDropdown.type('tag1')
+        const addTag = await page.waitForSelector('#tags_container div div>div')
+        addTag.click()
+        await page.waitFor(300)
+        await tagsDropdown.type('tag2')
+        await page.waitFor(300)
+        await tagsDropdown.press('Enter')
+        await page.waitFor(300)
+        await tagsDropdown.type('tag3')
+        await page.waitFor(300)
+        await tagsDropdown.press('Enter')
+        // Check if tags have been updated in tagHolder
+        await page.click('.bm-menu textarea')
+        const tagHolderList = async () => {
+            const length = await tagsContainer.$$eval(
+                'div>span',
+                list => list.length,
+            )
+            return length
+        }
+        // one for the '+' span
+        expect(await tagHolderList()).toBe(4)
+        await tagsContainer.click()
+        // write more tags again
+        await tagsDropdown.type('tag4')
+        await page.waitFor(300)
+        await tagsDropdown.press('Enter')
+        // write more tags again
+        await tagsDropdown.type('tag5')
+        await page.waitFor(300)
+        await tagsDropdown.press('Enter')
+
+        await page.click('.bm-menu textarea')
+        expect(await tagHolderList()).toBe(5)
+
+        // Save comment
+        await page.click('.bm-menu button')
+        await page.waitFor(300)
+        const savedComments = await page.$$(
+            '#memex_sidebar_panel div[id]:not(#add_comment_btn):not(#tags_container)',
+        )
+        expect(savedComments.length).toBe(2)
+    })
+
     afterAll(async () => {
-        // await browser.close()
+        await browser.close()
     })
 })

@@ -250,7 +250,9 @@ class CommentBox extends React.PureComponent {
                         onClick={() => this.props.setTagInput(false)}
                     />
                     <br />
-                    <div ref={this.setTagRef}>{this.renderTagInput()}</div>
+                    <div id="tags_container" ref={this.setTagRef}>
+                        {this.renderTagInput()}
+                    </div>
                     <div className={styles.buttonHolder}>
                         <button
                             className={styles.save}
