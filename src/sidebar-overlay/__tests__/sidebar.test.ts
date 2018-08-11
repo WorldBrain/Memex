@@ -1,10 +1,9 @@
 import puppeteer from 'puppeteer'
+import * as testConstants from './constants'
+import * as constants from '../constants'
 
 // TODO: Find a way to import styles.
 // import styles from 'src/overview/components/PageResultItem.css'
-
-const EXT_PATH = 'extension'
-const EXT_ID = 'alnbjhgekjgejonkjfkdnfohblemabal'
 
 jest.setTimeout(100000)
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 100000
@@ -16,14 +15,16 @@ describe('Memex overview test', async () => {
         browser = await puppeteer.launch({
             headless: false,
             args: [
-                `--disable-extensions-except=${EXT_PATH}`,
-                `--load-extension=${EXT_PATH}`,
+                `--disable-extensions-except=${testConstants.EXT_PATH}`,
+                `--load-extension=${testConstants.EXT_PATH}`,
                 '--user-agent=PuppeteerAgent',
             ],
         })
         page = await browser.newPage()
         await page.goto(
-            'chrome-extension://' + EXT_ID + '/options.html#/overview',
+            'chrome-extension://' +
+                testConstants.EXT_ID +
+                '/options.html#/overview',
             {
                 waitUntil: 'domcontentloaded',
             },
@@ -68,7 +69,83 @@ describe('Memex overview test', async () => {
         expect($emptyMessage).not.toBeNull()
     })
 
+    test('Check if commentbox is focussed', async () => {
+        const isActive = await page.$eval('.bm-menu textarea', textarea => {
+            return document.activeElement === textarea
+        })
+        expect(isActive).toBeTruthy()
+    })
+
+    test('Write a new comment and test rows', async () => {
+        const getRows = async () => {
+            const rows = await page.$eval('.bm-menu textarea', textarea => {
+                return textarea.rows
+            })
+            return rows
+        }
+        const rowsBefore = await getRows()
+        await page.type('.bm-menu textarea', 'Comment from puppeteer')
+        const rowsAfter = await getRows()
+
+        // Test the row size
+        expect(rowsBefore).toBe(constants.DEFAULT_ROWS)
+        expect(rowsAfter).toBe(constants.MAXED_ROWS)
+    })
+
+    const getBgColor = async () => {
+        const color = await page.$eval(
+            '#add_comment_btn',
+            btn => getComputedStyle(btn).backgroundColor,
+        )
+        return color
+    }
+
+    test('Check saving comment behaviour', async () => {
+        const bgColorBefore = await getBgColor()
+
+        const saveButton = await page.$('.bm-menu button')
+        saveButton.click()
+        // Query fetches div having an id, which at the moment is just the annotation
+        const savedComment = await page.waitForSelector(
+            '#memex_sidebar_panel div[id]:not(#add_comment_btn)',
+        )
+        const text = await savedComment.$eval(
+            'div:nth-child(3)',
+            div => div.textContent,
+        )
+
+        expect(savedComment).toBeDefined()
+        expect(text).toBe('Comment from puppeteer')
+
+        // checks if comment box gets hidden
+        const display = await page.$eval('.bm-menu textarea', commentbox => {
+            const container = commentbox.parentElement
+            return getComputedStyle(container).display
+        })
+        expect(display).toBe('none')
+
+        const bgColorAfter = await getBgColor()
+        expect(bgColorBefore).toBe(testConstants.grayColor)
+        expect(bgColorAfter).toBe(testConstants.greenColor)
+    })
+
+    test('Check actions of Add Comment button', async () => {
+        await page.click('#add_comment_btn')
+        const bgColor = await page.$eval('#add_comment_btn', btn => {
+            const styles = getComputedStyle(btn)
+            return styles.backgroundColor
+        })
+        expect(bgColor).toBe(testConstants.grayColor)
+
+        const isShown = await page.$eval('.bm-menu textarea', textarea => {
+            const containerDisplay = getComputedStyle(textarea.parentElement)
+                .display
+            return containerDisplay === 'block'
+        })
+        expect(isShown).toBeTruthy()
+    })
+
     afterAll(async () => {
-        await browser.close()
+        // await browser.close()
     })
 })

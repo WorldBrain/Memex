@@ -202,6 +202,7 @@ class CommentBox extends React.PureComponent {
                         onClick={this.openSettings}
                     />
                     <div
+                        id="add_comment_btn"
                         className={cx(styles.addNote, {
                             [styles.disabled]: !this.props.isHidden,
                         })}
