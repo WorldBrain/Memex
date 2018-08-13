@@ -3,6 +3,15 @@ import importStateManager from 'src/imports/background/state-manager'
 import { updateLastActive } from 'src/analytics'
 
 /**
+ * Main checking logic between a given blacklist expression and current URL.
+ */
+const initExpressionMatch = url => (expression = '') => {
+    // Ensure special characters that can appear in URLs are escaped out before checking against the curr URL
+    expression = expression.replace(/[()]/g, '\\$&')
+    return new RegExp(expression, 'ig').test(url)
+}
+
+/**
  * Given a URL and user's blacklist, checks the URL against the blacklist expressions to see if any
  * rule matches it.
  *
@@ -11,10 +20,7 @@ import { updateLastActive } from 'src/analytics'
  * @return {boolean} Denotes whether or not the given URL matches any blacklist expressions.
  */
 export function isURLBlacklisted(url = '', blacklist = []) {
-    // Main checking logic between a given blacklist expression and current URL
-    const doesExpressionMatchURL = (expression = '') =>
-        new RegExp(expression, 'ig').test(url)
-
+    const doesExpressionMatchURL = initExpressionMatch(url)
     // Reduces blacklist to a bool by running main checking logic against each blacklist expression
     // (returns true if a single match is found in entire blacklist)
     return blacklist.reduce(
