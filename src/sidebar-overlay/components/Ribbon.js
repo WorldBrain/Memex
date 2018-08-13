@@ -24,6 +24,7 @@ class Ribbon extends React.Component {
 
     state = {
         isSidebarActive: false,
+        isFullScreen: false,
         annotations: [],
         // For preventing the page scroll, when sidebar is open
         isInsideFrame: false,
@@ -45,6 +46,19 @@ class Ribbon extends React.Component {
         this.setState({
             annotations,
         })
+        // For hiding the ribbion when fullScreen event is fired
+        // For chrome
+        document.addEventListener(
+            'webkitfullscreenchange',
+            this.onFullScreenCall,
+            false,
+        )
+        // For Firefox
+        document.addEventListener(
+            'mozfullscreenchange',
+            this.onFullScreenCall,
+            false,
+        )
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -221,7 +235,6 @@ class Ribbon extends React.Component {
 
     closeSidebarOps = async () => {
         this.props.removeHighlights()
-        await this.frameFC.remoteExecute('sendAnchorToSidebar')(null)
         this.frameFC.remoteExecute('focusAnnotation')('')
         this.frameFC.remoteExecute('setAnnotations')([])
         this.frameFC.remoteExecute('focusCommentBox')(false)
@@ -269,6 +282,16 @@ class Ribbon extends React.Component {
         })
     }
 
+    onFullScreenCall = () => {
+        let isFullScreenBool
+        if (document.webkitIsFullScreen || document.mozIsFullScreen) {
+            isFullScreenBool = true
+        } else {
+            isFullScreenBool = false
+        }
+        this.setState({ isFullScreen: isFullScreenBool })
+    }
+
     setiFrameRef = node => (this.iFrame = node)
 
     renderIFrame() {
@@ -291,13 +314,15 @@ class Ribbon extends React.Component {
     }
 
     render() {
-        const { isSidebarActive } = this.state
+        const { isSidebarActive, isFullScreen } = this.state
         const { destroy } = this.props
+
         return (
             <div>
                 <div
                     className={cx(styles.ribbon, {
                         [styles.ribbonSidebarActive]: isSidebarActive,
+                        [styles.onFullScreen]: isFullScreen,
                     })}
                 >
                     <div className={styles.buttonHolder}>

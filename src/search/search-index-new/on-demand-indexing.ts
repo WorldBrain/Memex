@@ -42,17 +42,12 @@ export async function createPageFromTab({
     return page
 }
 
-export async function createPageFromUrl({
-    url,
-    stubOnly = false,
-    ...fetchDataArgs
-}: Props) {
+export async function createPageFromUrl({ url, stubOnly = false }: Props) {
     const fetchRes = await fetchPageData({
         url,
         opts: {
             includePageContent: true,
             includeFavIcon: false,
-            ...fetchDataArgs,
         },
     }).run()
 
