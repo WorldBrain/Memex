@@ -201,7 +201,7 @@ class Ribbon extends React.Component {
             window.location.href,
         )
         this.setState({
-            annotations,
+            annotations: annotations || [],
         })
     }
 
