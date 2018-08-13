@@ -315,6 +315,14 @@ class PopupContainer extends Component {
                 : 'disableTooltipPopup',
         })
 
+        this.setState({
+            isTooltipEnabled,
+        })
+
+        if (!this.state.isLoggable) {
+            return
+        }
+
         if (isTooltipEnabled) {
             await this.insertRibbon()
             await this.openSidebar()
@@ -323,10 +331,6 @@ class PopupContainer extends Component {
             this.removeRibbon()
             setTimeout(() => window.close(), 500)
         }
-
-        this.setState({
-            isTooltipEnabled,
-        })
     }
 
     // Hides full-popup confirm
