@@ -49,15 +49,46 @@ describe('Memex overview test', async () => {
         expect(listCount).not.toBeNull()
     })
 
-    test('Check if sidebar opens', async () => {
+    const openSidebar = async () => {
         page.waitForSelector('#app a[draggable=true]')
         const $commentButton = (await page.$$(
             '#app a[draggable=true] button',
         ))[1]
         $commentButton.click()
-        const $menu = await page.waitForSelector('.bm-menu')
+    }
+
+    test('Check if sidebar opens', async () => {
+        await openSidebar()
+        const $menu = await page.waitForSelector('#memex_sidebar_panel')
         expect($menu).toBeDefined()
         expect($menu).not.toBeNull()
+    })
+
+    const expectSidebarToBeClosed = async () => {
+        await page.waitFor(500)
+        const $menu = await page.$('#memex_sidebar_panel')
+        expect($menu).toBeNull()
+    }
+
+    test('Check if sidebar closes through close button', async () => {
+        const $closeButton = await page.waitForSelector(
+            '#memex_sidebar_close_btn',
+        )
+        $closeButton.click()
+        await expectSidebarToBeClosed()
+    })
+
+    test('Check if sidebar closes through outside', async () => {
+        const $input = await page.$('input')
+        $input.click()
+        await expectSidebarToBeClosed()
+    })
+
+    test('Test if loading indicator is shown', async () => {
+        await openSidebar()
+        const loader = await page.waitForSelector('#memex_sidebar_loader')
+        expect(loader).toBeDefined()
+        expect(loader).not.toBeNull()
     })
 
     test('Check if empty annotation message is present', async () => {
@@ -107,7 +138,7 @@ describe('Memex overview test', async () => {
         saveButton.click()
         // Query fetches div having an id, which at the moment is just the annotation
         const savedComment = await page.waitForSelector(
-            '#memex_sidebar_panel div[id]:not(#add_comment_btn):not(#tags_container)',
+            '#memex_sidebar_panel div[id]:not(#add_comment_btn):not(#tags_container):not(#memex_sidebar_loader)',
         )
         const text = await savedComment.$eval(
             'div:nth-child(3)',
@@ -162,13 +193,13 @@ describe('Memex overview test', async () => {
         await tagsDropdown.type('tag1')
         const addTag = await page.waitForSelector('#tags_container div div>div')
         addTag.click()
-        await page.waitFor(300)
+        await page.waitFor(400)
         await tagsDropdown.type('tag2')
-        await page.waitFor(300)
+        await page.waitFor(400)
         await tagsDropdown.press('Enter')
-        await page.waitFor(300)
+        await page.waitFor(400)
         await tagsDropdown.type('tag3')
-        await page.waitFor(300)
+        await page.waitFor(400)
         await tagsDropdown.press('Enter')
         // Check if tags have been updated in tagHolder
         await page.click('.bm-menu textarea')
@@ -198,12 +229,12 @@ describe('Memex overview test', async () => {
         await page.click('.bm-menu button')
         await page.waitFor(300)
         const savedComments = await page.$$(
-            '#memex_sidebar_panel div[id]:not(#add_comment_btn):not(#tags_container)',
+            '#memex_sidebar_panel div[id]:not(#add_comment_btn):not(#tags_container):not(#memex_sidebar_loader)',
         )
         expect(savedComments.length).toBe(2)
     })
 
     afterAll(async () => {
-        await browser.close()
+        // await browser.close()
     })
 })

@@ -6,6 +6,7 @@ import styles from './CloseButton.css'
 
 const CloseButton = ({ isActive, isOverview, clickHandler }) => (
     <div
+        id="memex_sidebar_close_btn"
         className={cx(styles.close, {
             [styles.hidden]: !isActive,
             [styles.overview]: isOverview,

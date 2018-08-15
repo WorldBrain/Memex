@@ -3,7 +3,7 @@ import React from 'react'
 import styles from './Sidebar.css'
 
 const Loader = () => (
-    <div className={styles.ldsEllipsis}>
+    <div id="memex_sidebar_loader" className={styles.ldsEllipsis}>
         <div />
         <div />
         <div />
