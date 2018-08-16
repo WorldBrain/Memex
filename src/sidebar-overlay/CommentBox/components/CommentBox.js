@@ -40,7 +40,6 @@ class CommentBox extends React.PureComponent {
     componentDidMount() {
         // Auto resize textarea
         if (this.inputRef) {
-            this.inputRef.focus()
             this.inputRef.addEventListener('scroll', e => {
                 let i = 0
                 // i prevents infinity loop when resizing
@@ -51,6 +50,10 @@ class CommentBox extends React.PureComponent {
                     e.target.style.height = height + 20 + 'px'
                 }
             })
+        }
+
+        if (this.inputRef && this.props.env === 'overview') {
+            this.inputRef.focus()
         }
 
         this.attachEventListener()
