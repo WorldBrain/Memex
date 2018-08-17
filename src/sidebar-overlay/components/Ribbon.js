@@ -109,7 +109,7 @@ class Ribbon extends React.Component {
                     this.frameFC.remoteExecute('focusAnnotation')(
                         annotation.url,
                     )
-                }, 50)
+                }, 1)
             },
             toggleIFrameRender: shouldRenderIFrame => {
                 this.setState(state => {
