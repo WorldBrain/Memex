@@ -1,11 +1,10 @@
 /* eslint-env jest */
-import { StorageManager } from './manager'
+import { storageManager } from '..'
 import { getDexieHistory } from './dexie-schema'
 
 describe('StorageManager', () => {
     describe('Dexie schema generation', () => {
         test('it should work', () => {
-            const storageManager = new StorageManager()
             storageManager.registerCollection('spam', {
                 version: new Date(2018, 5, 20),
                 fields: {
