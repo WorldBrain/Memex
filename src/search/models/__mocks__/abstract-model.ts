@@ -1,6 +1,6 @@
-import DataURI from 'datauri'
+const dataURI = require('datauri')
 
-const datauri = new DataURI()
+const datauri = new dataURI()
 
 export default abstract class AbstractModel {
     public static DEF_NON_ENUM_PROP: PropertyDescriptor = {

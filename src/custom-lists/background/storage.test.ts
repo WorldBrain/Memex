@@ -1,9 +1,10 @@
 import CustomListBackground from './'
 import Storage from '../../search/storage'
-import indexedDB from 'fake-indexeddb'
-import IDBKeyRange from 'fake-indexeddb/lib/FDBKeyRange'
 import * as DATA from './storage.test.data'
 import { StorageManager } from '../../search/storage/manager'
+
+const indexedDB = require('fake-indexeddb')
+const iDBKeyRange = require('fake-indexeddb/lib/FDBKeyRange')
 
 const runSuite = () => () => {
     // New storage manager instance
@@ -28,7 +29,7 @@ const runSuite = () => () => {
         storageManager._finishInitialization(
             new Storage({
                 indexedDB,
-                IDBKeyRange,
+                IDBKeyRange: iDBKeyRange,
                 dbName,
                 storageManager,
             }),

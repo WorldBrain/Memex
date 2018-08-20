@@ -1,4 +1,4 @@
-import { FeatureStorage } from '../../search/storage'
+import { FeatureStorage } from '../../search/storage/types'
 import { PageList, PageListEntry } from './types'
 
 export default class CustomListStorage extends FeatureStorage {
