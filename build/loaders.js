@@ -44,6 +44,7 @@ export const cssModulesLoader = {
     loader: 'css-loader',
     options: {
         modules: true,
+        localIdentName: 'Memex__[name]__[local]',
         importLoaders: 1,
     },
 }
