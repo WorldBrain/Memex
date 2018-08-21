@@ -22,8 +22,8 @@ class BackgroundScript {
         storageChangesMan = storageChangesManager,
     }: {
         notifsBackground: NotifsBackground
-        utilFns: typeof utils
-        storageChangesMan: StorageChangesManager
+        utilFns?: typeof utils
+        storageChangesMan?: StorageChangesManager
     }) {
         this.notifsBackground = notifsBackground
         this.utils = utilFns
