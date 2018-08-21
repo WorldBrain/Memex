@@ -1,9 +1,8 @@
-import indexedDB from 'fake-indexeddb'
-import IDBKeyRange from 'fake-indexeddb/lib/FDBKeyRange'
-
 import db, * as index from '.'
 import * as DATA from './index.test.data'
-import { intersection, flatten, difference } from 'lodash'
+
+const indexedDB = require('fake-indexeddb')
+const iDBKeyRange = require('fake-indexeddb/lib/FDBKeyRange')
 
 jest.mock('./models/abstract-model')
 jest.mock('lodash/fp/intersection')
@@ -29,7 +28,7 @@ describe('Search index integration', () => {
 
     async function resetTestData(dbName = 'test') {
         indexedDB.deleteDatabase(dbName)
-        index.init({ indexedDB, IDBKeyRange, dbName })
+        index.init({ indexedDB, IDBKeyRange: iDBKeyRange, dbName })
 
         await insertTestData()
     }
