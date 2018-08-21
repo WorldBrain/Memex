@@ -2,9 +2,8 @@ import indexedDB from 'fake-indexeddb'
 import IDBKeyRange from 'fake-indexeddb/lib/FDBKeyRange'
 import normalize from '../../util/encode-url-for-id'
 
-import Storage from '../../search/search-index-new/storage'
-import { StorageManager } from '../../search/search-index-new/storage/manager'
-// import { AnnotationStorage } from './storage'
+import Storage from '../../search/storage'
+import { StorageManager } from '../../search/storage/manager'
 import AnnotationBackground from './'
 
 import * as DATA from './storage.test.data'

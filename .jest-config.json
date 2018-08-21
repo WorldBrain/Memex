@@ -13,8 +13,7 @@
     },
     "modulePaths": ["<rootDir>"],
     "moduleNameMapper": {
-        "\\.(css|less)$": "identity-obj-proxy",
-        "^pouchdb-browser$": "pouchdb-memory"
+        "\\.(css|less)$": "identity-obj-proxy"
     },
     "moduleFileExtensions": ["js", "jsx", "ts", "tsx"],
     "setupFiles": ["jest-webextension-mock", "./setupJest.js"],

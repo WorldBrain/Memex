@@ -1,4 +1,4 @@
-import searchIndex from '../../search'
+import * as searchIndex from '../../search'
 import { blacklist } from '../../blacklist/background'
 import { isLoggable, getPauseState } from '..'
 import { LoggableTabChecker, VisitInteractionUpdater } from './types'

@@ -16,7 +16,6 @@ type ForEachChunkCb = (
 jest.mock('src/blacklist/background/interface')
 jest.mock('src/util/encode-url-for-id')
 jest.mock('src/activity-logger')
-jest.mock('src/search')
 jest.mock('./cache')
 jest.mock('./data-sources')
 
@@ -30,7 +29,13 @@ const runSuite = (DATA: TestData) => async () => {
             bookmarks: DATA.bookmarks,
         })
 
-        const itemCreator = new ItemCreator({ dataSources })
+        const itemCreator = new ItemCreator({
+            dataSources,
+            existingKeySource: async () => ({
+                histKeys: new Set(),
+                bmKeys: new Set(),
+            }),
+        })
         state = new State({ itemCreator })
     })
 
@@ -47,7 +52,13 @@ const runSuite = (DATA: TestData) => async () => {
             bookmarks: [],
         })
 
-        const itemCreator = new ItemCreator({ dataSources })
+        const itemCreator = new ItemCreator({
+            dataSources,
+            existingKeySource: async () => ({
+                histKeys: new Set(),
+                bmKeys: new Set(),
+            }),
+        })
         const localState = new State({ itemCreator }) as any
         await localState.fetchEsts()
 

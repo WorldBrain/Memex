@@ -1,6 +1,6 @@
 import fetchPageData from 'src/page-analysis/background/fetch-page-data'
 import { IMPORT_TYPE, DOWNLOAD_STATUS } from 'src/options/imports/constants'
-import searchIndex from 'src/search'
+import * as searchIndex from 'src/search'
 
 const fetchPageDataOpts = {
     includePageContent: true,

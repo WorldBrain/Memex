@@ -1,7 +1,6 @@
 import { createAction } from 'redux-act'
 
 import analytics from 'src/analytics'
-import db from 'src/pouchdb'
 import { CMDS, IMPORT_CONN_NAME } from './constants'
 import * as selectors from './selectors'
 import { remoteFunction } from 'src/util/webextensionRPC'
@@ -36,58 +35,10 @@ export const resumeImport = createAction('imports/resumeImport')
 
 // Adv settings mode actions
 export const toggleAdvMode = createAction('imports-adv/toggleAdvMode')
-export const setFileUploading = createAction('imports-adv/setFileUploading')
 export const setConcurrency = createAction('imports-adv/setConcurrency')
 export const setProcessErrs = createAction('imports-adv/setProcessErrs')
 
 export const showDownloadDetails = createAction('imports/showDownloadDetails')
-
-/**
- * @param {FileReader} fileReader FileReader instance to bind to text reading function.
- * @return {(File) => Promise<String>} Async function that reads a given file and returns its text.
- */
-const getFileTextViaReader = fileReader => file =>
-    new Promise((resolve, reject) => {
-        fileReader.onload = event => resolve(event.target.result)
-        fileReader.readAsText(file)
-    })
-
-const deserializeDoc = docString => {
-    if (!docString) return undefined
-    try {
-        return JSON.parse(docString)
-    } catch (error) {
-        console.error(`Cannot parse following input:\n${docString}`)
-    }
-}
-
-/**
- * Performs a restore of given docs files.
- * @param {Array<File>} files One or more NDJSON files that contain database docs.
- */
-export const uploadTestData = files => async (dispatch, getState) => {
-    dispatch(setFileUploading(true))
-
-    if (files.length < 1) {
-        return dispatch(setFileUploading(false))
-    }
-
-    const getFileText = getFileTextViaReader(new FileReader())
-    const onlyDefinedDocs = doc => doc
-
-    // Write contents of each file, one-at-a-time, to the DB
-    for (const file of files) {
-        const text = await getFileText(file)
-        const docs = text
-            .split('\n')
-            .map(deserializeDoc)
-            .filter(onlyDefinedDocs)
-
-        await db.bulkDocs(docs)
-    }
-
-    dispatch(setFileUploading(false))
-}
 
 /**
  * Responds to messages sent from background script over the runtime connection by dispatching

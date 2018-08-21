@@ -1,9 +1,9 @@
 import CustomListBackground from './'
-import Storage from '../../search/search-index-new/storage'
+import Storage from '../../search/storage'
 import indexedDB from 'fake-indexeddb'
 import IDBKeyRange from 'fake-indexeddb/lib/FDBKeyRange'
 import * as DATA from './storage.test.data'
-import { StorageManager } from '../../search/search-index-new/storage/manager'
+import { StorageManager } from '../../search/storage/manager'
 
 const runSuite = () => () => {
     // New storage manager instance

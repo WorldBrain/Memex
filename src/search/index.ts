@@ -1,79 +1,82 @@
-import * as oldBackend from './search-index-old/api'
-import * as newBackend from './search-index-new'
+import Storage, { Props } from './storage'
+import { StorageManager } from './storage/manager'
 
-export class SearchIndex {
-    /**
-     * Denotes which backend to use; either the old LevelUP-based
-     * or the new Dexie-based implementation. Can be set from outside.
-     */
-    useOld: boolean
-
-    /**
-     * In the case where no explicit setting of index backend, it will
-     * do some async checks to see if there is old index data existing
-     * to decide. This Promise affords checking the status of that from outside.
-     */
-    dataReady: Promise<void>
-
-    constructor(useOld?: boolean) {
-        if (useOld) {
-            this.dataReady = Promise.resolve()
-            this.useOld = useOld
-        } else {
-            this.dataReady = oldBackend
-                .hasData()
-                .catch(() => false)
-                .then(hasOldData => {
-                    this.useOld = hasOldData
-                })
+// Create main singleton to interact with DB in the ext
+const storageManager = new StorageManager()
+let realIndex: Storage = null
+const index = new Proxy<Storage>({} as Storage, {
+    get: (target, key) => {
+        if (!realIndex) {
+            init()
         }
-    }
+        if (key === 'db') {
+            return realIndex
+        }
 
-    private get backend(): typeof newBackend {
-        return this.useOld ? (oldBackend as any) : newBackend
-    }
+        let prop = realIndex[key]
+        if (typeof prop === 'function') {
+            prop = prop.bind(realIndex)
+        }
+        return prop
+    },
+})
 
-    private bindIndexMethod = (name: string) => (...args) =>
-        this.backend[name](...args)
-
-    // Adding stuff
-    addPage = this.bindIndexMethod('addPage')
-    addPageTerms = this.bindIndexMethod('addPageTerms')
-    updateTimestampMeta = this.bindIndexMethod('updateTimestampMeta')
-    addVisit = this.bindIndexMethod('addVisit')
-    addFavIcon = this.bindIndexMethod('addFavIcon')
-
-    // Deleting stuff
-    delPages = this.bindIndexMethod('delPages')
-    delPagesByDomain = this.bindIndexMethod('delPagesByDomain')
-    delPagesByPattern = this.bindIndexMethod('delPagesByPattern')
-
-    // Tags
-    addTag = this.bindIndexMethod('addTag')
-    delTag = this.bindIndexMethod('delTag')
-    addAnnotationTag = this.bindIndexMethod('addAnnotationTag')
-    delAnnotationTag = this.bindIndexMethod('delAnnotationTag')
-    getAnnotationTags = this.bindIndexMethod('getAnnotationTags')
-
-    // Bookmarks
-    addBookmark = this.bindIndexMethod('addBookmark')
-    delBookmark = this.bindIndexMethod('delBookmark')
-
-    // Utilities
-    grabExistingKeys = this.bindIndexMethod('grabExistingKeys')
-    getPage = this.bindIndexMethod('getPage')
-
-    // Searching & suggesting
-    search = this.bindIndexMethod('search')
-    suggest = this.bindIndexMethod('suggest')
-    getMatchingPageCount = this.bindIndexMethod('getMatchingPageCount')
-    domainHasFavIcon = this.bindIndexMethod('domainHasFavIcon')
-    extendedSuggest = this.bindIndexMethod('extendedSuggest')
-
-    queue = {
-        clear: () => this.backend.indexQueue.clear(),
-    }
+export const init = (props?: Props) => {
+    realIndex = new Storage({ ...props, storageManager })
+    storageManager._finishInitialization(realIndex)
 }
 
-const indexInterface = new SearchIndex()
-export default indexInterface
+export * from './types'
+export * from './models'
+
+export { Storage, storageManager }
+export default index
+
+//
+// Adding stuff
+//
+
+export {
+    addPage,
+    addPageTerms,
+    updateTimestampMeta,
+    addVisit,
+    addFavIcon,
+} from './add'
+
+//
+// Deleting stuff
+
+export { delPages, delPagesByDomain, delPagesByPattern } from './del'
+
+//
+// Tags-specific
+//
+
+export { addTag, delTag } from './tags'
+
+//
+// Bookmarks-specific
+//
+
+export { addBookmark, delBookmark } from './bookmarks'
+
+//
+// Utilities
+//
+
+export { getPage, grabExistingKeys } from './util'
+
+//
+// Searching & suggesting
+//
+
+export {
+    search,
+    suggest,
+    extendedSuggest,
+    getMatchingPageCount,
+    domainHasFavIcon,
+} from './search'
+
+export { createPageFromTab, createPageFromUrl } from './on-demand-indexing'

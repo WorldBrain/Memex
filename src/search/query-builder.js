@@ -81,10 +81,6 @@ class QueryBuilder {
     isBadTerm = false
     showOnlyBookmarks = false
 
-    constructor(useOld = false) {
-        this.useOld = useOld
-    }
-
     /**
      * @returns {IndexQuery}
      * @memberof QueryBuilder
@@ -167,8 +163,7 @@ class QueryBuilder {
             term = term.replace(QueryBuilder.TERM_CLEAN_PATTERN, '')
 
             if (QueryBuilder.DOMAIN_TLD_PATTERN.test(term)) {
-                const domainIndex =
-                    isExclusive && !this.useOld ? 'domainExclude' : 'domain'
+                const domainIndex = isExclusive ? 'domainExclude' : 'domain'
 
                 this[domainIndex].add(term)
                 continue
