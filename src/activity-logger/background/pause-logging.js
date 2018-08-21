@@ -84,6 +84,8 @@ export default function initPauser() {
 
     // Either clears or sets the pause timeout depending on its running state as denoted by local storage flag
     return async timeoutMins => {
+        timeoutMins = timeoutMins || Infinity
+
         const isPaused = await getState()
         // Immediately toggle the local storage flag and continue on
         setState(timeoutMins == Infinity ? Infinity : !isPaused)

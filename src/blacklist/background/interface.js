@@ -5,10 +5,20 @@ import { updateLastActive } from 'src/analytics'
 /**
  * Main checking logic between a given blacklist expression and current URL.
  */
-const initExpressionMatch = url => (expression = '') => {
+function doesExpMatchURL(expression, url) {
     // Ensure special characters that can appear in URLs are escaped out before checking against the curr URL
     expression = expression.replace(/[()]/g, '\\$&')
     return new RegExp(expression, 'ig').test(url)
+}
+
+function checkBlacklist(url = '', blacklist = []) {
+    for (const { expression } of blacklist) {
+        if (doesExpMatchURL(expression, url)) {
+            return true
+        }
+    }
+
+    return false
 }
 
 /**
@@ -16,22 +26,17 @@ const initExpressionMatch = url => (expression = '') => {
  * rule matches it.
  *
  * @param {string} url The URL to check against the blacklist.
- * @param {Array<any>} blacklist Blacklist data to check URL against.
- * @return {boolean} Denotes whether or not the given URL matches any blacklist expressions.
+ * @return {Promise<boolean>} Denotes whether or not the given URL matches any blacklist expressions.
  */
-export function isURLBlacklisted(url = '', blacklist = []) {
-    const doesExpressionMatchURL = initExpressionMatch(url)
-    // Reduces blacklist to a bool by running main checking logic against each blacklist expression
-    // (returns true if a single match is found in entire blacklist)
-    return blacklist.reduce(
-        (prev, curr) => doesExpressionMatchURL(curr.expression) || prev,
-        false,
-    )
+export async function isURLBlacklisted(url = '') {
+    const blacklist = await fetchBlacklist()
+
+    return checkBlacklist(url, blacklist)
 }
 
 /**
  * HOF which wraps a blacklist checking function up with stored blacklist data.
- * @returns {({ url: string }) => boolean} Ready-to-use checking function against a URL
+ * @returns {Promise<({ url: string }) => boolean>} Ready-to-use checking function against a URL
  */
 export async function checkWithBlacklist() {
     const blacklist = await fetchBlacklist()
@@ -40,7 +45,7 @@ export async function checkWithBlacklist() {
      * @param {string} url The URL to check against the blacklist
      * @returns {boolean} `true` if url in blacklist, else `false`
      */
-    return ({ url = '' } = {}) => isURLBlacklisted(url, blacklist)
+    return ({ url = '' } = {}) => checkBlacklist(url, blacklist)
 }
 
 /**
