@@ -3,7 +3,7 @@ import { connect, MapStateToProps } from 'react-redux'
 
 import ButtonIcon from '../../components/ButtonIcon'
 import { RootState } from '../../types'
-import * as constants from '../../constants'
+import * as constants from '../../../constants'
 import * as selectors from '../selectors'
 import * as acts from '../actions'
 

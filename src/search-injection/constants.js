@@ -40,9 +40,6 @@ export const UNWANTED_GOOGLE_SEARCH_TYPES = [
     'pers', // Google personal
 ]
 
-// Action names
-export const OPEN_OVERVIEW = 'openOverviewURL'
-export const OPEN_OPTIONS = 'openOptionsURL'
 // Storage keys
 export const HIDE_RESULTS_KEY = 'HIDE_MEMEX_RESULTS'
 export const SEARCH_INJECTION_KEY = 'SEARCH_INJECTION'

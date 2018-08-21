@@ -11,7 +11,7 @@ import * as searchIndex from 'src/search'
 import extractTimeFiltersFromQuery, {
     queryFiltersDisplay,
 } from 'src/util/nlp-time-filter'
-import { OVERVIEW_URL } from 'src/background'
+import { OVERVIEW_URL } from './constants'
 
 // Read which browser we are running in.
 let browserName

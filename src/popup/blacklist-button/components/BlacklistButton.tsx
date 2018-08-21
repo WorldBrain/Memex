@@ -1,10 +1,10 @@
 import React, { PureComponent } from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 
+import { OPTIONS_URL } from '../../../constants'
 import Button from '../../components/Button'
 import LinkButton from '../../components/LinkButton'
 import SplitButton from '../../components/SplitButton'
-import { OPTIONS_URL } from '../../constants'
 import * as selectors from '../selectors'
 import * as popup from '../../selectors'
 import * as acts from '../actions'

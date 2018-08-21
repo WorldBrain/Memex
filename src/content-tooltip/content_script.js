@@ -1,5 +1,5 @@
+import { remoteFunction } from 'src/util/webextensionRPC'
 import { bodyLoader } from 'src/util/loader'
-import { OPEN_OPTIONS } from 'src/search-injection/constants'
 import {
     createAndCopyDirectLink,
     createAnnotation,
@@ -7,6 +7,8 @@ import {
 import { setupUIContainer, destroyUIContainer } from './components'
 import * as interactions from './interactions'
 import { injectCSS } from 'src/search-injection/dom'
+
+const openOptionsRPC = remoteFunction('openOptionsTab')
 
 export async function init() {
     await bodyLoader()
@@ -21,13 +23,7 @@ export async function init() {
     const showTooltip = await setupUIContainer(target, {
         createAndCopyDirectLink,
         createAnnotation,
-        openSettings: () => {
-            const message = {
-                action: OPEN_OPTIONS,
-                query: 'settings',
-            }
-            browser.runtime.sendMessage(message)
-        },
+        openSettings: () => openOptionsRPC('settings'),
         destroyTooltip: () => {
             interactions.destroyTooltipTrigger()
             destroyUIContainer(target)

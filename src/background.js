@@ -1,5 +1,3 @@
-import urlRegex from 'url-regex'
-
 import 'src/activity-logger/background'
 import 'src/search/background'
 import 'src/analytics/background'
@@ -9,65 +7,29 @@ import EventLogBackground from 'src/analytics/internal/background'
 import CustomListBackground from 'src/custom-lists/background'
 import NotificationBackground from 'src/notifications/background'
 import 'src/omnibar'
-import { INSTALL_TIME_KEY } from './constants'
+import { INSTALL_TIME_KEY, OVERVIEW_URL } from './constants'
 import {
     constants as blacklistConsts,
     blacklist,
 } from 'src/blacklist/background'
 import analytics from 'src/analytics'
-import {
-    OPEN_OVERVIEW,
-    OPEN_OPTIONS,
-    SEARCH_INJECTION_KEY,
-} from 'src/search-injection/constants'
+import { SEARCH_INJECTION_KEY } from 'src/search-injection/constants'
 import db, { storageManager } from 'src/search'
 import initSentry from './util/raven'
 import { USER_ID, generateTokenIfNot } from 'src/util/generate-token'
 import { API_HOST } from 'src/analytics/internal/constants'
 import { storageChangesManager } from 'src/util/storage-changes'
 import internalAnalytics from 'src/analytics/internal'
+import BackgroundScript, { utils } from './background-script'
 
 window.db = db
+
 window.storageMan = storageManager
 
 initSentry()
 
-export const OPTIONS_URL = '/options.html'
-export const OVERVIEW_URL = `${OPTIONS_URL}#/overview`
-export const OLD_EXT_UPDATE_KEY = 'updated-from-old-ext'
-export const UNINSTALL_URL =
-    process.env.NODE_ENV === 'production'
-        ? 'http://worldbrain.io/uninstall'
-        : ''
-export const NEW_FEATURE_NOTIF = {
-    title: 'NEW FEATURE: Annotations',
-    message: 'Click to learn more',
-    url: 'https://worldbrain.helprace.com/i66-annotations-comments',
-}
-
 const notifications = new NotificationBackground({ storageManager })
 notifications.setupRemoteFunctions()
-
-async function openOverview() {
-    const [currentTab] = await browser.tabs.query({ active: true })
-
-    // Either create new tab or update current tab with overview page, depending on URL validity
-    if (currentTab && currentTab.url && urlRegex().test(currentTab.url)) {
-        browser.tabs.create({ url: OVERVIEW_URL })
-    } else {
-        browser.tabs.update({ url: OVERVIEW_URL })
-    }
-}
-
-const openOverviewURL = query =>
-    browser.tabs.create({
-        url: `${OVERVIEW_URL}?query=${query}`,
-    })
-
-const openOptionsURL = query =>
-    browser.tabs.create({
-        url: `${OPTIONS_URL}#${query}`,
-    })
 
 async function onInstall() {
     await notifications.deliverStaticNotifications()
@@ -111,18 +73,7 @@ async function onUpdate() {
 browser.commands.onCommand.addListener(command => {
     switch (command) {
         case 'openOverview':
-            return openOverview()
-        default:
-    }
-})
-
-// Open an extension URL on receving message from content script
-browser.runtime.onMessage.addListener(({ action, query }) => {
-    switch (action) {
-        case OPEN_OVERVIEW:
-            return openOverviewURL(query)
-        case OPEN_OPTIONS:
-            return openOptionsURL(query)
+            return utils.openOverview()
         default:
     }
 })
@@ -140,6 +91,10 @@ browser.runtime.onInstalled.addListener(details => {
 storageChangesManager.addListener('local', USER_ID, ({ newValue }) => {
     browser.runtime.setUninstallURL(`${API_HOST}/uninstall?user=${newValue}`)
 })
+
+const bgScript = new BackgroundScript({})
+bgScript.setupRemoteFunctions()
+window.bgScript = bgScript
 
 const directLinking = new DirectLinkingBackground({ storageManager })
 directLinking.setupRemoteFunctions()

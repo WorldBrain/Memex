@@ -42,6 +42,7 @@ class Container extends React.Component {
         this.readNotification = remoteFunction('readNotification')
         this.fetchNotifById = remoteFunction('fetchNotifById')
         this.processEvent = remoteFunction('processEvent')
+        this.openOverviewRPC = remoteFunction('openOverviewTab')
     }
 
     state = {
@@ -102,12 +103,7 @@ class Container extends React.Component {
         this.updateLastActive()
         // Create a new tab with the query overview URL
         const query = new URL(location.href).searchParams.get('q')
-
-        const message = {
-            action: constants.OPEN_OVERVIEW,
-            query,
-        }
-        browser.runtime.sendMessage(message)
+        this.openOverviewRPC(query)
     }
 
     async toggleHideResults() {
