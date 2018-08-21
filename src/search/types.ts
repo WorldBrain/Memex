@@ -59,6 +59,8 @@ export interface PageAddRequest {
 export interface PageDoc {
     content: Partial<PageContent>
     url: string
+    favIconURI?: string
+    screenshotURI?: string
     [extra: string]: any
 }
 
@@ -69,4 +71,30 @@ export interface PageContent {
     canonicalUrl?: string
     description?: string
     keywords?: string[]
+}
+
+export interface PipelineReq {
+    pageDoc: PageDoc
+    rejectNoContent?: boolean
+}
+
+export interface PipelineRes {
+    url: string
+
+    // Display data
+    fullUrl: string
+    fullTitle: string
+
+    // Indexed data
+    domain: string
+    hostname: string
+    tags: string[]
+    terms: string[]
+    urlTerms: string[]
+    titleTerms: string[]
+
+    // Misc.
+    favIconURI?: string
+    screenshotURI?: string
+    text: string
 }

@@ -1,14 +1,12 @@
 import normalizeUrl from '../util/encode-url-for-id'
 import transformPageText from '../util/transform-page-text'
 import { DEFAULT_TERM_SEPARATOR, extractContent } from './util'
+import { PipelineReq, PipelineRes } from './types'
 
 /**
  * Derived from answer in: https://stackoverflow.com/a/23945027
- *
- * @param {string} hostname
- * @return {string}
  */
-function extractRootDomain(hostname) {
+function extractRootDomain(hostname: string) {
     const splitArr = hostname.split('.')
     const len = splitArr.length
 
@@ -29,13 +27,19 @@ function extractRootDomain(hostname) {
 }
 
 /**
- * @param {string} url A raw URL string to attempt to extract parts from.
- * @returns {any} Object containing `hostname` and `pathname` props. Values should be the `domain.tld.cctld` part and
+ * @param url A raw URL string to attempt to extract parts from.
+ * @returns Object containing `hostname` and `pathname` props. Values should be the `domain.tld.cctld` part and
  *  everything after, respectively. If regex matching failed on given URL, error will be logged and simply
  *  the URL with protocol and opt. `www` parts removed will be returned for both values.
  */
-export function transformUrl(url) {
-    let parsed, normalized
+export function transformUrl(
+    url: string,
+): {
+    hostname: string
+    pathname: string
+    domain: string
+} {
+    let normalized: string
 
     try {
         normalized = normalizeUrl(url, { skipProtocolTrim: true })
@@ -44,7 +48,7 @@ export function transformUrl(url) {
     }
 
     try {
-        parsed = new URL(normalized)
+        const parsed = new URL(normalized)
 
         return {
             hostname: parsed.hostname,
@@ -62,11 +66,9 @@ export function transformUrl(url) {
 }
 
 /**
- *
- * @param {string} text
- * @returns {Set<string>} Set of "words-of-interest" - determined by pre-proc logic in `transformPageText` - extracted from `text`.
+ * @returns Set of "words-of-interest" - determined by pre-proc logic in `transformPageText` - extracted from `text`.
  */
-export function extractTerms(text) {
+export function extractTerms(text: string): Set<string> {
     if (!text || !text.length) {
         return new Set()
     }
@@ -88,14 +90,12 @@ export function extractTerms(text) {
  * Given some page data, applies some transformations to the text and
  * returns page data ready for creation of new Page model instance.
  *
- * @param {any} args.pageDoc Contains props like content (full text, blobs), url.
- * @param {boolean} [args.rejectNoContent=true] Whether or not to reject if input page data text is empty.
- * @returns {Promise<any>} Resolves to an object containing all data needed for Page model.
+ * @returns Resolves to an object containing all data needed for Page model.
  */
 export default function pipeline({
     pageDoc: { content = {}, url, ...data },
     rejectNoContent = true,
-}) {
+}: PipelineReq): Promise<PipelineRes> {
     // First apply transformations to the URL
     const { pathname, hostname, domain } = transformUrl(url)
 
