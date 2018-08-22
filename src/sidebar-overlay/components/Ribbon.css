@@ -32,8 +32,14 @@
     right: 0;
     border: 0;
     outline: 0;
+
+    /* Giving it !important to prevent global overrides */
     width: 340px !important; /* stylelint-disable-line declaration-no-important */
     height: 100% !important; /* stylelint-disable-line declaration-no-important */
+    min-width: 340px !important; /* stylelint-disable-line declaration-no-important */
+    max-width: 340px !important; /* stylelint-disable-line declaration-no-important */
+    min-height: 100% !important; /* stylelint-disable-line declaration-no-important */
+    max-height: 100% !important; /* stylelint-disable-line declaration-no-important */
     z-index: 2147483646;
     transform: translate(400px, 0);
     transition: all 0.05s ease-in;
