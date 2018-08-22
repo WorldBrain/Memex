@@ -2,14 +2,14 @@ import 'rxjs/add/operator/debounceTime'
 import 'rxjs/add/operator/map'
 import 'rxjs/add/operator/filter'
 
-import * as actions from './actions'
 import { actions as onboardingActs } from './onboarding'
+import { acts as searchBarActs } from './search-bar'
 import { actions as filterActs } from '../search-filters'
 
 const searchUpdateActions = [
-    actions.setQuery.getType(),
-    actions.setStartDate.getType(),
-    actions.setEndDate.getType(),
+    searchBarActs.setQuery.getType(),
+    searchBarActs.setStartDate.getType(),
+    searchBarActs.setEndDate.getType(),
     filterActs.toggleBookmarkFilter.getType(),
     filterActs.addTagFilter.getType(),
     filterActs.delTagFilter.getType(),
@@ -32,4 +32,4 @@ export const refreshSearchResultsUponQueryChange = action$ =>
     action$
         .filter(action => searchUpdateActions.includes(action.type))
         .debounceTime(500) // wait until typing stops for 500ms
-        .map(() => actions.search({ overwrite: true })) // Schedule new fresh (overwriting) search
+        .map(() => searchBarActs.search({ overwrite: true })) // Schedule new fresh (overwriting) search

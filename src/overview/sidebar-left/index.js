@@ -1,8 +1,7 @@
 import reducer from './reducer'
 import * as actions from './actions'
 import * as selectors from './selectors'
+import SidebarContainer from './components/SidebarContainer'
+import SidebarIconsContainer from './components/SidebarIconsContainer'
 
-import container from './container'
-
-export { reducer, actions, selectors, container }
-export default container
+export { reducer, actions, selectors, SidebarContainer, SidebarIconsContainer }

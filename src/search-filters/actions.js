@@ -2,6 +2,7 @@ import { createAction } from 'redux-act'
 
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { selectors } from './'
+import { results } from '../overview/results/selectors'
 
 export const showTagFilter = createAction('search-filters/showTagFilter')
 export const hideTagFilter = createAction('search-filters/hideTagFilter')
@@ -15,7 +16,10 @@ export const toggleFilterTypes = createAction(
 
 export const addTagFilter = createAction('search-filters/addTagFilter')
 export const delTagFilter = createAction('search-filters/delTagFilter')
-export const toggleTagFilter = createAction('search-filters/toggleTagFilter')
+export const toggleTagFilter = createAction(
+    'search-filters/toggleTagFilter',
+    a => a,
+)
 export const addIncDomainFilter = createAction(
     'search-filters/addIncDomainFilter',
 )
@@ -30,9 +34,11 @@ export const delExcDomainFilter = createAction(
 )
 export const toggleIncDomainFilter = createAction(
     'search-filters/toggleIncDomainFilter',
+    a => a,
 )
 export const toggleExcDomainFilter = createAction(
     'search-filters/toggleExcDomainFilter',
+    a => a,
 )
 export const setTagFilters = createAction('search-filters/setTagFilters')
 export const setListFilters = createAction('searc-filters/setListFilters')
@@ -81,4 +87,33 @@ export const fetchSuggestedDomains = () => async (dispatch, getState) => {
             })),
         ]),
     )
+}
+
+// Remove tags with no associated paged from filters
+export const removeTagFromFilter = () => (dispatch, getState) => {
+    const filterTags = selectors.tags(getState()) || []
+    if (!filterTags.length) {
+        return
+    }
+    const pages = results(getState())
+    const isOnPage = {}
+    filterTags.forEach(tag => {
+        isOnPage[tag] = false
+    })
+
+    pages.forEach(page => {
+        filterTags.forEach(tag => {
+            if (!isOnPage[tag]) {
+                if (page.tags.indexOf(tag) > -1) {
+                    isOnPage[tag] = true
+                }
+            }
+        })
+    })
+
+    Object.entries(isOnPage).forEach(([key, value]) => {
+        if (!value) {
+            dispatch(delTagFilter(key))
+        }
+    })
 }

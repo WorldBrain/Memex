@@ -2,7 +2,6 @@ import { createAction } from 'redux-act'
 import { browser } from 'webextension-polyfill-ts'
 
 import { remoteFunction } from '../util/webextensionRPC'
-import { actions as overviewActs } from '../overview'
 import * as selectors from './selectors'
 import * as constants from './constants'
 import { NotifDefinition } from './types'
@@ -19,7 +18,7 @@ export const appendResult = createAction<NotifDefinition[]>(
     'notifications/appendResult',
 )
 
-export const toggleInbox = createAction<any>('notifications/toggleInbox')
+export const toggleInbox = createAction('notifications/toggleInbox')
 export const setUnreadCount = createAction<number>(
     'notifications/setUnreadCount',
 )
@@ -30,7 +29,6 @@ export const handleReadNotification = createAction<number>(
 
 const fetchUnreadNotifications = remoteFunction('fetchUnreadNotifications')
 const fetchReadNotifications = remoteFunction('fetchReadNotifications')
-const storeNotification = remoteFunction('storeNotification')
 const fetchUnreadCount = remoteFunction('fetchUnreadCount')
 const readNotification = remoteFunction('readNotification')
 const processEvent = remoteFunction('processEvent')
@@ -158,12 +156,12 @@ export const updateUnreadNotif = () => async (dispatch, getState) => {
     dispatch(setUnreadCount(unreadNotifs))
 }
 
-export const toggleInboxMid = val => (dispatch, getState) => {
+export const toggleInboxMid = () => (dispatch, getState) => {
     const showInbox = selectors.showInbox(getState())
 
     processEvent({
         type: !showInbox ? 'openInboxOveview' : 'closeInboxOveview',
     })
 
-    dispatch(toggleInbox(val))
+    dispatch(toggleInbox())
 }

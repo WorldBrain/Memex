@@ -9,7 +9,11 @@ import * as privacy from './privacy'
 import * as settings from './settings'
 import * as overviewPage from '../overview'
 import { reducer as onboarding } from '../overview/onboarding'
-import { reducer as sidebar } from 'src/overview/sidebar'
+import { reducer as sidebar } from '../overview/sidebar'
+import { reducer as deleteConfModal } from '../overview/delete-confirm-modal'
+import { reducer as results } from '../overview/results'
+import { reducer as searchBar } from '../overview/search-bar'
+import { reducer as tooltips } from '../overview/tooltips'
 import { reducer as customLists } from 'src/custom-lists'
 // Search filters in the sidebar
 import { reducer as searchFilters } from 'src/search-filters'
@@ -20,7 +24,6 @@ const rootReducer = combineReducers({
     blacklist: blacklist.reducer,
     imports: imports.reducer,
     privacy: privacy.reducer,
-    overview: overviewPage.reducer,
     settings: settings.reducer,
     onboarding,
     sidebar,
@@ -28,6 +31,10 @@ const rootReducer = combineReducers({
     searchFilters,
     sidebarLeft,
     notifications: notifications.reducer,
+    deleteConfModal,
+    searchBar,
+    tooltips,
+    results,
 })
 
 const rootEpic = combineEpics(...Object.values(overviewPage.epics))

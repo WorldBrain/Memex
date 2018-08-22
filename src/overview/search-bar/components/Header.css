@@ -1,0 +1,135 @@
+.navbar {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: space-between;
+    height: 70px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 2000;
+    background-color: #fafafa;
+    padding: 0 60px;
+    box-shadow: 0 2px 4px rgba(220, 220, 220, 0.7);
+
+    @media (max-width: 1000px) {
+        justify-content: center;
+        padding: 0;
+    }
+}
+
+.logo {
+    background-image: url('/img/worldbrain-logo.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 131px;
+    height: 33px;
+
+    @media (max-width: 1200px) {
+        width: 24px;
+        background-image: url('/img/worldbrain-logo-narrow.png');
+    }
+
+    @media (max-width: 1000px) {
+        display: none;
+    }
+}
+
+.searchField {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 800px;
+    height: 37px;
+    border-radius: 3.5px;
+    box-shadow: 0 2px 4px 1px rgba(220, 220, 220, 0.7);
+    background-color: white;
+    transition: all 200ms ease-out;
+
+    @media (max-width: 724px) {
+        margin: 0 8px;
+    }
+}
+
+.query {
+    flex: 1;
+    background-image: url('/img/search-icon.png');
+    background-repeat: no-repeat;
+    background-size: 18px;
+    background-position: 27px;
+    background-color: transparent;
+    padding-left: 60px;
+    font-size: 15px;
+    color: #777;
+    border: none;
+    font-family: 'Open Sans';
+    font-weight: lighter;
+
+    &::placeholder {
+        color: #b8b8b8;
+    }
+
+    &:focus {
+        outline: none;
+        border: none;
+    }
+}
+
+.container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 800px;
+    height: 37px;
+    background-color: #fafafa;
+    transition: all 200ms ease-out;
+    border-right: none;
+}
+
+.links {
+    display: flex;
+    justify-content: flex-end;
+    align-content: center;
+    width: 360px;
+    margin-left: -230px;
+    font-weight: normal;
+    align-items: center;
+
+    @media (max-width: 1200px) {
+        margin-left: 0;
+        width: 24px;
+    }
+
+    @media (max-width: 1000px) {
+        display: none;
+    }
+
+    > a {
+        height: 25px;
+    }
+}
+
+.upgrade {
+    font-size: 15px;
+    text-decoration: none;
+    padding-top: 1px;
+    padding-right: 30px;
+    padding-left: 30px;
+    color: #3eb995;
+
+    &:hover {
+        color: #777;
+    }
+
+    @media (max-width: 1260px) {
+        display: none;
+    }
+}
+
+.icon {
+    height: 25px;
+    width: 25px;
+    margin-bottom: -6px;
+}
