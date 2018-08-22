@@ -1,3 +1,4 @@
+/* stylelint-disable declaration-no-important */
 .ribbon {
     position: fixed;
     top: 35%;
@@ -32,8 +33,14 @@
     right: 0;
     border: 0;
     outline: 0;
-    width: 340px;
-    height: 100%;
+
+    /* Giving it !important to prevent global overrides */
+    width: 340px !important;
+    height: 100% !important;
+    min-width: 340px !important;
+    max-width: 340px !important;
+    min-height: 100% !important;
+    max-height: 100% !important;
     z-index: 2147483646;
     transform: translate(400px, 0);
     transition: all 0.05s ease-in;
