@@ -30,6 +30,12 @@ class BackgroundScript {
         this.storageChangesMan = storageChangesMan
     }
 
+    get defaultUninstallURL() {
+        return process.env.NODE_ENV === 'production'
+            ? 'http://worldbrain.io/uninstall'
+            : ''
+    }
+
     /**
      * Set up custom commands defined in the manifest.
      * https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/commands
@@ -67,6 +73,8 @@ class BackgroundScript {
      * https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/setUninstallURL
      */
     private setupUninstallURL() {
+        browser.runtime.setUninstallURL(this.defaultUninstallURL)
+
         this.storageChangesMan.addListener('local', USER_ID, ({ newValue }) =>
             browser.runtime.setUninstallURL(
                 `${UNINSTALL_URL}?user=${newValue}`,
