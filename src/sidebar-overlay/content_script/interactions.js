@@ -2,11 +2,12 @@ import scrollToElement from 'scroll-to-element'
 
 import { highlightAnnotation } from 'src/direct-linking/content_script/rendering'
 import { injectCSS } from 'src/search-injection/dom'
-import { makeRemotelyCallable } from 'src/util/webextensionRPC'
+import { makeRemotelyCallable, remoteFunction } from 'src/util/webextensionRPC'
 import { setupRibbonUI, destroyAll } from '../components'
-import { OPEN_OPTIONS } from '../../search-injection/constants'
 import { getOffsetTop } from '../utils'
 import styles from 'src/direct-linking/content_script/styles.css'
+
+const openOptionsRPC = remoteFunction('openOptionsTab')
 
 /**
  * Scrolls to the highlight of the passed annotation.
@@ -240,13 +241,7 @@ export const removeAnnotationHighlights = ({ url }) => {
 /**
  * Sends a message to the background to open up Memex Settings.
  */
-export const openSettings = () => {
-    const message = {
-        action: OPEN_OPTIONS,
-        query: 'settings',
-    }
-    browser.runtime.sendMessage(message)
-}
+export const openSettings = () => openOptionsRPC('settings')
 
 /**
  * Finds each annotations position in page, sorts it by the position and returns.

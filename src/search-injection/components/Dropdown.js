@@ -2,16 +2,8 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import onClickOutside from 'react-onclickoutside'
 
-import { OPEN_OPTIONS } from '../constants'
+import { remoteFunction } from 'src/util/webextensionRPC'
 import styles from './Dropdown.css'
-
-const openSettings = () => {
-    const message = {
-        action: OPEN_OPTIONS,
-        query: 'settings',
-    }
-    browser.runtime.sendMessage(message)
-}
 
 class Dropdown extends React.Component {
     static propTypes = {
@@ -19,6 +11,10 @@ class Dropdown extends React.Component {
         rerender: PropTypes.func.isRequired,
         closeDropdown: PropTypes.func.isRequired,
     }
+
+    openOptionsRPC = remoteFunction('openOptionsTab')
+
+    openSettings = () => this.openOptionsRPC('settings')
 
     handleClickOutside = () => {
         this.props.closeDropdown()
@@ -30,7 +26,7 @@ class Dropdown extends React.Component {
                 <ul className={styles.dropdown}>
                     <li
                         className={styles.dropdownElement}
-                        onClick={openSettings}
+                        onClick={this.openSettings}
                     >
                         Settings
                     </li>

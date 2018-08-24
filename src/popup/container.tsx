@@ -3,6 +3,7 @@ import qs from 'query-string'
 import { connect, MapStateToProps } from 'react-redux'
 import { browser } from 'webextension-polyfill-ts'
 
+import * as constants from '../constants'
 import analytics from '../analytics'
 import extractQueryFilters from '../util/nlp-time-filter'
 import { remoteFunction } from '../util/webextensionRPC'
@@ -31,7 +32,6 @@ import {
 import { BookmarkButton } from './bookmark-button'
 import * as selectors from './selectors'
 import * as acts from './actions'
-import * as constants from './constants'
 import { ClickHandler, RootState } from './types'
 
 const btnStyles = require('./components/Button.css')

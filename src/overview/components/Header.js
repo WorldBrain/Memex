@@ -6,7 +6,7 @@ import { OutLink } from 'src/common-ui/containers'
 import DateRangeSelection from './DateRangeSelection'
 import styles from './Overview.css'
 import InboxButton from 'src/notifications/components/InboxButton'
-import * as constants from 'src/popup/constants'
+import * as constants from '../../constants'
 
 const Header = ({
     currentQueryParams: { query, startDate, endDate },
