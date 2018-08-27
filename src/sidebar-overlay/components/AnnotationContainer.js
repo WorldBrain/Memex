@@ -196,6 +196,14 @@ class AnnotationContainer extends React.Component {
                     className={styles.trashIcon}
                     onClick={this._setFooterState('delete')}
                 />
+                <span
+                    className={styles.shareIcon}
+                    // onClick={this._setFooterState('')}
+                />
+                <span
+                    className={styles.replyIcon}
+                    // onClick={this._setFooterState('')}
+                />
                 {env === 'overview' && annotation.body ? (
                     <span
                         className={styles.goToPageIcon}
