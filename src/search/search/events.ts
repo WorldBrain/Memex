@@ -7,48 +7,63 @@ export async function mapUrlsToLatestEvents(
     { endDate, startDate, bookmarks }: Partial<SearchParams>,
     urls: string[],
 ) {
-    const latestEvents = new Map()
+    /**
+     * @param {PageResultsMap} urlTimeMap Map to keep track of URL-timestamp pairs.
+     * @param {boolean} [skipDateCheck=false] Flag to denote whether to skip start/end date boundary checking.
+     * @returns A function that looks at each URL-timestamp pair and decides if should keep track or not.
+     */
+    function attemptAdd(urlTimeMap: PageResultsMap, skipDateCheck = false) {
+        return (time: number, url: string) => {
+            const existing = urlTimeMap.get(url) || 0
 
-    const attemptAdd = ({ time, url }) => {
-        const existing = latestEvents.get(url) || 0
-        if (
-            existing > time ||
-            (endDate != null && time > endDate) ||
-            (startDate != null && time < startDate)
-        ) {
-            return false
+            if (
+                existing > time ||
+                (!skipDateCheck && endDate != null && endDate < time) ||
+                (!skipDateCheck && startDate != null && startDate > time)
+            ) {
+                return false
+            }
+
+            urlTimeMap.set(url, time)
+            return true
         }
-
-        latestEvents.set(url, time)
-        return true
     }
+
+    const latestBookmarks: PageResultsMap = new Map()
+    await db.bookmarks
+        .where('url')
+        .anyOf(urls)
+        .each(({ time, url }) =>
+            attemptAdd(latestBookmarks, bookmarks)(time, url),
+        )
+
+    const latestVisits: PageResultsMap = new Map()
+    const urlsToCheck = bookmarks ? [...latestBookmarks.keys()] : urls
+    // Simple state to keep track of when to finish each query
+    const doneFlags = urlsToCheck.map(url => false)
 
     // Previously used `.anyOf()` + `.eachPrimaryKey()` in a single query
     //  Turns out it's _way_ faster to do multiple parrallel queries for this
     //  (URLs are not unique in visits index)
-    if (!bookmarks) {
-        // Simple state to keep track of when to finish each query
-        const doneFlags = urls.map(url => false)
-        await Promise.all(
-            urls.map((currUrl, i) =>
-                db.visits
-                    .where('url')
-                    .equals(currUrl)
-                    .reverse()
-                    // Mark of current query as done as soon as visit passes adding criteria
-                    .until(() => doneFlags[i])
-                    .eachPrimaryKey(
-                        ([time, url]) =>
-                            (doneFlags[i] = attemptAdd({ time, url })),
-                    ),
-            ),
-        )
-    }
+    await Promise.all(
+        urlsToCheck.map((currUrl, i) =>
+            db.visits
+                .where('url')
+                .equals(currUrl)
+                .reverse()
+                // Mark of current query as done as soon as visit passes adding criteria
+                .until(() => doneFlags[i])
+                .eachPrimaryKey(
+                    ([time, url]) =>
+                        (doneFlags[i] = attemptAdd(latestVisits)(time, url)),
+                ),
+        ),
+    )
 
-    await db.bookmarks
-        .where('url')
-        .anyOf(urls)
-        .each(attemptAdd)
+    // Merge results
+    const latestEvents: PageResultsMap = new Map()
+    latestVisits.forEach(attemptAdd(latestEvents))
+    latestBookmarks.forEach(attemptAdd(latestEvents))
 
     return latestEvents
 }
