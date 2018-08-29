@@ -212,7 +212,7 @@ export class LocalLastBackupStorage implements LastBackupStorage {
 }
 
 export function _getMemexCloudOrigin() {
-    if (process.env.NODE_ENV !== 'production') {
+    if (process.env.NODE_ENV !== 'production' && process.env.LOCAL_AUTH_SERVICE === 'true') {
         return 'http://localhost:3002'
     } else {
         return 'https://memex.cloud'

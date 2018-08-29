@@ -1,25 +1,43 @@
 export class DriveTokenManager {
     public tokenStore: DriveTokenStore
-    public accessToken: string
+    private accessToken: string
     public memexCloudOrigin: string
     private refreshToken: string
     private lastTokenRefresh: Date
     private tokenExpiryDate: Date
+    private initializationPromise: Promise<any>
 
     constructor({ tokenStore, memexCloudOrigin }: { tokenStore: DriveTokenStore, memexCloudOrigin: string }) {
-        this.tokenStore = tokenStore
-        this.tokenStore.retrieveAccessToken().then(({ token, expiryDate }) => {
-            if (token) {
-                this.accessToken = token
-                this.tokenExpiryDate = expiryDate
-            }
-        })
-        this.tokenStore.retrieveRefreshToken().then(token => {
-            if (token) {
-                this.refreshToken = token
-            }
-        })
         this.memexCloudOrigin = memexCloudOrigin
+        this.tokenStore = tokenStore
+        this.initializationPromise = new Promise(async (resolve, reject) => {
+            try {
+                const { token: accessToken, expiryDate } = await this.tokenStore.retrieveAccessToken()
+                if (accessToken) {
+                    this.accessToken = accessToken
+                    this.tokenExpiryDate = expiryDate
+                }
+
+                const refreshToken = await this.tokenStore.retrieveRefreshToken()
+                if (refreshToken) {
+                    this.refreshToken = refreshToken
+                }
+
+                resolve()
+            } catch (err) {
+                reject(err)
+            }
+        })
+    }
+
+    async getAccessToken() {
+        await this.initializationPromise
+        return this.accessToken
+    }
+
+    async getRefreshToken() {
+        await this.initializationPromise
+        return this.accessToken
     }
 
     async handleNewTokens({ accessToken, refreshToken, expiresInSeconds }: { accessToken: string, refreshToken?: string, expiresInSeconds: number }) {

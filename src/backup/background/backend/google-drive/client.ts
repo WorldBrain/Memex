@@ -122,8 +122,9 @@ export class GoogleDriveClient {
     }
 
     async _request(path, options: any = {}): Promise<any> {
+        const accessToken = await this.tokenManager.getAccessToken()
         options.headers = options.headers || {}
-        options.headers['Authorization'] = `Bearer ${this.tokenManager.accessToken}`
+        options.headers['Authorization'] = `Bearer ${accessToken}`
 
         if (options.prefix === undefined) {
             options.prefix = 'main'
