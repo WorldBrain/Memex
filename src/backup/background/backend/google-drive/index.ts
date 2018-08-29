@@ -28,17 +28,17 @@ export class DriveBackupBackend {
     }
 
     async isAuthenticated() {
-        return !!this.tokenManager.accessToken && !this.tokenManager.isAccessTokenExpired({ margin: 1000 * 60 * 40 })
+        return !!await this.tokenManager.getAccessToken()
     }
 
     async isConnected() {
-        return !!(await this.tokenManager.tokenStore.retrieveRefreshToken())
+        return !!await this.tokenManager.getAccessToken() && !this.tokenManager.isAccessTokenExpired({ margin: 1000 * 60 * 40 })
     }
 
     async handleLoginRedirectedBack(locationHref: string) {
         const response = await fetch(locationHref)
-        const { profile, accessToken, expiresInSeconds } = await response.json()
-        await this.tokenManager.handleNewTokens({ accessToken, refreshToken: null, expiresInSeconds })
+        const { profile, accessToken, refreshToken, expiresInSeconds } = await response.json()
+        await this.tokenManager.handleNewTokens({ accessToken, refreshToken, expiresInSeconds })
     }
 
     async startBackup({ events }: { events: EventEmitter }): Promise<any> {
