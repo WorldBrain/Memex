@@ -69,44 +69,51 @@ export async function mapUrlsToLatestEvents(
 }
 
 /**
- * Goes through visits and bookmarks index from `endDate` until it groups enough URLs.
- * The `.until` in the query chain forces time and space to be constant to `skip + limit`
- *
  * @return Map of URL keys to latest visit time numbers. Should be size <= skip + limit.
  */
 export async function groupLatestEventsByUrl(
+    params: Partial<SearchParams>,
+    filteredUrls: FilteredURLs,
+) {
+    return params.bookmarks
+        ? lookbackBookmarksTime(params)
+        : lookbackFromEndDate(params, filteredUrls)
+}
+
+/**
+ * Goes through visits and bookmarks index from `endDate` until it groups enough URLs.
+ * The `.until` in the query chain forces time and space to be constant to `skip + limit`
+ */
+async function lookbackFromEndDate(
     {
         startDate = 0,
         endDate = Date.now(),
         skip = 0,
         limit = 10,
-        bookmarks,
     }: Partial<SearchParams>,
     filteredUrls: FilteredURLs,
-): Promise<PageResultsMap> {
+) {
     // Lookback from endDate to get needed amount of visits
     const latestVisits: PageResultsMap = new Map()
-    if (!bookmarks) {
-        await db.visits
-            .where('[time+url]')
-            .between(
-                [startDate, Storage.MIN_STR],
-                [endDate, Storage.MAX_STR],
-                true,
-                true,
-            )
-            // Go through visits by most recent
-            .reverse()
-            // Stop iterating once we have enough
-            .until(() => latestVisits.size >= skip + limit)
-            // For each visit PK, reduce down into Map of URL keys to latest visit time
-            .eachPrimaryKey(([time, url]) => {
-                // Only ever record the latest visit for each URL (first due to IndexedDB reverse keys ordering)
-                if (!latestVisits.has(url) && filteredUrls.isAllowed(url)) {
-                    latestVisits.set(url, time)
-                }
-            })
-    }
+    await db.visits
+        .where('[time+url]')
+        .between(
+            [startDate, Storage.MIN_STR],
+            [endDate, Storage.MAX_STR],
+            true,
+            true,
+        )
+        // Go through visits by most recent
+        .reverse()
+        // Stop iterating once we have enough
+        .until(() => latestVisits.size >= skip + limit)
+        // For each visit PK, reduce down into Map of URL keys to latest visit time
+        .eachPrimaryKey(([time, url]) => {
+            // Only ever record the latest visit for each URL (first due to IndexedDB reverse keys ordering)
+            if (!latestVisits.has(url) && filteredUrls.isAllowed(url)) {
+                latestVisits.set(url, time)
+            }
+        })
 
     // Similar lookback on bookmarks
     const latestBookmarks: PageResultsMap = new Map()
@@ -118,15 +125,79 @@ export async function groupLatestEventsByUrl(
         .each(({ time, url }) => latestBookmarks.set(url, time))
 
     // Merge results
-    const latestEvents: PageResultsMap = new Map()
+    const results: PageResultsMap = new Map()
     const addToMap = (time, url) => {
-        const existing = latestEvents.get(url) || 0
+        const existing = results.get(url) || 0
         if (existing < time) {
-            latestEvents.set(url, time)
+            results.set(url, time)
         }
     }
     latestVisits.forEach(addToMap)
     latestBookmarks.forEach(addToMap)
 
-    return latestEvents
+    return results
+}
+
+/**
+ * Goes through bookmarks index from latest time until it groups enough URLs that have either been
+ * bookmarked OR visited within the bounds specified in the search params.
+ */
+async function lookbackBookmarksTime({
+    startDate = 0,
+    endDate = Date.now(),
+    skip = 0,
+    limit = 10,
+}: Partial<SearchParams>) {
+    let bmsExhausted = false
+    let results: PageResultsMap = new Map()
+
+    // Start looking back from latest time, then update upper bound to the latest result time each iteration
+    let upperBound = Date.now()
+
+    // Stop lookback when we have enough results or no more bookmarks
+    while (results.size < limit && !bmsExhausted) {
+        const bms: PageResultsMap = new Map()
+
+        // Grab latest page of bookmarks
+        await db.bookmarks
+            .where('time')
+            .between(startDate, upperBound, true, true)
+            .reverse() // Latest first
+            .until(() => bms.size >= skip + limit)
+            .each(({ time, url }) => bms.set(url, time))
+
+        if (bms.size < skip + limit) {
+            bmsExhausted = true
+        }
+
+        // For each one, if was bookmarked later than endDate filter, replace with latest in-bounds visit
+        for (const [currentUrl, currentTime] of bms) {
+            if (currentTime > endDate) {
+                let done = false
+                await db.visits
+                    .where('url')
+                    .equals(currentUrl)
+                    .reverse()
+                    .until(() => done)
+                    .eachPrimaryKey(([visitTime]) => {
+                        if (visitTime <= endDate) {
+                            bms.set(currentUrl, visitTime)
+                            done = true
+                        }
+                    })
+            }
+        }
+
+        // Add current iteration's bm results to result pool, filtering out any out-of-bounds bms
+        results = new Map([
+            ...results,
+            ...[...bms].filter(
+                ([, time]) => time >= startDate && time <= endDate,
+            ),
+        ])
+        // Next iteration, look back from the oldest result's time (-1 to exclude the same result next time)
+        upperBound = Math.min(...results.values()) - 1
+    }
+
+    return results
 }
