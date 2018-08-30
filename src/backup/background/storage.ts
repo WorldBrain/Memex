@@ -1,5 +1,5 @@
-import { FeatureStorage, CollectionDefinitions } from "../../search/search-index-new/storage"
-import { StorageManager } from '../../search/search-index-new/storage/manager'
+import { FeatureStorage, CollectionDefinitions } from '../../search/storage'
+import { StorageManager } from '../../search/storage/manager'
 
 export default class BackupStorage extends FeatureStorage {
     collections: { [name: string]: CollectionDefinitions } = {
@@ -12,13 +12,11 @@ export default class BackupStorage extends FeatureStorage {
                     objectPk: { type: 'string' },
                     operation: { type: 'string' }, // 'create'|'update'|'delete'
                 },
-                indices: [
-                    { pk: true, field: 'timestamp' },
-                ],
+                indices: [{ pk: true, field: 'timestamp' }],
                 watch: false,
                 backup: false,
-            }
-        ]
+            },
+        ],
     }
 
     constructor({ storageManager }: { storageManager: StorageManager }) {
@@ -26,21 +24,38 @@ export default class BackupStorage extends FeatureStorage {
         this.registerCollections()
     }
 
-    registerChange({ collection, pk, operation }: { collection: string, pk: string, operation: string }) {
-        console.log('registering change to collection', collection, 'with pk', pk)
+    registerChange({
+        collection,
+        pk,
+        operation,
+    }: {
+        collection: string
+        pk: string
+        operation: string
+    }) {
+        console.log(
+            'registering change to collection',
+            collection,
+            'with pk',
+            pk,
+        )
 
         this.storageManager.putObject('backupChanges', {
             timestamp: new Date(),
             collection,
             objectPk: pk,
-            operation
+            operation,
         })
     }
 
-    async* streamChanges(until: Date) {
+    async *streamChanges(until: Date) {
         let changes
         do {
-            changes = await this.storageManager.findAll('backupChanges', {}, { limit: 50 })
+            changes = await this.storageManager.findAll(
+                'backupChanges',
+                {},
+                { limit: 50 },
+            )
             for (const change of changes) {
                 if (change.timestamp.getTime() > until.getTime()) {
                     break
@@ -49,15 +64,20 @@ export default class BackupStorage extends FeatureStorage {
                 yield {
                     ...change,
                     forget: async () => {
-                        await this.storageManager.deleteObject('backupChanges', change)
-                    }
+                        await this.storageManager.deleteObject(
+                            'backupChanges',
+                            change,
+                        )
+                    },
                 }
             }
         } while (changes.length > 0)
     }
 
     async countQueuedChangesByCollection(collectionName: string, until: Date) {
-        return await this.storageManager.countAll(collectionName, { timestamp: { $lte: until } })
+        return this.storageManager.countAll(collectionName, {
+            timestamp: { $lte: until },
+        })
     }
 
     async forgetAllChanges() {

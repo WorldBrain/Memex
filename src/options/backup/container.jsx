@@ -13,7 +13,7 @@ export default class BackupSettingsContainer extends React.Component {
         const isConnected = await remoteFunction('isBackupConnected')()
 
         if (isAuthenticated && !isConnected) {
-            return await this.handleLoginRequested()
+            return this.handleLoginRequested()
         }
 
         this.setState({

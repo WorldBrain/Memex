@@ -145,12 +145,10 @@ export interface DexieSchema {
 export abstract class FeatureStorage {
     protected collections: { [name: string]: CollectionDefinitions }
 
-    constructor(protected storageManager: ManageableStorage) {
-
-    }
+    constructor(protected storageManager: ManageableStorage) {}
 
     registerCollections() {
-        for (const name in this.collections || {}) {
+        for (const name of Object.keys(this.collections || {})) {
             this.storageManager.registerCollection(name, this.collections[name])
         }
     }
