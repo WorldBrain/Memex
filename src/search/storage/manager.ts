@@ -227,10 +227,10 @@ export class StorageManager extends EventEmitter implements ManageableStorage {
     }
 
     async findByPk(collectionName: string, pk: string) {
-        return await this._storage[collectionName].get(pk)
+        return this._storage[collectionName].get(pk)
     }
 
-    async* streamPks(collectionName: string) {
+    async *streamPks(collectionName: string) {
         const table = this._storage[collectionName]
         const pks = await table.toCollection().primaryKeys()
         for (const pk of pks) {
@@ -238,7 +238,7 @@ export class StorageManager extends EventEmitter implements ManageableStorage {
         }
     }
 
-    async* streamCollection(collectionName: string) {
+    async *streamCollection(collectionName: string) {
         const table = this._storage[collectionName]
         for await (const pk of this.streamPks(collectionName)) {
             yield await { pk, object: await table.get(pk) }
@@ -278,8 +278,8 @@ export class StorageManager extends EventEmitter implements ManageableStorage {
 
         let coll =
             findOpts.ignoreCase &&
-                findOpts.ignoreCase.length &&
-                findOpts.ignoreCase[0] === indexName
+            findOpts.ignoreCase.length &&
+            findOpts.ignoreCase[0] === indexName
                 ? whereClause.startsWithIgnoreCase(value)
                 : whereClause.startsWith(value)
 
@@ -308,7 +308,10 @@ export class StorageManager extends EventEmitter implements ManageableStorage {
      * @param filter
      * @returns Promise that resolves to the number of objects in the collection which match the filter.
      */
-    async countAll<T>(collectionName: string, filter: FilterQuery<T>): Promise<number> {
+    async countAll<T>(
+        collectionName: string,
+        filter: FilterQuery<T>,
+    ): Promise<number> {
         await this._initializationPromise
 
         return this._storage

@@ -1,21 +1,36 @@
 import { DriveTokenManager } from './token-manager'
 
 export class GoogleDriveClient {
-    private idCache: { [parentId: string]: { [childName: string]: string } } = {}
+    private idCache: {
+        [parentId: string]: { [childName: string]: string }
+    } = {}
     private baseUrl = 'https://www.googleapis.com'
 
-    constructor(private tokenManager: DriveTokenManager) {
-    }
+    constructor(private tokenManager: DriveTokenManager) {}
 
     isIdCacheEmpty(parentId) {
         return !this.idCache[parentId]
     }
 
-    async storeObject({ collection, pk, object }: { collection: string, pk: string, object: object }) {
+    async storeObject({
+        collection,
+        pk,
+        object,
+    }: {
+        collection: string
+        pk: string
+        object: object
+    }) {
         await this.tokenManager.refreshAccessToken()
 
-        const { id: collectionFolderId, created: folderCreated } = await this.createFolder({ parentId: "appDataFolder", name: collection })
-        let fileId = await this.getFolderChildId(collectionFolderId, pk)
+        const {
+            id: collectionFolderId,
+            created: folderCreated,
+        } = await this.createFolder({
+            parentId: 'appDataFolder',
+            name: collection,
+        })
+        const fileId = await this.getFolderChildId(collectionFolderId, pk)
 
         const metadata = {
             name: pk,
@@ -25,7 +40,9 @@ export class GoogleDriveClient {
             metadata['parents'] = [collectionFolderId]
         }
 
-        const uploadUri = `/files${fileId ? `/${fileId}` : ''}?uploadType=resumable`
+        const uploadUri = `/files${
+            fileId ? `/${fileId}` : ''
+        }?uploadType=resumable`
         const response = await this._request(uploadUri, {
             prefix: 'upload',
             json: false,
@@ -43,9 +60,9 @@ export class GoogleDriveClient {
             method: !fileId ? 'PUT' : 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
-                'Content-Length': serialized.length
+                'Content-Length': serialized.length,
             },
-            body: serialized
+            body: serialized,
         })
 
         if (!fileId) {
@@ -53,10 +70,13 @@ export class GoogleDriveClient {
         }
     }
 
-    async deleteObject({ collection, pk }: { collection: string, pk: string }) {
+    async deleteObject({ collection, pk }: { collection: string; pk: string }) {
         await this.tokenManager.refreshAccessToken()
 
-        const collectionFolderId = await this.getFolderChildId('appDataFolder', collection)
+        const collectionFolderId = await this.getFolderChildId(
+            'appDataFolder',
+            collection,
+        )
         if (!collectionFolderId) {
             return
         }
@@ -67,14 +87,19 @@ export class GoogleDriveClient {
         }
 
         await this._request(`/files/${fileId}`, {
-            method: 'DELETE'
+            method: 'DELETE',
         })
         delete this.idCache[collectionFolderId][pk]
     }
 
     async cacheFolderContentIDs(parentId: string) {
-        const query = parentId !== 'appDataFolder' ? `q=${encodeURIComponent(`'${parentId}' in parents`)}&` : ''
-        const entries = <Array<any>>(await this._request(`/files?${query}spaces=appDataFolder`)).files
+        const query =
+            parentId !== 'appDataFolder'
+                ? `q=${encodeURIComponent(`'${parentId}' in parents`)}&`
+                : ''
+        const entries = (await this._request(
+            `/files?${query}spaces=appDataFolder`,
+        )).files as Array<any>
 
         if (!this.idCache[parentId]) {
             this.idCache[parentId] = {}
@@ -98,7 +123,7 @@ export class GoogleDriveClient {
         return childId
     }
 
-    async createFolder({ parentId, name }: { parentId: string, name: string }) {
+    async createFolder({ parentId, name }: { parentId: string; name: string }) {
         if (this.isIdCacheEmpty(parentId)) {
             await this.cacheFolderContentIDs(parentId)
         }
@@ -146,6 +171,6 @@ export class GoogleDriveClient {
 
         const url = baseUrl + path
         const response = await fetch(url, options)
-        return options.json ? await response.json() : response
+        return options.json ? response.json() : response
     }
 }

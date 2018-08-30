@@ -1,4 +1,4 @@
-import { EventEmitter } from "events"
+import { EventEmitter } from 'events'
 
 export abstract class BackupBackend {
     async getLoginUrl(params: any): Promise<string | null> {
@@ -14,6 +14,7 @@ export abstract class BackupBackend {
     }
 
     async handleLoginRedirectedBack(locationHref: string) {
+        return
     }
 
     async startBackup({ events }: { events: EventEmitter }): Promise<any> {
@@ -23,6 +24,24 @@ export abstract class BackupBackend {
         return
     }
 
-    abstract storeObject({ collection, pk, object, events }: { collection: string, pk: string, object: object, events: EventEmitter }): Promise<any>
-    abstract deleteObject({ collection, pk, events }: { collection: string, pk: string, events: EventEmitter }): Promise<any>
+    abstract storeObject({
+        collection,
+        pk,
+        object,
+        events,
+    }: {
+        collection: string
+        pk: string
+        object: object
+        events: EventEmitter
+    }): Promise<any>
+    abstract deleteObject({
+        collection,
+        pk,
+        events,
+    }: {
+        collection: string
+        pk: string
+        events: EventEmitter
+    }): Promise<any>
 }
