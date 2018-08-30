@@ -103,6 +103,7 @@ export default class Storage extends Dexie {
             IDBKeyRange: IDBKeyRange || window['IDBKeyRange'],
         })
 
+        this.storageManager = storageManager
         this.backupTable = backupTableName || Storage.DEF_BACKUP_TABLE
         this._initSchema()
     }
