@@ -185,7 +185,7 @@ describe('Search index integration', () => {
             })
 
             expect(docs.length).toBe(1)
-            expect(docs[0]).toEqual([DATA.PAGE_ID_2, DATA.BOOKMARK_1])
+            expect(docs[0]).toEqual([DATA.PAGE_ID_2, DATA.VISIT_2])
         })
 
         // NOTE: some differences with how domain filtering works in new index
