@@ -163,6 +163,18 @@ export class StorageManager extends EventEmitter implements ManageableStorage {
             .catch(Storage.initErrHandler())
     }
 
+    async createObjects(collectionName: string, objects: any[]) {
+        await this._initializationPromise
+
+        const collection = this.registry.collections[collectionName]
+        for (const object of objects) {
+            StorageManager._processFieldsForWrites(collection, object)
+        }
+
+        const table = this._storage[collectionName]
+        await table.bulkAdd(objects)
+    }
+
     /**
      * @param collectionName The name of the collection to query.
      * @param filter
@@ -218,10 +230,17 @@ export class StorageManager extends EventEmitter implements ManageableStorage {
         return await this._storage[collectionName].get(pk)
     }
 
-    async* streamCollection(collectionName: string) {
+    async* streamPks(collectionName: string) {
         const table = this._storage[collectionName]
         const pks = await table.toCollection().primaryKeys()
         for (const pk of pks) {
+            yield pk
+        }
+    }
+
+    async* streamCollection(collectionName: string) {
+        const table = this._storage[collectionName]
+        for await (const pk of this.streamPks(collectionName)) {
             yield await { pk, object: await table.get(pk) }
         }
     }

@@ -60,5 +60,5 @@ export function BackupRunning(props) {
 }
 
 export function PostBackup(props) {
-    return null
+    return <span>Post backup: {props}</span>
 }

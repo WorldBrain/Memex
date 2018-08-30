@@ -55,4 +55,12 @@ export default class BackupStorage extends FeatureStorage {
             }
         } while (changes.length > 0)
     }
+
+    async countQueuedChangesByCollection(collectionName: string, until: Date) {
+        return await this.storageManager.countAll(collectionName, { timestamp: { $lte: until } })
+    }
+
+    async forgetAllChanges() {
+        await this.storageManager.deleteObject('backupChanges', {})
+    }
 }
