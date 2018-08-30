@@ -155,7 +155,7 @@ async function lookbackBookmarksTime({
     let upperBound = Date.now()
 
     // Stop lookback when we have enough results or no more bookmarks
-    while (results.size < limit && !bmsExhausted) {
+    while (results.size < skip + limit && !bmsExhausted) {
         const bms: PageResultsMap = new Map()
 
         // Grab latest page of bookmarks
@@ -188,6 +188,9 @@ async function lookbackBookmarksTime({
             }
         }
 
+        // Next iteration, look back from the oldest result's time (-1 to exclude the same result next time)
+        upperBound = Math.min(...bms.values()) - 1
+
         // Add current iteration's bm results to result pool, filtering out any out-of-bounds bms
         results = new Map([
             ...results,
@@ -195,8 +198,6 @@ async function lookbackBookmarksTime({
                 ([, time]) => time >= startDate && time <= endDate,
             ),
         ])
-        // Next iteration, look back from the oldest result's time (-1 to exclude the same result next time)
-        upperBound = Math.min(...results.values()) - 1
     }
 
     return results
