@@ -3,11 +3,7 @@ let mouseupListener = null
 
 export function setupTooltipTrigger(callback) {
     mouseupListener = event => {
-        conditionallyTriggerTooltip(
-            { x: event.pageX, y: event.pageY },
-            callback,
-            event,
-        )
+        conditionallyTriggerTooltip(callback, event)
     }
 
     document.body.addEventListener('mouseup', mouseupListener)
@@ -18,21 +14,31 @@ export function destroyTooltipTrigger() {
     mouseupListener = null
 }
 
-export const conditionallyTriggerTooltip = delayed(
-    async (position, callback, event) => {
-        const isTooltipEnabled = await getTooltipState()
-        if (
-            !userSelectedText() ||
-            !isTooltipEnabled ||
-            isTargetInsideTooltip(event)
-        ) {
-            return
-        }
+export const conditionallyTriggerTooltip = delayed(async (callback, event) => {
+    const isTooltipEnabled = await getTooltipState()
+    if (
+        !userSelectedText() ||
+        !isTooltipEnabled ||
+        isTargetInsideTooltip(event)
+    ) {
+        return
+    }
+    const position = calculateTooltipPostion()
+    callback(position)
+}, 300)
 
-        callback(position)
-    },
-    300,
-)
+function calculateTooltipPostion() {
+    const range = document.getSelection().getRangeAt(0)
+    const boundingRect = range.getBoundingClientRect()
+    // x = position of element from the left + half of it's width
+    const x = boundingRect.left + boundingRect.width / 2
+    // y = scroll height from top + pixels from top + height of element - offset
+    const y = window.pageYOffset + boundingRect.top + boundingRect.height - 10
+    return {
+        x,
+        y,
+    }
+}
 
 function isAnchorOrContentEditable(selected) {
     // Returns true if the any of the parent is an anchor element
