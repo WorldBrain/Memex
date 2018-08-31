@@ -34,10 +34,12 @@ export const conditionallyTriggerTooltip = delayed(
     300,
 )
 
-function isInsideContentEditableElement(selected) {
+function isAnchorOrContentEditable(selected) {
+    // Returns true if the any of the parent is an anchor element
+    // or is content editable.
     let parent = selected.parentElement
     while (parent) {
-        if (parent.contentEditable === 'true') {
+        if (parent.contentEditable === 'true' || parent.nodeName === 'A') {
             return true
         }
         parent = parent.parentElement
@@ -49,13 +51,10 @@ function userSelectedText() {
     const selection = document.getSelection()
     const selectedString = selection.toString().trim()
     const container = selection.getRangeAt(0).commonAncestorContainer
-    const isContentEditable = isInsideContentEditableElement(container)
+    const extras = isAnchorOrContentEditable(container)
 
     const userSelectedText =
-        !!selection &&
-        !selection.isCollapsed &&
-        !!selectedString &&
-        !isContentEditable
+        !!selection && !selection.isCollapsed && !!selectedString && !extras
     return userSelectedText
 }
 
