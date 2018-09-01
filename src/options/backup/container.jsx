@@ -10,11 +10,11 @@ export default class BackupSettingsContainer extends React.Component {
         browser.runtime.onMessage.addListener(this.messageListener)
 
         const isAuthenticated = await remoteFunction('isBackupAuthenticated')()
-        const isConnected = await remoteFunction('isBackupConnected')()
+        // const isConnected = await remoteFunction('isBackupConnected')()
 
-        if (isAuthenticated && !isConnected) {
-            return this.handleLoginRequested()
-        }
+        // if (isAuthenticated && !isConnected) {
+        //     return this.handleLoginRequested()
+        // }
 
         this.setState({
             status: isAuthenticated ? 'authenticated' : 'unauthenticated',

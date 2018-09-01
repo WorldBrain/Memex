@@ -12,7 +12,10 @@ export default class BackupStorage extends FeatureStorage {
                     objectPk: { type: 'string' },
                     operation: { type: 'string' }, // 'create'|'update'|'delete'
                 },
-                indices: [{ pk: true, field: 'timestamp' }],
+                indices: [
+                    { pk: true, field: 'timestamp' },
+                    { field: 'collection' },
+                ],
                 watch: false,
                 backup: false,
             },
@@ -41,7 +44,7 @@ export default class BackupStorage extends FeatureStorage {
         )
 
         this.storageManager.putObject('backupChanges', {
-            timestamp: new Date(),
+            timestamp: Date.now(),
             collection,
             objectPk: pk,
             operation,
@@ -57,13 +60,14 @@ export default class BackupStorage extends FeatureStorage {
                 { limit: 50 },
             )
             for (const change of changes) {
-                if (change.timestamp.getTime() > until.getTime()) {
+                if (change.timestamp > until.getTime()) {
                     break
                 }
 
                 yield {
                     ...change,
                     forget: async () => {
+                        console.log('forgetting change', change)
                         await this.storageManager.deleteObject(
                             'backupChanges',
                             change,
@@ -76,7 +80,7 @@ export default class BackupStorage extends FeatureStorage {
 
     async countQueuedChangesByCollection(collectionName: string, until: Date) {
         return this.storageManager.countAll(collectionName, {
-            timestamp: { $lte: until },
+            timestamp: { $lte: until.getTime() },
         })
     }
 

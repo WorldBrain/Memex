@@ -94,9 +94,9 @@ export class BackupBackgroundModule {
         })
     }
 
-    startRecordingChangesIfNeeded() {
+    async startRecordingChangesIfNeeded() {
         if (
-            !this.lastBackupStorage.getLastBackupTime() ||
+            !(await this.lastBackupStorage.getLastBackupTime()) ||
             this.recordingChanges
         ) {
             return
@@ -115,15 +115,26 @@ export class BackupBackgroundModule {
         ;(async () => {
             this.startRecordingChanges()
             const lastBackupTime = await this.lastBackupStorage.getLastBackupTime()
-            const backupTime = new Date()
 
             await this.backend.startBackup({ events })
             if (!lastBackupTime) {
-                events.emit('info', { info: { state: 'preparing' } })
-                await this.storage.forgetAllChanges()
-                await this._queueInitialBackup() // Pushes all the objects in the DB to the queue for the incremental backup
+                console.log(
+                    'no last backup found, putting everything in backup table',
+                )
+                console.time('put initial backup into changes table')
+
+                try {
+                    events.emit('info', { info: { state: 'preparing' } })
+                    await this.storage.forgetAllChanges()
+                    await this._queueInitialBackup() // Pushes all the objects in the DB to the queue for the incremental backup
+                } catch (err) {
+                    throw err
+                } finally {
+                    console.timeEnd('put initial backup into changes table')
+                }
             }
 
+            const backupTime = new Date()
             await this._doIncrementalBackup(backupTime, events)
             await this.backend.commitBackup({ events })
             await this.lastBackupStorage.storeLastBackupTime(backupTime)
@@ -157,6 +168,8 @@ export class BackupBackgroundModule {
     }
 
     async _doIncrementalBackup(untilWhen: Date, events: EventEmitter) {
+        console.log('starting incremental backup')
+
         const collectionsWithVersions = this._getCollectionsToBackup()
         const info = await this._createBackupInfo(
             collectionsWithVersions,
@@ -170,6 +183,8 @@ export class BackupBackgroundModule {
             info.collections[change.collection].processedObjects += 1
             events.emit('info', { info })
         }
+
+        console.log('finished incremental backup')
     }
 
     _backupChange = async (change, events) => {
@@ -226,6 +241,11 @@ export class BackupBackgroundModule {
         )) as [string, number][]
 
         for (const [collectionName, totalObjects] of collectionCountPairs) {
+            console.log(
+                'no. of queued changed to %s: %d',
+                collectionName,
+                totalObjects,
+            )
             info.collections[collectionName] = {
                 totalObjects,
                 processedObjects: 0,

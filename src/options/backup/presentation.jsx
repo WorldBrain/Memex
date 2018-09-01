@@ -14,7 +14,7 @@ export default function BackupSettings(props) {
 }
 
 BackupSettings.propTypes = {
-    info: PropTypes.object.isRequired,
+    info: PropTypes.object,
     status: PropTypes.string.isRequired,
     onLoginRequested: PropTypes.func.isRequired,
     startBackup: PropTypes.func.isRequired,
