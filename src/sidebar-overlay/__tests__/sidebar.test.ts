@@ -78,4 +78,8 @@ describe('Memex Sidebar Test Suite', async () => {
         expect($emptyMessage).toBeDefined()
         expect($emptyMessage).not.toBeNull()
     })
+
+    afterAll(async () => {
+        await killBrowser()
+    })
 })

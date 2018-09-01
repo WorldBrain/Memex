@@ -18,9 +18,6 @@ const initBrowser = async () => {
 }
 
 export const getMemexPage = async () => {
-    console.log(global.browserInstance)
-    global.browserInstance = 'uppps'
-    console.log(global.browserInstance)
     if (page) {
         return page
     }
