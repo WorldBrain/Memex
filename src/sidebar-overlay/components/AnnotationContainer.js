@@ -6,6 +6,7 @@ import { remoteFunction } from '../../util/webextensionRPC'
 
 import Annotation from './Annotation'
 import TagHolder from './TagHolder.js'
+import CrowdfundingBox from './CrowdfundingBox'
 import styles from './Annotation.css'
 import { IndexDropdown } from '../../common-ui/containers'
 
@@ -50,6 +51,8 @@ class AnnotationContainer extends React.Component {
             tagInput: false,
 
             footerState: 'default',
+
+            crowdfunding: false,
         }
     }
 
@@ -79,6 +82,11 @@ class AnnotationContainer extends React.Component {
         const sidebar = document.querySelector('#memex_sidebar_panel')
         sidebar.addEventListener('click', this.maybeCloseTagsDropdown, false)
     }
+
+    setCrowdfunding = value => () =>
+        this.setState({
+            crowdfunding: value,
+        })
 
     reloadTags = async () => {
         const tags = await remoteFunction('getAnnotationTags')(
@@ -198,11 +206,11 @@ class AnnotationContainer extends React.Component {
                 />
                 <span
                     className={cx(styles.commonIcon, styles.shareIcon)}
-                    // onClick={}
+                    onClick={this.setCrowdfunding(true)}
                 />
                 <span
                     className={cx(styles.commonIcon, styles.replyIcon)}
-                    // onClick={}
+                    onClick={this.setCrowdfunding(true)}
                 />
                 {env === 'overview' && annotation.body ? (
                     <span
@@ -418,6 +426,9 @@ class AnnotationContainer extends React.Component {
 
     render() {
         const { goToAnnotation, annotation } = this.props
+        if (this.state.crowdfunding) {
+            return <CrowdfundingBox onClose={this.setCrowdfunding(false)} />
+        }
         return (
             <Annotation
                 truncatedHighlightText={this.getHighlightText()}
