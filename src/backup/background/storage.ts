@@ -79,7 +79,8 @@ export default class BackupStorage extends FeatureStorage {
     }
 
     async countQueuedChangesByCollection(collectionName: string, until: Date) {
-        return this.storageManager.countAll(collectionName, {
+        return this.storageManager.countAll('backupChanges', {
+            collection: collectionName,
             timestamp: { $lte: until.getTime() },
         })
     }
