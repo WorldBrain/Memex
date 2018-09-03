@@ -11,16 +11,16 @@ class OptIn extends PureComponent {
     render() {
         return (
             <div className={localStyles.optInContainer}>
-                {this.props.children}
                 <div className={localStyles.optInTextContainer}>
                     <p className={localStyles.optIn}>
-                        Send 100% private & anonymous usage statistics
+                        Send anonymous usage statistics
                     </p>
                     <p className={localStyles.subOptIn}>
-                        None of your history or searches, only interactions with
-                        software
+                        No Keywordsm no urls you visit; just intreaction with
+                        Memex.
                     </p>
                 </div>
+                {this.props.children}
             </div>
         )
     }

@@ -51,26 +51,26 @@
 
 .choiceBtn {
     padding: 6px 1.6em;
-    border-radius: 25px;
-    font-weight: 300;
-    border: 1px solid #3eb995;
-    color: #3eb995;
+    border-radius: 2px;
+    font-weight: 600;
+    color: #fff;
     cursor: pointer;
-    height: 35px;
-    margin-left: 12px;
-    margin-right: 12px;
     text-decoration: none;
-    font-size: 1rem;
+    background: #777;
+    width: fit-content;
+    border: 2px solid #777;
+    font-size: 24px;
 
     &:hover,
     &:active {
-        background-color: #3eb995;
-        color: #fff;
+        background-color: #fff;
+        color: #3eb995;
+        border: 2px solid #3eb995;
     }
 }
 
 .startBtn {
-    background-color: #3eb995;
+    background-color: #777;
     color: #fff;
 
     &:hover,
@@ -84,29 +84,34 @@
     display: flex;
     flex-direction: column;
     width: 110%;
-    margin-left: 1%;
+    margin-left: 10px;
 }
 
 .optInContainer {
     display: flex;
     justify-content: space-around;
     align-items: center;
-    margin: 0 7.5em;
     margin-top: 15px;
     margin-bottom: 15px;
 }
 
 .popup {
-    padding: 20px;
-    background: #fff;
+    padding: 60px 80px;
+    background: #f9fffd;
     border-radius: 5px;
-    width: 900px;
+    width: 1100px;
     position: relative;
     transition: all 1s ease-in-out;
     cursor: default;
     max-height: 90%;
     overflow: auto;
-    max-width: 800px;
+    max-width: 1100px;
+    display: flex;
+    flex-direction: row;
+
+    @media (max-width: 1100px) {
+        width: 100%;
+    }
 }
 
 .closeBtn {
@@ -153,7 +158,7 @@
 
 .optIn {
     font-size: 20px;
-    font-weight: 200;
+    font-weight: 600;
     color: #777;
     text-align: center;
     text-align: left;
@@ -222,4 +227,134 @@
 p {
     margin-right: -10px;
     margin-bottom: -10px;
+}
+
+.mainContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    @media (max-width: 950px) {
+        flex-direction: row;
+    }
+}
+
+.messageContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    flex: 1;
+}
+
+.heading {
+    color: #3eb995;
+    font-size: 42px;
+    font-weight: 800;
+    font-style: italic;
+}
+
+.subheading {
+    font-size: 30px;
+    margin-top: 20px;
+    color: #3eb995;
+}
+
+.featureContainer {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    flex: 1;
+    background: #fff;
+}
+
+.infoContainer {
+    display: flex;
+    position: relative;
+    align-items: center;
+    color: inherit;
+    text-decoration: none;
+    border-bottom: 1px solid #c9c9c9;
+}
+
+.infoContainer:last-child {
+    border: none;
+}
+
+.featureLink {
+    position: relative;
+    display: flex;
+    box-sizing: content-box;
+    overflow: hidden;
+    width: 100%;
+    text-decoration: none;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 10px 20px 20px;
+    cursor: pointer;
+
+    &:hover {
+        background-color: #c2e9dd;
+    }
+}
+
+.arrow {
+    width: 40px;
+}
+
+.or {
+    margin: 80px 0;
+    position: relative;
+    left: 17%;
+    color: #3eb995;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.or::before {
+    content: '';
+    width: 15%;
+    border-bottom: solid 2px #000;
+    position: absolute;
+    top: 50%;
+    left: -17%;
+    z-index: 1;
+}
+
+.or::after {
+    content: '';
+    width: 15%;
+    border-bottom: solid 2px #000;
+    position: absolute;
+    left: 42px;
+    top: 50%;
+    z-index: 1;
+}
+
+.headingSubheading {
+    display: flex;
+    flex-direction: column;
+}
+
+.featureHeading {
+    font-weight: bold;
+    color: black;
+    text-transform: uppercase;
+}
+
+.featureSubheading {
+    color: #858585;
+    font-size: 14px;
+}
+
+.letsGoBtn {
+    display: none;
+}
+
+.startBtn:hover .getStatedBtn {
+    display: none;
+}
+
+.startBtn:hover .letsGoBtn {
+    display: block;
 }
