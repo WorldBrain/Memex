@@ -3,7 +3,7 @@ import createNotif from 'src/util/notifications'
 import { PAUSE_STORAGE_KEY } from '..'
 
 export const pauseIconPath = '/img/worldbrain-logo-narrow-pause.png'
-export const unpauseIconPath = '/img/worldbrain-logo-narrow-bw.png'
+export const unpauseIconPath = '/img/worldbrain-logo-unpause.png'
 
 const getState = async () => {
     const state = (await browser.storage.local.get(PAUSE_STORAGE_KEY))[
