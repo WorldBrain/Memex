@@ -175,15 +175,16 @@ We recommend reading through the [Code Overview](#code-overview) to get an idea 
 
 ### Documenting
 
-If you have made changes to any code or modules please update the corresponding docs **Pull Requests will not be merged otherwise**.
+We try to encourage documententing module exports using JSDoc with TypeScript, and also higher level overviews of different "feature modules" (directories containing multiple modules related to a particular feature) in README markdown modules.
 
-If you are creating a new 'module' (folder in src i.e. src/new_folder/)
-Please add some documentation in that corresponding folders, so everything stays in context. 
+If you have made changes to any exports in existing modules, please update the corresponding docs if needed.
+
+If you are creating a new feature module, please add a brief overview in the way of a README in the corresponding directory. 
 
 ### Styling
 
-We are using [prettier](https://github.com/prettier/prettier). With some hooks for eslint.
-This will automatically format all the styling for the code every time a merge request is made. So you can focus on coding and not on styling.
+We are using [prettier](https://github.com/prettier/prettier).
+This will automatically format all the styling for the code every time a commit is made, so you can focus on coding and not on code styling.
 
 # <a id="code-overview" href="#code-overview">Code Overview</a>
 
@@ -214,7 +215,7 @@ This API is available in Chrome/Chromium by default (under `window.chrome`) but 
 
 ## Application Structure
 
-To keep things modular, the source code in [`src/`](./src/) is split into folders which are grouped by functionality. They can almost be thought of as separate libraries and some folders may end up being factored out into their own repos later on.
+To keep things modular, the source code in [`src/`](./src/) is split into "feature modules"/directories which are grouped by functionality. They can almost be thought of as separate libraries and some features may end up being factored out into their own repos later on.
 
 #### **[src/blacklist/](./src/blacklist/)**: blacklist
 
@@ -231,8 +232,6 @@ Tools to help during development. They are not used in production builds.
 #### **[src/imports/](./src/imports/)**: browser history import
 
 This allows users to import their whole browser history, however, due to slow speeds and multiple setbacks it has been deprecated and may only be kept on as a dev tool to import test docs.
-
-Instead of using a browser this module is set to move to a native Desktop Application see [roadmap](https://trello.com/b/mdqEuBjb) for more details
 
 #### **[src/options](./src/options/)**: the settings page
 
@@ -280,7 +279,7 @@ See [The Docs](./src/search/Readme.md) for more details.
 #### **[src/util/](./src/util)**: utilities
 
 Contains small generic things, stuff that is not project-specific. Things that
-could perhaps be packaged and published as an NPM module some day.
+could perhaps be packaged and published as an NPM package some day.
 See [The Docs](./src/util/Readme.md) for more details.
 
 #### **[src/background.ts](./src/background.ts)**: WebExtension background script
