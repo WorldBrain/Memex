@@ -81,8 +81,8 @@ export class DriveBackupBackend extends BackupBackend {
         object: object
         events: EventEmitter
     }): Promise<any> {
-        await new Promise(resolve => setTimeout(resolve, 3000))
-        // await this.client.storeObject({ collection, pk, object })
+        // await new Promise(resolve => setTimeout(resolve, 3000))
+        await this.client.storeObject({ collection, pk, object })
     }
 
     async deleteObject({

@@ -112,7 +112,7 @@ export class BackupBackgroundModule {
     doBackup() {
         const events = new EventEmitter()
 
-        ;(async () => {
+        const procedure = async () => {
             this.startRecordingChanges()
             const lastBackupTime = await this.lastBackupStorage.getLastBackupTime()
 
@@ -138,7 +138,9 @@ export class BackupBackgroundModule {
             await this._doIncrementalBackup(backupTime, events)
             await this.backend.commitBackup({ events })
             await this.lastBackupStorage.storeLastBackupTime(backupTime)
-        })()
+        }
+
+        procedure()
             .then(() => {
                 events.emit('success')
             })
