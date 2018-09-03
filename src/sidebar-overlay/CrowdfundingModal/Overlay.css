@@ -1,0 +1,78 @@
+.popup {
+    padding: 20px;
+    background: #fff;
+    border-radius: 5px;
+    width: 600px;
+    position: relative;
+    transition: all 1s ease-in-out;
+    cursor: default;
+    height: 340px;
+    overflow: auto;
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.background {
+    background-color: rgba(113, 221, 162, 0.37);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 99999;
+    cursor: pointer;
+
+    &:disabled,
+    &[disabled] {
+        cursor: default;
+    }
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 30px;
+    font-size: 20px;
+    color: #ccc;
+    cursor: pointer;
+}
+
+.header {
+    color: #3eb995;
+    font-size: 35px;
+    font-weight: 800;
+    font-style: italic;
+    width: 70%;
+    text-align: center;
+    line-height: 35px;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+}
+
+.text {
+    color: #5d697bc4;
+    font-size: 18px;
+    width: 75%;
+    margin-top: 0px;
+    font-weight: 100;
+    text-align: center;
+}
+
+.learnMore {
+    background-color: white;
+    color: #3eb995;
+    padding: 7px 20px;
+    border-radius: 3px;
+    border: 2px solid #3eb995ba;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 18px;
+    margin-top: 20px;
+}

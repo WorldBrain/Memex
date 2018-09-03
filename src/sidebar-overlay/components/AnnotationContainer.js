@@ -7,6 +7,7 @@ import { remoteFunction } from '../../util/webextensionRPC'
 import Annotation from './Annotation'
 import TagHolder from './TagHolder.js'
 import CrowdfundingBox from './CrowdfundingBox'
+import CrowdfundingModal from '../CrowdfundingModal/Overlay'
 import styles from './Annotation.css'
 import { IndexDropdown } from '../../common-ui/containers'
 
@@ -426,31 +427,44 @@ class AnnotationContainer extends React.Component {
 
     render() {
         const { goToAnnotation, annotation } = this.props
-        if (this.state.crowdfunding) {
+        if (this.state.crowdfunding && this.props.env === 'iframe') {
             return <CrowdfundingBox onClose={this.setCrowdfunding(false)} />
         }
         return (
-            <Annotation
-                truncatedHighlightText={this.getHighlightText()}
-                truncatedAnnotationText={this.getAnnotationText()}
-                showMoreHighlight={this.renderShowButton('highlight')}
-                showMoreAnnotation={this.renderShowButton('annotation')}
-                annotationEditMode={this.state.annotationEditMode}
-                tagClasses={this.deriveTagsClass()}
-                tags={this.state.tags}
-                dateDetails={this.getDateDetails()}
-                renderAnnotationInput={this.renderAnnotationInput}
-                renderFooter={this.renderFooter}
-                goToAnnotation={goToAnnotation(annotation)}
-                isIFrame={this.deriveIsIFrame()}
-                shouldCommentBoxBeVisible={this.shouldCommentBoxBeVisible()}
-                isJustComment={this.deriveIsJustComment()}
-                onMouseEnter={this.props.onMouseEnter(this.props.annotation)}
-                onMouseLeave={this.props.onMouseLeave}
-                isHovered={this.props.isHovered}
-                isActive={this.props.isActive}
-                id={this.props.annotation.url}
-            />
+            <React.Fragment>
+                <Annotation
+                    truncatedHighlightText={this.getHighlightText()}
+                    truncatedAnnotationText={this.getAnnotationText()}
+                    showMoreHighlight={this.renderShowButton('highlight')}
+                    showMoreAnnotation={this.renderShowButton('annotation')}
+                    annotationEditMode={this.state.annotationEditMode}
+                    tagClasses={this.deriveTagsClass()}
+                    tags={this.state.tags}
+                    dateDetails={this.getDateDetails()}
+                    renderAnnotationInput={this.renderAnnotationInput}
+                    renderFooter={this.renderFooter}
+                    goToAnnotation={goToAnnotation(annotation)}
+                    isIFrame={this.deriveIsIFrame()}
+                    shouldCommentBoxBeVisible={this.shouldCommentBoxBeVisible()}
+                    isJustComment={this.deriveIsJustComment()}
+                    onMouseEnter={this.props.onMouseEnter(
+                        this.props.annotation,
+                    )}
+                    onMouseLeave={this.props.onMouseLeave}
+                    isHovered={this.props.isHovered}
+                    isActive={this.props.isActive}
+                    id={this.props.annotation.url}
+                />
+                {this.state.crowdfunding &&
+                    this.props.env === 'overview' && (
+                        <CrowdfundingModal
+                            handleClose={() => {
+                                console.log('clsoing')
+                                this.setCrowdfunding(false)
+                            }}
+                        />
+                    )}
+            </React.Fragment>
         )
     }
 }
