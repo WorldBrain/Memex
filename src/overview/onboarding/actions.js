@@ -20,6 +20,10 @@ const persistShouldTrack = flag =>
     browser.storage.local.set({ [SHOULD_TRACK]: flag })
 
 export const init = () => (dispatch, getState) => {
+    processEvent({
+        type: 'startOnbarding',
+    })
+
     if (selectors.isVisible(getState())) {
         browser.storage.local
             .get(SHOULD_TRACK)
@@ -33,6 +37,14 @@ export const init = () => (dispatch, getState) => {
 
         return new ImportsConnHandler(IMPORT_CONN_NAME, dispatch, getState)
     }
+}
+
+export const setVisibleMiddle = val => dispatch => {
+    processEvent({
+        type: val ? 'startOnbarding' : 'finishOnboarding',
+    })
+
+    dispatch(setVisible(val))
 }
 
 export const toggleShouldTrack = () => async (dispatch, getState) => {

@@ -248,6 +248,15 @@ export const EVENT_TYPES = {
     removePageFromCollection: {
         id: 68,
     },
+    openURLFeature: {
+        id: 69,
+    },
+    startOnbarding: {
+        id: 70,
+    },
+    finishOnboarding: {
+        id: 71,
+    },
 }
 
 export const NOTIF_TYPE_EVENT_IDS = {
