@@ -251,7 +251,7 @@ export const EVENT_TYPES = {
     openURLFeature: {
         id: 69,
     },
-    startOnbarding: {
+    startOnboarding: {
         id: 70,
     },
     finishOnboarding: {
