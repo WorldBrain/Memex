@@ -39,12 +39,9 @@ export const init = () => (dispatch, getState) => {
     }
 }
 
-export const setVisibleMiddle = val => dispatch => {
-    processEvent({
-        type: val ? 'startOnbarding' : 'finishOnboarding',
-    })
-
-    dispatch(setVisible(val))
+export const hideOnboarding = () => dispatch => {
+    processEvent({ type: 'finishOnboarding' })
+    dispatch(setVisible(false))
 }
 
 export const toggleShouldTrack = () => async (dispatch, getState) => {
