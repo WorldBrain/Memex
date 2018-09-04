@@ -458,10 +458,7 @@ class AnnotationContainer extends React.Component {
                 {this.state.crowdfunding &&
                     this.props.env === 'overview' && (
                         <CrowdfundingModal
-                            handleClose={() => {
-                                console.log('clsoing')
-                                this.setCrowdfunding(false)
-                            }}
+                            handleClose={this.setCrowdfunding(false)}
                         />
                     )}
             </React.Fragment>

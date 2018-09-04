@@ -5,6 +5,7 @@ import onClickOutside from 'react-onclickoutside'
 import Sidebar, { CloseButton } from 'src/sidebar-overlay/'
 import * as selectors from './selectors'
 import * as actions from './actions'
+import styles from '../../sidebar-overlay/CrowdfundingModal/Overlay.css'
 
 class SidebarContainer extends React.Component {
     static propTypes = {
@@ -16,7 +17,18 @@ class SidebarContainer extends React.Component {
         closeSidebar: PropTypes.func.isRequired,
     }
 
-    handleClickOutside = () => this.props.closeSidebar()
+    handleClickOutside = e => {
+        if (!this.props.showSidebar) {
+            return
+        }
+
+        const $modalContainer = document.querySelector(`.${styles.background}`)
+        if ($modalContainer.contains(e.target)) {
+            return
+        }
+
+        this.props.closeSidebar()
+    }
 
     render() {
         return (
