@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import styles from './Settings.css'
+import styles from './settings.css'
 
 const SearchInjection = ({ children }) => {
     return (
