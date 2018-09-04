@@ -16,7 +16,7 @@ class OptIn extends PureComponent {
                         Send anonymous usage statistics
                     </p>
                     <p className={localStyles.subOptIn}>
-                        No Keywordsm no urls you visit; just intreaction with
+                        No keywords, no urls you visit; just interaction with
                         Memex.
                     </p>
                 </div>

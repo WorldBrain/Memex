@@ -21,7 +21,7 @@ const persistShouldTrack = flag =>
 
 export const init = () => (dispatch, getState) => {
     processEvent({
-        type: 'startOnbarding',
+        type: 'startOnboarding',
     })
 
     if (selectors.isVisible(getState())) {

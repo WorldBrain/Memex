@@ -21,19 +21,19 @@ export const FEATURES_INFO = [
     {
         heading: 'Sharing links to text highlights',
         subheading:
-            'Find any word of any website you visited, and apply powerful filters.',
+            'Show people specific pieces of text in any website. With just one click.',
         url: 'https://worldbrain.io',
     },
     {
         heading: 'Bookmarks & Tags',
         subheading:
-            'Find any word of any website you visited, and apply powerful filters.',
+            "Favorite pages, tag them, and sync with your browser's bookmarks.",
         url: 'https://worldbrain.io',
     },
     {
         heading: 'Collections',
         subheading:
-            'Find any word of any website you visited, and apply powerful filters.',
+            'Automatic local indexing of all content of all pages you visit.',
         url: 'https://worldbrain.io',
     },
 ]
