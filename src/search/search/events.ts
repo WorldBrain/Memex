@@ -161,7 +161,7 @@ async function lookbackBookmarksTime({
         // Grab latest page of bookmarks
         await db.bookmarks
             .where('time')
-            .between(startDate, upperBound, true, true)
+            .belowOrEqual(upperBound)
             .reverse() // Latest first
             .until(() => bms.size >= skip + limit)
             .each(({ time, url }) => bms.set(url, time))
@@ -171,22 +171,27 @@ async function lookbackBookmarksTime({
         }
 
         // For each one, if was bookmarked later than endDate filter, replace with latest in-bounds visit
-        for (const [currentUrl, currentTime] of bms) {
-            if (currentTime > endDate) {
-                let done = false
-                await db.visits
-                    .where('url')
-                    .equals(currentUrl)
-                    .reverse()
-                    .until(() => done)
-                    .eachPrimaryKey(([visitTime]) => {
-                        if (visitTime <= endDate) {
-                            bms.set(currentUrl, visitTime)
-                            done = true
-                        }
-                    })
-            }
-        }
+        await Promise.all(
+            [...bms].map(async ([currentUrl, currentTime]) => {
+                if (currentTime > endDate || currentTime < startDate) {
+                    let done = false
+                    await db.visits
+                        .where('url')
+                        .equals(currentUrl)
+                        .reverse()
+                        .until(() => done)
+                        .eachPrimaryKey(([visitTime]) => {
+                            if (
+                                visitTime >= startDate &&
+                                visitTime <= endDate
+                            ) {
+                                bms.set(currentUrl, visitTime)
+                                done = true
+                            }
+                        })
+                }
+            }),
+        )
 
         // Next iteration, look back from the oldest result's time (-1 to exclude the same result next time)
         upperBound = Math.min(...bms.values()) - 1
