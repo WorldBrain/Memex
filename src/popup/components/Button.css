@@ -147,6 +147,12 @@
     float: left;
 }
 
+.searchIcon {
+    background-image: url('/img/search.svg');
+    background-repeat: no-repeat;
+    background-size: 20px;
+}
+
 .badge {
     background-color: #c12908;
     color: white;

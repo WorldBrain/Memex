@@ -125,6 +125,13 @@ class PopupContainer extends PureComponent<Props> {
                     onSearchChange={this.props.handleSearchChange}
                     onSearchEnter={this.onSearchEnter}
                 />
+                <LinkButton
+                    btnClass={btnStyles.searchIcon}
+                    href={`${constants.OPTIONS_URL}#/overview`}
+                >
+                    Go to search
+                </LinkButton>
+                <hr />
                 <BookmarkButton closePopup={this.closePopup} />
                 <TagsButton />
                 <CollectionsButton />
