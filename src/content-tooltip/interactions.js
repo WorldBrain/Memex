@@ -25,7 +25,6 @@ export const conditionallyTriggerTooltip = delayed(async (callback, event) => {
     }
     const positioning = await getPositionState()
     let position
-    console.log(positioning)
     if (positioning === 'text') {
         position = calculateTooltipPostion()
     } else if (positioning === 'mouse') {

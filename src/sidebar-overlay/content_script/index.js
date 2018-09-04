@@ -1,4 +1,4 @@
-import { interactiveLoader } from 'src/util/loader'
+import { bodyLoader } from 'src/util/loader'
 
 import * as interactions from './interactions'
 import { getLocalStorage } from 'src/util/storage'
@@ -11,7 +11,10 @@ const init = async () => {
     const isTooltipEnabled = await getLocalStorage(TOOLTIP_STORAGE_NAME, true)
     if (!isTooltipEnabled) return
 
-    await interactiveLoader()
+    await bodyLoader()
+    const passwordInputs = document.querySelectorAll('input[type=password]')
+    const hasAPasswordInput = passwordInputs.length > 0
+    if (hasAPasswordInput) return
 
     interactions.insertRibbon()
 }
