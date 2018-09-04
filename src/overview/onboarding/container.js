@@ -7,10 +7,7 @@ import { remoteFunction } from '../../util/webextensionRPC'
 import { ToggleSwitch } from 'src/common-ui/components'
 import * as selectors from './selectors'
 import * as actions from './actions'
-// import Importer from './components/Importer'
-// import ImportMsg from './components/ImportMsg'
 import Overlay from './components/Overlay'
-// import Info from './components/Info'
 import OptIn from './components/OptIn'
 import OnboardingMsg from './components/OnboardingMsg'
 import FeaturesInfo from './components/FeaturesInfo'
@@ -24,22 +21,12 @@ class OnboardingContainer extends PureComponent {
         isVisible: PropTypes.bool.isRequired,
         shouldTrack: PropTypes.bool.isRequired,
         toggleShouldTrack: PropTypes.func.isRequired,
-        setVisibleMiddle: PropTypes.func.isRequired,
-        initConnection: PropTypes.func.isRequired,
+        hideOnboarding: PropTypes.func.isRequired,
+        init: PropTypes.func.isRequired,
     }
 
-    constructor(props) {
-        super(props)
-
-        // Init the connection to imports module in BG script
-        this._importsConnMan = this.props.initConnection()
-    }
-
-    cancelImport = () => this._importsConnMan.cancel()
-
-    handleClose = event => {
-        this.cancelImport()
-        this.props.setVisibleMiddle(false)()
+    componentDidMount() {
+        this.props.init()
     }
 
     openNewUrl = url => {
@@ -79,27 +66,13 @@ class OnboardingContainer extends PureComponent {
 
         return (
             <Overlay
-                onClose={this.handleClose}
+                onClose={this.props.hideOnboarding}
                 showCloseBtn={this.props.showCancelBtn}
             >
-                <OnboardingMsg onFinish={this.props.setVisibleMiddle(false)} />
+                <OnboardingMsg onFinish={this.props.hideOnboarding} />
                 <FeaturesInfo optInManager={this.renderOptIn()}>
                     {this.renderFeaturesInfo()}
                 </FeaturesInfo>
-                {/* <Importer {...this.props}>
-                    <ImportMsg
-                        isImportsDone={this.props.isImportsDone}
-                        onCancel={this.cancelImport}
-                        onFinish={this.props.setVisibleMiddle(false)}
-                    />
-                </Importer>
-                <Info />
-                <OptIn>
-                    <ToggleSwitch
-                        isChecked={this.props.shouldTrack}
-                        onChange={this.props.toggleShouldTrack}
-                    />
-                </OptIn> */}
             </Overlay>
         )
     }
@@ -114,8 +87,8 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-    setVisibleMiddle: flag => () => dispatch(actions.setVisibleMiddle(flag)),
-    initConnection: () => dispatch(actions.init()),
+    hideOnboarding: () => dispatch(actions.hideOnboarding()),
+    init: () => dispatch(actions.init()),
     toggleShouldTrack: () => dispatch(actions.toggleShouldTrack()),
 })
 
