@@ -6,7 +6,7 @@ import { bindActionCreators } from 'redux'
 import * as selectors from './selectors'
 import * as actions from './actions'
 import * as constants from './constants'
-import { Wrapper, ProgressBar } from 'src/common-ui/components'
+import { ProgressBar } from 'src/common-ui/components'
 import Import from './components/Import'
 import EstimatesTable from './components/EstimatesTable'
 import ProgressTable from './components/ProgressTable'
@@ -212,7 +212,7 @@ class ImportContainer extends Component {
     }
 
     renderProgressTable = () => (
-        <Wrapper>
+        <React.Fragment>
             <ProgressBar progress={this.props.progressPercent} />
             <ProgressTable {...this.props} />
             {/* <ShowDownloadDetails
@@ -227,11 +227,11 @@ class ImportContainer extends Component {
                     {this.renderDownloadDetailsRows()}
                 </DownloadDetails>
             )}
-        </Wrapper>
+        </React.Fragment>
     )
 
     renderStatusReport = () => (
-        <Wrapper>
+        <React.Fragment>
             <StatusReport
                 {...this.props}
                 changeShowDetails={this.props.boundActions.showDownloadDetails}
@@ -248,7 +248,7 @@ class ImportContainer extends Component {
                     {this.renderDownloadDetailsRows()}
                 </DownloadDetails>
             )}
-        </Wrapper>
+        </React.Fragment>
     )
 
     renderMainTable() {
@@ -266,7 +266,7 @@ class ImportContainer extends Component {
     renderButtonBar = () => (
         <ButtonBar helpText={this.renderHelpText()} {...this.props}>
             {this.props.shouldRenderEsts && (
-                <Wrapper>
+                <React.Fragment>
                     <AdvSettingCheckbox {...this.props} />
                     <ActionButton
                         handleClick={this.props.recalcEsts}
@@ -274,7 +274,7 @@ class ImportContainer extends Component {
                     >
                         <i className="material-icons">autorenew</i>
                     </ActionButton>
-                </Wrapper>
+                </React.Fragment>
             )}
             {this.renderCancelButton()}
             {this.renderImportButton()}
@@ -318,4 +318,7 @@ const mapDispatchToProps = dispatch => ({
     toggleAdvMode: () => dispatch(actions.toggleAdvMode()),
 })
 
-export default connect(mapStateToProps, mapDispatchToProps)(ImportContainer)
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps,
+)(ImportContainer)
