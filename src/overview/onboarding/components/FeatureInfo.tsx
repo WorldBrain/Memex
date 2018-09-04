@@ -1,6 +1,6 @@
 import React, { PureComponent, MouseEventHandler } from 'react'
 
-const styles = require('./Onboarding.css')
+const styles = require('./FeatureInfo.css')
 
 export interface Props {
     heading: string

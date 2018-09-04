@@ -1,0 +1,15 @@
+.featureContainer {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    flex: 1;
+    background: #fff;
+}
+
+.optInContainer {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}

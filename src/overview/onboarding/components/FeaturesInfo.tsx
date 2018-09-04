@@ -1,6 +1,6 @@
 import React, { PureComponent, ReactChild } from 'react'
 
-const styles = require('./Onboarding.css')
+const styles = require('./FeaturesInfo.css')
 
 export interface Props {
     children: ReactChild[] | ReactChild

@@ -1,0 +1,49 @@
+.infoContainer {
+    display: flex;
+    position: relative;
+    align-items: center;
+    color: inherit;
+    text-decoration: none;
+    border-bottom: 1px solid #c9c9c9;
+}
+
+.infoContainer:last-child {
+    border: none;
+}
+
+.featureLink {
+    position: relative;
+    display: flex;
+    box-sizing: content-box;
+    overflow: hidden;
+    width: 100%;
+    text-decoration: none;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 10px 20px 20px;
+    cursor: pointer;
+
+    &:hover {
+        background-color: #c2e9dd;
+    }
+}
+
+.arrow {
+    width: 40px;
+}
+
+.headingSubheading {
+    display: flex;
+    flex-direction: column;
+}
+
+.featureHeading {
+    font-weight: bold;
+    color: black;
+    text-transform: uppercase;
+}
+
+.featureSubheading {
+    color: #858585;
+    font-size: 14px;
+}
