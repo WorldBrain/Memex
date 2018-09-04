@@ -1,4 +1,4 @@
-import { delayed, getTooltipState } from './utils'
+import { delayed, getTooltipState, getPositionState } from './utils'
 let mouseupListener = null
 
 export function setupTooltipTrigger(callback) {
@@ -23,7 +23,14 @@ export const conditionallyTriggerTooltip = delayed(async (callback, event) => {
     ) {
         return
     }
-    const position = calculateTooltipPostion()
+    const positioning = await getPositionState()
+    let position
+    console.log(positioning)
+    if (positioning === 'text') {
+        position = calculateTooltipPostion()
+    } else if (positioning === 'mouse') {
+        position = { x: event.pageX, y: event.pageY }
+    }
     callback(position)
 }, 300)
 
