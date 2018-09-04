@@ -1,3 +1,5 @@
+import { FeatureInfo } from './types'
+
 export const IMPORT_CONN_NAME = 'imports-onboarding-runtime-connection'
 export const NUM_IMPORT_ITEMS = 30
 export const STORAGE_KEYS = {
@@ -5,7 +7,7 @@ export const STORAGE_KEYS = {
     progress: 'onboarding-import-progress',
 }
 
-export const FEATURES_INFO = [
+export const FEATURES_INFO: FeatureInfo[] = [
     {
         heading: 'Power Search',
         subheading:
