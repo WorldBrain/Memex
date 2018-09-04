@@ -1,7 +1,7 @@
 import React, { PureComponent, MouseEventHandler } from 'react'
 import cx from 'classnames'
 
-const styles = require('./Onboarding.css')
+const styles = require('./OnboardingMsg.css')
 
 export interface Props {
     onFinish: MouseEventHandler

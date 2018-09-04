@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
 
-import localStyles from './Onboarding.css'
+import localStyles from './OptIn.css'
 
 class OptIn extends PureComponent {
     static propTypes = {
