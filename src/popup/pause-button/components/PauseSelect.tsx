@@ -25,6 +25,7 @@ export default function PauseSelect({
                 value={pauseTime}
                 onChange={onTimeChange}
                 onClick={onClick}
+                title={'Enable Memex sidebar & Highlighting tooltip'}
             >
                 {children}
             </select>

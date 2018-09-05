@@ -25,7 +25,7 @@ class FeatureInfo extends PureComponent<Props> {
                         </div>
                     </div>
                     <div className={styles.arrow}>
-                        <img src="/img/arrow.svg" />
+                        <img src="/img/onboarding/arrow.svg" />
                     </div>
                 </a>
             </div>

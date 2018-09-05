@@ -12,12 +12,12 @@ class OptIn extends PureComponent {
         return (
             <div className={localStyles.optInContainer}>
                 <div className={localStyles.optInTextContainer}>
-                    <p className={localStyles.optIn}>
-                        Send anonymous usage statistics
-                    </p>
+                    <p className={localStyles.optIn}>HELP IMPROVING MEMEX</p>
                     <p className={localStyles.subOptIn}>
-                        No keywords, no urls you visit; just interaction with
-                        Memex.
+                        Share non-personal & anonymous interaction data.{' '}
+                        <a href="https://worldbrain.io/privacy-policy/">
+                            (Full Privacy Policy)
+                        </a>
                     </p>
                 </div>
                 {this.props.children}

@@ -9,33 +9,32 @@ export const STORAGE_KEYS = {
 
 export const FEATURES_INFO: FeatureInfo[] = [
     {
-        heading: 'Power Search',
+        heading: 'Search your memory',
         subheading:
             'Find any word of any website you visited, and apply powerful filters.',
-        url: 'https://worldbrain.io',
+        url: 'https://worldbrain.io/onboarding-search',
     },
     {
         heading: 'Web Annotation & Comments',
         subheading:
             'Add your thoughts to websites and specific pieces of text in them.',
-        url: 'https://worldbrain.io',
+        url: 'https://worldbrain.io/onboarding-annotations',
     },
     {
         heading: 'Sharing links to text highlights',
         subheading:
             'Show people specific pieces of text in any website. With just one click.',
-        url: 'https://worldbrain.io',
+        url: 'https://worldbrain.io/onboarding-memex-link',
     },
     {
         heading: 'Bookmarks & Tags',
         subheading:
             "Favorite pages, tag them, and sync with your browser's bookmarks.",
-        url: 'https://worldbrain.io',
+        url: 'https://worldbrain.io/onboarding-bookmarks',
     },
     {
         heading: 'Collections',
-        subheading:
-            'Automatic local indexing of all content of all pages you visit.',
-        url: 'https://worldbrain.io',
+        subheading: 'Sort websites in useful lists',
+        url: 'https://worldbrain.io/onboarding-collections',
     },
 ]

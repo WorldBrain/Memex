@@ -49,8 +49,9 @@ class BookmarkButton extends PureComponent<Props> {
                 onClick={this.props.handleBtnClick}
                 disabled={this.props.isDisabled}
                 btnClass={styles.blacklist}
+                title={'Ignore all future visits to current page'}
             >
-                Blacklist Current Page
+                Ignore Current Page
             </Button>
         )
     }
@@ -58,10 +59,16 @@ class BookmarkButton extends PureComponent<Props> {
     private renderBlacklistChoice() {
         return (
             <SplitButton iconClass={styles.blacklist}>
-                <Button onClick={this.props.handleBlacklistingChoice(true)}>
+                <Button
+                    title={'Delete all pages from this domain'}
+                    onClick={this.props.handleBlacklistingChoice(true)}
+                >
                     Domain
                 </Button>
-                <Button onClick={this.props.handleBlacklistingChoice(false)}>
+                <Button
+                    title={'Delete only this URL'}
+                    onClick={this.props.handleBlacklistingChoice(false)}
+                >
                     URL
                 </Button>
             </SplitButton>
