@@ -17,6 +17,11 @@
     margin: -5px 0 20px;
 }
 
+.dropdown {
+    margin-left: 5px;
+    vertical-align: 1px;
+}
+
 .subText {
     font-size: 14px;
     font-weight: lighter;
