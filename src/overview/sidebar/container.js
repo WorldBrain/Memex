@@ -27,7 +27,7 @@ class SidebarContainer extends React.Component {
         const $modalContainer = document.querySelector(
             `.${crowdfundingModalStyles.background}`,
         )
-        if ($modalContainer.contains(e.target)) {
+        if ($modalContainer && $modalContainer.contains(e.target)) {
             return
         }
 
