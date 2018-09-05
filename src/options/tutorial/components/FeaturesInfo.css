@@ -11,5 +11,5 @@
 .featureContainer {
     display: flex;
     flex-direction: column;
-    box-shadow: 0 4px 20px 1px rgba(62, 185, 149, 0.0902);
+    box-shadow: 0 0 10px 4px rgba(119, 119, 119, 0.10196);
 }

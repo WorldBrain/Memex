@@ -6,7 +6,7 @@ import { bindActionCreators } from 'redux'
 import Waypoint from 'react-waypoint'
 import reduce from 'lodash/fp/reduce'
 
-import { Wrapper, LoadingIndicator } from 'src/common-ui/components'
+import { LoadingIndicator } from 'src/common-ui/components'
 import { IndexDropdown, MigrationNotice } from 'src/common-ui/containers'
 import * as actions from './actions'
 import * as selectors from './selectors'
@@ -280,7 +280,7 @@ class OverviewContainer extends Component {
 
         // No issues; render out results list view
         return (
-            <Wrapper>
+            <React.Fragment>
                 {this.props.shouldShowCount && (
                     <ResultsMessage small>
                         Found <strong>{this.props.totalResultCount}</strong>{' '}
@@ -290,7 +290,7 @@ class OverviewContainer extends Component {
                 <ResultList scrollDisabled={this.scrollDisabled}>
                     {this.renderResultItems()}
                 </ResultList>
-            </Wrapper>
+            </React.Fragment>
         )
     }
 
@@ -328,7 +328,7 @@ class OverviewContainer extends Component {
 
     render() {
         return (
-            <Wrapper>
+            <React.Fragment>
                 <Overview
                     {...this.props}
                     setInputRef={this.setInputRef}
@@ -344,7 +344,7 @@ class OverviewContainer extends Component {
                 </Overview>
                 <Sidebar />
                 <Onboarding />
-            </Wrapper>
+            </React.Fragment>
         )
     }
 }

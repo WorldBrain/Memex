@@ -1,6 +1,5 @@
 import React, { SyntheticEvent, HTMLProps } from 'react'
 
-import { Wrapper } from '../../../common-ui/components'
 import { Props as ContainerProps } from './PauseContainer'
 
 const styles = require('./PauseButton.css')
@@ -18,7 +17,7 @@ export default function PauseSelect({
     onClick = (e: SyntheticEvent) => e.stopPropagation(),
 }: Props) {
     return (
-        <Wrapper>
+        <React.Fragment>
             Pause indexing for
             <select
                 className={styles.dropdown}
@@ -30,6 +29,6 @@ export default function PauseSelect({
                 {children}
             </select>
             mins
-        </Wrapper>
+        </React.Fragment>
     )
 }

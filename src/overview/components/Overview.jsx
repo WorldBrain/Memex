@@ -1,7 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import { Wrapper } from 'src/common-ui/components'
 import DeleteConfirmModal from './DeleteConfirmModal'
 import Header from './Header'
 import styles from './Overview.css'
@@ -9,7 +8,7 @@ import Head from 'src/options/containers/Head'
 import SideBar from '../sidebar-left/container'
 
 const Overview = props => (
-    <Wrapper>
+    <React.Fragment>
         <Head />
         <Header {...props} />
 
@@ -23,7 +22,7 @@ const Overview = props => (
             deleteDocs={props.deleteDocs}
         />
         {props.renderDragElement}
-    </Wrapper>
+    </React.Fragment>
 )
 
 Overview.propTypes = {
