@@ -11,7 +11,6 @@ import {
     IndexDropdown,
     AddListDropdownContainer,
 } from '../common-ui/containers'
-import { Wrapper } from '../common-ui/components'
 import Search from './components/Search'
 import LinkButton from './components/LinkButton'
 import UpgradeButton from './components/UpgradeButton'
@@ -120,7 +119,7 @@ class PopupContainer extends PureComponent<Props> {
         }
 
         return (
-            <Wrapper>
+            <React.Fragment>
                 <Search
                     searchValue={this.props.searchValue}
                     onSearchChange={this.props.handleSearchChange}
@@ -154,7 +153,7 @@ class PopupContainer extends PureComponent<Props> {
                     btnClass={btnStyles.help}
                 />
                 <NotifButton />
-            </Wrapper>
+            </React.Fragment>
         )
     }
 

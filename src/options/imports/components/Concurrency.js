@@ -1,12 +1,10 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import { Wrapper } from 'src/common-ui/components'
-
 import styles from './AdvSettings.css'
 
 const Concurrency = ({ concurrency, onConcurrencyChange }) => (
-    <Wrapper>
+    <React.Fragment>
         <label htmlFor="concurrency">
             # of simultaneous downloads (max. 20)
         </label>
@@ -19,7 +17,7 @@ const Concurrency = ({ concurrency, onConcurrencyChange }) => (
             min="1"
             max="20"
         />
-    </Wrapper>
+    </React.Fragment>
 )
 
 Concurrency.propTypes = {

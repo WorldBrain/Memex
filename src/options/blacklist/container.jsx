@@ -3,7 +3,6 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 
 import { OutLink } from 'src/common-ui/containers'
-import { Wrapper } from 'src/common-ui/components'
 import BlacklistTable from './components/BlacklistTable'
 import BlacklistRow from './components/BlacklistRow'
 import BlacklistInputRow from './components/BlacklistInputRow'
@@ -128,7 +127,7 @@ class BlacklistContainer extends Component {
 
     render() {
         return (
-            <Wrapper>
+            <React.Fragment>
                 <div>
                     <div className={styles.ignoreDomainText}>
                         Ignore a new domain/url:
@@ -147,7 +146,7 @@ class BlacklistContainer extends Component {
                     onCancel={this.props.hideModal}
                     onConfirm={this.handleRemoveMatching}
                 />
-            </Wrapper>
+            </React.Fragment>
         )
     }
 }
@@ -177,4 +176,7 @@ const mapDispatchToProps = dispatch => ({
         dispatch(actions.setSiteInputValue({ siteInputValue })),
 })
 
-export default connect(mapStateToProps, mapDispatchToProps)(BlacklistContainer)
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps,
+)(BlacklistContainer)
