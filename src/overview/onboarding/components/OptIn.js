@@ -15,7 +15,10 @@ class OptIn extends PureComponent {
                     <p className={localStyles.optIn}>HELP IMPROVING MEMEX</p>
                     <p className={localStyles.subOptIn}>
                         Share non-personal & anonymous interaction data.{' '}
-                        <a href="https://worldbrain.io/privacy-policy/">
+                        <a
+                            target="_blank"
+                            href="https://worldbrain.io/privacy-policy/"
+                        >
                             (Full Privacy Policy)
                         </a>
                     </p>
