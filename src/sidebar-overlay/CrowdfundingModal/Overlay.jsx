@@ -1,12 +1,25 @@
 import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
 
+import { remoteFunction } from '../../util/webextensionRPC'
+
 import { Overlay } from 'src/common-ui/components'
 import styles from './Overlay.css'
 
 class CrowdfundingOverlay extends PureComponent {
     static propTypes = {
         handleClose: PropTypes.func.isRequired,
+    }
+
+    openNewLink = () => async () => {
+        await remoteFunction('processEvent')({
+            type: 'learnMoreCrowdFunding',
+        })
+
+        window.open(
+            'https://worldbrain.io/product/collaborative-annotations/',
+            '_blank',
+        )
     }
 
     render() {
@@ -29,12 +42,7 @@ class CrowdfundingOverlay extends PureComponent {
                     Support the development with 10€ and <br />
                     <b>get back 30€</b> worth of Memex Premium Credits.
                 </p>
-                <a
-                    className={styles.learnMore}
-                    href={
-                        'https://worldbrain.io/product/collaborative-annotations/'
-                    }
-                >
+                <a className={styles.learnMore} onClick={this.openNewLink()}>
                     LEARN MORE
                 </a>
             </Overlay>

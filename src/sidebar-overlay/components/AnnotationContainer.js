@@ -84,10 +84,17 @@ class AnnotationContainer extends React.Component {
         sidebar.addEventListener('click', this.maybeCloseTagsDropdown, false)
     }
 
-    setCrowdfunding = value => () =>
+    setCrowdfunding = (value, isReply) => async () => {
+        if (isReply !== undefined) {
+            await remoteFunction('processEvent')({
+                type: isReply ? 'clickReplyButton' : 'clickShareButton',
+            })
+        }
+
         this.setState({
             crowdfunding: value,
         })
+    }
 
     reloadTags = async () => {
         const tags = await remoteFunction('getAnnotationTags')(
@@ -207,11 +214,11 @@ class AnnotationContainer extends React.Component {
                 />
                 <span
                     className={cx(styles.commonIcon, styles.shareIcon)}
-                    onClick={this.setCrowdfunding(true)}
+                    onClick={this.setCrowdfunding(true, false)}
                 />
                 <span
                     className={cx(styles.commonIcon, styles.replyIcon)}
-                    onClick={this.setCrowdfunding(true)}
+                    onClick={this.setCrowdfunding(true, true)}
                 />
                 {env === 'overview' && annotation.body ? (
                     <span

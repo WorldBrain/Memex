@@ -257,6 +257,15 @@ export const EVENT_TYPES = {
     finishOnboarding: {
         id: 71,
     },
+    clickReplyButton: {
+        id: 72,
+    },
+    clickShareButton: {
+        id: 73,
+    },
+    learnMoreCrowdFunding: {
+        id: 74,
+    },
 }
 
 export const NOTIF_TYPE_EVENT_IDS = {

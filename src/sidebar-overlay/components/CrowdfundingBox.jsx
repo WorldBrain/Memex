@@ -1,7 +1,20 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
+import { remoteFunction } from '../../util/webextensionRPC'
+
 import styles from './CrowdfundingBox.css'
+
+const openNewLink = () => async () => {
+    await remoteFunction('processEvent')({
+        type: 'learnMoreCrowdFunding',
+    })
+
+    window.open(
+        'https://worldbrain.io/product/collaborative-annotations/',
+        '_blank',
+    )
+}
 
 const CrowdfundingBox = props => (
     <div className={styles.container}>
@@ -16,11 +29,7 @@ const CrowdfundingBox = props => (
             </i>{' '}
             worth in Memex Premium Credits.
         </p>
-        <a
-            className={styles.learnMore}
-            href={'https://worldbrain.io/product/collaborative-annotations/'}
-            target={'_blank'}
-        >
+        <a className={styles.learnMore} onClick={openNewLink()}>
             LEARN MORE
         </a>
         <div onClick={props.onClose} className={styles.closeDiv}>
