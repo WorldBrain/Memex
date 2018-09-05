@@ -13,7 +13,7 @@ class OnboardingMsg extends PureComponent<Props> {
             <div className={styles.messageContainer}>
                 <div className={styles.heading}>Welcome!</div>
                 <div className={styles.subheading}>
-                    Let me show you what your memex can do for you.
+                    Let me show you what your <b>memex</b> can do for you.
                 </div>
                 <div className={styles.or}>OR</div>
                 <a

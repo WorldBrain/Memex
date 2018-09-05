@@ -215,7 +215,8 @@ class OverviewContainer extends Component {
                 <Link style={{ color: '#777' }} to="/import">
                     import
                 </Link>
-                <br /> <p className={localStyles.subTitle}>any websites yet.</p>
+                <br />
+                any websites yet.
             </div>
             <div>
                 <Link

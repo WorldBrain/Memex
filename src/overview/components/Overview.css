@@ -212,6 +212,7 @@
     font-weight: 300;
     border: 1px solid #3eb995;
     font-size: 1.1rem;
+    text-decoration: none;
     color: #3eb995;
     cursor: pointer;
     height: 35px;
@@ -238,7 +239,7 @@
     font-size: 30px;
     font-weight: 800;
     padding-top: 50px;
-    margin-bottom: 15px;
+    margin-bottom: 30px;
     font-style: italic;
 }
 
