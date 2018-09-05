@@ -50,7 +50,11 @@ const Header = ({
                 Upgrade Memex
             </OutLink>
             <Link to="/settings">
-                <img src="/img/settings-icon.png" className={styles.icon} />
+                <img
+                    src="/img/settings-icon.png"
+                    title="Settings"
+                    className={styles.icon}
+                />
             </Link>
         </div>
     </div>

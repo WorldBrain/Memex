@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
 
-import localStyles from './Onboarding.css'
+import localStyles from './OptIn.css'
 
 class OptIn extends PureComponent {
     static propTypes = {
@@ -11,16 +11,19 @@ class OptIn extends PureComponent {
     render() {
         return (
             <div className={localStyles.optInContainer}>
-                {this.props.children}
                 <div className={localStyles.optInTextContainer}>
-                    <p className={localStyles.optIn}>
-                        Send 100% private & anonymous usage statistics
-                    </p>
+                    <p className={localStyles.optIn}>HELP IMPROVING MEMEX</p>
                     <p className={localStyles.subOptIn}>
-                        None of your history or searches, only interactions with
-                        software
+                        Share non-personal & anonymous interaction data.{' '}
+                        <a
+                            target="_blank"
+                            href="https://worldbrain.io/privacy-policy/"
+                        >
+                            (Full Privacy Policy)
+                        </a>
                     </p>
                 </div>
+                {this.props.children}
             </div>
         )
     }

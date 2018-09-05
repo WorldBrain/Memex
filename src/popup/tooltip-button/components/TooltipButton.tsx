@@ -35,10 +35,14 @@ class TooltipButton extends PureComponent<Props> {
             <Button
                 onClick={this.props.handleChange}
                 btnClass={buttonStyles.linkIcon}
+                title={'Enable Memex sidebar & Highlighting tooltip'}
             >
                 <span>
                     Show Sidebar/Tooltip
-                    <span className={styles.switch}>
+                    <span
+                        className={styles.switch}
+                        title={'Enable Memex sidebar & Highlighting tooltip'}
+                    >
                         <ToggleSwitch
                             isChecked={this.props.isChecked}
                             onChange={this.props.handleChange}

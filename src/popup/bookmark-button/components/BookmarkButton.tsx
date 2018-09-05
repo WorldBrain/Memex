@@ -33,6 +33,7 @@ class BookmarkButton extends PureComponent<Props> {
         return (
             <Button
                 onClick={this.props.toggleBookmark}
+                title={'Bookmark, so you can filter for it later'}
                 btnClass={cx({
                     [styles.bookmarkedBtn]: this.props.isBookmarked,
                     [styles.unbookmarkedBtn]: !this.props.isBookmarked,
