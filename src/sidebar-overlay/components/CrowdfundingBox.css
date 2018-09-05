@@ -33,41 +33,53 @@ p {
 
 .header {
     color: #3eb995;
-    font-size: 25px;
-    width: 70%;
+    width: 90%;
     text-align: center;
-    line-height: 35px;
+    line-height: 32px;
     letter-spacing: 1px;
     margin-bottom: 10px;
+    font-family: 'Uni Neue', sans-serif;
+    font-weight: bolder;
+    font-size: 30px;
+    font-style: italic;
 }
 
 .boldText {
     color: #1e3357;
-    font-weight: 800;
+    font-weight: 600;
     font-size: 17px;
     margin-top: 15px;
     margin-bottom: 0px;
+    text-align: center;
+    letter-spacing: 0.5px;
 }
 
 .text {
     color: #5d697bc4;
     font-size: 16px;
-    width: 58%;
-    margin-top: 0px;
-    font-weight: 100;
+    width: 70%;
+    margin-top: 15px;
+    margin-bottom: 20px;
+    font-weight: 200;
     text-align: center;
+    font-family: 'lato';
 }
 
 .learnMore {
-    background-color: white;
-    color: #3eb995;
+    background-color: #3eb995;
+    color: white;
     padding: 7px 20px;
     border-radius: 3px;
-    border: 2px solid #3eb995ba;
+    border: 2px solid #3eb995;
     cursor: pointer;
     text-decoration: none;
     font-size: 15px;
-    margin-top: 20px;
+    margin-top: 10px;
+
+    &:hover {
+        background-color: white;
+        color: #3eb995;
+    }
 }
 
 .closeDiv {

@@ -16,19 +16,27 @@ class CrowdfundingOverlay extends PureComponent {
                 innerClassName={styles.popup}
                 onClick={this.props.handleClose}
             >
-                <span className={styles.close} onClick={this.props.handleClose}>
-                    x
-                </span>
-                <p className={styles.header}>Ah snap</p>
-                <p className={styles.text}>
-                    Glad you'd like to have this feature. We too. Unfortunately
-                    it's not available yet.
+                <span
+                    className={styles.close}
+                    onClick={this.props.handleClose}
+                />
+                <p className={styles.header}>Fund the future!</p>
+                <p className={styles.bolderText}>
+                    Unfortunately you can't share <br /> and discuss annotations
+                    yet.
                 </p>
                 <p className={styles.text}>
-                    <b>But</b> you can back it with 10€ and receive 30€ worth of
-                    Memex Credits once it launches.
+                    Support the development with 10€ and <br />
+                    <b>get back 30€</b> worth of Memex Premium Credits.
                 </p>
-                <a className={styles.learnMore}>Learn More</a>
+                <a
+                    className={styles.learnMore}
+                    href={
+                        'https://worldbrain.io/product/collaborative-annotations/'
+                    }
+                >
+                    LEARN MORE
+                </a>
             </Overlay>
         )
     }

@@ -5,13 +5,24 @@ import styles from './CrowdfundingBox.css'
 
 const CrowdfundingBox = props => (
     <div className={styles.container}>
-        <p className={styles.header}>Sharing not available yet</p>
-        <p className={styles.boldText}>You can make it possible</p>
-        <p className={styles.boldText}>Back it with 10€</p>
-        <p className={styles.text}>
-            and receive 30€ worth of Memex credits once it launches.
+        <p className={styles.header}>Fund the future!</p>
+        <p className={styles.boldText}>
+            Unfortunately you can't share <br /> and discuss annotations yet.
         </p>
-        <a className={styles.learnMore}>Learn More</a>
+        <p className={styles.text}>
+            Support the development with 10€ and{' '}
+            <i>
+                <b>get back 30€</b>
+            </i>{' '}
+            worth in Memex Premium Credits.
+        </p>
+        <a
+            className={styles.learnMore}
+            href={'https://worldbrain.io/product/collaborative-annotations/'}
+            target={'_blank'}
+        >
+            LEARN MORE
+        </a>
         <div onClick={props.onClose} className={styles.closeDiv}>
             Close Notification
         </div>

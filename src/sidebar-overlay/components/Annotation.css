@@ -128,6 +128,7 @@
     margin-top: -10px;
     margin-left: 0px;
     padding-top: 11px;
+    padding-left: 10px;
 }
 
 .footerBoldText {
@@ -262,11 +263,15 @@ input:focus {
 }
 
 .replyIcon {
-    background-image: url('/img/reply.svg');
+    background-image: url('/img/reply_empty.svg');
+
+    &:hover {
+        background-image: url('/img/reply_full.svg');
+    }
 }
 
 .shareIcon {
-    background-image: url('/img/share.svg');
+    background-image: url('/img/share_empty.svg');
 
     &:hover {
         background-image: url('/img/share_hover.svg');
