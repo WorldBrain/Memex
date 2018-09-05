@@ -19,7 +19,7 @@ h3 {
 }
 
 .root {
-    background-color: white;
+    background-color: #fbfafa;
     display: flex;
     flex-direction: row;
 }

@@ -10,6 +10,16 @@ const StatusReport = ({
     children,
 }) => (
     <div>
+        <div className={localStyles.warningContainerReport}>
+            <img src="/img/caution.png" className={localStyles.icon} />{' '}
+            <p className={localStyles.stepText}>
+                Don't forget to{' '}
+                <a href="http://memex.link/2Jw-R3BQh/worldbrain.helprace.com/i49-prevent-your-imports-from-stopping-midway">
+                    re-enable your browsing protection
+                </a>
+                .
+            </p>
+        </div>
         <h1 className={localStyles.heading}>Import Summary</h1>
         <div className={localStyles.reportDetails}>
             <p>{`Succeeded (${successCount})`}</p>

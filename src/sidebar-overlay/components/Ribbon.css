@@ -4,7 +4,7 @@
     top: 35%;
     right: -50px;
     width: 30px;
-    height: 70px;
+    height: 68px;
     background-color: #fff;
     z-index: 2147483647;
     border-top-left-radius: 5px;
@@ -13,7 +13,6 @@
     transform: translate(0, 0);
     transition: all 0s ease-in;
     box-shadow: -1px 2px 5px 0px rgba(0, 0, 0, 0.16);
-    border: 1px solid #c2c2c2;
     line-height: normal;
     text-align: start;
     font-family: serif;
@@ -86,7 +85,7 @@
     background-size: 14px;
     width: 14px;
     height: 14px;
-    margin-left: 5px;
+    margin-left: 6px;
     margin-top: 5px;
 }
 

@@ -55,7 +55,7 @@
     border-radius: 5px;
     width: 1100px;
     position: relative;
-    transition: all 1s ease-in-out;
+    transition: all 0.3s ease-in-out;
     cursor: default;
     max-height: 90%;
     overflow: auto;
