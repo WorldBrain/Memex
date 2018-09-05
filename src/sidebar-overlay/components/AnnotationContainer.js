@@ -189,12 +189,20 @@ class AnnotationContainer extends React.Component {
         return (
             <div className={styles.footerAside}>
                 <span
-                    className={styles.editIcon}
+                    className={cx(styles.commonIcon, styles.editIcon)}
                     onClick={this.toggleEditAnnotation}
                 />
                 <span
-                    className={styles.trashIcon}
+                    className={cx(styles.commonIcon, styles.trashIcon)}
                     onClick={this._setFooterState('delete')}
+                />
+                <span
+                    className={cx(styles.commonIcon, styles.shareIcon)}
+                    // onClick={}
+                />
+                <span
+                    className={cx(styles.commonIcon, styles.replyIcon)}
+                    // onClick={}
                 />
                 {env === 'overview' && annotation.body ? (
                     <span

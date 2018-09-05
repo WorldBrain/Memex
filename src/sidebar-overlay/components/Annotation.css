@@ -240,9 +240,8 @@ input:focus {
     outline: none;
 }
 
-.trashIcon {
+.commonIcon {
     box-sizing: border-box;
-    background-image: url('/img/trash_closed.svg');
     background-repeat: no-repeat;
     background-size: 18px;
     display: inline-block;
@@ -259,29 +258,31 @@ input:focus {
 
     &:hover {
         background-color: #efefef;
+    }
+}
+
+.replyIcon {
+    background-image: url('/img/reply.svg');
+}
+
+.shareIcon {
+    background-image: url('/img/share.svg');
+
+    &:hover {
+        background-image: url('/img/share_hover.svg');
+    }
+}
+
+.trashIcon {
+    background-image: url('/img/trash_closed.svg');
+
+    &:hover {
         background-image: url('/img/trash_open.svg');
     }
 }
 
 .editIcon {
-    box-sizing: border-box;
     background-image: url('/img/newedit.svg');
-    background-repeat: no-repeat;
-    background-size: 18px;
-    background-position: center;
-    display: inline-block;
-    cursor: pointer;
-    border-radius: 50%;
-    padding: 3px;
-    width: 28px;
-    height: 28px;
-    float: left;
-    margin-top: -5px;
-    margin-left: 10px;
-
-    &:hover {
-        background-color: #efefef;
-    }
 }
 
 .goToPageIcon {
