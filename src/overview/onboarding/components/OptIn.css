@@ -2,7 +2,7 @@
     display: flex;
     flex-direction: column;
     width: 110%;
-    margin-left: -15px;
+    padding-right: 25px;
 }
 
 .optInContainer {
@@ -10,12 +10,13 @@
     justify-content: space-around;
     align-items: center;
     margin-top: 15px;
-    margin-bottom: 15px;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
 .optIn {
-    font-size: 20px;
-    font-weight: 600;
+    font-size: 13px;
+    font-weight: 500;
     color: #777;
     text-align: center;
     text-align: left;
@@ -24,7 +25,7 @@
 }
 
 .subOptIn {
-    font-size: 15px;
+    font-size: 11px;
     font-weight: 200;
     color: #777;
     line-height: 1em;

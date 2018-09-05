@@ -7,6 +7,10 @@
     @media (max-width: 950px) {
         flex-direction: row;
     }
+
+    @media (max-width: 1100px) {
+        flex-direction: row;
+    }
 }
 
 .messageContainer {
@@ -14,6 +18,7 @@
     flex-direction: column;
     justify-content: flex-start;
     flex: 1;
+    margin-right: 30px;
 }
 
 .heading {
@@ -21,6 +26,7 @@
     font-size: 42px;
     font-weight: 800;
     font-style: italic;
+    line-height: 30px;
 }
 
 .subheading {
@@ -72,16 +78,17 @@
 
 .choiceBtn {
     padding: 6px 0;
+    margin-top: 10px;
     border-radius: 2px;
-    font-weight: 600;
+    font-weight: 400;
     color: #fff;
     cursor: pointer;
+    background-color: #3eb995;
     text-decoration: none;
-    background: #777;
-    border: 2px solid #777;
+    border: 2px solid #3eb995;
     font-size: 24px;
     text-align: center;
-    width: 234px;
+    width: 190px;
 
     &:hover,
     &:active {
@@ -92,7 +99,6 @@
 }
 
 .startBtn {
-    background-color: #777;
     color: #fff;
 
     &:hover,

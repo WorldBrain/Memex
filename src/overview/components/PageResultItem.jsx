@@ -116,6 +116,7 @@ class PageResultItem extends PureComponent {
                                         )}
                                         onClick={this.props.onTagBtnClick}
                                         ref={this.props.setTagButtonRef}
+                                        title={'Add/View Tags'}
                                     />
                                     <button
                                         className={classNames(
@@ -123,6 +124,9 @@ class PageResultItem extends PureComponent {
                                             styles.comment,
                                         )}
                                         onClick={this.props.onCommentBtnClick}
+                                        title={
+                                            'Add/View Commments & Annotations'
+                                        }
                                     />
                                     <button
                                         disabled={this.props.isDeleting}
@@ -131,6 +135,9 @@ class PageResultItem extends PureComponent {
                                             styles.trash,
                                         )}
                                         onClick={this.props.onTrashBtnClick}
+                                        title={
+                                            'Delete this page & all related content'
+                                        }
                                     />
                                     <button
                                         disabled={this.props.isDeleting}
@@ -138,6 +145,7 @@ class PageResultItem extends PureComponent {
                                         onClick={
                                             this.props.onToggleBookmarkClick
                                         }
+                                        title={'Bookmark this page'}
                                     />
                                 </div>
                             </div>

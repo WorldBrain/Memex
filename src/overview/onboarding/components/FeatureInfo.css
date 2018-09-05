@@ -4,7 +4,7 @@
     align-items: center;
     color: inherit;
     text-decoration: none;
-    border-bottom: 1px solid #c9c9c9;
+    border-bottom: 1px solid #c9c9c985;
 }
 
 .infoContainer:last-child {
@@ -29,7 +29,8 @@
 }
 
 .arrow {
-    width: 40px;
+    width: 30px;
+    opacity: 0.6;
 }
 
 .headingSubheading {

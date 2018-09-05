@@ -329,13 +329,22 @@ class Ribbon extends React.Component {
                     })}
                 >
                     <div className={styles.buttonHolder}>
-                        <span className={styles.cancel} onClick={destroy} />
+                        <span
+                            title={
+                                'Close once. Permanently disable via the menu bar popup.'
+                            }
+                            className={styles.cancel}
+                            onClick={destroy}
+                        />
                     </div>
                     <div className={styles.logo} onClick={this.toggleSidebar} />
                 </div>
                 <CloseButton
                     isActive={isSidebarActive}
                     clickHandler={this.toggleSidebar}
+                    title={
+                        'Close once. If you want to permanently disable, open the menu bar popup.'
+                    }
                 />
                 {this.renderIFrame()}
             </div>

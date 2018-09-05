@@ -50,7 +50,7 @@
 }
 
 .popup {
-    padding: 60px 80px;
+    padding: 60px 60px;
     background: #f9fffd;
     border-radius: 5px;
     width: 1100px;
@@ -65,6 +65,8 @@
 
     @media (max-width: 1100px) {
         width: 100%;
+        max-height: 100%;
+        padding: 60px 40px;
     }
 }
 
