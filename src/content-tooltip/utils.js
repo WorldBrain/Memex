@@ -1,5 +1,5 @@
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
-import { TOOLTIP_STORAGE_NAME, TOOLTIP_DEFAULT_OPTION } from './constants'
+import * as constants from './constants'
 
 export const delayed = (f, delay) => {
     let timeout = null
@@ -30,7 +30,19 @@ export const copyToClipboard = text => {
 }
 
 export const getTooltipState = async () =>
-    getLocalStorage(TOOLTIP_STORAGE_NAME, TOOLTIP_DEFAULT_OPTION)
+    getLocalStorage(
+        constants.TOOLTIP_STORAGE_NAME,
+        constants.TOOLTIP_DEFAULT_OPTION,
+    )
 
 export const setTooltipState = async tooltipValue =>
-    setLocalStorage(TOOLTIP_STORAGE_NAME, tooltipValue)
+    setLocalStorage(constants.TOOLTIP_STORAGE_NAME, tooltipValue)
+
+export const getPositionState = async () =>
+    getLocalStorage(
+        constants.POSITION_STORAGE_NAME,
+        constants.POSITION_DEFAULT_OPTION,
+    )
+
+export const setPositionState = async positionValue =>
+    setLocalStorage(constants.POSITION_STORAGE_NAME, positionValue)
