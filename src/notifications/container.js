@@ -36,10 +36,12 @@ class NotificationContainer extends Component {
         messageCharLimit: PropTypes.number.isRequired,
         localStorageNotif: PropTypes.object.isRequired,
         isLoadingBar: PropTypes.bool.isRequired,
+        tabs: PropTypes.object,
     }
 
     static defaultProps = {
         messageCharLimit: 150,
+        tabs: browser.tabs,
     }
 
     componentDidMount() {
@@ -85,7 +87,7 @@ class NotificationContainer extends Component {
             },
         })
 
-        window.open(url, '_blank').focus()
+        this.props.tabs.create({ url })
     }
 
     renderButtons(buttons, id) {

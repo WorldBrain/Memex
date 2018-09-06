@@ -23,18 +23,22 @@ class OnboardingContainer extends PureComponent {
         toggleShouldTrack: PropTypes.func.isRequired,
         hideOnboarding: PropTypes.func.isRequired,
         init: PropTypes.func.isRequired,
+        tabs: PropTypes.object,
+    }
+
+    static defaultProps = {
+        tabs: browser.tabs,
     }
 
     componentDidMount() {
         this.props.init()
     }
 
-    openNewUrl = url => {
-        remoteFunction('processEvent')({
-            type: 'openURLFeature',
-        })
+    processEventRPC = remoteFunction('processEvent')
 
-        window.open(url, '_blank')
+    openNewUrl = url => () => {
+        this.processEventRPC({ type: 'openURLFeature' })
+        this.props.tabs.create({ url })
     }
 
     renderFeaturesInfo = () => {
@@ -43,7 +47,7 @@ class OnboardingContainer extends PureComponent {
                 key={index}
                 heading={feature.heading}
                 subheading={feature.subheading}
-                handleClick={() => this.openNewUrl(feature.url)}
+                handleClick={this.openNewUrl(feature.url)}
             />
         ))
     }
