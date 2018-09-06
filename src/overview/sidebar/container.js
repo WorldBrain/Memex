@@ -2,9 +2,11 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import onClickOutside from 'react-onclickoutside'
-import Sidebar, { CloseButton } from 'src/sidebar-overlay/'
+
+import Sidebar, { CloseButton } from '../../sidebar-overlay'
 import * as selectors from './selectors'
 import * as actions from './actions'
+import crowdfundingModalStyles from '../../sidebar-overlay/CrowdfundingModal/Overlay.css'
 
 class SidebarContainer extends React.Component {
     static propTypes = {
@@ -16,7 +18,21 @@ class SidebarContainer extends React.Component {
         closeSidebar: PropTypes.func.isRequired,
     }
 
-    handleClickOutside = () => this.props.closeSidebar()
+    handleClickOutside = e => {
+        if (!this.props.showSidebar) {
+            return
+        }
+
+        // Don't attempt close of sidebar if click occurred within crowdfunding modal (see `sidebar-overlay` feature)
+        const $modalContainer = document.querySelector(
+            `.${crowdfundingModalStyles.background}`,
+        )
+        if ($modalContainer && $modalContainer.contains(e.target)) {
+            return
+        }
+
+        this.props.closeSidebar()
+    }
 
     render() {
         return (
