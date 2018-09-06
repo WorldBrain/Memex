@@ -85,7 +85,7 @@ class AnnotationContainer extends React.Component {
     }
 
     setCrowdfunding = (value, isReply) => async () => {
-        if (isReply !== undefined) {
+        if (isReply != null) {
             await remoteFunction('processEvent')({
                 type: isReply ? 'clickReplyButton' : 'clickShareButton',
             })
@@ -465,7 +465,7 @@ class AnnotationContainer extends React.Component {
                 {this.state.crowdfunding &&
                     this.props.env === 'overview' && (
                         <CrowdfundingModal
-                            handleClose={this.setCrowdfunding(false)}
+                            onClose={this.setCrowdfunding(false)}
                         />
                     )}
             </React.Fragment>
