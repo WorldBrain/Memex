@@ -1,0 +1,30 @@
+.root {
+    list-style: none;
+    margin: 40px auto;
+    padding: 0;
+    max-width: 800px;
+}
+
+.timestamp {
+    display: inline-block;
+    text-align: center;
+    width: 100%;
+    margin-bottom: 5px;
+    color: #9b9ba2;
+}
+
+.noScroll {
+    overflow: hidden;
+    margin-bottom: 0;
+    margin-top: -30px;
+}
+
+.main {
+    margin-top: 100px;
+    font-size: 0.65rem;
+    font-weight: normal;
+
+    @media (max-width: 1000px) {
+        margin-top: 100px !important; /* stylelint-disable-line declaration-no-important */
+    }
+}

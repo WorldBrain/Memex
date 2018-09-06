@@ -9,7 +9,7 @@ import extStyles from './Index.css'
 import MyCollection from './MyCollections'
 import CreateListForm from './CreateListForm'
 import ListItem from './ListItem'
-import DeleteConfirmModal from 'src/overview/components/DeleteConfirmModal'
+import DeleteConfirmModal from 'src/overview/delete-confirm-modal/components/DeleteConfirmModal'
 import { actions as filterActs } from '../../../../search-filters'
 import * as sidebar from '../../../../overview/sidebar-left/selectors'
 

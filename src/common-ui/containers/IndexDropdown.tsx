@@ -29,7 +29,8 @@ export interface Props {
     onFilterDel?: (filter: string) => void
     /** Opt. cb with new tag to be added to a new annotation */
     onNewTagAdd?: (filter: string) => void
-    // initial suggestions from the popup
+    setTagDivRef?: (el: HTMLDivElement) => void
+    /** initial suggestions from the popup */
     initSuggestions?: string[]
     isForSidebar?: boolean
 }

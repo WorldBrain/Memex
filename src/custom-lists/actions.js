@@ -52,7 +52,10 @@ export const toggleListFilterIndex = createAction(
     'custom-lists/toggleListFilterIndex',
 )
 
-export const setUrlDragged = createAction('custom-lists/setUrlDragged')
+export const setUrlDragged = createAction(
+    'custom-lists/setUrlDragged',
+    url => url,
+)
 export const resetUrlDragged = createAction('custom-lists/resetUrlDragged')
 export const closeCreateListForm = createAction(
     'custom-lists/closeCreateListForm',
