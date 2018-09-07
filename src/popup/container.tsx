@@ -129,7 +129,7 @@ class PopupContainer extends PureComponent<Props> {
                     btnClass={btnStyles.searchIcon}
                     href={`${constants.OPTIONS_URL}#/overview`}
                 >
-                    Go to search
+                    Go to search dashboard
                 </LinkButton>
                 <hr />
                 <BookmarkButton closePopup={this.closePopup} />

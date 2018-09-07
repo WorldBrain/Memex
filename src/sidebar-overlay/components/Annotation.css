@@ -5,7 +5,7 @@
     border-radius: 5px;
     padding: 10px 0px;
     padding-bottom: 12px;
-    color: #000;
+    color: #4a4a4a;
     font-family: sans-serif;
     font-size: 13px;
     border: 1px #d2d2d2 solid;
@@ -116,6 +116,7 @@
         font-weight: 400;
         color: #929292;
         margin-right: 5px;
+        margin-left: -1px;
     }
 }
 

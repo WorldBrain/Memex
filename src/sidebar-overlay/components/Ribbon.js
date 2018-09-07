@@ -331,7 +331,7 @@ class Ribbon extends React.Component {
                     <div className={styles.buttonHolder}>
                         <span
                             title={
-                                'Close once. Permanently disable via the menu bar popup.'
+                                'Close once. Disable via Memex icon in the extension toolbar.'
                             }
                             className={styles.cancel}
                             onClick={destroy}
@@ -343,7 +343,7 @@ class Ribbon extends React.Component {
                     isActive={isSidebarActive}
                     clickHandler={this.toggleSidebar}
                     title={
-                        'Close once. If you want to permanently disable, open the menu bar popup.'
+                        'Close once. Disable via Memex icon in the extension toolbar.'
                     }
                 />
                 {this.renderIFrame()}

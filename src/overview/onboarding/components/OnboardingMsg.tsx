@@ -11,9 +11,12 @@ class OnboardingMsg extends PureComponent<Props> {
     render() {
         return (
             <div className={styles.messageContainer}>
-                <div className={styles.heading}>Welcome!</div>
+                <img
+                    className={styles.introImage}
+                    src={'/img/memex_beta_logo.png'}
+                />
                 <div className={styles.subheading}>
-                    Let me show you what your <b>memex</b> can do for you.
+                    Explore your new abilities.
                 </div>
                 <div className={styles.or}>OR</div>
                 <a

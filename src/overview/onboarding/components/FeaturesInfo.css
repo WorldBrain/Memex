@@ -13,8 +13,4 @@
     justify-content: space-around;
     align-items: center;
     margin-top: 15px;
-
-    @media (max-width: 1100px) {
-        margin-bottom: 60px;
-    }
 }

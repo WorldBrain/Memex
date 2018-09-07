@@ -13,6 +13,12 @@
     }
 }
 
+.introImage {
+    width: 400px;
+    max-width: 100%;
+    height: auto;
+}
+
 .messageContainer {
     display: flex;
     flex-direction: column;

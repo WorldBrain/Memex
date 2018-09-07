@@ -4,6 +4,7 @@
     cursor: pointer;
     border-bottom: 1px solid #eaecef;
     word-wrap: break-word;
+    font-size: 14px;
 
     &:hover,
     &:focus,

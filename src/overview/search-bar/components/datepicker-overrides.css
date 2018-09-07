@@ -1,6 +1,8 @@
 /* stylelint-disable  declaration-no-important, selector-pseudo-class-no-unknown */
 :global .react-datepicker__close-icon::after {
     background-color: #3eb995 !important;
+    padding-left: 3px;
+    top: 9px;
 }
 
 :global .react-datepicker__triangle {
