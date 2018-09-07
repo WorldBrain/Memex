@@ -50,11 +50,14 @@ const Import = ({
                     <img src="/img/caution.png" className={localStyles.icon} />{' '}
                     <p className={localStyles.stepText}>
                         Your import may ocassionally freeze or crash. No need to
-                        worry.{' '}
-                        <a href="http://memex.link/2Jw-R3BQh/worldbrain.helprace.com/i49-prevent-your-imports-from-stopping-midway">
-                            Follow these steps to fix it
-                        </a>
-                        .
+                        worry. Go to{' '}
+                        <a
+                            target="_blank"
+                            href="http://memex.link/2Jw-R3BQh/worldbrain.helprace.com/i49-prevent-your-imports-from-stopping-midway"
+                        >
+                            <b>worldbrain.io/import_bug</b>
+                        </a>{' '}
+                        to fix it.
                     </p>
                 </div>
             </div>
