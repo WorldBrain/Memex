@@ -13,7 +13,7 @@ export default () => [
     new CssAssetsPlugin({
         cssProcessorOptions: {
             autoprefixer: { disable: true },
-            safe: true,
+            parser: require('postcss-safe-parser'),
             discardComments: {
                 removeAll: true,
             },

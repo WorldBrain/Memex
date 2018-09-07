@@ -1,0 +1,18 @@
+.pauseIcon {
+    background-image: url('/img/pause.svg');
+    background-repeat: no-repeat;
+    background-size: 20px;
+    cursor: pointer;
+}
+
+.playIcon {
+    background-image: url('/img/play.svg');
+    background-repeat: no-repeat;
+    background-size: 20px;
+    cursor: pointer;
+}
+
+.dropdown {
+    margin: 0 5px;
+    cursor: pointer;
+}

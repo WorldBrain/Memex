@@ -7,8 +7,8 @@ import initMinimizers from './minimizers'
 export const extensions = ['.ts', '.tsx', '.js', '.jsx', '.coffee']
 
 export const entry = {
-    background: './src/background-entry.js',
-    popup: './src/popup/popup.js',
+    background: './src/background.ts',
+    popup: './src/popup/index.tsx',
     content_script: './src/content_script.js',
     options: './src/options/options.jsx',
     sidebar: './src/sidebar-overlay/sidebar.js',

@@ -1,7 +1,6 @@
 import promiseLimit from 'promise-limit'
 import noop from 'lodash/fp/noop'
 
-import searchIndex from 'src/search'
 import ItemProcessor from './item-processor'
 
 class ImportProgressManager {
@@ -176,9 +175,6 @@ class ImportProgressManager {
         // Run processors' cancal methods to stop running async logic, then wipe references
         this.processors.forEach(proc => proc != null && proc.cancel())
         this.processors = []
-
-        // Ensure index queue is cleared so queued up item's indexing doesn't happen
-        searchIndex.queue.clear()
     }
 }
 

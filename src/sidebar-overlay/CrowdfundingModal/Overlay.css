@@ -1,0 +1,110 @@
+.popup {
+    padding: 20px;
+    background: #fff;
+    border-radius: 5px;
+    width: 500px;
+    position: relative;
+    transition: all 0.3s ease-in-out;
+    cursor: default;
+    height: 340px;
+    overflow: auto;
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0px 0px 6px 4px #3eb9952b;
+}
+
+.background {
+    background-color: #3eb9951a;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 99999;
+    cursor: pointer;
+
+    &:disabled,
+    &[disabled] {
+        cursor: default;
+    }
+}
+
+.close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 20px;
+    color: #ccc;
+    cursor: pointer;
+    background-image: url('/img/cross_grey.svg');
+    background-size: 15px;
+    display: block;
+    background-repeat: no-repeat;
+    width: 29px;
+    height: 29px;
+    background-position: 6.5px 6.5px;
+    border-radius: 50%;
+
+    &:hover {
+        background-image: url('/img/cross.svg');
+        background-color: #efefef;
+    }
+}
+
+.header {
+    color: #3eb995;
+    font-size: 35px;
+    font-weight: 800;
+    font-style: italic;
+    width: 70%;
+    text-align: center;
+    line-height: 35px;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    margin-top: 15px;
+}
+
+.text {
+    color: #5d697bc4;
+    font-size: 18px;
+    width: 95%;
+    font-family: 'lato';
+    margin-top: 0px;
+    font-weight: 100;
+    text-align: center;
+}
+
+.bolderText {
+    color: #173766;
+    font-size: 18px;
+    width: 75%;
+    margin-top: 0px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.learnMore {
+    background-color: #3eb995;
+    color: white;
+    padding: 7px 20px;
+    border-radius: 3px;
+    border: 2px solid #3eb995;
+    cursor: pointer;
+    font-weight: 500;
+    text-decoration: none;
+    font-size: 15px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+
+    &:hover {
+        background-color: white;
+        color: #3eb995;
+    }
+}

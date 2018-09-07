@@ -1,0 +1,16 @@
+.dragElement {
+    display: none;
+    border: solid 2px #3eb995;
+    border-radius: 10%;
+    font-size: 0.9em;
+    padding: 5px;
+    max-height: 50px;
+    max-width: 300px;
+    text-align: center;
+    font-weight: 500;
+    background: #3eb995;
+    color: #fff;
+    opacity: 1;
+    position: absolute;
+    top: -90vh;
+}

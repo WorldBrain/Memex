@@ -1,0 +1,115 @@
+.mainContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    @media (max-width: 950px) {
+        flex-direction: row;
+    }
+
+    @media (max-width: 1100px) {
+        flex-direction: row;
+    }
+}
+
+.introImage {
+    width: 400px;
+    max-width: 100%;
+    height: auto;
+}
+
+.messageContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    flex: 1;
+    margin-right: 30px;
+}
+
+.heading {
+    color: #3eb995;
+    font-size: 42px;
+    font-weight: 800;
+    font-style: italic;
+    line-height: 30px;
+}
+
+.subheading {
+    font-size: 30px;
+    margin-top: 20px;
+    color: #3eb995;
+}
+
+.or {
+    margin: 80px 0;
+    position: relative;
+    left: 17%;
+    color: #3eb995;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.or::before {
+    content: '';
+    width: 15%;
+    border-bottom: solid 2px #000;
+    position: absolute;
+    top: 50%;
+    left: -17%;
+    z-index: 1;
+}
+
+.or::after {
+    content: '';
+    width: 15%;
+    border-bottom: solid 2px #000;
+    position: absolute;
+    left: 42px;
+    top: 50%;
+    z-index: 1;
+}
+
+.letsGoBtn {
+    display: none;
+}
+
+.startBtn:hover .getStatedBtn {
+    display: none;
+}
+
+.startBtn:hover .letsGoBtn {
+    display: block;
+}
+
+.choiceBtn {
+    padding: 6px 0;
+    margin-top: 10px;
+    border-radius: 2px;
+    font-weight: 400;
+    color: #fff;
+    cursor: pointer;
+    background-color: #3eb995;
+    text-decoration: none;
+    border: 2px solid #3eb995;
+    font-size: 24px;
+    text-align: center;
+    width: 190px;
+
+    &:hover,
+    &:active {
+        background-color: #fff;
+        color: #3eb995;
+        border: 2px solid #3eb995;
+    }
+}
+
+.startBtn {
+    color: #fff;
+
+    &:hover,
+    &:active {
+        background-color: #fff;
+        color: #3eb995;
+    }
+}

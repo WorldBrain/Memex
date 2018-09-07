@@ -1,4 +1,4 @@
-import { FeatureStorage } from '../../search/search-index-new/storage'
+import { FeatureStorage } from '../../search/storage'
 
 export default class NotificationStorage extends FeatureStorage {
     constructor(storageManager) {

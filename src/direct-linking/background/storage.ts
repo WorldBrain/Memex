@@ -1,12 +1,8 @@
 import { browser, Tabs, Storage } from 'webextension-polyfill-ts'
 
-import { createPageFromTab } from '../../search/search-index-new'
-import {
-    FeatureStorage,
-    ManageableStorage,
-} from '../../search/search-index-new/storage'
+import { createPageFromTab, Tag } from '../../search'
+import { FeatureStorage, ManageableStorage } from '../../search/storage'
 import { STORAGE_KEYS as IDXING_PREF_KEYS } from '../../options/settings/constants'
-import { Tag } from '../../search/search-index-new/models'
 
 export const DIRECTLINK_TABLE = 'directLinks'
 export const ANNOTATION_TABLE = 'annotations'
@@ -194,6 +190,12 @@ export class AnnotationStorage extends FeatureStorage {
         await page.save()
     }
 
+    async getAnnotationByPk(url: string) {
+        return this.storageManager.findObject(ANNOTATION_TABLE, {
+            url,
+        })
+    }
+
     async getAnnotationsByUrl(pageUrl: string) {
         return this.storageManager.findAll(ANNOTATION_TABLE, {
             pageUrl,
@@ -265,11 +267,16 @@ export class AnnotationStorage extends FeatureStorage {
     }
 
     modifyTags = (shouldAdd: boolean) => async (name: string, url: string) => {
-        const tag = new Tag({ name, url })
         if (shouldAdd) {
-            tag.save()
+            this.storageManager.putObject(TAGS_TABLE, {
+                name,
+                url,
+            })
         } else {
-            tag.delete()
+            this.storageManager.deleteObject(TAGS_TABLE, {
+                name,
+                url,
+            })
         }
     }
 }

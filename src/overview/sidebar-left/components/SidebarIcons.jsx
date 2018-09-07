@@ -81,9 +81,9 @@ class SidebarIcons extends PureComponent {
                 </div>
                 <InfoTooltip
                     showTooltip={this.state.showCollTooltip}
-                    content="My collections"
+                    content="My Collections"
                 >
-                    My collections
+                    My Collections
                 </InfoTooltip>
                 <div className={styles.enabled}>
                     <button

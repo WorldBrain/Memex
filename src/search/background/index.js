@@ -1,21 +1,20 @@
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
-import indexInterface from '../'
+import * as index from '..'
 import { tabManager } from '../../activity-logger/background/'
 
 makeRemotelyCallable({
-    addTag: indexInterface.addTag,
-    delTag: indexInterface.delTag,
-    suggest: indexInterface.suggest,
-    extendedSuggest: indexInterface.extendedSuggest,
-    addBookmark: indexInterface.addBookmark,
-    delBookmark: indexInterface.delBookmark,
-    delPages: indexInterface.delPages,
-    delPagesByDomain: indexInterface.delPagesByDomain,
-    delPagesByPattern: indexInterface.delPagesByPattern,
-    getMatchingPageCount: indexInterface.getMatchingPageCount,
-    search: indexInterface.search,
-    pageLookup: url =>
-        indexInterface.getPage(url).then(transformPageForSending),
+    addTag: index.addTag,
+    delTag: index.delTag,
+    suggest: index.suggest,
+    extendedSuggest: index.extendedSuggest,
+    addBookmark: index.addBookmark,
+    delBookmark: index.delBookmark,
+    delPages: index.delPages,
+    delPagesByDomain: index.delPagesByDomain,
+    delPagesByPattern: index.delPagesByPattern,
+    getMatchingPageCount: index.getMatchingPageCount,
+    search: index.search,
+    pageLookup: url => index.getPage(url).then(transformPageForSending),
 })
 
 async function transformPageForSending(page) {
@@ -40,7 +39,7 @@ async function handleBookmarkRemoval(id, { node }) {
         return
     }
 
-    return indexInterface.delBookmark(node).catch(console.error)
+    return index.delBookmark(node).catch(console.error)
 }
 
 async function handleBookmarkCreation(id, node) {
@@ -56,5 +55,5 @@ async function handleBookmarkCreation(id, node) {
         tabId = activeTab.id
     }
 
-    return indexInterface.addBookmark({ url: node.url, tabId })
+    return index.addBookmark({ url: node.url, tabId })
 }

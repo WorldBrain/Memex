@@ -1,0 +1,41 @@
+.dateRangeSelection {
+    display: flex;
+    align-items: center;
+    background-image: url('/img/calendar-icon.png');
+    background-repeat: no-repeat;
+    background-size: 18px;
+    background-position: 27px;
+    padding-left: 50px;
+    padding-right: 40px;
+    width: 45%;
+
+    @media (max-width: 600px) {
+        display: none;
+    }
+}
+
+.datePicker {
+    width: 130px;
+    height: 37px;
+    font-size: 15px;
+    color: #777;
+    border: none;
+    margin: 0 10px;
+    font-family: 'Open Sans';
+    font-weight: lighter;
+    padding-right: 20px;
+
+    &::placeholder {
+        color: #b8b8b8;
+    }
+
+    &:focus {
+        outline: none;
+        border: none;
+    }
+}
+
+.toIcon {
+    width: 5px;
+    height: 8px;
+}

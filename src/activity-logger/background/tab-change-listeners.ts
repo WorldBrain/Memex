@@ -2,7 +2,7 @@ import { browser, Tabs, Storage } from 'webextension-polyfill-ts'
 import noop from 'lodash/noop'
 import debounce from 'lodash/debounce'
 
-import searchIndex from '../../search'
+import * as searchIndex from '../../search'
 import {
     TabEventChecker,
     whenPageDOMLoaded,

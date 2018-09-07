@@ -47,7 +47,7 @@
     }
 
     &:nth-child(odd) {
-        background-color: #fff;
+        background-color: #fbfafa;
     }
 }
 
@@ -72,12 +72,13 @@
     flex-direction: column;
     height: auto;
     justify-content: space-between;
-    background: #fff;
+    background: #fbfafa;
     border-radius: 10px;
 }
 
 .mainContainer {
     position: relative;
+    background-color: #fbfafa;
 }
 
 .loadingBlocker {
@@ -90,7 +91,7 @@
     align-items: center;
     height: 750px;
     width: 830px;
-    background: #fff;
+    background: #fbfafa;
     opacity: 0.8;
 }
 
@@ -105,6 +106,18 @@
     letter-spacing: 1px;
 }
 
+.warningContainer {
+    display: flex;
+    flex-direction: row;
+}
+
+.warningContainerReport {
+    margin-top: 0px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: row;
+}
+
 .stepNumber {
     font-size: 18px;
     color: #3eb995;
@@ -115,8 +128,12 @@
 }
 
 .stepText {
-    font-size: 14px;
-    color: #4d4b4c;
+    font-size: 15px;
+    font-weight: 300;
+    color: #777;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: 10px;
 }
 
 .warning {
@@ -140,6 +157,7 @@
 .icon {
     width: auto;
     height: 20px;
+    margin-bottom: 20px;
 }
 
 .stepImportText {

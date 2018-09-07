@@ -175,15 +175,16 @@ We recommend reading through the [Code Overview](#code-overview) to get an idea 
 
 ### Documenting
 
-If you have made changes to any code or modules please update the corresponding docs **Pull Requests will not be merged otherwise**.
+We try to encourage documententing module exports using JSDoc with TypeScript, and also higher level overviews of different "feature modules" (directories containing multiple modules related to a particular feature) in README markdown modules.
 
-If you are creating a new 'module' (folder in src i.e. src/new_folder/)
-Please add some documentation, See [Doc-Template](./Readme-Template.md)
+If you have made changes to any exports in existing modules, please update the corresponding docs if needed.
+
+If you are creating a new feature module, please add a brief overview in the way of a README in the corresponding directory. 
 
 ### Styling
 
-We are using [prettier](https://github.com/prettier/prettier). With some hooks for eslint.
-This will automatically format all the styling for the code every time a merge request is made. So you can focus on coding and not on styling.
+We are using [prettier](https://github.com/prettier/prettier).
+This will automatically format all the styling for the code every time a commit is made, so you can focus on coding and not on code styling.
 
 # <a id="code-overview" href="#code-overview">Code Overview</a>
 
@@ -200,7 +201,7 @@ A web extension consists of three main parts:
 
 The parts communicate in three ways:
 
--   Messaging through `browser.runtime.sendMessage`, usually done implicitly by using a remote procedure call ([`util/webextensionRPC.js`](../src/util/webextensionRPC.js)).
+-   Messaging through `browser.runtime.sendMessage`, usually done implicitly by using a remote procedure call ([`util/webextensionRPC.js`](./src/util/webextensionRPC.js)).
 -   Bidirectional messaging using `browser.runtime.connect`. We use this to communicate between Overview UI script and background script, and also the deprecated imports UI (via Options UI script) and background script. See [Runtime](https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/runtime) for more info
 -   Through the in-browser PouchDB database, they get to see the same data and can react to changes made by other parts.
 
@@ -214,31 +215,25 @@ This API is available in Chrome/Chromium by default (under `window.chrome`) but 
 
 ## Application Structure
 
-To keep things modular, the source code in [`src/`](../src/) is split into folders which are grouped by functionality. They can almost be thought of as separate libraries and some folders may end up being factored out into their own repos later on.
+To keep things modular, the source code in [`src/`](./src/) is split into "feature modules"/directories which are grouped by functionality. They can almost be thought of as separate libraries and some features may end up being factored out into their own repos later on.
 
-#### **[src/blacklist/](../src/blacklist/)**: blacklist
+#### **[src/blacklist/](./src/blacklist/)**: blacklist
 
 This allows a user to stop and/or delete the index/logging of specific domains or pages they visit.
 
-#### **[src/bookmarks](../src/bookmarks)**: Bookmarks-related logic
-
-Contains all the logic related to handling our data structure for bookmarks, along with background event listeners for handling browser bookmark creation.
-
-#### **[src/common-ui/components](../src/common-ui/components)**: ui elements
+#### **[src/common-ui/components](./src/common-ui/components)**: ui elements
 
 This contains common user interface elements such as the loading indicator.
 
-#### **[src/dev/](../src/dev/)**: development tools
+#### **[src/dev/](./src/dev/)**: development tools
 
 Tools to help during development. They are not used in production builds.
 
-#### **[src/imports/](../src/imports/)**: browser history import
+#### **[src/imports/](./src/imports/)**: browser history import
 
 This allows users to import their whole browser history, however, due to slow speeds and multiple setbacks it has been deprecated and may only be kept on as a dev tool to import test docs.
 
-Instead of using a browser this module is set to move to a native Desktop Application see [roadmap](https://trello.com/b/mdqEuBjb) for more details
-
-#### **[src/options](../src/options/)**: the settings page
+#### **[src/options](./src/options/)**: the settings page
 
 This shows the settings page of the extension which includes (for the time being)
 
@@ -247,13 +242,13 @@ This shows the settings page of the extension which includes (for the time being
 -   Privacy
 -   Help Me Please
 
-#### **[src/overview/](../src/overview/)**: overview
+#### **[src/overview/](./src/overview/)**: overview
 
 The `overview` is a user interface that opens in its own tab. It shows a 'facebook newsfeed' like page that lists random pages you have visited. It also provides tools for more advanced search options and a complete search overview with screenshots. It is built with [React](https://facebook.github.io/react/) and [Redux](http://redux.js.org/).
 
-See [The Docs](../src/overview/Readme.md) for more details.
+See [The Docs](./src/overview/Readme.md) for more details.
 
-#### **[src/page-analysis](../src/page-analysis/)**: page analysis
+#### **[src/page-analysis](./src/page-analysis/)**: page analysis
 
 This extracts and stores information about the page in a given tab, such as:
 
@@ -262,15 +257,9 @@ This extracts and stores information about the page in a given tab, such as:
 -   Metadata, such as its author, publication date, etc...
 -   A screenshot for visual recognition.
 
-See [The Docs](../src/page-analysis/Readme.md) for more details.
+See [The Docs](./src/page-analysis/Readme.md) for more details.
 
-#### **[src/page-storage](../src/page-storage/)**: document search
-
-This runs through each page to store and makes sure there isn't a duplicate and prepares it for use in our data model
-
-See [The Docs](../src/page-storage/Readme.md) for more details.
-
-#### **[src/popup](../src/popup/)**: extension popup
+#### **[src/popup](./src/popup/)**: extension popup
 
 The `popup` is a mini UI that pops up when you click on the worldbrain. It contains
 
@@ -279,37 +268,37 @@ The `popup` is a mini UI that pops up when you click on the worldbrain. It conta
 -   settings
 -   feedback
 
-See [The Docs](../src/popup/Readme.md) for more details.
+See [The Docs](./src/popup/Readme.md) for more details.
 
-#### **[src/search](../src/search/)**: document search
+#### **[src/search](./src/search/)**: document search
 
 This provides a **Full-Text-Search** through all the web pages a user visits.
 
-See [The Docs](../src/search/Readme.md) for more details.
+See [The Docs](./src/search/Readme.md) for more details.
 
-#### **[src/util/](../src/util)**: utilities
+#### **[src/util/](./src/util)**: utilities
 
 Contains small generic things, stuff that is not project-specific. Things that
-could perhaps be packaged and published as an NPM module some day.
-See [The Docs](../src/util/Readme.md) for more details.
+could perhaps be packaged and published as an NPM package some day.
+See [The Docs](./src/util/Readme.md) for more details.
 
-#### **[src/background.js](../src/background.js)**: WebExtension background script
+#### **[src/background.ts](./src/background.ts)**: WebExtension background script
 
 This provides a wrapper for all the process run in the background which sits in an empty tab listening for events.
 
 See [A brief overview of web extensions](#AbriefoverviewofWebExtensions) for more details.
 
-#### **[src/content_script.js](../src/content-script.js)**: A Part of Web Extensions
+#### **[src/content_script.js](./src/content_script.js)**: A Part of Web Extensions
 
 This just wraps the content scripts of activity-logger and page analysis for use as a [Web Extension](#AbriefoverviewofWebExtensions).
 
-#### **[src/omnibar.js](../src/omnibar.js)**: Search-Bar Controls
+#### **[src/omnibar.js](./src/omnibar.js)**: Search-Bar Controls
 
 Allows a user to type `w` + `space_bar` to search through worldbrain without leaving the search bar.
 
 See [Mozilla Omnibox Docs](https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/omnibox) for more details
 
-#### **[src/pouchdb.js](../src/omnibar.js)**: Our Persistent Browser Database
+#### **[src/pouchdb.js](./src/omnibar.js)**: Our Persistent Browser Database
 
 This initializes the user database using [PouchDB](https://pouchdb.com/)
 

@@ -60,6 +60,7 @@ class FilteredRow extends PureComponent {
                     </div>
                     {this.props.isExclusive && (
                         <button
+                            title={'Results from this domain excluded'}
                             className={cx(styles.exclusion, styles.button)}
                         />
                     )}

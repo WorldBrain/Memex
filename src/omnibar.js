@@ -7,11 +7,11 @@ import moment from 'moment'
 import analytics from 'src/analytics'
 import internalAnalytics from 'src/analytics/internal'
 import shortUrl from 'src/util/short-url'
-import searchIndex from 'src/search'
+import * as searchIndex from 'src/search'
 import extractTimeFiltersFromQuery, {
     queryFiltersDisplay,
 } from 'src/util/nlp-time-filter'
-import { OVERVIEW_URL } from 'src/background'
+import { OVERVIEW_URL } from './constants'
 
 // Read which browser we are running in.
 let browserName

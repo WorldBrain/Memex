@@ -2,38 +2,65 @@ import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 
+import { remoteFunction } from '../../util/webextensionRPC'
+
 import { ToggleSwitch } from 'src/common-ui/components'
 import * as selectors from './selectors'
 import * as actions from './actions'
-import Importer from './components/Importer'
-import ImportMsg from './components/ImportMsg'
 import Overlay from './components/Overlay'
-import Info from './components/Info'
 import OptIn from './components/OptIn'
+import OnboardingMsg from './components/OnboardingMsg'
+import FeaturesInfo from './components/FeaturesInfo'
+import FeatureInfo from './components/FeatureInfo'
+import { FEATURES_INFO } from './constants'
 
 class OnboardingContainer extends PureComponent {
     static propTypes = {
         showCancelBtn: PropTypes.bool.isRequired,
-        isImportsDone: PropTypes.bool.isRequired,
+        // isImportsDone: PropTypes.bool.isRequired,
         isVisible: PropTypes.bool.isRequired,
         shouldTrack: PropTypes.bool.isRequired,
         toggleShouldTrack: PropTypes.func.isRequired,
-        setVisible: PropTypes.func.isRequired,
-        initConnection: PropTypes.func.isRequired,
+        hideOnboarding: PropTypes.func.isRequired,
+        init: PropTypes.func.isRequired,
+        tabs: PropTypes.object,
     }
 
-    constructor(props) {
-        super(props)
-
-        // Init the connection to imports module in BG script
-        this._importsConnMan = this.props.initConnection()
+    static defaultProps = {
+        tabs: browser.tabs,
     }
 
-    cancelImport = () => this._importsConnMan.cancel()
+    componentDidMount() {
+        this.props.init()
+    }
 
-    handleClose = event => {
-        this.cancelImport()
-        this.props.setVisible(false)()
+    processEventRPC = remoteFunction('processEvent')
+
+    openNewUrl = url => () => {
+        this.processEventRPC({ type: 'openURLFeature' })
+        this.props.tabs.create({ url })
+    }
+
+    renderFeaturesInfo = () => {
+        return FEATURES_INFO.map((feature, index) => (
+            <FeatureInfo
+                key={index}
+                heading={feature.heading}
+                subheading={feature.subheading}
+                handleClick={this.openNewUrl(feature.url)}
+            />
+        ))
+    }
+
+    renderOptIn = () => {
+        return (
+            <OptIn>
+                <ToggleSwitch
+                    isChecked={this.props.shouldTrack}
+                    onChange={this.props.toggleShouldTrack}
+                />
+            </OptIn>
+        )
     }
 
     render() {
@@ -43,23 +70,13 @@ class OnboardingContainer extends PureComponent {
 
         return (
             <Overlay
-                onClose={this.handleClose}
+                onClose={this.props.hideOnboarding}
                 showCloseBtn={this.props.showCancelBtn}
             >
-                <Importer {...this.props}>
-                    <ImportMsg
-                        isImportsDone={this.props.isImportsDone}
-                        onCancel={this.cancelImport}
-                        onFinish={this.props.setVisible(false)}
-                    />
-                </Importer>
-                <Info />
-                <OptIn>
-                    <ToggleSwitch
-                        isChecked={this.props.shouldTrack}
-                        onChange={this.props.toggleShouldTrack}
-                    />
-                </OptIn>
+                <OnboardingMsg onFinish={this.props.hideOnboarding} />
+                <FeaturesInfo optInManager={this.renderOptIn()}>
+                    {this.renderFeaturesInfo()}
+                </FeaturesInfo>
             </Overlay>
         )
     }
@@ -74,8 +91,8 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-    setVisible: flag => () => dispatch(actions.setVisible(flag)),
-    initConnection: () => dispatch(actions.init()),
+    hideOnboarding: () => dispatch(actions.hideOnboarding()),
+    init: () => dispatch(actions.init()),
     toggleShouldTrack: () => dispatch(actions.toggleShouldTrack()),
 })
 

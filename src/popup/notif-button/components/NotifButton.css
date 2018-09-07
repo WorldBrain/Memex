@@ -1,0 +1,6 @@
+.notification {
+    background-image: url('/img/notification.svg');
+    background-repeat: no-repeat;
+    background-size: 20px;
+    margin-top: 0px;
+}

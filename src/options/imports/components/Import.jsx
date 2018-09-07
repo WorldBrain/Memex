@@ -30,8 +30,9 @@ const Import = ({
                     <p className={localStyles.stepImportText}>
                         If you want, you can also make your existing browsing
                         history and bookmarks available for full-text search.
-                        <br />Even without doing that, you still can search
-                        everything you visit after installing the tool.
+                        <br />
+                        Even without doing that, you still can search everything
+                        you visit after installing the tool.
                     </p>
                     <Warning>
                         Re-downloading so many urls may slow down your regular
@@ -45,13 +46,19 @@ const Import = ({
                 <div className={localStyles.stepNumber}>
                     Step 2/3: Download Progress{' '}
                 </div>
-                <div className={localStyles.stepText}>
-                    <img
-                        src="/img/caution.png"
-                        className={localStyles.icon}
-                    />{' '}
-                    If you leave this page, your import will paused. You can
-                    always come back and resume where you left off.
+                <div className={localStyles.warningContainer}>
+                    <img src="/img/caution.png" className={localStyles.icon} />{' '}
+                    <p className={localStyles.stepText}>
+                        Your import may ocassionally freeze or crash. No need to
+                        worry. Go to{' '}
+                        <a
+                            target="_blank"
+                            href="http://memex.link/2Jw-R3BQh/worldbrain.helprace.com/i49-prevent-your-imports-from-stopping-midway"
+                        >
+                            <b>worldbrain.io/import_bug</b>
+                        </a>{' '}
+                        to fix it.
+                    </p>
                 </div>
             </div>
         )}

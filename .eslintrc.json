@@ -20,6 +20,11 @@
             "jsx": true
         }
     },
+    "settings": {
+        "react": {
+            "version": "16.4"
+        }
+    },
     "rules": {
         "camelcase": "error",
         "comma-dangle": ["error", "always-multiline"],

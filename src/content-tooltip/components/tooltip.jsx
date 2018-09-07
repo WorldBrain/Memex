@@ -34,7 +34,13 @@ const Tooltip = ({
 
         <span className={styles.buttons}>
             <a onClick={closeTooltip} className={styles.smallButton}>
-                <img className={styles.imgCross} src={images.cross} />
+                <img
+                    className={styles.imgCross}
+                    src={images.cross}
+                    title={
+                        'Close once. Disable via Memex icon in the extension toolbar.'
+                    }
+                />
             </a>
             <a onClick={openSettings} className={styles.smallButton}>
                 <img className={styles.imgSettings} src={images.settings} />

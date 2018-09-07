@@ -25,6 +25,11 @@ export const PAGE_3 = {
 }
 export const PAGE_4 = { ...PAGE_3, url: 'https://test.com/tmp' }
 
+export const PAGE_ID_1 = 'lorem.com/test2'
+export const PAGE_ID_2 = 'sub.lorem.com/test1'
+export const PAGE_ID_3 = 'test.com/test'
+export const PAGE_ID_4 = 'test.com/tmp'
+
 // single coloured pixel via http://png-pixel.com/
 export const FAV_1 =
     'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='

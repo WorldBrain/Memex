@@ -1,5 +1,5 @@
 import normalizeUrl from 'src/util/encode-url-for-id'
-import searchIndex from 'src/search'
+import * as searchIndex from 'src/search'
 import { checkWithBlacklist } from 'src/blacklist/background/interface'
 import { isLoggable } from 'src/activity-logger'
 import { IMPORT_TYPE as TYPE } from 'src/options/imports/constants'
@@ -32,9 +32,9 @@ const deriveImportItem = type => item => ({
 
 /**
  * @typedef {Object} ItemCreatorParams
- * @property {ItemLimits} limits
+ * @property {ItemLimits} [limits]
  * @property {DataSources} dataSources
- * @property {() => Promise<any>} existingKeySource Resolves to `histKeys` and `bmKeys` `Set<string>`s containing
+ * @property {() => Promise<any>} [existingKeySource] Resolves to `histKeys` and `bmKeys` `Set<string>`s containing
  *  all existing history and bookmark keys to compare incoming URLs against.
  */
 
@@ -96,13 +96,13 @@ export default class ImportItemCreator {
     }
 
     /**
-    *
-    * Performs all needed filtering on a collection of history or bookmarks
-    *
-    * @param {(item: any) => any} [transform=noop] Opt. transformformation fn turning current iterm into import item structure.
-    * @param {(url: string) => bool} [alreadyExists] Opt. checker function to check against existing data.
-    * @return {(items: BrowserItem[]) => Map<string, any>} Function that filters array of browser items into a Map of encoded URL strings to import items.
-    */
+     *
+     * Performs all needed filtering on a collection of history or bookmarks
+     *
+     * @param {(item: any) => any} [transform=noop] Opt. transformformation fn turning current iterm into import item structure.
+     * @param {(url: string) => bool} [alreadyExists] Opt. checker function to check against existing data.
+     * @return {(items: BrowserItem[]) => Map<string, any>} Function that filters array of browser items into a Map of encoded URL strings to import items.
+     */
     _filterItemsByUrl = (transform, existsSet) => items => {
         const importItems = new Map()
 

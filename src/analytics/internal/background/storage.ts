@@ -1,4 +1,4 @@
-import { FeatureStorage } from '../../../search/search-index-new/storage'
+import { FeatureStorage } from '../../../search/storage'
 import { NOTIF_TYPE_EVENT_IDS, EVENT_TYPES } from '../constants'
 
 export default class EventLogStorage extends FeatureStorage {

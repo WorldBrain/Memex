@@ -49,64 +49,30 @@
     }
 }
 
-.choiceBtn {
-    padding: 6px 1.6em;
-    border-radius: 25px;
-    font-weight: 300;
-    border: 1px solid #3eb995;
-    color: #3eb995;
-    cursor: pointer;
-    height: 35px;
-    margin-left: 12px;
-    margin-right: 12px;
-    text-decoration: none;
-    font-size: 1rem;
-
-    &:hover,
-    &:active {
-        background-color: #3eb995;
-        color: #fff;
-    }
-}
-
-.startBtn {
-    background-color: #3eb995;
-    color: #fff;
-
-    &:hover,
-    &:active {
-        background-color: #fff;
-        color: #3eb995;
-    }
-}
-
-.optInTextContainer {
-    display: flex;
-    flex-direction: column;
-    width: 110%;
-    margin-left: 1%;
-}
-
-.optInContainer {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    margin: 0 7.5em;
-    margin-top: 15px;
-    margin-bottom: 15px;
-}
-
 .popup {
-    padding: 20px;
-    background: #fff;
+    padding: 60px 60px;
+    background: #f9fffd;
     border-radius: 5px;
-    width: 900px;
+    width: 1100px;
     position: relative;
-    transition: all 1s ease-in-out;
+    transition: all 0.3s ease-in-out;
     cursor: default;
     max-height: 90%;
     overflow: auto;
-    max-width: 800px;
+    max-width: 1100px;
+    display: flex;
+    flex-direction: row;
+
+    @media (max-width: 1200px) {
+        max-width: 90%;
+        padding: 60px 40px;
+    }
+
+    @media (max-width: 768px) {
+        max-width: 100%;
+        max-height: 100%;
+        padding: 60px 40px;
+    }
 }
 
 .closeBtn {
@@ -149,26 +115,6 @@
     & > p {
         font-size: 18px;
     }
-}
-
-.optIn {
-    font-size: 20px;
-    font-weight: 200;
-    color: #777;
-    text-align: center;
-    text-align: left;
-    margin-top: 0;
-    margin-bottom: 0;
-}
-
-.subOptIn {
-    font-size: 15px;
-    font-weight: 200;
-    color: #777;
-    line-height: 1em;
-    margin-bottom: 5px;
-    margin-top: 5px;
-    text-align: left;
 }
 
 .logobig {

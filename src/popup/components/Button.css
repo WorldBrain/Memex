@@ -51,35 +51,6 @@
     }
 }
 
-.itemBlacklisted {
-    &:hover {
-        color: rgb(193, 146, 146);
-
-        & > .itemBtnBlacklisted {
-            background-image: url('/img/blacklist_red.svg');
-        }
-    }
-}
-
-.itemBtnBlacklisted {
-    background-image: url('/img/blacklist.svg');
-    background-repeat: no-repeat;
-    background-size: 20px;
-}
-
-.itemDropdown {
-    &:hover,
-    &:focus {
-        background: none;
-        color: rgb(59, 59, 59);
-    }
-}
-
-.dropdown {
-    margin: 0 5px;
-    cursor: pointer;
-}
-
 .clickableIcon {
     cursor: pointer;
     color: rgb(62, 185, 149);
@@ -145,39 +116,8 @@
     outline: 0;
 }
 
-.bmk {
-    background: url('/img/star_full.svg');
-    background-repeat: no-repeat;
-    background-size: 20px;
-}
-
-.notBmk {
-    background-image: url('/img/star_empty.svg');
-    background-repeat: no-repeat;
-    background-size: 20px;
-}
-
-.tag {
-    background-image: url('/img/tag.svg');
-    background-repeat: no-repeat;
-    background-size: 20px;
-}
-
-.blacklist {
-    background-image: url('/img/blacklist_green.svg');
-    background-repeat: no-repeat;
-    background-size: 20px;
-}
-
 .settings {
     background-image: url('/img/settings.svg');
-    background-repeat: no-repeat;
-    background-size: 20px;
-    margin-top: 0px;
-}
-
-.notification {
-    background-image: url('/img/notification.svg');
     background-repeat: no-repeat;
     background-size: 20px;
     margin-top: 0px;
@@ -194,20 +134,6 @@
     background-size: 22px;
 }
 
-.pauseIcon {
-    background-image: url('/img/pause.svg');
-    background-repeat: no-repeat;
-    background-size: 20px;
-    cursor: pointer;
-}
-
-.playIcon {
-    background-image: url('/img/play.svg');
-    background-repeat: no-repeat;
-    background-size: 20px;
-    cursor: pointer;
-}
-
 .voteIcon {
     background-image: url('/img/vote.svg');
     background-repeat: no-repeat;
@@ -221,13 +147,13 @@
     float: left;
 }
 
-.addToList {
-    background-image: url('/img/list_popup.svg');
+.searchIcon {
+    background-image: url('/img/search.svg');
     background-repeat: no-repeat;
     background-size: 20px;
 }
 
-.notificationBadge {
+.badge {
     background-color: #c12908;
     color: white;
     width: 20px;

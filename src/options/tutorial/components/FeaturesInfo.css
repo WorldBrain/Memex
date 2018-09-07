@@ -1,0 +1,15 @@
+.mainContainer {
+    margin-left: 10px;
+}
+
+.heading {
+    margin: 20px 0;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.featureContainer {
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 0 10px 4px rgba(119, 119, 119, 0.10196);
+}
