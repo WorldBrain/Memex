@@ -63,7 +63,7 @@ export const NOTIFS: NotifDefinition[] = [
         search: {
             title: 'NEW: Crowdfunding Memex',
             message:
-                'Back your favorite features with 10-20 bucks and earn rewards to get free premium upgrades.',
+                'Support the development of your favorite features with and get free premium upgrades.',
             buttons: [
                 {
                     action: {
@@ -78,7 +78,7 @@ export const NOTIFS: NotifDefinition[] = [
         overview: {
             title: 'NEW: Crowdfunding Memex',
             message:
-                'Back your favorite features with 10-20 bucks and earn rewards to get free premium upgrades.',
+                'Support the development of your favorite features with and get free premium upgrades.',
             buttons: [
                 {
                     action: {
