@@ -10,21 +10,18 @@ class InitResultsMessage extends PureComponent {
         return (
             <ResultsMessage>
                 <div className={styles.title}>
-                    You didn't visit or{' '}
-                    <Link style={{ color: '#777' }} to="/import">
-                        import
-                    </Link>
-                    <br />
-                    any websites yet.
-                </div>
-                <div>
-                    <Link
-                        className={styles.choiceBtn}
-                        type="button"
-                        to="/import"
-                    >
-                        Import History & Bookmarks
-                    </Link>
+                    Nothing to search yet. <br />
+                    <div className={styles.subTitle}>
+                        <a
+                            target="_blank"
+                            href="http://memex.link/S1zVMgKzX/en.wikipedia.org/wiki/Memex"
+                        >
+                            Visit
+                        </a>{' '}
+                        a website, <a href="/options.html#/import">import</a>{' '}
+                        your existing history or{' '}
+                        <a href="/options.html#/tutorial">read</a> the tutorial.
+                    </div>
                 </div>
             </ResultsMessage>
         )

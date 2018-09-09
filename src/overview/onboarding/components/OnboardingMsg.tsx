@@ -16,15 +16,15 @@ class OnboardingMsg extends PureComponent<Props> {
                     src={'/img/memex_beta_logo.png'}
                 />
                 <div className={styles.subheading}>
-                    Explore your new abilities.
+                    <b>Organise</b>, <b>Navigate</b> and <b>Share</b> your
+                    personal web of knowledge.
                 </div>
-                <div className={styles.or}>OR</div>
                 <a
                     className={cx(styles.choiceBtn, styles.startBtn)}
                     type="button"
                     onClick={this.props.onFinish}
                 >
-                    <div className={styles.getStatedBtn}> GET STARTED </div>
+                    <div className={styles.getStatedBtn}> Skip Tutorial </div>
                     <div className={styles.letsGoBtn}> LET'S GOOO! </div>
                 </a>
             </div>

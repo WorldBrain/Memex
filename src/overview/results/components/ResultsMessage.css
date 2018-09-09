@@ -46,11 +46,16 @@
 }
 
 .subTitle {
-    font-size: 25px !important; /* stylelint-disable-line declaration-no-important */
+    font-size: 20px !important; /* stylelint-disable-line declaration-no-important */
     font-weight: 300 !important; /* stylelint-disable-line declaration-no-important */
     text-decoration: none;
     margin-bottom: 40px;
     margin-top: 10px;
+    line-height: 35px;
+}
+
+.subTitle a {
+    color: #173766;
 }
 
 .title {

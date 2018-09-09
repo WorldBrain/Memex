@@ -63,13 +63,13 @@ async function makeSuggestion(query, suggest) {
 
     // Show no suggestions if there is no query.
     if (query.trim() === '') {
-        setOmniboxMessage('Type to search your memory.')
+        setOmniboxMessage('Enter keywords or start with # to filter by tags')
         suggest([])
         latestResolvedQuery = query
         return
     }
 
-    setOmniboxMessage('Searching your memory.. (press enter to search deeper)')
+    setOmniboxMessage('Searching...(press enter to search in Dashboard)')
 
     const queryForOldSuggestions = latestResolvedQuery
 
@@ -108,7 +108,7 @@ async function makeSuggestion(query, suggest) {
 
     if (searchResults.isBadTerm === true) {
         setOmniboxMessage(
-            'Your search terms are very vague, please try and use more unique language',
+            'Your search terms are very vague, please try and use more unique ones',
         )
     } else if (searchResults.requiresMigration) {
         setOmniboxMessage(
@@ -120,7 +120,7 @@ async function makeSuggestion(query, suggest) {
         setOmniboxMessage(
             `Found these ${
                 searchResults.totalCount
-            } pages in your memory: (press enter to see all results)`,
+            } pages: (press enter for all results)`,
         )
     }
 
