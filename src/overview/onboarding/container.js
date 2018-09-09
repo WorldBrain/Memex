@@ -14,6 +14,8 @@ import FeaturesInfo from './components/FeaturesInfo'
 import FeatureInfo from './components/FeatureInfo'
 import { FEATURES_INFO } from './constants'
 
+const styles = require('./components/Onboarding.css')
+
 class OnboardingContainer extends PureComponent {
     static propTypes = {
         showCancelBtn: PropTypes.bool.isRequired,
@@ -74,9 +76,14 @@ class OnboardingContainer extends PureComponent {
                 showCloseBtn={this.props.showCancelBtn}
             >
                 <OnboardingMsg onFinish={this.props.hideOnboarding} />
-                <FeaturesInfo optInManager={this.renderOptIn()}>
-                    {this.renderFeaturesInfo()}
-                </FeaturesInfo>
+                <div>
+                    <div className={styles.tutorialTitle}>
+                        Explore what you can do
+                    </div>
+                    <FeaturesInfo optInManager={this.renderOptIn()}>
+                        {this.renderFeaturesInfo()}
+                    </FeaturesInfo>
+                </div>
             </Overlay>
         )
     }

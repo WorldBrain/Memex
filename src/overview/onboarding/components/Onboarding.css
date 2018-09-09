@@ -169,3 +169,9 @@ p {
     margin-right: -10px;
     margin-bottom: -10px;
 }
+
+.tutorialTitle {
+    font-size: 25px;
+    padding-bottom: 20px;
+    color: #3eb995;
+}

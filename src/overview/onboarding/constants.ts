@@ -9,29 +9,23 @@ export const STORAGE_KEYS = {
 
 export const FEATURES_INFO: FeatureInfo[] = [
     {
-        heading: 'Add Web Annotation & Comments',
-        subheading: 'Add notes to websites and highlighted text in them.',
+        heading: 'Add notes to websites',
+        subheading: 'Comment on, highlight and annotate your web',
         url: 'https://worldbrain.io/onboarding-annotations',
     },
     {
-        heading: 'Powersearch your Browser History',
-        subheading: 'Find past websites even if you only remember a few words.',
+        heading: 'Full-Text Search your History ',
+        subheading: 'And filter by time, domain, tags or bookmarks',
         url: 'https://worldbrain.io/onboarding-search',
     },
     {
-        heading: 'Linking to paragraphs.',
-        subheading:
-            'Show anyone specific pieces of text in any website via a url.',
+        heading: 'Share URLs to highlighted text',
+        subheading: 'Show others specific pieces of text in any website',
         url: 'https://worldbrain.io/onboarding-memex-link',
     },
     {
-        heading: 'Bookmarks & Tags',
-        subheading: "Favorite & tag pages, and sync your browser's bookmarks.",
-        url: 'https://worldbrain.io/onboarding-bookmarks',
-    },
-    {
-        heading: 'Collections',
-        subheading: 'Sort websites in useful lists',
+        heading: 'Flexibly organise',
+        subheading: 'Bookmark, tag & and sort websites into lists',
         url: 'https://worldbrain.io/onboarding-collections',
     },
 ]

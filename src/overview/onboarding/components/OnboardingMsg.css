@@ -25,6 +25,7 @@
     justify-content: flex-start;
     flex: 1;
     margin-right: 30px;
+    min-width: 25%;
 }
 
 .heading {
@@ -36,9 +37,10 @@
 }
 
 .subheading {
-    font-size: 30px;
+    font-size: 25px;
     margin-top: 20px;
-    color: #3eb995;
+    color: #173766;
+    margin-right: 30px;
 }
 
 .or {
@@ -84,28 +86,28 @@
 
 .choiceBtn {
     padding: 6px 0;
-    margin-top: 10px;
+    margin-top: 50px;
     border-radius: 2px;
     font-weight: 400;
-    color: #fff;
+    color: #173766;
     cursor: pointer;
-    background-color: #3eb995;
     text-decoration: none;
-    border: 2px solid #3eb995;
-    font-size: 24px;
-    text-align: center;
+    font-size: 20px;
     width: 190px;
+    vertical-align: bottom;
+    text-align: left;
+    display: flex;
+    position: absolute;
+    bottom: 50px;
 
-    &:hover,
-    &:active {
+    &:hover {
         background-color: #fff;
         color: #3eb995;
-        border: 2px solid #3eb995;
     }
 }
 
 .startBtn {
-    color: #fff;
+    color: #173766;
 
     &:hover,
     &:active {

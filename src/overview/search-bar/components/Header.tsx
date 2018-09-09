@@ -34,7 +34,7 @@ export interface Props {
 
 class Header extends PureComponent<Props> {
     static defaultProps = {
-        searchPlaceholder: 'Search your memory; use # to filter by tag',
+        searchPlaceholder: 'Enter keywords or start with # to filter by tag',
         pricingUrl: 'https://worldbrain.io/pricing',
         settingsIconUrl: '/img/settings-icon.png',
         settingsRoute: '/settings',

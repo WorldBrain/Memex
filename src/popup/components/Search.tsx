@@ -16,7 +16,7 @@ class Search extends PureComponent<Props> {
                     autoFocus
                     className={styles.search}
                     name="query"
-                    placeholder="Search your memory"
+                    placeholder="Enter keywords"
                     autoComplete="off"
                     onKeyDown={this.props.onSearchEnter}
                     onChange={this.props.onSearchChange}
