@@ -1,6 +1,6 @@
 import Dexie from 'dexie'
 
-import db from '..'
+import db, { Storage } from '..'
 import { Tag, Page } from '../models'
 
 type SuggestType = 'domain' | 'tag'
@@ -11,6 +11,7 @@ export async function suggest(query = '', type: SuggestType, limit = 10) {
             .startsWith(query)
             .limit(limit)
             .uniqueKeys()
+            .catch(Storage.initErrHandler([] as T[]))
 
     switch (type) {
         case 'domain': {
@@ -39,6 +40,7 @@ export async function extendedSuggest(
             .noneOf(notInclude)
             .limit(limit)
             .uniqueKeys()
+            .catch(Storage.initErrHandler([] as T[]))
 
     switch (type) {
         case 'domain': {

@@ -1,3 +1,4 @@
+import { Storage } from '.'
 import { createPageViaBmTagActs } from './on-demand-indexing'
 import { getPage } from './util'
 
@@ -26,7 +27,7 @@ const modifyTag = (shouldAdd: boolean) =>
             page.delTag(tag)
         }
 
-        await page.save()
+        await page.save().catch(Storage.initErrHandler())
     }
 
 export const delTag = modifyTag(false)

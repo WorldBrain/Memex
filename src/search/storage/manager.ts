@@ -1,3 +1,4 @@
+import Dexie from 'dexie'
 import { extractTerms } from '../pipeline'
 import Storage from '.'
 import StorageRegistry from './registry'
@@ -155,7 +156,9 @@ export class StorageManager implements ManageableStorage {
         const collection = this.registry.collections[collectionName]
         StorageManager._processFieldsForWrites(collection, object)
 
-        return this._storage[collectionName].put(object)
+        return this._storage[collectionName]
+            .put(object)
+            .catch(Storage.initErrHandler())
     }
 
     /**
@@ -172,7 +175,7 @@ export class StorageManager implements ManageableStorage {
         await this._initializationPromise
 
         const coll = this._find<T>(collectionName, filter, findOpts)
-        const doc = await coll.first()
+        const doc = await coll.first().catch(Storage.initErrHandler())
 
         if (doc != null) {
             const collection = this.registry.collections[collectionName]
@@ -196,7 +199,10 @@ export class StorageManager implements ManageableStorage {
         await this._initializationPromise
 
         const coll = this._find<T>(collectionName, filter, findOpts)
-        const docs = await coll.toArray()
+
+        const docs = await coll
+            .toArray()
+            .catch(Storage.initErrHandler([] as T[]))
 
         const collection = this.registry.collections[collectionName]
         docs.forEach(doc =>
@@ -250,8 +256,12 @@ export class StorageManager implements ManageableStorage {
             coll = coll.reverse()
         }
 
-        const suggestions = (await coll.uniqueKeys()) as string[]
-        const pks = findOpts.suggestPks ? await coll.primaryKeys() : []
+        const suggestions = (await coll
+            .uniqueKeys()
+            .catch(Storage.initErrHandler([]))) as string[]
+        const pks = findOpts.suggestPks
+            ? await coll.primaryKeys().catch(Storage.initErrHandler([]))
+            : []
 
         return suggestions.map((suggestion, i) => ({
             suggestion,
@@ -268,7 +278,10 @@ export class StorageManager implements ManageableStorage {
     async countAll<T>(collectionName: string, filter: FilterQuery<T>) {
         await this._initializationPromise
 
-        return this._storage.collection(collectionName).count(filter)
+        return this._storage
+            .collection(collectionName)
+            .count(filter)
+            .catch(Storage.initErrHandler(0))
     }
 
     /**
@@ -282,6 +295,7 @@ export class StorageManager implements ManageableStorage {
         const { deletedCount } = await this._storage
             .collection(collectionName)
             .remove(filter)
+            .catch(Storage.initErrHandler({ deletedCount: 0 }))
 
         return deletedCount
     }
@@ -307,6 +321,7 @@ export class StorageManager implements ManageableStorage {
         const { modifiedCount } = await this._storage
             .collection(collectionName)
             .update(filter, update)
+            .catch(Storage.initErrHandler({ modifiedCount: 0 }))
 
         return modifiedCount
     }

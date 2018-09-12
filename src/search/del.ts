@@ -1,6 +1,6 @@
 import Dexie from 'dexie'
 
-import db, { Page } from '.'
+import db, { Page, Storage } from '.'
 import normalizeUrl from '../util/encode-url-for-id'
 
 type QueryApplier = (table: typeof db.pages) => Dexie.Collection<Page, string>
@@ -9,7 +9,9 @@ const deletePages = (applyQuery: QueryApplier) =>
     db.transaction('rw', db.tables, async () => {
         const pages = await applyQuery(db.pages).toArray()
 
-        await Promise.all(pages.map(page => page.delete()))
+        await Promise.all(pages.map(page => page.delete())).catch(
+            Storage.initErrHandler(),
+        )
     })
 
 export function delPages(urls: string[]) {

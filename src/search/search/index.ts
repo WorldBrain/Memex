@@ -1,11 +1,10 @@
-import db, { SearchParams, PageResultsMap } from '..'
+import db, { SearchParams, PageResultsMap, Storage } from '..'
 import QueryBuilder from '../query-builder'
 import { groupLatestEventsByUrl, mapUrlsToLatestEvents } from './events'
 import { mapResultsToDisplay } from './map-results-to-display'
 import { findFilteredUrls } from './filters'
 import { textSearch } from './text-search'
 import { paginate, applyScores } from './util'
-
 export { domainHasFavIcon } from './fav-icon'
 export { suggest, extendedSuggest } from './suggest'
 
@@ -60,17 +59,15 @@ export async function search({
         lists: [...qb.lists],
     } as SearchParams
 
-    const { docs, totalCount } = await db.transaction(
-        'r',
-        db.tables,
-        async () => {
+    const { docs, totalCount } = await db
+        .transaction('r', db.tables, async () => {
             const results = await fullSearch(params)
 
             const mappedDocs = await mapResultsFunc(results.ids, params)
 
             return { docs: mappedDocs, totalCount: results.totalCount }
-        },
-    )
+        })
+        .catch(Storage.initErrHandler({ docs: [], totalCount: 0 }))
 
     return {
         docs,
@@ -83,7 +80,10 @@ export async function search({
 // WARNING: Inefficient; goes through entire table
 export async function getMatchingPageCount(pattern) {
     const re = new RegExp(pattern, 'i')
-    return db.pages.filter(page => re.test(page.url)).count()
+    return db.pages
+        .filter(page => re.test(page.url))
+        .count()
+        .catch(Storage.initErrHandler(0))
 }
 
 /**

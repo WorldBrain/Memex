@@ -25,6 +25,24 @@ export default class Storage extends Dexie {
     public static MIN_STR = ''
     public static MAX_STR = String.fromCharCode(65535)
 
+    /**
+     * Error hanlder captures `OpenFailedError`s relating to `createObjectStore` IDB issues,
+     * allowing all other errors to get thrown. We do this as some users experience a fatal issue
+     * with this error rendering the DB unusable, but spamming our sentry error tracker.
+     */
+    public static initErrHandler = <T>(defReturnVal: T = null) => (
+        err: Dexie.DexieError,
+    ) => {
+        if (
+            err.name === Dexie.errnames.OpenFailed &&
+            err.message.includes('createObjectStore')
+        ) {
+            return defReturnVal
+        }
+
+        throw err
+    }
+
     // Quick typings as `dexie-mongoify` doesn't contain any
     public collection: <T>(
         name: string,
