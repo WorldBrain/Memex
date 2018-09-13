@@ -34,7 +34,6 @@ class Tooltip extends React.Component {
     }
 
     render() {
-        console.log(this.state)
         return (
             <div className={styles.container}>
                 <h1 className={styles.header}>Annotation Toolip</h1>

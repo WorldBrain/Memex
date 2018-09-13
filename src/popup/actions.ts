@@ -49,7 +49,6 @@ export const initState: () => Thunk = () => async dispatch => {
             limit: 20,
         })
         dispatch(collectionActs.setInitColls([...listsAssocWithPage, ...lists]))
-        console.log(listsAssocWithPage)
         dispatch(collectionActs.setCollections(listsAssocWithPage))
 
         // Get 20 more tags that are not related related to the list.
