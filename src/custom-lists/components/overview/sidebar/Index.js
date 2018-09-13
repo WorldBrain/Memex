@@ -152,7 +152,6 @@ class ListContainer extends Component {
         ) : null
 
     render() {
-        console.log(this.props.showCrowdFundingModal)
         return (
             <React.Fragment>
                 <MyCollection
@@ -182,6 +181,7 @@ class ListContainer extends Component {
                 {this.props.showCrowdFundingModal ? (
                     <CrowdfundingModal
                         onClose={this.props.setShowCrowdFundingModal(false)}
+                        context="collections"
                     />
                 ) : null}
             </React.Fragment>

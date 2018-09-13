@@ -10,6 +10,7 @@ export interface Props {
     onClose: MouseEventHandler
     tabs: Tabs.Static
     learnMoreUrl: string
+    context: string
 }
 
 class CrowdfundingOverlay extends PureComponent<Props> {
@@ -36,8 +37,8 @@ class CrowdfundingOverlay extends PureComponent<Props> {
                 <span className={styles.close} onClick={this.props.onClose} />
                 <p className={styles.header}>Fund the future!</p>
                 <p className={styles.bolderText}>
-                    Unfortunately you can't share <br /> and discuss annotations
-                    yet.
+                    Unfortunately you can't share <br /> and discuss{' '}
+                    {this.props.context} yet.
                 </p>
                 <p className={styles.text}>
                     Support the development with 10€ and <br />

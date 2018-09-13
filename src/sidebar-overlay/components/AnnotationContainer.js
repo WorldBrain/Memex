@@ -466,6 +466,7 @@ class AnnotationContainer extends React.Component {
                     this.props.env === 'overview' && (
                         <CrowdfundingModal
                             onClose={this.setCrowdfunding(false)}
+                            context="annotations"
                         />
                     )}
             </React.Fragment>
