@@ -15,6 +15,7 @@ import { ListSideBar } from '../../../custom-lists/components'
 import Sidebar from './SideBar'
 import ClearFilter from './ClearFilter'
 import ButtonContainer from './ButtonContainer'
+import crowdfundingModalStyles from 'src/sidebar-overlay/CrowdfundingModal/Overlay.css'
 
 class SidebarContainer extends PureComponent {
     static propTypes = {
@@ -40,6 +41,15 @@ class SidebarContainer extends PureComponent {
 
     handleClickOutside = e => {
         const { id } = e.target
+
+        // Don't attempt close of sidebar if click occurred within crowdfunding modal (see `sidebar-overlay` feature)
+        const $modalContainer = document.querySelector(
+            `.${crowdfundingModalStyles.background}`,
+        )
+        if ($modalContainer && $modalContainer.contains(e.target)) {
+            return
+        }
+
         // Delay the closing of the sidebar for 200ms to check is something is
         // being dragged.
         setTimeout(() => {

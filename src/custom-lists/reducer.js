@@ -38,6 +38,7 @@ const defaultState = {
     urlDragged: '',
     showCreateListForm: false,
     showCommonNameWarning: false,
+    showCrowdFundingModal: false,
 }
 
 const fetchAllLists = (state, lists) => ({
@@ -121,6 +122,13 @@ const setUrlDragged = (state, url) => {
     }
 }
 
+const setShowCrowdFundingModal = (state, value) => {
+    return {
+        ...state,
+        showCrowdFundingModal: value,
+    }
+}
+
 const resetUrlDragged = state => {
     return {
         ...state,
@@ -178,6 +186,7 @@ export default createReducer(
         [actions.toggleCreateListForm]: toggleCreateListForm,
         [actions.showCommonNameWarning]: showCommonNameWarning,
         [actions.removeCommonNameWarning]: removeCommonNameWarning,
+        [actions.setShowCrowdFundingModal]: setShowCrowdFundingModal,
     },
     defaultState,
 )

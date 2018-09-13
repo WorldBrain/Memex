@@ -9,6 +9,7 @@ class PageList extends Component {
     static propTypes = {
         listName: PropTypes.string.isRequired,
         onEditButtonClick: PropTypes.func.isRequired,
+        onShareButtonClick: PropTypes.func.isRequired,
         onCrossButtonClick: PropTypes.func.isRequired,
         onAddPageToList: PropTypes.func.isRequired,
         isFiltered: PropTypes.bool.isRequired,
@@ -94,6 +95,11 @@ class PageList extends Component {
         this.props.onCrossButtonClick(e)
     }
 
+    handleShareBtnClick = e => {
+        e.stopPropagation()
+        this.props.onShareButtonClick(e)
+    }
+
     render() {
         return (
             <div
@@ -124,7 +130,7 @@ class PageList extends Component {
                     {this.state.isMouseInside ? (
                         <button
                             className={cx(styles.shareButton, styles.button)}
-                            onClick={() => null}
+                            onClick={this.handleShareBtnClick}
                         />
                     ) : null}
                 </div>
