@@ -66,6 +66,10 @@ browser.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
     if (changeInfo.url) {
         await tabChangeListener.handleUrl(tabId, changeInfo, tab)
     }
+
+    if (changeInfo.status) {
+        tabManager.setTabLoaded(tabId, changeInfo.status === 'complete')
+    }
 })
 
 export { tabManager }

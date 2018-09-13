@@ -8,6 +8,7 @@ class Tab implements TabState {
     id: number
     url: string
     isActive: boolean
+    isLoaded: boolean
     visitTime: number
     activeTime: number
     lastActivated: number
@@ -20,12 +21,14 @@ class Tab implements TabState {
         id,
         url,
         isActive = false,
+        isLoaded = false,
         visitTime = Date.now(),
         navState = {},
     }: Partial<TabState>) {
         this.id = id
         this.url = url
         this.isActive = isActive
+        this.isLoaded = isLoaded
         this.visitTime = visitTime
         this.navState = navState
         this.scrollState = new ScrollState()
@@ -95,6 +98,10 @@ class Tab implements TabState {
         }
 
         this.isActive = !this.isActive
+    }
+
+    setLoadedState(isLoaded: boolean) {
+        this.isLoaded = isLoaded
     }
 
     /**
