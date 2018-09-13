@@ -25,14 +25,14 @@ import {
 interface Props {
     tabManager: TabManager
     pageVisitLogger: PageVisitLogger
-    storageArea: Storage.StorageArea
-    loggableTabCheck: LoggableTabChecker
-    visitUpdate: VisitInteractionUpdater
-    favIconFetch: FavIconFetcher
-    favIconCheck: FavIconChecker
-    favIconCreate: FavIconCreator
-    domLoadCheck: TabEventChecker
-    tabActiveCheck: TabEventChecker
+    storageArea?: Storage.StorageArea
+    favIconFetch?: FavIconFetcher
+    visitUpdate?: VisitInteractionUpdater
+    favIconCheck?: FavIconChecker
+    domLoadCheck?: TabEventChecker
+    favIconCreate?: FavIconCreator
+    tabActiveCheck?: TabEventChecker
+    loggableTabCheck?: LoggableTabChecker
 }
 
 export default class TabChangeListeners {

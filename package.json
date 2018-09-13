@@ -165,7 +165,7 @@
         "uglifyjs-webpack-plugin": "^1.2.7",
         "url-loader": "^1.0.1",
         "web-ext": "^1.10.0",
-        "webextension-polyfill-ts": "^0.8.3",
+        "webextension-polyfill-ts": "^0.8.8",
         "webpack": "^4.12.2",
         "webpack-build-notifier": "^0.1.25",
         "webpack-chrome-extension-reloader": "^0.8.3",

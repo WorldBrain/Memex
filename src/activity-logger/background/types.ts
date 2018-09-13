@@ -1,6 +1,9 @@
 import { WebNavigation, Tabs } from 'webextension-polyfill-ts'
 
-export type NavState = Partial<WebNavigation.OnCommittedDetailsType>
+export type NavState = Partial<WebNavigation.OnCommittedDetailsType> & {
+    type?: WebNavigation.TransitionType
+    qualifiers?: WebNavigation.TransitionQualifier
+}
 
 export interface ScrollState {
     pixel: number
