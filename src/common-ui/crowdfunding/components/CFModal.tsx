@@ -1,17 +1,19 @@
 import React, { PureComponent, MouseEventHandler } from 'react'
 import { browser, Tabs } from 'webextension-polyfill-ts'
 
-import { remoteFunction } from '../../util/webextensionRPC'
+import { remoteFunction } from '../../../util/webextensionRPC'
+import { Overlay } from '../../components'
 
-const styles = require('./CrowdfundingBox.css')
+const styles = require('./CFModal.css')
 
 export interface Props {
     onClose: MouseEventHandler
     tabs: Tabs.Static
     learnMoreUrl: string
+    context: string
 }
 
-class CrowdfundingBox extends PureComponent<Props> {
+class CrowdfundingOverlay extends PureComponent<Props> {
     static defaultProps: Pick<Props, 'tabs' | 'learnMoreUrl'> = {
         tabs: browser.tabs,
         learnMoreUrl:
@@ -27,28 +29,27 @@ class CrowdfundingBox extends PureComponent<Props> {
 
     render() {
         return (
-            <div className={styles.container}>
+            <Overlay
+                className={styles.background}
+                innerClassName={styles.popup}
+                onClick={this.props.onClose}
+            >
+                <span className={styles.close} onClick={this.props.onClose} />
                 <p className={styles.header}>Fund the future!</p>
-                <p className={styles.boldText}>
-                    Unfortunately you can't share <br /> and discuss annotations
-                    yet.
+                <p className={styles.bolderText}>
+                    Unfortunately you can't share <br /> and discuss{' '}
+                    {this.props.context} yet.
                 </p>
                 <p className={styles.text}>
-                    Support the development with 10€ and{' '}
-                    <i>
-                        <b>get back 30€</b>
-                    </i>{' '}
-                    worth in Memex Premium Credits.
+                    Support the development with 10€ and <br />
+                    <b>get back 30€</b> worth of Memex Premium Credits.
                 </p>
                 <a className={styles.learnMore} onClick={this.openNewLink}>
                     LEARN MORE
                 </a>
-                <div onClick={this.props.onClose} className={styles.closeDiv}>
-                    Close Notification
-                </div>
-            </div>
+            </Overlay>
         )
     }
 }
 
-export default CrowdfundingBox
+export default CrowdfundingOverlay

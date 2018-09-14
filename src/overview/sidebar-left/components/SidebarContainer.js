@@ -15,7 +15,7 @@ import { ListSideBar } from '../../../custom-lists/components'
 import Sidebar from './SideBar'
 import ClearFilter from './ClearFilter'
 import ButtonContainer from './ButtonContainer'
-import crowdfundingModalStyles from 'src/sidebar-overlay/CrowdfundingModal/Overlay.css'
+import crowdfundingModalStyles from 'src/common-ui/crowdfunding/components/CFModal.css'
 
 class SidebarContainer extends PureComponent {
     static propTypes = {

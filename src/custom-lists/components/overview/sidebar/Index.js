@@ -10,7 +10,7 @@ import MyCollection from './MyCollections'
 import CreateListForm from './CreateListForm'
 import ListItem from './ListItem'
 import DeleteConfirmModal from 'src/overview/delete-confirm-modal/components/DeleteConfirmModal'
-import CrowdfundingModal from 'src/sidebar-overlay/CrowdfundingModal/Overlay'
+import { CrowdfundingModal } from '../../../../common-ui/crowdfunding'
 import { actions as filterActs } from '../../../../search-filters'
 import * as sidebar from '../../../../overview/sidebar-left/selectors'
 
