@@ -15,19 +15,35 @@ export function destroyTooltipTrigger() {
 }
 
 export const conditionallyTriggerTooltip = delayed(async (callback, event) => {
+    /*
+    Checks for certain conditions before triggering the tooltip.
+    i) Whether the selection made by the user is just text.
+    ii) Whether the user has enabled the tooltip in his preferences.
+    iii) Whether the selected target is not inside the tooltip itself.
+
+    Event is undefined in the scenario of user selecting the text before the
+    page has loaded. So we don't need to check for condition iii) since the
+    tooltip wouldn't have popped up yet.
+    */
     const isTooltipEnabled = await getTooltipState()
     if (
         !userSelectedText() ||
         !isTooltipEnabled ||
-        isTargetInsideTooltip(event)
+        (event && isTargetInsideTooltip(event))
     ) {
         return
     }
+
+    /*
+    If all the conditions passed, then this returns the position to anchor the
+    tooltip. The positioning is based on the user's preferred method. But in the
+    case of tooltip popping up before page load, it resorts to text based method
+    */
     const positioning = await getPositionState()
     let position
-    if (positioning === 'text') {
+    if (positioning === 'text' || !event) {
         position = calculateTooltipPostion()
-    } else if (positioning === 'mouse') {
+    } else if (positioning === 'mouse' && event) {
         position = { x: event.pageX, y: event.pageY }
     }
     callback(position)

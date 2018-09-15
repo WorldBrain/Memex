@@ -31,6 +31,7 @@ export async function init() {
         },
     })
     interactions.setupTooltipTrigger(showTooltip)
+    interactions.conditionallyTriggerTooltip(showTooltip)
 }
 
 init()
