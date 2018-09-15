@@ -41,6 +41,7 @@ Memex is currently in beta status and serves almost 10.000 users. We still have 
 
 ### Next:
 - Automatic Backup to Google Drive
+- Making Annotations searchable
 - Saving & searching social posts and comments on Facebook and Twitter
 - Integration with Pocket
 - Sharing & Discussing Annotations
