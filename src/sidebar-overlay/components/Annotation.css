@@ -121,7 +121,7 @@
 }
 
 .footerAside {
-    width: 100%;
+    width: 96.5%;
     display: inline-block;
     font-size: 13px;
     text-align: right;
@@ -160,7 +160,7 @@
     font-size: 15px;
     float: left;
     color: #000;
-    margin-left: 15px;
+    margin-left: 5px;
     margin-top: -1px;
 }
 
