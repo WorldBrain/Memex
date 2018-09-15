@@ -81,8 +81,8 @@ Just head over to the issues section and grab one of the "[Newcomer Tasks](https
 ### Funding Memex
 
 Interested in helping to fund our development? 
-**For anything under 200€**, please check out our [feature based crowdfunding page]() where you can help supporting the development and get Memex Premium Credits in return. Those then can be used to flexibly pay for premium upgrades. 
-**For more than 1000€**, please [get in touch with Oliver](mailto:oli@worldbrain.io) to learn more about how we fund our business and the modes of investing money into worldbrain.io
+- **For anything under 200€**, please check out our [feature based crowdfunding page]() where you can help supporting the development and get Memex Premium Credits in return. Those then can be used to flexibly pay for premium upgrades. 
+- **For more than 1000€**, please [get in touch with Oliver](mailto:oli@worldbrain.io) to learn more about how we fund our business and the modes of investing money into worldbrain.io
 
 ### Becoming a collaboration partner
 
