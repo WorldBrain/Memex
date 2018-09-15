@@ -77,6 +77,8 @@ function isAnchorOrContentEditable(selected) {
 
 function userSelectedText() {
     const selection = document.getSelection()
+    if (selection.type === 'None') return false
+
     const selectedString = selection.toString().trim()
     const container = selection.getRangeAt(0).commonAncestorContainer
     const extras = isAnchorOrContentEditable(container)
