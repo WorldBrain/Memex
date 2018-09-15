@@ -27,7 +27,7 @@
 The Memex we build is a browser extension allowing you to create, search and share your personal web of knowledge.
 Its name and functionalities are heavily inspired by [Vannevar Bush's vision of a Memex](http://memex.link/S1zVMgKzX/en.wikipedia.org/wiki/Memex). 
 
- - **Full-Text-Search:** Search with every word of all websites & PDFs you visited.
+ - **Full-Text-Search:** Search with every word of all websites & PDFs you visited. Up to 5 years of your personal web-research
  - **Associative filtering:** Remember only visit time, domain or custom tags?**
  - **Web Annotations:** Add notes to websites and pieces of text in them
  - **Memex.Link** Share links to specific pieces of text in any website, instead of copy-pasting the segements and urls you want to show someone. 
@@ -40,11 +40,12 @@ Memex is [available for Chrome and Firefox](https://worldbrain.io) and under act
 Memex is currently in beta status and serves almost 10.000 users. We still have some non-critical bugs, but all in all Memex runs smoothly. (Found another bug? [Please do tell](#report-bugs-&-feature-requests))
 
 ### Next:
-- Automatic Backup to Google Drive
+- [Automatic Backup to Google Drive](https://worldbrain.io/product/cloud-backup/)
 - Making Annotations searchable
-- Saving & searching social posts and comments on Facebook and Twitter
-- Integration with Pocket
-- Sharing & Discussing Annotations
+- [Saving & searching social posts and comments on Facebook and Twitter](https://worldbrain.io/product/search_social_feeds/)
+- [Integration with Pocket](https://worldbrain.io/product/integration-with-pocket)
+- [Collaborative Collections](https://worldbrain.io/product/collaborative-collections/)
+- [Sharing & Discussing Annotations](https://worldbrain.io/product/collaborative-annotations/)
 
 
 ## Values
