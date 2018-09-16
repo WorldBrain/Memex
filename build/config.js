@@ -30,7 +30,7 @@ export default ({ context = __dirname, mode = 'development', ...opts }) => {
         devtool:
             mode === 'development'
                 ? 'inline-cheap-module-source-map'
-                : 'source-map',
+                : 'hidden-source-map',
         plugins: initPlugins({
             ...opts,
             mode,
