@@ -72,7 +72,7 @@
 }
 
 .logo {
-    background-image: url('/img/worldbrain-logo-narrow.png');
+    background-image: url('../../../img/worldbrain-logo-narrow.png');
     background-size: 18px;
     margin-top: 7px;
     width: 18px;
@@ -81,7 +81,7 @@
 }
 
 .cancel {
-    background-image: url('/img/cross_grey.svg');
+    background-image: url('../../../img/cross_grey.svg');
     fill: white;
     background-size: 14px;
     width: 14px;
@@ -91,7 +91,7 @@
 }
 
 .settings {
-    background-image: url('/img/settings_grey.svg');
+    background-image: url('../../../img/settings_grey.svg');
     fill: white;
     background-size: 17px;
     width: 15px;
