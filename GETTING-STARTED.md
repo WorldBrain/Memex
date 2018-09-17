@@ -1,15 +1,5 @@
 # <a id="contributing" href="#contributing">Contributing</a>
 
-## Getting Started
-
-We have broken up tasks into three levels, **easy**, **medium** and **hard** tasks. You can choose based on your skill level or how much time you would like to put into contributing. **After finding a Task you would like to help out with please see [Installation Instructions](#installation)**.
-
-#### [Priorities :exclamation:](https://github.com/WorldBrain/Memex/issues?q=is%3Aissue+is%3Aopen+label%3A%22Prio+1%22)
-
-#### [Bugs :space_invader:](https://github.com/WorldBrain/Memex/issues?utf8=%E2%9C%93&q=is%3Aissue%20is%3Aopen%20label%3Abug)
-
-#### [Enhancements :muscle::point_up:](https://github.com/WorldBrain/Memex/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement)
-
 ## Installation
 
 **This assumes a basic knowledge of `git`, `npm` and usage of the `command line`.**
@@ -161,17 +151,6 @@ code.
 
 **Now you are ready to hack! 😃**
 We recommend reading through the [Code Overview](#code-overview) to get an idea of how the extension works and also looking @ [Submitting Changes](#submitting-changes) before making any pull requests.
-
-## Submitting Changes
-
-1.  Before making **any changes**
-    -   Write a Readme and/or Update Existing Readme. We use a [Readme First Development Approach](http://tom.preston-werner.com/2010/08/23/readme-driven-development.html).
-    -   Create a New Branch
-    -   Make a pull-request with your Initial Readme
-    -   Add a to-do list to help everyone be on board with the changes you plan on making.
-    -   Start Coding :computer::punch:
-2.  Please Always re-base after finishing up your branch before merging :recycle:
-3.  We encourage you to message us when you are ready to merge or at least indicate you are finished working on your branch, that way things happen quickly and efficently, otherwise pull requests can get old :older_woman::older_man:
 
 ### Documenting
 
