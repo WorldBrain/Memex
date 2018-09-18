@@ -46,6 +46,7 @@
     height: inherit;
     min-width: 20vw;
     overflow: hidden;
+    width: max-content;
 }
 
 .allListsInner {
