@@ -20,17 +20,19 @@ import {
     FavIconFetcher,
     FavIconChecker,
     FavIconCreator,
+    BookmarkChecker,
 } from './types'
 
 interface Props {
     tabManager: TabManager
     pageVisitLogger: PageVisitLogger
     storageArea?: Storage.StorageArea
-    favIconFetch?: FavIconFetcher
     visitUpdate?: VisitInteractionUpdater
+    favIconFetch?: FavIconFetcher
     favIconCheck?: FavIconChecker
     domLoadCheck?: TabEventChecker
     favIconCreate?: FavIconCreator
+    bookmarkCheck?: BookmarkChecker
     tabActiveCheck?: TabEventChecker
     loggableTabCheck?: LoggableTabChecker
 }
@@ -54,6 +56,7 @@ export default class TabChangeListeners {
     private _pageDOMLoaded: TabEventChecker
     private _tabActive: TabEventChecker
     private _pageVisitLogger: PageVisitLogger
+    private _checkBookmark: BookmarkChecker
 
     /**
      * Handles scheduling the main page indexing logic that happens on browser tab URL change,
@@ -77,6 +80,7 @@ export default class TabChangeListeners {
         favIconCreate = searchIndex.addFavIcon,
         domLoadCheck = whenPageDOMLoaded,
         tabActiveCheck = whenTabActive,
+        bookmarkCheck = searchIndex.pageHasBookmark,
     }: Props) {
         this._tabManager = tabManager
         this._pageVisitLogger = pageVisitLogger
@@ -88,6 +92,7 @@ export default class TabChangeListeners {
         this._createFavIcon = favIconCreate
         this._pageDOMLoaded = domLoadCheck
         this._tabActive = tabActiveCheck
+        this._checkBookmark = bookmarkCheck
 
         // Set up debounces for different tab change listeners as some sites can
         // really spam the fav-icon changes when they first load and to avoid some URL redirects.
@@ -128,8 +133,16 @@ export default class TabChangeListeners {
         { url },
         { incognito, active },
     ) => {
+        // Check if new URL of tab has an assoc. bookmark or not
+        const hasBookmark = await this._checkBookmark(url)
+
         // Ensures the URL change counts as a new visit in tab state (tab ID doesn't change)
-        const oldTab = this._tabManager.resetTab(tabId, active, url)
+        const oldTab = this._tabManager.resetTab(
+            tabId,
+            active,
+            url,
+            hasBookmark,
+        )
 
         // Send off request for updating that prev. visit's tab state, if active long enough
         if (

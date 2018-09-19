@@ -23,7 +23,6 @@ async function transformPageForSending(page) {
     }
 
     return {
-        hasBookmark: page.hasBookmark,
         tags: page.tags,
         latest: page.latest,
     }

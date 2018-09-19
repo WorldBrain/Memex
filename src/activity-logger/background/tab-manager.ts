@@ -19,11 +19,19 @@ export class TabManager {
         this._tabs.set(id, new Tab({ id, isActive: active, url }))
 
     /**
-     * @param {number} id The ID of the tab as assigned by web ext API.
+     * @param {number|string} id The ID of the tab as assigned by web ext API or the URL of the tab.
      * @returns {Tab|undefined} The state for tab stored under given ID, or undefined if no matching tab.
      */
-    getTabState(id: number) {
-        return this._tabs.get(id)
+    getTabState(id: number | string) {
+        if (typeof id === 'number') {
+            return this._tabs.get(id)
+        }
+
+        for (const [, tab] of this._tabs) {
+            if (tab.url === id) {
+                return tab
+            }
+        }
     }
 
     getActiveTab() {
@@ -63,7 +71,12 @@ export class TabManager {
      * @param {number} id The ID of the tab to stop reset tracking of.
      * @returns {Tab} The state of the previously tracked tab assoc. with `id`.
      */
-    resetTab(id: number, activeState: boolean, url: string) {
+    resetTab(
+        id: number,
+        activeState: boolean,
+        url: string,
+        isBookmarked: boolean,
+    ) {
         const oldTab = this.removeTab(id)
 
         if (oldTab != null) {
@@ -71,9 +84,10 @@ export class TabManager {
                 id,
                 new Tab({
                     id,
+                    url,
+                    isBookmarked,
                     isActive: activeState,
                     navState: oldTab.navState,
-                    url,
                 }),
             )
         }
@@ -150,6 +164,14 @@ export class TabManager {
 
         if (tab != null) {
             tab.navState = navState
+        }
+    }
+
+    setBookmarkState(id: number | string, newState: boolean) {
+        const tab = this.getTabState(id)
+
+        if (tab != null) {
+            tab.isBookmarked = newState
         }
     }
 }

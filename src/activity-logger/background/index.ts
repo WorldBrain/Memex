@@ -9,7 +9,10 @@ import tabManager from './tab-manager'
 
 // Allow logging pause state toggle to be called from other scripts
 const toggleLoggingPause = initPauser()
-makeRemotelyCallable({ toggleLoggingPause })
+makeRemotelyCallable({
+    toggleLoggingPause,
+    fetchTab: id => tabManager.getTabState(id),
+})
 
 // Ensure tab scroll states are kept in-sync with scroll events from the content script
 browser.runtime.onMessage.addListener(
