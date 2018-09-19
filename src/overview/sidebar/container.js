@@ -6,7 +6,7 @@ import onClickOutside from 'react-onclickoutside'
 import Sidebar, { CloseButton } from '../../sidebar-overlay'
 import * as selectors from './selectors'
 import * as actions from './actions'
-import crowdfundingModalStyles from '../../sidebar-overlay/CrowdfundingModal/Overlay.css'
+import crowdfundingModalStyles from 'src/common-ui/crowdfunding/components/CFModal.css'
 
 class SidebarContainer extends React.Component {
     static propTypes = {

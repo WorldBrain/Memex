@@ -6,8 +6,10 @@ import { remoteFunction } from '../../util/webextensionRPC'
 
 import Annotation from './Annotation'
 import TagHolder from './TagHolder.js'
-import CrowdfundingBox from './CrowdfundingBox'
-import CrowdfundingModal from '../CrowdfundingModal/Overlay'
+import {
+    CrowdfundingBox,
+    CrowdfundingModal,
+} from '../../common-ui/crowdfunding'
 import styles from './Annotation.css'
 import { IndexDropdown } from '../../common-ui/containers'
 
@@ -466,6 +468,7 @@ class AnnotationContainer extends React.Component {
                     this.props.env === 'overview' && (
                         <CrowdfundingModal
                             onClose={this.setCrowdfunding(false)}
+                            context="annotations"
                         />
                     )}
             </React.Fragment>

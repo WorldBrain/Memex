@@ -48,6 +48,10 @@ export const setActiveListIndex = createAction(
     'custom-lists/setActiveListIndex',
 )
 
+export const setShowCrowdFundingModal = createAction(
+    'custom-lists/setShowCrowdFundingModal',
+)
+
 export const toggleListFilterIndex = createAction(
     'custom-lists/toggleListFilterIndex',
 )

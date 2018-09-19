@@ -83,3 +83,8 @@ export const showCommonNameWarning = createSelector(
     customLists,
     state => state.showCommonNameWarning,
 )
+
+export const showCrowdFundingModal = createSelector(
+    customLists,
+    state => state.showCrowdFundingModal,
+)

@@ -40,6 +40,18 @@
     animation: appear 0.2s forwards;
 }
 
+.shareButton {
+    background-image: url('/img/share_empty.svg');
+    width: 20px;
+    height: 20px;
+    visibility: hidden;
+    animation: appear 0.2s forwards;
+
+    &:hover {
+        background-image: url('/img/share_hover.svg');
+    }
+}
+
 .deleteButton {
     background-image: url('/img/trash_closed_new.svg');
     width: 20px;

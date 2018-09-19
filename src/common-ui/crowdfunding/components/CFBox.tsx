@@ -1,9 +1,10 @@
 import React, { PureComponent, MouseEventHandler } from 'react'
 import { browser, Tabs } from 'webextension-polyfill-ts'
 
-import { remoteFunction } from '../../util/webextensionRPC'
+import { remoteFunction } from '../../../util/webextensionRPC'
+import Message from './Message'
 
-const styles = require('./CrowdfundingBox.css')
+const styles = require('./CFBox.css')
 
 export interface Props {
     onClose: MouseEventHandler
@@ -28,21 +29,11 @@ class CrowdfundingBox extends PureComponent<Props> {
     render() {
         return (
             <div className={styles.container}>
-                <p className={styles.header}>Fund the future!</p>
-                <p className={styles.boldText}>
-                    Unfortunately you can't share <br /> and discuss annotations
-                    yet.
-                </p>
-                <p className={styles.text}>
-                    Support the development with 10€ and{' '}
-                    <i>
-                        <b>get back 30€</b>
-                    </i>{' '}
-                    worth in Memex Premium Credits.
-                </p>
-                <a className={styles.learnMore} onClick={this.openNewLink}>
-                    LEARN MORE
-                </a>
+                <Message
+                    styles={styles}
+                    context="annotations"
+                    openNewLink={this.openNewLink}
+                />
                 <div onClick={this.props.onClose} className={styles.closeDiv}>
                     Close Notification
                 </div>
