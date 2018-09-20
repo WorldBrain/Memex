@@ -1,0 +1,10 @@
+/* http://google-webfonts-helper.herokuapp.com/fonts/libre-franklin?subsets=latin-ext,latin */
+
+/* libre-franklin-100 - latin_latin-ext */
+@font-face {
+    font-family: 'Libre Franklin';
+    font-style: normal;
+    font-weight: 100;
+    src: local('Libre Franklin Thin'), local('LibreFranklin-Thin'),
+        url('./libre-franklin-v2-latin_latin-ext-100.woff2') format('woff2'); /* Chrome 26+, Opera 23+, Firefox 39+ */
+}

@@ -5,18 +5,11 @@
 export const htmlAssets = [
     'fonts/material-icons/material-icons.css',
     'fonts/googlefonts/lato.css',
+    'fonts/googlefonts/open-sans.css',
+    'fonts/googlefonts/libre-franklin.css',
     'lib/browser-polyfill.js',
     'style/slick.css',
     'style/slick-theme.css',
-    {
-        path:
-            'https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800',
-        type: 'css',
-    },
-    {
-        path: 'https://fonts.googleapis.com/css?family=Libre+Franklin:100',
-        type: 'css',
-    },
 ]
 
 /**

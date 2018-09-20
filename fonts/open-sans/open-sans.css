@@ -1,0 +1,47 @@
+/* http://google-webfonts-helper.herokuapp.com/fonts/open-sans?subsets=cyrillic,greek-ext,latin-ext,cyrillic-ext,greek,vietnamese,latin */
+
+/* open-sans-300 - latin_vietnamese_greek_cyrillic-ext_latin-ext_greek-ext_cyrillic */
+@font-face {
+    font-family: 'Open Sans';
+    font-style: normal;
+    font-weight: 300;
+    src: local('Open Sans Light'), local('OpenSans-Light'),
+        url('./open-sans-v15-latin_vietnamese_greek_cyrillic-ext_latin-ext_greek-ext_cyrillic-300.woff2')
+            format('woff2'); /* Chrome 26+, Opera 23+, Firefox 39+ */
+}
+/* open-sans-regular - latin_vietnamese_greek_cyrillic-ext_latin-ext_greek-ext_cyrillic */
+@font-face {
+    font-family: 'Open Sans';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Open Sans Regular'), local('OpenSans-Regular'),
+        url('./open-sans-v15-latin_vietnamese_greek_cyrillic-ext_latin-ext_greek-ext_cyrillic-regular.woff2')
+            format('woff2'); /* Chrome 26+, Opera 23+, Firefox 39+ */
+}
+/* open-sans-600 - latin_vietnamese_greek_cyrillic-ext_latin-ext_greek-ext_cyrillic */
+@font-face {
+    font-family: 'Open Sans';
+    font-style: normal;
+    font-weight: 600;
+    src: local('Open Sans SemiBold'), local('OpenSans-SemiBold'),
+        url('./open-sans-v15-latin_vietnamese_greek_cyrillic-ext_latin-ext_greek-ext_cyrillic-600.woff2')
+            format('woff2'); /* Chrome 26+, Opera 23+, Firefox 39+ */
+}
+/* open-sans-700 - latin_vietnamese_greek_cyrillic-ext_latin-ext_greek-ext_cyrillic */
+@font-face {
+    font-family: 'Open Sans';
+    font-style: normal;
+    font-weight: 700;
+    src: local('Open Sans Bold'), local('OpenSans-Bold'),
+        url('./open-sans-v15-latin_vietnamese_greek_cyrillic-ext_latin-ext_greek-ext_cyrillic-700.woff2')
+            format('woff2'); /* Chrome 26+, Opera 23+, Firefox 39+ */
+}
+/* open-sans-800 - latin_vietnamese_greek_cyrillic-ext_latin-ext_greek-ext_cyrillic */
+@font-face {
+    font-family: 'Open Sans';
+    font-style: normal;
+    font-weight: 800;
+    src: local('Open Sans ExtraBold'), local('OpenSans-ExtraBold'),
+        url('./open-sans-v15-latin_vietnamese_greek_cyrillic-ext_latin-ext_greek-ext_cyrillic-800.woff2')
+            format('woff2'); /* Chrome 26+, Opera 23+, Firefox 39+ */
+}
