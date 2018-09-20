@@ -94,7 +94,7 @@ export const delPageFromList = url => async (dispatch, getState) => {
 
         dispatch(hidePageFromList(url, index))
     } catch (err) {
-        console.log(err)
+        console.error(err)
     } finally {
         updateLastActive() // Consider user active
     }
@@ -105,7 +105,7 @@ export const getListFromDB = () => async (dispatch, getState) => {
         const lists = await remoteFunction('fetchAllLists')({})
         dispatch(fetchAllLists(lists || []))
     } catch (err) {
-        console.log(err)
+        console.error(err)
     } finally {
         updateLastActive() // Consider user active
     }
@@ -137,8 +137,8 @@ export const createPageList = (name, cb) => async (dispatch, getState) => {
         } else {
             dispatch(showCommonNameWarning())
         }
-    } catch (error) {
-        console.log(error)
+    } catch (err) {
+        console.error(err)
     } finally {
         updateLastActive() // consider user active.
     }
@@ -149,8 +149,8 @@ export const updateList = (index, name, id) => async (dispatch, getState) => {
     try {
         await remoteFunction('updateListName')({ id, name })
         dispatch(updateListName(name, index))
-    } catch (e) {
-        console.log(e)
+    } catch (err) {
+        console.error(err)
     } finally {
         updateLastActive() // consider user active.
     }
@@ -163,7 +163,7 @@ export const deletePageList = () => async (dispatch, getState) => {
         // DB call to remove List by ID.
         await remoteFunction('removeList')({ id })
     } catch (err) {
-        console.log(err)
+        console.error(err)
     } finally {
         dispatch(deleteList(id, deleting))
         dispatch(resetListDeleteModal())
@@ -174,8 +174,8 @@ export const deletePageList = () => async (dispatch, getState) => {
 export const addUrltoList = (url, index, id) => async (dispatch, getState) => {
     try {
         await remoteFunction('insertPageToList')({ id, url })
-    } catch (e) {
-        console.log(e)
+    } catch (err) {
+        console.error(err)
     } finally {
         dispatch(addPagetoList(url, index))
         updateLastActive()

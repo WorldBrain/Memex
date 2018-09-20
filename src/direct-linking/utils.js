@@ -10,8 +10,6 @@ export function retryUntil(
     const startMs = Date.now()
     return new Promise((resolve, reject) => {
         const doTry = async () => {
-            // console.log('trying')
-
             let res
             try {
                 res = await promiseCreator()
@@ -36,7 +34,6 @@ export function retryUntil(
                 return reject(new RetryTimeoutError())
             }
 
-            // console.log('scheduling retry')
             setTimeout(tryOrRetryLater, intervalMiliseconds)
         }
 
