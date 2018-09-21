@@ -9,12 +9,16 @@ const init = async () => {
     interactions.setupRPC()
 
     const isTooltipEnabled = await getLocalStorage(TOOLTIP_STORAGE_NAME, true)
-    if (!isTooltipEnabled) return
+    if (!isTooltipEnabled) {
+        return
+    }
 
     await bodyLoader()
     const passwordInputs = document.querySelectorAll('input[type=password]')
     const hasAPasswordInput = passwordInputs.length > 0
-    if (hasAPasswordInput) return
+    if (hasAPasswordInput) {
+        return
+    }
 
     interactions.insertRibbon()
 }

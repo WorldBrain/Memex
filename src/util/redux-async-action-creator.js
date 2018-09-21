@@ -38,7 +38,9 @@ export default function asyncActionCreator(
 
     const newActionCreator = (...args) => {
         return async dispatch => {
-            if (isPending() && exclusive === true) return
+            if (isPending() && exclusive === true) {
+                return
+            }
             if (isPending() && exclusive === 'takeLast') {
                 cancelAll()
             }

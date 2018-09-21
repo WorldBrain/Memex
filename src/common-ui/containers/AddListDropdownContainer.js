@@ -55,7 +55,9 @@ class DropdownContainer extends Component {
 
     componentWillMount() {
         // The temporary list array gets updated.
-        if (this.overviewMode) this.props.setTempLists()
+        if (this.overviewMode) {
+            this.props.setTempLists()
+        }
     }
 
     get inputBlockPattern() {
@@ -245,7 +247,9 @@ class DropdownContainer extends Component {
 
         let offset = this.canCreateList() ? 0 : 1
 
-        if (!this.allowIndexUpdate) offset = 1
+        if (!this.allowIndexUpdate) {
+            offset = 1
+        }
 
         // Calculate the next focused index depending on current focus and direction
         let focusedReducer

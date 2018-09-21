@@ -33,7 +33,9 @@ export const interactiveLoader = loader(() => {
         }
 
         document.addEventListener('readystatechange', () => {
-            if (document.readyState !== 'loading') return resolve()
+            if (document.readyState !== 'loading') {
+                return resolve()
+            }
         })
     })
 })

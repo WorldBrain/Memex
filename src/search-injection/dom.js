@@ -16,7 +16,9 @@ import * as constants from './constants'
 export const injectCSS = cssUrl => {
     // Check if the css file is already present in the webpage
     const node = document.querySelector(`link[href="${cssUrl}"]`)
-    if (node) return
+    if (node) {
+        return
+    }
 
     const link = document.createElement('link')
     link.type = 'text/css'
@@ -58,7 +60,9 @@ export const handleRender = (
 
         // If re-rendering remove the already present component
         const component = document.getElementById('memexResults')
-        if (component) component.parentNode.removeChild(component)
+        if (component) {
+            component.parentNode.removeChild(component)
+        }
 
         const target = document.createElement('div')
         target.setAttribute('id', 'memexResults')
@@ -92,5 +96,7 @@ export const handleRender = (
         document.readyState === 'interactive'
     ) {
         renderComponent()
-    } else document.addEventListener('DOMContentLoaded', renderComponent, true)
+    } else {
+        document.addEventListener('DOMContentLoaded', renderComponent, true)
+    }
 }

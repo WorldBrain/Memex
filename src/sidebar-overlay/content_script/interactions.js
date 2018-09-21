@@ -74,7 +74,9 @@ let target = null
  */
 export const insertRibbon = () => {
     // If target is set, Ribbon has already been injected.
-    if (target) return
+    if (target) {
+        return
+    }
 
     target = document.createElement('div')
     target.setAttribute('id', 'memex-annotations-ribbon')
@@ -87,7 +89,9 @@ export const insertRibbon = () => {
 }
 
 const removeRibbon = () => {
-    if (!target) return
+    if (!target) {
+        return
+    }
     removeHighlights()
     destroyAll(target)()
     target = null
@@ -124,11 +128,15 @@ export const attachEventListenersToNewHighlights = (
     )
     newHighlights.forEach(highlight => {
         highlight.dataset.annotation = annotation.url
-        if (!focusOnAnnotation || !hoverAnnotationContainer) return
+        if (!focusOnAnnotation || !hoverAnnotationContainer) {
+            return
+        }
 
         const clickListener = async e => {
             e.preventDefault()
-            if (!e.target.dataset.annotation) return
+            if (!e.target.dataset.annotation) {
+                return
+            }
             removeHighlights(true)
             makeHighlightDark(annotation)
             focusOnAnnotation(annotation.url)
@@ -136,7 +144,9 @@ export const attachEventListenersToNewHighlights = (
         highlight.addEventListener('click', clickListener, false)
 
         const mouseenterListener = e => {
-            if (!e.target.dataset.annotation) return
+            if (!e.target.dataset.annotation) {
+                return
+            }
             removeMediumHighlights()
             makeHighlightMedium(annotation)
             hoverAnnotationContainer(annotation.url)
@@ -144,7 +154,9 @@ export const attachEventListenersToNewHighlights = (
         highlight.addEventListener('mouseenter', mouseenterListener, false)
 
         const mouseleaveListener = e => {
-            if (!e.target.dataset.annotation) return
+            if (!e.target.dataset.annotation) {
+                return
+            }
             removeMediumHighlights()
             hoverAnnotationContainer('')
         }

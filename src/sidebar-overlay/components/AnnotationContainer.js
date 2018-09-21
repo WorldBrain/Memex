@@ -65,8 +65,9 @@ class AnnotationContainer extends React.Component {
     }
 
     maybeCloseTagsDropdown = e => {
-        if (!this.state.tagInput) return
-        else if (
+        if (!this.state.tagInput) {
+            return
+        } else if (
             this.tagInputContainer &&
             this.tagInputContainer.contains(e.target)
         ) {
@@ -117,7 +118,9 @@ class AnnotationContainer extends React.Component {
         let shouldTruncateForNewLines = false
 
         while (i < text.length) {
-            if (text[i++] === '\n') newlineCount++
+            if (text[i++] === '\n') {
+                newlineCount++
+            }
             if (newlineCount > 4) {
                 shouldTruncateForNewLines = true
                 // Now i stores the position for max possible characters
@@ -191,8 +194,11 @@ class AnnotationContainer extends React.Component {
 
         const { createdWhen, lastEdited } = this.props.annotation
         let dateObject
-        if (!lastEdited) dateObject = new Date(createdWhen)
-        else dateObject = new Date(lastEdited)
+        if (!lastEdited) {
+            dateObject = new Date(createdWhen)
+        } else {
+            dateObject = new Date(lastEdited)
+        }
         const timestamp = moment(dateObject)
             .format('MMMM D YYYY')
             .toUpperCase()
@@ -272,9 +278,13 @@ class AnnotationContainer extends React.Component {
     }
 
     findFooterRenderer(state) {
-        if (state === 'default') return this.renderFooterIcons()
-        else if (state === 'edit') return this.renderEditButtons()
-        else if (state === 'delete') return this.renderDeleteButtons()
+        if (state === 'default') {
+            return this.renderFooterIcons()
+        } else if (state === 'edit') {
+            return this.renderEditButtons()
+        } else if (state === 'delete') {
+            return this.renderDeleteButtons()
+        }
     }
 
     renderFooter = () => {
@@ -316,7 +326,9 @@ class AnnotationContainer extends React.Component {
         this._toggleState('annotationEditMode')()
         if (this.state.footerState === 'edit') {
             this._setFooterState('default')(e)
-        } else this._setFooterState('edit')(e)
+        } else {
+            this._setFooterState('edit')(e)
+        }
     }
 
     setTagRef = node => {
@@ -325,7 +337,9 @@ class AnnotationContainer extends React.Component {
 
     renderShowButton = name => {
         const { truncated } = this.state
-        if (!truncated) return null
+        if (!truncated) {
+            return null
+        }
         if (truncated[name]) {
             return (
                 <span
@@ -347,19 +361,25 @@ class AnnotationContainer extends React.Component {
             truncated.highlight.isTruncated
         ) {
             return truncated.highlight.text
-        } else return this.props.annotation.body
+        } else {
+            return this.props.annotation.body
+        }
     }
 
     getAnnotationText = () => {
         const { truncated, annotationEditMode } = this.state
-        if (annotationEditMode) return ''
+        if (annotationEditMode) {
+            return ''
+        }
         if (
             truncated &&
             truncated.annotation &&
             truncated.annotation.isTruncated
         ) {
             return truncated.annotation.text
-        } else return this.props.annotation.comment
+        } else {
+            return this.props.annotation.comment
+        }
     }
 
     renderTagInput() {
@@ -390,7 +410,9 @@ class AnnotationContainer extends React.Component {
     }
 
     renderAnnotationInput = () => {
-        if (!this.state.annotationEditMode) return null
+        if (!this.state.annotationEditMode) {
+            return null
+        }
         return (
             <div className={styles.annotationInput}>
                 <textarea

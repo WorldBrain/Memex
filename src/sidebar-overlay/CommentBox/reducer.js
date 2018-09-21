@@ -22,7 +22,9 @@ const deleteTag = (state, tag) => {
     const oldTags = [...state.tags]
     const tagIndex = oldTags.indexOf(tag)
 
-    if (tagIndex === -1) return state
+    if (tagIndex === -1) {
+        return state
+    }
 
     return {
         ...state,

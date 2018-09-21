@@ -35,7 +35,9 @@ class SidebarContainer extends PureComponent {
     // Capture state of the react-burger-menu
     captureStateChange = ({ isOpen }) => {
         // reset mouse over when either close button clicked or esc pressed
-        if (!isOpen) this.props.resetMouseOver()
+        if (!isOpen) {
+            this.props.resetMouseOver()
+        }
         this.props.setSidebarState(isOpen)
     }
 
@@ -54,7 +56,9 @@ class SidebarContainer extends PureComponent {
         // being dragged.
         setTimeout(() => {
             if (id !== 'filter-icon' && id !== 'collection-icon') {
-                if (!this.props.urlDragged) this.props.closeSidebar()
+                if (!this.props.urlDragged) {
+                    this.props.closeSidebar()
+                }
             }
         }, 200)
     }

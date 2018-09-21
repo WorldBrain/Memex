@@ -5,7 +5,9 @@ import { STORAGE_KEYS } from './constants'
 const hydrateImportsFromStorage = store => {
     const hydrate = (key, action) =>
         browser.storage.local.get(key).then(data => {
-            if (!data[key]) return
+            if (!data[key]) {
+                return
+            }
 
             const parsedData =
                 typeof data[key] === 'string'

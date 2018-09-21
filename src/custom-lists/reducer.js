@@ -73,7 +73,9 @@ const addPageToList = (state, { url, index }) => {
     const { lists } = state
     const list = lists[index]
 
-    if (list.pages.includes(url)) return state
+    if (list.pages.includes(url)) {
+        return state
+    }
 
     const newList = {
         ...list,

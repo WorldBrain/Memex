@@ -58,7 +58,9 @@ export const maxPossibleTags = tags => {
     while (tagsAllowed < tags.length) {
         const tag = tags[tagsAllowed].name
         totalTagsWidth += computeTagPillWidth(tag.length)
-        if (totalTagsWidth >= tagContainerWidth) break
+        if (totalTagsWidth >= tagContainerWidth) {
+            break
+        }
         tagsAllowed++
     }
     return tagsAllowed
@@ -81,8 +83,9 @@ export const goToAnnotation = (
     highlightAndScroll,
 ) => annotation => async () => {
     // If annotation is a comment, do nothing
-    if (!annotation.body) return false
-    else if (env === 'overview') {
+    if (!annotation.body) {
+        return false
+    } else if (env === 'overview') {
         const tab = await browser.tabs.create({
             active: true,
             url: pageUrl,

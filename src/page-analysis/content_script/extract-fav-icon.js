@@ -14,7 +14,9 @@ function getFavIconURLFromDOM(doc) {
  * @returns {string?} Favicon encoded as data URL.
  */
 async function getFavIcon(favIconUrl) {
-    if (!favIconUrl) return
+    if (!favIconUrl) {
+        return
+    }
 
     try {
         const response = await fetch(favIconUrl)

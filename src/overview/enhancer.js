@@ -91,7 +91,9 @@ const locationSync = ReduxQuerySync.enhancer({
 const hydrateStateFromStorage = store => {
     const hydrate = (key, action) =>
         browser.storage.local.get(key).then(data => {
-            if (data[key] == null) return
+            if (data[key] == null) {
+                return
+            }
 
             store.dispatch(action(data[key]))
         })
