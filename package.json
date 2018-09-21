@@ -1,6 +1,6 @@
 {
     "name": "worldbrain-extension",
-    "version": "0.8.2",
+    "version": "0.8.3",
     "homepage": "https://worldbrain.io",
     "license": "MIT",
     "repository": {
@@ -68,7 +68,6 @@
         "react-onclickoutside": "^6.7.1",
         "react-redux": "^5.0.7",
         "react-router": "^3.2.1",
-        "react-slick": "^0.23.1",
         "react-waypoint": "^8.0.3",
         "redux": "^4.0.0",
         "redux-act": "^1.7.4",
@@ -80,7 +79,6 @@
         "response-to-data-url": "^0.1.0",
         "rxjs": "^5.5.5",
         "scroll-to-element": "^2.0.0",
-        "slick-carousel": "^1.8.1",
         "through2": "^2.0.3",
         "url-regex": "^4.1.1",
         "webextension-polyfill": "^0.3.0",
@@ -165,7 +163,7 @@
         "uglifyjs-webpack-plugin": "^1.2.7",
         "url-loader": "^1.0.1",
         "web-ext": "^1.10.0",
-        "webextension-polyfill-ts": "^0.8.3",
+        "webextension-polyfill-ts": "^0.8.8",
         "webpack": "^4.12.2",
         "webpack-build-notifier": "^0.1.25",
         "webpack-chrome-extension-reloader": "^0.8.3",

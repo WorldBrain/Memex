@@ -95,6 +95,14 @@ export class TabManager {
         }
     }
 
+    setTabLoaded(id: number, isLoaded: boolean) {
+        const tab = this.getTabState(id)
+
+        if (tab != null) {
+            tab.setLoadedState(isLoaded)
+        }
+    }
+
     /**
      * @param {number} id The ID of the tab to set to associate the debounced log with.
      * @param {() => Promise<void>} cb The page log logic to delay.

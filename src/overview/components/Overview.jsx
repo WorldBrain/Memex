@@ -1,4 +1,6 @@
-import React from 'react'
+import React, { PureComponent } from 'react'
+import { connect } from 'react-redux'
+import propTypes from 'prop-types'
 
 import Sidebar from '../sidebar'
 import Onboarding from '../onboarding'
@@ -7,23 +9,38 @@ import {
     SidebarContainer as SidebarLeft,
     SidebarIconsContainer as SidebarIcons,
 } from '../sidebar-left'
-import { Header } from '../search-bar'
+import { Header, acts as searchBarActs } from '../search-bar'
 import { Results } from '../results'
 import Head from '../../options/containers/Head'
 import DragElement from './DragElement'
 
-const Overview = () => (
-    <React.Fragment>
-        <Head />
-        <Header />
-        <SidebarIcons />
-        <SidebarLeft />
-        <Results />
-        <DeleteConfirmModal />
-        <DragElement />
-        <Sidebar />
-        <Onboarding />
-    </React.Fragment>
-)
+class Overview extends PureComponent {
+    static propTypes = {
+        init: propTypes.func.isRequired,
+    }
 
-export default Overview
+    componentDidMount() {
+        this.props.init()
+    }
+
+    render() {
+        return (
+            <React.Fragment>
+                <Head />
+                <Header />
+                <SidebarIcons />
+                <SidebarLeft />
+                <Results />
+                <DeleteConfirmModal />
+                <DragElement />
+                <Sidebar />
+                <Onboarding />
+            </React.Fragment>
+        )
+    }
+}
+
+export default connect(
+    null,
+    dispatch => ({ init: () => dispatch(searchBarActs.init()) }),
+)(Overview)

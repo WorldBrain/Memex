@@ -1,3 +1,5 @@
+@import url('/fonts/googlefonts/open-sans.css');
+
 .container {
     display: flex;
     flex-direction: column;

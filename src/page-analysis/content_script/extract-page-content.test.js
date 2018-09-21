@@ -24,7 +24,6 @@ describe('Extract page content', () => {
         //     const data = new Uint8Array(fs.readFileSync(pdfPath))
         //     fetch.mockResponseOnce(new Blob([data], { type: 'application/pdf' }))
         //     const result = await extractPageContent(null, pdfUrl)
-        //     console.log(result)
     })
 
     test('extract content from an HTML page', async () => {

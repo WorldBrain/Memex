@@ -26,16 +26,11 @@ export default class DirectLinkingBackend {
         const json = await response.json()
 
         return { url: json.link }
-
-        // return await new Promise((resolve, reject) => {
-        //     setTimeout(() => resolve({url: 'http://memex.link/aefdawfe/memex.link/demo'}), 2000)
-        // })
     }
 
     async fetchAnnotationData({ annotationId }: { annotationId: string }) {
         const response = await fetch(this._buildAnnotationUrl({ annotationId }))
         const data = await response.json()
-        // console.log('Received annotation data:', data)
         return data
     }
 
@@ -46,6 +41,7 @@ export default class DirectLinkingBackend {
 
 function guessOrigin({ dynamic }: { dynamic: boolean }) {
     const dynamicPrefix = dynamic ? 'dyn.' : ''
-    const stagingPrefix = process.env.NODE_ENV !== 'production' ? 'staging.' : ''
+    const stagingPrefix =
+        process.env.NODE_ENV !== 'production' ? 'staging.' : ''
     return `http://${dynamicPrefix}${stagingPrefix}memex.link`
 }

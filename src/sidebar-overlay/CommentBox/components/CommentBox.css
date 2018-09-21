@@ -1,3 +1,6 @@
+@import url('/fonts/googlefonts/lato.css');
+@import url('/fonts/googlefonts/ibm-plex-serif.css');
+
 .commentBoxContainer {
     & > * {
         font-family: 'Lato', sans-serif;
@@ -38,7 +41,7 @@
     width: 95%;
     font-size: 14px;
     color: #222;
-    font-family: 'lato';
+    font-family: 'Lato';
     font-style: italic;
     background: #f7f7f7;
     border: none;

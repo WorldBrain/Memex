@@ -8,13 +8,13 @@ import { FavIconChecker } from './types'
 
 interface Props {
     tabManager: TabManager
-    pageAnalyzer: PageAnalyzer
-    pageTermsAdd: typeof searchIndex.addPageTerms
-    pageCreate: typeof searchIndex.addPage
-    pageFetch: typeof searchIndex.getPage
-    visitCreate: typeof searchIndex.addVisit
-    favIconCheck: FavIconChecker
-    momentLib: typeof moment
+    pageFetch?: typeof searchIndex.getPage
+    momentLib?: typeof moment
+    pageCreate?: typeof searchIndex.addPage
+    visitCreate?: typeof searchIndex.addVisit
+    pageTermsAdd?: typeof searchIndex.addPageTerms
+    favIconCheck?: FavIconChecker
+    pageAnalyzer?: PageAnalyzer
 }
 
 export default class PageVisitLogger {

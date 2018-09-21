@@ -1,9 +1,11 @@
+@import url('/fonts/googlefonts/lato.css');
+
 .mainContainer {
     position: fixed;
     display: flex;
     flex-direction: row;
     top: 100px;
-    font-family: 'lato';
+    font-family: 'Lato';
     justify-content: space-evenly;
     padding: 11px 13px 10px 7px;
     color: #777;

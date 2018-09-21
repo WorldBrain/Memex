@@ -1,42 +1,73 @@
+import { browser, Storage } from 'webextension-polyfill-ts'
+
 import PausableTimer from '../../util/pausable-timer'
+import { TOOLTIP_STORAGE_NAME } from '../../content-tooltip/constants'
 import ScrollState from './scroll-state'
 import { TabState, NavState } from './types'
 import { remoteFunction } from '../../util/webextensionRPC'
 import { isLoggable } from '..'
 
+export interface TabProps extends TabState {
+    storageAPI: Storage.Static
+}
+
 class Tab implements TabState {
     id: number
     url: string
     isActive: boolean
+    isLoaded: boolean
     visitTime: number
     activeTime: number
     lastActivated: number
     scrollState: ScrollState
     navState: NavState
     private _timer: PausableTimer
-    private _toggleRenderSidebarIFrame: (shouldRender: boolean) => Promise<void>
+    private _storageAPI: Storage.Static
 
     constructor({
         id,
         url,
         isActive = false,
+        isLoaded = false,
         visitTime = Date.now(),
         navState = {},
-    }: Partial<TabState>) {
+        storageAPI = browser.storage,
+    }: Partial<TabProps>) {
         this.id = id
         this.url = url
         this.isActive = isActive
+        this.isLoaded = isLoaded
         this.visitTime = visitTime
         this.navState = navState
         this.scrollState = new ScrollState()
         this.activeTime = 0
         this.lastActivated = Date.now()
-
-        this._toggleRenderSidebarIFrame = remoteFunction('toggleIFrameRender', {
-            tabId: id,
-        })
-
+        this._storageAPI = storageAPI
         this._timer = null
+    }
+
+    /**
+     * Decides whether or not to send the remote function call to the content script
+     * to tell it to toggle rendering the iFrame for the sidebar for the current tab.
+     *
+     * Should check whether the tab's loading state, loggability, tooltip enabled state.
+     */
+    private async _toggleRenderSidebarIFrame(shouldRender: boolean) {
+        if (!this.isLoaded || !isLoggable({ url: this.url })) {
+            return
+        }
+
+        const tooltipEnabled = await this._storageAPI.local.get(
+            TOOLTIP_STORAGE_NAME,
+        )[TOOLTIP_STORAGE_NAME]
+
+        if (!tooltipEnabled) {
+            return
+        }
+
+        return remoteFunction('toggleIFrameRender', {
+            tabId: this.id,
+        })(shouldRender)
     }
 
     private _pauseLogTimer() {
@@ -88,13 +119,15 @@ class Tab implements TabState {
             this._resumeLogTimer()
         }
 
-        if (!skipRemoteCall && isLoggable({ url: this.url })) {
-            this._toggleRenderSidebarIFrame(!this.isActive).catch(err => {
-                // Do nothing
-            })
+        if (!skipRemoteCall) {
+            this._toggleRenderSidebarIFrame(!this.isActive)
         }
 
         this.isActive = !this.isActive
+    }
+
+    setLoadedState(isLoaded: boolean) {
+        this.isLoaded = isLoaded
     }
 
     /**

@@ -1,4 +1,4 @@
-import db, { VisitInteraction, PageAddRequest } from '.'
+import db, { VisitInteraction, PageAddRequest, Storage } from '.'
 import normalizeUrl from '../util/encode-url-for-id'
 import pipeline, { transformUrl } from './pipeline'
 import { Page, FavIcon } from './models'
@@ -71,12 +71,14 @@ export async function updateTimestampMeta(
 ) {
     const normalized = normalizeUrl(url)
 
-    await db.transaction('rw', db.visits, () =>
-        db.visits
-            .where('[time+url]')
-            .equals([time, normalized])
-            .modify(data),
-    )
+    await db
+        .transaction('rw', db.visits, () =>
+            db.visits
+                .where('[time+url]')
+                .equals([time, normalized])
+                .modify(data),
+        )
+        .catch(Storage.initErrHandler())
 }
 
 export async function addVisit(url: string, time = Date.now()) {
@@ -87,11 +89,13 @@ export async function addVisit(url: string, time = Date.now()) {
     }
 
     matchingPage.addVisit(time)
-    return matchingPage.save()
+    return matchingPage.save().catch(Storage.initErrHandler())
 }
 
 export async function addFavIcon(url: string, favIconURI: string) {
     const { hostname } = transformUrl(url)
 
-    return new FavIcon({ hostname, favIconURI }).save()
+    return new FavIcon({ hostname, favIconURI })
+        .save()
+        .catch(Storage.initErrHandler())
 }

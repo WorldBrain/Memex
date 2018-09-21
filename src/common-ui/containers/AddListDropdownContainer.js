@@ -125,7 +125,7 @@ class DropdownContainer extends Component {
                         focused: 0,
                     }))
                 })
-                .catch(console.log)
+                .catch(console.error)
         }
         this.inputEl.focus()
         updateLastActive() // Consider user active (analytics)

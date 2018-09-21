@@ -2,7 +2,6 @@ import 'rxjs/add/operator/debounceTime'
 import 'rxjs/add/operator/map'
 import 'rxjs/add/operator/filter'
 
-import { actions as onboardingActs } from './onboarding'
 import { acts as searchBarActs } from './search-bar'
 import { actions as filterActs } from '../search-filters'
 
@@ -24,7 +23,6 @@ const searchUpdateActions = [
     filterActs.resetFilters.getType(),
     filterActs.toggleListFilter.getType(),
     filterActs.delListFilter.getType(),
-    onboardingActs.setVisible.getType(),
 ]
 
 // When the query changed, refresh the search results

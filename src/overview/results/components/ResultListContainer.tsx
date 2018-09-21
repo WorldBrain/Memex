@@ -24,7 +24,6 @@ import {
     actions as filterActs,
     selectors as filters,
 } from '../../../search-filters'
-import { acts as searchBarActs } from '../../search-bar'
 
 export interface StateProps {
     isLoading: boolean
@@ -37,7 +36,6 @@ export interface StateProps {
 }
 
 export interface DispatchProps {
-    init: () => void
     resetUrlDragged: () => void
     hideSearchFilters: () => void
     resetActiveTagIndex: () => void
@@ -70,7 +68,6 @@ class ResultListContainer extends PureComponent<Props> {
 
     componentDidMount() {
         document.addEventListener('click', this.handleOutsideClick, false)
-        this.props.init()
     }
 
     componentWillUnmount() {
@@ -229,7 +226,6 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
     addTag: resultIndex => tag => dispatch(acts.addTag(tag, resultIndex)),
     delTag: resultIndex => tag => dispatch(acts.delTag(tag, resultIndex)),
     resetActiveTagIndex: () => dispatch(acts.resetActiveTagIndex()),
-    init: () => dispatch(searchBarActs.init()),
     setUrlDragged: url => dispatch(listActs.setUrlDragged(url)),
     resetUrlDragged: () => dispatch(listActs.resetUrlDragged()),
     hideSearchFilters: () => dispatch(sidebarLeftActs.openSidebarListMode()),

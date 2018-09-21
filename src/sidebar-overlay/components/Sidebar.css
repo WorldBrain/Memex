@@ -1,5 +1,5 @@
-@import url('https://fonts.googleapis.com/css?family=IBM+Plex+Serif:300i');
-@import url('/fonts/googlefonts/lato.css');
+@import url('/fonts/googlefonts/open-sans.css');
+@import url('/fonts/googlefonts/ibm-plex-serif.css');
 
 .sidebar {
     padding: 0px;

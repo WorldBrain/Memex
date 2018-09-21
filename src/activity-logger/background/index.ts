@@ -1,4 +1,6 @@
-import { makeRemotelyCallable } from 'src/util/webextensionRPC'
+import { browser } from 'webextension-polyfill-ts'
+
+import { makeRemotelyCallable } from '../../util/webextensionRPC'
 import initPauser from './pause-logging'
 import { updateVisitInteractionData } from './util'
 import TabChangeListener from './tab-change-listeners'
@@ -42,7 +44,7 @@ browser.tabs.onRemoved.addListener(tabId => {
  * navigation event for each tab in state for later decision making.
  */
 browser.webNavigation.onCommitted.addListener(
-    ({ tabId, frameId, ...navData }) => {
+    ({ tabId, frameId, ...navData }: any) => {
         // Frame ID is always `0` for the main webpage frame, which is what we care about
         if (frameId === 0) {
             tabManager.updateNavState(tabId, {
@@ -63,6 +65,10 @@ browser.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
 
     if (changeInfo.url) {
         await tabChangeListener.handleUrl(tabId, changeInfo, tab)
+    }
+
+    if (changeInfo.status) {
+        tabManager.setTabLoaded(tabId, changeInfo.status === 'complete')
     }
 })
 

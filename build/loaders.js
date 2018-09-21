@@ -56,17 +56,11 @@ export const postcssLoader = {
     loader: 'postcss-loader',
 }
 
-export const imgLoader = {
-    test: /\.(png|jpg|gif)$/,
-    include: path.resolve(__dirname, '../img'),
-    use: [
-        {
-            loader: 'url-loader',
-            options: {
-                limit: 8192,
-            },
-        },
-    ],
+export const urlLoader = {
+    loader: 'url-loader',
+    options: {
+        limit: 8192,
+    },
 }
 
 export const svgLoader = {
@@ -111,13 +105,19 @@ export default ({ mode, context, isCI = false, injectStyles = false }) => {
         use: [eslintLoader],
     }
 
+    const imgLoader = {
+        test: /\.(png|jpg|gif|svg)$/,
+        include: path.resolve(context, './img'),
+        use: [urlLoader],
+    }
+
     if (isCI) {
-        return [main, coffee, cssModules, cssVanilla]
+        return [main, coffee, imgLoader, cssModules, cssVanilla]
     }
 
     if (mode !== 'production') {
         main.use = [threadLoader, ...main.use]
     }
 
-    return [main, coffee, lint, cssModules, cssVanilla]
+    return [main, coffee, imgLoader, lint, cssModules, cssVanilla]
 }

@@ -34,7 +34,6 @@ class Tooltip extends React.Component {
     }
 
     render() {
-        console.log(this.state)
         return (
             <div className={styles.container}>
                 <h1 className={styles.header}>Annotation Toolip</h1>
@@ -59,6 +58,7 @@ class Tooltip extends React.Component {
                 <Checkbox
                     id="position-memex-link"
                     isChecked={this.state.tooltip}
+                    isDisabled={!this.state.tooltip}
                     handleChange={() => null}
                 >
                     Position tooltip below
@@ -66,6 +66,7 @@ class Tooltip extends React.Component {
                         className={styles.dropdown}
                         value={this.state.position}
                         onChange={this.togglePosition}
+                        disabled={!this.state.tooltip}
                     >
                         <option value="mouse">mouse pointer</option>
                         <option value="text">selected text</option>

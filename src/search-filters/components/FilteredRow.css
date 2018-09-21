@@ -1,3 +1,5 @@
+@import url('/fonts/googlefonts/lato.css');
+
 .container {
     font-size: 14px;
     color: #8b8b8b;
@@ -10,7 +12,7 @@
     text-overflow: ellipsis;
     font-size: 14px;
     flex: 10;
-    font-family: 'lato';
+    font-family: 'Lato';
     cursor: pointer;
     text-align: left;
 }
