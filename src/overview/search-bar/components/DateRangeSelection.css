@@ -1,3 +1,5 @@
+@import url('/fonts/googlefonts/open-sans.css');
+
 .dateRangeSelection {
     display: flex;
     align-items: center;

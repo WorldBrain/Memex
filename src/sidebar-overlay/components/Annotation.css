@@ -1,3 +1,6 @@
+@import url('/fonts/googlefonts/lato.css');
+@import url('/fonts/googlefonts/ibm-plex-serif.css');
+
 .container {
     box-sizing: border-box;
     width: 95.3%;

@@ -1,3 +1,5 @@
+@import url('/fonts/googlefonts/lato.css');
+
 .listForm {
     height: 30px;
     width: 70%;
@@ -7,7 +9,7 @@
     outline: none;
     padding-left: 15px;
     font-size: 13px;
-    font-family: 'lato';
+    font-family: 'Lato';
     font-style: italic;
     padding-top: 4px;
 }

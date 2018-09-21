@@ -1,5 +1,7 @@
 /* stylelint-disable declaration-no-important */
 
+@import url('/fonts/googlefonts/open-sans.css');
+
 .link {
     text-decoration: none;
 

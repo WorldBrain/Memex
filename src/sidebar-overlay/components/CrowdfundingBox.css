@@ -1,3 +1,5 @@
+@import url('/fonts/googlefonts/lato.css');
+
 .container {
     box-sizing: border-box;
     width: 95.3%;
@@ -58,7 +60,7 @@
     margin-bottom: 20px;
     font-weight: 200;
     text-align: center;
-    font-family: 'lato';
+    font-family: 'Lato';
 }
 
 .learnMore {
