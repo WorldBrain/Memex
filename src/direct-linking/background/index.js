@@ -133,7 +133,7 @@ export default class DirectLinkingBackground {
     async createAnnotation({ tab }, { url, title, comment, body, selector }) {
         const pageUrl = url === null ? tab.url : url
         const pageTitle = title === null ? tab.title : title
-        const uniqueUrl = `${pageUrl}/#${new Date().getTime()}`
+        const uniqueUrl = `${pageUrl}/#${Date.now()}`
 
         await this.annotationStorage.createAnnotation({
             pageUrl,

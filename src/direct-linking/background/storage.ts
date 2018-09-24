@@ -4,80 +4,72 @@ import { browser, Tabs, Storage } from 'webextension-polyfill-ts'
 import { createPageFromTab, Dexie, Tag } from '../../search'
 import { FeatureStorage } from '../../search/storage'
 import { STORAGE_KEYS as IDXING_PREF_KEYS } from '../../options/settings/constants'
+import { Annotation } from '../types'
 
-export interface Annotation {
-    pageTitle: string
-    pageUrl: string
-    body: string
-    selector: object
-    createdWhen?: Date
-    lastEdited?: Date
-    url?: string
-    comment?: string
+export interface DirectLinkingStorageProps {
+    storageManager: StorageManager
+    getDb: () => Promise<Dexie>
+    browserStorageArea?: Storage.StorageArea
+    directLinksColl?: string
 }
 
 export default class DirectLinkingStorage extends FeatureStorage {
     static DIRECT_LINKS_COLL = 'directLinks'
-
     private _browserStorageArea: Storage.StorageArea
     private _getDb: () => Promise<Dexie>
+    private _directLinksColl: string
 
     constructor({
         storageManager,
         browserStorageArea = browser.storage.local,
         getDb,
-    }: {
-        storageManager: StorageManager
-        browserStorageArea: Storage.StorageArea
-        getDb: () => Promise<Dexie>
-    }) {
+        directLinksColl = DirectLinkingStorage.DIRECT_LINKS_COLL,
+    }: DirectLinkingStorageProps) {
         super(storageManager)
         this._browserStorageArea = browserStorageArea
+        this._directLinksColl = directLinksColl
         this._getDb = getDb
 
-        this.storageManager.registry.registerCollection(
-            DirectLinkingStorage.DIRECT_LINKS_COLL,
-            [
-                {
-                    version: new Date(2018, 5, 31),
-                    fields: {
-                        pageTitle: { type: 'text' },
-                        pageUrl: { type: 'url' },
-                        body: { type: 'text' },
-                        selector: { type: 'json' },
-                        createdWhen: { type: 'datetime' },
-                        url: { type: 'string' },
-                    },
-                    indices: [
-                        { field: 'url', pk: true },
-                        { field: 'pageTitle' },
-                        { field: 'body' },
-                        { field: 'createdWhen' },
-                    ],
+        this.storageManager.registry.registerCollection(this._directLinksColl, [
+            {
+                version: new Date(2018, 5, 31),
+                fields: {
+                    pageTitle: { type: 'text' },
+                    pageUrl: { type: 'url' },
+                    body: { type: 'text' },
+                    selector: { type: 'json' },
+                    createdWhen: { type: 'datetime' },
+                    url: { type: 'string' },
                 },
-                {
-                    version: new Date(2018, 7, 3),
-                    fields: {
-                        pageTitle: { type: 'text' },
-                        pageUrl: { type: 'url' },
-                        body: { type: 'text' },
-                        comment: { type: 'text' },
-                        selector: { type: 'json' },
-                        createdWhen: { type: 'datetime' },
-                        lastEdited: { type: 'datetime' },
-                        url: { type: 'string' },
-                    },
-                    indices: [
-                        { field: 'url', pk: true },
-                        { field: 'pageTitle' },
-                        { field: 'pageUrl' },
-                        { field: 'body' },
-                        { field: 'createdWhen' },
-                        { field: 'comment' },
-                    ],
+                indices: [
+                    { field: 'url', pk: true },
+                    { field: 'pageTitle' },
+                    { field: 'body' },
+                    { field: 'createdWhen' },
+                ],
+            },
+            {
+                version: new Date(2018, 7, 3),
+                fields: {
+                    pageTitle: { type: 'text' },
+                    pageUrl: { type: 'url' },
+                    body: { type: 'text' },
+                    comment: { type: 'text' },
+                    selector: { type: 'json' },
+                    createdWhen: { type: 'datetime' },
+                    lastEdited: { type: 'datetime' },
+                    url: { type: 'string' },
                 },
-            ],
-        )
+                indices: [
+                    { field: 'url', pk: true },
+                    { field: 'pageTitle' },
+                    { field: 'pageUrl' },
+                    { field: 'body' },
+                    { field: 'createdWhen' },
+                    { field: 'comment' },
+                ],
+            },
+        ])
     }
 
     private async fetchIndexingPrefs(): Promise<{ shouldIndexLinks: boolean }> {
@@ -132,50 +124,57 @@ export default class DirectLinkingStorage extends FeatureStorage {
     }
 }
 
+export interface AnnotationStorageProps {
+    storageManager: StorageManager
+        getDb: () => Promise<Dexie>
+    browserStorageArea?: Storage.StorageArea
+    annotationsColl?: string
+    tagsColl?: string
+}
+
 // TODO: Move to src/annotations in the future
 export class AnnotationStorage extends FeatureStorage {
-    static ANNOTATIONS_COLL = 'annotations'
+    static ANNOTS_COLL = 'annotations'
     static TAGS_COLL = 'tags'
-
     private _browserStorageArea: Storage.StorageArea
     private _getDb: () => Promise<Dexie>
+    private _annotationsColl: string
+    private _tagsColl: string
 
     constructor({
         storageManager,
-        browserStorageArea = browser.storage.local,
         getDb,
-    }: {
-        storageManager: StorageManager
-        browserStorageArea: Storage.StorageArea
-        getDb: () => Promise<Dexie>
-    }) {
+        browserStorageArea = browser.storage.local,
+        annotationsColl = AnnotationStorage.ANNOTS_COLL,
+        tagsColl = AnnotationStorage.TAGS_COLL,
+    }: AnnotationStorageProps) {
         super(storageManager)
+        this._annotationsColl = annotationsColl
+        this._tagsColl = tagsColl
+
         this._browserStorageArea = browserStorageArea
         this._getDb = getDb
 
-        this.storageManager.registry.registerCollection(
-            AnnotationStorage.ANNOTATIONS_COLL,
-            {
-                version: new Date(2018, 7, 26),
-                fields: {
-                    pageTitle: { type: 'text' },
-                    pageUrl: { type: 'url' },
-                    body: { type: 'text' },
-                    comment: { type: 'text' },
-                    selector: { type: 'json' },
-                    createdWhen: { type: 'datetime' },
-                    lastEdited: { type: 'datetime' },
-                    url: { type: 'string' },
-                },
-                indices: [
-                    { field: 'url', pk: true },
-                    { field: 'pageTitle' },
-                    { field: 'body' },
-                    { field: 'createdWhen' },
-                    { field: 'comment' },
-                ],
+        this.storageManager.registry.registerCollection(this._annotationsColl, {
+            version: new Date(2018, 7, 26),
+            fields: {
+                pageTitle: { type: 'text' },
+                pageUrl: { type: 'url' },
+                body: { type: 'text' },
+                comment: { type: 'text' },
+                selector: { type: 'json' },
+                createdWhen: { type: 'datetime' },
+                lastEdited: { type: 'datetime' },
+                url: { type: 'string' },
             },
-        )
+            indices: [
+                { field: 'url', pk: true },
+                { field: 'pageTitle' },
+                { field: 'body' },
+                { field: 'createdWhen' },
+                { field: 'comment' },
+            ],
+        })
     }
 
     private async fetchIndexingPrefs(): Promise<{ shouldIndexLinks: boolean }> {
@@ -210,13 +209,13 @@ export class AnnotationStorage extends FeatureStorage {
 
     async getAnnotationByPk(url: string) {
         return this.storageManager
-            .collection(AnnotationStorage.ANNOTATIONS_COLL)
+            .collection(this._annotationsColl)
             .findOneObject<Annotation>({ url })
     }
 
     async getAnnotationsByUrl(pageUrl: string) {
         return this.storageManager
-            .collection(AnnotationStorage.ANNOTATIONS_COLL)
+            .collection(this._annotationsColl)
             .findObjects<Annotation>({ pageUrl })
     }
 
@@ -228,7 +227,7 @@ export class AnnotationStorage extends FeatureStorage {
         selector,
     }: Annotation) {
         await this.storageManager
-            .collection(AnnotationStorage.ANNOTATIONS_COLL)
+            .collection(this._annotationsColl)
             .createObject({
                 pageTitle,
                 pageUrl,
@@ -250,7 +249,7 @@ export class AnnotationStorage extends FeatureStorage {
         selector,
     }: Annotation) {
         return this.storageManager
-            .collection(AnnotationStorage.ANNOTATIONS_COLL)
+            .collection(this._annotationsColl)
             .createObject({
                 pageTitle,
                 pageUrl,
@@ -265,7 +264,7 @@ export class AnnotationStorage extends FeatureStorage {
 
     async editAnnotation(url: string, comment: string) {
         return this.storageManager
-            .collection(AnnotationStorage.ANNOTATIONS_COLL)
+            .collection(this._annotationsColl)
             .updateOneObject(
                 { url },
                 {
@@ -279,31 +278,27 @@ export class AnnotationStorage extends FeatureStorage {
 
     async deleteAnnotation(url: string) {
         return this.storageManager
-            .collection(AnnotationStorage.ANNOTATIONS_COLL)
+            .collection(this._annotationsColl)
             .deleteOneObject({ url })
     }
 
     async getTagsByAnnotationUrl(url: string) {
         return this.storageManager
-            .collection(AnnotationStorage.TAGS_COLL)
+            .collection(this._tagsColl)
             .findObjects<Tag>({ url })
     }
 
     modifyTags = (shouldAdd: boolean) => async (name: string, url: string) => {
         if (shouldAdd) {
-            this.storageManager
-                .collection(AnnotationStorage.TAGS_COLL)
-                .createObject({
-                    name,
-                    url,
-                })
+            this.storageManager.collection(this._tagsColl).createObject({
+                name,
+                url,
+            })
         } else {
-            this.storageManager
-                .collection(AnnotationStorage.TAGS_COLL)
-                .deleteObjects({
-                    name,
-                    url,
-                })
+            this.storageManager.collection(this._tagsColl).deleteObjects({
+                name,
+                url,
+            })
         }
     }
 }
