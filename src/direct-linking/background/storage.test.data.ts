@@ -1,12 +1,13 @@
 export const directLink = {
     pageTitle: 'Some random page',
     pageUrl: 'https://somerandomurl.com',
-    url: 'https://memex.link/3234235/',
+    url: 'http://memex.link/3234235/',
     body: 'Some random quote in some random page',
+    comment: '',
     selector: {},
 }
 
-export const pageUrl = 'https://annotation.url'
+export const pageUrl = 'annotation.url'
 
 export const tag1 = 'tag1'
 export const tag2 = 'tagwithahugename'
@@ -34,6 +35,6 @@ export const comment = {
     pageUrl,
     body: '',
     url: 'https://annotation.url/#12124124159',
-    comment: 'Hmm this is just a commenttuuu',
+    comment: 'Hmm this is just a comment',
     selector: {},
 }

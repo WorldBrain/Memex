@@ -1,24 +1,49 @@
+import { browser } from 'webextension-polyfill-ts'
+
 import { makeRemotelyCallable, remoteFunction } from 'src/util/webextensionRPC'
+import QueryBuilder from 'src/search/query-builder'
+import { StorageManager, Dexie } from 'src/search'
 import DirectLinkingBackend from './backend'
 import { setupRequestInterceptor } from './redirect'
 import { AnnotationRequests } from './request'
 import DirectLinkingStorage, { AnnotationStorage } from './storage'
 import normalize from '../../util/encode-url-for-id'
+import { AnnotationSender } from '../types'
 
 export default class DirectLinkingBackground {
-    constructor({ storageManager, getDb }) {
+    private backend: DirectLinkingBackend
+    private queryBuilderFactory: () => QueryBuilder
+    private annotationStorage: AnnotationStorage
+    private directLinkingStorage: DirectLinkingStorage
+    private sendAnnotation: AnnotationSender
+    private requests: AnnotationRequests
+
+    constructor({
+        storageManager,
+        getDb,
+        queryBuilder = () => new QueryBuilder(),
+    }: {
+        storageManager: StorageManager
+        getDb: () => Promise<Dexie>
+        queryBuilder?: () => QueryBuilder
+    }) {
         this.backend = new DirectLinkingBackend()
-        this.directLinkingStorage = new DirectLinkingStorage({
-            storageManager,
-            getDb,
-        })
+        this.queryBuilderFactory = queryBuilder
+
         this.annotationStorage = new AnnotationStorage({
             storageManager,
             getDb,
         })
+
+        this.directLinkingStorage = new DirectLinkingStorage({
+            storageManager,
+            getDb,
+        })
+
         this.sendAnnotation = ({ tabId, annotation }) => {
             browser.tabs.sendMessage(tabId, { type: 'direct-link', annotation })
         }
+
         this.requests = new AnnotationRequests(
             this.backend,
             this.sendAnnotation,
@@ -28,39 +53,22 @@ export default class DirectLinkingBackground {
     setupRemoteFunctions() {
         makeRemotelyCallable(
             {
-                followAnnotationRequest: (...params) => {
-                    this.followAnnotationRequest(...params)
-                },
-                createDirectLink: (...params) => {
-                    return this.createDirectLink(...params)
-                },
-                getAllAnnotations: (...params) => {
-                    return this.getAllAnnotationsByUrl(...params)
-                },
-                createAnnotation: (...params) => {
-                    return this.createAnnotation(...params)
-                },
-                editAnnotation: (...params) => {
-                    return this.editAnnotation(...params)
-                },
-                deleteAnnotation: (...params) => {
-                    return this.deleteAnnotation(...params)
-                },
-                openSidebarWithHighlight: (...params) => {
-                    return this.openSidebarWithHighlight(...params)
-                },
-                toggleSidebar: () => {
-                    return this.toggleSidebar()
-                },
-                getAnnotationTags: (...params) => {
-                    return this.getTagsByAnnotationUrl(...params)
-                },
-                addAnnotationTag: (...params) => {
-                    return this.addTagForAnnotation(...params)
-                },
-                delAnnotationTag: (...params) => {
-                    return this.delTagForAnnotation(...params)
-                },
+                createDirectLink: this.createDirectLink.bind(this),
+                getAllAnnotations: this.getAllAnnotationsByUrl.bind(this),
+                createAnnotation: this.createAnnotation.bind(this),
+                editAnnotation: this.editAnnotation.bind(this),
+                deleteAnnotation: this.deleteAnnotation.bind(this),
+                searchAnnotations: this.searchAnnotations.bind(this),
+                toggleSidebar: this.toggleSidebar.bind(this),
+                getAnnotationTags: this.getTagsByAnnotationUrl.bind(this),
+                addAnnotationTag: this.addTagForAnnotation.bind(this),
+                delAnnotationTag: this.delTagForAnnotation.bind(this),
+                followAnnotationRequest: this.followAnnotationRequest.bind(
+                    this,
+                ),
+                openSidebarWithHighlight: this.openSidebarWithHighlight.bind(
+                    this,
+                ),
             },
             { insertExtraArg: true },
         )
@@ -101,12 +109,13 @@ export default class DirectLinkingBackground {
     async createDirectLink({ tab }, request) {
         const pageTitle = tab.title
         const result = await this.backend.createDirectLink(request)
-        await this.annotationStorage.insertDirectLink({
+        await this.annotationStorage.createAnnotation({
             pageTitle,
             pageUrl: tab.url,
             body: request.anchor.quote,
             url: result.url,
             selector: request.anchor,
+            comment: '',
         })
 
         // Attempt to (re-)index, if user preference set, but don't wait for it
@@ -145,6 +154,21 @@ export default class DirectLinkingBackground {
         })
 
         return uniqueUrl
+    }
+
+    async searchAnnotations(_, { query, ...params }) {
+        const qb = this.queryBuilderFactory()
+            .searchTerm(query)
+            .get()
+
+        if (qb.isBadTerm || qb.isInvalidSearch) {
+            return []
+        }
+
+        return this.annotationStorage.search({
+            terms: [...qb.query],
+            ...params,
+        })
     }
 
     async editAnnotation({ tab }, pk, comment) {
