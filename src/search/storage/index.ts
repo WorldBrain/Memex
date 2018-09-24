@@ -34,8 +34,9 @@ export default class Storage extends Dexie {
         err: Dexie.DexieError,
     ) => {
         if (
-            err.name === Dexie.errnames.OpenFailed &&
-            err.message.includes('createObjectStore')
+            err.message === 'Data fetch failed' ||
+            (err.name === Dexie.errnames.OpenFailed &&
+                err.message.includes('createObjectStore'))
         ) {
             return defReturnVal
         }

@@ -57,11 +57,9 @@ class Tab implements TabState {
             return
         }
 
-        const tooltipEnabled = await this._storageAPI.local.get(
-            TOOLTIP_STORAGE_NAME,
-        )[TOOLTIP_STORAGE_NAME]
+        const storage = await this._storageAPI.local.get(TOOLTIP_STORAGE_NAME)
 
-        if (!tooltipEnabled) {
+        if (!storage[TOOLTIP_STORAGE_NAME]) {
             return
         }
 
