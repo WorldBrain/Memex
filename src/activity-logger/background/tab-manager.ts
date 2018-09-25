@@ -19,19 +19,11 @@ export class TabManager {
         this._tabs.set(id, new Tab({ id, isActive: active, url }))
 
     /**
-     * @param {number|string} id The ID of the tab as assigned by web ext API or the URL of the tab.
+     * @param {number} id The ID of the tab as assigned by web ext API.
      * @returns {Tab|undefined} The state for tab stored under given ID, or undefined if no matching tab.
      */
-    getTabState(id: number | string) {
-        if (typeof id === 'number') {
-            return this._tabs.get(id)
-        }
-
-        for (const [, tab] of this._tabs) {
-            if (tab.url === id) {
-                return tab
-            }
-        }
+    getTabState(id: number) {
+        return this._tabs.get(id)
     }
 
     getActiveTab() {
@@ -167,11 +159,11 @@ export class TabManager {
         }
     }
 
-    setBookmarkState(id: number | string, newState: boolean) {
-        const tab = this.getTabState(id)
-
-        if (tab != null) {
-            tab.isBookmarked = newState
+    setBookmarkState(url: string, newState: boolean) {
+        for (const [, tab] of this._tabs) {
+            if (tab.url === url) {
+                tab.isBookmarked = newState
+            }
         }
     }
 }
