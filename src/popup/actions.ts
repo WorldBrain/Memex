@@ -8,7 +8,7 @@ import { acts as tagActs } from './tags-button'
 import { acts as collectionActs } from './collections-button'
 import { acts as blacklistActs } from './blacklist-button'
 
-const pageLookupRPC = remoteFunction('pageLookup')
+const fetchPageTagsRPC = remoteFunction('fetchPageTags')
 const fetchListsRPC = remoteFunction('fetchListPagesByUrl')
 const fetchAllListsRPC = remoteFunction('fetchAllLists')
 const fetchInitTagSuggRPC = remoteFunction('extendedSuggest')
@@ -42,10 +42,6 @@ export const initState: () => Thunk = () => async dispatch => {
 
         const listsAssocWithPage = await fetchListsRPC({ url: currentTab.url })
         const lists = await fetchAllListsRPC({
-            // query: {
-            //     id: { $nin: listIds },
-            // },
-            // opts: { limit: 20 },
             excludeIds: listsAssocWithPage.map(({ id }) => id),
             limit: 20,
         })
@@ -53,10 +49,10 @@ export const initState: () => Thunk = () => async dispatch => {
         dispatch(collectionActs.setCollections(listsAssocWithPage))
 
         // Get 20 more tags that are not related related to the list.
-        const page = await pageLookupRPC(currentTab.url)
-        const tags = await fetchInitTagSuggRPC(page.tags, 'tag')
-        dispatch(tagActs.setInitTagSuggests([...page.tags, ...tags]))
-        dispatch(tagActs.setTags(page.tags))
+        const pageTags = await fetchPageTagsRPC(currentTab.url)
+        const tags = await fetchInitTagSuggRPC(pageTags, 'tag')
+        dispatch(tagActs.setInitTagSuggests([...pageTags, ...tags]))
+        dispatch(tagActs.setTags(pageTags))
     } catch (err) {
         // Do nothing; just catch the error - means page doesn't exist for URL
     }

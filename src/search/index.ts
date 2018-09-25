@@ -53,7 +53,7 @@ export { delPages, delPagesByDomain, delPagesByPattern } from './del'
 // Tags-specific
 //
 
-export { addTag, delTag } from './tags'
+export { addTag, delTag, fetchPageTags } from './tags'
 
 //
 // Bookmarks-specific

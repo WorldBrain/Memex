@@ -56,6 +56,4 @@ export async function extendedSuggest(
         default:
             return applyQuery<Tag, [string, string]>(db.tags.where('name'))
     }
-
-    // return await applyQuery<Tag, [string, string]>(db.tags.where('name'))
 }

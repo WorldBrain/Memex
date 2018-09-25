@@ -3,30 +3,19 @@ import * as index from '..'
 import { tabManager } from '../../activity-logger/background/'
 
 makeRemotelyCallable({
+    search: index.search,
     addTag: index.addTag,
     delTag: index.delTag,
     suggest: index.suggest,
-    extendedSuggest: index.extendedSuggest,
+    delPages: index.delPages,
     addBookmark: index.addBookmark,
     delBookmark: index.delBookmark,
-    delPages: index.delPages,
+    fetchPageTags: index.fetchPageTags,
+    extendedSuggest: index.extendedSuggest,
     delPagesByDomain: index.delPagesByDomain,
     delPagesByPattern: index.delPagesByPattern,
     getMatchingPageCount: index.getMatchingPageCount,
-    search: index.search,
-    pageLookup: url => index.getPage(url).then(transformPageForSending),
 })
-
-async function transformPageForSending(page) {
-    if (page == null) {
-        return null
-    }
-
-    return {
-        tags: page.tags,
-        latest: page.latest,
-    }
-}
 
 // Handle any new browser bookmark actions (bookmark mananger or bookmark btn in URL bar)
 browser.bookmarks.onCreated.addListener(handleBookmarkCreation)
