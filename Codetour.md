@@ -66,6 +66,10 @@ This feature contains the background script code for finding relevant knowledge
 in the user's memory. It is the backend used to provide results to the overview and
 address bar searches.
 
+### [`src/search-filters/`](src/search-filters/): search filters UI
+
+Contains the UI for various filters that are supported in the search, like filter by tags/domains/collections/bookmarks.
+
 ### [`src/popup/`](src/popup/): extension popup
 
 This feature contains the React+Redux app that makes up the extension's popup.
@@ -107,6 +111,10 @@ when a user makes a text highlight on any webpage.
 
 Contains small generic things, stuff that is not project-specific. Things that
 could perhaps be packaged and published as an NPM module some day.
+
+### [`src/dev/`](src/dev/): development tools
+
+Tools to help during development. They are not used in production builds.
 
 ### `...`: other stuff
 
