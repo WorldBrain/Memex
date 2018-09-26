@@ -6,8 +6,12 @@ import * as selectors from '../search-filters/selectors'
 
 // TODO: Needs some work.
 const sortAlphabetically = (a, b) => {
-    if (a.name.toLowerCase() < b.name.toLowerCase()) return -1
-    if (a.name.toLowerCase() > b.name.toLowerCase()) return 1
+    if (a.name.toLowerCase() < b.name.toLowerCase()) {
+        return -1
+    }
+    if (a.name.toLowerCase() > b.name.toLowerCase()) {
+        return 1
+    }
     return 0
 }
 
@@ -82,4 +86,9 @@ export const showCreateListForm = createSelector(
 export const showCommonNameWarning = createSelector(
     customLists,
     state => state.showCommonNameWarning,
+)
+
+export const showCrowdFundingModal = createSelector(
+    customLists,
+    state => state.showCrowdFundingModal,
 )

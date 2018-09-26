@@ -109,7 +109,9 @@ class SidebarContainer extends React.Component {
      */
     focusAnnotation = url => {
         this.props.setActiveAnnotation(url)
-        if (!url) return
+        if (!url) {
+            return
+        }
         retryUntilErrorResolves(
             () => {
                 const $container = document.getElementById(url)
@@ -138,7 +140,9 @@ class SidebarContainer extends React.Component {
      * Makes highlight dark a little when the container is hovered
      */
     makeHighlightMedium = annotation => () => {
-        if (this.props.env === 'overview') return
+        if (this.props.env === 'overview') {
+            return
+        }
         this.parentFC.remoteExecute('makeHighlightMedium')(annotation)
     }
 
@@ -146,14 +150,18 @@ class SidebarContainer extends React.Component {
      * Removes all medium highlights
      */
     removeMediumHighlights = () => {
-        if (this.props.env === 'overview') return
+        if (this.props.env === 'overview') {
+            return
+        }
         this.parentFC.remoteExecute('removeMediumHighlights')()
     }
 
     renderAnnotations = () => {
         const { annotations, env, isLoading } = this.props
 
-        if (isLoading) return <Loader />
+        if (isLoading) {
+            return <Loader />
+        }
 
         if (!this.props.isLoading && !this.props.annotations.length) {
             return <EmptyMessage />

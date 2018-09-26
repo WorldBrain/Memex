@@ -28,7 +28,7 @@
     "rules": {
         "camelcase": "error",
         "comma-dangle": ["error", "always-multiline"],
-        "curly": "error",
+        "curly": ["error", "all"],
         "quotes": "off",
         "no-var": "error",
         "prefer-const": "error",

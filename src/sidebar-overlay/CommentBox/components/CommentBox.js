@@ -70,8 +70,9 @@ class CommentBox extends React.PureComponent {
     }
 
     maybeCloseTagsDropdown = e => {
-        if (!this.props.tagInput) return
-        else if (
+        if (!this.props.tagInput) {
+            return
+        } else if (
             (this.tagInputContainer &&
                 this.tagInputContainer.contains(e.target)) ||
             e.target === this.saveButton
@@ -145,7 +146,9 @@ class CommentBox extends React.PureComponent {
                 this.props.env,
             )
             // Update highlights only if it's in iframe
-            if (this.props.env === 'iframe') this.props.updateAnnotations()
+            if (this.props.env === 'iframe') {
+                this.props.updateAnnotations()
+            }
         }
     }
 

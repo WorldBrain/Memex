@@ -85,15 +85,23 @@ export default function eventToPromise({
 }
 
 function castToError(reason) {
-    if (reason instanceof Error) return reason
-    if (reason instanceof Object) return new Error(JSON.stringify(reason))
+    if (reason instanceof Error) {
+        return reason
+    }
+    if (reason instanceof Object) {
+        return new Error(JSON.stringify(reason))
+    }
     return new Error(reason)
 }
 
 function castToArray(value) {
-    if (Array.isArray(value)) return value
-    else if (value === undefined) return []
-    else return [value]
+    if (Array.isArray(value)) {
+        return value
+    } else if (value === undefined) {
+        return []
+    } else {
+        return [value]
+    }
 }
 
 // Identity function, except that if passed a function, its return value.

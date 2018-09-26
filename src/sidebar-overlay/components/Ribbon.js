@@ -177,7 +177,9 @@ class Ribbon extends React.Component {
             'scroll',
             () => {
                 const { top, isInsideFrame } = this.state
-                if (isInsideFrame) window.scrollTo(0, top)
+                if (isInsideFrame) {
+                    window.scrollTo(0, top)
+                }
             },
             false,
         )
@@ -278,8 +280,11 @@ class Ribbon extends React.Component {
     }
 
     handleClickOutside = e => {
-        if (!this.state.isSidebarActive) return
-        else if (e.target.dataset.annotation) return
+        if (!this.state.isSidebarActive) {
+            return
+        } else if (e.target.dataset.annotation) {
+            return
+        }
         this.closeSidebarOps()
         this.setState({
             isSidebarActive: false,

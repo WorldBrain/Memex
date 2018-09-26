@@ -29,8 +29,11 @@ class IndexDropdown extends PureComponent {
     }
 
     get styles() {
-        if (this.props.isForAnnotation) return annotationStyles
-        else if (this.props.isForSidebar) return sidebarStyles
+        if (this.props.isForAnnotation) {
+            return annotationStyles
+        } else if (this.props.isForSidebar) {
+            return sidebarStyles
+        }
         return styles
     }
 

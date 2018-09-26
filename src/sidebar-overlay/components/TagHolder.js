@@ -30,7 +30,9 @@ class TagHolder extends React.Component {
     }
 
     findMaxTagsAllowed() {
-        if (!this.props.tags.length) return
+        if (!this.props.tags.length) {
+            return
+        }
         const maxTagsAllowed = maxPossibleTags(this.props.tags)
         this.setState({
             maxTagsAllowed,
@@ -48,7 +50,9 @@ class TagHolder extends React.Component {
 
     renderTags() {
         return this.props.tags.map((tag, index) => {
-            if (index >= this.state.maxTagsAllowed) return null
+            if (index >= this.state.maxTagsAllowed) {
+                return null
+            }
             return (
                 <span key={tag.name} className={styles.tag}>
                     {tag.name}
@@ -64,9 +68,13 @@ class TagHolder extends React.Component {
         const { maxTagsAllowed } = this.state
         const { tags } = this.props
 
-        if (!maxTagsAllowed || !(tags.length - maxTagsAllowed)) return null
+        if (!maxTagsAllowed || !(tags.length - maxTagsAllowed)) {
+            return null
+        }
         const tagsLeft = this.props.tags.length - this.state.maxTagsAllowed
-        if (tagsLeft < 1) return null
+        if (tagsLeft < 1) {
+            return null
+        }
         return <span className={styles.tagsLeft}>+{tagsLeft}</span>
     }
 

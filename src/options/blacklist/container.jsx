@@ -52,7 +52,9 @@ class BlacklistContainer extends Component {
             .replace('.', '\\.')
 
         // Ignore when user tries to submit nothing (no error state, so just do nothing)
-        if (!expression.length) return
+        if (!expression.length) {
+            return
+        }
 
         this.props.addToBlacklist(expression)
     }

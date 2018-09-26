@@ -93,7 +93,9 @@ export const createAnnotation = (comment, body, tags, env) => async (
 
     dispatch(commentActions.setAnchor(null))
     dispatch(setActiveAnnotation(uniqueUrl))
-    if (env === 'overview') dispatch(fetchAnnotationAct())
+    if (env === 'overview') {
+        dispatch(fetchAnnotationAct())
+    }
 }
 
 export const editAnnotation = (url, comment) => async (dispatch, getState) => {

@@ -38,6 +38,7 @@ const defaultState = {
     urlDragged: '',
     showCreateListForm: false,
     showCommonNameWarning: false,
+    showCrowdFundingModal: false,
 }
 
 const fetchAllLists = (state, lists) => ({
@@ -72,7 +73,9 @@ const addPageToList = (state, { url, index }) => {
     const { lists } = state
     const list = lists[index]
 
-    if (list.pages.includes(url)) return state
+    if (list.pages.includes(url)) {
+        return state
+    }
 
     const newList = {
         ...list,
@@ -118,6 +121,13 @@ const setUrlDragged = (state, url) => {
     return {
         ...state,
         urlDragged: url,
+    }
+}
+
+const setShowCrowdFundingModal = (state, value) => {
+    return {
+        ...state,
+        showCrowdFundingModal: value,
     }
 }
 
@@ -178,6 +188,7 @@ export default createReducer(
         [actions.toggleCreateListForm]: toggleCreateListForm,
         [actions.showCommonNameWarning]: showCommonNameWarning,
         [actions.removeCommonNameWarning]: removeCommonNameWarning,
+        [actions.setShowCrowdFundingModal]: setShowCrowdFundingModal,
     },
     defaultState,
 )

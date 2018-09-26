@@ -15,6 +15,7 @@ import { ListSideBar } from '../../../custom-lists/components'
 import Sidebar from './SideBar'
 import ClearFilter from './ClearFilter'
 import ButtonContainer from './ButtonContainer'
+import crowdfundingModalStyles from 'src/common-ui/crowdfunding/components/CFModal.css'
 
 class SidebarContainer extends PureComponent {
     static propTypes = {
@@ -34,17 +35,30 @@ class SidebarContainer extends PureComponent {
     // Capture state of the react-burger-menu
     captureStateChange = ({ isOpen }) => {
         // reset mouse over when either close button clicked or esc pressed
-        if (!isOpen) this.props.resetMouseOver()
+        if (!isOpen) {
+            this.props.resetMouseOver()
+        }
         this.props.setSidebarState(isOpen)
     }
 
     handleClickOutside = e => {
         const { id } = e.target
+
+        // Don't attempt close of sidebar if click occurred within crowdfunding modal (see `sidebar-overlay` feature)
+        const $modalContainer = document.querySelector(
+            `.${crowdfundingModalStyles.background}`,
+        )
+        if ($modalContainer && $modalContainer.contains(e.target)) {
+            return
+        }
+
         // Delay the closing of the sidebar for 200ms to check is something is
         // being dragged.
         setTimeout(() => {
             if (id !== 'filter-icon' && id !== 'collection-icon') {
-                if (!this.props.urlDragged) this.props.closeSidebar()
+                if (!this.props.urlDragged) {
+                    this.props.closeSidebar()
+                }
             }
         }, 200)
     }
