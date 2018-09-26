@@ -14,8 +14,8 @@ const message: React.SFC<Props> = ({ styles, ...props }) => (
     <React.Fragment>
         <p className={styles.header}>Fund the future!</p>
         <p className={styles.bolderText}>
-            Unfortunately you can't share <br /> and discuss {props.context}{' '}
-            yet.
+            You can't share, co-curate <br />
+            and discuss {props.context} yet.
         </p>
         <p className={styles.text}>
             Support the development with 10€ and <br />
