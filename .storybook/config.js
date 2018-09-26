@@ -1,7 +1,7 @@
 import { configure } from '@storybook/react'
 
 function loadStories() {
-    require('../src/stories/index.js')
+    require('../src/dev/stories/index.js')
 }
 
 configure(loadStories, module)
