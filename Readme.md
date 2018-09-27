@@ -6,6 +6,7 @@
 1. [Memex Features](#memex-features)
 1. [Values](#values)
 1. [Project Status](#project-status)
+    1. [Roadmap](#roadmap)
 1. [Our Economy](#our-economy)
 1. [Contributing](#contributing)
     1. [Report Bugs & Feature Requests](#report-bugs--feature-requests)
@@ -27,7 +28,9 @@
 The Memex we build is a browser extension allowing you to create, search and share your personal web of knowledge.
 Its name and functionalities are heavily inspired by [Vannevar Bush's vision of a Memex](http://memex.link/S1zVMgKzX/en.wikipedia.org/wiki/Memex). 
 
- - **Full-Text-Search:** Search with every word of all websites & PDFs you visited. Up to 5 years of your personal web-research ([60s Tutorial](https://www.youtube.com/watch?v=GwOMrTh_q9M))
+![](https://worldbrain.io/wp-content/uploads/2018/09/Combo4.png)
+
+ - **Full-Text-Search:** Search with every word of all websites & PDFs you visited. Up to 5 years of your personal web-research locally and in the browser. ([60s Tutorial](https://www.youtube.com/watch?v=GwOMrTh_q9M))
  - **Associative filtering:** Remember only visit time, domain or custom tags?**
  - **Web Annotations:** Add notes to websites and pieces of text in them ([60s Tutorial](https://www.youtube.com/watch?v=uEMmZ77IltE&feature=youtu.be))
  - **Memex.Link** Share links to specific pieces of text in any website, instead of copy-pasting the segements and urls you want to show someone. ([30s Tutorial](https://www.youtube.com/watch?v=lLcOVTqsMC8))
@@ -39,13 +42,13 @@ Its name and functionalities are heavily inspired by [Vannevar Bush's vision of 
 Memex is [available for Chrome and Firefox](https://worldbrain.io) and under active development by [our wonderful team](https://worldbrain.io/team).
 Memex is currently in beta status and serves almost 10.000 users. We still have some non-critical bugs, but all in all Memex runs smoothly. (Found another bug? [Please do tell](#report-bugs-&-feature-requests))
 
-### Next:
-- [Automatic Backup to Google Drive](https://worldbrain.io/product/cloud-backup/)
-- Making Annotations searchable
+### Roadmap:
+- [Automatic Backup to Memex Cloud](https://worldbrain.io/product/cloud-backup/)
+- [Making Annotations searchable](https://github.com/WorldBrain/Memex/issues/580)
 - [Saving & searching social posts and comments on Facebook and Twitter](https://worldbrain.io/product/search_social_feeds/)
-- [Integration with Pocket](https://worldbrain.io/product/integration-with-pocket)
 - [Collaborative Collections](https://worldbrain.io/product/collaborative-collections/)
 - [Sharing & Discussing Annotations](https://worldbrain.io/product/collaborative-annotations/)
+- [Integration with Pocket](https://worldbrain.io/product/integration-with-pocket)
 
 
 ## Values
@@ -58,15 +61,16 @@ We believe that users should be able to freely chose the providers of software t
 
 ### Collaboration, not monopolisation
 In 10 years time we envision 100s of Memex-y tools that are all adapted to the individual workflows different professions and people have. To get there, it is necessary to remove the incentives for Memex providers to lock-in their users and monopolise. 
-The question for us was: How can we create an ecosystem, in which it is more profitable to collaborate than to compete, and where monopolisation is almost impossible. To get there we combine interoperability with our financial model called [Steward Ownership](https://blog.p2pfoundation.net/steward-ownership-is-capitalism-2-0/2018/05/11). While interoperability will make it harder for providers to monopolise, because users have less lock-ins, Steward Ownership provides a company with the intrinsic motivations to not grow at all costs. Instead they are able to focus on providing profit generating service to less users, and reduce costs by collaborating with other Memex providers on core infrastructure. More on this in a blog post that will be released soon. 
+The question for us was: How can we create an ecosystem, in which it is more profitable to collaborate than to compete, and where monopolisation is almost impossible. To get there we combine interoperability with our financial model called [Steward Ownership](https://blog.p2pfoundation.net/steward-ownership-is-capitalism-2-0/2018/05/11). While interoperability will make it harder for providers to monopolise, because users have less lock-ins, Steward Ownership provides a company with the intrinsic motivations to not grow at all costs. Instead they are able to focus on providing profit generating service to less users, and reduce costs by collaborating with other Memex providers on core infrastructure. More details on this you find [on our crowdfunding page](https://worldbrain.io/crowdfunding-memex/#why).
 
 ## Our Economy
 
 *worldbrain.io* does not take Venture Capital money in order to finance the development and growth of Memex. 
 Instead we have 2 funding mechanism that aim to make us a fully community- and user-focussed service. 
-On the one hand we run our own [feature based crowdfunding](https://worldbrain.io/crowdfunding-memex/), which allows users to back the development of features in advance, and in return get [Memex Credits](https://worldbrain.io/memex-credits/). Those then can be used to modularly pay for premium services we offer.
+On the one hand we run our own [feature based crowdfunding](https://worldbrain.io/crowdfunding-memex/), which allows users to back the development of features in advance, and in return get up to 4.5x back in Memex Credits. Those then can be used to modularly pay for premium services we offer and effectively get discounts of up to 80%. 
 
-On the other hand we use a financial model called [Steward Ownership](https://blog.p2pfoundation.net/steward-ownership-is-capitalism-2-0/2018/05/11) which will provide investors and collaborators with a fixed return on invest that is paid with the profits we are making. With that we prevent worldbrain.io to become a speculative commodity with a need to become a monopoly in order to provide investors with a financial return. We have enough of those companies already and we need a mindset shift in how we do business. 
+On the other hand we use a financial model called [Steward Ownership](https://blog.p2pfoundation.net/steward-ownership-is-capitalism-2-0/2018/05/11) which will provide investors and collaborators with a fixed return on invest that is paid with the profits we are making. With that we prevent worldbrain.io to become a speculative commodity with a need to become a monopoly in order to provide investors with a financial return. 
+
 
 ## Contributing
 
@@ -83,7 +87,7 @@ Just head over to the issues section and grab one of the "[Newcomer Tasks](https
 ### Funding Memex
 
 Interested in helping to fund our development? 
-- **For anything under 200€**, please check out our [feature based crowdfunding page]() where you can help supporting the development and get Memex Premium Credits in return. Those then can be used to flexibly pay for premium upgrades. 
+- **For anything under 200€**, please check out our [feature based crowdfunding page](https://worldbrain.io/crowdfunding-memex) where you can help supporting the development and get Memex Premium Credits in return. Those then can be used to flexibly pay for premium upgrades. 
 - **For more than 1000€**, please [get in touch with Oliver](mailto:oli@worldbrain.io) to learn more about how we fund our business and the modes of investing money into worldbrain.io
 
 ### Becoming a collaboration partner

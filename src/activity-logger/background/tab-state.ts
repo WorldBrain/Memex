@@ -16,6 +16,7 @@ class Tab implements TabState {
     url: string
     isActive: boolean
     isLoaded: boolean
+    isBookmarked: boolean
     visitTime: number
     activeTime: number
     lastActivated: number
@@ -32,11 +33,13 @@ class Tab implements TabState {
         visitTime = Date.now(),
         navState = {},
         storageAPI = browser.storage,
+        isBookmarked = false,
     }: Partial<TabProps>) {
         this.id = id
         this.url = url
         this.isActive = isActive
         this.isLoaded = isLoaded
+        this.isBookmarked = isBookmarked
         this.visitTime = visitTime
         this.navState = navState
         this.scrollState = new ScrollState()

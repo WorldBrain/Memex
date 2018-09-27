@@ -32,3 +32,9 @@ const modifyTag = (shouldAdd: boolean) =>
 
 export const delTag = modifyTag(false)
 export const addTag = modifyTag(true)
+
+export async function fetchPageTags(url: string) {
+    const page = await getPage(url)
+
+    return page != null ? page.tags : []
+}

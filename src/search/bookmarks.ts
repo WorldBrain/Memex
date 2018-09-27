@@ -1,5 +1,6 @@
 import { Bookmarks } from 'webextension-polyfill-ts'
 
+import tabManager from '../activity-logger/background/tab-manager'
 import { createPageViaBmTagActs } from './on-demand-indexing'
 import { getPage } from './util'
 
@@ -20,6 +21,7 @@ export async function addBookmark({
 
     page.setBookmark(timestamp)
     await page.save()
+    tabManager.setBookmarkState(url, true)
 }
 
 export async function delBookmark({
@@ -36,5 +38,12 @@ export async function delBookmark({
         } else {
             await page.save()
         }
+        tabManager.setBookmarkState(url, false)
     }
+}
+
+export async function pageHasBookmark(url: string) {
+    const page = await getPage(url)
+
+    return page != null ? page.hasBookmark : false
 }

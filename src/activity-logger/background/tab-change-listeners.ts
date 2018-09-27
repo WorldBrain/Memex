@@ -1,5 +1,4 @@
-import { browser, Tabs, Storage } from 'webextension-polyfill-ts'
-import noop from 'lodash/noop'
+import { browser, Storage } from 'webextension-polyfill-ts'
 import debounce from 'lodash/debounce'
 
 import * as searchIndex from '../../search'
@@ -20,17 +19,19 @@ import {
     FavIconFetcher,
     FavIconChecker,
     FavIconCreator,
+    BookmarkChecker,
 } from './types'
 
 interface Props {
     tabManager: TabManager
     pageVisitLogger: PageVisitLogger
     storageArea?: Storage.StorageArea
-    favIconFetch?: FavIconFetcher
     visitUpdate?: VisitInteractionUpdater
+    favIconFetch?: FavIconFetcher
     favIconCheck?: FavIconChecker
     domLoadCheck?: TabEventChecker
     favIconCreate?: FavIconCreator
+    bookmarkCheck?: BookmarkChecker
     tabActiveCheck?: TabEventChecker
     loggableTabCheck?: LoggableTabChecker
 }
@@ -54,17 +55,13 @@ export default class TabChangeListeners {
     private _pageDOMLoaded: TabEventChecker
     private _tabActive: TabEventChecker
     private _pageVisitLogger: PageVisitLogger
-
-    /**
-     * Handles scheduling the main page indexing logic that happens on browser tab URL change,
-     * and updating the internally held tab manager state.
-     */
-    handleUrl: TabChangeListener
+    private _checkBookmark: BookmarkChecker
 
     /**
      * Handles fetching, and indexing the fav-icon once the tab updates, if needed.
      */
     handleFavIcon: TabChangeListener
+    private handleVisitIndexing: TabChangeListener
 
     constructor({
         tabManager,
@@ -77,6 +74,7 @@ export default class TabChangeListeners {
         favIconCreate = searchIndex.addFavIcon,
         domLoadCheck = whenPageDOMLoaded,
         tabActiveCheck = whenTabActive,
+        bookmarkCheck = searchIndex.pageHasBookmark,
     }: Props) {
         this._tabManager = tabManager
         this._pageVisitLogger = pageVisitLogger
@@ -88,6 +86,7 @@ export default class TabChangeListeners {
         this._createFavIcon = favIconCreate
         this._pageDOMLoaded = domLoadCheck
         this._tabActive = tabActiveCheck
+        this._checkBookmark = bookmarkCheck
 
         // Set up debounces for different tab change listeners as some sites can
         // really spam the fav-icon changes when they first load and to avoid some URL redirects.
@@ -96,8 +95,9 @@ export default class TabChangeListeners {
             this._handleFavIcon,
             TabChangeListeners.FAV_ICON_CHANGE_THRESHOLD,
         )
-        this.handleUrl = debounce(
-            this._handleUrl,
+
+        this.handleVisitIndexing = debounce(
+            this._handleVisitIndexing,
             TabChangeListeners.URL_CHANGE_THRESHOLD,
         )
     }
@@ -128,57 +128,68 @@ export default class TabChangeListeners {
         { url },
         { incognito, active },
     ) => {
+        // Check if new URL of tab has an assoc. bookmark or not
+        const hasBookmark = await this._checkBookmark(url)
+
         // Ensures the URL change counts as a new visit in tab state (tab ID doesn't change)
-        const oldTab = this._tabManager.resetTab(tabId, active, url)
+        const oldTab = this._tabManager.resetTab(
+            tabId,
+            active,
+            url,
+            hasBookmark,
+        )
 
         // Send off request for updating that prev. visit's tab state, if active long enough
         if (
             oldTab != null &&
             oldTab.url !== url &&
-            oldTab.activeTime > TabChangeListeners.FAUX_VISIT_THRESHOLD &&
-            (await this._checkTabLoggable({
-                url: oldTab.url,
-                incognito,
-            } as Tabs.Tab))
+            oldTab.activeTime > TabChangeListeners.FAUX_VISIT_THRESHOLD
         ) {
             await this._updateTabVisit(oldTab)
         }
     }
 
-    private _handleUrl: TabChangeListener = async (tabId, { url }, tab) => {
+    /**
+     * Handles scheduling the main page indexing logic that happens on browser tab URL change,
+     * and updating the internally held tab manager state.
+     */
+    public handleUrl: TabChangeListener = async (tabId, { url }, tab) => {
         try {
-            await this.handleVisitEnd(tabId, { url }, tab).catch(noop)
-
             if (!(await this._checkTabLoggable(tab))) {
                 return
             }
 
-            const indexingPrefs = await this.fetchIndexingPrefs()
-
-            // Run stage 1 of visit indexing immediately (depends on user settings)
-            await this._pageDOMLoaded({ tabId })
-            if (indexingPrefs.shouldLogStubs) {
-                await this._pageVisitLogger.logPageStub(tab)
-            }
-
-            // Schedule stage 2 of visit indexing soon after - if user stays on page
-            if (indexingPrefs.shouldLogVisits) {
-                await this._tabManager.scheduleTabLog(
-                    tabId,
-                    () =>
-                        this._tabActive({ tabId })
-                            .then(() =>
-                                this._pageVisitLogger.logPageVisit(
-                                    tab,
-                                    indexingPrefs.shouldLogStubs,
-                                ),
-                            )
-                            .catch(console.error),
-                    indexingPrefs.logDelay,
-                )
-            }
+            await this.handleVisitEnd(tabId, { url }, tab)
+            await this.handleVisitIndexing(tabId, { url }, tab)
         } catch (err) {
             console.error(err)
+        }
+    }
+
+    private _handleVisitIndexing: TabChangeListener = async (tabId, _, tab) => {
+        const indexingPrefs = await this.fetchIndexingPrefs()
+
+        // Run stage 1 of visit indexing immediately (depends on user settings)
+        await this._pageDOMLoaded({ tabId })
+        if (indexingPrefs.shouldLogStubs) {
+            await this._pageVisitLogger.logPageStub(tab)
+        }
+
+        // Schedule stage 2 of visit indexing soon after - if user stays on page
+        if (indexingPrefs.shouldLogVisits) {
+            await this._tabManager.scheduleTabLog(
+                tabId,
+                () =>
+                    this._tabActive({ tabId })
+                        .then(() =>
+                            this._pageVisitLogger.logPageVisit(
+                                tab,
+                                indexingPrefs.shouldLogStubs,
+                            ),
+                        )
+                        .catch(console.error),
+                indexingPrefs.logDelay,
+            )
         }
     }
 

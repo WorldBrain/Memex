@@ -12,10 +12,18 @@ const images = {
 
 export const InitialComponent = ({ createLink, createAnnotation }) => (
     <div className={styles.createButtons}>
-        <div className={styles.annotateButton} onMouseDown={createAnnotation}>
+        <div
+            title={'Add note to highlight'}
+            className={styles.annotateButton}
+            onMouseDown={createAnnotation}
+        >
             <span className={styles.annotateIcon} />
         </div>
-        <div className={styles.linkButton} onMouseDown={createLink}>
+        <div
+            title={'Share a link to this highlight'}
+            className={styles.linkButton}
+            onMouseDown={createLink}
+        >
             <span className={styles.shareIcon} />
         </div>
     </div>

@@ -6,24 +6,22 @@ A quick introduction to the folders and files in this repo.
 
 To comply with the [anatomy of a WebExtension](https://developer.mozilla.org/en-US/Add-ons/WebExtensions/Anatomy_of_a_WebExtension),
 this extension consists of the following parts (found in
-[`extension/`](extension/) after compilation):
+`extension/` after compilation):
 
 -   `background.js` always runs, in an 'empty invisible tab', listening for
     messages and events.
 -   `content_script.js` is loaded into every web page that is visited. It is
     invisible from that web page's own scripts, and can talk to the background
     script.
--   `overview/overview.html`, with the resources in that folder, provides the main
-    user interface.
--   `options/options.html` (plus resources) is a technically separate application
-    that provides the settings page.
+-   `options.html` (plus resources) is a technically separate application
+    that provides the settings page + overview.
+-   `popup.html` (plus resources) is a technically separate application
+    that provides the extension popup.
 
 The parts communicate in two ways:
 
 -   Messaging through `browser.sendMessage`, usually done implicitly by using a
     remote procedure call ([`util/webextensionRPC.js`](src/util/webextensionRPC.js)).
--   Through the in-browser PouchDB database, they get to see the same data, and
-    can react to changes made by other parts.
 
 Besides these parts,
 [`browser-polyfill.js`](https://github.com/mozilla/webextension-polyfill/)
@@ -41,76 +39,88 @@ extensions.
 
 ### [`src/activity-logger/`](src/activity-logger/): activity logger
 
-This logs every page visit in PouchDB. Soon it should also watch for user
-interactions, for example to remember which parts of a page you have read.
-
-Currently, for every visit, a new page object is created in the database, to
-represent the visited page itself. This object should soon be deduplicated when
-the same page is visited multiple times. After creating a new page object,
-the next module is triggered to start analysing the page.
+This feature handles logging of every visited page in the DB.
 
 ### [`src/page-analysis/`](src/page-analysis/): (web)page analysis
 
-This extracts and stores information about the page in a given tab, such as:
-
--   A full html version of the rendered page, by 'freeze-drying' it.
--   The plain text of the page, mainly for the full-text search.
--   Metadata, such as its author, title, etcetera.
--   A screenshot for visual recognition.
-
-### [`src/page-storage/`](src/page-storage/): (web)page storage
-
-Code for displaying the locally stored web pages, making them accessible on
-their own URL.
-
-### [`src/overview/`](src/overview/): overview
-
-The overview is the user interface that opens in a tab of its own. It is built
-with [React](https://facebook.github.io/react/) and [Redux](http://redux.js.org/),
-which create a somewhat complex but nicely organised application structure.
-
-See [`src/overview/Readme.md`](src/overview/Readme.md) for more details.
+This feature extracts and stores information about the page from a given tab.
 
 ### [`src/options/`](src/options/): settings panel
 
-The page for modifying the settings is implemented as an individual React app.
-Currently it does not do much yet.
+The pages for modifying the extension's settings. It is built
+with [React](https://facebook.github.io/react/) and [Redux](http://redux.js.org/).
+
+### [`src/overview/`](src/overview/): overview
+
+The overview is the main user interface for search. It currently lives as a separate
+feature module however is part of the same React app as the options pages.
 
 ### [`src/imports/`](src/imports/): background browser history + bookmarks imports logic
 
-Currently unused code for importing information from the browser's own history.
-Still to be developed and reorganised.
+This feature contains the background script code for our browser history and bookmarks importer.
+Note that the UI currently lives in [`src/options/imports/`](src/options/imports).
 
 ### [`src/search/`](src/search/): document search
 
-Functions for finding relevant knowledge in the user's memory. Currently
-provides a simple word filter to search through text of visited pages.
-This can be improved in many ways, because we are searching through a person's
-memory, not just some arbitrary document collection. For example, we can use
-created assocations and browsing paths to better understand what one is looking
-for.
+This feature contains the background script code for finding relevant knowledge
+in the user's memory. It is the backend used to provide results to the overview and
+address bar searches.
 
-### [`src/dev/`](src/dev/): development tools
+### [`src/search-filters/`](src/search-filters/): search filters UI
 
-Tools to help during development. They are not used in production builds.
+Contains the UI for various filters that are supported in the search, like filter by tags/domains/collections/bookmarks.
+
+### [`src/popup/`](src/popup/): extension popup
+
+This feature contains the React+Redux app that makes up the extension's popup.
+It appears when you press the Memex extension's badge.
+
+### [`src/direct-linking/`](src/direct-linking/): direct linking and annotations
+
+This feature contains all the logic related to enabling in-extension highlights,
+annotations, comments, and direct links to highlights on different webpages.
+
+### [`src/notifications/`](src/notifications/): in-extension notifications
+
+This feature contains all the logic related to the notifications that appear in
+a user's overview. They get hard-coded into the distributed code as to not contact a
+remote server. Note these are different to system/browser notifications.
+
+### [`src/search-injection/`](src/search-injections/): search engine injection of Memex results
+
+This feature contains content script logic used to optional inject memex search results
+into the UIs of popuplar search engines. Currently it supports Google and DuckDuckGo.
+
+### [`src/custom-lists/`](src/custom-lists/): custom lists/collections
+
+Contains everything related to the collections feature, which enables users to
+group pages into collections/lists.
+
+### [`src/sidebar-overlay/`](src/sidebar-overlay/): highlights and comments sidebar
+
+Code that is responsible for the in-overview and content script sidebar that opens
+on the right-hand side of the screen to manage user highlights and comments on given
+pages.
+
+### [`src/content-tooltip/`](src/content-tooltip/): in-page highlight tooltip
+
+This feature contains all the code that allows the in-page tooltip to optionally show
+when a user makes a text highlight on any webpage.
 
 ### [`src/util/`](src/util/): utilities
 
 Contains small generic things, stuff that is not project-specific. Things that
 could perhaps be packaged and published as an NPM module some day.
 
-### [`src/search-filters/`](src/search-filters/): search filters
+### [`src/dev/`](src/dev/): development tools
 
-Contains the UI for various filters that are supported in the search, like filter by tags/domains/collections/bookmarks.
-
-### [`src/custom-lists/`](src/custom-lists/): search filters
-
-Contains everything related to the collections feature, which enables users to group pages into collections/lists.
+Tools to help during development. They are not used in production builds.
 
 ### `...`: other stuff
 
 The build process is implemented using webpack v4. The main build entrypoint lives in
-`webpack.config.babel.js` with the core logic split up into several modules in the `build/` directory.
+`webpack.config.babel.js` with the core logic split up into several modules in the
+[`build/`](build/) directory.
 
 And a bunch of other development tool configurations, the usual cruft.
 
