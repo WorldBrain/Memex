@@ -1,5 +1,4 @@
 import { browser, Storage } from 'webextension-polyfill-ts'
-import noop from 'lodash/noop'
 import debounce from 'lodash/debounce'
 
 import * as searchIndex from '../../search'
@@ -155,12 +154,16 @@ export default class TabChangeListeners {
      * and updating the internally held tab manager state.
      */
     public handleUrl: TabChangeListener = async (tabId, { url }, tab) => {
-        if (!(await this._checkTabLoggable(tab))) {
-            return
-        }
+        try {
+            if (!(await this._checkTabLoggable(tab))) {
+                return
+            }
 
-        await this.handleVisitEnd(tabId, { url }, tab).catch(noop)
-        await this.handleVisitIndexing(tabId, { url }, tab).catch(console.error)
+            await this.handleVisitEnd(tabId, { url }, tab)
+            await this.handleVisitIndexing(tabId, { url }, tab)
+        } catch (err) {
+            console.error(err)
+        }
     }
 
     private _handleVisitIndexing: TabChangeListener = async (tabId, _, tab) => {
