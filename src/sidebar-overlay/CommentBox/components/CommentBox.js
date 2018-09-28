@@ -117,6 +117,8 @@ class CommentBox extends React.PureComponent {
             e.preventDefault()
             e.stopPropagation()
             this.props.setTagInput(true)
+        } else if (e.shiftKey && e.key === 'Enter') {
+            this.save()
         }
     }
 
