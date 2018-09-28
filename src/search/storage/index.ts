@@ -1,12 +1,13 @@
+import StorageManager from 'storex'
 import Dexie from 'dexie'
 import 'dexie-mongoify'
 
 import { Page, Visit, Bookmark, Tag, FavIcon } from '../models'
-import { StorageManager } from './manager'
-import { getDexieHistory } from './dexie-schema'
 import { FilterQuery } from './types'
 
-export * from './types'
+export abstract class FeatureStorage {
+    constructor(protected storageManager: StorageManager) {}
+}
 
 export interface Props {
     indexedDB: IDBFactory
@@ -114,91 +115,76 @@ export default class Storage extends Dexie {
      */
     private _initSchema() {
         // TODO: move these declarations to own feature storage classes
-        this.storageManager.registerCollection('pages', {
-            version: new Date(2018, 1, 1),
-            fields: {
-                url: { type: 'string' },
-                fullUrl: { type: 'text' },
-                fullTitle: { type: 'text' },
-                text: { type: 'text' },
-                domain: { type: 'string' },
-                hostname: { type: 'string' },
-                screenshot: { type: 'blob' },
-                lang: { type: 'string' },
-                canonicalUrl: { type: 'url' },
-                description: { type: 'text' },
+        this.storageManager.registry.registerCollections({
+            pages: {
+                version: new Date(2018, 1, 1),
+                fields: {
+                    url: { type: 'string' },
+                    fullUrl: { type: 'text' },
+                    fullTitle: { type: 'text' },
+                    text: { type: 'text' },
+                    domain: { type: 'string' },
+                    hostname: { type: 'string' },
+                    screenshot: { type: 'media' },
+                    lang: { type: 'string' },
+                    canonicalUrl: { type: 'url' },
+                    description: { type: 'text' },
+                },
+                indices: [
+                    { field: 'url', pk: true },
+                    { field: 'text', fullTextIndexName: 'terms' },
+                    { field: 'fullTitle', fullTextIndexName: 'titleTerms' },
+                    { field: 'fullUrl', fullTextIndexName: 'urlTerms' },
+                    { field: 'domain' },
+                    { field: 'hostname' },
+                ],
             },
-            indices: [
-                { field: 'url', pk: true },
-                { field: 'text', fullTextIndexName: 'terms' },
-                { field: 'fullTitle', fullTextIndexName: 'titleTerms' },
-                { field: 'fullUrl', fullTextIndexName: 'urlTerms' },
-                { field: 'domain' },
-                { field: 'hostname' },
-            ],
-        })
-
-        this.storageManager.registerCollection('visits', {
-            version: new Date(2018, 1, 1),
-            fields: {
-                url: { type: 'string' },
-                time: { type: 'timestamp' },
-                duration: { type: 'int' },
-                scrollMaxPerc: { type: 'float' },
-                scrollMaxPx: { type: 'float' },
-                scrollPerc: { type: 'float' },
-                scrollPx: { type: 'float' },
+            visits: {
+                version: new Date(2018, 1, 1),
+                fields: {
+                    url: { type: 'string' },
+                    time: { type: 'timestamp' },
+                    duration: { type: 'int' },
+                    scrollMaxPerc: { type: 'float' },
+                    scrollMaxPx: { type: 'float' },
+                    scrollPerc: { type: 'float' },
+                    scrollPx: { type: 'float' },
+                },
+                indices: [
+                    { field: ['time', 'url'], pk: true },
+                    { field: 'url' },
+                ],
             },
-            indices: [{ field: ['time', 'url'], pk: true }, { field: 'url' }],
-        })
-
-        this.storageManager.registerCollection('bookmarks', {
-            version: new Date(2018, 1, 1),
-            fields: {
-                url: { type: 'string' },
-                time: { type: 'timestamp' },
+            bookmarks: {
+                version: new Date(2018, 1, 1),
+                fields: {
+                    url: { type: 'string' },
+                    time: { type: 'timestamp' },
+                },
+                indices: [{ field: 'url', pk: true }, { field: 'time' }],
             },
-            indices: [{ field: 'url', pk: true }, { field: 'time' }],
-        })
-
-        this.storageManager.registerCollection('tags', {
-            version: new Date(2018, 1, 1),
-            fields: {
-                url: { type: 'string' },
-                name: { type: 'string' },
+            tags: {
+                version: new Date(2018, 1, 1),
+                fields: {
+                    url: { type: 'string' },
+                    name: { type: 'string' },
+                },
+                indices: [
+                    { field: ['name', 'url'], pk: true },
+                    { field: 'name' },
+                    { field: 'url' },
+                ],
             },
-            indices: [
-                { field: ['name', 'url'], pk: true },
-                { field: 'name' },
-                { field: 'url' },
-            ],
-        })
-
-        this.storageManager.registerCollection('favIcons', {
-            version: new Date(2018, 1, 1),
-            fields: {
-                hostname: { type: 'string' },
-                favIcon: { type: 'blob' },
+            favIcons: {
+                version: new Date(2018, 1, 1),
+                fields: {
+                    hostname: { type: 'string' },
+                    favIcon: { type: 'media' },
+                },
+                indices: [{ field: 'hostname', pk: true }],
             },
-            indices: [{ field: 'hostname', pk: true }],
-        })
+        }) // Set up model classes
 
-        const dexieHistory = getDexieHistory(this.storageManager.registry)
-        const baseVersion = 0
-
-        dexieHistory.forEach(({ version, schema, migrations }) => {
-            const finalVersion = baseVersion + version
-            const finalSchema = schema
-            this.version(finalVersion)
-                .stores(finalSchema)
-                .upgrade(() => {
-                    migrations.forEach(migration => {
-                        // TODO: Call migration with some object that allows for data manipulation
-                    })
-                })
-        })
-
-        // Set up model classes
         this.pages.mapToClass(Page)
         this.visits.mapToClass(Visit)
         this.bookmarks.mapToClass(Bookmark)

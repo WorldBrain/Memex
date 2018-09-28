@@ -1,8 +1,17 @@
+import StorageManager from 'storex'
+import { DexieStorageBackend } from 'storex-backend-dexie'
+import stemmer from 'memex-stemmer'
+
 import Storage, { Props } from './storage'
-import { StorageManager } from './storage/manager'
 
 // Create main singleton to interact with DB in the ext
-const storageManager = new StorageManager()
+const backend = new DexieStorageBackend({
+    dbName: 'memex',
+    stemmer,
+    idbImplementation: { factory: indexedDB, range: IDBKeyRange },
+}) as any
+
+const storageManager = new StorageManager({ backend })
 let realIndex: Storage = null
 const index = new Proxy<Storage>({} as Storage, {
     get: (target, key) => {
@@ -23,7 +32,7 @@ const index = new Proxy<Storage>({} as Storage, {
 
 export const init = (props?: Props) => {
     realIndex = new Storage({ ...props, storageManager })
-    storageManager._finishInitialization(realIndex)
+    storageManager.finishInitialization()
 }
 
 export * from './types'
