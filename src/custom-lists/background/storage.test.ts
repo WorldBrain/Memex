@@ -1,14 +1,24 @@
+import StorageManager from 'storex'
+import { DexieStorageBackend } from 'storex-backend-dexie'
+import stemmer from 'memex-stemmer'
+
 import CustomListBackground from './'
-import Storage from '../../search/storage'
 import * as DATA from './storage.test.data'
-import { StorageManager } from '../../search/storage/manager'
 
 const indexedDB = require('fake-indexeddb')
 const iDBKeyRange = require('fake-indexeddb/lib/FDBKeyRange')
 
 const runSuite = () => () => {
-    // New storage manager instance
-    const storageManager = new StorageManager()
+    const storageManager = new StorageManager({
+        backend: new DexieStorageBackend({
+            stemmer,
+            dbName: 'test',
+            idbImplementation: {
+                factory: indexedDB,
+                range: iDBKeyRange,
+            },
+        }) as any,
+    })
     const fakeIndex = new CustomListBackground({ storageManager })
     let fakeListCounter = 0
     fakeIndex.storage._generateListId = () => ++fakeListCounter
@@ -28,14 +38,7 @@ const runSuite = () => () => {
         indexedDB.deleteDatabase(dbName)
 
         // Passing fake IndexedDB to the storage manager
-        storageManager._finishInitialization(
-            new Storage({
-                indexedDB,
-                IDBKeyRange: iDBKeyRange,
-                dbName,
-                storageManager,
-            }),
-        )
+        storageManager.finishInitialization()
 
         await insertTestData()
     }
