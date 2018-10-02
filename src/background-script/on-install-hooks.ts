@@ -8,6 +8,12 @@ import {
     constants as blacklistConsts,
     blacklist,
 } from '../blacklist/background'
+import tabManager from '../activity-logger/background/tab-manager'
+import TabChangeListener from '../activity-logger/background/tab-change-listeners'
+import PageVisitLogger from '../activity-logger/background/log-page-visit'
+
+const pageVisitLogger = new PageVisitLogger({ tabManager })
+const tabChangeListener = new TabChangeListener({ tabManager, pageVisitLogger })
 
 export async function onInstall() {
     const now = Date.now()
@@ -27,6 +33,20 @@ export async function onInstall() {
 }
 
 export async function onUpdate() {
+    const tabs = await browser.tabs.query({})
+
+    for (const tab of tabs) {
+        tabManager.trackTab(tab)
+
+        if (tab.favIconUrl) {
+            await tabChangeListener.handleFavIcon(tab.id, tab, tab)
+        }
+
+        if (tab.url) {
+            await tabChangeListener.handleUrl(tab.id, tab, tab)
+        }
+    }
+
     // Check whether old Search Injection boolean exists and replace it with new object
     const searchInjectionKey = (await browser.storage.local.get(
         SEARCH_INJECTION_KEY,
