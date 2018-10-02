@@ -17,7 +17,7 @@ const runSuite = () => () => {
                 factory: indexedDB,
                 range: iDBKeyRange,
             },
-        }) as any,
+        }),
     })
     const fakeIndex = new CustomListBackground({ storageManager })
     let fakeListCounter = 0

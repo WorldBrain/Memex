@@ -19,7 +19,7 @@ const runSuite = () => {
                 factory: indexedDB,
                 range: iDBKeyRange,
             },
-        }) as any,
+        }),
     })
 
     const annotationStorage = new AnnotationBackground({ storageManager })

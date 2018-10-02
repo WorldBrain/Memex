@@ -1,3 +1,24 @@
+import Storex, { StorageCollection } from 'storex'
+import { FindManyOptions } from 'storex/lib/types'
+
+export type SuggestOptions = FindManyOptions & { includePks?: boolean }
+export type SuggestResult<S, P> = Array<{
+    collection: string
+    suggestion: S
+    pk: P
+}>
+
+interface MemexCollection extends StorageCollection {
+    suggestObjects<S, P = any>(
+        query,
+        options?: SuggestOptions,
+    ): Promise<SuggestResult<S, P>>
+}
+
+export interface StorageManager extends Storex {
+    collection(name: string): MemexCollection
+}
+
 export type VisitInput = number
 export type BookmarkInput = number
 export type PageID = string
