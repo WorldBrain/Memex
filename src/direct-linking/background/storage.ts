@@ -1,4 +1,4 @@
-import StorageManager from 'storex'
+import { StorageManager } from '../../search/types'
 import { browser, Tabs, Storage } from 'webextension-polyfill-ts'
 
 import { createPageFromTab, Tag } from '../../search'
