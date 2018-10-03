@@ -46,6 +46,8 @@ export default ({ context = __dirname, mode = 'development', ...opts }) => {
             alias: {
                 src: path.resolve(context, './src'),
                 external: path.resolve(context, './external'),
+                pson: 'pson/dist/PSON.js',
+                Long: 'long/dist/long.js',
             },
         },
         stats: {

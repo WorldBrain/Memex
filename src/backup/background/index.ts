@@ -1,19 +1,21 @@
+const pickBy = require('lodash/pickBy')
 import { EventEmitter } from 'events'
 import { makeRemotelyCallable } from '../../util/webextensionRPC'
 import { StorageManager } from '../../search/storage/manager'
 import { setupRequestInterceptor } from './redirect'
 import BackupStorage from './storage'
 import { BackupBackend } from './backend'
+import { ObjectChangeBatch } from './backend/types'
 export * from './backend'
 
 export interface BackupProgressInfo {
     state: 'preparing' | 'synching'
     totalObjects: number
-    processedObjects: number
+    processedChanges: number
     // currentCollection: string
-    collections: {
-        [name: string]: { totalObjects: number; processedObjects: number }
-    }
+    // collections: {
+    //     [name: string]: { totalObjects: number; processedObjects: number }
+    // }
 }
 
 export class BackupBackgroundModule {
@@ -137,7 +139,7 @@ export class BackupBackgroundModule {
             const backupTime = new Date()
             await this._doIncrementalBackup(backupTime, events)
             await this.backend.commitBackup({ events })
-            await this.lastBackupStorage.storeLastBackupTime(backupTime)
+            // await this.lastBackupStorage.storeLastBackupTime(backupTime)
         }
 
         procedure()
@@ -177,37 +179,38 @@ export class BackupBackgroundModule {
             collectionsWithVersions,
             untilWhen,
         )
-        for await (const change of this.storage.streamChanges(untilWhen)) {
-            await this._backupChange(change, events)
-            await change.forget()
-
-            info.processedObjects += 1
-            info.collections[change.collection].processedObjects += 1
+        for await (const batch of this.storage.streamChanges(untilWhen, {
+            batchSize: 5000,
+        })) {
+            await this._backupChanges(batch, info, events)
             events.emit('info', { info })
         }
 
         console.log('finished incremental backup')
     }
 
-    _backupChange = async (change, events) => {
-        if (change.operation !== 'delete') {
-            const object = await this.storageManager.findByPk(
-                change.collection,
-                change.objectPk,
+    _backupChanges = async (
+        batch: ObjectChangeBatch,
+        info: BackupProgressInfo,
+        events,
+    ) => {
+        for (const change of batch.changes) {
+            const object = pickBy(
+                await this.storageManager.findByPk(
+                    change.collection,
+                    change.objectPk,
+                ),
+                (val, key) => {
+                    return key !== 'terms' && key.indexOf('_terms') === -1
+                },
             )
-            await this.backend.storeObject({
-                collection: change.collection,
-                pk: change.objectPk,
-                object,
-                events,
-            })
-        } else {
-            await this.backend.deleteObject({
-                collection: change.collection,
-                pk: change.objectPk,
-                events,
-            })
+            change.object = object
         }
+        await this.backend.backupChanges({ changes: batch.changes, events })
+        await batch.forget()
+
+        info.processedChanges += batch.changes.length
+        // info.collections[change.collection].processedObjects += 1
     }
 
     _getCollectionsToBackup(): { name: string; version: Date }[] {
@@ -226,8 +229,8 @@ export class BackupBackgroundModule {
         const info: BackupProgressInfo = {
             state: 'synching',
             totalObjects: 0,
-            processedObjects: 0,
-            collections: {},
+            processedChanges: 0,
+            // collections: {},
         }
 
         const collectionCountPairs = (await Promise.all(
@@ -248,10 +251,10 @@ export class BackupBackgroundModule {
                 collectionName,
                 totalObjects,
             )
-            info.collections[collectionName] = {
-                totalObjects,
-                processedObjects: 0,
-            }
+            // info.collections[collectionName] = {
+            //     `totalObject`s,
+            //     processedObjects: 0,
+            // }
             info.totalObjects += totalObjects as number
         }
 
