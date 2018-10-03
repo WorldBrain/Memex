@@ -1,17 +1,33 @@
 import { EventEmitter } from 'events'
 
+export interface BackupObjectLocation {
+    collection: string
+    pk: string
+}
+
+export type BackupObject = BackupObjectLocation & {
+    object: object
+}
+
+export interface ObjectChange {
+    collection: string
+    objectPk: string
+    object?: any
+    operation: 'create' | 'update' | 'delete'
+}
+
+export interface ObjectChangeBatch {
+    changes: Array<ObjectChange>
+    forget: () => Promise<void>
+}
+
 export abstract class BackupBackend {
     async getLoginUrl(params: any): Promise<string | null> {
         return null
     }
 
-    async isAuthenticated() {
-        return false
-    }
-
-    async isConnected() {
-        return false
-    }
+    abstract isConnected(): Promise<boolean>
+    abstract isAuthenticated(): Promise<boolean>
 
     async handleLoginRedirectedBack(locationHref: string) {
         return
@@ -24,24 +40,52 @@ export abstract class BackupBackend {
         return
     }
 
-    abstract storeObject({
-        collection,
-        pk,
-        object,
+    async storeObject({
+        backupObject,
         events,
     }: {
-        collection: string
-        pk: string
-        object: object
+        backupObject: BackupObject
         events: EventEmitter
-    }): Promise<any>
-    abstract deleteObject({
-        collection,
-        pk,
+    }): Promise<any> {
+        // Either implement this and deleteObject(), or implement backupChanges()
+    }
+
+    async deleteObject({
+        backupObject,
         events,
     }: {
-        collection: string
-        pk: string
+        backupObject: BackupObjectLocation
         events: EventEmitter
-    }): Promise<any>
+    }): Promise<any> {
+        // Either implement this and storeObject(), or implement backupChanges()
+    }
+
+    async backupChanges({
+        changes,
+        events,
+    }: {
+        changes: ObjectChange[]
+        events: EventEmitter
+    }) {
+        for (const change of changes) {
+            if (change.operation !== 'delete') {
+                await this.storeObject({
+                    backupObject: {
+                        collection: change.collection,
+                        pk: change.objectPk,
+                        object: change.object,
+                    },
+                    events,
+                })
+            } else {
+                await this.deleteObject({
+                    backupObject: {
+                        collection: change.collection,
+                        pk: change.objectPk,
+                    },
+                    events,
+                })
+            }
+        }
+    }
 }

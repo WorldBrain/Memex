@@ -39,12 +39,17 @@ customList.setupRemoteFunctions()
 
 const backupModule = new backup.BackupBackgroundModule({
     storageManager,
-    backend: new driveBackup.DriveBackupBackend({
-        tokenStore: new driveBackup.LocalStorageDriveTokenStore({
-            prefix: 'drive-token-',
-        }),
-        memexCloudOrigin: backup._getMemexCloudOrigin(),
-    }),
+    backend:
+        process.env.BACKUP_BACKEND === 'local'
+            ? new (require('./backup/background/backend/simple-http')).default({
+                  url: 'http://localhost:8000',
+              })
+            : new driveBackup.DriveBackupBackend({
+                  tokenStore: new driveBackup.LocalStorageDriveTokenStore({
+                      prefix: 'drive-token-',
+                  }),
+                  memexCloudOrigin: backup._getMemexCloudOrigin(),
+              }),
     lastBackupStorage: new backup.LocalLastBackupStorage({ key: 'lastBackup' }),
 })
 backupModule.setupRemoteFunctions()

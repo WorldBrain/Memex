@@ -3,6 +3,7 @@ export default ({ mode }) => {
         VERSION: process.env.npm_package_version,
         PIWIK_SITE_ID: '1',
         NODE_ENV: mode,
+        BACKUP_BACKEND: 'google-drive',
     }
 
     if (mode === 'development') {

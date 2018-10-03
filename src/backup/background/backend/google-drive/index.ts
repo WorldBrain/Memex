@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events'
 import { GoogleDriveClient } from './client'
 import { DriveTokenManager, DriveTokenStore } from './token-manager'
-import { BackupBackend } from '../types'
+import { BackupBackend, ObjectChange } from '../types'
 export { LocalStorageDriveTokenStore } from './token-manager'
 
 const DEFAULT_AUTH_SCOPE = 'https://www.googleapis.com/auth/drive.appdata'
@@ -70,30 +70,44 @@ export class DriveBackupBackend extends BackupBackend {
         })
     }
 
-    async storeObject({
-        collection,
-        pk,
-        object,
-        events,
-    }: {
-        collection: string
-        pk: string
-        object: object
-        events: EventEmitter
-    }): Promise<any> {
-        // await new Promise(resolve => setTimeout(resolve, 3000))
-        await this.client.storeObject({ collection, pk, object })
-    }
+    // async storeObject({
+    //     collection,
+    //     pk,
+    //     object,
+    //     events,
+    // }: {
+    //     collection: string
+    //     pk: string
+    //     object: object
+    //     events: EventEmitter
+    // }): Promise<any> {
+    //     // await new Promise(resolve => setTimeout(resolve, 3000))
+    //     await this.client.storeObject({ collection, pk, object })
+    // }
 
-    async deleteObject({
-        collection,
-        pk,
+    // async deleteObject({
+    //     collection,
+    //     pk,
+    //     events,
+    // }: {
+    //     collection: string
+    //     pk: string
+    //     events: EventEmitter
+    // }): Promise<any> {
+    //     await this.client.deleteObject({ collection, pk })
+    // }
+
+    async backupChanges({
+        changes,
         events,
     }: {
-        collection: string
-        pk: string
+        changes: ObjectChange[]
         events: EventEmitter
-    }): Promise<any> {
-        await this.client.deleteObject({ collection, pk })
+    }) {
+        await this.client.storeObject({
+            folderName: 'change-sets',
+            fileName: Date.now().toString(),
+            object: changes,
+        })
     }
 }

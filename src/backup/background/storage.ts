@@ -1,5 +1,6 @@
 import { FeatureStorage, CollectionDefinitions } from '../../search/storage'
 import { StorageManager } from '../../search/storage/manager'
+import { ObjectChangeBatch } from './backend/types'
 
 export default class BackupStorage extends FeatureStorage {
     collections: { [name: string]: CollectionDefinitions } = {
@@ -51,31 +52,53 @@ export default class BackupStorage extends FeatureStorage {
         })
     }
 
-    async *streamChanges(until: Date) {
+    async *streamChanges(
+        until: Date,
+        { batchSize }: { batchSize: number },
+    ): AsyncIterableIterator<ObjectChangeBatch> {
         let changes
-        do {
+        const batch = {
+            changes: [],
+            forget: async () => {
+                const pks = batch.changes.map(change => change['timestamp'])
+                await this.storageManager.deleteObject('backupChanges', {
+                    timestamp: { $in: pks },
+                })
+            },
+        }
+
+        // Explicit variable with while loop prevents fighting and confusing with nested breaks
+        let running = true
+        while (running) {
             changes = await this.storageManager.findAll(
                 'backupChanges',
                 {},
                 { limit: 50 },
             )
+            if (!changes.length) {
+                running = false
+                break
+            }
+
             for (const change of changes) {
                 if (change.timestamp > until.getTime()) {
+                    running = false
                     break
                 }
 
-                yield {
-                    ...change,
-                    forget: async () => {
-                        console.log('forgetting change', change)
-                        await this.storageManager.deleteObject(
-                            'backupChanges',
-                            change,
-                        )
-                    },
+                batch.changes.push(change)
+                if (batch.changes.length === batchSize) {
+                    yield batch
+                    batch.changes = []
                 }
             }
-        } while (changes.length > 0)
+
+            // Means we didn't have enough changes for an entire batch, so we've reached the end
+            if (batch.changes.length) {
+                yield batch
+                running = false
+            }
+        }
     }
 
     async countQueuedChangesByCollection(collectionName: string, until: Date) {

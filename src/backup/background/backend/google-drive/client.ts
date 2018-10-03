@@ -13,12 +13,12 @@ export class GoogleDriveClient {
     }
 
     async storeObject({
-        collection,
-        pk,
+        folderName,
+        fileName,
         object,
     }: {
-        collection: string
-        pk: string
+        folderName: string
+        fileName: string
         object: object
     }) {
         await this.tokenManager.refreshAccessToken()
@@ -28,12 +28,12 @@ export class GoogleDriveClient {
             created: folderCreated,
         } = await this.createFolder({
             parentId: 'appDataFolder',
-            name: collection,
+            name: folderName,
         })
-        const fileId = await this.getFolderChildId(collectionFolderId, pk)
+        const fileId = await this.getFolderChildId(collectionFolderId, fileName)
 
         const metadata = {
-            name: pk,
+            name: fileName,
             mimeType: 'application/json',
         }
         if (!fileId) {
@@ -66,22 +66,28 @@ export class GoogleDriveClient {
         })
 
         if (!fileId) {
-            this.idCache[collectionFolderId][pk] = 'NEW'
+            this.idCache[collectionFolderId][fileName] = 'NEW'
         }
     }
 
-    async deleteObject({ collection, pk }: { collection: string; pk: string }) {
+    async deleteObject({
+        folderName,
+        fileName,
+    }: {
+        folderName: string
+        fileName: string
+    }) {
         await this.tokenManager.refreshAccessToken()
 
         const collectionFolderId = await this.getFolderChildId(
             'appDataFolder',
-            collection,
+            folderName,
         )
         if (!collectionFolderId) {
             return
         }
 
-        const fileId = await this.getFolderChildId(collectionFolderId, pk)
+        const fileId = await this.getFolderChildId(collectionFolderId, fileName)
         if (!fileId) {
             return
         }
@@ -89,7 +95,7 @@ export class GoogleDriveClient {
         await this._request(`/files/${fileId}`, {
             method: 'DELETE',
         })
-        delete this.idCache[collectionFolderId][pk]
+        delete this.idCache[collectionFolderId][fileName]
     }
 
     async cacheFolderContentIDs(parentId: string) {
