@@ -8,12 +8,7 @@ import {
     constants as blacklistConsts,
     blacklist,
 } from '../blacklist/background'
-import tabManager from '../activity-logger/background/tab-manager'
-import TabChangeListener from '../activity-logger/background/tab-change-listeners'
-import PageVisitLogger from '../activity-logger/background/log-page-visit'
-
-const pageVisitLogger = new PageVisitLogger({ tabManager })
-const tabChangeListener = new TabChangeListener({ tabManager, pageVisitLogger })
+import { trackExistingTabs } from '../activity-logger/background/tab-bridge'
 
 export async function onInstall() {
     const now = Date.now()
@@ -29,30 +24,11 @@ export async function onInstall() {
     // Store the timestamp of when the extension was installed
     browser.storage.local.set({ [INSTALL_TIME_KEY]: now })
 
+    await trackExistingTabs({ isNewInstall: true })
     await generateTokenIfNot({ installTime: now })
 }
 
 export async function onUpdate() {
-    const tabs = await browser.tabs.query({})
-
-    for (const tab of tabs) {
-        tabManager.trackTab(tab)
-
-        if (tab.favIconUrl) {
-            await tabChangeListener.handleFavIcon(tab.id, tab, tab)
-        }
-
-        if (tab.url) {
-            await tabChangeListener.handleUrl(tab.id, tab, tab)
-            if (tab.url.startsWith('http')) {
-                const ans = await browser.tabs.executeScript(tab.id, {
-                    file: '/content_script.js',
-                })
-                console.log(ans)
-            }
-        }
-    }
-
     // Check whether old Search Injection boolean exists and replace it with new object
     const searchInjectionKey = (await browser.storage.local.get(
         SEARCH_INJECTION_KEY,
@@ -71,5 +47,6 @@ export async function onUpdate() {
         INSTALL_TIME_KEY
     ]
 
+    await trackExistingTabs({ isNewInstall: false })
     await generateTokenIfNot({ installTime })
 }
