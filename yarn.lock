@@ -631,10 +631,6 @@
     text-table "^0.2.0"
     webpack-log "^1.1.2"
 
-ByteBuffer@^0.2.6:
-  version "0.2.6"
-  resolved "https://registry.yarnpkg.com/ByteBuffer/-/ByteBuffer-0.2.6.tgz#ddbbdef1cc97f7073d52a11a7e03597c423761d1"
-
 JSONSelect@0.2.1:
   version "0.2.1"
   resolved "https://registry.yarnpkg.com/JSONSelect/-/JSONSelect-0.2.1.tgz#415418a526d33fe31d74b4defa3c836d485ec203"
@@ -2439,10 +2435,6 @@ buffer@^4.3.0:
     ieee754 "^1.1.4"
     isarray "^1.0.0"
 
-bufferview@~1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/bufferview/-/bufferview-1.0.1.tgz#7afd74a45f937fa422a1d338c08bbfdc76cd725d"
-
 builtin-modules@^1.0.0, builtin-modules@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/builtin-modules/-/builtin-modules-1.1.1.tgz#270f076c5a72c02f5b65a47df94c5fe3a278892f"
@@ -2459,19 +2451,6 @@ bunyan@1.8.10:
     moment "^2.10.6"
     mv "~2"
     safe-json-stringify "~1"
-
-bytebuffer@^5.0.1:
-  version "5.0.1"
-  resolved "https://registry.yarnpkg.com/bytebuffer/-/bytebuffer-5.0.1.tgz#582eea4b1a873b6d020a48d58df85f0bba6cfddd"
-  dependencies:
-    long "~3"
-
-bytebuffer@~3:
-  version "3.5.5"
-  resolved "https://registry.yarnpkg.com/bytebuffer/-/bytebuffer-3.5.5.tgz#7a6faf1a13514b083f1fcf9541c4c9bfbe7e7fd3"
-  dependencies:
-    bufferview "~1"
-    long "~2 >=2.2.3"
 
 bytes@3.0.0:
   version "3.0.0"
@@ -7366,17 +7345,13 @@ lolex@^2.7.1:
   version "2.7.1"
   resolved "https://registry.yarnpkg.com/lolex/-/lolex-2.7.1.tgz#e40a8c4d1f14b536aa03e42a537c7adbaf0c20be"
 
-long@4.0.0, long@^4.0.0:
+long@4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/long/-/long-4.0.0.tgz#9a7b71cfb7d361a194ea555241c92f7468d5bf28"
 
-long@^3.2.0, long@~3:
+long@^3.2.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/long/-/long-3.2.0.tgz#d821b7138ca1cb581c172990ef14db200b5c474b"
-
-"long@~2 >=2.2.3":
-  version "2.4.0"
-  resolved "https://registry.yarnpkg.com/long/-/long-2.4.0.tgz#9fa180bb1d9500cdc29c4156766a1995e1f4524f"
 
 longest-streak@^2.0.1:
   version "2.0.2"
@@ -9551,12 +9526,6 @@ pseudomap@^1.0.2:
 psl@^1.1.24:
   version "1.1.28"
   resolved "https://registry.yarnpkg.com/psl/-/psl-1.1.28.tgz#4fb6ceb08a1e2214d4fd4de0ca22dae13740bc7b"
-
-pson@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/pson/-/pson-2.0.0.tgz#9200a8b7954a53f0773e3668db0341264595387a"
-  dependencies:
-    bytebuffer "~3"
 
 public-encrypt@^4.0.0:
   version "4.0.2"
