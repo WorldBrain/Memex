@@ -11,11 +11,16 @@ const tabChangeListener = new TabChangeListeners({
     pageVisitLogger,
 })
 
+let resolveTabQuery
+const tabQueryP = new Promise(resolve => (resolveTabQuery = resolve))
+
 export const tabUpdatedListener: TabChangeListener = async (
     tabId,
     changeInfo,
     tab,
 ) => {
+    await tabQueryP
+
     if (changeInfo.status) {
         tabManager.setTabLoaded(tabId, changeInfo.status === 'complete')
     }
@@ -52,4 +57,6 @@ export async function trackExistingTabs({ isNewInstall = false }) {
             await tabChangeListener.handleUrl(tab.id, tab, tab)
         }
     }
+
+    resolveTabQuery()
 }
