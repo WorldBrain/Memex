@@ -1,5 +1,6 @@
 import initStorageManager from './memory-storex'
-import getDb, * as index from '.'
+import getDb, { setStorexBackend } from './get-db'
+import * as idx from '.'
 import * as DATA from './index.test.data'
 
 jest.mock('./models/abstract-model')
@@ -12,18 +13,24 @@ describe('Search index integration', () => {
 
     async function insertTestData() {
         // Insert some test data for all tests to use
-        await index.addPage({ pageDoc: DATA.PAGE_3, visits: [DATA.VISIT_3] })
-        await index.addPage({
+        await idx.addPage(getDb)({
+            pageDoc: DATA.PAGE_3,
+            visits: [DATA.VISIT_3],
+        })
+        await idx.addPage(getDb)({
             pageDoc: DATA.PAGE_2,
             visits: [DATA.VISIT_2],
             bookmark: DATA.BOOKMARK_1,
         })
-        await index.addPage({ pageDoc: DATA.PAGE_1, visits: [DATA.VISIT_1] })
+        await idx.addPage(getDb)({
+            pageDoc: DATA.PAGE_1,
+            visits: [DATA.VISIT_1],
+        })
 
         // // Add some test tags
-        await index.addTag({ url: DATA.PAGE_3.url, tag: 'good' })
-        await index.addTag({ url: DATA.PAGE_3.url, tag: 'quality' })
-        await index.addTag({ url: DATA.PAGE_2.url, tag: 'quality' })
+        await idx.addTag(getDb)({ url: DATA.PAGE_3.url, tag: 'good' })
+        await idx.addTag(getDb)({ url: DATA.PAGE_3.url, tag: 'quality' })
+        await idx.addTag(getDb)({ url: DATA.PAGE_2.url, tag: 'quality' })
     }
 
     async function resetTestData() {
@@ -32,7 +39,7 @@ describe('Search index integration', () => {
 
     // Bind projecting-out just ID and score from results to search
     const search = (params = {}) =>
-        index.search({
+        idx.search(getDb)({
             mapResultsFunc: db => res => {
                 return res.map(([id, score]) => [id, score])
             },
@@ -43,7 +50,7 @@ describe('Search index integration', () => {
     beforeEach(async () => {
         storageManager = initStorageManager()
         await storageManager.finishInitialization()
-        index.setStorexBackend(storageManager.backend)
+        setStorexBackend(storageManager.backend)
         await resetTestData()
     })
 
@@ -58,10 +65,10 @@ describe('Search index integration', () => {
                 expect(currPage.latest).toEqual(DATA.VISIT_3)
             }
 
-            await runChecks(await index.getPage(DATA.PAGE_3.url))
-            await runChecks(await index.getPage('test.com/test')) // Should get normalized the same
+            await runChecks(await idx.getPage(getDb)(DATA.PAGE_3.url))
+            await runChecks(await idx.getPage(getDb)('test.com/test')) // Should get normalized the same
 
-            const page = await index.getPage(DATA.PAGE_2.url)
+            const page = await idx.getPage(getDb)(DATA.PAGE_2.url)
 
             expect(page).toBeDefined()
             expect(page).not.toBeNull()
@@ -344,32 +351,42 @@ describe('Search index integration', () => {
 
         test('domains suggest', async () => {
             const expected1 = ['lorem.com']
-            expect(await index.suggest('l', 'domain')).toEqual(expected1)
-            expect(await index.suggest('lo', 'domain')).toEqual(expected1)
-            expect(await index.suggest('lol', 'domain')).not.toEqual(expected1)
+            expect(await idx.suggest(getDb)('l', 'domain')).toEqual(expected1)
+            expect(await idx.suggest(getDb)('lo', 'domain')).toEqual(expected1)
+            expect(await idx.suggest(getDb)('lol', 'domain')).not.toEqual(
+                expected1,
+            )
 
             const expected2 = ['test.com']
-            expect(await index.suggest('t', 'domain')).toEqual(expected2)
-            expect(await index.suggest('te', 'domain')).toEqual(expected2)
-            expect(await index.suggest('tet', 'domain')).not.toEqual(expected2)
+            expect(await idx.suggest(getDb)('t', 'domain')).toEqual(expected2)
+            expect(await idx.suggest(getDb)('te', 'domain')).toEqual(expected2)
+            expect(await idx.suggest(getDb)('tet', 'domain')).not.toEqual(
+                expected2,
+            )
 
             // New implementation should also support hostnames
             const expected3 = ['sub.lorem.com']
-            expect(await index.suggest('s', 'domain')).toEqual(expected3)
-            expect(await index.suggest('su', 'domain')).toEqual(expected3)
-            expect(await index.suggest('sus', 'domain')).not.toEqual(expected3)
+            expect(await idx.suggest(getDb)('s', 'domain')).toEqual(expected3)
+            expect(await idx.suggest(getDb)('su', 'domain')).toEqual(expected3)
+            expect(await idx.suggest(getDb)('sus', 'domain')).not.toEqual(
+                expected3,
+            )
         })
 
         test('tags suggest', async () => {
             const expected1 = ['quality']
-            expect(await index.suggest('q', 'tag')).toEqual(expected1)
-            expect(await index.suggest('qu', 'tag')).toEqual(expected1)
-            expect(await index.suggest('quq', 'tag')).not.toEqual(expected1)
+            expect(await idx.suggest(getDb)('q', 'tag')).toEqual(expected1)
+            expect(await idx.suggest(getDb)('qu', 'tag')).toEqual(expected1)
+            expect(await idx.suggest(getDb)('quq', 'tag')).not.toEqual(
+                expected1,
+            )
 
             const expected2 = ['good']
-            expect(await index.suggest('g', 'tag')).toEqual(expected2)
-            expect(await index.suggest('go', 'tag')).toEqual(expected2)
-            expect(await index.suggest('gog', 'tag')).not.toEqual(expected2)
+            expect(await idx.suggest(getDb)('g', 'tag')).toEqual(expected2)
+            expect(await idx.suggest(getDb)('go', 'tag')).toEqual(expected2)
+            expect(await idx.suggest(getDb)('gog', 'tag')).not.toEqual(
+                expected2,
+            )
         })
 
         test('blank search', async () => {
@@ -408,8 +425,8 @@ describe('Search index integration', () => {
             const hostname1 = 'lorem.com'
             const hostname2 = 'sub.lorem.com'
 
-            await index.addFavIcon(DATA.PAGE_1.url, DATA.FAV_1)
-            await index.addFavIcon(DATA.PAGE_2.url, DATA.FAV_1)
+            await idx.addFavIcon(getDb)(DATA.PAGE_1.url, DATA.FAV_1)
+            await idx.addFavIcon(getDb)(DATA.PAGE_2.url, DATA.FAV_1)
 
             const fav1 = await db.favIcons.get(hostname1)
             const fav2 = await db.favIcons.get(hostname2)
@@ -420,7 +437,7 @@ describe('Search index integration', () => {
         test('page adding affects search', async () => {
             const tmpVisit = Date.now()
             // Insert a tmp page
-            await index.addPage({
+            await idx.addPage(getDb)({
                 pageDoc: DATA.PAGE_4,
                 visits: [tmpVisit],
             })
@@ -446,7 +463,7 @@ describe('Search index integration', () => {
             expect(before[0]).toEqual([DATA.PAGE_ID_3, DATA.VISIT_3])
 
             const newVisit = Date.now()
-            await index.addVisit(DATA.PAGE_2.url, newVisit)
+            await idx.addVisit(getDb)(DATA.PAGE_2.url, newVisit)
 
             const { docs: after } = await search()
 
@@ -465,7 +482,7 @@ describe('Search index integration', () => {
             )
 
             // so delete it
-            await index.delPages([DATA.PAGE_2.url])
+            await idx.delPages(getDb)([DATA.PAGE_2.url])
 
             const { docs: after } = await search()
 
@@ -484,7 +501,7 @@ describe('Search index integration', () => {
             )
 
             // This page doesn't have any tags; 'quality' tag has 2 other pages
-            await index.addTag({ url: DATA.PAGE_1.url, tag: 'quality' })
+            await idx.addTag(getDb)({ url: DATA.PAGE_1.url, tag: 'quality' })
 
             const { docs: after } = await search({ tags: ['quality'] })
             expect(after.length).toBe(3)
@@ -500,7 +517,7 @@ describe('Search index integration', () => {
                 expect.arrayContaining([[DATA.PAGE_ID_2, DATA.VISIT_2]]),
             )
 
-            await index.delTag({ url: DATA.PAGE_2.url, tag: 'quality' })
+            await idx.delTag(getDb)({ url: DATA.PAGE_2.url, tag: 'quality' })
 
             const { docs: after } = await search({ tags: ['quality'] })
             expect(after.length).toBe(1)
@@ -520,7 +537,7 @@ describe('Search index integration', () => {
             ) // Base test data expectation
 
             // Add bm to 3rd test page
-            await index.addBookmark({
+            await idx.addBookmark(getDb)({
                 url: DATA.PAGE_1.url,
                 timestamp: tmpBm,
             } as any)
@@ -541,7 +558,7 @@ describe('Search index integration', () => {
             expect(before[0]).toEqual([DATA.PAGE_ID_2, DATA.BOOKMARK_1])
 
             // Add bm to 3rd test page
-            await index.delBookmark({ url: DATA.PAGE_2.url })
+            await idx.delBookmark(getDb)({ url: DATA.PAGE_2.url })
 
             const { docs: after } = await search({ showOnlyBookmarks: true })
             expect(after.length).toBe(0) // Bye
@@ -552,7 +569,7 @@ describe('Search index integration', () => {
             const { docs: before } = await search({ query })
             expect(before.length).toBe(0)
 
-            await index.addPageTerms({
+            await idx.addPageTerms(getDb)({
                 pageDoc: {
                     ...DATA.PAGE_3,
                     content: {
@@ -572,7 +589,7 @@ describe('Search index integration', () => {
             expect(before.length).toBe(1)
 
             // Re-add page 3, but with new data (in-ext use case is page re-visit)
-            await index.addPage({
+            await idx.addPage(getDb)({
                 pageDoc: {
                     ...DATA.PAGE_3,
                     content: {
