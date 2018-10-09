@@ -45,7 +45,15 @@ export default ({ context = __dirname, mode = 'development', ...opts }) => {
             mainFields: ['browser', 'main', 'module'],
             alias: {
                 src: path.resolve(context, './src'),
-                external: path.resolve(context, './external'),
+                storex: path.resolve(context, './external/storex'),
+                'storex-backend-dexie': path.resolve(
+                    context,
+                    './external/storex-backend-dexie',
+                ),
+                'memex-stemmer': path.resolve(
+                    context,
+                    './external/memex-stemmer',
+                ),
             },
         },
         stats: {
