@@ -8,33 +8,33 @@ import { FavIconChecker } from './types'
 
 interface Props {
     tabManager: TabManager
-    pageFetch?: typeof searchIndex.getPage
     momentLib?: typeof moment
-    pageCreate?: typeof searchIndex.addPage
-    visitCreate?: typeof searchIndex.addVisit
-    pageTermsAdd?: typeof searchIndex.addPageTerms
     favIconCheck?: FavIconChecker
     pageAnalyzer?: PageAnalyzer
+    pageFetch?: any
+    pageCreate?: any
+    visitCreate?: any
+    pageTermsAdd?: any
 }
 
 export default class PageVisitLogger {
     private _tabManager: TabManager
     private _checkFavIcon: FavIconChecker
     private _analyzePage: PageAnalyzer
-    private _addPageTerms: typeof searchIndex.addPageTerms
-    private _createPage: typeof searchIndex.addPage
-    private _fetchPage: typeof searchIndex.getPage
-    private _createVisit: typeof searchIndex.addVisit
+    private _addPageTerms
+    private _createPage
+    private _fetchPage
+    private _createVisit
     private _moment: typeof moment
 
     constructor({
         tabManager,
         pageAnalyzer = analyzePage,
-        pageTermsAdd = searchIndex.addPageTerms,
-        pageCreate = searchIndex.addPage,
-        pageFetch = searchIndex.getPage,
-        visitCreate = searchIndex.addVisit,
-        favIconCheck = searchIndex.domainHasFavIcon,
+        pageTermsAdd = searchIndex.addPageTerms(searchIndex.getDb),
+        pageCreate = searchIndex.addPage(searchIndex.getDb),
+        pageFetch = searchIndex.getPage(searchIndex.getDb),
+        visitCreate = searchIndex.addVisit(searchIndex.getDb),
+        favIconCheck = searchIndex.domainHasFavIcon(searchIndex.getDb),
         momentLib = moment,
     }: Props) {
         this._tabManager = tabManager
