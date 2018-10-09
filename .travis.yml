@@ -1,8 +1,9 @@
 language: node_js
 node_js:
-    - "lts/*"
+    - 'lts/*'
 install:
     - yarn install --frozen-lockfile
+    - ./setup-submodules.sh
 script:
     - npm run test
     - npm run lint
