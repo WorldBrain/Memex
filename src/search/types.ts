@@ -1,5 +1,5 @@
 import Storex, { StorageCollection } from 'storex'
-import { FindManyOptions } from 'storex/lib/types'
+import { FindManyOptions } from 'storex/types'
 
 export type SuggestOptions = FindManyOptions & { includePks?: boolean }
 export type SuggestResult<S, P> = Array<{

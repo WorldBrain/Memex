@@ -13,7 +13,11 @@
     },
     "modulePaths": ["<rootDir>"],
     "moduleNameMapper": {
-        "\\.(css|less)$": "identity-obj-proxy"
+        "\\.(css|less)$": "identity-obj-proxy",
+        "storex": "<rootDir>/external/storex",
+        "storex/(.*)": "<rootDir>/external/storex/lib/$1",
+        "storex-backend-dexie": "<rootDir>/external/storex-backend-dexie",
+        "memex-stemmer": "<rootDir>/external/memex-stemmer"
     },
     "moduleFileExtensions": ["js", "jsx", "ts", "tsx"],
     "setupFiles": ["jest-webextension-mock", "./setupJest.js"],

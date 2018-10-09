@@ -15,18 +15,14 @@
         "skipLibCheck": true,
         "strictNullChecks": false,
         "outDir": "tmp",
-        "lib": [
-            "es2017",
-            "dom",
-            "esnext.asynciterable"
-        ]
+        "paths": {
+            "storex": ["external/storex"],
+            "storex/*": ["external/storex/lib/*"],
+            "storex-backend-dexie": ["external/storex-backend-dexie"],
+            "memex-stemmer": ["external/memex-stemmer"]
+        },
+        "lib": ["es2017", "dom", "esnext.asynciterable"]
     },
-    "include": [
-        "./src/**/*",
-    ],
-    "exclude": [
-        "node_modules",
-        "./src/**/*.js",
-        "./src/**/*.jsx"
-    ]
+    "include": ["./src/**/*"],
+    "exclude": ["node_modules", "./src/**/*.js", "./src/**/*.jsx"]
 }
