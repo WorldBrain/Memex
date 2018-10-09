@@ -9,7 +9,6 @@ import TagHolder from '../../components/TagHolder'
 import * as constants from '../../constants'
 
 import styles from './CommentBox.css'
-// import { close } from 'fs';
 
 class CommentBox extends React.PureComponent {
     static propTypes = {
@@ -119,14 +118,9 @@ class CommentBox extends React.PureComponent {
             e.stopPropagation()
             this.props.setTagInput(true)
         } else if (e.altKey && e.key === 'Enter') {
-            console.log('meta thin')
             e.preventDefault()
             this.save()
         }
-    }
-
-    handleSubmit = e => {
-        this.save()
     }
 
     getHighlightText = () => {
@@ -250,7 +244,7 @@ class CommentBox extends React.PureComponent {
                         [styles.noDisplay]: this.isHidden(),
                     })}
                 >
-                    <form onSubmit={this.handleSubmit}>
+                    <form onSubmit={this.save}>
                         <textarea
                             rows={this.props.textareaRows}
                             className={styles.textarea}
