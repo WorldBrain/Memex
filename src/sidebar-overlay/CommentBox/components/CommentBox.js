@@ -117,7 +117,7 @@ class CommentBox extends React.PureComponent {
             e.preventDefault()
             e.stopPropagation()
             this.props.setTagInput(true)
-        } else if (e.altKey && e.key === 'Enter') {
+        } else if (e.metaKey && e.key === 'Enter') {
             e.preventDefault()
             this.save()
         }
@@ -238,39 +238,38 @@ class CommentBox extends React.PureComponent {
                     </div>
                 ) : null}
 
-                <div
+                <form
+                    onSubmit={this.save}
                     className={cx(styles.commentBox, {
                         [styles.iframe]: this.props.env === 'iframe',
                         [styles.noDisplay]: this.isHidden(),
                     })}
                 >
-                    <form onSubmit={this.save}>
-                        <textarea
-                            rows={this.props.textareaRows}
-                            className={styles.textarea}
-                            value={this.props.commentInput}
-                            placeholder={'Add your comment...'}
-                            onChange={this.handleChange}
-                            onKeyDown={this.handleKeyDown}
-                            ref={this.setInputRef}
-                            onClick={() => this.props.setTagInput(false)}
-                        />
-                        <br />
-                        <div ref={this.setTagRef}>{this.renderTagInput()}</div>
-                        <div className={styles.buttonHolder}>
-                            <button
-                                className={styles.save}
-                                type="submit"
-                                ref={this.setSaveRef}
-                            >
-                                Save
-                            </button>
-                            <a className={styles.cancel} onClick={this.cancel}>
-                                Cancel
-                            </a>
-                        </div>
-                    </form>
-                </div>
+                    <textarea
+                        rows={this.props.textareaRows}
+                        className={styles.textarea}
+                        value={this.props.commentInput}
+                        placeholder={'Add your comment...'}
+                        onChange={this.handleChange}
+                        onKeyDown={this.handleKeyDown}
+                        ref={this.setInputRef}
+                        onClick={() => this.props.setTagInput(false)}
+                    />
+                    <br />
+                    <div ref={this.setTagRef}>{this.renderTagInput()}</div>
+                    <div className={styles.buttonHolder}>
+                        <button
+                            className={styles.save}
+                            type="submit"
+                            ref={this.setSaveRef}
+                        >
+                            Save
+                        </button>
+                        <a className={styles.cancel} onClick={this.cancel}>
+                            Cancel
+                        </a>
+                    </div>
+                </form>
             </div>
         )
     }
