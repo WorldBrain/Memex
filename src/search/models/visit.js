@@ -1,4 +1,4 @@
-import db from '..'
+import getDb from '..'
 import EventModel from './event-model'
 
 export default class Visit extends EventModel {
@@ -57,6 +57,8 @@ export default class Visit extends EventModel {
     }
 
     async save() {
+        const db = await getDb()
+
         // Only update if changes detected between existing visit and this one
         const existingVisit = await db.visits.get(this.pk)
         if (!this._hasChanged(existingVisit)) {

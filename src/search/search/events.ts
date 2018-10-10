@@ -1,4 +1,4 @@
-import db, { Storage, SearchParams, PageResultsMap, FilteredURLs } from '..'
+import getDb, { SearchParams, PageResultsMap, FilteredURLs } from '..'
 
 /**
  * Given some URLs, grab the latest assoc. event timestamp for each one within the time filter bounds.
@@ -7,6 +7,8 @@ export async function mapUrlsToLatestEvents(
     { endDate, startDate, bookmarks }: Partial<SearchParams>,
     urls: string[],
 ) {
+    const db = await getDb
+
     /**
      * @param {PageResultsMap} urlTimeMap Map to keep track of URL-timestamp pairs.
      * @param {boolean} [skipDateCheck=false] Flag to denote whether to skip start/end date boundary checking.
@@ -93,13 +95,14 @@ async function lookbackFromEndDate(
     }: Partial<SearchParams>,
     filteredUrls: FilteredURLs,
 ) {
+    const db = await getDb
     // Lookback from endDate to get needed amount of visits
     const latestVisits: PageResultsMap = new Map()
     await db.visits
         .where('[time+url]')
         .between(
-            [startDate, Storage.MIN_STR],
-            [endDate, Storage.MAX_STR],
+            [startDate, ''],
+            [endDate, String.fromCharCode(65535)],
             true,
             true,
         )
@@ -148,6 +151,7 @@ async function lookbackBookmarksTime({
     skip = 0,
     limit = 10,
 }: Partial<SearchParams>) {
+    const db = await getDb
     let bmsExhausted = false
     let results: PageResultsMap = new Map()
 

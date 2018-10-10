@@ -1,4 +1,4 @@
-import db, { VisitInteraction } from '..'
+import getDb, { VisitInteraction } from '..'
 import AbstractModel from './abstract-model'
 import Visit from './visit'
 import Bookmark from './bookmark'
@@ -236,7 +236,8 @@ export default class Page extends AbstractModel
         }
     }
 
-    loadRels() {
+    async loadRels() {
+        const db = await getDb
         return db.transaction('r', db.tables, async () => {
             this.loadBlobs()
 
@@ -260,7 +261,8 @@ export default class Page extends AbstractModel
         })
     }
 
-    delete() {
+    async delete() {
+        const db = await getDb
         return db.transaction('rw', db.tables, () =>
             Promise.all([
                 db.visits.where({ url: this.url }).delete(),
@@ -271,7 +273,8 @@ export default class Page extends AbstractModel
         )
     }
 
-    save() {
+    async save() {
+        const db = await getDb
         return db.transaction('rw', db.tables, async () => {
             this.loadBlobs()
 
