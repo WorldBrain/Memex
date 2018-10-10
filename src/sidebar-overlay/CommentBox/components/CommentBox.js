@@ -174,6 +174,11 @@ class CommentBox extends React.PureComponent {
         }, 100)
     }
 
+    handleSubmit = e => {
+        e.preventDefault()
+        this.save()
+    }
+
     renderTagInput() {
         const tagObjs = this.props.tags.map(tag => ({ name: tag }))
 
@@ -239,7 +244,7 @@ class CommentBox extends React.PureComponent {
                 ) : null}
 
                 <form
-                    onSubmit={this.save}
+                    onSubmit={this.handleSubmit}
                     className={cx(styles.commentBox, {
                         [styles.iframe]: this.props.env === 'iframe',
                         [styles.noDisplay]: this.isHidden(),
