@@ -2,17 +2,20 @@ import Storex from 'storex'
 import { DexieStorageBackend } from 'storex-backend-dexie'
 import stemmer from 'memex-stemmer'
 
-import schemaPatcher from './storage/dexie-schema'
-import { suggestObjects } from './search/suggest'
-import { StorageManager, Dexie } from './types'
+import schemaPatcher from '../storage/dexie-schema'
+import { suggestObjects } from '../search/suggest'
+import { StorageManager, Dexie } from '../types'
 
-export const backend = new DexieStorageBackend({
+const indexedDB: IDBFactory = require('fake-indexeddb')
+const iDBKeyRange = require('fake-indexeddb/lib/FDBKeyRange')
+
+const backend = new DexieStorageBackend({
     stemmer,
     schemaPatcher,
-    dbName: 'memex',
+    dbName: 'test',
     idbImplementation: {
-        factory: window.indexedDB,
-        range: window['IDBKeyRange'],
+        factory: indexedDB,
+        range: iDBKeyRange,
     },
 }) as any
 
@@ -26,6 +29,6 @@ instance.collection = (name: string) => ({
     suggestObjects,
 })
 
-instance.deleteDB = window.indexedDB.deleteDatabase
+instance.deleteDB = indexedDB.deleteDatabase
 
 export default instance

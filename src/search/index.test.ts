@@ -4,6 +4,7 @@ import * as DATA from './index.test.data'
 const indexedDB = require('fake-indexeddb')
 const iDBKeyRange = require('fake-indexeddb/lib/FDBKeyRange')
 
+jest.mock('./storex')
 jest.mock('./models/abstract-model')
 jest.mock('lodash/fp/intersection')
 jest.mock('lodash/fp/flatten')
@@ -28,7 +29,7 @@ describe('Search index integration', () => {
 
     async function resetTestData(dbName = 'test') {
         indexedDB.deleteDatabase(dbName)
-        index.init({ indexedDB, IDBKeyRange: iDBKeyRange, dbName })
+        index.init()
 
         await insertTestData()
     }
