@@ -1,17 +1,14 @@
-import db, * as index from '../'
+import * as index from '..'
+import storageMan, { dexieInstance as db } from '../storex'
 import importNewPage from './import'
 import * as data from './import-export.test.data'
 import { MigrationManager } from './migration-manager'
 import { ExportedPage } from './types'
 
-const indexedDB = require('fake-indexeddb')
-const iDBKeyRange = require('fake-indexeddb/lib/FDBKeyRange')
-
 jest.mock('../models/abstract-model')
+jest.mock('../storex')
 
 async function insertTestPageIntoOldIndex() {
-    // index.useOld = false
-
     await index.addPage({
         pageDoc: data.PAGE_DOC_1,
         visits: [data.TEST_VISIT_1],
@@ -28,8 +25,8 @@ async function insertTestPageIntoOldIndex() {
 }
 
 async function resetDataSources(dbName = 'test') {
-    indexedDB.deleteDatabase(dbName)
-    index.init({ indexedDB, IDBKeyRange: iDBKeyRange, dbName })
+    storageMan.deleteDB(dbName)
+    index.init()
 }
 
 describe('Old=>New index migration', () => {

@@ -1,27 +1,12 @@
-import StorageManager from 'storex'
-import { DexieStorageBackend } from 'storex-backend-dexie'
-import stemmer from 'memex-stemmer'
-
+import storageManager from '../../search/storex'
 import normalize from '../../util/encode-url-for-id'
 import AnnotationBackground from './'
 
 import * as DATA from './storage.test.data'
 
-const indexedDB = require('fake-indexeddb')
-const iDBKeyRange = require('fake-indexeddb/lib/FDBKeyRange')
+jest.mock('../../search/storex')
 
 const runSuite = () => {
-    const storageManager = new StorageManager({
-        backend: new DexieStorageBackend({
-            stemmer,
-            dbName: 'test',
-            idbImplementation: {
-                factory: indexedDB,
-                range: iDBKeyRange,
-            },
-        }),
-    })
-
     const annotationStorage = new AnnotationBackground({ storageManager })
         .annotationStorage
 
@@ -36,8 +21,8 @@ const runSuite = () => {
         await annotationStorage.modifyTags(true)(DATA.tag2, DATA.annotation.url)
     }
 
-    async function resetTestData(dbName = 'Memex') {
-        indexedDB.deleteDatabase(dbName)
+    async function resetTestData(dbName = 'test') {
+        storageManager.deleteDB(dbName)
 
         // Passing fake IndexedDB to the storage manager
         storageManager.finishInitialization()
