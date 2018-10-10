@@ -117,6 +117,9 @@ class CommentBox extends React.PureComponent {
             e.preventDefault()
             e.stopPropagation()
             this.props.setTagInput(true)
+        } else if (e.metaKey && e.key === 'Enter') {
+            e.preventDefault()
+            this.save()
         }
     }
 
@@ -169,6 +172,11 @@ class CommentBox extends React.PureComponent {
         setTimeout(() => {
             this.inputRef.focus()
         }, 100)
+    }
+
+    handleSubmit = e => {
+        e.preventDefault()
+        this.save()
     }
 
     renderTagInput() {
@@ -235,7 +243,8 @@ class CommentBox extends React.PureComponent {
                     </div>
                 ) : null}
 
-                <div
+                <form
+                    onSubmit={this.handleSubmit}
                     className={cx(styles.commentBox, {
                         [styles.iframe]: this.props.env === 'iframe',
                         [styles.noDisplay]: this.isHidden(),
@@ -256,8 +265,8 @@ class CommentBox extends React.PureComponent {
                     <div className={styles.buttonHolder}>
                         <button
                             className={styles.save}
+                            type="submit"
                             ref={this.setSaveRef}
-                            onClick={this.save}
                         >
                             Save
                         </button>
@@ -265,7 +274,7 @@ class CommentBox extends React.PureComponent {
                             Cancel
                         </a>
                     </div>
-                </div>
+                </form>
             </div>
         )
     }
