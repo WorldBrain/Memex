@@ -1,4 +1,4 @@
-import db from '..'
+import getDb from '..'
 import AbstractModel from './abstract-model'
 
 const favIcon = Symbol('favIconURI')
@@ -42,12 +42,14 @@ export default class FavIcon extends AbstractModel {
     }
 
     public async delete() {
+        const db = await getDb
         return db.transaction('rw', db.favIcons, () =>
             db.favIcons.delete(this.hostname),
         )
     }
 
     public async save() {
+        const db = await getDb
         return db.transaction('rw', db.favIcons, () => {
             // Could have been errors converting the data url to blob
             if (this.favIcon !== null) {

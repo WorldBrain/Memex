@@ -1,7 +1,7 @@
 import 'babel-polyfill'
 import 'core-js/es7/symbol'
 
-import db, { storageManager } from './search'
+import getDb, { storageManager, initStorageManager } from './search'
 import internalAnalytics from './analytics/internal'
 import initSentry from './util/raven'
 
@@ -33,7 +33,6 @@ directLinking.setupRequestInterceptor()
 
 const eventLog = new EventLogBackground({ storageManager })
 eventLog.setupRemoteFunctions()
-internalAnalytics.registerOperations(eventLog)
 
 const customList = new CustomListBackground({ storageManager })
 customList.setupRemoteFunctions()
@@ -63,9 +62,12 @@ const bgScript = new BackgroundScript({ notifsBackground: notifications })
 bgScript.setupRemoteFunctions()
 bgScript.setupWebExtAPIHandlers()
 
+initStorageManager()
+getDb.then(() => internalAnalytics.registerOperations(eventLog))
+
 // Attach interesting features onto global window scope for interested users
-window['db'] = db
 window['backup'] = backupModule
+window['getDb'] = getDb
 window['storageMan'] = storageManager
 window['bgScript'] = bgScript
 window['eventLog'] = eventLog

@@ -1,4 +1,4 @@
-import db, {
+import getDb, {
     SearchParams,
     FilteredURLs,
     TermsIndexName,
@@ -16,9 +16,10 @@ export interface TermResults {
 /**
  * Performs a query for a single term on a given multi-index.
  */
-const termQuery = (term: string, excluded: string[]) => (
+const termQuery = (term: string, excluded: string[]) => async (
     index: TermsIndexName,
 ) => {
+    const db = await getDb
     let coll = db.pages.where(index).equals(term)
 
     // Adding a `.filter/.and` clause to a collection means it needs to iterate through

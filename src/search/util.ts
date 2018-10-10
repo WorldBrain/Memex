@@ -1,13 +1,13 @@
-import db, { Storage } from '.'
+import getDb from '.'
 import normalizeUrl from '../util/encode-url-for-id'
+import { initErrHandler } from './storage'
 
 export const DEFAULT_TERM_SEPARATOR = /[|\u{A0}' .,|(\n)]+/u
 export const URL_SEPARATOR = /[/?#=+& _.,\-|(\n)]+/
 
 export async function getPage(url: string) {
-    const page = await db.pages
-        .get(normalizeUrl(url))
-        .catch(Storage.initErrHandler())
+    const db = await getDb
+    const page = await db.pages.get(normalizeUrl(url)).catch(initErrHandler())
 
     if (page != null) {
         // Force-load any related records from other tables
@@ -23,14 +23,13 @@ export async function getPage(url: string) {
  * TODO: Maybe overhaul `import-item-creation` module to not need this (only caller)
  */
 export async function grabExistingKeys() {
+    const db = await getDb
     return db
         .transaction('r', db.pages, db.bookmarks, async () => ({
             histKeys: new Set(await db.pages.toCollection().primaryKeys()),
             bmKeys: new Set(await db.bookmarks.toCollection().primaryKeys()),
         }))
-        .catch(
-            Storage.initErrHandler({ histKeys: new Set(), bmKeys: new Set() }),
-        )
+        .catch(initErrHandler({ histKeys: new Set(), bmKeys: new Set() }))
 }
 
 /**

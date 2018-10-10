@@ -1,4 +1,4 @@
-import db from '..'
+import getDb from '..'
 import { Page, FavIcon } from '../models'
 import { SearchParams, SearchResult } from '../types'
 
@@ -40,6 +40,7 @@ export async function mapResultsToDisplay(
     results: SearchResult[],
     params: SearchParams,
 ) {
+    const db = await getDb
     const resultUrls = results.map(([url]) => url)
 
     const pagesMap = new Map<string, Page>()

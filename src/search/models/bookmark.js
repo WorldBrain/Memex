@@ -1,8 +1,9 @@
-import db from '..'
+import getDb from '..'
 import EventModel from './event-model'
 
 export default class Bookmark extends EventModel {
-    save() {
+    async save() {
+        const db = await getDb
         return db.bookmarks.put(this)
     }
 }

@@ -1,9 +1,10 @@
-import db, { VisitInteraction, PageAddRequest, Storage } from '.'
+import getDb, { VisitInteraction, PageAddRequest } from '.'
 import normalizeUrl from '../util/encode-url-for-id'
 import pipeline, { transformUrl } from './pipeline'
 import { Page, FavIcon } from './models'
 import { getPage } from './util'
 import { PipelineReq } from './types'
+import { initErrHandler } from './storage'
 
 /**
  * Adds/updates a page + associated visit (pages never exist without either an assoc.
@@ -15,6 +16,8 @@ export async function addPage({
     pageDoc,
     rejectNoContent,
 }: Partial<PageAddRequest>) {
+    const db = await getDb
+
     const { favIconURI, ...pageData } = await pipeline({
         pageDoc,
         rejectNoContent,
@@ -48,6 +51,7 @@ export async function addPage({
 }
 
 export async function addPageTerms(pipelineReq: PipelineReq) {
+    const db = await getDb
     const pageData = await pipeline(pipelineReq)
 
     try {
@@ -69,6 +73,7 @@ export async function updateTimestampMeta(
     time: number,
     data: Partial<VisitInteraction>,
 ) {
+    const db = await getDb
     const normalized = normalizeUrl(url)
 
     await db
@@ -78,7 +83,7 @@ export async function updateTimestampMeta(
                 .equals([time, normalized])
                 .modify(data),
         )
-        .catch(Storage.initErrHandler())
+        .catch(initErrHandler())
 }
 
 export async function addVisit(url: string, time = Date.now()) {
@@ -89,13 +94,11 @@ export async function addVisit(url: string, time = Date.now()) {
     }
 
     matchingPage.addVisit(time)
-    return matchingPage.save().catch(Storage.initErrHandler())
+    return matchingPage.save().catch(initErrHandler())
 }
 
 export async function addFavIcon(url: string, favIconURI: string) {
     const { hostname } = transformUrl(url)
 
-    return new FavIcon({ hostname, favIconURI })
-        .save()
-        .catch(Storage.initErrHandler())
+    return new FavIcon({ hostname, favIconURI }).save().catch(initErrHandler())
 }
