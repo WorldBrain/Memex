@@ -1,24 +1,10 @@
-import StorageManager from 'storex'
-import { DexieStorageBackend } from 'storex-backend-dexie'
-import stemmer from 'memex-stemmer'
-
+import storageManager from '../../search/storex'
 import CustomListBackground from './'
 import * as DATA from './storage.test.data'
 
-const indexedDB = require('fake-indexeddb')
-const iDBKeyRange = require('fake-indexeddb/lib/FDBKeyRange')
+jest.mock('../../search/storex')
 
 const runSuite = () => () => {
-    const storageManager = new StorageManager({
-        backend: new DexieStorageBackend({
-            stemmer,
-            dbName: 'test',
-            idbImplementation: {
-                factory: indexedDB,
-                range: iDBKeyRange,
-            },
-        }),
-    })
     const fakeIndex = new CustomListBackground({ storageManager })
     let fakeListCounter = 0
     fakeIndex.storage._generateListId = () => ++fakeListCounter
@@ -34,8 +20,8 @@ const runSuite = () => () => {
         await fakeIndex.insertPageToList(DATA.PAGE_ENTRY_4)
     }
     // insertTestData()
-    async function resetTestData(dbName = 'Memex') {
-        indexedDB.deleteDatabase(dbName)
+    async function resetTestData(dbName = 'test') {
+        storageManager.deleteDB(dbName)
 
         // Passing fake IndexedDB to the storage manager
         storageManager.finishInitialization()
