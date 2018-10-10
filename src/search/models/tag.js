@@ -1,4 +1,4 @@
-import db from '..'
+import getDb from '..'
 import AbstractModel from './abstract-model'
 
 export default class Tag extends AbstractModel {
@@ -8,11 +8,13 @@ export default class Tag extends AbstractModel {
         this.url = url
     }
 
-    save() {
+    async save() {
+        const db = await getDb
         return db.tags.put(this)
     }
 
-    delete() {
+    async delete() {
+        const db = await getDb
         return db.tags.delete([this.name, this.url])
     }
 }

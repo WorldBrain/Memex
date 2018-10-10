@@ -1,20 +1,22 @@
 import Dexie from 'dexie'
 
-import db, { Storage } from '..'
-import { backend } from '../storex'
+import getDb from '..'
+import { dexieInstance } from '../storex'
 import { SuggestOptions, SuggestResult } from '../types'
 import { UnimplementedError, InvalidFindOptsError } from '../storage/errors'
 import { Tag, Page } from '../models'
+import { initErrHandler } from '../storage'
 
 type SuggestType = 'domain' | 'tag'
 
 export async function suggest(query = '', type: SuggestType, limit = 10) {
+    const db = await getDb
     const applyQuery = <T, Key>(where: Dexie.WhereClause<T, Key>) =>
         where
             .startsWith(query)
             .limit(limit)
             .uniqueKeys()
-            .catch(Storage.initErrHandler([] as T[]))
+            .catch(initErrHandler([] as T[]))
 
     switch (type) {
         case 'domain': {
@@ -46,9 +48,7 @@ export async function suggestObjects<S, P = any>(
         )
     }
 
-    const whereClause = backend.dexieInstance
-        .table<S, P>(collection)
-        .where(indexName)
+    const whereClause = dexieInstance.table<S, P>(collection).where(indexName)
 
     let coll =
         options.ignoreCase &&
@@ -88,12 +88,13 @@ export async function extendedSuggest(
     type: SuggestType,
     limit = 20,
 ) {
+    const db = await getDb
     const applyQuery = <T, Key>(where: Dexie.WhereClause<T, Key>) =>
         where
             .noneOf(notInclude)
             .limit(limit)
             .uniqueKeys()
-            .catch(Storage.initErrHandler([] as T[]))
+            .catch(initErrHandler([] as T[]))
 
     switch (type) {
         case 'domain': {

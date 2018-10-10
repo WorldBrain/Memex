@@ -1,15 +1,17 @@
-import db, { SearchParams, FilteredURLs, storageManager } from '..'
+import getDb, { SearchParams, FilteredURLs, storageManager } from '..'
 import { remoteFunction } from '../../util/webextensionRPC'
 import CustomListBackground from '../../custom-lists/background'
 import intersection from 'lodash/fp/intersection'
 import flatten from 'lodash/fp/flatten'
 import difference from 'lodash/fp/difference'
 
-const pageIndexLookup = (index: string, matches: string[]) =>
-    db.pages
+const pageIndexLookup = async (index: string, matches: string[]) => {
+    const db = await getDb
+    return db.pages
         .where(index)
         .anyOf(matches)
         .primaryKeys()
+}
 
 /**
  * Affords hiding away of the URL filters (tags, domains inc/exc) and related
@@ -62,6 +64,7 @@ export class FilteredURLsManager implements FilteredURLs {
 }
 
 async function tagSearch({ tags }: Partial<SearchParams>) {
+    const db = await getDb
     if (!tags || !tags.length) {
         return undefined
     }

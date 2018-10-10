@@ -1,4 +1,4 @@
-import db, { Page, FavIcon } from '..'
+import getDb, { Page, FavIcon } from '..'
 import { ExportedPage } from './types'
 
 async function importPage({
@@ -8,6 +8,7 @@ async function importPage({
     favIconURI,
     ...pageData
 }: ExportedPage) {
+    const db = await getDb
     return db.transaction('rw', db.tables, async () => {
         const page = new Page(pageData)
 

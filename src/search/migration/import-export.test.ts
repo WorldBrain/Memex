@@ -26,7 +26,7 @@ async function insertTestPageIntoOldIndex() {
 
 async function resetDataSources(dbName = 'test') {
     storageMan.deleteDB(dbName)
-    index.init()
+    // index.init()
 }
 
 describe('Old=>New index migration', () => {

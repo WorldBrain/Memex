@@ -1,6 +1,6 @@
-import { Storage } from '.'
 import { createPageViaBmTagActs } from './on-demand-indexing'
 import { getPage } from './util'
+import { initErrHandler } from './storage'
 
 interface Props {
     url: string
@@ -27,7 +27,7 @@ const modifyTag = (shouldAdd: boolean) =>
             page.delTag(tag)
         }
 
-        await page.save().catch(Storage.initErrHandler())
+        await page.save().catch(initErrHandler())
     }
 
 export const delTag = modifyTag(false)
