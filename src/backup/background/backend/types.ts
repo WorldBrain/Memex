@@ -63,9 +63,11 @@ export abstract class BackupBackend {
     async backupChanges({
         changes,
         events,
+        currentSchemaVersion,
     }: {
         changes: ObjectChange[]
         events: EventEmitter
+        currentSchemaVersion: number
     }) {
         for (const change of changes) {
             if (change.operation !== 'delete') {
