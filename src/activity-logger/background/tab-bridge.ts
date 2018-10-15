@@ -50,11 +50,11 @@ export async function trackExistingTabs({ isNewInstall = false }) {
         }
 
         if (tab.favIconUrl) {
-            await tabChangeListener.handleFavIcon(tab.id, tab, tab)
+            tabChangeListener.handleFavIcon(tab.id, tab, tab)
         }
 
         if (tab.url) {
-            await tabChangeListener.handleUrl(tab.id, tab, tab)
+            tabChangeListener.handleUrl(tab.id, tab, tab)
         }
     }
 

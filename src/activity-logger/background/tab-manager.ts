@@ -71,9 +71,7 @@ export class TabManager {
      */
     resetTab(
         id: number,
-        activeState: boolean,
-        url: string,
-        isBookmarked: boolean,
+        { isActive, url, isBookmarked, isLoaded }: Partial<TabState>,
     ) {
         const oldTab = this.removeTab(id)
 
@@ -83,8 +81,9 @@ export class TabManager {
                 new Tab({
                     id,
                     url,
+                    isLoaded,
                     isBookmarked,
-                    isActive: activeState,
+                    isActive,
                     navState: oldTab.navState,
                 }),
             )

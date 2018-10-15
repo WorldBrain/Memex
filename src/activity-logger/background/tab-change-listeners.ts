@@ -134,18 +134,18 @@ export default class TabChangeListeners {
     private handleVisitEnd: TabChangeListener = async (
         tabId,
         { url },
-        { incognito, active },
+        { active, status },
     ) => {
         // Check if new URL of tab has an assoc. bookmark or not
-        const hasBookmark = await this.checkBookmark(url)
+        const isBookmarked = await this.checkBookmark(url)
 
         // Ensures the URL change counts as a new visit in tab state (tab ID doesn't change)
-        const oldTab = this._tabManager.resetTab(
-            tabId,
-            active,
+        const oldTab = this._tabManager.resetTab(tabId, {
             url,
-            hasBookmark,
-        )
+            isBookmarked,
+            isActive: active,
+            isLoaded: status === 'complete',
+        })
 
         // Send off request for updating that prev. visit's tab state, if active long enough
         if (
