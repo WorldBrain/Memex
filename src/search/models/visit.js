@@ -37,7 +37,32 @@ export default class Visit extends EventModel {
         this.scrollMaxPerc = props.scrollMaxPerc
     }
 
-    save() {
+    get pk() {
+        return [this.time, this.url]
+    }
+
+    /**
+     * @param {Visit} visit
+     * @returns {boolean}
+     */
+    _hasChanged(visit) {
+        return (
+            visit == null ||
+            visit.duration !== this.duration ||
+            visit.scrollPx !== this.scrollPx ||
+            visit.scrollPerc !== this.scrollPerc ||
+            visit.scrollMaxPx !== this.scrollMaxPx ||
+            visit.scrollMaxPerc !== this.scrollMaxPerc
+        )
+    }
+
+    async save() {
+        // Only update if changes detected between existing visit and this one
+        const existingVisit = await db.visits.get(this.pk)
+        if (!this._hasChanged(existingVisit)) {
+            return this.pk
+        }
+
         return db.visits.put(this)
     }
 }
