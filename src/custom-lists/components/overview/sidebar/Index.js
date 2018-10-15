@@ -60,11 +60,6 @@ class ListContainer extends Component {
     handleSearchChange = field => event => {
         const { value } = event.target
 
-        // Block input of non-words, spaces and hypens for tags
-        if (this.inputBlockPattern.test(value)) {
-            return
-        }
-
         this.setState(state => ({
             ...state,
             [field]: value,
