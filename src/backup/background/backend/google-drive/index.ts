@@ -100,14 +100,16 @@ export class DriveBackupBackend extends BackupBackend {
     async backupChanges({
         changes,
         events,
+        currentSchemaVersion,
     }: {
         changes: ObjectChange[]
         events: EventEmitter
+        currentSchemaVersion: number
     }) {
         await this.client.storeObject({
             folderName: 'change-sets',
             fileName: Date.now().toString(),
-            object: changes,
+            object: { version: currentSchemaVersion, changes },
         })
     }
 }

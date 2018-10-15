@@ -1,4 +1,5 @@
 const pickBy = require('lodash/pickBy')
+const last = require('lodash/last')
 import { EventEmitter } from 'events'
 import { makeRemotelyCallable } from '../../util/webextensionRPC'
 import { StorageManager } from '../../search/storage/manager'
@@ -21,6 +22,7 @@ export interface BackupProgressInfo {
 export class BackupBackgroundModule {
     storageManager: StorageManager
     storage: BackupStorage
+    currentSchemaVersion: number
     backend: BackupBackend
     lastBackupStorage: LastBackupStorage
     recordingChanges: boolean = false
@@ -38,6 +40,12 @@ export class BackupBackgroundModule {
         this.storage = new BackupStorage({ storageManager })
         this.lastBackupStorage = lastBackupStorage
         this.backend = backend
+
+        const schemaVersions = Object.keys(
+            storageManager.registry.collectionsByVersion,
+        ).map(version => parseInt(version, 10))
+        schemaVersions.sort()
+        this.currentSchemaVersion = last(schemaVersions)
 
         this.storageManager.on(
             'changing',
@@ -206,7 +214,11 @@ export class BackupBackgroundModule {
             )
             change.object = object
         }
-        await this.backend.backupChanges({ changes: batch.changes, events })
+        await this.backend.backupChanges({
+            changes: batch.changes,
+            events,
+            currentSchemaVersion: this.currentSchemaVersion,
+        })
         await batch.forget()
 
         info.processedChanges += batch.changes.length
