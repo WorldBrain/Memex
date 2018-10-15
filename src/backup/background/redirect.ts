@@ -1,3 +1,5 @@
+import { browser } from 'webextension-polyfill-ts'
+
 export function setupRequestInterceptor({
     webRequest,
     handleLoginRedirectedBack,
@@ -18,7 +20,7 @@ export function makeRequestHandler({ handleLoginRedirectedBack }) {
         }
 
         handleLoginRedirectedBack(url)
-        const targetUrl = `${chrome.extension.getURL('/options.html')}#/backup`
+        const targetUrl = `${browser.extension.getURL('/options.html')}#/backup`
         return { redirectUrl: targetUrl }
     }
 }
