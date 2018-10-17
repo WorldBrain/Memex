@@ -16,7 +16,7 @@ import { IndexDropdown } from '../../common-ui/containers'
 class AnnotationContainer extends React.Component {
     static propTypes = {
         annotation: PropTypes.object.isRequired,
-        tags: PropTypes.array.isRequired,
+        tags: PropTypes.array,
         deleteAnnotation: PropTypes.func.isRequired,
         editAnnotation: PropTypes.func.isRequired,
         goToAnnotation: PropTypes.func.isRequired,
