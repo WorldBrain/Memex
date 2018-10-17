@@ -1,4 +1,4 @@
-import { browser } from 'webextension-polyfill-ts'
+import { browser, Tabs } from 'webextension-polyfill-ts'
 
 import tabManager from './tab-manager'
 import TabChangeListeners from './tab-change-listeners'
@@ -13,6 +13,8 @@ const tabChangeListener = new TabChangeListeners({
 
 let resolveTabQuery
 const tabQueryP = new Promise(resolve => (resolveTabQuery = resolve))
+
+const isTabLoaded = (tab: Tabs.Tab) => tab.status === 'complete'
 
 export const tabUpdatedListener: TabChangeListener = async (
     tabId,
@@ -37,26 +39,39 @@ export const tabUpdatedListener: TabChangeListener = async (
 export async function trackExistingTabs({ isNewInstall = false }) {
     const tabs = await browser.tabs.query({})
 
-    for (const tab of tabs) {
-        tabManager.trackTab(tab, {
-            isLoaded: tab.status === 'complete',
-            isBookmarked: await tabChangeListener.checkBookmark(tab.url),
+    for (const browserTab of tabs) {
+        tabManager.trackTab(browserTab, {
+            isLoaded: isTabLoaded(browserTab),
+            isBookmarked: await tabChangeListener.checkBookmark(browserTab.url),
         })
 
-        await tabChangeListener.injectContentScripts(tab)
+        await tabChangeListener.injectContentScripts(browserTab)
 
         if (!isNewInstall) {
             continue
         }
 
-        if (tab.favIconUrl) {
-            tabChangeListener.handleFavIcon(tab.id, tab, tab)
+        if (browserTab.favIconUrl) {
+            tabChangeListener.handleFavIcon(
+                browserTab.id,
+                browserTab,
+                browserTab,
+            )
         }
 
-        if (tab.url) {
-            tabChangeListener.handleUrl(tab.id, tab, tab)
+        if (browserTab.url) {
+            tabChangeListener.handleUrl(browserTab.id, browserTab, browserTab)
         }
     }
 
     resolveTabQuery()
+}
+
+export async function trackNewTab(id: number) {
+    const browserTab = await browser.tabs.get(id)
+
+    tabManager.trackTab(browserTab, {
+        isLoaded: isTabLoaded(browserTab),
+        isBookmarked: await tabChangeListener.checkBookmark(browserTab.url),
+    })
 }

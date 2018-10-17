@@ -45,6 +45,10 @@ export class TabManager {
         return activeTab
     }
 
+    isTracked(id: number) {
+        return this._tabs.has(id)
+    }
+
     /**
      * @param {number} id The ID of the tab to stop keeping track of.
      * @returns {Tab}

@@ -4,7 +4,7 @@ import { makeRemotelyCallable } from '../../util/webextensionRPC'
 import initPauser from './pause-logging'
 import { updateVisitInteractionData } from './util'
 import tabManager from './tab-manager'
-import { tabUpdatedListener } from './tab-bridge'
+import { tabUpdatedListener, trackNewTab } from './tab-bridge'
 
 // Allow logging pause state toggle to be called from other scripts
 const toggleLoggingPause = initPauser()
@@ -26,9 +26,13 @@ browser.runtime.onMessage.addListener(
 // Bind tab state updates to tab API events
 browser.tabs.onCreated.addListener(tabManager.trackTab)
 
-browser.tabs.onActivated.addListener(({ tabId }) =>
-    tabManager.activateTab(tabId),
-)
+browser.tabs.onActivated.addListener(async ({ tabId }) => {
+    if (!tabManager.isTracked(tabId)) {
+        await trackNewTab(tabId)
+    }
+
+    tabManager.activateTab(tabId)
+})
 
 // Runs stage 3 of the visit indexing
 browser.tabs.onRemoved.addListener(tabId => {
