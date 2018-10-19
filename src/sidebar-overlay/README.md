@@ -10,12 +10,8 @@ Contains components and redux related to sidebar common to both sidebar overlay 
 -   `messaging.ts` Exports `FrameCommunication` class for communication between the iFrame and the parent website. Used in sidebar overlay.
 -   `sidebar.js` ReactDOM renders Sidebar Component to DOM.
 
-
-
-Most of the remote calling ( `toggleSidebar`, `highlightAnnotations` ) happens through either `webextensionsRPC` or `FrameCommunication`. 
-
-
+Most of the remote calling ( `toggleSidebar`, `highlightAnnotations` ) happens through either `webextensionsRPC` or `FrameCommunication`.
 
 ### Overview/sidebar
 
-Submodule inside Overview which contains renders Sidebar on Overview with  some extra props.
+Submodule inside Overview which contains renders Sidebar on Overview with some extra props.
