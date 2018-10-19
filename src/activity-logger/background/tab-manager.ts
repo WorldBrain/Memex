@@ -1,5 +1,5 @@
 import { Tabs } from 'webextension-polyfill-ts'
-import Tab from './tab-state'
+import Tab, { TabProps } from './tab-state'
 import { TabState, NavState } from './types'
 
 export class TabManager {
@@ -15,8 +15,14 @@ export class TabManager {
     /**
      * @param {tabs.Tab} tab The browser tab to start keeping track of.
      */
-    trackTab = ({ id, active, url }: Tabs.Tab) =>
-        this._tabs.set(id, new Tab({ id, isActive: active, url }))
+    trackTab = (
+        { id, active, url }: Tabs.Tab,
+        extraProps: Partial<TabProps> = {},
+    ) =>
+        this._tabs.set(
+            id,
+            new Tab({ id, isActive: active, url, ...extraProps }),
+        )
 
     /**
      * @param {number} id The ID of the tab as assigned by web ext API.
@@ -37,6 +43,10 @@ export class TabManager {
         }
 
         return activeTab
+    }
+
+    isTracked(id: number) {
+        return this._tabs.has(id)
     }
 
     /**
@@ -65,9 +75,7 @@ export class TabManager {
      */
     resetTab(
         id: number,
-        activeState: boolean,
-        url: string,
-        isBookmarked: boolean,
+        { isActive, url, isBookmarked, isLoaded }: Partial<TabState>,
     ) {
         const oldTab = this.removeTab(id)
 
@@ -77,8 +85,9 @@ export class TabManager {
                 new Tab({
                     id,
                     url,
+                    isLoaded,
                     isBookmarked,
-                    isActive: activeState,
+                    isActive,
                     navState: oldTab.navState,
                 }),
             )
