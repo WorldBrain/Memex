@@ -51,10 +51,6 @@ class ListContainer extends Component {
         this.props.getListFromDB()
     }
 
-    get inputBlockPattern() {
-        return /[^\w\s-]/gi
-    }
-
     setInputRef = el => (this.inputEl = el)
 
     handleSearchChange = field => event => {

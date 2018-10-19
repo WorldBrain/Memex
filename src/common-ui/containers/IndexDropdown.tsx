@@ -88,9 +88,6 @@ class IndexDropdownContainer extends Component<Props, State> {
     /**
      * Domain inputs need to allow '.' while tags shouldn't.
      */
-    private get inputBlockPattern() {
-        return this.props.source === 'domain' ? /[^\w\s-.]/gi : /[^\w\s-]/gi
-    }
 
     /**
      * Decides whether or not to allow index update. Currently determined by `props.url` setting.
