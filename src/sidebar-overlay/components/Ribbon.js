@@ -29,23 +29,16 @@ class Ribbon extends React.Component {
         // For preventing the page scroll, when sidebar is open
         isInsideFrame: false,
         top: null,
-        shouldRenderIFrame: true,
+        shouldRenderIFrame: false,
     }
 
     async componentDidMount() {
         this.setupRPCfunctions()
 
-        this.setupFrameFunctions()
-
         this.setupScrollListeners()
 
-        const annotations = await remoteFunction('getAllAnnotations')(
-            window.location.href,
-        )
+        await this.fetchAnnotations()
 
-        this.setState({
-            annotations,
-        })
         // For hiding the ribbion when fullScreen event is fired
         // For chrome
         document.addEventListener(
@@ -147,7 +140,7 @@ class Ribbon extends React.Component {
                 const selection = document.getSelection()
                 selection.removeAllRanges()
                 this.props.removeHighlights()
-                await this.openSidebarOps()
+                await this.openSidebar()
             },
         })
 
@@ -215,30 +208,6 @@ class Ribbon extends React.Component {
         this.frameFC.remoteExecute('setHoveredAnnotation')(annotationUrl)
     }
 
-    openSidebarOps = async () => {
-        if (!this.frameFC) {
-            this.setupFrameFunctions()
-        }
-        await this.frameFC.remoteExecute('setLoaderActive')()
-        await this.fetchAnnotations()
-        const highlightables = this.state.annotations.filter(
-            annotation => annotation.selector,
-        )
-        await this.props.highlightAll(
-            highlightables,
-            this.focusAnnotationContainer,
-            this.hoverAnnotationContainer,
-        )
-        this.frameFC.remoteExecute('focusCommentBox')(true)
-
-        setTimeout(() => {
-            const sorted = this.props.sortAnnotationByPosition(
-                this.state.annotations,
-            )
-            this.frameFC.remoteExecute('setAnnotations')(sorted)
-        }, 400)
-    }
-
     closeSidebarOps = async () => {
         this.props.removeHighlights()
         this.frameFC.remoteExecute('focusAnnotation')('')
@@ -257,7 +226,7 @@ class Ribbon extends React.Component {
         }
 
         if (isSidebarActive) {
-            await this.openSidebarOps()
+            await this.openSidebar()
         } else {
             this.closeSidebarOps()
         }
@@ -267,16 +236,45 @@ class Ribbon extends React.Component {
         })
     }
 
-    openSidebar = async () => {
-        await this.openSidebarOps()
-        this.setState({
-            isSidebarActive: true,
-        })
+    openSidebar = () => {
+        return this.setState(
+            {
+                isSidebarActive: true,
+                shouldRenderIFrame: true,
+            },
+            async () => {
+                if (!this.frameFC) {
+                    this.setupFrameFunctions()
+                }
+                await this.frameFC.remoteExecute('setLoaderActive')()
+                await this.fetchAnnotations()
+                const highlightables = this.state.annotations.filter(
+                    annotation => annotation.selector,
+                )
+                await this.props.highlightAll(
+                    highlightables,
+                    this.focusAnnotationContainer,
+                    this.hoverAnnotationContainer,
+                )
+                this.frameFC.remoteExecute('focusCommentBox')(true)
+
+                setTimeout(() => {
+                    const sorted = this.props.sortAnnotationByPosition(
+                        this.state.annotations,
+                    )
+                    this.frameFC.remoteExecute('setAnnotations')(sorted)
+                }, 400)
+            },
+        )
     }
 
     openSidebarAndSendAnchor = async anchor => {
-        await this.frameFC.remoteExecute('sendAnchorToSidebar')(anchor)
         await this.openSidebar()
+
+        setTimeout(
+            () => this.frameFC.remoteExecute('sendAnchorToSidebar')(anchor),
+            400,
+        )
     }
 
     handleClickOutside = e => {
