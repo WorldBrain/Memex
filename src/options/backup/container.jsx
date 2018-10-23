@@ -88,6 +88,9 @@ export default class BackupSettingsContainer extends React.Component {
             return (
                 <OnboardingSize
                     isAuthenticated={this.state.isAuthenticated}
+                    onBlobPreferenceChange={saveBlobs => {
+                        remoteFunction('setBackupBlobs')(saveBlobs)
+                    }}
                     onLoginRequested={() => {
                         localStorage.setItem(
                             'backup.onboarding.authenticating',

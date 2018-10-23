@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-// import { remoteFunction } from 'src/util/webextensionRPC'
+import { remoteFunction } from 'src/util/webextensionRPC'
 import styles from './running-backup.css'
 import { BackupProgressBar } from '../components/progress-bar'
 import { PrimaryButton } from '../components/primary-button'
@@ -15,23 +15,18 @@ export default class RunningBackupContainer extends React.Component {
     async componentDidMount() {
         browser.runtime.onMessage.addListener(this.messageListener)
 
-        // const isAuthenticated = await remoteFunction('isBackupAuthenticated')()
-        // this.setState({
-        //     status: isAuthenticated ? 'authenticated' : 'unauthenticated',
-        // })
+        const info = await remoteFunction('getBackupInfo')()
+        if (info) {
+            this.setState({
+                status: 'running',
+                info,
+            })
+        }
 
         // this.setState({
-        //     status: 'unauthenticated',
-        //     info: null,
+        //     status: 'running',
+        //     info: { status: 'preparing' },
         // })
-        // this.setState({
-        //     status: 'authenticated',
-        //     info: null,
-        // })
-        this.setState({
-            status: 'running',
-            info: { status: 'preparing' },
-        })
         // this.setState({
         //     status: 'running',
         //     info: { status: 'synching', totalChanges: 1000, processedChanges: 500 },
@@ -66,9 +61,16 @@ export default class RunningBackupContainer extends React.Component {
         }
     }
 
-    handlePause() {}
+    handlePause() {
+        remoteFunction('pauseBackup')()
+    }
+
+    handleResume() {
+        remoteFunction('resumeBackup')()
+    }
 
     handleCancel() {
+        remoteFunction('cancelBackup')()
         this.props.onFinish()
     }
 
@@ -81,7 +83,7 @@ export default class RunningBackupContainer extends React.Component {
 
         return (
             <div>
-                <h1>Backup progress</h1>
+                <h2>Backup progress</h2>
 
                 <div className={styles.steps}>
                     <div className={styles.step}>
@@ -110,13 +112,24 @@ export default class RunningBackupContainer extends React.Component {
                 >
                     Cancel
                 </div>
-                <PrimaryButton
-                    onClick={() => {
-                        this.handlePause()
-                    }}
-                >
-                    Pause
-                </PrimaryButton>
+                {this.state.info.state !== 'paused' && (
+                    <PrimaryButton
+                        onClick={() => {
+                            this.handlePause()
+                        }}
+                    >
+                        Pause
+                    </PrimaryButton>
+                )}
+                {this.state.info.state === 'paused' && (
+                    <PrimaryButton
+                        onClick={() => {
+                            this.handleResume()
+                        }}
+                    >
+                        Resume
+                    </PrimaryButton>
+                )}
             </div>
         )
     }

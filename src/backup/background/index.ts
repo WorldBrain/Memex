@@ -21,7 +21,9 @@ export interface BackupProgressInfo {
 
 export interface BackupState {
     running: boolean
+    cancelled?: boolean
     info: BackupProgressInfo
+    events: EventEmitter
     pausePromise?: Promise<null> // only set if paused, resolved when pause ends
     resume?: () => void // only set if paused
 }
@@ -54,7 +56,7 @@ export class BackupBackgroundModule {
         ).map(version => parseInt(version, 10))
         schemaVersions.sort()
         this.currentSchemaVersion = last(schemaVersions)
-        this.state = { running: false, info: null }
+        this.resetBackupState()
 
         this.storageManager.on(
             'changing',
@@ -74,6 +76,10 @@ export class BackupBackgroundModule {
         )
     }
 
+    private resetBackupState() {
+        this.state = { running: false, info: null, events: null }
+    }
+
     setupRemoteFunctions() {
         makeRemotelyCallable(
             {
@@ -82,15 +88,21 @@ export class BackupBackgroundModule {
                     return url
                 },
                 startBackup: ({ tab }, params) => {
-                    const events = this.doBackup()
+                    this.doBackup()
                     const sendEvent = (eventType, event) =>
                         window['browser'].tabs.sendMessage(tab.id, {
                             type: 'backup-event',
                             event: { type: eventType, ...(event || {}) },
                         })
-                    events.on('info', event => sendEvent('info', event))
-                    events.on('fail', event => sendEvent('info', event))
-                    events.on('success', event => sendEvent('info', event))
+                    this.state.events.on('info', event =>
+                        sendEvent('info', event),
+                    )
+                    this.state.events.on('fail', event =>
+                        sendEvent('info', event),
+                    )
+                    this.state.events.on('success', event =>
+                        sendEvent('info', event),
+                    )
                 },
                 pauseBackup: () => {
                     if (this.state.info.state !== 'synching') {
@@ -101,6 +113,7 @@ export class BackupBackgroundModule {
                     this.state.pausePromise = new Promise(resolve => {
                         this.state.resume = resolve
                     })
+                    this.state.events.emit('info', this.state.info)
                 },
                 resumeBackup: () => {
                     if (this.state.info.state !== 'paused') {
@@ -111,6 +124,10 @@ export class BackupBackgroundModule {
                     this.state.pausePromise = null
                     this.state.resume()
                     this.state.resume = null
+                    this.state.events.emit('info', this.state.info)
+                },
+                cancelBackup: () => {
+                    this.state.cancelled = true
                 },
                 hasInitialBackup: async () => {
                     return !!(await this.lastBackupStorage.getLastBackupTime())
@@ -121,11 +138,34 @@ export class BackupBackgroundModule {
                 isBackupConnected: async (info, params) => {
                     return this.backend.isConnected()
                 },
+                isAutomaticBackupEnabled: async () => {
+                    return this.isAutomaticBackupEnabled()
+                },
                 getBackupInfo: () => {
                     return this.state.info
                 },
                 estimateInitialBackupSize: () => {
                     return this.estimateInitialBackupSize()
+                },
+                setBackupBlobs: saveBlobs => {
+                    localStorage.setItem('backup.save-blobs', saveBlobs)
+                },
+                getBackupTimes: async () => {
+                    const lastBackup = await this.lastBackupStorage.getLastBackupTime()
+                    let nextBackup
+                    if (this.state.running) {
+                        nextBackup = 'running'
+                    } else if (await this.isAutomaticBackupEnabled()) {
+                        const backupIntervalMinutes = 15
+                        nextBackup = new Date(
+                            lastBackup.getTime() +
+                                1000 * 60 * backupIntervalMinutes,
+                        )
+                    }
+                    return {
+                        lastBackup,
+                        nextBackup,
+                    }
                 },
             },
             { insertExtraArg: true },
@@ -157,6 +197,10 @@ export class BackupBackgroundModule {
         this.recordingChanges = true
     }
 
+    async isAutomaticBackupEnabled() {
+        return false
+    }
+
     async estimateInitialBackupSize(): Promise<{
         bytesWithBlobs: number
         bytesWithoutBlobs: number
@@ -170,14 +214,13 @@ export class BackupBackgroundModule {
 
     doBackup() {
         this.state.running = true
-
-        const events = new EventEmitter()
+        this.state.events = new EventEmitter()
 
         const procedure = async () => {
             this.startRecordingChanges()
             const lastBackupTime = await this.lastBackupStorage.getLastBackupTime()
 
-            await this.backend.startBackup({ events })
+            await this.backend.startBackup({ events: this.state.events })
             if (!lastBackupTime) {
                 console.log(
                     'no last backup found, putting everything in backup table',
@@ -185,7 +228,9 @@ export class BackupBackgroundModule {
                 console.time('put initial backup into changes table')
 
                 try {
-                    events.emit('info', { info: { state: 'preparing' } })
+                    this.state.events.emit('info', {
+                        info: { state: 'preparing' },
+                    })
                     await this.storage.forgetAllChanges()
                     await this._queueInitialBackup() // Pushes all the objects in the DB to the queue for the incremental backup
                 } catch (err) {
@@ -196,24 +241,26 @@ export class BackupBackgroundModule {
             }
 
             const backupTime = new Date()
-            await this._doIncrementalBackup(backupTime, events)
-            await this.backend.commitBackup({ events })
+            await this._doIncrementalBackup(backupTime, this.state.events)
+            await this.backend.commitBackup({ events: this.state.events })
             // await this.lastBackupStorage.storeLastBackupTime(backupTime)
         }
 
         procedure()
             .then(() => {
                 this.state.running = false
-                events.emit('success')
+                this.state.events.emit('success')
+                this.resetBackupState()
             })
             .catch(e => {
                 this.state.running = false
                 console.error(e)
                 console.error(e.stack)
-                events.emit('fail', e)
+                this.state.events.emit('fail', e)
+                this.resetBackupState()
             })
 
-        return events
+        return this.state.events
     }
 
     async _queueInitialBackup() {
@@ -245,6 +292,9 @@ export class BackupBackgroundModule {
         })) {
             if (this.state.info.state === 'paused') {
                 await this.state.pausePromise
+            }
+            if (this.state.cancelled) {
+                break
             }
 
             await this._backupChanges(batch, info, events)
