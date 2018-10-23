@@ -1,69 +1,120 @@
 import React from 'react'
 // import PropTypes from 'prop-types'
 import { remoteFunction } from 'src/util/webextensionRPC'
-import BackupSettings from './presentation'
+import { redirectToGDriveLogin } from './utils'
+import { default as Overview } from './screens/overview'
+import { default as RunningBackup } from './screens/running-backup'
+import { default as OnboardingWhere } from './screens/onboarding-1-where'
+import { default as OnboardingHow } from './screens/onboarding-2-how'
+import { default as OnboardingSize } from './screens/onboarding-3-size'
+import { BackupHeader } from './components/backup-header'
 
 export default class BackupSettingsContainer extends React.Component {
-    state = { status: null, info: null }
+    state = { screen: null, isAuthenticated: null }
 
     async componentDidMount() {
-        browser.runtime.onMessage.addListener(this.messageListener)
-
         const isAuthenticated = await remoteFunction('isBackupAuthenticated')()
-        // const isConnected = await remoteFunction('isBackupConnected')()
+        this.setState({ isAuthenticated })
 
-        // if (isAuthenticated && !isConnected) {
-        //     return this.handleLoginRequested()
+        this.setState({ screen: 'running-backup' })
+
+        // if (!await remoteFunction('hasInitialBackup')()) {
+        //     localStorage.setItem('backup.onboarding', true)
+        //     this.setState({ screen: 'onboarding-where' })
+        // } else if (localStorage.getItem('backup.onboarding.payment')) {
+        //     localStorage.removeItem('backup.onboarding.payment')
+        //     localStorage.setItem('backup.onboarding.authenticating', true)
+        //     redirectToGDriveLogin()
+        // } else if (!isAuthenticated && localStorage.getItem('backup.onboarding.authenticating')) {
+        //     localStorage.removeItem('backup.onboarding.authenticating')
+        //     this.setState({ screen: 'onboarding-size' })
+        // } else if (isAuthenticated && localStorage.getItem('backup.onboarding')) {
+        //     localStorage.removeItem('backup.onboarding')
+        //     this.setState({ screen: 'running-backup' })
+        // } else {
+        //     this.setState({ screen: 'overview' })
         // }
-
-        this.setState({
-            status: isAuthenticated ? 'authenticated' : 'unauthenticated',
-        })
     }
 
-    componentWillUnmount() {
-        browser.runtime.onMessage.removeListener(this.messageListener)
-    }
-
-    messageListener = message => {
-        if (message.type === 'backup-event') {
-            this.handleBackupEvent(message.event)
-        }
-    }
-
-    handleBackupEvent(event) {
-        if (event.type === 'info') {
-            this.setState({ status: 'running', info: event.info })
-        } else if (event.type === 'success') {
-            this.setState({ status: 'success' })
-        } else if (event.type === 'fail') {
-            this.setState({ status: 'fail' })
-        }
-    }
-
-    handleLoginRequested = async () => {
-        window.location.href = await remoteFunction(
-            'getBackupProviderLoginLink',
-        )({
-            returnUrl: 'http://memex.cloud/backup/auth-redirect/google-drive',
-            provider: 'googledrive',
-        })
-    }
-
-    render() {
-        if (!this.state.status) {
+    renderScreen() {
+        const { screen } = this.state
+        if (!screen) {
             return null
         }
 
+        if (screen === 'overview') {
+            return (
+                <Overview
+                    onBackupRequested={() => {
+                        if (this.state.isAuthenticated) {
+                            this.setState({ page: 'running-backup' })
+                        } else {
+                            redirectToGDriveLogin()
+                        }
+                    }}
+                />
+            )
+        } else if (screen === 'running-backup') {
+            return (
+                <RunningBackup
+                    onFinish={() => this.setState({ page: 'overview' })}
+                />
+            )
+        } else if (screen === 'onboarding-where') {
+            return (
+                <OnboardingWhere
+                    onChoice={choice => {
+                        this.setState({ screen: 'onboarding-how' })
+                    }}
+                />
+            )
+        } else if (screen === 'onboarding-how') {
+            return (
+                <OnboardingHow
+                    onChoice={choice => {
+                        if (choice.type === 'automatic') {
+                            localStorage.setItem(
+                                'backup.onboarding.payment',
+                                true,
+                            )
+                            // redirect to WP
+                        } else {
+                            this.setState({ screen: 'onboarding-size' })
+                        }
+                    }}
+                />
+            )
+        } else if (screen === 'onboading-size') {
+            return (
+                <OnboardingSize
+                    isAuthenticated={this.state.isAuthenticated}
+                    onLoginRequested={() => {
+                        localStorage.setItem(
+                            'backup.onboarding.authenticating',
+                            true,
+                        )
+                        redirectToGDriveLogin()
+                    }}
+                    onBackupRequested={() => {
+                        this.setState({ page: 'running-backup' })
+                    }}
+                />
+            )
+        } else {
+            throw new Error('This should never happen')
+        }
+    }
+
+    render() {
         return (
             <div>
-                <BackupSettings
-                    info={this.state.info}
-                    status={this.state.status || 'running'}
-                    onLoginRequested={this.handleLoginRequested}
-                    startBackup={() => remoteFunction('startBackup')()}
-                />
+                <BackupHeader />
+                {this.renderScreen()}
             </div>
         )
     }
 }
+
+// export async function _getCurrentScreen() {
+//     const isAuthenticated = await remoteFunction('isBackupAuthenticated')()
+// }

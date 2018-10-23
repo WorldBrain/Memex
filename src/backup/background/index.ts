@@ -10,13 +10,20 @@ import { ObjectChangeBatch } from './backend/types'
 export * from './backend'
 
 export interface BackupProgressInfo {
-    state: 'preparing' | 'synching'
-    totalObjects: number
+    state: 'preparing' | 'synching' | 'paused'
+    totalChanges: number
     processedChanges: number
     // currentCollection: string
     // collections: {
     //     [name: string]: { totalObjects: number; processedObjects: number }
     // }
+}
+
+export interface BackupState {
+    running: boolean
+    info: BackupProgressInfo
+    pausePromise?: Promise<null> // only set if paused, resolved when pause ends
+    resume?: () => void // only set if paused
 }
 
 export class BackupBackgroundModule {
@@ -26,6 +33,7 @@ export class BackupBackgroundModule {
     backend: BackupBackend
     lastBackupStorage: LastBackupStorage
     recordingChanges: boolean = false
+    state: BackupState
 
     constructor({
         storageManager,
@@ -46,6 +54,7 @@ export class BackupBackgroundModule {
         ).map(version => parseInt(version, 10))
         schemaVersions.sort()
         this.currentSchemaVersion = last(schemaVersions)
+        this.state = { running: false, info: null }
 
         this.storageManager.on(
             'changing',
@@ -83,11 +92,40 @@ export class BackupBackgroundModule {
                     events.on('fail', event => sendEvent('info', event))
                     events.on('success', event => sendEvent('info', event))
                 },
+                pauseBackup: () => {
+                    if (this.state.info.state !== 'synching') {
+                        return
+                    }
+
+                    this.state.info.state = 'paused'
+                    this.state.pausePromise = new Promise(resolve => {
+                        this.state.resume = resolve
+                    })
+                },
+                resumeBackup: () => {
+                    if (this.state.info.state !== 'paused') {
+                        return
+                    }
+
+                    this.state.info.state = 'synching'
+                    this.state.pausePromise = null
+                    this.state.resume()
+                    this.state.resume = null
+                },
+                hasInitialBackup: async () => {
+                    return !!(await this.lastBackupStorage.getLastBackupTime())
+                },
                 isBackupAuthenticated: async (info, params) => {
                     return this.backend.isAuthenticated()
                 },
                 isBackupConnected: async (info, params) => {
                     return this.backend.isConnected()
+                },
+                getBackupInfo: () => {
+                    return this.state.info
+                },
+                estimateInitialBackupSize: () => {
+                    return this.estimateInitialBackupSize()
                 },
             },
             { insertExtraArg: true },
@@ -119,7 +157,20 @@ export class BackupBackgroundModule {
         this.recordingChanges = true
     }
 
+    async estimateInitialBackupSize(): Promise<{
+        bytesWithBlobs: number
+        bytesWithoutBlobs: number
+    }> {
+        // TODO Jon: estimation without bytes still includes favicons
+        return {
+            bytesWithBlobs: 666,
+            bytesWithoutBlobs: 42,
+        }
+    }
+
     doBackup() {
+        this.state.running = true
+
         const events = new EventEmitter()
 
         const procedure = async () => {
@@ -152,9 +203,11 @@ export class BackupBackgroundModule {
 
         procedure()
             .then(() => {
+                this.state.running = false
                 events.emit('success')
             })
             .catch(e => {
+                this.state.running = false
                 console.error(e)
                 console.error(e.stack)
                 events.emit('fail', e)
@@ -190,7 +243,12 @@ export class BackupBackgroundModule {
         for await (const batch of this.storage.streamChanges(untilWhen, {
             batchSize: 5000,
         })) {
+            if (this.state.info.state === 'paused') {
+                await this.state.pausePromise
+            }
+
             await this._backupChanges(batch, info, events)
+            this.state.info = info
             events.emit('info', { info })
         }
 
@@ -218,6 +276,7 @@ export class BackupBackgroundModule {
             changes: batch.changes,
             events,
             currentSchemaVersion: this.currentSchemaVersion,
+            options: { storeBlobs: true },
         })
         await batch.forget()
 
@@ -240,7 +299,7 @@ export class BackupBackgroundModule {
     ): Promise<BackupProgressInfo> {
         const info: BackupProgressInfo = {
             state: 'synching',
-            totalObjects: 0,
+            totalChanges: 0,
             processedChanges: 0,
             // collections: {},
         }
@@ -267,7 +326,7 @@ export class BackupBackgroundModule {
             //     `totalObject`s,
             //     processedObjects: 0,
             // }
-            info.totalObjects += totalObjects as number
+            info.totalChanges += totalObjects as number
         }
 
         return info

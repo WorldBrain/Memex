@@ -1,0 +1,26 @@
+.outerProgressBar {
+    position: relative;
+    width: 400px;
+    height: 30px;
+    border-radius: 15px;
+    padding: 2px;
+    border: 1px solid #3eb995;
+}
+
+.innerProgressBar {
+    background-color: #3eb995;
+    border-radius: 12px;
+    height: 24px;
+}
+
+.progressHelpText {
+    margin-top: 10px;
+}
+
+.progressPercentage {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #333;
+}

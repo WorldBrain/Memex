@@ -1,0 +1,10 @@
+.primaryBtn {
+    display: inline-block;
+    background: #3eb995;
+    cursor: pointer;
+    padding: 10px;
+}
+
+.disabled {
+    background: #ddd;
+}
