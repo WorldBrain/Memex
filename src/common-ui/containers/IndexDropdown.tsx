@@ -88,9 +88,6 @@ class IndexDropdownContainer extends Component<Props, State> {
     /**
      * Domain inputs need to allow '.' while tags shouldn't.
      */
-    private get inputBlockPattern() {
-        return this.props.source === 'domain' ? /[^\w\s-.]/gi : /[^\w\s-]/gi
-    }
 
     /**
      * Decides whether or not to allow index update. Currently determined by `props.url` setting.
@@ -313,10 +310,6 @@ class IndexDropdownContainer extends Component<Props, State> {
     ) => {
         const searchVal = event.currentTarget.value
 
-        // Block input of non-words, spaces and hypens for tags
-        if (this.inputBlockPattern.test(searchVal)) {
-            return
-        }
         // If user backspaces to clear input, show the current assoc tags again
         let displayFilters
         let clearFieldBtn
