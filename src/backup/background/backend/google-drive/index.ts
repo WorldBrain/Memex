@@ -101,15 +101,32 @@ export class DriveBackupBackend extends BackupBackend {
         changes,
         events,
         currentSchemaVersion,
+        options,
     }: {
         changes: ObjectChange[]
         events: EventEmitter
         currentSchemaVersion: number
+        options: { storeBlobs: boolean }
     }) {
+        for (const change of changes) {
+            _prepareBackupChangeForStorage(change, options)
+        }
+
         await this.client.storeObject({
             folderName: 'change-sets',
             fileName: Date.now().toString(),
             object: { version: currentSchemaVersion, changes },
         })
     }
+}
+
+export function _prepareBackupChangeForStorage(
+    change: ObjectChange,
+    { storeBlobs }: { storeBlobs: boolean },
+) {
+    // TODO Jon:
+    // if storeBlobs
+    // Strip only screenshots from change.object
+    // always
+    // encode blobs (favicon and screenshot if applicable)
 }

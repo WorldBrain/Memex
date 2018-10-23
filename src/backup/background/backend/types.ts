@@ -64,10 +64,12 @@ export abstract class BackupBackend {
         changes,
         events,
         currentSchemaVersion,
+        options,
     }: {
         changes: ObjectChange[]
         events: EventEmitter
         currentSchemaVersion: number
+        options: { storeBlobs: boolean }
     }) {
         for (const change of changes) {
             if (change.operation !== 'delete') {

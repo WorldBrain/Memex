@@ -1,5 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import styles from './presentation.css'
 
 export default function BackupSettings(props) {
     if (props.status === 'unauthenticated') {
@@ -23,14 +24,8 @@ BackupSettings.propTypes = {
 export function PreLogin(props) {
     return (
         <div>
-            Want to do backup-y stuff with Google?
-            <strong
-                style={{ cursor: 'pointer' }}
-                onClick={props.onLoginRequested}
-            >
-                {' '}
-                Of course!
-            </strong>
+            <SettingsHeader />
+            <ProviderList onLoginRequested={props.onLoginRequested} />
         </div>
     )
 }
@@ -42,11 +37,9 @@ PreLogin.propTypes = {
 export function PreBackup(props) {
     return (
         <div>
-            You're logged in! Want to start backing up?
-            <strong style={{ cursor: 'pointer' }} onClick={props.startBackup}>
-                {' '}
-                Okelidokeli o_o
-            </strong>
+            <SettingsHeader />
+            <ProviderList />
+            <PrimaryButton onClick={props.startBackup} />
         </div>
     )
 }
@@ -56,9 +49,34 @@ PreBackup.propTypes = {
 }
 
 export function BackupRunning(props) {
-    return <span>{JSON.stringify(props)}</span>
+    return (
+        <div>
+            <SettingsHeader />
+            <ProviderList />
+            <BackupProgressBar
+                value={props.info.processedChanges / props.info.totalChanges}
+            />
+            <div className={styles.progressHelpText}>
+                You can leave this page and come back at any time.
+            </div>
+            {/* <PrimaryButton onClick={() => { }}>Pause</PrimaryButton> */}
+        </div>
+    )
+}
+
+BackupRunning.propTypes = {
+    info: PropTypes.object,
 }
 
 export function PostBackup(props) {
     return <span>Post backup: {props}</span>
+}
+
+export function SettingsHeader(props) {
+    return (
+        <div>
+            <h1>Backups</h1>
+            Backup your data to your favorite cloud provider.
+        </div>
+    )
 }
