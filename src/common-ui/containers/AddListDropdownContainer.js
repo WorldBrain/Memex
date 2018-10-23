@@ -60,10 +60,6 @@ class DropdownContainer extends Component {
         }
     }
 
-    get inputBlockPattern() {
-        return /[^\w\s-]/gi
-    }
-
     get allowIndexUpdate() {
         return this.props.url != null
     }
@@ -283,10 +279,6 @@ class DropdownContainer extends Component {
 
     handleSearchChange = event => {
         const searchVal = event.target.value
-
-        if (this.inputBlockPattern.test(searchVal)) {
-            return
-        }
 
         const displayFilters = !searchVal.length
             ? this.state.filters

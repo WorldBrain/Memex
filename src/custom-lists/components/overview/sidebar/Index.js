@@ -51,19 +51,10 @@ class ListContainer extends Component {
         this.props.getListFromDB()
     }
 
-    get inputBlockPattern() {
-        return /[^\w\s-]/gi
-    }
-
     setInputRef = el => (this.inputEl = el)
 
     handleSearchChange = field => event => {
         const { value } = event.target
-
-        // Block input of non-words, spaces and hypens for tags
-        if (this.inputBlockPattern.test(value)) {
-            return
-        }
 
         this.setState(state => ({
             ...state,

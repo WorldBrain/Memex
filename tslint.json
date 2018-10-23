@@ -1,5 +1,6 @@
 {
     "extends": ["tslint:latest", "tslint-react", "tslint-config-prettier"],
+    "defaultSeverity": "warning",
     "jsRules": {
         "no-empty": true
     },

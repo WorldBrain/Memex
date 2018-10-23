@@ -1,4 +1,4 @@
-import { browser, Storage } from 'webextension-polyfill-ts'
+import { browser, Storage, Tabs } from 'webextension-polyfill-ts'
 import debounce from 'lodash/debounce'
 
 import * as searchIndex from '../../search'
@@ -34,6 +34,7 @@ interface Props {
     bookmarkCheck?: BookmarkChecker
     tabActiveCheck?: TabEventChecker
     loggableTabCheck?: LoggableTabChecker
+    contentScriptPaths?: string[]
 }
 
 export default class TabChangeListeners {
@@ -44,7 +45,12 @@ export default class TabChangeListeners {
     static FAUX_VISIT_THRESHOLD = 100
     static FAV_ICON_CHANGE_THRESHOLD = 200
     static URL_CHANGE_THRESHOLD = 1000
+    static DEF_CONTENT_SCRIPTS = [
+        '/lib/browser-polyfill.js',
+        '/content_script.js',
+    ]
 
+    private _contentScriptPaths: string[]
     private _tabManager: TabManager
     private _storage: Storage.StorageArea
     private _checkTabLoggable: LoggableTabChecker
@@ -55,7 +61,7 @@ export default class TabChangeListeners {
     private _pageDOMLoaded: TabEventChecker
     private _tabActive: TabEventChecker
     private _pageVisitLogger: PageVisitLogger
-    private _checkBookmark: BookmarkChecker
+    public checkBookmark: BookmarkChecker
 
     /**
      * Handles fetching, and indexing the fav-icon once the tab updates, if needed.
@@ -75,6 +81,7 @@ export default class TabChangeListeners {
         domLoadCheck = whenPageDOMLoaded,
         tabActiveCheck = whenTabActive,
         bookmarkCheck = searchIndex.pageHasBookmark,
+        contentScriptPaths = TabChangeListeners.DEF_CONTENT_SCRIPTS,
     }: Props) {
         this._tabManager = tabManager
         this._pageVisitLogger = pageVisitLogger
@@ -86,7 +93,8 @@ export default class TabChangeListeners {
         this._createFavIcon = favIconCreate
         this._pageDOMLoaded = domLoadCheck
         this._tabActive = tabActiveCheck
-        this._checkBookmark = bookmarkCheck
+        this.checkBookmark = bookmarkCheck
+        this._contentScriptPaths = contentScriptPaths
 
         // Set up debounces for different tab change listeners as some sites can
         // really spam the fav-icon changes when they first load and to avoid some URL redirects.
@@ -126,18 +134,18 @@ export default class TabChangeListeners {
     private handleVisitEnd: TabChangeListener = async (
         tabId,
         { url },
-        { incognito, active },
+        { active, status },
     ) => {
         // Check if new URL of tab has an assoc. bookmark or not
-        const hasBookmark = await this._checkBookmark(url)
+        const isBookmarked = await this.checkBookmark(url)
 
         // Ensures the URL change counts as a new visit in tab state (tab ID doesn't change)
-        const oldTab = this._tabManager.resetTab(
-            tabId,
-            active,
+        const oldTab = this._tabManager.resetTab(tabId, {
             url,
-            hasBookmark,
-        )
+            isBookmarked,
+            isActive: active,
+            isLoaded: status === 'complete',
+        })
 
         // Send off request for updating that prev. visit's tab state, if active long enough
         if (
@@ -146,6 +154,18 @@ export default class TabChangeListeners {
             oldTab.activeTime > TabChangeListeners.FAUX_VISIT_THRESHOLD
         ) {
             await this._updateTabVisit(oldTab)
+        }
+    }
+
+    public async injectContentScripts(tab: Tabs.Tab) {
+        const isLoggable = await this._checkTabLoggable(tab)
+
+        if (!isLoggable) {
+            return
+        }
+
+        for (const file of this._contentScriptPaths) {
+            await browser.tabs.executeScript(tab.id, { file })
         }
     }
 

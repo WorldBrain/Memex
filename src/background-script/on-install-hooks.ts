@@ -8,6 +8,7 @@ import {
     constants as blacklistConsts,
     blacklist,
 } from '../blacklist/background'
+import { trackExistingTabs } from '../activity-logger/background/tab-bridge'
 
 export async function onInstall() {
     const now = Date.now()
@@ -23,6 +24,7 @@ export async function onInstall() {
     // Store the timestamp of when the extension was installed
     browser.storage.local.set({ [INSTALL_TIME_KEY]: now })
 
+    await trackExistingTabs({ isNewInstall: true })
     await generateTokenIfNot({ installTime: now })
 }
 
@@ -45,5 +47,6 @@ export async function onUpdate() {
         INSTALL_TIME_KEY
     ]
 
+    await trackExistingTabs({ isNewInstall: false })
     await generateTokenIfNot({ installTime })
 }
