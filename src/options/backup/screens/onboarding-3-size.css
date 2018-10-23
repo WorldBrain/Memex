@@ -1,0 +1,9 @@
+.headerEmphasis {
+    font-size: 1.3em;
+    text-transform: uppercase;
+}
+
+.sumCell {
+    padding: 20px 0;
+    border-top: 2px solid black;
+}
