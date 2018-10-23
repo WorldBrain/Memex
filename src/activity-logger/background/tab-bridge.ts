@@ -45,7 +45,7 @@ export async function trackExistingTabs({ isNewInstall = false }) {
             isBookmarked: await tabChangeListener.checkBookmark(browserTab.url),
         })
 
-        await tabChangeListener.injectContentScripts(browserTab)
+        await tabChangeListener.injectContentScripts(browserTab).catch(e => e)
 
         if (!isNewInstall) {
             continue

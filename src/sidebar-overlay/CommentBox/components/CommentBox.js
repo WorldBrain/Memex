@@ -254,7 +254,9 @@ class CommentBox extends React.PureComponent {
                         rows={this.props.textareaRows}
                         className={styles.textarea}
                         value={this.props.commentInput}
-                        placeholder={'Add your comment...'}
+                        placeholder={
+                            'Add your comment... (save with cmd/ctrl+enter)'
+                        }
                         onChange={this.handleChange}
                         onKeyDown={this.handleKeyDown}
                         ref={this.setInputRef}
