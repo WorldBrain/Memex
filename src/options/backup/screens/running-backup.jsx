@@ -76,8 +76,12 @@ export default class RunningBackupContainer extends React.Component {
 
     render() {
         const { info } = this.state
+        if (!info) {
+            return null
+        }
+
         const progressPercentage =
-            this.state.info && this.state.info.status === 'synching'
+            info.status === 'synching'
                 ? info.processedChanges / info.totalChanges
                 : 0
 
@@ -112,7 +116,7 @@ export default class RunningBackupContainer extends React.Component {
                 >
                     Cancel
                 </div>
-                {this.state.info.state !== 'paused' && (
+                {info.state !== 'paused' && (
                     <PrimaryButton
                         onClick={() => {
                             this.handlePause()
@@ -121,7 +125,7 @@ export default class RunningBackupContainer extends React.Component {
                         Pause
                     </PrimaryButton>
                 )}
-                {this.state.info.state === 'paused' && (
+                {info.state === 'paused' && (
                     <PrimaryButton
                         onClick={() => {
                             this.handleResume()
