@@ -173,7 +173,7 @@ class ListContainer extends Component {
                     <CrowdfundingModal
                         onClose={this.props.setShowCrowdFundingModal(false)}
                         context="collections"
-                        learnMoreUrl="https://worldbrain.io/product/collaborative-collections/"
+                        learnMoreUrl="https://worldbrain.io/crowdfunding-memex/"
                     />
                 ) : null}
             </React.Fragment>
