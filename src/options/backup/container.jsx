@@ -16,6 +16,7 @@ export default class BackupSettingsContainer extends React.Component {
         const isAuthenticated = await remoteFunction('isBackupAuthenticated')()
         this.setState({ isAuthenticated })
 
+        // this.setState({ screen: 'running-backup' })
         if (localStorage.getItem('backup.onboarding')) {
             if (localStorage.getItem('backup.onboarding.payment')) {
                 localStorage.removeItem('backup.onboarding.payment')
@@ -27,10 +28,7 @@ export default class BackupSettingsContainer extends React.Component {
             ) {
                 localStorage.removeItem('backup.onboarding.authenticating')
                 this.setState({ screen: 'onboarding-size' })
-            } else if (
-                isAuthenticated &&
-                localStorage.getItem('backup.onboarding')
-            ) {
+            } else if (isAuthenticated) {
                 localStorage.removeItem('backup.onboarding.payment')
                 localStorage.removeItem('backup.onboarding.authenticating')
                 localStorage.removeItem('backup.onboarding')
@@ -39,25 +37,6 @@ export default class BackupSettingsContainer extends React.Component {
         } else if (!(await remoteFunction('hasInitialBackup')())) {
             localStorage.setItem('backup.onboarding', true)
             this.setState({ screen: 'onboarding-where' })
-        }
-
-        if (localStorage.getItem('backup.onboarding.payment')) {
-            localStorage.removeItem('backup.onboarding.payment')
-            localStorage.setItem('backup.onboarding.authenticating', true)
-            redirectToGDriveLogin()
-        } else if (
-            !isAuthenticated &&
-            localStorage.getItem('backup.onboarding.authenticating')
-        ) {
-            localStorage.removeItem('backup.onboarding.authenticating')
-            this.setState({ screen: 'onboarding-size' })
-        } else if (
-            isAuthenticated &&
-            localStorage.getItem('backup.onboarding')
-        ) {
-            localStorage.removeItem('backup.onboarding.authenticating')
-            localStorage.removeItem('backup.onboarding')
-            this.setState({ screen: 'running-backup' })
         } else {
             this.setState({ screen: 'overview' })
         }
@@ -84,7 +63,9 @@ export default class BackupSettingsContainer extends React.Component {
         } else if (screen === 'running-backup') {
             return (
                 <RunningBackup
-                    onFinish={() => this.setState({ page: 'overview' })}
+                    onFinish={() => {
+                        this.setState({ screen: 'overview' })
+                    }}
                 />
             )
         } else if (screen === 'onboarding-where') {
@@ -109,6 +90,9 @@ export default class BackupSettingsContainer extends React.Component {
                             this.setState({ screen: 'onboarding-size' })
                         }
                     }}
+                    onBackRequested={() => {
+                        this.setState({ screen: 'onboarding-where' })
+                    }}
                 />
             )
         } else if (screen === 'onboarding-size') {
@@ -126,7 +110,7 @@ export default class BackupSettingsContainer extends React.Component {
                         redirectToGDriveLogin()
                     }}
                     onBackupRequested={() => {
-                        this.setState({ page: 'running-backup' })
+                        this.setState({ screen: 'running-backup' })
                     }}
                 />
             )

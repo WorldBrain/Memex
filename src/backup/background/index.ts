@@ -36,6 +36,7 @@ export class BackupBackgroundModule {
     lastBackupStorage: LastBackupStorage
     recordingChanges: boolean = false
     state: BackupState
+    uiTabId?: any
 
     constructor({
         storageManager,
@@ -88,9 +89,14 @@ export class BackupBackgroundModule {
                     return url
                 },
                 startBackup: ({ tab }, params) => {
+                    this.uiTabId = tab.id
+                    if (this.state.running) {
+                        return
+                    }
+
                     this.doBackup()
                     const sendEvent = (eventType, event) =>
-                        window['browser'].tabs.sendMessage(tab.id, {
+                        window['browser'].tabs.sendMessage(this.uiTabId, {
                             type: 'backup-event',
                             event: { type: eventType, ...(event || {}) },
                         })
@@ -98,14 +104,14 @@ export class BackupBackgroundModule {
                         sendEvent('info', event),
                     )
                     this.state.events.on('fail', event =>
-                        sendEvent('info', event),
+                        sendEvent('fail', event),
                     )
                     this.state.events.on('success', event =>
-                        sendEvent('info', event),
+                        sendEvent('success', event),
                     )
                 },
                 pauseBackup: () => {
-                    if (this.state.info.state !== 'synching') {
+                    if (!this.state || this.state.info.state !== 'synching') {
                         return
                     }
 
@@ -215,6 +221,11 @@ export class BackupBackgroundModule {
     doBackup() {
         this.state.running = true
         this.state.events = new EventEmitter()
+        this.state.info = {
+            state: 'preparing',
+            totalChanges: null,
+            processedChanges: null,
+        }
 
         const procedure = async () => {
             this.startRecordingChanges()
@@ -228,9 +239,7 @@ export class BackupBackgroundModule {
                 console.time('put initial backup into changes table')
 
                 try {
-                    this.state.events.emit('info', {
-                        info: { state: 'preparing' },
-                    })
+                    this.state.events.emit('info', this.state.info)
                     await this.storage.forgetAllChanges()
                     await this._queueInitialBackup() // Pushes all the objects in the DB to the queue for the incremental backup
                 } catch (err) {
@@ -283,12 +292,15 @@ export class BackupBackgroundModule {
         console.log('starting incremental backup')
 
         const collectionsWithVersions = this._getCollectionsToBackup()
-        const info = await this._createBackupInfo(
+        const info = (this.state.info = await this._createBackupInfo(
             collectionsWithVersions,
             untilWhen,
-        )
+        ))
+        events.emit('info', { info })
+
         for await (const batch of this.storage.streamChanges(untilWhen, {
-            batchSize: 5000,
+            // batchSize: 5000,
+            batchSize: 20,
         })) {
             if (this.state.info.state === 'paused') {
                 await this.state.pausePromise
@@ -298,7 +310,6 @@ export class BackupBackgroundModule {
             }
 
             await this._backupChanges(batch, info, events)
-            this.state.info = info
             events.emit('info', { info })
         }
 
@@ -322,12 +333,13 @@ export class BackupBackgroundModule {
             )
             change.object = object
         }
-        await this.backend.backupChanges({
-            changes: batch.changes,
-            events,
-            currentSchemaVersion: this.currentSchemaVersion,
-            options: { storeBlobs: true },
-        })
+        await new Promise(resolve => setTimeout(resolve, 500))
+        // await this.backend.backupChanges({
+        //     changes: batch.changes,
+        //     events,
+        //     currentSchemaVersion: this.currentSchemaVersion,
+        //     options: { storeBlobs: true },
+        // })
         await batch.forget()
 
         info.processedChanges += batch.changes.length

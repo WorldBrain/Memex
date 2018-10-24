@@ -1,5 +1,4 @@
 .outerProgressBar {
-    position: relative;
     width: 400px;
     height: 30px;
     border-radius: 15px;
@@ -8,6 +7,7 @@
 }
 
 .innerProgressBar {
+    position: relative;
     background-color: #3eb995;
     border-radius: 12px;
     height: 24px;
