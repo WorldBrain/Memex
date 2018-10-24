@@ -186,7 +186,7 @@ export default class TabChangeListeners {
         }
     }
 
-    private _handleVisitIndexing: TabChangeListener = async (tabId, _, tab) => {
+    _handleVisitIndexing: TabChangeListener = async (tabId, _, tab) => {
         const indexingPrefs = await this.fetchIndexingPrefs()
 
         // Run stage 1 of visit indexing immediately (depends on user settings)

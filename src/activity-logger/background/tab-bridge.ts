@@ -51,16 +51,12 @@ export async function trackExistingTabs({ isNewInstall = false }) {
             continue
         }
 
-        if (browserTab.favIconUrl) {
-            tabChangeListener.handleFavIcon(
+        if (browserTab.url) {
+            tabChangeListener._handleVisitIndexing(
                 browserTab.id,
                 browserTab,
                 browserTab,
             )
-        }
-
-        if (browserTab.url) {
-            tabChangeListener.handleUrl(browserTab.id, browserTab, browserTab)
         }
     }
 

@@ -14,12 +14,11 @@ const message: React.SFC<Props> = ({ styles, ...props }) => (
     <React.Fragment>
         <p className={styles.header}>Fund the future!</p>
         <p className={styles.bolderText}>
-            You can't share, co-curate <br />
-            and discuss {props.context} yet.
+            This feature is not available yet but it's on our roadmap.
         </p>
         <p className={styles.text}>
             Support the development with 10€ and <br />
-            <b>get back 30€</b> worth of Memex Premium Credits.
+            <b>get back 40€</b> worth of premium credits.
         </p>
         <a className={styles.learnMore} onClick={props.openNewLink}>
             LEARN MORE
