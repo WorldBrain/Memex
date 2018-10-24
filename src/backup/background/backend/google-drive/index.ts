@@ -125,7 +125,7 @@ export function _prepareBackupChangeForStorage(
     { storeBlobs }: { storeBlobs: boolean },
 ) {
     // TODO Jon:
-    // if storeBlobs
+    // if not storeBlobs
     // Strip only screenshots from change.object
     // always
     // encode blobs (favicon and screenshot if applicable)
