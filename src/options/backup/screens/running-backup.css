@@ -1,11 +1,19 @@
-/* .steps {
-}
-
 .step {
+    display: flex;
 }
 
 .stepLabel {
+    width: 400px;
 }
 
-.stepStatus {
+.stepNumber {
+    font-weight: bold;
+}
+
+.actions {
+    display: flex;
+}
+
+/* .actionCancel {
+
 } */

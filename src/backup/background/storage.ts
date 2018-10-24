@@ -73,10 +73,9 @@ export default class BackupStorage extends FeatureStorage {
             changes = await this.storageManager.findAll(
                 'backupChanges',
                 {},
-                { limit: 50 },
+                { limit: batchSize },
             )
             if (!changes.length) {
-                running = false
                 break
             }
 
@@ -93,11 +92,13 @@ export default class BackupStorage extends FeatureStorage {
                 }
             }
 
-            // Means we didn't have enough changes for an entire batch, so we've reached the end
-            if (batch.changes.length) {
-                yield batch
-                running = false
+            if (changes.length < batchSize) {
+                break
             }
+        }
+
+        if (batch.changes.length) {
+            yield batch
         }
     }
 

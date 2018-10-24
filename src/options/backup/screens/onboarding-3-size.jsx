@@ -117,6 +117,7 @@ export default class OnboardingSizeContainer extends React.Component {
                 {this.props.isAuthenticated && (
                     <PrimaryButton
                         onClick={() => {
+                            console.log('backup button clicked')
                             this.props.onBackupRequested()
                         }}
                     >

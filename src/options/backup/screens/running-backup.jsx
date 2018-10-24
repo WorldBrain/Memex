@@ -21,23 +21,25 @@ export default class RunningBackupContainer extends React.Component {
                 status: 'running',
                 info,
             })
+        } else {
+            await remoteFunction('startBackup')()
         }
 
         // this.setState({
         //     status: 'running',
-        //     info: { status: 'preparing' },
+        //     info: { state: 'preparing' },
         // })
         // this.setState({
         //     status: 'running',
-        //     info: { status: 'synching', totalChanges: 1000, processedChanges: 500 },
+        //     info: { state: 'synching', totalChanges: 1000, processedChanges: 500 },
         // })
         // this.setState({
         //     status: 'success',
-        //     info: { status: 'synching', totalChanges: 1000, processedChanges: 10 },
+        //     info: { state: 'synching', totalChanges: 1000, processedChanges: 1000 },
         // })
         // this.setState({
         //     status: 'fail',
-        //     info: { status: 'synching', totalChanges: 1000, processedChanges: 10 },
+        //     info: { state: 'synching', totalChanges: 1000, processedChanges: 10 },
         // })
     }
 
@@ -53,9 +55,12 @@ export default class RunningBackupContainer extends React.Component {
 
     handleBackupEvent(event) {
         if (event.type === 'info') {
-            this.setState({ status: 'running', info: event.info })
+            this.setState({
+                status: 'running',
+                info: event.info || this.state.info,
+            })
         } else if (event.type === 'success') {
-            this.props.onFinish()
+            this.setState({ status: 'success' })
         } else if (event.type === 'fail') {
             this.setState({ status: 'fail' })
         }
@@ -75,13 +80,13 @@ export default class RunningBackupContainer extends React.Component {
     }
 
     render() {
-        const { info } = this.state
+        const { info, status } = this.state
         if (!info) {
             return null
         }
 
         const progressPercentage =
-            info.status === 'synching'
+            info.state === 'synching'
                 ? info.processedChanges / info.totalChanges
                 : 0
 
@@ -95,44 +100,69 @@ export default class RunningBackupContainer extends React.Component {
                             <span className={styles.stepNumber}>Step 1:</span>
                             Preparing uploads
                         </div>
-                        <div className={styles.stepStatus}>In progress</div>
+                        <div className={styles.stepStatus}>
+                            {info.state === 'preparing' && 'In progress'}
+                            {info.state === 'synching' && 'Done'}
+                        </div>
                     </div>
                     <div className={styles.step}>
                         <div className={styles.stepLabel}>
-                            <span className={styles.stepNumber}>Step 1:</span>
+                            <span className={styles.stepNumber}>Step 2:</span>
                             Uploading your Memex backup
                         </div>
-                        <div className={styles.stepStatus}>Waiting</div>
+                        <div className={styles.stepStatus}>
+                            {info.state === 'preparing' && 'Waiting'}
+                            {status === 'running' &&
+                                info.state === 'synching' &&
+                                'In progress'}
+                            {status === 'success' && 'Done'}
+                        </div>
                     </div>
                 </div>
                 <BackupProgressBar value={progressPercentage} />
                 <div className={styles.progressHelpText}>
                     You can leave this page and come back at any time.
                 </div>
-                <div
-                    onClick={() => {
-                        this.handleCancel()
-                    }}
-                >
-                    Cancel
-                </div>
-                {info.state !== 'paused' && (
-                    <PrimaryButton
-                        onClick={() => {
-                            this.handlePause()
-                        }}
-                    >
-                        Pause
-                    </PrimaryButton>
+                {status === 'running' && (
+                    <div className={styles.actions}>
+                        <div
+                            className={styles.actionCancel}
+                            onClick={() => {
+                                this.handleCancel()
+                            }}
+                        >
+                            Cancel
+                        </div>
+                        {info.state !== 'paused' && (
+                            <PrimaryButton
+                                onClick={() => {
+                                    this.handlePause()
+                                }}
+                            >
+                                Pause
+                            </PrimaryButton>
+                        )}
+                        {info.state === 'paused' && (
+                            <PrimaryButton
+                                onClick={() => {
+                                    this.handleResume()
+                                }}
+                            >
+                                Resume
+                            </PrimaryButton>
+                        )}
+                    </div>
                 )}
-                {info.state === 'paused' && (
-                    <PrimaryButton
-                        onClick={() => {
-                            this.handleResume()
-                        }}
-                    >
-                        Resume
-                    </PrimaryButton>
+                {status === 'success' && (
+                    <div className={styles.actions}>
+                        <PrimaryButton
+                            onClick={() => {
+                                this.props.onFinish()
+                            }}
+                        >
+                            Finish
+                        </PrimaryButton>
+                    </div>
                 )}
             </div>
         )
