@@ -60,47 +60,49 @@ export default class OnboardingSizeContainer extends React.Component {
                 </h2>
                 <div>What do you want to include in the backup?</div>
                 <table>
-                    <tr>
-                        <td>&nbsp;</td>
-                        <td>
-                            Searchable History, Annotations, Comments,
-                            Highlights, Collections
-                        </td>
-                        <td className={styles.estimationSize}>
-                            {_bytesToMega(sizes.withoutBlobs).toFixed(0)}
-                            MB
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <input
-                                type="checkbox"
-                                onChange={event =>
-                                    this.props.onBlobPreferenceChange(
-                                        event.target.checked,
-                                    )
-                                }
-                            />
-                        </td>
-                        <td>Screenshots</td>
-                        <td className={styles.estimationSize}>
-                            {_bytesToMega(sizes.blobs).toFixed(0)}
-                            MB
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>&nbsp;</td>
-                        <td>&nbsp;</td>
-                        <td
-                            className={classNames(
-                                styles.estimationSize,
-                                styles.sumCell,
-                            )}
-                        >
-                            {_bytesToMega(sizes.blobs).toFixed(0)}
-                            MB
-                        </td>
-                    </tr>
+                    <tbody>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td>
+                                Searchable History, Annotations, Comments,
+                                Highlights, Collections
+                            </td>
+                            <td className={styles.estimationSize}>
+                                {_bytesToMega(sizes.withoutBlobs).toFixed(0)}
+                                MB
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <input
+                                    type="checkbox"
+                                    onChange={event =>
+                                        this.props.onBlobPreferenceChange(
+                                            event.target.checked,
+                                        )
+                                    }
+                                />
+                            </td>
+                            <td>Screenshots</td>
+                            <td className={styles.estimationSize}>
+                                {_bytesToMega(sizes.blobs).toFixed(0)}
+                                MB
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td
+                                className={classNames(
+                                    styles.estimationSize,
+                                    styles.sumCell,
+                                )}
+                            >
+                                {_bytesToMega(sizes.blobs).toFixed(0)}
+                                MB
+                            </td>
+                        </tr>
+                    </tbody>
                 </table>
 
                 {!this.props.isAuthenticated && (

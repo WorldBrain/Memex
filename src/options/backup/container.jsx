@@ -16,24 +16,51 @@ export default class BackupSettingsContainer extends React.Component {
         const isAuthenticated = await remoteFunction('isBackupAuthenticated')()
         this.setState({ isAuthenticated })
 
-        this.setState({ screen: 'running-backup' })
+        if (localStorage.getItem('backup.onboarding')) {
+            if (localStorage.getItem('backup.onboarding.payment')) {
+                localStorage.removeItem('backup.onboarding.payment')
+                localStorage.setItem('backup.onboarding.authenticating', true)
+                redirectToGDriveLogin()
+            } else if (
+                !isAuthenticated &&
+                localStorage.getItem('backup.onboarding.authenticating')
+            ) {
+                localStorage.removeItem('backup.onboarding.authenticating')
+                this.setState({ screen: 'onboarding-size' })
+            } else if (
+                isAuthenticated &&
+                localStorage.getItem('backup.onboarding')
+            ) {
+                localStorage.removeItem('backup.onboarding.payment')
+                localStorage.removeItem('backup.onboarding.authenticating')
+                localStorage.removeItem('backup.onboarding')
+                this.setState({ screen: 'running-backup' })
+            }
+        } else if (!(await remoteFunction('hasInitialBackup')())) {
+            localStorage.setItem('backup.onboarding', true)
+            this.setState({ screen: 'onboarding-where' })
+        }
 
-        // if (!await remoteFunction('hasInitialBackup')()) {
-        //     localStorage.setItem('backup.onboarding', true)
-        //     this.setState({ screen: 'onboarding-where' })
-        // } else if (localStorage.getItem('backup.onboarding.payment')) {
-        //     localStorage.removeItem('backup.onboarding.payment')
-        //     localStorage.setItem('backup.onboarding.authenticating', true)
-        //     redirectToGDriveLogin()
-        // } else if (!isAuthenticated && localStorage.getItem('backup.onboarding.authenticating')) {
-        //     localStorage.removeItem('backup.onboarding.authenticating')
-        //     this.setState({ screen: 'onboarding-size' })
-        // } else if (isAuthenticated && localStorage.getItem('backup.onboarding')) {
-        //     localStorage.removeItem('backup.onboarding')
-        //     this.setState({ screen: 'running-backup' })
-        // } else {
-        //     this.setState({ screen: 'overview' })
-        // }
+        if (localStorage.getItem('backup.onboarding.payment')) {
+            localStorage.removeItem('backup.onboarding.payment')
+            localStorage.setItem('backup.onboarding.authenticating', true)
+            redirectToGDriveLogin()
+        } else if (
+            !isAuthenticated &&
+            localStorage.getItem('backup.onboarding.authenticating')
+        ) {
+            localStorage.removeItem('backup.onboarding.authenticating')
+            this.setState({ screen: 'onboarding-size' })
+        } else if (
+            isAuthenticated &&
+            localStorage.getItem('backup.onboarding')
+        ) {
+            localStorage.removeItem('backup.onboarding.authenticating')
+            localStorage.removeItem('backup.onboarding')
+            this.setState({ screen: 'running-backup' })
+        } else {
+            this.setState({ screen: 'overview' })
+        }
     }
 
     renderScreen() {
@@ -84,7 +111,7 @@ export default class BackupSettingsContainer extends React.Component {
                     }}
                 />
             )
-        } else if (screen === 'onboading-size') {
+        } else if (screen === 'onboarding-size') {
             return (
                 <OnboardingSize
                     isAuthenticated={this.state.isAuthenticated}
@@ -104,6 +131,7 @@ export default class BackupSettingsContainer extends React.Component {
                 />
             )
         } else {
+            console.error(`Unknown screen: ${this.state.screen}`)
             throw new Error('This should never happen')
         }
     }
