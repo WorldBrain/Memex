@@ -113,3 +113,28 @@ export default class BackupStorage extends FeatureStorage {
         await this.storageManager.deleteObject('backupChanges', {})
     }
 }
+
+export interface LastBackupStorage {
+    getLastBackupTime(): Promise<Date>
+    storeLastBackupTime(time: Date): Promise<any>
+}
+
+export class LocalLastBackupStorage implements LastBackupStorage {
+    private key: string
+
+    constructor({ key }: { key: string }) {
+        this.key = key
+    }
+
+    async getLastBackupTime() {
+        const value = localStorage.getItem(this.key)
+        if (!value) {
+            return null
+        }
+        return new Date(JSON.parse(value))
+    }
+
+    async storeLastBackupTime(time: Date) {
+        localStorage.setItem(this.key, JSON.stringify(time.getTime()))
+    }
+}
