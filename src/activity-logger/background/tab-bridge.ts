@@ -11,8 +11,9 @@ const tabChangeListener = new TabChangeListeners({
     pageVisitLogger,
 })
 
-let resolveTabQuery
-const tabQueryP = new Promise(resolve => (resolveTabQuery = resolve))
+// Used to stop of tab updated event listeners while the
+//  tracking of existing tabs is happening.
+let tabQueryP = new Promise(resolve => resolve())
 
 const isTabLoaded = (tab: Tabs.Tab) => tab.status === 'complete'
 
@@ -37,6 +38,8 @@ export const tabUpdatedListener: TabChangeListener = async (
 }
 
 export async function trackExistingTabs({ isNewInstall = false }) {
+    let resolveTabQueryP
+    tabQueryP = new Promise(resolve => (resolveTabQueryP = resolve))
     const tabs = await browser.tabs.query({})
 
     for (const browserTab of tabs) {
@@ -60,7 +63,7 @@ export async function trackExistingTabs({ isNewInstall = false }) {
         }
     }
 
-    resolveTabQuery()
+    resolveTabQueryP()
 }
 
 export async function trackNewTab(id: number) {
