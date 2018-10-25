@@ -1,0 +1,15 @@
+.smallButton {
+    border-radius: 2px;
+    background-color: #3eb995;
+    color: white;
+}
+
+.paymentButton {
+    background-color: blue;
+    color: white;
+}
+
+.dangerButton {
+    background-color: red;
+    color: white;
+}

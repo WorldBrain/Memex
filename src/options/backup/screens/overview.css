@@ -1,19 +1,20 @@
-/* .settingsSection {
+.settingsSection {
+    display: flex;
 }
 
-.settingsLabel {
+.settingsSectionDescription {
+    width: 500px;
 }
+
+/* .settingsLabel {
+
+} */
 
 .settingsHelp {
+    font-size: 0.9em;
 }
 
-.smallButton {
-}
-
-.dangerButton {
-}
-
-.statusLine {
+/* .statusLine {
 } */
 
 .statusLabel {
