@@ -2,6 +2,8 @@ import { EventEmitter } from 'events'
 import { GoogleDriveClient } from './client'
 import { DriveTokenManager, DriveTokenStore } from './token-manager'
 import { BackupBackend, ObjectChange } from '../types'
+import encodeBlob from '../../../../util/encode-blob'
+
 export { LocalStorageDriveTokenStore } from './token-manager'
 
 const DEFAULT_AUTH_SCOPE = 'https://www.googleapis.com/auth/drive.appdata'
@@ -109,7 +111,7 @@ export class DriveBackupBackend extends BackupBackend {
         options: { storeBlobs: boolean }
     }) {
         for (const change of changes) {
-            _prepareBackupChangeForStorage(change, options)
+            await _prepareBackupChangeForStorage(change, options)
         }
 
         await this.client.storeObject({
@@ -120,13 +122,25 @@ export class DriveBackupBackend extends BackupBackend {
     }
 }
 
-export function _prepareBackupChangeForStorage(
+export async function _prepareBackupChangeForStorage(
     change: ObjectChange,
     { storeBlobs }: { storeBlobs: boolean },
 ) {
-    // TODO Jon:
-    // if not storeBlobs
-    // Strip only screenshots from change.object
-    // always
-    // encode blobs (favicon and screenshot if applicable)
+    if (
+        change.collection === 'pages' &&
+        change.object != null &&
+        change.object.screenshot != null
+    ) {
+        change.object.screenshot = storeBlobs
+            ? await encodeBlob(change.object.screenshot)
+            : undefined
+    }
+
+    if (
+        change.collection === 'favIcons' &&
+        change.object != null &&
+        change.object.favIcon != null
+    ) {
+        change.object.favIcon = await encodeBlob(change.object.favIcon)
+    }
 }
