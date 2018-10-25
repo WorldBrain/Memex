@@ -1,15 +1,85 @@
-.smallButton {
-    border-radius: 2px;
-    background-color: #3eb995;
-    color: white;
-}
-
-.paymentButton {
-    background-color: blue;
-    color: white;
-}
-
 .dangerButton {
     background-color: red;
     color: white;
+}
+
+h1 {
+    color: #3eb995;
+    margin-left: -2px;
+    font-weight: 600;
+}
+
+.subtitle {
+    color: #4a4a4a;
+    margin-top: -20px;
+    font-weight: 200;
+}
+
+.subtitle2 {
+    color: #4a4a4a;
+    margin-top: -10px;
+    font-weight: 200;
+    font-size: 15px;
+    margin-bottom: 30px;
+}
+
+.header2 {
+    color: #173766;
+    font-size: 20px;
+    margin-bottom: 10px;
+    margin-top: 30px;
+}
+
+.back {
+    margin-left: 15px;
+    cursor: pointer;
+}
+
+/* Upgrade Button */
+
+.labelFree {
+    background: #3eb995;
+}
+
+.labelPremium {
+    background: #173766;
+}
+
+.star {
+    font-size: 18px;
+    vertical-align: text-top;
+    margin-right: 5px;
+    margin-top: 1px;
+}
+
+.label {
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    color: white;
+    font-size: 15px;
+    vertical-align: middle;
+    margin-left: 10px;
+}
+
+/* Elements for selections */
+
+.option {
+    vertical-align: middle;
+    display: inline-block;
+    margin-bottom: 15px;
+    padding-left: 10px;
+    width: 600px;
+}
+
+.name {
+    vertical-align: middle;
+    color: #3eb995;
+    font-weight: 500;
+}
+
+.subname {
+    font-size: 15px;
+    color: #4a4a4a;
 }

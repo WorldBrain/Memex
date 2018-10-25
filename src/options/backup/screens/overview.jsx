@@ -1,10 +1,10 @@
 import moment from 'moment'
 import React from 'react'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import AutomaticBackupButton from '../components/overview-automatic-backup-button'
-import backupStyles from '../styles.css'
-import styles from './overview.css'
+import Styles from '../styles.css'
+import localStyles from './overview.css'
 
 export default class OverviewContainer extends React.Component {
     state = { automaticBackupEnabled: null, backupTimes: null }
@@ -25,18 +25,12 @@ export default class OverviewContainer extends React.Component {
 
         return (
             <div>
-                <h2>Settings</h2>
-                <div className={styles.settingsSection}>
-                    <div className={styles.settingsSectionDescription}>
-                        <div className={styles.settingsLabel}>
-                            Automatic backup
-                        </div>
-                        <div className={styles.settingsHelp}>
-                            Worry-free. Automatically backs up your data every
-                            15 minutes.
-                        </div>
-                    </div>
-                    <div>
+                <p className={Styles.header2}>
+                    <strong>SETTINGS </strong>
+                </p>
+                <div className={Styles.option}>
+                    <span className={Styles.name}>Automatic Backup</span>
+                    <span className={cx(localStyles.button)}>
                         {this.state.automaticBackupEnabled !== null && (
                             <AutomaticBackupButton
                                 automaticBackupEnabled={
@@ -50,65 +44,66 @@ export default class OverviewContainer extends React.Component {
                                 }}
                             />
                         )}
-                    </div>
+                    </span>
+                    <br />
+                    <span className={Styles.subname}>
+                        Worry-free backups every 15 minutes.
+                    </span>
                 </div>
-                <div className={styles.settingsSection}>
-                    <div className={styles.settingsSectionDescription}>
-                        <div className={styles.settingsLabel}>
-                            Delete backup
-                        </div>
-                    </div>
-                    <div>
-                        <div className={backupStyles.smallButton}>Tutorial</div>
-                    </div>
+
+                <div className={Styles.option}>
+                    <span className={Styles.name}>Delete Backup</span>
+                    <span className={localStyles.button}>
+                        <span className={cx(Styles.label, Styles.labelFree)}>
+                            Tutorial
+                        </span>
+                    </span>
+                    <br />
                 </div>
-                <h2>Status</h2>
-                <div className={styles.statusLine}>
-                    <span className={styles.statusLabel}>Last backup: </span>
-                    {this.state.backupTimes.lastBackup
-                        ? moment(this.state.backupTimes.lastBackup).fromNow()
-                        : "Panic, you don't have a backup!!"}
+
+                <p className={Styles.header2}>
+                    <strong>STATUS </strong>
+                </p>
+                <div className={localStyles.statusLine}>
+                    <span className={Styles.name}>Last backup: </span>
+                    <span className={localStyles.time}>
+                        {this.state.backupTimes.lastBackup
+                            ? moment(
+                                  this.state.backupTimes.lastBackup,
+                              ).fromNow()
+                            : "You haven't made any backup yet"}
+                    </span>
                 </div>
                 {this.state.backupTimes.nextBackup && (
-                    <div className={styles.statusLine}>
-                        <span className={styles.statusLabel}>
-                            Next backup:{' '}
+                    <div className={localStyles.statusLine}>
+                        <span className={Styles.name}>Next backup: </span>
+                        <span className={localStyles.time}>
+                            {moment(
+                                this.state.backupTimes.nextBackup,
+                            ).fromNow()}
                         </span>
-                        {moment(this.state.backupTimes.nextBackup).fromNow()}
                     </div>
                 )}
-                {this.state.automaticBackupEnabled && (
-                    <div>
-                        <h2>Restore</h2>
-                        <div className={styles.settingsSection}>
-                            <div>
-                                <div
-                                    className={classNames(
-                                        styles.settingsLabel,
-                                        styles.comingSoon,
-                                    )}
-                                >
-                                    Coming Very Soon
-                                </div>
-                                <div className={styles.settingsHelp}>
-                                    You can back our development and get up to
-                                    4.5x of your contribution back in Premium
-                                    Credits
-                                </div>
-                            </div>
-                            <div>
-                                <div
-                                    className={classNames(
-                                        backupStyles.smallButton,
-                                        backupStyles.paymentButton,
-                                    )}
-                                >
-                                    Support
-                                </div>
-                            </div>
-                        </div>
+                <div>
+                    <p className={Styles.header2}>
+                        <strong>RESTORE </strong>
+                    </p>
+                    <div className={Styles.option}>
+                        <span className={Styles.name}>Coming Very Soon</span>
+                        <span className={localStyles.button}>
+                            <span
+                                className={cx(Styles.label, Styles.labelFree)}
+                            >
+                                Chip in 10€
+                            </span>
+                        </span>
+                        <br />
+                        <span className={Styles.subname}>
+                            Support our development and get back 40€ worth of
+                            premium credits
+                        </span>
                     </div>
-                )}
+                </div>
             </div>
         )
     }

@@ -1,0 +1,23 @@
+.logo {
+    height: 20px;
+    vertical-align: middle;
+    margin-right: 5px;
+}
+
+.disabled {
+    color: grey;
+    vertical-align: middle;
+}
+
+input[disabled] {
+    color: grey;
+}
+
+input {
+    margin-right: 15px;
+    margin-left: 10px;
+}
+
+.name {
+    vertical-align: middle;
+}

@@ -1,9 +1,12 @@
 .outerProgressBar {
-    width: 400px;
+    width: 520px;
     height: 30px;
     border-radius: 15px;
     padding: 2px;
     border: 1px solid #3eb995;
+    margin-top: 30px;
+    position: absolute;
+    top: 300px;
 }
 
 .innerProgressBar {
@@ -11,16 +14,13 @@
     background-color: #3eb995;
     border-radius: 12px;
     height: 24px;
-}
-
-.progressHelpText {
-    margin-top: 10px;
+    width: 100%;
 }
 
 .progressPercentage {
-    position: absolute;
     top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    color: #333;
+    padding-right: 15px;
+    color: white;
+    font-weight: 300;
+    float: right;
 }
