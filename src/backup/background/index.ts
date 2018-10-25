@@ -4,7 +4,7 @@ import { EventEmitter } from 'events'
 import { makeRemotelyCallable } from '../../util/webextensionRPC'
 import { StorageManager } from '../../search/storage/manager'
 import { setupRequestInterceptor } from './redirect'
-import BackupStorage from './storage'
+import BackupStorage, { LastBackupStorage } from './storage'
 import { BackupBackend } from './backend'
 import { ObjectChangeBatch } from './backend/types'
 export * from './backend'
@@ -37,6 +37,7 @@ export class BackupBackgroundModule {
     recordingChanges: boolean = false
     state: BackupState
     uiTabId?: any
+    automaticBackupCheck?: Promise<boolean>
 
     constructor({
         storageManager,
@@ -203,8 +204,19 @@ export class BackupBackgroundModule {
         this.recordingChanges = true
     }
 
-    async isAutomaticBackupEnabled() {
-        return false
+    isAutomaticBackupEnabled({ forceCheck = false } = {}) {
+        return this.checkForAutomaticBakup({ force: forceCheck })
+    }
+
+    checkForAutomaticBakup({ force = false } = {}) {
+        if (!force && this.automaticBackupCheck) {
+            return this.automaticBackupCheck
+        }
+
+        this.automaticBackupCheck = new Promise(resolve => {
+            setTimeout(() => resolve(false), 1000)
+        })
+        return this.automaticBackupCheck
     }
 
     async estimateInitialBackupSize(): Promise<{
@@ -392,31 +404,6 @@ export class BackupBackgroundModule {
         }
 
         return info
-    }
-}
-
-export interface LastBackupStorage {
-    getLastBackupTime(): Promise<Date>
-    storeLastBackupTime(time: Date): Promise<any>
-}
-
-export class LocalLastBackupStorage implements LastBackupStorage {
-    private key: string
-
-    constructor({ key }: { key: string }) {
-        this.key = key
-    }
-
-    async getLastBackupTime() {
-        const value = localStorage.getItem(this.key)
-        if (!value) {
-            return null
-        }
-        return new Date(JSON.parse(value))
-    }
-
-    async storeLastBackupTime(time: Date) {
-        localStorage.setItem(this.key, JSON.stringify(time.getTime()))
     }
 }
 
