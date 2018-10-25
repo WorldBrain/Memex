@@ -1,0 +1,68 @@
+.disabled {
+    color: grey;
+    vertical-align: middle;
+}
+
+input {
+    margin-right: 15px;
+    margin-left: 10px;
+}
+
+.name {
+    vertical-align: middle;
+    color: #3eb995;
+    font-weight: 500;
+}
+
+.subname {
+    font-size: 15px;
+    color: #4a4a4a;
+}
+
+.option {
+    vertical-align: top;
+    display: inline-block;
+    margin-bottom: 15px;
+    width: 500px;
+}
+
+.label {
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    color: white;
+    font-size: 15px;
+    vertical-align: middle;
+    margin-left: 10px;
+    float: right;
+    cursor: pointer;
+}
+
+.labelFree {
+    background: #3eb995;
+}
+
+.labelPremium {
+    background: #173766;
+}
+
+.star {
+    font-size: 18px;
+    vertical-align: text-top;
+    margin-right: 5px;
+    margin-top: 1px;
+}
+
+.period {
+    font-size: 16px;
+    vertical-align: middle;
+}
+
+.price {
+    font-family: 'Uni Neue';
+    font-style: italic;
+    color: #173766;
+    font-size: 19px;
+    vertical-align: middle;
+}

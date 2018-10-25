@@ -16,7 +16,7 @@ export default class BackupSettingsContainer extends React.Component {
         const isAuthenticated = await remoteFunction('isBackupAuthenticated')()
         this.setState({ isAuthenticated })
 
-        this.setState({ screen: 'overview' })
+        this.setState({ screen: 'running-backup' })
         // if (localStorage.getItem('backup.onboarding')) {
         //     if (localStorage.getItem('backup.onboarding.payment')) {
         //         localStorage.removeItem('backup.onboarding.payment')

@@ -14,8 +14,9 @@
     font-size: 0.9em;
 }
 
-/* .statusLine {
-} */
+.statusLine {
+    margin-left: 10px;
+}
 
 .statusLabel {
     font-weight: bold;
@@ -26,3 +27,13 @@
 
 .supportUs {
 } */
+
+.time {
+    vertical-align: middle;
+}
+
+.button {
+    float: right;
+    margin-top: -2px;
+    cursor: pointer;
+}

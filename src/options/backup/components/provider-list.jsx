@@ -1,19 +1,23 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import Styles from './provider-list.css'
 
 export function ProviderList({ onChange }) {
     return (
         <div>
             <label>
                 <input type="radio" onChange={() => onChange('google-drive')} />
-                <strong style={{ cursor: 'pointer' }}>Google Drive</strong>
+                <span style={{ cursor: 'pointer' }}>
+                    <img className={Styles.logo} src={'img/google-drive.png'} />
+                    <span className={Styles.name}>Google Drive</span>
+                </span>
             </label>
             <br />
             <input type="radio" disabled />
-            Dropbox
+            <span className={Styles.disabled}>Dropbox</span>
             <br />
             <input type="radio" disabled />
-            Self hosting
+            <span className={Styles.disabled}>Self hosting</span>
         </div>
     )
 }

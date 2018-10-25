@@ -1,9 +1,10 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { remoteFunction } from 'src/util/webextensionRPC'
-import styles from './running-backup.css'
+import localStyles from './running-backup.css'
 import { BackupProgressBar } from '../components/progress-bar'
 import { PrimaryButton } from '../components/primary-button'
+import Styles from '../styles.css'
 
 export default class RunningBackupContainer extends React.Component {
     static propTypes = {
@@ -92,75 +93,88 @@ export default class RunningBackupContainer extends React.Component {
 
         return (
             <div>
-                <h2>Backup progress</h2>
-
-                <div className={styles.steps}>
-                    <div className={styles.step}>
-                        <div className={styles.stepLabel}>
-                            <span className={styles.stepNumber}>Step 1:</span>
-                            Preparing uploads
-                        </div>
-                        <div className={styles.stepStatus}>
-                            {info.state === 'preparing' && 'In progress'}
-                            {info.state === 'synching' && 'Done'}
-                        </div>
-                    </div>
-                    <div className={styles.step}>
-                        <div className={styles.stepLabel}>
-                            <span className={styles.stepNumber}>Step 2:</span>
-                            Uploading your Memex backup
-                        </div>
-                        <div className={styles.stepStatus}>
-                            {info.state === 'preparing' && 'Waiting'}
-                            {status === 'running' &&
-                                info.state === 'synching' &&
-                                'In progress'}
-                            {status === 'success' && 'Done'}
-                        </div>
-                    </div>
-                </div>
-                <BackupProgressBar value={progressPercentage} />
-                <div className={styles.progressHelpText}>
-                    You can leave this page and come back at any time.
-                </div>
                 {status === 'running' && (
-                    <div className={styles.actions}>
-                        <div
-                            className={styles.actionCancel}
-                            onClick={() => {
-                                this.handleCancel()
-                            }}
-                        >
-                            Cancel
+                    <div>
+                        <p className={Styles.header2}>
+                            <strong>STEP 4/5: </strong>
+                            BACKUP PROGRESS
+                        </p>
+                        <div className={Styles.subtitle2}>
+                            You can leave this page and come back at any time.
                         </div>
-                        {info.state !== 'paused' && (
-                            <PrimaryButton
+                        <div className={localStyles.steps}>
+                            <div className={localStyles.step}>
+                                <div className={localStyles.stepLabel}>
+                                    <span className={localStyles.stepNumber}>
+                                        Step 1:
+                                    </span>
+                                    Preparing uploads
+                                </div>
+                                <div className={localStyles.stepStatus}>
+                                    {info.state === 'preparing' &&
+                                        'In progress'}
+                                    {info.state === 'synching' && '✔️'}
+                                </div>
+                            </div>
+                            <div className={localStyles.step}>
+                                <div className={localStyles.stepLabel}>
+                                    <span className={localStyles.stepNumber}>
+                                        Step 2:
+                                    </span>
+                                    Uploading your Memex backup
+                                </div>
+                                <div className={localStyles.stepStatus}>
+                                    {info.state === 'preparing' && 'Waiting'}
+                                    {status === 'running' &&
+                                        info.state === 'synching' &&
+                                        'In progress'}
+                                    {status === 'success' && '✔️'}
+                                </div>
+                            </div>
+                        </div>
+                        <BackupProgressBar value={progressPercentage} />
+                        <div className={localStyles.actions}>
+                            {info.state !== 'paused' && (
+                                <PrimaryButton
+                                    onClick={() => {
+                                        this.handlePause()
+                                    }}
+                                >
+                                    Pause
+                                </PrimaryButton>
+                            )}
+                            {info.state === 'paused' && (
+                                <PrimaryButton
+                                    onClick={() => {
+                                        this.handleResume()
+                                    }}
+                                >
+                                    Resume
+                                </PrimaryButton>
+                            )}
+                            <div
+                                className={localStyles.actionCancel}
                                 onClick={() => {
-                                    this.handlePause()
+                                    this.handleCancel()
                                 }}
                             >
-                                Pause
-                            </PrimaryButton>
-                        )}
-                        {info.state === 'paused' && (
-                            <PrimaryButton
-                                onClick={() => {
-                                    this.handleResume()
-                                }}
-                            >
-                                Resume
-                            </PrimaryButton>
-                        )}
+                                Cancel
+                            </div>
+                        </div>
                     </div>
                 )}
                 {status === 'success' && (
-                    <div className={styles.actions}>
+                    <div className={localStyles.finish}>
+                        <p className={Styles.header2}>
+                            <strong>FINISHED: </strong>
+                            YOUR BACKUP WAS SUCCESSFUL
+                        </p>
                         <PrimaryButton
                             onClick={() => {
                                 this.props.onFinish()
                             }}
                         >
-                            Finish
+                            Return to Settings
                         </PrimaryButton>
                     </div>
                 )}

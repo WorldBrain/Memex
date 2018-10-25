@@ -6,4 +6,74 @@
 .sumCell {
     padding: 20px 0;
     border-top: 2px solid black;
+    margin-right: 20px;
+    vertical-align: top;
+}
+
+tr {
+    vertical-align: top;
+}
+
+.include {
+    font-size: 16px;
+    vertical-align: middle;
+    padding-left: 10px;
+}
+
+.option {
+    vertical-align: top;
+    display: inline-block;
+    margin-bottom: 15px;
+    padding-left: 10px;
+}
+
+.name {
+    vertical-align: top;
+    color: #3eb995;
+    font-weight: 500;
+}
+
+.subname {
+    font-size: 15px;
+    color: #4a4a4a;
+}
+
+.checkbox {
+    margin-left: -0px;
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    background: #3eb995;
+    outline: 2px solid #3eb995;
+    box-shadow: 0 0 0 2pt #3eb995;
+    border-radius: 1px;
+    vertical-align: middle;
+    margin-top: -1px;
+
+    &:checked + ::before {
+        background: #3eb995;
+    }
+
+    &:checked {
+        background: #3eb995;
+        border-radius: 1px;
+    }
+
+    &:checked ::before {
+        border-radius: 1px;
+    }
+
+    &:checked + ::after {
+        content: '';
+        border-radius: 1px;
+        position: absolute;
+        left: 1px;
+        top: 8px;
+        background: white;
+        width: 2px;
+        height: 2px;
+        box-shadow: 2px 0 0 white, 4px 0 0 white, 4px -2px 0 white,
+            4px -4px 0 white, 4px -6px 0 white, 4px -8px 0 white;
+        transform: rotate(45deg);
+    }
 }

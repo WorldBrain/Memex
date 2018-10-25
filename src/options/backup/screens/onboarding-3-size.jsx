@@ -2,8 +2,9 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
 import { remoteFunction } from 'src/util/webextensionRPC'
-import styles from './onboarding-3-size.css'
+import localStyles from './onboarding-3-size.css'
 import { PrimaryButton } from '../components/primary-button'
+import Styles from '../styles.css'
 
 export default class OnboardingSizeContainer extends React.Component {
     static propTypes = {
@@ -52,55 +53,73 @@ export default class OnboardingSizeContainer extends React.Component {
 
         return (
             <div>
-                <h2>
-                    <span className={styles.headerEmphasis}>
-                        Estimated size
-                    </span>
-                    of your backup
-                </h2>
-                <div>What do you want to include in the backup?</div>
+                <p className={Styles.header2}>
+                    <strong>STEP 3/5: </strong>
+                    WHAT?
+                </p>
+                <div className={Styles.subtitle2}>
+                    Estimated size of your backup. What do you want to include?
+                </div>
                 <table>
                     <tbody>
                         <tr>
-                            <td>&nbsp;</td>
-                            <td>
-                                Searchable History, Annotations, Comments,
-                                Highlights, Collections
-                            </td>
-                            <td className={styles.estimationSize}>
+                            <td className={localStyles.estimationSize}>
                                 {_bytesToMega(sizes.withoutBlobs).toFixed(0)}
                                 MB
                             </td>
+                            <td>
+                                <span className={localStyles.option}>
+                                    <span className={localStyles.name}>
+                                        All your knowledge
+                                    </span>
+                                    <br />
+                                    <span className={localStyles.subname}>
+                                        Searchable History, Annotations,
+                                        Comments, Highlights, Collections
+                                    </span>
+                                </span>
+                            </td>
                         </tr>
                         <tr>
-                            <td>
-                                <input
-                                    type="checkbox"
-                                    onChange={event =>
-                                        this.props.onBlobPreferenceChange(
-                                            event.target.checked,
-                                        )
-                                    }
-                                />
-                            </td>
-                            <td>Screenshots</td>
-                            <td className={styles.estimationSize}>
+                            <td className={localStyles.estimationSize}>
                                 {_bytesToMega(sizes.blobs).toFixed(0)}
                                 MB
                             </td>
+                            <td>
+                                <span className={localStyles.option}>
+                                    <input
+                                        type="checkbox"
+                                        onChange={event =>
+                                            this.props.onBlobPreferenceChange(
+                                                event.target.checked,
+                                            )
+                                        }
+                                        className={localStyles.checkbox}
+                                    />
+                                    <span className={localStyles.name}>
+                                        Include Screenshots?
+                                    </span>
+                                    <br />
+                                    <span className={localStyles.subname}>
+                                        If you want to enable this option later,
+                                        it will only backup screenshots made
+                                        after that point in time.
+                                    </span>
+                                </span>
+                            </td>
                         </tr>
                         <tr>
-                            <td>&nbsp;</td>
-                            <td>&nbsp;</td>
                             <td
                                 className={classNames(
-                                    styles.estimationSize,
-                                    styles.sumCell,
+                                    localStyles.estimationSize,
+                                    localStyles.sumCell,
                                 )}
                             >
                                 {_bytesToMega(sizes.blobs).toFixed(0)}
                                 MB
                             </td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
                         </tr>
                     </tbody>
                 </table>

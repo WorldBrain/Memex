@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import classNames from 'classnames'
-import backupStyles from '../styles.css'
+import cx from 'classnames'
+import Styles from '../styles.css'
 // import styles from './overview-automatic-backup-button.css'
 
 export default class AutomaticBackupButton extends React.Component {
@@ -28,8 +28,8 @@ export default class AutomaticBackupButton extends React.Component {
         }
 
         const extraClass = {
-            cancel: backupStyles.dangerButton,
-            upgrade: backupStyles.paymentButton,
+            cancel: cx(Styles.label, Styles.dangerButton),
+            upgrade: cx(Styles.label, Styles.labelPremium),
         }[status]
 
         const onClick = () => {
@@ -40,16 +40,23 @@ export default class AutomaticBackupButton extends React.Component {
         }
 
         return (
-            <div
-                className={classNames(backupStyles.smallButton, extraClass)}
+            <span
+                className={cx(extraClass)}
                 onMouseEnter={() => this.setState({ hover: true })}
                 onMouseLeave={() => this.setState({ hover: false })}
                 onClick={onClick}
             >
                 {status === 'cancel' && 'Cancel'}
                 {status === 'active' && 'Enabled'}
-                {status === 'upgrade' && 'Enable'}
-            </div>
+                {status === 'upgrade' && (
+                    <span>
+                        <i className={cx('material-icons', Styles.star)}>
+                            star
+                        </i>
+                        Upgrade Now
+                    </span>
+                )}
+            </span>
         )
     }
 }
