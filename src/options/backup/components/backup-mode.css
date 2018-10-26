@@ -37,6 +37,7 @@ input {
     margin-left: 10px;
     float: right;
     cursor: pointer;
+    border-radius: 3px;
 }
 
 .labelFree {

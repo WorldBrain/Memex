@@ -19,14 +19,14 @@ export default class BackupSettingsContainer extends React.Component {
         const isAuthenticated = await remoteFunction('isBackupAuthenticated')()
         this.setState({ isAuthenticated })
 
-        this.setState({ screen: 'overview' })
         if (localStorage.getItem('backup.onboarding')) {
             if (localStorage.getItem('backup.onboarding.payment')) {
                 localStorage.removeItem('backup.onboarding.payment')
-                // Checking with subscription system can be done in the bg,
-                // as we won't be using this info very soon, so no await
-                remoteFunction('checkAutomaticBakupEnabled')()
-                this.setState({ screen: 'onboarding-size' })
+                if (await remoteFunction('checkAutomaticBakupEnabled')()) {
+                    this.setState({ screen: 'onboarding-size' })
+                } else {
+                    this.setState({ screen: 'onboarding-how' })
+                }
             } else if (
                 !isAuthenticated &&
                 localStorage.getItem('backup.onboarding.authenticating')

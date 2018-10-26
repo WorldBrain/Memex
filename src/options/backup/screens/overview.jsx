@@ -5,6 +5,7 @@ import { remoteFunction } from 'src/util/webextensionRPC'
 import AutomaticBackupButton from '../components/overview-automatic-backup-button'
 import Styles from '../styles.css'
 import localStyles from './overview.css'
+import { redirectToAutomaticBackupPurchase } from '../utils'
 
 export default class OverviewContainer extends React.Component {
     state = { automaticBackupEnabled: null, backupTimes: null }
@@ -37,7 +38,7 @@ export default class OverviewContainer extends React.Component {
                                     this.state.automaticBackupEnabled
                                 }
                                 onUpgrade={() => {
-                                    console.log('upgrade')
+                                    redirectToAutomaticBackupPurchase()
                                 }}
                                 onCancel={() => {
                                     console.log('cancel')

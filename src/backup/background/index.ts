@@ -141,10 +141,10 @@ export class BackupBackgroundModule {
                 hasInitialBackup: async () => {
                     return !!(await this.lastBackupStorage.getLastBackupTime())
                 },
-                isBackupAuthenticated: async (info, params) => {
+                isBackupAuthenticated: async () => {
                     return this.backend.isAuthenticated()
                 },
-                isBackupConnected: async (info, params) => {
+                isBackupConnected: async () => {
                     return this.backend.isConnected()
                 },
                 checkAutomaticBakupEnabled: async () => {
@@ -175,7 +175,7 @@ export class BackupBackgroundModule {
                 estimateInitialBackupSize: () => {
                     return this.estimateInitialBackupSize()
                 },
-                setBackupBlobs: saveBlobs => {
+                setBackupBlobs: (info, saveBlobs) => {
                     localStorage.setItem('backup.save-blobs', saveBlobs)
                 },
                 getBackupTimes: async () => {
