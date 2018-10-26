@@ -1,5 +1,3 @@
-import scrollToElement from 'scroll-to-element'
-
 import { highlightAnnotation } from 'src/direct-linking/content_script/rendering'
 import { injectCSS } from 'src/search-injection/dom'
 import { makeRemotelyCallable, remoteFunction } from 'src/util/webextensionRPC'
@@ -20,14 +18,18 @@ export function scrollToHighlight(annotation) {
     )
 
     if ($highlight) {
-        scrollToElement($highlight, {
-            offset: -200,
-            duration: 400,
-        })
+        Element.prototype.documentOffsetTop = function() {
+            return (
+                this.offsetTop +
+                (this.offsetParent ? this.offsetParent.documentOffsetTop() : 0)
+            )
+        }
+
+        const top = $highlight.documentOffsetTop() - window.innerHeight / 2
+        window.scrollTo({ top, behavior: 'smooth' })
         // The pixels scrolled need to be returned in
         // order to restrict scrolling when mouse is
         // over the iFrame
-        const top = getOffsetTop($highlight) - 200
         return top
     } else {
         console.error('MEMEX: Oops, no highlight found to scroll to')
