@@ -9,10 +9,13 @@ const estimateBackupSize = ({
     storageManager,
     indexedDB = window.indexedDB,
     dbName = 'memex',
+    estimateBoost = 20,
 }: {
     storageManager: StorageManager
     indexedDB?: IDBFactory
     dbName?: string
+    /** Percentage which will be added to the total estimate. */
+    estimateBoost?: number
 }) =>
     new Promise<SizeEst>((resolve, reject) => {
         let totalSize: SizeEst = {
@@ -31,7 +34,7 @@ const estimateBackupSize = ({
                 totalSize = sumSizeEsts(totalSize, storeSize)
             }
 
-            resolve(totalSize)
+            resolve(applyEstBoost(totalSize, estimateBoost))
         }
 
         req.onerror = function() {
@@ -74,20 +77,22 @@ function calcObjectSize(storeName: string, obj): SizeEst {
     if (storeName === 'pages' && obj.screenshot != null) {
         const { screenshot, ...rest } = obj
         const bytesWithoutBlobs = JSON.stringify(rest).length
-        const bytesWithBlobs = bytesWithoutBlobs + (screenshot as Blob).size
+        const bytesWithBlobs = bytesWithoutBlobs + calcBlobSize(screenshot)
 
         return { bytesWithBlobs, bytesWithoutBlobs }
     }
 
     if (storeName === 'favIcons' && obj.favIcon != null) {
         const { favIcon, ...rest } = obj
-        const size = JSON.stringify(rest).length + (favIcon as Blob).size
+        const size = JSON.stringify(rest).length + calcBlobSize(favIcon)
         return { bytesWithBlobs: size, bytesWithoutBlobs: size }
     }
 
     const bytes = JSON.stringify(obj).length
     return { bytesWithBlobs: bytes, bytesWithoutBlobs: bytes }
 }
+
+const calcBlobSize = (blob: Blob, multiplier = 4) => blob.size * multiplier
 
 const deriveStoreNames = ({ registry }: StorageManager) =>
     Object.entries(registry.collections)
@@ -97,6 +102,12 @@ const deriveStoreNames = ({ registry }: StorageManager) =>
 const sumSizeEsts = (a: SizeEst, b: SizeEst): SizeEst => ({
     bytesWithBlobs: a.bytesWithBlobs + b.bytesWithBlobs,
     bytesWithoutBlobs: a.bytesWithoutBlobs + b.bytesWithoutBlobs,
+})
+
+const applyEstBoost = (size: SizeEst, boost: number): SizeEst => ({
+    bytesWithBlobs: size.bytesWithBlobs + size.bytesWithBlobs * (boost / 100),
+    bytesWithoutBlobs:
+        size.bytesWithoutBlobs + size.bytesWithoutBlobs * (boost / 100),
 })
 
 export default estimateBackupSize
