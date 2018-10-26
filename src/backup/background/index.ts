@@ -7,6 +7,8 @@ import { setupRequestInterceptor } from './redirect'
 import BackupStorage, { LastBackupStorage } from './storage'
 import { BackupBackend } from './backend'
 import { ObjectChangeBatch } from './backend/types'
+import estimateBackupSize from './estimate-backup-size'
+
 export * from './backend'
 
 export interface BackupProgressInfo {
@@ -219,15 +221,8 @@ export class BackupBackgroundModule {
         return this.automaticBackupCheck
     }
 
-    async estimateInitialBackupSize(): Promise<{
-        bytesWithBlobs: number
-        bytesWithoutBlobs: number
-    }> {
-        // TODO Jon: estimation without bytes still includes favicons
-        return {
-            bytesWithBlobs: 666,
-            bytesWithoutBlobs: 42,
-        }
+    estimateInitialBackupSize() {
+        return estimateBackupSize({ storageManager: this.storageManager })
     }
 
     doBackup() {
