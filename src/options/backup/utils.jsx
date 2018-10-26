@@ -6,3 +6,7 @@ export async function redirectToGDriveLogin() {
         provider: 'googledrive',
     })
 }
+
+export function redirectToAutomaticBackupPurchase() {
+    window.location.reload()
+}
