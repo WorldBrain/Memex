@@ -1,7 +1,10 @@
 import React from 'react'
 // import PropTypes from 'prop-types'
 import { remoteFunction } from 'src/util/webextensionRPC'
-import { redirectToGDriveLogin } from './utils'
+import {
+    redirectToGDriveLogin,
+    redirectToAutomaticBackupPurchase,
+} from './utils'
 import { default as Overview } from './screens/overview'
 import { default as RunningBackup } from './screens/running-backup'
 import { default as OnboardingWhere } from './screens/onboarding-1-where'
@@ -16,30 +19,32 @@ export default class BackupSettingsContainer extends React.Component {
         const isAuthenticated = await remoteFunction('isBackupAuthenticated')()
         this.setState({ isAuthenticated })
 
-        this.setState({ screen: 'running-backup' })
-        // if (localStorage.getItem('backup.onboarding')) {
-        //     if (localStorage.getItem('backup.onboarding.payment')) {
-        //         localStorage.removeItem('backup.onboarding.payment')
-        //         localStorage.setItem('backup.onboarding.authenticating', true)
-        //         redirectToGDriveLogin()
-        //     } else if (
-        //         !isAuthenticated &&
-        //         localStorage.getItem('backup.onboarding.authenticating')
-        //     ) {
-        //         localStorage.removeItem('backup.onboarding.authenticating')
-        //         this.setState({ screen: 'onboarding-size' })
-        //     } else if (isAuthenticated) {
-        //         localStorage.removeItem('backup.onboarding.payment')
-        //         localStorage.removeItem('backup.onboarding.authenticating')
-        //         localStorage.removeItem('backup.onboarding')
-        //         this.setState({ screen: 'running-backup' })
-        //     }
-        // } else if (!(await remoteFunction('hasInitialBackup')())) {
-        //     localStorage.setItem('backup.onboarding', true)
-        //     this.setState({ screen: 'onboarding-where' })
-        // } else {
-        //     this.setState({ screen: 'overview' })
-        // }
+        this.setState({ screen: 'overview' })
+        if (localStorage.getItem('backup.onboarding')) {
+            if (localStorage.getItem('backup.onboarding.payment')) {
+                localStorage.removeItem('backup.onboarding.payment')
+                // Checking with subscription system can be done in the bg,
+                // as we won't be using this info very soon, so no await
+                remoteFunction('checkAutomaticBakupEnabled')()
+                this.setState({ screen: 'onboarding-size' })
+            } else if (
+                !isAuthenticated &&
+                localStorage.getItem('backup.onboarding.authenticating')
+            ) {
+                localStorage.removeItem('backup.onboarding.authenticating')
+                this.setState({ screen: 'onboarding-size' })
+            } else if (isAuthenticated) {
+                localStorage.removeItem('backup.onboarding.payment')
+                localStorage.removeItem('backup.onboarding.authenticating')
+                localStorage.removeItem('backup.onboarding')
+                this.setState({ screen: 'running-backup' })
+            }
+        } else if (!(await remoteFunction('hasInitialBackup')())) {
+            localStorage.setItem('backup.onboarding', true)
+            this.setState({ screen: 'onboarding-where' })
+        } else {
+            this.setState({ screen: 'overview' })
+        }
     }
 
     renderScreen() {
@@ -71,8 +76,15 @@ export default class BackupSettingsContainer extends React.Component {
         } else if (screen === 'onboarding-where') {
             return (
                 <OnboardingWhere
-                    onChoice={choice => {
-                        this.setState({ screen: 'onboarding-how' })
+                    onChoice={async choice => {
+                        const isAutomaticBackupEnabled = await remoteFunction(
+                            'isAutomaticBackupEnabled',
+                        )()
+                        if (isAutomaticBackupEnabled) {
+                            this.setState({ screen: 'onboarding-size' })
+                        } else {
+                            this.setState({ screen: 'onboarding-how' })
+                        }
                     }}
                 />
             )
@@ -85,7 +97,7 @@ export default class BackupSettingsContainer extends React.Component {
                                 'backup.onboarding.payment',
                                 true,
                             )
-                            // redirect to WP
+                            redirectToAutomaticBackupPurchase()
                         } else {
                             this.setState({ screen: 'onboarding-size' })
                         }

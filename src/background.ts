@@ -11,6 +11,7 @@ import EventLogBackground from './analytics/internal/background'
 import CustomListBackground from './custom-lists/background'
 import NotificationBackground from './notifications/background'
 import * as backup from './backup/background'
+import * as backupStorage from './backup/background/storage'
 import * as driveBackup from './backup/background/backend/google-drive'
 import BackgroundScript from './background-script'
 
@@ -50,7 +51,9 @@ const backupModule = new backup.BackupBackgroundModule({
                   }),
                   memexCloudOrigin: backup._getMemexCloudOrigin(),
               }),
-    lastBackupStorage: new backup.LocalLastBackupStorage({ key: 'lastBackup' }),
+    lastBackupStorage: new backupStorage.LocalLastBackupStorage({
+        key: 'lastBackup',
+    }),
 })
 backupModule.setupRemoteFunctions()
 backupModule.setupRequestInterceptor()

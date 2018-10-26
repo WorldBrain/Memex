@@ -147,6 +147,25 @@ export class BackupBackgroundModule {
                 isBackupConnected: async (info, params) => {
                     return this.backend.isConnected()
                 },
+                checkAutomaticBakupEnabled: async () => {
+                    // The only place this is called right now is post-purchase.
+                    // Move to more suitable place once this changes.
+                    const override =
+                        process.env.AUTOMATIC_BACKUP_PAYMENT_SUCCESS
+                    if (override === 'true') {
+                        console.log(
+                            'Automatic backup payment override',
+                            override,
+                        )
+                        this.automaticBackupCheck = Promise.resolve(
+                            override === 'true',
+                        )
+                    } else {
+                        this.checkAutomaticBakupEnabled()
+                    }
+
+                    return this.automaticBackupCheck
+                },
                 isAutomaticBackupEnabled: async () => {
                     return this.isAutomaticBackupEnabled()
                 },
@@ -207,17 +226,30 @@ export class BackupBackgroundModule {
     }
 
     isAutomaticBackupEnabled({ forceCheck = false } = {}) {
-        return this.checkForAutomaticBakup({ force: forceCheck })
-    }
-
-    checkForAutomaticBakup({ force = false } = {}) {
-        if (!force && this.automaticBackupCheck) {
+        if (!forceCheck && this.automaticBackupCheck) {
             return this.automaticBackupCheck
         }
 
-        this.automaticBackupCheck = new Promise(resolve => {
-            setTimeout(() => resolve(false), 1000)
-        })
+        const override = process.env.AUTOMATIC_BACKUP
+        if (override) {
+            console.log('Automatic backup override:', override)
+            return override === 'true'
+        }
+
+        return this.checkAutomaticBakupEnabled()
+    }
+
+    checkAutomaticBakupEnabled() {
+        this.automaticBackupCheck = (async () => {
+            try {
+                return (await new Promise(resolve => {
+                    setTimeout(() => resolve(false), 1000)
+                })) as boolean
+            } catch (e) {
+                return true
+            }
+        })()
+
         return this.automaticBackupCheck
     }
 
