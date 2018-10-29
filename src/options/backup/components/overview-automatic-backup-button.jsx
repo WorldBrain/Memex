@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import cx from 'classnames'
+import classNames from 'classnames'
 import Styles from '../styles.css'
 // import styles from './overview-automatic-backup-button.css'
 
@@ -28,8 +28,8 @@ export default class AutomaticBackupButton extends React.Component {
         }
 
         const extraClass = {
-            cancel: cx(Styles.label, Styles.dangerButton),
-            upgrade: cx(Styles.label, Styles.labelPremium),
+            cancel: classNames(Styles.label, Styles.dangerButton),
+            upgrade: classNames(Styles.label, Styles.labelPremium),
         }[status]
 
         const onClick = () => {
@@ -41,7 +41,7 @@ export default class AutomaticBackupButton extends React.Component {
 
         return (
             <span
-                className={cx(extraClass)}
+                className={classNames(extraClass)}
                 onMouseEnter={() => this.setState({ hover: true })}
                 onMouseLeave={() => this.setState({ hover: false })}
                 onClick={onClick}
@@ -50,7 +50,12 @@ export default class AutomaticBackupButton extends React.Component {
                 {status === 'active' && 'Enabled'}
                 {status === 'upgrade' && (
                     <span>
-                        <i className={cx('material-icons', Styles.star)}>
+                        <i
+                            className={classNames(
+                                'material-icons',
+                                Styles.star,
+                            )}
+                        >
                             star
                         </i>
                         Upgrade Now
