@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import Styles from './backup-mode.css'
-import cx from 'classnames'
+import classNames from 'classnames'
 
 export function OnboardingBackupMode({
     mode,
@@ -21,7 +21,12 @@ export function OnboardingBackupMode({
                     />{' '}
                     <span className={Styles.option}>
                         <span className={Styles.name}>Manual Backup</span>
-                        <span className={cx(Styles.label, Styles.labelFree)}>
+                        <span
+                            className={classNames(
+                                Styles.label,
+                                Styles.labelFree,
+                            )}
+                        >
                             Free
                         </span>
                         <br />
@@ -40,8 +45,18 @@ export function OnboardingBackupMode({
                     />{' '}
                     <span className={Styles.option}>
                         <span className={Styles.name}>Automatic Backup</span>
-                        <span className={cx(Styles.label, Styles.labelPremium)}>
-                            <i className={cx('material-icons', Styles.star)}>
+                        <span
+                            className={classNames(
+                                Styles.label,
+                                Styles.labelPremium,
+                            )}
+                        >
+                            <i
+                                className={classNames(
+                                    'material-icons',
+                                    Styles.star,
+                                )}
+                            >
                                 star
                             </i>
                             Premium

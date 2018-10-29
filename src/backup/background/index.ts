@@ -2,6 +2,7 @@ const pickBy = require('lodash/pickBy')
 const last = require('lodash/last')
 import { EventEmitter } from 'events'
 import { makeRemotelyCallable } from '../../util/webextensionRPC'
+import { CollectionDefinition } from '../../search/storage'
 import { StorageManager } from '../../search/storage/manager'
 import { setupRequestInterceptor } from './redirect'
 import BackupStorage, { LastBackupStorage } from './storage'
@@ -74,7 +75,15 @@ export class BackupBackgroundModule {
                 operation: string
             }) => {
                 if (this.recordingChanges) {
-                    this.storage.registerChange({ collection, pk, operation })
+                    const collectionDefinition = this.storageManager.registry
+                        .collections[collection]
+                    if (!isExcludedFromBackup(collectionDefinition)) {
+                        this.storage.registerChange({
+                            collection,
+                            pk,
+                            operation,
+                        })
+                    }
                 }
             },
         )
@@ -387,7 +396,7 @@ export class BackupBackgroundModule {
 
     _getCollectionsToBackup(): { name: string; version: Date }[] {
         return Object.entries(this.storageManager.registry.collections)
-            .filter(([key, value]) => value.backup !== false)
+            .filter(([key, value]) => !isExcludedFromBackup(value))
             .map(([key, value]) => ({
                 name: key,
                 version: value.version,
@@ -443,4 +452,8 @@ export function _getMemexCloudOrigin() {
     } else {
         return 'https://memex.cloud'
     }
+}
+
+export function isExcludedFromBackup(collection: CollectionDefinition) {
+    return collection.backup === false
 }

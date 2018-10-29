@@ -1,13 +1,19 @@
 import moment from 'moment'
 import React from 'react'
-import cx from 'classnames'
+import PropTypes from 'prop-types'
+import classNames from 'classnames'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import AutomaticBackupButton from '../components/overview-automatic-backup-button'
 import Styles from '../styles.css'
 import localStyles from './overview.css'
 import { redirectToAutomaticBackupPurchase } from '../utils'
+import { PrimaryButton } from '../components/primary-button'
 
 export default class OverviewContainer extends React.Component {
+    static propTypes = {
+        onBackupRequested: PropTypes.func.isRequired,
+    }
+
     state = { automaticBackupEnabled: null, backupTimes: null }
 
     async componentDidMount() {
@@ -31,7 +37,7 @@ export default class OverviewContainer extends React.Component {
                 </p>
                 <div className={Styles.option}>
                     <span className={Styles.name}>Automatic Backup</span>
-                    <span className={cx(localStyles.button)}>
+                    <span className={classNames(localStyles.button)}>
                         {this.state.automaticBackupEnabled !== null && (
                             <AutomaticBackupButton
                                 automaticBackupEnabled={
@@ -55,7 +61,12 @@ export default class OverviewContainer extends React.Component {
                 <div className={Styles.option}>
                     <span className={Styles.name}>Delete Backup</span>
                     <span className={localStyles.button}>
-                        <span className={cx(Styles.label, Styles.labelFree)}>
+                        <span
+                            className={classNames(
+                                Styles.label,
+                                Styles.labelFree,
+                            )}
+                        >
                             Tutorial
                         </span>
                     </span>
@@ -79,12 +90,19 @@ export default class OverviewContainer extends React.Component {
                     <div className={localStyles.statusLine}>
                         <span className={Styles.name}>Next backup: </span>
                         <span className={localStyles.time}>
-                            {moment(
-                                this.state.backupTimes.nextBackup,
-                            ).fromNow()}
+                            {this.state.backupTimes.nextBackup !== 'running'
+                                ? moment(
+                                      this.state.backupTimes.nextBackup,
+                                  ).fromNow()
+                                : 'In progress'}
                         </span>
                     </div>
                 )}
+                <PrimaryButton onClick={this.props.onBackupRequested}>
+                    {this.state.backupTimes.nextBackup !== 'running'
+                        ? 'Backup Now'
+                        : 'Go to Backup'}
+                </PrimaryButton>
                 <div>
                     <p className={Styles.header2}>
                         <strong>RESTORE </strong>
@@ -93,7 +111,10 @@ export default class OverviewContainer extends React.Component {
                         <span className={Styles.name}>Coming Very Soon</span>
                         <span className={localStyles.button}>
                             <span
-                                className={cx(Styles.label, Styles.labelFree)}
+                                className={classNames(
+                                    Styles.label,
+                                    Styles.labelFree,
+                                )}
                             >
                                 Chip in 10€
                             </span>

@@ -58,7 +58,7 @@ export default class BackupSettingsContainer extends React.Component {
                 <Overview
                     onBackupRequested={() => {
                         if (this.state.isAuthenticated) {
-                            this.setState({ page: 'running-backup' })
+                            this.setState({ screen: 'running-backup' })
                         } else {
                             redirectToGDriveLogin()
                         }
