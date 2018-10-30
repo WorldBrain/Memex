@@ -1,5 +1,5 @@
-import * as index from '..'
-import storageMan, { dexieInstance as db } from '../storex'
+import getDb, * as index from '..'
+import storageMan from '../storex'
 import importNewPage from './import'
 import * as data from './import-export.test.data'
 import { MigrationManager } from './migration-manager'
@@ -45,6 +45,7 @@ describe('Old=>New index migration', () => {
 
         // Try to find the page data stored for given test data from DB - check everything
         async function testStoredPage(expectedData: Partial<ExportedPage>) {
+            const db = await getDb
             const storedPage = await db.pages.get(expectedData.url)
 
             const {

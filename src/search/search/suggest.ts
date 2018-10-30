@@ -1,7 +1,6 @@
 import Dexie from 'dexie'
 
 import getDb from '..'
-import { dexieInstance } from '../storex'
 import { SuggestOptions, SuggestResult } from '../types'
 import { UnimplementedError, InvalidFindOptsError } from '../storage/errors'
 import { Tag, Page } from '../models'
@@ -39,16 +38,17 @@ export async function suggestObjects<S, P = any>(
     query,
     options: SuggestOptions = {},
 ) {
+    const db = await getDb
     // Grab first entry from the filter query; ignore rest for now
     const [[indexName, value], ...fields] = Object.entries<string>(query)
 
-    if (fields.length > 0) {
+    if (fields.length > 1) {
         throw new UnimplementedError(
             '`suggestObjects` only supports querying a single field.',
         )
     }
 
-    const whereClause = dexieInstance.table<S, P>(collection).where(indexName)
+    const whereClause = db.table<S, P>(collection).where(indexName)
 
     let coll =
         options.ignoreCase &&
