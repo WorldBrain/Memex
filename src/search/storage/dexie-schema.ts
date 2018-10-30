@@ -1,5 +1,3 @@
-import { DexieSchema } from './types'
-
 /**
  * Takes the generated schema versions, based on the registed collections, and finds the
  * first one in which `directLinks` schema was added, then generates a "patch" schema.
@@ -7,9 +5,7 @@ import { DexieSchema } from './types'
  * to users at the release of our Direct Links feature. This should ensure Dexie knows about
  * both the incorrect indexes and how to drop those to migrate to the correct indexes.
  */
-export default function patchDirectLinksSchema(
-    schemaVersions: DexieSchema[],
-): DexieSchema[] {
+export default function patchDirectLinksSchema(schemaVersions: any[]): any[] {
     const firstAppears = schemaVersions.findIndex(
         ({ schema }) => schema.directLinks != null,
     )
