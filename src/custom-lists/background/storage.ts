@@ -277,16 +277,14 @@ export default class CustomListStorage extends FeatureStorage {
         pageUrl,
     }: {
         listId: number
-        pageUrl: number
+        pageUrl: string
     }) {
-        const x = await this.storageManager
+        return this.storageManager
             .collection(CustomListStorage.LIST_ENTRIES_COLL)
-            .deleteOneObject({
+            .deleteObjects({
                 listId,
                 pageUrl,
             })
-
-        return x
     }
 
     /**

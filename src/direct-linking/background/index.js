@@ -125,7 +125,7 @@ export default class DirectLinkingBackground {
         const uniqueUrl = `${pageUrl}/#${new Date().getTime()}`
 
         await this.annotationStorage.createAnnotation({
-            pageUrl: pageUrl,
+            pageUrl,
             url: uniqueUrl,
             pageTitle,
             comment,

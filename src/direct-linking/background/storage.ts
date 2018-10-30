@@ -277,7 +277,7 @@ export class AnnotationStorage extends FeatureStorage {
 
     async getTagsByAnnotationUrl(url: string) {
         return this.storageManager
-            .collection(AnnotationStorage.ANNOTATIONS_COLL)
+            .collection(AnnotationStorage.TAGS_COLL)
             .findObjects({ url })
     }
 
