@@ -41,6 +41,8 @@ export class BackupBackgroundModule {
     state: BackupState
     uiTabId?: any
     automaticBackupCheck?: Promise<boolean>
+    automaticBackupTimeout?: any
+    automaticBackupEnabled?: boolean
 
     constructor({
         storageManager,
@@ -204,6 +206,9 @@ export class BackupBackgroundModule {
                         nextBackup,
                     }
                 },
+                storeWordpressUserId: userId => {
+                    localStorage.setItem('wp.user-id', userId)
+                },
             },
             { insertExtraArg: true },
         )
@@ -228,6 +233,7 @@ export class BackupBackgroundModule {
         }
 
         this.startRecordingChanges()
+        this.maybeScheduleAutomaticBackup()
     }
 
     startRecordingChanges() {
@@ -245,21 +251,46 @@ export class BackupBackgroundModule {
             return override === 'true'
         }
 
+        if (!localStorage.getItem('backup.has-subscription')) {
+            return false
+        }
+
         return this.checkAutomaticBakupEnabled()
     }
 
     checkAutomaticBakupEnabled() {
         this.automaticBackupCheck = (async () => {
+            let hasSubscription
             try {
-                return (await new Promise(resolve => {
-                    setTimeout(() => resolve(false), 1000)
+                hasSubscription = (await new Promise(resolve => {
+                    setTimeout(() => resolve(true), 1000)
                 })) as boolean
             } catch (e) {
                 return true
             }
+
+            localStorage.setItem('backup.has-subscription', hasSubscription)
+            return hasSubscription
         })()
 
         return this.automaticBackupCheck
+    }
+
+    async maybeScheduleAutomaticBackup() {
+        if (await this.isAutomaticBackupEnabled()) {
+            this.scheduleAutomaticBackup()
+        }
+    }
+
+    scheduleAutomaticBackup() {
+        this.automaticBackupEnabled = true
+        if (this.automaticBackupTimeout || this.state.resume) {
+            return
+        }
+
+        this.automaticBackupTimeout = setTimeout(() => {
+            this.doBackup()
+        }, 1000 * 60 * 15)
     }
 
     estimateInitialBackupSize() {
@@ -267,6 +298,11 @@ export class BackupBackgroundModule {
     }
 
     doBackup() {
+        if (this.automaticBackupTimeout) {
+            clearTimeout(this.automaticBackupTimeout)
+            this.automaticBackupTimeout = null
+        }
+
         this.state.running = true
         this.state.events = new EventEmitter()
         this.state.info = {
@@ -308,6 +344,7 @@ export class BackupBackgroundModule {
                 this.state.running = false
                 this.state.events.emit('success')
                 this.resetBackupState()
+                this.maybeScheduleAutomaticBackup()
             })
             .catch(e => {
                 this.state.running = false
@@ -315,6 +352,7 @@ export class BackupBackgroundModule {
                 console.error(e.stack)
                 this.state.events.emit('fail', e)
                 this.resetBackupState()
+                this.maybeScheduleAutomaticBackup()
             })
 
         return this.state.events
