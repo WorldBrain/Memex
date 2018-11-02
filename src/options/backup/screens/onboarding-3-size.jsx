@@ -14,7 +14,7 @@ export default class OnboardingSizeContainer extends React.Component {
         onBackupRequested: PropTypes.func.isRequired,
     }
 
-    state = { estimation: null }
+    state = { estimation: null, blobPreference: true }
 
     async componentDidMount() {
         try {
@@ -64,7 +64,7 @@ export default class OnboardingSizeContainer extends React.Component {
                     <tbody>
                         <tr>
                             <td className={localStyles.estimationSize}>
-                                {_bytesToMega(sizes.withoutBlobs).toFixed(0)}
+                                {Math.ceil(_bytesToMega(sizes.withoutBlobs))}
                                 MB
                             </td>
                             <td>
@@ -82,18 +82,23 @@ export default class OnboardingSizeContainer extends React.Component {
                         </tr>
                         <tr>
                             <td className={localStyles.estimationSize}>
-                                {_bytesToMega(sizes.blobs).toFixed(0)}
+                                {Math.ceil(_bytesToMega(sizes.blobs))}
                                 MB
                             </td>
                             <td>
                                 <span className={localStyles.option}>
                                     <input
                                         type="checkbox"
-                                        onChange={event =>
+                                        checked={this.state.blobPreference}
+                                        onChange={event => {
+                                            this.setState({
+                                                blobPreference:
+                                                    event.target.checked,
+                                            })
                                             this.props.onBlobPreferenceChange(
                                                 event.target.checked,
                                             )
-                                        }
+                                        }}
                                         className={localStyles.checkbox}
                                     />
                                     <span className={localStyles.name}>
@@ -115,7 +120,13 @@ export default class OnboardingSizeContainer extends React.Component {
                                     localStyles.sumCell,
                                 )}
                             >
-                                {_bytesToMega(sizes.blobs).toFixed(0)}
+                                {Math.ceil(
+                                    _bytesToMega(
+                                        this.state.blobPreference
+                                            ? sizes.withBlobs
+                                            : sizes.withoutBlobs,
+                                    ),
+                                )}
                                 MB
                             </td>
                             <td>&nbsp;</td>

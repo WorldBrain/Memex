@@ -19,32 +19,33 @@ export default class BackupSettingsContainer extends React.Component {
         const isAuthenticated = await remoteFunction('isBackupAuthenticated')()
         this.setState({ isAuthenticated })
 
-        if (localStorage.getItem('backup.onboarding')) {
-            if (localStorage.getItem('backup.onboarding.payment')) {
-                localStorage.removeItem('backup.onboarding.payment')
-                if (await remoteFunction('checkAutomaticBakupEnabled')()) {
-                    this.setState({ screen: 'onboarding-size' })
-                } else {
-                    this.setState({ screen: 'onboarding-how' })
-                }
-            } else if (
-                !isAuthenticated &&
-                localStorage.getItem('backup.onboarding.authenticating')
-            ) {
-                localStorage.removeItem('backup.onboarding.authenticating')
-                this.setState({ screen: 'onboarding-size' })
-            } else if (isAuthenticated) {
-                localStorage.removeItem('backup.onboarding.payment')
-                localStorage.removeItem('backup.onboarding.authenticating')
-                localStorage.removeItem('backup.onboarding')
-                this.setState({ screen: 'running-backup' })
-            }
-        } else if (!(await remoteFunction('hasInitialBackup')())) {
-            localStorage.setItem('backup.onboarding', true)
-            this.setState({ screen: 'onboarding-where' })
-        } else {
-            this.setState({ screen: 'overview' })
-        }
+        this.setState({ screen: 'onboarding-size' })
+        // if (localStorage.getItem('backup.onboarding')) {
+        //     if (localStorage.getItem('backup.onboarding.payment')) {
+        //         localStorage.removeItem('backup.onboarding.payment')
+        //         if (await remoteFunction('checkAutomaticBakupEnabled')()) {
+        //             this.setState({ screen: 'onboarding-size' })
+        //         } else {
+        //             this.setState({ screen: 'onboarding-how' })
+        //         }
+        //     } else if (
+        //         !isAuthenticated &&
+        //         localStorage.getItem('backup.onboarding.authenticating')
+        //     ) {
+        //         localStorage.removeItem('backup.onboarding.authenticating')
+        //         this.setState({ screen: 'onboarding-size' })
+        //     } else if (isAuthenticated) {
+        //         localStorage.removeItem('backup.onboarding.payment')
+        //         localStorage.removeItem('backup.onboarding.authenticating')
+        //         localStorage.removeItem('backup.onboarding')
+        //         this.setState({ screen: 'running-backup' })
+        //     }
+        // } else if (!(await remoteFunction('hasInitialBackup')())) {
+        //     localStorage.setItem('backup.onboarding', true)
+        //     this.setState({ screen: 'onboarding-where' })
+        // } else {
+        //     this.setState({ screen: 'overview' })
+        // }
     }
 
     renderScreen() {
