@@ -92,7 +92,7 @@ function calcObjectSize(storeName: string, obj): SizeEst {
     return { bytesWithBlobs: bytes, bytesWithoutBlobs: bytes }
 }
 
-const calcBlobSize = (blob: Blob, multiplier = 4) => blob.size * multiplier
+const calcBlobSize = (blob: Blob, multiplier = 2.5) => blob.size * multiplier
 
 const deriveStoreNames = ({ registry }: StorageManager) =>
     Object.entries(registry.collections)
