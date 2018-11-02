@@ -203,8 +203,8 @@ export class BackupBackgroundModule {
                         )
                     }
                     return {
-                        lastBackup,
-                        nextBackup,
+                        lastBackup: lastBackup && lastBackup.getTime(),
+                        nextBackup: nextBackup && nextBackup.getTime(),
                     }
                 },
                 storeWordpressUserId: (info, userId) => {
