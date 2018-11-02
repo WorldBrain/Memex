@@ -92,7 +92,9 @@ function calcObjectSize(storeName: string, obj): SizeEst {
     return { bytesWithBlobs: bytes, bytesWithoutBlobs: bytes }
 }
 
-const calcBlobSize = (blob: Blob, multiplier = 2.5) => blob.size * multiplier
+const calcBlobSize = (blob: Blob) =>
+    // https://stackoverflow.com/questions/4715415/base64-what-is-the-worst-possible-increase-in-space-usage
+    Math.ceil(blob.size / 3) * 4
 
 const deriveStoreNames = ({ registry }: StorageManager) =>
     Object.entries(registry.collections)
