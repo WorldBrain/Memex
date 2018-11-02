@@ -1,0 +1,396 @@
+                                                           Remote Functions & Events
+
+Remote Events and Functions are used to let Scripts (on the server) and LocalScripts (on clients) to communicate with each other. There are some actions that only the server can perform, and others that only the client can. In some cases the server or client will want the other to perform one of these actions. For example, data stores are only accessible on the server, but clients may want to access the information they store. In this case, a RemoteEvent or RemoteFunction can be used to both send a request from the client to the server to get information from a Data Store, and to send a response from the server back to the client.
+Contents
+
+    1 Difference between Remote Events and Functions
+    2 Using RemoteEvents
+        2.1 Client to Server
+        2.2 Server to Client
+    3 Using RemoteFunctions
+        3.1 Client to Server
+        3.2 Server to Client
+    4 Client to Client Communication
+    5 Limitations
+        5.1 Bandwidth
+        5.2 Parameters
+            5.2.1 Mixed Tables
+            5.2.2 Metatables
+            5.2.3 Non-replicated Instances
+
+Difference between Remote Events and Functions
+
+While RemoteEvents and RemoteFunctions are similar in that they allow communication between servers and clients, there are a few differences between them that should be known before deciding which to use.
+
+The first difference is that RemoteFunctions are designed for two way communication, while RemoteEvents are designed for one way. A RemoteFunction sends a request and then waits for a response, while RemoteEvents just send a request.
+
+Another major difference between the two is how they are handled. RemoteEvents use the Roblox event system. This means that any number of scripts can listen for the event to fire, and they can each handle that firing in different ways. RemoteFunctions on the other hand use a callback. For every RemoteFunction, only one callback can be defined on the server and only one for each client.
+
+The last difference is how many different targets remote events and functions can have. For both Remote Events and Functions, a client can contact the server and the server can contact the client. In the case of RemoteEvents, the server can also contact every client at the same time.
+
+While all of the above outlines should be considered when deciding which object to use for a specific communication task, the most important factor usually is whether the communication needs to be one or two way. As outlined above, it is recommended to use RemoteFunctions if the code needs a response, otherwise RemoteEvents should be used.
+Using RemoteEvents
+
+Remote Events are designed to provide a one way message between the server and clients. This message can be directed from one client to the server, from the server to a particular client, or from the server to all clients.
+
+In order for both the server and clients to utilize RemoteEvents, the RemoteEvent object itself must be in a place where both can see it. It is recommended to store RemoteEvents in a folder inside of ReplicatedStorage, although in some cases it is appropriate to store events in the Workspace or in Tools.
+Client to Server
+
+In order for a client to send a message to the server, it needs to fire the RemoteEvent with the function FireServer.
+
+-- LocalScript
+ 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local createPartEvent = ReplicatedStorage:WaitForChild("CreatePartEvent")
+ 
+createPartEvent:FireServer()
+
+The server meanwhile needs to connect a function to the OnServerEvent of the RemoteEvent.
+
+-- Script
+ 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local createPartEvent = Instance.new("RemoteEvent", ReplicatedStorage)
+createPartEvent.Name = "CreatePartEvent"
+ 
+local function onCreatePartFired(player)
+	print(player.Name, "wants to create a part")
+	local newPart = Instance.new("Part")
+	newPart.Position = Vector3.new(0, 20, 0)
+	newPart.Parent = game.Workspace
+end
+ 
+createPartEvent.OnServerEvent:Connect(onCreatePartFired)
+
+When a client calls the FireServer function, any functions on the server that are connected to OnServerEvent will fire. Note that this is not immediate - the network connection between the client and server will determine how quickly this happens.
+
+When firing a RemoteEvent from a client to the server, data can be included in the firing. By default, the functions connected to OnServerEvent will be passed the player who fired the event as the first parameter. If any other arguments are provided in the FireServer function, they will also be included in OnServerEvent after the player argument.
+
+-- LocalScript
+ 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local createPartEvent = ReplicatedStorage:WaitForChild("CreatePartEvent")
+ 
+createPartEvent:FireServer(BrickColor.Green(), Vector3.new(10, 20, 0))
+
+-- Script
+ 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local createPartEvent = Instance.new("RemoteEvent", ReplicatedStorage)
+createPartEvent.Name = "CreatePartEvent"
+ 
+local function onCreatePartFired(player, color, position)
+	print(player.Name, "wants to create a part")
+	local newPart = Instance.new("Part")
+	newPart.BrickColor = color
+	newPart.Position = position
+	newPart.Parent = game.Workspace
+end
+ 
+createPartEvent.OnServerEvent:Connect(onCreatePartFired)
+
+Server to Client
+
+The server can send messages to the client through remote events in two ways: it can send a message to an individual client or it can send a message to every client at the same time.
+
+In order to send a message to a single client, the FireClient function should be called from the server.
+
+-- Script
+ 
+local Players = game:GetService("Players")
+ 
+local welcomePlayerEvent = Instance.new("RemoteEvent")
+welcomePlayerEvent.Parent = game.ReplicatedStorage
+welcomePlayerEvent.Name = "WelcomePlayerEvent"
+ 
+local function onPlayerAdded(player)
+	welcomePlayerEvent:FireClient(player)
+end
+ 
+Players.PlayerAdded:Connect(onPlayerAdded)
+
+To listen for the message on the client, a LocalScript needs to connect a function to the OnClientEvent event of the RemoteEvent.
+
+--LocalScript
+ 
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+ 
+local player = Players.LocalPlayer
+local welcomePlayerEvent = ReplicatedStorage:WaitForChild("WelcomePlayerEvent")
+local playerGui = player:WaitForChild("PlayerGui")
+ 
+local welcomeScreen = Instance.new("ScreenGui")
+welcomeScreen.Parent = playerGui
+local welcomeMessage = Instance.new("TextLabel")
+welcomeMessage.Size = UDim2.new(0, 200, 0, 50)
+welcomeMessage.Parent = welcomeScreen
+welcomeMessage.Visible = false
+welcomeMessage.Text = "Welcome to the game!"
+ 
+local function onWelcomePlayerFired()
+	welcomeMessage.Visible = true
+	wait(3)
+	welcomeMessage.Visible = false
+end
+ 
+welcomePlayerEvent.OnClientEvent:Connect(onWelcomePlayerFired)
+
+To fire a message to all clients, the server needs to call FireAllClients. Note that in this case a player does not have to be passed into the arguments (as the function fires the remote event on all of the connected clients).
+
+local Players = game:GetService("Players")
+ 
+local newPlayerEvent = Instance.new("RemoteEvent")
+newPlayerEvent.Parent = game.ReplicatedStorage
+newPlayerEvent.Name = "NewPlayer"
+ 
+local function onPlayerAdded(player)
+	newPlayerEvent:FireAllClients()
+end
+ 
+Players.PlayerAdded:Connect(onPlayerAdded)
+
+To listen for this event, each client needs to connect a function to OnClientEvent.
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+ 
+local player = Players.LocalPlayer
+local newPlayerEvent = ReplicatedStorage:WaitForChild("NewPlayerEvent")
+local playerGui = player:WaitForChild("PlayerGui")
+ 
+local welcomeScreen = Instance.new("ScreenGui")
+welcomeScreen.Parent = playerGui
+local newPlayerMessage = Instance.new("TextLabel")
+newPlayerMessage.Size = UDim2.new(0, 200, 0, 50)
+newPlayerMessage.Parent = welcomeScreen
+newPlayerMessage.Visible = false
+newPlayerMessage.Text = "A new player has joined the game!"
+ 
+local function onNewPlayerFired()
+	newPlayerMessage.Visible = true
+	wait(3)
+	newPlayerMessage.Visible = false
+end
+ 
+newPlayerEvent.OnClientEvent:Connect(onNewPlayerFired)
+
+Data can be passed from server to client through remote events in the same way data is passed from client to server. Any extra information can be passed in as arguments to the FireClient and FireAllClients functions. Note that the FireClient function still needs to pass the player to send the message to as the first argument.
+Using RemoteFunctions
+
+Remote Functions are designed to provide a two way message between the server and clients. The message can originate on either the server or a client. Note that unlike a Remote Event, Remote Functions can only facilitate communication with one client at a time (there is no InvokeAll method).
+
+In order for both the server and clients to utilize RemoteFunctions, the RemoteFunction object itself must be in a place where both can see it. It is recommended to store RemoteFunction in a folder inside of ReplicatedStorage, although in some cases it is appropriate to store events in the Workspace or in Tools.
+
+Sending a message with a Remote Function is called “invoking”, and either the server or client can invoke the other. The other machine will need to have a function set for the onInvoke callback of the remote function. Note that the environment that defines the callback is the one that is invoked. For example, if a callback is defined on the server (with OnServerInvoke), the client will need to invoke the server to make that callback execute (with InvokeServer).
+
+It is important to note that invoking remote functions, either on the server or client, will yield until the remote function’s callback finishes executing or returns. This means that while code in other threads on the machine that invoked the function can run, code in the same thread as the invoke will not execute until the invocation is done.
+Warning: Invocations (both InvokeServer and InvokeClient will yield until to corresponding callback has been defined. If the callback is never set, then the Script or LocalScript that invoked will not resume execution.
+Client to Server
+
+A Remote Function is invoked on the client when that client wants the server to do something, and then wants to be notified that the server is done. This is commonly done to fetch information from the server and then do something with that information, but it can be used in a few other applications.
+
+When a client wants to use a remote function, it will invoke the server with the InvokeServer function.
+
+-- LocalScript
+ 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+ 
+local createPartRequest = ReplicatedStorage:WaitForChild("CreatePartRequest")
+ 
+local newPart = createPartRequest:InvokeServer()
+print("The server created this part for me:", newPart)
+
+-- Server
+ 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+ 
+local createPartRequest = Instance.new("RemoteFunction")
+createPartRequest.Parent = ReplicatedStorage
+createPartRequest.Name = "CreatePartRequest"
+ 
+local function onCreatePartRequested(player)
+	print(player.Name, "wants to create a new part")
+	local newPart = Instance.new("Part")
+	newPart.Parent = game.Workspace
+	return newPart
+end
+ 
+createPartRequest.OnServerInvoke = onCreatePartRequested
+
+Note that binding a function to OnServerInvoke is done with the assignment operator =, and not with an event. That is because OnServerInvoke is a callback and expects a function to be assigned to it. When the RemoteFunction is invoked, it will execute the function that was assigned to the onInvoke function.
+Only one function can be assigned to OnServerInvoke at a time. If multiple functions are assigned, only the last function to be assigned will be used.
+Server to Client
+
+Clients invoking the server is often used because the server either has access to information the client does not, or the client is requesting a game action that only the server can perform. Going the other way (the server invoking a client) is not done often in practice. Clients typically do not have information the server doesn’t have and the actions that only a client can take (displaying a GUI for instance), often do not require a callback. That said, the server invoking clients is still an action that the Roblox engine will support and may be useful in niche situations.
+
+Invoking a client is very similar to invoking the server, except in this case the invocation has to pass the player to invoke. The function used to do this is InvokeClient.
+
+-- Server
+ 
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+ 
+local createPopupRequest = Instance.new("RemoteFunction")
+createPopupRequest.Name = "CreatePopupRequest"
+createPopupRequest.Parent = ReplicatedStorage
+Players.CharacterAutoLoads = false
+ 
+local function onPlayerAdded(player)
+	createPopupRequest:InvokeClient(player)
+	player:LoadCharacter()
+end
+ 
+Players.PlayerAdded:Connect(onPlayerAdded)
+
+Note that unlike invoking the server, invoking the client with InvokeClient requires that the client be specified by passing in the player.
+
+-- LocalScript
+ 
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+ 
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+local createPopupRequest = ReplicatedStorage:WaitForChild("CreatePopupRequest")
+ 
+local function onCreatePopupRequested()
+	local screen = Instance.new("ScreenGui")
+	screen.Parent = playerGui
+	local closeButton = Instance.new("TextButton")
+	closeButton.Text = "Welcome to the game! Click me to play!"
+	closeButton.Size = UDim2.new(0, 300, 0, 50)
+	closeButton.Parent = screen
+ 
+	closeButton.MouseButton1Click:Wait()
+	closeButton.Visible = false
+end
+ 
+createPopupRequest.OnClientInvoke = onCreatePopupRequested
+
+When handling the invocation from the client note that nothing has to be passed in by default (unlike invoking the server where the player is passed in).
+Warning: If a client disconnects or leaves the game while it is being invoked from the server, the InvokeClient function will error. It is therefore recommended to wrap this function in a pcall so it does stop the execution of other code.
+Client to Client Communication
+
+Sometimes a game will need to send information from one client to another. Roblox does not support direct client to client contact, so any communication must first go through the server. This is typically done using remote events (although functions could be used if desired). First, the sending client would call FireServer. On the server, the function connected to OnServerEvent would hear this firing, and itself would then call FireClient.
+
+In this example, each player has a TextBox where they can type another player’s name and a button to click. When they click the button, it sends a message to the other player.
+
+-- LocalScript
+ 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+ 
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+local messageScreen = playerGui:WaitForChild("MessageScreen")
+local recipientInput = messageScreen:WaitForChild("RecipientInput")
+local sendButton = messageScreen:WaitForChild("SendButton")
+local messageLabel = messageScreen:WaitForChild("MessageLabel")
+ 
+local sendMessageEvent = ReplicatedStorage:WaitForChild("SendMessageEvent")
+ 
+local function onSendButtonClicked()
+	local recipientName = recipientInput.Text
+	local recipient = Players:FindFirstChild(recipientName)
+	if recipient then
+		sendMessageEvent:FireServer(recipient)
+	end
+end
+ 
+local function onMessageReceived(sender)
+	messageLabel.Text = sender.Name .. " says hello!"
+	messageLabel.Visible = true
+	wait(3)
+	messageLabel.Visible = false
+end
+ 
+sendButton.MouseButton1Click:Connect(onSendButtonClicked)
+sendMessageEvent.OnClientEvent:Connect(onMessageReceived)
+
+This local script handles both sending messages and receiving them from the server, although two scripts could also have been used (one for sending and one for receiving).
+
+On the server:
+
+-- Script
+ 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+ 
+local sendMessageEvent = Instance.new("RemoteEvent")
+sendMessageEvent.Name = "SendMessageEvent"
+sendMessageEvent.Parent = ReplicatedStorage
+ 
+local function onSendMessageFired(sender, recipient)
+	if recipient:IsA("Player") and recipient.Parent == Players then
+		sendMessageEvent:FireClient(recipient, sender)
+	end
+end
+ 
+sendMessageEvent.OnServerEvent:Connect(onSendMessageFired)
+
+The server simply receives the message, checks that the input is valid, and then fires an event at the recipient player.
+Notice that in the above example the server checked if the information it got from the event was valid before continuing. This practice is recommended as it helps catch errors and overall makes code more robust.
+Limitations
+Bandwidth
+
+For most devices and connections, a Roblox server can only send and receive about 50 KB/sec of data to each client, not including physics updates. That said, it is highly recommended to maintain a lower value during normal gameplay as sudden spikes in data transfer can cause lag and an overall subpar user experience.
+
+Every time a remote event is fired or a remote function invoked, a packet of data is sent over the network between the server and client. This packet is counted towards the 50 KB/sec limit. If too many packets are sent (remote event or function used often), or too much data is sent per packet (lots of large arguments to the event or function), the latency of the connected clients can be adversely affected.
+Parameters
+
+Any type of Roblox object (Enumeration value, instance, userdata) can be passed as a parameter in a RemoteEvent firing or RemoteFunction invocation. Lua types (such as numbers, strings, boolean) can also be passed, although there there are some limitations on how data can be passed.
+Mixed Tables
+
+If a table is passed with mixed indices (some values indexed by number, others by string), then only the data indexed by number will be passed. If the table does not have mixed indices, then no data will be lost.
+
+For example, consider the following code:
+
+local data = {}
+data["one"] = "Pear"
+data["two"] = "Orange"
+data[1] = "Apple"
+data[2] = "Banana"
+ 
+remoteEvent:FireServer(data)
+
+The table that is being passed has mixed indices, some numbers and some strings. When the server receieves this table, it will only see the indexes 1 and 2 (containing "Apple" and "Banana"). The other data will be lost in the transfer.
+
+Note that sub tables do not have to be indexed with the same type as their parent. For example, the following table will transfer fine:
+
+local playerData = {}
+playerData["Inventory"] = {}
+playerData["Inventory"][1] = "Sword"
+playerData["Inventory"][2] = "Bow"
+playerData["Inventory"][3] = "Rope"
+playerData["Gold"] = 20
+playerData["Experience"] = 500
+ 
+remoteEvent:FireServer(playerData)
+
+As long as each individual subtable is indexed with the same type, all of the data will be preserved.
+Metatables
+
+If a table has a metatable, all of the metatable information will be lost in the transfer.
+
+For example, consider the following code:
+
+local Car = {}
+Car.NumWheels = 4
+Car.__index = Car
+ 
+local truck = {}
+truck.Name = "MyTruck"
+setmetatable(truck, Car)
+ 
+remoteEvent:FireServer(truck)
+
+When the server gets the event, the truck table that was passed will only have the Name element, not the NumWheels as that was part of the Car metatable.
+Non-replicated Instances
+
+If the value being sent is only visible to the sender then nil will be passed instead of the value. For example, if a server tries to pass a descendant of ServerStorage, the client listening to the event will see nil passed as the value.
+
+local part = Instance.new("Part", ServerStorage)
+remoteEvent:FireClient(player, part)
+
+In the above code, when the client receives the event it will only see nil passed in and will not have reference to the part.  
