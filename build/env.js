@@ -4,13 +4,15 @@ export default ({ mode }) => {
         PIWIK_SITE_ID: '1',
         NODE_ENV: mode,
         BACKUP_BACKEND: 'google-drive',
+        AUTOMATIC_BACKUP: '',
+        AUTOMATIC_BACKUP_PAYMENT_SUCCESS: '',
+        MOCK_BACKUP_BACKEND: '',
+        BACKUP_BATCH_SIZE: '5000',
     }
 
     if (mode === 'development') {
         env.PIWIK_HOST = 'http://localhost:1234'
         env.SENTRY_DSN = ''
-        env.AUTOMATIC_BACKUP = ''
-        env.AUTOMATIC_BACKUP_PAYMENT_SUCCESS = ''
     } else if (mode === 'production') {
         env.PIWIK_HOST = 'https://analytics.worldbrain.io'
         env.SENTRY_DSN =
