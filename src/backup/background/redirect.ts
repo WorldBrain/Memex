@@ -1,18 +1,24 @@
 import { browser } from 'webextension-polyfill-ts'
 
-export function setupRequestInterceptor({
+export function setupRequestInterceptors({
     webRequest,
     handleLoginRedirectedBack,
+    checkAutomaticBakupEnabled,
     memexCloudOrigin,
 }) {
     webRequest.onBeforeRequest.addListener(
-        makeRequestHandler({ handleLoginRedirectedBack }),
+        makeGoogleCallbackHandler({ handleLoginRedirectedBack }),
         { urls: [`${memexCloudOrigin}/auth/google/callback*`] },
+        ['blocking'],
+    )
+    webRequest.onBeforeRequest.addListener(
+        makeWooCommercePurchaseHandler({ checkAutomaticBakupEnabled }),
+        { urls: ['https://worldbrain.io/order-received/thank-you/redirect/'] },
         ['blocking'],
     )
 }
 
-export function makeRequestHandler({ handleLoginRedirectedBack }) {
+export function makeGoogleCallbackHandler({ handleLoginRedirectedBack }) {
     return ({ url, tabId }) => {
         if (tabId === -1) {
             // Came from bg script, prevent infinite loop of DOOM!
@@ -20,6 +26,14 @@ export function makeRequestHandler({ handleLoginRedirectedBack }) {
         }
 
         handleLoginRedirectedBack(url)
+        const targetUrl = `${browser.extension.getURL('/options.html')}#/backup`
+        return { redirectUrl: targetUrl }
+    }
+}
+
+export function makeWooCommercePurchaseHandler({ checkAutomaticBakupEnabled }) {
+    return () => {
+        checkAutomaticBakupEnabled()
         const targetUrl = `${browser.extension.getURL('/options.html')}#/backup`
         return { redirectUrl: targetUrl }
     }

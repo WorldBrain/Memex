@@ -7,6 +7,9 @@ export async function redirectToGDriveLogin() {
     })
 }
 
-export function redirectToAutomaticBackupPurchase() {
-    window.location.reload()
+export function redirectToAutomaticBackupPurchase(billingPeriod) {
+    const productId = 7542
+    const variationId = billingPeriod === 'yearly' ? 7545 : 7544
+
+    window.location.href = `http://worldbrain.io/?add-to-cart=${productId}&variation_id=${variationId}`
 }

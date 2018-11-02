@@ -1,4 +1,4 @@
-import { remoteFunction } from 'src/util/webextensionRPC'
+import { remoteFunction } from '../../util/webextensionRPC'
 
 function sniff() {
     document.addEventListener('DOMContentLoaded', () => {
@@ -9,7 +9,13 @@ function sniff() {
 
         const userId = script.innerHTML.trim()
         if (userId !== '0') {
-            remoteFunction('storeWordpressUserId')
+            remoteFunction('storeWordpressUserId')(userId)
+        }
+
+        if (window.location.pathname === '/order-received/thank-you/') {
+            setTimeout(() => {
+                window.location.href = window.location.pathname + 'redirect/'
+            }, 1000 * 5)
         }
     })
 }

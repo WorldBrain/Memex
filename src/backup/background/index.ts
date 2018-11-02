@@ -1,10 +1,11 @@
+import * as AllRaven from 'raven-js'
 const pickBy = require('lodash/pickBy')
 const last = require('lodash/last')
 import { EventEmitter } from 'events'
 import { makeRemotelyCallable } from '../../util/webextensionRPC'
 import { CollectionDefinition } from '../../search/storage'
 import { StorageManager } from '../../search/storage/manager'
-import { setupRequestInterceptor } from './redirect'
+import { setupRequestInterceptors } from './redirect'
 import BackupStorage, { LastBackupStorage } from './storage'
 import { BackupBackend } from './backend'
 import { ObjectChangeBatch } from './backend/types'
@@ -206,7 +207,7 @@ export class BackupBackgroundModule {
                         nextBackup,
                     }
                 },
-                storeWordpressUserId: userId => {
+                storeWordpressUserId: (info, userId) => {
                     localStorage.setItem('wp.user-id', userId)
                 },
             },
@@ -215,11 +216,12 @@ export class BackupBackgroundModule {
     }
 
     setupRequestInterceptor() {
-        setupRequestInterceptor({
+        setupRequestInterceptors({
             webRequest: window['browser'].webRequest,
             handleLoginRedirectedBack: this.backend.handleLoginRedirectedBack.bind(
                 this.backend,
             ),
+            checkAutomaticBakupEnabled: () => this.checkAutomaticBakupEnabled(),
             memexCloudOrigin: _getMemexCloudOrigin(),
         })
     }
@@ -251,7 +253,7 @@ export class BackupBackgroundModule {
             return override === 'true'
         }
 
-        if (!localStorage.getItem('backup.has-subscription')) {
+        if (!localStorage.getItem('wp.user-id')) {
             return false
         }
 
@@ -260,16 +262,26 @@ export class BackupBackgroundModule {
 
     checkAutomaticBakupEnabled() {
         this.automaticBackupCheck = (async () => {
+            const wpUserId = localStorage.getItem('wp.user-id')
+            if (!wpUserId) {
+                return false
+            }
+
             let hasSubscription
+            let endDate
             try {
-                hasSubscription = (await new Promise(resolve => {
-                    setTimeout(() => resolve(true), 1000)
-                })) as boolean
+                const subscriptionUrl = `${_getMemexCloudOrigin()}/subscriptions/automatic-backup?user=${wpUserId}`
+                const response = await (await fetch(subscriptionUrl)).json()
+                hasSubscription = response.active
+                endDate = response.endDate
             } catch (e) {
                 return true
             }
 
             localStorage.setItem('backup.has-subscription', hasSubscription)
+            if (endDate !== undefined) {
+                localStorage.setItem('backup.subscription-end-date', endDate)
+            }
             return hasSubscription
         })()
 
@@ -336,7 +348,7 @@ export class BackupBackgroundModule {
             const backupTime = new Date()
             await this._doIncrementalBackup(backupTime, this.state.events)
             await this.backend.commitBackup({ events: this.state.events })
-            // await this.lastBackupStorage.storeLastBackupTime(backupTime)
+            await this.lastBackupStorage.storeLastBackupTime(backupTime)
         }
 
         procedure()
@@ -348,6 +360,12 @@ export class BackupBackgroundModule {
             })
             .catch(e => {
                 this.state.running = false
+
+                if (process.env.NODE_ENV === 'production') {
+                    const raven = AllRaven['default']
+                    raven.captureException(e)
+                }
+
                 console.error(e)
                 console.error(e.stack)
                 this.state.events.emit('fail', e)
@@ -385,8 +403,7 @@ export class BackupBackgroundModule {
         events.emit('info', { info })
 
         for await (const batch of this.storage.streamChanges(untilWhen, {
-            // batchSize: 5000,
-            batchSize: 20,
+            batchSize: parseInt(process.env.BACKUP_BATCH_SIZE, 10),
         })) {
             if (this.state.info.state === 'paused') {
                 await this.state.pausePromise
@@ -419,13 +436,16 @@ export class BackupBackgroundModule {
             )
             change.object = object
         }
-        await new Promise(resolve => setTimeout(resolve, 500))
-        // await this.backend.backupChanges({
-        //     changes: batch.changes,
-        //     events,
-        //     currentSchemaVersion: this.currentSchemaVersion,
-        //     options: { storeBlobs: true },
-        // })
+        if (process.env.MOCK_BACKUP_BACKEND === 'true') {
+            await new Promise(resolve => setTimeout(resolve, 500))
+        } else {
+            await this.backend.backupChanges({
+                changes: batch.changes,
+                events,
+                currentSchemaVersion: this.currentSchemaVersion,
+                options: { storeBlobs: true },
+            })
+        }
         await batch.forget()
 
         info.processedChanges += batch.changes.length

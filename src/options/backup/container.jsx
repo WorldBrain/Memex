@@ -69,6 +69,7 @@ export default class BackupSettingsContainer extends React.Component {
             return (
                 <RunningBackup
                     onFinish={() => {
+                        localStorage.removeItem('backup.onboarding')
                         this.setState({ screen: 'overview' })
                     }}
                 />
@@ -97,7 +98,9 @@ export default class BackupSettingsContainer extends React.Component {
                                 'backup.onboarding.payment',
                                 true,
                             )
-                            redirectToAutomaticBackupPurchase()
+                            redirectToAutomaticBackupPurchase(
+                                choice.billingPeriod,
+                            )
                         } else {
                             this.setState({ screen: 'onboarding-size' })
                         }
