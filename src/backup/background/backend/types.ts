@@ -12,6 +12,7 @@ export type BackupObject = BackupObjectLocation & {
 export interface ObjectChange {
     collection: string
     objectPk: string
+    timestamp: number
     object?: any
     operation: 'create' | 'update' | 'delete'
 }
