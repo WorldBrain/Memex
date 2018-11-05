@@ -110,8 +110,20 @@ export class DriveBackupBackend extends BackupBackend {
         currentSchemaVersion: number
         options: { storeBlobs: boolean }
     }) {
+        const images = []
         for (const change of changes) {
-            await _prepareBackupChangeForStorage(change, options)
+            const changeImages = await _prepareBackupChangeForStorage(
+                change,
+                options,
+            )
+            for (const [imageType, imageData] of Object.entries(changeImages)) {
+                images.push({
+                    collection: change.collection,
+                    pk: change.objectPk,
+                    type: imageType,
+                    data: imageData,
+                })
+            }
         }
 
         await this.client.storeObject({
@@ -119,6 +131,13 @@ export class DriveBackupBackend extends BackupBackend {
             fileName: Date.now().toString(),
             object: { version: currentSchemaVersion, changes },
         })
+        if (images.length) {
+            await this.client.storeObject({
+                folderName: 'images',
+                fileName: Date.now().toString(),
+                object: { version: currentSchemaVersion, changes },
+            })
+        }
     }
 }
 
@@ -126,14 +145,13 @@ export async function _prepareBackupChangeForStorage(
     change: ObjectChange,
     { storeBlobs }: { storeBlobs: boolean },
 ) {
+    const images = {}
     if (
         change.collection === 'pages' &&
         change.object != null &&
         change.object.screenshot != null
     ) {
-        change.object.screenshot = storeBlobs
-            ? await encodeBlob(change.object.screenshot)
-            : undefined
+        images['screenshot'] = await encodeBlob(change.object.screenshot)
     }
 
     if (
@@ -143,4 +161,6 @@ export async function _prepareBackupChangeForStorage(
     ) {
         change.object.favIcon = await encodeBlob(change.object.favIcon)
     }
+
+    return images
 }
