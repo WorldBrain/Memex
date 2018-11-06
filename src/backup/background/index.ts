@@ -443,7 +443,7 @@ export class BackupBackgroundModule {
                 changes: batch.changes,
                 events,
                 currentSchemaVersion: this.currentSchemaVersion,
-                options: { storeBlobs: true },
+                options: { storeBlobs: _shouldStoreBlobs() },
             })
         }
         await batch.forget()
@@ -514,4 +514,9 @@ export function _getMemexCloudOrigin() {
 
 export function isExcludedFromBackup(collection: CollectionDefinition) {
     return collection.backup === false
+}
+
+export function _shouldStoreBlobs() {
+    const pref = localStorage.getItem('backup.save-blobs')
+    return pref !== 'false'
 }

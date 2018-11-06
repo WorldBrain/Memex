@@ -112,10 +112,7 @@ export class DriveBackupBackend extends BackupBackend {
     }) {
         const images = []
         for (const change of changes) {
-            const changeImages = await _prepareBackupChangeForStorage(
-                change,
-                options,
-            )
+            const changeImages = await _prepareBackupChangeForStorage(change)
             for (const [imageType, imageData] of Object.entries(changeImages)) {
                 images.push({
                     collection: change.collection,
@@ -135,16 +132,13 @@ export class DriveBackupBackend extends BackupBackend {
             await this.client.storeObject({
                 folderName: 'images',
                 fileName: Date.now().toString(),
-                object: { version: currentSchemaVersion, changes },
+                object: { version: currentSchemaVersion, images },
             })
         }
     }
 }
 
-export async function _prepareBackupChangeForStorage(
-    change: ObjectChange,
-    { storeBlobs }: { storeBlobs: boolean },
-) {
+export async function _prepareBackupChangeForStorage(change: ObjectChange) {
     const images = {}
     if (
         change.collection === 'pages' &&
