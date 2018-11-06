@@ -7,7 +7,7 @@ export default ({ mode }) => {
         AUTOMATIC_BACKUP: '',
         AUTOMATIC_BACKUP_PAYMENT_SUCCESS: '',
         MOCK_BACKUP_BACKEND: '',
-        BACKUP_BATCH_SIZE: '5000',
+        BACKUP_BATCH_SIZE: '1000',
     }
 
     if (mode === 'development') {
