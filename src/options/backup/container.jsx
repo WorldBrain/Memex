@@ -40,7 +40,7 @@ export default class BackupSettingsContainer extends React.Component {
                 this.setState({ screen: 'running-backup' })
             }
         } else {
-            const [hasInitialBackup, backupInfo] = Promise.all([
+            const [hasInitialBackup, backupInfo] = await Promise.all([
                 remoteFunction('hasInitialBackup')(),
                 remoteFunction('getBackupInfo')(),
             ])
