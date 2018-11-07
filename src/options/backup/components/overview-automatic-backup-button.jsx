@@ -28,8 +28,9 @@ export default class AutomaticBackupButton extends React.Component {
         }
 
         const extraClass = {
-            cancel: classNames(Styles.label, Styles.dangerButton),
-            upgrade: classNames(Styles.label, Styles.labelPremium),
+            active: Styles.labelFree,
+            cancel: Styles.dangerButton,
+            upgrade: Styles.labelPremium,
         }[status]
 
         const onClick = () => {
@@ -41,7 +42,7 @@ export default class AutomaticBackupButton extends React.Component {
 
         return (
             <span
-                className={classNames(extraClass)}
+                className={classNames(Styles.label, extraClass)}
                 onMouseEnter={() => this.setState({ hover: true })}
                 onMouseLeave={() => this.setState({ hover: false })}
                 onClick={onClick}

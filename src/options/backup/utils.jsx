@@ -13,3 +13,7 @@ export function redirectToAutomaticBackupPurchase(billingPeriod) {
 
     window.location.href = `http://worldbrain.io/?add-to-cart=${productId}&variation_id=${variationId}`
 }
+
+export function redirectToAutomaticBackupCancellation() {
+    window.location.href = 'https://worldbrain.io/community/subscriptions/'
+}

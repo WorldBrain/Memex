@@ -23,6 +23,10 @@ export default class RunningBackupContainer extends React.Component {
                 info,
             })
         } else {
+            this.setState({
+                status: 'running',
+                info: { state: 'preparing' },
+            })
             await remoteFunction('startBackup')()
         }
 
