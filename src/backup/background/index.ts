@@ -14,7 +14,7 @@ import estimateBackupSize from './estimate-backup-size'
 export * from './backend'
 
 export interface BackupProgressInfo {
-    state: 'preparing' | 'synching' | 'paused'
+    state: 'preparing' | 'synching' | 'paused' | 'cancelled'
     totalChanges: number
     processedChanges: number
     // currentCollection: string
@@ -25,7 +25,6 @@ export interface BackupProgressInfo {
 
 export interface BackupState {
     running: boolean
-    cancelled?: boolean
     info: BackupProgressInfo
     events: EventEmitter
     pausePromise?: Promise<null> // only set if paused, resolved when pause ends
@@ -110,11 +109,16 @@ export class BackupBackgroundModule {
                     }
 
                     this.doBackup()
-                    const sendEvent = (eventType, event) =>
-                        window['browser'].tabs.sendMessage(this.uiTabId, {
-                            type: 'backup-event',
-                            event: { type: eventType, ...(event || {}) },
-                        })
+                    const sendEvent = (eventType, event) => {
+                        try {
+                            window['browser'].tabs.sendMessage(this.uiTabId, {
+                                type: 'backup-event',
+                                event: { type: eventType, ...(event || {}) },
+                            })
+                        } catch (e) {
+                            // ignore the error, user closed tab
+                        }
+                    }
                     this.state.events.on('info', event =>
                         sendEvent('info', event),
                     )
@@ -148,7 +152,7 @@ export class BackupBackgroundModule {
                     this.state.events.emit('info', this.state.info)
                 },
                 cancelBackup: () => {
-                    this.state.cancelled = true
+                    this.state.info.state = 'cancelled'
                 },
                 hasInitialBackup: async () => {
                     return !!(await this.lastBackupStorage.getLastBackupTime())
@@ -410,7 +414,7 @@ export class BackupBackgroundModule {
             if (this.state.info.state === 'paused') {
                 await this.state.pausePromise
             }
-            if (this.state.cancelled) {
+            if (this.state.info.state === 'cancelled') {
                 break
             }
 
