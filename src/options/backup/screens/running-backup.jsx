@@ -198,6 +198,28 @@ export default class RunningBackupContainer extends React.Component {
                         </PrimaryButton>
                     </div>
                 )}
+                {status === 'fail' && (
+                    <div className={localStyles.finish}>
+                        <p className={Styles.header2}>
+                            <strong>FAIL: </strong>
+                            We couldn't back up your data. Please check whether
+                            you have enough space in your Drive and the
+                            stability of your internet connection. You can try
+                            again any time you want. Otherwise, please&nbsp;
+                            <a href="mailto:support@worldbrain.io">
+                                contact support
+                            </a>
+                            .
+                        </p>
+                        <PrimaryButton
+                            onClick={() => {
+                                this.props.onFinish()
+                            }}
+                        >
+                            Return to Settings
+                        </PrimaryButton>
+                    </div>
+                )}
             </div>
         )
     }
