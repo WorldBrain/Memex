@@ -121,7 +121,7 @@ export default class RunningBackupContainer extends React.Component {
                                 <div className={localStyles.stepStatus}>
                                     {info.state === 'preparing' &&
                                         'In progress'}
-                                    {info.state !== 'synching' && '✔️'}
+                                    {info.state !== 'preparing' && '✔️'}
                                 </div>
                             </div>
                             <div className={localStyles.step}>
