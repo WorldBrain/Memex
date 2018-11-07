@@ -351,27 +351,29 @@ export class BackupBackgroundModule {
             await this.lastBackupStorage.storeLastBackupTime(backupTime)
         }
 
-        procedure()
-            .then(() => {
-                this.state.running = false
-                this.state.events.emit('success')
-                this.resetBackupState()
-                this.maybeScheduleAutomaticBackup()
-            })
-            .catch(e => {
-                this.state.running = false
+        setTimeout(() => {
+            procedure()
+                .then(() => {
+                    this.state.running = false
+                    this.state.events.emit('success')
+                    this.resetBackupState()
+                    this.maybeScheduleAutomaticBackup()
+                })
+                .catch(e => {
+                    this.state.running = false
 
-                if (process.env.NODE_ENV === 'production') {
-                    const raven = AllRaven['default']
-                    raven.captureException(e)
-                }
+                    if (process.env.NODE_ENV === 'production') {
+                        const raven = AllRaven['default']
+                        raven.captureException(e)
+                    }
 
-                console.error(e)
-                console.error(e.stack)
-                this.state.events.emit('fail', e)
-                this.resetBackupState()
-                this.maybeScheduleAutomaticBackup()
-            })
+                    console.error(e)
+                    console.error(e.stack)
+                    this.state.events.emit('fail', e)
+                    this.resetBackupState()
+                    this.maybeScheduleAutomaticBackup()
+                })
+        }, 200)
 
         return this.state.events
     }
