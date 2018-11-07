@@ -177,6 +177,9 @@ export class GoogleDriveClient {
 
         const url = baseUrl + path
         const response = await fetch(url, options)
+        if (!response.ok) {
+            throw new Error(await response.json())
+        }
         return options.json ? response.json() : response
     }
 }
