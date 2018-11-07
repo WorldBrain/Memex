@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { OnboardingBackupMode } from '../components/onboarding-backup-mode'
+import OnboardingBackupMode from '../components/onboarding-backup-mode'
 import { PrimaryButton } from '../components/primary-button'
 import Styles from '../styles.css'
 
@@ -15,9 +15,6 @@ export default class OnboardingHowContainer extends React.Component {
                     HOW?
                 </p>
                 <OnboardingBackupMode
-                    showPrice={isAutomatic}
-                    mode={this.state.mode}
-                    billingPeriod={this.state.billingPeriod}
                     onModeChange={mode => this.setState({ mode })}
                     onBillingPeriodChange={billingPeriod =>
                         this.setState({ billingPeriod })

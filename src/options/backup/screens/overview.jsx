@@ -4,6 +4,7 @@ import PropTypes from 'prop-types'
 import classNames from 'classnames'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import AutomaticBackupButton from '../components/overview-automatic-backup-button'
+import OnboardingBackupMode from '../components/onboarding-backup-mode'
 import Styles from '../styles.css'
 import localStyles from './overview.css'
 import { redirectToAutomaticBackupPurchase } from '../utils'
@@ -14,7 +15,12 @@ export default class OverviewContainer extends React.Component {
         onBackupRequested: PropTypes.func.isRequired,
     }
 
-    state = { automaticBackupEnabled: null, backupTimes: null }
+    state = {
+        automaticBackupEnabled: null,
+        backupTimes: null,
+        showAutomaticUpgradeDetails: false,
+        upgradeBillingPeriod: null,
+    }
 
     async componentDidMount() {
         this.setState({
@@ -38,24 +44,47 @@ export default class OverviewContainer extends React.Component {
                 <div className={Styles.option}>
                     <span className={Styles.name}>Automatic Backup</span>
                     <span className={classNames(localStyles.button)}>
-                        {this.state.automaticBackupEnabled !== null && (
-                            <AutomaticBackupButton
-                                automaticBackupEnabled={
-                                    this.state.automaticBackupEnabled
-                                }
-                                onUpgrade={() => {
-                                    redirectToAutomaticBackupPurchase()
-                                }}
-                                onCancel={() => {
-                                    console.log('cancel')
-                                }}
-                            />
-                        )}
+                        {this.state.automaticBackupEnabled !== null &&
+                            !this.state.showAutomaticUpgradeDetails && (
+                                <AutomaticBackupButton
+                                    automaticBackupEnabled={
+                                        this.state.automaticBackupEnabled
+                                    }
+                                    onUpgrade={() => {
+                                        this.setState({
+                                            showAutomaticUpgradeDetails: true,
+                                        })
+                                    }}
+                                    onCancel={() => {
+                                        console.log('cancel')
+                                    }}
+                                />
+                            )}
                     </span>
                     <br />
                     <span className={Styles.subname}>
                         Worry-free backups every 15 minutes.
                     </span>
+                    {this.state.showAutomaticUpgradeDetails && (
+                        <div style={{ marginTop: '20px' }}>
+                            <OnboardingBackupMode
+                                disableModeSelection
+                                onBillingPeriodChange={upgradeBillingPeriod =>
+                                    this.setState({ upgradeBillingPeriod })
+                                }
+                            />
+                            <PrimaryButton
+                                onClick={() =>
+                                    redirectToAutomaticBackupPurchase(
+                                        this.state.upgradeBillingPeriod,
+                                    )
+                                }
+                                disabled={!this.state.upgradeBillingPeriod}
+                            >
+                                Purchase
+                            </PrimaryButton>
+                        </div>
+                    )}
                 </div>
 
                 <div className={Styles.option}>

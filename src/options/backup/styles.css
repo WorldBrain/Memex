@@ -61,6 +61,7 @@ h1 {
     font-size: 15px;
     vertical-align: middle;
     margin-left: 10px;
+    border-radius: 3px;
 }
 
 /* Elements for selections */
