@@ -90,7 +90,8 @@ export const NOTIFS: NotifDefinition[] = [
         },
         overview: {
             title: "Don't lose your knowledge!",
-            message: 'Backup your data to Google Drive',
+            message:
+                'Backup your data for free with our new Google Drive backup.',
             buttons: [
                 {
                     action: {
