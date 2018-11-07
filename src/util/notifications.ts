@@ -24,11 +24,12 @@ browser.notifications.onClicked.addListener(id => {
 function filterOpts({
     type,
     iconUrl,
+    requireInteraction,
     title,
     message,
     ...rest
 }: NotifOpts): NotifOpts {
-    const opts = { type, iconUrl, title, message }
+    const opts = { type, iconUrl, requireInteraction, title, message }
     return browser.runtime.getBrowserInfo != null ? opts : { ...opts, ...rest }
 }
 
@@ -40,6 +41,7 @@ async function createNotification(
         filterOpts({
             type: DEF_TYPE,
             iconUrl: DEF_ICON_URL,
+            requireInteraction: true,
             ...(notifOptions as NotifOpts),
         }),
     )
