@@ -39,11 +39,17 @@ export default class BackupSettingsContainer extends React.Component {
                 localStorage.removeItem('backup.onboarding')
                 this.setState({ screen: 'running-backup' })
             }
-        } else if (!(await remoteFunction('hasInitialBackup')())) {
-            localStorage.setItem('backup.onboarding', true)
-            this.setState({ screen: 'onboarding-where' })
         } else {
-            this.setState({ screen: 'overview' })
+            const [hasInitialBackup, backupInfo] = Promise.all([
+                remoteFunction('hasInitialBackup')(),
+                remoteFunction('getBackupInfo')(),
+            ])
+            if (!hasInitialBackup && !backupInfo) {
+                localStorage.setItem('backup.onboarding', true)
+                this.setState({ screen: 'onboarding-where' })
+            } else {
+                this.setState({ screen: 'overview' })
+            }
         }
     }
 

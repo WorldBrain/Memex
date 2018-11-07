@@ -164,7 +164,7 @@ export class BackupBackgroundModule {
                     // Move to more suitable place once this changes.
                     const override =
                         process.env.AUTOMATIC_BACKUP_PAYMENT_SUCCESS
-                    if (override === 'true') {
+                    if (override && override.length) {
                         console.log(
                             'Automatic backup payment override',
                             override,
