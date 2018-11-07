@@ -139,8 +139,8 @@ export default class RunningBackupContainer extends React.Component {
                                     {status === 'success' && '✔️'}
                                 </div>
                             </div>
+                            <BackupProgressBar value={progressPercentage} />
                         </div>
-                        <BackupProgressBar value={progressPercentage} />
                         <div className={localStyles.actions}>
                             {info.state !== 'paused' &&
                                 info.state !== 'pausing' && (
@@ -201,11 +201,16 @@ export default class RunningBackupContainer extends React.Component {
                 {status === 'fail' && (
                     <div className={localStyles.finish}>
                         <p className={Styles.header2}>
-                            <strong>FAIL: </strong>
-                            We couldn't back up your data. Please check whether
-                            you have enough space in your Drive and the
-                            stability of your internet connection. You can try
-                            again any time you want. Otherwise, please&nbsp;
+                            <strong>BACKUP FAILED </strong>
+                        </p>
+                        <p className={Styles.name}>
+                            Please check whether you have enough space in your{' '}
+                            <a href="https://http://drive.google.com">
+                                Google Drive
+                            </a>{' '}
+                            and the stability of your internet connection. You
+                            can retry the backup anytimes you want. <br /> If
+                            you still encounter isuses please{' '}
                             <a href="mailto:support@worldbrain.io">
                                 contact support
                             </a>

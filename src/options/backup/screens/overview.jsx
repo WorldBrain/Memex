@@ -92,16 +92,21 @@ export default class OverviewContainer extends React.Component {
 
                 <div className={Styles.option}>
                     <span className={Styles.name}>Delete Backup</span>
-                    <span className={localStyles.button}>
-                        <span
-                            className={classNames(
-                                Styles.label,
-                                Styles.labelFree,
-                            )}
-                        >
-                            Tutorial
+                    <a
+                        target="_blank"
+                        href="https://worldbrain.helprace.com/i100-delete-your-backup-and-start-over"
+                    >
+                        <span className={localStyles.button}>
+                            <span
+                                className={classNames(
+                                    Styles.label,
+                                    Styles.labelFree,
+                                )}
+                            >
+                                Tutorial
+                            </span>
                         </span>
-                    </span>
+                    </a>
                     <br />
                 </div>
 
@@ -126,7 +131,7 @@ export default class OverviewContainer extends React.Component {
                                 ? moment(
                                       this.state.backupTimes.nextBackup,
                                   ).fromNow()
-                                : 'In progress'}
+                                : 'in progress'}
                         </span>
                     </div>
                 )}
@@ -141,16 +146,21 @@ export default class OverviewContainer extends React.Component {
                     </p>
                     <div className={Styles.option}>
                         <span className={Styles.name}>Coming Very Soon</span>
-                        <span className={localStyles.button}>
-                            <span
-                                className={classNames(
-                                    Styles.label,
-                                    Styles.labelFree,
-                                )}
-                            >
-                                Chip in 10€
+                        <a
+                            target="_blank"
+                            href="https://worldbrain.io/crowdfunding-memex"
+                        >
+                            <span className={localStyles.button}>
+                                <span
+                                    className={classNames(
+                                        Styles.label,
+                                        Styles.labelFree,
+                                    )}
+                                >
+                                    Chip in 10€
+                                </span>
                             </span>
-                        </span>
+                        </a>
                         <br />
                         <span className={Styles.subname}>
                             Support our development and get back 40€ worth of

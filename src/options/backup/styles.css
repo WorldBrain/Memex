@@ -64,6 +64,12 @@ h1 {
     border-radius: 3px;
 }
 
+.label:hover {
+    background: white;
+    border: solid 2px #3eb995;
+    color: #3eb995;
+}
+
 /* Elements for selections */
 
 .option {

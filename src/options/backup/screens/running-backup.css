@@ -1,14 +1,17 @@
 .steps {
     margin-bottom: 10px;
+    width: 550px;
+    margin-right: 50px;
 }
 
 .step {
     display: inline-flex;
     margin-bottom: 10px;
+    width: 550px;
 }
 
 .stepLabel {
-    width: 500px;
+    width: 450px;
     color: #3eb995;
 }
 
@@ -26,7 +29,8 @@
 }
 
 .stepStatus {
-    float: right;
+    text-align: right;
+    width: 100px;
 }
 
 .progressHelpText {
