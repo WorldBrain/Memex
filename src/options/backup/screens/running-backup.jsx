@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import localStyles from './running-backup.css'
 import { BackupProgressBar } from '../components/progress-bar'
+import MovingDotsLabel from '../components/moving-dots-label'
 import { PrimaryButton } from '../components/primary-button'
 import Styles from '../styles.css'
 
@@ -36,7 +37,7 @@ export default class RunningBackupContainer extends React.Component {
         // })
         // this.setState({
         //     status: 'running',
-        //     info: { state: 'synching', totalChanges: 1000, processedChanges: 500 },
+        //     info: { state: 'pausing', totalChanges: 1000, processedChanges: 500 },
         // })
         // this.setState({
         //     status: 'success',
@@ -72,6 +73,9 @@ export default class RunningBackupContainer extends React.Component {
     }
 
     handlePause() {
+        const info = this.state.info
+        info.state = 'pausing'
+        this.setState({ info })
         remoteFunction('pauseBackup')()
     }
 
@@ -91,7 +95,7 @@ export default class RunningBackupContainer extends React.Component {
         }
 
         const progressPercentage =
-            info.state === 'synching'
+            info.processedChanges && info.totalChanges
                 ? info.processedChanges / info.totalChanges
                 : 0
 
@@ -117,7 +121,7 @@ export default class RunningBackupContainer extends React.Component {
                                 <div className={localStyles.stepStatus}>
                                     {info.state === 'preparing' &&
                                         'In progress'}
-                                    {info.state === 'synching' && '✔️'}
+                                    {info.state !== 'synching' && '✔️'}
                                 </div>
                             </div>
                             <div className={localStyles.step}>
@@ -130,7 +134,7 @@ export default class RunningBackupContainer extends React.Component {
                                 <div className={localStyles.stepStatus}>
                                     {info.state === 'preparing' && 'Waiting'}
                                     {status === 'running' &&
-                                        info.state === 'synching' &&
+                                        info.state !== 'preparing' &&
                                         'In progress'}
                                     {status === 'success' && '✔️'}
                                 </div>
@@ -138,15 +142,27 @@ export default class RunningBackupContainer extends React.Component {
                         </div>
                         <BackupProgressBar value={progressPercentage} />
                         <div className={localStyles.actions}>
-                            {info.state !== 'paused' && (
-                                <PrimaryButton
-                                    onClick={() => {
-                                        this.handlePause()
-                                    }}
-                                >
-                                    Pause
-                                </PrimaryButton>
-                            )}
+                            {info.state !== 'paused' &&
+                                info.state !== 'pausing' && (
+                                    <PrimaryButton
+                                        onClick={() => {
+                                            this.handlePause()
+                                        }}
+                                    >
+                                        Pause
+                                    </PrimaryButton>
+                                )}
+                            {info.state !== 'paused' &&
+                                info.state === 'pausing' && (
+                                    <PrimaryButton onClick={() => {}}>
+                                        <div style={{ width: '150px' }}>
+                                            <MovingDotsLabel
+                                                text="Preparing pause"
+                                                intervalMs={500}
+                                            />
+                                        </div>
+                                    </PrimaryButton>
+                                )}
                             {info.state === 'paused' && (
                                 <PrimaryButton
                                     onClick={() => {
