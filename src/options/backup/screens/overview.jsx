@@ -7,7 +7,10 @@ import AutomaticBackupButton from '../components/overview-automatic-backup-butto
 import OnboardingBackupMode from '../components/onboarding-backup-mode'
 import Styles from '../styles.css'
 import localStyles from './overview.css'
-import { redirectToAutomaticBackupPurchase } from '../utils'
+import {
+    redirectToAutomaticBackupPurchase,
+    redirectToAutomaticBackupCancellation,
+} from '../utils'
 import { PrimaryButton } from '../components/primary-button'
 
 export default class OverviewContainer extends React.Component {
@@ -56,7 +59,7 @@ export default class OverviewContainer extends React.Component {
                                         })
                                     }}
                                     onCancel={() => {
-                                        console.log('cancel')
+                                        redirectToAutomaticBackupCancellation()
                                     }}
                                 />
                             )}
