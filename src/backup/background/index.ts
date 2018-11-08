@@ -152,6 +152,7 @@ export class BackupBackgroundModule {
                     this.state.events.emit('info', this.state.info)
                 },
                 cancelBackup: () => {
+                    this.state.events = null
                     this.state.info.state = 'cancelled'
                 },
                 hasInitialBackup: async () => {
@@ -351,15 +352,18 @@ export class BackupBackgroundModule {
 
             const backupTime = new Date()
             await this._doIncrementalBackup(backupTime, this.state.events)
-            await this.backend.commitBackup({ events: this.state.events })
-            await this.lastBackupStorage.storeLastBackupTime(backupTime)
+            if (process.env.STORE_BACKUP_TIME !== 'false') {
+                await this.lastBackupStorage.storeLastBackupTime(backupTime)
+            }
         }
 
         setTimeout(() => {
             procedure()
                 .then(() => {
                     this.state.running = false
-                    this.state.events.emit('success')
+                    if (this.state.events) {
+                        this.state.events.emit('success')
+                    }
                     this.resetBackupState()
                     this.maybeScheduleAutomaticBackup()
                 })
@@ -373,7 +377,9 @@ export class BackupBackgroundModule {
 
                     console.error(e)
                     console.error(e.stack)
-                    this.state.events.emit('fail', e)
+                    if (this.state.events) {
+                        this.state.events.emit('fail', e)
+                    }
                     this.resetBackupState()
                     this.maybeScheduleAutomaticBackup()
                 })

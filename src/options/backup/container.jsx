@@ -19,45 +19,56 @@ export default class BackupSettingsContainer extends React.Component {
         const isAuthenticated = await remoteFunction('isBackupAuthenticated')()
         this.setState({ isAuthenticated })
 
-        if (localStorage.getItem('backup.onboarding')) {
-            if (localStorage.getItem('backup.onboarding.payment')) {
-                localStorage.removeItem('backup.onboarding.payment')
-                if (await remoteFunction('checkAutomaticBakupEnabled')()) {
+        if (
+            !(
+                process.env.BACKUP_START_SCREEN &&
+                process.env.BACKUP_START_SCREEN.length
+            )
+        ) {
+            if (localStorage.getItem('backup.onboarding')) {
+                if (localStorage.getItem('backup.onboarding.payment')) {
+                    localStorage.removeItem('backup.onboarding.payment')
+                    if (await remoteFunction('checkAutomaticBakupEnabled')()) {
+                        this.setState({ screen: 'onboarding-size' })
+                    } else {
+                        this.setState({ screen: 'onboarding-how' })
+                    }
+                } else if (
+                    !isAuthenticated &&
+                    localStorage.getItem('backup.onboarding.authenticating')
+                ) {
+                    localStorage.removeItem('backup.onboarding.authenticating')
                     this.setState({ screen: 'onboarding-size' })
-                } else {
-                    this.setState({ screen: 'onboarding-how' })
+                } else if (isAuthenticated) {
+                    localStorage.removeItem('backup.onboarding.payment')
+                    localStorage.removeItem('backup.onboarding.authenticating')
+                    localStorage.removeItem('backup.onboarding')
+                    this.setState({ screen: 'running-backup' })
                 }
-            } else if (
-                !isAuthenticated &&
-                localStorage.getItem('backup.onboarding.authenticating')
-            ) {
-                localStorage.removeItem('backup.onboarding.authenticating')
-                this.setState({ screen: 'onboarding-size' })
-            } else if (isAuthenticated) {
-                localStorage.removeItem('backup.onboarding.payment')
-                localStorage.removeItem('backup.onboarding.authenticating')
-                localStorage.removeItem('backup.onboarding')
-                this.setState({ screen: 'running-backup' })
+            } else {
+                const [hasInitialBackup, backupInfo] = await Promise.all([
+                    remoteFunction('hasInitialBackup')(),
+                    remoteFunction('getBackupInfo')(),
+                ])
+                if (!hasInitialBackup && !backupInfo) {
+                    localStorage.setItem('backup.onboarding', true)
+                    this.setState({ screen: 'onboarding-where' })
+                } else {
+                    this.setState({ screen: 'overview' })
+                }
             }
         } else {
-            const [hasInitialBackup, backupInfo] = await Promise.all([
-                remoteFunction('hasInitialBackup')(),
-                remoteFunction('getBackupInfo')(),
-            ])
-            if (!hasInitialBackup && !backupInfo) {
-                localStorage.setItem('backup.onboarding', true)
-                this.setState({ screen: 'onboarding-where' })
-            } else {
-                this.setState({ screen: 'overview' })
-            }
+            this.setState({ screen: process.env.BACKUP_START_SCREEN })
         }
     }
 
     renderScreen() {
         const { screen } = this.state
         if (!screen) {
+            console.log('no screen yet')
             return null
         }
+        console.log('rendering screen')
 
         if (screen === 'overview') {
             return (
