@@ -12,7 +12,7 @@ export default class RunningBackupContainer extends React.Component {
         onFinish: PropTypes.func.isRequired,
     }
 
-    state = { status: null, info: null }
+    state = { status: null, info: null, canceling: false }
 
     async componentDidMount() {
         browser.runtime.onMessage.addListener(this.messageListener)
@@ -84,6 +84,7 @@ export default class RunningBackupContainer extends React.Component {
     }
 
     async handleCancel() {
+        this.setState({ canceling: true })
         await remoteFunction('cancelBackup')()
         this.props.onFinish()
     }
@@ -175,10 +176,16 @@ export default class RunningBackupContainer extends React.Component {
                             <div
                                 className={localStyles.actionCancel}
                                 onClick={() => {
-                                    this.handleCancel()
+                                    !this.state.canceling && this.handleCancel()
                                 }}
                             >
-                                Cancel
+                                {!this.state.canceling && 'Cancel'}
+                                {this.state.canceling && (
+                                    <MovingDotsLabel
+                                        text="Canceling"
+                                        intervalMs={500}
+                                    />
+                                )}
                             </div>
                         </div>
                     </div>
