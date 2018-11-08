@@ -158,6 +158,9 @@ export class BackupBackgroundModule {
                     this.state.events = null
                     this.state.info.state = 'cancelled'
                     await this.state.completionPromise
+                    await new Promise(resolve => {
+                        setTimeout(resolve, 1000)
+                    })
                 },
                 hasInitialBackup: async () => {
                     return !!(await this.lastBackupStorage.getLastBackupTime())
