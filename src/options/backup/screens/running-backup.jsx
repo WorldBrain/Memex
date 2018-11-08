@@ -83,8 +83,8 @@ export default class RunningBackupContainer extends React.Component {
         remoteFunction('resumeBackup')()
     }
 
-    handleCancel() {
-        remoteFunction('cancelBackup')()
+    async handleCancel() {
+        await remoteFunction('cancelBackup')()
         this.props.onFinish()
     }
 

@@ -25,8 +25,11 @@ export interface BackupProgressInfo {
 
 export interface BackupState {
     running: boolean
+    completionPromise?: Promise<void> // only set after first run
+
     info: BackupProgressInfo
     events: EventEmitter
+
     pausePromise?: Promise<null> // only set if paused, resolved when pause ends
     resume?: () => void // only set if paused
 }
@@ -151,9 +154,10 @@ export class BackupBackgroundModule {
                     this.state.resume = null
                     this.state.events.emit('info', this.state.info)
                 },
-                cancelBackup: () => {
+                cancelBackup: async () => {
                     this.state.events = null
                     this.state.info.state = 'cancelled'
+                    await this.state.completionPromise
                 },
                 hasInitialBackup: async () => {
                     return !!(await this.lastBackupStorage.getLastBackupTime())
@@ -332,6 +336,11 @@ export class BackupBackgroundModule {
             processedChanges: null,
         }
 
+        let resolveCompletionPromise
+        this.state.completionPromise = new Promise(resolve => {
+            resolveCompletionPromise = resolve
+        })
+
         const procedure = async () => {
             this.startRecordingChanges()
             const lastBackupTime = await this.lastBackupStorage.getLastBackupTime()
@@ -361,7 +370,7 @@ export class BackupBackgroundModule {
             }
         }
 
-        setTimeout(() => {
+        setTimeout(async () => {
             procedure()
                 .then(() => {
                     this.state.running = false
@@ -370,6 +379,7 @@ export class BackupBackgroundModule {
                     }
                     this.resetBackupState()
                     this.maybeScheduleAutomaticBackup()
+                    resolveCompletionPromise()
                 })
                 .catch(e => {
                     this.state.running = false
@@ -386,6 +396,7 @@ export class BackupBackgroundModule {
                     }
                     this.resetBackupState()
                     this.maybeScheduleAutomaticBackup()
+                    resolveCompletionPromise()
                 })
         }, 200)
 
