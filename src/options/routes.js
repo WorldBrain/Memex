@@ -38,7 +38,7 @@ export default [
         name: 'Backup',
         pathname: '/backup',
         component: BackupSettingsContainer,
-        icon: 'file_download',
+        icon: 'backup',
     },
     {
         name: 'Blacklist',
