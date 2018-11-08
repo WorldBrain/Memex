@@ -26,18 +26,23 @@ export default class OverviewContainer extends React.Component {
     }
 
     async componentDidMount() {
+        console.log('before')
+        const backupTimes = await remoteFunction('getBackupTimes')()
         this.setState({
             automaticBackupEnabled: await remoteFunction(
                 'isAutomaticBackupEnabled',
             )(),
-            backupTimes: await remoteFunction('getBackupTimes')(),
+            backupTimes,
         })
+        console.log('after', backupTimes)
     }
 
     render() {
         if (!this.state.backupTimes) {
+            console.log('no backup times yet')
             return null
         }
+        console.log('rendering overview')
 
         return (
             <div>
