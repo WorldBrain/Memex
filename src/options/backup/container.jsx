@@ -65,10 +65,8 @@ export default class BackupSettingsContainer extends React.Component {
     renderScreen() {
         const { screen } = this.state
         if (!screen) {
-            console.log('no screen yet')
             return null
         }
-        console.log('rendering screen')
 
         if (screen === 'overview') {
             return (
