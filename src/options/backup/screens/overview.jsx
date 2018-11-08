@@ -39,10 +39,10 @@ export default class OverviewContainer extends React.Component {
 
     render() {
         if (!this.state.backupTimes) {
-            console.log('no backup times yet')
             return null
         }
-        console.log('rendering overview')
+
+        console.log(this.state.backupTimes.nextBackup)
 
         return (
             <div>

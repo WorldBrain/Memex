@@ -197,7 +197,7 @@ export class BackupBackgroundModule {
                 },
                 getBackupTimes: async () => {
                     const lastBackup = await this.lastBackupStorage.getLastBackupTime()
-                    let nextBackup
+                    let nextBackup = null
                     if (this.state.running) {
                         nextBackup = 'running'
                     } else if (await this.isAutomaticBackupEnabled()) {
@@ -207,10 +207,14 @@ export class BackupBackgroundModule {
                                 1000 * 60 * backupIntervalMinutes,
                         )
                     }
-                    return {
+                    const times = {
                         lastBackup: lastBackup && lastBackup.getTime(),
-                        nextBackup: nextBackup && nextBackup.getTime(),
+                        nextBackup:
+                            nextBackup && nextBackup.getTime
+                                ? nextBackup.getTime()
+                                : nextBackup,
                     }
+                    return times
                 },
                 storeWordpressUserId: (info, userId) => {
                     localStorage.setItem('wp.user-id', userId)

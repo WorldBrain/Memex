@@ -24,6 +24,20 @@ import mapValues from 'lodash/fp/mapValues'
 const RPC_CALL = '__RPC_CALL__'
 const RPC_RESPONSE = '__RPC_RESPONSE__'
 
+export class RpcError extends Error {
+    constructor(message) {
+        super(message)
+        this.name = this.constructor.name
+    }
+}
+
+export class RemoteError extends Error {
+    constructor(message) {
+        super(message)
+        this.name = this.constructor.name
+    }
+}
+
 // === Initiating side ===
 
 // Create a proxy function that invokes the specified remote function.
@@ -44,36 +58,37 @@ export function remoteFunction(funcName, { tabId } = {}) {
             [RPC_CALL]: RPC_CALL,
             funcName,
             args,
-            isFirefox: typeof browser.runtime.getBrowserInfo !== 'undefined',
         }
 
         // Try send the message and await the response.
         let response
         try {
             response =
-                tabId != null
+                tabId !== undefined
                     ? await browser.tabs.sendMessage(tabId, message)
                     : await browser.runtime.sendMessage(message)
         } catch (err) {
-            const origErrMsg = err.message
-                ? `\nError message: ${err.message}`
-                : ''
-
-            throw new Error(
+            throw new RpcError(
                 `Got no response when trying to call '${funcName}'. ` +
-                    `Did you enable RPC in ${otherSide}?` +
-                    origErrMsg,
+                    `Did you enable RPC in ${otherSide}?`,
             )
         }
 
         // Check if it was *our* listener that responded.
         if (!response || response[RPC_RESPONSE] !== RPC_RESPONSE) {
-            throw new Error(`RPC got a response from an interfering listener.`)
+            throw new RpcError(
+                `RPC got a response from an interfering listener.`,
+            )
+        }
+
+        // If we could not invoke the function on the other side, throw an error.
+        if (response.rpcError) {
+            throw new RpcError(response.rpcError)
         }
 
         // Return the value or throw the error we received from the other side.
         if (response.errorMessage) {
-            throw new Error(response.errorMessage)
+            throw new RemoteError(response.errorMessage)
         } else {
             return response.returnValue
         }
@@ -86,53 +101,45 @@ export function remoteFunction(funcName, { tabId } = {}) {
 
 // === Executing side ===
 
-const noSuchFunctionError = 'Received RPC for unknown function: '
-
 const remotelyCallableFunctions = {}
 
-function incomingRPCListener(message, sender, sendResponse) {
-    if (!message || message[RPC_CALL] !== RPC_CALL) {
-        return false
-    }
-
-    function handleResponse(value) {
-        // Chrome seems fine returning a Promise
-        if (!message.isFirefox) {
-            return Promise.resolve(value)
+function incomingRPCListener(message, sender) {
+    if (message && message[RPC_CALL] === RPC_CALL) {
+        const funcName = message.funcName
+        const args = message.hasOwnProperty('args') ? message.args : []
+        const func = remotelyCallableFunctions[funcName]
+        if (func === undefined) {
+            console.error(`Received RPC for unknown function: ${funcName}`)
+            return Promise.resolve({
+                rpcError: `No such function registered for RPC: ${funcName}`,
+                [RPC_RESPONSE]: RPC_RESPONSE,
+            })
+        }
+        const extraArg = {
+            tab: sender.tab,
         }
 
-        // Set up to call `sendResponse` callback on FF, and immediately return `true`
-        Promise.resolve(value)
-            .then(sendResponse)
-            .catch(sendResponse)
-        return true
-    }
-
-    const funcName = message.funcName
-    const args = message.hasOwnProperty('args') ? message.args : []
-    const func = remotelyCallableFunctions[funcName]
-    if (func === undefined) {
-        console.error(noSuchFunctionError, funcName)
-
-        return handleResponse({
-            error: `No such function registered for RPC: ${funcName}`,
-            [RPC_RESPONSE]: RPC_RESPONSE,
-        })
-    }
-
-    // Run the function, and await its value if it returns a promise.
-    const returnValue = func({ tab: sender.tab }, ...args)
-    return handleResponse(
-        Promise.resolve(returnValue)
+        // Run the function
+        let returnValue
+        try {
+            returnValue = func(extraArg, ...args)
+        } catch (error) {
+            return Promise.resolve({
+                errorMessage: error.message,
+                [RPC_RESPONSE]: RPC_RESPONSE,
+            })
+        }
+        // Return the function's return value. If it is a promise, first await its result.
+        return Promise.resolve(returnValue)
             .then(returnValue => ({
                 returnValue,
                 [RPC_RESPONSE]: RPC_RESPONSE,
             }))
             .catch(error => ({
-                error: error.message,
+                errorMessage: error.message,
                 [RPC_RESPONSE]: RPC_RESPONSE,
-            })),
-    )
+            }))
+    }
 }
 
 // A bit of global state to ensure we only attach the event listener once.
