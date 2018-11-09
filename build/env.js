@@ -2,6 +2,7 @@ export default ({ mode }) => {
     const env = {
         VERSION: process.env.npm_package_version,
         PIWIK_SITE_ID: '1',
+        DEBUG_ANALYTICS_EVENTS: '',
         NODE_ENV: mode,
         BACKUP_BACKEND: 'google-drive',
         AUTOMATIC_BACKUP: '',

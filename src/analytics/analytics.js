@@ -135,7 +135,9 @@ class Analytics {
      */
     async trackEvent(eventArgs, force = false) {
         const shouldTrack = await this.shouldTrack()
-        // console.log('Tracking event', shouldTrack, eventArgs, force)
+        if (process.env.DEBUG_ANALYTICS_EVENTS === 'true') {
+            console.log('Tracking event', shouldTrack, eventArgs, force)
+        }
         if (!shouldTrack) {
             return
         }
