@@ -3,6 +3,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
 import { remoteFunction } from 'src/util/webextensionRPC'
+import analytics from 'src/analytics'
 import AutomaticBackupButton from '../components/overview-automatic-backup-button'
 import OnboardingBackupMode from '../components/onboarding-backup-mode'
 import Styles from '../styles.css'
@@ -59,6 +60,14 @@ export default class OverviewContainer extends React.Component {
                                         this.state.automaticBackupEnabled
                                     }
                                     onUpgrade={() => {
+                                        analytics.trackEvent(
+                                            {
+                                                category: 'Backup',
+                                                action:
+                                                    'overview-expand-auto-upgrade',
+                                            },
+                                            true,
+                                        )
                                         this.setState({
                                             showAutomaticUpgradeDetails: true,
                                         })
