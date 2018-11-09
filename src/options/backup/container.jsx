@@ -45,6 +45,8 @@ export default class BackupSettingsContainer extends React.Component {
                     localStorage.removeItem('backup.onboarding.authenticating')
                     localStorage.removeItem('backup.onboarding')
                     this.setState({ screen: 'running-backup' })
+                } else {
+                    this.setState({ screen: 'onboarding-where' })
                 }
             } else {
                 const [hasInitialBackup, backupInfo] = await Promise.all([
