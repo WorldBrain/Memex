@@ -1,6 +1,7 @@
 import React from 'react'
 // import PropTypes from 'prop-types'
 import { remoteFunction } from 'src/util/webextensionRPC'
+import analytics from 'src/analytics'
 import {
     redirectToGDriveLogin,
     redirectToAutomaticBackupPurchase,
@@ -52,13 +53,22 @@ export default class BackupSettingsContainer extends React.Component {
                 ])
                 if (!hasInitialBackup && !backupInfo) {
                     localStorage.setItem('backup.onboarding', true)
+                    analytics.trackEvent(
+                        {
+                            category: 'Backup',
+                            action: 'onboarding-triggered',
+                        },
+                        true,
+                    )
                     this.setState({ screen: 'onboarding-where' })
                 } else {
                     this.setState({ screen: 'overview' })
                 }
             }
         } else {
-            this.setState({ screen: process.env.BACKUP_START_SCREEN })
+            const override = process.env.BACKUP_START_SCREEN
+            console.log('Backup screen override:', override)
+            this.setState({ screen: override })
         }
     }
 
@@ -93,6 +103,14 @@ export default class BackupSettingsContainer extends React.Component {
             return (
                 <OnboardingWhere
                     onChoice={async choice => {
+                        analytics.trackEvent(
+                            {
+                                category: 'Backup',
+                                action: 'onboarding-where-chosen',
+                            },
+                            true,
+                        )
+
                         const isAutomaticBackupEnabled = await remoteFunction(
                             'isAutomaticBackupEnabled',
                         )()
@@ -107,7 +125,16 @@ export default class BackupSettingsContainer extends React.Component {
         } else if (screen === 'onboarding-how') {
             return (
                 <OnboardingHow
-                    onChoice={choice => {
+                    onChoice={async choice => {
+                        await analytics.trackEvent(
+                            {
+                                category: 'Backup',
+                                action: 'onboarding-how-chosen',
+                                value: choice,
+                            },
+                            true,
+                        )
+
                         if (choice.type === 'automatic') {
                             localStorage.setItem(
                                 'backup.onboarding.payment',
@@ -130,9 +157,24 @@ export default class BackupSettingsContainer extends React.Component {
                 <OnboardingSize
                     isAuthenticated={this.state.isAuthenticated}
                     onBlobPreferenceChange={saveBlobs => {
+                        analytics.trackEvent(
+                            {
+                                category: 'Backup',
+                                action: 'onboarding-blob-pref-change',
+                                value: saveBlobs,
+                            },
+                            true,
+                        )
                         remoteFunction('setBackupBlobs')(saveBlobs)
                     }}
                     onLoginRequested={() => {
+                        analytics.trackEvent(
+                            {
+                                category: 'Backup',
+                                action: 'onboarding-login-requested',
+                            },
+                            true,
+                        )
                         localStorage.setItem(
                             'backup.onboarding.authenticating',
                             true,
@@ -140,6 +182,13 @@ export default class BackupSettingsContainer extends React.Component {
                         redirectToGDriveLogin()
                     }}
                     onBackupRequested={() => {
+                        analytics.trackEvent(
+                            {
+                                category: 'Backup',
+                                action: 'onboarding-backup-requested',
+                            },
+                            true,
+                        )
                         this.setState({ screen: 'running-backup' })
                     }}
                 />
