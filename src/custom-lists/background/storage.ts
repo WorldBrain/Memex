@@ -20,7 +20,7 @@ export default class CustomListStorage extends FeatureStorage {
                     createdAt: { type: 'datetime' },
                 },
                 indices: [
-                    { field: 'id', pk: true, autoInc: true },
+                    { field: 'id', pk: true },
                     { field: 'name', unique: true },
                     { field: 'isDeletable' },
                     { field: 'isNestable' },
