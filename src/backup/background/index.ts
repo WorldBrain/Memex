@@ -209,10 +209,12 @@ export class BackupBackgroundModule {
                         nextBackup = 'running'
                     } else if (await this.isAutomaticBackupEnabled()) {
                         const backupIntervalMinutes = 15
-                        nextBackup = new Date(
-                            lastBackup.getTime() +
-                                1000 * 60 * backupIntervalMinutes,
-                        )
+                        nextBackup =
+                            lastBackup &&
+                            new Date(
+                                lastBackup.getTime() +
+                                    1000 * 60 * backupIntervalMinutes,
+                            )
                     }
                     const times = {
                         lastBackup: lastBackup && lastBackup.getTime(),

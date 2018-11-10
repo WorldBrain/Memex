@@ -185,6 +185,7 @@ export default class CustomListStorage extends FeatureStorage {
         return this.storageManager.putObject(
             CustomListStorage.CUSTOM_LISTS_COLL,
             {
+                id: Date.now(),
                 name,
                 isDeletable,
                 isNestable,
