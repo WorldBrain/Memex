@@ -172,6 +172,15 @@ export class BackupBackgroundModule {
                 isBackupConnected: async () => {
                     return this.backend.isConnected()
                 },
+                maybeCheckAutomaticBakupEnabled: async () => {
+                    if (
+                        !!(await this.lastBackupStorage.getLastBackupTime()) &&
+                        localStorage.getItem('wp.user-id') &&
+                        localStorage.getItem('backup.has-subscription') === null
+                    ) {
+                        await this.checkAutomaticBakupEnabled()
+                    }
+                },
                 checkAutomaticBakupEnabled: async () => {
                     // The only place this is called right now is post-purchase.
                     // Move to more suitable place once this changes.
