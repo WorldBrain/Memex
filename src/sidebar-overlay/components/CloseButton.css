@@ -13,7 +13,7 @@
     border-left: 1px solid #d0cece;
     padding-top: 5px;
     padding-bottom: 5px;
-    animation: fadeIn 0s linear 0s;
+    animation: fadeIn 0.5s linear 0.5s;
     animation-fill-mode: both;
 
     &.overview {
