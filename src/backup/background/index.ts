@@ -46,6 +46,7 @@ export class BackupBackgroundModule {
     automaticBackupCheck?: Promise<boolean>
     automaticBackupTimeout?: any
     automaticBackupEnabled?: boolean
+    scheduledAutomaticBackupTimestamp?: number
 
     constructor({
         storageManager,
@@ -208,13 +209,9 @@ export class BackupBackgroundModule {
                     if (this.state.running) {
                         nextBackup = 'running'
                     } else if (await this.isAutomaticBackupEnabled()) {
-                        const backupIntervalMinutes = 15
-                        nextBackup =
-                            lastBackup &&
-                            new Date(
-                                lastBackup.getTime() +
-                                    1000 * 60 * backupIntervalMinutes,
-                            )
+                        nextBackup = new Date(
+                            this.scheduledAutomaticBackupTimestamp,
+                        )
                     }
                     const times = {
                         lastBackup: lastBackup && lastBackup.getTime(),
@@ -318,9 +315,11 @@ export class BackupBackgroundModule {
             return
         }
 
+        const msUntilNextBackup = 1000 * 60 * 15
+        this.scheduledAutomaticBackupTimestamp = Date.now() + msUntilNextBackup
         this.automaticBackupTimeout = setTimeout(() => {
             this.doBackup()
-        }, 1000 * 60 * 15)
+        }, msUntilNextBackup)
     }
 
     estimateInitialBackupSize() {

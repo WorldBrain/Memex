@@ -10,6 +10,8 @@ const runSuite = () => () => {
     // New storage manager instance
     const storageManager = new StorageManager()
     const fakeIndex = new CustomListBackground({ storageManager })
+    let fakeListCounter = 0
+    fakeIndex.storage._generateListId = () => ++fakeListCounter
     async function insertTestData() {
         // Insert some test data for all tests to use
         await fakeIndex.createCustomList(DATA.LIST_1)
@@ -39,6 +41,7 @@ const runSuite = () => () => {
     }
 
     beforeAll(async () => {
+        fakeListCounter = 0
         await resetTestData()
     })
 
