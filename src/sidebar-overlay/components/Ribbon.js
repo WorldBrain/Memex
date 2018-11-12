@@ -236,37 +236,41 @@ class Ribbon extends React.Component {
         })
     }
 
-    openSidebar = () => {
-        return this.setState(
-            {
-                isSidebarActive: true,
-                shouldRenderIFrame: true,
-            },
-            async () => {
-                if (!this.frameFC) {
-                    this.setupFrameFunctions()
-                }
-                await this.frameFC.remoteExecute('setLoaderActive')()
-                await this.fetchAnnotations()
-                const highlightables = this.state.annotations.filter(
-                    annotation => annotation.selector,
-                )
-                await this.props.highlightAll(
-                    highlightables,
-                    this.focusAnnotationContainer,
-                    this.hoverAnnotationContainer,
-                )
-                this.frameFC.remoteExecute('focusCommentBox')(true)
-
-                setTimeout(() => {
-                    const sorted = this.props.sortAnnotationByPosition(
-                        this.state.annotations,
+    openSidebar = () =>
+        new Promise(resolve => {
+            return this.setState(
+                {
+                    isSidebarActive: true,
+                    shouldRenderIFrame: true,
+                },
+                async () => {
+                    if (!this.frameFC) {
+                        this.setupFrameFunctions()
+                    }
+                    await this.frameFC.remoteExecute('setLoaderActive')()
+                    await this.fetchAnnotations()
+                    const highlightables = this.state.annotations.filter(
+                        annotation => annotation.selector,
                     )
-                    this.frameFC.remoteExecute('setAnnotations')(sorted)
-                }, 400)
-            },
-        )
-    }
+                    await this.props.highlightAll(
+                        highlightables,
+                        this.focusAnnotationContainer,
+                        this.hoverAnnotationContainer,
+                    )
+                    this.frameFC.remoteExecute('focusCommentBox')(true)
+
+                    setTimeout(async () => {
+                        const sorted = this.props.sortAnnotationByPosition(
+                            this.state.annotations,
+                        )
+                        await this.frameFC.remoteExecute('setAnnotations')(
+                            sorted,
+                        )
+                        resolve()
+                    }, 400)
+                },
+            )
+        })
 
     openSidebarAndSendAnchor = async anchor => {
         await this.openSidebar()
