@@ -186,7 +186,8 @@ export class BackupBackgroundModule {
                             override === 'true',
                         )
                     } else {
-                        this.checkAutomaticBakupEnabled()
+                        await this.checkAutomaticBakupEnabled()
+                        await this.maybeScheduleAutomaticBackup()
                     }
 
                     return this.automaticBackupCheck
@@ -297,6 +298,7 @@ export class BackupBackgroundModule {
             if (endDate !== undefined) {
                 localStorage.setItem('backup.subscription-end-date', endDate)
             }
+
             return hasSubscription
         })()
 
