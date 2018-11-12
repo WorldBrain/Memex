@@ -129,6 +129,19 @@ export class GoogleDriveClient {
         return childId
     }
 
+    async listFolder(parentId: string) {
+        await this.cacheFolderContentIDs(parentId)
+        return this.idCache[parentId]
+    }
+
+    async getFile(fileId: string, options: { json?: boolean } = {}) {
+        const response = await this._request(`/files/${fileId}?alt=media`, {
+            method: 'GET',
+            json: options.json,
+        })
+        return response
+    }
+
     async createFolder({ parentId, name }: { parentId: string; name: string }) {
         if (this.isIdCacheEmpty(parentId)) {
             await this.cacheFolderContentIDs(parentId)
@@ -178,7 +191,11 @@ export class GoogleDriveClient {
         const url = baseUrl + path
         const response = await fetch(url, options)
         if (!response.ok) {
-            throw new Error(await response.json())
+            console.error(
+                'Something went wrong making a request to Drive:',
+                response,
+            )
+            throw new Error('Error during request to Drive')
         }
         return options.json ? response.json() : response
     }
