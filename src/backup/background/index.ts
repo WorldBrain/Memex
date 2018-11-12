@@ -179,6 +179,7 @@ export class BackupBackgroundModule {
                         localStorage.getItem('backup.has-subscription') === null
                     ) {
                         await this.checkAutomaticBakupEnabled()
+                        await this.maybeScheduleAutomaticBackup()
                     }
                 },
                 checkAutomaticBakupEnabled: async () => {
