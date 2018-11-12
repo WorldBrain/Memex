@@ -187,7 +187,6 @@ export class BackupBackgroundModule {
                         )
                     } else {
                         await this.checkAutomaticBakupEnabled()
-                        await this.maybeScheduleAutomaticBackup()
                     }
 
                     return this.automaticBackupCheck
