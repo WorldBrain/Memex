@@ -455,7 +455,7 @@ export class BackupBackgroundModule {
         info: BackupProgressInfo,
         events,
     ) => {
-        console.log('preparing batch')
+        // console.log('preparing batch')
         for (const change of batch.changes) {
             const object = pickBy(
                 await this.storageManager.findByPk(
@@ -467,11 +467,11 @@ export class BackupBackgroundModule {
                 },
             )
             change.object = object
-            console.log('prepared change %o', change.object)
+            // console.log('prepared change %o', change.object)
         }
-        console.log('prepared batch')
+        // console.log('prepared batch')
 
-        console.log('uploading batch')
+        // console.log('uploading batch')
         if (process.env.MOCK_BACKUP_BACKEND === 'true') {
             await new Promise(resolve => setTimeout(resolve, 500))
         } else {
@@ -482,9 +482,9 @@ export class BackupBackgroundModule {
                 options: { storeBlobs: _shouldStoreBlobs() },
             })
         }
-        console.log('uploaded batch, removing affected items from log')
+        // console.log('uploaded batch, removing affected items from log')
         await batch.forget()
-        console.log('removed from log')
+        // console.log('removed from log')
 
         info.processedChanges += batch.changes.length
         // info.collections[change.collection].processedObjects += 1
