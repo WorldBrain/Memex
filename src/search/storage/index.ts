@@ -225,14 +225,20 @@ export default class Storage extends Dexie {
      * TODO: Add clause to condition to check if backups is enabled
      *  (no reason to add this table to all transactions if backups is off)
      */
-    private _createTransaction = Dexie.override(
-        this._createTransaction,
-        origFn => (mode: string, tables: string[], ...args) => {
-            if (mode === 'readwrite' && !tables.includes(this.backupTable)) {
-                tables = [...tables, this.backupTable]
-            }
+    private _createTransaction =
+        process.env.NODE_ENV === 'test'
+            ? this._createTransaction
+            : Dexie.override(
+                  this._createTransaction,
+                  origFn => (mode: string, tables: string[], ...args) => {
+                      if (
+                          mode === 'readwrite' &&
+                          !tables.includes(this.backupTable)
+                      ) {
+                          tables = [...tables, this.backupTable]
+                      }
 
-            return origFn.call(this, mode, tables, ...args)
-        },
-    )
+                      return origFn.call(this, mode, tables, ...args)
+                  },
+              )
 }
