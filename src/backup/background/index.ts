@@ -176,7 +176,8 @@ export class BackupBackgroundModule {
                     if (
                         !!(await this.lastBackupStorage.getLastBackupTime()) &&
                         localStorage.getItem('wp.user-id') &&
-                        localStorage.getItem('backup.has-subscription') === null
+                        localStorage.getItem('backup.has-subscription') &&
+                        localStorage.getItem('nextBackup') === null
                     ) {
                         await this.checkAutomaticBakupEnabled()
                         await this.maybeScheduleAutomaticBackup()
