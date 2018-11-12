@@ -37,12 +37,12 @@ export default class BackupStorage extends FeatureStorage {
         pk: string
         operation: string
     }) {
-        console.log(
-            'registering change to collection',
-            collection,
-            'with pk',
-            pk,
-        )
+        // console.log(
+        //     'registering change to collection',
+        //     collection,
+        //     'with pk',
+        //     pk,
+        // )
 
         this.storageManager.putObject('backupChanges', {
             timestamp: Date.now(),
