@@ -221,8 +221,8 @@ export default class RunningBackupContainer extends React.Component {
                                 Google Drive
                             </a>{' '}
                             and the stability of your internet connection. You
-                            can retry the backup anytimes you want. <br /> If
-                            you still encounter issues please{' '}
+                            can retry the backup anytime you want. <br /> If you
+                            still encounter issues please{' '}
                             <a href="mailto:support@worldbrain.io">
                                 contact support
                             </a>

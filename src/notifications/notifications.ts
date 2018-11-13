@@ -5,7 +5,7 @@ import * as actionTypes from './action-types'
 import { NotifDefinition } from './types'
 
 /** Time when create the notif, get the current unix time (Date.now()) - Important, the notif insertation in db depends on it */
-export const releaseTime: number = 1541631657
+export const releaseTime: number = 1542123600915
 
 /* Example Notification:
 {
