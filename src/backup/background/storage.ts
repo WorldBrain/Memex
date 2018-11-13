@@ -28,7 +28,7 @@ export default class BackupStorage extends FeatureStorage {
         this.registerCollections()
     }
 
-    registerChange({
+    async registerChange({
         collection,
         pk,
         operation,
@@ -44,7 +44,7 @@ export default class BackupStorage extends FeatureStorage {
         //     pk,
         // )
 
-        this.storageManager.putObject('backupChanges', {
+        await this.storageManager.putObject('backupChanges', {
             timestamp: Date.now(),
             collection,
             objectPk: pk,

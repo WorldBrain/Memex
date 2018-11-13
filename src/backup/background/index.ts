@@ -426,7 +426,7 @@ export class BackupBackgroundModule {
             for await (const pk of this.storageManager.streamPks(
                 collection.name,
             )) {
-                this.storage.registerChange({
+                await this.storage.registerChange({
                     collection: collection.name,
                     pk,
                     operation: 'create',
