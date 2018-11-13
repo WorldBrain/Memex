@@ -222,7 +222,7 @@ export default class RunningBackupContainer extends React.Component {
                             </a>{' '}
                             and the stability of your internet connection. You
                             can retry the backup anytimes you want. <br /> If
-                            you still encounter isuses please{' '}
+                            you still encounter issues please{' '}
                             <a href="mailto:support@worldbrain.io">
                                 contact support
                             </a>
