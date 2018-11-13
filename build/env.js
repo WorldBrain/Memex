@@ -2,7 +2,16 @@ export default ({ mode }) => {
     const env = {
         VERSION: process.env.npm_package_version,
         PIWIK_SITE_ID: '1',
+        DEBUG_ANALYTICS_EVENTS: '',
         NODE_ENV: mode,
+        BACKUP_BACKEND: 'google-drive',
+        AUTOMATIC_BACKUP: '',
+        AUTOMATIC_BACKUP_PAYMENT_SUCCESS: '',
+        MOCK_BACKUP_BACKEND: '',
+        STORE_BACKUP_TIME: 'true',
+        BACKUP_BATCH_SIZE: '1000',
+        BACKUP_START_SCREEN: '',
+        BACKUP_TEST_SIZE_ESTIMATION: '',
     }
 
     if (mode === 'development') {

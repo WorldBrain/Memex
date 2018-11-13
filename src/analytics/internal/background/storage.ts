@@ -17,6 +17,8 @@ export default class EventLogStorage extends FeatureStorage {
                 { field: 'time' },
                 { field: 'type' },
             ],
+            watch: false,
+            backup: false,
         })
     }
 

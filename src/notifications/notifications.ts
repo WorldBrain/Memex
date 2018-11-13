@@ -5,7 +5,7 @@ import * as actionTypes from './action-types'
 import { NotifDefinition } from './types'
 
 /** Time when create the notif, get the current unix time (Date.now()) - Important, the notif insertation in db depends on it */
-export const releaseTime: number = 1536281002664
+export const releaseTime: number = 1541631657
 
 /* Example Notification:
 {
@@ -59,34 +59,47 @@ export const releaseTime: number = 1536281002664
 */
 export const NOTIFS: NotifDefinition[] = [
     {
-        id: 'Crowdfunding-Funding-Memex',
+        id: 'backups_launch',
         search: {
-            title: 'NEW: Crowdfunding Memex',
-            message:
-                'Support the development of your favorite features with and get free premium upgrades.',
+            title: "Don't lose your knowledge!",
+            message: 'Backup your data to Google Drive',
             buttons: [
                 {
                     action: {
                         type: actionTypes.OPEN_URL,
-                        url: 'https://worldbrain.io/pricing',
+                        url: '/options.html#/backup',
                         context: 'new-tab',
                     },
-                    label: 'Learn More',
+                    label: 'Backup Now',
+                },
+            ],
+        },
+        system: {
+            title: "Don't lose your knowledge!",
+            message: 'Backup your Memex to Google Drive - for free.',
+            buttons: [
+                {
+                    action: {
+                        type: actionTypes.OPEN_URL,
+                        url: '/options.html#/backup',
+                        context: 'new-tab',
+                    },
+                    label: 'Backup Now',
                 },
             ],
         },
         overview: {
-            title: 'NEW: Crowdfunding Memex',
+            title: "Don't lose your knowledge!",
             message:
-                'Support the development of your favorite features with and get free premium upgrades.',
+                'Backup your data for free with our new Google Drive backup.',
             buttons: [
                 {
                     action: {
                         type: actionTypes.OPEN_URL,
-                        url: 'https://worldbrain.io/pricing',
+                        url: '/options.html#/backup',
                         context: 'new-tab',
                     },
-                    label: 'Learn More',
+                    label: 'Backup Now',
                 },
             ],
         },

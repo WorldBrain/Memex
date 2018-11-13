@@ -134,7 +134,11 @@ class Analytics {
      * @param {boolean} [force=false] Whether or not to send immediately or just add to request pool.
      */
     async trackEvent(eventArgs, force = false) {
-        if (!(await this.shouldTrack())) {
+        const shouldTrack = await this.shouldTrack()
+        if (process.env.DEBUG_ANALYTICS_EVENTS === 'true') {
+            console.log('Tracking event', shouldTrack, eventArgs, force)
+        }
+        if (!shouldTrack) {
             return
         }
 

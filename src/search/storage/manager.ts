@@ -1,4 +1,4 @@
-import Dexie from 'dexie'
+import { EventEmitter } from 'events'
 import { extractTerms } from '../pipeline'
 import Storage from '.'
 import StorageRegistry from './registry'
@@ -14,7 +14,7 @@ import {
     SuggestResult,
 } from './types'
 
-export class StorageManager implements ManageableStorage {
+export class StorageManager extends EventEmitter implements ManageableStorage {
     static DEF_SUGGEST_LIMIT = 10
     static DEF_FIND_OPTS: Partial<FindOpts> = {
         reverse: false,
@@ -85,6 +85,8 @@ export class StorageManager implements ManageableStorage {
     }
 
     constructor() {
+        super()
+
         this._initializationPromise = new Promise(
             resolve => (this._initializationResolve = resolve),
         )
@@ -161,6 +163,18 @@ export class StorageManager implements ManageableStorage {
             .catch(Storage.initErrHandler())
     }
 
+    async createObjects(collectionName: string, objects: any[]) {
+        await this._initializationPromise
+
+        const collection = this.registry.collections[collectionName]
+        for (const object of objects) {
+            StorageManager._processFieldsForWrites(collection, object)
+        }
+
+        const table = this._storage[collectionName]
+        await table.bulkAdd(objects)
+    }
+
     /**
      * @param collectionName The name of the collection to query.
      * @param filter
@@ -210,6 +224,25 @@ export class StorageManager implements ManageableStorage {
         )
 
         return docs
+    }
+
+    async findByPk(collectionName: string, pk: string) {
+        return this._storage[collectionName].get(pk)
+    }
+
+    async *streamPks(collectionName: string) {
+        const table = this._storage[collectionName]
+        const pks = await table.toCollection().primaryKeys()
+        for (const pk of pks) {
+            yield pk
+        }
+    }
+
+    async *streamCollection(collectionName: string) {
+        const table = this._storage[collectionName]
+        for await (const pk of this.streamPks(collectionName)) {
+            yield await { pk, object: await table.get(pk) }
+        }
     }
 
     /**
@@ -275,7 +308,10 @@ export class StorageManager implements ManageableStorage {
      * @param filter
      * @returns Promise that resolves to the number of objects in the collection which match the filter.
      */
-    async countAll<T>(collectionName: string, filter: FilterQuery<T>) {
+    async countAll<T>(
+        collectionName: string,
+        filter: FilterQuery<T>,
+    ): Promise<number> {
         await this._initializationPromise
 
         return this._storage
@@ -328,6 +364,42 @@ export class StorageManager implements ManageableStorage {
 
     _finishInitialization(storage) {
         this._storage = storage
+        this._setupChangeEvent()
         this._initializationResolve()
+    }
+
+    _setupChangeEvent() {
+        if (this.listenerCount('changing') === 0) {
+            return
+        }
+
+        for (const collectionName in this.registry.collections) {
+            if (this.registry.collections[collectionName].watch === false) {
+                continue
+            }
+
+            const table = this._storage[collectionName]
+            table.hook('creating', (pk, obj, transaction) => {
+                this.emit('changing', {
+                    operation: 'create',
+                    collection: collectionName,
+                    pk,
+                })
+            })
+            table.hook('updating', (mods, pk, obj, transaction) => {
+                this.emit('changing', {
+                    operation: 'update',
+                    collection: collectionName,
+                    pk,
+                })
+            })
+            table.hook('deleting', (pk, obj, transaction) => {
+                this.emit('changing', {
+                    operation: 'delete',
+                    collection: collectionName,
+                    pk,
+                })
+            })
+        }
     }
 }

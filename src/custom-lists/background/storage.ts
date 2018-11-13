@@ -20,7 +20,7 @@ export default class CustomListStorage extends FeatureStorage {
                     createdAt: { type: 'datetime' },
                 },
                 indices: [
-                    { field: 'id', pk: true, autoInc: true },
+                    { field: 'id', pk: true },
                     { field: 'name', unique: true },
                     { field: 'isDeletable' },
                     { field: 'isNestable' },
@@ -185,12 +185,17 @@ export default class CustomListStorage extends FeatureStorage {
         return this.storageManager.putObject(
             CustomListStorage.CUSTOM_LISTS_COLL,
             {
+                id: this._generateListId(),
                 name,
                 isDeletable,
                 isNestable,
                 createdAt: new Date(),
             },
         )
+    }
+
+    _generateListId() {
+        return Date.now()
     }
 
     /**

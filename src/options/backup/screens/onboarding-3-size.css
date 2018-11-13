@@ -1,0 +1,49 @@
+.headerEmphasis {
+    font-size: 1.3em;
+    text-transform: uppercase;
+}
+
+.sumCell {
+    padding: 20px 0;
+    border-top: 2px solid black;
+    margin-right: 20px;
+    vertical-align: top;
+}
+
+tr {
+    vertical-align: top;
+}
+
+.include {
+    font-size: 16px;
+    vertical-align: middle;
+    padding-left: 10px;
+}
+
+.option {
+    vertical-align: top;
+    display: inline-block;
+    margin-bottom: 15px;
+    padding-left: 10px;
+}
+
+.name {
+    vertical-align: top;
+    color: #3eb995;
+    font-weight: 500;
+}
+
+.subname {
+    font-size: 15px;
+    color: #4a4a4a;
+}
+
+.checkbox {
+    margin-left: -0px;
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 1px;
+    vertical-align: middle;
+    margin-top: -1px;
+}
