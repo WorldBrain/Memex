@@ -174,20 +174,24 @@ export default class RunningBackupContainer extends React.Component {
                                     Resume
                                 </PrimaryButton>
                             )}
-                            <div
-                                className={localStyles.actionCancel}
-                                onClick={() => {
-                                    !this.state.canceling && this.handleCancel()
-                                }}
-                            >
-                                {!this.state.canceling && 'Cancel'}
-                                {this.state.canceling && (
-                                    <MovingDotsLabel
-                                        text="Canceling"
-                                        intervalMs={500}
-                                    />
+                            {info.state !== 'paused' &&
+                                info.state !== 'pausing' && (
+                                    <div
+                                        className={localStyles.actionCancel}
+                                        onClick={() => {
+                                            !this.state.canceling &&
+                                                this.handleCancel()
+                                        }}
+                                    >
+                                        {!this.state.canceling && 'Cancel'}
+                                        {this.state.canceling && (
+                                            <MovingDotsLabel
+                                                text="Canceling"
+                                                intervalMs={500}
+                                            />
+                                        )}
+                                    </div>
                                 )}
-                            </div>
                         </div>
                     </div>
                 )}
