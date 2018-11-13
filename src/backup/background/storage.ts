@@ -6,7 +6,7 @@ export default class BackupStorage extends FeatureStorage {
     collections: { [name: string]: CollectionDefinitions } = {
         backupChanges: [
             {
-                version: new Date(2018, 7, 4),
+                version: new Date(2018, 11, 13),
                 fields: {
                     timestamp: { type: 'datetime' },
                     collection: { type: 'string' },
