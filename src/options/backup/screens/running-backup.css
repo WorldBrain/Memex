@@ -25,7 +25,7 @@
     display: flex;
     flex-direction: row;
     position: absolute;
-    top: 360px;
+    top: 230px;
 }
 
 .stepStatus {
