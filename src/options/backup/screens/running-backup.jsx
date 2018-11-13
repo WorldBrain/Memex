@@ -5,6 +5,7 @@ import localStyles from './running-backup.css'
 import { BackupProgressBar } from '../components/progress-bar'
 import MovingDotsLabel from '../components/moving-dots-label'
 import { PrimaryButton } from '../components/primary-button'
+import LoadingBlocker from '../components/loading-blocker'
 import Styles from '../styles.css'
 
 export default class RunningBackupContainer extends React.Component {
@@ -92,7 +93,7 @@ export default class RunningBackupContainer extends React.Component {
     render() {
         const { info, status } = this.state
         if (!info) {
-            return null
+            return <LoadingBlocker />
         }
 
         const progressPercentage =

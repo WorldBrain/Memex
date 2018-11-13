@@ -11,6 +11,7 @@ export default ({ mode }) => {
         STORE_BACKUP_TIME: 'true',
         BACKUP_BATCH_SIZE: '1000',
         BACKUP_START_SCREEN: '',
+        BACKUP_TEST_SIZE_ESTIMATION: '',
     }
 
     if (mode === 'development') {

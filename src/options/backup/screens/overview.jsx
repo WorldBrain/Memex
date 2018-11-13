@@ -13,6 +13,7 @@ import {
     redirectToAutomaticBackupCancellation,
 } from '../utils'
 import { PrimaryButton } from '../components/primary-button'
+import LoadingBlocker from '../components/loading-blocker'
 
 export default class OverviewContainer extends React.Component {
     static propTypes = {
@@ -41,7 +42,7 @@ export default class OverviewContainer extends React.Component {
 
     render() {
         if (!this.state.backupTimes) {
-            return null
+            return <LoadingBlocker />
         }
 
         console.log(this.state.backupTimes.nextBackup)

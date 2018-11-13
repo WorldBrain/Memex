@@ -4,6 +4,7 @@ import classNames from 'classnames'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import localStyles from './onboarding-3-size.css'
 import { PrimaryButton } from '../components/primary-button'
+import LoadingBlocker from '../components/loading-blocker'
 import Styles from '../styles.css'
 
 export default class OnboardingSizeContainer extends React.Component {
@@ -18,9 +19,13 @@ export default class OnboardingSizeContainer extends React.Component {
 
     async componentDidMount() {
         try {
-            this.setState({
-                estimation: await remoteFunction('estimateInitialBackupSize')(),
-            })
+            if (process.env.BACKUP_TEST_SIZE_ESTIMATION !== 'true') {
+                this.setState({
+                    estimation: await remoteFunction(
+                        'estimateInitialBackupSize',
+                    )(),
+                })
+            }
         } catch (e) {
             this.setState({ estimation: 'error' })
             console.log(e)
@@ -29,7 +34,7 @@ export default class OnboardingSizeContainer extends React.Component {
     }
 
     renderLoadingIndicator() {
-        return null // TOOD: See if it actually takes long enough to be worth the effort
+        return <LoadingBlocker />
     }
 
     renderEstimationFailure() {
@@ -52,7 +57,7 @@ export default class OnboardingSizeContainer extends React.Component {
         sizes.blobs = sizes.withBlobs - sizes.withoutBlobs
 
         return (
-            <div>
+            <div className={Styles.container}>
                 <p className={Styles.header2}>
                     <strong>STEP 3/5: </strong>
                     WHAT?

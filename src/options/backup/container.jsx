@@ -12,6 +12,8 @@ import { default as OnboardingWhere } from './screens/onboarding-1-where'
 import { default as OnboardingHow } from './screens/onboarding-2-how'
 import { default as OnboardingSize } from './screens/onboarding-3-size'
 import { BackupHeader } from './components/backup-header'
+import LoadingBlocker from './components/loading-blocker'
+import Styles from './styles.css'
 
 export default class BackupSettingsContainer extends React.Component {
     state = { screen: null, isAuthenticated: null }
@@ -77,7 +79,7 @@ export default class BackupSettingsContainer extends React.Component {
     renderScreen() {
         const { screen } = this.state
         if (!screen) {
-            return null
+            return <LoadingBlocker />
         }
 
         if (screen === 'overview') {
@@ -205,7 +207,9 @@ export default class BackupSettingsContainer extends React.Component {
         return (
             <div>
                 <BackupHeader />
-                {this.renderScreen()}
+                <div className={Styles.screenContainer}>
+                    {this.renderScreen()}
+                </div>
             </div>
         )
     }
