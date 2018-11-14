@@ -63,8 +63,12 @@ const calcStoreSize = (db: IDBDatabase, storeName: string) =>
             }
 
             const obj = cursor['value'] // Somehow `value` prop doesn't exist in the typedef :S
-            const objSize = calcObjectSize(storeName, obj)
-            storeSize = sumSizeEsts(storeSize, objSize)
+
+            if (obj != null) {
+                const objSize = calcObjectSize(storeName, obj)
+                storeSize = sumSizeEsts(storeSize, objSize)
+            }
+
             cursor.continue()
         }
 
