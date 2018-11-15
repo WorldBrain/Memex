@@ -93,4 +93,12 @@ export abstract class BackupBackend {
             }
         }
     }
+
+    async listObjects(collection: string): Promise<string[]> {
+        return null
+    }
+
+    async retrieveObject(collection: string, object: string) {
+        return null
+    }
 }
