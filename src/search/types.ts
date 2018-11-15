@@ -16,6 +16,12 @@ interface MemexCollection extends StorageCollection {
         query,
         options?: SuggestOptions,
     ): Promise<SuggestResult<S, P>>
+    findByPk<T = any>(pk): Promise<T>
+    streamPks<K = any>(): AsyncIterableIterator<K>
+    streamCollection<K = any, T = any>(): AsyncIterableIterator<{
+        pk: K
+        object: T
+    }>
 }
 
 export interface StorageManager extends Storex {
