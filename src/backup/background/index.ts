@@ -141,7 +141,7 @@ export class BackupBackgroundModule {
                     localStorage.setItem('backup.save-blobs', saveBlobs)
                 },
                 getBackupTimes: async () => {
-                    return await this.getBackupTimes()
+                    return this.getBackupTimes()
                 },
                 storeWordpressUserId: (info, userId) => {
                     localStorage.setItem('wp.user-id', userId)

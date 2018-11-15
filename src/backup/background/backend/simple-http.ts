@@ -64,4 +64,24 @@ export default class SimpleHttpBackend extends BackupBackend {
             body,
         })
     }
+
+    async listObjects(collection: string): Promise<string[]> {
+        const response = await fetch(`${this.url}/${collection}`)
+        if (!response.ok) {
+            throw new Error(await response.text())
+        }
+
+        const body = await response.text()
+        const lines = body.split('\n')
+        const regex = /href="([^"]+)"/g
+        const matches = lines.map(line => regex.exec(line))
+        const fileNames = matches
+            .filter(match => !!match)
+            .map(match => match[1])
+        return fileNames
+    }
+
+    async retrieveObject(collection: string, object: string) {
+        return (await fetch(`${this.url}/${collection}/${object}`)).json()
+    }
 }
