@@ -9,6 +9,7 @@ import BackupStorage, { LastBackupStorage } from './storage'
 import { BackupBackend } from './backend'
 import { ObjectChangeBatch } from './backend/types'
 import estimateBackupSize from './estimate-backup-size'
+import setupChangeTracking from './change-hooks'
 const pickBy = require('lodash/pickBy')
 const last = require('lodash/last')
 
@@ -70,17 +71,9 @@ export class BackupBackgroundModule {
         this.currentSchemaVersion = last(schemaVersions)
         this.resetBackupState()
 
-        this.storageManager.on(
-            'changing',
-            ({
-                collection,
-                pk,
-                operation,
-            }: {
-                collection: string
-                pk: string
-                operation: string
-            }) => {
+        setupChangeTracking(
+            this.storageManager,
+            ({ collection, pk, operation }) => {
                 if (this.recordingChanges) {
                     const collectionDefinition = this.storageManager.registry
                         .collections[collection]
