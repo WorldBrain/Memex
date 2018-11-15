@@ -36,13 +36,6 @@ export default class BackupStorage extends FeatureStorage {
         this.registerCollections()
     }
 
-    setupChangeTracking() {
-        setupChangeTracking(
-            this.storageManager,
-            this._handleStorageChange.bind(this),
-        )
-    }
-
     _handleStorageChange({
         collection,
         pk,
@@ -66,6 +59,13 @@ export default class BackupStorage extends FeatureStorage {
                 operation,
             })
         }
+    }
+
+    setupChangeTracking() {
+        setupChangeTracking(
+            this.storageManager,
+            this._handleStorageChange.bind(this),
+        )
     }
 
     async registerChange({
