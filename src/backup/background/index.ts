@@ -1,8 +1,6 @@
 import { EventEmitter } from 'events'
 import * as AllRaven from 'raven-js'
 import { CollectionDefinition } from 'storex'
-const pickBy = require('lodash/pickBy')
-const last = require('lodash/last')
 
 import { StorageManager } from '../../search/types'
 import { makeRemotelyCallable } from '../../util/webextensionRPC'
@@ -11,6 +9,8 @@ import BackupStorage, { LastBackupStorage } from './storage'
 import { BackupBackend } from './backend'
 import { ObjectChangeBatch } from './backend/types'
 import estimateBackupSize from './estimate-backup-size'
+const pickBy = require('lodash/pickBy')
+const last = require('lodash/last')
 
 export * from './backend'
 
@@ -424,9 +424,9 @@ export class BackupBackgroundModule {
         const collectionsWithVersions = this._getCollectionsToBackup()
 
         for (const collection of collectionsWithVersions) {
-            for await (const pk of this.storageManager.streamPks(
-                collection.name,
-            )) {
+            for await (const pk of this.storageManager
+                .collection(collection.name)
+                .streamPks()) {
                 await this.storage.registerChange({
                     collection: collection.name,
                     pk,
@@ -471,10 +471,9 @@ export class BackupBackgroundModule {
         // console.log('preparing batch')
         for (const change of batch.changes) {
             const object = pickBy(
-                await this.storageManager.findByPk(
-                    change.collection,
-                    change.objectPk,
-                ),
+                await this.storageManager
+                    .collection(change.collection)
+                    .findByPk(change.objectPk),
                 (val, key) => {
                     return key !== 'terms' && key.indexOf('_terms') === -1
                 },
