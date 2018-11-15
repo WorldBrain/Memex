@@ -5,7 +5,7 @@ import * as actionTypes from './action-types'
 import { NotifDefinition } from './types'
 
 /** Time when create the notif, get the current unix time (Date.now()) - Important, the notif insertation in db depends on it */
-export const releaseTime: number = 1542123600915
+export const releaseTime: number = 1542240979258
 
 /* Example Notification:
 {
@@ -57,6 +57,7 @@ export const releaseTime: number = 1542123600915
         },
     },
 */
+
 export const NOTIFS: NotifDefinition[] = [
     {
         id: 'backups_launch',
@@ -67,21 +68,7 @@ export const NOTIFS: NotifDefinition[] = [
                 {
                     action: {
                         type: actionTypes.OPEN_URL,
-                        url: '/options.html#/backup',
-                        context: 'new-tab',
-                    },
-                    label: 'Backup Now',
-                },
-            ],
-        },
-        system: {
-            title: "Don't lose your knowledge!",
-            message: 'Backup your Memex to Google Drive - for free.',
-            buttons: [
-                {
-                    action: {
-                        type: actionTypes.OPEN_URL,
-                        url: '/options.html#/backup',
+                        url: 'https://worldbrain.io/pricing',
                         context: 'new-tab',
                     },
                     label: 'Backup Now',
