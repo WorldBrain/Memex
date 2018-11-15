@@ -27,6 +27,22 @@ const oldMethod = instance.collection.bind(instance)
 instance.collection = (name: string) => ({
     ...oldMethod(name),
     suggestObjects: (query, opts) => suggestObjects(name, query, opts),
+    findByPk: function(pk) {
+        return this.backend[name].get(pk)
+    }.bind(instance),
+    streamPks: async function*() {
+        const table = this.backend[name]
+        const pks = await table.toCollection().primaryKeys()
+        for (const pk of pks) {
+            yield pk
+        }
+    }.bind(instance),
+    streamCollection: async function*() {
+        const table = this.backend[name]
+        for await (const pk of this.streamPks(name)) {
+            yield await { pk, object: await table.get(pk) }
+        }
+    }.bind(instance),
 })
 
 instance.deleteDB = window.indexedDB.deleteDatabase
