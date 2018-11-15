@@ -1,3 +1,5 @@
+import DexieOrig from 'dexie'
+
 import storageManager, { backend } from './storex'
 import { Dexie } from './types'
 import { Page, Visit, Bookmark, Tag, FavIcon } from './models'
@@ -94,6 +96,30 @@ const getDb = (async () => {
     index.bookmarks.mapToClass(Bookmark)
     index.tags.mapToClass(Tag)
     index.favIcons.mapToClass(FavIcon)
+
+    /**
+     * Overrides `Dexie._createTransaction` to ensure to add `backupChanges` table to any readwrite transaction.
+     * This allows us to avoid specifying this table on every single transaction to allow table hooks to write to
+     * our change tracking table.
+     *
+     * TODO: Add clause to condition to check if backups is enabled
+     *  (no reason to add this table to all transactions if backups is off)
+     */
+    index['_createTransaction'] =
+        process.env.NODE_ENV === 'test'
+            ? index['_createTransaction']
+            : DexieOrig.override(
+                  index['_createTransaction'],
+                  origFn => (mode: string, tables: string[], ...args) => {
+                      if (
+                          mode === 'readwrite' &&
+                          !tables.includes('backupChanges')
+                      ) {
+                          tables = [...tables, 'backupChanges']
+                      }
+                      return origFn.call(index, mode, tables, ...args)
+                  },
+              )
 
     return index
 })()
