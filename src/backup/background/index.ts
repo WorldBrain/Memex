@@ -1,10 +1,11 @@
+import { EventEmitter } from 'events'
 import * as AllRaven from 'raven-js'
+import { CollectionDefinition } from 'storex'
 const pickBy = require('lodash/pickBy')
 const last = require('lodash/last')
-import { EventEmitter } from 'events'
+
+import { StorageManager } from '../../search/types'
 import { makeRemotelyCallable } from '../../util/webextensionRPC'
-import { CollectionDefinition } from '../../search/storage'
-import { StorageManager } from '../../search/storage/manager'
 import { setupRequestInterceptors } from './redirect'
 import BackupStorage, { LastBackupStorage } from './storage'
 import { BackupBackend } from './backend'
@@ -562,8 +563,8 @@ export function _getMemexCloudOrigin() {
     }
 }
 
-export function isExcludedFromBackup(collection: CollectionDefinition) {
-    return collection.backup === false
+export function isExcludedFromBackup(collectionDef: CollectionDefinition) {
+    return collectionDef.backup === false
 }
 
 export function _shouldStoreBlobs() {
