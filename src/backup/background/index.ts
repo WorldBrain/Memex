@@ -1,48 +1,21 @@
-import { EventEmitter } from 'events'
-import * as AllRaven from 'raven-js'
-import { CollectionDefinition } from 'storex'
-
-import { StorageManager } from '../../search/types'
 import { makeRemotelyCallable } from '../../util/webextensionRPC'
+import { StorageManager } from '../../search/types'
 import { setupRequestInterceptors } from './redirect'
 import BackupStorage, { LastBackupStorage } from './storage'
 import { BackupBackend } from './backend'
-import { ObjectChangeBatch } from './backend/types'
 import estimateBackupSize from './estimate-backup-size'
-const pickBy = require('lodash/pickBy')
-const last = require('lodash/last')
+import BackupProcedure from './procedures/backup'
+import { isExcludedFromBackup } from './utils'
 
 export * from './backend'
-
-export interface BackupProgressInfo {
-    state: 'preparing' | 'synching' | 'paused' | 'cancelled'
-    totalChanges: number
-    processedChanges: number
-    // currentCollection: string
-    // collections: {
-    //     [name: string]: { totalObjects: number; processedObjects: number }
-    // }
-}
-
-export interface BackupState {
-    running: boolean
-    completionPromise?: Promise<void> // only set after first run
-
-    info: BackupProgressInfo
-    events: EventEmitter
-
-    pausePromise?: Promise<null> // only set if paused, resolved when pause ends
-    resume?: () => void // only set if paused
-}
 
 export class BackupBackgroundModule {
     storageManager: StorageManager
     storage: BackupStorage
-    currentSchemaVersion: number
     backend: BackupBackend
     lastBackupStorage: LastBackupStorage
-    recordingChanges: boolean = false
-    state: BackupState
+    backupProcedure: BackupProcedure
+
     uiTabId?: any
     automaticBackupCheck?: Promise<boolean>
     automaticBackupTimeout?: any
@@ -54,25 +27,21 @@ export class BackupBackgroundModule {
         lastBackupStorage,
         backend,
     }: {
-        storageManager: StorageManager
-        lastBackupStorage: LastBackupStorage
-        backend: BackupBackend
-    }) {
+            storageManager: StorageManager
+            lastBackupStorage: LastBackupStorage
+            backend: BackupBackend
+        }) {
         this.storageManager = storageManager
         this.storage = new BackupStorage({ storageManager })
         this.lastBackupStorage = lastBackupStorage
         this.backend = backend
 
-        const schemaVersions = Object.keys(
-            storageManager.registry.collectionsByVersion,
-        ).map(version => parseInt(version, 10))
-        schemaVersions.sort()
-        this.currentSchemaVersion = last(schemaVersions)
-        this.resetBackupState()
-    }
-
-    private resetBackupState() {
-        this.state = { running: false, info: null, events: null }
+        this.backupProcedure = new BackupProcedure({
+            storageManager,
+            storage: this.storage,
+            lastBackupStorage,
+            backend,
+        })
     }
 
     setupRemoteFunctions() {
@@ -84,7 +53,7 @@ export class BackupBackgroundModule {
                 },
                 startBackup: ({ tab }, params) => {
                     this.uiTabId = tab.id
-                    if (this.state.running) {
+                    if (this.backupProcedure.running) {
                         return
                     }
 
@@ -99,45 +68,24 @@ export class BackupBackgroundModule {
                             // ignore the error, user closed tab
                         }
                     }
-                    this.state.events.on('info', event =>
+                    this.backupProcedure.events.on('info', event =>
                         sendEvent('info', event),
                     )
-                    this.state.events.on('fail', event =>
+                    this.backupProcedure.events.on('fail', event =>
                         sendEvent('fail', event),
                     )
-                    this.state.events.on('success', event =>
+                    this.backupProcedure.events.on('success', event =>
                         sendEvent('success', event),
                     )
                 },
                 pauseBackup: () => {
-                    if (!this.state || this.state.info.state !== 'synching') {
-                        return
-                    }
-
-                    this.state.info.state = 'paused'
-                    this.state.pausePromise = new Promise(resolve => {
-                        this.state.resume = resolve
-                    })
-                    this.state.events.emit('info', this.state.info)
+                    this.backupProcedure.pause()
                 },
                 resumeBackup: () => {
-                    if (this.state.info.state !== 'paused') {
-                        return
-                    }
-
-                    this.state.info.state = 'synching'
-                    this.state.pausePromise = null
-                    this.state.resume()
-                    this.state.resume = null
-                    this.state.events.emit('info', this.state.info)
+                    this.backupProcedure.resume()
                 },
                 cancelBackup: async () => {
-                    this.state.events = null
-                    this.state.info.state = 'cancelled'
-                    await this.state.completionPromise
-                    await new Promise(resolve => {
-                        setTimeout(resolve, 1000)
-                    })
+                    await this.backupProcedure.cancel()
                 },
                 hasInitialBackup: async () => {
                     return !!(await this.lastBackupStorage.getLastBackupTime())
@@ -182,32 +130,18 @@ export class BackupBackgroundModule {
                     return this.isAutomaticBackupEnabled()
                 },
                 getBackupInfo: () => {
-                    return this.state.info
+                    return this.backupProcedure.info
                 },
                 estimateInitialBackupSize: () => {
-                    return this.estimateInitialBackupSize()
+                    return estimateBackupSize({
+                        storageManager: this.storageManager,
+                    })
                 },
                 setBackupBlobs: (info, saveBlobs) => {
                     localStorage.setItem('backup.save-blobs', saveBlobs)
                 },
                 getBackupTimes: async () => {
-                    const lastBackup = await this.lastBackupStorage.getLastBackupTime()
-                    let nextBackup = null
-                    if (this.state.running) {
-                        nextBackup = 'running'
-                    } else if (await this.isAutomaticBackupEnabled()) {
-                        nextBackup = new Date(
-                            this.scheduledAutomaticBackupTimestamp,
-                        )
-                    }
-                    const times = {
-                        lastBackup: lastBackup && lastBackup.getTime(),
-                        nextBackup:
-                            nextBackup && nextBackup.getTime
-                                ? nextBackup.getTime()
-                                : nextBackup,
-                    }
-                    return times
+                    return await this.getBackupTimes()
                 },
                 storeWordpressUserId: (info, userId) => {
                     localStorage.setItem('wp.user-id', userId)
@@ -231,32 +165,13 @@ export class BackupBackgroundModule {
     async startRecordingChangesIfNeeded() {
         if (
             !(await this.lastBackupStorage.getLastBackupTime()) ||
-            this.recordingChanges
+            this.storage.recordingChanges
         ) {
             return
         }
 
-        this.startRecordingChanges()
+        this.storage.startRecordingChanges()
         this.maybeScheduleAutomaticBackup()
-    }
-
-    attemptChangeTrack({ collection, pk, operation }) {
-        if (this.recordingChanges) {
-            const collectionDefinition = this.storageManager.registry
-                .collections[collection]
-
-            if (!isExcludedFromBackup(collectionDefinition)) {
-                this.storage.registerChange({
-                    collection,
-                    pk,
-                    operation,
-                })
-            }
-        }
-    }
-
-    startRecordingChanges() {
-        this.recordingChanges = true
     }
 
     isAutomaticBackupEnabled({ forceCheck = false } = {}) {
@@ -314,7 +229,7 @@ export class BackupBackgroundModule {
 
     scheduleAutomaticBackup() {
         this.automaticBackupEnabled = true
-        if (this.automaticBackupTimeout || this.state.resume) {
+        if (this.automaticBackupTimeout || this.backupProcedure.running) {
             return
         }
 
@@ -325,8 +240,22 @@ export class BackupBackgroundModule {
         }, msUntilNextBackup)
     }
 
-    estimateInitialBackupSize() {
-        return estimateBackupSize({ storageManager: this.storageManager })
+    async getBackupTimes() {
+        const lastBackup = await this.lastBackupStorage.getLastBackupTime()
+        let nextBackup = null
+        if (this.backupProcedure.running) {
+            nextBackup = 'running'
+        } else if (await this.isAutomaticBackupEnabled()) {
+            nextBackup = new Date(this.scheduledAutomaticBackupTimestamp)
+        }
+        const times = {
+            lastBackup: lastBackup && lastBackup.getTime(),
+            nextBackup:
+                nextBackup && nextBackup.getTime
+                    ? nextBackup.getTime()
+                    : nextBackup,
+        }
+        return times
     }
 
     doBackup() {
@@ -335,209 +264,20 @@ export class BackupBackgroundModule {
             this.automaticBackupTimeout = null
         }
 
-        this.state.running = true
-        this.state.events = new EventEmitter()
-        this.state.info = {
-            state: 'preparing',
-            totalChanges: null,
-            processedChanges: null,
-        }
+        this.storage.startRecordingChanges()
+        this.backupProcedure.run()
 
-        let resolveCompletionPromise
-        this.state.completionPromise = new Promise(resolve => {
-            resolveCompletionPromise = resolve
+        const always = () => {
+            this.maybeScheduleAutomaticBackup()
+        }
+        this.backupProcedure.events.on('success', () => {
+            always()
+        })
+        this.backupProcedure.events.on('fail', () => {
+            always()
         })
 
-        const procedure = async () => {
-            this.startRecordingChanges()
-            const lastBackupTime = await this.lastBackupStorage.getLastBackupTime()
-
-            await this.backend.startBackup({ events: this.state.events })
-            if (!lastBackupTime) {
-                console.log(
-                    'no last backup found, putting everything in backup table',
-                )
-                console.time('put initial backup into changes table')
-
-                try {
-                    this.state.events.emit('info', this.state.info)
-                    await this.storage.forgetAllChanges()
-                    await this._queueInitialBackup() // Pushes all the objects in the DB to the queue for the incremental backup
-                } catch (err) {
-                    throw err
-                } finally {
-                    console.timeEnd('put initial backup into changes table')
-                }
-            }
-
-            const backupTime = new Date()
-            await this._doIncrementalBackup(backupTime, this.state.events)
-            if (process.env.STORE_BACKUP_TIME !== 'false') {
-                await this.lastBackupStorage.storeLastBackupTime(backupTime)
-            }
-        }
-
-        setTimeout(async () => {
-            procedure()
-                .then(() => {
-                    this.state.running = false
-                    if (this.state.events) {
-                        this.state.events.emit('success')
-                    }
-                    this.resetBackupState()
-                    this.maybeScheduleAutomaticBackup()
-                    resolveCompletionPromise()
-                })
-                .catch(e => {
-                    this.state.running = false
-
-                    if (process.env.NODE_ENV === 'production') {
-                        const raven = AllRaven['default']
-                        raven.captureException(e)
-                    }
-
-                    console.error(e)
-                    console.error(e.stack)
-                    if (this.state.events) {
-                        this.state.events.emit('fail', e)
-                    }
-                    this.resetBackupState()
-                    this.maybeScheduleAutomaticBackup()
-                    resolveCompletionPromise()
-                })
-        }, 200)
-
-        return this.state.events
-    }
-
-    async _queueInitialBackup() {
-        const collectionsWithVersions = this._getCollectionsToBackup()
-
-        for (const collection of collectionsWithVersions) {
-            for await (const pk of this.storageManager
-                .collection(collection.name)
-                .streamPks()) {
-                await this.storage.registerChange({
-                    collection: collection.name,
-                    pk,
-                    operation: 'create',
-                })
-            }
-        }
-    }
-
-    async _doIncrementalBackup(untilWhen: Date, events: EventEmitter) {
-        console.log('starting incremental backup')
-
-        const collectionsWithVersions = this._getCollectionsToBackup()
-        const info = (this.state.info = await this._createBackupInfo(
-            collectionsWithVersions,
-            untilWhen,
-        ))
-        events.emit('info', { info })
-
-        for await (const batch of this.storage.streamChanges(untilWhen, {
-            batchSize: parseInt(process.env.BACKUP_BATCH_SIZE, 10),
-        })) {
-            if (this.state.info.state === 'paused') {
-                await this.state.pausePromise
-            }
-            if (this.state.info.state === 'cancelled') {
-                break
-            }
-
-            await this._backupChanges(batch, info, events)
-            events.emit('info', { info })
-        }
-
-        console.log('finished incremental backup')
-    }
-
-    _backupChanges = async (
-        batch: ObjectChangeBatch,
-        info: BackupProgressInfo,
-        events,
-    ) => {
-        // console.log('preparing batch')
-        for (const change of batch.changes) {
-            const object = pickBy(
-                await this.storageManager
-                    .collection(change.collection)
-                    .findByPk(change.objectPk),
-                (val, key) => {
-                    return key !== 'terms' && key.indexOf('_terms') === -1
-                },
-            )
-            change.object = object
-            // console.log('prepared change %o', change.object)
-        }
-        // console.log('prepared batch')
-
-        // console.log('uploading batch')
-        if (process.env.MOCK_BACKUP_BACKEND === 'true') {
-            await new Promise(resolve => setTimeout(resolve, 500))
-        } else {
-            await this.backend.backupChanges({
-                changes: batch.changes,
-                events,
-                currentSchemaVersion: this.currentSchemaVersion,
-                options: { storeBlobs: _shouldStoreBlobs() },
-            })
-        }
-        // console.log('uploaded batch, removing affected items from log')
-        await batch.forget()
-        // console.log('removed from log')
-
-        info.processedChanges += batch.changes.length
-        // info.collections[change.collection].processedObjects += 1
-    }
-
-    _getCollectionsToBackup(): { name: string; version: Date }[] {
-        return Object.entries(this.storageManager.registry.collections)
-            .filter(([key, value]) => !isExcludedFromBackup(value))
-            .map(([key, value]) => ({
-                name: key,
-                version: value.version,
-            }))
-    }
-
-    async _createBackupInfo(
-        collections: { name: string }[],
-        until: Date,
-    ): Promise<BackupProgressInfo> {
-        const info: BackupProgressInfo = {
-            state: 'synching',
-            totalChanges: 0,
-            processedChanges: 0,
-            // collections: {},
-        }
-
-        const collectionCountPairs = (await Promise.all(
-            collections.map(async ({ name }) => {
-                return [
-                    name,
-                    await this.storage.countQueuedChangesByCollection(
-                        name,
-                        until,
-                    ),
-                ]
-            }),
-        )) as [string, number][]
-
-        for (const [collectionName, totalObjects] of collectionCountPairs) {
-            console.log(
-                'no. of queued changed to %s: %d',
-                collectionName,
-                totalObjects,
-            )
-            // info.collections[collectionName] = {
-            //     `totalObject`s,
-            //     processedObjects: 0,
-            // }
-            info.totalChanges += totalObjects as number
-        }
-
-        return info
+        return this.backupProcedure.events
     }
 }
 
@@ -550,13 +290,4 @@ export function _getMemexCloudOrigin() {
     } else {
         return 'https://memex.cloud'
     }
-}
-
-export function isExcludedFromBackup(collectionDef: CollectionDefinition) {
-    return collectionDef.backup === false
-}
-
-export function _shouldStoreBlobs() {
-    const pref = localStorage.getItem('backup.save-blobs')
-    return pref !== 'false'
 }

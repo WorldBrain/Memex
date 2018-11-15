@@ -3,6 +3,7 @@ import { CollectionDefinitions } from 'storex'
 import { FeatureStorage } from '../../search/storage'
 import { StorageManager } from '../../search/types'
 import { ObjectChangeBatch } from './backend/types'
+import { isExcludedFromBackup } from './utils'
 
 export default class BackupStorage extends FeatureStorage {
     static BACKUP_COLL = 'backupChanges'
@@ -27,9 +28,40 @@ export default class BackupStorage extends FeatureStorage {
         ],
     }
 
+    recordingChanges: boolean = false
+
     constructor({ storageManager }: { storageManager: StorageManager }) {
         super(storageManager)
         this.registerCollections()
+
+        storageManager.on('changing', change => {
+            this._handleStorageChange(change)
+        })
+    }
+
+    _handleStorageChange({
+        collection,
+        pk,
+        operation,
+    }: {
+            collection: string
+            pk: string
+            operation: string
+        }) {
+        if (!this.recordingChanges) {
+            return
+        }
+
+        const collectionDefinition = this.storageManager.registry.collections[
+            collection
+        ]
+        if (!isExcludedFromBackup(collectionDefinition)) {
+            this.registerChange({
+                collection,
+                pk,
+                operation,
+            })
+        }
     }
 
     async registerChange({
@@ -37,10 +69,10 @@ export default class BackupStorage extends FeatureStorage {
         pk,
         operation,
     }: {
-        collection: string
-        pk: string
-        operation: string
-    }) {
+            collection: string
+            pk: string
+            operation: string
+        }) {
         // console.log(
         //     'registering change to collection',
         //     collection,
@@ -56,6 +88,10 @@ export default class BackupStorage extends FeatureStorage {
                 objectPk: pk,
                 operation,
             })
+    }
+
+    startRecordingChanges() {
+        this.recordingChanges = true
     }
 
     async *streamChanges(
