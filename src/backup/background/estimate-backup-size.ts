@@ -1,4 +1,5 @@
-import { StorageManager } from '../../search/storage/manager'
+import { StorageManager } from '../../search/types'
+import { isExcludedFromBackup } from '.'
 
 export interface SizeEst {
     bytesWithBlobs: number
@@ -98,7 +99,7 @@ const calcBlobSize = (blob: Blob) =>
 
 const deriveStoreNames = ({ registry }: StorageManager) =>
     Object.entries(registry.collections)
-        .filter(([, def]) => def.backup !== false)
+        .filter(([, def]) => !isExcludedFromBackup(def))
         .map(([name]) => name)
 
 const sumSizeEsts = (a: SizeEst, b: SizeEst): SizeEst => ({

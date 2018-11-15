@@ -1,9 +1,21 @@
 import Dexie from 'dexie'
+import { CollectionDefinitions } from 'storex'
 
 import { StorageManager } from '../types'
 
 export abstract class FeatureStorage {
+    protected collections: { [name: string]: CollectionDefinitions }
+
     constructor(protected storageManager: StorageManager) {}
+
+    registerCollections() {
+        for (const name of Object.keys(this.collections || {})) {
+            this.storageManager.registry.registerCollection(
+                name,
+                this.collections[name],
+            )
+        }
+    }
 }
 
 /**
