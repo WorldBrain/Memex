@@ -1,5 +1,4 @@
-import Storex, { StorageCollection } from 'storex'
-import { FindManyOptions } from 'storex/types'
+import Storex, { StorageCollection, FindManyOptions } from 'storex'
 import DexieOrig from 'dexie'
 import { FilterQuery } from 'dexie-mongoify'
 
