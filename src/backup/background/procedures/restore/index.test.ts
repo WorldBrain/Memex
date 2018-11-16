@@ -1,5 +1,6 @@
 import * as expect from 'expect'
 import { BackupRestoreProcedure } from '.'
+import { BackupBackend } from 'src/backup/background/backend'
 
 describe('BackupRestoreProcedure', () => {
     it('the top-level procedure for restoring change sets and images should work', async () => {
@@ -20,10 +21,11 @@ describe('BackupRestoreProcedure', () => {
             backend: null,
             storageManager: null,
         })
-        restoreProcedure._listBackupCollection = collection =>
+        restoreProcedure._listBackupCollection = async collection =>
             Object.keys(backupObjects[collection])
         restoreProcedure._createBackupObjectFetcher = () => {
-            return async item => backupObjects[item[0]][item[1]]
+            return async ([collection, object]) =>
+                backupObjects[collection][object]
         }
         restoreProcedure._writeChange = async change => {
             writtenChanges.push(change)
@@ -57,12 +59,46 @@ describe('BackupRestoreProcedure', () => {
         ])
     })
 
+    it('should list and fetch from backend correctly', async () => {
+        const lists = []
+        const retrievals = []
+        const backend = {
+            listObjects: async (collection: string) => {
+                lists.push(collection)
+                return ['one', 'two']
+            },
+            retrieveObject: async (collection: string, object: string) => {
+                retrievals.push([collection, object])
+                return 'bla'
+            },
+        } as BackupBackend
+        const restoreProcedure = new BackupRestoreProcedure({
+            backend,
+            storageManager: null,
+        })
+
+        expect(await restoreProcedure._listBackupCollection('foo')).toEqual([
+            'one',
+            'two',
+        ])
+        expect(lists).toEqual(['foo'])
+
+        expect(
+            await restoreProcedure._createBackupObjectFetcher()([
+                'eggs',
+                'spam',
+            ]),
+        ).toEqual('bla')
+        expect(lists).toEqual(['foo'])
+        expect(retrievals).toEqual([['eggs', 'spam']])
+    })
+
     it('should propagate errors correctly', async () => {
         const restoreProcedure = new BackupRestoreProcedure({
             backend: null,
             storageManager: null,
         })
-        restoreProcedure._clearAndBlockDatabase = () => {
+        restoreProcedure._clearDatabase = () => {
             throw new Error('Muahaha!')
         }
 
