@@ -29,7 +29,7 @@ describe('DownloadQueue', () => {
     it('should already be fetching the first URL when constructed', async () => {
         const mockFetcher = createMockFetcher()
         const queue = new DownloadQueue({
-            urls: Object.keys(mockFetcher.urls),
+            items: Object.keys(mockFetcher.urls),
             fetcher: mockFetcher.fetch,
         })
         expect(queue.hasNext()).toBe(true)
@@ -44,7 +44,7 @@ describe('DownloadQueue', () => {
     it('should immediately return a result if already fetched and start downloading the next one when I retrieve the first', async () => {
         const mockFetcher = createMockFetcher()
         const queue = new DownloadQueue({
-            urls: Object.keys(mockFetcher.urls),
+            items: Object.keys(mockFetcher.urls),
             fetcher: mockFetcher.fetch,
         })
         expect(queue.hasNext()).toBe(true)
@@ -70,7 +70,7 @@ describe('DownloadQueue', () => {
     it('should not download more than one item ahead', async () => {
         const mockFetcher = createMockFetcher()
         const queue = new DownloadQueue({
-            urls: Object.keys(mockFetcher.urls),
+            items: Object.keys(mockFetcher.urls),
             fetcher: mockFetcher.fetch,
         })
         expect(queue.hasNext()).toBe(true)
