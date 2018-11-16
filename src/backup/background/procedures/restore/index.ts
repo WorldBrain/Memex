@@ -2,6 +2,7 @@ const sorted = require('lodash/sortBy')
 import { EventEmitter } from 'events'
 import { StorageManager } from '../../../../search/storage/manager'
 import { BackupBackend } from '../../backend'
+import Interruptable from '../interruptable'
 import { DownloadQueue } from './download-queue'
 
 export class BackupRestoreProcedure {
@@ -9,6 +10,7 @@ export class BackupRestoreProcedure {
     backend: BackupBackend
 
     events?: EventEmitter
+    interruptable?: Interruptable
 
     constructor({
         storageManager,
@@ -21,26 +23,35 @@ export class BackupRestoreProcedure {
         this.backend = backend
     }
 
-    // cancel() {
-
-    // }
-
     runner() {
         this.events = new EventEmitter()
+        this.interruptable = new Interruptable()
 
         const procedure = async () => {
             try {
-                await this._clearAndBlockDatabase()
-                await this._restoreCollection(
-                    'change-sets',
-                    this._writeChange.bind(this),
+                await this._clearDatabase()
+                await this._blockDatabase()
+
+                await this.interruptable.execute(() =>
+                    this._restoreCollection(
+                        'change-sets',
+                        this._writeChange.bind(this),
+                    ),
                 )
-                await this._restoreCollection(
-                    'images',
-                    this._writeImage.bind(this),
+                await this.interruptable.execute(() =>
+                    this._restoreCollection(
+                        'images',
+                        this._writeImage.bind(this),
+                    ),
                 )
+
                 await this._unblockDatabase()
-                this.events.emit('success')
+                if (!this.interruptable.cancelled) {
+                    this.events.emit('success')
+                } else {
+                    await this._clearDatabase()
+                    this.events.emit('cancelled')
+                }
             } catch (e) {
                 this.events.emit('fail', e)
             }
@@ -49,7 +60,8 @@ export class BackupRestoreProcedure {
         return procedure
     }
 
-    _clearAndBlockDatabase() {}
+    _clearDatabase() {}
+    _blockDatabase() {}
 
     async _restoreCollection(
         collection: string,
@@ -70,12 +82,15 @@ export class BackupRestoreProcedure {
         queue: DownloadQueue,
         writeObject: (object: any) => Promise<any>,
     ) {
-        while (queue.hasNext()) {
-            const batch = await queue.getNext()
-            for (const change of batch) {
-                await writeObject(change)
-            }
-        }
+        await this.interruptable.whileLoop(
+            () => queue.hasNext(),
+            async () => {
+                const batch = await queue.getNext()
+                await this.interruptable.forOfLoop(batch, async change => {
+                    await writeObject(change)
+                })
+            },
+        )
     }
 
     _unblockDatabase() {}
@@ -89,8 +104,6 @@ export class BackupRestoreProcedure {
 
     _writeImage(image) {}
 
-    _listBackupCollection(collection: string): any {}
-
     _createDownloadQueue(collection: string, timestamps: string[]) {
         const items = sorted(timestamps).map(timestamp => [
             collection,
@@ -102,5 +115,12 @@ export class BackupRestoreProcedure {
         })
     }
 
-    _createBackupObjectFetcher(): any {}
+    _listBackupCollection(collection: string) {
+        return this.backend.listObjects(collection)
+    }
+
+    _createBackupObjectFetcher() {
+        return ([collection, object]) =>
+            this.backend.retrieveObject(collection, object)
+    }
 }
