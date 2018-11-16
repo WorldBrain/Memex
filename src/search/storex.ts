@@ -28,17 +28,17 @@ instance.collection = (name: string) => ({
     ...oldMethod(name),
     suggestObjects: (query, opts) => suggestObjects(name, query, opts),
     findByPk: function(pk) {
-        return this.backend[name].get(pk)
+        return this.backend.dexie[name].get(pk)
     }.bind(instance),
     streamPks: async function*() {
-        const table = this.backend[name]
+        const table = this.backend.dexie[name]
         const pks = await table.toCollection().primaryKeys()
         for (const pk of pks) {
             yield pk
         }
     }.bind(instance),
     streamCollection: async function*() {
-        const table = this.backend[name]
+        const table = this.backend.dexie[name]
         for await (const pk of this.streamPks(name)) {
             yield await { pk, object: await table.get(pk) }
         }

@@ -57,7 +57,7 @@ export default class Visit extends EventModel {
     }
 
     async save() {
-        const db = await getDb()
+        const db = await getDb
 
         // Only update if changes detected between existing visit and this one
         const existingVisit = await db.visits.get(this.pk)
