@@ -16,17 +16,37 @@
         "strictNullChecks": false,
         "outDir": "tmp",
         "paths": {
-            "storex": ["external/storex/ts"],
-            "storex/lib/*": ["external/storex/ts/*"],
-            "storex-backend-dexie": ["external/storex-backend-dexie/ts"],
+            "storex": [
+                "external/storex/ts"
+            ],
+            "storex/lib/*": [
+                "external/storex/ts/*"
+            ],
+            "storex-backend-dexie": [
+                "external/storex-backend-dexie/ts"
+            ],
             "storex-backend-dexie/lib/*": [
                 "external/storex-backend-dexie/ts/*"
             ],
-            "memex-stemmer": ["external/memex-stemmer/ts"],
-            "src/*": ["src/*"]
+            "memex-stemmer": [
+                "external/memex-stemmer/ts"
+            ],
+            "src/*": [
+                "src/*"
+            ]
         },
-        "lib": ["es2017", "dom", "esnext.asynciterable"]
+        "lib": [
+            "es2017",
+            "dom",
+            "esnext.asynciterable"
+        ]
     },
-    "include": ["./src/**/*"],
-    "exclude": ["node_modules", "./src/**/*.js", "./src/**/*.jsx"]
+    "include": [
+        "./src/**/*"
+    ],
+    "exclude": [
+        "node_modules",
+        "./src/**/*.js",
+        "./src/**/*.jsx"
+    ]
 }
