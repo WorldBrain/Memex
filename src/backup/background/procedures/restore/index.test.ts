@@ -2,12 +2,17 @@ import * as expect from 'expect'
 import { BackupRestoreProcedure } from '.'
 
 describe('BackupRestoreProcedure', () => {
-    it('should restore the change sets correctly', async () => {
+    it('the top-level procedure for restoring change sets and images should work', async () => {
         const writtenChanges = []
+        const writtenImages = []
         const backupObjects = {
             'change-sets': {
                 11111: ['change 1', 'change 2'],
                 22222: ['change 3', 'change 4'],
+            },
+            images: {
+                11111: ['image 1', 'image 2'],
+                22222: ['image 3', 'image 4'],
             },
         }
 
@@ -22,6 +27,9 @@ describe('BackupRestoreProcedure', () => {
         }
         restoreProcedure._writeChange = async change => {
             writtenChanges.push(change)
+        }
+        restoreProcedure._writeImage = async image => {
+            writtenImages.push(image)
         }
 
         const runner = restoreProcedure.runner()
@@ -40,6 +48,12 @@ describe('BackupRestoreProcedure', () => {
             'change 2',
             'change 3',
             'change 4',
+        ])
+        expect(writtenImages).toEqual([
+            'image 1',
+            'image 2',
+            'image 3',
+            'image 4',
         ])
     })
 
