@@ -2,7 +2,6 @@ const last = require('lodash/last')
 const pickBy = require('lodash/pickBy')
 import * as AllRaven from 'raven-js'
 import { EventEmitter } from 'events'
-import { CollectionDefinition } from '../../../search/storage'
 import { StorageManager } from '../../../search/storage/manager'
 import BackupStorage, { LastBackupStorage } from '../storage'
 import { BackupBackend } from '../backend'
