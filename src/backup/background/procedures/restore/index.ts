@@ -31,8 +31,14 @@ export class BackupRestoreProcedure {
         const procedure = async () => {
             try {
                 await this._clearAndBlockDatabase()
-                await this._restoreChangeSets()
-                await this._restoreImages()
+                await this._restoreCollection(
+                    'change-sets',
+                    this._writeChange.bind(this),
+                )
+                await this._restoreCollection(
+                    'images',
+                    this._writeImage.bind(this),
+                )
                 await this._unblockDatabase()
                 this.events.emit('success')
             } catch (e) {
@@ -45,38 +51,32 @@ export class BackupRestoreProcedure {
 
     _clearAndBlockDatabase() {}
 
-    async _restoreChangeSets() {
-        const changeSetTimestamps = await this._listBackupCollection(
-            'change-sets',
+    async _restoreCollection(
+        collection: string,
+        writeObject: (object: any) => Promise<any>,
+    ) {
+        const timestamps = await this._listBackupCollection(collection)
+        const changeSetDownloadQueue = this._createDownloadQueue(
+            collection,
+            timestamps,
         )
-        const changeSetDownloadQueue = this._createChangeSetDownloadQueue(
-            changeSetTimestamps,
+        await this._restoreFromDownloadQueue(
+            changeSetDownloadQueue,
+            writeObject,
         )
-        await this._restoreChangeSetsFromDownloadQueue(changeSetDownloadQueue)
     }
 
-    _createChangeSetDownloadQueue(timestamps: string[]) {
-        return this._createDownloadQueue('change-sets', timestamps)
-    }
-
-    async _restoreChangeSetsFromDownloadQueue(queue: DownloadQueue) {
+    async _restoreFromDownloadQueue(
+        queue: DownloadQueue,
+        writeObject: (object: any) => Promise<any>,
+    ) {
         while (queue.hasNext()) {
             const batch = await queue.getNext()
             for (const change of batch) {
-                this._writeChange(change)
+                await writeObject(change)
             }
         }
     }
-
-    async _restoreImages() {
-        // const imageTimestamps = await this._listBackupCollection('images')
-        // const imageDownloadQueue = this._createImageDownloadQueue(imageTimestamps)
-        // await this._restoreImagesFromDownloadQueue(imageDownloadQueue)
-    }
-
-    _createImageDownloadQueue(timestamps: string[]) {}
-
-    _restoreImagesFromDownloadQueue(queue: DownloadQueue) {}
 
     _unblockDatabase() {}
 
