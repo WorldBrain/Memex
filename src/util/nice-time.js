@@ -63,5 +63,7 @@ export default function niceTime(date, { now = undefined } = {}) {
     if (then.getYear() === now.getYear()) {
         return `${then.getDate()} ${monthString(then)} ${hourString(then)}`
     }
-    return `${then.getDate()} ${monthString(then)} ${hourString(then)}`
+    return `${then.getDate()} ${monthString(
+        then,
+    )} ${then.getFullYear()} ${hourString(then)}`
 }
