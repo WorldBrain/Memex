@@ -1,6 +1,7 @@
 function hourString(date) {
     // return date.toLocaleTimeString([], {hour: 'numeric', minute: '2-digit'})
-    return `${('0' + date.getHours()).slice(-2)}:${('0' + date.getMinutes()
+    return `${('0' + date.getHours()).slice(-2)}:${(
+        '0' + date.getMinutes()
     ).slice(-2)}`
 }
 
@@ -60,7 +61,7 @@ export default function niceTime(date, { now = undefined } = {}) {
         return `${dayString(then)} ${hourString(then)}`
     }
     if (then.getYear() === now.getYear()) {
-        return `${then.getDate()} ${monthString(then)}`
+        return `${then.getDate()} ${monthString(then)} ${hourString(then)}`
     }
-    return `${then.getDate()} ${monthString(then)} ${then.getFullYear()}`
+    return `${then.getDate()} ${monthString(then)} ${hourString(then)}`
 }
