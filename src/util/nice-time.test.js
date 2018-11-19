@@ -32,16 +32,16 @@ describe('niceTime', () => {
         expect(niceTime(date, { now })).toBe('Tue 14:25')
     })
 
-    test('should return the date and the month for timeperiod in the same year', () => {
+    test('should return the date, the month and the time for timeperiod in the same year', () => {
         const date = new Date(2016, 7, 2, 14, 25)
         const now = new Date(2016, 9, 2, 18, 55)
-        expect(niceTime(date, { now })).toBe('2 Aug')
+        expect(niceTime(date, { now })).toBe('2 Aug 14:25')
     })
 
-    test('should return the date, month and year for timeperiod not in the same year', () => {
+    test('should return the date, month, year and the time for timeperiod not in the same year', () => {
         const date = new Date(2016, 7, 2, 14, 25)
         const now = new Date(2017, 7, 2, 18, 55)
-        expect(niceTime(date, { now })).toBe('2 Aug 2016')
+        expect(niceTime(date, { now })).toBe('2 Aug 2016 14:25')
     })
 
     test('should return the placeholder for invalid date', () => {
