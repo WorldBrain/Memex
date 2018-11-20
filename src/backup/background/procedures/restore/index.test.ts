@@ -21,6 +21,7 @@ describe('BackupRestoreProcedure', () => {
             backend: null,
             storageManager: null,
         })
+        expect(restoreProcedure.running).toBe(false)
         restoreProcedure._listBackupCollection = async collection =>
             Object.keys(backupObjects[collection])
         restoreProcedure._createBackupObjectFetcher = () => {
@@ -28,6 +29,7 @@ describe('BackupRestoreProcedure', () => {
                 backupObjects[collection][object]
         }
         restoreProcedure._writeChange = async change => {
+            expect(restoreProcedure.running).toBe(true)
             writtenChanges.push(change)
         }
         restoreProcedure._writeImage = async image => {
@@ -57,6 +59,7 @@ describe('BackupRestoreProcedure', () => {
             'image 3',
             'image 4',
         ])
+        expect(restoreProcedure.running).toBe(false)
     })
 
     it('should list and fetch from backend correctly', async () => {
