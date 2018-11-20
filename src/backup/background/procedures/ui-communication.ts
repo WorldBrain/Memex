@@ -3,7 +3,7 @@ import { EventEmitter } from 'events'
 export class ProcedureUiCommunication {
     _uiTabIds: { [tabId: string]: true } = {}
 
-    constructor(public eventName: string) {}
+    constructor(public eventName: string) { }
 
     registerUiTab(tab) {
         this._uiTabIds[tab.id] = true

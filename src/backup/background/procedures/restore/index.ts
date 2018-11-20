@@ -128,7 +128,7 @@ export class BackupRestoreProcedure {
         await search.dangerousPleaseBeSureDeleteAndRecreateDatabase()
     }
 
-    _blockDatabase() {}
+    _blockDatabase() { }
 
     async _restoreCollection(
         collection: string,
@@ -169,7 +169,7 @@ export class BackupRestoreProcedure {
         )
     }
 
-    _unblockDatabase() {}
+    _unblockDatabase() { }
 
     async _writeChange(change: ObjectChange) {
         change = _filterBadChange(change)
