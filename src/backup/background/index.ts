@@ -5,7 +5,8 @@ import BackupStorage, { LastBackupStorage } from './storage'
 import { BackupBackend } from './backend'
 import estimateBackupSize from './estimate-backup-size'
 import BackupProcedure from './procedures/backup'
-import { isExcludedFromBackup } from './utils'
+import { BackupRestoreProcedure } from './procedures/restore'
+import { ProcedureUiCommunication } from 'src/backup/background/procedures/ui-communication'
 
 export * from './backend'
 
@@ -14,7 +15,11 @@ export class BackupBackgroundModule {
     storage: BackupStorage
     backend: BackupBackend
     lastBackupStorage: LastBackupStorage
+
     backupProcedure: BackupProcedure
+    backupUiCommunication = new ProcedureUiCommunication()
+    restoreProcedure: BackupRestoreProcedure
+    restoreUiCommunication: ProcedureUiCommunication = new ProcedureUiCommunication()
 
     uiTabId?: any
     automaticBackupCheck?: Promise<boolean>
@@ -42,6 +47,10 @@ export class BackupBackgroundModule {
             lastBackupStorage,
             backend,
         })
+        this.restoreProcedure = new BackupRestoreProcedure({
+            storageManager,
+            backend,
+        })
     }
 
     setupRemoteFunctions() {
@@ -52,30 +61,19 @@ export class BackupBackgroundModule {
                     return url
                 },
                 startBackup: ({ tab }, params) => {
-                    this.uiTabId = tab.id
+                    this.backupUiCommunication.registerUiTab(tab)
                     if (this.backupProcedure.running) {
                         return
                     }
+                    if (this.restoreProcedure.running) {
+                        throw new Error(
+                            "Come on, don't be crazy and run backup and restore at once please",
+                        )
+                    }
 
                     this.doBackup()
-                    const sendEvent = (eventType, event) => {
-                        try {
-                            window['browser'].tabs.sendMessage(this.uiTabId, {
-                                type: 'backup-event',
-                                event: { type: eventType, ...(event || {}) },
-                            })
-                        } catch (e) {
-                            // ignore the error, user closed tab
-                        }
-                    }
-                    this.backupProcedure.events.on('info', event =>
-                        sendEvent('info', event),
-                    )
-                    this.backupProcedure.events.on('fail', event =>
-                        sendEvent('fail', event),
-                    )
-                    this.backupProcedure.events.on('success', event =>
-                        sendEvent('success', event),
+                    this.backupUiCommunication.connect(
+                        this.backupProcedure.events,
                     )
                 },
                 pauseBackup: () => {
@@ -86,6 +84,22 @@ export class BackupBackgroundModule {
                 },
                 cancelBackup: async () => {
                     await this.backupProcedure.cancel()
+                },
+                startRestore: async ({ tab }) => {
+                    this.restoreUiCommunication.registerUiTab(tab)
+                    if (this.restoreProcedure.running) {
+                        return
+                    }
+                    if (this.backupProcedure.running) {
+                        throw new Error(
+                            "Come on, don't be crazy and run backup and restore at once please",
+                        )
+                    }
+                    const runner = await this.prepareRestore()
+                    this.restoreUiCommunication.connect(
+                        this.restoreProcedure.events,
+                    )
+                    runner()
                 },
                 hasInitialBackup: async () => {
                     return !!(await this.lastBackupStorage.getLastBackupTime())
@@ -240,6 +254,13 @@ export class BackupBackgroundModule {
         }, msUntilNextBackup)
     }
 
+    clearAutomaticBackupTimeout() {
+        if (this.automaticBackupTimeout) {
+            clearTimeout(this.automaticBackupTimeout)
+            this.automaticBackupTimeout = null
+        }
+    }
+
     async getBackupTimes() {
         const lastBackup = await this.lastBackupStorage.getLastBackupTime()
         let nextBackup = null
@@ -259,10 +280,7 @@ export class BackupBackgroundModule {
     }
 
     doBackup() {
-        if (this.automaticBackupTimeout) {
-            clearTimeout(this.automaticBackupTimeout)
-            this.automaticBackupTimeout = null
-        }
+        this.clearAutomaticBackupTimeout()
 
         this.storage.startRecordingChanges()
         this.backupProcedure.run()
@@ -278,6 +296,20 @@ export class BackupBackgroundModule {
         })
 
         return this.backupProcedure.events
+    }
+
+    async prepareRestore() {
+        this.clearAutomaticBackupTimeout()
+        await this.lastBackupStorage.storeLastBackupTime(null)
+
+        const runner = this.restoreProcedure.runner()
+        this.restoreProcedure.events.once('success', async () => {
+            await this.lastBackupStorage.storeLastBackupTime(new Date())
+            await this.startRecordingChangesIfNeeded()
+            await this.maybeScheduleAutomaticBackup()
+        })
+
+        return runner
     }
 }
 

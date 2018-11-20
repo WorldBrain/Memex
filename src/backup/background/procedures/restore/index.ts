@@ -23,6 +23,10 @@ export class BackupRestoreProcedure {
         this.backend = backend
     }
 
+    get running() {
+        return !!this.interruptable
+    }
+
     runner() {
         this.events = new EventEmitter()
         this.interruptable = new Interruptable()
@@ -48,12 +52,18 @@ export class BackupRestoreProcedure {
                 await this._unblockDatabase()
                 if (!this.interruptable.cancelled) {
                     this.events.emit('success')
+                    return 'success'
                 } else {
                     await this._clearDatabase()
                     this.events.emit('cancelled')
+                    return 'cancelled'
                 }
             } catch (e) {
                 this.events.emit('fail', e)
+                return 'fail'
+            } finally {
+                this.interruptable = null
+                this.events = null
             }
         }
 
@@ -94,11 +104,6 @@ export class BackupRestoreProcedure {
     }
 
     _unblockDatabase() {}
-
-    _resumeBackupLog() {
-        // set lastBackupTime to now
-        // maybe schedule backup
-    }
 
     _writeChange(change) {}
 
