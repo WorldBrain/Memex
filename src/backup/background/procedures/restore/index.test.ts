@@ -17,6 +17,16 @@ describe('BackupRestoreProcedure', () => {
             },
         }
 
+        const reportedInfo = []
+        const expectedInfo = [
+            { status: 'preparing', processedObjects: 0 },
+            { status: 'synching', processedObjects: 0, totalObjects: 4 },
+            { status: 'synching', processedObjects: 1, totalObjects: 4 },
+            { status: 'synching', processedObjects: 2, totalObjects: 4 },
+            { status: 'synching', processedObjects: 3, totalObjects: 4 },
+            { status: 'synching', processedObjects: 4, totalObjects: 4 },
+        ]
+
         const restoreProcedure = new BackupRestoreProcedure({
             backend: null,
             storageManager: null,
@@ -33,11 +43,15 @@ describe('BackupRestoreProcedure', () => {
             writtenChanges.push(change)
         }
         restoreProcedure._writeImage = async image => {
+            expect(restoreProcedure.running).toBe(true)
             writtenImages.push(image)
         }
 
         const runner = restoreProcedure.runner()
         await new Promise((resolve, reject) => {
+            restoreProcedure.events.on('info', info => {
+                reportedInfo.push(info)
+            })
             restoreProcedure.events.on('success', () => {
                 resolve()
             })
@@ -60,6 +74,7 @@ describe('BackupRestoreProcedure', () => {
             'image 4',
         ])
         expect(restoreProcedure.running).toBe(false)
+        expect(reportedInfo).toEqual(expectedInfo)
     })
 
     it('should list and fetch from backend correctly', async () => {
