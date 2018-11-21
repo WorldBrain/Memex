@@ -262,7 +262,7 @@ export class BackupBackgroundModule {
     }
 
     async getBackupTimes() {
-        const lastBackup = await this.lastBackupStorage.getLastBackupTime()
+        const lastBackup = await this.lastBackupStorage.getLastBackupFinishTime()
         let nextBackup = null
         if (this.backupProcedure.running) {
             nextBackup = 'running'
@@ -289,6 +289,7 @@ export class BackupBackgroundModule {
             this.maybeScheduleAutomaticBackup()
         }
         this.backupProcedure.events.on('success', () => {
+            this.lastBackupStorage.storeLastBackupFinishTime(new Date())
             always()
         })
         this.backupProcedure.events.on('fail', () => {
