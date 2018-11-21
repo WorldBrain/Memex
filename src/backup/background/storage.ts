@@ -163,6 +163,9 @@ export default class BackupStorage extends FeatureStorage {
 export interface LastBackupStorage {
     getLastBackupTime(): Promise<Date>
     storeLastBackupTime(time: Date): Promise<any>
+
+    getLastBackupFinishTime(): Promise<Date>
+    storeLastBackupFinishTime(time: Date): Promise<any>
 }
 
 export class LocalLastBackupStorage implements LastBackupStorage {
@@ -173,14 +176,30 @@ export class LocalLastBackupStorage implements LastBackupStorage {
     }
 
     async getLastBackupTime() {
-        const value = localStorage.getItem(this.key)
+        return this._getTime(this.key)
+    }
+
+    async storeLastBackupTime(time: Date) {
+        await this._setDate(this.key, time)
+    }
+
+    async getLastBackupFinishTime() {
+        return this._getTime(`${this.key}Finish`)
+    }
+
+    async storeLastBackupFinishTime(time: Date) {
+        await this._setDate(`${this.key}Finish`, time)
+    }
+
+    async _getTime(key) {
+        const value = localStorage.getItem(key)
         if (!value) {
             return null
         }
         return new Date(JSON.parse(value))
     }
 
-    async storeLastBackupTime(time: Date) {
-        localStorage.setItem(this.key, JSON.stringify(time.getTime()))
+    async _setDate(key, date) {
+        localStorage.setItem(key, JSON.stringify(date.getTime()))
     }
 }
