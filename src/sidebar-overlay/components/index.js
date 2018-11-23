@@ -9,6 +9,8 @@ import * as interactions from '../content_script/interactions'
 const processEventRPC = remoteFunction('processEvent')
 
 export const setupRibbonUI = target => {
+    console.log('wtf!?!?!')
+
     const sidebarURL = browser.extension.getURL('sidebar.html')
 
     ReactDOM.render(

@@ -1,5 +1,7 @@
 import { RetryTimeoutError } from '../direct-linking/utils'
 import { remoteFunction } from '../util/webextensionRPC'
+import { getLocalStorage, setLocalStorage } from '../util/storage'
+import * as constants from './constants'
 
 /**
  * Keeps executing a promiseCreator function till no error is thrown.
@@ -86,7 +88,7 @@ export const goToAnnotation = (
     if (!annotation.body) {
         return false
     } else if (env === 'overview') {
-        const tab = await browser.tabs.create({
+        const tab = await window['browser'].tabs.create({
             active: true,
             url: pageUrl,
         })
@@ -96,11 +98,11 @@ export const goToAnnotation = (
                 remoteFunction('goToAnnotation', {
                     tabId: tab.id,
                 })(annotation)
-                browser.tabs.onUpdated.removeListener(listener)
+                window['browser'].tabs.onUpdated.removeListener(listener)
             }
         }
 
-        browser.tabs.onUpdated.addListener(listener)
+        window['browser'].tabs.onUpdated.addListener(listener)
     } else {
         highlightAndScroll(annotation)
     }
@@ -119,4 +121,14 @@ export const getOffsetTop = element => {
         el = el.offsetParent
     }
     return offset
+}
+
+export const getSidebarState = async () =>
+    getLocalStorage(
+        constants.SIDEBAR_STORAGE_NAME,
+        constants.SIDEBAR_DEFAULT_OPTION,
+    )
+
+export const setSidebarState = async enabled => {
+    setLocalStorage(constants.SIDEBAR_STORAGE_NAME, enabled)
 }

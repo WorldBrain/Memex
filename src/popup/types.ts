@@ -6,7 +6,7 @@ import { State as TagsBtnState } from './tags-button/reducer'
 import { State as CollectionsBtnState } from './collections-button/reducer'
 import { State as PauseBtnState } from './pause-button/reducer'
 import { State as NotifsBtnState } from './notif-button/reducer'
-import { State as TooltipBtnState } from './tooltip-button/reducer'
+import { State as InPageSwitchesState } from './in-page-switches/reducer'
 import { State as PopupState } from './reducer'
 
 export interface RootState {
@@ -15,7 +15,7 @@ export interface RootState {
     tagsBtn: TagsBtnState
     collectionsBtn: CollectionsBtnState
     pauseBtn: PauseBtnState
-    tooltipBtn: TooltipBtnState
+    inPageSwitches: InPageSwitchesState
     notifsBtn: NotifsBtnState
     popup: PopupState
 }

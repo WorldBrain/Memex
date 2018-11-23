@@ -7,7 +7,7 @@ import { RootState, ClickHandler } from '../../types'
 import * as selectors from '../selectors'
 import * as acts from '../actions'
 
-const styles = require('./TooltipButton.css')
+const styles = require('./SidebarButton.css')
 const buttonStyles = require('../../components/Button.css')
 
 export interface OwnProps {
@@ -15,40 +15,29 @@ export interface OwnProps {
 }
 
 interface StateProps {
-    isChecked: boolean
+    // isChecked: boolean
 }
 
 interface DispatchProps {
-    handleChange: ClickHandler<HTMLButtonElement>
-    initState: () => Promise<void>
+    handleClick: ClickHandler<HTMLButtonElement>
+    // initState: () => Promise<void>
 }
 
 export type Props = OwnProps & StateProps & DispatchProps
 
 class TooltipButton extends PureComponent<Props> {
     componentDidMount() {
-        this.props.initState()
+        // this.props.initState()
     }
 
     render() {
         return (
             <Button
-                onClick={this.props.handleChange}
+                onClick={this.props.handleClick}
                 btnClass={buttonStyles.linkIcon}
                 title={'Enable Memex sidebar & Highlighting tooltip'}
             >
-                <span>
-                    Show Sidebar/Tooltip
-                    <span
-                        className={styles.switch}
-                        title={'Enable Memex sidebar & Highlighting tooltip'}
-                    >
-                        <ToggleSwitch
-                            isChecked={this.props.isChecked}
-                            onChange={this.props.handleChange}
-                        />
-                    </span>
-                </span>
+                <span>Open sidebar</span>
             </Button>
         )
     }
@@ -62,7 +51,7 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
     dispatch,
     props,
 ) => ({
-    handleChange: async e => {
+    handleClick: async e => {
         e.preventDefault()
         await dispatch(acts.toggleTooltipFlag())
         setTimeout(props.closePopup, 200)
