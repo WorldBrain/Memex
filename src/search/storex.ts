@@ -11,10 +11,6 @@ export const backend = new DexieStorageBackend({
     stemmer,
     schemaPatcher,
     dbName: 'memex',
-    idbImplementation: {
-        factory: window.indexedDB,
-        range: window['IDBKeyRange'],
-    },
 }) as any
 
 // Extend storex instance with Memex-specific methods
