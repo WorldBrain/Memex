@@ -75,8 +75,6 @@ let target = null
  * Sets up iFrame <--> webpage Remote functions.
  */
 export const insertRibbon = () => {
-    console.log('ribbon?')
-
     // If target is set, Ribbon has already been injected.
     if (target) {
         return

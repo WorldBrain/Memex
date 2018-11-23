@@ -14,7 +14,6 @@ const onKeydown = e => {
 const init = async () => {
     interactions.setupRPC()
 
-    console.log('hello fuckso!')
     const isSidebarEnabled = await getSidebarState()
     if (!isSidebarEnabled) {
         return
@@ -26,14 +25,12 @@ const init = async () => {
     await bodyLoader()
     document.removeEventListener('keydown', onKeydown, false)
     const passwordInputs = document.querySelectorAll('input[type=password]')
-    const hasAPasswordInput = passwordInputs.length > 0
-    if (hasAPasswordInput) {
+    const hasPasswordInput = passwordInputs.length > 0
+    if (hasPasswordInput) {
         return
     }
 
     interactions.insertRibbon()
 }
 
-if ([].length > 1) {
-    init()
-}
+init()

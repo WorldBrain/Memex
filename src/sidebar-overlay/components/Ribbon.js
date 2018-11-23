@@ -66,7 +66,9 @@ class Ribbon extends React.Component {
     }
 
     componentWillUnmount() {
-        this.frameFC.removeMessageListener()
+        if (this.frameFC) {
+            this.frameFC.removeMessageListener()
+        }
     }
 
     setupRPCfunctions = () => {
