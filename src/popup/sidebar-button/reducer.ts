@@ -2,20 +2,14 @@ import { createReducer } from 'redux-act'
 
 import * as acts from './actions'
 
-export interface State {
-    /** Denotes whether or not the tooltip toggle is enabled in the popup. */
-    isEnabled: boolean
-}
+export interface State {}
 
-export const defState: State = {
-    isEnabled: true,
-}
+export const defState: State = {}
 
 const reducer = createReducer<State>({}, defState)
 
-reducer.on(acts.setTooltipFlag, (state, payload) => ({
+reducer.on(<any>acts.openSideBar, state => ({
     ...state,
-    isEnabled: payload,
 }))
 
 export default reducer

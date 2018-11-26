@@ -129,6 +129,5 @@ export const getSidebarState = async () =>
         constants.SIDEBAR_DEFAULT_OPTION,
     )
 
-export const setSidebarState = async enabled => {
+export const setSidebarState = async enabled =>
     setLocalStorage(constants.SIDEBAR_STORAGE_NAME, enabled)
-}
