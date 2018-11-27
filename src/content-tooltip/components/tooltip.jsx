@@ -20,6 +20,7 @@ const deriveTooltipClass = state =>
 const Tooltip = ({
     x,
     y,
+    showCloseMessage,
     state,
     tooltipComponent,
     closeTooltip,
@@ -46,12 +47,31 @@ const Tooltip = ({
                 <img className={styles.imgSettings} src={images.settings} />
             </a>
         </span>
+
+        {showCloseMessage && (
+            <div className={styles.closeMessage}>
+                <div
+                    onClick={closeTooltip}
+                    className={styles.closeMessageCross}
+                >
+                    x
+                </div>
+                <div>It's your first time doing this</div>
+                <div
+                    onClick={event => closeTooltip(event, { disable: true })}
+                    className={styles.closeMessageDisableTooltip}
+                >
+                    Disable on all sites
+                </div>
+            </div>
+        )}
     </div>
 )
 
 Tooltip.propTypes = {
     x: PropTypes.number.isRequired,
     y: PropTypes.number.isRequired,
+    showCloseMessage: PropTypes.bool.isRequired,
     state: PropTypes.string.isRequired,
     tooltipComponent: PropTypes.element.isRequired,
     closeTooltip: PropTypes.func.isRequired,

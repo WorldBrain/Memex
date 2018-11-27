@@ -53,7 +53,6 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
 ) => ({
     handleClick: async e => {
         e.preventDefault()
-        await dispatch(acts.toggleTooltipFlag())
         setTimeout(props.closePopup, 200)
     },
     initState: () => dispatch(acts.init()),

@@ -69,6 +69,14 @@
     }
 }
 
+.closeMessage {
+    position: absolute;
+    border: 1px solid black;
+    background: white;
+    top: 50px;
+    width: 110px;
+}
+
 .createButtons,
 .progressIndicator,
 .copiedMessage,
@@ -213,20 +221,20 @@
     border-left: 1px solid #e5e5e5;
     padding-left: 5px;
 
-    & .smallButton img {
-        display: block;
-        cursor: pointer;
-    }
-
     & .imgSettings {
         width: 13px;
         margin-top: 4px;
     }
+}
 
-    & .imgCross {
-        width: 11px;
-        margin-top: 2px;
-    }
+.smallButton img {
+    display: block;
+    cursor: pointer;
+}
+
+.imgCross {
+    width: 11px;
+    margin-top: 2px;
 }
 
 /* Loading CSS */

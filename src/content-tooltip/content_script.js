@@ -29,6 +29,9 @@ export async function init() {
             destroyUIContainer(target)
             target.remove()
         },
+        disableTooltip: () => {
+            console.log('disabling tooltip')
+        },
     })
     interactions.setupTooltipTrigger(showTooltip)
     interactions.conditionallyTriggerTooltip(showTooltip)

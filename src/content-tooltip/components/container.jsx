@@ -14,16 +14,20 @@ import {
 class TooltipContainer extends React.Component {
     static propTypes = {
         onInit: PropTypes.func.isRequired,
+        onCloseMessageShown: PropTypes.func.isRequired,
+        closeMessageShown: PropTypes.bool.isRequired,
         createAndCopyDirectLink: PropTypes.func.isRequired,
         createAnnotation: PropTypes.func.isRequired,
         openSettings: PropTypes.func.isRequired,
         destroy: PropTypes.func.isRequired,
+        disable: PropTypes.func.isRequired,
     }
 
     state = {
         showTooltip: false,
         position: { x: 250, y: 200 },
         tooltipState: 'copied',
+        showingCloseMessage: false,
     }
 
     componentDidMount() {
@@ -47,10 +51,23 @@ class TooltipContainer extends React.Component {
         })
     }
 
-    closeTooltip = event => {
+    closeTooltip = (event, options = { disable: false }) => {
         event.preventDefault()
         event.stopPropagation()
-        this.props.destroy()
+
+        if (this.props.closeMessageShown || this.state.showingCloseMessage) {
+            this.props.destroy()
+            if (options.disable) {
+                this.props.disable()
+            }
+        } else {
+            this.showCloseMessage()
+            this.props.onCloseMessageShown()
+        }
+    }
+
+    showCloseMessage() {
+        this.setState({ showingCloseMessage: true })
     }
 
     createLink = async () => {
@@ -115,6 +132,7 @@ class TooltipContainer extends React.Component {
                         tooltipComponent={this.renderTooltipComponent()}
                         closeTooltip={this.closeTooltip}
                         openSettings={this.openSettings}
+                        showCloseMessage={this.state.showingCloseMessage}
                     />
                 ) : null}
             </div>
