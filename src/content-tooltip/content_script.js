@@ -7,6 +7,7 @@ import {
 import { setupUIContainer, destroyUIContainer } from './components'
 import * as interactions from './interactions'
 import { injectCSS } from 'src/search-injection/dom'
+import { setTooltipState } from './utils'
 
 const openOptionsRPC = remoteFunction('openOptionsTab')
 
@@ -30,7 +31,7 @@ export async function init() {
             target.remove()
         },
         disableTooltip: () => {
-            console.log('disabling tooltip')
+            setTooltipState(false)
         },
     })
     interactions.setupTooltipTrigger(showTooltip)

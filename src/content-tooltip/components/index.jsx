@@ -18,8 +18,9 @@ export function setupUIContainer(
             'browser'
         ].storage.local.get({ [closeMessageShownKey]: false })
         const onCloseMessageShown = () => {
-            console.log('close message shown!')
-            window['browser'].storage.local.set({ closeMessageShownKey: true })
+            window['browser'].storage.local.set({
+                [closeMessageShownKey]: true,
+            })
         }
 
         ReactDOM.render(
