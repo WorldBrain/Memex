@@ -11,10 +11,11 @@ const images = {
     settings: getExtURL('/img/settings_grey.svg'),
 }
 
-const deriveTooltipClass = state =>
+const deriveTooltipClass = (state, showCloseMessage) =>
     classNames(styles.tooltip, {
         [styles.statePristine]: state === 'pristine',
         [styles.stateCopied]: state === 'copied',
+        [styles.tooltipWithCloseMessage]: showCloseMessage,
     })
 
 const Tooltip = ({
@@ -27,42 +28,31 @@ const Tooltip = ({
     openSettings,
 }) => (
     <div
-        className={deriveTooltipClass(state)}
+        className={deriveTooltipClass(state, showCloseMessage)}
         style={{ left: x, top: y }}
         id="memex-tooltip"
     >
-        <AnimationWrapper>{tooltipComponent}</AnimationWrapper>
-
-        <span className={styles.buttons}>
-            <a onClick={closeTooltip} className={styles.smallButton}>
-                <img
-                    className={styles.imgCross}
-                    src={images.cross}
-                    title={
-                        'Close once. Disable via Memex icon in the extension toolbar.'
-                    }
-                />
-            </a>
-            <a onClick={openSettings} className={styles.smallButton}>
-                <img className={styles.imgSettings} src={images.settings} />
-            </a>
-        </span>
+        {!showCloseMessage && (
+            <div>
+                <AnimationWrapper>{tooltipComponent}</AnimationWrapper>
+                {_renderButtons({ closeTooltip, openSettings })}
+            </div>
+        )}
 
         {showCloseMessage && (
-            <div className={styles.closeMessage}>
-                <div
-                    onClick={closeTooltip}
-                    className={styles.closeMessageCross}
-                >
-                    x
+            <div>
+                <div className={styles.closeMessage}>
+                    <div>It's your first time doing this</div>
+                    <div
+                        onClick={event =>
+                            closeTooltip(event, { disable: true })
+                        }
+                        className={styles.closeMessageDisableTooltip}
+                    >
+                        Disable on all sites
+                    </div>
                 </div>
-                <div>It's your first time doing this</div>
-                <div
-                    onClick={event => closeTooltip(event, { disable: true })}
-                    className={styles.closeMessageDisableTooltip}
-                >
-                    Disable on all sites
-                </div>
+                {_renderButtons({ closeTooltip })}
             </div>
         )}
     </div>
@@ -79,3 +69,29 @@ Tooltip.propTypes = {
 }
 
 export default Tooltip
+
+export function _renderButtons({ closeTooltip, openSettings }) {
+    return (
+        <span className={styles.buttons}>
+            <a onClick={closeTooltip} className={styles.smallButton}>
+                <img
+                    className={styles.imgCross}
+                    src={images.cross}
+                    title={
+                        'Close once. Disable via Memex icon in the extension toolbar.'
+                    }
+                />
+            </a>
+            {openSettings && (
+                <a onClick={openSettings} className={styles.smallButton}>
+                    <img className={styles.imgSettings} src={images.settings} />
+                </a>
+            )}
+        </span>
+    )
+}
+
+_renderButtons.propTypes = {
+    closeTooltip: PropTypes.func.isRequired,
+    openSettings: PropTypes.func,
+}

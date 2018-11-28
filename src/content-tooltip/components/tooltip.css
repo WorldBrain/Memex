@@ -52,6 +52,18 @@
     transition-delay: 0.3s;
 }
 
+.tooltip.tooltipWithCloseMessage {
+    &,
+    &.statePristine {
+        height: 80px;
+        width: 220px;
+    }
+}
+
+.tooltipWithCloseMessage::after {
+    bottom: calc(80px - 5px);
+}
+
 .tooltip.stateCopied {
     animation: expand-width 0.1s ease-in 0.2s;
     animation-fill-mode: forwards;
@@ -69,13 +81,13 @@
     }
 }
 
-.closeMessage {
+/* .closeMessage {
     position: absolute;
     border: 1px solid black;
     background: white;
     top: 50px;
     width: 110px;
-}
+} */
 
 .createButtons,
 .progressIndicator,
