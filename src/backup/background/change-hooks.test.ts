@@ -2,6 +2,8 @@ import * as expect from 'expect'
 import StorageManager from 'storex'
 import { DexieStorageBackend } from 'storex-backend-dexie'
 import inMemory from 'storex-backend-dexie/lib/in-memory'
+
+import { Dexie } from '../../search/types'
 import setupChangeTracking from './change-hooks'
 
 describe('Backup change hooks', () => {
@@ -25,7 +27,7 @@ describe('Backup change hooks', () => {
         const changes = []
         setupChangeTracking(
             storageManager as any,
-            async () => storageBackend.dexieInstance,
+            new Promise(res => res(storageBackend.dexieInstance as Dexie)),
             change => {
                 changes.push(change)
             },

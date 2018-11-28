@@ -1,5 +1,4 @@
-import Dexie from 'dexie'
-import { StorageManager } from '../../search/types'
+import { StorageManager, Dexie } from '../../search/types'
 
 export type ChangeTracker = (
     args: { collection: string; pk: string; operation: string },
@@ -7,10 +6,10 @@ export type ChangeTracker = (
 
 export default async function setupChangeTracking(
     { registry }: StorageManager,
-    getDb: () => Promise<Dexie>,
+    getDb: Promise<Dexie>,
     track: ChangeTracker,
 ) {
-    const db = await getDb()
+    const db = await getDb
 
     for (const collection in registry.collections) {
         if (registry.collections[collection].watch === false) {

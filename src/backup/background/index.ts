@@ -2,7 +2,7 @@ import { EventEmitter } from 'events'
 import * as AllRaven from 'raven-js'
 import { CollectionDefinition } from 'storex'
 
-import { getDb } from '../../search'
+import getDb from '../../search'
 import { StorageManager } from '../../search/types'
 import { makeRemotelyCallable } from '../../util/webextensionRPC'
 import { setupRequestInterceptors } from './redirect'
