@@ -5,7 +5,7 @@
         "no-empty": true
     },
     "linterOptions": {
-        "exclude": ["node_modules/**/*", "src/**/*.{js,jsx}"]
+        "exclude": ["node_modules/**/*", "src/**/*.{js,jsx}", "external/**/*"]
     },
     "rules": {
         "adjacent-overload-signatures": false,
