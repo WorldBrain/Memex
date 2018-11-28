@@ -1,7 +1,7 @@
 import { StorageManager } from '../../search/types'
 import { browser, Tabs, Storage } from 'webextension-polyfill-ts'
 
-import { createPageFromTab, Tag } from '../../search'
+import { createPageFromTab, Dexie } from '../../search'
 import { FeatureStorage } from '../../search/storage'
 import { STORAGE_KEYS as IDXING_PREF_KEYS } from '../../options/settings/constants'
 
@@ -20,16 +20,20 @@ export default class DirectLinkingStorage extends FeatureStorage {
     static DIRECT_LINKS_COLL = 'directLinks'
 
     private _browserStorageArea: Storage.StorageArea
+    private _getDb: Promise<Dexie>
 
     constructor({
         storageManager,
         browserStorageArea = browser.storage.local,
+        getDb,
     }: {
         storageManager: StorageManager
         browserStorageArea: Storage.StorageArea
+        getDb: Promise<Dexie>
     }) {
         super(storageManager)
         this._browserStorageArea = browserStorageArea
+        this._getDb = getDb
 
         this.storageManager.registry.registerCollection(
             DirectLinkingStorage.DIRECT_LINKS_COLL,
@@ -116,7 +120,7 @@ export default class DirectLinkingStorage extends FeatureStorage {
             stubOnly: !indexingPrefs.shouldIndexLinks,
         })
 
-        await page.loadRels()
+        await page.loadRels(this._getDb)
 
         // Add new visit if none, else page won't appear in results
         // TODO: remove once search changes to incorporate assoc. page data apart from bookmarks/visits
@@ -124,7 +128,7 @@ export default class DirectLinkingStorage extends FeatureStorage {
             page.addVisit()
         }
 
-        await page.save()
+        await page.save(this._getDb)
     }
 }
 
@@ -134,16 +138,20 @@ export class AnnotationStorage extends FeatureStorage {
     static TAGS_COLL = 'tags'
 
     private _browserStorageArea: Storage.StorageArea
+    private _getDb: Promise<Dexie>
 
     constructor({
         storageManager,
         browserStorageArea = browser.storage.local,
+        getDb,
     }: {
         storageManager: StorageManager
         browserStorageArea: Storage.StorageArea
+        getDb: Promise<Dexie>
     }) {
         super(storageManager)
         this._browserStorageArea = browserStorageArea
+        this._getDb = getDb
 
         this.storageManager.registry.registerCollection(
             AnnotationStorage.ANNOTATIONS_COLL,
@@ -189,7 +197,7 @@ export class AnnotationStorage extends FeatureStorage {
             stubOnly: !indexingPrefs.shouldIndexLinks,
         })
 
-        await page.loadRels()
+        await page.loadRels(this._getDb)
 
         // Add new visit if none, else page won't appear in results
         // TODO: remove once search changes to incorporate assoc. page data apart from bookmarks/visits
@@ -197,7 +205,7 @@ export class AnnotationStorage extends FeatureStorage {
             page.addVisit()
         }
 
-        await page.save()
+        await page.save(this._getDb)
     }
 
     async getAnnotationByPk(url: string) {

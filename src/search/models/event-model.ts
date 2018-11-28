@@ -17,7 +17,6 @@ abstract class EventModel extends AbstractModel implements Props {
 
     constructor({ url, time }: Props) {
         super()
-
         this.url = url
         this.time = typeof time === 'number' ? time : +time
     }

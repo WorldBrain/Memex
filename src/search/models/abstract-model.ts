@@ -1,3 +1,5 @@
+import { Dexie } from '../types'
+
 /**
  * Basic Model blueprint. Each Model representing a Dexie index table should extend this.
  */
@@ -41,9 +43,7 @@ export default abstract class AbstractModel {
     }
 
     /**
-     * Persist the current Modol instance to the `db`.
-     *
-     * @return {Promise<any>}
+     * Persist the current Model instance to the `db`.
      */
-    public abstract async save()
+    public abstract async save(getDb: Promise<Dexie>)
 }

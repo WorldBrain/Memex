@@ -1,11 +1,13 @@
-import getDb, { SearchParams, FilteredURLs, storageManager } from '..'
-import { remoteFunction } from '../../util/webextensionRPC'
+import { Dexie, SearchParams, FilteredURLs, storageManager } from '..'
 import CustomListBackground from '../../custom-lists/background'
 import intersection from 'lodash/fp/intersection'
 import flatten from 'lodash/fp/flatten'
 import difference from 'lodash/fp/difference'
 
-const pageIndexLookup = async (index: string, matches: string[]) => {
+const pageIndexLookup = (getDb: Promise<Dexie>) => async (
+    index: string,
+    matches: string[],
+) => {
     const db = await getDb
     return db.pages
         .where(index)
@@ -63,7 +65,9 @@ export class FilteredURLsManager implements FilteredURLs {
     }
 }
 
-async function tagSearch({ tags }: Partial<SearchParams>) {
+const tagSearch = (getDb: Promise<Dexie>) => async ({
+    tags,
+}: Partial<SearchParams>) => {
     const db = await getDb
     if (!tags || !tags.length) {
         return undefined
@@ -82,23 +86,25 @@ async function tagSearch({ tags }: Partial<SearchParams>) {
 /**
  * Grabs all URLs associated with given domains; either matching in `domain` or `hostname` fields.
  */
-async function domainSearch(domains: string[]) {
+const domainSearch = (getDb: Promise<Dexie>) => async (domains: string[]) => {
     if (!domains.length) {
         return undefined
     }
 
     const [domainUrls, hostnameUrls] = await Promise.all([
-        pageIndexLookup('hostname', domains),
-        pageIndexLookup('domain', domains),
+        pageIndexLookup(getDb)('hostname', domains),
+        pageIndexLookup(getDb)('domain', domains),
     ])
 
     return new Set([...domainUrls, ...hostnameUrls])
 }
 
-const incDomainSearch = ({ domains }: Partial<SearchParams>) =>
-    domainSearch(domains)
-const excDomainSearch = ({ domainsExclude }: Partial<SearchParams>) =>
-    domainSearch(domainsExclude)
+const incDomainSearch = (getDb: Promise<Dexie>) => ({
+    domains,
+}: Partial<SearchParams>) => domainSearch(getDb)(domains)
+const excDomainSearch = (getDb: Promise<Dexie>) => ({
+    domainsExclude,
+}: Partial<SearchParams>) => domainSearch(getDb)(domainsExclude)
 
 async function listSearch({ lists }: Partial<SearchParams>) {
     if (!lists || !lists.length || !lists[0].length) {
@@ -123,14 +129,14 @@ async function listSearch({ lists }: Partial<SearchParams>) {
 /**
  * of URLs that match the filters to use as a white-list.
  */
-export async function findFilteredUrls(
+export const findFilteredUrls = (getDb: Promise<Dexie>) => async (
     params: Partial<SearchParams>,
-): Promise<FilteredURLs> {
+): Promise<FilteredURLs> => {
     const [incDomainUrls, excDomainUrls, tagUrls, listUrls] = await Promise.all(
         [
-            incDomainSearch(params),
-            excDomainSearch(params),
-            tagSearch(params),
+            incDomainSearch(getDb)(params),
+            excDomainSearch(getDb)(params),
+            tagSearch(getDb)(params),
             listSearch(params),
         ],
     )

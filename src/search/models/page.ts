@@ -1,4 +1,4 @@
-import getDb, { VisitInteraction } from '..'
+import { VisitInteraction, Dexie } from '..'
 import AbstractModel from './abstract-model'
 import Visit from './visit'
 import Bookmark from './bookmark'
@@ -236,7 +236,7 @@ export default class Page extends AbstractModel
         }
     }
 
-    async loadRels() {
+    async loadRels(getDb: Promise<Dexie>) {
         const db = await getDb
         return db.transaction('r', db.tables, async () => {
             this.loadBlobs()
@@ -261,7 +261,7 @@ export default class Page extends AbstractModel
         })
     }
 
-    async delete() {
+    async delete(getDb: Promise<Dexie>) {
         const db = await getDb
         return db.transaction('rw', db.tables, () =>
             Promise.all([
@@ -273,7 +273,7 @@ export default class Page extends AbstractModel
         )
     }
 
-    async save() {
+    async save(getDb: Promise<Dexie>) {
         const db = await getDb
         return db.transaction('rw', db.tables, async () => {
             this.loadBlobs()
@@ -295,13 +295,13 @@ export default class Page extends AbstractModel
 
             // Insert or update all associated visits + tags
             const [visitIds, tagIds] = await Promise.all([
-                Promise.all(this[visitsProp].map(visit => visit.save())),
-                Promise.all(this[tagsProp].map(tag => tag.save())),
+                Promise.all(this[visitsProp].map(visit => visit.save(getDb))),
+                Promise.all(this[tagsProp].map(tag => tag.save(getDb))),
             ])
 
             // Either try to update or delete the assoc. bookmark
             if (this[bookmarkProp] != null) {
-                this[bookmarkProp].save()
+                this[bookmarkProp].save(getDb)
             } else {
                 await db.bookmarks.where({ url: this.url }).delete()
             }
