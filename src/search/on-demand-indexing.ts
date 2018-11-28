@@ -5,6 +5,7 @@ import fetchPageData from '../page-analysis/background/fetch-page-data'
 import pipeline from './pipeline'
 import { Page } from './models'
 import { STORAGE_KEYS as IDXING_PREF_KEYS } from '../options/settings/constants'
+import { Dexie } from './types'
 
 interface Props {
     url: string
@@ -12,12 +13,12 @@ interface Props {
     stubOnly?: boolean
 }
 
-export async function createPageFromTab({
+export const createPageFromTab = (getDb: Promise<Dexie>) => async ({
     url,
     tabId,
     stubOnly = false,
     ...pageAnalysisArgs
-}: Props) {
+}: Props) => {
     if (tabId == null) {
         throw new Error(`No tabID provided to extract content: ${url}`)
     }
@@ -38,11 +39,14 @@ export async function createPageFromTab({
     })
 
     const page = new Page(pageData)
-    await page.loadRels()
+    await page.loadRels(getDb)
     return page
 }
 
-export async function createPageFromUrl({ url, stubOnly = false }: Props) {
+export const createPageFromUrl = (getDb: Promise<Dexie>) => async ({
+    url,
+    stubOnly = false,
+}: Props) => {
     const fetchRes = await fetchPageData({
         url,
         opts: {
@@ -61,7 +65,7 @@ export async function createPageFromUrl({ url, stubOnly = false }: Props) {
     })
 
     const page = new Page(pageData)
-    await page.loadRels()
+    await page.loadRels(getDb)
     return page
 }
 
@@ -70,14 +74,16 @@ export async function createPageFromUrl({ url, stubOnly = false }: Props) {
  * Also sets the `stubOnly` option based on user bookmark/tag indexing pref.
  * TODO: Better name?
  */
-export async function createPageViaBmTagActs(props: Props) {
+export const createPageViaBmTagActs = (getDb: Promise<Dexie>) => async (
+    props: Props,
+) => {
     const {
         [IDXING_PREF_KEYS.BOOKMARKS]: fullyIndex,
     } = await browser.storage.local.get(IDXING_PREF_KEYS.BOOKMARKS)
 
     if (props.tabId) {
-        return createPageFromTab({ stubOnly: !fullyIndex, ...props })
+        return createPageFromTab(getDb)({ stubOnly: !fullyIndex, ...props })
     }
 
-    return createPageFromUrl({ stubOnly: !fullyIndex, ...props })
+    return createPageFromUrl(getDb)({ stubOnly: !fullyIndex, ...props })
 }

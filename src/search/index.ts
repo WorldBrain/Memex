@@ -3,6 +3,13 @@ import DexieOrig from 'dexie'
 import storageManager, { backend } from './storex'
 import { Dexie } from './types'
 import { Page, Visit, Bookmark, Tag, FavIcon } from './models'
+import * as addMethods from './add'
+import * as delMethods from './del'
+import * as tagMethods from './tags'
+import * as bookmarkMethods from './bookmarks'
+import * as utilMethods from './util'
+import * as searchMethods from './search'
+import * as onDemandMethods from './on-demand-indexing'
 
 // This code allows the `getDb` Promise to delay resolution until
 //   the `initStorageManager` function is invoked. This is currently
@@ -129,10 +136,29 @@ export * from './models'
 
 export { storageManager }
 export default getDb
-
-//
-// Adding stuff
-//
+const addPage = addMethods.addPage(getDb)
+const addPageTerms = addMethods.addPageTerms(getDb)
+const updateTimestampMeta = addMethods.updateTimestampMeta(getDb)
+const addVisit = addMethods.addVisit(getDb)
+const addFavIcon = addMethods.addFavIcon(getDb)
+const delPages = delMethods.delPages(getDb)
+const delPagesByDomain = delMethods.delPagesByDomain(getDb)
+const delPagesByPattern = delMethods.delPagesByPattern(getDb)
+const addTag = tagMethods.addTag(getDb)
+const delTag = tagMethods.delTag(getDb)
+const fetchPageTags = tagMethods.fetchPageTags(getDb)
+const addBookmark = bookmarkMethods.addBookmark(getDb)
+const delBookmark = bookmarkMethods.delBookmark(getDb)
+const pageHasBookmark = bookmarkMethods.pageHasBookmark(getDb)
+const getPage = utilMethods.getPage(getDb)
+const grabExistingKeys = utilMethods.grabExistingKeys(getDb)
+const search = searchMethods.search(getDb)
+const suggest = searchMethods.suggest(getDb)
+const extendedSuggest = searchMethods.extendedSuggest(getDb)
+const getMatchingPageCount = searchMethods.getMatchingPageCount(getDb)
+const domainHasFavIcon = searchMethods.domainHasFavIcon(getDb)
+const createPageFromTab = onDemandMethods.createPageFromTab(getDb)
+const createPageFromUrl = onDemandMethods.createPageFromUrl(getDb)
 
 export {
     addPage,
@@ -140,41 +166,22 @@ export {
     updateTimestampMeta,
     addVisit,
     addFavIcon,
-} from './add'
-
-//
-// Deleting stuff
-
-export { delPages, delPagesByDomain, delPagesByPattern } from './del'
-
-//
-// Tags-specific
-//
-
-export { addTag, delTag, fetchPageTags } from './tags'
-
-//
-// Bookmarks-specific
-//
-
-export { addBookmark, delBookmark, pageHasBookmark } from './bookmarks'
-
-//
-// Utilities
-//
-
-export { getPage, grabExistingKeys } from './util'
-
-//
-// Searching & suggesting
-//
-
-export {
+    delPages,
+    delPagesByDomain,
+    delPagesByPattern,
+    addTag,
+    delTag,
+    fetchPageTags,
+    addBookmark,
+    delBookmark,
+    pageHasBookmark,
+    getPage,
+    grabExistingKeys,
     search,
     suggest,
     extendedSuggest,
     getMatchingPageCount,
     domainHasFavIcon,
-} from './search'
-
-export { createPageFromTab, createPageFromUrl } from './on-demand-indexing'
+    createPageFromTab,
+    createPageFromUrl,
+}

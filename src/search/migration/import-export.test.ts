@@ -62,7 +62,7 @@ describe('Old=>New index migration', () => {
             expect(page).toEqual(expected)
 
             // Test assoc. data via getters
-            await storedPage.loadRels()
+            await storedPage.loadRels(getDb)
             expect(storedPage.screenshotURI).toBe(screenshotURI)
             expect(storedPage.hasBookmark).toBe(true)
             expect(storedPage.bookmark.time).toBe(bookmark)
@@ -81,7 +81,7 @@ describe('Old=>New index migration', () => {
         }
 
         test.skip('Importing data to new index', async () => {
-            await importNewPage(data.EXPORTED_PAGE_1 as ExportedPage)
+            await importNewPage(getDb)(data.EXPORTED_PAGE_1 as ExportedPage)
 
             // index.useOld = false
             // Make sure search works post-import

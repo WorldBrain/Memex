@@ -1,6 +1,5 @@
-import getDb from '..'
 import { Page, FavIcon } from '../models'
-import { SearchParams, SearchResult } from '../types'
+import { SearchParams, SearchResult, Dexie } from '../types'
 
 export interface SearchDisplayResult {
     url: string
@@ -16,11 +15,12 @@ const mapPageToDisplay = (
     pagesMap: Map<string, Page>,
     favIconsMap: Map<string, FavIcon>,
     { endDate }: SearchParams,
+    getDb: Promise<Dexie>,
 ) =>
     async function([url]: SearchResult): Promise<SearchDisplayResult> {
         const page = pagesMap.get(url)
         const favIcon = favIconsMap.get(page.hostname)
-        await page.loadRels()
+        await page.loadRels(getDb)
 
         return {
             url: page.fullUrl,
@@ -36,10 +36,10 @@ const mapPageToDisplay = (
 /**
  * Used as a helper to shape the search results for the current UI's expected result shape.
  */
-export async function mapResultsToDisplay(
+export const mapResultsToDisplay = (getDb: Promise<Dexie>) => async (
     results: SearchResult[],
     params: SearchParams,
-) {
+) => {
     const db = await getDb
     const resultUrls = results.map(([url]) => url)
 
@@ -64,6 +64,6 @@ export async function mapResultsToDisplay(
 
     // Grab all the Pages needed for results (mapping over input `results` to maintain order)
     return Promise.all(
-        results.map(mapPageToDisplay(pagesMap, favIconsMap, params)),
+        results.map(mapPageToDisplay(pagesMap, favIconsMap, params, getDb)),
     )
 }

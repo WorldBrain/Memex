@@ -1,4 +1,4 @@
-import getDb, { SearchParams, PageResultsMap } from '..'
+import { SearchParams, PageResultsMap, Dexie } from '..'
 import QueryBuilder from '../query-builder'
 import { initErrHandler } from '../storage'
 import { groupLatestEventsByUrl, mapUrlsToLatestEvents } from './events'
@@ -9,7 +9,7 @@ import { paginate, applyScores } from './util'
 export { domainHasFavIcon } from './fav-icon'
 export { suggest, extendedSuggest } from './suggest'
 
-export async function search({
+export const search = (getDb: Promise<Dexie>) => async ({
     query,
     showOnlyBookmarks,
     mapResultsFunc = mapResultsToDisplay,
@@ -18,7 +18,7 @@ export async function search({
     tags = [],
     lists = [],
     ...restParams
-}) {
+}) => {
     const db = await getDb
     // Extract query terms via QueryBuilder (may change)
     const qb = new QueryBuilder()
@@ -63,9 +63,9 @@ export async function search({
 
     const { docs, totalCount } = await db
         .transaction('r', db.tables, async () => {
-            const results = await fullSearch(params)
+            const results = await fullSearch(getDb)(params)
 
-            const mappedDocs = await mapResultsFunc(results.ids, params)
+            const mappedDocs = await mapResultsFunc(getDb)(results.ids, params)
 
             return { docs: mappedDocs, totalCount: results.totalCount }
         })
@@ -80,7 +80,9 @@ export async function search({
 }
 
 // WARNING: Inefficient; goes through entire table
-export async function getMatchingPageCount(pattern) {
+export const getMatchingPageCount = (
+    getDb: Promise<Dexie>,
+) => async pattern => {
     const db = await getDb
     const re = new RegExp(pattern, 'i')
     return db.pages
@@ -92,12 +94,12 @@ export async function getMatchingPageCount(pattern) {
 /**
  * Main search logic. Calls the rest of serach depending on input search params.
  */
-async function fullSearch({
+const fullSearch = (getDb: Promise<Dexie>) => async ({
     terms = [],
     termsExclude = [],
     ...params
-}: SearchParams) {
-    const filteredUrls = await findFilteredUrls(params)
+}: SearchParams) => {
+    const filteredUrls = await findFilteredUrls(getDb)(params)
 
     let totalCount: number = null
     let urlScoresMap: PageResultsMap
@@ -105,22 +107,22 @@ async function fullSearch({
     // Few different cases of search params we can take short-cuts on
     if (!terms.length && filteredUrls.isDataFiltered) {
         // Blank search + domain/tags filters: just grab the events for filtered URLs and paginate
-        urlScoresMap = await mapUrlsToLatestEvents(params, [
+        urlScoresMap = await mapUrlsToLatestEvents(getDb)(params, [
             ...filteredUrls.include,
         ])
         totalCount = urlScoresMap.size
     } else if (!terms.length) {
         // Blank search: simply do lookback from `endDate` on visits and score URLs by latest
-        urlScoresMap = await groupLatestEventsByUrl(params, filteredUrls)
+        urlScoresMap = await groupLatestEventsByUrl(getDb)(params, filteredUrls)
     } else {
         // Terms search: do terms lookup first then latest event lookup (within time bounds) for each result
-        const urlScoreMultiMap = await textSearch(
+        const urlScoreMultiMap = await textSearch(getDb)(
             { terms, termsExclude },
             filteredUrls,
         )
 
         const urls = [...urlScoreMultiMap.keys()]
-        const latestEvents = await mapUrlsToLatestEvents(params, urls)
+        const latestEvents = await mapUrlsToLatestEvents(getDb)(params, urls)
 
         urlScoresMap = applyScores(urlScoreMultiMap, latestEvents)
         totalCount = urlScoresMap.size

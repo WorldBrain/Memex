@@ -1,3 +1,4 @@
+import * as expect from 'expect'
 import getDb, * as index from '.'
 import * as DATA from './index.test.data'
 

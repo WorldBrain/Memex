@@ -1,37 +1,40 @@
-import Dexie from 'dexie'
+import DexieOrig from 'dexie'
 
-import getDb, { Page } from '.'
+import { Page } from '.'
 import { initErrHandler } from './storage'
+import { Dexie } from './types'
 import normalizeUrl from '../util/encode-url-for-id'
 
 type QueryApplier = (
-    table: Dexie.Table<Page, string>,
-) => Dexie.Collection<Page, string>
+    table: DexieOrig.Table<Page, string>,
+) => DexieOrig.Collection<Page, string>
 
-const deletePages = async (applyQuery: QueryApplier) => {
+const deletePages = async (applyQuery: QueryApplier, getDb: Promise<Dexie>) => {
     const db = await getDb
     return db.transaction('rw', db.tables, async () => {
         const pages = await applyQuery(db.pages).toArray()
 
-        await Promise.all(pages.map(page => page.delete())).catch(
+        await Promise.all(pages.map(page => page.delete(getDb))).catch(
             initErrHandler(),
         )
     })
 }
 
-export function delPages(urls: string[]) {
+export const delPages = (getDb: Promise<Dexie>) => (urls: string[]) => {
     const normalizedUrls: string[] = urls.map(normalizeUrl as any)
 
-    return deletePages(table => table.where('url').anyOf(normalizedUrls))
+    return deletePages(table => table.where('url').anyOf(normalizedUrls), getDb)
 }
 
-export function delPagesByDomain(url: string) {
-    return deletePages(table => table.where('domain').equals(url))
+export const delPagesByDomain = (getDb: Promise<Dexie>) => (url: string) => {
+    return deletePages(table => table.where('domain').equals(url), getDb)
 }
 
 // WARNING: Inefficient; goes through entire table
-export function delPagesByPattern(pattern: string | RegExp) {
+export const delPagesByPattern = (getDb: Promise<Dexie>) => (
+    pattern: string | RegExp,
+) => {
     const re = typeof pattern === 'string' ? new RegExp(pattern, 'i') : pattern
 
-    return deletePages(table => table.filter(page => re.test(page.url)))
+    return deletePages(table => table.filter(page => re.test(page.url)), getDb)
 }

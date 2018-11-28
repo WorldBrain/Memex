@@ -5,7 +5,7 @@ import stemmer from 'memex-stemmer'
 import UrlField from './storage/url-field'
 import schemaPatcher from './storage/dexie-schema'
 import { suggestObjects } from './search/suggest'
-import { StorageManager } from './types'
+import { StorageManager, Dexie } from './types'
 
 export const backend = new DexieStorageBackend({
     stemmer,
@@ -22,7 +22,12 @@ instance.registry.fieldTypes.registerType('url', UrlField as any)
 const oldMethod = instance.collection.bind(instance)
 instance.collection = (name: string) => ({
     ...oldMethod(name),
-    suggestObjects: (query, opts) => suggestObjects(name, query, opts),
+    suggestObjects: (query, opts) =>
+        suggestObjects(new Promise(res => res(backend.dexieInstance as Dexie)))(
+            name,
+            query,
+            opts,
+        ),
     findByPk: function(pk) {
         return this.backend.dexie[name].get(pk)
     }.bind(instance),

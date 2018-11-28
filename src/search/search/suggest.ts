@@ -1,16 +1,19 @@
-import Dexie from 'dexie'
+import DexieOrig from 'dexie'
 
-import getDb from '..'
-import { SuggestOptions, SuggestResult } from '../types'
+import { SuggestOptions, SuggestResult, Dexie } from '../types'
 import { UnimplementedError, InvalidFindOptsError } from '../storage/errors'
 import { Tag, Page } from '../models'
 import { initErrHandler } from '../storage'
 
 type SuggestType = 'domain' | 'tag'
 
-export async function suggest(query = '', type: SuggestType, limit = 10) {
+export const suggest = (getDb: Promise<Dexie>) => async (
+    query = '',
+    type: SuggestType,
+    limit = 10,
+) => {
     const db = await getDb
-    const applyQuery = <T, Key>(where: Dexie.WhereClause<T, Key>) =>
+    const applyQuery = <T, Key>(where: DexieOrig.WhereClause<T, Key>) =>
         where
             .startsWith(query)
             .limit(limit)
@@ -33,11 +36,11 @@ export async function suggest(query = '', type: SuggestType, limit = 10) {
     }
 }
 
-export async function suggestObjects<S, P = any>(
+export const suggestObjects = (getDb: Promise<Dexie>) => async <S, P = any>(
     collection: string,
     query,
     options: SuggestOptions = {},
-) {
+) => {
     const db = await getDb
     // Grab first entry from the filter query; ignore rest for now
     const [[indexName, value], ...fields] = Object.entries<string>(query)
@@ -83,13 +86,13 @@ export async function suggestObjects<S, P = any>(
 }
 
 // Used to provide initial suggestions for tags that are not associated with the list.
-export async function extendedSuggest(
+export const extendedSuggest = (getDb: Promise<Dexie>) => async (
     notInclude = [],
     type: SuggestType,
     limit = 20,
-) {
+) => {
     const db = await getDb
-    const applyQuery = <T, Key>(where: Dexie.WhereClause<T, Key>) =>
+    const applyQuery = <T, Key>(where: DexieOrig.WhereClause<T, Key>) =>
         where
             .noneOf(notInclude)
             .limit(limit)
