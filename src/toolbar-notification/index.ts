@@ -1,1 +1,3 @@
-export function showToolbarNotification(type: string) {}
+export function showToolbarNotification(type: string) {
+    return
+}

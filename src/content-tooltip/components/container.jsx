@@ -27,7 +27,7 @@ class TooltipContainer extends React.Component {
         showTooltip: false,
         position: { x: 250, y: 200 },
         tooltipState: 'copied',
-        showingCloseMessage: true,
+        showingCloseMessage: false,
     }
 
     componentDidMount() {

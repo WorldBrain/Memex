@@ -81,13 +81,9 @@
     }
 }
 
-/* .closeMessage {
-    position: absolute;
-    border: 1px solid black;
-    background: white;
-    top: 50px;
-    width: 110px;
-} */
+.closeMessage {
+    width: calc(100% - 25px);
+}
 
 .createButtons,
 .progressIndicator,

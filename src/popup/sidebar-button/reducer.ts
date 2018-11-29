@@ -8,7 +8,7 @@ export const defState: State = {}
 
 const reducer = createReducer<State>({}, defState)
 
-reducer.on(<any>acts.openSideBar, state => ({
+reducer.on(acts.openSideBar as any, state => ({
     ...state,
 }))
 

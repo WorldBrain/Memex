@@ -33,14 +33,14 @@ const Tooltip = ({
         id="memex-tooltip"
     >
         {!showCloseMessage && (
-            <div>
+            <React.Fragment>
                 <AnimationWrapper>{tooltipComponent}</AnimationWrapper>
                 {_renderButtons({ closeTooltip, openSettings })}
-            </div>
+            </React.Fragment>
         )}
 
         {showCloseMessage && (
-            <div>
+            <React.Fragment>
                 <div className={styles.closeMessage}>
                     <div>It's your first time doing this</div>
                     <div
@@ -53,7 +53,7 @@ const Tooltip = ({
                     </div>
                 </div>
                 {_renderButtons({ closeTooltip })}
-            </div>
+            </React.Fragment>
         )}
     </div>
 )

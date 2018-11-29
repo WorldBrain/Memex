@@ -35,7 +35,7 @@ class InPageSwitches extends PureComponent<Props> {
     render() {
         return (
             <Button
-                onClick={() => {}}
+                onClick={() => null}
                 btnClass={buttonStyles.linkIcon}
                 title={'Enable Memex sidebar & Highlighting tooltip'}
             >
