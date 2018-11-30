@@ -35,7 +35,7 @@ class TooltipContainer extends React.Component {
     }
 
     showTooltip = position => {
-        if (this.state.tooltipState !== 'running') {
+        if (!this.state.showTooltip && this.state.tooltipState !== 'running') {
             this.setState({
                 showTooltip: true,
                 position,
