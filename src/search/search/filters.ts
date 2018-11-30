@@ -1,4 +1,5 @@
-import { Dexie, SearchParams, FilteredURLs, storageManager } from '..'
+import initStorex from '../memex-storex'
+import { Dexie, SearchParams, FilteredURLs } from '..'
 import CustomListBackground from '../../custom-lists/background'
 import intersection from 'lodash/fp/intersection'
 import flatten from 'lodash/fp/flatten'
@@ -111,7 +112,9 @@ async function listSearch({ lists }: Partial<SearchParams>) {
         return undefined
     }
 
-    const customList = new CustomListBackground({ storageManager })
+    const customList = new CustomListBackground({
+        storageManager: initStorex(),
+    })
 
     const urls = new Set<string>()
 
