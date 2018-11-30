@@ -1,7 +1,8 @@
 import 'babel-polyfill'
 import 'core-js/es7/symbol'
 
-import getDb, { storageManager, initStorageManager } from './search'
+import initStorex from './search/memex-storex'
+import getDb, { setStorexBackend } from './search'
 import internalAnalytics from './analytics/internal'
 import initSentry from './util/raven'
 
@@ -23,6 +24,8 @@ import './imports/background'
 import './omnibar'
 
 initSentry()
+
+const storageManager = initStorex()
 
 const notifications = new NotificationBackground({ storageManager })
 notifications.setupRemoteFunctions()
@@ -62,8 +65,10 @@ const bgScript = new BackgroundScript({ notifsBackground: notifications })
 bgScript.setupRemoteFunctions()
 bgScript.setupWebExtAPIHandlers()
 
-initStorageManager()
-getDb.then(() => internalAnalytics.registerOperations(eventLog))
+storageManager.finishInitialization().then(() => {
+    setStorexBackend(storageManager.backend)
+    internalAnalytics.registerOperations(eventLog)
+})
 
 // Attach interesting features onto global window scope for interested users
 window['backup'] = backupModule

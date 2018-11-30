@@ -1,7 +1,6 @@
-import DexieOrig from 'dexie'
+import { DexieStorageBackend } from 'storex-backend-dexie'
 
-import storageManager, { backend } from './storex'
-import { Dexie } from './types'
+import initDexie from './dexie'
 import { Page, Visit, Bookmark, Tag, FavIcon } from './models'
 import * as addMethods from './add'
 import * as delMethods from './del'
@@ -11,130 +10,43 @@ import * as utilMethods from './util'
 import * as searchMethods from './search'
 import * as onDemandMethods from './on-demand-indexing'
 
-// This code allows the `getDb` Promise to delay resolution until
-//   the `initStorageManager` function is invoked. This is currently
-//   needed to make sure the init code that runs inside `getDb` init
-//   logic waits until all the `FeatureStorage` backends have a chance
-//   to register their collections with storex.
-//   TODO: more sane solution
-let resolveFeaturesReady = () => undefined
-const featuresReady = new Promise(resolve => (resolveFeaturesReady = resolve))
+/*
+ * Bit of a hack to allow the storex Dexie backend to be available to all
+ * the legacy code that uses Dexie directly (i.e., all this module's exports).
+ * Storex is init'd async, hence this needs to be a Promise that resolves to
+ * the backend. It is resolved after storex is init'd in the BG script entrypoint.
+ */
+let resolveBackend = backend => undefined
+const storexBackend = new Promise<DexieStorageBackend>(
+    resolve => (resolveBackend = resolve),
+)
+export const setStorexBackend = backend => resolveBackend(backend)
 
-export const initStorageManager = () => {
-    resolveFeaturesReady()
-}
-
+/**
+ * WARNING: This should only ever be used by the legacy memex code which relies on Dexie.
+ * Any new code should use the storex instance set up in the BG script entrypoint.
+ */
 const getDb = (async () => {
-    // TODO: move these declarations to own feature storage classes
-    storageManager.registry.registerCollections({
-        pages: {
-            version: new Date(2018, 1, 1),
-            fields: {
-                url: { type: 'string' },
-                fullUrl: { type: 'text' },
-                fullTitle: { type: 'text' },
-                text: { type: 'text' },
-                domain: { type: 'string' },
-                hostname: { type: 'string' },
-                screenshot: { type: 'media' },
-                lang: { type: 'string' },
-                canonicalUrl: { type: 'url' },
-                description: { type: 'text' },
-            },
-            indices: [
-                { field: 'url', pk: true },
-                { field: 'text', fullTextIndexName: 'terms' },
-                { field: 'fullTitle', fullTextIndexName: 'titleTerms' },
-                { field: 'fullUrl', fullTextIndexName: 'urlTerms' },
-                { field: 'domain' },
-                { field: 'hostname' },
-            ],
-        },
-        visits: {
-            version: new Date(2018, 1, 1),
-            fields: {
-                url: { type: 'string' },
-                time: { type: 'timestamp' },
-                duration: { type: 'int' },
-                scrollMaxPerc: { type: 'float' },
-                scrollMaxPx: { type: 'float' },
-                scrollPerc: { type: 'float' },
-                scrollPx: { type: 'float' },
-            },
-            indices: [{ field: ['time', 'url'], pk: true }, { field: 'url' }],
-        },
-        bookmarks: {
-            version: new Date(2018, 1, 1),
-            fields: {
-                url: { type: 'string' },
-                time: { type: 'timestamp' },
-            },
-            indices: [{ field: 'url', pk: true }, { field: 'time' }],
-        },
-        tags: {
-            version: new Date(2018, 1, 1),
-            fields: {
-                url: { type: 'string' },
-                name: { type: 'string' },
-            },
-            indices: [
-                { field: ['name', 'url'], pk: true },
-                { field: 'name' },
-                { field: 'url' },
-            ],
-        },
-        favIcons: {
-            version: new Date(2018, 1, 1),
-            fields: {
-                hostname: { type: 'string' },
-                favIcon: { type: 'media' },
-            },
-            indices: [{ field: 'hostname', pk: true }],
-        },
+    const backend = await storexBackend
+
+    // Extend the base Dexie instance with all the Memex-specific stuff we've added
+    const dexie = initDexie({
+        backend,
+        tableClasses: [
+            { table: 'pages', model: Page },
+            { table: 'visits', model: Visit },
+            { table: 'bookmarks', model: Bookmark },
+            { table: 'tags', model: Tag },
+            { table: 'favIcons', model: FavIcon },
+        ],
     })
 
-    await featuresReady
-    await storageManager.finishInitialization()
-
-    // Set up model classes
-    const index = backend['dexie'] as Dexie
-    index.pages.mapToClass(Page)
-    index.visits.mapToClass(Visit)
-    index.bookmarks.mapToClass(Bookmark)
-    index.tags.mapToClass(Tag)
-    index.favIcons.mapToClass(FavIcon)
-
-    /**
-     * Overrides `Dexie._createTransaction` to ensure to add `backupChanges` table to any readwrite transaction.
-     * This allows us to avoid specifying this table on every single transaction to allow table hooks to write to
-     * our change tracking table.
-     *
-     * TODO: Add clause to condition to check if backups is enabled
-     *  (no reason to add this table to all transactions if backups is off)
-     */
-    index['_createTransaction'] =
-        process.env.NODE_ENV === 'test'
-            ? index['_createTransaction']
-            : DexieOrig.override(
-                  index['_createTransaction'],
-                  origFn => (mode: string, tables: string[], ...args) => {
-                      if (
-                          mode === 'readwrite' &&
-                          !tables.includes('backupChanges')
-                      ) {
-                          tables = [...tables, 'backupChanges']
-                      }
-                      return origFn.call(index, mode, tables, ...args)
-                  },
-              )
-
-    return index
+    return dexie
 })()
 
 export * from './types'
 export * from './models'
 
-export { storageManager }
 export default getDb
 const addPage = addMethods.addPage(getDb)
 const addPageTerms = addMethods.addPageTerms(getDb)
