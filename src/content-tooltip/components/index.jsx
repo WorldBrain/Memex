@@ -28,7 +28,8 @@ export function setupUIContainer(
                 onInit={showTooltip => resolve(showTooltip)}
                 destroy={destroyTooltip}
                 disable={disableTooltip}
-                closeMessageShown={closeMessageShown}
+                // closeMessageShown={closeMessageShown}
+                closeMessageShown={false}
                 onCloseMessageShown={onCloseMessageShown}
                 createAndCopyDirectLink={createAndCopyDirectLink}
                 createAnnotation={createAnnotation}

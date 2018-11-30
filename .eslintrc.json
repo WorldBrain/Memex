@@ -39,8 +39,19 @@
         "space-before-function-paren": "off",
         "space-infix-ops": "off",
         "no-empty": "error",
-        "no-multiple-empty-lines": ["error", { "max": 2, "maxEOF": 0 }],
-        "no-multi-spaces": ["error", { "ignoreEOLComments": true }],
+        "no-multiple-empty-lines": [
+            "error",
+            {
+                "max": 2,
+                "maxEOF": 0
+            }
+        ],
+        "no-multi-spaces": [
+            "error",
+            {
+                "ignoreEOLComments": true
+            }
+        ],
         "no-unused-vars": "error",
         "no-return-await": "error",
         "promise/avoid-new": "off",
@@ -56,10 +67,17 @@
         "react/jsx-filename-extension": "off",
         "react/prefer-stateless-function": [
             "error",
-            { "ignorePureComponents": true }
+            {
+                "ignorePureComponents": true
+            }
         ],
         "react/sort-comp": "warn",
-        "react/jsx-max-props-per-line": [1, { "when": "multiline" }],
+        "react/jsx-max-props-per-line": [
+            1,
+            {
+                "when": "multiline"
+            }
+        ],
         "jest/no-disabled-tests": "off"
     }
 }

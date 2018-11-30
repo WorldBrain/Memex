@@ -1,0 +1,32 @@
+.container {
+    display: flex;
+    font-size: 1rem;
+}
+
+.left {
+    width: 50px;
+}
+
+.middle {
+    flex-grow: 2;
+}
+
+.right {
+    width: 15px;
+}
+
+.icon {
+    /* Move the icon around here */
+}
+
+.title {
+    font-size: 1.1em;
+}
+
+.close {
+    cursor: pointer;
+}
+
+.close::after {
+    content: 'x';
+}

@@ -1,17 +1,23 @@
-import { remoteFunction } from 'src/util/webextensionRPC'
-import { bodyLoader } from 'src/util/loader'
+import { browser } from 'webextension-polyfill-ts'
+import { remoteFunction } from '../util/webextensionRPC'
+import { bodyLoader } from '../util/loader'
 import {
     createAndCopyDirectLink,
     createAnnotation,
-} from 'src/direct-linking/content_script/interactions'
+} from '../direct-linking/content_script/interactions'
 import { setupUIContainer, destroyUIContainer } from './components'
 import * as interactions from './interactions'
-import { injectCSS } from 'src/search-injection/dom'
+import ToolbarNotifications from '../toolbar-notification/content_script'
+import { injectCSS } from '../search-injection/dom'
 import { setTooltipState } from './utils'
 
 const openOptionsRPC = remoteFunction('openOptionsTab')
 
-export async function init() {
+export default async function init({
+    toolbarNotifications,
+}: {
+    toolbarNotifications: ToolbarNotifications
+}) {
     await bodyLoader()
 
     const target = document.createElement('div')
@@ -31,11 +37,10 @@ export async function init() {
             target.remove()
         },
         disableTooltip: () => {
-            setTooltipState(false)
+            // setTooltipState(false)
+            toolbarNotifications.showToolbarNotification('tooltip-first-close')
         },
     })
     interactions.setupTooltipTrigger(showTooltip)
     interactions.conditionallyTriggerTooltip(showTooltip)
 }
-
-init()
