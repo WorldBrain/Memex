@@ -9,6 +9,7 @@ import styles from './tooltip.css'
 const images = {
     cross: getExtURL('/img/cross_grey.svg'),
     settings: getExtURL('/img/settings_grey.svg'),
+    tooltipIcon: getExtURL('/img/tooltipIcon.svg'),
 }
 
 const deriveTooltipClass = (state, showCloseMessage) =>
@@ -42,13 +43,21 @@ const Tooltip = ({
         {showCloseMessage && (
             <React.Fragment>
                 <div className={styles.closeMessage}>
-                    <div>It's your first time doing this</div>
+                    <div className={styles.titleMessage}>
+                        It's your first time closing the Highlighter
+                    </div>
                     <div
                         onClick={event =>
                             closeTooltip(event, { disable: true })
                         }
                         className={styles.closeMessageDisableTooltip}
                     >
+                        <span>
+                            <img
+                                src={images.tooltipIcon}
+                                className={styles.tooltipIcon}
+                            />
+                        </span>
                         Disable on all sites
                     </div>
                 </div>

@@ -1,10 +1,14 @@
 .container {
     display: flex;
-    font-size: 1rem;
+    flex-direction: row;
+    font-size: 0.9rem;
+    width: 100%;
+    color: #3eb995;
 }
 
 .left {
     width: 50px;
+    padding-top: 11px;
 }
 
 .middle {
@@ -12,21 +16,39 @@
 }
 
 .right {
-    width: 15px;
+    display: flex;
+    flex-direction: row;
 }
 
-.icon {
-    /* Move the icon around here */
+.thirdRowImage {
+    margin-right: 30px;
+    margin-bottom: 3px;
+}
+
+.notifIcon {
+    margin-left: 10px;
 }
 
 .title {
     font-size: 1.1em;
+    color: #173766;
+    margin-bottom: 5px;
+    margin-top: -1px;
 }
 
 .close {
     cursor: pointer;
+    width: 15px;
+    height: 15px;
+    margin-right: 13px;
+    border-radius: 10px;
 }
 
-.close::after {
-    content: 'x';
+.close .img:hover {
+    width: 10px;
+    height: 10px;
+}
+
+.close:hover {
+    background: #e4e9ef;
 }

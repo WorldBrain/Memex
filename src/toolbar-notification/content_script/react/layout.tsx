@@ -6,22 +6,28 @@ import styles from './layout.css'
 
 export default function NotificationLayout({
     title,
-    icon = null,
+    icon,
     children,
     onCloseRequested,
+    thirdRowImage,
+    closeIcon,
 }) {
     return (
         <div className={styles.container}>
             <div className={styles.left}>
-                {}
-                <div className={classNames([styles.icon, icon])} />
+                <img className={styles.notifIcon} src={icon} />
             </div>
             <div className={styles.middle}>
                 <div className={styles.title}>{title}</div>
                 <div className={styles.body}>{children}</div>
             </div>
             <div className={styles.right}>
-                <div className={styles.close} onClick={onCloseRequested} />
+                <img className={styles.thirdRowImage} src={thirdRowImage} />
+                <img
+                    className={styles.close}
+                    src={closeIcon}
+                    onClick={onCloseRequested}
+                />
             </div>
         </div>
     )
