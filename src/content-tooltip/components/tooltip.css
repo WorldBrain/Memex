@@ -57,6 +57,8 @@
     &.statePristine {
         height: 100px;
         width: 345px;
+        display: flex;
+        justify-content: center;
     }
 }
 

@@ -61,7 +61,6 @@ const Tooltip = ({
                         Disable on all sites
                     </div>
                 </div>
-                {_renderButtons({ closeTooltip })}
             </React.Fragment>
         )}
     </div>
