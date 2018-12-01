@@ -10,6 +10,7 @@ import {
     IndexDropdownNewRow,
     IndexDropdownRow,
 } from '../components'
+import { ClickHandler } from '../../popup/types'
 
 export interface Props {
     source: 'tag' | 'domain'
@@ -33,6 +34,7 @@ export interface Props {
     /** initial suggestions from the popup */
     initSuggestions?: string[]
     isForSidebar?: boolean
+    onBackBtnClick?: ClickHandler<HTMLButtonElement>
 }
 
 export interface State {
@@ -82,6 +84,24 @@ class IndexDropdownContainer extends Component<Props, State> {
             filters: props.initFilters, // Actual tags associated with the page; will only change when DB updates
             focused: props.initFilters.length ? 0 : -1,
             clearFieldBtn: false,
+        }
+    }
+
+    componentDidUpdate(prevProps) {
+        // Checking for initFilters' length is better as component updates only
+        // when a filter is added or deleted, which implies that the length of
+        // props.initFilters will differ across two updates.
+        if (
+            prevProps.initFilters !== undefined &&
+            this.props.initFilters !== undefined &&
+            prevProps.initFilters.length !== this.props.initFilters.length
+        ) {
+            this.setState({
+                displayFilters: this.props.initSuggestions
+                    ? this.props.initSuggestions
+                    : this.props.initFilters,
+                filters: this.props.initFilters,
+            })
         }
     }
 
@@ -167,8 +187,6 @@ class IndexDropdownContainer extends Component<Props, State> {
      */
     private addTag = async () => {
         const newTag = this.getSearchVal()
-        const newTags = [newTag, ...this.state.filters]
-        // log
 
         if (this.allowIndexUpdate) {
             this.addTagRPC({
@@ -182,15 +200,15 @@ class IndexDropdownContainer extends Component<Props, State> {
 
         this.inputEl.focus()
 
-        this.setState(state => ({
-            ...state,
+        // Clear the component state.
+        this.setState({
             searchVal: '',
-            filters: newTags,
-            displayFilters: newTags,
             focused: 0,
-        }))
+            clearFieldBtn: false,
+        })
 
         this.props.onFilterAdd(newTag)
+
         updateLastActive() // Consider user active (analytics)
     }
 
@@ -199,13 +217,11 @@ class IndexDropdownContainer extends Component<Props, State> {
      * depending on their current status as assoc. tags or not.
      */
     private handleTagSelection = (index: number) => async event => {
-        const tag = this.getDisplayTags()[index].value
-        const tagIndex = this.state.filters.findIndex(val => val === tag)
+        const tag = this.state.displayFilters[index]
+        const pageHasTag = this.state.filters.includes(tag)
 
-        let tagsReducer: (filters: string[]) => string[] = t => t
-
-        // Either add or remove it to the main `state.tags` array
-        if (tagIndex === -1) {
+        // Either add or remove the tag, let Redux handle the store changes.
+        if (!pageHasTag) {
             if (this.allowIndexUpdate) {
                 this.addTagRPC({
                     url: this.props.url,
@@ -214,9 +230,8 @@ class IndexDropdownContainer extends Component<Props, State> {
                 }).catch(console.error)
             }
 
-            this.props.onFilterAdd(tag)
-            tagsReducer = tags => [tag, ...tags]
             await this.storeTrackEvent(true)
+            this.props.onFilterAdd(tag)
         } else {
             if (this.allowIndexUpdate) {
                 this.delTagRPC({
@@ -226,19 +241,18 @@ class IndexDropdownContainer extends Component<Props, State> {
                 }).catch(console.error)
             }
 
-            this.props.onFilterDel(tag)
-            tagsReducer = tags => [
-                ...tags.slice(0, tagIndex),
-                ...tags.slice(tagIndex + 1),
-            ]
             await this.storeTrackEvent(false)
+            this.props.onFilterDel(tag)
         }
 
-        this.setState(state => ({
-            ...state,
-            filters: tagsReducer(state.filters),
-            focused: index,
-        }))
+        this.inputEl.focus()
+
+        // Clear the component state.
+        this.setState({
+            searchVal: '', // Clear the search field.
+            focused: 0,
+            clearFieldBtn: false,
+        })
 
         updateLastActive() // Consider user active (analytics)
     }
@@ -314,7 +328,9 @@ class IndexDropdownContainer extends Component<Props, State> {
         let displayFilters
         let clearFieldBtn
         if (!searchVal.length) {
-            displayFilters = this.state.filters
+            displayFilters = this.props.initSuggestions
+                ? this.props.initSuggestions
+                : this.props.initFilters
             clearFieldBtn = false
         } else {
             displayFilters = this.state.displayFilters

@@ -49,6 +49,12 @@
     }
 }
 
+.backButton {
+    border: none;
+    outline: none;
+    margin-top: 6px;
+}
+
 .numberTags {
     align-items: flex-start;
     margin-top: 6px;

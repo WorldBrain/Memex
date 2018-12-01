@@ -13,6 +13,7 @@ import {
 
 class DropdownContainer extends Component {
     static propTypes = {
+        onFilterAdd: PropTypes.func,
         onFilterDel: PropTypes.func,
         results: PropTypes.array.isRequired,
         initSuggestions: PropTypes.array,
@@ -23,6 +24,7 @@ class DropdownContainer extends Component {
         setTempLists: PropTypes.func,
         mode: PropTypes.string.isRequired,
         url: PropTypes.string,
+        onBackBtnClick: PropTypes.func,
     }
 
     static defaultProps = {
@@ -38,6 +40,8 @@ class DropdownContainer extends Component {
         this.fetchListSuggestions = debounce(300)(this.fetchListSuggestions)
         this.addList = remoteFunction('createCustomList')
         this.addUrlToList = remoteFunction('insertPageToList')
+        this.deleteUrlFromList = remoteFunction('removePageFromList')
+        this.fetchListById = remoteFunction('fetchListById')
         this.fetchListNameSuggestions = remoteFunction(
             'fetchListNameSuggestions',
         )
@@ -57,6 +61,26 @@ class DropdownContainer extends Component {
         // The temporary list array gets updated.
         if (this.overviewMode) {
             this.props.setTempLists()
+        }
+    }
+
+    componentDidUpdate(prevProps) {
+        // Checking for results' length is better as component updates only
+        // when a list is added or deleted, which implies that the length of
+        // props.results will differ across two updates.
+        if (
+            prevProps.results !== undefined &&
+            this.props.results !== undefined &&
+            prevProps.results.length !== this.props.results.length
+        ) {
+            /* eslint-disable-next-line react/no-did-update-set-state */
+            this.setState({
+                displayFilters: this.props.initSuggestions
+                    ? this.props.initSuggestions
+                    : this.props.results,
+                filters: this.props.results,
+            })
+            /* eslint-enable */
         }
     }
 
@@ -97,35 +121,31 @@ class DropdownContainer extends Component {
     addPageToList = () => {}
 
     createList = async () => {
-        let newLists = this.state.filters
+        const listName = this.getSearchVal()
+
         if (this.allowIndexUpdate) {
-            // Adds a list as well as add this page to list.
-            this.addList({ name: this.getSearchVal() })
-                .then(id => {
-                    const newList = {
-                        id,
-                        name: this.getSearchVal(),
-                        pages: [this.props.url],
-                        active: true,
-                    }
-                    this.addUrlToList({
-                        id,
-                        url: this.props.url,
-                    })
-                    newLists = [newList, ...this.state.filters]
-                    this.setState(state => ({
-                        ...state,
-                        searchVal: '',
-                        filters: newLists,
-                        displayFilters: newLists,
-                        focused: 0,
-                    }))
-                })
-                .catch(console.error)
+            try {
+                // Add a list as well as add this page to the list.
+                const id = await this.addList({ name: listName })
+                await this.addUrlToList({ id, url: this.props.url })
+
+                // Get the list that was added.
+                const newList = await this.fetchListById({ id })
+
+                this.props.onFilterAdd(newList)
+            } catch (err) {
+                console.error(err)
+            }
         }
+
         this.inputEl.focus()
+
+        // Clear the component state.
+        this.setState({ searchVal: '', focused: 0 })
+
         updateLastActive() // Consider user active (analytics)
     }
+
     /**
      * Selector for derived display lists state
      */
@@ -143,13 +163,17 @@ class DropdownContainer extends Component {
         if (!searchVal.length) {
             return
         }
+
         let suggestions = this.state.filters
 
-        // suggestions = this.suggest(searchVal)
-        suggestions = await this.fetchListNameSuggestions({
-            name: searchVal,
-            url: this.props.url,
-        })
+        try {
+            suggestions = await this.fetchListNameSuggestions({
+                name: searchVal,
+                url: this.props.url,
+            })
+        } catch (err) {
+            console.log(err)
+        }
 
         this.setState(state => ({
             ...state,
@@ -177,65 +201,41 @@ class DropdownContainer extends Component {
     }
 
     handleListClick = index => async event => {
-        let list
-        const listId = this.getDisplayLists()[index].value.id
-        const { filters } = this.state
-        const listIndex = filters.findIndex(val => val.id === listId)
-        if (listIndex === -1) {
-            list = this.getDisplayLists()[index].value
-        } else {
-            list = filters[listIndex]
-        }
+        const list = this.state.displayFilters[index]
+        const pageBelongsToList = !(
+            this.state.filters.findIndex(val => val.id === list.id) === -1
+        )
 
-        const { active } = list
-
-        const pagesReducer = !active
-        let listReducer = lists => lists
-        // Either add or remove it to the main `state.pages` array
-        try {
-            if (listIndex === -1) {
-                await this.addUrlToList({
-                    id: listId,
+        // Either add or remove the list, let Redux handle the store changes.
+        if (!pageBelongsToList) {
+            if (this.allowIndexUpdate) {
+                this.addUrlToList({
+                    id: list.id,
                     url: this.props.url,
-                })
-
-                listReducer = lists => [
-                    {
-                        ...list,
-                        id: listId,
-                        active: pagesReducer,
-                    },
-                    ...lists,
-                ]
-            } else {
-                // this.props.onFilterDel(tag)
-                await remoteFunction('removePageFromList')({
-                    id: listId,
-                    url: this.props.url,
-                })
-                listReducer = list => [
-                    ...list.slice(0, listIndex),
-                    ...list.slice(listIndex + 1),
-                ]
+                }).catch(console.error)
             }
-        } catch (err) {
-            // Do nothing
-        } finally {
-            this.setState(state => ({
-                ...state,
-                filters: listReducer(state.filters),
-                displayFilters: [
-                    ...this.state.displayFilters.slice(0, index),
-                    {
-                        ...this.state.displayFilters[index],
-                        active: pagesReducer,
-                    },
-                    ...this.state.displayFilters.slice(index + 1),
-                ],
-                focused: index,
-            }))
-            updateLastActive() // Consider user active (analytics)
+
+            this.props.onFilterAdd(list)
+        } else {
+            if (this.allowIndexUpdate) {
+                this.deleteUrlFromList({
+                    id: list.id,
+                    url: this.props.url,
+                }).catch(console.error)
+            }
+
+            this.props.onFilterDel(list)
         }
+
+        this.inputEl.focus()
+
+        // Clear the component state.
+        this.setState({
+            searchVal: '',
+            focused: 0,
+        })
+
+        updateLastActive() // Consider user active (analytics)
     }
 
     handleSearchArrowPress(event) {
@@ -281,7 +281,9 @@ class DropdownContainer extends Component {
         const searchVal = event.target.value
 
         const displayFilters = !searchVal.length
-            ? this.state.filters
+            ? this.props.initSuggestions
+                ? this.props.initSuggestions
+                : this.props.results
             : this.state.displayFilters
 
         this.setState(

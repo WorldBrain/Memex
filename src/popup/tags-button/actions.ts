@@ -11,3 +11,6 @@ export const setInitTagSuggests = createAction<string[]>(
 
 export const toggleShowTagsPicker: () => Thunk = () => (dispatch, getState) =>
     dispatch(setShowTagsPicker(!selectors.showTagsPicker(getState())))
+
+export const addTag = createAction<string>('tags/addTag')
+export const deleteTag = createAction<string>('tags/deleteTag')
