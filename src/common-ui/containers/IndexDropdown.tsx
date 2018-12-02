@@ -87,7 +87,7 @@ class IndexDropdownContainer extends Component<Props, State> {
         }
     }
 
-    componentDidUpdate(prevProps) {
+    componentDidUpdate(prevProps: Props) {
         // Checking for initFilters' length is better as component updates only
         // when a filter is added or deleted, which implies that the length of
         // props.initFilters will differ across two updates.
@@ -218,10 +218,9 @@ class IndexDropdownContainer extends Component<Props, State> {
      */
     private handleTagSelection = (index: number) => async event => {
         const tag = this.state.displayFilters[index]
-        const pageHasTag = this.state.filters.includes(tag)
 
         // Either add or remove the tag, let Redux handle the store changes.
-        if (!pageHasTag) {
+        if (!this.pageHasTag(tag)) {
             if (this.allowIndexUpdate) {
                 this.addTagRPC({
                     url: this.props.url,
@@ -324,7 +323,7 @@ class IndexDropdownContainer extends Component<Props, State> {
     ) => {
         const searchVal = event.currentTarget.value
 
-        // If user backspaces to clear input, show the current assoc tags again
+        // If user backspaces to clear input, show the list of suggested tags again.
         let displayFilters
         let clearFieldBtn
         if (!searchVal.length) {

@@ -1,59 +1,75 @@
 import React, { Component } from 'react'
-import PropTypes from 'prop-types'
 import debounce from 'lodash/fp/debounce'
 import noop from 'lodash/fp/noop'
 
-import { updateLastActive } from 'src/analytics'
-import { remoteFunction } from 'src/util/webextensionRPC'
+import { updateLastActive } from '../../analytics'
+import { remoteFunction } from '../../util/webextensionRPC'
 import {
     IndexDropdownNewRow,
     IndexDropdown,
     IndexDropdownRow,
 } from '../components'
+import { PageList } from '../../custom-lists/background/types'
+import { ClickHandler } from '../../popup/types'
 
-class DropdownContainer extends Component {
-    static propTypes = {
-        onFilterAdd: PropTypes.func,
-        onFilterDel: PropTypes.func,
-        results: PropTypes.array.isRequired,
-        initSuggestions: PropTypes.array,
-        bulkAddPagesToList: PropTypes.func,
-        bulkRemovePagesFromList: PropTypes.func,
-        applyBulkEdits: PropTypes.func,
-        resetPagesinTempList: PropTypes.func,
-        setTempLists: PropTypes.func,
-        mode: PropTypes.string.isRequired,
-        url: PropTypes.string,
-        onBackBtnClick: PropTypes.func,
-    }
+export interface Props {
+    mode: string
+    url?: string
+    initLists: PageList[]
+    initSuggestions?: PageList[]
+    onBackBtnClick?: ClickHandler<HTMLButtonElement>
+    onFilterAdd?: (collection: PageList) => void
+    onFilterDel?: (collection: PageList) => void
+    bulkAddPagesToList?: () => void
+    bulkRemovePagesFromList?: () => void
+    applyBulkEdits?: () => void
+    resetPagesInTempList?: () => void
+    setTempLists?: () => void
+}
 
-    static defaultProps = {
+export interface State {
+    searchVal: string
+    isLoading: boolean
+    displayFilters: PageList[]
+    filters: PageList[]
+    focused: number
+}
+
+class AddListDropdownContainer extends Component<Props, State> {
+    static defaultProps: Partial<Props> = {
         onFilterAdd: noop,
         onFilterDel: noop,
-        results: [],
-        displayFilters: [],
+        initLists: [],
     }
 
-    constructor(props) {
+    private addListRPC
+    private addPageToListRPC
+    private deletePageFromListRPC
+    private fetchListByIdRPC
+    private fetchListNameSuggestionsRPC
+    private inputEl: HTMLInputElement
+
+    constructor(props: Props) {
         super(props)
 
-        this.fetchListSuggestions = debounce(300)(this.fetchListSuggestions)
-        this.addList = remoteFunction('createCustomList')
-        this.addUrlToList = remoteFunction('insertPageToList')
-        this.deleteUrlFromList = remoteFunction('removePageFromList')
-        this.fetchListById = remoteFunction('fetchListById')
-        this.fetchListNameSuggestions = remoteFunction(
+        this.addListRPC = remoteFunction('createCustomList')
+        this.addPageToListRPC = remoteFunction('insertPageToList')
+        this.deletePageFromListRPC = remoteFunction('removePageFromList')
+        this.fetchListByIdRPC = remoteFunction('fetchListById')
+        this.fetchListNameSuggestionsRPC = remoteFunction(
             'fetchListNameSuggestions',
         )
+
+        this.fetchListSuggestions = debounce(300)(this.fetchListSuggestions)
 
         this.state = {
             searchVal: '',
             isLoading: false,
             displayFilters: props.initSuggestions
                 ? props.initSuggestions
-                : props.results, // Display state objects; will change all the time
-            filters: props.results, // Actual lists associated with the page; will only change when DB updates
-            focused: props.results.length ? 0 : -1,
+                : props.initLists, // Display state objects; will change all the time
+            filters: props.initLists, // Actual lists associated with the page; will only change when DB updates
+            focused: props.initLists.length ? 0 : -1,
         }
     }
 
@@ -64,45 +80,49 @@ class DropdownContainer extends Component {
         }
     }
 
-    componentDidUpdate(prevProps) {
-        // Checking for results' length is better as component updates only
+    componentDidUpdate(prevProps: Props) {
+        // Checking for initLists' length is better as component updates only
         // when a list is added or deleted, which implies that the length of
-        // props.results will differ across two updates.
+        // props.initLists will differ across two updates.
         if (
-            prevProps.results !== undefined &&
-            this.props.results !== undefined &&
-            prevProps.results.length !== this.props.results.length
+            prevProps.initLists !== undefined &&
+            this.props.initLists !== undefined &&
+            prevProps.initLists.length !== this.props.initLists.length
         ) {
-            /* eslint-disable-next-line react/no-did-update-set-state */
             this.setState({
                 displayFilters: this.props.initSuggestions
                     ? this.props.initSuggestions
-                    : this.props.results,
-                filters: this.props.results,
+                    : this.props.initLists,
+                filters: this.props.initLists,
             })
-            /* eslint-enable */
         }
     }
 
-    get allowIndexUpdate() {
+    /**
+     * Decides whether or not to allow index update. Currently determined by
+     * `props.url` setting.
+     */
+    private get allowIndexUpdate() {
         return this.props.url != null
     }
 
-    get overviewMode() {
+    private get overviewMode() {
         return this.props.mode === 'overview'
     }
 
-    scrollElementIntoViewIfNeeded(domNode) {
+    scrollElementIntoViewIfNeeded(domNode: HTMLElement) {
         // const parentNode = domNode.parentNode
         // parentNode.scrollTop = domNode.offsetTop - parentNode.offsetTop
-        domNode.scrollIntoView({ behaviour: 'smooth', block: 'nearest' })
+        domNode.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
         // Gives error in FF.
         // domNode.scrollIntoViewIfNeeded()
     }
 
-    setInputRef = el => (this.inputEl = el)
+    private pageBelongsToList = (list: PageList) =>
+        !(this.state.filters.findIndex(filter => filter.id === list.id) === -1)
+    private setInputRef = (el: HTMLInputElement) => (this.inputEl = el)
 
-    canCreateList() {
+    private canCreateList() {
         if (!this.allowIndexUpdate) {
             return false
         }
@@ -118,19 +138,22 @@ class DropdownContainer extends Component {
         )
     }
 
-    addPageToList = () => {}
+    // private addPageToList = () => {}
 
-    createList = async () => {
+    /**
+     * Used for 'Enter' presses or 'Add new tag' clicks.
+     */
+    private createList = async () => {
         const listName = this.getSearchVal()
 
         if (this.allowIndexUpdate) {
             try {
                 // Add a list as well as add this page to the list.
-                const id = await this.addList({ name: listName })
-                await this.addUrlToList({ id, url: this.props.url })
+                const id = await this.addListRPC({ name: listName })
+                await this.addPageToListRPC({ id, url: this.props.url })
 
                 // Get the list that was added.
-                const newList = await this.fetchListById({ id })
+                const newList = await this.fetchListByIdRPC({ id })
 
                 this.props.onFilterAdd(newList)
             } catch (err) {
@@ -149,16 +172,17 @@ class DropdownContainer extends Component {
     /**
      * Selector for derived display lists state
      */
-    getDisplayLists = () =>
+    private getDisplayLists = () =>
         this.state.displayFilters.map((value, i) => ({
             value,
             active: value.active,
             focused: this.state.focused === i,
         }))
 
-    getSearchVal = () => this.state.searchVal.trim().replace(/\s\s+/g, ' ')
+    private getSearchVal = () =>
+        this.state.searchVal.trim().replace(/\s\s+/g, ' ')
 
-    fetchListSuggestions = async () => {
+    private fetchListSuggestions = async () => {
         const searchVal = this.getSearchVal()
         if (!searchVal.length) {
             return
@@ -167,7 +191,7 @@ class DropdownContainer extends Component {
         let suggestions = this.state.filters
 
         try {
-            suggestions = await this.fetchListNameSuggestions({
+            suggestions = await this.fetchListNameSuggestionsRPC({
                 name: searchVal,
                 url: this.props.url,
             })
@@ -182,7 +206,9 @@ class DropdownContainer extends Component {
         }))
     }
 
-    handleSearchEnterPress(event) {
+    private handleSearchEnterPress = (
+        event: React.KeyboardEvent<HTMLInputElement>,
+    ) => {
         event.preventDefault()
 
         if (
@@ -200,16 +226,17 @@ class DropdownContainer extends Component {
         return null
     }
 
-    handleListClick = index => async event => {
+    /**
+     * Used for clicks on displayed lists. Will either add or remove lists to
+     * the page depending on their current status as associated lists or not.
+     */
+    private handleListClick = (index: number) => async event => {
         const list = this.state.displayFilters[index]
-        const pageBelongsToList = !(
-            this.state.filters.findIndex(val => val.id === list.id) === -1
-        )
 
         // Either add or remove the list, let Redux handle the store changes.
-        if (!pageBelongsToList) {
+        if (!this.pageBelongsToList(list)) {
             if (this.allowIndexUpdate) {
-                this.addUrlToList({
+                this.addPageToListRPC({
                     id: list.id,
                     url: this.props.url,
                 }).catch(console.error)
@@ -218,7 +245,7 @@ class DropdownContainer extends Component {
             this.props.onFilterAdd(list)
         } else {
             if (this.allowIndexUpdate) {
-                this.deleteUrlFromList({
+                this.deletePageFromListRPC({
                     id: list.id,
                     url: this.props.url,
                 }).catch(console.error)
@@ -238,9 +265,12 @@ class DropdownContainer extends Component {
         updateLastActive() // Consider user active (analytics)
     }
 
-    handleSearchArrowPress(event) {
+    private handleSearchArrowPress = (
+        event: React.KeyboardEvent<HTMLInputElement>,
+    ) => {
         event.preventDefault()
 
+        // One extra index of the "add new list" option is showing.
         let offset = this.canCreateList() ? 0 : 1
 
         if (!this.allowIndexUpdate) {
@@ -267,23 +297,29 @@ class DropdownContainer extends Component {
         }))
     }
 
-    handleSearchKeyDown = event => {
+    private handleSearchKeyDown = (
+        event: React.KeyboardEvent<HTMLInputElement>,
+    ) => {
         switch (event.key) {
             case 'Enter':
                 return this.handleSearchEnterPress(event)
             case 'ArrowUp':
             case 'ArrowDown':
                 return this.handleSearchArrowPress(event)
+            default:
         }
     }
 
-    handleSearchChange = event => {
-        const searchVal = event.target.value
+    private handleSearchChange = (
+        event: React.SyntheticEvent<HTMLInputElement>,
+    ) => {
+        const searchVal = event.currentTarget.value
 
+        // If user backspaces to clear input, show the list of suggested lists again.
         const displayFilters = !searchVal.length
             ? this.props.initSuggestions
                 ? this.props.initSuggestions
-                : this.props.results
+                : this.props.initLists
             : this.state.displayFilters
 
         this.setState(
@@ -292,7 +328,7 @@ class DropdownContainer extends Component {
         )
     }
 
-    renderLists() {
+    private renderLists() {
         const lists = this.getDisplayLists()
 
         const listOptions = lists.map((list, i) => (
@@ -301,6 +337,7 @@ class DropdownContainer extends Component {
                 key={i}
                 onClick={this.handleListClick(i)}
                 scrollIntoView={this.scrollElementIntoViewIfNeeded}
+                isForSidebar={false}
             />
         ))
 
@@ -349,4 +386,4 @@ class DropdownContainer extends Component {
     }
 }
 
-export default DropdownContainer
+export default AddListDropdownContainer

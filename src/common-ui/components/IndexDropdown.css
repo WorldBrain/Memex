@@ -52,21 +52,26 @@
 .backButton {
     border: none;
     outline: none;
-    margin-top: 6px;
+    grid-area: backButton;
+    justify-self: center;
+    align-self: center;
+    font-size: 1em;
+    padding: 0;
 }
 
 .numberTags {
-    align-items: flex-start;
-    margin-top: 6px;
+    grid-area: numberTags;
+    justify-self: center;
+    align-self: center;
     color: #777;
 }
 
 .summaryTagContainer {
     width: 100%;
-    display: flex;
-    padding-top: 10px;
-    justify-content: space-around;
-    padding-bottom: 10px;
+    display: grid;
+    grid-template-columns: 1fr 1.5fr 1fr;
+    grid-template-areas: 'backButton numberTags .';
+    padding: 10px 0;
     background: white;
 }
 

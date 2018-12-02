@@ -122,7 +122,7 @@ class PopupContainer extends PureComponent<Props> {
             return (
                 <AddListDropdownContainer
                     mode="popup"
-                    results={this.props.collections}
+                    initLists={this.props.collections}
                     initSuggestions={this.props.initCollSuggs}
                     url={this.props.url}
                     onBackBtnClick={this.props.toggleShowCollectionsPicker}

@@ -116,10 +116,7 @@ class IndexDropdown extends PureComponent {
                     <div className={this.styles.summaryTagContainer}>
                         {!this.props.isForAnnotation && (
                             <button
-                                className={cx(
-                                    this.styles.backButton,
-                                    this.styles.bold,
-                                )}
+                                className={this.styles.backButton}
                                 onClick={this.props.onBackBtnClick}
                             >
                                 &lt;Back
