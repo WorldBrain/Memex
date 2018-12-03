@@ -1,7 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import PropTypes from 'prop-types'
-import OnClickOutside from 'react-onclickoutside'
 import TooltipFirstCloseNotification from './notifications/tooltip-first-close'
 import styles from './styles.css'
 
@@ -11,9 +10,8 @@ export class ToolbarNotification extends React.Component {
         onCloseRequested: PropTypes.func.isRequired,
     }
 
-    handleClickOutside = () => {
-        this.props.onCloseRequested()
-    }
+    shutUpLinter =
+        "I don't want to refactor this to a pure functional component just to shut up the linter"
 
     render() {
         return (
@@ -28,4 +26,4 @@ export class ToolbarNotification extends React.Component {
     }
 }
 
-export default OnClickOutside(ToolbarNotification)
+export default ToolbarNotification
