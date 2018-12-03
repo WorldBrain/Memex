@@ -56,7 +56,12 @@
     justify-self: center;
     align-self: center;
     font-size: 1em;
-    padding: 0;
+    background-color: #3eb995;
+    border-radius: 4px;
+    padding: 3px 7px 4px 7px;
+    color: white;
+    margin-top: 3px;
+    cursor: pointer;
 }
 
 .numberTags {
@@ -64,6 +69,7 @@
     justify-self: center;
     align-self: center;
     color: #777;
+    padding-top: 2px;
 }
 
 .summaryTagContainer {

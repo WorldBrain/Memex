@@ -119,7 +119,7 @@ class IndexDropdown extends PureComponent {
                                 className={this.styles.backButton}
                                 onClick={this.props.onBackBtnClick}
                             >
-                                &lt;Back
+                                Back
                             </button>
                         )}
                         <div className={this.styles.numberTags}>
