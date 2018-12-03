@@ -17,7 +17,7 @@ export default function TooltipFirstCloseNotification({ onCloseRequested }) {
         <div className={styles.title}>
             {/*<img className={styles.notifIcon} src={images.notifIcon}/>*/}
             <NotificationLayout
-                title={'Re-enable Highlighter Anytime'}
+                title={'Turn on/off Highlighter permanently'}
                 icon={images.notifIcon}
                 onCloseRequested={onCloseRequested}
                 thirdRowImage={images.arrowUp}
