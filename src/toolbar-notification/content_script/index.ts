@@ -27,7 +27,10 @@ export default class ToolbarNotifications {
 
         await setupUIContainer(createRootElement(), {
             type,
-            onCloseRequested: () => this._destroyRootElement(),
+            onCloseRequested: () => {
+                console.log('Close requested')
+                this._destroyRootElement()
+            },
         })
     }
 

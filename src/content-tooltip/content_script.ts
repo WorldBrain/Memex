@@ -31,16 +31,36 @@ export default async function init({
         createAndCopyDirectLink,
         createAnnotation,
         openSettings: () => openOptionsRPC('settings'),
-        destroyTooltip: () => {
+        destroyTooltip: async () => {
             interactions.destroyTooltipTrigger()
             destroyUIContainer(target)
             target.remove()
-        },
-        disableTooltip: () => {
-            // setTooltipState(false)
-            toolbarNotifications.showToolbarNotification('tooltip-first-close')
+
+            const closeMessageShown = await _getCloseMessageShown()
+            if (!closeMessageShown) {
+                toolbarNotifications.showToolbarNotification(
+                    'tooltip-first-close',
+                )
+                // _setCloseMessageShown()
+            }
         },
     })
     interactions.setupTooltipTrigger(showTooltip)
     interactions.conditionallyTriggerTooltip(showTooltip)
+}
+
+const CLOSE_MESSAGESHOWN_KEY = 'tooltip.close-message-shown'
+
+export async function _getCloseMessageShown() {
+    await window['browser'].storage.local.set({
+        [CLOSE_MESSAGESHOWN_KEY]: true,
+    })
+}
+
+export async function _setCloseMessageShown() {
+    const { [CLOSE_MESSAGESHOWN_KEY]: closeMessageShown } = await window[
+        'browser'
+    ].storage.local.get({ [CLOSE_MESSAGESHOWN_KEY]: false })
+
+    return closeMessageShown
 }

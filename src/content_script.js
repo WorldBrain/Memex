@@ -13,7 +13,7 @@ const remoteFunctionRegistry = new RemoteFunctionRegistry()
 
 const toolbarNotifications = new ToolbarNotifications()
 toolbarNotifications.registerRemoteFunctions(remoteFunctionRegistry)
-//toolbarNotifications.showToolbarNotification('tooltip-first-close')
+// toolbarNotifications.showToolbarNotification('tooltip-first-close')
 window['toolbarNotifications'] = toolbarNotifications
 
 initContentTooltip({ toolbarNotifications })

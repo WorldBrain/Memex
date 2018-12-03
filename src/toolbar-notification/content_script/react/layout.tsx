@@ -21,12 +21,18 @@ export default function NotificationLayout({
                 <div className={styles.title}>{title}</div>
                 <div className={styles.body}>{children}</div>
             </div>
-            <div className={styles.right}>
+            <div
+                className={styles.right}
+                onClick={() => console.log('wtf!?!?')}
+            >
                 <img className={styles.thirdRowImage} src={thirdRowImage} />
                 <img
                     className={styles.close}
                     src={closeIcon}
-                    onClick={onCloseRequested}
+                    onClick={() => {
+                        console.log('click')
+                        onCloseRequested()
+                    }}
                 />
             </div>
         </div>

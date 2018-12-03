@@ -12,64 +12,33 @@ const images = {
     tooltipIcon: getExtURL('/img/tooltipIcon.svg'),
 }
 
-const deriveTooltipClass = (state, showCloseMessage) =>
+const deriveTooltipClass = state =>
     classNames(styles.tooltip, {
         [styles.statePristine]: state === 'pristine',
         [styles.stateCopied]: state === 'copied',
-        [styles.tooltipWithCloseMessage]: showCloseMessage,
     })
 
 const Tooltip = ({
     x,
     y,
-    showCloseMessage,
     state,
     tooltipComponent,
     closeTooltip,
     openSettings,
 }) => (
     <div
-        className={deriveTooltipClass(state, showCloseMessage)}
+        className={deriveTooltipClass(state)}
         style={{ left: x, top: y }}
         id="memex-tooltip"
     >
-        {!showCloseMessage && (
-            <React.Fragment>
-                <AnimationWrapper>{tooltipComponent}</AnimationWrapper>
-                {_renderButtons({ closeTooltip, openSettings })}
-            </React.Fragment>
-        )}
-
-        {showCloseMessage && (
-            <React.Fragment>
-                <div className={styles.closeMessage}>
-                    <div className={styles.titleMessage}>
-                        It's your first time closing the Highlighter
-                    </div>
-                    <div
-                        onClick={event =>
-                            closeTooltip(event, { disable: true })
-                        }
-                        className={styles.closeMessageDisableTooltip}
-                    >
-                        <span>
-                            <img
-                                src={images.tooltipIcon}
-                                className={styles.tooltipIcon}
-                            />
-                        </span>
-                        Disable on all sites
-                    </div>
-                </div>
-            </React.Fragment>
-        )}
+        <AnimationWrapper>{tooltipComponent}</AnimationWrapper>
+        {_renderButtons({ closeTooltip, openSettings })}
     </div>
 )
 
 Tooltip.propTypes = {
     x: PropTypes.number.isRequired,
     y: PropTypes.number.isRequired,
-    showCloseMessage: PropTypes.bool.isRequired,
     state: PropTypes.string.isRequired,
     tooltipComponent: PropTypes.element.isRequired,
     closeTooltip: PropTypes.func.isRequired,

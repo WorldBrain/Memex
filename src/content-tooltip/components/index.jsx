@@ -4,33 +4,13 @@ import TooltipContainer from './container'
 
 export function setupUIContainer(
     target,
-    {
-        createAndCopyDirectLink,
-        openSettings,
-        destroyTooltip,
-        disableTooltip,
-        createAnnotation,
-    },
+    { createAndCopyDirectLink, openSettings, destroyTooltip, createAnnotation },
 ) {
     return new Promise(async resolve => {
-        const closeMessageShownKey = 'tooltip.close-message-shown'
-        const { [closeMessageShownKey]: closeMessageShown } = await window[
-            'browser'
-        ].storage.local.get({ [closeMessageShownKey]: false })
-        const onCloseMessageShown = () => {
-            window['browser'].storage.local.set({
-                [closeMessageShownKey]: true,
-            })
-        }
-
         ReactDOM.render(
             <TooltipContainer
                 onInit={showTooltip => resolve(showTooltip)}
                 destroy={destroyTooltip}
-                disable={disableTooltip}
-                // closeMessageShown={closeMessageShown}
-                closeMessageShown={false}
-                onCloseMessageShown={onCloseMessageShown}
                 createAndCopyDirectLink={createAndCopyDirectLink}
                 createAnnotation={createAnnotation}
                 openSettings={openSettings}
