@@ -1,7 +1,7 @@
 .container {
     display: flex;
     flex-direction: row;
-    font-size: 0.9rem;
+    font-size: 14.4px;
     width: 100%;
     color: #3eb995;
 }
