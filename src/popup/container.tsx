@@ -18,9 +18,10 @@ import ButtonIcon from './components/ButtonIcon'
 import { TooltipButton } from './tooltip-button'
 import { NotifButton } from './notif-button'
 import { HistoryPauser } from './pause-button'
-import { selectors as tags, TagsButton } from './tags-button'
+import { selectors as tags, acts as tagActs, TagsButton } from './tags-button'
 import {
     selectors as collections,
+    acts as collectionActs,
     CollectionsButton,
 } from './collections-button'
 import {
@@ -32,6 +33,7 @@ import { BookmarkButton } from './bookmark-button'
 import * as selectors from './selectors'
 import * as acts from './actions'
 import { ClickHandler, RootState } from './types'
+import { PageList } from '../custom-lists/background/types'
 
 const btnStyles = require('./components/Button.css')
 const styles = require('./components/Popup.css')
@@ -45,15 +47,21 @@ interface StateProps {
     tabId: number
     url: string
     tags: string[]
-    collections: any[]
+    collections: PageList[]
     searchValue: string
     initTagSuggs: string[]
-    initCollSuggs: any[]
+    initCollSuggs: PageList[]
 }
 
 interface DispatchProps {
     initState: () => Promise<void>
     handleSearchChange: ClickHandler<HTMLInputElement>
+    toggleShowTagsPicker: () => void
+    toggleShowCollectionsPicker: () => void
+    onTagAdd: (tag: string) => void
+    onTagDel: (tag: string) => void
+    onCollectionAdd: (collection: PageList) => void
+    onCollectionDel: (collection: PageList) => void
 }
 
 export type Props = OwnProps & StateProps & DispatchProps
@@ -103,6 +111,9 @@ class PopupContainer extends PureComponent<Props> {
                     initFilters={this.props.tags}
                     initSuggestions={this.props.initTagSuggs}
                     source="tag"
+                    onBackBtnClick={this.props.toggleShowTagsPicker}
+                    onFilterAdd={this.props.onTagAdd}
+                    onFilterDel={this.props.onTagDel}
                 />
             )
         }
@@ -111,9 +122,12 @@ class PopupContainer extends PureComponent<Props> {
             return (
                 <AddListDropdownContainer
                     mode="popup"
-                    results={this.props.collections}
+                    initLists={this.props.collections}
                     initSuggestions={this.props.initCollSuggs}
                     url={this.props.url}
+                    onBackBtnClick={this.props.toggleShowCollectionsPicker}
+                    onFilterAdd={this.props.onCollectionAdd}
+                    onFilterDel={this.props.onCollectionDel}
                 />
             )
         }
@@ -189,6 +203,15 @@ const mapDispatch = (dispatch): DispatchProps => ({
         const input = e.target as HTMLInputElement
         dispatch(acts.setSearchVal(input.value))
     },
+    toggleShowTagsPicker: () => dispatch(tagActs.toggleShowTagsPicker()),
+    toggleShowCollectionsPicker: () =>
+        dispatch(collectionActs.toggleShowTagsPicker()),
+    onTagAdd: (tag: string) => dispatch(tagActs.addTag(tag)),
+    onTagDel: (tag: string) => dispatch(tagActs.deleteTag(tag)),
+    onCollectionAdd: (collection: PageList) =>
+        dispatch(collectionActs.addCollection(collection)),
+    onCollectionDel: (collection: PageList) =>
+        dispatch(collectionActs.deleteCollection(collection)),
 })
 
 export default connect<StateProps, DispatchProps, OwnProps>(

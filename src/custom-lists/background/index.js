@@ -29,7 +29,9 @@ export default class CustomListBackground {
             fetchAllLists: (...params) => {
                 return this.fetchAllLists(...params)
             },
-
+            fetchListById: (...params) => {
+                return this.fetchListById(...params)
+            },
             fetchListPagesByUrl: (...params) => {
                 return this.fetchListPagesByUrl(...params)
             },
@@ -56,6 +58,16 @@ export default class CustomListBackground {
         }
 
         return this.storage.fetchAllLists({ query, opts })
+    }
+
+    /**
+     * Takes an id and returns the list object associated with it.
+     * @param {Object} obj
+     * @param {number} id
+     * @returns {Object}
+     */
+    async fetchListById({ id }) {
+        return this.storage.fetchListById(id)
     }
 
     /**
