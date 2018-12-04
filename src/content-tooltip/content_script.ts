@@ -41,7 +41,7 @@ export default async function init({
                 toolbarNotifications.showToolbarNotification(
                     'tooltip-first-close',
                 )
-                // _setCloseMessageShown()
+                _setCloseMessageShown()
             }
         },
     })
