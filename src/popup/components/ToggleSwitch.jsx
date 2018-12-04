@@ -41,6 +41,7 @@ class ToggleSwitch extends PureComponent {
                 <span className={this.deriveTextClass()}>
                     {this.props.isChecked ? 'On' : 'Off'}
                 </span>
+                <p className={styles.subTitle}>on all pages</p>
             </span>
         )
     }

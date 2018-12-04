@@ -37,10 +37,13 @@ class InPageSwitches extends PureComponent<Props> {
                     <Button
                         onClick={() => {}}
                         itemClass={styles.button}
-                        btnClass={buttonStyles.linkIcon}
+                        btnClass={buttonStyles.highlighterIcon}
                         title={'Open Memex annotation sidebar'}
                     >
                         Show Highlighter
+                        <p className={buttonStyles.subTitle}>
+                            only on this page
+                        </p>
                     </Button>
                 </span>
                 <span

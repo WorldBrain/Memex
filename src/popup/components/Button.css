@@ -17,8 +17,8 @@
     align-items: center;
     cursor: default;
     font-weight: 100;
-    padding-left: 10px;
-    padding-top: 2px;
+    height: 40px;
+    padding-left: 20px;
 
     &:hover,
     &:focus {
@@ -31,14 +31,12 @@
 .itemBtn {
     border: none;
     width: 100%;
-    padding: 0;
     font-size: 1em;
     cursor: pointer;
     font-family: 'Open Sans';
     font-weight: 100;
-    padding-left: 10px;
+    padding-left: 20px;
     background: none !important;
-    padding-top: 10px;
 
     &:disabled {
         color: rgb(156, 156, 156);
@@ -66,6 +64,7 @@
 
 .clickableIconNeg {
     color: rgb(255, 74, 85);
+    padding-left: 10px;
 
     &:hover,
     &:focus {
@@ -76,7 +75,6 @@
 .splitBtn {
     display: flex;
     width: 100%;
-    height: 40px;
 
     & > .itemBtn {
         justify-content: left;
@@ -85,15 +83,14 @@
 
 .button {
     float: right;
-    width: 10%;
     border: none;
     background: none;
     padding: 0;
     cursor: pointer;
     font-family: 'Open Sans';
     font-weight: 100;
-    margin-top: 17px;
     margin-right: 6px;
+    margin-top: 15px;
     outline: 0;
     color: #909090;
     text-decoration: none;
@@ -104,7 +101,7 @@
 }
 
 .settingsIcon {
-    margin-right: 12px;
+    margin-right: 6px;
 }
 
 .icon {
@@ -114,8 +111,8 @@
 .customIcon {
     width: 30px;
     height: 29px;
-    margin-left: 10px;
     outline: 0;
+    margin-bottom: -10px;
 }
 
 .settings {
@@ -147,6 +144,23 @@
     background-repeat: no-repeat;
     background-size: 20px;
     float: left;
+    margin-top: 6px;
+}
+
+.sidebarIcon {
+    background-image: url('/img/sidebarIcon_grey.svg');
+    background-repeat: no-repeat;
+    background-size: 20px;
+    float: left;
+    margin-top: 10px;
+}
+
+.highlighterIcon {
+    background-image: url('/img/highlighterIcon_grey.svg');
+    background-repeat: no-repeat;
+    background-size: 20px;
+    float: left;
+    margin-top: 6px;
 }
 
 .searchIcon {
@@ -164,6 +178,13 @@
     display: flex;
     justify-content: center;
     position: relative;
-    top: -33px;
-    left: 21px;
+    top: -32px;
+    left: 9px;
+}
+
+.subTitle {
+    margin-left: 30px;
+    margin-top: auto;
+    font-size: 10px;
+    color: #777;
 }

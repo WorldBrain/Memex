@@ -4,23 +4,11 @@
 
 .switch {
     position: absolute;
-    padding-top: 10px;
+    margin-top: 3px;
 }
 
 .button {
     display: inline-block;
-    width: 170px;
-}
-
-.infoLink {
-    background-image: url('/img/info_green.svg');
-    background-repeat: no-repeat;
-    background-size: 15px;
-    display: inline-block;
-    width: 15px;
-    height: 15px;
-    position: absolute;
-    top: 13px;
-    left: 65%;
-    cursor: pointer;
+    width: 200px;
+    text-align: left;
 }

@@ -4,7 +4,7 @@
 
 .switch {
     position: absolute;
-    padding-top: 10px;
+    margin-top: 3px;
 }
 
 .icon {
@@ -15,5 +15,6 @@
 
 .button {
     display: inline-block;
-    width: 170px;
+    width: 200px;
+    text-align: left;
 }

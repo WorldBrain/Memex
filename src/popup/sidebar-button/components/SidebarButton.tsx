@@ -38,10 +38,13 @@ class TooltipButton extends PureComponent<Props> {
                     <Button
                         onClick={this.props.openSidebar}
                         itemClass={styles.button}
-                        btnClass={buttonStyles.linkIcon}
+                        btnClass={buttonStyles.sidebarIcon}
                         title={'Open Memex annotation sidebar'}
                     >
                         Open Sidebar
+                        <p className={buttonStyles.subTitle}>
+                            only on this page
+                        </p>
                     </Button>
                 </span>
                 <span
