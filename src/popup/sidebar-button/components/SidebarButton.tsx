@@ -2,7 +2,7 @@ import React, { PureComponent } from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 
 import Button from '../../components/Button'
-import ToggleSwitch from './ToggleSwitch'
+import ToggleSwitch from '../../components/ToggleSwitch'
 import { RootState, ClickHandler } from '../../types'
 import * as selectors from '../selectors'
 import * as acts from '../actions'
@@ -15,45 +15,65 @@ export interface OwnProps {
 }
 
 interface StateProps {
-    // isChecked: boolean
+    isEnabled: boolean
 }
 
 interface DispatchProps {
-    handleClick: ClickHandler<HTMLButtonElement>
-    // initState: () => Promise<void>
+    handleChange: ClickHandler<HTMLButtonElement>
+    openSidebar: ClickHandler<HTMLButtonElement>
+    initState: () => Promise<void>
 }
 
 export type Props = OwnProps & StateProps & DispatchProps
 
 class TooltipButton extends PureComponent<Props> {
     componentDidMount() {
-        // this.props.initState()
+        this.props.initState()
     }
 
     render() {
         return (
             <Button
-                onClick={this.props.handleClick}
+                onClick={this.props.openSidebar}
                 btnClass={buttonStyles.linkIcon}
-                title={'Enable Memex sidebar & Highlighting tooltip'}
+                title={'Open Memex annotation sidebar'}
             >
-                <span>Open sidebar</span>
+                <span>
+                    Open Sidebar
+                    <span
+                        className={styles.switch}
+                        title={
+                            'Enable/disable Memex annotation sidebar on all pages'
+                        }
+                    >
+                        <ToggleSwitch
+                            isChecked={this.props.isEnabled}
+                            onChange={this.props.handleChange}
+                        />
+                    </span>
+                </span>
             </Button>
         )
     }
 }
 
 const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
-    isChecked: selectors.isTooltipEnabled(state),
+    isEnabled: selectors.isSidebarEnabled(state),
 })
 
 const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
     dispatch,
     props,
 ) => ({
-    handleClick: async e => {
+    openSidebar: async e => {
         e.preventDefault()
+        await dispatch(acts.openSideBar())
         setTimeout(props.closePopup, 200)
+    },
+    handleChange: async e => {
+        e.preventDefault()
+        await dispatch(acts.toggleSidebarFlag())
+        // setTimeout(props.closePopup, 200)
     },
     initState: () => dispatch(acts.init()),
 })

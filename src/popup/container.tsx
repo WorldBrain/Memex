@@ -15,7 +15,7 @@ import Search from './components/Search'
 import LinkButton from './components/LinkButton'
 import UpgradeButton from './components/UpgradeButton'
 import ButtonIcon from './components/ButtonIcon'
-import { InPageSwitches } from './in-page-switches'
+import { component as TooltipButton } from './tooltip-button'
 import { SidebarButton } from './sidebar-button'
 import { NotifButton } from './notif-button'
 import { HistoryPauser } from './pause-button'
@@ -140,8 +140,8 @@ class PopupContainer extends PureComponent<Props> {
                 <HistoryPauser />
                 <BlacklistButton />
                 <hr />
-                <InPageSwitches closePopup={this.closePopup} />
                 <SidebarButton closePopup={this.closePopup} />
+                <TooltipButton closePopup={this.closePopup} />
                 <hr />
                 <LinkButton
                     btnClass={btnStyles.voteIcon}

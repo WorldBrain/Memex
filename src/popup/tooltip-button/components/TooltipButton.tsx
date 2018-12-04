@@ -2,12 +2,12 @@ import React, { PureComponent } from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 
 import Button from '../../components/Button'
-import ToggleIcon from './ToggleIcon'
+import ToggleSwitch from '../../components/ToggleSwitch'
 import { RootState, ClickHandler } from '../../types'
 import * as selectors from '../selectors'
 import * as acts from '../actions'
 
-const styles = require('./InPageSwitches.css')
+const styles = require('./TooltipButton.css')
 const buttonStyles = require('../../components/Button.css')
 
 export interface OwnProps {
@@ -15,13 +15,11 @@ export interface OwnProps {
 }
 
 interface StateProps {
-    isSidebarEnabled: boolean
-    isTooltipEnabled: boolean
+    isEnabled: boolean
 }
 
 interface DispatchProps {
-    handleSidebarChange: ClickHandler<HTMLButtonElement>
-    handleTooltipChange: ClickHandler<HTMLButtonElement>
+    handleChange: ClickHandler<HTMLButtonElement>
     initState: () => Promise<void>
 }
 
@@ -37,29 +35,17 @@ class InPageSwitches extends PureComponent<Props> {
             <Button
                 onClick={() => null}
                 btnClass={buttonStyles.linkIcon}
-                title={'Enable Memex sidebar & Highlighting tooltip'}
+                // title={'Enable Memex sidebar & Highlighting tooltip'}
             >
                 <span>
-                    Show Sidebar/Tooltip
+                    Show Highlighter
                     <span
                         className={styles.switch}
                         title={'Enable Memex sidebar & Highlighting tooltip'}
                     >
-                        <ToggleIcon
-                            className={[styles.icon, styles.sidebarIcon]}
-                            activeClassName={styles.sidebarIconActive}
-                            title={'Show/hide annotation sidebar button'}
-                            isChecked={this.props.isSidebarEnabled}
-                            onChange={this.props.handleSidebarChange}
-                        />
-                        <ToggleIcon
-                            className={[styles.icon, styles.tooltipIcon]}
-                            activeClassName={styles.tooltipIconActive}
-                            title={
-                                'Enable/disable Memex tooltip when you select a piece of text'
-                            }
-                            isChecked={this.props.isTooltipEnabled}
-                            onChange={this.props.handleTooltipChange}
+                        <ToggleSwitch
+                            isChecked={this.props.isEnabled}
+                            onChange={this.props.handleChange}
                         />
                     </span>
                 </span>
@@ -69,20 +55,19 @@ class InPageSwitches extends PureComponent<Props> {
 }
 
 const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
-    isSidebarEnabled: selectors.isSidebarEnabled(state),
-    isTooltipEnabled: selectors.isTooltipEnabled(state),
+    isEnabled: selectors.isTooltipEnabled(state),
 })
 
 const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
     dispatch,
     props,
 ) => ({
-    handleSidebarChange: async e => {
-        e.preventDefault()
-        await dispatch(acts.toggleSidebarFlag())
-        // setTimeout(props.closePopup, 200)
-    },
-    handleTooltipChange: async e => {
+    // handleSidebarChange: async e => {
+    //     e.preventDefault()
+    //     await dispatch(acts.toggleSidebarFlag())
+    //     // setTimeout(props.closePopup, 200)
+    // },
+    handleChange: async e => {
         e.preventDefault()
         await dispatch(acts.toggleTooltipFlag())
         // setTimeout(props.closePopup, 200)

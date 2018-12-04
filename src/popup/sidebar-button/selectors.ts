@@ -2,6 +2,9 @@ import { createSelector } from 'reselect'
 
 import { RootState } from '../types'
 
-const tooltipBtn = (state: RootState) => state.inPageSwitches
+const sidebarBtn = (state: RootState) => state.sidebarBtn
 
-export const isTooltipEnabled = createSelector(tooltipBtn, state => false)
+export const isSidebarEnabled = createSelector(
+    sidebarBtn,
+    state => state.isEnabled,
+)
