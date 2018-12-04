@@ -20,6 +20,7 @@ interface StateProps {
 
 interface DispatchProps {
     handleChange: ClickHandler<HTMLButtonElement>
+    showTooltip: ClickHandler<HTMLButtonElement>
     initState: () => Promise<void>
 }
 
@@ -35,7 +36,7 @@ class InPageSwitches extends PureComponent<Props> {
             <div>
                 <span>
                     <Button
-                        onClick={() => {}}
+                        onClick={this.props.showTooltip}
                         itemClass={styles.button}
                         btnClass={buttonStyles.highlighterIcon}
                         title={'Open Memex annotation sidebar'}
@@ -70,11 +71,12 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
     dispatch,
     props,
 ) => ({
-    // handleSidebarChange: async e => {
-    //     e.preventDefault()
-    //     await dispatch(acts.toggleSidebarFlag())
-    //     // setTimeout(props.closePopup, 200)
-    // },
+    showTooltip: async e => {
+        // console.log('dispatch')
+        e.preventDefault()
+        await dispatch(acts.showTooltip())
+        // setTimeout(props.closePopup, 200)
+    },
     handleChange: async e => {
         e.preventDefault()
         await dispatch(acts.toggleTooltipFlag())

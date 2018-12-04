@@ -29,3 +29,7 @@ export const toggleTooltipFlag: () => Thunk = () => async (
     await setTooltipState(!wasEnabled)
     dispatch(setTooltipFlag(!wasEnabled))
 }
+
+export const showTooltip: () => Thunk = () => async () => {
+    await remoteFunction('showContentTooltip')()
+}

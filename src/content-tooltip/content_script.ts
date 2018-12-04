@@ -1,5 +1,5 @@
 import { browser } from 'webextension-polyfill-ts'
-import { remoteFunction } from '../util/webextensionRPC'
+import { remoteFunction, makeRemotelyCallable } from '../util/webextensionRPC'
 import { bodyLoader } from '../util/loader'
 import {
     createAndCopyDirectLink,
@@ -47,6 +47,16 @@ export default async function init({
     })
     interactions.setupTooltipTrigger(showTooltip)
     interactions.conditionallyTriggerTooltip(showTooltip)
+
+    makeRemotelyCallable({
+        showContentTooltip: () => {
+            // console.log('called!')
+            if (interactions.userSelectedText()) {
+                const position = interactions.calculateTooltipPostion()
+                showTooltip(position)
+            }
+        },
+    })
 }
 
 const CLOSE_MESSAGESHOWN_KEY = 'tooltip.close-message-shown'
