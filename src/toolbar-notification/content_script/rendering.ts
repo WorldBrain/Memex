@@ -7,15 +7,7 @@ export function createRootElement() {
     container.classList.add(CONTAINER_CLASS)
 
     const cssFile = window['browser'].extension.getURL('/content_script.css')
-    const rootElement = document.createElement('div')
-    if (container.attachShadow) {
-        const shadow = container.attachShadow({ mode: 'closed' })
-        shadow.appendChild(rootElement)
-        injectCSS(cssFile, shadow)
-    } else {
-        container.appendChild(rootElement)
-        injectCSS(cssFile)
-    }
+    const rootElement = createShadowRootIfSupported(container, cssFile)
     document.body.appendChild(container)
 
     return rootElement
@@ -26,4 +18,21 @@ export function destroyRootElement() {
     if (container) {
         container.remove()
     }
+}
+
+export function createShadowRootIfSupported(
+    container: HTMLElement,
+    cssFile?: string,
+) {
+    const rootElement = document.createElement('div')
+    if (container.attachShadow) {
+        const shadow = container.attachShadow({ mode: 'closed' })
+        shadow.appendChild(rootElement)
+        injectCSS(cssFile, shadow)
+    } else {
+        container.appendChild(rootElement)
+        injectCSS(cssFile)
+    }
+
+    return rootElement
 }
