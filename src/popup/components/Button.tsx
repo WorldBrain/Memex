@@ -7,6 +7,7 @@ export interface Props extends HTMLProps<HTMLButtonElement> {
     children: React.ReactChild
     btnClass?: string
     itemClass?: string
+    extraClass?: string
 }
 
 class Button extends React.PureComponent<Props> {

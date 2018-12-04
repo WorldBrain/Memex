@@ -38,6 +38,7 @@
     font-weight: 100;
     padding-left: 10px;
     background: none !important;
+    padding-top: 10px;
 
     &:disabled {
         color: rgb(156, 156, 156);
@@ -114,7 +115,6 @@
     width: 30px;
     height: 29px;
     margin-left: 10px;
-    margin-top: 10px;
     outline: 0;
 }
 

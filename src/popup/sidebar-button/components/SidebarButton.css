@@ -4,6 +4,12 @@
 
 .switch {
     position: absolute;
+    padding-top: 10px;
+}
+
+.button {
+    display: inline-block;
+    width: 170px;
 }
 
 .infoLink {

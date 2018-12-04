@@ -32,24 +32,29 @@ class InPageSwitches extends PureComponent<Props> {
 
     render() {
         return (
-            <Button
-                onClick={() => null}
-                btnClass={buttonStyles.linkIcon}
-                // title={'Enable Memex sidebar & Highlighting tooltip'}
-            >
+            <div>
                 <span>
-                    Show Highlighter
-                    <span
-                        className={styles.switch}
-                        title={'Enable Memex sidebar & Highlighting tooltip'}
+                    <Button
+                        onClick={() => {}}
+                        itemClass={styles.button}
+                        btnClass={buttonStyles.linkIcon}
+                        title={'Open Memex annotation sidebar'}
                     >
-                        <ToggleSwitch
-                            isChecked={this.props.isEnabled}
-                            onChange={this.props.handleChange}
-                        />
-                    </span>
+                        Show Highlighter
+                    </Button>
                 </span>
-            </Button>
+                <span
+                    className={styles.switch}
+                    title={
+                        'Enable/disable Memex highlighter tooltip on all pages'
+                    }
+                >
+                    <ToggleSwitch
+                        isChecked={this.props.isEnabled}
+                        onChange={this.props.handleChange}
+                    />
+                </span>
+            </div>
         )
     }
 }

@@ -1,5 +1,19 @@
+.toggleDiv {
+    position: relative;
+}
+
+.switch {
+    position: absolute;
+    padding-top: 10px;
+}
+
 .icon {
     display: inline-block;
     margin-left: 10px;
     cursor: pointer;
+}
+
+.button {
+    display: inline-block;
+    width: 170px;
 }

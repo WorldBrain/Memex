@@ -33,26 +33,29 @@ class TooltipButton extends PureComponent<Props> {
 
     render() {
         return (
-            <Button
-                onClick={this.props.openSidebar}
-                btnClass={buttonStyles.linkIcon}
-                title={'Open Memex annotation sidebar'}
-            >
+            <div>
                 <span>
-                    Open Sidebar
-                    <span
-                        className={styles.switch}
-                        title={
-                            'Enable/disable Memex annotation sidebar on all pages'
-                        }
+                    <Button
+                        onClick={this.props.openSidebar}
+                        itemClass={styles.button}
+                        btnClass={buttonStyles.linkIcon}
+                        title={'Open Memex annotation sidebar'}
                     >
-                        <ToggleSwitch
-                            isChecked={this.props.isEnabled}
-                            onChange={this.props.handleChange}
-                        />
-                    </span>
+                        Open Sidebar
+                    </Button>
                 </span>
-            </Button>
+                <span
+                    className={styles.switch}
+                    title={
+                        'Enable/disable Memex annotation sidebar on all pages'
+                    }
+                >
+                    <ToggleSwitch
+                        isChecked={this.props.isEnabled}
+                        onChange={this.props.handleChange}
+                    />
+                </span>
+            </div>
         )
     }
 }
@@ -71,6 +74,7 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
         setTimeout(props.closePopup, 200)
     },
     handleChange: async e => {
+        e.stopPropagation()
         e.preventDefault()
         await dispatch(acts.toggleSidebarFlag())
         // setTimeout(props.closePopup, 200)
