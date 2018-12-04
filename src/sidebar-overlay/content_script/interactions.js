@@ -1,5 +1,4 @@
 import { highlightAnnotation } from 'src/direct-linking/content_script/rendering'
-import { injectCSS } from 'src/search-injection/dom'
 import { makeRemotelyCallable, remoteFunction } from 'src/util/webextensionRPC'
 import { setupRibbonUI, destroyAll } from '../components'
 import { getOffsetTop } from '../utils'
@@ -84,13 +83,6 @@ export const insertRibbon = () => {
     toggleSidebar = new Promise(resolve => {
         resolveToggleSidebar = resolve
     })
-
-    target = document.createElement('div')
-    target.setAttribute('id', 'memex-annotations-ribbon')
-    document.body.appendChild(target)
-
-    const cssFile = browser.extension.getURL('content_script.css')
-    injectCSS(cssFile)
 
     setupRibbonUI(target, {
         onInit: ({ toggleSidebar }) => {
