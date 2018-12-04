@@ -7,10 +7,13 @@ export function createRootElement() {
     container.classList.add(CONTAINER_CLASS)
 
     const cssFile = window['browser'].extension.getURL('/content_script.css')
-    const rootElement = createShadowRootIfSupported(container, cssFile)
+    const { rootElement, shadow } = createShadowRootIfSupported(
+        container,
+        cssFile,
+    )
     document.body.appendChild(container)
 
-    return rootElement
+    return { rootElement, shadow }
 }
 
 export function destroyRootElement() {
@@ -25,8 +28,9 @@ export function createShadowRootIfSupported(
     cssFile?: string,
 ) {
     const rootElement = document.createElement('div')
+    let shadow = null
     if (container.attachShadow) {
-        const shadow = container.attachShadow({ mode: 'closed' })
+        shadow = container.attachShadow({ mode: 'closed' })
         shadow.appendChild(rootElement)
         injectCSS(cssFile, shadow)
     } else {
@@ -34,5 +38,5 @@ export function createShadowRootIfSupported(
         injectCSS(cssFile)
     }
 
-    return rootElement
+    return { rootElement, shadow }
 }
