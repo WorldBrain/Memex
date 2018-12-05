@@ -1,6 +1,7 @@
 // NOTE: Loader `include` paths are relative to this module
 import path from 'path'
 import CssExtractPlugin from 'mini-css-extract-plugin'
+import { externalTsModules } from './external'
 
 export const threadLoader = {
     loader: 'thread-loader',
@@ -77,7 +78,12 @@ export default ({ mode, context, isCI = false, injectStyles = false }) => {
 
     const main = {
         test: /\.(j|t)sx?$/,
-        include: path.resolve(context, './src'),
+        include: [
+            path.resolve(context, './src'),
+            ...externalTsModules.map(mod =>
+                path.resolve(context, `./external/${mod}`),
+            ),
+        ],
         use: [babelLoader, tsLoader],
     }
 
