@@ -1,0 +1,12 @@
+.brainIcon {
+    height: 20px;
+    vertical-align: bottom;
+}
+
+.title {
+    display: flex;
+    font-family: 'Lato', sans-serif !important;
+    flex-direction: row !important;
+    width: 100%;
+    padding-left: 10px;
+}

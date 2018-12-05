@@ -9,6 +9,7 @@ import styles from './tooltip.css'
 const images = {
     cross: getExtURL('/img/cross_grey.svg'),
     settings: getExtURL('/img/settings_grey.svg'),
+    tooltipIcon: getExtURL('/img/tooltipIcon.svg'),
 }
 
 const deriveTooltipClass = state =>
@@ -31,21 +32,7 @@ const Tooltip = ({
         id="memex-tooltip"
     >
         <AnimationWrapper>{tooltipComponent}</AnimationWrapper>
-
-        <span className={styles.buttons}>
-            <a onClick={closeTooltip} className={styles.smallButton}>
-                <img
-                    className={styles.imgCross}
-                    src={images.cross}
-                    title={
-                        'Close once. Disable via Memex icon in the extension toolbar.'
-                    }
-                />
-            </a>
-            <a onClick={openSettings} className={styles.smallButton}>
-                <img className={styles.imgSettings} src={images.settings} />
-            </a>
-        </span>
+        {_renderButtons({ closeTooltip, openSettings })}
     </div>
 )
 
@@ -59,3 +46,29 @@ Tooltip.propTypes = {
 }
 
 export default Tooltip
+
+export function _renderButtons({ closeTooltip, openSettings }) {
+    return (
+        <span className={styles.buttons}>
+            <a onClick={closeTooltip} className={styles.smallButton}>
+                <img
+                    className={styles.imgCross}
+                    src={images.cross}
+                    title={
+                        'Close once. Disable via Memex icon in the extension toolbar.'
+                    }
+                />
+            </a>
+            {openSettings && (
+                <a onClick={openSettings} className={styles.smallButton}>
+                    <img className={styles.imgSettings} src={images.settings} />
+                </a>
+            )}
+        </span>
+    )
+}
+
+_renderButtons.propTypes = {
+    closeTooltip: PropTypes.func.isRequired,
+    openSettings: PropTypes.func,
+}

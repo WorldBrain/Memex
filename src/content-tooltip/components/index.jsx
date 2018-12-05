@@ -6,7 +6,7 @@ export function setupUIContainer(
     target,
     { createAndCopyDirectLink, openSettings, destroyTooltip, createAnnotation },
 ) {
-    return new Promise(resolve => {
+    return new Promise(async resolve => {
         ReactDOM.render(
             <TooltipContainer
                 onInit={showTooltip => resolve(showTooltip)}

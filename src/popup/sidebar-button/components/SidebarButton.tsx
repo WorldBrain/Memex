@@ -7,7 +7,7 @@ import { RootState, ClickHandler } from '../../types'
 import * as selectors from '../selectors'
 import * as acts from '../actions'
 
-const styles = require('./TooltipButton.css')
+const styles = require('./SidebarButton.css')
 const buttonStyles = require('../../components/Button.css')
 
 export interface OwnProps {
@@ -20,13 +20,13 @@ interface StateProps {
 
 interface DispatchProps {
     handleChange: ClickHandler<HTMLButtonElement>
-    showTooltip: ClickHandler<HTMLButtonElement>
+    openSidebar: ClickHandler<HTMLButtonElement>
     initState: () => Promise<void>
 }
 
 export type Props = OwnProps & StateProps & DispatchProps
 
-class InPageSwitches extends PureComponent<Props> {
+class TooltipButton extends PureComponent<Props> {
     componentDidMount() {
         this.props.initState()
     }
@@ -36,12 +36,12 @@ class InPageSwitches extends PureComponent<Props> {
             <div>
                 <span>
                     <Button
-                        onClick={this.props.showTooltip}
+                        onClick={this.props.openSidebar}
                         itemClass={styles.button}
-                        btnClass={buttonStyles.highlighterIcon}
+                        btnClass={buttonStyles.sidebarIcon}
                         title={'Open Memex annotation sidebar'}
                     >
-                        Show Highlighter
+                        Open Sidebar
                         <p className={buttonStyles.subTitle}>
                             only on this page
                         </p>
@@ -50,7 +50,7 @@ class InPageSwitches extends PureComponent<Props> {
                 <span
                     className={styles.switch}
                     title={
-                        'Enable/disable Memex highlighter tooltip on all pages'
+                        'Enable/disable Memex annotation sidebar on all pages'
                     }
                 >
                     <ToggleSwitch
@@ -64,22 +64,22 @@ class InPageSwitches extends PureComponent<Props> {
 }
 
 const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
-    isEnabled: selectors.isTooltipEnabled(state),
+    isEnabled: selectors.isSidebarEnabled(state),
 })
 
 const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
     dispatch,
     props,
 ) => ({
-    showTooltip: async e => {
-        // console.log('dispatch')
+    openSidebar: async e => {
         e.preventDefault()
-        await dispatch(acts.showTooltip())
-        // setTimeout(props.closePopup, 200)
+        await dispatch(acts.openSideBar())
+        setTimeout(props.closePopup, 200)
     },
     handleChange: async e => {
+        e.stopPropagation()
         e.preventDefault()
-        await dispatch(acts.toggleTooltipFlag())
+        await dispatch(acts.toggleSidebarFlag())
         // setTimeout(props.closePopup, 200)
     },
     initState: () => dispatch(acts.init()),
@@ -88,4 +88,4 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
 export default connect<StateProps, DispatchProps, OwnProps>(
     mapState,
     mapDispatch,
-)(InPageSwitches)
+)(TooltipButton)

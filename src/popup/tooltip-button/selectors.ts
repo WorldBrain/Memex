@@ -2,9 +2,9 @@ import { createSelector } from 'reselect'
 
 import { RootState } from '../types'
 
-const tooltipBtn = (state: RootState) => state.tooltipBtn
+const tooltipButton = (state: RootState) => state.tooltipBtn
 
 export const isTooltipEnabled = createSelector(
-    tooltipBtn,
+    tooltipButton,
     state => state.isEnabled,
 )

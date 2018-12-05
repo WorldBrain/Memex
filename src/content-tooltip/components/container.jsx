@@ -31,7 +31,7 @@ class TooltipContainer extends React.Component {
     }
 
     showTooltip = position => {
-        if (this.state.tooltipState !== 'running') {
+        if (!this.state.showTooltip && this.state.tooltipState !== 'running') {
             this.setState({
                 showTooltip: true,
                 position,
@@ -47,10 +47,15 @@ class TooltipContainer extends React.Component {
         })
     }
 
-    closeTooltip = event => {
+    closeTooltip = (event, options = { disable: false }) => {
         event.preventDefault()
         event.stopPropagation()
+
         this.props.destroy()
+    }
+
+    showCloseMessage() {
+        this.setState({ showingCloseMessage: true })
     }
 
     createLink = async () => {

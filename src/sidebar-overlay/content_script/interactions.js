@@ -67,6 +67,7 @@ export const highlightAnnotations = async (
 
 // Target container for the Ribbon/Sidebar iFrame
 let target = null
+let toggleSidebar = null
 
 /**
  * Creates target container for Ribbon and Sidebar iFrame.
@@ -79,6 +80,10 @@ export const insertRibbon = () => {
     if (target) {
         return
     }
+    let resolveToggleSidebar
+    toggleSidebar = new Promise(resolve => {
+        resolveToggleSidebar = resolve
+    })
 
     target = document.createElement('div')
     target.setAttribute('id', 'memex-annotations-ribbon')
@@ -87,7 +92,14 @@ export const insertRibbon = () => {
     const cssFile = browser.extension.getURL('content_script.css')
     injectCSS(cssFile)
 
-    setupRibbonUI(target)
+    setupRibbonUI(target, {
+        onInit: ({ toggleSidebar }) => {
+            resolveToggleSidebar(toggleSidebar)
+        },
+        onClose: () => {
+            removeRibbon()
+        },
+    })
 }
 
 const removeRibbon = () => {
@@ -97,6 +109,7 @@ const removeRibbon = () => {
     removeHighlights()
     destroyAll(target)()
     target = null
+    toggleSidebar = null
 }
 
 /**
@@ -104,6 +117,12 @@ const removeRibbon = () => {
  */
 export const setupRPC = () => {
     makeRemotelyCallable({
+        toggleSidebarOverlay: async () => {
+            if (!toggleSidebar) {
+                insertRibbon()
+            }
+            return toggleSidebar.then(f => f())
+        },
         insertRibbon: () => {
             insertRibbon()
         },

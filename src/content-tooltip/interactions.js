@@ -49,7 +49,7 @@ export const conditionallyTriggerTooltip = delayed(async (callback, event) => {
     callback(position)
 }, 300)
 
-function calculateTooltipPostion() {
+export function calculateTooltipPostion() {
     const range = document.getSelection().getRangeAt(0)
     const boundingRect = range.getBoundingClientRect()
     // x = position of element from the left + half of it's width
@@ -75,7 +75,7 @@ function isAnchorOrContentEditable(selected) {
     return false
 }
 
-function userSelectedText() {
+export function userSelectedText() {
     const selection = document.getSelection()
     if (selection.type === 'None') {
         return false
