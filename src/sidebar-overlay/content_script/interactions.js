@@ -1,8 +1,11 @@
+import retargetEvents from 'react-shadow-dom-retarget-events'
+
 import { highlightAnnotation } from 'src/direct-linking/content_script/rendering'
 import { makeRemotelyCallable, remoteFunction } from 'src/util/webextensionRPC'
 import { setupRibbonUI, destroyAll } from '../components'
 import { getOffsetTop } from '../utils'
 import styles from 'src/direct-linking/content_script/styles.css'
+import { createRootElement, destroyRootElement } from './rendering'
 
 const openOptionsRPC = remoteFunction('openOptionsTab')
 
@@ -66,6 +69,7 @@ export const highlightAnnotations = async (
 
 // Target container for the Ribbon/Sidebar iFrame
 let target = null
+let shadowRoot = null
 let toggleSidebar = null
 
 /**
@@ -84,6 +88,17 @@ export const insertRibbon = () => {
         resolveToggleSidebar = resolve
     })
 
+    const { shadow, rootElement } = createRootElement({
+        containerId: 'memex-annotations-ribbon-container',
+        rootId: 'memex-annotations-ribbon',
+        classNames: ['memex-annotations-ribbon'],
+    })
+    target = rootElement
+    shadowRoot = shadow
+
+    // React messes up event propagation with shadow dom, hence fix.
+    retargetEvents(shadowRoot)
+
     setupRibbonUI(target, {
         onInit: ({ toggleSidebar }) => {
             resolveToggleSidebar(toggleSidebar)
@@ -99,7 +114,9 @@ const removeRibbon = () => {
         return
     }
     removeHighlights()
-    destroyAll(target)()
+    destroyAll(target, shadowRoot)()
+    destroyRootElement()
+    shadowRoot = null
     target = null
     toggleSidebar = null
 }

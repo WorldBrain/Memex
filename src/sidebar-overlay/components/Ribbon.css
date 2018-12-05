@@ -4,7 +4,7 @@
     top: 35%;
     right: -50px;
     width: 30px;
-    height: 68px;
+    height: 130px;
     background-color: #fff;
     z-index: 2147483647;
     border-top-left-radius: 5px;
@@ -56,7 +56,7 @@
 }
 
 .buttonHolder {
-    border-bottom: 1px solid #c2c2c2;
+    /* border-bottom: 1px solid #c2c2c2; */
     padding: 3px 0;
     width: 86%;
     margin: 0px auto;
@@ -64,6 +64,7 @@
 }
 
 .logo,
+.toggler,
 .cancel,
 .settings {
     background-repeat: no-repeat;
@@ -78,6 +79,31 @@
     width: 18px;
     height: 25px;
     margin-left: 6px;
+}
+
+.toggler {
+    fill: white;
+    background-size: 14px;
+    width: 14px;
+    height: 14px;
+    margin-left: 6px;
+    margin-top: 5px;
+}
+
+.tooltipOn {
+    background-image: url('../../../img/tooltipIcon_grey.svg');
+}
+
+.tooltipOff {
+    background-image: url('../../../img/tooltipIcon_blue.svg');
+}
+
+.ribbonOn {
+    background-image: url('../../../img/sidebarIcon_grey.svg');
+}
+
+.ribbonOff {
+    background-image: url('../../../img/sidebarIcon_blue.svg');
 }
 
 .cancel {

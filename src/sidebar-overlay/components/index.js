@@ -30,11 +30,16 @@ export const setupRibbonUI = (target, { onInit, onClose }) => {
     )
 }
 
-export const destroyAll = target => () => {
+export const destroyAll = (target, shadowRoot = null) => () => {
     processEventRPC({ type: 'disableSidebarPage' })
 
     ReactDOM.unmountComponentAtNode(target)
-    document.body.removeChild(target)
+
+    if (shadowRoot !== null) {
+        shadowRoot.removeChild(target)
+    } else {
+        document.body.removeChild(target)
+    }
 }
 
 export default SidebarContainer

@@ -330,13 +330,30 @@ class Ribbon extends React.Component {
         const { destroy } = this.props
 
         return (
-            <div>
+            <React.Fragment>
                 <div
                     className={cx(styles.ribbon, {
                         [styles.ribbonSidebarActive]: isSidebarActive,
                         [styles.onFullScreen]: isFullScreen,
                     })}
                 >
+                    <div className={styles.logo} onClick={this.toggleSidebar} />
+                    <div className={styles.buttonHolder}>
+                        <span
+                            className={cx(styles.toggler, {
+                                [styles.tooltipOn]: true,
+                                [styles.tooltipOff]: false,
+                            })}
+                        />
+                    </div>
+                    <div className={styles.buttonHolder}>
+                        <span
+                            className={cx(styles.toggler, {
+                                [styles.ribbonOn]: false,
+                                [styles.ribbonOff]: true,
+                            })}
+                        />
+                    </div>
                     <div className={styles.buttonHolder}>
                         <span
                             title={
@@ -346,7 +363,6 @@ class Ribbon extends React.Component {
                             onClick={destroy}
                         />
                     </div>
-                    <div className={styles.logo} onClick={this.toggleSidebar} />
                 </div>
                 <CloseButton
                     isActive={isSidebarActive}
@@ -356,7 +372,7 @@ class Ribbon extends React.Component {
                     }
                 />
                 {this.renderIFrame()}
-            </div>
+            </React.Fragment>
         )
     }
 }
