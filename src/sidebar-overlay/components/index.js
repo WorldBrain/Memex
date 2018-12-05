@@ -15,8 +15,7 @@ export const setupRibbonUI = (target, { onInit, onClose }) => {
         <Ribbon
             onInit={onInit}
             destroy={() => {
-                console.log('huhh!?!!')
-                // onClose()
+                onClose()
             }}
             sidebarURL={sidebarURL}
             highlightAll={interactions.highlightAnnotations}
