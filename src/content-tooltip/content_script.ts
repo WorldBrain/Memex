@@ -50,7 +50,6 @@ export default async function init({
 
     makeRemotelyCallable({
         showContentTooltip: () => {
-            // console.log('called!')
             if (interactions.userSelectedText()) {
                 const position = interactions.calculateTooltipPostion()
                 showTooltip(position)
@@ -61,13 +60,13 @@ export default async function init({
 
 const CLOSE_MESSAGESHOWN_KEY = 'tooltip.close-message-shown'
 
-export async function _getCloseMessageShown() {
+export async function _setCloseMessageShown() {
     await window['browser'].storage.local.set({
         [CLOSE_MESSAGESHOWN_KEY]: true,
     })
 }
 
-export async function _setCloseMessageShown() {
+export async function _getCloseMessageShown() {
     const { [CLOSE_MESSAGESHOWN_KEY]: closeMessageShown } = await window[
         'browser'
     ].storage.local.get({ [CLOSE_MESSAGESHOWN_KEY]: false })
