@@ -3,7 +3,8 @@ import retargetEvents from 'react-shadow-dom-retarget-events'
 import { highlightAnnotation } from 'src/direct-linking/content_script/rendering'
 import { makeRemotelyCallable, remoteFunction } from 'src/util/webextensionRPC'
 import { setupRibbonUI, destroyAll } from '../components'
-import { getOffsetTop } from '../utils'
+import { getSidebarState, getOffsetTop, setSidebarState } from '../utils'
+import { setTooltipState, getTooltipState } from '../../content-tooltip/utils'
 import styles from 'src/direct-linking/content_script/styles.css'
 import { createRootElement, destroyRootElement } from './rendering'
 
@@ -105,6 +106,17 @@ export const insertRibbon = () => {
         },
         onClose: () => {
             removeRibbon()
+        },
+        getInitialState: async () => {
+            const isTooltipEnabled = await getTooltipState()
+            const isRibbonEnabled = await getSidebarState()
+            return { isTooltipEnabled, isRibbonEnabled }
+        },
+        handleRibbonToggle: async prevState => {
+            await setSidebarState(!prevState)
+        },
+        handleTooltipToggle: async prevState => {
+            await setTooltipState(!prevState)
         },
     })
 }

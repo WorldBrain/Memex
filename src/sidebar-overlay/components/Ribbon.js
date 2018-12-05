@@ -13,6 +13,9 @@ class Ribbon extends React.Component {
     static propTypes = {
         onInit: PropTypes.func.isRequired,
         destroy: PropTypes.func.isRequired,
+        getInitialState: PropTypes.func.isRequired,
+        handleRibbonToggle: PropTypes.func.isRequired,
+        handleTooltipToggle: PropTypes.func.isRequired,
         sidebarURL: PropTypes.string.isRequired,
         highlightAll: PropTypes.func.isRequired,
         removeHighlights: PropTypes.func.isRequired,
@@ -31,9 +34,18 @@ class Ribbon extends React.Component {
         isInsideFrame: false,
         top: null,
         shouldRenderIFrame: false,
+        isRibbonEnabled: true,
+        isTooltipEnabled: true,
     }
 
     async componentDidMount() {
+        // Get ribbon state.
+        const {
+            isRibbonEnabled,
+            isTooltipEnabled,
+        } = await this.props.getInitialState()
+        this.setState({ isRibbonEnabled, isTooltipEnabled })
+
         this.setupRPCfunctions()
 
         this.setupScrollListeners()
@@ -238,6 +250,26 @@ class Ribbon extends React.Component {
         })
     }
 
+    /* Toggles tooltip on/off for all pages. */
+    toggleTooltip = async e => {
+        e.stopPropagation()
+        e.preventDefault()
+
+        const { isTooltipEnabled } = this.state
+        this.props.handleTooltipToggle(isTooltipEnabled)
+        this.setState({ isTooltipEnabled: !isTooltipEnabled })
+    }
+
+    /* Toggles ribbon on/off for all pages. */
+    toggleRibbon = async e => {
+        e.stopPropagation()
+        e.preventDefault()
+
+        const { isRibbonEnabled } = this.state
+        this.props.handleRibbonToggle(isRibbonEnabled)
+        this.setState({ isRibbonEnabled: !isRibbonEnabled })
+    }
+
     openSidebar = () =>
         new Promise(resolve => {
             return this.setState(
@@ -326,7 +358,12 @@ class Ribbon extends React.Component {
     }
 
     render() {
-        const { isSidebarActive, isFullScreen } = this.state
+        const {
+            isSidebarActive,
+            isFullScreen,
+            isTooltipEnabled,
+            isRibbonEnabled,
+        } = this.state
         const { destroy } = this.props
 
         return (
@@ -338,19 +375,25 @@ class Ribbon extends React.Component {
                     })}
                 >
                     <div className={styles.logo} onClick={this.toggleSidebar} />
-                    <div className={styles.buttonHolder}>
+                    <div
+                        className={styles.buttonHolder}
+                        onClick={this.toggleTooltip}
+                    >
                         <span
                             className={cx(styles.toggler, {
-                                [styles.tooltipOn]: true,
-                                [styles.tooltipOff]: false,
+                                [styles.tooltipOn]: isTooltipEnabled,
+                                [styles.tooltipOff]: !isTooltipEnabled,
                             })}
                         />
                     </div>
-                    <div className={styles.buttonHolder}>
+                    <div
+                        className={styles.buttonHolder}
+                        onClick={this.toggleRibbon}
+                    >
                         <span
                             className={cx(styles.toggler, {
-                                [styles.ribbonOn]: false,
-                                [styles.ribbonOff]: true,
+                                [styles.ribbonOn]: isRibbonEnabled,
+                                [styles.ribbonOff]: !isRibbonEnabled,
                             })}
                         />
                     </div>
