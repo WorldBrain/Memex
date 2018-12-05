@@ -7,12 +7,11 @@ import * as selectors from './selectors'
 
 const processEventRPC = remoteFunction('processEvent')
 
-export const setSidebarFlag = createAction<boolean>('tooltip/setSidebarFlag')
 export const setTooltipFlag = createAction<boolean>('tooltip/setTooltipFlag')
 
 export const init: () => Thunk = () => async dispatch => {
-    const [sidebar, tooltip] = await Promise.all([getTooltipState()])
-    dispatch(setSidebarFlag(sidebar))
+    const sidebar = await getTooltipState()
+    dispatch(setTooltipFlag(sidebar))
 }
 
 export const toggleTooltipFlag: () => Thunk = () => async (
