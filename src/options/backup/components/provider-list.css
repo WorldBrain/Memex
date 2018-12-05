@@ -21,3 +21,21 @@ input {
 .name {
     vertical-align: middle;
 }
+
+.vote {
+    background-color: #3eb995;
+    color: white;
+    text-decoration: none;
+    padding: 2px 10px 3px 10px;
+    border-radius: 4px;
+    margin-right: 5px;
+}
+
+.voteContainer {
+    margin-bottom: 10px;
+}
+
+.subTitle {
+    font-weight: 600;
+    margin-bottom: 10px;
+}
