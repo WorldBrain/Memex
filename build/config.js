@@ -3,6 +3,7 @@ import path from 'path'
 import initLoaderRules from './loaders'
 import initPlugins from './plugins'
 import initMinimizers from './minimizers'
+import { externalTsModules } from './external'
 
 export const extensions = ['.ts', '.tsx', '.js', '.jsx', '.coffee']
 
@@ -22,6 +23,22 @@ export const output = {
 }
 
 export default ({ context = __dirname, mode = 'development', ...opts }) => {
+    const aliases = {
+        src: path.resolve(context, './src'),
+    }
+    for (const externalTsModule of externalTsModules) {
+        Object.assign(aliases, {
+            [`${externalTsModule}$`]: path.resolve(
+                context,
+                './external/storex/ts',
+            ),
+            [`${externalTsModule}/lib`]: path.resolve(
+                context,
+                './external/storex/ts',
+            ),
+        })
+    }
+
     const conf = {
         context,
         entry,
@@ -43,18 +60,7 @@ export default ({ context = __dirname, mode = 'development', ...opts }) => {
             extensions,
             symlinks: false,
             mainFields: ['browser', 'main', 'module'],
-            alias: {
-                src: path.resolve(context, './src'),
-                storex: path.resolve(context, './external/storex'),
-                'storex-backend-dexie': path.resolve(
-                    context,
-                    './external/storex-backend-dexie',
-                ),
-                'memex-stemmer': path.resolve(
-                    context,
-                    './external/memex-stemmer',
-                ),
-            },
+            alias: aliases,
         },
         stats: {
             assetsSort: 'size',
