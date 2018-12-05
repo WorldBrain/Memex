@@ -1,6 +1,6 @@
 import * as expect from 'expect'
+import { BackupBackend } from '../../backend'
 import { BackupRestoreProcedure } from '.'
-import { BackupBackend } from 'src/backup/background/backend'
 
 describe('BackupRestoreProcedure', () => {
     it('the top-level procedure for restoring change sets and images should work', async () => {
