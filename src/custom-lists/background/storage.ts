@@ -95,12 +95,11 @@ export default class CustomListStorage extends FeatureStorage {
     /**
      *  Fetch list By Id.
      *
-     * @private
      * @param {number} id
-     * @returns {PageList}
+     * @returns
      * @memberof CustomListStorage
      */
-    private async fetchListById(id: number) {
+    async fetchListById(id: number) {
         const list = await this.storageManager.findObject<PageList>(
             CustomListStorage.CUSTOM_LISTS_COLL,
             { id },

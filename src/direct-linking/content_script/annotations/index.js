@@ -1,7 +1,7 @@
 import * as domTextQuote from 'dom-anchor-text-quote'
 import * as domTextPosition from 'dom-anchor-text-position'
 import * as hypAnchoring from './anchoring/html'
-import highlightRange from 'dom-highlight-range'
+import highlightRange from './dom-highlight-range'
 
 export function isSelectionWithinCorpus({ selection, corpus }) {
     if (selection === null || selection.isCollapsed) {
