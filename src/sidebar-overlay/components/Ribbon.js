@@ -11,6 +11,7 @@ import CloseButton from './CloseButton'
 
 class Ribbon extends React.Component {
     static propTypes = {
+        onInit: PropTypes.func.isRequired,
         destroy: PropTypes.func.isRequired,
         sidebarURL: PropTypes.string.isRequired,
         highlightAll: PropTypes.func.isRequired,
@@ -52,6 +53,8 @@ class Ribbon extends React.Component {
             this.onFullScreenCall,
             false,
         )
+
+        this.props.onInit({ toggleSidebar: () => this.toggleSidebar() })
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -73,9 +76,6 @@ class Ribbon extends React.Component {
 
     setupRPCfunctions = () => {
         makeRemotelyCallable({
-            toggleSidebarOverlay: async () => {
-                await this.toggleSidebar()
-            },
             /**
              * Opens sidebar and displays the "New annotation" message above Comment Box.
              * @param {*} anchor The anchor of the selected text
