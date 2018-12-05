@@ -38,6 +38,7 @@
 }
 
 .text {
+    cursor: pointer;
     z-index: 10;
     color: #ddd;
     font-size: 0.8em;
