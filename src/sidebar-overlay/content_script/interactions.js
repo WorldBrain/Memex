@@ -80,6 +80,10 @@ export const insertRibbon = () => {
     if (target) {
         return
     }
+    let resolveToggleSidebar
+    toggleSidebar = new Promise(resolve => {
+        resolveToggleSidebar = resolve
+    })
 
     target = document.createElement('div')
     target.setAttribute('id', 'memex-annotations-ribbon')
@@ -89,8 +93,11 @@ export const insertRibbon = () => {
     injectCSS(cssFile)
 
     setupRibbonUI(target, {
-        onInit: params => {
-            toggleSidebar = params.toggleSidebar
+        onInit: ({ toggleSidebar }) => {
+            resolveToggleSidebar(toggleSidebar)
+        },
+        onClose: () => {
+            removeRibbon()
         },
     })
 }
@@ -111,7 +118,10 @@ const removeRibbon = () => {
 export const setupRPC = () => {
     makeRemotelyCallable({
         toggleSidebarOverlay: async () => {
-            return toggleSidebar()
+            if (!toggleSidebar) {
+                insertRibbon()
+            }
+            return toggleSidebar.then(f => f())
         },
         insertRibbon: () => {
             insertRibbon()

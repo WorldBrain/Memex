@@ -8,13 +8,16 @@ import * as interactions from '../content_script/interactions'
 
 const processEventRPC = remoteFunction('processEvent')
 
-export const setupRibbonUI = (target, { onInit }) => {
+export const setupRibbonUI = (target, { onInit, onClose }) => {
     const sidebarURL = browser.extension.getURL('sidebar.html')
 
     ReactDOM.render(
         <Ribbon
             onInit={onInit}
-            destroy={destroyAll(target)}
+            destroy={() => {
+                console.log('huhh!?!!')
+                // onClose()
+            }}
             sidebarURL={sidebarURL}
             highlightAll={interactions.highlightAnnotations}
             removeHighlights={interactions.removeHighlights}
