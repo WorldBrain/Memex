@@ -1,4 +1,5 @@
-import mapValues from 'lodash/mapValues'
+import React from 'react'
+import * as mapValues from 'lodash/mapValues'
 import {
     redirectToGDriveLogin,
     redirectToAutomaticBackupPurchase,
@@ -190,16 +191,33 @@ export async function processEvent({
     return { screen, redirect }
 }
 
-export const getScreenStateProps = ({ state, screenConfig }) =>
-    mapValues(screenConfig.state || {}, (value, key) => state[key])
+export interface ScreenConfig {
+    component: React.Component
+    state: { [key: string]: true }
+    events: { [name: string]: true | { argument: string } }
+}
+export const getScreenStateProps = ({
+    state,
+    screenConfig,
+}: {
+    state
+    screenConfig: ScreenConfig
+}) => mapValues(screenConfig.state || {}, (value, key) => state[key])
+
 export const getScreenHandlers = ({
     state,
     screenConfig,
-    localStorage,
-    analytics,
-    remoteFunction,
+    processEvent,
+    dependencies,
     onStateChange,
     onRedirect,
+}: {
+    state
+    screenConfig: ScreenConfig
+    processEvent
+    dependencies: { localStorage; analytics; remoteFunction }
+    onStateChange
+    onRedirect
 }) =>
     mapValues(screenConfig.events, (eventConfig, eventName) => {
         return async event => {
@@ -210,9 +228,7 @@ export const getScreenHandlers = ({
             const result = await processEvent({
                 state,
                 event: handlerEvent,
-                localStorage,
-                analytics,
-                remoteFunction,
+                ...dependencies,
             })
             if (result.screen) {
                 onStateChange({ screen: result.screen })
