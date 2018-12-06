@@ -82,7 +82,7 @@ export default class BackupSettingsContainer extends React.Component {
             localStorage,
             analytics,
             remoteFunction,
-            onScreenSwitch: screen => this.setState({ screen }),
+            onStateChange: changes => this.setState(changes),
             onRedirect: logic.doRedirect,
         })
 
