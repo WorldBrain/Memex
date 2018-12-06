@@ -1,0 +1,61 @@
+.container {
+    width: 56%;
+    height: 400px;
+    background-color: #fff;
+    margin: 50px auto;
+    display: flex;
+    font-size: 16px;
+    padding: 30px;
+    font-family: 'Open sans', sans-serif;
+}
+
+.leftParent {
+    width: 40%;
+    text-align: left;
+    padding-left: 15px;
+}
+
+.rightParent {
+    width: 60%;
+    padding: 0 50px;
+}
+
+.welcome {
+    font-size: 37px;
+    font-weight: 700;
+    font-style: italic;
+    color: #3eb995;
+    line-height: 1;
+    margin-top: 5px;
+    margin-bottom: 25px;
+}
+
+.text {
+    font-size: 17px;
+    color: #3a3a75;
+    letter-spacing: 0.7px;
+}
+
+.title {
+    text-align: left;
+    margin-top: 5px;
+    font-size: 18px;
+    color: #2d2d54;
+    font-weight: 400;
+    margin-top: 25px;
+}
+
+.subtext {
+    text-align: left;
+    margin-top: 12px;
+    font-size: 13px;
+    margin-bottom: 30px;
+}
+
+.checklist {
+    text-align: left;
+    margin: 20px 0;
+    color: #3eb995;
+    font-weight: 600;
+    font-size: 14px;
+}
