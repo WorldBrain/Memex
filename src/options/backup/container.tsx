@@ -79,9 +79,12 @@ export default class BackupSettingsContainer extends React.Component {
         const handlers = logic.getScreenHandlers({
             state: this.state,
             screenConfig,
-            localStorage,
-            analytics,
-            remoteFunction,
+            processEvent: logic.processEvent,
+            dependencies: {
+                localStorage,
+                analytics,
+                remoteFunction,
+            },
             onStateChange: changes => this.setState(changes),
             onRedirect: logic.doRedirect,
         })

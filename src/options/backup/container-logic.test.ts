@@ -161,3 +161,98 @@ describe('Backup settings container logic', () => {
         })
     })
 })
+
+describe('Backup settings container logic helpers', () => {
+    describe('getScreenStateProps()', () => {
+        it('should return the corrent state props', () => {
+            expect(
+                logic.getScreenStateProps({
+                    state: {
+                        foo: 5,
+                    },
+                    screenConfig: {
+                        component: null,
+                        state: { foo: true },
+                        events: {},
+                    },
+                }),
+            )
+        })
+    })
+
+    describe('getScreenHandlers()', () => {
+        it('should correctly dispatch state changes without an argument', async () => {
+            const calls = []
+            const handlers = logic.getScreenHandlers({
+                state: {},
+                screenConfig: {
+                    component: null,
+                    state: {},
+                    events: { bla: true },
+                },
+                dependencies: {
+                    localStorage: 'localStorage',
+                    remoteFunction: 'remoteFunction',
+                    analytics: 'analytics',
+                },
+                processEvent: async args => {
+                    calls.push({ type: 'process', args })
+                    return { screen: 'bla' }
+                },
+                onStateChange: args => calls.push({ type: 'state', args }),
+                onRedirect: args => calls.push({ type: 'redirect', args }),
+            })
+            await handlers['bla']()
+            expect(calls).toEqual([
+                {
+                    type: 'process',
+                    args: {
+                        state: {},
+                        event: { type: 'bla' },
+                        localStorage: 'localStorage',
+                        remoteFunction: 'remoteFunction',
+                        analytics: 'analytics',
+                    },
+                },
+                { type: 'state', args: { screen: 'bla' } },
+            ])
+        })
+
+        it('should correctly dispatch state changes with an argument', async () => {
+            const calls = []
+            const handlers = logic.getScreenHandlers({
+                state: {},
+                screenConfig: {
+                    component: null,
+                    state: {},
+                    events: { bla: { argument: 'arg' } },
+                },
+                dependencies: {
+                    localStorage: 'localStorage',
+                    remoteFunction: 'remoteFunction',
+                    analytics: 'analytics',
+                },
+                processEvent: async args => {
+                    calls.push({ type: 'process', args })
+                    return { screen: 'bla' }
+                },
+                onStateChange: args => calls.push({ type: 'state', args }),
+                onRedirect: args => calls.push({ type: 'redirect', args }),
+            })
+            await handlers['bla']('foo')
+            expect(calls).toEqual([
+                {
+                    type: 'process',
+                    args: {
+                        state: {},
+                        event: { type: 'bla', arg: 'foo' },
+                        localStorage: 'localStorage',
+                        remoteFunction: 'remoteFunction',
+                        analytics: 'analytics',
+                    },
+                },
+                { type: 'state', args: { screen: 'bla' } },
+            ])
+        })
+    })
+})
