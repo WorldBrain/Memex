@@ -1,4 +1,6 @@
 import { EventEmitter } from 'events'
+import * as AllRaven from 'raven-js'
+const Raven = AllRaven['default']
 import { GoogleDriveClient } from './client'
 import { DriveTokenManager, DriveTokenStore } from './token-manager'
 import { BackupBackend, ObjectChange } from '../types'
@@ -145,7 +147,11 @@ export async function _prepareBackupChangeForStorage(change: ObjectChange) {
         change.object != null &&
         change.object.screenshot != null
     ) {
-        images['screenshot'] = await encodeBlob(change.object.screenshot)
+        try {
+            images['screenshot'] = await encodeBlob(change.object.screenshot)
+        } catch (e) {
+            Raven.captureException(e)
+        }
     }
 
     if (
@@ -153,7 +159,11 @@ export async function _prepareBackupChangeForStorage(change: ObjectChange) {
         change.object != null &&
         change.object.favIcon != null
     ) {
-        change.object.favIcon = await encodeBlob(change.object.favIcon)
+        try {
+            change.object.favIcon = await encodeBlob(change.object.favIcon)
+        } catch (e) {
+            Raven.captureException(e)
+        }
     }
 
     return images
