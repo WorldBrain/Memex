@@ -35,6 +35,19 @@ class InitResultsMessage extends PureComponent {
                         </div>
                     </div>
                 </div>
+                <div className={styles.footer}>
+                    {/* <img></img> */}
+                    <div className={styles.textContainer}>
+                        <p className={styles.bold}>
+                            ALL DATA STORED ON YOUR COMPUTER
+                        </p>
+                        <p className={styles.subtextGreen}>
+                            Your data is not our business model
+                        </p>
+                    </div>
+                    <div className={styles.learnMore}>learn more</div>
+                    <div className={styles.settings} />
+                </div>
             </ResultsMessage>
         )
     }
