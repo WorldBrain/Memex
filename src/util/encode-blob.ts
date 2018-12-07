@@ -17,6 +17,7 @@ export default (blob: Blob) =>
         }
 
         reader.onerror = function() {
+            console.log('Got error encoding this blob', blob)
             reject(reader.error)
         }
     })
