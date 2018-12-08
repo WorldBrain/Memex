@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react'
 import { Link } from 'react-router'
 
+import { Checkbox } from '../../../common-ui/components'
 import ResultsMessage from './ResultsMessage'
 
 const styles = require('./InitResultsMessage.css')
@@ -16,7 +17,7 @@ class InitResultsMessage extends PureComponent {
                             The all-in-one tool to get
                             <br /> on top of your online chaos.
                         </p>
-                        {/* <img></img> */}
+                        <div className={styles.privacyImage} />
                     </div>
                     <div className={styles.rightParent}>
                         <p className={styles.title}>Let's get started</p>
@@ -25,13 +26,41 @@ class InitResultsMessage extends PureComponent {
                             auto-backups
                         </p>
                         <div className={styles.checklist}>
-                            Make your first web annotation
+                            <Checkbox
+                                isChecked={false}
+                                handleChange={() => null}
+                                id="step1"
+                            >
+                                {' '}
+                                <span className={styles.checklistText}>
+                                    Make your first web annotation{' '}
+                                </span>
+                            </Checkbox>
                         </div>
                         <div className={styles.checklist}>
-                            Do your first power search
+                            <Checkbox
+                                isChecked={false}
+                                handleChange={() => null}
+                                id="step2"
+                            >
+                                {' '}
+                                <span className={styles.checklistText}>
+                                    Do your first power search{' '}
+                                </span>
+                            </Checkbox>
                         </div>
                         <div className={styles.checklist}>
-                            Import from your existing bookmarks & history
+                            <Checkbox
+                                isChecked={false}
+                                handleChange={() => null}
+                                id="step3"
+                            >
+                                {' '}
+                                <span className={styles.checklistText}>
+                                    Import from your existing bookmarks &
+                                    history{' '}
+                                </span>
+                            </Checkbox>
                         </div>
                     </div>
                 </div>
