@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react'
 import { Link } from 'react-router'
 
-import { Checkbox } from '../../../common-ui/components'
+import OnboardingChecklist from './OnboardingChecklist'
 import ResultsMessage from './ResultsMessage'
 
 const styles = require('./InitResultsMessage.css')
@@ -20,48 +20,7 @@ class InitResultsMessage extends PureComponent {
                         <div className={styles.privacyImage} />
                     </div>
                     <div className={styles.rightParent}>
-                        <p className={styles.title}>Let's get started</p>
-                        <p className={styles.subtext}>
-                            Complete the steps & get 1 month of free
-                            auto-backups
-                        </p>
-                        <div className={styles.checklist}>
-                            <Checkbox
-                                isChecked={false}
-                                handleChange={() => null}
-                                id="step1"
-                            >
-                                {' '}
-                                <span className={styles.checklistText}>
-                                    Make your first web annotation{' '}
-                                </span>
-                            </Checkbox>
-                        </div>
-                        <div className={styles.checklist}>
-                            <Checkbox
-                                isChecked={false}
-                                handleChange={() => null}
-                                id="step2"
-                            >
-                                {' '}
-                                <span className={styles.checklistText}>
-                                    Do your first power search{' '}
-                                </span>
-                            </Checkbox>
-                        </div>
-                        <div className={styles.checklist}>
-                            <Checkbox
-                                isChecked={false}
-                                handleChange={() => null}
-                                id="step3"
-                            >
-                                {' '}
-                                <span className={styles.checklistText}>
-                                    Import from your existing bookmarks &
-                                    history{' '}
-                                </span>
-                            </Checkbox>
-                        </div>
+                        <OnboardingChecklist />
                     </div>
                 </div>
                 <div className={styles.footer}>

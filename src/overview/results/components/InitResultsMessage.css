@@ -12,7 +12,7 @@
 }
 
 .leftParent {
-    width: 65%;
+    width: 40%;
     text-align: left;
     padding-left: 15px;
 }
@@ -55,7 +55,7 @@
 .title {
     text-align: left;
     font-size: 18px;
-    color: #2d2d54;
+    color: #22227d;
     font-weight: 400;
     margin-top: 25px;
 }
