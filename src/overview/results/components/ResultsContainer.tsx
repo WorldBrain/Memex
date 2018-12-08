@@ -8,6 +8,7 @@ import InitResultsMessage from './InitResultsMessage'
 import NoResultBadTerm from './NoResultBadTerm'
 import ResultsMessage from './ResultsMessage'
 import ResultList from './ResultListContainer'
+import OnboardingChecklist from './OnboardingChecklist'
 import * as selectors from '../selectors'
 import { RootState } from '../../../options/types'
 
@@ -16,6 +17,7 @@ const styles = require('./ResultList.css')
 export interface StateProps {
     noResults: boolean
     isBadTerm: boolean
+    isLoading: boolean
     showInbox: boolean
     shouldShowCount: boolean
     isInvalidSearch: boolean
@@ -81,6 +83,11 @@ class ResultsContainer extends PureComponent<Props> {
                     </ResultsMessage>
                 )}
                 <ResultList />
+                {!this.props.isLoading && (
+                    <div className={styles.checklistContainer}>
+                        <OnboardingChecklist />
+                    </div>
+                )}
             </React.Fragment>
         )
     }
@@ -94,6 +101,7 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
     showInbox: notifs.showInbox(state),
     noResults: selectors.noResults(state),
     isBadTerm: selectors.isBadTerm(state),
+    isLoading: selectors.isLoading(state),
     shouldShowCount: selectors.shouldShowCount(state),
     isInvalidSearch: selectors.isInvalidSearch(state),
     totalResultCount: selectors.totalResultCount(state),
