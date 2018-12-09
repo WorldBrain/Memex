@@ -2,12 +2,12 @@ import React from 'react'
 
 import { Checkbox } from '../../../common-ui/components'
 
-const styles = require('./InitResultsMessage.css')
+const styles = require('./OnboardingChecklist.css')
 
 class OnboardingChecklist extends React.Component {
     render() {
         return (
-            <>
+            <React.Fragment>
                 <p className={styles.title}>Let's get started</p>
                 <p className={styles.subtext}>
                     Complete the steps & get 1 month of free auto-backups
@@ -48,7 +48,7 @@ class OnboardingChecklist extends React.Component {
                         </span>
                     </Checkbox>
                 </div>
-            </>
+            </React.Fragment>
         )
     }
 }
