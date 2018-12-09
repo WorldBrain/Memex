@@ -41,8 +41,14 @@
 }
 
 .arrow {
-    grid-area: arrow;
     justify-self: center;
+    height: 30px;
+    cursor: pointer;
+}
+
+.arrow:hover {
+    cursor: pointer;
+    opacity: 0.8;
 }
 
 .ribbonSidebarActive {
@@ -112,29 +118,29 @@
 }
 
 .tooltipOn {
-    background-image: url('../../../img/tooltipIcon_grey.svg');
-}
-
-.tooltipOff {
     background-image: url('../../../img/tooltipIcon_blue.svg');
 }
 
+.tooltipOff {
+    background-image: url('../../../img/tooltipIcon_grey.svg');
+}
+
 .ribbonOn {
-    background-image: url('../../../img/sidebarIcon_grey.svg');
+    background-image: url('../../../img/sidebarIcon_blue.svg');
 }
 
 .ribbonOff {
-    background-image: url('../../../img/sidebarIcon_blue.svg');
+    background-image: url('../../../img/sidebarIcon_grey.svg');
 }
 
 .cancel {
     background-image: url('../../../img/cross_grey.svg');
     fill: white;
-    background-size: 14px;
-    width: 14px;
-    height: 14px;
-    margin-left: 6px;
-    margin-top: 5px;
+    background-size: 12px;
+    width: 12px;
+    height: 12px;
+    margin-left: 7px;
+    margin-top: 3px;
 }
 
 .settings {

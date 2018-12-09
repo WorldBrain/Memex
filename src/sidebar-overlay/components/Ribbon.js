@@ -9,6 +9,8 @@ import FrameCommunication from '../messaging'
 import styles from './Ribbon.css'
 import CloseButton from './CloseButton'
 
+const arrowRibbon = browser.extension.getURL('/img/arrow_ribbon.svg')
+
 class Ribbon extends React.Component {
     static propTypes = {
         onInit: PropTypes.func.isRequired,
@@ -410,12 +412,18 @@ class Ribbon extends React.Component {
                     })}
                     ref={this.setupInputRef}
                 >
-                    <div className={styles.arrow}>&lt;</div>
+                    <img
+                        onClick={this.toggleSidebar}
+                        className={styles.arrow}
+                        src={arrowRibbon}
+                        title={'Open Annotation Sidebar'}
+                    />
                     {isHovering && (
                         <div className={styles.buttons}>
                             <div
                                 className={styles.logo}
                                 onClick={this.toggleSidebar}
+                                title={'Open Annotation Sidebar'}
                             />
                             <div
                                 className={styles.buttonHolder}
@@ -426,6 +434,9 @@ class Ribbon extends React.Component {
                                         [styles.tooltipOn]: isTooltipEnabled,
                                         [styles.tooltipOff]: !isTooltipEnabled,
                                     })}
+                                    title={
+                                        'Turn on/off Highlighter on all pages'
+                                    }
                                 />
                             </div>
                             <div
@@ -437,12 +448,15 @@ class Ribbon extends React.Component {
                                         [styles.ribbonOn]: isRibbonEnabled,
                                         [styles.ribbonOff]: !isRibbonEnabled,
                                     })}
+                                    title={
+                                        'Turn on/off this ribbon on all pages'
+                                    }
                                 />
                             </div>
                             <div className={styles.buttonHolder}>
                                 <span
                                     title={
-                                        'Close once. Disable via Memex icon in the extension toolbar.'
+                                        'Close ribbon once. Disable via Memex icon in the extension toolbar.'
                                     }
                                     className={styles.cancel}
                                     onClick={destroy}
