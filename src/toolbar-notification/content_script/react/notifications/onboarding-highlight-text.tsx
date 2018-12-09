@@ -2,36 +2,31 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import NotificationLayout from '../layout'
 import { getExtURL } from '../utils.js'
-const styles = require('./tooltip-first-close.css')
 
 const styles = require('./tooltip-first-close.css')
 
 const images = {
     notifIcon: getExtURL('img/tooltipIcon_blue.svg'),
-    brainIcon: getExtURL('/img/worldbrain-logo-narrow-bw-48.png'),
-    arrowUp: getExtURL('/img/notifArrowUp.svg'),
     closeIcon: getExtURL('/img/cross.svg'),
 }
 
-export default function TooltipFirstCloseNotification({ onCloseRequested }) {
+export default function OnboardingHighlightText({ onCloseRequested }) {
     return (
         <div className={styles.title}>
             {/*<img className={styles.notifIcon} src={images.notifIcon}/>*/}
             <NotificationLayout
-                title={'Turn on/off Highlighter permanently'}
+                title={'MAKE YOUR FIRST ANNOTATION'}
                 icon={images.notifIcon}
                 onCloseRequested={onCloseRequested}
-                thirdRowImage={images.arrowUp}
+                thirdRowImage={null}
                 closeIcon={images.closeIcon}
             >
-                Via the little{' '}
-                <img src={images.brainIcon} className={styles.brainIcon} />
-                icon in the menu
+                Step 1: Highlight any piece of text on this page
             </NotificationLayout>
         </div>
     )
 }
 
-TooltipFirstCloseNotification['propTypes'] = {
+OnboardingHighlightText.propTypes = {
     onCloseRequested: PropTypes.func.isRequired,
 }

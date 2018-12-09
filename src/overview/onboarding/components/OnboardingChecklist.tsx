@@ -1,10 +1,34 @@
 import React from 'react'
 
 import { Checkbox } from '../../../common-ui/components'
+import * as constants from '../constants'
+import { browser } from 'webextension-polyfill-ts'
+import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 
 const styles = require('./OnboardingChecklist.css')
 
 class OnboardingChecklist extends React.Component {
+    handleStepOne = async () => {
+        const stepOneStage = await getLocalStorage(
+            constants.STORAGE_KEYS.onboardingDemo.step1,
+            'unvisited',
+        )
+        console.log(stepOneStage)
+
+        if (stepOneStage === 'done') {
+            return
+        }
+
+        const url = constants.ANNOTATION_DEMO_URL
+        await setLocalStorage(
+            constants.STORAGE_KEYS.onboardingDemo.step1,
+            'highlight_text',
+        )
+        await browser.tabs.create({
+            url,
+        })
+    }
+
     render() {
         return (
             <React.Fragment>
@@ -19,7 +43,10 @@ class OnboardingChecklist extends React.Component {
                         id="step1"
                     >
                         {' '}
-                        <span className={styles.checklistText}>
+                        <span
+                            className={styles.checklistText}
+                            onClick={this.handleStepOne}
+                        >
                             Make your first web annotation{' '}
                         </span>
                     </Checkbox>

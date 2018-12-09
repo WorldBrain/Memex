@@ -2,6 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
+
 const styles = require('./layout.css')
 
 export default function NotificationLayout({
@@ -22,7 +23,9 @@ export default function NotificationLayout({
                 <div className={styles.body}>{children}</div>
             </div>
             <div className={styles.right}>
-                <img className={styles.thirdRowImage} src={thirdRowImage} />
+                {thirdRowImage && (
+                    <img className={styles.thirdRowImage} src={thirdRowImage} />
+                )}
                 <img
                     className={styles.close}
                     src={closeIcon}
