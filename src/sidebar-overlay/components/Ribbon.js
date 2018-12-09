@@ -36,6 +36,8 @@ class Ribbon extends React.Component {
         shouldRenderIFrame: false,
         isRibbonEnabled: true,
         isTooltipEnabled: true,
+        ribbonRef: null,
+        isHovering: false,
     }
 
     async componentDidMount() {
@@ -49,6 +51,8 @@ class Ribbon extends React.Component {
         this.setupRPCfunctions()
 
         this.setupScrollListeners()
+
+        this.setupHoverListeners()
 
         await this.fetchAnnotations()
 
@@ -84,6 +88,8 @@ class Ribbon extends React.Component {
         if (this.frameFC) {
             this.frameFC.removeMessageListener()
         }
+
+        this.removeHoverListeners()
     }
 
     setupRPCfunctions = () => {
@@ -190,6 +196,16 @@ class Ribbon extends React.Component {
             },
             false,
         )
+    }
+
+    setupHoverListeners() {
+        this.ribbonRef.addEventListener('mouseenter', this.handleMouseEnter)
+        this.ribbonRef.addEventListener('mouseleave', this.handleMouseLeave)
+    }
+
+    removeHoverListeners() {
+        this.ribbonRef.removeEventListener('mouseenter', this.handleMouseEnter)
+        this.ribbonRef.removeEventListener('mouseleave', this.handleMouseLeave)
     }
 
     highlightAndScroll = async annotation => {
@@ -357,12 +373,31 @@ class Ribbon extends React.Component {
         )
     }
 
+    handleMouseEnter = e => {
+        e.stopPropagation()
+        if (!this.state.isHovering) {
+            this.setState({ isHovering: true })
+        }
+    }
+
+    handleMouseLeave = e => {
+        e.stopPropagation()
+        if (this.state.isHovering) {
+            this.setState({ isHovering: false })
+        }
+    }
+
+    setupInputRef = ref => {
+        this.ribbonRef = ref
+    }
+
     render() {
         const {
             isSidebarActive,
             isFullScreen,
             isTooltipEnabled,
             isRibbonEnabled,
+            isHovering,
         } = this.state
         const { destroy } = this.props
 
@@ -372,40 +407,50 @@ class Ribbon extends React.Component {
                     className={cx(styles.ribbon, {
                         [styles.ribbonSidebarActive]: isSidebarActive,
                         [styles.onFullScreen]: isFullScreen,
+                        [styles.ribbonExpanded]: isHovering,
                     })}
+                    ref={this.setupInputRef}
                 >
-                    <div className={styles.logo} onClick={this.toggleSidebar} />
-                    <div
-                        className={styles.buttonHolder}
-                        onClick={this.toggleTooltip}
-                    >
-                        <span
-                            className={cx(styles.toggler, {
-                                [styles.tooltipOn]: isTooltipEnabled,
-                                [styles.tooltipOff]: !isTooltipEnabled,
-                            })}
-                        />
-                    </div>
-                    <div
-                        className={styles.buttonHolder}
-                        onClick={this.toggleRibbon}
-                    >
-                        <span
-                            className={cx(styles.toggler, {
-                                [styles.ribbonOn]: isRibbonEnabled,
-                                [styles.ribbonOff]: !isRibbonEnabled,
-                            })}
-                        />
-                    </div>
-                    <div className={styles.buttonHolder}>
-                        <span
-                            title={
-                                'Close once. Disable via Memex icon in the extension toolbar.'
-                            }
-                            className={styles.cancel}
-                            onClick={destroy}
-                        />
-                    </div>
+                    <div className={styles.arrow}>&lt;</div>
+                    {isHovering && (
+                        <div className={styles.buttons}>
+                            <div
+                                className={styles.logo}
+                                onClick={this.toggleSidebar}
+                            />
+                            <div
+                                className={styles.buttonHolder}
+                                onClick={this.toggleTooltip}
+                            >
+                                <span
+                                    className={cx(styles.toggler, {
+                                        [styles.tooltipOn]: isTooltipEnabled,
+                                        [styles.tooltipOff]: !isTooltipEnabled,
+                                    })}
+                                />
+                            </div>
+                            <div
+                                className={styles.buttonHolder}
+                                onClick={this.toggleRibbon}
+                            >
+                                <span
+                                    className={cx(styles.toggler, {
+                                        [styles.ribbonOn]: isRibbonEnabled,
+                                        [styles.ribbonOff]: !isRibbonEnabled,
+                                    })}
+                                />
+                            </div>
+                            <div className={styles.buttonHolder}>
+                                <span
+                                    title={
+                                        'Close once. Disable via Memex icon in the extension toolbar.'
+                                    }
+                                    className={styles.cancel}
+                                    onClick={destroy}
+                                />
+                            </div>
+                        </div>
+                    )}
                 </div>
                 <CloseButton
                     isActive={isSidebarActive}

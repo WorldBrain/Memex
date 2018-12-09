@@ -19,9 +19,30 @@
     font-family: serif;
     animation: slideLeft 0.15s ease-in 1s 1 forwards;
 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
     &:-webkit-fullscreen {
         display: none;
     }
+}
+
+.ribbonExpanded {
+    width: 60px;
+    display: grid;
+    grid-template-areas: 'buttons arrow';
+    grid-template-columns: 1fr 1fr;
+}
+
+.buttons {
+    grid-area: buttons;
+}
+
+.arrow {
+    grid-area: arrow;
+    justify-self: center;
 }
 
 .ribbonSidebarActive {

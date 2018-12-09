@@ -1,4 +1,5 @@
 import retargetEvents from 'react-shadow-dom-retarget-events'
+// import retargetEvents from './retarget_events'
 
 import { highlightAnnotation } from 'src/direct-linking/content_script/rendering'
 import { makeRemotelyCallable, remoteFunction } from 'src/util/webextensionRPC'
