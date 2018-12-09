@@ -3,7 +3,7 @@
     position: fixed;
     top: 35%;
     right: -50px;
-    width: 30px;
+    width: 10px;
     height: 130px;
     background-color: #fff;
     z-index: 2147483647;
@@ -30,7 +30,7 @@
 }
 
 .ribbonExpanded {
-    width: 60px;
+    width: 45px;
     display: grid;
     grid-template-areas: 'buttons arrow';
     grid-template-columns: 1fr 1fr;
