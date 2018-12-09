@@ -27,7 +27,11 @@ class Ribbon extends React.Component {
         return (
             <div className={styles.container}>
                 <h1 className={styles.header}>Sidebar Ribbon</h1>
-                <p className={styles.subHeader}>Umm.. insert some text here?</p>
+                <p className={styles.subHeader}>
+                    Memex injects a small ribbon on the right side of every
+                    page. <br /> If disabled, you can still reach it via the
+                    little 'brain' icon in the popup.
+                </p>
                 <Checkbox
                     id="show-memex-ribbon"
                     isChecked={this.state.ribbon}
