@@ -1,0 +1,26 @@
+.title {
+    text-align: left;
+    font-size: 18px;
+    color: #22227d;
+    font-weight: 400;
+    margin-top: 25px;
+}
+
+.subtext {
+    text-align: left;
+    margin-top: 12px;
+    font-size: 13px;
+    margin-bottom: 30px;
+}
+
+.checklist {
+    text-align: left;
+    margin: 35px 0;
+}
+
+.checklistText {
+    color: #3eb995;
+    font-weight: 400;
+    cursor: pointer;
+    font-size: 15px;
+}

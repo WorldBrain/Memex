@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react'
 import { Link } from 'react-router'
 
-import OnboardingChecklist from './OnboardingChecklist'
+import OnboardingChecklist from '../../onboarding/components/OnboardingChecklist'
 import ResultsMessage from './ResultsMessage'
 
 const styles = require('./InitResultsMessage.css')
