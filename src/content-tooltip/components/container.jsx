@@ -87,6 +87,18 @@ class TooltipContainer extends React.Component {
         e.stopPropagation()
         await this.props.createAnnotation()
 
+        const onboardingAnnotationStage = await getLocalStorage(
+            STORAGE_KEYS.onboardingDemo.step1,
+        )
+        if (onboardingAnnotationStage === 'select_option_notification_shown') {
+            await setLocalStorage(
+                STORAGE_KEYS.onboardingDemo.step1,
+                'annotation_created',
+            )
+            // Remove active notification
+            document.querySelector('.memex-tooltip-notification').remove()
+        }
+
         // quick hack, to prevent the tooltip from popping again
         setTimeout(() => {
             this.setState({

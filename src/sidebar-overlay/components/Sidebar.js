@@ -33,6 +33,18 @@ const Sidebar = props => (
 
             <div className={styles.annotationContainer}>
                 {props.renderAnnotations()}
+                {props.showCongratsMessage && (
+                    <div className={styles.congrats}>
+                        {/* <img src /> */}
+                        <p className={styles.title}>
+                            CONGRATS TO YOUR FIRST ANNOTATION
+                        </p>
+                        <div className={styles.learnMore}>
+                            Learn more about the sidebar
+                        </div>
+                        <p>or go back to dashboard</p>
+                    </div>
+                )}
             </div>
         </div>
     </Menu>
@@ -40,6 +52,7 @@ const Sidebar = props => (
 
 Sidebar.propTypes = {
     showSidebar: PropTypes.bool.isRequired,
+    showCongratsMessage: PropTypes.bool.isRequired,
     handleStateChange: PropTypes.func.isRequired,
     renderAnnotations: PropTypes.func.isRequired,
     toggleMouseOnSidebar: PropTypes.func.isRequired,
