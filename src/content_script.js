@@ -5,7 +5,7 @@ import 'src/page-analysis/content_script'
 import 'src/search-injection/content_script'
 import initContentTooltip from 'src/content-tooltip/content_script'
 import 'src/direct-linking/content_script'
-import 'src/sidebar-overlay/content_script'
+import initRibbon from './sidebar-overlay/content_script'
 import 'src/backup/content_script'
 import ToolbarNotifications from 'src/toolbar-notification/content_script'
 
@@ -17,3 +17,4 @@ toolbarNotifications.registerRemoteFunctions(remoteFunctionRegistry)
 window['toolbarNotifications'] = toolbarNotifications
 
 initContentTooltip({ toolbarNotifications })
+initRibbon({ toolbarNotifications })

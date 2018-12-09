@@ -68,6 +68,22 @@ export const highlightAnnotations = async (
     )
 }
 
+const CLOSE_MESSAGESHOWN_KEY = 'ribbon.close-message-shown'
+
+const _setCloseMessageShown = async () => {
+    await window['browser'].storage.local.set({
+        [CLOSE_MESSAGESHOWN_KEY]: true,
+    })
+}
+
+const _getCloseMessageShown = async () => {
+    const { [CLOSE_MESSAGESHOWN_KEY]: closeMessageShown } = await window[
+        'browser'
+    ].storage.local.get({ [CLOSE_MESSAGESHOWN_KEY]: false })
+
+    return closeMessageShown
+}
+
 // Target container for the Ribbon/Sidebar iFrame
 let target = null
 let shadowRoot = null
@@ -79,7 +95,7 @@ let toggleSidebar = null
  * Mounts Ribbon React component.
  * Sets up iFrame <--> webpage Remote functions.
  */
-export const insertRibbon = () => {
+export const insertRibbon = ({ toolbarNotifications }) => {
     // If target is set, Ribbon has already been injected.
     if (target) {
         return
@@ -104,8 +120,16 @@ export const insertRibbon = () => {
         onInit: ({ toggleSidebar }) => {
             resolveToggleSidebar(toggleSidebar)
         },
-        onClose: () => {
+        onClose: async () => {
             removeRibbon()
+
+            const closeMessageShown = await _getCloseMessageShown()
+            if (!closeMessageShown) {
+                toolbarNotifications.showToolbarNotification(
+                    'ribbon-first-close',
+                )
+                _setCloseMessageShown()
+            }
         },
         getInitialState: async () => {
             const isTooltipEnabled = await getTooltipState()
