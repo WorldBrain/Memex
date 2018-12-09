@@ -36,7 +36,7 @@ class Tooltip extends React.Component {
     render() {
         return (
             <div className={styles.container}>
-                <h1 className={styles.header}>Annotation Toolip</h1>
+                <h1 className={styles.header}>Annotation Tooltip</h1>
                 <p className={styles.subHeader}>
                     With Memex.Links you can highlight any piece of text on the
                     web and share a link to it.{' '}
