@@ -36,7 +36,6 @@ class Ribbon extends React.Component {
         shouldRenderIFrame: false,
         isRibbonEnabled: true,
         isTooltipEnabled: true,
-        ribbonRef: null,
         isHovering: false,
     }
 
