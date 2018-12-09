@@ -5,6 +5,9 @@ export default (blob: Blob) =>
 
         reader.onloadend = function() {
             let result = reader.result as string
+            if (!result) {
+                return // result.onerror has already been called at this point
+            }
 
             // Remove `data:*/*;base64,` prefix:
             //   https://developer.mozilla.org/en-US/docs/Web/API/FileReader/readAsDataURL
