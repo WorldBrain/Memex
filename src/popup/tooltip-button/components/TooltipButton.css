@@ -4,17 +4,17 @@
 
 .switch {
     position: absolute;
+    margin-top: 3px;
 }
 
-.infoLink {
-    background-image: url('/img/info_green.svg');
-    background-repeat: no-repeat;
-    background-size: 15px;
+.icon {
     display: inline-block;
-    width: 15px;
-    height: 15px;
-    position: absolute;
-    top: 13px;
-    left: 65%;
+    margin-left: 10px;
     cursor: pointer;
+}
+
+.button {
+    display: inline-block;
+    width: 200px;
+    text-align: left;
 }

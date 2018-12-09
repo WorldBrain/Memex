@@ -9834,6 +9834,10 @@ react-router@^3.2.1:
     prop-types "^15.5.6"
     warning "^3.0.0"
 
+react-shadow-dom-retarget-events@^1.0.8:
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/react-shadow-dom-retarget-events/-/react-shadow-dom-retarget-events-1.0.8.tgz#411fe79194d974d7d1944622508ac271cc3a4346"
+
 react-side-effect@^1.1.0:
   version "1.1.5"
   resolved "https://registry.yarnpkg.com/react-side-effect/-/react-side-effect-1.1.5.tgz#f26059e50ed9c626d91d661b9f3c8bb38cd0ff2d"

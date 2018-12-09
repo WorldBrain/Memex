@@ -1,33 +1,20 @@
 {
-    "extends": [
-        "tslint:latest",
-        "tslint-react",
-        "tslint-config-prettier"
-    ],
+    "extends": ["tslint:latest", "tslint-react", "tslint-config-prettier"],
     "defaultSeverity": "warning",
     "jsRules": {
         "no-empty": true
     },
     "linterOptions": {
-        "exclude": [
-            "node_modules/**/*",
-            "src/**/*.{js,jsx}"
-        ]
+        "exclude": ["node_modules/**/*", "src/**/*.{js,jsx}"]
     },
     "rules": {
         "adjacent-overload-signatures": false,
         "array-type": false,
         "class-name": true,
-        "comment-format": [
-            true,
-            "check-space"
-        ],
+        "comment-format": [true, "check-space"],
         "curly": true,
         "forin": true,
-        "interface-name": [
-            true,
-            "never-prefix"
-        ],
+        "interface-name": [true, "never-prefix"],
         "jsdoc-format": true,
         "jsx-no-multiline-js": false,
         "jsx-boolean-value": false,
@@ -37,28 +24,21 @@
         "member-access": false,
         "member-ordering": false,
         "no-arg": true,
-        "no-console": [
-            true,
-            "debug",
-            "info",
-            "trace"
-        ],
+        "no-console": [true, "debug", "info", "trace"],
         "no-construct": true,
         "no-debugger": true,
         "no-duplicate-variable": true,
         "no-empty": true,
         "no-empty-interface": false,
         "no-eval": true,
-        "no-implicit-dependencies": [
-            true,
-            "dev"
-        ],
+        "no-implicit-dependencies": [true, "dev"],
         "no-object-literal-type-assertion": false,
         "no-shadowed-variable": true,
         "no-string-literal": false,
         "no-switch-case-fall-through": true,
         "no-submodule-imports": false,
-        "no-unused-expression": true,
+        "no-unused-vars": false,
+        "no-unused-expression": false,
         "no-var-requires": false,
         "object-literal-sort-keys": false,
         "one-line": [
@@ -75,14 +55,8 @@
         "switch-default": true,
         "strict-type-predicates": false,
         "trailing-comma": true,
-        "triple-equals": [
-            true,
-            "allow-null-check"
-        ],
-        "typedef": [
-            true,
-            "property-declaration"
-        ],
+        "triple-equals": [true, "allow-null-check"],
+        "typedef": [true, "property-declaration"],
         "valid-jsdoc": false,
         "variable-name": [
             true,

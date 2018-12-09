@@ -1,9 +1,7 @@
 import { bodyLoader, interactiveLoader } from 'src/util/loader'
 
 import * as interactions from './interactions'
-import { getLocalStorage } from 'src/util/storage'
-
-import { TOOLTIP_STORAGE_NAME } from 'src/content-tooltip/constants'
+import { getSidebarState } from '../utils'
 
 const onKeydown = e => {
     if (e.key !== 'm') {
@@ -16,8 +14,8 @@ const onKeydown = e => {
 const init = async () => {
     interactions.setupRPC()
 
-    const isTooltipEnabled = await getLocalStorage(TOOLTIP_STORAGE_NAME, true)
-    if (!isTooltipEnabled) {
+    const isSidebarEnabled = await getSidebarState()
+    if (!isSidebarEnabled) {
         return
     }
 
@@ -27,8 +25,8 @@ const init = async () => {
     await bodyLoader()
     document.removeEventListener('keydown', onKeydown, false)
     const passwordInputs = document.querySelectorAll('input[type=password]')
-    const hasAPasswordInput = passwordInputs.length > 0
-    if (hasAPasswordInput) {
+    const hasPasswordInput = passwordInputs.length > 0
+    if (hasPasswordInput) {
         return
     }
 

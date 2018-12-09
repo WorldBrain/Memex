@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="20px" height="18px" viewBox="0 0 20 18" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 51 (57462) - http://www.bohemiancoding.com/sketch -->
+    <title>Shape</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-2" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Artboard-4" transform="translate(-526.000000, -78.000000)" fill="#FFFFFF" fill-rule="nonzero">
+            <g id="noun_tooltip_384409" transform="translate(526.000000, 78.000000)">
+                <g id="Group">
+                    <path d="M2.66512945,0.40913951 L17.8881376,0.40913951 C19.0589964,0.40913951 20,1.31439688 20,2.44088922 L20,12.9382631 C20,14.0646651 19.0654267,14.9417941 17.8881376,14.9417941 L13.1364472,14.9417941 C12.9992296,14.9415792 12.8632135,15.0026924 12.7753037,15.1040514 L10.2638009,18 L7.77796334,15.105815 C7.69041022,15.0038121 7.55432368,14.9420072 7.41681985,14.9417941 L2.66512945,14.9417941 C1.48784003,14.9417941 0.553267045,14.0646651 0.553267045,12.9382631 L0.553267045,2.44088922 C0.553267045,1.31439688 1.4942706,0.40913951 2.66512945,0.40913951 Z" id="Shape" transform="translate(10.276634, 9.204570) rotate(180.000000) translate(-10.276634, -9.204570) "></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

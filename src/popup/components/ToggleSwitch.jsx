@@ -38,9 +38,13 @@ class ToggleSwitch extends PureComponent {
                         type="checkbox"
                     />
                 </label>
-                <span className={this.deriveTextClass()}>
+                <span
+                    className={this.deriveTextClass()}
+                    onClick={this.props.onChange}
+                >
                     {this.props.isChecked ? 'On' : 'Off'}
                 </span>
+                <p className={styles.subTitle}>on all pages</p>
             </span>
         )
     }

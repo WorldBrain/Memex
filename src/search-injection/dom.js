@@ -13,9 +13,9 @@ import * as constants from './constants'
  * Injects a CSS stylesheet into the webpage.
  * @param {string} cssUrl URL of the stylesheet to inject
  */
-export const injectCSS = cssUrl => {
+export const injectCSS = (cssUrl, root = null) => {
     // Check if the css file is already present in the webpage
-    const node = document.querySelector(`link[href="${cssUrl}"]`)
+    const node = (root || document).querySelector(`link[href="${cssUrl}"]`)
     if (node) {
         return
     }
@@ -24,7 +24,7 @@ export const injectCSS = cssUrl => {
     link.type = 'text/css'
     link.rel = 'stylesheet'
     link.href = cssUrl
-    const d = document.body || document.head || document.documentElement
+    const d = root || document.body || document.head || document.documentElement
     d.prepend(link)
 }
 

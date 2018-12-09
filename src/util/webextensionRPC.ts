@@ -19,6 +19,7 @@
 // myRemoteFunc(21).then(result => { ... result is 42! ... })
 
 import mapValues from 'lodash/fp/mapValues'
+import { browser } from 'webextension-polyfill-ts'
 
 // Our secret tokens to recognise our messages
 const RPC_CALL = '__RPC_CALL__'
@@ -47,7 +48,7 @@ export class RemoteError extends Error {
 //       tabId: The id of the tab whose content script is the remote side.
 //              Leave undefined to call the background script (from a tab).
 //   }
-export function remoteFunction(funcName, { tabId } = {}) {
+export function remoteFunction(funcName, { tabId }: { tabId? } = {}) {
     const otherSide =
         tabId !== undefined
             ? "the tab's content script"
@@ -103,42 +104,47 @@ export function remoteFunction(funcName, { tabId } = {}) {
 
 const remotelyCallableFunctions = {}
 
-function incomingRPCListener(message, sender) {
-    if (message && message[RPC_CALL] === RPC_CALL) {
-        const funcName = message.funcName
-        const args = message.hasOwnProperty('args') ? message.args : []
-        const func = remotelyCallableFunctions[funcName]
-        if (func === undefined) {
-            console.error(`Received RPC for unknown function: ${funcName}`)
-            return Promise.resolve({
-                rpcError: `No such function registered for RPC: ${funcName}`,
-                [RPC_RESPONSE]: RPC_RESPONSE,
-            })
-        }
-        const extraArg = {
-            tab: sender.tab,
-        }
+async function incomingRPCListener(message, sender) {
+    if (!message || message[RPC_CALL] !== RPC_CALL) {
+        return
+    }
 
-        // Run the function
-        let returnValue
-        try {
-            returnValue = func(extraArg, ...args)
-        } catch (error) {
-            return Promise.resolve({
-                errorMessage: error.message,
-                [RPC_RESPONSE]: RPC_RESPONSE,
-            })
+    const funcName = message.funcName
+    const args = message.hasOwnProperty('args') ? message.args : []
+    const func = remotelyCallableFunctions[funcName]
+    if (func === undefined) {
+        console.error(`Received RPC for unknown function: ${funcName}`)
+        return {
+            rpcError: `No such function registered for RPC: ${funcName}`,
+            [RPC_RESPONSE]: RPC_RESPONSE,
         }
-        // Return the function's return value. If it is a promise, first await its result.
-        return Promise.resolve(returnValue)
-            .then(returnValue => ({
-                returnValue,
-                [RPC_RESPONSE]: RPC_RESPONSE,
-            }))
-            .catch(error => ({
-                errorMessage: error.message,
-                [RPC_RESPONSE]: RPC_RESPONSE,
-            }))
+    }
+    const extraArg = {
+        tab: sender.tab,
+    }
+
+    // Run the function
+    let returnValue
+    try {
+        returnValue = func(extraArg, ...args)
+    } catch (error) {
+        return {
+            errorMessage: error.message,
+            [RPC_RESPONSE]: RPC_RESPONSE,
+        }
+    }
+
+    try {
+        returnValue = await returnValue
+        return {
+            returnValue,
+            [RPC_RESPONSE]: RPC_RESPONSE,
+        }
+    } catch (error) {
+        return {
+            errorMessage: error.message,
+            [RPC_RESPONSE]: RPC_RESPONSE,
+        }
     }
 }
 
@@ -179,5 +185,11 @@ export function makeRemotelyCallable(
     if (!enabled) {
         browser.runtime.onMessage.addListener(incomingRPCListener)
         enabled = true
+    }
+}
+
+export class RemoteFunctionRegistry {
+    registerRemotelyCallable(functions, { insertExtraArg = false } = {}) {
+        makeRemotelyCallable(functions, { insertExtraArg })
     }
 }

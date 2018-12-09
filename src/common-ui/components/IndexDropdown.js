@@ -26,6 +26,7 @@ class IndexDropdown extends PureComponent {
         isForSidebar: PropTypes.bool,
         clearSearchField: PropTypes.func,
         showClearfieldBtn: PropTypes.bool,
+        onBackBtnClick: PropTypes.func,
     }
 
     get styles() {
@@ -113,6 +114,14 @@ class IndexDropdown extends PureComponent {
                 </div>
                 {!this.props.isForSidebar && (
                     <div className={this.styles.summaryTagContainer}>
+                        {!this.props.isForAnnotation && (
+                            <button
+                                className={this.styles.backButton}
+                                onClick={this.props.onBackBtnClick}
+                            >
+                                Back
+                            </button>
+                        )}
                         <div className={this.styles.numberTags}>
                             <span className={this.styles.bold}>
                                 {this.props.numberOfTags}

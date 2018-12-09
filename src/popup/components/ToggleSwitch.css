@@ -8,7 +8,7 @@
     border-radius: 100px;
     position: relative;
     margin-top: 0px;
-    margin-left: 40px;
+    margin-left: 10px;
 
     &::after {
         content: '';
@@ -38,15 +38,24 @@
 }
 
 .text {
+    cursor: pointer;
     z-index: 10;
     color: #ddd;
     font-size: 0.8em;
     position: absolute;
-    margin-left: -33px;
+    margin-left: -35px;
     margin-top: 2px;
 }
 
 .activeText {
     color: #fff;
     margin-left: -44px;
+}
+
+.subTitle {
+    margin-left: 10px;
+    margin-top: auto;
+    font-size: 10px;
+    text-align: center;
+    color: #777;
 }

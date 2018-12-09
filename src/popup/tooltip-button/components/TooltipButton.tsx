@@ -2,7 +2,7 @@ import React, { PureComponent } from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 
 import Button from '../../components/Button'
-import ToggleSwitch from './ToggleSwitch'
+import ToggleSwitch from '../../components/ToggleSwitch'
 import { RootState, ClickHandler } from '../../types'
 import * as selectors from '../selectors'
 import * as acts from '../actions'
@@ -15,57 +15,72 @@ export interface OwnProps {
 }
 
 interface StateProps {
-    isChecked: boolean
+    isEnabled: boolean
 }
 
 interface DispatchProps {
     handleChange: ClickHandler<HTMLButtonElement>
+    showTooltip: ClickHandler<HTMLButtonElement>
     initState: () => Promise<void>
 }
 
 export type Props = OwnProps & StateProps & DispatchProps
 
-class TooltipButton extends PureComponent<Props> {
+class InPageSwitches extends PureComponent<Props> {
     componentDidMount() {
         this.props.initState()
     }
 
     render() {
         return (
-            <Button
-                onClick={this.props.handleChange}
-                btnClass={buttonStyles.linkIcon}
-                title={'Enable Memex sidebar & Highlighting tooltip'}
-            >
+            <div>
                 <span>
-                    Show Sidebar/Tooltip
-                    <span
-                        className={styles.switch}
-                        title={'Enable Memex sidebar & Highlighting tooltip'}
+                    <Button
+                        onClick={this.props.showTooltip}
+                        itemClass={styles.button}
+                        btnClass={buttonStyles.highlighterIcon}
+                        title={'Open Memex annotation sidebar'}
                     >
-                        <ToggleSwitch
-                            isChecked={this.props.isChecked}
-                            onChange={this.props.handleChange}
-                        />
-                    </span>
+                        Show Highlighter
+                        <p className={buttonStyles.subTitle}>
+                            only on this page
+                        </p>
+                    </Button>
                 </span>
-            </Button>
+                <span
+                    className={styles.switch}
+                    title={
+                        'Enable/disable Memex highlighter tooltip on all pages'
+                    }
+                >
+                    <ToggleSwitch
+                        isChecked={this.props.isEnabled}
+                        onChange={this.props.handleChange}
+                    />
+                </span>
+            </div>
         )
     }
 }
 
 const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
-    isChecked: selectors.isTooltipEnabled(state),
+    isEnabled: selectors.isTooltipEnabled(state),
 })
 
 const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
     dispatch,
     props,
 ) => ({
+    showTooltip: async e => {
+        // console.log('dispatch')
+        e.preventDefault()
+        await dispatch(acts.showTooltip())
+        // setTimeout(props.closePopup, 200)
+    },
     handleChange: async e => {
         e.preventDefault()
         await dispatch(acts.toggleTooltipFlag())
-        setTimeout(props.closePopup, 200)
+        // setTimeout(props.closePopup, 200)
     },
     initState: () => dispatch(acts.init()),
 })
@@ -73,4 +88,4 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
 export default connect<StateProps, DispatchProps, OwnProps>(
     mapState,
     mapDispatch,
-)(TooltipButton)
+)(InPageSwitches)

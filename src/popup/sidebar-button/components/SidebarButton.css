@@ -1,0 +1,14 @@
+.toggleDiv {
+    position: relative;
+}
+
+.switch {
+    position: absolute;
+    margin-top: 3px;
+}
+
+.button {
+    display: inline-block;
+    width: 200px;
+    text-align: left;
+}
