@@ -4,7 +4,7 @@ import NotificationLayout from '../layout'
 import { getExtURL } from '../utils.js'
 const styles = require('./tooltip-first-close.css')
 
-const styles = require('./tooltip-first-close.css')
+const styles = require('./notifications.css')
 
 const images = {
     notifIcon: getExtURL('img/tooltipIcon_blue.svg'),
@@ -25,7 +25,7 @@ export default function TooltipFirstCloseNotification({ onCloseRequested }) {
                 closeIcon={images.closeIcon}
             >
                 Via the little{' '}
-                <img src={images.brainIcon} className={styles.brainIcon} />
+                <img src={images.brainIcon} className={styles.icon} />
                 icon in the menu
             </NotificationLayout>
         </div>

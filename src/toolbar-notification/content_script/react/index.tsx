@@ -8,8 +8,14 @@ export function setupUIContainer(
     {
         type,
         shadow,
+        position,
         onCloseRequested,
-    }: { type: string; shadow: HTMLElement; onCloseRequested: () => void },
+    }: {
+        type: string
+        shadow: HTMLElement
+        position: any
+        onCloseRequested: () => void
+    },
 ) {
     retargetEvents(shadow)
     return new Promise(async resolve => {
@@ -17,6 +23,7 @@ export function setupUIContainer(
             <ToolbarNotification
                 type={type}
                 onCloseRequested={onCloseRequested}
+                position={position}
             />,
             target,
         )

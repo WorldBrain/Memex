@@ -6,26 +6,31 @@ import { getExtURL } from '../utils.js'
 const styles = require('./notifications.css')
 
 const images = {
-    notifIcon: getExtURL('img/tooltipIcon_blue.svg'),
     closeIcon: getExtURL('/img/cross.svg'),
+    annotateIcon: getExtURL('/img/annotate.svg'),
+    shareIcon: getExtURL('/img/share.svg'),
 }
 
-export default function OnboardingHighlightText({ onCloseRequested }) {
+export default function OnboardingSelectOption({ onCloseRequested }) {
     return (
         <div className={styles.title}>
             <NotificationLayout
-                title={'MAKE YOUR FIRST ANNOTATION'}
-                icon={images.notifIcon}
+                title={'STEP 2: SELECT OPTION'}
+                icon={null}
                 onCloseRequested={onCloseRequested}
                 thirdRowImage={null}
                 closeIcon={images.closeIcon}
             >
-                Step 1: Highlight any piece of text on this page
+                <img src={images.annotateIcon} className={styles.icon} />
+                Add a note to this highlight
+                <br />
+                <img src={images.shareIcon} className={styles.icon} />
+                Share a link to this higlight
             </NotificationLayout>
         </div>
     )
 }
 
-OnboardingHighlightText.propTypes = {
+OnboardingSelectOption.propTypes = {
     onCloseRequested: PropTypes.func.isRequired,
 }
