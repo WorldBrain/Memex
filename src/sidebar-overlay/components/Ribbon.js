@@ -10,6 +10,7 @@ import styles from './Ribbon.css'
 import CloseButton from './CloseButton'
 
 const arrowRibbon = browser.extension.getURL('/img/arrow_ribbon.svg')
+const logo = browser.extension.getURL('/img/worldbrain-logo-narrow.png')
 
 class Ribbon extends React.Component {
     static propTypes = {
@@ -410,17 +411,21 @@ class Ribbon extends React.Component {
                         [styles.onFullScreen]: isFullScreen,
                         [styles.ribbonExpanded]: isHovering,
                     })}
+                    onClick={this.toggleSidebar}
                     ref={this.setupInputRef}
                 >
-                    <img
-                        onClick={this.toggleSidebar}
-                        className={styles.arrow}
-                        src={arrowRibbon}
-                        title={'Open Annotation Sidebar'}
-                    />
+                    <div className={styles.arrowBox}>
+                        <img
+                            onClick={this.toggleSidebar}
+                            className={styles.arrow}
+                            src={arrowRibbon}
+                            title={'Open Annotation Sidebar'}
+                        />
+                    </div>
                     {isHovering && (
                         <div className={styles.buttons}>
-                            <div
+                            <img
+                                src={logo}
                                 className={styles.logo}
                                 onClick={this.toggleSidebar}
                                 title={'Open Annotation Sidebar'}
