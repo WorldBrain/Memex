@@ -1,5 +1,4 @@
 import React from 'react'
-import ReactDOM from 'react-dom'
 import PropTypes from 'prop-types'
 import NotificationLayout from '../layout'
 import styles from './tooltip-first-close.css'

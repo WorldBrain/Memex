@@ -410,7 +410,6 @@ class Ribbon extends React.Component {
                         [styles.onFullScreen]: isFullScreen,
                         [styles.ribbonExpanded]: isHovering,
                     })}
-                    onClick={this.toggleSidebar}
                     ref={this.setupInputRef}
                 >
                     <img
