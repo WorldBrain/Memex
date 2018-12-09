@@ -3,8 +3,8 @@
     position: fixed;
     top: 20%;
     right: -50px;
-    width: 10px;
-    height: 30px;
+    width: 13px;
+    height: 40px;
     background-color: #fff;
     z-index: 2147483647;
     border-top-left-radius: 5px;
@@ -30,8 +30,8 @@
 }
 
 .ribbonExpanded {
-    width: 110px;
-    height: 30px;
+    width: 130px;
+    height: 40px;
     display: grid;
     grid-template-areas: 'buttons arrow';
     grid-template-columns: 1fr;
@@ -46,21 +46,20 @@
 }
 
 .arrow {
-    justify-self: center;
     cursor: pointer;
-    padding-top: 1px;
+    height: 25px;
 }
 
 .arrow:hover {
     cursor: pointer;
-    opacity: 0.8;
 }
 
 .arrowBox {
     width: 9px;
     display: flex;
     justify-content: flex-end;
-    margin-right: 3px;
+    margin-right: 4px;
+    padding-top: 1px;
 }
 
 .ribbonSidebarActive {
@@ -96,7 +95,7 @@
 
 .buttonHolder {
     /* border-bottom: 1px solid #c2c2c2; */
-    display: block;
+    display: flex;
     margin-left: 10px;
     padding-top: 1px;
 }
@@ -111,17 +110,16 @@
 }
 
 .logo {
-    width: 12px;
-    height: 16px;
+    width: 15px;
+    height: 20px;
     margin-left: 10px;
 }
 
 .toggler {
     fill: white;
-    background-size: 14px;
-    width: 14px;
-    height: 14px;
-    margin-top: 3px;
+    background-size: 20px;
+    width: 20px;
+    height: 20px;
 }
 
 .tooltipOn {
@@ -146,6 +144,10 @@
     background-size: 12px;
     width: 12px;
     height: 12px;
+}
+
+.tooltipIcon {
+    padding-top: 1px;
 }
 
 .settings {

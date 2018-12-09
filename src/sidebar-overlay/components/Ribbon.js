@@ -449,10 +449,14 @@ class Ribbon extends React.Component {
                                 onClick={this.toggleRibbon}
                             >
                                 <span
-                                    className={cx(styles.toggler, {
-                                        [styles.ribbonOn]: isRibbonEnabled,
-                                        [styles.ribbonOff]: !isRibbonEnabled,
-                                    })}
+                                    className={cx(
+                                        styles.toggler,
+                                        styles.tooltipIcon,
+                                        {
+                                            [styles.ribbonOn]: isRibbonEnabled,
+                                            [styles.ribbonOff]: !isRibbonEnabled,
+                                        },
+                                    )}
                                     title={
                                         'Turn on/off this ribbon on all pages'
                                     }
