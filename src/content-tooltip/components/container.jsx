@@ -10,6 +10,8 @@ import {
     ErrorComponent,
     DoneComponent,
 } from './tooltip-states'
+import { getLocalStorage, setLocalStorage } from 'src/util/storage'
+import { STORAGE_KEYS } from 'src/overview/onboarding/constants'
 
 class TooltipContainer extends React.Component {
     static propTypes = {
@@ -40,11 +42,23 @@ class TooltipContainer extends React.Component {
         }
     }
 
-    handleClickOutside = () => {
+    handleClickOutside = async () => {
         this.setState({
             showTooltip: false,
             position: {},
         })
+        const onboardingAnnotationStage = await getLocalStorage(
+            STORAGE_KEYS.onboardingDemo.step1,
+        )
+        if (onboardingAnnotationStage === 'select_option_notification_shown') {
+            await setLocalStorage(
+                STORAGE_KEYS.onboardingDemo.step1,
+                'highlight_text_notification_shown',
+            )
+            // Close toolbar notification manually
+            // Replace with better method in the future.
+            document.querySelector('.memex-tooltip-notification').remove()
+        }
     }
 
     closeTooltip = (event, options = { disable: false }) => {

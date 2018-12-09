@@ -196,6 +196,8 @@ export const conditionallyTriggerTooltip = delayed(
             STORAGE_KEYS.onboardingDemo.step1,
         )
         if (onboardingAnnotationStage === 'highlight_text_notification_shown') {
+            // Remove previous notification
+            toolbarNotifications._destroyRootElement()
             toolbarNotifications.showToolbarNotification(
                 'onboarding-select-option',
                 position,
