@@ -18,7 +18,7 @@
     text-align: start;
     font-family: serif;
     animation: slideLeft 0.15s ease-in 1s 1 forwards;
-
+    cursor: pointer;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -41,8 +41,14 @@
 }
 
 .arrow {
-    grid-area: arrow;
     justify-self: center;
+    height: 30px;
+    cursor: pointer;
+}
+
+.arrow:hover {
+    cursor: pointer;
+    opacity: 0.8;
 }
 
 .ribbonSidebarActive {
@@ -130,11 +136,11 @@
 .cancel {
     background-image: url('../../../img/cross_grey.svg');
     fill: white;
-    background-size: 14px;
-    width: 14px;
-    height: 14px;
-    margin-left: 6px;
-    margin-top: 5px;
+    background-size: 12px;
+    width: 12px;
+    height: 12px;
+    margin-left: 7px;
+    margin-top: 3px;
 }
 
 .settings {
