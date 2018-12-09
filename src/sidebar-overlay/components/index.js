@@ -8,7 +8,16 @@ import * as interactions from '../content_script/interactions'
 
 const processEventRPC = remoteFunction('processEvent')
 
-export const setupRibbonUI = (target, { onInit, onClose }) => {
+export const setupRibbonUI = (
+    target,
+    {
+        onInit,
+        onClose,
+        getInitialState,
+        handleRibbonToggle,
+        handleTooltipToggle,
+    },
+) => {
     const sidebarURL = browser.extension.getURL('sidebar.html')
 
     ReactDOM.render(
@@ -17,6 +26,9 @@ export const setupRibbonUI = (target, { onInit, onClose }) => {
             destroy={() => {
                 onClose()
             }}
+            getInitialState={getInitialState}
+            handleRibbonToggle={handleRibbonToggle}
+            handleTooltipToggle={handleTooltipToggle}
             sidebarURL={sidebarURL}
             highlightAll={interactions.highlightAnnotations}
             removeHighlights={interactions.removeHighlights}
@@ -30,11 +42,16 @@ export const setupRibbonUI = (target, { onInit, onClose }) => {
     )
 }
 
-export const destroyAll = target => () => {
+export const destroyAll = (target, shadowRoot = null) => () => {
     processEventRPC({ type: 'disableSidebarPage' })
 
     ReactDOM.unmountComponentAtNode(target)
-    document.body.removeChild(target)
+
+    if (shadowRoot !== null) {
+        shadowRoot.removeChild(target)
+    } else {
+        document.body.removeChild(target)
+    }
 }
 
 export default SidebarContainer
