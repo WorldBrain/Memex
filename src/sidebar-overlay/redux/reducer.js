@@ -16,6 +16,7 @@ const defaultState = {
     activeAnnotation: '',
     // PK (url) of the annotation which the user's mouse is over
     hoveredAnnotation: '',
+    congratsMessage: false,
 }
 
 const setAnnotations = (state, annotations) => ({
@@ -36,6 +37,11 @@ const setAnnotationCount = (state, value) => ({
 const setIsLoading = (state, value) => ({
     ...state,
     isLoading: value,
+})
+
+const setCongratsMessage = (state, value) => ({
+    ...state,
+    congratsMessage: value,
 })
 
 const setPageInfo = (state, page) => ({
@@ -62,6 +68,7 @@ export default createReducer(
         [actions.setHoveredAnnotation]: setHoveredAnnotation,
         [actions.setAnnotationCount]: setAnnotationCount,
         [actions.setIsLoading]: setIsLoading,
+        [actions.setCongratsMessage]: setCongratsMessage,
     },
     defaultState,
 )

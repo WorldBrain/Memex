@@ -23,6 +23,7 @@ class SidebarContainer extends React.Component {
         annotations: PropTypes.array.isRequired,
         tags: PropTypes.object.isRequired,
         isLoading: PropTypes.bool.isRequired,
+        congratsMessage: PropTypes.bool.isRequired,
         fetchAnnotations: PropTypes.func.isRequired,
         setAnnotationAndTags: PropTypes.func.isRequired,
         editAnnotation: PropTypes.func.isRequired,
@@ -196,6 +197,9 @@ class SidebarContainer extends React.Component {
                 toggleMouseOnSidebar={this.props.toggleMouseOnSidebar}
                 renderAnnotations={this.renderAnnotations}
                 updateAnnotations={this.updateAnnotations}
+                showCongratsMessage={
+                    this.props.congratsMessage && !this.props.isLoading
+                }
                 env={this.props.env}
             />
         )
@@ -208,6 +212,7 @@ const mapStateToProps = state => ({
     activeAnnotation: selectors.activeAnnotation(state),
     hoveredAnnotation: selectors.activeAnnotation(state),
     isLoading: selectors.isLoading(state),
+    congratsMessage: selectors.congratsMessage(state),
 })
 
 const mapDispatchToProps = dispatch => ({

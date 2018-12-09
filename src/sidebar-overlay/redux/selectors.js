@@ -17,6 +17,11 @@ export const activeAnnotation = createSelector(
 
 export const isLoading = createSelector(sidebar, state => state.isLoading)
 
+export const congratsMessage = createSelector(
+    sidebar,
+    state => state.congratsMessage,
+)
+
 export const hoveredAnnotation = createSelector(
     sidebar,
     state => state.hoveredAnnotation,
