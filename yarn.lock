@@ -9837,6 +9837,7 @@ react-router@^3.2.1:
 react-shadow-dom-retarget-events@^1.0.8:
   version "1.0.8"
   resolved "https://registry.yarnpkg.com/react-shadow-dom-retarget-events/-/react-shadow-dom-retarget-events-1.0.8.tgz#411fe79194d974d7d1944622508ac271cc3a4346"
+  integrity sha1-QR/nkZTZdNfRlEYiUIrCccw6Q0Y=
 
 react-side-effect@^1.1.0:
   version "1.1.5"

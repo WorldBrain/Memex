@@ -9,10 +9,16 @@ import FrameCommunication from '../messaging'
 import styles from './Ribbon.css'
 import CloseButton from './CloseButton'
 
+const arrowRibbon = browser.extension.getURL('/img/arrow_ribbon.svg')
+const logo = browser.extension.getURL('/img/worldbrain-logo-narrow.png')
+
 class Ribbon extends React.Component {
     static propTypes = {
         onInit: PropTypes.func.isRequired,
         destroy: PropTypes.func.isRequired,
+        getInitialState: PropTypes.func.isRequired,
+        handleRibbonToggle: PropTypes.func.isRequired,
+        handleTooltipToggle: PropTypes.func.isRequired,
         sidebarURL: PropTypes.string.isRequired,
         highlightAll: PropTypes.func.isRequired,
         removeHighlights: PropTypes.func.isRequired,
@@ -31,12 +37,24 @@ class Ribbon extends React.Component {
         isInsideFrame: false,
         top: null,
         shouldRenderIFrame: false,
+        isRibbonEnabled: true,
+        isTooltipEnabled: true,
+        isHovering: false,
     }
 
     async componentDidMount() {
+        // Get ribbon state.
+        const {
+            isRibbonEnabled,
+            isTooltipEnabled,
+        } = await this.props.getInitialState()
+        this.setState({ isRibbonEnabled, isTooltipEnabled })
+
         this.setupRPCfunctions()
 
         this.setupScrollListeners()
+
+        this.setupHoverListeners()
 
         await this.fetchAnnotations()
 
@@ -72,6 +90,8 @@ class Ribbon extends React.Component {
         if (this.frameFC) {
             this.frameFC.removeMessageListener()
         }
+
+        this.removeHoverListeners()
     }
 
     setupRPCfunctions = () => {
@@ -180,6 +200,16 @@ class Ribbon extends React.Component {
         )
     }
 
+    setupHoverListeners() {
+        this.ribbonRef.addEventListener('mouseenter', this.handleMouseEnter)
+        this.ribbonRef.addEventListener('mouseleave', this.handleMouseLeave)
+    }
+
+    removeHoverListeners() {
+        this.ribbonRef.removeEventListener('mouseenter', this.handleMouseEnter)
+        this.ribbonRef.removeEventListener('mouseleave', this.handleMouseLeave)
+    }
+
     highlightAndScroll = async annotation => {
         const top = await this.props.highlightAndScroll(annotation)
         this.setState({
@@ -236,6 +266,26 @@ class Ribbon extends React.Component {
         this.setState({
             isSidebarActive,
         })
+    }
+
+    /* Toggles tooltip on/off for all pages. */
+    toggleTooltip = async e => {
+        e.stopPropagation()
+        e.preventDefault()
+
+        const { isTooltipEnabled } = this.state
+        this.props.handleTooltipToggle(isTooltipEnabled)
+        this.setState({ isTooltipEnabled: !isTooltipEnabled })
+    }
+
+    /* Toggles ribbon on/off for all pages. */
+    toggleRibbon = async e => {
+        e.stopPropagation()
+        e.preventDefault()
+
+        const { isRibbonEnabled } = this.state
+        this.props.handleRibbonToggle(isRibbonEnabled)
+        this.setState({ isRibbonEnabled: !isRibbonEnabled })
     }
 
     openSidebar = () =>
@@ -325,28 +375,104 @@ class Ribbon extends React.Component {
         )
     }
 
+    handleMouseEnter = e => {
+        e.stopPropagation()
+        if (!this.state.isHovering) {
+            this.setState({ isHovering: true })
+        }
+    }
+
+    handleMouseLeave = e => {
+        e.stopPropagation()
+        if (this.state.isHovering) {
+            this.setState({ isHovering: false })
+        }
+    }
+
+    setupInputRef = ref => {
+        this.ribbonRef = ref
+    }
+
     render() {
-        const { isSidebarActive, isFullScreen } = this.state
+        const {
+            isSidebarActive,
+            isFullScreen,
+            isTooltipEnabled,
+            isRibbonEnabled,
+            isHovering,
+        } = this.state
         const { destroy } = this.props
 
         return (
-            <div>
+            <React.Fragment>
                 <div
                     className={cx(styles.ribbon, {
                         [styles.ribbonSidebarActive]: isSidebarActive,
                         [styles.onFullScreen]: isFullScreen,
+                        [styles.ribbonExpanded]: isHovering,
                     })}
+                    onClick={this.toggleSidebar}
+                    ref={this.setupInputRef}
                 >
-                    <div className={styles.buttonHolder}>
-                        <span
-                            title={
-                                'Close once. Disable via Memex icon in the extension toolbar.'
-                            }
-                            className={styles.cancel}
-                            onClick={destroy}
+                    <div className={styles.arrowBox}>
+                        <img
+                            onClick={this.toggleSidebar}
+                            className={styles.arrow}
+                            src={arrowRibbon}
+                            title={'Open Annotation Sidebar'}
                         />
                     </div>
-                    <div className={styles.logo} onClick={this.toggleSidebar} />
+                    {isHovering && (
+                        <div className={styles.buttons}>
+                            <img
+                                src={logo}
+                                className={styles.logo}
+                                onClick={this.toggleSidebar}
+                                title={'Open Annotation Sidebar'}
+                            />
+                            <div
+                                className={styles.buttonHolder}
+                                onClick={this.toggleTooltip}
+                            >
+                                <span
+                                    className={cx(styles.toggler, {
+                                        [styles.tooltipOn]: isTooltipEnabled,
+                                        [styles.tooltipOff]: !isTooltipEnabled,
+                                    })}
+                                    title={
+                                        'Turn on/off Highlighter on all pages'
+                                    }
+                                />
+                            </div>
+                            <div
+                                className={styles.buttonHolder}
+                                onClick={this.toggleRibbon}
+                            >
+                                <span
+                                    className={cx(
+                                        styles.toggler,
+                                        styles.tooltipIcon,
+                                        {
+                                            [styles.ribbonOn]: isRibbonEnabled,
+                                            [styles.ribbonOff]: !isRibbonEnabled,
+                                        },
+                                    )}
+                                    title={
+                                        'Turn on/off this ribbon on all pages'
+                                    }
+                                />
+                            </div>
+                            <div className={styles.buttonHolder}>
+                                <span
+                                    title={
+                                        'Close ribbon once. Disable via Memex icon in the extension toolbar.'
+                                    }
+                                    className={styles.cancel}
+                                    onClick={destroy}
+                                />
+                            </div>
+                        </div>
+                    )}
                 </div>
                 <CloseButton
                     isActive={isSidebarActive}
@@ -356,7 +482,7 @@ class Ribbon extends React.Component {
                     }
                 />
                 {this.renderIFrame()}
-            </div>
+            </React.Fragment>
         )
     }
 }

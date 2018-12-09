@@ -1,9 +1,12 @@
+import retargetEvents from 'react-shadow-dom-retarget-events'
+
 import { highlightAnnotation } from 'src/direct-linking/content_script/rendering'
-import { injectCSS } from 'src/search-injection/dom'
 import { makeRemotelyCallable, remoteFunction } from 'src/util/webextensionRPC'
 import { setupRibbonUI, destroyAll } from '../components'
-import { getOffsetTop } from '../utils'
+import { getSidebarState, getOffsetTop, setSidebarState } from '../utils'
+import { setTooltipState, getTooltipState } from '../../content-tooltip/utils'
 import styles from 'src/direct-linking/content_script/styles.css'
+import { createRootElement, destroyRootElement } from './rendering'
 
 const openOptionsRPC = remoteFunction('openOptionsTab')
 
@@ -65,8 +68,25 @@ export const highlightAnnotations = async (
     )
 }
 
+const CLOSE_MESSAGESHOWN_KEY = 'ribbon.close-message-shown'
+
+const _setCloseMessageShown = async () => {
+    await window['browser'].storage.local.set({
+        [CLOSE_MESSAGESHOWN_KEY]: true,
+    })
+}
+
+const _getCloseMessageShown = async () => {
+    const { [CLOSE_MESSAGESHOWN_KEY]: closeMessageShown } = await window[
+        'browser'
+    ].storage.local.get({ [CLOSE_MESSAGESHOWN_KEY]: false })
+
+    return closeMessageShown
+}
+
 // Target container for the Ribbon/Sidebar iFrame
 let target = null
+let shadowRoot = null
 let toggleSidebar = null
 
 /**
@@ -75,7 +95,7 @@ let toggleSidebar = null
  * Mounts Ribbon React component.
  * Sets up iFrame <--> webpage Remote functions.
  */
-export const insertRibbon = () => {
+export const insertRibbon = ({ toolbarNotifications }) => {
     // If target is set, Ribbon has already been injected.
     if (target) {
         return
@@ -85,19 +105,42 @@ export const insertRibbon = () => {
         resolveToggleSidebar = resolve
     })
 
-    target = document.createElement('div')
-    target.setAttribute('id', 'memex-annotations-ribbon')
-    document.body.appendChild(target)
+    const { shadow, rootElement } = createRootElement({
+        containerId: 'memex-annotations-ribbon-container',
+        rootId: 'memex-annotations-ribbon',
+        classNames: ['memex-annotations-ribbon'],
+    })
+    target = rootElement
+    shadowRoot = shadow
 
-    const cssFile = browser.extension.getURL('content_script.css')
-    injectCSS(cssFile)
+    // React messes up event propagation with shadow dom, hence fix.
+    retargetEvents(shadowRoot)
 
     setupRibbonUI(target, {
         onInit: ({ toggleSidebar }) => {
             resolveToggleSidebar(toggleSidebar)
         },
-        onClose: () => {
+        onClose: async () => {
             removeRibbon()
+
+            const closeMessageShown = await _getCloseMessageShown()
+            if (!closeMessageShown) {
+                toolbarNotifications.showToolbarNotification(
+                    'ribbon-first-close',
+                )
+                _setCloseMessageShown()
+            }
+        },
+        getInitialState: async () => {
+            const isTooltipEnabled = await getTooltipState()
+            const isRibbonEnabled = await getSidebarState()
+            return { isTooltipEnabled, isRibbonEnabled }
+        },
+        handleRibbonToggle: async prevState => {
+            await setSidebarState(!prevState)
+        },
+        handleTooltipToggle: async prevState => {
+            await setTooltipState(!prevState)
         },
     })
 }
@@ -107,7 +150,9 @@ const removeRibbon = () => {
         return
     }
     removeHighlights()
-    destroyAll(target)()
+    destroyAll(target, shadowRoot)()
+    destroyRootElement()
+    shadowRoot = null
     target = null
     toggleSidebar = null
 }
