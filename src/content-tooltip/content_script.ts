@@ -2,6 +2,8 @@ import { bodyLoader } from '../util/loader'
 import * as interactions from './interactions'
 import ToolbarNotifications from '../toolbar-notification/content_script'
 import { getTooltipState } from './utils'
+import { getLocalStorage, setLocalStorage } from 'src/util/storage'
+import { STORAGE_KEYS } from 'src/overview/onboarding/constants'
 
 export default async function init({
     toolbarNotifications,
@@ -17,6 +19,19 @@ export default async function init({
     }
 
     await bodyLoader()
+
+    const onboardingAnnotationStage = await getLocalStorage(
+        STORAGE_KEYS.onboardingDemo.step1,
+        'unvisited',
+    )
+
+    if (onboardingAnnotationStage === 'highlight_text') {
+        toolbarNotifications.showToolbarNotification('onboarding-higlight-text')
+        await setLocalStorage(
+            STORAGE_KEYS.onboardingDemo.step1,
+            'highlight_text_notification_shown',
+        )
+    }
 
     await interactions.insertTooltip({ toolbarNotifications })
 }

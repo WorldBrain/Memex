@@ -2,9 +2,13 @@ import { FeatureInfo } from './types'
 
 export const IMPORT_CONN_NAME = 'imports-onboarding-runtime-connection'
 export const NUM_IMPORT_ITEMS = 30
+export const ANNOTATION_DEMO_URL = 'https://en.wikipedia.org/wiki/Memex'
 export const STORAGE_KEYS = {
     isImportsDone: 'is-onboarding-done',
     progress: 'onboarding-import-progress',
+    onboardingDemo: {
+        step1: 'step-one-annotations',
+    },
 }
 
 export const FEATURES_INFO: FeatureInfo[] = [

@@ -2,6 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import TooltipFirstCloseNotification from './notifications/tooltip-first-close'
 import RibbonFirstCloseNotification from './notifications/ribbon-first-close'
+import OnboardingHighlightText from './notifications/onboarding-highlight-text'
 import styles from './styles.css'
 
 export class ToolbarNotification extends React.Component {
@@ -23,6 +24,11 @@ export class ToolbarNotification extends React.Component {
                 )}
                 {this.props.type === 'ribbon-first-close' && (
                     <RibbonFirstCloseNotification
+                        onCloseRequested={this.props.onCloseRequested}
+                    />
+                )}
+                {this.props.type === 'onboarding-higlight-text' && (
+                    <OnboardingHighlightText
                         onCloseRequested={this.props.onCloseRequested}
                     />
                 )}
