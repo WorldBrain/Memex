@@ -8,14 +8,16 @@ import {
 import { setupUIContainer, destroyUIContainer } from './components'
 import { remoteFunction, makeRemotelyCallable } from '../util/webextensionRPC'
 import { injectCSS } from '../search-injection/dom'
+import { getLocalStorage, setLocalStorage } from 'src/util/storage'
+import { STORAGE_KEYS } from 'src/overview/onboarding/constants'
 
 const openOptionsRPC = remoteFunction('openOptionsTab')
 
 let mouseupListener = null
 
-export function setupTooltipTrigger(callback) {
+export function setupTooltipTrigger(callback, toolbarNotifications) {
     mouseupListener = event => {
-        conditionallyTriggerTooltip(callback, event)
+        conditionallyTriggerTooltip(callback, event, toolbarNotifications)
     }
 
     document.body.addEventListener('mouseup', mouseupListener)
@@ -159,25 +161,53 @@ export const setupRPC = ({ toolbarNotifications }) => {
  * page has loaded. So we don't need to check for condition ii) since the
  * tooltip wouldn't have popped up yet.
  */
+<<<<<<< HEAD
 export const conditionallyTriggerTooltip = delayed(async (callback, event) => {
     if (!userSelectedText() || (event && isTargetInsideTooltip(event))) {
         return
     }
+=======
+export const conditionallyTriggerTooltip = delayed(
+    async (callback, event, toolbarNotifications) => {
+        const isTooltipEnabled = await getTooltipState()
+        if (
+            !userSelectedText() ||
+            !isTooltipEnabled ||
+            (event && isTargetInsideTooltip(event))
+        ) {
+            return
+        }
+>>>>>>> Add Select Option notification.
 
-    /*
+        /*
     If all the conditions passed, then this returns the position to anchor the
     tooltip. The positioning is based on the user's preferred method. But in the
     case of tooltip popping up before page load, it resorts to text based method
     */
-    const positioning = await getPositionState()
-    let position
-    if (positioning === 'text' || !event) {
-        position = calculateTooltipPostion()
-    } else if (positioning === 'mouse' && event) {
-        position = { x: event.pageX, y: event.pageY }
-    }
-    callback(position)
-}, 300)
+        const positioning = await getPositionState()
+        let position
+        if (positioning === 'text' || !event) {
+            position = calculateTooltipPostion()
+        } else if (positioning === 'mouse' && event) {
+            position = { x: event.pageX, y: event.pageY }
+        }
+        callback(position)
+        const onboardingAnnotationStage = await getLocalStorage(
+            STORAGE_KEYS.onboardingDemo.step1,
+        )
+        if (onboardingAnnotationStage === 'highlight_text_notification_shown') {
+            toolbarNotifications.showToolbarNotification(
+                'onboarding-select-option',
+                position,
+            )
+            await setLocalStorage(
+                STORAGE_KEYS.onboardingDemo.step1,
+                'select_option_notification_shown',
+            )
+        }
+    },
+    300,
+)
 
 export function calculateTooltipPostion() {
     const range = document.getSelection().getRangeAt(0)

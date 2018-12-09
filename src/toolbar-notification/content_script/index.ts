@@ -2,6 +2,7 @@ import { bodyLoader } from 'src/util/loader'
 import { createRootElement, destroyRootElement } from './rendering'
 import { setupUIContainer } from './react'
 import { RemoteFunctionRegistry } from '../../util/webextensionRPC'
+import { any } from 'prop-types'
 
 export default class ToolbarNotifications {
     _rootElement = null
@@ -14,9 +15,8 @@ export default class ToolbarNotifications {
         })
     }
 
-    async showToolbarNotification(type: string) {
+    async showToolbarNotification(type: string, position = null) {
         await bodyLoader()
-
         if (this._rootElement) {
             // We're already showing a notification, close it
             console.warn(
@@ -29,6 +29,7 @@ export default class ToolbarNotifications {
         await setupUIContainer(rootElement, {
             type,
             shadow,
+            position,
             onCloseRequested: () => {
                 this._destroyRootElement()
             },
