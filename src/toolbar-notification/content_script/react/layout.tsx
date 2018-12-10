@@ -2,7 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
-import styles from './layout.css'
+const styles = require('./layout.css')
 
 export default function NotificationLayout({
     title,
@@ -33,7 +33,7 @@ export default function NotificationLayout({
     )
 }
 
-NotificationLayout.propTypes = {
+NotificationLayout['propTypes'] = {
     title: PropTypes.string.isRequired,
     icon: PropTypes.string,
     children: PropTypes.node.isRequired,
