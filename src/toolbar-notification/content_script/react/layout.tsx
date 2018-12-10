@@ -15,9 +15,11 @@ export default function NotificationLayout({
 }) {
     return (
         <div className={styles.container}>
-            <div className={styles.left}>
-                {icon && <img className={styles.notifIcon} src={icon} />}
-            </div>
+            {icon && (
+                <div className={styles.left}>
+                    <img className={styles.notifIcon} src={icon} />
+                </div>
+            )}
             <div className={styles.middle}>
                 <div className={styles.title}>{title}</div>
                 <div className={styles.body}>{children}</div>

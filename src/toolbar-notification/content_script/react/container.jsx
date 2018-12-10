@@ -26,11 +26,14 @@ export class ToolbarNotification extends React.Component {
         if (position) {
             // In the use case where the notification must be displayed in a
             // custom position
+            // Styles tailored for onboarding notification
             const { x, y } = position
             positionStyles = {
                 left: x - 200,
                 top: y + 100,
-                height: '100px',
+                height: 'auto',
+                width: '400px',
+                'padding-top': '15px',
             }
         } else {
             positionStyles = {
