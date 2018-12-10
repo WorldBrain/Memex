@@ -157,25 +157,21 @@ class PopupContainer extends PureComponent<Props> {
                 <SidebarButton closePopup={this.closePopup} />
                 <TooltipButton closePopup={this.closePopup} />
                 <hr />
-                <LinkButton
-                    btnClass={btnStyles.voteIcon}
-                    href="https://worldbrain.io/vote_feature"
-                >
-                    Vote for Next Features
-                </LinkButton>
                 <UpgradeButton />
-                <ButtonIcon
-                    href={`${constants.OPTIONS_URL}#/settings`}
-                    icon="settings"
-                    className={btnStyles.settingsIcon}
-                    btnClass={btnStyles.settings}
-                />
-                <ButtonIcon
-                    href="https://worldbrain.io/help"
-                    icon="help"
-                    btnClass={btnStyles.help}
-                />
-                <NotifButton />
+                <div className={styles.buttonContainer}>
+                    <ButtonIcon
+                        href={`${constants.OPTIONS_URL}#/settings`}
+                        icon="settings"
+                        className={btnStyles.settingsIcon}
+                        btnClass={btnStyles.settings}
+                    />
+                    <ButtonIcon
+                        href="https://worldbrain.io/help"
+                        icon="help"
+                        btnClass={btnStyles.help}
+                    />
+                    <NotifButton />
+                </div>
             </React.Fragment>
         )
     }
