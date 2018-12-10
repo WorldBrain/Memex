@@ -2,8 +2,8 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import PropTypes from 'prop-types'
 import NotificationLayout from '../layout'
-import styles from './tooltip-first-close.css'
 import { getExtURL } from '../utils.js'
+const styles = require('./tooltip-first-close.css')
 
 const images = {
     notifIcon: getExtURL('img/tooltipIcon_blue.svg'),
@@ -31,6 +31,6 @@ export default function TooltipFirstCloseNotification({ onCloseRequested }) {
     )
 }
 
-TooltipFirstCloseNotification.propTypes = {
+TooltipFirstCloseNotification['propTypes'] = {
     onCloseRequested: PropTypes.func.isRequired,
 }
