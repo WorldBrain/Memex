@@ -89,6 +89,7 @@ const _getCloseMessageShown = async () => {
 let target = null
 let shadowRoot = null
 let toggleSidebar = null
+let notifications = null
 
 /**
  * Creates target container for Ribbon and Sidebar iFrame.
@@ -96,11 +97,16 @@ let toggleSidebar = null
  * Mounts Ribbon React component.
  * Sets up iFrame <--> webpage Remote functions.
  */
-export const insertRibbon = ({ toolbarNotifications }) => {
+export const insertRibbon = ({ toolbarNotifications } = {}) => {
     // If target is set, Ribbon has already been injected.
     if (target) {
         return
     }
+
+    if (toolbarNotifications !== undefined) {
+        notifications = toolbarNotifications
+    }
+
     let resolveToggleSidebar
     toggleSidebar = new Promise(resolve => {
         resolveToggleSidebar = resolve
@@ -126,9 +132,7 @@ export const insertRibbon = ({ toolbarNotifications }) => {
 
             const closeMessageShown = await _getCloseMessageShown()
             if (!closeMessageShown) {
-                toolbarNotifications.showToolbarNotification(
-                    'ribbon-first-close',
-                )
+                notifications.showToolbarNotification('ribbon-first-close')
                 _setCloseMessageShown()
             }
         },
