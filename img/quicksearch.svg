@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="807px" height="90px" viewBox="0 0 807 90" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 51.3 (57544) - http://www.bohemiancoding.com/sketch -->
+    <title>Group</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Search-Integration" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Group" transform="translate(-30.000000, 0.000000)">
+            <rect id="Rectangle-1801-Copy-33" fill="#E6E6E6" x="612" y="0" width="225" height="90" rx="2"></rect>
+            <rect id="Rectangle-1801-Copy" fill="#E6E6E6" x="30" y="0" width="110" height="90" rx="2"></rect>
+            <rect id="Rectangle-1801-Copy-40" fill="#E6E6E6" x="189" y="0" width="331" height="90" rx="2"></rect>
+            <text id="space" font-family="Lato-Light, Lato" font-size="55" font-weight="300" fill="#3EB995">
+                <tspan x="281.241234" y="61">space</tspan>
+            </text>
+            <text id="tab" font-family="Lato-Light, Lato" font-size="55" font-weight="300" fill="#3EB995">
+                <tspan x="686.569984" y="60">tab</tspan>
+            </text>
+            <text id="or" font-family="Lato-Light, Lato" font-size="45" font-weight="300" fill="#000000">
+                <tspan x="549.844951" y="59">or</tspan>
+            </text>
+            <text id="+" font-family="Lato-Light, Lato" font-size="45" font-weight="300" fill="#000000">
+                <tspan x="152.401234" y="62">+</tspan>
+            </text>
+            <text id="w" font-family="Lato-Light, Lato" font-size="55" font-weight="300" fill="#3EB995">
+                <tspan x="64.4274836" y="60">w</tspan>
+            </text>
+        </g>
+    </g>
+</svg>

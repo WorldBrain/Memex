@@ -4,8 +4,17 @@
     background-color: #3eb995;
     text-decoration: none;
     margin-left: 18px;
-    float: left;
     margin-bottom: 10px;
     border-radius: 2px;
     margin-top: 13px;
+    display: flex;
+    width: 72%;
+    padding-bottom: 7px;
+    justify-content: center;
+}
+
+.voteIcon {
+    width: 20px;
+    height: 20px;
+    margin-right: 12px;
 }

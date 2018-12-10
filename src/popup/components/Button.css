@@ -101,7 +101,7 @@
 }
 
 .settingsIcon {
-    margin-right: 6px;
+    margin-left: -2px;
 }
 
 .icon {
@@ -130,12 +130,6 @@
 }
 
 .buttonIcons {
-    background-size: 22px;
-}
-
-.voteIcon {
-    background-image: url('/img/vote.svg');
-    background-repeat: no-repeat;
     background-size: 20px;
 }
 
@@ -152,7 +146,7 @@
     background-repeat: no-repeat;
     background-size: 20px;
     float: left;
-    margin-top: 10px;
+    margin-top: 8px;
 }
 
 .highlighterIcon {

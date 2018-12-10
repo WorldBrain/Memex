@@ -48,7 +48,7 @@ export class RemoteError extends Error {
 //       tabId: The id of the tab whose content script is the remote side.
 //              Leave undefined to call the background script (from a tab).
 //   }
-export function remoteFunction(funcName, { tabId }: { tabId? } = {}) {
+export function remoteFunction(funcName, { tabId }: { tabId?: any } = {}) {
     const otherSide =
         tabId !== undefined
             ? "the tab's content script"

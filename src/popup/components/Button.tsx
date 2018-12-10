@@ -4,7 +4,7 @@ import classNames from 'classnames'
 const styles = require('./Button.css')
 
 export interface Props extends HTMLProps<HTMLButtonElement> {
-    children: React.ReactChild
+    children: React.ReactNode
     btnClass?: string
     itemClass?: string
     extraClass?: string

@@ -1,4 +1,5 @@
 import retargetEvents from 'react-shadow-dom-retarget-events'
+import { browser } from 'webextension-polyfill-ts'
 
 import { highlightAnnotation } from 'src/direct-linking/content_script/rendering'
 import { makeRemotelyCallable, remoteFunction } from 'src/util/webextensionRPC'
@@ -71,15 +72,15 @@ export const highlightAnnotations = async (
 const CLOSE_MESSAGESHOWN_KEY = 'ribbon.close-message-shown'
 
 const _setCloseMessageShown = async () => {
-    await window['browser'].storage.local.set({
+    await browser.storage.local.set({
         [CLOSE_MESSAGESHOWN_KEY]: true,
     })
 }
 
 const _getCloseMessageShown = async () => {
-    const { [CLOSE_MESSAGESHOWN_KEY]: closeMessageShown } = await window[
-        'browser'
-    ].storage.local.get({ [CLOSE_MESSAGESHOWN_KEY]: false })
+    const {
+        [CLOSE_MESSAGESHOWN_KEY]: closeMessageShown,
+    } = await browser.storage.local.get({ [CLOSE_MESSAGESHOWN_KEY]: false })
 
     return closeMessageShown
 }

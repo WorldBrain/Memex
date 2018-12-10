@@ -65,3 +65,9 @@ hr {
         outline: none;
     }
 }
+
+.buttonContainer {
+    float: left;
+    margin-top: 1px;
+    margin-left: 22px;
+}

@@ -31,7 +31,7 @@
         "no-empty": true,
         "no-empty-interface": false,
         "no-eval": true,
-        "no-implicit-dependencies": [true, "dev"],
+        "no-implicit-dependencies": false,
         "no-object-literal-type-assertion": false,
         "no-shadowed-variable": true,
         "no-string-literal": false,
