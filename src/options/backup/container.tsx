@@ -14,7 +14,7 @@ import { default as OnboardingSize } from './screens/onboarding-3-size'
 import { BackupHeader } from './components/backup-header'
 import LoadingBlocker from './components/loading-blocker'
 import * as logic from './container-logic'
-import Styles from './styles.css'
+const STYLES = require('./styles.css')
 
 export const SCREENS = {
     overview: {
@@ -79,7 +79,7 @@ export default class BackupSettingsContainer extends React.Component {
         const handlers = logic.getScreenHandlers({
             state: this.state,
             screenConfig,
-            processEvent: logic.processEvent,
+            eventProcessor: logic.processEvent,
             dependencies: {
                 localStorage,
                 analytics,
@@ -99,7 +99,7 @@ export default class BackupSettingsContainer extends React.Component {
         return (
             <div>
                 <BackupHeader />
-                <div className={Styles.screenContainer}>
+                <div className={STYLES.screenContainer}>
                     {this.renderScreen()}
                 </div>
             </div>
