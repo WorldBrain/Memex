@@ -65,12 +65,7 @@
         "react/jsx-indent": "off",
         "react/jsx-indent-props": "off",
         "react/jsx-filename-extension": "off",
-        "react/prefer-stateless-function": [
-            "error",
-            {
-                "ignorePureComponents": true
-            }
-        ],
+        "react/prefer-stateless-function": "off",
         "react/sort-comp": "warn",
         "react/jsx-max-props-per-line": [
             1,
