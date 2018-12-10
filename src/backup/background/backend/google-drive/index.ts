@@ -1,5 +1,6 @@
 import { EventEmitter } from 'events'
 import * as AllRaven from 'raven-js'
+// tslint:disable-next-line:variable-name
 const Raven = AllRaven['default']
 import { GoogleDriveClient } from './client'
 import { DriveTokenManager, DriveTokenStore } from './token-manager'
