@@ -10,3 +10,24 @@
     width: 100%;
     padding-left: 10px;
 }
+
+.notifContainer {
+    width: fit-content;
+    margin: 10px auto;
+    margin-top: 20px;
+}
+
+.selectIcon {
+    height: 30px;
+    vertical-align: super;
+}
+
+.notifText {
+    font-size: 16px;
+    text-align: center;
+    display: inline-block;
+    vertical-align: top;
+    margin-top: 3px;
+    margin-bottom: 23px;
+    margin-left: 15px;
+}

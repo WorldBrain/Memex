@@ -21,11 +21,20 @@ export default function OnboardingSelectOption({ onCloseRequested }) {
                 thirdRowImage={null}
                 closeIcon={images.closeIcon}
             >
-                <img src={images.annotateIcon} className={styles.icon} />
-                Add a note to this highlight
-                <br />
-                <img src={images.shareIcon} className={styles.icon} />
-                Share a link to this higlight
+                <div className={styles.notifContainer}>
+                    <img
+                        src={images.annotateIcon}
+                        className={styles.selectIcon}
+                    />
+                    <div className={styles.notifText}>
+                        Add a note to this highlight
+                    </div>
+                    <br />
+                    <img src={images.shareIcon} className={styles.selectIcon} />
+                    <div className={styles.notifText}>
+                        Share a link to this higlight
+                    </div>
+                </div>
             </NotificationLayout>
         </div>
     )
