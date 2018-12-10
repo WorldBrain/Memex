@@ -204,7 +204,9 @@ export class RemoteFunctionRegistry {
     }
 }
 
-export function fakeRemoteFunction(functions: { [name: string]: Function }) {
+export function fakeRemoteFunction(functions: {
+    [name: string]: (...args) => any
+}) {
     return name => {
         return (...args) => {
             return Promise.resolve(functions[name](...args))
