@@ -61,15 +61,15 @@ export default async function init({
 const CLOSE_MESSAGESHOWN_KEY = 'tooltip.close-message-shown'
 
 export async function _setCloseMessageShown() {
-    await window['browser'].storage.local.set({
+    await browser.storage.local.set({
         [CLOSE_MESSAGESHOWN_KEY]: true,
     })
 }
 
 export async function _getCloseMessageShown() {
-    const { [CLOSE_MESSAGESHOWN_KEY]: closeMessageShown } = await window[
-        'browser'
-    ].storage.local.get({ [CLOSE_MESSAGESHOWN_KEY]: false })
+    const {
+        [CLOSE_MESSAGESHOWN_KEY]: closeMessageShown,
+    } = await browser.storage.local.get({ [CLOSE_MESSAGESHOWN_KEY]: false })
 
     return closeMessageShown
 }
