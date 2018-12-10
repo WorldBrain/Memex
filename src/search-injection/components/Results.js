@@ -1,12 +1,14 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
-
+import { OutLink } from '../../common-ui/containers'
 import Dropdown from './Dropdown'
 import styles from './Results.css'
 
 const Results = props => {
     const logoURL = browser.extension.getURL('img/worldbrain-logo-wo-beta.png')
+    const shortcut = browser.extension.getURL('img/shortcut.svg')
+    const voteIcon = browser.extension.getURL('img/vote_white.svg')
     const searchEngineClass = `${props.searchEngine}_${props.position}`
     return (
         <div
@@ -17,7 +19,6 @@ const Results = props => {
         >
             <div className={styles.header}>
                 <p className={styles.resultsText}>
-                    You have{' '}
                     <span className={styles.resultLength}>
                         {props.totalCount} results
                     </span>{' '}
@@ -50,10 +51,28 @@ const Results = props => {
                 )}
             </div>
             {props.renderNotification}
+            <div className={styles.proTip}>
+                <span className={styles.emoji}>🤓</span>
+                <span>
+                    <b>Pro Tip: </b>
+                    Search by typing
+                </span>
+                <img className={styles.shortcut} src={shortcut} />
+                <span>into the address bar</span>
+            </div>
             <div className={styles.resultsBox}>
                 {// Render only if hideResults is false
                 props.hideResults ? '' : props.renderResultItems()}
             </div>
+            <OutLink
+                className={styles.upgradeButton}
+                to="https://worldbrain.io/vote_feature"
+            >
+                <div>
+                    <img className={styles.voteIcon} src={voteIcon} />
+                    Vote for Next Features
+                </div>
+            </OutLink>
         </div>
     )
 }
