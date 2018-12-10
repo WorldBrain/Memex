@@ -1,3 +1,5 @@
+import { browser } from 'webextension-polyfill-ts'
+
 import { injectCSS } from '../../search-injection/dom'
 
 const CONTAINER_CLASS = 'memex-annotations-ribbon-container'
@@ -15,7 +17,7 @@ export function createRootElement({
     container.classList.add(CONTAINER_CLASS)
     container.setAttribute('id', containerId)
 
-    const cssFile = window['browser'].extension.getURL('/content_script.css')
+    const cssFile = browser.runtime.getURL('/content_script.css')
     const { rootElement, shadow } = createShadowRootIfSupported(
         container,
         rootId,
