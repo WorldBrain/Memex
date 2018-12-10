@@ -3,7 +3,7 @@ import Interruptable from './interruptable'
 
 describe('Interruptable', () => {
     it('should not execute steps if canceled', async () => {
-        let calls = []
+        const calls = []
         const step = () => calls.push(calls.length)
 
         const interruptable = new Interruptable()
@@ -15,7 +15,7 @@ describe('Interruptable', () => {
     })
 
     it('should allow for pausable execute steps', async () => {
-        let calls = []
+        const calls = []
         const step = () => calls.push(calls.length)
 
         const interruptable = new Interruptable()

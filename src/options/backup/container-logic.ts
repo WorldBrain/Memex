@@ -200,24 +200,28 @@ export const getScreenStateProps = ({
     state,
     screenConfig,
 }: {
-    state
+    state: any
     screenConfig: ScreenConfig
 }) => mapValues(screenConfig.state || {}, (value, key) => state[key])
 
 export const getScreenHandlers = ({
     state,
     screenConfig,
-    processEvent,
+    eventProcessor,
     dependencies,
     onStateChange,
     onRedirect,
 }: {
-    state
+    state: any
     screenConfig: ScreenConfig
-    processEvent
-    dependencies: { localStorage; analytics; remoteFunction }
-    onStateChange
-    onRedirect
+    eventProcessor: typeof processEvent
+    dependencies: {
+        localStorage: any
+        analytics: any
+        remoteFunction: (name: string) => (...args) => Promise<any>
+    }
+    onStateChange: (changes: any) => void
+    onRedirect: (redirect: any) => void
 }) =>
     mapValues(screenConfig.events, (eventConfig, eventName) => {
         return async event => {
@@ -225,7 +229,7 @@ export const getScreenHandlers = ({
             if (eventConfig.argument) {
                 handlerEvent[eventConfig.argument] = event
             }
-            const result = await processEvent({
+            const result = await eventProcessor({
                 state,
                 event: handlerEvent,
                 ...dependencies,
