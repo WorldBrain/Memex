@@ -1,0 +1,40 @@
+.container {
+    width: 75%;
+    margin: 20px auto;
+    text-align: center;
+    font-family: 'Opens Sans', sans-serif;
+}
+
+.firstRow {
+    display: flex;
+}
+
+.partyPopper {
+    height: 43px;
+    margin-top: 16px;
+}
+
+.title {
+    color: #506288;
+    font-weight: 400;
+    font-size: 17px;
+}
+
+.learnMore {
+    background: #3eb995;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 200;
+    width: fit-content;
+    margin: 3px auto;
+}
+
+.subtext {
+    color: #616161;
+    font-family: 11px;
+    margin-top: 6px;
+    cursor: pointer;
+}

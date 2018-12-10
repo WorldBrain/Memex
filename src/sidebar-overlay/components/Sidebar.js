@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import Menu from 'react-burger-menu/lib/menus/slide'
 
 import CommentBox from '../CommentBox'
+import CongratsMessage from './CongratsMessage'
 import styles from './Sidebar.css'
 import MenuStyles from './MenuStyles'
 
@@ -33,18 +34,7 @@ const Sidebar = props => (
 
             <div className={styles.annotationContainer}>
                 {props.renderAnnotations()}
-                {props.showCongratsMessage && (
-                    <div className={styles.congrats}>
-                        {/* <img src /> */}
-                        <p className={styles.title}>
-                            CONGRATS TO YOUR FIRST ANNOTATION
-                        </p>
-                        <div className={styles.learnMore}>
-                            Learn more about the sidebar
-                        </div>
-                        <p>or go back to dashboard</p>
-                    </div>
-                )}
+                {props.showCongratsMessage && <CongratsMessage />}
             </div>
         </div>
     </Menu>
