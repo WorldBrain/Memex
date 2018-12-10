@@ -18,7 +18,7 @@ export default function PauseSelect({
 }: Props) {
     return (
         <React.Fragment>
-            Pause indexing for
+            Pause Indexing for
             <select
                 className={styles.dropdown}
                 value={pauseTime}
