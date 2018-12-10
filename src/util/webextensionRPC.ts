@@ -61,6 +61,11 @@ export function remoteFunction(funcName, { tabId }: { tabId?: any } = {}) {
             args,
         }
 
+        console.group('RPC logs')
+        console.log(funcName)
+        console.log(message)
+        console.log(remotelyCallableFunctions)
+
         // Try send the message and await the response.
         let response
         try {
@@ -74,6 +79,9 @@ export function remoteFunction(funcName, { tabId }: { tabId?: any } = {}) {
                     `Did you enable RPC in ${otherSide}?`,
             )
         }
+
+        console.log(response)
+        console.groupEnd()
 
         // Check if it was *our* listener that responded.
         if (!response || response[RPC_RESPONSE] !== RPC_RESPONSE) {

@@ -13,11 +13,13 @@ import { setTooltipState } from './utils'
 
 const openOptionsRPC = remoteFunction('openOptionsTab')
 
+let notifications = null
+
 export default async function init({
     toolbarNotifications,
 }: {
-    toolbarNotifications: ToolbarNotifications
-}) {
+    toolbarNotifications?: ToolbarNotifications
+} = {}) {
     await bodyLoader()
 
     const target = document.createElement('div')
@@ -26,6 +28,10 @@ export default async function init({
 
     const cssFile = browser.extension.getURL('/content_script.css')
     injectCSS(cssFile)
+
+    if (toolbarNotifications !== undefined) {
+        notifications = toolbarNotifications
+    }
 
     const showTooltip = await setupUIContainer(target, {
         createAndCopyDirectLink,
@@ -38,9 +44,7 @@ export default async function init({
 
             const closeMessageShown = await _getCloseMessageShown()
             if (!closeMessageShown) {
-                toolbarNotifications.showToolbarNotification(
-                    'tooltip-first-close',
-                )
+                notifications.showToolbarNotification('tooltip-first-close')
                 _setCloseMessageShown()
             }
         },
