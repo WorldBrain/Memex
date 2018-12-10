@@ -1,8 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import NotificationLayout from '../layout'
-import styles from './ribbon-first-close.css'
 import { getExtURL } from '../utils.js'
+const styles = require('./ribbon-first-close.css')
 
 const images = {
     notifIcon: getExtURL('img/sidebarIcon_blue.svg'),
@@ -30,6 +30,6 @@ export default function TooltipFirstCloseNotification({ onCloseRequested }) {
     )
 }
 
-TooltipFirstCloseNotification.propTypes = {
+TooltipFirstCloseNotification['propTypes'] = {
     onCloseRequested: PropTypes.func.isRequired,
 }
