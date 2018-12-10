@@ -192,12 +192,12 @@ describe('Backup settings container logic helpers', () => {
                 },
                 dependencies: {
                     localStorage: 'localStorage',
-                    remoteFunction: 'remoteFunction',
+                    remoteFunction: 'remoteFunction' as any,
                     analytics: 'analytics',
                 },
-                processEvent: async args => {
+                eventProcessor: async args => {
                     calls.push({ type: 'process', args })
-                    return { screen: 'bla' }
+                    return { screen: 'bla', redirect: null }
                 },
                 onStateChange: args => calls.push({ type: 'state', args }),
                 onRedirect: args => calls.push({ type: 'redirect', args }),
@@ -229,12 +229,12 @@ describe('Backup settings container logic helpers', () => {
                 },
                 dependencies: {
                     localStorage: 'localStorage',
-                    remoteFunction: 'remoteFunction',
+                    remoteFunction: 'remoteFunction' as any,
                     analytics: 'analytics',
                 },
-                processEvent: async args => {
+                eventProcessor: async args => {
                     calls.push({ type: 'process', args })
-                    return { screen: 'bla' }
+                    return { screen: 'bla', redirect: null }
                 },
                 onStateChange: args => calls.push({ type: 'state', args }),
                 onRedirect: args => calls.push({ type: 'redirect', args }),

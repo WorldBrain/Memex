@@ -82,9 +82,9 @@ describe('remoteFunction', () => {
     })
 
     it('should create fake remote functions', async () => {
-        const remoteFunction = fakeRemoteFunction({
+        const remoteFunc = fakeRemoteFunction({
             foo: (a, b) => a + b + 5,
         })
-        expect(await remoteFunction('foo')(1, 2)).toEqual(8)
+        expect(await remoteFunc('foo')(1, 2)).toEqual(8)
     })
 })

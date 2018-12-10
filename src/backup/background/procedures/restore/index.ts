@@ -158,7 +158,7 @@ export class BackupRestoreProcedure {
     }
 
     _updateInfo(changes) {
-        this.info = Object.assign({}, this.info, changes)
+        this.info = { ...this.info, ...changes }
         this.events.emit('info', this.info)
     }
 }
