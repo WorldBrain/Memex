@@ -1,9 +1,9 @@
 import * as expect from 'expect'
-import StorageManager from 'storex'
+import Storex from 'storex'
 import { DexieStorageBackend } from 'storex-backend-dexie'
 import inMemory from 'storex-backend-dexie/lib/in-memory'
 
-import { Dexie } from '../../search/types'
+import { StorageManager } from '../../search/types'
 import setupChangeTracking from './change-hooks'
 
 describe('Backup change hooks', () => {
@@ -12,7 +12,9 @@ describe('Backup change hooks', () => {
             dbName: 'my-awesome-product',
             idbImplementation: inMemory(),
         })
-        const storageManager = new StorageManager({ backend: storageBackend })
+        const storageManager = new Storex({
+            backend: storageBackend,
+        }) as StorageManager
         storageManager.registry.registerCollections({
             user: {
                 version: new Date(2018, 11, 11),
@@ -25,13 +27,9 @@ describe('Backup change hooks', () => {
         await storageManager.finishInitialization()
 
         const changes = []
-        setupChangeTracking(
-            storageManager as any,
-            new Promise(res => res(storageBackend.dexieInstance as Dexie)),
-            change => {
-                changes.push(change)
-            },
-        )
+        setupChangeTracking(storageManager, change => {
+            changes.push(change)
+        })
 
         await storageManager
             .collection('user')
