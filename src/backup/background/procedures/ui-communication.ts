@@ -10,7 +10,7 @@ export class ProcedureUiCommunication {
     sendEvent(eventType, event) {
         for (const tabId of Object.keys(this._uiTabIds)) {
             try {
-                window['browser'].tabs.sendMessage(tabId, {
+                window['browser'].tabs.sendMessage(parseInt(tabId, 10), {
                     type: 'backup-event',
                     event: { type: eventType, ...(event || {}) },
                 })

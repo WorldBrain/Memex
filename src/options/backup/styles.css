@@ -48,6 +48,12 @@ h1 {
     background: #3eb995;
 }
 
+.labelContribute {
+    color: #3eb995;
+    border: 2px solid #3eb995;
+    background: transparent;
+}
+
 .labelPremium {
     background: #173766;
 }
