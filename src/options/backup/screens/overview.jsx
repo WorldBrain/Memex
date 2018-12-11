@@ -14,10 +14,12 @@ import {
 } from '../utils'
 import { PrimaryButton } from '../components/primary-button'
 import LoadingBlocker from '../components/loading-blocker'
+import RestoreConfirmation from '../components/restore-confirmation'
 
 export default class OverviewContainer extends React.Component {
     static propTypes = {
         onBackupRequested: PropTypes.func.isRequired,
+        onRestoreRequested: PropTypes.func.isRequired,
     }
 
     state = {
@@ -25,10 +27,10 @@ export default class OverviewContainer extends React.Component {
         backupTimes: null,
         showAutomaticUpgradeDetails: false,
         upgradeBillingPeriod: null,
+        showRestoreConfirmation: false,
     }
 
     async componentDidMount() {
-        console.log('before')
         await remoteFunction('maybeCheckAutomaticBakupEnabled')()
         const backupTimes = await remoteFunction('getBackupTimes')()
         this.setState({
@@ -37,7 +39,6 @@ export default class OverviewContainer extends React.Component {
             )(),
             backupTimes,
         })
-        console.log('after', backupTimes)
     }
 
     render() {
@@ -45,10 +46,17 @@ export default class OverviewContainer extends React.Component {
             return <LoadingBlocker />
         }
 
-        console.log(this.state.backupTimes.nextBackup)
-
         return (
             <div>
+                {this.state.showRestoreConfirmation && (
+                    <RestoreConfirmation
+                        onConfirm={this.props.onRestoreRequested}
+                        onClose={() =>
+                            this.setState({ showRestoreConfirmation: false })
+                        }
+                    />
+                )}
+
                 <p className={Styles.header2}>
                     <strong>SETTINGS </strong>
                 </p>
@@ -161,7 +169,32 @@ export default class OverviewContainer extends React.Component {
                         <strong>RESTORE </strong>
                     </p>
                     <div className={Styles.option}>
-                        <span className={Styles.name}>Coming Very Soon</span>
+                        <span className={Styles.name}>
+                            Restore &amp; Replace
+                        </span>
+                        <a
+                            target="_blank"
+                            href="https://worldbrain.io/crowdfunding-memex"
+                        >
+                            <span className={localStyles.button}>
+                                <span
+                                    className={classNames(
+                                        Styles.labelContribute,
+                                        Styles.label,
+                                    )}
+                                >
+                                    RESTORE
+                                </span>
+                            </span>
+                        </a>
+                        <br />
+                        <span className={Styles.subname}>
+                            This will replace all present data and replace
+                            everything from backup.
+                        </span>
+                    </div>
+                    <div className={Styles.option}>
+                        <span className={Styles.name}>Restore &amp; Merge</span>
                         <a
                             target="_blank"
                             href="https://worldbrain.io/crowdfunding-memex"
@@ -170,17 +203,19 @@ export default class OverviewContainer extends React.Component {
                                 <span
                                     className={classNames(
                                         Styles.label,
-                                        Styles.labelFree,
+                                        Styles.labelContribute,
                                     )}
                                 >
-                                    Chip in 10€
+                                    CONTRIBUTE
                                 </span>
                             </span>
                         </a>
                         <br />
                         <span className={Styles.subname}>
-                            Support our development and get back 40€ worth of
-                            premium credits
+                            Merge the data you've backed up into the data
+                            currently present in your extension. We currently
+                            don't have the resources to build this. Help us to
+                            get there!
                         </span>
                     </div>
                 </div>

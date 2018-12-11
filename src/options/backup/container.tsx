@@ -19,7 +19,7 @@ const STYLES = require('./styles.css')
 export const SCREENS = {
     overview: {
         component: Overview,
-        events: { onBackupRequested: true },
+        events: { onBackupRequested: true, onRestoreRequested: true },
     },
     'running-backup': {
         component: RunningBackup,

@@ -4,22 +4,28 @@ import * as logic from './container-logic'
 import { MemoryLocalStorage } from 'src/util/tests/local-storage'
 import { FakeAnalytics } from 'src/analytics'
 
+function setupTest() {
+    const localStorage = new MemoryLocalStorage()
+    const analytics = new FakeAnalytics()
+    const triggerEvent = async (state, event, { remoteFunctions }) => {
+        const result = await logic.processEvent({
+            state,
+            localStorage,
+            analytics,
+            event,
+            remoteFunction: fakeRemoteFunction(remoteFunctions),
+        })
+        if (result.screen) {
+            Object.assign(state, result)
+        }
+        return result
+    }
+    return { localStorage, analytics, triggerEvent }
+}
+
 describe('Backup settings container logic', () => {
     it('should be able to guide the user through the onboarding flow', async () => {
-        const localStorage = new MemoryLocalStorage()
-        const analytics = new FakeAnalytics()
-        const triggerEvent = async (state, event, { remoteFunctions }) => {
-            Object.assign(
-                state,
-                await logic.processEvent({
-                    state,
-                    localStorage,
-                    analytics,
-                    event,
-                    remoteFunction: fakeRemoteFunction(remoteFunctions),
-                }),
-            )
-        }
+        const { localStorage, analytics, triggerEvent } = setupTest()
 
         const firstSessionState = await logic.getInitialState({
             analytics,
@@ -172,6 +178,44 @@ describe('Backup settings container logic', () => {
         expect(secondSessionState).toEqual({
             isAuthenticated: true,
             screen: 'overview',
+        })
+    })
+
+    it('should be able to guide the user through the restore flow', async () => {
+        const { localStorage, analytics, triggerEvent } = setupTest()
+
+        const firstSessionState = await logic.getInitialState({
+            analytics,
+            localStorage,
+            remoteFunction: fakeRemoteFunction({
+                isBackupAuthenticated: () => false,
+                hasInitialBackup: () => false,
+                getBackupInfo: () => null,
+            }),
+        })
+        expect(firstSessionState).toEqual({
+            isAuthenticated: false,
+            screen: 'overview',
+        })
+
+        await triggerEvent(
+            firstSessionState,
+            { type: 'onRestoreRequested' },
+            { remoteFunctions: {} },
+        )
+        expect(firstSessionState).toEqual({
+            isAuthenticated: false,
+            screen: 'restore-where',
+        })
+
+        await triggerEvent(
+            firstSessionState,
+            { type: 'onChoice' },
+            { remoteFunctions: {} },
+        )
+        expect(firstSessionState).toEqual({
+            isAuthenticated: false,
+            screen: 'restore-where',
         })
     })
 })
