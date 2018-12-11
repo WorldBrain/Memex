@@ -14,6 +14,7 @@ import NotificationBackground from './notifications/background'
 import * as backup from './backup/background'
 import * as backupStorage from './backup/background/storage'
 import * as driveBackup from './backup/background/backend/google-drive'
+import setupChangeTracking from './backup/background/change-hooks'
 import BackgroundScript from './background-script'
 
 // Features that auto-setup
@@ -68,6 +69,10 @@ bgScript.setupWebExtAPIHandlers()
 storageManager.finishInitialization().then(() => {
     setStorexBackend(storageManager.backend)
     internalAnalytics.registerOperations(eventLog)
+    setupChangeTracking(
+        storageManager,
+        backupModule.attemptChangeTrack.bind(backupModule),
+    )
 })
 
 // Attach interesting features onto global window scope for interested users

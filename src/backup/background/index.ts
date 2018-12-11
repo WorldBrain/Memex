@@ -2,7 +2,6 @@ import { EventEmitter } from 'events'
 import * as AllRaven from 'raven-js'
 import { CollectionDefinition } from 'storex'
 
-import getDb from '../../search'
 import { StorageManager } from '../../search/types'
 import { makeRemotelyCallable } from '../../util/webextensionRPC'
 import { setupRequestInterceptors } from './redirect'
@@ -10,7 +9,6 @@ import BackupStorage, { LastBackupStorage } from './storage'
 import { BackupBackend } from './backend'
 import { ObjectChangeBatch } from './backend/types'
 import estimateBackupSize from './estimate-backup-size'
-import setupChangeTracking from './change-hooks'
 const pickBy = require('lodash/pickBy')
 const last = require('lodash/last')
 
@@ -71,24 +69,6 @@ export class BackupBackgroundModule {
         schemaVersions.sort()
         this.currentSchemaVersion = last(schemaVersions)
         this.resetBackupState()
-
-        setupChangeTracking(
-            this.storageManager,
-            getDb,
-            ({ collection, pk, operation }) => {
-                if (this.recordingChanges) {
-                    const collectionDefinition = this.storageManager.registry
-                        .collections[collection]
-                    if (!isExcludedFromBackup(collectionDefinition)) {
-                        this.storage.registerChange({
-                            collection,
-                            pk,
-                            operation,
-                        })
-                    }
-                }
-            },
-        )
     }
 
     private resetBackupState() {
@@ -258,6 +238,21 @@ export class BackupBackgroundModule {
 
         this.startRecordingChanges()
         this.maybeScheduleAutomaticBackup()
+    }
+
+    attemptChangeTrack({ collection, pk, operation }) {
+        if (this.recordingChanges) {
+            const collectionDefinition = this.storageManager.registry
+                .collections[collection]
+
+            if (!isExcludedFromBackup(collectionDefinition)) {
+                this.storage.registerChange({
+                    collection,
+                    pk,
+                    operation,
+                })
+            }
+        }
     }
 
     startRecordingChanges() {
