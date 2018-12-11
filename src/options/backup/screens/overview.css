@@ -37,3 +37,8 @@
     margin-top: -2px;
     cursor: pointer;
 }
+
+.limitWidth {
+    display: block;
+    width: 400px;
+}
