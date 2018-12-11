@@ -1,6 +1,6 @@
 import { browser } from 'webextension-polyfill-ts'
 
-import { delayed, getTooltipState, getPositionState } from './utils'
+import { delayed, getPositionState } from './utils'
 import {
     createAndCopyDirectLink,
     createAnnotation,
@@ -124,20 +124,14 @@ export const setupRPC = ({ toolbarNotifications }) => {
 /**
  * Checks for certain conditions before triggering the tooltip.
  * i) Whether the selection made by the user is just text.
- * ii) Whether the user has enabled the tooltip in his preferences.
- * iii) Whether the selected target is not inside the tooltip itself.
+ * ii) Whether the selected target is not inside the tooltip itself.
  *
  * Event is undefined in the scenario of user selecting the text before the
- * page has loaded. So we don't need to check for condition iii) since the
+ * page has loaded. So we don't need to check for condition ii) since the
  * tooltip wouldn't have popped up yet.
  */
 export const conditionallyTriggerTooltip = delayed(async (callback, event) => {
-    const isTooltipEnabled = await getTooltipState()
-    if (
-        !userSelectedText() ||
-        !isTooltipEnabled ||
-        (event && isTargetInsideTooltip(event))
-    ) {
+    if (!userSelectedText() || (event && isTargetInsideTooltip(event))) {
         return
     }
 
