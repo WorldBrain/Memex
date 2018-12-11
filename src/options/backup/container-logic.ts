@@ -60,23 +60,7 @@ export async function getStartScreen({
             return 'onboarding-where'
         }
     } else {
-        const [hasInitialBackup, backupInfo] = await Promise.all([
-            remoteFunction('hasInitialBackup')(),
-            remoteFunction('getBackupInfo')(),
-        ])
-        if (!hasInitialBackup && !backupInfo) {
-            localStorage.setItem('backup.onboarding', true)
-            analytics.trackEvent(
-                {
-                    category: 'Backup',
-                    action: 'onboarding-triggered',
-                },
-                true,
-            )
-            return 'onboarding-where'
-        } else {
-            return 'overview'
-        }
+        return 'overview'
     }
 }
 
@@ -89,7 +73,24 @@ export async function processEvent({
 }) {
     const handlers = {
         overview: {
-            onBackupRequested: () => {
+            onBackupRequested: async () => {
+                const [hasInitialBackup, backupInfo] = await Promise.all([
+                    remoteFunction('hasInitialBackup')(),
+                    remoteFunction('getBackupInfo')(),
+                ])
+                const needsOnBoarding = !hasInitialBackup && !backupInfo
+                if (needsOnBoarding) {
+                    localStorage.setItem('backup.onboarding', true)
+                    analytics.trackEvent(
+                        {
+                            category: 'Backup',
+                            action: 'onboarding-triggered',
+                        },
+                        true,
+                    )
+                    return { screen: 'onboarding-where' }
+                }
+
                 if (state.isAuthenticated) {
                     return { screen: 'running-backup' }
                 } else {
