@@ -179,8 +179,8 @@ export default class OverviewContainer extends React.Component {
                             <span className={localStyles.button}>
                                 <span
                                     className={classNames(
-                                        Styles.labelContribute,
                                         Styles.label,
+                                        Styles.labelContribute,
                                     )}
                                 >
                                     CONTRIBUTE
@@ -188,7 +188,12 @@ export default class OverviewContainer extends React.Component {
                             </span>
                         </a>
                         <br />
-                        <span className={Styles.subname}>
+                        <span
+                            className={classNames(
+                                Styles.subname,
+                                localStyles.limitWidth,
+                            )}
+                        >
                             This will replace all present data and replace
                             everything from backup.
                         </span>
@@ -211,7 +216,12 @@ export default class OverviewContainer extends React.Component {
                             </span>
                         </a>
                         <br />
-                        <span className={Styles.subname}>
+                        <span
+                            className={classNames(
+                                Styles.subname,
+                                localStyles.limitWidth,
+                            )}
+                        >
                             Merge the data you've backed up into the data
                             currently present in your extension. We currently
                             don't have the resources to build this. Help us to
