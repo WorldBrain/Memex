@@ -183,7 +183,7 @@ export default class OverviewContainer extends React.Component {
                                         Styles.label,
                                     )}
                                 >
-                                    RESTORE
+                                    CONTRIBUTE
                                 </span>
                             </span>
                         </a>
