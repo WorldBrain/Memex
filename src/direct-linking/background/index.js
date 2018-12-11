@@ -73,14 +73,6 @@ export default class DirectLinkingBackground {
             currentWindow: true,
         })
 
-        // Check that the sidebar is mounted or not.
-        const ribbon = document.getElementById(
-            'memex-annotations-ribbon-container',
-        )
-        if (!ribbon) {
-            await remoteFunction('insertRibbon', { tabId: currentTab.id })()
-        }
-
         await remoteFunction(functionName, { tabId: currentTab.id })(...args)
     }
 
@@ -89,6 +81,10 @@ export default class DirectLinkingBackground {
     }
 
     async openSidebarWithHighlight({ tab }, anchor) {
+        // Toggling the sidebar ensures that if the page does not have the
+        // ribbon mounted at this point, then it will get inserted before
+        // proceeding any further.
+        await this.toggleSidebar()
         this.triggerSidebar('openSidebarAndSendAnchor', anchor)
     }
 
