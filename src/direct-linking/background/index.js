@@ -72,6 +72,15 @@ export default class DirectLinkingBackground {
             active: true,
             currentWindow: true,
         })
+
+        // Check that the sidebar is mounted or not.
+        const ribbon = document.getElementById(
+            'memex-annotations-ribbon-container',
+        )
+        if (!ribbon) {
+            await remoteFunction('insertRibbon', { tabId: currentTab.id })()
+        }
+
         await remoteFunction(functionName, { tabId: currentTab.id })(...args)
     }
 
