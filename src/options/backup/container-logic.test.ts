@@ -8,6 +8,18 @@ describe('Backup settings container logic', () => {
     it('should be able to guide the user through the onboarding flow', async () => {
         const localStorage = new MemoryLocalStorage()
         const analytics = new FakeAnalytics()
+        const triggerEvent = async (state, event, { remoteFunctions }) => {
+            Object.assign(
+                state,
+                await logic.processEvent({
+                    state,
+                    localStorage,
+                    analytics,
+                    event,
+                    remoteFunction: fakeRemoteFunction(remoteFunctions),
+                }),
+            )
+        }
 
         const firstSessionState = await logic.getInitialState({
             analytics,
@@ -20,8 +32,20 @@ describe('Backup settings container logic', () => {
         })
         expect(firstSessionState).toEqual({
             isAuthenticated: false,
-            screen: 'onboarding-where',
+            screen: 'overview',
         })
+
+        await triggerEvent(
+            firstSessionState,
+            { type: 'onBackupRequested' },
+            {
+                remoteFunctions: {
+                    isBackupAuthenticated: () => false,
+                    hasInitialBackup: () => false,
+                    getBackupInfo: () => null,
+                },
+            },
+        )
         expect(localStorage.popChanges()).toEqual([
             { type: 'set', key: 'backup.onboarding', value: true },
         ])
@@ -36,18 +60,14 @@ describe('Backup settings container logic', () => {
         ])
 
         // User chooses backup location
-
-        Object.assign(
+        await triggerEvent(
             firstSessionState,
-            await logic.processEvent({
-                state: firstSessionState,
-                localStorage,
-                analytics,
-                event: { type: 'onChoice' },
-                remoteFunction: fakeRemoteFunction({
+            { type: 'onChoice' },
+            {
+                remoteFunctions: {
                     isAutomaticBackupEnabled: () => false,
-                }),
-            }),
+                },
+            },
         )
         expect(firstSessionState).toEqual({
             isAuthenticated: false,
@@ -64,18 +84,14 @@ describe('Backup settings container logic', () => {
         ])
 
         // User chooses manual backup
-
-        Object.assign(
+        await triggerEvent(
             firstSessionState,
-            await logic.processEvent({
-                state: firstSessionState,
-                localStorage,
-                analytics,
-                event: { type: 'onChoice', choice: { type: 'manual' } },
-                remoteFunction: fakeRemoteFunction({
+            { type: 'onChoice', choice: { type: 'manual' } },
+            {
+                remoteFunctions: {
                     isAutomaticBackupEnabled: () => false,
-                }),
-            }),
+                },
+            },
         )
         expect(firstSessionState).toEqual({
             isAuthenticated: false,
@@ -143,18 +159,16 @@ describe('Backup settings container logic', () => {
         ])
 
         // Backup finished, return to overview
-        Object.assign(
+        await triggerEvent(
             secondSessionState,
-            await logic.processEvent({
-                state: secondSessionState,
-                localStorage,
-                analytics,
-                event: { type: 'onFinish' },
-                remoteFunction: fakeRemoteFunction({
+            { type: 'onFinish' },
+            {
+                remoteFunctions: {
                     isAutomaticBackupEnabled: () => false,
-                }),
-            }),
+                },
+            },
         )
+
         expect(secondSessionState).toEqual({
             isAuthenticated: true,
             screen: 'overview',
