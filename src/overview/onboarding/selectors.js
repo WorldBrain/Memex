@@ -20,9 +20,14 @@ export const showCancelBtn = createSelector(
 export const progress = createSelector(onboarding, state => state.progress)
 export const progressPercent = createSelector(
     progress,
-    progress => progress / constants.NUM_IMPORT_ITEMS * 100,
+    progress => (progress / constants.NUM_IMPORT_ITEMS) * 100,
 )
 export const shouldTrack = createSelector(
     onboarding,
     state => state.shouldTrack,
+)
+
+export const onboardingStages = createSelector(
+    onboarding,
+    state => state.onboardingStages,
 )
