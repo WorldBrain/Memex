@@ -1,4 +1,16 @@
+import { browser } from 'webextension-polyfill-ts'
+
 import { delayed, getTooltipState, getPositionState } from './utils'
+import {
+    createAndCopyDirectLink,
+    createAnnotation,
+} from '../direct-linking/content_script/interactions'
+import { setupUIContainer, destroyUIContainer } from './components'
+import { remoteFunction, makeRemotelyCallable } from '../util/webextensionRPC'
+import { injectCSS } from '../search-injection/dom'
+
+const openOptionsRPC = remoteFunction('openOptionsTab')
+
 let mouseupListener = null
 
 export function setupTooltipTrigger(callback) {
@@ -12,6 +24,101 @@ export function setupTooltipTrigger(callback) {
 export function destroyTooltipTrigger() {
     document.body.removeEventListener('mouseup', mouseupListener)
     mouseupListener = null
+}
+
+const CLOSE_MESSAGESHOWN_KEY = 'tooltip.close-message-shown'
+
+async function _setCloseMessageShown() {
+    await browser.storage.local.set({
+        [CLOSE_MESSAGESHOWN_KEY]: true,
+    })
+}
+
+async function _getCloseMessageShown() {
+    const {
+        [CLOSE_MESSAGESHOWN_KEY]: closeMessageShown,
+    } = await browser.storage.local.get({ [CLOSE_MESSAGESHOWN_KEY]: false })
+
+    return closeMessageShown
+}
+
+// Target container for the Tooltip.
+let target = null
+let showTooltip = null
+
+/**
+ * Creates target container for Tooltip.
+ * Injects content_script.css.
+ * Mounts Tooltip React component.
+ * Sets up Container <---> webpage Remote functions.
+ */
+export const insertTooltip = async ({ toolbarNotifications } = {}) => {
+    // If target is set, Tooltip has already been injected.
+    if (target) {
+        return
+    }
+
+    target = document.createElement('div')
+    target.setAttribute('id', 'memex-direct-linking-tooltip')
+    document.body.appendChild(target)
+
+    const cssFile = browser.extension.getURL('/content_script.css')
+    injectCSS(cssFile)
+
+    showTooltip = await setupUIContainer(target, {
+        createAndCopyDirectLink,
+        createAnnotation,
+        openSettings: () => openOptionsRPC('settings'),
+        destroyTooltip: async () => {
+            removeTooltip()
+
+            const closeMessageShown = await _getCloseMessageShown()
+            if (!closeMessageShown) {
+                toolbarNotifications.showToolbarNotification(
+                    'tooltip-first-close',
+                )
+                _setCloseMessageShown()
+            }
+        },
+    })
+
+    setupTooltipTrigger(showTooltip)
+    conditionallyTriggerTooltip(showTooltip)
+}
+
+const removeTooltip = () => {
+    if (!target) {
+        return
+    }
+    destroyTooltipTrigger()
+    destroyUIContainer(target)
+    target.remove()
+
+    target = null
+    showTooltip = null
+}
+
+/**
+ * Sets up RPC functions to insert and remove Tooltip from Popup.
+ */
+export const setupRPC = ({ toolbarNotifications }) => {
+    makeRemotelyCallable({
+        showContentTooltip: async () => {
+            if (!showTooltip) {
+                await insertTooltip({ toolbarNotifications })
+            }
+            if (userSelectedText()) {
+                const position = calculateTooltipPostion()
+                showTooltip(position)
+            }
+        },
+        insertTooltip: () => {
+            insertTooltip({ toolbarNotifications })
+        },
+        removeTooltip: () => {
+            removeTooltip()
+        },
+    })
 }
 
 /**

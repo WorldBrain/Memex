@@ -4,6 +4,7 @@ import { getTooltipState, setTooltipState } from '../../content-tooltip/utils'
 import { remoteFunction } from '../../util/webextensionRPC'
 import { Thunk } from '../types'
 import * as selectors from './selectors'
+import * as popup from '../selectors'
 
 const processEventRPC = remoteFunction('processEvent')
 
@@ -27,8 +28,33 @@ export const toggleTooltipFlag: () => Thunk = () => async (
 
     await setTooltipState(!wasEnabled)
     dispatch(setTooltipFlag(!wasEnabled))
+
+    const isLoggable = popup.isLoggable(state)
+    if (!isLoggable) {
+        return
+    }
+
+    const tabId = popup.tabId(state)
+    if (wasEnabled) {
+        await remoteFunction('removeTooltip', { tabId })()
+    } else {
+        await remoteFunction('insertTooltip', { tabId })()
+        await remoteFunction('showContentTooltip', { tabId })()
+    }
 }
 
-export const showTooltip: () => Thunk = () => async () => {
-    await remoteFunction('showContentTooltip')()
+export const showTooltip: () => Thunk = () => async (dispatch, getState) => {
+    const state = getState()
+    const tabId = popup.tabId(state)
+    const isLoggable = popup.isLoggable(state)
+    if (!isLoggable) {
+        return
+    }
+
+    const isEnabled = await getTooltipState()
+    if (!isEnabled) {
+        await remoteFunction('insertTooltip', { tabId })()
+    }
+
+    await remoteFunction('showContentTooltip', { tabId })()
 }
