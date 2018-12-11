@@ -45,6 +45,7 @@ h1 {
 /* Upgrade Button */
 
 .labelFree {
+    color: white;
     background: #3eb995;
 }
 
@@ -55,6 +56,7 @@ h1 {
 }
 
 .labelPremium {
+    color: white;
     background: #173766;
 }
 
@@ -70,7 +72,6 @@ h1 {
     padding-right: 10px;
     padding-top: 2px;
     padding-bottom: 2px;
-    color: white;
     font-size: 15px;
     vertical-align: middle;
     margin-left: 10px;
