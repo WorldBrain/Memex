@@ -2,8 +2,10 @@ import { createAction } from 'redux-act'
 
 import analytics from 'src/analytics'
 import { remoteFunction } from 'src/util/webextensionRPC'
+import { getLocalStorage } from 'src/util/storage'
 // import { IMPORT_TYPE as TYPE, CMDS } from 'src/options/imports/constants'
 // import { IMPORT_CONN_NAME } from './constants'
+import { STORAGE_KEYS } from './constants'
 import * as selectors from './selectors'
 import { SHOULD_TRACK_STORAGE_KEY as SHOULD_TRACK } from '../../options/privacy/constants'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
@@ -14,6 +16,7 @@ export const incProgress = createAction('onboarding/incProgress')
 export const setProgress = createAction('onboarding/setProgress')
 export const setImportsDone = createAction('onboarding/setImportsDone')
 export const setImportsStarted = createAction('onboarding/setImportsStarted')
+export const setAnnotationStage = createAction('onboarding/setAnnotationStage')
 
 const processEvent = remoteFunction('processEvent')
 
@@ -81,6 +84,14 @@ export const toggleShouldTrack = () => async (dispatch, getState) => {
         await trackEvent(true)
         await persistShouldTrack(toggled)
     }
+}
+
+export const fetchOnboardingStages = () => async dispatch => {
+    const annotationStage = await getLocalStorage(
+        STORAGE_KEYS.onboardingDemo.step1,
+        'unvisited',
+    )
+    dispatch(setAnnotationStage(annotationStage))
 }
 
 /**

@@ -1,21 +1,37 @@
 import React from 'react'
+import { connect } from 'react-redux'
 
 import { Checkbox } from '../../../common-ui/components'
 import * as constants from '../constants'
 import { browser } from 'webextension-polyfill-ts'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 
+import * as actions from '../actions'
+import * as selectors from '../selectors'
+
 const styles = require('./OnboardingChecklist.css')
 
-class OnboardingChecklist extends React.Component {
-    handleStepOne = async () => {
-        const stepOneStage = await getLocalStorage(
-            constants.STORAGE_KEYS.onboardingDemo.step1,
-            'unvisited',
-        )
-        console.log(stepOneStage)
+export interface StateProps {
+    onboardingStages: {
+        annotationStage: string
+    }
+}
 
-        if (stepOneStage === 'done') {
+export interface DispatchProps {
+    fetchOnboardingStages: () => void
+}
+
+export interface OwnProps {}
+
+export type Props = StateProps & DispatchProps & OwnProps
+
+class OnboardingChecklist extends React.Component<Props> {
+    async componentDidMount() {
+        await this.props.fetchOnboardingStages()
+    }
+
+    handleStepOne = async () => {
+        if (this.props.onboardingStages.annotationStage === 'DONE') {
             return
         }
 
@@ -30,6 +46,7 @@ class OnboardingChecklist extends React.Component {
     }
 
     render() {
+        const { annotationStage } = this.props.onboardingStages
         return (
             <React.Fragment>
                 <p className={styles.title}>Let's get started</p>
@@ -38,7 +55,7 @@ class OnboardingChecklist extends React.Component {
                 </p>
                 <div className={styles.checklist}>
                     <Checkbox
-                        isChecked={false}
+                        isChecked={annotationStage === 'DONE'}
                         handleChange={() => null}
                         id="step1"
                     >
@@ -80,4 +97,15 @@ class OnboardingChecklist extends React.Component {
     }
 }
 
-export default OnboardingChecklist
+const mapStateToProps = state => ({
+    onboardingStages: selectors.onboardingStages(state),
+})
+
+const mapDispatchToPrpos = dispatch => ({
+    fetchOnboardingStages: () => dispatch(actions.fetchOnboardingStages()),
+})
+
+export default connect(
+    mapStateToProps,
+    mapDispatchToPrpos,
+)(OnboardingChecklist)

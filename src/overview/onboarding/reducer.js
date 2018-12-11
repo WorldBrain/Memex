@@ -9,6 +9,11 @@ const defState = {
     isImportsDone: false,
     isImportsStarted: false,
     shouldTrack: true,
+
+    // Stages for the user driven onboarding stages
+    onboardingStages: {
+        annotationStage: null,
+    },
 }
 
 export default createReducer(
@@ -33,6 +38,13 @@ export default createReducer(
             progress: isImportsDone
                 ? constants.NUM_IMPORT_ITEMS
                 : state.progress,
+        }),
+        [actions.setAnnotationStage]: (state, annotationStage) => ({
+            ...state,
+            onboardingStages: {
+                ...state.onboardingStages,
+                annotationStage,
+            },
         }),
     },
     defState,
