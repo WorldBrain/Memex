@@ -4,10 +4,28 @@ import * as logic from './container-logic'
 import { MemoryLocalStorage } from 'src/util/tests/local-storage'
 import { FakeAnalytics } from 'src/analytics'
 
+function setupTest() {
+    const localStorage = new MemoryLocalStorage()
+    const analytics = new FakeAnalytics()
+    const triggerEvent = async (state, event, { remoteFunctions }) => {
+        const result = await logic.processEvent({
+            state,
+            localStorage,
+            analytics,
+            event,
+            remoteFunction: fakeRemoteFunction(remoteFunctions),
+        })
+        if (result.screen) {
+            Object.assign(state, result)
+        }
+        return result
+    }
+    return { localStorage, analytics, triggerEvent }
+}
+
 describe('Backup settings container logic', () => {
     it('should be able to guide the user through the onboarding flow', async () => {
-        const localStorage = new MemoryLocalStorage()
-        const analytics = new FakeAnalytics()
+        const { localStorage, analytics, triggerEvent } = setupTest()
 
         const state = await logic.getInitialState({
             analytics,

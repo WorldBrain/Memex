@@ -1,4 +1,4 @@
-import mapValues from 'lodash/mapValues'
+const mapValues = require('lodash/mapValues')
 import {
     redirectToGDriveLogin,
     redirectToAutomaticBackupPurchase,
@@ -95,6 +95,9 @@ export async function processEvent({
                     return { redirect: { to: 'gdrive-login' } }
                 }
             },
+            onRestoreRequested: () => {
+                return { screen: 'restore-where' }
+            },
         },
         'onboarding-where': {
             onChoice: async () => {
@@ -181,6 +184,20 @@ export async function processEvent({
             onFinish: () => {
                 localStorage.removeItem('backup.onboarding')
                 return { screen: 'overview' }
+            },
+        },
+        'restore-where': {
+            onChoice: async () => {
+                analytics.trackEvent(
+                    {
+                        category: 'Backup',
+                        action: 'restore-where-chosen',
+                    },
+                    true,
+                )
+
+                localStorage.setItem('backup.restore.authenticating', true)
+                return { redirect: { to: 'gdrive-login' } }
             },
         },
     }

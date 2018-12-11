@@ -142,8 +142,8 @@ export default class OverviewContainer extends React.Component {
                     <span className={localStyles.time}>
                         {this.state.backupTimes.lastBackup
                             ? moment(
-                                  this.state.backupTimes.lastBackup,
-                              ).fromNow()
+                                this.state.backupTimes.lastBackup,
+                            ).fromNow()
                             : "You haven't made any backup yet"}
                     </span>
                 </div>
@@ -153,8 +153,8 @@ export default class OverviewContainer extends React.Component {
                         <span className={localStyles.time}>
                             {this.state.backupTimes.nextBackup !== 'running'
                                 ? moment(
-                                      this.state.backupTimes.nextBackup,
-                                  ).fromNow()
+                                    this.state.backupTimes.nextBackup,
+                                ).fromNow()
                                 : 'in progress'}
                         </span>
                     </div>
