@@ -224,7 +224,7 @@ describe('Backup settings container logic helpers', () => {
     describe('getScreenStateProps()', () => {
         it('should return the corrent state props', () => {
             expect(
-                logic.getScreenStateProps({
+                logic.getScreenProps({
                     state: {
                         foo: 5,
                     },
