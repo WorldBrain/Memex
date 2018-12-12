@@ -5,7 +5,7 @@ export type EventProcessor<Dependencies> = (
 ) => EventProcessorResult
 export type EventProcessorArgs<Dependencies> = {
     state: any
-    event: { type: string; [key: string]: any }
+    event: { type: string;[key: string]: any }
     dependencies: Dependencies
 }
 export interface EventProcessorResult {
@@ -45,14 +45,14 @@ export function handleEvent<Dependencies = null>({
     dependencies,
     actions,
 }: {
-    eventProcessor: EventProcessor<Dependencies>
-    state
-    setState
-    props
-    event
-    dependencies: Dependencies
-    actions: ActionMap
-}) {
+        eventProcessor: EventProcessor<Dependencies>
+        state
+        setState
+        props
+        event
+        dependencies: Dependencies
+        actions: ActionMap
+    }) {
     const result = eventProcessor({ state, event, dependencies })
     if (result.updateState) {
         setState(result.updateState)

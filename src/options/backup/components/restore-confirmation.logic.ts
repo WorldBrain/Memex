@@ -1,48 +1,29 @@
+import {
+    reactEventHandler,
+    handleEvent,
+    compositeEventProcessor,
+} from 'src/util/ui-logic'
+
 export const CONFIRMATION_WORD = 'RESTORE'
 export const INITIAL_STATE = {
     confirmation: '',
     confirmed: false,
 }
 
-export function processEvent(state, event) {
-    if (event.type === 'onConfirmationChange') {
+export const processEvent = compositeEventProcessor({
+    onConfirmationChange: ({ event }) => {
         const confirmed = event.value === CONFIRMATION_WORD
         return {
-            state: {
+            updateState: {
                 confirmation: event.value,
                 confirmed,
             },
-            dispatch: confirmed && 'onConfirm',
+            dispatch: confirmed ? { type: 'onConfirm' } : null,
         }
-    } else if (event.type === 'onClose') {
-        return { dispatch: 'onClose' }
-    }
-}
+    },
+    onClose: () => {
+        return { dispatch: { type: 'onClose' } }
+    },
+})
 
-export function handleEvent({ eventProcessor, state, setState, props, event }) {
-    const result = eventProcessor(state, event)
-    if (result.state) {
-        setState(result.state)
-    }
-    if (result.dispatch) {
-        const handler = props[result.dispatch]
-        if (!handler) {
-            console.error(
-                `Event dispatched without handler: ${result.dispatch}`,
-            )
-        }
-        handler()
-    }
-}
-
-export function reactEventHandler(component, eventProcessor) {
-    return event => {
-        handleEvent({
-            eventProcessor,
-            state: component.state,
-            props: component.props,
-            setState: component.setState.bind(this),
-            event,
-        })
-    }
-}
+export { reactEventHandler, handleEvent }
