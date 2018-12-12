@@ -34,13 +34,10 @@ export class ToolbarNotification extends React.Component {
                 height: 'auto',
                 width: '400px',
                 'padding-top': '15px',
-            }
-        } else {
-            positionStyles = {
-                right: 0,
-                top: 0,
+                position: 'absolute',
             }
         }
+
         return positionStyles
     }
 

@@ -24,13 +24,18 @@ export default function OnboardingSelectOption({ onCloseRequested }) {
                 <div className={styles.notifContainer}>
                     <img
                         src={images.annotateIcon}
+                        height={'30px'}
                         className={styles.selectIcon}
                     />
                     <div className={styles.notifText}>
                         Add a note to this highlight
                     </div>
                     <br />
-                    <img src={images.shareIcon} className={styles.selectIcon} />
+                    <img
+                        src={images.shareIcon}
+                        className={styles.selectIcon}
+                        height={'30px'}
+                    />
                     <div className={styles.notifText}>
                         Share a link to this higlight
                     </div>
