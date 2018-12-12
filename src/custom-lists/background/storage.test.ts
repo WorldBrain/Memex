@@ -1,24 +1,27 @@
-import storageManager from '../../search/storex'
+import initStorageManager from '../../search/memory-storex'
 import CustomListBackground from './'
 import * as DATA from './storage.test.data'
 
-jest.mock('../../search/storex')
+describe('Custom List Integrations', () => {
+    const storageManager = initStorageManager()
 
-const runSuite = () => () => {
-    const fakeIndex = new CustomListBackground({ storageManager })
+    const bg = new CustomListBackground({ storageManager })
+
     let fakeListCounter = 0
-    fakeIndex.storage._generateListId = () => ++fakeListCounter
+    bg.storage._generateListId = () => ++fakeListCounter
+
     async function insertTestData() {
         // Insert some test data for all tests to use
-        await fakeIndex.createCustomList(DATA.LIST_1)
-        await fakeIndex.createCustomList(DATA.LIST_2)
-        await fakeIndex.createCustomList(DATA.LIST_3)
+        await bg.createCustomList(DATA.LIST_1)
+        await bg.createCustomList(DATA.LIST_2)
+        await bg.createCustomList(DATA.LIST_3)
 
-        await fakeIndex.insertPageToList(DATA.PAGE_ENTRY_1)
-        await fakeIndex.insertPageToList(DATA.PAGE_ENTRY_2)
-        await fakeIndex.insertPageToList(DATA.PAGE_ENTRY_3)
-        await fakeIndex.insertPageToList(DATA.PAGE_ENTRY_4)
+        await bg.insertPageToList(DATA.PAGE_ENTRY_1)
+        await bg.insertPageToList(DATA.PAGE_ENTRY_2)
+        await bg.insertPageToList(DATA.PAGE_ENTRY_3)
+        await bg.insertPageToList(DATA.PAGE_ENTRY_4)
     }
+
     // insertTestData()
     async function resetTestData(dbName = 'test') {
         storageManager.deleteDB(dbName)
@@ -31,12 +34,13 @@ const runSuite = () => () => {
 
     beforeAll(async () => {
         fakeListCounter = 0
+        await storageManager.finishInitialization()
         await resetTestData()
     })
 
     describe('read ops', () => {
         test('fetch All Lists', async () => {
-            const lists = await fakeIndex.fetchAllLists({})
+            const lists = await bg.fetchAllLists({})
 
             expect(lists).toBeDefined()
             expect(lists).not.toBeNull()
@@ -49,8 +53,8 @@ const runSuite = () => () => {
                 expect(currPage).not.toBeNull()
             }
 
-            runChecks(await fakeIndex.fetchListPagesById({ id: 1 }))
-            const lists = await fakeIndex.fetchListPagesById({ id: 1 })
+            runChecks(await bg.fetchListPagesById({ id: 1 }))
+            const lists = await bg.fetchListPagesById({ id: 1 })
 
             expect(lists).toBeDefined()
             expect(lists).not.toBeNull()
@@ -58,7 +62,7 @@ const runSuite = () => () => {
         })
 
         test('fetch suggestions based on list names', async () => {
-            const lists = await fakeIndex.fetchListNameSuggestions({
+            const lists = await bg.fetchListNameSuggestions({
                 name: 'Go',
                 url: 'https://www.ipsum.com/test',
             })
@@ -69,7 +73,7 @@ const runSuite = () => () => {
         })
 
         test('Case insensitive name search', async () => {
-            const list = await fakeIndex.fetchListIgnoreCase({
+            const list = await bg.fetchListIgnoreCase({
                 name: 'somE good things',
             })
 
@@ -79,7 +83,7 @@ const runSuite = () => () => {
         })
 
         test('fetch Pages associated with list by url', async () => {
-            const lists = await fakeIndex.fetchListPagesByUrl({
+            const lists = await bg.fetchListPagesByUrl({
                 url: 'https://www.ipsum.com/test',
             })
 
@@ -89,7 +93,7 @@ const runSuite = () => () => {
         })
 
         test('fetch lists with some urls excluded', async () => {
-            const lists = await fakeIndex.fetchAllLists({
+            const lists = await bg.fetchAllLists({
                 excludeIds: [1, 2] as any[],
             })
 
@@ -101,7 +105,7 @@ const runSuite = () => () => {
         })
 
         test('fetch lists with limits', async () => {
-            const lists = await fakeIndex.fetchAllLists({
+            const lists = await bg.fetchAllLists({
                 limit: 1,
             })
 
@@ -117,11 +121,11 @@ const runSuite = () => () => {
                 expect(currPage).toBeDefined()
                 expect(currPage).not.toBeNull()
             }
-            const updatedList = await fakeIndex.updateList({
+            const updatedList = await bg.updateList({
                 id: 3,
                 name: 'new name',
             })
-            const newName = await fakeIndex.fetchListIgnoreCase({
+            const newName = await bg.fetchListIgnoreCase({
                 name: 'new name',
             })
             runChecks(updatedList)
@@ -137,11 +141,11 @@ const runSuite = () => () => {
                 expect(currPage).toBeDefined()
                 expect(currPage).not.toBeNull()
             }
-            const updatedList = await fakeIndex.updateList({
+            const updatedList = await bg.updateList({
                 id: 4,
                 name: 'another new name',
             })
-            const newName = await fakeIndex.fetchListIgnoreCase({
+            const newName = await bg.fetchListIgnoreCase({
                 name: 'another new name',
             })
             runChecks(updatedList)
@@ -155,7 +159,7 @@ const runSuite = () => () => {
 
     describe('delete ops', () => {
         test('delete list along with associated pages', async () => {
-            const lists = await fakeIndex.removeList({ id: 3 })
+            const lists = await bg.removeList({ id: 3 })
             expect(lists).toBeDefined()
             expect(lists).not.toBeNull()
             // No of pages and list deleted by
@@ -163,7 +167,7 @@ const runSuite = () => () => {
         })
 
         test('Remove page from list', async () => {
-            const pages = await fakeIndex.removePageFromList({
+            const pages = await bg.removePageFromList({
                 id: 1,
                 url: 'https://www.ipsum.com/test',
             })
@@ -173,6 +177,4 @@ const runSuite = () => () => {
             expect(pages).toBe(1)
         })
     })
-}
-
-describe('Custom List Integrations', runSuite())
+})

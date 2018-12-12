@@ -1,14 +1,12 @@
-import storageManager from '../../search/storex'
+import initStorageManager from '../../search/memory-storex'
 import normalize from '../../util/encode-url-for-id'
 import AnnotationBackground from './'
-
 import * as DATA from './storage.test.data'
 
-jest.mock('../../search/storex')
+describe('Annotations storage', () => {
+    const storageManager = initStorageManager()
 
-const runSuite = () => {
-    const annotationStorage = new AnnotationBackground({ storageManager })
-        .annotationStorage
+    const { annotationStorage } = new AnnotationBackground({ storageManager })
 
     async function insertTestData() {
         // Insert annotations and direct links
@@ -29,6 +27,10 @@ const runSuite = () => {
 
         await insertTestData()
     }
+
+    beforeAll(async () => {
+        await storageManager.finishInitialization()
+    })
 
     beforeEach(async () => {
         await resetTestData()
@@ -158,6 +160,4 @@ const runSuite = () => {
             expect(tagsAfter2.length).toBe(0)
         })
     })
-}
-
-describe('Annotations storage', runSuite)
+})

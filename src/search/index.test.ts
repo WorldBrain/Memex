@@ -1,17 +1,15 @@
-import * as expect from 'expect'
+import initStorageManager from './memory-storex'
 import getDb, * as index from '.'
 import * as DATA from './index.test.data'
 
-const indexedDB = require('fake-indexeddb')
-const iDBKeyRange = require('fake-indexeddb/lib/FDBKeyRange')
-
-jest.mock('./storex')
 jest.mock('./models/abstract-model')
 jest.mock('lodash/fp/intersection')
 jest.mock('lodash/fp/flatten')
 jest.mock('lodash/fp/difference')
 
 describe('Search index integration', () => {
+    const storageManager = initStorageManager()
+
     async function insertTestData() {
         // Insert some test data for all tests to use
         await index.addPage({ pageDoc: DATA.PAGE_3, visits: [DATA.VISIT_3] })
@@ -29,7 +27,7 @@ describe('Search index integration', () => {
     }
 
     async function resetTestData(dbName = 'test') {
-        indexedDB.deleteDatabase(dbName)
+        storageManager.deleteDB(dbName)
 
         await insertTestData()
     }
@@ -43,6 +41,8 @@ describe('Search index integration', () => {
 
     // Set what index to use for tests + initialize data
     beforeAll(async () => {
+        await storageManager.finishInitialization()
+        index.setStorexBackend(storageManager.backend)
         await resetTestData()
     })
 
