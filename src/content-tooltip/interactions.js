@@ -86,7 +86,7 @@ export const insertTooltip = async ({ toolbarNotifications } = {}) => {
     conditionallyTriggerTooltip(showTooltip)
 }
 
-const removeTooltip = () => {
+export const removeTooltip = () => {
     if (!target) {
         return
     }

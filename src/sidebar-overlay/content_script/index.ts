@@ -16,7 +16,7 @@ export default async ({
 }: {
     toolbarNotifications: ToolbarNotifications
 }) => {
-    interactions.setupRPC()
+    interactions.setupRPC({ toolbarNotifications })
 
     const isSidebarEnabled = await getSidebarState()
     if (!isSidebarEnabled) {
