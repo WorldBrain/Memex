@@ -72,7 +72,7 @@ export default class BackupSettingsContainer extends React.Component {
             throw new Error('This should never happen')
         }
 
-        const stateProps = logic.getScreenStateProps({
+        const stateProps = logic.getScreenProps({
             state: this.state,
             screenConfig,
         })

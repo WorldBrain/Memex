@@ -214,7 +214,7 @@ export interface ScreenConfig {
     state: { [key: string]: true }
     events: { [name: string]: true | { argument: string } }
 }
-export const getScreenStateProps = ({
+export const getScreenProps = ({
     state,
     screenConfig,
 }: {
