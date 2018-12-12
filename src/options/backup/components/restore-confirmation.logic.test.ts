@@ -22,23 +22,23 @@ export function fakeEventProps(eventNames) {
     return { events, props }
 }
 
-export function setup({ inititalState, eventNames, eventProcessor }) {
+export function setupUiLogicTest({
+    inititalState,
+    eventNames,
+    eventProcessor,
+}) {
     const { state, setState } = fakeState(inititalState)
     const { props, events } = fakeEventProps(eventNames)
-    const trigger = event =>
-        logic.handleEvent({
-            eventProcessor,
-            state,
-            setState,
-            props,
-            event,
-        })
+    const trigger = logic.reactEventHandler(
+        { props, state, setState },
+        eventProcessor,
+    )
     return { state, setState, props, events, trigger }
 }
 
 describe('Restore confirmation logic', () => {
     it('should work', async () => {
-        const { state, events, trigger } = setup({
+        const { state, events, trigger } = setupUiLogicTest({
             inititalState: logic.INITIAL_STATE,
             eventNames: ['onConfirm', 'onClose'],
             eventProcessor: logic.processEvent,
