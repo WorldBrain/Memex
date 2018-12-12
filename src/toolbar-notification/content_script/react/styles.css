@@ -5,6 +5,8 @@
 
 .container {
     position: fixed;
+    top: 0;
+    right: 0;
     width: 420px;
     display: flex;
     align-items: center;
