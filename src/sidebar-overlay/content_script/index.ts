@@ -32,11 +32,6 @@ export default async ({
 
     await bodyLoader()
     document.removeEventListener('keydown', onKeydownWrapper, false)
-    const passwordInputs = document.querySelectorAll('input[type=password]')
-    const hasPasswordInput = passwordInputs.length > 0
-    if (hasPasswordInput) {
-        return
-    }
 
     interactions.insertRibbon({ toolbarNotifications })
 }

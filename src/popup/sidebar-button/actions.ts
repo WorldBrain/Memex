@@ -33,7 +33,6 @@ export const toggleSidebarFlag: () => Thunk = () => async (
         await remoteFunction('removeRibbon', { tabId })()
     } else {
         await remoteFunction('insertRibbon', { tabId })()
-        await remoteFunction('toggleSidebarOverlay', { tabId })()
     }
 }
 
