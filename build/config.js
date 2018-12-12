@@ -30,11 +30,11 @@ export default ({ context = __dirname, mode = 'development', ...opts }) => {
         Object.assign(aliases, {
             [`${externalTsModule}$`]: path.resolve(
                 context,
-                './external/storex/ts',
+                `./external/${externalTsModule}/ts`,
             ),
             [`${externalTsModule}/lib`]: path.resolve(
                 context,
-                './external/storex/ts',
+                `./external/${externalTsModule}/ts`,
             ),
         })
     }
