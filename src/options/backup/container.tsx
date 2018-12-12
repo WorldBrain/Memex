@@ -13,7 +13,7 @@ import { default as OnboardingHow } from './screens/onboarding-2-how'
 import { default as OnboardingSize } from './screens/onboarding-3-size'
 import { BackupHeader } from './components/backup-header'
 import LoadingBlocker from './components/loading-blocker'
-import * as logic from './container-logic'
+import * as logic from 'src/options/backup/container.logic'
 const STYLES = require('./styles.css')
 
 export const SCREENS = {
