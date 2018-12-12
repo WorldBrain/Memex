@@ -1,40 +1,6 @@
-import * as fromPairs from 'lodash/fromPairs'
 import * as expect from 'expect'
-import { fakeRemoteFunction } from 'src/util/webextensionRPC'
 import * as logic from './restore-confirmation.logic'
-
-export function fakeState(initial) {
-    const state = { ...initial }
-    const setState = updates => {
-        Object.assign(state, updates)
-    }
-    return { state, setState }
-}
-
-export function fakeEventProps(eventNames) {
-    const events = { log: [] }
-    const props = fromPairs(
-        eventNames.map(eventName => [
-            eventName,
-            (...args) => events.log.push({ event: eventName, args }),
-        ]),
-    )
-    return { events, props }
-}
-
-export function setupUiLogicTest({
-    inititalState,
-    eventNames,
-    eventProcessor,
-}) {
-    const { state, setState } = fakeState(inititalState)
-    const { props, events } = fakeEventProps(eventNames)
-    const trigger = logic.reactEventHandler(
-        { props, state, setState },
-        eventProcessor,
-    )
-    return { state, setState, props, events, trigger }
-}
+import { setupUiLogicTest } from 'src/util/ui-logic'
 
 describe('Restore confirmation logic', () => {
     it('should work', async () => {
