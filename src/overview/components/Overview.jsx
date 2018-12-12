@@ -3,7 +3,6 @@ import { connect } from 'react-redux'
 import propTypes from 'prop-types'
 
 import Sidebar from '../sidebar'
-import Onboarding from '../onboarding'
 import { DeleteConfirmModal } from '../delete-confirm-modal'
 import {
     SidebarContainer as SidebarLeft,
@@ -34,7 +33,6 @@ class Overview extends PureComponent {
                 <DeleteConfirmModal />
                 <DragElement />
                 <Sidebar />
-                <Onboarding />
             </React.Fragment>
         )
     }
