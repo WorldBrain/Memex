@@ -109,7 +109,9 @@ export const results = createSelector(
 export const showInitSearchMsg = createSelector(
     searchCount,
     resultDocs,
-    (searchCount, results) => !results.length && !searchCount,
+    isLoading,
+    (searchCount, results, isLoading) =>
+        !results.length && !searchCount && !isLoading,
 )
 
 export const isScrollDisabled = createSelector(
