@@ -5,7 +5,7 @@ export type EventProcessor<Dependencies> = (
 ) => EventProcessorResult
 export type EventProcessorArgs<Dependencies> = {
     state: any
-    event: { type: string;[key: string]: any }
+    event: { type: string; [key: string]: any }
     dependencies: Dependencies
 }
 export interface EventProcessorResult {
@@ -30,7 +30,9 @@ export function compositeEventProcessor<Dependencies = null>(processors: {
     return (args: EventProcessorArgs<Dependencies>) => {
         const processor = processors[args.event.type]
         if (!processor) {
-            throw new Error(`No event processor found for event ${event.type}`)
+            throw new Error(
+                `No event processor found for event ${args.event.type}`,
+            )
         }
         return processor(args)
     }
@@ -45,14 +47,14 @@ export function handleEvent<Dependencies = null>({
     dependencies,
     actions,
 }: {
-        eventProcessor: EventProcessor<Dependencies>
-        state
-        setState
-        props
-        event
-        dependencies: Dependencies
-        actions: ActionMap
-    }) {
+    eventProcessor: EventProcessor<Dependencies>
+    state
+    setState
+    props
+    event
+    dependencies: Dependencies
+    actions: ActionMap
+}) {
     const result = eventProcessor({ state, event, dependencies })
     if (result.updateState) {
         setState(result.updateState)
