@@ -192,10 +192,16 @@ export const conditionallyTriggerTooltip = delayed(
             position = { x: event.pageX, y: event.pageY }
         }
         callback(position)
-        const onboardingAnnotationStage = await getLocalStorage(
+
+        // Onboarding Demo stages
+        const annotationStage = await getLocalStorage(
             STORAGE_KEYS.onboardingDemo.step1,
         )
-        if (onboardingAnnotationStage === 'highlight_text_notification_shown') {
+        // const powerSearchStage = await getLocalStorage(
+        //     STORAGE_KEYS.onboardingDemo.step2,
+        // )
+
+        if (annotationStage === 'highlight_text_notification_shown') {
             // Remove previous notification
             toolbarNotifications._destroyRootElement()
             toolbarNotifications.showToolbarNotification(

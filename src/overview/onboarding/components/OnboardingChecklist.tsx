@@ -14,6 +14,7 @@ const styles = require('./OnboardingChecklist.css')
 export interface StateProps {
     onboardingStages: {
         annotationStage: string
+        powerSearchStage: string
     }
 }
 
@@ -39,6 +40,21 @@ class OnboardingChecklist extends React.Component<Props> {
         await setLocalStorage(
             constants.STORAGE_KEYS.onboardingDemo.step1,
             'highlight_text',
+        )
+        await browser.tabs.create({
+            url,
+        })
+    }
+
+    handleStepTwo = async () => {
+        if (this.props.onboardingStages.powerSearchStage === 'DONE') {
+            return
+        }
+
+        const url = constants.ANNOTATION_DEMO_URL
+        await setLocalStorage(
+            constants.STORAGE_KEYS.onboardingDemo.step2,
+            'redirected',
         )
         await browser.tabs.create({
             url,
@@ -75,7 +91,10 @@ class OnboardingChecklist extends React.Component<Props> {
                         id="step2"
                     >
                         {' '}
-                        <span className={styles.checklistText}>
+                        <span
+                            className={styles.checklistText}
+                            onClick={this.handleStepTwo}
+                        >
                             Do your first power search{' '}
                         </span>
                     </Checkbox>
