@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import styles from './progress-bar.css'
 
-export function BackupProgressBar(props) {
+export function ProgressBar(props) {
     const percentageNumber = Math.floor(props.value * 100)
     const clampedPercentage = Math.max(10, percentageNumber)
     return (
@@ -19,6 +19,6 @@ export function BackupProgressBar(props) {
     )
 }
 
-BackupProgressBar.propTypes = {
+ProgressBar.propTypes = {
     value: PropTypes.number, // float from 0 to 1
 }
