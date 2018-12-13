@@ -34,7 +34,9 @@ export function compositeEventProcessor<Dependencies = null>(processors: {
     return (args: EventProcessorArgs<Dependencies>) => {
         const processor = processors[args.event.type]
         if (!processor) {
-            throw new Error(`No event processor found for event ${event.type}`)
+            throw new Error(
+                `No event processor found for event ${args.event.type}`,
+            )
         }
         return processor(args)
     }
