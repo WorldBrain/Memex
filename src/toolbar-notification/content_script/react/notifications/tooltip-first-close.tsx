@@ -2,7 +2,6 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import NotificationLayout from '../layout'
 import { getExtURL } from '../utils.js'
-const styles = require('./tooltip-first-close.css')
 
 const styles = require('./notifications.css')
 
