@@ -4,6 +4,7 @@ import TooltipFirstCloseNotification from './notifications/tooltip-first-close'
 import RibbonFirstCloseNotification from './notifications/ribbon-first-close'
 import OnboardingHighlightText from './notifications/onboarding-highlight-text'
 import OnboardingSelectOption from './notifications/onboarding-select-option'
+import PowerSearchBrowse from './notifications/power-search-browse'
 
 import styles from './styles.css'
 
@@ -62,6 +63,12 @@ export class ToolbarNotification extends React.Component {
                 )}
                 {this.props.type === 'onboarding-select-option' && (
                     <OnboardingSelectOption
+                        onCloseRequested={this.props.onCloseRequested}
+                    />
+                )}
+                )}
+                {this.props.type === 'power-search-browse' && (
+                    <PowerSearchBrowse
                         onCloseRequested={this.props.onCloseRequested}
                     />
                 )}

@@ -8,6 +8,7 @@ export const STORAGE_KEYS = {
     progress: 'onboarding-import-progress',
     onboardingDemo: {
         step1: 'step-one-annotations',
+        step2: 'step-two-power-search',
     },
 }
 

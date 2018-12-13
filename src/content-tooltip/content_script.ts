@@ -24,12 +24,27 @@ export default async function init({
         STORAGE_KEYS.onboardingDemo.step1,
         'unvisited',
     )
+    const powerSearchStage = await getLocalStorage(
+        STORAGE_KEYS.onboardingDemo.step2,
+    )
 
     if (onboardingAnnotationStage === 'highlight_text') {
         toolbarNotifications.showToolbarNotification('onboarding-higlight-text')
         await setLocalStorage(
             STORAGE_KEYS.onboardingDemo.step1,
             'highlight_text_notification_shown',
+        )
+    }
+
+    if (powerSearchStage === 'redirected') {
+        toolbarNotifications._destroyRootElement()
+        toolbarNotifications.showToolbarNotification('power-search-browse', {
+            x: window.innerHeight / 2,
+            y: window.innerHeight / 2,
+        })
+        await setLocalStorage(
+            STORAGE_KEYS.onboardingDemo.step1,
+            'power-search-browse-shown',
         )
     }
 
