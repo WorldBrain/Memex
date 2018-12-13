@@ -4,7 +4,7 @@ import React from 'react'
 import * as logic from './restore-where.logic'
 // const styles = require('./restore-confirmation.css')
 
-export default class RestoreConfirmation extends React.Component {
+export default class RestoreWhere extends React.Component {
     // static propTypes = {
     //     onConfirm: PropTypes.func.isRequired,
     //     onClose: PropTypes.func.isRequired,
@@ -18,6 +18,6 @@ export default class RestoreConfirmation extends React.Component {
     }
 
     render() {
-        return <div className={styles.container}>Placeholder</div>
+        return <div>Placeholder</div>
     }
 }
