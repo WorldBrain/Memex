@@ -1,23 +1,52 @@
 import React from 'react'
-// import PropTypes from 'prop-types'
-// import classNames from 'classnames'
-// import * as logic from './restore-running.logic'
-// const styles = require('./restore-confirmation.css')
+import RunningProcess from '../components/running-process'
+const STYLES = require('../styles.css')
 
-// export default class RestoreRunning extends React.Component {
-//     // static propTypes = {
-//     //     onConfirm: PropTypes.func.isRequired,
-//     //     onClose: PropTypes.func.isRequired,
-//     // }
+export default function RestoreRunning({ onFinish }: { onFinish: () => void }) {
+    return (
+        <RunningProcess
+            functionNames={{
+                info: 'getRestoreInfo',
+                start: 'startRestore',
+                cancel: 'cancelRestore',
+                pause: 'pauseRestore',
+                resume: 'resumeRestore',
+            }}
+            eventMessageName="restore-event"
+            preparingStepLabel="Preparing restore"
+            synchingStepLabel="Restoring your Memex backup"
+            renderHeader={renderHeader}
+            renderFailMessage={renderFailMessage}
+            renderSuccessMessage={renderSuccessMessage}
+            onFinish={onFinish}
+        />
+    )
+}
 
-//     state = logic.INITIAL_STATE
-//     handleEvent = null
+function renderHeader() {
+    return <p className={STYLES.header2}>RESTORE PROGRESS</p>
+}
 
-//     componentWillMount() {
-//         this.handleEvent = logic.reactEventHandler(this, logic.processEvent)
-//     }
+function renderFailMessage() {
+    return (
+        <React.Fragment>
+            <p className={STYLES.header2}>
+                <strong>RESTORE FAILED </strong>
+            </p>
+            <p className={STYLES.name}>
+                You can retry the restore anytime you want. <br />
+                If you still encounter issues please{' '}
+                <a href="mailto:support@worldbrain.io">contact support</a>.
+            </p>
+        </React.Fragment>
+    )
+}
 
-//     render() {
-//         return <div>Placeholder</div>
-//     }
-// }
+function renderSuccessMessage() {
+    return (
+        <p className={STYLES.header2}>
+            <strong>FINISHED: </strong>
+            RESTORE WAS SUCCESSFUL
+        </p>
+    )
+}
