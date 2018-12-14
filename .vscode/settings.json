@@ -7,9 +7,5 @@
     "eslint.enable": true,
     "tslint.enable": true,
     "editor.formatOnSave": true,
-    "prettier.trailingComma": "all",
-    "prettier.tabWidth": 4,
-    "prettier.singleQuote": true,
-    "prettier.semi": false,
     "typescript.tsdk": "node_modules/typescript/lib"
 }
