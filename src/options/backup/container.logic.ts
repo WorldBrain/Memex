@@ -37,6 +37,15 @@ export async function getStartScreen({
         return override
     }
 
+    if (localStorage.getItem('backup.restore.authenticating')) {
+        localStorage.removeItem('backup.restore.authenticating')
+        if (isAuthenticated) {
+            return 'restore-running'
+        } else {
+            return 'restore-where'
+        }
+    }
+
     if (localStorage.getItem('backup.onboarding')) {
         if (localStorage.getItem('backup.onboarding.payment')) {
             localStorage.removeItem('backup.onboarding.payment')
@@ -198,8 +207,12 @@ export async function processEvent({
                     true,
                 )
 
-                localStorage.setItem('backup.restore.authenticating', true)
-                return { redirect: { to: 'gdrive-login' } }
+                if (!state.isAuthenticated) {
+                    localStorage.setItem('backup.restore.authenticating', true)
+                    return { redirect: { to: 'gdrive-login' } }
+                } else {
+                    return { screen: 'restore-running' }
+                }
             },
         },
     }
