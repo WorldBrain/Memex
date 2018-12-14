@@ -46,3 +46,9 @@ export const getPositionState = async () =>
 
 export const setPositionState = async positionValue =>
     setLocalStorage(constants.POSITION_STORAGE_NAME, positionValue)
+
+// Finding the coordinates to center the notification box
+export const getPageCenter = () => ({
+    x: window.innerWidth / 2,
+    y: window.innerHeight / 2 - 200, // Assuming average height as 200, since height is 'auto'
+})

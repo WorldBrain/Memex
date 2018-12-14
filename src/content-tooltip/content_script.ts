@@ -1,7 +1,7 @@
 import { bodyLoader } from '../util/loader'
 import * as interactions from './interactions'
 import ToolbarNotifications from '../toolbar-notification/content_script'
-import { getTooltipState } from './utils'
+import { getTooltipState, getPageCenter } from './utils'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import { STORAGE_KEYS } from 'src/overview/onboarding/constants'
 
@@ -37,13 +37,14 @@ export default async function init({
     }
 
     if (powerSearchStage === 'redirected') {
+        const position = getPageCenter()
         toolbarNotifications._destroyRootElement()
-        toolbarNotifications.showToolbarNotification('power-search-browse', {
-            x: window.innerHeight / 2,
-            y: window.innerHeight / 2,
-        })
+        toolbarNotifications.showToolbarNotification(
+            'power-search-browse',
+            position,
+        )
         await setLocalStorage(
-            STORAGE_KEYS.onboardingDemo.step1,
+            STORAGE_KEYS.onboardingDemo.step2,
             'power-search-browse-shown',
         )
     }
