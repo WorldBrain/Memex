@@ -14,6 +14,8 @@ import { default as OnboardingSize } from './screens/onboarding-3-size'
 import { BackupHeader } from './components/backup-header'
 import LoadingBlocker from './components/loading-blocker'
 import * as logic from 'src/options/backup/container.logic'
+import RestoreWhere from 'src/options/backup/screens/restore-where'
+import RestoreRunning from 'src/options/backup/screens/restore-running'
 const STYLES = require('./styles.css')
 
 export const SCREENS = {
@@ -43,6 +45,18 @@ export const SCREENS = {
             onBlobPreferenceChange: { argument: 'saveBlobs' },
             onLoginRequested: true,
             onBackupRequested: true,
+        },
+    },
+    'restore-where': {
+        component: RestoreWhere,
+        events: {
+            onChoice: { argument: 'choice' },
+        },
+    },
+    'restore-running': {
+        component: RestoreRunning,
+        events: {
+            onChoice: { argument: 'choice' },
         },
     },
 }

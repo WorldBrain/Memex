@@ -67,6 +67,9 @@ export default class SimpleHttpBackend extends BackupBackend {
 
     async listObjects(collection: string): Promise<string[]> {
         const response = await fetch(`${this.url}/${collection}`)
+        if (response.status === 404) {
+            return []
+        }
         if (!response.ok) {
             throw new Error(await response.text())
         }
