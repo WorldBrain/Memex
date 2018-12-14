@@ -172,18 +172,15 @@ export default class OverviewContainer extends React.Component {
                         <span className={Styles.name}>
                             Restore &amp; Replace
                         </span>
-                        <a
-                            target="_blank"
-                            href="https://worldbrain.io/crowdfunding-memex"
-                        >
+                        <a onClick={() => this.props.onRestoreRequested()}>
                             <span className={localStyles.button}>
                                 <span
                                     className={classNames(
                                         Styles.label,
-                                        Styles.labelContribute,
+                                        Styles.labelFree,
                                     )}
                                 >
-                                    CONTRIBUTE
+                                    RESTORE
                                 </span>
                             </span>
                         </a>

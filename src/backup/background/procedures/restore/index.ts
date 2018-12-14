@@ -7,15 +7,15 @@ import { DownloadQueue } from './download-queue'
 
 export interface BackupRestoreInfo {
     status: 'preparing' | 'synching'
-    totalObjects?: number
-    processedObjects: number
+    totalChanges?: number
+    processedChanges: number
 }
 
 export class BackupRestoreProcedure {
     storageManager: StorageManager
     backend: BackupBackend
 
-    info?: BackupRestoreInfo
+    info?: BackupRestoreInfo = null
     events?: EventEmitter
     interruptable?: Interruptable
 
@@ -39,7 +39,7 @@ export class BackupRestoreProcedure {
         this.interruptable = new Interruptable()
 
         const procedure = async () => {
-            this._updateInfo({ status: 'preparing', processedObjects: 0 })
+            this._updateInfo({ status: 'preparing', processedChanges: 0 })
 
             try {
                 await this._clearDatabase()
@@ -54,7 +54,7 @@ export class BackupRestoreProcedure {
                 ])
                 this._updateInfo({
                     status: 'synching',
-                    totalObjects:
+                    totalChanges:
                         changeSetTimestamps.length + imageTimestamps.length,
                 })
 
@@ -125,7 +125,7 @@ export class BackupRestoreProcedure {
                     await writeObject(change)
                 })
                 this._updateInfo({
-                    processedObjects: this.info.processedObjects + 1,
+                    processedChanges: this.info.processedChanges + 1,
                 })
             },
         )
@@ -133,7 +133,11 @@ export class BackupRestoreProcedure {
 
     _unblockDatabase() {}
 
-    _writeChange(change) {}
+    _writeChange(change) {
+        return new Promise(resolve =>
+            setTimeout(() => resolve(), 500),
+        ) as Promise<void>
+    }
 
     _writeImage(image) {}
 
@@ -159,6 +163,6 @@ export class BackupRestoreProcedure {
 
     _updateInfo(changes) {
         this.info = { ...this.info, ...changes }
-        this.events.emit('info', this.info)
+        this.events.emit('info', { info: this.info })
     }
 }

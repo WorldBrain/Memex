@@ -19,12 +19,42 @@ describe('BackupRestoreProcedure', () => {
 
         const reportedInfo = []
         const expectedInfo = [
-            { status: 'preparing', processedObjects: 0 },
-            { status: 'synching', processedObjects: 0, totalObjects: 4 },
-            { status: 'synching', processedObjects: 1, totalObjects: 4 },
-            { status: 'synching', processedObjects: 2, totalObjects: 4 },
-            { status: 'synching', processedObjects: 3, totalObjects: 4 },
-            { status: 'synching', processedObjects: 4, totalObjects: 4 },
+            { info: { status: 'preparing', processedChanges: 0 } },
+            {
+                info: {
+                    status: 'synching',
+                    processedChanges: 0,
+                    totalChanges: 4,
+                },
+            },
+            {
+                info: {
+                    status: 'synching',
+                    processedChanges: 1,
+                    totalChanges: 4,
+                },
+            },
+            {
+                info: {
+                    status: 'synching',
+                    processedChanges: 2,
+                    totalChanges: 4,
+                },
+            },
+            {
+                info: {
+                    status: 'synching',
+                    processedChanges: 3,
+                    totalChanges: 4,
+                },
+            },
+            {
+                info: {
+                    status: 'synching',
+                    processedChanges: 4,
+                    totalChanges: 4,
+                },
+            },
         ]
 
         const restoreProcedure = new BackupRestoreProcedure({
