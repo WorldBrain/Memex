@@ -88,6 +88,9 @@ export function remoteFunction(funcName, { tabId }: { tabId?: any } = {}) {
 
         // Return the value or throw the error we received from the other side.
         if (response.errorMessage) {
+            console.error(
+                `Error occured on remote side, please check it's console for more details`,
+            )
             throw new RemoteError(response.errorMessage)
         } else {
             return response.returnValue
@@ -127,6 +130,7 @@ async function incomingRPCListener(message, sender) {
     try {
         returnValue = func(extraArg, ...args)
     } catch (error) {
+        console.error(error)
         return {
             errorMessage: error.message,
             [RPC_RESPONSE]: RPC_RESPONSE,
@@ -140,6 +144,7 @@ async function incomingRPCListener(message, sender) {
             [RPC_RESPONSE]: RPC_RESPONSE,
         }
     } catch (error) {
+        console.error(error)
         return {
             errorMessage: error.message,
             [RPC_RESPONSE]: RPC_RESPONSE,

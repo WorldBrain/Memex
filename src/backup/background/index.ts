@@ -17,9 +17,11 @@ export class BackupBackgroundModule {
     lastBackupStorage: LastBackupStorage
 
     backupProcedure: BackupProcedure
-    backupUiCommunication = new ProcedureUiCommunication()
+    backupUiCommunication = new ProcedureUiCommunication('backup-event')
     restoreProcedure: BackupRestoreProcedure
-    restoreUiCommunication: ProcedureUiCommunication = new ProcedureUiCommunication()
+    restoreUiCommunication: ProcedureUiCommunication = new ProcedureUiCommunication(
+        'restore-event',
+    )
 
     uiTabId?: any
     automaticBackupCheck?: Promise<boolean>
@@ -76,6 +78,9 @@ export class BackupBackgroundModule {
                         this.backupProcedure.events,
                     )
                 },
+                getBackupInfo: () => {
+                    return this.backupProcedure.info
+                },
                 pauseBackup: () => {
                     this.backupProcedure.pause()
                 },
@@ -87,19 +92,19 @@ export class BackupBackgroundModule {
                 },
                 startRestore: async ({ tab }) => {
                     this.restoreUiCommunication.registerUiTab(tab)
-                    if (this.restoreProcedure.running) {
-                        return
-                    }
-                    if (this.backupProcedure.running) {
-                        throw new Error(
-                            "Come on, don't be crazy and run backup and restore at once please",
-                        )
-                    }
-                    const runner = await this.prepareRestore()
-                    this.restoreUiCommunication.connect(
-                        this.restoreProcedure.events,
-                    )
-                    runner()
+                    await this.startRestore()
+                },
+                getRestoreInfo: async () => {
+                    return this.restoreProcedure.info
+                },
+                pauseRestore: async () => {
+                    await this.restoreProcedure.interruptable.pause()
+                },
+                resumeRestore: async () => {
+                    await this.restoreProcedure.interruptable.resume()
+                },
+                cancelRestore: async () => {
+                    await this.restoreProcedure.interruptable.cancel()
                 },
                 hasInitialBackup: async () => {
                     return !!(await this.lastBackupStorage.getLastBackupTime())
@@ -142,9 +147,6 @@ export class BackupBackgroundModule {
                 },
                 isAutomaticBackupEnabled: async () => {
                     return this.isAutomaticBackupEnabled()
-                },
-                getBackupInfo: () => {
-                    return this.backupProcedure.info
                 },
                 estimateInitialBackupSize: () => {
                     return estimateBackupSize({
@@ -311,6 +313,29 @@ export class BackupBackgroundModule {
         })
 
         return runner
+    }
+
+    async startRestore({ debug = false } = {}) {
+        if (this.restoreProcedure.running) {
+            return
+        }
+        if (this.backupProcedure.running) {
+            throw new Error(
+                "Come on, don't be crazy and run backup and restore at once please",
+            )
+        }
+        const runner = await this.prepareRestore()
+        if (!debug) {
+            this.restoreUiCommunication.connect(this.restoreProcedure.events)
+        } else {
+            this.restoreUiCommunication.connect(
+                this.restoreProcedure.events,
+                (name, event) => {
+                    console.log(`RESTORE DEBUG (${name}):`, event)
+                },
+            )
+        }
+        runner()
     }
 }
 

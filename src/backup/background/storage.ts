@@ -200,6 +200,6 @@ export class LocalLastBackupStorage implements LastBackupStorage {
     }
 
     async _setDate(key, date) {
-        localStorage.setItem(key, JSON.stringify(date.getTime()))
+        localStorage.setItem(key, date ? JSON.stringify(date.getTime()) : null)
     }
 }

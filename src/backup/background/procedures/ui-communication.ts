@@ -3,6 +3,8 @@ import { EventEmitter } from 'events'
 export class ProcedureUiCommunication {
     _uiTabIds: { [tabId: string]: true } = {}
 
+    constructor(public eventName: string) {}
+
     registerUiTab(tab) {
         this._uiTabIds[tab.id] = true
     }
@@ -10,8 +12,9 @@ export class ProcedureUiCommunication {
     sendEvent(eventType, event) {
         for (const tabId of Object.keys(this._uiTabIds)) {
             try {
+                console.log('sending event', eventType, event)
                 window['browser'].tabs.sendMessage(parseInt(tabId, 10), {
-                    type: 'backup-event',
+                    type: this.eventName,
                     event: { type: eventType, ...(event || {}) },
                 })
             } catch (e) {
@@ -21,9 +24,15 @@ export class ProcedureUiCommunication {
         }
     }
 
-    connect(events: EventEmitter) {
+    connect(events: EventEmitter, handler = null) {
         for (const eventName of ['info', 'fail', 'success']) {
-            events.on(eventName, event => this.sendEvent(eventName, event))
+            events.on(eventName, event => {
+                if (!handler) {
+                    this.sendEvent(eventName, event)
+                } else {
+                    handler(eventName, event)
+                }
+            })
         }
     }
 }
