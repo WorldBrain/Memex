@@ -94,6 +94,9 @@ let target = null
 let shadowRoot = null
 let toggleSidebar = null
 
+/* Denotes whether the user inserted/removed ribbon by his/her own self. */
+let manualOverride = false
+
 /**
  * Creates target container for Ribbon and Sidebar shadow DOM.
  * Injects content_script.css.
@@ -127,6 +130,7 @@ export const insertRibbon = ({ toolbarNotifications } = {}) => {
             resolveToggleSidebar(toggleSidebar)
         },
         onClose: async () => {
+            manualOverride = true
             removeRibbon()
 
             const closeMessageShown = await _getCloseMessageShown()
@@ -168,6 +172,21 @@ const removeRibbon = () => {
     toggleSidebar = null
 }
 
+const insertOrRemoveRibbon = async ({ toolbarNotifications }) => {
+    if (manualOverride) {
+        return
+    }
+
+    const isRibbonEnabled = await getSidebarState()
+    const isRibbonPresent = !!target
+
+    if (isRibbonEnabled && !isRibbonPresent) {
+        insertRibbon({ toolbarNotifications })
+    } else if (!isRibbonEnabled && isRibbonPresent) {
+        removeRibbon()
+    }
+}
+
 /**
  * Setups up RPC functions to insert and remove Ribbon from Popup.
  */
@@ -175,15 +194,21 @@ export const setupRPC = ({ toolbarNotifications }) => {
     makeRemotelyCallable({
         toggleSidebarOverlay: async () => {
             if (!toggleSidebar) {
+                manualOverride = true
                 insertRibbon({ toolbarNotifications })
             }
             return toggleSidebar.then(f => f())
         },
-        insertRibbon: () => {
+        insertRibbon: ({ override } = {}) => {
+            manualOverride = override
             insertRibbon({ toolbarNotifications })
         },
-        removeRibbon: () => {
+        removeRibbon: ({ override } = {}) => {
+            manualOverride = override
             removeRibbon()
+        },
+        insertOrRemoveRibbon: async () => {
+            await insertOrRemoveRibbon({ toolbarNotifications })
         },
     })
 }

@@ -1,7 +1,7 @@
 import { browser, Storage } from 'webextension-polyfill-ts'
 
 import PausableTimer from '../../util/pausable-timer'
-import { TOOLTIP_STORAGE_NAME } from '../../content-tooltip/constants'
+import { SIDEBAR_STORAGE_NAME } from '../../sidebar-overlay/constants'
 import ScrollState from './scroll-state'
 import { TabState, NavState } from './types'
 import { remoteFunction } from '../../util/webextensionRPC'
@@ -60,15 +60,23 @@ class Tab implements TabState {
             return
         }
 
-        const storage = await this._storageAPI.local.get(TOOLTIP_STORAGE_NAME)
+        const storage = await this._storageAPI.local.get(SIDEBAR_STORAGE_NAME)
 
-        if (!storage[TOOLTIP_STORAGE_NAME]) {
+        if (!storage[SIDEBAR_STORAGE_NAME]) {
             return
         }
 
         return remoteFunction('toggleIFrameRender', {
             tabId: this.id,
         })(shouldRender)
+    }
+
+    private async _toggleRibbon() {
+        if (!this.isLoaded || !isLoggable({ url: this.url })) {
+            return
+        }
+
+        return remoteFunction('insertOrRemoveRibbon', { tabId: this.id })()
     }
 
     private _pauseLogTimer() {
@@ -121,6 +129,7 @@ class Tab implements TabState {
         }
 
         if (!skipRemoteCall) {
+            this._toggleRibbon()
             this._toggleRenderSidebarIFrame(!this.isActive)
         }
 
