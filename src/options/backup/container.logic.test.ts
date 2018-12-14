@@ -181,7 +181,7 @@ describe('Backup settings container logic', () => {
         })
     })
 
-    it('should be able to guide the user through the restore flow', async () => {
+    it('should be able to guide the user through the restore flow when they try to restore without being logged in', async () => {
         const { localStorage, analytics, triggerEvent } = setupTest()
 
         const firstSessionState = await logic.getInitialState({
@@ -208,14 +208,152 @@ describe('Backup settings container logic', () => {
             screen: 'restore-where',
         })
 
-        await triggerEvent(
+        const choiceResult = await triggerEvent(
             firstSessionState,
             { type: 'onChoice' },
+            {
+                remoteFunctions: {
+                    isBackupAuthenticated: () => false,
+                },
+            },
+        )
+        expect(choiceResult).toEqual({
+            redirect: { to: 'gdrive-login' },
+        })
+        expect(localStorage.popChanges()).toEqual([
+            {
+                type: 'set',
+                key: 'backup.restore.authenticating',
+                value: true,
+            },
+        ])
+
+        const secondSessionState = await logic.getInitialState({
+            analytics,
+            localStorage,
+            remoteFunction: fakeRemoteFunction({
+                isBackupAuthenticated: () => true,
+                hasInitialBackup: () => false,
+                getBackupInfo: () => null,
+            }),
+        })
+        expect(secondSessionState).toEqual({
+            isAuthenticated: true,
+            screen: 'restore-running',
+        })
+        expect(localStorage.popChanges()).toEqual([
+            {
+                type: 'remove',
+                key: 'backup.restore.authenticating',
+            },
+        ])
+    })
+
+    it('should be able to handle a Drive login cancel during restore flow', async () => {
+        const { localStorage, analytics, triggerEvent } = setupTest()
+
+        const firstSessionState = await logic.getInitialState({
+            analytics,
+            localStorage,
+            remoteFunction: fakeRemoteFunction({
+                isBackupAuthenticated: () => false,
+                hasInitialBackup: () => false,
+                getBackupInfo: () => null,
+            }),
+        })
+        expect(firstSessionState).toEqual({
+            isAuthenticated: false,
+            screen: 'overview',
+        })
+
+        await triggerEvent(
+            firstSessionState,
+            { type: 'onRestoreRequested' },
             { remoteFunctions: {} },
         )
         expect(firstSessionState).toEqual({
             isAuthenticated: false,
             screen: 'restore-where',
+        })
+
+        const choiceResult = await triggerEvent(
+            firstSessionState,
+            { type: 'onChoice' },
+            {
+                remoteFunctions: {
+                    isBackupAuthenticated: () => false,
+                },
+            },
+        )
+        expect(choiceResult).toEqual({
+            redirect: { to: 'gdrive-login' },
+        })
+        expect(localStorage.popChanges()).toEqual([
+            {
+                type: 'set',
+                key: 'backup.restore.authenticating',
+                value: true,
+            },
+        ])
+
+        const secondSessionState = await logic.getInitialState({
+            analytics,
+            localStorage,
+            remoteFunction: fakeRemoteFunction({
+                isBackupAuthenticated: () => false,
+                hasInitialBackup: () => false,
+                getBackupInfo: () => null,
+            }),
+        })
+        expect(secondSessionState).toEqual({
+            isAuthenticated: false,
+            screen: 'restore-where',
+        })
+        expect(localStorage.popChanges()).toEqual([
+            {
+                type: 'remove',
+                key: 'backup.restore.authenticating',
+            },
+        ])
+    })
+
+    it('should be able to guide the user through the restore flow when they try to restore while being logged in', async () => {
+        const { localStorage, analytics, triggerEvent } = setupTest()
+
+        const firstSessionState = await logic.getInitialState({
+            analytics,
+            localStorage,
+            remoteFunction: fakeRemoteFunction({
+                isBackupAuthenticated: () => true,
+                hasInitialBackup: () => false,
+                getBackupInfo: () => null,
+            }),
+        })
+        expect(firstSessionState).toEqual({
+            isAuthenticated: true,
+            screen: 'overview',
+        })
+
+        await triggerEvent(
+            firstSessionState,
+            { type: 'onRestoreRequested' },
+            { remoteFunctions: {} },
+        )
+        expect(firstSessionState).toEqual({
+            isAuthenticated: true,
+            screen: 'restore-where',
+        })
+
+        await triggerEvent(
+            firstSessionState,
+            { type: 'onChoice' },
+            {
+                remoteFunctions: {},
+            },
+        )
+        expect(firstSessionState).toEqual({
+            isAuthenticated: true,
+            screen: 'restore-running',
         })
     })
 })
