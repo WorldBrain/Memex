@@ -1,12 +1,21 @@
 .inbox {
     font-size: 15px;
     text-decoration: none;
-    padding: 25px;
-    color: #777;
+    padding-top: 5px;
+    margin-right: 20px;
+    margin-left: 20px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 5px;
+    color: #3eb995;
     cursor: pointer;
 
     &:hover {
-        color: #3eb995;
+        color: #777;
+        background-color: #c7d3d0;
+        border-radius: 4px;
+        padding-top: 4px;
+        padding-bottom: 5px;
     }
 
     @media (max-width: 1650px) {
@@ -26,6 +35,14 @@
 .activeInbox {
     color: #777;
     border-bottom: 6px solid #3eb995;
-    margin-top: -1px;
     padding-bottom: 19px;
+    padding-top: 25px;
+
+    &:hover {
+        color: #777;
+        border-radius: 4px;
+        margin-top: 20px;
+        padding-bottom: 19px;
+        padding-top: 5px;
+    }
 }

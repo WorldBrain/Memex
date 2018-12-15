@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="36px" height="35px" viewBox="0 0 36 35" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 51.3 (57544) - http://www.bohemiancoding.com/sketch -->
+    <title>Path</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Onboarding-Memex" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Artboard" transform="translate(-152.000000, -107.000000)" fill="#F8E71C" stroke="#E1ECE9">
+            <path d="M171.734073,109.125 L175.675073,117.963 L185.298073,118.98 C186.932073,119.153 187.591073,121.179 186.370073,122.279 L179.183073,128.758 L181.189073,138.224 C181.530073,139.832 179.807073,141.084 178.383073,140.263 L170.000073,135.429 L161.617073,140.263 C160.193073,141.084 158.470073,139.832 158.811073,138.224 L160.817073,128.758 L153.630073,122.279 C152.409073,121.179 153.068073,119.153 154.702073,118.98 L164.325073,117.963 L168.266073,109.125 C168.935073,107.625 171.065073,107.625 171.734073,109.125 Z" id="Path"></path>
+        </g>
+    </g>
+</svg>

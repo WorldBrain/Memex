@@ -17,7 +17,14 @@ const DownloadDetails = ({ children, filterHandlers, filter }) => (
                 Success
             </button>
             <button className={filterClass} onClick={filterHandlers.fail}>
-                Failed
+                Failed (
+                <a
+                    target="_blank"
+                    href="https://worldbrain.helprace.com/i117-why-do-so-many-of-my-imports-fail"
+                >
+                    ?
+                </a>
+                )
             </button>
         </div>
         <table className={localStyles.detailsTable}>
