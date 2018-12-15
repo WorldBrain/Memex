@@ -2,7 +2,6 @@ import ImportContainer from './imports'
 import SettingsContainer from './containers/settings'
 import BackupSettingsContainer from './backup'
 import Privacy from './privacy'
-import Acknowledgements from './acknowledgement/components/content'
 import Tutorial from './tutorial'
 import Statistics from './statistics'
 import Settings from './settings'
@@ -53,10 +52,10 @@ export default [
         icon: 'security',
     },
     {
-        name: 'Acknowledgements',
-        pathname: '/acknowledgements',
-        component: Acknowledgements,
-        icon: 'perm_identity',
+        name: 'Who is behind this?',
+        pathname: 'https://worldbrain.io/team',
+        icon: 'people',
+        isExternal: true,
     },
     {
         name: 'Help Me Please',

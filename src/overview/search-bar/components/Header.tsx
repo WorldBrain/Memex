@@ -86,7 +86,11 @@ class Header extends PureComponent<Props> {
                         className={styles.upgrade}
                         to={this.props.pricingUrl}
                     >
-                        Upgrade Memex
+                        <img
+                            src={'/img/star_gold.svg'}
+                            className={styles.upgradeIcon}
+                        />
+                        Go Premium
                     </OutLink>
                     <Link to={this.props.settingsRoute}>
                         <img

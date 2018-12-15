@@ -37,7 +37,16 @@ const ProgressTable = ({ progress, allowTypes }) => (
                 <th />
                 <th>Total Progress</th>
                 <th>Successful</th>
-                <th>Failed</th>
+                <th>
+                    Failed (
+                    <a
+                        target="_blank"
+                        href="https://worldbrain.helprace.com/i117-why-do-so-many-of-my-imports-fail"
+                    >
+                        ?
+                    </a>
+                    )
+                </th>
             </tr>
         </thead>
         <tbody>
