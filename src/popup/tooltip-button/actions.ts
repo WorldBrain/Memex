@@ -53,7 +53,7 @@ export const showTooltip: () => Thunk = () => async (dispatch, getState) => {
 
     const isEnabled = await getTooltipState()
     if (!isEnabled) {
-        await remoteFunction('insertTooltip', { tabId })()
+        await remoteFunction('insertTooltip', { tabId })({ override: true })
     }
 
     await remoteFunction('showContentTooltip', { tabId })()

@@ -1,6 +1,6 @@
 import { browser } from 'webextension-polyfill-ts'
 
-import { delayed, getPositionState } from './utils'
+import { delayed, getPositionState, getTooltipState } from './utils'
 import {
     createAndCopyDirectLink,
     createAnnotation,
@@ -46,13 +46,16 @@ async function _getCloseMessageShown() {
 let target = null
 let showTooltip = null
 
+/* Denotes whether the user inserted/removed tooltip by his/her own self. */
+let manualOverride = false
+
 /**
  * Creates target container for Tooltip.
  * Injects content_script.css.
  * Mounts Tooltip React component.
  * Sets up Container <---> webpage Remote functions.
  */
-export const insertTooltip = async ({ toolbarNotifications } = {}) => {
+export const insertTooltip = async ({ toolbarNotifications }) => {
     // If target is set, Tooltip has already been injected.
     if (target) {
         return
@@ -70,6 +73,7 @@ export const insertTooltip = async ({ toolbarNotifications } = {}) => {
         createAnnotation,
         openSettings: () => openOptionsRPC('settings'),
         destroyTooltip: async () => {
+            manualOverride = true
             removeTooltip()
 
             const closeMessageShown = await _getCloseMessageShown()
@@ -99,6 +103,26 @@ export const removeTooltip = () => {
 }
 
 /**
+ * Inserts or removes tooltip from the page (if not overridden manually).
+ * Should either be called through the RPC, or pass the `toolbarNotifications`
+ * wrapped in an object.
+ */
+const insertOrRemoveTooltip = async ({ toolbarNotifications }) => {
+    if (manualOverride) {
+        return
+    }
+
+    const isTooltipEnabled = await getTooltipState()
+    const isTooltipPresent = !!target
+
+    if (isTooltipEnabled && !isTooltipPresent) {
+        insertTooltip({ toolbarNotifications })
+    } else if (!isTooltipEnabled && isTooltipPresent) {
+        removeTooltip()
+    }
+}
+
+/**
  * Sets up RPC functions to insert and remove Tooltip from Popup.
  */
 export const setupRPC = ({ toolbarNotifications }) => {
@@ -112,11 +136,16 @@ export const setupRPC = ({ toolbarNotifications }) => {
                 showTooltip(position)
             }
         },
-        insertTooltip: () => {
+        insertTooltip: ({ override } = {}) => {
+            manualOverride = !!override
             insertTooltip({ toolbarNotifications })
         },
-        removeTooltip: () => {
+        removeTooltip: ({ override } = {}) => {
+            manualOverride = !!override
             removeTooltip()
+        },
+        insertOrRemoveTooltip: async () => {
+            await insertOrRemoveTooltip({ toolbarNotifications })
         },
     })
 }

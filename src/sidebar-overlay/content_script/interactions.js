@@ -103,7 +103,7 @@ let manualOverride = false
  * Mounts Ribbon React component.
  * Sets up shadow DOM <--> webpage Remote functions.
  */
-export const insertRibbon = ({ toolbarNotifications } = {}) => {
+export const insertRibbon = ({ toolbarNotifications }) => {
     // If target is set, Ribbon has already been injected.
     if (target) {
         return
@@ -172,6 +172,11 @@ const removeRibbon = () => {
     toggleSidebar = null
 }
 
+/**
+ * Inserts or removes ribbon from the page (if not overridden manually).
+ * Should either be called through the RPC, or pass the `toolbarNotifications`
+ * wrapped in an object.
+ */
 const insertOrRemoveRibbon = async ({ toolbarNotifications }) => {
     if (manualOverride) {
         return
@@ -200,11 +205,11 @@ export const setupRPC = ({ toolbarNotifications }) => {
             return toggleSidebar.then(f => f())
         },
         insertRibbon: ({ override } = {}) => {
-            manualOverride = override
+            manualOverride = !!override
             insertRibbon({ toolbarNotifications })
         },
         removeRibbon: ({ override } = {}) => {
-            manualOverride = override
+            manualOverride = !!override
             removeRibbon()
         },
         insertOrRemoveRibbon: async () => {
