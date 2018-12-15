@@ -1,4 +1,16 @@
-import { delayed, getTooltipState, getPositionState } from './utils'
+import { browser } from 'webextension-polyfill-ts'
+
+import { delayed, getPositionState, getTooltipState } from './utils'
+import {
+    createAndCopyDirectLink,
+    createAnnotation,
+} from '../direct-linking/content_script/interactions'
+import { setupUIContainer, destroyUIContainer } from './components'
+import { remoteFunction, makeRemotelyCallable } from '../util/webextensionRPC'
+import { injectCSS } from '../search-injection/dom'
+
+const openOptionsRPC = remoteFunction('openOptionsTab')
+
 let mouseupListener = null
 
 export function setupTooltipTrigger(callback) {
@@ -14,23 +26,141 @@ export function destroyTooltipTrigger() {
     mouseupListener = null
 }
 
+const CLOSE_MESSAGESHOWN_KEY = 'tooltip.close-message-shown'
+
+async function _setCloseMessageShown() {
+    await browser.storage.local.set({
+        [CLOSE_MESSAGESHOWN_KEY]: true,
+    })
+}
+
+async function _getCloseMessageShown() {
+    const {
+        [CLOSE_MESSAGESHOWN_KEY]: closeMessageShown,
+    } = await browser.storage.local.get({ [CLOSE_MESSAGESHOWN_KEY]: false })
+
+    return closeMessageShown
+}
+
+// Target container for the Tooltip.
+let target = null
+let showTooltip = null
+
+/* Denotes whether the user inserted/removed tooltip by his/her own self. */
+let manualOverride = false
+
+/**
+ * Creates target container for Tooltip.
+ * Injects content_script.css.
+ * Mounts Tooltip React component.
+ * Sets up Container <---> webpage Remote functions.
+ */
+export const insertTooltip = async ({ toolbarNotifications }) => {
+    // If target is set, Tooltip has already been injected.
+    if (target) {
+        return
+    }
+
+    target = document.createElement('div')
+    target.setAttribute('id', 'memex-direct-linking-tooltip')
+    document.body.appendChild(target)
+
+    const cssFile = browser.extension.getURL('/content_script.css')
+    injectCSS(cssFile)
+
+    showTooltip = await setupUIContainer(target, {
+        createAndCopyDirectLink,
+        createAnnotation,
+        openSettings: () => openOptionsRPC('settings'),
+        destroyTooltip: async () => {
+            manualOverride = true
+            removeTooltip()
+
+            const closeMessageShown = await _getCloseMessageShown()
+            if (!closeMessageShown) {
+                toolbarNotifications.showToolbarNotification(
+                    'tooltip-first-close',
+                )
+                _setCloseMessageShown()
+            }
+        },
+    })
+
+    setupTooltipTrigger(showTooltip)
+    conditionallyTriggerTooltip(showTooltip)
+}
+
+export const removeTooltip = () => {
+    if (!target) {
+        return
+    }
+    destroyTooltipTrigger()
+    destroyUIContainer(target)
+    target.remove()
+
+    target = null
+    showTooltip = null
+}
+
+/**
+ * Inserts or removes tooltip from the page (if not overridden manually).
+ * Should either be called through the RPC, or pass the `toolbarNotifications`
+ * wrapped in an object.
+ */
+const insertOrRemoveTooltip = async ({ toolbarNotifications }) => {
+    if (manualOverride) {
+        return
+    }
+
+    const isTooltipEnabled = await getTooltipState()
+    const isTooltipPresent = !!target
+
+    if (isTooltipEnabled && !isTooltipPresent) {
+        insertTooltip({ toolbarNotifications })
+    } else if (!isTooltipEnabled && isTooltipPresent) {
+        removeTooltip()
+    }
+}
+
+/**
+ * Sets up RPC functions to insert and remove Tooltip from Popup.
+ */
+export const setupRPC = ({ toolbarNotifications }) => {
+    makeRemotelyCallable({
+        showContentTooltip: async () => {
+            if (!showTooltip) {
+                await insertTooltip({ toolbarNotifications })
+            }
+            if (userSelectedText()) {
+                const position = calculateTooltipPostion()
+                showTooltip(position)
+            }
+        },
+        insertTooltip: ({ override } = {}) => {
+            manualOverride = !!override
+            insertTooltip({ toolbarNotifications })
+        },
+        removeTooltip: ({ override } = {}) => {
+            manualOverride = !!override
+            removeTooltip()
+        },
+        insertOrRemoveTooltip: async () => {
+            await insertOrRemoveTooltip({ toolbarNotifications })
+        },
+    })
+}
+
 /**
  * Checks for certain conditions before triggering the tooltip.
  * i) Whether the selection made by the user is just text.
- * ii) Whether the user has enabled the tooltip in his preferences.
- * iii) Whether the selected target is not inside the tooltip itself.
+ * ii) Whether the selected target is not inside the tooltip itself.
  *
  * Event is undefined in the scenario of user selecting the text before the
- * page has loaded. So we don't need to check for condition iii) since the
+ * page has loaded. So we don't need to check for condition ii) since the
  * tooltip wouldn't have popped up yet.
  */
 export const conditionallyTriggerTooltip = delayed(async (callback, event) => {
-    const isTooltipEnabled = await getTooltipState()
-    if (
-        !userSelectedText() ||
-        !isTooltipEnabled ||
-        (event && isTargetInsideTooltip(event))
-    ) {
+    if (!userSelectedText() || (event && isTargetInsideTooltip(event))) {
         return
     }
 

@@ -23,7 +23,16 @@ const StatusReport = ({
         <h1 className={localStyles.heading}>Import Summary</h1>
         <div className={localStyles.reportDetails}>
             <p>{`Succeeded (${successCount})`}</p>
-            <p>{`Failed (${failCount})`}</p>
+            <p>
+                {`Failed (${failCount})`} (
+                <a
+                    target="_blank"
+                    href="https://worldbrain.helprace.com/i117-why-do-so-many-of-my-imports-fail"
+                >
+                    ?
+                </a>
+                )
+            </p>
             <p>{`Total (${successCount + failCount})`}</p>
             {children && (
                 <p>

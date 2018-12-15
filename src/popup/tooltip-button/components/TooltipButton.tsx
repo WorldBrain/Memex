@@ -39,7 +39,7 @@ class InPageSwitches extends PureComponent<Props> {
                         onClick={this.props.showTooltip}
                         itemClass={styles.button}
                         btnClass={buttonStyles.highlighterIcon}
-                        title={'Open Memex annotation sidebar'}
+                        title={'Open Memex annotation tooltip'}
                     >
                         Show Highlighter
                         <p className={buttonStyles.subTitle}>
@@ -75,7 +75,7 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
         // console.log('dispatch')
         e.preventDefault()
         await dispatch(acts.showTooltip())
-        // setTimeout(props.closePopup, 200)
+        setTimeout(props.closePopup, 200)
     },
     handleChange: async e => {
         e.preventDefault()
