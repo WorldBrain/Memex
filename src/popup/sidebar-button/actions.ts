@@ -33,7 +33,6 @@ export const toggleSidebarFlag: () => Thunk = () => async (
         await remoteFunction('removeRibbon', { tabId })()
     } else {
         await remoteFunction('insertRibbon', { tabId })()
-        await remoteFunction('toggleSidebarOverlay', { tabId })()
     }
 }
 
@@ -47,7 +46,7 @@ export const openSideBar: () => Thunk = () => async (dispatch, getState) => {
 
     const isEnabled = await getSidebarState()
     if (!isEnabled) {
-        await remoteFunction('insertRibbon', { tabId })()
+        await remoteFunction('insertRibbon', { tabId })({ override: true })
     }
 
     await remoteFunction('toggleSidebarOverlay', { tabId })()

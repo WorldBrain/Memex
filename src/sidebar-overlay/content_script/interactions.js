@@ -8,6 +8,10 @@ import { getSidebarState, getOffsetTop, setSidebarState } from '../utils'
 import { setTooltipState, getTooltipState } from '../../content-tooltip/utils'
 import styles from 'src/direct-linking/content_script/styles.css'
 import { createRootElement, destroyRootElement } from './rendering'
+import {
+    removeTooltip,
+    insertTooltip,
+} from '../../content-tooltip/interactions'
 
 const openOptionsRPC = remoteFunction('openOptionsTab')
 
@@ -85,22 +89,26 @@ const _getCloseMessageShown = async () => {
     return closeMessageShown
 }
 
-// Target container for the Ribbon/Sidebar iFrame
+// Target container for the Ribbon/Sidebar shadow DOM.
 let target = null
 let shadowRoot = null
 let toggleSidebar = null
 
+/* Denotes whether the user inserted/removed ribbon by his/her own self. */
+let manualOverride = false
+
 /**
- * Creates target container for Ribbon and Sidebar iFrame.
+ * Creates target container for Ribbon and Sidebar shadow DOM.
  * Injects content_script.css.
  * Mounts Ribbon React component.
- * Sets up iFrame <--> webpage Remote functions.
+ * Sets up shadow DOM <--> webpage Remote functions.
  */
 export const insertRibbon = ({ toolbarNotifications }) => {
     // If target is set, Ribbon has already been injected.
     if (target) {
         return
     }
+
     let resolveToggleSidebar
     toggleSidebar = new Promise(resolve => {
         resolveToggleSidebar = resolve
@@ -122,6 +130,7 @@ export const insertRibbon = ({ toolbarNotifications }) => {
             resolveToggleSidebar(toggleSidebar)
         },
         onClose: async () => {
+            manualOverride = true
             removeRibbon()
 
             const closeMessageShown = await _getCloseMessageShown()
@@ -140,8 +149,13 @@ export const insertRibbon = ({ toolbarNotifications }) => {
         handleRibbonToggle: async prevState => {
             await setSidebarState(!prevState)
         },
-        handleTooltipToggle: async prevState => {
-            await setTooltipState(!prevState)
+        handleTooltipToggle: async isTooltipEnabled => {
+            if (isTooltipEnabled) {
+                removeTooltip()
+            } else {
+                await insertTooltip({ toolbarNotifications })
+            }
+            await setTooltipState(!isTooltipEnabled)
         },
     })
 }
@@ -159,21 +173,47 @@ const removeRibbon = () => {
 }
 
 /**
+ * Inserts or removes ribbon from the page (if not overridden manually).
+ * Should either be called through the RPC, or pass the `toolbarNotifications`
+ * wrapped in an object.
+ */
+const insertOrRemoveRibbon = async ({ toolbarNotifications }) => {
+    if (manualOverride) {
+        return
+    }
+
+    const isRibbonEnabled = await getSidebarState()
+    const isRibbonPresent = !!target
+
+    if (isRibbonEnabled && !isRibbonPresent) {
+        insertRibbon({ toolbarNotifications })
+    } else if (!isRibbonEnabled && isRibbonPresent) {
+        removeRibbon()
+    }
+}
+
+/**
  * Setups up RPC functions to insert and remove Ribbon from Popup.
  */
-export const setupRPC = () => {
+export const setupRPC = ({ toolbarNotifications }) => {
     makeRemotelyCallable({
         toggleSidebarOverlay: async () => {
             if (!toggleSidebar) {
-                insertRibbon()
+                manualOverride = true
+                insertRibbon({ toolbarNotifications })
             }
             return toggleSidebar.then(f => f())
         },
-        insertRibbon: () => {
-            insertRibbon()
+        insertRibbon: ({ override } = {}) => {
+            manualOverride = !!override
+            insertRibbon({ toolbarNotifications })
         },
-        removeRibbon: () => {
+        removeRibbon: ({ override } = {}) => {
+            manualOverride = !!override
             removeRibbon()
+        },
+        insertOrRemoveRibbon: async () => {
+            await insertOrRemoveRibbon({ toolbarNotifications })
         },
     })
 }
