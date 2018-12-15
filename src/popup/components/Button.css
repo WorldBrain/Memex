@@ -90,7 +90,7 @@
     font-family: 'Open Sans';
     font-weight: 100;
     margin-right: 6px;
-    margin-top: 15px;
+    margin-bottom: 6px;
     outline: 0;
     color: #909090;
     text-decoration: none;
@@ -166,14 +166,15 @@
 .badge {
     background-color: #c12908;
     color: white;
-    width: 20px;
-    height: 20px;
+    width: 15px;
+    height: 15px;
     border-radius: 10px;
     display: flex;
     justify-content: center;
-    position: relative;
-    top: -32px;
-    left: 9px;
+    position: absolute;
+    bottom: 15px;
+    left: 33px;
+    font-size: 10px;
 }
 
 .subTitle {
