@@ -210,6 +210,10 @@ class Ribbon extends React.Component {
         this.ribbonRef.removeEventListener('mouseleave', this.handleMouseLeave)
     }
 
+    updateState = ({ isRibbonEnabled, isTooltipEnabled }) => {
+        this.setState({ isRibbonEnabled, isTooltipEnabled })
+    }
+
     highlightAndScroll = async annotation => {
         const top = await this.props.highlightAndScroll(annotation)
         this.setState({
