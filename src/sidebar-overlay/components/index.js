@@ -3,14 +3,18 @@ import ReactDOM from 'react-dom'
 
 import SidebarContainer from './sidebarContainer'
 import Ribbon from './Ribbon'
-import { remoteFunction } from '../../util/webextensionRPC'
+import {
+    remoteFunction
+} from '../../util/webextensionRPC'
 import * as interactions from '../content_script/interactions'
+import {
+    EVENT_NAMES
+} from '../../analytics/internal/constants'
 
 const processEventRPC = remoteFunction('processEvent')
 
 export const setupRibbonUI = (
-    target,
-    {
+    target, {
         onInit,
         onClose,
         getInitialState,
@@ -21,32 +25,61 @@ export const setupRibbonUI = (
 ) => {
     const sidebarURL = browser.extension.getURL('sidebar.html')
 
-    ReactDOM.render(
-        <Ribbon
-            onInit={onInit}
-            destroy={e => {
+    ReactDOM.render( <
+        Ribbon onInit = {
+            onInit
+        }
+        destroy = {
+            e => {
                 e.stopPropagation()
                 onClose()
-            }}
-            ref={setRibbonRef}
-            getInitialState={getInitialState}
-            handleRibbonToggle={handleRibbonToggle}
-            handleTooltipToggle={handleTooltipToggle}
-            sidebarURL={sidebarURL}
-            highlightAll={interactions.highlightAnnotations}
-            removeHighlights={interactions.removeHighlights}
-            removeAnnotationHighlights={interactions.removeAnnotationHighlights}
-            highlightAndScroll={interactions.highlightAndScroll}
-            makeHighlightMedium={interactions.makeHighlightMedium}
-            removeMediumHighlights={interactions.removeMediumHighlights}
-            sortAnnotationByPosition={interactions.sortAnnotationByPosition}
+            }
+        }
+        ref = {
+            setRibbonRef
+        }
+        getInitialState = {
+            getInitialState
+        }
+        handleRibbonToggle = {
+            handleRibbonToggle
+        }
+        handleTooltipToggle = {
+            handleTooltipToggle
+        }
+        sidebarURL = {
+            sidebarURL
+        }
+        highlightAll = {
+            interactions.highlightAnnotations
+        }
+        removeHighlights = {
+            interactions.removeHighlights
+        }
+        removeAnnotationHighlights = {
+            interactions.removeAnnotationHighlights
+        }
+        highlightAndScroll = {
+            interactions.highlightAndScroll
+        }
+        makeHighlightMedium = {
+            interactions.makeHighlightMedium
+        }
+        removeMediumHighlights = {
+            interactions.removeMediumHighlights
+        }
+        sortAnnotationByPosition = {
+            interactions.sortAnnotationByPosition
+        }
         />,
         target,
     )
 }
 
 export const destroyAll = (target, shadowRoot = null) => () => {
-    processEventRPC({ type: 'disableSidebarPage' })
+    processEventRPC({
+        type: EVENT_NAMES.DISABLE_SIDEBAR_PAGE
+    })
 
     ReactDOM.unmountComponentAtNode(target)
 

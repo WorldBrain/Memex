@@ -8,6 +8,7 @@ import * as constants from './constants'
 import { SearchResult } from '../types'
 import { selectors as searchBar, acts as searchBarActs } from '../search-bar'
 import { selectors as filters } from '../../search-filters'
+import { EVENT_NAMES } from '../../analytics/internal/constants'
 
 const processEventRPC = remoteFunction('processEvent')
 const createBookmarkRPC = remoteFunction('addBookmark')
@@ -59,7 +60,7 @@ export const toggleBookmark: (url: string, i: number) => Thunk = (
     })
 
     processEventRPC({
-        type: hasBookmark ? 'removeResultBookmark' : 'createResultBookmark',
+        type: hasBookmark ? EVENT_NAMES.REMOVE_RESULT_BOOKMARK : EVENT_NAMES.CREATE_RESULT_BOOKMARK,
     })
 
     // Reset UI state in case of error
@@ -158,25 +159,25 @@ function trackSearch(searchResult, overwrite, state) {
 function storeSearch(searchResult, overwrite, state) {
     const type =
         searchResult.totalCount === 0
-            ? 'unsuccessfulSearch'
+            ? EVENT_NAMES.UNSUCCESSFUL_SEARCH
             : overwrite
-                ? 'successfulSearch'
-                : 'paginateSearch'
+                ? EVENT_NAMES.SUCCESSFUL_SEARCH
+                : EVENT_NAMES.PAGINATE_SEARCH
 
     processEventRPC({ type })
 
     if (filters.onlyBookmarks(state)) {
-        processEventRPC({ type: 'bookmarkFilter' })
+        processEventRPC({ type: EVENT_NAMES.BOOKMARK_FILTER })
     }
 
     if (filters.tags(state).length > 0) {
-        processEventRPC({ type: 'tagFilter' })
+        processEventRPC({ type: EVENT_NAMES.TAG_FILTER })
     }
 
     if (
         filters.domainsInc(state).length > 0 ||
         filters.domainsExc(state).length > 0
     ) {
-        processEventRPC({ type: 'domainFilter' })
+        processEventRPC({ type: EVENT_NAMES.DOMAIN_FILTER })
     }
 }

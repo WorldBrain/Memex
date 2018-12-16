@@ -17,261 +17,263 @@ export const API_HOST =
  */
 
 export const EVENT_TYPES = {
-    successfulSearch: {
+    [EVENT_NAMES.SUCCESSFUL_SEARCH]: {
         id: 1,
-        notifType: 'successfulSearch',
+        notifType: EVENT_NAMES.SUCCESSFUL_SEARCH,
     },
-    paginateSearch: {
+    [EVENT_NAMES.PAGINATE_SEARCH]: {
         id: 2,
-        notifType: 'successfulSearch',
+        notifType: EVENT_NAMES.SUCCESSFUL_SEARCH,
     },
-    unsuccessfulSearch: {
+    [EVENT_NAMES.UNSUCCESSFUL_SEARCH]: {
         id: 3,
-        notifType: 'unsuccessfulSearch',
+        notifType: EVENT_NAMES.UNSUCCESSFUL_SEARCH,
     },
-    datepickerByDropdownStartDate: {
+    [EVENT_NAMES.DATEPICKER_DROPDOWN_START]: {
         id: 4,
-        notifType: 'datepicker',
+        notifType: EVENT_NAMES.DATEPICKER,
     },
-    datepickerClearStartDate: {
+    [EVENT_NAMES.DATEPICKER_CLEAR_START]: {
         id: 5,
-        notifType: 'datepicker',
+        notifType: EVENT_NAMES.DATEPICKER,
     },
-    datepickerByDropdownEndDate: {
+    [EVENT_NAMES.DATEPICKER_DROPDOWN_END]: {
         id: 6,
-        notifType: 'datepicker',
+        notifType: EVENT_NAMES.DATEPICKER,
     },
-    datepickerClearEndDate: {
+    [EVENT_NAMES.DATEPICKER_CLEAR_END]: {
         id: 7,
-        notifType: 'datepicker',
+        notifType: EVENT_NAMES.DATEPICKER,
     },
-    bookmarkFilter: {
+    [EVENT_NAMES.BOOKMARK_FILTER]: {
         id: 8,
-        notifType: 'bookmarkFilter',
+        notifType: EVENT_NAMES.BOOKMARK_FILTER,
     },
-    tagFilter: {
+    [EVENT_NAMES.TAG_FILTER]: {
         id: 9,
-        notifType: 'tagFilter',
+        notifType: EVENT_NAMES.TAG_FILTER,
     },
-    domainFilter: {
+    [EVENT_NAMES.DOMAIN_FILTER]: {
         id: 10,
-        notifType: 'domainFilter',
+        notifType: EVENT_NAMES.DOMAIN_FILTER,
     },
-    addTag: {
+    [EVENT_NAMES.ADD_TAG]: {
         id: 12,
-        notifType: 'tagging',
+        notifType: EVENT_NAMES.TAGGING,
     },
-    deleteTag: {
+    [EVENT_NAMES.DELETE_TAG]: {
         id: 13,
-        notifType: 'tagging',
+        notifType: EVENT_NAMES.TAGGING,
     },
-    deleteResult: {
+    [EVENT_NAMES.DELETE_RESULT]: {
         id: 14,
     },
-    createResultBookmark: {
+    [EVENT_NAMES.CREATE_RESULT_BOOKMARK]: {
         id: 15,
-        notifType: 'bookmark',
+        notifType: EVENT_NAMES.BOOKMARK,
     },
-    removeResultBookmark: {
+    [EVENT_NAMES.REMOVE_RESULT_BOOKMARK]: {
         id: 16,
-        notifType: 'bookmark',
+        notifType: EVENT_NAMES.BOOKMARK,
     },
-    createBrowserBookmark: {
+    [EVENT_NAMES.CREATE_BROWSER_BOOKMARK]: {
         id: 17,
-        notifType: 'bookmark',
+        notifType: EVENT_NAMES.BOOKMARK,
     },
-    removeBrowserBookmark: {
+    [EVENT_NAMES.REMOVE_BROWSER_BOOKMARK]: {
         id: 18,
-        notifType: 'bookmark',
+        notifType: EVENT_NAMES.BOOKMARK,
     },
-    createPopupBookmark: {
+    [EVENT_NAMES.CREATE_POPUP_BOOKMARK]: {
         id: 19,
-        notifType: 'bookmark',
+        notifType: EVENT_NAMES.BOOKMARK,
     },
-    removePopupBookmark: {
+    [EVENT_NAMES.REMOVE_POPUP_BOOKMARK]: {
         id: 20,
-        notifType: 'bookmark',
+        notifType: EVENT_NAMES.BOOKMARK,
     },
-    addPopupTag: {
+    [EVENT_NAMES.ADD_POPUP_TAG]: {
         id: 21,
-        notifType: 'tagging',
+        notifType: EVENT_NAMES.TAGGING,
     },
-    deletePopupTag: {
+    [EVENT_NAMES.DELETE_POPUP_TAG]: {
         id: 22,
-        notifType: 'tagging',
+        notifType: EVENT_NAMES.TAGGING,
     },
-    blacklistSite: {
+    [EVENT_NAMES.BLACKLIST_SITE]: {
         id: 23,
-        notifType: 'blacklist',
+        notifType: EVENT_NAMES.BLACKLIST,
     },
-    blacklistDomain: {
+    [EVENT_NAMES.BLACKLIST_DOMAIN]: {
         id: 24,
-        notifType: 'blacklist',
+        notifType: EVENT_NAMES.BLACKLIST,
     },
-    removeBlacklistEntry: {
+    [EVENT_NAMES.REMOVE_BLACKLIST_ENTRY]: {
         id: 25,
-        notifType: 'blacklist',
+        notifType: EVENT_NAMES.BLACKLIST,
     },
-    changeTrackingPrefOptOut: {
+    [EVENT_NAMES.CHANGE_TRACKING_PREF_OPTOUT]: {
         id: 26,
     },
-    changeTrackingPrefOptIn: {
+    [EVENT_NAMES.CHANGE_TRACKING_PREF_OPTIN]: {
         id: 27,
     },
-    startImport: {
+    [EVENT_NAMES.START_IMPORT]: {
         id: 28,
     },
-    pauseImport: {
+    [EVENT_NAMES.PAUSE_IMPORT]: {
         id: 29,
     },
-    resumeImport: {
+    [EVENT_NAMES.RESUME_IMPORT]: {
         id: 30,
     },
-    cancelImport: {
+    [EVENT_NAMES.CANCEL_IMPORT]: {
         id: 31,
     },
-    finishImport: {
+    [EVENT_NAMES.FINISH_IMPORT]: {
         id: 32,
     },
-    searchPopup: {
+    [EVENT_NAMES.SEARCH_POPUP]: {
         id: 33,
-        notifType: 'addressBarSearch',
+        notifType: EVENT_NAMES.ADDRESS_BAR_SEARCH,
     },
-    successfulOmnibarSearch: {
+    [EVENT_NAMES.SUCCESSFUL_OMNIBAR_SEARCH]: {
         id: 34,
-        notifType: 'addressBarSearch',
+        notifType: EVENT_NAMES.ADDRESS_BAR_SEARCH,
     },
-    unsuccessfulOmnibarSearch: {
+    [EVENT_NAMES.UNSUCCESSFUL_OMNIBAR_SEARCH]: {
         id: 35,
-        notifType: 'addressBarSearch',
+        notifType: EVENT_NAMES.ADDRESS_BAR_SEARCH,
     },
-    datepickerByNlpStartDate: {
+    [EVENT_NAMES.DATEPICKER_NLP_START_DATE]: {
         id: 36,
-        notifType: 'datepickerNlp',
+        notifType: EVENT_NAMES.DATEPICKER_NLP,
     },
-    datepickerByNlpEndDate: {
+    [EVENT_NAMES.DATEPICKER_NLP_END_DATE]: {
         id: 37,
-        notifType: 'datepickerNlp',
+        notifType: EVENT_NAMES.DATEPICKER_NLP,
     },
-    nlpSearch: {
+    [EVENT_NAMES.NLP_SEARCH]: {
         id: 38,
-        notifType: 'nlpSearch',
+        notifType: EVENT_NAMES.NLP_SEARCH,
     },
-    onboardingCancelImport: {
+    [EVENT_NAMES.ONBOARDING_CANCEL_IMPORT]: {
         id: 39,
     },
-    onboardingFinishImport: {
+    [EVENT_NAMES.ONBOARDING_FINISH_IMPORT]: {
         id: 40,
     },
-    addBlacklistEntry: {
+    [EVENT_NAMES.ADD_BLACKLIST_ENTRY]: {
         id: 41,
-        notifType: 'blacklist',
+        notifType: EVENT_NAMES.BLACKLIST,
     },
-    readNotificationSearchEngine: {
+    [EVENT_NAMES.READ_NOTIFICATION_SEARCH_ENGINE]: {
         id: 42,
     },
-    readNotificationOverview: {
+    [EVENT_NAMES.READ_NOTIFICATION_OVERVIEW]: {
         id: 43,
     },
-    readNotificationPagination: {
+    [EVENT_NAMES.READ_NOTIFICATION_PAGINATION]: {
         id: 44,
     },
-    openInboxOveview: {
+    [EVENT_NAMES.OPEN_INBOX_OVERVIEW]: {
         id: 45,
     },
-    clickStorageChangeNotifButton: {
+    [EVENT_NAMES.CLICK_STORAGE_CHANGE_NOTIF_BUTTON]: {
         id: 46,
     },
-    clickOpenNewLinkButton: {
+    [EVENT_NAMES.CLICK_OPEN_NEW_LINK_BUTTON]: {
         id: 47,
     },
-    closeInboxOveview: {
+    [EVENT_NAMES.CLOSE_INBOX_OVERVIEW]: {
         id: 48,
     },
-    clickOnSystemNotification: {
+    [EVENT_NAMES.CLICK_ON_SYSTEM_NOTIFICATION]: {
         id: 49,
     },
-    toggleStorageSearchEngine: {
+    [EVENT_NAMES.TOGGLE_STORAGE_SEARCH_ENGINE]: {
         id: 50,
     },
-    clickOpenNewLinkButtonSearch: {
+    [EVENT_NAMES.CLICK_OPEN_NEW_LINK_BUTTON_SEARCH]: {
         id: 51,
     },
-    resumeIndexing: {
+    [EVENT_NAMES.RESUME_INDEXING]: {
         id: 52,
     },
-    pauseIndexing: {
+    [EVENT_NAMES.PAUSE_INDEXING]: {
         id: 53,
     },
-    closeCommentSidebar: {
+    [EVENT_NAMES.CLOSE_COMMENT_SIDEBAR]: {
         id: 54,
     },
-    openCommentSidebar: {
+    [EVENT_NAMES.OPEN_COMMENT_SIDEBAR]: {
         id: 55,
     },
-    createAnnotation: {
+    [EVENT_NAMES.CREATE_ANNOTATION]: {
         id: 56,
     },
-    removeRibbon: {
+    [EVENT_NAMES.REMOVE_RIBBON]: {
         id: 57,
     },
-    openSidebarPage: {
+    [EVENT_NAMES.OPEN_SIDEBAR_PAGE]: {
         id: 58,
     },
-    closeSidebarPage: {
+    [EVENT_NAMES.CLOSE_SIDEBAR_PAGE]: {
         id: 59,
     },
-    createAnnotationPage: {
+    [EVENT_NAMES.CREATE_ANNOTATION_PAGE]: {
         id: 60,
     },
-    disableSidebarPage: {
+    [EVENT_NAMES.DISABLE_SIDEBAR_PAGE]: {
         id: 61,
     },
-    enableTooltipPopup: {
+    [EVENT_NAMES.ENABLE_TOOLTIP_POPUP]: {
         id: 62,
     },
-    disableTooltipPopup: {
+    [EVENT_NAMES.DISABLE_TOOLTIP_POPUP]: {
         id: 63,
     },
-    deleteAnnotation: {
+    [EVENT_NAMES.DELETE_ANNOTATION]: {
         id: 64,
     },
-    createCollection: {
+    [EVENT_NAMES.CREATE_COLLECTION]: {
         id: 65,
     },
-    insertPageToCollection: {
+    [EVENT_NAMES.INSERT_PAGE_COLLECTION]: {
         id: 66,
     },
-    removeCollection: {
+    [EVENT_NAMES.REMOVE_COLLECTION]: {
         id: 67,
     },
-    removePageFromCollection: {
+    [EVENT_NAMES.REMOVE_PAGE_COLLECTION]: {
         id: 68,
     },
-    openURLFeature: {
+    [EVENT_NAMES.OPEN_URL_FEATURE]: {
         id: 69,
     },
-    startOnboarding: {
+    [EVENT_NAMES.START_ONBOARDING]: {
         id: 70,
     },
-    finishOnboarding: {
+    [EVENT_NAMES.FINISH_ONBOARDING]: {
         id: 71,
     },
-    clickReplyButton: {
+    [EVENT_NAMES.CLICK_REPLY_BUTTON]: {
         id: 72,
     },
-    clickShareButton: {
+    [EVENT_NAMES.CLICK_SHARE_BUTTON]: {
         id: 73,
     },
-    learnMoreCrowdFunding: {
+    [EVENT_NAMES.LEARN_MORE_CROWD_FUNDING]: {
         id: 74,
     },
 }
 
 export const EVENT_NAMES = {
-    SUCCESFUL_SEARCH: 'succesfulSearch',
+    SUCCESSFUL_SEARCH: 'succesfulSearch',
     PAGINATE_SEARCH: 'paginateSearch',
-    UNSUCCESFUL_SEARCH: 'unsuccessfulSearch',
+    UNSUCCESSFUL_SEARCH: 'unsuccessfulSearch',
+    DATEPICKER: 'datepicker',
+    DATEPICKER_DROPDOWN: 'datepickerByDropdown',
     DATEPICKER_DROPDOWN_START: 'datepickerByDropdownStartDate',
     DATEPICKER_CLEAR_START: 'datepickerClearStartDate',
     DATEPICKER_DROPDOWN_END: 'datepickerByDropdownEndDate',
@@ -321,19 +323,47 @@ export const EVENT_NAMES = {
     CLICK_OPEN_NEW_LINK_BUTTON_SEARCH: 'clickOpenNewLinkButtonSearch',
     RESUME_INDEXING: 'resumeIndexing',
     PAUSE_INDEXING: 'pauseIndexing',
+    CLOSE_COMMENT_SIDEBAR: 'closeCommentSidebar',
+    OPEN_COMMENT_SIDEBAR: 'openCommentSidebar',
+    CREATE_ANNOTATION: 'createAnnotation',
+    REMOVE_RIBBON: 'removeRibbon',
+    OPEN_SIDEBAR_PAGE: 'openSidebarPage',
+    CLOSE_SIDEBAR_PAGE: 'closeSidebarPage',
+    CREATE_ANNOTATION_PAGE: 'createAnnotationPage',
+    DISABLE_SIDEBAR_PAGE: 'disableSidebarPage',
+    ENABLE_TOOLTIP_POPUP: 'enableTooltipPopup',
+    DISABLE_TOOLTIP_POPUP: 'disableTooltipPopup',
+    DELETE_ANNOTATION: 'deleteAnnotation',
+    CREATE_COLLECTION: 'createCollection',
+    INSERT_PAGE_COLLECTION: 'insertPageToCollection',
+    REMOVE_COLLECTION: 'removeCollection',
+    REMOVE_PAGE_COLLECTION: 'removePageFromCollection',
+    OPEN_URL_FEATURE: 'openURLFeature',
+    START_ONBOARDING: 'startOnboarding',
+    FINISH_ONBOARDING: 'finishOnboarding',
+    CLICK_REPLY_BUTTON: 'clickReplyButton',
+    CLICK_SHARE_BUTTON: 'clickShareButton',
+    LEARN_MORE_CROWD_FUNDING: 'learnMoreCrowdFunding',
+
+    TAGGING: 'tagging',
+    BOOKMARK: 'bookmark',
+    BLACKLIST: 'blacklist',
+    ADDRESS_BAR_SEARCH: 'addressBarSearch',
+    DATEPICKER_NLP: 'datepickerNlp',
+
 }
 
 export const NOTIF_TYPE_EVENT_IDS = {
-    successfulSearch: [1, 2],
-    unsuccessfulSearch: [3],
-    datepicker: [4, 5, 6, 7],
-    bookmarkFilter: [8],
-    tagFilter: [9],
-    domainFilter: [10],
-    tagging: [12, 13, 21, 22],
-    bookmark: [14, 15, 16, 17, 18, 19, 20],
-    blacklist: [23, 24, 25, 41],
-    addressBarSearch: [33, 34, 35],
-    datepickerNlp: [36, 37],
-    nlpSearch: [38],
+    [EVENT_NAMES.SUCCESSFUL_SEARCH]: [1, 2],
+    [EVENT_NAMES.UNSUCCESSFUL_SEARCH]: [3],
+    [EVENT_NAMES.DATEPICKER]: [4, 5, 6, 7],
+    [EVENT_NAMES.BOOKMARK_FILTER]: [8],
+    [EVENT_NAMES.TAG_FILTER]: [9],
+    [EVENT_NAMES.DOMAIN_FILTER]: [10],
+    [EVENT_NAMES.TAGGING]: [12, 13, 21, 22],
+    [EVENT_NAMES.BOOKMARK]: [14, 15, 16, 17, 18, 19, 20],
+    [EVENT_NAMES.BLACKLIST]: [23, 24, 25, 41],
+    [EVENT_NAMES.ADDRESS_BAR_SEARCH]: [33, 34, 35],
+    [EVENT_NAMES.DATEPICKER_NLP]: [36, 37],
+    [EVENT_NAMES.NLP_SEARCH]: [38],
 }

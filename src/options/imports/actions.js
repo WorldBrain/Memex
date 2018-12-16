@@ -1,9 +1,19 @@
-import { createAction } from 'redux-act'
+import {
+    createAction
+} from 'redux-act'
 
 import analytics from 'src/analytics'
-import { CMDS, IMPORT_CONN_NAME } from './constants'
+import {
+    CMDS,
+    IMPORT_CONN_NAME
+} from './constants'
 import * as selectors from './selectors'
-import { remoteFunction } from 'src/util/webextensionRPC'
+import {
+    remoteFunction
+} from 'src/util/webextensionRPC'
+import {
+    EVENT_NAMES
+} from '../../analytics/internal/constants'
 
 const processEvent = remoteFunction('processEvent')
 
@@ -44,7 +54,10 @@ export const showDownloadDetails = createAction('imports/showDownloadDetails')
  * Responds to messages sent from background script over the runtime connection by dispatching
  * appropriate redux actions. Non-handled messages are ignored.
  */
-const getCmdMessageHandler = dispatch => ({ cmd, ...payload }) => {
+const getCmdMessageHandler = dispatch => ({
+    cmd,
+    ...payload
+}) => {
     switch (cmd) {
         case CMDS.INIT:
             dispatch(initEstimateCounts(payload))
@@ -72,7 +85,9 @@ let port
  * Handles initing the imports runtime connection with the background script's batch import logic.
  */
 export const init = () => async dispatch => {
-    port = browser.runtime.connect({ name: IMPORT_CONN_NAME })
+    port = browser.runtime.connect({
+        name: IMPORT_CONN_NAME
+    })
     port.onMessage.addListener(getCmdMessageHandler(dispatch))
 }
 
@@ -90,7 +105,10 @@ const makePortMessagingThunk = ({
 }) => payload => dispatch => {
     cb()
     dispatch(actionCreator(payload))
-    port.postMessage({ cmd, payload })
+    port.postMessage({
+        cmd,
+        payload
+    })
 }
 
 export const recalcEsts = makePortMessagingThunk({
@@ -119,7 +137,7 @@ export const stop = makePortMessagingThunk({
         })
 
         processEvent({
-            type: 'cancelImport',
+            type: EVENT_NAMES.CANCEL_IMPORT,
         })
     },
 })
@@ -134,7 +152,7 @@ export const pause = makePortMessagingThunk({
         })
 
         processEvent({
-            type: 'pauseImport',
+            type: EVENT_NAMES.PAUSE_IMPORT,
         })
     },
 })
@@ -149,7 +167,7 @@ export const resume = makePortMessagingThunk({
         })
 
         processEvent({
-            type: 'resumeImport',
+            type: EVENT_NAMES.RESUME_IMPORT,
         })
     },
 })
@@ -164,7 +182,7 @@ export const finish = makePortMessagingThunk({
         })
 
         processEvent({
-            type: 'finishImport',
+            type: EVENT_NAMES.FINISH_IMPORT,
         })
     },
 })
@@ -180,7 +198,7 @@ export const start = () => (dispatch, getState) => {
     })
 
     processEvent({
-        type: 'startImport',
+        type: EVENT_NAMES.START_IMPORT,
     })
 
     dispatch(prepareImport())

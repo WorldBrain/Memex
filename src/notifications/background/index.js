@@ -1,13 +1,19 @@
-import { makeRemotelyCallable } from 'src/util/webextensionRPC'
+import {
+    makeRemotelyCallable
+} from 'src/util/webextensionRPC'
 import NotificationStorage from './storage'
 import * as notifications from '../notifications'
 import createNotif from 'src/util/notifications'
 import internalAnalytics from 'src/analytics/internal'
-
+import {
+    EVENT_NAMES
+} from '../../analytics/internal/constants'
 export default class NotificationBackground {
     static LAST_NOTIF_TIME = 'last-notif-proc-timestamp'
 
-    constructor({ storageManager }) {
+    constructor({
+        storageManager
+    }) {
         this.storage = new NotificationStorage(storageManager)
     }
 
@@ -75,20 +81,21 @@ export default class NotificationBackground {
                     const url = notification.system.buttons[0].action.url
 
                     // Notification with updates when we update
-                    await createNotif(
-                        {
+                    await createNotif({
                             title: notification.system.title,
                             message: notification.system.message,
                         },
                         () => {
                             internalAnalytics.processEvent({
-                                type: 'clickOnSystemNotification',
+                                type: EVENT_NAMES.CLICK_ON_SYSTEM_NOTIFICATION,
                                 details: {
                                     notificationId: notification.id,
                                 },
                             })
 
-                            return browser.tabs.create({ url })
+                            return browser.tabs.create({
+                                url
+                            })
                         },
                     )
                 }

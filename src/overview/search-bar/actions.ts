@@ -12,6 +12,7 @@ import {
     selectors as filters,
 } from '../../search-filters'
 import { actions as notifActs } from '../../notifications'
+import { EVENT_NAMES } from '../../analytics/internal/constants'
 
 const processEventRPC = remoteFunction('processEvent')
 const requestSearchRPC = remoteFunction('search')
@@ -69,7 +70,7 @@ export const setQueryTagsDomains: (
     }
 
     if (input.length > 0) {
-        processEventRPC({ type: 'nlpSearch' })
+        processEventRPC({ type: EVENT_NAMES.NLP_SEARCH })
     }
 
     dispatch(setQuery(input))

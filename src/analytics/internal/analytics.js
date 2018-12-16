@@ -1,10 +1,14 @@
-import { EVENT_TYPES } from './constants'
+import {
+    EVENT_NAMES
+} from './constants'
 
 class Analytics {
     _initDataLoaded
     _setDataLoaded
 
-    constructor({ serverConnector }) {
+    constructor({
+        serverConnector
+    }) {
         this._serverConnector = serverConnector
 
         this._initDataLoaded = new Promise(
@@ -13,18 +17,42 @@ class Analytics {
     }
 
     _eventStats = {
-        successfulSearch: { count: 0 },
-        unsuccessfulSearch: { count: 0 },
-        datepicker: { count: 0 },
-        bookmarkFilter: { count: 0 },
-        tagFilter: { count: 0 },
-        domainFilter: { count: 0 },
-        tagging: { count: 0 },
-        bookmark: { count: 0 },
-        blacklist: { count: 0 },
-        addressBarSearch: { count: 0 },
-        datepickerNlp: { count: 0 },
-        nlpSearch: { count: 0 },
+        [EVENT_NAMES.SUCCESSFUL_SEARCH]: {
+            count: 0
+        },
+        [EVENT_NAMES.UNSUCCESSFUL_SEARCH]: {
+            count: 0
+        },
+        [EVENT_NAMES.DATEPICKER]: {
+            count: 0
+        },
+        [EVENT_NAMES.BOOKMARK_FILTER]: {
+            count: 0
+        },
+        [EVENT_NAMES.TAG_FILTER]: {
+            count: 0
+        },
+        [EVENT_NAMES.DOMAIN_FILTER]: {
+            count: 0
+        },
+        [EVENT_NAMES.TAGGING]: {
+            count: 0
+        },
+        [EVENT_NAMES.BOOKMARK]: {
+            count: 0
+        },
+        [EVENT_NAMES.BLACKLIST]: {
+            count: 0
+        },
+        [EVENT_NAMES.ADDRESS_BAR_SEARCH]: {
+            count: 0
+        },
+        [EVENT_NAMES.DATEPICKER_NLP]: {
+            count: 0
+        },
+        [EVENT_NAMES.NLP_SEARCH]: {
+            count: 0
+        },
     }
 
     async registerOperations(eventLog) {

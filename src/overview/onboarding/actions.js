@@ -1,11 +1,20 @@
-import { createAction } from 'redux-act'
+import {
+    createAction
+} from 'redux-act'
 
 import analytics from 'src/analytics'
-import { remoteFunction } from 'src/util/webextensionRPC'
+import {
+    remoteFunction
+} from 'src/util/webextensionRPC'
 // import { IMPORT_TYPE as TYPE, CMDS } from 'src/options/imports/constants'
 // import { IMPORT_CONN_NAME } from './constants'
 import * as selectors from './selectors'
-import { SHOULD_TRACK_STORAGE_KEY as SHOULD_TRACK } from '../../options/privacy/constants'
+import {
+    SHOULD_TRACK_STORAGE_KEY as SHOULD_TRACK
+} from '../../options/privacy/constants'
+import {
+    EVENT_NAMES
+} from '../../analytics/internal/constants'
 
 export const setShouldTrack = createAction('onboarding/setShouldTrack')
 export const setVisible = createAction('onboarding/setVisible')
@@ -17,11 +26,13 @@ export const setImportsStarted = createAction('onboarding/setImportsStarted')
 const processEvent = remoteFunction('processEvent')
 
 const persistShouldTrack = flag =>
-    browser.storage.local.set({ [SHOULD_TRACK]: flag })
+    browser.storage.local.set({
+        [SHOULD_TRACK]: flag
+    })
 
 export const init = () => (dispatch, getState) => {
     processEvent({
-        type: 'startOnboarding',
+        type: EVENT_NAMES.START_ONBOARDING,
     })
 
     if (selectors.isVisible(getState())) {
@@ -29,9 +40,9 @@ export const init = () => (dispatch, getState) => {
             .get(SHOULD_TRACK)
             .then(
                 storage =>
-                    storage[SHOULD_TRACK] == null
-                        ? persistShouldTrack(selectors.shouldTrack(getState()))
-                        : dispatch(setShouldTrack(!!storage[SHOULD_TRACK])),
+                storage[SHOULD_TRACK] == null ?
+                persistShouldTrack(selectors.shouldTrack(getState())) :
+                dispatch(setShouldTrack(!!storage[SHOULD_TRACK])),
             )
             .catch()
 
@@ -40,7 +51,9 @@ export const init = () => (dispatch, getState) => {
 }
 
 export const hideOnboarding = () => dispatch => {
-    processEvent({ type: 'finishOnboarding' })
+    processEvent({
+        type: EVENT_NAMES.FINISH_ONBOARDING
+    })
     dispatch(setVisible(false))
 }
 
@@ -48,8 +61,7 @@ export const toggleShouldTrack = () => async (dispatch, getState) => {
     const toggled = !selectors.shouldTrack(getState())
 
     const trackEvent = force => {
-        const trackEvent = analytics.trackEvent(
-            {
+        const trackEvent = analytics.trackEvent({
                 category: 'Privacy',
                 action: 'Change tracking pref',
                 name: toggled ? 'opt-in' : 'opt-out',
@@ -58,9 +70,8 @@ export const toggleShouldTrack = () => async (dispatch, getState) => {
         )
 
         const processEventToStore = processEvent({
-            type: toggled
-                ? 'changeTrackingPrefOptIn'
-                : 'changeTrackingPrefOptOut',
+            type: toggled ?
+                EVENT_NAMES.CHANGE_TRACKING_PREF_OPTIN : EVENT_NAMES.CHANGE_TRACKING_PREF_OPTOUT,
             force,
         })
 

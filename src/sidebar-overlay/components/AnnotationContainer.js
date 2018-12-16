@@ -2,7 +2,9 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import cx from 'classnames'
 import moment from 'moment'
-import { remoteFunction } from '../../util/webextensionRPC'
+import {
+    remoteFunction
+} from '../../util/webextensionRPC'
 
 import Annotation from './Annotation'
 import TagHolder from './TagHolder.js'
@@ -11,7 +13,12 @@ import {
     CrowdfundingModal,
 } from '../../common-ui/crowdfunding'
 import styles from './Annotation.css'
-import { IndexDropdown } from '../../common-ui/containers'
+import {
+    IndexDropdown
+} from '../../common-ui/containers'
+import {
+    EVENT_NAMES
+} from '../../analytics/internal/constants'
 
 class AnnotationContainer extends React.Component {
     static propTypes = {
@@ -90,7 +97,7 @@ class AnnotationContainer extends React.Component {
     setCrowdfunding = (value, isReply) => async () => {
         if (isReply != null) {
             await remoteFunction('processEvent')({
-                type: isReply ? 'clickReplyButton' : 'clickShareButton',
+                type: isReply ? EVENT_NAMES.CLICK_REPLY_BUTTON : EVENT_NAMES.CLICK_SHARE_BUTTON,
             })
         }
 
@@ -160,14 +167,23 @@ class AnnotationContainer extends React.Component {
     handleEditAnnotation = e => {
         e.preventDefault()
         e.stopPropagation()
-        const { url, comment } = this.props.annotation
-        const { annotationText, truncated } = this.state
+        const {
+            url,
+            comment
+        } = this.props.annotation
+        const {
+            annotationText,
+            truncated
+        } = this.state
         const newTruncated = {
             ...truncated,
         }
 
         if (annotationText !== comment) {
-            this.props.editAnnotation({ url, comment: annotationText })
+            this.props.editAnnotation({
+                url,
+                comment: annotationText
+            })
             // Recalculate if truncation is needed
             newTruncated.annotation = this.getTruncatedObject(annotationText)
         }
@@ -183,7 +199,9 @@ class AnnotationContainer extends React.Component {
 
     getTags = () => this.state.tags.map(tag => tag.name)
 
-    _setTagInput = value => () => this.setState({ tagInput: value })
+    _setTagInput = value => () => this.setState({
+        tagInput: value
+    })
 
     getDateDetails = () => {
         if (this.state.annotationEditMode) {
@@ -192,7 +210,10 @@ class AnnotationContainer extends React.Component {
             }
         }
 
-        const { createdWhen, lastEdited } = this.props.annotation
+        const {
+            createdWhen,
+            lastEdited
+        } = this.props.annotation
         let dateObject
         if (!lastEdited) {
             dateObject = new Date(createdWhen)
@@ -209,293 +230,418 @@ class AnnotationContainer extends React.Component {
     }
 
     renderFooterIcons = () => {
-        const { annotation, env } = this.props
-        return (
-            <div className={styles.footerAside}>
-                <span
-                    className={cx(styles.commonIcon, styles.editIcon)}
-                    onClick={this.toggleEditAnnotation}
-                />
-                <span
-                    className={cx(styles.commonIcon, styles.trashIcon)}
-                    onClick={this._setFooterState('delete')}
-                />
-                <span
-                    className={cx(styles.commonIcon, styles.shareIcon)}
-                    onClick={this.setCrowdfunding(true, false)}
-                />
-                <span
-                    className={cx(styles.commonIcon, styles.replyIcon)}
-                    onClick={this.setCrowdfunding(true, true)}
-                />
-                {env === 'overview' && annotation.body ? (
-                    <span
-                        className={styles.goToPageIcon}
-                        onClick={this.props.goToAnnotation(annotation)}
+        const {
+            annotation,
+            env
+        } = this.props
+        return ( <
+                div className = {
+                    styles.footerAside
+                } >
+                <
+                span className = {
+                    cx(styles.commonIcon, styles.editIcon)
+                }
+                onClick = {
+                    this.toggleEditAnnotation
+                }
+                /> <
+                span className = {
+                    cx(styles.commonIcon, styles.trashIcon)
+                }
+                onClick = {
+                    this._setFooterState('delete')
+                }
+                /> <
+                span className = {
+                    cx(styles.commonIcon, styles.shareIcon)
+                }
+                onClick = {
+                    this.setCrowdfunding(true, false)
+                }
+                /> <
+                span className = {
+                    cx(styles.commonIcon, styles.replyIcon)
+                }
+                onClick = {
+                    this.setCrowdfunding(true, true)
+                }
+                /> {
+                env === 'overview' && annotation.body ? ( <
+                    span className = {
+                        styles.goToPageIcon
+                    }
+                    onClick = {
+                        this.props.goToAnnotation(annotation)
+                    }
                     />
-                ) : null}
-            </div>
-        )
-    }
+                ) : null
+            } <
+            /div>
+    )
+}
 
-    renderEditButtons = () => {
-        return (
-            <div className={styles.footerAside}>
-                <span
-                    className={styles.footerBoldText}
-                    onClick={this.handleEditAnnotation}
-                >
-                    Save
-                </span>
-                <span
-                    className={styles.footerText}
-                    onClick={this.toggleEditAnnotation}
-                >
-                    Cancel
-                </span>
-            </div>
-        )
-    }
-
-    renderDeleteButtons = () => {
-        return (
-            <div className={styles.footerAside}>
-                <span className={styles.deleteReally}>Really?</span>
-                <span
-                    className={styles.footerBoldText}
-                    onClick={this.handleDeleteAnnotation}
-                >
-                    Delete
-                </span>
-                <span
-                    className={styles.footerText}
-                    onClick={this._setFooterState('default')}
-                >
-                    Cancel
-                </span>
-            </div>
-        )
-    }
-
-    findFooterRenderer(state) {
-        if (state === 'default') {
-            return this.renderFooterIcons()
-        } else if (state === 'edit') {
-            return this.renderEditButtons()
-        } else if (state === 'delete') {
-            return this.renderDeleteButtons()
+renderEditButtons = () => {
+    return ( <
+        div className = {
+            styles.footerAside
+        } >
+        <
+        span className = {
+            styles.footerBoldText
         }
-    }
-
-    renderFooter = () => {
-        const { footerState } = this.state
-        return (
-            <div className={styles.footer}>
-                {this.findFooterRenderer(footerState)}
-            </div>
-        )
-    }
-
-    _toggleState = stateName => () => {
-        const toggled = !this.state[stateName]
-        this.setState({
-            [stateName]: toggled,
-        })
-    }
-
-    toggleTruncation = name => e => {
-        e.preventDefault()
-        e.stopPropagation()
-        const truncated = { ...this.state.truncated }
-        truncated[name].isTruncated = !truncated[name].isTruncated
-
-        this.setState({
-            truncated,
-        })
-    }
-
-    _setFooterState = footerState => e => {
-        e.preventDefault()
-        e.stopPropagation()
-        this.setState({
-            footerState,
-        })
-    }
-
-    toggleEditAnnotation = e => {
-        this._toggleState('annotationEditMode')()
-        if (this.state.footerState === 'edit') {
-            this._setFooterState('default')(e)
-        } else {
-            this._setFooterState('edit')(e)
+        onClick = {
+            this.handleEditAnnotation
+        } >
+        Save <
+        /span> <
+        span className = {
+            styles.footerText
         }
-    }
+        onClick = {
+            this.toggleEditAnnotation
+        } >
+        Cancel <
+        /span> < /
+        div >
+    )
+}
 
-    setTagRef = node => {
-        this.tagInputContainer = node
-    }
+renderDeleteButtons = () => {
+    return ( <
+        div className = {
+            styles.footerAside
+        } >
+        <
+        span className = {
+            styles.deleteReally
+        } > Really ? < /span> <
+        span className = {
+            styles.footerBoldText
+        }
+        onClick = {
+            this.handleDeleteAnnotation
+        } >
+        Delete <
+        /span> <
+        span className = {
+            styles.footerText
+        }
+        onClick = {
+            this._setFooterState('default')
+        } >
+        Cancel <
+        /span> < /
+        div >
+    )
+}
 
-    renderShowButton = name => {
-        const { truncated } = this.state
-        if (!truncated) {
-            return null
-        }
-        if (truncated[name]) {
-            return (
-                <span
-                    className={cx(styles.showMore, {
-                        [styles.rotated]: !truncated[name].isTruncated,
-                    })}
-                    onClick={this.toggleTruncation(name)}
-                />
-            )
-        }
+findFooterRenderer(state) {
+    if (state === 'default') {
+        return this.renderFooterIcons()
+    } else if (state === 'edit') {
+        return this.renderEditButtons()
+    } else if (state === 'delete') {
+        return this.renderDeleteButtons()
+    }
+}
+
+renderFooter = () => {
+    const {
+        footerState
+    } = this.state
+    return ( <
+        div className = {
+            styles.footer
+        } > {
+            this.findFooterRenderer(footerState)
+        } <
+        /div>
+    )
+}
+
+_toggleState = stateName => () => {
+    const toggled = !this.state[stateName]
+    this.setState({
+        [stateName]: toggled,
+    })
+}
+
+toggleTruncation = name => e => {
+    e.preventDefault()
+    e.stopPropagation()
+    const truncated = { ...this.state.truncated
+    }
+    truncated[name].isTruncated = !truncated[name].isTruncated
+
+    this.setState({
+        truncated,
+    })
+}
+
+_setFooterState = footerState => e => {
+    e.preventDefault()
+    e.stopPropagation()
+    this.setState({
+        footerState,
+    })
+}
+
+toggleEditAnnotation = e => {
+    this._toggleState('annotationEditMode')()
+    if (this.state.footerState === 'edit') {
+        this._setFooterState('default')(e)
+    } else {
+        this._setFooterState('edit')(e)
+    }
+}
+
+setTagRef = node => {
+    this.tagInputContainer = node
+}
+
+renderShowButton = name => {
+    const {
+        truncated
+    } = this.state
+    if (!truncated) {
         return null
     }
-
-    getHighlightText = () => {
-        const { truncated } = this.state
-        if (
-            truncated &&
-            truncated.highlight &&
-            truncated.highlight.isTruncated
-        ) {
-            return truncated.highlight.text
-        } else {
-            return this.props.annotation.body
-        }
+    if (truncated[name]) {
+        return ( <
+            span className = {
+                cx(styles.showMore, {
+                    [styles.rotated]: !truncated[name].isTruncated,
+                })
+            }
+            onClick = {
+                this.toggleTruncation(name)
+            }
+            />
+        )
     }
+    return null
+}
 
-    getAnnotationText = () => {
-        const { truncated, annotationEditMode } = this.state
-        if (annotationEditMode) {
-            return ''
-        }
-        if (
-            truncated &&
-            truncated.annotation &&
-            truncated.annotation.isTruncated
-        ) {
-            return truncated.annotation.text
-        } else {
-            return this.props.annotation.comment
-        }
+getHighlightText = () => {
+    const {
+        truncated
+    } = this.state
+    if (
+        truncated &&
+        truncated.highlight &&
+        truncated.highlight.isTruncated
+    ) {
+        return truncated.highlight.text
+    } else {
+        return this.props.annotation.body
     }
+}
 
-    renderTagInput() {
-        const tagStringArray = this.state.tags.map(tag => tag.name)
-        if (this.state.tagInput) {
-            return (
-                <IndexDropdown
-                    isForAnnotation
-                    url={this.props.annotation.url}
-                    initFilters={tagStringArray}
-                    onFilterAdd={this.reloadTags}
-                    onFilterDel={this.reloadTags}
-                    source="tag"
-                />
+getAnnotationText = () => {
+    const {
+        truncated,
+        annotationEditMode
+    } = this.state
+    if (annotationEditMode) {
+        return ''
+    }
+    if (
+        truncated &&
+        truncated.annotation &&
+        truncated.annotation.isTruncated
+    ) {
+        return truncated.annotation.text
+    } else {
+        return this.props.annotation.comment
+    }
+}
+
+renderTagInput() {
+    const tagStringArray = this.state.tags.map(tag => tag.name)
+    if (this.state.tagInput) {
+        return ( <
+            IndexDropdown isForAnnotation url = {
+                this.props.annotation.url
+            }
+            initFilters = {
+                tagStringArray
+            }
+            onFilterAdd = {
+                this.reloadTags
+            }
+            onFilterDel = {
+                this.reloadTags
+            }
+            source = "tag" /
+            >
+        )
+    } else {
+        return ( <
+            TagHolder tags = {
+                this.state.tags
+            }
+            clickHandler = {
+                this._setTagInput(true)
+            }
+            deleteTag = {
+                tag => {
+                    remoteFunction('delAnnotationTag')(tag)
+                    this.reloadTags()
+                }
+            }
+            />
+        )
+    }
+}
+
+renderAnnotationInput = () => {
+    if (!this.state.annotationEditMode) {
+        return null
+    }
+    return ( <
+        div className = {
+            styles.annotationInput
+        } >
+        <
+        textarea rows = "5"
+        cols = "20"
+        className = {
+            styles.annotationTextarea
+        }
+        value = {
+            this.state.annotationText
+        }
+        onChange = {
+            this.handleChange
+        }
+        onClick = {
+            () => {
+                this.setState({
+                    tagInput: false,
+                })
+            }
+        }
+        placeholder = "Add comment..." /
+        >
+        <
+        div ref = {
+            this.setTagRef
+        } > {
+            this.renderTagInput()
+        } < /div> < /
+        div >
+    )
+}
+
+deriveTagsClass = () =>
+    cx({
+        [styles.tagsContainer]: this.state.tags.length,
+        [styles.noComment]: this.state.tags.length && !this.props.annotation.comment,
+        [styles.noDisplay]: this.state.annotationEditMode,
+    })
+
+deriveIsJustComment = () => !this.props.annotation.body
+
+deriveIsIFrame = () => this.props.env === 'iframe'
+
+/**
+ * Comment box (#fafafa bg) should only be visible if there is a comment
+ * or the annotaion isn't edit mode.
+ */
+shouldCommentBoxBeVisible = () => {
+    return (
+        this.props.annotation.comment.length > 0 &&
+        !this.state.annotationEditMode
+    )
+}
+
+render() {
+    const {
+        goToAnnotation,
+        annotation
+    } = this.props
+    if (this.state.crowdfunding && this.props.env === 'iframe') {
+        return <CrowdfundingBox onClose = {
+            this.setCrowdfunding(false)
+        }
+        />
+    }
+    return ( <
+            React.Fragment >
+            <
+            Annotation truncatedHighlightText = {
+                this.getHighlightText()
+            }
+            truncatedAnnotationText = {
+                this.getAnnotationText()
+            }
+            showMoreHighlight = {
+                this.renderShowButton('highlight')
+            }
+            showMoreAnnotation = {
+                this.renderShowButton('annotation')
+            }
+            annotationEditMode = {
+                this.state.annotationEditMode
+            }
+            tagClasses = {
+                this.deriveTagsClass()
+            }
+            tags = {
+                this.state.tags
+            }
+            dateDetails = {
+                this.getDateDetails()
+            }
+            renderAnnotationInput = {
+                this.renderAnnotationInput
+            }
+            renderFooter = {
+                this.renderFooter
+            }
+            goToAnnotation = {
+                goToAnnotation(annotation)
+            }
+            isIFrame = {
+                this.deriveIsIFrame()
+            }
+            shouldCommentBoxBeVisible = {
+                this.shouldCommentBoxBeVisible()
+            }
+            isJustComment = {
+                this.deriveIsJustComment()
+            }
+            onMouseEnter = {
+                this.props.onMouseEnter(
+                    this.props.annotation,
+                )
+            }
+            onMouseLeave = {
+                this.props.onMouseLeave
+            }
+            isHovered = {
+                this.props.isHovered
+            }
+            isActive = {
+                this.props.isActive
+            }
+            id = {
+                this.props.annotation.url
+            }
+            /> {
+            this.state.crowdfunding &&
+            this.props.env === 'overview' && ( <
+                CrowdfundingModal onClose = {
+                    this.setCrowdfunding(false)
+                }
+                context = "annotations" /
+                >
             )
-        } else {
-            return (
-                <TagHolder
-                    tags={this.state.tags}
-                    clickHandler={this._setTagInput(true)}
-                    deleteTag={tag => {
-                        remoteFunction('delAnnotationTag')(tag)
-                        this.reloadTags()
-                    }}
-                />
-            )
-        }
-    }
-
-    renderAnnotationInput = () => {
-        if (!this.state.annotationEditMode) {
-            return null
-        }
-        return (
-            <div className={styles.annotationInput}>
-                <textarea
-                    rows="5"
-                    cols="20"
-                    className={styles.annotationTextarea}
-                    value={this.state.annotationText}
-                    onChange={this.handleChange}
-                    onClick={() => {
-                        this.setState({
-                            tagInput: false,
-                        })
-                    }}
-                    placeholder="Add comment..."
-                />
-                <div ref={this.setTagRef}>{this.renderTagInput()}</div>
-            </div>
-        )
-    }
-
-    deriveTagsClass = () =>
-        cx({
-            [styles.tagsContainer]: this.state.tags.length,
-            [styles.noComment]:
-                this.state.tags.length && !this.props.annotation.comment,
-            [styles.noDisplay]: this.state.annotationEditMode,
-        })
-
-    deriveIsJustComment = () => !this.props.annotation.body
-
-    deriveIsIFrame = () => this.props.env === 'iframe'
-
-    /**
-     * Comment box (#fafafa bg) should only be visible if there is a comment
-     * or the annotaion isn't edit mode.
-     */
-    shouldCommentBoxBeVisible = () => {
-        return (
-            this.props.annotation.comment.length > 0 &&
-            !this.state.annotationEditMode
-        )
-    }
-
-    render() {
-        const { goToAnnotation, annotation } = this.props
-        if (this.state.crowdfunding && this.props.env === 'iframe') {
-            return <CrowdfundingBox onClose={this.setCrowdfunding(false)} />
-        }
-        return (
-            <React.Fragment>
-                <Annotation
-                    truncatedHighlightText={this.getHighlightText()}
-                    truncatedAnnotationText={this.getAnnotationText()}
-                    showMoreHighlight={this.renderShowButton('highlight')}
-                    showMoreAnnotation={this.renderShowButton('annotation')}
-                    annotationEditMode={this.state.annotationEditMode}
-                    tagClasses={this.deriveTagsClass()}
-                    tags={this.state.tags}
-                    dateDetails={this.getDateDetails()}
-                    renderAnnotationInput={this.renderAnnotationInput}
-                    renderFooter={this.renderFooter}
-                    goToAnnotation={goToAnnotation(annotation)}
-                    isIFrame={this.deriveIsIFrame()}
-                    shouldCommentBoxBeVisible={this.shouldCommentBoxBeVisible()}
-                    isJustComment={this.deriveIsJustComment()}
-                    onMouseEnter={this.props.onMouseEnter(
-                        this.props.annotation,
-                    )}
-                    onMouseLeave={this.props.onMouseLeave}
-                    isHovered={this.props.isHovered}
-                    isActive={this.props.isActive}
-                    id={this.props.annotation.url}
-                />
-                {this.state.crowdfunding &&
-                    this.props.env === 'overview' && (
-                        <CrowdfundingModal
-                            onClose={this.setCrowdfunding(false)}
-                            context="annotations"
-                        />
-                    )}
-            </React.Fragment>
-        )
-    }
+        } <
+        /React.Fragment>
+)
+}
 }
 
 export default AnnotationContainer
