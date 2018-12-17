@@ -1,6 +1,11 @@
 import { browser } from 'webextension-polyfill-ts'
 
-import { delayed, getPositionState, getTooltipState } from './utils'
+import {
+    delayed,
+    getPositionState,
+    getTooltipState,
+    getPageCenter,
+} from './utils'
 import {
     createAndCopyDirectLink,
     createAnnotation,
@@ -17,7 +22,7 @@ let mouseupListener = null
 
 export function setupTooltipTrigger(callback, toolbarNotifications) {
     mouseupListener = event => {
-        conditionallyTriggerTooltip(callback, event, toolbarNotifications)
+        conditionallyTriggerTooltip({ callback, toolbarNotifications }, event)
     }
 
     document.body.addEventListener('mouseup', mouseupListener)
@@ -88,8 +93,8 @@ export const insertTooltip = async ({ toolbarNotifications }) => {
         },
     })
 
-    setupTooltipTrigger(showTooltip)
-    conditionallyTriggerTooltip(showTooltip)
+    setupTooltipTrigger(showTooltip, toolbarNotifications)
+    conditionallyTriggerTooltip({ callback: showTooltip, toolbarNotifications })
 }
 
 export const removeTooltip = () => {
@@ -161,23 +166,11 @@ export const setupRPC = ({ toolbarNotifications }) => {
  * page has loaded. So we don't need to check for condition ii) since the
  * tooltip wouldn't have popped up yet.
  */
-<<<<<<< HEAD
-export const conditionallyTriggerTooltip = delayed(async (callback, event) => {
-    if (!userSelectedText() || (event && isTargetInsideTooltip(event))) {
-        return
-    }
-=======
 export const conditionallyTriggerTooltip = delayed(
-    async (callback, event, toolbarNotifications) => {
-        const isTooltipEnabled = await getTooltipState()
-        if (
-            !userSelectedText() ||
-            !isTooltipEnabled ||
-            (event && isTargetInsideTooltip(event))
-        ) {
+    async ({ callback, toolbarNotifications }, event) => {
+        if (!userSelectedText() || (event && isTargetInsideTooltip(event))) {
             return
         }
->>>>>>> Add Select Option notification.
 
         /*
     If all the conditions passed, then this returns the position to anchor the
@@ -203,6 +196,7 @@ export const conditionallyTriggerTooltip = delayed(
 
         if (annotationStage === 'highlight_text_notification_shown') {
             // Remove previous notification
+            console.log(toolbarNotifications)
             toolbarNotifications._destroyRootElement()
             toolbarNotifications.showToolbarNotification(
                 'onboarding-select-option',
@@ -216,6 +210,44 @@ export const conditionallyTriggerTooltip = delayed(
     },
     300,
 )
+
+/**
+ * Shows Toolbar notifications on website based on
+ * onboarding flags set in local storage.
+ * @param toolbarNotifications ToolbarNotification instance to trigger notification
+ */
+export const conditionallyShowOnboardingNotifications = async ({
+    toolbarNotifications,
+}) => {
+    const onboardingAnnotationStage = await getLocalStorage(
+        STORAGE_KEYS.onboardingDemo.step1,
+        'unvisited',
+    )
+    const powerSearchStage = await getLocalStorage(
+        STORAGE_KEYS.onboardingDemo.step2,
+    )
+
+    if (onboardingAnnotationStage === 'highlight_text') {
+        toolbarNotifications.showToolbarNotification('onboarding-higlight-text')
+        await setLocalStorage(
+            STORAGE_KEYS.onboardingDemo.step1,
+            'highlight_text_notification_shown',
+        )
+    }
+
+    if (powerSearchStage === 'redirected') {
+        const position = getPageCenter()
+        toolbarNotifications._destroyRootElement()
+        toolbarNotifications.showToolbarNotification(
+            'power-search-browse',
+            position,
+        )
+        await setLocalStorage(
+            STORAGE_KEYS.onboardingDemo.step2,
+            'power-search-browse-shown',
+        )
+    }
+}
 
 export function calculateTooltipPostion() {
     const range = document.getSelection().getRangeAt(0)
