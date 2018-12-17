@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import { maxPossibleTags } from '../utils'
+import { maxPossibleTags } from '../../utils'
 import styles from './TagHolder.css'
 
 /**

@@ -2,17 +2,17 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import cx from 'classnames'
 import moment from 'moment'
-import { remoteFunction } from '../../util/webextensionRPC'
+import { remoteFunction } from '../../../util/webextensionRPC'
 
 import Annotation from './Annotation'
-import TagHolder from './TagHolder.js'
+import TagHolder from '../TagHolder/TagHolder.js'
 import {
     CrowdfundingBox,
     CrowdfundingModal,
-} from '../../common-ui/crowdfunding'
+} from '../../../common-ui/crowdfunding'
 import styles from './Annotation.css'
-import { IndexDropdown } from '../../common-ui/containers'
-import { EVENT_NAMES } from '../../analytics/internal/constants'
+import { EVENT_NAMES } from '../../../analytics/internal/constants'
+import { IndexDropdown } from '../../../common-ui/containers'
 
 class AnnotationContainer extends React.Component {
     static propTypes = {
