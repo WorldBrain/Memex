@@ -172,7 +172,11 @@ export default class OverviewContainer extends React.Component {
                         <span className={Styles.name}>
                             Restore &amp; Replace
                         </span>
-                        <a onClick={() => this.props.onRestoreRequested()}>
+                        <a
+                            onClick={() =>
+                                this.setState({ showRestoreConfirmation: true })
+                            }
+                        >
                             <span className={localStyles.button}>
                                 <span
                                     className={classNames(
