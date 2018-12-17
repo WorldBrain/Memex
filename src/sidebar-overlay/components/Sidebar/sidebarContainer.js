@@ -2,15 +2,15 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 
-import { selectors, actions } from '../redux'
-import { actions as commentActions } from '../CommentBox'
+import { selectors, actions } from '../../redux'
+import { actions as commentActions } from '../../CommentBox'
 import Sidebar from './Sidebar'
-import EmptyMessage from './EmptyMessage'
-import Annotation from './AnnotationContainer'
-import Loader from './Loader'
+import EmptyMessage from '../EmptyMessage'
+import Annotation from '../Annotation/AnnotationContainer'
+import Loader from '../Loader'
 
-import { goToAnnotation, retryUntilErrorResolves } from '../utils'
-import FrameCommunication from '../messaging'
+import { goToAnnotation, retryUntilErrorResolves } from '../../utils'
+import FrameCommunication from '../../messaging'
 
 class SidebarContainer extends React.Component {
     static propTypes = {

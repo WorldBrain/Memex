@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 
-import SidebarContainer from './sidebarContainer'
+import SidebarContainer from './Sidebar/sidebarContainer'
 import Ribbon from './Ribbon'
 import { remoteFunction } from '../../util/webextensionRPC'
 import * as interactions from '../content_script/interactions'

@@ -30,8 +30,7 @@ const Annotation = props => (
                 !props.isJustComment ? styles.highlight : styles.noDisplay
             }
         >
-            "{props.truncatedHighlightText}"
-            {props.showMoreHighlight}
+            "{props.truncatedHighlightText}"{props.showMoreHighlight}
         </div>
 
         <div

@@ -1,34 +1,53 @@
-import React from 'react'
-import PropTypes from 'prop-types'
+import * as React from 'react'
 import cx from 'classnames'
 import onClickOutside from 'react-onclickoutside'
+import { browser } from 'webextension-polyfill-ts'
 
 import { remoteFunction, makeRemotelyCallable } from 'src/util/webextensionRPC'
-import FrameCommunication from '../messaging'
+import FrameCommunication from '../../messaging'
+import CloseButton from '../CloseButton/CloseButton'
 
-import styles from './Ribbon.css'
-import CloseButton from './CloseButton'
-import { EVENT_NAMES } from '../../analytics/internal/constants'
+import { EVENT_NAMES } from '../../../analytics/internal/constants'
+const styles = require('./Ribbon.css')
 
 const arrowRibbon = browser.extension.getURL('/img/arrow_ribbon.svg')
 const logo = browser.extension.getURL('/img/worldbrain-logo-narrow.png')
 
-class Ribbon extends React.Component {
-    static propTypes = {
-        onInit: PropTypes.func.isRequired,
-        destroy: PropTypes.func.isRequired,
-        getInitialState: PropTypes.func.isRequired,
-        handleRibbonToggle: PropTypes.func.isRequired,
-        handleTooltipToggle: PropTypes.func.isRequired,
-        sidebarURL: PropTypes.string.isRequired,
-        highlightAll: PropTypes.func.isRequired,
-        removeHighlights: PropTypes.func.isRequired,
-        highlightAndScroll: PropTypes.func.isRequired,
-        makeHighlightMedium: PropTypes.func.isRequired,
-        removeMediumHighlights: PropTypes.func.isRequired,
-        sortAnnotationByPosition: PropTypes.func.isRequired,
-        removeAnnotationHighlights: PropTypes.func.isRequired,
+interface Props {
+    onInit: ({ toggleSidebar }: { toggleSidebar: () => void }) => any
+    destroy: () => any
+    getInitialState: () => {
+        isRibbonEnabled: boolean
+        isTooltipEnabled: boolean
     }
+    handleRibbonToggle: (isRibbonEnabled: boolean) => any
+    handleTooltipToggle: (isTooltipEnabled: boolean) => any
+    highlightAll: (...args: any[]) => any
+    removeHighlights: () => any
+    highlightAndScroll: (...args: any[]) => any
+    makeHighlightMedium: (...args: any[]) => any
+    removeMediumHighlights: () => void
+    sortAnnotationByPosition: (...args: any[]) => any
+    removeAnnotationHighlights: (...args: any[]) => void
+    sidebarURL: string
+}
+
+interface State {
+    isSidebarActive: boolean
+    isFullScreen: boolean
+    annotations: any[]
+    isInsideFrame: boolean
+    top: any
+    shouldRenderIFrame: boolean
+    isRibbonEnabled: boolean
+    isTooltipEnabled: boolean
+    isHovering: boolean
+}
+
+class Ribbon extends React.Component<Props, State> {
+    private frameFC: any
+    private iFrame: any
+    private ribbonRef: any
 
     state = {
         isSidebarActive: false,
@@ -226,7 +245,7 @@ class Ribbon extends React.Component {
         const top = await this.props.highlightAndScroll(annotation)
         this.setState({
             isInsideFrame: false,
-            top: top,
+            top,
         })
         setTimeout(() => {
             this.setState({
@@ -306,7 +325,7 @@ class Ribbon extends React.Component {
         })
     }
 
-    openSidebar = ({ anchor } = {}) =>
+    openSidebar = ({ anchor } = { anchor: undefined }) =>
         new Promise(resolve => {
             return this.setState(
                 {
@@ -364,15 +383,12 @@ class Ribbon extends React.Component {
     }
 
     onFullScreenCall = () => {
-        let isFullScreenBool
-        if (document.webkitIsFullScreen || document.mozIsFullScreen) {
-            isFullScreenBool = true
-        } else {
-            isFullScreenBool = false
-        }
-        this.setState({
-            isFullScreen: isFullScreenBool,
-        })
+        const isFullScreen =
+            (document as any).webkitIsFullScreen ||
+            (document as any).mozIsFullScreen
+                ? true
+                : false
+        this.setState({ isFullScreen })
     }
 
     setiFrameRef = node => (this.iFrame = node)
