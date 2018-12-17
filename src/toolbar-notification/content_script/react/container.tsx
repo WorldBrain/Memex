@@ -1,23 +1,20 @@
-import React from 'react'
-import PropTypes from 'prop-types'
+import React, { Component } from 'react'
 import TooltipFirstCloseNotification from './notifications/tooltip-first-close'
 import RibbonFirstCloseNotification from './notifications/ribbon-first-close'
 import OnboardingHighlightText from './notifications/onboarding-highlight-text'
 import OnboardingSelectOption from './notifications/onboarding-select-option'
 import PowerSearchBrowse from './notifications/power-search-browse'
+import GoToDashboard from './notifications/go-to-dashboard'
 
-import styles from './styles.css'
+const styles = require('./styles.css')
 
-export class ToolbarNotification extends React.Component {
-    static propTypes = {
-        type: PropTypes.string.isRequired,
-        onCloseRequested: PropTypes.func.isRequired,
-        position: PropTypes.object,
-    }
+export interface Props {
+    type: string
+    onCloseRequested: () => void
+    [propName: string]: any
+}
 
-    shutUpLinter =
-        "I don't want to refactor this to a pure functional component just to shut up the linter"
-
+export class ToolbarNotification extends Component<Props> {
     /**
      * Return extra styles for the container based on whether the postion prop
      * is passed or not.
@@ -51,6 +48,11 @@ export class ToolbarNotification extends React.Component {
                         onCloseRequested={this.props.onCloseRequested}
                     />
                 )}
+                {this.props.type === 'go-to-dashboard' && (
+                    <GoToDashboard
+                        onCloseRequested={this.props.onCloseRequested}
+                    />
+                )}
                 {this.props.type === 'ribbon-first-close' && (
                     <RibbonFirstCloseNotification
                         onCloseRequested={this.props.onCloseRequested}
@@ -69,6 +71,9 @@ export class ToolbarNotification extends React.Component {
                 {this.props.type === 'power-search-browse' && (
                     <PowerSearchBrowse
                         onCloseRequested={this.props.onCloseRequested}
+                        triggerNextNotification={
+                            this.props.triggerNextNotification
+                        }
                     />
                 )}
             </div>

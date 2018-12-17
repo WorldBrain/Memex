@@ -200,7 +200,9 @@ export const conditionallyTriggerTooltip = delayed(
             toolbarNotifications._destroyRootElement()
             toolbarNotifications.showToolbarNotification(
                 'onboarding-select-option',
-                position,
+                {
+                    position,
+                },
             )
             await setLocalStorage(
                 STORAGE_KEYS.onboardingDemo.step1,
@@ -235,13 +237,27 @@ export const conditionallyShowOnboardingNotifications = async ({
         )
     }
 
+    /**
+     * Trigger's the next notification which is seen after the user clicks
+     * "browse around a bit" in Power Search welcome notification.
+     */
+
+    const triggerNextNotification = async () => {
+        toolbarNotifications._destroyRootElement()
+        toolbarNotifications.showToolbarNotification('go-to-dashboard')
+        await setLocalStorage(
+            STORAGE_KEYS.onboardingDemo.step2,
+            'power-goto-dashboard',
+        )
+    }
+
     if (powerSearchStage === 'redirected') {
         const position = getPageCenter()
         toolbarNotifications._destroyRootElement()
-        toolbarNotifications.showToolbarNotification(
-            'power-search-browse',
+        toolbarNotifications.showToolbarNotification('power-search-browse', {
             position,
-        )
+            triggerNextNotification,
+        })
         await setLocalStorage(
             STORAGE_KEYS.onboardingDemo.step2,
             'power-search-browse-shown',

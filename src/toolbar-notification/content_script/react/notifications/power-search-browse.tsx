@@ -11,7 +11,10 @@ const images = {
     shareIcon: getExtURL('/img/share.svg'),
 }
 
-export default function PowerSearchBrowse({ onCloseRequested }) {
+export default function PowerSearchBrowse({
+    onCloseRequested,
+    triggerNextNotification,
+}) {
     return (
         <div className={styles.title}>
             <NotificationLayout
@@ -27,7 +30,9 @@ export default function PowerSearchBrowse({ onCloseRequested }) {
                     </p>
                     <p>go back to dashboard to try it out.</p>
                     <div className={styles.button}>Get me there</div>
-                    <p>Or browse around a bit</p>
+                    <p onClick={triggerNextNotification}>
+                        Or browse around a bit
+                    </p>
                 </div>
             </NotificationLayout>
         </div>
@@ -36,4 +41,5 @@ export default function PowerSearchBrowse({ onCloseRequested }) {
 
 PowerSearchBrowse.propTypes = {
     onCloseRequested: PropTypes.func.isRequired,
+    triggerNextNotifcation: PropTypes.func.isRequired,
 }
