@@ -2,14 +2,15 @@ import React from 'react'
 // import PropTypes from 'prop-types'
 // import classNames from 'classnames'
 import * as logic from './restore-where.logic'
-// const styles = require('./restore-confirmation.css')
+import { ProviderList } from 'src/options/backup/components/provider-list'
+import { PrimaryButton } from 'src/options/backup/components/primary-button'
+const STYLES = require('../styles.css')
 
-export default class RestoreWhere extends React.Component {
-    // static propTypes = {
-    //     onConfirm: PropTypes.func.isRequired,
-    //     onClose: PropTypes.func.isRequired,
-    // }
+interface Props {
+    onChoice: () => void
+}
 
+export default class RestoreWhere extends React.Component<Props> {
     state = logic.INITIAL_STATE
     handleEvent = null
 
@@ -18,6 +19,25 @@ export default class RestoreWhere extends React.Component {
     }
 
     render() {
-        return <div>Placeholder</div>
+        return (
+            <div>
+                <p className={STYLES.header2}>
+                    <strong>STEP 1/2: </strong>
+                    FROM WHERE?
+                </p>
+                <ProviderList
+                    onChange={value =>
+                        this.handleEvent({ type: 'onProviderChoice', value })
+                    }
+                />
+                <PrimaryButton
+                    disabled={!this.state.valid}
+                    onClick={() => this.handleEvent({ type: 'onConfirm' })}
+                >
+                    Continue
+                </PrimaryButton>
+            </div>
+        )
+        // return <div>Placeholder</div>
     }
 }
