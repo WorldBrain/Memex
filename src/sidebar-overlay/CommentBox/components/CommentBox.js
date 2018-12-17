@@ -5,7 +5,7 @@ import cx from 'classnames'
 
 import { selectors, actions } from '../'
 import { IndexDropdown } from 'src/common-ui/containers'
-import TagHolder from '../../components/TagHolder'
+import TagHolder from '../../components/TagHolder/TagHolder'
 import * as constants from '../../constants'
 
 import styles from './CommentBox.css'

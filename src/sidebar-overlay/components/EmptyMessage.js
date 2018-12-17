@@ -1,5 +1,5 @@
 import React from 'react'
-import styles from './Sidebar.css'
+import styles from './Sidebar/Sidebar.css'
 
 const EmptyMessage = () => (
     <div className={styles.emptyMessage}>

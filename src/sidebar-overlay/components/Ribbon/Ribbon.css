@@ -123,23 +123,23 @@
 }
 
 .tooltipOn {
-    background-image: url('../../../img/tooltipIcon_blue.svg');
+    background-image: url('../../../../img/tooltipIcon_blue.svg');
 }
 
 .tooltipOff {
-    background-image: url('../../../img/tooltipIcon_grey.svg');
+    background-image: url('../../../../img/tooltipIcon_grey.svg');
 }
 
 .ribbonOn {
-    background-image: url('../../../img/sidebarIcon_blue.svg');
+    background-image: url('../../../../img/sidebarIcon_blue.svg');
 }
 
 .ribbonOff {
-    background-image: url('../../../img/sidebarIcon_grey.svg');
+    background-image: url('../../../../img/sidebarIcon_grey.svg');
 }
 
 .cancel {
-    background-image: url('../../../img/cross_grey.svg');
+    background-image: url('../../../../img/cross_grey.svg');
     fill: white;
     background-size: 12px;
     width: 12px;
@@ -151,7 +151,7 @@
 }
 
 .settings {
-    background-image: url('../../../img/settings.svg');
+    background-image: url('/img/settings.svg');
     fill: white;
     background-size: 17px;
     width: 15px;
