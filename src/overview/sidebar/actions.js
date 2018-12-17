@@ -1,14 +1,8 @@
-import {
-    createAction
-} from 'redux-act'
+import { createAction } from 'redux-act'
 
-import {
-    remoteFunction
-} from 'src/util/webextensionRPC'
+import { remoteFunction } from 'src/util/webextensionRPC'
 
-import {
-    EVENT_NAMES
-} from '../../analytics/internal/constants'
+import { EVENT_NAMES } from '../../analytics/internal/constants'
 
 export const setShowSidebar = createAction('overview-sidebar/setShowSidebar')
 
@@ -24,7 +18,9 @@ export const toggleMouseOnSidebar = createAction(
 
 export const setShowSideBarMid = val => async dispatch => {
     processEvent({
-        type: val ? EVENT_NAMES.OPEN_COMMENT_SIDEBAR : EVENT_NAMES.CLOSE_COMMENT_SIDEBAR,
+        type: val
+            ? EVENT_NAMES.OPEN_COMMENT_SIDEBAR
+            : EVENT_NAMES.CLOSE_COMMENT_SIDEBAR,
     })
 
     dispatch(setShowSidebar(val))
@@ -36,8 +32,10 @@ export const openSidebar = (url, title) => async dispatch => {
     })
 
     dispatch(setShowSidebar(true))
-    dispatch(setPageInfo({
-        url,
-        title
-    }))
+    dispatch(
+        setPageInfo({
+            url,
+            title,
+        }),
+    )
 }

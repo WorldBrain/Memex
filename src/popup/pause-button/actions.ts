@@ -31,7 +31,9 @@ export const togglePaused: () => Thunk = () => (dispatch, getState) => {
     })
 
     processEventRPC({
-        type: isPaused ? EVENT_NAMES.RESUME_INDEXING : EVENT_NAMES.PAUSE_INDEXING,
+        type: isPaused
+            ? EVENT_NAMES.RESUME_INDEXING
+            : EVENT_NAMES.PAUSE_INDEXING,
         details: isPaused ? undefined : { pauseValue: pauseTime },
     })
 

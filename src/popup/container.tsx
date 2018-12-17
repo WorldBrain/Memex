@@ -40,7 +40,7 @@ import { EVENT_NAMES } from '../analytics/internal/constants'
 const btnStyles = require('./components/Button.css')
 const styles = require('./components/Popup.css')
 
-export interface OwnProps { }
+export interface OwnProps {}
 
 interface StateProps {
     blacklistConfirm: boolean

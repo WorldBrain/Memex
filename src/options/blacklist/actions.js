@@ -1,20 +1,10 @@
-import {
-    createAction
-} from 'redux-act'
+import { createAction } from 'redux-act'
 
-import analytics, {
-    updateLastActive
-} from 'src/analytics'
-import {
-    remoteFunction
-} from 'src/util/webextensionRPC'
+import analytics, { updateLastActive } from 'src/analytics'
+import { remoteFunction } from 'src/util/webextensionRPC'
 import * as selectors from './selectors'
-import {
-    STORAGE_KEY
-} from './constants'
-import {
-    EVENT_NAMES
-} from '../../analytics/internal/constants'
+import { STORAGE_KEY } from './constants'
+import { EVENT_NAMES } from '../../analytics/internal/constants'
 
 const deletePagesByPattern = remoteFunction('delPagesByPattern')
 const getMatchingPageCount = remoteFunction('getMatchingPageCount')
@@ -35,9 +25,7 @@ export const removeSiteFromBlacklist = createAction(
 export const initBlacklist = () => async dispatch => {
     dispatch(setIsLoading(true))
     try {
-        const {
-            [STORAGE_KEY]: blacklist
-        } = await browser.storage.local.get({
+        const { [STORAGE_KEY]: blacklist } = await browser.storage.local.get({
             [STORAGE_KEY]: '[]',
         })
 
@@ -63,7 +51,7 @@ export const addToBlacklist = expression => async (dispatch, getState) => {
     const oldBlacklist = selectors.blacklist(getState())
     const newEntry = {
         expression,
-        dateAdded: Date.now()
+        dateAdded: Date.now(),
     }
 
     dispatch(addSiteToBlacklist(newEntry))
@@ -109,9 +97,11 @@ export const removeFromBlacklist = index => async (dispatch, getState) => {
     })
 
     updateLastActive() // Consider user active (analytics)
-    dispatch(removeSiteFromBlacklist({
-        index
-    }))
+    dispatch(
+        removeSiteFromBlacklist({
+            index,
+        }),
+    )
     dirtyEstsCache() // Force import ests to recalc next visit
 }
 

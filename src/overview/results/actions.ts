@@ -60,7 +60,9 @@ export const toggleBookmark: (url: string, i: number) => Thunk = (
     })
 
     processEventRPC({
-        type: hasBookmark ? EVENT_NAMES.REMOVE_RESULT_BOOKMARK : EVENT_NAMES.CREATE_RESULT_BOOKMARK,
+        type: hasBookmark
+            ? EVENT_NAMES.REMOVE_RESULT_BOOKMARK
+            : EVENT_NAMES.CREATE_RESULT_BOOKMARK,
     })
 
     // Reset UI state in case of error
@@ -161,8 +163,8 @@ function storeSearch(searchResult, overwrite, state) {
         searchResult.totalCount === 0
             ? EVENT_NAMES.UNSUCCESSFUL_SEARCH
             : overwrite
-                ? EVENT_NAMES.SUCCESSFUL_SEARCH
-                : EVENT_NAMES.PAGINATE_SEARCH
+            ? EVENT_NAMES.SUCCESSFUL_SEARCH
+            : EVENT_NAMES.PAGINATE_SEARCH
 
     processEventRPC({ type })
 

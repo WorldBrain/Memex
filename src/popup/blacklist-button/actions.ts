@@ -48,7 +48,9 @@ export const addURLToBlacklist: (
     })
 
     processEventRPC({
-        type: isDomainChoice ? EVENT_NAMES.BLACKLIST_DOMAIN : EVENT_NAMES.BLACKLIST_SITE,
+        type: isDomainChoice
+            ? EVENT_NAMES.BLACKLIST_DOMAIN
+            : EVENT_NAMES.BLACKLIST_SITE,
     })
 
     let url = popup.url(state)

@@ -22,7 +22,9 @@ class CrowdfundingBox extends PureComponent<Props> {
     private processEventRPC = remoteFunction('processEvent')
 
     private openNewLink = async () => {
-        await this.processEventRPC({ type: EVENT_NAMES.LEARN_MORE_CROWD_FUNDING })
+        await this.processEventRPC({
+            type: EVENT_NAMES.LEARN_MORE_CROWD_FUNDING,
+        })
         this.props.tabs.create({ url: this.props.learnMoreUrl })
     }
 

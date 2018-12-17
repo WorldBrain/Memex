@@ -1,36 +1,21 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import {
-    remoteFunction
-} from 'src/util/webextensionRPC'
+import { remoteFunction } from 'src/util/webextensionRPC'
 import Results from './Results'
 import ResultItem from './ResultItem'
 import RemovedText from './RemovedText'
 import * as constants from '../constants'
-import {
-    getLocalStorage,
-    setLocalStorage
-} from '../utils'
-import {
-    MigrationNotice
-} from '../../common-ui/containers'
+import { getLocalStorage, setLocalStorage } from '../utils'
+import { MigrationNotice } from '../../common-ui/containers'
 import Notification from './Notification'
-import {
-    NOTIFS
-} from '../../notifications/notifications'
+import { NOTIFS } from '../../notifications/notifications'
 import * as actionTypes from '../../notifications/action-types'
-import {
-    actionRegistry
-} from '../../notifications/registry'
+import { actionRegistry } from '../../notifications/registry'
 import ActionButton from '../../notifications/components/ActionButton'
 import OptIn from '../../notifications/components/OptIn'
-import {
-    ToggleSwitch
-} from '../../common-ui/components'
-import {
-    EVENT_NAMES
-} from '../../analytics/internal/constants'
+import { ToggleSwitch } from '../../common-ui/components'
+import { EVENT_NAMES } from '../../analytics/internal/constants'
 
 class Container extends React.Component {
     static propTypes = {
@@ -104,17 +89,12 @@ class Container extends React.Component {
     handleResultLinkClick = () => this.updateLastActive()
 
     renderResultItems() {
-        const resultItems = this.props.results.map((result, i) => ( <
-            ResultItem key = {
-                i
-            }
-            onLinkClick = {
-                this.handleResultLinkClick
-            }
-            searchEngine = {
-                this.props.searchEngine
-            } { ...result
-            }
+        const resultItems = this.props.results.map((result, i) => (
+            <ResultItem
+                key={i}
+                onLinkClick={this.handleResultLinkClick}
+                searchEngine={this.props.searchEngine}
+                {...result}
             />
         ))
         return resultItems
@@ -191,7 +171,7 @@ class Container extends React.Component {
         await this._persistEnabledChange(true)
 
         this.setState({
-            removed: false
+            removed: false,
         })
     }
 
@@ -247,93 +227,75 @@ class Container extends React.Component {
     }
 
     renderButton() {
-        const {
-            buttons
-        } = this.state.notification
-        const {
-            action
-        } = buttons[0]
+        const { buttons } = this.state.notification
+        const { action } = buttons[0]
 
         if (action.type === actionTypes.OPEN_URL) {
-            return ( <
-                ActionButton handleClick = {
-                    () =>
-                    this.handleClickOpenNewTabButton(action.url)
-                }
-                fromSearch > {
-                    buttons[0].label
-                } <
-                /ActionButton>
+            return (
+                <ActionButton
+                    handleClick={() =>
+                        this.handleClickOpenNewTabButton(action.url)
+                    }
+                    fromSearch
+                >
+                    {' '}
+                    {buttons[0].label}{' '}
+                </ActionButton>
             )
         } else if (action.type === actionTypes.TOGGLE_SETTING) {
-            return ( <
-                OptIn fromSearch label = {
-                    buttons[0].label
-                } >
-                <
-                ToggleSwitch defaultValue onChange = {
-                    val =>
-                    this.handleToggleStorageOption(action, val)
-                }
-                fromSearch /
-                >
-                <
-                /OptIn>
+            return (
+                <OptIn fromSearch label={buttons[0].label}>
+                    <ToggleSwitch
+                        defaultValue
+                        onChange={val =>
+                            this.handleToggleStorageOption(action, val)
+                        }
+                        fromSearch
+                    />
+                </OptIn>
             )
         } else {
-            return ( <
-                ActionButton handleClick = {
-                    actionRegistry[action.type]({
+            return (
+                <ActionButton
+                    handleClick={actionRegistry[action.type]({
                         definition: action,
-                    })
-                } > {
-                    buttons[0].label
-                } <
-                /ActionButton>
+                    })}
+                >
+                    {' '}
+                    {buttons[0].label}{' '}
+                </ActionButton>
             )
         }
     }
 
     renderNotification() {
-        const {
-            isNotif
-        } = this.state
+        const { isNotif } = this.state
 
         if (!isNotif || !this.state.notification.id) {
             return null
         }
 
-        return ( <
-            Notification title = {
-                this.state.notification.title
-            }
-            message = {
-                this.state.notification.message
-            }
-            button = {
-                this.renderButton()
-            }
-            handleTick = {
-                this.handleClickTick
-            }
+        return (
+            <Notification
+                title={this.state.notification.title}
+                message={this.state.notification.message}
+                button={this.renderButton()}
+                handleTick={this.handleClickTick}
             />
         )
     }
 
     render() {
         if (this.props.requiresMigration) {
-            return <MigrationNotice showBanner / >
+            return <MigrationNotice showBanner />
         }
 
         // If the state.removed is true, show the RemovedText component
         if (this.state.removed) {
-            return ( <
-                RemovedText undo = {
-                    this.undoRemove
-                }
-                position = {
-                    this.state.position
-                }
+            return (
+                <RemovedText
+                    undo={this.undoRemove}
+                    position={this.state.position}
                 />
             )
         }
@@ -342,46 +304,21 @@ class Container extends React.Component {
             return null
         }
 
-        return ( <
-            Results position = {
-                this.state.position
-            }
-            searchEngine = {
-                this.props.searchEngine
-            }
-            totalCount = {
-                this.props.len
-            }
-            seeMoreResults = {
-                this.seeMoreResults
-            }
-            toggleHideResults = {
-                this.toggleHideResults
-            }
-            hideResults = {
-                this.state.hideResults
-            }
-            toggleDropdown = {
-                this.toggleDropdown
-            }
-            closeDropdown = {
-                this.closeDropdown
-            }
-            dropdown = {
-                this.state.dropdown
-            }
-            removeResults = {
-                this.removeResults
-            }
-            changePosition = {
-                this.changePosition
-            }
-            renderResultItems = {
-                this.renderResultItems
-            }
-            renderNotification = {
-                this.renderNotification()
-            }
+        return (
+            <Results
+                position={this.state.position}
+                searchEngine={this.props.searchEngine}
+                totalCount={this.props.len}
+                seeMoreResults={this.seeMoreResults}
+                toggleHideResults={this.toggleHideResults}
+                hideResults={this.state.hideResults}
+                toggleDropdown={this.toggleDropdown}
+                closeDropdown={this.closeDropdown}
+                dropdown={this.state.dropdown}
+                removeResults={this.removeResults}
+                changePosition={this.changePosition}
+                renderResultItems={this.renderResultItems}
+                renderNotification={this.renderNotification()}
             />
         )
     }

@@ -162,7 +162,9 @@ export const toggleInboxMid = () => (dispatch, getState) => {
     const showInbox = selectors.showInbox(getState())
 
     processEvent({
-        type: !showInbox ? EVENT_NAMES.OPEN_INBOX_OVERVIEW : EVENT_NAMES.CLOSE_INBOX_OVERVIEW,
+        type: !showInbox
+            ? EVENT_NAMES.OPEN_INBOX_OVERVIEW
+            : EVENT_NAMES.CLOSE_INBOX_OVERVIEW,
     })
 
     dispatch(toggleInbox())

@@ -1,18 +1,12 @@
 import analytics from '.'
-import {
-    remoteFunction
-} from 'src/util/webextensionRPC'
-import {
-    SHOULD_TRACK_STORAGE_KEY as SHOULD_TRACK
-} from 'src/options/privacy/constants'
-import {
-    EVENT_NAMES
-} from '../analytics/internal/constants'
+import { remoteFunction } from 'src/util/webextensionRPC'
+import { SHOULD_TRACK_STORAGE_KEY as SHOULD_TRACK } from 'src/options/privacy/constants'
+import { EVENT_NAMES } from '../analytics/internal/constants'
 
 export async function storeTrackingOption(isOptIn, skipEventTrack = false) {
     const storeLocalStorage = () =>
         browser.storage.local.set({
-            [SHOULD_TRACK]: isOptIn
+            [SHOULD_TRACK]: isOptIn,
         })
 
     const trackEvent = force => {
@@ -20,7 +14,8 @@ export async function storeTrackingOption(isOptIn, skipEventTrack = false) {
             return Promise.resolve()
         }
 
-        const trackEvent = analytics.trackEvent({
+        const trackEvent = analytics.trackEvent(
+            {
                 category: 'Privacy',
                 action: 'Change tracking pref',
                 name: isOptIn ? 'opt-in' : 'opt-out',
@@ -29,9 +24,9 @@ export async function storeTrackingOption(isOptIn, skipEventTrack = false) {
         )
 
         const processEvent = remoteFunction('processEvent')({
-            type: isOptIn ?
-                EVENT_NAMES.CHANGE_TRACKING_PREF_OPTIN :
-                EVENT_NAMES.CHANGE_TRACKING_PREF_OPTOUT,
+            type: isOptIn
+                ? EVENT_NAMES.CHANGE_TRACKING_PREF_OPTIN
+                : EVENT_NAMES.CHANGE_TRACKING_PREF_OPTOUT,
             force,
         })
 

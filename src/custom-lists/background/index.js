@@ -1,20 +1,14 @@
-import {
-    makeRemotelyCallable
-} from 'src/util/webextensionRPC'
+import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import normalizeUrl from 'src/util/encode-url-for-id'
 import CustomListStorage from './storage'
 import internalAnalytics from '../../analytics/internal'
-import {
-    EVENT_NAMES
-} from '../../analytics/internal/constants'
+import { EVENT_NAMES } from '../../analytics/internal/constants'
 
 export default class CustomListBackground {
-    constructor({
-        storageManager
-    }) {
+    constructor({ storageManager }) {
         // Makes the custom list Table in indexed DB.
         this.storage = new CustomListStorage({
-            storageManager
+            storageManager,
         })
     }
 
@@ -56,14 +50,10 @@ export default class CustomListBackground {
         })
     }
 
-    async fetchAllLists({
-        excludeIds = [],
-        skip = 0,
-        limit = 20
-    }) {
+    async fetchAllLists({ excludeIds = [], skip = 0, limit = 20 }) {
         const query = {
             id: {
-                $nin: excludeIds
+                $nin: excludeIds,
             },
         }
 
@@ -74,7 +64,7 @@ export default class CustomListBackground {
 
         return this.storage.fetchAllLists({
             query,
-            opts
+            opts,
         })
     }
 
@@ -84,9 +74,7 @@ export default class CustomListBackground {
      * @param {number} id
      * @returns {Object}
      */
-    async fetchListById({
-        id
-    }) {
+    async fetchListById({ id }) {
         return this.storage.fetchListById(id)
     }
 
@@ -95,9 +83,7 @@ export default class CustomListBackground {
      * @param {Object} obj
      * @param {number} obj.id
      */
-    async fetchListPagesById({
-        id
-    }) {
+    async fetchListPagesById({ id }) {
         return this.storage.fetchListPagesById({
             listId: id,
         })
@@ -108,9 +94,7 @@ export default class CustomListBackground {
      * @param {Object} obj
      * @param {string} obj.url
      */
-    async fetchListPagesByUrl({
-        url
-    }) {
+    async fetchListPagesByUrl({ url }) {
         return this.storage.fetchListPagesByUrl({
             url: normalizeUrl(url),
         })
@@ -124,9 +108,7 @@ export default class CustomListBackground {
      * @returns {number} id
      * @memberof CustomListBackground
      */
-    async createCustomList({
-        name
-    }) {
+    async createCustomList({ name }) {
         internalAnalytics.processEvent({
             type: EVENT_NAMES.CREATE_COLLECTION,
         })
@@ -144,10 +126,7 @@ export default class CustomListBackground {
      * @param {string} obj.name
      * @memberof CustomListBackground
      */
-    async updateList({
-        id,
-        name
-    }) {
+    async updateList({ id, name }) {
         return this.storage.updateListName({
             id,
             name,
@@ -162,10 +141,7 @@ export default class CustomListBackground {
      * @param {string} obj.url
      * @memberof CustomListBackground
      */
-    async insertPageToList({
-        id,
-        url
-    }) {
+    async insertPageToList({ id, url }) {
         internalAnalytics.processEvent({
             type: EVENT_NAMES.INSERT_PAGE_COLLECTION,
         })
@@ -184,9 +160,7 @@ export default class CustomListBackground {
      * @param {number} obj.id
      * @memberof CustomListBackground
      */
-    async removeList({
-        id
-    }) {
+    async removeList({ id }) {
         internalAnalytics.processEvent({
             type: EVENT_NAMES.REMOVE_COLLECTION,
         })
@@ -204,10 +178,7 @@ export default class CustomListBackground {
      * @param {string} obj.url
      * @memberof CustomListBackground
      */
-    async removePageFromList({
-        id,
-        url
-    }) {
+    async removePageFromList({ id, url }) {
         internalAnalytics.processEvent({
             type: EVENT_NAMES.REMOVE_PAGE_COLLECTION,
         })
@@ -226,10 +197,7 @@ export default class CustomListBackground {
      * @returns
      * @memberof CustomListBackground
      */
-    async fetchListNameSuggestions({
-        name,
-        url
-    }) {
+    async fetchListNameSuggestions({ name, url }) {
         return this.storage.fetchListNameSuggestions({
             name,
             url: normalizeUrl(url),
@@ -244,11 +212,9 @@ export default class CustomListBackground {
      * @returns
      * @memberof CustomListBackground
      */
-    async fetchListIgnoreCase({
-        name
-    }) {
+    async fetchListIgnoreCase({ name }) {
         return this.storage.fetchListIgnoreCase({
-            name
+            name,
         })
     }
 }

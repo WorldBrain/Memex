@@ -1,19 +1,10 @@
-import {
-    createAction
-} from 'redux-act'
+import { createAction } from 'redux-act'
 
 import analytics from 'src/analytics'
-import {
-    CMDS,
-    IMPORT_CONN_NAME
-} from './constants'
+import { CMDS, IMPORT_CONN_NAME } from './constants'
 import * as selectors from './selectors'
-import {
-    remoteFunction
-} from 'src/util/webextensionRPC'
-import {
-    EVENT_NAMES
-} from '../../analytics/internal/constants'
+import { remoteFunction } from 'src/util/webextensionRPC'
+import { EVENT_NAMES } from '../../analytics/internal/constants'
 
 const processEvent = remoteFunction('processEvent')
 
@@ -54,10 +45,7 @@ export const showDownloadDetails = createAction('imports/showDownloadDetails')
  * Responds to messages sent from background script over the runtime connection by dispatching
  * appropriate redux actions. Non-handled messages are ignored.
  */
-const getCmdMessageHandler = dispatch => ({
-    cmd,
-    ...payload
-}) => {
+const getCmdMessageHandler = dispatch => ({ cmd, ...payload }) => {
     switch (cmd) {
         case CMDS.INIT:
             dispatch(initEstimateCounts(payload))
@@ -86,7 +74,7 @@ let port
  */
 export const init = () => async dispatch => {
     port = browser.runtime.connect({
-        name: IMPORT_CONN_NAME
+        name: IMPORT_CONN_NAME,
     })
     port.onMessage.addListener(getCmdMessageHandler(dispatch))
 }
@@ -107,7 +95,7 @@ const makePortMessagingThunk = ({
     dispatch(actionCreator(payload))
     port.postMessage({
         cmd,
-        payload
+        payload,
     })
 }
 

@@ -1,7 +1,7 @@
 export const API_HOST =
-    process.env.NODE_ENV === 'production' ?
-    'https://203bqy2f93.execute-api.eu-central-1.amazonaws.com/production' :
-    'https://a8495szyaa.execute-api.eu-central-1.amazonaws.com/staging'
+    process.env.NODE_ENV === 'production'
+        ? 'https://203bqy2f93.execute-api.eu-central-1.amazonaws.com/production'
+        : 'https://a8495szyaa.execute-api.eu-central-1.amazonaws.com/staging'
 
 // This is used to change the event type into integer to optimize the space
 
@@ -350,7 +350,6 @@ export const EVENT_NAMES = {
     BLACKLIST: 'blacklist',
     ADDRESS_BAR_SEARCH: 'addressBarSearch',
     DATEPICKER_NLP: 'datepickerNlp',
-
 }
 
 export const NOTIF_TYPE_EVENT_IDS = {

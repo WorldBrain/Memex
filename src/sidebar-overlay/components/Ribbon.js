@@ -3,17 +3,12 @@ import PropTypes from 'prop-types'
 import cx from 'classnames'
 import onClickOutside from 'react-onclickoutside'
 
-import {
-    remoteFunction,
-    makeRemotelyCallable
-} from 'src/util/webextensionRPC'
+import { remoteFunction, makeRemotelyCallable } from 'src/util/webextensionRPC'
 import FrameCommunication from '../messaging'
 
 import styles from './Ribbon.css'
 import CloseButton from './CloseButton'
-import {
-    EVENT_NAMES
-} from '../../analytics/internal/constants'
+import { EVENT_NAMES } from '../../analytics/internal/constants'
 
 const arrowRibbon = browser.extension.getURL('/img/arrow_ribbon.svg')
 const logo = browser.extension.getURL('/img/worldbrain-logo-narrow.png')
@@ -56,7 +51,7 @@ class Ribbon extends React.Component {
         } = await this.props.getInitialState()
         this.setState({
             isRibbonEnabled,
-            isTooltipEnabled
+            isTooltipEnabled,
         })
 
         this.setupRPCfunctions()
@@ -82,7 +77,7 @@ class Ribbon extends React.Component {
         )
 
         this.props.onInit({
-            toggleSidebar: () => this.toggleSidebar()
+            toggleSidebar: () => this.toggleSidebar(),
         })
     }
 
@@ -144,7 +139,7 @@ class Ribbon extends React.Component {
                     }
 
                     return {
-                        shouldRenderIFrame
+                        shouldRenderIFrame,
                     }
                 })
             },
@@ -204,10 +199,7 @@ class Ribbon extends React.Component {
         document.addEventListener(
             'scroll',
             () => {
-                const {
-                    top,
-                    isInsideFrame
-                } = this.state
+                const { top, isInsideFrame } = this.state
                 if (isInsideFrame) {
                     window.scrollTo(0, top)
                 }
@@ -273,7 +265,9 @@ class Ribbon extends React.Component {
 
         if (processEvent) {
             processEvent({
-                type: isSidebarActive ? EVENT_NAMES.OPEN_SIDEBAR_PAGE : EVENT_NAMES.CLOSE_SIDEBAR_PAGE,
+                type: isSidebarActive
+                    ? EVENT_NAMES.OPEN_SIDEBAR_PAGE
+                    : EVENT_NAMES.CLOSE_SIDEBAR_PAGE,
             })
         }
 
@@ -293,12 +287,10 @@ class Ribbon extends React.Component {
         e.stopPropagation()
         e.preventDefault()
 
-        const {
-            isTooltipEnabled
-        } = this.state
+        const { isTooltipEnabled } = this.state
         this.props.handleTooltipToggle(isTooltipEnabled)
         this.setState({
-            isTooltipEnabled: !isTooltipEnabled
+            isTooltipEnabled: !isTooltipEnabled,
         })
     }
 
@@ -307,18 +299,17 @@ class Ribbon extends React.Component {
         e.stopPropagation()
         e.preventDefault()
 
-        const {
-            isRibbonEnabled
-        } = this.state
+        const { isRibbonEnabled } = this.state
         this.props.handleRibbonToggle(isRibbonEnabled)
         this.setState({
-            isRibbonEnabled: !isRibbonEnabled
+            isRibbonEnabled: !isRibbonEnabled,
         })
     }
 
     openSidebar = () =>
         new Promise(resolve => {
-            return this.setState({
+            return this.setState(
+                {
                     isSidebarActive: true,
                     shouldRenderIFrame: true,
                 },
@@ -380,7 +371,7 @@ class Ribbon extends React.Component {
             isFullScreenBool = false
         }
         this.setState({
-            isFullScreen: isFullScreenBool
+            isFullScreen: isFullScreenBool,
         })
     }
 
@@ -391,22 +382,15 @@ class Ribbon extends React.Component {
             return null
         }
 
-        return ( <
-            iframe src = {
-                this.props.sidebarURL
-            }
-            height = {
-                window.innerHeight
-            }
-            id = "memex_annotations_sidebar"
-            ref = {
-                this.setiFrameRef
-            }
-            className = {
-                cx(styles.sidebarFrame, {
+        return (
+            <iframe
+                src={this.props.sidebarURL}
+                height={window.innerHeight}
+                id="memex_annotations_sidebar"
+                ref={this.setiFrameRef}
+                className={cx(styles.sidebarFrame, {
                     [styles.sidebarActive]: this.state.isSidebarActive,
-                })
-            }
+                })}
             />
         )
     }
@@ -415,7 +399,7 @@ class Ribbon extends React.Component {
         e.stopPropagation()
         if (!this.state.isHovering) {
             this.setState({
-                isHovering: true
+                isHovering: true,
             })
         }
     }
@@ -424,7 +408,7 @@ class Ribbon extends React.Component {
         e.stopPropagation()
         if (this.state.isHovering) {
             this.setState({
-                isHovering: false
+                isHovering: false,
             })
         }
     }
@@ -441,136 +425,90 @@ class Ribbon extends React.Component {
             isRibbonEnabled,
             isHovering,
         } = this.state
-        const {
-            destroy
-        } = this.props
+        const { destroy } = this.props
 
-        return ( <
-                React.Fragment >
-                <
-                div className = {
-                    cx(styles.ribbon, {
+        return (
+            <React.Fragment>
+                <div
+                    className={cx(styles.ribbon, {
                         [styles.ribbonSidebarActive]: isSidebarActive,
                         [styles.onFullScreen]: isFullScreen,
                         [styles.ribbonExpanded]: isHovering,
-                    })
-                }
-                onClick = {
-                    this.toggleSidebar
-                }
-                ref = {
-                    this.setupInputRef
-                } >
-                <
-                div className = {
-                    styles.arrowBox
-                } >
-                <
-                img onClick = {
-                    this.toggleSidebar
-                }
-                className = {
-                    styles.arrow
-                }
-                src = {
-                    arrowRibbon
-                }
-                title = {
-                    'Open Annotation Sidebar'
-                }
-                /> < /
-                div > {
-                    isHovering && ( <
-                        div className = {
-                            styles.buttons
-                        } >
-                        <
-                        img src = {
-                            logo
-                        }
-                        className = {
-                            styles.logo
-                        }
-                        onClick = {
-                            this.toggleSidebar
-                        }
-                        title = {
-                            'Open Annotation Sidebar'
-                        }
-                        /> <
-                        div className = {
-                            styles.buttonHolder
-                        }
-                        onClick = {
-                            this.toggleTooltip
-                        } >
-                        <
-                        span className = {
-                            cx(styles.toggler, {
-                                [styles.tooltipOn]: isTooltipEnabled,
-                                [styles.tooltipOff]: !isTooltipEnabled,
-                            })
-                        }
-                        title = {
-                            'Turn on/off Highlighter on all pages'
-                        }
-                        /> < /
-                        div > <
-                        div className = {
-                            styles.buttonHolder
-                        }
-                        onClick = {
-                            this.toggleRibbon
-                        } >
-                        <
-                        span className = {
-                            cx(
-                                styles.toggler,
-                                styles.tooltipIcon, {
-                                    [styles.ribbonOn]: isRibbonEnabled,
-                                    [styles.ribbonOff]: !isRibbonEnabled,
-                                },
-                            )
-                        }
-                        title = {
-                            'Turn on/off this ribbon on all pages'
-                        }
-                        /> < /
-                        div > <
-                        div className = {
-                            styles.buttonHolder
-                        } >
-                        <
-                        span title = {
-                            'Close ribbon once. Disable via Memex icon in the extension toolbar.'
-                        }
-                        className = {
-                            styles.cancel
-                        }
-                        onClick = {
-                            destroy
-                        }
-                        /> < /
-                        div > <
-                        /div>
-                    )
-                } <
-                /div> <
-                CloseButton isActive = {
-                    isSidebarActive
-                }
-                clickHandler = {
-                    this.toggleSidebar
-                }
-                title = {
-                    'Close once. Disable via Memex icon in the extension toolbar.'
-                }
-                /> {
-                this.renderIFrame()
-            } <
-            /React.Fragment>
-    )
-}
+                    })}
+                    onClick={this.toggleSidebar}
+                    ref={this.setupInputRef}
+                >
+                    <div className={styles.arrowBox}>
+                        <img
+                            onClick={this.toggleSidebar}
+                            className={styles.arrow}
+                            src={arrowRibbon}
+                            title={'Open Annotation Sidebar'}
+                        />{' '}
+                    </div>{' '}
+                    {isHovering && (
+                        <div className={styles.buttons}>
+                            <img
+                                src={logo}
+                                className={styles.logo}
+                                onClick={this.toggleSidebar}
+                                title={'Open Annotation Sidebar'}
+                            />{' '}
+                            <div
+                                className={styles.buttonHolder}
+                                onClick={this.toggleTooltip}
+                            >
+                                <span
+                                    className={cx(styles.toggler, {
+                                        [styles.tooltipOn]: isTooltipEnabled,
+                                        [styles.tooltipOff]: !isTooltipEnabled,
+                                    })}
+                                    title={
+                                        'Turn on/off Highlighter on all pages'
+                                    }
+                                />{' '}
+                            </div>{' '}
+                            <div
+                                className={styles.buttonHolder}
+                                onClick={this.toggleRibbon}
+                            >
+                                <span
+                                    className={cx(
+                                        styles.toggler,
+                                        styles.tooltipIcon,
+                                        {
+                                            [styles.ribbonOn]: isRibbonEnabled,
+                                            [styles.ribbonOff]: !isRibbonEnabled,
+                                        },
+                                    )}
+                                    title={
+                                        'Turn on/off this ribbon on all pages'
+                                    }
+                                />{' '}
+                            </div>{' '}
+                            <div className={styles.buttonHolder}>
+                                <span
+                                    title={
+                                        'Close ribbon once. Disable via Memex icon in the extension toolbar.'
+                                    }
+                                    className={styles.cancel}
+                                    onClick={destroy}
+                                />{' '}
+                            </div>{' '}
+                        </div>
+                    )}{' '}
+                </div>{' '}
+                <CloseButton
+                    isActive={isSidebarActive}
+                    clickHandler={this.toggleSidebar}
+                    title={
+                        'Close once. Disable via Memex icon in the extension toolbar.'
+                    }
+                />{' '}
+                {this.renderIFrame()}{' '}
+            </React.Fragment>
+        )
+    }
 }
 
 export default onClickOutside(Ribbon)

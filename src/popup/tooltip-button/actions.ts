@@ -24,7 +24,9 @@ export const toggleTooltipFlag: () => Thunk = () => async (
     const wasEnabled = selectors.isTooltipEnabled(state)
 
     processEventRPC({
-        type: wasEnabled ? EVENT_NAMES.DISABLE_TOOLTIP_POPUP : EVENT_NAMES.ENABLE_TOOLTIP_POPUP,
+        type: wasEnabled
+            ? EVENT_NAMES.DISABLE_TOOLTIP_POPUP
+            : EVENT_NAMES.ENABLE_TOOLTIP_POPUP,
     })
 
     await setTooltipState(!wasEnabled)

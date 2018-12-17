@@ -96,7 +96,9 @@ class DateRangeSelection extends Component {
         })
 
         processEvent({
-            type: EVENT_NAMES.DATEPICKER_NLP + (isStartDate ? 'StartDate' : 'EndDate'),
+            type:
+                EVENT_NAMES.DATEPICKER_NLP +
+                (isStartDate ? 'StartDate' : 'EndDate'),
         })
 
         // Get the time from the NLP query, if it could be parsed
@@ -170,7 +172,7 @@ class DateRangeSelection extends Component {
         processEvent({
             type: date
                 ? EVENT_NAMES.DATEPICKER_DROPDOWN +
-                (isStartDate ? 'StartDate' : 'EndDate')
+                  (isStartDate ? 'StartDate' : 'EndDate')
                 : 'datepickerClear' + (isStartDate ? 'StartDate' : 'EndDate'),
         })
 

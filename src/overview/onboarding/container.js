@@ -1,18 +1,10 @@
-import React, {
-    PureComponent
-} from 'react'
+import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
-import {
-    connect
-} from 'react-redux'
+import { connect } from 'react-redux'
 
-import {
-    remoteFunction
-} from '../../util/webextensionRPC'
+import { remoteFunction } from '../../util/webextensionRPC'
 
-import {
-    ToggleSwitch
-} from 'src/common-ui/components'
+import { ToggleSwitch } from 'src/common-ui/components'
 import * as selectors from './selectors'
 import * as actions from './actions'
 import Overlay from './components/Overlay'
@@ -20,12 +12,8 @@ import OptIn from './components/OptIn'
 import OnboardingMsg from './components/OnboardingMsg'
 import FeaturesInfo from './components/FeaturesInfo'
 import FeatureInfo from './components/FeatureInfo'
-import {
-    FEATURES_INFO
-} from './constants'
-import {
-    EVENT_NAMES
-} from '../../analytics/internal/constants'
+import { FEATURES_INFO } from './constants'
+import { EVENT_NAMES } from '../../analytics/internal/constants'
 
 const styles = require('./components/Onboarding.css')
 
@@ -53,43 +41,32 @@ class OnboardingContainer extends PureComponent {
 
     openNewUrl = url => () => {
         this.processEventRPC({
-            type: EVENT_NAMES.OPEN_URL_FEATURE
+            type: EVENT_NAMES.OPEN_URL_FEATURE,
         })
         this.props.tabs.create({
-            url
+            url,
         })
     }
 
     renderFeaturesInfo = () => {
-        return FEATURES_INFO.map((feature, index) => ( <
-            FeatureInfo key = {
-                index
-            }
-            heading = {
-                feature.heading
-            }
-            subheading = {
-                feature.subheading
-            }
-            handleClick = {
-                this.openNewUrl(feature.url)
-            }
+        return FEATURES_INFO.map((feature, index) => (
+            <FeatureInfo
+                key={index}
+                heading={feature.heading}
+                subheading={feature.subheading}
+                handleClick={this.openNewUrl(feature.url)}
             />
         ))
     }
 
     renderOptIn = () => {
-        return ( <
-            OptIn >
-            <
-            ToggleSwitch isChecked = {
-                this.props.shouldTrack
-            }
-            onChange = {
-                this.props.toggleShouldTrack
-            }
-            /> <
-            /OptIn>
+        return (
+            <OptIn>
+                <ToggleSwitch
+                    isChecked={this.props.shouldTrack}
+                    onChange={this.props.toggleShouldTrack}
+                />{' '}
+            </OptIn>
         )
     }
 
@@ -98,33 +75,22 @@ class OnboardingContainer extends PureComponent {
             return null
         }
 
-        return ( <
-            Overlay onClose = {
-                this.props.hideOnboarding
-            }
-            showCloseBtn = {
-                this.props.showCancelBtn
-            } >
-            <
-            OnboardingMsg onFinish = {
-                this.props.hideOnboarding
-            }
-            /> <
-            div >
-            <
-            div className = {
-                styles.tutorialTitle
-            } >
-            Explore what you can do
-                </div> <
-                FeaturesInfo optInManager = {
-                    this.renderOptIn()
-                } > {
-                    this.renderFeaturesInfo()
-                } <
-                /FeaturesInfo> <
-                /div> <
-                /Overlay>
+        return (
+            <Overlay
+                onClose={this.props.hideOnboarding}
+                showCloseBtn={this.props.showCancelBtn}
+            >
+                <OnboardingMsg onFinish={this.props.hideOnboarding} />{' '}
+                <div>
+                    <div className={styles.tutorialTitle}>
+                        Explore what you can do
+                    </div>{' '}
+                    <FeaturesInfo optInManager={this.renderOptIn()}>
+                        {' '}
+                        {this.renderFeaturesInfo()}{' '}
+                    </FeaturesInfo>{' '}
+                </div>{' '}
+            </Overlay>
         )
     }
 }
