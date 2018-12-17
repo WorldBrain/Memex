@@ -66,7 +66,6 @@ export class ToolbarNotification extends React.Component {
                         onCloseRequested={this.props.onCloseRequested}
                     />
                 )}
-                )}
                 {this.props.type === 'power-search-browse' && (
                     <PowerSearchBrowse
                         onCloseRequested={this.props.onCloseRequested}
