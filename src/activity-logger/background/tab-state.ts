@@ -87,6 +87,14 @@ class Tab implements TabState {
         return remoteFunction('insertOrRemoveTooltip', { tabId: this.id })()
     }
 
+    private async _updateRibbonState() {
+        if (!this.isLoaded || !isLoggable({ url: this.url })) {
+            return
+        }
+
+        return remoteFunction('updateRibbon', { tabId: this.id })()
+    }
+
     private _pauseLogTimer() {
         if (this._timer != null) {
             this._timer.pause()
@@ -139,6 +147,7 @@ class Tab implements TabState {
         if (!skipRemoteCall) {
             this._toggleTooltip()
             this._toggleRibbon()
+            this._updateRibbonState()
             this._toggleRenderSidebarIFrame(!this.isActive)
         }
 

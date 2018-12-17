@@ -16,6 +16,7 @@ export const setupRibbonUI = (
         getInitialState,
         handleRibbonToggle,
         handleTooltipToggle,
+        setRibbonRef,
     },
 ) => {
     const sidebarURL = browser.extension.getURL('sidebar.html')
@@ -23,9 +24,11 @@ export const setupRibbonUI = (
     ReactDOM.render(
         <Ribbon
             onInit={onInit}
-            destroy={() => {
+            destroy={e => {
+                e.stopPropagation()
                 onClose()
             }}
+            ref={setRibbonRef}
             getInitialState={getInitialState}
             handleRibbonToggle={handleRibbonToggle}
             handleTooltipToggle={handleTooltipToggle}
