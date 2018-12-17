@@ -75,33 +75,6 @@ export class DriveBackupBackend extends BackupBackend {
         })
     }
 
-    // async storeObject({
-    //     collection,
-    //     pk,
-    //     object,
-    //     events,
-    // }: {
-    //     collection: string
-    //     pk: string
-    //     object: object
-    //     events: EventEmitter
-    // }): Promise<any> {
-    //     // await new Promise(resolve => setTimeout(resolve, 3000))
-    //     await this.client.storeObject({ collection, pk, object })
-    // }
-
-    // async deleteObject({
-    //     collection,
-    //     pk,
-    //     events,
-    // }: {
-    //     collection: string
-    //     pk: string
-    //     events: EventEmitter
-    // }): Promise<any> {
-    //     await this.client.deleteObject({ collection, pk })
-    // }
-
     async backupChanges({
         changes,
         events,
@@ -138,6 +111,28 @@ export class DriveBackupBackend extends BackupBackend {
                 object: { version: currentSchemaVersion, images },
             })
         }
+    }
+
+    async listObjects(collection: string): Promise<string[]> {
+        await this.tokenManager.refreshAccessToken()
+        const collectionFolderId = await this.client.getFolderChildId(
+            'appDataFolder',
+            collection,
+        )
+        return Object.keys(await this.client.listFolder(collectionFolderId))
+    }
+
+    async retrieveObject(collection: string, object: string) {
+        await this.tokenManager.refreshAccessToken()
+        const collectionFolderId = await this.client.getFolderChildId(
+            'appDataFolder',
+            collection,
+        )
+        const collectionFolderContents = await this.client.listFolder(
+            collectionFolderId,
+        )
+        const objectFileId = collectionFolderContents[object]
+        return this.client.getFile(objectFileId, { json: true })
     }
 }
 
