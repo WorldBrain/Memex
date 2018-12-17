@@ -1,4 +1,5 @@
 import { browser, Notifications } from 'webextension-polyfill-ts'
+import browserIsChrome from './check-browser'
 export const DEF_ICON_URL = '/img/worldbrain-logo-narrow.png'
 export const DEF_TYPE = 'basic'
 
@@ -30,7 +31,7 @@ function filterOpts({
     ...rest
 }: NotifOpts): NotifOpts {
     const opts = { type, iconUrl, requireInteraction, title, message }
-    return browser.runtime.getBrowserInfo != null ? opts : { ...opts, ...rest }
+    return !browserIsChrome() ? opts : { ...opts, ...rest }
 }
 
 async function createNotification(
