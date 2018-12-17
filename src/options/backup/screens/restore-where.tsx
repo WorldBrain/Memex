@@ -38,6 +38,5 @@ export default class RestoreWhere extends React.Component<Props> {
                 </PrimaryButton>
             </div>
         )
-        // return <div>Placeholder</div>
     }
 }

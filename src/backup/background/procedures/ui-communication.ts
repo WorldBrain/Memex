@@ -12,7 +12,6 @@ export class ProcedureUiCommunication {
     sendEvent(eventType, event) {
         for (const tabId of Object.keys(this._uiTabIds)) {
             try {
-                console.log('sending event', eventType, event)
                 window['browser'].tabs.sendMessage(parseInt(tabId, 10), {
                     type: this.eventName,
                     event: { type: eventType, ...(event || {}) },

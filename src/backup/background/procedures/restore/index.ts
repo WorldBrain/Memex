@@ -4,6 +4,7 @@ import { StorageManager } from '../../../../search/storage/manager'
 import { BackupBackend } from '../../backend'
 import Interruptable from '../interruptable'
 import { DownloadQueue } from './download-queue'
+import { checkServerIdentity } from 'tls'
 
 export interface BackupRestoreInfo {
     status: 'preparing' | 'synching'
@@ -62,6 +63,7 @@ export class BackupRestoreProcedure {
                     this._restoreCollection(
                         'change-sets',
                         changeSetTimestamps,
+                        'changes',
                         this._writeChange.bind(this),
                     ),
                 )
@@ -69,6 +71,7 @@ export class BackupRestoreProcedure {
                     this._restoreCollection(
                         'images',
                         imageTimestamps,
+                        'images',
                         this._writeImage.bind(this),
                     ),
                 )
@@ -83,6 +86,7 @@ export class BackupRestoreProcedure {
                     return 'cancelled'
                 }
             } catch (e) {
+                console.error(e)
                 this.events.emit('fail', e)
                 return 'fail'
             } finally {
@@ -101,6 +105,7 @@ export class BackupRestoreProcedure {
     async _restoreCollection(
         collection: string,
         timestamps: string[],
+        changesKey: string,
         writeObject: (object: any) => Promise<any>,
     ) {
         const changeSetDownloadQueue = this._createDownloadQueue(
@@ -109,21 +114,26 @@ export class BackupRestoreProcedure {
         )
         await this._restoreFromDownloadQueue(
             changeSetDownloadQueue,
+            changesKey,
             writeObject,
         )
     }
 
     async _restoreFromDownloadQueue(
         queue: DownloadQueue,
+        changesKey: string,
         writeObject: (object: any) => Promise<any>,
     ) {
         await this.interruptable.whileLoop(
             () => queue.hasNext(),
             async () => {
                 const batch = await queue.getNext()
-                await this.interruptable.forOfLoop(batch, async change => {
-                    await writeObject(change)
-                })
+                await this.interruptable.forOfLoop(
+                    batch.changes || batch.images,
+                    async change => {
+                        await writeObject(change)
+                    },
+                )
                 this._updateInfo({
                     processedChanges: this.info.processedChanges + 1,
                 })
@@ -135,7 +145,7 @@ export class BackupRestoreProcedure {
 
     _writeChange(change) {
         return new Promise(resolve =>
-            setTimeout(() => resolve(), 500),
+            setTimeout(() => resolve(), 10),
         ) as Promise<void>
     }
 

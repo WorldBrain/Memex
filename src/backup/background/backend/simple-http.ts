@@ -53,11 +53,17 @@ export default class SimpleHttpBackend extends BackupBackend {
     async backupChanges({
         changes,
         events,
+        currentSchemaVersion,
     }: {
         changes: ObjectChange[]
         events: EventEmitter
+        currentSchemaVersion: number
     }) {
-        const body = JSON.stringify(changes, null, 4)
+        const body = JSON.stringify(
+            { version: currentSchemaVersion, changes },
+            null,
+            4,
+        )
 
         await fetch(`${this.url}/change-sets/${Date.now()}`, {
             method: 'PUT',

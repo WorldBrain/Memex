@@ -8,12 +8,12 @@ describe('BackupRestoreProcedure', () => {
         const writtenImages = []
         const backupObjects = {
             'change-sets': {
-                11111: ['change 1', 'change 2'],
-                22222: ['change 3', 'change 4'],
+                11111: { changes: ['change 1', 'change 2'] },
+                22222: { changes: ['change 3', 'change 4'] },
             },
             images: {
-                11111: ['image 1', 'image 2'],
-                22222: ['image 3', 'image 4'],
+                11111: { images: ['image 1', 'image 2'] },
+                22222: { images: ['image 3', 'image 4'] },
             },
         }
 
