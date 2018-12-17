@@ -9,13 +9,13 @@ export default class ToolbarNotifications {
 
     registerRemoteFunctions(registry: RemoteFunctionRegistry) {
         registry.registerRemotelyCallable({
-            showToolbarNotification: (type: string) => {
-                this.showToolbarNotification(type)
+            showToolbarNotification: (type: string, extraProps: any) => {
+                this.showToolbarNotification(type, extraProps)
             },
         })
     }
 
-    async showToolbarNotification(type: string, position = null) {
+    async showToolbarNotification(type: string, extraProps: any) {
         await bodyLoader()
         if (this._rootElement) {
             // We're already showing a notification, close it
@@ -29,10 +29,10 @@ export default class ToolbarNotifications {
         await setupUIContainer(rootElement, {
             type,
             shadow,
-            position,
             onCloseRequested: () => {
                 this._destroyRootElement()
             },
+            extraProps,
         })
     }
 

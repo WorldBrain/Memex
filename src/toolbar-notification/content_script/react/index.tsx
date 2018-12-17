@@ -8,13 +8,13 @@ export function setupUIContainer(
     {
         type,
         shadow,
-        position,
         onCloseRequested,
+        extraProps,
     }: {
         type: string
         shadow: HTMLElement
-        position: any
         onCloseRequested: () => void
+        extraProps: any
     },
 ) {
     retargetEvents(shadow)
@@ -23,7 +23,7 @@ export function setupUIContainer(
             <ToolbarNotification
                 type={type}
                 onCloseRequested={onCloseRequested}
-                position={position}
+                {...extraProps}
             />,
             target,
         )
