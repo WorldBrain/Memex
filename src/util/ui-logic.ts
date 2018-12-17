@@ -80,7 +80,7 @@ export function reactEventHandler<Dependencies extends object = null>(
             eventProcessor,
             state: component.state,
             props: component.props,
-            setState: component.setState.bind(this),
+            setState: component.setState.bind(component),
             event,
             actions,
             dependencies,
