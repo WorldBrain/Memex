@@ -3,12 +3,12 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import cx from 'classnames'
 
-import { selectors, actions } from '../'
+import { selectors, actions } from '..'
 import { IndexDropdown } from 'src/common-ui/containers'
-import TagHolder from '../../components/TagHolder/TagHolder'
+import TagHolder from '../../components/tag-holder'
 import * as constants from '../../constants'
 
-import styles from './CommentBox.css'
+import styles from './comment-box.css'
 
 class CommentBox extends React.PureComponent {
     static propTypes = {
