@@ -7,12 +7,12 @@ import { initErrHandler } from '../storage'
 
 type SuggestType = 'domain' | 'tag'
 
-export const suggest = (getDb: Promise<Dexie>) => async (
+export const suggest = (getDb: () => Promise<Dexie>) => async (
     query = '',
     type: SuggestType,
     limit = 10,
 ) => {
-    const db = await getDb
+    const db = await getDb()
     const applyQuery = <T, Key>(where: DexieOrig.WhereClause<T, Key>) =>
         where
             .startsWith(query)
@@ -36,12 +36,15 @@ export const suggest = (getDb: Promise<Dexie>) => async (
     }
 }
 
-export const suggestObjects = (getDb: Promise<Dexie>) => async <S, P = any>(
+export const suggestObjects = (getDb: () => Promise<Dexie>) => async <
+    S,
+    P = any
+>(
     collection: string,
     query,
     options: SuggestOptions = {},
 ) => {
-    const db = await getDb
+    const db = await getDb()
     // Grab first entry from the filter query; ignore rest for now
     const [[indexName, value], ...fields] = Object.entries<string>(query)
 
@@ -86,12 +89,12 @@ export const suggestObjects = (getDb: Promise<Dexie>) => async <S, P = any>(
 }
 
 // Used to provide initial suggestions for tags that are not associated with the list.
-export const extendedSuggest = (getDb: Promise<Dexie>) => async (
+export const extendedSuggest = (getDb: () => Promise<Dexie>) => async (
     notInclude = [],
     type: SuggestType,
     limit = 20,
 ) => {
-    const db = await getDb
+    const db = await getDb()
     const applyQuery = <T, Key>(where: DexieOrig.WhereClause<T, Key>) =>
         where
             .noneOf(notInclude)

@@ -13,7 +13,7 @@ interface Props {
     stubOnly?: boolean
 }
 
-export const createPageFromTab = (getDb: Promise<Dexie>) => async ({
+export const createPageFromTab = (getDb: () => Promise<Dexie>) => async ({
     url,
     tabId,
     stubOnly = false,
@@ -43,7 +43,7 @@ export const createPageFromTab = (getDb: Promise<Dexie>) => async ({
     return page
 }
 
-export const createPageFromUrl = (getDb: Promise<Dexie>) => async ({
+export const createPageFromUrl = (getDb: () => Promise<Dexie>) => async ({
     url,
     stubOnly = false,
 }: Props) => {
@@ -74,7 +74,7 @@ export const createPageFromUrl = (getDb: Promise<Dexie>) => async ({
  * Also sets the `stubOnly` option based on user bookmark/tag indexing pref.
  * TODO: Better name?
  */
-export const createPageViaBmTagActs = (getDb: Promise<Dexie>) => async (
+export const createPageViaBmTagActs = (getDb: () => Promise<Dexie>) => async (
     props: Props,
 ) => {
     const {

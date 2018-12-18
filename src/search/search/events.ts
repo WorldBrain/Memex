@@ -3,11 +3,11 @@ import { Dexie, SearchParams, PageResultsMap, FilteredURLs } from '..'
 /**
  * Given some URLs, grab the latest assoc. event timestamp for each one within the time filter bounds.
  */
-export const mapUrlsToLatestEvents = (getDb: Promise<Dexie>) => async (
+export const mapUrlsToLatestEvents = (getDb: () => Promise<Dexie>) => async (
     { endDate, startDate, bookmarks }: Partial<SearchParams>,
     urls: string[],
 ) => {
-    const db = await getDb
+    const db = await getDb()
 
     /**
      * @param {PageResultsMap} urlTimeMap Map to keep track of URL-timestamp pairs.
@@ -73,7 +73,7 @@ export const mapUrlsToLatestEvents = (getDb: Promise<Dexie>) => async (
 /**
  * @return Map of URL keys to latest visit time numbers. Should be size <= skip + limit.
  */
-export const groupLatestEventsByUrl = (getDb: Promise<Dexie>) => (
+export const groupLatestEventsByUrl = (getDb: () => Promise<Dexie>) => (
     params: Partial<SearchParams>,
     filteredUrls: FilteredURLs,
 ) => {
@@ -86,7 +86,7 @@ export const groupLatestEventsByUrl = (getDb: Promise<Dexie>) => (
  * Goes through visits and bookmarks index from `endDate` until it groups enough URLs.
  * The `.until` in the query chain forces time and space to be constant to `skip + limit`
  */
-const lookbackFromEndDate = (getDb: Promise<Dexie>) => async (
+const lookbackFromEndDate = (getDb: () => Promise<Dexie>) => async (
     {
         startDate = 0,
         endDate = Date.now(),
@@ -95,7 +95,7 @@ const lookbackFromEndDate = (getDb: Promise<Dexie>) => async (
     }: Partial<SearchParams>,
     filteredUrls: FilteredURLs,
 ) => {
-    const db = await getDb
+    const db = await getDb()
     // Lookback from endDate to get needed amount of visits
     const latestVisits: PageResultsMap = new Map()
     await db.visits
@@ -145,13 +145,13 @@ const lookbackFromEndDate = (getDb: Promise<Dexie>) => async (
  * Goes through bookmarks index from latest time until it groups enough URLs that have either been
  * bookmarked OR visited within the bounds specified in the search params.
  */
-const lookbackBookmarksTime = (getDb: Promise<Dexie>) => async ({
+const lookbackBookmarksTime = (getDb: () => Promise<Dexie>) => async ({
     startDate = 0,
     endDate = Date.now(),
     skip = 0,
     limit = 10,
 }: Partial<SearchParams>) => {
-    const db = await getDb
+    const db = await getDb()
     let bmsExhausted = false
     let results: PageResultsMap = new Map()
 

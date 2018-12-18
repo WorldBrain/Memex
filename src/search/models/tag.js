@@ -8,12 +8,12 @@ export default class Tag extends AbstractModel {
     }
 
     async save(getDb) {
-        const db = await getDb
+        const db = await getDb()
         return db.tags.put(this)
     }
 
     async delete(getDb) {
-        const db = await getDb
+        const db = await getDb()
         return db.tags.delete([this.name, this.url])
     }
 }

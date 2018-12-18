@@ -10,13 +10,13 @@ import { initErrHandler } from './storage'
  * Adds/updates a page + associated visit (pages never exist without either an assoc.
  *  visit or bookmark in current model).
  */
-export const addPage = (getDb: Promise<Dexie>) => async ({
+export const addPage = (getDb: () => Promise<Dexie>) => async ({
     visits = [],
     bookmark,
     pageDoc,
     rejectNoContent,
 }: Partial<PageAddRequest>) => {
-    const db = await getDb
+    const db = await getDb()
 
     const { favIconURI, ...pageData } = await pipeline({
         pageDoc,
@@ -50,10 +50,10 @@ export const addPage = (getDb: Promise<Dexie>) => async ({
     }
 }
 
-export const addPageTerms = (getDb: Promise<Dexie>) => async (
+export const addPageTerms = (getDb: () => Promise<Dexie>) => async (
     pipelineReq: PipelineReq,
 ) => {
-    const db = await getDb
+    const db = await getDb()
     const pageData = await pipeline(pipelineReq)
 
     try {
@@ -70,12 +70,12 @@ export const addPageTerms = (getDb: Promise<Dexie>) => async (
 /**
  * Updates an existing specified visit with interactions data.
  */
-export const updateTimestampMeta = (getDb: Promise<Dexie>) => async (
+export const updateTimestampMeta = (getDb: () => Promise<Dexie>) => async (
     url: string,
     time: number,
     data: Partial<VisitInteraction>,
 ) => {
-    const db = await getDb
+    const db = await getDb()
     const normalized = normalizeUrl(url)
 
     await db
@@ -88,7 +88,7 @@ export const updateTimestampMeta = (getDb: Promise<Dexie>) => async (
         .catch(initErrHandler())
 }
 
-export const addVisit = (getDb: Promise<Dexie>) => async (
+export const addVisit = (getDb: () => Promise<Dexie>) => async (
     url: string,
     time = Date.now(),
 ) => {
@@ -102,7 +102,7 @@ export const addVisit = (getDb: Promise<Dexie>) => async (
     return matchingPage.save(getDb).catch(initErrHandler())
 }
 
-export const addFavIcon = (getDb: Promise<Dexie>) => async (
+export const addFavIcon = (getDb: () => Promise<Dexie>) => async (
     url: string,
     favIconURI: string,
 ) => {

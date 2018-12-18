@@ -15,7 +15,7 @@ const mapPageToDisplay = (
     pagesMap: Map<string, Page>,
     favIconsMap: Map<string, FavIcon>,
     { endDate }: SearchParams,
-    getDb: Promise<Dexie>,
+    getDb: () => Promise<Dexie>,
 ) =>
     async function([url]: SearchResult): Promise<SearchDisplayResult> {
         const page = pagesMap.get(url)
@@ -36,11 +36,11 @@ const mapPageToDisplay = (
 /**
  * Used as a helper to shape the search results for the current UI's expected result shape.
  */
-export const mapResultsToDisplay = (getDb: Promise<Dexie>) => async (
+export const mapResultsToDisplay = (getDb: () => Promise<Dexie>) => async (
     results: SearchResult[],
     params: SearchParams,
 ) => {
-    const db = await getDb
+    const db = await getDb()
     const resultUrls = results.map(([url]) => url)
 
     const pagesMap = new Map<string, Page>()
