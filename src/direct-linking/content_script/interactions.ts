@@ -1,20 +1,31 @@
-import { remoteFunction } from 'src/util/webextensionRPC'
+import { remoteFunction } from '../../util/webextensionRPC'
 import { copyToClipboard } from './utils'
 import * as annotations from './annotations'
 
-export async function createAndCopyDirectLink() {
+export interface Anchor {
+    quote: string
+    descriptor: {
+        strategy: string
+        content: any
+    }
+}
+
+export const createAndCopyDirectLink = async () => {
     const selection = document.getSelection()
     const range = selection.getRangeAt(0)
     const url = window.location.href
 
     const anchor = await extractAnchor(selection)
-    const result = await remoteFunction('createDirectLink')({ url, anchor })
+    const result: { url: string } = await remoteFunction('createDirectLink')({
+        url,
+        anchor,
+    })
     copyToClipboard(result.url)
     selectTextFromRange(range)
     return result
 }
 
-export async function createAnnotation() {
+export const createAnnotation = async () => {
     const selection = document.getSelection()
     const range = selection.getRangeAt(0)
 
@@ -23,7 +34,7 @@ export async function createAnnotation() {
     selectTextFromRange(range)
 }
 
-async function extractAnchor(selection) {
+const extractAnchor = async (selection: Selection): Promise<Anchor> => {
     const quote = selection.toString()
 
     const descriptor = await annotations.selectionToDescriptor({ selection })
@@ -33,7 +44,7 @@ async function extractAnchor(selection) {
     }
 }
 
-function selectTextFromRange(range) {
+const selectTextFromRange = (range: Range) => {
     const selection = document.getSelection()
     selection.removeAllRanges()
     selection.addRange(range)
