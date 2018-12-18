@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { Provider } from 'react-redux'
 
 import { store } from './redux'
-import Sidebar from './components'
+import Sidebar from './components/sidebar'
 
 const Container = props => (
     <Provider store={store}>
