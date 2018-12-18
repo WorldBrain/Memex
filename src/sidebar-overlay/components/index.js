@@ -1,7 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 
-import SidebarContainer from './sidebar'
 import Ribbon from './ribbon'
 import { remoteFunction } from '../../util/webextensionRPC'
 import * as interactions from '../content_script/interactions'
@@ -59,5 +58,3 @@ export const destroyAll = (target, shadowRoot = null) => () => {
         document.body.removeChild(target)
     }
 }
-
-export default SidebarContainer
