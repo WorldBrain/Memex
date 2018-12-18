@@ -9,7 +9,7 @@ import { paginate, applyScores } from './util'
 export { domainHasFavIcon } from './fav-icon'
 export { suggest, extendedSuggest } from './suggest'
 
-export const search = (getDb: Promise<Dexie>) => async ({
+export const search = (getDb: () => Promise<Dexie>) => async ({
     query,
     showOnlyBookmarks,
     mapResultsFunc = mapResultsToDisplay,
@@ -19,7 +19,7 @@ export const search = (getDb: Promise<Dexie>) => async ({
     lists = [],
     ...restParams
 }) => {
-    const db = await getDb
+    const db = await getDb()
     // Extract query terms via QueryBuilder (may change)
     const qb = new QueryBuilder()
         .searchTerm(query)
@@ -81,9 +81,9 @@ export const search = (getDb: Promise<Dexie>) => async ({
 
 // WARNING: Inefficient; goes through entire table
 export const getMatchingPageCount = (
-    getDb: Promise<Dexie>,
+    getDb: () => Promise<Dexie>,
 ) => async pattern => {
-    const db = await getDb
+    const db = await getDb()
     const re = new RegExp(pattern, 'i')
     return db.pages
         .filter(page => re.test(page.url))
@@ -94,7 +94,7 @@ export const getMatchingPageCount = (
 /**
  * Main search logic. Calls the rest of serach depending on input search params.
  */
-const fullSearch = (getDb: Promise<Dexie>) => async ({
+const fullSearch = (getDb: () => Promise<Dexie>) => async ({
     terms = [],
     termsExclude = [],
     ...params

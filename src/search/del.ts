@@ -9,8 +9,11 @@ type QueryApplier = (
     table: DexieOrig.Table<Page, string>,
 ) => DexieOrig.Collection<Page, string>
 
-const deletePages = async (applyQuery: QueryApplier, getDb: Promise<Dexie>) => {
-    const db = await getDb
+const deletePages = async (
+    applyQuery: QueryApplier,
+    getDb: () => Promise<Dexie>,
+) => {
+    const db = await getDb()
     return db.transaction('rw', db.tables, async () => {
         const pages = await applyQuery(db.pages).toArray()
 
@@ -20,18 +23,20 @@ const deletePages = async (applyQuery: QueryApplier, getDb: Promise<Dexie>) => {
     })
 }
 
-export const delPages = (getDb: Promise<Dexie>) => (urls: string[]) => {
+export const delPages = (getDb: () => Promise<Dexie>) => (urls: string[]) => {
     const normalizedUrls: string[] = urls.map(normalizeUrl as any)
 
     return deletePages(table => table.where('url').anyOf(normalizedUrls), getDb)
 }
 
-export const delPagesByDomain = (getDb: Promise<Dexie>) => (url: string) => {
+export const delPagesByDomain = (getDb: () => Promise<Dexie>) => (
+    url: string,
+) => {
     return deletePages(table => table.where('domain').equals(url), getDb)
 }
 
 // WARNING: Inefficient; goes through entire table
-export const delPagesByPattern = (getDb: Promise<Dexie>) => (
+export const delPagesByPattern = (getDb: () => Promise<Dexie>) => (
     pattern: string | RegExp,
 ) => {
     const re = typeof pattern === 'string' ? new RegExp(pattern, 'i') : pattern

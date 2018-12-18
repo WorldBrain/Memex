@@ -20,9 +20,9 @@ export interface TermResults {
 const termQuery = (
     term: string,
     excluded: string[],
-    getDb: Promise<Dexie>,
+    getDb: () => Promise<Dexie>,
 ) => async (index: TermsIndexName) => {
-    const db = await getDb
+    const db = await getDb()
     let coll = db.pages.where(index).equals(term)
 
     // Adding a `.filter/.and` clause to a collection means it needs to iterate through
@@ -44,7 +44,7 @@ const termQuery = (
 /**
  * Performs a query for a single term on a all terms indexes.
  */
-const lookupTerm = (excluded: string[], getDb: Promise<Dexie>) =>
+const lookupTerm = (excluded: string[], getDb: () => Promise<Dexie>) =>
     async function(term: string): Promise<TermResults> {
         const queryIndex = termQuery(term, excluded, getDb)
 
@@ -86,7 +86,7 @@ const scoreTermResults = (filteredUrls: FilteredURLs) =>
 const intersectTermResults = (a: PageResultsMap, b: PageResultsMap) =>
     new Map([...a].filter(([url]) => b.has(url)))
 
-export const textSearch = (getDb: Promise<Dexie>) => async (
+export const textSearch = (getDb: () => Promise<Dexie>) => async (
     { terms, termsExclude }: Partial<SearchParams>,
     filteredUrls: FilteredURLs,
 ): Promise<PageResultsMap> => {

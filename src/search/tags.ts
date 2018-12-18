@@ -9,7 +9,7 @@ interface Props {
     tabId?: number
 }
 
-const modifyTag = (shouldAdd: boolean) => (getDb: Promise<Dexie>) =>
+const modifyTag = (shouldAdd: boolean) => (getDb: () => Promise<Dexie>) =>
     async function({ url, tag, tabId }: Props) {
         let page = await getPage(getDb)(url)
 
@@ -34,7 +34,9 @@ const modifyTag = (shouldAdd: boolean) => (getDb: Promise<Dexie>) =>
 export const delTag = modifyTag(false)
 export const addTag = modifyTag(true)
 
-export const fetchPageTags = (getDb: Promise<Dexie>) => async (url: string) => {
+export const fetchPageTags = (getDb: () => Promise<Dexie>) => async (
+    url: string,
+) => {
     const page = await getPage(getDb)(url)
 
     return page != null ? page.tags : []

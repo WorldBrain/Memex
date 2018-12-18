@@ -2,14 +2,14 @@ import { Page, FavIcon } from '..'
 import { ExportedPage } from './types'
 import { Dexie } from '../types'
 
-const importPage = (getDb: Promise<Dexie>) => async ({
+const importPage = (getDb: () => Promise<Dexie>) => async ({
     bookmark,
     visits,
     tags,
     favIconURI,
     ...pageData
 }: ExportedPage) => {
-    const db = await getDb
+    const db = await getDb()
     return db.transaction('rw', db.tables, async () => {
         const page = new Page(pageData)
 
