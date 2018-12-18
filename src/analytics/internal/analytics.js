@@ -1,4 +1,4 @@
-import { EVENT_NAMES } from './constants'
+import { EVENT_TYPES, EVENT_NAMES } from './constants'
 
 class Analytics {
     _initDataLoaded
