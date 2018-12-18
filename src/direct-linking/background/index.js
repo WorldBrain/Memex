@@ -6,10 +6,16 @@ import DirectLinkingStorage, { AnnotationStorage } from './storage'
 import normalize from '../../util/encode-url-for-id'
 
 export default class DirectLinkingBackground {
-    constructor({ storageManager }) {
+    constructor({ storageManager, getDb }) {
         this.backend = new DirectLinkingBackend()
-        this.directLinkingStorage = new DirectLinkingStorage({ storageManager })
-        this.annotationStorage = new AnnotationStorage({ storageManager })
+        this.directLinkingStorage = new DirectLinkingStorage({
+            storageManager,
+            getDb,
+        })
+        this.annotationStorage = new AnnotationStorage({
+            storageManager,
+            getDb,
+        })
         this.sendAnnotation = ({ tabId, annotation }) => {
             browser.tabs.sendMessage(tabId, { type: 'direct-link', annotation })
         }

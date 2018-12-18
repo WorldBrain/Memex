@@ -31,7 +31,7 @@ const storageManager = initStorex()
 const notifications = new NotificationBackground({ storageManager })
 notifications.setupRemoteFunctions()
 
-const directLinking = new DirectLinkingBackground({ storageManager })
+const directLinking = new DirectLinkingBackground({ storageManager, getDb })
 directLinking.setupRemoteFunctions()
 directLinking.setupRequestInterceptor()
 

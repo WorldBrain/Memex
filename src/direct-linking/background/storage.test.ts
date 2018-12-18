@@ -1,12 +1,16 @@
 import initStorageManager from '../../search/memory-storex'
 import normalize from '../../util/encode-url-for-id'
 import AnnotationBackground from './'
+import getDb from '../../search'
 import * as DATA from './storage.test.data'
 
 describe('Annotations storage', () => {
     const storageManager = initStorageManager()
 
-    const { annotationStorage } = new AnnotationBackground({ storageManager })
+    const { annotationStorage } = new AnnotationBackground({
+        storageManager,
+        getDb,
+    })
 
     async function insertTestData() {
         // Insert annotations and direct links
