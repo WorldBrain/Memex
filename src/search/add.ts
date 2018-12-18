@@ -24,16 +24,15 @@ export const addPage = (getDb: () => Promise<Dexie>) => async ({
     })
 
     try {
-        await db.transaction('rw', db.tables, async () => {
-            const page = new Page(pageData)
+        const page = new Page(pageData)
+        await page.loadRels(getDb)
 
+        await db.transaction('rw', db.tables, async () => {
             if (favIconURI != null) {
                 await new FavIcon({ hostname: page.hostname, favIconURI })
                     .save(getDb)
                     .catch()
             }
-
-            await page.loadRels(getDb)
 
             // Create Visits for each specified time, or a single Visit for "now" if no assoc event
             visits = !visits.length && bookmark == null ? [Date.now()] : visits
