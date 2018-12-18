@@ -3,9 +3,9 @@ import PropTypes from 'prop-types'
 import Menu from 'react-burger-menu/lib/menus/slide'
 
 import CongratsMessage from '../CongratsMessage'
-import CommentBox from '../../CommentBox'
-import styles from './Sidebar.css'
-import MenuStyles from '../MenuStyles'
+import CommentBox from '../../comment-box'
+import styles from './sidebar.css'
+import MenuStyles from '../menu-styles'
 
 const Sidebar = props => (
     <Menu

@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import cx from 'classnames'
 
-import styles from './CloseButton.css'
+import styles from './close-button.css'
 
 const CloseButton = ({ isActive, isOverview = false, clickHandler, title }) => (
     <div

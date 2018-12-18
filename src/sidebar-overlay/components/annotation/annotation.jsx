@@ -1,7 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import styles from './Annotation.css'
 import cx from 'classnames'
+
+import styles from './annotation.css'
 
 const Annotation = props => (
     <div

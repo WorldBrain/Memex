@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 import { maxPossibleTags } from '../../utils'
-import styles from './TagHolder.css'
+import styles from './tag-holder.css'
 
 /**
  * Dummy Tag Holder to display all the tags
