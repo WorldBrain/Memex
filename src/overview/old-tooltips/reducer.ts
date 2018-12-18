@@ -1,15 +1,16 @@
 import { createReducer } from 'redux-act'
 
+import { Tooltip } from '../types'
 import * as acts from './actions'
 
 export interface State {
+    tooltip: Tooltip
     showTooltip: boolean
-    whichTooltip: string
 }
 
 const defState: State = {
-    showTooltip: false,
-    whichTooltip: '',
+    tooltip: null,
+    showTooltip: true,
 }
 
 const reducer = createReducer<State>({}, defState)

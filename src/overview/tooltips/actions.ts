@@ -1,13 +1,11 @@
 import { createAction } from 'redux-act'
+import { getLocalStorage } from 'src/util/storage'
 
-import { Tooltip } from '../types'
-import { fetchNextTooltip } from './tooltips'
-
-export const setTooltip = createAction<Tooltip>('tooltips/setTooltip')
+export const setWhichTooltip = createAction<boolean>('tooltips/setTooltip')
 export const toggleShowTooltip = createAction('tooltips/toggleShowTooltip')
 export const setShowTooltip = createAction<boolean>('tooltips/setShowTooltip')
 
-export const nextTooltip = () => async dispatch => {
-    const tooltip = await fetchNextTooltip()
-    dispatch(setTooltip(tooltip))
+export const fetchWhichTooltip = async dispatch => {
+    const whichTooltip = await getLocalStorage('onboarding-overview-tooltip')
+    dispatch(setWhichTooltip(whichTooltip))
 }
