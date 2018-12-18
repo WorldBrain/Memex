@@ -27,23 +27,20 @@ export const addPage = (getDb: () => Promise<Dexie>) => async ({
         const page = new Page(pageData)
         await page.loadRels(getDb)
 
-        await db.transaction('rw', db.tables, async () => {
-            if (favIconURI != null) {
-                await new FavIcon({ hostname: page.hostname, favIconURI })
-                    .save(getDb)
-                    .catch()
-            }
+        // Create Visits for each specified time, or a single Visit for "now" if no assoc event
+        visits = !visits.length && bookmark == null ? [Date.now()] : visits
+        visits.forEach(time => page.addVisit(time))
 
-            // Create Visits for each specified time, or a single Visit for "now" if no assoc event
-            visits = !visits.length && bookmark == null ? [Date.now()] : visits
-            visits.forEach(time => page.addVisit(time))
+        if (bookmark != null) {
+            page.setBookmark(bookmark)
+        }
 
-            if (bookmark != null) {
-                page.setBookmark(bookmark)
-            }
-
-            await page.save(getDb)
-        })
+        if (favIconURI != null) {
+            await new FavIcon({ hostname: page.hostname, favIconURI }).save(
+                getDb,
+            )
+        }
+        await page.save(getDb)
     } catch (error) {
         console.error(error)
     }
