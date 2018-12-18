@@ -1,6 +1,6 @@
 import React from 'react'
 
-import styles from './Sidebar/Sidebar.css'
+import styles from './sidebar/sidebar.css'
 
 const Loader = () => (
     <div className={styles.ldsEllipsis}>

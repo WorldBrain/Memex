@@ -1,7 +1,8 @@
 import { createStore, applyMiddleware, combineReducers } from 'redux'
 import thunk from 'redux-thunk'
+
 import sidebar from './reducer'
-import { reducer as commentBox } from '../CommentBox/'
+import { reducer as commentBox } from '../comment-box'
 
 const rootReducer = combineReducers({
     sidebar,

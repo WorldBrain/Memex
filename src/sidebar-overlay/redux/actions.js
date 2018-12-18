@@ -5,7 +5,7 @@ import { remove } from 'lodash/array'
 import {
     selectors as commentSelectors,
     actions as commentActions,
-} from '../CommentBox'
+} from '../comment-box'
 import * as selectors from './selectors'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { getLocalStorage } from 'src/search-injection/utils'

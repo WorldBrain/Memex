@@ -3,12 +3,16 @@ import cx from 'classnames'
 import onClickOutside from 'react-onclickoutside'
 import { browser } from 'webextension-polyfill-ts'
 
-import { remoteFunction, makeRemotelyCallable } from 'src/util/webextensionRPC'
+import {
+    remoteFunction,
+    makeRemotelyCallable,
+} from '../../../util/webextensionRPC'
 import FrameCommunication from '../../messaging'
-import CloseButton from '../CloseButton/CloseButton'
+import CloseButton from '../close-button'
+import { Anchor } from '../../../direct-linking/content_script/interactions'
 
 import { EVENT_NAMES } from '../../../analytics/internal/constants'
-const styles = require('./Ribbon.css')
+const styles = require('./ribbon.css')
 
 const arrowRibbon = browser.extension.getURL('/img/arrow_ribbon.svg')
 const logo = browser.extension.getURL('/img/worldbrain-logo-narrow.png')
@@ -35,8 +39,10 @@ interface Props {
 interface State {
     isSidebarActive: boolean
     isFullScreen: boolean
+    // TODO: Make annotations a specific type.
     annotations: any[]
     isInsideFrame: boolean
+    // TODO: Make top a specific type.
     top: any
     shouldRenderIFrame: boolean
     isRibbonEnabled: boolean
@@ -45,9 +51,9 @@ interface State {
 }
 
 class Ribbon extends React.Component<Props, State> {
-    private frameFC: any
-    private iFrame: any
-    private ribbonRef: any
+    private frameFC: FrameCommunication
+    private iFrame: HTMLIFrameElement
+    private ribbonRef: HTMLElement
 
     state = {
         isSidebarActive: false,
@@ -125,7 +131,7 @@ class Ribbon extends React.Component<Props, State> {
              * Opens sidebar and displays the "New annotation" message above Comment Box.
              * @param {*} anchor The anchor of the selected text
              */
-            openSidebarAndSendAnchor: async anchor => {
+            openSidebarAndSendAnchor: async (anchor: Anchor) => {
                 await this.openSidebarAndSendAnchor(anchor)
 
                 const highlightables = this.state.annotations.filter(
@@ -366,8 +372,13 @@ class Ribbon extends React.Component<Props, State> {
             )
         })
 
-    openSidebarAndSendAnchor = async anchor => {
-        await this.openSidebar({ anchor })
+    openSidebarAndSendAnchor = async (anchor: Anchor) => {
+        await this.openSidebar()
+
+        setTimeout(
+            () => this.frameFC.remoteExecute('sendAnchorToSidebar')(anchor),
+            400,
+        )
     }
 
     handleClickOutside = e => {
@@ -429,7 +440,7 @@ class Ribbon extends React.Component<Props, State> {
         }
     }
 
-    setupInputRef = ref => {
+    setRibbonRef = (ref: HTMLElement) => {
         this.ribbonRef = ref
     }
 
@@ -452,7 +463,7 @@ class Ribbon extends React.Component<Props, State> {
                         [styles.ribbonExpanded]: isHovering,
                     })}
                     onClick={this.toggleSidebar}
-                    ref={this.setupInputRef}
+                    ref={this.setRibbonRef}
                 >
                     <div className={styles.arrowBox}>
                         <img
@@ -520,8 +531,9 @@ class Ribbon extends React.Component<Props, State> {
                     title={
                         'Close once. Disable via Memex icon in the extension toolbar.'
                     }
-                />{' '}
-                {this.renderIFrame()}{' '}
+                />
+                {/* <Sidebar /> */}
+                {this.renderIFrame()}
             </React.Fragment>
         )
     }
