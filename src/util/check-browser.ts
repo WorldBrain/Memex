@@ -1,8 +1,6 @@
-/**
- * `runtime.getBrowserInfo` is only available on FF web ext API
- * @returns {Boolean} true if current browser is Chrome
- */
+import { browser } from 'webextension-polyfill-ts'
 function browserIsChrome() {
+    // `runtime.getBrowserInfo` is only available on FF web ext API
     return typeof browser.runtime.getBrowserInfo === 'undefined'
 }
 
