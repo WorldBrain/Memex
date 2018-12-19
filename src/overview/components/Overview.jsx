@@ -12,6 +12,7 @@ import { Header, acts as searchBarActs } from '../search-bar'
 import { Results } from '../results'
 import Head from '../../options/containers/Head'
 import DragElement from './DragElement'
+import { Tooltip } from '../tooltips'
 
 class Overview extends PureComponent {
     static propTypes = {
@@ -33,6 +34,7 @@ class Overview extends PureComponent {
                 <DeleteConfirmModal />
                 <DragElement />
                 <Sidebar />
+                <Tooltip />
             </React.Fragment>
         )
     }

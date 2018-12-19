@@ -1,6 +1,6 @@
 import React, { SFC } from 'react'
 
-const styles = require('tooltip.css')
+const styles = require('./tooltip.css')
 
 export interface Props {
     children: React.ReactChild

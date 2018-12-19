@@ -247,7 +247,7 @@ export const conditionallyShowOnboardingNotifications = async ({
         toolbarNotifications.showToolbarNotification('go-to-dashboard')
         await setLocalStorage(
             STORAGE_KEYS.onboardingDemo.step2,
-            'power-goto-dashboard',
+            'overview-tooltips',
         )
     }
 

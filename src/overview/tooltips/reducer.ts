@@ -14,14 +14,9 @@ const defState: State = {
 
 const reducer = createReducer<State>({}, defState)
 
-reducer.on(acts.setTooltip, (state, payload) => ({
+reducer.on(acts.setWhichTooltip, (state, payload) => ({
     ...state,
-    tooltip: payload,
-}))
-
-reducer.on(acts.toggleShowTooltip, state => ({
-    ...state,
-    showTooltip: !state.showTooltip,
+    whichTooltip: payload,
 }))
 
 reducer.on(acts.setShowTooltip, (state, payload) => ({
