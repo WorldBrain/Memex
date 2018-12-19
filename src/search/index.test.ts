@@ -40,7 +40,7 @@ describe('Search index integration', () => {
         } as any)
 
     // Set what index to use for tests + initialize data
-    beforeAll(async () => {
+    beforeEach(async () => {
         storageManager = initStorageManager()
         await storageManager.finishInitialization()
         index.setStorexBackend(storageManager.backend)
