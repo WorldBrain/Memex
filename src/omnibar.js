@@ -12,13 +12,14 @@ import extractTimeFiltersFromQuery, {
     queryFiltersDisplay,
 } from 'src/util/nlp-time-filter'
 import { OVERVIEW_URL } from './constants'
+import browserIsChrome from './util/check-browser'
 
 // Read which browser we are running in.
 let browserName
 ;(async () => {
     // XXX Firefox seems the only one currently implementing this function, but
     // luckily that is enough for our current needs.
-    if (browser.runtime.getBrowserInfo !== undefined) {
+    if (!browserIsChrome()) {
         const browserInfo = await browser.runtime.getBrowserInfo()
         browserName = browserInfo.name
     }
