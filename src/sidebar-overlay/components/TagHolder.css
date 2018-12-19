@@ -39,15 +39,6 @@
     font-style: italic;
 }
 
-.plus {
-    font-size: 21px;
-    position: absolute;
-    right: 15px;
-    top: 6px;
-    font-weight: bold;
-    color: #555;
-}
-
 .tagsLeft {
     font-weight: 800;
     color: #888;

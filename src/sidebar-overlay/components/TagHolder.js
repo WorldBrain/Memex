@@ -82,12 +82,11 @@ class TagHolder extends React.Component {
         return (
             <div className={styles.tagHolder} onClick={this.props.clickHandler}>
                 {!this.props.tags.length ? (
-                    <span className={styles.placeholder}>Tag Comment...</span>
+                    <span className={styles.placeholder}>Tags</span>
                 ) : null}
 
                 {this.renderTags()}
                 {this.renderTagsLeft()}
-                <span className={styles.plus}>+</span>
             </div>
         )
     }

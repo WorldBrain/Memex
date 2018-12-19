@@ -74,7 +74,7 @@ class IndexDropdown extends PureComponent {
     render() {
         return (
             <div className={this.mainClass} ref={this.props.setTagDivRef}>
-                <form
+                <div
                     className={cx(this.styles.searchContainer, {
                         [this.styles.commentBox]: this.props.allowAdd,
                     })}
@@ -103,7 +103,7 @@ class IndexDropdown extends PureComponent {
                             cancel
                         </i>
                     )}
-                </form>
+                </div>
                 <div
                     className={cx(this.styles.tagContainerSB, {
                         [this.styles.tagContainer]: this.props.isForSidebar,

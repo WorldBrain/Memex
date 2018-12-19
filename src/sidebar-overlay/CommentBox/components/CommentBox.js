@@ -113,11 +113,7 @@ class CommentBox extends React.PureComponent {
     }
 
     handleKeyDown = e => {
-        if (e.key === 'Tab') {
-            e.preventDefault()
-            e.stopPropagation()
-            this.props.setTagInput(true)
-        } else if (e.metaKey && e.key === 'Enter') {
+        if (e.metaKey && e.key === 'Enter') {
             e.preventDefault()
             this.save()
         }
@@ -181,9 +177,8 @@ class CommentBox extends React.PureComponent {
 
     renderTagInput() {
         const tagObjs = this.props.tags.map(tag => ({ name: tag }))
-
-        if (this.props.tagInput) {
-            return (
+        return (
+            <React.Fragment>
                 <IndexDropdown
                     isForAnnotation
                     allowAdd
@@ -192,16 +187,12 @@ class CommentBox extends React.PureComponent {
                     onFilterDel={this.props.deleteTag}
                     source="tag"
                 />
-            )
-        } else {
-            return (
                 <TagHolder
                     tags={tagObjs}
-                    clickHandler={() => this.props.setTagInput(true)}
                     deleteTag={({ tag }) => this.props.deleteTag(tag)}
                 />
-            )
-        }
+            </React.Fragment>
+        )
     }
 
     render() {
