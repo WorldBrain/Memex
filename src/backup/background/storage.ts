@@ -4,6 +4,7 @@ import { FeatureStorage } from '../../search/storage'
 import { StorageManager } from '../../search/types'
 import { ObjectChangeBatch } from './backend/types'
 import { isExcludedFromBackup } from './utils'
+import setupChangeTracking from 'src/backup/background/change-hooks'
 
 export default class BackupStorage extends FeatureStorage {
     static BACKUP_COLL = 'backupChanges'
@@ -34,9 +35,10 @@ export default class BackupStorage extends FeatureStorage {
         super(storageManager)
         this.registerCollections()
 
-        storageManager.on('changing', change => {
-            this._handleStorageChange(change)
-        })
+        setupChangeTracking(
+            storageManager,
+            this._handleStorageChange.bind(this),
+        )
     }
 
     _handleStorageChange({
@@ -44,10 +46,10 @@ export default class BackupStorage extends FeatureStorage {
         pk,
         operation,
     }: {
-            collection: string
-            pk: string
-            operation: string
-        }) {
+        collection: string
+        pk: string
+        operation: string
+    }) {
         if (!this.recordingChanges) {
             return
         }
@@ -69,10 +71,10 @@ export default class BackupStorage extends FeatureStorage {
         pk,
         operation,
     }: {
-            collection: string
-            pk: string
-            operation: string
-        }) {
+        collection: string
+        pk: string
+        operation: string
+    }) {
         // console.log(
         //     'registering change to collection',
         //     collection,
