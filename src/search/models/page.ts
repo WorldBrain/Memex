@@ -236,8 +236,8 @@ export default class Page extends AbstractModel
         }
     }
 
-    async loadRels(getDb: Promise<Dexie>) {
-        const db = await getDb
+    async loadRels(getDb: () => Promise<Dexie>) {
+        const db = await getDb()
         return db.transaction('r', db.tables, async () => {
             this.loadBlobs()
 
@@ -261,8 +261,8 @@ export default class Page extends AbstractModel
         })
     }
 
-    async delete(getDb: Promise<Dexie>) {
-        const db = await getDb
+    async delete(getDb: () => Promise<Dexie>) {
+        const db = await getDb()
         return db.transaction('rw', db.tables, () =>
             Promise.all([
                 db.visits.where({ url: this.url }).delete(),
@@ -273,8 +273,8 @@ export default class Page extends AbstractModel
         )
     }
 
-    async save(getDb: Promise<Dexie>) {
-        const db = await getDb
+    async save(getDb: () => Promise<Dexie>) {
+        const db = await getDb()
         return db.transaction('rw', db.tables, async () => {
             this.loadBlobs()
 

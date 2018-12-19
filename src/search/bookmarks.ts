@@ -5,7 +5,7 @@ import { createPageViaBmTagActs } from './on-demand-indexing'
 import { getPage } from './util'
 import { Dexie } from './types'
 
-export const addBookmark = (getDb: Promise<Dexie>) => async ({
+export const addBookmark = (getDb: () => Promise<Dexie>) => async ({
     url,
     timestamp = Date.now(),
     tabId,
@@ -25,7 +25,7 @@ export const addBookmark = (getDb: Promise<Dexie>) => async ({
     tabManager.setBookmarkState(url, true)
 }
 
-export const delBookmark = (getDb: Promise<Dexie>) => async ({
+export const delBookmark = (getDb: () => Promise<Dexie>) => async ({
     url,
 }: Partial<Bookmarks.BookmarkTreeNode>) => {
     const page = await getPage(getDb)(url)
@@ -43,7 +43,7 @@ export const delBookmark = (getDb: Promise<Dexie>) => async ({
     }
 }
 
-export const pageHasBookmark = (getDb: Promise<Dexie>) => async (
+export const pageHasBookmark = (getDb: () => Promise<Dexie>) => async (
     url: string,
 ) => {
     const page = await getPage(getDb)(url)

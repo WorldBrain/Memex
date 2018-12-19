@@ -45,5 +45,5 @@ export default abstract class AbstractModel {
     /**
      * Persist the current Model instance to the `db`.
      */
-    public abstract async save(getDb: Promise<Dexie>)
+    public abstract async save(getDb: () => Promise<Dexie>)
 }

@@ -1,4 +1,5 @@
 import { DexieStorageBackend } from 'storex-backend-dexie'
+import { Dexie } from 'src/search/types'
 
 import initDexie from './dexie'
 import { Page, Visit, Bookmark, Tag, FavIcon } from './models'
@@ -16,33 +17,40 @@ import * as onDemandMethods from './on-demand-indexing'
  * Storex is init'd async, hence this needs to be a Promise that resolves to
  * the backend. It is resolved after storex is init'd in the BG script entrypoint.
  */
-let resolveBackend = backend => undefined
-const storexBackend = new Promise<DexieStorageBackend>(
-    resolve => (resolveBackend = resolve),
-)
-export const setStorexBackend = backend => resolveBackend(backend)
+let db: Promise<Dexie>
+let resolveDb: (db: Dexie) => void = null
+const createNewDbPromise = () => {
+    db = new Promise<Dexie>(resolve => (resolveDb = resolve))
+}
+createNewDbPromise()
+
+export const setStorexBackend = backend => {
+    if (!resolveDb) {
+        createNewDbPromise()
+    }
+
+    // Extend the base Dexie instance with all the Memex-specific stuff we've added
+    resolveDb(
+        initDexie({
+            backend,
+            tableClasses: [
+                { table: 'pages', model: Page },
+                { table: 'visits', model: Visit },
+                { table: 'bookmarks', model: Bookmark },
+                { table: 'tags', model: Tag },
+                { table: 'favIcons', model: FavIcon },
+            ],
+        }),
+    )
+
+    resolveDb = null
+}
 
 /**
  * WARNING: This should only ever be used by the legacy memex code which relies on Dexie.
  * Any new code should use the storex instance set up in the BG script entrypoint.
  */
-const getDb = (async () => {
-    const backend = await storexBackend
-
-    // Extend the base Dexie instance with all the Memex-specific stuff we've added
-    const dexie = initDexie({
-        backend,
-        tableClasses: [
-            { table: 'pages', model: Page },
-            { table: 'visits', model: Visit },
-            { table: 'bookmarks', model: Bookmark },
-            { table: 'tags', model: Tag },
-            { table: 'favIcons', model: FavIcon },
-        ],
-    })
-
-    return dexie
-})()
+const getDb = () => db
 
 export * from './types'
 export * from './models'

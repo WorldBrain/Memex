@@ -5,8 +5,8 @@ import { initErrHandler } from './storage'
 export const DEFAULT_TERM_SEPARATOR = /[|\u{A0}' .,|(\n)]+/u
 export const URL_SEPARATOR = /[/?#=+& _.,\-|(\n)]+/
 
-export const getPage = (getDb: Promise<Dexie>) => async (url: string) => {
-    const db = await getDb
+export const getPage = (getDb: () => Promise<Dexie>) => async (url: string) => {
+    const db = await getDb()
     const page = await db.pages.get(normalizeUrl(url)).catch(initErrHandler())
 
     if (page != null) {
@@ -22,8 +22,8 @@ export const getPage = (getDb: Promise<Dexie>) => async (url: string) => {
  *
  * TODO: Maybe overhaul `import-item-creation` module to not need this (only caller)
  */
-export const grabExistingKeys = (getDb: Promise<Dexie>) => async () => {
-    const db = await getDb
+export const grabExistingKeys = (getDb: () => Promise<Dexie>) => async () => {
+    const db = await getDb()
     return db
         .transaction('r', db.pages, db.bookmarks, async () => ({
             histKeys: new Set(await db.pages.toCollection().primaryKeys()),

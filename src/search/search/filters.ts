@@ -5,11 +5,11 @@ import intersection from 'lodash/fp/intersection'
 import flatten from 'lodash/fp/flatten'
 import difference from 'lodash/fp/difference'
 
-const pageIndexLookup = (getDb: Promise<Dexie>) => async (
+const pageIndexLookup = (getDb: () => Promise<Dexie>) => async (
     index: string,
     matches: string[],
 ) => {
-    const db = await getDb
+    const db = await getDb()
     return db.pages
         .where(index)
         .anyOf(matches)
@@ -66,10 +66,10 @@ export class FilteredURLsManager implements FilteredURLs {
     }
 }
 
-const tagSearch = (getDb: Promise<Dexie>) => async ({
+const tagSearch = (getDb: () => Promise<Dexie>) => async ({
     tags,
 }: Partial<SearchParams>) => {
-    const db = await getDb
+    const db = await getDb()
     if (!tags || !tags.length) {
         return undefined
     }
@@ -87,7 +87,9 @@ const tagSearch = (getDb: Promise<Dexie>) => async ({
 /**
  * Grabs all URLs associated with given domains; either matching in `domain` or `hostname` fields.
  */
-const domainSearch = (getDb: Promise<Dexie>) => async (domains: string[]) => {
+const domainSearch = (getDb: () => Promise<Dexie>) => async (
+    domains: string[],
+) => {
     if (!domains.length) {
         return undefined
     }
@@ -100,10 +102,10 @@ const domainSearch = (getDb: Promise<Dexie>) => async (domains: string[]) => {
     return new Set([...domainUrls, ...hostnameUrls])
 }
 
-const incDomainSearch = (getDb: Promise<Dexie>) => ({
+const incDomainSearch = (getDb: () => Promise<Dexie>) => ({
     domains,
 }: Partial<SearchParams>) => domainSearch(getDb)(domains)
-const excDomainSearch = (getDb: Promise<Dexie>) => ({
+const excDomainSearch = (getDb: () => Promise<Dexie>) => ({
     domainsExclude,
 }: Partial<SearchParams>) => domainSearch(getDb)(domainsExclude)
 
@@ -132,7 +134,7 @@ async function listSearch({ lists }: Partial<SearchParams>) {
 /**
  * of URLs that match the filters to use as a white-list.
  */
-export const findFilteredUrls = (getDb: Promise<Dexie>) => async (
+export const findFilteredUrls = (getDb: () => Promise<Dexie>) => async (
     params: Partial<SearchParams>,
 ): Promise<FilteredURLs> => {
     const [incDomainUrls, excDomainUrls, tagUrls, listUrls] = await Promise.all(
