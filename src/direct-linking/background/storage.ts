@@ -20,7 +20,7 @@ export default class DirectLinkingStorage extends FeatureStorage {
     static DIRECT_LINKS_COLL = 'directLinks'
 
     private _browserStorageArea: Storage.StorageArea
-    private _getDb: Promise<Dexie>
+    private _getDb: () => Promise<Dexie>
 
     constructor({
         storageManager,
@@ -29,7 +29,7 @@ export default class DirectLinkingStorage extends FeatureStorage {
     }: {
         storageManager: StorageManager
         browserStorageArea: Storage.StorageArea
-        getDb: Promise<Dexie>
+        getDb: () => Promise<Dexie>
     }) {
         super(storageManager)
         this._browserStorageArea = browserStorageArea
@@ -138,7 +138,7 @@ export class AnnotationStorage extends FeatureStorage {
     static TAGS_COLL = 'tags'
 
     private _browserStorageArea: Storage.StorageArea
-    private _getDb: Promise<Dexie>
+    private _getDb: () => Promise<Dexie>
 
     constructor({
         storageManager,
@@ -147,7 +147,7 @@ export class AnnotationStorage extends FeatureStorage {
     }: {
         storageManager: StorageManager
         browserStorageArea: Storage.StorageArea
-        getDb: Promise<Dexie>
+        getDb: () => Promise<Dexie>
     }) {
         super(storageManager)
         this._browserStorageArea = browserStorageArea

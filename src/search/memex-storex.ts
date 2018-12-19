@@ -25,9 +25,7 @@ export default () =>
                 ...oldMethod(name),
                 suggestObjects: (query, opts) =>
                     suggestObjects(
-                        new Promise(res =>
-                            res(storex.backend['dexieInstance'] as Dexie),
-                        ),
+                        async () => storex.backend['dexieInstance'] as Dexie,
                     )(name, query, opts),
                 findByPk: function(pk) {
                     return this.backend.dexie[name].get(pk)
