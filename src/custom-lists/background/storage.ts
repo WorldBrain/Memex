@@ -223,7 +223,7 @@ export default class CustomListStorage extends FeatureStorage {
         // Delete All pages associated with that list also
         const pages = await this.storageManager
             .collection(CustomListStorage.LIST_ENTRIES_COLL)
-            .deleteOneObject({
+            .deleteObjects({
                 listId: id,
             })
         return { list, pages }
@@ -311,6 +311,7 @@ export default class CustomListStorage extends FeatureStorage {
                 {
                     includePks: true,
                     ignoreCase: ['name'],
+                    limit: 5,
                 },
             )
         const listIds = suggestions.map(({ pk }) => pk)
