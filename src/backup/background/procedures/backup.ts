@@ -2,7 +2,7 @@ const last = require('lodash/last')
 const pickBy = require('lodash/pickBy')
 import * as AllRaven from 'raven-js'
 import { EventEmitter } from 'events'
-import { StorageManager } from '../../../search/storage/manager'
+import { StorageManager } from '../../../search/types'
 import BackupStorage, { LastBackupStorage } from '../storage'
 import { BackupBackend } from '../backend'
 import { ObjectChangeBatch } from '../backend/types'
@@ -167,9 +167,9 @@ export default class BackupProcedure {
         const collectionsWithVersions = this._getCollectionsToBackup()
 
         for (const collection of collectionsWithVersions) {
-            for await (const pk of this.storageManager.streamPks(
-                collection.name,
-            )) {
+            for await (const pk of this.storageManager
+                .collection(collection.name)
+                .streamPks()) {
                 await this.storage.registerChange({
                     collection: collection.name,
                     pk,
@@ -214,10 +214,9 @@ export default class BackupProcedure {
         // console.log('preparing batch')
         for (const change of batch.changes) {
             const object = pickBy(
-                await this.storageManager.findByPk(
-                    change.collection,
-                    change.objectPk,
-                ),
+                await this.storageManager
+                    .collection(change.collection)
+                    .findByPk(change.objectPk),
                 (val, key) => {
                     return key !== 'terms' && key.indexOf('_terms') === -1
                 },

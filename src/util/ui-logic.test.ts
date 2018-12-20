@@ -1,4 +1,5 @@
 describe('Tools to connect framework independent UI logic with React', () => {
-    // TODO: Write these, but not urgently since relying components test these fully
-    test.skip('noop', () => undefined)
+    it.skip('should correctly dispatch state changes', () => {})
+    it.skip('should correctly dispatch events', () => {})
+    it.skip('should correctly dispatch actions', () => {})
 })
