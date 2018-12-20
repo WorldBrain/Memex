@@ -4,7 +4,6 @@ import BackupStorage from '../../storage'
 import { BackupBackend, ObjectChange } from '../../backend'
 import Interruptable from '../interruptable'
 import { DownloadQueue } from './download-queue'
-import { StorageRegistry } from 'storex'
 const dataURLtoBlob = require('dataurl-to-blob')
 const sorted = require('lodash/sortBy')
 const zipObject = require('lodash/zipObject')

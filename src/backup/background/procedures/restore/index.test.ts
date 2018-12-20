@@ -121,7 +121,6 @@ describe('BackupRestoreProcedure', () => {
         expect(restoreProcedure.running).toBe(false)
         expect(reportedInfo).toEqual(expectedInfo)
     })
-
     it('should list and fetch from backend correctly', async () => {
         const lists = []
         const retrievals = []
