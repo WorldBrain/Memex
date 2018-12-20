@@ -1,8 +1,11 @@
 import * as expect from 'expect'
-import * as jest from 'jest-mock'
 import { remoteFunction, fakeRemoteFunction } from './webextensionRPC'
 
 describe('remoteFunction', () => {
+    const jest =
+        (typeof window !== 'undefined' ? window : global)['jest'] ||
+        require('jest-mock')
+
     beforeEach(() => {
         if (global) {
             global['window'] = { browser: {} }

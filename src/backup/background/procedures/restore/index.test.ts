@@ -65,8 +65,9 @@ describe('BackupRestoreProcedure', () => {
         restoreProcedure._listBackupCollection = async collection =>
             Object.keys(backupObjects[collection])
         restoreProcedure._createBackupObjectFetcher = () => {
-            return async ([collection, object]) =>
-                backupObjects[collection][object]
+            return async ([collection, object]) => {
+                return backupObjects[collection][object]
+            }
         }
         restoreProcedure._writeChange = async change => {
             expect(restoreProcedure.running).toBe(true)
@@ -145,8 +146,9 @@ describe('BackupRestoreProcedure', () => {
         const restoreProcedure = new BackupRestoreProcedure({
             backend: null,
             storageManager: null,
+            logErrors: false,
         })
-        restoreProcedure._clearDatabase = () => {
+        restoreProcedure._clearDatabase = async () => {
             throw new Error('Muahaha!')
         }
 

@@ -1,10 +1,9 @@
 const sorted = require('lodash/sortBy')
 import { EventEmitter } from 'events'
-import { StorageManager } from '../../../../search/storage/manager'
+import { StorageManager } from '../../../../search/types'
 import { BackupBackend } from '../../backend'
 import Interruptable from '../interruptable'
 import { DownloadQueue } from './download-queue'
-import { checkServerIdentity } from 'tls'
 
 export interface BackupRestoreInfo {
     status: 'preparing' | 'synching'
@@ -20,15 +19,20 @@ export class BackupRestoreProcedure {
     events?: EventEmitter
     interruptable?: Interruptable
 
+    logErrors: boolean
+
     constructor({
         storageManager,
         backend,
+        logErrors = true,
     }: {
         storageManager: StorageManager
         backend: BackupBackend
+        logErrors?: boolean
     }) {
         this.storageManager = storageManager
         this.backend = backend
+        this.logErrors = logErrors
     }
 
     get running() {
@@ -86,7 +90,9 @@ export class BackupRestoreProcedure {
                     return 'cancelled'
                 }
             } catch (e) {
-                console.error(e)
+                if (this.logErrors) {
+                    console.error(e)
+                }
                 this.events.emit('fail', e)
                 return 'fail'
             } finally {
