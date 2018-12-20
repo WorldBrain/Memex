@@ -3,12 +3,12 @@ import CustomListBackground from './'
 import * as DATA from './storage.test.data'
 
 describe('Custom List Integrations', () => {
-    const storageManager = initStorageManager()
+    let bg: CustomListBackground
 
-    const bg = new CustomListBackground({ storageManager })
-
-    let fakeListCounter = 0
-    bg.storage._generateListId = () => ++fakeListCounter
+    const checkDefined = currPage => {
+        expect(currPage).toBeDefined()
+        expect(currPage).not.toBeNull()
+    }
 
     async function insertTestData() {
         // Insert some test data for all tests to use
@@ -22,42 +22,30 @@ describe('Custom List Integrations', () => {
         await bg.insertPageToList(DATA.PAGE_ENTRY_4)
     }
 
-    // insertTestData()
-    async function resetTestData(dbName = 'test') {
-        storageManager.deleteDB(dbName)
+    beforeEach(async () => {
+        const storageManager = initStorageManager()
+        bg = new CustomListBackground({ storageManager })
 
-        // Passing fake IndexedDB to the storage manager
-        storageManager.finishInitialization()
+        // NOTE: Each test starts creating lists at ID `1`
+        let fakeListCount = 0
+        bg.storage._generateListId = () => ++fakeListCount
 
-        await insertTestData()
-    }
-
-    beforeAll(async () => {
-        fakeListCounter = 0
         await storageManager.finishInitialization()
-        await resetTestData()
+        await insertTestData()
     })
 
     describe('read ops', () => {
         test('fetch All Lists', async () => {
             const lists = await bg.fetchAllLists({})
 
-            expect(lists).toBeDefined()
-            expect(lists).not.toBeNull()
+            checkDefined(lists)
             expect(lists.length).toBe(3)
         })
 
         test('fetch Pages associated with list', async () => {
-            const runChecks = async currPage => {
-                expect(currPage).toBeDefined()
-                expect(currPage).not.toBeNull()
-            }
-
-            runChecks(await bg.fetchListPagesById({ id: 1 }))
             const lists = await bg.fetchListPagesById({ id: 1 })
 
-            expect(lists).toBeDefined()
-            expect(lists).not.toBeNull()
+            checkDefined(lists)
             expect(lists.length).toBe(2)
         })
 
@@ -66,8 +54,9 @@ describe('Custom List Integrations', () => {
                 name: 'Go',
                 url: 'https://www.ipsum.com/test',
             })
-            expect(lists).toBeDefined()
-            expect(lists).not.toBeNull()
+
+            checkDefined(lists)
+
             expect(lists.length).toBe(1)
             expect(lists[0].active).toBe(true)
         })
@@ -77,8 +66,7 @@ describe('Custom List Integrations', () => {
                 name: 'somE good things',
             })
 
-            expect(list).toBeDefined()
-            expect(list).not.toBeNull()
+            checkDefined(list)
             expect(list.name).toBe('some good things')
         })
 
@@ -87,8 +75,7 @@ describe('Custom List Integrations', () => {
                 url: 'https://www.ipsum.com/test',
             })
 
-            expect(lists).toBeDefined()
-            expect(lists).not.toBeNull()
+            checkDefined(lists)
             expect(lists.length).toBe(2)
         })
 
@@ -97,8 +84,7 @@ describe('Custom List Integrations', () => {
                 excludeIds: [1, 2] as any[],
             })
 
-            expect(lists).toBeDefined()
-            expect(lists).not.toBeNull()
+            checkDefined(lists)
             expect(lists.length).toBe(1)
             expect(lists[0].id).not.toBe(1)
             expect(lists[0].id).not.toBe(2)
@@ -109,38 +95,29 @@ describe('Custom List Integrations', () => {
                 limit: 1,
             })
 
-            expect(lists).toBeDefined()
-            expect(lists).not.toBeNull()
+            checkDefined(lists)
             expect(lists.length).toBe(1)
         })
     })
 
     describe('update ops', () => {
         test('update list name', async () => {
-            const runChecks = async currPage => {
-                expect(currPage).toBeDefined()
-                expect(currPage).not.toBeNull()
-            }
             const updatedList = await bg.updateList({
-                id: 3,
+                id: 1,
                 name: 'new name',
             })
             const newName = await bg.fetchListIgnoreCase({
                 name: 'new name',
             })
-            runChecks(updatedList)
-            runChecks(newName)
+            // checkDefined(updatedList)
+            checkDefined(newName)
             // No of pages and list updated
-            expect(updatedList).toBe(1)
+            // expect(updatedList).toBe(1)
             // Test the name is updated correctly
             expect(newName.name).toBe('new name')
         })
 
         test('fail to update list name', async () => {
-            const runChecks = async currPage => {
-                expect(currPage).toBeDefined()
-                expect(currPage).not.toBeNull()
-            }
             const updatedList = await bg.updateList({
                 id: 4,
                 name: 'another new name',
@@ -148,33 +125,34 @@ describe('Custom List Integrations', () => {
             const newName = await bg.fetchListIgnoreCase({
                 name: 'another new name',
             })
-            runChecks(updatedList)
+            // checkDefined(updatedList)
 
             // Nothing updated
-            expect(updatedList).toBe(0)
+            // expect(updatedList).toBe(0)
             // cannot found anything with the new name
-            expect(newName).toBeUndefined()
+            expect(newName).toBeNull()
         })
     })
 
     describe('delete ops', () => {
         test('delete list along with associated pages', async () => {
             const lists = await bg.removeList({ id: 3 })
-            expect(lists).toBeDefined()
-            expect(lists).not.toBeNull()
+            checkDefined(lists)
+
+            const list = await bg.fetchListById({ id: 3 })
             // No of pages and list deleted by
-            expect(lists).toEqual({ list: 1, pages: 1 })
+            expect(list).toBeNull()
         })
 
         test('Remove page from list', async () => {
-            const pages = await bg.removePageFromList({
+            const pagesBefore = await bg.fetchListPagesById({ id: 1 })
+            const delResult = await bg.removePageFromList({
                 id: 1,
                 url: 'https://www.ipsum.com/test',
             })
-            expect(pages).toBeDefined()
-            expect(pages).not.toBeNull()
+            const pagesAfter = await bg.fetchListPagesById({ id: 1 })
             // No of pages deleted
-            expect(pages).toBe(1)
+            expect(pagesBefore.length - pagesAfter.length).toBe(1)
         })
     })
 })
