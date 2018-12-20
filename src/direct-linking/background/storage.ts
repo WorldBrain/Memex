@@ -1,7 +1,7 @@
 import { StorageManager } from '../../search/types'
 import { browser, Tabs, Storage } from 'webextension-polyfill-ts'
 
-import { createPageFromTab, Dexie } from '../../search'
+import { createPageFromTab, Dexie, Tag } from '../../search'
 import { FeatureStorage } from '../../search/storage'
 import { STORAGE_KEYS as IDXING_PREF_KEYS } from '../../options/settings/constants'
 
@@ -211,13 +211,13 @@ export class AnnotationStorage extends FeatureStorage {
     async getAnnotationByPk(url: string) {
         return this.storageManager
             .collection(AnnotationStorage.ANNOTATIONS_COLL)
-            .findOneObject({ url })
+            .findOneObject<Annotation>({ url })
     }
 
     async getAnnotationsByUrl(pageUrl: string) {
         return this.storageManager
             .collection(AnnotationStorage.ANNOTATIONS_COLL)
-            .findObjects({ pageUrl })
+            .findObjects<Annotation>({ pageUrl })
     }
 
     async insertDirectLink({
@@ -286,7 +286,7 @@ export class AnnotationStorage extends FeatureStorage {
     async getTagsByAnnotationUrl(url: string) {
         return this.storageManager
             .collection(AnnotationStorage.TAGS_COLL)
-            .findObjects({ url })
+            .findObjects<Tag>({ url })
     }
 
     modifyTags = (shouldAdd: boolean) => async (name: string, url: string) => {
@@ -300,7 +300,7 @@ export class AnnotationStorage extends FeatureStorage {
         } else {
             this.storageManager
                 .collection(AnnotationStorage.TAGS_COLL)
-                .deleteOneObject({
+                .deleteObjects({
                     name,
                     url,
                 })
