@@ -63,7 +63,7 @@ export const suggestObjects = (getDb: () => Promise<Dexie>) => async <
             ? whereClause.startsWithIgnoreCase(value)
             : whereClause.startsWith(value)
 
-    if (options.ignoreCase[0] !== indexName) {
+    if (options.ignoreCase && options.ignoreCase[0] !== indexName) {
         throw new InvalidFindOptsError(
             `Specified ignoreCase field '${
                 options.ignoreCase[0]
@@ -71,7 +71,7 @@ export const suggestObjects = (getDb: () => Promise<Dexie>) => async <
         )
     }
 
-    coll = coll.limit(options.limit)
+    coll = coll.limit(options.limit || 10)
 
     if (options.reverse) {
         coll = coll.reverse()
