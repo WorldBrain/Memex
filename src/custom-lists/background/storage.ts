@@ -166,7 +166,7 @@ export default class CustomListStorage extends FeatureStorage {
         isDeletable: boolean
         isNestable: boolean
     }) {
-        return this.storageManager
+        const { object } = await this.storageManager
             .collection(CustomListStorage.CUSTOM_LISTS_COLL)
             .createObject({
                 id: this._generateListId(),
@@ -175,6 +175,8 @@ export default class CustomListStorage extends FeatureStorage {
                 isNestable,
                 createdAt: new Date(),
             })
+
+        return object.id
     }
 
     _generateListId() {
