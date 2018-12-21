@@ -57,7 +57,7 @@ describe('Restore confirmation logic', () => {
 A few things to note:
 
 -   We explictly import the Jest expect library even if the tests may be running on Jest where this library is made globally available by default. This allows us to run the tests both on Jest and Mocha.
--   The hart of the logic is the logic.processEvent() function, which is always named like that as a convention, containing the logic to handle events
+-   The heart of the logic is the logic.processEvent() function, which is always named like that as a convention, containing the logic to handle events
 -   We define the initial state object in the logic file, and use it both in the test and the component.
 -   We can simulate an event (like a key-press) being triggered with the `trigger` function. Every event has a `type` attribute on the basis of which we decide what logic needs to be ran.
 -   Events that are dispatched as a result of the logic (like onConfirm), end up in the `events.log` and have to be defined beforehand in `eventNames`. When using a component, this'd mean a function passed in a prop would be ran, like `<ConfirmationScreen onConfirm={() => console.log('confirmed!')}`
