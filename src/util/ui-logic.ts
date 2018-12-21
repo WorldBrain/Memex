@@ -133,12 +133,15 @@ export function setupUiLogicTest({
     inititalState,
     eventNames,
     eventProcessor,
+    actions = {},
+    dependencies = null,
 }) {
     const { state, setState } = fakeState(inititalState)
     const { props, events } = fakeEventProps(eventNames)
     const trigger = reactEventHandler(
         { props, state, setState },
         eventProcessor,
+        { actions, dependencies },
     )
     return { state, setState, props, events, trigger }
 }
