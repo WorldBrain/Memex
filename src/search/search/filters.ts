@@ -1,6 +1,4 @@
-import initStorex from '../memex-storex'
 import { Dexie, SearchParams, FilteredURLs } from '..'
-import CustomListBackground from '../../custom-lists/background'
 import intersection from 'lodash/fp/intersection'
 import flatten from 'lodash/fp/flatten'
 import difference from 'lodash/fp/difference'
@@ -109,24 +107,26 @@ const excDomainSearch = (getDb: () => Promise<Dexie>) => ({
     domainsExclude,
 }: Partial<SearchParams>) => domainSearch(getDb)(domainsExclude)
 
-async function listSearch({ lists }: Partial<SearchParams>) {
+const listSearch = (getDb: () => Promise<Dexie>) => async ({
+    lists,
+}: Partial<SearchParams>) => {
     if (!lists || !lists.length || !lists[0].length) {
         return undefined
     }
 
-    const customList = new CustomListBackground({
-        storageManager: initStorex(),
-    })
-
+    const db = await getDb()
     const urls = new Set<string>()
 
     // The list filter contains only one list at a time
     // It is just a temporary hack until multiple lists for filtering in used.
     // Eg: The list: String i.e = "23" gets converted into ["2", "3"] converting back to 23.
-    const listEnteries = await customList.fetchListPagesById({
-        id: Number(lists[0]),
-    })
-    listEnteries.forEach(({ pageUrl }: any) => urls.add(pageUrl))
+    const listEntries = await db
+        .table('pageListEntries')
+        .where('listId')
+        .equals(Number(lists[0]))
+        .toArray()
+
+    listEntries.forEach(({ pageUrl }: any) => urls.add(pageUrl))
 
     return urls
 }
@@ -142,7 +142,7 @@ export const findFilteredUrls = (getDb: () => Promise<Dexie>) => async (
             incDomainSearch(getDb)(params),
             excDomainSearch(getDb)(params),
             tagSearch(getDb)(params),
-            listSearch(params),
+            listSearch(getDb)(params),
         ],
     )
 
