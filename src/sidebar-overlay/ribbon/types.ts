@@ -4,7 +4,7 @@
  */
 
 export default interface State {
-    isMouseHoveringOver: boolean
+    isExpanded: boolean
     isRibbonEnabled: boolean
     isTooltipEnabled: boolean
 }
