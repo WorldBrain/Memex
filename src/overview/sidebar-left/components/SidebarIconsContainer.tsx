@@ -9,6 +9,7 @@ import {
     actions as filterActs,
 } from '../../../search-filters'
 import { selectors as notifs } from '../../../notifications'
+import { acts as tooltipActs } from '../../tooltips'
 
 export interface Props {
     showInbox: boolean
@@ -32,7 +33,13 @@ const mapState = state => ({
 })
 
 const mapDispatch = dispatch => ({
-    filterBtnClick: () => dispatch(acts.openSidebarFilterMode()),
+    filterBtnClick: () => {
+        // Remove and reset onboarding tooltip
+        dispatch(tooltipActs.setShowTooltip(false))
+        dispatch(tooltipActs.setWhichTooltip('none'))
+
+        dispatch(acts.openSidebarFilterMode())
+    },
     listBtnClick: () => dispatch(acts.openSidebarListMode()),
     onPageDrag: () => dispatch(acts.openSidebarListMode()),
     onClearBtnClick: () => dispatch(filterActs.resetFilters()),
