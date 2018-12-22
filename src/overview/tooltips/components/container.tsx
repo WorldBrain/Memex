@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 
-import Tooltip from './tooltip'
+import Tooltip, { Position } from './tooltip'
+import TimeFilterTooltip from './time-filter-tooltip'
 import * as acts from '../actions'
 import * as selectors from '../selectors'
 import { RootState } from '../../../options/types'
@@ -20,12 +21,50 @@ class TooltipContainer extends Component<Props> {
     }
 
     render() {
-        console.log(this.props)
-        if (!this.props.showTooltip) {
+        const { showTooltip, whichTooltip } = this.props
+        if (!showTooltip) {
             return null
         }
 
-        return <Tooltip>This is the new tooltip</Tooltip>
+        let position: Position
+
+        if (whichTooltip === 'search-box') {
+            position = {
+                top: 100,
+                left: '30%',
+            }
+            return (
+                <Tooltip position={position}>
+                    What words do you remember?
+                </Tooltip>
+            )
+        }
+
+        if (whichTooltip === 'time-filters') {
+            position = {
+                top: 100,
+                left: '50%',
+            }
+            return (
+                <Tooltip position={position}>
+                    <TimeFilterTooltip />
+                </Tooltip>
+            )
+        }
+
+        if (whichTooltip === 'more-filters') {
+            position = {
+                top: 100,
+                left: 20,
+            }
+            return (
+                <Tooltip position={position}>
+                    <React.Fragment>
+                        More <br /> Filters
+                    </React.Fragment>
+                </Tooltip>
+            )
+        }
     }
 }
 
