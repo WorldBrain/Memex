@@ -1,6 +1,6 @@
 import { createSelector } from 'reselect'
 
-import RootState from '../types'
+import RootState from '../ribbon-sidebar-controller/types'
 
 export const ribbon = (state: RootState) => state.ribbon
 
