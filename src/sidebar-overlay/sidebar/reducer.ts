@@ -1,9 +1,19 @@
 import { createReducer } from 'redux-act'
 
-export interface State {}
+import * as actions from './actions'
+import State from './types'
 
-export const defaultState: State = {}
+export const defaultState: State = {
+    isOpen: false,
+}
 
-const reducer = createReducer<State>({}, defaultState)
+const setSidebarOpen = (state: State, isOpen: boolean) => ({
+    ...state,
+    isOpen,
+})
+
+const reducer = createReducer<State>(on => {
+    on(actions.setSidebarOpen, setSidebarOpen)
+}, defaultState)
 
 export default reducer

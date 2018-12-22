@@ -6,6 +6,7 @@ import { RootState } from '../../ribbon-sidebar-controller'
 import Ribbon from './ribbon'
 import * as actions from '../actions'
 import * as selectors from '../selectors'
+import { actions as sidebarActions } from '../../sidebar'
 
 interface StateProps {
     isExpanded: boolean
@@ -87,7 +88,11 @@ const mapDispatchToProps: MapDispatchToProps<
     DispatchProps,
     OwnProps
 > = dispatch => ({
-    openSidebar: () => null,
+    openSidebar: e => {
+        e.stopPropagation()
+        dispatch(actions.shrinkRibbon())
+        dispatch(sidebarActions.setSidebarOpen(true))
+    },
     handleRibbonToggle: e => {
         e.stopPropagation()
         dispatch(actions.toggleRibbon())

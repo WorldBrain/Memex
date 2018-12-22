@@ -3,9 +3,7 @@ import { browser } from 'webextension-polyfill-ts'
 
 import { highlightAnnotation } from 'src/direct-linking/content_script/rendering'
 import { makeRemotelyCallable, remoteFunction } from 'src/util/webextensionRPC'
-// import { setupRibbonUI, destroyAll } from '../components'
-import { destroyAll } from '../components'
-import { setupRibbonAndSidebarUI } from '..'
+import { setupRibbonAndSidebarUI, destroyRibbonAndSidebarUI } from '..'
 import { getSidebarState, getOffsetTop } from '../utils'
 // import { setTooltipState, getTooltipState } from '../../content-tooltip/utils'
 import { getTooltipState } from '../../content-tooltip/utils'
@@ -52,9 +50,9 @@ export const insertRibbon = async ({ toolbarNotifications }) => {
     // })
 
     const { shadow, rootElement } = createRootElement({
-        containerId: 'memex-annotations-ribbon-container',
-        rootId: 'memex-annotations-ribbon',
-        classNames: ['memex-annotations-ribbon'],
+        containerId: 'memex-ribbon-sidebar-container',
+        rootId: 'memex-ribbon-sidebar',
+        classNames: ['memex-ribbon-sidebar'],
     })
     target = rootElement
     shadowRoot = shadow
@@ -62,7 +60,21 @@ export const insertRibbon = async ({ toolbarNotifications }) => {
     // React messes up event propagation with shadow dom, hence fix.
     retargetEvents(shadowRoot)
 
-    setupRibbonAndSidebarUI(target)
+    // TODO: Refactor ribbon removal to a different manager.
+    setupRibbonAndSidebarUI(target, {
+        handleRemoveRibbon: async () => {
+            manualOverride = true
+            removeRibbon()
+
+            const closeMessageShown = await _getCloseMessageShown()
+            if (!closeMessageShown) {
+                toolbarNotifications.showToolbarNotification(
+                    'ribbon-first-close',
+                )
+                _setCloseMessageShown()
+            }
+        },
+    })
     // setupRibbonUI(target, {
     //     onInit: ({ toggleSidebar }) => {
     //         resolveToggleSidebar(toggleSidebar)
@@ -110,7 +122,7 @@ const removeRibbon = () => {
         return
     }
     removeHighlights()
-    destroyAll(target, shadowRoot)()
+    destroyRibbonAndSidebarUI(target, shadowRoot)
     destroyRootElement()
     shadowRoot = null
     target = null
@@ -203,13 +215,13 @@ export const setupRPC = ({ toolbarNotifications }) => {
 
 const CLOSE_MESSAGESHOWN_KEY = 'ribbon.close-message-shown'
 
-export const _setCloseMessageShown = async () => {
+const _setCloseMessageShown = async () => {
     await browser.storage.local.set({
         [CLOSE_MESSAGESHOWN_KEY]: true,
     })
 }
 
-export const _getCloseMessageShown = async () => {
+const _getCloseMessageShown = async () => {
     const {
         [CLOSE_MESSAGESHOWN_KEY]: closeMessageShown,
     } = await browser.storage.local.get({ [CLOSE_MESSAGESHOWN_KEY]: false })

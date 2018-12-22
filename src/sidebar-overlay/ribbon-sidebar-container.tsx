@@ -7,13 +7,23 @@ import { ErrorBoundary, RuntimeError } from '../common-ui/components'
 
 const store = configureStore()
 
+interface Props {
+    handleRemoveRibbon: () => void
+}
+
 /* tslint:disable-next-line variable-name */
-const RibbonSidebarContainer = () => (
-    <ErrorBoundary component={RuntimeError}>
-        <Provider store={store}>
-            <RibbonSidebarController />
-        </Provider>
-    </ErrorBoundary>
-)
+const RibbonSidebarContainer = (props: Props) => {
+    const { handleRemoveRibbon } = props
+
+    return (
+        <ErrorBoundary component={RuntimeError}>
+            <Provider store={store}>
+                <RibbonSidebarController
+                    handleRemoveRibbon={handleRemoveRibbon}
+                />
+            </Provider>
+        </ErrorBoundary>
+    )
+}
 
 export default RibbonSidebarContainer
