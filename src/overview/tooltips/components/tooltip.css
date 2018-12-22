@@ -16,6 +16,19 @@
     font-size: 15px;
 }
 
+.container::after {
+    content: ' ';
+    position: absolute;
+    top: -50px;
+    left: calc(50% - 12.5px);
+    margin-left: -5px;
+    border-width: 25px;
+    border-style: solid;
+    border-color: transparent transparent white transparent;
+
+    /* TODO: Figure out how to add box shadow */
+}
+
 .emoji {
     font-size: 20px;
     vertical-align: middle;
