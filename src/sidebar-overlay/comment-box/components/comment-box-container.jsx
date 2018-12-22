@@ -206,7 +206,11 @@ class CommentBox extends React.PureComponent {
 
     render() {
         return (
-            <div className={this.isHidden() ? styles.commentBoxContainer : ''}>
+            <div
+                className={cx({
+                    [styles.commentBoxContainer]: this.isHidden(),
+                })}
+            >
                 <div className={styles.topBar}>
                     <span
                         className={styles.settings}
