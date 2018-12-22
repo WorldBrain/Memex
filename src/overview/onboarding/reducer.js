@@ -13,6 +13,7 @@ const defState = {
     // Stages for the user driven onboarding stages
     onboardingStages: {
         annotationStage: null,
+        powerSearchStage: null,
     },
 }
 
@@ -39,12 +40,9 @@ export default createReducer(
                 ? constants.NUM_IMPORT_ITEMS
                 : state.progress,
         }),
-        [actions.setAnnotationStage]: (state, annotationStage) => ({
+        [actions.setOnboardingStages]: (state, onboardingStages) => ({
             ...state,
-            onboardingStages: {
-                ...state.onboardingStages,
-                annotationStage,
-            },
+            onboardingStages,
         }),
     },
     defState,

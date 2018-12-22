@@ -16,7 +16,9 @@ export const incProgress = createAction('onboarding/incProgress')
 export const setProgress = createAction('onboarding/setProgress')
 export const setImportsDone = createAction('onboarding/setImportsDone')
 export const setImportsStarted = createAction('onboarding/setImportsStarted')
-export const setAnnotationStage = createAction('onboarding/setAnnotationStage')
+export const setOnboardingStages = createAction(
+    'onboarding/setOnboardingStages',
+)
 
 const processEvent = remoteFunction('processEvent')
 
@@ -91,7 +93,16 @@ export const fetchOnboardingStages = () => async dispatch => {
         STORAGE_KEYS.onboardingDemo.step1,
         'unvisited',
     )
-    dispatch(setAnnotationStage(annotationStage))
+    const powerSearchStage = await getLocalStorage(
+        STORAGE_KEYS.onboardingDemo.step2,
+        'unvisited',
+    )
+    dispatch(
+        setOnboardingStages({
+            annotationStage,
+            powerSearchStage,
+        }),
+    )
 }
 
 /**
