@@ -15,6 +15,7 @@ import { remoteFunction, makeRemotelyCallable } from '../util/webextensionRPC'
 import { injectCSS } from '../search-injection/dom'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import { STORAGE_KEYS } from 'src/overview/onboarding/constants'
+import { STORAGE_KEY as tooltipKey } from 'src/overview/tooltips/constants'
 
 const openOptionsRPC = remoteFunction('openOptionsTab')
 
@@ -249,6 +250,7 @@ export const conditionallyShowOnboardingNotifications = async ({
             STORAGE_KEYS.onboardingDemo.step2,
             'overview-tooltips',
         )
+        await setLocalStorage(tooltipKey, 'search-bar')
     }
 
     if (powerSearchStage === 'redirected') {

@@ -30,6 +30,7 @@ export interface Props {
     onStartDateChange: (date: number) => void
     onEndDateChange: (date: number) => void
     toggleInbox: () => void
+    changeTooltip: () => void
 }
 
 class Header extends PureComponent<Props> {
@@ -72,6 +73,7 @@ class Header extends PureComponent<Props> {
                             onStartDateChange={this.props.onStartDateChange}
                             onEndDateChange={this.props.onEndDateChange}
                             disabled={this.props.isSearchDisabled}
+                            changeTooltip={this.props.changeTooltip}
                         />
                     </div>
                 </div>

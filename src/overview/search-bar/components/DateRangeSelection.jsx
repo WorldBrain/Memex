@@ -21,6 +21,7 @@ class DateRangeSelection extends Component {
         onStartDateChange: PropTypes.func,
         onEndDateChange: PropTypes.func,
         disabled: PropTypes.bool,
+        changeTooltip: PropTypes.func,
     }
 
     state = {
@@ -195,6 +196,9 @@ class DateRangeSelection extends Component {
         }
 
         updateDate(date ? date.valueOf() : undefined)
+
+        // Change onboarding tooltip to more filters
+        this.props.changeTooltip()
     }
 
     render() {

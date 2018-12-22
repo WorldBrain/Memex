@@ -28,7 +28,7 @@ class TooltipContainer extends Component<Props> {
 
         let position: Position
 
-        if (whichTooltip === 'search-box') {
+        if (whichTooltip === 'search-bar') {
             position = {
                 top: 100,
                 left: '30%',
@@ -54,7 +54,7 @@ class TooltipContainer extends Component<Props> {
 
         if (whichTooltip === 'more-filters') {
             position = {
-                top: 100,
+                top: 200,
                 left: 20,
             }
             return (
@@ -65,6 +65,8 @@ class TooltipContainer extends Component<Props> {
                 </Tooltip>
             )
         }
+
+        return null
     }
 }
 

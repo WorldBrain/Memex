@@ -1,5 +1,5 @@
 import { createAction } from 'redux-act'
-import { getLocalStorage } from 'src/util/storage'
+import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 
 import { STORAGE_KEY as tooltipKey } from './constants'
 import { STORAGE_KEYS as onboardingKeys } from '../onboarding/constants'
@@ -13,6 +13,8 @@ export const fetchOnboardingState = () => async dispatch => {
     )
     if (onboardingState === 'overview-tooltips') {
         dispatch(setShowTooltip(true))
+        // Set state to done, as the onboarding tooltips must be shown only once
+        await setLocalStorage(onboardingKeys.onboardingDemo.step2, 'DONE')
     }
 }
 
