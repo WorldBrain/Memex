@@ -62,7 +62,10 @@ class OnboardingChecklist extends React.Component<Props> {
     }
 
     render() {
-        const { annotationStage } = this.props.onboardingStages
+        const {
+            annotationStage,
+            powerSearchStage,
+        } = this.props.onboardingStages
         return (
             <React.Fragment>
                 <p className={styles.title}>Let's get started</p>
@@ -86,7 +89,7 @@ class OnboardingChecklist extends React.Component<Props> {
                 </div>
                 <div className={styles.checklist}>
                     <Checkbox
-                        isChecked={false}
+                        isChecked={powerSearchStage === 'DONE'}
                         handleChange={() => null}
                         id="step2"
                     >
