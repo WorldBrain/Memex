@@ -10,7 +10,7 @@ const arrowRibbon = getExtUrl('/img/arrow_ribbon.svg')
 const logo = getExtUrl('/img/worldbrain-logo-narrow.png')
 
 interface Props {
-    isMouseHoveringOver: boolean
+    isExpanded: boolean
     isRibbonEnabled: boolean
     isTooltipEnabled: boolean
     openSidebar: ClickHandler<HTMLImageElement>
@@ -22,7 +22,7 @@ interface Props {
 /* tslint:disable-next-line variable-name */
 const Ribbon = (props: Props) => {
     const {
-        isMouseHoveringOver,
+        isExpanded,
         isRibbonEnabled,
         isTooltipEnabled,
         openSidebar,
@@ -34,7 +34,7 @@ const Ribbon = (props: Props) => {
     return (
         <div
             className={cx(styles.ribbon, {
-                [styles.ribbonExpanded]: isMouseHoveringOver,
+                [styles.ribbonExpanded]: isExpanded,
             })}
         >
             {/* Ribbon arrow */}
@@ -46,7 +46,7 @@ const Ribbon = (props: Props) => {
                     title={'Open Annotation Sidebar'}
                 />
             </div>
-            {isMouseHoveringOver && (
+            {isExpanded && (
                 <div className={styles.buttons}>
                     {/* Worldbrain logo to open sidebar */}
                     <img

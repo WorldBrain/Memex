@@ -3,15 +3,18 @@ import { browser } from 'webextension-polyfill-ts'
 
 import { highlightAnnotation } from 'src/direct-linking/content_script/rendering'
 import { makeRemotelyCallable, remoteFunction } from 'src/util/webextensionRPC'
-import { setupRibbonUI, destroyAll } from '../components'
-import { getSidebarState, getOffsetTop, setSidebarState } from '../utils'
-import { setTooltipState, getTooltipState } from '../../content-tooltip/utils'
+// import { setupRibbonUI, destroyAll } from '../components'
+import { destroyAll } from '../components'
+import { setupRibbonAndSidebarUI } from '..'
+import { getSidebarState, getOffsetTop } from '../utils'
+// import { setTooltipState, getTooltipState } from '../../content-tooltip/utils'
+import { getTooltipState } from '../../content-tooltip/utils'
 import styles from 'src/direct-linking/content_script/styles.css'
 import { createRootElement, destroyRootElement } from './rendering'
-import {
-    removeTooltip,
-    insertTooltip,
-} from '../../content-tooltip/interactions'
+// import {
+//     removeTooltip,
+//     insertTooltip,
+// } from '../../content-tooltip/interactions'
 
 const openOptionsRPC = remoteFunction('openOptionsTab')
 
@@ -43,10 +46,10 @@ export const insertRibbon = async ({ toolbarNotifications }) => {
         return
     }
 
-    let resolveToggleSidebar
-    toggleSidebar = new Promise(resolve => {
-        resolveToggleSidebar = resolve
-    })
+    // let resolveToggleSidebar
+    // toggleSidebar = new Promise(resolve => {
+    //     resolveToggleSidebar = resolve
+    // })
 
     const { shadow, rootElement } = createRootElement({
         containerId: 'memex-annotations-ribbon-container',
@@ -59,42 +62,43 @@ export const insertRibbon = async ({ toolbarNotifications }) => {
     // React messes up event propagation with shadow dom, hence fix.
     retargetEvents(shadowRoot)
 
-    setupRibbonUI(target, {
-        onInit: ({ toggleSidebar }) => {
-            resolveToggleSidebar(toggleSidebar)
-        },
-        onClose: async () => {
-            manualOverride = true
-            removeRibbon()
+    setupRibbonAndSidebarUI(target)
+    // setupRibbonUI(target, {
+    //     onInit: ({ toggleSidebar }) => {
+    //         resolveToggleSidebar(toggleSidebar)
+    //     },
+    //     onClose: async () => {
+    //         manualOverride = true
+    //         removeRibbon()
 
-            const closeMessageShown = await _getCloseMessageShown()
-            if (!closeMessageShown) {
-                toolbarNotifications.showToolbarNotification(
-                    'ribbon-first-close',
-                )
-                _setCloseMessageShown()
-            }
-        },
-        getInitialState: async () => {
-            const isTooltipEnabled = await getTooltipState()
-            const isRibbonEnabled = await getSidebarState()
-            return { isTooltipEnabled, isRibbonEnabled }
-        },
-        handleRibbonToggle: async prevState => {
-            await setSidebarState(!prevState)
-        },
-        handleTooltipToggle: async isTooltipEnabled => {
-            if (isTooltipEnabled) {
-                removeTooltip()
-            } else {
-                await insertTooltip({ toolbarNotifications })
-            }
-            await setTooltipState(!isTooltipEnabled)
-        },
-        setRibbonRef: ribbon => {
-            ribbonRef = ribbon
-        },
-    })
+    //         const closeMessageShown = await _getCloseMessageShown()
+    //         if (!closeMessageShown) {
+    //             toolbarNotifications.showToolbarNotification(
+    //                 'ribbon-first-close',
+    //             )
+    //             _setCloseMessageShown()
+    //         }
+    //     },
+    //     getInitialState: async () => {
+    //         const isTooltipEnabled = await getTooltipState()
+    //         const isRibbonEnabled = await getSidebarState()
+    //         return { isTooltipEnabled, isRibbonEnabled }
+    //     },
+    //     handleRibbonToggle: async prevState => {
+    //         await setSidebarState(!prevState)
+    //     },
+    //     handleTooltipToggle: async isTooltipEnabled => {
+    //         if (isTooltipEnabled) {
+    //             removeTooltip()
+    //         } else {
+    //             await insertTooltip({ toolbarNotifications })
+    //         }
+    //         await setTooltipState(!isTooltipEnabled)
+    //     },
+    //     setRibbonRef: ribbon => {
+    //         ribbonRef = ribbon
+    //     },
+    // })
 }
 
 /**
@@ -199,13 +203,13 @@ export const setupRPC = ({ toolbarNotifications }) => {
 
 const CLOSE_MESSAGESHOWN_KEY = 'ribbon.close-message-shown'
 
-const _setCloseMessageShown = async () => {
+export const _setCloseMessageShown = async () => {
     await browser.storage.local.set({
         [CLOSE_MESSAGESHOWN_KEY]: true,
     })
 }
 
-const _getCloseMessageShown = async () => {
+export const _getCloseMessageShown = async () => {
     const {
         [CLOSE_MESSAGESHOWN_KEY]: closeMessageShown,
     } = await browser.storage.local.get({ [CLOSE_MESSAGESHOWN_KEY]: false })
