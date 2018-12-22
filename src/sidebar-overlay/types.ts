@@ -3,7 +3,7 @@
  * Default export is the component's state's type declaration.
  */
 
-import { ThunkAction } from 'redux-thunk'
+import { ThunkAction, ThunkDispatch } from 'redux-thunk'
 
 import { State as RibbonState } from './ribbon'
 
@@ -16,3 +16,8 @@ export type ClickHandler<T extends HTMLElement> = (
 ) => void
 
 export type Thunk<R = void> = ThunkAction<R, RootState, void, any>
+
+export type MapDispatchToProps<DispatchProps, OwnProps> = (
+    dispatch: ThunkDispatch<RootState, void, any>,
+    ownProps: OwnProps,
+) => DispatchProps
