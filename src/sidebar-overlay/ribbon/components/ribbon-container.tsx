@@ -1,7 +1,8 @@
 import * as React from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 
-import RootState, { ClickHandler, MapDispatchToProps } from '../../types'
+import { ClickHandler, MapDispatchToProps } from '../../types'
+import { RootState } from '../../ribbon-sidebar-controller'
 import Ribbon from './ribbon'
 import * as actions from '../actions'
 import * as selectors from '../selectors'
