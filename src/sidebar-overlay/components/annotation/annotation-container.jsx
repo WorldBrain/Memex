@@ -84,7 +84,7 @@ class AnnotationContainer extends React.Component {
         // Attaches on click listener to close the tags input
         // when clicked outside
         // TODO: Use refs instead of manually calling it
-        const sidebar = document.querySelector('#memex_sidebar_panel')
+        const sidebar = document.querySelector('#memex-sidebar-panel')
         sidebar.addEventListener('click', this.maybeCloseTagsDropdown, false)
     }
 

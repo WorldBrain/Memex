@@ -5,7 +5,9 @@
  */
 
 import { State as RibbonState } from '../ribbon'
+import { State as SidebarState } from '../sidebar'
 
 export default interface RootState {
     ribbon: RibbonState
+    sidebar: SidebarState
 }
