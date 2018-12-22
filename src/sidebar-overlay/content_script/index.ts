@@ -26,7 +26,7 @@ export default async ({
         return
     }
 
-    const onKeydownWrapper = e => {
+    const onKeydownWrapper = (e: KeyboardEvent) => {
         onKeydown(e, toolbarNotifications)
     }
 

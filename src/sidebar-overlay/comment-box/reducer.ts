@@ -1,7 +1,7 @@
 import { createReducer } from 'redux-act'
 
 import * as actions from './actions'
-import { DEFAULT_ROWS } from '../constants'
+import { NUM_DEFAULT_ROWS } from './constants'
 
 export interface State {
     commentInput: string
@@ -16,7 +16,7 @@ export interface State {
 
 const defaultState: State = {
     commentInput: '',
-    textareaRows: DEFAULT_ROWS,
+    textareaRows: NUM_DEFAULT_ROWS,
     isHidden: false,
     tagInput: false,
     tags: [],
@@ -31,16 +31,17 @@ const addTag = (state: State, newTag: any) => ({
 })
 
 const deleteTag = (state: State, tag: any) => {
-    const oldTags = [...state.tags]
-    const tagIndex = oldTags.indexOf(tag)
-
+    const tagIndex = state.tags.indexOf(tag)
     if (tagIndex === -1) {
         return state
     }
 
     return {
         ...state,
-        tags: [...oldTags.slice(0, tagIndex), ...oldTags.slice(tagIndex + 1)],
+        tags: [
+            ...state.tags.slice(0, tagIndex),
+            ...state.tags.slice(tagIndex + 1),
+        ],
     }
 }
 

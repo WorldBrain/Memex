@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 
-import Ribbon from './ribbon'
+import Ribbon from '../ribbon'
 import { remoteFunction } from '../../util/webextensionRPC'
 import * as interactions from '../content_script/interactions'
 import { EVENT_NAMES } from '../../analytics/internal/constants'

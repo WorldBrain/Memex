@@ -1,6 +1,6 @@
-// Styles for react-burger-menu
+// Styles for react-burger-menu.
 
-const baseStyles = {
+const menuStyles = {
     bmMenuWrap: {
         top: 0,
         transition: 'all 0s',
@@ -8,11 +8,11 @@ const baseStyles = {
     bmMenu: {
         position: 'fixed',
         right: 0,
-        top: '81px',
+        top: 0,
         zIndex: 1100,
         width: '340px',
         height: '100%',
-        marginTop: '-25px',
+        marginTop: 0,
         transition: 'all 0s',
         boxShadow: '-4px 2px 20px 1px rgba(62, 185, 149, 0.0902)',
     },
@@ -27,14 +27,4 @@ const baseStyles = {
     },
 }
 
-const MenuStyles = env => {
-    if (env === 'iframe') {
-        baseStyles.bmMenu.top = 0
-        baseStyles.bmMenu.marginTop = 0
-        baseStyles.bmMenu.transition = 'all 0s'
-        baseStyles.bmMenuWrap.transition = 'all 0s'
-    }
-    return baseStyles
-}
-
-export default MenuStyles
+export default menuStyles

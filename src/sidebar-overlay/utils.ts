@@ -1,3 +1,5 @@
+import { browser } from 'webextension-polyfill-ts'
+
 import { RetryTimeoutError } from '../direct-linking/utils'
 import { remoteFunction } from '../util/webextensionRPC'
 import { getLocalStorage, setLocalStorage } from '../util/storage'
@@ -8,7 +10,10 @@ import * as constants from './constants'
  */
 export function retryUntilErrorResolves(
     promiseCreator,
-    { intervalMiliseconds, timeoutMiliseconds },
+    {
+        intervalMilliSeconds,
+        timeoutMilliSeconds,
+    }: { intervalMilliSeconds: number; timeoutMilliSeconds: number },
 ) {
     const startMs = Date.now()
     return new Promise((resolve, reject) => {
@@ -29,11 +34,11 @@ export function retryUntilErrorResolves(
                 return
             }
 
-            if (Date.now() - startMs >= timeoutMiliseconds) {
+            if (Date.now() - startMs >= timeoutMilliSeconds) {
                 return reject(new RetryTimeoutError())
             }
 
-            setTimeout(tryOrRetryLater, intervalMiliseconds)
+            setTimeout(tryOrRetryLater, intervalMilliSeconds)
         }
 
         tryOrRetryLater()
@@ -129,5 +134,8 @@ export const getSidebarState = async () =>
         constants.SIDEBAR_DEFAULT_OPTION,
     )
 
-export const setSidebarState = async enabled =>
+export const setSidebarState = async (enabled: boolean) =>
     setLocalStorage(constants.SIDEBAR_STORAGE_NAME, enabled)
+
+export const getExtUrl = (location: string) =>
+    browser.extension ? browser.extension.getURL(location) : location
