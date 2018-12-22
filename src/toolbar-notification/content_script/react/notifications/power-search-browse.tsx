@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import NotificationLayout from '../layout'
 import { getExtURL } from '../utils.js'
 
-const styles = require('./notifications.css')
+const styles = require('./power-search-browse.css')
 
 const images = {
     closeIcon: getExtURL('/img/cross.svg'),
@@ -16,7 +16,7 @@ export default function PowerSearchBrowse({
     triggerNextNotification,
 }) {
     return (
-        <div className={styles.title}>
+        <div className={styles.container}>
             <NotificationLayout
                 title={''}
                 icon={null}
@@ -30,8 +30,21 @@ export default function PowerSearchBrowse({
                     </p>
                     <p>go back to dashboard to try it out.</p>
                     <div className={styles.button}>Get me there</div>
-                    <p onClick={triggerNextNotification}>
+                    <p
+                        onClick={triggerNextNotification}
+                        className={styles.pointer}
+                    >
                         Or browse around a bit
+                    </p>
+                    <br />
+                    <p>
+                        <span className={styles.emoji}>🤓</span>
+                        <span>
+                            <b className={styles.protip}>Pro Tip: </b>
+                            Search via the address bar with
+                            <span className={styles.key}>M</span>+
+                            <span className={styles.key}>SPACE</span>
+                        </span>
                     </p>
                 </div>
             </NotificationLayout>

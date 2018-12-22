@@ -1,0 +1,57 @@
+.container {
+    display: flex;
+    font-family: 'Lato', sans-serif;
+    flex-direction: row;
+    width: 100%;
+    padding-left: 10px;
+}
+
+.title {
+    font-weight: 100;
+    color: #3eb995;
+    font-size: 17px;
+    text-transform: uppercase;
+}
+
+.notifContainer {
+    width: fit-content;
+    margin: 10px auto;
+    margin-top: 20px;
+    text-align: center;
+    color: #6f6a86;
+}
+
+.button {
+    width: fit-content;
+    margin: 0px auto;
+    color: white;
+    background: #3eb995;
+    padding: 8px 15px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.pointer {
+    cursor: pointer;
+}
+
+.emoji {
+    font-size: 33px;
+    vertical-align: middle;
+    margin-top: -7px;
+}
+
+.protip {
+    font-weight: 800;
+    font-size: 18px;
+    letter-spacing: 0.5px;
+    margin: 0px 3px;
+    text-transform: uppercase;
+}
+
+.key {
+    color: white;
+    padding: 5px;
+    background-color: #3eb995;
+    margin: 0px 3px;
+}
