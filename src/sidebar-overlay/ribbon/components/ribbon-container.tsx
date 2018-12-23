@@ -23,7 +23,7 @@ interface DispatchProps {
 }
 
 interface OwnProps {
-    handleRemoveRibbon: ClickHandler<HTMLElement>
+    handleRemoveRibbon: () => void
 }
 
 type Props = StateProps & DispatchProps & OwnProps
@@ -66,9 +66,17 @@ class RibbonContainer extends React.Component<Props> {
     }
 
     render() {
+        const { handleRemoveRibbon } = this.props
+
         return (
             <div ref={this._setRibbonRef}>
-                <Ribbon {...this.props} />
+                <Ribbon
+                    {...this.props}
+                    handleRemoveRibbon={e => {
+                        e.stopPropagation()
+                        handleRemoveRibbon()
+                    }}
+                />
             </div>
         )
     }
