@@ -13,11 +13,6 @@ import {
 import { selectors as filters, actions as filterActs } from '../search-filters'
 import { selectors as searchBar, acts as searchBarActs } from './search-bar'
 import { selectors as results, acts as resultsActs } from './results'
-// import {
-//     constants as tooltipConsts,
-//     selectors as tooltips,
-//     // acts as tooltipActs,
-// } from './tooltips'
 
 const parseBool = str => str === 'true'
 const parseNumber = str => Number(str)
@@ -105,8 +100,6 @@ const hydrateStateFromStorage = store => {
         onboardingActs.setImportsDone,
     )
     hydrate(onboardingConsts.STORAGE_KEYS.progress, onboardingActs.setProgress)
-    // hydrate(tooltipConsts.SHOW_TOOL_TIP, tooltipActs.setShowTooltip)
-    // hydrate(tooltipConsts.TOOL_TIP, tooltipActs.setTooltip)
 }
 
 const syncStateToStorage = store =>
@@ -121,8 +114,6 @@ const syncStateToStorage = store =>
             onboarding.isImportsDone(state),
         )
         dump(onboardingConsts.STORAGE_KEYS.progress, onboarding.progress(state))
-        // dump(tooltipConsts.SHOW_TOOL_TIP, tooltips.showTooltip(state))
-        // dump(tooltipConsts.TOOL_TIP, tooltips.tooltip(state))
     })
 
 const storageSync = storeCreator => (reducer, initState, enhancer) => {

@@ -1,10 +1,16 @@
 import React, { Component } from 'react'
+import { remoteFunction } from 'src/util/webextensionRPC'
+import { setLocalStorage } from 'src/util/storage'
+
 import TooltipFirstCloseNotification from './notifications/tooltip-first-close'
 import RibbonFirstCloseNotification from './notifications/ribbon-first-close'
 import OnboardingHighlightText from './notifications/onboarding-highlight-text'
 import OnboardingSelectOption from './notifications/onboarding-select-option'
 import PowerSearchBrowse from './notifications/power-search-browse'
 import GoToDashboard from './notifications/go-to-dashboard'
+
+import { STORAGE_KEY } from 'src/overview/tooltips/constants'
+import { STORAGE_KEYS } from 'src/overview/onboarding/constants'
 
 const styles = require('./styles.css')
 
@@ -74,6 +80,14 @@ export class ToolbarNotification extends Component<Props> {
                         triggerNextNotification={
                             this.props.triggerNextNotification
                         }
+                        openDashboard={async () => {
+                            await setLocalStorage(
+                                STORAGE_KEYS.onboardingDemo.step2,
+                                'overview-tooltips',
+                            )
+                            await setLocalStorage(STORAGE_KEY, 'search-bar')
+                            remoteFunction('openOptionsTab')('overview')
+                        }}
                     />
                 )}
             </div>
