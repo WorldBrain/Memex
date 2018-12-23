@@ -215,9 +215,9 @@ class SidebarContainer extends React.Component<Props> {
     }
 
     render() {
-        const { isOpen } = this.props
+        const { isOpen, toggleSidebar } = this.props
 
-        return <Sidebar isOpen={isOpen} />
+        return <Sidebar isOpen={isOpen} toggleSidebar={toggleSidebar} />
     }
 }
 
