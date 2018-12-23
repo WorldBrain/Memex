@@ -19,14 +19,26 @@
 .container::after {
     content: ' ';
     position: absolute;
-    top: -50px;
+    top: -20px;
     left: calc(50% - 12.5px);
     margin-left: -5px;
-    border-width: 25px;
-    border-style: solid;
-    border-color: transparent transparent white transparent;
+    width: 40px;
+    height: 40px;
+    background-color: white;
+    transform: rotate(45deg);
+    z-index: -1;
+    box-shadow: 2px 2px 8px 1px rgba(0, 0, 0, 0.61961);
+}
 
-    /* TODO: Figure out how to add box shadow */
+.container::before {
+    content: ' ';
+    position: absolute;
+    top: -55px;
+    left: calc(50% - 26px);
+    border-width: 28px;
+    border-style: solid;
+    border-color: transparent;
+    border-bottom-color: #ffffff;
 }
 
 .emoji {
