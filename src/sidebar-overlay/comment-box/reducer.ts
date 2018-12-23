@@ -1,18 +1,8 @@
 import { createReducer } from 'redux-act'
 
 import * as actions from './actions'
+import State from './types'
 import { NUM_DEFAULT_ROWS } from './constants'
-
-export interface State {
-    commentInput: string
-    textareaRows: number
-    isHidden: boolean
-    tagInput: boolean
-    tags: any[]
-    displayHighlightTruncated: boolean
-    anchor: any
-    focusCommentBox: any
-}
 
 const defaultState: State = {
     commentInput: '',
