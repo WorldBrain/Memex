@@ -14,6 +14,7 @@ const images = {
 export default function PowerSearchBrowse({
     onCloseRequested,
     triggerNextNotification,
+    openDashboard,
 }) {
     return (
         <div className={styles.container}>
@@ -29,7 +30,9 @@ export default function PowerSearchBrowse({
                         Search with any word you see here
                     </p>
                     <p>go back to dashboard to try it out.</p>
-                    <div className={styles.button}>Get me there</div>
+                    <div className={styles.button} onClick={openDashboard}>
+                        Get me there
+                    </div>
                     <p
                         onClick={triggerNextNotification}
                         className={styles.pointer}
@@ -55,4 +58,5 @@ export default function PowerSearchBrowse({
 PowerSearchBrowse.propTypes = {
     onCloseRequested: PropTypes.func.isRequired,
     triggerNextNotifcation: PropTypes.func.isRequired,
+    openDashboard: PropTypes.func.isRequired,
 }

@@ -187,17 +187,14 @@ export const conditionallyTriggerTooltip = delayed(
         }
         callback(position)
 
+        // Trigger onboarding annotation after highlight tooltip.
         // Onboarding Demo stages
         const annotationStage = await getLocalStorage(
             STORAGE_KEYS.onboardingDemo.step1,
         )
-        // const powerSearchStage = await getLocalStorage(
-        //     STORAGE_KEYS.onboardingDemo.step2,
-        // )
 
         if (annotationStage === 'highlight_text_notification_shown') {
             // Remove previous notification
-            console.log(toolbarNotifications)
             toolbarNotifications._destroyRootElement()
             toolbarNotifications.showToolbarNotification(
                 'onboarding-select-option',
