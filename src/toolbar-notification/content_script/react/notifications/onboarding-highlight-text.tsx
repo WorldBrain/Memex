@@ -26,6 +26,6 @@ export default function OnboardingHighlightText({ onCloseRequested }) {
     )
 }
 
-OnboardingHighlightText.propTypes = {
+OnboardingHighlightText['propTypes'] = {
     onCloseRequested: PropTypes.func.isRequired,
 }

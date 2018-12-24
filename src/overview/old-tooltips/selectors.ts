@@ -5,6 +5,7 @@ import { RootState } from '../../options/types'
 
 export const tooltips = (state: RootState) => state.tooltips
 
+// @ts-ignores
 export const tooltip = createSelector(tooltips, state => state.tooltip)
 export const showTooltip = createSelector(tooltips, state => state.showTooltip)
 

@@ -45,6 +45,6 @@ export default function OnboardingSelectOption({ onCloseRequested }) {
     )
 }
 
-OnboardingSelectOption.propTypes = {
+OnboardingSelectOption['propTypes'] = {
     onCloseRequested: PropTypes.func.isRequired,
 }
