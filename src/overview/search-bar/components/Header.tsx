@@ -59,6 +59,7 @@ class Header extends PureComponent<Props> {
                 <div className={styles.container}>
                     <div className={styles.searchField}>
                         <input
+                            id="query-search-bar"
                             className={styles.query}
                             onChange={this.props.onQueryChange}
                             placeholder={this.props.searchPlaceholder}

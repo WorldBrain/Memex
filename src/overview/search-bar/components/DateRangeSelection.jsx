@@ -205,7 +205,7 @@ class DateRangeSelection extends Component {
         const { startDate, endDate, disabled } = this.props
 
         return (
-            <div className={styles.dateRangeSelection}>
+            <div className={styles.dateRangeSelection} id="date-picker">
                 <DatePicker
                     ref={dp => {
                         this.startDatePicker = dp

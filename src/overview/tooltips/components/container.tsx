@@ -6,6 +6,7 @@ import TimeFilterTooltip from './time-filter-tooltip'
 import * as acts from '../actions'
 import * as selectors from '../selectors'
 import { RootState } from '../../../options/types'
+import { getBottomCenter } from '../utils'
 
 export interface Props {
     showTooltip: boolean
@@ -26,39 +27,27 @@ class TooltipContainer extends Component<Props> {
             return null
         }
 
-        let position: Position
-
         if (whichTooltip === 'search-bar') {
-            position = {
-                top: 100,
-                left: '30%',
-            }
             return (
-                <Tooltip position={position}>
+                <Tooltip
+                    position={getBottomCenter('#query-search-bar', 48, 50)}
+                >
                     What words do you remember?
                 </Tooltip>
             )
         }
 
         if (whichTooltip === 'time-filters') {
-            position = {
-                top: 100,
-                left: '50%',
-            }
             return (
-                <Tooltip position={position}>
+                <Tooltip position={getBottomCenter('#date-picker', 50, -30)}>
                     <TimeFilterTooltip />
                 </Tooltip>
             )
         }
 
         if (whichTooltip === 'more-filters') {
-            position = {
-                top: 200,
-                left: 20,
-            }
             return (
-                <Tooltip position={position}>
+                <Tooltip position={getBottomCenter('#filter-icon', 40, -20)}>
                     <React.Fragment>
                         More <br /> Filters
                     </React.Fragment>
