@@ -96,9 +96,9 @@ class DateRangeSelection extends Component {
         })
 
         processEvent({
-            type:
-                EVENT_NAMES.DATEPICKER_NLP +
-                (isStartDate ? 'StartDate' : 'EndDate'),
+            type: isStartDate
+                ? EVENT_NAMES.DATEPICKER_NLP_START_DATE
+                : EVENT_NAMES.DATEPICKER_NLP_END_DATE,
         })
 
         // Get the time from the NLP query, if it could be parsed
@@ -171,9 +171,12 @@ class DateRangeSelection extends Component {
 
         processEvent({
             type: date
-                ? EVENT_NAMES.DATEPICKER_DROPDOWN +
-                  (isStartDate ? 'StartDate' : 'EndDate')
-                : 'datepickerClear' + (isStartDate ? 'StartDate' : 'EndDate'),
+                ? isStartDate
+                    ? EVENT_NAMES.DATEPICKER_DROPDOWN_START
+                    : EVENT_NAMES.DATEPICKER_DROPDOWN_END
+                : isStartDate
+                    ? EVENT_NAMES.DATEPICKER_CLEAR_START
+                    : EVENT_NAMES.DATEPICKER_CLEAR_END,
         })
 
         const updateDate = isStartDate

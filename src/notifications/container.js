@@ -221,8 +221,7 @@ class NotificationContainer extends Component {
         } else {
             return unreadNotificationList.length === 0 ? (
                 <NoNotification title="No new notifications">
-                    {' '}
-                    ¯\_(ツ) _ / ¯
+                    ¯\_(ツ)_/¯
                 </NoNotification>
             ) : null
         }
