@@ -5,6 +5,7 @@ import { remoteFunction } from '../../util/webextensionRPC'
 import { Thunk } from '../types'
 import * as selectors from './selectors'
 import * as popup from '../selectors'
+import { EVENT_NAMES } from '../../analytics/internal/constants'
 
 function deriveDomain(url: string) {
     const { hostname } = new URL(url)
@@ -47,7 +48,9 @@ export const addURLToBlacklist: (
     })
 
     processEventRPC({
-        type: isDomainChoice ? 'blacklistDomain' : 'blacklistSite',
+        type: isDomainChoice
+            ? EVENT_NAMES.BLACKLIST_DOMAIN
+            : EVENT_NAMES.BLACKLIST_SITE,
     })
 
     let url = popup.url(state)

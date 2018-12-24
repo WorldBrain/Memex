@@ -13,6 +13,7 @@ import extractTimeFiltersFromQuery, {
 } from 'src/util/nlp-time-filter'
 import { OVERVIEW_URL } from './constants'
 import browserIsChrome from './util/check-browser'
+import { EVENT_NAMES } from './analytics/internal/constants'
 
 // Read which browser we are running in.
 let browserName
@@ -94,8 +95,8 @@ async function makeSuggestion(query, suggest) {
     internalAnalytics.processEvent({
         type:
             searchResults.totalCount > 0
-                ? 'successfulOmnibarSearch'
-                : 'unsuccessfulOmnibarSearch',
+                ? EVENT_NAMES.SUCCESSFUL_OMNIBAR_SEARCH
+                : EVENT_NAMES.UNSUCCESSFUL_OMNIBAR_SEARCH,
     })
 
     // A subsequent search could have already started and finished while we
@@ -150,13 +151,20 @@ const acceptInput = (text, disposition) => {
 
     switch (disposition) {
         case 'currentTab':
-            browser.tabs.update({ url })
+            browser.tabs.update({
+                url,
+            })
             break
         case 'newForegroundTab':
-            browser.tabs.create({ url })
+            browser.tabs.create({
+                url,
+            })
             break
         case 'newBackgroundTab':
-            browser.tabs.create({ url, active: false })
+            browser.tabs.create({
+                url,
+                active: false,
+            })
             break
     }
 }

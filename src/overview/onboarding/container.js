@@ -13,6 +13,7 @@ import OnboardingMsg from './components/OnboardingMsg'
 import FeaturesInfo from './components/FeaturesInfo'
 import FeatureInfo from './components/FeatureInfo'
 import { FEATURES_INFO } from './constants'
+import { EVENT_NAMES } from '../../analytics/internal/constants'
 
 const styles = require('./components/Onboarding.css')
 
@@ -39,8 +40,12 @@ class OnboardingContainer extends PureComponent {
     processEventRPC = remoteFunction('processEvent')
 
     openNewUrl = url => () => {
-        this.processEventRPC({ type: 'openURLFeature' })
-        this.props.tabs.create({ url })
+        this.processEventRPC({
+            type: EVENT_NAMES.OPEN_URL_FEATURE,
+        })
+        this.props.tabs.create({
+            url,
+        })
     }
 
     renderFeaturesInfo = () => {
@@ -60,7 +65,7 @@ class OnboardingContainer extends PureComponent {
                 <ToggleSwitch
                     isChecked={this.props.shouldTrack}
                     onChange={this.props.toggleShouldTrack}
-                />
+                />{' '}
             </OptIn>
         )
     }
@@ -75,15 +80,16 @@ class OnboardingContainer extends PureComponent {
                 onClose={this.props.hideOnboarding}
                 showCloseBtn={this.props.showCancelBtn}
             >
-                <OnboardingMsg onFinish={this.props.hideOnboarding} />
+                <OnboardingMsg onFinish={this.props.hideOnboarding} />{' '}
                 <div>
                     <div className={styles.tutorialTitle}>
                         Explore what you can do
-                    </div>
+                    </div>{' '}
                     <FeaturesInfo optInManager={this.renderOptIn()}>
-                        {this.renderFeaturesInfo()}
-                    </FeaturesInfo>
-                </div>
+                        {' '}
+                        {this.renderFeaturesInfo()}{' '}
+                    </FeaturesInfo>{' '}
+                </div>{' '}
             </Overlay>
         )
     }

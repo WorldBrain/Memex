@@ -12,6 +12,7 @@ import {
 } from '../../common-ui/crowdfunding'
 import styles from './Annotation.css'
 import { IndexDropdown } from '../../common-ui/containers'
+import { EVENT_NAMES } from '../../analytics/internal/constants'
 
 class AnnotationContainer extends React.Component {
     static propTypes = {
@@ -90,7 +91,9 @@ class AnnotationContainer extends React.Component {
     setCrowdfunding = (value, isReply) => async () => {
         if (isReply != null) {
             await remoteFunction('processEvent')({
-                type: isReply ? 'clickReplyButton' : 'clickShareButton',
+                type: isReply
+                    ? EVENT_NAMES.CLICK_REPLY_BUTTON
+                    : EVENT_NAMES.CLICK_SHARE_BUTTON,
             })
         }
 
@@ -167,7 +170,10 @@ class AnnotationContainer extends React.Component {
         }
 
         if (annotationText !== comment) {
-            this.props.editAnnotation({ url, comment: annotationText })
+            this.props.editAnnotation({
+                url,
+                comment: annotationText,
+            })
             // Recalculate if truncation is needed
             newTruncated.annotation = this.getTruncatedObject(annotationText)
         }
@@ -183,7 +189,10 @@ class AnnotationContainer extends React.Component {
 
     getTags = () => this.state.tags.map(tag => tag.name)
 
-    _setTagInput = value => () => this.setState({ tagInput: value })
+    _setTagInput = value => () =>
+        this.setState({
+            tagInput: value,
+        })
 
     getDateDetails = () => {
         if (this.state.annotationEditMode) {
@@ -215,25 +224,25 @@ class AnnotationContainer extends React.Component {
                 <span
                     className={cx(styles.commonIcon, styles.editIcon)}
                     onClick={this.toggleEditAnnotation}
-                />
+                />{' '}
                 <span
                     className={cx(styles.commonIcon, styles.trashIcon)}
                     onClick={this._setFooterState('delete')}
-                />
+                />{' '}
                 <span
                     className={cx(styles.commonIcon, styles.shareIcon)}
                     onClick={this.setCrowdfunding(true, false)}
-                />
+                />{' '}
                 <span
                     className={cx(styles.commonIcon, styles.replyIcon)}
                     onClick={this.setCrowdfunding(true, true)}
-                />
+                />{' '}
                 {env === 'overview' && annotation.body ? (
                     <span
                         className={styles.goToPageIcon}
                         onClick={this.props.goToAnnotation(annotation)}
                     />
-                ) : null}
+                ) : null}{' '}
             </div>
         )
     }
@@ -245,14 +254,14 @@ class AnnotationContainer extends React.Component {
                     className={styles.footerBoldText}
                     onClick={this.handleEditAnnotation}
                 >
-                    Save
-                </span>
+                    Save{' '}
+                </span>{' '}
                 <span
                     className={styles.footerText}
                     onClick={this.toggleEditAnnotation}
                 >
-                    Cancel
-                </span>
+                    Cancel{' '}
+                </span>{' '}
             </div>
         )
     }
@@ -260,19 +269,19 @@ class AnnotationContainer extends React.Component {
     renderDeleteButtons = () => {
         return (
             <div className={styles.footerAside}>
-                <span className={styles.deleteReally}>Really?</span>
+                <span className={styles.deleteReally}> Really ? </span>{' '}
                 <span
                     className={styles.footerBoldText}
                     onClick={this.handleDeleteAnnotation}
                 >
-                    Delete
-                </span>
+                    Delete{' '}
+                </span>{' '}
                 <span
                     className={styles.footerText}
                     onClick={this._setFooterState('default')}
                 >
-                    Cancel
-                </span>
+                    Cancel{' '}
+                </span>{' '}
             </div>
         )
     }
@@ -291,7 +300,8 @@ class AnnotationContainer extends React.Component {
         const { footerState } = this.state
         return (
             <div className={styles.footer}>
-                {this.findFooterRenderer(footerState)}
+                {' '}
+                {this.findFooterRenderer(footerState)}{' '}
             </div>
         )
     }
@@ -428,7 +438,7 @@ class AnnotationContainer extends React.Component {
                     }}
                     placeholder="Add comment..."
                 />
-                <div ref={this.setTagRef}>{this.renderTagInput()}</div>
+                <div ref={this.setTagRef}> {this.renderTagInput()} </div>{' '}
             </div>
         )
     }
@@ -485,14 +495,13 @@ class AnnotationContainer extends React.Component {
                     isHovered={this.props.isHovered}
                     isActive={this.props.isActive}
                     id={this.props.annotation.url}
-                />
-                {this.state.crowdfunding &&
-                    this.props.env === 'overview' && (
-                        <CrowdfundingModal
-                            onClose={this.setCrowdfunding(false)}
-                            context="annotations"
-                        />
-                    )}
+                />{' '}
+                {this.state.crowdfunding && this.props.env === 'overview' && (
+                    <CrowdfundingModal
+                        onClose={this.setCrowdfunding(false)}
+                        context="annotations"
+                    />
+                )}{' '}
             </React.Fragment>
         )
     }

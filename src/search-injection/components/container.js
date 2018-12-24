@@ -15,6 +15,7 @@ import { actionRegistry } from '../../notifications/registry'
 import ActionButton from '../../notifications/components/ActionButton'
 import OptIn from '../../notifications/components/OptIn'
 import { ToggleSwitch } from '../../common-ui/components'
+import { EVENT_NAMES } from '../../analytics/internal/constants'
 
 class Container extends React.Component {
     static propTypes = {
@@ -169,7 +170,9 @@ class Container extends React.Component {
     async undoRemove() {
         await this._persistEnabledChange(true)
 
-        this.setState({ removed: false })
+        this.setState({
+            removed: false,
+        })
     }
 
     async changePosition() {
@@ -181,7 +184,7 @@ class Container extends React.Component {
 
     async handleClickTick() {
         this.processEvent({
-            type: 'readNotificationSearchEngine',
+            type: EVENT_NAMES.READ_NOTIFICATION_SEARCH_ENGINE,
             details: {
                 notificationId: this.state.notification.id,
             },
@@ -196,7 +199,7 @@ class Container extends React.Component {
 
     handleToggleStorageOption(action, value) {
         this.processEvent({
-            type: 'toggleStorageSearchEngine',
+            type: EVENT_NAMES.TOGGLE_STORAGE_SEARCH_ENGINE,
             details: {
                 notificationId: this.state.notification.id,
             },
@@ -214,7 +217,7 @@ class Container extends React.Component {
 
     handleClickOpenNewTabButton(url) {
         this.processEvent({
-            type: 'clickOpenNewLinkButtonSearch',
+            type: EVENT_NAMES.CLICK_OPEN_NEW_LINK_BUTTON_SEARCH,
             details: {
                 notificationId: this.state.notification.id,
             },
@@ -235,7 +238,8 @@ class Container extends React.Component {
                     }
                     fromSearch
                 >
-                    {buttons[0].label}
+                    {' '}
+                    {buttons[0].label}{' '}
                 </ActionButton>
             )
         } else if (action.type === actionTypes.TOGGLE_SETTING) {
@@ -257,7 +261,8 @@ class Container extends React.Component {
                         definition: action,
                     })}
                 >
-                    {buttons[0].label}
+                    {' '}
+                    {buttons[0].label}{' '}
                 </ActionButton>
             )
         }

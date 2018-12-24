@@ -10,6 +10,7 @@ import { remoteFunction } from 'src/util/webextensionRPC'
 import { DATE_PICKER_DATE_FORMAT as FORMAT } from '../constants'
 import styles from './DateRangeSelection.css'
 import './datepicker-overrides.css'
+import { EVENT_NAMES } from '../../../analytics/internal/constants'
 
 const processEvent = remoteFunction('processEvent')
 
@@ -95,7 +96,9 @@ class DateRangeSelection extends Component {
         })
 
         processEvent({
-            type: 'datepickerByNlp' + (isStartDate ? 'StartDate' : 'EndDate'),
+            type: isStartDate
+                ? EVENT_NAMES.DATEPICKER_NLP_START_DATE
+                : EVENT_NAMES.DATEPICKER_NLP_END_DATE,
         })
 
         // Get the time from the NLP query, if it could be parsed
@@ -168,9 +171,12 @@ class DateRangeSelection extends Component {
 
         processEvent({
             type: date
-                ? 'datepickerByDropdown' +
-                  (isStartDate ? 'StartDate' : 'EndDate')
-                : 'datepickerClear' + (isStartDate ? 'StartDate' : 'EndDate'),
+                ? isStartDate
+                    ? EVENT_NAMES.DATEPICKER_DROPDOWN_START
+                    : EVENT_NAMES.DATEPICKER_DROPDOWN_END
+                : isStartDate
+                    ? EVENT_NAMES.DATEPICKER_CLEAR_START
+                    : EVENT_NAMES.DATEPICKER_CLEAR_END,
         })
 
         const updateDate = isStartDate

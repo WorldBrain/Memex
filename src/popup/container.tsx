@@ -35,6 +35,7 @@ import * as selectors from './selectors'
 import * as acts from './actions'
 import { ClickHandler, RootState } from './types'
 import { PageList } from '../custom-lists/background/types'
+import { EVENT_NAMES } from '../analytics/internal/constants'
 
 const btnStyles = require('./components/Button.css')
 const styles = require('./components/Popup.css')
@@ -85,7 +86,7 @@ class PopupContainer extends PureComponent<Props> {
             })
 
             this.processEvent({
-                type: 'searchPopup',
+                type: EVENT_NAMES.SEARCH_POPUP,
             })
 
             const queryFilters = extractQueryFilters(this.props.searchValue)

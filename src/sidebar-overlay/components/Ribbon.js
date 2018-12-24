@@ -8,6 +8,7 @@ import FrameCommunication from '../messaging'
 
 import styles from './Ribbon.css'
 import CloseButton from './CloseButton'
+import { EVENT_NAMES } from '../../analytics/internal/constants'
 
 const arrowRibbon = browser.extension.getURL('/img/arrow_ribbon.svg')
 const logo = browser.extension.getURL('/img/worldbrain-logo-narrow.png')
@@ -48,7 +49,10 @@ class Ribbon extends React.Component {
             isRibbonEnabled,
             isTooltipEnabled,
         } = await this.props.getInitialState()
-        this.setState({ isRibbonEnabled, isTooltipEnabled })
+        this.setState({
+            isRibbonEnabled,
+            isTooltipEnabled,
+        })
 
         this.setupRPCfunctions()
 
@@ -72,7 +76,9 @@ class Ribbon extends React.Component {
             false,
         )
 
-        this.props.onInit({ toggleSidebar: () => this.toggleSidebar() })
+        this.props.onInit({
+            toggleSidebar: () => this.toggleSidebar(),
+        })
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -132,7 +138,9 @@ class Ribbon extends React.Component {
                         this.frameFC = null
                     }
 
-                    return { shouldRenderIFrame }
+                    return {
+                        shouldRenderIFrame,
+                    }
                 })
             },
         })
@@ -257,7 +265,9 @@ class Ribbon extends React.Component {
 
         if (processEvent) {
             processEvent({
-                type: isSidebarActive ? 'openSidebarPage' : 'closeSidebarPage',
+                type: isSidebarActive
+                    ? EVENT_NAMES.OPEN_SIDEBAR_PAGE
+                    : EVENT_NAMES.CLOSE_SIDEBAR_PAGE,
             })
         }
 
@@ -279,7 +289,9 @@ class Ribbon extends React.Component {
 
         const { isTooltipEnabled } = this.state
         this.props.handleTooltipToggle(isTooltipEnabled)
-        this.setState({ isTooltipEnabled: !isTooltipEnabled })
+        this.setState({
+            isTooltipEnabled: !isTooltipEnabled,
+        })
     }
 
     /* Toggles ribbon on/off for all pages. */
@@ -289,7 +301,9 @@ class Ribbon extends React.Component {
 
         const { isRibbonEnabled } = this.state
         this.props.handleRibbonToggle(isRibbonEnabled)
-        this.setState({ isRibbonEnabled: !isRibbonEnabled })
+        this.setState({
+            isRibbonEnabled: !isRibbonEnabled,
+        })
     }
 
     openSidebar = () =>
@@ -356,7 +370,9 @@ class Ribbon extends React.Component {
         } else {
             isFullScreenBool = false
         }
-        this.setState({ isFullScreen: isFullScreenBool })
+        this.setState({
+            isFullScreen: isFullScreenBool,
+        })
     }
 
     setiFrameRef = node => (this.iFrame = node)
@@ -382,14 +398,18 @@ class Ribbon extends React.Component {
     handleMouseEnter = e => {
         e.stopPropagation()
         if (!this.state.isHovering) {
-            this.setState({ isHovering: true })
+            this.setState({
+                isHovering: true,
+            })
         }
     }
 
     handleMouseLeave = e => {
         e.stopPropagation()
         if (this.state.isHovering) {
-            this.setState({ isHovering: false })
+            this.setState({
+                isHovering: false,
+            })
         }
     }
 
@@ -424,8 +444,8 @@ class Ribbon extends React.Component {
                             className={styles.arrow}
                             src={arrowRibbon}
                             title={'Open Annotation Sidebar'}
-                        />
-                    </div>
+                        />{' '}
+                    </div>{' '}
                     {isHovering && (
                         <div className={styles.buttons}>
                             <img
@@ -433,7 +453,7 @@ class Ribbon extends React.Component {
                                 className={styles.logo}
                                 onClick={this.toggleSidebar}
                                 title={'Open Annotation Sidebar'}
-                            />
+                            />{' '}
                             <div
                                 className={styles.buttonHolder}
                                 onClick={this.toggleTooltip}
@@ -446,8 +466,8 @@ class Ribbon extends React.Component {
                                     title={
                                         'Turn on/off Highlighter on all pages'
                                     }
-                                />
-                            </div>
+                                />{' '}
+                            </div>{' '}
                             <div
                                 className={styles.buttonHolder}
                                 onClick={this.toggleRibbon}
@@ -464,8 +484,8 @@ class Ribbon extends React.Component {
                                     title={
                                         'Turn on/off this ribbon on all pages'
                                     }
-                                />
-                            </div>
+                                />{' '}
+                            </div>{' '}
                             <div className={styles.buttonHolder}>
                                 <span
                                     title={
@@ -473,19 +493,19 @@ class Ribbon extends React.Component {
                                     }
                                     className={styles.cancel}
                                     onClick={destroy}
-                                />
-                            </div>
+                                />{' '}
+                            </div>{' '}
                         </div>
-                    )}
-                </div>
+                    )}{' '}
+                </div>{' '}
                 <CloseButton
                     isActive={isSidebarActive}
                     clickHandler={this.toggleSidebar}
                     title={
                         'Close once. Disable via Memex icon in the extension toolbar.'
                     }
-                />
-                {this.renderIFrame()}
+                />{' '}
+                {this.renderIFrame()}{' '}
             </React.Fragment>
         )
     }

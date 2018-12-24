@@ -7,6 +7,7 @@ import {
     actions as commentActions,
 } from '../CommentBox'
 import * as selectors from './selectors'
+import { EVENT_NAMES } from '../../analytics/internal/constants'
 
 const getAllAnnotationsRPC = remoteFunction('getAllAnnotations')
 const getAnnotationTagsRPC = remoteFunction('getAnnotationTags')
@@ -72,7 +73,9 @@ export const createAnnotation = (comment, body, tags, env) => async (
     dispatch,
     getState,
 ) => {
-    processEventRPC({ type: 'createAnnotation' })
+    processEventRPC({
+        type: EVENT_NAMES.CREATE_ANNOTATION,
+    })
 
     const state = getState()
     const { url, title } = selectors.page(state)
@@ -88,7 +91,10 @@ export const createAnnotation = (comment, body, tags, env) => async (
 
     // Write tags to database
     tags.forEach(async tag => {
-        await addAnnotationTagRPC({ tag, url: uniqueUrl })
+        await addAnnotationTagRPC({
+            tag,
+            url: uniqueUrl,
+        })
     })
 
     dispatch(commentActions.setAnchor(null))
@@ -112,7 +118,9 @@ export const editAnnotation = (url, comment) => async (dispatch, getState) => {
 }
 
 export const deleteAnnotation = url => async (dispatch, getState) => {
-    processEventRPC({ type: 'deleteAnnotation' })
+    processEventRPC({
+        type: EVENT_NAMES.DELETE_ANNOTATION,
+    })
 
     await deleteAnnotationRPC(url)
     const state = getState()
