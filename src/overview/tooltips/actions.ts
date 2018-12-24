@@ -13,8 +13,6 @@ export const fetchOnboardingState = () => async dispatch => {
     )
     if (onboardingState === 'overview-tooltips') {
         dispatch(setShowTooltip(true))
-        // Set state to done, as the onboarding tooltips must be shown only once
-        await setLocalStorage(onboardingKeys.onboardingDemo.step2, 'DONE')
     }
 }
 
