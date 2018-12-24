@@ -2,7 +2,7 @@ import { createAction } from 'redux-act'
 
 import analytics from 'src/analytics'
 import { remoteFunction } from 'src/util/webextensionRPC'
-import { getLocalStorage } from 'src/util/storage'
+import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 // import { IMPORT_TYPE as TYPE, CMDS } from 'src/options/imports/constants'
 // import { IMPORT_CONN_NAME } from './constants'
 import { STORAGE_KEYS } from './constants'
@@ -105,6 +105,22 @@ export const fetchOnboardingStages = () => async dispatch => {
     )
 }
 
+/**
+ * Sets Power Search Stage as done.
+ * Dispatched from the last tooltip in Power Search Stage.
+ */
+export const setPowerSearchDone = () => async (dispatch, getState) => {
+    const state = getState()
+    const onboardingStages = selectors.onboardingStages(state)
+    await setLocalStorage(STORAGE_KEYS.onboardingDemo.step2, 'DONE')
+    dispatch(
+        setOnboardingStages({
+            ...onboardingStages,
+            powerSearchStage: 'DONE',
+        }),
+    )
+    console.log(state)
+}
 /**
  * Background script connection state handler, which sets up the connection and dispatches
  * specific redux actions for specific commands sent from the background script along the connection.

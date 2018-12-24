@@ -10,6 +10,7 @@ import {
 } from '../../../search-filters'
 import { selectors as notifs } from '../../../notifications'
 import { acts as tooltipActs } from '../../tooltips'
+import { actions as onboardingActs } from '../../onboarding'
 
 export interface Props {
     showInbox: boolean
@@ -37,6 +38,8 @@ const mapDispatch = dispatch => ({
         // Remove and reset onboarding tooltip
         dispatch(tooltipActs.setShowTooltip(false))
         dispatch(tooltipActs.setWhichTooltip('none'))
+        // Tick off Power Search onboarding stage
+        dispatch(onboardingActs.setPowerSearchDone())
 
         dispatch(acts.openSidebarFilterMode())
     },
