@@ -148,6 +148,7 @@ export async function _prepareBackupChangeForStorage(change: ObjectChange) {
         } catch (e) {
             Raven.captureException(e)
         }
+        change.object.screenshot = null
     }
 
     if (

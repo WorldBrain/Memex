@@ -171,7 +171,11 @@ export class BackupRestoreProcedure {
         }
     }
 
-    _writeImage(image) {}
+    async _writeImage(image) {
+        const collection = this.storageManager.collection(image.collection)
+        const where = _getChangeWhere(image, this.storageManager.registry)
+        await collection.updateOneObject(where, { [image.type]: image.data })
+    }
 
     _createDownloadQueue(collection: string, timestamps: string[]) {
         const items = sorted(timestamps).map(timestamp => [
