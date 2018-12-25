@@ -64,6 +64,9 @@ const addFavIcon = addMethods.addFavIcon(getDb)
 const delPages = delMethods.delPages(getDb)
 const delPagesByDomain = delMethods.delPagesByDomain(getDb)
 const delPagesByPattern = delMethods.delPagesByPattern(getDb)
+const dangerousPleaseBeSureDeleteAndRecreateDatabase = delMethods.dangerousPleaseBeSureDeleteAndRecreateDatabase(
+    getDb,
+)
 const addTag = tagMethods.addTag(getDb)
 const delTag = tagMethods.delTag(getDb)
 const fetchPageTags = tagMethods.fetchPageTags(getDb)
@@ -89,6 +92,7 @@ export {
     delPages,
     delPagesByDomain,
     delPagesByPattern,
+    dangerousPleaseBeSureDeleteAndRecreateDatabase,
     addTag,
     delTag,
     fetchPageTags,

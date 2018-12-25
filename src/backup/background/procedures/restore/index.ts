@@ -1,9 +1,12 @@
 const sorted = require('lodash/sortBy')
+const zipObject = require('lodash/zipObject')
 import { EventEmitter } from 'events'
 import { StorageManager } from '../../../../search/types'
 import { BackupBackend } from '../../backend'
 import Interruptable from '../interruptable'
 import { DownloadQueue } from './download-queue'
+import { dangerousPleaseBeSureDeleteAndRecreateDatabase } from 'src/search'
+import { StorageRegistry } from 'storex'
 
 export interface BackupRestoreInfo {
     status: 'preparing' | 'synching'
@@ -105,7 +108,10 @@ export class BackupRestoreProcedure {
         return procedure
     }
 
-    _clearDatabase() {}
+    async _clearDatabase() {
+        await dangerousPleaseBeSureDeleteAndRecreateDatabase()
+    }
+
     _blockDatabase() {}
 
     async _restoreCollection(
@@ -149,10 +155,20 @@ export class BackupRestoreProcedure {
 
     _unblockDatabase() {}
 
-    _writeChange(change) {
-        return new Promise(resolve =>
-            setTimeout(() => resolve(), 10),
-        ) as Promise<void>
+    async _writeChange(change) {
+        const collection = this.storageManager.collection(change.collection)
+        if (change.operation === 'create') {
+            await collection.createObject(change.object)
+        } else if (change.operation === 'update') {
+            await collection.updateOneObject(
+                _getChangeWhere(change, this.storageManager.registry),
+                change.object,
+            )
+        } else if (change.operation === 'delete') {
+            await collection.deleteOneObject(
+                _getChangeWhere(change, this.storageManager.registry),
+            )
+        }
     }
 
     _writeImage(image) {}
@@ -180,5 +196,16 @@ export class BackupRestoreProcedure {
     _updateInfo(changes) {
         this.info = { ...this.info, ...changes }
         this.events.emit('info', { info: this.info })
+    }
+}
+
+export function _getChangeWhere(change, registry: StorageRegistry) {
+    // TODO: What if none of these are true?
+    const collectionDef = registry.collections[change.collection]
+    const pkIndex = collectionDef.pkIndex
+    if (pkIndex instanceof Array) {
+        return zipObject(pkIndex, change.pk)
+    } else if (typeof pkIndex === 'string') {
+        return { [pkIndex]: change.pk }
     }
 }
