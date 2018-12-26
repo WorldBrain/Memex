@@ -1,6 +1,8 @@
 import React, { PureComponent } from 'react'
 import { connect } from 'react-redux'
 
+import { remoteFunction } from 'src/util/webextensionRPC'
+import { EVENT_NAMES } from 'src/analytics/internal/constants'
 import SidebarIcons from './SidebarIcons'
 import BackToSearch from './BackToSearch'
 import * as acts from '../actions'
@@ -15,6 +17,8 @@ import { actions as onboardingActs } from '../../onboarding'
 export interface Props {
     showInbox: boolean
 }
+
+const processEventRPC = remoteFunction('processEvent')
 
 class SidebarIconsContainer extends PureComponent<Props> {
     render() {
@@ -40,6 +44,9 @@ const mapDispatch = dispatch => ({
         dispatch(tooltipActs.setWhichTooltip('none'))
         // Tick off Power Search onboarding stage
         dispatch(onboardingActs.setPowerSearchDone())
+        processEventRPC({
+            type: EVENT_NAMES.FINISH_POWERSEARCH_ONBOARDING,
+        })
 
         dispatch(acts.openSidebarFilterMode())
     },

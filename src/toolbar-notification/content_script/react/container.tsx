@@ -11,6 +11,7 @@ import GoToDashboard from './notifications/go-to-dashboard'
 
 import { STORAGE_KEY } from 'src/overview/tooltips/constants'
 import { STORAGE_KEYS } from 'src/overview/onboarding/constants'
+import { EVENT_NAMES } from 'src/analytics/internal/constants'
 
 const styles = require('./styles.css')
 
@@ -21,6 +22,8 @@ export interface Props {
 }
 
 export class ToolbarNotification extends Component<Props> {
+    openOptionsTab = remoteFunction('openOptionsTab')
+    processEventRPC = remoteFunction('processEvent')
     /**
      * Return extra styles for the container based on whether the postion prop
      * is passed or not.
@@ -81,12 +84,15 @@ export class ToolbarNotification extends Component<Props> {
                             this.props.triggerNextNotification
                         }
                         openDashboard={async () => {
+                            this.processEventRPC({
+                                type: EVENT_NAMES.POWERSEARCH_GOTO_DASH,
+                            })
                             await setLocalStorage(
                                 STORAGE_KEYS.onboardingDemo.step2,
                                 'overview-tooltips',
                             )
                             await setLocalStorage(STORAGE_KEY, 'search-bar')
-                            remoteFunction('openOptionsTab')('overview')
+                            this.openOptionsTab('overview')
                         }}
                     />
                 )}

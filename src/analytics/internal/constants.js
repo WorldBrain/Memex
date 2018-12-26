@@ -97,6 +97,13 @@ export const EVENT_NAMES = {
     BLACKLIST: 'blacklist',
     ADDRESS_BAR_SEARCH: 'addressBarSearch',
     DATEPICKER_NLP: 'datepickerNlp',
+    START_ANNOTATION_ONBOARDING: 'startAnnotationOnboarding',
+    ONBOARDING_HIGHLIGHT_MADE: 'onboardingHighlightMade',
+    FINISH_ANNOTATION_ONBOARDING: 'finishAnnotationOnboarding',
+    START_POWERSEARCH_ONBOARDING: 'startPowerSearchOnboarding',
+    POWERSEARCH_BROWSE_PAGE: 'powerSearchBrowsePage',
+    POWERSEARCH_GOTO_DASH: 'powerSearchGotoDash',
+    FINISH_POWERSEARCH_ONBOARDING: 'finshPowerSearchOnboarding',
 }
 
 export const EVENT_TYPES = {
@@ -348,6 +355,27 @@ export const EVENT_TYPES = {
     },
     [EVENT_NAMES.LEARN_MORE_CROWD_FUNDING]: {
         id: 74,
+    },
+    [EVENT_NAMES.START_ANNOTATION_ONBOARDING]: {
+        id: 75,
+    },
+    [EVENT_NAMES.FINISH_ANNOTATION_ONBOARDING]: {
+        id: 76,
+    },
+    [EVENT_NAMES.START_POWERSEARCH_ONBOARDING]: {
+        id: 77,
+    },
+    [EVENT_NAMES.FINISH_POWERSEARCH_ONBOARDING]: {
+        id: 78,
+    },
+    [EVENT_NAMES.ONBOARDING_HIGHLIGHT_MADE]: {
+        id: 79,
+    },
+    [EVENT_NAMES.POWERSEARCH_BROWSE_PAGE]: {
+        id: 80,
+    },
+    [EVENT_NAMES.POWERSEARCH_GOTO_DASH]: {
+        id: 81,
     },
 }
 
