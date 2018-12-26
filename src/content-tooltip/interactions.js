@@ -12,13 +12,14 @@ import {
 } from '../direct-linking/content_script/interactions'
 import { setupUIContainer, destroyUIContainer } from './components'
 import { remoteFunction, makeRemotelyCallable } from '../util/webextensionRPC'
+import { EVENT_NAMES } from 'src/analytics/internal/constants'
 import { injectCSS } from '../search-injection/dom'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import { STORAGE_KEYS } from 'src/overview/onboarding/constants'
 import { STORAGE_KEY as tooltipKey } from 'src/overview/tooltips/constants'
 
 const openOptionsRPC = remoteFunction('openOptionsTab')
-
+const processEventRPC = remoteFunction('processEvent')
 let mouseupListener = null
 
 export function setupTooltipTrigger(callback, toolbarNotifications) {
@@ -202,6 +203,9 @@ export const conditionallyTriggerTooltip = delayed(
                     position,
                 },
             )
+            processEventRPC({
+                type: EVENT_NAMES.ONBOARDING_HIGHLIGHT_MADE,
+            })
             await setLocalStorage(
                 STORAGE_KEYS.onboardingDemo.step1,
                 'select_option_notification_shown',
@@ -243,6 +247,11 @@ export const conditionallyShowOnboardingNotifications = async ({
     const triggerNextNotification = async () => {
         toolbarNotifications._destroyRootElement()
         toolbarNotifications.showToolbarNotification('go-to-dashboard')
+
+        processEventRPC({
+            type: EVENT_NAMES.POWERSEARCH_BROWSE_PAGE,
+        })
+
         await setLocalStorage(
             STORAGE_KEYS.onboardingDemo.step2,
             'overview-tooltips',

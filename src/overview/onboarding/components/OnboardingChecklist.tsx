@@ -1,6 +1,8 @@
 import React from 'react'
 import { connect } from 'react-redux'
 
+import { remoteFunction } from 'src/util/webextensionRPC'
+import { EVENT_NAMES } from 'src/analytics/internal/constants'
 import { Checkbox } from '../../../common-ui/components'
 import * as constants from '../constants'
 import { browser } from 'webextension-polyfill-ts'
@@ -31,10 +33,16 @@ class OnboardingChecklist extends React.Component<Props> {
         await this.props.fetchOnboardingStages()
     }
 
+    processEvent = remoteFunction('processEvent')
+
     handleStepOne = async () => {
         if (this.props.onboardingStages.annotationStage === 'DONE') {
             return
         }
+
+        this.processEvent({
+            type: EVENT_NAMES.START_ANNOTATION_ONBOARDING,
+        })
 
         const url = constants.ANNOTATION_DEMO_URL
         await setLocalStorage(
@@ -50,6 +58,10 @@ class OnboardingChecklist extends React.Component<Props> {
         if (this.props.onboardingStages.powerSearchStage === 'DONE') {
             return
         }
+
+        this.processEvent({
+            type: EVENT_NAMES.START_POWERSEARCH_ONBOARDING,
+        })
 
         const url = constants.ANNOTATION_DEMO_URL
         await setLocalStorage(

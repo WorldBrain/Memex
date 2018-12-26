@@ -7,13 +7,10 @@ import {
     actions as commentActions,
 } from '../CommentBox'
 import * as selectors from './selectors'
-<<<<<<< HEAD
 import { EVENT_NAMES } from '../../analytics/internal/constants'
-=======
 import { getLocalStorage } from 'src/search-injection/utils'
 import { STORAGE_KEYS } from 'src/overview/onboarding/constants'
 import { setLocalStorage } from 'src/util/storage'
->>>>>>> Display the congrats message once the user saves his first annotation.
 
 const getAllAnnotationsRPC = remoteFunction('getAllAnnotations')
 const getAnnotationTagsRPC = remoteFunction('getAnnotationTags')
@@ -120,6 +117,9 @@ export const createAnnotation = (comment, body, tags, env) => async (
         onboardingAnnotationStage === 'annotation_created'
     ) {
         dispatch(setCongratsMessage(true))
+        processEventRPC({
+            type: EVENT_NAMES.FINISH_ANNOTATION_ONBOARDING,
+        })
         await setLocalStorage(STORAGE_KEYS.onboardingDemo.step1, 'DONE')
     } else if (congratsMessage) {
         // Since we need to display the congrats message only once,
