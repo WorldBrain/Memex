@@ -20,3 +20,7 @@ export const fetchWhichTooltip = () => async dispatch => {
     const whichTooltip = await getLocalStorage(tooltipKey, 'none')
     dispatch(setWhichTooltip(whichTooltip))
 }
+
+export const closeTooltip = () => dispatch => {
+    dispatch(setWhichTooltip('none'))
+}

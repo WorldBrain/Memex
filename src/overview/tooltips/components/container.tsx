@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 
-import Tooltip, { Position } from './tooltip'
+import Tooltip from './tooltip'
 import TimeFilterTooltip from './time-filter-tooltip'
 import * as acts from '../actions'
 import * as selectors from '../selectors'
@@ -13,6 +13,7 @@ export interface Props {
     whichTooltip: string
     fetchWhichTooltip: () => void
     fetchOnboardingState: () => void
+    closeTooltip: () => void
 }
 
 class TooltipContainer extends Component<Props> {
@@ -31,6 +32,7 @@ class TooltipContainer extends Component<Props> {
             return (
                 <Tooltip
                     position={getBottomCenter('#query-search-bar', 48, 50)}
+                    closeTooltip={this.props.closeTooltip}
                 >
                     What words do you remember?
                 </Tooltip>
@@ -39,7 +41,10 @@ class TooltipContainer extends Component<Props> {
 
         if (whichTooltip === 'time-filters') {
             return (
-                <Tooltip position={getBottomCenter('#date-picker', 50, -30)}>
+                <Tooltip
+                    position={getBottomCenter('#date-picker', 50, -30)}
+                    closeTooltip={this.props.closeTooltip}
+                >
                     <TimeFilterTooltip />
                 </Tooltip>
             )
@@ -47,7 +52,10 @@ class TooltipContainer extends Component<Props> {
 
         if (whichTooltip === 'more-filters') {
             return (
-                <Tooltip position={getBottomCenter('#filter-icon', 40, -20)}>
+                <Tooltip
+                    position={getBottomCenter('#filter-icon', 40, -20)}
+                    closeTooltip={this.props.closeTooltip}
+                >
                     <React.Fragment>
                         More <br /> Filters
                     </React.Fragment>
@@ -70,6 +78,9 @@ const mapDispatchToProps: (dispatch) => Partial<Props> = dispatch => ({
     },
     fetchOnboardingState: () => {
         dispatch(acts.fetchOnboardingState())
+    },
+    closeTooltip: () => {
+        dispatch(acts.closeTooltip())
     },
 })
 
