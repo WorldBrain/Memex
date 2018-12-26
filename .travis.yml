@@ -4,7 +4,6 @@ node_js:
 install:
     - git submodule update --init --recursive
     - yarn install --frozen-lockfile
-    - ./setup-submodules.sh
 script:
     - npm run test
     - npm run lint
