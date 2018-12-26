@@ -61,3 +61,15 @@
     text-transform: none;
     margin-top: 0px;
 }
+
+.close {
+    font-size: 10px;
+    font-style: normal;
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    color: white;
+    background: #444882;
+    border-radius: 8px;
+    padding: 1px 5px 2px 5px;
+}
