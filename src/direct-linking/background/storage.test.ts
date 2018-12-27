@@ -15,6 +15,7 @@ describe('Annotations storage', () => {
             DATA.highlight,
             DATA.annotation,
             DATA.comment,
+            DATA.hybrid,
         ]) {
             // Pages also need to be seeded to match domains filters against
             await storageManager.collection('pages').createObject({
@@ -27,6 +28,15 @@ describe('Annotations storage', () => {
 
             await annotationStorage.createAnnotation(annot)
         }
+
+        await storageManager.collection('bookmarks').createObject({
+            url: DATA.directLink.pageUrl,
+            time: Date.now(),
+        })
+        await storageManager.collection('bookmarks').createObject({
+            url: DATA.hybrid.pageUrl,
+            time: Date.now(),
+        })
 
         // Insert tags
         await annotationStorage.modifyTags(true)(DATA.tag1, DATA.annotation.url)
@@ -87,101 +97,113 @@ describe('Annotations storage', () => {
             assertTag(tags[0], DATA.tag1)
         })
 
-        test('terms search', async () => {
-            const results = await annotationStorage.search({
-                terms: ['highlight', 'annotation', 'comment'],
+        describe('annotations search', () => {
+            test('terms search', async () => {
+                const results = await annotationStorage.search({
+                    terms: ['highlight', 'annotation', 'comment'],
+                })
+
+                expect(results).toBeDefined()
+                expect(results.length).toBe(4)
             })
 
-            expect(results).toBeDefined()
-            expect(results.length).toBe(3)
-        })
+            test('bookmarks only', async () => {
+                const resA = await annotationStorage.search({
+                    terms: ['highlight', 'annotation', 'comment'],
+                    bookmarksOnly: true,
+                })
 
-        test('terms search (highlight only)', async () => {
-            const results = await annotationStorage.search({
-                terms: ['highlight', 'annotation', 'comment'],
-                highlightsOnly: true,
+                expect(resA).toBeDefined()
+                expect(resA.length).toBe(1)
             })
 
-            expect(results).toBeDefined()
-            expect(results.length).toBe(2)
-        })
+            test('highlights only', async () => {
+                const results = await annotationStorage.search({
+                    terms: ['highlight', 'annotation', 'comment'],
+                    highlightsOnly: true,
+                })
 
-        test('terms search (direct links only)', async () => {
-            const linkOnlyRes = await annotationStorage.search({
-                terms: ['quote'],
-                directLinksOnly: true,
+                expect(results).toBeDefined()
+                expect(results.length).toBe(3)
             })
 
-            expect(linkOnlyRes).toBeDefined()
-            expect(linkOnlyRes.length).toBe(1)
-        })
+            test('direct links only', async () => {
+                const linkOnlyRes = await annotationStorage.search({
+                    terms: ['quote'],
+                    directLinksOnly: true,
+                })
 
-        test('terms search (tag filter)', async () => {
-            const results = await annotationStorage.search({
-                terms: ['highlight', 'annotation', 'comment'],
-                tagsInc: [DATA.tag1],
+                expect(linkOnlyRes).toBeDefined()
+                expect(linkOnlyRes.length).toBe(1)
             })
 
-            expect(results).toBeDefined()
-            expect(results.length).toBe(1)
-        })
+            test('tags filter', async () => {
+                const results = await annotationStorage.search({
+                    terms: ['highlight', 'annotation', 'comment'],
+                    tagsInc: [DATA.tag1],
+                })
 
-        test('terms search (domain filter)', async () => {
-            const resA = await annotationStorage.search({
-                terms: ['highlight', 'annotation', 'comment'],
-                domainsExc: ['annotation.url'],
+                expect(results).toBeDefined()
+                expect(results.length).toBe(1)
             })
 
-            expect(resA).toBeDefined()
-            expect(resA.length).toBe(0)
+            test('domains filter', async () => {
+                const resA = await annotationStorage.search({
+                    terms: ['highlight', 'annotation', 'comment'],
+                    domainsExc: ['annotation.url'],
+                })
 
-            const resB = await annotationStorage.search({
-                terms: ['highlight', 'annotation', 'comment'],
-                domainsInc: ['annotation.url'],
+                expect(resA).toBeDefined()
+                expect(resA.length).toBe(1)
+
+                const resB = await annotationStorage.search({
+                    terms: ['highlight', 'annotation', 'comment'],
+                    domainsInc: ['annotation.url'],
+                })
+
+                expect(resB).toBeDefined()
+                expect(resB.length).toBe(3)
             })
 
-            expect(resB).toBeDefined()
-            expect(resB.length).toBe(3)
-        })
+            test('limit', async () => {
+                const single = await annotationStorage.search({
+                    terms: ['highlight', 'annotation', 'comment'],
+                    limit: 1,
+                })
+                const double = await annotationStorage.search({
+                    terms: ['highlight', 'annotation', 'comment'],
+                    limit: 2,
+                })
+                const triple = await annotationStorage.search({
+                    terms: ['highlight', 'annotation', 'comment'],
+                    limit: 3,
+                })
 
-        test('terms search (limit)', async () => {
-            const single = await annotationStorage.search({
-                terms: ['highlight', 'annotation', 'comment'],
-                limit: 1,
-            })
-            const double = await annotationStorage.search({
-                terms: ['highlight', 'annotation', 'comment'],
-                limit: 2,
-            })
-            const triple = await annotationStorage.search({
-                terms: ['highlight', 'annotation', 'comment'],
-                limit: 3,
-            })
-
-            expect(single).toBeDefined()
-            expect(single.length).toBe(1)
-            expect(double).toBeDefined()
-            expect(double.length).toBe(2)
-            expect(triple).toBeDefined()
-            expect(triple.length).toBe(3)
-        })
-
-        test('terms search (url scope)', async () => {
-            const res = await annotationStorage.search({
-                terms: ['quote'],
-                url: normalize(DATA.directLink.pageUrl),
+                expect(single).toBeDefined()
+                expect(single.length).toBe(1)
+                expect(double).toBeDefined()
+                expect(double.length).toBe(2)
+                expect(triple).toBeDefined()
+                expect(triple.length).toBe(3)
             })
 
-            expect(res).toBeDefined()
-            expect(res.length).toBe(1)
+            test('url scope', async () => {
+                const res = await annotationStorage.search({
+                    terms: ['quote'],
+                    url: normalize(DATA.directLink.pageUrl),
+                })
 
-            const resNone = await annotationStorage.search({
-                terms: ['quote'],
-                url: normalize(DATA.pageUrl),
+                expect(res).toBeDefined()
+                expect(res.length).toBe(1)
+
+                const resNone = await annotationStorage.search({
+                    terms: ['quote'],
+                    url: normalize(DATA.pageUrl),
+                })
+
+                expect(resNone).toBeDefined()
+                expect(resNone.length).toBe(0)
             })
-
-            expect(resNone).toBeDefined()
-            expect(resNone.length).toBe(0)
         })
     })
 

@@ -21,6 +21,15 @@ export const highlight = {
     selector: {},
 }
 
+export const hybrid = {
+    pageTitle: 'Annotation title',
+    pageUrl: 'test.com/test',
+    body: 'Whooo this is a highlight',
+    url: 'https://test.com/test#12124124124',
+    comment: 'Great quote in that highlight',
+    selector: {},
+}
+
 export const annotation = {
     pageTitle: 'Annotation title',
     pageUrl,

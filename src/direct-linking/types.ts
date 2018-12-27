@@ -46,6 +46,8 @@ export interface SearchParams {
     url?: string
     /** Use for pagination (result skip may not be possible). */
     limit?: number
+    /** Denotes whether or not to limit search to annotations on a bookmarked page. */
+    bookmarksOnly?: boolean
     /** Denotes whether or not to limit search to highlighted text (body). */
     highlightsOnly?: boolean
     /** Denotes whether or not to limit search to direct links. */

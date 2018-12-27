@@ -4,6 +4,7 @@ import {
     createPageFromTab,
     Tag,
     Page,
+    Bookmark,
     Dexie,
     StorageManager,
 } from '../../search'
@@ -138,6 +139,7 @@ export interface AnnotationStorageProps {
     annotationsColl?: string
     pagesColl?: string
     tagsColl?: string
+    bookmarksColl?: string
 }
 
 // TODO: Move to src/annotations in the future
@@ -145,6 +147,7 @@ export class AnnotationStorage extends FeatureStorage {
     static ANNOTS_COLL = 'annotations'
     static TAGS_COLL = 'tags'
     static PAGES_COLL = 'pages'
+    static BMS_COLL = 'bookmarks'
     static MEMEX_LINK_PROVIDERS = [
         'http://memex.link',
         'http://staging.memex.link',
@@ -154,6 +157,7 @@ export class AnnotationStorage extends FeatureStorage {
     private _getDb: () => Promise<Dexie>
     private _annotationsColl: string
     private _pagesColl: string
+    private _bookmarksColl: string
     private _tagsColl: string
     private _uniqAnnots: (annots: Annotation[]) => Annotation[] = uniqBy('url')
 
@@ -163,12 +167,14 @@ export class AnnotationStorage extends FeatureStorage {
         browserStorageArea = browser.storage.local,
         annotationsColl = AnnotationStorage.ANNOTS_COLL,
         pagesColl = AnnotationStorage.PAGES_COLL,
+        bookmarksColl = AnnotationStorage.BMS_COLL,
         tagsColl = AnnotationStorage.TAGS_COLL,
     }: AnnotationStorageProps) {
         super(storageManager)
         this._annotationsColl = annotationsColl
         this._tagsColl = tagsColl
         this._pagesColl = pagesColl
+        this._bookmarksColl = bookmarksColl
 
         this._browserStorageArea = browserStorageArea
         this._getDb = getDb
@@ -352,15 +358,46 @@ export class AnnotationStorage extends FeatureStorage {
         return new Set<string>(pages.map(page => page.url))
     }
 
+    private async mapSearchResToBookmarks(
+        { bookmarksOnly = false }: SearchParams,
+        results: Annotation[],
+    ) {
+        const bookmarks = await this.storageManager
+            .collection(this._bookmarksColl)
+            .findObjects<Bookmark>({
+                url: { $in: results.map(annot => annot.pageUrl) },
+            })
+
+        const bmUrlSet = new Set(bookmarks.map(bm => bm.url))
+
+        if (bookmarksOnly) {
+            return results.filter(annot => bmUrlSet.has(annot.pageUrl))
+        }
+
+        return results.map(annot => ({
+            ...annot,
+            isBookmarked: bmUrlSet.has(annot.pageUrl),
+        }))
+    }
+
     private projectSearchResults(results) {
         return results.map(
-            ({ url, pageUrl, body, comment, createdWhen, tags }) => ({
+            ({
+                url,
+                pageUrl,
+                body,
+                comment,
+                createdWhen,
+                tags,
+                isBookmarked,
+            }) => ({
                 url,
                 pageUrl,
                 body,
                 comment,
                 createdWhen,
                 tags: tags.map(tag => tag.name),
+                isBookmarked,
             }),
         )
     }
@@ -398,6 +435,11 @@ export class AnnotationStorage extends FeatureStorage {
         let annotResults = this._uniqAnnots([].concat(...termResults)).slice(
             0,
             limit,
+        )
+
+        annotResults = await this.mapSearchResToBookmarks(
+            searchParams,
+            annotResults,
         )
 
         // Lookup tags for each annotation

@@ -14,7 +14,6 @@ export default class DirectLinkingBackground {
     private backend: DirectLinkingBackend
     private queryBuilderFactory: () => QueryBuilder
     private annotationStorage: AnnotationStorage
-    private directLinkingStorage: DirectLinkingStorage
     private sendAnnotation: AnnotationSender
     private requests: AnnotationRequests
 
@@ -31,11 +30,6 @@ export default class DirectLinkingBackground {
         this.queryBuilderFactory = queryBuilder
 
         this.annotationStorage = new AnnotationStorage({
-            storageManager,
-            getDb,
-        })
-
-        this.directLinkingStorage = new DirectLinkingStorage({
             storageManager,
             getDb,
         })
