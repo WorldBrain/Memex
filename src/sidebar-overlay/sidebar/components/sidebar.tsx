@@ -9,34 +9,73 @@ const styles = require('./sidebar.css')
 
 interface Props {
     isOpen: boolean
-    toggleSidebar: () => void
+    closeSidebar: () => void
+    handleMouseEnter: (e: Event) => void
+    handleMouseLeave: (e: Event) => void
 }
 
-/* tslint:disable-next-line variable-name */
-const Sidebar = (props: Props) => {
-    const { toggleSidebar } = props
+class Sidebar extends React.Component<Props> {
+    private sidebarRef: HTMLElement
 
-    return (
-        <Menu
-            isOpen={props.isOpen}
-            width={340}
-            styles={menuStyles}
-            right
-            noOverlay
-            disableCloseOnEsc
-        >
-            <CloseButton
-                title="Close sidebar once. Disable via Memex icon in the extension toolbar."
-                clickHandler={e => {
-                    e.stopPropagation()
-                    toggleSidebar()
-                }}
-            />
-            <div className={styles.sidebar} id="memex-sidebar-panel">
-                <div className={styles.separator} />
-            </div>
-        </Menu>
-    )
+    componentDidMount() {
+        this._attachEventListeners()
+    }
+
+    componentWillUnmount() {
+        this._removeEventListeners()
+    }
+
+    private _attachEventListeners() {
+        this.sidebarRef.addEventListener(
+            'mouseenter',
+            this.props.handleMouseEnter,
+        )
+        this.sidebarRef.addEventListener(
+            'mouseleave',
+            this.props.handleMouseLeave,
+        )
+    }
+
+    private _removeEventListeners() {
+        this.sidebarRef.removeEventListener(
+            'mouseenter',
+            this.props.handleMouseEnter,
+        )
+        this.sidebarRef.removeEventListener(
+            'mouseleave',
+            this.props.handleMouseLeave,
+        )
+    }
+
+    private _setSidebarRef = (ref: HTMLElement) => {
+        this.sidebarRef = ref
+    }
+
+    render() {
+        const { isOpen, closeSidebar } = this.props
+
+        return (
+            <Menu
+                isOpen={isOpen}
+                width={340}
+                styles={menuStyles}
+                right
+                noOverlay
+                disableCloseOnEsc
+            >
+                <CloseButton
+                    title="Close sidebar once. Disable via Memex icon in the extension toolbar."
+                    clickHandler={e => {
+                        e.stopPropagation()
+                        closeSidebar()
+                    }}
+                />
+                <div className={styles.sidebar} ref={this._setSidebarRef}>
+                    <div className={styles.separator} />
+                </div>
+            </Menu>
+        )
+    }
 }
 
 export default Sidebar
