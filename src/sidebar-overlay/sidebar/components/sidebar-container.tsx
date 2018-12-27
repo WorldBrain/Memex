@@ -20,7 +20,7 @@ interface StateProps {
 }
 
 interface DispatchProps {
-    toggleSidebar: () => void
+    closeSidebar: () => void
 }
 
 interface OwnProps {}
@@ -71,6 +71,10 @@ class SidebarContainer extends React.Component<Props> {
     //         await fetchAnnotations()
     //     }
     // }
+
+    state = {
+        isMouseInsideSidebar: false,
+    }
 
     // parentFC = new FrameCommunication()
 
@@ -208,16 +212,38 @@ class SidebarContainer extends React.Component<Props> {
      */
     handleClickOutside = (e: Event) => {
         e.stopPropagation()
-        const { isOpen, toggleSidebar } = this.props
-        if (isOpen) {
-            toggleSidebar()
+
+        const { isOpen, closeSidebar } = this.props
+        const { isMouseInsideSidebar } = this.state
+
+        // Only close the sidebar if the sidebar is open and if the mouse is not inside it.
+        // This step is necessary as `onClickOutside` fires for a variety of events.
+        if (isOpen && !isMouseInsideSidebar) {
+            closeSidebar()
         }
     }
 
-    render() {
-        const { isOpen, toggleSidebar } = this.props
+    handleMouseEnter = (e: Event) => {
+        e.stopPropagation()
+        this.setState({ isMouseInsideSidebar: true })
+    }
 
-        return <Sidebar isOpen={isOpen} toggleSidebar={toggleSidebar} />
+    handleMouseLeave = (e: Event) => {
+        e.stopPropagation()
+        this.setState({ isMouseInsideSidebar: false })
+    }
+
+    render() {
+        const { isOpen, closeSidebar } = this.props
+
+        return (
+            <Sidebar
+                isOpen={isOpen}
+                closeSidebar={closeSidebar}
+                handleMouseEnter={this.handleMouseEnter}
+                handleMouseLeave={this.handleMouseLeave}
+            />
+        )
     }
 }
 
@@ -265,8 +291,8 @@ const mapDispatchToProps: MapDispatchToProps<
     DispatchProps,
     OwnProps
 > = dispatch => ({
-    toggleSidebar: () => {
-        dispatch(actions.toggleSidebar())
+    closeSidebar: () => {
+        dispatch(actions.setSidebarOpen(false))
     },
 })
 
