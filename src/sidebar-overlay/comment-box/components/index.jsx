@@ -1,3 +1,3 @@
-import CommentBoxContainer from './comment-box-container'
+import CommentBox from './comment-box'
 
-export default CommentBoxContainer
+export default CommentBox

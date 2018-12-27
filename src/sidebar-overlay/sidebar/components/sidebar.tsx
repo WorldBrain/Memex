@@ -1,14 +1,18 @@
 import * as React from 'react'
 import Menu from 'react-burger-menu/lib/menus/slide'
+import { browser } from 'webextension-polyfill-ts'
 
 import CongratsMessage from '../../components/CongratsMessage'
 import menuStyles from './menu-styles'
-import CloseButton from '../../components'
+import CommentBox from '../../comment-box'
+import { Topbar } from '../../components'
+import { getExtUrl } from 'src/sidebar-overlay/utils'
 
 const styles = require('./sidebar.css')
 
 interface Props {
     isOpen: boolean
+    isUserCommenting: boolean
     closeSidebar: () => void
     handleMouseEnter: (e: Event) => void
     handleMouseLeave: (e: Event) => void
@@ -51,8 +55,18 @@ class Sidebar extends React.Component<Props> {
         this.sidebarRef = ref
     }
 
+    private _handleSettingsBtnClick() {
+        // TODO: Following piece of code does not work.
+        // Gives `browser` is undefined. Move to a content script.
+        // const settingsUrl = getExtUrl('/options.html#/settings')
+        // browser.tabs.create({
+        //     url: settingsUrl,
+        //     active: true,
+        // })
+    }
+
     render() {
-        const { isOpen, closeSidebar } = this.props
+        const { isOpen, isUserCommenting, closeSidebar } = this.props
 
         return (
             <Menu
@@ -63,15 +77,15 @@ class Sidebar extends React.Component<Props> {
                 noOverlay
                 disableCloseOnEsc
             >
-                <CloseButton
-                    title="Close sidebar once. Disable via Memex icon in the extension toolbar."
-                    clickHandler={e => {
-                        e.stopPropagation()
-                        closeSidebar()
-                    }}
-                />
                 <div className={styles.sidebar} ref={this._setSidebarRef}>
-                    <div className={styles.separator} />
+                    <Topbar
+                        disableAddCommentBtn={isUserCommenting}
+                        handleCloseBtnClick={closeSidebar}
+                        handleSettingsBtnClick={this._handleSettingsBtnClick}
+                        handleAddCommentBtnClick={() => null}
+                    />
+
+                    {isUserCommenting && <CommentBox />}
                 </div>
             </Menu>
         )
