@@ -1,0 +1,41 @@
+.highlighted {
+    color: #000;
+    margin: 10px 20px;
+    border-bottom: 1px dashed #d2d2d2;
+    padding-bottom: 20px;
+
+    & .newAnnotation {
+        font-size: 15px;
+        margin-bottom: 20px;
+        font-weight: 800;
+        font-family: 'Lato', serif;
+    }
+
+    & .highlightedText {
+        font-size: 14px;
+        font-family: 'IBM Plex Serif', serif;
+        line-height: 19px;
+        letter-spacing: 0.5px;
+        font-style: italic;
+    }
+}
+
+.showMoreBtn {
+    margin-left: 5px;
+    margin-bottom: -7px;
+    cursor: pointer;
+    display: inline-block;
+    background-image: url('/img/longarrow.svg');
+    background-repeat: no-repeat;
+    background-size: 43px;
+    width: 40px;
+    height: 20px;
+    background-position: center;
+    transition: transform 0.15s ease-in;
+    transform: rotate(0deg);
+
+    &.rotated {
+        transform: rotate(-180deg);
+        transform-origin: center;
+    }
+}
