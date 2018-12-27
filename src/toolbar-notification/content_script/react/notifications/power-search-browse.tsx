@@ -57,6 +57,6 @@ export default function PowerSearchBrowse({
 
 PowerSearchBrowse['propTypes'] = {
     onCloseRequested: PropTypes.func.isRequired,
-    triggerNextNotifcation: PropTypes.func.isRequired,
+    triggerNextNotifcation: PropTypes.func,
     openDashboard: PropTypes.func.isRequired,
 }
