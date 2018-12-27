@@ -40,7 +40,7 @@ export class ToolbarNotification extends Component<Props> {
                 top: y + 100,
                 height: 'auto',
                 width: '450px',
-                'padding-top': '15px',
+                paddingTop: '15px',
                 position: 'absolute',
             }
         }

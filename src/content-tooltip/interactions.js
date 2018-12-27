@@ -15,7 +15,10 @@ import { remoteFunction, makeRemotelyCallable } from '../util/webextensionRPC'
 import { EVENT_NAMES } from 'src/analytics/internal/constants'
 import { injectCSS } from '../search-injection/dom'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
-import { STORAGE_KEYS } from 'src/overview/onboarding/constants'
+import {
+    STORAGE_KEYS,
+    ANNOTATION_DEMO_URL,
+} from 'src/overview/onboarding/constants'
 import { STORAGE_KEY as tooltipKey } from 'src/overview/tooltips/constants'
 
 const openOptionsRPC = remoteFunction('openOptionsTab')
@@ -223,6 +226,11 @@ export const conditionallyTriggerTooltip = delayed(
 export const conditionallyShowOnboardingNotifications = async ({
     toolbarNotifications,
 }) => {
+    // Returns if the website is not the Memex Demo Wiki.
+    if (window.location.href !== ANNOTATION_DEMO_URL) {
+        return
+    }
+
     const onboardingAnnotationStage = await getLocalStorage(
         STORAGE_KEYS.onboardingDemo.step1,
         'unvisited',
