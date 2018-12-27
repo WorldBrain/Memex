@@ -72,4 +72,18 @@
     background: #444882;
     border-radius: 8px;
     padding: 1px 5px 2px 5px;
+    cursor: pointer;
+}
+
+.prev {
+    font-size: 10px;
+    font-style: normal;
+    position: absolute;
+    top: 4px;
+    left: 3px;
+    color: white;
+    background: #444882;
+    border-radius: 8px;
+    padding: 1px 5px 2px 5px;
+    cursor: pointer;
 }
