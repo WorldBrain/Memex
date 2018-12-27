@@ -5,4 +5,5 @@
 
 export default interface State {
     isOpen: boolean
+    isUserCommenting: boolean
 }

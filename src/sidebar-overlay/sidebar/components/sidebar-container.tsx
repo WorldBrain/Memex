@@ -17,6 +17,7 @@ import { MapDispatchToProps } from '../../types'
 
 interface StateProps {
     isOpen: boolean
+    isUserCommenting: boolean
 }
 
 interface DispatchProps {
@@ -27,7 +28,11 @@ interface OwnProps {}
 
 type Props = StateProps & DispatchProps & OwnProps
 
-class SidebarContainer extends React.Component<Props> {
+interface State {
+    isMouseInsideSidebar: boolean
+}
+
+class SidebarContainer extends React.Component<Props, State> {
     // static propTypes = {
     //     showSidebar: PropTypes.bool,
     //     setShowSidebar: PropTypes.func,
@@ -234,11 +239,12 @@ class SidebarContainer extends React.Component<Props> {
     }
 
     render() {
-        const { isOpen, closeSidebar } = this.props
+        const { isOpen, closeSidebar, isUserCommenting } = this.props
 
         return (
             <Sidebar
                 isOpen={isOpen}
+                isUserCommenting={isUserCommenting}
                 closeSidebar={closeSidebar}
                 handleMouseEnter={this.handleMouseEnter}
                 handleMouseLeave={this.handleMouseLeave}
@@ -285,6 +291,7 @@ const mapStateToProps: MapStateToProps<
     RootState
 > = state => ({
     isOpen: selectors.isOpen(state),
+    isUserCommenting: selectors.isUserCommenting(state),
 })
 
 const mapDispatchToProps: MapDispatchToProps<

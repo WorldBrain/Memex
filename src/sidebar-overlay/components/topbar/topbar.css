@@ -1,0 +1,54 @@
+.topbar {
+    background: #fff;
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    position: absolute;
+    z-index: 2147483647;
+    left: 0px;
+    top: 0;
+    padding-right: 8px;
+    height: 42px;
+    border-bottom: 1px solid #d2d2d2;
+    box-sizing: border-box;
+    box-shadow: 4px 5px 28px 1px white;
+}
+
+.settingsBtn {
+    background-image: url('/img/settings_grey.svg');
+    margin-left: 0px;
+    margin-top: 0px;
+    background-size: 20px;
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    cursor: pointer;
+
+    &:hover {
+        background-image: url('/img/settings.svg');
+    }
+}
+
+.addCommentBtn {
+    box-sizing: border-box;
+    font-family: 'Lato', sans-serif;
+    background: #3eb995;
+    color: #fff;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    padding: 12px;
+    font-size: 11px;
+    height: 20px;
+    letter-spacing: 0.6px;
+    font-weight: 100;
+    display: flex;
+    align-items: center;
+
+    &.disabled {
+        background: #bbb;
+        color: #efefef;
+        cursor: not-allowed;
+    }
+}

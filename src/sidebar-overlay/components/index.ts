@@ -1,3 +1,4 @@
 import CloseButton from './close-button'
+import Topbar from './topbar'
 
-export default CloseButton
+export { CloseButton, Topbar }
