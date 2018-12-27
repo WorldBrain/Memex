@@ -11,6 +11,7 @@ import {
 import { FeatureStorage } from '../../search/storage'
 import { STORAGE_KEYS as IDXING_PREF_KEYS } from '../../options/settings/constants'
 import { Annotation, SearchParams, UrlFilters } from '../types'
+import { customLists } from 'src/custom-lists/selectors'
 
 const uniqBy = require('lodash/fp/uniqBy')
 
@@ -140,6 +141,8 @@ export interface AnnotationStorageProps {
     pagesColl?: string
     tagsColl?: string
     bookmarksColl?: string
+    listsColl?: string
+    listEntriesColl?: string
 }
 
 // TODO: Move to src/annotations in the future
@@ -148,6 +151,8 @@ export class AnnotationStorage extends FeatureStorage {
     static TAGS_COLL = 'tags'
     static PAGES_COLL = 'pages'
     static BMS_COLL = 'bookmarks'
+    static LISTS_COLL = 'customLists'
+    static LIST_ENTRIES_COLL = 'pageListEntries'
     static MEMEX_LINK_PROVIDERS = [
         'http://memex.link',
         'http://staging.memex.link',
@@ -159,6 +164,8 @@ export class AnnotationStorage extends FeatureStorage {
     private _pagesColl: string
     private _bookmarksColl: string
     private _tagsColl: string
+    private _listsColl: string
+    private _listEntriesColl: string
     private _uniqAnnots: (annots: Annotation[]) => Annotation[] = uniqBy('url')
 
     constructor({
@@ -169,12 +176,16 @@ export class AnnotationStorage extends FeatureStorage {
         pagesColl = AnnotationStorage.PAGES_COLL,
         bookmarksColl = AnnotationStorage.BMS_COLL,
         tagsColl = AnnotationStorage.TAGS_COLL,
+        listsColl = AnnotationStorage.LISTS_COLL,
+        listEntriesColl = AnnotationStorage.LIST_ENTRIES_COLL,
     }: AnnotationStorageProps) {
         super(storageManager)
         this._annotationsColl = annotationsColl
         this._tagsColl = tagsColl
         this._pagesColl = pagesColl
         this._bookmarksColl = bookmarksColl
+        this._listsColl = listsColl
+        this._listEntriesColl = listEntriesColl
 
         this._browserStorageArea = browserStorageArea
         this._getDb = getDb
@@ -256,11 +267,38 @@ export class AnnotationStorage extends FeatureStorage {
 
     private applyUrlFilters(
         query,
-        { domainUrlsInc, domainUrlsExc, tagUrlsInc, tagUrlsExc }: UrlFilters,
+        {
+            collUrlsInc,
+            domainUrlsInc,
+            domainUrlsExc,
+            tagUrlsInc,
+            tagUrlsExc,
+        }: UrlFilters,
     ) {
-        if (domainUrlsInc != null && domainUrlsInc.size) {
+        let pageUrlInc: string[]
+
+        if (collUrlsInc != null && collUrlsInc.size) {
+            pageUrlInc = [...collUrlsInc]
+
             query.pageUrl = {
-                $in: [...domainUrlsInc],
+                $in: pageUrlInc,
+                ...(query.pageUrl || {}),
+            }
+        }
+
+        if (domainUrlsInc != null && domainUrlsInc.size) {
+            // Intersect inc. domain URLs and inc. collection URLs, if both defined
+            pageUrlInc =
+                pageUrlInc != null
+                    ? [
+                          ...new Set(
+                              pageUrlInc.filter(url => domainUrlsInc.has(url)),
+                          ),
+                      ]
+                    : [...domainUrlsInc]
+
+            query.pageUrl = {
+                $in: pageUrlInc,
                 ...(query.pageUrl || {}),
             }
         }
@@ -327,6 +365,22 @@ export class AnnotationStorage extends FeatureStorage {
             : await termSearchField('_comment_terms')
 
         return this._uniqAnnots([...bodyRes, ...commentsRes]).slice(0, limit)
+    }
+
+    private async collectionSearch(collections: string[]) {
+        if (!collections.length) {
+            return undefined
+        }
+
+        const colls = await this.storageManager
+            .collection(this._listsColl)
+            .findObjects<any>({ name: { $in: collections } })
+
+        const collEntries = await this.storageManager
+            .collection(this._listEntriesColl)
+            .findObjects<any>({ listId: { $in: colls.map(coll => coll.id) } })
+
+        return new Set<string>(collEntries.map(coll => coll.pageUrl))
     }
 
     private async tagSearch(tags: string[]) {
@@ -408,21 +462,24 @@ export class AnnotationStorage extends FeatureStorage {
         tagsExc = [],
         domainsInc = [],
         domainsExc = [],
+        collections = [],
         limit = 5,
         ...searchParams
     }: SearchParams) {
         const filters: UrlFilters = {
+            collUrlsInc: await this.collectionSearch(collections),
             tagUrlsInc: await this.tagSearch(tagsInc),
             tagUrlsExc: await this.tagSearch(tagsExc),
             domainUrlsInc: await this.domainSearch(domainsInc),
             domainUrlsExc: await this.domainSearch(domainsExc),
         }
 
-        // If domains/tags filters were specified but no matches, search fails early
+        // If domains/tags/collections filters were specified but no matches, search fails early
         if (
             (filters.domainUrlsInc != null &&
                 filters.domainUrlsInc.size === 0) ||
-            (filters.tagUrlsInc != null && filters.tagUrlsInc.size === 0)
+            (filters.tagUrlsInc != null && filters.tagUrlsInc.size === 0) ||
+            (filters.collUrlsInc != null && filters.collUrlsInc.size === 0)
         ) {
             return []
         }

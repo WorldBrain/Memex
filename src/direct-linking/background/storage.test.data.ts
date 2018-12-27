@@ -12,6 +12,9 @@ export const pageUrl = 'annotation.url'
 export const tag1 = 'tag1'
 export const tag2 = 'tagwithahugename'
 
+export const coll1 = 'testA'
+export const coll2 = 'testB'
+
 export const highlight = {
     pageTitle: 'Annotation title',
     pageUrl,
