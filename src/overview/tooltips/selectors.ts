@@ -10,3 +10,7 @@ export const whichTooltip = createSelector(
     state => state.whichTooltip,
 )
 export const showTooltip = createSelector(tooltips, state => state.showTooltip)
+export const prevTooltips = createSelector(
+    tooltips,
+    state => state.prevTooltips,
+)

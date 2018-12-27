@@ -14,6 +14,7 @@ export interface Props {
     fetchWhichTooltip: () => void
     fetchOnboardingState: () => void
     closeTooltip: () => void
+    previousTooltip: () => void
 }
 
 class TooltipContainer extends Component<Props> {
@@ -44,6 +45,7 @@ class TooltipContainer extends Component<Props> {
                 <Tooltip
                     position={getBottomCenter('#date-picker', 50, -30)}
                     closeTooltip={this.props.closeTooltip}
+                    previousTooltip={this.props.previousTooltip}
                 >
                     <TimeFilterTooltip />
                 </Tooltip>
@@ -55,6 +57,7 @@ class TooltipContainer extends Component<Props> {
                 <Tooltip
                     position={getBottomCenter('#filter-icon', 40, -20)}
                     closeTooltip={this.props.closeTooltip}
+                    previousTooltip={this.props.previousTooltip}
                 >
                     <React.Fragment>
                         More <br /> Filters
@@ -81,6 +84,9 @@ const mapDispatchToProps: (dispatch) => Partial<Props> = dispatch => ({
     },
     closeTooltip: () => {
         dispatch(acts.closeTooltip())
+    },
+    previousTooltip: () => {
+        dispatch(acts.previousTooltip())
     },
 })
 

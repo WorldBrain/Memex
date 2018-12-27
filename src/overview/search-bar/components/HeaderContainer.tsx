@@ -35,11 +35,11 @@ const mapDispatch: (dispatch: any) => Partial<Props> = dispatch => ({
             dispatch(acts.setQueryTagsDomains(el.value, true))
         }
         // Close search-bar tooltip in overview
-        dispatch(tooltipActs.setWhichTooltip('time-filters'))
+        dispatch(tooltipActs.setNextTooltip('time-filters'))
     },
     changeTooltip: () => {
         // Change tooltip notification to more filters once the user selects date
-        dispatch(tooltipActs.setWhichTooltip('more-filters'))
+        dispatch(tooltipActs.setNextTooltip('more-filters'))
     },
 })
 

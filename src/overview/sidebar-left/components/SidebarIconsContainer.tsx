@@ -40,8 +40,7 @@ const mapState = state => ({
 const mapDispatch = dispatch => ({
     filterBtnClick: () => {
         // Remove and reset onboarding tooltip
-        dispatch(tooltipActs.setShowTooltip(false))
-        dispatch(tooltipActs.setWhichTooltip('none'))
+        dispatch(tooltipActs.resetTooltips())
         // Tick off Power Search onboarding stage
         dispatch(onboardingActs.setPowerSearchDone())
         processEventRPC({
