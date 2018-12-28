@@ -1,10 +1,9 @@
 import React, { PureComponent } from 'react'
+import OnboardingChecklist from './checklist-container'
 
-import OnboardingChecklist from '../../onboarding/components/OnboardingChecklist'
+const styles = require('./onboarding-box.css')
 
-const styles = require('./index.css')
-
-class InitResultsMessage extends PureComponent {
+class OnboardingBox extends PureComponent {
     render() {
         return (
             <React.Fragment>
@@ -38,4 +37,4 @@ class InitResultsMessage extends PureComponent {
     }
 }
 
-export default InitResultsMessage
+export default OnboardingBox
