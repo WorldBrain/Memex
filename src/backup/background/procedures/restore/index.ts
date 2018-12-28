@@ -158,13 +158,16 @@ export class BackupRestoreProcedure {
     async _writeChange(change) {
         const collection = this.storageManager.collection(change.collection)
         if (change.operation === 'create') {
+            // console.log('creating', change.object)
             await collection.createObject(change.object)
         } else if (change.operation === 'update') {
+            // console.log('updating', _getChangeWhere(change, this.storageManager.registry), change.object)
             await collection.updateOneObject(
                 _getChangeWhere(change, this.storageManager.registry),
                 change.object,
             )
         } else if (change.operation === 'delete') {
+            // console.log('deleting', _getChangeWhere(change, this.storageManager.registry))
             await collection.deleteOneObject(
                 _getChangeWhere(change, this.storageManager.registry),
             )
