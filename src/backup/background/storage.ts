@@ -34,9 +34,11 @@ export default class BackupStorage extends FeatureStorage {
     constructor({ storageManager }: { storageManager: StorageManager }) {
         super(storageManager)
         this.registerCollections()
+    }
 
+    setupChangeTracking() {
         setupChangeTracking(
-            storageManager,
+            this.storageManager,
             this._handleStorageChange.bind(this),
         )
     }
