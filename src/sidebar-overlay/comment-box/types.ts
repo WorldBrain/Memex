@@ -3,13 +3,15 @@
  * Default export is the Comment Box's state's type declaration.
  */
 
+import { Anchor } from '../../direct-linking/content_script/interactions'
+
 export default interface State {
-    commentInput: string
-    textareaRows: number
-    isHidden: boolean
-    tagInput: boolean
-    tags: any[]
-    displayHighlightTruncated: boolean
-    anchor: any
-    focusCommentBox: boolean
+    /** Denotes whether or not the sidebar should show the comment box. */
+    showCommentBox: boolean
+    /** Highlighted anchor that is relevant for the current comment. */
+    anchor: Anchor | undefined
+    /** Holds the tags associated with the current comment. */
+    tags: string[]
+    /** Holds the initial tag suggestions to display for the user search. */
+    initTagSuggestions: string[]
 }
