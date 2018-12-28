@@ -12,7 +12,7 @@ const styles = require('./sidebar.css')
 
 interface Props {
     isOpen: boolean
-    isUserCommenting: boolean
+    showCommentBox: boolean
     closeSidebar: () => void
     handleMouseEnter: (e: Event) => void
     handleMouseLeave: (e: Event) => void
@@ -66,7 +66,7 @@ class Sidebar extends React.Component<Props> {
     }
 
     render() {
-        const { isOpen, isUserCommenting, closeSidebar } = this.props
+        const { isOpen, showCommentBox, closeSidebar } = this.props
 
         return (
             <Menu
@@ -79,13 +79,13 @@ class Sidebar extends React.Component<Props> {
             >
                 <div className={styles.sidebar} ref={this._setSidebarRef}>
                     <Topbar
-                        disableAddCommentBtn={isUserCommenting}
+                        disableAddCommentBtn={showCommentBox}
                         handleCloseBtnClick={closeSidebar}
                         handleSettingsBtnClick={this._handleSettingsBtnClick}
                         handleAddCommentBtnClick={() => null}
                     />
 
-                    {isUserCommenting && <CommentBox />}
+                    {showCommentBox && <CommentBox />}
                 </div>
             </Menu>
         )

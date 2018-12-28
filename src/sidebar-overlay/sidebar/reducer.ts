@@ -1,26 +1,27 @@
 import { createReducer } from 'redux-act'
+import { combineReducers } from 'redux'
 
 import * as actions from './actions'
 import State from './types'
+import {
+    reducer as commentBoxReducer,
+    defaultState as defCommentBoxState,
+} from '../comment-box'
 
 export const defaultState: State = {
     isOpen: false,
-    isUserCommenting: true,
+    commentBox: defCommentBoxState,
 }
 
-const setSidebarOpen = (state: State, isOpen: boolean) => ({
-    ...state,
-    isOpen,
-})
+const setSidebarOpen = (state: boolean, isOpen: boolean) => isOpen
 
-const setUserCommenting = (state: State, isUserCommenting: boolean) => ({
-    ...state,
-    isUserCommenting,
-})
-
-const reducer = createReducer<State>(on => {
+const isOpenReducer = createReducer<boolean>(on => {
     on(actions.setSidebarOpen, setSidebarOpen)
-    on(actions.setUserCommenting, setUserCommenting)
-}, defaultState)
+}, defaultState.isOpen)
+
+const reducer = combineReducers<State>({
+    isOpen: isOpenReducer,
+    commentBox: commentBoxReducer,
+})
 
 export default reducer

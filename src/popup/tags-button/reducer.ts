@@ -57,7 +57,7 @@ reducer.on(acts.deleteTag, (state, payload) => {
     const tagIndex = state.tags.indexOf(payload)
     const suggestionIndex = state.initTagSuggestions.indexOf(payload)
 
-    // Remote the tag from the list of tags.
+    // Remove the tag from the list of tags.
     const tags = [
         ...state.tags.slice(0, tagIndex),
         ...state.tags.slice(tagIndex + 1),

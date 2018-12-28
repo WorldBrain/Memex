@@ -1,7 +1,8 @@
 import CommentBox from './components'
 import * as actions from './actions'
-import reducer from './reducer'
+import reducer, { defaultState } from './reducer'
 import * as selectors from './selectors'
+import State from './types'
 
 export default CommentBox
-export { actions, selectors, reducer }
+export { actions, selectors, reducer, defaultState, State }

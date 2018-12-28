@@ -6,7 +6,7 @@ import * as constants from '../constants'
 const styles = require('./comment-box-form.css')
 
 interface Props {
-    handleSubmit: ClickHandler<HTMLFormElement>
+    onSave: (...args: any[]) => void
     handleCancelBtnClick: ClickHandler<HTMLElement>
     placeholder?: string
 }
@@ -19,11 +19,31 @@ interface State {
 class CommentBoxForm extends React.Component<Props, State> {
     private _textAreaRef: HTMLElement
     private _tagRef: HTMLElement
-    private _saveBtnRef: HTMLElement
 
     state = {
         rows: constants.NUM_DEFAULT_ROWS,
         value: '',
+    }
+
+    componentDidMount() {
+        // TODO: Use `rows` while resizing instead of directly manipulating height.
+
+        // Auto resize text area.
+        if (this._textAreaRef) {
+            this._textAreaRef.addEventListener('scroll', (e: UIEvent) => {
+                const targetElement = e.target as HTMLElement
+
+                // i prevents infinity loop when resizing
+                for (let i = 0; targetElement.scrollTop && i < 30; ++i) {
+                    // For dynamically getting the height even if resized
+                    const height = window.getComputedStyle(targetElement).height
+                    targetElement.style.height =
+                        parseInt(height, 10) + 20 + 'px'
+                }
+
+                this._textAreaRef.focus()
+            })
+        }
     }
 
     private _handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -42,14 +62,9 @@ class CommentBoxForm extends React.Component<Props, State> {
 
     private _handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         // TODO: Implement a better logic to handle tabbing.
-        // if (e.key === 'Tab') {
-        //     e.preventDefault()
-        //     e.stopPropagation()
-        //     this.props.setTagInput(true)
-        // } else if (e.metaKey && e.key === 'Enter') {
-        //     e.preventDefault()
-        //     this.save()
-        // }
+        if (e.metaKey && e.key === 'Enter') {
+            // this.props.handleSubmit(e)
+        }
     }
 
     private _renderTagInput() {
@@ -85,44 +100,36 @@ class CommentBoxForm extends React.Component<Props, State> {
         this._textAreaRef = ref
     }
 
-    private _setTagRef = (ref: HTMLElement) => {
-        this._tagRef = ref
-    }
-
-    private _setSaveRef = (ref: HTMLElement) => {
-        this._saveBtnRef = ref
-    }
-
     render() {
-        const { handleSubmit, placeholder, handleCancelBtnClick } = this.props
+        const { onSave, placeholder, handleCancelBtnClick } = this.props
         const { rows, value } = this.state
 
         return (
-            <form onSubmit={handleSubmit} className={styles.commentBoxForm}>
+            <form
+                onSubmit={e => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                }}
+                className={styles.commentBoxForm}
+            >
                 {/* Text area to get the actual comment. */}
                 <textarea
                     rows={rows}
                     className={styles.textArea}
                     value={value}
-                    // placeholder="Add your comment... (save with cmd/ctrl+enter)"
                     placeholder={placeholder ? placeholder : ''}
                     onChange={this._handleChange}
                     onKeyDown={this._handleKeyDown}
                     ref={this._setTextAreaRef}
-                    // onClick={() => this.props.setTagInput(false)}
                 />
                 <br />
 
                 {/* Tags for the current annotation/comment. */}
-                <div ref={this._setTagRef}>{this._renderTagInput()}</div>
+                {this._renderTagInput()}
 
                 {/* Save and Cancel buttons. */}
                 <div className={styles.buttonHolder}>
-                    <button
-                        className={styles.saveBtn}
-                        type="submit"
-                        ref={this._setSaveRef}
-                    >
+                    <button className={styles.saveBtn} type="submit">
                         Save
                     </button>
                     <button
