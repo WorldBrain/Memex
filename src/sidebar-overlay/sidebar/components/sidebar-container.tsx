@@ -5,6 +5,7 @@ import onClickOutside from 'react-onclickoutside'
 // import { actions as commentActions } from '../../comment-box'
 import * as actions from '../actions'
 import * as selectors from '../selectors'
+import { selectors as commentBoxSelectors } from '../../comment-box'
 import Sidebar from './sidebar'
 import { RootState } from '../../ribbon-sidebar-controller'
 import { MapDispatchToProps } from '../../types'
@@ -17,7 +18,7 @@ import { MapDispatchToProps } from '../../types'
 
 interface StateProps {
     isOpen: boolean
-    isUserCommenting: boolean
+    showCommentBox: boolean
 }
 
 interface DispatchProps {
@@ -239,12 +240,12 @@ class SidebarContainer extends React.Component<Props, State> {
     }
 
     render() {
-        const { isOpen, closeSidebar, isUserCommenting } = this.props
+        const { isOpen, closeSidebar, showCommentBox } = this.props
 
         return (
             <Sidebar
                 isOpen={isOpen}
-                isUserCommenting={isUserCommenting}
+                showCommentBox={showCommentBox}
                 closeSidebar={closeSidebar}
                 handleMouseEnter={this.handleMouseEnter}
                 handleMouseLeave={this.handleMouseLeave}
@@ -291,7 +292,7 @@ const mapStateToProps: MapStateToProps<
     RootState
 > = state => ({
     isOpen: selectors.isOpen(state),
-    isUserCommenting: selectors.isUserCommenting(state),
+    showCommentBox: commentBoxSelectors.showCommentBox(state),
 })
 
 const mapDispatchToProps: MapDispatchToProps<

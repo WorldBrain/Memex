@@ -6,7 +6,4 @@ export const sidebar = (state: RootState) => state.sidebar
 
 export const isOpen = createSelector(sidebar, state => state.isOpen)
 
-export const isUserCommenting = createSelector(
-    sidebar,
-    state => state.isUserCommenting,
-)
+export const commentBox = createSelector(sidebar, state => state.commentBox)
