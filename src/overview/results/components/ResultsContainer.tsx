@@ -4,7 +4,7 @@ import { connect, MapStateToProps } from 'react-redux'
 import NotificationContainer, {
     selectors as notifs,
 } from '../../../notifications'
-import InitResultsMessage from './InitResultsMessage'
+import OnboardingBox from '../../onboarding'
 import NoResultBadTerm from './NoResultBadTerm'
 import ResultsMessage from './ResultsMessage'
 import ResultList from './ResultListContainer'
@@ -60,7 +60,7 @@ class ResultsContainer extends PureComponent<Props> {
         }
 
         if (this.props.showInitSearchMsg) {
-            return <InitResultsMessage />
+            return <OnboardingBox />
         }
 
         if (this.props.noResults) {

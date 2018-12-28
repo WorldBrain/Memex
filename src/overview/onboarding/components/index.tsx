@@ -1,15 +1,13 @@
 import React, { PureComponent } from 'react'
-import { Link } from 'react-router'
 
 import OnboardingChecklist from '../../onboarding/components/OnboardingChecklist'
-import ResultsMessage from './ResultsMessage'
 
-const styles = require('./InitResultsMessage.css')
+const styles = require('./index.css')
 
 class InitResultsMessage extends PureComponent {
     render() {
         return (
-            <ResultsMessage>
+            <React.Fragment>
                 <div className={styles.container}>
                     <div className={styles.leftParent}>
                         <p className={styles.welcome}>Welcome to your Memex</p>
@@ -24,7 +22,6 @@ class InitResultsMessage extends PureComponent {
                     </div>
                 </div>
                 <div className={styles.footer}>
-                    {/* <img></img> */}
                     <div className={styles.textContainer}>
                         <p className={styles.bold}>
                             ALL DATA STORED ON YOUR COMPUTER
@@ -36,7 +33,7 @@ class InitResultsMessage extends PureComponent {
                     <div className={styles.learnMore}>learn more</div>
                     <div className={styles.settings} />
                 </div>
-            </ResultsMessage>
+            </React.Fragment>
         )
     }
 }

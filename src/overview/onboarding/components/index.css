@@ -47,9 +47,9 @@
     fill: white;
     background-size: 270px 265px;
     width: 270px;
-    height: 265px;
-    margin-left: 0px;
-    margin-top: 9px;
+    height: 240px;
+    margin-left: -18px;
+    margin-top: -13px;
 }
 
 .footer {
@@ -65,13 +65,14 @@
     color: #000;
     font-weight: 500;
     margin-top: 0px;
+    margin-bottom: 0px;
 }
 
 .subtextGreen {
     color: #3eb995;
     font-size: 13px;
     text-align: left;
-    margin-top: 8px;
+    margin-top: 0px;
 }
 
 .learnMore {
@@ -81,7 +82,8 @@
     padding: 3px 24px 4px 24px;
     border-radius: 15px;
     cursor: pointer;
-    margin-top: 8px;
+    margin-top: 4px;
+    height: fit-content;
 }
 
 .settings {
@@ -94,5 +96,5 @@
     width: 20px;
     height: 20px;
     margin-left: 0px;
-    margin-top: 9px;
+    margin-top: 6px;
 }
