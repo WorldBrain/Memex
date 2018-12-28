@@ -43,7 +43,6 @@ export const closeTooltip = () => dispatch => {
  * @param nextTooltip The next tooltip to be shown
  */
 export const setNextTooltip = nextTooltip => (dispatch, getState) => {
-    console.log(getState())
     const prevTooltips = selectors.prevTooltips(getState())
 
     // If the next tooltip is already present, do nothing and return
@@ -61,7 +60,6 @@ export const setNextTooltip = nextTooltip => (dispatch, getState) => {
  * Does nothing, if there was no previous tooltip shown
  */
 export const previousTooltip = () => (dispatch, getState) => {
-    console.log(getState())
     const prevTooltips = selectors.prevTooltips(getState())
     prevTooltips.pop()
     // Return if prevTooltips is empty
