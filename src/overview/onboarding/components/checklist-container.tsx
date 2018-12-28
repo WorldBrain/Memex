@@ -12,10 +12,8 @@ import * as actions from '../actions'
 import * as selectors from '../selectors'
 
 export interface StateProps {
-    onboardingStages: {
-        annotationStage: string
-        powerSearchStage: string
-    }
+    annotationStage: string
+    powerSearchStage: string
 }
 
 export interface DispatchProps {
@@ -34,7 +32,7 @@ class OnboardingChecklist extends React.Component<Props> {
     }
 
     handleAnnotationStage = async () => {
-        if (this.props.onboardingStages.annotationStage === 'DONE') {
+        if (this.props.annotationStage === 'DONE') {
             return
         }
 
@@ -53,7 +51,7 @@ class OnboardingChecklist extends React.Component<Props> {
     }
 
     handlePowerSearchStage = async () => {
-        if (this.props.onboardingStages.powerSearchStage === 'DONE') {
+        if (this.props.powerSearchStage === 'DONE') {
             return
         }
 
@@ -72,10 +70,7 @@ class OnboardingChecklist extends React.Component<Props> {
     }
 
     render() {
-        const {
-            annotationStage,
-            powerSearchStage,
-        } = this.props.onboardingStages
+        const { annotationStage, powerSearchStage } = this.props
         return (
             <Checklist
                 isAnnotationChecked={annotationStage === 'DONE'}
@@ -88,7 +83,8 @@ class OnboardingChecklist extends React.Component<Props> {
 }
 
 const mapStateToProps = state => ({
-    onboardingStages: selectors.onboardingStages(state),
+    annotationStage: selectors.annotationStage(state),
+    powerSearchStage: selectors.powerSearchStage(state),
 })
 
 const mapDispatchToPrpos = dispatch => ({
