@@ -8,7 +8,7 @@ import OnboardingBox from '../../onboarding'
 import NoResultBadTerm from './NoResultBadTerm'
 import ResultsMessage from './ResultsMessage'
 import ResultList from './ResultListContainer'
-import OnboardingChecklist from '../../onboarding/components/OnboardingChecklist'
+import { OnboardingChecklist } from '../../onboarding/components'
 import * as selectors from '../selectors'
 import { RootState } from '../../../options/types'
 
