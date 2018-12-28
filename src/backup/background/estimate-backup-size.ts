@@ -1,5 +1,5 @@
 import { StorageManager } from '../../search/types'
-import { isExcludedFromBackup } from '.'
+import { isExcludedFromBackup } from './utils'
 
 export interface SizeEst {
     bytesWithBlobs: number
