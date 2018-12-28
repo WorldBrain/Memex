@@ -6,13 +6,11 @@ import {
     actions as notifActs,
     selectors as notifs,
 } from '../../../notifications'
-import { selectors as onboarding } from '../../onboarding'
 import { acts as tooltipActs } from '../../tooltips'
 
 import Header, { Props } from './Header'
 
 const mapState = state => ({
-    isSearchDisabled: onboarding.isVisible(state),
     unreadNotifCount: notifs.unreadNotifCount(state),
     showUnreadCount: notifs.showUnreadCount(state),
     showInbox: notifs.showInbox(state),
