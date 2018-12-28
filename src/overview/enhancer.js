@@ -5,11 +5,6 @@ import history from '../options/history'
 import * as notifActions from '../notifications/actions'
 import * as notifSelectors from '../notifications/selectors'
 import * as constants from './constants'
-import {
-    selectors as onboarding,
-    actions as onboardingActs,
-    constants as onboardingConsts,
-} from './onboarding'
 import { selectors as filters, actions as filterActs } from '../search-filters'
 import { selectors as searchBar, acts as searchBarActs } from './search-bar'
 import { selectors as results, acts as resultsActs } from './results'
@@ -63,12 +58,6 @@ const locationSync = ReduxQuerySync.enhancer({
             action: filterActs.setListFilters,
             defaultValue: '',
         },
-        install: {
-            selector: onboarding.isVisible,
-            action: onboardingActs.setVisible,
-            stringToValue: parseBool,
-            defaultValue: false,
-        },
         query: {
             selector: searchBar.query,
             action: searchBarActs.setQueryTagsDomains,
@@ -95,11 +84,6 @@ const hydrateStateFromStorage = store => {
 
     // Keep each of these storage keys in sync
     hydrate(constants.SEARCH_COUNT_KEY, resultsActs.initSearchCount)
-    hydrate(
-        onboardingConsts.STORAGE_KEYS.isImportsDone,
-        onboardingActs.setImportsDone,
-    )
-    hydrate(onboardingConsts.STORAGE_KEYS.progress, onboardingActs.setProgress)
 }
 
 const syncStateToStorage = store =>
@@ -109,11 +93,6 @@ const syncStateToStorage = store =>
         const state = store.getState()
 
         dump(constants.SEARCH_COUNT_KEY, results.searchCount(state))
-        dump(
-            onboardingConsts.STORAGE_KEYS.isImportsDone,
-            onboarding.isImportsDone(state),
-        )
-        dump(onboardingConsts.STORAGE_KEYS.progress, onboarding.progress(state))
     })
 
 const storageSync = storeCreator => (reducer, initState, enhancer) => {
