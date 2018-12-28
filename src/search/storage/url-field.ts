@@ -5,7 +5,7 @@ export default class UrlField {
     primitiveType = 'string'
 
     prepareForStorage(input) {
-        return normalize(input)
+        return input && normalize(input)
     }
 
     prepareFromStorage(stored) {
