@@ -10,6 +10,8 @@ export default interface State {
     showCommentBox: boolean
     /** Highlighted anchor that is relevant for the current comment. */
     anchor: Anchor | undefined
+    /** Actual text value for the comment. */
+    commentText: string
     /** Holds the tags associated with the current comment. */
     tags: string[]
     /** Holds the initial tag suggestions to display for the user search. */

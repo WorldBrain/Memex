@@ -5,7 +5,10 @@ import onClickOutside from 'react-onclickoutside'
 // import { actions as commentActions } from '../../comment-box'
 import * as actions from '../actions'
 import * as selectors from '../selectors'
-import { selectors as commentBoxSelectors } from '../../comment-box'
+import {
+    actions as commentBoxActions,
+    selectors as commentBoxSelectors,
+} from '../../comment-box'
 import Sidebar from './sidebar'
 import { RootState } from '../../ribbon-sidebar-controller'
 import { MapDispatchToProps } from '../../types'
@@ -23,6 +26,7 @@ interface StateProps {
 
 interface DispatchProps {
     closeSidebar: () => void
+    handleAddCommentBtnClick: () => void
 }
 
 interface OwnProps {}
@@ -240,12 +244,18 @@ class SidebarContainer extends React.Component<Props, State> {
     }
 
     render() {
-        const { isOpen, closeSidebar, showCommentBox } = this.props
+        const {
+            isOpen,
+            closeSidebar,
+            handleAddCommentBtnClick,
+            showCommentBox,
+        } = this.props
 
         return (
             <Sidebar
                 isOpen={isOpen}
                 showCommentBox={showCommentBox}
+                handleAddCommentBtnClick={handleAddCommentBtnClick}
                 closeSidebar={closeSidebar}
                 handleMouseEnter={this.handleMouseEnter}
                 handleMouseLeave={this.handleMouseLeave}
@@ -301,6 +311,9 @@ const mapDispatchToProps: MapDispatchToProps<
 > = dispatch => ({
     closeSidebar: () => {
         dispatch(actions.setSidebarOpen(false))
+    },
+    handleAddCommentBtnClick: () => {
+        dispatch(commentBoxActions.setShowCommentBox(true))
     },
 })
 

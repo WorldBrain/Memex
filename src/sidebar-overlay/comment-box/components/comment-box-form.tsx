@@ -6,39 +6,36 @@ import * as constants from '../constants'
 const styles = require('./comment-box-form.css')
 
 interface Props {
-    onSave: (...args: any[]) => void
-    handleCancelBtnClick: ClickHandler<HTMLElement>
-    placeholder?: string
+    commentText: string
+    handleCommentTextChange: (comment: string) => void
+    saveComment: React.EventHandler<React.SyntheticEvent>
+    cancelComment: ClickHandler<HTMLElement>
 }
 
 interface State {
     rows: number
-    value: string
 }
 
 class CommentBoxForm extends React.Component<Props, State> {
     private _textAreaRef: HTMLElement
-    private _tagRef: HTMLElement
 
     state = {
         rows: constants.NUM_DEFAULT_ROWS,
-        value: '',
     }
 
     componentDidMount() {
-        // TODO: Use `rows` while resizing instead of directly manipulating height.
-
         // Auto resize text area.
         if (this._textAreaRef) {
             this._textAreaRef.addEventListener('scroll', (e: UIEvent) => {
                 const targetElement = e.target as HTMLElement
 
-                // i prevents infinity loop when resizing
-                for (let i = 0; targetElement.scrollTop && i < 30; ++i) {
-                    // For dynamically getting the height even if resized
-                    const height = window.getComputedStyle(targetElement).height
-                    targetElement.style.height =
-                        parseInt(height, 10) + 20 + 'px'
+                let { rows } = this.state
+                while (
+                    targetElement.scrollTop &&
+                    rows < constants.NUM_MAX_ROWS
+                ) {
+                    rows += 1
+                    this.setState({ rows })
                 }
 
                 this._textAreaRef.focus()
@@ -47,23 +44,26 @@ class CommentBoxForm extends React.Component<Props, State> {
     }
 
     private _handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        let rows: number
-        const comment = e.target.value
+        e.preventDefault()
+        e.stopPropagation()
 
-        if (comment.length === 0) {
-            rows = constants.NUM_DEFAULT_ROWS
-            this._textAreaRef.style.height = ''
-        } else {
-            rows = constants.NUM_MAX_ROWS
+        const comment = e.target.value
+        const rows =
+            comment.length === 0
+                ? constants.NUM_DEFAULT_ROWS
+                : Math.max(this.state.rows, constants.NUM_MIN_ROWS)
+
+        if (rows !== this.state.rows) {
+            this.setState({ rows })
         }
 
-        this.setState({ value: comment, rows })
+        this.props.handleCommentTextChange(comment)
     }
 
     private _handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         // TODO: Implement a better logic to handle tabbing.
         if (e.metaKey && e.key === 'Enter') {
-            // this.props.handleSubmit(e)
+            this.props.saveComment(e)
         }
     }
 
@@ -101,23 +101,17 @@ class CommentBoxForm extends React.Component<Props, State> {
     }
 
     render() {
-        const { onSave, placeholder, handleCancelBtnClick } = this.props
-        const { rows, value } = this.state
+        const { commentText, saveComment, cancelComment } = this.props
+        const { rows } = this.state
 
         return (
-            <form
-                onSubmit={e => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                }}
-                className={styles.commentBoxForm}
-            >
+            <form onSubmit={saveComment} className={styles.commentBoxForm}>
                 {/* Text area to get the actual comment. */}
                 <textarea
                     rows={rows}
                     className={styles.textArea}
-                    value={value}
-                    placeholder={placeholder ? placeholder : ''}
+                    value={commentText}
+                    placeholder="Add your comment... (save with cmd/ctrl+enter)"
                     onChange={this._handleChange}
                     onKeyDown={this._handleKeyDown}
                     ref={this._setTextAreaRef}
@@ -125,7 +119,7 @@ class CommentBoxForm extends React.Component<Props, State> {
                 <br />
 
                 {/* Tags for the current annotation/comment. */}
-                {this._renderTagInput()}
+                <div>{this._renderTagInput()}</div>
 
                 {/* Save and Cancel buttons. */}
                 <div className={styles.buttonHolder}>
@@ -134,7 +128,7 @@ class CommentBoxForm extends React.Component<Props, State> {
                     </button>
                     <button
                         className={styles.cancelBtn}
-                        onClick={handleCancelBtnClick}
+                        onClick={cancelComment}
                     >
                         Cancel
                     </button>
