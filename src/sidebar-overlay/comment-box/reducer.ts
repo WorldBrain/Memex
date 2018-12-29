@@ -7,6 +7,7 @@ import { Anchor } from '../../direct-linking/content_script/interactions'
 export const defaultState: State = {
     showCommentBox: false,
     anchor: undefined,
+    commentText: '',
     tags: [],
     initTagSuggestions: [],
 }
@@ -19,6 +20,11 @@ const setShowCommentBox = (state: State, showCommentBox: boolean) => ({
 const setAnchor = (state: State, anchor: Anchor) => ({
     ...state,
     anchor,
+})
+
+const setCommentText = (state: State, commentText: string) => ({
+    ...state,
+    commentText,
 })
 
 const setTags = (state: State, tags: string[]) => ({
@@ -78,6 +84,7 @@ const deleteTag = (state: State, tag: string) => {
 export default createReducer<State>(on => {
     on(actions.setShowCommentBox, setShowCommentBox)
     on(actions.setAnchor, setAnchor)
+    on(actions.setCommentText, setCommentText)
     on(actions.setTags, setTags)
     on(actions.setInitTagSuggestions, setInitTagSuggestions)
     on(actions.addTag, addTag)

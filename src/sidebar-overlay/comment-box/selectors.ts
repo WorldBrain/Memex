@@ -11,6 +11,11 @@ export const showCommentBox = createSelector(
 
 export const anchor = createSelector(commentBox, state => state.anchor)
 
+export const commentText = createSelector(
+    commentBox,
+    state => state.commentText,
+)
+
 export const tags = createSelector(commentBox, state => state.tags)
 
 export const initTagSuggestions = createSelector(
