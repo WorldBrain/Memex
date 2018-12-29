@@ -14,12 +14,13 @@ interface Props {
     isOpen: boolean
     showCommentBox: boolean
     closeSidebar: () => void
+    handleAddCommentBtnClick: () => void
     handleMouseEnter: (e: Event) => void
     handleMouseLeave: (e: Event) => void
 }
 
 class Sidebar extends React.Component<Props> {
-    private sidebarRef: HTMLElement
+    private _sidebarRef: HTMLElement
 
     componentDidMount() {
         this._attachEventListeners()
@@ -30,29 +31,29 @@ class Sidebar extends React.Component<Props> {
     }
 
     private _attachEventListeners() {
-        this.sidebarRef.addEventListener(
+        this._sidebarRef.addEventListener(
             'mouseenter',
             this.props.handleMouseEnter,
         )
-        this.sidebarRef.addEventListener(
+        this._sidebarRef.addEventListener(
             'mouseleave',
             this.props.handleMouseLeave,
         )
     }
 
     private _removeEventListeners() {
-        this.sidebarRef.removeEventListener(
+        this._sidebarRef.removeEventListener(
             'mouseenter',
             this.props.handleMouseEnter,
         )
-        this.sidebarRef.removeEventListener(
+        this._sidebarRef.removeEventListener(
             'mouseleave',
             this.props.handleMouseLeave,
         )
     }
 
     private _setSidebarRef = (ref: HTMLElement) => {
-        this.sidebarRef = ref
+        this._sidebarRef = ref
     }
 
     private _handleSettingsBtnClick() {
@@ -66,7 +67,12 @@ class Sidebar extends React.Component<Props> {
     }
 
     render() {
-        const { isOpen, showCommentBox, closeSidebar } = this.props
+        const {
+            isOpen,
+            showCommentBox,
+            closeSidebar,
+            handleAddCommentBtnClick,
+        } = this.props
 
         return (
             <Menu
@@ -82,7 +88,7 @@ class Sidebar extends React.Component<Props> {
                         disableAddCommentBtn={showCommentBox}
                         handleCloseBtnClick={closeSidebar}
                         handleSettingsBtnClick={this._handleSettingsBtnClick}
-                        handleAddCommentBtnClick={() => null}
+                        handleAddCommentBtnClick={handleAddCommentBtnClick}
                     />
 
                     {showCommentBox && <CommentBox />}
