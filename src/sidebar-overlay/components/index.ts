@@ -1,4 +1,5 @@
 import CloseButton from './close-button'
+import TagHolder from './tag-holder'
 import Topbar from './topbar'
 
-export { CloseButton, Topbar }
+export { CloseButton, TagHolder, Topbar }
