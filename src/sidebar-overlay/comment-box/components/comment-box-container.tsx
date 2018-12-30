@@ -9,7 +9,7 @@ import { Anchor } from '../../../direct-linking/content_script/interactions'
 import { RootState } from '../../ribbon-sidebar-controller'
 import { MapDispatchToProps, ClickHandler } from '../../types'
 
-const styles = require('./comment-box.css')
+const styles = require('./comment-box-container.css')
 
 interface StateProps {
     anchor: Anchor
@@ -27,7 +27,8 @@ interface OwnProps {}
 
 type Props = StateProps & DispatchProps & OwnProps
 
-class CommentBox extends React.PureComponent<Props> {
+// TODO: Fetch initial tag suggestions when the component is mounted.
+class CommentBoxContainer extends React.PureComponent<Props> {
     // static propTypes = {
     //     env: PropTypes.string.isRequired,
     //     updateAnnotations: PropTypes.func.isRequired,
@@ -122,4 +123,4 @@ const mapDispatchToProps: MapDispatchToProps<
 export default connect(
     mapStateToProps,
     mapDispatchToProps,
-)(CommentBox)
+)(CommentBoxContainer)

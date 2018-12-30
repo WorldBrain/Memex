@@ -319,9 +319,9 @@ class IndexDropdownContainer extends Component<Props, State> {
     }
 
     private handleSearchChange = (
-        event: React.SyntheticEvent<HTMLInputElement>,
+        event: React.ChangeEvent<HTMLInputElement>,
     ) => {
-        const searchVal = event.currentTarget.value
+        const searchVal = event.target.value
 
         // If user backspaces to clear input, show the list of suggested tags again.
         let displayFilters
@@ -376,7 +376,7 @@ class IndexDropdownContainer extends Component<Props, State> {
         // If not, set the container's scrollTop appropriately.
         // Below are two ways to do it
         // 1. Element.ScrollIntoView()
-        domNode.scrollIntoView({ behavior: 'instant', block: 'nearest' })
+        domNode.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
         // 2. Use Element.scrollTop()
         // const parentNode = domNode.parentNode as HTMLElement
         // parentNode.scrollTop = domNode.offsetTop - parentNode.offsetTop

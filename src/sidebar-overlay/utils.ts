@@ -59,11 +59,11 @@ const computeTagPillWidth = letters => letters * avgLetterPx + tagPillExtra
  * @param {Array<String>} tags Array of tag names
  * @returns {Number} Maximum possible tags the container can hold.
  */
-export const maxPossibleTags = tags => {
+export const maxPossibleTags = (tags: string[]) => {
     let totalTagsWidth = 0
     let tagsAllowed = 0
     while (tagsAllowed < tags.length) {
-        const tag = tags[tagsAllowed].name
+        const tag = tags[tagsAllowed]
         totalTagsWidth += computeTagPillWidth(tag.length)
         if (totalTagsWidth >= tagContainerWidth) {
             break

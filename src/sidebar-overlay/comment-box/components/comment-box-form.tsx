@@ -2,6 +2,7 @@ import * as React from 'react'
 
 import { ClickHandler } from '../../types'
 import * as constants from '../constants'
+import TagInputContainer from './tag-input-container'
 
 const styles = require('./comment-box-form.css')
 
@@ -14,13 +15,18 @@ interface Props {
 
 interface State {
     rows: number
+    isTagInputActive: boolean
 }
 
 class CommentBoxForm extends React.Component<Props, State> {
+    /** Ref of the text area element to listen for `scroll` events. */
     private _textAreaRef: HTMLElement
+    /** Ref of the tag input element to focus on it when tabbing. */
+    private _tagInputRef: HTMLElement
 
     state = {
         rows: constants.NUM_DEFAULT_ROWS,
+        isTagInputActive: false,
     }
 
     componentDidMount() {
@@ -43,6 +49,50 @@ class CommentBoxForm extends React.Component<Props, State> {
         }
     }
 
+    private _setTextAreaRef = (ref: HTMLElement) => {
+        this._textAreaRef = ref
+    }
+
+    private _setTagInputRef = (ref: HTMLElement) => {
+        this._tagInputRef = ref
+    }
+
+    private _handleTextAreaKeyDown = (
+        e: React.KeyboardEvent<HTMLTextAreaElement>,
+    ) => {
+        // Save comment.
+        if (e.metaKey && e.key === 'Enter') {
+            this.props.saveComment(e)
+        } else if (e.key === 'Tab' && !e.shiftKey) {
+            this.setTagInputActive(true)
+            setTimeout(() => {
+                this._tagInputRef.querySelector('input').focus()
+            }, 0)
+        }
+    }
+
+    private _handleTagInputKeyDown = (
+        e: React.KeyboardEvent<HTMLDivElement>,
+    ) => {
+        // Only check for `Tab` and `Shift + Tab`, handle rest of the events normally.
+        if (e.key === 'Tab') {
+            this.setTagInputActive(false)
+        }
+    }
+
+    private _handleSaveButtonKeyDown = (
+        e: React.KeyboardEvent<HTMLButtonElement>,
+    ) => {
+        // Focus on the tag input element when `Shift + Tab` is pressed,
+        // handle other events normally.
+        if (e.key === 'Tab' && e.shiftKey) {
+            this.setTagInputActive(true)
+            setTimeout(() => {
+                this._tagInputRef.querySelector('input').focus()
+            }, 0)
+        }
+    }
+
     private _handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         e.preventDefault()
         e.stopPropagation()
@@ -60,70 +110,47 @@ class CommentBoxForm extends React.Component<Props, State> {
         this.props.handleCommentTextChange(comment)
     }
 
-    private _handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-        // TODO: Implement a better logic to handle tabbing.
-        if (e.metaKey && e.key === 'Enter') {
-            this.props.saveComment(e)
-        }
-    }
-
-    private _renderTagInput() {
-        // TODO: Implement a better logic to render tags.
-
-        // const tagObjs = this.props.tags.map(tag => ({ name: tag }))
-
-        // if (this.props.tagInput) {
-        //     return (
-        //         <IndexDropdown
-        //             isForAnnotation
-        //             allowAdd
-        //             initFilters={this.props.tags}
-        //             onFilterAdd={this.props.addTag}
-        //             onFilterDel={this.props.deleteTag}
-        //             source="tag"
-        //         />
-        //     )
-        // } else {
-        //     return (
-        //         <TagHolder
-        //             tags={tagObjs}
-        //             clickHandler={() => this.props.setTagInput(true)}
-        //             deleteTag={({ tag }) => this.props.deleteTag(tag)}
-        //         />
-        //     )
-        // }
-
-        return null
-    }
-
-    private _setTextAreaRef = (ref: HTMLElement) => {
-        this._textAreaRef = ref
+    setTagInputActive = (isTagInputActive: boolean) => {
+        this.setState({ isTagInputActive })
     }
 
     render() {
         const { commentText, saveComment, cancelComment } = this.props
-        const { rows } = this.state
+        const { rows, isTagInputActive } = this.state
 
         return (
-            <form onSubmit={saveComment} className={styles.commentBoxForm}>
+            <div className={styles.commentBoxForm}>
                 {/* Text area to get the actual comment. */}
                 <textarea
                     rows={rows}
                     className={styles.textArea}
                     value={commentText}
                     placeholder="Add your comment... (save with cmd/ctrl+enter)"
+                    onClick={() => this.setTagInputActive(false)}
                     onChange={this._handleChange}
-                    onKeyDown={this._handleKeyDown}
+                    onKeyDown={this._handleTextAreaKeyDown}
                     ref={this._setTextAreaRef}
                 />
                 <br />
 
                 {/* Tags for the current annotation/comment. */}
-                <div>{this._renderTagInput()}</div>
+                <div
+                    onKeyDown={this._handleTagInputKeyDown}
+                    ref={this._setTagInputRef}
+                >
+                    <TagInputContainer
+                        isTagInputActive={isTagInputActive}
+                        setTagInputActive={this.setTagInputActive}
+                    />
+                </div>
 
                 {/* Save and Cancel buttons. */}
                 <div className={styles.buttonHolder}>
-                    <button className={styles.saveBtn} type="submit">
+                    <button
+                        className={styles.saveBtn}
+                        onClick={saveComment}
+                        onKeyDown={this._handleSaveButtonKeyDown}
+                    >
                         Save
                     </button>
                     <button
@@ -133,7 +160,7 @@ class CommentBoxForm extends React.Component<Props, State> {
                         Cancel
                     </button>
                 </div>
-            </form>
+            </div>
         )
     }
 }
