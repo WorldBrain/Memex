@@ -4,7 +4,7 @@ import { browser } from 'webextension-polyfill-ts'
 
 import CongratsMessage from '../../components/CongratsMessage'
 import menuStyles from './menu-styles'
-import CommentBox from '../../comment-box'
+import CommentBoxContainer from '../../comment-box'
 import { Topbar } from '../../components'
 import { getExtUrl } from 'src/sidebar-overlay/utils'
 
@@ -91,7 +91,7 @@ class Sidebar extends React.Component<Props> {
                         handleAddCommentBtnClick={handleAddCommentBtnClick}
                     />
 
-                    {showCommentBox && <CommentBox />}
+                    {showCommentBox && <CommentBoxContainer />}
                 </div>
             </Menu>
         )
