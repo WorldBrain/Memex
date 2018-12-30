@@ -9,7 +9,6 @@ import OnboardingSelectOption from './notifications/onboarding-select-option'
 import PowerSearchBrowse from './notifications/power-search-browse'
 import GoToDashboard from './notifications/go-to-dashboard'
 
-import { STORAGE_KEY } from 'src/overview/tooltips/constants'
 import { STORAGE_KEYS } from 'src/overview/onboarding/constants'
 import { EVENT_NAMES } from 'src/analytics/internal/constants'
 
@@ -91,7 +90,6 @@ export class ToolbarNotification extends Component<Props> {
                                 STORAGE_KEYS.onboardingDemo.step2,
                                 'overview-tooltips',
                             )
-                            await setLocalStorage(STORAGE_KEY, 'search-bar')
                             this.openOptionsTab('overview')
                         }}
                     />

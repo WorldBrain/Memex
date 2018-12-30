@@ -10,29 +10,30 @@ import { getBottomCenter } from '../utils'
 
 export interface Props {
     showTooltip: boolean
-    whichTooltip: string
+    tooltip: string
     fetchWhichTooltip: () => void
     fetchOnboardingState: () => void
     closeTooltip: () => void
+    nextTooltip: () => void
     previousTooltip: () => void
 }
 
 class TooltipContainer extends Component<Props> {
     async componentDidMount() {
-        this.props.fetchWhichTooltip()
         this.props.fetchOnboardingState()
     }
 
     render() {
-        const { showTooltip, whichTooltip } = this.props
+        const { showTooltip, tooltip } = this.props
         if (!showTooltip) {
             return null
         }
 
-        if (whichTooltip === 'search-bar') {
+        if (tooltip === 'search-bar') {
             return (
                 <Tooltip
                     position={getBottomCenter('#query-search-bar', 48, 50)}
+                    nextTooltip={this.props.nextTooltip}
                     closeTooltip={this.props.closeTooltip}
                 >
                     What words do you remember?
@@ -40,11 +41,12 @@ class TooltipContainer extends Component<Props> {
             )
         }
 
-        if (whichTooltip === 'time-filters') {
+        if (tooltip === 'time-filters') {
             return (
                 <Tooltip
                     position={getBottomCenter('#date-picker', 50, -30)}
                     closeTooltip={this.props.closeTooltip}
+                    nextTooltip={this.props.nextTooltip}
                     previousTooltip={this.props.previousTooltip}
                 >
                     <TimeFilterTooltip />
@@ -52,7 +54,7 @@ class TooltipContainer extends Component<Props> {
             )
         }
 
-        if (whichTooltip === 'more-filters') {
+        if (tooltip === 'more-filters') {
             return (
                 <Tooltip
                     position={getBottomCenter('#filter-icon', 40, -20)}
@@ -72,18 +74,18 @@ class TooltipContainer extends Component<Props> {
 
 const mapStateToProps: (state: RootState) => Partial<Props> = state => ({
     showTooltip: selectors.showTooltip(state),
-    whichTooltip: selectors.whichTooltip(state),
+    tooltip: selectors.tooltip(state),
 })
 
 const mapDispatchToProps: (dispatch) => Partial<Props> = dispatch => ({
-    fetchWhichTooltip: () => {
-        dispatch(acts.fetchWhichTooltip())
-    },
     fetchOnboardingState: () => {
         dispatch(acts.fetchOnboardingState())
     },
     closeTooltip: () => {
         dispatch(acts.closeTooltip())
+    },
+    nextTooltip: () => {
+        dispatch(acts.nextTooltip())
     },
     previousTooltip: () => {
         dispatch(acts.previousTooltip())

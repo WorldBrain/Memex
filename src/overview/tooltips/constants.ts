@@ -1,1 +1,1 @@
-export const STORAGE_KEY = 'onboarding-overview-tooltip'
+export const TOOLTIPS = ['search-bar', 'time-filters', 'more-filters']

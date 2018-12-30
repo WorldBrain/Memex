@@ -19,7 +19,6 @@ import {
     STORAGE_KEYS,
     ANNOTATION_DEMO_URL,
 } from 'src/overview/onboarding/constants'
-import { STORAGE_KEY as tooltipKey } from 'src/overview/tooltips/constants'
 
 const openOptionsRPC = remoteFunction('openOptionsTab')
 const processEventRPC = remoteFunction('processEvent')
@@ -264,7 +263,6 @@ export const conditionallyShowOnboardingNotifications = async ({
             STORAGE_KEYS.onboardingDemo.step2,
             'overview-tooltips',
         )
-        await setLocalStorage(tooltipKey, 'search-bar')
     }
 
     if (powerSearchStage === 'redirected') {
