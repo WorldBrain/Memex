@@ -10,6 +10,7 @@ export interface Props {
     children: React.ReactChild
     position: Position
     closeTooltip: () => void
+    nextTooltip?: () => void
     previousTooltip?: () => void
 }
 
@@ -18,6 +19,7 @@ const tooltip: SFC<Props> = ({
     position,
     closeTooltip,
     previousTooltip,
+    nextTooltip,
 }) => (
     <div className={styles.container} style={position}>
         <span className={styles.close} onClick={closeTooltip}>
@@ -26,6 +28,11 @@ const tooltip: SFC<Props> = ({
         {previousTooltip ? (
             <span className={styles.prev} onClick={previousTooltip}>
                 {'<'}
+            </span>
+        ) : null}
+        {nextTooltip ? (
+            <span className={styles.next} onClick={nextTooltip}>
+                {'>'}
             </span>
         ) : null}
         {children}
