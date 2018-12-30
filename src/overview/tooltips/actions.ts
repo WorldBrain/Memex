@@ -5,6 +5,11 @@ import * as selectors from './selectors'
 import { STORAGE_KEYS as onboardingKeys } from '../onboarding/constants'
 import { TOOLTIPS } from './constants'
 
+import { remoteFunction } from 'src/util/webextensionRPC'
+import { EVENT_NAMES } from 'src/analytics/internal/constants'
+
+const processEventRPC = remoteFunction('processEvent')
+
 export const setWhichTooltip = createAction<number>('tooltips/setTooltip')
 export const resetWhichTooltip = createAction('tooltip/resetWhichTooltip')
 export const setShowTooltip = createAction<boolean>('tooltips/setShowTooltip')
@@ -15,13 +20,20 @@ export const fetchOnboardingState = () => async dispatch => {
     )
     if (onboardingState === 'overview-tooltips') {
         dispatch(setShowTooltip(true))
-        dispatch(setWhichTooltip(0))
+        dispatch(processAndSetWhichTooltip(0))
     }
 }
 
 export const processAndSetWhichTooltip = (whichTooltip: number) => dispatch => {
-    // Do analytics here
     // Fetch tooltip name, generalized to be used with different dispatched actions
+    const tooltipName = TOOLTIPS[whichTooltip]
+    console.log(tooltipName)
+    processEventRPC({
+        type: EVENT_NAMES.SET_TOOLTIP,
+        details: {
+            tooltip: tooltipName,
+        },
+    })
 
     dispatch(setWhichTooltip(whichTooltip))
 }
@@ -38,6 +50,9 @@ export const setTooltip = (tooltip: string) => dispatch => {
  */
 export const closeTooltip = () => dispatch => {
     dispatch(resetWhichTooltip())
+    processEventRPC({
+        type: EVENT_NAMES.CLOSE_TOOLTIP,
+    })
 }
 
 /**

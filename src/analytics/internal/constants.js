@@ -104,6 +104,9 @@ export const EVENT_NAMES = {
     POWERSEARCH_BROWSE_PAGE: 'powerSearchBrowsePage',
     POWERSEARCH_GOTO_DASH: 'powerSearchGotoDash',
     FINISH_POWERSEARCH_ONBOARDING: 'finshPowerSearchOnboarding',
+    OVERVIEW_TOOLTIP: 'overviewTooltip',
+    SET_TOOLTIP: 'setTooltip',
+    CLOSE_TOOLTIP: 'closeTooltip',
 }
 
 export const EVENT_TYPES = {
@@ -377,6 +380,14 @@ export const EVENT_TYPES = {
     [EVENT_NAMES.POWERSEARCH_GOTO_DASH]: {
         id: 81,
     },
+    [EVENT_NAMES.SET_TOOLTIP]: {
+        id: 82,
+        notifType: EVENT_NAMES.OVERVIEW_TOOLTIP,
+    },
+    [EVENT_NAMES.CLOSE_TOOLTIP]: {
+        id: 83,
+        notifType: EVENT_NAMES.OVERVIEW_TOOLTIP,
+    },
 }
 
 export const NOTIF_TYPE_EVENT_IDS = {
@@ -392,4 +403,5 @@ export const NOTIF_TYPE_EVENT_IDS = {
     [EVENT_NAMES.ADDRESS_BAR_SEARCH]: [33, 34, 35],
     [EVENT_NAMES.DATEPICKER_NLP]: [36, 37],
     [EVENT_NAMES.NLP_SEARCH]: [38],
+    [EVENT_NAMES.OVERVIEW_TOOLTIP]: [82, 83],
 }
