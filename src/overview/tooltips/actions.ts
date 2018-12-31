@@ -14,13 +14,17 @@ export const setWhichTooltip = createAction<number>('tooltips/setTooltip')
 export const resetWhichTooltip = createAction('tooltip/resetWhichTooltip')
 export const setShowTooltip = createAction<boolean>('tooltips/setShowTooltip')
 
+export const initOnboardingTooltips = () => dispatch => {
+    dispatch(setShowTooltip(true))
+    dispatch(processAndSetWhichTooltip(0))
+}
+
 export const fetchOnboardingState = () => async dispatch => {
     const onboardingState = await getLocalStorage(
         onboardingKeys.onboardingDemo.step2,
     )
     if (onboardingState === 'overview-tooltips') {
-        dispatch(setShowTooltip(true))
-        dispatch(processAndSetWhichTooltip(0))
+        dispatch(initOnboardingTooltips())
     }
 }
 

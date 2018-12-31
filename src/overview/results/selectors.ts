@@ -4,7 +4,7 @@ import { createSelector } from 'reselect'
 import { RootState } from '../../options/types'
 import { selectors as deleteConfSelectors } from '../delete-confirm-modal'
 import { PAGE_SIZE } from '../search-bar/constants'
-import { selectors as sidebarLeft } from '../sidebar-left'
+import * as sidebarLeft from '../sidebar-left/selectors'
 import { selectors as sidebar } from '../sidebar'
 import * as constants from './constants'
 
