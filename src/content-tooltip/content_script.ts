@@ -1,6 +1,7 @@
 import { bodyLoader } from '../util/loader'
-import * as interactions from './interactions'
+import { setupRPC, insertTooltip } from './interactions'
 import ToolbarNotifications from '../toolbar-notification/content_script'
+import { conditionallyShowOnboardingNotifications } from './onboarding-notifications'
 import { getTooltipState } from './utils'
 
 export default async function init({
@@ -9,8 +10,8 @@ export default async function init({
     toolbarNotifications?: ToolbarNotifications
 }) {
     // Set up the RPC calls even if the tooltip is enabled or not.
-    interactions.setupRPC({ toolbarNotifications })
-    await interactions.conditionallyShowOnboardingNotifications({
+    setupRPC({ toolbarNotifications })
+    await conditionallyShowOnboardingNotifications({
         toolbarNotifications,
     })
     const isTooltipEnabled = await getTooltipState()
@@ -19,5 +20,5 @@ export default async function init({
     }
 
     await bodyLoader()
-    await interactions.insertTooltip({ toolbarNotifications })
+    await insertTooltip({ toolbarNotifications })
 }
