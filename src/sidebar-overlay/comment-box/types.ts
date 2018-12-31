@@ -9,7 +9,7 @@ export default interface State {
     /** Denotes whether or not the sidebar should show the comment box. */
     showCommentBox: boolean
     /** Highlighted anchor that is relevant for the current comment. */
-    anchor: Anchor | undefined
+    anchor: Anchor | null
     /** Actual text value for the comment. */
     commentText: string
     /** Holds the tags associated with the current comment. */

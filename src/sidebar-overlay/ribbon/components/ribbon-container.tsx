@@ -15,6 +15,7 @@ interface StateProps {
 }
 
 interface DispatchProps {
+    onInit: () => void
     openSidebar: ClickHandler<HTMLImageElement>
     handleRibbonToggle: ClickHandler<HTMLElement>
     handleTooltipToggle: ClickHandler<HTMLElement>
@@ -33,6 +34,7 @@ class RibbonContainer extends React.Component<Props> {
 
     componentDidMount() {
         this._setupHoverListeners()
+        this.props.onInit()
     }
 
     componentWillUnmount() {
@@ -96,6 +98,7 @@ const mapDispatchToProps: MapDispatchToProps<
     DispatchProps,
     OwnProps
 > = dispatch => ({
+    onInit: () => dispatch(actions.initState()),
     openSidebar: e => {
         e.stopPropagation()
         dispatch(actions.shrinkRibbon())
