@@ -31,6 +31,8 @@ export default function NotificationLayout({
                 <img
                     className={styles.close}
                     src={closeIcon}
+                    width={'15px'}
+                    height={'15px'}
                     onClick={() => onCloseRequested()}
                 />
             </div>
