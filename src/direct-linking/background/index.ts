@@ -6,7 +6,7 @@ import { StorageManager, Dexie } from 'src/search'
 import DirectLinkingBackend from './backend'
 import { setupRequestInterceptor } from './redirect'
 import { AnnotationRequests } from './request'
-import DirectLinkingStorage, { AnnotationStorage } from './storage'
+import AnnotationStorage from './storage'
 import normalize from '../../util/encode-url-for-id'
 import { AnnotationSender } from '../types'
 

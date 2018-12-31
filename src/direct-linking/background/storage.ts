@@ -11,127 +11,8 @@ import {
 import { FeatureStorage } from '../../search/storage'
 import { STORAGE_KEYS as IDXING_PREF_KEYS } from '../../options/settings/constants'
 import { Annotation, SearchParams, UrlFilters } from '../types'
-import { customLists } from 'src/custom-lists/selectors'
 
 const uniqBy = require('lodash/fp/uniqBy')
-
-export interface DirectLinkingStorageProps {
-    storageManager: StorageManager
-    getDb: () => Promise<Dexie>
-    browserStorageArea?: Storage.StorageArea
-    directLinksColl?: string
-}
-
-export default class DirectLinkingStorage extends FeatureStorage {
-    static DIRECT_LINKS_COLL = 'directLinks'
-    private _browserStorageArea: Storage.StorageArea
-    private _getDb: () => Promise<Dexie>
-    private _directLinksColl: string
-
-    constructor({
-        storageManager,
-        browserStorageArea = browser.storage.local,
-        getDb,
-        directLinksColl = DirectLinkingStorage.DIRECT_LINKS_COLL,
-    }: DirectLinkingStorageProps) {
-        super(storageManager)
-        this._browserStorageArea = browserStorageArea
-        this._directLinksColl = directLinksColl
-        this._getDb = getDb
-
-        this.storageManager.registry.registerCollection(this._directLinksColl, [
-            {
-                version: new Date(2018, 5, 31),
-                fields: {
-                    pageTitle: { type: 'text' },
-                    pageUrl: { type: 'url' },
-                    body: { type: 'text' },
-                    selector: { type: 'json' },
-                    createdWhen: { type: 'datetime' },
-                    url: { type: 'string' },
-                },
-                indices: [
-                    { field: 'url', pk: true },
-                    { field: 'pageTitle' },
-                    { field: 'body' },
-                    { field: 'createdWhen' },
-                ],
-            },
-            {
-                version: new Date(2018, 7, 3),
-                fields: {
-                    pageTitle: { type: 'text' },
-                    pageUrl: { type: 'url' },
-                    body: { type: 'text' },
-                    comment: { type: 'text' },
-                    selector: { type: 'json' },
-                    createdWhen: { type: 'datetime' },
-                    lastEdited: { type: 'datetime' },
-                    url: { type: 'string' },
-                },
-                indices: [
-                    { field: 'url', pk: true },
-                    { field: 'pageTitle' },
-                    { field: 'pageUrl' },
-                    { field: 'body' },
-                    { field: 'createdWhen' },
-                    { field: 'comment' },
-                ],
-            },
-        ])
-    }
-
-    private async fetchIndexingPrefs(): Promise<{ shouldIndexLinks: boolean }> {
-        const storage = await this._browserStorageArea.get(
-            IDXING_PREF_KEYS.LINKS,
-        )
-
-        return {
-            shouldIndexLinks: !!storage[IDXING_PREF_KEYS.LINKS],
-        }
-    }
-
-    async insertDirectLink({
-        pageTitle,
-        pageUrl,
-        url,
-        body,
-        selector,
-    }: Annotation) {
-        await this.storageManager
-            .collection(DirectLinkingStorage.DIRECT_LINKS_COLL)
-            .createObject({
-                pageTitle,
-                pageUrl,
-                body,
-                selector,
-                createdWhen: new Date(),
-                lastEdited: {},
-                url,
-                comment: '',
-            })
-    }
-
-    async indexPageFromTab({ id, url }: Tabs.Tab) {
-        const indexingPrefs = await this.fetchIndexingPrefs()
-
-        const page = await createPageFromTab({
-            tabId: id,
-            url,
-            stubOnly: !indexingPrefs.shouldIndexLinks,
-        })
-
-        await page.loadRels(this._getDb)
-
-        // Add new visit if none, else page won't appear in results
-        // TODO: remove once search changes to incorporate assoc. page data apart from bookmarks/visits
-        if (!page.visits.length) {
-            page.addVisit()
-        }
-
-        await page.save(this._getDb)
-    }
-}
 
 export interface AnnotationStorageProps {
     storageManager: StorageManager
@@ -146,13 +27,13 @@ export interface AnnotationStorageProps {
 }
 
 // TODO: Move to src/annotations in the future
-export class AnnotationStorage extends FeatureStorage {
+export default class AnnotationStorage extends FeatureStorage {
     static ANNOTS_COLL = 'annotations'
     static TAGS_COLL = 'tags'
     static PAGES_COLL = 'pages'
-    static BMS_COLL = 'bookmarks'
+    static BMS_COLL = 'annotBookmarks'
     static LISTS_COLL = 'customLists'
-    static LIST_ENTRIES_COLL = 'pageListEntries'
+    static LIST_ENTRIES_COLL = 'annotListEntries'
     static MEMEX_LINK_PROVIDERS = [
         'http://memex.link',
         'http://staging.memex.link',
@@ -210,6 +91,102 @@ export class AnnotationStorage extends FeatureStorage {
                 { field: 'comment' },
             ],
         })
+
+        this.storageManager.registry.registerCollection(this._listEntriesColl, {
+            version: new Date(2019, 0, 4),
+            fields: {
+                listId: { type: 'string' },
+                url: { type: 'string' },
+                createdAt: { type: 'datetime' },
+            },
+            indices: [
+                { field: ['listId', 'url'], pk: true },
+                { field: 'listId' },
+                { field: 'url' },
+            ],
+        })
+
+        this.storageManager.registry.registerCollection(this._bookmarksColl, {
+            version: new Date(2019, 0, 5),
+            fields: {
+                url: { type: 'string' },
+                createdAt: { type: 'datetime' },
+            },
+            indices: [{ field: 'url', pk: true }, { field: 'createdAt' }],
+        })
+
+        // NOTE: This is no longer used; keeping to maintain DB schema sanity
+        this.storageManager.registry.registerCollection('directLinks', [
+            {
+                version: new Date(2018, 5, 31),
+                fields: {
+                    pageTitle: { type: 'text' },
+                    pageUrl: { type: 'url' },
+                    body: { type: 'text' },
+                    selector: { type: 'json' },
+                    createdWhen: { type: 'datetime' },
+                    url: { type: 'string' },
+                },
+                indices: [
+                    { field: 'url', pk: true },
+                    { field: 'pageTitle' },
+                    { field: 'body' },
+                    { field: 'createdWhen' },
+                ],
+            },
+            {
+                version: new Date(2018, 7, 3),
+                fields: {
+                    pageTitle: { type: 'text' },
+                    pageUrl: { type: 'url' },
+                    body: { type: 'text' },
+                    comment: { type: 'text' },
+                    selector: { type: 'json' },
+                    createdWhen: { type: 'datetime' },
+                    lastEdited: { type: 'datetime' },
+                    url: { type: 'string' },
+                },
+                indices: [
+                    { field: 'url', pk: true },
+                    { field: 'pageTitle' },
+                    { field: 'pageUrl' },
+                    { field: 'body' },
+                    { field: 'createdWhen' },
+                    { field: 'comment' },
+                ],
+            },
+        ])
+    }
+
+    async insertAnnotToList({ listId, url }: { listId: number; url: string }) {
+        const list = await this.storageManager
+            .collection(this._listsColl)
+            .findOneObject({ id: listId })
+
+        if (list == null) {
+            throw new Error(`No list exists for ID: ${listId}`)
+        }
+
+        return this.storageManager
+            .collection(this._listEntriesColl)
+            .createObject({ listId, url, createdAt: new Date() })
+    }
+
+    /**
+     * @returns Promise resolving to a boolean denoting whether or not a bookmark was created.
+     */
+    async toggleAnnotBookmark({ url }: { url: string }) {
+        const coll = this.storageManager.collection(this._bookmarksColl)
+
+        const bookmark = await coll.findOneObject({ url })
+
+        if (bookmark == null) {
+            await coll.createObject({ url, createdAt: new Date() })
+            return true
+        }
+
+        await coll.deleteOneObject({ url })
+        return false
     }
 
     private async fetchIndexingPrefs(): Promise<{ shouldIndexLinks: boolean }> {
