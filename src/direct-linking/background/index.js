@@ -52,7 +52,7 @@ export default class DirectLinkingBackground {
                 toggleSidebar: () => {
                     return this.toggleSidebar()
                 },
-                getAnnotationTags: (...params) => {
+                getTagsByAnnotationUrl: (...params) => {
                     return this.getTagsByAnnotationUrl(...params)
                 },
                 addAnnotationTag: (...params) => {

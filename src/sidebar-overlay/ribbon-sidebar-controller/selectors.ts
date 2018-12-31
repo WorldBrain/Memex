@@ -1,3 +1,5 @@
 import RootState from './types'
 
-export const dummySelector = (state: RootState) => state
+export const ribbon = (state: RootState) => state.ribbon
+
+export const sidebar = (state: RootState) => state.sidebar

@@ -103,7 +103,7 @@ class AnnotationContainer extends React.Component {
     }
 
     reloadTags = async () => {
-        const tags = await remoteFunction('getAnnotationTags')(
+        const tags = await remoteFunction('getTagsByAnnotationUrl')(
             this.props.annotation.url,
         )
         this.setState({

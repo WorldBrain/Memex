@@ -6,7 +6,7 @@ import { Anchor } from '../../direct-linking/content_script/interactions'
 
 export const defaultState: State = {
     showCommentBox: false,
-    anchor: undefined,
+    anchor: null,
     commentText: '',
     tags: [],
     initTagSuggestions: [],

@@ -1,8 +1,8 @@
 import { createSelector } from 'reselect'
 
-import RootState from '../ribbon-sidebar-controller/types'
+import * as RootSelectors from '../ribbon-sidebar-controller/selectors'
 
-export const ribbon = (state: RootState) => state.ribbon
+export const ribbon = RootSelectors.ribbon
 
 export const isExpanded = createSelector(ribbon, state => state.isExpanded)
 

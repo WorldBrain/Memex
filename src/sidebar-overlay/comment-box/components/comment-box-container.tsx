@@ -67,7 +67,7 @@ class CommentBoxContainer extends React.PureComponent<Props> {
 
         return (
             <div className={styles.commentBoxContainer}>
-                {anchor && <AnnotationHighlight anchor={anchor} />}
+                {anchor !== null && <AnnotationHighlight anchor={anchor} />}
 
                 <CommentBoxForm
                     commentText={commentText}
@@ -100,7 +100,7 @@ const mapDispatchToProps: MapDispatchToProps<
     saveComment: e => {
         e.preventDefault()
         e.stopPropagation()
-        console.log('saved')
+        dispatch(actions.saveComment())
     },
     cancelComment: e => {
         e.preventDefault()
@@ -108,17 +108,6 @@ const mapDispatchToProps: MapDispatchToProps<
         dispatch(actions.cancelComment())
     },
 })
-
-// const mapStateToProps = state => ({
-//     tagInput: selectors.tagInput(state),
-//     tags: selectors.tags(state),
-// })
-// const mapDispatchToProps = dispatch => ({
-//     setTagInput: value => dispatch(actions.setTagInput(value)),
-//     saveAnnotation: (...args) => dispatch(actions.saveAnnotation(...args)),
-//     addTag: tag => dispatch(actions.addTag(tag)),
-//     deleteTag: tag => dispatch(actions.deleteTag(tag)),
-// })
 
 export default connect(
     mapStateToProps,
