@@ -35,9 +35,9 @@ class Checklist extends PureComponent<Props> {
                 <ChecklistItem
                     isChecked={false}
                     handleClick={() => null}
-                    id="importChecklist"
+                    id="addTagsChecklist"
                 >
-                    Import from your existing bookmarks & history
+                    Add Tags/Collections
                 </ChecklistItem>
             </React.Fragment>
         )
