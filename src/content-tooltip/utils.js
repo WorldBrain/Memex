@@ -1,4 +1,5 @@
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
+import { ANNOTATION_DEMO_URL } from 'src/overview/onboarding/constants'
 import * as constants from './constants'
 
 export const delayed = (f, delay) => {
@@ -52,3 +53,8 @@ export const getPageCenter = () => ({
     x: window.innerWidth / 2,
     y: window.innerHeight / 2 - 200, // Assuming average height as 200, since height is 'auto'
 })
+
+/**
+ * Check whether page is onboarding demo page (Wikipedia Memex)
+ */
+export const isDemoPage = () => window.location.href === ANNOTATION_DEMO_URL

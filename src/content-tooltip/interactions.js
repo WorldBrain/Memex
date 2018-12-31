@@ -1,27 +1,16 @@
 import { browser } from 'webextension-polyfill-ts'
 
-import {
-    delayed,
-    getPositionState,
-    getTooltipState,
-    getPageCenter,
-} from './utils'
+import { delayed, getPositionState, getTooltipState } from './utils'
 import {
     createAndCopyDirectLink,
     createAnnotation,
 } from '../direct-linking/content_script/interactions'
 import { setupUIContainer, destroyUIContainer } from './components'
 import { remoteFunction, makeRemotelyCallable } from '../util/webextensionRPC'
-import { EVENT_NAMES } from 'src/analytics/internal/constants'
 import { injectCSS } from '../search-injection/dom'
-import { getLocalStorage, setLocalStorage } from 'src/util/storage'
-import {
-    STORAGE_KEYS,
-    ANNOTATION_DEMO_URL,
-} from 'src/overview/onboarding/constants'
+import { conditionallyShowHighlightNotification } from './onboarding-notifications'
 
 const openOptionsRPC = remoteFunction('openOptionsTab')
-const processEventRPC = remoteFunction('processEvent')
 let mouseupListener = null
 
 export function setupTooltipTrigger(callback, toolbarNotifications) {
@@ -190,94 +179,13 @@ export const conditionallyTriggerTooltip = delayed(
         }
         callback(position)
 
-        // Trigger onboarding annotation after highlight tooltip.
-        // Onboarding Demo stages
-        const annotationStage = await getLocalStorage(
-            STORAGE_KEYS.onboardingDemo.step1,
-        )
-
-        if (annotationStage === 'highlight_text_notification_shown') {
-            // Remove previous notification
-            toolbarNotifications._destroyRootElement()
-            toolbarNotifications.showToolbarNotification(
-                'onboarding-select-option',
-                {
-                    position,
-                },
-            )
-            processEventRPC({
-                type: EVENT_NAMES.ONBOARDING_HIGHLIGHT_MADE,
-            })
-            await setLocalStorage(
-                STORAGE_KEYS.onboardingDemo.step1,
-                'select_option_notification_shown',
-            )
-        }
+        conditionallyShowHighlightNotification({
+            toolbarNotifications,
+            position,
+        })
     },
     300,
 )
-
-/**
- * Shows Toolbar notifications on website based on
- * onboarding flags set in local storage.
- * @param toolbarNotifications ToolbarNotification instance to trigger notification
- */
-export const conditionallyShowOnboardingNotifications = async ({
-    toolbarNotifications,
-}) => {
-    // Returns if the website is not the Memex Demo Wiki.
-    if (window.location.href !== ANNOTATION_DEMO_URL) {
-        return
-    }
-
-    const onboardingAnnotationStage = await getLocalStorage(
-        STORAGE_KEYS.onboardingDemo.step1,
-        'unvisited',
-    )
-    const powerSearchStage = await getLocalStorage(
-        STORAGE_KEYS.onboardingDemo.step2,
-    )
-
-    if (onboardingAnnotationStage === 'highlight_text') {
-        toolbarNotifications.showToolbarNotification('onboarding-higlight-text')
-        await setLocalStorage(
-            STORAGE_KEYS.onboardingDemo.step1,
-            'highlight_text_notification_shown',
-        )
-    }
-
-    /**
-     * Trigger's the next notification which is seen after the user clicks
-     * "browse around a bit" in Power Search welcome notification.
-     */
-
-    const triggerNextNotification = async () => {
-        toolbarNotifications._destroyRootElement()
-        toolbarNotifications.showToolbarNotification('go-to-dashboard')
-
-        processEventRPC({
-            type: EVENT_NAMES.POWERSEARCH_BROWSE_PAGE,
-        })
-
-        await setLocalStorage(
-            STORAGE_KEYS.onboardingDemo.step2,
-            'overview-tooltips',
-        )
-    }
-
-    if (powerSearchStage === 'redirected') {
-        const position = getPageCenter()
-        toolbarNotifications._destroyRootElement()
-        toolbarNotifications.showToolbarNotification('power-search-browse', {
-            position,
-            triggerNextNotification,
-        })
-        await setLocalStorage(
-            STORAGE_KEYS.onboardingDemo.step2,
-            'power-search-browse-shown',
-        )
-    }
-}
 
 export function calculateTooltipPostion() {
     const range = document.getSelection().getRangeAt(0)
