@@ -14,7 +14,7 @@ import { EVENT_NAMES } from '../../../analytics/internal/constants'
 import styles from './annotation.css'
 import { IndexDropdown } from '../../../common-ui/containers'
 
-class AnnotationContainer extends React.Component {
+class AnnotationBox extends React.Component {
     static propTypes = {
         annotation: PropTypes.object.isRequired,
         tags: PropTypes.array,
@@ -116,18 +116,15 @@ class AnnotationContainer extends React.Component {
         // This piece of code, counts the new lines and finds
         // the position until which to truncate
 
-        let newlineCount = 0
-        let i = 0
         let shouldTruncateForNewLines = false
-
-        while (i < text.length) {
-            if (text[i++] === '\n') {
+        let i = 0
+        for (let newlineCount = 0; i < text.length; i++) {
+            if (text[i] === '\n') {
                 newlineCount++
-            }
-            if (newlineCount > 4) {
-                shouldTruncateForNewLines = true
-                // Now i stores the position for max possible characters
-                break
+                if (newlineCount > 4) {
+                    shouldTruncateForNewLines = true
+                    break
+                }
             }
         }
 
@@ -512,4 +509,4 @@ class AnnotationContainer extends React.Component {
     }
 }
 
-export default AnnotationContainer
+export default AnnotationBox

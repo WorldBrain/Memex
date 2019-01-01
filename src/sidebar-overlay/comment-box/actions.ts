@@ -37,17 +37,15 @@ export const resetCommentBox: () => Thunk = () => dispatch => {
  * Redux store, does some input cleaning/validation, and saves the comment
  * to the storage. Also, resets the comment box afterwards.
  */
-export const saveComment: () => Thunk = () => (dispatch, getState) => {
-    const state = getState()
-    const anchor = selectors.anchor(state)
-    const commentText = selectors.commentText(state)
-    const tags = selectors.tags(state)
-
-    const strippedComment = commentText.trim()
-    if (strippedComment.length !== 0 || anchor !== null) {
+export const saveComment: (
+    anchor: Anchor,
+    commentText: string,
+    tags: string[],
+) => Thunk = (anchor, commentText, tags) => dispatch => {
+    if (commentText.length !== 0 || anchor !== null) {
         const body = anchor !== null ? anchor.quote : ''
 
-        dispatch(createAnnotation(anchor, body, strippedComment, tags))
+        dispatch(createAnnotation(anchor, body, commentText, tags))
         dispatch(resetCommentBox())
     }
 }

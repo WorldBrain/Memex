@@ -27,6 +27,7 @@
         border-color: #3db994;
     }
 
+    /* TODO: Check if this condition is necessary. */
     &.isHovered {
         border-color: #3db994;
     }
