@@ -19,7 +19,7 @@ interface StateProps {
 
 interface DispatchProps {
     handleCommentTextChange: (comment: string) => void
-    saveComment: React.EventHandler<React.SyntheticEvent>
+    saveComment: (anchor: Anchor, commentText: string, tags: string[]) => void
     cancelComment: ClickHandler<HTMLElement>
 }
 
@@ -29,50 +29,30 @@ type Props = StateProps & DispatchProps & OwnProps
 
 // TODO: Fetch initial tag suggestions when the component is mounted.
 class CommentBoxContainer extends React.PureComponent<Props> {
-    // static propTypes = {
-    //     env: PropTypes.string.isRequired,
-    //     updateAnnotations: PropTypes.func.isRequired,
-    // }
+    save = (e: React.SyntheticEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
 
-    // save = () => {
-    //     const strippedComment = this.props.commentInput.trim()
-    //     if (strippedComment.length || this.props.anchor) {
-    //         const body = this.props.anchor ? this.props.anchor.quote : ''
-    //         this.props.saveAnnotation(
-    //             strippedComment,
-    //             body,
-    //             this.props.tags,
-    //             this.props.env,
-    //         )
-    //         // Update highlights only if it's in iframe
-    //         if (this.props.env === 'iframe') {
-    //             this.props.updateAnnotations()
-    //         }
-    //     }
-    // }
-
-    // handleSubmit = e => {
-    //     e.preventDefault()
-    //     this.save()
-    // }
+        const { anchor, commentText, tags, saveComment } = this.props
+        saveComment(anchor, commentText.trim(), tags)
+    }
 
     render() {
         const {
             anchor,
             commentText,
             handleCommentTextChange,
-            saveComment,
             cancelComment,
         } = this.props
 
         return (
             <div className={styles.commentBoxContainer}>
-                {anchor !== null && <AnnotationHighlight anchor={anchor} />}
+                {!!anchor && <AnnotationHighlight anchor={anchor} />}
 
                 <CommentBoxForm
                     commentText={commentText}
                     handleCommentTextChange={handleCommentTextChange}
-                    saveComment={saveComment}
+                    saveComment={this.save}
                     cancelComment={cancelComment}
                 />
             </div>
@@ -94,14 +74,10 @@ const mapDispatchToProps: MapDispatchToProps<
     DispatchProps,
     OwnProps
 > = dispatch => ({
-    handleCommentTextChange: comment => {
-        dispatch(actions.setCommentText(comment))
-    },
-    saveComment: e => {
-        e.preventDefault()
-        e.stopPropagation()
-        dispatch(actions.saveComment())
-    },
+    handleCommentTextChange: comment =>
+        dispatch(actions.setCommentText(comment)),
+    saveComment: (anchor, commentText, tags) =>
+        dispatch(actions.saveComment(anchor, commentText, tags)),
     cancelComment: e => {
         e.preventDefault()
         e.stopPropagation()
