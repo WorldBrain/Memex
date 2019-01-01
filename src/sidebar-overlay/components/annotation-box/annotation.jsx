@@ -20,19 +20,17 @@ const Annotation = props => (
         onMouseLeave={props.onMouseLeave}
     >
         <div className={styles.timestamp}>
-            {props.dateDetails.lastEdited ? (
+            {!!props.dateDetails.lastEdited && (
                 <span className={styles.lastEdit}>Last Edit: </span>
-            ) : null}
+            )}
             {props.dateDetails.timestamp}
         </div>
 
-        <div
-            className={
-                !props.isJustComment ? styles.highlight : styles.noDisplay
-            }
-        >
-            "{props.truncatedHighlightText}"{props.showMoreHighlight}
-        </div>
+        {!props.isJustComment && (
+            <div className={styles.highlight}>
+                "{props.truncatedHighlightText}"{props.showMoreHighlight}
+            </div>
+        )}
 
         <div
             className={cx({
@@ -41,7 +39,7 @@ const Annotation = props => (
             })}
         >
             {props.truncatedAnnotationText}
-            {props.annotationEditMode ? null : props.showMoreAnnotation}
+            {props.annotationEditMode && props.showMoreAnnotation}
             <div className={props.tagClasses}>
                 {props.tags.map((tag, i) => (
                     <span key={i} className={styles.tagPill}>

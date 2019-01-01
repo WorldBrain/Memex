@@ -41,9 +41,6 @@ interface State {
 
 class SidebarContainer extends React.Component<Props, State> {
     // static propTypes = {
-    //     showSidebar: PropTypes.bool,
-    //     setShowSidebar: PropTypes.func,
-    //     toggleMouseOnSidebar: PropTypes.func,
     //     env: PropTypes.string,
     //     pageUrl: PropTypes.string,
     //     pageTitle: PropTypes.string,
@@ -60,15 +57,11 @@ class SidebarContainer extends React.Component<Props, State> {
     //     setAnnotations: PropTypes.func.isRequired,
     //     setHidden: PropTypes.func.isRequired,
     //     setIsLoading: PropTypes.func.isRequired,
-    //     focusCommentBox: PropTypes.func.isRequired,
     //     activeAnnotation: PropTypes.string.isRequired,
     //     hoveredAnnotation: PropTypes.string.isRequired,
     // }
 
     // static defaultProps = {
-    //     showSidebar: true,
-    //     setShowSidebar: () => null,
-    //     toggleMouseOnSidebar: () => null,
     //     env: 'iframe',
     //     pageUrl: null,
     //     pageTitle: null,
@@ -111,14 +104,6 @@ class SidebarContainer extends React.Component<Props, State> {
     //             this.props.setIsLoading(true)
     //         },
     //     })
-    // }
-
-    // handleStateChange = ({ isOpen }) => {
-    //     if (!isOpen) {
-    //         this.props.setShowSidebar(false)
-    //         this.props.setAnnotations([])
-    //         this.props.setHidden(false)
-    //     }
     // }
 
     // /**
@@ -292,14 +277,7 @@ class SidebarContainer extends React.Component<Props, State> {
 //     setHoveredAnnotation: key => dispatch(actions.setHoveredAnnotation(key)),
 //     setHidden: value => dispatch(commentActions.setHidden(value)),
 //     setIsLoading: value => dispatch(actions.setIsLoading(value)),
-//     focusCommentBox: value =>
-//         dispatch(commentActions.setFocusCommentBox(value)),
 // })
-
-// export default connect(
-//     mapStateToProps,
-//     mapDispatchToProps,
-// )(SidebarContainer)
 
 const mapStateToProps: MapStateToProps<
     StateProps,
