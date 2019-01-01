@@ -1,7 +1,8 @@
 import React from 'react'
 
-import styles from './sidebar/sidebar.css'
+const styles = require('./empty-message.css')
 
+/* tslint:disable-next-line variable-name */
 const EmptyMessage = () => (
     <div className={styles.emptyMessage}>
         <div className={styles.emoji}> ¯\_(ツ)_/¯ </div>

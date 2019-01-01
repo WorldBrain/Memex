@@ -5,14 +5,15 @@
     cursor: pointer;
     color: #3eb995;
     z-index: 2147483647;
-    padding: 2px 7.5px 4px 7.5px;
+    padding: 5px 7.5px;
     line-height: normal;
     background: #fff;
     border-bottom: 1px solid #d0cece;
-    border-left: solid 3px #efefef;
+    border-left: 3px solid #efefef;
     padding-top: 5px;
     padding-bottom: 5px;
 
+    /* TODO: Check if this is necessary, and how much of it. */
     &.overview {
         top: 56px;
         right: 290px;
@@ -22,25 +23,19 @@
         padding-top: 5px;
         height: 42px;
     }
-
-    &.hidden {
-        display: none;
-    }
 }
 
 .closeIcon {
     background-image: url('/img/cross.svg');
     background-size: 15px;
     display: block;
-    margin-top: 2px;
+    margin: 2px 2px 0 0;
     cursor: pointer;
     background-repeat: no-repeat;
     width: 29px;
     height: 29px;
     background-position: 6.5px 6.5px;
     border-radius: 50%;
-    margin-right: 2px;
-    margin-left: 0;
 
     &:hover {
         background-image: url('/img/cross.svg');

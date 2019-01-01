@@ -119,7 +119,7 @@ class CommentBoxForm extends React.Component<Props, State> {
         const { rows, isTagInputActive } = this.state
 
         return (
-            <div className={styles.commentBoxForm}>
+            <React.Fragment>
                 {/* Text area to get the actual comment. */}
                 <textarea
                     rows={rows}
@@ -160,7 +160,7 @@ class CommentBoxForm extends React.Component<Props, State> {
                         Cancel
                     </button>
                 </div>
-            </div>
+            </React.Fragment>
         )
     }
 }

@@ -2,159 +2,22 @@
 @import url('/fonts/googlefonts/ibm-plex-serif.css');
 
 .sidebar {
-    padding: 0px;
+    padding: 0;
     height: 100%;
     background: #fff;
-    overflow-y: scroll;
+
+    /* TODO: Check if the following scrolling property is desired. */
+
+    /* overflow-y: scroll; */
     border-left: 3px solid #e1ece9;
 
-    &::-webkit-scrollbar {
+    /* &::-webkit-scrollbar {
         display: none;
-    }
+    } */
 
-    & > * {
+    /* & > * {
         font-family: 'IBM Plex Serif', serif;
         margin: 0;
         box-sizing: border-box;
-    }
-}
-
-.emptyMessage {
-    width: 65%;
-    margin: 0px auto;
-    color: #777;
-    font-family: 'Open Sans', sans-serif;
-    text-align: center;
-    margin-top: 90px;
-
-    & .emoji {
-        font-size: 20px;
-        margin-bottom: 15px;
-    }
-
-    & .text {
-        margin-bottom: 15px;
-        font-weight: 400;
-        font-size: 15px;
-    }
-
-    & .learnHow {
-        color: #fff;
-        text-decoration: none;
-        padding: 3px 14px;
-        background-color: #3eb995;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 13px;
-        letter-spacing: 1px;
-    }
-}
-
-.closeButton {
-    color: #000;
-    font-weight: 800;
-    font-size: 20px;
-    margin-top: 5px;
-    margin-left: 15px;
-    cursor: pointer;
-}
-
-.sidebarTitle,
-.previous {
-    color: #3eb995;
-    margin-top: 0px;
-    margin-bottom: 5px;
-    font-weight: 100;
-}
-
-.sidebarTitle {
-    font-size: 18px;
-}
-
-.previous {
-    font-size: 15px;
-}
-
-.separator {
-    height: 2px;
-    background-color: #efefef;
-    width: 89%;
-    margin: 20px auto;
-    display: none;
-}
-
-.annotationContainer {
-    margin: 30px 0px;
-    width: 330px;
-    margin-left: 5px;
-    margin-bottom: 100px;
-    background: #fff;
-}
-
-.ldsEllipsis {
-    display: block;
-    position: relative;
-    width: 64px;
-    height: 64px;
-    margin: 0px auto;
-}
-
-.ldsEllipsis div {
-    position: absolute;
-    top: 27px;
-    width: 11px;
-    height: 11px;
-    border-radius: 50%;
-    background: #dfdfdf;
-    animation-timing-function: cubic-bezier(0, 1, 1, 0);
-}
-
-.ldsEllipsis div:nth-child(1) {
-    left: 6px;
-    animation: lds-ellipsis1 0.6s infinite;
-}
-
-.ldsEllipsis div:nth-child(2) {
-    left: 6px;
-    animation: lds-ellipsis2 0.6s infinite;
-}
-
-.ldsEllipsis div:nth-child(3) {
-    left: 26px;
-    animation: lds-ellipsis2 0.6s infinite;
-}
-
-.ldsEllipsis div:nth-child(4) {
-    left: 45px;
-    animation: lds-ellipsis3 0.6s infinite;
-}
-
-@keyframes lds-ellipsis1 {
-    0% {
-        transform: scale(0);
-    }
-
-    100% {
-        transform: scale(1);
-    }
-}
-
-@keyframes lds-ellipsis3 {
-    0% {
-        transform: scale(1);
-    }
-
-    100% {
-        transform: scale(0);
-    }
-}
-
-@keyframes lds-ellipsis2 {
-    0% {
-        transform: translate(0, 0);
-    }
-
-    100% {
-        transform: translate(19px, 0);
-    }
+    } */
 }

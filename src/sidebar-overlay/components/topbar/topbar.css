@@ -4,10 +4,7 @@
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    position: absolute;
     z-index: 2147483647;
-    left: 0px;
-    top: 0;
     padding-right: 8px;
     height: 42px;
     border-bottom: 1px solid #d2d2d2;
@@ -17,12 +14,10 @@
 
 .settingsBtn {
     background-image: url('/img/settings_grey.svg');
-    margin-left: 0px;
-    margin-top: 0px;
+    margin: 0 10px 0 0;
     background-size: 20px;
     width: 20px;
     height: 20px;
-    margin-right: 10px;
     cursor: pointer;
 
     &:hover {

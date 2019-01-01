@@ -1,7 +1,8 @@
-import React from 'react'
+import * as React from 'react'
 
-import styles from './sidebar/sidebar.css'
+const styles = require('./loader.css')
 
+/* tslint:disable-next-line variable-name */
 const Loader = () => (
     <div className={styles.ldsEllipsis}>
         <div />

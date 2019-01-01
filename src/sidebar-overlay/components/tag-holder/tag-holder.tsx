@@ -16,7 +16,7 @@ interface State {
 }
 
 /**
- * Dummy Tag Holder to display all the tags
+ * Tag Holder to display all the tags.
  */
 class TagHolder extends React.Component<Props, State> {
     state = {

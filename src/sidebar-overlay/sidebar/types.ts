@@ -12,7 +12,7 @@ export interface Page {
 
 // TODO: Update this once annotation search's backend is complete.
 export interface Annotation {
-    /** Unique URL for this annot. Used as more of an ID; probably not for display. */
+    /** Unique URL for this annotation. Used as more of an ID; probably not for display. */
     url: string
     /** URL for display. */
     pageUrl: string
@@ -21,6 +21,7 @@ export interface Annotation {
     /** Defined for annotations with a user comment. */
     comment?: string
     createdWhen: Date
+    lastEdited: Date | null
     tags: string[]
     isBookmarked: boolean
 }
@@ -28,6 +29,8 @@ export interface Annotation {
 export default interface State {
     /** Denotes whether the sidebar is open or not. */
     isOpen: boolean
+    /** Denotes whether the sidebar is loading annotations or not. */
+    isLoading: boolean
     /** Information about the page to pass to the storage. */
     page: Page
     /** Annotations that this page has. */

@@ -1,23 +1,23 @@
-import React from 'react'
-import PropTypes from 'prop-types'
+import * as React from 'react'
+import * as PropTypes from 'prop-types'
 import cx from 'classnames'
 
-import styles from './annotation.css'
+const styles = require('./annotation-box.css')
 
-const Annotation = props => (
+/* tslint:disable-next-line variable-name */
+const AnnotationBox = props => (
     <div
         className={cx(styles.container, {
             [styles.pointer]: props.isIFrame && !props.isJustComment,
             [styles.iframe]: props.isIFrame,
-            [styles.isHovered]: props.isHovered,
             [styles.active]: props.isActive,
         })}
         id={props.id}
         onClick={
             props.isIFrame && !props.isJustComment ? props.goToAnnotation : null
         }
-        onMouseEnter={props.onMouseEnter}
-        onMouseLeave={props.onMouseLeave}
+        // onMouseEnter={props.onMouseEnter}
+        // onMouseLeave={props.onMouseLeave}
     >
         <div className={styles.timestamp}>
             {!!props.dateDetails.lastEdited && (
@@ -55,34 +55,34 @@ const Annotation = props => (
     </div>
 )
 
-Annotation.propTypes = {
-    truncatedHighlightText: PropTypes.string.isRequired,
-    showMoreHighlight: PropTypes.node,
-    showMoreAnnotation: PropTypes.node,
-    truncatedAnnotationText: PropTypes.string.isRequired,
-    annotationEditMode: PropTypes.bool.isRequired,
-    tagClasses: PropTypes.string.isRequired,
-    tags: PropTypes.arrayOf(
-        PropTypes.shape({
-            name: PropTypes.string.isRequired,
-            url: PropTypes.string.isRequired,
-        }),
-    ),
-    dateDetails: PropTypes.shape({
-        timestamp: PropTypes.string.isRequired,
-        lastEdited: PropTypes.number,
-    }),
-    renderAnnotationInput: PropTypes.func.isRequired,
-    renderFooter: PropTypes.func.isRequired,
-    goToAnnotation: PropTypes.func.isRequired,
-    isIFrame: PropTypes.bool.isRequired,
-    shouldCommentBoxBeVisible: PropTypes.bool.isRequired,
-    isJustComment: PropTypes.bool.isRequired,
-    isActive: PropTypes.bool.isRequired,
-    isHovered: PropTypes.bool.isRequired,
-    onMouseEnter: PropTypes.func.isRequired,
-    onMouseLeave: PropTypes.func.isRequired,
-    id: PropTypes.string.isRequired,
-}
+// Annotation.propTypes = {
+//     truncatedHighlightText: PropTypes.string.isRequired,
+//     showMoreHighlight: PropTypes.node,
+//     showMoreAnnotation: PropTypes.node,
+//     truncatedAnnotationText: PropTypes.string.isRequired,
+//     annotationEditMode: PropTypes.bool.isRequired,
+//     tagClasses: PropTypes.string.isRequired,
+//     tags: PropTypes.arrayOf(
+//         PropTypes.shape({
+//             name: PropTypes.string.isRequired,
+//             url: PropTypes.string.isRequired,
+//         }),
+//     ),
+//     dateDetails: PropTypes.shape({
+//         timestamp: PropTypes.string.isRequired,
+//         lastEdited: PropTypes.number,
+//     }),
+//     renderAnnotationInput: PropTypes.func.isRequired,
+//     renderFooter: PropTypes.func.isRequired,
+//     goToAnnotation: PropTypes.func.isRequired,
+//     isIFrame: PropTypes.bool.isRequired,
+//     shouldCommentBoxBeVisible: PropTypes.bool.isRequired,
+//     isJustComment: PropTypes.bool.isRequired,
+//     isActive: PropTypes.bool.isRequired,
+//     isHovered: PropTypes.bool.isRequired,
+//     onMouseEnter: PropTypes.func.isRequired,
+//     onMouseLeave: PropTypes.func.isRequired,
+//     id: PropTypes.string.isRequired,
+// }
 
-export default Annotation
+export default AnnotationBox
