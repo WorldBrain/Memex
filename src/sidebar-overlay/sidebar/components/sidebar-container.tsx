@@ -2,7 +2,6 @@ import * as React from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 import onClickOutside from 'react-onclickoutside'
 
-// import { actions as commentActions } from '../../comment-box'
 import * as actions from '../actions'
 import * as selectors from '../selectors'
 import {
@@ -12,21 +11,16 @@ import {
 import Sidebar from './sidebar'
 import { RootState } from '../../ribbon-sidebar-controller'
 import { MapDispatchToProps } from '../../types'
-import { Annotation } from '../types'
-// import EmptyMessage from '../empty-message'
-// import Annotation from '../annotation'
-// import Loader from '../loader'
 
 // import { goToAnnotation, retryUntilErrorResolves } from '../../utils'
-// import FrameCommunication from '../../messaging'
 
 interface StateProps {
     isOpen: boolean
-    annotations: Annotation[]
     showCommentBox: boolean
 }
 
 interface DispatchProps {
+    onInit: () => void
     closeSidebar: () => void
     handleAddCommentBtnClick: () => void
 }
@@ -44,21 +38,7 @@ class SidebarContainer extends React.Component<Props, State> {
     //     env: PropTypes.string,
     //     pageUrl: PropTypes.string,
     //     pageTitle: PropTypes.string,
-    //     annotations: PropTypes.array.isRequired,
-    //     tags: PropTypes.object.isRequired,
-    //     isLoading: PropTypes.bool.isRequired,
-    //     fetchAnnotations: PropTypes.func.isRequired,
-    //     setAnnotationAndTags: PropTypes.func.isRequired,
-    //     editAnnotation: PropTypes.func.isRequired,
-    //     deleteAnnotation: PropTypes.func.isRequired,
     //     recieveAnchor: PropTypes.func.isRequired,
-    //     setActiveAnnotation: PropTypes.func.isRequired,
-    //     setHoveredAnnotation: PropTypes.func.isRequired,
-    //     setAnnotations: PropTypes.func.isRequired,
-    //     setHidden: PropTypes.func.isRequired,
-    //     setIsLoading: PropTypes.func.isRequired,
-    //     activeAnnotation: PropTypes.string.isRequired,
-    //     hoveredAnnotation: PropTypes.string.isRequired,
     // }
 
     // static defaultProps = {
@@ -79,6 +59,10 @@ class SidebarContainer extends React.Component<Props, State> {
 
     state = {
         isMouseInsideSidebar: false,
+    }
+
+    componentDidMount() {
+        this.props.onInit()
     }
 
     // parentFC = new FrameCommunication()
@@ -172,38 +156,6 @@ class SidebarContainer extends React.Component<Props, State> {
     //     this.parentFC.remoteExecute('removeMediumHighlights')()
     // }
 
-    // renderAnnotations = () => {
-    //     const { annotations, env, isLoading } = this.props
-
-    //     if (isLoading) {
-    //         return <Loader />
-    //     }
-
-    //     if (!this.props.isLoading && !this.props.annotations.length) {
-    //         return <EmptyMessage />
-    //     }
-
-    //     if (env === 'overview') {
-    //         annotations.sort((x, y) => x.createdWhen < y.createdWhen)
-    //     }
-
-    //     return annotations.map(annotation => (
-    //         <Annotation
-    //             annotation={annotation}
-    //             tags={this.props.tags[annotation.url]}
-    //             goToAnnotation={this.goToAnnotation()}
-    //             editAnnotation={this.props.editAnnotation}
-    //             deleteAnnotation={this.deleteAnnotation}
-    //             key={annotation.url}
-    //             env={this.props.env}
-    //             onMouseEnter={this.makeHighlightMedium}
-    //             onMouseLeave={this.removeMediumHighlights}
-    //             isActive={this.props.activeAnnotation === annotation.url}
-    //             isHovered={this.props.hoveredAnnotation === annotation.url}
-    //         />
-    //     ))
-    // }
-
     /**
      * Method used by `react-onclickoutside` to detect outside clicks.
      */
@@ -236,10 +188,7 @@ class SidebarContainer extends React.Component<Props, State> {
             closeSidebar,
             handleAddCommentBtnClick,
             showCommentBox,
-            annotations,
         } = this.props
-
-        console.log(annotations)
 
         return (
             <Sidebar
@@ -254,29 +203,8 @@ class SidebarContainer extends React.Component<Props, State> {
     }
 }
 
-// const mapStateToProps = state => ({
-//     annotations: selectors.annotations(state),
-//     tags: selectors.tags(state),
-//     activeAnnotation: selectors.activeAnnotation(state),
-//     hoveredAnnotation: selectors.activeAnnotation(state),
-//     isLoading: selectors.isLoading(state),
-// })
-
 // const mapDispatchToProps = dispatch => ({
 //     setPageInfo: (url, title) => dispatch(actions.setPageInfo({ url, title })),
-//     fetchAnnotations: () => dispatch(actions.fetchAnnotationAct()),
-//     setAnnotationAndTags: annotations =>
-//         dispatch(actions.setAnnotationAndTags(annotations)),
-//     setAnnotations: annotations =>
-//         dispatch(actions.setAnnotations(annotations)),
-//     editAnnotation: ({ url, comment }) =>
-//         dispatch(actions.editAnnotation(url, comment)),
-//     deleteAnnotation: ({ url }) => dispatch(actions.deleteAnnotation(url)),
-//     recieveAnchor: anchor => dispatch(commentActions.receiveAnchor(anchor)),
-//     setActiveAnnotation: key => dispatch(actions.setActiveAnnotation(key)),
-//     setHoveredAnnotation: key => dispatch(actions.setHoveredAnnotation(key)),
-//     setHidden: value => dispatch(commentActions.setHidden(value)),
-//     setIsLoading: value => dispatch(actions.setIsLoading(value)),
 // })
 
 const mapStateToProps: MapStateToProps<
@@ -293,6 +221,7 @@ const mapDispatchToProps: MapDispatchToProps<
     DispatchProps,
     OwnProps
 > = dispatch => ({
+    onInit: () => dispatch(actions.initState()),
     closeSidebar: () => {
         dispatch(actions.setSidebarOpen(false))
     },

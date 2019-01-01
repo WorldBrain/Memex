@@ -34,7 +34,7 @@ export default class DirectLinkingBackground {
                 createDirectLink: (...params) => {
                     return this.createDirectLink(...params)
                 },
-                getAllAnnotations: (...params) => {
+                getAllAnnotationsByUrl: (...params) => {
                     return this.getAllAnnotationsByUrl(...params)
                 },
                 createAnnotation: (...params) => {
@@ -49,8 +49,8 @@ export default class DirectLinkingBackground {
                 openSidebarWithHighlight: (...params) => {
                     return this.openSidebarWithHighlight(...params)
                 },
-                toggleSidebar: () => {
-                    return this.toggleSidebar()
+                toggleSidebar: (...params) => {
+                    return this.toggleSidebar(...params)
                 },
                 getTagsByAnnotationUrl: (...params) => {
                     return this.getTagsByAnnotationUrl(...params)
@@ -82,7 +82,7 @@ export default class DirectLinkingBackground {
         await remoteFunction(functionName, { tabId: currentTab.id })(...args)
     }
 
-    async toggleSidebar() {
+    async toggleSidebar({ tab }) {
         await this.triggerSidebar('toggleSidebarOverlay')
     }
 
