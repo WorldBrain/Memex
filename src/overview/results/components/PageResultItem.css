@@ -206,13 +206,13 @@
     display: flex;
     position: relative;
     align-items: center;
-    margin-top: 30px;
+    margin-top: 20px;
     border: 1px solid rgba(62, 185, 149, 0.0902);
     border-radius: 3px;
     background-color: #fefefe;
     color: inherit;
     text-decoration: none;
-    box-shadow: 0 4px 20px 1px rgba(62, 185, 149, 0.0902);
+    box-shadow: 0 3px 6px 0px #17376626;
     z-index: -2;
 
     &:hover {
