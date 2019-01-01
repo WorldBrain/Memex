@@ -1,12 +1,11 @@
 import * as React from 'react'
 import Menu from 'react-burger-menu/lib/menus/slide'
-import { browser } from 'webextension-polyfill-ts'
 
 import CongratsMessage from '../../components/CongratsMessage'
 import menuStyles from './menu-styles'
 import CommentBoxContainer from '../../comment-box'
 import { Topbar } from '../../components'
-import { getExtUrl } from 'src/sidebar-overlay/utils'
+import AnnotationsSectionContainer from './annotations-section-container'
 
 const styles = require('./sidebar.css')
 
@@ -92,6 +91,8 @@ class Sidebar extends React.Component<Props> {
                     />
 
                     {showCommentBox && <CommentBoxContainer />}
+
+                    <AnnotationsSectionContainer />
                 </div>
             </Menu>
         )

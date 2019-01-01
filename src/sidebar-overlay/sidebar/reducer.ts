@@ -10,6 +10,7 @@ import {
 
 export const defaultState: State = {
     isOpen: false,
+    isLoading: false,
     page: {
         url: null,
         title: null,
@@ -19,6 +20,8 @@ export const defaultState: State = {
 }
 
 const setSidebarOpen = (state: boolean, isOpen: boolean) => isOpen
+
+const setIsLoading = (state: boolean, isLoading: boolean) => isLoading
 
 const setPage = (state: Page, page: Page) => page
 
@@ -39,6 +42,10 @@ const isOpenReducer = createReducer<boolean>(on => {
     on(actions.setSidebarOpen, setSidebarOpen)
 }, defaultState.isOpen)
 
+const isLoadingReducer = createReducer<boolean>(on => {
+    on(actions.setIsLoading, setIsLoading)
+}, defaultState.isLoading)
+
 const pageReducer = createReducer<Page>(on => {
     on(actions.setPage, setPage)
     on(actions.setPageUrl, setPageUrl)
@@ -51,9 +58,10 @@ const annotationsReducer = createReducer<Annotation[]>(on => {
 
 const reducer = combineReducers<State>({
     isOpen: isOpenReducer,
-    commentBox: commentBoxReducer,
+    isLoading: isLoadingReducer,
     page: pageReducer,
     annotations: annotationsReducer,
+    commentBox: commentBoxReducer,
 })
 
 export default reducer

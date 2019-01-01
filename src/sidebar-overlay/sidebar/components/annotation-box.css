@@ -1,0 +1,307 @@
+@import url('/fonts/googlefonts/lato.css');
+@import url('/fonts/googlefonts/ibm-plex-serif.css');
+
+.container {
+    box-sizing: border-box;
+    width: 95.3%;
+    background-color: #fff;
+    border-radius: 5px;
+    padding: 12px;
+    color: #4a4a4a;
+    font-family: sans-serif;
+    font-size: 13px;
+    border: 1px #d2d2d2 solid;
+    margin: 13px 0 0 8px;
+    box-shadow: 0px 0px 5px 0px #00000040;
+    transition: border 0.05s ease-in;
+
+    & > * {
+        font-family: 'Lato', sans-serif;
+    }
+
+    &:hover {
+        border-color: #3db994;
+    }
+
+    /**
+    * Check the following class' purpose.
+    * See if it can't be replaced by a pseudo-class.
+    */
+    &.active {
+        border-color: #3db994b8;
+        box-shadow: 0px 0px 5px 1px #00000050;
+    }
+}
+
+.timestamp {
+    max-width: 100%;
+    font-size: 10px;
+    text-align: right;
+    vertical-align: middle;
+    margin: 0 5px 0 0;
+    font-weight: 600;
+    font-family: 'Lato', sans-serif;
+    color: #4a4a4a;
+
+    & .lastEdit {
+        font-weight: 400;
+        color: #929292;
+        margin: 0 5px 0 -1px;
+    }
+}
+
+.pointer {
+    cursor: pointer;
+}
+
+.highlight {
+    font-family: 'IBM Plex Serif', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    margin-bottom: 16px;
+    margin-top: 30px;
+    padding: 7px 15px;
+    line-height: 20px;
+}
+
+.noDisplay {
+    display: none;
+}
+
+.showMore {
+    margin-left: 5px;
+    margin-bottom: -7px;
+    cursor: pointer;
+    display: inline-block;
+    background-image: url('/img/longarrow.svg');
+    background-repeat: no-repeat;
+    background-size: 43px;
+    width: 40px;
+    height: 20px;
+    background-position: center;
+    transition: transform 0.15s ease-in;
+    transform: rotate(0deg);
+
+    &.rotated {
+        transform: rotate(-180deg);
+        transform-origin: center;
+    }
+}
+
+.annotationText {
+    font-size: 15px;
+    font-weight: 500;
+    font-family: 'Lato', sans-serif;
+    line-height: 16px;
+    overflow: hidden;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    background: #f0f0f0;
+    margin: 0px;
+    padding: 15px 10px 15px 15px;
+
+    &.isJustComment {
+        padding-top: 35px;
+        border-top: none;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+    }
+}
+
+.footer {
+    height: 19px;
+    margin-top: 10px;
+}
+
+.footerAside {
+    width: 96.5%;
+    display: inline-block;
+    font-size: 13px;
+    text-align: right;
+    border-top: 1px solid #d2d2d2;
+    margin-top: -10px;
+    margin-left: 0px;
+    padding-top: 11px;
+    padding-left: 10px;
+}
+
+.footerBoldText {
+    color: #000;
+    margin-left: 8px;
+    margin-right: 0px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 3px;
+    background-color: transparent;
+
+    &:hover {
+        background-color: #efefef;
+    }
+}
+
+.footerText {
+    color: #818181;
+    cursor: pointer;
+    margin-left: 10px;
+    margin-right: 10px;
+    font-size: 14px;
+}
+
+.deleteReally {
+    font-weight: 800;
+    font-size: 15px;
+    float: left;
+    color: #000;
+    margin-left: 5px;
+    margin-top: -1px;
+}
+
+.tagPill {
+    font-size: 13px;
+    font-weight: 800;
+    background-color: #3eb995d9;
+    color: #fff;
+    margin-right: 8px;
+    margin-top: 5px;
+    padding: 2px 10px 3px 10px;
+    cursor: pointer;
+    border-radius: 3px;
+}
+
+.tagsContainer {
+    height: auto;
+    padding-top: 13px;
+    display: flex;
+    flex-wrap: wrap;
+
+    &.noComment {
+        margin-top: -8px;
+        margin-left: 10px;
+        padding-bottom: 15px;
+    }
+
+    &.noDisplay {
+        display: none;
+    }
+}
+
+.icon {
+    margin: 0px 5px;
+    cursor: pointer;
+}
+
+.annotationTextarea {
+    font-size: 13px;
+    width: 95%;
+    resize: none;
+    color: #222;
+    font-family: 'Lato', sans-serif;
+    background: #f7f7f7;
+    border: none;
+    padding: 10px;
+    line-height: 19px;
+    font-weight: 400;
+    margin-bottom: 2px;
+    margin-left: 8px;
+    margin-top: 9px;
+    box-sizing: border-box;
+
+    &::placeholder {
+        color: #4a4a4a;
+        font-style: italic;
+    }
+}
+
+.tagsInput {
+    width: 95%;
+    height: 18px;
+    border-radius: 10px;
+    background-color: #fdfbfb;
+    margin-top: 7px;
+    font-size: 11px;
+    padding: 3px 8px 4px 10px;
+    color: #3eb995;
+    box-shadow: #0000005c 0px 0px 5px 0px inset;
+    border: 0.5px #0000005c solid;
+
+    &::placeholder {
+        color: #3eb995;
+    }
+}
+
+textarea:focus,
+input:focus {
+    outline: none;
+}
+
+.commonIcon {
+    box-sizing: border-box;
+    background-repeat: no-repeat;
+    background-size: 18px;
+    display: inline-block;
+    cursor: pointer;
+    background-color: transparent;
+    background-position: center;
+    border-radius: 0;
+    border-radius: 50%;
+    margin-top: -5px;
+    padding: 3px;
+    width: 28px;
+    height: 28px;
+    float: left;
+
+    &:hover {
+        background-color: #efefef;
+    }
+}
+
+.replyIcon {
+    background-image: url('/img/reply_empty.svg');
+
+    &:hover {
+        background-image: url('/img/reply_full.svg');
+    }
+}
+
+.shareIcon {
+    background-image: url('/img/share_empty.svg');
+
+    &:hover {
+        background-image: url('/img/share_hover.svg');
+    }
+}
+
+.trashIcon {
+    background-image: url('/img/trash_closed.svg');
+
+    &:hover {
+        background-image: url('/img/trash_open.svg');
+    }
+}
+
+.editIcon {
+    background-image: url('/img/newedit.svg');
+}
+
+.goToPageIcon {
+    background-image: url('/img/gotopage.svg');
+    background-repeat: no-repeat;
+    background-size: 27px;
+    background-position-x: 1px;
+    width: 26px;
+    height: 26px;
+    margin-top: -4.5px;
+    margin-right: 10px;
+    display: inline-block;
+    cursor: pointer;
+    margin-left: 2px;
+    padding: 3px;
+    border-radius: 50%;
+
+    &:hover {
+        background-color: #efefef;
+    }
+}
