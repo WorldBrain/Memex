@@ -30,12 +30,12 @@
 }
 
 .checklistContainer {
-    width: fit-content;
     position: absolute;
     right: 20px;
     top: 105px;
+    width: 330px;
     background: white;
-    padding: 0px 18px;
+    padding: 7px 45px 9px 28px;
     box-shadow: 0px 2px 11px 0px #00000075;
     border-radius: 5px;
 }

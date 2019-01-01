@@ -14,9 +14,9 @@ class Checklist extends PureComponent<Props> {
     render() {
         return (
             <React.Fragment>
-                <p className={styles.title}>Let's get started</p>
+                <p className={styles.title}>GET STARTED</p>
                 <p className={styles.subtext}>
-                    Complete the steps & get 1 month of free auto-backups
+                    with 30 sec interactive tutorials
                 </p>
                 <ChecklistItem
                     isChecked={this.props.isAnnotationChecked}
@@ -25,20 +25,20 @@ class Checklist extends PureComponent<Props> {
                 >
                     Make your first web annotation
                 </ChecklistItem>
+                <p className={styles.subTitle}>
+                    Learn how to add highlights and notes to websites
+                </p>
                 <ChecklistItem
                     isChecked={this.props.isPowerSearchChecked}
                     handleClick={this.props.handlePowerSearchStage}
                     id="powerSearchChecklist"
                 >
-                    Do your first power search
+                    Do your first History search
                 </ChecklistItem>
-                <ChecklistItem
-                    isChecked={false}
-                    handleClick={() => null}
-                    id="addTagsChecklist"
-                >
-                    Add Tags/Collections
-                </ChecklistItem>
+                <p className={styles.subTitle}>
+                    Learn how to full-text search your browser history and
+                    bookmarks
+                </p>
             </React.Fragment>
         )
     }

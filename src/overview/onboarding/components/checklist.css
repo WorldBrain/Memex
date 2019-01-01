@@ -3,24 +3,32 @@
     font-size: 18px;
     color: #22227d;
     font-weight: 400;
-    margin-top: 25px;
 }
 
 .subtext {
     text-align: left;
-    margin-top: 12px;
-    font-size: 13px;
+    margin-top: -12px;
+    color: #4a4a4a;
+    font-size: 15px;
     margin-bottom: 30px;
 }
 
 .checklist {
     text-align: left;
-    margin: 35px 0;
+    margin: 25px 0 25px -10px;
 }
 
 .checklistText {
-    color: #3eb995;
+    color: #333;
     font-weight: 400;
     cursor: pointer;
     font-size: 15px;
+}
+
+.subTitle {
+    font-size: 13px;
+    margin-left: 30px;
+    margin-top: -28px;
+    margin-right: 20px;
+    color: #333333c7;
 }

@@ -11,8 +11,9 @@ class OnboardingBox extends PureComponent {
                     <div className={styles.leftParent}>
                         <p className={styles.welcome}>Welcome to your Memex</p>
                         <p className={styles.text}>
-                            The all-in-one tool to get
-                            <br /> on top of your online chaos.
+                            The all-in-one tool to get on top of
+                            <br />
+                            your online chaos.
                         </p>
                         <div className={styles.privacyImage} />
                     </div>
@@ -29,8 +30,14 @@ class OnboardingBox extends PureComponent {
                             Your data is not our business model
                         </p>
                     </div>
-                    <div className={styles.learnMore}>learn more</div>
-                    <div className={styles.settings} />
+                    <a
+                        className={styles.learnMore}
+                        target="_blank"
+                        href="https://worldbrain.io/privacy"
+                    >
+                        LEARN MORE
+                    </a>
+                    <a className={styles.settings} href="#privacy" />
                 </div>
             </React.Fragment>
         )

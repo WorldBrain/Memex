@@ -2,7 +2,10 @@
 :global .react-datepicker__close-icon::after {
     background-color: #3eb995 !important;
     padding-left: 3px;
-    top: 9px;
+    top: 7px;
+    padding-top: 2px;
+    height: 17px;
+    width: 17px;
 }
 
 :global .react-datepicker__triangle {

@@ -1,6 +1,7 @@
 .container {
     width: 75%;
     margin: 20px auto;
+    margin-left: 48px;
     text-align: center;
     font-family: 'Opens Sans', sans-serif;
 }
@@ -18,15 +19,17 @@
     color: #506288;
     font-weight: 400;
     font-size: 17px;
+    text-align: left;
+    margin-left: 15px;
 }
 
 .learnMore {
     background: #3eb995;
     color: white;
-    padding: 5px 10px;
+    padding: 5px 15px;
     border-radius: 15px;
     cursor: pointer;
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 200;
     width: fit-content;
     margin: 3px auto;
