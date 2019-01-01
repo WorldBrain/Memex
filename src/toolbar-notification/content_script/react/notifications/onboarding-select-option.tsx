@@ -6,7 +6,6 @@ import { getExtURL } from '../utils.js'
 const styles = require('./notifications.css')
 
 const images = {
-    closeIcon: getExtURL('/img/cross.svg'),
     annotateIcon: getExtURL('/img/annotate.svg'),
     shareIcon: getExtURL('/img/share.svg'),
 }
@@ -15,11 +14,11 @@ export default function OnboardingSelectOption({ onCloseRequested }) {
     return (
         <div className={styles.title}>
             <NotificationLayout
-                title={'STEP 2: SELECT OPTION'}
+                title={'STEP 2: SELECT OPTION IN TOOLTIP'}
                 icon={null}
                 onCloseRequested={onCloseRequested}
                 thirdRowImage={null}
-                closeIcon={images.closeIcon}
+                closeIcon={null}
             >
                 <div className={styles.notifContainer}>
                     <img
@@ -28,7 +27,7 @@ export default function OnboardingSelectOption({ onCloseRequested }) {
                         className={styles.selectIcon}
                     />
                     <div className={styles.notifText}>
-                        Add a note to this highlight
+                        to add a note to this highlight
                     </div>
                     <br />
                     <img
@@ -37,7 +36,7 @@ export default function OnboardingSelectOption({ onCloseRequested }) {
                         height={'30px'}
                     />
                     <div className={styles.notifText}>
-                        Share a link to this higlight
+                        to share a link to this higlight
                     </div>
                 </div>
             </NotificationLayout>

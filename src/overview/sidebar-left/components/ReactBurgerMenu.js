@@ -31,7 +31,7 @@ export const styles = {
     bmMenuWrap: {
         position: 'fixed',
         right: 'inherit',
-        top: '70px',
+        top: '55px',
         left: '-1px',
         width: '250px',
         height: '100%',

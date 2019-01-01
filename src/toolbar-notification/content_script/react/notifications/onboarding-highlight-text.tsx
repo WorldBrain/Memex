@@ -14,13 +14,13 @@ export default function OnboardingHighlightText({ onCloseRequested }) {
     return (
         <div className={styles.title}>
             <NotificationLayout
-                title={'MAKE YOUR FIRST ANNOTATION'}
+                title={'STEP 1: Highlight some text'}
                 icon={images.notifIcon}
                 onCloseRequested={onCloseRequested}
                 thirdRowImage={null}
                 closeIcon={images.closeIcon}
             >
-                Step 1: Highlight any piece of text on this page
+                Just like you would normally do to copy/paste stuff.
             </NotificationLayout>
         </div>
     )

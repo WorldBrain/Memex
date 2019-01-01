@@ -5,7 +5,7 @@
     align-items: center;
     background-image: url('/img/calendar-icon.png');
     background-repeat: no-repeat;
-    background-size: 18px;
+    background-size: 17px;
     background-position: 27px;
     padding-left: 50px;
     padding-right: 40px;
@@ -18,17 +18,19 @@
 
 .datePicker {
     width: 130px;
-    height: 37px;
+    height: 30px;
     font-size: 15px;
     color: #777;
     border: none;
     margin: 0 10px;
     font-family: 'Open Sans';
     font-weight: lighter;
+    padding-top: 1px;
     padding-right: 20px;
 
     &::placeholder {
         color: #b8b8b8;
+        font-style: italic;
     }
 
     &:focus {
@@ -40,4 +42,5 @@
 .toIcon {
     width: 5px;
     height: 8px;
+    margin-top: 1px;
 }

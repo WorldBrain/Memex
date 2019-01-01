@@ -31,15 +31,9 @@ class CongratsMessage extends PureComponent {
                         CONGRATS TO YOUR FIRST ANNOTATION
                     </p>
                 </div>
-                <div
-                    className={styles.learnMore}
-                    onClick={this.moreAboutSidebar}
-                >
-                    Learn more about the sidebar
+                <div className={styles.learnMore} onClick={this.goToDashboard}>
+                    Go back to Dashboard
                 </div>
-                <p className={styles.subtext} onClick={this.goToDashboard}>
-                    or go back to dashboard
-                </p>
             </div>
         )
     }
