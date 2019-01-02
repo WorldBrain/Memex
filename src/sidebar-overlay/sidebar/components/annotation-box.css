@@ -6,12 +6,11 @@
     width: 95.3%;
     background-color: #fff;
     border-radius: 5px;
-    padding: 12px;
     color: #4a4a4a;
     font-family: sans-serif;
     font-size: 13px;
     border: 1px #d2d2d2 solid;
-    margin: 13px 0 0 8px;
+    margin: 13px 0 0 0;
     box-shadow: 0px 0px 5px 0px #00000040;
     transition: border 0.05s ease-in;
 
@@ -24,13 +23,21 @@
     }
 
     /**
-    * Check the following class' purpose.
+    * TODO: (Untested) Check the following class' purpose.
     * See if it can't be replaced by a pseudo-class.
     */
     &.active {
         border-color: #3db994b8;
         box-shadow: 0px 0px 5px 1px #00000050;
     }
+
+    &.isJustComment {
+        background: #f0f0f0;
+    }
+}
+
+.isClickable {
+    cursor: pointer;
 }
 
 .timestamp {
@@ -38,11 +45,12 @@
     font-size: 10px;
     text-align: right;
     vertical-align: middle;
-    margin: 0 5px 0 0;
+    padding: 16px 16px 8px 16px;
     font-weight: 600;
     font-family: 'Lato', sans-serif;
     color: #4a4a4a;
 
+    /* TODO: (Untested). */
     & .lastEdit {
         font-weight: 400;
         color: #929292;
@@ -50,10 +58,7 @@
     }
 }
 
-.pointer {
-    cursor: pointer;
-}
-
+/* TODO: (Untested). */
 .highlight {
     font-family: 'IBM Plex Serif', serif;
     font-style: italic;
@@ -66,30 +71,6 @@
     line-height: 20px;
 }
 
-.noDisplay {
-    display: none;
-}
-
-.showMore {
-    margin-left: 5px;
-    margin-bottom: -7px;
-    cursor: pointer;
-    display: inline-block;
-    background-image: url('/img/longarrow.svg');
-    background-repeat: no-repeat;
-    background-size: 43px;
-    width: 40px;
-    height: 20px;
-    background-position: center;
-    transition: transform 0.15s ease-in;
-    transform: rotate(0deg);
-
-    &.rotated {
-        transform: rotate(-180deg);
-        transform-origin: center;
-    }
-}
-
 .annotationText {
     font-size: 15px;
     font-weight: 500;
@@ -100,63 +81,27 @@
     white-space: pre-wrap;
     background: #f0f0f0;
     margin: 0px;
-    padding: 15px 10px 15px 15px;
+    padding: 0 15px 15px;
 
     &.isJustComment {
-        padding-top: 35px;
         border-top: none;
         border-top-left-radius: 5px;
         border-top-right-radius: 5px;
     }
 }
 
-.footer {
-    height: 19px;
-    margin-top: 10px;
-}
+.tagsContainer {
+    height: auto;
+    padding-top: 13px;
+    display: flex;
+    flex-wrap: wrap;
 
-.footerAside {
-    width: 96.5%;
-    display: inline-block;
-    font-size: 13px;
-    text-align: right;
-    border-top: 1px solid #d2d2d2;
-    margin-top: -10px;
-    margin-left: 0px;
-    padding-top: 11px;
-    padding-left: 10px;
-}
-
-.footerBoldText {
-    color: #000;
-    margin-left: 8px;
-    margin-right: 0px;
-    cursor: pointer;
-    font-weight: 700;
-    font-size: 14px;
-    padding: 3px;
-    background-color: transparent;
-
-    &:hover {
-        background-color: #efefef;
+    /* TODO: (Untested). */
+    &.noComment {
+        margin-top: -8px;
+        margin-left: 10px;
+        padding-bottom: 15px;
     }
-}
-
-.footerText {
-    color: #818181;
-    cursor: pointer;
-    margin-left: 10px;
-    margin-right: 10px;
-    font-size: 14px;
-}
-
-.deleteReally {
-    font-weight: 800;
-    font-size: 15px;
-    float: left;
-    color: #000;
-    margin-left: 5px;
-    margin-top: -1px;
 }
 
 .tagPill {
@@ -169,23 +114,6 @@
     padding: 2px 10px 3px 10px;
     cursor: pointer;
     border-radius: 3px;
-}
-
-.tagsContainer {
-    height: auto;
-    padding-top: 13px;
-    display: flex;
-    flex-wrap: wrap;
-
-    &.noComment {
-        margin-top: -8px;
-        margin-left: 10px;
-        padding-bottom: 15px;
-    }
-
-    &.noDisplay {
-        display: none;
-    }
 }
 
 .icon {
@@ -235,55 +163,6 @@
 textarea:focus,
 input:focus {
     outline: none;
-}
-
-.commonIcon {
-    box-sizing: border-box;
-    background-repeat: no-repeat;
-    background-size: 18px;
-    display: inline-block;
-    cursor: pointer;
-    background-color: transparent;
-    background-position: center;
-    border-radius: 0;
-    border-radius: 50%;
-    margin-top: -5px;
-    padding: 3px;
-    width: 28px;
-    height: 28px;
-    float: left;
-
-    &:hover {
-        background-color: #efefef;
-    }
-}
-
-.replyIcon {
-    background-image: url('/img/reply_empty.svg');
-
-    &:hover {
-        background-image: url('/img/reply_full.svg');
-    }
-}
-
-.shareIcon {
-    background-image: url('/img/share_empty.svg');
-
-    &:hover {
-        background-image: url('/img/share_hover.svg');
-    }
-}
-
-.trashIcon {
-    background-image: url('/img/trash_closed.svg');
-
-    &:hover {
-        background-image: url('/img/trash_open.svg');
-    }
-}
-
-.editIcon {
-    background-image: url('/img/newedit.svg');
 }
 
 .goToPageIcon {
