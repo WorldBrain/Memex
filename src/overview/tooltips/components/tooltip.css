@@ -54,15 +54,20 @@
 }
 
 .noBold {
-    font-weight: 100;
-    font-style: normal;
+    font-weight: 400;
     vertical-align: middle;
+    font-size: 14px;
+    color: #3eb995;
+}
+
+.proTipPro {
+    text-align: center;
 }
 
 .example {
-    font-weight: 100;
     color: #3eb995;
-    font-size: 13px;
+    font-size: 14px;
+    font-weight: 400;
     text-transform: none;
     vertical-align: middle;
     margin-top: 0px;
@@ -109,6 +114,8 @@
 
 .proTip {
     vertical-align: middle;
+    font-size: 14px;
+    font-weight: 400;
 }
 
 .subInfo {
