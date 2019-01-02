@@ -39,6 +39,7 @@
     height: 24px !important;
     width: 18px !important;
     border-color: transparent !important;
+    padding-top: 26px;
 }
 
 :global .react-datepicker__navigation:hover {
@@ -58,6 +59,10 @@
     width: 35px !important;
     line-height: 35px !important;
     border-radius: 50% !important;
+}
+
+:global .react-datepicker__day-name {
+    font-weight: 400;
 }
 
 :global .react-datepicker__day:hover {
