@@ -10,6 +10,7 @@
     padding-left: 50px;
     padding-right: 40px;
     width: 45%;
+    text-align: center;
 
     @media (max-width: 600px) {
         display: none;

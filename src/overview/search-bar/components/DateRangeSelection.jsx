@@ -13,6 +13,7 @@ import './datepicker-overrides.css'
 import { EVENT_NAMES } from '../../../analytics/internal/constants'
 
 const processEvent = remoteFunction('processEvent')
+const stylesPro = require('../../tooltips/components/tooltip.css')
 
 class DateRangeSelection extends Component {
     static propTypes = {
@@ -227,7 +228,16 @@ class DateRangeSelection extends Component {
                     onBlur={this.handleInputChange({ isStartDate: true })}
                     value={this.state.startDateText}
                     disabled={disabled}
-                />
+                >
+                    <div className={stylesPro.proTipBox}>
+                        <span className={stylesPro.emoji}>🤓</span>
+                        <span className={stylesPro.proTip}>PRO Tip: </span>
+                        <span className={stylesPro.noBold}>type </span>
+                        <span className={stylesPro.example}>
+                            e.g. "1 hour ago"
+                        </span>
+                    </div>
+                </DatePicker>
                 <img src="/img/to-icon.png" className={styles.toIcon} />
                 <DatePicker
                     ref={dp => {
@@ -250,7 +260,16 @@ class DateRangeSelection extends Component {
                     onBlur={this.handleInputChange({ isStartDate: false })}
                     value={this.state.endDateText}
                     disabled={disabled}
-                />
+                >
+                    <div className={stylesPro.proTipBox}>
+                        <span className={stylesPro.emoji}>🤓</span>
+                        <span className={stylesPro.proTip}>PRO Tip: </span>
+                        <span className={stylesPro.noBold}>type </span>
+                        <span className={stylesPro.example}>
+                            e.g. "1 hour ago"
+                        </span>
+                    </div>
+                </DatePicker>
             </div>
         )
     }
