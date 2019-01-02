@@ -46,11 +46,10 @@ class Checklist extends PureComponent<Props> {
                     handleClick={this.props.handlePowerSearchStage}
                     id="powerSearchChecklist"
                 >
-                    Tag websites & sort them into collections
+                    Tag & sort websites into collections
                 </ChecklistItem>
                 <p className={styles.subTitle}>
-                    Learn how to full-text search your browser history and
-                    bookmarks
+                    Learn how to add some organisation to your web-research
                 </p>
             </React.Fragment>
         )
