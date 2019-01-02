@@ -17,7 +17,7 @@ export default function TagThisPage({ onCloseRequested }) {
         <div className={styles.title}>
             {/*<img className={styles.notifIcon} src={images.notifIcon}/>*/}
             <NotificationLayout
-                title={'Add tags to this page'}
+                title={'Tag & sort this page in collections'}
                 icon={images.notifIcon}
                 onCloseRequested={onCloseRequested}
                 thirdRowImage={images.arrowUp}
