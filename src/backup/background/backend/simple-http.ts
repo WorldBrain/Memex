@@ -82,8 +82,7 @@ export default class SimpleHttpBackend extends BackupBackend {
 
         const body = await response.text()
         const lines = body.split('\n')
-        const regex = /href="([^"]+)"/g
-        const matches = lines.map(line => regex.exec(line))
+        const matches = lines.map(line => /href="([^"]+)"/g.exec(line))
         const fileNames = matches
             .filter(match => !!match)
             .map(match => match[1])
