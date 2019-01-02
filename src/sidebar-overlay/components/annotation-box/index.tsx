@@ -1,3 +1,3 @@
-import AnnotationBox from './annotation-box'
+import Annotation from './annotation'
 
-export default AnnotationBox
+export default Annotation
