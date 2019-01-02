@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { connect, MapStateToProps } from 'react-redux'
+import moment from 'moment'
 
 import * as selectors from '../selectors'
 import { MapDispatchToProps } from '../../types'
@@ -21,7 +22,56 @@ interface OwnProps {}
 
 type Props = StateProps & DispatchProps & OwnProps
 
-class AnnotationsSectionContainer extends React.Component<Props> {
+interface State {
+    mode: 'default' | 'edit' | 'delete'
+}
+
+class AnnotationsSectionContainer extends React.Component<Props, State> {
+    state: State = {
+        mode: 'default',
+    }
+
+    getFormattedTimestamp = (timestamp: Date) =>
+        moment(timestamp)
+            .format('MMMM D YYYY')
+            .toUpperCase()
+
+    getTruncatedTextObject: (
+        text: string,
+    ) => { isTextTooLong: boolean; text: string } = text => {
+        if (text.length > 280) {
+            const truncatedText = text.slice(0, 280) + ' [...]'
+            return {
+                isTextTooLong: true,
+                text: truncatedText,
+            }
+        }
+
+        for (let i = 0, newlineCount = 0; i < text.length; ++i) {
+            if (text[i] === '\n') {
+                newlineCount++
+                if (newlineCount > 4) {
+                    const truncatedText = text.slice(0, i) + ' [...]'
+                    return {
+                        isTextTooLong: true,
+                        text: truncatedText,
+                    }
+                }
+            }
+        }
+
+        return {
+            isTextTooLong: false,
+            text,
+        }
+    }
+
+    shareIconClickHander = () => null
+
+    replyIconClickHandler = () => null
+
+    setMode = (mode: 'default' | 'edit' | 'delete') => null
+
     render() {
         const { isLoading, annotations } = this.props
 
@@ -35,10 +85,21 @@ class AnnotationsSectionContainer extends React.Component<Props> {
 
         console.log(annotations)
 
+        const { mode } = this.state
+
         return (
             <div className={styles.annotationsSection}>
                 {annotations.map(annotation => (
-                    <AnnotationBox key={annotation.url} {...annotation} />
+                    <AnnotationBox
+                        key={annotation.url}
+                        mode={mode}
+                        {...annotation}
+                        getFormattedTimestamp={this.getFormattedTimestamp}
+                        getTruncatedTextObject={this.getTruncatedTextObject}
+                        shareIconClickHandler={this.shareIconClickHander}
+                        replyIconClickHandler={this.replyIconClickHandler}
+                        setMode={this.setMode}
+                    />
                 ))}
             </div>
         )

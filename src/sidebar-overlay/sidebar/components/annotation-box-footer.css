@@ -1,0 +1,42 @@
+.footer {
+    display: flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-top: 1px solid #d2d2d2;
+    font-size: 13px;
+    text-align: right;
+    background: #fff;
+    border-radius: 0 0 5px 5px;
+}
+
+.footerBoldText {
+    color: #000;
+    margin-left: 8px;
+    margin-right: 0px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 3px;
+    background-color: transparent;
+
+    &:hover {
+        background-color: #efefef;
+    }
+}
+
+.footerText {
+    color: #818181;
+    cursor: pointer;
+    margin-left: 10px;
+    margin-right: 10px;
+    font-size: 14px;
+}
+
+.deleteReally {
+    font-weight: 800;
+    font-size: 15px;
+    float: left;
+    color: #000;
+    margin-left: 5px;
+    margin-top: -1px;
+}
