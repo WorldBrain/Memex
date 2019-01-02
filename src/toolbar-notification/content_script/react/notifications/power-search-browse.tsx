@@ -27,27 +27,19 @@ export default function PowerSearchBrowse({
             >
                 <div className={styles.notifContainer}>
                     <p className={styles.title}>
-                        Search with any word you see here
+                        From now on you can search with any word of any page you
+                        visit.
                     </p>
-                    <p>go back to dashboard to try it out.</p>
-                    <div className={styles.button} onClick={openDashboard}>
-                        Get me there
-                    </div>
-                    <p
-                        onClick={triggerNextNotification}
-                        className={styles.pointer}
-                    >
-                        Or browse around a bit
+                    <p className={styles.instructions}>
+                        Search via the{' '}
+                        <span className={styles.button} onClick={openDashboard}>
+                            Dashboard
+                        </span>{' '}
+                        or the address bar by typing{' '}
                     </p>
-                    <br />
-                    <p>
-                        <span className={styles.emoji}>🤓</span>
-                        <span>
-                            <b className={styles.protip}>Pro Tip: </b>
-                            Search via the address bar with
-                            <span className={styles.key}>M</span>+
-                            <span className={styles.key}>SPACE</span>
-                        </span>
+                    <p className={styles.keys}>
+                        <span className={styles.key}>W</span>+
+                        <span className={styles.key}>SPACE</span>
                     </p>
                 </div>
             </NotificationLayout>

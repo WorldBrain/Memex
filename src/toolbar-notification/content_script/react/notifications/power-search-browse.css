@@ -7,10 +7,9 @@
 }
 
 .title {
-    font-weight: 100;
-    color: #3eb995;
+    font-weight: 400;
+    color: #173766;
     font-size: 17px;
-    text-transform: uppercase;
 }
 
 .notifContainer {
@@ -18,17 +17,15 @@
     margin: 10px auto;
     margin-top: 20px;
     text-align: center;
-    color: #6f6a86;
+    color: #333;
+    margin-bottom: 15px;
 }
 
 .button {
-    width: fit-content;
-    margin: 0px auto;
-    color: white;
-    background: #3eb995;
-    padding: 8px 15px;
+    color: #333;
     font-weight: 600;
     cursor: pointer;
+    text-decoration: underline;
 }
 
 .pointer {
@@ -54,4 +51,14 @@
     padding: 5px;
     background-color: #3eb995;
     margin: 0px 3px;
+}
+
+.keys {
+    margin-top: 20px;
+    margin-bottom: 40px;
+}
+
+.instructions {
+    margin-top: 20px;
+    color: #3eb995;
 }
