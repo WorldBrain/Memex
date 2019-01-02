@@ -22,20 +22,22 @@ const tooltip: SFC<Props> = ({
     nextTooltip,
 }) => (
     <div className={styles.container} style={position}>
-        <span className={styles.close} onClick={closeTooltip}>
-            X
-        </span>
-        {previousTooltip ? (
-            <span className={styles.prev} onClick={previousTooltip}>
-                {'<'}
+        <div className={styles.navigationBox}>
+            <span className={styles.close} onClick={closeTooltip}>
+                X
             </span>
-        ) : null}
-        {nextTooltip ? (
-            <span className={styles.next} onClick={nextTooltip}>
-                {'>'}
-            </span>
-        ) : null}
-        {children}
+            {previousTooltip ? (
+                <span className={styles.prev} onClick={previousTooltip}>
+                    {'<'}
+                </span>
+            ) : null}
+            {nextTooltip ? (
+                <span className={styles.next} onClick={nextTooltip}>
+                    {'>'}
+                </span>
+            ) : null}
+        </div>
+        <div>{children}</div>
     </div>
 )
 
