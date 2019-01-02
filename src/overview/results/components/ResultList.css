@@ -28,15 +28,3 @@
         margin-top: 100px !important; /* stylelint-disable-line declaration-no-important */
     }
 }
-
-.checklistContainer {
-    position: absolute;
-    right: 20px;
-    top: 105px;
-    width: 350px;
-    background: white;
-    padding: 7px 45px 9px 28px;
-    box-shadow: 0px 2px 11px 0px #00000075;
-    border-radius: 5px;
-    padding-bottom: 20px;
-}

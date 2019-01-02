@@ -14,6 +14,7 @@ import * as tooltipsActs from '../../tooltips/actions'
 import * as resultSelectors from '../../results/selectors'
 
 export interface StateProps {
+    showOnboardingBox: boolean
     annotationStage: string
     powerSearchStage: string
     noResults: boolean
@@ -21,10 +22,14 @@ export interface StateProps {
 
 export interface DispatchProps {
     fetchOnboardingStages: () => void
+    fetchShowOnboarding: () => void
     initOnboardingTooltips: () => void
+    closeOnboardingBox: () => void
 }
 
-export interface OwnProps {}
+export interface OwnProps {
+    isRightBox?: boolean
+}
 
 export type Props = StateProps & DispatchProps & OwnProps
 
@@ -32,6 +37,7 @@ class OnboardingChecklist extends React.Component<Props> {
     processEvent = remoteFunction('processEvent')
 
     async componentDidMount() {
+        await this.props.fetchShowOnboarding()
         await this.props.fetchOnboardingStages()
     }
 
@@ -69,8 +75,7 @@ class OnboardingChecklist extends React.Component<Props> {
         })
 
         /*
-        If there are no results in Overview, take user to the Memex
-        page so that it gets indexed.
+        If there are no results in Overview, take user to the Wiki
         Else, directly start the onboarding tooltip process.
         */
         if (this.props.noResults) {
@@ -86,21 +91,33 @@ class OnboardingChecklist extends React.Component<Props> {
     }
 
     render() {
-        const { annotationStage, powerSearchStage } = this.props
+        const {
+            showOnboardingBox,
+            annotationStage,
+            powerSearchStage,
+        } = this.props
+
+        if (!showOnboardingBox) {
+            return null
+        }
+
         return (
             <Checklist
+                isRightBox={this.props.isRightBox}
                 isAnnotationChecked={annotationStage === 'DONE'}
                 isPowerSearchChecked={powerSearchStage === 'DONE'}
                 isTaggingChecked={powerSearchStage === 'DONE'}
                 handleAnnotationStage={this.handleAnnotationStage}
                 handlePowerSearchStage={this.handlePowerSearchStage}
                 handleTaggingStage={this.handlePowerSearchStage}
+                closeOnboardingBox={this.props.closeOnboardingBox}
             />
         )
     }
 }
 
 const mapStateToProps = state => ({
+    showOnboardingBox: selectors.showOnboardingBox(state),
     annotationStage: selectors.annotationStage(state),
     powerSearchStage: selectors.powerSearchStage(state),
     noResults: resultSelectors.noResults(state),
@@ -108,6 +125,8 @@ const mapStateToProps = state => ({
 
 const mapDispatchToPrpos = dispatch => ({
     fetchOnboardingStages: () => dispatch(actions.fetchOnboardingStages()),
+    fetchShowOnboarding: () => dispatch(actions.fetchShowOnboarding()),
+    closeOnboardingBox: () => dispatch(actions.closeOnboardingBox()),
     initOnboardingTooltips: () =>
         dispatch(tooltipsActs.initOnboardingTooltips()),
 })
