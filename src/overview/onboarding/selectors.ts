@@ -11,6 +11,10 @@ export const powerSearchStage = createSelector(
     onboarding,
     state => state.powerSearchStage,
 )
+export const taggingStage = createSelector(
+    onboarding,
+    state => state.taggingStage,
+)
 export const showOnboardingBox = createSelector(
     onboarding,
     state => state.showOnboardingBox,

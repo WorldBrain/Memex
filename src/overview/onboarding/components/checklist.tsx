@@ -57,8 +57,8 @@ class Checklist extends PureComponent<Props> {
                     bookmarks
                 </p>
                 <ChecklistItem
-                    isChecked={this.props.isPowerSearchChecked}
-                    handleClick={this.props.handlePowerSearchStage}
+                    isChecked={this.props.isTaggingChecked}
+                    handleClick={this.props.handleTaggingStage}
                     id="powerSearchChecklist"
                 >
                     Tag & sort websites into collections

@@ -4,5 +4,6 @@ export const STORAGE_KEYS = {
     onboardingDemo: {
         step1: 'step-one-annotations',
         step2: 'step-two-power-search',
+        step3: 'step-three-tagging',
     },
 }

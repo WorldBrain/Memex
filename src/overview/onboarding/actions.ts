@@ -9,6 +9,9 @@ export const setAnnotationStage = createAction<string>(
 export const setPowerSearchStage = createAction<string>(
     'onboarding/setPowerSearchStage',
 )
+export const setTaggingStage = createAction<string>(
+    'onboarding/setTaggingStage',
+)
 export const setShowOnboardingBox = createAction<boolean>(
     'onboarding/setShowOnboardingBox',
 )
@@ -20,6 +23,10 @@ export const fetchOnboardingStages = () => async dispatch => {
     )
     const powerSearchStage = await getLocalStorage(
         STORAGE_KEYS.onboardingDemo.step2,
+        'unvisited',
+    )
+    const taggingStage = await getLocalStorage(
+        STORAGE_KEYS.onboardingDemo.step3,
         'unvisited',
     )
     dispatch(setAnnotationStage(annotationStage))
