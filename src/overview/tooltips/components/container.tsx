@@ -34,7 +34,7 @@ class TooltipContainer extends Component<Props> {
         if (tooltip === 'search-bar') {
             return (
                 <Tooltip
-                    position={getBottomCenter('#query-search-bar', 30, 50)}
+                    position={getBottomCenter('#query-search-bar', 20, 70)}
                     nextTooltip={this.props.nextTooltip}
                     closeTooltip={this.props.closeTooltip}
                 >
@@ -55,7 +55,7 @@ class TooltipContainer extends Component<Props> {
         if (tooltip === 'time-filters') {
             return (
                 <Tooltip
-                    position={getBottomCenter('#date-picker', 30, -30)}
+                    position={getBottomCenter('#date-picker', 20, 80)}
                     closeTooltip={this.props.closeTooltip}
                     nextTooltip={this.props.nextTooltip}
                     previousTooltip={this.props.previousTooltip}
@@ -68,7 +68,7 @@ class TooltipContainer extends Component<Props> {
         if (tooltip === 'more-filters') {
             return (
                 <Tooltip
-                    position={getBottomCenter('#filter-icon', 30, -20)}
+                    position={getBottomCenter('#filter-icon', 20, -10)}
                     closeTooltip={this.props.closeTooltip}
                     previousTooltip={this.props.previousTooltip}
                 >

@@ -11,38 +11,25 @@
     font-weight: 400;
     border-radius: 6px;
     color: #173766;
-    box-shadow: 0px 2px 8px 1px #17376626;
-    border: solid 1px #3eb99561;
+    border: solid 1px #3eb99536;
+    animation: pulse_slow 4s infinite;
     font-size: 16px;
 }
 
 .container::after {
     content: ' ';
     position: absolute;
-    top: -10px;
+    top: -48px;
     left: calc(50% - 12.5px);
     margin-left: 0px;
-    width: 20px;
-    height: 20px;
-    border-top-left-radius: 3px;
-    background-color: white;
-    border: solid 1px #3eb99561;
+    width: 16px;
+    background-color: #3eb995;
+    border-radius: 50px;
+    height: 16px;
+    border: solid 2px #173766;
     transform: rotate(45deg);
-    z-index: -1;
-    box-shadow: 2px 2px 8px 1px #17376626;
-}
-
-.container::before {
-    content: ' ';
-    position: absolute;
-    top: -37px;
-    left: calc(50% - 26px);
-    border-top-left-radius: 6px;
-    border-top-right-radius: 6px;
-    border-width: 24px;
-    border-style: solid;
-    border-color: transparent;
-    border-bottom-color: #fff;
+    z-index: 253459;
+    animation: pulse 2s infinite;
 }
 
 .emoji {
@@ -122,4 +109,32 @@
     color: #3eb995;
     font-size: 15px;
     margin-bottom: -5px;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 #17376676;
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px #17376600;
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 #17376600;
+    }
+}
+
+@keyframes pulse_slow {
+    0% {
+        box-shadow: 0 0 0 0 #79ffd8;
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px #3eb99500;
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 #3eb99500;
+    }
 }
