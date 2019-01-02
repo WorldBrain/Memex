@@ -6,8 +6,10 @@ const styles = require('./checklist.css')
 interface Props {
     isAnnotationChecked: boolean
     isPowerSearchChecked: boolean
+    isTaggingChecked: boolean
     handleAnnotationStage: () => void
     handlePowerSearchStage: () => void
+    handleTaggingStage: () => void
 }
 
 class Checklist extends PureComponent<Props> {
@@ -34,6 +36,17 @@ class Checklist extends PureComponent<Props> {
                     id="powerSearchChecklist"
                 >
                     Do your first History search
+                </ChecklistItem>
+                <p className={styles.subTitle}>
+                    Learn how to full-text search your browser history and
+                    bookmarks
+                </p>
+                <ChecklistItem
+                    isChecked={this.props.isPowerSearchChecked}
+                    handleClick={this.props.handlePowerSearchStage}
+                    id="powerSearchChecklist"
+                >
+                    Tag websites & sort them into collections
                 </ChecklistItem>
                 <p className={styles.subTitle}>
                     Learn how to full-text search your browser history and

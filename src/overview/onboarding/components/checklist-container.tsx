@@ -91,8 +91,10 @@ class OnboardingChecklist extends React.Component<Props> {
             <Checklist
                 isAnnotationChecked={annotationStage === 'DONE'}
                 isPowerSearchChecked={powerSearchStage === 'DONE'}
+                isTaggingChecked={powerSearchStage === 'DONE'}
                 handleAnnotationStage={this.handleAnnotationStage}
                 handlePowerSearchStage={this.handlePowerSearchStage}
+                handleTaggingStage={this.handlePowerSearchStage}
             />
         )
     }
