@@ -9,6 +9,9 @@ export const setAnnotationStage = createAction<string>(
 export const setPowerSearchStage = createAction<string>(
     'onboarding/setPowerSearchStage',
 )
+export const setShowOnboardingBox = createAction<boolean>(
+    'onboarding/setShowOnboardingBox',
+)
 
 export const fetchOnboardingStages = () => async dispatch => {
     const annotationStage = await getLocalStorage(
@@ -23,6 +26,14 @@ export const fetchOnboardingStages = () => async dispatch => {
     dispatch(setPowerSearchStage(powerSearchStage))
 }
 
+export const fetchShowOnboarding = () => async dispatch => {
+    const showOnboardingBox = await getLocalStorage(
+        STORAGE_KEYS.shouldShowOnboarding,
+        true,
+    )
+    dispatch(setShowOnboardingBox(showOnboardingBox))
+}
+
 /**
  * Sets Power Search Stage as done.
  * Dispatched from the last tooltip in Power Search Stage.
@@ -30,4 +41,9 @@ export const fetchOnboardingStages = () => async dispatch => {
 export const setPowerSearchDone = () => async dispatch => {
     await setLocalStorage(STORAGE_KEYS.onboardingDemo.step2, 'DONE')
     dispatch(setPowerSearchStage('DONE'))
+}
+
+export const closeOnboardingBox = () => async dispatch => {
+    await setLocalStorage(STORAGE_KEYS.shouldShowOnboarding, false)
+    dispatch(setShowOnboardingBox(false))
 }

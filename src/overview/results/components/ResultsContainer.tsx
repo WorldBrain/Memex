@@ -4,11 +4,10 @@ import { connect, MapStateToProps } from 'react-redux'
 import NotificationContainer, {
     selectors as notifs,
 } from '../../../notifications'
-import OnboardingBox from '../../onboarding'
 import NoResultBadTerm from './NoResultBadTerm'
 import ResultsMessage from './ResultsMessage'
 import ResultList from './ResultListContainer'
-import { OnboardingChecklist } from '../../onboarding/components'
+import OnboardingBox, { OnboardingChecklist } from '../../onboarding/components'
 import * as selectors from '../selectors'
 import { RootState } from '../../../options/types'
 
@@ -83,11 +82,7 @@ class ResultsContainer extends PureComponent<Props> {
                     </ResultsMessage>
                 )}
                 <ResultList />
-                {!this.props.isLoading && (
-                    <div className={styles.checklistContainer}>
-                        <OnboardingChecklist />
-                    </div>
-                )}
+                {!this.props.isLoading && <OnboardingChecklist isRightBox />}
             </React.Fragment>
         )
     }
