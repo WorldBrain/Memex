@@ -120,9 +120,9 @@ async function makeSuggestion(query, suggest) {
         setOmniboxMessage('No results found for this query.')
     } else {
         setOmniboxMessage(
-            `Found these ${
+            `Found ${
                 searchResults.totalCount
-            } pages: (press enter for all results)`,
+            } pages - press ENTER for ALL results`,
         )
     }
 
