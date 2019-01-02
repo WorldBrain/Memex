@@ -62,6 +62,7 @@ describe('BackupRestoreProcedure', () => {
             storageManager: null,
         })
         expect(restoreProcedure.running).toBe(false)
+        restoreProcedure._clearDatabase = async () => null
         restoreProcedure._listBackupCollection = async collection =>
             Object.keys(backupObjects[collection])
         restoreProcedure._createBackupObjectFetcher = () => {
