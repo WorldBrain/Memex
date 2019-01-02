@@ -46,9 +46,8 @@ export class DownloadQueue {
         }
 
         this.queueNext()
-        return this.downloads[this.consumed++].then(getResponse =>
-            getResponse(),
-        )
+        const nextDownload = this.downloads[this.consumed++]
+        return nextDownload.then(getResponse => getResponse())
     }
 
     hasNext() {
