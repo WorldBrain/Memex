@@ -6,36 +6,40 @@
     width: fit-content;
     background: #fff;
     height: fit-content;
-    padding: 20px;
+    padding: 30px;
     font-family: 'Open Sans', sans-serif;
-    font-weight: 600;
-    font-style: italic;
-    color: #444882;
-    box-shadow: 0px 2px 8px 1px #0000009e;
-    text-transform: uppercase;
-    font-size: 15px;
+    font-weight: 400;
+    border-radius: 6px;
+    color: #173766;
+    box-shadow: 0px 2px 8px 1px #17376626;
+    border: solid 1px #3eb99561;
+    font-size: 16px;
 }
 
 .container::after {
     content: ' ';
     position: absolute;
-    top: -20px;
+    top: -10px;
     left: calc(50% - 12.5px);
-    margin-left: -5px;
-    width: 40px;
-    height: 40px;
+    margin-left: 0px;
+    width: 20px;
+    height: 20px;
+    border-top-left-radius: 3px;
     background-color: white;
+    border: solid 1px #3eb99561;
     transform: rotate(45deg);
     z-index: -1;
-    box-shadow: 2px 2px 8px 1px rgba(0, 0, 0, 0.61961);
+    box-shadow: 2px 2px 8px 1px #17376626;
 }
 
 .container::before {
     content: ' ';
     position: absolute;
-    top: -55px;
+    top: -37px;
     left: calc(50% - 26px);
-    border-width: 28px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    border-width: 24px;
     border-style: solid;
     border-color: transparent;
     border-bottom-color: #fff;
@@ -43,22 +47,24 @@
 
 .emoji {
     font-size: 20px;
-    vertical-align: middle;
     margin-right: 5px;
     font-style: normal;
     font-weight: normal;
+    vertical-align: middle;
 }
 
 .noBold {
     font-weight: 100;
     font-style: normal;
+    vertical-align: middle;
 }
 
 .example {
     font-weight: 100;
     color: #3eb995;
-    font-size: 12px;
+    font-size: 13px;
     text-transform: none;
+    vertical-align: middle;
     margin-top: 0px;
 }
 
@@ -99,4 +105,14 @@
     border-radius: 8px;
     padding: 1px 5px 2px 5px;
     cursor: pointer;
+}
+
+.proTip {
+    vertical-align: middle;
+}
+
+.subInfo {
+    color: #3eb995;
+    font-size: 15px;
+    margin-bottom: -5px;
 }
