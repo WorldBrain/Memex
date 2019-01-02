@@ -66,7 +66,7 @@
     color: #173766;
     border: none;
     font-family: 'Open Sans';
-    font-weight: lighter;
+    font-weight: 400;
 
     &::placeholder {
         color: #b8b8b8;
