@@ -17,6 +17,7 @@ export interface StateProps {
     showOnboardingBox: boolean
     annotationStage: string
     powerSearchStage: string
+    taggingStage: string
     noResults: boolean
 }
 
@@ -48,6 +49,11 @@ class OnboardingChecklist extends React.Component<Props> {
         )
     }
 
+    _openDemoPage = async () => {
+        const url = constants.ANNOTATION_DEMO_URL
+        await browser.tabs.create({ url })
+    }
+
     handleAnnotationStage = async () => {
         if (this.props.annotationStage === 'DONE') {
             return
@@ -57,12 +63,8 @@ class OnboardingChecklist extends React.Component<Props> {
             type: EVENT_NAMES.START_ANNOTATION_ONBOARDING,
         })
 
-        this._setOnboardingKey('step1', 'highlight_text')
-
-        const url = constants.ANNOTATION_DEMO_URL
-        await browser.tabs.create({
-            url,
-        })
+        await this._setOnboardingKey('step1', 'highlight_text')
+        await this._openDemoPage()
     }
 
     handlePowerSearchStage = async () => {
@@ -79,15 +81,23 @@ class OnboardingChecklist extends React.Component<Props> {
         Else, directly start the onboarding tooltip process.
         */
         if (this.props.noResults) {
-            const url = constants.ANNOTATION_DEMO_URL
-            this._setOnboardingKey('step2', 'redirected')
-            await browser.tabs.create({
-                url,
-            })
+            await this._setOnboardingKey('step2', 'redirected')
+            await this._openDemoPage()
         } else {
-            this._setOnboardingKey('step2', 'overview-tooltips')
+            await this._setOnboardingKey('step2', 'overview-tooltips')
             this.props.initOnboardingTooltips()
         }
+    }
+
+    handleTaggingStage = async () => {
+        if (this.props.taggingStage === 'DONE') {
+            return
+        }
+
+        // TODO: Add analytic
+
+        await this._setOnboardingKey('step3', 'redirected')
+        await this._openDemoPage()
     }
 
     render() {
@@ -95,6 +105,7 @@ class OnboardingChecklist extends React.Component<Props> {
             showOnboardingBox,
             annotationStage,
             powerSearchStage,
+            taggingStage,
         } = this.props
 
         if (!showOnboardingBox) {
@@ -106,10 +117,10 @@ class OnboardingChecklist extends React.Component<Props> {
                 isRightBox={this.props.isRightBox}
                 isAnnotationChecked={annotationStage === 'DONE'}
                 isPowerSearchChecked={powerSearchStage === 'DONE'}
-                isTaggingChecked={powerSearchStage === 'DONE'}
+                isTaggingChecked={taggingStage === 'DONE'}
                 handleAnnotationStage={this.handleAnnotationStage}
                 handlePowerSearchStage={this.handlePowerSearchStage}
-                handleTaggingStage={this.handlePowerSearchStage}
+                handleTaggingStage={this.handleTaggingStage}
                 closeOnboardingBox={this.props.closeOnboardingBox}
             />
         )
@@ -120,6 +131,7 @@ const mapStateToProps = state => ({
     showOnboardingBox: selectors.showOnboardingBox(state),
     annotationStage: selectors.annotationStage(state),
     powerSearchStage: selectors.powerSearchStage(state),
+    taggingStage: selectors.taggingStage(state),
     noResults: resultSelectors.noResults(state),
 })
 

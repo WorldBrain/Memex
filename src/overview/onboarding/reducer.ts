@@ -6,6 +6,7 @@ export interface State {
     // Status of onboarding stages
     annotationStage: string
     powerSearchStage: string
+    taggingStage: string
 
     // Decides whether or not to show the Right Onboarding box
     showOnboardingBox: boolean
@@ -14,6 +15,7 @@ export interface State {
 const defState = {
     annotationStage: '',
     powerSearchStage: '',
+    taggingStage: '',
     showOnboardingBox: false,
 }
 
@@ -27,6 +29,11 @@ reducer.on(actions.setAnnotationStage, (state, payload) => ({
 reducer.on(actions.setPowerSearchStage, (state, payload) => ({
     ...state,
     powerSearchStage: payload,
+}))
+
+reducer.on(actions.setTaggingStage, (state, payload) => ({
+    ...state,
+    taggingStage: payload,
 }))
 
 reducer.on(actions.setShowOnboardingBox, (state, payload) => ({

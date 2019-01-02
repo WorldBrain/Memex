@@ -8,6 +8,7 @@ import OnboardingHighlightText from './notifications/onboarding-highlight-text'
 import OnboardingSelectOption from './notifications/onboarding-select-option'
 import PowerSearchBrowse from './notifications/power-search-browse'
 import GoToDashboard from './notifications/go-to-dashboard'
+import TagThisPage from './notifications/tag-this-page'
 
 import { STORAGE_KEYS } from 'src/overview/onboarding/constants'
 import { EVENT_NAMES } from 'src/analytics/internal/constants'
@@ -60,6 +61,11 @@ export class ToolbarNotification extends Component<Props> {
                 )}
                 {this.props.type === 'go-to-dashboard' && (
                     <GoToDashboard
+                        onCloseRequested={this.props.onCloseRequested}
+                    />
+                )}
+                {this.props.type === 'tag-this-page' && (
+                    <TagThisPage
                         onCloseRequested={this.props.onCloseRequested}
                     />
                 )}

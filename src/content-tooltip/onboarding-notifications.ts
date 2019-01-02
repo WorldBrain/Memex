@@ -75,10 +75,12 @@ export const conditionallyShowOnboardingNotifications = async ({
 
     const onboardingAnnotationStage = await getLocalStorage(
         STORAGE_KEYS.onboardingDemo.step1,
-        'unvisited',
     )
     const powerSearchStage = await getLocalStorage(
         STORAGE_KEYS.onboardingDemo.step2,
+    )
+    const taggingStage = await getLocalStorage(
+        STORAGE_KEYS.onboardingDemo.step3,
     )
 
     if (onboardingAnnotationStage === 'highlight_text') {
@@ -99,6 +101,14 @@ export const conditionallyShowOnboardingNotifications = async ({
         await setLocalStorage(
             STORAGE_KEYS.onboardingDemo.step2,
             'power-search-browse-shown',
+        )
+    }
+
+    if (taggingStage === 'redirected') {
+        toolbarNotifications.showToolbarNotification('tag-this-page')
+        await setLocalStorage(
+            STORAGE_KEYS.onboardingDemo.step3,
+            'tag-page-notification-shown',
         )
     }
 }
