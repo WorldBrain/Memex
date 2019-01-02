@@ -1,0 +1,44 @@
+.annotationText {
+    font-size: 15px;
+    font-weight: 500;
+    font-family: 'Lato', sans-serif;
+    line-height: 16px;
+    overflow: hidden;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    background: #f0f0f0;
+    margin: 0px;
+    padding: 0 15px 15px;
+
+    &.isJustComment {
+        border-top: none;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+    }
+}
+
+.tagsContainer {
+    height: auto;
+    padding-top: 13px;
+    display: flex;
+    flex-wrap: wrap;
+
+    /* TODO: (Untested). */
+    &.noComment {
+        margin-top: -8px;
+        margin-left: 10px;
+        padding-bottom: 15px;
+    }
+}
+
+.tagPill {
+    font-size: 13px;
+    font-weight: 800;
+    background-color: #3eb995d9;
+    color: #fff;
+    margin-right: 8px;
+    margin-top: 5px;
+    padding: 2px 10px 3px 10px;
+    cursor: pointer;
+    border-radius: 3px;
+}

@@ -1,8 +1,9 @@
 import * as React from 'react'
 import cx from 'classnames'
 
-import TruncatedTextRenderer from './truncated-text-renderer'
+import TruncatedTextRenderer from '../truncated-text-renderer'
 import AnnotationBoxFooter from './annotation-box-footer'
+import AnnotationBoxCommentTags from './annotation-box-comment-tags'
 
 const styles = require('./annotation-box.css')
 
@@ -65,6 +66,7 @@ const AnnotationBox = (props: Props) => {
                     {timestamp}
                 </div>
             )}
+
             {/* Highlighted text for the annotation. If available, shown in
                 every mode. */}
             {!isJustComment && (
@@ -75,39 +77,16 @@ const AnnotationBox = (props: Props) => {
                     />
                 </div>
             )}
+
             {/* Comment and tags to be displayed. Hidden during 'edit' mode. */}
             {mode !== 'edit' ? (
                 (!!comment || (!!tags && tags.length !== 0)) && (
-                    <div
-                        className={cx({
-                            [styles.annotationText]: !!comment,
-                            [styles.isJustComment]: isJustComment,
-                        })}
-                    >
-                        {!!comment && (
-                            <TruncatedTextRenderer
-                                text={comment}
-                                getTruncatedTextObject={getTruncatedTextObject}
-                            />
-                        )}
-                        {!!tags &&
-                            tags.length !== 0 && (
-                                <div
-                                    className={cx(styles.tagsContainer, {
-                                        [styles.noComment]: !comment,
-                                    })}
-                                >
-                                    {props.tags.map(tag => (
-                                        <span
-                                            key={tag}
-                                            className={styles.tagPill}
-                                        >
-                                            {tag}
-                                        </span>
-                                    ))}
-                                </div>
-                            )}
-                    </div>
+                    <AnnotationBoxCommentTags
+                        comment={comment}
+                        tags={tags}
+                        isJustComment={isJustComment}
+                        getTruncatedTextObject={getTruncatedTextObject}
+                    />
                 )
             ) : (
                 <div>hello</div>
