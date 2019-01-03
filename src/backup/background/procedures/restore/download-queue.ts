@@ -6,17 +6,30 @@ export class DownloadQueue {
     private downloads: Array<Promise<any>> = [] // When we're downloading something, listen here for that request to finish
     private fetcher: Fetcher
     private consumed = 0
+    private concurrency: number
 
     constructor({
         items,
         fetcher = fetch,
+        concurrency = 1,
     }: {
         items: any[]
         fetcher: Fetcher
+        concurrency?: number
     }) {
         this.items = items
         this.fetcher = fetcher
+        this.concurrency = concurrency
         this.queueNext()
+    }
+
+    get hasFreeDownloadSlots() {
+        const slotsInUse = this.downloads.reduce(
+            (sum, download) => (sum += download != null ? 1 : 0),
+            0,
+        )
+
+        return slotsInUse < this.concurrency
     }
 
     async downloadNext() {
@@ -27,7 +40,7 @@ export class DownloadQueue {
     }
 
     queueNext() {
-        if (this.items.length && this.downloads.length <= 1) {
+        if (this.items.length && this.hasFreeDownloadSlots) {
             const index = this.downloads.length
             this.downloads.push(
                 this.downloadNext().then(response => {
