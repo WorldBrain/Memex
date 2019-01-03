@@ -19,3 +19,7 @@ export const showOnboardingBox = createSelector(
     onboarding,
     state => state.showOnboardingBox,
 )
+export const congratsMessage = createSelector(
+    onboarding,
+    state => state.congratsMessage,
+)

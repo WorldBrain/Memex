@@ -8,6 +8,7 @@ interface Props {
     isAnnotationChecked: boolean
     isPowerSearchChecked: boolean
     isTaggingChecked: boolean
+    congratsMessage: boolean
     isRightBox?: boolean
     handleAnnotationStage: () => void
     handlePowerSearchStage: () => void
@@ -23,9 +24,17 @@ class Checklist extends PureComponent<Props> {
                     [styles.container]: this.props.isRightBox,
                 })}
             >
-                <p className={styles.title}>GET STARTED</p>
+                <p className={styles.title}>
+                    {!this.props.congratsMessage ? (
+                        'GET STARTED'
+                    ) : (
+                        <span>CONGRATS!</span>
+                    )}
+                </p>
                 <p className={styles.subtext}>
-                    with 30 sec interactive tutorials
+                    {!this.props.congratsMessage
+                        ? 'with 30 sec interactive tutorials'
+                        : 'You have completed all tutorials'}
                 </p>
 
                 {this.props.isRightBox ? (
