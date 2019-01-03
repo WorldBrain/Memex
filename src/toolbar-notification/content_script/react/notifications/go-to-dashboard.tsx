@@ -17,7 +17,7 @@ export default function GoToDashboard({ onCloseRequested }) {
         <div className={styles.title}>
             {/*<img className={styles.notifIcon} src={images.notifIcon}/>*/}
             <NotificationLayout
-                title={'Go back to the dashboard'}
+                title={'Go back to the search Dashboard'}
                 icon={images.notifIcon}
                 onCloseRequested={onCloseRequested}
                 thirdRowImage={images.arrowUp}

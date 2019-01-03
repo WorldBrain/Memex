@@ -9,12 +9,12 @@
 }
 
 .item {
-    color: rgb(59, 59, 59);
+    color: #444;
     text-decoration: none;
     display: flex;
     align-items: center;
     cursor: default;
-    font-weight: 100;
+    font-weight: 400;
     height: 40px;
     padding-left: 20px;
 
@@ -110,6 +110,7 @@
 .customIcon {
     width: 30px;
     height: 29px;
+    margin-right: 5px;
     outline: 0;
     margin-bottom: -10px;
 }
