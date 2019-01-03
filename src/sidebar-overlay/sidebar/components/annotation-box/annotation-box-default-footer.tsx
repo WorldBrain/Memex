@@ -24,21 +24,21 @@ const AnnotationBoxDefaultFooter = ({
                 e.stopPropagation()
                 editIconClickHandler()
             }}
-        />{' '}
+        />
         <span
             className={cx(styles.commonIcon, styles.trashIcon)}
             onClick={e => {
                 e.stopPropagation()
                 trashIconClickHandler()
             }}
-        />{' '}
+        />
         <span
             className={cx(styles.commonIcon, styles.shareIcon)}
             onClick={e => {
                 e.stopPropagation()
                 shareIconClickHandler()
             }}
-        />{' '}
+        />
         <span
             className={cx(styles.commonIcon, styles.replyIcon)}
             onClick={e => {

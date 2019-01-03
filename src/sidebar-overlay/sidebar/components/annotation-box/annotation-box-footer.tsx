@@ -1,6 +1,6 @@
 import * as React from 'react'
 
-import Footer from '../footer'
+import { Footer } from '../../../components'
 import AnnotationBoxDefaultFooter from './annotation-box-default-footer'
 
 const styles = require('./annotation-box-footer.css')
@@ -19,7 +19,7 @@ interface Props {
 
 /* tslint:disable-next-line variable-name */
 const AnnotationBoxFooter = (props: Props) => (
-    <div className={styles.footer}>
+    <div className={styles.annotationBoxFooter}>
         {props.mode === 'edit' ? (
             <Footer
                 actionBtnClassName={styles.footerBoldText}

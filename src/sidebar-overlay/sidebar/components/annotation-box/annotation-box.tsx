@@ -1,111 +1,157 @@
 import * as React from 'react'
 import cx from 'classnames'
+import moment from 'moment'
 
-import TruncatedTextRenderer from '../truncated-text-renderer'
-import AnnotationBoxFooter from './annotation-box-footer'
 import AnnotationBoxCommentTags from './annotation-box-comment-tags'
+import AnnotationBoxFooter from './annotation-box-footer'
+import TruncatedTextRenderer from '../truncated-text-renderer'
 
 const styles = require('./annotation-box.css')
 
 interface Props {
-    mode: 'default' | 'edit' | 'delete'
     createdWhen: Date
     lastEdited?: Date
     body?: string
     comment?: string
     tags: string[]
-    getFormattedTimestamp: (timestamp: Date) => string
-    getTruncatedTextObject: (
-        text: string,
-    ) => { isTextTooLong: boolean; text: string }
-    shareIconClickHandler: () => void
-    replyIconClickHandler: () => void
-    setMode: (mode: 'default' | 'edit' | 'delete') => void
 }
 
-/* tslint:disable-next-line variable-name */
-const AnnotationBox = (props: Props) => {
-    const {
-        mode,
-        createdWhen,
-        lastEdited,
-        body,
-        comment,
-        tags,
-        getFormattedTimestamp,
-        getTruncatedTextObject,
-        setMode,
-        shareIconClickHandler,
-        replyIconClickHandler,
-    } = props
+interface State {
+    mode: 'default' | 'edit' | 'delete'
+}
 
-    const timestamp = !!lastEdited
-        ? getFormattedTimestamp(lastEdited)
-        : getFormattedTimestamp(createdWhen)
+class AnnotationBox extends React.Component<Props, State> {
+    state: State = {
+        mode: 'default',
+    }
 
-    const isJustComment = !body
+    private _getFormattedTimestamp = (timestamp: Date) =>
+        moment(timestamp)
+            .format('MMMM D YYYY')
+            .toUpperCase()
 
-    return (
-        <div
-            className={cx(styles.container, {
-                [styles.isClickable]: !isJustComment,
-                [styles.isJustComment]: isJustComment,
-            })}
-            onClick={
-                !isJustComment
-                    ? () => console.log('go to annotation')
-                    : () => null
+    private _getTruncatedTextObject: (
+        text: string,
+    ) => { isTextTooLong: boolean; text: string } = text => {
+        if (text.length > 280) {
+            const truncatedText = text.slice(0, 280) + ' [...]'
+            return {
+                isTextTooLong: true,
+                text: truncatedText,
             }
-        >
-            {/* Timestamp for the annotation. Hidden during 'edit' mode. */}
-            {mode !== 'edit' && (
-                <div className={styles.timestamp}>
-                    {!!lastEdited && (
-                        <span className={styles.lastEdit}>Last Edit: </span>
-                    )}
-                    {timestamp}
-                </div>
-            )}
+        }
 
-            {/* Highlighted text for the annotation. If available, shown in
+        for (let i = 0, newlineCount = 0; i < text.length; ++i) {
+            if (text[i] === '\n') {
+                newlineCount++
+                if (newlineCount > 4) {
+                    const truncatedText = text.slice(0, i) + ' [...]'
+                    return {
+                        isTextTooLong: true,
+                        text: truncatedText,
+                    }
+                }
+            }
+        }
+
+        return {
+            isTextTooLong: false,
+            text,
+        }
+    }
+
+    private _handleEditIconClick = () => {
+        this.setState({ mode: 'edit' })
+    }
+
+    private _handleTrashIconClick = () => {
+        this.setState({ mode: 'delete' })
+    }
+
+    private _handleShareIconClick = () => null
+
+    private _handleReplyIconClick = () => null
+
+    private _handleCancelOperation = () => {
+        this.setState({ mode: 'default' })
+    }
+
+    render() {
+        const { mode } = this.state
+        const { createdWhen, lastEdited, body, comment, tags } = this.props
+
+        const timestamp = !!lastEdited
+            ? this._getFormattedTimestamp(lastEdited)
+            : this._getFormattedTimestamp(createdWhen)
+
+        const isJustComment = !body
+
+        return (
+            <div
+                className={cx(styles.container, {
+                    [styles.isClickable]: !isJustComment,
+                    [styles.isJustComment]: isJustComment,
+                })}
+                onClick={
+                    !isJustComment
+                        ? () => console.log('go to annotation')
+                        : () => null
+                }
+            >
+                {/* Timestamp for the annotation. Hidden during 'edit' mode. */}
+                {mode !== 'edit' && (
+                    <div className={styles.timestamp}>
+                        {!!lastEdited && (
+                            <span className={styles.lastEdit}>Last Edit: </span>
+                        )}
+                        {timestamp}
+                    </div>
+                )}
+
+                {/* Highlighted text for the annotation. If available, shown in
                 every mode. */}
-            {!isJustComment && (
-                <div className={styles.highlight}>
-                    <TruncatedTextRenderer
-                        text={body}
-                        getTruncatedTextObject={getTruncatedTextObject}
-                    />
-                </div>
-            )}
+                {!isJustComment && (
+                    <div className={styles.highlight}>
+                        <TruncatedTextRenderer
+                            text={body}
+                            getTruncatedTextObject={
+                                this._getTruncatedTextObject
+                            }
+                        />
+                    </div>
+                )}
 
-            {/* Comment and tags to be displayed. Hidden during 'edit' mode. */}
-            {mode !== 'edit' ? (
-                (!!comment || (!!tags && tags.length !== 0)) && (
-                    <AnnotationBoxCommentTags
-                        comment={comment}
-                        tags={tags}
-                        isJustComment={isJustComment}
-                        getTruncatedTextObject={getTruncatedTextObject}
-                    />
-                )
-            ) : (
-                <div>hello</div>
-            )}
+                {/* Comment and tags to be displayed. Hidden during 'edit' mode. */}
+                {mode !== 'edit' ? (
+                    (!!comment || (!!tags && tags.length !== 0)) && (
+                        <AnnotationBoxCommentTags
+                            comment={comment}
+                            tags={tags}
+                            isJustComment={isJustComment}
+                            getTruncatedTextObject={
+                                this._getTruncatedTextObject
+                            }
+                        />
+                    )
+                ) : (
+                    <div>hello</div>
+                )}
 
-            {/* Footer. */}
-            <AnnotationBoxFooter
-                mode={mode}
-                handleEditAnnotation={() => null}
-                handleDeleteAnnotation={() => null}
-                handleCancelEdit={() => null}
-                handleCancelDeletion={() => null}
-                editIconClickHandler={() => null}
-                trashIconClickHandler={() => null}
-                shareIconClickHandler={shareIconClickHandler}
-                replyIconClickHandler={replyIconClickHandler}
-            />
-        </div>
-    )
+                {/* Footer. */}
+                <AnnotationBoxFooter
+                    mode={mode}
+                    handleEditAnnotation={() => null}
+                    handleDeleteAnnotation={() => null}
+                    handleCancelEdit={this._handleCancelOperation}
+                    handleCancelDeletion={this._handleCancelOperation}
+                    editIconClickHandler={this._handleEditIconClick}
+                    trashIconClickHandler={this._handleTrashIconClick}
+                    shareIconClickHandler={this._handleShareIconClick}
+                    replyIconClickHandler={this._handleReplyIconClick}
+                />
+            </div>
+        )
+    }
 }
 
 export default AnnotationBox
