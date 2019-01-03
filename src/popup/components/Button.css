@@ -138,6 +138,7 @@
     background-repeat: no-repeat;
     background-size: 20px;
     float: left;
+    opacity: 0.6;
     margin-top: 6px;
 }
 
@@ -146,6 +147,7 @@
     background-repeat: no-repeat;
     background-size: 20px;
     float: left;
+    opacity: 0.6;
     margin-top: 8px;
 }
 
@@ -155,6 +157,7 @@
     background-size: 24px;
     float: left;
     margin-top: 6px;
+    opacity: 0.6;
     padding-right: 2px;
     margin-left: -2px;
 }
@@ -163,6 +166,7 @@
     background-image: url('/img/search-icon.svg');
     background-repeat: no-repeat;
     background-size: 20px;
+    opacity: 0.8;
 }
 
 .badge {

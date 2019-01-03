@@ -3,6 +3,7 @@
     background-repeat: no-repeat;
     background-size: 20px;
     cursor: pointer;
+    opacity: 0.6;
 }
 
 .playIcon {
@@ -10,6 +11,7 @@
     background-repeat: no-repeat;
     background-size: 20px;
     cursor: pointer;
+    opacity: 0.8;
 }
 
 .dropdown {

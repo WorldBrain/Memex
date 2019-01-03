@@ -160,6 +160,7 @@
     background-image: url('/img/trash.svg');
     opacity: 0.4;
     width: 20px;
+    margin-top: 1px;
     margin-right: 10px;
 
     &:hover {
@@ -182,13 +183,15 @@
 .bookmark {
     background-image: url('/img/star_blue_full.svg');
     opacity: 0.8;
-    width: 25px;
+    width: 23px;
+    margin-top: 1px;
 }
 
 .notBookmark {
     background-image: url('/img/star_blue_empty.svg');
     opacity: 0.4;
-    width: 25px;
+    width: 23px;
+    margin-top: 1px;
 
     &:hover {
         background-image: url('/img/star_blue_full.svg');
