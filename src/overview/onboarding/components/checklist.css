@@ -42,6 +42,7 @@
     padding: 0px 18px;
     box-shadow: 0px 2px 11px 0px #00000075;
     border-radius: 5px;
+    z-index: 1;
 }
 
 .close {
