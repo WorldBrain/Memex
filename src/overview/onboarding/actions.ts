@@ -15,6 +15,9 @@ export const setTaggingStage = createAction<string>(
 export const setShowOnboardingBox = createAction<boolean>(
     'onboarding/setShowOnboardingBox',
 )
+export const setCongratsMessage = createAction<boolean>(
+    'onboarding/setCongratsMessage',
+)
 
 export const fetchOnboardingStages = () => async dispatch => {
     const annotationStage = await getLocalStorage(
@@ -29,8 +32,18 @@ export const fetchOnboardingStages = () => async dispatch => {
         STORAGE_KEYS.onboardingDemo.step3,
         'unvisited',
     )
+
+    if (
+        annotationStage === 'DONE' &&
+        powerSearchStage === 'DONE' &&
+        taggingStage === 'DONE'
+    ) {
+        dispatch(setCongratsMessage(true))
+    }
+
     dispatch(setAnnotationStage(annotationStage))
     dispatch(setPowerSearchStage(powerSearchStage))
+    dispatch(setTaggingStage(taggingStage))
 }
 
 export const fetchShowOnboarding = () => async dispatch => {

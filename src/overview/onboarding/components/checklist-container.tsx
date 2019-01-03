@@ -19,6 +19,7 @@ export interface StateProps {
     powerSearchStage: string
     taggingStage: string
     noResults: boolean
+    congratsMessage: boolean
 }
 
 export interface DispatchProps {
@@ -115,6 +116,7 @@ class OnboardingChecklist extends React.Component<Props> {
         return (
             <Checklist
                 isRightBox={this.props.isRightBox}
+                congratsMessage={this.props.congratsMessage}
                 isAnnotationChecked={annotationStage === 'DONE'}
                 isPowerSearchChecked={powerSearchStage === 'DONE'}
                 isTaggingChecked={taggingStage === 'DONE'}
@@ -132,6 +134,7 @@ const mapStateToProps = state => ({
     annotationStage: selectors.annotationStage(state),
     powerSearchStage: selectors.powerSearchStage(state),
     taggingStage: selectors.taggingStage(state),
+    congratsMessage: selectors.congratsMessage(state),
     noResults: resultSelectors.noResults(state),
 })
 

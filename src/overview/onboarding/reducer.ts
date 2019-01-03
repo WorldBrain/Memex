@@ -10,6 +10,10 @@ export interface State {
 
     // Decides whether or not to show the Right Onboarding box
     showOnboardingBox: boolean
+
+    // Decides whether or not to show the Congrats message
+    // Set to true after all stages are done
+    congratsMessage: boolean
 }
 
 const defState = {
@@ -17,6 +21,7 @@ const defState = {
     powerSearchStage: '',
     taggingStage: '',
     showOnboardingBox: false,
+    congratsMessage: false,
 }
 
 const reducer = createReducer<State>({}, defState)
@@ -39,6 +44,11 @@ reducer.on(actions.setTaggingStage, (state, payload) => ({
 reducer.on(actions.setShowOnboardingBox, (state, payload) => ({
     ...state,
     showOnboardingBox: payload,
+}))
+
+reducer.on(actions.setCongratsMessage, (state, payload) => ({
+    ...state,
+    congratsMessage: payload,
 }))
 
 export default reducer
