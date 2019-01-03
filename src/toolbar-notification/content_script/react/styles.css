@@ -16,7 +16,7 @@
     border-radius: 5px;
     background: white;
     border: 1px solid #3eb99561;
-    animation: pulse 2s infinite;
+    animation: pulse 2s infinite, fadein 0.25s ease-in 0s 1 normal both;
     z-index: 2147483647;
 }
 
@@ -31,5 +31,15 @@
 
     100% {
         box-shadow: 0 0 0 0 #17376600;
+    }
+}
+
+@keyframes fadein {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
     }
 }
