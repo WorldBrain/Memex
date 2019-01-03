@@ -1,7 +1,5 @@
 /* stylelint-disable declaration-no-important */
 
-@import url('/fonts/googlefonts/open-sans.css');
-
 .link {
     text-decoration: none;
 
@@ -34,7 +32,8 @@
     font-size: 1em;
     cursor: pointer;
     font-family: 'Open Sans';
-    font-weight: 100;
+    font-weight: 400;
+    color: #555;
     padding-left: 20px;
     background: none !important;
 

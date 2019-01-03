@@ -5,10 +5,10 @@
     <desc>Created with Sketch.</desc>
     <defs></defs>
     <g id="New-Overview" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="Annotation-search-overview" transform="translate(-1634.000000, -653.000000)" stroke="#173766" stroke-width="2">
-            <g id="Group-15" transform="translate(1635.000000, 654.000000)">
-                <path d="M34,17 C34,26.389 26.389,34 17,34 C7.611,34 0,26.389 0,17 C0,7.611 7.611,0 17,0 C26.389,0 34,7.611 34,17 Z" id="Path"></path>
-                <path d="M5,29 L29,5 L5,29 Z" id="Path"></path>
+        <g id="Annotation-search-overview" transform="translate(-1634.000000, -703.000000)" stroke="#173766" stroke-width="4">
+            <g id="Group-15" transform="translate(1636.000000, 705.000000)">
+                <path d="M32,16 C32,24.8367059 24.8367059,32 16,32 C7.16329412,32 0,24.8367059 0,16 C0,7.16329412 7.16329412,0 16,0 C24.8367059,0 32,7.16329412 32,16 Z" id="Path"></path>
+                <path d="M5,27 L27,5 L5,27 Z" id="Path"></path>
             </g>
         </g>
     </g>
