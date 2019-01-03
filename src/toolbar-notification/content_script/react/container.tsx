@@ -28,14 +28,15 @@ export class ToolbarNotification extends Component<Props> {
      * Return extra styles for the container based on whether the postion prop
      * is passed or not.
      */
-    derivePositionStyles = position => {
-        let positionStyles
+    deriveContainerStyles = position => {
+        let containerStyles
         if (position) {
             // In the use case where the notification must be displayed in a
             // custom position
             // Styles tailored for onboarding notification
             const { x, y } = position
-            positionStyles = {
+            containerStyles = {
+                opacity: 0,
                 left: x - 185,
                 top: y + 80,
                 height: 'auto',
@@ -45,15 +46,19 @@ export class ToolbarNotification extends Component<Props> {
                 position: 'absolute',
                 textAlign: 'center',
             }
+        } else {
+            containerStyles = {
+                opacity: 0,
+            }
         }
 
-        return positionStyles
+        return containerStyles
     }
 
     render() {
-        const positionStyles = this.derivePositionStyles(this.props.position)
+        const containerStyles = this.deriveContainerStyles(this.props.position)
         return (
-            <div className={styles.container} style={positionStyles}>
+            <div className={styles.container} style={containerStyles}>
                 {this.props.type === 'tooltip-first-close' && (
                     <TooltipFirstCloseNotification
                         onCloseRequested={this.props.onCloseRequested}
