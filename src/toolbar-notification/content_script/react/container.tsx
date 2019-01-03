@@ -86,10 +86,10 @@ export class ToolbarNotification extends Component<Props> {
                 )}
                 {this.props.type === 'power-search-browse' && (
                     <PowerSearchBrowse
-                        onCloseRequested={this.props.onCloseRequested}
-                        triggerNextNotification={
-                            this.props.triggerNextNotification
-                        }
+                        onCloseRequested={() => {
+                            this.props.onCloseRequested()
+                            this.props.triggerNextNotification()
+                        }}
                         openDashboard={async () => {
                             this.processEventRPC({
                                 type: EVENT_NAMES.POWERSEARCH_GOTO_DASH,

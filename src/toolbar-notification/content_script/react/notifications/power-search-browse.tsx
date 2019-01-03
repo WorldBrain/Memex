@@ -11,11 +11,7 @@ const images = {
     shareIcon: getExtURL('/img/share.svg'),
 }
 
-export default function PowerSearchBrowse({
-    onCloseRequested,
-    triggerNextNotification,
-    openDashboard,
-}) {
+export default function PowerSearchBrowse({ onCloseRequested, openDashboard }) {
     return (
         <div className={styles.container}>
             <NotificationLayout
@@ -49,6 +45,5 @@ export default function PowerSearchBrowse({
 
 PowerSearchBrowse['propTypes'] = {
     onCloseRequested: PropTypes.func.isRequired,
-    triggerNextNotifcation: PropTypes.func,
     openDashboard: PropTypes.func.isRequired,
 }
