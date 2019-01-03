@@ -11,11 +11,14 @@ import {
 import Sidebar from './sidebar'
 import { RootState } from '../../ribbon-sidebar-controller'
 import { MapDispatchToProps } from '../../types'
+import { Annotation } from '../types'
 
 // import { goToAnnotation, retryUntilErrorResolves } from '../../utils'
 
 interface StateProps {
     isOpen: boolean
+    isLoading: boolean
+    annotations: Annotation[]
     showCommentBox: boolean
 }
 
@@ -185,6 +188,8 @@ class SidebarContainer extends React.Component<Props, State> {
     render() {
         const {
             isOpen,
+            isLoading,
+            annotations,
             closeSidebar,
             handleAddCommentBtnClick,
             showCommentBox,
@@ -193,6 +198,8 @@ class SidebarContainer extends React.Component<Props, State> {
         return (
             <Sidebar
                 isOpen={isOpen}
+                isLoading={isLoading}
+                annotations={annotations}
                 showCommentBox={showCommentBox}
                 handleAddCommentBtnClick={handleAddCommentBtnClick}
                 closeSidebar={closeSidebar}
@@ -213,6 +220,7 @@ const mapStateToProps: MapStateToProps<
     RootState
 > = state => ({
     isOpen: selectors.isOpen(state),
+    isLoading: selectors.isLoading(state),
     annotations: selectors.annotations(state),
     showCommentBox: commentBoxSelectors.showCommentBox(state),
 })
