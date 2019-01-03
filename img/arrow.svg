@@ -1,1 +1,12 @@
-<svg fill="#3EB995" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 100" version="1.1" x="0px" y="0px"><title>Chevron Sq 5</title><desc>Created with Sketch.</desc><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g fill-rule="nonzero" fill="#3EB995"><polygon transform="translate(51.205523, 50.000000) rotate(90.000000) translate(-51.205523, -50.000000) " points="68.7306496 63.680397 73.680397 58.7306496 51.2150955 36.319603 28.7306496 58.7306496 33.680397 63.680397 51.2150955 46.1456986"></polygon></g></g></svg>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="27px" height="45px" viewBox="0 0 27 45" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 51.3 (57544) - http://www.bohemiancoding.com/sketch -->
+    <title>noun_Arrow_1827114</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="noun_Arrow_1827114" fill="#3EB995" fill-rule="nonzero">
+            <path d="M0.74177781,44.1191328 C1.2890266,44.7041327 2.0323716,45.000153 2.77787658,44.9999999 C3.45395333,44.9999999 4.13172721,44.7564796 4.66632464,44.2643878 L26.1119357,24.5194938 C26.6781615,23.9981673 27,23.2663818 27,22.5000044 C27,21.733627 26.6781615,21.0018414 26.1119357,20.480515 L4.66632464,0.735620905 C3.5425129,-0.29922583 1.7848985,-0.234480945 0.741623525,0.880875978 C-0.301805739,1.9962329 -0.236234626,3.73944684 0.888039963,4.77444664 L20.1403359,22.5000044 L0.888194248,40.225409 C-0.236080341,41.2605619 -0.301651454,43.0037758 0.74177781,44.1191328 Z" id="Shape"></path>
+        </g>
+    </g>
+</svg>

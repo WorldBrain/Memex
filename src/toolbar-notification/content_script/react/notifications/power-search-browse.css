@@ -4,6 +4,7 @@
     flex-direction: row;
     width: 100%;
     padding-left: 10px;
+    padding-right: 10px;
 }
 
 .title {
@@ -14,15 +15,13 @@
 
 .notifContainer {
     width: fit-content;
-    margin: 10px auto;
-    margin-top: 20px;
+    margin: 20px 0px 15px 0px;
     text-align: center;
-    color: #333;
-    margin-bottom: 15px;
+    color: #444;
 }
 
 .button {
-    color: #333;
+    color: #444;
     font-weight: 600;
     cursor: pointer;
     text-decoration: underline;

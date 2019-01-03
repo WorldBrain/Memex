@@ -67,34 +67,78 @@
     cursor: pointer;
     width: 20px;
     height: 20px;
-    background: url('/img/cross_circle.svg');
+    background: url('/img/cross.svg');
     background-repeat: no-repeat;
-    background-size: 20px;
+    background-position: center;
+    background-size: 10px;
+    margin: 3px 3px 0px 0px;
+
+    &:hover {
+        border-radius: 50px;
+        background-color: #f0f0f0;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 10px;
+        margin: 3px 3px 0px 0px;
+        top: 3px;
+        right: 3px;
+        cursor: pointer;
+        width: 20px;
+        height: 20px;
+    }
 }
 
 .prev {
     position: absolute;
-    top: 4px;
-    left: 3px;
+    top: 3px;
+    left: 4px;
     cursor: pointer;
     width: 20px;
     height: 20px;
     background: url('/img/arrow.svg');
     background-repeat: no-repeat;
-    background-size: 20px;
+    background-position: center;
+    background-size: 7px;
+    margin: 3px 3px 0px 0px;
     transform: rotate(180deg);
+
+    &:hover {
+        border-radius: 50px;
+        background-color: #f0f0f0;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 7px;
+        margin: 3px 3px 0px 0px;
+        cursor: pointer;
+        width: 20px;
+        height: 20px;
+    }
 }
 
 .next {
     position: absolute;
     top: 3px;
-    right: 20px;
+    right: 24px;
     cursor: pointer;
     width: 20px;
     height: 20px;
     background: url('/img/arrow.svg');
     background-repeat: no-repeat;
-    background-size: 20px;
+    background-position: center;
+    background-size: 7px;
+    margin: 3px 3px 0px 0px;
+
+    &:hover {
+        border-radius: 50px;
+        background-color: #f0f0f0;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 7px;
+        margin: 3px 3px 0px 0px;
+        cursor: pointer;
+        width: 20px;
+        height: 20px;
+    }
 }
 
 .proTip {
