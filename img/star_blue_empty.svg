@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="19px" height="18px" viewBox="0 0 19 18" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 51.3 (57544) - http://www.bohemiancoding.com/sketch -->
+    <title>Path</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="New-Overview" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Annotation-search-overview" transform="translate(-1297.000000, -327.000000)" stroke="#173766">
+            <g id="Group" transform="translate(530.000000, 258.000000)">
+                <path d="M777.335913,70.558926 L779.293893,74.9498485 L784.074821,75.4551176 C784.88663,75.541068 785.214036,76.5476315 784.607415,77.0941369 L781.036748,80.3130538 L782.033375,85.0159812 C782.202792,85.8148727 781.346766,86.4368952 780.639289,86.0290034 L776.474421,83.6273606 L772.309553,86.0290034 C771.602077,86.4368952 770.746051,85.8148727 770.915468,85.0159812 L771.912095,80.3130538 L768.341427,77.0941369 C767.734806,76.5476315 768.062213,75.541068 768.874022,75.4551176 L773.65495,74.9498485 L775.61293,70.558926 C775.945305,69.8136913 777.003538,69.8136913 777.335913,70.558926 Z" id="Path"></path>
+            </g>
+        </g>
+    </g>
+</svg>

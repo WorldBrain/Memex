@@ -16,13 +16,13 @@ class Search extends PureComponent<Props> {
                     autoFocus
                     className={styles.search}
                     name="query"
-                    placeholder="Enter keywords"
+                    placeholder="Search Memex"
                     autoComplete="off"
                     onKeyDown={this.props.onSearchEnter}
                     onChange={this.props.onSearchChange}
                     value={this.props.searchValue}
                 />
-                <i className="material-icons">search</i>
+                <i className="material-icons">keyboard_arrow_right</i>
             </form>
         )
     }
