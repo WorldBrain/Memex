@@ -5,15 +5,15 @@
     <desc>Created with Sketch.</desc>
     <defs></defs>
     <g id="New-Overview" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="Annotation-search-overview" transform="translate(-1195.000000, -327.000000)">
+        <g id="Annotation-search-overview" transform="translate(-1195.000000, -308.000000)">
             <g id="Group" transform="translate(530.000000, 258.000000)">
-                <g id="Group-8" transform="translate(665.000000, 70.000000)">
-                    <path d="M14,3 L14,14.2068966 C14,15.1971379 13.1733846,16 12.1538462,16 L3.84615385,16 C2.82661538,16 2,15.1971379 2,14.2068966 L2,3 L14,3 Z" id="Path" stroke="#173766"></path>
+                <g id="Group-8" transform="translate(665.000000, 51.000000)">
+                    <path d="M14,3 L14,14.2068966 C14,15.1971379 13.1733846,16 12.1538462,16 L3.84615385,16 C2.82661538,16 2,15.1971379 2,14.2068966 L2,3 L14,3 Z" id="Path" stroke="#173766" fill="#173766"></path>
                     <polygon id="Path" stroke="#173766" points="0 3 3.5 3 14 3 16 3"></polygon>
                     <path d="M11,3 L5,3 L5,1.2 C5,0.537 5.4475,0 6,0 L10,0 C10.5525,0 11,0.537 11,1.2 L11,3 Z" id="Path" stroke="#173766"></path>
-                    <path d="M8,5 L8,14 L8,5 Z" id="Path" stroke="#3EB995"></path>
-                    <path d="M11,5 L11,14 L11,5 Z" id="Path" stroke="#3EB995"></path>
-                    <path d="M5,5 L5,14 L5,5 Z" id="Path" stroke="#3EB995"></path>
+                    <path d="M8,5 L8,14 L8,5 Z" id="Path" stroke="#FFFFFF"></path>
+                    <path d="M11,5 L11,14 L11,5 Z" id="Path" stroke="#FFFFFF"></path>
+                    <path d="M5,5 L5,14 L5,5 Z" id="Path" stroke="#FFFFFF"></path>
                 </g>
             </g>
         </g>

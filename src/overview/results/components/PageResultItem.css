@@ -154,45 +154,57 @@
     background-size: contain;
     cursor: pointer;
     outline: none;
-    margin: 0 3px 0 3px;
 }
 
 .trash {
-    background-image: url('/img/trash_new.svg');
+    background-image: url('/img/trash.svg');
     opacity: 0.4;
     width: 20px;
-    margin-top: 3px;
+    margin-right: 10px;
+
+    &:hover {
+        background-image: url('/img/trash_blue_full.svg');
+    }
 }
 
 .comment {
     background-image: url('/img/comment.svg');
     opacity: 0.4;
-    width: 30px;
-    height: 30px;
+    margin-right: 10px;
+    margin-top: 1px;
+    width: 23px;
+
+    &:hover {
+        background-image: url('/img/comment_blue_full.svg');
+    }
 }
 
 .bookmark {
-    background-image: url('/img/star_full.svg');
+    background-image: url('/img/star_blue_full.svg');
     opacity: 0.8;
     width: 25px;
 }
 
 .notBookmark {
-    background-image: url('/img/star_empty.svg');
-    opacity: 0.3;
-    margin-top: 1px;
+    background-image: url('/img/star_blue_empty.svg');
+    opacity: 0.4;
     width: 25px;
 
     &:hover {
-        background-image: url('/img/star_full.svg');
+        background-image: url('/img/star_blue_full.svg');
     }
 }
 
 .tag {
-    background-image: url('/img/tag.svg');
+    background-image: url('/img/tag_blue_empty.svg');
     opacity: 0.4;
-    margin-top: 6px;
-    width: 18px;
+    width: 21px;
+    margin-top: 1px;
+    margin-right: 9px;
+
+    &:hover {
+        background-image: url('/img/tag_blue.svg');
+    }
 }
 
 .tagList {

@@ -142,7 +142,7 @@
 }
 
 .sidebarIcon {
-    background-image: url('/img/sidebarIcon_grey.svg');
+    background-image: url('/img/sidebarIcon_blue.svg');
     background-repeat: no-repeat;
     background-size: 20px;
     float: left;
@@ -150,15 +150,17 @@
 }
 
 .highlighterIcon {
-    background-image: url('/img/highlighterIcon_grey.svg');
+    background-image: url('/img/tooltipIcon_blue.svg');
     background-repeat: no-repeat;
-    background-size: 20px;
+    background-size: 24px;
     float: left;
     margin-top: 6px;
+    padding-right: 2px;
+    margin-left: -2px;
 }
 
 .searchIcon {
-    background-image: url('/img/search.svg');
+    background-image: url('/img/search-icon.svg');
     background-repeat: no-repeat;
     background-size: 20px;
 }

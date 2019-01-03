@@ -6,7 +6,7 @@ import { getExtURL } from '../utils.js'
 const styles = require('./notifications.css')
 
 const images = {
-    notifIcon: getExtURL('img/tooltipIcon_blue.svg'),
+    notifIcon: getExtURL('img/tag_blue.svg'),
     brainIcon: getExtURL('/img/worldbrain-logo-narrow-bw-48.png'),
     arrowUp: getExtURL('/img/notifArrowUp.svg'),
     closeIcon: getExtURL('/img/cross.svg'),

@@ -1,21 +1,11 @@
-.itemBlacklisted {
-    &:hover {
-        color: rgb(193, 146, 146);
-
-        & > .itemBtnBlacklisted {
-            background-image: url('/img/blacklist_red.svg');
-        }
-    }
-}
-
 .itemBtnBlacklisted {
-    background-image: url('/img/blacklist.svg');
+    background-image: url('/img/ignore_active.svg');
     background-repeat: no-repeat;
     background-size: 20px;
 }
 
 .blacklist {
-    background-image: url('/img/blacklist_green.svg');
+    background-image: url('/img/ignore_blue.svg');
     background-repeat: no-repeat;
     background-size: 20px;
 }

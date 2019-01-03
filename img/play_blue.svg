@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="36px" height="36px" viewBox="0 0 36 36" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 51.3 (57544) - http://www.bohemiancoding.com/sketch -->
+    <title>Group 14</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="New-Overview" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Annotation-search-overview" transform="translate(-1574.000000, -651.000000)" stroke="#173766">
+            <g id="Group-14" transform="translate(1575.000000, 652.000000)">
+                <g id="Group-13" stroke-width="2">
+                    <path d="M34,17 C34,26.389 26.389,34 17,34 C7.611,34 0,26.389 0,17 C0,7.611 7.611,0 17,0 C26.389,0 34,7.611 34,17 Z" id="Path" transform="translate(17.000000, 17.000000) rotate(90.000000) translate(-17.000000, -17.000000) "></path>
+                </g>
+                <path d="M14.34525,27 L22.74325,17.669 C23.08625,17.289 23.08625,16.711 22.74325,16.331 L14.34525,7 L14.34525,27 Z" id="Path" fill="#173766"></path>
+            </g>
+        </g>
+    </g>
+</svg>

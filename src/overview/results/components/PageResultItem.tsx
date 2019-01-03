@@ -119,6 +119,17 @@ class PageResultItem extends PureComponent<Props> {
                                     onClick={e => e.preventDefault()}
                                 >
                                     <button
+                                        disabled={this.props.isDeleting}
+                                        className={classNames(
+                                            styles.button,
+                                            styles.trash,
+                                        )}
+                                        onClick={this.props.onTrashBtnClick}
+                                        title={
+                                            'Delete this page & all related content'
+                                        }
+                                    />
+                                    <button
                                         className={classNames(
                                             styles.button,
                                             styles.tag,
@@ -135,17 +146,6 @@ class PageResultItem extends PureComponent<Props> {
                                         onClick={this.props.onCommentBtnClick}
                                         title={
                                             'Add/View Commments & Annotations'
-                                        }
-                                    />
-                                    <button
-                                        disabled={this.props.isDeleting}
-                                        className={classNames(
-                                            styles.button,
-                                            styles.trash,
-                                        )}
-                                        onClick={this.props.onTrashBtnClick}
-                                        title={
-                                            'Delete this page & all related content'
                                         }
                                     />
                                     <button
