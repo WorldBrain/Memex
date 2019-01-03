@@ -112,10 +112,12 @@ export default class TabChangeListeners {
                 favIcon: throttle(
                     tab => this._handleFavIcon(tabId, {}, tab),
                     TabChangeListeners.FAV_ICON_CHANGE_THRESHOLD,
+                    { leading: false },
                 ),
                 page: throttle(
                     tab => this._handleVisitIndexing(tabId, {}, tab),
                     TabChangeListeners.URL_CHANGE_THRESHOLD,
+                    { leading: false },
                 ),
             })
             indexers = this.tabIndexers.get(tabId)
