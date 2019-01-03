@@ -1,5 +1,5 @@
 import { createAction } from 'redux-act'
-import { getLocalStorage } from 'src/util/storage'
+import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 
 import * as selectors from './selectors'
 import { STORAGE_KEYS as onboardingKeys } from '../onboarding/constants'
@@ -31,7 +31,6 @@ export const fetchOnboardingState = () => async dispatch => {
 export const processAndSetWhichTooltip = (whichTooltip: number) => dispatch => {
     // Fetch tooltip name, generalized to be used with different dispatched actions
     const tooltipName = TOOLTIPS[whichTooltip]
-    console.log(tooltipName)
     processEventRPC({
         type: EVENT_NAMES.SET_TOOLTIP,
         details: {
@@ -52,11 +51,12 @@ export const setTooltip = (tooltip: string) => dispatch => {
 /**
  * Temporarily removes tooltip by setting tooltip to 'none'
  */
-export const closeTooltip = () => dispatch => {
+export const closeTooltip = () => async dispatch => {
     dispatch(resetWhichTooltip())
     processEventRPC({
         type: EVENT_NAMES.CLOSE_TOOLTIP,
     })
+    await setLocalStorage(onboardingKeys.onboardingDemo.step2, 'unvisited')
 }
 
 /**
