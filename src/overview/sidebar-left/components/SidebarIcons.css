@@ -1,12 +1,16 @@
 .filterButton {
-    background-image: url('/img/filter_filled.svg');
+    background-image: url('/img/filter.svg');
     width: 32px;
-    height: 32px;
-    opacity: 0.5;
+    height: 34px;
+    opacity: 0.6;
+
+    &:hover {
+        opacity: 0.8;
+    }
 }
 
 .filterEnabled {
-    background-image: url('/img/filter_filled_green.svg');
+    background-image: url('/img/filter.svg');
     opacity: 1;
 }
 
@@ -15,10 +19,14 @@
     width: 30px;
     height: 30px;
     opacity: 0.5;
+
+    &:hover {
+        opacity: 0.8;
+    }
 }
 
 .collectionEnabled {
-    background-image: url('/img/collections_green.svg');
+    background-image: url('/img/collections.svg');
     opacity: 1;
 }
 
