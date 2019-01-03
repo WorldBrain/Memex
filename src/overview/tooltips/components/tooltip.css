@@ -61,42 +61,40 @@
 }
 
 .close {
-    font-size: 10px;
-    font-style: normal;
     position: absolute;
     top: 3px;
     right: 3px;
-    color: white;
-    background: #444882;
-    border-radius: 8px;
-    padding: 1px 5px 2px 5px;
     cursor: pointer;
+    width: 20px;
+    height: 20px;
+    background: url('/img/cross_circle.svg');
+    background-repeat: no-repeat;
+    background-size: 20px;
 }
 
 .prev {
-    font-size: 10px;
-    font-style: normal;
     position: absolute;
     top: 4px;
     left: 3px;
-    color: white;
-    background: #444882;
-    border-radius: 8px;
-    padding: 1px 5px 2px 5px;
     cursor: pointer;
+    width: 20px;
+    height: 20px;
+    background: url('/img/arrow.svg');
+    background-repeat: no-repeat;
+    background-size: 20px;
+    transform: rotate(180deg);
 }
 
 .next {
-    font-size: 10px;
-    font-style: normal;
     position: absolute;
     top: 3px;
     right: 20px;
-    color: white;
-    background: #444882;
-    border-radius: 8px;
-    padding: 1px 5px 2px 5px;
     cursor: pointer;
+    width: 20px;
+    height: 20px;
+    background: url('/img/arrow.svg');
+    background-repeat: no-repeat;
+    background-size: 20px;
 }
 
 .proTip {
