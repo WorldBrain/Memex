@@ -4,13 +4,16 @@ import Menu from 'react-burger-menu/lib/menus/slide'
 import CongratsMessage from '../../components/CongratsMessage'
 import menuStyles from './menu-styles'
 import CommentBoxContainer from '../../comment-box'
-import { Topbar } from '../../components'
-import AnnotationsSectionContainer from './annotations-section-container'
+import { Topbar, Loader, EmptyMessage } from '../../components'
+import AnnotationBox from './annotation-box'
+import { Annotation } from '../types'
 
 const styles = require('./sidebar.css')
 
 interface Props {
     isOpen: boolean
+    isLoading: boolean
+    annotations: Annotation[]
     showCommentBox: boolean
     closeSidebar: () => void
     handleAddCommentBtnClick: () => void
@@ -68,6 +71,8 @@ class Sidebar extends React.Component<Props> {
     render() {
         const {
             isOpen,
+            isLoading,
+            annotations,
             showCommentBox,
             closeSidebar,
             handleAddCommentBtnClick,
@@ -92,7 +97,20 @@ class Sidebar extends React.Component<Props> {
 
                     {showCommentBox && <CommentBoxContainer />}
 
-                    <AnnotationsSectionContainer />
+                    {isLoading ? (
+                        <Loader />
+                    ) : annotations.length === 0 ? (
+                        <EmptyMessage />
+                    ) : (
+                        <div className={styles.annotationsSection}>
+                            {annotations.map(annotation => (
+                                <AnnotationBox
+                                    key={annotation.url}
+                                    {...annotation}
+                                />
+                            ))}
+                        </div>
+                    )}
                 </div>
             </Menu>
         )

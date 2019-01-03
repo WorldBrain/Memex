@@ -6,3 +6,13 @@
     overflow-y: scroll;
     border-left: 3px solid #e1ece9;
 }
+
+.annotationsSection {
+    margin: 0 0 100px 0;
+    width: 100%;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
