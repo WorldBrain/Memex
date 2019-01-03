@@ -5,6 +5,7 @@
     margin-left: -2px;
     padding-right: 2px;
     margin-top: -5px;
+    opacity: 0.8;
 }
 
 .unbookmarkedBtn {
@@ -13,5 +14,6 @@
     background-size: 23px;
     margin-left: -2px;
     padding-right: 2px;
+    opacity: 0.6;
     margin-top: -5px;
 }

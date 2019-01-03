@@ -1,28 +1,6 @@
 .icon {
-    position: absolute;
-    top: 7px;
-    right: 7px;
-    cursor: pointer;
-    width: 13px;
-    height: 13px;
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 20px;
-    margin: 3px 3px 0px 0px;
-
-    &:hover {
-        border-radius: 50px;
-        background-color: #f0f0f0;
-        background-repeat: no-repeat;
-        background-position: center;
-        background-size: 20px;
-        margin: 3px 3px 0px 0px;
-        top: 7px;
-        right: 7px;
-        cursor: pointer;
-        width: 13px;
-        height: 13px;
-    }
+    height: 20px;
+    vertical-align: bottom;
 }
 
 .title {
