@@ -1,11 +1,17 @@
 .bookmarkedBtn {
     background: url('/img/star_blue_full.svg');
     background-repeat: no-repeat;
-    background-size: 20px;
+    background-size: 23px;
+    margin-left: -2px;
+    padding-right: 2px;
+    margin-top: -5px;
 }
 
 .unbookmarkedBtn {
     background-image: url('/img/star_blue_empty.svg');
     background-repeat: no-repeat;
-    background-size: 20px;
+    background-size: 23px;
+    margin-left: -2px;
+    padding-right: 2px;
+    margin-top: -5px;
 }

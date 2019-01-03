@@ -199,7 +199,7 @@
     background-image: url('/img/tag_blue_empty.svg');
     opacity: 0.4;
     width: 21px;
-    margin-top: 1px;
+    margin-top: 2px;
     margin-right: 9px;
 
     &:hover {
