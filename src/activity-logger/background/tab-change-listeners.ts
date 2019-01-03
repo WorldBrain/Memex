@@ -1,5 +1,5 @@
 import { browser, Storage, Tabs } from 'webextension-polyfill-ts'
-import debounce from 'lodash/debounce'
+import throttle from 'lodash/throttle'
 
 import * as searchIndex from '../../search'
 import {
@@ -20,6 +20,7 @@ import {
     FavIconChecker,
     FavIconCreator,
     BookmarkChecker,
+    TabIndexer,
 } from './types'
 
 interface Props {
@@ -64,10 +65,16 @@ export default class TabChangeListeners {
     public checkBookmark: BookmarkChecker
 
     /**
-     * Handles fetching, and indexing the fav-icon once the tab updates, if needed.
+     * Handles throttled indexing of the tab contents on tab updates.
+     * Each tab gets an object of throttled indexers to handle indexing of
+     * things such as the fav-icon and visit.
+     *
+     * TODO: should this be integrated with the ext-wide tab state manager?
      */
-    handleFavIcon: TabChangeListener
-    private handleVisitIndexing: TabChangeListener
+    private tabIndexers = new Map<
+        number,
+        { favIcon: TabIndexer; page: TabIndexer }
+    >()
 
     constructor({
         tabManager,
@@ -95,20 +102,35 @@ export default class TabChangeListeners {
         this._tabActive = tabActiveCheck
         this.checkBookmark = bookmarkCheck
         this._contentScriptPaths = contentScriptPaths
-
-        // Set up debounces for different tab change listeners as some sites can
-        // really spam the fav-icon changes when they first load and to avoid some URL redirects.
-        // TODO: Better ways should exist
-        this.handleFavIcon = debounce(
-            this._handleFavIcon,
-            TabChangeListeners.FAV_ICON_CHANGE_THRESHOLD,
-        )
-
-        this.handleVisitIndexing = debounce(
-            this._handleVisitIndexing,
-            TabChangeListeners.URL_CHANGE_THRESHOLD,
-        )
     }
+
+    private getOrCreateTabIndexers(tabId: number) {
+        let indexers = this.tabIndexers.get(tabId)
+
+        if (!indexers) {
+            this.tabIndexers.set(tabId, {
+                favIcon: throttle(
+                    tab => this._handleFavIcon(tabId, {}, tab),
+                    TabChangeListeners.FAV_ICON_CHANGE_THRESHOLD,
+                    { leading: false },
+                ),
+                page: throttle(
+                    tab => this._handleVisitIndexing(tabId, {}, tab),
+                    TabChangeListeners.URL_CHANGE_THRESHOLD,
+                    { leading: false },
+                ),
+            })
+            indexers = this.tabIndexers.get(tabId)
+        }
+
+        return indexers
+    }
+
+    handleFavIcon: TabChangeListener = (tabId, _, tab) =>
+        this.getOrCreateTabIndexers(tabId).favIcon(tab)
+
+    handleVisitIndexing: TabChangeListener = (tabId, _, tab) =>
+        this.getOrCreateTabIndexers(tabId).page(tab)
 
     /**
      * Handles fetching of user indexing preferences from underyling browser storage.
@@ -147,7 +169,7 @@ export default class TabChangeListeners {
             isLoaded: status === 'complete',
         })
 
-        // Send off request for updating that prev. visit's tab state, if active long enough
+        // Update that prev. visit's tab state, if active long enough
         if (
             oldTab != null &&
             oldTab.url !== url &&
