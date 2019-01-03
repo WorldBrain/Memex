@@ -35,6 +35,8 @@ export type TabChangeListener = (
     tab: Tabs.Tab,
 ) => Promise<void>
 
+export type TabIndexer = (tab: Tabs.Tab) => Promise<void>
+
 export type LoggableTabChecker = (tab: Tabs.Tab) => Promise<boolean>
 export type VisitInteractionUpdater = (interalTab: TabState) => Promise<void>
 export type FavIconFetcher = (url: string) => Promise<string>
