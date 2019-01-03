@@ -8,7 +8,7 @@ const baseStyles = {
     bmMenu: {
         position: 'fixed',
         right: 0,
-        top: '97px',
+        top: '81px',
         zIndex: 1100,
         width: '340px',
         height: '100%',

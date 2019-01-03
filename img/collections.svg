@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="87px" height="87px" viewBox="0 0 87 87" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 51 (57462) - http://www.bohemiancoding.com/sketch -->
-    <title>Group 6</title>
+<svg width="38px" height="38px" viewBox="0 0 38 38" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 51.3 (57544) - http://www.bohemiancoding.com/sketch -->
+    <title>add_collections_blue</title>
     <desc>Created with Sketch.</desc>
     <defs></defs>
-    <g id="Lists" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="Group-6">
-            <rect id="Rectangle-path" fill="#777777" fill-rule="nonzero" x="0" y="0" width="87" height="8"></rect>
-            <rect id="Rectangle-path" fill="#777777" fill-rule="nonzero" x="0" y="21" width="87" height="8"></rect>
-            <rect id="Rectangle-path" fill="#777777" fill-rule="nonzero" x="0" y="40" width="87" height="8"></rect>
-            <rect id="Rectangle-path" fill="#777777" fill-rule="nonzero" x="0" y="59" width="87" height="8"></rect>
-            <g id="noun_1795132_3db995" transform="translate(0.000000, 79.000000)"></g>
-            <rect id="Rectangle-path" fill="#777777" fill-rule="nonzero" x="0" y="79" width="87" height="8"></rect>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="add_collections_blue" fill="#173766" fill-rule="nonzero">
+            <g id="noun_add-collection_393233" transform="translate(20.000000, 20.000000)">
+                <g id="Group">
+                    <path d="M3.6,0.3410822 C1.8479572,0.3410822 0.4,1.7731305 0.4,3.5059174 L0.4,14.5828404 C0.4,16.3156273 1.8479572,17.7476756 3.6,17.7476756 L14.8,17.7476756 C16.5520428,17.7476756 18,16.3156273 18,14.5828404 L18,3.5059174 C18,1.7731305 16.5520428,0.3410822 14.8,0.3410822 L3.6,0.3410822 Z M11.0375,2.4289943 L7.3625,2.4289943 C7.21026444,2.4289943 7.1,2.7763433 7.1,3.2559174 L7.1,14.8328404 C7.1,15.3124145 7.21026444,15.6597635 7.3625,15.6597635 L11.0375,15.6597635 C11.1897356,15.6597635 11.3,15.3124145 11.3,14.8328404 L11.3,3.2559174 C11.3,2.7763433 11.1897356,2.4289943 11.0375,2.4289943 Z" id="Shape"></path>
+                </g>
+            </g>
+            <path d="M3.6,20.3410822 C1.8479572,20.3410822 0.4,21.7731305 0.4,23.5059174 L0.4,34.5828404 C0.4,36.3156273 1.8479572,37.7476756 3.6,37.7476756 L14.8,37.7476756 C16.5520428,37.7476756 18,36.3156273 18,34.5828404 L18,23.5059174 C18,21.7731305 16.5520428,20.3410822 14.8,20.3410822 L3.6,20.3410822 Z" id="Path"></path>
+            <path d="M3.6,0.341082198 C1.8479572,0.341082198 0.4,1.77313055 0.4,3.50591736 L0.4,14.5828404 C0.4,16.3156273 1.8479572,17.7476756 3.6,17.7476756 L14.8,17.7476756 C16.5520428,17.7476756 18,16.3156273 18,14.5828404 L18,3.50591736 C18,1.77313055 16.5520428,0.341082198 14.8,0.341082198 L3.6,0.341082198 Z" id="Path"></path>
+            <path d="M23.6,0.341082198 C21.8479572,0.341082198 20.4,1.77313055 20.4,3.50591736 L20.4,14.5828404 C20.4,16.3156273 21.8479572,17.7476756 23.6,17.7476756 L34.8,17.7476756 C36.5520428,17.7476756 38,16.3156273 38,14.5828404 L38,3.50591736 C38,1.77313055 36.5520428,0.341082198 34.8,0.341082198 L23.6,0.341082198 Z" id="Path"></path>
         </g>
     </g>
 </svg>

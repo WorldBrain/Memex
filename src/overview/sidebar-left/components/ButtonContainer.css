@@ -14,12 +14,11 @@
     display: flex !important; /* stylelint-disable-line declaration-no-important */
     justify-content: space-between;
     top: 0px;
-    width: 285px;
+    width: 250px;
     background-color: #fff;
-    border-bottom-right-radius: 5px;
-    border-width: 0 1px 1px 0;
+    border-width: 0 2px 1px 0;
     border-style: solid;
-    border-color: #d0cece;
+    border-color: #e1ece9;
     z-index: 214748364;
     align-items: center;
     height: 45px;
@@ -30,7 +29,7 @@
 }
 
 .closeIcon {
-    background-image: url('/img/cross_grey.svg');
+    background-image: url('/img/cross.svg');
     background-size: 15px;
     display: block;
     margin-right: 5px;
@@ -47,17 +46,19 @@
 }
 
 .filterButton {
-    background-image: url('/img/filter_filled.svg');
+    background-image: url('/img/filter.svg');
     background-size: 20px;
     display: block;
     background-repeat: no-repeat;
     width: 35px;
+    opacity: 0.6;
     height: 35px;
     background-position: 7.5px 7.5px;
     border-radius: 50%;
 
     &:hover {
         background-color: #efefef;
+        opacity: 0.8;
     }
 }
 
@@ -66,6 +67,7 @@
     background-size: 20px;
     display: block;
     margin-left: 10px;
+    opacity: 0.6;
     background-repeat: no-repeat;
     width: 35px;
     height: 35px;
@@ -74,13 +76,14 @@
 
     &:hover {
         background-color: #efefef;
+        opacity: 0.8;
     }
 }
 
 .clearFilters {
     color: #767676;
     padding: 3px 6px;
-    margin-left: 80px;
+    margin-left: 40px;
     height: 24px;
     font-size: 1.1em;
     cursor: pointer;
@@ -92,7 +95,16 @@
 }
 
 .filterEnabled {
-    background-color: #efefef;
+    border-bottom: solid 4px #173766;
+    padding-bottom: 36px;
+    margin-top: 5px;
+    border-radius: 0px;
+    background-color: #fff0;
+
+    &:hover {
+        background-color: #fff0;
+        opacity: 1;
+    }
 }
 
 .wrapper {

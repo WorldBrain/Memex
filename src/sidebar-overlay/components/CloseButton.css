@@ -1,29 +1,25 @@
 .close {
     position: fixed;
     top: 0px;
-    right: 334px;
+    right: 291px;
     cursor: pointer;
     color: #3eb995;
     z-index: 2147483647;
     padding: 2px 7.5px 4px 7.5px;
     line-height: normal;
     background: #fff;
-    border-bottom-left-radius: 5px;
     border-bottom: 1px solid #d0cece;
-    border-left: 1px solid #d0cece;
+    border-left: solid 3px #efefef;
     padding-top: 5px;
     padding-bottom: 5px;
-    animation: fadeIn 0.5s linear 0.5s;
-    animation-fill-mode: both;
 
     &.overview {
-        top: 72px;
-        right: 330px;
+        top: 56px;
+        right: 290px;
         z-index: 1200;
+        width: 50px;
+        border-radius: 0px;
         padding-top: 5px;
-        padding-bottom: 5px;
-        animation: fadeIn 0s linear 0s;
-        animation-fill-mode: both;
         height: 42px;
     }
 
@@ -33,7 +29,7 @@
 }
 
 .closeIcon {
-    background-image: url('/img/cross_grey.svg');
+    background-image: url('/img/cross.svg');
     background-size: 15px;
     display: block;
     margin-top: 2px;
