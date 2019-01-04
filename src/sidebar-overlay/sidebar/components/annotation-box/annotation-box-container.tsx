@@ -1,14 +1,19 @@
 import * as React from 'react'
 import cx from 'classnames'
 import moment from 'moment'
+import { connect } from 'react-redux'
 
+import * as actions from '../../actions'
 import AnnotationBoxCommentTags from './annotation-box-comment-tags'
 import AnnotationBoxFooter from './annotation-box-footer'
 import TruncatedTextRenderer from '../truncated-text-renderer'
+import CommentTagsInput from './comment-tags-input'
+import { MapDispatchToProps } from '../../../types'
 
-const styles = require('./annotation-box.css')
+const styles = require('./annotation-box-container.css')
 
-interface Props {
+interface OwnProps {
+    url: string
     createdWhen: Date
     lastEdited?: Date
     body?: string
@@ -16,13 +21,83 @@ interface Props {
     tags: string[]
 }
 
-interface State {
-    mode: 'default' | 'edit' | 'delete'
+interface StateProps {}
+
+interface DispatchProps {
+    handleEditAnnotation: (url: string, comment: string, tags: string[]) => any
+    handleDeleteAnnotation: (...args: any[]) => any
 }
 
-class AnnotationBox extends React.Component<Props, State> {
+type Props = OwnProps & StateProps & DispatchProps
+
+interface State {
+    mode: 'default' | 'edit' | 'delete'
+    commentText: string
+    tagsInput: string[]
+}
+
+class AnnotationBoxContainer extends React.Component<Props, State> {
     state: State = {
         mode: 'default',
+        commentText: '',
+        tagsInput: [],
+    }
+
+    /**
+     * Method to change the text of the comment (which is temporary until
+     * saved explicitly). Gets called when the text of the text area is
+     * changed.
+     * Only relevant when component is in `edit` mode.
+     */
+    private _handleCommentTextChange = (comment: string) => {
+        this.setState({ commentText: comment })
+    }
+
+    /**
+     * Method to add a tag to the list of tags for the comment temporarily
+     * until saved explicitly. Gets called when the tags are changed through
+     * tag input.
+     * Only relevant when component is in `edit` mode.
+     */
+    private _addTag = (tag: string) => {
+        this.setState(prevState => ({
+            tagsInput: [tag, ...prevState.tagsInput],
+        }))
+    }
+
+    /**
+     * Method to delete a tag from the list of tags for the comment temporarily
+     * until saved explicitly. Gets called when the tags are changed through
+     * tag input.
+     * Only relevant when component is in `edit` mode.
+     */
+    private _deleteTag = (tag: string) => {
+        const tagIndex = this.state.tagsInput.indexOf(tag)
+        this.setState(prevState => ({
+            tagsInput: [
+                ...prevState.tagsInput.slice(0, tagIndex),
+                ...prevState.tagsInput.slice(tagIndex + 1),
+            ],
+        }))
+    }
+
+    /**
+     * Serves as a proxy to call the actual method (which is passed via props)
+     * that saves any edits made to the comment/annotation.
+     */
+    private _handleEditAnnotation = () => {
+        const { url } = this.props
+        const { commentText, tagsInput } = this.state
+        this.props.handleEditAnnotation(url, commentText.trim(), tagsInput)
+        this.setState({ mode: 'default' })
+    }
+
+    /**
+     * Serves as a proxy to call the actual method (which is passed via props)
+     * that deletes the current comment/annotation.
+     */
+    private _handleDeleteAnnotation = () => {
+        console.log('delete')
     }
 
     private _getFormattedTimestamp = (timestamp: Date) =>
@@ -61,15 +136,18 @@ class AnnotationBox extends React.Component<Props, State> {
     }
 
     private _handleEditIconClick = () => {
-        this.setState({ mode: 'edit' })
+        const { tags, comment } = this.props
+        this.setState({ mode: 'edit', commentText: comment, tagsInput: tags })
     }
 
     private _handleTrashIconClick = () => {
         this.setState({ mode: 'delete' })
     }
 
+    // TODO: Complete this.
     private _handleShareIconClick = () => null
 
+    // TODO: Complete this.
     private _handleReplyIconClick = () => null
 
     private _handleCancelOperation = () => {
@@ -90,7 +168,7 @@ class AnnotationBox extends React.Component<Props, State> {
             <div
                 className={cx(styles.container, {
                     [styles.isClickable]: !isJustComment,
-                    [styles.isJustComment]: isJustComment,
+                    [styles.isJustComment]: mode !== 'edit' && isJustComment,
                 })}
                 onClick={
                     !isJustComment
@@ -134,14 +212,20 @@ class AnnotationBox extends React.Component<Props, State> {
                         />
                     )
                 ) : (
-                    <div>hello</div>
+                    <CommentTagsInput
+                        commentText={this.state.commentText}
+                        tags={this.state.tagsInput}
+                        handleCommentTextChange={this._handleCommentTextChange}
+                        addTag={this._addTag}
+                        deleteTag={this._deleteTag}
+                    />
                 )}
 
                 {/* Footer. */}
                 <AnnotationBoxFooter
                     mode={mode}
-                    handleEditAnnotation={() => null}
-                    handleDeleteAnnotation={() => null}
+                    handleEditAnnotation={this._handleEditAnnotation}
+                    handleDeleteAnnotation={this._handleDeleteAnnotation}
                     handleCancelEdit={this._handleCancelOperation}
                     handleCancelDeletion={this._handleCancelOperation}
                     editIconClickHandler={this._handleEditIconClick}
@@ -154,4 +238,16 @@ class AnnotationBox extends React.Component<Props, State> {
     }
 }
 
-export default AnnotationBox
+const mapDispatchToProps: MapDispatchToProps<
+    DispatchProps,
+    OwnProps
+> = dispatch => ({
+    handleEditAnnotation: (url, comment, tags) =>
+        dispatch(actions.editAnnotation(url, comment, tags)),
+    handleDeleteAnnotation: () => null,
+})
+
+export default connect(
+    undefined,
+    mapDispatchToProps,
+)(AnnotationBoxContainer)

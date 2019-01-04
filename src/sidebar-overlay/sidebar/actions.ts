@@ -12,6 +12,7 @@ const createAnnotationRPC = remoteFunction('createAnnotation')
 const addAnnotationTagRPC = remoteFunction('addAnnotationTag')
 const getAllAnnotationsByUrlRPC = remoteFunction('getAllAnnotationsByUrl')
 const getTagsByAnnotationUrlRPC = remoteFunction('getTagsByAnnotationUrl')
+const editAnnotationRPC = remoteFunction('editAnnotation')
 
 export const setSidebarOpen = createAction<boolean>('setSidebarOpen')
 
@@ -95,4 +96,29 @@ export const createAnnotation: (
 
     // Re-fetch annotations.
     dispatch(fetchAnnotations())
+}
+
+// TODO: Perform a check for empty comment and no anchor.
+export const editAnnotation: (
+    url: string,
+    comment: string,
+    tags: string[],
+) => Thunk = (url, comment, tags) => async (dispatch, getState) => {
+    console.log(url)
+    console.log(comment)
+    console.log(tags)
+    console.log(getState())
+
+    // Save the new annotation to the storage.
+    await editAnnotationRPC(url, comment)
+
+    const state = getState()
+    const {
+        sidebar: { annotations },
+    } = state
+    const { tags: oldTags } = annotations.find(
+        annotation => annotation.url === url,
+    )
+
+    // .sort()
 }

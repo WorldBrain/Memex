@@ -5,7 +5,7 @@ import CongratsMessage from '../../components/CongratsMessage'
 import menuStyles from './menu-styles'
 import CommentBoxContainer from '../../comment-box'
 import { Topbar, Loader, EmptyMessage } from '../../components'
-import AnnotationBox from './annotation-box'
+import AnnotationBoxContainer from './annotation-box'
 import { Annotation } from '../types'
 
 const styles = require('./sidebar.css')
@@ -104,7 +104,7 @@ class Sidebar extends React.Component<Props> {
                     ) : (
                         <div className={styles.annotationsSection}>
                             {annotations.map(annotation => (
-                                <AnnotationBox
+                                <AnnotationBoxContainer
                                     key={annotation.url}
                                     {...annotation}
                                 />
