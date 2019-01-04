@@ -15,13 +15,14 @@
 }
 
 .listButton {
-    background-image: url('/img/collections.svg');
+    background-image: url('/img/collections_empty.svg');
     width: 30px;
     height: 30px;
     opacity: 0.5;
 
     &:hover {
         opacity: 0.8;
+        background-image: url('/img/collections.svg');
     }
 }
 
