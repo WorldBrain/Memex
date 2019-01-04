@@ -4,9 +4,8 @@ import { connect, MapStateToProps } from 'react-redux'
 import * as actions from '../actions'
 import * as selectors from '../selectors'
 import { RootState } from '../../ribbon-sidebar-controller'
-import { IndexDropdown } from '../../../common-ui/containers'
 import { MapDispatchToProps } from '../../types'
-import { TagHolder } from '../../components'
+import { TagInput } from '../../components'
 
 interface StateProps {
     tags: string[]
@@ -26,39 +25,7 @@ interface OwnProps {
 type Props = StateProps & DispatchProps & OwnProps
 
 /* tslint:disable-next-line variable-name */
-const TagInputContainer = ({
-    isTagInputActive,
-    tags,
-    initTagSuggestions,
-    addTag,
-    deleteTag,
-    setTagInputActive,
-}: Props) => {
-    if (isTagInputActive) {
-        return (
-            <IndexDropdown
-                isForAnnotation
-                allowAdd
-                initFilters={tags}
-                initSuggestions={initTagSuggestions}
-                onFilterAdd={addTag}
-                onFilterDel={deleteTag}
-                source="tag"
-            />
-        )
-    }
-
-    return (
-        <TagHolder
-            tags={tags}
-            clickHandler={e => {
-                e.stopPropagation()
-                setTagInputActive(true)
-            }}
-            deleteTag={deleteTag}
-        />
-    )
-}
+const TagInputContainer = (props: Props) => <TagInput {...props} />
 
 const mapStateToProps: MapStateToProps<
     StateProps,
