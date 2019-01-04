@@ -1,16 +1,17 @@
 .filterButton {
-    background-image: url('/img/filter.svg');
+    background-image: url('/img/filter_empty.svg');
     width: 32px;
     height: 34px;
     opacity: 0.6;
 
     &:hover {
         opacity: 0.8;
+        background-image: url('/img/filter_full.svg');
     }
 }
 
 .filterEnabled {
-    background-image: url('/img/filter.svg');
+    background-image: url('/img/filter_full.svg');
     opacity: 1;
 }
 

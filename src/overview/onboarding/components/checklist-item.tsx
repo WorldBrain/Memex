@@ -21,6 +21,7 @@ export default class ChecklistItem extends PureComponent<Props> {
                             styles.icon,
                             styles[this.props.iconClass],
                         )}
+                        onClick={this.props.handleClick}
                     />
                     <span
                         className={cx(styles.checklistText, {
@@ -35,6 +36,7 @@ export default class ChecklistItem extends PureComponent<Props> {
                     className={cx(styles.subTitle, {
                         [styles.striked]: this.props.isChecked,
                     })}
+                    onClick={this.props.handleClick}
                 >
                     {this.props.subtitle}
                 </p>

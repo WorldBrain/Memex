@@ -11,9 +11,10 @@
 }
 
 .subTitle {
-    font-size: 13px;
+    font-size: 14px;
     margin-left: 30px;
-    margin-top: -28px;
+    margin-top: -22px;
+    cursor: pointer;
     margin-right: 20px;
     color: #333333c7;
 }
@@ -21,6 +22,11 @@
 .striked {
     text-decoration: line-through;
     cursor: default;
+    opacity: 0.7;
+}
+
+.checked {
+    background-image: url('/img/checked_green.svg');
 }
 
 .icon {
@@ -32,8 +38,22 @@
     background-repeat: no-repeat;
     background-position: center;
     background-size: 25px;
+    vertical-align: bottom;
+    cursor: pointer;
 }
 
 .close {
     background-image: url('/img/cross_circle.svg');
+}
+
+.step1 {
+    background-image: url('/img/step1.svg');
+}
+
+.step2 {
+    background-image: url('/img/step2.svg');
+}
+
+.step3 {
+    background-image: url('/img/step3.svg');
 }
