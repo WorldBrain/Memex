@@ -205,10 +205,10 @@ const mapDispatch = (dispatch): DispatchProps => ({
     toggleShowTagsPicker: () => dispatch(tagActs.toggleShowTagsPicker()),
     toggleShowCollectionsPicker: () =>
         dispatch(collectionActs.toggleShowTagsPicker()),
-    onTagAdd: (tag: string) => dispatch(tagActs.addTag(tag)),
+    onTagAdd: (tag: string) => dispatch(tagActs.addTagToPage(tag)),
     onTagDel: (tag: string) => dispatch(tagActs.deleteTag(tag)),
     onCollectionAdd: (collection: PageList) =>
-        dispatch(collectionActs.addCollection(collection)),
+        dispatch(collectionActs.addCollectionToPage(collection)),
     onCollectionDel: (collection: PageList) =>
         dispatch(collectionActs.deleteCollection(collection)),
 })
