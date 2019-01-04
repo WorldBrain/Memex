@@ -1,4 +1,4 @@
-import { browser } from 'webextension-polyfill-ts'
+import { browser, Tabs } from 'webextension-polyfill-ts'
 
 import { makeRemotelyCallable, remoteFunction } from 'src/util/webextensionRPC'
 import QueryBuilder from 'src/search/query-builder'
@@ -9,6 +9,10 @@ import { AnnotationRequests } from './request'
 import AnnotationStorage from './storage'
 import normalize from '../../util/encode-url-for-id'
 import { AnnotationSender } from '../types'
+
+interface TabArg {
+    tab: Tabs.Tab
+}
 
 export default class DirectLinkingBackground {
     private backend: DirectLinkingBackend
@@ -63,6 +67,8 @@ export default class DirectLinkingBackground {
                 openSidebarWithHighlight: this.openSidebarWithHighlight.bind(
                     this,
                 ),
+                toggleAnnotBookmark: this.toggleAnnotBookmark.bind(this),
+                insertAnnotToList: this.insertAnnotToList.bind(this),
             },
             { insertExtraArg: true },
         )
@@ -88,7 +94,7 @@ export default class DirectLinkingBackground {
         await this.triggerSidebar('toggleSidebarOverlay')
     }
 
-    async openSidebarWithHighlight({ tab }, anchor) {
+    async openSidebarWithHighlight(_, anchor) {
         // Toggling the sidebar ensures that if the page does not have the
         // ribbon mounted at this point, then it will get inserted before
         // proceeding any further.
@@ -96,11 +102,11 @@ export default class DirectLinkingBackground {
         this.triggerSidebar('openSidebarAndSendAnchor', anchor)
     }
 
-    followAnnotationRequest({ tab }) {
+    followAnnotationRequest({ tab }: TabArg) {
         this.requests.followAnnotationRequest(tab.id)
     }
 
-    async createDirectLink({ tab }, request) {
+    async createDirectLink({ tab }: TabArg, request) {
         const pageTitle = tab.title
         const result = await this.backend.createDirectLink(request)
         await this.annotationStorage.createAnnotation({
@@ -118,8 +124,8 @@ export default class DirectLinkingBackground {
         return result
     }
 
-    async getAllAnnotationsByUrl({ tab }, url) {
-        let pageUrl = url === null ? tab.url : url
+    async getAllAnnotationsByUrl({ tab }: TabArg, url) {
+        let pageUrl = url == null ? tab.url : url
         pageUrl = normalize(pageUrl)
         const annotations = await this.annotationStorage.getAnnotationsByUrl(
             pageUrl,
@@ -133,9 +139,12 @@ export default class DirectLinkingBackground {
         )
     }
 
-    async createAnnotation({ tab }, { url, title, comment, body, selector }) {
-        const pageUrl = url === null ? tab.url : url
-        const pageTitle = title === null ? tab.title : title
+    async createAnnotation(
+        { tab }: TabArg,
+        { url, title, comment, body, selector },
+    ) {
+        const pageUrl = url == null ? tab.url : url
+        const pageTitle = title == null ? tab.title : title
         const uniqueUrl = `${pageUrl}/#${Date.now()}`
 
         await this.annotationStorage.createAnnotation({
@@ -148,6 +157,21 @@ export default class DirectLinkingBackground {
         })
 
         return uniqueUrl
+    }
+
+    async insertAnnotToList(
+        { tab }: TabArg,
+        { listId, url }: { listId: number; url: string },
+    ) {
+        url = url == null ? tab.url : url
+
+        return this.annotationStorage.insertAnnotToList({ listId, url })
+    }
+
+    async toggleAnnotBookmark({ tab }: TabArg, { url }: { url: string }) {
+        url = url == null ? tab.url : url
+
+        return this.annotationStorage.toggleAnnotBookmark({ url })
     }
 
     async searchAnnotations(_, { query, ...params }) {
@@ -165,23 +189,23 @@ export default class DirectLinkingBackground {
         })
     }
 
-    async editAnnotation({ tab }, pk, comment) {
+    async editAnnotation(_, pk, comment) {
         return this.annotationStorage.editAnnotation(pk, comment)
     }
 
-    async deleteAnnotation({ tab }, pk) {
+    async deleteAnnotation(_, pk) {
         return this.annotationStorage.deleteAnnotation(pk)
     }
 
-    async getTagsByAnnotationUrl({ tab }, url) {
+    async getTagsByAnnotationUrl(_, url) {
         return this.annotationStorage.getTagsByAnnotationUrl(url)
     }
 
-    async addTagForAnnotation({ tab }, { tag, url }) {
+    async addTagForAnnotation(_, { tag, url }) {
         return this.annotationStorage.modifyTags(true)(tag, url)
     }
 
-    async delTagForAnnotation({ tab }, { tag, url }) {
+    async delTagForAnnotation(_, { tag, url }) {
         return this.annotationStorage.modifyTags(false)(tag, url)
     }
 }

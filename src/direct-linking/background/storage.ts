@@ -4,7 +4,6 @@ import {
     createPageFromTab,
     Tag,
     Page,
-    Bookmark,
     Dexie,
     StorageManager,
 } from '../../search'
@@ -167,9 +166,11 @@ export default class AnnotationStorage extends FeatureStorage {
             throw new Error(`No list exists for ID: ${listId}`)
         }
 
-        return this.storageManager
+        const { object } = await this.storageManager
             .collection(this._listEntriesColl)
             .createObject({ listId, url, createdAt: new Date() })
+
+        return [object.listId, object.url]
     }
 
     /**
@@ -257,7 +258,7 @@ export default class AnnotationStorage extends FeatureStorage {
         if (collUrlsInc != null && collUrlsInc.size) {
             pageUrlInc = [...collUrlsInc]
 
-            query.pageUrl = {
+            query.url = {
                 $in: pageUrlInc,
                 ...(query.pageUrl || {}),
             }
@@ -357,7 +358,7 @@ export default class AnnotationStorage extends FeatureStorage {
             .collection(this._listEntriesColl)
             .findObjects<any>({ listId: { $in: colls.map(coll => coll.id) } })
 
-        return new Set<string>(collEntries.map(coll => coll.pageUrl))
+        return new Set<string>(collEntries.map(coll => coll.url))
     }
 
     private async tagSearch(tags: string[]) {
@@ -395,14 +396,14 @@ export default class AnnotationStorage extends FeatureStorage {
     ) {
         const bookmarks = await this.storageManager
             .collection(this._bookmarksColl)
-            .findObjects<Bookmark>({
-                url: { $in: results.map(annot => annot.pageUrl) },
+            .findObjects<any>({
+                url: { $in: results.map(annot => annot.url) },
             })
 
         const bmUrlSet = new Set(bookmarks.map(bm => bm.url))
 
         if (bookmarksOnly) {
-            return results.filter(annot => bmUrlSet.has(annot.pageUrl))
+            results = results.filter(annot => bmUrlSet.has(annot.url))
         }
 
         return results.map(annot => ({
