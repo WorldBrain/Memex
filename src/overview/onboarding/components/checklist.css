@@ -13,26 +13,6 @@
     margin-bottom: 30px;
 }
 
-.checklist {
-    text-align: left;
-    margin: 25px 0 25px -10px;
-}
-
-.checklistText {
-    color: #333;
-    font-weight: 400;
-    cursor: pointer;
-    font-size: 15px;
-}
-
-.subTitle {
-    font-size: 13px;
-    margin-left: 30px;
-    margin-top: -28px;
-    margin-right: 20px;
-    color: #333333c7;
-}
-
 .container {
     width: fit-content;
     position: absolute;

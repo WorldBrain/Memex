@@ -1,11 +1,12 @@
 import React, { PureComponent } from 'react'
-import { Checkbox } from '../../../common-ui/components'
+import cx from 'classnames'
 
-const styles = require('./checklist.css')
+const styles = require('./checklist-item.css')
 
 interface Props {
     isChecked: boolean
-    id: string
+    iconClass: string
+    subtitle: string
     children: React.ReactChild
     handleClick: () => void
 }
@@ -13,21 +14,31 @@ interface Props {
 export default class ChecklistItem extends PureComponent<Props> {
     render() {
         return (
-            <div className={styles.checklist}>
-                <Checkbox
-                    isChecked={this.props.isChecked}
-                    handleChange={() => null}
-                    id={this.props.id}
-                >
-                    {' '}
+            <React.Fragment>
+                <div className={styles.checklist}>
                     <span
-                        className={styles.checklistText}
+                        className={cx(
+                            styles.icon,
+                            styles[this.props.iconClass],
+                        )}
+                    />
+                    <span
+                        className={cx(styles.checklistText, {
+                            [styles.striked]: this.props.isChecked,
+                        })}
                         onClick={this.props.handleClick}
                     >
                         {this.props.children}{' '}
                     </span>
-                </Checkbox>
-            </div>
+                </div>
+                <p
+                    className={cx(styles.subTitle, {
+                        [styles.striked]: this.props.isChecked,
+                    })}
+                >
+                    {this.props.subtitle}
+                </p>
+            </React.Fragment>
         )
     }
 }

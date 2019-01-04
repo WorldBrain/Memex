@@ -1,0 +1,39 @@
+.checklist {
+    text-align: left;
+    margin: 25px 0 25px -10px;
+}
+
+.checklistText {
+    color: #333;
+    font-weight: 400;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+.subTitle {
+    font-size: 13px;
+    margin-left: 30px;
+    margin-top: -28px;
+    margin-right: 20px;
+    color: #333333c7;
+}
+
+.striked {
+    text-decoration: line-through;
+    cursor: default;
+}
+
+.icon {
+    display: inline-block;
+    width: 25px;
+    height: 25px;
+    margin-bottom: -9px;
+    margin-right: 15px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 25px;
+}
+
+.close {
+    background-image: url('/img/cross_circle.svg');
+}
