@@ -1,3 +1,3 @@
-import AnnotationBox from './annotation-box'
+import AnnotationBoxContainer from './annotation-box-container'
 
-export default AnnotationBox
+export default AnnotationBoxContainer
