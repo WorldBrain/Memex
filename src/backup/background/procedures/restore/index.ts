@@ -213,6 +213,6 @@ export function _getChangeWhere(change, registry: StorageRegistry) {
     if (pkIndex instanceof Array) {
         return zipObject(pkIndex, change.pk)
     } else if (typeof pkIndex === 'string') {
-        return { [pkIndex]: change.pk }
+        return { [pkIndex]: change.objectPk }
     }
 }
