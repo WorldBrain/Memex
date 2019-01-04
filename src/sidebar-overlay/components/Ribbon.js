@@ -306,7 +306,7 @@ class Ribbon extends React.Component {
         })
     }
 
-    openSidebar = () =>
+    openSidebar = ({ anchor } = {}) =>
         new Promise(resolve => {
             return this.setState(
                 {
@@ -316,6 +316,11 @@ class Ribbon extends React.Component {
                 async () => {
                     if (!this.frameFC) {
                         this.setupFrameFunctions()
+                    }
+                    if (anchor !== undefined) {
+                        await this.frameFC.remoteExecute('sendAnchorToSidebar')(
+                            anchor,
+                        )
                     }
                     await this.frameFC.remoteExecute('setLoaderActive')()
                     await this.fetchAnnotations()
@@ -343,12 +348,7 @@ class Ribbon extends React.Component {
         })
 
     openSidebarAndSendAnchor = async anchor => {
-        await this.openSidebar()
-
-        setTimeout(
-            () => this.frameFC.remoteExecute('sendAnchorToSidebar')(anchor),
-            400,
-        )
+        await this.openSidebar({ anchor })
     }
 
     handleClickOutside = e => {
