@@ -3,8 +3,9 @@ import { createAction } from 'redux-act'
 import { Annotation, Page } from './types'
 import { Thunk } from '../types'
 import { remoteFunction } from '../../util/webextensionRPC'
-import { Anchor } from 'src/direct-linking/content_script/interactions'
+import { Anchor } from '../../direct-linking/content_script/interactions'
 import * as selectors from './selectors'
+import { getTagArrays } from '../utils'
 
 // Remote function declarations.
 const processEventRPC = remoteFunction('processEvent')
@@ -14,7 +15,7 @@ const getAllAnnotationsByUrlRPC = remoteFunction('getAllAnnotationsByUrl')
 const getTagsByAnnotationUrlRPC = remoteFunction('getTagsByAnnotationUrl')
 const editAnnotationRPC = remoteFunction('editAnnotation')
 const deleteAnnotationRPC = remoteFunction('deleteAnnotation')
-const setAnnotationTagsRPC = remoteFunction('setAnnotationTags')
+const editAnnotationTagsRPC = remoteFunction('editAnnotationTags')
 
 export const setSidebarOpen = createAction<boolean>('setSidebarOpen')
 
@@ -109,16 +110,20 @@ export const editAnnotation: (
     // Save the new annotation to the storage.
     await editAnnotationRPC(url, comment)
 
+    // Get the previous annotation from the state.
     const state = getState()
     const annotations = selectors.annotations(state)
     const index = annotations.findIndex(annotation => annotation.url === url)
     const prevAnnotation = annotations[index]
 
-    const oldTags = prevAnnotation.tags
+    // Evaluate which tags need to be added and which need to be deleted.
+    const { tagsToBeAdded, tagsToBeDeleted } = getTagArrays(
+        prevAnnotation.tags,
+        tags,
+    )
+    await editAnnotationTagsRPC({ tagsToBeAdded, tagsToBeDeleted, url })
 
-    // Edit the tags.
-    await setAnnotationTagsRPC({ oldTags, newTags: tags, url })
-
+    // Update state to reflect the edit.
     const updatedAnnotations = [
         ...annotations.slice(0, index),
         { ...prevAnnotation, tags },
