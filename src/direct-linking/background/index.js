@@ -61,6 +61,9 @@ export default class DirectLinkingBackground {
                 delAnnotationTag: (...params) => {
                     return this.delTagForAnnotation(...params)
                 },
+                setAnnotationTags: (...params) => {
+                    return this.setAnnotationTags(...params)
+                },
             },
             { insertExtraArg: true },
         )
@@ -165,5 +168,9 @@ export default class DirectLinkingBackground {
 
     async delTagForAnnotation({ tab }, { tag, url }) {
         return this.annotationStorage.modifyTags(false)(tag, url)
+    }
+
+    async setAnnotationTags({ tab }, { oldTags, newTags, url }) {
+        return this.annotationStorage.setAnnotationTags(oldTags, newTags, url)
     }
 }

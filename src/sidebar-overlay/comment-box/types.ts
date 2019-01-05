@@ -14,6 +14,8 @@ export default interface State {
     commentText: string
     /** Holds the tags associated with the current comment. */
     tags: string[]
-    /** Holds the initial tag suggestions to display for the user search. */
+    /** Holds the initial tag suggestions to display for the user search.
+     * (NOT BEING USED CURRENTLY but using would probably make for a better UX).
+     */
     initTagSuggestions: string[]
 }
