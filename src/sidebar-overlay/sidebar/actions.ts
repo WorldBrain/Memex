@@ -13,6 +13,8 @@ const addAnnotationTagRPC = remoteFunction('addAnnotationTag')
 const getAllAnnotationsByUrlRPC = remoteFunction('getAllAnnotationsByUrl')
 const getTagsByAnnotationUrlRPC = remoteFunction('getTagsByAnnotationUrl')
 const editAnnotationRPC = remoteFunction('editAnnotation')
+const deleteAnnotationRPC = remoteFunction('deleteAnnotation')
+const setAnnotationTagsRPC = remoteFunction('setAnnotationTags')
 
 export const setSidebarOpen = createAction<boolean>('setSidebarOpen')
 
@@ -104,21 +106,39 @@ export const editAnnotation: (
     comment: string,
     tags: string[],
 ) => Thunk = (url, comment, tags) => async (dispatch, getState) => {
-    console.log(url)
-    console.log(comment)
-    console.log(tags)
-    console.log(getState())
-
     // Save the new annotation to the storage.
     await editAnnotationRPC(url, comment)
 
     const state = getState()
-    const {
-        sidebar: { annotations },
-    } = state
-    const { tags: oldTags } = annotations.find(
-        annotation => annotation.url === url,
-    )
+    const annotations = selectors.annotations(state)
+    const index = annotations.findIndex(annotation => annotation.url === url)
+    const prevAnnotation = annotations[index]
 
-    // .sort()
+    const oldTags = prevAnnotation.tags
+
+    // Edit the tags.
+    await setAnnotationTagsRPC({ oldTags, newTags: tags, url })
+
+    const updatedAnnotations = [
+        ...annotations.slice(0, index),
+        { ...prevAnnotation, tags },
+        ...annotations.slice(index + 1),
+    ]
+    dispatch(setAnnotations(updatedAnnotations))
+}
+
+export const deleteAnnotation: (url: string) => Thunk = url => async (
+    dispatch,
+    getState,
+) => {
+    // TODO: Process event.
+
+    await deleteAnnotationRPC(url)
+
+    const state = getState()
+    const annotations = selectors.annotations(state)
+    const newAnnotations = annotations.filter(
+        annotation => annotation.url !== url,
+    )
+    dispatch(setAnnotations(newAnnotations))
 }
