@@ -266,14 +266,14 @@ export class AnnotationStorage extends FeatureStorage {
         })
     }
 
-    setAnnotationTags = async (
-        oldTags: string[],
-        newTags: string[],
+    editAnnotationTags = async (
+        tagsToBeAdded: string[],
+        tagsToBeDeleted: string[],
         url: string,
     ) => {
-        // Remove previous tags.
+        // Remove the tags that are to be deleted.
         await Promise.all(
-            oldTags.map(async tag =>
+            tagsToBeDeleted.map(async tag =>
                 this.storageManager.deleteObject(TAGS_TABLE, {
                     name: tag,
                     url,
@@ -281,9 +281,9 @@ export class AnnotationStorage extends FeatureStorage {
             ),
         )
 
-        // Add new tags.
+        // Add the tags that are to be added.
         return Promise.all(
-            newTags.map(async tag =>
+            tagsToBeAdded.map(async tag =>
                 this.storageManager.putObject(TAGS_TABLE, {
                     name: tag,
                     url,
