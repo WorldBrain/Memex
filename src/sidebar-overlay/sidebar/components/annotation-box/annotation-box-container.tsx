@@ -9,6 +9,7 @@ import AnnotationBoxFooter from './annotation-box-footer'
 import TruncatedTextRenderer from '../truncated-text-renderer'
 import CommentTagsInput from './comment-tags-input'
 import { MapDispatchToProps } from '../../../types'
+import { CrowdfundingBox } from '../../../../common-ui/crowdfunding'
 
 const styles = require('./annotation-box-container.css')
 
@@ -24,8 +25,8 @@ interface OwnProps {
 interface StateProps {}
 
 interface DispatchProps {
-    handleEditAnnotation: (url: string, comment: string, tags: string[]) => any
-    handleDeleteAnnotation: (...args: any[]) => any
+    handleEditAnnotation: (url: string, comment: string, tags: string[]) => void
+    handleDeleteAnnotation: (url: string) => void
 }
 
 type Props = OwnProps & StateProps & DispatchProps
@@ -34,6 +35,7 @@ interface State {
     mode: 'default' | 'edit' | 'delete'
     commentText: string
     tagsInput: string[]
+    displayCrowdfunding: boolean
 }
 
 class AnnotationBoxContainer extends React.Component<Props, State> {
@@ -41,6 +43,20 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
         mode: 'default',
         commentText: '',
         tagsInput: [],
+        displayCrowdfunding: false,
+    }
+
+    private _setDisplayCrowdfunding = (
+        value: boolean,
+        event: 'clickReplyButton' | 'clickShareButton' = undefined,
+    ) => {
+        if (event !== undefined) {
+            // TODO: Call RPC to process the event.
+            // await remoteFunction('processEvent')({
+            //     type: event
+            // })
+        }
+        this.setState({ displayCrowdfunding: value })
     }
 
     /**
@@ -97,7 +113,8 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
      * that deletes the current comment/annotation.
      */
     private _handleDeleteAnnotation = () => {
-        console.log('delete')
+        const { url } = this.props
+        this.props.handleDeleteAnnotation(url)
     }
 
     private _getFormattedTimestamp = (timestamp: Date) =>
@@ -144,18 +161,20 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
         this.setState({ mode: 'delete' })
     }
 
-    // TODO: Complete this.
-    private _handleShareIconClick = () => null
+    private _handleShareIconClick = () => {
+        this._setDisplayCrowdfunding(true, 'clickShareButton')
+    }
 
-    // TODO: Complete this.
-    private _handleReplyIconClick = () => null
+    private _handleReplyIconClick = () => {
+        this._setDisplayCrowdfunding(true, 'clickReplyButton')
+    }
 
     private _handleCancelOperation = () => {
         this.setState({ mode: 'default' })
     }
 
     render() {
-        const { mode } = this.state
+        const { mode, displayCrowdfunding } = this.state
         const { createdWhen, lastEdited, body, comment, tags } = this.props
 
         const timestamp = !!lastEdited
@@ -163,6 +182,14 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
             : this._getFormattedTimestamp(createdWhen)
 
         const isJustComment = !body
+
+        if (displayCrowdfunding) {
+            return (
+                <CrowdfundingBox
+                    onClose={() => this._setDisplayCrowdfunding(false)}
+                />
+            )
+        }
 
         return (
             <div
@@ -244,7 +271,7 @@ const mapDispatchToProps: MapDispatchToProps<
 > = dispatch => ({
     handleEditAnnotation: (url, comment, tags) =>
         dispatch(actions.editAnnotation(url, comment, tags)),
-    handleDeleteAnnotation: () => null,
+    handleDeleteAnnotation: url => dispatch(actions.deleteAnnotation(url)),
 })
 
 export default connect(
