@@ -2,6 +2,7 @@ import React, { ReactChild, PureComponent } from 'react'
 import cx from 'classnames'
 
 const styles = require('./ResultList.css')
+const shortcut = 'img/shortcut.svg'
 
 export interface Props {
     scrollDisabled?: boolean
@@ -31,9 +32,20 @@ class ResultList extends PureComponent<Props> {
 
     render() {
         return (
-            <ul className={this.mainClass} style={this.listHeightStyles}>
-                {this.props.children}
-            </ul>
+            <div>
+                <ul className={this.mainClass} style={this.listHeightStyles}>
+                    {this.props.children}
+                </ul>
+                <p className={styles.infoBox}>
+                    <span className={styles.emoji}>🤓</span>
+                    <span>
+                        <b>Pro Tip: </b>
+                        Search by typing
+                    </span>
+                    <img className={styles.shortcut} src={shortcut} />
+                    <span>into the address bar</span>
+                </p>
+            </div>
         )
     }
 }

@@ -28,3 +28,35 @@
         margin-top: 100px !important; /* stylelint-disable-line declaration-no-important */
     }
 }
+
+.proTip {
+    margin-left: 1px;
+    color: #3eb995;
+    font-size: 12px;
+    display: flex;
+    justify-content: center;
+    margin-top: 14px;
+}
+
+.shortcut {
+    vertical-align: middle;
+    width: 35%;
+    height: 35%;
+    margin: -2px 10px 0px 10px;
+}
+
+.emoji {
+    font-size: 30px;
+    vertical-align: middle;
+    margin-top: 1px;
+    margin-right: 5px;
+}
+
+.infoBox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 750px;
+    margin: 30px auto 50px auto;
+    font-size: 15px;
+}
