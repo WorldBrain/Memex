@@ -128,6 +128,35 @@ export const getOffsetTop = element => {
     return offset
 }
 
+export const getTagArrays: (
+    oldTags: string[],
+    newTags: string[],
+) => { tagsToBeAdded: string[]; tagsToBeDeleted: string[] } = (
+    oldTags,
+    newTags,
+) => {
+    const oldSet = new Set(oldTags)
+    const tagsToBeAdded = newTags.reduce((accumulator, currentTag) => {
+        if (!oldSet.has(currentTag)) {
+            accumulator.push(currentTag)
+        }
+        return accumulator
+    }, [])
+
+    const newSet = new Set(newTags)
+    const tagsToBeDeleted = oldTags.reduce((accumulator, currentTag) => {
+        if (!newSet.has(currentTag)) {
+            accumulator.push(currentTag)
+        }
+        return accumulator
+    }, [])
+
+    return {
+        tagsToBeAdded,
+        tagsToBeDeleted,
+    }
+}
+
 export const getSidebarState = async () =>
     getLocalStorage(
         constants.SIDEBAR_STORAGE_NAME,
