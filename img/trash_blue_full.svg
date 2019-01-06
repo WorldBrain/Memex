@@ -1,21 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="16px" height="18px" viewBox="0 0 16 18" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="24px" height="26px" viewBox="0 0 24 26" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <!-- Generator: Sketch 51.3 (57544) - http://www.bohemiancoding.com/sketch -->
-    <title>Group 8</title>
+    <title>trash</title>
     <desc>Created with Sketch.</desc>
     <defs></defs>
-    <g id="New-Overview" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="Annotation-search-overview" transform="translate(-1195.000000, -308.000000)">
-            <g id="Group" transform="translate(530.000000, 258.000000)">
-                <g id="Group-8" transform="translate(665.000000, 51.000000)">
-                    <path d="M14,3 L14,14.2068966 C14,15.1971379 13.1733846,16 12.1538462,16 L3.84615385,16 C2.82661538,16 2,15.1971379 2,14.2068966 L2,3 L14,3 Z" id="Path" stroke="#173766" fill="#173766"></path>
-                    <polygon id="Path" stroke="#173766" points="0 3 3.5 3 14 3 16 3"></polygon>
-                    <path d="M11,3 L5,3 L5,1.2 C5,0.537 5.4475,0 6,0 L10,0 C10.5525,0 11,0.537 11,1.2 L11,3 Z" id="Path" stroke="#173766"></path>
-                    <path d="M8,5 L8,14 L8,5 Z" id="Path" stroke="#FFFFFF"></path>
-                    <path d="M11,5 L11,14 L11,5 Z" id="Path" stroke="#FFFFFF"></path>
-                    <path d="M5,5 L5,14 L5,5 Z" id="Path" stroke="#FFFFFF"></path>
-                </g>
-            </g>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="trash" transform="translate(0.000000, 1.000000)">
+            <path d="M20.5,5.5 L3.5,5.5 L3.5,22.2413794 C3.5,23.4882546 4.51563672,24.5 5.76923078,24.5 L18.2307693,24.5 C18.5801955,24.5 18.9173937,24.4216543 19.2238524,24.2728888 C19.9985026,23.8968472 20.5,23.1139072 20.5,22.2413794 L20.5,5.5 Z" id="Path" stroke="#173766"></path>
+            <rect id="Rectangle" stroke="#173766" fill="#173766" x="4.5" y="6.5" width="15" height="17"></rect>
+            <polygon id="Path" stroke="#173766" points="0 5 5.25 5 21 5 24 5"></polygon>
+            <path d="M17,5 L7,5 L7,2 C7,0.895 7.74583333,0 8.66666667,0 L15.3333333,0 C16.2541667,0 17,0.895 17,2 L17,5 Z" id="Path" stroke="#173766"></path>
+            <path d="M12,8 L12,22 L12,8 Z" id="Path" stroke="#FFFFFF"></path>
+            <path d="M16,8 L16,22 L16,8 Z" id="Path" stroke="#FFFFFF"></path>
+            <path d="M8,8 L8,22 L8,8 Z" id="Path" stroke="#FFFFFF"></path>
         </g>
     </g>
 </svg>
