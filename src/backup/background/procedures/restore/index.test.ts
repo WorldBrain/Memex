@@ -57,9 +57,15 @@ describe('BackupRestoreProcedure', () => {
             },
         ]
 
+        const storage = {
+            recording: null,
+            startRecordingChanges: () => (storage.recording = true),
+            stopRecordingChanges: () => (storage.recording = false),
+        }
         const restoreProcedure = new BackupRestoreProcedure({
             backend: null,
             storageManager: null,
+            storage: storage as any,
         })
         expect(restoreProcedure.running).toBe(false)
         restoreProcedure._clearDatabase = async () => null
@@ -80,8 +86,12 @@ describe('BackupRestoreProcedure', () => {
         }
 
         const runner = restoreProcedure.runner()
+        expect(storage.recording).toBe(null)
         await new Promise((resolve, reject) => {
             restoreProcedure.events.on('info', info => {
+                if (info.status === 'synching') {
+                    expect(storage.recording).toBe(false)
+                }
                 reportedInfo.push(info)
             })
             restoreProcedure.events.on('success', () => {
@@ -92,6 +102,7 @@ describe('BackupRestoreProcedure', () => {
             })
             runner()
         })
+        expect(storage.recording).toBe(true)
 
         expect(writtenChanges).toEqual([
             'change 1',
@@ -125,7 +136,10 @@ describe('BackupRestoreProcedure', () => {
         const restoreProcedure = new BackupRestoreProcedure({
             backend,
             storageManager: null,
+            storage: null,
         })
+        restoreProcedure._startRecordingChanges = () => {}
+        restoreProcedure._stopRecordingChanges = () => {}
 
         expect(await restoreProcedure._listBackupCollection('foo')).toEqual([
             'one',
@@ -148,10 +162,13 @@ describe('BackupRestoreProcedure', () => {
             backend: null,
             storageManager: null,
             logErrors: false,
+            storage: null,
         })
         restoreProcedure._clearDatabase = async () => {
             throw new Error('Muahaha!')
         }
+        restoreProcedure._startRecordingChanges = () => {}
+        restoreProcedure._stopRecordingChanges = () => {}
 
         const runner = restoreProcedure.runner()
         const boom = new Promise((resolve, reject) => {

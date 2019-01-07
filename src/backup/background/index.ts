@@ -34,10 +34,10 @@ export class BackupBackgroundModule {
         lastBackupStorage,
         backend,
     }: {
-            storageManager: StorageManager
-            lastBackupStorage: LastBackupStorage
-            backend: BackupBackend
-        }) {
+        storageManager: StorageManager
+        lastBackupStorage: LastBackupStorage
+        backend: BackupBackend
+    }) {
         this.storageManager = storageManager
         this.storage = new BackupStorage({ storageManager })
         this.lastBackupStorage = lastBackupStorage
@@ -51,6 +51,7 @@ export class BackupBackgroundModule {
         })
         this.restoreProcedure = new BackupRestoreProcedure({
             storageManager,
+            storage: this.storage,
             backend,
         })
     }
