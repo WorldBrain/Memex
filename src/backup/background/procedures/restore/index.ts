@@ -2,10 +2,10 @@ const sorted = require('lodash/sortBy')
 const zipObject = require('lodash/zipObject')
 import { EventEmitter } from 'events'
 import { StorageManager } from '../../../../search/types'
+import BackupStorage from '../../storage'
 import { BackupBackend } from '../../backend'
 import Interruptable from '../interruptable'
 import { DownloadQueue } from './download-queue'
-import { dangerousPleaseBeSureDeleteAndRecreateDatabase } from 'src/search'
 import { StorageRegistry } from 'storex'
 
 export interface BackupRestoreInfo {
@@ -16,6 +16,7 @@ export interface BackupRestoreInfo {
 
 export class BackupRestoreProcedure {
     storageManager: StorageManager
+    storage: BackupStorage
     backend: BackupBackend
 
     info?: BackupRestoreInfo = null
@@ -26,14 +27,17 @@ export class BackupRestoreProcedure {
 
     constructor({
         storageManager,
+        storage,
         backend,
         logErrors = true,
     }: {
         storageManager: StorageManager
+        storage: BackupStorage
         backend: BackupBackend
         logErrors?: boolean
     }) {
         this.storageManager = storageManager
+        this.storage = storage
         this.backend = backend
         this.logErrors = logErrors
     }
@@ -50,6 +54,7 @@ export class BackupRestoreProcedure {
             this._updateInfo({ status: 'preparing', processedChanges: 0 })
 
             try {
+                this._stopRecordingChanges()
                 await this._clearDatabase()
                 await this._blockDatabase()
 
@@ -85,6 +90,7 @@ export class BackupRestoreProcedure {
 
                 await this._unblockDatabase()
                 if (!this.interruptable.cancelled) {
+                    this._startRecordingChanges()
                     this.events.emit('success')
                     return 'success'
                 } else {
@@ -108,8 +114,17 @@ export class BackupRestoreProcedure {
         return procedure
     }
 
+    _startRecordingChanges() {
+        this.storage.startRecordingChanges()
+    }
+
+    _stopRecordingChanges() {
+        this.storage.stopRecordingChanges()
+    }
+
     async _clearDatabase() {
-        await dangerousPleaseBeSureDeleteAndRecreateDatabase()
+        const search = require('src/search')
+        await search.dangerousPleaseBeSureDeleteAndRecreateDatabase()
     }
 
     _blockDatabase() {}

@@ -98,6 +98,10 @@ export default class BackupStorage extends FeatureStorage {
         this.recordingChanges = true
     }
 
+    stopRecordingChanges() {
+        this.recordingChanges = false
+    }
+
     async *streamChanges(
         until: Date,
         { batchSize }: { batchSize: number },

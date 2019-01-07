@@ -57,6 +57,7 @@ export class BackupBackgroundModule {
         })
         this.restoreProcedure = new BackupRestoreProcedure({
             storageManager,
+            storage: this.storage,
             backend,
         })
     }
