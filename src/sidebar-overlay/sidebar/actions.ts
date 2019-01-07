@@ -29,6 +29,15 @@ export const setPageTitle = createAction<string>('setPageTitle')
 
 export const setAnnotations = createAction<Annotation[]>('setAnnotations')
 
+export const openSidebar: (url: string, title: string) => Thunk = (
+    url,
+    title,
+) => dispatch => {
+    dispatch(setPage({ url, title }))
+    dispatch(setSidebarOpen(true))
+    dispatch(fetchAnnotations())
+}
+
 /**
  * Hydrates the initial state of the sidebar.
  */
@@ -40,14 +49,9 @@ export const fetchAnnotations: () => Thunk = () => async (
     dispatch,
     getState,
 ) => {
+    dispatch(setIsLoading(true))
+
     const state = getState()
-
-    // Set `isLoading` to true, if currently the sidebar has no annotations.
-    const annotations = selectors.annotations(state)
-    if (annotations.length === 0) {
-        dispatch(setIsLoading(true))
-    }
-
     const { url } = selectors.page(state)
     // TODO: Following type conversion is incorrect. Correct it once the backend
     // for annotations search is in place.

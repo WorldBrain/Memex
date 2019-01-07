@@ -1,8 +1,6 @@
 // Styles for react-burger-menu.
 
-const menuStyles = {
-    // TODO: Check if the styles for `bmMenuWrap` are necessary, since
-    // they're already being covered in `bmMenu`.
+const baseStyles = {
     bmMenuWrap: {
         top: 0,
         transition: 'all 0s',
@@ -23,6 +21,17 @@ const menuStyles = {
     bmCrossButton: {
         display: 'none',
     },
+}
+
+const menuStyles = (env: 'inpage' | 'overview') => {
+    if (env === 'overview') {
+        ;((baseStyles.bmMenu.top as unknown) as string) = '72px'
+        ;((baseStyles.bmMenuWrap.top as unknown) as string) = '72px'
+        baseStyles.bmMenu.transition = 'all 0s'
+        baseStyles.bmMenuWrap.transition = 'all 0s'
+    }
+
+    return baseStyles
 }
 
 export default menuStyles

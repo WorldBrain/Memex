@@ -15,7 +15,7 @@ import * as selectors from '../selectors'
 import * as acts from '../actions'
 import { actions as listActs } from '../../../custom-lists'
 import { acts as deleteConfActs } from '../../delete-confirm-modal'
-import { actions as sidebarActs } from '../../sidebar'
+import { actions as sidebarActs } from '../../../sidebar-overlay/sidebar'
 import {
     actions as sidebarLeftActs,
     selectors as sidebarLeft,

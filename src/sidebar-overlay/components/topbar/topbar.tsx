@@ -6,6 +6,7 @@ import CloseButton from '../close-button'
 const styles = require('./topbar.css')
 
 interface Props {
+    env: 'inpage' | 'overview'
     disableAddCommentBtn: boolean
     handleCloseBtnClick: () => void
     handleSettingsBtnClick: () => void
@@ -14,14 +15,17 @@ interface Props {
 
 /* tslint:disable-next-line variable-name */
 const Topbar = ({
+    env,
     disableAddCommentBtn,
     handleCloseBtnClick,
     handleSettingsBtnClick,
     handleAddCommentBtnClick,
 }: Props) => (
     <div className={styles.topbar}>
+        {/* TODO: Use better styling so that `env` is not necessary. */}
         {/* Button to close sidebar. */}
         <CloseButton
+            isOverview={env === 'overview'}
             title="Close sidebar once. Disable via Memex icon in the extension toolbar."
             clickHandler={e => {
                 e.stopPropagation()

@@ -11,6 +11,7 @@ import { Annotation } from '../types'
 const styles = require('./sidebar.css')
 
 interface Props {
+    env: 'inpage' | 'overview'
     isOpen: boolean
     isLoading: boolean
     annotations: Annotation[]
@@ -70,6 +71,7 @@ class Sidebar extends React.Component<Props> {
 
     render() {
         const {
+            env,
             isOpen,
             isLoading,
             annotations,
@@ -82,18 +84,25 @@ class Sidebar extends React.Component<Props> {
             <Menu
                 isOpen={isOpen}
                 width={340}
-                styles={menuStyles}
+                styles={menuStyles(env)}
                 right
                 noOverlay
                 disableCloseOnEsc
             >
                 <div className={styles.sidebar} ref={this._setSidebarRef}>
-                    <Topbar
-                        disableAddCommentBtn={showCommentBox}
-                        handleCloseBtnClick={closeSidebar}
-                        handleSettingsBtnClick={this._handleSettingsBtnClick}
-                        handleAddCommentBtnClick={handleAddCommentBtnClick}
-                    />
+                    {/* TODO: Change the styling of CloseButton so that there
+                    is no need to use `isOpen` here. */}
+                    {isOpen && (
+                        <Topbar
+                            env={env}
+                            disableAddCommentBtn={showCommentBox}
+                            handleCloseBtnClick={closeSidebar}
+                            handleSettingsBtnClick={
+                                this._handleSettingsBtnClick
+                            }
+                            handleAddCommentBtnClick={handleAddCommentBtnClick}
+                        />
+                    )}
 
                     {showCommentBox && <CommentBoxContainer />}
 
