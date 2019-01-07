@@ -26,7 +26,7 @@ const RibbonSidebarController = ({
         {!isSidebarOpen && (
             <RibbonContainer handleRemoveRibbon={handleRemoveRibbon} />
         )}
-        {isSidebarOpen && <SidebarContainer />}
+        <SidebarContainer env="inpage" />
     </React.Fragment>
 )
 

@@ -25,10 +25,13 @@ interface StateProps {
 interface DispatchProps {
     onInit: () => void
     closeSidebar: () => void
+    fetchAnnotations: () => void
     handleAddCommentBtnClick: () => void
 }
 
-interface OwnProps {}
+interface OwnProps {
+    env: 'inpage' | 'overview'
+}
 
 type Props = StateProps & DispatchProps & OwnProps
 
@@ -38,26 +41,7 @@ interface State {
 
 class SidebarContainer extends React.Component<Props, State> {
     // static propTypes = {
-    //     env: PropTypes.string,
-    //     pageUrl: PropTypes.string,
-    //     pageTitle: PropTypes.string,
     //     recieveAnchor: PropTypes.func.isRequired,
-    // }
-
-    // static defaultProps = {
-    //     env: 'iframe',
-    //     pageUrl: null,
-    //     pageTitle: null,
-    // }
-
-    // async componentDidMount() {
-    //     const { pageTitle, pageUrl, setPageInfo, fetchAnnotations } = this.props
-    //     setPageInfo(pageUrl, pageTitle)
-    //     if (this.props.env === 'iframe') {
-    //         this.setupFrameFunctions()
-    //     } else {
-    //         await fetchAnnotations()
-    //     }
     // }
 
     state = {
@@ -66,6 +50,12 @@ class SidebarContainer extends React.Component<Props, State> {
 
     componentDidMount() {
         this.props.onInit()
+    }
+
+    componentDidUpdate(prevProps: Props) {
+        if (!prevProps.isOpen && this.props.isOpen) {
+            this.props.fetchAnnotations()
+        }
     }
 
     // parentFC = new FrameCommunication()
@@ -132,13 +122,6 @@ class SidebarContainer extends React.Component<Props, State> {
     //     setTimeout(() => this.focusAnnotation(this.props.activeAnnotation), 300)
     // }
 
-    // deleteAnnotation = annotation => {
-    //     if (annotation.body) {
-    //         this.parentFC.remoteExecute('deleteAnnotation')(annotation)
-    //     }
-    //     this.props.deleteAnnotation(annotation)
-    // }
-
     // /**
     //  * Makes highlight dark a little when the container is hovered
     //  */
@@ -187,6 +170,7 @@ class SidebarContainer extends React.Component<Props, State> {
 
     render() {
         const {
+            env,
             isOpen,
             isLoading,
             annotations,
@@ -197,6 +181,7 @@ class SidebarContainer extends React.Component<Props, State> {
 
         return (
             <Sidebar
+                env={env}
                 isOpen={isOpen}
                 isLoading={isLoading}
                 annotations={annotations}
@@ -209,10 +194,6 @@ class SidebarContainer extends React.Component<Props, State> {
         )
     }
 }
-
-// const mapDispatchToProps = dispatch => ({
-//     setPageInfo: (url, title) => dispatch(actions.setPageInfo({ url, title })),
-// })
 
 const mapStateToProps: MapStateToProps<
     StateProps,
@@ -230,12 +211,10 @@ const mapDispatchToProps: MapDispatchToProps<
     OwnProps
 > = dispatch => ({
     onInit: () => dispatch(actions.initState()),
-    closeSidebar: () => {
-        dispatch(actions.setSidebarOpen(false))
-    },
-    handleAddCommentBtnClick: () => {
-        dispatch(commentBoxActions.setShowCommentBox(true))
-    },
+    closeSidebar: () => dispatch(actions.setSidebarOpen(false)),
+    fetchAnnotations: () => dispatch(actions.fetchAnnotations()),
+    handleAddCommentBtnClick: () =>
+        dispatch(commentBoxActions.setShowCommentBox(true)),
 })
 
 export default connect(

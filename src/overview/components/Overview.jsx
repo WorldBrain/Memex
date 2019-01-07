@@ -2,7 +2,8 @@ import React, { PureComponent } from 'react'
 import { connect } from 'react-redux'
 import propTypes from 'prop-types'
 
-import Sidebar from '../sidebar'
+import SidebarContainer from '../../sidebar-overlay/sidebar'
+import Onboarding from '../onboarding'
 import { DeleteConfirmModal } from '../delete-confirm-modal'
 import {
     SidebarContainer as SidebarLeft,
@@ -13,7 +14,6 @@ import { Results } from '../results'
 import Head from '../../options/containers/Head'
 import DragElement from './DragElement'
 import { Tooltip } from '../tooltips'
-import Onboarding from '../onboarding'
 import { isDuringInstall } from '../onboarding/utils'
 
 class Overview extends PureComponent {
@@ -35,7 +35,7 @@ class Overview extends PureComponent {
                 {isDuringInstall() ? <Onboarding /> : <Results />}
                 <DeleteConfirmModal />
                 <DragElement />
-                <Sidebar />
+                <SidebarContainer env="overview" />
                 <Tooltip />
             </React.Fragment>
         )
