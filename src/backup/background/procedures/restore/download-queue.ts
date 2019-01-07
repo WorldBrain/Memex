@@ -46,6 +46,7 @@ export class DownloadQueue {
                 this.downloadNext().then(response => {
                     return () => {
                         this.downloads[index] = null
+                        this.queueNext()
                         return response
                     }
                 }),
