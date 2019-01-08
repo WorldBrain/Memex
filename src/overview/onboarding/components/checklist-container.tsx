@@ -18,6 +18,7 @@ export interface StateProps {
     annotationStage: string
     powerSearchStage: string
     taggingStage: string
+    backupStage: string
     noResults: boolean
     congratsMessage: boolean
 }
@@ -27,6 +28,7 @@ export interface DispatchProps {
     fetchShowOnboarding: () => void
     initOnboardingTooltips: () => void
     closeOnboardingBox: () => void
+    setBackupStageDone: () => void
 }
 
 export interface OwnProps {
@@ -94,11 +96,22 @@ class OnboardingChecklist extends React.Component<Props> {
         if (this.props.taggingStage === 'DONE') {
             return
         }
-
-        // TODO: Add analytic
-
+        // TODO: Add analytics
         await this._setOnboardingKey('step3', 'redirected')
         await this._openDemoPage()
+    }
+
+    handleBackupStage = async () => {
+        if (this.props.backupStage === 'DONE') {
+            return
+        }
+
+        // TODO: Add analytics
+        await browser.tabs.create({
+            url: browser.runtime.getURL(constants.BACKUP_URL),
+            active: true,
+        })
+        await this.props.setBackupStageDone()
     }
 
     render() {
@@ -107,6 +120,7 @@ class OnboardingChecklist extends React.Component<Props> {
             annotationStage,
             powerSearchStage,
             taggingStage,
+            backupStage,
         } = this.props
 
         if (!showOnboardingBox) {
@@ -120,9 +134,11 @@ class OnboardingChecklist extends React.Component<Props> {
                 isAnnotationChecked={annotationStage === 'DONE'}
                 isPowerSearchChecked={powerSearchStage === 'DONE'}
                 isTaggingChecked={taggingStage === 'DONE'}
+                isBackupChecked={backupStage === 'DONE'}
                 handleAnnotationStage={this.handleAnnotationStage}
                 handlePowerSearchStage={this.handlePowerSearchStage}
                 handleTaggingStage={this.handleTaggingStage}
+                handleBackupStage={this.handleBackupStage}
                 closeOnboardingBox={this.props.closeOnboardingBox}
             />
         )
@@ -134,6 +150,7 @@ const mapStateToProps = state => ({
     annotationStage: selectors.annotationStage(state),
     powerSearchStage: selectors.powerSearchStage(state),
     taggingStage: selectors.taggingStage(state),
+    backupStage: selectors.backupStage(state),
     congratsMessage: selectors.congratsMessage(state),
     noResults: resultSelectors.noResults(state),
 })
@@ -144,6 +161,7 @@ const mapDispatchToPrpos = dispatch => ({
     closeOnboardingBox: () => dispatch(actions.closeOnboardingBox()),
     initOnboardingTooltips: () =>
         dispatch(tooltipsActs.initOnboardingTooltips()),
+    setBackupStageDone: () => dispatch(actions.setBackupStageDone()),
 })
 
 export default connect(

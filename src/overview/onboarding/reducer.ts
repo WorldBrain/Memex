@@ -3,10 +3,11 @@ import { createReducer } from 'redux-act'
 import * as actions from './actions'
 
 export interface State {
-    // Status of onboarding stages
+    // Status of onboarding workflows
     annotationStage: string
     powerSearchStage: string
     taggingStage: string
+    backupStage: string
 
     // Decides whether or not to show the Right Onboarding box
     showOnboardingBox: boolean
@@ -20,6 +21,7 @@ const defState = {
     annotationStage: '',
     powerSearchStage: '',
     taggingStage: '',
+    backupStage: '',
     showOnboardingBox: false,
     congratsMessage: false,
 }
@@ -39,6 +41,11 @@ reducer.on(actions.setPowerSearchStage, (state, payload) => ({
 reducer.on(actions.setTaggingStage, (state, payload) => ({
     ...state,
     taggingStage: payload,
+}))
+
+reducer.on(actions.setBackupStage, (state, payload) => ({
+    ...state,
+    backupStage: payload,
 }))
 
 reducer.on(actions.setShowOnboardingBox, (state, payload) => ({

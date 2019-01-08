@@ -8,11 +8,13 @@ interface Props {
     isAnnotationChecked: boolean
     isPowerSearchChecked: boolean
     isTaggingChecked: boolean
+    isBackupChecked: boolean
     congratsMessage: boolean
     isRightBox?: boolean
     handleAnnotationStage: () => void
     handlePowerSearchStage: () => void
     handleTaggingStage: () => void
+    handleBackupStage: () => void
     closeOnboardingBox: () => void
 }
 
@@ -68,6 +70,14 @@ class Checklist extends PureComponent<Props> {
                     subtitle="Learn how to add some organisation to your web-research"
                 >
                     Tag & sort websites into collections
+                </ChecklistItem>
+                <ChecklistItem
+                    isChecked={this.props.isBackupChecked}
+                    handleClick={this.props.handleBackupStage}
+                    iconClass="step3"
+                    subtitle="Learn how to backup your Memex to save your data"
+                >
+                    Backup your Memex to cloud
                 </ChecklistItem>
             </div>
         )

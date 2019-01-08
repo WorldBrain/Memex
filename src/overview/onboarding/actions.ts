@@ -18,6 +18,7 @@ export const setShowOnboardingBox = createAction<boolean>(
 export const setCongratsMessage = createAction<boolean>(
     'onboarding/setCongratsMessage',
 )
+export const setBackupStage = createAction<string>('onboarding/setBackupStage')
 
 export const fetchOnboardingStages = () => async dispatch => {
     const annotationStage = await getLocalStorage(
@@ -32,11 +33,16 @@ export const fetchOnboardingStages = () => async dispatch => {
         STORAGE_KEYS.onboardingDemo.step3,
         'unvisited',
     )
+    const backupStage = await getLocalStorage(
+        STORAGE_KEYS.onboardingDemo.step4,
+        'unvisited',
+    )
 
     if (
         annotationStage === 'DONE' &&
         powerSearchStage === 'DONE' &&
-        taggingStage === 'DONE'
+        taggingStage === 'DONE' &&
+        backupStage === 'DONE'
     ) {
         dispatch(setCongratsMessage(true))
     }
@@ -44,6 +50,7 @@ export const fetchOnboardingStages = () => async dispatch => {
     dispatch(setAnnotationStage(annotationStage))
     dispatch(setPowerSearchStage(powerSearchStage))
     dispatch(setTaggingStage(taggingStage))
+    dispatch(setBackupStage(backupStage))
 }
 
 export const fetchShowOnboarding = () => async dispatch => {
@@ -61,6 +68,11 @@ export const fetchShowOnboarding = () => async dispatch => {
 export const setPowerSearchDone = () => async dispatch => {
     await setLocalStorage(STORAGE_KEYS.onboardingDemo.step2, 'DONE')
     dispatch(setPowerSearchStage('DONE'))
+}
+
+export const setBackupStageDone = () => async dispatch => {
+    await setLocalStorage(STORAGE_KEYS.onboardingDemo.step4, 'DONE')
+    dispatch(setBackupStage('DONE'))
 }
 
 export const closeOnboardingBox = () => async dispatch => {

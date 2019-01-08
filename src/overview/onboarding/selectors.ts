@@ -15,6 +15,10 @@ export const taggingStage = createSelector(
     onboarding,
     state => state.taggingStage,
 )
+export const backupStage = createSelector(
+    onboarding,
+    state => state.backupStage,
+)
 export const showOnboardingBox = createSelector(
     onboarding,
     state => state.showOnboardingBox,
