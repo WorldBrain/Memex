@@ -1,2 +1,2 @@
-export { BackupBackend } from './types'
+export * from './types'
 export { DriveBackupBackend } from './google-drive'

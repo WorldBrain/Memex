@@ -210,9 +210,9 @@ describe('BackupRestoreProcedure', () => {
         })
 
         expect(createObject).not.toHaveBeenCalled()
-        await restoreProcedure._writeChange(favChange)
+        await restoreProcedure._writeChange(favChange as any)
         expect(createObject).not.toHaveBeenCalled()
-        await restoreProcedure._writeChange(pageChange)
+        await restoreProcedure._writeChange(pageChange as any)
         const { screenshot, ...pageWithoutScreenshotKey } = pageChange.object
         expect(createObject).toHaveBeenCalledWith(pageWithoutScreenshotKey)
     })
