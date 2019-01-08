@@ -2,13 +2,23 @@ import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 
 import RibbonSidebarController from './ribbon-sidebar-controller'
+import AnnotationsManager from '../sidebar-common/annotations-manager'
 
 export const setupRibbonAndSidebarUI = (
     target: HTMLElement,
-    { handleRemoveRibbon }: { handleRemoveRibbon: () => void },
+    {
+        annotationsManager,
+        handleRemoveRibbon,
+    }: {
+        annotationsManager: AnnotationsManager
+        handleRemoveRibbon: () => void
+    },
 ) => {
     ReactDOM.render(
-        <RibbonSidebarController handleRemoveRibbon={handleRemoveRibbon} />,
+        <RibbonSidebarController
+            annotationsManager={annotationsManager}
+            handleRemoveRibbon={handleRemoveRibbon}
+        />,
         target,
     )
 }

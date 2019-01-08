@@ -6,6 +6,7 @@
 import { ThunkAction, ThunkDispatch } from 'redux-thunk'
 
 import { State as CommentBoxState } from './comment-box'
+import AnnotationsManager from './annotations-manager'
 
 export interface Page {
     url: string | null
@@ -29,6 +30,10 @@ export interface Annotation {
 }
 
 export default interface State {
+    /** An object that is responsible for interacting with appropriate scripts
+     * for annotations.
+     */
+    annotationsManager: AnnotationsManager
     /** Denotes whether the sidebar is open or not. */
     isOpen: boolean
     /** Denotes whether the sidebar is loading annotations or not. */

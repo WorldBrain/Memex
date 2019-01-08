@@ -1,8 +1,14 @@
 import { createSelector } from 'reselect'
 
+import State from './types'
 // NOTE: Any parent reducer will need to define state for the sidebar in a
 // property called `sidebar`.
-export const sidebar = state => state.sidebar
+export const sidebar: (state) => State = state => state.sidebar
+
+export const annotationsManager = createSelector(
+    sidebar,
+    state => state.annotationsManager,
+)
 
 export const isOpen = createSelector(sidebar, state => state.isOpen)
 

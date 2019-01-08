@@ -37,7 +37,10 @@ let manualOverride = false
  *
  * If ribbon is already inserted, then updates the ribbon.
  */
-export const insertRibbon = async ({ toolbarNotifications }) => {
+export const insertRibbon = async ({
+    annotationsManager,
+    toolbarNotifications,
+}) => {
     // If target is set, Ribbon has already been injected.
     if (target) {
         await updateRibbon()
@@ -62,6 +65,7 @@ export const insertRibbon = async ({ toolbarNotifications }) => {
 
     // TODO: Refactor ribbon removal to a different manager.
     setupRibbonAndSidebarUI(target, {
+        annotationsManager,
         handleRemoveRibbon: async () => {
             manualOverride = true
             removeRibbon()
@@ -78,18 +82,6 @@ export const insertRibbon = async ({ toolbarNotifications }) => {
     // setupRibbonUI(target, {
     //     onInit: ({ toggleSidebar }) => {
     //         resolveToggleSidebar(toggleSidebar)
-    //     },
-    //     onClose: async () => {
-    //         manualOverride = true
-    //         removeRibbon()
-
-    //         const closeMessageShown = await _getCloseMessageShown()
-    //         if (!closeMessageShown) {
-    //             toolbarNotifications.showToolbarNotification(
-    //                 'ribbon-first-close',
-    //             )
-    //             _setCloseMessageShown()
-    //         }
     //     },
     //     getInitialState: async () => {
     //         const isTooltipEnabled = await getTooltipState()
@@ -135,7 +127,10 @@ const removeRibbon = () => {
  * Should either be called through the RPC, or pass the `toolbarNotifications`
  * wrapped in an object.
  */
-const insertOrRemoveRibbon = async ({ toolbarNotifications }) => {
+const insertOrRemoveRibbon = async ({
+    annotationsManager,
+    toolbarNotifications,
+}) => {
     if (manualOverride) {
         return
     }
@@ -144,7 +139,7 @@ const insertOrRemoveRibbon = async ({ toolbarNotifications }) => {
     const isRibbonPresent = !!target
 
     if (isRibbonEnabled && !isRibbonPresent) {
-        insertRibbon({ toolbarNotifications })
+        insertRibbon({ annotationsManager, toolbarNotifications })
     } else if (!isRibbonEnabled && isRibbonPresent) {
         removeRibbon()
     }
@@ -170,7 +165,7 @@ const updateRibbon = async () => {
 /**
  * Setups up RPC functions for the ribbon.
  */
-export const setupRPC = ({ toolbarNotifications }) => {
+export const setupRPC = ({ annotationsManager, toolbarNotifications }) => {
     makeRemotelyCallable({
         /**
          * Used for opening the sidebar. If the ribbon is not present in the
@@ -179,7 +174,7 @@ export const setupRPC = ({ toolbarNotifications }) => {
         toggleSidebarOverlay: async () => {
             if (!toggleSidebar) {
                 manualOverride = true
-                insertRibbon({ toolbarNotifications })
+                insertRibbon({ annotationsManager, toolbarNotifications })
             }
             return toggleSidebar.then(f => f())
         },
@@ -189,7 +184,7 @@ export const setupRPC = ({ toolbarNotifications }) => {
          */
         insertRibbon: ({ override } = {}) => {
             manualOverride = !!override
-            insertRibbon({ toolbarNotifications })
+            insertRibbon({ annotationsManager, toolbarNotifications })
         },
         /**
          * Used for removing the ribbon.
@@ -204,7 +199,10 @@ export const setupRPC = ({ toolbarNotifications }) => {
          * is enabled or not.
          */
         insertOrRemoveRibbon: async () => {
-            await insertOrRemoveRibbon({ toolbarNotifications })
+            await insertOrRemoveRibbon({
+                annotationsManager,
+                toolbarNotifications,
+            })
         },
         /**
          * RPC for updating the ribbon's state.
