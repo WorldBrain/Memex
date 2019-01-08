@@ -224,10 +224,12 @@ class AnnotationContainer extends React.Component {
                 <span
                     className={cx(styles.commonIcon, styles.editIcon)}
                     onClick={this.toggleEditAnnotation}
+                    title={'Edit note'}
                 />{' '}
                 <span
                     className={cx(styles.commonIcon, styles.trashIcon)}
                     onClick={this._setFooterState('delete')}
+                    title={'Delete note'}
                 />{' '}
                 <span
                     className={cx(styles.commonIcon, styles.shareIcon)}
