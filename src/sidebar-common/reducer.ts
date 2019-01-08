@@ -6,7 +6,7 @@ import State, { Annotation, Page } from './types'
 import {
     reducer as commentBoxReducer,
     defaultState as defCommentBoxState,
-} from '../comment-box'
+} from './comment-box'
 
 export const defaultState: State = {
     isOpen: false,

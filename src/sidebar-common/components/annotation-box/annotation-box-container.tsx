@@ -8,8 +8,8 @@ import AnnotationBoxCommentTags from './annotation-box-comment-tags'
 import AnnotationBoxFooter from './annotation-box-footer'
 import TruncatedTextRenderer from '../truncated-text-renderer'
 import CommentTagsInput from './comment-tags-input'
-import { MapDispatchToProps } from '../../../types'
-import { CrowdfundingBox } from '../../../../common-ui/crowdfunding'
+import { MapDispatchToProps } from '../../types'
+import { CrowdfundingBox } from '../../../common-ui/crowdfunding'
 
 const styles = require('./annotation-box-container.css')
 

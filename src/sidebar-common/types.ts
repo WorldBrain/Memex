@@ -3,7 +3,9 @@
  * Default export is the Sidebar's state's type declaration.
  */
 
-import { State as CommentBoxState } from '../comment-box'
+import { ThunkAction, ThunkDispatch } from 'redux-thunk'
+
+import { State as CommentBoxState } from './comment-box'
 
 export interface Page {
     url: string | null
@@ -38,3 +40,14 @@ export default interface State {
     /** State for the comment box. */
     commentBox: CommentBoxState
 }
+
+export type ClickHandler<T extends HTMLElement> = (
+    e: React.SyntheticEvent<T>,
+) => void
+
+export type Thunk<R = void> = ThunkAction<R, State, void, any>
+
+export type MapDispatchToProps<DispatchProps, OwnProps> = (
+    dispatch: ThunkDispatch<State, void, any>,
+    ownProps: OwnProps,
+) => DispatchProps

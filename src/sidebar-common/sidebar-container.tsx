@@ -2,18 +2,14 @@ import * as React from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 import onClickOutside from 'react-onclickoutside'
 
-import * as actions from '../actions'
-import * as selectors from '../selectors'
+import * as actions from './actions'
+import * as selectors from './selectors'
 import {
     actions as commentBoxActions,
     selectors as commentBoxSelectors,
-} from '../../comment-box'
-import Sidebar from './sidebar'
-import { RootState } from '../../ribbon-sidebar-controller'
-import { MapDispatchToProps } from '../../types'
-import { Annotation } from '../types'
-
-// import { goToAnnotation, retryUntilErrorResolves } from '../../utils'
+} from './comment-box'
+import { Sidebar } from './components'
+import SidebarState, { MapDispatchToProps, Annotation } from './types'
 
 interface StateProps {
     isOpen: boolean
@@ -198,7 +194,7 @@ class SidebarContainer extends React.Component<Props, State> {
 const mapStateToProps: MapStateToProps<
     StateProps,
     OwnProps,
-    RootState
+    SidebarState
 > = state => ({
     isOpen: selectors.isOpen(state),
     isLoading: selectors.isLoading(state),

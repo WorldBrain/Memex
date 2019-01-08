@@ -2,7 +2,7 @@ import React, { PureComponent } from 'react'
 import { connect } from 'react-redux'
 import propTypes from 'prop-types'
 
-import SidebarContainer from '../../sidebar-overlay/sidebar'
+import SidebarContainer from '../../sidebar-common'
 import Onboarding from '../onboarding'
 import { DeleteConfirmModal } from '../delete-confirm-modal'
 import {

@@ -3,8 +3,7 @@ import { connect, MapStateToProps } from 'react-redux'
 
 import * as actions from '../actions'
 import * as selectors from '../selectors'
-import { RootState } from '../../ribbon-sidebar-controller'
-import { MapDispatchToProps } from '../../types'
+import State, { MapDispatchToProps } from '../../types'
 import { TagInput } from '../../components'
 
 interface StateProps {
@@ -30,7 +29,7 @@ const TagInputContainer = (props: Props) => <TagInput {...props} />
 const mapStateToProps: MapStateToProps<
     StateProps,
     OwnProps,
-    RootState
+    State
 > = state => ({
     tags: selectors.tags(state),
     initTagSuggestions: selectors.initTagSuggestions(state),

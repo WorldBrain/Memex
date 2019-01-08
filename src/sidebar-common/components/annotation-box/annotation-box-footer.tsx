@@ -1,6 +1,6 @@
 import * as React from 'react'
 
-import { Footer } from '../../../components'
+import Footer from '../footer'
 import AnnotationBoxDefaultFooter from './annotation-box-default-footer'
 
 const styles = require('./annotation-box-footer.css')

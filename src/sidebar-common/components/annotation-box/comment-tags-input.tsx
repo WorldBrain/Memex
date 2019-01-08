@@ -1,7 +1,7 @@
 import * as React from 'react'
 
-import * as constants from '../../../comment-box/constants'
-import { TagInput } from '../../../components'
+import * as constants from '../../comment-box/constants'
+import TagInput from '../tag-input'
 
 const styles = require('./comment-tags-input.css')
 

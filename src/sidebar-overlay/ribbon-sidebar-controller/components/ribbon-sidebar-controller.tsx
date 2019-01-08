@@ -2,8 +2,10 @@ import * as React from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 
 import RibbonContainer from '../../ribbon'
-import RootState from '../types'
-import SidebarContainer, { selectors as sidebarSelectors } from '../../sidebar'
+import SidebarContainer, {
+    State as SidebarState,
+    selectors as sidebarSelectors,
+} from '../../../sidebar-common'
 
 interface StateProps {
     isSidebarOpen: boolean
@@ -33,7 +35,7 @@ const RibbonSidebarController = ({
 const mapStateToProps: MapStateToProps<
     StateProps,
     OwnProps,
-    RootState
+    SidebarState
 > = state => ({
     isSidebarOpen: sidebarSelectors.isOpen(state),
 })

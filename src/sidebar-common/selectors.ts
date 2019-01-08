@@ -1,8 +1,8 @@
 import { createSelector } from 'reselect'
 
-import * as RootSelectors from '../ribbon-sidebar-controller/selectors'
-
-export const sidebar = RootSelectors.sidebar
+// NOTE: Any parent reducer will need to define state for the sidebar in a
+// property called `sidebar`.
+export const sidebar = state => state.sidebar
 
 export const isOpen = createSelector(sidebar, state => state.isOpen)
 

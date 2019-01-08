@@ -3,11 +3,10 @@ import { connect, MapStateToProps } from 'react-redux'
 
 import * as actions from '../actions'
 import * as selectors from '../selectors'
-import AnnotationHighlight from './annotation-highlight'
+import { AnnotationHighlight } from '../../components'
 import CommentBoxForm from './comment-box-form'
 import { Anchor } from '../../../direct-linking/content_script/interactions'
-import { RootState } from '../../ribbon-sidebar-controller'
-import { MapDispatchToProps, ClickHandler } from '../../types'
+import State, { MapDispatchToProps, ClickHandler } from '../../types'
 
 const styles = require('./comment-box-container.css')
 
@@ -63,7 +62,7 @@ class CommentBoxContainer extends React.PureComponent<Props> {
 const mapStateToProps: MapStateToProps<
     StateProps,
     OwnProps,
-    RootState
+    State
 > = state => ({
     anchor: selectors.anchor(state),
     commentText: selectors.commentText(state),

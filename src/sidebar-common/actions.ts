@@ -1,11 +1,10 @@
 import { createAction } from 'redux-act'
 
-import { Annotation, Page } from './types'
-import { Thunk } from '../types'
-import { remoteFunction } from '../../util/webextensionRPC'
-import { Anchor } from '../../direct-linking/content_script/interactions'
+import { Annotation, Page, Thunk } from './types'
+import { remoteFunction } from '../util/webextensionRPC'
+import { Anchor } from '../direct-linking/content_script/interactions'
 import * as selectors from './selectors'
-import { getTagArrays } from '../utils'
+import { getTagArrays } from './utils'
 
 // Remote function declarations.
 const processEventRPC = remoteFunction('processEvent')

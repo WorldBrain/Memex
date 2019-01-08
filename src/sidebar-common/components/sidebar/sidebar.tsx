@@ -1,12 +1,14 @@
 import * as React from 'react'
 import Menu from 'react-burger-menu/lib/menus/slide'
 
-import CongratsMessage from '../../components/CongratsMessage'
+import CongratsMessage from '../congrats-message'
 import menuStyles from './menu-styles'
 import CommentBoxContainer from '../../comment-box'
-import { Topbar, Loader, EmptyMessage } from '../../components'
-import AnnotationBoxContainer from './annotation-box'
-import { Annotation } from '../types'
+import Topbar from '../topbar'
+import Loader from '../loader'
+import EmptyMessage from '../empty-message'
+import AnnotationBoxContainer from '../annotation-box'
+import { Annotation } from '../../types'
 
 const styles = require('./sidebar.css')
 
