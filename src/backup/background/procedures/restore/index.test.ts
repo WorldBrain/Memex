@@ -1,5 +1,5 @@
 import * as expect from 'expect'
-import { BackupBackend } from '../../backend'
+import { BackupBackend, ObjectChange } from '../../backend'
 import { BackupRestoreProcedure } from '.'
 
 describe('BackupRestoreProcedure', () => {
@@ -185,35 +185,88 @@ describe('BackupRestoreProcedure', () => {
     })
 
     it('should not restore empty objects in place of Blobs', async () => {
-        const favChange = {
-            operation: 'create',
-            object: { favIcon: {}, hostname: 'test.com' },
+        const favCreateChange: ObjectChange = {
             collection: 'favIcons',
-        }
-        const pageChange = {
             operation: 'create',
+            objectPk: 'test.com',
+            object: { favIcon: {}, hostname: 'test.com' },
+            timestamp: 0,
+        }
+        const pageCreateChange: ObjectChange = {
+            collection: 'pages',
+            operation: 'create',
+            objectPk: 'test.com/route',
             object: {
                 url: 'test.com/route',
                 screenshot: {},
                 hostname: 'test.com',
             },
+            timestamp: 0,
+        }
+        const pageUpdateChange: ObjectChange = {
             collection: 'pages',
+            operation: 'update',
+            objectPk: 'test.com/route',
+            object: {
+                url: 'test.com/route',
+                screenshot: {},
+                hostname: 'test.com',
+            },
+            timestamp: 0,
+        }
+        const pageDeleteChange: ObjectChange = {
+            collection: 'pages',
+            operation: 'delete',
+            objectPk: 'test.com/route',
+            timestamp: 0,
         }
 
         const createObject = jest.fn()
+        const updateOneObject = jest.fn()
+        const deleteOneObject = jest.fn()
 
         const restoreProcedure = new BackupRestoreProcedure({
             backend: null,
-            storageManager: { collection: () => ({ createObject }) } as any,
+            storageManager: {
+                collection: () => ({
+                    createObject,
+                    deleteOneObject,
+                    updateOneObject,
+                }),
+                registry: {
+                    collections: {
+                        pages: { pkIndex: 'test' },
+                        favIcons: { pkIndex: 'test' },
+                    },
+                },
+            } as any,
             logErrors: false,
             storage: null,
         })
 
+        const {
+            screenshot,
+            ...pageWithoutScreenshotKey
+        } = pageCreateChange.object
+
         expect(createObject).not.toHaveBeenCalled()
-        await restoreProcedure._writeChange(favChange as any)
+        await restoreProcedure._writeChange(favCreateChange)
         expect(createObject).not.toHaveBeenCalled()
-        await restoreProcedure._writeChange(pageChange as any)
-        const { screenshot, ...pageWithoutScreenshotKey } = pageChange.object
+
+        await restoreProcedure._writeChange(pageCreateChange)
         expect(createObject).toHaveBeenCalledWith(pageWithoutScreenshotKey)
+
+        await restoreProcedure._writeChange(pageUpdateChange)
+        expect(updateOneObject).toHaveBeenCalledWith(
+            {
+                test: pageUpdateChange.objectPk,
+            },
+            pageWithoutScreenshotKey,
+        )
+
+        await restoreProcedure._writeChange(pageDeleteChange)
+        expect(deleteOneObject).toHaveBeenCalledWith({
+            test: pageDeleteChange.objectPk,
+        })
     })
 })
