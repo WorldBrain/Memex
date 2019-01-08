@@ -1,6 +1,7 @@
 import { createAction } from 'redux-act'
-
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
+
+import * as selectors from './selectors'
 import { STORAGE_KEYS } from './constants'
 
 export const setAnnotationStage = createAction<string>(
@@ -20,6 +21,23 @@ export const setCongratsMessage = createAction<boolean>(
 )
 export const setBackupStage = createAction<string>('onboarding/setBackupStage')
 
+export const checkForCompletion = () => (dispatch, getState) => {
+    const state = getState()
+    const annotationStage = selectors.annotationStage(state)
+    const powerSearchStage = selectors.powerSearchStage(state)
+    const taggingStage = selectors.taggingStage(state)
+    const backupStage = selectors.backupStage(state)
+
+    if (
+        annotationStage === 'DONE' &&
+        powerSearchStage === 'DONE' &&
+        taggingStage === 'DONE' &&
+        backupStage === 'DONE'
+    ) {
+        dispatch(setCongratsMessage(true))
+    }
+}
+
 export const fetchOnboardingStages = () => async dispatch => {
     const annotationStage = await getLocalStorage(
         STORAGE_KEYS.onboardingDemo.step1,
@@ -38,19 +56,12 @@ export const fetchOnboardingStages = () => async dispatch => {
         'unvisited',
     )
 
-    if (
-        annotationStage === 'DONE' &&
-        powerSearchStage === 'DONE' &&
-        taggingStage === 'DONE' &&
-        backupStage === 'DONE'
-    ) {
-        dispatch(setCongratsMessage(true))
-    }
-
     dispatch(setAnnotationStage(annotationStage))
     dispatch(setPowerSearchStage(powerSearchStage))
     dispatch(setTaggingStage(taggingStage))
     dispatch(setBackupStage(backupStage))
+
+    dispatch(checkForCompletion())
 }
 
 export const fetchShowOnboarding = () => async dispatch => {
@@ -68,11 +79,13 @@ export const fetchShowOnboarding = () => async dispatch => {
 export const setPowerSearchDone = () => async dispatch => {
     await setLocalStorage(STORAGE_KEYS.onboardingDemo.step2, 'DONE')
     dispatch(setPowerSearchStage('DONE'))
+    dispatch(checkForCompletion())
 }
 
 export const setBackupStageDone = () => async dispatch => {
     await setLocalStorage(STORAGE_KEYS.onboardingDemo.step4, 'DONE')
     dispatch(setBackupStage('DONE'))
+    dispatch(checkForCompletion())
 }
 
 export const closeOnboardingBox = () => async dispatch => {
