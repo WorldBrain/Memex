@@ -1,9 +1,9 @@
 .container {
     width: 95%;
     max-width: 800px;
-    height: 450px;
+    height: 500px;
     background-color: #fff;
-    margin: 50px auto 30px auto;
+    margin: 150px auto 30px auto;
     display: flex;
     font-size: 16px;
     font-family: 'Open Sans', sans-serif;

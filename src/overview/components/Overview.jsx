@@ -13,6 +13,8 @@ import { Results } from '../results'
 import Head from '../../options/containers/Head'
 import DragElement from './DragElement'
 import { Tooltip } from '../tooltips'
+import Onboarding from '../onboarding'
+import { isDuringInstall } from '../onboarding/utils'
 
 class Overview extends PureComponent {
     static propTypes = {
@@ -30,7 +32,7 @@ class Overview extends PureComponent {
                 <Header />
                 <SidebarIcons />
                 <SidebarLeft />
-                <Results />
+                {isDuringInstall() ? <Onboarding /> : <Results />}
                 <DeleteConfirmModal />
                 <DragElement />
                 <Sidebar />

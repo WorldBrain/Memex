@@ -17,3 +17,9 @@ export const conditionallySkipToTimeFilter = async () => {
         )
     }
 }
+
+/**
+ * Check if the URL has the parameter install set to true
+ */
+export const isDuringInstall = (): boolean =>
+    location.href.indexOf('install=true') > -1

@@ -7,7 +7,7 @@ import NotificationContainer, {
 import NoResultBadTerm from './NoResultBadTerm'
 import ResultsMessage from './ResultsMessage'
 import ResultList from './ResultListContainer'
-import OnboardingBox, { OnboardingChecklist } from '../../onboarding/components'
+import { OnboardingChecklist } from '../../onboarding/components'
 import * as selectors from '../selectors'
 import { RootState } from '../../../options/types'
 
@@ -56,10 +56,6 @@ class ResultsContainer extends PureComponent<Props> {
                     </NoResultBadTerm>
                 </ResultsMessage>
             )
-        }
-
-        if (this.props.showInitSearchMsg) {
-            return <OnboardingBox />
         }
 
         if (this.props.noResults) {
