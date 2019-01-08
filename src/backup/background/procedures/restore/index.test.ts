@@ -183,4 +183,37 @@ describe('BackupRestoreProcedure', () => {
 
         expect(boom).rejects.toThrow('Muahaha!')
     })
+
+    it('should not restore empty objects in place of Blobs', async () => {
+        const favChange = {
+            operation: 'create',
+            object: { favIcon: {}, hostname: 'test.com' },
+            collection: 'favIcons',
+        }
+        const pageChange = {
+            operation: 'create',
+            object: {
+                url: 'test.com/route',
+                screenshot: {},
+                hostname: 'test.com',
+            },
+            collection: 'pages',
+        }
+
+        const createObject = jest.fn()
+
+        const restoreProcedure = new BackupRestoreProcedure({
+            backend: null,
+            storageManager: { collection: () => ({ createObject }) } as any,
+            logErrors: false,
+            storage: null,
+        })
+
+        expect(createObject).not.toHaveBeenCalled()
+        await restoreProcedure._writeChange(favChange)
+        expect(createObject).not.toHaveBeenCalled()
+        await restoreProcedure._writeChange(pageChange)
+        const { screenshot, ...pageWithoutScreenshotKey } = pageChange.object
+        expect(createObject).toHaveBeenCalledWith(pageWithoutScreenshotKey)
+    })
 })
