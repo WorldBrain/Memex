@@ -74,7 +74,7 @@ class Checklist extends PureComponent<Props> {
                 <ChecklistItem
                     isChecked={this.props.isBackupChecked}
                     handleClick={this.props.handleBackupStage}
-                    iconClass="step3"
+                    iconClass="step4"
                     subtitle="Learn how to backup your Memex to save your data"
                 >
                     Backup your Memex to cloud

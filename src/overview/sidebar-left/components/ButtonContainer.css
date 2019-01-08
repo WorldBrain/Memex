@@ -41,7 +41,7 @@
 
     &:hover {
         background-image: url('/img/cross.svg');
-        background-color: #efefef;
+        background-color: #f0f0f0;
     }
 }
 
@@ -57,7 +57,7 @@
     border-radius: 50%;
 
     &:hover {
-        background-color: #efefef;
+        background-color: #f0f0f0;
         opacity: 0.8;
     }
 }
@@ -75,7 +75,7 @@
     border-radius: 50%;
 
     &:hover {
-        background-color: #efefef;
+        background-color: #f0f0f0;
         opacity: 0.8;
     }
 }

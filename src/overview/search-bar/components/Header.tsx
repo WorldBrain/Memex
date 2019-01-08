@@ -37,7 +37,7 @@ class Header extends PureComponent<Props> {
     static defaultProps = {
         searchPlaceholder: 'Search keywords and/or use # to filter by tag',
         pricingUrl: 'https://worldbrain.io/pricing',
-        settingsIconUrl: '/img/settings-icon.png',
+        settingsIconUrl: '/img/settings.svg',
         settingsRoute: '/settings',
         overviewUrl: OVERVIEW_URL,
     }
@@ -99,7 +99,7 @@ class Header extends PureComponent<Props> {
                         <img
                             src={this.props.settingsIconUrl}
                             title="Settings"
-                            className={styles.icon}
+                            className={styles.SettingsIcon}
                         />
                     </Link>
                 </div>
