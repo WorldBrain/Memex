@@ -31,11 +31,13 @@ export default function PowerSearchBrowse({ onCloseRequested, openDashboard }) {
                         <span className={styles.button} onClick={openDashboard}>
                             Dashboard
                         </span>{' '}
-                        or the address bar by typing{' '}
+                        or via the address bar by typing{' '}
                     </p>
                     <p className={styles.keys}>
                         <span className={styles.key}>W</span>+
                         <span className={styles.key}>SPACE</span>
+                        or
+                        <span className={styles.key}>TAB</span>
                     </p>
                 </div>
             </NotificationLayout>

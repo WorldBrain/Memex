@@ -224,18 +224,22 @@ class AnnotationContainer extends React.Component {
                 <span
                     className={cx(styles.commonIcon, styles.editIcon)}
                     onClick={this.toggleEditAnnotation}
+                    title={'Edit note'}
                 />{' '}
                 <span
                     className={cx(styles.commonIcon, styles.trashIcon)}
                     onClick={this._setFooterState('delete')}
+                    title={'Delete note'}
                 />{' '}
                 <span
                     className={cx(styles.commonIcon, styles.shareIcon)}
                     onClick={this.setCrowdfunding(true, false)}
+                    title={'Share this note'}
                 />{' '}
                 <span
                     className={cx(styles.commonIcon, styles.replyIcon)}
                     onClick={this.setCrowdfunding(true, true)}
+                    title={'Reply to this note'}
                 />{' '}
                 {env === 'overview' && annotation.body ? (
                     <span
@@ -496,12 +500,13 @@ class AnnotationContainer extends React.Component {
                     isActive={this.props.isActive}
                     id={this.props.annotation.url}
                 />{' '}
-                {this.state.crowdfunding && this.props.env === 'overview' && (
-                    <CrowdfundingModal
-                        onClose={this.setCrowdfunding(false)}
-                        context="annotations"
-                    />
-                )}{' '}
+                {this.state.crowdfunding &&
+                    this.props.env === 'overview' && (
+                        <CrowdfundingModal
+                            onClose={this.setCrowdfunding(false)}
+                            context="annotations"
+                        />
+                    )}{' '}
             </React.Fragment>
         )
     }
