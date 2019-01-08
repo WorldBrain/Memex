@@ -15,6 +15,7 @@ import Head from '../../options/containers/Head'
 import DragElement from './DragElement'
 import { Tooltip } from '../tooltips'
 import { isDuringInstall } from '../onboarding/utils'
+import AnnotationsManager from '../../sidebar-common/annotations-manager'
 
 class Overview extends PureComponent {
     static propTypes = {
@@ -24,6 +25,8 @@ class Overview extends PureComponent {
     componentDidMount() {
         this.props.init()
     }
+
+    _annotationsManager = new AnnotationsManager()
 
     render() {
         return (
@@ -35,7 +38,10 @@ class Overview extends PureComponent {
                 {isDuringInstall() ? <Onboarding /> : <Results />}
                 <DeleteConfirmModal />
                 <DragElement />
-                <SidebarContainer env="overview" />
+                <SidebarContainer
+                    env="overview"
+                    annotationsManager={this._annotationsManager}
+                />
                 <Tooltip />
             </React.Fragment>
         )

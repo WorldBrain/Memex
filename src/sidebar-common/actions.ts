@@ -5,6 +5,7 @@ import { remoteFunction } from '../util/webextensionRPC'
 import { Anchor } from '../direct-linking/content_script/interactions'
 import * as selectors from './selectors'
 import { getTagArrays } from './utils'
+import AnnotationsManager from './annotations-manager'
 
 // Remote function declarations.
 const processEventRPC = remoteFunction('processEvent')
@@ -15,6 +16,10 @@ const getTagsByAnnotationUrlRPC = remoteFunction('getTagsByAnnotationUrl')
 const editAnnotationRPC = remoteFunction('editAnnotation')
 const deleteAnnotationRPC = remoteFunction('deleteAnnotation')
 const editAnnotationTagsRPC = remoteFunction('editAnnotationTags')
+
+export const setAnnotationsManager = createAction<AnnotationsManager>(
+    'setAnnotationsManager',
+)
 
 export const setSidebarOpen = createAction<boolean>('setSidebarOpen')
 
@@ -81,24 +86,20 @@ export const createAnnotation: (
     comment: string,
     tags: string[],
 ) => Thunk = (anchor, body, comment, tags) => async (dispatch, getState) => {
-    processEventRPC({ type: 'createAnnotation' })
-
     const state = getState()
+    const annotationsManager = selectors.annotationsManager(state)
     const { url, title } = selectors.page(state)
 
-    // Write annotation to database.
-    const uniqueUrl = await createAnnotationRPC({
-        url,
-        title,
-        body,
-        comment,
-        selector: anchor,
-    })
-
-    // Write tags to database.
-    tags.forEach(async tag => {
-        await addAnnotationTagRPC({ tag, url: uniqueUrl })
-    })
+    if (annotationsManager) {
+        await annotationsManager.createAnnotation({
+            url,
+            title,
+            body,
+            comment,
+            anchor,
+            tags,
+        })
+    }
 
     // Re-fetch annotations.
     dispatch(fetchAnnotations())
