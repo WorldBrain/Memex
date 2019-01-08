@@ -6,6 +6,7 @@ import SidebarContainer, {
     State as SidebarState,
     selectors as sidebarSelectors,
 } from '../../sidebar-common'
+import AnnotationsManager from '../../sidebar-common/annotations-manager'
 
 interface StateProps {
     isSidebarOpen: boolean
@@ -14,6 +15,7 @@ interface StateProps {
 interface DispatchProps {}
 
 interface OwnProps {
+    annotationsManager: AnnotationsManager
     handleRemoveRibbon: () => void
 }
 
@@ -21,6 +23,7 @@ type Props = StateProps & DispatchProps & OwnProps
 
 /* tslint:disable-next-line variable-name */
 const RibbonSidebarContainer = ({
+    annotationsManager,
     handleRemoveRibbon,
     isSidebarOpen,
 }: Props) => (
@@ -28,7 +31,10 @@ const RibbonSidebarContainer = ({
         {!isSidebarOpen && (
             <RibbonContainer handleRemoveRibbon={handleRemoveRibbon} />
         )}
-        <SidebarContainer env="inpage" />
+        <SidebarContainer
+            env="inpage"
+            annotationsManager={annotationsManager}
+        />
     </React.Fragment>
 )
 

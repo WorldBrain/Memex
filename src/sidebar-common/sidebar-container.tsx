@@ -10,6 +10,7 @@ import {
 } from './comment-box'
 import { Sidebar } from './components'
 import SidebarState, { MapDispatchToProps, Annotation } from './types'
+import AnnotationsManager from './annotations-manager'
 
 interface StateProps {
     isOpen: boolean
@@ -20,6 +21,7 @@ interface StateProps {
 
 interface DispatchProps {
     onInit: () => void
+    setAnnotationsManager: (annotationsManager: AnnotationsManager) => void
     closeSidebar: () => void
     fetchAnnotations: () => void
     handleAddCommentBtnClick: () => void
@@ -27,6 +29,7 @@ interface DispatchProps {
 
 interface OwnProps {
     env: 'inpage' | 'overview'
+    annotationsManager: AnnotationsManager
 }
 
 type Props = StateProps & DispatchProps & OwnProps
@@ -45,7 +48,9 @@ class SidebarContainer extends React.Component<Props, State> {
     }
 
     componentDidMount() {
-        this.props.onInit()
+        const { onInit, setAnnotationsManager, annotationsManager } = this.props
+        onInit()
+        setAnnotationsManager(annotationsManager)
     }
 
     componentDidUpdate(prevProps: Props) {
@@ -207,6 +212,8 @@ const mapDispatchToProps: MapDispatchToProps<
     OwnProps
 > = dispatch => ({
     onInit: () => dispatch(actions.initState()),
+    setAnnotationsManager: annotationsManager =>
+        dispatch(actions.setAnnotationsManager(annotationsManager)),
     closeSidebar: () => dispatch(actions.setSidebarOpen(false)),
     fetchAnnotations: () => dispatch(actions.fetchAnnotations()),
     handleAddCommentBtnClick: () =>

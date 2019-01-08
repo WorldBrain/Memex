@@ -7,8 +7,10 @@ import {
     reducer as commentBoxReducer,
     defaultState as defCommentBoxState,
 } from './comment-box'
+import AnnotationsManager from './annotations-manager'
 
 export const defaultState: State = {
+    annotationsManager: null,
     isOpen: false,
     isLoading: false,
     page: {
@@ -18,6 +20,11 @@ export const defaultState: State = {
     annotations: [],
     commentBox: defCommentBoxState,
 }
+
+const setAnnotationsManager = (
+    state: AnnotationsManager,
+    annotationsManager: AnnotationsManager,
+) => annotationsManager
 
 const setSidebarOpen = (state: boolean, isOpen: boolean) => isOpen
 
@@ -38,6 +45,10 @@ const setPageTitle = (state: Page, title: string) => ({
 const setAnnotations = (state: Annotation[], annotations: Annotation[]) =>
     annotations
 
+const annotationsManagerReducer = createReducer<AnnotationsManager>(on => {
+    on(actions.setAnnotationsManager, setAnnotationsManager)
+}, defaultState.annotationsManager)
+
 const isOpenReducer = createReducer<boolean>(on => {
     on(actions.setSidebarOpen, setSidebarOpen)
 }, defaultState.isOpen)
@@ -57,6 +68,7 @@ const annotationsReducer = createReducer<Annotation[]>(on => {
 }, defaultState.annotations)
 
 const reducer = combineReducers<State>({
+    annotationsManager: annotationsManagerReducer,
     isOpen: isOpenReducer,
     isLoading: isLoadingReducer,
     page: pageReducer,
