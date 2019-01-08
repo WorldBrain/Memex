@@ -14,8 +14,8 @@ const message: React.SFC<Props> = ({ styles, ...props }) => (
     <React.Fragment>
         <p className={styles.header}>Feature not available yet</p>
         <p className={styles.bolderText}>
-            Preoder today for 75% off and free access to the invite-only Preview
-            Release.
+            Preoder today for 75% off plus get free access to the invite-only
+            Preview Release.
         </p>
         <a className={styles.learnMore} onClick={props.openNewLink}>
             LEARN MORE
