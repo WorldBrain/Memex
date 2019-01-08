@@ -1,0 +1,142 @@
+@import url('/fonts/Inter/inter.css');
+
+.container {
+    box-sizing: border-box;
+    width: 95.3%;
+    background-color: #fff;
+    border-radius: 5px;
+    color: #4a4a4a;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    border: 1px #d2d2d2 solid;
+    margin: 13px 0 0 0;
+    box-shadow: 0px 0px 5px 0px #00000040;
+    transition: border 0.05s ease-in;
+
+    & > * {
+        font-family: 'Inter', sans-serif;
+    }
+
+    &:hover {
+        border-color: #3db994;
+    }
+
+    /**
+    * TODO: (Untested) Check the following class' purpose.
+    * See if it can't be replaced by a pseudo-class.
+    */
+    &.active {
+        border-color: #3db994b8;
+        box-shadow: 0px 0px 5px 1px #00000050;
+    }
+
+    &.isJustComment {
+        background: #f0f0f0;
+    }
+}
+
+.isClickable {
+    cursor: pointer;
+}
+
+.timestamp {
+    max-width: 100%;
+    font-size: 10px;
+    text-align: right;
+    vertical-align: middle;
+    padding: 16px 16px 8px 16px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    color: #4a4a4a;
+
+    /* TODO: (Untested). */
+    & .lastEdit {
+        font-weight: 400;
+        color: #929292;
+        margin: 0 5px 0 -1px;
+    }
+}
+
+/* TODO: (Untested). */
+.highlight {
+    font-family: 'Inter', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    margin-bottom: 16px;
+    margin-top: 30px;
+    padding: 7px 15px;
+    line-height: 20px;
+}
+
+/* Tested till this point. */
+
+.icon {
+    margin: 0px 5px;
+    cursor: pointer;
+}
+
+.annotationTextarea {
+    font-size: 13px;
+    width: 95%;
+    resize: none;
+    color: #222;
+    font-family: 'Inter', sans-serif;
+    background: #f7f7f7;
+    border: none;
+    padding: 10px;
+    line-height: 19px;
+    font-weight: 400;
+    margin-bottom: 2px;
+    margin-left: 8px;
+    margin-top: 9px;
+    box-sizing: border-box;
+
+    &::placeholder {
+        color: #4a4a4a;
+        font-style: italic;
+    }
+}
+
+.tagsInput {
+    width: 95%;
+    height: 18px;
+    border-radius: 10px;
+    background-color: #fdfbfb;
+    margin-top: 7px;
+    font-size: 11px;
+    padding: 3px 8px 4px 10px;
+    color: #3eb995;
+    box-shadow: #0000005c 0px 0px 5px 0px inset;
+    border: 0.5px #0000005c solid;
+
+    &::placeholder {
+        color: #3eb995;
+    }
+}
+
+textarea:focus,
+input:focus {
+    outline: none;
+}
+
+.goToPageIcon {
+    background-image: url('/img/gotopage.svg');
+    background-repeat: no-repeat;
+    background-size: 27px;
+    background-position-x: 1px;
+    width: 26px;
+    height: 26px;
+    margin-top: -4.5px;
+    margin-right: 10px;
+    display: inline-block;
+    cursor: pointer;
+    margin-left: 2px;
+    padding: 3px;
+    border-radius: 50%;
+
+    &:hover {
+        background-color: #efefef;
+    }
+}
