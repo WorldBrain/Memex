@@ -223,12 +223,15 @@ export class BackupRestoreProcedure {
     }
 }
 
-export function _getChangeWhere(change, registry: StorageRegistry) {
+export function _getChangeWhere(
+    change: ObjectChange,
+    registry: StorageRegistry,
+) {
     // TODO: What if none of these are true?
     const collectionDef = registry.collections[change.collection]
     const pkIndex = collectionDef.pkIndex
     if (pkIndex instanceof Array) {
-        return zipObject(pkIndex, change.pk)
+        return zipObject(pkIndex, change.objectPk)
     } else if (typeof pkIndex === 'string') {
         return { [pkIndex]: change.objectPk }
     }
@@ -241,13 +244,21 @@ export function _filterBadChange({
     const isBadBlob = val =>
         val != null && !(val instanceof Blob) && !Object.keys(val).length
 
-    if (change.collection === 'pages' && isBadBlob(object.screenshot)) {
+    if (
+        change.collection === 'pages' &&
+        object != null &&
+        isBadBlob(object.screenshot)
+    ) {
         // Pages can exist without screenshot Blobs; omit bad value
         const { screenshot, ...objectMod } = object
         return { ...change, object: objectMod }
     }
 
-    if (change.collection === 'favIcons' && isBadBlob(object.favIcon)) {
+    if (
+        change.collection === 'favIcons' &&
+        object != null &&
+        isBadBlob(object.favIcon)
+    ) {
         // FavIcons cannot exist without favIcon Blobs; unset operation to skip write
         return { ...change, object, operation: null }
     }
