@@ -1,11 +1,11 @@
 import * as React from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 
-import RibbonContainer from '../../ribbon'
+import RibbonContainer from '../ribbon'
 import SidebarContainer, {
     State as SidebarState,
     selectors as sidebarSelectors,
-} from '../../../sidebar-common'
+} from '../../sidebar-common'
 
 interface StateProps {
     isSidebarOpen: boolean
@@ -20,7 +20,7 @@ interface OwnProps {
 type Props = StateProps & DispatchProps & OwnProps
 
 /* tslint:disable-next-line variable-name */
-const RibbonSidebarController = ({
+const RibbonSidebarContainer = ({
     handleRemoveRibbon,
     isSidebarOpen,
 }: Props) => (
@@ -40,4 +40,4 @@ const mapStateToProps: MapStateToProps<
     isSidebarOpen: sidebarSelectors.isOpen(state),
 })
 
-export default connect(mapStateToProps)(RibbonSidebarController)
+export default connect(mapStateToProps)(RibbonSidebarContainer)

@@ -1,14 +1,14 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 
-import RibbonSidebarContainer from './ribbon-sidebar-container'
+import RibbonSidebarController from './ribbon-sidebar-controller'
 
 export const setupRibbonAndSidebarUI = (
     target: HTMLElement,
     { handleRemoveRibbon }: { handleRemoveRibbon: () => void },
 ) => {
     ReactDOM.render(
-        <RibbonSidebarContainer handleRemoveRibbon={handleRemoveRibbon} />,
+        <RibbonSidebarController handleRemoveRibbon={handleRemoveRibbon} />,
         target,
     )
 }

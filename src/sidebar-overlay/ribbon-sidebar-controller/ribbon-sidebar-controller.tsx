@@ -1,9 +1,9 @@
 import * as React from 'react'
 import { Provider } from 'react-redux'
 
-import configureStore from './store'
-import RibbonSidebarController from './ribbon-sidebar-controller'
-import { ErrorBoundary, RuntimeError } from '../common-ui/components'
+import configureStore from '../store'
+import RibbonSidebarContainer from './ribbon-sidebar-container'
+import { ErrorBoundary, RuntimeError } from '../../common-ui/components'
 
 const store = configureStore()
 
@@ -12,13 +12,13 @@ interface Props {
 }
 
 /* tslint:disable-next-line variable-name */
-const RibbonSidebarContainer = (props: Props) => {
+const RibbonSidebarController = (props: Props) => {
     const { handleRemoveRibbon } = props
 
     return (
         <ErrorBoundary component={RuntimeError}>
             <Provider store={store}>
-                <RibbonSidebarController
+                <RibbonSidebarContainer
                     handleRemoveRibbon={handleRemoveRibbon}
                 />
             </Provider>
@@ -26,4 +26,4 @@ const RibbonSidebarContainer = (props: Props) => {
     )
 }
 
-export default RibbonSidebarContainer
+export default RibbonSidebarController
