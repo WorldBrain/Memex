@@ -14,9 +14,9 @@ export const setWhichTooltip = createAction<number>('tooltips/setTooltip')
 export const resetWhichTooltip = createAction('tooltip/resetWhichTooltip')
 export const setShowTooltip = createAction<boolean>('tooltips/setShowTooltip')
 
-export const initOnboardingTooltips = () => dispatch => {
+export const initOnboardingTooltips = (index = 0) => dispatch => {
     dispatch(setShowTooltip(true))
-    dispatch(processAndSetWhichTooltip(0))
+    dispatch(processAndSetWhichTooltip(index))
 }
 
 export const fetchOnboardingState = () => async dispatch => {
@@ -25,6 +25,8 @@ export const fetchOnboardingState = () => async dispatch => {
     )
     if (onboardingState === 'overview-tooltips') {
         dispatch(initOnboardingTooltips())
+    } else if (onboardingState === 'skip-to-time-filters') {
+        dispatch(initOnboardingTooltips(1))
     }
 }
 

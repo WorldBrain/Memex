@@ -14,6 +14,7 @@ import extractTimeFiltersFromQuery, {
 import { OVERVIEW_URL } from './constants'
 import browserIsChrome from './util/check-browser'
 import { EVENT_NAMES } from './analytics/internal/constants'
+import { conditionallySkipToTimeFilter } from './overview/onboarding/utils'
 
 // Read which browser we are running in.
 let browserName
@@ -145,9 +146,12 @@ const formOverviewQuery = text => {
     return `${OVERVIEW_URL}?${queryParams}`
 }
 
-const acceptInput = (text, disposition) => {
+const acceptInput = async (text, disposition) => {
     // Either go to URL if input is valid URL, else form query for overview search using input terms
     const url = urlRegex().test(text) ? text : formOverviewQuery(text)
+
+    // Skips to time filter in Onboarding Power Search workflow if user queries during demo
+    await conditionallySkipToTimeFilter()
 
     switch (disposition) {
         case 'currentTab':
