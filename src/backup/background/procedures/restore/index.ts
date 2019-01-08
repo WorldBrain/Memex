@@ -3,7 +3,7 @@ const zipObject = require('lodash/zipObject')
 import { EventEmitter } from 'events'
 import { StorageManager } from '../../../../search/types'
 import BackupStorage from '../../storage'
-import { BackupBackend } from '../../backend'
+import { BackupBackend, ObjectChange } from '../../backend'
 import Interruptable from '../interruptable'
 import { DownloadQueue } from './download-queue'
 import { StorageRegistry } from 'storex'
@@ -170,7 +170,9 @@ export class BackupRestoreProcedure {
 
     _unblockDatabase() {}
 
-    async _writeChange(change) {
+    async _writeChange(change: ObjectChange) {
+        change = _filterBadChange(change)
+
         const collection = this.storageManager.collection(change.collection)
         if (change.operation === 'create') {
             // console.log('creating', change.object)
@@ -230,4 +232,25 @@ export function _getChangeWhere(change, registry: StorageRegistry) {
     } else if (typeof pkIndex === 'string') {
         return { [pkIndex]: change.objectPk }
     }
+}
+
+export function _filterBadChange({
+    object,
+    ...change
+}: ObjectChange): ObjectChange {
+    const isBadBlob = val =>
+        val != null && !(val instanceof Blob) && !Object.keys(val).length
+
+    if (change.collection === 'pages' && isBadBlob(object.screenshot)) {
+        // Pages can exist without screenshot Blobs; omit bad value
+        const { screenshot, ...objectMod } = object
+        return { ...change, object: objectMod }
+    }
+
+    if (change.collection === 'favIcons' && isBadBlob(object.favIcon)) {
+        // FavIcons cannot exist without favIcon Blobs; unset operation to skip write
+        return { ...change, object, operation: null }
+    }
+
+    return { ...change, object }
 }
