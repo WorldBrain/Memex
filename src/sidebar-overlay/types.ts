@@ -1,6 +1,20 @@
+/**
+ * This file contains any type declarations pertinent to RibbonSidebarController
+ * Default export is the component's state's type declaration, which also
+ * happens to be the Root State for the entire 'sidebar-overlay' component.
+ */
+
 import { ThunkAction, ThunkDispatch } from 'redux-thunk'
 
-import { RootState } from './ribbon-sidebar-controller'
+import { State as RibbonState } from './ribbon'
+import { State as SidebarState } from '../sidebar-common'
+
+export default interface RootState {
+    ribbon: RibbonState
+    sidebar: SidebarState
+}
+
+import RootState from './reducer'
 
 export type ClickHandler<T extends HTMLElement> = (
     e: React.SyntheticEvent<T>,

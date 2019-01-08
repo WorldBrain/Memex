@@ -1,6 +1,6 @@
 import { createSelector } from 'reselect'
 
-import * as RootSelectors from '../ribbon-sidebar-controller/selectors'
+import * as RootSelectors from '../selectors'
 
 export const ribbon = RootSelectors.ribbon
 
