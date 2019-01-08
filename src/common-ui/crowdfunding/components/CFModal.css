@@ -64,8 +64,8 @@
     color: #3eb995;
     font-size: 35px;
     font-weight: 800;
-    font-style: italic;
-    width: 70%;
+    width: 80%;
+    font-family: 'Open Sans';
     text-align: center;
     line-height: 35px;
     letter-spacing: 1px;
@@ -77,7 +77,7 @@
     color: #5d697bc4;
     font-size: 18px;
     width: 95%;
-    font-family: 'Lato';
+    font-family: 'Open Sans';
     margin-top: 0px;
     font-weight: 100;
     text-align: center;
@@ -86,7 +86,7 @@
 .bolderText {
     color: #173766;
     font-size: 18px;
-    width: 75%;
+    width: 85%;
     margin-top: 0px;
     font-weight: 600;
     text-align: center;
@@ -102,7 +102,6 @@
     font-weight: 500;
     text-decoration: none;
     font-size: 15px;
-    margin-top: 10px;
     margin-bottom: 10px;
 
     &:hover {

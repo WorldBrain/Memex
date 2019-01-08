@@ -16,7 +16,7 @@ export interface Props {
 class CrowdfundingBox extends PureComponent<Props> {
     static defaultProps: Pick<Props, 'tabs' | 'learnMoreUrl'> = {
         tabs: browser.tabs,
-        learnMoreUrl: 'https://worldbrain.io/crowdfunding-memex/',
+        learnMoreUrl: 'https://worldbrain.io/pricing',
     }
 
     private processEventRPC = remoteFunction('processEvent')

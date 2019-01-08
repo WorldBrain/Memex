@@ -12,13 +12,10 @@ interface Props {
 
 const message: React.SFC<Props> = ({ styles, ...props }) => (
     <React.Fragment>
-        <p className={styles.header}>Fund the future!</p>
+        <p className={styles.header}>Feature not available yet</p>
         <p className={styles.bolderText}>
-            This feature is not available yet but it's on our roadmap.
-        </p>
-        <p className={styles.text}>
-            Support the development with 10€ and <br />
-            <b>get back 40€</b> worth of premium credits.
+            Preoder today for 75% off and free access to the invite-only Preview
+            Release.
         </p>
         <a className={styles.learnMore} onClick={props.openNewLink}>
             LEARN MORE

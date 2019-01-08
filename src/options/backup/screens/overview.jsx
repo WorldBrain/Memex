@@ -162,10 +162,7 @@ export default class OverviewContainer extends React.Component {
                     </p>
                     <div className={Styles.option}>
                         <span className={Styles.name}>Coming Very Soon</span>
-                        <a
-                            target="_blank"
-                            href="https://worldbrain.io/crowdfunding-memex"
-                        >
+                        <a target="_blank" href="https://worldbrain.io/pricing">
                             <span className={localStyles.button}>
                                 <span
                                     className={classNames(
