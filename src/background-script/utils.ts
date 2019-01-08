@@ -15,7 +15,7 @@ export const openOptionsURL = (query: string) =>
 
 export async function openOverview() {
     const [currentTab] = await browser.tabs.query({ active: true })
-
+    console.log('sup')
     // Either create new tab or update current tab with overview page, depending on URL validity
     if (currentTab && currentTab.url && urlRegex().test(currentTab.url)) {
         return browser.tabs.create({ url: OVERVIEW_URL })

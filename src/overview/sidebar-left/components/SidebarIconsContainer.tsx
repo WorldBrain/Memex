@@ -1,6 +1,8 @@
 import React, { PureComponent } from 'react'
 import { connect } from 'react-redux'
 
+import { remoteFunction } from 'src/util/webextensionRPC'
+import { EVENT_NAMES } from 'src/analytics/internal/constants'
 import SidebarIcons from './SidebarIcons'
 import BackToSearch from './BackToSearch'
 import * as acts from '../actions'
@@ -9,10 +11,14 @@ import {
     actions as filterActs,
 } from '../../../search-filters'
 import { selectors as notifs } from '../../../notifications'
+import { acts as tooltipActs } from '../../tooltips'
+import { actions as onboardingActs } from '../../onboarding'
 
 export interface Props {
     showInbox: boolean
 }
+
+const processEventRPC = remoteFunction('processEvent')
 
 class SidebarIconsContainer extends PureComponent<Props> {
     render() {
@@ -32,7 +38,17 @@ const mapState = state => ({
 })
 
 const mapDispatch = dispatch => ({
-    filterBtnClick: () => dispatch(acts.openSidebarFilterMode()),
+    filterBtnClick: () => {
+        // Remove and reset onboarding tooltip
+        dispatch(tooltipActs.resetTooltips())
+        // Tick off Power Search onboarding stage
+        dispatch(onboardingActs.setPowerSearchDone())
+        processEventRPC({
+            type: EVENT_NAMES.FINISH_POWERSEARCH_ONBOARDING,
+        })
+
+        dispatch(acts.openSidebarFilterMode())
+    },
     listBtnClick: () => dispatch(acts.openSidebarListMode()),
     onPageDrag: () => dispatch(acts.openSidebarListMode()),
     onClearBtnClick: () => dispatch(filterActs.resetFilters()),

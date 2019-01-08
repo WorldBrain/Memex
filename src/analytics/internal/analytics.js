@@ -49,6 +49,9 @@ class Analytics {
         [EVENT_NAMES.NLP_SEARCH]: {
             count: 0,
         },
+        [EVENT_NAMES.OVERVIEW_TOOLTIP]: {
+            count: 0,
+        },
     }
 
     async registerOperations(eventLog) {

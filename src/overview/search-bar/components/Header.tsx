@@ -30,13 +30,14 @@ export interface Props {
     onStartDateChange: (date: number) => void
     onEndDateChange: (date: number) => void
     toggleInbox: () => void
+    changeTooltip: () => void
 }
 
 class Header extends PureComponent<Props> {
     static defaultProps = {
-        searchPlaceholder: 'Enter keywords or start with # to filter by tag',
+        searchPlaceholder: 'Search keywords and/or use # to filter by tag',
         pricingUrl: 'https://worldbrain.io/pricing',
-        settingsIconUrl: '/img/settings-icon.png',
+        settingsIconUrl: '/img/settings.svg',
         settingsRoute: '/settings',
         overviewUrl: OVERVIEW_URL,
     }
@@ -58,6 +59,7 @@ class Header extends PureComponent<Props> {
                 <div className={styles.container}>
                     <div className={styles.searchField}>
                         <input
+                            id="query-search-bar"
                             className={styles.query}
                             onChange={this.props.onQueryChange}
                             placeholder={this.props.searchPlaceholder}
@@ -72,6 +74,7 @@ class Header extends PureComponent<Props> {
                             onStartDateChange={this.props.onStartDateChange}
                             onEndDateChange={this.props.onEndDateChange}
                             disabled={this.props.isSearchDisabled}
+                            changeTooltip={this.props.changeTooltip}
                         />
                     </div>
                 </div>
@@ -96,7 +99,7 @@ class Header extends PureComponent<Props> {
                         <img
                             src={this.props.settingsIconUrl}
                             title="Settings"
-                            className={styles.icon}
+                            className={styles.SettingsIcon}
                         />
                     </Link>
                 </div>

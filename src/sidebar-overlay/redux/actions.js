@@ -8,6 +8,9 @@ import {
 } from '../CommentBox'
 import * as selectors from './selectors'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
+import { getLocalStorage } from 'src/search-injection/utils'
+import { STORAGE_KEYS } from 'src/overview/onboarding/constants'
+import { setLocalStorage } from 'src/util/storage'
 
 const getAllAnnotationsRPC = remoteFunction('getAllAnnotations')
 const getAnnotationTagsRPC = remoteFunction('getAnnotationTags')
@@ -28,6 +31,8 @@ export const setHoveredAnnotation = createAction('setHoveredAnnotation')
 export const setAnnotationCount = createAction('setAnnotationCount')
 
 export const setIsLoading = createAction('setIsLoading')
+
+export const setCongratsMessage = createAction('setCongratsMessage')
 
 export const setPageInfo = createAction('setPageInfo')
 
@@ -101,6 +106,25 @@ export const createAnnotation = (comment, body, tags, env) => async (
     dispatch(setActiveAnnotation(uniqueUrl))
     if (env === 'overview') {
         dispatch(fetchAnnotationAct())
+    }
+
+    const congratsMessage = selectors.congratsMessage(state)
+    const onboardingAnnotationStage = await getLocalStorage(
+        STORAGE_KEYS.onboardingDemo.step1,
+    )
+    if (
+        !congratsMessage &&
+        onboardingAnnotationStage === 'annotation_created'
+    ) {
+        dispatch(setCongratsMessage(true))
+        processEventRPC({
+            type: EVENT_NAMES.FINISH_ANNOTATION_ONBOARDING,
+        })
+        await setLocalStorage(STORAGE_KEYS.onboardingDemo.step1, 'DONE')
+    } else if (congratsMessage) {
+        // Since we need to display the congrats message only once,
+        // it can be set to false after setting it true once.
+        dispatch(setCongratsMessage(false))
     }
 }
 

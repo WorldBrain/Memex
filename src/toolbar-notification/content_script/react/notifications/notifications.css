@@ -1,0 +1,33 @@
+.icon {
+    height: 20px;
+    vertical-align: bottom;
+}
+
+.title {
+    display: flex;
+    font-family: 'Lato', sans-serif;
+    flex-direction: row;
+    width: 100%;
+}
+
+.notifContainer {
+    width: fit-content;
+    margin: 10px auto;
+    margin-top: 20px;
+    text-align: left;
+}
+
+.selectIcon {
+    height: 30px;
+    vertical-align: super;
+}
+
+.notifText {
+    font-size: 16px;
+    text-align: center;
+    display: inline-block;
+    vertical-align: top;
+    margin-top: 3px;
+    margin-bottom: 23px;
+    margin-left: 15px;
+}

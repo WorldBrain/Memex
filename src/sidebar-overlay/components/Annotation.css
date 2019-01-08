@@ -258,12 +258,9 @@ input:focus {
     margin-top: -5px;
     padding: 3px;
     width: 28px;
+    opacity: 0.7;
     height: 28px;
     float: left;
-
-    &:hover {
-        background-color: #efefef;
-    }
 }
 
 .replyIcon {
@@ -278,20 +275,26 @@ input:focus {
     background-image: url('/img/share_empty.svg');
 
     &:hover {
-        background-image: url('/img/share_hover.svg');
+        background-image: url('/img/share_full.svg');
     }
 }
 
 .trashIcon {
-    background-image: url('/img/trash_closed.svg');
+    background-image: url('/img/trash.svg');
+    background-size: 17px;
 
     &:hover {
-        background-image: url('/img/trash_open.svg');
+        background-image: url('/img/trash_blue_full.svg');
+        margin-top: -6px;
     }
 }
 
 .editIcon {
-    background-image: url('/img/newedit.svg');
+    background-image: url('/img/edit_empty.svg');
+
+    &:hover {
+        background-image: url('/img/edit_full.svg');
+    }
 }
 
 .goToPageIcon {

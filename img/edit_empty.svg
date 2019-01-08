@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="75px" height="75px" viewBox="0 0 75 75" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 51.3 (57544) - http://www.bohemiancoding.com/sketch -->
+    <title>Group</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Group" transform="translate(2.000000, 1.000000)" stroke="#173766" stroke-width="3">
+            <path d="M24.0880626,64.4254861 L0.99277768,71.0234723 L7.59076392,47.9281874 L52.1341703,3.384781 C55.3235081,0.19544324 60.4936416,0.19544324 63.6829793,3.384781 L68.631469,8.33327068 C71.8208068,11.5226084 71.8208068,16.6927419 68.631469,19.8820797 L24.0880626,64.4254861 Z" id="Path"></path>
+            <path d="M62.0334828,26.4800659 L45.5361841,9.98276724 L62.0334828,26.4800659 Z" id="Path" fill="#D8D8D8"></path>
+        </g>
+    </g>
+</svg>

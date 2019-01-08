@@ -4,8 +4,8 @@ import { browser, Tabs } from 'webextension-polyfill-ts'
 import { remoteFunction } from '../../util/webextensionRPC'
 
 import FeaturesInfo from './components/FeaturesInfo'
-import FeatureInfo from '../../overview/onboarding/components/FeatureInfo'
-import { FEATURES_INFO } from '../../overview/onboarding/constants'
+import FeatureInfo from './components/FeatureInfo'
+import { FEATURES_INFO } from './constants'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 
 export interface Props {

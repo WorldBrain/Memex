@@ -1,7 +1,5 @@
 /* stylelint-disable declaration-no-important */
 
-@import url('/fonts/googlefonts/open-sans.css');
-
 .link {
     text-decoration: none;
 
@@ -11,12 +9,12 @@
 }
 
 .item {
-    color: rgb(59, 59, 59);
+    color: #444;
     text-decoration: none;
     display: flex;
     align-items: center;
     cursor: default;
-    font-weight: 100;
+    font-weight: 400;
     height: 40px;
     padding-left: 20px;
 
@@ -34,7 +32,8 @@
     font-size: 1em;
     cursor: pointer;
     font-family: 'Open Sans';
-    font-weight: 100;
+    font-weight: 400;
+    color: #555;
     padding-left: 20px;
     background: none !important;
 
@@ -111,6 +110,7 @@
 .customIcon {
     width: 30px;
     height: 29px;
+    margin-right: 5px;
     outline: 0;
     margin-bottom: -10px;
 }
@@ -138,29 +138,35 @@
     background-repeat: no-repeat;
     background-size: 20px;
     float: left;
+    opacity: 0.6;
     margin-top: 6px;
 }
 
 .sidebarIcon {
-    background-image: url('/img/sidebarIcon_grey.svg');
+    background-image: url('/img/sidebarIcon_blue.svg');
     background-repeat: no-repeat;
     background-size: 20px;
     float: left;
+    opacity: 0.6;
     margin-top: 8px;
 }
 
 .highlighterIcon {
-    background-image: url('/img/highlighterIcon_grey.svg');
+    background-image: url('/img/tooltipIcon_blue.svg');
     background-repeat: no-repeat;
-    background-size: 20px;
+    background-size: 24px;
     float: left;
     margin-top: 6px;
+    opacity: 0.6;
+    padding-right: 2px;
+    margin-left: -2px;
 }
 
 .searchIcon {
-    background-image: url('/img/search.svg');
+    background-image: url('/img/search-icon.svg');
     background-repeat: no-repeat;
     background-size: 20px;
+    opacity: 0.8;
 }
 
 .badge {

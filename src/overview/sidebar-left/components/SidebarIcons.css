@@ -1,24 +1,34 @@
 .filterButton {
-    background-image: url('/img/filter_filled.svg');
+    background-image: url('/img/filter_empty.svg');
     width: 32px;
-    height: 32px;
-    opacity: 0.5;
+    height: 34px;
+    opacity: 0.6;
+
+    &:hover {
+        opacity: 0.8;
+        background-image: url('/img/filter_full.svg');
+    }
 }
 
 .filterEnabled {
-    background-image: url('/img/filter_filled_green.svg');
+    background-image: url('/img/filter_full.svg');
     opacity: 1;
 }
 
 .listButton {
-    background-image: url('/img/collections.svg');
+    background-image: url('/img/collections_empty.svg');
     width: 30px;
     height: 30px;
     opacity: 0.5;
+
+    &:hover {
+        opacity: 0.8;
+        background-image: url('/img/collections.svg');
+    }
 }
 
 .collectionEnabled {
-    background-image: url('/img/collections_green.svg');
+    background-image: url('/img/collections.svg');
     opacity: 1;
 }
 
@@ -38,7 +48,7 @@
     display: flex !important; /* stylelint-disable-line declaration-no-important */
     flex-direction: column;
     align-items: center;
-    top: 100px;
+    top: 80px;
     left: -8px;
     width: 105px;
     justify-content: space-evenly;

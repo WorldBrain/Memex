@@ -1,0 +1,182 @@
+.container {
+    position: absolute;
+    top: 100px;
+    left: 200px;
+    text-align: center;
+    width: fit-content;
+    background: #fff;
+    height: fit-content;
+    padding: 30px;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 400;
+    border-radius: 6px;
+    color: #173766;
+    border: solid 1px #3eb99536;
+    animation: pulse_slow 4s infinite;
+    font-size: 16px;
+}
+
+.container::after {
+    content: ' ';
+    position: absolute;
+    top: -48px;
+    left: calc(50% - 12.5px);
+    margin-left: 0px;
+    width: 16px;
+    background-color: #3eb995;
+    border-radius: 50px;
+    height: 16px;
+    border: solid 2px #173766;
+    transform: rotate(45deg);
+    z-index: 253459;
+    animation: pulse 2s infinite;
+}
+
+.emoji {
+    font-size: 20px;
+    margin-right: 5px;
+    font-style: normal;
+    font-weight: normal;
+    vertical-align: middle;
+}
+
+.noBold {
+    font-weight: 400;
+    vertical-align: middle;
+    font-size: 14px;
+    color: #3eb995;
+}
+
+.proTipPro {
+    text-align: center;
+}
+
+.example {
+    color: #3eb995;
+    font-size: 14px;
+    font-weight: 400;
+    text-transform: none;
+    vertical-align: middle;
+    margin-top: 0px;
+}
+
+.close {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    background: url('/img/cross.svg');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 10px;
+    margin: 3px 3px 0px 0px;
+
+    &:hover {
+        border-radius: 50px;
+        background-color: #f0f0f0;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 10px;
+        margin: 3px 3px 0px 0px;
+        top: 3px;
+        right: 3px;
+        cursor: pointer;
+        width: 20px;
+        height: 20px;
+    }
+}
+
+.prev {
+    position: absolute;
+    top: 3px;
+    left: 4px;
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    background: url('/img/arrow.svg');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 7px;
+    margin: 3px 3px 0px 0px;
+    transform: rotate(180deg);
+
+    &:hover {
+        border-radius: 50px;
+        background-color: #f0f0f0;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 7px;
+        margin: 3px 3px 0px 0px;
+        cursor: pointer;
+        width: 20px;
+        height: 20px;
+    }
+}
+
+.next {
+    position: absolute;
+    top: 3px;
+    right: 24px;
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    background: url('/img/arrow.svg');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 7px;
+    margin: 3px 3px 0px 0px;
+
+    &:hover {
+        border-radius: 50px;
+        background-color: #f0f0f0;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 7px;
+        margin: 3px 3px 0px 0px;
+        cursor: pointer;
+        width: 20px;
+        height: 20px;
+    }
+}
+
+.proTip {
+    vertical-align: middle;
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.subInfo {
+    color: #3eb995;
+    font-size: 15px;
+    margin-bottom: -5px;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 #17376676;
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px #17376600;
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 #17376600;
+    }
+}
+
+@keyframes pulse_slow {
+    0% {
+        box-shadow: 0 0 0 0 #79ffd8;
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px #3eb99500;
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 #3eb99500;
+    }
+}

@@ -97,6 +97,16 @@ export const EVENT_NAMES = {
     BLACKLIST: 'blacklist',
     ADDRESS_BAR_SEARCH: 'addressBarSearch',
     DATEPICKER_NLP: 'datepickerNlp',
+    START_ANNOTATION_ONBOARDING: 'startAnnotationOnboarding',
+    ONBOARDING_HIGHLIGHT_MADE: 'onboardingHighlightMade',
+    FINISH_ANNOTATION_ONBOARDING: 'finishAnnotationOnboarding',
+    START_POWERSEARCH_ONBOARDING: 'startPowerSearchOnboarding',
+    POWERSEARCH_BROWSE_PAGE: 'powerSearchBrowsePage',
+    POWERSEARCH_GOTO_DASH: 'powerSearchGotoDash',
+    FINISH_POWERSEARCH_ONBOARDING: 'finshPowerSearchOnboarding',
+    OVERVIEW_TOOLTIP: 'overviewTooltip',
+    SET_TOOLTIP: 'setTooltip',
+    CLOSE_TOOLTIP: 'closeTooltip',
 }
 
 export const EVENT_TYPES = {
@@ -349,6 +359,35 @@ export const EVENT_TYPES = {
     [EVENT_NAMES.LEARN_MORE_CROWD_FUNDING]: {
         id: 74,
     },
+    [EVENT_NAMES.START_ANNOTATION_ONBOARDING]: {
+        id: 75,
+    },
+    [EVENT_NAMES.FINISH_ANNOTATION_ONBOARDING]: {
+        id: 76,
+    },
+    [EVENT_NAMES.START_POWERSEARCH_ONBOARDING]: {
+        id: 77,
+    },
+    [EVENT_NAMES.FINISH_POWERSEARCH_ONBOARDING]: {
+        id: 78,
+    },
+    [EVENT_NAMES.ONBOARDING_HIGHLIGHT_MADE]: {
+        id: 79,
+    },
+    [EVENT_NAMES.POWERSEARCH_BROWSE_PAGE]: {
+        id: 80,
+    },
+    [EVENT_NAMES.POWERSEARCH_GOTO_DASH]: {
+        id: 81,
+    },
+    [EVENT_NAMES.SET_TOOLTIP]: {
+        id: 82,
+        notifType: EVENT_NAMES.OVERVIEW_TOOLTIP,
+    },
+    [EVENT_NAMES.CLOSE_TOOLTIP]: {
+        id: 83,
+        notifType: EVENT_NAMES.OVERVIEW_TOOLTIP,
+    },
 }
 
 export const NOTIF_TYPE_EVENT_IDS = {
@@ -364,4 +403,5 @@ export const NOTIF_TYPE_EVENT_IDS = {
     [EVENT_NAMES.ADDRESS_BAR_SEARCH]: [33, 34, 35],
     [EVENT_NAMES.DATEPICKER_NLP]: [36, 37],
     [EVENT_NAMES.NLP_SEARCH]: [38],
+    [EVENT_NAMES.OVERVIEW_TOOLTIP]: [82, 83],
 }
