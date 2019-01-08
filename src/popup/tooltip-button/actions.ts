@@ -5,6 +5,7 @@ import { remoteFunction } from '../../util/webextensionRPC'
 import { Thunk } from '../types'
 import * as selectors from './selectors'
 import * as popup from '../selectors'
+import { EVENT_NAMES } from '../../analytics/internal/constants'
 
 const processEventRPC = remoteFunction('processEvent')
 
@@ -23,7 +24,9 @@ export const toggleTooltipFlag: () => Thunk = () => async (
     const wasEnabled = selectors.isTooltipEnabled(state)
 
     processEventRPC({
-        type: wasEnabled ? 'disableTooltipPopup' : 'enableTooltipPopup',
+        type: wasEnabled
+            ? EVENT_NAMES.DISABLE_TOOLTIP_POPUP
+            : EVENT_NAMES.ENABLE_TOOLTIP_POPUP,
     })
 
     await setTooltipState(!wasEnabled)
@@ -37,9 +40,11 @@ export const toggleTooltipFlag: () => Thunk = () => async (
     const tabId = popup.tabId(state)
     if (wasEnabled) {
         await remoteFunction('removeTooltip', { tabId })()
+        await remoteFunction('updateRibbon', { tabId })()
     } else {
         await remoteFunction('insertTooltip', { tabId })()
         await remoteFunction('showContentTooltip', { tabId })()
+        await remoteFunction('updateRibbon', { tabId })()
     }
 }
 

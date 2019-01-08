@@ -4,6 +4,7 @@ import analytics, { updateLastActive } from 'src/analytics'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import * as selectors from './selectors'
 import { STORAGE_KEY } from './constants'
+import { EVENT_NAMES } from '../../analytics/internal/constants'
 
 const deletePagesByPattern = remoteFunction('delPagesByPattern')
 const getMatchingPageCount = remoteFunction('getMatchingPageCount')
@@ -44,11 +45,14 @@ export const addToBlacklist = expression => async (dispatch, getState) => {
     })
 
     processEvent({
-        type: 'addBlacklistEntry',
+        type: EVENT_NAMES.ADD_BLACKLIST_ENTRY,
     })
 
     const oldBlacklist = selectors.blacklist(getState())
-    const newEntry = { expression, dateAdded: Date.now() }
+    const newEntry = {
+        expression,
+        dateAdded: Date.now(),
+    }
 
     dispatch(addSiteToBlacklist(newEntry))
     dispatch(resetSiteInputValue())
@@ -79,7 +83,7 @@ export const removeFromBlacklist = index => async (dispatch, getState) => {
     })
 
     processEvent({
-        type: 'removeBlacklistEntry',
+        type: EVENT_NAMES.REMOVE_BLACKLIST_ENTRY,
     })
 
     const oldBlacklist = selectors.blacklist(getState())
@@ -93,7 +97,11 @@ export const removeFromBlacklist = index => async (dispatch, getState) => {
     })
 
     updateLastActive() // Consider user active (analytics)
-    dispatch(removeSiteFromBlacklist({ index }))
+    dispatch(
+        removeSiteFromBlacklist({
+            index,
+        }),
+    )
     dirtyEstsCache() // Force import ests to recalc next visit
 }
 

@@ -1,0 +1,54 @@
+.title {
+    text-align: left;
+    font-size: 18px;
+    color: #22227d;
+    font-weight: 400;
+}
+
+.subtext {
+    text-align: left;
+    margin-top: -12px;
+    color: #4a4a4a;
+    font-size: 15px;
+    margin-bottom: 30px;
+}
+
+.container {
+    width: fit-content;
+    position: absolute;
+    right: 20px;
+    top: 495px;
+    background: white;
+    box-shadow: 0px 2px 11px 0px #00000075;
+    border-radius: 5px;
+    z-index: 1;
+    padding: 10px 15px 15px 40px;
+}
+
+.close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 25px;
+    height: 25px;
+    background: url('/img/cross.svg');
+    background-repeat: no-repeat;
+    background-position: center;
+    padding: 2px;
+    background-size: 15px;
+    margin: 10px 10px 0px 0px;
+    cursor: pointer;
+
+    &:hover {
+        border-radius: 50px;
+        background-color: #f0f0f0;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 15px;
+        margin: 10px 10px 0px 0px;
+        top: 8px;
+        width: 25px;
+        height: 25px;
+        right: 8px;
+    }
+}

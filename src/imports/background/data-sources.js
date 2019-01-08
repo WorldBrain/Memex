@@ -1,4 +1,5 @@
 import moment from 'moment'
+import browserIsChrome from '../../util/check-browser'
 
 export default class ImportDataSources {
     static LOOKBACK_WEEKS = 12 // Browser history is limited to the last 3 months
@@ -11,10 +12,10 @@ export default class ImportDataSources {
     /**
      * Bookmarks are stored in a shallow tree, which we traverse recursively. We need a node to start from.
      *  Chrome and FF seem to ID their bookmark data differently. Root works from '' in FF
-     *  but needs '0' in Chrome. `runtime.getBrowserInfo` is only available on FF web ext API
+     *  but needs '0' in Chrome.
      */
     static ROOT_BM = {
-        id: typeof browser.runtime.getBrowserInfo === 'undefined' ? '0' : '',
+        id: browserIsChrome() ? '0' : '',
     }
 
     constructor({ history = browser.history, bookmarks = browser.bookmarks }) {

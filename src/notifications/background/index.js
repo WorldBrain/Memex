@@ -3,7 +3,7 @@ import NotificationStorage from './storage'
 import * as notifications from '../notifications'
 import createNotif from 'src/util/notifications'
 import internalAnalytics from 'src/analytics/internal'
-
+import { EVENT_NAMES } from '../../analytics/internal/constants'
 export default class NotificationBackground {
     static LAST_NOTIF_TIME = 'last-notif-proc-timestamp'
 
@@ -82,13 +82,15 @@ export default class NotificationBackground {
                         },
                         () => {
                             internalAnalytics.processEvent({
-                                type: 'clickOnSystemNotification',
+                                type: EVENT_NAMES.CLICK_ON_SYSTEM_NOTIFICATION,
                                 details: {
                                     notificationId: notification.id,
                                 },
                             })
 
-                            return browser.tabs.create({ url })
+                            return browser.tabs.create({
+                                url,
+                            })
                         },
                     )
                 }

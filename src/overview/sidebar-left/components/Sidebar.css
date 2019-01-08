@@ -1,11 +1,13 @@
 .filterButton {
-    background-image: url('/img/filter.png');
+    background-image: url('/img/filter.svg');
     width: 40px;
     height: 40px;
+    opacity: 0.4;
 }
 
 .filterEnabled {
-    background-image: url('/img/filter_filled.svg');
+    background-image: url('/img/filter.svg');
+    opacity: 0.8;
 }
 
 .listButton {

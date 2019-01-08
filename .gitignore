@@ -11,3 +11,4 @@ publish.sh
 stats.json
 .sentryclirc
 .DS_Store
+local-backup

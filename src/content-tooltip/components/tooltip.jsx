@@ -8,7 +8,7 @@ import styles from './tooltip.css'
 
 const images = {
     cross: getExtURL('/img/cross_grey.svg'),
-    settings: getExtURL('/img/settings_grey.svg'),
+    settings: getExtURL('/img/settingss.svg'),
     tooltipIcon: getExtURL('/img/tooltipIcon.svg'),
 }
 

@@ -2,11 +2,14 @@ import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import normalizeUrl from 'src/util/encode-url-for-id'
 import CustomListStorage from './storage'
 import internalAnalytics from '../../analytics/internal'
+import { EVENT_NAMES } from '../../analytics/internal/constants'
 
 export default class CustomListBackground {
     constructor({ storageManager }) {
         // Makes the custom list Table in indexed DB.
-        this.storage = new CustomListStorage({ storageManager })
+        this.storage = new CustomListStorage({
+            storageManager,
+        })
     }
 
     setupRemoteFunctions() {
@@ -49,7 +52,9 @@ export default class CustomListBackground {
 
     async fetchAllLists({ excludeIds = [], skip = 0, limit = 20 }) {
         const query = {
-            id: { $nin: excludeIds },
+            id: {
+                $nin: excludeIds,
+            },
         }
 
         const opts = {
@@ -57,7 +62,10 @@ export default class CustomListBackground {
             skip,
         }
 
-        return this.storage.fetchAllLists({ query, opts })
+        return this.storage.fetchAllLists({
+            query,
+            opts,
+        })
     }
 
     /**
@@ -102,7 +110,7 @@ export default class CustomListBackground {
      */
     async createCustomList({ name }) {
         internalAnalytics.processEvent({
-            type: 'createCollection',
+            type: EVENT_NAMES.CREATE_COLLECTION,
         })
 
         return this.storage.insertCustomList({
@@ -135,7 +143,7 @@ export default class CustomListBackground {
      */
     async insertPageToList({ id, url }) {
         internalAnalytics.processEvent({
-            type: 'insertPageToCollection',
+            type: EVENT_NAMES.INSERT_PAGE_COLLECTION,
         })
 
         return this.storage.insertPageToList({
@@ -154,7 +162,7 @@ export default class CustomListBackground {
      */
     async removeList({ id }) {
         internalAnalytics.processEvent({
-            type: 'removeCollection',
+            type: EVENT_NAMES.REMOVE_COLLECTION,
         })
 
         return this.storage.removeList({
@@ -172,7 +180,7 @@ export default class CustomListBackground {
      */
     async removePageFromList({ id, url }) {
         internalAnalytics.processEvent({
-            type: 'removePageFromCollection',
+            type: EVENT_NAMES.REMOVE_PAGE_COLLECTION,
         })
 
         return this.storage.removePageFromList({
@@ -205,6 +213,8 @@ export default class CustomListBackground {
      * @memberof CustomListBackground
      */
     async fetchListIgnoreCase({ name }) {
-        return this.storage.fetchListIgnoreCase({ name })
+        return this.storage.fetchListIgnoreCase({
+            name,
+        })
     }
 }

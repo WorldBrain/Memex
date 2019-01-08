@@ -10,8 +10,10 @@ import { remoteFunction } from 'src/util/webextensionRPC'
 import { DATE_PICKER_DATE_FORMAT as FORMAT } from '../constants'
 import styles from './DateRangeSelection.css'
 import './datepicker-overrides.css'
+import { EVENT_NAMES } from '../../../analytics/internal/constants'
 
 const processEvent = remoteFunction('processEvent')
+const stylesPro = require('../../tooltips/components/tooltip.css')
 
 class DateRangeSelection extends Component {
     static propTypes = {
@@ -20,6 +22,7 @@ class DateRangeSelection extends Component {
         onStartDateChange: PropTypes.func,
         onEndDateChange: PropTypes.func,
         disabled: PropTypes.bool,
+        changeTooltip: PropTypes.func,
     }
 
     state = {
@@ -95,7 +98,9 @@ class DateRangeSelection extends Component {
         })
 
         processEvent({
-            type: 'datepickerByNlp' + (isStartDate ? 'StartDate' : 'EndDate'),
+            type: isStartDate
+                ? EVENT_NAMES.DATEPICKER_NLP_START_DATE
+                : EVENT_NAMES.DATEPICKER_NLP_END_DATE,
         })
 
         // Get the time from the NLP query, if it could be parsed
@@ -168,9 +173,12 @@ class DateRangeSelection extends Component {
 
         processEvent({
             type: date
-                ? 'datepickerByDropdown' +
-                  (isStartDate ? 'StartDate' : 'EndDate')
-                : 'datepickerClear' + (isStartDate ? 'StartDate' : 'EndDate'),
+                ? isStartDate
+                    ? EVENT_NAMES.DATEPICKER_DROPDOWN_START
+                    : EVENT_NAMES.DATEPICKER_DROPDOWN_END
+                : isStartDate
+                    ? EVENT_NAMES.DATEPICKER_CLEAR_START
+                    : EVENT_NAMES.DATEPICKER_CLEAR_END,
         })
 
         const updateDate = isStartDate
@@ -189,13 +197,16 @@ class DateRangeSelection extends Component {
         }
 
         updateDate(date ? date.valueOf() : undefined)
+
+        // Change onboarding tooltip to more filters
+        this.props.changeTooltip()
     }
 
     render() {
         const { startDate, endDate, disabled } = this.props
 
         return (
-            <div className={styles.dateRangeSelection}>
+            <div className={styles.dateRangeSelection} id="date-picker">
                 <DatePicker
                     ref={dp => {
                         this.startDatePicker = dp
@@ -217,7 +228,16 @@ class DateRangeSelection extends Component {
                     onBlur={this.handleInputChange({ isStartDate: true })}
                     value={this.state.startDateText}
                     disabled={disabled}
-                />
+                >
+                    <div className={stylesPro.proTipBox}>
+                        <span className={stylesPro.emoji}>🤓</span>
+                        <span className={stylesPro.proTip}>PRO Tip: </span>
+                        <span className={stylesPro.noBold}>type </span>
+                        <span className={stylesPro.example}>
+                            e.g. "1 hour ago"
+                        </span>
+                    </div>
+                </DatePicker>
                 <img src="/img/to-icon.png" className={styles.toIcon} />
                 <DatePicker
                     ref={dp => {
@@ -240,7 +260,16 @@ class DateRangeSelection extends Component {
                     onBlur={this.handleInputChange({ isStartDate: false })}
                     value={this.state.endDateText}
                     disabled={disabled}
-                />
+                >
+                    <div className={stylesPro.proTipBox}>
+                        <span className={stylesPro.emoji}>🤓</span>
+                        <span className={stylesPro.proTip}>PRO Tip: </span>
+                        <span className={stylesPro.noBold}>type </span>
+                        <span className={stylesPro.example}>
+                            e.g. "1 hour ago"
+                        </span>
+                    </div>
+                </DatePicker>
             </div>
         )
     }

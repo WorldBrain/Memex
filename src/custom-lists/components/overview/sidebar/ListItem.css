@@ -13,13 +13,17 @@
     cursor: pointer;
 
     &:hover {
-        background-color: #d7d7d7;
-        width: 335px;
+        background-color: #e5e5e5;
+        width: 248px;
         overflow-x: unset;
     }
 
     & > .listName {
         width: 250px;
+    }
+
+    &:hover .listName {
+        width: 170px;
     }
 }
 
@@ -33,11 +37,18 @@
 }
 
 .editButton {
-    background-image: url('/img/list_edit.svg');
-    width: 20px;
-    height: 20px;
+    background-image: url('/img/edit_empty.svg');
+    width: 19px;
+    height: 19px;
     visibility: hidden;
     animation: appear 0.2s forwards;
+    opacity: 0.4;
+    margin-top: 1px;
+    margin-right: 3px;
+
+    &:hover {
+        background-image: url('/img/edit_full.svg');
+    }
 }
 
 .shareButton {
@@ -46,21 +57,27 @@
     height: 20px;
     visibility: hidden;
     animation: appear 0.2s forwards;
+    opacity: 0.4;
+    margin-top: 1px;
+    margin-right: 10px;
+    margin-left: 5px;
 
     &:hover {
-        background-image: url('/img/share_hover.svg');
+        background-image: url('/img/share_full.svg');
     }
 }
 
 .deleteButton {
-    background-image: url('/img/trash_closed_new.svg');
+    background-image: url('/img/trash.svg');
     width: 20px;
     height: 20px;
     visibility: hidden;
+    opacity: 0.4;
+    margin-left: 7px;
     animation: appear 0.2s forwards;
 
     &:hover {
-        background-image: url('/img/trash_open_new.svg');
+        background-image: url('/img/trash_blue_full.svg');
     }
 }
 
@@ -72,7 +89,6 @@
     background-size: contain;
     cursor: pointer;
     outline: none;
-    margin-top: 3px;
 }
 
 .listName {

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="26px" viewBox="0 0 24 26" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 51.3 (57544) - http://www.bohemiancoding.com/sketch -->
+    <title>trash</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="trash" transform="translate(0.000000, 1.000000)">
+            <path d="M20.5,5.5 L3.5,5.5 L3.5,22.2413794 C3.5,23.4882546 4.51563672,24.5 5.76923078,24.5 L18.2307693,24.5 C18.5801955,24.5 18.9173937,24.4216543 19.2238524,24.2728888 C19.9985026,23.8968472 20.5,23.1139072 20.5,22.2413794 L20.5,5.5 Z" id="Path" stroke="#173766"></path>
+            <rect id="Rectangle" stroke="#173766" fill="#173766" x="4.5" y="6.5" width="15" height="17"></rect>
+            <polygon id="Path" stroke="#173766" points="0 5 5.25 5 21 5 24 5"></polygon>
+            <path d="M17,5 L7,5 L7,2 C7,0.895 7.74583333,0 8.66666667,0 L15.3333333,0 C16.2541667,0 17,0.895 17,2 L17,5 Z" id="Path" stroke="#173766"></path>
+            <path d="M12,8 L12,22 L12,8 Z" id="Path" stroke="#FFFFFF"></path>
+            <path d="M16,8 L16,22 L16,8 Z" id="Path" stroke="#FFFFFF"></path>
+            <path d="M8,8 L8,22 L8,8 Z" id="Path" stroke="#FFFFFF"></path>
+        </g>
+    </g>
+</svg>

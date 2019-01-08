@@ -3,6 +3,7 @@ import { createAction } from 'redux-act'
 import { Thunk } from '../types'
 import { PageList } from '../../custom-lists/background/types'
 import * as selectors from './selectors'
+import onboardingCheck from '../onboarding-helper'
 
 export const setShowCollectionsPicker = createAction<boolean>(
     'collections/showCollectionsPicker',
@@ -22,3 +23,8 @@ export const addCollection = createAction<PageList>('collections/addCollection')
 export const deleteCollection = createAction<PageList>(
     'collections/deleteCollection',
 )
+
+export const addCollectionToPage = (collection: PageList) => async dispatch => {
+    dispatch(addCollection(collection))
+    await onboardingCheck()
+}

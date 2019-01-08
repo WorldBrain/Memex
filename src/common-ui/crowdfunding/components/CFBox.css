@@ -36,10 +36,9 @@
     line-height: 32px;
     letter-spacing: 1px;
     margin-bottom: 10px;
-    font-family: 'Uni Neue', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-weight: bolder;
-    font-size: 30px;
-    font-style: italic;
+    font-size: 25px;
 }
 
 .bolderText {
@@ -47,7 +46,8 @@
     font-weight: 600;
     font-size: 17px;
     margin-top: 15px;
-    margin-bottom: 0px;
+    width: 80%;
+    margin-bottom: 20px;
     text-align: center;
     letter-spacing: 0.5px;
 }
@@ -55,7 +55,7 @@
 .text {
     color: #5d697bc4;
     font-size: 16px;
-    width: 70%;
+    width: 80%;
     margin-top: 15px;
     margin-bottom: 20px;
     font-weight: 200;

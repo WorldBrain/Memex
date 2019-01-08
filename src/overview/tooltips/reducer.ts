@@ -1,28 +1,27 @@
 import { createReducer } from 'redux-act'
 
-import { Tooltip } from '../types'
 import * as acts from './actions'
 
 export interface State {
-    tooltip: Tooltip
     showTooltip: boolean
+    whichTooltip: number
 }
 
 const defState: State = {
-    tooltip: null,
-    showTooltip: true,
+    showTooltip: false,
+    whichTooltip: -1,
 }
 
 const reducer = createReducer<State>({}, defState)
 
-reducer.on(acts.setTooltip, (state, payload) => ({
+reducer.on(acts.setWhichTooltip, (state, payload) => ({
     ...state,
-    tooltip: payload,
+    whichTooltip: payload,
 }))
 
-reducer.on(acts.toggleShowTooltip, state => ({
+reducer.on(acts.resetWhichTooltip, state => ({
     ...state,
-    showTooltip: !state.showTooltip,
+    whichTooltip: -1,
 }))
 
 reducer.on(acts.setShowTooltip, (state, payload) => ({

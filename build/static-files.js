@@ -8,6 +8,7 @@ export const htmlAssets = [
     'fonts/googlefonts/open-sans.css',
     'fonts/googlefonts/libre-franklin.css',
     'lib/browser-polyfill.js',
+    'fonts/googlefonts/nunito.css',
 ]
 
 /**

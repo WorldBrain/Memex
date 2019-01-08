@@ -16,6 +16,7 @@ import OptIn from './components/OptIn'
 import * as actionTypes from './action-types'
 import NoNotification from './components/NoNotification'
 import { remoteFunction } from 'src/util/webextensionRPC'
+import { EVENT_NAMES } from '../analytics/internal/constants'
 
 const processEvent = remoteFunction('processEvent')
 
@@ -63,7 +64,7 @@ class NotificationContainer extends Component {
 
     handleToggleStorageOption(action, value, id) {
         processEvent({
-            type: 'clickStorageChangeNotifButton',
+            type: EVENT_NAMES.CLICK_STORAGE_CHANGE_NOTIF_BUTTON,
             details: {
                 notificationId: id,
             },
@@ -81,13 +82,15 @@ class NotificationContainer extends Component {
 
     handleOpenNewTab(url, id) {
         processEvent({
-            type: 'clickOpenNewLinkButton',
+            type: EVENT_NAMES.CLICK_OPEN_NEW_LINK_BUTTON,
             details: {
                 notificationId: id,
             },
         })
 
-        this.props.tabs.create({ url })
+        this.props.tabs.create({
+            url,
+        })
     }
 
     renderButtons(buttons, id) {
@@ -108,7 +111,7 @@ class NotificationContainer extends Component {
                             this.handleOpenNewTab(action.url, id)
                         }
                     >
-                        {button.label}
+                        {button.label}{' '}
                     </ActionButton>
                 )
             } else if (action.type === actionTypes.TOGGLE_SETTING) {
@@ -119,7 +122,7 @@ class NotificationContainer extends Component {
                             onChange={val =>
                                 this.handleToggleStorageOption(action, val, id)
                             }
-                        />
+                        />{' '}
                     </OptIn>
                 )
             } else {
@@ -130,7 +133,7 @@ class NotificationContainer extends Component {
                             definition: action,
                         })}
                     >
-                        {button.label}
+                        {button.label}{' '}
                     </ActionButton>
                 )
             }
@@ -229,15 +232,15 @@ class NotificationContainer extends Component {
 
         return (
             <NotificationList>
-                {this.renderStatusHeading()}
-                {this.renderUnreadNotifications()}
+                {' '}
+                {this.renderStatusHeading()} {this.renderUnreadNotifications()}{' '}
                 {readNotificationList.length !== 0 && (
                     <ReadHeader
                         isReadExpanded={this.props.isReadExpanded}
                         toggleReadExpand={this.props.toggleReadExpand}
                     />
-                )}
-                {this.renderReadNotifications()}
+                )}{' '}
+                {this.renderReadNotifications()}{' '}
             </NotificationList>
         )
     }

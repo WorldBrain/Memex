@@ -21,12 +21,13 @@
 }
 
 .thirdRowImage {
-    margin-right: 30px;
+    margin-right: 40px;
     margin-bottom: 3px;
 }
 
 .notifIcon {
-    margin-left: 10px;
+    margin-left: 17px;
+    width: 20px;
 }
 
 .title {
@@ -37,18 +38,29 @@
 }
 
 .close {
+    position: absolute;
+    top: 7px;
+    right: 7px;
     cursor: pointer;
-    width: 15px;
-    height: 15px;
-    margin-right: 13px;
-    border-radius: 10px;
-}
+    width: 13px;
+    height: 13px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 20px;
+    margin: 3px 3px 0px 0px;
 
-.close .img:hover {
-    width: 10px;
-    height: 10px;
-}
-
-.close:hover {
-    background: #e4e9ef;
+    &:hover {
+        border-radius: 50px;
+        background-color: #f0f0f0;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 41px;
+        margin: 3px 3px 0px 0px;
+        top: 2.5px;
+        right: 3px;
+        cursor: pointer;
+        width: 22px;
+        height: 22px;
+        padding: 3px;
+    }
 }

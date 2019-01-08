@@ -3,7 +3,10 @@ import ToolbarNotifications from '../../toolbar-notification/content_script'
 import * as interactions from './interactions'
 import { getSidebarState } from '../utils'
 
-const onKeydown = (e, toolbarNotifications) => {
+const onKeydown = (
+    e: KeyboardEvent,
+    toolbarNotifications: ToolbarNotifications,
+) => {
     if (e.key !== 'm') {
         return
     }

@@ -7,6 +7,8 @@ import * as constants from './constants'
 import { NotifDefinition } from './types'
 import * as storageKeys from './storage-keys-notif'
 
+import { EVENT_NAMES } from '../analytics/internal/constants'
+
 export const setShowMoreIndex = createAction('notifications/setShowMoreIndex')
 export const nextPage = createAction('notifications/nextPage')
 export const setLoading = createAction<boolean>('notifications/setLoading')
@@ -111,7 +113,7 @@ export const handleReadNotif = notification => async (dispatch, getState) => {
     })
 
     processEvent({
-        type: 'readNotificationOverview',
+        type: EVENT_NAMES.READ_NOTIFICATION_OVERVIEW,
         details: {
             notificationId: notification.id,
         },
@@ -136,7 +138,7 @@ export const handleMoreResult = () => async (dispatch, getState) => {
     }
 
     processEvent({
-        type: 'readNotificationPagination',
+        type: EVENT_NAMES.READ_NOTIFICATION_PAGINATION,
     })
 
     dispatch(appendResult(readNotifications))
@@ -160,7 +162,9 @@ export const toggleInboxMid = () => (dispatch, getState) => {
     const showInbox = selectors.showInbox(getState())
 
     processEvent({
-        type: !showInbox ? 'openInboxOveview' : 'closeInboxOveview',
+        type: !showInbox
+            ? EVENT_NAMES.OPEN_INBOX_OVERVIEW
+            : EVENT_NAMES.CLOSE_INBOX_OVERVIEW,
     })
 
     dispatch(toggleInbox())

@@ -35,6 +35,7 @@ import * as selectors from './selectors'
 import * as acts from './actions'
 import { ClickHandler, RootState } from './types'
 import { PageList } from '../custom-lists/background/types'
+import { EVENT_NAMES } from '../analytics/internal/constants'
 
 const btnStyles = require('./components/Button.css')
 const styles = require('./components/Popup.css')
@@ -85,7 +86,7 @@ class PopupContainer extends PureComponent<Props> {
             })
 
             this.processEvent({
-                type: 'searchPopup',
+                type: EVENT_NAMES.SEARCH_POPUP,
             })
 
             const queryFilters = extractQueryFilters(this.props.searchValue)
@@ -204,10 +205,10 @@ const mapDispatch = (dispatch): DispatchProps => ({
     toggleShowTagsPicker: () => dispatch(tagActs.toggleShowTagsPicker()),
     toggleShowCollectionsPicker: () =>
         dispatch(collectionActs.toggleShowTagsPicker()),
-    onTagAdd: (tag: string) => dispatch(tagActs.addTag(tag)),
+    onTagAdd: (tag: string) => dispatch(tagActs.addTagToPage(tag)),
     onTagDel: (tag: string) => dispatch(tagActs.deleteTag(tag)),
     onCollectionAdd: (collection: PageList) =>
-        dispatch(collectionActs.addCollection(collection)),
+        dispatch(collectionActs.addCollectionToPage(collection)),
     onCollectionDel: (collection: PageList) =>
         dispatch(collectionActs.deleteCollection(collection)),
 })

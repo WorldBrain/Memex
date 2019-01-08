@@ -6,6 +6,7 @@ import { Thunk } from '../../options/types'
 import * as selectors from './selectors'
 import { acts as resultsActs } from '../results'
 import { actions as searchFilterActs } from '../../search-filters'
+import { EVENT_NAMES } from '../../analytics/internal/constants'
 
 export const show = createAction<{ url: string; index: number }>(
     'deleteConf/show',
@@ -27,7 +28,7 @@ export const deleteDocs: () => Thunk = () => async (dispatch, getState) => {
     })
 
     processEventRPC({
-        type: 'deleteResult',
+        type: EVENT_NAMES.DELETE_RESULT,
     })
 
     try {

@@ -6,11 +6,11 @@ import {
     actions as notifActs,
     selectors as notifs,
 } from '../../../notifications'
-import { selectors as onboarding } from '../../onboarding'
+import { acts as tooltipActs } from '../../tooltips'
+
 import Header, { Props } from './Header'
 
 const mapState = state => ({
-    isSearchDisabled: onboarding.isVisible(state),
     unreadNotifCount: notifs.unreadNotifCount(state),
     showUnreadCount: notifs.showUnreadCount(state),
     showInbox: notifs.showInbox(state),
@@ -32,6 +32,12 @@ const mapDispatch: (dispatch: any) => Partial<Props> = dispatch => ({
             const el = e.target as HTMLInputElement
             dispatch(acts.setQueryTagsDomains(el.value, true))
         }
+        // Close search-bar tooltip in overview
+        dispatch(tooltipActs.setTooltip('time-filters'))
+    },
+    changeTooltip: () => {
+        // Change tooltip notification to more filters once the user selects date
+        dispatch(tooltipActs.setTooltip('more-filters'))
     },
 })
 

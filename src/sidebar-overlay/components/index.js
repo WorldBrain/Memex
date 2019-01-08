@@ -5,6 +5,7 @@ import SidebarContainer from './sidebarContainer'
 import Ribbon from './Ribbon'
 import { remoteFunction } from '../../util/webextensionRPC'
 import * as interactions from '../content_script/interactions'
+import { EVENT_NAMES } from '../../analytics/internal/constants'
 
 const processEventRPC = remoteFunction('processEvent')
 
@@ -16,6 +17,7 @@ export const setupRibbonUI = (
         getInitialState,
         handleRibbonToggle,
         handleTooltipToggle,
+        setRibbonRef,
     },
 ) => {
     const sidebarURL = browser.extension.getURL('sidebar.html')
@@ -23,9 +25,11 @@ export const setupRibbonUI = (
     ReactDOM.render(
         <Ribbon
             onInit={onInit}
-            destroy={() => {
+            destroy={e => {
+                e.stopPropagation()
                 onClose()
             }}
+            ref={setRibbonRef}
             getInitialState={getInitialState}
             handleRibbonToggle={handleRibbonToggle}
             handleTooltipToggle={handleTooltipToggle}
@@ -43,7 +47,9 @@ export const setupRibbonUI = (
 }
 
 export const destroyAll = (target, shadowRoot = null) => () => {
-    processEventRPC({ type: 'disableSidebarPage' })
+    processEventRPC({
+        type: EVENT_NAMES.DISABLE_SIDEBAR_PAGE,
+    })
 
     ReactDOM.unmountComponentAtNode(target)
 

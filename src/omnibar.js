@@ -12,13 +12,16 @@ import extractTimeFiltersFromQuery, {
     queryFiltersDisplay,
 } from 'src/util/nlp-time-filter'
 import { OVERVIEW_URL } from './constants'
+import browserIsChrome from './util/check-browser'
+import { EVENT_NAMES } from './analytics/internal/constants'
+import { conditionallySkipToTimeFilter } from './overview/onboarding/utils'
 
 // Read which browser we are running in.
 let browserName
 ;(async () => {
     // XXX Firefox seems the only one currently implementing this function, but
     // luckily that is enough for our current needs.
-    if (browser.runtime.getBrowserInfo !== undefined) {
+    if (!browserIsChrome()) {
         const browserInfo = await browser.runtime.getBrowserInfo()
         browserName = browserInfo.name
     }
@@ -93,8 +96,8 @@ async function makeSuggestion(query, suggest) {
     internalAnalytics.processEvent({
         type:
             searchResults.totalCount > 0
-                ? 'successfulOmnibarSearch'
-                : 'unsuccessfulOmnibarSearch',
+                ? EVENT_NAMES.SUCCESSFUL_OMNIBAR_SEARCH
+                : EVENT_NAMES.UNSUCCESSFUL_OMNIBAR_SEARCH,
     })
 
     // A subsequent search could have already started and finished while we
@@ -118,9 +121,9 @@ async function makeSuggestion(query, suggest) {
         setOmniboxMessage('No results found for this query.')
     } else {
         setOmniboxMessage(
-            `Found these ${
+            `Found ${
                 searchResults.totalCount
-            } pages: (press enter for all results)`,
+            } pages - press ENTER for ALL results`,
         )
     }
 
@@ -143,19 +146,29 @@ const formOverviewQuery = text => {
     return `${OVERVIEW_URL}?${queryParams}`
 }
 
-const acceptInput = (text, disposition) => {
+const acceptInput = async (text, disposition) => {
     // Either go to URL if input is valid URL, else form query for overview search using input terms
     const url = urlRegex().test(text) ? text : formOverviewQuery(text)
 
+    // Skips to time filter in Onboarding Power Search workflow if user queries during demo
+    await conditionallySkipToTimeFilter()
+
     switch (disposition) {
         case 'currentTab':
-            browser.tabs.update({ url })
+            browser.tabs.update({
+                url,
+            })
             break
         case 'newForegroundTab':
-            browser.tabs.create({ url })
+            browser.tabs.create({
+                url,
+            })
             break
         case 'newBackgroundTab':
-            browser.tabs.create({ url, active: false })
+            browser.tabs.create({
+                url,
+                active: false,
+            })
             break
     }
 }

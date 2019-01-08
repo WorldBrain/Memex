@@ -61,15 +61,14 @@ We believe that users should be able to freely chose the providers of software t
 
 ### Collaboration, not monopolisation
 In 10 years time we envision 100s of Memex-y tools that are all adapted to the individual workflows different professions and people have. To get there, it is necessary to remove the incentives for Memex providers to lock-in their users and monopolise. 
-The question for us was: How can we create an ecosystem, in which it is more profitable to collaborate than to compete, and where monopolisation is almost impossible. To get there we combine interoperability with our financial model called [Steward Ownership](https://blog.p2pfoundation.net/steward-ownership-is-capitalism-2-0/2018/05/11). While interoperability will make it harder for providers to monopolise, because users have less lock-ins, Steward Ownership provides a company with the intrinsic motivations to not grow at all costs. Instead they are able to focus on providing profit generating service to less users, and reduce costs by collaborating with other Memex providers on core infrastructure. More details on this you find [on our crowdfunding page](https://worldbrain.io/crowdfunding-memex/#why).
+The question for us was: How can we create an ecosystem, in which it is more profitable to collaborate than to compete, and where monopolisation is almost impossible. To get there we combine interoperability with our financial model called [Steward Ownership](https://blog.p2pfoundation.net/steward-ownership-is-capitalism-2-0/2018/05/11). While interoperability will make it harder for providers to monopolise, because users have less lock-ins, Steward Ownership provides a company with the intrinsic motivations to stay profitable and be OK not to grow as much. Instead they are able to focus on providing profit generating service to less users, and reduce costs by collaborating with other Memex providers on core infrastructure. More details on this you find [on our manifesto](https://worldbrain.io/preorder#why).
 
 ## Our Economy
 
 *worldbrain.io* does not take Venture Capital money in order to finance the development and growth of Memex. 
 Instead we have 2 funding mechanism that aim to make us a fully community- and user-focussed service. 
-On the one hand we run our own [feature based crowdfunding](https://worldbrain.io/crowdfunding-memex/), which allows users to back the development of features in advance, and in return get up to 4.5x back in Memex Credits. Those then can be used to modularly pay for premium services we offer and effectively get discounts of up to 80%. 
-
-On the other hand we use a financial model called [Steward Ownership](https://blog.p2pfoundation.net/steward-ownership-is-capitalism-2-0/2018/05/11) which will provide investors and collaborators with a fixed return on invest that is paid with the profits we are making. With that we prevent worldbrain.io to become a speculative commodity with a need to become a monopoly in order to provide investors with a financial return. 
+On the one hand we fund ourselves through the community that [pre-orders premium features](https://worldbrain.io/preorder/).
+On the other hand we use a financial model called [Steward Ownership](https://blog.p2pfoundation.net/steward-ownership-is-capitalism-2-0/2018/05/11) which will provide investors and collaborators with a fixed return on invest that is paid with the profits we are making. With that we prevent worldbrain.io to become a speculative commodity with a need to become a monopoly, be sold and provide investors with an exit in order for them to have a financial return. WorldBrain/Memex cannot be sold. 
 
 
 ## Contributing
@@ -87,7 +86,7 @@ Just head over to the issues section and grab one of the "[Newcomer Tasks](https
 ### Funding Memex
 
 Interested in helping to fund our development? 
-- **For anything under 200€**, please check out our [feature based crowdfunding page](https://worldbrain.io/crowdfunding-memex) where you can help supporting the development and get Memex Premium Credits in return. Those then can be used to flexibly pay for premium upgrades. 
+- **For anything under 200€**, please check out our [premium preorder](https://worldbrain.io/preorder) where you can help supporting the development and in return get 75% discount on premium features and an invite to the preview releases. 
 - **For more than 1000€**, please [get in touch with Oliver](mailto:oli@worldbrain.io) to learn more about how we fund our business and the modes of investing money into worldbrain.io
 
 ### Becoming a collaboration partner
