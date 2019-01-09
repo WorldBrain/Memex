@@ -5,11 +5,18 @@ import * as selectors from './selectors'
 import { getSidebarState, setSidebarState } from '../utils'
 import { getTooltipState, setTooltipState } from '../../content-tooltip/utils'
 
+export const setIsPageFullScreen = createAction<boolean>('setIsPageFullScreen')
+
 export const setIsExpanded = createAction<boolean>('setIsExpanded')
 
 export const setRibbonEnabled = createAction<boolean>('setRibbonEnabled')
 
 export const setTooltipEnabled = createAction<boolean>('setTooltipEnabled')
+
+export const toggleFullScreen: () => Thunk = () => (dispatch, getState) => {
+    const isPageFullScreen = selectors.isPageFullScreen(getState())
+    dispatch(setIsPageFullScreen(!isPageFullScreen))
+}
 
 /**
  * Hydrates the initial state of the ribbon.

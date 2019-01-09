@@ -4,10 +4,16 @@ import State from './types'
 import * as actions from './actions'
 
 const defaultState: State = {
+    isPageFullScreen: false,
     isExpanded: false,
     isRibbonEnabled: true,
     isTooltipEnabled: true,
 }
+
+const setIsPageFullScreen = (state: State, isPageFullScreen: boolean) => ({
+    ...state,
+    isPageFullScreen,
+})
 
 const setIsExpanded = (state: State, isExpanded: boolean) => ({
     ...state,
@@ -25,6 +31,7 @@ const setTooltipEnabled = (state: State, isTooltipEnabled: boolean) => ({
 })
 
 const reducer = createReducer<State>(on => {
+    on(actions.setIsPageFullScreen, setIsPageFullScreen)
     on(actions.setIsExpanded, setIsExpanded)
     on(actions.setRibbonEnabled, setRibbonEnabled)
     on(actions.setTooltipEnabled, setTooltipEnabled)
