@@ -4,6 +4,12 @@ import { Annotation, Page, Thunk } from './types'
 import { Anchor } from '../direct-linking/content_script/interactions'
 import * as selectors from './selectors'
 import AnnotationsManager from './annotations-manager'
+import { remoteFunction } from '../util/webextensionRPC'
+import { EVENT_NAMES } from '../analytics/internal/constants'
+
+// Remote function declarations.
+// TODO: Move the operations involving these to some other place.
+const processEventRPC = remoteFunction('processEvent')
 
 export const setAnnotationsManager = createAction<AnnotationsManager>(
     'setAnnotationsManager',
@@ -21,20 +27,26 @@ export const setPageTitle = createAction<string>('setPageTitle')
 
 export const setAnnotations = createAction<Annotation[]>('setAnnotations')
 
-export const openSidebar: (url: string, title: string) => Thunk = (
-    url,
-    title,
-) => dispatch => {
-    dispatch(setPage({ url, title }))
-    dispatch(setSidebarOpen(true))
-    dispatch(fetchAnnotations())
-}
-
 /**
  * Hydrates the initial state of the sidebar.
  */
 export const initState: () => Thunk = () => dispatch => {
     dispatch(fetchAnnotations())
+}
+
+export const openSidebar: (url?: string, title?: string) => Thunk = (
+    url = null,
+    title = null,
+) => async dispatch => {
+    dispatch(setPage({ url, title }))
+    dispatch(setSidebarOpen(true))
+    dispatch(fetchAnnotations())
+    await processEventRPC({ type: EVENT_NAMES.OPEN_SIDEBAR_PAGE })
+}
+
+export const closeSidebar: () => Thunk = () => async dispatch => {
+    dispatch(setSidebarOpen(false))
+    await processEventRPC({ type: EVENT_NAMES.CLOSE_SIDEBAR_PAGE })
 }
 
 export const fetchAnnotations: () => Thunk = () => async (
