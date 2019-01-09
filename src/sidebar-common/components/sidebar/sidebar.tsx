@@ -9,6 +9,7 @@ import Loader from '../loader'
 import EmptyMessage from '../empty-message'
 import AnnotationBoxContainer from '../annotation-box'
 import { Annotation } from '../../types'
+import { openSettings } from '../../utils'
 
 const styles = require('./sidebar.css')
 
@@ -62,13 +63,8 @@ class Sidebar extends React.Component<Props> {
     }
 
     private _handleSettingsBtnClick() {
-        // TODO: Following piece of code does not work.
-        // Gives `browser` is undefined. Move to a content script.
-        // const settingsUrl = getExtUrl('/options.html#/settings')
-        // browser.tabs.create({
-        //     url: settingsUrl,
-        //     active: true,
-        // })
+        // TODO: Separate behavior for `inpage` and `overview` environments.
+        openSettings()
     }
 
     render() {
