@@ -1,4 +1,3 @@
-/* stylelint-disable declaration-no-important */
 .ribbon {
     position: fixed;
     top: 20%;
@@ -48,10 +47,10 @@
 .arrow {
     cursor: pointer;
     height: 25px;
-}
 
-.arrow:hover {
-    cursor: pointer;
+    &:hover {
+        cursor: pointer;
+    }
 }
 
 .arrowBox {
@@ -60,37 +59,6 @@
     justify-content: flex-end;
     margin-right: 4px;
     padding-top: 1px;
-}
-
-.ribbonSidebarActive {
-    opacity: 0;
-}
-
-.sidebarFrame {
-    position: fixed;
-    top: 0;
-    right: 0;
-    border: 0;
-    outline: 0;
-
-    /* Giving it !important to prevent global overrides */
-    width: 340px !important;
-    height: 100% !important;
-    min-width: 340px !important;
-    max-width: 340px !important;
-    min-height: 100% !important;
-    max-height: 100% !important;
-    z-index: 2147483646;
-    transform: translate(400px, 0);
-    transition: all 0.05s ease-in;
-}
-
-.sidebarActive {
-    transform: translate(0, 0);
-}
-
-.onFullScreen {
-    display: none;
 }
 
 .buttonHolder {
@@ -102,8 +70,7 @@
 
 .logo,
 .toggler,
-.cancel,
-.settings {
+.cancel {
     background-repeat: no-repeat;
     display: inline-block;
     cursor: pointer;
@@ -122,6 +89,14 @@
     height: 20px;
 }
 
+.cancel {
+    background-image: url('/img/cross_grey.svg');
+    fill: white;
+    background-size: 12px;
+    width: 12px;
+    height: 12px;
+}
+
 .tooltipOn {
     background-image: url('/img/tooltipIcon_blue.svg');
 }
@@ -138,26 +113,8 @@
     background-image: url('/img/sidebarIcon_grey.svg');
 }
 
-.cancel {
-    background-image: url('/img/cross_grey.svg');
-    fill: white;
-    background-size: 12px;
-    width: 12px;
-    height: 12px;
-}
-
-.tooltipIcon {
+.ribbonIcon {
     padding-top: 1px;
-}
-
-.settings {
-    background-image: url('/img/settings.svg');
-    fill: white;
-    background-size: 17px;
-    width: 15px;
-    height: 15px;
-    margin-left: 0px;
-    margin-top: 0px;
 }
 
 @keyframes slideLeft {

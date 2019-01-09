@@ -67,12 +67,12 @@ class RibbonContainer extends React.Component<Props> {
     }
 
     render() {
-        const { handleRemoveRibbon } = this.props
+        const { handleRemoveRibbon, ...rest } = this.props
 
         return (
             <div ref={this._setRibbonRef}>
                 <Ribbon
-                    {...this.props}
+                    {...rest}
                     handleRemoveRibbon={e => {
                         e.stopPropagation()
                         handleRemoveRibbon()
@@ -100,7 +100,7 @@ const mapDispatchToProps: MapDispatchToProps<
     onInit: () => dispatch(actions.initState()),
     openSidebar: e => {
         e.stopPropagation()
-        dispatch(actions.shrinkRibbon())
+        dispatch(actions.setIsExpanded(false))
         dispatch(sidebarActions.setSidebarOpen(true))
     },
     handleRibbonToggle: e => {
@@ -113,11 +113,11 @@ const mapDispatchToProps: MapDispatchToProps<
     },
     handleMouseEnter: e => {
         e.stopPropagation()
-        dispatch(actions.expandRibbon())
+        dispatch(actions.setIsExpanded(true))
     },
     handleMouseLeave: e => {
         e.stopPropagation()
-        dispatch(actions.shrinkRibbon())
+        dispatch(actions.setIsExpanded(false))
     },
 })
 

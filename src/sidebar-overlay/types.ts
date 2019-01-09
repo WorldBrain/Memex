@@ -14,8 +14,6 @@ export default interface RootState {
     sidebar: SidebarState
 }
 
-import RootState from './reducer'
-
 export type ClickHandler<T extends HTMLElement> = (
     e: React.SyntheticEvent<T>,
 ) => void

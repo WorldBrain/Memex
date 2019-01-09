@@ -9,14 +9,9 @@ const defaultState: State = {
     isTooltipEnabled: true,
 }
 
-const expandRibbon = (state: State) => ({
+const setIsExpanded = (state: State, isExpanded: boolean) => ({
     ...state,
-    isExpanded: true,
-})
-
-const shrinkRibbon = (state: State) => ({
-    ...state,
-    isExpanded: false,
+    isExpanded,
 })
 
 const setRibbonEnabled = (state: State, isRibbonEnabled: boolean) => ({
@@ -30,8 +25,7 @@ const setTooltipEnabled = (state: State, isTooltipEnabled: boolean) => ({
 })
 
 const reducer = createReducer<State>(on => {
-    on(actions.expandRibbon, expandRibbon)
-    on(actions.shrinkRibbon, shrinkRibbon)
+    on(actions.setIsExpanded, setIsExpanded)
     on(actions.setRibbonEnabled, setRibbonEnabled)
     on(actions.setTooltipEnabled, setTooltipEnabled)
 }, defaultState)
