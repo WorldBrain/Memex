@@ -52,6 +52,12 @@ export type ClickHandler<T extends HTMLElement> = (
 
 export type Thunk<R = void> = ThunkAction<R, State, void, any>
 
+/**
+ * Allows omission of a key in T.
+ * Taken from: https://stackoverflow.com/a/48216010
+ */
+export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
+
 export type MapDispatchToProps<DispatchProps, OwnProps> = (
     dispatch: ThunkDispatch<State, void, any>,
     ownProps: OwnProps,
