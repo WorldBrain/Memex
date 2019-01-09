@@ -1,21 +1,9 @@
 import { createAction } from 'redux-act'
 
 import { Annotation, Page, Thunk } from './types'
-import { remoteFunction } from '../util/webextensionRPC'
 import { Anchor } from '../direct-linking/content_script/interactions'
 import * as selectors from './selectors'
-import { getTagArrays } from './utils'
 import AnnotationsManager from './annotations-manager'
-
-// Remote function declarations.
-const processEventRPC = remoteFunction('processEvent')
-const createAnnotationRPC = remoteFunction('createAnnotation')
-const addAnnotationTagRPC = remoteFunction('addAnnotationTag')
-const getAllAnnotationsByUrlRPC = remoteFunction('getAllAnnotationsByUrl')
-const getTagsByAnnotationUrlRPC = remoteFunction('getTagsByAnnotationUrl')
-const editAnnotationRPC = remoteFunction('editAnnotation')
-const deleteAnnotationRPC = remoteFunction('deleteAnnotation')
-const editAnnotationTagsRPC = remoteFunction('editAnnotationTags')
 
 export const setAnnotationsManager = createAction<AnnotationsManager>(
     'setAnnotationsManager',
@@ -56,27 +44,16 @@ export const fetchAnnotations: () => Thunk = () => async (
     dispatch(setIsLoading(true))
 
     const state = getState()
+    const annotationsManager = selectors.annotationsManager(state)
     const { url } = selectors.page(state)
-    // TODO: Following type conversion is incorrect. Correct it once the backend
-    // for annotations search is in place.
-    const annotationsWithoutTags: Annotation[] = await getAllAnnotationsByUrlRPC(
-        url,
-    )
-    const fetchedAnnotations = await Promise.all(
-        annotationsWithoutTags.map(async (annotation: Annotation) => {
-            const annotationTags: {
-                name: string
-                url: string
-            }[] = await getTagsByAnnotationUrlRPC(annotation.url)
-            const tags = annotationTags.map(tag => tag.name)
-            return {
-                ...annotation,
-                tags,
-            }
-        }),
-    )
 
-    dispatch(setAnnotations(fetchedAnnotations))
+    if (annotationsManager) {
+        const annotations = await annotationsManager.fetchAnnotationsWithTags(
+            url,
+        )
+        dispatch(setAnnotations(annotations))
+    }
+
     dispatch(setIsLoading(false))
 }
 
@@ -99,10 +76,10 @@ export const createAnnotation: (
             anchor,
             tags,
         })
-    }
 
-    // Re-fetch annotations.
-    dispatch(fetchAnnotations())
+        // Re-fetch annotations.
+        dispatch(fetchAnnotations())
+    }
 }
 
 // TODO: Perform a check for empty comment and no anchor.
@@ -111,43 +88,24 @@ export const editAnnotation: (
     comment: string,
     tags: string[],
 ) => Thunk = (url, comment, tags) => async (dispatch, getState) => {
-    // Save the new annotation to the storage.
-    await editAnnotationRPC(url, comment)
-
-    // Get the previous annotation from the state.
     const state = getState()
-    const annotations = selectors.annotations(state)
-    const index = annotations.findIndex(annotation => annotation.url === url)
-    const prevAnnotation = annotations[index]
+    const annotationsManager = selectors.annotationsManager(state)
 
-    // Evaluate which tags need to be added and which need to be deleted.
-    const { tagsToBeAdded, tagsToBeDeleted } = getTagArrays(
-        prevAnnotation.tags,
-        tags,
-    )
-    await editAnnotationTagsRPC({ tagsToBeAdded, tagsToBeDeleted, url })
-
-    // Update state to reflect the edit.
-    const updatedAnnotations = [
-        ...annotations.slice(0, index),
-        { ...prevAnnotation, tags },
-        ...annotations.slice(index + 1),
-    ]
-    dispatch(setAnnotations(updatedAnnotations))
+    if (annotationsManager) {
+        await annotationsManager.editAnnotation({ url, comment, tags })
+        dispatch(fetchAnnotations())
+    }
 }
 
 export const deleteAnnotation: (url: string) => Thunk = url => async (
     dispatch,
     getState,
 ) => {
-    // TODO: Process event.
-
-    await deleteAnnotationRPC(url)
-
     const state = getState()
-    const annotations = selectors.annotations(state)
-    const newAnnotations = annotations.filter(
-        annotation => annotation.url !== url,
-    )
-    dispatch(setAnnotations(newAnnotations))
+    const annotationsManager = selectors.annotationsManager(state)
+
+    if (annotationsManager) {
+        await annotationsManager.deleteAnnotation(url)
+        dispatch(fetchAnnotations())
+    }
 }
