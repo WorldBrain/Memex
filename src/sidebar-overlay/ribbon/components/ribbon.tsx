@@ -74,7 +74,7 @@ const Ribbon = (props: Props) => {
                         onClick={handleRibbonToggle}
                     >
                         <span
-                            className={cx(styles.toggler, styles.tooltipIcon, {
+                            className={cx(styles.toggler, styles.ribbonIcon, {
                                 [styles.ribbonOn]: isRibbonEnabled,
                                 [styles.ribbonOff]: !isRibbonEnabled,
                             })}

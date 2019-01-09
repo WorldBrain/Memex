@@ -1,6 +1,6 @@
 import { bodyLoader, interactiveLoader } from '../../util/loader'
 import ToolbarNotifications from '../../toolbar-notification/content_script'
-import * as interactions from './interactions'
+import * as interactions from './ribbon-interactions'
 import { getSidebarState } from '../utils'
 import AnnotationsManager from '../../sidebar-common/annotations-manager'
 

@@ -5,9 +5,7 @@ import * as selectors from './selectors'
 import { getSidebarState, setSidebarState } from '../utils'
 import { getTooltipState, setTooltipState } from '../../content-tooltip/utils'
 
-export const expandRibbon = createAction('expandRibbon')
-
-export const shrinkRibbon = createAction('shrinkRibbon')
+export const setIsExpanded = createAction<boolean>('setIsExpanded')
 
 export const setRibbonEnabled = createAction<boolean>('setRibbonEnabled')
 
