@@ -21,7 +21,7 @@ const onKeydown = (
     interactions.insertRibbon({ annotationsManager, toolbarNotifications })
 }
 
-export default async ({
+const initRibbonAndSidebar = async ({
     annotationsManager,
     toolbarNotifications,
 }: {
@@ -47,3 +47,5 @@ export default async ({
 
     interactions.insertRibbon({ annotationsManager, toolbarNotifications })
 }
+
+export default initRibbonAndSidebar

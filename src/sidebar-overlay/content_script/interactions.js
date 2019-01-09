@@ -47,11 +47,6 @@ export const insertRibbon = async ({
         return
     }
 
-    // let resolveToggleSidebar
-    // toggleSidebar = new Promise(resolve => {
-    //     resolveToggleSidebar = resolve
-    // })
-
     const { shadow, rootElement } = createRootElement({
         containerId: 'memex-ribbon-sidebar-container',
         rootId: 'memex-ribbon-sidebar',
@@ -159,7 +154,12 @@ const updateRibbon = async () => {
     const isRibbonEnabled = await getSidebarState()
     const isTooltipEnabled = await getTooltipState()
 
-    ribbonRef.getInstance().updateState({ isRibbonEnabled, isTooltipEnabled })
+    // TODO: Find a solution for this.
+    if (ribbonRef && ribbonRef.getInstance()) {
+        ribbonRef
+            .getInstance()
+            .updateState({ isRibbonEnabled, isTooltipEnabled })
+    }
 }
 
 /**

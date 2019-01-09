@@ -6,7 +6,7 @@ import 'src/search-injection/content_script'
 import AnnotationsManager from 'src/sidebar-common/annotations-manager'
 import initContentTooltip from 'src/content-tooltip/content_script'
 import 'src/direct-linking/content_script'
-import initRibbon from './sidebar-overlay/content_script'
+import initRibbonAndSidebar from './sidebar-overlay/content_script'
 import 'src/backup/content_script'
 import ToolbarNotifications from 'src/toolbar-notification/content_script'
 
@@ -20,4 +20,4 @@ window['toolbarNotifications'] = toolbarNotifications
 const annotationsManager = new AnnotationsManager()
 
 initContentTooltip({ toolbarNotifications })
-initRibbon({ annotationsManager, toolbarNotifications })
+initRibbonAndSidebar({ annotationsManager, toolbarNotifications })
