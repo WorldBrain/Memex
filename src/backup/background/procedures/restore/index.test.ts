@@ -1,3 +1,4 @@
+import * as sinon from 'sinon'
 import * as expect from 'expect'
 import { BackupBackend, ObjectChange } from '../../backend'
 import { BackupRestoreProcedure } from '.'
@@ -221,9 +222,9 @@ describe('BackupRestoreProcedure', () => {
             timestamp: 0,
         }
 
-        const createObject = jest.fn()
-        const updateOneObject = jest.fn()
-        const deleteOneObject = jest.fn()
+        const createObject = sinon.fake()
+        const updateOneObject = sinon.fake()
+        const deleteOneObject = sinon.fake()
 
         const restoreProcedure = new BackupRestoreProcedure({
             backend: null,
@@ -249,24 +250,30 @@ describe('BackupRestoreProcedure', () => {
             ...pageWithoutScreenshotKey
         } = pageCreateChange.object
 
-        expect(createObject).not.toHaveBeenCalled()
+        expect(createObject.callCount).toBe(0)
         await restoreProcedure._writeChange(favCreateChange)
-        expect(createObject).not.toHaveBeenCalled()
+        expect(createObject.callCount).toBe(0)
 
         await restoreProcedure._writeChange(pageCreateChange)
-        expect(createObject).toHaveBeenCalledWith(pageWithoutScreenshotKey)
-
-        await restoreProcedure._writeChange(pageUpdateChange)
-        expect(updateOneObject).toHaveBeenCalledWith(
-            {
-                test: pageUpdateChange.objectPk,
-            },
-            pageWithoutScreenshotKey,
+        expect(createObject.lastCall.calledWith(pageWithoutScreenshotKey)).toBe(
+            true,
         )
 
+        await restoreProcedure._writeChange(pageUpdateChange)
+        expect(
+            updateOneObject.lastCall.calledWith(
+                {
+                    test: pageUpdateChange.objectPk,
+                },
+                pageWithoutScreenshotKey,
+            ),
+        ).toBe(true)
+
         await restoreProcedure._writeChange(pageDeleteChange)
-        expect(deleteOneObject).toHaveBeenCalledWith({
-            test: pageDeleteChange.objectPk,
-        })
+        expect(
+            deleteOneObject.lastCall.calledWith({
+                test: pageDeleteChange.objectPk,
+            }),
+        ).toBe(true)
     })
 })
