@@ -115,7 +115,10 @@ export default class TabChangeListeners {
                     { leading: false },
                 ),
                 page: throttle(
-                    tab => this._handleVisitIndexing(tabId, {}, tab),
+                    tab =>
+                        this._handleVisitIndexing(tabId, {}, tab).catch(
+                            console.error,
+                        ),
                     TabChangeListeners.URL_CHANGE_THRESHOLD,
                     { leading: false },
                 ),
