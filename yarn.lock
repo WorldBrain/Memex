@@ -484,6 +484,11 @@
   dependencies:
     csstype "^2.2.0"
 
+"@types/sinon@^7.0.3":
+  version "7.0.3"
+  resolved "https://registry.yarnpkg.com/@types/sinon/-/sinon-7.0.3.tgz#f8647e883d873962130f906a6114a4e187755696"
+  integrity sha512-cjmJQLx2B5Hp9SzO7rdSivipo3kBqRqeYkTW17nLST1tn5YLWBjTdnzdmeTJXA1+KrrBLsEuvKQ0fUPGrfazQg==
+
 "@types/url-regex@^4.1.0":
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/@types/url-regex/-/url-regex-4.1.0.tgz#12908eeec04e8e95d40f5c2e28af0ba64a5e62fe"
