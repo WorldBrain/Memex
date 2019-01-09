@@ -1,6 +1,6 @@
 import * as AllRaven from 'raven-js'
 import { retryUntil } from '../utils'
-import { attachEventListenersToNewHighlights } from 'src/sidebar-overlay/content_script/interactions'
+import { attachEventListenersToNewHighlights } from 'src/sidebar-overlay/content_script/highlight-interactions'
 import { descriptorToRange, markRange } from './annotations'
 
 import styles from './styles.css'
