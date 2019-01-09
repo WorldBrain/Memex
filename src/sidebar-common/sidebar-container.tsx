@@ -23,7 +23,6 @@ interface DispatchProps {
     onInit: () => void
     setAnnotationsManager: (annotationsManager: AnnotationsManager) => void
     closeSidebar: () => void
-    fetchAnnotations: () => void
     handleAddCommentBtnClick: () => void
 }
 
@@ -51,12 +50,6 @@ class SidebarContainer extends React.Component<Props, State> {
         const { onInit, setAnnotationsManager, annotationsManager } = this.props
         onInit()
         setAnnotationsManager(annotationsManager)
-    }
-
-    componentDidUpdate(prevProps: Props) {
-        if (!prevProps.isOpen && this.props.isOpen) {
-            this.props.fetchAnnotations()
-        }
     }
 
     // parentFC = new FrameCommunication()
@@ -214,8 +207,7 @@ const mapDispatchToProps: MapDispatchToProps<
     onInit: () => dispatch(actions.initState()),
     setAnnotationsManager: annotationsManager =>
         dispatch(actions.setAnnotationsManager(annotationsManager)),
-    closeSidebar: () => dispatch(actions.setSidebarOpen(false)),
-    fetchAnnotations: () => dispatch(actions.fetchAnnotations()),
+    closeSidebar: () => dispatch(actions.closeSidebar()),
     handleAddCommentBtnClick: () =>
         dispatch(commentBoxActions.setShowCommentBox(true)),
 })

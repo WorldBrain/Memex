@@ -101,7 +101,7 @@ const mapDispatchToProps: MapDispatchToProps<
     openSidebar: e => {
         e.stopPropagation()
         dispatch(actions.setIsExpanded(false))
-        dispatch(sidebarActions.setSidebarOpen(true))
+        dispatch(sidebarActions.openSidebar())
     },
     handleRibbonToggle: e => {
         e.stopPropagation()
