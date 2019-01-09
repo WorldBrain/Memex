@@ -10,8 +10,6 @@
     background: #fff;
     border-bottom: 1px solid #d0cece;
     border-left: 3px solid #efefef;
-    padding-top: 5px;
-    padding-bottom: 5px;
 
     /* TODO: Check if this is necessary, and how much of it. */
     &.overview {
@@ -20,7 +18,6 @@
         z-index: 1200;
         width: 50px;
         border-radius: 0px;
-        padding-top: 5px;
         height: 42px;
     }
 }
@@ -38,19 +35,6 @@
     border-radius: 50%;
 
     &:hover {
-        background-image: url('/img/cross.svg');
         background-color: #efefef;
-    }
-}
-
-@keyframes fadeIn {
-    0% {
-        opacity: 0;
-        transform: translate(40px, 0);
-    }
-
-    100% {
-        opacity: 1;
-        transform: translate(0, 0);
     }
 }

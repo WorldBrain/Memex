@@ -38,11 +38,7 @@ interface State {
 }
 
 class SidebarContainer extends React.Component<Props, State> {
-    // static propTypes = {
-    //     recieveAnchor: PropTypes.func.isRequired,
-    // }
-
-    state = {
+    state: State = {
         isMouseInsideSidebar: false,
     }
 
@@ -51,90 +47,6 @@ class SidebarContainer extends React.Component<Props, State> {
         onInit()
         setAnnotationsManager(annotationsManager)
     }
-
-    // parentFC = new FrameCommunication()
-
-    // setupFrameFunctions = () => {
-    //     this.parentFC.setUpRemoteFunctions({
-    //         focusCommentBox: value => {
-    //             this.props.focusCommentBox(value)
-    //         },
-    //         setAnnotations: annotations => {
-    //             this.props.setAnnotationAndTags(annotations)
-    //         },
-    //         sendAnchorToSidebar: anchor => {
-    //             this.props.recieveAnchor(anchor)
-    //         },
-    //         focusAnnotation: url => {
-    //             this.focusAnnotation(url)
-    //         },
-    //         setHoveredAnnotation: url => {
-    //             this.props.setHoveredAnnotation(url)
-    //         },
-    //         setLoaderActive: () => {
-    //             this.props.setIsLoading(true)
-    //         },
-    //     })
-    // }
-
-    // /**
-    //  * Takes the user to the actual higlighted text.
-    //  */
-    // goToAnnotation = () => {
-    //     return goToAnnotation(
-    //         this.props.env,
-    //         this.props.pageUrl,
-    //         annotation => {
-    //             this.props.setActiveAnnotation(annotation.url)
-    //             this.parentFC.remoteExecute('highlightAndScroll')(annotation)
-    //         },
-    //     )
-    // }
-
-    // /**
-    //  * Sets the annotation container active
-    //  */
-    // focusAnnotation = url => {
-    //     this.props.setActiveAnnotation(url)
-    //     if (!url) {
-    //         return
-    //     }
-    //     retryUntilErrorResolves(
-    //         () => {
-    //             const $container = document.getElementById(url)
-    //             $container.scrollIntoView({
-    //                 block: 'center',
-    //                 behavior: 'smooth',
-    //             })
-    //         },
-    //         { intervalMiliseconds: 200, timeoutMiliseconds: 2000 },
-    //     )
-    // }
-
-    // updateAnnotations = async () => {
-    //     await this.parentFC.remoteExecute('updateAnnotations')()
-    //     setTimeout(() => this.focusAnnotation(this.props.activeAnnotation), 300)
-    // }
-
-    // /**
-    //  * Makes highlight dark a little when the container is hovered
-    //  */
-    // makeHighlightMedium = annotation => () => {
-    //     if (this.props.env === 'overview') {
-    //         return
-    //     }
-    //     this.parentFC.remoteExecute('makeHighlightMedium')(annotation)
-    // }
-
-    // /**
-    //  * Removes all medium highlights
-    //  */
-    // removeMediumHighlights = () => {
-    //     if (this.props.env === 'overview') {
-    //         return
-    //     }
-    //     this.parentFC.remoteExecute('removeMediumHighlights')()
-    // }
 
     /**
      * Method used by `react-onclickoutside` to detect outside clicks.

@@ -1,10 +1,18 @@
+import { remoteFunction } from 'src/util/webextensionRPC'
+
+// TODO: Perhaps move RPC calls to some sort of a manager.
+const openOptionsTabRPC = remoteFunction('openOptionsTab')
+
+export const openSettings = () => openOptionsTabRPC('settings')
+
 // Compute the maximum width of a Tag pill
 const avgLetterPx = 8
 // Padding + Margin + X button
 const tagPillExtra = 10 + 8 + 12
 const tagContainerWidth = 240
 
-const computeTagPillWidth = letters => letters * avgLetterPx + tagPillExtra
+const computeTagPillWidth = (letters: number) =>
+    letters * avgLetterPx + tagPillExtra
 
 /**
  * Given a list of tags, computes the maximum possible of tags the container can
