@@ -77,7 +77,7 @@ class Checklist extends PureComponent<Props> {
                     iconClass="step4"
                     subtitle="Learn how to backup your data to any cloud provider."
                 >
-                    Backup your Memex to cloud
+                    Backup your Memex data
                 </ChecklistItem>
             </div>
         )
