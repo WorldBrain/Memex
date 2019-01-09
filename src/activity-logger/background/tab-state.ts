@@ -163,7 +163,7 @@ class Tab implements TabState {
             this._toggleTooltip()
             this._toggleRibbon()
             this._updateRibbonState()
-            this._toggleRenderSidebarIFrame(!this.isActive)
+            // this._toggleRenderSidebarIFrame(!this.isActive)
         }
 
         this.isActive = !this.isActive
