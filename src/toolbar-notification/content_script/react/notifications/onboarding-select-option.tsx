@@ -36,7 +36,7 @@ export default function OnboardingSelectOption({ onCloseRequested }) {
                         height={'30px'}
                     />
                     <div className={styles.notifText}>
-                        to share a link to this higlight
+                        to share a link to this highlight
                     </div>
                 </div>
             </NotificationLayout>

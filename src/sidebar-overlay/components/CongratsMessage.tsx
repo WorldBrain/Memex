@@ -28,7 +28,7 @@ class CongratsMessage extends PureComponent {
                         className={styles.partyPopper}
                     />
                     <p className={styles.title}>
-                        CONGRATS TO YOUR FIRST ANNOTATION
+                        Congrats on your first annotation
                     </p>
                 </div>
                 <div className={styles.learnMore} onClick={this.goToDashboard}>
