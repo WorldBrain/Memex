@@ -8,7 +8,7 @@ import { setupRequestInterceptor } from './redirect'
 import { AnnotationRequests } from './request'
 import AnnotationStorage from './storage'
 import normalize from '../../util/encode-url-for-id'
-import { AnnotationSender } from '../types'
+import { AnnotationSender, AnnotListEntry } from '../types'
 
 interface TabArg {
     tab: Tabs.Tab
@@ -69,6 +69,7 @@ export default class DirectLinkingBackground {
                 ),
                 toggleAnnotBookmark: this.toggleAnnotBookmark.bind(this),
                 insertAnnotToList: this.insertAnnotToList.bind(this),
+                removeAnnotFromList: this.removeAnnotFromList.bind(this),
             },
             { insertExtraArg: true },
         )
@@ -159,13 +160,16 @@ export default class DirectLinkingBackground {
         return uniqueUrl
     }
 
-    async insertAnnotToList(
-        { tab }: TabArg,
-        { listId, url }: { listId: number; url: string },
-    ) {
-        url = url == null ? tab.url : url
+    async insertAnnotToList({ tab }: TabArg, params: AnnotListEntry) {
+        params.url = params.url == null ? tab.url : params.url
 
-        return this.annotationStorage.insertAnnotToList({ listId, url })
+        return this.annotationStorage.insertAnnotToList(params)
+    }
+
+    async removeAnnotFromList({ tab }: TabArg, params: AnnotListEntry) {
+        params.url = params.url == null ? tab.url : params.url
+
+        return this.annotationStorage.removeAnnotFromList(params)
     }
 
     async toggleAnnotBookmark({ tab }: TabArg, { url }: { url: string }) {

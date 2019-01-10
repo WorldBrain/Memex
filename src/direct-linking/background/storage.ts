@@ -9,7 +9,7 @@ import {
 } from '../../search'
 import { FeatureStorage } from '../../search/storage'
 import { STORAGE_KEYS as IDXING_PREF_KEYS } from '../../options/settings/constants'
-import { Annotation, SearchParams, UrlFilters } from '../types'
+import { Annotation, AnnotListEntry, SearchParams, UrlFilters } from '../types'
 
 const uniqBy = require('lodash/fp/uniqBy')
 
@@ -157,20 +157,34 @@ export default class AnnotationStorage extends FeatureStorage {
         ])
     }
 
-    async insertAnnotToList({ listId, url }: { listId: number; url: string }) {
+    private async getListById({ listId }: { listId: number }) {
         const list = await this.storageManager
             .collection(this._listsColl)
-            .findOneObject({ id: listId })
+            .findOneObject<{ id: number }>({ id: listId })
 
         if (list == null) {
             throw new Error(`No list exists for ID: ${listId}`)
         }
+
+        return list.id
+    }
+
+    async insertAnnotToList({ listId, url }: AnnotListEntry) {
+        await this.getListById({ listId })
 
         const { object } = await this.storageManager
             .collection(this._listEntriesColl)
             .createObject({ listId, url, createdAt: new Date() })
 
         return [object.listId, object.url]
+    }
+
+    async removeAnnotFromList({ listId, url }: AnnotListEntry) {
+        await this.getListById({ listId })
+
+        await this.storageManager
+            .collection(this._listEntriesColl)
+            .deleteObjects({ listId, url })
     }
 
     /**

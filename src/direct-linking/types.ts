@@ -9,6 +9,11 @@ export interface Annotation {
     comment?: string
 }
 
+export interface AnnotListEntry {
+    listId: number
+    url: string
+}
+
 export interface AnnotationRequest {
     memexLinkOrigin: string
     // urlWithoutProtocol: string

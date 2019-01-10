@@ -10,6 +10,7 @@ describe('Annotations storage', () => {
     let annotationStorage: AnnotationStorage
     let storageManager: StorageManager
     let customListsBg: CustomListBackground
+    let coll1Id: number
 
     async function insertTestData() {
         for (const annot of [
@@ -38,7 +39,7 @@ describe('Annotations storage', () => {
         await annotationStorage.toggleAnnotBookmark({ url: DATA.hybrid.url })
 
         // Insert collections + collection entries
-        const coll1Id = await customListsBg.createCustomList({
+        coll1Id = await customListsBg.createCustomList({
             name: DATA.coll1,
         })
         await customListsBg.createCustomList({ name: DATA.coll2 })
@@ -322,6 +323,27 @@ describe('Annotations storage', () => {
             )
             expect(tagsAfter2).toBeDefined()
             expect(tagsAfter2.length).toBe(1)
+        })
+
+        test('remove annot from list', async () => {
+            const runSearch = () =>
+                annotationStorage.search({
+                    terms: ['quote'],
+                    collections: [DATA.coll1, DATA.coll2],
+                })
+
+            const resA = await runSearch()
+            expect(resA).toBeDefined()
+            expect(resA.length).toBe(1)
+
+            await annotationStorage.removeAnnotFromList({
+                listId: coll1Id,
+                url: DATA.hybrid.url,
+            })
+
+            const resB = await runSearch()
+            expect(resB).toBeDefined()
+            expect(resB.length).toBe(0)
         })
     })
 })
