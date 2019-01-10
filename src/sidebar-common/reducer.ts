@@ -19,6 +19,7 @@ export const defaultState: State = {
     },
     annotations: [],
     commentBox: defCommentBoxState,
+    showCongratsMessage: false,
 }
 
 const setAnnotationsManager = (
@@ -32,18 +33,11 @@ const setIsLoading = (state: boolean, isLoading: boolean) => isLoading
 
 const setPage = (state: Page, page: Page) => page
 
-const setPageUrl = (state: Page, url: string) => ({
-    ...state,
-    url,
-})
-
-const setPageTitle = (state: Page, title: string) => ({
-    ...state,
-    title,
-})
-
 const setAnnotations = (state: Annotation[], annotations: Annotation[]) =>
     annotations
+
+const setShowCongratsMessage = (state: boolean, showCongratsMessage: boolean) =>
+    showCongratsMessage
 
 const annotationsManagerReducer = createReducer<AnnotationsManager>(on => {
     on(actions.setAnnotationsManager, setAnnotationsManager)
@@ -59,13 +53,15 @@ const isLoadingReducer = createReducer<boolean>(on => {
 
 const pageReducer = createReducer<Page>(on => {
     on(actions.setPage, setPage)
-    on(actions.setPageUrl, setPageUrl)
-    on(actions.setPageTitle, setPageTitle)
 }, defaultState.page)
 
 const annotationsReducer = createReducer<Annotation[]>(on => {
     on(actions.setAnnotations, setAnnotations)
 }, defaultState.annotations)
+
+const showCongratsMessageReducer = createReducer<boolean>(on => {
+    on(actions.setShowCongratsMessage, setShowCongratsMessage)
+}, defaultState.showCongratsMessage)
 
 const reducer = combineReducers<State>({
     annotationsManager: annotationsManagerReducer,
@@ -74,6 +70,7 @@ const reducer = combineReducers<State>({
     page: pageReducer,
     annotations: annotationsReducer,
     commentBox: commentBoxReducer,
+    showCongratsMessage: showCongratsMessageReducer,
 })
 
 export default reducer

@@ -44,6 +44,8 @@ export default interface State {
     annotations: Annotation[]
     /** State for the comment box. */
     commentBox: CommentBoxState
+    /** Denotes whether to to show the congrats message during onboarding or not. */
+    showCongratsMessage: boolean
 }
 
 export type ClickHandler<T extends HTMLElement> = (

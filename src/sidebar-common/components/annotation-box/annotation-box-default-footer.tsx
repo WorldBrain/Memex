@@ -20,6 +20,7 @@ const AnnotationBoxDefaultFooter = ({
     <React.Fragment>
         <span
             className={cx(styles.commonIcon, styles.editIcon)}
+            title="Edit note"
             onClick={e => {
                 e.stopPropagation()
                 editIconClickHandler()
@@ -27,6 +28,7 @@ const AnnotationBoxDefaultFooter = ({
         />
         <span
             className={cx(styles.commonIcon, styles.trashIcon)}
+            title="Delete note"
             onClick={e => {
                 e.stopPropagation()
                 trashIconClickHandler()
@@ -34,6 +36,7 @@ const AnnotationBoxDefaultFooter = ({
         />
         <span
             className={cx(styles.commonIcon, styles.shareIcon)}
+            title="Share this note"
             onClick={e => {
                 e.stopPropagation()
                 shareIconClickHandler()
@@ -41,6 +44,7 @@ const AnnotationBoxDefaultFooter = ({
         />
         <span
             className={cx(styles.commonIcon, styles.replyIcon)}
+            title="Reply to this note"
             onClick={e => {
                 e.stopPropagation()
                 replyIconClickHandler()

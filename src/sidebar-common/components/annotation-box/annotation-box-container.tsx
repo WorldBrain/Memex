@@ -2,6 +2,7 @@ import * as React from 'react'
 import cx from 'classnames'
 import moment from 'moment'
 import { connect } from 'react-redux'
+import noop from 'lodash/fp/noop'
 
 import * as actions from '../../actions'
 import AnnotationBoxCommentTags from './annotation-box-comment-tags'
@@ -10,6 +11,8 @@ import TruncatedTextRenderer from '../truncated-text-renderer'
 import CommentTagsInput from './comment-tags-input'
 import { MapDispatchToProps } from '../../types'
 import { CrowdfundingBox } from '../../../common-ui/crowdfunding'
+import { remoteFunction } from '../../../util/webextensionRPC'
+import { EVENT_NAMES } from '../../../analytics/internal/constants'
 
 const styles = require('./annotation-box-container.css')
 
@@ -39,6 +42,8 @@ interface State {
 }
 
 class AnnotationBoxContainer extends React.Component<Props, State> {
+    private _processEventRPC = remoteFunction('processEvent')
+
     state: State = {
         mode: 'default',
         commentText: '',
@@ -46,15 +51,17 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
         displayCrowdfunding: false,
     }
 
-    private _setDisplayCrowdfunding = (
+    private _setDisplayCrowdfunding = async (
         value: boolean,
         event: 'clickReplyButton' | 'clickShareButton' = undefined,
     ) => {
-        if (event !== undefined) {
-            // TODO: Call RPC to process the event.
-            // await remoteFunction('processEvent')({
-            //     type: event
-            // })
+        if (event) {
+            // Call RPC to process the event.
+            const type =
+                event === 'clickReplyButton'
+                    ? EVENT_NAMES.CLICK_REPLY_BUTTON
+                    : EVENT_NAMES.CLICK_SHARE_BUTTON
+            await this._processEventRPC({ type })
         }
         this.setState({ displayCrowdfunding: value })
     }
@@ -200,7 +207,7 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
                 onClick={
                     !isJustComment
                         ? () => console.log('go to annotation')
-                        : () => null
+                        : noop
                 }
             >
                 {/* Timestamp for the annotation. Hidden during 'edit' mode. */}
