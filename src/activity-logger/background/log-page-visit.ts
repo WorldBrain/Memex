@@ -84,10 +84,16 @@ export default class PageVisitLogger {
             }
 
             const allowFavIcon = !(await this._checkFavIcon(tab.url))
-            const analysisRes = await this._analyzePage({
-                tabId: tab.id,
-                allowFavIcon,
-            })
+            let analysisRes
+            try {
+                analysisRes = await this._analyzePage({
+                    tabId: tab.id,
+                    allowFavIcon,
+                })
+            } catch (err) {
+                console.error(err)
+                return
+            }
 
             // Don't index full-text in this stage
             delete analysisRes.content.fullText
@@ -104,11 +110,17 @@ export default class PageVisitLogger {
     }
 
     async logPageVisit(tab: Tabs.Tab, textOnly = true) {
-        const analysisRes = await this._analyzePage({
-            tabId: tab.id,
-            allowFavIcon: false,
-            allowScreenshot: !textOnly,
-        })
+        let analysisRes
+        try {
+            analysisRes = await this._analyzePage({
+                tabId: tab.id,
+                allowFavIcon: false,
+                allowScreenshot: !textOnly,
+            })
+        } catch (err) {
+            console.error(err)
+            return
+        }
 
         const pageDoc = { url: tab.url, ...analysisRes }
 

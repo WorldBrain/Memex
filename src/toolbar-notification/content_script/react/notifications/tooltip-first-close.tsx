@@ -15,7 +15,7 @@ const images = {
 export default function TooltipFirstCloseNotification({ onCloseRequested }) {
     return (
         <div className={styles.title}>
-            {/*<img className={styles.notifIcon} src={images.notifIcon}/>*/}
+            {/* <img className={styles.notifIcon} src={images.notifIcon}/> */}
             <NotificationLayout
                 title={'Turn on/off Highlighter permanently'}
                 icon={images.notifIcon}
@@ -24,8 +24,8 @@ export default function TooltipFirstCloseNotification({ onCloseRequested }) {
                 closeIcon={images.closeIcon}
             >
                 Via the little{' '}
-                <img src={images.brainIcon} className={styles.icon} />
-                icon in the menu
+                <img src={images.brainIcon} className={styles.icon} /> icon in
+                the menu
             </NotificationLayout>
         </div>
     )
