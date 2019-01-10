@@ -1,32 +1,15 @@
 .close {
-    position: fixed;
-    top: 0px;
-    right: 291px;
     cursor: pointer;
     color: #3eb995;
     z-index: 2147483647;
-    padding: 5px 7.5px;
     line-height: normal;
     background: #fff;
-    border-bottom: 1px solid #d0cece;
-    border-left: 3px solid #efefef;
-
-    /* TODO: Check if this is necessary, and how much of it. */
-    &.overview {
-        top: 56px;
-        right: 290px;
-        z-index: 1200;
-        width: 50px;
-        border-radius: 0px;
-        height: 42px;
-    }
 }
 
 .closeIcon {
     background-image: url('/img/cross.svg');
     background-size: 15px;
     display: block;
-    margin: 2px 2px 0 0;
     cursor: pointer;
     background-repeat: no-repeat;
     width: 29px;

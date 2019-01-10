@@ -1,6 +1,7 @@
 import { remoteFunction } from '../util/webextensionRPC'
 import { Anchor } from '../direct-linking/content_script/interactions'
 import { Annotation, Omit } from './types'
+import { EVENT_NAMES } from '../analytics/internal/constants'
 
 export default class AnnotationsManager {
     private readonly _processEventRPC = remoteFunction('processEvent')
@@ -101,7 +102,7 @@ export default class AnnotationsManager {
     }
 
     public deleteAnnotation = async (url: string) => {
-        // TODO: Process event.
+        await this._processEventRPC({ type: EVENT_NAMES.DELETE_ANNOTATION })
         await this._deleteAnnotationRPC(url)
     }
 
