@@ -110,4 +110,4 @@ export const setSidebarState = async (enabled: boolean) =>
     setLocalStorage(constants.SIDEBAR_STORAGE_NAME, enabled)
 
 export const getExtUrl = (location: string) =>
-    browser.extension ? browser.extension.getURL(location) : location
+    browser.runtime ? browser.runtime.getURL(location) : location

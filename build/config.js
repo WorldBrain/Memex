@@ -12,7 +12,6 @@ export const entry = {
     popup: './src/popup/index.tsx',
     content_script: './src/content_script.js',
     options: './src/options/options.jsx',
-    // sidebar: './src/sidebar-overlay/sidebar.js',
 }
 
 export const htmlTemplate = path.resolve(__dirname, './template.html')

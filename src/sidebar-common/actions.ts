@@ -115,9 +115,11 @@ export const deleteAnnotation: (url: string) => Thunk = url => async (
 ) => {
     const state = getState()
     const annotationsManager = selectors.annotationsManager(state)
+    const annotations = selectors.annotations(state)
 
     if (annotationsManager) {
         await annotationsManager.deleteAnnotation(url)
-        dispatch(fetchAnnotations())
+        const newAnnotations = annotations.filter(annot => annot.url !== url)
+        dispatch(setAnnotations(newAnnotations))
     }
 }

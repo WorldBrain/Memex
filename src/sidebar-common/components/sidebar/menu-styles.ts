@@ -25,8 +25,8 @@ const baseStyles = {
 
 const menuStyles = (env: 'inpage' | 'overview') => {
     if (env === 'overview') {
-        ;((baseStyles.bmMenu.top as unknown) as string) = '72px'
-        ;((baseStyles.bmMenuWrap.top as unknown) as string) = '72px'
+        ;((baseStyles.bmMenu.top as unknown) as string) = '55px'
+        ;((baseStyles.bmMenuWrap.top as unknown) as string) = '55px'
         baseStyles.bmMenu.transition = 'all 0s'
         baseStyles.bmMenuWrap.transition = 'all 0s'
     }
