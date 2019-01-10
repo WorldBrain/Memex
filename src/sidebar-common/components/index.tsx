@@ -1,6 +1,7 @@
 export { default as AnnotationBox } from './annotation-box'
 export { default as AnnotationHighlight } from './annotation-highlight'
 export { default as CloseButton } from './close-button'
+export { default as CongratsMessage } from './congrats-message'
 export { default as EmptyMessage } from './empty-message'
 export { default as Footer } from './footer'
 export { default as Loader } from './loader'

@@ -88,19 +88,12 @@ class Sidebar extends React.Component<Props> {
                 disableCloseOnEsc
             >
                 <div className={styles.sidebar} ref={this._setSidebarRef}>
-                    {/* TODO: Change the styling of CloseButton so that there
-                    is no need to use `isOpen` here. */}
-                    {isOpen && (
-                        <Topbar
-                            env={env}
-                            disableAddCommentBtn={showCommentBox}
-                            handleCloseBtnClick={closeSidebar}
-                            handleSettingsBtnClick={
-                                this._handleSettingsBtnClick
-                            }
-                            handleAddCommentBtnClick={handleAddCommentBtnClick}
-                        />
-                    )}
+                    <Topbar
+                        disableAddCommentBtn={showCommentBox}
+                        handleCloseBtnClick={closeSidebar}
+                        handleSettingsBtnClick={this._handleSettingsBtnClick}
+                        handleAddCommentBtnClick={handleAddCommentBtnClick}
+                    />
 
                     {showCommentBox && <CommentBoxContainer />}
 

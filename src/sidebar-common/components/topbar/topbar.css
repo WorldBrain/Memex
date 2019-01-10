@@ -4,27 +4,29 @@
     background: #fff;
     width: 100%;
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     align-items: center;
     z-index: 2147483647;
-    padding-right: 8px;
+    padding: 7.5px;
     height: 42px;
     border-bottom: 1px solid #d2d2d2;
     box-sizing: border-box;
     box-shadow: 4px 5px 28px 1px white;
 }
 
+.right {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+
 .settingsBtn {
-    background-image: url('/img/settings_grey.svg');
-    margin: 0 10px 0 0;
+    background-image: url('/img/settings.svg');
     background-size: 20px;
     width: 20px;
     height: 20px;
     cursor: pointer;
-
-    &:hover {
-        background-image: url('/img/settings.svg');
-    }
+    margin-right: 10px;
 }
 
 .addCommentBtn {
