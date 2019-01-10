@@ -19,3 +19,8 @@ export const page = createSelector(sidebar, state => state.page)
 export const annotations = createSelector(sidebar, state => state.annotations)
 
 export const commentBox = createSelector(sidebar, state => state.commentBox)
+
+export const showCongratsMessage = createSelector(
+    sidebar,
+    state => state.showCongratsMessage,
+)

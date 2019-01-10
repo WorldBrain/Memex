@@ -19,6 +19,7 @@ interface Props {
     isLoading: boolean
     annotations: Annotation[]
     showCommentBox: boolean
+    showCongratsMessage: boolean
     closeSidebar: () => void
     handleAddCommentBtnClick: () => void
     handleMouseEnter: (e: Event) => void
@@ -63,7 +64,6 @@ class Sidebar extends React.Component<Props> {
     }
 
     private _handleSettingsBtnClick() {
-        // TODO: Separate behavior for `inpage` and `overview` environments.
         openSettings()
     }
 
@@ -74,6 +74,7 @@ class Sidebar extends React.Component<Props> {
             isLoading,
             annotations,
             showCommentBox,
+            showCongratsMessage,
             closeSidebar,
             handleAddCommentBtnClick,
         } = this.props
@@ -109,6 +110,7 @@ class Sidebar extends React.Component<Props> {
                                     {...annotation}
                                 />
                             ))}
+                            {showCongratsMessage && <CongratsMessage />}
                         </div>
                     )}
                 </div>

@@ -34,7 +34,7 @@ export default class AnnotationsManager {
         anchor: Anchor
         tags: string[]
     }) => {
-        this._processEventRPC({ type: 'createAnnotation' })
+        this._processEventRPC({ type: EVENT_NAMES.CREATE_ANNOTATION })
 
         // Write annotation to database.
         const uniqueUrl = await this._createAnnotationRPC({

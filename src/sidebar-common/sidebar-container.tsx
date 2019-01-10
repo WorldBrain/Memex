@@ -17,6 +17,7 @@ interface StateProps {
     isLoading: boolean
     annotations: Annotation[]
     showCommentBox: boolean
+    showCongratsMessage: boolean
 }
 
 interface DispatchProps {
@@ -83,6 +84,7 @@ class SidebarContainer extends React.Component<Props, State> {
             closeSidebar,
             handleAddCommentBtnClick,
             showCommentBox,
+            showCongratsMessage,
         } = this.props
 
         return (
@@ -92,6 +94,7 @@ class SidebarContainer extends React.Component<Props, State> {
                 isLoading={isLoading}
                 annotations={annotations}
                 showCommentBox={showCommentBox}
+                showCongratsMessage={showCongratsMessage && !isLoading}
                 handleAddCommentBtnClick={handleAddCommentBtnClick}
                 closeSidebar={closeSidebar}
                 handleMouseEnter={this.handleMouseEnter}
@@ -110,6 +113,7 @@ const mapStateToProps: MapStateToProps<
     isLoading: selectors.isLoading(state),
     annotations: selectors.annotations(state),
     showCommentBox: commentBoxSelectors.showCommentBox(state),
+    showCongratsMessage: selectors.showCongratsMessage(state),
 })
 
 const mapDispatchToProps: MapDispatchToProps<

@@ -6,6 +6,8 @@ import * as selectors from './selectors'
 import AnnotationsManager from './annotations-manager'
 import { remoteFunction } from '../util/webextensionRPC'
 import { EVENT_NAMES } from '../analytics/internal/constants'
+import { getLocalStorage, setLocalStorage } from '../util/storage'
+import { STORAGE_KEYS } from '../overview/onboarding/constants'
 
 // Remote function declarations.
 // TODO: Move the operations involving these to some other place.
@@ -21,11 +23,11 @@ export const setIsLoading = createAction<boolean>('setIsLoading')
 
 export const setPage = createAction<Page>('setPage')
 
-export const setPageUrl = createAction<string>('setPageUrl')
-
-export const setPageTitle = createAction<string>('setPageTitle')
-
 export const setAnnotations = createAction<Annotation[]>('setAnnotations')
+
+export const setShowCongratsMessage = createAction<boolean>(
+    'setShowCongratsMessage',
+)
 
 /**
  * Hydrates the initial state of the sidebar.
@@ -91,10 +93,11 @@ export const createAnnotation: (
 
         // Re-fetch annotations.
         dispatch(fetchAnnotations())
+
+        dispatch(checkAndSetCongratsMessage())
     }
 }
 
-// TODO: Perform a check for empty comment and no anchor.
 export const editAnnotation: (
     url: string,
     comment: string,
@@ -102,10 +105,27 @@ export const editAnnotation: (
 ) => Thunk = (url, comment, tags) => async (dispatch, getState) => {
     const state = getState()
     const annotationsManager = selectors.annotationsManager(state)
+    const annotations = selectors.annotations(state)
+    const index = annotations.findIndex(annot => annot.url === url)
+    const annotation = annotations[index]
+    const { body } = annotation
+
+    // Check that annotation isn't completely empty.
+    if ((!body || !body.length) && !comment.length && !tags.length) {
+        return
+    }
 
     if (annotationsManager) {
+        // Let annotationsManager handle editing the annotation in the storage.
         await annotationsManager.editAnnotation({ url, comment, tags })
-        dispatch(fetchAnnotations())
+
+        // Edit the annotation in Redux store.
+        const newAnnotations = [
+            ...annotations.slice(0, index),
+            { ...annotation, comment, tags, lastEdited: new Date() },
+            ...annotations.slice(index + 1),
+        ]
+        dispatch(setAnnotations(newAnnotations))
     }
 }
 
@@ -121,5 +141,30 @@ export const deleteAnnotation: (url: string) => Thunk = url => async (
         await annotationsManager.deleteAnnotation(url)
         const newAnnotations = annotations.filter(annot => annot.url !== url)
         dispatch(setAnnotations(newAnnotations))
+    }
+}
+
+export const checkAndSetCongratsMessage: () => Thunk = () => async (
+    dispatch,
+    getState,
+) => {
+    const showCongratsMessage = selectors.showCongratsMessage(getState())
+    const onboardingAnnotationStage = await getLocalStorage(
+        STORAGE_KEYS.onboardingDemo.step1,
+    )
+
+    if (
+        !showCongratsMessage &&
+        onboardingAnnotationStage === 'annotation_created'
+    ) {
+        dispatch(setShowCongratsMessage(true))
+        await processEventRPC({
+            type: EVENT_NAMES.FINISH_ANNOTATION_ONBOARDING,
+        })
+        await setLocalStorage(STORAGE_KEYS.onboardingDemo.step1, 'DONE')
+    } else if (showCongratsMessage) {
+        // Since we need to display the congrats message only once,
+        // it can be set to false after setting it true once.
+        dispatch(setShowCongratsMessage(false))
     }
 }
