@@ -4,7 +4,7 @@ export default ({ mode }) => {
         PIWIK_SITE_ID: '1',
         DEBUG_ANALYTICS_EVENTS: '',
         NODE_ENV: mode,
-        BACKUP_BACKEND: 'google-drive',
+        BACKUP_BACKEND: 'local',
         AUTOMATIC_BACKUP: '',
         AUTOMATIC_BACKUP_PAYMENT_SUCCESS: '',
         MOCK_BACKUP_BACKEND: '',
