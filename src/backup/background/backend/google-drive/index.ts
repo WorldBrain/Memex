@@ -1,11 +1,12 @@
 import { EventEmitter } from 'events'
 import * as AllRaven from 'raven-js'
-// tslint:disable-next-line:variable-name
-const Raven = AllRaven['default']
 import { GoogleDriveClient } from './client'
 import { DriveTokenManager, DriveTokenStore } from './token-manager'
-import { BackupBackend, ObjectChange } from '../types'
+import { BackupBackend, ObjectChange, ObjectChangeImages } from '../types'
 import encodeBlob from '../../../../util/encode-blob'
+
+// tslint:disable-next-line:variable-name
+const Raven = AllRaven['default']
 
 export { LocalStorageDriveTokenStore } from './token-manager'
 
@@ -104,7 +105,8 @@ export class DriveBackupBackend extends BackupBackend {
             fileName: Date.now().toString(),
             object: { version: currentSchemaVersion, changes },
         })
-        if (images.length) {
+
+        if (options.storeBlobs && images.length) {
             await this.client.storeObject({
                 folderName: 'images',
                 fileName: Date.now().toString(),
@@ -137,18 +139,18 @@ export class DriveBackupBackend extends BackupBackend {
 }
 
 export async function _prepareBackupChangeForStorage(change: ObjectChange) {
-    const images = {}
+    const images: Partial<ObjectChangeImages> = {}
     if (
         change.collection === 'pages' &&
         change.object != null &&
         change.object.screenshot != null
     ) {
         try {
-            images['screenshot'] = await encodeBlob(change.object.screenshot)
+            images.screenshot = await encodeBlob(change.object.screenshot)
         } catch (e) {
             Raven.captureException(e)
         }
-        change.object.screenshot = null
+        change.object.screenshot = undefined
     }
 
     if (
