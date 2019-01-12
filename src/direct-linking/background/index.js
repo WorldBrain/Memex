@@ -49,9 +49,6 @@ export default class DirectLinkingBackground {
                 openSidebarWithHighlight: (...params) => {
                     return this.openSidebarWithHighlight(...params)
                 },
-                toggleSidebar: (...params) => {
-                    return this.toggleSidebar(...params)
-                },
                 getTagsByAnnotationUrl: (...params) => {
                     return this.getTagsByAnnotationUrl(...params)
                 },
@@ -76,7 +73,7 @@ export default class DirectLinkingBackground {
         })
     }
 
-    async triggerSidebar(functionName, ...args) {
+    async _triggerSidebar(functionName, ...args) {
         const [currentTab] = await browser.tabs.query({
             active: true,
             currentWindow: true,
@@ -85,16 +82,21 @@ export default class DirectLinkingBackground {
         await remoteFunction(functionName, { tabId: currentTab.id })(...args)
     }
 
-    async toggleSidebar({ tab }) {
-        await this.triggerSidebar('toggleSidebarOverlay')
+    async _toggleSidebar() {
+        await this._triggerSidebar('toggleSidebarOverlay')
     }
 
     async openSidebarWithHighlight({ tab }, anchor) {
-        // Toggling the sidebar ensures that if the page does not have the
-        // ribbon mounted at this point, then it will get inserted before
-        // proceeding any further.
-        await this.toggleSidebar()
-        this.triggerSidebar('openSidebarAndSendAnchor', anchor)
+        const [currentTab] = await browser.tabs.query({
+            active: true,
+            currentWindow: true,
+        })
+
+        const { id: tabId } = currentTab
+        // Make sure that the ribbon is inserted before trying to open the
+        // sidebar.
+        await remoteFunction('insertRibbon', { tabId })()
+        await remoteFunction('openSidebar', { tabId })(anchor)
     }
 
     followAnnotationRequest({ tab }) {

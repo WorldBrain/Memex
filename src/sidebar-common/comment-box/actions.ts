@@ -20,6 +20,13 @@ export const addTag = createAction<string>('addTag')
 
 export const deleteTag = createAction<string>('deleteTag')
 
+export const openCommentBoxWithHighlight: (
+    anchor: Anchor,
+) => Thunk = anchor => dispatch => {
+    dispatch(setShowCommentBox(true))
+    dispatch(setAnchor(anchor))
+}
+
 /**
  * Resets the state of the comment box in the Redux store.
  */
