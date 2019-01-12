@@ -17,10 +17,14 @@ export default ({ mode }) => {
     if (mode === 'development') {
         env.PIWIK_HOST = 'http://localhost:1234'
         env.SENTRY_DSN = ''
+        env.COUNTLY_HOST = 'http://localhost:1234'
+        env.COUNTLY_APP_KEY = ''
     } else if (mode === 'production') {
         env.PIWIK_HOST = 'https://analytics.worldbrain.io'
         env.SENTRY_DSN =
             'https://205014a0f65e4160a29db2935250b47c@sentry.io/305612'
+        env.COUNTLY_HOST = 'http://18.195.12.147/'
+        env.COUNTLY_APP_KEY = '47678cda223ca2570cb933959c9037613a751283'
     }
 
     return env
