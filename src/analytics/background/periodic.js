@@ -1,7 +1,15 @@
 import moment from 'moment-timezone'
+import Countly from 'countly-sdk-web'
 
 import analytics from '../'
 import { STORAGE_KEYS, SCHEDULES, TIMEZONE } from '../constants'
+import { generateTokenIfNot } from 'src/util/generate-token'
+import { INSTALL_TIME_KEY } from '../../constants'
+
+Countly.init({
+    app_key: process.env.COUNTLY_APP_KEY,
+    url: process.env.COUNTLY_HOST,
+})
 
 /*
  * The purpose of this module is to attempt reimplement standard active user metrics
@@ -57,6 +65,8 @@ const attemptPeriodicPing = async (
         [STORAGE_KEYS.LAST_ACTIVE]: 0,
     })
 
+    const userId = await fetchUserId()
+
     // Milestone is either first day of month/week or just midnight for day
     const lastMilestone = moment()
         .tz(TIMEZONE)
@@ -69,6 +79,14 @@ const attemptPeriodicPing = async (
             analytics.trackEvent({
                 category: 'Periodic',
                 action: `${action} activity ping`,
+            })
+
+            Countly.add_event({
+                key: 'activity',
+                count: 1,
+                segmentation: {
+                    id: userId,
+                },
             })
         }
 
@@ -83,8 +101,25 @@ const attemptPeriodicPing = async (
             action: `${action} install ping`,
         })
 
+        Countly.add_event({
+            key: 'install',
+            count: 1,
+            segmentation: {
+                id: userId,
+            },
+        })
+
         await browser.storage.local.set({ [installKey]: Date.now() })
     }
+}
+
+async function fetchUserId() {
+    const installTime = (await browser.storage.local.get(INSTALL_TIME_KEY))[
+        INSTALL_TIME_KEY
+    ]
+    const userId = await generateTokenIfNot(installTime)
+
+    return userId
 }
 
 // Schedule all periodic ping attempts at a random minute past the hour, every hour
@@ -100,6 +135,6 @@ browser.alarms.onAlarm.addListener(alarm =>
     attemptPeriodicPing(alarm.name, getActivePeriodVars(alarm.name)),
 )
 
-createPeriodicEventJob('month')
-createPeriodicEventJob('week')
+// createPeriodicEventJob('month')
+// createPeriodicEventJob('week')
 createPeriodicEventJob('day')
