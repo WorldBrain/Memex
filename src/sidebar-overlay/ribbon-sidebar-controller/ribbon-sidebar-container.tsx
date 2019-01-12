@@ -1,15 +1,19 @@
 import * as React from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 
+import { makeRemotelyCallable } from '../../util/webextensionRPC'
 import RootState, { MapDispatchToProps } from '../types'
 import RibbonContainer, {
     actions as ribbonActions,
     selectors as ribbonSelectors,
 } from '../ribbon'
 import SidebarContainer, {
+    actions as sidebarActions,
     selectors as sidebarSelectors,
 } from '../../sidebar-common'
+import { actions as commentBoxActions } from '../../sidebar-common/comment-box'
 import AnnotationsManager from '../../sidebar-common/annotations-manager'
+import { Anchor } from '../../direct-linking/content_script/interactions'
 
 interface StateProps {
     isPageFullScreen: boolean
@@ -18,6 +22,8 @@ interface StateProps {
 
 interface DispatchProps {
     handleToggleFullScreen: (e: Event) => void
+    openSidebar: () => void
+    openCommentBoxWithHighlight: (anchor: Anchor) => void
 }
 
 interface OwnProps {
@@ -30,10 +36,22 @@ type Props = StateProps & DispatchProps & OwnProps
 class RibbonSidebarContainer extends React.Component<Props> {
     componentDidMount() {
         this._setupFullScreenListener()
+        this._setupRPC()
     }
 
     componentWillUnmount() {
         this._removeFullScreenListener()
+    }
+
+    private _setupRPC = () => {
+        makeRemotelyCallable({
+            openSidebar: (anchor: Anchor) => {
+                this.props.openSidebar()
+                if (anchor) {
+                    this.props.openCommentBoxWithHighlight(anchor)
+                }
+            },
+        })
     }
 
     private _setupFullScreenListener = () => {
@@ -88,6 +106,9 @@ const mapDispatchToProps: MapDispatchToProps<
         e.stopPropagation()
         dispatch(ribbonActions.toggleFullScreen())
     },
+    openSidebar: () => dispatch(sidebarActions.openSidebar()),
+    openCommentBoxWithHighlight: anchor =>
+        dispatch(commentBoxActions.openCommentBoxWithHighlight(anchor)),
 })
 
 export default connect(

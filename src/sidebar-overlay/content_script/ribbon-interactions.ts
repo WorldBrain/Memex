@@ -1,7 +1,7 @@
 import retargetEvents from 'react-shadow-dom-retarget-events'
 import { browser } from 'webextension-polyfill-ts'
 
-import { makeRemotelyCallable } from 'src/util/webextensionRPC'
+import { makeRemotelyCallable } from '../../util/webextensionRPC'
 import { setupRibbonAndSidebarUI, destroyRibbonAndSidebarUI } from '..'
 import { getSidebarState } from '../utils'
 import { getTooltipState } from '../../content-tooltip/utils'
