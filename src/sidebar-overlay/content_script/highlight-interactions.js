@@ -39,7 +39,7 @@ export function scrollToHighlight(annotation) {
  * from the page.
  * @param {*} annotation Annotation object which has the selector to be highlighted
  */
-export const highlightAndScroll = async annotation => {
+export const highlightAndScroll = annotation => {
     removeHighlights(true)
     makeHighlightDark(annotation)
     return scrollToHighlight(annotation)
