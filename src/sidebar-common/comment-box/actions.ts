@@ -23,8 +23,8 @@ export const deleteTag = createAction<string>('deleteTag')
 export const openCommentBoxWithHighlight: (
     anchor: Anchor,
 ) => Thunk = anchor => dispatch => {
-    dispatch(setShowCommentBox(true))
     dispatch(setAnchor(anchor))
+    dispatch(setShowCommentBox(true))
 }
 
 /**

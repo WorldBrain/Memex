@@ -30,7 +30,7 @@ export const createAnnotation = async () => {
     const range = selection.getRangeAt(0)
 
     const anchor = await extractAnchor(selection)
-    await remoteFunction('openSidebarWithHighlight')(anchor)
+    await remoteFunction('toggleSidebarOverlay')({ anchor, override: true })
     selectTextFromRange(range)
 }
 

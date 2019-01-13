@@ -165,33 +165,16 @@ const updateRibbon = async () => {
 export const setupRPC = ({ annotationsManager, toolbarNotifications }) => {
     makeRemotelyCallable({
         /**
-         * Used for opening the sidebar. If the ribbon is not present in the
-         * DOM, the ribbon is first inserted and then the sidebar is opened.
-         */
-        toggleSidebarOverlay: async () => {
-            if (!toggleSidebar) {
-                manualOverride = true
-                insertRibbon({ annotationsManager, toolbarNotifications })
-            }
-            return toggleSidebar.then(f => f())
-        },
-        /**
          * Used for inserting the ribbon.
-         * @param {{override: boolean}} options Takes in an object with property `override`.
          */
-        insertRibbon: (
-            { override }: { override: boolean } = { override: false },
-        ) => {
+        insertRibbon: ({ override } = { override: false }) => {
             manualOverride = !!override
             insertRibbon({ annotationsManager, toolbarNotifications })
         },
         /**
          * Used for removing the ribbon.
-         * @param {{override: boolean}} options Takes in an object with property `override`.
          */
-        removeRibbon: (
-            { override }: { override: boolean } = { override: false },
-        ) => {
+        removeRibbon: ({ override } = { override: false }) => {
             manualOverride = !!override
             removeRibbon()
         },
