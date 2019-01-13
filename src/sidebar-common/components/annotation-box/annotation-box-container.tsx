@@ -266,6 +266,8 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
                 {/* Footer. */}
                 <AnnotationBoxFooter
                     mode={mode}
+                    displayGoToAnnotation={env === 'overview' && !!body}
+                    handleGoToAnnotation={handleGoToAnnotation}
                     handleEditAnnotation={this._handleEditAnnotation}
                     handleDeleteAnnotation={this._handleDeleteAnnotation}
                     handleCancelEdit={this._handleCancelOperation}

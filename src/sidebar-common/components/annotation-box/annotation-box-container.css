@@ -119,23 +119,3 @@
 input:focus {
     outline: none;
 }
-
-.goToPageIcon {
-    background-image: url('/img/gotopage.svg');
-    background-repeat: no-repeat;
-    background-size: 27px;
-    background-position-x: 1px;
-    width: 26px;
-    height: 26px;
-    margin-top: -4.5px;
-    margin-right: 10px;
-    display: inline-block;
-    cursor: pointer;
-    margin-left: 2px;
-    padding: 3px;
-    border-radius: 50%;
-
-    &:hover {
-        background-color: #efefef;
-    }
-}
