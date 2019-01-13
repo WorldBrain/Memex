@@ -7,6 +7,8 @@ const styles = require('./annotation-box-footer.css')
 
 interface Props {
     mode: 'default' | 'edit' | 'delete'
+    displayGoToAnnotation: boolean
+    handleGoToAnnotation: (e: React.MouseEvent<HTMLElement>) => void
     handleEditAnnotation: () => void
     handleDeleteAnnotation: () => void
     handleCancelEdit: () => void
@@ -40,6 +42,8 @@ const AnnotationBoxFooter = (props: Props) => (
             />
         ) : (
             <AnnotationBoxDefaultFooter
+                displayGoToAnnotation={props.displayGoToAnnotation}
+                goToAnnotationHandler={props.handleGoToAnnotation}
                 editIconClickHandler={props.editIconClickHandler}
                 trashIconClickHandler={props.trashIconClickHandler}
                 shareIconClickHandler={props.shareIconClickHandler}
