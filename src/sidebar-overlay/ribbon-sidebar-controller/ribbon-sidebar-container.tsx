@@ -45,8 +45,8 @@ class RibbonSidebarContainer extends React.Component<Props> {
 
     private _setupRPC = () => {
         makeRemotelyCallable({
-            openSidebar: (anchor: Anchor) => {
-                this.props.openSidebar()
+            openSidebar: async (anchor: Anchor = null) => {
+                await this.props.openSidebar()
                 if (anchor) {
                     this.props.openCommentBoxWithHighlight(anchor)
                 }

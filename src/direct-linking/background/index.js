@@ -40,8 +40,8 @@ export default class DirectLinkingBackground {
                 deleteAnnotation: (...params) => {
                     return this.deleteAnnotation(...params)
                 },
-                openSidebarWithHighlight: (...params) => {
-                    return this.openSidebarWithHighlight(...params)
+                toggleSidebarOverlay: (...params) => {
+                    return this.toggleSidebarOverlay(...params)
                 },
                 getTagsByAnnotationUrl: (...params) => {
                     return this.getTagsByAnnotationUrl(...params)
@@ -76,11 +76,7 @@ export default class DirectLinkingBackground {
         await remoteFunction(functionName, { tabId: currentTab.id })(...args)
     }
 
-    async _toggleSidebar() {
-        await this._triggerSidebar('toggleSidebarOverlay')
-    }
-
-    async openSidebarWithHighlight({ tab }, anchor) {
+    async toggleSidebarOverlay({ tab }, { anchor, override } = {}) {
         const [currentTab] = await browser.tabs.query({
             active: true,
             currentWindow: true,
@@ -89,7 +85,7 @@ export default class DirectLinkingBackground {
         const { id: tabId } = currentTab
         // Make sure that the ribbon is inserted before trying to open the
         // sidebar.
-        await remoteFunction('insertRibbon', { tabId })()
+        await remoteFunction('insertRibbon', { tabId })({ override })
         await remoteFunction('openSidebar', { tabId })(anchor)
     }
 
