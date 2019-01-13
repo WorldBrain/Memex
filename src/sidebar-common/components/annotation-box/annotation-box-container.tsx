@@ -17,12 +17,15 @@ import { EVENT_NAMES } from '../../../analytics/internal/constants'
 const styles = require('./annotation-box-container.css')
 
 interface OwnProps {
+    /** Required to decide how to go to an annotation when it's clicked. */
+    env: 'inpage' | 'overview'
     url: string
     createdWhen: Date
     lastEdited?: Date
     body?: string
     comment?: string
     tags: string[]
+    handleGoToAnnotation: (e: React.MouseEvent<HTMLElement>) => void
 }
 
 interface StateProps {}
@@ -182,13 +185,22 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
 
     render() {
         const { mode, displayCrowdfunding } = this.state
-        const { createdWhen, lastEdited, body, comment, tags } = this.props
+        const {
+            env,
+            createdWhen,
+            lastEdited,
+            body,
+            comment,
+            tags,
+            handleGoToAnnotation,
+        } = this.props
 
         const timestamp = !!lastEdited
             ? this._getFormattedTimestamp(lastEdited)
             : this._getFormattedTimestamp(createdWhen)
 
         const isJustComment = !body
+        const isClickable = !isJustComment && env !== 'overview'
 
         if (displayCrowdfunding) {
             return (
@@ -201,14 +213,10 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
         return (
             <div
                 className={cx(styles.container, {
-                    [styles.isClickable]: !isJustComment,
+                    [styles.isClickable]: isClickable,
                     [styles.isJustComment]: mode !== 'edit' && isJustComment,
                 })}
-                onClick={
-                    !isJustComment
-                        ? () => console.log('go to annotation')
-                        : noop
-                }
+                onClick={isClickable ? handleGoToAnnotation : noop}
             >
                 {/* Timestamp for the annotation. Hidden during 'edit' mode. */}
                 {mode !== 'edit' && (

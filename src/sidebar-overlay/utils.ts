@@ -1,7 +1,6 @@
 import { browser } from 'webextension-polyfill-ts'
 
 import { RetryTimeoutError } from '../direct-linking/utils'
-import { remoteFunction } from '../util/webextensionRPC'
 import { getLocalStorage, setLocalStorage } from '../util/storage'
 import * as constants from './constants'
 
@@ -43,46 +42,6 @@ export function retryUntilErrorResolves(
 
         tryOrRetryLater()
     })
-}
-
-/**
- * HOF to return a function which
- * Scrolls to annotation or creates a new tab and then scrolls to annotation
- * Depending on the environment of the sidebar.
- * @param {*} annotation The annotation to go to.
- * @param {string} env The sidebar enviroment in which the function is being executed.
- * @param {string} pageUrl Url of the page highlight is in.
- * @param {function} highlightAndScroll Remote function which gets the passed annotation
- * @returns {Promise<function>}
- */
-
-export const goToAnnotation = (
-    env,
-    pageUrl,
-    highlightAndScroll,
-) => annotation => async () => {
-    // If annotation is a comment, do nothing
-    if (!annotation.body) {
-        return false
-    } else if (env === 'overview') {
-        const tab = await window['browser'].tabs.create({
-            active: true,
-            url: pageUrl,
-        })
-
-        const listener = (tabId, changeInfo) => {
-            if (tabId === tab.id && changeInfo.status === 'complete') {
-                remoteFunction('goToAnnotation', {
-                    tabId: tab.id,
-                })(annotation)
-                window['browser'].tabs.onUpdated.removeListener(listener)
-            }
-        }
-
-        window['browser'].tabs.onUpdated.addListener(listener)
-    } else {
-        highlightAndScroll(annotation)
-    }
 }
 
 /**
