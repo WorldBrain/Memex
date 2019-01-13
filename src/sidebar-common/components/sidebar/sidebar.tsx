@@ -21,6 +21,7 @@ interface Props {
     showCommentBox: boolean
     showCongratsMessage: boolean
     closeSidebar: () => void
+    goToAnnotation: (annotation: Annotation) => void
     handleAddCommentBtnClick: () => void
     handleMouseEnter: (e: Event) => void
     handleMouseLeave: (e: Event) => void
@@ -63,8 +64,17 @@ class Sidebar extends React.Component<Props> {
         this._sidebarRef = ref
     }
 
-    private _handleSettingsBtnClick() {
+    private _handleSettingsBtnClick = () => {
         openSettings()
+    }
+
+    private _handleGoToAnnotation = (annotation: Annotation) => (
+        e: React.MouseEvent<HTMLElement>,
+    ) => {
+        e.preventDefault()
+        e.stopPropagation()
+
+        this.props.goToAnnotation(annotation)
     }
 
     render() {
@@ -107,7 +117,11 @@ class Sidebar extends React.Component<Props> {
                             {annotations.map(annotation => (
                                 <AnnotationBoxContainer
                                     key={annotation.url}
+                                    env={env}
                                     {...annotation}
+                                    handleGoToAnnotation={this._handleGoToAnnotation(
+                                        annotation,
+                                    )}
                                 />
                             ))}
                             {showCongratsMessage && <CongratsMessage />}
