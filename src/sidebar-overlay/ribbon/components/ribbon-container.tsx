@@ -5,7 +5,6 @@ import RootState, { ClickHandler, MapDispatchToProps } from '../../types'
 import Ribbon from './ribbon'
 import * as actions from '../actions'
 import * as selectors from '../selectors'
-import { actions as sidebarActions } from '../../../sidebar-common'
 
 interface StateProps {
     isExpanded: boolean
@@ -15,7 +14,6 @@ interface StateProps {
 
 interface DispatchProps {
     onInit: () => void
-    openSidebar: ClickHandler<HTMLImageElement>
     handleRibbonToggle: ClickHandler<HTMLElement>
     handleTooltipToggle: ClickHandler<HTMLElement>
     handleMouseEnter: (e: MouseEvent) => void
@@ -24,6 +22,7 @@ interface DispatchProps {
 
 interface OwnProps {
     handleRemoveRibbon: () => void
+    openSidebar: () => void
 }
 
 type Props = StateProps & DispatchProps & OwnProps
@@ -67,7 +66,7 @@ class RibbonContainer extends React.Component<Props> {
     }
 
     render() {
-        const { handleRemoveRibbon, ...rest } = this.props
+        const { handleRemoveRibbon, openSidebar, ...rest } = this.props
 
         return (
             <div ref={this._setRibbonRef}>
@@ -76,6 +75,10 @@ class RibbonContainer extends React.Component<Props> {
                     handleRemoveRibbon={e => {
                         e.stopPropagation()
                         handleRemoveRibbon()
+                    }}
+                    openSidebar={e => {
+                        e.stopPropagation()
+                        openSidebar()
                     }}
                 />
             </div>
@@ -98,11 +101,6 @@ const mapDispatchToProps: MapDispatchToProps<
     OwnProps
 > = dispatch => ({
     onInit: () => dispatch(actions.initState()),
-    openSidebar: e => {
-        e.stopPropagation()
-        dispatch(actions.setIsExpanded(false))
-        dispatch(sidebarActions.openSidebar())
-    },
     handleRibbonToggle: e => {
         e.stopPropagation()
         dispatch(actions.toggleRibbon())
