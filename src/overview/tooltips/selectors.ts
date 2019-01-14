@@ -20,6 +20,5 @@ export const tooltip = createSelector(whichTooltip, whichTooltip => {
     if (whichTooltip === -1) {
         return 'none'
     }
-    console.log(whichTooltip)
     return TOOLTIPS[whichTooltip]
 })

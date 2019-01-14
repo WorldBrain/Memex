@@ -21,6 +21,10 @@ export const setCongratsMessage = createAction<boolean>(
 )
 export const setBackupStage = createAction<string>('onboarding/setBackupStage')
 
+/**
+ * Checks whether all stages of onboarding is DONE.
+ * If yes, set congratsMessage to True.
+ */
 export const checkForCompletion = () => (dispatch, getState) => {
     const state = getState()
     const annotationStage = selectors.annotationStage(state)
