@@ -45,9 +45,11 @@ const backupModule = new backup.BackupBackgroundModule({
     storageManager,
     backend:
         process.env.BACKUP_BACKEND === 'local'
-            ? new (require('./backup/background/backend/simple-http')).default({
-                  url: 'http://localhost:11922/backup',
-              })
+            ? new (require('./backup/background/backend/memex-local-server')).default(
+                  {
+                      url: 'http://localhost:11922/backup',
+                  },
+              )
             : new driveBackup.DriveBackupBackend({
                   tokenStore: new driveBackup.LocalStorageDriveTokenStore({
                       prefix: 'drive-token-',
