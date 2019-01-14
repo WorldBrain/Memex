@@ -7,6 +7,7 @@ import { ThunkAction, ThunkDispatch } from 'redux-thunk'
 
 import { State as CommentBoxState } from './comment-box'
 import AnnotationsManager from './annotations-manager'
+import { Anchor } from '../direct-linking/content_script/interactions'
 
 export interface Page {
     url: string | null
@@ -23,6 +24,8 @@ export interface Annotation {
     body?: string
     /** Defined for annotations with a user comment. */
     comment?: string
+    /** Selector required for highlighting annotations. */
+    selector: Anchor
     createdWhen: Date
     lastEdited: Date | null
     tags: string[]

@@ -47,7 +47,6 @@ export const highlightAndScroll = annotation => {
 
 /**
  * Given an array of annotation objects, highlights all of them.
- * @param {Array<*>} annotations Array of annotations to highlight
  */
 export const highlightAnnotations = async (
     annotations,

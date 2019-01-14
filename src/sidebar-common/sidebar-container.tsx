@@ -70,9 +70,16 @@ class SidebarContainer extends React.Component<Props, State> {
         const { isOpen, closeSidebar } = this.props
         const { isMouseInsideSidebar } = this.state
 
-        // Only close the sidebar if the sidebar is open and if the mouse is not inside it.
+        // Only close the sidebar when all of the following conditions are met:
+        // 1. Sidebar is open.
+        // 2. Mouse is not inside the sidebar.
+        // 3. Click did not occur on an annotation highlight.
         // This step is necessary as `onClickOutside` fires for a variety of events.
-        if (isOpen && !isMouseInsideSidebar) {
+        if (
+            isOpen &&
+            !isMouseInsideSidebar &&
+            !(e.target as any).dataset.annotation
+        ) {
             closeSidebar()
         }
     }
