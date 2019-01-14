@@ -6,6 +6,7 @@ import AnnotationsManager from '../sidebar-common/annotations-manager'
 import {
     highlightAnnotations,
     highlightAndScroll,
+    removeHighlights,
 } from './content_script/highlight-interactions'
 
 export const setupRibbonAndSidebarUI = (
@@ -24,6 +25,7 @@ export const setupRibbonAndSidebarUI = (
             handleRemoveRibbon={handleRemoveRibbon}
             highlightAll={highlightAnnotations}
             highlightAndScroll={highlightAndScroll}
+            removeHighlights={removeHighlights}
         />,
         target,
     )
