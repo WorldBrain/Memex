@@ -2,7 +2,8 @@ import { createAction } from 'redux-act'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 
 import * as selectors from './selectors'
-import { STORAGE_KEYS } from './constants'
+import * as utils from './utils'
+import { STORAGE_KEYS, STAGES } from './constants'
 
 export const setAnnotationStage = createAction<string>(
     'onboarding/setAnnotationStage',
@@ -42,23 +43,17 @@ export const checkForCompletion = () => (dispatch, getState) => {
     }
 }
 
+/**
+ * Hydrates the onboarding states from the storage.
+ */
 export const fetchOnboardingStages = () => async dispatch => {
-    const annotationStage = await getLocalStorage(
-        STORAGE_KEYS.onboardingDemo.step1,
-        'unvisited',
-    )
-    const powerSearchStage = await getLocalStorage(
-        STORAGE_KEYS.onboardingDemo.step2,
-        'unvisited',
-    )
-    const taggingStage = await getLocalStorage(
-        STORAGE_KEYS.onboardingDemo.step3,
-        'unvisited',
-    )
-    const backupStage = await getLocalStorage(
-        STORAGE_KEYS.onboardingDemo.step4,
-        'unvisited',
-    )
+    // Fetch keys from storage
+    const {
+        annotationStage,
+        powerSearchStage,
+        taggingStage,
+        backupStage,
+    } = await utils.fetchAllStages()
 
     dispatch(setAnnotationStage(annotationStage))
     dispatch(setPowerSearchStage(powerSearchStage))
@@ -68,6 +63,9 @@ export const fetchOnboardingStages = () => async dispatch => {
     dispatch(checkForCompletion())
 }
 
+/**
+ * Hydrates the showOnboardingBox from storage
+ */
 export const fetchShowOnboarding = () => async dispatch => {
     const showOnboardingBox = await getLocalStorage(
         STORAGE_KEYS.shouldShowOnboarding,
@@ -76,18 +74,14 @@ export const fetchShowOnboarding = () => async dispatch => {
     dispatch(setShowOnboardingBox(showOnboardingBox))
 }
 
-/**
- * Sets Power Search Stage as done.
- * Dispatched from the last tooltip in Power Search Stage.
- */
 export const setPowerSearchDone = () => async dispatch => {
-    await setLocalStorage(STORAGE_KEYS.onboardingDemo.step2, 'DONE')
+    await utils.setOnboardingStage('powerSearch', STAGES.done)
     dispatch(setPowerSearchStage('DONE'))
     dispatch(checkForCompletion())
 }
 
 export const setBackupStageDone = () => async dispatch => {
-    await setLocalStorage(STORAGE_KEYS.onboardingDemo.step4, 'DONE')
+    await utils.setOnboardingStage('backup', STAGES.done)
     dispatch(setBackupStage('DONE'))
     dispatch(checkForCompletion())
 }

@@ -3,11 +3,10 @@ import { connect } from 'react-redux'
 
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { EVENT_NAMES } from 'src/analytics/internal/constants'
-import * as constants from '../constants'
-import { browser } from 'webextension-polyfill-ts'
-import { setLocalStorage } from 'src/util/storage'
-import Checklist from './checklist'
+import { STAGES } from '../constants'
+import * as utils from '../utils'
 
+import Checklist from './checklist'
 import * as actions from '../actions'
 import * as selectors from '../selectors'
 import * as tooltipsActs from '../../tooltips/actions'
@@ -39,25 +38,14 @@ export type Props = StateProps & DispatchProps & OwnProps
 
 class OnboardingChecklist extends React.Component<Props> {
     processEvent = remoteFunction('processEvent')
+    openOptionsTab = remoteFunction('openOptionsTab')
 
     async componentDidMount() {
         await this.props.fetchShowOnboarding()
         await this.props.fetchOnboardingStages()
     }
 
-    _setOnboardingKey = async (step: string, value: string) => {
-        await setLocalStorage(
-            constants.STORAGE_KEYS.onboardingDemo[step],
-            value,
-        )
-    }
-
-    _openDemoPage = async () => {
-        const url = constants.ANNOTATION_DEMO_URL
-        await browser.tabs.create({ url })
-    }
-
-    handleAnnotationStage = async () => {
+    private handleAnnotationStage = async () => {
         if (this.props.annotationStage === 'DONE') {
             return
         }
@@ -66,11 +54,11 @@ class OnboardingChecklist extends React.Component<Props> {
             type: EVENT_NAMES.START_ANNOTATION_ONBOARDING,
         })
 
-        await this._setOnboardingKey('step1', 'highlight_text')
-        await this._openDemoPage()
+        await utils.setOnboardingStage('annotation', STAGES.redirected)
+        await utils.openDemoPage()
     }
 
-    handlePowerSearchStage = async () => {
+    private handlePowerSearchStage = async () => {
         if (this.props.powerSearchStage === 'DONE') {
             return
         }
@@ -84,46 +72,38 @@ class OnboardingChecklist extends React.Component<Props> {
         Else, directly start the onboarding tooltip process.
         */
         if (this.props.noResults) {
-            await this._setOnboardingKey('step2', 'redirected')
-            await this._openDemoPage()
+            await utils.setOnboardingStage('powerSearch', STAGES.redirected)
+            await utils.openDemoPage()
         } else {
-            await this._setOnboardingKey('step2', 'overview-tooltips')
+            await utils.setOnboardingStage(
+                'powerSearch',
+                STAGES.powerSearch.overviewTooltips,
+            )
             this.props.initOnboardingTooltips()
         }
     }
 
-    handleTaggingStage = async () => {
+    private handleTaggingStage = async () => {
         if (this.props.taggingStage === 'DONE') {
             return
         }
         // TODO: Add analytics
-        await this._setOnboardingKey('step3', 'redirected')
-        await this._openDemoPage()
+        await utils.setOnboardingStage('tagging', STAGES.redirected)
+        await utils.openDemoPage()
     }
 
-    handleBackupStage = async () => {
+    private handleBackupStage = async () => {
         if (this.props.backupStage === 'DONE') {
             return
         }
 
         // TODO: Add analytics
-        await browser.tabs.create({
-            url: browser.runtime.getURL(constants.BACKUP_URL),
-            active: true,
-        })
+        this.openOptionsTab('backup')
         await this.props.setBackupStageDone()
     }
 
     render() {
-        const {
-            showOnboardingBox,
-            annotationStage,
-            powerSearchStage,
-            taggingStage,
-            backupStage,
-        } = this.props
-
-        if (!showOnboardingBox) {
+        if (!this.props.showOnboardingBox) {
             return null
         }
 
@@ -131,10 +111,10 @@ class OnboardingChecklist extends React.Component<Props> {
             <Checklist
                 isRightBox={this.props.isRightBox}
                 congratsMessage={this.props.congratsMessage}
-                isAnnotationChecked={annotationStage === 'DONE'}
-                isPowerSearchChecked={powerSearchStage === 'DONE'}
-                isTaggingChecked={taggingStage === 'DONE'}
-                isBackupChecked={backupStage === 'DONE'}
+                isAnnotationChecked={this.props.annotationStage === 'DONE'}
+                isPowerSearchChecked={this.props.powerSearchStage === 'DONE'}
+                isTaggingChecked={this.props.taggingStage === 'DONE'}
+                isBackupChecked={this.props.backupStage === 'DONE'}
                 handleAnnotationStage={this.handleAnnotationStage}
                 handlePowerSearchStage={this.handlePowerSearchStage}
                 handleTaggingStage={this.handleTaggingStage}

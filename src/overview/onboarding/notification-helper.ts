@@ -1,9 +1,9 @@
 import { remoteFunction } from 'src/util/webextensionRPC'
-import { getPageCenter, isDemoPage } from './utils'
 
-import { getLocalStorage, setLocalStorage } from 'src/util/storage'
-import { STORAGE_KEYS } from './constants'
+import { getLocalStorage } from 'src/util/storage'
+import { STAGES, STORAGE_KEYS } from './constants'
 import { EVENT_NAMES } from 'src/analytics/internal/constants'
+import * as utils from './utils'
 
 const processEventRPC = remoteFunction('processEvent')
 
@@ -16,19 +16,18 @@ export const conditionallyShowHighlightNotification = async ({
     toolbarNotifications,
     position,
 }) => {
-    if (!isDemoPage()) {
+    if (!utils.isDemoPage()) {
         return
     }
 
-    const annotationStage = await getLocalStorage(
-        STORAGE_KEYS.onboardingDemo.step1,
-    )
+    const annotationStage = await utils.fetchOnboardingStage('annotation')
 
-    if (annotationStage !== 'highlight_text_notification_shown') {
+    if (annotationStage !== STAGES.annotation.notifiedHighlightText) {
         return
     }
 
-    // Remove previous notification
+    // Toolbar Notfication doesn't destroy the previous tooltip by default
+    // So hack to destroy it using private method.
     toolbarNotifications._destroyRootElement()
     toolbarNotifications.showToolbarNotification('onboarding-select-option', {
         position,
@@ -36,9 +35,9 @@ export const conditionallyShowHighlightNotification = async ({
     processEventRPC({
         type: EVENT_NAMES.ONBOARDING_HIGHLIGHT_MADE,
     })
-    await setLocalStorage(
-        STORAGE_KEYS.onboardingDemo.step1,
-        'select_option_notification_shown',
+    await utils.setOnboardingStage(
+        'annotation',
+        STAGES.annotation.notifiedSelectOption,
     )
 }
 
@@ -55,9 +54,9 @@ const handler = toolbarNotifications => async () => {
         type: EVENT_NAMES.POWERSEARCH_BROWSE_PAGE,
     })
 
-    await setLocalStorage(
-        STORAGE_KEYS.onboardingDemo.step2,
-        'overview-tooltips',
+    await utils.setOnboardingStage(
+        'powerSearch',
+        STAGES.powerSearch.overviewTooltips,
     )
 }
 
@@ -69,46 +68,67 @@ const handler = toolbarNotifications => async () => {
 export const conditionallyShowOnboardingNotifications = async ({
     toolbarNotifications,
 }) => {
-    if (!isDemoPage()) {
+    /*
+    Fetch shouldShowOnboarding and return if it's false as 
+    that would mean the user has closed the onboarding demo.
+    */
+    const shouldShowOnboarding = await getLocalStorage(
+        STORAGE_KEYS.shouldShowOnboarding,
+        true,
+    )
+    if (!utils.isDemoPage && !shouldShowOnboarding) {
         return
     }
 
-    const onboardingAnnotationStage = await getLocalStorage(
-        STORAGE_KEYS.onboardingDemo.step1,
-    )
-    const powerSearchStage = await getLocalStorage(
-        STORAGE_KEYS.onboardingDemo.step2,
-    )
-    const taggingStage = await getLocalStorage(
-        STORAGE_KEYS.onboardingDemo.step3,
-    )
+    const {
+        annotationStage,
+        powerSearchStage,
+        taggingStage,
+    } = await utils.fetchAllStages()
 
-    if (onboardingAnnotationStage === 'highlight_text') {
+    if (annotationStage === STAGES.redirected) {
         toolbarNotifications.showToolbarNotification('onboarding-higlight-text')
-        await setLocalStorage(
-            STORAGE_KEYS.onboardingDemo.step1,
-            'highlight_text_notification_shown',
+        await utils.setOnboardingStage(
+            'annotation',
+            STAGES.annotation.notifiedHighlightText,
         )
     }
 
-    if (powerSearchStage === 'redirected') {
-        const position = getPageCenter()
+    if (powerSearchStage === STAGES.redirected) {
+        const position = utils.getPageCenter()
         toolbarNotifications._destroyRootElement()
         toolbarNotifications.showToolbarNotification('power-search-browse', {
             position,
             triggerNextNotification: handler(toolbarNotifications),
         })
-        await setLocalStorage(
-            STORAGE_KEYS.onboardingDemo.step2,
-            'power-search-browse-shown',
+        await utils.setOnboardingStage(
+            'powerSearch',
+            STAGES.powerSearch.notifiedBrowsePage,
         )
     }
 
-    if (taggingStage === 'redirected') {
+    if (taggingStage === STAGES.redirected) {
         toolbarNotifications.showToolbarNotification('tag-this-page')
-        await setLocalStorage(
-            STORAGE_KEYS.onboardingDemo.step3,
-            'tag-page-notification-shown',
+        await utils.setOnboardingStage(
+            'tagging',
+            STAGES.tagging.notifiedTagPage,
         )
+    }
+}
+
+/**
+ * Conditionally removes the Select Option notifcation in Annotation
+ * Onboarding Flow. Either used when user clicks outside or an annotation
+ * is created.
+ * @param nextStage Next stage to set for annotations flow
+ */
+export const conditionallyRemoveSelectOption = async nextStage => {
+    const annotationStage = await utils.fetchOnboardingStage('annotation')
+    console.log(annotationStage)
+    if (annotationStage === STAGES.annotation.notifiedSelectOption) {
+        await utils.setOnboardingStage('annotation', nextStage)
+        // Close the curren select-option notification manually since
+        // accessing the toolbarNotification instance from here is not possible
+        document.querySelector('.memex-tooltip-notification').remove()
     }
 }

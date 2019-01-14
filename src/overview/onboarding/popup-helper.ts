@@ -1,24 +1,20 @@
 import { browser } from 'webextension-polyfill-ts'
 
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
-import { STORAGE_KEYS } from './constants'
-
-const taggingStageKey: string = STORAGE_KEYS.onboardingDemo.step3
+import { STAGES } from './constants'
+import { fetchOnboardingStage, setOnboardingStage } from './utils'
+import { utils } from 'src/background-script'
 
 /**
  * Fetches the tagging stage status from local storage and checks
  * whether the in page notification for tagging is shown.
  */
 const _checkTaggingStageStatus = async () => {
-    const taggingStage = await getLocalStorage(taggingStageKey, 'unvisited')
-    if (taggingStage === 'tag-page-notification-shown') {
+    const taggingStage = await fetchOnboardingStage('tagging')
+    if (taggingStage === STAGES.tagging.notifiedTagPage) {
         return true
     }
     return false
-}
-
-const _setStageDone = async () => {
-    await setLocalStorage(taggingStageKey, 'DONE')
 }
 
 /**
@@ -42,7 +38,7 @@ export const checkForTaggingStage = async () => {
         return
     }
 
-    await _setStageDone()
+    await setOnboardingStage('tagging', STAGES.done)
     setTimeout(async () => {
         await _goToDashboard()
     }, 1000)
