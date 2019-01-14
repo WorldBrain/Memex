@@ -3,6 +3,7 @@ import * as ReactDOM from 'react-dom'
 
 import RibbonSidebarController from './ribbon-sidebar-controller'
 import AnnotationsManager from '../sidebar-common/annotations-manager'
+import { highlightAnnotations } from './content_script/highlight-interactions'
 
 export const setupRibbonAndSidebarUI = (
     target: HTMLElement,
@@ -18,6 +19,7 @@ export const setupRibbonAndSidebarUI = (
         <RibbonSidebarController
             annotationsManager={annotationsManager}
             handleRemoveRibbon={handleRemoveRibbon}
+            highlightAll={highlightAnnotations}
         />,
         target,
     )

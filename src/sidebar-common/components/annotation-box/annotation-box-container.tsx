@@ -187,6 +187,7 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
         const { mode, displayCrowdfunding } = this.state
         const {
             env,
+            url,
             createdWhen,
             lastEdited,
             body,
@@ -212,6 +213,7 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
 
         return (
             <div
+                id={url} // Focusing on annotation relies on this ID.
                 className={cx(styles.container, {
                     [styles.isClickable]: isClickable,
                     [styles.isJustComment]: mode !== 'edit' && isJustComment,
