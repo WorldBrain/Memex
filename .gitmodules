@@ -1,0 +1,9 @@
+[submodule "external/storex-backend-dexie"]
+	path = external/storex-backend-dexie
+	url = https://github.com/WorldBrain/storex-backend-dexie.git
+[submodule "external/storex"]
+	path = external/storex
+	url = https://github.com/WorldBrain/storex.git
+[submodule "external/memex-stemmer"]
+	path = external/memex-stemmer
+	url = https://github.com/WorldBrain/memex-stemmer.git

@@ -1,8 +1,12 @@
-import { FeatureStorage, CollectionDefinitions } from '../../search/storage'
-import { StorageManager } from '../../search/storage/manager'
+import { CollectionDefinitions } from 'storex'
+
+import { FeatureStorage } from '../../search/storage'
+import { StorageManager } from '../../search/types'
 import { ObjectChangeBatch } from './backend/types'
 
 export default class BackupStorage extends FeatureStorage {
+    static BACKUP_COLL = 'backupChanges'
+
     collections: { [name: string]: CollectionDefinitions } = {
         backupChanges: [
             {
@@ -44,12 +48,14 @@ export default class BackupStorage extends FeatureStorage {
         //     pk,
         // )
 
-        await this.storageManager.putObject('backupChanges', {
-            timestamp: Date.now(),
-            collection,
-            objectPk: pk,
-            operation,
-        })
+        await this.storageManager
+            .collection(BackupStorage.BACKUP_COLL)
+            .createObject({
+                timestamp: Date.now(),
+                collection,
+                objectPk: pk,
+                operation,
+            })
     }
 
     async *streamChanges(
@@ -61,20 +67,20 @@ export default class BackupStorage extends FeatureStorage {
             changes: [],
             forget: async () => {
                 const pks = batch.changes.map(change => change['timestamp'])
-                await this.storageManager.deleteObject('backupChanges', {
-                    timestamp: { $in: pks },
-                })
+                await this.storageManager
+                    .collection(BackupStorage.BACKUP_COLL)
+                    .deleteObjects({
+                        timestamp: { $in: pks },
+                    })
             },
         }
 
         // Explicit variable with while loop prevents fighting and confusing with nested breaks
         let running = true
         while (running) {
-            changes = await this.storageManager.findAll(
-                'backupChanges',
-                {},
-                { limit: batchSize },
-            )
+            changes = await this.storageManager
+                .collection(BackupStorage.BACKUP_COLL)
+                .findObjects({}, { limit: batchSize })
             if (!changes.length) {
                 break
             }
@@ -103,14 +109,18 @@ export default class BackupStorage extends FeatureStorage {
     }
 
     async countQueuedChangesByCollection(collectionName: string, until: Date) {
-        return this.storageManager.countAll('backupChanges', {
-            collection: collectionName,
-            timestamp: { $lte: until.getTime() },
-        })
+        return this.storageManager
+            .collection(BackupStorage.BACKUP_COLL)
+            .countObjects({
+                collection: collectionName,
+                timestamp: { $lte: until.getTime() },
+            })
     }
 
     async forgetAllChanges() {
-        await this.storageManager.deleteObject('backupChanges', {})
+        await this.storageManager
+            .collection(BackupStorage.BACKUP_COLL)
+            .deleteObjects({})
     }
 }
 

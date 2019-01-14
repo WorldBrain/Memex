@@ -27,6 +27,12 @@ This could take a while....
 $ yarn
 ```
 
+**Clone [Storex](https://github.com/WorldBrain/storex) submodules that we depend on**
+
+```sh
+git submodule update --init --recursive
+```
+
 **Now run `yarn watch` to compile incremental builds**
 
 ```sh
@@ -158,7 +164,7 @@ We try to encourage documententing module exports using JSDoc with TypeScript, a
 
 If you have made changes to any exports in existing modules, please update the corresponding docs if needed.
 
-If you are creating a new feature module, please add a brief overview in the way of a README in the corresponding directory. 
+If you are creating a new feature module, please add a brief overview in the way of a README in the corresponding directory.
 
 ### Styling
 

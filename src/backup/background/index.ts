@@ -1,15 +1,16 @@
-import * as AllRaven from 'raven-js'
-const pickBy = require('lodash/pickBy')
-const last = require('lodash/last')
 import { EventEmitter } from 'events'
+import * as AllRaven from 'raven-js'
+import { CollectionDefinition } from 'storex'
+
+import { StorageManager } from '../../search/types'
 import { makeRemotelyCallable } from '../../util/webextensionRPC'
-import { CollectionDefinition } from '../../search/storage'
-import { StorageManager } from '../../search/storage/manager'
 import { setupRequestInterceptors } from './redirect'
 import BackupStorage, { LastBackupStorage } from './storage'
 import { BackupBackend } from './backend'
 import { ObjectChangeBatch } from './backend/types'
 import estimateBackupSize from './estimate-backup-size'
+const pickBy = require('lodash/pickBy')
+const last = require('lodash/last')
 
 export * from './backend'
 
@@ -68,31 +69,6 @@ export class BackupBackgroundModule {
         schemaVersions.sort()
         this.currentSchemaVersion = last(schemaVersions)
         this.resetBackupState()
-
-        this.storageManager.on(
-            'changing',
-            ({
-                collection,
-                pk,
-                operation,
-            }: {
-                collection: string
-                pk: string
-                operation: string
-            }) => {
-                if (this.recordingChanges) {
-                    const collectionDefinition = this.storageManager.registry
-                        .collections[collection]
-                    if (!isExcludedFromBackup(collectionDefinition)) {
-                        this.storage.registerChange({
-                            collection,
-                            pk,
-                            operation,
-                        })
-                    }
-                }
-            },
-        )
     }
 
     private resetBackupState() {
@@ -264,6 +240,21 @@ export class BackupBackgroundModule {
         this.maybeScheduleAutomaticBackup()
     }
 
+    attemptChangeTrack({ collection, pk, operation }) {
+        if (this.recordingChanges) {
+            const collectionDefinition = this.storageManager.registry
+                .collections[collection]
+
+            if (!isExcludedFromBackup(collectionDefinition)) {
+                this.storage.registerChange({
+                    collection,
+                    pk,
+                    operation,
+                })
+            }
+        }
+    }
+
     startRecordingChanges() {
         this.recordingChanges = true
     }
@@ -423,9 +414,9 @@ export class BackupBackgroundModule {
         const collectionsWithVersions = this._getCollectionsToBackup()
 
         for (const collection of collectionsWithVersions) {
-            for await (const pk of this.storageManager.streamPks(
-                collection.name,
-            )) {
+            for await (const pk of this.storageManager
+                .collection(collection.name)
+                .streamPks()) {
                 await this.storage.registerChange({
                     collection: collection.name,
                     pk,
@@ -470,10 +461,9 @@ export class BackupBackgroundModule {
         // console.log('preparing batch')
         for (const change of batch.changes) {
             const object = pickBy(
-                await this.storageManager.findByPk(
-                    change.collection,
-                    change.objectPk,
-                ),
+                await this.storageManager
+                    .collection(change.collection)
+                    .findByPk(change.objectPk),
                 (val, key) => {
                     return key !== 'terms' && key.indexOf('_terms') === -1
                 },
@@ -562,8 +552,8 @@ export function _getMemexCloudOrigin() {
     }
 }
 
-export function isExcludedFromBackup(collection: CollectionDefinition) {
-    return collection.backup === false
+export function isExcludedFromBackup(collectionDef: CollectionDefinition) {
+    return collectionDef.backup === false
 }
 
 export function _shouldStoreBlobs() {
