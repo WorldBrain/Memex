@@ -1,7 +1,4 @@
-import { browser, Tabs } from 'webextension-polyfill-ts'
-
 import { remoteFunction } from '../util/webextensionRPC'
-import { Annotation } from './types'
 
 // TODO: Perhaps move RPC calls to some sort of a manager.
 const openOptionsTabRPC = remoteFunction('openOptionsTab')
@@ -35,58 +32,4 @@ export const maxPossibleTags = (tags: string[]) => {
         tagsAllowed++
     }
     return tagsAllowed
-}
-
-/**
- * HOF to return a function which takes in an `annotation`, and
- * scrolls to that annotation (in-page),
- * or creates a new tab and then scrolls to that annotation (overview).
- *
- * Behavior depends on the environment of the sidebar.
- * First-order arguments are those that are not expected to change for a
- * certain environment.
- */
-export const goToAnnotation = (
-    env: 'inpage' | 'overview',
-    pageUrl: string,
-    callback: (annotation: Annotation) => void,
-) => {
-    if (env === 'inpage') {
-        const handleGoToAnnotationInPage = (annotation: Annotation) => {
-            if (!annotation.body) {
-                return
-            }
-
-            callback(annotation)
-        }
-
-        return handleGoToAnnotationInPage
-    }
-
-    const handleGoToAnnotationInOverview = async (annotation: Annotation) => {
-        if (!annotation.body) {
-            return
-        }
-
-        const tab = await browser.tabs.create({
-            active: true,
-            url: annotation.url,
-        })
-
-        const listener = (
-            tabId: number,
-            changeInfo: Tabs.OnUpdatedChangeInfoType,
-        ) => {
-            if (tabId === tab.id && changeInfo.status === 'complete') {
-                remoteFunction('goToAnnotation', {
-                    tabId,
-                })(annotation)
-                browser.tabs.onUpdated.removeListener(listener)
-            }
-        }
-
-        browser.tabs.onUpdated.addListener(listener)
-    }
-
-    return handleGoToAnnotationInOverview
 }

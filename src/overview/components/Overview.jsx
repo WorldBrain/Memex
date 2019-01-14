@@ -16,6 +16,7 @@ import DragElement from './DragElement'
 import { Tooltip } from '../tooltips'
 import { isDuringInstall } from '../onboarding/utils'
 import AnnotationsManager from '../../sidebar-common/annotations-manager'
+import { goToAnnotation } from '../utils'
 
 class Overview extends PureComponent {
     static propTypes = {
@@ -41,6 +42,7 @@ class Overview extends PureComponent {
                 <SidebarContainer
                     env="overview"
                     annotationsManager={this._annotationsManager}
+                    goToAnnotation={goToAnnotation}
                 />
                 <Tooltip />
             </React.Fragment>
