@@ -1,7 +1,7 @@
 import { bodyLoader } from '../util/loader'
 import { setupRPC, insertTooltip } from './interactions'
 import ToolbarNotifications from '../toolbar-notification/content_script'
-import { conditionallyShowOnboardingNotifications } from './onboarding-notifications'
+import { conditionallyShowOnboardingNotifications } from 'src/overview/onboarding/notification-helper'
 import { getTooltipState } from './utils'
 
 export default async function init({

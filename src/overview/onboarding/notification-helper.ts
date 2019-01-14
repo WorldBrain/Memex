@@ -2,7 +2,7 @@ import { remoteFunction } from 'src/util/webextensionRPC'
 import { getPageCenter, isDemoPage } from './utils'
 
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
-import { STORAGE_KEYS } from 'src/overview/onboarding/constants'
+import { STORAGE_KEYS } from './constants'
 import { EVENT_NAMES } from 'src/analytics/internal/constants'
 
 const processEventRPC = remoteFunction('processEvent')
