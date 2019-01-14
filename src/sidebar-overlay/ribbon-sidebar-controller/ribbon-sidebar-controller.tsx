@@ -18,6 +18,7 @@ interface Props {
         hoverAnnotationContainer: (url: string) => void,
     ) => void
     highlightAndScroll: (annotation: Annotation) => number
+    removeHighlights: () => void
 }
 
 /* tslint:disable-next-line variable-name */

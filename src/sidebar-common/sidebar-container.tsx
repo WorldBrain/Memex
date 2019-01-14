@@ -31,6 +31,8 @@ interface OwnProps {
     env: 'inpage' | 'overview'
     annotationsManager: AnnotationsManager
     goToAnnotation: (annotation: Annotation) => void
+    /** Optional callback function that gets called after the sidebar is closed. */
+    closeSidebarCallback?: () => void
 }
 
 type Props = StateProps & DispatchProps & OwnProps
@@ -55,20 +57,17 @@ class SidebarContainer extends React.Component<Props, State> {
     handleClickOutside = (e: Event) => {
         e.stopPropagation()
 
-        const { isOpen, closeSidebar } = this.props
-        const { isMouseInsideSidebar } = this.state
-
         // Only close the sidebar when all of the following conditions are met:
         // 1. Sidebar is open.
         // 2. Mouse is not inside the sidebar.
         // 3. Click did not occur on an annotation highlight.
         // This step is necessary as `onClickOutside` fires for a variety of events.
         if (
-            isOpen &&
-            !isMouseInsideSidebar &&
+            this.props.isOpen &&
+            !this.state.isMouseInsideSidebar &&
             !(e.target as any).dataset.annotation
         ) {
-            closeSidebar()
+            this._closeSidebar()
         }
     }
 
@@ -82,13 +81,19 @@ class SidebarContainer extends React.Component<Props, State> {
         this.setState({ isMouseInsideSidebar: false })
     }
 
+    private _closeSidebar = () => {
+        this.props.closeSidebar()
+        if (this.props.closeSidebarCallback) {
+            this.props.closeSidebarCallback()
+        }
+    }
+
     render() {
         const {
             env,
             isOpen,
             isLoading,
             annotations,
-            closeSidebar,
             handleAddCommentBtnClick,
             showCommentBox,
             showCongratsMessage,
@@ -104,8 +109,8 @@ class SidebarContainer extends React.Component<Props, State> {
                 showCommentBox={showCommentBox}
                 showCongratsMessage={showCongratsMessage && !isLoading}
                 handleAddCommentBtnClick={handleAddCommentBtnClick}
-                closeSidebar={closeSidebar}
                 goToAnnotation={goToAnnotation}
+                closeSidebar={this._closeSidebar}
                 handleMouseEnter={this._handleMouseEnter}
                 handleMouseLeave={this._handleMouseLeave}
             />

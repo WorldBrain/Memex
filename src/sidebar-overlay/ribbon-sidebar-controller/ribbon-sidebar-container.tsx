@@ -39,6 +39,7 @@ interface OwnProps {
         hoverAnnotationContainer: (url: string) => void,
     ) => void
     highlightAndScroll: (annotation: Annotation) => number
+    removeHighlights: () => void
 }
 
 type Props = StateProps & DispatchProps & OwnProps
@@ -87,6 +88,12 @@ class RibbonSidebarContainer extends React.PureComponent<Props> {
         // Highlight any annotations with anchor.
         // (Done here as only in-page sidebar requires to do this.)
         this._highlightAnnotations()
+    }
+
+    private _closeSidebarCallback = () => {
+        // TODO: Set active annotation to null.
+
+        this.props.removeHighlights()
     }
 
     private _goToAnnotation = async (annotation: Annotation) => {
@@ -182,6 +189,7 @@ class RibbonSidebarContainer extends React.PureComponent<Props> {
                     annotationsManager={annotationsManager}
                     ref={this._setSidebarRef}
                     goToAnnotation={this._goToAnnotation}
+                    closeSidebarCallback={this._closeSidebarCallback}
                 />
             </React.Fragment>
         )
