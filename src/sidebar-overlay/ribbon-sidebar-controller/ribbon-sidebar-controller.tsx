@@ -17,20 +17,15 @@ interface Props {
         focusOnAnnotation: (url: string) => void,
         hoverAnnotationContainer: (url: string) => void,
     ) => void
+    highlightAndScroll: (annotation: Annotation) => number
 }
 
 /* tslint:disable-next-line variable-name */
 const RibbonSidebarController = (props: Props) => {
-    const { annotationsManager, handleRemoveRibbon, highlightAll } = props
-
     return (
         <ErrorBoundary component={RuntimeError}>
             <Provider store={store}>
-                <RibbonSidebarContainer
-                    annotationsManager={annotationsManager}
-                    handleRemoveRibbon={handleRemoveRibbon}
-                    highlightAll={highlightAll}
-                />
+                <RibbonSidebarContainer {...props} />
             </Provider>
         </ErrorBoundary>
     )
