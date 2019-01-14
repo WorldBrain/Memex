@@ -68,6 +68,7 @@ class Tab implements TabState {
 
         return remoteFunction('toggleIFrameRender', {
             tabId: this.id,
+            throwWhenNoResponse: false,
         })(shouldRender)
     }
 
@@ -76,7 +77,10 @@ class Tab implements TabState {
             return
         }
 
-        return remoteFunction('insertOrRemoveRibbon', { tabId: this.id })()
+        return remoteFunction('insertOrRemoveRibbon', {
+            tabId: this.id,
+            throwWhenNoResponse: false,
+        })()
     }
 
     private async _toggleTooltip() {
@@ -84,7 +88,10 @@ class Tab implements TabState {
             return
         }
 
-        return remoteFunction('insertOrRemoveTooltip', { tabId: this.id })()
+        return remoteFunction('insertOrRemoveTooltip', {
+            tabId: this.id,
+            throwWhenNoResponse: false,
+        })()
     }
 
     private async _updateRibbonState() {
@@ -92,7 +99,10 @@ class Tab implements TabState {
             return
         }
 
-        return remoteFunction('updateRibbon', { tabId: this.id })()
+        return remoteFunction('updateRibbon', {
+            tabId: this.id,
+            throwWhenNoResponse: false,
+        })()
     }
 
     private _pauseLogTimer() {

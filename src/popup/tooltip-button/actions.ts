@@ -40,11 +40,17 @@ export const toggleTooltipFlag: () => Thunk = () => async (
     const tabId = popup.tabId(state)
     if (wasEnabled) {
         await remoteFunction('removeTooltip', { tabId })()
-        await remoteFunction('updateRibbon', { tabId })()
+        await remoteFunction('updateRibbon', {
+            tabId,
+            throwWhenNoResponse: false,
+        })()
     } else {
         await remoteFunction('insertTooltip', { tabId })()
         await remoteFunction('showContentTooltip', { tabId })()
-        await remoteFunction('updateRibbon', { tabId })()
+        await remoteFunction('updateRibbon', {
+            tabId,
+            throwWhenNoResponse: false,
+        })()
     }
 }
 

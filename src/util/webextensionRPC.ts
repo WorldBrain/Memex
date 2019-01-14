@@ -48,7 +48,15 @@ export class RemoteError extends Error {
 //       tabId: The id of the tab whose content script is the remote side.
 //              Leave undefined to call the background script (from a tab).
 //   }
-export function remoteFunction(funcName, { tabId }: { tabId?: any } = {}) {
+export function remoteFunction(
+    funcName: string,
+    {
+        tabId,
+        throwWhenNoResponse,
+    }: { tabId?: number; throwWhenNoResponse?: boolean } = {},
+) {
+    throwWhenNoResponse =
+        throwWhenNoResponse == null || throwWhenNoResponse === true
     const otherSide =
         tabId !== undefined
             ? "the tab's content script"
@@ -69,10 +77,13 @@ export function remoteFunction(funcName, { tabId }: { tabId?: any } = {}) {
                     ? await browser.tabs.sendMessage(tabId, message)
                     : await browser.runtime.sendMessage(message)
         } catch (err) {
-            throw new RpcError(
-                `Got no response when trying to call '${funcName}'. ` +
-                    `Did you enable RPC in ${otherSide}?`,
-            )
+            if (throwWhenNoResponse) {
+                throw new RpcError(
+                    `Got no response when trying to call '${funcName}'. ` +
+                        `Did you enable RPC in ${otherSide}?`,
+                )
+            }
+            return
         }
 
         // Check if it was *our* listener that responded.
@@ -164,7 +175,7 @@ let enabled = false
 //   }
 
 export function makeRemotelyCallable(
-    functions,
+    functions: { [fnName: string]: (...args: any[]) => any },
     { insertExtraArg = false } = {},
 ) {
     // Every function is passed an extra argument with sender information,

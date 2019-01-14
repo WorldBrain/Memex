@@ -15,7 +15,7 @@ const images = {
 export default function TagThisPage({ onCloseRequested }) {
     return (
         <div className={styles.title}>
-            {/*<img className={styles.notifIcon} src={images.notifIcon}/>*/}
+            {/* <img className={styles.notifIcon} src={images.notifIcon}/> */}
             <NotificationLayout
                 title={'Tag & sort this page in collections'}
                 icon={images.notifIcon}
@@ -24,8 +24,8 @@ export default function TagThisPage({ onCloseRequested }) {
                 closeIcon={images.closeIcon}
             >
                 Via the little{' '}
-                <img src={images.brainIcon} className={styles.icon} />
-                icon in the menu
+                <img src={images.brainIcon} className={styles.icon} /> icon in
+                the menu
             </NotificationLayout>
         </div>
     )
