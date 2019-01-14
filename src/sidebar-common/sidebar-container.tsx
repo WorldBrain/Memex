@@ -11,13 +11,10 @@ import {
 import { Sidebar } from './components'
 import SidebarState, { MapDispatchToProps, Annotation } from './types'
 import AnnotationsManager from './annotations-manager'
-import { highlightAndScroll } from '../sidebar-overlay/content_script/highlight-interactions'
-import { goToAnnotation } from './utils'
 
 interface StateProps {
     isOpen: boolean
     isLoading: boolean
-    pageUrl: string
     annotations: Annotation[]
     showCommentBox: boolean
     showCongratsMessage: boolean
@@ -33,6 +30,7 @@ interface DispatchProps {
 interface OwnProps {
     env: 'inpage' | 'overview'
     annotationsManager: AnnotationsManager
+    goToAnnotation: (annotation: Annotation) => void
 }
 
 type Props = StateProps & DispatchProps & OwnProps
@@ -42,8 +40,6 @@ interface State {
 }
 
 class SidebarContainer extends React.Component<Props, State> {
-    private _goToAnnotation: (annotation: Annotation) => void
-
     state: State = {
         isMouseInsideSidebar: false,
     }
@@ -51,14 +47,6 @@ class SidebarContainer extends React.Component<Props, State> {
     componentDidMount() {
         this.props.onInit()
         this.props.setAnnotationsManager(this.props.annotationsManager)
-
-        this._setGoToAnnotation()
-    }
-
-    componentDidUpdate(prevProps: Props) {
-        if (prevProps.pageUrl !== this.props.pageUrl) {
-            this._setGoToAnnotation()
-        }
     }
 
     /**
@@ -84,19 +72,6 @@ class SidebarContainer extends React.Component<Props, State> {
         }
     }
 
-    private _setGoToAnnotation = () => {
-        const { env, pageUrl } = this.props
-        const callback = (annotation: Annotation) => {
-            // TODO: Set active annotation.
-
-            // TODO: Do not use `highlightAndScroll` directly here. Instead,
-            // take it from `props` iff `env` is `inpage`.
-            highlightAndScroll(annotation)
-        }
-
-        this._goToAnnotation = goToAnnotation(env, pageUrl, callback)
-    }
-
     private _handleMouseEnter = (e: Event) => {
         e.stopPropagation()
         this.setState({ isMouseInsideSidebar: true })
@@ -117,6 +92,7 @@ class SidebarContainer extends React.Component<Props, State> {
             handleAddCommentBtnClick,
             showCommentBox,
             showCongratsMessage,
+            goToAnnotation,
         } = this.props
 
         return (
@@ -129,7 +105,7 @@ class SidebarContainer extends React.Component<Props, State> {
                 showCongratsMessage={showCongratsMessage && !isLoading}
                 handleAddCommentBtnClick={handleAddCommentBtnClick}
                 closeSidebar={closeSidebar}
-                goToAnnotation={this._goToAnnotation}
+                goToAnnotation={goToAnnotation}
                 handleMouseEnter={this._handleMouseEnter}
                 handleMouseLeave={this._handleMouseLeave}
             />
@@ -147,7 +123,6 @@ const mapStateToProps: MapStateToProps<
     annotations: selectors.annotations(state),
     showCommentBox: commentBoxSelectors.showCommentBox(state),
     showCongratsMessage: selectors.showCongratsMessage(state),
-    pageUrl: selectors.pageUrl(state),
 })
 
 const mapDispatchToProps: MapDispatchToProps<

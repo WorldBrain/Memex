@@ -38,11 +38,12 @@ interface OwnProps {
         focusOnAnnotation: (url: string) => void,
         hoverAnnotationContainer: (url: string) => void,
     ) => void
+    highlightAndScroll: (annotation: Annotation) => number
 }
 
 type Props = StateProps & DispatchProps & OwnProps
 
-class RibbonSidebarContainer extends React.Component<Props> {
+class RibbonSidebarContainer extends React.PureComponent<Props> {
     private _sidebarRef: React.Component = null
 
     componentDidMount() {
@@ -63,6 +64,7 @@ class RibbonSidebarContainer extends React.Component<Props> {
     private _setupRPC = () => {
         makeRemotelyCallable({
             openSidebar: this._openSidebar,
+            goToAnnotation: this._goToAnnotation,
         })
     }
 
@@ -85,6 +87,19 @@ class RibbonSidebarContainer extends React.Component<Props> {
         // Highlight any annotations with anchor.
         // (Done here as only in-page sidebar requires to do this.)
         this._highlightAnnotations()
+    }
+
+    private _goToAnnotation = async (annotation: Annotation) => {
+        if (!this.props.isSidebarOpen) {
+            await this.props.openSidebar()
+        }
+
+        // TODO: Set active annotation.
+
+        setTimeout(() => {
+            this.props.highlightAndScroll(annotation)
+            this._focusOnAnnotation(annotation.url)
+        }, 200)
     }
 
     private _highlightAnnotations = () => {
@@ -166,6 +181,7 @@ class RibbonSidebarContainer extends React.Component<Props> {
                     env="inpage"
                     annotationsManager={annotationsManager}
                     ref={this._setSidebarRef}
+                    goToAnnotation={this._goToAnnotation}
                 />
             </React.Fragment>
         )
