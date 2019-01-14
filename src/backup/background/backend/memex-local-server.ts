@@ -6,7 +6,7 @@ import {
     ObjectChange,
 } from './types'
 
-export default class SimpleHttpBackend extends BackupBackend {
+export default class MemexLocalBackend extends BackupBackend {
     private url
 
     constructor({ url }: { url: string }) {
@@ -79,13 +79,8 @@ export default class SimpleHttpBackend extends BackupBackend {
         if (!response.ok) {
             throw new Error(await response.text())
         }
-
         const body = await response.text()
-        const lines = body.split('\n')
-        const matches = lines.map(line => /href="([^"]+)"/g.exec(line))
-        const fileNames = matches
-            .filter(match => !!match)
-            .map(match => match[1])
+        const fileNames = body.split(',')
         return fileNames
     }
 
