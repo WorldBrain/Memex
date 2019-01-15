@@ -1,27 +1,15 @@
 import { browser, Tabs, Storage } from 'webextension-polyfill-ts'
 
-import {
-    createPageFromTab,
-    Tag,
-    Page,
-    Dexie,
-    StorageManager,
-} from '../../search'
+import { createPageFromTab, Tag, Dexie, StorageManager } from '../../search'
 import { FeatureStorage } from '../../search/storage'
 import { STORAGE_KEYS as IDXING_PREF_KEYS } from '../../options/settings/constants'
-import {
-    AnnotPage,
-    Annotation,
-    AnnotListEntry,
-    SearchParams,
-    UrlFilters,
-} from '../types'
-
-const uniqBy = require('lodash/fp/uniqBy')
+import { AnnotPage, Annotation, AnnotListEntry, SearchParams } from '../types'
+import { AnnotsSearcher } from './annots-search'
 
 export interface AnnotationStorageProps {
     storageManager: StorageManager
     getDb: () => Promise<Dexie>
+    AnnotationsSearcher?: typeof AnnotsSearcher
     browserStorageArea?: Storage.StorageArea
     annotationsColl?: string
     pagesColl?: string
@@ -35,40 +23,35 @@ export interface AnnotationStorageProps {
 export default class AnnotationStorage extends FeatureStorage {
     static ANNOTS_COLL = 'annotations'
     static TAGS_COLL = 'tags'
-    static PAGES_COLL = 'pages'
     static BMS_COLL = 'annotBookmarks'
     static LISTS_COLL = 'customLists'
     static LIST_ENTRIES_COLL = 'annotListEntries'
-    static MEMEX_LINK_PROVIDERS = [
-        'http://memex.link',
-        'http://staging.memex.link',
-    ]
 
     private _browserStorageArea: Storage.StorageArea
     private _getDb: () => Promise<Dexie>
     private _annotationsColl: string
-    private _pagesColl: string
     private _bookmarksColl: string
     private _tagsColl: string
     private _listsColl: string
     private _listEntriesColl: string
-    private _uniqAnnots: (annots: Annotation[]) => Annotation[] = uniqBy('url')
+
+    search: (params: SearchParams) => Promise<Annotation[] | AnnotPage[]>
 
     constructor({
         storageManager,
         getDb,
+        AnnotationsSearcher = AnnotsSearcher,
         browserStorageArea = browser.storage.local,
         annotationsColl = AnnotationStorage.ANNOTS_COLL,
-        pagesColl = AnnotationStorage.PAGES_COLL,
         bookmarksColl = AnnotationStorage.BMS_COLL,
         tagsColl = AnnotationStorage.TAGS_COLL,
         listsColl = AnnotationStorage.LISTS_COLL,
         listEntriesColl = AnnotationStorage.LIST_ENTRIES_COLL,
     }: AnnotationStorageProps) {
         super(storageManager)
+
         this._annotationsColl = annotationsColl
         this._tagsColl = tagsColl
-        this._pagesColl = pagesColl
         this._bookmarksColl = bookmarksColl
         this._listsColl = listsColl
         this._listEntriesColl = listEntriesColl
@@ -161,6 +144,18 @@ export default class AnnotationStorage extends FeatureStorage {
                 ],
             },
         ])
+
+        const searcher = new AnnotationsSearcher({
+            storageManager,
+            listsColl,
+            listEntriesColl,
+            tagsColl,
+            bookmarksColl,
+            annotsColl: annotationsColl,
+            getTagsByAnnotationUrl: this.getTagsByAnnotationUrl.bind(this),
+        })
+
+        this.search = searcher.search.bind(searcher)
     }
 
     private async getListById({ listId }: { listId: number }) {
@@ -250,301 +245,6 @@ export default class AnnotationStorage extends FeatureStorage {
         return this.storageManager
             .collection(this._annotationsColl)
             .findObjects<Annotation>({ pageUrl })
-    }
-
-    // TODO: Find better way of calculating this?
-    private isAnnotDirectLink = (annot: Annotation) => {
-        let isDirectLink = false
-
-        for (const provider of AnnotationStorage.MEMEX_LINK_PROVIDERS) {
-            isDirectLink = isDirectLink || annot.url.startsWith(provider)
-        }
-
-        return isDirectLink
-    }
-
-    private applyUrlFilters(
-        query,
-        {
-            collUrlsInc,
-            domainUrlsInc,
-            domainUrlsExc,
-            tagUrlsInc,
-            tagUrlsExc,
-        }: UrlFilters,
-    ) {
-        let pageUrlInc: string[]
-
-        if (collUrlsInc != null && collUrlsInc.size) {
-            pageUrlInc = [...collUrlsInc]
-
-            query.url = {
-                $in: pageUrlInc,
-                ...(query.pageUrl || {}),
-            }
-        }
-
-        if (domainUrlsInc != null && domainUrlsInc.size) {
-            // Intersect inc. domain URLs and inc. collection URLs, if both defined
-            pageUrlInc =
-                pageUrlInc != null
-                    ? [
-                          ...new Set(
-                              pageUrlInc.filter(url => domainUrlsInc.has(url)),
-                          ),
-                      ]
-                    : [...domainUrlsInc]
-
-            query.pageUrl = {
-                $in: pageUrlInc,
-                ...(query.pageUrl || {}),
-            }
-        }
-
-        if (domainUrlsExc != null && domainUrlsExc.size) {
-            query.pageUrl = {
-                $nin: [...domainUrlsExc],
-                ...(query.pageUrl || {}),
-            }
-        }
-
-        if (tagUrlsInc != null && tagUrlsInc.size) {
-            query.url = { $in: [...tagUrlsInc], ...(query.url || {}) }
-        }
-
-        if (tagUrlsExc != null && tagUrlsExc.size) {
-            query.url = { $nin: [...tagUrlsExc], ...(query.url || {}) }
-        }
-    }
-
-    /**
-     * I don't know why this is the only way I can get this working...
-     * I originally intended a simpler single query like:
-     *  { $or: [_body_terms: term, _comment_terms: term] }
-     */
-    private termSearch = (
-        {
-            endDate = Date.now(),
-            startDate = 0,
-            limit = 5,
-            url,
-            highlightsOnly = false,
-            directLinksOnly = false,
-        }: Partial<SearchParams>,
-        urlFilters: UrlFilters,
-    ) => async (term: string) => {
-        const termSearchField = async (field: string) => {
-            const query: any = {
-                [field]: { $all: [term] },
-                createdWhen: {
-                    $lte: endDate,
-                    $gte: startDate,
-                },
-            }
-
-            this.applyUrlFilters(query, urlFilters)
-
-            if (url != null && url.length) {
-                query.pageUrl = url
-            }
-
-            const results = await this.storageManager
-                .collection(this._annotationsColl)
-                .findObjects<Annotation>(query, { limit })
-
-            return directLinksOnly
-                ? results.filter(this.isAnnotDirectLink)
-                : results
-        }
-
-        const bodyRes = await termSearchField('_body_terms')
-        const commentsRes = highlightsOnly
-            ? []
-            : await termSearchField('_comment_terms')
-
-        return this._uniqAnnots([...bodyRes, ...commentsRes]).slice(0, limit)
-    }
-
-    private async collectionSearch(collections: string[]) {
-        if (!collections.length) {
-            return undefined
-        }
-
-        const colls = await this.storageManager
-            .collection(this._listsColl)
-            .findObjects<any>({ name: { $in: collections } })
-
-        const collEntries = await this.storageManager
-            .collection(this._listEntriesColl)
-            .findObjects<any>({ listId: { $in: colls.map(coll => coll.id) } })
-
-        return new Set<string>(collEntries.map(coll => coll.url))
-    }
-
-    private async tagSearch(tags: string[]) {
-        if (!tags.length) {
-            return undefined
-        }
-
-        const tagResults = await this.storageManager
-            .collection(this._tagsColl)
-            .findObjects<Tag>({ name: { $in: tags } })
-
-        return new Set<string>(tagResults.map(tag => tag.url))
-    }
-
-    private async domainSearch(domains: string[]) {
-        if (!domains.length) {
-            return undefined
-        }
-
-        const pages = await this.storageManager
-            .collection(this._pagesColl)
-            .findObjects<Page>({
-                $or: [
-                    { hostname: { $in: domains } },
-                    { domain: { $in: domains } },
-                ],
-            })
-
-        return new Set<string>(pages.map(page => page.url))
-    }
-
-    private async mapSearchResToBookmarks(
-        { bookmarksOnly = false }: SearchParams,
-        results: Annotation[],
-    ) {
-        const bookmarks = await this.storageManager
-            .collection(this._bookmarksColl)
-            .findObjects<any>({
-                url: { $in: results.map(annot => annot.url) },
-            })
-
-        const bmUrlSet = new Set(bookmarks.map(bm => bm.url))
-
-        if (bookmarksOnly) {
-            results = results.filter(annot => bmUrlSet.has(annot.url))
-        }
-
-        return results.map(annot => ({
-            ...annot,
-            hasBookmark: bmUrlSet.has(annot.pageUrl),
-        }))
-    }
-
-    private projectPageSearchResults(results): AnnotPage[] {
-        return results.map(({ annotations, fullUrl, fullTitle }) => ({
-            url: fullUrl,
-            title: fullTitle,
-            hasBookmark: true,
-            annotations: this.projectAnnotSearchResults(annotations),
-        }))
-    }
-
-    private projectAnnotSearchResults(results): Annotation[] {
-        return results.map(
-            ({
-                url,
-                pageUrl,
-                body,
-                comment,
-                createdWhen,
-                tags,
-                hasBookmark,
-            }) => ({
-                url,
-                pageUrl,
-                body,
-                comment,
-                createdWhen,
-                tags: tags.map(tag => tag.name),
-                hasBookmark,
-            }),
-        )
-    }
-
-    private async mapAnnotsToPages(annots: Annotation[]): Promise<AnnotPage[]> {
-        const pageUrls = annots.map(annot => annot.pageUrl)
-
-        const annotsByUrl = new Map<string, Annotation[]>()
-
-        for (const annot of annots) {
-            const pageAnnots = annotsByUrl.get(annot.pageUrl) || []
-            annotsByUrl.set(annot.pageUrl, [...pageAnnots, annot])
-        }
-
-        const pages = await this.storageManager
-            .collection(this._pagesColl)
-            .findObjects<AnnotPage>({ url: { $in: pageUrls } })
-
-        // TODO: map bookmark status, favIcon, screenshot
-        // ...
-
-        return pages.map(page => ({
-            ...page,
-            annotations: annotsByUrl.get(page.url),
-        }))
-    }
-
-    async search({
-        terms = [],
-        tagsInc = [],
-        tagsExc = [],
-        domainsInc = [],
-        domainsExc = [],
-        collections = [],
-        limit = 5,
-        includePageResults = false,
-        ...searchParams
-    }: SearchParams): Promise<Annotation[] | AnnotPage[]> {
-        const filters: UrlFilters = {
-            collUrlsInc: await this.collectionSearch(collections),
-            tagUrlsInc: await this.tagSearch(tagsInc),
-            tagUrlsExc: await this.tagSearch(tagsExc),
-            domainUrlsInc: await this.domainSearch(domainsInc),
-            domainUrlsExc: await this.domainSearch(domainsExc),
-        }
-
-        // If domains/tags/collections filters were specified but no matches, search fails early
-        if (
-            (filters.domainUrlsInc != null &&
-                filters.domainUrlsInc.size === 0) ||
-            (filters.tagUrlsInc != null && filters.tagUrlsInc.size === 0) ||
-            (filters.collUrlsInc != null && filters.collUrlsInc.size === 0)
-        ) {
-            return []
-        }
-
-        const termResults = await Promise.all(
-            terms.map(this.termSearch({ ...searchParams, limit }, filters)),
-        )
-
-        // Flatten out results
-        let annotResults = this._uniqAnnots([].concat(...termResults)).slice(
-            0,
-            limit,
-        )
-
-        annotResults = await this.mapSearchResToBookmarks(
-            searchParams,
-            annotResults,
-        )
-
-        // Lookup tags for each annotation
-        annotResults = await Promise.all(
-            annotResults.map(async annot => ({
-                ...annot,
-                tags: await this.getTagsByAnnotationUrl(annot.url),
-            })),
-        )
-
-        if (includePageResults) {
-            const pageResults = await this.mapAnnotsToPages(annotResults)
-            return this.projectPageSearchResults(pageResults)
-        }
-
-        // Project out unwanted data
-        return this.projectAnnotSearchResults(annotResults)
     }
 
     async createAnnotation({
