@@ -5,16 +5,20 @@ import { Annotation } from 'src/sidebar-common/types'
 
 /**
  * Defines how to go to an annotation from the `overview` sidebar.
- * @param annotation The annotation/highlight to go to.
+ * Returns a method that takes an annotation and goes to it.
+ *
+ * @param pageUrl The url of the page for which the annotations are shown.
  */
-export const goToAnnotation = async (annotation: Annotation) => {
+export const goToAnnotation = (pageUrl: string) => async (
+    annotation: Annotation,
+) => {
     if (!annotation.body) {
         return
     }
 
     const tab = await browser.tabs.create({
         active: true,
-        url: annotation.url,
+        url: pageUrl,
     })
 
     const listener = async (tabId, changeInfo) => {
