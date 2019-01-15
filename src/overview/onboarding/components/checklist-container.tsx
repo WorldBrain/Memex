@@ -50,22 +50,18 @@ class OnboardingChecklist extends React.Component<Props> {
             return
         }
 
+        await utils.setOnboardingStage('annotation', STAGES.redirected)
+        await utils.openDemoPage()
+
         this.processEvent({
             type: EVENT_NAMES.START_ANNOTATION_ONBOARDING,
         })
-
-        await utils.setOnboardingStage('annotation', STAGES.redirected)
-        await utils.openDemoPage()
     }
 
     private handlePowerSearchStage = async () => {
         if (this.props.powerSearchStage === 'DONE') {
             return
         }
-
-        this.processEvent({
-            type: EVENT_NAMES.START_POWERSEARCH_ONBOARDING,
-        })
 
         /*
         If there are no results in Overview, take user to the Wiki
@@ -81,15 +77,23 @@ class OnboardingChecklist extends React.Component<Props> {
             )
             this.props.initOnboardingTooltips()
         }
+
+        this.processEvent({
+            type: EVENT_NAMES.START_POWERSEARCH_ONBOARDING,
+        })
     }
 
     private handleTaggingStage = async () => {
         if (this.props.taggingStage === 'DONE') {
             return
         }
-        // TODO: Add analytics
+
         await utils.setOnboardingStage('tagging', STAGES.redirected)
         await utils.openDemoPage()
+
+        this.processEvent({
+            type: EVENT_NAMES.START_TAGGING_ONBOARDING,
+        })
     }
 
     private handleBackupStage = async () => {
@@ -97,9 +101,12 @@ class OnboardingChecklist extends React.Component<Props> {
             return
         }
 
-        // TODO: Add analytics
         this.openOptionsTab('backup')
         await this.props.setBackupStageDone()
+
+        this.processEvent({
+            type: EVENT_NAMES.FINISH_BACKUP_ONBOARDING,
+        })
     }
 
     render() {

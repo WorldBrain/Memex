@@ -1,10 +1,11 @@
 import { browser } from 'webextension-polyfill-ts'
 
-import { getLocalStorage, setLocalStorage } from 'src/util/storage'
+import { remoteFunction } from 'src/util/webextensionRPC'
+import { EVENT_NAMES } from 'src/analytics/internal/constants'
 import { STAGES } from './constants'
 import { fetchOnboardingStage, setOnboardingStage } from './utils'
-import { utils } from 'src/background-script'
 
+const processEventRPC = remoteFunction('processEvent')
 /**
  * Fetches the tagging stage status from local storage and checks
  * whether the in page notification for tagging is shown.
@@ -42,4 +43,6 @@ export const checkForTaggingStage = async () => {
     setTimeout(async () => {
         await _goToDashboard()
     }, 1000)
+
+    processEventRPC({ type: EVENT_NAMES.FINISH_TAGGING_ONBOARDING })
 }
