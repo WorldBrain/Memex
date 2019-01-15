@@ -50,7 +50,6 @@
     font-family: 'Lato', sans-serif;
     color: #4a4a4a;
 
-    /* TODO: (Untested). */
     & .lastEdit {
         font-weight: 400;
         color: #929292;
@@ -58,7 +57,6 @@
     }
 }
 
-/* TODO: (Untested). */
 .highlight {
     font-family: 'IBM Plex Serif', serif;
     font-style: italic;
@@ -68,54 +66,4 @@
     margin: 0 0 5px 0;
     padding: 7px 15px;
     line-height: 20px;
-}
-
-/* Tested till this point. */
-
-.icon {
-    margin: 0px 5px;
-    cursor: pointer;
-}
-
-.annotationTextarea {
-    font-size: 13px;
-    width: 95%;
-    resize: none;
-    color: #222;
-    font-family: 'Lato', sans-serif;
-    background: #f7f7f7;
-    border: none;
-    padding: 10px;
-    line-height: 19px;
-    font-weight: 400;
-    margin-bottom: 2px;
-    margin-left: 8px;
-    margin-top: 9px;
-    box-sizing: border-box;
-
-    &::placeholder {
-        color: #4a4a4a;
-        font-style: italic;
-    }
-}
-
-.tagsInput {
-    width: 95%;
-    height: 18px;
-    border-radius: 10px;
-    background-color: #fdfbfb;
-    margin-top: 7px;
-    font-size: 11px;
-    padding: 3px 8px 4px 10px;
-    color: #3eb995;
-    box-shadow: #0000005c 0px 0px 5px 0px inset;
-    border: 0.5px #0000005c solid;
-
-    &::placeholder {
-        color: #3eb995;
-    }
-}
-
-input:focus {
-    outline: none;
 }
