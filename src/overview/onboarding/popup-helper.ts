@@ -1,11 +1,11 @@
-import { browser } from 'webextension-polyfill-ts'
-
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { EVENT_NAMES } from 'src/analytics/internal/constants'
 import { STAGES } from './constants'
 import { fetchOnboardingStage, setOnboardingStage } from './utils'
 
 const processEventRPC = remoteFunction('processEvent')
+const openOptionsRPC = remoteFunction('openOptionsTab')
+
 /**
  * Fetches the tagging stage status from local storage and checks
  * whether the in page notification for tagging is shown.
@@ -16,15 +16,6 @@ const _checkTaggingStageStatus = async () => {
         return true
     }
     return false
-}
-
-/**
- * Creates a new tab to the overview dashboard.
- */
-const _goToDashboard = async () => {
-    browser.tabs.create({
-        url: browser.runtime.getURL('options.html#/overview'),
-    })
 }
 
 /**
@@ -41,7 +32,7 @@ export const checkForTaggingStage = async () => {
 
     await setOnboardingStage('tagging', STAGES.done)
     setTimeout(async () => {
-        await _goToDashboard()
+        openOptionsRPC('overview')
     }, 1000)
 
     processEventRPC({ type: EVENT_NAMES.FINISH_TAGGING_ONBOARDING })
