@@ -9,7 +9,13 @@ import {
 } from '../../search'
 import { FeatureStorage } from '../../search/storage'
 import { STORAGE_KEYS as IDXING_PREF_KEYS } from '../../options/settings/constants'
-import { Annotation, AnnotListEntry, SearchParams, UrlFilters } from '../types'
+import {
+    AnnotPage,
+    Annotation,
+    AnnotListEntry,
+    SearchParams,
+    UrlFilters,
+} from '../types'
 
 const uniqBy = require('lodash/fp/uniqBy')
 
@@ -422,11 +428,20 @@ export default class AnnotationStorage extends FeatureStorage {
 
         return results.map(annot => ({
             ...annot,
-            isBookmarked: bmUrlSet.has(annot.pageUrl),
+            hasBookmark: bmUrlSet.has(annot.pageUrl),
         }))
     }
 
-    private projectSearchResults(results) {
+    private projectPageSearchResults(results): AnnotPage[] {
+        return results.map(({ annotations, fullUrl, fullTitle }) => ({
+            url: fullUrl,
+            title: fullTitle,
+            hasBookmark: true,
+            annotations: this.projectAnnotSearchResults(annotations),
+        }))
+    }
+
+    private projectAnnotSearchResults(results): Annotation[] {
         return results.map(
             ({
                 url,
@@ -435,7 +450,7 @@ export default class AnnotationStorage extends FeatureStorage {
                 comment,
                 createdWhen,
                 tags,
-                isBookmarked,
+                hasBookmark,
             }) => ({
                 url,
                 pageUrl,
@@ -443,9 +458,32 @@ export default class AnnotationStorage extends FeatureStorage {
                 comment,
                 createdWhen,
                 tags: tags.map(tag => tag.name),
-                isBookmarked,
+                hasBookmark,
             }),
         )
+    }
+
+    private async mapAnnotsToPages(annots: Annotation[]): Promise<AnnotPage[]> {
+        const pageUrls = annots.map(annot => annot.pageUrl)
+
+        const annotsByUrl = new Map<string, Annotation[]>()
+
+        for (const annot of annots) {
+            const pageAnnots = annotsByUrl.get(annot.pageUrl) || []
+            annotsByUrl.set(annot.pageUrl, [...pageAnnots, annot])
+        }
+
+        const pages = await this.storageManager
+            .collection(this._pagesColl)
+            .findObjects<AnnotPage>({ url: { $in: pageUrls } })
+
+        // TODO: map bookmark status, favIcon, screenshot
+        // ...
+
+        return pages.map(page => ({
+            ...page,
+            annotations: annotsByUrl.get(page.url),
+        }))
     }
 
     async search({
@@ -456,8 +494,9 @@ export default class AnnotationStorage extends FeatureStorage {
         domainsExc = [],
         collections = [],
         limit = 5,
+        includePageResults = false,
         ...searchParams
-    }: SearchParams) {
+    }: SearchParams): Promise<Annotation[] | AnnotPage[]> {
         const filters: UrlFilters = {
             collUrlsInc: await this.collectionSearch(collections),
             tagUrlsInc: await this.tagSearch(tagsInc),
@@ -499,8 +538,13 @@ export default class AnnotationStorage extends FeatureStorage {
             })),
         )
 
+        if (includePageResults) {
+            const pageResults = await this.mapAnnotsToPages(annotResults)
+            return this.projectPageSearchResults(pageResults)
+        }
+
         // Project out unwanted data
-        return this.projectSearchResults(annotResults)
+        return this.projectAnnotSearchResults(annotResults)
     }
 
     async createAnnotation({

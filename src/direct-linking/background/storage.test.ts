@@ -5,6 +5,7 @@ import AnnotationStorage from './storage'
 import getDb, { StorageManager } from '../../search'
 import CustomListBackground from 'src/custom-lists/background'
 import * as DATA from './storage.test.data'
+import { AnnotPage } from '../types'
 
 describe('Annotations storage', () => {
     let annotationStorage: AnnotationStorage
@@ -22,9 +23,10 @@ describe('Annotations storage', () => {
         ]) {
             // Pages also need to be seeded to match domains filters against
             await storageManager.collection('pages').createObject({
-                url: normalize(annot.url),
+                url: annot.pageUrl,
                 hostname: normalize(annot.pageUrl),
                 domain: normalize(annot.pageUrl),
+                title: annot.pageTitle,
                 text: '',
                 canonicalUrl: annot.url,
             })
@@ -233,6 +235,17 @@ describe('Annotations storage', () => {
 
                 expect(resNone).toBeDefined()
                 expect(resNone.length).toBe(0)
+            })
+
+            test('page results include', async () => {
+                const results = (await annotationStorage.search({
+                    terms: ['highlight', 'annotation', 'comment'],
+                    includePageResults: true,
+                })) as AnnotPage[]
+
+                expect(results).toBeDefined()
+                expect(results.length).toBe(2)
+                expect(results[0].annotations.length).toBe(3)
             })
         })
     })
