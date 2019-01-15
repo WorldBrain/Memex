@@ -2,7 +2,9 @@ import React, { PureComponent } from 'react'
 import { connect } from 'react-redux'
 import propTypes from 'prop-types'
 
-import SidebarContainer from '../../sidebar-common'
+import SidebarContainer, {
+    selectors as sidebarSelectors,
+} from '../../sidebar-common'
 import Onboarding from '../onboarding'
 import { DeleteConfirmModal } from '../delete-confirm-modal'
 import {
@@ -21,6 +23,7 @@ import { goToAnnotation } from '../utils'
 class Overview extends PureComponent {
     static propTypes = {
         init: propTypes.func.isRequired,
+        pageUrl: propTypes.string.isRequired,
     }
 
     componentDidMount() {
@@ -42,7 +45,7 @@ class Overview extends PureComponent {
                 <SidebarContainer
                     env="overview"
                     annotationsManager={this._annotationsManager}
-                    goToAnnotation={goToAnnotation}
+                    goToAnnotation={goToAnnotation(this.props.pageUrl)}
                 />
                 <Tooltip />
             </React.Fragment>
@@ -50,7 +53,11 @@ class Overview extends PureComponent {
     }
 }
 
+const mapStateToProps = state => ({
+    pageUrl: sidebarSelectors.pageUrl(state),
+})
+
 export default connect(
-    null,
+    mapStateToProps,
     dispatch => ({ init: () => dispatch(searchBarActs.init()) }),
 )(Overview)
