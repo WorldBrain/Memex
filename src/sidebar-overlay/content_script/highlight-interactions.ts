@@ -1,33 +1,30 @@
 import { highlightAnnotation } from 'src/direct-linking/content_script/rendering'
-import { remoteFunction } from 'src/util/webextensionRPC'
 import { getOffsetTop } from '../utils'
-import styles from 'src/direct-linking/content_script/styles.css'
+import { Annotation } from 'src/sidebar-common/sidebar/types'
 
-const openOptionsRPC = remoteFunction('openOptionsTab')
+const styles = require('src/direct-linking/content_script/styles.css')
+
+const _getOffsetTop = (element: HTMLElement) =>
+    element.offsetTop +
+    (element.offsetParent
+        ? _getOffsetTop(element.offsetParent as HTMLElement)
+        : 0)
 
 /**
- * Scrolls to the highlight of the passed annotation.
- * @param {*} annotation The annotation object to scroll to.
+ * Scrolls to the highlight of the given annotation on the current page.
  */
-export function scrollToHighlight(annotation) {
+export function scrollToHighlight({ url }: Annotation) {
     const baseClass = styles['memex-highlight']
     const $highlight = document.querySelector(
-        `.${baseClass}[data-annotation="${annotation.url}"]`,
+        `.${baseClass}[data-annotation="${url}"]`,
     )
 
     if ($highlight) {
-        Element.prototype.documentOffsetTop = function() {
-            return (
-                this.offsetTop +
-                (this.offsetParent ? this.offsetParent.documentOffsetTop() : 0)
-            )
-        }
-
-        const top = $highlight.documentOffsetTop() - window.innerHeight / 2
+        const top =
+            _getOffsetTop($highlight as HTMLElement) - window.innerHeight / 2
         window.scrollTo({ top, behavior: 'smooth' })
-        // The pixels scrolled need to be returned in
-        // order to restrict scrolling when mouse is
-        // over the iFrame
+        // The pixels scrolled need to be returned in order to restrict
+        // scrolling when mouse is over the sidebar.
         return top
     } else {
         console.error('MEMEX: Oops, no highlight found to scroll to')
@@ -39,7 +36,7 @@ export function scrollToHighlight(annotation) {
  * from the page.
  * @param {*} annotation Annotation object which has the selector to be highlighted
  */
-export const highlightAndScroll = annotation => {
+export const highlightAndScroll = (annotation: Annotation) => {
     removeHighlights(true)
     makeHighlightDark(annotation)
     return scrollToHighlight(annotation)
@@ -49,9 +46,9 @@ export const highlightAndScroll = annotation => {
  * Given an array of annotation objects, highlights all of them.
  */
 export const highlightAnnotations = async (
-    annotations,
-    focusOnAnnotation,
-    hoverAnnotationContainer,
+    annotations: Annotation[],
+    focusOnAnnotation: (url: string) => void,
+    hoverAnnotationContainer: (url: string) => void,
 ) => {
     annotations.forEach(async annotation =>
         highlightAnnotation(
@@ -63,22 +60,22 @@ export const highlightAnnotations = async (
 }
 
 /**
- * Attaches event listeners to the highlightsfor hovering/focusing
- * on the annotaiton in sidebar.
- * @param {*} annotation The annotation to which the listeners are going to be attached
+ * Attaches event listeners to the highlights for hovering/focusing on the
+ * annotation in sidebar.
+ * @param {Annotation} annotation The annotation to which the listeners are going to be attached
  * @param {function} focusOnAnnotation Function when called will set the sidebar container to active state
  * @param {function} hoverAnnotationContainer Function when called will set the sidebar container to hover state
  */
 export const attachEventListenersToNewHighlights = (
-    annotation,
-    focusOnAnnotation,
-    hoverAnnotationContainer,
+    annotation: Annotation,
+    focusOnAnnotation: (url: string) => void,
+    hoverAnnotationContainer: (url: string) => void,
 ) => {
     const newHighlights = document.querySelectorAll(
         `.${styles['memex-highlight']}:not([data-annotation])`,
     )
     newHighlights.forEach(highlight => {
-        highlight.dataset.annotation = annotation.url
+        ;(highlight as HTMLElement).dataset.annotation = annotation.url
         if (!focusOnAnnotation || !hoverAnnotationContainer) {
             return
         }
@@ -98,8 +95,8 @@ export const attachEventListenersToNewHighlights = (
             if (!e.target.dataset.annotation) {
                 return
             }
-            removeMediumHighlights()
-            makeHighlightMedium(annotation)
+            _removeMediumHighlights()
+            _makeHighlightMedium(annotation)
             hoverAnnotationContainer(annotation.url)
         }
         highlight.addEventListener('mouseenter', mouseenterListener, false)
@@ -108,8 +105,8 @@ export const attachEventListenersToNewHighlights = (
             if (!e.target.dataset.annotation) {
                 return
             }
-            removeMediumHighlights()
-            hoverAnnotationContainer('')
+            _removeMediumHighlights()
+            hoverAnnotationContainer(null)
         }
         highlight.addEventListener('mouseleave', mouseleaveListener, false)
     })
@@ -118,7 +115,7 @@ export const attachEventListenersToNewHighlights = (
 /**
  * Removes the medium class from all the highlights making them light.
  */
-export const removeMediumHighlights = () => {
+const _removeMediumHighlights = () => {
     // Remove previous "medium" highlights
     const baseClass = styles['memex-highlight']
     const mediumClass = styles['medium']
@@ -132,8 +129,8 @@ export const removeMediumHighlights = () => {
  * Makes the given annotation as a medium highlight.
  * @param {string} url PK of the annotation to make medium
  */
-export const makeHighlightMedium = ({ url }) => {
-    // Make the current annotation as a "medium" highlight
+const _makeHighlightMedium = ({ url }: Annotation) => {
+    // Make the current annotation as a "medium" highlight.
     const baseClass = styles['memex-highlight']
     const mediumClass = styles['medium']
     const highlights = document.querySelectorAll(
@@ -143,11 +140,9 @@ export const makeHighlightMedium = ({ url }) => {
 }
 
 /**
- * Makes the highlight a dark highlight
- * @param {string} url PK of the annotation to make dark
+ * Makes the highlight a dark highlight.
  */
-
-export const makeHighlightDark = ({ url }) => {
+export const makeHighlightDark = ({ url }: Annotation) => {
     const baseClass = styles['memex-highlight']
     const highlights = document.querySelectorAll(
         `.${baseClass}[data-annotation="${url}"]`,
@@ -160,27 +155,28 @@ export const makeHighlightDark = ({ url }) => {
 
 /**
  * Removes all highlight elements in the current page.
- * @param {bool} isDark If isDark is true, only dark highlights will be removed.
+ * If `onlyRemoveDarkHighlights` is true, only dark highlights will be removed.
  */
-export function removeHighlights(isDark = false) {
+export const removeHighlights = (onlyRemoveDarkHighlights = false) => {
     const baseClass = '.' + styles['memex-highlight']
-    const darkClass = isDark ? '.' + styles['dark'] : ''
+    const darkClass = onlyRemoveDarkHighlights ? '.' + styles['dark'] : ''
     const highlightClass = `${baseClass}${darkClass}`
     const highlights = document.querySelectorAll(highlightClass)
 
-    highlights.forEach(highlight => {
-        highlight.classList.remove(styles['dark'])
-        if (!isDark) {
-            removeHighlight(highlight)
-        }
-    })
+    if (onlyRemoveDarkHighlights) {
+        highlights.forEach(highlight =>
+            highlight.classList.remove(styles['dark']),
+        )
+    } else {
+        highlights.forEach(highlight => _removeHighlight(highlight))
+    }
 }
 
 /**
- * Unwraps the span element from the highlight,
+ * Unwraps the `memex-highlight` element from the highlight,
  * resetting the DOM Text to how it was.
  */
-const removeHighlight = highlight => {
+const _removeHighlight = (highlight: Element) => {
     const parent = highlight.parentNode
     while (highlight.firstChild) {
         parent.insertBefore(highlight.firstChild, highlight)
@@ -191,27 +187,20 @@ const removeHighlight = highlight => {
 /**
  * Removes all the highlights of a given annotation.
  * Called when the annotation is deleted.
- * @param {string} url PK of the annotation to be removed
  */
-export const removeAnnotationHighlights = ({ url }) => {
+const _removeAnnotationHighlights = ({ url }: Annotation) => {
     const baseClass = styles['memex-highlight']
     const highlights = document.querySelectorAll(
         `.${baseClass}[data-annotation="${url}"]`,
     )
-    highlights.forEach(highlight => removeHighlight(highlight))
+    highlights.forEach(highlight => _removeHighlight(highlight))
 }
 
 /**
- * Sends a message to the background to open up Memex Settings.
+ * Finds each annotation's position in page, sorts it by the position and
+ * returns the sorted annotations.
  */
-export const openSettings = () => openOptionsRPC('settings')
-
-/**
- * Finds each annotations position in page, sorts it by the position and returns.
- * @param {Array<*>} annotations Array of Annotation objects
- * @returns {Array<*>} Sorted array of Annotations
- */
-export const sortAnnotationByPosition = annotations => {
+export const sortAnnotationsByPosition = (annotations: Annotation[]) => {
     const annotationsWithTops = annotations.map(annotation => {
         const firstHighlight = document.querySelector(
             `.${styles['memex-highlight']}[data-annotation="${
@@ -223,5 +212,7 @@ export const sortAnnotationByPosition = annotations => {
             offsetTop: firstHighlight ? getOffsetTop(firstHighlight) : Infinity,
         }
     })
-    return annotationsWithTops.sort((a, b) => a.offsetTop > b.offsetTop)
+
+    // TODO: Check if it should be a minus or plus.
+    return annotationsWithTops.sort((a, b) => a.offsetTop - b.offsetTop)
 }
