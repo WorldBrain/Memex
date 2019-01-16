@@ -25,6 +25,14 @@ export const setPage = createAction<Page>('setPage')
 
 export const setAnnotations = createAction<Annotation[]>('setAnnotations')
 
+export const setActiveAnnotationUrl = createAction<string>(
+    'setActiveAnnotationUrl',
+)
+
+export const setHoverAnnotationUrl = createAction<string>(
+    'setHoverAnnotationUrl',
+)
+
 export const setShowCongratsMessage = createAction<boolean>(
     'setShowCongratsMessage',
 )

@@ -18,6 +18,8 @@ interface Props {
     isOpen: boolean
     isLoading: boolean
     annotations: Annotation[]
+    activeAnnotationUrl: string
+    hoverAnnotationUrl: string
     showCommentBox: boolean
     showCongratsMessage: boolean
     closeSidebar: () => void
@@ -83,6 +85,8 @@ class Sidebar extends React.Component<Props> {
             isOpen,
             isLoading,
             annotations,
+            activeAnnotationUrl,
+            hoverAnnotationUrl,
             showCommentBox,
             showCongratsMessage,
             closeSidebar,
@@ -119,6 +123,12 @@ class Sidebar extends React.Component<Props> {
                                     key={annotation.url}
                                     env={env}
                                     {...annotation}
+                                    isActive={
+                                        activeAnnotationUrl === annotation.url
+                                    }
+                                    isHovered={
+                                        hoverAnnotationUrl === annotation.url
+                                    }
                                     handleGoToAnnotation={this._handleGoToAnnotation(
                                         annotation,
                                     )}

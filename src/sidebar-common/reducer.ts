@@ -18,6 +18,8 @@ export const defaultState: State = {
         title: null,
     },
     annotations: [],
+    activeAnnotationUrl: null,
+    hoverAnnotationUrl: null,
     commentBox: defCommentBoxState,
     showCongratsMessage: false,
 }
@@ -35,6 +37,12 @@ const setPage = (state: Page, page: Page) => page
 
 const setAnnotations = (state: Annotation[], annotations: Annotation[]) =>
     annotations
+
+const setActiveAnnotationUrl = (state: string, activeAnnotationUrl: string) =>
+    activeAnnotationUrl
+
+const setHoverAnnotationUrl = (state: string, hoverAnnotationUrl: string) =>
+    hoverAnnotationUrl
 
 const setShowCongratsMessage = (state: boolean, showCongratsMessage: boolean) =>
     showCongratsMessage
@@ -59,6 +67,14 @@ const annotationsReducer = createReducer<Annotation[]>(on => {
     on(actions.setAnnotations, setAnnotations)
 }, defaultState.annotations)
 
+const activeAnnotationUrlReducer = createReducer<string>(on => {
+    on(actions.setActiveAnnotationUrl, setActiveAnnotationUrl)
+}, defaultState.activeAnnotationUrl)
+
+const hoverAnnotationUrlReducer = createReducer<string>(on => {
+    on(actions.setHoverAnnotationUrl, setHoverAnnotationUrl)
+}, defaultState.hoverAnnotationUrl)
+
 const showCongratsMessageReducer = createReducer<boolean>(on => {
     on(actions.setShowCongratsMessage, setShowCongratsMessage)
 }, defaultState.showCongratsMessage)
@@ -69,6 +85,8 @@ const reducer = combineReducers<State>({
     isLoading: isLoadingReducer,
     page: pageReducer,
     annotations: annotationsReducer,
+    activeAnnotationUrl: activeAnnotationUrlReducer,
+    hoverAnnotationUrl: hoverAnnotationUrlReducer,
     commentBox: commentBoxReducer,
     showCongratsMessage: showCongratsMessageReducer,
 })
