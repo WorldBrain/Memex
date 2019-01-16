@@ -1,8 +1,8 @@
-import { bodyLoader, interactiveLoader } from '../../util/loader'
-import ToolbarNotifications from '../../toolbar-notification/content_script'
+import { bodyLoader, interactiveLoader } from 'src/util/loader'
+import ToolbarNotifications from 'src/toolbar-notification/content_script'
 import * as interactions from './ribbon-interactions'
 import { getSidebarState } from '../utils'
-import AnnotationsManager from '../../sidebar-common/annotations-manager'
+import AnnotationsManager from 'src/sidebar-common/annotations-manager'
 
 const onKeydown = (
     e: KeyboardEvent,

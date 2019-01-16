@@ -1,7 +1,7 @@
 import { createStore, applyMiddleware, compose } from 'redux'
 import thunk from 'redux-thunk'
 
-import initSentry from '../util/raven'
+import initSentry from 'src/util/raven'
 import rootReducer from './reducer'
 
 const configureStore = () => {

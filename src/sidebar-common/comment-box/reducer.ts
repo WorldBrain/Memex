@@ -2,7 +2,7 @@ import { createReducer } from 'redux-act'
 
 import * as actions from './actions'
 import State from './types'
-import { Anchor } from '../../direct-linking/content_script/interactions'
+import { Anchor } from 'src/direct-linking/content_script/interactions'
 
 export const defaultState: State = {
     showCommentBox: false,

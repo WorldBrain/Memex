@@ -1,7 +1,7 @@
 import { browser } from 'webextension-polyfill-ts'
 
 import { remoteFunction } from 'src/util/webextensionRPC'
-import { Annotation } from 'src/sidebar-common/types'
+import { Annotation } from 'src/sidebar-common/sidebar/types'
 
 /**
  * Defines how to go to an annotation from the `overview` sidebar.

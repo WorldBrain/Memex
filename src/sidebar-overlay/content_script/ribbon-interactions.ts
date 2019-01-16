@@ -1,10 +1,10 @@
 import retargetEvents from 'react-shadow-dom-retarget-events'
 import { browser } from 'webextension-polyfill-ts'
 
-import { makeRemotelyCallable } from '../../util/webextensionRPC'
+import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import { setupRibbonAndSidebarUI, destroyRibbonAndSidebarUI } from '..'
 import { getSidebarState } from '../utils'
-import { getTooltipState } from '../../content-tooltip/utils'
+import { getTooltipState } from 'src/content-tooltip/utils'
 import { createRootElement, destroyRootElement } from './rendering'
 import { removeHighlights } from './highlight-interactions'
 // import { setTooltipState, getTooltipState } from '../../content-tooltip/utils'
