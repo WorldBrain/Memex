@@ -45,6 +45,10 @@ export default interface State {
     page: Page
     /** Annotations that this page has. */
     annotations: Annotation[]
+    /** URL for the currently active annotation. */
+    activeAnnotationUrl: string | null
+    /** URL for the currently hovered annotation. */
+    hoverAnnotationUrl: string | null
     /** State for the comment box. */
     commentBox: CommentBoxState
     /** Denotes whether to to show the congrats message during onboarding or not. */

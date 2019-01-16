@@ -16,6 +16,8 @@ interface StateProps {
     isOpen: boolean
     isLoading: boolean
     annotations: Annotation[]
+    activeAnnotationUrl: string
+    hoverAnnotationUrl: string
     showCommentBox: boolean
     showCongratsMessage: boolean
 }
@@ -94,6 +96,8 @@ class SidebarContainer extends React.Component<Props, State> {
             isOpen,
             isLoading,
             annotations,
+            activeAnnotationUrl,
+            hoverAnnotationUrl,
             handleAddCommentBtnClick,
             showCommentBox,
             showCongratsMessage,
@@ -106,6 +110,8 @@ class SidebarContainer extends React.Component<Props, State> {
                 isOpen={isOpen}
                 isLoading={isLoading}
                 annotations={annotations}
+                activeAnnotationUrl={activeAnnotationUrl}
+                hoverAnnotationUrl={hoverAnnotationUrl}
                 showCommentBox={showCommentBox}
                 showCongratsMessage={showCongratsMessage && !isLoading}
                 handleAddCommentBtnClick={handleAddCommentBtnClick}
@@ -126,6 +132,8 @@ const mapStateToProps: MapStateToProps<
     isOpen: selectors.isOpen(state),
     isLoading: selectors.isLoading(state),
     annotations: selectors.annotations(state),
+    activeAnnotationUrl: selectors.activeAnnotationUrl(state),
+    hoverAnnotationUrl: selectors.hoverAnnotationUrl(state),
     showCommentBox: commentBoxSelectors.showCommentBox(state),
     showCongratsMessage: selectors.showCongratsMessage(state),
 })

@@ -20,6 +20,8 @@ interface OwnProps {
     /** Required to decide how to go to an annotation when it's clicked. */
     env: 'inpage' | 'overview'
     url: string
+    isActive: boolean
+    isHovered: boolean
     createdWhen: Date
     lastEdited?: Date
     body?: string
@@ -46,12 +48,35 @@ interface State {
 
 class AnnotationBoxContainer extends React.Component<Props, State> {
     private _processEventRPC = remoteFunction('processEvent')
+    private _boxRef: HTMLDivElement = null
 
     state: State = {
         mode: 'default',
         commentText: '',
         tagsInput: [],
         displayCrowdfunding: false,
+    }
+
+    componentDidMount() {
+        this._setupEventListeners()
+    }
+
+    componentWillUnmount() {
+        this._removeEventListeners()
+    }
+
+    private _setupEventListeners = () => {
+        if (this._boxRef) {
+            this._boxRef.addEventListener('mouseenter', this._handleMouseEnter)
+            this._boxRef.addEventListener('mouseleave', this._handleMouseLeave)
+        }
+    }
+
+    private _removeEventListeners = () => {
+        if (this._boxRef) {
+            this._boxRef.addEventListener('mouseenter', this._handleMouseEnter)
+            this._boxRef.addEventListener('mouseleave', this._handleMouseLeave)
+        }
     }
 
     private _setDisplayCrowdfunding = async (
@@ -183,11 +208,25 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
         this.setState({ mode: 'default' })
     }
 
+    private _handleMouseEnter = (e: MouseEvent) => {
+        console.log(e)
+    }
+
+    private _handleMouseLeave = (e: MouseEvent) => {
+        console.log(e)
+    }
+
+    private _setBoxRef = (ref: HTMLDivElement) => {
+        this._boxRef = ref
+    }
+
     render() {
         const { mode, displayCrowdfunding } = this.state
         const {
             env,
             url,
+            isActive,
+            isHovered,
             createdWhen,
             lastEdited,
             body,
@@ -215,10 +254,13 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
             <div
                 id={url} // Focusing on annotation relies on this ID.
                 className={cx(styles.container, {
+                    [styles.isActive]: isActive,
+                    [styles.isHovered]: isHovered,
                     [styles.isClickable]: isClickable,
                     [styles.isJustComment]: mode !== 'edit' && isJustComment,
                 })}
                 onClick={isClickable ? handleGoToAnnotation : noop}
+                ref={this._setBoxRef}
             >
                 {/* Timestamp for the annotation. Hidden during 'edit' mode. */}
                 {mode !== 'edit' && (

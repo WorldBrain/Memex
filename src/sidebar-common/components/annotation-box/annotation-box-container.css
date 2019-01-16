@@ -18,15 +18,12 @@
         font-family: 'Lato', sans-serif;
     }
 
-    &:hover {
+    &:hover,
+    &.isHovered {
         border-color: #3db994;
     }
 
-    /**
-    * TODO: (Untested) Check the following class' purpose.
-    * See if it can't be replaced by a pseudo-class.
-    */
-    &.active {
+    &.isActive {
         border-color: #3db994b8;
         box-shadow: 0px 0px 5px 1px #00000050;
     }
