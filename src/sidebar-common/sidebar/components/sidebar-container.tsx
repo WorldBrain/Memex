@@ -2,16 +2,16 @@ import * as React from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 import onClickOutside from 'react-onclickoutside'
 
-import * as actions from './actions'
-import * as selectors from './selectors'
+import * as actions from '../actions'
+import * as selectors from '../selectors'
 import {
     actions as commentBoxActions,
     selectors as commentBoxSelectors,
-} from '../comment-box'
-import { Sidebar } from '../components'
-import SidebarState, { Annotation } from './types'
-import { MapDispatchToProps } from '../types'
-import AnnotationsManager from '../annotations-manager'
+} from '../../comment-box'
+import Sidebar from './sidebar'
+import SidebarState, { Annotation } from '../types'
+import { MapDispatchToProps } from '../../types'
+import AnnotationsManager from '../../annotations-manager'
 
 interface StateProps {
     isOpen: boolean

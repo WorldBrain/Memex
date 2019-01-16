@@ -1,4 +1,4 @@
-import SidebarContainer from './sidebar-container'
+import SidebarContainer from './components'
 import * as actions from './actions'
 import reducer from './reducer'
 import * as selectors from './selectors'
