@@ -1,4 +1,5 @@
 import { EVENT_TYPES, EVENT_NAMES } from './constants'
+import { updateLastActive } from '../'
 
 class Analytics {
     _initDataLoaded
@@ -121,6 +122,18 @@ class Analytics {
         return this._eventStats[notifType]
     }
 
+    isUserActiveEvent(eventArgs) {
+        if (
+            eventArgs.type === EVENT_NAMES.SUCCESSFUL_SEARCH ||
+            eventArgs.type === EVENT_NAMES.NLP_SEARCH ||
+            eventArgs.type === EVENT_NAMES.BOOKMARK
+        ) {
+            return true
+        }
+
+        return false
+    }
+
     /**
      * Track any user-invoked events internally.
      *
@@ -128,6 +141,10 @@ class Analytics {
      */
     async processEvent(eventArgs) {
         await this._initDataLoaded
+
+        if (this.isUserActiveEvent(eventArgs)) {
+            updateLastActive()
+        }
 
         // Prepare the event to store the event in dexie db.
         const time = Date.now()
