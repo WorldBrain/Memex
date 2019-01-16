@@ -1,13 +1,23 @@
 export const ANNOTATION_DEMO_URL = 'https://en.wikipedia.org/wiki/Memex'
 export const BACKUP_URL = '/options.html#/backup'
 
+/**
+ * Constant to store the names of different onboarding workflows.
+ */
+export const FLOWS = {
+    annotation: 'annotation',
+    powerSearch: 'powerSearch',
+    tagging: 'tagging',
+    backup: 'backup',
+}
+
 export const STORAGE_KEYS = {
     shouldShowOnboarding: 'should-show-onboarding',
     onboardingFlows: {
-        annotation: 'step-one-annotations',
-        powerSearch: 'step-two-power-search',
-        tagging: 'step-three-tagging',
-        backup: 'step-four-backup',
+        [FLOWS.annotation]: 'step-one-annotations',
+        [FLOWS.powerSearch]: 'step-two-power-search',
+        [FLOWS.tagging]: 'step-three-tagging',
+        [FLOWS.backup]: 'step-four-backup',
     },
 }
 

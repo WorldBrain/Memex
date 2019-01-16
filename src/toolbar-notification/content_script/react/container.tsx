@@ -10,7 +10,7 @@ import GoToDashboard from './notifications/go-to-dashboard'
 import TagThisPage from './notifications/tag-this-page'
 
 import { setOnboardingStage } from 'src/overview/onboarding/utils'
-import { STAGES } from 'src/overview/onboarding/constants'
+import { FLOWS, STAGES } from 'src/overview/onboarding/constants'
 import { EVENT_NAMES } from 'src/analytics/internal/constants'
 
 const styles = require('./styles.css')
@@ -99,7 +99,7 @@ export class ToolbarNotification extends Component<Props> {
                                 type: EVENT_NAMES.POWERSEARCH_GOTO_DASH,
                             })
                             await setOnboardingStage(
-                                'powerSearch',
+                                FLOWS.powerSearch,
                                 STAGES.powerSearch.overviewTooltips,
                             )
                             this.openOptionsTab('overview')

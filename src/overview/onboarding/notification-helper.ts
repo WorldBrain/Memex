@@ -1,7 +1,7 @@
 import { remoteFunction } from 'src/util/webextensionRPC'
 
 import { getLocalStorage } from 'src/util/storage'
-import { STAGES, STORAGE_KEYS } from './constants'
+import { FLOWS, STAGES, STORAGE_KEYS } from './constants'
 import { EVENT_NAMES } from 'src/analytics/internal/constants'
 import * as utils from './utils'
 
@@ -20,7 +20,7 @@ export const conditionallyShowHighlightNotification = async ({
         return
     }
 
-    const annotationStage = await utils.fetchOnboardingStage('annotation')
+    const annotationStage = await utils.fetchOnboardingStage(FLOWS.annotation)
 
     if (annotationStage !== STAGES.annotation.notifiedHighlightText) {
         return
@@ -36,7 +36,7 @@ export const conditionallyShowHighlightNotification = async ({
         type: EVENT_NAMES.ONBOARDING_HIGHLIGHT_MADE,
     })
     await utils.setOnboardingStage(
-        'annotation',
+        FLOWS.annotation,
         STAGES.annotation.notifiedSelectOption,
     )
 }
@@ -55,7 +55,7 @@ const handler = toolbarNotifications => async () => {
     })
 
     await utils.setOnboardingStage(
-        'powerSearch',
+        FLOWS.powerSearch,
         STAGES.powerSearch.overviewTooltips,
     )
 }
@@ -89,7 +89,7 @@ export const conditionallyShowOnboardingNotifications = async ({
     if (annotationStage === STAGES.redirected) {
         toolbarNotifications.showToolbarNotification('onboarding-higlight-text')
         await utils.setOnboardingStage(
-            'annotation',
+            FLOWS.annotation,
             STAGES.annotation.notifiedHighlightText,
         )
     }
@@ -102,7 +102,7 @@ export const conditionallyShowOnboardingNotifications = async ({
             triggerNextNotification: handler(toolbarNotifications),
         })
         await utils.setOnboardingStage(
-            'powerSearch',
+            FLOWS.powerSearch,
             STAGES.powerSearch.notifiedBrowsePage,
         )
     }
@@ -110,7 +110,7 @@ export const conditionallyShowOnboardingNotifications = async ({
     if (taggingStage === STAGES.redirected) {
         toolbarNotifications.showToolbarNotification('tag-this-page')
         await utils.setOnboardingStage(
-            'tagging',
+            FLOWS.tagging,
             STAGES.tagging.notifiedTagPage,
         )
     }
@@ -123,9 +123,9 @@ export const conditionallyShowOnboardingNotifications = async ({
  * @param nextStage Next stage to set for annotations flow
  */
 export const conditionallyRemoveSelectOption = async nextStage => {
-    const annotationStage = await utils.fetchOnboardingStage('annotation')
+    const annotationStage = await utils.fetchOnboardingStage(FLOWS.annotation)
     if (annotationStage === STAGES.annotation.notifiedSelectOption) {
-        await utils.setOnboardingStage('annotation', nextStage)
+        await utils.setOnboardingStage(FLOWS.annotation, nextStage)
         // Close the curren select-option notification manually since
         // accessing the toolbarNotification instance from here is not possible
         document.querySelector('.memex-tooltip-notification').remove()

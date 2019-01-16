@@ -1,4 +1,4 @@
-import { STORAGE_KEYS, ANNOTATION_DEMO_URL, STAGES } from './constants'
+import { STORAGE_KEYS, ANNOTATION_DEMO_URL, STAGES, FLOWS } from './constants'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import { browser } from 'webextension-polyfill-ts'
 
@@ -10,7 +10,7 @@ import { browser } from 'webextension-polyfill-ts'
 export const fetchOnboardingStage = async (flow: string): Promise<string> => {
     const stage = await getLocalStorage(
         STORAGE_KEYS.onboardingFlows[flow],
-        'unvisited',
+        STAGES.unvisited,
     )
     return stage
 }
@@ -45,14 +45,14 @@ export const fetchAllStages = async () => {
  * Used when user searches through the Memex omnibar.
  */
 export const conditionallySkipToTimeFilter = async () => {
-    const powerSearchStage = await fetchOnboardingStage('powerSearch')
+    const powerSearchStage = await fetchOnboardingStage(FLOWS.powerSearch)
 
     if (
         powerSearchStage === 'power-search-browse-shown' ||
         powerSearchStage === 'overview-tooltips'
     ) {
         await setOnboardingStage(
-            'powerSearch',
+            FLOWS.powerSearch,
             STAGES.powerSearch.skipToTimeFilters,
         )
     }

@@ -3,7 +3,7 @@ import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 
 import * as selectors from './selectors'
 import * as utils from './utils'
-import { STORAGE_KEYS, STAGES } from './constants'
+import { STORAGE_KEYS, FLOWS, STAGES } from './constants'
 
 export const setAnnotationStage = createAction<string>(
     'onboarding/setAnnotationStage',
@@ -75,14 +75,14 @@ export const fetchShowOnboarding = () => async dispatch => {
 }
 
 export const setPowerSearchDone = () => async dispatch => {
-    await utils.setOnboardingStage('powerSearch', STAGES.done)
-    dispatch(setPowerSearchStage('DONE'))
+    await utils.setOnboardingStage(FLOWS.powerSearch, STAGES.done)
+    dispatch(setPowerSearchStage(STAGES.done))
     dispatch(checkForCompletion())
 }
 
 export const setBackupStageDone = () => async dispatch => {
-    await utils.setOnboardingStage('backup', STAGES.done)
-    dispatch(setBackupStage('DONE'))
+    await utils.setOnboardingStage(FLOWS.backup, STAGES.done)
+    dispatch(setBackupStage(STAGES.done))
     dispatch(checkForCompletion())
 }
 

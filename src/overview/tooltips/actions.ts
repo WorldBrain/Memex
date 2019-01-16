@@ -1,7 +1,7 @@
 import { createAction } from 'redux-act'
 
 import * as selectors from './selectors'
-import { STAGES } from '../onboarding/constants'
+import { FLOWS, STAGES } from '../onboarding/constants'
 import { fetchOnboardingStage, setOnboardingStage } from '../onboarding/utils'
 import { TOOLTIPS } from './constants'
 
@@ -20,7 +20,7 @@ export const initOnboardingTooltips = (index = 0) => dispatch => {
 }
 
 export const fetchOnboardingState = () => async dispatch => {
-    const onboardingState = await fetchOnboardingStage('powerSearch')
+    const onboardingState = await fetchOnboardingStage(FLOWS.powerSearch)
     if (onboardingState === STAGES.powerSearch.overviewTooltips) {
         dispatch(initOnboardingTooltips())
     } else if (onboardingState === STAGES.powerSearch.skipToTimeFilters) {
@@ -56,7 +56,7 @@ export const closeTooltip = () => async dispatch => {
     processEventRPC({
         type: EVENT_NAMES.CLOSE_TOOLTIP,
     })
-    await setOnboardingStage('powerSearch', STAGES.unvisited)
+    await setOnboardingStage(FLOWS.powerSearch, STAGES.unvisited)
 }
 
 /**

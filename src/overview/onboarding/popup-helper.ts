@@ -1,6 +1,6 @@
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { EVENT_NAMES } from 'src/analytics/internal/constants'
-import { STAGES } from './constants'
+import { FLOWS, STAGES } from './constants'
 import { fetchOnboardingStage, setOnboardingStage } from './utils'
 
 const processEventRPC = remoteFunction('processEvent')
@@ -11,7 +11,7 @@ const openOptionsRPC = remoteFunction('openOptionsTab')
  * whether the in page notification for tagging is shown.
  */
 const _checkTaggingStageStatus = async () => {
-    const taggingStage = await fetchOnboardingStage('tagging')
+    const taggingStage = await fetchOnboardingStage(FLOWS.tagging)
     if (taggingStage === STAGES.tagging.notifiedTagPage) {
         return true
     }
@@ -30,7 +30,7 @@ export const checkForTaggingStage = async () => {
         return
     }
 
-    await setOnboardingStage('tagging', STAGES.done)
+    await setOnboardingStage(FLOWS.tagging, STAGES.done)
     setTimeout(async () => {
         openOptionsRPC('overview')
     }, 1000)

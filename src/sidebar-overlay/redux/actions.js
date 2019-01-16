@@ -8,7 +8,7 @@ import {
 } from '../CommentBox'
 import * as selectors from './selectors'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
-import { STAGES } from 'src/overview/onboarding/constants'
+import { FLOWS, STAGES } from 'src/overview/onboarding/constants'
 import {
     fetchOnboardingStage,
     setOnboardingStage,
@@ -111,7 +111,9 @@ export const createAnnotation = (comment, body, tags, env) => async (
     }
 
     const congratsMessage = selectors.congratsMessage(state)
-    const onboardingAnnotationStage = await fetchOnboardingStage('annotation')
+    const onboardingAnnotationStage = await fetchOnboardingStage(
+        FLOWS.annotation,
+    )
     if (
         !congratsMessage &&
         onboardingAnnotationStage === STAGES.annotation.annotationCreated
@@ -120,7 +122,7 @@ export const createAnnotation = (comment, body, tags, env) => async (
         processEventRPC({
             type: EVENT_NAMES.FINISH_ANNOTATION_ONBOARDING,
         })
-        await setOnboardingStage('annotation', STAGES.done)
+        await setOnboardingStage(FLOWS.annotation, STAGES.done)
     } else if (congratsMessage) {
         // Since we need to display the congrats message only once,
         // it can be set to false after setting it true once.

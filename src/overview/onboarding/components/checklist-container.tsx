@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { EVENT_NAMES } from 'src/analytics/internal/constants'
-import { STAGES } from '../constants'
+import { FLOWS, STAGES } from '../constants'
 import * as utils from '../utils'
 
 import Checklist from './checklist'
@@ -50,7 +50,7 @@ class OnboardingChecklist extends React.Component<Props> {
             return
         }
 
-        await utils.setOnboardingStage('annotation', STAGES.redirected)
+        await utils.setOnboardingStage(FLOWS.annotation, STAGES.redirected)
         await utils.openDemoPage()
 
         this.processEvent({
@@ -68,11 +68,11 @@ class OnboardingChecklist extends React.Component<Props> {
         Else, directly start the onboarding tooltip process.
         */
         if (this.props.noResults) {
-            await utils.setOnboardingStage('powerSearch', STAGES.redirected)
+            await utils.setOnboardingStage(FLOWS.powerSearch, STAGES.redirected)
             await utils.openDemoPage()
         } else {
             await utils.setOnboardingStage(
-                'powerSearch',
+                FLOWS.powerSearch,
                 STAGES.powerSearch.overviewTooltips,
             )
             this.props.initOnboardingTooltips()
@@ -88,7 +88,7 @@ class OnboardingChecklist extends React.Component<Props> {
             return
         }
 
-        await utils.setOnboardingStage('tagging', STAGES.redirected)
+        await utils.setOnboardingStage(FLOWS.tagging, STAGES.redirected)
         await utils.openDemoPage()
 
         this.processEvent({
