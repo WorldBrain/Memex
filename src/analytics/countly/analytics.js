@@ -24,7 +24,7 @@ class Analytics {
      * @return {Promise<Response>}
      */
     _sendReq = async params => {
-        if (!(await this.shouldTrack())) {
+        if (!(await PiwikAnalytics.shouldTrack())) {
             return
         }
 
