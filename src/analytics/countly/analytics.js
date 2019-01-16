@@ -14,6 +14,7 @@ class Analytics {
         // Asynchronous initialization of Countly
         this._countlyConnector.app_key = appKey
         this._countlyConnector.url = url
+        this._countlyConnector.q = countlyConnector.q || []
     }
 
     /**
