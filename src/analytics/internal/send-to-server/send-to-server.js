@@ -51,7 +51,7 @@ class SendToServer {
      * @return {Promise<Response>}
      */
     _sendReq = async event => {
-        if (!(await shouldTrack())) {
+        if (!(await shouldTrack(SendToServer.DEF_TRACKING))) {
             return
         }
 
@@ -75,7 +75,10 @@ class SendToServer {
      * @return {Promise<boolean>}
      */
     _sendBulkReq = async () => {
-        if (!this._pool.size || !(await shouldTrack())) {
+        if (
+            !this._pool.size ||
+            !(await shouldTrack(SendToServer.DEF_TRACKING))
+        ) {
             this._pool.clear() // Clear pool if user turned off tracking
             return
         }
@@ -104,7 +107,7 @@ class SendToServer {
      * @param {boolean} [force=false] Whether or not to send immediately or just add to request pool.
      */
     async trackEvent(event, force = false) {
-        if (!(await shouldTrack())) {
+        if (!(await shouldTrack(SendToServer.DEF_TRACKING))) {
             return
         }
 
