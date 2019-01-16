@@ -1,6 +1,6 @@
 import { idleManager } from 'src/util/idle'
 import randomString from 'src/util/random-string'
-import { SHOULD_TRACK_STORAGE_KEY as SHOULD_TRACK } from 'src/options/privacy/constants'
+import { shouldTrack } from './utils'
 
 /**
  * @typedef {Object} EventTrackInfo
@@ -103,7 +103,7 @@ class Analytics {
      * @return {Promise<boolean>}
      */
     _sendBulkReq = async () => {
-        if (!this._pool.size || !(await this.shouldTrack())) {
+        if (!this._pool.size || !(await shouldTrack())) {
             this._pool.clear() // Clear pool if user turned off tracking
             return
         }
@@ -119,14 +119,6 @@ class Analytics {
         }
     }
 
-    async shouldTrack() {
-        const storage = await browser.storage.local.get({
-            [SHOULD_TRACK]: Analytics.DEF_TRACKING,
-        })
-
-        return storage[SHOULD_TRACK]
-    }
-
     /**
      * Track any user-invoked events.
      *
@@ -134,11 +126,11 @@ class Analytics {
      * @param {boolean} [force=false] Whether or not to send immediately or just add to request pool.
      */
     async trackEvent(eventArgs, force = false) {
-        const shouldTrack = await this.shouldTrack()
+        const shouldTrackValue = await shouldTrack()
         if (process.env.DEBUG_ANALYTICS_EVENTS === 'true') {
-            console.log('Tracking event', shouldTrack, eventArgs, force)
+            console.log('Tracking event', shouldTrackValue, eventArgs, force)
         }
-        if (!shouldTrack) {
+        if (!shouldTrackValue) {
             return
         }
 
@@ -162,7 +154,7 @@ class Analytics {
      * @param {LinkTrackInfo} linkArgs
      */
     async trackLink({ linkType, url }) {
-        if (!(await this.shouldTrack())) {
+        if (!(await shouldTrack())) {
             return
         }
 
@@ -176,7 +168,7 @@ class Analytics {
      * @param {string} args.title The title of the page to track
      */
     async trackPage({ title }) {
-        if (!(await this.shouldTrack())) {
+        if (!(await shouldTrack())) {
             return
         }
 
