@@ -8,7 +8,7 @@ import Topbar from '../topbar'
 import Loader from '../loader'
 import EmptyMessage from '../empty-message'
 import AnnotationBoxContainer from '../annotation-box'
-import { Annotation } from '../../types'
+import { Annotation } from '../../sidebar/types'
 import { openSettings } from '../../utils'
 
 const styles = require('./sidebar.css')

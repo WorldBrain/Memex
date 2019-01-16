@@ -1,16 +1,16 @@
 import { createAction } from 'redux-act'
 
-import { Annotation, Page, Thunk } from './types'
-import { Anchor } from '../direct-linking/content_script/interactions'
+import { Thunk } from '../types'
+import { Annotation, Page } from './types'
+import { Anchor } from 'src/direct-linking/content_script/interactions'
 import * as selectors from './selectors'
-import AnnotationsManager from './annotations-manager'
-import { remoteFunction } from '../util/webextensionRPC'
-import { EVENT_NAMES } from '../analytics/internal/constants'
-import { getLocalStorage, setLocalStorage } from '../util/storage'
-import { STORAGE_KEYS } from '../overview/onboarding/constants'
+import AnnotationsManager from '../annotations-manager'
+import { remoteFunction } from 'src/util/webextensionRPC'
+import { EVENT_NAMES } from 'src/analytics/internal/constants'
+import { getLocalStorage, setLocalStorage } from 'src/util/storage'
+import { STORAGE_KEYS } from 'src/overview/onboarding/constants'
 
 // Remote function declarations.
-// TODO: Move the operations involving these to some other place.
 const processEventRPC = remoteFunction('processEvent')
 
 export const setAnnotationsManager = createAction<AnnotationsManager>(

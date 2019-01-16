@@ -7,10 +7,11 @@ import * as selectors from './selectors'
 import {
     actions as commentBoxActions,
     selectors as commentBoxSelectors,
-} from './comment-box'
-import { Sidebar } from './components'
-import SidebarState, { MapDispatchToProps, Annotation } from './types'
-import AnnotationsManager from './annotations-manager'
+} from '../comment-box'
+import { Sidebar } from '../components'
+import SidebarState, { Annotation } from './types'
+import { MapDispatchToProps } from '../types'
+import AnnotationsManager from '../annotations-manager'
 
 interface StateProps {
     isOpen: boolean

@@ -1,7 +1,7 @@
 import { browser } from 'webextension-polyfill-ts'
 
-import { RetryTimeoutError } from '../direct-linking/utils'
-import { getLocalStorage, setLocalStorage } from '../util/storage'
+import { RetryTimeoutError } from 'src/direct-linking/utils'
+import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import * as constants from './constants'
 
 /**

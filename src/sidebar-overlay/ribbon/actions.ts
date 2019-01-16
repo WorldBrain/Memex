@@ -3,7 +3,7 @@ import { createAction } from 'redux-act'
 import { Thunk } from '../types'
 import * as selectors from './selectors'
 import { getSidebarState, setSidebarState } from '../utils'
-import { getTooltipState, setTooltipState } from '../../content-tooltip/utils'
+import { getTooltipState, setTooltipState } from 'src/content-tooltip/utils'
 
 export const setIsPageFullScreen = createAction<boolean>('setIsPageFullScreen')
 

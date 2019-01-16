@@ -4,15 +4,15 @@ import moment from 'moment'
 import { connect } from 'react-redux'
 import noop from 'lodash/fp/noop'
 
-import * as actions from '../../actions'
+import * as actions from '../../sidebar/actions'
 import AnnotationBoxCommentTags from './annotation-box-comment-tags'
 import AnnotationBoxFooter from './annotation-box-footer'
 import TruncatedTextRenderer from '../truncated-text-renderer'
 import CommentTagsInput from './comment-tags-input'
 import { MapDispatchToProps } from '../../types'
-import { CrowdfundingBox } from '../../../common-ui/crowdfunding'
-import { remoteFunction } from '../../../util/webextensionRPC'
-import { EVENT_NAMES } from '../../../analytics/internal/constants'
+import { CrowdfundingBox } from 'src/common-ui/crowdfunding'
+import { remoteFunction } from 'src/util/webextensionRPC'
+import { EVENT_NAMES } from 'src/analytics/internal/constants'
 
 const styles = require('./annotation-box-container.css')
 
