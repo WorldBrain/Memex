@@ -11,10 +11,9 @@ class Analytics {
     constructor({ countlyConnector, url, appKey }) {
         this._countlyConnector = countlyConnector
 
-        this._countlyConnector.init({
-            app_key: appKey,
-            url: url,
-        })
+        // Asynchronous initialization of Countly
+        this._countlyConnector.app_key = appKey
+        this._countlyConnector.url = url
     }
 
     /**
@@ -41,7 +40,17 @@ class Analytics {
             },
         }
 
-        return this._countlyConnector.q.push(params)
+        // Async add event to countly
+        return this._countlyConnector.q.push([
+            'add_event',
+            {
+                key: params.key,
+                count: 1,
+                segmentation: {
+                    id: userId,
+                },
+            },
+        ])
     }
 
     /**
