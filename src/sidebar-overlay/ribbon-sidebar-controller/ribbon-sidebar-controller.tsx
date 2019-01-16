@@ -3,9 +3,9 @@ import { Provider } from 'react-redux'
 
 import configureStore from '../store'
 import RibbonSidebarContainer from './ribbon-sidebar-container'
-import { ErrorBoundary, RuntimeError } from '../../common-ui/components'
-import AnnotationsManager from '../../sidebar-common/annotations-manager'
-import { Annotation } from '../../sidebar-common/types'
+import { ErrorBoundary, RuntimeError } from 'src/common-ui/components'
+import AnnotationsManager from 'src/sidebar-common/annotations-manager'
+import { Annotation } from 'src/sidebar-common/sidebar/types'
 
 const store = configureStore()
 

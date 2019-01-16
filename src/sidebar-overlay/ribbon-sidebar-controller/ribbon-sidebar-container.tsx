@@ -2,7 +2,7 @@ import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { connect, MapStateToProps } from 'react-redux'
 
-import { makeRemotelyCallable } from '../../util/webextensionRPC'
+import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import RootState, { MapDispatchToProps } from '../types'
 import RibbonContainer, {
     actions as ribbonActions,
@@ -11,11 +11,11 @@ import RibbonContainer, {
 import SidebarContainer, {
     actions as sidebarActions,
     selectors as sidebarSelectors,
-} from '../../sidebar-common'
-import { Annotation } from '../../sidebar-common/types'
-import { actions as commentBoxActions } from '../../sidebar-common/comment-box'
-import AnnotationsManager from '../../sidebar-common/annotations-manager'
-import { Anchor } from '../../direct-linking/content_script/interactions'
+} from 'src/sidebar-common'
+import { Annotation } from 'src/sidebar-common/sidebar/types'
+import { actions as commentBoxActions } from 'src/sidebar-common/comment-box'
+import AnnotationsManager from 'src/sidebar-common/annotations-manager'
+import { Anchor } from 'src/direct-linking/content_script/interactions'
 import { retryUntilErrorResolves } from '../utils'
 
 interface StateProps {

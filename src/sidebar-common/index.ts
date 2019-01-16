@@ -1,8 +1,4 @@
-import SidebarContainer from './sidebar-container'
-import * as actions from './actions'
-import reducer from './reducer'
-import * as selectors from './selectors'
-import State, * as types from './types'
+import SidebarContainer from './sidebar'
 
 export default SidebarContainer
-export { actions, reducer, selectors, State, types }
+export { actions, reducer, selectors, State, types } from './sidebar'

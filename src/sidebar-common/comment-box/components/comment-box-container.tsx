@@ -3,10 +3,11 @@ import { connect, MapStateToProps } from 'react-redux'
 
 import * as actions from '../actions'
 import * as selectors from '../selectors'
+import State from '../types'
 import { AnnotationHighlight } from '../../components'
 import CommentBoxForm from './comment-box-form'
-import { Anchor } from '../../../direct-linking/content_script/interactions'
-import State, { MapDispatchToProps, ClickHandler } from '../../types'
+import { Anchor } from 'src/direct-linking/content_script/interactions'
+import { MapDispatchToProps, ClickHandler } from '../../types'
 
 const styles = require('./comment-box-container.css')
 

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import cx from 'classnames'
 
-import { Anchor } from '../../../direct-linking/content_script/interactions'
+import { Anchor } from 'src/direct-linking/content_script/interactions'
 
 const styles = require('./annotation-highlight.css')
 

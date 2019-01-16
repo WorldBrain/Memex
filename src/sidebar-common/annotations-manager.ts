@@ -1,7 +1,8 @@
-import { remoteFunction } from '../util/webextensionRPC'
-import { Anchor } from '../direct-linking/content_script/interactions'
-import { Annotation, Omit } from './types'
-import { EVENT_NAMES } from '../analytics/internal/constants'
+import { remoteFunction } from 'src/util/webextensionRPC'
+import { Anchor } from 'src/direct-linking/content_script/interactions'
+import { Omit } from './types'
+import { Annotation } from './sidebar/types'
+import { EVENT_NAMES } from 'src/analytics/internal/constants'
 
 export default class AnnotationsManager {
     private readonly _processEventRPC = remoteFunction('processEvent')

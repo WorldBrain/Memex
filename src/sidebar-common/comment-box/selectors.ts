@@ -1,6 +1,6 @@
 import { createSelector } from 'reselect'
 
-import * as sidebarSelectors from '../selectors'
+import * as sidebarSelectors from '../sidebar/selectors'
 
 const commentBox = sidebarSelectors.commentBox
 

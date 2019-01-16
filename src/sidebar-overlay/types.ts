@@ -7,7 +7,7 @@
 import { ThunkAction, ThunkDispatch } from 'redux-thunk'
 
 import { State as RibbonState } from './ribbon'
-import { State as SidebarState } from '../sidebar-common'
+import { State as SidebarState } from 'src/sidebar-common'
 
 export default interface RootState {
     ribbon: RibbonState
