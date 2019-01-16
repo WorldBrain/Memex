@@ -1,6 +1,8 @@
 import { fetchUserId, shouldTrack } from '../utils'
 
 class Analytics {
+    static DEF_TRACKING = true
+
     /**
      * @param {Object} args
      * @param {string} args.countlyConnector Connector to the Countly.
@@ -23,24 +25,16 @@ class Analytics {
      * @return {Promise<Response>}
      */
     _sendReq = async params => {
-        if (!(await shouldTrack())) {
+        if (!(await shouldTrack(Analytics.DEF_TRACKING))) {
             return
         }
 
         const userId = await fetchUserId()
-
         if (!userId) {
             return
         }
 
-        params = {
-            ...params,
-            segmentation: {
-                id: userId,
-            },
-        }
-
-        // Async add event to countly
+        // async add event to countly
         return this._countlyConnector.q.push([
             'add_event',
             {
@@ -59,7 +53,8 @@ class Analytics {
      * @param {EventTrackInfo} eventArgs
      */
     async trackEvent(eventArgs) {
-        const shouldTrackValue = await shouldTrack()
+        const shouldTrackValue = await shouldTrack(Analytics.DEF_TRACKING)
+
         if (process.env.DEBUG_ANALYTICS_EVENTS === 'true') {
             console.log('Tracking event', shouldTrackValue, eventArgs)
         }

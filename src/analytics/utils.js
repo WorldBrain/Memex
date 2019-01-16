@@ -17,14 +17,10 @@ export async function shouldTrack(defTracking = false) {
 }
 
 export async function fetchUserId() {
-    if (!(await shouldTrack())) {
-        return null
-    }
-
     const installTime = (await browser.storage.local.get(INSTALL_TIME_KEY))[
         INSTALL_TIME_KEY
     ]
-    const userId = await generateTokenIfNot(installTime)
 
+    const userId = await generateTokenIfNot(installTime)
     return userId
 }

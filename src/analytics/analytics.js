@@ -103,7 +103,7 @@ class Analytics {
      * @return {Promise<boolean>}
      */
     _sendBulkReq = async () => {
-        if (!this._pool.size || !(await shouldTrack())) {
+        if (!this._pool.size || !(await shouldTrack(Analytics.DEF_TRACKING))) {
             this._pool.clear() // Clear pool if user turned off tracking
             return
         }
@@ -126,7 +126,7 @@ class Analytics {
      * @param {boolean} [force=false] Whether or not to send immediately or just add to request pool.
      */
     async trackEvent(eventArgs, force = false) {
-        const shouldTrackValue = await shouldTrack()
+        const shouldTrackValue = await shouldTrack(Analytics.DEF_TRACKING)
         if (process.env.DEBUG_ANALYTICS_EVENTS === 'true') {
             console.log('Tracking event', shouldTrackValue, eventArgs, force)
         }
@@ -154,7 +154,7 @@ class Analytics {
      * @param {LinkTrackInfo} linkArgs
      */
     async trackLink({ linkType, url }) {
-        if (!(await shouldTrack())) {
+        if (!(await shouldTrack(Analytics.DEF_TRACKING))) {
             return
         }
 
@@ -168,7 +168,7 @@ class Analytics {
      * @param {string} args.title The title of the page to track
      */
     async trackPage({ title }) {
-        if (!(await shouldTrack())) {
+        if (!(await shouldTrack(Analytics.DEF_TRACKING))) {
             return
         }
 

@@ -4,7 +4,7 @@ import Analytics from './analytics'
 
 const analytics = new Analytics({
     url: process.env.COUNTLY_HOST,
-    siteId: process.env.COUNTLY_APP_KEY,
+    appKey: process.env.COUNTLY_APP_KEY,
     countlyConnector: Countly,
 })
 
