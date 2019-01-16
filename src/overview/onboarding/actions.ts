@@ -28,16 +28,16 @@ export const setBackupStage = createAction<string>('onboarding/setBackupStage')
  */
 export const checkForCompletion = () => (dispatch, getState) => {
     const state = getState()
-    const annotationStage = selectors.annotationStage(state)
-    const powerSearchStage = selectors.powerSearchStage(state)
-    const taggingStage = selectors.taggingStage(state)
-    const backupStage = selectors.backupStage(state)
+    const isAnnotationDone = selectors.isAnnotationDone(state)
+    const isPowerSearchDone = selectors.isPowerSearchDone(state)
+    const isTaggingDone = selectors.isTaggingDone(state)
+    const isBackupDone = selectors.isBackupDone(state)
 
     if (
-        annotationStage === 'DONE' &&
-        powerSearchStage === 'DONE' &&
-        taggingStage === 'DONE' &&
-        backupStage === 'DONE'
+        isAnnotationDone &&
+        isPowerSearchDone &&
+        isTaggingDone &&
+        isBackupDone
     ) {
         dispatch(setCongratsMessage(true))
     }

@@ -14,10 +14,10 @@ import * as resultSelectors from '../../results/selectors'
 
 export interface StateProps {
     showOnboardingBox: boolean
-    annotationStage: string
-    powerSearchStage: string
-    taggingStage: string
-    backupStage: string
+    isAnnotationDone: boolean
+    isPowerSearchDone: boolean
+    isTaggingDone: boolean
+    isBackupDone: boolean
     noResults: boolean
     congratsMessage: boolean
 }
@@ -46,7 +46,7 @@ class OnboardingChecklist extends React.Component<Props> {
     }
 
     private handleAnnotationStage = async () => {
-        if (this.props.annotationStage === 'DONE') {
+        if (this.props.isAnnotationDone) {
             return
         }
 
@@ -59,7 +59,7 @@ class OnboardingChecklist extends React.Component<Props> {
     }
 
     private handlePowerSearchStage = async () => {
-        if (this.props.powerSearchStage === 'DONE') {
+        if (this.props.isPowerSearchDone) {
             return
         }
 
@@ -84,7 +84,7 @@ class OnboardingChecklist extends React.Component<Props> {
     }
 
     private handleTaggingStage = async () => {
-        if (this.props.taggingStage === 'DONE') {
+        if (this.props.isTaggingDone) {
             return
         }
 
@@ -97,7 +97,7 @@ class OnboardingChecklist extends React.Component<Props> {
     }
 
     private handleBackupStage = async () => {
-        if (this.props.backupStage === 'DONE') {
+        if (this.props.isBackupDone) {
             return
         }
 
@@ -118,10 +118,10 @@ class OnboardingChecklist extends React.Component<Props> {
             <Checklist
                 isRightBox={this.props.isRightBox}
                 congratsMessage={this.props.congratsMessage}
-                isAnnotationChecked={this.props.annotationStage === 'DONE'}
-                isPowerSearchChecked={this.props.powerSearchStage === 'DONE'}
-                isTaggingChecked={this.props.taggingStage === 'DONE'}
-                isBackupChecked={this.props.backupStage === 'DONE'}
+                isAnnotationChecked={this.props.isAnnotationDone}
+                isPowerSearchChecked={this.props.isPowerSearchDone}
+                isTaggingChecked={this.props.isTaggingDone}
+                isBackupChecked={this.props.isBackupDone}
                 handleAnnotationStage={this.handleAnnotationStage}
                 handlePowerSearchStage={this.handlePowerSearchStage}
                 handleTaggingStage={this.handleTaggingStage}
@@ -134,10 +134,10 @@ class OnboardingChecklist extends React.Component<Props> {
 
 const mapStateToProps = state => ({
     showOnboardingBox: selectors.showOnboardingBox(state),
-    annotationStage: selectors.annotationStage(state),
-    powerSearchStage: selectors.powerSearchStage(state),
-    taggingStage: selectors.taggingStage(state),
-    backupStage: selectors.backupStage(state),
+    isAnnotationDone: selectors.isAnnotationDone(state),
+    isPowerSearchDone: selectors.isPowerSearchDone(state),
+    isTaggingDone: selectors.isTaggingDone(state),
+    isBackupDone: selectors.isBackupDone(state),
     congratsMessage: selectors.congratsMessage(state),
     noResults: resultSelectors.noResults(state),
 })

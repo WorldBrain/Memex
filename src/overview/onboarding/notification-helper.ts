@@ -124,7 +124,6 @@ export const conditionallyShowOnboardingNotifications = async ({
  */
 export const conditionallyRemoveSelectOption = async nextStage => {
     const annotationStage = await utils.fetchOnboardingStage('annotation')
-    console.log(annotationStage)
     if (annotationStage === STAGES.annotation.notifiedSelectOption) {
         await utils.setOnboardingStage('annotation', nextStage)
         // Close the curren select-option notification manually since
