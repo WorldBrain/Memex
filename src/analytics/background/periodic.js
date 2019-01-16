@@ -2,7 +2,7 @@ import moment from 'moment-timezone'
 
 import analytics from '../'
 import { STORAGE_KEYS, SCHEDULES, TIMEZONE } from '../constants'
-import CountlyAnalytics from '../countly'
+import countlyAnalytics from '../countly'
 
 /*
  * The purpose of this module is to attempt reimplement standard active user metrics
@@ -72,7 +72,7 @@ const attemptPeriodicPing = async (
                 action: `${action} activity ping`,
             })
 
-            CountlyAnalytics.trackEvent({
+            countlyAnalytics.trackEvent({
                 key: 'activity',
             })
         }
@@ -88,7 +88,7 @@ const attemptPeriodicPing = async (
             action: `${action} install ping`,
         })
 
-        CountlyAnalytics.trackEvent({
+        countlyAnalytics.trackEvent({
             key: 'install',
         })
 

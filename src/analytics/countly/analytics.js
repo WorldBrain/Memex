@@ -1,5 +1,4 @@
-import PiwikAnalytics from '../'
-import CustomAnalytics from '../internal/send-to-server'
+import { fetchUserId, shouldTrack } from '../utils'
 
 class Analytics {
     /**
@@ -24,11 +23,11 @@ class Analytics {
      * @return {Promise<Response>}
      */
     _sendReq = async params => {
-        if (!(await PiwikAnalytics.shouldTrack())) {
+        if (!(await shouldTrack())) {
             return
         }
 
-        const userId = await CustomAnalytics.fetchUserId()
+        const userId = await fetchUserId()
 
         if (!userId) {
             return
@@ -60,11 +59,11 @@ class Analytics {
      * @param {EventTrackInfo} eventArgs
      */
     async trackEvent(eventArgs) {
-        const shouldTrack = await PiwikAnalytics.shouldTrack()
+        const shouldTrackValue = await shouldTrack()
         if (process.env.DEBUG_ANALYTICS_EVENTS === 'true') {
-            console.log('Tracking event', shouldTrack, eventArgs)
+            console.log('Tracking event', shouldTrackValue, eventArgs)
         }
-        if (!shouldTrack) {
+        if (!shouldTrackValue) {
             return
         }
 
